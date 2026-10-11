@@ -22,7 +22,10 @@ from src.modules.trending.services.trending_contribution_service import (
     build_trending_actor_claim_key,
     build_trending_write_operations,
 )
-from src.repositories.online_feature_keyspace_repository import TRENDING_ACTOR_DEDUPLICATION_TTL_SECONDS
+from src.repositories.online_feature_keyspace_repository import (
+    ACCOUNT_DELETED_FIELD,
+    TRENDING_ACTOR_DEDUPLICATION_TTL_SECONDS,
+)
 from src.repositories.online_feature_repository import OnlineFeatureStore
 
 ingestion_logger = logging.getLogger("intelligence.events")
@@ -70,6 +73,8 @@ class EventIngestionService:
     ) -> EventBatchResponse:
         received_at = received_at or datetime.now(UTC)
         valid_events, rejected = await asyncio.to_thread(validate_raw_events, list(raw_events), received_at)
+        valid_events, deleted_rejections = await self.drop_events_from_deleted_accounts(valid_events, raw_events)
+        rejected += deleted_rejections
         unique_events: dict[str, IntelligenceEvent] = {}
         duplicate_count = 0
         for event in valid_events:
@@ -89,6 +94,9 @@ class EventIngestionService:
         claimed_keys = [keyspace.event_deduplication_key(event.event_id) for event in new_events]
         try:
             await self.raw_event_sink.write_events(new_events, received_at)
+        except asyncio.CancelledError:
+            await self.release_claims_quietly(claimed_keys)
+            raise
         except Exception as storage_error:
             await self.release_claims_quietly(claimed_keys)
             ingestion_logger.exception("raw_event_write_failed", extra={"event_count": len(new_events)})
@@ -99,6 +107,40 @@ class EventIngestionService:
             await self.release_claims_quietly(claimed_keys)
             raise
         return EventBatchResponse(accepted=len(new_events), duplicates=duplicate_count, rejected=rejected)
+
+    async def drop_events_from_deleted_accounts(
+        self, events: list[IntelligenceEvent], raw_events: Sequence[dict[str, JsonValue]]
+    ) -> tuple[list[IntelligenceEvent], list[RejectedEvent]]:
+        actor_ids = list(dict.fromkeys(event.actor_id for event in events))
+        if not actor_ids:
+            return events, []
+        keyspace = self.feature_store.keyspace
+        try:
+            consent_rows = await self.feature_store.feature_backend.read_hash_fields(
+                [keyspace.consent_key(actor_id) for actor_id in actor_ids]
+            )
+        except FeatureBackendUnavailableError as backend_error:
+            raise EventStorageUnavailableError("consent store unavailable") from backend_error
+        deleted = {
+            actor_id
+            for actor_id, flags in zip(actor_ids, consent_rows, strict=True)
+            if flags.get(ACCOUNT_DELETED_FIELD)
+        }
+        if not deleted:
+            return events, []
+        positions: dict[str, int] = {}
+        for index, raw_event in enumerate(raw_events):
+            if isinstance(raw_event_id := raw_event.get("eventId"), str):
+                positions.setdefault(raw_event_id, index)
+        kept: list[IntelligenceEvent] = []
+        rejected: list[RejectedEvent] = []
+        for event in events:
+            if event.actor_id in deleted:
+                index = positions.get(event.event_id, 0)
+                rejected.append(RejectedEvent(index=index, event_id=event.event_id, reason="account_deleted"))
+            else:
+                kept.append(event)
+        return kept, rejected
 
     async def release_claims_quietly(self, claimed_keys: list[str]) -> None:
         try:

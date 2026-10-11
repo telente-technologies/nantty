@@ -6,6 +6,7 @@ from src.modules.help_content.services.help_text_guard_service import (
     redact_residual_personal_data,
     replace_placeholders_with_generic_words,
 )
+from src.utils.markup_neutralising_util import neutralise_markup
 
 GREETING = re.compile(
     r"^(?:hi|hello|hey|dear|good\s+(?:morning|afternoon|evening|day)|greetings)\b[^.!?\n]*[,.!]?\s*", re.IGNORECASE
@@ -87,9 +88,9 @@ def rank_keywords(text: str, limit: int) -> list[str]:
 
 
 def draft_help_answer(request: HelpAnswerDraftRequest) -> HelpAnswerDraftResponse:
-    subject, subject_redactions = redact_residual_personal_data(request.subject)
-    question_text, question_redactions = redact_residual_personal_data(request.question)
-    answer_text, answer_redactions = redact_residual_personal_data(request.answer)
+    subject, subject_redactions = redact_residual_personal_data(neutralise_markup(request.subject))
+    question_text, question_redactions = redact_residual_personal_data(neutralise_markup(request.question))
+    answer_text, answer_redactions = redact_residual_personal_data(neutralise_markup(request.answer))
     question = replace_placeholders_with_generic_words(strip_conversational_noise(question_text))
     answer_sentences = split_sentences(replace_placeholders_with_generic_words(strip_conversational_noise(answer_text)))
     title = build_title(replace_placeholders_with_generic_words(subject), question)

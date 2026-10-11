@@ -39,8 +39,9 @@ class ExperimentsController:
         variants: Annotated[str, Query(pattern=VARIANT_LIST_PATTERN)],
     ) -> ExperimentMetricsResponse:
         try:
-            response: ExperimentMetricsResponse = await self.query_bus.execute(
-                ReadExperimentMetricsQuery(experiment_key, variants.split(","))
+            response: ExperimentMetricsResponse = await run_within_request_deadline(
+                self.query_bus.execute(ReadExperimentMetricsQuery(experiment_key, variants.split(","))),
+                self.deadline_seconds,
             )
         except FeatureBackendUnavailableError as backend_error:
             raise HTTPException(status_code=503, detail="feature_store_unavailable") from backend_error

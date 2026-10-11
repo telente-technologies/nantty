@@ -43,12 +43,25 @@ def filter_candidates_for_viewer_safety(
     return SafetyFilterOutcome(kept, excluded)
 
 
+UNKNOWN_INTEGRITY_ASSESSMENT = IntegrityAssessment(
+    trusted_engagement_share=0.7, manipulated=False, suspicion_score=0.0, reasons=("integrity_unavailable",)
+)
+
+
 def assess_candidate_integrity(
-    candidates: Sequence[FeedCandidate], item_statistics_by_item: dict[str, dict[str, float]]
+    candidates: Sequence[FeedCandidate],
+    item_statistics_by_item: dict[str, dict[str, float]],
+    online_counters_available: bool = True,
 ) -> dict[str, IntegrityAssessment]:
     return {
-        candidate.item_id: assess_engagement_integrity(
-            combine_online_integrity_counters(candidate.integrity, item_statistics_by_item.get(candidate.item_id, {}))
+        candidate.item_id: (
+            UNKNOWN_INTEGRITY_ASSESSMENT
+            if candidate.integrity is None and not online_counters_available
+            else assess_engagement_integrity(
+                combine_online_integrity_counters(
+                    candidate.integrity, item_statistics_by_item.get(candidate.item_id, {})
+                )
+            )
         )
         for candidate in candidates
     }

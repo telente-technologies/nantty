@@ -159,23 +159,25 @@ def build_advertising_operations(
 ) -> list[FeatureWriteOperation]:
     day_bucket = format_utc_day_bucket(event.occurred_at)
     operations: list[FeatureWriteOperation] = []
+    if not isinstance(event, AdImpressionEvent | AdClickEvent | AdConversionEvent):
+        return []
+    ad_key = keyspace.ad_statistics_key(event.payload.ad_id)
     match event:
         case AdImpressionEvent():
             frequency_key = keyspace.ad_frequency_key(day_bucket, event.actor_id)
             operations += [
-                HashFieldIncrement(keyspace.ad_statistics_key(event.payload.ad_id), "impressions", 1.0),
+                HashFieldIncrement(ad_key, "impressions", 1.0),
                 HashFieldIncrement(frequency_key, event.payload.campaign_id, 1.0),
                 KeyExpiry(frequency_key, DAILY_COUNTER_TTL_SECONDS),
             ]
             charge = event.payload.charge
         case AdClickEvent():
-            operations.append(HashFieldIncrement(keyspace.ad_statistics_key(event.payload.ad_id), "clicks", 1.0))
+            operations.append(HashFieldIncrement(ad_key, "clicks", 1.0))
             charge = event.payload.charge
         case AdConversionEvent():
-            operations.append(HashFieldIncrement(keyspace.ad_statistics_key(event.payload.ad_id), "conversions", 1.0))
+            operations.append(HashFieldIncrement(ad_key, "conversions", 1.0))
             charge = None
-        case _:
-            return []
+    operations.append(KeyExpiry(ad_key, ITEM_STATISTICS_TTL_SECONDS))
     if charge is not None and charge.amount_minor > 0:
         spend_key = keyspace.campaign_spend_key(day_bucket, event.payload.campaign_id)
         operations += [

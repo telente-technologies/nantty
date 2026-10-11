@@ -114,6 +114,7 @@ class FeedRankingService:
         assessments = assess_candidate_integrity(
             [*safety_outcome.kept_candidates, *filter_outcome.previously_seen_candidates],
             online_features.item_statistics_by_item,
+            online_counters_available=not degraded,
         )
         candidates = [
             discount_candidate_engagement(candidate, assessments[candidate.item_id])
@@ -222,7 +223,7 @@ class FeedRankingService:
             await self.suggestion_service.suggest_if_warranted(
                 candidate.author_id,
                 "engagement_integrity",
-                max(assessment.suspicion_score, 0.8),
+                assessment.suspicion_score,
                 [RiskReason(code=reason, weight=1.0) for reason in assessment.reasons]
                 or [RiskReason(code="manipulated_engagement", weight=1.0)],
                 now,

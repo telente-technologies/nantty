@@ -52,16 +52,23 @@ class LiveSafetyScoringService:
         self.publisher = publisher
 
     async def process_job_body(self, body: str, now: datetime | None = None) -> JobOutcome:
+        frame_job: LiveFrameCapturedJob | None = None
+        audio_job: LiveAudioSegmentJob | None = None
         try:
             job = json.loads(body)
             job_type, payload = job["type"], job["payload"]
             if job_type == LIVE_FRAME_JOB_TYPE:
-                return await self.score_frame(LiveFrameCapturedJob.model_validate(payload), now)
-            if job_type == LIVE_AUDIO_JOB_TYPE:
-                return await self.score_audio_segment(LiveAudioSegmentJob.model_validate(payload), now)
+                frame_job = LiveFrameCapturedJob.model_validate(payload)
+            elif job_type == LIVE_AUDIO_JOB_TYPE:
+                audio_job = LiveAudioSegmentJob.model_validate(payload)
         except ValueError, KeyError, TypeError, ValidationError:
             live_safety_logger.warning("live_safety_job_rejected")
             return "rejected"
+        if frame_job is not None:
+            return await self.score_frame(frame_job, now)
+        if audio_job is not None:
+            return await self.score_audio_segment(audio_job, now)
+        live_safety_logger.warning("live_safety_job_type_skipped", extra={"job_type": str(job_type)[:64]})
         return "skipped"
 
     async def score_frame(self, job: LiveFrameCapturedJob, now: datetime | None = None) -> JobOutcome:

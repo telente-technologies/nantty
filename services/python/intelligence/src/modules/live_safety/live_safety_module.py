@@ -60,6 +60,7 @@ def register_rekognition_when_available(
         RekognitionImageModerationModel(
             session.client("rekognition", config=AWS_CLIENT_CONFIG),
             settings.live_safety_rekognition_min_confidence,
+            frozenset({settings.media_bucket}) if settings.media_bucket else frozenset(),
         )
     )
     return session
@@ -119,7 +120,8 @@ def start_live_safety_consumers(
     )
     return [
         asyncio.create_task(
-            AmqpLiveSafetyJobQueueConsumer(channels, queue, scoring, settings.live_safety_prefetch).run_consume_loop()
+            AmqpLiveSafetyJobQueueConsumer(channels, queue, scoring, settings.live_safety_prefetch).run_consume_loop(),
+            name=f"live_safety:{queue}",
         )
         for queue in queues
     ]

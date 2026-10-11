@@ -29,10 +29,20 @@ def parse_s3_image_url(image_url: str | None) -> tuple[str, str] | None:
     return parsed.netloc, parsed.path.lstrip("/")
 
 
+class ImageSourceNotAllowedError(ValueError):
+    pass
+
+
 class RekognitionImageModerationModel:
-    def __init__(self, client: RekognitionModerationClient, minimum_confidence_percent: float = 50.0) -> None:
+    def __init__(
+        self,
+        client: RekognitionModerationClient,
+        minimum_confidence_percent: float = 50.0,
+        allowed_image_buckets: frozenset[str] = frozenset(),
+    ) -> None:
         self.client = client
         self.minimum_confidence_percent = minimum_confidence_percent
+        self.allowed_image_buckets = allowed_image_buckets
         self.version = REKOGNITION_MODEL_VERSION_PREFIX
 
     def detect_frame_labels(self, bucket: str, key: str) -> list[DetectedModerationLabel]:
@@ -55,6 +65,8 @@ class RekognitionImageModerationModel:
         location = parse_s3_image_url(request.image_url)
         if location is None:
             return {}
+        if self.allowed_image_buckets and location[0] not in self.allowed_image_buckets:
+            raise ImageSourceNotAllowedError("image bucket is not an allowed moderation source")
         labels = self.detect_frame_labels(*location)
         return {item.category: item.confidence for item in map_labels_to_categories(labels)}
 
