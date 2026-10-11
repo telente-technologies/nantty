@@ -3,7 +3,7 @@ import { Inter } from "next/font/google";
 import { cookies } from "next/headers";
 import type { ReactNode } from "react";
 
-import { ConfirmDialogHost, OfflineBanner, ThemeInitScript, parseThemePreference, readHtmlThemeAttribute, themeCookieName, themeViewport } from "@zudomart/web-kit";
+import { ConfirmDialogHost, ConnectionStatus, ThemeInitScript, parseThemePreference, readHtmlThemeAttribute, themeCookieName, themeViewport } from "@zudomart/web-kit";
 
 import { ConsentBannerHost } from "@/components/privacy/consentBannerHost";
 import { AdsSessionProvider } from "@/components/session/adsSessionProvider";
@@ -12,6 +12,8 @@ import { ToastProvider } from "@/components/ui/toastProvider";
 import { AdsVerificationProvider } from "@/components/verification/adsVerificationProvider";
 import { adsManagerProductName, readPublicSiteUrl } from "@/config/siteMetadata.config";
 import { buildSessionViewFromCookies, readCsrfTokenForCookies } from "@/server/adsSessionView.service";
+
+import { AdsErrorExperienceProvider } from "@/components/errors/errorExperience.provider";
 
 import "./globals.css";
 
@@ -47,11 +49,13 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
         <a href="#main-content" className="skipToContentLink">
           Skip to content
         </a>
-        <OfflineBanner />
+        <ConnectionStatus />
         <AdsSessionProvider initialSessionView={sessionView} csrfToken={readCsrfTokenForCookies(cookieStore)}>
           <AppThemeProvider initialPreference={themePreference} isSignedIn={sessionView !== null}>
             <AdsVerificationProvider isSignedIn={sessionView !== null}>
-              <ToastProvider>{children}</ToastProvider>
+              <ToastProvider>
+                <AdsErrorExperienceProvider>{children}</AdsErrorExperienceProvider>
+              </ToastProvider>
               <ConfirmDialogHost />
             </AdsVerificationProvider>
             <ConsentBannerHost isSignedIn={sessionView !== null} />

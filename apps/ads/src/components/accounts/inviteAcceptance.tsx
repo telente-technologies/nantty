@@ -9,8 +9,12 @@ import { Card, KeyValueList, PageHeader } from "@/components/ui/surfaces";
 import { roleDescriptions, roleLabels } from "@/config/rolePermissions.config";
 import { useAdsQuery } from "@/hooks/useAdsQuery.hook";
 import { accountsApi } from "@/services/accountsApi.service";
-import { readErrorMessageForDisplay } from "@/services/adsApiClient.service";
+import { AdsApiRequestError, readErrorMessageForDisplay } from "@/services/adsApiClient.service";
 import { formatDateWithYear } from "@/utils/dateRange.util";
+
+function isInviteGone(error: unknown): boolean {
+  return error instanceof AdsApiRequestError && (error.status === 404 || error.status === 410 || error.code.startsWith("INVITE_"));
+}
 
 export function InviteAcceptance({ token }: { readonly token: string }) {
   const router = useRouter();
@@ -35,7 +39,7 @@ export function InviteAcceptance({ token }: { readonly token: string }) {
     <>
       <PageHeader title="Join an ad account" />
       {inviteQuery.isLoading ? <LoadingBlock /> : null}
-      {inviteQuery.errorMessage ? <ErrorState message={inviteQuery.errorMessage} onRetry={inviteQuery.reload} /> : null}
+      {inviteQuery.errorMessage ? <ErrorState variant="section" error={inviteQuery.error} kind={isInviteGone(inviteQuery.error) ? "inviteInvalid" : undefined} message={inviteQuery.errorMessage} onRetry={inviteQuery.reload} /> : null}
       {invite ? (
         <Card title={invite.accountName} description={`${invite.invitedBy} invited you.`}>
           <KeyValueList

@@ -88,7 +88,7 @@ export function CreateAdAccountForm() {
           <div className={styles.fields}>
             {kind === "business" ? (
               profilesQuery.errorMessage ? (
-                <ErrorState message={profilesQuery.errorMessage} onRetry={profilesQuery.reload} />
+                <ErrorState error={profilesQuery.error} message={profilesQuery.errorMessage} onRetry={profilesQuery.reload} />
               ) : (
                 <SelectField
                   label="Store or business profile"

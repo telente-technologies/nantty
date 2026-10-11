@@ -121,7 +121,7 @@ export function AudiencesPage() {
         description="Saved groups of people to include or exclude in ad sets."
         actions={canManageAudiences ? <Button variant="primary" iconName="plus16" onClick={() => setOpenDialog({ kind: "chooser" })}>Create audience</Button> : null}
       />
-      {audiencesQuery.errorMessage ? <ErrorState message={audiencesQuery.errorMessage} onRetry={audiencesQuery.reload} /> : null}
+      {audiencesQuery.errorMessage ? <ErrorState error={audiencesQuery.error} message={audiencesQuery.errorMessage} onRetry={audiencesQuery.reload} /> : null}
       <Card padded={false}>
         {audiencesQuery.isLoading && !audiencesQuery.data ? (
           <LoadingBlock />

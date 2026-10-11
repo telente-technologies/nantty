@@ -67,16 +67,19 @@ export function ActivityLogPage() {
   const [nextCursor, setNextCursor] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [loadError, setLoadError] = useState<unknown>(null);
   const [reloadCounter, setReloadCounter] = useState(0);
 
   async function loadActivityPage(cursor: string | null, replaceExisting: boolean) {
     setIsLoading(true);
     setErrorMessage(null);
+    setLoadError(null);
     try {
       const page = await accountsApi.listActivity(accountId, { objectType, cursor });
       setEntries((current) => (replaceExisting ? [...page.items] : [...current, ...page.items]));
       setNextCursor(page.nextCursor);
     } catch (error) {
+      setLoadError(error);
       setErrorMessage(readErrorMessageForDisplay(error));
     } finally {
       setIsLoading(false);
@@ -93,7 +96,7 @@ export function ActivityLogPage() {
       <div className={styles.filters}>
         <SelectField label="Show" value={objectType} onValueChange={setObjectType} options={objectTypeOptions} />
       </div>
-      {errorMessage ? <ErrorState message={errorMessage} onRetry={() => setReloadCounter((current) => current + 1)} /> : null}
+      {errorMessage ? <ErrorState error={loadError} message={errorMessage} onRetry={() => setReloadCounter((current) => current + 1)} /> : null}
       <Card padded={false}>
         {isLoading && entries.length === 0 ? <LoadingBlock /> : null}
         {!isLoading && entries.length === 0 && !errorMessage ? <EmptyState iconName="textIndent24" title="Nothing here yet" description="Changes appear here as soon as anyone on the account makes them." /> : null}

@@ -34,7 +34,7 @@ export function AccountChooser() {
       />
       {deniedAccountId ? <InlineNotice tone="caution">You are not a member of that ad account. Ask one of its admins to invite you.</InlineNotice> : null}
       {accountsQuery.isLoading && !accountsQuery.data ? <LoadingBlock height={220} label="Loading ad accounts" /> : null}
-      {accountsQuery.errorMessage ? <ErrorState message={accountsQuery.errorMessage} onRetry={accountsQuery.reload} /> : null}
+      {accountsQuery.errorMessage ? <ErrorState error={accountsQuery.error} message={accountsQuery.errorMessage} onRetry={accountsQuery.reload} /> : null}
       {accountsQuery.data && accounts.length === 0 ? (
         <EmptyState
           iconName="speedometer24"

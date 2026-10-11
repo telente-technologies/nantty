@@ -9,7 +9,7 @@ import { OverlayDialog } from "@/components/ui/overlayDialog";
 import { useToast } from "@/components/ui/toastProvider";
 import { useAdsVerification } from "@/components/verification/adsVerificationProvider";
 import { VerificationPrompt } from "@/components/verification/verificationPrompt";
-import { AdsApiRequestError, isVerificationRequiredError, readErrorMessageForDisplay } from "@/services/adsApiClient.service";
+import { AdsApiRequestError, grantStepUpWithPassword, isStepUpRequiredError, isVerificationRequiredError, readErrorMessageForDisplay } from "@/services/adsApiClient.service";
 import { billingApi } from "@/services/billingApi.service";
 import type { Money } from "@/types/money.type";
 import { createClientIdempotencyKey } from "@/utils/formValidation.util";
@@ -45,6 +45,8 @@ export function PayFromBalanceDialog({ accountId, accountCurrency, availableToWi
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [verificationMessage, setVerificationMessage] = useState<string | null>(null);
   const attemptRef = useRef<{ key: string; amountMinor: number } | null>(null);
+  const [stepUpNeeded, setStepUpNeeded] = useState(false);
+  const [password, setPassword] = useState("");
   const isSameCurrency = availableToWithdraw.currency === accountCurrency;
   const amount = parseTypedMajorAmountToMoney(typedAmount, accountCurrency);
   const amountError = validateAmount(amount, availableToWithdraw);
@@ -53,17 +55,30 @@ export function PayFromBalanceDialog({ accountId, accountCurrency, availableToWi
   async function payFromBalance() {
     setShowErrors(true);
     if (isPaying || cannotPay || amountError || !amount) return;
+    if (stepUpNeeded && password.length === 0) {
+      setErrorMessage("Enter your password to confirm this payment.");
+      return;
+    }
     if (attemptRef.current?.amountMinor !== amount.amountMinor) attemptRef.current = { key: createClientIdempotencyKey("fund"), amountMinor: amount.amountMinor };
     setIsPaying(true);
     setErrorMessage(null);
     setVerificationMessage(null);
     try {
-      const funding = await billingApi.fundFromEarnings(accountId, amount, attemptRef.current.key);
+      const stepUpToken = stepUpNeeded ? await grantStepUpWithPassword(password) : undefined;
+      const funding = await billingApi.fundFromEarnings(accountId, amount, attemptRef.current.key, stepUpToken);
       attemptRef.current = null;
+      setStepUpNeeded(false);
+      setPassword("");
       showToast(`Added ${formatMoneyForDisplay(funding.amount)} from your Zudomart balance`);
       onPaid();
       onClose();
     } catch (error) {
+      setPassword("");
+      if (isStepUpRequiredError(error)) {
+        setStepUpNeeded(true);
+        setErrorMessage("For your safety, confirm larger payments from your balance with your password.");
+        return;
+      }
       if (isVerificationRequiredError(error)) setVerificationMessage(error.message);
       else setErrorMessage(error instanceof AdsApiRequestError ? (knownErrorMessages[error.code] ?? readErrorMessageForDisplay(error)) : readErrorMessageForDisplay(error));
       if (error instanceof AdsApiRequestError && error.status > 0 && error.status < 500) attemptRef.current = null;
@@ -107,6 +122,9 @@ export function PayFromBalanceDialog({ accountId, accountCurrency, availableToWi
           error={showErrors ? amountError : undefined}
           hint={`Up to ${formatMoneyForDisplay(availableToWithdraw)}.`}
         />
+      ) : null}
+      {stepUpNeeded && !cannotPay ? (
+        <TextField label="Your Zudomart password" type="password" autoComplete="current-password" value={password} onValueChange={setPassword} hint="We ask again before larger payments leave your balance." />
       ) : null}
       {errorMessage ? <InlineNotice tone="error">{errorMessage}</InlineNotice> : null}
     </OverlayDialog>

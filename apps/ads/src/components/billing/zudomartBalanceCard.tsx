@@ -29,7 +29,7 @@ export function ZudomartBalanceCard({ walletQuery }: { readonly walletQuery: Ads
           </ul>
         )
       ) : walletQuery.errorMessage ? (
-        <ErrorState message={walletQuery.errorMessage} onRetry={walletQuery.reload} />
+        <ErrorState error={walletQuery.error} message={walletQuery.errorMessage} onRetry={walletQuery.reload} />
       ) : (
         <LoadingBlock height={180} label="Loading your Zudomart balance" />
       )}

@@ -33,7 +33,7 @@ export function BillingPage() {
   return (
     <>
       <PageHeader title="Billing" description={`Everything on ${account.name} is charged in ${account.currency}.`} />
-      {overviewQuery.errorMessage ? <ErrorState message={overviewQuery.errorMessage} onRetry={overviewQuery.reload} /> : null}
+      {overviewQuery.errorMessage ? <ErrorState error={overviewQuery.error} message={overviewQuery.errorMessage} onRetry={overviewQuery.reload} /> : null}
       {!overview && overviewQuery.isLoading ? <LoadingBlock height={220} /> : null}
       {overview ? (
         <div className={styles.layout}>

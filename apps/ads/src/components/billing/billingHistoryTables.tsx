@@ -100,7 +100,7 @@ export function BillingHistoryTables({ accountId }: { readonly accountId: string
   return (
     <>
       <Card title="Transactions" description="Top-ups, daily delivery charges and credits." padded={false}>
-        {transactionsQuery.errorMessage ? <ErrorState message={transactionsQuery.errorMessage} onRetry={transactionsQuery.reload} /> : null}
+        {transactionsQuery.errorMessage ? <ErrorState error={transactionsQuery.error} message={transactionsQuery.errorMessage} onRetry={transactionsQuery.reload} /> : null}
         {transactionsQuery.isLoading && transactions.length === 0 ? <LoadingBlock /> : <DataTable caption="Billing transactions" columns={transactionColumns} rows={transactions} readRowId={(row) => row.id} emptyState="No transactions yet." />}
         {nextCursor ? (
           <div style={{ padding: 12, display: "flex", justifyContent: "center" }}>
@@ -111,7 +111,7 @@ export function BillingHistoryTables({ accountId }: { readonly accountId: string
         ) : null}
       </Card>
       <Card title="Invoices" description="Monthly tax invoices for delivered ads." padded={false}>
-        {invoicesQuery.errorMessage ? <ErrorState message={invoicesQuery.errorMessage} onRetry={invoicesQuery.reload} /> : null}
+        {invoicesQuery.errorMessage ? <ErrorState error={invoicesQuery.error} message={invoicesQuery.errorMessage} onRetry={invoicesQuery.reload} /> : null}
         {invoicesQuery.isLoading ? <LoadingBlock /> : <DataTable caption="Invoices" columns={invoiceColumns} rows={invoicesQuery.data?.items ?? []} readRowId={(row) => row.id} emptyState="Invoices appear after your first full month of delivery." />}
       </Card>
     </>
