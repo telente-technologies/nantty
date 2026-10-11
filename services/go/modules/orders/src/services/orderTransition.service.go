@@ -69,5 +69,20 @@ func TransitionOrderGroup(ctx context.Context, tx *ent.Tx, group *ent.OrderGroup
 		"orderGroupId": group.ID, "checkoutId": group.CheckoutID, "storeId": group.StoreID, "buyerAccountId": group.BuyerAccountID,
 		"sellerAccountId": group.SellerAccountID, "from": group.Status, "to": transition.To, "reference": group.Reference, "actorKind": transition.Actor.Kind,
 	})
-	return updated, err
+	if err != nil {
+		return nil, err
+	}
+	return updated, enqueueFulfilmentEvent(ctx, tx, updated, transition.To, now)
+}
+
+var fulfilmentEventByStatus = map[string]string{enums.StatusShipped: "orderGroup.shipped", enums.StatusDelivered: "orderGroup.delivered"}
+
+func enqueueFulfilmentEvent(ctx context.Context, tx *ent.Tx, group *ent.OrderGroup, status string, now time.Time) error {
+	eventType, fulfilment := fulfilmentEventByStatus[status]
+	if !fulfilment {
+		return nil
+	}
+	data := map[string]any{"orderGroupId": group.ID.String(), "occurredAt": now.UTC(), "courierName": derefOrEmpty(group.CourierName),
+		"trackingNumber": derefOrEmpty(group.TrackingNumber), "trackingUrl": derefOrEmpty(group.TrackingURL)}
+	return events.EnqueueOutboxEventInTransaction(ctx, tx, eventType, group.ID.String(), now, data)
 }

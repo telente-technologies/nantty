@@ -47,11 +47,11 @@ func TestSecondStoreWithTheSameBankAccountIsRefusedAndSentToTrustReview(t *testi
 	bank := map[string]any{"bankCode": "058", "bankName": "GTBank", "accountNumber": "0123456789"}
 
 	_, firstToken := onboardSellerIdentity(t, harness)
-	if saved := harness.Call(http.MethodPut, "/api/v1/payments/payout-onboarding/me/bank", firstToken, "", bank); saved.Status != http.StatusOK {
+	if saved := harness.Call(http.MethodPut, "/api/v1/payments/payout-onboarding/me/bank", firstToken, "", bank, harness.StepUpFor(firstToken)); saved.Status != http.StatusOK {
 		t.Fatalf("first store: %d %s", saved.Status, saved.Raw)
 	}
 	second, secondToken := onboardSellerIdentity(t, harness)
-	refused := harness.Call(http.MethodPut, "/api/v1/payments/payout-onboarding/me/bank", secondToken, "", bank)
+	refused := harness.Call(http.MethodPut, "/api/v1/payments/payout-onboarding/me/bank", secondToken, "", bank, harness.StepUpFor(secondToken))
 	if refused.Status != http.StatusConflict || refused.Body["code"] != "BANK_ACCOUNT_ALREADY_LINKED" || !strings.Contains(string(refused.Raw), "already linked to another store") {
 		t.Fatalf("the second store must be told clearly: %d %s", refused.Status, refused.Raw)
 	}

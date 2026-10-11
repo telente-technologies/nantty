@@ -45,7 +45,7 @@ func TestDocumentsRequiredAccountGetsAHostedLinkAndTheWebhookMovesItToReview(t *
 	}); saved.Status != http.StatusOK {
 		t.Fatalf("identity: %d %s", saved.Status, saved.Raw)
 	}
-	if bank := harness.Call(http.MethodPut, "/api/v1/payments/payout-onboarding/me/bank", token, "", map[string]any{"bankCode": "058", "bankName": "GTBank", "accountNumber": "0123456789"}); bank.Status != http.StatusOK {
+	if bank := harness.Call(http.MethodPut, "/api/v1/payments/payout-onboarding/me/bank", token, "", map[string]any{"bankCode": "058", "bankName": "GTBank", "accountNumber": "0123456789"}, harness.StepUpFor(token)); bank.Status != http.StatusOK {
 		t.Fatalf("bank: %d %s", bank.Status, bank.Raw)
 	}
 	gateway.ProcessDueConnectedAccountJobs(context.Background(), 20)

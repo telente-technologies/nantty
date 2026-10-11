@@ -2,7 +2,6 @@ package services
 
 import (
 	"context"
-	"time"
 
 	"github.com/google/uuid"
 
@@ -11,7 +10,6 @@ import (
 	ordererrors "zudomart/modules/orders/src/errors"
 	"zudomart/modules/orders/src/generated/ent"
 	"zudomart/modules/orders/src/generated/ent/ordergroup"
-	"zudomart/modules/orders/src/interfaces"
 	"zudomart/platform/commerceports"
 )
 
@@ -71,14 +69,6 @@ func UpdateOrderStatus(ctx context.Context, deployed *container.Container, selle
 		return ordererrors.InvalidStatusChange
 	}
 	now := deployed.Now()
-	var escrowRelease *time.Time
-	if target == enums.StatusDelivered {
-		escrow, err := deployed.Money.RecordOrderFulfilment(ctx, interfaces.FulfilmentRecord{OrderId: group.ID.String(), Delivered: true, OccurredAt: now})
-		if err != nil {
-			return err
-		}
-		escrowRelease = escrow.AutoReleaseAt
-	}
 	return deployed.RunInTransaction(ctx, func(tx *ent.Tx) error {
 		locked, err := lockStoreOrder(ctx, tx, seller.Store.StoreId, orderId)
 		if err != nil || locked.Status != group.Status {
@@ -86,7 +76,7 @@ func UpdateOrderStatus(ctx context.Context, deployed *container.Container, selle
 		}
 		_, err = TransitionOrderGroup(ctx, tx, locked, Transition{To: target, Summary: "Status changed to " + target, Actor: seller.actor(), Customize: func(update *ent.OrderGroupUpdateOne) {
 			if target == enums.StatusDelivered {
-				update.SetDeliveredAt(now).AddDeliveryAttempts(1).SetNillableEscrowReleaseAt(escrowRelease)
+				update.SetDeliveredAt(now).AddDeliveryAttempts(1)
 			}
 		}}, now)
 		return err
@@ -121,11 +111,6 @@ func ShipOrder(ctx context.Context, deployed *container.Container, seller Seller
 		}
 	}
 	now := deployed.Now()
-	if _, err := deployed.Money.RecordOrderFulfilment(ctx, interfaces.FulfilmentRecord{
-		OrderId: group.ID.String(), OccurredAt: now, CourierName: request.Courier, TrackingNumber: request.TrackingNumber, TrackingUrl: derefOrEmpty(request.TrackingUrl),
-	}); err != nil {
-		return err
-	}
 	return deployed.RunInTransaction(ctx, func(tx *ent.Tx) error {
 		locked, err := lockStoreOrder(ctx, tx, seller.Store.StoreId, orderId)
 		if err != nil || locked.Status == enums.StatusShipped {

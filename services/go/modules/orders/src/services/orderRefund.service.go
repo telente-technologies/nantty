@@ -10,6 +10,7 @@ import (
 	"zudomart/modules/orders/src/container"
 	"zudomart/modules/orders/src/enums"
 	"zudomart/modules/orders/src/generated/ent"
+	"zudomart/modules/orders/src/generated/ent/ordergroup"
 	"zudomart/modules/orders/src/generated/ent/storecreditentry"
 )
 
@@ -48,9 +49,7 @@ func RecordOrderRefund(ctx context.Context, deployed *container.Container, order
 		return err
 	}
 	if released {
-		if stock, stockError := deployed.Stock(); stockError == nil {
-			return stock.Release(context.WithoutCancel(ctx), orderId.String())
-		}
+		releaseReservedStockOrLeaveForSweep(ctx, deployed, orderId)
 	}
 	return nil
 }
@@ -111,4 +110,11 @@ func MarkOrderDisputed(ctx context.Context, deployed *container.Container, order
 		_, err = TransitionOrderGroup(ctx, tx, group, Transition{To: restored, Summary: "The dispute was closed", Kind: "note", Actor: SystemActor}, now)
 		return err
 	})
+}
+
+func RecordEscrowReleaseTime(ctx context.Context, deployed *container.Container, orderId uuid.UUID, releaseAt *time.Time) error {
+	if releaseAt == nil {
+		return nil
+	}
+	return deployed.Client.OrderGroup.Update().Where(ordergroup.ID(orderId), ordergroup.EscrowReleaseAtIsNil()).SetEscrowReleaseAt(releaseAt.UTC()).Exec(ctx)
 }

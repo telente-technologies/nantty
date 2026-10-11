@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"time"
 
 	"github.com/google/uuid"
 
@@ -13,13 +14,14 @@ import (
 )
 
 type EscrowEventData struct {
-	EscrowId    string    `json:"escrowId"`
-	OrderId     string    `json:"orderId"`
-	Amount      moneyData `json:"amount"`
-	Refunded    moneyData `json:"refunded"`
-	Status      string    `json:"status"`
-	BuyerUserId string    `json:"buyerUserId"`
-	DisputeId   string    `json:"disputeId"`
+	EscrowId    string     `json:"escrowId"`
+	OrderId     string     `json:"orderId"`
+	Amount      moneyData  `json:"amount"`
+	Refunded    moneyData  `json:"refunded"`
+	Status      string     `json:"status"`
+	BuyerUserId string     `json:"buyerUserId"`
+	DisputeId   string     `json:"disputeId"`
+	ReleaseAt   *time.Time `json:"autoReleaseAt"`
 }
 
 type moneyData struct {
@@ -66,6 +68,8 @@ func (handler MoneyEventHandler) apply(ctx context.Context, eventType string, or
 		return CompleteOrderGroup(ctx, handler.Container, orderId, SystemActor, "Escrow released to the seller")
 	case "escrow.refunded", "escrow.partiallyRefunded":
 		return RecordOrderRefund(ctx, handler.Container, orderId, data.Refunded.AmountMinor, data.DisputeId)
+	case "escrow.releaseScheduled":
+		return RecordEscrowReleaseTime(ctx, handler.Container, orderId, data.ReleaseAt)
 	case "dispute.opened":
 		return MarkOrderDisputed(ctx, handler.Container, orderId, true)
 	case "dispute.closed":

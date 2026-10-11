@@ -23,8 +23,13 @@ func RecordOrderPaid(ctx context.Context, deployed *container.Container, orderId
 	if err != nil {
 		return err
 	}
+	stockShort := false
 	if group.StockReserved && group.Status == enums.StatusPending {
-		if err := confirmStockReservation(ctx, deployed, group); err != nil {
+		err := confirmStockReservation(ctx, deployed, group)
+		var shortage commerceports.InsufficientStockError
+		if asInsufficientStock(err, &shortage) {
+			stockShort = true
+		} else if err != nil {
 			return err
 		}
 	}
@@ -36,6 +41,9 @@ func RecordOrderPaid(ctx context.Context, deployed *container.Container, orderId
 		now := deployed.Now()
 		switch locked.Status {
 		case enums.StatusPending:
+			if stockShort {
+				return cancelPaidOrderWithoutStock(ctx, tx, locked, now)
+			}
 			return markGroupPaid(ctx, deployed, tx, locked, now)
 		case enums.StatusCancelled:
 			if locked.PaymentStatus == enums.PaymentPaid {
@@ -52,6 +60,33 @@ func RecordOrderPaid(ctx context.Context, deployed *container.Container, orderId
 		}
 		return nil
 	})
+}
+
+const outOfStockReason = "paid but an item sold out"
+
+func cancelPaidOrderWithoutStock(ctx context.Context, tx *ent.Tx, group *ent.OrderGroup, now time.Time) error {
+	if _, err := TransitionOrderGroup(ctx, tx, group, Transition{To: enums.StatusCancelled, Kind: "cancelled", Summary: "Payment received but an item sold out; the payment is being refunded", Actor: SystemActor,
+		Customize: func(update *ent.OrderGroupUpdateOne) {
+			update.SetCancelReason(outOfStockReason).SetPaymentStatus(enums.PaymentPaid).SetPaidAt(now).SetRefundRequestedAt(now)
+		}}, now); err != nil {
+		return err
+	}
+	if err := restoreStoreCreditOfCancelledGroup(ctx, tx, group, now); err != nil {
+		return err
+	}
+	if err := markCheckoutPaidWhenNoGroupPending(ctx, tx, group.CheckoutID); err != nil {
+		return err
+	}
+	_, err := EnqueueRefundRequest(ctx, tx, group, RefundRequestRecord{AmountMinor: group.TotalMinor, Currency: group.Currency, Reason: outOfStockReason, Source: RefundSourceSystem}, now)
+	return err
+}
+
+func markCheckoutPaidWhenNoGroupPending(ctx context.Context, tx *ent.Tx, checkoutId uuid.UUID) error {
+	pending, err := tx.OrderGroup.Query().Where(ordergroup.CheckoutID(checkoutId), ordergroup.Status(enums.StatusPending)).Exist(ctx)
+	if err != nil || pending {
+		return err
+	}
+	return tx.Checkout.Update().Where(checkout.ID(checkoutId)).SetStatus(enums.CheckoutPaid).Exec(ctx)
 }
 
 func confirmStockReservation(ctx context.Context, deployed *container.Container, group *ent.OrderGroup) error {
@@ -88,14 +123,8 @@ func markGroupPaid(ctx context.Context, deployed *container.Container, tx *ent.T
 	if err != nil {
 		return err
 	}
-	pending, err := tx.OrderGroup.Query().Where(ordergroup.CheckoutID(group.CheckoutID), ordergroup.Status(enums.StatusPending)).Exist(ctx)
-	if err != nil {
+	if err := markCheckoutPaidWhenNoGroupPending(ctx, tx, group.CheckoutID); err != nil {
 		return err
-	}
-	if !pending {
-		if err := tx.Checkout.Update().Where(checkout.ID(group.CheckoutID)).SetStatus(enums.CheckoutPaid).Exec(ctx); err != nil {
-			return err
-		}
 	}
 	attributed, err := loadAttributedSaleItems(ctx, tx, group)
 	if err != nil {

@@ -67,10 +67,10 @@ func TestWebSubscriptionIsWebOnlyAndDowngradesWhenPaystackDisablesIt(t *testing.
 	harness := paymentstesting.StartMoneyHarnessWithPayments(t, nil)
 	owner := uuid.NewString()
 	token := harness.Tokens.UserAccessToken(owner)
-	if mobile := harness.Call(http.MethodPost, "/api/v1/payments/subscriptions/checkout", token, "", map[string]any{"planCode": "premium_web"}, http.Header{"X-Client-Platform": {"ios"}}); mobile.Status != http.StatusUnprocessableEntity {
+	if mobile := harness.Call(http.MethodPost, "/api/v1/payments/subscriptions/checkout", token, "sub-checkout-ios-1", map[string]any{"planCode": "premium_web"}, http.Header{"X-Client-Platform": {"ios"}}); mobile.Status != http.StatusUnprocessableEntity {
 		t.Fatalf("subscription started in the app: %d", mobile.Status)
 	}
-	started := harness.Call(http.MethodPost, "/api/v1/payments/subscriptions/checkout", token, "", map[string]any{"planCode": "premium_web"}, http.Header{"X-Client-Platform": {"web"}})
+	started := harness.Call(http.MethodPost, "/api/v1/payments/subscriptions/checkout", token, "sub-checkout-web-1", map[string]any{"planCode": "premium_web"}, http.Header{"X-Client-Platform": {"web"}})
 	if started.Status != http.StatusCreated || started.Body["checkoutUrl"] == "" {
 		t.Fatalf("checkout: %d %s", started.Status, started.Raw)
 	}

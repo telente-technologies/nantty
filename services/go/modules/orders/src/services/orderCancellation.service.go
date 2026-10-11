@@ -56,11 +56,7 @@ func CancelOrderGroup(ctx context.Context, deployed *container.Container, reques
 		return nil, err
 	}
 	if released {
-		if stock, stockError := deployed.Stock(); stockError == nil {
-			if err := stock.Release(context.WithoutCancel(ctx), request.OrderId.String()); err != nil {
-				return nil, err
-			}
-		}
+		releaseReservedStockOrLeaveForSweep(ctx, deployed, request.OrderId)
 	}
 	return deployed.Client.OrderGroup.Get(ctx, request.OrderId)
 }
