@@ -39,3 +39,13 @@ export interface PostNotificationMuteContract {
 }
 
 export const postNotificationMutePathContract = "/api/v1/posts/:postId/notifications-mute";
+
+export interface PostVideoAnalyticsContract {
+  readonly views: number;
+  readonly watchTimeSeconds: number;
+  readonly averageWatchSeconds: number;
+  readonly completedViews: number;
+  readonly completionRate: number;
+}
+
+export const postAnalyticsPathContract = "/api/v1/posts/:postId/analytics";
