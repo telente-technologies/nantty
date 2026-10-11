@@ -43,6 +43,7 @@ locals {
       LIVE_ACCOUNT_DIRECTORY_GRPC_ADDRESS = local.grpc_address["go-identity"]
       LIVE_CATALOG_INTERNAL_URL           = local.internal_url["go-commerce"]
       LIVE_EVENTS_QUEUE                   = "live-domain-events"
+      ADMIN_INTERNAL_URL                  = local.internal_url["go-identity"]
     }
     go-ads = {
       SOCIAL_INTERNAL_URL    = local.internal_url["social"]
@@ -62,6 +63,7 @@ locals {
     }
     go-trust = {
       MODERATION_USERS_INTERNAL_URL           = local.internal_url["go-identity"]
+      ADMIN_INTERNAL_URL                      = local.internal_url["go-identity"]
       MODERATION_SOCIAL_INTERNAL_URL          = local.internal_url["social"]
       MODERATION_COMMERCE_INTERNAL_URL        = local.internal_url["go-commerce"]
       MODERATION_LIVE_INTERNAL_URL            = local.internal_url["go-live"]

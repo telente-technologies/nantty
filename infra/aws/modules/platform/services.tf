@@ -3,7 +3,7 @@ locals {
     gateway = {
       port         = 8080, cpu = 512, memory = 1024, health = "/healthz", ready = "/readyz", database = false, rabbit = false, min = 2, max = 12
       public_rules = [{ priority = 100, path_patterns = ["/*"] }], internal = false, request_target = 1500
-      secret_keys  = ["IDENTITY_INTERNAL_TOKEN", "TRUST_INTERNAL_TOKEN", "TURNSTILE_SECRET_KEY", "GATEWAY_IDENTITY_SECRET"], valkey = true, node = true
+      secret_keys  = ["IDENTITY_INTERNAL_TOKEN", "TRUST_INTERNAL_TOKEN", "TURNSTILE_SECRET_KEY", "GATEWAY_IDENTITY_SECRET", "ADMIN_INTERNAL_API_TOKEN"], valkey = true, node = true
     }
     go-identity = {
       port         = 8080, cpu = 512, memory = 1024, health = "/healthz", ready = "/readyz", database = true, rabbit = true, min = 2, max = 8, extra_ports = [9101]
@@ -23,7 +23,7 @@ locals {
     go-live = {
       port         = 8080, cpu = 1024, memory = 2048, health = "/healthz", ready = "/readyz", database = true, rabbit = true, min = 2, max = 10
       public_rules = [], internal = true, request_target = 0, valkey = true, node = false
-      secret_keys  = ["LIVE_INTERNAL_API_TOKEN", "LIVE_MONEY_GRPC_TOKEN", "LIVE_ACCOUNT_DIRECTORY_GRPC_TOKEN", "LIVE_CATALOG_INTERNAL_TOKEN"]
+      secret_keys  = ["LIVE_INTERNAL_API_TOKEN", "LIVE_MONEY_GRPC_TOKEN", "LIVE_ACCOUNT_DIRECTORY_GRPC_TOKEN", "LIVE_CATALOG_INTERNAL_TOKEN", "ADMIN_INTERNAL_API_TOKEN"]
     }
     go-ads = {
       port         = 8080, cpu = 512, memory = 1024, health = "/healthz", ready = "/readyz", database = true, rabbit = true, min = 2, max = 6
