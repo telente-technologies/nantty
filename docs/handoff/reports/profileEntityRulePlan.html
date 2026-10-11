@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Zudomart: Profile entity rule plan</title>
+<style>
+  @page { size: A4; margin: 18mm 16mm; }
+  body { font-family: "Inter", "Helvetica Neue", Arial, sans-serif; color: #15151a; font-size: 10.5pt; line-height: 1.5; }
+  h1 { font-size: 20pt; margin: 0 0 2mm; color: #3A2BFF; }
+  .sub { color: #5b5b5b; margin: 0 0 6mm; }
+  h2 { font-size: 13pt; margin: 7mm 0 2mm; border-bottom: 2px solid #3A2BFF; padding-bottom: 1mm; }
+  h3 { font-size: 11pt; margin: 4mm 0 1mm; }
+  table { border-collapse: collapse; width: 100%; margin: 2mm 0 3mm; font-size: 9.5pt; }
+  th, td { border: 1px solid #d9d9e3; padding: 1.6mm 2.2mm; text-align: left; vertical-align: top; }
+  th { background: #f1f0ff; }
+  .ok { color: #157a3c; font-weight: 700; }
+  .no { color: #b3261e; font-weight: 700; }
+  .box { background: #f7f7fb; border-left: 4px solid #3A2BFF; padding: 3mm 4mm; margin: 3mm 0; }
+  ul, ol { margin: 1mm 0 2mm 5mm; padding-left: 4mm; }
+  li { margin: 0.6mm 0; }
+  code { font-family: "JetBrains Mono", Menlo, monospace; font-size: 9pt; background: #f1f1f4; padding: 0 1mm; border-radius: 2px; }
+  .small { font-size: 9pt; color: #5b5b5b; }
+</style>
+</head>
+<body>
+<h1>Profile entity rule: implementation plan</h1>
+<p class="sub">Zudomart · owner decision of 11 October 2026 · status: planned, not built yet</p>
+
+<div class="box">
+<strong>The rule.</strong> A personal account can own at most <strong>two</strong> linked profiles:
+<strong>either one Store or one Business page</strong> (never both), <strong>plus at most one Brand</strong>.
+Business pages show <strong>no Mart / shop icon</strong>. Brands can <strong>choose to sell or not</strong>.
+Never mix them up.
+</div>
+
+<h2>1. Allowed combinations</h2>
+<table>
+<tr><th>Personal account owns…</th><th>Allowed?</th><th>Notes</th></tr>
+<tr><td>Nothing (just personal)</td><td class="ok">Yes</td><td>Default.</td></tr>
+<tr><td>1 Store</td><td class="ok">Yes</td><td>Sells in Mart; profile shows the Mart icon.</td></tr>
+<tr><td>1 Business page</td><td class="ok">Yes</td><td>A non-shop organisation page; <strong>no Mart icon</strong>, no products.</td></tr>
+<tr><td>1 Brand</td><td class="ok">Yes</td><td>The brand may sell or not (toggle).</td></tr>
+<tr><td>1 Store + 1 Brand</td><td class="ok">Yes</td><td>The two-in-one maximum.</td></tr>
+<tr><td>1 Business + 1 Brand</td><td class="ok">Yes</td><td>The two-in-one maximum.</td></tr>
+<tr><td>Store + Business</td><td class="no">No</td><td>Mutually exclusive: must choose one.</td></tr>
+<tr><td>2+ Stores, 2+ Businesses or 2+ Brands</td><td class="no">No</td><td>One of each kind at most.</td></tr>
+<tr><td>Store + Business + Brand</td><td class="no">No</td><td>More than two linked profiles.</td></tr>
+</table>
+
+<h2>2. How brands sell</h2>
+<ul>
+<li>A brand has a <code>sellingEnabled</code> setting (default <em>off</em>). When off, the brand is a showcase only: posts, clips, lives, the Official Store badge eligibility display, and brand protection. It has no products and no Mart icon.</li>
+<li>When on, the brand sells <strong>through its own brand storefront</strong>. It is a sales channel of the brand, not an extra Store, so it does <strong>not</strong> count as the account's Store slot. The owner can still separately have their one Store <em>or</em> one Business page.</li>
+<li>Turning selling off: hide the products and storefront, keep orders and payouts working until all open orders are completed, then lock new listings.</li>
+<li>Brand selling uses the same verification and money rules as stores: Flutterwave wallet, escrow in Nigeria, verification before selling outside Nigeria, and the debt limits.</li>
+</ul>
+
+<h2>3. Backend changes</h2>
+<h3>3.1 Single source of truth</h3>
+<ul>
+<li>In the <strong>users</strong> service (goIdentity), add one guarded registry of an account's linked profiles: <code>linked_profiles(account_id, kind ∈ {store, business, brand}, profile_id)</code> with a <strong>unique (account_id, kind)</strong> constraint and a check that store and business can't both exist for the same account (a partial unique index or a trigger, plus enforcement in code).</li>
+<li>Add an internal endpoint: <code>GET /internal/accounts/{id}/linked-profiles</code> and <code>POST …/claim {kind}</code>, called by catalog (stores) and users (business pages, brands) inside their create flows, so the rule is enforced <strong>server-side in one place</strong>.</li>
+</ul>
+<h3>3.2 Enforcement points</h3>
+<ul>
+<li><strong>Create a store</strong> (catalog <code>POST /stores</code>): refuse if the account has a business page or a store, with <code>409 PROFILE_LIMIT_STORE_OR_BUSINESS</code>.</li>
+<li><strong>Create a business page</strong> (users businessProfiles): refuse if the account has a store or a business page (the same code).</li>
+<li><strong>Create a brand</strong>: refuse if a brand exists, with <code>409 PROFILE_LIMIT_ONE_BRAND</code>.</li>
+<li><strong>Acting-profile switch</strong>: only linked profiles the account owns; the team-member access rules stay as they are.</li>
+<li><strong>Brand selling toggle</strong>: <code>PATCH /brands/{id} {sellingEnabled}</code> with step-up, owner only; products and storefront visibility follow it.</li>
+<li><strong>Admin</strong>: staff can view the rule state and, with step-up plus a reason, convert a Store ↔ Business page or reassign a brand (audited).</li>
+</ul>
+<h3>3.3 Existing data migration</h3>
+<ol>
+<li>Report accounts that break the rule (e.g. both a store and a business page, or several brands).</li>
+<li>Grandfather them read-only: nothing is deleted. The owner gets an in-app task, "Choose which to keep", and the extra profiles stop accepting new listings or posts until they choose. Admin can resolve it for them.</li>
+<li>Backfill <code>linked_profiles</code> for compliant accounts.</li>
+</ol>
+
+<h2>4. App changes (mobile, webapp, seller, studio, admin)</h2>
+<ul>
+<li><strong>Create flows:</strong> "Open a store" and "Create a business page" become one choice screen, Store or Business, with a clear explanation that you can only have one. Once one exists, the other option is hidden and replaced with "You already have a Store / Business page".</li>
+<li><strong>Brand:</strong> "Create a brand" appears only if none exists. Brand settings get a <strong>"Sell products with this brand"</strong> switch, with confirmation and step-up.</li>
+<li><strong>Profile UI:</strong> Business pages <strong>never show the Mart / shop icon</strong> or a products tab. Stores, and brands with selling on, show it.</li>
+<li><strong>Profile switcher (acting as):</strong> shows Personal plus at most two linked profiles, grouped and labelled (Store / Business / Brand).</li>
+<li><strong>Help Centre and Terms:</strong> add an article "Stores, business pages and brands: what you can have", and update the seller terms.</li>
+<li><strong>Error screens:</strong> map the new 409 codes to clear, centred screens with a link to manage profiles.</li>
+</ul>
+
+<h2>5. Tests</h2>
+<ul>
+<li>Backend: every row of the table in section 1, plus concurrent create races (two creates at once, only one wins), conversion, the brand selling toggle with open orders, and migration of rule-breaking accounts.</li>
+<li>Apps: the create choice screen, hidden options, no Mart icon on business pages, the brand toggle, and the error states.</li>
+<li>Contract tests for the new endpoints and error codes.</li>
+</ul>
+
+<h2>6. Order of work</h2>
+<ol>
+<li>Backend registry, constraint and enforcement, with tests.</li>
+<li>Migration report and grandfathering.</li>
+<li>App create flows, profile UI and brand toggle.</li>
+<li>Admin tools, Help Centre and Terms.</li>
+<li>Full QA (adversarial: double taps, races, deep links into blocked create flows).</li>
+</ol>
+
+<h2>7. Other open items (for when you're back)</h2>
+<table>
+<tr><th>Item</th><th>Status</th></tr>
+<tr><td>Payments: the wallet summary showing ₦0 for Flutterwave wallets, ads funding ignoring debt, PAY-7, ads step-up, TS staff IP check, removing dead code, smoke fixes</td><td>Agent running</td></tr>
+<tr><td>Keyboard covering inputs (all screens)</td><td>Agent running</td></tr>
+<tr><td>Product options as chips (mobile and seller)</td><td>Agent running</td></tr>
+<tr><td>Add Repost / Quote to clips</td><td>Waiting for your answer</td></tr>
+<tr><td>Full browser test run against the real backend</td><td>Webapp done (37 pass); other apps queued</td></tr>
+<tr><td>Owner actions: Flutterwave test keys, their written reply, IP allowlist registration, Apple Team ID / app group / APNs / FCM for widgets, LiveKit Cloud or local LiveKit, legal registrations (NDPC, ARCON)</td><td>Waiting on you</td></tr>
+<tr><td>README and architecture docs rewrite</td><td>Queued</td></tr>
+</table>
+
+<p class="small">Generated for the owner on 11 October 2026. The rule is also saved in the project's decisions memory, so any future work follows it.</p>
+</body>
+</html>
