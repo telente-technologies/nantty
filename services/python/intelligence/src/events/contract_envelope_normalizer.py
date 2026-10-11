@@ -1,4 +1,5 @@
 import json
+import re
 from typing import Any
 
 REPORT_REASON_CODES = {
@@ -34,17 +35,39 @@ SHARE_CHANNELS = {"in_app", "external", "message", "story"}
 SAVED_TARGET_TYPES = {"post": "post", "video": "post", "clip": "clip", "product": "product"}
 
 
+TOPIC_SLUG_PATTERN = re.compile(r"^[a-z0-9_\-]{1,64}$")
+MAXIMUM_FORWARDED_TOPICS = 20
+UNATTRIBUTED_EVENT_TYPES = {"product.purchased", "product.viewed"}
+
+
 def item_topics(data: dict[str, Any]) -> dict[str, Any]:
-    return {key: data[key] for key in ("topics", "hashtags") if isinstance(data.get(key), list)}
+    return {
+        key: [slug for slug in data[key] if isinstance(slug, str) and TOPIC_SLUG_PATTERN.match(slug)][
+            :MAXIMUM_FORWARDED_TOPICS
+        ]
+        for key in ("topics", "hashtags")
+        if isinstance(data.get(key), list)
+    }
+
+
+def first_present(data: dict[str, Any], *keys: str) -> Any:
+    return next((data[key] for key in keys if data.get(key) is not None), None)
 
 
 def normalize_comment_created(data: dict[str, Any], flat: dict[str, Any]) -> dict[str, Any]:
     post_author = data.get("postAuthorId") or (data.get("recipientUserId") if data.get("target") == "post" else None)
-    if post_author is not None:
+    if post_author is not None and data.get("commentId"):
         flat["eventId"] = f"comment.created:{data.get('commentId')}"
     flat["actorId"] = data.get("authorId")
     flat["payload"] = {"postId": data.get("postId"), "authorId": post_author, **item_topics(data)}
     return flat
+
+
+def normalize_product_viewed(data: dict[str, Any]) -> dict[str, Any]:
+    payload = {
+        key: data[key] for key in ("productId", "storeId", "categoryId", "sourcePostId") if data.get(key) is not None
+    }
+    return {"actorId": data.get("actorId"), "payload": payload}
 
 
 def normalize_product_purchased(data: dict[str, Any]) -> dict[str, Any]:
@@ -84,22 +107,22 @@ def normalize_social_engagement(event_type: Any, data: dict[str, Any], flat: dic
             **item_topics(data),
         }
     elif event_type == "post.viewed":
-        flat["actorId"] = data.get("viewerId")
+        flat["actorId"] = first_present(data, "viewerId", "actorId")
         flat["payload"] = {
             "postId": data.get("postId"),
-            "authorId": data.get("authorId"),
-            "dwellMs": data.get("dwellMs", 0),
+            "authorId": first_present(data, "authorId", "postAuthorId"),
+            "dwellMs": data.get("dwellMs") or 0,
             "position": data.get("position"),
-            "isProductPost": data.get("isProductPost", False),
+            "isProductPost": data.get("isProductPost") is True,
             **item_topics(data),
         }
     elif event_type == "clip.watched":
-        flat["actorId"] = data.get("viewerId")
+        flat["actorId"] = first_present(data, "viewerId", "actorId")
         flat["payload"] = {
-            "clipId": data.get("clipId"),
-            "creatorId": data.get("creatorId"),
+            "clipId": first_present(data, "clipId", "postId"),
+            "creatorId": first_present(data, "creatorId", "authorId", "postAuthorId"),
             "watchFraction": data.get("watchFraction"),
-            "loopCount": data.get("loopCount", 0),
+            "loopCount": data.get("loopCount") or 0,
             "durationMs": data.get("durationMs"),
             **item_topics(data),
         }
@@ -127,8 +150,13 @@ def select_rekognition_compatible_image_key(data: dict[str, Any]) -> str | None:
     return None
 
 
+SUPPORTED_ENVELOPE_SCHEMA_VERSIONS = frozenset({1})
+
+
 def normalize_contract_envelope(body: Any) -> Any:
     if not (isinstance(body, dict) and "schemaVersion" in body and isinstance(body.get("data"), dict)):
+        return body
+    if body.get("schemaVersion") not in SUPPORTED_ENVELOPE_SCHEMA_VERSIONS:
         return body
     data: dict[str, Any] = body["data"]
     event_type = body.get("type")
@@ -164,6 +192,8 @@ def normalize_contract_envelope(body: Any) -> Any:
         return flat
     if event_type == "product.purchased":
         return {**flat, **normalize_product_purchased(data)}
+    if event_type == "product.viewed":
+        return {**flat, **normalize_product_viewed(data)}
     if event_type == "report.created":
         return {**flat, **normalize_report_created(data, body)}
     social = normalize_social_engagement(event_type, data, flat)
@@ -193,7 +223,7 @@ def normalize_contract_envelope(body: Any) -> Any:
 def is_unattributed_purchase(normalized_body: Any) -> bool:
     return (
         isinstance(normalized_body, dict)
-        and normalized_body.get("eventType") == "product.purchased"
+        and normalized_body.get("eventType") in UNATTRIBUTED_EVENT_TYPES
         and not normalized_body.get("actorId")
     )
 

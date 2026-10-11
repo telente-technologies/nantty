@@ -22,7 +22,8 @@ async def respond_to_validation_error(_request: Request, error: Exception) -> JS
 async def respond_to_http_error(_request: Request, error: Exception) -> JSONResponse:
     status_code = error.status_code if isinstance(error, HTTPException) else 500
     detail = error.detail if isinstance(error, HTTPException) else "internal_error"
-    return JSONResponse(status_code=status_code, content={"error": {"code": str(detail)}})
+    headers = error.headers if isinstance(error, HTTPException) else None
+    return JSONResponse(status_code=status_code, content={"error": {"code": str(detail)}}, headers=headers)
 
 
 async def respond_to_unexpected_error(request: Request, error: Exception) -> JSONResponse:

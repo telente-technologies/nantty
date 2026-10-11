@@ -12,6 +12,8 @@ from src.interfaces.feature_backend_interface import (
     SortedSetKeepHighestScores,
 )
 
+EVICTION_SCAN_THRESHOLD = 10_000
+
 
 class InMemoryFeatureBackend:
     def __init__(self, current_time_provider: Callable[[], float] = time.time) -> None:
@@ -21,6 +23,7 @@ class InMemoryFeatureBackend:
         self._hashes: dict[str, dict[str, float]] = {}
         self._distinct_sets: dict[str, set[str]] = {}
         self._expiry_times: dict[str, float] = {}
+        self._next_eviction_size = EVICTION_SCAN_THRESHOLD
 
     def _discard_key_if_expired(self, key: str) -> None:
         expiry_time = self._expiry_times.get(key)
@@ -30,8 +33,17 @@ class InMemoryFeatureBackend:
             self._distinct_sets.pop(key, None)
             self._expiry_times.pop(key, None)
 
+    def _evict_expired_entries(self, now: float) -> None:
+        self._claimed_keys = {key: expiry for key, expiry in self._claimed_keys.items() if expiry > now}
+        for key in [key for key, expiry in self._expiry_times.items() if expiry <= now]:
+            self._discard_key_if_expired(key)
+
     async def claim_keys_if_absent(self, keys: Sequence[str], ttl_seconds: int) -> list[bool]:
         now = self._current_time_provider()
+        if len(self._claimed_keys) + len(self._expiry_times) >= self._next_eviction_size:
+            self._evict_expired_entries(now)
+            remaining = len(self._claimed_keys) + len(self._expiry_times)
+            self._next_eviction_size = max(EVICTION_SCAN_THRESHOLD, 2 * remaining)
         claim_results: list[bool] = []
         for key in keys:
             existing_expiry = self._claimed_keys.get(key)

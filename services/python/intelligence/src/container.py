@@ -1,5 +1,5 @@
 import logging
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 from src.configs.settings_config import IntelligenceSettings
 from src.databases.in_memory_feature_database import InMemoryFeatureBackend
@@ -69,6 +69,7 @@ from src.modules.trust_advisory.services.suspension_suggestion_service import Su
 from src.repositories.feature_log_parquet_repository import FeatureLogParquetSink
 from src.repositories.online_feature_keyspace_repository import OnlineFeatureKeyspace
 from src.repositories.online_feature_repository import OnlineFeatureStore
+from src.services.background_job_monitor_service import BackgroundJobMonitor
 from src.services.identifier_hashing_service import OpaqueIdentifierHasher, derive_identifier_hash_key
 from src.utils.cqrs_util import CommandBus, QueryBus
 
@@ -110,6 +111,7 @@ class ApplicationContainer:
     command_bus: CommandBus
     query_bus: QueryBus
     rabbitmq_channels: RabbitMqChannelProvider | None = None
+    background_job_monitor: BackgroundJobMonitor = field(default_factory=BackgroundJobMonitor)
 
 
 def build_feature_backend(settings: IntelligenceSettings) -> FeatureBackend:
@@ -171,6 +173,11 @@ def build_trust_advisory_publisher(
 
 
 def build_identifier_hasher(settings: IntelligenceSettings) -> OpaqueIdentifierHasher:
+    if settings.environment in {"staging", "production"} and not settings.id_hash_secret.get_secret_value():
+        container_logger.warning(
+            "identifier_hash_key_derived_from_shared_secret",
+            extra={"reason": "INTELLIGENCE_ID_HASH_SECRET unset; pseudonyms change when the shared secret rotates"},
+        )
     return OpaqueIdentifierHasher(
         derive_identifier_hash_key(
             settings.id_hash_secret.get_secret_value(), settings.shared_secret.get_secret_value()

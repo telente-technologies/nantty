@@ -149,7 +149,7 @@ The service enforces an internal per-request deadline of 250 ms for ranking-styl
 | endpoint | client timeout | fallback when Python is down, times out, returns 4xx/5xx |
 |---|---|---|
 | POST /v1/feed/rank | 250 ms | For You: social `deterministicFeedRanker` (quality x integrity x capped boost, see `docs/architecture/recommendations.md` §7), no consecutive author, drop blocked/hidden/seen. Following: pure reverse chronological. |
-| POST /v1/clips/rank | 100 ms | recency × historical completion rate, no consecutive same creator, drop seen |
+| POST /v1/clips/rank | 250 ms | quality × smoothed completion rate × capped boost, no consecutive same creator (social `deterministicClipRanker`) |
 | POST /v1/social-proof/select | 80 ms | no banners, or a simple rule: ≥2 followed friends engaged, at most every 5th post |
 | POST /v1/ads/select | 120 ms | no ads, or highest-bid eligible ad per slot using the same load rules (first after 3 organic, ≥6 between, never adjacent, skip sensitive/reported neighbours) and charging no more than the bid; never exceed budget |
 | POST /v1/search/rerank | 100 ms | text relevance order from the search engine |
@@ -328,15 +328,37 @@ Return size ≤ `limit`. The API must still drop anything no longer eligible.
 
 ### 7.2 POST /v1/clips/rank
 
+Called by social for the Clips For You tab (`intelligenceClipRanker.integration.ts`). The pinned request
+social sends is `tests/modules/clips/fixtures/social_clip_rank_request.json`.
+
 ```json
-{"requestId": "clipreq_1", "viewer": {"userId": "u_9f2c"}, "limit": 20, "explorationShare": 0.2,
+{"viewer": {"userId": "u_9f2c", "country": "NG", "followedAccountIds": ["u_c1"]}, "limit": 20,
+ "explorationShare": 0.2, "personalized": true, "trendingTopics": ["dance"],
+ "boostPolicy": {"version": 3, "tierBoosts": {"blue_verified": 1.04}, "officialEditorialBoost": 1.1},
  "candidates": [{"itemId": "c_1", "creatorId": "u_c1", "createdAt": "2026-09-28T10:00:00Z", "durationMs": 21000,
    "topics": ["comedy"], "hashtags": [], "viewCount": 5000, "completionCount": 1900, "rewatchCount": 300,
-   "creatorFollowerCount": 800, "creatorIsNew": false, "country": "NG", "isSensitive": false}]}
+   "likeCount": 40, "commentCount": 3, "shareCount": 2, "saveCount": 1, "authorTier": "blue_verified",
+   "authorIsOfficial": false, "isPromoted": false, "integrity": {"engagerCount": 40, "clusteredEngagerShare": 0.1},
+   "creatorFollowerCount": 800, "creatorIsNew": false, "country": "NG", "isSensitive": false, "ageRestricted": false}]}
 ```
 
 `limit` 1..100 (default 20); `explorationShare` 0..1 (default 0.2 => every 5th slot, positions 4, 9, 14, …).
-Response `items[]`: `{itemId, position, score, isExploration, reasons}`, plus `excluded` and `metadata`.
+Unknown fields are rejected (422).
+
+Score = P(completion) x (1 + 0.5 P(rewatch)) x freshness (72 h half-life, floor 0.15) x (1 + 0.3 creator affinity)
+x (1 + 0.25 engagement) x integrity x capped boost. P(completion) and P(rewatch) come from the `clip_watch` model
+or the heuristic heads, fed by the candidate counts and the online `clip_watched` statistics (`watches`,
+`completions`, `rewatches`, `watch_fraction_sum`), so watches recorded after social built its counts still count.
+Engagement = (likes + 2 saves + 3 comments + 4 shares) / views, saturating at 0.2, so likes break ties but never
+beat a clearly better completion rate. Integrity uses the feed's assessment: counts are discounted by the trusted
+share and the score is multiplied by 0.3 + 0.7 x trusted share; manipulated clips never get exploration slots.
+Boosts are clamped to the hard caps (Black 15%, Gold 12%, Premium 10%, Blue 8%, Blue Essential 5%, Official 15%,
+25% combined) and disclosed in `explanations`. Sensitive or age-restricted clips are dropped unless the viewer's
+`ageBracket` is adult. `personalized: false` (guests, no consent) skips follows, chosen topics, affinities and
+seen items and is not written to the feature log; `metadata.rankingSource` ends in `:non_personalized`.
+
+Response `items[]`: `{itemId, position, score, isExploration, reasons, explanations, boostMultiplier,
+trustedEngagementShare}`, plus `excluded`, `manipulatedItemIds`, `boostPolicyVersion` and `metadata`.
 Exploration slots go to new creators / clips with <50 watches chosen by Thompson sampling
 (Beta(1+completions, 1+non-completions)), seeded by userId+requestId so a retried request returns the
 same order. No duplicates, no two consecutive clips from one creator.
@@ -830,8 +852,9 @@ Social engagement (contract envelope `data`, personalization-gated, translated w
 | post.shared | postId, authorId, sharedBy, channel? | `shared` (actor `sharedBy`; unknown channels => `external`, none => `in_app`) |
 | comment.created | commentId, postId, authorId (commenter), recipientUserId, target, postAuthorId? | `commented` once per comment (eventId `comment.created:<commentId>`); needs `postAuthorId` or `target: "post"`, otherwise skipped |
 | content.saved | accountId, targetType (`post` \| `video` \| `clip` \| `product`), targetId, authorId? | `saved` (`video` => `post`) |
-| post.viewed | postId, authorId, viewerId, dwellMs?, position?, isProductPost? | `post_viewed` (impression; seen set + dwell) |
-| clip.watched | clipId, creatorId, viewerId, watchFraction, loopCount?, durationMs | `clip_watched` |
+| post.viewed | postId, authorId (or postAuthorId), viewerId (social sends actorId), dwellMs?, position?, isProductPost? | `post_viewed` (impression; seen set + dwell). Hashtags that are not `[a-z0-9_-]` slugs are dropped, not rejected |
+| clip.watched | clipId (social sends postId), creatorId (social sends authorId/postAuthorId), viewerId (social sends actorId), watchFraction, loopCount?, durationMs | `clip_watched` |
+| product.viewed (go-commerce) | productId, storeId, categoryId?, sourcePostId?, actorId (only when personalized) | `product_viewed` (actor `actorId`); events without `actorId` are acked as `skipped_unattributed` |
 | product.purchased (go-commerce, one per order item) | productId, storeId, variantId, quantity, orderGroupId, unitPrice (Money), actorId (only when the buyer allows personalization), sourcePostId? | `purchased` with one item (actor `actorId`); events without `actorId` are acked as `skipped_unattributed` (never attributed, never dead-lettered) |
 `message.sent` carries metadata only: `{recipientId, conversationId, containsLink?, linkReported?, deviceId?, ipHash?}`; extra fields reject the event.
 Personalization-gated: product.viewed, product.purchased, follow.created, ad.impressionRecorded, report.created affinity. Safety counters (messages, logins, reports, blocks, posts) are kept for abuse scoring.

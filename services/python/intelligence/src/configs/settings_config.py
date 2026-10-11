@@ -6,6 +6,12 @@ from pydantic import AliasChoices, Field, SecretStr, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 MINIMUM_SHARED_SECRET_LENGTH = 32
+PLACEHOLDER_SECRET_MARKERS = ("local-only", "change-me", "change_me", "changeme", "example", "placeholder")
+
+
+def looks_like_placeholder_secret(secret: str) -> bool:
+    lowered = secret.lower()
+    return any(marker in lowered for marker in PLACEHOLDER_SECRET_MARKERS)
 
 
 class IntelligenceSettings(BaseSettings):
@@ -19,6 +25,7 @@ class IntelligenceSettings(BaseSettings):
     environment: Literal["development", "test", "staging", "production"] = "development"
     host: str = "127.0.0.1"
     port: int = Field(default=8090, ge=1, le=65535)
+    trusted_proxy_ips: str = ""
     log_level: Literal["DEBUG", "INFO", "WARNING", "ERROR"] = "INFO"
 
     shared_secret: SecretStr = SecretStr("")
@@ -28,7 +35,7 @@ class IntelligenceSettings(BaseSettings):
     nonce_retention_seconds: int = Field(default=900, ge=60, le=3600)
 
     redis_url: str = ""
-    redis_socket_timeout_seconds: float = Field(default=0.05, gt=0, le=5)
+    redis_socket_timeout_seconds: float = Field(default=0.5, gt=0, le=5)
     redis_key_prefix: str = "intel"
 
     event_storage_uri: str = "./data"
@@ -82,6 +89,7 @@ class IntelligenceSettings(BaseSettings):
     max_request_body_bytes: int = Field(default=1_048_576, ge=1024)
     max_event_batch_body_bytes: int = Field(default=4_194_304, ge=1024)
     request_deadline_seconds: float = Field(default=0.25, gt=0, le=10)
+    event_ingestion_deadline_seconds: float = Field(default=10.0, gt=0, le=60)
     rate_limit_requests_per_second: float = Field(default=2000.0, gt=0)
     rate_limit_burst_size: int = Field(default=4000, ge=1)
 
@@ -90,6 +98,7 @@ class IntelligenceSettings(BaseSettings):
     event_deduplication_retention_seconds: int = Field(default=7 * 24 * 3600, ge=3600)
     dataset_retention_days: int = Field(default=90, ge=1, le=3650)
     dataset_retention_interval_seconds: float = Field(default=24 * 3600.0, ge=60.0)
+    dataset_erasure_interval_seconds: float = Field(default=3600.0, ge=60.0)
 
     @model_validator(mode="after")
     def reject_weak_configuration_outside_development(self) -> IntelligenceSettings:
@@ -101,6 +110,17 @@ class IntelligenceSettings(BaseSettings):
                 raise ValueError("INTELLIGENCE_REDIS_URL is required outside development")
             if len(self.model_signing_secret.get_secret_value()) < MINIMUM_SHARED_SECRET_LENGTH:
                 raise ValueError("INTELLIGENCE_MODEL_SIGNING_SECRET must be at least 32 characters")
+            id_hash_length = len(self.id_hash_secret.get_secret_value())
+            if 0 < id_hash_length < MINIMUM_SHARED_SECRET_LENGTH:
+                raise ValueError("INTELLIGENCE_ID_HASH_SECRET must be empty or at least 32 characters")
+            for name, secret in (
+                ("INTELLIGENCE_SHARED_SECRET", self.shared_secret),
+                ("INTELLIGENCE_PREVIOUS_SHARED_SECRET", self.previous_shared_secret),
+                ("INTELLIGENCE_MODEL_SIGNING_SECRET", self.model_signing_secret),
+                ("INTELLIGENCE_ID_HASH_SECRET", self.id_hash_secret),
+            ):
+                if looks_like_placeholder_secret(secret.get_secret_value()):
+                    raise ValueError(f"{name} is a placeholder value and cannot be used outside development")
         elif secret_length == 0:
             raise ValueError("INTELLIGENCE_SHARED_SECRET must be set, even in development")
         return self
@@ -118,14 +138,27 @@ class IntelligenceSettings(BaseSettings):
         if self.event_bus == "rabbitmq":
             if not self.rabbitmq_url.get_secret_value():
                 raise ValueError("INTELLIGENCE_RABBITMQ_URL is required when EVENT_BUS=rabbitmq")
-        elif not self.domain_events_queue_url:
+            return self
+        if not self.domain_events_queue_url:
             raise ValueError("INTELLIGENCE_DOMAIN_EVENTS_QUEUE_URL is required when EVENT_BUS=sqs")
-        return self
+        raise ValueError(
+            "EVENT_BUS=sqs has no content-score, sensitivity or live-safety publisher; use rabbitmq outside development"
+        )
 
     @model_validator(mode="after")
     def reject_undistributed_replay_protection(self) -> IntelligenceSettings:
         if self.environment != "test" and not self.redis_url and self.server_workers > 1:
             raise ValueError("INTELLIGENCE_SERVER_WORKERS must be 1 without INTELLIGENCE_REDIS_URL")
+        return self
+
+    @model_validator(mode="after")
+    def reject_unpaired_media_internal_settings(self) -> IntelligenceSettings:
+        if self.environment not in {"staging", "production"}:
+            return self
+        if bool(self.media_internal_url) != bool(self.media_internal_token.get_secret_value()):
+            raise ValueError(
+                "INTELLIGENCE_MEDIA_INTERNAL_URL and INTELLIGENCE_MEDIA_INTERNAL_TOKEN must be set together"
+            )
         return self
 
     @property

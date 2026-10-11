@@ -114,11 +114,13 @@ class RedisFeatureBackend:
     ) -> list[list[tuple[str, float]]]:
         if not keys:
             return []
+        raw_results: list[list[tuple[object, float]]] = []
         try:
-            async with self._redis_client.pipeline(transaction=False) as pipeline:
-                for key in keys:
-                    pipeline.zrevrange(key, 0, limit_per_key - 1, withscores=True)
-                raw_results = await pipeline.execute()
+            for chunk_start in range(0, len(keys), SCRIPT_KEY_CHUNK_SIZE):
+                async with self._redis_client.pipeline(transaction=False) as pipeline:
+                    for key in keys[chunk_start : chunk_start + SCRIPT_KEY_CHUNK_SIZE]:
+                        pipeline.zrevrange(key, 0, limit_per_key - 1, withscores=True)
+                    raw_results += await pipeline.execute()
         except RedisError as redis_error:
             raise FeatureBackendUnavailableError("redis read failed") from redis_error
         return [[(str(member), float(score)) for member, score in rows] for rows in raw_results]

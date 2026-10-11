@@ -24,7 +24,7 @@ from src.events.event_payload_dto import (
     SearchedPayload,
     SharedPayload,
 )
-from src.validators.common_field_validator import CountryCode, OpaqueIdentifier, RegionCode
+from src.validators.common_field_validator import CountryCode, ExperimentSlug, OpaqueIdentifier, RegionCode
 
 MAXIMUM_EVENTS_PER_BATCH = 500
 
@@ -32,7 +32,7 @@ MAXIMUM_EVENTS_PER_BATCH = 500
 class EventContext(ContractModel):
     surface: str | None = Field(default=None, max_length=40, pattern=r"^[a-z_]{1,40}$")
     ranking_request_id: OpaqueIdentifier | None = None
-    experiment_assignments: dict[str, str] = Field(default_factory=dict, max_length=20)
+    experiment_assignments: dict[ExperimentSlug, ExperimentSlug] = Field(default_factory=dict, max_length=20)
     device_class: Literal["android", "ios", "web", "other"] | None = None
     actor_trust: Literal["new", "low", "normal"] | None = None
     actor_cluster_key: OpaqueIdentifier | None = None
