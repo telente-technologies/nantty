@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.zudomart.com/events/escrow.releaseScheduled.v1.json",
+  "title": "EscrowReleaseScheduled",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "escrowId",
+    "orderId",
+    "autoReleaseAt"
+  ],
+  "properties": {
+    "escrowId": {
+      "type": "string"
+    },
+    "orderId": {
+      "type": "string"
+    },
+    "autoReleaseAt": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}

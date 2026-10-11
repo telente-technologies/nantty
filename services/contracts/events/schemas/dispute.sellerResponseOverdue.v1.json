@@ -1,0 +1,48 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.zudomart.com/events/dispute.sellerResponseOverdue.v1.json",
+  "title": "DisputeSellerResponseOverdue",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "disputeId",
+    "orderId",
+    "escrowId",
+    "buyerUserId",
+    "sellerUserId"
+  ],
+  "properties": {
+    "disputeId": {
+      "type": "string"
+    },
+    "orderId": {
+      "type": "string"
+    },
+    "escrowId": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string"
+    },
+    "buyerUserId": {
+      "type": "string"
+    },
+    "sellerUserId": {
+      "type": "string"
+    },
+    "storeId": {
+      "type": "string"
+    },
+    "reason": {
+      "type": "string"
+    },
+    "respondByAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "escalatedAt": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}

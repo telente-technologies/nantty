@@ -86,6 +86,24 @@
       ],
       "format": "uuid",
       "description": "Post this one quotes, resolved server-side from a Zudomart post link or an explicit quotedPostId."
+    },
+    "authorProfileId": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "Business profile the post was published as; null for the personal profile."
+    },
+    "authorProfileKind": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "Kind of that business profile (brand, store, creator...); null for the personal profile."
+    },
+    "isVideoReply": {
+      "type": "boolean",
+      "description": "True when the clip is a video reply to a comment. Post-notification fan-out skips these."
     }
   }
 }

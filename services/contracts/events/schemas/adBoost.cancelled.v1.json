@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.zudomart.com/events/adBoost.cancelled.v1.json",
+  "title": "AdBoostCancelled",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["boostId", "userId", "postId", "reason", "paymentMethod", "currency", "refundMinor", "debitIdempotencyKey", "allowanceRestored"],
+  "properties": {
+    "boostId": { "type": "string", "format": "uuid" },
+    "userId": { "type": "string", "format": "uuid" },
+    "postId": { "type": "string" },
+    "reason": { "enum": ["postDeleted", "ownerCancelled"] },
+    "paymentMethod": { "enum": ["wallet", "card", "balance", "free"] },
+    "currency": { "type": "string", "pattern": "^[A-Z]{3}$" },
+    "refundMinor": { "type": "integer", "minimum": 0 },
+    "debitIdempotencyKey": { "type": "string" },
+    "allowanceRestored": { "type": "boolean" }
+  }
+}

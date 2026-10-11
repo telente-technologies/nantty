@@ -250,6 +250,8 @@ channels:
         $ref: '#/components/messages/adPremiumPoolAllocated'
       adBoostCreated:
         $ref: '#/components/messages/adBoostCreated'
+      adBoostCancelled:
+        $ref: '#/components/messages/adBoostCancelled'
       adMediaUploaded:
         $ref: '#/components/messages/adMediaUploaded'
       adReportReady:
@@ -300,6 +302,38 @@ channels:
         $ref: '#/components/messages/paymentRefundSucceeded'
       paymentRefundFailed:
         $ref: '#/components/messages/paymentRefundFailed'
+      paymentRefundRequested:
+        $ref: '#/components/messages/paymentRefundRequested'
+      providerWalletCreated:
+        $ref: '#/components/messages/providerWalletCreated'
+      providerWalletFrozen:
+        $ref: '#/components/messages/providerWalletFrozen'
+      providerWalletUnfrozen:
+        $ref: '#/components/messages/providerWalletUnfrozen'
+      walletFunded:
+        $ref: '#/components/messages/walletFunded'
+      walletFundingReversed:
+        $ref: '#/components/messages/walletFundingReversed'
+      walletDebtRecorded:
+        $ref: '#/components/messages/walletDebtRecorded'
+      providerMovementSucceeded:
+        $ref: '#/components/messages/providerMovementSucceeded'
+      providerMovementFailed:
+        $ref: '#/components/messages/providerMovementFailed'
+      reconciliationAlertRaised:
+        $ref: '#/components/messages/reconciliationAlertRaised'
+      disputeSellerResponseOverdue:
+        $ref: '#/components/messages/disputeSellerResponseOverdue'
+      orderGroupShipped:
+        $ref: '#/components/messages/orderGroupShipped'
+      orderGroupDelivered:
+        $ref: '#/components/messages/orderGroupDelivered'
+      escrowReleaseScheduled:
+        $ref: '#/components/messages/escrowReleaseScheduled'
+      payoutAccountAdded:
+        $ref: '#/components/messages/payoutAccountAdded'
+      payoutAccountDefaultChanged:
+        $ref: '#/components/messages/payoutAccountDefaultChanged'
       payoutTransferSucceeded:
         $ref: '#/components/messages/payoutTransferSucceeded'
       payoutTransferFailed:
@@ -629,6 +663,22 @@ operations:
       - $ref: '#/channels/domainEvents/messages/paymentDuplicateRefunded'
       - $ref: '#/channels/domainEvents/messages/paymentRefundSucceeded'
       - $ref: '#/channels/domainEvents/messages/paymentRefundFailed'
+      - $ref: '#/channels/domainEvents/messages/paymentRefundRequested'
+      - $ref: '#/channels/domainEvents/messages/providerWalletCreated'
+      - $ref: '#/channels/domainEvents/messages/providerWalletFrozen'
+      - $ref: '#/channels/domainEvents/messages/providerWalletUnfrozen'
+      - $ref: '#/channels/domainEvents/messages/walletFunded'
+      - $ref: '#/channels/domainEvents/messages/walletFundingReversed'
+      - $ref: '#/channels/domainEvents/messages/walletDebtRecorded'
+      - $ref: '#/channels/domainEvents/messages/providerMovementSucceeded'
+      - $ref: '#/channels/domainEvents/messages/providerMovementFailed'
+      - $ref: '#/channels/domainEvents/messages/reconciliationAlertRaised'
+      - $ref: '#/channels/domainEvents/messages/disputeSellerResponseOverdue'
+      - $ref: '#/channels/domainEvents/messages/orderGroupShipped'
+      - $ref: '#/channels/domainEvents/messages/orderGroupDelivered'
+      - $ref: '#/channels/domainEvents/messages/escrowReleaseScheduled'
+      - $ref: '#/channels/domainEvents/messages/payoutAccountAdded'
+      - $ref: '#/channels/domainEvents/messages/payoutAccountDefaultChanged'
       - $ref: '#/channels/domainEvents/messages/payoutTransferSucceeded'
       - $ref: '#/channels/domainEvents/messages/payoutTransferFailed'
       - $ref: '#/channels/domainEvents/messages/storePurchaseRefunded'
@@ -671,6 +721,7 @@ operations:
       - $ref: '#/channels/domainEvents/messages/adCreatorEarningsPosted'
       - $ref: '#/channels/domainEvents/messages/adPremiumPoolAllocated'
       - $ref: '#/channels/domainEvents/messages/adBoostCreated'
+      - $ref: '#/channels/domainEvents/messages/adBoostCancelled'
       - $ref: '#/channels/domainEvents/messages/adMediaUploaded'
       - $ref: '#/channels/domainEvents/messages/adReportReady'
 
@@ -1425,6 +1476,118 @@ components:
         allOf:
           - $ref: './schemas/envelope.v1.json'
           - properties: { data: { $ref: './schemas/paymentRefund.failed.v1.json' } }
+    paymentRefundRequested:
+      name: paymentRefund.requested
+      headers: { type: object, properties: { eventType: { const: paymentRefund.requested } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/paymentRefund.requested.v1.json' } }
+    providerWalletCreated:
+      name: providerWallet.created
+      headers: { type: object, properties: { eventType: { const: providerWallet.created } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/providerWallet.created.v1.json' } }
+    providerWalletFrozen:
+      name: providerWallet.frozen
+      headers: { type: object, properties: { eventType: { const: providerWallet.frozen } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/providerWallet.frozen.v1.json' } }
+    providerWalletUnfrozen:
+      name: providerWallet.unfrozen
+      headers: { type: object, properties: { eventType: { const: providerWallet.unfrozen } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/providerWallet.unfrozen.v1.json' } }
+    walletFunded:
+      name: wallet.funded
+      headers: { type: object, properties: { eventType: { const: wallet.funded } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/wallet.funded.v1.json' } }
+    walletFundingReversed:
+      name: wallet.fundingReversed
+      headers: { type: object, properties: { eventType: { const: wallet.fundingReversed } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/wallet.fundingReversed.v1.json' } }
+    walletDebtRecorded:
+      name: wallet.debtRecorded
+      headers: { type: object, properties: { eventType: { const: wallet.debtRecorded } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/wallet.debtRecorded.v1.json' } }
+    providerMovementSucceeded:
+      name: providerMovement.succeeded
+      headers: { type: object, properties: { eventType: { const: providerMovement.succeeded } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/providerMovement.succeeded.v1.json' } }
+    providerMovementFailed:
+      name: providerMovement.failed
+      headers: { type: object, properties: { eventType: { const: providerMovement.failed } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/providerMovement.failed.v1.json' } }
+    reconciliationAlertRaised:
+      name: reconciliation.alertRaised
+      headers: { type: object, properties: { eventType: { const: reconciliation.alertRaised } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/reconciliation.alertRaised.v1.json' } }
+    disputeSellerResponseOverdue:
+      name: dispute.sellerResponseOverdue
+      headers: { type: object, properties: { eventType: { const: dispute.sellerResponseOverdue } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/dispute.sellerResponseOverdue.v1.json' } }
+    orderGroupShipped:
+      name: orderGroup.shipped
+      headers: { type: object, properties: { eventType: { const: orderGroup.shipped } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/orderGroup.shipped.v1.json' } }
+    orderGroupDelivered:
+      name: orderGroup.delivered
+      headers: { type: object, properties: { eventType: { const: orderGroup.delivered } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/orderGroup.delivered.v1.json' } }
+    escrowReleaseScheduled:
+      name: escrow.releaseScheduled
+      headers: { type: object, properties: { eventType: { const: escrow.releaseScheduled } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/escrow.releaseScheduled.v1.json' } }
+    payoutAccountAdded:
+      name: payoutAccount.added
+      headers: { type: object, properties: { eventType: { const: payoutAccount.added } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/payoutAccount.added.v1.json' } }
+    payoutAccountDefaultChanged:
+      name: payoutAccount.defaultChanged
+      headers: { type: object, properties: { eventType: { const: payoutAccount.defaultChanged } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/payoutAccount.defaultChanged.v1.json' } }
     payoutTransferSucceeded:
       name: payoutTransfer.succeeded
       headers: { type: object, properties: { eventType: { const: payoutTransfer.succeeded } } }
@@ -1684,6 +1847,13 @@ components:
         allOf:
           - $ref: './schemas/envelope.v1.json'
           - properties: { data: { $ref: './schemas/adBoost.created.v1.json' } }
+    adBoostCancelled:
+      name: adBoost.cancelled
+      headers: { type: object, properties: { eventType: { const: adBoost.cancelled } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/adBoost.cancelled.v1.json' } }
     adMediaUploaded:
       name: adMedia.uploaded
       headers: { type: object, properties: { eventType: { const: adMedia.uploaded } } }
@@ -1847,6 +2017,7 @@ components:
           - properties: { data: { $ref: './schemas/content.saved.v1.json' } }
     postViewed:
       name: post.viewed
+      summary: Emitted by social when a signed-in viewer leaves a post they looked at for at least a second (a "dwell" interaction after a counted view), carrying dwellMs. Never for the author's own posts.
       headers: { type: object, properties: { eventType: { const: post.viewed } } }
       payload:
         allOf:
@@ -1854,6 +2025,7 @@ components:
           - properties: { data: { $ref: './schemas/post.viewed.v1.json' } }
     clipWatched:
       name: clip.watched
+      summary: Emitted by social at most once per viewer per clip per 10 minutes when a watch is counted; watchMs is capped at durationMs times (loopCount + 1).
       headers: { type: object, properties: { eventType: { const: clip.watched } } }
       payload:
         allOf:

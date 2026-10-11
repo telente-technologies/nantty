@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.zudomart.com/events/orderGroup.shipped.v1.json",
+  "title": "OrderGroupShipped",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "orderGroupId",
+    "occurredAt"
+  ],
+  "properties": {
+    "orderGroupId": {
+      "type": "string"
+    },
+    "occurredAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "courierName": {
+      "type": "string"
+    },
+    "trackingNumber": {
+      "type": "string"
+    },
+    "trackingUrl": {
+      "type": "string"
+    }
+  }
+}
