@@ -29,7 +29,7 @@ const tabLabels: Readonly<Record<WithdrawalStatus, string>> = { pending_review: 
 const withdrawalColumns: readonly DataTableColumn<StaffWithdrawal>[] = [
   { key: "user", header: "User", render: (withdrawal) => <UserIdentity user={toIdentityUser(withdrawal.user)} size={24} /> },
   { key: "amount", header: "Amount", render: (withdrawal) => <span className={styles.stack}><span className={styles.amount}>{formatMoneyForDisplay(withdrawal.amount)}</span><span className={styles.muted}>fee {formatMoneyForDisplay(withdrawal.fee)}</span></span>, align: "end" },
-  { key: "destination", header: "Destination", render: (withdrawal) => (withdrawal.destination ? <span className={styles.stack}><span>{withdrawal.destination.bankName} <span className="mono">••••{withdrawal.destination.accountLast4}</span></span><span className={styles.muted}>added {formatRelativeTimeFromNow(withdrawal.destination.addedAt)}{withdrawal.destination.removed ? " · removed since" : ""}</span></span> : <span className={styles.muted}>Account not found</span>) },
+  { key: "destination", header: "Destination", render: (withdrawal) => (withdrawal.destination ? <span className={styles.stack}><span>{withdrawal.destination.bankName} <span className="mono">••••{withdrawal.destination.accountLast4}</span></span><span className={styles.muted}>added {formatRelativeTimeFromNow(withdrawal.destination.addedAt)}</span>{withdrawal.destination.removed ? <span><StatusBadge tone="caution" label="Account removed" /></span> : null}</span> : <span className={styles.muted}>Account not found</span>) },
   { key: "reference", header: "Reference", render: (withdrawal) => withdrawal.reference, isMono: true },
   { key: "status", header: "Status", render: (withdrawal) => <StatusBadge status={withdrawal.withdrawalStatus} /> },
   { key: "requested", header: "Requested", render: (withdrawal) => <span className={styles.muted}>{formatRelativeTimeFromNow(withdrawal.createdAt)}</span> },
@@ -63,7 +63,7 @@ export function WithdrawalsWorkspace() {
         </Toolbar>
       </form>
       {errorMessage ? <ErrorBlock error={queryError} message={errorMessage} onRetry={reload} /> : null}
-      <DataTable caption="Withdrawal requests" columns={withdrawalColumns} rows={data?.items ?? []} readRowKey={(withdrawal) => withdrawal.id} isLoading={isLoading} selectedRowKey={openWithdrawalId} onRowOpen={(withdrawal) => setOpenWithdrawalId(withdrawal.id)} readRowTone={(withdrawal) => (withdrawal.destination?.removed ? "caution" : null)} emptyMessage="No withdrawals in this state." />
+      <DataTable caption="Withdrawal requests" columns={withdrawalColumns} rows={data?.items ?? []} readRowKey={(withdrawal) => withdrawal.id} isLoading={isLoading} selectedRowKey={openWithdrawalId} onRowOpen={(withdrawal) => setOpenWithdrawalId(withdrawal.id)} emptyMessage="No withdrawals in this state." />
       <CursorPagination cursor={cursor} nextCursor={data?.nextCursor} onCursorChange={setCursor} />
       {openWithdrawalId ? <WithdrawalDetailPanel key={openWithdrawalId} withdrawalId={openWithdrawalId} onClose={() => setOpenWithdrawalId(null)} onChanged={reload} /> : null}
     </>

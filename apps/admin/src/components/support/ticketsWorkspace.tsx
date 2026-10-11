@@ -94,7 +94,6 @@ export function TicketsWorkspace() {
         onRowOpen={(ticket) => router.push(`/support/${encodeURIComponent(ticket.id)}`)}
         isLoading={tickets.isLoading}
         emptyMessage="No tickets match these filters. Nice work."
-        readRowTone={(ticket) => (ticket.isSlaBreached ? "danger" : ticket.priority === "URGENT" ? "caution" : null)}
       />
       {tickets.data ? <Pagination page={tickets.data.page} pageSize={tickets.data.pageSize} total={tickets.data.total} onPageChange={setPage} /> : null}
       {isMacrosOpen ? <MacrosManagerDialog canManage={can("support:assign")} onClose={() => setIsMacrosOpen(false)} /> : null}

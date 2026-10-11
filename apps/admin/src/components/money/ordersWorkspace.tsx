@@ -61,7 +61,7 @@ export function OrdersWorkspace() {
         </Toolbar>
       </form>
       {errorMessage ? <ErrorBlock error={queryError} message={errorMessage} onRetry={reload} /> : null}
-      <DataTable caption="Orders" columns={orderColumns} rows={data?.items ?? []} readRowKey={(order) => order.id} isLoading={isLoading} onRowOpen={(order) => router.push(`/commerce/orders/${order.id}`)} readRowTone={(order) => (order.status === "disputed" ? "danger" : null)} emptyMessage="No orders match these filters." />
+      <DataTable caption="Orders" columns={orderColumns} rows={data?.items ?? []} readRowKey={(order) => order.id} isLoading={isLoading} onRowOpen={(order) => router.push(`/commerce/orders/${order.id}`)} emptyMessage="No orders match these filters." />
       <CursorPagination cursor={cursor} nextCursor={data?.nextCursor} onCursorChange={setCursor} />
     </>
   );

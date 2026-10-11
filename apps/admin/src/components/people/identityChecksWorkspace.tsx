@@ -55,7 +55,6 @@ export function IdentityChecksWorkspace() {
         onRowOpen={(item) => router.push(`/verification/identity/${item.id}`)}
         isLoading={isLoading}
         emptyMessage="Nothing waiting here."
-        readRowTone={(item) => (item.fraudSignals.length > 0 ? "caution" : null)}
       />
     </>
   );

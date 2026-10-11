@@ -107,9 +107,8 @@
 
 .consequenceNote {
   padding: var(--space-2) 10px;
-  border-left: 3px solid var(--color-accent);
   background: var(--surface-sunken);
-  border-radius: 0 var(--radius-small) var(--radius-small) 0;
+  border-radius: var(--radius-small);
   font-size: var(--fs-12);
 }
 

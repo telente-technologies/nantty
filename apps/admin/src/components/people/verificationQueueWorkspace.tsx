@@ -69,7 +69,6 @@ export function VerificationQueueWorkspace() {
         onRowOpen={(application) => router.push(`/verification/${application.id}`)}
         isLoading={isLoading}
         emptyMessage="No verification requests here."
-        readRowTone={(application) => (application.status === "PENDING" && application.checks.some((check) => check.result === "FAIL") ? "caution" : null)}
       />
       <CursorPagination cursor={cursor} nextCursor={data?.nextCursor} onCursorChange={setCursor} />
     </>

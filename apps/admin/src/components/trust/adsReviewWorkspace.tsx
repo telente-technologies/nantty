@@ -54,7 +54,7 @@ export function AdsReviewWorkspace() {
         </div>
       </Toolbar>
       {errorMessage ? <ErrorBlock error={queryError} message={errorMessage} onRetry={reload} /> : null}
-      <DataTable caption="Ads waiting for review" columns={adColumns} rows={data?.items ?? []} readRowKey={(ad) => ad.id} onRowOpen={(ad) => setSelectedAdId(ad.id)} selectedRowKey={selectedAdId} isLoading={isLoading} readRowTone={(ad) => (ad.autoCheckFlags.some((flag) => flag.severity === "CRITICAL") ? "danger" : ad.autoCheckFlags.length > 0 ? "caution" : null)} emptyMessage="No ads waiting for review." />
+      <DataTable caption="Ads waiting for review" columns={adColumns} rows={data?.items ?? []} readRowKey={(ad) => ad.id} onRowOpen={(ad) => setSelectedAdId(ad.id)} selectedRowKey={selectedAdId} isLoading={isLoading} emptyMessage="No ads waiting for review." />
       {data ? <Pagination page={data.page} pageSize={data.pageSize} total={data.total} onPageChange={setPage} /> : null}
       {selectedAdId ? <AdReviewPanel key={selectedAdId} adId={selectedAdId} policies={policies.data?.items ?? []} onClose={() => setSelectedAdId(null)} onAdChanged={reload} /> : null}
     </>

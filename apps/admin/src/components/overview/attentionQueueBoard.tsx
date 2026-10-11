@@ -12,7 +12,7 @@ export function AttentionQueueBoard({ queues }: { readonly queues: readonly Atte
     <ol className={styles.board}>
       {sortedQueues.map((queue) => (
         <li key={queue.key}>
-          <Link href={queue.href} className={`${styles.queue} ${queue.breachingSla > 0 ? styles.breaching : ""} ${queue.count === 0 ? styles.clear : ""}`}>
+          <Link href={queue.href} className={`${styles.queue} ${queue.count === 0 ? styles.clear : ""}`}>
             <span className={styles.count}>{formatWholeNumber(queue.count)}</span>
             <span className={styles.label}>{queue.label}</span>
             <span className={styles.meta}>

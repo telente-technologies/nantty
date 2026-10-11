@@ -20,11 +20,12 @@ import { formatDateTime } from "@/utils/formatting.util";
 import { UserSessionsPanel, UserStrikesPanel, UserWalletPanel } from "./userActivityPanels";
 import { UserModerationActions } from "./userModerationActions";
 import { UserAccountHealthCard } from "./userAccountHealthCard";
+import { UserLinkedProfilesPanel } from "./userLinkedProfilesPanel";
 import { UserProfilePanel } from "./userProfilePanel";
 import { UserUsernamePanel } from "./userUsernamePanel";
 import styles from "./peopleWorkspace.module.css";
 
-type UserDetailTab = "profile" | "sessions" | "wallet" | "strikes" | "usernames" | "history";
+type UserDetailTab = "profile" | "linkedProfiles" | "sessions" | "wallet" | "strikes" | "usernames" | "history";
 
 export function UserDetailWorkspace({ userId }: { readonly userId: string }) {
   const { can } = useAdminPermissions();
@@ -37,6 +38,7 @@ export function UserDetailWorkspace({ userId }: { readonly userId: string }) {
   const { user } = detail;
   const tabs = [
     { key: "profile" as const, label: "Profile" },
+    { key: "linkedProfiles" as const, label: "Store, Business, Brand" },
     { key: "sessions" as const, label: "Sessions", count: detail.sessions.length },
     { key: "wallet" as const, label: "Wallet" },
     { key: "strikes" as const, label: "Strikes", count: detail.strikes.length },
@@ -77,6 +79,7 @@ export function UserDetailWorkspace({ userId }: { readonly userId: string }) {
         <UserAccountHealthCard userId={user.id} />
         <SegmentedTabs label="User sections" items={tabs} activeKey={activeTab} onChange={setActiveTab} />
         {activeTab === "profile" ? <UserProfilePanel detail={detail} canRevealPersonalData={can("users:read-pii")} /> : null}
+        {activeTab === "linkedProfiles" ? <UserLinkedProfilesPanel userId={user.id} /> : null}
         {activeTab === "sessions" ? <UserSessionsPanel detail={detail} canForceLogout={can("users:moderate")} onUpdated={acceptUpdatedDetail} /> : null}
         {activeTab === "wallet" ? <UserWalletPanel detail={detail} /> : null}
         {activeTab === "strikes" ? <UserStrikesPanel detail={detail} /> : null}

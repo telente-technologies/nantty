@@ -29,7 +29,7 @@ const advertiserColumns: readonly DataTableColumn<AdvertiserAccount>[] = [
   { key: "owner", header: "Owner", render: (advertiser) => <UserIdentity user={advertiser.owner} size={24} /> },
   { key: "spend", header: "Lifetime spend", render: (advertiser) => <MoneyByCurrencyList amounts={advertiser.spendByCurrency} /> },
   { key: "campaigns", header: "Active campaigns", align: "end", isMono: true, render: (advertiser) => advertiser.activeCampaigns },
-  { key: "violations", header: "Violations", align: "end", isMono: true, render: (advertiser) => advertiser.violationCount },
+  { key: "violations", header: "Violations", align: "end", isMono: true, render: (advertiser) => (advertiser.violationCount >= 2 ? <StatusBadge tone="caution" label={`${advertiser.violationCount} violations`} /> : advertiser.violationCount) },
   { key: "status", header: "Status", render: (advertiser) => <StatusBadge status={advertiser.status} /> },
 ];
 
@@ -49,7 +49,7 @@ export function AdvertisersWorkspace() {
         </div>
       </Toolbar>
       {errorMessage ? <ErrorBlock error={queryError} message={errorMessage} onRetry={reload} /> : null}
-      <DataTable caption="Advertiser accounts" columns={advertiserColumns} rows={data?.items ?? []} readRowKey={(advertiser) => advertiser.id} onRowOpen={(advertiser) => setSelectedAdvertiserId(advertiser.id)} selectedRowKey={selectedAdvertiserId} isLoading={isLoading} readRowTone={(advertiser) => (advertiser.status === "SUSPENDED" ? "danger" : advertiser.violationCount >= 2 ? "caution" : null)} emptyMessage="No advertisers match." />
+      <DataTable caption="Advertiser accounts" columns={advertiserColumns} rows={data?.items ?? []} readRowKey={(advertiser) => advertiser.id} onRowOpen={(advertiser) => setSelectedAdvertiserId(advertiser.id)} selectedRowKey={selectedAdvertiserId} isLoading={isLoading} emptyMessage="No advertisers match." />
       {data ? <Pagination page={data.page} pageSize={data.pageSize} total={data.total} onPageChange={(page) => setFilters((current) => ({ ...current, page }))} /> : null}
       {selectedAdvertiserId ? <AdvertiserAccountPanel key={selectedAdvertiserId} advertiserId={selectedAdvertiserId} onClose={() => setSelectedAdvertiserId(null)} onAdvertiserChanged={reload} /> : null}
     </>

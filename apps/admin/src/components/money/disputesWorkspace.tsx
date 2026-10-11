@@ -80,7 +80,7 @@ export function DisputesWorkspace() {
         </Toolbar>
       </form>
       {errorMessage ? <ErrorBlock error={queryError} message={errorMessage} onRetry={reload} /> : null}
-      <DataTable caption="Disputes" columns={disputeColumns} rows={data?.items ?? []} readRowKey={(dispute) => dispute.id} isLoading={isLoading} onRowOpen={(dispute) => router.push(`/commerce/disputes/${dispute.id}`)} readRowTone={(dispute) => (isDisputeOpen(dispute) && dispute.isSlaBreached ? "danger" : dispute.priority !== "normal" && isDisputeOpen(dispute) ? "caution" : null)} emptyMessage="No disputes here. Nice." />
+      <DataTable caption="Disputes" columns={disputeColumns} rows={data?.items ?? []} readRowKey={(dispute) => dispute.id} isLoading={isLoading} onRowOpen={(dispute) => router.push(`/commerce/disputes/${dispute.id}`)} emptyMessage="No disputes here. Nice." />
       <CursorPagination cursor={cursor} nextCursor={data?.nextCursor} onCursorChange={setCursor} />
     </>
   );

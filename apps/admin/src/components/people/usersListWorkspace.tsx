@@ -93,7 +93,6 @@ export function UsersListWorkspace({ initialSearch }: { readonly initialSearch: 
         onRowOpen={(user) => router.push(`/users/${user.id}`)}
         isLoading={isLoading}
         emptyMessage="No users match these filters."
-        readRowTone={(user) => (user.status === "BANNED" || user.status === "SUSPENDED" ? "danger" : user.riskLevel === "HIGH" ? "caution" : null)}
       />
       <CursorPagination cursor={cursor} nextCursor={data?.nextCursor} onCursorChange={setCursor} />
     </>

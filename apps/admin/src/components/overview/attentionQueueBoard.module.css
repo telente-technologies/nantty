@@ -15,7 +15,6 @@
   align-items: baseline;
   padding: 10px var(--space-3);
   border: 1px solid var(--divider);
-  border-left: 4px solid var(--color-brand);
   border-radius: var(--radius-medium);
   background: var(--surface-card);
   color: inherit;
@@ -26,12 +25,7 @@
   background: var(--surface-hover);
 }
 
-.breaching {
-  border-left-color: var(--error);
-}
-
 .clear {
-  border-left-color: var(--success);
   opacity: 0.75;
 }
 

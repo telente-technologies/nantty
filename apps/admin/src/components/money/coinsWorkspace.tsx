@@ -61,7 +61,7 @@ export function CoinsWorkspace() {
         <SelectField label="Kind" isLabelHidden options={kindOptions} value={kind} onChange={(event) => { setKind(event.target.value); setCursor(undefined); }} className={styles.filterField} />
       </Toolbar>
       {errorMessage ? <ErrorBlock error={queryError} message={errorMessage} onRetry={reload} /> : null}
-      <DataTable caption="Coin transactions" columns={coinColumns} rows={data?.items ?? []} readRowKey={(coin) => coin.id} isLoading={isLoading} selectedRowKey={openTransactionId} onRowOpen={(coin) => setOpenTransactionId(coin.id)} readRowTone={(coin) => (coin.chargebackRisk === "high" && coin.reviewStatus === "pending_review" ? "danger" : null)} emptyMessage="Nothing to review." />
+      <DataTable caption="Coin transactions" columns={coinColumns} rows={data?.items ?? []} readRowKey={(coin) => coin.id} isLoading={isLoading} selectedRowKey={openTransactionId} onRowOpen={(coin) => setOpenTransactionId(coin.id)} emptyMessage="Nothing to review." />
       <CursorPagination cursor={cursor} nextCursor={data?.nextCursor} onCursorChange={setCursor} />
       {openTransactionId ? <CoinDetailPanel key={openTransactionId} transactionId={openTransactionId} onClose={() => setOpenTransactionId(null)} onChanged={reload} /> : null}
     </>
