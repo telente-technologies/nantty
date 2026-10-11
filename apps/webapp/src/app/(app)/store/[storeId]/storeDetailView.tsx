@@ -5,7 +5,9 @@ import { useState } from "react";
 
 import { ContentActionsMenu } from "@/components/actions/contentActionsMenu";
 import { requireAuthThen } from "@/components/auth/authPrompt.store";
+import { confirmFollowChange } from "@/components/follow/useFollowUser.hook";
 import { ProductCard } from "@/components/commerce/productCard";
+import { MessageStoreButton } from "@/components/messages/messageStoreButton";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/feedback";
 import { StoreIcon } from "@/components/ui/icons";
@@ -14,6 +16,7 @@ import { storesService } from "@/services/stores.service";
 import type { StoreDetail } from "@/types/commerce.type";
 import type { ProductSummary } from "@/types";
 import { formatCountWithThousandsSuffix } from "@/utils/formatDate.util";
+import { followConfirmationCopy } from "@/utils/followToggle.util";
 import { buildStorePath } from "@/utils/seoPaths.util";
 
 import styles from "./storeDetailView.module.css";
@@ -35,6 +38,13 @@ export function StoreDetailView({ initialStore, initialProducts }: StoreDetailVi
     onMutate: (followNow) => setIsFollowing(followNow),
     onError: (_error, followNow) => setIsFollowing(!followNow),
   });
+  const confirmAndToggleFollow = async () => {
+    if (follow.isPending) return;
+    const copy = isFollowing ? followConfirmationCopy("unfollow", store.handle) : null;
+    if (copy !== null && !(await confirmFollowChange(copy))) return;
+    follow.mutate(!isFollowing);
+  };
+  const toggleFollow = () => requireAuthThen(() => void confirmAndToggleFollow(), `Sign in to follow ${store.name}.`);
 
   return (
     <div className={styles.page}>
@@ -51,9 +61,10 @@ export function StoreDetailView({ initialStore, initialProducts }: StoreDetailVi
           </div>
         </div>
         <div className={styles.actions}>
-          <Button size="sm" busy={follow.isPending} onClick={() => requireAuthThen(() => follow.mutate(!isFollowing), `Sign in to follow ${store.name}.`)}>
+          <Button size="sm" busy={follow.isPending} onClick={toggleFollow}>
             {isFollowing ? "Following" : "Follow"}
           </Button>
+          <MessageStoreButton storeId={store.id} storeName={store.name} />
           <ContentActionsMenu shareKind="store" reportTargetType="user" targetId={store.ownerUserId} canonicalPath={buildStorePath(store.id)} />
         </div>
       </header>

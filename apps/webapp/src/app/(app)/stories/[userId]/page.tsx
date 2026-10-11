@@ -1,9 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
+
+import { useDeleteOwnPost } from "@/components/feed/useDeleteOwnPost.hook";
+import { useSession } from "@/components/providers/sessionProvider";
 
 import { RetryButton } from "@/components/ui/controls";
 import { ErrorState } from "@/components/ui/feedback";
@@ -18,6 +21,11 @@ export default function StoryViewerPage() {
   const userId = params.userId;
   const stories = useQuery({ queryKey: ["stories", userId], queryFn: () => storiesService.fetchStoriesForUser(userId) });
   const [index, setIndex] = useState(0);
+  const router = useRouter();
+  const { viewer } = useSession();
+  const { confirmAndDelete, isDeleting } = useDeleteOwnPost({ onDeleted: () => {
+    if ((stories.data ?? []).length === 0) router.replace("/stories");
+  } });
   const list = stories.data ?? [];
   const current = list[Math.min(index, Math.max(list.length - 1, 0))];
   useEffect(() => {
@@ -65,6 +73,9 @@ export default function StoryViewerPage() {
           <button type="button" className={styles.linkButton} disabled={index === 0} onClick={() => setIndex((value) => Math.max(value - 1, 0))}>Previous</button>
           <button type="button" className={styles.linkButton} disabled={index >= list.length - 1} onClick={() => setIndex((value) => Math.min(value + 1, list.length - 1))}>Next</button>
           <Link className={styles.linkButton} href="/stories">All stories</Link>
+          {viewer?.id === current.author.id ? (
+            <button type="button" className={styles.linkButton} disabled={isDeleting} onClick={() => void confirmAndDelete({ id: current.id, kind: "story" })}>Delete story</button>
+          ) : null}
         </div>
         {viewers.data ? (
           <p className={styles.note}>{viewers.data.total.toLocaleString()} views{viewers.data.viewers.length > 0 ? ` · latest by @${viewers.data.viewers[0]?.username}` : ""}</p>

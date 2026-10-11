@@ -1,77 +1,64 @@
 "use client";
 
-import { useParams, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import Link from "next/link";
+import { useParams, useRouter } from "next/navigation";
 
+import { SellerProductForm } from "@/components/seller/sellerProductForm";
+import { requestConfirmation } from "@/components/ui/confirmDialog";
 import { RetryButton } from "@/components/ui/controls";
 import { ErrorState } from "@/components/ui/feedback";
 import { ListRowsSkeleton } from "@/components/ui/pageSkeletons";
 import { showToast } from "@/components/ui/toast";
-import { readErrorMessageForDisplay } from "@/services/clientApi.service";
+import { readErrorMessageForDisplay, WebappRequestError } from "@/services/clientApi.service";
 import { sellerService } from "@/services/seller.service";
 
 import styles from "../../page.module.css";
 
 export default function EditSellerProductPage() {
-  const params = useParams<{ productId: string }>();
-  const productId = params.productId;
+  const { productId } = useParams<{ productId: string }>();
   const router = useRouter();
   const queryClient = useQueryClient();
-  const product = useQuery({ queryKey: ["seller", "product", productId], queryFn: () => sellerService.fetchStoreProductById(productId) });
-  const [name, setName] = useState("");
-  const [description, setDescription] = useState("");
-  const [priceText, setPriceText] = useState("");
-  const [stockText, setStockText] = useState("");
-  const [error, setError] = useState<string | null>(null);
-  useEffect(() => {
-    if (product.data) {
-      setName(product.data.name);
-      setDescription(product.data.description);
-      setPriceText((product.data.price.amountMinor / 100).toFixed(2));
-      setStockText(String(product.data.stock));
-    }
-  }, [product.data]);
-  const save = useMutation({
-    mutationFn: () => {
-      const amountMinor = Math.round(Number.parseFloat(priceText || "0") * 100);
-      const stock = Number.parseInt(stockText || "0", 10);
-      return sellerService.updateStoreProduct(productId, { name: name.trim(), description: description.trim(), price: { amountMinor, currency: product.data?.price.currency ?? "NGN" }, stock, sizes: [], colors: [], imageUrls: product.data?.imageUrls ?? [] });
-    },
+  const product = useQuery({ queryKey: ["seller", "product", productId], queryFn: () => sellerService.fetchStoreProductById(productId), retry: false, refetchOnWindowFocus: false });
+  const archive = useMutation({
+    mutationFn: () => sellerService.archiveStoreProduct(productId),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ["seller", "products"] });
-      showToast({ text: "Product updated" });
-      router.push("/seller/products");
+      showToast({ text: "Product deleted" });
+      router.replace("/seller/products");
     },
-    onError: (mutationError) => setError(readErrorMessageForDisplay(mutationError)),
+    onError: (error) => showToast({ text: readErrorMessageForDisplay(error), tone: "error" }),
   });
+
   if (product.isLoading) return <ListRowsSkeleton label="Loading product" rows={5} />;
-  if (product.isError || !product.data) return <ErrorState description="We couldn't load this product." action={<RetryButton onRetry={() => product.refetch()} />} />;
+  if (!product.data) {
+    const gone = product.error instanceof WebappRequestError && (product.error.status === 404 || product.error.status === 403);
+    return gone
+      ? <ErrorState title="This product isn't available" description="It may have been deleted, or it belongs to another store." action={<Link href="/seller/products">Your products</Link>} />
+      : <ErrorState description="We couldn't load this product." action={<RetryButton onRetry={() => product.refetch()} />} />;
+  }
+
+  const confirmAndArchive = async () => {
+    if (archive.isPending) return;
+    const confirmed = await requestConfirmation({ title: "Delete this product?", description: "Buyers won't see it any more. Past orders keep their details.", confirmLabel: "Delete product", cancelLabel: "Keep", intent: "delete" });
+    if (confirmed) archive.mutate();
+  };
+
   return (
     <div className={styles.page}>
       <h1 className={styles.title}>Edit product</h1>
-      <form
-        className={styles.form}
-        onSubmit={(event) => {
-          event.preventDefault();
-          save.mutate();
+      <SellerProductForm
+        key={productId}
+        existing={product.data}
+        submitLabel="Save changes"
+        onSubmit={async (request) => {
+          await sellerService.updateStoreProduct(productId, request);
+          void queryClient.invalidateQueries({ queryKey: ["seller"] });
+          showToast({ text: "Product updated" });
+          router.replace("/seller/products");
         }}
-      >
-        <label className={styles.field}>Name
-          <input className={styles.input} value={name} onChange={(event) => setName(event.target.value)} required />
-        </label>
-        <label className={styles.field}>Description
-          <textarea className={styles.textarea} value={description} onChange={(event) => setDescription(event.target.value)} />
-        </label>
-        <label className={styles.field}>Price
-          <input className={styles.input} value={priceText} onChange={(event) => setPriceText(event.target.value)} inputMode="decimal" required />
-        </label>
-        <label className={styles.field}>Stock
-          <input className={styles.input} value={stockText} onChange={(event) => setStockText(event.target.value)} inputMode="numeric" required />
-        </label>
-        {error ? <p className={styles.error} role="alert">{error}</p> : null}
-        <button type="submit" className={styles.primary} disabled={save.isPending}>{save.isPending ? "Saving…" : "Save changes"}</button>
-      </form>
+      />
+      <button type="button" className={styles.linkButton} disabled={archive.isPending} onClick={() => void confirmAndArchive()}>Delete product</button>
     </div>
   );
 }

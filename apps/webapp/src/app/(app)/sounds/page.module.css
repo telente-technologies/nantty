@@ -31,3 +31,4 @@
 .progress { display: flex; gap: 4px; width: 100%; max-width: 420px; }
 .progressSegment { flex: 1; height: 3px; border-radius: 2px; background: var(--divider); }
 .progressDone { background: var(--primary); }
+span.avatar { display: grid; place-items: center; color: var(--ink-muted); }

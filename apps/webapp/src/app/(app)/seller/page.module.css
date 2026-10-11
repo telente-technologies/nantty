@@ -28,3 +28,5 @@
 .chip { border: 1px solid var(--divider); background: transparent; color: inherit; border-radius: var(--radius-full, 999px); padding: var(--space-1) var(--space-3); font-size: var(--text-sm); font-weight: 600; cursor: pointer; }
 .chipActive { background: var(--primary); color: var(--on-primary, #fff); border-color: var(--primary); }
 .pill { display: inline-flex; align-items: center; border: 1px solid var(--divider); border-radius: var(--radius-full, 999px); padding: 2px var(--space-2); font-size: var(--text-sm); font-weight: 600; white-space: nowrap; }
+.productThumb { width: 48px; height: 48px; flex: none; overflow: hidden; border-radius: var(--radius-md); background: var(--surface-sunken); }
+.productThumb img { width: 100%; height: 100%; object-fit: cover; }

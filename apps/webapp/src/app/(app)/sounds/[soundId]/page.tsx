@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
@@ -34,6 +35,7 @@ export default function SoundDetailPage() {
         <audio className={styles.media} src={data.audioUrl} controls preload="none" aria-label={data.title} />
       ) : null}
       <div className={styles.controls}>
+        {data.allowReuse && data.status === "available" ? <Link className={styles.primary} href={`/create/clip?soundId=${encodeURIComponent(data.id)}`}>Use this sound</Link> : null}
         <button type="button" className={styles.linkButton} disabled={toggleSave.isPending} onClick={() => toggleSave.mutate()}>
           {data.savedByViewer ? "Unsave" : "Save"}
         </button>
