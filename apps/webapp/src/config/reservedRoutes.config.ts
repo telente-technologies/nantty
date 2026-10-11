@@ -1,7 +1,7 @@
 export const topLevelRouteSegments: readonly string[] = [
-  "analytics", "boost", "cart", "category", "chats", "checkout", "clips", "coins", "collections", "creator", "explore", "live", "mart", "me",
+  "analytics", "boost", "cart", "category", "chats", "checkout", "clips", "coins", "collections", "create", "creator", "disputes", "explore", "live", "mart", "me",
   "notifications", "orders", "p", "pay", "post", "product", "saved", "seller", "settings", "sounds", "stories", "store", "store-rewards", "subscriptions", "u", "user",
-  "verification", "verify-email", "wallet", "watch", "forgot-password", "help", "login", "reset-password", "signup", "welcome", "bff", "api", "sitemap.xml", "sitemaps", "robots.txt", "security-check",
+  "verification", "verify-email", "wallet", "watch", "forgot-password", "help", "login", "reset-password", "signup", "welcome", "bff", "api", "sitemap.xml", "sitemaps", "robots.txt", "security-check", "embed", "oembed",
 ];
 
 const reservedSegments = new Set(topLevelRouteSegments.map((segment) => segment.toLowerCase()));

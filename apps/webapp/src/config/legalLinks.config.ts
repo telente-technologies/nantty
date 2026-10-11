@@ -6,4 +6,5 @@ export const legalLinks = {
   privacyPolicy: `${marketingSiteUrl}/privacy`,
   cookiePolicy: `${marketingSiteUrl}/cookies`,
   terms: `${marketingSiteUrl}/terms`,
+  dataRights: `${marketingSiteUrl}/data-rights`,
 } as const;

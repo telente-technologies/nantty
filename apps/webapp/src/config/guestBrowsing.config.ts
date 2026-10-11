@@ -3,8 +3,11 @@ import { isUsernameProfilePath } from "./reservedRoutes.config";
 const guestBrowsablePagePatterns: readonly RegExp[] = [
   /^\/$/,
   /^\/(explore|mart|clips|live)$/,
-  /^\/(product|p|category|collections|store|brand|user|u|post|watch|live)\/[A-Za-z0-9_.~%-]+$/,
+  /^\/(product|p|category|collections|store|brand|user|u|watch|live)\/[A-Za-z0-9_.~%-]+$/,
+  /^\/post\/(?!new$)[A-Za-z0-9_.~%-]+$/,
   /^\/post\/[A-Za-z0-9_.~%-]+\/quotes$/,
+  /^\/product\/[A-Za-z0-9_.~%-]+\/reviews$/,
+  /^\/post\/[A-Za-z0-9_.~%-]+\/comment\/[A-Za-z0-9_.~%-]+$/,
   /^\/help(?:\/(?!tickets(?:\/|$))[a-z0-9-]+(?:\/[a-z0-9-]+)?)?$/,
 ];
 
