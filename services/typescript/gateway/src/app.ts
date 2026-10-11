@@ -17,6 +17,7 @@ import { ValkeyConnection } from "./services/valkeyConnection.service.js";
 import { ValkeyRateLimitStore } from "./services/valkeyRateLimitStore.service.js";
 import type { GatewayConfig } from "./configs/gateway.config.js";
 import { createUpstreamDispatchHandler } from "./handlers/upstreamDispatch.handler.js";
+import { IdentityStaffNetworkPolicySource, StaffNetworkGate, type StaffNetworkPolicySource } from "./services/staffNetworkPolicy.service.js";
 import { IdentityPolicyGateSource, type PolicyGateSource } from "./services/policyAcceptanceGate.service.js";
 import { AccessTokenVerifier, ValkeySessionRevocationSource } from "./services/accessTokenVerifier.service.js";
 import { ValkeyWidgetTokenRevocationSource, WidgetTokenVerifier } from "./services/widgetTokenVerifier.service.js";
@@ -31,6 +32,7 @@ export interface GatewayServerOptions {
   readonly policyGate?: PolicyGateSource;
   readonly rateLimitStore?: RateLimitStore;
   readonly security?: SecurityServiceOverrides;
+  readonly staffNetworkPolicy?: StaffNetworkPolicySource;
 }
 
 function buildRateLimitStore(connection: ValkeyConnection | undefined, logger: Logger): RateLimitStore {
@@ -49,6 +51,11 @@ export function createGatewayServer(options: GatewayServerOptions) {
   const widgetVerifier = options.widgetVerifier ?? new WidgetTokenVerifier(options.config.accessToken, denylistConnection === undefined ? undefined : new ValkeyWidgetTokenRevocationSource(denylistConnection));
   const security = buildSecurityServices(options.config.security, options.config.upstreams.trust, logger, connection, options.security);
   const maximumRequestBodyBytes = options.config.maxRequestBodyBytes ?? 1024 * 1024;
+  const staffPolicyToken = options.config.staffNetworkPolicy?.internalToken ?? "";
+  const staffNetworkGate = new StaffNetworkGate(
+    options.staffNetworkPolicy ?? (staffPolicyToken === "" ? undefined : new IdentityStaffNetworkPolicySource(options.config.upstreams.identity, staffPolicyToken)),
+    options.config.staffNetworkPolicy?.failClosed ?? false,
+  );
   const pipeline = new HttpMiddlewarePipeline({
     middlewares: [
       createSecurityHeadersMiddleware(),
@@ -61,7 +68,7 @@ export function createGatewayServer(options: GatewayServerOptions) {
       createRequestSizeLimitMiddleware(maximumRequestBodyBytes),
       createAdminNetworkMiddleware(options.config.adminIpAllowList ?? []),
       createGlobalRateLimitMiddleware(rateLimitStore, options.config.rateLimitMaxPerMinute, (request) => !isAnsweredByCorsAlone(request, options.config.corsOrigins)),
-      createUpstreamDispatchHandler({ config: options.config, verifier, widgetVerifier, logger, rateLimitStore, security, ...(policyGate === undefined ? {} : { policyGate }), ...(connection === undefined ? {} : { cacheProbe: () => connection.command(["PING"]) }) }),
+      createUpstreamDispatchHandler({ config: options.config, verifier, widgetVerifier, logger, rateLimitStore, security, staffNetworkGate, ...(policyGate === undefined ? {} : { policyGate }), ...(connection === undefined ? {} : { cacheProbe: () => connection.command(["PING"]) }) }),
     ],
   });
   return createHttpServer({

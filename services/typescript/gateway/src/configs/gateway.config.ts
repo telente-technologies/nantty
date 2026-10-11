@@ -22,6 +22,7 @@ export interface GatewayConfig {
   readonly security?: SecurityConfig | null;
   readonly identitySigningSecret?: string;
   readonly adminIpAllowList?: readonly string[];
+  readonly staffNetworkPolicy?: { readonly internalToken: string; readonly failClosed: boolean };
 }
 
 export type UpstreamName = "identity" | "live" | "money" | "notifications" | "social" | "trust" | "commerce" | "media" | "search" | "ads" | "support";
@@ -77,6 +78,7 @@ export function loadGatewayConfigFromEnvironment(): GatewayConfig {
     security: loadSecurityConfigFromEnvironment(problems),
     identitySigningSecret: readRequiredEnvironmentVariable("GATEWAY_IDENTITY_SECRET", problems),
     adminIpAllowList: readEnvironmentVariableOrDefault("ADMIN_IP_ALLOWLIST", "").split(",").map((entry) => entry.trim()).filter(Boolean),
+    staffNetworkPolicy: { internalToken: process.env["ADMIN_INTERNAL_API_TOKEN"]?.trim() ?? "", failClosed: process.env["NODE_ENV"] === "production" },
     upstreams: { identity: readRequiredEnvironmentVariable("UPSTREAM_IDENTITY_URL", problems), live: readEnvironmentVariableOrDefault("UPSTREAM_LIVE_URL", "http://localhost:8102"), money: readEnvironmentVariableOrDefault("UPSTREAM_MONEY_URL", "http://localhost:8103"), notifications: readEnvironmentVariableOrDefault("UPSTREAM_NOTIFICATIONS_URL", "http://localhost:8104"), social: readEnvironmentVariableOrDefault("UPSTREAM_SOCIAL_URL", "http://localhost:8105"), trust: readEnvironmentVariableOrDefault("UPSTREAM_TRUST_URL", "http://localhost:8106"), commerce: readEnvironmentVariableOrDefault("UPSTREAM_COMMERCE_URL", "http://localhost:8107"), media: readEnvironmentVariableOrDefault("UPSTREAM_MEDIA_URL", "http://localhost:8108"), search: readEnvironmentVariableOrDefault("UPSTREAM_SEARCH_URL", "http://localhost:8109"), ads: readEnvironmentVariableOrDefault("UPSTREAM_ADS_URL", "http://localhost:8110"), support: readEnvironmentVariableOrDefault("UPSTREAM_SUPPORT_URL", "http://localhost:8111") },
   };
   if (config.corsOrigins.includes("*")) problems.push("CORS_ORIGINS must list exact origins, not *");

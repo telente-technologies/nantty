@@ -1,6 +1,6 @@
 const placeholderSecretPatterns: readonly RegExp[] = [/^local-only/i, /change[-_]?me/i, /^example/i, /placeholder/i, /^test[-_]/i];
 const minimumSecretLength = 32;
-const guardedSecretNames = ["GATEWAY_IDENTITY_SECRET", "IDENTITY_INTERNAL_TOKEN", "TRUST_INTERNAL_TOKEN"] as const;
+const guardedSecretNames = ["GATEWAY_IDENTITY_SECRET", "IDENTITY_INTERNAL_TOKEN", "TRUST_INTERNAL_TOKEN", "ADMIN_INTERNAL_API_TOKEN"] as const;
 
 export function isPlaceholderSecret(value: string): boolean {
   return placeholderSecretPatterns.some((pattern) => pattern.test(value));
@@ -9,6 +9,7 @@ export function isPlaceholderSecret(value: string): boolean {
 export function collectProductionHardeningProblems(environment: NodeJS.ProcessEnv): string[] {
   if (environment["NODE_ENV"] !== "production") return [];
   const problems: string[] = [];
+  if ((environment["ADMIN_INTERNAL_API_TOKEN"]?.trim() ?? "") === "") problems.push("ADMIN_INTERNAL_API_TOKEN is required in production (staff routes check each staff member's IP allow-list)");
   if ((environment["TRUSTED_PROXY_HOPS"]?.trim() ?? "") === "") problems.push("TRUSTED_PROXY_HOPS must be set explicitly in production (the number of proxies in front of the gateway)");
   for (const name of guardedSecretNames) {
     const value = environment[name]?.trim() ?? "";

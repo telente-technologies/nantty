@@ -1,5 +1,5 @@
 import { isAdminPath } from "./security/accessProbeClassifier.service.js";
-import { extractBearerTokenFromAuthorizationHeader, type AccessTokenVerifier } from "./accessTokenVerifier.service.js";
+import { extractBearerTokenFromAuthorizationHeader, type AccessTokenVerifier, type VerifiedPrincipal } from "./accessTokenVerifier.service.js";
 
 const publicAdminAuthPaths: ReadonlySet<string> = new Set([
   "/api/v1/admin/auth/login",
@@ -16,7 +16,7 @@ export function doesAdminRequestNeedStaffToken(method: string, path: string): bo
   return !(method.toUpperCase() === "POST" && publicAdminAuthPaths.has(path));
 }
 
-export async function isStaffRequestAuthenticated(verifier: AccessTokenVerifier, authorizationHeader: string | undefined): Promise<boolean> {
+export async function authenticateStaffRequest(verifier: AccessTokenVerifier, authorizationHeader: string | undefined): Promise<VerifiedPrincipal | undefined> {
   const token = extractBearerTokenFromAuthorizationHeader(authorizationHeader);
-  return token !== undefined && (await verifier.verifyStaffAccessToken(token)) !== undefined;
+  return token === undefined ? undefined : verifier.verifyStaffAccessToken(token);
 }

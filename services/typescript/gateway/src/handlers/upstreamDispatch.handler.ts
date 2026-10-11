@@ -4,7 +4,8 @@ import type { Logger } from "@zudojs/logger";
 import type { GatewayConfig } from "../configs/gateway.config.js";
 import { isChatReportSubmission, resolveUpstreamRouteForRequest, sensitiveGuestPathPrefixes, type UpstreamRoute } from "../routes/upstream.routes.js";
 import { shouldRefuseAnonymousMutation } from "../services/anonymousMutationGuard.service.js";
-import { doesAdminRequestNeedStaffToken, isStaffRequestAuthenticated } from "../services/adminStaffGate.service.js";
+import { authenticateStaffRequest, doesAdminRequestNeedStaffToken } from "../services/adminStaffGate.service.js";
+import type { StaffNetworkGate } from "../services/staffNetworkPolicy.service.js";
 import { doesRequestNeedPolicyGate, type PolicyGateSource } from "../services/policyAcceptanceGate.service.js";
 import { isInternalOnlyPath } from "../services/internalRouteGuard.service.js";
 import { InMemoryRateLimitStore, type RateLimitStore } from "../services/rateLimitStore.service.js";
@@ -30,6 +31,7 @@ export interface UpstreamDispatchOptions {
   readonly rateLimitStore?: RateLimitStore;
   readonly security?: SecurityServices;
   readonly cacheProbe?: () => Promise<unknown>;
+  readonly staffNetworkGate?: StaffNetworkGate;
 }
 
 async function readinessResponse(cacheProbe: (() => Promise<unknown>) | undefined) {
@@ -74,7 +76,12 @@ export function createUpstreamDispatchHandler(options: UpstreamDispatchOptions):
     if (widgetTokenMisused) return json(401, { message: "This token only works for home-screen widgets.", code: "WIDGET_TOKEN_SCOPE" });
     observeProbeSignalInBackground(security, options.logger, observed(principal), tamperedTokenSignal(request.path, token, principal, options.config.accessToken.audience));
     if (rejected) return json(401, unauthorizedResponseBody);
-    if (doesAdminRequestNeedStaffToken(request.method, request.path) && !(await isStaffRequestAuthenticated(options.verifier, request.getHeader("authorization")))) return json(401, unauthorizedResponseBody);
+    if (doesAdminRequestNeedStaffToken(request.method, request.path)) {
+      const staff = await authenticateStaffRequest(options.verifier, request.getHeader("authorization"));
+      if (staff === undefined) return json(401, unauthorizedResponseBody);
+      const refusal = await options.staffNetworkGate?.refuse(staff.accountId, request.remoteAddress);
+      if (refusal !== undefined) return json(refusal.status, refusal.body);
+    }
     if (principal === undefined && shouldRefuseAnonymousMutation(request.method, request.path, request.getHeader("authorization"))) return json(401, unauthorizedResponseBody);
     const requestUrl = new URL(request.url, "http://gateway.internal");
     if (principal !== undefined && options.policyGate !== undefined && doesRequestNeedPolicyGate(request.method, requestUrl.pathname)) {
