@@ -1,8 +1,11 @@
 import hashlib
+import math
 from collections.abc import Sequence
 from dataclasses import dataclass
 
 import numpy as np
+
+MAXIMUM_EXPLORATION_SHARE = 0.5
 
 
 @dataclass(frozen=True, slots=True)
@@ -21,8 +24,15 @@ def build_deterministic_random_generator(*seed_parts: str) -> np.random.Generato
 def calculate_exploration_slot_positions(output_limit: int, exploration_share: float) -> set[int]:
     if exploration_share <= 0 or output_limit <= 0:
         return set()
-    slot_spacing = max(round(1.0 / exploration_share), 2)
-    return {position for position in range(output_limit) if position % slot_spacing == slot_spacing - 1}
+    share = min(exploration_share, MAXIMUM_EXPLORATION_SHARE)
+    positions = {
+        position
+        for position in range(output_limit)
+        if math.floor((position + 1) * share + 1e-9) > math.floor(position * share + 1e-9)
+    }
+    if not positions and output_limit * share >= 0.5:
+        positions.add(output_limit - 1)
+    return positions
 
 
 def sample_thompson_scores_for_arms(

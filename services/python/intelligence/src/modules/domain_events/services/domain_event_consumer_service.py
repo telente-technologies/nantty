@@ -30,8 +30,18 @@ from src.services.identifier_hashing_service import OpaqueIdentifierHasher
 consumer_logger = logging.getLogger("intelligence.domain_events")
 
 type ProcessingStatus = Literal["processed", "duplicate", "rejected", "skipped_deleted_account", "skipped_unattributed"]
-DOMAIN_CLAIM_PREFIX = "domain:"
-DOMAIN_CLAIM_TTL_SECONDS = 7 * 24 * 3600
+DOMAIN_CLAIM_NAMESPACE = "domain"
+
+
+def describe_rejected_envelope(normalized: object) -> dict[str, str]:
+    if not isinstance(normalized, dict):
+        return {}
+    described = {
+        "event_id": normalized.get("eventId") or normalized.get("id"),
+        "event_type": normalized.get("eventType") or normalized.get("type"),
+        "schema_version": normalized.get("schemaVersion"),
+    }
+    return {key: str(value)[:128] for key, value in described.items() if value is not None}
 
 
 @dataclass(frozen=True, slots=True)
@@ -76,11 +86,15 @@ class DomainEventConsumerService:
             consumer_logger.exception("content_score_side_effect_failed")
 
     def parse_message_body(self, message_body: str) -> DomainEvent | None:
+        normalized: object = None
         try:
-            return domain_event_type_adapter.validate_python(unwrap_queue_message_body(json.loads(message_body)))
+            normalized = unwrap_queue_message_body(json.loads(message_body))
+            return domain_event_type_adapter.validate_python(normalized)
         except (ValidationError, ValueError, TypeError) as parse_error:
-            error_type = type(parse_error).__name__
-            consumer_logger.warning("domain_event_rejected", extra={"error_type": error_type})
+            consumer_logger.warning(
+                "domain_event_rejected",
+                extra={"error_type": type(parse_error).__name__, **describe_rejected_envelope(normalized)},
+            )
             return None
 
     @staticmethod
@@ -98,8 +112,12 @@ class DomainEventConsumerService:
             return DomainEventProcessingOutcome("rejected")
         backend = self.feature_store.feature_backend
         keyspace = self.feature_store.keyspace
-        claim_key = keyspace.event_deduplication_key(f"{DOMAIN_CLAIM_PREFIX}{event.event_id}")
-        if not (await backend.claim_keys_if_absent([claim_key], DOMAIN_CLAIM_TTL_SECONDS))[0]:
+        claim_key = keyspace.internal_claim_key(DOMAIN_CLAIM_NAMESPACE, event.event_id)
+        if not (
+            await backend.claim_keys_if_absent(
+                [claim_key], self.event_ingestion_service.deduplication_retention_seconds
+            )
+        )[0]:
             return DomainEventProcessingOutcome("duplicate", event.event_id)
         try:
             return await self.apply_event(event)

@@ -1,7 +1,13 @@
 import time
 from datetime import UTC, datetime
 
-from src.interfaces.feature_backend_interface import FeatureBackend, FeatureWriteOperation, HashFieldAssign
+from src.interfaces.feature_backend_interface import (
+    FeatureBackend,
+    FeatureWriteOperation,
+    HashFieldAssign,
+    SortedSetAssignScore,
+    SortedSetKeepHighestScores,
+)
 from src.modules.domain_events.services.behaviour_feature_service import list_recent_day_buckets
 from src.repositories.online_feature_keyspace_repository import (
     ACCOUNT_AFFINITY_KIND,
@@ -19,6 +25,7 @@ from src.repositories.online_feature_keyspace_repository import (
 from src.utils.decay_math_util import find_forward_decay_generation
 
 FLOW_DIRECTIONS = ("out", "in")
+MAXIMUM_PENDING_ERASURES = 1_000_000
 BEHAVIOUR_SET_NAMES = ("recipients", "devices", "ips")
 
 
@@ -77,6 +84,11 @@ class PersonalDataPurgeService:
                 self.keyspace.value_flow_base_key(direction, user_id), VALUE_FLOW_HALF_LIFE_SECONDS
             )
         await self.backend.delete_keys(keys)
+        erasure_key = self.keyspace.pending_dataset_erasure_key()
         await self.backend.apply_write_operations(
-            [HashFieldAssign(self.keyspace.consent_key(user_id), ACCOUNT_DELETED_FIELD, 1.0)]
+            [
+                HashFieldAssign(self.keyspace.consent_key(user_id), ACCOUNT_DELETED_FIELD, 1.0),
+                SortedSetAssignScore(erasure_key, user_id, now.timestamp()),
+                SortedSetKeepHighestScores(erasure_key, MAXIMUM_PENDING_ERASURES),
+            ]
         )

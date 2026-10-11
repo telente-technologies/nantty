@@ -151,12 +151,13 @@ class ContentScoringService:
             ),
             now,
         )
-        if response.no_signal:
-            if response.model_version == "unavailable":
-                scoring_logger.error(
-                    "image_moderation_unavailable_for_media",
-                    extra={"media_id": media_id, "post_id": post_id},
-                )
+        model_unavailable = response.model_version == "unavailable"
+        if model_unavailable:
+            scoring_logger.error(
+                "image_moderation_unavailable_for_media",
+                extra={"media_id": media_id, "post_id": post_id},
+            )
+        elif response.no_signal:
             return None
         message = ContentScoreMessage(
             score_id=build_score_id("image", post_id, media_id, response.model_version),

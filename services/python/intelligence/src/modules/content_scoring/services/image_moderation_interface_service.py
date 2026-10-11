@@ -80,11 +80,12 @@ class ImageModerationService:
             key=lambda item: (-item.score, item.category),
         )
         top_score = categories[0].score if categories else 0.0
+        no_model_loaded = model.version == PLACEHOLDER_IMAGE_MODEL_VERSION
         return ImageModerationResponse(
             media_id=request.media_id,
             categories=categories,
             score=top_score,
-            suggested_action=suggested_action_for_score(top_score),
+            suggested_action="review" if no_model_loaded else suggested_action_for_score(top_score),
             no_signal=not categories,
             model_version=model.version,
             generated_at=now or datetime.now(UTC),

@@ -15,4 +15,6 @@ class EventsIngestionModule:
         container.command_bus.register_handler(IngestEventBatchHandler(container.event_ingestion_service))
 
     def build_router(self, container: ApplicationContainer) -> APIRouter:
-        return build_events_ingestion_router(EventsIngestionController(container.command_bus))
+        return build_events_ingestion_router(
+            EventsIngestionController(container.command_bus, container.settings.event_ingestion_deadline_seconds)
+        )

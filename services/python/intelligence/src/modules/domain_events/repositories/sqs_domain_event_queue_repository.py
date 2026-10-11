@@ -11,6 +11,8 @@ from src.modules.domain_events.services.domain_event_consumer_service import Dom
 
 queue_logger = logging.getLogger("intelligence.domain_events.queue")
 RECEIVE_BATCH_SIZE = 10
+PER_MESSAGE_PROCESSING_BUDGET_SECONDS = 30
+BATCH_VISIBILITY_TIMEOUT_SECONDS = RECEIVE_BATCH_SIZE * PER_MESSAGE_PROCESSING_BUDGET_SECONDS
 FAILURE_BACKOFF_SECONDS = 2.0
 MAXIMUM_FAILURE_BACKOFF_SECONDS = 30.0
 
@@ -101,6 +103,7 @@ class SqsDomainEventQueuePoller:
             QueueUrl=self.queue_url,
             MaxNumberOfMessages=RECEIVE_BATCH_SIZE,
             WaitTimeSeconds=self.wait_time_seconds,
+            VisibilityTimeout=BATCH_VISIBILITY_TIMEOUT_SECONDS,
             AttributeNames=["ApproximateReceiveCount"],
         )
         acknowledged = 0
