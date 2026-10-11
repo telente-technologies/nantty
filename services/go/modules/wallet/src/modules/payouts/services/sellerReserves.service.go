@@ -7,7 +7,7 @@ import (
 
 	"zudomart/modules/ledger/src/databases"
 	"zudomart/modules/ledger/src/loaders"
-	sellerbalances "zudomart/modules/ledger/src/modules/sellerBalances/services"
+	sellerreserves "zudomart/modules/ledger/src/modules/sellerReserves"
 	"zudomart/modules/wallet/src/container"
 	"zudomart/modules/wallet/src/generated/ent"
 	"zudomart/modules/wallet/src/generated/ent/sellerreserveflag"
@@ -30,13 +30,13 @@ type SellerReserveView struct {
 	ReleasedAt   *time.Time `json:"releasedAt"`
 }
 
-func (reserves SellerReserves) PolicyFor(ctx context.Context, executor databases.ExecutorQuerier, sellerUserId string) (sellerbalances.SellerReserveTerms, error) {
+func (reserves SellerReserves) PolicyFor(ctx context.Context, executor databases.ExecutorQuerier, sellerUserId string) (sellerreserves.Terms, error) {
 	flag, err := reserves.Container.Client(executor).SellerReserveFlag.Query().Where(sellerreserveflag.SellerUserID(sellerUserId), sellerreserveflag.ReleasedAtIsNil()).Only(ctx)
 	if ent.IsNotFound(err) {
-		return sellerbalances.SellerReserveTerms{}, nil
+		return sellerreserves.Terms{}, nil
 	}
 	if err != nil {
-		return sellerbalances.SellerReserveTerms{}, err
+		return sellerreserves.Terms{}, err
 	}
 	bps := flag.ReserveBps
 	if bps == 0 {
@@ -46,7 +46,7 @@ func (reserves SellerReserves) PolicyFor(ctx context.Context, executor databases
 	if holdDays <= 0 {
 		holdDays = reserves.Container.Settings.SellerReserveHoldDays
 	}
-	return sellerbalances.SellerReserveTerms{ReserveBps: bps, HoldFor: time.Duration(holdDays) * 24 * time.Hour}, nil
+	return sellerreserves.Terms{ReserveBps: bps, HoldFor: time.Duration(holdDays) * 24 * time.Hour}, nil
 }
 
 func (reserves SellerReserves) FlagSeller(ctx context.Context, staffId, sellerUserId, reason string, reserveBps int64, holdDays int) (SellerReserveView, error) {

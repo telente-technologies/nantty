@@ -39,10 +39,13 @@ func TestSellerWalletViewsPayoutAccountsAndPayoutsThroughTheInternalApi(t *testi
 	if denied := harness.Call(http.MethodGet, prefix+"/wallet/balances", "", "", nil, http.Header{"X-Internal-Token": {"wrong-token-wrong-token-wrong-token"}}); denied.Status != http.StatusUnauthorized {
 		t.Fatalf("internal routes need the token: %d", denied.Status)
 	}
+	harness.OnboardConnectedAccount(seller, false)
+	walletRef := harness.WalletRef(seller)
 	harness.post(ledgermodels.JournalEntryRequest{Reference: "seed-seller-" + seller, Kind: "escrow.released", Description: "Escrow released for ZM-1001", Lines: []ledgermodels.JournalLineRequest{
-		{Account: ledgermodels.PlatformProviderBalanceAccount("flutterwave", "NGN"), Direction: ledgermodels.Debit, AmountMinor: 500_000},
-		{Account: ledgermodels.SellerAvailableAccount(seller, "NGN"), Direction: ledgermodels.Credit, AmountMinor: 500_000},
+		{Account: ledgermodels.ProviderWalletMirrorAccount("flutterwave", walletRef, "NGN"), Direction: ledgermodels.Debit, AmountMinor: 500_000},
+		{Account: ledgermodels.WalletAvailableAccount(seller, "NGN"), Direction: ledgermodels.Credit, AmountMinor: 500_000},
 	}})
+	harness.Flutterwave.CreditWalletWithoutFee(walletRef, 500_000, "seed-seller-"+seller)
 	balances := harness.Call(http.MethodGet, prefix+"/wallet/balances", "", "", nil, headers)
 	if balances.Status != http.StatusOK || balances.Body["available"].(map[string]any)["amountMinor"].(float64) != 500_000 {
 		t.Fatalf("balances: %d %s", balances.Status, balances.Raw)
@@ -75,8 +78,6 @@ func TestSellerWalletViewsPayoutAccountsAndPayoutsThroughTheInternalApi(t *testi
 		t.Fatalf("a resolution is single use: %d %s", reused.Status, reused.Raw)
 	}
 	accountId := added.Body["id"].(string)
-	harness.OnboardConnectedAccount(seller, false)
-	harness.SeedWalletAvailable(seller, 500_000)
 	if missingKey := harness.Call(http.MethodPost, prefix+"/wallet/payouts", "", "", map[string]any{"amountMinor": 100_000, "accountId": accountId}, steppedUp(headers)); missingKey.Status != http.StatusBadRequest {
 		t.Fatalf("payouts need an idempotency key: %d", missingKey.Status)
 	}

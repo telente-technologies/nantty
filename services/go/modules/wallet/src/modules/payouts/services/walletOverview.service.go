@@ -20,31 +20,23 @@ type WalletOverview struct {
 }
 
 func (overview WalletOverview) ReadWalletSummary(ctx context.Context, userId, currency string) (dtos.WalletSummaryDto, error) {
-	view, err := overview.Container.Sellers.ReadSellerBalances(ctx, overview.Container.Resources.Database, userId, currency)
-	if err != nil {
-		return dtos.WalletSummaryDto{}, err
-	}
-	creatorEarnings, err := overview.Container.Ledger.ReadAccountBalance(ctx, overview.Container.Resources.Database, ledgermodels.CreatorEarningsPayableAccount(userId, currency))
-	if err != nil {
-		return dtos.WalletSummaryDto{}, err
-	}
-	debts, err := Withdrawals{Container: overview.Container}.ReadOutstandingDebts(ctx, overview.Container.Resources.Database, userId, currency)
+	balances, err := ReadUserWalletBalances(ctx, overview.Container, overview.Container.Resources.Database, userId, currency)
 	if err != nil {
 		return dtos.WalletSummaryDto{}, err
 	}
 	money := func(amount int64) dtos.MoneyDto { return dtos.MoneyDto{AmountMinor: amount, Currency: currency} }
 	summary := dtos.WalletSummaryDto{
-		Available: money(debts.WithdrawableMinor()), Pending: money(view.InEscrowMinor), Locked: money(view.LockedMinor),
-		InEscrow: money(view.InEscrowMinor), PayoutRequested: money(view.PayoutRequestedMinor), NegativeBalance: money(debts.TotalMinor()),
-		NextAvailableAt: view.NextAvailableAt, EarningsPayable: money(creatorEarnings), Debts: money(debts.TotalMinor()),
+		Available: money(balances.WithdrawableMinor()), Pending: money(balances.InEscrowMinor), Locked: money(balances.DepositHoldMinor),
+		InEscrow: money(balances.InEscrowMinor), PayoutRequested: money(balances.ReservedPayoutMinor), NegativeBalance: money(balances.DebtsMinor()),
+		NextAvailableAt: balances.NextAvailableAt, EarningsPayable: money(balances.CreatorEarningsMinor), Debts: money(balances.DebtsMinor()),
 	}
-	return summary, overview.completeWalletSummary(ctx, &summary, userId, currency, debts.WithdrawableMinor())
+	return summary, overview.completeWalletSummary(ctx, &summary, userId, currency, balances.WithdrawableMinor())
 }
 
 func (overview WalletOverview) ListWalletTransactions(ctx context.Context, userId, currency string, afterLineId *uuid.UUID, limit int) (httpserver.CursorPage[dtos.WalletTransactionDto], error) {
 	database := overview.Container.Resources.Database
 	lines, next, err := overview.Container.Ledger.ListStatementLinesNewestFirst(ctx, database, ledgerservices.StatementPageRequest{
-		Accounts:    []ledgermodels.AccountRef{ledgermodels.SellerAvailableAccount(userId, currency), ledgermodels.SellerPendingAccount(userId, currency)},
+		Accounts:    []ledgermodels.AccountRef{ledgermodels.WalletAvailableAccount(userId, currency), ledgermodels.WalletDepositHoldAccount(userId, currency)},
 		AfterLineId: afterLineId, Limit: limit,
 	})
 	if err != nil {
@@ -56,7 +48,7 @@ func (overview WalletOverview) ListWalletTransactions(ctx context.Context, userI
 	}
 	transactions := make([]dtos.WalletTransactionDto, 0, len(lines))
 	for _, line := range lines {
-		if line.EntryKind == "sellerCredit.matured" {
+		if line.EntryKind == "sellerCredit.matured" || line.EntryKind == walletHoldReleasedKind {
 			continue
 		}
 		kind, status := "debit", "completed"
@@ -66,7 +58,7 @@ func (overview WalletOverview) ListWalletTransactions(ctx context.Context, userI
 		if strings.HasPrefix(line.EntryReference, "withdrawal-requested:") {
 			status = withdrawalStatuses[strings.TrimPrefix(line.EntryReference, "withdrawal-requested:")]
 		}
-		if line.EntryKind == "sellerCredit.locked" {
+		if line.EntryKind == "sellerCredit.locked" || IsWalletHoldCreditKind(line.EntryKind) {
 			status = "pending"
 		}
 		transactions = append(transactions, dtos.WalletTransactionDto{

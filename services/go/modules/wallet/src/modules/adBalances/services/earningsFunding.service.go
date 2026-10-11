@@ -70,36 +70,15 @@ func (balances AdBalances) fundFromEarningsInTransaction(ctx context.Context, tr
 	if err := lockAdvisory(ctx, transaction, "ad-balance:"+request.AdAccountId); err != nil {
 		return dtos.EarningsFundingDto{}, err
 	}
-	wallets := balances.Container.Payments.Container.UsesProviderWallets()
-	if !wallets {
-		withdrawable, err := balances.readWithdrawableMinor(ctx, transaction, request.UserId, currency)
-		if err != nil {
-			return dtos.EarningsFundingDto{}, err
-		}
-		if amount <= 0 || amount > withdrawable {
-			return dtos.EarningsFundingDto{}, ErrInsufficientEarnings
-		}
-	}
 	created, err := client.AdBalanceEarningsTransfer.Create().SetAdAccountID(request.AdAccountId).SetUserID(request.UserId).SetIdempotencyKey(request.IdempotencyKey).
 		SetAmountMinor(amount).SetCurrency(currency).SetCreatedAt(balances.Container.Now()).Save(ctx)
 	if err != nil {
 		return dtos.EarningsFundingDto{}, err
 	}
-	if wallets {
-		_, err = balances.Container.Payments.SpendWalletToPlatformInTransaction(ctx, transaction, paymentservices.WalletSpend{
-			UserId: request.UserId, Currency: currency, AmountMinor: amount, Reference: "ad-earnings-funding:" + created.ID.String(), Subject: "ads:" + created.ID.String(),
-			Description: "Ads paid from your wallet", Credit: ledgermodels.AdvertiserPrepaidBalanceAccount(request.AdAccountId, currency),
-		})
-	} else {
-		_, err = balances.Container.Ledger.PostBalancedJournalEntry(ctx, transaction, ledgermodels.JournalEntryRequest{
-			Reference: "ad-earnings-funding:" + created.ID.String(), Kind: "adBalance.fundedFromEarnings", Description: "Ads paid from your Zudomart balance",
-			Metadata: map[string]any{"adAccountId": request.AdAccountId, "fundingId": created.ID.String()},
-			Lines: []ledgermodels.JournalLineRequest{
-				{Account: ledgermodels.SellerAvailableAccount(request.UserId, currency), Direction: ledgermodels.Debit, AmountMinor: amount},
-				{Account: ledgermodels.AdvertiserPrepaidBalanceAccount(request.AdAccountId, currency), Direction: ledgermodels.Credit, AmountMinor: amount},
-			},
-		})
-	}
+	_, err = balances.Container.Payments.SpendWalletToPlatformInTransaction(ctx, transaction, paymentservices.WalletSpend{
+		UserId: request.UserId, Currency: currency, AmountMinor: amount, Reference: "ad-earnings-funding:" + created.ID.String(), Subject: "ads:" + created.ID.String(),
+		Description: "Ads paid from your wallet", Credit: ledgermodels.AdvertiserPrepaidBalanceAccount(request.AdAccountId, currency), NetDebts: true,
+	})
 	if errors.Is(err, ledgermodels.ErrInsufficientBalance) || errors.Is(err, paymentservices.ErrInsufficientWalletFunds) {
 		return dtos.EarningsFundingDto{}, ErrInsufficientEarnings
 	}
@@ -115,18 +94,6 @@ func (balances AdBalances) fundFromEarningsInTransaction(ctx context.Context, tr
 		}
 	}
 	return convertEarningsTransfer(created), nil
-}
-
-func (balances AdBalances) readWithdrawableMinor(ctx context.Context, executor databases.ExecutorQuerier, userId, currency string) (int64, error) {
-	accounts := []ledgermodels.AccountRef{
-		ledgermodels.SellerAvailableAccount(userId, currency), ledgermodels.SellerDebtAccount(userId, currency), ledgermodels.CreatorEarningsDebtAccount(userId, currency),
-	}
-	found, err := balances.Container.Ledger.ReadAccountBalances(ctx, executor, accounts)
-	if err != nil {
-		return 0, err
-	}
-	debts := max(found[accounts[1].Key()], 0) + max(found[accounts[2].Key()], 0)
-	return max(found[accounts[0].Key()]-debts, 0), nil
 }
 
 func (balances AdBalances) DebitEarningsForBoost(ctx context.Context, request dtos.BoostDebitRequestDto) (dtos.BoostDebitResultDto, error) {
@@ -165,21 +132,8 @@ func (balances AdBalances) returnEarningsFundedBoostRefund(ctx context.Context, 
 }
 
 func (balances AdBalances) returnEarningsCredit(ctx context.Context, transaction *sql.Tx, transfer *ent.AdBalanceEarningsTransfer, portion int64, reference string) error {
-	if balances.Container.Payments.Container.UsesProviderWallets() {
-		if err := balances.Container.Payments.CreditWalletFromPlatformInTransaction(ctx, transaction, transfer.UserID, transfer.Currency, "ads:"+reference, reference, portion,
-			ledgermodels.AdvertiserPrepaidBalanceAccount(transfer.AdAccountID, transfer.Currency), "Unused ad credit returned to your wallet"); err != nil {
-			return err
-		}
-		return transfer.Update().AddRefundedMinor(portion).Exec(ctx)
-	}
-	if _, err := balances.Container.Ledger.PostBalancedJournalEntry(ctx, transaction, ledgermodels.JournalEntryRequest{
-		Reference: reference, Kind: "adBalance.earningsReturned", Description: "Unused ad credit returned to your balance",
-		Metadata: map[string]any{"adAccountId": transfer.AdAccountID, "fundingId": transfer.ID.String()},
-		Lines: []ledgermodels.JournalLineRequest{
-			{Account: ledgermodels.AdvertiserPrepaidBalanceAccount(transfer.AdAccountID, transfer.Currency), Direction: ledgermodels.Debit, AmountMinor: portion},
-			{Account: ledgermodels.SellerAvailableAccount(transfer.UserID, transfer.Currency), Direction: ledgermodels.Credit, AmountMinor: portion},
-		},
-	}); err != nil {
+	if err := balances.Container.Payments.CreditWalletFromPlatformInTransaction(ctx, transaction, transfer.UserID, transfer.Currency, "ads:"+reference, reference, portion,
+		ledgermodels.AdvertiserPrepaidBalanceAccount(transfer.AdAccountID, transfer.Currency), "Unused ad credit returned to your wallet"); err != nil {
 		return err
 	}
 	return transfer.Update().AddRefundedMinor(portion).Exec(ctx)

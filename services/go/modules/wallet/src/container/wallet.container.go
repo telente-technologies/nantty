@@ -8,7 +8,6 @@ import (
 	ledgerevents "zudomart/modules/ledger/src/events"
 	"zudomart/modules/ledger/src/loaders"
 	ledgerservices "zudomart/modules/ledger/src/modules/journal/services"
-	sellerbalances "zudomart/modules/ledger/src/modules/sellerBalances/services"
 	ledgerrepositories "zudomart/modules/ledger/src/repositories"
 	ledgerutils "zudomart/modules/ledger/src/utils"
 	paymentservices "zudomart/modules/payments/src/modules/gateway/services"
@@ -27,7 +26,6 @@ type Container struct {
 	Settings     configs.WalletSettings
 	Ledger       *ledgerservices.Ledger
 	Payments     *paymentservices.PaymentGateway
-	Sellers      sellerbalances.SellerBalances
 	Outbox       ledgerevents.OutboxTable
 	Idempotency  ledgerutils.SqlIdempotencyRecordStore
 	Encryptor    utils.FieldEncryptor
@@ -54,7 +52,6 @@ func NewWalletContainer(resources loaders.MoneyModuleResources, settings configs
 		Audit:     audit,
 		Resources: resources, Settings: settings, Payments: payments, Encryptor: encryptor,
 		Ledger:      ledgerservices.NewLedgerInSchema(settings.Money.LedgerSchema),
-		Sellers:     sellerbalances.NewSellerBalancesInSchema(settings.Money.LedgerSchema),
 		Outbox:      ledgerevents.OutboxTable{Schema: schema, Source: "zudomart.wallet"},
 		Idempotency: ledgerutils.SqlIdempotencyRecordStore{Schema: schema},
 		Currency: utils.RegionHeaderCurrencyResolver{

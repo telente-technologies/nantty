@@ -7,8 +7,9 @@ import (
 	"log/slog"
 	"net/http"
 	"time"
+
 	moneyv1 "zudomart/contracts/gen/go/zudomart/money/v1"
-	sellerbalances "zudomart/modules/ledger/src/modules/sellerBalances/services"
+	sellerreserves "zudomart/modules/ledger/src/modules/sellerReserves"
 	adbalancecontrollers "zudomart/modules/wallet/src/modules/adBalances/controllers"
 	adbalancedtos "zudomart/modules/wallet/src/modules/adBalances/dtos"
 	adbalanceroutes "zudomart/modules/wallet/src/modules/adBalances/routes"
@@ -86,7 +87,7 @@ func StartWalletModuleWithSettings(ctx context.Context, settings configs.WalletS
 	payments.RegisterTransferOutcomeHandler(paymentconstants.PurposeWithdrawal, module.Payouts.Withdrawals)
 	payments.RegisterTransferOutcomeHandler(paymentconstants.PurposeCreatorEarnings, module.Payouts.Creators)
 	payments.RegisterPaymentPurposeHandler(paymentconstants.PurposeAdBalanceTopUp, module.AdBalances)
-	sellerbalances.RegisterSellerReservePolicy(module.Reserves.PolicyFor)
+	sellerreserves.RegisterPolicy(module.Reserves.PolicyFor)
 	adBalances, holds := module.AdBalances, module.Payouts.Holds
 	loaders.RegisterMoneyDomainEventHandler("accountHealth.changed", func(ctx context.Context, envelope platformevents.EventEnvelope) error {
 		var change payoutservices.AccountHealthChange

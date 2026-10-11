@@ -17,11 +17,11 @@ var (
 )
 
 func (withdrawals Withdrawals) requireProviderWalletPayoutAllowed(ctx context.Context, transaction *sql.Tx, userId, currency string, account *ent.PayoutAccount) error {
-	debt, err := withdrawals.Container.Ledger.ReadAccountBalance(ctx, transaction, ledgermodels.WalletDebtAccount(userId, currency))
+	balances, err := ReadUserWalletBalances(ctx, withdrawals.Container, transaction, userId, currency)
 	if err != nil {
 		return err
 	}
-	if debt > 0 {
+	if balances.DebtsMinor() > 0 {
 		return ErrWalletDebtOutstanding
 	}
 	wallet, err := withdrawals.Container.Payments.FindActiveProviderWallet(ctx, transaction, userId)
@@ -35,9 +35,6 @@ func (withdrawals Withdrawals) requireProviderWalletPayoutAllowed(ctx context.Co
 }
 
 func (withdrawals Withdrawals) payoutSourceAccount(ctx context.Context, transaction *sql.Tx, withdrawal *ent.Withdrawal, provider string) (ledgermodels.AccountRef, error) {
-	if ledgermodels.UserCashAccountsForProvider(withdrawal.Provider, withdrawal.UserID, withdrawal.Currency).DepositHold == nil {
-		return ledgermodels.PlatformProviderBalanceAccount(provider, withdrawal.Currency), nil
-	}
 	wallet, err := withdrawals.Container.Payments.FindProviderWallet(ctx, transaction, withdrawal.UserID)
 	if err != nil {
 		return ledgermodels.AccountRef{}, err

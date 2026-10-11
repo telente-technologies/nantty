@@ -1,16 +1,13 @@
 package wallet
 
 import (
-	"context"
 	"net/http"
 	"strings"
 	"testing"
-	"time"
 
 	"github.com/google/uuid"
 
 	ledgermodels "zudomart/modules/ledger/src/modules/journal/models"
-	sellerbalances "zudomart/modules/ledger/src/modules/sellerBalances/services"
 )
 
 func TestPrepaidAdBalanceIsFundedByCardAndDebitedBySpendAndBoosts(t *testing.T) {
@@ -65,52 +62,6 @@ func TestPrepaidAdBalanceIsFundedByCardAndDebitedBySpendAndBoosts(t *testing.T) 
 	unused := harness.Call(http.MethodPost, "/api/v1/ads/balance/refund", harness.Tokens.UserAccessToken(booster), "", map[string]any{"adAccountId": "user-" + booster})
 	if unused.Status != http.StatusAccepted || unused.Body["refunded"].(map[string]any)["amountMinor"].(float64) != 240_000 {
 		t.Fatalf("unused balance refund: %d %s", unused.Status, unused.Raw)
-	}
-	harness.AssertLedgerHealthy()
-}
-
-func TestFlaggedSellersKeepTheReservePercentageLockedWhenCreditsMature(t *testing.T) {
-	if testing.Short() {
-		t.Skip("integration test: needs Postgres")
-	}
-	harness := startWalletHarness(t, true)
-	seller := uuid.NewString()
-	staff := harness.Tokens.StaffTokens(uuid.NewString(), "money.withdrawals.process", "money.withdrawals.read")
-	stepUp := staff.StepUp
-	flagged := harness.Call(http.MethodPut, "/api/v1/admin/wallet/seller-reserves/"+seller, staff.AccessToken, "", map[string]any{"reason": "High chargeback rate", "reserveBps": 1000, "holdDays": 30}, stepUp())
-	if flagged.Status != http.StatusCreated {
-		t.Fatalf("flag: %d %s", flagged.Status, flagged.Raw)
-	}
-	harness.post(ledgermodels.JournalEntryRequest{Reference: "seed-release-" + seller, Kind: "test.release", Lines: []ledgermodels.JournalLineRequest{
-		{Account: ledgermodels.PlatformProviderBalanceAccount("flutterwave", "NGN"), Direction: ledgermodels.Debit, AmountMinor: 200_000},
-		{Account: ledgermodels.SellerPendingAccount(seller, "NGN"), Direction: ledgermodels.Credit, AmountMinor: 200_000},
-	}})
-	balances := sellerbalances.NewSellerBalancesInSchema(harness.LedgerSchema)
-	mustRun := func(work func(context.Context) error) {
-		t.Helper()
-		if err := work(context.Background()); err != nil {
-			t.Fatal(err)
-		}
-	}
-	mustRun(func(ctx context.Context) error {
-		transaction, err := harness.Database.BeginTx(ctx, nil)
-		if err != nil {
-			return err
-		}
-		if err := balances.ScheduleLockedCreditInTransaction(ctx, transaction, sellerbalances.LockedSellerCredit{SellerUserId: seller, Currency: "NGN", AmountMinor: 200_000, SourceReference: "order-credit:" + seller, AvailableAt: time.Now().Add(-time.Minute)}); err != nil {
-			return err
-		}
-		return transaction.Commit()
-	})
-	if matured, err := balances.MatureDueCredits(context.Background(), harness.Database, 10); err != nil || matured != 1 {
-		t.Fatalf("matured %d %v", matured, err)
-	}
-	if harness.balance(ledgermodels.SellerAvailableAccount(seller, "NGN")) != 180_000 || harness.balance(ledgermodels.SellerPendingAccount(seller, "NGN")) != 20_000 {
-		t.Fatal("a flagged seller must keep 10% locked as a reserve")
-	}
-	balances.Now = func() time.Time { return time.Now().Add(31 * 24 * time.Hour) }
-	if matured, _ := balances.MatureDueCredits(context.Background(), harness.Database, 10); matured != 1 || harness.balance(ledgermodels.SellerAvailableAccount(seller, "NGN")) != 200_000 {
-		t.Fatal("the reserve must be released after the hold")
 	}
 	harness.AssertLedgerHealthy()
 }

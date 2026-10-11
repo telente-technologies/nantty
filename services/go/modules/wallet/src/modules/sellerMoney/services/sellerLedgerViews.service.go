@@ -10,6 +10,7 @@ import (
 	ledgermodels "zudomart/modules/ledger/src/modules/journal/models"
 	ledgerservices "zudomart/modules/ledger/src/modules/journal/services"
 	"zudomart/modules/wallet/src/container"
+	payoutservices "zudomart/modules/wallet/src/modules/payouts/services"
 	"zudomart/modules/wallet/src/modules/sellerMoney/dtos"
 	"zudomart/platform/httpserver"
 )
@@ -21,12 +22,12 @@ type SellerLedgerViews struct {
 }
 
 func (views SellerLedgerViews) ReadBalances(ctx context.Context, seller dtos.SellerContext) (dtos.WalletBalancesView, error) {
-	view, err := views.Container.Sellers.ReadSellerBalances(ctx, views.Container.Resources.Database, seller.SellerId, seller.Currency)
+	view, err := payoutservices.ReadUserWalletBalances(ctx, views.Container, views.Container.Resources.Database, seller.SellerId, seller.Currency)
 	if err != nil {
 		return dtos.WalletBalancesView{}, err
 	}
 	return dtos.WalletBalancesView{
-		Escrow: seller.Money(view.InEscrowMinor), Pending: seller.Money(view.LockedMinor), Available: seller.Money(view.WithdrawableMinor()),
+		Escrow: seller.Money(view.InEscrowMinor), Pending: seller.Money(view.DepositHoldMinor), Available: seller.Money(view.WithdrawableMinor()),
 		NextEscrowReleaseAt: formatOptionalTime(view.NextAvailableAt),
 	}, nil
 }
@@ -44,7 +45,7 @@ func (views SellerLedgerViews) ListTransactions(ctx context.Context, seller dtos
 	after := filter.Cursor
 	for page := 0; page < maximumStatementPages; page++ {
 		lines, next, err := views.Container.Ledger.ListStatementLinesNewestFirst(ctx, views.Container.Resources.Database, ledgerservices.StatementPageRequest{
-			Accounts:    []ledgermodels.AccountRef{ledgermodels.SellerAvailableAccount(seller.SellerId, seller.Currency), ledgermodels.SellerPendingAccount(seller.SellerId, seller.Currency)},
+			Accounts:    []ledgermodels.AccountRef{ledgermodels.WalletAvailableAccount(seller.SellerId, seller.Currency), ledgermodels.WalletDepositHoldAccount(seller.SellerId, seller.Currency)},
 			AfterLineId: after, Limit: 100,
 		})
 		if err != nil {
@@ -54,7 +55,7 @@ func (views SellerLedgerViews) ListTransactions(ctx context.Context, seller dtos
 			if filter.From != nil && line.CreatedAt.Before(*filter.From) {
 				return httpserver.NewCursorPage(collected, ""), nil
 			}
-			if line.EntryKind == "sellerCredit.matured" || (filter.Until != nil && !line.CreatedAt.Before(*filter.Until)) {
+			if line.EntryKind == "sellerCredit.matured" || payoutservices.IsWalletHoldReleasedKind(line.EntryKind) || (filter.Until != nil && !line.CreatedAt.Before(*filter.Until)) {
 				continue
 			}
 			view := TransactionViewOf(line, bucketOf(line.EntryKind))
@@ -114,9 +115,9 @@ func SellerTransactionKindOf(entryKind string) string {
 }
 
 func (views SellerLedgerViews) ListAvailableLinesSince(ctx context.Context, seller dtos.SellerContext, since time.Time, includePending bool) ([]ledgerservices.StatementLine, *ledgerservices.StatementLine, error) {
-	accounts := []ledgermodels.AccountRef{ledgermodels.SellerAvailableAccount(seller.SellerId, seller.Currency)}
+	accounts := []ledgermodels.AccountRef{ledgermodels.WalletAvailableAccount(seller.SellerId, seller.Currency)}
 	if includePending {
-		accounts = append(accounts, ledgermodels.SellerPendingAccount(seller.SellerId, seller.Currency))
+		accounts = append(accounts, ledgermodels.WalletDepositHoldAccount(seller.SellerId, seller.Currency))
 	}
 	collected := []ledgerservices.StatementLine{}
 	var after *uuid.UUID
@@ -148,7 +149,7 @@ func formatOptionalTime(moment *time.Time) *string {
 }
 
 func bucketOf(entryKind string) string {
-	if entryKind == "sellerCredit.locked" {
+	if entryKind == "sellerCredit.locked" || payoutservices.IsWalletHoldCreditKind(entryKind) {
 		return "pending"
 	}
 	return "available"

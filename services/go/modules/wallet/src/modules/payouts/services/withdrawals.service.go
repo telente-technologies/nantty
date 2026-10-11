@@ -89,11 +89,7 @@ func (withdrawals Withdrawals) RequestWithdrawalInTransaction(ctx context.Contex
 		return dtos.WithdrawalDto{}, err
 	}
 	cash := ledgermodels.UserCashAccountsForProvider(created.Provider, userId, currency)
-	if cash.DepositHold == nil {
-		if _, err := withdrawals.settleDebtsBeforeWithdrawal(ctx, transaction, userId, currency, created.ID.String()); err != nil {
-			return dtos.WithdrawalDto{}, err
-		}
-	} else if err := withdrawals.requireProviderWalletPayoutAllowed(ctx, transaction, userId, currency, account); err != nil {
+	if err := withdrawals.requireProviderWalletPayoutAllowed(ctx, transaction, userId, currency, account); err != nil {
 		return dtos.WithdrawalDto{}, err
 	}
 	_, err = withdrawals.Container.Ledger.PostBalancedJournalEntry(ctx, transaction, ledgermodels.JournalEntryRequest{

@@ -37,13 +37,13 @@ func TestUnverifiedUsersCannotFundAdsFromEarningsAndKeepTheirMoney(t *testing.T)
 	user := uuid.NewString()
 	harness.post(ledgermodels.JournalEntryRequest{Reference: "seed-unverified-" + user, Kind: "test.seedAvailable", Lines: []ledgermodels.JournalLineRequest{
 		{Account: ledgermodels.CreatorCoinPayoutExpenseAccount("NGN"), Direction: ledgermodels.Debit, AmountMinor: 50_000},
-		{Account: ledgermodels.SellerAvailableAccount(user, "NGN"), Direction: ledgermodels.Credit, AmountMinor: 50_000},
+		{Account: ledgermodels.WalletAvailableAccount(user, "NGN"), Direction: ledgermodels.Credit, AmountMinor: 50_000},
 	}})
 	refused := harness.fundAdsFromEarnings(user, "ads-"+user[:8], "unverified-fund-1", 10_000)
 	if refused.Status != http.StatusForbidden || refused.Body["code"] != "VERIFICATION_REQUIRED" {
 		t.Fatalf("an unverified user funded ads: %d %s", refused.Status, refused.Raw)
 	}
-	if harness.balance(ledgermodels.SellerAvailableAccount(user, "NGN")) != 50_000 {
+	if harness.balance(ledgermodels.WalletAvailableAccount(user, "NGN")) != 50_000 {
 		t.Fatal("a refused funding must not move money")
 	}
 	summary := harness.Call(http.MethodGet, "/api/v1/wallets/me", harness.Tokens.UserAccessToken(user), "", nil, http.Header{"X-Client-Region": {"NG"}})
