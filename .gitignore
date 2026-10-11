@@ -28,3 +28,11 @@ CLAUDE.md
 services/python/intelligence/**/__pycache__/
 
 *.tsbuildinfo
+
+# Compiled Go service binaries (built locally and in CI; never tracked)
+/services/go/deployables/goAds/goAds
+/services/go/deployables/goCommerce/goCommerce
+/services/go/deployables/goIdentity/goIdentity
+/services/go/deployables/goLive/goLive
+/services/go/deployables/goMoney/goMoney
+/services/go/deployables/goTrust/goTrust
