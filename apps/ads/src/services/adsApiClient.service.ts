@@ -1,3 +1,5 @@
+import { parseRetryAfterHeader, readFriendlyErrorMessage, readRequestIdHeader } from "@zudomart/web-kit";
+
 import type { ApiErrorBody, ApiValidationIssue } from "@/types/api.type";
 import { adaptListEnvelope } from "@/utils/listEnvelope.util";
 import { describeLimitError } from "@/utils/limitErrors.util";
@@ -19,6 +21,8 @@ export class AdsApiRequestError extends Error {
     message: string,
     public readonly issues: readonly ApiValidationIssue[] = [],
     public readonly details?: Readonly<Record<string, unknown>>,
+    public readonly requestId?: string,
+    public readonly retryAfterSeconds?: number,
   ) {
     super(describeLimitError(code, details) ?? message);
     this.name = "AdsApiRequestError";
@@ -34,6 +38,7 @@ export interface AdsApiRequestOptions {
   readonly rawBody?: BodyInit;
   readonly headers?: Record<string, string>;
   readonly idempotencyKey?: string;
+  readonly stepUpToken?: string;
   readonly signal?: AbortSignal;
   readonly expect?: "json" | "text" | "blob";
 }
@@ -78,6 +83,7 @@ export async function sendRequestToAdsManagerServer<Payload>(bffPath: string, op
   const headers: Record<string, string> = { Accept: "application/json", ...options.headers };
   if (method !== "GET" && currentCsrfToken) headers["X-CSRF-Token"] = currentCsrfToken;
   if (options.idempotencyKey) headers["Idempotency-Key"] = options.idempotencyKey;
+  if (options.stepUpToken) headers["X-Step-Up-Token"] = options.stepUpToken;
   let body: BodyInit | undefined = options.rawBody;
   if (options.body !== undefined) {
     headers["Content-Type"] = "application/json";
@@ -94,7 +100,7 @@ export async function sendRequestToAdsManagerServer<Payload>(bffPath: string, op
     const errorBody = (await response.json().catch(() => null)) as ApiErrorBody | null;
     if (response.status === 401 && sessionEndedErrorCodes.has(errorBody?.code ?? "")) redirectToLoginAfterSessionEnded();
     if (response.status === 403 && errorBody?.code === verificationRequiredErrorCode) announceVerificationRequired(errorBody.message);
-    throw new AdsApiRequestError(response.status, errorBody?.code ?? `HTTP_${response.status}`, errorBody?.message ?? "Something went wrong. Try again.", errorBody?.issues ?? [], errorBody?.details);
+    throw new AdsApiRequestError(response.status, errorBody?.code ?? `HTTP_${response.status}`, errorBody?.message ?? "That didn't work. Try again.", errorBody?.issues ?? [], errorBody?.details, readRequestIdHeader(response.headers), parseRetryAfterHeader(response.headers.get("retry-after")));
   }
   if (response.status === 204) return undefined as Payload;
   if (options.expect === "text") return (await response.text()) as Payload;
@@ -126,8 +132,8 @@ export function buildAccountApiPath(accountId: string, resourcePath = ""): strin
 
 export function readErrorMessageForDisplay(error: unknown): string {
   if (typeof navigator !== "undefined" && navigator.onLine === false) return "You're offline. Check your connection and we'll retry when you're back.";
-  if (error instanceof AdsApiRequestError) return error.message === genericValidationMessage && error.issues[0] ? error.issues[0].message : error.message;
-  return "Something went wrong. Try again.";
+  if (error instanceof AdsApiRequestError && error.message === genericValidationMessage && error.issues[0]) return error.issues[0].message;
+  return readFriendlyErrorMessage(error);
 }
 
 export function saveBlobAsDownloadedFile(blob: Blob, fileName: string): void {
@@ -139,4 +145,15 @@ export function saveBlobAsDownloadedFile(blob: Blob, fileName: string): void {
   anchor.click();
   anchor.remove();
   setTimeout(() => URL.revokeObjectURL(objectUrl), 1000);
+}
+
+export const stepUpRequiredErrorCodes: readonly string[] = ["STEP_UP_REQUIRED", "STEP_UP_REUSED"];
+
+export function isStepUpRequiredError(error: unknown): error is AdsApiRequestError {
+  return error instanceof AdsApiRequestError && stepUpRequiredErrorCodes.includes(error.code);
+}
+
+export async function grantStepUpWithPassword(password: string): Promise<string> {
+  const granted = await sendRequestToAdsManagerServer<{ readonly stepUpToken: string }>("/bff/auth/step-up", { method: "POST", body: { password } });
+  return granted.stepUpToken;
 }

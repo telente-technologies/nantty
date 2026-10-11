@@ -71,5 +71,11 @@ export function registerAuthMockHandlers(): void {
     return respondWithNoContent();
   });
 
+  registerMockRoute("POST", "/auth/step-up", (request) => {
+    requirePrincipal(request);
+    if (!isDemoPasswordCorrect(String(readJsonObjectBody(request).password ?? ""))) return respondWithError(401, "INVALID_CREDENTIALS", "That password is not right.");
+    return respondWithJson(200, { stepUpToken: `mock_su_${randomBytes(24).toString("base64url")}`, expiresIn: 300 });
+  });
+
   registerMockRoute("GET", "/users/me", (request) => respondWithJson(200, presentCurrentUser(requirePrincipal(request).userId)));
 }

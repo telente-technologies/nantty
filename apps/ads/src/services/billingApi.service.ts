@@ -10,8 +10,8 @@ export const billingApi = {
   fetchBillingOverview: (accountId: string) => sendAdsApiRequest<BillingOverview>(buildAccountApiPath(accountId, "/billing")),
   startTopUpCheckout: (accountId: string, amount: Money, provider: PaymentProvider, idempotencyKey: string) =>
     sendAdsApiRequest<TopUpCheckout>(buildAccountApiPath(accountId, "/billing/top-ups"), { method: "POST", body: { amount, provider, returnPath: `/accounts/${accountId}/billing/return` }, idempotencyKey }),
-  fundFromEarnings: (accountId: string, amount: Money, idempotencyKey: string) =>
-    sendAdsApiRequest<EarningsFunding>(buildAccountApiPath(accountId, "/billing/fund-from-earnings"), { method: "POST", body: { amount }, idempotencyKey }),
+  fundFromEarnings: (accountId: string, amount: Money, idempotencyKey: string, stepUpToken?: string) =>
+    sendAdsApiRequest<EarningsFunding>(buildAccountApiPath(accountId, "/billing/fund-from-earnings"), { method: "POST", body: { amount }, idempotencyKey, ...(stepUpToken ? { stepUpToken } : {}) }),
   fetchTopUpByReference: (accountId: string, reference: string) => sendAdsApiRequest<TopUp>(buildAccountApiPath(accountId, `/billing/top-ups/${encodeURIComponent(reference)}`)),
   listTransactions: (accountId: string, cursor: string | null = null) =>
     sendAdsApiRequest<Page<BillingTransaction>>(buildAccountApiPath(accountId, "/billing/transactions"), { query: { cursor, limit: 25 } }),

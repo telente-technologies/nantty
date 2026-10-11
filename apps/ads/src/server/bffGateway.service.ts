@@ -9,11 +9,11 @@ import { isMutationProtectedAgainstCsrf, isSafeHttpMethod } from "@/server/reque
 
 const maximumForwardedBodyBytes = 12 * 1024 * 1024;
 const forwardedRequestHeaderNames = ["idempotency-key", "if-match"];
-const returnedResponseHeaderNames = ["content-type", "content-disposition", "idempotent-replayed", "retry-after", "etag"];
+const returnedResponseHeaderNames = ["content-type", "content-disposition", "idempotent-replayed", "retry-after", "etag", "x-request-id"];
 const allowedApiPathPattern = /^\/(ads|media|topics|users)(\/[A-Za-z0-9._~:@%-]+)*$|^\/wallets\/me$/;
 
 export function respondWithBffError(status: number, code: string, message: string): NextResponse {
-  return NextResponse.json({ message, code }, { status, headers: { "Cache-Control": "no-store" } });
+  return NextResponse.json({ message, code }, { status, headers: { "Cache-Control": "no-store", "x-request-id": crypto.randomUUID() } });
 }
 
 function convertBackendResultToResponse(result: BackendResult): NextResponse {
@@ -32,6 +32,15 @@ async function readRequestBodyWithinLimit(request: NextRequest): Promise<Uint8Ar
   if (declaredLength > maximumForwardedBodyBytes) return "too_large";
   const body = new Uint8Array(await request.arrayBuffer());
   return body.byteLength > maximumForwardedBodyBytes ? "too_large" : body;
+}
+
+function isStepUpRefusal(result: BackendResult): boolean {
+  try {
+    const code = (JSON.parse(new TextDecoder().decode(result.body)) as { code?: unknown }).code;
+    return code === "STEP_UP_REUSED" || code === "STEP_UP_REQUIRED";
+  } catch {
+    return false;
+  }
 }
 
 function findRoleForAccount(view: CachedSessionViewPayload, accountId: string) {
@@ -84,6 +93,8 @@ export async function forwardBffRequestToAdsApi(request: NextRequest, pathSegmen
     const headerValue = request.headers.get(headerName);
     if (headerValue && headerValue.length <= 256) forwardedHeaders[headerName] = headerValue;
   }
+  const stepUpToken = request.headers.get("x-step-up-token");
+  if (stepUpToken && stepUpToken.length <= 4096) forwardedHeaders["X-Step-Up-Token"] = stepUpToken;
   const clientAddress = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim();
   if (clientAddress) forwardedHeaders["X-Forwarded-For"] = clientAddress;
 
@@ -94,7 +105,7 @@ export async function forwardBffRequestToAdsApi(request: NextRequest, pathSegmen
   let backendResult = await sendToBackend();
   const alreadyRefreshed = rotatedTokens !== null || Boolean(renewedSession?.tokens);
   const refreshTokenToUse = renewedSession?.tokens?.refreshToken ?? tokens.refreshToken;
-  if (backendResult.status === 401 && !alreadyRefreshed) {
+  if (backendResult.status === 401 && !alreadyRefreshed && !isStepUpRefusal(backendResult)) {
     rotatedTokens = refreshTokenToUse ? await exchangeRefreshTokenForNewTokenPair(refreshTokenToUse) : null;
     if (!rotatedTokens) return respondSessionExpired();
     accessToken = rotatedTokens.accessToken;
