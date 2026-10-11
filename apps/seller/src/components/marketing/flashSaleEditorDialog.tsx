@@ -71,7 +71,7 @@ export function FlashSaleEditorDialog({ sale, currency, onClose, onSaved }: { re
   const updateItem = (index: number, changes: Partial<FlashSaleDraftItem>) => setItems((current) => current.map((item, itemIndex) => (itemIndex === index ? { ...item, ...changes } : item)));
 
   return (
-    <ModalDialog
+    <ModalDialog intent="discount"
       isOpen
       onClose={onClose}
       width="large"

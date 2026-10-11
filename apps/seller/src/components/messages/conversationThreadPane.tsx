@@ -1,73 +1,56 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useRef, useState, type FormEvent, type KeyboardEvent } from "react";
+import { useEffect, useMemo, useRef } from "react";
+
+import { BrandLoader } from "@zudomart/web-kit";
 
 import { readInitialsFromName } from "@/components/messages/conversationListPane";
+import { MessageBubble } from "@/components/messages/messageBubble";
+import { SecureChatSetupCard } from "@/components/messages/secureChatSetupCard";
+import { ThreadComposer } from "@/components/messages/threadComposer";
+import { useSellerSession } from "@/components/session/sellerSessionProvider";
 import { Button, IconButton } from "@/components/ui/button";
-import { Callout, EmptyState, LoadingBlock } from "@/components/ui/feedback";
+import { Callout, EmptyState } from "@/components/ui/feedback";
 import { useToast } from "@/components/ui/toastProvider";
-import { useSellerQuery } from "@/hooks/useSellerQuery.hook";
-import { readErrorMessageForDisplay, sendSellerApiRequest } from "@/services/clientApi.service";
-import type { ConversationMessage, ConversationThread } from "@/types/conversation.type";
-import { formatDateTimeForDisplay } from "@/utils/dateFormatting.util";
+import { IconLabel } from "@/components/ui/zudoIcon";
+import { useStoreThread } from "@/hooks/useStoreThread.hook";
+import { foldStoreThread, isSeenByCustomer } from "@/utils/storeChat.util";
 
 import styles from "./messages.module.css";
-import { IconLabel } from "@/components/ui/zudoIcon";
 
 export function ConversationThreadPane({ conversationId, onBack, onConversationChanged }: { readonly conversationId: string | null; readonly onBack: () => void; readonly onConversationChanged: () => void }) {
   const { showToast } = useToast();
-  const threadQuery = useSellerQuery<ConversationThread>(conversationId ? `/seller/conversations/${encodeURIComponent(conversationId)}` : null);
-  const [draftReply, setDraftReply] = useState("");
-  const [isSending, setIsSending] = useState(false);
+  const { sessionView } = useSellerSession();
+  const viewerId = sessionView?.user.id ?? null;
+  const thread = useStoreThread(conversationId, viewerId, sessionView?.user.name ?? "You", onConversationChanged);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const thread = threadQuery.data;
-  const unreadCount = thread?.conversation.unreadCount ?? 0;
-  const replaceThread = threadQuery.replaceData;
+  const conversation = thread.conversation;
+  const { visible, ledger } = useMemo(() => foldStoreThread([...thread.messages, ...thread.outgoing]), [thread.messages, thread.outgoing]);
+  const lastSeenId = useMemo(() => [...visible].reverse().find((message) => isSeenByCustomer(message, conversation?.customerLastReadAt))?.id ?? null, [visible, conversation?.customerLastReadAt]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ block: "end" });
-  }, [thread?.messages.length]);
-
-  useEffect(() => {
-    if (!conversationId || unreadCount === 0) return;
-    sendSellerApiRequest(`/seller/conversations/${encodeURIComponent(conversationId)}/read`, { method: "POST" })
-      .then(() => {
-        replaceThread((current) => (current ? { ...current, conversation: { ...current.conversation, unreadCount: 0 } } : current));
-        onConversationChanged();
-      })
-      .catch(() => undefined);
-  }, [conversationId, unreadCount, replaceThread, onConversationChanged]);
-
-  async function sendReplyToCustomer(event?: FormEvent<HTMLFormElement>) {
-    event?.preventDefault();
-    const body = draftReply.trim();
-    if (!conversationId || body.length === 0) return;
-    setIsSending(true);
-    try {
-      const message = await sendSellerApiRequest<ConversationMessage>(`/seller/conversations/${encodeURIComponent(conversationId)}/messages`, { method: "POST", body: { body } });
-      replaceThread((current) => (current ? { ...current, messages: [...current.messages, message] } : current));
-      setDraftReply("");
-      onConversationChanged();
-    } catch (error) {
-      showToast(readErrorMessageForDisplay(error), "error");
-    } finally {
-      setIsSending(false);
-    }
-  }
-
-  function sendOnEnterWithoutShift(event: KeyboardEvent<HTMLTextAreaElement>) {
-    if (event.key === "Enter" && !event.shiftKey) {
-      event.preventDefault();
-      void sendReplyToCustomer();
-    }
-  }
+  }, [visible.length, thread.isCustomerTyping]);
 
   if (!conversationId) {
     return (
       <section className={styles.threadPane} aria-label="Conversation">
         <div className={styles.placeholder}>
-          <EmptyState iconName="chatCircle24" title="Pick a conversation" description="These are the same chats customers see in the Zudomart app. Replies you send here arrive in the app instantly." />
+          <EmptyState iconName="chatCircle24" title="Pick a conversation" description="These are the same chats customers see in the Zudomart app. Replies are end-to-end encrypted on this device before they're sent." />
+        </div>
+      </section>
+    );
+  }
+
+  if (thread.setupState === "checking" || thread.setupState === "needsSetup" || thread.setupState === "settingUp") {
+    return (
+      <section className={styles.threadPane} aria-label="Conversation">
+        <header className={styles.threadHeader}>
+          <IconButton iconName="arrowLeft24" label="Back to conversations" size="small" className={styles.backButton} onClick={onBack} />
+        </header>
+        <div className={styles.placeholder}>
+          {thread.setupState === "checking" ? <BrandLoader size="md" label="Checking secure chat on this browser" /> : <SecureChatSetupCard isBusy={thread.setupState === "settingUp"} errorMessage={thread.errorMessage} onSetUp={() => void thread.setUpThisBrowser()} />}
         </div>
       </section>
     );
@@ -77,47 +60,44 @@ export function ConversationThreadPane({ conversationId, onBack, onConversationC
     <section className={styles.threadPane} aria-label="Conversation">
       <header className={styles.threadHeader}>
         <IconButton iconName="arrowLeft24" label="Back to conversations" size="small" className={styles.backButton} onClick={onBack} />
-        {thread ? (
+        {conversation ? (
           <>
-            <span className={styles.avatar} aria-hidden="true">
-              {readInitialsFromName(thread.conversation.customer.name)}
-            </span>
+            <span className={styles.avatar} aria-hidden="true">{readInitialsFromName(conversation.customer.name)}</span>
             <span className={styles.conversationText}>
-              <span className={styles.conversationName}>{thread.conversation.customer.name}</span>
-              <span className={styles.preview}>@{thread.conversation.customer.username}</span>
+              <span className={styles.conversationName}>{conversation.customer.name}</span>
+              <span className={styles.preview}>{thread.isCustomerTyping ? "typing…" : `@${conversation.customer.username}`}</span>
             </span>
-            {thread.conversation.orderId ? (
-              <Link href={`/orders/${thread.conversation.orderId}`} className={styles.orderChip} style={{ marginLeft: "auto" }}>
-                <IconLabel name="arrowRight24" size={14}>Order {thread.conversation.orderNumber}</IconLabel>
+            {conversation.orderId ? (
+              <Link href={`/orders/${conversation.orderId}`} className={styles.orderChip} style={{ marginLeft: "auto" }}>
+                <IconLabel name="arrowRight24" size={14}>Order {conversation.orderNumber}</IconLabel>
               </Link>
             ) : null}
           </>
         ) : null}
       </header>
+      {thread.status !== "live" ? (
+        <p className={styles.threadStatus} role="status">
+          <IconLabel name="wifiSlash20" size={14}>{thread.status === "connecting" ? "Connecting to live updates…" : "Live updates are paused. New messages are checked every few seconds."}</IconLabel>
+        </p>
+      ) : null}
       <div className={styles.threadMessages} aria-live="polite">
-        {threadQuery.isLoading && !thread ? <LoadingBlock label="Loading messages" /> : null}
-        {threadQuery.errorMessage ? <Callout tone="error" action={<Button size="small" onClick={threadQuery.reload}>Try again</Button>}>{threadQuery.errorMessage}</Callout> : null}
-        {thread && thread.messages.length === 0 ? <p className={styles.preview}>No messages yet. Say hello — the customer gets it in the Zudomart app.</p> : null}
-        {thread?.messages.map((message) => (
-          <div key={message.id} className={`${styles.bubble} ${message.from === "seller" ? styles.bubbleFromSeller : ""}`}>
-            {message.body}
-            <span className={styles.bubbleTime}>
-              {message.from === "seller" ? `${message.senderName} · ` : ""}
-              {formatDateTimeForDisplay(message.createdAt)}
-            </span>
-          </div>
+        <p className={styles.preview}><IconLabel name="lockKey24" size={14}>Messages are end-to-end encrypted. New team members only see messages sent after they join.</IconLabel></p>
+        {thread.isLoading && thread.messages.length === 0 ? <BrandLoader size="md" label="Loading messages" /> : null}
+        {thread.errorMessage ? <Callout tone="error" action={<Button size="small" onClick={thread.reload}>Try again</Button>}>{thread.errorMessage}</Callout> : null}
+        {conversation && !thread.isLoading && visible.length === 0 ? <p className={styles.preview}>No messages yet. Say hello — the customer gets it in the Zudomart app.</p> : null}
+        {visible.map((message) => (
+          <MessageBubble key={message.id} message={message} reactions={ledger.reactions(message.id, viewerId ?? "")} isSeen={message.id === lastSeenId} onRetry={thread.retry} onDiscard={thread.discard} />
         ))}
+        {thread.isCustomerTyping ? <p className={styles.typingIndicator}>{conversation?.customer.name ?? "The customer"} is typing…</p> : null}
         <div ref={messagesEndRef} />
       </div>
-      <form className={styles.composer} onSubmit={sendReplyToCustomer}>
-        <label htmlFor="conversation-reply" className="visuallyHidden">
-          Reply
-        </label>
-        <textarea id="conversation-reply" className={styles.composerInput} placeholder="Write a reply…" rows={1} maxLength={2000} value={draftReply} onChange={(event) => setDraftReply(event.target.value)} onKeyDown={sendOnEnterWithoutShift} disabled={!thread} />
-        <Button type="submit" variant="primary" iconName="paperPlaneTilt24" isBusy={isSending} disabled={!thread || draftReply.trim().length === 0}>
-          Send
-        </Button>
-      </form>
+      <ThreadComposer
+        conversationId={conversationId}
+        order={conversation?.orderId && conversation.orderNumber ? { id: conversation.orderId, orderNumber: conversation.orderNumber } : null}
+        disabled={!conversation || !viewerId}
+        onSend={thread.send}
+        onError={(message) => showToast(message, "error")}
+      />
     </section>
   );
 }

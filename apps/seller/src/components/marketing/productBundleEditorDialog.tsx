@@ -55,7 +55,7 @@ export function ProductBundleEditorDialog({ bundle, currency, onClose, onSaved }
   }
 
   return (
-    <ModalDialog
+    <ModalDialog intent="product"
       isOpen
       onClose={onClose}
       width="large"

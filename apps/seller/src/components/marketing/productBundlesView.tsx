@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 
+import { requestConfirmation } from "@zudomart/web-kit";
+
 import { PlanGate } from "@/components/billing/planGate";
 import { MarketingSectionHeader } from "@/components/marketing/marketingSectionHeader";
 import { ProductBundleEditorDialog } from "@/components/marketing/productBundleEditorDialog";
@@ -57,7 +59,7 @@ function ProductBundlesBoard() {
   const [editingBundle, setEditingBundle] = useState<ProductBundle | "new" | null>(null);
 
   async function deleteBundle(bundle: ProductBundle) {
-    if (!window.confirm(`Delete ${bundle.name}? Orders already placed are not affected.`)) return;
+    if (!(await requestConfirmation({ title: `Delete ${bundle.name}?`, description: "Orders already placed are not affected.", confirmLabel: "Delete bundle", tone: "danger", intent: "delete" }))) return;
     try {
       await sendSellerApiRequest(`/seller/marketing/bundles/${encodeURIComponent(bundle.id)}`, { method: "DELETE" });
       showToast("Bundle deleted.");

@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from "react";
 
+import { requestConfirmation } from "@zudomart/web-kit";
+
 import { PlanGate } from "@/components/billing/planGate";
 import { FlashSaleCard, type FlashSaleAction } from "@/components/marketing/flashSaleCard";
 import { FlashSaleEditorDialog } from "@/components/marketing/flashSaleEditorDialog";
@@ -35,8 +37,8 @@ function FlashSalesBoard() {
 
   async function runFlashSaleAction(sale: FlashSale, action: FlashSaleAction) {
     if (action === "edit") return setEditingSale(sale);
-    if (action === "delete" && !window.confirm(`Delete ${sale.name}?`)) return;
-    if (action === "end" && !window.confirm(`End ${sale.name} now? Prices go back to normal straight away.`)) return;
+    if (action === "delete" && !(await requestConfirmation({ title: `Delete ${sale.name}?`, description: "This can't be undone.", confirmLabel: "Delete sale", tone: "danger", intent: "delete" }))) return;
+    if (action === "end" && !(await requestConfirmation({ title: `End ${sale.name} now?`, description: "Prices go back to normal straight away.", confirmLabel: "End sale", tone: "danger", intent: "stop" }))) return;
     setBusy({ saleId: sale.id, action });
     try {
       if (action === "delete") await sendSellerApiRequest(`/seller/marketing/flash-sales/${encodeURIComponent(sale.id)}`, { method: "DELETE" });

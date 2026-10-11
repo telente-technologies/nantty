@@ -35,7 +35,7 @@ export function OrderCancelDialog({ order, mode = "cancel", isOpen, onClose, onC
   }
 
   return (
-    <ModalDialog
+    <ModalDialog intent="cancel"
       isOpen={isOpen}
       onClose={onClose}
       title={`${isRejecting ? "Reject" : "Cancel"} ${order.orderNumber}?`}

@@ -9,6 +9,7 @@ import { FeaturePlanBadge } from "@/components/billing/planGate";
 import { useSellerSession } from "@/components/session/sellerSessionProvider";
 import { ZudoIcon } from "@/components/ui/zudoIcon";
 import type { NavigationGroup } from "@/config/navigation.config";
+import { useInboxUnreadCount } from "@/hooks/useInboxUnreadCount.hook";
 
 import styles from "./sidebarNavigation.module.css";
 
@@ -19,6 +20,7 @@ export function DashboardWordmark({ height = 22, withSymbol = true }: { readonly
 export function SidebarNavigation({ groups, isOpenOnSmallScreens, onNavigate }: { readonly groups: NavigationGroup[]; readonly isOpenOnSmallScreens: boolean; readonly onNavigate: () => void }) {
   const pathname = usePathname();
   const { can } = useSellerSession();
+  const unreadConversations = useInboxUnreadCount(can("messages:manage"));
   const visibleGroups = groups
     .map((group) => ({ ...group, items: group.items.filter((item) => can(item.permission)) }))
     .filter((group) => group.items.length > 0);
@@ -48,6 +50,12 @@ export function SidebarNavigation({ groups, isOpenOnSmallScreens, onNavigate }: 
                         <ZudoIcon name={item.iconName} size={18} />
                         <span className={styles.linkLabel}>{item.label}</span>
                         {item.feature ? <FeaturePlanBadge feature={item.feature} /> : null}
+                        {item.href === "/messages" && unreadConversations > 0 ? (
+                          <span className={styles.countBadge}>
+                            {unreadConversations > 99 ? "99+" : unreadConversations}
+                            <span className="visuallyHidden"> unread conversations</span>
+                          </span>
+                        ) : null}
                       </Link>
                     )}
                   </li>
