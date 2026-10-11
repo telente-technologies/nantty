@@ -58,6 +58,14 @@ type PaymentIntent struct {
 	FailedAt *time.Time `json:"failed_at,omitempty"`
 	// RefundedMinor holds the value of the "refunded_minor" field.
 	RefundedMinor int64 `json:"refunded_minor,omitempty"`
+	// RefundInFlightMinor holds the value of the "refund_in_flight_minor" field.
+	RefundInFlightMinor int64 `json:"refund_in_flight_minor,omitempty"`
+	// SavedCardChargeStartedAt holds the value of the "saved_card_charge_started_at" field.
+	SavedCardChargeStartedAt *time.Time `json:"saved_card_charge_started_at,omitempty"`
+	// CustomerEmail holds the value of the "customer_email" field.
+	CustomerEmail string `json:"customer_email,omitempty"`
+	// ProviderSettledAt holds the value of the "provider_settled_at" field.
+	ProviderSettledAt *time.Time `json:"provider_settled_at,omitempty"`
 	// Version holds the value of the "version" field.
 	Version int64 `json:"version,omitempty"`
 	// Metadata holds the value of the "metadata" field.
@@ -74,11 +82,11 @@ func (*PaymentIntent) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case paymentintent.FieldMetadata:
 			values[i] = new([]byte)
-		case paymentintent.FieldAmountMinor, paymentintent.FieldPlatformFeeMinor, paymentintent.FieldProviderFeeMinor, paymentintent.FieldRefundedMinor, paymentintent.FieldVersion:
+		case paymentintent.FieldAmountMinor, paymentintent.FieldPlatformFeeMinor, paymentintent.FieldProviderFeeMinor, paymentintent.FieldRefundedMinor, paymentintent.FieldRefundInFlightMinor, paymentintent.FieldVersion:
 			values[i] = new(sql.NullInt64)
-		case paymentintent.FieldReference, paymentintent.FieldPurpose, paymentintent.FieldOwnerUserID, paymentintent.FieldSubjectID, paymentintent.FieldProvider, paymentintent.FieldCurrency, paymentintent.FieldConnectedAccountID, paymentintent.FieldBeneficiaryUserID, paymentintent.FieldProviderCheckoutID, paymentintent.FieldStatus, paymentintent.FieldAuthorizationURL, paymentintent.FieldProviderTransactionID, paymentintent.FieldFailureReason:
+		case paymentintent.FieldReference, paymentintent.FieldPurpose, paymentintent.FieldOwnerUserID, paymentintent.FieldSubjectID, paymentintent.FieldProvider, paymentintent.FieldCurrency, paymentintent.FieldConnectedAccountID, paymentintent.FieldBeneficiaryUserID, paymentintent.FieldProviderCheckoutID, paymentintent.FieldStatus, paymentintent.FieldAuthorizationURL, paymentintent.FieldProviderTransactionID, paymentintent.FieldFailureReason, paymentintent.FieldCustomerEmail:
 			values[i] = new(sql.NullString)
-		case paymentintent.FieldCreatedAt, paymentintent.FieldPaidAt, paymentintent.FieldFailedAt, paymentintent.FieldUpdatedAt:
+		case paymentintent.FieldCreatedAt, paymentintent.FieldPaidAt, paymentintent.FieldFailedAt, paymentintent.FieldSavedCardChargeStartedAt, paymentintent.FieldProviderSettledAt, paymentintent.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
 		case paymentintent.FieldID:
 			values[i] = new(uuid.UUID)
@@ -225,6 +233,32 @@ func (_m *PaymentIntent) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.RefundedMinor = value.Int64
 			}
+		case paymentintent.FieldRefundInFlightMinor:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field refund_in_flight_minor", values[i])
+			} else if value.Valid {
+				_m.RefundInFlightMinor = value.Int64
+			}
+		case paymentintent.FieldSavedCardChargeStartedAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field saved_card_charge_started_at", values[i])
+			} else if value.Valid {
+				_m.SavedCardChargeStartedAt = new(time.Time)
+				*_m.SavedCardChargeStartedAt = value.Time
+			}
+		case paymentintent.FieldCustomerEmail:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field customer_email", values[i])
+			} else if value.Valid {
+				_m.CustomerEmail = value.String
+			}
+		case paymentintent.FieldProviderSettledAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field provider_settled_at", values[i])
+			} else if value.Valid {
+				_m.ProviderSettledAt = new(time.Time)
+				*_m.ProviderSettledAt = value.Time
+			}
 		case paymentintent.FieldVersion:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field version", values[i])
@@ -342,6 +376,22 @@ func (_m *PaymentIntent) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("refunded_minor=")
 	builder.WriteString(fmt.Sprintf("%v", _m.RefundedMinor))
+	builder.WriteString(", ")
+	builder.WriteString("refund_in_flight_minor=")
+	builder.WriteString(fmt.Sprintf("%v", _m.RefundInFlightMinor))
+	builder.WriteString(", ")
+	if v := _m.SavedCardChargeStartedAt; v != nil {
+		builder.WriteString("saved_card_charge_started_at=")
+		builder.WriteString(v.Format(time.ANSIC))
+	}
+	builder.WriteString(", ")
+	builder.WriteString("customer_email=")
+	builder.WriteString(_m.CustomerEmail)
+	builder.WriteString(", ")
+	if v := _m.ProviderSettledAt; v != nil {
+		builder.WriteString("provider_settled_at=")
+		builder.WriteString(v.Format(time.ANSIC))
+	}
 	builder.WriteString(", ")
 	builder.WriteString("version=")
 	builder.WriteString(fmt.Sprintf("%v", _m.Version))

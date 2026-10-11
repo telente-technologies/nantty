@@ -45,6 +45,10 @@ const (
 	FieldBankCode = "bank_code"
 	// FieldDestinationLast4 holds the string denoting the destination_last4 field in the database.
 	FieldDestinationLast4 = "destination_last4"
+	// FieldSourceWalletRef holds the string denoting the source_wallet_ref field in the database.
+	FieldSourceWalletRef = "source_wallet_ref"
+	// FieldSealedDestination holds the string denoting the sealed_destination field in the database.
+	FieldSealedDestination = "sealed_destination"
 	// FieldStatus holds the string denoting the status field in the database.
 	FieldStatus = "status"
 	// FieldProviderTransferCode holds the string denoting the provider_transfer_code field in the database.
@@ -77,6 +81,8 @@ var Columns = []string{
 	FieldFeeMinor,
 	FieldBankCode,
 	FieldDestinationLast4,
+	FieldSourceWalletRef,
+	FieldSealedDestination,
 	FieldStatus,
 	FieldProviderTransferCode,
 	FieldFailureReason,
@@ -133,6 +139,10 @@ var (
 	DefaultDestinationLast4 string
 	// DestinationLast4Validator is a validator for the "destination_last4" field. It is called by the builders before save.
 	DestinationLast4Validator func(string) error
+	// DefaultSourceWalletRef holds the default value on creation for the "source_wallet_ref" field.
+	DefaultSourceWalletRef string
+	// SourceWalletRefValidator is a validator for the "source_wallet_ref" field. It is called by the builders before save.
+	SourceWalletRefValidator func(string) error
 	// DefaultProviderTransferCode holds the default value on creation for the "provider_transfer_code" field.
 	DefaultProviderTransferCode string
 	// ProviderTransferCodeValidator is a validator for the "provider_transfer_code" field. It is called by the builders before save.
@@ -283,6 +293,11 @@ func ByBankCode(opts ...sql.OrderTermOption) OrderOption {
 // ByDestinationLast4 orders the results by the destination_last4 field.
 func ByDestinationLast4(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldDestinationLast4, opts...).ToFunc()
+}
+
+// BySourceWalletRef orders the results by the source_wallet_ref field.
+func BySourceWalletRef(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldSourceWalletRef, opts...).ToFunc()
 }
 
 // ByStatus orders the results by the status field.

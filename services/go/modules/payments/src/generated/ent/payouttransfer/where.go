@@ -125,6 +125,16 @@ func DestinationLast4(v string) predicate.PayoutTransfer {
 	return predicate.PayoutTransfer(sql.FieldEQ(FieldDestinationLast4, v))
 }
 
+// SourceWalletRef applies equality check predicate on the "source_wallet_ref" field. It's identical to SourceWalletRefEQ.
+func SourceWalletRef(v string) predicate.PayoutTransfer {
+	return predicate.PayoutTransfer(sql.FieldEQ(FieldSourceWalletRef, v))
+}
+
+// SealedDestination applies equality check predicate on the "sealed_destination" field. It's identical to SealedDestinationEQ.
+func SealedDestination(v []byte) predicate.PayoutTransfer {
+	return predicate.PayoutTransfer(sql.FieldEQ(FieldSealedDestination, v))
+}
+
 // ProviderTransferCode applies equality check predicate on the "provider_transfer_code" field. It's identical to ProviderTransferCodeEQ.
 func ProviderTransferCode(v string) predicate.PayoutTransfer {
 	return predicate.PayoutTransfer(sql.FieldEQ(FieldProviderTransferCode, v))
@@ -998,6 +1008,121 @@ func DestinationLast4EqualFold(v string) predicate.PayoutTransfer {
 // DestinationLast4ContainsFold applies the ContainsFold predicate on the "destination_last4" field.
 func DestinationLast4ContainsFold(v string) predicate.PayoutTransfer {
 	return predicate.PayoutTransfer(sql.FieldContainsFold(FieldDestinationLast4, v))
+}
+
+// SourceWalletRefEQ applies the EQ predicate on the "source_wallet_ref" field.
+func SourceWalletRefEQ(v string) predicate.PayoutTransfer {
+	return predicate.PayoutTransfer(sql.FieldEQ(FieldSourceWalletRef, v))
+}
+
+// SourceWalletRefNEQ applies the NEQ predicate on the "source_wallet_ref" field.
+func SourceWalletRefNEQ(v string) predicate.PayoutTransfer {
+	return predicate.PayoutTransfer(sql.FieldNEQ(FieldSourceWalletRef, v))
+}
+
+// SourceWalletRefIn applies the In predicate on the "source_wallet_ref" field.
+func SourceWalletRefIn(vs ...string) predicate.PayoutTransfer {
+	return predicate.PayoutTransfer(sql.FieldIn(FieldSourceWalletRef, vs...))
+}
+
+// SourceWalletRefNotIn applies the NotIn predicate on the "source_wallet_ref" field.
+func SourceWalletRefNotIn(vs ...string) predicate.PayoutTransfer {
+	return predicate.PayoutTransfer(sql.FieldNotIn(FieldSourceWalletRef, vs...))
+}
+
+// SourceWalletRefGT applies the GT predicate on the "source_wallet_ref" field.
+func SourceWalletRefGT(v string) predicate.PayoutTransfer {
+	return predicate.PayoutTransfer(sql.FieldGT(FieldSourceWalletRef, v))
+}
+
+// SourceWalletRefGTE applies the GTE predicate on the "source_wallet_ref" field.
+func SourceWalletRefGTE(v string) predicate.PayoutTransfer {
+	return predicate.PayoutTransfer(sql.FieldGTE(FieldSourceWalletRef, v))
+}
+
+// SourceWalletRefLT applies the LT predicate on the "source_wallet_ref" field.
+func SourceWalletRefLT(v string) predicate.PayoutTransfer {
+	return predicate.PayoutTransfer(sql.FieldLT(FieldSourceWalletRef, v))
+}
+
+// SourceWalletRefLTE applies the LTE predicate on the "source_wallet_ref" field.
+func SourceWalletRefLTE(v string) predicate.PayoutTransfer {
+	return predicate.PayoutTransfer(sql.FieldLTE(FieldSourceWalletRef, v))
+}
+
+// SourceWalletRefContains applies the Contains predicate on the "source_wallet_ref" field.
+func SourceWalletRefContains(v string) predicate.PayoutTransfer {
+	return predicate.PayoutTransfer(sql.FieldContains(FieldSourceWalletRef, v))
+}
+
+// SourceWalletRefHasPrefix applies the HasPrefix predicate on the "source_wallet_ref" field.
+func SourceWalletRefHasPrefix(v string) predicate.PayoutTransfer {
+	return predicate.PayoutTransfer(sql.FieldHasPrefix(FieldSourceWalletRef, v))
+}
+
+// SourceWalletRefHasSuffix applies the HasSuffix predicate on the "source_wallet_ref" field.
+func SourceWalletRefHasSuffix(v string) predicate.PayoutTransfer {
+	return predicate.PayoutTransfer(sql.FieldHasSuffix(FieldSourceWalletRef, v))
+}
+
+// SourceWalletRefEqualFold applies the EqualFold predicate on the "source_wallet_ref" field.
+func SourceWalletRefEqualFold(v string) predicate.PayoutTransfer {
+	return predicate.PayoutTransfer(sql.FieldEqualFold(FieldSourceWalletRef, v))
+}
+
+// SourceWalletRefContainsFold applies the ContainsFold predicate on the "source_wallet_ref" field.
+func SourceWalletRefContainsFold(v string) predicate.PayoutTransfer {
+	return predicate.PayoutTransfer(sql.FieldContainsFold(FieldSourceWalletRef, v))
+}
+
+// SealedDestinationEQ applies the EQ predicate on the "sealed_destination" field.
+func SealedDestinationEQ(v []byte) predicate.PayoutTransfer {
+	return predicate.PayoutTransfer(sql.FieldEQ(FieldSealedDestination, v))
+}
+
+// SealedDestinationNEQ applies the NEQ predicate on the "sealed_destination" field.
+func SealedDestinationNEQ(v []byte) predicate.PayoutTransfer {
+	return predicate.PayoutTransfer(sql.FieldNEQ(FieldSealedDestination, v))
+}
+
+// SealedDestinationIn applies the In predicate on the "sealed_destination" field.
+func SealedDestinationIn(vs ...[]byte) predicate.PayoutTransfer {
+	return predicate.PayoutTransfer(sql.FieldIn(FieldSealedDestination, vs...))
+}
+
+// SealedDestinationNotIn applies the NotIn predicate on the "sealed_destination" field.
+func SealedDestinationNotIn(vs ...[]byte) predicate.PayoutTransfer {
+	return predicate.PayoutTransfer(sql.FieldNotIn(FieldSealedDestination, vs...))
+}
+
+// SealedDestinationGT applies the GT predicate on the "sealed_destination" field.
+func SealedDestinationGT(v []byte) predicate.PayoutTransfer {
+	return predicate.PayoutTransfer(sql.FieldGT(FieldSealedDestination, v))
+}
+
+// SealedDestinationGTE applies the GTE predicate on the "sealed_destination" field.
+func SealedDestinationGTE(v []byte) predicate.PayoutTransfer {
+	return predicate.PayoutTransfer(sql.FieldGTE(FieldSealedDestination, v))
+}
+
+// SealedDestinationLT applies the LT predicate on the "sealed_destination" field.
+func SealedDestinationLT(v []byte) predicate.PayoutTransfer {
+	return predicate.PayoutTransfer(sql.FieldLT(FieldSealedDestination, v))
+}
+
+// SealedDestinationLTE applies the LTE predicate on the "sealed_destination" field.
+func SealedDestinationLTE(v []byte) predicate.PayoutTransfer {
+	return predicate.PayoutTransfer(sql.FieldLTE(FieldSealedDestination, v))
+}
+
+// SealedDestinationIsNil applies the IsNil predicate on the "sealed_destination" field.
+func SealedDestinationIsNil() predicate.PayoutTransfer {
+	return predicate.PayoutTransfer(sql.FieldIsNull(FieldSealedDestination))
+}
+
+// SealedDestinationNotNil applies the NotNil predicate on the "sealed_destination" field.
+func SealedDestinationNotNil() predicate.PayoutTransfer {
+	return predicate.PayoutTransfer(sql.FieldNotNull(FieldSealedDestination))
 }
 
 // StatusEQ applies the EQ predicate on the "status" field.

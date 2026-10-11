@@ -186,6 +186,26 @@ func (_c *PayoutTransferCreate) SetNillableDestinationLast4(v *string) *PayoutTr
 	return _c
 }
 
+// SetSourceWalletRef sets the "source_wallet_ref" field.
+func (_c *PayoutTransferCreate) SetSourceWalletRef(v string) *PayoutTransferCreate {
+	_c.mutation.SetSourceWalletRef(v)
+	return _c
+}
+
+// SetNillableSourceWalletRef sets the "source_wallet_ref" field if the given value is not nil.
+func (_c *PayoutTransferCreate) SetNillableSourceWalletRef(v *string) *PayoutTransferCreate {
+	if v != nil {
+		_c.SetSourceWalletRef(*v)
+	}
+	return _c
+}
+
+// SetSealedDestination sets the "sealed_destination" field.
+func (_c *PayoutTransferCreate) SetSealedDestination(v []byte) *PayoutTransferCreate {
+	_c.mutation.SetSealedDestination(v)
+	return _c
+}
+
 // SetStatus sets the "status" field.
 func (_c *PayoutTransferCreate) SetStatus(v payouttransfer.Status) *PayoutTransferCreate {
 	_c.mutation.SetStatus(v)
@@ -341,6 +361,10 @@ func (_c *PayoutTransferCreate) defaults() {
 		v := payouttransfer.DefaultDestinationLast4
 		_c.mutation.SetDestinationLast4(v)
 	}
+	if _, ok := _c.mutation.SourceWalletRef(); !ok {
+		v := payouttransfer.DefaultSourceWalletRef
+		_c.mutation.SetSourceWalletRef(v)
+	}
 	if _, ok := _c.mutation.Status(); !ok {
 		v := payouttransfer.DefaultStatus
 		_c.mutation.SetStatus(v)
@@ -470,6 +494,14 @@ func (_c *PayoutTransferCreate) check() error {
 			return &ValidationError{Name: "destination_last4", err: fmt.Errorf(`ent: validator failed for field "PayoutTransfer.destination_last4": %w`, err)}
 		}
 	}
+	if _, ok := _c.mutation.SourceWalletRef(); !ok {
+		return &ValidationError{Name: "source_wallet_ref", err: errors.New(`ent: missing required field "PayoutTransfer.source_wallet_ref"`)}
+	}
+	if v, ok := _c.mutation.SourceWalletRef(); ok {
+		if err := payouttransfer.SourceWalletRefValidator(v); err != nil {
+			return &ValidationError{Name: "source_wallet_ref", err: fmt.Errorf(`ent: validator failed for field "PayoutTransfer.source_wallet_ref": %w`, err)}
+		}
+	}
 	if _, ok := _c.mutation.Status(); !ok {
 		return &ValidationError{Name: "status", err: errors.New(`ent: missing required field "PayoutTransfer.status"`)}
 	}
@@ -593,6 +625,14 @@ func (_c *PayoutTransferCreate) createSpec() (*PayoutTransfer, *sqlgraph.CreateS
 	if value, ok := _c.mutation.DestinationLast4(); ok {
 		_spec.SetField(payouttransfer.FieldDestinationLast4, field.TypeString, value)
 		_node.DestinationLast4 = value
+	}
+	if value, ok := _c.mutation.SourceWalletRef(); ok {
+		_spec.SetField(payouttransfer.FieldSourceWalletRef, field.TypeString, value)
+		_node.SourceWalletRef = value
+	}
+	if value, ok := _c.mutation.SealedDestination(); ok {
+		_spec.SetField(payouttransfer.FieldSealedDestination, field.TypeBytes, value)
+		_node.SealedDestination = &value
 	}
 	if value, ok := _c.mutation.Status(); ok {
 		_spec.SetField(payouttransfer.FieldStatus, field.TypeEnum, value)
@@ -817,6 +857,12 @@ func (u *PayoutTransferUpsertOne) UpdateNewValues() *PayoutTransferUpsertOne {
 		}
 		if _, exists := u.create.mutation.DestinationLast4(); exists {
 			s.SetIgnore(payouttransfer.FieldDestinationLast4)
+		}
+		if _, exists := u.create.mutation.SourceWalletRef(); exists {
+			s.SetIgnore(payouttransfer.FieldSourceWalletRef)
+		}
+		if _, exists := u.create.mutation.SealedDestination(); exists {
+			s.SetIgnore(payouttransfer.FieldSealedDestination)
 		}
 	}))
 	return u
@@ -1182,6 +1228,12 @@ func (u *PayoutTransferUpsertBulk) UpdateNewValues() *PayoutTransferUpsertBulk {
 			}
 			if _, exists := b.mutation.DestinationLast4(); exists {
 				s.SetIgnore(payouttransfer.FieldDestinationLast4)
+			}
+			if _, exists := b.mutation.SourceWalletRef(); exists {
+				s.SetIgnore(payouttransfer.FieldSourceWalletRef)
+			}
+			if _, exists := b.mutation.SealedDestination(); exists {
+				s.SetIgnore(payouttransfer.FieldSealedDestination)
 			}
 		}
 	}))

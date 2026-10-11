@@ -248,6 +248,62 @@ func (_c *PaymentIntentCreate) SetNillableRefundedMinor(v *int64) *PaymentIntent
 	return _c
 }
 
+// SetRefundInFlightMinor sets the "refund_in_flight_minor" field.
+func (_c *PaymentIntentCreate) SetRefundInFlightMinor(v int64) *PaymentIntentCreate {
+	_c.mutation.SetRefundInFlightMinor(v)
+	return _c
+}
+
+// SetNillableRefundInFlightMinor sets the "refund_in_flight_minor" field if the given value is not nil.
+func (_c *PaymentIntentCreate) SetNillableRefundInFlightMinor(v *int64) *PaymentIntentCreate {
+	if v != nil {
+		_c.SetRefundInFlightMinor(*v)
+	}
+	return _c
+}
+
+// SetSavedCardChargeStartedAt sets the "saved_card_charge_started_at" field.
+func (_c *PaymentIntentCreate) SetSavedCardChargeStartedAt(v time.Time) *PaymentIntentCreate {
+	_c.mutation.SetSavedCardChargeStartedAt(v)
+	return _c
+}
+
+// SetNillableSavedCardChargeStartedAt sets the "saved_card_charge_started_at" field if the given value is not nil.
+func (_c *PaymentIntentCreate) SetNillableSavedCardChargeStartedAt(v *time.Time) *PaymentIntentCreate {
+	if v != nil {
+		_c.SetSavedCardChargeStartedAt(*v)
+	}
+	return _c
+}
+
+// SetCustomerEmail sets the "customer_email" field.
+func (_c *PaymentIntentCreate) SetCustomerEmail(v string) *PaymentIntentCreate {
+	_c.mutation.SetCustomerEmail(v)
+	return _c
+}
+
+// SetNillableCustomerEmail sets the "customer_email" field if the given value is not nil.
+func (_c *PaymentIntentCreate) SetNillableCustomerEmail(v *string) *PaymentIntentCreate {
+	if v != nil {
+		_c.SetCustomerEmail(*v)
+	}
+	return _c
+}
+
+// SetProviderSettledAt sets the "provider_settled_at" field.
+func (_c *PaymentIntentCreate) SetProviderSettledAt(v time.Time) *PaymentIntentCreate {
+	_c.mutation.SetProviderSettledAt(v)
+	return _c
+}
+
+// SetNillableProviderSettledAt sets the "provider_settled_at" field if the given value is not nil.
+func (_c *PaymentIntentCreate) SetNillableProviderSettledAt(v *time.Time) *PaymentIntentCreate {
+	if v != nil {
+		_c.SetProviderSettledAt(*v)
+	}
+	return _c
+}
+
 // SetVersion sets the "version" field.
 func (_c *PaymentIntentCreate) SetVersion(v int64) *PaymentIntentCreate {
 	_c.mutation.SetVersion(v)
@@ -374,6 +430,14 @@ func (_c *PaymentIntentCreate) defaults() {
 	if _, ok := _c.mutation.RefundedMinor(); !ok {
 		v := paymentintent.DefaultRefundedMinor
 		_c.mutation.SetRefundedMinor(v)
+	}
+	if _, ok := _c.mutation.RefundInFlightMinor(); !ok {
+		v := paymentintent.DefaultRefundInFlightMinor
+		_c.mutation.SetRefundInFlightMinor(v)
+	}
+	if _, ok := _c.mutation.CustomerEmail(); !ok {
+		v := paymentintent.DefaultCustomerEmail
+		_c.mutation.SetCustomerEmail(v)
 	}
 	if _, ok := _c.mutation.Version(); !ok {
 		v := paymentintent.DefaultVersion
@@ -510,6 +574,17 @@ func (_c *PaymentIntentCreate) check() error {
 	if _, ok := _c.mutation.RefundedMinor(); !ok {
 		return &ValidationError{Name: "refunded_minor", err: errors.New(`ent: missing required field "PaymentIntent.refunded_minor"`)}
 	}
+	if _, ok := _c.mutation.RefundInFlightMinor(); !ok {
+		return &ValidationError{Name: "refund_in_flight_minor", err: errors.New(`ent: missing required field "PaymentIntent.refund_in_flight_minor"`)}
+	}
+	if _, ok := _c.mutation.CustomerEmail(); !ok {
+		return &ValidationError{Name: "customer_email", err: errors.New(`ent: missing required field "PaymentIntent.customer_email"`)}
+	}
+	if v, ok := _c.mutation.CustomerEmail(); ok {
+		if err := paymentintent.CustomerEmailValidator(v); err != nil {
+			return &ValidationError{Name: "customer_email", err: fmt.Errorf(`ent: validator failed for field "PaymentIntent.customer_email": %w`, err)}
+		}
+	}
 	if _, ok := _c.mutation.Version(); !ok {
 		return &ValidationError{Name: "version", err: errors.New(`ent: missing required field "PaymentIntent.version"`)}
 	}
@@ -635,6 +710,22 @@ func (_c *PaymentIntentCreate) createSpec() (*PaymentIntent, *sqlgraph.CreateSpe
 	if value, ok := _c.mutation.RefundedMinor(); ok {
 		_spec.SetField(paymentintent.FieldRefundedMinor, field.TypeInt64, value)
 		_node.RefundedMinor = value
+	}
+	if value, ok := _c.mutation.RefundInFlightMinor(); ok {
+		_spec.SetField(paymentintent.FieldRefundInFlightMinor, field.TypeInt64, value)
+		_node.RefundInFlightMinor = value
+	}
+	if value, ok := _c.mutation.SavedCardChargeStartedAt(); ok {
+		_spec.SetField(paymentintent.FieldSavedCardChargeStartedAt, field.TypeTime, value)
+		_node.SavedCardChargeStartedAt = &value
+	}
+	if value, ok := _c.mutation.CustomerEmail(); ok {
+		_spec.SetField(paymentintent.FieldCustomerEmail, field.TypeString, value)
+		_node.CustomerEmail = value
+	}
+	if value, ok := _c.mutation.ProviderSettledAt(); ok {
+		_spec.SetField(paymentintent.FieldProviderSettledAt, field.TypeTime, value)
+		_node.ProviderSettledAt = &value
 	}
 	if value, ok := _c.mutation.Version(); ok {
 		_spec.SetField(paymentintent.FieldVersion, field.TypeInt64, value)
@@ -829,6 +920,72 @@ func (u *PaymentIntentUpsert) UpdateRefundedMinor() *PaymentIntentUpsert {
 // AddRefundedMinor adds v to the "refunded_minor" field.
 func (u *PaymentIntentUpsert) AddRefundedMinor(v int64) *PaymentIntentUpsert {
 	u.Add(paymentintent.FieldRefundedMinor, v)
+	return u
+}
+
+// SetRefundInFlightMinor sets the "refund_in_flight_minor" field.
+func (u *PaymentIntentUpsert) SetRefundInFlightMinor(v int64) *PaymentIntentUpsert {
+	u.Set(paymentintent.FieldRefundInFlightMinor, v)
+	return u
+}
+
+// UpdateRefundInFlightMinor sets the "refund_in_flight_minor" field to the value that was provided on create.
+func (u *PaymentIntentUpsert) UpdateRefundInFlightMinor() *PaymentIntentUpsert {
+	u.SetExcluded(paymentintent.FieldRefundInFlightMinor)
+	return u
+}
+
+// AddRefundInFlightMinor adds v to the "refund_in_flight_minor" field.
+func (u *PaymentIntentUpsert) AddRefundInFlightMinor(v int64) *PaymentIntentUpsert {
+	u.Add(paymentintent.FieldRefundInFlightMinor, v)
+	return u
+}
+
+// SetSavedCardChargeStartedAt sets the "saved_card_charge_started_at" field.
+func (u *PaymentIntentUpsert) SetSavedCardChargeStartedAt(v time.Time) *PaymentIntentUpsert {
+	u.Set(paymentintent.FieldSavedCardChargeStartedAt, v)
+	return u
+}
+
+// UpdateSavedCardChargeStartedAt sets the "saved_card_charge_started_at" field to the value that was provided on create.
+func (u *PaymentIntentUpsert) UpdateSavedCardChargeStartedAt() *PaymentIntentUpsert {
+	u.SetExcluded(paymentintent.FieldSavedCardChargeStartedAt)
+	return u
+}
+
+// ClearSavedCardChargeStartedAt clears the value of the "saved_card_charge_started_at" field.
+func (u *PaymentIntentUpsert) ClearSavedCardChargeStartedAt() *PaymentIntentUpsert {
+	u.SetNull(paymentintent.FieldSavedCardChargeStartedAt)
+	return u
+}
+
+// SetCustomerEmail sets the "customer_email" field.
+func (u *PaymentIntentUpsert) SetCustomerEmail(v string) *PaymentIntentUpsert {
+	u.Set(paymentintent.FieldCustomerEmail, v)
+	return u
+}
+
+// UpdateCustomerEmail sets the "customer_email" field to the value that was provided on create.
+func (u *PaymentIntentUpsert) UpdateCustomerEmail() *PaymentIntentUpsert {
+	u.SetExcluded(paymentintent.FieldCustomerEmail)
+	return u
+}
+
+// SetProviderSettledAt sets the "provider_settled_at" field.
+func (u *PaymentIntentUpsert) SetProviderSettledAt(v time.Time) *PaymentIntentUpsert {
+	u.Set(paymentintent.FieldProviderSettledAt, v)
+	return u
+}
+
+// UpdateProviderSettledAt sets the "provider_settled_at" field to the value that was provided on create.
+func (u *PaymentIntentUpsert) UpdateProviderSettledAt() *PaymentIntentUpsert {
+	u.SetExcluded(paymentintent.FieldProviderSettledAt)
+	return u
+}
+
+// ClearProviderSettledAt clears the value of the "provider_settled_at" field.
+func (u *PaymentIntentUpsert) ClearProviderSettledAt() *PaymentIntentUpsert {
+	u.SetNull(paymentintent.FieldProviderSettledAt)
 	return u
 }
 
@@ -1106,6 +1263,83 @@ func (u *PaymentIntentUpsertOne) AddRefundedMinor(v int64) *PaymentIntentUpsertO
 func (u *PaymentIntentUpsertOne) UpdateRefundedMinor() *PaymentIntentUpsertOne {
 	return u.Update(func(s *PaymentIntentUpsert) {
 		s.UpdateRefundedMinor()
+	})
+}
+
+// SetRefundInFlightMinor sets the "refund_in_flight_minor" field.
+func (u *PaymentIntentUpsertOne) SetRefundInFlightMinor(v int64) *PaymentIntentUpsertOne {
+	return u.Update(func(s *PaymentIntentUpsert) {
+		s.SetRefundInFlightMinor(v)
+	})
+}
+
+// AddRefundInFlightMinor adds v to the "refund_in_flight_minor" field.
+func (u *PaymentIntentUpsertOne) AddRefundInFlightMinor(v int64) *PaymentIntentUpsertOne {
+	return u.Update(func(s *PaymentIntentUpsert) {
+		s.AddRefundInFlightMinor(v)
+	})
+}
+
+// UpdateRefundInFlightMinor sets the "refund_in_flight_minor" field to the value that was provided on create.
+func (u *PaymentIntentUpsertOne) UpdateRefundInFlightMinor() *PaymentIntentUpsertOne {
+	return u.Update(func(s *PaymentIntentUpsert) {
+		s.UpdateRefundInFlightMinor()
+	})
+}
+
+// SetSavedCardChargeStartedAt sets the "saved_card_charge_started_at" field.
+func (u *PaymentIntentUpsertOne) SetSavedCardChargeStartedAt(v time.Time) *PaymentIntentUpsertOne {
+	return u.Update(func(s *PaymentIntentUpsert) {
+		s.SetSavedCardChargeStartedAt(v)
+	})
+}
+
+// UpdateSavedCardChargeStartedAt sets the "saved_card_charge_started_at" field to the value that was provided on create.
+func (u *PaymentIntentUpsertOne) UpdateSavedCardChargeStartedAt() *PaymentIntentUpsertOne {
+	return u.Update(func(s *PaymentIntentUpsert) {
+		s.UpdateSavedCardChargeStartedAt()
+	})
+}
+
+// ClearSavedCardChargeStartedAt clears the value of the "saved_card_charge_started_at" field.
+func (u *PaymentIntentUpsertOne) ClearSavedCardChargeStartedAt() *PaymentIntentUpsertOne {
+	return u.Update(func(s *PaymentIntentUpsert) {
+		s.ClearSavedCardChargeStartedAt()
+	})
+}
+
+// SetCustomerEmail sets the "customer_email" field.
+func (u *PaymentIntentUpsertOne) SetCustomerEmail(v string) *PaymentIntentUpsertOne {
+	return u.Update(func(s *PaymentIntentUpsert) {
+		s.SetCustomerEmail(v)
+	})
+}
+
+// UpdateCustomerEmail sets the "customer_email" field to the value that was provided on create.
+func (u *PaymentIntentUpsertOne) UpdateCustomerEmail() *PaymentIntentUpsertOne {
+	return u.Update(func(s *PaymentIntentUpsert) {
+		s.UpdateCustomerEmail()
+	})
+}
+
+// SetProviderSettledAt sets the "provider_settled_at" field.
+func (u *PaymentIntentUpsertOne) SetProviderSettledAt(v time.Time) *PaymentIntentUpsertOne {
+	return u.Update(func(s *PaymentIntentUpsert) {
+		s.SetProviderSettledAt(v)
+	})
+}
+
+// UpdateProviderSettledAt sets the "provider_settled_at" field to the value that was provided on create.
+func (u *PaymentIntentUpsertOne) UpdateProviderSettledAt() *PaymentIntentUpsertOne {
+	return u.Update(func(s *PaymentIntentUpsert) {
+		s.UpdateProviderSettledAt()
+	})
+}
+
+// ClearProviderSettledAt clears the value of the "provider_settled_at" field.
+func (u *PaymentIntentUpsertOne) ClearProviderSettledAt() *PaymentIntentUpsertOne {
+	return u.Update(func(s *PaymentIntentUpsert) {
+		s.ClearProviderSettledAt()
 	})
 }
 
@@ -1557,6 +1791,83 @@ func (u *PaymentIntentUpsertBulk) AddRefundedMinor(v int64) *PaymentIntentUpsert
 func (u *PaymentIntentUpsertBulk) UpdateRefundedMinor() *PaymentIntentUpsertBulk {
 	return u.Update(func(s *PaymentIntentUpsert) {
 		s.UpdateRefundedMinor()
+	})
+}
+
+// SetRefundInFlightMinor sets the "refund_in_flight_minor" field.
+func (u *PaymentIntentUpsertBulk) SetRefundInFlightMinor(v int64) *PaymentIntentUpsertBulk {
+	return u.Update(func(s *PaymentIntentUpsert) {
+		s.SetRefundInFlightMinor(v)
+	})
+}
+
+// AddRefundInFlightMinor adds v to the "refund_in_flight_minor" field.
+func (u *PaymentIntentUpsertBulk) AddRefundInFlightMinor(v int64) *PaymentIntentUpsertBulk {
+	return u.Update(func(s *PaymentIntentUpsert) {
+		s.AddRefundInFlightMinor(v)
+	})
+}
+
+// UpdateRefundInFlightMinor sets the "refund_in_flight_minor" field to the value that was provided on create.
+func (u *PaymentIntentUpsertBulk) UpdateRefundInFlightMinor() *PaymentIntentUpsertBulk {
+	return u.Update(func(s *PaymentIntentUpsert) {
+		s.UpdateRefundInFlightMinor()
+	})
+}
+
+// SetSavedCardChargeStartedAt sets the "saved_card_charge_started_at" field.
+func (u *PaymentIntentUpsertBulk) SetSavedCardChargeStartedAt(v time.Time) *PaymentIntentUpsertBulk {
+	return u.Update(func(s *PaymentIntentUpsert) {
+		s.SetSavedCardChargeStartedAt(v)
+	})
+}
+
+// UpdateSavedCardChargeStartedAt sets the "saved_card_charge_started_at" field to the value that was provided on create.
+func (u *PaymentIntentUpsertBulk) UpdateSavedCardChargeStartedAt() *PaymentIntentUpsertBulk {
+	return u.Update(func(s *PaymentIntentUpsert) {
+		s.UpdateSavedCardChargeStartedAt()
+	})
+}
+
+// ClearSavedCardChargeStartedAt clears the value of the "saved_card_charge_started_at" field.
+func (u *PaymentIntentUpsertBulk) ClearSavedCardChargeStartedAt() *PaymentIntentUpsertBulk {
+	return u.Update(func(s *PaymentIntentUpsert) {
+		s.ClearSavedCardChargeStartedAt()
+	})
+}
+
+// SetCustomerEmail sets the "customer_email" field.
+func (u *PaymentIntentUpsertBulk) SetCustomerEmail(v string) *PaymentIntentUpsertBulk {
+	return u.Update(func(s *PaymentIntentUpsert) {
+		s.SetCustomerEmail(v)
+	})
+}
+
+// UpdateCustomerEmail sets the "customer_email" field to the value that was provided on create.
+func (u *PaymentIntentUpsertBulk) UpdateCustomerEmail() *PaymentIntentUpsertBulk {
+	return u.Update(func(s *PaymentIntentUpsert) {
+		s.UpdateCustomerEmail()
+	})
+}
+
+// SetProviderSettledAt sets the "provider_settled_at" field.
+func (u *PaymentIntentUpsertBulk) SetProviderSettledAt(v time.Time) *PaymentIntentUpsertBulk {
+	return u.Update(func(s *PaymentIntentUpsert) {
+		s.SetProviderSettledAt(v)
+	})
+}
+
+// UpdateProviderSettledAt sets the "provider_settled_at" field to the value that was provided on create.
+func (u *PaymentIntentUpsertBulk) UpdateProviderSettledAt() *PaymentIntentUpsertBulk {
+	return u.Update(func(s *PaymentIntentUpsert) {
+		s.UpdateProviderSettledAt()
+	})
+}
+
+// ClearProviderSettledAt clears the value of the "provider_settled_at" field.
+func (u *PaymentIntentUpsertBulk) ClearProviderSettledAt() *PaymentIntentUpsertBulk {
+	return u.Update(func(s *PaymentIntentUpsert) {
+		s.ClearProviderSettledAt()
 	})
 }
 

@@ -145,6 +145,26 @@ func RefundedMinor(v int64) predicate.PaymentIntent {
 	return predicate.PaymentIntent(sql.FieldEQ(FieldRefundedMinor, v))
 }
 
+// RefundInFlightMinor applies equality check predicate on the "refund_in_flight_minor" field. It's identical to RefundInFlightMinorEQ.
+func RefundInFlightMinor(v int64) predicate.PaymentIntent {
+	return predicate.PaymentIntent(sql.FieldEQ(FieldRefundInFlightMinor, v))
+}
+
+// SavedCardChargeStartedAt applies equality check predicate on the "saved_card_charge_started_at" field. It's identical to SavedCardChargeStartedAtEQ.
+func SavedCardChargeStartedAt(v time.Time) predicate.PaymentIntent {
+	return predicate.PaymentIntent(sql.FieldEQ(FieldSavedCardChargeStartedAt, v))
+}
+
+// CustomerEmail applies equality check predicate on the "customer_email" field. It's identical to CustomerEmailEQ.
+func CustomerEmail(v string) predicate.PaymentIntent {
+	return predicate.PaymentIntent(sql.FieldEQ(FieldCustomerEmail, v))
+}
+
+// ProviderSettledAt applies equality check predicate on the "provider_settled_at" field. It's identical to ProviderSettledAtEQ.
+func ProviderSettledAt(v time.Time) predicate.PaymentIntent {
+	return predicate.PaymentIntent(sql.FieldEQ(FieldProviderSettledAt, v))
+}
+
 // Version applies equality check predicate on the "version" field. It's identical to VersionEQ.
 func Version(v int64) predicate.PaymentIntent {
 	return predicate.PaymentIntent(sql.FieldEQ(FieldVersion, v))
@@ -1213,6 +1233,211 @@ func RefundedMinorLT(v int64) predicate.PaymentIntent {
 // RefundedMinorLTE applies the LTE predicate on the "refunded_minor" field.
 func RefundedMinorLTE(v int64) predicate.PaymentIntent {
 	return predicate.PaymentIntent(sql.FieldLTE(FieldRefundedMinor, v))
+}
+
+// RefundInFlightMinorEQ applies the EQ predicate on the "refund_in_flight_minor" field.
+func RefundInFlightMinorEQ(v int64) predicate.PaymentIntent {
+	return predicate.PaymentIntent(sql.FieldEQ(FieldRefundInFlightMinor, v))
+}
+
+// RefundInFlightMinorNEQ applies the NEQ predicate on the "refund_in_flight_minor" field.
+func RefundInFlightMinorNEQ(v int64) predicate.PaymentIntent {
+	return predicate.PaymentIntent(sql.FieldNEQ(FieldRefundInFlightMinor, v))
+}
+
+// RefundInFlightMinorIn applies the In predicate on the "refund_in_flight_minor" field.
+func RefundInFlightMinorIn(vs ...int64) predicate.PaymentIntent {
+	return predicate.PaymentIntent(sql.FieldIn(FieldRefundInFlightMinor, vs...))
+}
+
+// RefundInFlightMinorNotIn applies the NotIn predicate on the "refund_in_flight_minor" field.
+func RefundInFlightMinorNotIn(vs ...int64) predicate.PaymentIntent {
+	return predicate.PaymentIntent(sql.FieldNotIn(FieldRefundInFlightMinor, vs...))
+}
+
+// RefundInFlightMinorGT applies the GT predicate on the "refund_in_flight_minor" field.
+func RefundInFlightMinorGT(v int64) predicate.PaymentIntent {
+	return predicate.PaymentIntent(sql.FieldGT(FieldRefundInFlightMinor, v))
+}
+
+// RefundInFlightMinorGTE applies the GTE predicate on the "refund_in_flight_minor" field.
+func RefundInFlightMinorGTE(v int64) predicate.PaymentIntent {
+	return predicate.PaymentIntent(sql.FieldGTE(FieldRefundInFlightMinor, v))
+}
+
+// RefundInFlightMinorLT applies the LT predicate on the "refund_in_flight_minor" field.
+func RefundInFlightMinorLT(v int64) predicate.PaymentIntent {
+	return predicate.PaymentIntent(sql.FieldLT(FieldRefundInFlightMinor, v))
+}
+
+// RefundInFlightMinorLTE applies the LTE predicate on the "refund_in_flight_minor" field.
+func RefundInFlightMinorLTE(v int64) predicate.PaymentIntent {
+	return predicate.PaymentIntent(sql.FieldLTE(FieldRefundInFlightMinor, v))
+}
+
+// SavedCardChargeStartedAtEQ applies the EQ predicate on the "saved_card_charge_started_at" field.
+func SavedCardChargeStartedAtEQ(v time.Time) predicate.PaymentIntent {
+	return predicate.PaymentIntent(sql.FieldEQ(FieldSavedCardChargeStartedAt, v))
+}
+
+// SavedCardChargeStartedAtNEQ applies the NEQ predicate on the "saved_card_charge_started_at" field.
+func SavedCardChargeStartedAtNEQ(v time.Time) predicate.PaymentIntent {
+	return predicate.PaymentIntent(sql.FieldNEQ(FieldSavedCardChargeStartedAt, v))
+}
+
+// SavedCardChargeStartedAtIn applies the In predicate on the "saved_card_charge_started_at" field.
+func SavedCardChargeStartedAtIn(vs ...time.Time) predicate.PaymentIntent {
+	return predicate.PaymentIntent(sql.FieldIn(FieldSavedCardChargeStartedAt, vs...))
+}
+
+// SavedCardChargeStartedAtNotIn applies the NotIn predicate on the "saved_card_charge_started_at" field.
+func SavedCardChargeStartedAtNotIn(vs ...time.Time) predicate.PaymentIntent {
+	return predicate.PaymentIntent(sql.FieldNotIn(FieldSavedCardChargeStartedAt, vs...))
+}
+
+// SavedCardChargeStartedAtGT applies the GT predicate on the "saved_card_charge_started_at" field.
+func SavedCardChargeStartedAtGT(v time.Time) predicate.PaymentIntent {
+	return predicate.PaymentIntent(sql.FieldGT(FieldSavedCardChargeStartedAt, v))
+}
+
+// SavedCardChargeStartedAtGTE applies the GTE predicate on the "saved_card_charge_started_at" field.
+func SavedCardChargeStartedAtGTE(v time.Time) predicate.PaymentIntent {
+	return predicate.PaymentIntent(sql.FieldGTE(FieldSavedCardChargeStartedAt, v))
+}
+
+// SavedCardChargeStartedAtLT applies the LT predicate on the "saved_card_charge_started_at" field.
+func SavedCardChargeStartedAtLT(v time.Time) predicate.PaymentIntent {
+	return predicate.PaymentIntent(sql.FieldLT(FieldSavedCardChargeStartedAt, v))
+}
+
+// SavedCardChargeStartedAtLTE applies the LTE predicate on the "saved_card_charge_started_at" field.
+func SavedCardChargeStartedAtLTE(v time.Time) predicate.PaymentIntent {
+	return predicate.PaymentIntent(sql.FieldLTE(FieldSavedCardChargeStartedAt, v))
+}
+
+// SavedCardChargeStartedAtIsNil applies the IsNil predicate on the "saved_card_charge_started_at" field.
+func SavedCardChargeStartedAtIsNil() predicate.PaymentIntent {
+	return predicate.PaymentIntent(sql.FieldIsNull(FieldSavedCardChargeStartedAt))
+}
+
+// SavedCardChargeStartedAtNotNil applies the NotNil predicate on the "saved_card_charge_started_at" field.
+func SavedCardChargeStartedAtNotNil() predicate.PaymentIntent {
+	return predicate.PaymentIntent(sql.FieldNotNull(FieldSavedCardChargeStartedAt))
+}
+
+// CustomerEmailEQ applies the EQ predicate on the "customer_email" field.
+func CustomerEmailEQ(v string) predicate.PaymentIntent {
+	return predicate.PaymentIntent(sql.FieldEQ(FieldCustomerEmail, v))
+}
+
+// CustomerEmailNEQ applies the NEQ predicate on the "customer_email" field.
+func CustomerEmailNEQ(v string) predicate.PaymentIntent {
+	return predicate.PaymentIntent(sql.FieldNEQ(FieldCustomerEmail, v))
+}
+
+// CustomerEmailIn applies the In predicate on the "customer_email" field.
+func CustomerEmailIn(vs ...string) predicate.PaymentIntent {
+	return predicate.PaymentIntent(sql.FieldIn(FieldCustomerEmail, vs...))
+}
+
+// CustomerEmailNotIn applies the NotIn predicate on the "customer_email" field.
+func CustomerEmailNotIn(vs ...string) predicate.PaymentIntent {
+	return predicate.PaymentIntent(sql.FieldNotIn(FieldCustomerEmail, vs...))
+}
+
+// CustomerEmailGT applies the GT predicate on the "customer_email" field.
+func CustomerEmailGT(v string) predicate.PaymentIntent {
+	return predicate.PaymentIntent(sql.FieldGT(FieldCustomerEmail, v))
+}
+
+// CustomerEmailGTE applies the GTE predicate on the "customer_email" field.
+func CustomerEmailGTE(v string) predicate.PaymentIntent {
+	return predicate.PaymentIntent(sql.FieldGTE(FieldCustomerEmail, v))
+}
+
+// CustomerEmailLT applies the LT predicate on the "customer_email" field.
+func CustomerEmailLT(v string) predicate.PaymentIntent {
+	return predicate.PaymentIntent(sql.FieldLT(FieldCustomerEmail, v))
+}
+
+// CustomerEmailLTE applies the LTE predicate on the "customer_email" field.
+func CustomerEmailLTE(v string) predicate.PaymentIntent {
+	return predicate.PaymentIntent(sql.FieldLTE(FieldCustomerEmail, v))
+}
+
+// CustomerEmailContains applies the Contains predicate on the "customer_email" field.
+func CustomerEmailContains(v string) predicate.PaymentIntent {
+	return predicate.PaymentIntent(sql.FieldContains(FieldCustomerEmail, v))
+}
+
+// CustomerEmailHasPrefix applies the HasPrefix predicate on the "customer_email" field.
+func CustomerEmailHasPrefix(v string) predicate.PaymentIntent {
+	return predicate.PaymentIntent(sql.FieldHasPrefix(FieldCustomerEmail, v))
+}
+
+// CustomerEmailHasSuffix applies the HasSuffix predicate on the "customer_email" field.
+func CustomerEmailHasSuffix(v string) predicate.PaymentIntent {
+	return predicate.PaymentIntent(sql.FieldHasSuffix(FieldCustomerEmail, v))
+}
+
+// CustomerEmailEqualFold applies the EqualFold predicate on the "customer_email" field.
+func CustomerEmailEqualFold(v string) predicate.PaymentIntent {
+	return predicate.PaymentIntent(sql.FieldEqualFold(FieldCustomerEmail, v))
+}
+
+// CustomerEmailContainsFold applies the ContainsFold predicate on the "customer_email" field.
+func CustomerEmailContainsFold(v string) predicate.PaymentIntent {
+	return predicate.PaymentIntent(sql.FieldContainsFold(FieldCustomerEmail, v))
+}
+
+// ProviderSettledAtEQ applies the EQ predicate on the "provider_settled_at" field.
+func ProviderSettledAtEQ(v time.Time) predicate.PaymentIntent {
+	return predicate.PaymentIntent(sql.FieldEQ(FieldProviderSettledAt, v))
+}
+
+// ProviderSettledAtNEQ applies the NEQ predicate on the "provider_settled_at" field.
+func ProviderSettledAtNEQ(v time.Time) predicate.PaymentIntent {
+	return predicate.PaymentIntent(sql.FieldNEQ(FieldProviderSettledAt, v))
+}
+
+// ProviderSettledAtIn applies the In predicate on the "provider_settled_at" field.
+func ProviderSettledAtIn(vs ...time.Time) predicate.PaymentIntent {
+	return predicate.PaymentIntent(sql.FieldIn(FieldProviderSettledAt, vs...))
+}
+
+// ProviderSettledAtNotIn applies the NotIn predicate on the "provider_settled_at" field.
+func ProviderSettledAtNotIn(vs ...time.Time) predicate.PaymentIntent {
+	return predicate.PaymentIntent(sql.FieldNotIn(FieldProviderSettledAt, vs...))
+}
+
+// ProviderSettledAtGT applies the GT predicate on the "provider_settled_at" field.
+func ProviderSettledAtGT(v time.Time) predicate.PaymentIntent {
+	return predicate.PaymentIntent(sql.FieldGT(FieldProviderSettledAt, v))
+}
+
+// ProviderSettledAtGTE applies the GTE predicate on the "provider_settled_at" field.
+func ProviderSettledAtGTE(v time.Time) predicate.PaymentIntent {
+	return predicate.PaymentIntent(sql.FieldGTE(FieldProviderSettledAt, v))
+}
+
+// ProviderSettledAtLT applies the LT predicate on the "provider_settled_at" field.
+func ProviderSettledAtLT(v time.Time) predicate.PaymentIntent {
+	return predicate.PaymentIntent(sql.FieldLT(FieldProviderSettledAt, v))
+}
+
+// ProviderSettledAtLTE applies the LTE predicate on the "provider_settled_at" field.
+func ProviderSettledAtLTE(v time.Time) predicate.PaymentIntent {
+	return predicate.PaymentIntent(sql.FieldLTE(FieldProviderSettledAt, v))
+}
+
+// ProviderSettledAtIsNil applies the IsNil predicate on the "provider_settled_at" field.
+func ProviderSettledAtIsNil() predicate.PaymentIntent {
+	return predicate.PaymentIntent(sql.FieldIsNull(FieldProviderSettledAt))
+}
+
+// ProviderSettledAtNotNil applies the NotNil predicate on the "provider_settled_at" field.
+func ProviderSettledAtNotNil() predicate.PaymentIntent {
+	return predicate.PaymentIntent(sql.FieldNotNull(FieldProviderSettledAt))
 }
 
 // VersionEQ applies the EQ predicate on the "version" field.

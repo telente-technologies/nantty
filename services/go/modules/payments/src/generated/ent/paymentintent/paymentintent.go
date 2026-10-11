@@ -55,6 +55,14 @@ const (
 	FieldFailedAt = "failed_at"
 	// FieldRefundedMinor holds the string denoting the refunded_minor field in the database.
 	FieldRefundedMinor = "refunded_minor"
+	// FieldRefundInFlightMinor holds the string denoting the refund_in_flight_minor field in the database.
+	FieldRefundInFlightMinor = "refund_in_flight_minor"
+	// FieldSavedCardChargeStartedAt holds the string denoting the saved_card_charge_started_at field in the database.
+	FieldSavedCardChargeStartedAt = "saved_card_charge_started_at"
+	// FieldCustomerEmail holds the string denoting the customer_email field in the database.
+	FieldCustomerEmail = "customer_email"
+	// FieldProviderSettledAt holds the string denoting the provider_settled_at field in the database.
+	FieldProviderSettledAt = "provider_settled_at"
 	// FieldVersion holds the string denoting the version field in the database.
 	FieldVersion = "version"
 	// FieldMetadata holds the string denoting the metadata field in the database.
@@ -88,6 +96,10 @@ var Columns = []string{
 	FieldPaidAt,
 	FieldFailedAt,
 	FieldRefundedMinor,
+	FieldRefundInFlightMinor,
+	FieldSavedCardChargeStartedAt,
+	FieldCustomerEmail,
+	FieldProviderSettledAt,
 	FieldVersion,
 	FieldMetadata,
 	FieldUpdatedAt,
@@ -146,6 +158,12 @@ var (
 	FailureReasonValidator func(string) error
 	// DefaultRefundedMinor holds the default value on creation for the "refunded_minor" field.
 	DefaultRefundedMinor int64
+	// DefaultRefundInFlightMinor holds the default value on creation for the "refund_in_flight_minor" field.
+	DefaultRefundInFlightMinor int64
+	// DefaultCustomerEmail holds the default value on creation for the "customer_email" field.
+	DefaultCustomerEmail string
+	// CustomerEmailValidator is a validator for the "customer_email" field. It is called by the builders before save.
+	CustomerEmailValidator func(string) error
 	// DefaultVersion holds the default value on creation for the "version" field.
 	DefaultVersion int64
 	// DefaultUpdatedAt holds the default value on creation for the "updated_at" field.
@@ -318,6 +336,26 @@ func ByFailedAt(opts ...sql.OrderTermOption) OrderOption {
 // ByRefundedMinor orders the results by the refunded_minor field.
 func ByRefundedMinor(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldRefundedMinor, opts...).ToFunc()
+}
+
+// ByRefundInFlightMinor orders the results by the refund_in_flight_minor field.
+func ByRefundInFlightMinor(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldRefundInFlightMinor, opts...).ToFunc()
+}
+
+// BySavedCardChargeStartedAt orders the results by the saved_card_charge_started_at field.
+func BySavedCardChargeStartedAt(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldSavedCardChargeStartedAt, opts...).ToFunc()
+}
+
+// ByCustomerEmail orders the results by the customer_email field.
+func ByCustomerEmail(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldCustomerEmail, opts...).ToFunc()
+}
+
+// ByProviderSettledAt orders the results by the provider_settled_at field.
+func ByProviderSettledAt(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldProviderSettledAt, opts...).ToFunc()
 }
 
 // ByVersion orders the results by the version field.

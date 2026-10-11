@@ -48,6 +48,10 @@ type PayoutTransfer struct {
 	BankCode string `json:"bank_code,omitempty"`
 	// DestinationLast4 holds the value of the "destination_last4" field.
 	DestinationLast4 string `json:"destination_last4,omitempty"`
+	// SourceWalletRef holds the value of the "source_wallet_ref" field.
+	SourceWalletRef string `json:"source_wallet_ref,omitempty"`
+	// SealedDestination holds the value of the "sealed_destination" field.
+	SealedDestination *[]byte `json:"-"`
 	// Status holds the value of the "status" field.
 	Status payouttransfer.Status `json:"status,omitempty"`
 	// ProviderTransferCode holds the value of the "provider_transfer_code" field.
@@ -66,9 +70,11 @@ func (*PayoutTransfer) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
+		case payouttransfer.FieldSealedDestination:
+			values[i] = new([]byte)
 		case payouttransfer.FieldAmountMinor, payouttransfer.FieldFeeMinor:
 			values[i] = new(sql.NullInt64)
-		case payouttransfer.FieldReference, payouttransfer.FieldPurpose, payouttransfer.FieldSubjectID, payouttransfer.FieldProvider, payouttransfer.FieldCurrency, payouttransfer.FieldKind, payouttransfer.FieldConnectedAccountID, payouttransfer.FieldBeneficiaryUserID, payouttransfer.FieldTransferGroup, payouttransfer.FieldProviderDestinationID, payouttransfer.FieldBankCode, payouttransfer.FieldDestinationLast4, payouttransfer.FieldStatus, payouttransfer.FieldProviderTransferCode, payouttransfer.FieldFailureReason:
+		case payouttransfer.FieldReference, payouttransfer.FieldPurpose, payouttransfer.FieldSubjectID, payouttransfer.FieldProvider, payouttransfer.FieldCurrency, payouttransfer.FieldKind, payouttransfer.FieldConnectedAccountID, payouttransfer.FieldBeneficiaryUserID, payouttransfer.FieldTransferGroup, payouttransfer.FieldProviderDestinationID, payouttransfer.FieldBankCode, payouttransfer.FieldDestinationLast4, payouttransfer.FieldSourceWalletRef, payouttransfer.FieldStatus, payouttransfer.FieldProviderTransferCode, payouttransfer.FieldFailureReason:
 			values[i] = new(sql.NullString)
 		case payouttransfer.FieldCreatedAt, payouttransfer.FieldCompletedAt, payouttransfer.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
@@ -185,6 +191,18 @@ func (_m *PayoutTransfer) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.DestinationLast4 = value.String
 			}
+		case payouttransfer.FieldSourceWalletRef:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field source_wallet_ref", values[i])
+			} else if value.Valid {
+				_m.SourceWalletRef = value.String
+			}
+		case payouttransfer.FieldSealedDestination:
+			if value, ok := values[i].(*[]byte); !ok {
+				return fmt.Errorf("unexpected type %T for field sealed_destination", values[i])
+			} else if value != nil {
+				_m.SealedDestination = value
+			}
 		case payouttransfer.FieldStatus:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field status", values[i])
@@ -296,6 +314,11 @@ func (_m *PayoutTransfer) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("destination_last4=")
 	builder.WriteString(_m.DestinationLast4)
+	builder.WriteString(", ")
+	builder.WriteString("source_wallet_ref=")
+	builder.WriteString(_m.SourceWalletRef)
+	builder.WriteString(", ")
+	builder.WriteString("sealed_destination=<sensitive>")
 	builder.WriteString(", ")
 	builder.WriteString("status=")
 	builder.WriteString(fmt.Sprintf("%v", _m.Status))
