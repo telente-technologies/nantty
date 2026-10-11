@@ -16,6 +16,7 @@ var (
 	ErrWithdrawalTooSoon        = httpserver.NewApiError(http.StatusTooManyRequests, "WITHDRAWAL_TOO_SOON", "Wait a few minutes before another withdrawal.")
 	ErrWithdrawalDailyCount     = httpserver.NewApiError(http.StatusTooManyRequests, "WITHDRAWAL_DAILY_LIMIT", "You have reached today's number of withdrawals.")
 	ErrWithdrawalDailyAmount    = httpserver.NewApiError(http.StatusUnprocessableEntity, "WITHDRAWAL_DAILY_AMOUNT_LIMIT", "This would go over your daily withdrawal limit.")
+	ErrWithdrawalNoDailyLimit   = httpserver.NewApiError(http.StatusUnprocessableEntity, "WITHDRAWAL_CURRENCY_NOT_AVAILABLE", "Withdrawals in this currency are not available for your account yet.")
 )
 
 func (withdrawals Withdrawals) LockUserForWithdrawal(ctx context.Context, transaction *sql.Tx, userId string) error {
@@ -55,7 +56,11 @@ func (withdrawals Withdrawals) enforceWithdrawalLimits(ctx context.Context, tran
 			usedToday += row.AmountMinor
 		}
 	}
-	if cap, capped := limits.DailyCapFor(level, currency); capped && (amountMinor > cap || usedToday > cap-amountMinor) {
+	cap, capped := limits.DailyCapFor(level, currency)
+	if !capped {
+		return ErrWithdrawalNoDailyLimit
+	}
+	if amountMinor > cap || usedToday > cap-amountMinor {
 		return ErrWithdrawalDailyAmount
 	}
 	return nil
