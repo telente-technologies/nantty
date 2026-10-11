@@ -327,6 +327,8 @@ flowchart LR
 
 ### Money flow (Paystack)
 
+> Payments are moving from Paystack to Flutterwave (owner, 2026-10-10): each user's money sits in their own Flutterwave payout subaccount and Zudomart never holds customer money. Target design: [docs/integrations/flutterwaveMigration.md](docs/integrations/flutterwaveMigration.md). The diagram below shows the current Paystack code.
+
 ```mermaid
 flowchart TB
   B["Buyer pays once per checkout<br/>card, bank transfer, USSD"] --> TX["Paystack transaction<br/>verified by webhook (HMAC-SHA512)"]
@@ -355,7 +357,7 @@ The **go-money ledger is the single financial truth**: append-only journal entri
 
 `inEscrow → locked (24h) → available → payoutRequested → paid`. Refunds after release take from pending, then available, then book a debt repaid from future credits, so no balance goes negative.
 
-Open with Paystack (see [docs/integrations/paystack.md](docs/integrations/paystack.md)): whether escrow can be held in a per-seller subaccount with manual settlement (path E1). The launch path (E2) keeps escrow in Zudomart's Paystack balance and pays sellers by Transfer after release plus the 24h lock, which needs legal review. Per-plan escrow fee wiring (Business 1%) is still pending in go-money.
+Open with Paystack (see [docs/integrations/flutterwaveMigration.md Appendix B](docs/integrations/flutterwaveMigration.md#appendix-b-paystack-reference-fallback-provider)): whether escrow can be held in a per-seller subaccount with manual settlement (path E1). The launch path (E2) keeps escrow in Zudomart's Paystack balance and pays sellers by Transfer after release plus the 24h lock, which needs legal review. Per-plan escrow fee wiring (Business 1%) is still pending in go-money.
 
 </details>
 
@@ -647,7 +649,7 @@ Only `*.example` files are committed. Production secrets come from AWS Secrets M
 | [`apps/webapp/.env.example`](apps/webapp/.env.example) (and studio, seller, ads, admin) | `<APP>_API_URL`, `<APP>_USE_MOCKS`, `<APP>_REAL_API_PREFIXES`, `<APP>_SESSION_SECRET`, `NEXT_PUBLIC_*` site URLs |
 | [`services/python/intelligence/.env.example`](services/python/intelligence/.env.example) | `INTELLIGENCE_SHARED_SECRET` (HMAC requests), `INTELLIGENCE_REDIS_URL`, model registry and signing secret, rate limits |
 
-<sub>`services/go/.env.example` still lists legacy `BACHS_*` keys from an abandoned provider; they are being removed (see [docs/checkoutPaymentFlowPlan.md](docs/checkoutPaymentFlowPlan.md) section 12).</sub>
+<sub>`services/go/.env.example` still lists legacy `BACHS_*` keys from an abandoned provider; they are being removed (see [docs/integrations/flutterwaveMigration.md Appendix C](docs/integrations/flutterwaveMigration.md#appendix-c-checkout-and-payout-rules) section 12).</sub>
 
 ---
 
@@ -732,7 +734,7 @@ Report a vulnerability privately by email (see [SECURITY.md](SECURITY.md) and [C
 
 </details>
 
-**Phased plan** (from [docs/architecture/improvementReport.md](docs/architecture/improvementReport.md)):
+**Phased plan:**
 
 ```mermaid
 flowchart LR
@@ -787,16 +789,7 @@ Zudomart is a private, owner-led project. If you have been invited to contribute
 
 ## <img src="docs/assets/readme/icons/book.svg" width="22" height="22" alt="" /> Documentation index
 
-| Topic | Documents |
-| --- | --- |
-| Start here | [Architecture index](docs/architecture/README.md), [Inventory (what exists)](docs/architecture/inventory.md), [Improvement report](docs/architecture/improvementReport.md) |
-| System | [System](docs/architecture/system.md), [Backend](docs/architecture/backend.md), [Frontend](docs/architecture/frontend.md), [Events](docs/architecture/events.md), [Realtime and live](docs/architecture/realtime.md), [Media](docs/architecture/media.md), [Search](docs/architecture/search.md), [Recommendations](docs/architecture/recommendations.md), [Analytics](docs/architecture/analytics.md) |
-| Money and commerce | [Payments](docs/architecture/payments.md), [Marketplace](docs/architecture/marketplace.md), [Checkout and payout plan](docs/checkoutPaymentFlowPlan.md), [Paystack review](docs/integrations/paystack.md), [Pricing](docs/pricing.md) |
-| Database | [Database index](docs/database/README.md), [Domains](docs/database/domains.md), [Schema ERDs](docs/database/schema.md), [Indexes](docs/database/indexes.md), [Transactions](docs/database/transactions.md), [Migrations](docs/database/migrations.md), [Partitioning](docs/database/partitioning.md), [Backup and recovery](docs/database/backup-recovery.md) |
-| Trust and ops | [Security](docs/architecture/security.md), [Privacy](docs/architecture/privacy.md), [Fraud](docs/architecture/fraud.md), [Observability](docs/architecture/observability.md), [DevOps](docs/architecture/devops.md), [Disaster recovery](docs/architecture/disaster-recovery.md), [SECURITY.md](SECURITY.md) |
-| Backend services | [services/README.md](services/README.md), [Zudojs structure](services/zudojsStructure.md), [Backend plan](docs/backendPlan.md), [Service map](docs/architecture/microservicesPlan.json), [AWS layout](infra/aws/README.md) |
-| Front ends | [Frontend wiring](docs/integrations/frontendWiring.md), [Working plans](docs/plans.md), [Dark mode plan](docs/darkModePlan.md), [Changelog](docs/CHANGELOG.md) |
-| API contracts | [Seller](apps/seller/apiContract.md), [Ads](apps/ads/apiContract.md), [Admin](apps/admin/apiContract.md), [Intelligence](services/python/intelligence/apiContract.md), [Seller README](apps/seller/README.md), [Intelligence README](services/python/intelligence/README.md) |
+Every document, grouped by area with one line each, is listed in [docs/README.md](docs/README.md). Start with the [architecture index](docs/architecture/README.md), [services/README.md](services/README.md) and [SECURITY.md](SECURITY.md).
 
 ---
 
