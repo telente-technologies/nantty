@@ -23,6 +23,8 @@ start() { local name="$1"; shift; nice -n 5 "$@" >"$ZLOGS/$name.log" 2>&1 & echo
 
 (cd "$ROOT/services/go/modules/payments" && export FAKE_FLUTTERWAVE_LISTEN_ADDRESS=127.0.0.1:18998 && \
   start fakeFlutterwave go test -count=1 -timeout 0 -run TestServeFakeFlutterwaveForLocalApiSmoke ./src/integrations/paymentsTesting/)
+for _ in $(seq 1 120); do curl -fsS -m 2 -o /dev/null http://127.0.0.1:18998/__smoke/state && break; sleep 2; done
+curl -fsS -m 2 -o /dev/null http://127.0.0.1:18998/__smoke/state || { echo "fake Flutterwave did not start; see $ZLOGS/fakeFlutterwave.log" >&2; exit 1; }
 
 goEnv() {
   set -a; . "$ROOT/services/go/.env.example"; set +a
@@ -36,6 +38,7 @@ goEnv() {
   export FLUTTERWAVE_MERCHANT_ID="F400000001" WALLET_ALIAS_EMAIL_DOMAIN="wallets.zudomart.test" PAYMENTS_PROCESS_WEBHOOKS_IN_BACKGROUND=false
   if [ "${SANDBOX_RELAXED_LIMITS:-0}" = 1 ]; then
     export DEPOSIT_WITHDRAWAL_COOLDOWN=1s FIRST_DEPOSIT_WITHDRAWAL_COOLDOWN=1s NEW_PAYOUT_ACCOUNT_COOLDOWN=1s SELLER_CREDIT_HOLD_PERIOD=1s WALLET_WITHDRAWAL_MINIMUM_GAP=1s
+    export WALLET_MOVEMENT_WORKER_INTERVAL=3s PAYMENTS_SETTLEMENT_POLL_INTERVAL=5s
   fi
   export AUTH_ACCOUNT_DIRECTORY_GRPC_ADDRESS=127.0.0.1:9101 MONEY_GRPC_ADDRESS=127.0.0.1:9103
   export ORDERS_MONEY_GRPC_ADDRESS=localhost:9103 AUTH_SESSION_DENYLIST_URL=redis://127.0.0.1:16379
