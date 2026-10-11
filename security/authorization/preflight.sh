@@ -18,6 +18,7 @@ bad()  { printf 'REFUSE: %s\n' "$*"; fail=1; }
 while IFS='=' read -r name value; do
   case "${value:-}" in
     sk_live_*|pk_live_*) bad "env ${name} is a LIVE Paystack key";;
+    FLWSECK-*|FLWPUBK-*) bad "env ${name} is a LIVE Flutterwave key";;
   esac
 done < <(env)
 
@@ -29,6 +30,14 @@ if [ -n "${PAYSTACK_API_BASE_URL:-}" ]; then
   case "${PAYSTACK_API_BASE_URL}" in
     http://127.0.0.1*|http://localhost*|https://127.0.0.1*|https://localhost*) note "paystack base: loopback OK";;
     *) bad "PAYSTACK_API_BASE_URL is not loopback (got non-loopback host)";;
+  esac
+fi
+
+# 3b. Flutterwave base URL must be loopback (fake server) when set.
+if [ -n "${FLUTTERWAVE_API_BASE_URL:-}" ]; then
+  case "${FLUTTERWAVE_API_BASE_URL}" in
+    http://127.0.0.1*|http://localhost*|https://127.0.0.1*|https://localhost*) note "flutterwave base: loopback OK";;
+    *) bad "FLUTTERWAVE_API_BASE_URL is not loopback (got non-loopback host)";;
   esac
 fi
 
