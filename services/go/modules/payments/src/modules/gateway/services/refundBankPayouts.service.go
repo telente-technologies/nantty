@@ -78,18 +78,22 @@ func (gateway *PaymentGateway) SubmitRefundBankDestination(ctx context.Context, 
 	if refund.Status != paymentrefund.StatusAwaitingBankDetails || refund.ProviderRefundID == "" {
 		return RefundBankPayoutView{}, ErrRefundNotAwaitingBank
 	}
-	provider, err := gateway.Container.Provider(refund.Provider)
+	identity, err := gateway.Container.Identity(refund.Provider)
 	if err != nil {
 		return RefundBankPayoutView{}, err
 	}
-	accountName, err := provider.ResolveBankAccountName(ctx, destination.BankCode, destination.AccountNumber)
+	bankDetails, err := gateway.Container.RefundBankDetails(refund.Provider)
+	if err != nil {
+		return RefundBankPayoutView{}, err
+	}
+	accountName, err := identity.ResolveBankAccountName(ctx, destination.BankCode, destination.AccountNumber)
 	if errors.Is(err, interfaces.ErrBankAccountNotFound) {
 		return RefundBankPayoutView{}, ErrRefundBankAccountNotFound
 	}
 	if err != nil {
 		return RefundBankPayoutView{}, convertProviderError(err)
 	}
-	if err := provider.RetryRefundWithCustomerBankAccount(ctx, refund.ProviderRefundID, interfaces.PayeeBankAccount{
+	if err := bankDetails.RetryRefundWithCustomerBankAccount(ctx, refund.ProviderRefundID, interfaces.PayeeBankAccount{
 		UserId: destination.UserId, AccountName: accountName, BankCode: destination.BankCode, AccountNumber: destination.AccountNumber, Currency: refund.Currency,
 	}); err != nil {
 		return RefundBankPayoutView{}, convertProviderError(err)

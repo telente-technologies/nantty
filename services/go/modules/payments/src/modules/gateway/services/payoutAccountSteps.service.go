@@ -23,7 +23,7 @@ func (gateway *PaymentGateway) executeConnectedAccountStep(ctx context.Context, 
 	if err != nil {
 		return nil, err
 	}
-	provider, err := gateway.Container.Provider(account.Provider)
+	provider, err := gateway.Container.Payees(account.Provider)
 	if err != nil {
 		return nil, err
 	}

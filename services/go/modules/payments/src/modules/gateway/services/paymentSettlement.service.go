@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"strings"
 
 	"zudomart/modules/ledger/src/databases"
 	"zudomart/modules/payments/src/constants"
@@ -35,13 +36,15 @@ func (gateway *PaymentGateway) verifyAndSettlePaymentIntent(ctx context.Context,
 	if err != nil {
 		return models.PaymentIntentView{}, err
 	}
-	verification, err := provider.VerifyCharge(ctx, interfaces.ChargeLookup{Reference: reference})
+	verification, err := provider.VerifyCharge(ctx, interfaces.ChargeLookup{Reference: reference, ProviderChargeId: providerChargeIdHint})
 	if err != nil {
 		return models.PaymentIntentView{}, convertProviderError(err)
 	}
 	verification.Reference = reference
-	if providerChargeIdHint != "" {
+	if verification.ProviderChargeId == "" {
 		verification.ProviderChargeId = providerChargeIdHint
+	} else if providerChargeIdHint != "" && providerChargeIdHint != verification.ProviderChargeId {
+		gateway.Container.Resources.Logger.WarnContext(ctx, "webhook charge id differs from the verified charge; keeping the verified id", "reference", reference)
 	}
 	if verification.Outcome == interfaces.OutcomePending {
 		return ConvertPaymentIntentToView(intent), nil
@@ -110,17 +113,35 @@ func (gateway *PaymentGateway) applyVerificationToIntent(ctx context.Context, tr
 	if err != nil {
 		return nil, false, err
 	}
-	amountMatches := verification.AmountMinor == intent.AmountMinor && verification.Currency == intent.Currency
+	chargeReused := false
+	if verification.ProviderChargeId != "" {
+		if chargeReused, err = client.PaymentIntent.Query().Where(paymentintent.Provider(intent.Provider), paymentintent.ProviderTransactionID(verification.ProviderChargeId), paymentintent.IDNEQ(intent.ID)).Exist(ctx); err != nil {
+			return nil, false, err
+		}
+	}
+	customerMatches := intent.CustomerEmail == "" || verification.CustomerEmail == "" || strings.EqualFold(intent.CustomerEmail, verification.CustomerEmail)
+	amountMatches := verification.AmountMinor == intent.AmountMinor && verification.Currency == intent.Currency && !chargeReused && customerMatches
 	if verification.Outcome == interfaces.OutcomeFailed || !amountMatches {
 		reason := verification.FailureReason
 		if !amountMatches {
 			reason = fmt.Sprintf("amountMismatch: provider reported %d %s", verification.AmountMinor, verification.Currency)
 		}
+		if !customerMatches {
+			reason = "customerMismatch: the provider charge was paid by another customer"
+		}
+		if chargeReused {
+			reason = "chargeReused: the provider charge already settled another payment"
+		}
 		failed, err := intent.Update().Where(paymentintent.Version(intent.Version)).AddVersion(1).
 			SetStatus(paymentintent.StatusFailed).SetFailureReason(truncateReason(reason)).SetFailedAt(now).
-			SetProviderTransactionID(verification.ProviderChargeId).Save(ctx)
+			Save(ctx)
 		if err != nil {
 			return nil, false, err
+		}
+		if !chargeReused {
+			if failed, err = failed.Update().SetProviderTransactionID(verification.ProviderChargeId).Save(ctx); err != nil {
+				return nil, false, err
+			}
 		}
 		if err := gateway.notifyPurposeOfFailure(ctx, transaction, failed); err != nil {
 			return nil, false, err
@@ -159,6 +180,7 @@ func (gateway *PaymentGateway) applyVerificationToIntent(ctx context.Context, tr
 	if card := verification.Authorization; card != nil {
 		settledPayment.Authorization = &models.CardAuthorizationHandoff{
 			AuthorizationCode: card.AuthorizationCode, Signature: card.Signature, Brand: card.Brand, Last4: card.Last4, ExpiryMonth: card.ExpiryMonth, ExpiryYear: card.ExpiryYear, Reusable: card.Reusable,
+			TokenEmail: verification.CustomerEmail,
 		}
 	}
 	if err := gateway.recordProviderCustomerInTransaction(ctx, client, succeeded.OwnerUserID, succeeded.Provider, verification.ProviderCustomerId); err != nil {

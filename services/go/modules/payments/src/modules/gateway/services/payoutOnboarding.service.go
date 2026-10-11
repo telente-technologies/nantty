@@ -184,7 +184,7 @@ func (gateway *PaymentGateway) SavePayoutOnboardingBank(ctx context.Context, use
 }
 
 func (gateway *PaymentGateway) ResolveOnboardingBankAccount(ctx context.Context, bankCode, accountNumber string) (string, error) {
-	provider, err := gateway.Container.DefaultProvider()
+	provider, err := gateway.Container.DefaultIdentity()
 	if err != nil {
 		return "", err
 	}
@@ -250,6 +250,10 @@ func (gateway *PaymentGateway) RetryPayoutOnboarding(ctx context.Context, userId
 }
 
 func (gateway *PaymentGateway) RequirePayoutAccountVerified(ctx context.Context, userId string) error {
+	if gateway.Container.UsesProviderWallets() {
+		_, err := gateway.FindActiveProviderWallet(ctx, gateway.Container.Resources.Database, userId)
+		return err
+	}
 	account, err := gateway.FindConnectedAccountForUser(ctx, gateway.Container.Resources.Database, userId)
 	if err != nil || !ConnectedAccountReadyForPayouts(account) || account.PayoutsFrozen {
 		return ErrPayoutAccountNotVerified

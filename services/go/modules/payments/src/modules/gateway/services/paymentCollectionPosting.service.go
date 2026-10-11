@@ -7,6 +7,7 @@ import (
 	"fmt"
 
 	ledgermodels "zudomart/modules/ledger/src/modules/journal/models"
+	"zudomart/modules/payments/src/constants"
 	"zudomart/modules/payments/src/generated/ent"
 	"zudomart/modules/payments/src/modules/gateway/models"
 )
@@ -26,7 +27,7 @@ func (gateway *PaymentGateway) postCollectionJournalEntries(ctx context.Context,
 	if IsConnectedAccountCharge(intent) {
 		return gateway.postConnectedAccountCollection(ctx, transaction, intent)
 	}
-	platformBalance := ledgermodels.PlatformProviderBalanceAccount(intent.Provider, intent.Currency)
+	platformBalance := CollectionAssetAccount(intent.Provider, intent.Currency)
 	_, err := gateway.Container.Ledger.PostBalancedJournalEntry(ctx, transaction, ledgermodels.JournalEntryRequest{
 		Reference: "payment-received:" + intent.Reference, Kind: "payment.received", ExternalReference: intent.Reference,
 		Description: "Payment received into the platform account",
@@ -110,6 +111,9 @@ func checkoutGroupsOf(intent *ent.PaymentIntent) []models.CheckoutGroupAllocatio
 }
 
 func CollectionLinesForIntent(provider, currency string, amountMinor int64, groups []models.CheckoutGroupAllocation) []ledgermodels.JournalLineRequest {
+	if provider == constants.ProviderFlutterwave {
+		groups = nil
+	}
 	var directShares, directFees int64
 	var sellerLines []ledgermodels.JournalLineRequest
 	for _, group := range groups {
@@ -120,8 +124,15 @@ func CollectionLinesForIntent(provider, currency string, amountMinor int64, grou
 		directFees += group.EstimatedFeeMinor
 		sellerLines = AppendPositiveLine(sellerLines, ledgermodels.SellerProviderHeldFundsAccount(group.SellerUserId, currency), ledgermodels.Debit, group.ShareMinor)
 	}
-	lines := AppendPositiveLine(nil, ledgermodels.PlatformProviderBalanceAccount(provider, currency), ledgermodels.Debit, amountMinor-directShares)
+	lines := AppendPositiveLine(nil, CollectionAssetAccount(provider, currency), ledgermodels.Debit, amountMinor-directShares)
 	lines = append(lines, sellerLines...)
 	lines = AppendPositiveLine(lines, ledgermodels.PaymentsAwaitingApplicationAccount(currency), ledgermodels.Credit, amountMinor-directFees)
 	return AppendPositiveLine(lines, ledgermodels.PaymentProcessingFeeExpenseAccount(currency), ledgermodels.Credit, directFees)
+}
+
+func CollectionAssetAccount(provider, currency string) ledgermodels.AccountRef {
+	if provider == constants.ProviderFlutterwave {
+		return ledgermodels.PlatformProviderPendingAccount(provider, currency)
+	}
+	return ledgermodels.PlatformProviderBalanceAccount(provider, currency)
 }

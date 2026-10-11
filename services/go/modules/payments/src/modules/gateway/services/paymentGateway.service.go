@@ -18,17 +18,21 @@ type PaymentGateway struct {
 	transferHandlers map[string]models.TransferOutcomeHandler
 	refundHandlers   map[string]models.StoreRefundHandler
 	disputeHandlers  map[string]models.ProviderDisputeHandler
+	movementHandlers map[string]models.MovementOutcomeHandler
 	observers        gatewayObservers
 }
 
 func NewPaymentGateway(container *container.Container) *PaymentGateway {
-	return &PaymentGateway{
+	gateway := &PaymentGateway{
 		Container:        container,
 		purposeHandlers:  map[string]models.PaymentPurposeHandler{},
 		transferHandlers: map[string]models.TransferOutcomeHandler{},
 		refundHandlers:   map[string]models.StoreRefundHandler{},
 		disputeHandlers:  map[string]models.ProviderDisputeHandler{},
+		movementHandlers: map[string]models.MovementOutcomeHandler{},
 	}
+	gateway.registerWalletMovementHandlers()
+	return gateway
 }
 
 func (gateway *PaymentGateway) RegisterPaymentPurposeHandler(purpose string, handler models.PaymentPurposeHandler) {
@@ -53,6 +57,22 @@ func (gateway *PaymentGateway) RegisterProviderDisputeHandler(purpose string, ha
 	gateway.mutex.Lock()
 	defer gateway.mutex.Unlock()
 	gateway.disputeHandlers[purpose] = handler
+}
+
+func (gateway *PaymentGateway) RegisterMovementOutcomeHandler(kind string, handler models.MovementOutcomeHandler) {
+	gateway.mutex.Lock()
+	defer gateway.mutex.Unlock()
+	gateway.movementHandlers[kind] = handler
+}
+
+func (gateway *PaymentGateway) movementHandler(kind string) (models.MovementOutcomeHandler, error) {
+	gateway.mutex.RLock()
+	defer gateway.mutex.RUnlock()
+	handler, found := gateway.movementHandlers[kind]
+	if !found {
+		return nil, fmt.Errorf("no movement handler registered for kind %q", kind)
+	}
+	return handler, nil
 }
 
 func (gateway *PaymentGateway) disputeHandler(purpose string) (models.ProviderDisputeHandler, bool) {

@@ -48,22 +48,29 @@ func (gateway *PaymentGateway) RequestRefundInTransaction(ctx context.Context, t
 	if intent.Status != paymentintent.StatusSucceeded {
 		return RequestedRefund{}, ErrPaymentNotRefundable
 	}
-	if request.AmountMinor <= 0 || request.Currency != intent.Currency || intent.RefundedMinor+request.AmountMinor > intent.AmountMinor {
+	if request.AmountMinor <= 0 || request.Currency != intent.Currency || request.AmountMinor > RefundableMinor(intent) {
 		return RequestedRefund{}, ErrRefundExceedsPayment
 	}
-	if err := intent.Update().AddRefundedMinor(request.AmountMinor).AddVersion(1).Exec(ctx); err != nil {
+	if err := intent.Update().AddRefundInFlightMinor(request.AmountMinor).AddVersion(1).Exec(ctx); err != nil {
 		return RequestedRefund{}, err
 	}
 	refund, err := client.PaymentRefund.Create().
 		SetPaymentIntentID(intent.ID).SetReference(request.Reference).SetProvider(intent.Provider).
 		SetConnectedAccountID(intent.ConnectedAccountID).SetBeneficiaryUserID(intent.BeneficiaryUserID).
-		SetFullRefund(intent.RefundedMinor == 0 && request.AmountMinor == intent.AmountMinor).
+		SetFullRefund(intent.RefundedMinor == 0 && intent.RefundInFlightMinor == 0 && request.AmountMinor == intent.AmountMinor).
 		SetAmountMinor(request.AmountMinor).SetCurrency(intent.Currency).SetReason(truncateReason(request.Reason)).
 		SetCreatedAt(gateway.Container.Now()).Save(ctx)
 	if err != nil {
 		return RequestedRefund{}, err
 	}
+	if err := gateway.Container.Outbox.EnqueueInTransaction(ctx, transaction, "paymentRefund.requested", refund.ID.String(), refund.CreatedAt, refundEventData(refund)); err != nil {
+		return RequestedRefund{}, err
+	}
 	return RequestedRefund{RefundId: refund.ID, Provider: refund.Provider, Reference: refund.Reference}, nil
+}
+
+func RefundableMinor(intent *ent.PaymentIntent) int64 {
+	return max(intent.AmountMinor-intent.RefundedMinor-intent.RefundInFlightMinor, 0)
 }
 
 func (gateway *PaymentGateway) SendPendingRefundToProvider(ctx context.Context, refundId uuid.UUID) error {
@@ -85,6 +92,9 @@ func (gateway *PaymentGateway) SendPendingRefundToProvider(ctx context.Context, 
 	})
 	if err != nil || claimed == nil {
 		return err
+	}
+	if IsWalletPaidIntent(intent) {
+		return gateway.refundIntoProviderWallet(ctx, claimed.ID)
 	}
 	provider, err := gateway.Container.Provider(claimed.Provider)
 	if err != nil {
@@ -230,12 +240,18 @@ func (gateway *PaymentGateway) recordRefundOutcomeInTransaction(ctx context.Cont
 		if err := update.SetStatus(paymentrefund.StatusSucceeded).SetCompletedAt(now).Exec(ctx); err != nil {
 			return err
 		}
+		if err := client.PaymentIntent.UpdateOneID(refund.PaymentIntentID).AddRefundInFlightMinor(-refund.AmountMinor).AddRefundedMinor(refund.AmountMinor).AddVersion(1).Exec(ctx); err != nil {
+			return err
+		}
 		if err := gateway.postRefundPaidOut(ctx, transaction, refund); err != nil {
 			return err
 		}
 		return gateway.Container.Outbox.EnqueueInTransaction(ctx, transaction, "paymentRefund.succeeded", refund.ID.String(), now, refundEventData(refund))
 	case interfaces.OutcomeFailed:
 		if err := update.SetStatus(paymentrefund.StatusFailed).SetCompletedAt(now).Exec(ctx); err != nil {
+			return err
+		}
+		if err := client.PaymentIntent.UpdateOneID(refund.PaymentIntentID).AddRefundInFlightMinor(-refund.AmountMinor).AddVersion(1).Exec(ctx); err != nil {
 			return err
 		}
 		return gateway.Container.Outbox.EnqueueInTransaction(ctx, transaction, "paymentRefund.failed", refund.ID.String(), now, refundEventData(refund))

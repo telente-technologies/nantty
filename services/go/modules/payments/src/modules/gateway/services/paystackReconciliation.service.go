@@ -37,14 +37,14 @@ func (gateway *PaymentGateway) ReconcileProviderHeldSellerFundsAgainstProviderBa
 
 func (gateway *PaymentGateway) ReconcileProviderMirror(ctx context.Context) (ProviderMirrorReport, error) {
 	report := ProviderMirrorReport{BalanceBreaks: []BalanceBreak{}}
-	provider, err := gateway.Container.DefaultProvider()
+	provider, err := gateway.Container.DefaultPayouts()
 	if err != nil {
 		return report, err
 	}
 	database := gateway.Container.Resources.Database
 	client := gateway.Container.Client(database)
 	now := gateway.Container.Now().UTC()
-	pending, err := client.PaymentIntent.Query().Where(paymentintent.StatusEQ(paymentintent.StatusPending), paymentintent.ProviderCheckoutIDNEQ(""), paymentintent.CreatedAtLT(now.Add(-15*time.Minute)), paymentintent.CreatedAtGT(now.Add(-72*time.Hour))).Limit(200).All(ctx)
+	pending, err := client.PaymentIntent.Query().Where(paymentintent.StatusEQ(paymentintent.StatusPending), paymentintent.ProviderCheckoutIDNEQ(""), paymentintent.CreatedAtLT(now.Add(-15*time.Minute)), paymentintent.CreatedAtGT(now.Add(-pendingIntentReconcileWindow))).Limit(200).All(ctx)
 	if err != nil {
 		return report, err
 	}
@@ -71,7 +71,7 @@ func (gateway *PaymentGateway) ReconcileProviderMirror(ctx context.Context) (Pro
 		return report, convertProviderError(err)
 	}
 	for _, balance := range balances {
-		ledgerBalance, err := gateway.Container.Ledger.ReadAccountBalance(ctx, database, ledgermodels.PlatformProviderBalanceAccount(provider.Name(), balance.Currency))
+		ledgerBalance, err := gateway.Container.Ledger.ReadAccountBalance(ctx, database, ledgermodels.PlatformProviderBalanceAccount(gateway.Container.Settings.DefaultProvider, balance.Currency))
 		if err != nil {
 			return report, err
 		}
@@ -100,7 +100,7 @@ func (gateway *PaymentGateway) ReconcileProviderMirror(ctx context.Context) (Pro
 }
 
 func (gateway *PaymentGateway) settleDirectChargesForSubaccount(ctx context.Context, seller *ent.ConnectedAccount, from, to time.Time) (int, error) {
-	provider, err := gateway.Container.Provider(seller.Provider)
+	provider, err := gateway.Container.Payouts(seller.Provider)
 	if err != nil {
 		return 0, err
 	}
@@ -185,3 +185,5 @@ func (gateway *PaymentGateway) postDirectChargeSettled(ctx context.Context, refe
 	}
 	return posted, nil
 }
+
+const pendingIntentReconcileWindow = 30 * 24 * time.Hour

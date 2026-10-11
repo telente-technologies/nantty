@@ -4,10 +4,10 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"time"
 
 	"zudomart/modules/ledger/src/databases"
 	"zudomart/modules/payments/src/generated/ent"
-	"zudomart/modules/payments/src/generated/ent/paymentintent"
 	"zudomart/modules/payments/src/generated/ent/providerdispute"
 	"zudomart/modules/payments/src/interfaces"
 	"zudomart/modules/payments/src/modules/gateway/models"
@@ -32,8 +32,8 @@ func (gateway *PaymentGateway) recordProviderDispute(ctx context.Context, disput
 		if !opened && existing.Status == dispute.Status {
 			return nil
 		}
-		intent, err := client.PaymentIntent.Query().Where(paymentintent.Or(paymentintent.ProviderTransactionID(dispute.ProviderChargeId), paymentintent.Reference(dispute.ChargeReference))).First(ctx)
-		if err != nil && !ent.IsNotFound(err) {
+		intent, err := findDisputedIntent(ctx, client, provider, dispute)
+		if err != nil {
 			return err
 		}
 		if opened {
@@ -59,10 +59,16 @@ func (gateway *PaymentGateway) recordProviderDispute(ctx context.Context, disput
 			ProviderDisputeId: dispute.ProviderDisputeId, Status: dispute.Status, Reason: dispute.Reason, AmountMinor: dispute.AmountMinor,
 			Currency: dispute.Currency, Opened: opened, OccurredAt: now,
 		}
-		if handler, found := gateway.disputeHandler(string(intent.Purpose)); found {
+		if err := gateway.postChargebackWithholdingInTransaction(ctx, transaction, intent, dispute, opened); err != nil {
+			return err
+		}
+		handler, found := gateway.disputeHandler(string(intent.Purpose))
+		if found {
 			if err := handler.HandleProviderDispute(ctx, transaction, notice); err != nil {
 				return err
 			}
+		} else if err := gateway.writeOffUnrecoverableChargebackInTransaction(ctx, transaction, intent, dispute); err != nil {
+			return err
 		}
 		return gateway.Container.Outbox.EnqueueInTransaction(ctx, transaction, "providerDispute."+dispute.Status, dispute.ProviderDisputeId, now, map[string]any{
 			"providerDisputeId": dispute.ProviderDisputeId, "paymentIntentId": intent.ID.String(), "subjectId": intent.SubjectID, "status": dispute.Status,
@@ -72,13 +78,22 @@ func (gateway *PaymentGateway) recordProviderDispute(ctx context.Context, disput
 }
 
 func (gateway *PaymentGateway) PollOpenProviderDisputes(ctx context.Context) (int, error) {
-	provider, err := gateway.Container.DefaultProvider()
+	provider, err := gateway.Container.DefaultDisputes()
 	if err != nil {
 		return 0, err
 	}
 	disputes, err := provider.ListOpenDisputes(ctx)
 	if err != nil {
 		return 0, convertProviderError(err)
+	}
+	if resolvedLister, lists := provider.(interface {
+		ListResolvedDisputes(ctx context.Context, since time.Time) ([]interfaces.ProviderDispute, error)
+	}); lists {
+		resolved, err := resolvedLister.ListResolvedDisputes(ctx, gateway.Container.Now().AddDate(0, 0, -30))
+		if err != nil {
+			return 0, convertProviderError(err)
+		}
+		disputes = append(disputes, resolved...)
 	}
 	seen := 0
 	var failures []error
@@ -99,7 +114,7 @@ func (gateway *PaymentGateway) SubmitProviderDisputeEvidence(ctx context.Context
 	if err != nil {
 		return err
 	}
-	provider, err := gateway.Container.Provider(dispute.Provider)
+	provider, err := gateway.Container.Disputes(dispute.Provider)
 	if err != nil {
 		return err
 	}

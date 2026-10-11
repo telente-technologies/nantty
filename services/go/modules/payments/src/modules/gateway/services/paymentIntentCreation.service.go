@@ -41,6 +41,9 @@ func (gateway *PaymentGateway) CreatePendingPaymentIntentInTransaction(ctx conte
 	if !known || request.AmountMinor <= 0 || request.PlatformFeeMinor < 0 || request.PlatformFeeMinor >= request.AmountMinor {
 		return models.PaymentIntentView{}, fmt.Errorf("invalid payment intent request for purpose %q", request.Purpose)
 	}
+	if err := gateway.RequirePaymentAmountWithinLimits(ctx, request.Purpose, request.Currency, request.AmountMinor); err != nil {
+		return models.PaymentIntentView{}, err
+	}
 	if _, err := gateway.requireVerifiedContact(ctx, request.OwnerUserId); err != nil {
 		return models.PaymentIntentView{}, err
 	}
@@ -135,7 +138,7 @@ func (gateway *PaymentGateway) OpenProviderCheckoutForIntent(ctx context.Context
 		return models.PaymentIntentView{}, convertProviderError(err)
 	}
 	if err := client.PaymentIntent.Update().Where(paymentintent.ID(intent.ID), paymentintent.StatusEQ(paymentintent.StatusPending), paymentintent.AuthorizationURL("")).
-		SetAuthorizationURL(session.CheckoutUrl).SetProviderCheckoutID(session.ProviderCheckoutId).Exec(ctx); err != nil {
+		SetAuthorizationURL(session.CheckoutUrl).SetProviderCheckoutID(session.ProviderCheckoutId).SetCustomerEmail(strings.ToLower(strings.TrimSpace(contact.Email))).Exec(ctx); err != nil {
 		return models.PaymentIntentView{}, err
 	}
 	if intent, err = client.PaymentIntent.Get(ctx, intent.ID); err != nil {
