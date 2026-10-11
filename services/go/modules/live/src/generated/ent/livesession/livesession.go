@@ -69,6 +69,10 @@ const (
 	FieldModerationVisibility = "moderation_visibility"
 	// FieldModerationVisibilityAt holds the string denoting the moderation_visibility_at field in the database.
 	FieldModerationVisibilityAt = "moderation_visibility_at"
+	// FieldScheduledAt holds the string denoting the scheduled_at field in the database.
+	FieldScheduledAt = "scheduled_at"
+	// FieldReminderSentAt holds the string denoting the reminder_sent_at field in the database.
+	FieldReminderSentAt = "reminder_sent_at"
 	// FieldUpdatedAt holds the string denoting the updated_at field in the database.
 	FieldUpdatedAt = "updated_at"
 	// Table holds the table name of the livesession in the database.
@@ -105,6 +109,8 @@ var Columns = []string{
 	FieldSponsorshipLine,
 	FieldModerationVisibility,
 	FieldModerationVisibilityAt,
+	FieldScheduledAt,
+	FieldReminderSentAt,
 	FieldUpdatedAt,
 }
 
@@ -376,6 +382,16 @@ func ByModerationVisibility(opts ...sql.OrderTermOption) OrderOption {
 // ByModerationVisibilityAt orders the results by the moderation_visibility_at field.
 func ByModerationVisibilityAt(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldModerationVisibilityAt, opts...).ToFunc()
+}
+
+// ByScheduledAt orders the results by the scheduled_at field.
+func ByScheduledAt(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldScheduledAt, opts...).ToFunc()
+}
+
+// ByReminderSentAt orders the results by the reminder_sent_at field.
+func ByReminderSentAt(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldReminderSentAt, opts...).ToFunc()
 }
 
 // ByUpdatedAt orders the results by the updated_at field.

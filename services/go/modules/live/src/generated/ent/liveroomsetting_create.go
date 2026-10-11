@@ -85,6 +85,20 @@ func (_c *LiveRoomSettingCreate) SetNillableRecordEnabled(v *bool) *LiveRoomSett
 	return _c
 }
 
+// SetCommentAudience sets the "comment_audience" field.
+func (_c *LiveRoomSettingCreate) SetCommentAudience(v liveroomsetting.CommentAudience) *LiveRoomSettingCreate {
+	_c.mutation.SetCommentAudience(v)
+	return _c
+}
+
+// SetNillableCommentAudience sets the "comment_audience" field if the given value is not nil.
+func (_c *LiveRoomSettingCreate) SetNillableCommentAudience(v *liveroomsetting.CommentAudience) *LiveRoomSettingCreate {
+	if v != nil {
+		_c.SetCommentAudience(*v)
+	}
+	return _c
+}
+
 // SetID sets the "id" field.
 func (_c *LiveRoomSettingCreate) SetID(v uuid.UUID) *LiveRoomSettingCreate {
 	_c.mutation.SetID(v)
@@ -138,6 +152,10 @@ func (_c *LiveRoomSettingCreate) defaults() {
 		v := liveroomsetting.DefaultRecordEnabled
 		_c.mutation.SetRecordEnabled(v)
 	}
+	if _, ok := _c.mutation.CommentAudience(); !ok {
+		v := liveroomsetting.DefaultCommentAudience
+		_c.mutation.SetCommentAudience(v)
+	}
 }
 
 // check runs all checks and user-defined validators on the builder.
@@ -150,6 +168,14 @@ func (_c *LiveRoomSettingCreate) check() error {
 	}
 	if _, ok := _c.mutation.RecordEnabled(); !ok {
 		return &ValidationError{Name: "record_enabled", err: errors.New(`ent: missing required field "LiveRoomSetting.record_enabled"`)}
+	}
+	if _, ok := _c.mutation.CommentAudience(); !ok {
+		return &ValidationError{Name: "comment_audience", err: errors.New(`ent: missing required field "LiveRoomSetting.comment_audience"`)}
+	}
+	if v, ok := _c.mutation.CommentAudience(); ok {
+		if err := liveroomsetting.CommentAudienceValidator(v); err != nil {
+			return &ValidationError{Name: "comment_audience", err: fmt.Errorf(`ent: validator failed for field "LiveRoomSetting.comment_audience": %w`, err)}
+		}
 	}
 	return nil
 }
@@ -206,6 +232,10 @@ func (_c *LiveRoomSettingCreate) createSpec() (*LiveRoomSetting, *sqlgraph.Creat
 	if value, ok := _c.mutation.RecordEnabled(); ok {
 		_spec.SetField(liveroomsetting.FieldRecordEnabled, field.TypeBool, value)
 		_node.RecordEnabled = value
+	}
+	if value, ok := _c.mutation.CommentAudience(); ok {
+		_spec.SetField(liveroomsetting.FieldCommentAudience, field.TypeEnum, value)
+		_node.CommentAudience = value
 	}
 	return _node, _spec
 }
@@ -334,6 +364,18 @@ func (u *LiveRoomSettingUpsert) SetRecordEnabled(v bool) *LiveRoomSettingUpsert 
 // UpdateRecordEnabled sets the "record_enabled" field to the value that was provided on create.
 func (u *LiveRoomSettingUpsert) UpdateRecordEnabled() *LiveRoomSettingUpsert {
 	u.SetExcluded(liveroomsetting.FieldRecordEnabled)
+	return u
+}
+
+// SetCommentAudience sets the "comment_audience" field.
+func (u *LiveRoomSettingUpsert) SetCommentAudience(v liveroomsetting.CommentAudience) *LiveRoomSettingUpsert {
+	u.Set(liveroomsetting.FieldCommentAudience, v)
+	return u
+}
+
+// UpdateCommentAudience sets the "comment_audience" field to the value that was provided on create.
+func (u *LiveRoomSettingUpsert) UpdateCommentAudience() *LiveRoomSettingUpsert {
+	u.SetExcluded(liveroomsetting.FieldCommentAudience)
 	return u
 }
 
@@ -473,6 +515,20 @@ func (u *LiveRoomSettingUpsertOne) SetRecordEnabled(v bool) *LiveRoomSettingUpse
 func (u *LiveRoomSettingUpsertOne) UpdateRecordEnabled() *LiveRoomSettingUpsertOne {
 	return u.Update(func(s *LiveRoomSettingUpsert) {
 		s.UpdateRecordEnabled()
+	})
+}
+
+// SetCommentAudience sets the "comment_audience" field.
+func (u *LiveRoomSettingUpsertOne) SetCommentAudience(v liveroomsetting.CommentAudience) *LiveRoomSettingUpsertOne {
+	return u.Update(func(s *LiveRoomSettingUpsert) {
+		s.SetCommentAudience(v)
+	})
+}
+
+// UpdateCommentAudience sets the "comment_audience" field to the value that was provided on create.
+func (u *LiveRoomSettingUpsertOne) UpdateCommentAudience() *LiveRoomSettingUpsertOne {
+	return u.Update(func(s *LiveRoomSettingUpsert) {
+		s.UpdateCommentAudience()
 	})
 }
 
@@ -779,6 +835,20 @@ func (u *LiveRoomSettingUpsertBulk) SetRecordEnabled(v bool) *LiveRoomSettingUps
 func (u *LiveRoomSettingUpsertBulk) UpdateRecordEnabled() *LiveRoomSettingUpsertBulk {
 	return u.Update(func(s *LiveRoomSettingUpsert) {
 		s.UpdateRecordEnabled()
+	})
+}
+
+// SetCommentAudience sets the "comment_audience" field.
+func (u *LiveRoomSettingUpsertBulk) SetCommentAudience(v liveroomsetting.CommentAudience) *LiveRoomSettingUpsertBulk {
+	return u.Update(func(s *LiveRoomSettingUpsert) {
+		s.SetCommentAudience(v)
+	})
+}
+
+// UpdateCommentAudience sets the "comment_audience" field to the value that was provided on create.
+func (u *LiveRoomSettingUpsertBulk) UpdateCommentAudience() *LiveRoomSettingUpsertBulk {
+	return u.Update(func(s *LiveRoomSettingUpsert) {
+		s.UpdateCommentAudience()
 	})
 }
 

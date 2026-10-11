@@ -22,6 +22,7 @@ import (
 	"zudomart/modules/live/src/generated/ent/guestslot"
 	"zudomart/modules/live/src/generated/ent/joinrequest"
 	"zudomart/modules/live/src/generated/ent/livecomment"
+	"zudomart/modules/live/src/generated/ent/livehostdefault"
 	"zudomart/modules/live/src/generated/ent/livehostrestriction"
 	"zudomart/modules/live/src/generated/ent/liveingress"
 	"zudomart/modules/live/src/generated/ent/liveleaderboardentry"
@@ -74,6 +75,8 @@ type Client struct {
 	JoinRequest *JoinRequestClient
 	// LiveComment is the client for interacting with the LiveComment builders.
 	LiveComment *LiveCommentClient
+	// LiveHostDefault is the client for interacting with the LiveHostDefault builders.
+	LiveHostDefault *LiveHostDefaultClient
 	// LiveHostRestriction is the client for interacting with the LiveHostRestriction builders.
 	LiveHostRestriction *LiveHostRestrictionClient
 	// LiveIngress is the client for interacting with the LiveIngress builders.
@@ -128,6 +131,7 @@ func (c *Client) init() {
 	c.GuestSlot = NewGuestSlotClient(c.config)
 	c.JoinRequest = NewJoinRequestClient(c.config)
 	c.LiveComment = NewLiveCommentClient(c.config)
+	c.LiveHostDefault = NewLiveHostDefaultClient(c.config)
 	c.LiveHostRestriction = NewLiveHostRestrictionClient(c.config)
 	c.LiveIngress = NewLiveIngressClient(c.config)
 	c.LiveLeaderboardEntry = NewLiveLeaderboardEntryClient(c.config)
@@ -247,6 +251,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		GuestSlot:            NewGuestSlotClient(cfg),
 		JoinRequest:          NewJoinRequestClient(cfg),
 		LiveComment:          NewLiveCommentClient(cfg),
+		LiveHostDefault:      NewLiveHostDefaultClient(cfg),
 		LiveHostRestriction:  NewLiveHostRestrictionClient(cfg),
 		LiveIngress:          NewLiveIngressClient(cfg),
 		LiveLeaderboardEntry: NewLiveLeaderboardEntryClient(cfg),
@@ -293,6 +298,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		GuestSlot:            NewGuestSlotClient(cfg),
 		JoinRequest:          NewJoinRequestClient(cfg),
 		LiveComment:          NewLiveCommentClient(cfg),
+		LiveHostDefault:      NewLiveHostDefaultClient(cfg),
 		LiveHostRestriction:  NewLiveHostRestrictionClient(cfg),
 		LiveIngress:          NewLiveIngressClient(cfg),
 		LiveLeaderboardEntry: NewLiveLeaderboardEntryClient(cfg),
@@ -340,10 +346,11 @@ func (c *Client) Use(hooks ...Hook) {
 	for _, n := range []interface{ Use(...Hook) }{
 		c.Battle, c.BattleGiftEvent, c.BattleParticipant, c.Gift, c.GiftCombo,
 		c.GiftContribution, c.GiftGoal, c.GoalContribution, c.GuestSlot, c.JoinRequest,
-		c.LiveComment, c.LiveHostRestriction, c.LiveIngress, c.LiveLeaderboardEntry,
-		c.LiveModerator, c.LiveProduct, c.LiveRecording, c.LiveRestriction,
-		c.LiveRoomSetting, c.LiveSafetyState, c.LiveSession, c.LiveViewer,
-		c.OutboxEvent, c.OverlayScene, c.PointsEntry, c.PointsRule, c.ProcessedGift,
+		c.LiveComment, c.LiveHostDefault, c.LiveHostRestriction, c.LiveIngress,
+		c.LiveLeaderboardEntry, c.LiveModerator, c.LiveProduct, c.LiveRecording,
+		c.LiveRestriction, c.LiveRoomSetting, c.LiveSafetyState, c.LiveSession,
+		c.LiveViewer, c.OutboxEvent, c.OverlayScene, c.PointsEntry, c.PointsRule,
+		c.ProcessedGift,
 	} {
 		n.Use(hooks...)
 	}
@@ -355,10 +362,11 @@ func (c *Client) Intercept(interceptors ...Interceptor) {
 	for _, n := range []interface{ Intercept(...Interceptor) }{
 		c.Battle, c.BattleGiftEvent, c.BattleParticipant, c.Gift, c.GiftCombo,
 		c.GiftContribution, c.GiftGoal, c.GoalContribution, c.GuestSlot, c.JoinRequest,
-		c.LiveComment, c.LiveHostRestriction, c.LiveIngress, c.LiveLeaderboardEntry,
-		c.LiveModerator, c.LiveProduct, c.LiveRecording, c.LiveRestriction,
-		c.LiveRoomSetting, c.LiveSafetyState, c.LiveSession, c.LiveViewer,
-		c.OutboxEvent, c.OverlayScene, c.PointsEntry, c.PointsRule, c.ProcessedGift,
+		c.LiveComment, c.LiveHostDefault, c.LiveHostRestriction, c.LiveIngress,
+		c.LiveLeaderboardEntry, c.LiveModerator, c.LiveProduct, c.LiveRecording,
+		c.LiveRestriction, c.LiveRoomSetting, c.LiveSafetyState, c.LiveSession,
+		c.LiveViewer, c.OutboxEvent, c.OverlayScene, c.PointsEntry, c.PointsRule,
+		c.ProcessedGift,
 	} {
 		n.Intercept(interceptors...)
 	}
@@ -389,6 +397,8 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.JoinRequest.mutate(ctx, m)
 	case *LiveCommentMutation:
 		return c.LiveComment.mutate(ctx, m)
+	case *LiveHostDefaultMutation:
+		return c.LiveHostDefault.mutate(ctx, m)
 	case *LiveHostRestrictionMutation:
 		return c.LiveHostRestriction.mutate(ctx, m)
 	case *LiveIngressMutation:
@@ -1886,6 +1896,139 @@ func (c *LiveCommentClient) mutate(ctx context.Context, m *LiveCommentMutation) 
 		return (&LiveCommentDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
 		return nil, fmt.Errorf("ent: unknown LiveComment mutation op: %q", m.Op())
+	}
+}
+
+// LiveHostDefaultClient is a client for the LiveHostDefault schema.
+type LiveHostDefaultClient struct {
+	config
+}
+
+// NewLiveHostDefaultClient returns a client for the LiveHostDefault from the given config.
+func NewLiveHostDefaultClient(c config) *LiveHostDefaultClient {
+	return &LiveHostDefaultClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `livehostdefault.Hooks(f(g(h())))`.
+func (c *LiveHostDefaultClient) Use(hooks ...Hook) {
+	c.hooks.LiveHostDefault = append(c.hooks.LiveHostDefault, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `livehostdefault.Intercept(f(g(h())))`.
+func (c *LiveHostDefaultClient) Intercept(interceptors ...Interceptor) {
+	c.inters.LiveHostDefault = append(c.inters.LiveHostDefault, interceptors...)
+}
+
+// Create returns a builder for creating a LiveHostDefault entity.
+func (c *LiveHostDefaultClient) Create() *LiveHostDefaultCreate {
+	mutation := newLiveHostDefaultMutation(c.config, OpCreate)
+	return &LiveHostDefaultCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of LiveHostDefault entities.
+func (c *LiveHostDefaultClient) CreateBulk(builders ...*LiveHostDefaultCreate) *LiveHostDefaultCreateBulk {
+	return &LiveHostDefaultCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *LiveHostDefaultClient) MapCreateBulk(slice any, setFunc func(*LiveHostDefaultCreate, int)) *LiveHostDefaultCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &LiveHostDefaultCreateBulk{err: fmt.Errorf("calling to LiveHostDefaultClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*LiveHostDefaultCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &LiveHostDefaultCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for LiveHostDefault.
+func (c *LiveHostDefaultClient) Update() *LiveHostDefaultUpdate {
+	mutation := newLiveHostDefaultMutation(c.config, OpUpdate)
+	return &LiveHostDefaultUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *LiveHostDefaultClient) UpdateOne(_m *LiveHostDefault) *LiveHostDefaultUpdateOne {
+	mutation := newLiveHostDefaultMutation(c.config, OpUpdateOne, withLiveHostDefault(_m))
+	return &LiveHostDefaultUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *LiveHostDefaultClient) UpdateOneID(id uuid.UUID) *LiveHostDefaultUpdateOne {
+	mutation := newLiveHostDefaultMutation(c.config, OpUpdateOne, withLiveHostDefaultID(id))
+	return &LiveHostDefaultUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for LiveHostDefault.
+func (c *LiveHostDefaultClient) Delete() *LiveHostDefaultDelete {
+	mutation := newLiveHostDefaultMutation(c.config, OpDelete)
+	return &LiveHostDefaultDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *LiveHostDefaultClient) DeleteOne(_m *LiveHostDefault) *LiveHostDefaultDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *LiveHostDefaultClient) DeleteOneID(id uuid.UUID) *LiveHostDefaultDeleteOne {
+	builder := c.Delete().Where(livehostdefault.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &LiveHostDefaultDeleteOne{builder}
+}
+
+// Query returns a query builder for LiveHostDefault.
+func (c *LiveHostDefaultClient) Query() *LiveHostDefaultQuery {
+	return &LiveHostDefaultQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeLiveHostDefault},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a LiveHostDefault entity by its id.
+func (c *LiveHostDefaultClient) Get(ctx context.Context, id uuid.UUID) (*LiveHostDefault, error) {
+	return c.Query().Where(livehostdefault.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *LiveHostDefaultClient) GetX(ctx context.Context, id uuid.UUID) *LiveHostDefault {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *LiveHostDefaultClient) Hooks() []Hook {
+	return c.hooks.LiveHostDefault
+}
+
+// Interceptors returns the client interceptors.
+func (c *LiveHostDefaultClient) Interceptors() []Interceptor {
+	return c.inters.LiveHostDefault
+}
+
+func (c *LiveHostDefaultClient) mutate(ctx context.Context, m *LiveHostDefaultMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&LiveHostDefaultCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&LiveHostDefaultUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&LiveHostDefaultUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&LiveHostDefaultDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown LiveHostDefault mutation op: %q", m.Op())
 	}
 }
 
@@ -4022,18 +4165,18 @@ type (
 	hooks struct {
 		Battle, BattleGiftEvent, BattleParticipant, Gift, GiftCombo, GiftContribution,
 		GiftGoal, GoalContribution, GuestSlot, JoinRequest, LiveComment,
-		LiveHostRestriction, LiveIngress, LiveLeaderboardEntry, LiveModerator,
-		LiveProduct, LiveRecording, LiveRestriction, LiveRoomSetting, LiveSafetyState,
-		LiveSession, LiveViewer, OutboxEvent, OverlayScene, PointsEntry, PointsRule,
-		ProcessedGift []ent.Hook
+		LiveHostDefault, LiveHostRestriction, LiveIngress, LiveLeaderboardEntry,
+		LiveModerator, LiveProduct, LiveRecording, LiveRestriction, LiveRoomSetting,
+		LiveSafetyState, LiveSession, LiveViewer, OutboxEvent, OverlayScene,
+		PointsEntry, PointsRule, ProcessedGift []ent.Hook
 	}
 	inters struct {
 		Battle, BattleGiftEvent, BattleParticipant, Gift, GiftCombo, GiftContribution,
 		GiftGoal, GoalContribution, GuestSlot, JoinRequest, LiveComment,
-		LiveHostRestriction, LiveIngress, LiveLeaderboardEntry, LiveModerator,
-		LiveProduct, LiveRecording, LiveRestriction, LiveRoomSetting, LiveSafetyState,
-		LiveSession, LiveViewer, OutboxEvent, OverlayScene, PointsEntry, PointsRule,
-		ProcessedGift []ent.Interceptor
+		LiveHostDefault, LiveHostRestriction, LiveIngress, LiveLeaderboardEntry,
+		LiveModerator, LiveProduct, LiveRecording, LiveRestriction, LiveRoomSetting,
+		LiveSafetyState, LiveSession, LiveViewer, OutboxEvent, OverlayScene,
+		PointsEntry, PointsRule, ProcessedGift []ent.Interceptor
 	}
 )
 

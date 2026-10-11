@@ -9,6 +9,9 @@ import (
 const (
 	LiveStarted                  = "live.started"
 	LiveEnded                    = "live.ended"
+	LiveScheduled                = "live.scheduled"
+	LiveScheduleCancelled        = "live.scheduleCancelled"
+	LiveReminderDue              = "live.reminderDue"
 	LiveTopSupporter             = "live.topSupporterSelected"
 	LiveViewerCountChanged       = "live.viewerCountChanged"
 	GiftSent                     = "gift.sent"
@@ -149,4 +152,29 @@ type GuestChangedEventData struct {
 	AudioMuted bool   `json:"audioMuted"`
 	VideoMuted bool   `json:"videoMuted"`
 	Reason     string `json:"reason,omitempty"`
+}
+
+type LiveScheduledEventData struct {
+	LiveId      string `json:"liveId"`
+	HostId      string `json:"hostId"`
+	Title       string `json:"title"`
+	Category    string `json:"category"`
+	ScheduledAt string `json:"scheduledAt"`
+}
+
+type LiveScheduleCancelledEventData struct {
+	LiveId string `json:"liveId"`
+	HostId string `json:"hostId"`
+}
+
+type LiveReminderDueEventData struct {
+	LiveId          string            `json:"liveId"`
+	HostId          string            `json:"hostId"`
+	Title           string            `json:"title"`
+	ScheduledAt     string            `json:"scheduledAt"`
+	Host            types.UserSummary `json:"host"`
+	HostName        string            `json:"hostName"`
+	HostHandle      string            `json:"hostHandle"`
+	NotifyUserIds   []string          `json:"notifyUserIds"`
+	NotifyTruncated bool              `json:"notifyTruncated"`
 }

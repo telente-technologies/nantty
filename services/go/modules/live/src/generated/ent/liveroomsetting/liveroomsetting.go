@@ -3,6 +3,8 @@
 package liveroomsetting
 
 import (
+	"fmt"
+
 	"entgo.io/ent/dialect/sql"
 )
 
@@ -21,6 +23,8 @@ const (
 	FieldPinnedCommentID = "pinned_comment_id"
 	// FieldRecordEnabled holds the string denoting the record_enabled field in the database.
 	FieldRecordEnabled = "record_enabled"
+	// FieldCommentAudience holds the string denoting the comment_audience field in the database.
+	FieldCommentAudience = "comment_audience"
 	// Table holds the table name of the liveroomsetting in the database.
 	Table = "live_room_settings"
 )
@@ -33,6 +37,7 @@ var Columns = []string{
 	FieldBlockedWords,
 	FieldPinnedCommentID,
 	FieldRecordEnabled,
+	FieldCommentAudience,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -53,6 +58,33 @@ var (
 	// DefaultRecordEnabled holds the default value on creation for the "record_enabled" field.
 	DefaultRecordEnabled bool
 )
+
+// CommentAudience defines the type for the "comment_audience" enum field.
+type CommentAudience string
+
+// CommentAudienceEveryone is the default value of the CommentAudience enum.
+const DefaultCommentAudience = CommentAudienceEveryone
+
+// CommentAudience values.
+const (
+	CommentAudienceEveryone    CommentAudience = "everyone"
+	CommentAudienceFollowers   CommentAudience = "followers"
+	CommentAudienceSubscribers CommentAudience = "subscribers"
+)
+
+func (ca CommentAudience) String() string {
+	return string(ca)
+}
+
+// CommentAudienceValidator is a validator for the "comment_audience" field enum values. It is called by the builders before save.
+func CommentAudienceValidator(ca CommentAudience) error {
+	switch ca {
+	case CommentAudienceEveryone, CommentAudienceFollowers, CommentAudienceSubscribers:
+		return nil
+	default:
+		return fmt.Errorf("liveroomsetting: invalid enum value for comment_audience field: %q", ca)
+	}
+}
 
 // OrderOption defines the ordering options for the LiveRoomSetting queries.
 type OrderOption func(*sql.Selector)
@@ -80,4 +112,9 @@ func ByPinnedCommentID(opts ...sql.OrderTermOption) OrderOption {
 // ByRecordEnabled orders the results by the record_enabled field.
 func ByRecordEnabled(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldRecordEnabled, opts...).ToFunc()
+}
+
+// ByCommentAudience orders the results by the comment_audience field.
+func ByCommentAudience(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldCommentAudience, opts...).ToFunc()
 }

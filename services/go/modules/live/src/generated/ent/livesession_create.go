@@ -370,6 +370,34 @@ func (_c *LiveSessionCreate) SetNillableModerationVisibilityAt(v *time.Time) *Li
 	return _c
 }
 
+// SetScheduledAt sets the "scheduled_at" field.
+func (_c *LiveSessionCreate) SetScheduledAt(v time.Time) *LiveSessionCreate {
+	_c.mutation.SetScheduledAt(v)
+	return _c
+}
+
+// SetNillableScheduledAt sets the "scheduled_at" field if the given value is not nil.
+func (_c *LiveSessionCreate) SetNillableScheduledAt(v *time.Time) *LiveSessionCreate {
+	if v != nil {
+		_c.SetScheduledAt(*v)
+	}
+	return _c
+}
+
+// SetReminderSentAt sets the "reminder_sent_at" field.
+func (_c *LiveSessionCreate) SetReminderSentAt(v time.Time) *LiveSessionCreate {
+	_c.mutation.SetReminderSentAt(v)
+	return _c
+}
+
+// SetNillableReminderSentAt sets the "reminder_sent_at" field if the given value is not nil.
+func (_c *LiveSessionCreate) SetNillableReminderSentAt(v *time.Time) *LiveSessionCreate {
+	if v != nil {
+		_c.SetReminderSentAt(*v)
+	}
+	return _c
+}
+
 // SetUpdatedAt sets the "updated_at" field.
 func (_c *LiveSessionCreate) SetUpdatedAt(v time.Time) *LiveSessionCreate {
 	_c.mutation.SetUpdatedAt(v)
@@ -726,6 +754,14 @@ func (_c *LiveSessionCreate) createSpec() (*LiveSession, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.ModerationVisibilityAt(); ok {
 		_spec.SetField(livesession.FieldModerationVisibilityAt, field.TypeTime, value)
 		_node.ModerationVisibilityAt = &value
+	}
+	if value, ok := _c.mutation.ScheduledAt(); ok {
+		_spec.SetField(livesession.FieldScheduledAt, field.TypeTime, value)
+		_node.ScheduledAt = &value
+	}
+	if value, ok := _c.mutation.ReminderSentAt(); ok {
+		_spec.SetField(livesession.FieldReminderSentAt, field.TypeTime, value)
+		_node.ReminderSentAt = &value
 	}
 	if value, ok := _c.mutation.UpdatedAt(); ok {
 		_spec.SetField(livesession.FieldUpdatedAt, field.TypeTime, value)
@@ -1164,6 +1200,42 @@ func (u *LiveSessionUpsert) UpdateModerationVisibilityAt() *LiveSessionUpsert {
 // ClearModerationVisibilityAt clears the value of the "moderation_visibility_at" field.
 func (u *LiveSessionUpsert) ClearModerationVisibilityAt() *LiveSessionUpsert {
 	u.SetNull(livesession.FieldModerationVisibilityAt)
+	return u
+}
+
+// SetScheduledAt sets the "scheduled_at" field.
+func (u *LiveSessionUpsert) SetScheduledAt(v time.Time) *LiveSessionUpsert {
+	u.Set(livesession.FieldScheduledAt, v)
+	return u
+}
+
+// UpdateScheduledAt sets the "scheduled_at" field to the value that was provided on create.
+func (u *LiveSessionUpsert) UpdateScheduledAt() *LiveSessionUpsert {
+	u.SetExcluded(livesession.FieldScheduledAt)
+	return u
+}
+
+// ClearScheduledAt clears the value of the "scheduled_at" field.
+func (u *LiveSessionUpsert) ClearScheduledAt() *LiveSessionUpsert {
+	u.SetNull(livesession.FieldScheduledAt)
+	return u
+}
+
+// SetReminderSentAt sets the "reminder_sent_at" field.
+func (u *LiveSessionUpsert) SetReminderSentAt(v time.Time) *LiveSessionUpsert {
+	u.Set(livesession.FieldReminderSentAt, v)
+	return u
+}
+
+// UpdateReminderSentAt sets the "reminder_sent_at" field to the value that was provided on create.
+func (u *LiveSessionUpsert) UpdateReminderSentAt() *LiveSessionUpsert {
+	u.SetExcluded(livesession.FieldReminderSentAt)
+	return u
+}
+
+// ClearReminderSentAt clears the value of the "reminder_sent_at" field.
+func (u *LiveSessionUpsert) ClearReminderSentAt() *LiveSessionUpsert {
+	u.SetNull(livesession.FieldReminderSentAt)
 	return u
 }
 
@@ -1681,6 +1753,48 @@ func (u *LiveSessionUpsertOne) UpdateModerationVisibilityAt() *LiveSessionUpsert
 func (u *LiveSessionUpsertOne) ClearModerationVisibilityAt() *LiveSessionUpsertOne {
 	return u.Update(func(s *LiveSessionUpsert) {
 		s.ClearModerationVisibilityAt()
+	})
+}
+
+// SetScheduledAt sets the "scheduled_at" field.
+func (u *LiveSessionUpsertOne) SetScheduledAt(v time.Time) *LiveSessionUpsertOne {
+	return u.Update(func(s *LiveSessionUpsert) {
+		s.SetScheduledAt(v)
+	})
+}
+
+// UpdateScheduledAt sets the "scheduled_at" field to the value that was provided on create.
+func (u *LiveSessionUpsertOne) UpdateScheduledAt() *LiveSessionUpsertOne {
+	return u.Update(func(s *LiveSessionUpsert) {
+		s.UpdateScheduledAt()
+	})
+}
+
+// ClearScheduledAt clears the value of the "scheduled_at" field.
+func (u *LiveSessionUpsertOne) ClearScheduledAt() *LiveSessionUpsertOne {
+	return u.Update(func(s *LiveSessionUpsert) {
+		s.ClearScheduledAt()
+	})
+}
+
+// SetReminderSentAt sets the "reminder_sent_at" field.
+func (u *LiveSessionUpsertOne) SetReminderSentAt(v time.Time) *LiveSessionUpsertOne {
+	return u.Update(func(s *LiveSessionUpsert) {
+		s.SetReminderSentAt(v)
+	})
+}
+
+// UpdateReminderSentAt sets the "reminder_sent_at" field to the value that was provided on create.
+func (u *LiveSessionUpsertOne) UpdateReminderSentAt() *LiveSessionUpsertOne {
+	return u.Update(func(s *LiveSessionUpsert) {
+		s.UpdateReminderSentAt()
+	})
+}
+
+// ClearReminderSentAt clears the value of the "reminder_sent_at" field.
+func (u *LiveSessionUpsertOne) ClearReminderSentAt() *LiveSessionUpsertOne {
+	return u.Update(func(s *LiveSessionUpsert) {
+		s.ClearReminderSentAt()
 	})
 }
 
@@ -2367,6 +2481,48 @@ func (u *LiveSessionUpsertBulk) UpdateModerationVisibilityAt() *LiveSessionUpser
 func (u *LiveSessionUpsertBulk) ClearModerationVisibilityAt() *LiveSessionUpsertBulk {
 	return u.Update(func(s *LiveSessionUpsert) {
 		s.ClearModerationVisibilityAt()
+	})
+}
+
+// SetScheduledAt sets the "scheduled_at" field.
+func (u *LiveSessionUpsertBulk) SetScheduledAt(v time.Time) *LiveSessionUpsertBulk {
+	return u.Update(func(s *LiveSessionUpsert) {
+		s.SetScheduledAt(v)
+	})
+}
+
+// UpdateScheduledAt sets the "scheduled_at" field to the value that was provided on create.
+func (u *LiveSessionUpsertBulk) UpdateScheduledAt() *LiveSessionUpsertBulk {
+	return u.Update(func(s *LiveSessionUpsert) {
+		s.UpdateScheduledAt()
+	})
+}
+
+// ClearScheduledAt clears the value of the "scheduled_at" field.
+func (u *LiveSessionUpsertBulk) ClearScheduledAt() *LiveSessionUpsertBulk {
+	return u.Update(func(s *LiveSessionUpsert) {
+		s.ClearScheduledAt()
+	})
+}
+
+// SetReminderSentAt sets the "reminder_sent_at" field.
+func (u *LiveSessionUpsertBulk) SetReminderSentAt(v time.Time) *LiveSessionUpsertBulk {
+	return u.Update(func(s *LiveSessionUpsert) {
+		s.SetReminderSentAt(v)
+	})
+}
+
+// UpdateReminderSentAt sets the "reminder_sent_at" field to the value that was provided on create.
+func (u *LiveSessionUpsertBulk) UpdateReminderSentAt() *LiveSessionUpsertBulk {
+	return u.Update(func(s *LiveSessionUpsert) {
+		s.UpdateReminderSentAt()
+	})
+}
+
+// ClearReminderSentAt clears the value of the "reminder_sent_at" field.
+func (u *LiveSessionUpsertBulk) ClearReminderSentAt() *LiveSessionUpsertBulk {
+	return u.Update(func(s *LiveSessionUpsert) {
+		s.ClearReminderSentAt()
 	})
 }
 

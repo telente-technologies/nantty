@@ -458,6 +458,46 @@ func (_u *LiveSessionUpdate) ClearModerationVisibilityAt() *LiveSessionUpdate {
 	return _u
 }
 
+// SetScheduledAt sets the "scheduled_at" field.
+func (_u *LiveSessionUpdate) SetScheduledAt(v time.Time) *LiveSessionUpdate {
+	_u.mutation.SetScheduledAt(v)
+	return _u
+}
+
+// SetNillableScheduledAt sets the "scheduled_at" field if the given value is not nil.
+func (_u *LiveSessionUpdate) SetNillableScheduledAt(v *time.Time) *LiveSessionUpdate {
+	if v != nil {
+		_u.SetScheduledAt(*v)
+	}
+	return _u
+}
+
+// ClearScheduledAt clears the value of the "scheduled_at" field.
+func (_u *LiveSessionUpdate) ClearScheduledAt() *LiveSessionUpdate {
+	_u.mutation.ClearScheduledAt()
+	return _u
+}
+
+// SetReminderSentAt sets the "reminder_sent_at" field.
+func (_u *LiveSessionUpdate) SetReminderSentAt(v time.Time) *LiveSessionUpdate {
+	_u.mutation.SetReminderSentAt(v)
+	return _u
+}
+
+// SetNillableReminderSentAt sets the "reminder_sent_at" field if the given value is not nil.
+func (_u *LiveSessionUpdate) SetNillableReminderSentAt(v *time.Time) *LiveSessionUpdate {
+	if v != nil {
+		_u.SetReminderSentAt(*v)
+	}
+	return _u
+}
+
+// ClearReminderSentAt clears the value of the "reminder_sent_at" field.
+func (_u *LiveSessionUpdate) ClearReminderSentAt() *LiveSessionUpdate {
+	_u.mutation.ClearReminderSentAt()
+	return _u
+}
+
 // SetUpdatedAt sets the "updated_at" field.
 func (_u *LiveSessionUpdate) SetUpdatedAt(v time.Time) *LiveSessionUpdate {
 	_u.mutation.SetUpdatedAt(v)
@@ -671,6 +711,18 @@ func (_u *LiveSessionUpdate) sqlSave(ctx context.Context) (_node int, err error)
 	}
 	if _u.mutation.ModerationVisibilityAtCleared() {
 		_spec.ClearField(livesession.FieldModerationVisibilityAt, field.TypeTime)
+	}
+	if value, ok := _u.mutation.ScheduledAt(); ok {
+		_spec.SetField(livesession.FieldScheduledAt, field.TypeTime, value)
+	}
+	if _u.mutation.ScheduledAtCleared() {
+		_spec.ClearField(livesession.FieldScheduledAt, field.TypeTime)
+	}
+	if value, ok := _u.mutation.ReminderSentAt(); ok {
+		_spec.SetField(livesession.FieldReminderSentAt, field.TypeTime, value)
+	}
+	if _u.mutation.ReminderSentAtCleared() {
+		_spec.ClearField(livesession.FieldReminderSentAt, field.TypeTime)
 	}
 	if value, ok := _u.mutation.UpdatedAt(); ok {
 		_spec.SetField(livesession.FieldUpdatedAt, field.TypeTime, value)
@@ -1124,6 +1176,46 @@ func (_u *LiveSessionUpdateOne) ClearModerationVisibilityAt() *LiveSessionUpdate
 	return _u
 }
 
+// SetScheduledAt sets the "scheduled_at" field.
+func (_u *LiveSessionUpdateOne) SetScheduledAt(v time.Time) *LiveSessionUpdateOne {
+	_u.mutation.SetScheduledAt(v)
+	return _u
+}
+
+// SetNillableScheduledAt sets the "scheduled_at" field if the given value is not nil.
+func (_u *LiveSessionUpdateOne) SetNillableScheduledAt(v *time.Time) *LiveSessionUpdateOne {
+	if v != nil {
+		_u.SetScheduledAt(*v)
+	}
+	return _u
+}
+
+// ClearScheduledAt clears the value of the "scheduled_at" field.
+func (_u *LiveSessionUpdateOne) ClearScheduledAt() *LiveSessionUpdateOne {
+	_u.mutation.ClearScheduledAt()
+	return _u
+}
+
+// SetReminderSentAt sets the "reminder_sent_at" field.
+func (_u *LiveSessionUpdateOne) SetReminderSentAt(v time.Time) *LiveSessionUpdateOne {
+	_u.mutation.SetReminderSentAt(v)
+	return _u
+}
+
+// SetNillableReminderSentAt sets the "reminder_sent_at" field if the given value is not nil.
+func (_u *LiveSessionUpdateOne) SetNillableReminderSentAt(v *time.Time) *LiveSessionUpdateOne {
+	if v != nil {
+		_u.SetReminderSentAt(*v)
+	}
+	return _u
+}
+
+// ClearReminderSentAt clears the value of the "reminder_sent_at" field.
+func (_u *LiveSessionUpdateOne) ClearReminderSentAt() *LiveSessionUpdateOne {
+	_u.mutation.ClearReminderSentAt()
+	return _u
+}
+
 // SetUpdatedAt sets the "updated_at" field.
 func (_u *LiveSessionUpdateOne) SetUpdatedAt(v time.Time) *LiveSessionUpdateOne {
 	_u.mutation.SetUpdatedAt(v)
@@ -1367,6 +1459,18 @@ func (_u *LiveSessionUpdateOne) sqlSave(ctx context.Context) (_node *LiveSession
 	}
 	if _u.mutation.ModerationVisibilityAtCleared() {
 		_spec.ClearField(livesession.FieldModerationVisibilityAt, field.TypeTime)
+	}
+	if value, ok := _u.mutation.ScheduledAt(); ok {
+		_spec.SetField(livesession.FieldScheduledAt, field.TypeTime, value)
+	}
+	if _u.mutation.ScheduledAtCleared() {
+		_spec.ClearField(livesession.FieldScheduledAt, field.TypeTime)
+	}
+	if value, ok := _u.mutation.ReminderSentAt(); ok {
+		_spec.SetField(livesession.FieldReminderSentAt, field.TypeTime, value)
+	}
+	if _u.mutation.ReminderSentAtCleared() {
+		_spec.ClearField(livesession.FieldReminderSentAt, field.TypeTime)
 	}
 	if value, ok := _u.mutation.UpdatedAt(); ok {
 		_spec.SetField(livesession.FieldUpdatedAt, field.TypeTime, value)

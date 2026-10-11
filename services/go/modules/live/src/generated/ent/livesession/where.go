@@ -170,6 +170,16 @@ func ModerationVisibilityAt(v time.Time) predicate.LiveSession {
 	return predicate.LiveSession(sql.FieldEQ(FieldModerationVisibilityAt, v))
 }
 
+// ScheduledAt applies equality check predicate on the "scheduled_at" field. It's identical to ScheduledAtEQ.
+func ScheduledAt(v time.Time) predicate.LiveSession {
+	return predicate.LiveSession(sql.FieldEQ(FieldScheduledAt, v))
+}
+
+// ReminderSentAt applies equality check predicate on the "reminder_sent_at" field. It's identical to ReminderSentAtEQ.
+func ReminderSentAt(v time.Time) predicate.LiveSession {
+	return predicate.LiveSession(sql.FieldEQ(FieldReminderSentAt, v))
+}
+
 // UpdatedAt applies equality check predicate on the "updated_at" field. It's identical to UpdatedAtEQ.
 func UpdatedAt(v time.Time) predicate.LiveSession {
 	return predicate.LiveSession(sql.FieldEQ(FieldUpdatedAt, v))
@@ -1378,6 +1388,106 @@ func ModerationVisibilityAtIsNil() predicate.LiveSession {
 // ModerationVisibilityAtNotNil applies the NotNil predicate on the "moderation_visibility_at" field.
 func ModerationVisibilityAtNotNil() predicate.LiveSession {
 	return predicate.LiveSession(sql.FieldNotNull(FieldModerationVisibilityAt))
+}
+
+// ScheduledAtEQ applies the EQ predicate on the "scheduled_at" field.
+func ScheduledAtEQ(v time.Time) predicate.LiveSession {
+	return predicate.LiveSession(sql.FieldEQ(FieldScheduledAt, v))
+}
+
+// ScheduledAtNEQ applies the NEQ predicate on the "scheduled_at" field.
+func ScheduledAtNEQ(v time.Time) predicate.LiveSession {
+	return predicate.LiveSession(sql.FieldNEQ(FieldScheduledAt, v))
+}
+
+// ScheduledAtIn applies the In predicate on the "scheduled_at" field.
+func ScheduledAtIn(vs ...time.Time) predicate.LiveSession {
+	return predicate.LiveSession(sql.FieldIn(FieldScheduledAt, vs...))
+}
+
+// ScheduledAtNotIn applies the NotIn predicate on the "scheduled_at" field.
+func ScheduledAtNotIn(vs ...time.Time) predicate.LiveSession {
+	return predicate.LiveSession(sql.FieldNotIn(FieldScheduledAt, vs...))
+}
+
+// ScheduledAtGT applies the GT predicate on the "scheduled_at" field.
+func ScheduledAtGT(v time.Time) predicate.LiveSession {
+	return predicate.LiveSession(sql.FieldGT(FieldScheduledAt, v))
+}
+
+// ScheduledAtGTE applies the GTE predicate on the "scheduled_at" field.
+func ScheduledAtGTE(v time.Time) predicate.LiveSession {
+	return predicate.LiveSession(sql.FieldGTE(FieldScheduledAt, v))
+}
+
+// ScheduledAtLT applies the LT predicate on the "scheduled_at" field.
+func ScheduledAtLT(v time.Time) predicate.LiveSession {
+	return predicate.LiveSession(sql.FieldLT(FieldScheduledAt, v))
+}
+
+// ScheduledAtLTE applies the LTE predicate on the "scheduled_at" field.
+func ScheduledAtLTE(v time.Time) predicate.LiveSession {
+	return predicate.LiveSession(sql.FieldLTE(FieldScheduledAt, v))
+}
+
+// ScheduledAtIsNil applies the IsNil predicate on the "scheduled_at" field.
+func ScheduledAtIsNil() predicate.LiveSession {
+	return predicate.LiveSession(sql.FieldIsNull(FieldScheduledAt))
+}
+
+// ScheduledAtNotNil applies the NotNil predicate on the "scheduled_at" field.
+func ScheduledAtNotNil() predicate.LiveSession {
+	return predicate.LiveSession(sql.FieldNotNull(FieldScheduledAt))
+}
+
+// ReminderSentAtEQ applies the EQ predicate on the "reminder_sent_at" field.
+func ReminderSentAtEQ(v time.Time) predicate.LiveSession {
+	return predicate.LiveSession(sql.FieldEQ(FieldReminderSentAt, v))
+}
+
+// ReminderSentAtNEQ applies the NEQ predicate on the "reminder_sent_at" field.
+func ReminderSentAtNEQ(v time.Time) predicate.LiveSession {
+	return predicate.LiveSession(sql.FieldNEQ(FieldReminderSentAt, v))
+}
+
+// ReminderSentAtIn applies the In predicate on the "reminder_sent_at" field.
+func ReminderSentAtIn(vs ...time.Time) predicate.LiveSession {
+	return predicate.LiveSession(sql.FieldIn(FieldReminderSentAt, vs...))
+}
+
+// ReminderSentAtNotIn applies the NotIn predicate on the "reminder_sent_at" field.
+func ReminderSentAtNotIn(vs ...time.Time) predicate.LiveSession {
+	return predicate.LiveSession(sql.FieldNotIn(FieldReminderSentAt, vs...))
+}
+
+// ReminderSentAtGT applies the GT predicate on the "reminder_sent_at" field.
+func ReminderSentAtGT(v time.Time) predicate.LiveSession {
+	return predicate.LiveSession(sql.FieldGT(FieldReminderSentAt, v))
+}
+
+// ReminderSentAtGTE applies the GTE predicate on the "reminder_sent_at" field.
+func ReminderSentAtGTE(v time.Time) predicate.LiveSession {
+	return predicate.LiveSession(sql.FieldGTE(FieldReminderSentAt, v))
+}
+
+// ReminderSentAtLT applies the LT predicate on the "reminder_sent_at" field.
+func ReminderSentAtLT(v time.Time) predicate.LiveSession {
+	return predicate.LiveSession(sql.FieldLT(FieldReminderSentAt, v))
+}
+
+// ReminderSentAtLTE applies the LTE predicate on the "reminder_sent_at" field.
+func ReminderSentAtLTE(v time.Time) predicate.LiveSession {
+	return predicate.LiveSession(sql.FieldLTE(FieldReminderSentAt, v))
+}
+
+// ReminderSentAtIsNil applies the IsNil predicate on the "reminder_sent_at" field.
+func ReminderSentAtIsNil() predicate.LiveSession {
+	return predicate.LiveSession(sql.FieldIsNull(FieldReminderSentAt))
+}
+
+// ReminderSentAtNotNil applies the NotNil predicate on the "reminder_sent_at" field.
+func ReminderSentAtNotNil() predicate.LiveSession {
+	return predicate.LiveSession(sql.FieldNotNull(FieldReminderSentAt))
 }
 
 // UpdatedAtEQ applies the EQ predicate on the "updated_at" field.

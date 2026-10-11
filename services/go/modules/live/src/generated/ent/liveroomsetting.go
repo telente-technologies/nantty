@@ -28,7 +28,9 @@ type LiveRoomSetting struct {
 	PinnedCommentID *uuid.UUID `json:"pinned_comment_id,omitempty"`
 	// RecordEnabled holds the value of the "record_enabled" field.
 	RecordEnabled bool `json:"record_enabled,omitempty"`
-	selectValues  sql.SelectValues
+	// CommentAudience holds the value of the "comment_audience" field.
+	CommentAudience liveroomsetting.CommentAudience `json:"comment_audience,omitempty"`
+	selectValues    sql.SelectValues
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -44,6 +46,8 @@ func (*LiveRoomSetting) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullBool)
 		case liveroomsetting.FieldSlowModeSeconds:
 			values[i] = new(sql.NullInt64)
+		case liveroomsetting.FieldCommentAudience:
+			values[i] = new(sql.NullString)
 		case liveroomsetting.FieldID:
 			values[i] = new(uuid.UUID)
 		default:
@@ -100,6 +104,12 @@ func (_m *LiveRoomSetting) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.RecordEnabled = value.Bool
 			}
+		case liveroomsetting.FieldCommentAudience:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field comment_audience", values[i])
+			} else if value.Valid {
+				_m.CommentAudience = liveroomsetting.CommentAudience(value.String)
+			}
 		default:
 			_m.selectValues.Set(columns[i], values[i])
 		}
@@ -152,6 +162,9 @@ func (_m *LiveRoomSetting) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("record_enabled=")
 	builder.WriteString(fmt.Sprintf("%v", _m.RecordEnabled))
+	builder.WriteString(", ")
+	builder.WriteString("comment_audience=")
+	builder.WriteString(fmt.Sprintf("%v", _m.CommentAudience))
 	builder.WriteByte(')')
 	return builder.String()
 }

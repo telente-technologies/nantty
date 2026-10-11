@@ -116,6 +116,20 @@ func (_u *LiveRoomSettingUpdate) SetNillableRecordEnabled(v *bool) *LiveRoomSett
 	return _u
 }
 
+// SetCommentAudience sets the "comment_audience" field.
+func (_u *LiveRoomSettingUpdate) SetCommentAudience(v liveroomsetting.CommentAudience) *LiveRoomSettingUpdate {
+	_u.mutation.SetCommentAudience(v)
+	return _u
+}
+
+// SetNillableCommentAudience sets the "comment_audience" field if the given value is not nil.
+func (_u *LiveRoomSettingUpdate) SetNillableCommentAudience(v *liveroomsetting.CommentAudience) *LiveRoomSettingUpdate {
+	if v != nil {
+		_u.SetCommentAudience(*v)
+	}
+	return _u
+}
+
 // Mutation returns the LiveRoomSettingMutation object of the builder.
 func (_u *LiveRoomSettingUpdate) Mutation() *LiveRoomSettingMutation {
 	return _u.mutation
@@ -148,7 +162,20 @@ func (_u *LiveRoomSettingUpdate) ExecX(ctx context.Context) {
 	}
 }
 
+// check runs all checks and user-defined validators on the builder.
+func (_u *LiveRoomSettingUpdate) check() error {
+	if v, ok := _u.mutation.CommentAudience(); ok {
+		if err := liveroomsetting.CommentAudienceValidator(v); err != nil {
+			return &ValidationError{Name: "comment_audience", err: fmt.Errorf(`ent: validator failed for field "LiveRoomSetting.comment_audience": %w`, err)}
+		}
+	}
+	return nil
+}
+
 func (_u *LiveRoomSettingUpdate) sqlSave(ctx context.Context) (_node int, err error) {
+	if err := _u.check(); err != nil {
+		return _node, err
+	}
 	_spec := sqlgraph.NewUpdateSpec(liveroomsetting.Table, liveroomsetting.Columns, sqlgraph.NewFieldSpec(liveroomsetting.FieldID, field.TypeUUID))
 	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
@@ -185,6 +212,9 @@ func (_u *LiveRoomSettingUpdate) sqlSave(ctx context.Context) (_node int, err er
 	}
 	if value, ok := _u.mutation.RecordEnabled(); ok {
 		_spec.SetField(liveroomsetting.FieldRecordEnabled, field.TypeBool, value)
+	}
+	if value, ok := _u.mutation.CommentAudience(); ok {
+		_spec.SetField(liveroomsetting.FieldCommentAudience, field.TypeEnum, value)
 	}
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
@@ -293,6 +323,20 @@ func (_u *LiveRoomSettingUpdateOne) SetNillableRecordEnabled(v *bool) *LiveRoomS
 	return _u
 }
 
+// SetCommentAudience sets the "comment_audience" field.
+func (_u *LiveRoomSettingUpdateOne) SetCommentAudience(v liveroomsetting.CommentAudience) *LiveRoomSettingUpdateOne {
+	_u.mutation.SetCommentAudience(v)
+	return _u
+}
+
+// SetNillableCommentAudience sets the "comment_audience" field if the given value is not nil.
+func (_u *LiveRoomSettingUpdateOne) SetNillableCommentAudience(v *liveroomsetting.CommentAudience) *LiveRoomSettingUpdateOne {
+	if v != nil {
+		_u.SetCommentAudience(*v)
+	}
+	return _u
+}
+
 // Mutation returns the LiveRoomSettingMutation object of the builder.
 func (_u *LiveRoomSettingUpdateOne) Mutation() *LiveRoomSettingMutation {
 	return _u.mutation
@@ -338,7 +382,20 @@ func (_u *LiveRoomSettingUpdateOne) ExecX(ctx context.Context) {
 	}
 }
 
+// check runs all checks and user-defined validators on the builder.
+func (_u *LiveRoomSettingUpdateOne) check() error {
+	if v, ok := _u.mutation.CommentAudience(); ok {
+		if err := liveroomsetting.CommentAudienceValidator(v); err != nil {
+			return &ValidationError{Name: "comment_audience", err: fmt.Errorf(`ent: validator failed for field "LiveRoomSetting.comment_audience": %w`, err)}
+		}
+	}
+	return nil
+}
+
 func (_u *LiveRoomSettingUpdateOne) sqlSave(ctx context.Context) (_node *LiveRoomSetting, err error) {
+	if err := _u.check(); err != nil {
+		return _node, err
+	}
 	_spec := sqlgraph.NewUpdateSpec(liveroomsetting.Table, liveroomsetting.Columns, sqlgraph.NewFieldSpec(liveroomsetting.FieldID, field.TypeUUID))
 	id, ok := _u.mutation.ID()
 	if !ok {
@@ -392,6 +449,9 @@ func (_u *LiveRoomSettingUpdateOne) sqlSave(ctx context.Context) (_node *LiveRoo
 	}
 	if value, ok := _u.mutation.RecordEnabled(); ok {
 		_spec.SetField(liveroomsetting.FieldRecordEnabled, field.TypeBool, value)
+	}
+	if value, ok := _u.mutation.CommentAudience(); ok {
+		_spec.SetField(liveroomsetting.FieldCommentAudience, field.TypeEnum, value)
 	}
 	_node = &LiveRoomSetting{config: _u.config}
 	_spec.Assign = _node.assignValues

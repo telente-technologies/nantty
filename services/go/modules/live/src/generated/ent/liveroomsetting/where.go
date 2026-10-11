@@ -194,6 +194,26 @@ func RecordEnabledNEQ(v bool) predicate.LiveRoomSetting {
 	return predicate.LiveRoomSetting(sql.FieldNEQ(FieldRecordEnabled, v))
 }
 
+// CommentAudienceEQ applies the EQ predicate on the "comment_audience" field.
+func CommentAudienceEQ(v CommentAudience) predicate.LiveRoomSetting {
+	return predicate.LiveRoomSetting(sql.FieldEQ(FieldCommentAudience, v))
+}
+
+// CommentAudienceNEQ applies the NEQ predicate on the "comment_audience" field.
+func CommentAudienceNEQ(v CommentAudience) predicate.LiveRoomSetting {
+	return predicate.LiveRoomSetting(sql.FieldNEQ(FieldCommentAudience, v))
+}
+
+// CommentAudienceIn applies the In predicate on the "comment_audience" field.
+func CommentAudienceIn(vs ...CommentAudience) predicate.LiveRoomSetting {
+	return predicate.LiveRoomSetting(sql.FieldIn(FieldCommentAudience, vs...))
+}
+
+// CommentAudienceNotIn applies the NotIn predicate on the "comment_audience" field.
+func CommentAudienceNotIn(vs ...CommentAudience) predicate.LiveRoomSetting {
+	return predicate.LiveRoomSetting(sql.FieldNotIn(FieldCommentAudience, vs...))
+}
+
 // And groups predicates with the AND operator between them.
 func And(predicates ...predicate.LiveRoomSetting) predicate.LiveRoomSetting {
 	return predicate.LiveRoomSetting(sql.AndPredicates(predicates...))
