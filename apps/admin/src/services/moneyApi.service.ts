@@ -87,3 +87,10 @@ export function fetchLedgerAccounts(filters: { readonly currency: string; readon
 export function fetchLedgerEntries(filters: { readonly currency: string; readonly accountCode?: string; readonly cursor?: string }, signal?: AbortSignal): Promise<JournalEntryList> {
   return sendAdminApiRequest("/admin/ledger/journal-entries", { query: { ...filters }, signal });
 }
+
+export const fetchPayouts = fetchWithdrawals;
+export const fetchPayoutDetail = fetchWithdrawalDetail;
+
+export function decidePayout(withdrawalId: string, decision: WithdrawalDecision, reason: string, idempotencyKey: string): Promise<StaffWithdrawalDetail> {
+  return reviewWithdrawal(withdrawalId, { decision, reason, idempotencyKey });
+}

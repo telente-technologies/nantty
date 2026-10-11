@@ -1,10 +1,11 @@
 import type { ApiErrorBody, ApiValidationIssue } from "@/types/api.type";
+import { resolveAdminErrorMessage } from "@/utils/adminErrorMessages.util";
 import { adaptListEnvelope } from "@/utils/listEnvelope.util";
 
 let currentCsrfToken: string | null = null;
 let stepUpPrompt: (() => Promise<boolean>) | null = null;
 const activityListeners = new Set<() => void>();
-const sessionEndingCodes = new Set(["SESSION_EXPIRED", "SESSION_IDLE_TIMEOUT", "UNAUTHENTICATED"]);
+const sessionEndingCodes = new Set(["SESSION_EXPIRED", "SESSION_IDLE_TIMEOUT", "UNAUTHENTICATED", "SESSION_PRIVILEGES_CHANGED"]);
 
 export function rememberCsrfTokenForRequests(csrfToken: string | null): void {
   currentCsrfToken = csrfToken;
@@ -64,7 +65,7 @@ export function buildQueryString(query: AdminApiRequestOptions["query"]): string
 function redirectToSignedOutPage(code: string): void {
   if (typeof window === "undefined") return;
   const nextPath = `${window.location.pathname}${window.location.search}`;
-  const reason = code === "SESSION_IDLE_TIMEOUT" ? "idle" : "expired";
+  const reason = code === "SESSION_IDLE_TIMEOUT" ? "idle" : code === "SESSION_PRIVILEGES_CHANGED" ? "privileges" : "expired";
   window.location.assign(`/bff/auth/signed-out?reason=${reason}&next=${encodeURIComponent(nextPath)}`);
 }
 
@@ -99,7 +100,8 @@ export async function sendRequestToAdminConsoleServer<Payload>(bffPath: string, 
   }
   if (!response.ok) {
     if (response.status === 401 && errorBody && sessionEndingCodes.has(errorBody.code)) redirectToSignedOutPage(errorBody.code);
-    throw new AdminApiRequestError(response.status, errorBody?.code ?? `HTTP_${response.status}`, errorBody?.message ?? "Something went wrong. Try again.", errorBody?.issues ?? []);
+    const code = errorBody?.code ?? `HTTP_${response.status}`;
+    throw new AdminApiRequestError(response.status, code, resolveAdminErrorMessage(code, errorBody?.message, response.status), errorBody?.issues ?? []);
   }
   if (response.status === 204) return undefined as Payload;
   if (options.expect === "text") return (await response.text()) as Payload;
@@ -114,7 +116,8 @@ export function sendAdminApiRequest<Payload>(apiPath: string, options: AdminApiR
 export function readErrorMessageForDisplay(error: unknown): string {
   if (typeof navigator !== "undefined" && navigator.onLine === false) return "You're offline. Check your connection and we'll retry when you're back.";
   if (error instanceof AdminApiRequestError) return error.message;
-  return "Something went wrong. Try again.";
+  if (error instanceof Error && error.message) return `${error.message} (CLIENT_ERROR)`;
+  return "The console hit an unexpected error. Nothing was sent. Reload the page and try again. (CLIENT_ERROR)";
 }
 
 export function createIdempotencyKey(): string {

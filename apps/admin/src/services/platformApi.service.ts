@@ -51,6 +51,9 @@ export interface AuditLogFilters {
   readonly actorId?: string;
   readonly targetType?: string;
   readonly targetId?: string;
+  readonly action?: string;
+  readonly requestId?: string;
+  readonly stepUp?: boolean;
   readonly from?: string;
   readonly to?: string;
   readonly cursor?: string;
