@@ -3,7 +3,9 @@ package moderation
 import (
 	"context"
 	"encoding/json"
+	"maps"
 	"net/http"
+	"slices"
 	"testing"
 	"time"
 
@@ -175,8 +177,8 @@ func TestThirdCopyrightStrikeRestrictsOpensSuspensionReviewAndStrikesExpire(t *t
 			t.Fatalf("live claims take down immediately with a strike: %v", upheld)
 		}
 	}
-	if last := harness.users.last(); last.Action != "restrict" || len(last.Features) != 1 || last.Features[0] != "GOING_LIVE" || last.Source != "copyright" {
-		t.Fatalf("three strikes in the window restrict going live: %+v", last)
+	if last := harness.users.last(); last.Action != "restrict" || !slices.Equal(last.Features, []string{"POSTING", "GOING_LIVE", "SELLING"}) || *last.DurationDays < 30 || last.Source != "copyright" {
+		t.Fatalf("a repeat infringer is suspended from posting, live and selling for at least 30 days: %+v", last)
 	}
 	status := harness.accountStatus(uploader)
 	if status["status"] != "RESTRICTED" || status["canMonetise"] != false || status["canGoLive"] != false || status["copyrightStrikesInWindow"] != float64(3) {
@@ -207,11 +209,14 @@ func TestThirdCopyrightStrikeRestrictsOpensSuspensionReviewAndStrikesExpire(t *t
 func TestCopyrightPolicyIsAdminConfigurable(t *testing.T) {
 	harness := startModerationAgainstFreshSchema(t)
 	reviewer, stepUp := harness.staff("copyright:review")
-	if policy := harness.expect("GET", "/api/v1/admin/copyright-policy", reviewer, nil, http.StatusOK); policy["takedownDeadlineHours"] != float64(48) || policy["strikeLifetimeDays"] != float64(90) {
+	if policy := harness.expect("GET", "/api/v1/admin/copyright-policy", reviewer, nil, http.StatusOK); policy["takedownDeadlineHours"] != float64(48) || policy["strikeLifetimeDays"] != float64(365) || policy["restrictionThreshold"] != float64(2) || policy["restrictionDays"] != float64(30) {
 		t.Fatalf("defaults: %v", policy)
 	}
-	update := map[string]any{"takedownDeadlineHours": 24, "strikeLifetimeDays": 60, "warningLifetimeDays": 180, "strikeWindowDays": 60, "restrictionThreshold": 2, "suspensionReviewThreshold": 3, "restrictionDays": 14, "reason": "tighter policy for launch"}
+	update := map[string]any{"takedownDeadlineHours": 24, "strikeLifetimeDays": 60, "warningLifetimeDays": 180, "strikeWindowDays": 60, "restrictionThreshold": 2, "suspensionReviewThreshold": 3, "restrictionDays": 30, "reason": "tighter policy for launch"}
 	harness.expect("PUT", "/api/v1/admin/copyright-policy", reviewer, update, http.StatusForbidden)
+	belowLegalMinimum := maps.Clone(update)
+	belowLegalMinimum["restrictionDays"] = 14
+	harness.expect("PUT", "/api/v1/admin/copyright-policy", reviewer, belowLegalMinimum, http.StatusBadRequest, stepUp...)
 	harness.expect("PUT", "/api/v1/admin/copyright-policy", reviewer, update, http.StatusOK, stepUp...)
 	_, upheld := harness.fileAndUphold("clip", uuid.NewString(), "video", uuid.NewString())
 	deadline, _ := time.Parse(time.RFC3339, upheld["takedownDeadlineAt"].(string))

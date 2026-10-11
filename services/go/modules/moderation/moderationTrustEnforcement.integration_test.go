@@ -146,8 +146,10 @@ func TestContentReportsGroupPerTargetAndActionsGoThroughEventsAndGoIdentity(t *t
 	if len(detail["reporterNotes"].([]any)) != 3 {
 		t.Fatalf("reporter notes %v", detail["reporterNotes"])
 	}
-	acting, actingStepUp := harness.staff("moderation:reports")
+	reviewerOnly, reviewerOnlyStepUp := harness.staff("moderation:reports")
 	actions := "/api/v1/admin/reports/" + reportId + "/actions"
+	harness.expect("POST", actions, reviewerOnly, map[string]string{"action": "REMOVE", "reason": "fake giveaway scam"}, http.StatusForbidden, reviewerOnlyStepUp...)
+	acting, actingStepUp := harness.staff("moderation:reports", "users:moderate")
 	harness.expect("POST", actions, acting, map[string]string{"action": "NOPE", "reason": "valid reason here"}, http.StatusBadRequest)
 	harness.expect("POST", actions, acting, map[string]string{"action": "SUSPEND_AUTHOR", "reason": "valid reason here"}, http.StatusForbidden)
 	decided := harness.expect("POST", actions, acting, map[string]string{"action": "REMOVE", "reason": "fake giveaway scam"}, http.StatusOK, actingStepUp...)
@@ -174,7 +176,7 @@ func TestSuspendingAnAuthorNeedsStepUpAndGoesThroughGoIdentity(t *testing.T) {
 	if err := harness.contentReportHandler()(context.Background(), reportCreatedEnvelope(uuid.NewString(), "clip", "c-1", "violence", "")); err != nil {
 		t.Fatal(err)
 	}
-	token, stepUp := harness.staff("moderation:reports")
+	token, stepUp := harness.staff("moderation:reports", "users:suspend")
 	queue := harness.expect("GET", "/api/v1/admin/reports?targetType=clip", token, nil, http.StatusOK)["data"].([]any)
 	if queue[0].(map[string]any)["priority"] != "HIGH" {
 		t.Fatalf("violence reports start at high priority: %v", queue[0])

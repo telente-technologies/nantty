@@ -2,6 +2,8 @@ package services
 
 import (
 	"context"
+	"database/sql"
+	"errors"
 	"time"
 
 	"github.com/google/uuid"
@@ -18,7 +20,7 @@ import (
 const warningDisplayWindow = 2 * time.Minute
 
 func (service *LiveService) lockOrCreateSafetyState(ctx context.Context, tx *ent.Tx, session *ent.LiveSession, now time.Time) (*ent.LiveSafetyState, error) {
-	if err := tx.LiveSafetyState.Create().SetLiveID(session.ID).SetHostID(session.HostID).SetCreatedAt(now).SetUpdatedAt(now).OnConflictColumns(livesafetystate.FieldLiveID).DoNothing().Exec(ctx); err != nil && !ent.IsNotFound(err) {
+	if err := tx.LiveSafetyState.Create().SetLiveID(session.ID).SetHostID(session.HostID).SetCreatedAt(now).SetUpdatedAt(now).OnConflictColumns(livesafetystate.FieldLiveID).DoNothing().Exec(ctx); err != nil && !ent.IsNotFound(err) && !errors.Is(err, sql.ErrNoRows) {
 		return nil, err
 	}
 	return tx.LiveSafetyState.Query().Where(livesafetystate.LiveID(session.ID)).ForUpdate().Only(ctx)
@@ -63,7 +65,7 @@ func (service *LiveService) ReleaseLiveSafetyHold(ctx context.Context, liveId, i
 	released := false
 	err = service.RunInTransaction(ctx, func(tx *ent.Tx) error {
 		state, err := service.lockOrCreateSafetyState(ctx, tx, session, now)
-		if err != nil || !state.HoldActive {
+		if err != nil || !state.HoldActive || state.HoldIncidentID != incidentId {
 			return err
 		}
 		released = true

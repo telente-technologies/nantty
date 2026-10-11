@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log/slog"
+	"time"
 
 	"github.com/google/uuid"
 
@@ -41,7 +42,12 @@ func ApplyContentVisibilityChangedMessage(deployed *container.Container) platfor
 		if err != nil || data.TargetType != "live" {
 			return nil
 		}
-		session, err := deployed.Client.LiveSession.UpdateOneID(liveId).SetModerationVisibility(data.Visibility).Save(ctx)
+		occurredAt := envelope.OccurredAt
+		if occurredAt.IsZero() {
+			occurredAt = time.Now()
+		}
+		session, err := deployed.Client.LiveSession.UpdateOneID(liveId).Where(livesession.Or(livesession.ModerationVisibilityAtIsNil(), livesession.ModerationVisibilityAtLT(occurredAt))).
+			SetModerationVisibility(data.Visibility).SetModerationVisibilityAt(occurredAt).Save(ctx)
 		if ent.IsNotFound(err) {
 			return nil
 		}

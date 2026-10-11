@@ -74,7 +74,7 @@ func TestStrikeAppealsJoinTheUnifiedQueueWithFourEyes(t *testing.T) {
 	harness := startModerationAgainstFreshSchema(t)
 	author := uuid.NewString()
 	authorToken := harness.tokens.SignAccountAccessToken(t, author)
-	_, decider, deciderStepUp := harness.reportAndDecide("clip", "c-strike", author, "REMOVE", "moderation:appeals")
+	_, decider, deciderStepUp := harness.reportAndDecide("clip", "c-strike", author, "REMOVE", "moderation:appeals", "users:moderate")
 	strikes := harness.expect("GET", "/api/v1/account/status", authorToken, nil, http.StatusOK)
 	strikeId := firstStrikeId(t, strikes)
 	harness.expect("POST", "/api/v1/account/status/strikes/"+strikeId+"/appeal", authorToken, map[string]string{"message": "The clip was my own original footage."}, http.StatusAccepted)
@@ -165,7 +165,7 @@ func TestOverturningASuspensionThroughTheLegacyRouteLiftsItAndRestoresTheContent
 	if err := harness.contentReportHandler()(context.Background(), reportCreatedEnvelope(uuid.NewString(), "clip", "c-susp", "violence", "")); err != nil {
 		t.Fatal(err)
 	}
-	moderator, stepUp := harness.staff("moderation:reports")
+	moderator, stepUp := harness.staff("moderation:reports", "users:suspend")
 	reportId := harness.expect("GET", "/api/v1/admin/reports", moderator, nil, http.StatusOK)["data"].([]any)[0].(map[string]any)["id"].(string)
 	harness.expect("POST", "/api/v1/admin/reports/"+reportId+"/suspend-author", moderator, map[string]any{"durationDays": 7, "reason": "credible threats"}, http.StatusOK, stepUp...)
 	strikeId := firstStrikeId(t, harness.expect("GET", "/api/v1/account/status", authorToken, nil, http.StatusOK))

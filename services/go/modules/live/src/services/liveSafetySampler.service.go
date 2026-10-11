@@ -2,6 +2,8 @@ package services
 
 import (
 	"context"
+	"database/sql"
+	"errors"
 	"log/slog"
 	"time"
 
@@ -82,7 +84,7 @@ func (service *LiveService) ensureSafetyState(ctx context.Context, live *ent.Liv
 	}
 	now := service.Now()
 	err := service.Client.LiveSafetyState.Create().SetLiveID(live.ID).SetHostID(live.HostID).SetCreatedAt(now).SetUpdatedAt(now).OnConflictColumns(livesafetystate.FieldLiveID).DoNothing().Exec(ctx)
-	if err != nil && !ent.IsNotFound(err) {
+	if err != nil && !ent.IsNotFound(err) && !errors.Is(err, sql.ErrNoRows) {
 		return nil, err
 	}
 	return service.Client.LiveSafetyState.Query().Where(livesafetystate.LiveID(live.ID)).Only(ctx)

@@ -158,3 +158,28 @@ func (relations SchemaSocialRelations) ListLiveAlertRecipients(ctx context.Conte
 	}
 	return recipients, false, nil
 }
+
+func (relations SchemaSocialRelations) FollowedAmong(ctx context.Context, followerId uuid.UUID, candidates []uuid.UUID) (map[uuid.UUID]bool, error) {
+	followed := make(map[uuid.UUID]bool, len(candidates))
+	if len(candidates) == 0 {
+		return followed, nil
+	}
+	placeholders, arguments := placeholdersFor(2, candidates)
+	query := `SELECT "followeeId" FROM "` + relations.SocialSchema + `"."follows" WHERE "followerId" = $1 AND "state" = 'accepted' AND "followeeId" IN (` + placeholders + `)`
+	rows, err := relations.Database.QueryContext(ctx, query, append([]any{followerId.String()}, arguments...)...)
+	if err != nil {
+		if relations.tolerate(err) {
+			return followed, nil
+		}
+		return nil, err
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var followeeId uuid.UUID
+		if err := rows.Scan(&followeeId); err != nil {
+			return nil, err
+		}
+		followed[followeeId] = true
+	}
+	return followed, rows.Err()
+}
