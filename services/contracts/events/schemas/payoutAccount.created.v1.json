@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://contracts.zudomart.com/events/payoutAccount.created.v1.json",
   "title": "payoutAccount.created",
-  "description": "The Paystack transfer recipient exists. Notifications: 'Your payout account is ready, finish setup'.",
+  "description": "The Flutterwave transfer recipient exists. Notifications: 'Your payout account is ready, finish setup'.",
   "type": "object",
   "additionalProperties": false,
   "required": [

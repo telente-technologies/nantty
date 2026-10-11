@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://contracts.zudomart.com/events/payoutAccount.verified.v1.json",
   "title": "payoutAccount.verified",
-  "description": "Every Paystack object the person needs exists; withdrawals are enabled.",
+  "description": "Every Flutterwave object the person needs exists; withdrawals are enabled.",
   "type": "object",
   "additionalProperties": false,
   "required": [
