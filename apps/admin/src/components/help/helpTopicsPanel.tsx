@@ -80,7 +80,6 @@ export function HelpTopicsPanel() {
         readRowKey={(topic) => topic.id}
         onRowOpen={(topic) => router.push(`/support/help/${encodeURIComponent(topic.id)}`)}
         isLoading={topics.isLoading}
-        readRowTone={(topic) => (topic.status === "PENDING_REVIEW" ? "caution" : null)}
         emptyMessage="No topics match these filters."
       />
       {topics.data ? <Pagination page={topics.data.page} pageSize={topics.data.pageSize} total={topics.data.total} onPageChange={setPage} /> : null}

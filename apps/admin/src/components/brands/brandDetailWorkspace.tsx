@@ -18,6 +18,7 @@ import { formatDateOnly } from "@/utils/formatting.util";
 
 import { BrandLinkedStoresTable, BrandMembersTable } from "./brandPeopleAndStores";
 import { BrandLogo, OfficialStatusBadge } from "./brandLabels";
+import { BrandReassignAction } from "./brandReassignAction";
 import styles from "./brands.module.css";
 import { ipClaimColumns } from "./ipClaimColumns";
 import { OfficialStorePanel } from "./officialStorePanel";
@@ -56,7 +57,7 @@ export function BrandDetailWorkspace({ brandId }: { readonly brandId: string }) 
       <SegmentedTabs label="Brand sections" items={tabs} activeKey={activeTab} onChange={setActiveTab} />
       {activeTab === "official" ? <OfficialStorePanel brand={brand} onChanged={replaceBrand} /> : null}
       {activeTab === "profile" ? (
-        <Card title="Profile">
+        <Card title="Profile" actions={<BrandReassignAction brandId={brand.id} brandName={brand.name} onReassigned={detail.reload} />}>
           <KeyValueList
             columns={3}
             items={[

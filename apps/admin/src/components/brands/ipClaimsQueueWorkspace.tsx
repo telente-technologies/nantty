@@ -49,7 +49,6 @@ export function IpClaimsQueueWorkspace() {
         readRowKey={(claim) => claim.id}
         isLoading={list.isLoading}
         onRowOpen={(claim) => router.push(`/ip-claims/${encodeURIComponent(claim.id)}`)}
-        readRowTone={(claim) => (isIpClaimPastSla(claim) ? "danger" : claim.priorStrikeCount >= 2 ? "caution" : null)}
         emptyMessage="No claims in this view."
       />
       <CursorPagination cursor={cursor} nextCursor={list.data?.nextCursor} onCursorChange={setCursor} />

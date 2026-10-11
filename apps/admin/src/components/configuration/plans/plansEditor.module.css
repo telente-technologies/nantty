@@ -26,22 +26,6 @@
   color: var(--ink-muted);
 }
 
-.planCard {
-  border-left: 4px solid var(--divider);
-}
-
-.planBLUE {
-  border-left-color: var(--color-brand);
-}
-
-.planGOLD {
-  border-left-color: var(--verified-gold);
-}
-
-.planBLACK {
-  border-left-color: var(--console-night);
-}
-
 .planTitle {
   display: inline-flex;
   align-items: center;

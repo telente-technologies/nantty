@@ -49,7 +49,6 @@ export function AutoTopicsPanel() {
         readRowKey={(entry) => entry.id}
         onRowOpen={(entry) => (entry.topic ? router.push(`/support/help/${encodeURIComponent(entry.topic.id)}`) : undefined)}
         isLoading={log.isLoading}
-        readRowTone={(entry) => (entry.action === "PENDING_REVIEW" ? "caution" : null)}
         emptyMessage="No resolved tickets have been turned into topics yet."
       />
       {log.data ? <Pagination page={log.data.page} pageSize={log.data.pageSize} total={log.data.total} onPageChange={setPage} /> : null}

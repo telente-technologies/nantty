@@ -16,7 +16,7 @@ export const ipClaimColumns: readonly DataTableColumn<IpClaimSummary>[] = [
   { key: "brand", header: "Claimant brand", render: (claim) => <BrandNameCell name={claim.claimantBrand.name} logoUrl={claim.claimantBrand.logoUrl} /> },
   { key: "listing", header: "Listing", render: (claim) => <span>{claim.listing.title}<br /><span className={styles.muted}>{formatMoneyForDisplay(claim.listing.price)} · {claim.listing.storeName}</span></span> },
   { key: "seller", header: "Accused seller", render: (claim) => <UserIdentity user={claim.accusedSeller} size={24} /> },
-  { key: "strikes", header: "Strikes", render: (claim) => claim.priorStrikeCount, width: "80px", align: "end" },
+  { key: "strikes", header: "Strikes", render: (claim) => (claim.priorStrikeCount >= 2 ? <StatusBadge tone="caution" label={`${claim.priorStrikeCount} strikes`} /> : claim.priorStrikeCount), width: "110px", align: "end" },
   { key: "status", header: "Status", render: (claim) => <StatusBadge status={claim.status} />, width: "110px" },
-  { key: "sla", header: "Due", render: (claim) => (claim.status === "OPEN" || claim.status === "NEEDS_INFO" ? <span className={isIpClaimPastSla(claim) ? styles.slaBreached : undefined}>{formatRelativeTimeFromNow(claim.slaDueAt)}</span> : "—"), width: "110px" },
+  { key: "sla", header: "Due", render: (claim) => (claim.status === "OPEN" || claim.status === "NEEDS_INFO" ? isIpClaimPastSla(claim) ? <StatusBadge tone="danger" label={`Overdue ${formatRelativeTimeFromNow(claim.slaDueAt)}`} /> : formatRelativeTimeFromNow(claim.slaDueAt) : "—"), width: "150px" },
 ];

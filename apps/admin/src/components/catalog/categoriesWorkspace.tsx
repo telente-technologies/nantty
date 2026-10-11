@@ -91,7 +91,7 @@ export function CategoriesWorkspace() {
         <span className={styles.muted}>{categories.filter((category) => category.parentId === null).length} departments · {categories.filter((category) => category.parentId !== null).length} subcategories</span>
       </Toolbar>
       {errorMessage ? <ErrorBlock error={queryError} message={errorMessage} onRetry={reload} /> : null}
-      <DataTable caption="Product categories" columns={columns} rows={rows} readRowKey={(row) => row.category.id} onRowOpen={(row) => setSelectedCategoryId(row.category.id)} selectedRowKey={selectedCategoryId} isLoading={isLoading} emptyMessage="No categories match this filter." readRowTone={(row) => (row.category.isActive ? null : "caution")} />
+      <DataTable caption="Product categories" columns={columns} rows={rows} readRowKey={(row) => row.category.id} onRowOpen={(row) => setSelectedCategoryId(row.category.id)} selectedRowKey={selectedCategoryId} isLoading={isLoading} emptyMessage="No categories match this filter." />
       {selectedRow ? (
         <CategoryDetailPanel category={selectedRow.category} parentName={selectedRow.parentName} changeCounter={changeCounter} onClose={() => setSelectedCategoryId(null)} onEdit={() => setEditor({ category: selectedRow.category })} onChanged={refreshAfterChange} />
       ) : null}

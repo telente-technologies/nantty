@@ -18,7 +18,6 @@ export function PlanEditorCard({ plan, canWrite, onChange }: PlanEditorCardProps
   const isOfficial = plan.color === "BLACK";
   return (
     <Card
-      className={`${styles.planCard} ${styles[`plan${plan.color}`]}`}
       title={
         <span className={styles.planTitle}>
           {plan.displayName}

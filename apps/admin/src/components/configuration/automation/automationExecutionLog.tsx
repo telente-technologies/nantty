@@ -18,7 +18,6 @@ export function AutomationExecutionLog({ executions, isLoading }: { readonly exe
       rows={executions}
       isLoading={isLoading}
       readRowKey={(execution) => execution.id}
-      readRowTone={(execution) => (execution.outcome === "FAILED" ? "danger" : null)}
       emptyMessage="No runs recorded yet."
       columns={[
         { key: "when", header: "When", width: "120px", render: (execution) => <time dateTime={execution.occurredAt} title={formatDateTime(execution.occurredAt)}>{formatRelativeTimeFromNow(execution.occurredAt)}</time> },

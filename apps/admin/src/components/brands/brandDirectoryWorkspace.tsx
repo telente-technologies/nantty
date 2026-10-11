@@ -66,7 +66,6 @@ export function BrandDirectoryWorkspace() {
         readRowKey={(brand) => brand.id}
         isLoading={list.isLoading}
         onRowOpen={(brand) => router.push(`/brands/${encodeURIComponent(brand.id)}`)}
-        readRowTone={(brand) => (brand.officialStatus === "PENDING" ? "caution" : null)}
         emptyMessage="No brands match these filters."
       />
       <CursorPagination cursor={cursor} nextCursor={list.data?.nextCursor} onCursorChange={setCursor} />

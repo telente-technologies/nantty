@@ -17,7 +17,6 @@
   padding: var(--space-3);
   border-radius: var(--radius-medium);
   background: var(--surface-sunken);
-  border-left: 3px solid var(--color-brand);
 }
 
 .stepTitle {
