@@ -20,7 +20,7 @@ func TestRejectedVerificationRefundPathPerChannel(t *testing.T) {
 		row  ent.Subscription
 		want VerificationRefundPath
 	}{
-		{"paid web plan gets a Paystack refund", ent.Subscription{Channel: subscription.ChannelWebCheckout, BillingReference: "sub-1", AmountMinor: 250_000}, RefundPathCard},
+		{"paid web plan gets a provider refund", ent.Subscription{Channel: subscription.ChannelWebCheckout, BillingReference: "sub-1", AmountMinor: 250_000}, RefundPathCard},
 		{"converted web trial was charged", ent.Subscription{Channel: subscription.ChannelWebCheckout, BillingReference: "sub-1", AmountMinor: 250_000, WithTrial: true, TrialEndsAt: &past}, RefundPathCard},
 		{"running web trial was never charged", ent.Subscription{Channel: subscription.ChannelWebCheckout, BillingReference: "sub-1", AmountMinor: 250_000, WithTrial: true, TrialEndsAt: &future}, RefundPathNothingCharged},
 		{"Google Play is revoked with a full refund", ent.Subscription{Channel: subscription.ChannelGooglePlay, StoreOriginalTransactionID: "token"}, RefundPathGooglePlay},

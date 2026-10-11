@@ -13,7 +13,7 @@ import (
 	"zudomart/modules/subscriptions/src/repositories"
 )
 
-func TestRenewalWithALostPaystackReplyChargesTheCardOnce(t *testing.T) {
+func TestRenewalWithALostProviderReplyChargesTheCardOnce(t *testing.T) {
 	owner, profileId := uuid.NewString(), uuid.NewString()
 	identity := repositories.StaticIdentityDirectory{
 		Profiles: map[string]repositories.BillingProfile{profileId: {ProfileId: profileId, OwnerUserId: owner, ProfileType: "business", DisplayName: "Ada Fabrics", CountryCode: "NG"}},
@@ -33,20 +33,20 @@ func TestRenewalWithALostPaystackReplyChargesTheCardOnce(t *testing.T) {
 	if err != nil || row.NextChargeAt == nil {
 		t.Fatalf("trial: %+v %v", row, err)
 	}
-	harness.Paystack.LoseNextChargeReply = true
+	harness.Flutterwave.LoseNextChargeReply = true
 	harness.clock = row.NextChargeAt.Add(time.Minute)
 	harness.module.Billing.RunDueJobs(ctx)
 	harness.clock = harness.clock.Add(2 * time.Hour)
 	harness.module.Billing.RunDueJobs(ctx)
 	row = client.Subscription.GetX(ctx, row.ID)
 	renewals := 0
-	for reference := range harness.Paystack.Transactions {
-		if strings.HasPrefix(reference, "ren-") {
+	for _, transaction := range harness.Flutterwave.Transactions {
+		if strings.HasPrefix(transaction.TxRef, "ren-") {
 			renewals++
 		}
 	}
 	if renewals != 1 || row.Status != subscription.StatusActive {
-		t.Fatalf("one renewal charge despite the lost reply: charges=%d status=%s calls=%v", renewals, row.Status, harness.Paystack.CallCounts)
+		t.Fatalf("one renewal charge despite the lost reply: charges=%d status=%s calls=%v", renewals, row.Status, harness.Flutterwave.CallCounts)
 	}
 	if authorization, err := harness.Payments.Application.Gateway.DescribeBillingAuthorization(ctx, row.BillingAuthorizationID); err != nil || !authorization.Usable {
 		t.Fatalf("a lost reply must not revoke the saved card: %+v %v", authorization, err)

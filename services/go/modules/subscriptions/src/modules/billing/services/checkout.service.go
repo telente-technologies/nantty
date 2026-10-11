@@ -131,7 +131,7 @@ func (billing Billing) StartCheckout(ctx context.Context, request CheckoutReques
 	if err != nil {
 		return CheckoutView{}, err
 	}
-	view := CheckoutView{SubscriptionId: subscriptionId.String(), Provider: "paystack", Price: money(quote.AmountMinor, currency), Discount: quote, Trial: request.WithTrial, BillingNote: webBillingNote(price)}
+	view := CheckoutView{SubscriptionId: subscriptionId.String(), Provider: "flutterwave", Price: money(quote.AmountMinor, currency), Discount: quote, Trial: request.WithTrial, BillingNote: webBillingNote(price)}
 	metadata := map[string]string{"subscriptionId": subscriptionId.String(), "profileId": profile.ProfileId}
 	if request.WithTrial {
 		verificationAmount, verificationCurrency := regionpricing.CardVerificationCharge(currency)
@@ -169,9 +169,9 @@ func (billing Billing) ensureProviderPlan(ctx context.Context, planCode, interva
 	if !ent.IsNotFound(err) {
 		return "", err
 	}
-	paystackInterval := map[string]string{"month": "monthly", "year": "annually"}[interval]
+	providerInterval := map[string]string{"month": "monthly", "year": "annually"}[interval]
 	code, err := billing.Container.Payments.CreateRecurringPlanProduct(ctx, paymentinterfaces.RecurringPlanRequest{
-		Name: fmt.Sprintf("Zudomart %s %s %d", planCode, interval, amountMinor), AmountMinor: amountMinor, Currency: currency, Interval: paystackInterval,
+		Name: fmt.Sprintf("Zudomart %s %s %d", planCode, interval, amountMinor), AmountMinor: amountMinor, Currency: currency, Interval: providerInterval,
 	})
 	if err != nil {
 		return "", err

@@ -71,7 +71,7 @@ func TestSellerTrialConvertsByChargingTheSavedCardAndRenewsAtTheFullPlanPrice(t 
 	harness.PayCheckout(started.Body["reference"].(string), 75, "card")
 	client := harness.module.Billing.Container.Client(harness.Database)
 	row, err := client.Subscription.Query().Where(subscription.ProfileID(profileId)).Only(ctx)
-	if err != nil || row.Status != subscription.StatusTrialing || row.BillingAuthorizationID == "" || row.NextChargeAt == nil || len(harness.Paystack.Subscriptions) != 0 {
+	if err != nil || row.Status != subscription.StatusTrialing || row.BillingAuthorizationID == "" || row.NextChargeAt == nil {
 		t.Fatalf("the card check starts the trial on our own scheduler: %+v %v", row, err)
 	}
 	internal := http.Header{"X-Internal-Token": {strings.Repeat("s", 32)}}
@@ -135,9 +135,8 @@ func TestBlackKeepsItsBadgeForTheGracePeriodAndGoldGetsTheBundle(t *testing.T) {
 	if blocked := harness.Call(http.MethodPost, "/api/v1/subscriptions/checkout", harness.Tokens.UserAccessToken(owner), "", map[string]any{"profileId": agency, "planCode": "black"}); blocked.Status != http.StatusForbidden {
 		t.Fatalf("black is invitation only: %d", blocked.Status)
 	}
-	black := client.Subscription.Create().SetProfileID(agency).SetProfileType("government").SetOwnerUserID(owner).SetPlanCode("black").SetInterval("month").SetChannel("web_paystack").
+	black := client.Subscription.Create().SetProfileID(agency).SetProfileType("government").SetOwnerUserID(owner).SetPlanCode("black").SetInterval("month").SetChannel("web_checkout").
 		SetStatus("active").SetListAmountMinor(5_000_000).SetAmountMinor(5_000_000).SetCurrency("NGN").SetBillingReference("sub-black-1").SetCreatedAt(time.Now()).SaveX(ctx)
-	harness.DeliverPaystackEvent("subscription.create", map[string]any{"id": 9, "subscription_code": "SUB_black", "status": "active", "customer": map[string]any{"customer_code": "CUS_x"}, "plan": map[string]any{"plan_code": "PLN_x"}})
 	mustNotify := func(status string) {
 		t.Helper()
 		if err := harness.module.Billing.HandleBillingSubscriptionChangedForTest(ctx, black.BillingReference, status); err != nil {

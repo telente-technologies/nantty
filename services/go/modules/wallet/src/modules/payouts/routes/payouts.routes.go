@@ -14,7 +14,7 @@ func MountPayoutsRoutes(mux *http.ServeMux, application *payouts.Application) {
 	withdrawals := controllers.WithdrawalsController{Application: application}
 	resources := application.Container.Resources
 	requireUser := middlewares.RequireUserAccessToken(resources.AccessVerifier)
-	requireStepUp := middlewares.RequireUserAccessTokenAndStepUp(resources.AccessVerifier)
+	requireStepUp := middlewares.RequireUserAccessTokenAndSingleUseStepUp(resources.AccessVerifier, resources.StaffVerifiers.SingleUse)
 	requireStaffRead := middlewares.RequireStaffPermission(resources.StaffVerifiers, constants.PermissionReadWithdrawals, false)
 	requireStaffProcess := middlewares.RequireStaffPermissionWithSingleUseStepUp(resources.StaffVerifiers, constants.PermissionProcessWithdrawals)
 	mux.HandleFunc("GET /api/v1/internal/accounts/{accountId}/deletion-blockers", controllers.InternalAccountsController{Application: application}.DeletionBlockers)

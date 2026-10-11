@@ -51,7 +51,7 @@ func ReadWalletSettingsFromEnvironment(reader *platformconfig.EnvironmentReader)
 		WithdrawalsRequireReview:     reader.ReadStringOrDefault("WALLET_WITHDRAWALS_REQUIRE_REVIEW", "true") != "false",
 		AccountDirectorySchema:       reader.ReadStringOrDefault("WALLET_ACCOUNT_DIRECTORY_SCHEMA", "auth"),
 		PayoutRunInterval:            reader.ReadDurationOrDefault("WALLET_PAYOUT_RUN_INTERVAL", 24*time.Hour),
-		SellerSettlementAdapter:      reader.ReadStringOrDefault("WALLET_SELLER_SETTLEMENT_ADAPTER", "paystackTransfer"),
+		SellerSettlementAdapter:      reader.ReadStringOrDefault("WALLET_SELLER_SETTLEMENT_ADAPTER", "providerTransfer"),
 		CreatorTransferMinimum:       ParseCurrencyAmounts(reader.ReadStringOrDefault("CREATOR_TRANSFER_MINIMUMS", "NGN:10000,USD:100")),
 		CoinNetValueMinorByCurrency:  ParseCurrencyAmounts(reader.ReadStringOrDefault("COIN_NET_VALUES", "NGN:1000,USD:1")),
 		InternalApiToken:             reader.ReadStringOrDefault("MONEY_INTERNAL_API_TOKEN", ""),

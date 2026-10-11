@@ -87,6 +87,6 @@ func (container *Container) Client(executor databases.ExecutorQuerier) *ent.Clie
 func selectSellerSettlementAdapter(name string, payments *paymentservices.PaymentGateway) interfaces.SellerSettlementAdapter {
 	switch name {
 	default:
-		return integrations.PaystackTransferSettlement{Payments: payments}
+		return integrations.ProviderTransferSettlement{Payments: payments}
 	}
 }

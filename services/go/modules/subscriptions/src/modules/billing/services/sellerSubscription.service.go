@@ -86,7 +86,7 @@ func (billing Billing) detailsOf(ctx context.Context, row *ent.Subscription) (Se
 		details.PaymentMethodSummary = &row.CardLabel
 	}
 	if IsWebCheckoutChannel(row.Channel) {
-		provider := "paystack"
+		provider := "flutterwave"
 		details.Provider = &provider
 	}
 	periods, err := billing.Container.Client(billing.Container.Resources.Database).SubscriptionPeriod.Query().Where(subscriptionperiod.SubscriptionID(row.ID.String())).

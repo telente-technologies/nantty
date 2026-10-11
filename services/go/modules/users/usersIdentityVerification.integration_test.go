@@ -105,8 +105,8 @@ func TestIdentityVerificationJourneyFromRequestToAutoApproval(t *testing.T) {
 	}
 	harness.waitForPublishedEvents("verification.eligible")
 
-	harness.payForBlue(profileId, "sub_amaka", "web_paystack")
-	harness.payForBlue(profileId, "sub_amaka", "web_paystack")
+	harness.payForBlue(profileId, "sub_amaka", "web_checkout")
+	harness.payForBlue(profileId, "sub_amaka", "web_checkout")
 	cases := container.Client.VerificationCase.Query().Where(verificationcase.SubscriptionID("sub_amaka")).AllX(context.Background())
 	if len(cases) != 1 || cases[0].Status != verificationcase.StatusAwaitingConsent || !cases[0].EligibleAtPayment {
 		t.Fatalf("payment opens exactly one case: %+v", cases)

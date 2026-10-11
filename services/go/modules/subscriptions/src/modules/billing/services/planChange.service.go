@@ -193,7 +193,7 @@ func (billing Billing) PayOutstandingPeriod(ctx context.Context, userId string, 
 	if err != nil {
 		return CheckoutView{}, err
 	}
-	view := CheckoutView{SubscriptionId: row.ID.String(), Provider: "paystack", Price: money(period.AmountDueMinor, period.Currency), LineItems: period.LineItems, Reference: opened.Reference}
+	view := CheckoutView{SubscriptionId: row.ID.String(), Provider: "flutterwave", Price: money(period.AmountDueMinor, period.Currency), LineItems: period.LineItems, Reference: opened.Reference}
 	if opened.CheckoutUrl != nil {
 		view.AuthorizationUrl = *opened.CheckoutUrl
 	}
