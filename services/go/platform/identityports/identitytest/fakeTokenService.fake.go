@@ -85,6 +85,20 @@ func (service *FakeTokenService) SignAccountAccessToken(t testing.TB, accountId 
 	return token
 }
 
+func (service *FakeTokenService) SignAccountTokensWithStepUpForTest(t testing.TB, accountId string) (accessToken, stepUpToken string) {
+	t.Helper()
+	sessionId := uuid.NewString()
+	accessToken, err := service.sign(FakeAccountAudience, accountId, sessionId, []string{"buyer"}, 15*time.Minute)
+	if err != nil {
+		t.Fatal(err)
+	}
+	stepUpToken, err = service.sign("zudomart-user-step-up", accountId, sessionId, []string{"buyer"}, 5*time.Minute)
+	if err != nil {
+		t.Fatal(err)
+	}
+	return accessToken, stepUpToken
+}
+
 func (service *FakeTokenService) SignStaffTokensForTest(t testing.TB, role string, permissions []string) (accessToken, stepUpToken, staffId string) {
 	t.Helper()
 	staffId, sessionId := uuid.NewString(), uuid.NewString()
