@@ -112,9 +112,9 @@ export function createIdentityDirectory(client: IdentityReadClient, logger: Logg
       return row?.createdAt;
     },
 
-    async findOwnedPostableProfile(accountId, profileId) {
+    async findOwnedPostableProfile(accountId, profileId, purpose = "manage") {
       const row = await client.identityProfile.findFirst({
-        where: { id: profileId, accountId, status: "active", kind: { in: ["personal", "business", "brand", "store"] } },
+        where: { id: profileId, accountId, status: "active", ...(purpose === "publish" ? { publishingHeld: false } : {}), kind: { in: ["personal", "business", "brand", "store"] } },
         select: { id: true, accountId: true, kind: true, displayName: true, handle: true, avatarUrl: true },
       });
       return row === null ? null : { id: row.id, accountId: row.accountId, kind: row.kind, displayName: row.displayName, handle: row.handle, avatarUrl: row.avatarUrl };

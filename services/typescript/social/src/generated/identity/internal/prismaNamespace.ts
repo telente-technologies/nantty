@@ -916,7 +916,8 @@ export const IdentityProfileScalarFieldEnum = {
   verified: 'verified',
   status: 'status',
   creatorStatus: 'creatorStatus',
-  countryCode: 'countryCode'
+  countryCode: 'countryCode',
+  publishingHeld: 'publishingHeld'
 } as const
 
 export type IdentityProfileScalarFieldEnum = (typeof IdentityProfileScalarFieldEnum)[keyof typeof IdentityProfileScalarFieldEnum]

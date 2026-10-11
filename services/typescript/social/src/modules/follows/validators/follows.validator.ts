@@ -1,6 +1,8 @@
 import { schema } from "@zudojs/schema";
 
-export const userIdParamsSchema = schema.object({ userId: schema.string().min(1).max(64) });
+import { accountIdOrMeParam } from "../../../utils/accountParam.util.js";
+
+export const userIdParamsSchema = schema.object({ userId: accountIdOrMeParam });
 export const followRequestParamsSchema = schema.object({ requestId: schema.string().uuid() });
 export const connectionListQuerySchema = schema.object({
   q: schema.string().max(100).optional(),

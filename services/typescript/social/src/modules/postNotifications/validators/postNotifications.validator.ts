@@ -1,8 +1,9 @@
 import { schema } from "@zudojs/schema";
 
 import { postNotificationLevels } from "../models/postNotifications.model.js";
+import { accountIdOrMeParam } from "../../../utils/accountParam.util.js";
 
-export const targetParamsSchema = schema.object({ userId: schema.string().min(1).max(64) });
+export const targetParamsSchema = schema.object({ userId: accountIdOrMeParam });
 export const setPostNotificationsBodySchema = schema.object({ level: schema.enum(postNotificationLevels) });
 export const subscriberParamsSchema = schema.object({ accountId: schema.string().uuid() });
 export const subscriberQuerySchema = schema.object({

@@ -28,6 +28,7 @@ import type { RecordPostImpressionCommand } from "../commands/recordPostImpressi
 import type { RecordProfileVisitFromPostCommand } from "../commands/recordProfileVisitFromPost/recordProfileVisitFromPost.command.js";
 import type { PostAnalyticsView } from "../queries/getPostAnalytics/getPostAnalytics.handler.js";
 import type { GetPostAnalyticsQuery } from "../queries/getPostAnalytics/getPostAnalytics.query.js";
+import { resolveAccountParam } from "../../../utils/accountParam.util.js";
 
 export interface PostsHandlers {
   readonly recordPostImpression: Handler<RecordPostImpressionCommand, void>;
@@ -96,12 +97,12 @@ export function createPostsController(route: RouteFactory, handlers: PostsHandle
     resharePost: route({ authentication: "required", params: postIdParamsSchema, body: repostBodySchema, successStatus: 201 }, ({ principal, params, body }) => handlers.resharePost({ actorId: principal.accountId, postId: params.postId, text: body?.text ?? "" })),
     undoRepost: route({ authentication: "required", params: postIdParamsSchema, successStatus: 204 }, ({ principal, params }) => handlers.undoRepost({ actorId: principal.accountId, postId: params.postId })),
     listUserPosts: route({ authentication: "optional", params: userIdParamsSchema, query: userPostsQuerySchema }, ({ principal, params, query }) =>
-      handlers.listUserPosts({ viewerId: principal?.accountId, ownerId: params.userId === "me" ? (principal?.accountId ?? params.userId) : params.userId, cursor: query.cursor, limit: clampPageSize(query.limit), kind: query.kind })),
+      handlers.listUserPosts({ viewerId: principal?.accountId, ownerId: resolveAccountParam(params.userId, principal?.accountId), cursor: query.cursor, limit: clampPageSize(query.limit), kind: query.kind })),
     publishStory: route({ authentication: "required", body: publishStoryBodySchema, successStatus: 201 }, ({ principal, body }) => handlers.publishStory({ authorId: principal.accountId, mediaId: body.mediaId, soundId: body.soundId, look: body.look })),
     markStorySeen: route({ authentication: "required", params: storyIdParamsSchema }, ({ principal, params }) => handlers.markStorySeen({ viewerId: principal.accountId, storyId: params.storyId })),
     listStoryTray: route({ authentication: "required" }, ({ principal }) => handlers.listStoryTray({ viewerId: principal.accountId })),
     listUserStories: route({ authentication: "optional", params: userIdParamsSchema }, ({ principal, params }) =>
-      handlers.listUserStories({ viewerId: principal?.accountId, ownerId: params.userId === "me" ? (principal?.accountId ?? params.userId) : params.userId })),
+      handlers.listUserStories({ viewerId: principal?.accountId, ownerId: resolveAccountParam(params.userId, principal?.accountId) })),
     listStoryViewers: route({ authentication: "required", params: storyIdParamsSchema, query: storyViewersQuerySchema }, ({ principal, params, query }) =>
       handlers.listStoryViewers({ viewerId: principal.accountId, storyId: params.storyId, cursor: query.cursor, limit: clampPageSize(query.limit, 50) })),
   };

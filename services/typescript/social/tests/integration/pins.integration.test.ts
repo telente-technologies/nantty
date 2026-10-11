@@ -67,7 +67,7 @@ describe.skipIf(!enabled)("pins (needs Postgres with the social schema migrated)
     await expect(createPinCommentHandler(context)({ actorId: commenterId, postId: post.id, commentId: third.id })).rejects.toMatchObject({ status: 403 });
     await expect(createPinCommentHandler(context)({ actorId: authorId, postId: post.id, commentId: reply.id })).rejects.toMatchObject({ status: 422 });
     const listed = await createListPostCommentsHandler(context)({ viewerId: undefined, postId: post.id, cursor: undefined, limit: 10 });
-    expect(listed.data.map((row) => [row.id, row.isPinned])).toEqual([[second.id, true], [third.id, false], [first.id, false]]);
+    expect(listed.data.map((row) => [row.id, row.type === "comment" ? row.isPinned : null])).toEqual([[second.id, true], [third.id, false], [first.id, false]]);
     expect((await createGetPostHandler(context)({ viewerId: undefined, postId: post.id })).pinnedCommentId).toBe(second.id);
     await createDeleteCommentHandler(context)({ actorId: authorId, commentId: second.id });
     expect((await database.client.post.findUniqueOrThrow({ where: { id: post.id } })).pinnedCommentId).toBeNull();

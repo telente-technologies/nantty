@@ -56,7 +56,7 @@ export function createCreatePostHandler(context: HandlerContext): Handler<Create
     let authorProfileId: string | null = null;
     let authorProfileKind: string | null = null;
     if (command.asProfileId !== undefined) {
-      const owned = await context.directory.findOwnedPostableProfile(command.authorId, command.asProfileId);
+      const owned = await context.directory.findOwnedPostableProfile(command.authorId, command.asProfileId, "publish");
       if (owned === null) throw forbidden("NOT_YOUR_PROFILE", "You can't post as that profile.");
       authorProfileId = owned.id;
       authorProfileKind = owned.kind;

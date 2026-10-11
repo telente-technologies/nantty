@@ -14,6 +14,7 @@ import type { FollowedStoreEntry } from "../../storeFollows/models/storeFollow.m
 import type { ListFollowedStoresQuery } from "../../storeFollows/queries/listFollowedStores/listFollowedStores.query.js";
 import type { ListConnectionsQuery } from "../queries/listConnections/listConnections.query.js";
 import type { ListFollowRequestsQuery } from "../queries/listFollowRequests/listFollowRequests.query.js";
+import { resolveAccountParam } from "../../../utils/accountParam.util.js";
 
 export interface FollowsHandlers {
   readonly followUser: Handler<FollowUserCommand, FollowResult>;
@@ -27,12 +28,12 @@ export interface FollowsHandlers {
   readonly getFollowStatus: Handler<GetFollowStatusQuery, FollowStatusView>;
 }
 
-const resolveAccountId = (userId: string, principalAccountId: string | undefined): string => (userId === "me" ? (principalAccountId ?? userId) : userId);
+const resolveAccountId = resolveAccountParam;
 
 export function createFollowsController(route: RouteFactory, handlers: FollowsHandlers) {
   return {
-    followUser: route({ authentication: "required", params: userIdParamsSchema }, ({ principal, params }) => handlers.followUser({ followerId: principal.accountId, targetId: params.userId })),
-    unfollowUser: route({ authentication: "required", params: userIdParamsSchema }, ({ principal, params }) => handlers.unfollowUser({ followerId: principal.accountId, targetId: params.userId })),
+    followUser: route({ authentication: "required", params: userIdParamsSchema }, ({ principal, params }) => handlers.followUser({ followerId: principal.accountId, targetId: resolveAccountParam(params.userId, principal.accountId) })),
+    unfollowUser: route({ authentication: "required", params: userIdParamsSchema }, ({ principal, params }) => handlers.unfollowUser({ followerId: principal.accountId, targetId: resolveAccountParam(params.userId, principal.accountId) })),
     acceptFollowRequest: route({ authentication: "required", params: followRequestParamsSchema }, ({ principal, params }) => handlers.respondToFollowRequest({ followeeId: principal.accountId, requestId: params.requestId, decision: "accept" })),
     rejectFollowRequest: route({ authentication: "required", params: followRequestParamsSchema }, ({ principal, params }) => handlers.respondToFollowRequest({ followeeId: principal.accountId, requestId: params.requestId, decision: "reject" })),
     listFollowRequests: route({ authentication: "required", query: pageQuerySchema }, ({ principal, query }) =>

@@ -113,7 +113,8 @@ describe("top-level comment ranking", () => {
     const target = roots[3] as Row;
     const authorReply = reply(700, target, authorId);
     store.comments.push(authorReply, reply(701, authorReply, privateUser));
-    const page = await createListPostCommentsHandler(store.context)({ viewerId: viewer, postId, cursor: undefined, limit: 10 });
+    const listed = await createListPostCommentsHandler(store.context)({ viewerId: viewer, postId, cursor: undefined, limit: 10 });
+    const page = { data: listed.data.flatMap((item) => (item.type === "comment" ? [item] : [])) };
     expect(page.data.map((item) => item.author.id)).not.toContain(blockedUser);
     expect(page.data.map((item) => item.author.id)).not.toContain(privateUser);
     const withChain = page.data.find((item) => item.id === target["id"]);
@@ -129,7 +130,8 @@ describe("top-level comment ranking", () => {
     const third = reply(802, second, authorId, { replyCount: 1 });
     store.comments.push(first, second, third, reply(803, third, String(target["authorId"])));
     const page = await createGetPostConversationHandler(store.context)({ viewerId: viewer, postId, sort: "relevant", cursor: undefined, limit: 10 });
-    const top = page.data[0];
+    const first0 = page.data[0];
+    const top = first0?.type === "comment" ? first0 : undefined;
     expect(top?.id).toBe(target["id"]);
     expect(top?.inlineReplies[0]?.inlineReplies[0]?.inlineReplies[0]?.id).toBe(third["id"]);
     expect(top?.inlineReplies[0]?.inlineReplies[0]?.inlineReplies[0]?.continuesInThread).toBe(true);

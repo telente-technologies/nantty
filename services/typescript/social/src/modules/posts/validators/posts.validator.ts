@@ -1,6 +1,7 @@
 import { schema } from "@zudojs/schema";
 
 import { mentionEntitiesSchema } from "../../mentions/validators/mentions.validator.js";
+import { accountIdOrMeParam } from "../../../utils/accountParam.util.js";
 
 const mediaReferenceSchema = schema.object({
   id: schema.string().uuid().optional(),
@@ -78,7 +79,7 @@ export const storyViewersQuerySchema = schema.object({
   cursor: schema.string().max(100).optional(),
   limit: schema.coerce.number().int().min(1).max(50).optional(),
 });
-export const userIdParamsSchema = schema.object({ userId: schema.string().min(1).max(64) });
+export const userIdParamsSchema = schema.object({ userId: accountIdOrMeParam });
 export const repostBodySchema = schema.object({ text: schema.string().max(2200).optional() });
 export const shareBodySchema = schema.object({ channel: schema.string().max(30).optional() });
 export const userPostsQuerySchema = schema.object({
