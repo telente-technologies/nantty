@@ -9,7 +9,6 @@ import { SegmentedControl } from "@/components/ui/controls";
 import { EmptyState, ErrorState, Skeleton } from "@/components/ui/feedback";
 import { Card, DataRows, Muted, NextActionList, PageHeader, StatGrid, pageStyles } from "@/components/ui/studioPage";
 import { accountHealthService } from "@/services/accountHealth.service";
-import { readErrorMessageForDisplay } from "@/services/clientApi.service";
 import { creatorService } from "@/services/creator.service";
 import { livesService } from "@/services/lives.service";
 import { subscriptionsService } from "@/services/subscriptions.service";
@@ -46,7 +45,7 @@ export default function StudioHomePage() {
       </Card>
       <Card title="Earnings" action={<SegmentedControl label="Period" options={periodOptions} value={period} onChange={setPeriod} />}>
         {dashboard.isError ? (
-          <ErrorState title="Earnings didn't load" description={readErrorMessageForDisplay(dashboard.error)} onRetry={() => void dashboard.refetch()} />
+          <ErrorState title="Earnings didn't load" error={dashboard.error} onRetry={() => void dashboard.refetch()} />
         ) : !dashboard.data ? (
           <Skeleton height={120} />
         ) : (

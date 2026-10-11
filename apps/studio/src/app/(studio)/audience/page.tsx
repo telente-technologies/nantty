@@ -9,7 +9,6 @@ import { Button } from "@/components/ui/button";
 import { SegmentedControl } from "@/components/ui/controls";
 import { EmptyState, ErrorState, Skeleton } from "@/components/ui/feedback";
 import { Card, DataRows, Muted, PageHeader, StatGrid, pageStyles } from "@/components/ui/studioPage";
-import { readErrorMessageForDisplay } from "@/services/clientApi.service";
 import { contentService } from "@/services/content.service";
 import { creatorService } from "@/services/creator.service";
 import type { RankingBoard, RankingPeriod } from "@/types/audience.type";
@@ -38,7 +37,7 @@ function RankingCard({ viewerId }: { readonly viewerId: string | undefined }) {
         <SegmentedControl label="Board" options={boardOptions} value={board as "streamer" | "creator"} onChange={setBoard} />
         <SegmentedControl label="Period" options={periodOptions} value={period as "day" | "week" | "month"} onChange={setPeriod} />
       </div>
-      {rankings.isError ? <ErrorState title="Leaderboard didn't load" description={readErrorMessageForDisplay(rankings.error)} onRetry={() => void rankings.refetch()} /> : null}
+      {rankings.isError ? <ErrorState title="Leaderboard didn't load" error={rankings.error} onRetry={() => void rankings.refetch()} /> : null}
       {rankings.isLoading ? <Skeleton height={80} /> : null}
       {rankings.data ? (
         mine ? <Muted>{`You're #${mine.rank} with ${formatCountWithThousandsSuffix(mine.points)} points.`}</Muted> : <Muted>You're not in the top {rankings.data.data.length || 20} yet. Points come from gifts and engagement in your lives; <Link href="/lives">schedule a live</Link> to climb.</Muted>
@@ -72,10 +71,10 @@ export default function AudiencePage() {
           { label: "Gift and tip earnings, 30 days", value: month.data ? formatMoneyForDisplay(month.data.earnings.gifts) : "…" },
         ]}
       />
-      {dashboard.isError ? <ErrorState title="Totals didn't load" description={readErrorMessageForDisplay(dashboard.error)} onRetry={() => void dashboard.refetch()} /> : null}
+      {dashboard.isError ? <ErrorState title="Totals didn't load" error={dashboard.error} onRetry={() => void dashboard.refetch()} /> : null}
       <div className={pageStyles.columns}>
         <Card title="Recent followers">
-          {followers.isError ? <ErrorState title="Followers didn't load" description={readErrorMessageForDisplay(followers.error)} onRetry={() => void followers.refetch()} /> : null}
+          {followers.isError ? <ErrorState title="Followers didn't load" error={followers.error} onRetry={() => void followers.refetch()} /> : null}
           {followers.isLoading ? <Skeleton height={120} /> : null}
           {followers.isSuccess && people.length === 0 ? <EmptyState title="No followers yet" description="Share your profile link in your bio on other apps and post a clip; most first followers come from clips." /> : null}
           {notFollowedBack > 0 ? <Muted>{`${notFollowedBack} of these you don't follow back.`}</Muted> : null}

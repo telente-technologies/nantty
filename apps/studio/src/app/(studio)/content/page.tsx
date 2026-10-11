@@ -10,7 +10,6 @@ import { SegmentedControl } from "@/components/ui/controls";
 import { EmptyState, ErrorState, Skeleton } from "@/components/ui/feedback";
 import { Card, DataRows, PageHeader, StatGrid, pageStyles } from "@/components/ui/studioPage";
 import { webappLinks } from "@/config/webappLinks.config";
-import { readErrorMessageForDisplay } from "@/services/clientApi.service";
 import { contentService } from "@/services/content.service";
 import type { MyPost } from "@/types/audience.type";
 import { formatCountWithThousandsSuffix, formatTimeSincePosted } from "@/utils/formatDate.util";
@@ -46,7 +45,7 @@ export default function ContentPage() {
         action={<a className={pageStyles.textLink} href={webappLinks.newClip} target="_blank" rel="noopener noreferrer">Post a clip</a>}
       />
       <SegmentedControl label="Content type" options={kindOptions} value={kind} onChange={setKind} />
-      {posts.isError ? <ErrorState title="Your content didn't load" description={readErrorMessageForDisplay(posts.error)} onRetry={() => void posts.refetch()} /> : null}
+      {posts.isError ? <ErrorState title="Your content didn't load" error={posts.error} onRetry={() => void posts.refetch()} /> : null}
       {posts.isLoading ? <Skeleton height={160} /> : null}
       {posts.isSuccess && items.length === 0 ? (
         <EmptyState title={kind === "post" ? "No posts yet" : kind === "clip" ? "No clips yet" : "Nothing posted yet"} description="Clips get the most reach. Post one, then come back here for its watch time and completion rate." action={<a className={pageStyles.textLink} href={webappLinks.newClip} target="_blank" rel="noopener noreferrer">Post a clip</a>} />

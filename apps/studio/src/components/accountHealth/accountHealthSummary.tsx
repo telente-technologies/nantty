@@ -6,7 +6,6 @@ import { Badge, ErrorState, Skeleton } from "@/components/ui/feedback";
 import { Card, DataRows, Muted, pageStyles } from "@/components/ui/studioPage";
 import { webappLinks } from "@/config/webappLinks.config";
 import { accountHealthService, accountStandingLabel } from "@/services/accountHealth.service";
-import { readErrorMessageForDisplay } from "@/services/clientApi.service";
 import type { AccountHealthSummary } from "@/types/accountHealth.type";
 
 const shortDate = (iso: string) => new Date(iso).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
@@ -24,7 +23,7 @@ function ladderRows(health: AccountHealthSummary) {
 
 export function AccountStandingCard() {
   const health = useQuery({ queryKey: ["account", "status"], queryFn: accountHealthService.fetchMine, staleTime: 60_000 });
-  if (health.isError) return <ErrorState title="Account standing didn't load" description={readErrorMessageForDisplay(health.error)} onRetry={() => void health.refetch()} />;
+  if (health.isError) return <ErrorState title="Account standing didn't load" error={health.error} onRetry={() => void health.refetch()} />;
   if (!health.data) return <Skeleton height={200} />;
   const data = health.data;
   const strikes = [...(data.strikes ?? []).map((strike) => ({ ...strike, label: "Strike" })), ...data.warnings.map((warning) => ({ ...warning, label: "Warning" }))];

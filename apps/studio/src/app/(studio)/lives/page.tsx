@@ -11,7 +11,6 @@ import { ListPageSkeleton } from "@/components/ui/pageSkeletons";
 import { PayoutSetupBanner } from "@/components/payouts/payoutSetupBanner";
 import { LIVE_CATEGORY_LABELS, LIVE_CATEGORY_OPTIONS } from "@/constants/liveCategories.constant";
 import { useSession } from "@/components/providers/sessionProvider";
-import { readErrorMessageForDisplay } from "@/services/clientApi.service";
 import { livesService } from "@/services/lives.service";
 import type { LiveCategory, LiveSession, LiveState, StoreOption, User } from "@/types";
 import { formatCountWithThousandsSuffix, formatTimeSincePosted } from "@/utils/formatDate.util";
@@ -128,7 +127,7 @@ export default function LivesDashboardPage() {
         </p>
       ) : null}
 
-      {lives.isError ? <ErrorState title="We couldn't load your lives" description={readErrorMessageForDisplay(lives.error)} onRetry={() => void lives.refetch()} /> : null}
+      {lives.isError ? <ErrorState title="We couldn't load your lives" error={lives.error} onRetry={() => void lives.refetch()} /> : null}
 
       <ul className={styles.list}>
         {(lives.data ?? []).map((live) => (

@@ -81,8 +81,8 @@ export default function ControlRoomPage({ params }: { readonly params: Promise<{
 
   if (live.isLoading) return <ControlRoomSkeleton label="Loading control room" />;
   if (live.isError || !live.data) {
-    if (isNotFoundError(live.error)) return <ErrorState title="Live not found" description="This live may have been removed." action={<Link href="/lives">Back to all lives</Link>} />;
-    return <ErrorState title="We couldn't load this live" description={readErrorMessageForDisplay(live.error)} action={<RetryButton onRetry={() => live.refetch()} />} />;
+    if (isNotFoundError(live.error)) return <ErrorState kind="liveUnavailable" error={live.error} action={<Link href="/lives">Back to all lives</Link>} />;
+    return <ErrorState title="We couldn't load this live" error={live.error} action={<RetryButton onRetry={() => live.refetch()} />} />;
   }
 
   const actionError = [startLive, endLive, rotateKey, pinProduct].find((mutation) => mutation.isError)?.error ?? null;
@@ -212,7 +212,7 @@ export default function ControlRoomPage({ params }: { readonly params: Promise<{
               </li>
             ))}
           </ul>
-          {comments.isError ? <ErrorState title="Chat didn't load" description={readErrorMessageForDisplay(comments.error)} onRetry={() => void comments.refetch()} /> : null}
+          {comments.isError ? <ErrorState title="Chat didn't load" error={comments.error} onRetry={() => void comments.refetch()} /> : null}
           {comments.isSuccess && comments.data.length === 0 ? <p className={styles.muted}>No comments yet. They appear here as viewers chat.</p> : null}
           {postComment.isError ? <p className={styles.actionError} role="alert">{readErrorMessageForDisplay(postComment.error)}</p> : null}
           <form

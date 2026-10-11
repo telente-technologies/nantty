@@ -1,7 +1,7 @@
 "use client";
 
-import { ErrorState } from "@zudomart/web-kit";
+import { RouteErrorScreen } from "@zudomart/web-kit";
 
-export default function StudioRouteError({ reset }: { readonly error: Error; readonly reset: () => void }) {
-  return <ErrorState title="This page didn't load" description="Something went wrong. Your live settings are safe." onRetry={reset} />;
+export default function StudioRouteError({ error, retry }: { readonly error: Error & { readonly digest?: string }; readonly retry: () => void }) {
+  return <RouteErrorScreen error={error} retry={retry} />;
 }

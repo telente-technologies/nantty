@@ -7,7 +7,7 @@ import { use } from "react";
 import { ErrorState, Skeleton } from "@/components/ui/feedback";
 import { Card, DataRows, Muted, PageHeader, StatGrid, pageStyles } from "@/components/ui/studioPage";
 import { webappLinks } from "@/config/webappLinks.config";
-import { isNotFoundError, readErrorMessageForDisplay } from "@/services/clientApi.service";
+import { isNotFoundError } from "@/services/clientApi.service";
 import { contentService } from "@/services/content.service";
 import type { PostAnalytics } from "@/types/audience.type";
 import { formatCountWithThousandsSuffix } from "@/utils/formatDate.util";
@@ -28,8 +28,8 @@ export default function PostAnalyticsPage({ params }: { readonly params: Promise
   const analytics = useQuery({ queryKey: ["post-analytics", postId], queryFn: () => contentService.fetchPostAnalytics(postId) });
 
   if (analytics.isError) {
-    const description = isNotFoundError(analytics.error) ? "This post was deleted or isn't yours." : readErrorMessageForDisplay(analytics.error);
-    return <ErrorState title="Analytics didn't load" description={description} action={<Link href="/content">Back to content</Link>} onRetry={isNotFoundError(analytics.error) ? undefined : () => void analytics.refetch()} />;
+    if (isNotFoundError(analytics.error)) return <ErrorState kind="contentGone" subject="post" error={analytics.error} action={<Link href="/content">Back to content</Link>} />;
+    return <ErrorState title="Analytics didn't load" error={analytics.error} onRetry={() => void analytics.refetch()} />;
   }
   if (!analytics.data) return <Skeleton height={320} />;
   const data = analytics.data;

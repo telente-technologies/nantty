@@ -11,14 +11,13 @@ import { SignOutButton } from "@/components/shell/signOutButton";
 import { ErrorState, Skeleton } from "@/components/ui/feedback";
 import { Card, DataRows, Muted, PageHeader, pageStyles } from "@/components/ui/studioPage";
 import { webappLinks } from "@/config/webappLinks.config";
-import { readErrorMessageForDisplay } from "@/services/clientApi.service";
 import { creatorService } from "@/services/creator.service";
 
 const programLabels: Record<string, string> = { approved: "Approved", suspended: "Suspended", pending: "Application in review", rejected: "Not approved", none: "Not a member" };
 
 function CreatorProgramCard() {
   const status = useQuery({ queryKey: ["creator", "status"], queryFn: creatorService.fetchStatus });
-  if (status.isError) return <ErrorState title="Creator Program status didn't load" description={readErrorMessageForDisplay(status.error)} onRetry={() => void status.refetch()} />;
+  if (status.isError) return <ErrorState title="Creator Program status didn't load" error={status.error} onRetry={() => void status.refetch()} />;
   if (!status.data) return <Skeleton height={120} />;
   const data = status.data;
   return (

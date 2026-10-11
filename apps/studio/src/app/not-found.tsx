@@ -1,15 +1,13 @@
-import Link from "next/link";
+import type { Metadata } from "next";
 
-import styles from "./not-found.module.css";
+import { NotFoundScreen } from "@zudomart/web-kit";
+
+export const metadata: Metadata = { title: "Page not found", robots: { index: false } };
 
 export default function NotFoundPage() {
   return (
-    <main id="main-content" className={styles.page}>
-      <p className={styles.code}>404</p>
-      <h1 className={styles.title}>This page isn&apos;t here</h1>
-      <Link href="/home" className={styles.link}>
-        Back to the studio
-      </Link>
+    <main id="main-content">
+      <NotFoundScreen title="This page wandered off the stage" description="The link may be old or have a typo. Your content and lives are safe." />
     </main>
   );
 }

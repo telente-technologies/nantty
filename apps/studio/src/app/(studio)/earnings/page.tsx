@@ -10,7 +10,6 @@ import { WalletVerificationBanner, ZudomartBalanceCard } from "@/components/payo
 import { ErrorState, Skeleton } from "@/components/ui/feedback";
 import { Card, Muted, PageHeader, pageStyles } from "@/components/ui/studioPage";
 import { webappLinks } from "@/config/webappLinks.config";
-import { readErrorMessageForDisplay } from "@/services/clientApi.service";
 import { payoutOnboardingService } from "@/services/payoutOnboarding.service";
 import { walletService } from "@/services/wallet.service";
 import { formatMoneyForDisplay } from "@/utils/formatMoney.util";
@@ -35,7 +34,7 @@ export default function EarningsPage() {
         {fees.data ? (
           <Muted>{`Withdrawal fee: ${formatMoneyForDisplay(fees.data.fee)} flat, added on top of the amount. ${fees.data.arrivalEstimate} ${fees.data.firstPayoutNote}`}</Muted>
         ) : fees.isError ? (
-          <ErrorState title="Withdrawal fee didn't load" description={readErrorMessageForDisplay(fees.error)} onRetry={() => void fees.refetch()} />
+          <ErrorState title="Withdrawal fee didn't load" error={fees.error} onRetry={() => void fees.refetch()} />
         ) : null}
       </Card>
       <div className={pageStyles.columns}>

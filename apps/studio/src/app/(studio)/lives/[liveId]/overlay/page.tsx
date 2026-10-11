@@ -93,7 +93,7 @@ export default function OverlayEditorPage({ params }: { readonly params: Promise
 
   if (scene.isLoading) return <ControlRoomSkeleton label="Loading overlay" />;
   if (scene.isError || !scene.data) {
-    return <ErrorState title="We couldn't load this overlay" description={readErrorMessageForDisplay(scene.error)} action={<RetryButton onRetry={() => scene.refetch()} />} />;
+    return <ErrorState title="We couldn't load this overlay" error={scene.error} action={<RetryButton onRetry={() => scene.refetch()} />} />;
   }
 
   const overlayUrl = `${readPublicSiteUrl()}/overlay/${scene.data.id}`;

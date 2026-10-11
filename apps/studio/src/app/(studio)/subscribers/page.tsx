@@ -51,7 +51,7 @@ export default function SubscribersPage() {
         ]}
       />
       <Card title="Your tiers">
-        {plans.isError ? <ErrorState title="Tiers didn't load" description={readErrorMessageForDisplay(plans.error)} onRetry={() => void plans.refetch()} /> : null}
+        {plans.isError ? <ErrorState title="Tiers didn't load" error={plans.error} onRetry={() => void plans.refetch()} /> : null}
         {plans.isLoading ? <Skeleton height={60} /> : null}
         {plans.data?.length === 0 ? <EmptyState title="No tiers yet" description="Create your first tier below. Most creators start with one monthly tier and two or three perks." /> : null}
         <DataRows
@@ -72,7 +72,7 @@ export default function SubscribersPage() {
         <NewPlanForm currency={wallet.data?.available.currency ?? "NGN"} onCreated={() => void refreshPlans()} />
       </Card>
       <Card title="People subscribed to you">
-        {subscribers.isError ? <ErrorState title="Subscribers didn't load" description={readErrorMessageForDisplay(subscribers.error)} onRetry={() => void subscribers.refetch()} /> : null}
+        {subscribers.isError ? <ErrorState title="Subscribers didn't load" error={subscribers.error} onRetry={() => void subscribers.refetch()} /> : null}
         {subscribers.isLoading ? <Skeleton height={60} /> : null}
         {subscribers.data?.length === 0 ? <EmptyState title="No subscribers yet" description="Mention your tier in your next live and pin a subscriber-only clip so fans see what they get." /> : null}
         <DataRows
