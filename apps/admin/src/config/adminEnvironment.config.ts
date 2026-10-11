@@ -1,3 +1,5 @@
+import { isAddressInAllowList, isValidAllowListEntry } from "@/utils/ipAllowList.util";
+
 const isProductionRuntime = process.env.NODE_ENV === "production";
 const developmentOnlySessionSecret = "zudomart-admin-development-only-secret-never-use-in-production";
 
@@ -50,6 +52,35 @@ export function readAllowedAdminIpAddresses(): readonly string[] {
     .split(",")
     .map((address) => address.trim())
     .filter(Boolean);
+}
+
+export function isProductionDeployment(): boolean {
+  return readAdminDeploymentEnvironment() === "production";
+}
+
+export function findAdminEnvironmentProblems(): string[] {
+  const problems: string[] = [];
+  const allowList = readAllowedAdminIpAddresses();
+  const invalidEntries = allowList.filter((entry) => !isValidAllowListEntry(entry));
+  if (invalidEntries.length > 0) problems.push(`ADMIN_IP_ALLOWLIST has invalid entries: ${invalidEntries.join(", ")}.`);
+  if (!isProductionDeployment()) return problems;
+  if (allowList.length === 0) problems.push("ADMIN_IP_ALLOWLIST is required in production (comma-separated IPs or IPv4 CIDRs).");
+  if ((process.env.ADMIN_SESSION_SECRET ?? "").length < 32) problems.push("ADMIN_SESSION_SECRET must be at least 32 characters in production.");
+  if (!process.env.ADMIN_API_URL) problems.push("ADMIN_API_URL is required in production.");
+  if (!process.env.ADMIN_ORIGIN) problems.push("ADMIN_ORIGIN is required in production.");
+  if (process.env.ADMIN_USE_MOCKS === "true") problems.push("ADMIN_USE_MOCKS must not be true in production.");
+  return problems;
+}
+
+export function assertAdminEnvironmentIsSafe(): void {
+  const problems = findAdminEnvironmentProblems();
+  if (problems.length > 0) throw new Error(`Admin console configuration is unsafe:\n- ${problems.join("\n- ")}`);
+}
+
+export function isClientAddressAllowedForAdmin(address: string): boolean {
+  const allowList = readAllowedAdminIpAddresses();
+  if (allowList.length === 0) return !isProductionDeployment();
+  return isAddressInAllowList(allowList, address);
 }
 
 export function readPrivateMediaOrigin(): string {

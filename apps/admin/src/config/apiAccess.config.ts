@@ -1,116 +1,80 @@
 import type { AdminPermission } from "@/constants/adminPermissions.constant";
+import { adminApiRouteTable, type ApiRouteDefinition } from "@/config/apiRoutes.config";
 
-export type ApiAccessRequirement = { readonly kind: "anyOf"; readonly permissions: readonly AdminPermission[] } | { readonly kind: "superadmin" } | { readonly kind: "anyAdmin" };
+export type ApiAccessRequirement = { readonly kind: "anyOf"; readonly permissions: readonly AdminPermission[] } | { readonly kind: "superadmin" } | { readonly kind: "ownAccount" };
 
-interface ApiAreaRule {
-  readonly prefix: string;
+export interface ResolvedApiRoute {
+  readonly method: string;
+  readonly path: string;
   readonly requirement: ApiAccessRequirement;
+  readonly stepUp: boolean;
+  readonly reasonRequired: boolean;
+  readonly stepUpWhenBody?: (body: unknown) => boolean;
+  readonly singleUseStepUp: boolean;
 }
 
-const anyOf = (...permissions: AdminPermission[]): ApiAccessRequirement => ({ kind: "anyOf", permissions });
-
-const apiAreaRules: readonly ApiAreaRule[] = [
-  { prefix: "/admin/account", requirement: { kind: "anyAdmin" } },
-  { prefix: "/admin/consents", requirement: { kind: "anyAdmin" } },
-  { prefix: "/admin/users/me/preferences", requirement: { kind: "anyAdmin" } },
-  { prefix: "/admin/admins", requirement: anyOf("staff:manage") },
-  { prefix: "/admin/roles", requirement: { kind: "anyAdmin" } },
-  { prefix: "/admin/staff-settings", requirement: { kind: "anyAdmin" } },
-  { prefix: "/admin/metrics", requirement: anyOf("metrics:read") },
-  { prefix: "/admin/users", requirement: anyOf("users:read", "support:tickets", "verification:review", "moderation:reports") },
-  { prefix: "/admin/usernames", requirement: anyOf("usernames:manage", "usernames:reassign", "reserved-usernames:manage") },
-  { prefix: "/admin/usernames/reserved", requirement: anyOf("reserved-usernames:manage") },
-  { prefix: "/admin/accounts", requirement: anyOf("users:read", "verification:grant") },
-  { prefix: "/admin/checkmark-grants", requirement: anyOf("verification:grant", "verification:revoke") },
-  { prefix: "/admin/business-documents", requirement: anyOf("verification:review", "verification:documents") },
-  { prefix: "/admin/black-applications", requirement: anyOf("verification:review", "verification:revoke") },
-  { prefix: "/admin/reserved-usernames", requirement: anyOf("reserved-usernames:manage") },
-  { prefix: "/admin/verifications", requirement: anyOf("verification:review", "verification:revoke") },
-  { prefix: "/admin/verification-cases", requirement: anyOf("verification:review") },
-  { prefix: "/admin/applications/sellers", requirement: anyOf("applications:sellers") },
-  { prefix: "/admin/applications/creators", requirement: anyOf("applications:creators") },
-  { prefix: "/admin/brands", requirement: anyOf("brands:review", "brands:revoke", "ip-claims:review") },
-  { prefix: "/admin/ip-claims", requirement: anyOf("ip-claims:review") },
-  { prefix: "/admin/reports", requirement: anyOf("moderation:reports") },
-  { prefix: "/admin/live-incidents", requirement: anyOf("moderation:reports") },
-  { prefix: "/admin/suspensions/cases", requirement: anyOf("users:suspend", "users:moderate") },
-  { prefix: "/admin/suspensions/accounts", requirement: anyOf("users:suspend") },
-  { prefix: "/admin/account-health", requirement: anyOf("users:read", "copyright:review") },
-  { prefix: "/admin/strike-appeals", requirement: anyOf("moderation:appeals", "copyright:review") },
-  { prefix: "/admin/copyright-policy", requirement: anyOf("copyright:review") },
-  { prefix: "/admin/trending/moderation", requirement: anyOf("content:review", "moderation:reports") },
-  { prefix: "/admin/chat-reports", requirement: anyOf("chat-reports:review", "chat-reports:legal") },
-  { prefix: "/admin/appeals", requirement: anyOf("moderation:appeals") },
-  { prefix: "/admin/security", requirement: anyOf("security:cases") },
-  { prefix: "/admin/copyright-claims", requirement: anyOf("copyright:review") },
-  { prefix: "/admin/orders", requirement: anyOf("orders:read", "disputes:resolve", "refunds:issue", "support:tickets") },
-  { prefix: "/admin/disputes", requirement: anyOf("disputes:resolve") },
-  { prefix: "/admin/refunds", requirement: anyOf("refunds:issue") },
-  { prefix: "/admin/withdrawals", requirement: anyOf("payouts:approve") },
-  { prefix: "/admin/payouts", requirement: anyOf("payouts:approve") },
-  { prefix: "/admin/coins", requirement: anyOf("coins:review") },
-  { prefix: "/admin/coins/price-table", requirement: anyOf("config:read", "config:plans", "config:revenue") },
-  { prefix: "/admin/subscriptions/price-table", requirement: anyOf("config:read", "config:plans", "config:revenue") },
-  { prefix: "/admin/ledger", requirement: anyOf("ledger:read") },
-  { prefix: "/admin/ads", requirement: anyOf("ads:review", "advertisers:manage") },
-  { prefix: "/admin/advertisers", requirement: anyOf("advertisers:manage", "ads:review") },
-  { prefix: "/admin/ad-policies", requirement: anyOf("advertisers:manage", "ads:review") },
-  { prefix: "/admin/catalog", requirement: anyOf("catalog:manage") },
-  { prefix: "/admin/config", requirement: anyOf("config:read", "config:plans", "config:revenue", "config:rules") },
-  { prefix: "/admin/flags", requirement: anyOf("flags:manage") },
-  { prefix: "/admin/experiments", requirement: anyOf("flags:manage") },
-  { prefix: "/admin/automation", requirement: anyOf("automation:manage") },
-  { prefix: "/admin/notification-templates", requirement: anyOf("templates:manage") },
-  { prefix: "/admin/email-templates", requirement: anyOf("support:email", "legal.documents.view", "legal.documents.edit", "legal.notices.send") },
-  { prefix: "/admin/support", requirement: anyOf("support:tickets", "support:assign") },
-  { prefix: "/admin/support/macros", requirement: anyOf("support:tickets", "support:assign", "support:chat") },
-  { prefix: "/admin/support/chats", requirement: anyOf("support:chat") },
-  { prefix: "/admin/support/email", requirement: anyOf("support:email", "marketing:email") },
-  { prefix: "/admin/help", requirement: anyOf("support:helpContent", "support:tickets", "support:assign") },
-  { prefix: "/admin/legal", requirement: anyOf("legal.documents.view", "legal.documents.edit", "legal.documents.publish", "legal.notices.send") },
-  { prefix: "/admin/audit", requirement: anyOf("audit:read") },
-];
-
-const stepUpProtectedCalls: readonly { readonly method: string; readonly pattern: RegExp }[] = [
-  { method: "POST", pattern: /^\/admin\/admins$/ },
-  { method: "POST", pattern: /^\/admin\/account\/recovery-codes\/regenerate$/ },
-  { method: "PUT", pattern: /^\/admin\/admins\/[^/]+\/permissions$/ },
-  { method: "POST", pattern: /^\/admin\/admins\/[^/]+\/(disable|enable|reset-mfa)$/ },
-  { method: "POST", pattern: /^\/admin\/users\/[^/]+\/(ban|unban)$/ },
-  { method: "POST", pattern: /^\/admin\/users\/[^/]+\/username\/(withhold|reclaim)$/ },
-  { method: "POST", pattern: /^\/admin\/verifications\/[^/]+\/(revoke|suspend)$/ },
-  { method: "POST", pattern: /^\/admin\/verification-cases\/[^/]+\/(approve|reject)$/ },
-  { method: "POST", pattern: /^\/admin\/disputes\/[^/]+\/resolve$/ },
-  { method: "POST", pattern: /^\/admin\/brands\/[^/]+\/official-status\/revoke$/ },
-  { method: "POST", pattern: /^\/admin\/ip-claims\/[^/]+\/uphold$/ },
-  { method: "POST", pattern: /^\/admin\/copyright-claims\/[^/]+\/uphold$/ },
-  { method: "POST", pattern: /^\/admin\/copyright-claims\/[^/]+\/counter-notices\/[^/]+\/(accept|reject|court-action)$/ },
-  { method: "PUT", pattern: /^\/admin\/copyright-policy$/ },
-  { method: "POST", pattern: /^\/admin\/refunds$/ },
-  { method: "POST", pattern: /^\/admin\/legal\/versions\/[^/]+\/publish$/ },
-  { method: "POST", pattern: /^\/admin\/legal\/notices$/ },
-  { method: "POST", pattern: /^\/admin\/withdrawals\/[^/]+\/review$/ },
-  { method: "POST", pattern: /^\/admin\/payouts\/run$/ },
-  { method: "POST", pattern: /^\/admin\/coins\/transactions\/[^/]+\/reverse$/ },
-  { method: "PUT", pattern: /^\/admin\/config\/.+$/ },
-  { method: "PUT", pattern: /^\/admin\/(subscriptions|coins)\/price-table\/.+$/ },
-  { method: "POST", pattern: /^\/admin\/config\/.+$/ },
-  { method: "PUT", pattern: /^\/admin\/(flags|experiments)\/.+$/ },
-  { method: "POST", pattern: /^\/admin\/(flags|experiments)(\/.+)?$/ },
-  { method: "PUT", pattern: /^\/admin\/automation\/.+$/ },
-  { method: "POST", pattern: /^\/admin\/automation(\/.+)?$/ },
-  { method: "DELETE", pattern: /^\/admin\/automation\/.+$/ },
-  { method: "PUT", pattern: /^\/admin\/notification-templates\/.+$/ },
-  { method: "POST", pattern: /^\/admin\/notification-templates\/.+$/ },
-];
-
-export function findApiAccessRequirement(apiPath: string): ApiAccessRequirement | null {
-  const rule = apiAreaRules
-    .filter((candidate) => apiPath === candidate.prefix || apiPath.startsWith(`${candidate.prefix}/`))
-    .sort((first, second) => second.prefix.length - first.prefix.length)[0];
-  return rule?.requirement ?? null;
+interface CompiledRoute extends ResolvedApiRoute {
+  readonly pattern: RegExp;
 }
 
-export function doesApiCallRequireStepUp(method: string, apiPath: string): boolean {
-  return stepUpProtectedCalls.some((call) => call.method === method && call.pattern.test(apiPath));
+export const minimumReasonLength = 5;
+
+function compilePathPattern(path: string): RegExp {
+  const segments = path.split("/").map((segment) => {
+    if (segment.startsWith(":")) return "[^/]+";
+    const choices = /^\{(.+)\}$/.exec(segment);
+    if (choices) return `(?:${choices[1]!.split("|").map(escapeForRegExp).join("|")})`;
+    return escapeForRegExp(segment);
+  });
+  return new RegExp(`^${segments.join("/")}$`);
+}
+
+function escapeForRegExp(text: string): string {
+  return text.replace(/[.*+?^${}()|[\]\\-]/g, "\\$&");
+}
+
+function compileRoute(definition: ApiRouteDefinition): CompiledRoute {
+  const requirement: ApiAccessRequirement =
+    definition.access === "ownAccount" ? { kind: "ownAccount" } : definition.access === "superadmin" ? { kind: "superadmin" } : { kind: "anyOf", permissions: definition.access };
+  return {
+    method: definition.method,
+    path: definition.path,
+    requirement,
+    stepUp: definition.stepUp ?? false,
+    reasonRequired: definition.reason ?? false,
+    singleUseStepUp: definition.singleUseStepUp ?? false,
+    stepUpWhenBody: definition.stepUpWhenBody,
+    pattern: compilePathPattern(definition.path),
+  };
+}
+
+const compiledRoutes: readonly CompiledRoute[] = adminApiRouteTable.map(compileRoute);
+
+export function listAdminApiRoutes(): readonly ResolvedApiRoute[] {
+  return compiledRoutes;
+}
+
+export function findAdminApiRoute(method: string, apiPath: string): ResolvedApiRoute | null {
+  const normalisedMethod = method === "HEAD" ? "GET" : method;
+  return compiledRoutes.find((route) => route.method === normalisedMethod && route.pattern.test(apiPath)) ?? null;
+}
+
+export function findApiAccessRequirement(apiPath: string, method = "GET"): ApiAccessRequirement | null {
+  return findAdminApiRoute(method, apiPath)?.requirement ?? null;
+}
+
+export function doesApiCallRequireStepUp(method: string, apiPath: string, body?: unknown): boolean {
+  const route = findAdminApiRoute(method, apiPath);
+  if (!route) return false;
+  return route.stepUp || (route.stepUpWhenBody?.(body) ?? false);
+}
+
+export function readReasonFromBody(body: unknown): string {
+  if (!body || typeof body !== "object") return "";
+  const reason = (body as { reason?: unknown }).reason;
+  return typeof reason === "string" ? reason.trim() : "";
+}
+
+export function isReasonMissing(route: ResolvedApiRoute, body: unknown): boolean {
+  return route.reasonRequired && readReasonFromBody(body).length < minimumReasonLength;
 }
