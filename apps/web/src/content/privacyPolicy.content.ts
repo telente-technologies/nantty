@@ -49,7 +49,7 @@ const privacyPolicyIntroductionSections: readonly LegalDocumentSection[] = [
     heading: "Where data comes from",
     paragraphs: ["Most data comes from you and your devices. We also receive data from:"],
     bullets: [
-      "our payment partners (Flutterwave, and Paystack during the move to Flutterwave) about payments, wallet funding, payouts, chargebacks and bank account checks;",
+      "our payment partner (Flutterwave) about payments, wallet funding, payouts, chargebacks and bank account checks;",
       "Smile ID about identity and liveness checks;",
       "Apple and Google about in-app purchases, refunds and push notifications;",
       "other users, for example when they tag or mention you, report you, review an order or send you a chat request;",

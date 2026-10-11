@@ -38,7 +38,7 @@ export const privacyPolicyProcessingSections: readonly LegalDocumentSection[] = 
     heading: "Who we share data with",
     paragraphs: ["We do not sell your personal data. We share it only as needed with:"],
     bullets: [
-      "Payment partners: Flutterwave, which holds Nigerian wallets in your name and processes payments and payouts, and Paystack while we finish moving to Flutterwave. They act partly as our processors and partly as controllers under their own licences and policies.",
+      "Payment partner: Flutterwave, which holds Nigerian wallets in your name and processes payments and payouts. It acts partly as our processor and partly as a controller under its own licences and policies.",
       "Smile ID, for identity, document and liveness checks.",
       "Amazon Web Services, which hosts our systems and data (main region Ireland, backup region Germany), sends our emails (Amazon SES) and runs automated safety checks on live video and audio (Amazon Rekognition and Amazon Transcribe).",
       "LiveKit, which carries live video, and Cloudflare, which runs the Turnstile human check and receives technical signals from your browser to tell people from bots.",

@@ -54,7 +54,7 @@ export const termsOfServiceSections: readonly LegalDocumentSection[] = [
     id: "payments",
     heading: "Payments and wallets: Zudomart never holds your money",
     paragraphs: [
-      "Payments, wallets and payouts are provided by our licensed payment partner, Flutterwave. We are moving from Paystack to Flutterwave, and some payments may still be processed by Paystack during the move. You never pay into a Zudomart bank account.",
+      "Payments, wallets and payouts are provided by our licensed payment partner, Flutterwave. You never pay into a Zudomart bank account.",
       "In Nigeria, your wallet balance is held by our payment partner in a wallet in your own name. Zudomart does not hold, pool or lend it. We only instruct the partner to move money when you, or these terms, tell us to (for example, to pay a seller after delivery), and to collect our fees. The partner's own terms also apply to your wallet.",
       "Money you add to your wallet can be spent on Zudomart straight away, but it can be withdrawn only after a short hold, normally 24 hours, or 72 hours for your first deposit. The hold protects you if someone uses a stolen bank account. Withdrawals go only to a verified account in your own name.",
       "Prices, fees and the total are shown before you pay. If we suspect fraud, money laundering or a breach of these terms, we may pause payments on Zudomart and report to our payment partner and the authorities as the law requires. Your money is never forfeited to us: if your account is closed, money that is yours stays yours, subject to refunds you owe and any legal hold.",
