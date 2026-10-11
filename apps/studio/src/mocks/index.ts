@@ -1,11 +1,15 @@
 import { accountHealthMocks } from "./accountHealth.mock";
 import { authMocks } from "./auth.mock";
 import { consentsMocks } from "./consents.mock";
+import { contentMocks } from "./content.mock";
+import { creatorMocks } from "./creator.mock";
 import { liveMocks } from "./lives.mock";
 import { liveSafetyMocks } from "./liveSafety.mock";
 import { payoutOnboardingMocks } from "./payoutOnboarding.mock";
 import { preferencesMocks } from "./preferences.mock";
+import { providerWalletMocks } from "./providerWallet.mock";
 import type { MockRoute } from "./registry.mock";
+import { subscriptionsMocks } from "./subscriptions.mock";
 import { walletMocks } from "./wallet.mock";
 
-export const routes: MockRoute[] = [...authMocks, ...consentsMocks, ...preferencesMocks, ...liveSafetyMocks, ...liveMocks, ...payoutOnboardingMocks, ...accountHealthMocks, ...walletMocks];
+export const routes: MockRoute[] = [...authMocks, ...consentsMocks, ...preferencesMocks, ...liveSafetyMocks, ...liveMocks, ...payoutOnboardingMocks, ...accountHealthMocks, ...walletMocks, ...providerWalletMocks, ...creatorMocks, ...contentMocks, ...subscriptionsMocks];

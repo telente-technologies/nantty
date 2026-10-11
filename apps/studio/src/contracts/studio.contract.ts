@@ -12,7 +12,8 @@ const studioLive = c.object({
   viewers: c.number(), peakViewers: c.number(), streamKeyHint: c.nullable(c.string()), ingestProtocol: c.nullable(c.string()), hlsUrl: c.nullable(c.string()),
   earnings: c.object({ coins: c.number(), giftCount: c.number() }), recordEnabled: c.boolean(), visibility: c.string(), products: c.array(productPin),
 });
-const liveSession = c.object({ id: c.string(), title: c.string(), category: c.string(), state: liveState, viewers: c.number(), peakViewers: c.number(), startedAt: c.nullable(c.string()), endedAt: c.nullable(c.string()), playbackUrl: c.nullable(c.string()), storeId: c.nullable(c.string()) });
+const hostRanking = c.object({ globalRank: c.number(), categoryRank: c.nullable(c.number()), category: c.nullable(c.string()), period: c.string() });
+const liveSession = c.object({ id: c.string(), title: c.string(), category: c.string(), state: liveState, viewers: c.number(), peakViewers: c.number(), startedAt: c.nullable(c.string()), endedAt: c.nullable(c.string()), playbackUrl: c.nullable(c.string()), storeId: c.nullable(c.string()), hostRanking: c.nullable(hostRanking) });
 const myStore = c.object({ storeId: c.string(), storeName: c.string(), role: c.string(), isCurrent: c.boolean() });
 const streamKey = c.object({ liveId: c.string(), protocol: c.string(), ingestUrl: c.string(), streamKey: c.string(), streamKeyHint: c.string(), issuedAt: c.string() });
 const streamStats = c.object({ liveId: c.string(), giftCount: c.number(), totalCoins: c.number(), creatorCoins: c.number(), topSupporters: c.array(c.object({ rank: c.number(), user: c.object({ id: c.string(), name: c.string(), username: c.string() }), coins: c.number() })) });
@@ -29,6 +30,40 @@ const walletVerification = c.object({ level: c.number(), withdrawalsUnlocked: c.
 const walletSummary = c.object({
   available: money, pending: money, locked: money, inEscrow: money, payoutRequested: money, negativeBalance: money, nextAvailableAt: c.nullable(c.string()), adCredit: money, earningsPayable: money, debts: money,
   coins: c.object({ spendable: c.number(), earned: c.number() }), lines: c.array(c.object({ key: c.string(), label: c.string(), description: c.string(), amount: money })), verification: walletVerification,
+});
+
+const person = c.object({ id: c.string(), name: c.string(), username: c.string(), avatarUrl: c.nullable(c.string()) });
+const dashboard = c.object({
+  period: c.string(["today", "week", "month", "all"]), since: c.nullable(c.string()), currency: c.string(),
+  earnings: c.object({ gifts: money, tips: money, affiliateCommissions: money, subscriptions: money, adRevenue: money, bonuses: money, total: money }),
+  pendingBalance: money, availableBalance: money, followersGained: c.number(), followers: c.object({ total: c.number(), gainedInPeriod: c.nullable(c.number()) }), coins: c.object({ earned: c.number() }),
+  topContent: c.array(c.object({ id: c.string(), kind: c.string(), title: c.string(), thumbnailUrl: c.nullable(c.string()), views: c.number(), earnings: money })),
+});
+const creatorStatus = c.object({ status: c.string(), canGoLive: c.boolean(), tier: c.string(), giftSharePercent: c.number(), suspensionReason: c.nullable(c.string()), suspendedAt: c.nullable(c.string()), recentViolations: c.number() }, ["tier"]);
+const revenueRules = c.object({
+  giftCreatorSharePercentUpTo: c.number(), tipCreatorSharePercent: c.number(), subscriptionCreatorSharePercent: c.number(), subscriptionShareBasis: c.string(), adsRevenueCreatorSharePercent: c.number(),
+  coinTransferPlatformFeePercent: c.number(), affiliateCommissionReleasedAfterEscrow: c.boolean(), affiliateCommissionMaximumPercent: c.number(), coinCashValue: money, minimumPayout: money, withdrawalFeeDescription: c.string(),
+});
+const earning = c.object({ id: c.string(), kind: c.string(["gift", "tip", "subscription", "affiliate", "ad_revenue"]), source: c.string(), description: c.string(), amount: money, grossAmount: money, status: c.string(["pending", "available", "reversed"]), availableAt: c.nullable(c.string()), createdAt: c.string(), sourceRef: c.object({ type: c.string(), id: c.string() }) });
+const eligibility = c.object({ eligible: c.boolean(), decision: c.string(), decisionNote: c.string(), requirements: c.array(c.object({ key: c.string(), label: c.string(), currentValue: c.number(), requiredValue: c.number(), met: c.boolean() })) });
+const brandDeal = c.object({ id: c.string(), brandName: c.string(), amount: money, startsAt: c.string(), endsAt: c.nullable(c.string()), disclosure: c.string(), notes: c.string(), createdAt: c.string() });
+const withdrawal = c.object({ id: c.string(), amount: money, fee: money, netAmount: money, withdrawalStatus: c.string(["pending_review", "on_hold", "queued", "processing", "paid", "failed", "cancelled"]), reference: c.string(), failureReason: c.nullable(c.string()), createdAt: c.string(), processedAt: c.nullable(c.string()) });
+const plan = c.object({ id: c.string(), name: c.string(), description: c.string(), price: money, interval: c.string(["month", "year"]), benefits: c.array(c.string()), subscriberCount: c.number(), active: c.boolean() });
+const priceTier = c.object({ tier: c.string(), default: c.boolean(), prices: c.object({ web: money, ios: money, android: money }) });
+const subscriber = c.object({ id: c.string(), user: c.nullable(person), planId: c.string(), planName: c.string(), since: c.string(), renewsAt: c.nullable(c.string()), status: c.string(["active", "past_due", "cancelled"]) });
+const myPost = c.object({ id: c.string(), kind: c.string(["post", "clip"]), createdAt: c.string(), text: c.string(), media: c.array(c.object({ type: c.string(["image", "video"]), posterUrl: c.nullable(c.string()), url: c.nullable(c.string()) })), likes: c.number(), comments: c.number(), reposts: c.number(), shares: c.number(), views: c.number(), saveCount: c.number(), durationSeconds: c.nullable(c.number()), subscriberOnly: c.boolean() });
+const videoAnalytics = c.object({ views: c.number(), watchTimeSeconds: c.number(), averageWatchSeconds: c.number(), completedViews: c.number(), completionRate: c.number() });
+const postAnalytics = c.object({
+  postId: c.string(), kind: c.string(["post", "clip", "story"]), postedAt: c.string(), impressions: c.number(), uniqueViewers: c.number(), reach: c.number(), likes: c.number(), comments: c.number(), reposts: c.number(), shares: c.number(), saves: c.number(),
+  profileVisits: c.number(), linkClicks: c.number(), newFollows: c.number(), engagements: c.number(), engagementRate: c.number(), video: c.nullable(videoAnalytics),
+  audience: c.array(c.object({ label: c.string(), share: c.number() })), daily: c.array(c.object({ day: c.string(), impressions: c.number() })),
+});
+const follower = c.object({ id: c.string(), name: c.string(), username: c.string(), avatarUrl: c.nullable(c.string()), isFollowing: c.boolean() });
+const ranking = c.object({ rank: c.number(), user: person, points: c.number() });
+const strike = c.object({ id: c.string(), kind: c.string(), policy: c.string(), reason: c.string(), source: c.string(), issuedAt: c.string(), expiresAt: c.nullable(c.string()), status: c.string(), appealStatus: c.string(), canAppeal: c.boolean(), claimId: c.nullable(c.string()) });
+const accountStatus = c.object({
+  status: c.string(["GOOD_STANDING", "AT_RISK", "RESTRICTED"]), restrictions: c.array(c.string()), canMonetise: c.boolean(), canGoLive: c.boolean(), activeStrikeCount: c.number(), restrictionThreshold: c.number(),
+  pendingTakedownCount: c.number(), strikeLifetimeDays: c.number(), warnings: c.array(strike), strikes: c.array(strike), notices: c.array(c.object({ claimId: c.string(), state: c.string(), deadlineAt: c.nullable(c.string()) })),
 });
 
 export const studioContracts: readonly EndpointContract[] = [
@@ -53,4 +88,20 @@ export const studioContracts: readonly EndpointContract[] = [
   { domain: "payments", method: "GET", path: "/api/v1/banks?country=NG", schema: c.page(bank) },
   { domain: "payments", method: "GET", path: "/api/v1/payments/payout-onboarding/me", schema: payoutState },
   { domain: "payments", method: "GET", path: "/api/v1/wallets/me", schema: walletSummary },
+  { domain: "payments", method: "GET", path: "/api/v1/wallets/me/withdrawals", schema: c.page(withdrawal) },
+  { domain: "creators", method: "GET", path: "/api/v1/creators/me", schema: creatorStatus },
+  { domain: "creators", method: "GET", path: "/api/v1/creators/dashboard?period=week", schema: dashboard },
+  { domain: "creators", method: "GET", path: "/api/v1/creators/revenue-rules", schema: revenueRules },
+  { domain: "creators", method: "GET", path: "/api/v1/creators/earnings", schema: c.page(earning) },
+  { domain: "creators", method: "GET", path: "/api/v1/creators/eligibility", schema: eligibility },
+  { domain: "creators", method: "GET", path: "/api/v1/creators/brand-deals", schema: c.page(brandDeal) },
+  { domain: "creators", method: "POST", path: "/api/v1/creators/brand-deals", body: { brandName: "Acme", amountMinor: 100, currency: "NGN", startsAt: "2026-10-01T00:00:00Z", endsAt: null, disclosure: "Paid partnership with Acme", notes: "" }, schema: brandDeal },
+  { domain: "subscriptions", method: "GET", path: "/api/v1/creators/me/subscription-plans", schema: c.page(plan) },
+  { domain: "subscriptions", method: "GET", path: "/api/v1/creators/me/subscription-plans/price-tiers?currency=NGN&interval=month", schema: c.page(priceTier) },
+  { domain: "subscriptions", method: "GET", path: "/api/v1/creators/me/subscribers", schema: c.page(subscriber) },
+  { domain: "social", method: "GET", path: "/api/v1/users/u_me/posts?kind=clip", schema: c.page(myPost) },
+  { domain: "social", method: "GET", path: "/api/v1/posts/post_clip_1/analytics", schema: postAnalytics },
+  { domain: "social", method: "GET", path: "/api/v1/users/me/followers", schema: c.page(follower) },
+  { domain: "live", method: "GET", path: "/api/v1/rankings?board=streamer&period=week", schema: c.page(ranking) },
+  { domain: "trust", method: "GET", path: "/api/v1/account/status", schema: accountStatus },
 ];

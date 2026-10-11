@@ -12,6 +12,7 @@ import { PayoutDocumentStep, PAYOUT_VERIFICATION_CHANNEL } from "./payoutDocumen
 import { PayoutIdentityForm } from "./payoutIdentityForm";
 import { PayoutSyncList, PayoutStatusSummary } from "./payoutStatusSummary";
 import { payoutStateQueryKey } from "./payoutStateQuery.hook";
+import { BvnConsentNotice, WalletAccountSummary } from "./walletAccountAndConsent";
 
 import { readErrorMessageForDisplay } from "@/services/clientApi.service";
 
@@ -47,7 +48,15 @@ export function PayoutOnboardingPanel() {
   if (!state) return query.isError ? <ErrorState title="Payout setup didn't load" description={readErrorMessageForDisplay(query.error)} onRetry={() => void query.refetch()} /> : <Skeleton height={180} />;
 
   const showStatus = state.status === "pending_review" || state.status === "verified" || (state.status === "action_needed" && !isEditing);
-  if (showStatus) return <PayoutStatusSummary state={state} onFix={() => setIsEditing(true)} onChanged={() => void refresh()} />;
+  if (showStatus) {
+    return (
+      <div className={styles.stack}>
+        {state.idType === "bvn" && state.bankSummary ? <BvnConsentNotice /> : null}
+        {state.status === "verified" ? <WalletAccountSummary /> : null}
+        <PayoutStatusSummary state={state} onFix={() => setIsEditing(true)} onChanged={() => void refresh()} />
+      </div>
+    );
+  }
 
   const stepCount = 2 + (state.requiresBusinessStep ? 1 : 0) + (state.requiresDocumentStep ? 1 : 0);
   const stepNumber = { identity: 1, business: 2, bank: state.requiresBusinessStep ? 3 : 2, document: stepCount, done: stepCount }[state.currentStep];

@@ -4,7 +4,7 @@ import { readApiTokensFromCookies, readCachedViewerFromCookies, readSessionIdFro
 
 const publicPagePaths = new Set(["/", "/login"]);
 const homePath = "/";
-const studioHomePath = "/lives";
+const studioHomePath = "/home";
 const staticAssetPattern = /\.(?:webp|png|jpe?g|gif|svg|ico|woff2?|txt|map|json|xml|webmanifest)$/i;
 
 function isOverlayBrowserSourcePath(pathname: string): boolean {

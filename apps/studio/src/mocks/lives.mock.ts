@@ -67,6 +67,7 @@ const toStudioLiveWire = (live: MockLive): StudioLiveWire => ({
 const toLiveSessionWire = (live: MockLive): LiveSessionWire => ({
   id: live.id, title: live.title, category: live.category, state: live.state, viewers: live.viewers, peakViewers: live.peakViewers,
   startedAt: live.startedAt, endedAt: live.endedAt, playbackUrl: hlsUrlFor(live), storeId: live.storeId,
+  hostRanking: live.state === "live" ? { globalRank: 42, categoryRank: 3, category: live.category, period: "week" } : null,
 });
 
 const toStreamKeyWire = (live: MockLive, streamKey: string): StreamKeyWire => ({
@@ -207,6 +208,10 @@ export const liveMocks: MockRoute[] = [
       ...current,
       pins: [...current.pins.filter((pin) => pin.productId !== productId).map((pin) => ({ ...pin, pinned: false })), { productId, pinned: true }],
     }));
+    return { data: live.pins, nextCursor: null };
+  }),
+  createMockRoute("DELETE", "/api/v1/lives/:liveId/pins", ({ params }) => {
+    const live = patchLive(params.liveId!, (current) => ({ ...current, pins: current.pins.map((pin) => ({ ...pin, pinned: false })) }));
     return { data: live.pins, nextCursor: null };
   }),
   createMockRoute("GET", "/api/v1/seller/stores/mine", () => ({ data: MY_STORES, nextCursor: null })),
