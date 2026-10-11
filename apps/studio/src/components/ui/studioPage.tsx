@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 
+import { WarningIcon } from "./icons";
 import styles from "./studioPage.module.css";
 
 export function PageHeader({ title, subtitle, action }: { readonly title: string; readonly subtitle?: ReactNode; readonly action?: ReactNode }) {
@@ -63,9 +64,12 @@ export function NextActionList({ actions }: { readonly actions: readonly NextAct
   return (
     <ul className={styles.actions}>
       {actions.map((action) => (
-        <li key={action.key} className={styles.action} data-tone={action.tone ?? "normal"}>
+        <li key={action.key} className={styles.action}>
           <div className={styles.actionText}>
-            <strong>{action.title}</strong>
+            <strong className={action.tone === "urgent" ? styles.actionUrgent : undefined}>
+              {action.tone === "urgent" ? <WarningIcon size={16} weight="fill" /> : null}
+              {action.title}
+            </strong>
             <span className={styles.muted}>{action.detail}</span>
           </div>
           {action.external ? (

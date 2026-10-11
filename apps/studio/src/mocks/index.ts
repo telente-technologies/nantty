@@ -9,7 +9,9 @@ import { payoutOnboardingMocks } from "./payoutOnboarding.mock";
 import { preferencesMocks } from "./preferences.mock";
 import { providerWalletMocks } from "./providerWallet.mock";
 import type { MockRoute } from "./registry.mock";
+import { studioLiveMocks } from "./studioLive.mock";
+import { studioSocialMocks } from "./studioSocial.mock";
 import { subscriptionsMocks } from "./subscriptions.mock";
 import { walletMocks } from "./wallet.mock";
 
-export const routes: MockRoute[] = [...authMocks, ...consentsMocks, ...preferencesMocks, ...liveSafetyMocks, ...liveMocks, ...payoutOnboardingMocks, ...accountHealthMocks, ...walletMocks, ...providerWalletMocks, ...creatorMocks, ...contentMocks, ...subscriptionsMocks];
+export const routes: MockRoute[] = [...authMocks, ...consentsMocks, ...preferencesMocks, ...liveSafetyMocks, ...liveMocks, ...studioLiveMocks, ...studioSocialMocks, ...payoutOnboardingMocks, ...accountHealthMocks, ...walletMocks, ...providerWalletMocks, ...creatorMocks, ...contentMocks, ...subscriptionsMocks];

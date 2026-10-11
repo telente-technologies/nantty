@@ -3,7 +3,10 @@ import {
   CodeIcon as PhCode, CompassIcon as PhCompass, CopyIcon as PhCopy, CreditCardIcon as PhCreditCard, DotsThreeIcon, EnvelopeIcon, EyeIcon as PhEye, FunnelSimpleIcon, GearIcon,
   HeartIcon as PhHeart, HouseIcon, ImageIcon as PhImage, LockIcon as PhLock, MagnifyingGlassIcon, MapPinIcon as PhMapPin,
   PackageIcon as PhPackage, PhoneIcon as PhPhone, PlusIcon as PhPlus, ShareNetworkIcon, ShoppingCartIcon, SignOutIcon, StarIcon as PhStar,
-  StorefrontIcon, TagIcon as PhTag, TrashIcon as PhTrash, UserIcon as PhUser, XIcon,
+  StorefrontIcon, TagIcon as PhTag, TrashIcon as PhTrash, UserIcon as PhUser, WarningIcon as PhWarning, XIcon,
+  ArrowBendUpLeftIcon, ArrowSquareOutIcon, CalendarBlankIcon, CaretUpDownIcon, CellSignalHighIcon, CellSignalLowIcon, CellSignalMediumIcon, CellSignalXIcon, ChartLineUpIcon,
+  ChatsCircleIcon, ClockIcon as PhClock, EyeSlashIcon, ListIcon, MicrophoneIcon, MicrophoneSlashIcon, MonitorIcon, PlayIcon as PhPlay, PushPinIcon, QuestionIcon,
+  VideoCameraIcon, VideoCameraSlashIcon,
 } from "@phosphor-icons/react/dist/ssr";
 import type { Icon, IconProps as PhosphorIconProps } from "@phosphor-icons/react";
 
@@ -34,6 +37,7 @@ export const ShareIcon = createIcon(ShareNetworkIcon);
 export const MoreIcon = createIcon(DotsThreeIcon);
 export const CheckIcon = createIcon(PhCheck);
 export const TrashIcon = createIcon(PhTrash);
+export const WarningIcon = createIcon(PhWarning);
 export const StoreIcon = createIcon(StorefrontIcon);
 export const PackageIcon = createIcon(PhPackage);
 export const SettingsIcon = createIcon(GearIcon);
@@ -55,3 +59,24 @@ export const WalletIcon = createIcon(PhWallet);
 export const AudienceIcon = createIcon(UsersThreeIcon);
 export const SubscribersIcon = createIcon(CrownSimpleIcon);
 export const AccountIcon = createIcon(UserGearIcon);
+export const AnalyticsIcon = createIcon(ChartLineUpIcon);
+export const CommentsIcon = createIcon(ChatsCircleIcon);
+export const HelpIcon = createIcon(QuestionIcon);
+export const ExternalLinkIcon = createIcon(ArrowSquareOutIcon);
+export const MenuIcon = createIcon(ListIcon);
+export const ExpandIcon = createIcon(CaretUpDownIcon);
+export const CameraIcon = createIcon(VideoCameraIcon);
+export const CameraOffIcon = createIcon(VideoCameraSlashIcon);
+export const MicIcon = createIcon(MicrophoneIcon);
+export const MicOffIcon = createIcon(MicrophoneSlashIcon);
+export const ScreenShareIcon = createIcon(MonitorIcon);
+export const CalendarIcon = createIcon(CalendarBlankIcon);
+export const ClockIcon = createIcon(PhClock);
+export const PlayIcon = createIcon(PhPlay);
+export const PinIcon = createIcon(PushPinIcon);
+export const HideIcon = createIcon(EyeSlashIcon);
+export const ReplyIcon = createIcon(ArrowBendUpLeftIcon);
+export const SignalStrongIcon = createIcon(CellSignalHighIcon);
+export const SignalFairIcon = createIcon(CellSignalMediumIcon);
+export const SignalWeakIcon = createIcon(CellSignalLowIcon);
+export const SignalLostIcon = createIcon(CellSignalXIcon);

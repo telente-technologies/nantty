@@ -19,7 +19,7 @@ function renderNextLink({ href, className, children }: ErrorLinkProps) {
 export const studioErrorExperience: ErrorExperienceConfig = {
   homeHref: "/home",
   homeLabel: "Back to the studio",
-  hrefs: { signIn: "/login", accountStatus: webappLinks.accountStatus, appeal: webappLinks.accountStatus, support: buildContactMailtoLink("Help with Zudomart Studio"), browse: "/home", useApp: webappLinks.help },
+  hrefs: { signIn: "/login", accountStatus: webappLinks.accountStatus, appeal: webappLinks.accountStatus, support: buildContactMailtoLink("Help with Zudomart Studio"), browse: "/home", useApp: webappLinks.help, manageProfiles: webappLinks.manageProfiles },
   labels: { browse: "Back to the studio" },
   destinations: [
     { label: "Home", href: "/home", icon: "house" },
