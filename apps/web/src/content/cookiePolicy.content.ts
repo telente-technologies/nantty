@@ -1,38 +1,74 @@
 import type { LegalDocumentSection } from "@/components/legal/legalDocument";
 import { emailAddresses } from "@/lib/siteConfig.config";
 
+import { generalLegalCreditParagraph } from "./legalPlaceholders.content";
+
 export const cookiePolicySections: readonly LegalDocumentSection[] = [
   {
     id: "what-are-cookies",
     heading: "What cookies are",
-    paragraphs: ["Cookies are small files stored on your device. We also use similar technologies such as local storage and SDKs in our apps. This policy explains the categories we use and how to control them. It sits alongside our Privacy Policy."],
+    paragraphs: [
+      "Cookies are small files a website stores on your device. Session cookies expire when you close the browser; persistent cookies stay until they expire or you delete them. We also use similar technologies: browser local storage, and in our apps, secure device storage and software development kits (SDKs). This policy covers all of them, on our websites (zudomart.com, the web app, the seller dashboard, Creator Studio and Zudomart Ads) and our apps. It sits alongside our Privacy Policy.",
+    ],
   },
   {
     id: "categories",
     heading: "Categories we use",
-    paragraphs: ["Optional categories stay off until you allow them. Optional scripts are not loaded before you choose."],
+    paragraphs: [
+      "Optional categories stay off until you allow them, and their scripts are not loaded before you choose. Our banner lets you accept all, reject all or choose by category, with rejecting as easy as accepting, as the NDPC's GAID and the UK and EU rules expect.",
+    ],
     table: {
       columns: ["Category", "Purpose", "Your choice"],
       rows: [
-        ["Essential", "Keep you signed in, protect your account and our systems from abuse, and remember your cookie choice.", "Always on. Cannot be turned off because the service needs them."],
+        ["Essential", "Keep you signed in, protect your account and our systems from abuse, remember your theme and your cookie choice.", "Always on. The service cannot work without them."],
         ["Analytics", "Understand how features are used and how the product performs so we can fix problems and improve it.", "Off until you allow it."],
-        ["Personalization", "Remember preferences and tailor what you see, such as suggestions.", "Off until you allow it."],
-        ["Advertising", "Measure ads and show ads that are more relevant to you.", "Off until you allow it."],
+        ["Personalisation", "Remember preferences and tailor what you see, such as suggestions.", "Off until you allow it."],
+        ["Advertising", "Measure ads and show ads that are more relevant to you. Never used for under-18 accounts.", "Off until you allow it."],
       ],
     },
   },
   {
-    id: "our-consent-cookie",
-    heading: "The cookie that stores your choice",
+    id: "cookies-in-use",
+    heading: "Cookies and storage we use today",
     paragraphs: [
-      "We store your choice in a first-party cookie named zudomart_consent, together with the policy version you responded to. If you are signed in, we also record your choice against your account so it applies on your other devices. If the policy version changes in a way that affects consent, we ask again.",
-      "[Team to replace: the full list of cookies and SDKs in use, with provider, purpose and lifetime, once analytics and advertising tools are chosen.]",
+      "On live sites, sign-in cookies carry the __Host- prefix, which locks them to our domain and secure connections. They are HttpOnly, so scripts cannot read them.",
+      "[Team to replace: add each analytics, crash reporting and advertising cookie or SDK, with provider, purpose and lifetime, once those tools are chosen.]",
+    ],
+    table: {
+      columns: ["Name", "Category", "Purpose", "Lifetime"],
+      rows: [
+        ["zd_at", "Essential", "Short-lived sign-in token for the web apps.", "15 minutes"],
+        ["zd_rt", "Essential", "Keeps you signed in by renewing the sign-in token.", "30 days"],
+        ["zd_sid", "Essential", "Identifies your signed-in session so you can sign out everywhere.", "30 days"],
+        ["zd_viewer", "Essential", "Caches basic details of the signed-in account to load pages faster.", "5 minutes"],
+        ["zd_reset", "Essential", "Protects a password reset in progress.", "Until the reset finishes"],
+        ["theme", "Essential", "Remembers light or dark mode.", "Until you change it"],
+        ["zudomart_consent", "Essential", "Stores your cookie choice and the policy version you answered.", "180 days"],
+        ["zudomart_consent_synced_at (local storage)", "Essential", "Records when your choice was saved to your account.", "Until you clear site data"],
+        ["Cloudflare Turnstile", "Essential", "Human check that protects sign-up, sign-in and sensitive actions. It does not use cookies to track you across sites.", "Per check"],
+      ],
+    },
+  },
+  {
+    id: "apps",
+    heading: "In our mobile apps",
+    paragraphs: [
+      "The apps store your sign-in tokens, chat encryption keys and payment tokens in your device's secure storage (Keychain on iOS, Keystore on Android). They use push notification services from Apple, Google and Expo. Optional analytics and advertising SDKs, if we add them, follow the same choices as on the web, which you can change in Settings, Privacy & Data. On iOS we ask permission before any tracking across other companies' apps. You can also reset or limit your advertising ID in your device settings.",
+    ],
+  },
+  {
+    id: "our-consent-cookie",
+    heading: "How we record your choice",
+    paragraphs: [
+      "We store your choice in the zudomart_consent cookie, with the policy version you answered. If you are signed in, we also save the choice to your account so it applies on your other devices, and we keep a record of it to show we asked. If the policy version changes in a way that affects consent, we ask again.",
     ],
   },
   {
     id: "manage",
     heading: "How to manage your choices",
-    paragraphs: ["You can change your choice at any time using Cookie settings in the footer of our websites, or Settings, Privacy & Data in the app. You can also block or delete cookies in your browser settings, but parts of Zudomart may stop working."],
+    paragraphs: [
+      "Change your choice at any time with Cookie settings in the footer of our websites, or Settings, Privacy & Data in the app. You can also block or delete cookies in your browser, but parts of Zudomart, such as staying signed in, will stop working. We honour the Global Privacy Control signal as an opt-out of advertising cookies.",
+    ],
   },
   {
     id: "contact",
@@ -42,6 +78,11 @@ export const cookiePolicySections: readonly LegalDocumentSection[] = [
   {
     id: "updates",
     heading: "Updates to this policy",
-    paragraphs: ["We will post changes on this page and update the version and effective date."],
+    paragraphs: ["We post changes on this page and update the version and effective date."],
+  },
+  {
+    id: "credits",
+    heading: "About this document",
+    paragraphs: [generalLegalCreditParagraph],
   },
 ];

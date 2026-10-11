@@ -1,13 +1,18 @@
 import type { LegalDocumentSection } from "@/components/legal/legalDocument";
 import { emailAddresses } from "@/lib/siteConfig.config";
 
-export const privacyPolicySections: readonly LegalDocumentSection[] = [
+import { generalLegalCreditParagraph, legalEntityPlaceholder } from "./legalPlaceholders.content";
+import { privacyPolicyCountryAnnexSections } from "./privacyPolicyAnnexes.content";
+import { privacyPolicyProcessingSections } from "./privacyPolicyProcessing.content";
+
+const privacyPolicyIntroductionSections: readonly LegalDocumentSection[] = [
   {
     id: "who-we-are",
     heading: "Who we are",
     paragraphs: [
-      "Zudomart operates a Nigeria-first social commerce marketplace: the Zudomart app, this website, and the seller, creator and advertiser tools that go with them. This policy explains what personal data we collect, why, who we share it with and the choices you have.",
-      "[Team to replace: registered company name, address and registration number, and the data protection contact or officer once appointed.]",
+      `Zudomart is a Nigeria-first social marketplace: the Zudomart app, web app and website, and the seller, creator and advertiser tools that go with them. The data controller responsible for your personal data is ${legalEntityPlaceholder} ("Zudomart", "we").`,
+      `Our Data Protection Officer (DPO) can be reached at ${emailAddresses.dpo}. [Team to replace: the DPO's name or office, and Zudomart's registration number with the Nigeria Data Protection Commission (NDPC) once issued.]`,
+      "This policy explains what personal data we collect, why, who we share it with, how long we keep it and the rights you have. It is written to meet the Nigeria Data Protection Act 2023 (NDPA) and the NDPC's General Application and Implementation Directive 2025 (GAID). The annexes at the end add what the laws of Ghana, Kenya, South Africa, the UK, the EU and the US require.",
     ],
   },
   {
@@ -15,107 +20,69 @@ export const privacyPolicySections: readonly LegalDocumentSection[] = [
     heading: "Data we collect",
     paragraphs: ["Depending on how you use Zudomart, we collect the following."],
     bullets: [
-      "Identity and contact details: name, username, email address and phone number.",
-      "Addresses: delivery and billing addresses you save or enter at checkout.",
-      "Location: country and approximate location from your device or IP address, used for currency, delivery options and relevance. Precise device location is only collected if you allow it.",
-      "Purchase and search history: what you view, search for, add to cart, buy, return or review.",
-      "Interactions: follows, likes, comments, shares, watch time on clips and live streams, and gifts sent or received.",
-      "Device and network data: IP address, device type, operating system, app version, language and crash information.",
-      "Cookies and similar technologies: see our Cookie Policy.",
-      "Analytics data: how features are used and how the product performs.",
-      "Advertising data: ad impressions, clicks and conversions, and the audience and interest signals used to show ads.",
-      "Messages: chats with sellers and buyers, and messages you send to support, including attachments.",
-      "Payment-related data: transaction references, amounts, payout details and the status of payments. Card and bank credentials are handled by our payment providers; we do not store full card numbers.",
-      "Seller and creator verification data: identity, business and bank details provided for verification and payouts.",
+      "Account data: email address (you sign in with email only), username, display name, password hash, profile photo, bio, profile type and settings. Your phone number is only used as contact data for deliveries, stores and orders, never to log in.",
+      "Addresses and contact details you give for delivery, billing or your store.",
+      "Location: your country and approximate location from your IP address or device, used for currency, prices, delivery options and relevance. Precise location only if you allow it.",
+      "Content: posts, clips, stories, lives and recordings, comments, product listings, reviews and the metadata that comes with them.",
+      "Activity: follows, likes, shares, saves, searches, watch time, products viewed and bought, gifts sent and received, ZudoPoints, and the reasons you report or hide things.",
+      "Chat metadata: who you message, when and how often, delivery and read status, and the public keys your devices use for end-to-end encryption. We cannot read message content.",
+      "Payment and wallet data: transaction references, amounts, fees, escrow status, wallet balances held by our payment partner in your name, payout account details and payout history. Card numbers are entered only on our payment partner's secure page; we never see or store them.",
+      "Verification data: in Nigeria, your BVN and bank account details checked through our payment partner; your legal name, date of birth and address; ID document type and number (such as NIN, passport or driver's licence); and, for Smile ID checks, ID images, a liveness selfie and a face-match result.",
+      "Business data for sellers, brands and advertisers: business name, registration number, documents, tax details and the people who act for the business.",
+      "Support data: tickets, live chats with our support team (these are not end-to-end encrypted) and attachments.",
+      "Device and network data: IP address, device model, operating system, app version, language, push token, crash data and security signals such as failed checks.",
+      "Cookies and similar technologies, as explained in our Cookie Policy.",
+      "Advertising data: ad impressions, clicks and conversions, and the interest and audience signals used to choose ads, only where you have allowed personalised ads.",
     ],
   },
   {
-    id: "purposes",
-    heading: "How we use your data",
-    paragraphs: ["We use personal data to:"],
+    id: "sensitive-data",
+    heading: "Sensitive data, biometrics and ID numbers",
+    paragraphs: [
+      "Some data is sensitive under the NDPA, such as biometric data, or high risk, such as BVN, NIN and ID images. We collect it only for verification, fraud prevention and legal compliance, and only when you start a verification.",
+      "We ask for your explicit consent before any biometric check. Smile ID compares your selfie with your ID photo and returns a result. Zudomart does not create or store face templates; we keep the result and the minimum evidence needed to show the check happened. ID images and verification records are stored in an encrypted, access-restricted store.",
+      "If you do not want a biometric check, you can still use Zudomart, but you cannot get a checkmark, and outside Nigeria you cannot sell or receive payouts.",
+    ],
+  },
+  {
+    id: "sources",
+    heading: "Where data comes from",
+    paragraphs: ["Most data comes from you and your devices. We also receive data from:"],
     bullets: [
-      "create and run your account, process orders, hold and release escrow payments and handle payouts, returns and disputes;",
-      "show you relevant products, posts, clips and live streams, and measure and improve the product;",
-      "show and measure ads, where you have allowed advertising;",
-      "keep Zudomart safe: prevent fraud, abuse and unauthorized access, and enforce our terms;",
-      "send service messages, and marketing messages where you have allowed them;",
-      "meet legal, tax, accounting and regulatory obligations and respond to lawful requests.",
+      "our payment partners (Flutterwave, and Paystack during the move to Flutterwave) about payments, wallet funding, payouts, chargebacks and bank account checks;",
+      "Smile ID about identity and liveness checks;",
+      "Apple and Google about in-app purchases, refunds and push notifications;",
+      "other users, for example when they tag or mention you, report you, review an order or send you a chat request;",
+      "sellers, about the fulfilment of your orders;",
+      "public sources and authorities, for example sanctions lists and lawful requests.",
     ],
   },
-  {
-    id: "legal-basis",
-    heading: "Legal basis, where applicable",
-    paragraphs: [
-      "Where the Nigeria Data Protection Act 2023 or the GDPR applies, we rely on one or more of these bases: performing our contract with you (accounts, orders, payments), our legitimate interests (security, fraud prevention, product improvement), compliance with legal obligations, and your consent (optional cookies, personalization, personalized ads and marketing). You can withdraw consent at any time without affecting what happened before.",
-      "[Team to confirm the basis for each purpose with counsel.]",
-    ],
-  },
-  {
-    id: "sharing",
-    heading: "Who we share data with",
-    paragraphs: ["We do not sell your personal data. We share it only as needed with:"],
-    bullets: [
-      "Payment providers, currently Paystack and Flutterwave, who process payments and payouts.",
-      "Sellers, who receive the details needed to fulfil your order, such as name, delivery address and phone number.",
-      "Cloud hosting and infrastructure providers that store and process data for us.",
-      "Cloudflare, which runs the Turnstile human check. When you are asked to complete a check, Cloudflare receives technical signals from your browser or device (such as IP address, browser characteristics and how the check was completed) to decide whether you are a person. It does not use cookies to track you across sites, and we receive only a pass or fail result.",
-      "Analytics providers, only if you have allowed analytics.",
-      "Advertising partners and measurement providers, only if you have allowed advertising.",
-      "Delivery and logistics partners where a seller uses them.",
-      "Professional advisers, regulators, courts and law enforcement where the law requires or to protect rights and safety.",
-    ],
-  },
-  {
-    id: "international-transfers",
-    heading: "International transfers",
-    paragraphs: [
-      "Some providers may process data outside Nigeria. Where that happens we intend to use safeguards that the applicable law recognizes, such as contractual protections, and to share only what is needed.",
-      "[Team to replace: list of providers and the countries where data is stored, and the transfer mechanism for each.]",
-    ],
-  },
-  {
-    id: "retention",
-    heading: "Retention",
-    paragraphs: [
-      "We keep personal data only as long as needed for the purposes in this policy or as the law requires. Retention periods are configurable by data type, and the schedule will be published here once approved.",
-      "[Team to replace: retention schedule by data type, approved by counsel.]",
-      "When you delete your account, we delete or anonymize your profile and content. Orders, payments, payout and escrow records may be kept for as long as the law requires for tax, fraud and dispute purposes.",
-    ],
-  },
-  {
-    id: "security",
-    heading: "Security",
-    paragraphs: [
-      "We use technical and organizational measures designed to protect personal data, including encryption in transit, access controls, separation of duties for staff access and logging. No system is perfectly secure. If a personal data breach affects you we will tell you and the regulator as the law requires.",
-      "To protect accounts and data from unauthorised access and automated abuse, we keep security logs of requests that were refused (for example, attempts to open other people's orders, messages or payouts, or staff-only pages), recording the type of page, counts, the time, a device identifier and a shortened network address, never the content you sent. Accounts that show this pattern, or that behave like automated software, may be asked to complete a human check, sometimes on every sensitive action. Repeated failures can lead to a temporary suspension, which you can appeal. Automated systems never ban or delete accounts: a member of our team reviews the evidence first. Security logs are kept for up to 12 months, or longer while a case or appeal is open.",
-    ],
-  },
-  {
-    id: "your-rights",
-    heading: "Your rights",
-    paragraphs: ["Depending on where you live, you may have the right to:"],
-    bullets: [
-      "access the personal data we hold about you;",
-      "correct data that is wrong or incomplete;",
-      "delete your data, subject to what we must keep by law;",
-      "withdraw consent at any time, including in the app under Settings, Privacy & Data and through the cookie settings on our websites;",
-      "receive your data in a portable format;",
-      "object to or restrict certain uses, and complain to the Nigeria Data Protection Commission or your local data protection authority.",
-    ],
-  },
-  {
-    id: "children",
-    heading: "Children",
-    paragraphs: ["Zudomart is not intended for people under the age required to form a binding contract where they live. If you believe a child has given us personal data, contact us and we will act on it."],
-  },
+];
+
+const privacyPolicyClosingSections: readonly LegalDocumentSection[] = [
   {
     id: "contact",
-    heading: "Contact us",
-    paragraphs: [`To use your rights or ask a question, email ${emailAddresses.privacy}. You can reach our Data Protection Officer at ${emailAddresses.dpo}.`],
+    heading: "Contact us and complaints",
+    paragraphs: [
+      `To use your rights or ask a question, use Settings, Privacy & Data in the app, email ${emailAddresses.privacy}, or contact our Data Protection Officer at ${emailAddresses.dpo}. The Data rights requests page explains how we handle requests and how long we take.`,
+      "If you are not happy with our answer, you can complain to the Nigeria Data Protection Commission (ndpc.gov.ng) or to the data protection authority where you live, listed in the annexes below. You do not have to contact us first, but we would like the chance to fix the problem.",
+    ],
   },
   {
     id: "updates",
     heading: "Updates to this policy",
-    paragraphs: ["We will post changes on this page and update the version and effective date. We will ask for your choices again when a change affects consent, and announce significant changes in the app or by email."],
+    paragraphs: ["We post changes on this page and update the version and effective date. Earlier versions stay available. We tell you by email and in the app before a material change, and we ask for your choices again when a change affects consent."],
   },
+  {
+    id: "credits",
+    heading: "About this document",
+    paragraphs: [generalLegalCreditParagraph],
+  },
+];
+
+export const privacyPolicySections: readonly LegalDocumentSection[] = [
+  ...privacyPolicyIntroductionSections,
+  ...privacyPolicyProcessingSections,
+  ...privacyPolicyCountryAnnexSections,
+  ...privacyPolicyClosingSections,
 ];
