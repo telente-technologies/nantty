@@ -20,3 +20,19 @@ test("an old rankings link opens the profile tab instead of a removed screen", (
 test("the profile tab link still works", () => {
   expect(focusedRouteNames("me")).toEqual(["Tabs", "Me"]);
 });
+
+test.each([
+  ["orders/o_1042", ["OrderDetail"]],
+  ["seller/dashboard", ["SellerDashboard"]],
+  ["creator/dashboard", ["CreatorDashboard"]],
+  ["stories/u_1", ["Story"]],
+  ["live/live_ada", ["Live"]],
+  ["settings/widgets", ["SettingsWidgets"]],
+])("the %s widget deep link opens the right screen", (path, expected) => {
+  expect(focusedRouteNames(path)).toEqual(expected);
+});
+
+test("widget deep links never fall through to a username profile", () => {
+  expect(focusedRouteNames("orders")).toEqual(["Orders"]);
+  expect(focusedRouteNames("creator")).toEqual(["CreatorProgram"]);
+});

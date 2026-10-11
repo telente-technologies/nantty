@@ -28,6 +28,7 @@ import { SettingsSecurityScreen } from "@/screens/settings/settingsSecurity.scre
 import { AccountStatusScreen } from "@/screens/settings/accountStatus.screen";
 import { SettingsNotificationsScreen } from "@/screens/settings/settingsNotifications.screen";
 import { SettingsAppPreferenceScreen } from "@/screens/settings/settingsAppPreference.screen";
+import { SettingsWidgetsScreen } from "@/screens/settings/settingsWidgets.screen";
 import { SettingsPaymentMethodsScreen } from "@/screens/settings/settingsPaymentMethods.screen";
 import { ShippingAddressesScreen } from "@/screens/settings/shippingAddresses.screen";
 import { AddressFormScreen } from "@/screens/settings/addressForm.screen";
@@ -43,6 +44,7 @@ import { StoreRewardsScreen } from "@/screens/wallet/storeRewards.screen";
 import { TransactionsScreen } from "@/screens/wallet/transactions.screen";
 import { CoinActivityScreen } from "@/screens/wallet/coinActivity.screen";
 import { WithdrawScreen } from "@/screens/wallet/withdraw.screen";
+import { AddMoneyScreen } from "@/screens/wallet/addMoney.screen";
 import { PayoutSetupScreen } from "@/screens/wallet/payoutSetup.screen";
 import { PayoutAccountsScreen } from "@/screens/wallet/payoutAccounts.screen";
 import { SellerApplicationScreen } from "@/screens/seller/sellerApplication.screen";
@@ -136,6 +138,7 @@ export function MainNavigator() {
       <Stack.Screen name="SettingsSecurity" component={SettingsSecurityScreen} />
       <Stack.Screen name="SettingsNotifications" component={SettingsNotificationsScreen} />
       <Stack.Screen name="SettingsAppPreference" component={SettingsAppPreferenceScreen} />
+      <Stack.Screen name="SettingsWidgets" component={SettingsWidgetsScreen} />
       <Stack.Screen name="SettingsPaymentMethods" component={SettingsPaymentMethodsScreen} />
       <Stack.Screen name="ShippingAddresses" component={ShippingAddressesScreen} />
       <Stack.Screen name="AddressForm" component={AddressFormScreen} />
@@ -151,6 +154,7 @@ export function MainNavigator() {
       <Stack.Screen name="StoreRewards" component={StoreRewardsScreen} />
       <Stack.Screen name="CoinActivity" component={CoinActivityScreen} />
       <Stack.Screen name="Withdraw" component={WithdrawScreen} />
+      <Stack.Screen name="AddMoney" component={AddMoneyScreen} />
       <Stack.Screen name="PayoutAccounts" component={PayoutAccountsScreen} />
       <Stack.Screen name="PayoutSetup" component={PayoutSetupScreen} />
       <Stack.Screen name="SellerApplication" component={SellerApplicationScreen} />

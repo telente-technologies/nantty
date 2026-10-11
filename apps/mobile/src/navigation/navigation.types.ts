@@ -55,6 +55,7 @@ export type MainStackParamList = {
   SettingsSecurity: undefined;
   SettingsNotifications: undefined;
   SettingsAppPreference: undefined;
+  SettingsWidgets: undefined;
   SettingsPaymentMethods: undefined;
   ShippingAddresses: undefined;
   AddressForm: { addressId?: string } | undefined;
@@ -70,6 +71,7 @@ export type MainStackParamList = {
   StoreRewards: undefined;
   CoinActivity: undefined;
   Withdraw: undefined;
+  AddMoney: undefined;
   PayoutAccounts: undefined;
   PayoutSetup: { context?: "creator" | "seller" } | undefined;
   SellerApplication: undefined;
@@ -78,7 +80,7 @@ export type MainStackParamList = {
   ProductForm: { productId?: string } | undefined;
   SellerOrders: undefined;
   SellerOrderDetail: { orderId: string };
-  Chat: { conversationId?: string; userId?: string; name: string };
+  Chat: { conversationId?: string; userId?: string; storeId?: string; name: string };
   NewMessage: undefined;
   NewGroup: { kind: "group" | "channel" };
   ConversationInfo: { conversationId: string };
