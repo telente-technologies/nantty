@@ -38,6 +38,8 @@ func (PayoutTransfer) Fields() []ent.Field {
 		field.Int64("fee_minor").Default(0),
 		field.String("bank_code").MaxLen(20).Default("").Immutable(),
 		field.String("destination_last4").MaxLen(4).Default("").Immutable(),
+		field.String("source_wallet_ref").MaxLen(80).Default("").Immutable(),
+		field.Bytes("sealed_destination").Optional().Nillable().Sensitive().Immutable(),
 		field.Enum("status").Values("processing", "succeeded", "failed").Default("processing"),
 		field.String("provider_transfer_code").MaxLen(120).Default(""),
 		field.String("failure_reason").MaxLen(300).Default(""),

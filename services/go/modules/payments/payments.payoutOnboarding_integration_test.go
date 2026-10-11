@@ -36,11 +36,11 @@ func TestPayoutAccountCreationIsQueuedAndNeverDuplicatedAcrossRetries(t *testing
 	if saved.Status != http.StatusOK || saved.Body["accountStatus"] != "pending_creation" || saved.Body["idLast4"] != "5678" || saved.Body["currentStep"] != "bank" {
 		t.Fatalf("identity: %d %s", saved.Status, saved.Raw)
 	}
-	if mismatch := harness.Call(http.MethodPut, "/api/v1/payments/payout-onboarding/me/bank", token, "", map[string]any{"bankCode": "058", "bankName": "GTBank", "accountNumber": "1112223334"}); mismatch.Status != http.StatusUnprocessableEntity || mismatch.Body["code"] != "NAME_MISMATCH" {
+	if mismatch := harness.Call(http.MethodPut, "/api/v1/payments/payout-onboarding/me/bank", token, "", map[string]any{"bankCode": "058", "bankName": "GTBank", "accountNumber": "1112223334"}, harness.StepUpFor(token)); mismatch.Status != http.StatusUnprocessableEntity || mismatch.Body["code"] != "NAME_MISMATCH" {
 		t.Fatalf("name mismatch: %d %s", mismatch.Status, mismatch.Raw)
 	}
 	harness.Paystack.Recipients["RCP_pre_existing"] = map[string]any{"recipient_code": "RCP_pre_existing", "metadata": map[string]any{"zudomartUserId": seller}, "details": map[string]any{"account_number": "0123456789", "bank_code": "058"}}
-	bank := harness.Call(http.MethodPut, "/api/v1/payments/payout-onboarding/me/bank", token, "", map[string]any{"bankCode": "058", "bankName": "GTBank", "accountNumber": "0123456789"})
+	bank := harness.Call(http.MethodPut, "/api/v1/payments/payout-onboarding/me/bank", token, "", map[string]any{"bankCode": "058", "bankName": "GTBank", "accountNumber": "0123456789"}, harness.StepUpFor(token))
 	if bank.Status != http.StatusOK || bank.Body["syncByStep"].(map[string]any)["bank"] != "sending" || bank.Body["withdrawalsEnabled"] != false {
 		t.Fatalf("bank: %d %s", bank.Status, bank.Raw)
 	}
@@ -124,10 +124,10 @@ func TestSavedCardAuthorizationNeverLeavesTheServerAndChargesUseTheOwnersSavedCa
 	}
 	other := harness.Call(http.MethodPost, "/api/v1/payments/saved-cards/setups", strangerToken, "", map[string]any{})
 	otherReference := other.Body["reference"].(string)
-	if stolen := harness.Call(http.MethodPost, "/api/v1/payments/saved-cards/charges", strangerToken, "", map[string]any{"paymentReference": otherReference, "savedCardId": savedCardId}); stolen.Status != http.StatusConflict || stolen.Body["code"] != "BILLING_CARD_MISSING" {
+	if stolen := harness.Call(http.MethodPost, "/api/v1/payments/saved-cards/charges", strangerToken, "stolen-card-charge-1", map[string]any{"paymentReference": otherReference, "savedCardId": savedCardId}); stolen.Status != http.StatusConflict || stolen.Body["code"] != "BILLING_CARD_MISSING" {
 		t.Fatalf("another account cannot charge this saved card: %d %s", stolen.Status, stolen.Raw)
 	}
-	if legacy := harness.Call(http.MethodPost, "/api/v1/payments/saved-cards/charges", strangerToken, "", map[string]any{"paymentReference": otherReference, "authorizationCode": transaction.AuthorizationCode}); legacy.Status != http.StatusBadRequest {
+	if legacy := harness.Call(http.MethodPost, "/api/v1/payments/saved-cards/charges", strangerToken, "legacy-card-charge-1", map[string]any{"paymentReference": otherReference, "authorizationCode": transaction.AuthorizationCode}); legacy.Status != http.StatusBadRequest {
 		t.Fatalf("a provider authorization from a client is refused: %d %s", legacy.Status, legacy.Raw)
 	}
 	harness.Payments.Application.Gateway.RetryPendingRefunds(context.Background(), 10)

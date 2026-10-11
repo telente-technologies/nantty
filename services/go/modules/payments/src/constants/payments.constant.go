@@ -13,9 +13,10 @@ const (
 	PurposeCardVerification    = "card_verification"
 	PurposeSubscriptionRenewal = "subscription_renewal"
 
-	ProviderPaystack = "paystack"
-	StoreAppleIap    = "apple_iap"
-	StoreGooglePlay  = "google_play"
+	ProviderPaystack    = "paystack"
+	ProviderFlutterwave = "flutterwave"
+	StoreAppleIap       = "apple_iap"
+	StoreGooglePlay     = "google_play"
 
 	ConnectedAccountRoleSeller  = "seller"
 	ConnectedAccountRoleCreator = "creator"

@@ -1,6 +1,7 @@
 package container
 
 import (
+	"fmt"
 	"net/http"
 	"time"
 
@@ -18,17 +19,19 @@ import (
 	"zudomart/modules/payments/src/repositories"
 	"zudomart/modules/payments/src/utils"
 	"zudomart/platform/httpserver"
+	"zudomart/platform/staffaudit"
 )
 
 type Container struct {
 	Resources      loaders.MoneyModuleResources
 	Settings       configs.PaymentsSettings
-	Providers      map[string]interfaces.FullPaymentProvider
+	Providers      map[string]interfaces.PaymentProvider
 	StoreVerifiers map[string]interfaces.StoreReceiptVerifier
 	Accounts       repositories.VerifiedAccountDirectory
 	CardHandoffs   utils.SavedCardHandoffStore
 	OrderStatuses  repositories.OrderStatusDirectory
 	Documents      interfaces.DocumentVerificationProvider
+	Audit          staffaudit.Recorder
 	Ledger         *ledgerservices.Ledger
 	Outbox         ledgerevents.OutboxTable
 	Idempotency    ledgerutils.SqlIdempotencyRecordStore
@@ -37,12 +40,13 @@ type Container struct {
 }
 
 type Overrides struct {
-	Providers      map[string]interfaces.FullPaymentProvider
+	Providers      map[string]interfaces.PaymentProvider
 	StoreVerifiers map[string]interfaces.StoreReceiptVerifier
 	Accounts       repositories.VerifiedAccountDirectory
 	CardHandoffs   utils.SavedCardHandoffStore
 	OrderStatuses  repositories.OrderStatusDirectory
 	Documents      interfaces.DocumentVerificationProvider
+	Audit          staffaudit.Recorder
 }
 
 func NewPaystackProviderFromSettings(settings configs.PaymentsSettings) *integrations.PaystackProvider {
@@ -56,9 +60,18 @@ func NewPaystackProviderFromSettings(settings configs.PaymentsSettings) *integra
 
 func NewPaymentsContainer(resources loaders.MoneyModuleResources, settings configs.PaymentsSettings, overrides Overrides) (*Container, error) {
 	schema := settings.Money.DatabaseSchema
+	if settings.DefaultProvider == "" {
+		settings.DefaultProvider = constants.ProviderPaystack
+	}
 	providers := overrides.Providers
 	if providers == nil {
-		providers = map[string]interfaces.FullPaymentProvider{constants.ProviderPaystack: NewPaystackProviderFromSettings(settings)}
+		var err error
+		if providers, err = NewProvidersFromSettings(settings); err != nil {
+			return nil, err
+		}
+	}
+	if _, registered := providers[settings.DefaultProvider]; !registered {
+		return nil, fmt.Errorf("PAYMENTS_PROVIDER=%s has no registered adapter", settings.DefaultProvider)
 	}
 	storeVerifiers := overrides.StoreVerifiers
 	if storeVerifiers == nil {
@@ -79,12 +92,9 @@ func NewPaymentsContainer(resources loaders.MoneyModuleResources, settings confi
 	if cardHandoffs == nil {
 		cardHandoffs = utils.NewMemorySavedCardHandoffStore(15 * time.Minute)
 	}
-	if settings.DefaultProvider == "" {
-		settings.DefaultProvider = constants.ProviderPaystack
-	}
 	return &Container{
 		Resources: resources, Settings: settings, Providers: providers, StoreVerifiers: storeVerifiers, Accounts: accounts, CardHandoffs: cardHandoffs, OrderStatuses: orderStatuses,
-		Documents:   overrides.Documents,
+		Documents: overrides.Documents, Audit: auditRecorder(settings, overrides.Audit),
 		Ledger:      ledgerservices.NewLedgerInSchema(settings.Money.LedgerSchema),
 		Outbox:      ledgerevents.OutboxTable{Schema: schema, Source: "zudomart.payments"},
 		Idempotency: ledgerutils.SqlIdempotencyRecordStore{Schema: schema},
@@ -92,7 +102,8 @@ func NewPaymentsContainer(resources loaders.MoneyModuleResources, settings confi
 		schemaConfig: ent.SchemaConfig{
 			BillingAuthorization: schema, BillingSubscription: schema, ConnectedAccount: schema, IdempotentRequest: schema, OrderPayable: schema, OutboxEvent: schema,
 			PaymentIntent: schema, PaymentRefund: schema, PayoutOnboarding: schema, PayoutTransfer: schema, ConnectedAccountJob: schema, ProviderCustomer: schema, ProviderDispute: schema, ProviderPayoutDestination: schema, SavedCardSetup: schema, SellerVerification: schema, CustomerValidation: schema, VerificationLevelRecord: schema,
-			StorePurchase: schema, WebhookEvent: schema,
+			StorePurchase: schema, WebhookEvent: schema, ProviderWallet: schema, ProviderWalletNumber: schema, WalletFunding: schema, ProviderMovement: schema,
+			ReconciliationRun: schema, ReconciliationCase: schema,
 		},
 	}, nil
 }
@@ -101,7 +112,7 @@ func (container *Container) Client(executor databases.ExecutorQuerier) *ent.Clie
 	return ent.NewClient(ent.Driver(databases.EntDriverForExecutor(executor)), ent.AlternateSchema(container.schemaConfig))
 }
 
-func (container *Container) Provider(name string) (interfaces.FullPaymentProvider, error) {
+func (container *Container) Provider(name string) (interfaces.PaymentProvider, error) {
 	provider, found := container.Providers[name]
 	if !found {
 		return nil, httpserver.NewApiError(http.StatusUnprocessableEntity, "PAYMENT_PROVIDER_NOT_SUPPORTED", "This payment provider is not supported.")
@@ -109,7 +120,7 @@ func (container *Container) Provider(name string) (interfaces.FullPaymentProvide
 	return provider, nil
 }
 
-func (container *Container) DefaultProvider() (interfaces.FullPaymentProvider, error) {
+func (container *Container) DefaultProvider() (interfaces.PaymentProvider, error) {
 	return container.Provider(container.Settings.DefaultProvider)
 }
 
@@ -119,4 +130,14 @@ func (container *Container) StoreVerifier(name string) (interfaces.StoreReceiptV
 		return nil, httpserver.NewApiError(http.StatusUnprocessableEntity, "STORE_NOT_SUPPORTED", "This app store is not supported.")
 	}
 	return verifier, nil
+}
+
+func auditRecorder(settings configs.PaymentsSettings, override staffaudit.Recorder) staffaudit.Recorder {
+	if override != nil {
+		return override
+	}
+	if settings.AdminInternalUrl == "" {
+		return nil
+	}
+	return staffaudit.NewHttpRecorder(settings.AdminInternalUrl, settings.AdminInternalToken)
 }

@@ -17,6 +17,7 @@ import (
 	"zudomart/modules/payments/src/modules/gateway"
 	"zudomart/modules/payments/src/modules/gateway/services"
 	payoutonboardingroutes "zudomart/modules/payments/src/modules/payoutOnboarding/routes"
+	providerwalletroutes "zudomart/modules/payments/src/modules/providerWallets/routes"
 	reconciliationroutes "zudomart/modules/payments/src/modules/reconciliation/routes"
 	savedcardroutes "zudomart/modules/payments/src/modules/savedCards/routes"
 	webhookroutes "zudomart/modules/payments/src/modules/webhooks/routes"
@@ -77,6 +78,7 @@ func NewPaymentsModule(ctx context.Context, dependencies servicemodule.Dependenc
 			return gateway.RefreshVerificationLevel(ctx, data.AccountId)
 		})
 	}
+	registerRefundOutboxHandlers(gateway, dependencies.Logger)
 	ledgerjobs.RegisterProviderMirrorReconciler(module.Application.Gateway)
 	return module, nil
 }
@@ -104,6 +106,7 @@ func (module *Module) MountRoutes(mux *http.ServeMux) {
 	reconciliationroutes.MountReconciliationRoutes(mux, module.Application)
 	savedcardroutes.MountSavedCardsRoutes(mux, module.Application)
 	payoutonboardingroutes.MountPayoutOnboardingRoutes(mux, module.Application)
+	providerwalletroutes.MountProviderWalletsRoutes(mux, module.Application)
 }
 
 func (module *Module) RunBackgroundWorkersUntilContextDone(ctx context.Context) error {
@@ -111,9 +114,9 @@ func (module *Module) RunBackgroundWorkersUntilContextDone(ctx context.Context) 
 	gateway := module.Application.Gateway
 	go runEveryIntervalUntilContextDone(ctx, 5*time.Minute, func(ctx context.Context) {
 		gateway.RetryPendingRefunds(ctx, 100)
-		gateway.RetryUnprocessedWebhooks(ctx, 100)
 		_, _ = gateway.CancelPendingIntentsThatNeverOpenedACheckout(ctx, 30*time.Minute)
 	})
+	go gateway.RunWebhookWorkerUntilContextDone(ctx, 2*time.Second)
 	go runEveryIntervalUntilContextDone(ctx, 30*time.Second, func(ctx context.Context) {
 		gateway.ProcessDueConnectedAccountJobs(ctx, 50)
 	})
@@ -122,7 +125,12 @@ func (module *Module) RunBackgroundWorkersUntilContextDone(ctx context.Context) 
 			container.Resources.Logger.WarnContext(ctx, "payout account reconciliation failed", "error", err)
 		}
 	})
-	go runEveryIntervalUntilContextDone(ctx, 24*time.Hour, func(ctx context.Context) {
+	runProviderWalletWorkers(ctx, gateway)
+	disputePollInterval := 24 * time.Hour
+	if container.UsesProviderWallets() {
+		disputePollInterval = time.Hour
+	}
+	go runEveryIntervalUntilContextDone(ctx, disputePollInterval, func(ctx context.Context) {
 		if _, err := gateway.PollOpenProviderDisputes(ctx); err != nil && ctx.Err() == nil {
 			container.Resources.Logger.WarnContext(ctx, "provider dispute polling failed", "error", err)
 		}
@@ -131,6 +139,23 @@ func (module *Module) RunBackgroundWorkersUntilContextDone(ctx context.Context) 
 		Store:     ledgerevents.OutboxRelayStore{Database: container.Resources.Database, Table: container.Outbox, Now: time.Now},
 		Publisher: container.Resources.Publisher,
 		Logger:    container.Resources.Logger,
+	})
+}
+
+func runProviderWalletWorkers(ctx context.Context, gateway *services.PaymentGateway) {
+	if !gateway.Container.UsesProviderWallets() {
+		return
+	}
+	go runEveryIntervalUntilContextDone(ctx, 30*time.Second, func(ctx context.Context) {
+		gateway.ProcessDueMovements(ctx, 50)
+		gateway.ReleaseDueWalletHolds(ctx, 200)
+	})
+	go runEveryIntervalUntilContextDone(ctx, 5*time.Minute, func(ctx context.Context) { gateway.ProvisionMissingProviderWallets(ctx, 20) })
+	go runEveryIntervalUntilContextDone(ctx, time.Hour, func(ctx context.Context) { gateway.ProcessProviderSettlements(ctx, nil) })
+	go runEveryIntervalUntilContextDone(ctx, 24*time.Hour, func(ctx context.Context) {
+		if report, err := gateway.RunDailyWalletReconciliation(ctx); err != nil || report.Status != "clean" {
+			gateway.Container.Resources.Logger.ErrorContext(ctx, "daily wallet reconciliation needs attention", "status", report.Status, "issues", len(report.Issues), "error", err)
+		}
 	})
 }
 

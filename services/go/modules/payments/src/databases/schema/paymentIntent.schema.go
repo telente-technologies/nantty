@@ -19,6 +19,7 @@ func (PaymentIntent) Annotations() []schema.Annotation {
 	return []schema.Annotation{entsql.Checks(map[string]string{
 		"payment_intents_amount_positive":           "amount_minor > 0",
 		"payment_intents_refunds_within_amount":     "refunded_minor >= 0 AND refunded_minor <= amount_minor",
+		"payment_intents_refund_capacity":           "refund_in_flight_minor >= 0 AND refunded_minor + refund_in_flight_minor <= amount_minor",
 		"payment_intents_provider_fee_not_negative": "provider_fee_minor >= 0",
 		"payment_intents_platform_fee_in_range":     "platform_fee_minor >= 0 AND platform_fee_minor < amount_minor",
 	})}
@@ -49,6 +50,10 @@ func (PaymentIntent) Fields() []ent.Field {
 		field.Time("paid_at").Optional().Nillable(),
 		field.Time("failed_at").Optional().Nillable(),
 		field.Int64("refunded_minor").Default(0),
+		field.Int64("refund_in_flight_minor").Default(0),
+		field.Time("saved_card_charge_started_at").Optional().Nillable(),
+		field.String("customer_email").MaxLen(320).Default(""),
+		field.Time("provider_settled_at").Optional().Nillable(),
 		field.Int64("version").Default(0),
 		field.Bytes("metadata").SchemaType(map[string]string{dialect.Postgres: "jsonb"}),
 		field.Time("updated_at").Default(time.Now).UpdateDefault(time.Now),
@@ -63,5 +68,6 @@ func (PaymentIntent) Indexes() []ent.Index {
 		index.Fields("status", "created_at"),
 		index.Fields("provider_checkout_id"),
 		index.Fields("provider_transaction_id"),
+		index.Fields("provider", "provider_transaction_id").Unique().Annotations(entsql.IndexWhere("provider_transaction_id <> ''")).StorageKey("payment_intents_provider_charge_unique"),
 	}
 }

@@ -71,6 +71,7 @@ func (BillingAuthorization) Fields() []ent.Field {
 		field.String("provider").NotEmpty().MaxLen(40).Immutable(),
 		field.String("provider_customer_id").MaxLen(120).Default(""),
 		field.Bytes("sealed_authorization").Sensitive(),
+		field.String("token_email").MaxLen(320).Default(""),
 		field.String("card_fingerprint_hash").NotEmpty().MaxLen(64).Immutable(),
 		field.String("card_brand").MaxLen(30).Default(""),
 		field.String("card_last4").MaxLen(4).Default(""),

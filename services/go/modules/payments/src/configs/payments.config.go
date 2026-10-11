@@ -14,6 +14,11 @@ const PaystackBaseUrl = "https://api.paystack.co"
 type PaymentsSettings struct {
 	Money                       loaders.MoneyModuleSettings
 	Paystack                    PaystackSettings
+	Flutterwave                 FlutterwaveSettings
+	Wallets                     WalletSettings
+	PublicWebhookBaseUrl        string
+	AdminInternalUrl            string
+	AdminInternalToken          string
 	DefaultProvider             string
 	AllowedReturnUrls           []string
 	AdsReturnOrigins            []string
@@ -28,6 +33,10 @@ type PaymentsSettings struct {
 	OrderStatusSchema           string
 	UsersSchema                 string
 	UnverifiedSellerSalesCaps   map[string]int64
+	SellerDebtLimits            loaders.SellerDebtLimits
+	PaymentMinimums             map[string]int64
+	PaymentLimits               loaders.PaymentLimits
+	EscrowSchema                string
 	CustomerValidationMode      string
 	WebSubscriptionPlanProducts map[string]string
 	AppleInAppPurchaseFeeBps    int64
@@ -97,20 +106,31 @@ func ReadPaymentsSettingsFromEnvironment(reader *platformconfig.EnvironmentReade
 			CardVerificationAmount: int64(reader.ReadIntegerOrDefault("PAYSTACK_CARD_VERIFICATION_AMOUNT_MINOR", 5000)),
 			SupportedCurrencies:    reader.ReadCommaSeparatedListOrDefault("PAYSTACK_SUPPORTED_CURRENCIES", []string{"NGN", "USD"}),
 		},
-		DefaultProvider:             reader.ReadStringOrDefault("PAYMENTS_DEFAULT_PROVIDER", "paystack"),
-		AllowedReturnUrls:           reader.ReadCommaSeparatedListOrDefault("PAYMENT_RETURN_URLS", []string{"https://zudomart.com/pay/return", "https://app.zudomart.com/pay/return"}),
-		AdsReturnOrigins:            reader.ReadCommaSeparatedListOrDefault("PAYMENT_ADS_RETURN_ORIGINS", []string{"https://ads.zudomart.com"}),
-		OnboardingReturnUrl:         reader.ReadStringOrDefault("CONNECT_ONBOARDING_RETURN_URL", "https://zudomart.com/seller/verification/return"),
-		OnboardingRefreshUrl:        reader.ReadStringOrDefault("CONNECT_ONBOARDING_REFRESH_URL", "https://zudomart.com/seller/verification/refresh"),
-		ConnectedAccountCountry:     reader.ReadStringOrDefault("CONNECT_ACCOUNT_COUNTRY", "NG"),
-		EscrowFeeBps:                int64(reader.ReadIntegerOrDefault("ESCROW_FEE_BPS", 150)),
-		BusinessEscrowFeeBps:        int64(reader.ReadIntegerOrDefault("ESCROW_FEE_BUSINESS_PLAN_BPS", 100)),
-		EscrowMode:                  reader.ReadStringOrDefault("ESCROW_MODE", "e2"),
-		CheckoutExpiryMinutes:       reader.ReadIntegerOrDefault("CHECKOUT_SESSION_EXPIRY_MINUTES", 15),
-		AccountDirectorySchema:      reader.ReadStringOrDefault("PAYMENTS_ACCOUNT_DIRECTORY_SCHEMA", "auth"),
-		OrderStatusSchema:           reader.ReadStringOrDefault("PAYMENTS_ORDER_STATUS_SCHEMA", "orders"),
-		UsersSchema:                 reader.ReadStringOrDefault("PAYMENTS_USERS_SCHEMA", "users"),
-		UnverifiedSellerSalesCaps:   loaders.ParseCurrencyAmountMap(reader.ReadStringOrDefault("UNVERIFIED_SELLER_SALES_CAPS", "NGN:20000000")),
+		Flutterwave:               ReadFlutterwaveSettings(reader),
+		Wallets:                   ReadWalletSettings(reader),
+		PublicWebhookBaseUrl:      reader.ReadStringOrDefault("PAYMENTS_PUBLIC_WEBHOOK_BASE_URL", ""),
+		AdminInternalUrl:          reader.ReadStringOrDefault("ADMIN_INTERNAL_URL", ""),
+		AdminInternalToken:        reader.ReadStringOrDefault("ADMIN_INTERNAL_API_TOKEN", ""),
+		DefaultProvider:           reader.ReadStringOrDefault("PAYMENTS_PROVIDER", reader.ReadStringOrDefault("PAYMENTS_DEFAULT_PROVIDER", "paystack")),
+		AllowedReturnUrls:         reader.ReadCommaSeparatedListOrDefault("PAYMENT_RETURN_URLS", []string{"https://zudomart.com/pay/return", "https://app.zudomart.com/pay/return"}),
+		AdsReturnOrigins:          reader.ReadCommaSeparatedListOrDefault("PAYMENT_ADS_RETURN_ORIGINS", []string{"https://ads.zudomart.com"}),
+		OnboardingReturnUrl:       reader.ReadStringOrDefault("CONNECT_ONBOARDING_RETURN_URL", "https://zudomart.com/seller/verification/return"),
+		OnboardingRefreshUrl:      reader.ReadStringOrDefault("CONNECT_ONBOARDING_REFRESH_URL", "https://zudomart.com/seller/verification/refresh"),
+		ConnectedAccountCountry:   reader.ReadStringOrDefault("CONNECT_ACCOUNT_COUNTRY", "NG"),
+		EscrowFeeBps:              int64(reader.ReadIntegerOrDefault("ESCROW_FEE_BPS", 150)),
+		BusinessEscrowFeeBps:      int64(reader.ReadIntegerOrDefault("ESCROW_FEE_BUSINESS_PLAN_BPS", 100)),
+		EscrowMode:                reader.ReadStringOrDefault("ESCROW_MODE", "e2"),
+		CheckoutExpiryMinutes:     reader.ReadIntegerOrDefault("CHECKOUT_SESSION_EXPIRY_MINUTES", 15),
+		AccountDirectorySchema:    reader.ReadStringOrDefault("PAYMENTS_ACCOUNT_DIRECTORY_SCHEMA", "auth"),
+		OrderStatusSchema:         reader.ReadStringOrDefault("PAYMENTS_ORDER_STATUS_SCHEMA", "orders"),
+		UsersSchema:               reader.ReadStringOrDefault("PAYMENTS_USERS_SCHEMA", "users"),
+		UnverifiedSellerSalesCaps: loaders.ParseCurrencyAmountMap(reader.ReadStringOrDefault("UNVERIFIED_SELLER_SALES_CAPS", "NGN:20000000")),
+		SellerDebtLimits: loaders.ParseSellerDebtLimitsFromEnvironment(reader.ReadStringOrDefault("SELLER_DEBT_LIMITS_NGN", "unverified:1000000,payoutVerified:5000000,identityVerified:20000000"),
+			int64(reader.ReadIntegerOrDefault("SELLER_DEBT_LIMIT_OUTSIDE_NIGERIA_PERCENT", 50)), reader.ReadIntegerOrDefault("SELLER_TRUSTED_AGE_DAYS", 90), reader.ReadIntegerOrDefault("SELLER_TRUSTED_CLEAN_DAYS", 90)),
+		PaymentMinimums: loaders.ParseCurrencyAmountMap(reader.ReadStringOrDefault("PAYMENT_MINIMUM_AMOUNTS", "NGN:100,GHS:100,KES:100,USD:100")),
+		PaymentLimits: loaders.ParsePaymentLimitsFromEnvironment(reader.ReadStringOrDefault("PAYMENT_MAXIMUMS_NGN", "orderCheckout:500000000,coinPurchase:50000000,adsTopUp:1000000000"),
+			reader.ReadStringOrDefault("WALLET_DAILY_LIMITS_NGN", "basic:5000000,mid:20000000,full:500000000")),
+		EscrowSchema:                reader.ReadStringOrDefault("PAYMENTS_ESCROW_SCHEMA", "escrow"),
 		CustomerValidationMode:      reader.ReadStringOrDefault("PAYOUT_BANK_VALIDATION", "required"),
 		WebSubscriptionPlanProducts: parsePlanProducts(reader.ReadStringOrDefault("PAYSTACK_PLAN_CODES", "")),
 		AppleInAppPurchaseFeeBps:    int64(reader.ReadIntegerOrDefault("APPLE_IAP_STORE_FEE_BPS", 3000)),
@@ -160,6 +180,10 @@ func ProviderKeyEnvironmentMismatches(settings PaymentsSettings) []string {
 	if settings.EscrowFeeBps < 0 || settings.EscrowFeeBps >= 10_000 || settings.BusinessEscrowFeeBps < 0 || settings.BusinessEscrowFeeBps > settings.EscrowFeeBps {
 		problems = append(problems, "ESCROW_FEE_BPS_BETWEEN_0_AND_9999_AND_BUSINESS_NOT_ABOVE_DEFAULT")
 	}
+	if settings.DefaultProvider != "" && settings.DefaultProvider != "paystack" && settings.DefaultProvider != "flutterwave" {
+		problems = append(problems, "PAYMENTS_PROVIDER_PAYSTACK_OR_FLUTTERWAVE")
+	}
+	problems = append(problems, flutterwaveKeyProblems(settings)...)
 	if settings.EscrowMode != "e2" && settings.EscrowMode != "e1" {
 		problems = append(problems, "ESCROW_MODE_E1_OR_E2")
 	}
