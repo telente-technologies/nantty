@@ -22,7 +22,10 @@ export interface ChatCryptoClientOptions {
   readonly random?: RandomSource;
   readonly now?: () => Date;
   readonly allowMissingRecipients?: boolean;
+  readonly lock?: CrossContextLock;
 }
+
+export type CrossContextLock = <T>(task: () => Promise<T>) => Promise<T>;
 
 export interface EncryptionTarget {
   readonly kind: "direct" | "group";
@@ -86,7 +89,9 @@ export class ChatCryptoClient {
   }
 
   private exclusive<T>(task: () => Promise<T>): Promise<T> {
-    const run = this.queue.then(task, task);
+    const lock = this.options.lock;
+    const guarded = lock === undefined ? task : () => lock(task);
+    const run = this.queue.then(guarded, guarded);
     this.queue = run.catch(() => undefined);
     return run;
   }
@@ -97,7 +102,7 @@ export class ChatCryptoClient {
 
   public ensureReady(userId: string): Promise<DeviceIdentity> {
     return this.exclusive(async () => {
-      let identity = this.identity ?? (await this.store.loadIdentity());
+      let identity = await this.store.loadIdentity();
       if (identity === null || identity.userId !== userId) {
         identity = await createAndRegisterDevice(this.context, userId);
         this.readyCheckedAt = this.now().getTime();

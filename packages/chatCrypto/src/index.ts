@@ -2,6 +2,7 @@ export { decodeBase64, encodeBase64 } from "./bytes.util";
 export {
   ChatCryptoClient,
   type ChatCryptoClientOptions,
+  type CrossContextLock,
   type DecryptionFailure,
   type DecryptionResult,
   type EncryptedOutgoingMessage,
@@ -9,6 +10,7 @@ export {
   type IncomingMessage,
   type MessageEncryption,
 } from "./chatCryptoClient";
+export { createWebLocksMutex } from "./browserLock";
 export * from "./directory";
 export { encryptionProtocol, maximumEnvelopeLength, parseEnvelope } from "./envelope";
 export { ChatCryptoError, type ChatCryptoErrorCode, isChatCryptoError } from "./errors";
