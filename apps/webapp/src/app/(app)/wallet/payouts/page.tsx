@@ -7,6 +7,8 @@ import { RetryButton } from "@/components/ui/controls";
 import { EmptyState, ErrorState } from "@/components/ui/feedback";
 import { ListRowsSkeleton } from "@/components/ui/pageSkeletons";
 import { showToast } from "@/components/ui/toast";
+import { StepUpCancelledError, useStepUpPrompt } from "@/components/wallet/stepUpDialog";
+import { BvnConsentCard } from "@/components/wallet/bvnConsentCard";
 import { VerifyToWithdrawBanner } from "@/components/wallet/verifyToWithdrawBanner";
 import { createIdempotencyKey, readErrorMessageForDisplay } from "@/services/clientApi.service";
 import { walletsService } from "@/services/wallets.service";
@@ -25,18 +27,22 @@ export default function WalletPayoutsPage() {
   const [amountText, setAmountText] = useState("");
   const [selectedAccountId, setSelectedAccountId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const { withStepUp, stepUpDialog } = useStepUpPrompt();
+  const showMutationError = (mutationError: unknown) => {
+    if (!(mutationError instanceof StepUpCancelledError)) setError(readErrorMessageForDisplay(mutationError));
+  };
 
   const addAccount = useMutation({
-    mutationFn: () => walletsService.addPayoutAccount({ bankCode: bankCode.trim(), accountNumber: accountNumber.trim() }),
+    mutationFn: () => withStepUp((stepUpToken) => walletsService.addPayoutAccount({ bankCode: bankCode.trim(), accountNumber: accountNumber.trim() }, stepUpToken)),
     onSuccess: () => {
       setBankCode("");
       setAccountNumber("");
       setError(null);
       void queryClient.invalidateQueries({ queryKey: ["wallet"] });
       void queryClient.invalidateQueries({ queryKey: ["rail", "wallet"] });
-      showToast({ text: "Payout account added" });
+      showToast({ text: "Payout account added. You can withdraw to it after 48 hours." });
     },
-    onError: (mutationError) => setError(readErrorMessageForDisplay(mutationError)),
+    onError: showMutationError,
   });
   const removeAccount = useMutation({
     mutationFn: (id: string) => walletsService.removePayoutAccount(id),
@@ -51,7 +57,8 @@ export default function WalletPayoutsPage() {
   const withdraw = useMutation({
     mutationFn: (payoutAccountId: string) => {
       const currency = summary.data?.available.currency ?? "NGN";
-      return walletsService.requestWithdrawal({ payoutAccountId, amount: { amountMinor: withdrawalAmountMinor, currency } }, createIdempotencyKey("withdraw"));
+      const idempotencyKey = createIdempotencyKey("withdraw");
+      return withStepUp((stepUpToken) => walletsService.requestWithdrawal({ payoutAccountId, amount: { amountMinor: withdrawalAmountMinor, currency } }, idempotencyKey, stepUpToken));
     },
     onSuccess: () => {
       setAmountText("");
@@ -59,7 +66,7 @@ export default function WalletPayoutsPage() {
       void queryClient.invalidateQueries({ queryKey: ["wallet"] });
       showToast({ text: "Withdrawal requested" });
     },
-    onError: (mutationError) => setError(readErrorMessageForDisplay(mutationError)),
+    onError: showMutationError,
   });
 
   const verifyMessage = readVerifyToWithdrawMessage(summary.data);
@@ -72,7 +79,9 @@ export default function WalletPayoutsPage() {
   return (
     <div className={styles.page}>
       <h1 className={styles.title}>Payouts & withdraw</h1>
+      {stepUpDialog}
       {verifyMessage ? <VerifyToWithdrawBanner message={verifyMessage} href={verifyAction.href} actionLabel={verifyAction.label} /> : null}
+      <BvnConsentCard />
       <p className={styles.note}>Available to withdraw: {summary.data ? formatMoneyForDisplay(summary.data.available) : "…"}</p>
       <section id="payout-accounts" className={styles.section} aria-label="Payout accounts">
         <h2 className={styles.sectionTitle}>Payout accounts</h2>

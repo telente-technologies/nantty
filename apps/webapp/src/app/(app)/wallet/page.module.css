@@ -31,3 +31,4 @@
 .chipActive { background: var(--primary); color: var(--on-primary, #fff); border-color: var(--primary); }
 ul.grid { list-style: none; margin: 0; padding: 0; }
 .cardNote { color: var(--text-muted); font-size: var(--text-xs, 0.75rem); line-height: 1.4; }
+.primary[data-disabled="true"] { opacity: 0.5; cursor: not-allowed; }

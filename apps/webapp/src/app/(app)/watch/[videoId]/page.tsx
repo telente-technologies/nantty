@@ -11,13 +11,14 @@ import { SaveToggleButton } from "@/components/saves/saveToggleButton";
 import { RetryButton } from "@/components/ui/controls";
 import { ErrorState, Skeleton } from "@/components/ui/feedback";
 import { HeartIcon, LikeFilledActionIcon, ShareActionIcon } from "@/components/ui/icons";
-import { requireAuthThen } from "@/components/auth/authPrompt.store";
+import { useFollowUser } from "@/components/follow/useFollowUser.hook";
 import { ContentActionsMenu } from "@/components/actions/contentActionsMenu";
 import { ShareToChatButton } from "@/components/actions/shareToChatButton";
 import { Avatar, MediaImage } from "@/components/ui/media";
 import { showToast } from "@/components/ui/toast";
+import { InlineVideoPlayer } from "@/components/video/inlineVideoPlayer";
 import { discoveryService } from "@/services/discovery.service";
-import { followsService, postsService } from "@/services/posts.service";
+import { postsService } from "@/services/posts.service";
 import { findDownloadTargetForPost } from "@/utils/brandedDownload.util";
 import { formatCountWithThousandsSuffix, formatTimeSincePosted } from "@/utils/formatDate.util";
 import { buildAbsoluteSiteUrl } from "@/utils/seoPaths.util";
@@ -58,18 +59,8 @@ function VideoDetails({ video }: { readonly video: Post }) {
   const isLiked = video.liked;
   const likeCount = video.likes;
   const { toggleLike } = usePostLike(video, "Sign in to like videos.");
-  const [isFollowing, setIsFollowing] = useState(video.isFollowingAuthor);
+  const follow = useFollowUser({ userId: video.author.id, username: video.author.username, displayName: video.author.name, initialState: video.isFollowingAuthor ? "accepted" : "none" });
   const [shareCount, setShareCount] = useState(video.reposts);
-
-  function toggleFollow() {
-    requireAuthThen(() => {
-      const followNow = !isFollowing;
-      setIsFollowing(followNow);
-      if (followNow) {
-        void followsService.followUser(video.author.id).catch(() => setIsFollowing(false));
-      }
-    }, "Sign in to follow creators.");
-  }
 
   function shareVideoLink() {
     const url = buildAbsoluteSiteUrl(`/watch/${video.id}`);
@@ -90,7 +81,7 @@ function VideoDetails({ video }: { readonly video: Post }) {
     <div className={styles.main}>
       <div className={styles.player}>
         {media?.url ? (
-          <video key={video.id} className={styles.video} src={media.url} poster={media.posterUrl ?? undefined} controls preload="metadata" playsInline />
+          <InlineVideoPlayer key={video.id} className={styles.video} src={media.url} poster={media.posterUrl} durationSeconds={media.durationSeconds} label="Video player" documentShortcuts />
         ) : null}
       </div>
       <h1 className={styles.caption}>{video.text}</h1>
@@ -107,11 +98,12 @@ function VideoDetails({ video }: { readonly video: Post }) {
           </Link>
           <button
             type="button"
-            className={[styles.followPill, isFollowing ? styles.followPillActive : ""].join(" ")}
-            aria-pressed={isFollowing}
-            onClick={toggleFollow}
+            className={[styles.followPill, follow.isActive ? styles.followPillActive : ""].join(" ")}
+            aria-pressed={follow.isActive}
+            disabled={follow.isPending}
+            onClick={follow.toggle}
           >
-            {isFollowing ? "Following" : "Follow"}
+            {follow.label}
           </button>
         </div>
         <div className={styles.actions}>
