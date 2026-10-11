@@ -33,21 +33,6 @@ export type ConversationMember = Prisma.ConversationMemberModel
  */
 export type Message = Prisma.MessageModel
 /**
- * Model MessageReaction
- * 
- */
-export type MessageReaction = Prisma.MessageReactionModel
-/**
- * Model MessagePollOption
- * 
- */
-export type MessagePollOption = Prisma.MessagePollOptionModel
-/**
- * Model MessagePollVote
- * 
- */
-export type MessagePollVote = Prisma.MessagePollVoteModel
-/**
  * Model ChatSettings
  * 
  */
@@ -132,6 +117,11 @@ export type ContentPreference = Prisma.ContentPreferenceModel
  * 
  */
 export type CommentRankSnapshot = Prisma.CommentRankSnapshotModel
+/**
+ * Model FeedRankSnapshot
+ * 
+ */
+export type FeedRankSnapshot = Prisma.FeedRankSnapshotModel
 /**
  * Model PostNotificationMute
  * 

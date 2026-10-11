@@ -4,16 +4,24 @@ enum FollowState {
   rejected
 }
 
+enum PostNotificationLevel {
+  off
+  posts
+  posts_and_lives
+}
+
 model Follow {
-  id          String      @id @default(uuid(7)) @db.Uuid
-  followerId  String      @db.Uuid
-  followeeId  String      @db.Uuid
-  state       FollowState
-  createdAt   DateTime    @default(now())
-  respondedAt DateTime?
+  id                String                @id @default(uuid(7)) @db.Uuid
+  followerId        String                @db.Uuid
+  followeeId        String                @db.Uuid
+  state             FollowState
+  createdAt         DateTime              @default(now())
+  respondedAt       DateTime?
+  postNotifications PostNotificationLevel @default(off)
 
   @@unique([followerId, followeeId])
   @@index([followeeId, state, id])
+  @@index([followeeId, postNotifications, id])
   @@index([followerId, state, id])
   @@map("follows")
 }

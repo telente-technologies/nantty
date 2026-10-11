@@ -1,4 +1,5 @@
 import { readGatewayIdentitySecretsFromEnvironment } from "../middlewares/gatewayIdentity.middleware.js";
+import { collectPlaceholderSecretProblems } from "./productionSecrets.config.js";
 
 export interface SocialConfig {
   readonly gatewayIdentitySecrets?: readonly string[];
@@ -94,6 +95,7 @@ export function loadSocialConfigFromEnvironment(): SocialConfig {
     intelligence: readIntelligence(problems),
   };
   if (!Number.isInteger(config.port) || config.port <= 0) problems.push("PORT must be a positive integer");
+  problems.push(...collectPlaceholderSecretProblems(process.env));
   if (problems.length > 0) throw new Error(`Invalid social configuration: ${problems.join("; ")}`);
   return config;
 }

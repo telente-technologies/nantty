@@ -29,6 +29,7 @@ enum MessageKind {
   liveLocation
   document
   poll
+  control
 }
 
 enum MessageRequestAudience {
@@ -44,6 +45,7 @@ model Conversation {
   directKey                    String?          @unique
   title                        String?
   description                  String?
+  encryptedAttributes          String?
   photoMediaId                 String?          @db.Uuid
   createdById                  String           @db.Uuid
   storeId                      String?
@@ -94,16 +96,13 @@ model Message {
   clientMessageId  String?
   ciphertext       String?
   deviceId         String?
-  protocol         String      @default("signal-v1-pending")
+  protocol         String      @default("signal-v1")
   mediaId          String?     @db.Uuid
   mediaType        String?
   mediaUrl         String?
   mediaStatus      MediaProcessingStatus?
   mediaDurationSeconds Int?
   linkPreviewEnvelope  String?
-  sharedContent    Json?
-  location         Json?
-  document         Json?
   mentions         Json        @default("[]")
   expiresAt        DateTime?
   mediaExpiresAt   DateTime?
@@ -111,13 +110,9 @@ model Message {
   hiddenAt         DateTime?
   createdAt        DateTime    @default(now())
 
-  conversation Conversation      @relation(fields: [conversationId], references: [id], onDelete: Cascade)
-  reactions    MessageReaction[]
-  pollOptions  MessagePollOption[]
+  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
 
-  pollQuestion          String?
-  pollAllowMultiple     Boolean @default(false)
-  senderLabel           String?
+  senderLabel  String?
 
   @@unique([conversationId, senderId, clientMessageId])
   @@index([conversationId, id])
@@ -125,44 +120,6 @@ model Message {
   @@index([mediaId])
   @@index([expiresAt])
   @@map("messages")
-}
-
-model MessageReaction {
-  messageId String   @db.Uuid
-  userId    String   @db.Uuid
-  emoji     String
-  createdAt DateTime @default(now())
-
-  message Message @relation(fields: [messageId], references: [id], onDelete: Cascade)
-
-  @@id([messageId, userId, emoji])
-  @@map("message_reactions")
-}
-
-model MessagePollOption {
-  id        String @id @default(uuid(7)) @db.Uuid
-  messageId String @db.Uuid
-  text      String
-  position  Int
-
-  message Message        @relation(fields: [messageId], references: [id], onDelete: Cascade)
-  votes   MessagePollVote[]
-
-  @@unique([messageId, position])
-  @@map("message_poll_options")
-}
-
-model MessagePollVote {
-  optionId  String   @db.Uuid
-  messageId String   @db.Uuid
-  userId    String   @db.Uuid
-  createdAt DateTime @default(now())
-
-  option MessagePollOption @relation(fields: [optionId], references: [id], onDelete: Cascade)
-
-  @@id([optionId, userId])
-  @@index([messageId, userId])
-  @@map("message_poll_votes")
 }
 
 model ChatSettings {
