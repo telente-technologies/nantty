@@ -26,6 +26,11 @@ func TestCommerceRefundRequestRefundsTheOrderGroupOnceThroughPaystack(t *testing
 	}
 	first := harness.Call(http.MethodPost, "/api/v1/internal/order-groups/"+orderId+"/refunds", "", "", request, internal)
 	again := harness.Call(http.MethodPost, "/api/v1/internal/order-groups/"+orderId+"/refunds", "", "", request, internal)
+	if calls := harness.Paystack.Calls("POST /refund"); calls != 0 {
+		t.Fatalf("an escrow refund must not be sent before the outbox delivers it, sent %d", calls)
+	}
+	harness.relayQueuedRefunds()
+	harness.relayQueuedRefunds()
 	if first.Status != http.StatusOK || first.Body["status"] != "refunded" || again.Headers.Get("Idempotent-Replayed") != "true" || harness.Paystack.Calls("POST /refund") != 1 {
 		t.Fatalf("refund: %d %s / %v refunds %d", first.Status, first.Raw, again.Headers, harness.Paystack.Calls("POST /refund"))
 	}

@@ -5,6 +5,7 @@ import (
 
 	"zudomart/modules/creators/src/modules/creatorMoney/controllers"
 	"zudomart/modules/ledger/src/middlewares"
+	"zudomart/platform/jwtauth"
 )
 
 func MountCreatorMoneyRoutes(mux *http.ServeMux, controller controllers.CreatorMoneyController) {
@@ -15,4 +16,6 @@ func MountCreatorMoneyRoutes(mux *http.ServeMux, controller controllers.CreatorM
 	mux.Handle("GET /api/v1/creators/earnings", user(controller.Earnings))
 	mux.Handle("GET /api/v1/creators/dashboard", user(controller.Dashboard))
 	mux.Handle("POST /api/v1/tips", user(controller.SendTip))
+	widget := controllers.NewCreatorWidgetController(controller.Money)
+	mux.Handle("GET /api/v1/widgets/creator-today", jwtauth.RequireAccessTokenOrWidgetToken(controller.Money.Container.Resources.AccessVerifier)(http.HandlerFunc(widget.CreatorToday)))
 }

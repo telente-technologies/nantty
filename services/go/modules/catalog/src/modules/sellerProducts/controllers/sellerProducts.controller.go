@@ -3,6 +3,7 @@ package controllers
 import (
 	"net/http"
 	"strconv"
+	"zudomart/platform/sellingeligibility"
 
 	"zudomart/modules/catalog/src/container"
 	"zudomart/modules/catalog/src/middlewares"
@@ -72,6 +73,9 @@ func (controller SellerProductsController) CreateProduct(writer http.ResponseWri
 		controller.respond(writer, request, 0, nil, err)
 		return
 	}
+	if !controller.mayPublish(writer, request, body.PublishedOnline) {
+		return
+	}
 	view, err := (createproduct.Handler{Container: controller.Container}).Execute(request.Context(),
 		createproduct.Command{Store: middlewares.StoreAccessFrom(request.Context()), ActorId: middlewares.AccountIdFrom(request.Context()), Request: body})
 	controller.respond(writer, request, http.StatusCreated, view, err)
@@ -99,6 +103,9 @@ func (controller SellerProductsController) ReplaceProduct(writer http.ResponseWr
 		controller.respond(writer, request, 0, nil, err)
 		return
 	}
+	if !controller.mayPublish(writer, request, body.PublishedOnline) {
+		return
+	}
 	view, err := (replaceproduct.Handler{Container: controller.Container}).Execute(request.Context(), replaceproduct.Command{
 		Store: middlewares.StoreAccessFrom(request.Context()), ActorId: middlewares.AccountIdFrom(request.Context()), ProductId: productId, Request: body,
 	})
@@ -123,6 +130,9 @@ func (controller SellerProductsController) setPublication(publish bool) http.Han
 			controller.respond(writer, request, 0, nil, err)
 			return
 		}
+		if !controller.mayPublish(writer, request, publish) {
+			return
+		}
 		view, err := (setproductpublication.Handler{Container: controller.Container}).Execute(request.Context(),
 			setproductpublication.Command{Store: middlewares.StoreAccessFrom(request.Context()), ProductId: productId, Publish: publish})
 		controller.respond(writer, request, http.StatusOK, view, err)
@@ -139,6 +149,9 @@ func (controller SellerProductsController) BulkAction(writer http.ResponseWriter
 	body, err := utils.DecodeAndValidate[dtos.BulkActionRequest](writer, request, validators.ValidateBulkAction)
 	if err != nil {
 		controller.respond(writer, request, 0, nil, err)
+		return
+	}
+	if !controller.mayPublish(writer, request, body.Action == "publish") {
 		return
 	}
 	result, err := (bulkproductaction.Handler{Container: controller.Container}).Execute(request.Context(),
@@ -193,4 +206,15 @@ func (controller SellerProductsController) PublishProduct(writer http.ResponseWr
 
 func (controller SellerProductsController) UnpublishProduct(writer http.ResponseWriter, request *http.Request) {
 	controller.setPublication(false)(writer, request)
+}
+
+func (controller SellerProductsController) mayPublish(writer http.ResponseWriter, request *http.Request, publishing bool) bool {
+	if !publishing {
+		return true
+	}
+	if err := sellingeligibility.Default.RequireCanSell(request.Context(), middlewares.StoreAccessFrom(request.Context()).OwnerAccountId.String()); err != nil {
+		controller.respond(writer, request, 0, nil, err)
+		return false
+	}
+	return true
 }

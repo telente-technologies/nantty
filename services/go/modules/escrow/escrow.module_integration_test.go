@@ -116,6 +116,18 @@ func TestCheckoutPaymentIsHeldInEscrowOnceAndReleasedAfterInspection(t *testing.
 	if holds := harness.Call(http.MethodGet, "/api/v1/wallets/me/escrow-holds", harness.Tokens.UserAccessToken("seller-"+secondOrder[:4]), "", nil); len(holds.Body["data"].([]any)) != 1 {
 		t.Fatalf("seller holds: %v", holds.Body)
 	}
+	for attempt := range 2 {
+		mustRunInTransaction(t, harness.Database, func(ctx context.Context, transaction *sql.Tx) error {
+			result, err := escrows.RefundEscrowInTransaction(ctx, transaction, firstOrder, "item returned after release", escrowservices.EscrowActor{Type: "staff", Id: "staff-1"})
+			if err == nil && attempt == 1 && !result.AlreadySettled {
+				t.Error("a second refund after a clawback must be a no-op")
+			}
+			return err
+		})
+	}
+	if clawed := harness.escrow.Application.Container.Client(harness.Database).Escrow.GetX(context.Background(), uuid.MustParse(escrowId)); clawed.Status != "clawedBack" {
+		t.Fatalf("a refund after release is a clawback, not a plain refund: %s", clawed.Status)
+	}
 	harness.AssertLedgerHealthy()
 }
 
@@ -152,9 +164,9 @@ func TestDisputeFreezesEscrowAndPartialResolutionRefundsThroughTheProvider(t *te
 	if withoutStepUp.Status != http.StatusForbidden {
 		t.Fatalf("resolution without step-up: %d", withoutStepUp.Status)
 	}
-	stepUp := http.Header{"X-Step-Up-Token": {staff.StepUpToken}}
-	resolved := harness.Call(http.MethodPost, "/api/v1/admin/disputes/"+disputeId+"/resolve", staff.AccessToken, "resolve-key-1", resolveBody, stepUp)
-	again := harness.Call(http.MethodPost, "/api/v1/admin/disputes/"+disputeId+"/resolve", staff.AccessToken, "resolve-key-1", resolveBody, stepUp)
+	stepUp := staff.StepUp
+	resolved := harness.Call(http.MethodPost, "/api/v1/admin/disputes/"+disputeId+"/resolve", staff.AccessToken, "resolve-key-1", resolveBody, stepUp())
+	again := harness.Call(http.MethodPost, "/api/v1/admin/disputes/"+disputeId+"/resolve", staff.AccessToken, "resolve-key-1", resolveBody, stepUp())
 	if resolved.Status != http.StatusOK || resolved.Body["status"] != "resolved_refunded" || again.Headers.Get("Idempotent-Replayed") != "true" {
 		t.Fatalf("resolve: %d %v / %v", resolved.Status, resolved.Body, again.Headers)
 	}

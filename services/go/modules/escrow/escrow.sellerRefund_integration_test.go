@@ -26,6 +26,7 @@ func TestSellerPartialRefundComesOutOfHeldEscrowOnce(t *testing.T) {
 	if first.Status != http.StatusOK || first.Body["status"] != "partiallyRefunded" || again.Headers.Get("Idempotent-Replayed") != "true" {
 		t.Fatalf("partial seller refund: %d %s", first.Status, first.Raw)
 	}
+	harness.relayQueuedRefunds()
 	if calls := harness.Paystack.Calls("POST /refund"); calls != 1 || harness.Paystack.Refunds[0]["amount"] != int64(100_000) {
 		t.Fatalf("one provider refund of the requested amount: %d %v", calls, harness.Paystack.Refunds)
 	}

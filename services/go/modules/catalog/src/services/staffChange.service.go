@@ -21,7 +21,7 @@ type StaffActor struct {
 
 func StaffActorFrom(request *http.Request) StaffActor {
 	staff, _ := staffauth.StaffFromContext(request.Context())
-	return StaffActor{Staff: staff, IpAddress: ClientAddressOf(request), RequestId: request.Header.Get("X-Request-Id")}
+	return StaffActor{Staff: staff, IpAddress: ClientAddressOf(request), RequestId: httpserver.RequestIdFromContext(request.Context())}
 }
 
 type StaffChange struct {

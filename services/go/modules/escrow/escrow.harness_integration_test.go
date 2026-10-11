@@ -55,8 +55,17 @@ func (harness *escrowHarness) initializePayment(buyer, orderId, key string) paym
 	return harness.Call(http.MethodPost, "/api/v1/payments/initialize", harness.Tokens.UserAccessToken(buyer), key, map[string]any{"orderId": orderId})
 }
 
+func (harness *escrowHarness) relayQueuedRefunds() {
+	harness.T.Helper()
+	if !outboxHas(harness.T, harness, "paymentRefund.requested") {
+		harness.T.Fatal("refunds must be queued through the outbox")
+	}
+	harness.Payments.Application.Gateway.RetryPendingRefunds(context.Background(), 100)
+}
+
 func (harness *escrowHarness) deliverRefundProcessed(paymentReference string) {
 	harness.T.Helper()
+	harness.relayQueuedRefunds()
 	for _, refund := range harness.Paystack.Refunds {
 		if refund["transaction_reference"] == paymentReference {
 			harness.DeliverPaystackEvent("refund.processed", map[string]any{"id": refund["id"], "status": "processed", "transaction_reference": paymentReference, "amount": refund["amount"], "currency": "NGN"})

@@ -44,6 +44,23 @@ func FindStoreAccess(ctx context.Context, deployed *container.Container, account
 	}, row.Status != "closed", nil
 }
 
+func ListStoreTeamWithPermission(ctx context.Context, deployed *container.Container, storeId uuid.UUID, permission string) ([]uuid.UUID, error) {
+	members, err := deployed.Client.StoreMember.Query().Where(storemember.StoreID(storeId), storemember.Status("active")).Order(ent.Asc(storemember.FieldCreatedAt)).All(ctx)
+	if err != nil {
+		return nil, err
+	}
+	seen := map[uuid.UUID]bool{}
+	accountIds := []uuid.UUID{}
+	for _, member := range members {
+		if seen[member.AccountID] || !commerceports.RoleAllows(member.Role, member.Permissions, permission) {
+			continue
+		}
+		seen[member.AccountID] = true
+		accountIds = append(accountIds, member.AccountID)
+	}
+	return accountIds, nil
+}
+
 var nonSlugCharacters = regexp.MustCompile(`[^a-z0-9]+`)
 
 func Slugify(text string) string {

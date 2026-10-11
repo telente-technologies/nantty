@@ -42,7 +42,7 @@ func TestUnverifiedStoresAreEscrowOnlyAndDirectPaymentsLockTheSellerCreditUntilR
 		t.Fatal("the Paystack settlement was not mirrored")
 	}
 	staff := harness.Tokens.StaffTokens(uuid.NewString(), "money.disputes.resolve")
-	refund := harness.Call(http.MethodPost, "/api/v1/admin/orders/"+orderId+"/escrow/refund", staff.AccessToken, "refund-direct-1", map[string]any{"reason": "Seller could not fulfil"}, http.Header{"X-Step-Up-Token": {staff.StepUpToken}})
+	refund := harness.Call(http.MethodPost, "/api/v1/admin/orders/"+orderId+"/escrow/refund", staff.AccessToken, "refund-direct-1", map[string]any{"reason": "Seller could not fulfil"}, staff.StepUp())
 	if refund.Status != http.StatusOK || refund.Body["status"] != "refunded" {
 		t.Fatalf("refund of a direct order: %d %s", refund.Status, refund.Raw)
 	}
