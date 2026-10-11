@@ -68,12 +68,12 @@ sequenceDiagram
     participant A as Admin
     participant I as go-identity
     participant M as go-money
-    participant P as Paystack / Google Play
+    participant P as Flutterwave / Google Play
     A->>I: POST /admin/verification-cases/{id}/reject (reason, step-up)
     I->>I: case rejected, audit entry, verification.rejectedRefunded
     I->>M: verificationCase.refundRequested
-    alt web (Paystack)
-        M->>P: POST /refund (full) and disable subscription
+    alt web (Flutterwave)
+        M->>P: POST /v3/transactions/{id}/refund (full) and disable subscription
     else Google Play
         M->>P: subscriptionsv2.revoke with fullRefund
     else App Store
@@ -122,7 +122,7 @@ Retention: set Smile ID's image retention to the shortest period the contract al
 | `INTELLIGENCE_SHARED_SECRET` | Secrets Manager `zudomart/<env>/go-identity/app` | Same value as the intelligence service |
 | `SMILE_ID_ENVIRONMENT` | Terraform `wiring.tf` | `production` in prod, `sandbox` elsewhere |
 | `SMILE_ID_CALLBACK_URL` | Terraform `wiring.tf` | `https://api.<domain>/api/v1/webhooks/smile-id`; also set it as the callback URL in the Smile ID portal |
-| `PAYMENT_RETURN_URLS` | Terraform `wiring.tf` (go-money) | includes `<webapp>/settings/verification` for the Paystack return |
+| `PAYMENT_RETURN_URLS` | Terraform `wiring.tf` (go-money) | includes `<webapp>/settings/verification` for the Flutterwave checkout return |
 
 Local development: see `services/go/.env.example`. Without Smile ID keys the capture endpoint answers `503 IDENTITY_CHECK_UNAVAILABLE`; without the intelligence URL every profile is offered "Request verification".
 
