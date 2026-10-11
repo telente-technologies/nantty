@@ -29,6 +29,7 @@ export const toShareReferenceKind = (kind: ShareReferenceKind) => (kind === "vid
 export interface CoinPurchaseCheckout {
   readonly reference: string;
   readonly accessCode?: string;
+  readonly checkoutUrl?: string | null;
   readonly authorizationUrl: string;
 }
 
@@ -92,7 +93,9 @@ export const creatorSubscriptionsService = {
   fetchPlans: (creatorId: ID) => sendRequestToWebappServer<CreatorSubscriptionPlan[]>(`/api/v1/creators/${creatorId}/subscription-plans`),
   startSubscription: (creatorId: ID, planId: ID) =>
     sendRequestToWebappServer<CreatorSubscriptionCheckout>(`/api/v1/creators/${creatorId}/subscriptions`, { method: "POST", body: { planId }, idempotencyKey: createIdempotencyKey("subscribe") }),
-  fetchSubscriptionState: (subscriptionId: ID) => sendRequestToWebappServer<CreatorSubscriptionState>(`/api/v1/subscriptions/${encodeURIComponent(subscriptionId)}`),
+  fetchSubscriptionState: (subscriptionId: ID) => sendRequestToWebappServer<CreatorSubscriptionState>(`/api/v1/creator-subscriptions/${encodeURIComponent(subscriptionId)}`),
+  cancelSubscription: (subscriptionId: ID) => sendRequestToWebappServer<CreatorSubscriptionState>(`/api/v1/creator-subscriptions/${encodeURIComponent(subscriptionId)}/cancel`, { method: "POST" }),
+  resumeSubscription: (subscriptionId: ID) => sendRequestToWebappServer<CreatorSubscriptionState>(`/api/v1/creator-subscriptions/${encodeURIComponent(subscriptionId)}/resume`, { method: "POST" }),
   fetchMySubscriptions: async () => (await sendRequestToWebappServer<{ readonly data: CreatorSubscriptionState[] }>("/api/v1/creator-subscriptions")).data,
 };
 
