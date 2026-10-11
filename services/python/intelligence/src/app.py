@@ -7,6 +7,7 @@ from src.interfaces.feature_backend_interface import FeatureBackend
 from src.loaders.lifespan_loader import build_application_lifespan
 from src.loaders.middleware_loader import load_security_middlewares
 from src.loaders.module_loader import load_intelligence_modules
+from src.loaders.telemetry_loader import configure_telemetry_when_collector_is_set
 from src.loggers.structured_json_logger import configure_structured_logging
 
 
@@ -31,4 +32,5 @@ def create_application(
     load_intelligence_modules(application, container)
     register_error_response_handlers(application)
     load_security_middlewares(application, container)
+    configure_telemetry_when_collector_is_set(application)
     return application
