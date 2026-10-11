@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"net/http"
 
@@ -131,9 +132,20 @@ func convertApiErrorToStatus(err error) error {
 	case http.StatusBadGateway, http.StatusServiceUnavailable:
 		code = codes.Unavailable
 	}
-	detailed, detailError := status.New(code, apiError.Message).WithDetails(&errdetails.ErrorInfo{Reason: apiError.Code, Domain: "money.zudomart.com"})
+	detailed, detailError := status.New(code, apiError.Message).WithDetails(&errdetails.ErrorInfo{Reason: apiError.Code, Domain: "money.zudomart.com", Metadata: encodeErrorDetails(apiError.Details)})
 	if detailError != nil {
 		return status.Error(code, apiError.Message)
 	}
 	return detailed.Err()
+}
+
+func encodeErrorDetails(details map[string]any) map[string]string {
+	if len(details) == 0 {
+		return nil
+	}
+	encoded, err := json.Marshal(details)
+	if err != nil {
+		return nil
+	}
+	return map[string]string{"details": string(encoded)}
 }

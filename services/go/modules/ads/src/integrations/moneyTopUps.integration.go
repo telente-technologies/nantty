@@ -33,6 +33,7 @@ type moneyTopUp struct {
 	Status      string     `json:"status"`
 	Amount      moneyMoney `json:"amount"`
 	CheckoutUrl *string    `json:"checkoutUrl"`
+	Provider    string     `json:"provider"`
 	CompletedAt *time.Time `json:"completedAt"`
 }
 
@@ -54,7 +55,7 @@ func (gateway HttpMoneyTopUpGateway) StartTopUp(ctx context.Context, request int
 	if started.Id == "" || started.Reference == "" {
 		return interfaces.StartedTopUp{}, fmt.Errorf("money returned an unreadable top-up")
 	}
-	result := interfaces.StartedTopUp{TopUpId: started.Id, Reference: started.Reference}
+	result := interfaces.StartedTopUp{TopUpId: started.Id, Reference: started.Reference, Provider: started.Provider}
 	if started.CheckoutUrl != nil {
 		result.CheckoutUrl = *started.CheckoutUrl
 	}

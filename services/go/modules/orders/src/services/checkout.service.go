@@ -136,6 +136,9 @@ func (service CheckoutService) registerAndRespond(ctx context.Context, row *ent.
 				return types.CheckoutResultView{}, abortError
 			}
 			if refusal := PaymentRegistrationRefusal(err); refusal != nil {
+				if restoreError := RestoreCartOfRefusedCheckout(ctx, service.Container, groups); restoreError != nil {
+					service.Container.Logger.WarnContext(ctx, "refused checkout could not restore the cart", "checkoutId", row.ID.String(), "error", restoreError)
+				}
 				return types.CheckoutResultView{}, refusal
 			}
 			return types.CheckoutResultView{}, ordererrors.PaymentServiceFailed

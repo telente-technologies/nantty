@@ -18,8 +18,8 @@ type Command struct {
 
 func (command Command) Validate() error {
 	var issues []httpserver.ValidationIssue
-	if command.Request.Provider != "paystack" {
-		issues = append(issues, httpserver.ValidationIssue{Path: "provider", Message: "Choose Paystack."})
+	if provider := command.Request.Provider; provider != "" && provider != "paystack" && provider != "flutterwave" {
+		issues = append(issues, httpserver.ValidationIssue{Path: "provider", Message: "The payment provider is chosen by Zudomart; leave it out."})
 	}
 	path := command.Request.ReturnPath
 	if path != "" && (!strings.HasPrefix(path, "/") || strings.HasPrefix(path, "//") || strings.ContainsAny(path, "\\\r\n") || len(path) > 200) {

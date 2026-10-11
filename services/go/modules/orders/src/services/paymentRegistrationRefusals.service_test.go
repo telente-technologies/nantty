@@ -1,25 +1,28 @@
 package services
 
 import (
-	"errors"
-	"fmt"
+	"encoding/json"
+	"net/http"
 	"testing"
 
 	"google.golang.org/genproto/googleapis/rpc/errdetails"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+
+	"zudomart/platform/httpserver"
 )
 
-func TestMoneyRefusalsReachTheBuyerAsReadableCheckoutErrors(t *testing.T) {
-	detailed, err := status.New(codes.FailedPrecondition, "cap").WithDetails(&errdetails.ErrorInfo{Reason: "SELLER_SALES_CAP_REACHED", Domain: "money.zudomart.com"})
-	if err != nil {
-		t.Fatal(err)
+func TestBuyerSeesTheSellerDebtAndOrderLimitRefusalsWithTheirDetails(t *testing.T) {
+	if refusal := PaymentRegistrationRefusal(httpserver.NewApiError(http.StatusForbidden, "SELLER_DEBT_LIMIT", "owes")); refusal == nil || refusal.Code != "SELLER_DEBT_LIMIT" || refusal.Status != http.StatusForbidden {
+		t.Fatalf("a seller over the debt limit is a buyer-facing refusal: %+v", refusal)
 	}
-	refusal := PaymentRegistrationRefusal(fmt.Errorf("register payables: %w", detailed.Err()))
-	if refusal == nil || refusal.Status != 409 || refusal.Code != "SELLER_SALES_CAP_REACHED" {
-		t.Fatalf("cap refusal: %+v", refusal)
+	details, _ := json.Marshal(map[string]any{"reason": "contactSupportForLargeOrders", "maximum": map[string]any{"amountMinor": 500_000_000, "currency": "NGN"}})
+	overGrpc, _ := status.New(codes.InvalidArgument, "too large").WithDetails(&errdetails.ErrorInfo{Reason: "PAYMENT_AMOUNT_OUT_OF_RANGE", Metadata: map[string]string{"details": string(details)}})
+	refusal := PaymentRegistrationRefusal(overGrpc.Err())
+	if refusal == nil || refusal.Code != "PAYMENT_AMOUNT_OUT_OF_RANGE" || refusal.Details["reason"] != "contactSupportForLargeOrders" {
+		t.Fatalf("the order limit and its contact-support reason survive the money gRPC hop: %+v", refusal)
 	}
-	if PaymentRegistrationRefusal(status.Error(codes.Unavailable, "down")) != nil || PaymentRegistrationRefusal(errors.New("boom")) != nil {
-		t.Fatal("other failures must stay a payment service error")
+	if PaymentRegistrationRefusal(httpserver.NewApiError(http.StatusInternalServerError, "INTERNAL", "x")) != nil {
+		t.Fatal("unknown failures are not passed to the buyer")
 	}
 }

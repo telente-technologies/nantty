@@ -40,12 +40,12 @@ func (handler Handler) Execute(ctx context.Context, command Command) (dtos.TopUp
 		return dtos.TopUpCheckout{}, err
 	}
 	err = deployed.Client.AdTopUp.Create().SetAccountID(account.ID).SetMoneyTopUpID(started.TopUpId).SetReference(started.Reference).SetAmountMinor(command.Request.Amount.AmountMinor).
-		SetCurrency(account.Currency).SetProvider(command.Request.Provider).SetAuthorizationURL(started.CheckoutUrl).SetRequestedByUserID(command.UserId).
+		SetCurrency(account.Currency).SetProvider(firstNonEmptyProvider(started.Provider, command.Request.Provider)).SetAuthorizationURL(started.CheckoutUrl).SetRequestedByUserID(command.UserId).
 		OnConflictColumns(adtopup.FieldMoneyTopUpID).DoNothing().Exec(ctx)
 	if err != nil && !errors.Is(err, sql.ErrNoRows) {
 		return dtos.TopUpCheckout{}, err
 	}
-	return dtos.TopUpCheckout{TopUpId: started.TopUpId, Reference: started.Reference, Provider: command.Request.Provider, AuthorizationUrl: started.CheckoutUrl}, nil
+	return dtos.TopUpCheckout{TopUpId: started.TopUpId, Reference: started.Reference, Provider: firstNonEmptyProvider(started.Provider, command.Request.Provider), AuthorizationUrl: started.CheckoutUrl}, nil
 }
 
 func (handler Handler) checkAmount(ctx context.Context, account *ent.AdAccount, request dtos.StartTopUpRequest) error {
@@ -64,4 +64,13 @@ func returnUrl(origin, path string) string {
 		return ""
 	}
 	return strings.TrimRight(origin, "/") + path
+}
+
+func firstNonEmptyProvider(values ...string) string {
+	for _, value := range values {
+		if value != "" {
+			return value
+		}
+	}
+	return "paystack"
 }

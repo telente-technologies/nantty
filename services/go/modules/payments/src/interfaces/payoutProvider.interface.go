@@ -6,11 +6,16 @@ import (
 )
 
 type TransferRequest struct {
-	RecipientCode string
-	AmountMinor   int64
-	Currency      string
-	Reference     string
-	Reason        string
+	RecipientCode   string
+	AmountMinor     int64
+	Currency        string
+	Reference       string
+	Reason          string
+	SourceWalletRef string
+	BankCode        string
+	AccountNumber   string
+	BeneficiaryName string
+	BranchCode      string
 }
 
 type TransferResult struct {
@@ -34,7 +39,7 @@ type ProviderSettlement struct {
 	SettledAt            *time.Time
 }
 
-type MoneyMovementProvider interface {
+type PayoutProvider interface {
 	CreateTransfer(ctx context.Context, request TransferRequest) (TransferResult, error)
 	VerifyTransfer(ctx context.Context, reference string) (TransferResult, error)
 	ReadPlatformBalances(ctx context.Context) ([]ProviderBalance, error)

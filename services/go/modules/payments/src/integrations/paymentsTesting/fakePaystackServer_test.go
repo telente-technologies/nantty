@@ -67,6 +67,22 @@ func TestServeFakePaystackForLocalApiSmoke(t *testing.T) {
 		}
 		writeSignedSmokeWebhook(writer, "transfer."+transfer.Status, map[string]any{"reference": transfer.Reference, "status": transfer.Status, "transfer_code": transfer.Code, "amount": transfer.AmountMinor, "currency": "NGN"})
 	})
+	mux.HandleFunc("POST /__smoke/identifications/{email}/{outcome}", func(writer http.ResponseWriter, request *http.Request) {
+		fake.mutex.Lock()
+		customer := fake.Customers[request.PathValue("email")]
+		identification := fake.Identifications[customer]
+		fake.mutex.Unlock()
+		if customer == "" || identification == nil {
+			writeFakeJson(writer, http.StatusNotFound, map[string]any{"message": "no identification was requested for this email"})
+			return
+		}
+		data := map[string]any{"customer_code": customer, "identification": map[string]any{"country": "NG", "type": "bank_account", "bank_code": identification["bank_code"], "account_number": "012****345"}}
+		event := "customeridentification.success"
+		if request.PathValue("outcome") != "success" {
+			event, data["reason"] = "customeridentification.failed", "Account number or BVN is incorrect"
+		}
+		writeSignedSmokeWebhook(writer, event, data)
+	})
 	mux.HandleFunc("GET /__smoke/state", func(writer http.ResponseWriter, _ *http.Request) {
 		fake.mutex.Lock()
 		defer fake.mutex.Unlock()
