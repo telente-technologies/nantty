@@ -8,7 +8,8 @@ import { isMutationProtectedAgainstCsrf, isRequestFromWebappOrigin, isSafeHttpMe
 import { clearEverySessionCookie, readApiTokensFromCookies, readCachedViewerFromCookies, readSessionIdFromCookies, writeApiTokenCookies } from "@/server/session.service";
 
 const maximumForwardedBodyBytes = 8 * 1024 * 1024;
-const forwardedRequestHeaderNames = ["idempotency-key", "x-client-region", "if-match"];
+const forwardedRequestHeaderNames = ["idempotency-key", "x-client-region", "if-match", "x-step-up-token"];
+const longForwardedHeaderNames = new Set(["x-step-up-token"]);
 const returnedResponseHeaderNames = ["content-type", "content-disposition", "idempotent-replayed", "retry-after", "etag"];
 const allowedApiPathPattern = /^\/api\/v1(\/[A-Za-z0-9._~:@%,-]+)+$/;
 
@@ -84,8 +85,9 @@ export async function forwardBffRequestToWebappApi(request: NextRequest, pathSeg
 
   const forwardedHeaders: Record<string, string> = {};
   for (const headerName of forwardedRequestHeaderNames) {
+    if (headerName === "x-client-region" && !isSafeHttpMethod(request.method)) continue;
     const headerValue = request.headers.get(headerName);
-    if (headerValue && headerValue.length <= 256) forwardedHeaders[headerName] = headerValue;
+    if (headerValue && headerValue.length <= (longForwardedHeaderNames.has(headerName) ? 4096 : 256)) forwardedHeaders[headerName] = headerValue;
   }
 
   const sendToBackend = () =>
