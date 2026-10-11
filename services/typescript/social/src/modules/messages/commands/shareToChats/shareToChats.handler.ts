@@ -1,7 +1,7 @@
+import { unprocessable } from "../../../../errors/social.error.js";
 import type { Handler, HandlerContext } from "../../../../types/handlerContext.type.js";
 import { postRepository } from "../../../posts/repositories/post.repository.js";
 import { loadPostVisibleToViewer } from "../../../posts/services/postAccess.service.js";
-import { messageRepository } from "../../repositories/message.repository.js";
 import { createSendMessageHandler } from "../sendMessage/sendMessage.handler.js";
 import type { ShareToChatsCommand } from "./shareToChats.command.js";
 
@@ -12,13 +12,17 @@ export function createShareToChatsHandler(context: HandlerContext): Handler<Shar
   return async ({ senderId, conversationIds, reference, encryptions }) => {
     const isPost = (reference.kind === "post" || reference.kind === "clip") && uuidPattern.test(reference.id);
     if (isPost) await loadPostVisibleToViewer(context, senderId, reference.id);
+    const unique = [...new Set(conversationIds)];
+    if (unique.some((conversationId) => !encryptions.some((candidate) => candidate.conversationId === conversationId))) {
+      throw unprocessable("ENCRYPTION_REQUIRED", "Shared items are end-to-end encrypted. Update Zudomart to share to chats.");
+    }
     let sentCount = 0;
-    for (const conversationId of new Set(conversationIds)) {
+    for (const conversationId of unique) {
       const envelope = encryptions.find((candidate) => candidate.conversationId === conversationId);
       await sendMessage({
         senderId, conversationId, idempotencyKey: undefined, mentions: undefined,
         message: {
-          kind: "shared", text: undefined, media: undefined, linkPreview: undefined, location: undefined, document: undefined, poll: undefined, sharedContent: reference,
+          kind: "shared", media: undefined, linkPreview: undefined,
           encryption: envelope === undefined ? undefined : { deviceId: envelope.deviceId, ciphertext: envelope.ciphertext, protocol: undefined },
         },
       });
@@ -32,6 +36,6 @@ export function createShareToChatsHandler(context: HandlerContext): Handler<Shar
       const post = await postRepository.findById(context.database.client, reference.id);
       return { sentCount, shareCount: post?.shareCount ?? sentCount };
     }
-    return { sentCount, shareCount: await messageRepository.countSharesOfReference(context.database.client, reference.kind, reference.id) };
+    return { sentCount, shareCount: sentCount };
   };
 }

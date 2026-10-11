@@ -9,7 +9,7 @@ import type { ShareToChatsCommand } from "../commands/shareToChats/shareToChats.
 import type { StopLiveLocationCommand } from "../commands/stopLiveLocation/stopLiveLocation.command.js";
 import type { UpdateLiveLocationCommand } from "../commands/updateLiveLocation/updateLiveLocation.command.js";
 import type { VoteOnPollCommand } from "../commands/voteOnPoll/voteOnPoll.command.js";
-import type { MessagePollView, MessageReactionSummary, MessageView, SharedContentCard } from "../models/message.model.js";
+import type { MessageView, SharedContentCard } from "../models/message.model.js";
 import type { GetSharedContentCardQuery } from "../queries/getSharedContentCard/getSharedContentCard.query.js";
 import type { ListMessagesQuery } from "../queries/listMessages/listMessages.query.js";
 import { storyReplyBodySchema, storyReplyParamsSchema, contentQuerySchema, conversationMessagesParamsSchema, listMessagesQuerySchema, locationBodySchema, messageParamsSchema, pollVoteBodySchema, reactionBodySchema, reactionParamsSchema, sendMessageBodySchema, shareBodySchema } from "../validators/messages.validator.js";
@@ -19,11 +19,11 @@ import type { ReplyToStoryCommand } from "../commands/replyToStory/replyToStory.
 export interface MessagesHandlers {
   readonly replyToStory: Handler<ReplyToStoryCommand, MessageView>;
   readonly sendMessage: Handler<SendMessageCommand, MessageView>;
-  readonly reactToMessage: Handler<ReactToMessageCommand, MessageReactionSummary[]>;
-  readonly removeMessageReaction: Handler<RemoveMessageReactionCommand, MessageReactionSummary[]>;
-  readonly updateLiveLocation: Handler<UpdateLiveLocationCommand, MessageView>;
-  readonly stopLiveLocation: Handler<StopLiveLocationCommand, MessageView>;
-  readonly voteOnPoll: Handler<VoteOnPollCommand, MessagePollView>;
+  readonly reactToMessage: Handler<ReactToMessageCommand, never>;
+  readonly removeMessageReaction: Handler<RemoveMessageReactionCommand, never>;
+  readonly updateLiveLocation: Handler<UpdateLiveLocationCommand, never>;
+  readonly stopLiveLocation: Handler<StopLiveLocationCommand, never>;
+  readonly voteOnPoll: Handler<VoteOnPollCommand, never>;
   readonly shareToChats: Handler<ShareToChatsCommand, { readonly sentCount: number; readonly shareCount: number }>;
   readonly listMessages: Handler<ListMessagesQuery, Page<MessageView>>;
   readonly getSharedContentCard: Handler<GetSharedContentCardQuery, SharedContentCard>;
@@ -38,9 +38,10 @@ export function createMessagesController(route: RouteFactory, handlers: Messages
       handlers.sendMessage({
         senderId: principal.accountId, conversationId: params.conversationId, idempotencyKey, mentions: body.mentions,
         message: {
-          kind: body.kind ?? "text", text: body.text, encryption: body.encryption,
+          kind: body.kind ?? "text", encryption: body.encryption,
           media: body.mediaId === undefined ? undefined : { mediaId: body.mediaId, durationSeconds: body.durationSeconds },
-          linkPreview: body.linkPreview, sharedContent: body.sharedContent, location: body.location, document: body.document, poll: body.poll,
+          linkPreview: body.linkPreview,
+          plaintext: { text: body.text, location: body.location, poll: body.poll, document: body.document, sharedContent: body.sharedContent },
         },
       })),
     list: route({ authentication: "required", params: conversationMessagesParamsSchema, query: listMessagesQuerySchema }, ({ principal, params, query }) =>

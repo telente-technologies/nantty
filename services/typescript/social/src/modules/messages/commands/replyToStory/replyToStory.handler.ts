@@ -16,7 +16,7 @@ export function createReplyToStoryHandler(context: HandlerContext): Handler<Repl
     const conversation = await startConversation({ senderId: viewerId, peerId: story.authorId });
     return sendMessage({
       senderId: viewerId, conversationId: conversation.id, idempotencyKey: undefined, mentions: undefined,
-      message: { kind: "shared", text: undefined, encryption, media: undefined, linkPreview: undefined, location: undefined, document: undefined, poll: undefined, sharedContent: { kind: "story", id: storyId } },
+      message: { kind: "shared", encryption, media: undefined, linkPreview: undefined },
     });
   };
 }
