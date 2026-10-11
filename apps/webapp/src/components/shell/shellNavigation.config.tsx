@@ -10,6 +10,7 @@ import {
   HomeIcon,
   LiveIcon,
   OrdersIcon,
+  PlusIcon,
   SettingsIcon,
   StoreIcon,
   UserIcon,
@@ -49,7 +50,8 @@ export function buildSidebarNavigationGroups(isSignedIn: boolean, counts: ShellB
       { href: "/settings", label: "Settings", icon: <SettingsIcon /> },
     ],
   ];
-  return isSignedIn ? groups : [groups[0]!];
+  if (!isSignedIn) return [groups[0]!];
+  return [[...groups[0]!, { href: "/post/new", label: "Post", icon: <PlusIcon /> }], ...groups.slice(1)];
 }
 
 export function buildBottomNavigationItems(isSignedIn: boolean, counts: ShellBadgeCounts): readonly NavItem[] {
@@ -57,6 +59,7 @@ export function buildBottomNavigationItems(isSignedIn: boolean, counts: ShellBad
     { href: "/", label: "Home", icon: <HomeIcon /> },
     { href: "/mart", label: "Mart", icon: <StoreIcon /> },
     { href: "/clips", label: "Clips", icon: <ClipsIcon /> },
+    ...(isSignedIn ? [{ href: "/post/new", label: "Create", icon: <PlusIcon /> }] : []),
     { href: "/chats", label: "Chats", icon: <ChatIcon />, badgeCount: counts.chats },
     { href: isSignedIn ? "/me" : "/login", label: "Me", icon: <UserIcon /> },
   ];

@@ -83,3 +83,16 @@
 .linkDescription {
   font-size: var(--text-sm);
 }
+
+.signOutRow {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  min-height: var(--control-lg);
+  border: 1px solid var(--divider);
+  border-radius: var(--radius-pill);
+  background: var(--surface-card);
+  color: var(--color-danger-text);
+  font-weight: 700;
+}

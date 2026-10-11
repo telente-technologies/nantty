@@ -2,7 +2,6 @@
 
 import { Dialog } from "@/components/ui/dialog";
 import { TextField } from "@/components/ui/field";
-import { TrashIcon } from "@/components/ui/icons";
 
 import styles from "./settings.module.css";
 
@@ -22,8 +21,7 @@ export function DeleteAccountDialog({ isOpen, onClose, confirmation, onConfirmat
       isOpen={isOpen}
       onClose={onClose}
       role="alertdialog"
-      tone="danger"
-      icon={<TrashIcon size={24} />}
+      intent="deleteAccount"
       title="Delete your account?"
       description="Your account will be permanently deleted in 30 days. Log in any time before then to cancel. Order and payment records the law requires are kept."
       dismissible={!deletion.isPending}

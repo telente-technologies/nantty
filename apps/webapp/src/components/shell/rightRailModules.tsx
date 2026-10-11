@@ -1,17 +1,15 @@
 "use client";
 
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
-import { useState } from "react";
 import { Skeleton } from "@zudomart/web-kit";
 
-import { requireAuthThen } from "@/components/auth/authPrompt.store";
+import { useFollowUser } from "@/components/follow/useFollowUser.hook";
 import { useSession } from "@/components/providers/sessionProvider";
 import { CoinIcon, TrendingIcon } from "@/components/ui/icons";
 import { Avatar, MediaImage } from "@/components/ui/media";
 import { cartsService } from "@/services/carts.service";
 import { discoveryService } from "@/services/discovery.service";
-import { followsService } from "@/services/posts.service";
 import { walletsService } from "@/services/wallets.service";
 import { formatCountWithThousandsSuffix } from "@/utils/formatDate.util";
 import { formatMoneyForDisplay } from "@/utils/formatMoney.util";
@@ -68,12 +66,7 @@ export function WalletSummaryModule() {
 }
 
 function SuggestedAccountRow({ account }: { readonly account: UserSummary }) {
-  const [isFollowing, setIsFollowing] = useState(false);
-  const followMutation = useMutation({
-    mutationFn: (followNow: boolean) => (followNow ? followsService.followUser(account.id) : followsService.unfollowUser(account.id)),
-    onMutate: (followNow) => setIsFollowing(followNow),
-    onError: (_error, followNow) => setIsFollowing(!followNow),
-  });
+  const follow = useFollowUser({ userId: account.id, username: account.username, displayName: account.name, initialState: "none" });
   return (
     <li className={styles.accountRow}>
       <Link href={`/${account.username}`} className={styles.accountLink}>
@@ -85,12 +78,13 @@ function SuggestedAccountRow({ account }: { readonly account: UserSummary }) {
       </Link>
       <button
         type="button"
-        className={[styles.followButton, isFollowing ? styles.followButtonActive : ""].join(" ")}
-        aria-pressed={isFollowing}
-        aria-label={`${isFollowing ? "Unfollow" : "Follow"} ${account.name}`}
-        onClick={() => requireAuthThen(() => followMutation.mutate(!isFollowing), `Sign in to follow ${account.name}.`)}
+        className={[styles.followButton, follow.isActive ? styles.followButtonActive : ""].join(" ")}
+        aria-pressed={follow.isActive}
+        aria-label={`${follow.isActive ? "Unfollow" : "Follow"} ${account.name}`}
+        disabled={follow.isPending}
+        onClick={follow.toggle}
       >
-        {isFollowing ? "Following" : "Follow"}
+        {follow.label}
       </button>
     </li>
   );

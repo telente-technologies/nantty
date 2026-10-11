@@ -11,27 +11,45 @@ import { ProfileContentTabs } from "./profileContentTabs";
 import { ProfileVisitorActions } from "./profileVisitorActions";
 import { Button } from "@/components/ui/button";
 import { Avatar, MediaImage } from "@/components/ui/media";
-import { BellIcon, BookmarkIcon, LogOutIcon, OrdersIcon, SettingsIcon } from "@/components/ui/icons";
+import { LogOutIcon } from "@/components/ui/icons";
+import { showToast } from "@/components/ui/toast";
+import { buildProfilePath } from "@/utils/seoPaths.util";
+import { OwnProfileHeaderActions } from "./ownProfileMenu";
 import { requestConfirmation } from "@/components/ui/confirmDialog";
-import { followsService } from "@/services/posts.service";
 import { chatCryptoService } from "@/services/chatCrypto/chatCrypto.service";
 import { sendRequestToWebappServer } from "@/services/clientApi.service";
 import { messagesService } from "@/services/messages.service";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { formatCountWithThousandsSuffix, formatJoinedDate } from "@/utils/formatDate.util";
-import type { User } from "@/types";
+import type { PostNotificationLevel, User } from "@/types";
+import { PostNotificationsBell } from "@/components/follow/postNotificationsBell";
+import { useFollowUser } from "@/components/follow/useFollowUser.hook";
+import { useSession } from "@/components/providers/sessionProvider";
+import { shouldShowPostNotificationBell } from "@/utils/followToggle.util";
 
 import styles from "./profileView.module.css";
 import { AppIcon } from "@/components/ui/appIcon";
 import { SearchScopeRegistrar } from "@/components/search/searchScopeRegistrar";
 
-function Stat({ label, value }: { readonly label: string; readonly value: number }) {
-  return (
-    <span className={styles.stat}>
+function Stat({ label, value, href }: { readonly label: string; readonly value: number; readonly href?: string }) {
+  const content = (
+    <>
       <strong>{formatCountWithThousandsSuffix(value)}</strong>
       <span>{label}</span>
-    </span>
+    </>
   );
+  return href ? <Link href={href} className={styles.stat}>{content}</Link> : <span className={styles.stat}>{content}</span>;
+}
+
+async function shareProfileLink(user: User) {
+  const url = `${window.location.origin}${buildProfilePath(user.username)}`;
+  const text = `Follow ${user.name} on Zudomart`;
+  if (typeof navigator.share === "function") {
+    await navigator.share({ title: text, text, url }).catch(() => undefined);
+    return;
+  }
+  const copied = await navigator.clipboard?.writeText(url).then(() => true, () => false);
+  showToast(copied ? { text: "Profile link copied" } : { text: "Couldn't copy the link", tone: "error" });
 }
 
 interface ProfileViewProps {
@@ -42,17 +60,16 @@ interface ProfileViewProps {
 export function ProfileView({ user, isSelf }: ProfileViewProps) {
   const router = useRouter();
   const queryClient = useQueryClient();
-  const [isFollowing, setIsFollowing] = useState(user.isFollowing ?? false);
-  useEffect(() => setIsFollowing(user.isFollowing ?? false), [user.isFollowing]);
-
-  const followMutation = useMutation({
-    mutationFn: (followNow: boolean) => (followNow ? followsService.followUser(user.id) : followsService.unfollowUser(user.id)),
-    onMutate: async (followNow) => {
-      setIsFollowing(followNow);
-      await queryClient.cancelQueries({ queryKey: ["profile", user.id] });
+  const { viewer } = useSession();
+  const [postNotificationLevel, setPostNotificationLevel] = useState<PostNotificationLevel>(user.viewerPostNotifications ?? "off");
+  useEffect(() => setPostNotificationLevel(user.viewerPostNotifications ?? "off"), [user.viewerPostNotifications]);
+  const follow = useFollowUser({
+    userId: user.id, username: user.username, displayName: user.name,
+    initialState: user.followState ?? (user.isFollowing ? "accepted" : "none"),
+    onStateChange: (state) => {
+      if (state !== "accepted") setPostNotificationLevel("off");
+      void queryClient.invalidateQueries({ queryKey: ["profile", user.id] });
     },
-    onError: (_error, followNow) => setIsFollowing(!followNow),
-    onSettled: () => queryClient.invalidateQueries({ queryKey: ["profile", user.id] }),
   });
 
   const startChat = useMutation({
@@ -67,6 +84,7 @@ export function ProfileView({ user, isSelf }: ProfileViewProps) {
         {user.bannerUrl ? <MediaImage src={user.bannerUrl} alt="" sizes="100vw" priority /> : null}
       </div>
 
+      {isSelf ? <OwnProfileHeaderActions profile={user} /> : null}
       <header className={styles.header}>
         <div className={styles.avatarWrap}>
           <Avatar name={user.name} src={user.avatarUrl} size="xl" ring />
@@ -87,29 +105,20 @@ export function ProfileView({ user, isSelf }: ProfileViewProps) {
         <div className={styles.actions}>
           {isSelf ? (
             <>
-              <div className={styles.iconLinks}>
-                <Link href="/saved" className={styles.iconLink} aria-label="Saved items">
-                  <BookmarkIcon size={18} />
-                </Link>
-                <Link href="/orders" className={styles.iconLink} aria-label="Your orders">
-                  <OrdersIcon size={18} />
-                </Link>
-                <Link href="/notifications" className={styles.iconLink} aria-label="Notifications">
-                  <BellIcon size={18} />
-                </Link>
-                <Link href="/settings" className={styles.iconLink} aria-label="Settings">
-                  <SettingsIcon size={18} />
-                </Link>
-              </div>
+              <Link href="/me/edit" className={styles.secondaryAction}>Edit profile</Link>
+              <button type="button" className={styles.secondaryAction} onClick={() => void shareProfileLink(user)}>Share profile</button>
             </>
           ) : (
             <>
-              <Button size="sm" busy={followMutation.isPending} onClick={() => requireAuthThen(() => followMutation.mutate(!isFollowing), `Sign in to follow ${user.name}.`)}>
-                {isFollowing ? "Following" : "Follow"}
+              <Button size="sm" variant={follow.isActive ? "secondary" : "primary"} busy={follow.isPending} onClick={follow.toggle}>
+                {follow.label}
               </Button>
               <Button size="sm" variant="secondary" busy={startChat.isPending} onClick={() => requireAuthThen(() => startChat.mutate(), `Sign in to message ${user.name}.`)}>
                 Message
               </Button>
+              {shouldShowPostNotificationBell({ isSelf, isSignedIn: viewer !== null, followState: follow.state }) ? (
+                <PostNotificationsBell userId={user.id} username={user.username} initialLevel={postNotificationLevel} onLevelChange={setPostNotificationLevel} />
+              ) : null}
               <ProfileVisitorActions user={user} />
             </>
           )}
@@ -118,8 +127,8 @@ export function ProfileView({ user, isSelf }: ProfileViewProps) {
 
       <div className={styles.stats}>
         <Stat label="Posts" value={user.posts} />
-        <Stat label="Followers" value={user.followers} />
-        <Stat label="Following" value={user.following} />
+        <Stat label="Followers" value={user.followers} href={`/user/${encodeURIComponent(user.id)}/connections?tab=followers`} />
+        <Stat label="Following" value={user.following} href={`/user/${encodeURIComponent(user.id)}/connections?tab=following`} />
       </div>
 
       <ProfileContentTabs user={user} isSelf={isSelf} />
@@ -137,8 +146,7 @@ export async function confirmThenSignOut(): Promise<boolean> {
     title: "Sign out of Zudomart?",
     description: "You'll need to sign in again to message, buy or post.",
     confirmLabel: "Sign out",
-    icon: <LogOutIcon size={22} />,
-    tone: "brand",
+    intent: "signOut",
   });
   if (!confirmed) return false;
   await signOut().catch(() => undefined);

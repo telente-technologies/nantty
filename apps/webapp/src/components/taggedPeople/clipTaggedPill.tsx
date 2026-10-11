@@ -1,7 +1,6 @@
 "use client";
 
 import { Dialog } from "@/components/ui/dialog";
-import { PersonTagIcon } from "@/components/ui/icons";
 import { Avatar } from "@/components/ui/media";
 import type { Post } from "@/types";
 import { formatCompactCount, formatTaggedPeopleSummary } from "@/utils/formatCount.util";
