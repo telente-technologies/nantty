@@ -2,8 +2,8 @@ import { beforeAll, describe, expect, it } from "vitest";
 
 import { registerUser, stepUpUser, type UserActor } from "../src/actors.util.js";
 import { callApi, describeResponse, uniqueSuffix, waitFor } from "../src/apiClient.util.js";
-import { bankAccountNumberFor } from "../src/commerceFixtures.util.js";
-import { payCheckoutThroughProvider, readProviderState, settleTransferThroughProvider, isOpenProviderTransfer } from "../src/fakeFlutterwave.util.js";
+import { onboardPayoutAccount } from "../src/commerceFixtures.util.js";
+import { payCheckoutThroughProvider, readProviderState, readWallet, settleCardPaymentsFor, settleTransferThroughProvider, isOpenProviderTransfer } from "../src/fakeFlutterwave.util.js";
 import { uploadSampleImage } from "../src/mediaUpload.util.js";
 import { isListEnvelope } from "../src/smokeReport.util.js";
 
@@ -127,6 +127,8 @@ describe("commerce journey: seller onboarding → product → cart → checkout 
     expect([200, 201], describeResponse(fulfilled)).toContain(fulfilled.status);
     const delivered = await callApi("POST", `/api/v1/seller/orders/${orderId}/status`, { token: seller.accessToken, headers: { "x-store-id": storeId }, body: { status: "delivered" } });
     expect([200, 201], describeResponse(delivered)).toContain(delivered.status);
+    await onboardPayoutAccount(seller);
+    await settleCardPaymentsFor([orderId]);
     const confirmed = await callApi("POST", `/api/v1/orders/${orderId}/confirm-receipt`, { token: buyer.accessToken, body: {} });
     expect([200, 201], describeResponse(confirmed)).toContain(confirmed.status);
     const released = await waitFor(async () => {
@@ -136,17 +138,11 @@ describe("commerce journey: seller onboarding → product → cart → checkout 
     expect(released, "escrow was never released").toBeDefined();
   });
 
-  it("onboards the seller for payouts and pays out the released funds", async () => {
-    const identity = await callApi("PUT", "/api/v1/payments/payout-onboarding/me/identity", { token: seller.accessToken, body: { legalName: "Temitope Adeyemi", dateOfBirth: "1994-02-03", addressLine1: "4 Allen Avenue", city: "Ikeja", state: "Lagos", idType: "bvn", idNumber: "22212345678", registeredBusiness: false } });
-    expect([200, 201], describeResponse(identity)).toContain(identity.status);
-    const resolved = await callApi("POST", "/api/v1/payments/payout-onboarding/me/resolve", { token: seller.accessToken, body: { bankCode: "058", accountNumber: bankAccountNumberFor(seller.accountId) } });
-    expect(resolved.status, describeResponse(resolved)).toBe(200);
-    const bank = await callApi("PUT", "/api/v1/payments/payout-onboarding/me/bank", { token: seller.accessToken, headers: { "x-step-up-token": await stepUpUser(seller) }, body: { bankCode: "058", bankName: "Guaranty Trust Bank", accountNumber: bankAccountNumberFor(seller.accountId), resolvedAccountName: resolved.body.accountName ?? "Temitope Adeyemi" } });
-    expect([200, 201], describeResponse(bank)).toContain(bank.status);
+  it("pays the released funds into the seller's Flutterwave wallet", { timeout: 180_000 }, async () => {
     const wallet = await waitFor(async () => {
-      const response = await callApi("GET", "/api/v1/wallets/me", { token: seller.accessToken, headers: { "x-client-region": "NG" } });
-      return response.status === 200 && /"amountMinor":[1-9]/.test(JSON.stringify(response.body)) ? response : undefined;
-    }, 30_000, 1000);
+      const balances = await readWallet(seller);
+      return balances.availableMinor + balances.depositHoldMinor > 0 ? balances : undefined;
+    }, 150_000, 3000);
     expect(wallet, "seller wallet never showed the released funds").toBeDefined();
     const accounts = await callApi("GET", "/api/v1/wallets/me/payout-accounts", { token: seller.accessToken });
     expect(accounts.status, describeResponse(accounts)).toBe(200);

@@ -3,7 +3,7 @@ import { beforeAll, describe, expect, it } from "vitest";
 import type { UserActor } from "../src/actors.util.js";
 import { callApi, describeResponse, uniqueSuffix, waitFor } from "../src/apiClient.util.js";
 import { addToCart, adjustStock, bankAccountNumberFor, checkout, createBuyerWithAddress, createStoreWithProduct, onboardPayoutAccount, psql, shipAndDeliver, type SmokeStore } from "../src/commerceFixtures.util.js";
-import { payCheckoutThroughProvider } from "../src/fakeFlutterwave.util.js";
+import { payCheckoutThroughProvider, readWallet, settleCardPaymentsFor } from "../src/fakeFlutterwave.util.js";
 import { expectClearError, expectLedgerBalancedSince } from "../src/journeyChecks.util.js";
 
 describe("seller dashboard journey: product → stock → order → fulfil → payout view, on the free plan", () => {
@@ -61,8 +61,10 @@ describe("seller dashboard journey: product → stock → order → fulfil → p
     expect(dashboard.body.balances).not.toBeNull();
   });
 
-  it("fulfils the order and shows the released money in finance and the wallet", { timeout: 120_000 }, async () => {
+  it("fulfils the order and shows the released money in finance and the wallet", { timeout: 240_000 }, async () => {
+    await onboardPayoutAccount(store.seller);
     await shipAndDeliver(store, orderId);
+    await settleCardPaymentsFor([orderId]);
     const confirmed = await callApi("POST", `/api/v1/orders/${orderId}/confirm-receipt`, { token: buyer.accessToken, body: {} });
     expect([200, 201], describeResponse(confirmed)).toContain(confirmed.status);
     const escrow = await waitFor(async () => {
@@ -77,15 +79,13 @@ describe("seller dashboard journey: product → stock → order → fulfil → p
       expect(response.status, `${path}: ${describeResponse(response)}`).toBe(200);
     }
     const credited = await waitFor(async () => {
-      const response = await seller("GET", "/api/v1/seller/wallet/balances");
-      const body = response.body;
-      return response.status === 200 && body.available.amountMinor + body.pending.amountMinor + body.escrow.amountMinor > 0 ? response : undefined;
-    }, 60_000, 2000);
+      const balances = await readWallet(store.seller);
+      return balances.availableMinor + balances.depositHoldMinor > 0 ? balances : undefined;
+    }, 150_000, 3000);
     expect(credited, "the released money never reached the seller balances").toBeDefined();
   });
 
   it("adds a payout account through the two-step lookup and refuses a payout it cannot cover", { timeout: 90_000 }, async () => {
-    await onboardPayoutAccount(store.seller);
     const resolved = await seller("POST", "/api/v1/seller/wallet/payout-accounts/resolve", { body: { bankCode: "058", accountNumber: bankAccountNumberFor(store.seller.accountId) } });
     expect(resolved.status, describeResponse(resolved)).toBe(200);
     expect(JSON.stringify(resolved.body)).not.toContain(bankAccountNumberFor(store.seller.accountId));

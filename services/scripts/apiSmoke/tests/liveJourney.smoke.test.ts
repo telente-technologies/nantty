@@ -1,9 +1,9 @@
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
-import { createSuperadmin, registerUser, stepUpStaff, stepUpStaffForMoneyAction, type StaffActor, type UserActor } from "../src/actors.util.js";
+import { createSuperadmin, registerUser, stepUpStaff, stepUpStaffForMoneyAction, stepUpUser, type StaffActor, type UserActor } from "../src/actors.util.js";
 import { callApi, describeResponse, uniqueSuffix, waitFor } from "../src/apiClient.util.js";
 import { onboardPayoutAccount, psql } from "../src/commerceFixtures.util.js";
-import { payCheckoutThroughProvider, readProviderState, settleTransferThroughProvider, isOpenProviderTransfer } from "../src/fakeFlutterwave.util.js";
+import { payCheckoutThroughProvider, readProviderState, readWallet, settleTransferThroughProvider, isOpenProviderTransfer } from "../src/fakeFlutterwave.util.js";
 import { connectRealtimeClient, type RealtimeClient } from "../src/realtimeClient.util.js";
 
 async function refreshAccessToken(actor: UserActor): Promise<UserActor> {
@@ -162,6 +162,7 @@ describe("live journey: creator approval → live start → coins → gift with 
     const pack = await callApi("PUT", `/api/v1/admin/coins/price-table/${usdPack}`, { token: staff.accessToken, headers: { "x-step-up-token": await stepUpStaff(staff) }, body: { name: "Smoke USD 50", clientPlatform: "web", coins: 50, bonusCoins: 0, prices: { NGN: 50_000, USD: 500 }, active: true, sortOrder: 2 } });
     expect([200, 201], describeResponse(pack)).toContain(pack.status);
     const usdBuyer = await registerUser("usdbuyer");
+    await callApi("PATCH", "/api/v1/users/me/preferences", { token: usdBuyer.accessToken, body: { countryCode: "US" } });
     const before = 0;
     const purchase = await callApi("POST", "/api/v1/coins/purchases", { token: usdBuyer.accessToken, headers: { "x-client-region": "US", "cloudfront-viewer-country": "US" }, body: { packageId: usdPack } });
     expect([200, 201], describeResponse(purchase)).toContain(purchase.status);
@@ -183,20 +184,20 @@ describe("live journey: creator approval → live start → coins → gift with 
     const balance = await callApi("GET", "/api/v1/coins/balance", { token: host.accessToken });
     const earned: number = balance.body?.earnedCoins ?? balance.body?.earned ?? 0;
     expect(earned, describeResponse(balance)).toBeGreaterThan(0);
+    await onboardPayoutAccount(host);
     const converted = await callApi("POST", "/api/v1/creators/earnings/convert", { token: host.accessToken, headers: ngn, body: { coins: earned, currency: "NGN" } });
     expect([200, 201], describeResponse(converted)).toContain(converted.status);
-    const account = await callApi("POST", "/api/v1/wallets/me/payout-accounts", { token: host.accessToken, headers: ngn, body: { bankCode: "058", accountNumber: "0123456789", countryCode: "NG" } });
+    const account = await callApi("POST", "/api/v1/wallets/me/payout-accounts", { token: host.accessToken, headers: { ...ngn, "x-step-up-token": await stepUpUser(host) }, body: { bankCode: "058", accountNumber: "0123456789", countryCode: "NG" } });
     expect([200, 201], describeResponse(account)).toContain(account.status);
-    await onboardPayoutAccount(host);
     const wallet = await waitFor(async () => {
       await callApi("POST", "/api/v1/admin/payouts/run", { token: staff.accessToken, headers: { "x-step-up-token": await stepUpStaffForMoneyAction(staff) }, body: {} });
-      const response = await callApi("GET", "/api/v1/wallets/me", { token: host.accessToken, headers: ngn });
-      return (response.body.available?.amountMinor ?? 0) > 0 ? response : undefined;
-    }, 90_000, 2000);
-    const amountMinor: number = wallet?.body.available?.amountMinor ?? 0;
-    expect(amountMinor, wallet === undefined ? "creator funds never became withdrawable" : describeResponse(wallet)).toBeGreaterThan(0);
+      const balances = await readWallet(host);
+      return balances.availableMinor > 0 ? balances : undefined;
+    }, 150_000, 3000);
+    const amountMinor: number = wallet?.availableMinor ?? 0;
+    expect(amountMinor, "creator funds never reached the creator's Flutterwave wallet").toBeGreaterThan(0);
     const requested = (await waitFor(async () => {
-      const response = await callApi("POST", "/api/v1/wallets/me/withdrawals", { token: host.accessToken, headers: ngn, body: { payoutAccountId: account.body.id ?? account.body.payoutAccount?.id, amount: { amountMinor, currency: "NGN" } } });
+      const response = await callApi("POST", "/api/v1/wallets/me/withdrawals", { token: host.accessToken, headers: { ...ngn, "x-step-up-token": await stepUpUser(host) }, body: { payoutAccountId: account.body.id ?? account.body.payoutAccount?.id, amount: { amountMinor, currency: "NGN" } } });
       return response.body?.code === "PAYOUT_ACCOUNT_NOT_VERIFIED" ? undefined : response;
     }, 60_000, 2000))!;
     expect([200, 201, 202], describeResponse(requested)).toContain(requested.status);

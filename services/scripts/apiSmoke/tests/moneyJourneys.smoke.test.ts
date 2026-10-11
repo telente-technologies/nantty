@@ -3,7 +3,7 @@ import { beforeAll, describe, expect, it } from "vitest";
 import { createSuperadmin, stepUpStaff, stepUpStaffForMoneyAction, stepUpUser, type StaffActor, type UserActor } from "../src/actors.util.js";
 import { callApi, describeResponse, waitFor } from "../src/apiClient.util.js";
 import { addToCart, checkout, createBuyerWithAddress, createStoreWithProduct, onboardPayoutAccount, psql, shipAndDeliver, type SmokeStore } from "../src/commerceFixtures.util.js";
-import { payCheckoutThroughProvider, readProviderState, settleTransferThroughProvider, isOpenProviderTransfer } from "../src/fakeFlutterwave.util.js";
+import { payCheckoutThroughProvider, readProviderState, readWallet, settleCardPaymentsFor, settleTransferThroughProvider, isOpenProviderTransfer } from "../src/fakeFlutterwave.util.js";
 import { expectClearError } from "../src/journeyChecks.util.js";
 import { verifySellerBusiness } from "../src/sellerVerification.util.js";
 
@@ -64,14 +64,17 @@ describe("money journeys: multi-seller checkout, escrow timers, fees, payout, re
     expect(Number(held[0]![5]), "pro-rata fee for equal groups").toBe(processingFeeMinor / 2);
   });
 
-  it("books the processing fee as an expense line apart from the escrow fee at payment", async () => {
-    const lines = psql(`select a.code, l.direction, l.amount_minor from ledger.journal_entries e join ledger.journal_lines l on l.entry_id = e.id join ledger.ledger_accounts a on a.id = l.account_id where e.kind in ('payment.received','escrow.held') and e.created_at > now() - interval '5 minutes' order by e.created_at, l.line_number`);
+  it("books the processing fee as an expense line once the card payment settles, and no escrow fee before release", { timeout: 120_000 }, async () => {
+    await settleCardPaymentsFor([orderA, orderB]);
+    const lines = psql(`select a.code, l.direction, l.amount_minor from ledger.journal_entries e join ledger.journal_lines l on l.entry_id = e.id join ledger.ledger_accounts a on a.id = l.account_id where e.created_at > now() - interval '5 minutes' order by e.created_at, l.line_number`);
     const codes = lines.map((line) => line[0] ?? "");
-    expect(codes.some((code) => code.startsWith("expense:paymentProcessingFees")), JSON.stringify(lines)).toBe(true);
-    expect(codes.some((code) => code.startsWith("liability:platformFeesUnearned"))).toBe(true);
+    expect(codes.some((code) => code.startsWith("expense:paymentProcessingFees")), JSON.stringify(lines).slice(0, 2000)).toBe(true);
+    const earlyRevenue = psql(`select count(*) from escrow.escrows x join ledger.journal_entries e on (e.reference like '%' || x.id::text || '%' or e.metadata->>'escrowId' = x.id::text) join ledger.journal_lines l on l.entry_id = e.id join ledger.ledger_accounts a on a.id = l.account_id where x.order_id in ('${orderA}', '${orderB}') and a.code like 'revenue:escrowFees%'`)[0]?.[0];
+    expect(earlyRevenue, "the escrow fee is earned on release, not at payment").toBe("0");
   });
 
-  it("releases automatically 3 days after delivery (timer set to 72h, then time-travelled), then holds the credit for 24h", { timeout: 120_000 }, async () => {
+  it("releases automatically 3 days after delivery (timer set to 72h, then time-travelled) into the seller's Flutterwave wallet", { timeout: 240_000 }, async () => {
+    await onboardPayoutAccount(storeA.seller);
     await shipAndDeliver(storeA, orderA);
     const timer = await waitFor(async () => {
       const seconds = psql(`select extract(epoch from (auto_release_at - delivered_at)) from escrow.escrows where order_id = '${orderA}'`)[0]?.[0];
@@ -83,33 +86,28 @@ describe("money journeys: multi-seller checkout, escrow timers, fees, payout, re
     const released = await waitForEscrowStatus(orderA, "released", 90_000);
     expect(released, "escrow was not auto-released").toBeDefined();
     expect(released?.[1]).toMatch(/auto/i);
-    const lockHours = psql(`select round(extract(epoch from (available_at - created_at)) / 3600) from ledger.seller_credit_maturities order by created_at desc limit 1`)[0]?.[0];
-    expect(Number(lockHours), "24h lock").toBe(24);
-    const wallet = await callApi("GET", "/api/v1/wallets/me", { token: storeA.seller.accessToken, headers: ngn });
-    expect(wallet.status, describeResponse(wallet)).toBe(200);
     const expectedNet = itemPriceMinor + 150_000 - Math.round((itemPriceMinor + 150_000) * 0.015) - processingFeeMinor / 2;
-    expect(wallet.body.available?.amountMinor ?? 0, "nothing withdrawable during the lock").toBe(0);
-    expect(wallet.body.pending?.amountMinor ?? 0, "pending is money still in escrow; released money is locked").toBe(0);
-    expect(wallet.body.locked?.amountMinor ?? 0, describeResponse(wallet)).toBe(expectedNet);
+    const credited = await waitFor(async () => {
+      const balances = await readWallet(storeA.seller);
+      return balances.availableMinor + balances.depositHoldMinor === expectedNet ? balances : undefined;
+    }, 150_000, 3000);
+    expect(credited, `the seller wallet must hold the net of fees: ${JSON.stringify(await readWallet(storeA.seller))}`).toBeDefined();
   });
 
-  it("refuses a withdrawal before business verification and during the lock, then pays out after the lock passes", { timeout: 240_000 }, async () => {
-    await onboardPayoutAccount(storeA.seller);
+  it("refuses a withdrawal before business verification, then pays out from the seller's wallet", { timeout: 240_000 }, async () => {
     const created = await callApi("POST", "/api/v1/wallets/me/payout-accounts", { token: storeA.seller.accessToken, headers: { ...ngn, "x-step-up-token": await stepUpUser(storeA.seller) }, body: { bankCode: "058", accountNumber: "0123456789", countryCode: "NG" } });
     expect([200, 201], describeResponse(created)).toContain(created.status);
     const payoutAccountId: string = created.body.id ?? created.body.payoutAccount?.id;
     const unverified = await callApi("POST", "/api/v1/wallets/me/withdrawals", { token: storeA.seller.accessToken, headers: { ...ngn, "x-step-up-token": await stepUpUser(storeA.seller) }, body: { payoutAccountId, amount: { amountMinor: 500_000, currency: "NGN" } } });
     expectClearError(unverified, 403, "SELLER_VERIFICATION_REQUIRED");
     await verifySellerBusiness(staff, storeA.seller);
-    const early = await callApi("POST", "/api/v1/wallets/me/withdrawals", { token: storeA.seller.accessToken, headers: { ...ngn, "x-step-up-token": await stepUpUser(storeA.seller) }, body: { payoutAccountId, amount: { amountMinor: 500_000, currency: "NGN" } } });
-    expect(early.status, `withdrawal during the 24h lock must be refused: ${describeResponse(early)}`).toBeGreaterThanOrEqual(400);
-    psql(`update ledger.seller_credit_maturities set available_at = now() - interval '1 minute' where matured_at is null`);
+    psql(`update payments.wallet_fundings set hold_release_at = now() - interval '1 minute' where user_id = '${storeA.seller.accountId}' and status = 'held'`);
     const available = await waitFor(async () => {
-      const response = await callApi("GET", "/api/v1/wallets/me", { token: storeA.seller.accessToken, headers: ngn });
-      return (response.body.available?.amountMinor ?? 0) > 0 ? response : undefined;
+      const balances = await readWallet(storeA.seller);
+      return balances.availableMinor > 0 ? balances : undefined;
     }, 90_000, 2000);
-    expect(available, "credit never matured after the lock").toBeDefined();
-    const amountMinor: number = available?.body.available.amountMinor;
+    expect(available, "the deposit hold never released the seller's money").toBeDefined();
+    const amountMinor: number = Math.min(available!.availableMinor, 500_000);
     const requested = (await waitFor(async () => {
       const response = await callApi("POST", "/api/v1/wallets/me/withdrawals", { token: storeA.seller.accessToken, headers: { ...ngn, "x-step-up-token": await stepUpUser(storeA.seller) }, body: { payoutAccountId, amount: { amountMinor, currency: "NGN" } } });
       return response.body?.code === "PAYOUT_ACCOUNT_NOT_VERIFIED" ? undefined : response;
@@ -154,7 +152,7 @@ describe("money journeys: multi-seller checkout, escrow timers, fees, payout, re
       return Array.isArray(current.refunds) && current.refunds.length > 0 ? current : undefined;
     }, 30_000, 500);
     expect(state, "provider never received the refund sent through the outbox").toBeDefined();
-    const feeLines = psql(`select a.code, l.amount_minor from escrow.escrows x join ledger.journal_entries e on e.reference like '%' || x.id::text || '%' join ledger.journal_lines l on l.entry_id = e.id join ledger.ledger_accounts a on a.id = l.account_id where x.order_id = '${orderId}' and e.kind like 'escrow.refund%' and a.code like 'revenue:escrowFees%'`);
+    const feeLines = psql(`select a.code, l.amount_minor from escrow.escrows x join ledger.journal_entries e on (e.reference like '%' || x.id::text || '%' or e.metadata->>'escrowId' = x.id::text) join ledger.journal_lines l on l.entry_id = e.id join ledger.ledger_accounts a on a.id = l.account_id where x.order_id = '${orderId}' and e.kind like 'escrow.refund%' and a.code like 'revenue:escrowFees%'`);
     expect(feeLines.length, "refunds must not earn an escrow fee").toBe(0);
   });
 

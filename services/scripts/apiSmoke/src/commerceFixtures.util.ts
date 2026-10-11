@@ -64,6 +64,7 @@ export async function adjustStock(store: SmokeStore, quantityDelta: number): Pro
 
 export async function createBuyerWithAddress(): Promise<{ buyer: UserActor; addressId: string }> {
   const buyer = await registerUser("buyer");
+  await callApi("PATCH", "/api/v1/users/me/preferences", { token: buyer.accessToken, body: { countryCode: "NG" } });
   const countries = await callApi("GET", "/api/v1/geo/countries");
   const nigeria = countries.body.data.find((country: { code: string }) => country.code === "NG");
   const regions = await callApi("GET", `/api/v1/geo/countries/${nigeria.id}/regions`);
@@ -125,4 +126,11 @@ export async function onboardPayoutAccount(seller: UserActor, role?: "seller"): 
     return state.body?.status === "verified" ? state : undefined;
   }, 30_000, 1000);
   expect(verified, "the BVN consent never verified").toBeDefined();
+  const level = await waitFor(async () => {
+    const view = await callApi("GET", "/api/v1/payments/verification/me", { token: seller.accessToken });
+    return view.body?.level >= 1 ? view : undefined;
+  }, 90_000, 2000);
+  expect(level, "the seller never reached verification level 1").toBeDefined();
+  const wallet = await callApi("POST", "/api/v1/payments/wallet/me/activate", { token: seller.accessToken });
+  expect([200, 201, 409], describeResponse(wallet)).toContain(wallet.status);
 }

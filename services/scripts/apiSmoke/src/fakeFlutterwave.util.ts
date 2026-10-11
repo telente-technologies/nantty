@@ -1,6 +1,6 @@
 import { stepUpUser, type UserActor } from "./actors.util.js";
 import { callApi, describeResponse, waitFor, type ApiResponse } from "./apiClient.util.js";
-import { bankAccountNumberFor } from "./commerceFixtures.util.js";
+import { bankAccountNumberFor, psql } from "./commerceFixtures.util.js";
 
 const fakeFlutterwaveUrl = process.env["SMOKE_FAKE_FLUTTERWAVE_URL"] ?? "http://127.0.0.1:18998";
 
@@ -106,5 +106,13 @@ export async function verifyNigerianUserToLevelOne(user: UserActor): Promise<{ a
 export async function readWallet(user: UserActor): Promise<{ availableMinor: number; depositHoldMinor: number; escrowLockedMinor: number; outgoingMinor: number; reservedPayoutMinor: number; debtMinor: number }> {
   const view = await callApi("GET", "/api/v1/payments/wallet/me", { token: user.accessToken });
   if (view.status !== 200) throw new Error(`wallet view: ${describeResponse(view)}`);
-  return view.body.balances;
+  return view.body.balances ?? { availableMinor: 0, depositHoldMinor: 0, escrowLockedMinor: 0, outgoingMinor: 0, reservedPayoutMinor: 0, debtMinor: 0 };
+}
+
+export async function settleCardPaymentsFor(orderIds: readonly string[], timeoutMs = 90_000): Promise<void> {
+  await settle("NGN");
+  for (const orderId of orderIds) {
+    const funded = await waitFor(async () => (psql(`select wallet_funded_at is not null from escrow.escrows where order_id = '${orderId}'`)[0]?.[0] === "t" ? true : undefined), timeoutMs, 1000);
+    if (funded === undefined) throw new Error(`the card payment for ${orderId} never reached the buyer's wallet`);
+  }
 }

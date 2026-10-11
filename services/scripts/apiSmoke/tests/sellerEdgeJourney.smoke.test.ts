@@ -3,7 +3,7 @@ import { beforeAll, describe, expect, it } from "vitest";
 import type { UserActor } from "../src/actors.util.js";
 import { callApi, describeResponse, waitFor } from "../src/apiClient.util.js";
 import { addToCart, checkout, createBuyerWithAddress, createStoreWithProduct, psql, type SmokeStore } from "../src/commerceFixtures.util.js";
-import { payCheckoutThroughProvider, readProviderState } from "../src/fakeFlutterwave.util.js";
+import { payCheckoutThroughProvider, readProviderState, readWallet, settleCardPaymentsFor } from "../src/fakeFlutterwave.util.js";
 import { expectClearError, expectLedgerBalancedSince } from "../src/journeyChecks.util.js";
 
 function escrowOf(orderId: string): string[] | undefined {
@@ -50,6 +50,7 @@ describe("selling on the free plan, and refunds that ask for more than is left",
     await payCheckoutThroughProvider(initialized.body.reference);
     expect(await waitFor(async () => (escrowOf(orderId)?.[0] === "held" ? true : undefined), 20_000, 500), "escrow held").toBe(true);
     expect(await waitFor(async () => (psql(`select payment_status from orders.order_groups where id = '${orderId}'`)[0]?.[0] === "paid" ? true : undefined), 20_000, 500), "the seller sees the order as paid").toBe(true);
+    await settleCardPaymentsFor([orderId]);
     const headers = { "x-store-id": store.storeId };
     const tooMuch = await callApi("POST", `/api/v1/seller/orders/${orderId}/refunds`, { token: store.seller.accessToken, headers, body: { amountMinor: totalMinor + 1, reason: "Fat finger" } });
     expectClearError(tooMuch, [400, 422]);
@@ -64,7 +65,8 @@ describe("selling on the free plan, and refunds that ask for more than is left",
     expectClearError(second, [400, 409, 422]);
     const settled = await waitFor(async () => (/refunded/i.test(escrowOf(orderId)?.[0] ?? "") ? escrowOf(orderId) : undefined), 30_000, 500);
     expect(settled, `escrow after partial refund: ${JSON.stringify(escrowOf(orderId))}`).toBeDefined();
-    expect(((await readProviderState()).refunds ?? []).length - refundsBefore, "one provider refund").toBe(1);
+    expect(((await readProviderState()).refunds ?? []).length - refundsBefore, "a settled card escrow is refunded inside the buyer's wallet, not to the card").toBe(0);
+    expect((await readWallet(buyer)).availableMinor, "the partial refund is unlocked in the buyer's wallet").toBe(partial);
     const refunds = psql(`select coalesce(sum(amount_minor), 0) from payments.payment_refunds where payment_intent_id in (select id from payments.payment_intents where subject_id = '${placed.checkoutId}')`)[0]?.[0];
     expect(Number(refunds), "never refund more than was paid").toBeLessThanOrEqual(totalMinor);
     expectLedgerBalancedSince(15);

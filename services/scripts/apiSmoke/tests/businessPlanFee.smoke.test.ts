@@ -2,8 +2,8 @@ import { beforeAll, describe, expect, it } from "vitest";
 
 import type { UserActor } from "../src/actors.util.js";
 import { callApi, describeResponse, waitFor } from "../src/apiClient.util.js";
-import { addToCart, checkout, createBuyerWithAddress, createStoreWithProduct, psql, shipAndDeliver, type SmokeStore } from "../src/commerceFixtures.util.js";
-import { payCheckoutThroughProvider } from "../src/fakeFlutterwave.util.js";
+import { addToCart, checkout, createBuyerWithAddress, createStoreWithProduct, onboardPayoutAccount, psql, shipAndDeliver, type SmokeStore } from "../src/commerceFixtures.util.js";
+import { payCheckoutThroughProvider, settleCardPaymentsFor } from "../src/fakeFlutterwave.util.js";
 
 const itemPriceMinor = 1_000_000;
 const shippingMinor = 150_000;
@@ -49,13 +49,16 @@ describe("Business plan: a seller on Business pays the 1% escrow fee end to end"
     expect(Number(held![2]), "1% of the seller-group total").toBe(Math.round(groupTotal * 0.01));
   });
 
-  it("earns exactly 1% as escrow-fee revenue on release", { timeout: 60_000 }, async () => {
+  it("earns exactly 1% as escrow-fee revenue on release", { timeout: 240_000 }, async () => {
+    await onboardPayoutAccount(store.seller);
     await shipAndDeliver(store, orderId);
+    await settleCardPaymentsFor([orderId]);
     const confirmed = await callApi("POST", `/api/v1/orders/${orderId}/confirm-receipt`, { token: buyer.accessToken, body: {} });
     expect([200, 201], describeResponse(confirmed)).toContain(confirmed.status);
-    const released = await waitFor(async () => (escrowRow(orderId)?.[0] === "released" ? escrowRow(orderId) : undefined), 30_000, 500);
+    const released = await waitFor(async () => (escrowRow(orderId)?.[0] === "released" ? escrowRow(orderId) : undefined), 90_000, 1000);
     expect(released, "escrow was not released").toBeDefined();
-    const revenue = psql(`select l.amount_minor from escrow.escrows x join ledger.journal_entries e on e.reference like '%' || x.id::text || '%' join ledger.journal_lines l on l.entry_id = e.id join ledger.ledger_accounts a on a.id = l.account_id where x.order_id = '${orderId}' and a.code like 'revenue:escrowFees%' and l.direction = 'credit'`);
+    const revenueRows = () => psql(`select l.amount_minor from escrow.escrows x join ledger.journal_entries e on (e.reference like '%' || x.id::text || '%' or e.metadata->>'escrowId' = x.id::text) join ledger.journal_lines l on l.entry_id = e.id join ledger.ledger_accounts a on a.id = l.account_id where x.order_id = '${orderId}' and a.code like 'revenue:escrowFees%' and l.direction = 'credit'`);
+    const revenue = (await waitFor(async () => (revenueRows().length > 0 ? revenueRows() : undefined), 90_000, 2000)) ?? [];
     expect(revenue.map((row) => Number(row[0])), "escrow-fee revenue booked at release").toEqual([Math.round(groupTotal * 0.01)]);
   });
 });
