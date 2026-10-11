@@ -17,7 +17,7 @@ export async function confirmBeforeOpeningRiskyLink(event: MouseEvent<HTMLAnchor
     title: risk === "shortened" ? "Shortened link" : "Suspicious link",
     description: risk === "shortened" ? `This link hides its real destination (${domain}). Only open it if you trust the person who shared it.` : `${domain} looks unusual and may be unsafe. Never enter passwords or payment details.`,
     confirmLabel: "Open anyway",
-    tone: "caution",
+    intent: "link",
   });
   if (confirmed) window.open(href, "_blank", "noopener,noreferrer");
 }

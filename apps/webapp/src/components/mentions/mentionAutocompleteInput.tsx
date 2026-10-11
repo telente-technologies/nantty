@@ -24,6 +24,10 @@ interface MentionAutocompleteInputProps {
   readonly enabled: boolean;
   readonly surface: MentionSurface;
   readonly onFocus?: () => void;
+  readonly multiline?: boolean;
+  readonly rows?: number;
+  readonly ariaLabel?: string;
+  readonly ariaDescribedBy?: string;
 }
 
 function useDebouncedValue<T>(value: T, delayMs: number) {
@@ -35,8 +39,8 @@ function useDebouncedValue<T>(value: T, delayMs: number) {
   return debounced;
 }
 
-export function MentionAutocompleteInput({ id, value, onChange, chosenMentions, onChooseMention, placeholder, className, maxLength, autoFocus, enabled, surface, onFocus }: MentionAutocompleteInputProps) {
-  const inputRef = useRef<HTMLInputElement | null>(null);
+export function MentionAutocompleteInput({ id, value, onChange, chosenMentions, onChooseMention, placeholder, className, maxLength, autoFocus, enabled, surface, onFocus, multiline = false, rows = 4, ariaLabel, ariaDescribedBy }: MentionAutocompleteInputProps) {
+  const inputRef = useRef<HTMLInputElement | HTMLTextAreaElement | null>(null);
   const listId = useId();
   const [activeQuery, setActiveQuery] = useState<ActiveMentionQuery | null>(null);
   const [highlightedIndex, setHighlightedIndex] = useState(0);
@@ -70,7 +74,7 @@ export function MentionAutocompleteInput({ id, value, onChange, chosenMentions, 
     requestAnimationFrame(() => inputRef.current?.setSelectionRange(next.caretPosition, next.caretPosition));
   }
 
-  function handleKeyDown(event: KeyboardEvent<HTMLInputElement>) {
+  function handleKeyDown(event: KeyboardEvent<HTMLInputElement | HTMLTextAreaElement>) {
     if (!isListOpen) return;
     if (event.key === "ArrowDown" || event.key === "ArrowUp") {
       event.preventDefault();
@@ -83,29 +87,36 @@ export function MentionAutocompleteInput({ id, value, onChange, chosenMentions, 
     }
   }
 
+  const sharedFieldProps = {
+    id,
+    className,
+    value,
+    maxLength,
+    autoFocus,
+    placeholder,
+    role: "combobox" as const,
+    "aria-label": ariaLabel,
+    "aria-describedby": ariaDescribedBy,
+    "aria-autocomplete": "list" as const,
+    "aria-expanded": isListOpen,
+    "aria-controls": listId,
+    "aria-activedescendant": isListOpen ? `${listId}-${highlightedIndex}` : undefined,
+    onChange: (event: { readonly target: HTMLInputElement | HTMLTextAreaElement }) => {
+      onChange(event.target.value);
+      refreshActiveQuery(event.target.value, event.target.selectionStart ?? event.target.value.length);
+    },
+    onKeyDown: handleKeyDown,
+    onFocus,
+    onBlur: () => setTimeout(() => setActiveQuery(null), 120),
+  };
+
   return (
     <div className={styles.inputWrap}>
-      <input
-        ref={inputRef}
-        id={id}
-        className={className}
-        value={value}
-        maxLength={maxLength}
-        autoFocus={autoFocus}
-        placeholder={placeholder}
-        role="combobox"
-        aria-autocomplete="list"
-        aria-expanded={isListOpen}
-        aria-controls={listId}
-        aria-activedescendant={isListOpen ? `${listId}-${highlightedIndex}` : undefined}
-        onChange={(event) => {
-          onChange(event.target.value);
-          refreshActiveQuery(event.target.value, event.target.selectionStart ?? event.target.value.length);
-        }}
-        onKeyDown={handleKeyDown}
-        onFocus={onFocus}
-        onBlur={() => setTimeout(() => setActiveQuery(null), 120)}
-      />
+      {multiline ? (
+        <textarea ref={(node) => { inputRef.current = node; }} rows={rows} {...sharedFieldProps} />
+      ) : (
+        <input ref={(node) => { inputRef.current = node; }} {...sharedFieldProps} />
+      )}
       {isListOpen ? (
         <ul className={styles.suggestions} id={listId} role="listbox" aria-label="People to mention">
           {suggestions.map(({ user: suggestion, allowsMentions, rank }, index) => (

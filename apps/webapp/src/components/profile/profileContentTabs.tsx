@@ -90,7 +90,7 @@ export function ProfileContentTabs({ user, isSelf }: { readonly user: User; read
         ) : (
           <div className={styles.postList}>
             {(tab === "clips" ? clips : visiblePosts).map((post) => (
-              <PostCard key={post.id} post={post} showPinnedBadge />
+              <PostCard key={post.id} post={post} showPinnedBadge surface="profile" />
             ))}
           </div>
         )}

@@ -184,3 +184,48 @@
     height: 260px;
   }
 }
+
+.ownHeaderActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-2);
+  padding: 0 0 var(--space-2);
+}
+
+.secondaryAction {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--control-sm, 32px);
+  padding-inline: var(--space-4);
+  border: 1px solid var(--divider);
+  border-radius: var(--radius-pill);
+  background: var(--surface-card);
+  color: var(--ink-strong);
+  font-size: var(--text-sm);
+  font-weight: 700;
+}
+
+.secondaryAction:hover {
+  background: var(--surface-hover);
+}
+
+a.stat:hover strong {
+  text-decoration: underline;
+}
+
+.menuItemDisabled {
+  opacity: 0.5;
+}
+
+.menuBadge {
+  margin-left: auto;
+  min-width: 20px;
+  padding: 0 6px;
+  border-radius: var(--radius-pill);
+  background: var(--color-brand-solid);
+  color: var(--color-on-brand);
+  font-size: var(--text-xs);
+  font-weight: 700;
+  text-align: center;
+}

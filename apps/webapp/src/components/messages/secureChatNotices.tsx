@@ -63,14 +63,18 @@ export function DecryptionNotice({ text }: { readonly text: string }) {
   return <p className={styles.notice}>{text}</p>;
 }
 
-const sharedKindLabels: Record<SharedContentCard["reference"]["kind"], string> = { post: "Post", clip: "Clip", story: "Story", product: "Product", store: "Store", profile: "Profile", live: "Live" };
+const sharedKindLabels: Record<SharedContentCard["reference"]["kind"], string> = { post: "Post", clip: "Clip", story: "Story", product: "Product", store: "Store", profile: "Profile", live: "Live", order: "Order" };
 
 function sharedContentHref(card: SharedContentCard): string | null {
   const { kind, id } = card.reference;
-  if (kind === "post" || kind === "clip") return `/post/${id}`;
+  if (kind === "post") return `/post/${id}`;
+  if (kind === "clip") return `/clips?start=${encodeURIComponent(id)}`;
   if (kind === "product") return `/product/${id}`;
   if (kind === "store") return `/store/${id}`;
   if (kind === "live") return `/live/${id}`;
+  if (kind === "order") return `/orders/${id}`;
+  if (kind === "story") return card.profileUserId ? `/stories/${card.profileUserId}` : null;
+  if (kind === "profile" && card.profileUserId) return `/user/${card.profileUserId}`;
   if (kind === "profile" && card.subtitle?.startsWith("@")) return `/${card.subtitle.slice(1)}`;
   return null;
 }
@@ -81,16 +85,20 @@ export function SharedContentPreviewCard({ card }: { readonly card: SharedConten
     return (
       <div className={styles.linkCard}>
         <span className={styles.linkDomain}>{label}</span>
-        <span className={styles.linkDescription}>{card.availability === "private" ? "This is only visible to the owner's followers." : "This is no longer available."}</span>
+        <span className={styles.linkDescription}>{card.availability === "private" ? "This is only visible to the owner's followers." : card.reference.kind === "order" ? "Only the buyer and the store can see this order." : "This is no longer available."}</span>
       </div>
     );
   }
   const href = sharedContentHref(card);
+  const details = [card.priceLabel, card.isLive && typeof card.viewerCount === "number" ? `${card.viewerCount.toLocaleString()} watching` : null, typeof card.stock === "number" && card.stock <= 0 ? "Out of stock" : null].filter(Boolean).join(" · ");
   const body = (
     <>
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      {card.imageUrl ? <img src={card.imageUrl} alt="" className={styles.sharedImage} loading="lazy" /> : null}
       <span className={styles.linkDomain}>{label}</span>
       {card.title ? <span className={styles.linkTitle}>{card.title}</span> : null}
       {card.subtitle ? <span className={styles.linkDescription}>{card.subtitle}</span> : null}
+      {details ? <span className={styles.linkDescription}>{details}</span> : null}
     </>
   );
   return href === null ? <div className={styles.linkCard}>{body}</div> : <Link className={styles.linkCard} href={href}>{body}</Link>;
