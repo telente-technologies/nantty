@@ -21,6 +21,7 @@ import type {
   StreamStatsWire,
   StudioLiveWire,
 } from "@/types";
+import type { IngestProtocol } from "@/types/studioLive.type";
 
 import { isNotFoundError, sendRequestToStudioServer } from "./clientApi.service";
 
@@ -50,6 +51,7 @@ const toLiveSession = (wire: StudioLiveWire): LiveSession => ({
   viewers: wire.viewers,
   peakViewers: wire.peakViewers,
   hlsUrl: wire.hlsUrl,
+  scheduledAt: wire.scheduledAt ?? null,
   earnings: buildEarnings(wire.earnings.coins, wire.earnings.giftCount),
 });
 
@@ -98,6 +100,8 @@ export const livesService = {
       hlsUrl: live.playbackUrl,
       storeId: live.storeId ?? null,
       hostRanking: live.hostRanking ?? null,
+      scheduledAt: live.scheduledAt ?? null,
+      hostId: live.host?.id ?? null,
       earnings: toEarnings(stats),
     };
   },
@@ -105,15 +109,16 @@ export const livesService = {
     await sendRequestToStudioServer<LiveSessionWire>(`/api/v1/lives/${liveId}/start`, { method: "POST" });
   },
   endLive: (liveId: ID) => sendRequestToStudioServer<void>(`/api/v1/lives/${liveId}/end`, { method: "POST" }),
-  fetchStreamKey: async (liveId: ID): Promise<StreamKey | null> => {
+  fetchStreamKey: async (liveId: ID, protocol: IngestProtocol = "rtmp"): Promise<StreamKey | null> => {
     try {
-      return toStreamKey(await sendRequestToStudioServer<StreamKeyWire>(`/api/v1/lives/${liveId}/stream-key`));
+      return toStreamKey(await sendRequestToStudioServer<StreamKeyWire>(`/api/v1/lives/${liveId}/stream-key`, { query: { protocol } }));
     } catch (error) {
       if (isNotFoundError(error)) return null;
       throw error;
     }
   },
-  rotateStreamKey: async (liveId: ID) => toStreamKey(await sendRequestToStudioServer<StreamKeyWire>(`/api/v1/lives/${liveId}/stream-key`, { method: "POST" })),
+  rotateStreamKey: async (liveId: ID, protocol: IngestProtocol = "rtmp") =>
+    toStreamKey(await sendRequestToStudioServer<StreamKeyWire>(`/api/v1/lives/${liveId}/stream-key`, { method: "POST", query: { protocol } })),
   createLive: ({ title, category, storeId }: CreateLiveInput) =>
     sendRequestToStudioServer<LiveSessionWire>("/api/v1/lives", { method: "POST", body: { title, category, startNow: false, ...(storeId ? { storeId } : {}) } }),
   listMyStores: async (): Promise<StoreOption[]> =>

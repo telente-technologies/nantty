@@ -87,11 +87,13 @@ export interface LiveSession {
   readonly viewers: number;
   readonly peakViewers: number;
   readonly hlsUrl: string | null;
+  readonly scheduledAt: ISODate | null;
 }
 
 export interface LiveDetail extends Omit<LiveSession, "createdAt"> {
   readonly storeId: ID | null;
   readonly hostRanking: HostRanking | null;
+  readonly hostId: ID | null;
 }
 
 export interface StoreOption {
@@ -134,6 +136,7 @@ export interface StudioLiveWire {
   readonly recordEnabled: boolean;
   readonly visibility: string;
   readonly products: readonly LiveProductPinWire[];
+  readonly scheduledAt?: ISODate | null;
 }
 
 export interface LiveSessionWire {
@@ -148,6 +151,8 @@ export interface LiveSessionWire {
   readonly playbackUrl: string | null;
   readonly storeId?: ID | null;
   readonly hostRanking?: HostRanking | null;
+  readonly scheduledAt?: ISODate | null;
+  readonly host?: { readonly id: ID; readonly name?: string; readonly username?: string };
 }
 
 export interface StreamKeyWire {

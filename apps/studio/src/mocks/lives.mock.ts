@@ -7,6 +7,9 @@ const hoursAgo = (hours: number): ISODate => new Date(Date.now() - hours * 3_600
 const minutesAgo = (minutes: number): ISODate => new Date(Date.now() - minutes * 60_000).toISOString();
 
 const readIngestUrl = () => process.env.RTMP_INGEST_URL ?? "rtmp://studio.zudomart.com/live";
+export const MOCK_WHIP_INGEST_URL = "mock://whip";
+export const MOCK_HOST_ID = "u_me";
+const MAX_SCHEDULE_DAYS = 90;
 const readHlsBaseUrl = () => process.env.HLS_PLAYBACK_URL ?? "https://studio.zudomart.com/hls";
 
 const buildStreamKey = (liveId: ID) => `sk_${liveId}_${btoa(liveId).replace(/=/g, "").slice(0, 16)}`;
@@ -45,6 +48,9 @@ interface MockLive {
   readonly streamKey: string | null;
   readonly pins: readonly LiveProductPinWire[];
   readonly storeId: ID | null;
+  readonly scheduledAt: ISODate | null;
+  readonly hostId: ID;
+  readonly whipKey: string | null;
 }
 
 const buildScene = (liveId: ID): OverlayScene => ({ id: `scene_${liveId}`, liveId, name: "Main scene", layers: [...DEFAULT_LAYERS] });
@@ -62,23 +68,41 @@ const toStudioLiveWire = (live: MockLive): StudioLiveWire => ({
   id: live.id, title: live.title, category: live.category, state: live.state, createdAt: live.createdAt, startedAt: live.startedAt, endedAt: live.endedAt,
   viewers: live.viewers, peakViewers: live.peakViewers, streamKeyHint: live.streamKey ? live.streamKey.slice(-4) : null, ingestProtocol: live.streamKey ? "rtmp" : null,
   hlsUrl: hlsUrlFor(live), earnings: { coins: live.coins, giftCount: live.giftCount }, recordEnabled: false, visibility: "public", products: live.pins,
+  scheduledAt: live.scheduledAt,
 });
 
 const toLiveSessionWire = (live: MockLive): LiveSessionWire => ({
   id: live.id, title: live.title, category: live.category, state: live.state, viewers: live.viewers, peakViewers: live.peakViewers,
   startedAt: live.startedAt, endedAt: live.endedAt, playbackUrl: hlsUrlFor(live), storeId: live.storeId,
   hostRanking: live.state === "live" ? { globalRank: 42, categoryRank: 3, category: live.category, period: "week" } : null,
+  scheduledAt: live.scheduledAt, host: { id: live.hostId, name: "Temitope Adeyemi", username: "temi.creates" },
 });
 
-const toStreamKeyWire = (live: MockLive, streamKey: string): StreamKeyWire => ({
-  liveId: live.id, protocol: "rtmp", ingestUrl: readIngestUrl(), streamKey, streamKeyHint: streamKey.slice(-4), issuedAt: new Date().toISOString(),
+const toStreamKeyWire = (live: MockLive, streamKey: string, protocol: "rtmp" | "whip" = "rtmp"): StreamKeyWire => ({
+  liveId: live.id, protocol, ingestUrl: protocol === "whip" ? MOCK_WHIP_INGEST_URL : readIngestUrl(), streamKey, streamKeyHint: streamKey.slice(-4), issuedAt: new Date().toISOString(),
 });
+
+const readProtocol = (query: URLSearchParams): "rtmp" | "whip" => {
+  const protocol = query.get("protocol") ?? "rtmp";
+  if (protocol !== "rtmp" && protocol !== "whip") throw new ApiError(400, "protocol must be rtmp or whip", "VALIDATION_FAILED");
+  return protocol;
+};
+
+export const validateMockSchedule = (value: unknown): ISODate | null => {
+  if (value === undefined || value === null) return null;
+  const time = typeof value === "string" ? Date.parse(value) : Number.NaN;
+  if (Number.isNaN(time)) throw new ApiError(400, "scheduledAt must be an RFC3339 time", "VALIDATION_FAILED");
+  if (time < Date.now() + 60_000) throw new ApiError(422, "Pick a time at least a minute from now.", "SCHEDULE_IN_PAST");
+  if (time > Date.now() + MAX_SCHEDULE_DAYS * 86_400_000) throw new ApiError(422, "You can schedule up to 90 days ahead.", "SCHEDULE_TOO_FAR");
+  return new Date(time).toISOString();
+};
 
 const liveState = new Map<ID, MockLive>();
 const overlayState = new Map<ID, OverlayScene>();
 const commentState = new Map<ID, LiveComment[]>();
 
-const seedLive = (live: MockLive, comments: LiveComment[] = []) => {
+const seedLive = (seed: Omit<MockLive, "scheduledAt" | "hostId" | "whipKey"> & Partial<Pick<MockLive, "scheduledAt" | "hostId">>, comments: LiveComment[] = []) => {
+  const live: MockLive = { scheduledAt: null, hostId: MOCK_HOST_ID, whipKey: null, ...seed };
   liveState.set(live.id, live);
   overlayState.set(live.id, buildScene(live.id));
   commentState.set(live.id, comments);
@@ -112,16 +136,32 @@ seedLive({
   viewers: 0, peakViewers: 0, coins: 0, giftCount: 0, topSupporters: [], streamKey: buildStreamKey("live_3"), pins: [], storeId: null,
 });
 
-const findLiveOrThrow = (liveId: string): MockLive => {
+seedLive({
+  id: "live_4", title: "Friday glaze reveal and Q&A", category: "shopping", state: "idle", createdAt: hoursAgo(20), startedAt: null, endedAt: null,
+  viewers: 0, peakViewers: 0, coins: 0, giftCount: 0, topSupporters: [], streamKey: null, pins: [], storeId: "store_1", scheduledAt: new Date(Date.now() + 2 * 86_400_000).toISOString(),
+});
+
+seedLive({
+  id: "live_other_host", title: "Someone else's live", category: "music", state: "live", createdAt: hoursAgo(1), startedAt: minutesAgo(20), endedAt: null,
+  viewers: 40, peakViewers: 52, coins: 0, giftCount: 0, topSupporters: [], streamKey: null, pins: [], storeId: null, hostId: "u_someone_else",
+});
+
+export const findLiveOrThrow = (liveId: string): MockLive => {
   const live = liveState.get(liveId);
   if (!live) throw new ApiError(404, "That live session no longer exists.", "LIVE_NOT_FOUND");
   return live;
 };
 
-const patchLive = (liveId: ID, change: (live: MockLive) => MockLive): MockLive => {
+export const patchLive = (liveId: ID, change: (live: MockLive) => MockLive): MockLive => {
   const updated = change(findLiveOrThrow(liveId));
   liveState.set(liveId, updated);
   return updated;
+};
+
+export const requireMockHost = (liveId: string): MockLive => {
+  const live = findLiveOrThrow(liveId);
+  if (live.hostId !== MOCK_HOST_ID) throw new ApiError(403, "Only the host can do that.", "NOT_LIVE_HOST");
+  return live;
 };
 
 const toStreamStatsWire = (live: MockLive): StreamStatsWire => ({
@@ -131,7 +171,7 @@ const toStreamStatsWire = (live: MockLive): StreamStatsWire => ({
 
 export const liveMocks: MockRoute[] = [
   createMockRoute("GET", "/api/v1/lives", () => ({
-    data: [...liveState.values()].sort((a, b) => b.createdAt.localeCompare(a.createdAt)).map(toStudioLiveWire),
+    data: [...liveState.values()].filter((live) => live.hostId === MOCK_HOST_ID).sort((a, b) => b.createdAt.localeCompare(a.createdAt)).map(toStudioLiveWire),
     nextCursor: null,
   })),
   createMockRoute("GET", "/api/v1/lives/:liveId", ({ params }) => toLiveSessionWire(findLiveOrThrow(params.liveId!))),
@@ -147,30 +187,37 @@ export const liveMocks: MockRoute[] = [
     if (productIds.some((productId) => !SELLER_PRODUCTS.some((product) => product.id === productId))) throw new ApiError(403, "That product is not in this store.", "PRODUCT_NOT_IN_STORE");
     const id = `live_${liveState.size + 1}_${Date.now()}`;
     const startNow = payload.startNow !== false;
+    const scheduledAt = validateMockSchedule((payload as { scheduledAt?: unknown }).scheduledAt);
+    if (scheduledAt && startNow) throw new ApiError(422, "A scheduled live can't start now.", "SCHEDULE_WITH_START_NOW");
     const live: MockLive = {
       id, title, category: payload.category as LiveCategory, state: startNow ? "live" : "idle", createdAt: new Date().toISOString(), startedAt: startNow ? new Date().toISOString() : null, endedAt: null,
       viewers: 0, peakViewers: 0, coins: 0, giftCount: 0, topSupporters: [], streamKey: null, pins: productIds.map((productId) => ({ productId, pinned: false })), storeId,
+      scheduledAt, hostId: MOCK_HOST_ID, whipKey: null,
     };
     seedLive(live);
     return toLiveSessionWire(live);
   }),
   createMockRoute("POST", "/api/v1/lives/:liveId/start", ({ params }) =>
-    toLiveSessionWire(patchLive(params.liveId!, (live) => ({ ...live, state: "live", startedAt: live.startedAt ?? new Date().toISOString(), endedAt: null, viewers: Math.max(live.viewers, 1) }))),
+    toLiveSessionWire(patchLive(requireMockHost(params.liveId!).id, (live) => ({ ...live, state: "live", startedAt: live.startedAt ?? new Date().toISOString(), endedAt: null, viewers: Math.max(live.viewers, 1) }))),
   ),
   createMockRoute("POST", "/api/v1/lives/:liveId/end", ({ params }) => {
-    patchLive(params.liveId!, (live) => ({ ...live, state: "ended", endedAt: new Date().toISOString(), viewers: 0, streamKey: null }));
+    patchLive(requireMockHost(params.liveId!).id, (live) => ({ ...live, state: "ended", endedAt: new Date().toISOString(), viewers: 0, streamKey: null, whipKey: null }));
     return undefined;
   }),
-  createMockRoute("GET", "/api/v1/lives/:liveId/stream-key", ({ params }) => {
-    const live = findLiveOrThrow(params.liveId!);
-    if (!live.streamKey) throw new ApiError(404, "There's no stream key for this live yet.", "STREAM_KEY_MISSING");
-    return toStreamKeyWire(live, live.streamKey);
+  createMockRoute("GET", "/api/v1/lives/:liveId/stream-key", ({ params, query }) => {
+    const live = requireMockHost(params.liveId!);
+    const protocol = readProtocol(query);
+    const key = protocol === "whip" ? live.whipKey : live.streamKey;
+    if (!key) throw new ApiError(404, "There's no stream key for this live yet.", "STREAM_KEY_MISSING");
+    return toStreamKeyWire(live, key, protocol);
   }),
-  createMockRoute("POST", "/api/v1/lives/:liveId/stream-key", ({ params }) => {
+  createMockRoute("POST", "/api/v1/lives/:liveId/stream-key", ({ params, query }) => {
     const liveId = params.liveId!;
-    if (findLiveOrThrow(liveId).state === "ended") throw new ApiError(409, "This live has ended.", "LIVE_NOT_ACTIVE");
-    const live = patchLive(liveId, (current) => ({ ...current, streamKey: buildStreamKey(`${liveId}_${Date.now()}`) }));
-    return toStreamKeyWire(live, live.streamKey!);
+    const protocol = readProtocol(query);
+    if (requireMockHost(liveId).state === "ended") throw new ApiError(409, "This live has ended.", "LIVE_NOT_ACTIVE");
+    const key = buildStreamKey(`${liveId}_${protocol}_${Date.now()}`);
+    const live = patchLive(liveId, (current) => (protocol === "whip" ? { ...current, whipKey: key } : { ...current, streamKey: key }));
+    return toStreamKeyWire(live, key, protocol);
   }),
   createMockRoute("GET", "/api/v1/creators/me/analytics/gifts/streams/:liveId", ({ params }) => toStreamStatsWire(findLiveOrThrow(params.liveId!))),
   createMockRoute("GET", "/api/v1/lives/:liveId/overlays", ({ params }) => {
