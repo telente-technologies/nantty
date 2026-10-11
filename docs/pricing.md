@@ -156,6 +156,8 @@ Decisions: join Apple's Small Business Program before launch (then `COIN_CHANNEL
 
 ## 7. Web payments: Paystack currency constraints
 
+> Payments are moving to Flutterwave (owner, 2026-10-10); re-check these currency rules against [`flutterwaveMigration.md`](integrations/flutterwaveMigration.md) §6.
+
 | Business country | Charge | Settle | Source |
 |---|---|---|---|
 | Nigeria (Zudomart's entity) | NGN and **USD (enabled by the owner, 4 Oct 2026)** | NGN; USD to a domiciliary account | Paystack support "What currency is available to my business?", "Can I accept payments in USD?" (fetched 4 Oct 2026) |

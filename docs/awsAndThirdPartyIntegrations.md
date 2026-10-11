@@ -1,6 +1,6 @@
 # AWS services and third-party integrations
 
-As of 2026-10-06. Sources: `infra/aws/` (Terraform, written and validated but never applied), every `.env.example`,
+As of 2026-10-06 (merged with the former `docs/architecture/awsServicesAndIntegrations.md` on 2026-10-11). Sources: `infra/aws/` (Terraform, written and validated but never applied), every `.env.example`,
 `infra/local/docker-compose.yml`, `docs/architecture/*` and `docs/integrations/*`.
 
 Status:
@@ -84,13 +84,27 @@ Production replicates to a disaster-recovery (DR) region.
 | **AWS X-Ray** (or Amazon Managed Grafana / Tempo) via an OpenTelemetry collector sidecar | Distributed tracing (`OTEL_EXPORTER_OTLP_ENDPOINT`) | **Needed, not in Terraform.** Local: OTel collector + Jaeger. |
 | **AWS Budgets / Cost Anomaly Detection** | Cost alerts | Recommended |
 
+### Later or not planned
+
+Documented in `docs/architecture` with a trigger; none is built or in Terraform.
+
+| Service | Used for | When |
+| --- | --- | --- |
+| **EventBridge** | Replace or complement the SNS fan-out | Later |
+| **Step Functions** | Multi-step payout runs and dispute timelines | Only if real orchestration is needed |
+| **Amazon Managed Prometheus and Grafana** | Metrics at higher cardinality | Only past CloudWatch limits |
+| **Athena + Glue** | Event analytics on Parquet in S3 | Before ClickHouse |
+| **SSM Parameter Store** | Read-only lookups (the ECS-optimised AMI id) | Only for self-hosted LiveKit |
+| **MediaConvert / IVS** | Managed transcoding or streaming | Not planned (ffmpeg in `media`, LiveKit for live) |
+
 ## 2. Third-party integrations
 
 ### Payments and money
 
 | Provider | Used for | What you need | Docs |
 | --- | --- | --- | --- |
-| **Paystack** (the only payment provider) | Card and bank-transfer checkout, saved cards, subscriptions and trials, transfers and payouts, bank account verification, webhooks, split payments. A USD account is needed for UK/EU/US buyers. | Live secret and public keys, the webhook URL, plan codes, transfer setup, plus a USD (domiciliary) account | `docs/integrations/paystack.md` |
+| **Flutterwave** (target provider, owner decision 2026-10-10) | Per-user payout subaccounts (wallets), card and transfer checkout, escrow locks, payouts, BVN and bank verification, webhooks | Live and test keys, the webhook secret, payout subaccounts enabled on the account | `docs/integrations/flutterwaveMigration.md` |
+| **Paystack** (current code, being replaced by Flutterwave) | Card and bank-transfer checkout, saved cards, subscriptions and trials, transfers and payouts, bank account verification, webhooks, split payments. A USD account is needed for UK/EU/US buyers. | Live secret and public keys, the webhook URL, plan codes, transfer setup, plus a USD (domiciliary) account | `docs/integrations/flutterwaveMigration.md` Appendix B |
 | **Apple App Store** (in-app purchase) | Creator subscriptions (70 slot products); coins and Premium later | Paid Apps agreement, the products, an In-App Purchase API key (`.p8`), the Server Notifications V2 URL | `docs/integrations/appStoreProducts.md` |
 | **Google Play Billing** | The same products on Android | Play payments profile, the products, a service account with the Android Publisher API, Pub/Sub real-time notifications with authenticated push | `docs/integrations/appStoreProducts.md` |
 | **Google Cloud Pub/Sub** | Delivers Google Play's real-time developer notifications to our webhook | A topic with an authenticated push subscription | same |
@@ -134,6 +148,7 @@ Production replicates to a disaster-recovery (DR) region.
 | --- | --- | --- |
 | **GitHub** (Actions + OIDC to AWS, Dependabot) | CI, image builds and pushes to ECR, deploys, dependency updates | The repo, plus the environments `dev`/`staging`/`prod` with protection rules |
 | **Error tracking: Sentry or similar** (optional) | Crash and error reports for the mobile and web apps (jest is already set up to transform `@sentry/react-native`) | Decide whether to add it |
+| **Exchange-rate feed** | Live FX for display prices (`EXCHANGE_RATE_PROVIDER` is `static` today) | Choose a provider |
 | **Domain registrar + DNS** | `zudomart.com` delegated to Route 53. Subdomains: api, dashboard, ads, studio, admin, app/web, livekit, media CDN. | Registrar access |
 
 ## 3. Local stand-ins (development only)

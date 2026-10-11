@@ -3,6 +3,21 @@
 All notable changes to Zudomart are documented here. Format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [Unreleased] — 2026-10-11
+
+### Docs — cleanup
+
+- Removed finished or superseded docs: `integrations/bachsMigrationCase.md`
+  (decision final: no Bachs; payments move to Flutterwave),
+  `verification/finalCheckReport.md`, `verification/darkModeScan.md`,
+  `verification/requirementsTraceability.md` (one-off 4–5 Oct reports),
+  `architecture/improvementReport.md` (3 Oct snapshot) and
+  `verification/securityReview.md` (merged into `security/README.md`).
+- Merged `architecture/awsServicesAndIntegrations.md` into
+  `awsAndThirdPartyIntegrations.md`.
+- Paystack-era docs now carry a Flutterwave provider-change note.
+- New single index: `docs/README.md`; the root README links to it.
+
 ## [Unreleased] — 2026-10-09 (batch 3)
 
 ### Mobile — services reorganization
