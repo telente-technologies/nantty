@@ -1,44 +1,8 @@
 import type { NextConfig } from "next";
 
-const isDevelopmentBuild = process.env.NODE_ENV === "development";
-const hostedCheckoutOrigins = ["https://checkout.flutterwave.com", "https://checkout-testing.flutterwave.com"];
 
-function readOriginOrEmpty(configuredUrl: string | undefined): string {
-  if (!configuredUrl) return "";
-  try {
-    return new URL(configuredUrl).origin;
-  } catch {
-    return "";
-  }
-}
-
-function buildContentSecurityPolicyHeaderValue(): string {
-  const mediaOrigin = readOriginOrEmpty(process.env.ADS_MEDIA_URL);
-  const uploadOrigin = readOriginOrEmpty(process.env.ADS_UPLOAD_URL);
-  const directives: Record<string, string[]> = {
-    "default-src": ["'self'"],
-    "script-src": ["'self'", "'unsafe-inline'", ...(isDevelopmentBuild ? ["'unsafe-eval'"] : [])],
-    "style-src": ["'self'", "'unsafe-inline'"],
-    "img-src": ["'self'", "data:", "blob:", "https://images.unsplash.com", mediaOrigin].filter(Boolean),
-    "font-src": ["'self'"],
-    "connect-src": ["'self'", uploadOrigin, ...(isDevelopmentBuild ? ["ws:"] : [])].filter(Boolean),
-    "media-src": ["'self'", "blob:", mediaOrigin].filter(Boolean),
-    "object-src": ["'none'"],
-    "base-uri": ["'self'"],
-    "form-action": ["'self'", ...hostedCheckoutOrigins],
-    "frame-ancestors": ["'none'"],
-    "frame-src": ["'none'"],
-    "manifest-src": ["'self'"],
-    "worker-src": ["'self'"],
-    ...(isDevelopmentBuild ? {} : { "upgrade-insecure-requests": [] }),
-  };
-  return Object.entries(directives)
-    .map(([directiveName, sources]) => [directiveName, ...sources].join(" "))
-    .join("; ");
-}
-
+// Content-Security-Policy is built per request in src/proxy.ts, so origins come from the runtime env, not the build.
 const securityHeaders = [
-  { key: "Content-Security-Policy", value: buildContentSecurityPolicyHeaderValue() },
   { key: "Strict-Transport-Security", value: "max-age=63072000; includeSubDomains; preload" },
   { key: "X-Content-Type-Options", value: "nosniff" },
   { key: "X-Frame-Options", value: "DENY" },
@@ -49,6 +13,7 @@ const securityHeaders = [
 ];
 
 const nextConfig: NextConfig = {
+  experimental: { authInterrupts: true },
   reactStrictMode: true,
   transpilePackages: ["@zudomart/web-kit"],
   poweredByHeader: false,
@@ -56,7 +21,7 @@ const nextConfig: NextConfig = {
   async headers() {
     return [
       { source: "/:path*", headers: securityHeaders },
-      { source: "/bff/:path*", headers: [{ key: "Cache-Control", value: "no-store" }] },
+      { source: "/bff/:path*", headers: [{ key: "Cache-Control", value: "no-store" }, { key: "Content-Security-Policy", value: "default-src 'none'; frame-ancestors 'none'" }] },
     ];
   },
 };
