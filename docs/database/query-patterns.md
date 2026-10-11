@@ -143,7 +143,7 @@ Never cache financial truth: balances, ledger lines, escrow status, payment stat
 | `live:suggested:{country}` | top 20 live ids | 5–10 s | time-based | DB query (§1) | eventual |
 | `live:{id}:viewers` (set / HLL) | presence | per heartbeat, key TTL 2× heartbeat | join/leave | Postgres `live_viewers` (flushed) | eventual (replaces Q9 hot row) |
 | `live:{id}:leaderboard` (sorted set) | gifter scores | live duration + 1 h | gift recorded | `live_leaderboard_entries` | eventual |
-| `rankings:{type}:{window}:{scope}` | rankings page | 60 s | time-based | aggregate query | eventual |
+| `rankings:{type}:{window}:{scope}` | live host rank ring (rankings are livestream-only) | 60 s | time-based | aggregate query | eventual |
 | `live:idempotency:{key}` (EXISTING) | in-flight/completed response | `MoneyMovingTimeToLive` | completion | **DB unique keys are the guard** (`gift_transactions` UQ, journal `reference` UQ) | Valkey only short-circuits duplicates |
 | `ratelimit:*` | counters | window | – | allow-and-log | – |
 | PLANNED `product:{id}` | product card without stock | 60 s | `product.updated` | DB | eventual; checkout re-reads price and stock under lock |
