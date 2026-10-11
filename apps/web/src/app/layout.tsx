@@ -4,6 +4,7 @@ import type { ReactNode } from "react";
 
 import { CookieConsentBanner, OfflineBanner, ThemeInitScript, themeViewport } from "@zudomart/web-kit";
 
+import { MarketingErrorExperienceProvider } from "@/components/errors/errorExperience.provider";
 import { LaunchAnnouncementBar } from "@/components/layout/announcementBar";
 import { SiteFooterWithGiantWordmark } from "@/components/layout/siteFooter";
 import { SiteHeaderWithFloatingNavigation } from "@/components/layout/siteHeader";
@@ -62,10 +63,11 @@ export default function RootLayout({ children }: Readonly<{ children: ReactNode 
       </head>
       <body>
         <SiteThemeProvider>
+        <MarketingErrorExperienceProvider>
         <a href="#main-content" className="skipToContentLink">
           Skip to content
         </a>
-        <OfflineBanner message="You're offline. Some pages and images may not load until you reconnect." />
+        <OfflineBanner message="You're offline. Check your data or Wi-Fi. Some pages and images may not load until you reconnect." />
         <LaunchAnnouncementBar />
         <SiteHeaderWithFloatingNavigation />
         <main id="main-content" tabIndex={-1}>
@@ -73,6 +75,7 @@ export default function RootLayout({ children }: Readonly<{ children: ReactNode 
         </main>
         <SiteFooterWithGiantWordmark />
         <CookieConsentBanner />
+        </MarketingErrorExperienceProvider>
         </SiteThemeProvider>
       </body>
     </html>
