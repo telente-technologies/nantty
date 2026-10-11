@@ -21,7 +21,7 @@ import { summariseProductForInventory } from "@/utils/sellerProductForm.util";
 export function SellerProductsScreen({ navigation }: MainScreenProps<"SellerProducts">) {
   const { colors } = useTheme();
   const viewerCurrency = useLocaleStore((state) => state.currency);
-  const { data: allProducts = [], isLoading, isError, refetch, isRefetching } = useQuery({ queryKey: sellerQueryKeys.products, queryFn: sellerService.listMyStoreProducts });
+  const { data: allProducts = [], isLoading, isError, error, refetch, isRefetching } = useQuery({ queryKey: sellerQueryKeys.products, queryFn: sellerService.listMyStoreProducts });
   const refreshControl = usePullToRefresh(refetch);
   const products = allProducts.filter((product) => product.status !== "archived");
   return (
@@ -40,7 +40,7 @@ export function SellerProductsScreen({ navigation }: MainScreenProps<"SellerProd
           isLoading ? (
             <GridSkeleton items={4} />
           ) : isError ? (
-            <ErrorState compact message="Couldn't load your products." onRetry={() => refetch()} retrying={isRefetching} />
+            <ErrorState error={error} compact message="Couldn't load your products." onRetry={() => refetch()} retrying={isRefetching} />
           ) : (
             <EmptyState compact icon={<Tag24Icon color={colors.textMuted} />} title="No products yet" body="Add your first product so buyers can find your store." />
           )

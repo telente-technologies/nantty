@@ -20,6 +20,7 @@ import { sellerService } from "@/services/sellers/seller.service";
 import type { MarkOrderShippedInput } from "@/types/commerce.type";
 import { formatMoneyForDisplay, multiplyMoneyByQuantity } from "@/utils/formatMoney.util";
 import { ListSkeleton } from "@/components/ui/listSkeleton";
+import { describeActionFailure } from "@/errors/errorExperience/describeError";
 
 export function SellerOrderDetailScreen({ navigation, route }: MainScreenProps<"SellerOrderDetail">) {
   const { colors } = useTheme();
@@ -101,7 +102,7 @@ export function SellerOrderDetailScreen({ navigation, route }: MainScreenProps<"
       <MarkAsShippedSheet
         visible={shipSheetVisible}
         submitting={markAsShipped.isPending}
-        errorMessage={markAsShipped.isError ? markAsShipped.error.message : null}
+        errorMessage={markAsShipped.isError ? describeActionFailure(markAsShipped.error) : null}
         onClose={() => setShipSheetVisible(false)}
         onSubmit={(input) => markAsShipped.mutate(input)}
       />

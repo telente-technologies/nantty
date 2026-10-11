@@ -118,9 +118,9 @@ export function ConnectionsScreen({ navigation, route }: MainScreenProps<"Connec
         <Text size={typeScale.md} weight={500} lineHeight={20}>Sort by {connectionSortLabel(preference.sort)}</Text>
       </Pressable>
       {isListHiddenBecausePrivate ? (
-        <ErrorState message="This account is private. Follow them to see their followers and following." />
+        <ErrorState kind="contentPrivate" description="Follow them to see their followers and following." />
       ) : error ? (
-        <ErrorState message="Couldn't load this list." onRetry={() => refetch()} retrying={isRefetching} />
+        <ErrorState error={error} message="Couldn't load this list." onRetry={() => refetch()} retrying={isRefetching} />
       ) : isLoading ? (
         <ListSkeleton />
       ) : null}

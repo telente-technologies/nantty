@@ -21,7 +21,7 @@ export function FollowRequestsScreen({ navigation }: MainScreenProps<"FollowRequ
       {requests.isPending ? (
         <ListSkeleton />
       ) : requests.isError ? (
-        <ErrorState message="Couldn't load follow requests." onRetry={() => requests.refetch()} />
+        <ErrorState error={requests.error} message="Couldn't load follow requests." onRetry={() => requests.refetch()} />
       ) : (
         <FlatList
           data={requests.data.data}

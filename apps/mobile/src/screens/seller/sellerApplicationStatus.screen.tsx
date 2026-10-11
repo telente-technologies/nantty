@@ -37,7 +37,7 @@ export function SellerApplicationStatusScreen({ navigation }: MainScreenProps<"S
       <Header title="Seller application" onBack={() => navigation.popToTop()} />
       {!details ? (
         application.isLoading ? <ListSkeleton /> : application.isError ? (
-          <ErrorState message="Couldn't load your application." onRetry={() => application.refetch()} retrying={application.isRefetching} />
+          <ErrorState error={application.error} message="Couldn't load your application." onRetry={() => application.refetch()} retrying={application.isRefetching} />
         ) : (
           <View style={styles.empty}>
             <Text align="center" color={colors.textSubtle}>You haven't applied yet.</Text>

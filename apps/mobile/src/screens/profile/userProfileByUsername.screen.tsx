@@ -23,7 +23,7 @@ export function UserProfileByUsernameScreen({ navigation, route }: MainScreenPro
     <Screen>
       <Header title={`@${username}`} />
       {lookup.isError ? (
-        <ErrorState message="This account doesn't exist or has been renamed." onRetry={() => lookup.refetch()} />
+        <ErrorState error={lookup.error} message="This account doesn't exist or has been renamed." onRetry={() => lookup.refetch()} />
       ) : (
         <View style={styles.center} accessibilityLabel="Opening profile">
           <BrandLoader size="lg" />

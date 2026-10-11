@@ -35,7 +35,7 @@ export function SellerDashboardScreen({ navigation }: MainScreenProps<"SellerDas
   const [period, setPeriod] = useState<SellerDashboardPeriod>("today");
   const [ordersExpanded, setOrdersExpanded] = useState(true);
   const [inventoryExpanded, setInventoryExpanded] = useState(true);
-  const { data: dashboard, isLoading, isError, refetch, isRefetching } = useSellerDashboardQuery(period);
+  const { data: dashboard, isLoading, isError, error, refetch, isRefetching } = useSellerDashboardQuery(period);
   const refreshControl = usePullToRefresh(refetch);
   const myStoreId = useAuthStore((state) => state.user?.storeId ?? null);
   const setActingProfile = useActingProfileStore((s) => s.setActingProfile);
@@ -69,7 +69,7 @@ export function SellerDashboardScreen({ navigation }: MainScreenProps<"SellerDas
       <BusinessDocumentsNudge />
       <PeriodChips value={period} onChange={setPeriod} />
       {isError && !dashboard ? (
-        <ErrorState message="Couldn't load your dashboard." onRetry={() => refetch()} retrying={isRefetching} />
+        <ErrorState error={error} message="Couldn't load your dashboard." onRetry={() => refetch()} retrying={isRefetching} />
       ) : isLoading || !dashboard || !totalSales ? (
         <ListSkeleton />
       ) : (

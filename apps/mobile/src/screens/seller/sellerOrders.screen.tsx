@@ -30,7 +30,7 @@ export function SellerOrdersScreen({ navigation }: MainScreenProps<"SellerOrders
   const { colors } = useTheme();
   const styles = useStyles();
   const [filter, setFilter] = useState<"all" | OrderStatus>("all");
-  const { data: orders = [], isLoading, isError, refetch, isRefetching } = useQuery({ queryKey: sellerQueryKeys.orders, queryFn: sellerService.listMyStoreOrders });
+  const { data: orders = [], isLoading, isError, error, refetch, isRefetching } = useQuery({ queryKey: sellerQueryKeys.orders, queryFn: sellerService.listMyStoreOrders });
   const refreshControl = usePullToRefresh(refetch);
   const visibleOrders = useMemo(
     () => (filter === "all" ? orders : orders.filter((o) => o.status === filter || (filter === "pending" && o.status === "paid"))),
@@ -60,7 +60,7 @@ export function SellerOrdersScreen({ navigation }: MainScreenProps<"SellerOrders
           isLoading ? (
             <ListSkeleton rows={5} avatarSize={48} padding={4} />
           ) : isError ? (
-            <ErrorState compact message="Couldn't load orders." onRetry={() => refetch()} retrying={isRefetching} />
+            <ErrorState error={error} compact message="Couldn't load orders." onRetry={() => refetch()} retrying={isRefetching} />
           ) : (
             <EmptyState
               compact

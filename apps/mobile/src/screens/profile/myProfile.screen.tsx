@@ -62,7 +62,7 @@ export function MeScreen() {
         onMore={() => setIsProfileMenuOpen(true)}
       />
       {profileQuery.isError && !profile ? (
-        <ErrorState message="Couldn't load your profile." onRetry={() => profileQuery.refetch()} retrying={profileQuery.isRefetching} />
+        <ErrorState error={profileQuery.error} message="Couldn't load your profile." onRetry={() => profileQuery.refetch()} retrying={profileQuery.isRefetching} />
       ) : (
       <ProfileView
         key={actingProfileId ?? profile?.id ?? "me"}

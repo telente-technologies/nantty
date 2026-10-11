@@ -88,7 +88,7 @@ export function UserProfileScreen({ navigation, route }: MainScreenProps<"UserPr
         onMore={() => setMoreSheetVisible(true)}
       />
       {profileQuery.isError && !profile ? (
-        <ErrorState message="Couldn't load this profile." onRetry={() => profileQuery.refetch()} retrying={profileQuery.isRefetching} />
+        <ErrorState error={profileQuery.error} message="Couldn't load this profile." onRetry={() => profileQuery.refetch()} retrying={profileQuery.isRefetching} />
       ) : profile?.account?.status === "suspended" ? <SuspendedProfileState profile={profile} /> : (
       <ProfileView
         profile={viewingOwnProfile ? undefined : profile}

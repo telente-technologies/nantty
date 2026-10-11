@@ -18,6 +18,7 @@ import { generateIdempotencyKey } from "@/services/core/apiClient.service";
 import { sellerService } from "@/services/sellers/seller.service";
 import type { SellerApplicationDraft, SellerApplicationInput } from "@/types/account.type";
 import { ListSkeleton } from "@/components/ui/listSkeleton";
+import { describeActionFailure } from "@/errors/errorExperience/describeError";
 
 const EMPTY_DRAFT: SellerApplicationDraft = {
   storeName: "", categoryId: "", description: "", phone: "", addressLine: "", city: "", state: "",
@@ -94,7 +95,7 @@ export function SellerApplicationScreen({ navigation }: MainScreenProps<"SellerA
       </ScrollView>
       <View style={styles.footer}>
         {submitApplication.isError ? (
-          <Text size={12} lineHeight={16} color={colors.error} align="center" accessibilityRole="alert">{submitApplication.error.message}</Text>
+          <Text size={12} lineHeight={16} color={colors.error} align="center" accessibilityRole="alert">{describeActionFailure(submitApplication.error)}</Text>
         ) : null}
         <Button
           title={isLastStep ? "Submit application" : "Continue"}

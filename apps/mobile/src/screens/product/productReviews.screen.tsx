@@ -36,7 +36,7 @@ export function ProductReviewsScreen({ route }: MainScreenProps<"ProductReviews"
     <Screen>
       <Header title="Reviews" />
       {reviews.isLoading ? <ListSkeleton avatarSize={32} /> : null}
-      {reviews.isError && !reviews.data ? <ErrorState message="Couldn't load reviews." onRetry={() => reviews.refetch()} retrying={reviews.isRefetching} /> : null}
+      {reviews.isError && !reviews.data ? <ErrorState error={reviews.error} message="Couldn't load reviews." onRetry={() => reviews.refetch()} retrying={reviews.isRefetching} /> : null}
       {reviews.data ? (
         <FlatList
           data={items}

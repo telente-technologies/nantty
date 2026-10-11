@@ -70,7 +70,7 @@ export function SavedScreen({ navigation, route }: MainScreenProps<"Saved">) {
       {savedItems.isLoading ? (
         <ListSkeleton />
       ) : savedItems.isError && items.length === 0 ? (
-        <ErrorState message="Couldn't load your saved items." onRetry={() => savedItems.refetch()} />
+        <ErrorState error={savedItems.error} message="Couldn't load your saved items." onRetry={() => savedItems.refetch()} />
       ) : (
         <FlatList
           key={filter}

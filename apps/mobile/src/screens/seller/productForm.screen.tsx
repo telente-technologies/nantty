@@ -27,6 +27,7 @@ import {
 import { showAlertWithButtons } from "@/utils/crossPlatformAlert.util";
 import { RoleGateScreen } from "@/components/roleGate/roleGateScreen";
 import { useCreateMenuAccess } from "@/hooks/useCreateMenuAccess.hook";
+import { describeActionFailure } from "@/errors/errorExperience/describeError";
 
 
 export function ProductFormScreen(props: MainScreenProps<"ProductForm">) {
@@ -135,7 +136,7 @@ function ProductFormEditor({ navigation, route }: MainScreenProps<"ProductForm">
         ) : null}
         {saveProduct.isError ? (
           <Text size={12} lineHeight={14.4} color={colors.error}>
-            {saveProduct.error.message}
+            {describeActionFailure(saveProduct.error)}
           </Text>
         ) : null}
         <Button title={productId ? "Save changes" : "Publish product"} disabled={!canSave || uploading} loading={saveProduct.isPending} onPress={() => saveProduct.mutate()} />

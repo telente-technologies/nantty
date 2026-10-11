@@ -65,7 +65,7 @@ export function BusinessDocumentsScreen() {
           You can sell without these. Our team reviews them so your business can earn the Gold checkmark. Documents are encrypted and only seen by our verification team.
         </Text>
         {documents.isLoading ? <ListSkeleton rows={3} /> : null}
-        {documents.isError ? <ErrorState message="Couldn't load your documents." onRetry={() => documents.refetch()} /> : null}
+        {documents.isError ? <ErrorState error={documents.error} message="Couldn't load your documents." onRetry={() => documents.refetch()} /> : null}
         {(documents.data?.documents ?? []).map((document) => <BusinessDocumentCard key={document.kind} document={document} />)}
       </ScrollView>
     </Screen>
