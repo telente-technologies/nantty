@@ -37,8 +37,15 @@ export class CachedChallengeStateSource {
   public async read(accountId: string): Promise<ChallengeState> {
     const cached = this.cache.get(accountId);
     if (cached !== undefined && cached.expiresAt > this.now()) return cached.state;
-    const state = await this.trust.readChallengeState(accountId);
-    if (this.cache.size > 50_000) this.cache.clear();
+    let state: ChallengeState;
+    try {
+      state = await this.trust.readChallengeState(accountId);
+    } catch (error) {
+      if (cached !== undefined && cached.state.requirement !== "none") return cached.state;
+      throw error;
+    }
+    this.cache.delete(accountId);
+    if (this.cache.size >= 50_000) this.cache.delete(this.cache.keys().next().value as string);
     this.cache.set(accountId, { state, expiresAt: this.now() + this.ttlMs });
     return state;
   }

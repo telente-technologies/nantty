@@ -9,6 +9,11 @@ export interface SecurityStore {
 }
 
 const maximumMembersPerWindow = 1000;
+const maximumTrackedKeys = 50_000;
+
+export function evictOldestBeyond<Value>(entries: Map<string, Value>, limit: number): void {
+  while (entries.size > limit) entries.delete(entries.keys().next().value as string);
+}
 
 export class InMemorySecurityStore implements SecurityStore {
   private readonly windows = new Map<string, Map<string, number>>();
@@ -22,8 +27,9 @@ export class InMemorySecurityStore implements SecurityStore {
     for (const [existing, seenAt] of window) if (seenAt <= moment - windowSeconds * 1000) window.delete(existing);
     window.set(member, moment);
     while (window.size > maximumMembersPerWindow) window.delete(window.keys().next().value as string);
+    this.windows.delete(key);
+    evictOldestBeyond(this.windows, maximumTrackedKeys - 1);
     this.windows.set(key, window);
-    if (this.windows.size > 50_000) this.windows.clear();
     return window.size;
   }
 
@@ -34,7 +40,8 @@ export class InMemorySecurityStore implements SecurityStore {
   }
 
   public async put(key: string, ttlSeconds: number): Promise<void> {
-    if (this.flags.size > 50_000) this.flags.clear();
+    this.flags.delete(key);
+    evictOldestBeyond(this.flags, maximumTrackedKeys - 1);
     this.flags.set(key, this.now() + ttlSeconds * 1000);
   }
 

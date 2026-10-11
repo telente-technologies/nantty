@@ -65,9 +65,17 @@ describe("webhook passthrough", () => {
     expect(forwarded?.headers["x-paystack-signature"]).toBe("abc123");
   });
 
+  it("forwards the Flutterwave verif-hash header to go-money", async () => {
+    const payload = '{"event":"charge.completed","data":{"id":1}}';
+    const response = await fetch(`${base}/webhooks/flutterwave`, { method: "POST", headers: { "content-type": "application/json", "verif-hash": "hash-value" }, body: payload });
+    expect(response.status).toBe(200);
+    expect(recorded.at(-1)?.headers["verif-hash"]).toBe("hash-value");
+  });
+
   it("does not forward signature headers on ordinary routes", async () => {
-    await fetch(`${base}/api/v1/auth/refresh`, { method: "POST", headers: { "x-paystack-signature": "abc123", "content-type": "application/json" }, body: "{}" });
+    await fetch(`${base}/api/v1/auth/refresh`, { method: "POST", headers: { "x-paystack-signature": "abc123", "verif-hash": "hash-value", "content-type": "application/json" }, body: "{}" });
     expect(recorded.at(-1)?.headers["x-paystack-signature"]).toBeUndefined();
+    expect(recorded.at(-1)?.headers["verif-hash"]).toBeUndefined();
   });
 });
 
@@ -115,11 +123,11 @@ describe("per-route rate limits", () => {
       command: async (args) => {
         const key = String(args[3]);
         counts.set(key, (counts.get(key) ?? 0) + 1);
-        return [counts.get(key) ?? 0, 42];
+        return [counts.get(key) ?? 0, 0];
       },
-    }, new InMemoryRateLimitStore());
+    }, new InMemoryRateLimitStore(), () => undefined, () => 1_000_000_040_000);
     expect((await store.hit("k", 1, 60)).allowed).toBe(true);
-    expect(await store.hit("k", 1, 60)).toEqual({ allowed: false, retryAfterSeconds: 42 });
+    expect(await store.hit("k", 1, 60)).toEqual({ allowed: false, retryAfterSeconds: 40 });
     let failures = 0;
     const broken = new ValkeyRateLimitStore({ command: async () => { throw new Error("down"); } }, new InMemoryRateLimitStore(), () => { failures += 1; });
     expect((await broken.hit("k", 1, 60)).allowed).toBe(true);

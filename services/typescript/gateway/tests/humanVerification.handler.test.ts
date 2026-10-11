@@ -39,7 +39,7 @@ class FakeTrust implements TrustSecurityClient {
 const provider: HumanVerificationProvider = { name: "turnstile", verifyChallengeToken: async (token) => ({ success: token === turnstileAlwaysPassToken, errorCodes: token === turnstileAlwaysPassToken ? [] : ["invalid-input-response"] }) };
 const logged: string[] = [];
 const logger = { info: (...args: unknown[]) => logged.push(JSON.stringify(args)), warn: (...args: unknown[]) => logged.push(JSON.stringify(args)), error: (...args: unknown[]) => logged.push(JSON.stringify(args)), debug: () => undefined, child: () => logger } as unknown as Logger;
-const verifier = { verifyAccessTokenWithJwks: async (token: string) => principals[token] } as unknown as AccessTokenVerifier;
+const verifier = { verifyAccessTokenWithJwks: async (token: string) => principals[token], verifyStaffAccessToken: async (token: string) => (token === "staff-token" ? { accountId: "staff-1", sessionId: "s-staff", roles: [] } : undefined) } as unknown as AccessTokenVerifier;
 
 const trust = new FakeTrust();
 let upstream: Server;

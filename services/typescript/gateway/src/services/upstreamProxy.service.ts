@@ -12,6 +12,7 @@ export interface ProxiedRequest {
   readonly traceparent?: string;
   readonly forwardWebhookSignatureHeaders?: boolean;
   readonly allowRedirect?: boolean;
+  readonly trustCdnCountryHeader?: boolean;
 }
 
 export interface ProxiedResponse {
@@ -20,8 +21,9 @@ export interface ProxiedResponse {
   readonly body: Uint8Array;
 }
 
-const forwardedRequestHeaders = ["accept", "authorization", "content-type", "idempotency-key", "if-match", "if-none-match", "x-chunk-sha256", "x-seller-store", "x-seller-location", "user-agent", "x-client-platform", "x-client-region", "x-device-id", "x-step-up-token", "x-store-storefront", "cloudfront-viewer-country"];
-const webhookSignatureHeaders = ["x-paystack-signature", "x-signature", "x-apple-signature", "x-goog-signature", "x-zudomart-push-token", "x-webhook-id", "x-webhook-timestamp"];
+const forwardedRequestHeaders = ["accept", "authorization", "content-type", "idempotency-key", "if-match", "if-none-match", "x-chunk-sha256", "x-seller-store", "x-seller-location", "user-agent", "x-client-platform", "x-client-region", "x-device-id", "x-step-up-token", "x-store-storefront"];
+const cdnCountryHeader = "cloudfront-viewer-country";
+const webhookSignatureHeaders = ["x-paystack-signature", "verif-hash", "x-signature", "x-apple-signature", "x-goog-signature", "x-zudomart-push-token", "x-webhook-id", "x-webhook-timestamp"];
 const returnedResponseHeaders = ["cache-control", "content-type", "etag", "idempotent-replayed", "retry-after", "x-request-id"];
 
 const redirectStatuses = new Set([301, 302, 303, 307, 308]);
@@ -43,6 +45,8 @@ export function buildUpstreamRequestHeaders(request: ProxiedRequest, identitySec
     const value = request.headers[name];
     if (value !== undefined) headers[name] = value;
   }
+  const cdnCountry = request.headers[cdnCountryHeader];
+  if (request.trustCdnCountryHeader === true && cdnCountry !== undefined) headers[cdnCountryHeader] = cdnCountry;
   if (request.forwardWebhookSignatureHeaders === true) {
     for (const name of webhookSignatureHeaders) {
       const value = request.headers[name];

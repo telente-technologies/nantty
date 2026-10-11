@@ -12,7 +12,9 @@ export interface IdentitySigningInput {
 }
 
 export function buildIdentitySigningPayload(input: IdentitySigningInput): string {
-  return ["v1", String(input.issuedAtSeconds), input.method.toUpperCase(), input.path, input.requestId, ...signedIdentityHeaderNames.map((name) => input.headers[name] ?? "")].join("\n");
+  const fields = ["v1", String(input.issuedAtSeconds), input.method.toUpperCase(), input.path, input.requestId, ...signedIdentityHeaderNames.map((name) => input.headers[name] ?? "")];
+  if (fields.some((field) => /[\r\n]/.test(field))) throw new Error("identity signing fields must not contain line breaks");
+  return fields.join("\n");
 }
 
 export function signGatewayIdentity(secret: string, input: IdentitySigningInput): string {
