@@ -81,6 +81,7 @@ func ReadOrdersSettingsFromEnvironment(reader *platformconfig.EnvironmentReader)
 	settings.AllowInMemoryMoneyFake = !settings.IsProduction()
 	if settings.IsProduction() {
 		settings.MoneyGrpcAddress = reader.ReadRequiredString("ORDERS_MONEY_GRPC_ADDRESS")
+		settings.RedisUrl = reader.ReadRequiredString("ORDERS_REDIS_URL")
 		if len(settings.MoneyGrpcToken) < 32 {
 			reader.ReadRequiredString("ORDERS_MONEY_GRPC_TOKEN_OF_AT_LEAST_32_CHARACTERS")
 		}

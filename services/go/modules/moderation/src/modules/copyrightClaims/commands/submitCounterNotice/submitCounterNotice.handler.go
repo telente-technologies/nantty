@@ -64,7 +64,13 @@ func (handler Handler) Execute(ctx context.Context, command Command) (Result, er
 	eligible := services.AddBusinessDays(now, services.CounterNoticeRestoreBusinessDays)
 	var notice *ent.CounterNotice
 	err = handler.Container.RunInTransaction(ctx, func(tx *ent.Tx) error {
-		var saveErr error
+		locked, saveErr := tx.CopyrightClaim.Query().Where(copyrightclaim.ID(claim.ID)).ForUpdate().Only(ctx)
+		if saveErr != nil {
+			return saveErr
+		}
+		if locked.Status != copyrightclaim.StatusUpheld || locked.RemedyState == copyrightclaim.RemedyStateRemovedVoluntarily {
+			return httpserver.NewApiError(http.StatusConflict, "CLAIM_STATE_CONFLICT", "A counter-notice can only be sent against an upheld takedown.")
+		}
 		if notice, saveErr = tx.CounterNotice.Create().SetClaimID(claim.ID).SetSubmitterID(submitter).SetStatement(statement).SetContactEmail(email).SetRestoreEligibleAt(eligible).SetCreatedAt(now).Save(ctx); saveErr != nil {
 			return saveErr
 		}

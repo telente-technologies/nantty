@@ -142,7 +142,7 @@ func (module *Module) openIdempotencyStore(settings configs.OrdersSettings, logg
 	}
 	options, err := redis.ParseURL(settings.RedisUrl)
 	if err != nil {
-		logger.Warn("INVENTORY_REDIS_URL is invalid: mutations fall back to header validation only", slog.Any("error", err))
+		logger.Warn("ORDERS_REDIS_URL is invalid: mutations fall back to header validation only outside production", slog.Any("error", err))
 		return nil
 	}
 	client := redis.NewClient(options)

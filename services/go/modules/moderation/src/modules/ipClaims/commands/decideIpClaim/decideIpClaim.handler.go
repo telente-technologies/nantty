@@ -14,10 +14,10 @@ import (
 	"zudomart/modules/moderation/src/generated/ent"
 	"zudomart/modules/moderation/src/generated/ent/ipclaim"
 	"zudomart/modules/moderation/src/integrations"
+	healthservices "zudomart/modules/moderation/src/modules/accountHealth/services"
 	contentservices "zudomart/modules/moderation/src/modules/contentReports/services"
 	ipevents "zudomart/modules/moderation/src/modules/ipClaims/events"
 	"zudomart/modules/moderation/src/modules/ipClaims/services"
-	healthservices "zudomart/modules/moderation/src/modules/accountHealth/services"
 	strikeservices "zudomart/modules/moderation/src/modules/strikes/services"
 	"zudomart/platform/httpserver"
 )
@@ -65,6 +65,14 @@ func (handler Handler) record(ctx context.Context, command Command, claim *ent.I
 	strikeAdded := command.Action == "uphold" && command.AddStrike
 	encoded, _ := json.Marshal(decision{Outcome: strings.ToUpper(string(outcome)), Reason: reason, DecidedAt: now.UTC().Format(time.RFC3339), DecidedByName: command.Staff.Name, StrikeAdded: strikeAdded})
 	err := handler.Container.RunInTransaction(ctx, func(tx *ent.Tx) error {
+		locked, err := tx.IpClaim.Query().Where(ipclaim.ID(claim.ID)).ForUpdate().Only(ctx)
+		if err != nil {
+			return err
+		}
+		if !services.CanTransition(string(locked.Status), command.Action) {
+			return httpserver.NewApiError(http.StatusConflict, "INVALID_CLAIM_TRANSITION", "This claim cannot move to that state.")
+		}
+		claim = locked
 		update := tx.IpClaim.UpdateOne(claim).SetStatus(outcome).SetDecision(encoded)
 		if command.Action == "uphold" {
 			update.SetListingStatus(ipclaim.ListingStatusDelisted)

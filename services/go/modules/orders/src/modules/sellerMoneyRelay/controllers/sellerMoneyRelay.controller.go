@@ -1,6 +1,8 @@
 package controllers
 
 import (
+	"crypto/sha256"
+	"encoding/hex"
 	"io"
 	"net/http"
 	"net/url"
@@ -12,6 +14,7 @@ import (
 	"zudomart/modules/orders/src/modules/sellerMoneyRelay/services"
 	"zudomart/modules/orders/src/utils"
 	"zudomart/platform/httpserver"
+	"zudomart/platform/jwtauth"
 )
 
 const maximumRelayedBodyBytes = 64 << 10
@@ -47,6 +50,10 @@ func (controller SellerMoneyRelayController) Relay(suffix string, audit *Audited
 		headers := map[string]string{
 			"X-Seller-Store-Id": store.StoreId.String(), "X-Store-Currency": string(store.Currency), "X-Store-Country": store.CountryCode,
 			"X-Store-Timezone": store.Timezone, "X-Store-Name": store.StoreName, "X-Actor-Id": actorId.String(), "Idempotency-Key": request.Header.Get("Idempotency-Key"),
+		}
+		if token := strings.TrimSpace(request.Header.Get(jwtauth.UserStepUpHeader)); token != "" {
+			digest := sha256.Sum256([]byte(token))
+			headers["X-Step-Up-Token-Digest"] = hex.EncodeToString(digest[:])
 		}
 		response, err := controller.Money.Forward(request.Context(), request.Method, path, headers, body)
 		if err != nil {

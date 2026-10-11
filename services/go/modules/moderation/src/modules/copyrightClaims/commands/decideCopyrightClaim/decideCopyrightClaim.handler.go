@@ -51,8 +51,14 @@ func (handler Handler) Execute(ctx context.Context, command Command) error {
 	if err != nil {
 		return err
 	}
-	status := string(claim.Status)
-	switch command.Action {
+	if err := checkTransition(command.Action, string(claim.Status)); err != nil {
+		return err
+	}
+	return handler.record(ctx, command, claim, reason)
+}
+
+func checkTransition(action, status string) error {
+	switch action {
 	case "uphold", "reject":
 		if !services.CanDecide(status) {
 			return conflict()
@@ -64,7 +70,7 @@ func (handler Handler) Execute(ctx context.Context, command Command) error {
 	default:
 		return httpserver.ErrNotFound
 	}
-	return handler.record(ctx, command, claim, reason)
+	return nil
 }
 
 func (handler Handler) record(ctx context.Context, command Command, claim *ent.CopyrightClaim, reason string) error {
@@ -77,6 +83,14 @@ func (handler Handler) record(ctx context.Context, command Command, claim *ent.C
 	}
 	var remedy services.UpholdOutcome
 	err = handler.Container.RunInTransaction(ctx, func(tx *ent.Tx) error {
+		locked, err := tx.CopyrightClaim.Query().Where(copyrightclaim.ID(claim.ID)).ForUpdate().Only(ctx)
+		if err != nil {
+			return err
+		}
+		if err := checkTransition(command.Action, string(locked.Status)); err != nil {
+			return err
+		}
+		claim = locked
 		update := tx.CopyrightClaim.UpdateOne(claim).SetStatus(copyrightclaim.Status(outcome)).SetDecision(encoded)
 		infringer := ""
 		if claim.InfringerID != nil {

@@ -43,8 +43,12 @@ func PaymentRegistrationRefusal(err error) *httpserver.ApiError {
 }
 
 func withRefusalDetails(refusal *httpserver.ApiError, details map[string]any) *httpserver.ApiError {
-	if refusal == nil || len(details) == 0 {
-		return refusal
+	if refusal == nil {
+		return nil
 	}
-	return refusal.WithDetails(details)
+	merged := map[string]any{"audience": "buyer"}
+	for key, value := range details {
+		merged[key] = value
+	}
+	return refusal.WithDetails(merged)
 }

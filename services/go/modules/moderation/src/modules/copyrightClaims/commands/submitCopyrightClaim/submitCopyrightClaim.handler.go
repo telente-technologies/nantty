@@ -79,6 +79,9 @@ func (handler Handler) Execute(ctx context.Context, command Command) (Result, er
 	if resolveErr != nil {
 		handler.Container.Logger.WarnContext(ctx, "claim target could not be resolved", "error", resolveErr.Error())
 	}
+	if preview != nil && command.OriginalWorkMediaId != "" && slices.Contains(preview.MediaIds, command.OriginalWorkMediaId) {
+		return Result{}, invalid("originalWorkMediaId", "must be your own upload of the original work, not the claimed content")
+	}
 	encodedSegments, _ := json.Marshal(append([]validators.Segment{}, command.Segments...))
 	var created *ent.CopyrightClaim
 	err = handler.Container.RunInTransaction(ctx, func(tx *ent.Tx) error {

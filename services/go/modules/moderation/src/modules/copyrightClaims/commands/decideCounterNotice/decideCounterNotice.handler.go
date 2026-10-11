@@ -48,12 +48,19 @@ func (handler Handler) Execute(ctx context.Context, command Command) error {
 	if err != nil {
 		return err
 	}
-	switch command.Action {
+	if err := checkTransition(command.Action, claim, notice); err != nil {
+		return err
+	}
+	return handler.record(ctx, command, claim, notice, reason)
+}
+
+func checkTransition(action string, claim *ent.CopyrightClaim, notice *ent.CounterNotice) error {
+	switch action {
 	case "accept", "reject":
-		if claim.Status != copyrightclaim.StatusCounterNotice || notice.Status != counternotice.StatusPending {
-			if notice.Status != counternotice.StatusPending {
-				return apiError("COUNTER_NOTICE_DECIDED", "This counter-notice was already decided.")
-			}
+		if notice.Status != counternotice.StatusPending {
+			return apiError("COUNTER_NOTICE_DECIDED", "This counter-notice was already decided.")
+		}
+		if claim.Status != copyrightclaim.StatusCounterNotice {
 			return apiError("CLAIM_STATE_CONFLICT", "This claim is not awaiting a counter-notice decision.")
 		}
 	case "court_action":
@@ -63,12 +70,22 @@ func (handler Handler) Execute(ctx context.Context, command Command) error {
 	default:
 		return httpserver.ErrNotFound
 	}
-	return handler.record(ctx, command, claim, notice, reason)
+	return nil
 }
 
 func (handler Handler) record(ctx context.Context, command Command, claim *ent.CopyrightClaim, notice *ent.CounterNotice, reason string) error {
 	now := handler.Container.Now()
 	return handler.Container.RunInTransaction(ctx, func(tx *ent.Tx) error {
+		var err error
+		if claim, err = tx.CopyrightClaim.Query().Where(copyrightclaim.ID(claim.ID)).ForUpdate().Only(ctx); err != nil {
+			return err
+		}
+		if notice, err = tx.CounterNotice.Query().Where(counternotice.ID(notice.ID)).ForUpdate().Only(ctx); err != nil {
+			return err
+		}
+		if err := checkTransition(command.Action, claim, notice); err != nil {
+			return err
+		}
 		outcome := map[string]string{"accept": "accepted", "reject": "rejected", "court_action": "court_action_recorded"}[command.Action]
 		switch command.Action {
 		case "accept":

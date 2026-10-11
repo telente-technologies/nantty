@@ -19,7 +19,7 @@ import (
 
 func startBillingRefundHarness(t *testing.T) (*paymentstesting.MoneyHarness, *paymentservices.PaymentGateway) {
 	harness := paymentstesting.StartMoneyHarnessWithPayments(t, nil)
-	harness.Paystack.Transactions["sub-charge-1"] = &paymentstesting.FakeTransaction{Reference: "sub-charge-1", AmountMinor: 1_500_000, Currency: "NGN", Channel: "card", Status: "success"}
+	harness.Flutterwave.SeedSuccessfulCharge("sub-charge-1", 1_500_000, "NGN")
 	return harness, harness.Payments.Application.Gateway
 }
 
@@ -48,10 +48,10 @@ func runTwoConsumersAtOnce(call func() error) []error {
 	return results
 }
 
-func TestRedeliveredCheckmarkShareRefundCallsPaystackExactlyOnce(t *testing.T) {
+func TestRedeliveredCheckmarkShareRefundCallsTheProviderExactlyOnce(t *testing.T) {
 	skipIntegrationWhenShort(t)
 	harness, gateway := startBillingRefundHarness(t)
-	harness.Paystack.RefundDelay = 300 * time.Millisecond
+	harness.Flutterwave.RefundDelay = 300 * time.Millisecond
 	request := paymentservices.PartialBillingRefund{BillingReference: "sub-charge-1", Reference: "verification-share:case-race", AmountMinor: 450_000, Currency: "NGN", Reason: "Checkmark verification rejected"}
 	ctx := context.Background()
 
@@ -74,13 +74,13 @@ func TestRedeliveredCheckmarkShareRefundCallsPaystackExactlyOnce(t *testing.T) {
 	if _, err := gateway.RefundBillingSubscriptionPartially(ctx, request); err != nil {
 		t.Fatalf("a later redelivery replays the stored outcome: %v", err)
 	}
-	if calls := harness.Paystack.CallCounts["POST /refund"]; calls != 1 || len(harness.Paystack.Refunds) != 1 {
-		t.Fatalf("exactly one provider refund: calls=%d refunds=%v", calls, harness.Paystack.Refunds)
+	if calls := harness.Flutterwave.CallCounts["POST /transactions"]; calls != 1 || len(harness.Flutterwave.Refunds) != 1 {
+		t.Fatalf("exactly one provider refund: calls=%d refunds=%v", calls, harness.Flutterwave.Refunds)
 	}
-	if note, _ := harness.Paystack.Refunds[0]["merchant_note"].(string); !strings.Contains(note, "[ref:verification-share:case-race]") {
+	if note, _ := harness.Flutterwave.Refunds[0]["comments"].(string); !strings.Contains(note, "[ref:verification-share:case-race]") {
 		t.Fatalf("the deterministic reference travels with the refund: %q", note)
 	}
-	balance, err := harness.Ledger.ReadAccountBalance(ctx, harness.Database, ledgermodels.RefundsPayableAccount("paystack", "NGN"))
+	balance, err := harness.Ledger.ReadAccountBalance(ctx, harness.Database, ledgermodels.RefundsPayableAccount("flutterwave", "NGN"))
 	if err != nil || balance != 450_000 {
 		t.Fatalf("one ledger entry for the share: balance=%d err=%v", balance, err)
 	}
@@ -90,7 +90,7 @@ func TestRedeliveredCheckmarkShareRefundCallsPaystackExactlyOnce(t *testing.T) {
 func TestFullVerificationRefundIsSentOnceUnderConcurrentRedelivery(t *testing.T) {
 	skipIntegrationWhenShort(t)
 	harness, gateway := startBillingRefundHarness(t)
-	harness.Paystack.RefundDelay = 300 * time.Millisecond
+	harness.Flutterwave.RefundDelay = 300 * time.Millisecond
 	results := runTwoConsumersAtOnce(func() error {
 		_, err := gateway.RefundBillingSubscriptionCharge(context.Background(), "sub-charge-1", "verification-refund:case-full", "Checkmark verification rejected")
 		return err
@@ -103,7 +103,7 @@ func TestFullVerificationRefundIsSentOnceUnderConcurrentRedelivery(t *testing.T)
 	if _, err := gateway.RefundBillingSubscriptionCharge(context.Background(), "sub-charge-1", "verification-refund:case-full", "again"); err != nil {
 		t.Fatalf("replay: %v", err)
 	}
-	if calls := harness.Paystack.CallCounts["POST /refund"]; calls != 1 {
+	if calls := harness.Flutterwave.CallCounts["POST /transactions"]; calls != 1 {
 		t.Fatalf("the full refund is sent once: %d", calls)
 	}
 }
@@ -113,16 +113,16 @@ func TestRefundWithLostProviderReplyIsLookedUpInsteadOfResent(t *testing.T) {
 	harness, gateway := startBillingRefundHarness(t)
 	request := paymentservices.PartialBillingRefund{BillingReference: "sub-charge-1", Reference: "verification-share:case-lost", AmountMinor: 450_000, Currency: "NGN", Reason: "Checkmark verification rejected"}
 	ctx := context.Background()
-	harness.Paystack.LoseNextRefundReply = true
+	harness.Flutterwave.LoseNextRefundReply = true
 	if _, err := gateway.RefundBillingSubscriptionPartially(ctx, request); err == nil {
 		t.Fatal("a lost reply must surface so the refund is retried")
 	}
 	result, err := gateway.RefundBillingSubscriptionPartially(ctx, request)
 	if err != nil || result.ProviderRefundId == "" {
-		t.Fatalf("the retry finds the refund Paystack already made: %+v err=%v", result, err)
+		t.Fatalf("the retry finds the refund the provider already made: %+v err=%v", result, err)
 	}
-	if calls := harness.Paystack.CallCounts["POST /refund"]; calls != 1 || harness.Paystack.CallCounts["GET /refund"] != 1 {
-		t.Fatalf("looked up, not resent: %v", harness.Paystack.CallCounts)
+	if calls := harness.Flutterwave.CallCounts["POST /transactions"]; calls != 1 || harness.Flutterwave.CallCounts["GET /refunds"] != 1 {
+		t.Fatalf("looked up, not resent: %v", harness.Flutterwave.CallCounts)
 	}
 	assertLedgerHealthy(t, harness)
 }
@@ -139,8 +139,8 @@ func TestCardCheckRefundWithLostReplyIsNotSentTwice(t *testing.T) {
 		t.Fatalf("setup: %d %s", started.Status, started.Raw)
 	}
 	reference := started.Body["reference"].(string)
-	harness.Paystack.CompleteCheckout(reference, 0, 0, "card")
-	harness.Paystack.LoseNextRefundReply = true
+	harness.Flutterwave.CompleteCheckout(reference, 0, 0, "card")
+	harness.Flutterwave.LoseNextRefundReply = true
 	if completed := harness.Call(http.MethodPost, "/api/v1/payments/saved-cards/setups/"+reference+"/complete", token, "", map[string]any{}); completed.Status != http.StatusOK {
 		t.Fatalf("complete: %d %s", completed.Status, completed.Raw)
 	}
@@ -155,9 +155,9 @@ func TestCardCheckRefundWithLostReplyIsNotSentTwice(t *testing.T) {
 	time.Sleep(200 * time.Millisecond)
 	refund, err := client.PaymentRefund.Query().Only(context.Background())
 	if err != nil || refund.ProviderRefundID == "" || refund.AttemptCount < 2 {
-		t.Fatalf("the retry must adopt the refund Paystack already made: %+v err=%v", refund, err)
+		t.Fatalf("the retry must adopt the refund the provider already made: %+v err=%v", refund, err)
 	}
-	if calls := harness.Paystack.CallCounts["POST /refund"]; calls != 1 {
+	if calls := harness.Flutterwave.CallCounts["POST /transactions"]; calls != 1 {
 		t.Fatalf("the card check is refunded once: %d calls", calls)
 	}
 }
@@ -177,7 +177,7 @@ func TestRefundAmountsAtOrBelowZeroAreRefusedNotTreatedAsFull(t *testing.T) {
 	if _, err := gateway.RefundSubscriptionPayment(ctx, paymentservices.SubscriptionPaymentRefund{PaymentReference: "ren-x", Reference: "r-both", AmountMinor: 5, Full: true}); !errors.Is(err, paymentservices.ErrRefundAmountInvalid) {
 		t.Fatalf("an amount together with full is ambiguous: %v", err)
 	}
-	if harness.Paystack.CallCounts["POST /refund"] != 0 {
+	if harness.Flutterwave.CallCounts["POST /transactions"] != 0 {
 		t.Fatal("no provider call for an invalid amount")
 	}
 }

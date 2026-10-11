@@ -13,7 +13,7 @@ import (
 )
 
 func TestBuyerSeesTheSellerDebtAndOrderLimitRefusalsWithTheirDetails(t *testing.T) {
-	if refusal := PaymentRegistrationRefusal(httpserver.NewApiError(http.StatusForbidden, "SELLER_DEBT_LIMIT", "owes")); refusal == nil || refusal.Code != "SELLER_DEBT_LIMIT" || refusal.Status != http.StatusForbidden {
+	if refusal := PaymentRegistrationRefusal(httpserver.NewApiError(http.StatusForbidden, "SELLER_DEBT_LIMIT", "owes")); refusal == nil || refusal.Code != "SELLER_DEBT_LIMIT" || refusal.Status != http.StatusForbidden || refusal.Details["audience"] != "buyer" {
 		t.Fatalf("a seller over the debt limit is a buyer-facing refusal: %+v", refusal)
 	}
 	details, _ := json.Marshal(map[string]any{"reason": "contactSupportForLargeOrders", "maximum": map[string]any{"amountMinor": 500_000_000, "currency": "NGN"}})
