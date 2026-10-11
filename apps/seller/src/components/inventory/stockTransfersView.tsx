@@ -74,7 +74,7 @@ function StockTransfersPanel({ isDialogOpen, onDialogClose }: { readonly isDialo
         <div className={styles.toolbar}>
           <SegmentedControl label="Transfer status" value={statusFilter} onValueChange={setStatusFilter} options={[{ value: "", label: "All" }, { value: "in_transit", label: "In transit" }, { value: "received", label: "Received" }, { value: "cancelled", label: "Cancelled" }]} />
         </div>
-        {transfers.errorMessage ? <div className={styles.toolbar}><ErrorCallout message={transfers.errorMessage} onRetry={transfers.reload} /></div> : null}
+        {transfers.errorMessage ? <div className={styles.toolbar}><ErrorCallout error={transfers.error} message={transfers.errorMessage} onRetry={transfers.reload} /></div> : null}
         <DataTable caption="Stock transfers" columns={columns} rows={transfers.items} readRowKey={(transfer) => transfer.id} isLoading={transfers.isLoading} hasMore={transfers.hasMore} onLoadMore={transfers.loadMore} isLoadingMore={transfers.isLoadingMore} emptyState={<EmptyState iconName="repeat24" title="No transfers yet" description="Send stock from your warehouse to a shop when it runs low." />} />
       </Panel>
       <NewStockTransferDialog isOpen={isDialogOpen} onClose={onDialogClose} onSaved={() => { onDialogClose(); transfers.reload(); }} />

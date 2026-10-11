@@ -65,7 +65,7 @@ export function BusinessDocumentsView() {
   }
 
   if (query.isLoading && !query.data) return <LoadingBlock label="Loading your documents" />;
-  if (!overview) return <ErrorCallout message={query.errorMessage ?? "Your documents could not be loaded."} onRetry={query.reload} />;
+  if (!overview) return <ErrorCallout variant="section" error={query.error} message={query.errorMessage ?? "Your documents could not be loaded."} onRetry={query.reload} />;
   return (
     <>
       <Callout tone="info" title="Selling never waits for this">You can create your store, list products and take orders without these documents. They unlock the Gold checkmark.</Callout>

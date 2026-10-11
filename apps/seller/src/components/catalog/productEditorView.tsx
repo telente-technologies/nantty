@@ -51,7 +51,7 @@ export function ProductEditorView({ productId }: { readonly productId: string | 
     if (productQuery.data) setDraft(convertProductToDraft(productQuery.data));
   }, [productQuery.data]);
 
-  if (productId && productQuery.errorMessage) return <ErrorCallout title="This product could not be loaded" message={productQuery.errorMessage} onRetry={productQuery.reload} />;
+  if (productId && productQuery.errorMessage) return <ErrorCallout variant="section" title="This product could not be loaded" error={productQuery.error} message={productQuery.errorMessage} onRetry={productQuery.reload} />;
   if (!draft || !settings) return <LoadingBlock label="Loading product" />;
 
   const fieldErrors = convertIssuesToFieldErrorMap(issues);

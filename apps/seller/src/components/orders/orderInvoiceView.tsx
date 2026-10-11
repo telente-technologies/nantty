@@ -22,7 +22,7 @@ export function OrderInvoiceView({ orderId, documentKind }: { readonly orderId: 
   const isReceipt = documentKind === "receipt";
 
   if (orderQuery.isLoading && !order) return <LoadingBlock label={`Preparing ${documentKind}`} />;
-  if (!order) return <ErrorCallout message={orderQuery.errorMessage ?? "This order could not be loaded."} onRetry={orderQuery.reload} />;
+  if (!order) return <ErrorCallout variant="section" error={orderQuery.error} message={orderQuery.errorMessage ?? "This order could not be loaded."} onRetry={orderQuery.reload} />;
 
   const amountPaidAfterRefunds = { amountMinor: order.total.amountMinor - order.refundedAmount.amountMinor, currency: order.total.currency };
 

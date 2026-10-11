@@ -33,7 +33,7 @@ export function DisputesListView() {
     <PageStack>
       <PageHeader title="Disputes" description="When a buyer reports a problem, escrow release pauses. Reply with details and photos so Zudomart can decide fairly." />
       <LinkTabs label="Order sections" tabs={ordersSectionTabs} />
-      {disputesList.errorMessage ? <ErrorCallout message={disputesList.errorMessage} onRetry={disputesList.reload} /> : null}
+      {disputesList.errorMessage ? <ErrorCallout error={disputesList.error} message={disputesList.errorMessage} onRetry={disputesList.reload} /> : null}
       <Panel padded={false}>
         <DataTable
           caption="Disputes"

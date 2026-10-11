@@ -71,7 +71,7 @@ function StoreRewardsForm({ settings }: { readonly settings: StoreSettings }) {
 function StoreRewardsLiability() {
   const { formatMoney } = useMoneyFormatter();
   const summary = useSellerQuery<StoreRewardsSummary>("/seller/marketing/rewards/summary");
-  if (!summary.data) return summary.errorMessage ? <ErrorCallout message={summary.errorMessage} onRetry={summary.reload} /> : null;
+  if (!summary.data) return summary.errorMessage ? <ErrorCallout error={summary.error} message={summary.errorMessage} onRetry={summary.reload} /> : null;
   return (
     <ResponsiveGrid minimumColumnWidth={200}>
       <StatTile label="Outstanding credit" value={formatMoney(summary.data.outstandingLiability)} detail="What you owe customers as discounts" tone="caution" />

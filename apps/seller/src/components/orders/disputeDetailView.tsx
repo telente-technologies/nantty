@@ -33,7 +33,7 @@ export function DisputeDetailView({ disputeId }: { readonly disputeId: string })
   const dispute = disputeQuery.data;
 
   if (disputeQuery.isLoading && !dispute) return <LoadingBlock label="Loading dispute" />;
-  if (!dispute) return <ErrorCallout message={disputeQuery.errorMessage ?? "This dispute could not be loaded."} onRetry={disputeQuery.reload} />;
+  if (!dispute) return <ErrorCallout variant="section" error={disputeQuery.error} message={disputeQuery.errorMessage ?? "This dispute could not be loaded."} onRetry={disputeQuery.reload} />;
   const isResolved = dispute.status === "resolved_for_buyer" || dispute.status === "resolved_for_seller";
 
   async function sendDisputeResponse(event: FormEvent<HTMLFormElement>) {

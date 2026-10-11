@@ -28,7 +28,7 @@ export function CustomerDetailView({ customerId }: { readonly customerId: string
   const customer = customerQuery.data;
 
   if (customerQuery.isLoading && !customer) return <LoadingBlock label="Loading customer" />;
-  if (!customer) return <ErrorCallout message={customerQuery.errorMessage ?? "This customer could not be loaded."} onRetry={customerQuery.reload} />;
+  if (!customer) return <ErrorCallout variant="section" error={customerQuery.error} message={customerQuery.errorMessage ?? "This customer could not be loaded."} onRetry={customerQuery.reload} />;
   const replaceCustomer = (updated: Customer) => customerQuery.replaceData(() => updated);
   const customerType = deriveCustomerTypeFromPurchases(customer);
 

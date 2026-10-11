@@ -67,7 +67,7 @@ export function BarcodeLabelsView() {
         <div className="noPrint">
           <Panel title="Choose items">
             <SearchInput label="Search products" placeholder="Search name or SKU" value={searchText} onValueChange={setSearchText} />
-            {productList.errorMessage ? <ErrorCallout message={productList.errorMessage} onRetry={productList.reload} /> : null}
+            {productList.errorMessage ? <ErrorCallout error={productList.error} message={productList.errorMessage} onRetry={productList.reload} /> : null}
             <div className={styles.variantList}>
               {(productList.items ?? []).flatMap((product) => product.variants.map((variant) => (
                 <label key={variant.id} className={styles.variantRow}>

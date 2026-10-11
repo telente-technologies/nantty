@@ -70,7 +70,7 @@ export function StockAdjustmentsView({ initialVariantId, initialLocationId, shou
             </label>
           </FilterBar>
         </div>
-        {adjustments.errorMessage ? <div className={styles.toolbar}><ErrorCallout message={adjustments.errorMessage} onRetry={adjustments.reload} /></div> : null}
+        {adjustments.errorMessage ? <div className={styles.toolbar}><ErrorCallout error={adjustments.error} message={adjustments.errorMessage} onRetry={adjustments.reload} /></div> : null}
         <DataTable caption="Stock adjustments" columns={columns} rows={adjustments.items} readRowKey={(adjustment) => adjustment.id} isLoading={adjustments.isLoading} hasMore={adjustments.hasMore} onLoadMore={adjustments.loadMore} isLoadingMore={adjustments.isLoadingMore} emptyState={<EmptyState iconName="boxArrowDown24" title="No adjustments at this location yet" description="Record a delivery or a stock count to get started." />} />
       </Panel>
       <NewStockAdjustmentDialog

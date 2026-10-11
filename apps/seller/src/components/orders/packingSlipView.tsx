@@ -21,7 +21,7 @@ export function PackingSlipView({ orderId }: { readonly orderId: string }) {
   const order = orderQuery.data;
 
   if (orderQuery.isLoading && !order) return <LoadingBlock label="Preparing packing slip" />;
-  if (!order) return <ErrorCallout message={orderQuery.errorMessage ?? "This order could not be loaded."} onRetry={orderQuery.reload} />;
+  if (!order) return <ErrorCallout variant="section" error={orderQuery.error} message={orderQuery.errorMessage ?? "This order could not be loaded."} onRetry={orderQuery.reload} />;
 
   return (
     <div className={styles.page}>

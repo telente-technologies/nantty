@@ -13,7 +13,7 @@ export function CustomersSummaryPanels() {
   const { formatMoney, locale } = useMoneyFormatter();
   const summaryQuery = useSellerQuery<CustomersSummary>("/seller/customers/summary");
   const summary = summaryQuery.data;
-  if (summaryQuery.errorMessage && !summary) return <ErrorCallout message={summaryQuery.errorMessage} onRetry={summaryQuery.reload} />;
+  if (summaryQuery.errorMessage && !summary) return <ErrorCallout variant="section" error={summaryQuery.error} message={summaryQuery.errorMessage} onRetry={summaryQuery.reload} />;
   return (
     <>
       <ResponsiveGrid minimumColumnWidth={170}>
