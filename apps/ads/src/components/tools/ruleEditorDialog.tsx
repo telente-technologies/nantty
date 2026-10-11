@@ -75,7 +75,7 @@ export function RuleEditorDialog({ existingRule, onClose, onSaved }: { readonly 
   const actionOptions = (Object.keys(ruleActionLabels) as RuleActionType[]).filter((type) => level !== "ad" || (type !== "increase_budget" && type !== "decrease_budget"));
 
   return (
-    <OverlayDialog
+    <OverlayDialog intent="rule"
       isOpen
       onClose={onClose}
       layout="sidePanel"

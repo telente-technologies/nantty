@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 
+import { requestConfirmation } from "@zudomart/web-kit";
+
 import { useAdsSession } from "@/components/session/adsSessionProvider";
 import { useAdAccount } from "@/components/session/adAccountProvider";
 import { Button } from "@/components/ui/button";
@@ -102,8 +104,8 @@ export function MembersCard() {
           isAlwaysVisible: true,
           render: (member: AdAccountMember) =>
             member.isOwner || member.userId === session?.user.id ? null : (
-              <Button size="small" variant="ghost" onClick={() => {
-                if (window.confirm(`Remove ${member.name} from this ad account?`)) void runMemberChange(() => accountsApi.removeMember(accountId, member.userId), `${member.name} removed`, membersQuery.reload);
+              <Button size="small" variant="ghost" onClick={async () => {
+                if (await requestConfirmation({ title: `Remove ${member.name}?`, description: "They lose access to this ad account straight away.", confirmLabel: "Remove", tone: "danger", intent: "removeMember" })) void runMemberChange(() => accountsApi.removeMember(accountId, member.userId), `${member.name} removed`, membersQuery.reload);
               }}>Remove</Button>
             ),
         }]

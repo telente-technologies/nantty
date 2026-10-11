@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 
+import { requestConfirmation } from "@zudomart/web-kit";
+
 import { ScheduleReportDialog } from "@/components/reports/scheduleReportDialog";
 import { useAdsSession } from "@/components/session/adsSessionProvider";
 import { Button } from "@/components/ui/button";
@@ -27,7 +29,7 @@ export function ScheduledReportsPanel({ accountId, breakdown, metrics }: { reado
   const scheduledQuery = useAdsQuery(() => reportsApi.listScheduledReports(accountId), `scheduled-${accountId}`);
 
   async function deleteScheduledReport(scheduledReportId: string, name: string) {
-    if (!window.confirm(`Stop sending "${name}"?`)) return;
+    if (!(await requestConfirmation({ title: `Stop sending "${name}"?`, description: "No more emails go out for this report.", confirmLabel: "Stop sending", tone: "danger", intent: "stop" }))) return;
     setDeletingId(scheduledReportId);
     try {
       await reportsApi.deleteScheduledReport(accountId, scheduledReportId);

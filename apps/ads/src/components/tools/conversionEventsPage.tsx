@@ -53,7 +53,7 @@ function CreateConversionEventDialog({ accountId, onClose, onCreated }: { readon
   }
 
   return (
-    <OverlayDialog
+    <OverlayDialog intent="analytics"
       isOpen
       onClose={onClose}
       title="Custom conversion event"

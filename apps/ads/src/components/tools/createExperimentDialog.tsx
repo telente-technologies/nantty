@@ -79,7 +79,7 @@ export function CreateExperimentDialog({ accountId, onClose, onCreated }: { read
   }
 
   return (
-    <OverlayDialog
+    <OverlayDialog intent="experiment"
       isOpen
       onClose={onClose}
       layout="sidePanel"

@@ -46,6 +46,9 @@ export function LandingFooterWithContact() {
               <li>
                 <a href={`${mainSiteUrl}/terms`}>Terms of service</a>
               </li>
+              <li>
+                <a href={`${mainSiteUrl}/ads-policy`}>Ads policy (legal)</a>
+              </li>
             </ul>
           </div>
           <div>

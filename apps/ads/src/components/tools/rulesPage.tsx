@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 
+import { requestConfirmation } from "@zudomart/web-kit";
+
 import { useAdAccount } from "@/components/session/adAccountProvider";
 import { Button } from "@/components/ui/button";
 import { EmptyState, ErrorState, LoadingBlock } from "@/components/ui/feedback";
@@ -84,8 +86,8 @@ export function RulesPage() {
                     variant="ghost"
                     iconName="trash24"
                     aria-label={`Delete ${rule.name}`}
-                    onClick={() => {
-                      if (window.confirm(`Delete "${rule.name}"?`)) void runRuleChange(() => toolsApi.deleteRule(accountId, rule.id), "Rule deleted");
+                    onClick={async () => {
+                      if (await requestConfirmation({ title: `Delete "${rule.name}"?`, description: "It stops running straight away.", confirmLabel: "Delete rule", tone: "danger", intent: "delete" })) void runRuleChange(() => toolsApi.deleteRule(accountId, rule.id), "Rule deleted");
                     }}
                   />
                 </div>

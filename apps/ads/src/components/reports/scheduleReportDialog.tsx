@@ -63,7 +63,7 @@ export function ScheduleReportDialog(props: ScheduleReportDialogProps) {
   }
 
   return (
-    <OverlayDialog
+    <OverlayDialog intent="schedule"
       isOpen={props.isOpen}
       onClose={props.onClose}
       title="Schedule an email report"

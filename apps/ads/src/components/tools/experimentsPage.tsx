@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 
+import { requestConfirmation } from "@zudomart/web-kit";
+
 import { useAdAccount } from "@/components/session/adAccountProvider";
 import { Button } from "@/components/ui/button";
 import { EmptyState, ErrorState, LoadingBlock } from "@/components/ui/feedback";
@@ -74,7 +76,7 @@ export function ExperimentsPage() {
   const experiments = experimentsQuery.data?.items ?? [];
 
   async function stopExperiment(experiment: Experiment) {
-    if (!window.confirm(`Stop "${experiment.name}"? Both ad sets keep delivering normally.`)) return;
+    if (!(await requestConfirmation({ title: `Stop "${experiment.name}"?`, description: "Both ad sets keep delivering normally.", confirmLabel: "Stop test", tone: "danger", intent: "stop" }))) return;
     try {
       await toolsApi.stopExperiment(accountId, experiment.id);
       showToast("Test stopped");
