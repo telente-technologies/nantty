@@ -1,0 +1,80 @@
+{
+  "viewer": {
+    "userId": "u_8470320fa1e83f584643816b8e559cf79feb4ed7",
+    "country": "NG",
+    "followedAccountIds": [
+      "u_25689497f204c483b2689e018dafc84caecce458"
+    ]
+  },
+  "candidates": [
+    {
+      "itemId": "0192f0a0-0000-7000-8000-000000000001",
+      "creatorId": "u_25689497f204c483b2689e018dafc84caecce458",
+      "createdAt": "2026-10-04T12:00:00.000Z",
+      "durationMs": 15000,
+      "topics": [
+        "music"
+      ],
+      "hashtags": [
+        "dance"
+      ],
+      "viewCount": 50,
+      "completionCount": 30,
+      "likeCount": 4,
+      "commentCount": 1,
+      "shareCount": 2,
+      "saveCount": 1,
+      "authorTier": "blue_verified",
+      "authorIsOfficial": false,
+      "isPromoted": false,
+      "country": "NG",
+      "integrity": {
+        "engagerCount": 3,
+        "newAccountEngagerShare": 0,
+        "lowTrustEngagerShare": 0,
+        "suspendedEngagerShare": 0,
+        "clusteredEngagerShare": 0,
+        "reciprocalPodShare": 0,
+        "burstRatio": 0,
+        "purchasedEngagementSuspected": false,
+        "spamHashtagCount": 0
+      }
+    },
+    {
+      "itemId": "0192f0a0-0000-7000-8000-000000000002",
+      "creatorId": "u_0548275218bad868a05f0b37091448dc6a061f50",
+      "createdAt": "2026-10-04T12:00:00.000Z",
+      "durationMs": 0,
+      "topics": [],
+      "hashtags": [],
+      "viewCount": 0,
+      "completionCount": 0,
+      "likeCount": 0,
+      "commentCount": 0,
+      "shareCount": 0,
+      "saveCount": 0,
+      "authorTier": "none",
+      "authorIsOfficial": false,
+      "isPromoted": false
+    }
+  ],
+  "limit": 2,
+  "explorationShare": 0.2,
+  "personalized": true,
+  "boostPolicy": {
+    "version": 0,
+    "tierBoosts": {
+      "none": 1,
+      "blue_essential": 1.02,
+      "blue_verified": 1.04,
+      "premium": 1.06,
+      "gold_business": 1.08,
+      "black_official": 1.1
+    },
+    "officialEditorialBoost": 1.1
+  },
+  "trendingTopics": [
+    "dance"
+  ],
+  "now": "2026-10-04T12:00:00.000Z"
+}
