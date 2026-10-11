@@ -1085,7 +1085,7 @@ Paid Blue and Gold checkmarks verified with Smile ID. Served by go-identity. Per
 
 All on go-money through `/bff/admin/payments/...`. Every write needs step-up (`x-step-up-token`) and writes a staff audit record.
 
-- `GET /admin/payments/webhooks/dead-letters?provider=flutterwave|paystack&limit=` (`payments:webhooks`): `{ items: DeadLetteredWebhook[] }`, newest dead letter first. `DeadLetteredWebhook = { id, provider, eventType, eventKey, reference, attempts, lastError, createdAt, deadLetteredAt, processedAt }`.
+- `GET /admin/payments/webhooks/dead-letters?provider=flutterwave&limit=` (`payments:webhooks`): `{ items: DeadLetteredWebhook[] }`, newest dead letter first. `DeadLetteredWebhook = { id, provider, eventType, eventKey, reference, attempts, lastError, createdAt, deadLetteredAt, processedAt }`.
 - `GET /admin/payments/webhooks/dead-letters/{id}` (`payments:webhooks`): the same plus `payload`, with account numbers, BVN, names, emails, phones, card digits and tokens replaced by `"[redacted]"`. `404 WEBHOOK_NOT_FOUND`.
 - `POST /admin/payments/webhooks/dead-letters/{id}/replay` (`payments:webhooks`, step-up) body `{ reason }` (5–500 chars): clears the dead letter and processes the event once more (it is re-verified with the provider before any credit). Response: the list item. `404 WEBHOOK_NOT_FOUND` when it is not dead-lettered.
 - `POST /admin/payments/wallet-fundings/{reference}/reject` (`payments:wallets`, step-up) body `{ reason }`: sends an unspent deposit back to the sender (`POST /v3/payout-subaccounts/refunds`). `409 FUNDING_NOT_REJECTABLE` once spent or released.
