@@ -162,6 +162,7 @@ export interface PaymentLimitAmounts {
   readonly orderCheckout: number;
   readonly coinPurchase: number;
   readonly adsTopUp: number;
+  readonly adsStepUpAbove?: number;
   readonly walletDaily: WalletDailyAmounts;
 }
 
