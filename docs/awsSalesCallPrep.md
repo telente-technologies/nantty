@@ -87,7 +87,7 @@ Ask for **all** of these. Different teams own different pots.
 ## 5. Things NOT to agree to on the call
 
 - Upfront commitments (EDP, 3-year Reserved Instances or Savings Plans) before launch.
-- Moving off LiveKit or Paystack because a sales rep suggests it. Evaluate first.
+- Moving off LiveKit or Flutterwave because a sales rep suggests it. Evaluate first.
 - Sharing customer data or exact revenue figures you're not comfortable with; ranges are fine.
 - Any Marketplace purchase "paid with credits" without checking whether credits actually apply.
 
