@@ -41,7 +41,6 @@ func RunSuggestionSchedulerDailyUntilContextDone(ctx context.Context, c *contain
 }
 
 func RunBackgroundWorkersUntilContextDone(ctx context.Context, c *container.Container) error {
-	go RunSuggestionSchedulerDailyUntilContextDone(ctx, c)
 	ticker := time.NewTicker(c.Settings.Privacy.DeletionWorkerPollInterval)
 	defer ticker.Stop()
 	for {
@@ -56,15 +55,20 @@ func RunBackgroundWorkersUntilContextDone(ctx context.Context, c *container.Cont
 	}
 }
 
-func ConsumeEntitlementEventsUntilContextDone(ctx context.Context, c *container.Container, production bool) {
+func ConsumeEntitlementEventsUntilContextDone(ctx context.Context, c *container.Container, production bool) error {
 	queueName := c.Settings.EntitlementEventsQueue
 	if queueName == "" {
-		return
+		<-ctx.Done()
+		return nil
 	}
 	_, queues, err := platformevents.CreateJobQueueAndConsumerFromEnvironment(ctx, platformevents.MessageBusSelection{DeployableName: "go-identity", Logger: c.Logger, IsProduction: production})
-	if err != nil || queues == nil {
-		c.Logger.ErrorContext(ctx, "entitlement consumer disabled: no message broker configured", "error", err)
-		return
+	if err != nil {
+		return fmt.Errorf("entitlement consumer setup: %w", err)
+	}
+	if queues == nil {
+		c.Logger.ErrorContext(ctx, "entitlement consumer disabled: no message broker configured")
+		<-ctx.Done()
+		return nil
 	}
 	handler := services.HandleEntitlementEventMessage(func(ctx context.Context, eventType string, data json.RawMessage) error {
 		if eventType == services.AccountRegisteredEventType {
@@ -83,9 +87,7 @@ func ConsumeEntitlementEventsUntilContextDone(ctx context.Context, c *container.
 		command.EventType = eventType
 		return applyentitlement.Handler{Container: c}.Execute(ctx, command)
 	})
-	if err := queues.ConsumeQueueUntilContextDone(ctx, queueName, handler, c.Logger); err != nil && ctx.Err() == nil {
-		c.Logger.ErrorContext(ctx, "entitlement consumer stopped", "error", err)
-	}
+	return queues.ConsumeQueueUntilContextDone(ctx, queueName, handler, c.Logger)
 }
 
 func ensurePersonalProfileForRegisteredAccount(ctx context.Context, c *container.Container, data json.RawMessage) error {

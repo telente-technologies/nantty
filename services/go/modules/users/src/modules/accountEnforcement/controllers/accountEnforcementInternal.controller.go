@@ -16,6 +16,7 @@ import (
 	revokeaccountcheckmarks "zudomart/modules/users/src/modules/checkmarks/commands/revokeAccountCheckmarks"
 	"zudomart/modules/users/src/types"
 	"zudomart/modules/users/src/utils"
+	"zudomart/platform/identityports"
 )
 
 func (controller AccountEnforcementController) InternalAction(writer http.ResponseWriter, request *http.Request) {
@@ -27,7 +28,7 @@ func (controller AccountEnforcementController) InternalAction(writer http.Respon
 		controller.respond(writer, request, 0, nil, err)
 		return
 	}
-	actor := types.StaffActor{Id: body.Actor.Id, Name: body.Actor.Name, Role: body.Actor.Role, IpAddress: body.Actor.IpAddress, RequestId: body.Actor.RequestId, StepUp: body.Actor.StepUp}
+	actor := types.StaffActor{Id: body.Actor.Id, Name: body.Actor.Name, Role: body.Actor.Role, IpAddress: body.Actor.IpAddress, RequestId: body.Actor.RequestId, StepUp: body.Actor.StepUp && forwardedStepUpIsValid(identityports.Default, request, body.Actor.Id)}
 	var result any
 	switch body.Action {
 	case "restrict":

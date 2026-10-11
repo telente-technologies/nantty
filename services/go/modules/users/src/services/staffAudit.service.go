@@ -3,6 +3,7 @@ package services
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 
 	"zudomart/modules/users/src/types"
 	"zudomart/platform/identityports"
@@ -25,7 +26,7 @@ func RecordStaffAuditEvent(ctx context.Context, actor types.StaffActor, action, 
 func RecordStaffAuditEntry(ctx context.Context, actor types.StaffActor, entry StaffAuditEntry) error {
 	recorder, err := identityports.Default.AuditRecorder()
 	if err != nil {
-		return nil
+		return fmt.Errorf("staff audit recorder unavailable, refusing an unaudited staff action: %w", err)
 	}
 	beforeJson, _ := json.Marshal(entry.Before)
 	afterJson, _ := json.Marshal(entry.After)

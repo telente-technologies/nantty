@@ -34,11 +34,11 @@ func MountCheckmarksRoutes(mux *http.ServeMux, container *container.Container) {
 	mux.Handle("POST /api/v1/admin/verifications/{verificationId}/suspend", revokeStepUp(controller.TransitionHandler("suspend")))
 	mux.Handle("POST /api/v1/admin/verifications/{verificationId}/revoke", revokeStepUp(controller.TransitionHandler("revoke")))
 
-	mux.Handle("GET /api/v1/admin/checkmark-grants", guard.RequireStaff("verification:grant", false)(http.HandlerFunc(controller.ListGrants)))
+	mux.Handle("GET /api/v1/admin/checkmark-grants", guard.RequireStaffWithAnyPermission([]string{"verification:grant", "verification:revoke"}, false)(http.HandlerFunc(controller.ListGrants)))
 	mux.Handle("POST /api/v1/admin/checkmark-grants", guard.RequireStaff("verification:grant", true)(http.HandlerFunc(controller.Grant)))
 	mux.Handle("POST /api/v1/admin/checkmark-grants/{grantId}/revoke", revokeStepUp(http.HandlerFunc(controller.RevokeGrant)))
-	mux.Handle("GET /api/v1/admin/accounts/created", guard.RequireStaff("users:read", false)(http.HandlerFunc(controller.ListCreatedAccounts)))
-	mux.Handle("POST /api/v1/admin/accounts", guard.RequireStaff("", true)(http.HandlerFunc(controller.CreateAccount)))
+	mux.Handle("GET /api/v1/admin/accounts/created", guard.RequireStaffWithAnyPermission([]string{"users:read", "verification:grant"}, false)(http.HandlerFunc(controller.ListCreatedAccounts)))
+	mux.Handle("POST /api/v1/admin/accounts", guard.RequireStaff("verification:grant", true)(http.HandlerFunc(controller.CreateAccount)))
 
 	mux.Handle("GET /api/v1/admin/black-applications", review(http.HandlerFunc(controller.ListBlack)))
 	mux.Handle("POST /api/v1/admin/black-applications/{blackId}/checklist", guard.RequireStaff("verification:review", false)(controller.BlackTransitionHandler(transitionblackapplication.ActionChecklist)))

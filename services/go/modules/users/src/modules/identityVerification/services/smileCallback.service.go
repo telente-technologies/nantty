@@ -94,7 +94,7 @@ func (envelope SmileCallbackEnvelope) IsFresh(now time.Time) bool {
 }
 
 func (envelope SmileCallbackEnvelope) BelongsTo(accountId string) bool {
-	return envelope.UserId == "" || strings.EqualFold(envelope.UserId, accountId)
+	return envelope.UserId != "" && strings.EqualFold(envelope.UserId, accountId)
 }
 
 func (envelope SmileCallbackEnvelope) DocumentFingerprint(key string) string {

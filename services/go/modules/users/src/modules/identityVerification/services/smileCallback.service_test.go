@@ -89,6 +89,11 @@ func TestSmileCallbackMustBeRecentAndBelongToTheCase(t *testing.T) {
 	if !envelope.BelongsTo("USER-1") || envelope.BelongsTo("someone-else") {
 		t.Fatal("the echoed user id must match the case owner")
 	}
+	withoutOwner := envelope
+	withoutOwner.UserId = ""
+	if withoutOwner.BelongsTo("user-1") {
+		t.Fatal("a callback that omits partner_params.user_id must not bind to any case")
+	}
 	envelope.Timestamp = "not a time"
 	if envelope.IsFresh(signedAt) {
 		t.Fatal("an unreadable timestamp is rejected")

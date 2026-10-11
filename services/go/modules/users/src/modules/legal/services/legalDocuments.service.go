@@ -22,6 +22,8 @@ var DocumentDefinitions = []DocumentDefinition{
 	{"creator-terms", "Creator Program Terms", "/creator-terms"},
 	{"ads-policy", "Ads Policy", "/ads-policy"},
 	{"refund-escrow-policy", "Refund and Escrow Policy", "/refund-escrow-policy"},
+	{"copyright-policy", "Copyright and IP Policy", "/copyright-policy"},
+	{"data-rights", "Data Rights Requests", "/data-rights"},
 }
 
 func DefinitionOf(key string) (DocumentDefinition, bool) {

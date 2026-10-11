@@ -126,8 +126,8 @@ func TestLegalVersionsMakerCheckerNoticesAndAcceptance(t *testing.T) {
 	viewer, _ := harness.staff("admin", "legal.documents.view")
 	harness.expect("GET", "/api/v1/admin/legal/documents", userToken, nil, http.StatusUnauthorized)
 	documents := harness.expect("GET", "/api/v1/admin/legal/documents", viewer, nil, http.StatusOK)["items"].([]any)
-	if len(documents) != 8 {
-		t.Fatalf("eight legal documents are seeded: %v", documents)
+	if len(documents) != 10 {
+		t.Fatalf("ten legal documents are seeded, including the copyright and data rights policies: %v", documents)
 	}
 
 	body := map[string]any{"bodyMarkdown": "# Terms\n\nBe kind.", "changeSummary": "Plain language rewrite", "isMaterialChange": true}

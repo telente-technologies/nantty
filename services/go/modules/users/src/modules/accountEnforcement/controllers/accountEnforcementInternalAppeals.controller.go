@@ -13,6 +13,7 @@ import (
 	"zudomart/modules/users/src/types"
 	"zudomart/modules/users/src/utils"
 	"zudomart/platform/httpserver"
+	"zudomart/platform/identityports"
 )
 
 type internalAppealDecisionRequest struct {
@@ -61,7 +62,7 @@ func (controller AccountEnforcementController) InternalDecideAppeal(writer http.
 		controller.respond(writer, request, 0, nil, err)
 		return
 	}
-	actor := types.StaffActor{Id: body.Actor.Id, Name: body.Actor.Name, Role: body.Actor.Role, IpAddress: body.Actor.IpAddress, RequestId: body.Actor.RequestId, StepUp: body.Actor.StepUp}
+	actor := types.StaffActor{Id: body.Actor.Id, Name: body.Actor.Name, Role: body.Actor.Role, IpAddress: body.Actor.IpAddress, RequestId: body.Actor.RequestId, StepUp: body.Actor.StepUp && forwardedStepUpIsValid(identityports.Default, request, body.Actor.Id)}
 	if actor.Id == "" {
 		controller.respond(writer, request, 0, nil, usersErrors.ValidationFailedFor("actor.id", "is required"))
 		return
