@@ -20,6 +20,14 @@ export const sellerTermsSections: readonly LegalDocumentSection[] = [
     ],
   },
   {
+    id: "stores-business-pages-and-brands",
+    heading: "Stores, business pages and brands",
+    paragraphs: [
+      "Each personal account can own one Store or one Business page, never both, plus one Brand. Business pages are for organisations that do not sell and cannot list products. If an account had more than this before the rule applied, nothing is deleted, but the extra profiles cannot post or add listings until the owner chooses which to keep or our team resolves it.",
+      "A Brand sells only when its owner turns on selling for it. A brand storefront is a sales channel of that Brand and does not count as your Store. Brand selling follows these Seller Terms in full, including the wallet, escrow in Nigeria, identity verification before selling outside Nigeria, and the seller debt limits. If you turn selling off, your brand products and storefront are hidden and you cannot add new listings, but you must still complete open orders, and their payouts continue as normal.",
+    ],
+  },
+  {
     id: "listings",
     heading: "Listings",
     paragraphs: [
