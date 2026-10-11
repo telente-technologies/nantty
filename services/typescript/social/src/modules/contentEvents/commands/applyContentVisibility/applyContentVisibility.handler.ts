@@ -11,6 +11,8 @@ import type { ApplyContentVisibilityCommand, ModerationVisibilityValue } from ".
 
 const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
+const notNewerThan = (occurredAt: Date) => ({ OR: [{ moderationVisibilityAt: null }, { moderationVisibilityAt: { lt: occurredAt } }] });
+
 const isShownToViewers = (visibility: ModerationVisibilityValue): boolean => (viewableModerationVisibilities as readonly string[]).includes(visibility);
 
 export function soundStatusForVisibility(visibility: ModerationVisibilityValue): SoundStatus {
@@ -22,7 +24,7 @@ export function createApplyContentVisibilityHandler(context: HandlerContext): Ha
     if (!uuidPattern.test(targetId)) return false;
     return context.database.client.$transaction(async (db) => {
       if (targetType === "post" || targetType === "clip") {
-        const updated = await db.post.updateMany({ where: { id: targetId }, data: { moderationVisibility: visibility } });
+        const updated = await db.post.updateMany({ where: { id: targetId, ...notNewerThan(occurredAt) }, data: { moderationVisibility: visibility, moderationVisibilityAt: occurredAt } });
         if (updated.count === 0) return false;
         if (!isShownToViewers(visibility)) await postRepository.clearProfilePin(db, targetId);
         const post = await db.post.findUniqueOrThrow({ where: { id: targetId }, select: { authorId: true, kind: true } });
@@ -30,14 +32,14 @@ export function createApplyContentVisibilityHandler(context: HandlerContext): Ha
         return true;
       }
       if (targetType === "comment") {
-        if ((await db.comment.updateMany({ where: { id: targetId }, data: { moderationVisibility: visibility } })).count === 0) return false;
+        if ((await db.comment.updateMany({ where: { id: targetId, ...notNewerThan(occurredAt) }, data: { moderationVisibility: visibility, moderationVisibilityAt: occurredAt } })).count === 0) return false;
         if (!isShownToViewers(visibility)) await commentRepository.clearPins(db, [targetId]);
         return true;
       }
       if (targetType === "message") {
         const hiddenAt = visibility === "hidden" || visibility === "removed" ? occurredAt : null;
         if ((await db.message.updateMany({ where: { id: targetId }, data: { hiddenAt } })).count === 0) return false;
-        const row = await messageRepository.findById(db, targetId, targetId);
+        const row = await messageRepository.findById(db, targetId);
         if (row === null) return true;
         const memberIds = await activeMemberIds(db, row.conversationId);
         await appendDomainEventsToOutbox(db, [hiddenAt === null ? messageUpdatedEvent(row, memberIds, occurredAt) : messageRemovedEvent(row.conversationId, row.id, "moderation", memberIds, occurredAt)]);

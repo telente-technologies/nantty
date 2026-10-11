@@ -16,13 +16,14 @@ export interface ConversationView {
   readonly kind: ConversationKindName;
   readonly title: string | null;
   readonly description: string | null;
+  readonly encryptedAttributes: string | null;
   readonly photoUrl: string | null;
   readonly photoMediaId: string | null;
   readonly memberCount: number;
   readonly myRole: MemberRoleName;
   readonly disappearingMessagesSeconds: number | null;
   readonly onlyAdminsCanMentionAll: boolean;
-  readonly store: null;
+  readonly store: { readonly id: string; readonly name: string; readonly avatarUrl: string | null } | null;
   readonly inboxFolder: InboxFolderName;
   readonly spamReason: string | null;
   readonly streak: StreakView | null;

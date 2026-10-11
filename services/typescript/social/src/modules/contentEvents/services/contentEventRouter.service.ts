@@ -42,7 +42,11 @@ export interface ContentEventHandlers {
   readonly applyProcessedMedia: Handler<ApplyProcessedMediaCommand, unknown>;
   readonly applySensitiveLabels?: Handler<ApplySensitiveLabelsCommand, boolean>;
   readonly applyCopyrightAudioRemedy?: Handler<ApplyCopyrightAudioRemedyCommand, unknown>;
+  readonly blockReportedUser?: Handler<{ readonly reporterId: string; readonly reportedUserId: string }, unknown>;
+  readonly revokeStoreInboxAccess?: Handler<{ readonly storeId: string; readonly accountId: string; readonly occurredAt: Date }, unknown>;
 }
+
+const storeTeamChangeEvents = new Set(["store.staff_removed", "store.staff_updated"]);
 
 function copyrightAudioModeFor(envelope: Envelope): "mute" | "restore" | undefined {
   if (envelope.type === "copyrightClaim.audioMuteOrdered") return "mute";
@@ -76,6 +80,21 @@ export function createContentEventRouter(handlers: ContentEventHandlers) {
     if (envelope.type === "content.sensitivityAdvised") {
       if (typeof data["targetType"] !== "string" || typeof data["targetId"] !== "string") throw new PoisonEventError("content.sensitivityAdvised data is malformed");
       await handlers.applySensitiveLabels?.({ targetType: data["targetType"], targetId: data["targetId"], source: "advisory", labels: advisoryLabelsAboveThreshold(readAdvisoryScores(data["scores"])), occurredAt });
+      return;
+    }
+    if (storeTeamChangeEvents.has(envelope.type)) {
+      const storeId = optionalString(data["storeId"]);
+      const accountId = optionalString(data["accountId"]);
+      if (storeId === undefined || accountId === undefined) throw new PoisonEventError(`${envelope.type} has no store or account`);
+      await handlers.revokeStoreInboxAccess?.({ storeId, accountId, occurredAt });
+      return;
+    }
+    if (envelope.type === "chatReport.received") {
+      if (data["blockReportedUser"] !== true) return;
+      const reporterId = optionalString(data["reporterId"]);
+      const reportedUserId = optionalString(data["reportedUserId"]);
+      if (reporterId === undefined || reportedUserId === undefined) throw new PoisonEventError("chatReport.received asks for a block without both users");
+      await handlers.blockReportedUser?.({ reporterId, reportedUserId });
       return;
     }
     const copyrightAudioMode = copyrightAudioModeFor(envelope);

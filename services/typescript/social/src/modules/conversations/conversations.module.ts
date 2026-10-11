@@ -18,6 +18,7 @@ import { createStartDirectConversationHandler } from "./commands/startDirectConv
 import { createUpdateConversationHandler } from "./commands/updateConversation/updateConversation.handler.js";
 import { createConversationsController } from "./controllers/conversations.controller.js";
 import { createGetConversationHandler } from "./queries/getConversation/getConversation.handler.js";
+import { createGetEncryptionRecipientsHandler } from "./queries/getEncryptionRecipients/getEncryptionRecipients.handler.js";
 import { createListConversationMembersHandler } from "./queries/listConversationMembers/listConversationMembers.handler.js";
 import { createListConversationsHandler } from "./queries/listConversations/listConversations.handler.js";
 import { createSearchConversationsHandler } from "./queries/searchConversations/searchConversations.handler.js";
@@ -51,6 +52,7 @@ export function mountConversationsModule(router: HttpRouter, route: RouteFactory
     listConversations: createListConversationsHandler(context),
     getConversation: createGetConversationHandler(context),
     listConversationMembers: createListConversationMembersHandler(context),
+    getEncryptionRecipients: createGetEncryptionRecipientsHandler(context),
     searchConversations: createSearchConversationsHandler(context),
   }));
   registerChannelsRoutes(router, createChannelsController(route, {

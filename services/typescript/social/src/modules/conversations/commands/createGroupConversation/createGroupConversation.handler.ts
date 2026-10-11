@@ -4,15 +4,18 @@ import type { Handler, HandlerContext } from "../../../../types/handlerContext.t
 import type { ConversationView } from "../../models/conversation.model.js";
 import { conversationRepository } from "../../repositories/conversation.repository.js";
 import { loadConversationViewForMember } from "../../services/conversationViewById.service.js";
+import { requireSealedGroupAttributes, verifyEncryptedGroupPhoto } from "../../services/groupAttributes.service.js";
 import { resolveAddableMemberIds } from "../../services/groupMembers.service.js";
 import type { CreateGroupConversationCommand } from "./createGroupConversation.command.js";
 
 export function createCreateGroupConversationHandler(context: HandlerContext): Handler<CreateGroupConversationCommand, ConversationView> {
-  return async ({ creatorId, name, photoMediaId, memberIds }) => {
+  return async ({ creatorId, plaintextName, encryptedAttributes, photoMediaId, memberIds }) => {
+    const sealed = requireSealedGroupAttributes(plaintextName, encryptedAttributes);
+    await verifyEncryptedGroupPhoto(context, creatorId, photoMediaId);
     const addable = await resolveAddableMemberIds(context, creatorId, memberIds, [creatorId]);
     const now = context.clock.now();
     const conversation = await context.database.transaction(async (transaction) => {
-      const created = await conversationRepository.create(transaction, { kind: "group", title: name.trim(), createdById: creatorId, lastMessageAt: now, createdAt: now, ...(photoMediaId === undefined ? {} : { photoMediaId }) }, [
+      const created = await conversationRepository.create(transaction, { kind: "group", encryptedAttributes: sealed, createdById: creatorId, lastMessageAt: now, createdAt: now, ...(photoMediaId === undefined ? {} : { photoMediaId }) }, [
         { accountId: creatorId, role: "owner", inboxFolder: "chats" },
         ...addable.map((accountId) => ({ accountId, role: "member" as const, inboxFolder: "chats" as const })),
       ]);

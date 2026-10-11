@@ -22,9 +22,12 @@ import type { ListConversationMembersQuery } from "../queries/listConversationMe
 import type { ListConversationsQuery } from "../queries/listConversations/listConversations.query.js";
 import type { ChatSearchResults } from "../queries/searchConversations/searchConversations.handler.js";
 import type { SearchConversationsQuery } from "../queries/searchConversations/searchConversations.query.js";
+import type { GetEncryptionRecipientsQuery } from "../queries/getEncryptionRecipients/getEncryptionRecipients.query.js";
+import type { EncryptionRecipients } from "../services/encryptionRecipients.service.js";
 import { addMembersBodySchema, adminBodySchema, conversationParamsSchema, createGroupBodySchema, listConversationsQuerySchema, memberParamsSchema, muteBodySchema, searchQuerySchema, startConversationBodySchema, updateConversationBodySchema } from "../validators/conversations.validator.js";
 
 export interface ConversationsHandlers {
+  readonly getEncryptionRecipients: Handler<GetEncryptionRecipientsQuery, EncryptionRecipients>;
   readonly startDirectConversation: Handler<StartDirectConversationCommand, ConversationView>;
   readonly createGroupConversation: Handler<CreateGroupConversationCommand, ConversationView>;
   readonly acceptMessageRequest: Handler<AcceptMessageRequestCommand, ConversationView>;
@@ -53,10 +56,10 @@ export function createConversationsController(route: RouteFactory, handlers: Con
     search: route({ authentication: "required", query: searchQuerySchema }, ({ principal, query }) => handlers.searchConversations({ viewerId: principal.accountId, term: query.q })),
     start: route({ authentication: "required", body: startConversationBodySchema, successStatus: 201 }, ({ principal, body }) => handlers.startDirectConversation({ senderId: principal.accountId, peerId: body.userId })),
     createGroup: route({ authentication: "required", body: createGroupBodySchema, successStatus: 201 }, ({ principal, body }) =>
-      handlers.createGroupConversation({ creatorId: principal.accountId, name: body.name, photoMediaId: body.photoMediaId, memberIds: body.memberIds })),
+      handlers.createGroupConversation({ creatorId: principal.accountId, plaintextName: body.name, encryptedAttributes: body.encryptedAttributes, photoMediaId: body.photoMediaId, memberIds: body.memberIds })),
     get: route(idOnly, ({ principal, params }) => handlers.getConversation({ viewerId: principal.accountId, conversationId: params.conversationId })),
     update: route({ ...idOnly, body: updateConversationBodySchema }, ({ principal, params, body }) =>
-      handlers.updateConversation({ viewerId: principal.accountId, conversationId: params.conversationId, name: body.name, photoMediaId: body.photoMediaId, disappearingMessagesSeconds: body.disappearingMessagesSeconds, onlyAdminsCanMentionAll: body.onlyAdminsCanMentionAll })),
+      handlers.updateConversation({ viewerId: principal.accountId, conversationId: params.conversationId, name: body.name, encryptedAttributes: body.encryptedAttributes, photoMediaId: body.photoMediaId, disappearingMessagesSeconds: body.disappearingMessagesSeconds, onlyAdminsCanMentionAll: body.onlyAdminsCanMentionAll })),
     remove: route(idOnly, ({ principal, params }) => handlers.deleteConversation({ viewerId: principal.accountId, conversationId: params.conversationId })),
     accept: route(idOnly, ({ principal, params }) => handlers.acceptMessageRequest({ viewerId: principal.accountId, conversationId: params.conversationId })),
     block: route(idOnly, ({ principal, params }) => handlers.blockConversationPeer({ viewerId: principal.accountId, conversationId: params.conversationId })),
@@ -65,6 +68,7 @@ export function createConversationsController(route: RouteFactory, handlers: Con
     mute: route({ ...idOnly, body: muteBodySchema }, ({ principal, params, body }) => handlers.muteConversation({ viewerId: principal.accountId, conversationId: params.conversationId, duration: body.duration })),
     read: route(idOnly, ({ principal, params }) => handlers.markConversationRead({ viewerId: principal.accountId, conversationId: params.conversationId })),
     leave: route(idOnly, ({ principal, params }) => handlers.leaveConversation({ viewerId: principal.accountId, conversationId: params.conversationId })),
+    recipients: route(idOnly, ({ principal, params }) => handlers.getEncryptionRecipients({ viewerId: principal.accountId, conversationId: params.conversationId })),
     members: route(idOnly, ({ principal, params }) => handlers.listConversationMembers({ viewerId: principal.accountId, conversationId: params.conversationId })),
     addMembers: route({ ...idOnly, body: addMembersBodySchema }, ({ principal, params, body }) => handlers.addGroupMembers({ actorId: principal.accountId, conversationId: params.conversationId, userIds: body.userIds })),
     removeMember: route({ authentication: "required", params: memberParamsSchema }, ({ principal, params }) => handlers.removeGroupMember({ actorId: principal.accountId, conversationId: params.conversationId, userId: params.userId })),
