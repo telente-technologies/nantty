@@ -4,7 +4,7 @@ import { requireConversationMember } from "../../conversations/services/conversa
 import { messageRepository, type MessageRow } from "../repositories/message.repository.js";
 
 export async function loadMessageForMember(context: HandlerContext, messageId: string, viewerId: string): Promise<MessageRow> {
-  const row = await messageRepository.findById(context.database.client, messageId, viewerId);
+  const row = await messageRepository.findById(context.database.client, messageId);
   if (row === null) throw notFound("MESSAGE_NOT_FOUND", "Message not found.");
   await requireConversationMember(context.database.client, row.conversationId, viewerId);
   return row;

@@ -1,11 +1,13 @@
-import { conflict, forbidden, unprocessable } from "../../../errors/social.error.js";
-import type { SharedLocation } from "../models/message.model.js";
-import type { MessageRow } from "../repositories/message.repository.js";
+import { gone } from "../../../errors/social.error.js";
 
-export function assertLiveLocationEditableBy(row: MessageRow, viewerId: string, now: Date): SharedLocation {
-  if (row.kind !== "liveLocation" || row.location === null) throw unprocessable("NOT_A_LIVE_LOCATION", "This message isn't a live location.");
-  if (row.senderId !== viewerId) throw forbidden("NOT_MESSAGE_SENDER", "Only the sender can update this location.");
-  const location = row.location as unknown as SharedLocation;
-  if (location.liveUntil === undefined || location.liveUntil === null || new Date(location.liveUntil) <= now) throw conflict("LIVE_LOCATION_ENDED", "Live location sharing has ended.");
-  return location;
+export type LegacyChatFeature = "reactions" | "pollVotes" | "liveLocation";
+
+const copy: Record<LegacyChatFeature, string> = {
+  reactions: "Reactions are now end-to-end encrypted. Update Zudomart to react to messages.",
+  pollVotes: "Poll votes are now end-to-end encrypted. Update Zudomart to vote.",
+  liveLocation: "Live locations are now end-to-end encrypted. Update Zudomart to share your location.",
+};
+
+export function rejectLegacyPlaintextEndpoint(feature: LegacyChatFeature): never {
+  throw gone("ENCRYPTED_CLIENT_REQUIRED", copy[feature]);
 }

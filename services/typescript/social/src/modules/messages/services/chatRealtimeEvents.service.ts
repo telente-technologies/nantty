@@ -14,8 +14,6 @@ export function realtimeMessageEnvelope(row: MessageRow): Prisma.InputJsonObject
   return {
     id: row.id, conversationId: row.conversationId, senderId: row.senderId, kind: row.kind, createdAt: row.createdAt.toISOString(),
     encryption: hidden ? null : { deviceId: row.deviceId, ciphertext: row.ciphertext, protocol: row.protocol },
-    location: hidden ? null : (row.location as Prisma.InputJsonValue | null),
-    poll: hidden || row.pollQuestion === null ? null : { question: row.pollQuestion, allowMultipleAnswers: row.pollAllowMultiple, options: row.pollOptions.map((option) => ({ id: option.id, text: option.text, voteCount: option._count.votes })) },
     moderationHidden: hidden,
   };
 }
@@ -26,15 +24,6 @@ export function messageUpdatedEvent(row: MessageRow, memberIds: readonly string[
 
 export function messageRemovedEvent(conversationId: string, messageId: string, reason: "moderation" | "deleted" | "expired", memberIds: readonly string[], occurredAt: Date): DomainEventInput {
   return { eventType: socialEventTypes.messageRemoved, subject: conversationId, occurredAt, data: { conversationId, messageId, reason, memberIds: [...memberIds] } };
-}
-
-export function reactionsChangedEvent(row: MessageRow, memberIds: readonly string[], occurredAt: Date): DomainEventInput {
-  const byEmoji = new Map<string, string[]>();
-  for (const reaction of row.reactions) byEmoji.set(reaction.emoji, [...(byEmoji.get(reaction.emoji) ?? []), reaction.userId]);
-  return {
-    eventType: socialEventTypes.messageReactionsChanged, subject: row.conversationId, occurredAt,
-    data: { conversationId: row.conversationId, messageId: row.id, reactions: [...byEmoji].map(([emoji, accountIds]) => ({ emoji, count: accountIds.length, accountIds })), memberIds: [...memberIds] },
-  };
 }
 
 export function conversationReadEvent(conversationId: string, readerId: string, readAt: Date, memberIds: readonly string[]): DomainEventInput {

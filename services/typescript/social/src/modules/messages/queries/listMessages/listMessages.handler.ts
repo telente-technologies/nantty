@@ -14,8 +14,8 @@ export function createListMessagesHandler(context: HandlerContext): Handler<List
     const now = context.clock.now();
     const peer = conversation.members.find((candidate) => candidate.accountId === findDirectPeerId(conversation, viewerId));
     const options = { isDirect: peer !== undefined, peerLastReadAt: member.inboxFolder === "chats" && peer?.inboxFolder === "chats" ? (peer.lastReadAt ?? null) : null };
-    if (after !== undefined) return { data: await buildMessageViews(context, viewerId, await messageRepository.listAfter(db, conversationId, viewerId, now, after), options), nextCursor: null };
-    const page = buildPageFromOverfetchedRows(await messageRepository.pageNewestFirst(db, conversationId, viewerId, now, limit, cursor), limit);
+    if (after !== undefined) return { data: await buildMessageViews(context, viewerId, await messageRepository.listAfter(db, conversationId, now, after), options), nextCursor: null };
+    const page = buildPageFromOverfetchedRows(await messageRepository.pageNewestFirst(db, conversationId, now, limit, cursor), limit);
     return { data: await buildMessageViews(context, viewerId, page.data, options), nextCursor: page.nextCursor };
   };
 }

@@ -1,13 +1,7 @@
 import type { UserSummary } from "../../../interfaces/identityDirectory.interface.js";
 import type { MentionEntity } from "../../mentions/models/mention.model.js";
 
-export type MessageKindName = "text" | "voice" | "image" | "video" | "system" | "shared" | "location" | "liveLocation" | "document" | "poll";
-
-export interface MessageReactionSummary {
-  readonly emoji: string;
-  readonly count: number;
-  readonly reactedByMe: boolean;
-}
+export type MessageKindName = "text" | "voice" | "image" | "video" | "system" | "shared" | "location" | "liveLocation" | "document" | "poll" | "control";
 
 export interface MessageAttachedMedia {
   readonly id: string;
@@ -16,37 +10,12 @@ export interface MessageAttachedMedia {
   readonly durationSeconds?: number;
 }
 
-export interface SharedLocation {
-  readonly latitude: number;
-  readonly longitude: number;
-  readonly address: string | null;
-  readonly liveUntil?: string | null;
-  readonly updatedAt?: string;
-}
-
-export interface MessageDocument {
-  readonly fileName: string;
-  readonly mimeType: string;
-  readonly sizeBytes: number;
-  readonly pageCount?: number | null;
+export interface EncryptedDocumentView {
   readonly url: string | null;
 }
 
-export interface MessagePollOptionView {
-  readonly id: string;
-  readonly text: string;
-  readonly voteCount: number;
-  readonly votedByMe: boolean;
-}
-
-export interface MessagePollView {
-  readonly question: string;
-  readonly allowMultipleAnswers: boolean;
-  readonly options: readonly MessagePollOptionView[];
-}
-
 export interface SharedContentReference {
-  readonly kind: "post" | "clip" | "story" | "product" | "live" | "store" | "profile";
+  readonly kind: "post" | "clip" | "story" | "product" | "live" | "store" | "profile" | "order";
   readonly id: string;
 }
 
@@ -73,14 +42,10 @@ export interface MessageView {
   readonly kind: MessageKindName;
   readonly sender?: UserSummary;
   readonly media: MessageAttachedMedia | null;
-  readonly reactions: readonly MessageReactionSummary[];
   readonly expiresAt: string | null;
   readonly mediaExpiresAt: string | null;
   readonly linkPreview: string | null;
-  readonly sharedContent: SharedContentCard | null;
-  readonly location: SharedLocation | null;
-  readonly document: MessageDocument | null;
-  readonly poll: MessagePollView | null;
+  readonly document: EncryptedDocumentView | null;
   readonly readAt: string | null;
   readonly moderationHidden: boolean;
   readonly encryption: { readonly deviceId: string; readonly ciphertext: string | null; readonly protocol: string } | null;

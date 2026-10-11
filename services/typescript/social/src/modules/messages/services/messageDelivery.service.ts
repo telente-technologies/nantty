@@ -16,11 +16,17 @@ export interface DeliveryRequest {
   readonly now: Date;
   readonly messageEnvelope: unknown;
   readonly actor: { readonly id: string; readonly name: string };
+  readonly storeTeamIds?: readonly string[];
 }
 
 export async function applyMessageDelivery(db: Db, request: DeliveryRequest): Promise<DomainEventInput[]> {
   const { conversation, message, now } = request;
   const senderId = message.senderId;
+  const teamAudience = request.storeTeamIds !== undefined && request.storeTeamIds.length > 0 ? { memberIds: [...request.storeTeamIds] } : {};
+  const recipientIdsForControl = conversation.members.filter((member) => member.accountId !== senderId).map((member) => member.accountId);
+  if (message.kind === "control") {
+    return [{ eventType: socialEventTypes.messageCreated, subject: conversation.id, occurredAt: now, data: { conversationId: conversation.id, message: request.messageEnvelope as never, recipientIds: recipientIdsForControl, ...teamAudience } }];
+  }
   await conversationRepository.touchLastMessage(db, conversation.id, message.kind, now);
   await conversationRepository.incrementUnreadForOthers(db, conversation.id, senderId);
   const recipients = conversation.members.filter((member) => member.accountId !== senderId);
@@ -36,10 +42,10 @@ export async function applyMessageDelivery(db: Db, request: DeliveryRequest): Pr
     data: {
       conversationId: conversation.id, messageId: message.id, senderId, kind: message.kind, recipientIds, isNewConversation: request.isNewConversation,
       inboxFolderByRecipient: Object.fromEntries(recipients.map((member) => [member.accountId, member.inboxFolder])), sentAt: message.createdAt.toISOString(),
-      conversationKind: conversation.kind, conversationTitle: conversation.title ?? null, senderName: request.actor.name, pushRecipients,
+      conversationKind: conversation.kind, conversationTitle: conversation.kind === "group" ? null : (conversation.title ?? null), senderName: request.actor.name, pushRecipients,
     },
   });
-  events.push({ eventType: socialEventTypes.messageCreated, subject: conversation.id, occurredAt: now, data: { conversationId: conversation.id, message: request.messageEnvelope as never, recipientIds } });
+  events.push({ eventType: socialEventTypes.messageCreated, subject: conversation.id, occurredAt: now, data: { conversationId: conversation.id, message: request.messageEnvelope as never, recipientIds, ...teamAudience } });
   const actor = request.actor;
   if (request.isNewConversation) {
     for (const member of recipients.filter((candidate) => candidate.inboxFolder === "requests")) {
