@@ -28,7 +28,7 @@ func TestUnverifiedSellersSellEscrowOnlyUpToTheSalesCapUntilVerified(t *testing.
 	harness := startEscrowHarness(t)
 	gateway := harness.Payments.Application.Gateway
 	harness.Payments.Application.Container.Settings.UnverifiedSellerSalesCaps = map[string]int64{"NGN": 1_000_000}
-	seller, buyer := "seller-"+uuid.NewString()[:8], uuid.NewString()
+	seller, buyer := uuid.NewString(), uuid.NewString()
 	paid := uuid.NewString()
 	if err := harness.registerSellerOrder(buyer, seller, paid, 600_000, "escrow"); err != nil {
 		t.Fatalf("below the cap: %v", err)
@@ -43,7 +43,7 @@ func TestUnverifiedSellersSellEscrowOnlyUpToTheSalesCapUntilVerified(t *testing.
 	if err := harness.registerSellerOrder(buyer, seller, uuid.NewString(), 100, "escrow"); !errors.Is(err, paymentservices.ErrSellerSalesCapReached) {
 		t.Fatalf("an unpaid checkout still holds the cap, so this must be refused: %v", err)
 	}
-	if err := harness.registerSellerOrder(buyer, "seller-"+uuid.NewString()[:8], uuid.NewString(), 900_000, "escrow"); err != nil {
+	if err := harness.registerSellerOrder(buyer, uuid.NewString(), uuid.NewString(), 900_000, "escrow"); err != nil {
 		t.Fatalf("the cap is per seller: %v", err)
 	}
 	client := startCheckoutMoneyClient(t, harness)

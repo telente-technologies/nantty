@@ -29,9 +29,9 @@ func TestEscrowHoldingAccountKeepsLegacySellerEscrowByDefault(t *testing.T) {
 }
 
 func TestUserCashAccountsFollowTheProviderFlag(t *testing.T) {
-	paystack := UserCashAccountsForProvider("paystack", "u1", "NGN")
-	if paystack.Available.Code != "seller:u1:available" || paystack.DepositHold != nil {
-		t.Errorf("paystack accounts = %+v", paystack)
+	pooled := UserCashAccountsForProvider("pooled", "u1", "NGN")
+	if pooled.Available.Code != "seller:u1:available" || pooled.DepositHold != nil {
+		t.Errorf("pooled accounts = %+v", pooled)
 	}
 	flutterwave := UserCashAccountsForProvider("flutterwave", "u1", "NGN")
 	if flutterwave.Available.Code != "wallet:u1:available" || flutterwave.DepositHold == nil || flutterwave.DepositHold.Code != "wallet:u1:depositHold" {

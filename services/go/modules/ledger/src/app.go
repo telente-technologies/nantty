@@ -58,23 +58,30 @@ func (module *Module) Name() string { return "ledger" }
 func (module *Module) MountRoutes(mux *http.ServeMux) { journal.Mount(mux, module.Container) }
 
 func (module *Module) RunBackgroundWorkersUntilContextDone(ctx context.Context) error {
-	go jobs.RunLedgerIntegrityCheckEveryIntervalUntilContextDone(ctx, module.Container, module.integrityCheckInterval)
-	go jobs.RunSellerCreditMaturingEveryIntervalUntilContextDone(ctx, module.Container, module.maturingInterval)
-	go func() {
-		if err := loaders.ConsumeMoneyDomainEventsUntilContextDone(ctx, module.Container.Settings.IsProduction(), module.Container.Resources.Logger); err != nil && ctx.Err() == nil {
-			module.Container.Resources.Logger.Error("money domain event consumer stopped", "error", err)
-		}
-	}()
-	go func() {
-		if err := loaders.ServeRegisteredMoneyGrpcServicesUntilContextDone(ctx, module.grpcAddress, module.grpcToken, module.Container.Resources.Logger); err != nil {
-			module.Container.Resources.Logger.Error("internal money gRPC stopped", "error", err)
-		}
-	}()
-	return platformevents.RelayOutboxEventsUntilContextDone(ctx, platformevents.OutboxRelayOptions{
-		Store:     events.OutboxRelayStore{Database: module.Container.Resources.Database, Table: module.Container.Outbox, Now: time.Now},
-		Publisher: module.Container.Resources.Publisher,
-		Logger:    module.Container.Resources.Logger,
+	logger := module.Container.Resources.Logger
+	go servicemodule.SuperviseWorkerUntilContextDone(ctx, logger, "ledger integrity check", func(ctx context.Context) error {
+		jobs.RunLedgerIntegrityCheckEveryIntervalUntilContextDone(ctx, module.Container, module.integrityCheckInterval)
+		return nil
 	})
+	go servicemodule.SuperviseWorkerUntilContextDone(ctx, logger, "seller credit maturing", func(ctx context.Context) error {
+		jobs.RunSellerCreditMaturingEveryIntervalUntilContextDone(ctx, module.Container, module.maturingInterval)
+		return nil
+	})
+	go servicemodule.SuperviseWorkerUntilContextDone(ctx, logger, "money domain event consumer", func(ctx context.Context) error {
+		return loaders.ConsumeMoneyDomainEventsUntilContextDone(ctx, module.Container.Settings.IsProduction(), logger)
+	})
+	return servicemodule.RunWorkersStoppingAllOnFirstFailure(ctx,
+		servicemodule.NamedWorker{Name: "internal money gRPC", Run: func(ctx context.Context) error {
+			return loaders.ServeRegisteredMoneyGrpcServicesUntilContextDone(ctx, module.grpcAddress, module.grpcToken, logger)
+		}},
+		servicemodule.NamedWorker{Name: "ledger outbox relay", Run: func(ctx context.Context) error {
+			return platformevents.RelayOutboxEventsUntilContextDone(ctx, platformevents.OutboxRelayOptions{
+				Store:     events.OutboxRelayStore{Database: module.Container.Resources.Database, Table: module.Container.Outbox, Now: time.Now},
+				Publisher: module.Container.Resources.Publisher,
+				Logger:    logger,
+			})
+		}},
+	)
 }
 
 func (module *Module) Close(context.Context) error { return module.Container.Resources.Close() }

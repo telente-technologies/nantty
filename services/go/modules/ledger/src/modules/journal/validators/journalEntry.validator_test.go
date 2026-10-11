@@ -13,7 +13,7 @@ func TestValidateJournalEntryRequestRejectsEveryMalformedEntry(t *testing.T) {
 	creator := models.CreatorEarnedCoinsAccount("creator")
 	platform := models.PlatformGiftRevenueCoinsAccount()
 	wallet := models.SellerAvailableAccount("seller", "NGN")
-	clearing := models.PlatformProviderBalanceAccount("paystack", "NGN")
+	clearing := models.PlatformProviderBalanceAccount("flutterwave", "NGN")
 	line := func(account models.AccountRef, direction models.Direction, amount int64) models.JournalLineRequest {
 		return models.JournalLineRequest{Account: account, Direction: direction, AmountMinor: amount}
 	}
@@ -58,8 +58,8 @@ func TestSignedChangeFollowsTheNormalSideOfEachAccountKind(t *testing.T) {
 	}{
 		{models.UserSpendableCoinsAccount("u"), models.Credit, 10},
 		{models.UserSpendableCoinsAccount("u"), models.Debit, -10},
-		{models.PlatformProviderBalanceAccount("paystack", "NGN"), models.Debit, 10},
-		{models.PlatformProviderBalanceAccount("paystack", "NGN"), models.Credit, -10},
+		{models.PlatformProviderBalanceAccount("flutterwave", "NGN"), models.Debit, 10},
+		{models.PlatformProviderBalanceAccount("flutterwave", "NGN"), models.Credit, -10},
 		{models.PlatformGiftRevenueCoinsAccount(), models.Credit, 10},
 		{models.CreatorCoinPayoutExpenseAccount("NGN"), models.Debit, 10},
 	}

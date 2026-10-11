@@ -227,7 +227,7 @@ func TestReconciliationClassifiesEveryBreak(t *testing.T) {
 	harness := startLedgerAgainstFreshSchema(t)
 	collect := func(reference string, amount int64) {
 		harness.mustPost(models.JournalEntryRequest{Reference: "collect-" + reference, Kind: "test.collected", ExternalReference: reference, Lines: []models.JournalLineRequest{
-			{Account: models.PlatformProviderBalanceAccount("paystack", "NGN"), Direction: models.Debit, AmountMinor: amount},
+			{Account: models.PlatformProviderBalanceAccount("flutterwave", "NGN"), Direction: models.Debit, AmountMinor: amount},
 			{Account: models.SellerAvailableAccount("grace", "NGN"), Direction: models.Credit, AmountMinor: amount},
 		}})
 	}
@@ -238,7 +238,7 @@ func TestReconciliationClassifiesEveryBreak(t *testing.T) {
 	err := databases.RunInMoneyTransaction(context.Background(), harness.database, func(ctx context.Context, transaction *sql.Tx) error {
 		var reconcileError error
 		report, reconcileError = harness.ledger.ReconcileProviderSettlements(ctx, transaction, ReconcileProviderSettlementsRequest{
-			Provider: "paystack", WindowStartsAt: time.Now().Add(-time.Hour), WindowEndsAt: time.Now().Add(time.Hour),
+			Provider: "flutterwave", WindowStartsAt: time.Now().Add(-time.Hour), WindowEndsAt: time.Now().Add(time.Hour),
 			Items: []ProviderSettlementItem{
 				{ProviderReference: "ps_matched", AmountMinor: 5000, Currency: "NGN"},
 				{ProviderReference: "ps_wrong_amount", AmountMinor: 6900, Currency: "NGN"},

@@ -118,9 +118,9 @@ func (service EscrowService) holdFundsForPaidOrder(ctx context.Context, transact
 	awaiting := ledgermodels.JournalLineRequest{Account: ledgermodels.PaymentsAwaitingApplicationAccount(payable.Currency), Direction: ledgermodels.Debit, AmountMinor: payment.AppliedAmountMinor}
 	if direct {
 		_, err = service.Container.Ledger.PostBalancedJournalEntry(ctx, transaction, ledgermodels.JournalEntryRequest{
-			Reference: "direct-payment:" + payable.OrderId, Kind: "directPayment.settlingByPaystack", Description: "Order " + payable.OrderReference + " paid directly to the seller's Paystack subaccount",
-			Metadata: map[string]any{"escrowId": held.ID.String(), "orderId": payable.OrderId, "paymentReference": payment.Reference, "paystackProcessingFeeMinor": payment.ProviderFeeMinor},
-			Lines:    appendPositiveCredit([]ledgermodels.JournalLineRequest{awaiting}, ledgermodels.SellerSettlingByPaystackAccount(held.SellerUserID, payable.Currency), sellerNet),
+			Reference: "direct-payment:" + payable.OrderId, Kind: "directPayment.settlingByProvider", Description: "Order " + payable.OrderReference + " paid directly to the seller's provider subaccount",
+			Metadata: map[string]any{"escrowId": held.ID.String(), "orderId": payable.OrderId, "paymentReference": payment.Reference, "providerProcessingFeeMinor": payment.ProviderFeeMinor},
+			Lines:    appendPositiveCredit([]ledgermodels.JournalLineRequest{awaiting}, ledgermodels.SellerSettlingByProviderAccount(held.SellerUserID, payable.Currency), sellerNet),
 		})
 	} else {
 		lines := []ledgermodels.JournalLineRequest{awaiting}
@@ -129,7 +129,7 @@ func (service EscrowService) holdFundsForPaidOrder(ctx context.Context, transact
 		lines = appendPositiveCredit(lines, ledgermodels.PaymentProcessingFeeExpenseAccount(payable.Currency), payment.ProviderFeeMinor)
 		_, err = service.Container.Ledger.PostBalancedJournalEntry(ctx, transaction, ledgermodels.JournalEntryRequest{
 			Reference: "escrow-hold:" + payable.OrderId, Kind: "escrow.held", Description: "Order " + payable.OrderReference + " held in escrow",
-			Metadata: map[string]any{"escrowId": held.ID.String(), "orderId": payable.OrderId, "paymentReference": payment.Reference, "escrowFeeMinor": held.CommissionMinor, "paystackProcessingFeeMinor": payment.ProviderFeeMinor}, Lines: lines,
+			Metadata: map[string]any{"escrowId": held.ID.String(), "orderId": payable.OrderId, "paymentReference": payment.Reference, "escrowFeeMinor": held.CommissionMinor, "providerProcessingFeeMinor": payment.ProviderFeeMinor}, Lines: lines,
 		})
 	}
 	if err != nil {

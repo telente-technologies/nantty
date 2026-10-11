@@ -8,6 +8,7 @@ import (
 	"sync"
 
 	"zudomart/platform/events"
+	"zudomart/platform/servicemodule"
 )
 
 const MoneyDomainEventsQueue = "money-domain-events"
@@ -43,8 +44,11 @@ func DispatchMoneyDomainEvent(ctx context.Context, body []byte) error {
 
 func ConsumeMoneyDomainEventsUntilContextDone(ctx context.Context, production bool, logger *slog.Logger) error {
 	_, consumer, err := events.CreateJobQueueAndConsumerFromEnvironment(ctx, events.MessageBusSelection{DeployableName: "go-money", Logger: logger, IsProduction: production})
-	if err != nil || consumer == nil {
+	if err != nil {
 		return err
+	}
+	if consumer == nil {
+		return servicemodule.ErrWorkerDisabled
 	}
 	return consumer.ConsumeQueueUntilContextDone(ctx, MoneyDomainEventsQueue, DispatchMoneyDomainEvent, logger)
 }

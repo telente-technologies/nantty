@@ -135,8 +135,8 @@ func SellerReservedPayoutAccount(userId, currency string) AccountRef {
 	return providerHeldSellerLiability(fmt.Sprintf("seller:%s:reservedPayout", userId), currency, userId)
 }
 
-func SellerSettlingByPaystackAccount(userId, currency string) AccountRef {
-	return providerHeldSellerLiability(fmt.Sprintf("seller:%s:settlingByPaystack", userId), currency, userId)
+func SellerSettlingByProviderAccount(userId, currency string) AccountRef {
+	return providerHeldSellerLiability(fmt.Sprintf("seller:%s:settlingByProvider", userId), currency, userId)
 }
 
 func SellerRefundsInFlightAccount(userId, currency string) AccountRef {

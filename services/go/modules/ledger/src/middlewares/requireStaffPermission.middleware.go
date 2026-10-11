@@ -41,6 +41,10 @@ func requireStaffWithStepUpPolicy(verifiers StaffTokenVerifiers, permitted func(
 				return
 			}
 			staff := convertPrincipalToStaff(principal)
+			if failure := staffauth.RefuseDisallowedStaffNetwork(request, staff.Id); failure != nil {
+				httpserver.WriteJsonResponse(writer, failure.Status, failure)
+				return
+			}
 			if !permitted(staff) {
 				httpserver.WriteJsonResponse(writer, http.StatusForbidden, httpserver.ErrForbidden)
 				return

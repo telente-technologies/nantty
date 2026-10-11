@@ -12,7 +12,7 @@ func TestOnlyTheBuyerAndSellerCanSeeAnEscrowOrTalkInItsDispute(t *testing.T) {
 	harness := startEscrowHarness(t)
 	buyer, orderId, otherOrder := uuid.NewString(), uuid.NewString(), uuid.NewString()
 	harness.registerCheckout(buyer, map[string]int64{orderId: 400_000})
-	harness.payCheckoutThroughWebhook(buyer, orderId, 0)
+	harness.payAndSettle(buyer, orderId)
 	stranger := harness.Tokens.UserAccessToken(uuid.NewString())
 	buyerToken := harness.Tokens.UserAccessToken(buyer)
 	if own := harness.Call(http.MethodGet, "/api/v1/orders/"+orderId+"/escrow", buyerToken, "", nil); own.Status != http.StatusOK {
@@ -29,7 +29,7 @@ func TestOnlyTheBuyerAndSellerCanSeeAnEscrowOrTalkInItsDispute(t *testing.T) {
 		t.Fatalf("open: %d %s", opened.Status, opened.Raw)
 	}
 	disputeId := opened.Body["id"].(string)
-	otherSeller := harness.Tokens.UserAccessToken("seller-" + otherOrder[:4])
+	otherSeller := harness.Tokens.UserAccessToken(sellerForOrder(otherOrder))
 	for name, token := range map[string]string{"stranger": stranger, "other seller": otherSeller} {
 		if view := harness.Call(http.MethodGet, "/api/v1/disputes/"+disputeId, token, "", nil); view.Status != http.StatusNotFound {
 			t.Fatalf("%s read the dispute: %d", name, view.Status)
@@ -44,7 +44,7 @@ func TestOnlyTheBuyerAndSellerCanSeeAnEscrowOrTalkInItsDispute(t *testing.T) {
 	if listed := harness.Call(http.MethodGet, "/api/v1/disputes", stranger, "", nil); len(listed.Body["data"].([]any)) != 0 {
 		t.Fatalf("a stranger listed the dispute: %s", listed.Raw)
 	}
-	seller := harness.Tokens.UserAccessToken("seller-" + orderId[:4])
+	seller := harness.Tokens.UserAccessToken(sellerForOrder(orderId))
 	if reply := harness.Call(http.MethodPost, "/api/v1/disputes/"+disputeId+"/messages", seller, "seller-reply-ok-1", map[string]any{"text": "Shipped on Monday", "attachmentUrls": []string{}}); reply.Status != http.StatusCreated {
 		t.Fatalf("seller reply: %d %s", reply.Status, reply.Raw)
 	}
@@ -55,10 +55,10 @@ func TestStaffDisputeViewHasPartiesEscrowSlaAndAcceptsTheConsoleResolveBody(t *t
 	harness.escrow.Application.Container.Settings.StaffReviewWindow = 48 * time.Hour
 	buyer, orderId := uuid.NewString(), uuid.NewString()
 	harness.registerCheckout(buyer, map[string]int64{orderId: 1_000_000})
-	harness.payCheckoutThroughWebhook(buyer, orderId, 0)
+	harness.payAndSettle(buyer, orderId)
 	opened := harness.Call(http.MethodPost, "/api/v1/orders/"+orderId+"/disputes", harness.Tokens.UserAccessToken(buyer), "staff-view-dispute-1", map[string]any{"reason": "damaged", "description": "Torn", "evidenceUrls": []string{"https://cdn.zudomart.test/a.jpg"}})
 	disputeId, orderReference := opened.Body["id"].(string), opened.Body["orderReference"].(string)
-	seller := harness.Tokens.UserAccessToken("seller-" + orderId[:4])
+	seller := harness.Tokens.UserAccessToken(sellerForOrder(orderId))
 	harness.Call(http.MethodPost, "/api/v1/disputes/"+disputeId+"/messages", seller, "staff-view-reply-1", map[string]any{"text": "It left intact", "attachmentUrls": []string{}})
 	staff := harness.Tokens.StaffTokens(uuid.NewString(), "money.disputes.resolve")
 	if bad := harness.Call(http.MethodGet, "/api/v1/admin/disputes?status=bogus", staff.AccessToken, "", nil); bad.Status != http.StatusBadRequest {
@@ -110,7 +110,7 @@ func TestOpenDisputesAreListedOldestFirstWithTheirWaitingAge(t *testing.T) {
 	for index := range 3 {
 		buyer, orderId := uuid.NewString(), uuid.NewString()
 		harness.registerCheckout(buyer, map[string]int64{orderId: 300_000})
-		harness.payCheckoutThroughWebhook(buyer, orderId, 0)
+		harness.payAndSettle(buyer, orderId)
 		response := harness.Call(http.MethodPost, "/api/v1/orders/"+orderId+"/disputes", harness.Tokens.UserAccessToken(buyer), "queue-dispute-"+string(rune('a'+index)), map[string]any{"reason": "not_received", "description": "Nothing came", "evidenceUrls": []string{}})
 		if response.Status != http.StatusCreated {
 			t.Fatalf("open dispute: %d %s", response.Status, response.Raw)

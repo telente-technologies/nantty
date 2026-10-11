@@ -20,20 +20,17 @@ func TestSellerPartialRefundComesOutOfHeldEscrowOnce(t *testing.T) {
 	harness := startEscrowHarness(t)
 	buyer, orderId := uuid.NewString(), uuid.NewString()
 	harness.registerCheckout(buyer, map[string]int64{orderId: 300_000})
-	reference := harness.payCheckoutThroughWebhook(buyer, orderId, 0)
+	reference := harness.payAndSettle(buyer, orderId)
 	first := sellerRefundRequest(harness, orderId, buyer, 100_000)
 	again := sellerRefundRequest(harness, orderId, buyer, 100_000)
 	if first.Status != http.StatusOK || first.Body["status"] != "partiallyRefunded" || again.Headers.Get("Idempotent-Replayed") != "true" {
 		t.Fatalf("partial seller refund: %d %s", first.Status, first.Raw)
 	}
-	harness.relayQueuedRefunds()
-	if calls := harness.Paystack.Calls("POST /refund"); calls != 1 || harness.Paystack.Refunds[0]["amount"] != int64(100_000) {
-		t.Fatalf("one provider refund of the requested amount: %d %v", calls, harness.Paystack.Refunds)
+	harness.RunMoneyWorkers()
+	if calls := harness.Flutterwave.Calls("POST /transactions"); calls != 0 || harness.balance(ledgermodels.WalletAvailableAccount(buyer, "NGN")) != 100_000 {
+		t.Fatalf("a settled escrow refunds the requested amount inside the buyer's wallet: %d card refunds, balances %v", calls, harness.NonZeroBalances())
 	}
-	harness.deliverRefundProcessed(reference)
-	if harness.balance(ledgermodels.RefundsPayableAccount("paystack", "NGN")) != 0 {
-		t.Fatal("the refund is paid from the main balance")
-	}
+	_ = reference
 	harness.AssertLedgerHealthy()
 }
 
@@ -49,9 +46,9 @@ func TestSellerRefundOfADirectOrderIsInFullAndBookedAsSellerDebt(t *testing.T) {
 		t.Fatalf("full seller refund: %d %s", full.Status, full.Raw)
 	}
 	harness.deliverRefundProcessed(reference)
-	sellerId := "seller-" + orderId[:4]
-	if harness.balance(ledgermodels.SellerDebtAccount(sellerId, "NGN")) != 197_000 || harness.Paystack.Calls("POST /refund") != 1 {
-		t.Fatal("the seller owes the refunded share and Paystack is called once")
+	sellerId := sellerForOrder(orderId)
+	if harness.balance(ledgermodels.SellerDebtAccount(sellerId, "NGN")) != 197_200 || harness.Flutterwave.Calls("POST /transactions") != 1 {
+		t.Fatalf("the seller owes the refunded share and provider is called once: %d %v", harness.Flutterwave.Calls("POST /transactions"), harness.NonZeroBalances())
 	}
 	harness.AssertLedgerHealthy()
 }
