@@ -17,12 +17,12 @@ export function stopLiveLocationUpdates(messageId: string) {
   useLiveLocationSharesStore.getState().removeShare(messageId);
 }
 
-export async function stopSharingLiveLocation(messageId: string, onMessageChanged: (message: Message) => void) {
+export async function stopSharingLiveLocation(conversationId: string, messageId: string, onControlSent: (control: Message) => void) {
   stopLiveLocationUpdates(messageId);
-  onMessageChanged(await messagesService.stopLiveLocation(messageId));
+  onControlSent(await messagesService.stopLiveLocation(conversationId, messageId));
 }
 
-export function startLiveLocationUpdates(share: ActiveLiveLocationShare, onMessageChanged: (message: Message) => void) {
+export function startLiveLocationUpdates(share: ActiveLiveLocationShare, onControlSent: (control: Message) => void) {
   stopLiveLocationUpdates(share.messageId);
   useLiveLocationSharesStore.getState().addShare(share);
   const sendLatestPosition = async () => {
@@ -33,7 +33,7 @@ export function startLiveLocationUpdates(share: ActiveLiveLocationShare, onMessa
     if (AppState.currentState !== "active") return;
     try {
       const { latitude, longitude, address } = await readCurrentSharedLocation();
-      onMessageChanged(await messagesService.updateLiveLocation(share.messageId, { latitude, longitude, address }));
+      onControlSent(await messagesService.updateLiveLocation(share.conversationId, share.messageId, { latitude, longitude, address }));
     } catch {
       return;
     }

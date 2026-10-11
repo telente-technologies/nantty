@@ -60,4 +60,12 @@ export const mediaService = {
     if (!publicUrl) throw new Error("Upload finished but no image is available yet. Please try again.");
     return publicUrl;
   },
+  uploadLocalImageAndReturnMediaImage: async (localUri: string, contentType: string, purpose: MediaUploadPurpose): Promise<{ readonly mediaId: ID; readonly url: string }> => {
+    const jobId = await enqueueLocalMediaForUpload(describeLocalImageFromUri(localUri, contentType), purpose);
+    const asset = await waitForProcessedMediaAsset(jobId);
+    if (shouldUseMockForPath("/api/v1/media")) return { mediaId: asset.id, url: localUri };
+    const publicUrl = pickLargestDisplayableImageUrl(asset);
+    if (!publicUrl) throw new Error("Upload finished but no image is available yet. Please try again.");
+    return { mediaId: asset.id, url: publicUrl };
+  },
 };

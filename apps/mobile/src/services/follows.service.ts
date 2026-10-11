@@ -1,12 +1,16 @@
 import type { Page } from "@/types";
 import type { ConnectionEntry, ConnectionTab } from "@/types/account.type";
-import type { FollowRequest, FollowResult } from "@/types/socialGraph.type";
+import type { FollowRequest, FollowResult, FollowStatus, PostNotificationLevel, PostNotificationSettings } from "@/types/socialGraph.type";
 
-import { api } from "./apiClient.service";
+import { api, generateIdempotencyKey } from "./apiClient.service";
 
 export const followsService = {
   followUser: (userId: string) => api.post<FollowResult>(`/api/v1/users/${encodeURIComponent(userId)}/follow`),
   unfollowUser: (userId: string) => api.delete<void>(`/api/v1/users/${encodeURIComponent(userId)}/follow`),
+  fetchFollowStatus: (userId: string) => api.get<FollowStatus>(`/api/v1/users/${encodeURIComponent(userId)}/follow-status`),
+  fetchPostNotifications: (userId: string) => api.get<PostNotificationSettings>(`/api/v1/users/${encodeURIComponent(userId)}/post-notifications`),
+  setPostNotifications: (userId: string, level: PostNotificationLevel) =>
+    api.put<PostNotificationSettings>(`/api/v1/users/${encodeURIComponent(userId)}/post-notifications`, { level }, { idempotencyKey: generateIdempotencyKey() }),
   listConnectionsOfUser: (userId: string, tab: ConnectionTab) =>
     api.getList<ConnectionEntry>(`/api/v1/users/${encodeURIComponent(userId)}/connections`, { tab }),
   listFollowersOfUser: (userId: string, query: string, cursor?: string) =>
