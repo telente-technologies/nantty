@@ -1,8 +1,10 @@
 # Payments architecture
 
+> **Provider change (owner, 2026-10-10):** payments are moving from Paystack to Flutterwave (per-user payout subaccounts; Zudomart never holds customer money). The Paystack design below describes the code being replaced; the target is [`flutterwaveMigration.md`](../integrations/flutterwaveMigration.md).
+
 Status date: 2026-10-03.
 
-> **Bachs and Anchor dropped; Paystack adopted (owner, 2026-10-03).** Paystack is the single provider. Provider facts: `docs/integrations/paystack.md`; flows and code changes: `docs/checkoutPaymentFlowPlan.md`. Code still contains the Bachs adapter until the plan's section 12 is implemented.
+> **Bachs and Anchor dropped; Paystack adopted (owner, 2026-10-03).** Paystack is the single provider. Provider facts: `docs/integrations/flutterwaveMigration.md` Appendix B; flows and code changes: `docs/integrations/flutterwaveMigration.md` Appendix C. Code still contains the Bachs adapter until the plan's section 12 is implemented.
 
 Labels: **EXISTING** (in code), **MOCK-ONLY** (frontend mocks), **PROPOSED**, **OPTIONAL FUTURE**.
 
@@ -42,7 +44,7 @@ Store policies change and differ by region. **Re-check Apple App Review Guidelin
 | Rule | Consequence for design |
 | --- | --- |
 | Digital goods consumed inside the iOS/Android app (coins, gifts, premium, creator subscriptions, in-app boosts) must be sold with Apple IAP / Google Play Billing | Mobile coin store uses store products only. No Paystack checkout, no external payment link inside the apps |
-| Store takes about 15 to 30 percent | 1 coin is not NGN 1. Each channel has its own price and coin amount so that the **net value per coin after the channel cost is the same**: `coins = floor(price x (1 - channelFee) / netValuePerCoin)`. App packs give fewer coins per naira (store cut 15 to 30 percent); web packs through Paystack give more (1.5% + NGN 100, waived under NGN 2,500, capped NGN 2,000). `CoinPack` needs a `channel` (`app_ios`, `app_android`, `web`) and per-channel price and coin amount. Worked table: `checkoutPaymentFlowPlan.md` section 8.2 |
+| Store takes about 15 to 30 percent | 1 coin is not NGN 1. Each channel has its own price and coin amount so that the **net value per coin after the channel cost is the same**: `coins = floor(price x (1 - channelFee) / netValuePerCoin)`. App packs give fewer coins per naira (store cut 15 to 30 percent); web packs through Paystack give more (1.5% + NGN 100, waived under NGN 2,500, capped NGN 2,000). `CoinPack` needs a `channel` (`app_ios`, `app_android`, `web`) and per-channel price and coin amount. Worked table: `docs/integrations/flutterwaveMigration.md` Appendix C section 8.2 |
 | Creator share must be computed after the store fee | Ledger records the store fee as an expense or contra account at purchase. The gift split applies to coins already minted, so the **coin-to-payout rate is a platform decision**: coins bought through stores must be backed at net-of-fee value. Finance sets the payout rate per coin; do not promise a rate in UI copy |
 | Physical goods and services delivered outside the app must use external payment | Marketplace checkout stays on Paystack checkout in the apps (`authorization_url` in an in-app browser with universal-link return) |
 | Web (webapp, ads., dashboard., web coin store) may use Paystack | Web coin pack is the better-value path for users. **In-app, never link to or mention the cheaper web price**, except in regions whose steering rules allow it (US and EU rules are the ones to check). **FLAG: re-check Apple 3.1, Google Play payments policy and each region's anti-steering rules before launch and on each major release.** Default is no steering anywhere |
@@ -51,7 +53,7 @@ Store policies change and differ by region. **Re-check Apple App Review Guidelin
 
 ## 3. Provider adapters to ledger
 
-Owner direction (2026-10-03): **Zudomart holds as little user money as possible.** Payments run on Paystack only. Full flows, ledger mapping and citations: `checkoutPaymentFlowPlan.md` and `docs/integrations/paystack.md`. This file keeps the architecture view.
+Owner direction (2026-10-03): **Zudomart holds as little user money as possible.** Payments run on Paystack only. Full flows, ledger mapping and citations: `docs/integrations/flutterwaveMigration.md` Appendix C and `docs/integrations/flutterwaveMigration.md` Appendix B. This file keeps the architecture view.
 
 Go interfaces in go-money: `PaymentProvider`, `PayeeProvider` (recipients, subaccounts, account resolve), `MoneyMovementProvider` (transfers, balance), `DisputeProvider`, `SubscriptionProvider`, `SavedCardProvider`. Active adapters: `paystack` (PROPOSED, replaces `bachsConnect`), Apple IAP, Google Play. The interfaces carry no Paystack types, so another provider can be added later; none is planned.
 
@@ -83,14 +85,14 @@ The ledger decides what every naira means; Paystack balances, settlements and tr
 | Apple IAP | verify transaction, receive refund/revoke/renewal notifications | StoreKit 2 signed JWS verified against Apple chain on the server; App Store Server API for status; Notifications v2 | EXISTING verifier in go-money; notifications PROPOSED |
 | Google Play | verify purchase token, acknowledge, consume, RTDN via Pub/Sub push | Play Developer API `purchases.products/subscriptions` get; RTDN authenticated push | EXISTING verifier in go-money; RTDN PROPOSED |
 
-Paystack facts that shape the model (`docs/integrations/paystack.md`):
+Paystack facts that shape the model (`docs/integrations/flutterwaveMigration.md` Appendix B):
 
 - Direct mode: a dynamic `flat` split sends the seller share to the seller's subaccount, settled T+1 (`settlement_schedule: auto`). Commission is the remainder in Zudomart's main account.
 - Escrow: no escrow product. Launch path E2 keeps escrow in Zudomart's balance and pays sellers by transfer after release + 24h. E1 (manual-settlement subaccount: "payout to the subaccount should only be made when requested") removes that holding if Paystack confirms a per-order settlement request. UNCONFIRMED, ask Paystack.
 - Refunds debit Zudomart's balance; whether Paystack reverses a subaccount share is UNCONFIRMED, so settled direct shares become seller debt.
 - Transfers draw only on the balance; OTP must be disabled for automation.
 - Paystack does not KYC payees: seller and creator KYC is Zudomart's.
-- Control caveat: E2 means Zudomart controls escrowed buyer money in its Paystack balance. Legal review is required (`checkoutPaymentFlowPlan.md` section 10).
+- Control caveat: E2 means Zudomart controls escrowed buyer money in its Paystack balance. Legal review is required (`docs/integrations/flutterwaveMigration.md` Appendix C section 10).
 
 ### 3.1 Data model (PROPOSED, `money` schema owned by go-money)
 
@@ -201,7 +203,7 @@ sequenceDiagram
   M->>L: record seller debt if lost after the seller was paid
 ```
 
-Refund source: Zudomart's Paystack balance (escrow covers escrow groups). A direct share already settled to the seller becomes seller debt, recovered from later escrow payouts, and the store is escrow-only until it is repaid. Whether Paystack reverses a subaccount share on refund or chargeback is UNCONFIRMED. Chargebacks freeze remaining escrow, notify the seller and feed risk signals (fraud.md). Source: `docs/integrations/paystack.md` sections 6.5 and 11.
+Refund source: Zudomart's Paystack balance (escrow covers escrow groups). A direct share already settled to the seller becomes seller debt, recovered from later escrow payouts, and the store is escrow-only until it is repaid. Whether Paystack reverses a subaccount share on refund or chargeback is UNCONFIRMED. Chargebacks freeze remaining escrow, notify the seller and feed risk signals (fraud.md). Source: `docs/integrations/flutterwaveMigration.md` Appendix B sections 6.5 and 11.
 
 ### 4.2 Fee lines: direct vs escrow (4 Oct 2026)
 
@@ -212,7 +214,7 @@ Product commission is 0%. Buyers pay nothing extra. The seller sees two separate
 | Escrow fee | 1.5% of the group total including shipping (1% for Business plan), deducted from the payout at release, none on refunded amounts | none |
 | Paystack processing fee | allocated pro rata across the checkout and deducted from the payout | borne by the seller: the dynamic split sends `groupTotal - allocatedPaystackFee`, `bearer_type: account` |
 
-Unverified stores are escrow only. All amounts are int64 minor units. Detail: `checkoutPaymentFlowPlan.md` section 2.2.
+Unverified stores are escrow only. All amounts are int64 minor units. Detail: `docs/integrations/flutterwaveMigration.md` Appendix C section 2.2.
 
 ### 4.3 Verification checkmark share refund
 
@@ -347,6 +349,6 @@ See `marketplace.md` section 6 for the escrow state machine. Money rule: only go
 | 9 | Prepaid ad credit and unspent coins | Not modelled | Stored value held by Zudomart | Postpaid or threshold ads billing; lawyer review of coin terms | S | Medium | P1 |
 | 7 | Ledger at scale | Single Aurora | Hot ledger rows (platform account) serialize writes | MVP: split platform accounts per shard key (per day or per creator bucket); Scale stage: only consider partitioning ledger entries when write p95 exceeds a defined budget. No sharding trigger is met today | M | Low | P3, Scale stage |
 
-The money-module change checklist is `checkoutPaymentFlowPlan.md` section 12.
+The money-module change checklist is `docs/integrations/flutterwaveMigration.md` Appendix C section 12.
 
 Store policy items are time-sensitive; schedule a pre-launch policy re-read as an explicit launch checklist item.
