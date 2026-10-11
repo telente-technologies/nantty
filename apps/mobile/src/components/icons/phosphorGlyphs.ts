@@ -142,3 +142,6 @@ export const StopCircleIcon: Icon = require("phosphor-react-native/src/icons/Sto
 export const WarningOctagonIcon: Icon = require("phosphor-react-native/src/icons/WarningOctagon").WarningOctagonIcon;
 export const XCircleIcon: Icon = require("phosphor-react-native/src/icons/XCircle").XCircleIcon;
 export const PaperclipIcon: Icon = require("phosphor-react-native/src/icons/Paperclip").PaperclipIcon;
+export const CameraRotateIcon: Icon = require("phosphor-react-native/src/icons/CameraRotate").CameraRotateIcon;
+export const SpeakerSlashIcon: Icon = require("phosphor-react-native/src/icons/SpeakerSlash").SpeakerSlashIcon;
+export const VideoCameraSlashIcon: Icon = require("phosphor-react-native/src/icons/VideoCameraSlash").VideoCameraSlashIcon;

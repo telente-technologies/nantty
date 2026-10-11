@@ -15,7 +15,7 @@ export const matchesRealApiPrefix = (path: string, prefixes: readonly string[]) 
 
 export const apiConfig = {
   baseUrl: process.env.EXPO_PUBLIC_API_URL ?? extra.apiUrl ?? "http://localhost:8080",
-  useMocks: (process.env.EXPO_PUBLIC_USE_MOCKS ?? String(extra.useMocks ?? true)) === "true",
+  useMocks: (process.env.EXPO_PUBLIC_USE_MOCKS ?? String(extra.useMocks ?? __DEV__)) === "true",
   realApiPrefixes: parseRealApiPrefixes(process.env.EXPO_PUBLIC_REAL_API_PREFIXES ?? extra.realApiPrefixes),
   timeoutMs: 15_000,
 };

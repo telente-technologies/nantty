@@ -35,7 +35,8 @@ export const staleTimeByQueryKeyPrefix: Readonly<Record<string, number>> = {
   messages: 0,
 };
 
-const persistableQueryKeyPrefixes = new Set(Object.keys(staleTimeByQueryKeyPrefix));
+const decryptedChatQueryKeyPrefixes = new Set(["conversations", "conversation", "messages"]);
+const persistableQueryKeyPrefixes = new Set(Object.keys(staleTimeByQueryKeyPrefix).filter((prefix) => !decryptedChatQueryKeyPrefixes.has(prefix)));
 
 export const isQuerySafeToPersistOnDevice = (query: Query) =>
   query.state.status === "success" && typeof query.queryKey[0] === "string" && persistableQueryKeyPrefixes.has(query.queryKey[0]);

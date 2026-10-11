@@ -31,6 +31,7 @@ describe("live store ownership in the mobile mocks", () => {
     const foreign = listProductSummariesInStore("s_glow")[0]!.id;
     expect(await failureOf(resolveMockApiRequest("POST", `/api/v1/lives/${live.id}/pins`, { productId: foreign }))).toMatchObject({ status: 403, code: "PRODUCT_NOT_IN_STORE" });
     await resolveMockApiRequest("POST", `/api/v1/lives/${live.id}/pins`, { productId: own });
+    await resolveMockApiRequest("POST", `/api/v1/lives/${live.id}/end`, undefined);
     const personal = await resolveMockApiRequest<LiveSessionDetails>("POST", "/api/v1/lives", { title: "Chat", category: "justChatting" });
     expect(personal.storeId ?? null).toBeNull();
     expect(await failureOf(resolveMockApiRequest("POST", `/api/v1/lives/${personal.id}/pins`, { productId: own }))).toMatchObject({ status: 422, code: "PRODUCTS_REQUIRE_STORE" });

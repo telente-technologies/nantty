@@ -35,6 +35,7 @@ interface SendLiveGiftVariables {
 
 const describeGiftSendingError = (error: unknown) => {
   if (error instanceof ApiError && error.status === 402) return "You don't have enough coins for this gift.";
+  if (error instanceof ApiError && error.code === "LIVE_NOT_ACTIVE") return "This live has ended, so gifts are off. You weren't charged.";
   if (error instanceof ApiError) return error.message;
   return "We couldn't send your gift. Check your connection and try again.";
 };
@@ -85,6 +86,7 @@ export function useSendLiveGift({ liveId, recipientUserId }: UseSendLiveGiftOpti
       const current = queryClient.getQueryData<CoinBalance>(COIN_BALANCE_QUERY_KEY);
       if (current) queryClient.setQueryData<CoinBalance>(COIN_BALANCE_QUERY_KEY, { ...current, coins: current.coins + gift.priceCoins * quantity });
       if (error instanceof ApiError && error.status === 402) setHasNotEnoughCoins(true);
+      if (error instanceof ApiError && error.code === "LIVE_NOT_ACTIVE") void queryClient.invalidateQueries({ queryKey: ["live", liveId] });
     },
     onSuccess: (receipt, { gift }) => {
       const cached = queryClient.getQueryData<CoinBalance>(COIN_BALANCE_QUERY_KEY);

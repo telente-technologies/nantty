@@ -129,6 +129,9 @@ import {
   WarningOctagonIcon,
   XCircleIcon,
   PaperclipIcon,
+  CameraRotateIcon,
+  SpeakerSlashIcon,
+  VideoCameraSlashIcon,
 } from "./phosphorGlyphs";
 import { phosphorIcon } from "./phosphorIcon";
 
@@ -294,3 +297,6 @@ export const XCircle24Icon = phosphorIcon(XCircleIcon);
 export const SealCheck24Icon = phosphorIcon(SealCheckIcon);
 export const ShareFat24Icon = phosphorIcon(ShareFatIcon);
 export const Paperclip24Icon = phosphorIcon(PaperclipIcon);
+export const CameraRotate24Icon = phosphorIcon(CameraRotateIcon);
+export const SpeakerSlash24Icon = phosphorIcon(SpeakerSlashIcon);
+export const VideoCameraSlash24Icon = phosphorIcon(VideoCameraSlashIcon);

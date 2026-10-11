@@ -11,6 +11,9 @@ import type { LiveSessionDetails, Media } from "@/types";
 import type { LiveBattleParticipant, LiveStageStreamer } from "@/types/liveStage.type";
 
 import { liveAccent, liveGlass, liveReadableTextShadow } from "../liveSurface.constant";
+import { LiveKitVideo } from "../media/liveKitVideo";
+import type { LiveMedia } from "../media/liveMedia.hook";
+import { findStreamerVideo } from "../media/liveViewerMedia.hook";
 import type { StageTileFrame } from "./stageGridLayout.util";
 import { Coin24Icon, Crown24Icon, MicrophoneSlash24Icon } from "@/components/icons";
 import { IconRow } from "@/components/ui/iconRow";
@@ -32,9 +35,10 @@ export interface LiveStageTileProps {
   readonly battleBadge: LiveStageTileBattleBadge | null;
   readonly onPress: () => void;
   readonly pressHint: string;
+  readonly media?: LiveMedia;
 }
 
-function StreamerTileMedia({ streamer, session, isMe, isCameraPermissionGranted, isPlaybackAllowed, frame }: LiveStageTileProps) {
+function StreamerTileMedia({ streamer, session, isMe, isCameraPermissionGranted, isPlaybackAllowed, frame, media }: LiveStageTileProps) {
   const hostStreamMedia = useMemo<Media | null>(
     () => (session.playbackUrl ? { type: "video", url: session.playbackUrl, posterUrl: session.coverUrl ?? null } : null),
     [session.playbackUrl, session.coverUrl],
@@ -50,7 +54,11 @@ function StreamerTileMedia({ streamer, session, isMe, isCameraPermissionGranted,
       </View>
     );
   }
-  if (isMe && isCameraPermissionGranted) return <CameraView style={StyleSheet.absoluteFill} facing="front" />;
+  const liveKitVideo = media?.mode === "livekit" ? findStreamerVideo(media.connection, streamer.user.id) : undefined;
+  if (liveKitVideo && media?.connection.runtime) {
+    return <LiveKitVideo runtime={media.connection.runtime} trackRef={liveKitVideo} isMirrored={isMe && media.host.facing === "user"} />;
+  }
+  if (isMe && isCameraPermissionGranted && media?.mode !== "livekit") return <CameraView style={StyleSheet.absoluteFill} facing="front" />;
   if (streamer.role === "host" && !isMe && hostStreamMedia) {
     return <ClipVideoPlayer media={hostStreamMedia} isActive={isPlaybackAllowed} isMuted={Platform.OS === "web"} style={StyleSheet.absoluteFill} />;
   }

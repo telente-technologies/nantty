@@ -1,6 +1,6 @@
 import { CameraView, useCameraPermissions } from "expo-camera";
 import { forwardRef } from "react";
-import { StyleSheet, View } from "react-native";
+import { Linking, StyleSheet, View } from "react-native";
 
 import { Button } from "@/components/ui/button";
 import { Text } from "@/components/ui/text";
@@ -15,9 +15,12 @@ export const CameraBackdrop = forwardRef<CameraView, { active: boolean }>(functi
   return (
     <View style={[styles.fill, styles.center]}>
       {permission && !permission.canAskAgain ? (
-        <Text size={13} lineHeight={16.9} color={colors.textMuted} align="center">
-          Camera access is off. Turn it on in Settings to take photos and go live.
-        </Text>
+        <>
+          <Text size={13} lineHeight={16.9} color={colors.textMuted} align="center">
+            Camera access is off. Turn it on in Settings to take photos and go live.
+          </Text>
+          <Button title="Open Settings" variant="subtle" onPress={() => void Linking.openSettings().catch(() => undefined)} style={styles.allow} />
+        </>
       ) : (
         <Button title="Allow camera" variant="subtle" onPress={() => requestPermission()} style={styles.allow} />
       )}
@@ -27,6 +30,6 @@ export const CameraBackdrop = forwardRef<CameraView, { active: boolean }>(functi
 
 const useStyles = makeThemedStyles((colors) => StyleSheet.create({
   fill: { ...StyleSheet.absoluteFill, backgroundColor: colors.surface },
-  center: { alignItems: "center", justifyContent: "center", paddingHorizontal: 40, paddingBottom: 160 },
+  center: { alignItems: "center", justifyContent: "center", gap: 12, paddingHorizontal: 40, paddingBottom: 160 },
   allow: { width: 160 },
 }));

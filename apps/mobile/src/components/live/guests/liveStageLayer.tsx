@@ -13,6 +13,7 @@ import type { LiveStageStreamer } from "@/types/liveStage.type";
 
 import { LiveGuestsSheet } from "./liveGuestsSheet";
 import { LiveStageControlRail } from "./liveStageControlRail";
+import type { LiveMedia } from "../media/liveMedia.hook";
 import { LiveStageGrid } from "./liveStageGrid";
 import type { LiveStageController } from "./liveStage.hook";
 import { LiveStageInvitePrompt } from "./liveStageInvitePrompt";
@@ -31,9 +32,10 @@ export interface LiveStageLayerProps {
   readonly canViewerSendGifts: boolean;
   readonly isCameraPermissionGranted: boolean;
   readonly isPlaybackAllowed: boolean;
+  readonly media?: LiveMedia;
 }
 
-export function LiveStageLayer({ liveId, session, controller, canViewerSendGifts, isCameraPermissionGranted, isPlaybackAllowed }: LiveStageLayerProps) {
+export function LiveStageLayer({ liveId, session, controller, canViewerSendGifts, isCameraPermissionGranted, isPlaybackAllowed, media }: LiveStageLayerProps) {
   const insets = useSafeAreaInsets();
   const window = useWindowDimensions();
   const [isGuestsSheetOpen, setIsGuestsSheetOpen] = useState(false);
@@ -79,6 +81,7 @@ export function LiveStageLayer({ liveId, session, controller, canViewerSendGifts
               maximumHeight={window.height * GRID_MAXIMUM_SCREEN_SHARE}
               isCameraPermissionGranted={isCameraPermissionGranted}
               isPlaybackAllowed={isPlaybackAllowed}
+              media={media}
               tilePressHint={isHostView ? "Opens guest controls" : canGiftStreamers ? "Opens gifts for this streamer" : ""}
               onPressStreamer={pressStreamerTile}
               onPressEmptySeat={isHostView ? () => setIsGuestsSheetOpen(true) : undefined}

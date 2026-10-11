@@ -78,6 +78,7 @@ export const buildLiveSession = (liveId: string, host = userSummaryById(findKnow
 });
 
 const hostedLives = new Map<string, LiveSessionDetails>();
+const findRunningHostedLive = (hostId: string) => [...hostedLives.values()].find((session) => session.host.id === hostId && session.status === "live") ?? null;
 const issuedStreamKeys = new Map<string, { readonly ingestUrl: string; readonly streamKey: string }>();
 
 const buildStreamCredentials = (liveId: string) => {
@@ -111,6 +112,8 @@ export const liveMocks: MockRoute[] = [
     if (storeId && storeId !== getSignedInMockUser().storeId) throw new ApiError(403, "You are not a member of this store.", "NOT_STORE_MEMBER");
     const storeProducts = storeId ? listProductSummariesInStore(storeId) : [];
     if (productIds.some((productId) => !storeProducts.some((product) => product.id === productId))) throw new ApiError(403, "That product is not in this store.", "PRODUCT_NOT_IN_STORE");
+    const running = findRunningHostedLive(getSignedInMockUser().id);
+    if (running) throw new ApiError(409, "You are already live.", "LIVE_ALREADY_RUNNING", undefined, { liveId: running.id });
     const session = {
       ...buildLiveSession(`live_${Date.now()}`, summariseUser(getSignedInMockUser())),
       title: (body as { title: string }).title,
@@ -137,7 +140,15 @@ export const liveMocks: MockRoute[] = [
   }),
   createMockRoute("POST", "/api/v1/lives/:liveId/join", () => undefined),
   createMockRoute("POST", "/api/v1/lives/:liveId/leave", () => undefined),
-  createMockRoute("POST", "/api/v1/lives/:liveId/end", () => undefined),
+  createMockRoute("POST", "/api/v1/lives/:liveId/end", ({ params }) => {
+    const session = hostedLives.get(params.liveId!);
+    if (session) hostedLives.set(session.id, { ...session, status: "ended", viewers: 0 });
+  }),
+  createMockRoute("POST", "/api/v1/lives/:liveId/heartbeat", ({ params }) => {
+    const session = hostedLives.get(params.liveId!);
+    const status = session?.status ?? "live";
+    return { liveId: params.liveId!, status, leaseExpiresAt: status === "live" ? new Date(Date.now() + 60_000).toISOString() : null, timeoutSeconds: 60 };
+  }),
   createMockRoute("POST", "/api/v1/lives/:liveId/reactions", () => undefined),
   createMockRoute("POST", "/api/v1/lives/:liveId/share", () => undefined),
   createMockRoute("GET", "/api/v1/lives/:liveId/comments", ({ params }) => ({ data: commentsFor(params.liveId!), nextCursor: null })),

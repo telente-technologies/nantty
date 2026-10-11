@@ -34,7 +34,7 @@ const buildWallet = () => {
 };
 
 export const providerWalletMocks: MockRoute[] = [
-  createMockRoute("GET", "/api/v1/payments/wallet/me", () => buildWallet()),
+  createMockRoute("GET", "/api/v1/payments/wallet/me", () => (state.hasWallet ? buildWallet() : { wallet: null, status: "not_ready" })),
   createMockRoute("POST", "/api/v1/payments/wallet/me/activate", () => {
     state.hasWallet = true;
     return buildWallet();

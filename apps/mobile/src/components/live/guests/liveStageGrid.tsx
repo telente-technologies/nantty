@@ -8,6 +8,7 @@ import type { LiveStage, LiveStageStreamer } from "@/types/liveStage.type";
 
 import { liveGlass } from "../liveSurface.constant";
 import { buildBattleBadgeForStreamer } from "../battle/battleStandings.util";
+import type { LiveMedia } from "../media/liveMedia.hook";
 import { LiveStageTile } from "./liveStageTile";
 import { computeStageTileFramesForStreamerCount, stageGridHeightForWidth } from "./stageGridLayout.util";
 
@@ -22,6 +23,7 @@ export interface LiveStageGridProps {
   readonly onPressStreamer: (streamer: LiveStageStreamer) => void;
   readonly onPressEmptySeat?: () => void;
   readonly overlay?: ReactNode;
+  readonly media?: LiveMedia;
 }
 
 export function LiveStageGrid(props: LiveStageGridProps) {
@@ -41,6 +43,7 @@ export function LiveStageGrid(props: LiveStageGridProps) {
               isMe={streamer.user.id === props.signedInUserId}
               isCameraPermissionGranted={props.isCameraPermissionGranted}
               isPlaybackAllowed={props.isPlaybackAllowed}
+              media={props.media}
               battleBadge={buildBattleBadgeForStreamer(battle, streamer.user.id)}
               pressHint={props.tilePressHint}
               onPress={() => props.onPressStreamer(streamer)}

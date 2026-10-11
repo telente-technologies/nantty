@@ -26,7 +26,7 @@ export function useProviderWallet() {
     verification,
     wallet,
     isNigeria,
-    isMissing: isWalletNotReadyError(wallet.error),
+    isMissing: wallet.data === null || isWalletNotReadyError(wallet.error),
     active,
     spendableMinor: active ? walletSpendableMinor(active.balances) : 0,
   };
