@@ -32,6 +32,15 @@ export function requireMockStepUp(request: MockRequest): void {
   }
 }
 
+const consumedMoneyStepUps = new Set<string>();
+
+export function requireMockSingleUseStepUp(request: MockRequest): void {
+  requireMockStepUp(request);
+  const token = request.headers.get("x-step-up-token") ?? "";
+  if (consumedMoneyStepUps.has(token)) throw new MockHttpError(401, "STEP_UP_REUSED", "This confirmation was already used. Confirm it's you again for each money action.");
+  consumedMoneyStepUps.add(token);
+}
+
 export function hasMockStepUp(request: MockRequest): boolean {
   try {
     requireMockStepUp(request);

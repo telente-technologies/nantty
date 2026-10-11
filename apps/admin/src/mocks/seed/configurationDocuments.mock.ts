@@ -2,6 +2,7 @@ import { buildInitialPlansConfiguration } from "@/mocks/seed/configurationPlans.
 import { buildInitialRegionalPricingDocument } from "@/mocks/seed/regionalPricing.mock";
 import { buildInitialCheckmarkPricing, buildInitialCheckmarkSuggestionRules, buildInitialCreatorThresholds, buildInitialTrialRules } from "@/mocks/seed/configurationTrustRules.mock";
 import type { ConfigurationDocumentContentByKey, CreatorEligibilityRules, RevenueRulesConfiguration, UsernameRules } from "@/types/platformConfiguration.type";
+import { defaultPaymentLimits, defaultSellerDebtLimits } from "@/mocks/handlers/configuration/moneyLimitsValidation.mock";
 
 export function buildInitialRevenueRules(): RevenueRulesConfiguration {
   return {
@@ -17,7 +18,7 @@ export function buildInitialRevenueRules(): RevenueRulesConfiguration {
       { amountMinor: 1, currency: "GBP" },
       { amountMinor: 1, currency: "USD" },
     ],
-    withdrawalFee: { mode: "PASS_THROUGH", note: "We charge exactly what Paystack or Flutterwave charges for the transfer. No Zudomart margin." },
+    withdrawalFee: { mode: "PASS_THROUGH", note: "We charge exactly what the payment partner charges for the transfer. No Zudomart margin." },
     escrowFee: { defaultBasisPoints: 150, businessPlanBasisPoints: 100 },
   };
 }
@@ -43,5 +44,7 @@ export function buildInitialConfigurationDocuments(): { id: keyof ConfigurationD
     { id: "regional-pricing", content: buildInitialRegionalPricingDocument(), changeReason: "Regional ad floors and creator subscription bands from docs/pricing.md (4 Oct 2026)." },
     { id: "feed.ranking", content: { tierBoostBps: { blue_essential: 10_200, blue_verified: 10_400, premium: 10_600, gold_business: 10_800, black_official: 11_000 }, officialEditorialBoostBps: 11_000 }, changeReason: "Disclosed, capped checkmark and Official boosts (owner rules, 4 Oct 2026)." },
     { id: "appStore.fees", content: { appleFeeBps: 3_000, appleSmallBusinessProgram: false, appleSmallBusinessFeeBps: 1_500, googleSubscriptionFeeBps: 1_500 }, changeReason: "Standard Apple and Google commissions." },
+    { id: "seller.debtLimits", content: defaultSellerDebtLimits, changeReason: "Owner-approved seller debt limits by verification level." },
+    { id: "payments.limits", content: defaultPaymentLimits, changeReason: "Owner-approved maximum payments and wallet daily limits." },
   ];
 }

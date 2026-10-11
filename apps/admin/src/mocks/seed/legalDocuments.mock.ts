@@ -10,7 +10,7 @@ export type MutableLegalVersion = { -readonly [Key in keyof LegalVersion]: Legal
 function buildBody(title: string, revision: number): string {
   const sections = [
     `# ${title}`,
-    "## 1. Who we are\nZudomart operates a social shopping marketplace with escrow-protected payments. This document explains the rules that apply to you.",
+    "## 1. Who we are\nZudomart operates a Nigeria-first social marketplace. Payments and wallets are held by our licensed payment partner in your name, with escrow in Nigeria only. This document explains the rules that apply to you.",
     "## 2. What you agree to\nBy using Zudomart you agree to follow this document and the other policies linked from it.",
     "## 3. Your responsibilities\nGive accurate information, keep your login safe and follow the law where you live.",
   ];

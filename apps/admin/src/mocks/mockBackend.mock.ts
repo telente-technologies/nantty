@@ -1,4 +1,6 @@
+import { doesApiCallRequireStepUp } from "@/config/apiAccess.config";
 import { readMockDatabase } from "@/mocks/mockDatabase.mock";
+import { requireMockStepUp } from "@/mocks/mockGuards.mock";
 import { registerEveryMockHandler } from "@/mocks/mockHandlerRegistry.mock";
 import { MockHttpError, respondWithError } from "@/mocks/mockResponses.mock";
 import { clearEveryMockRoute, findMockRouteForRequest, type MockPrincipal, type MockResponse } from "@/mocks/mockRouter.mock";
@@ -61,9 +63,10 @@ export async function dispatchMockApiRequest(call: MockApiCall): Promise<MockRes
   try {
     const principal = resolveMockPrincipalFromHeaders(call.headers);
     if (matched.route.requiresPrincipal && !principal) return respondWithError(401, "UNAUTHENTICATED", "Your session has expired. Sign in again.");
-    return await replayOrRememberIdempotentResponse(call, principal, async () =>
-      matched.route.handler({ method: call.method, path: call.path, params: matched.params, query: call.query, jsonBody: parseJsonBodyIfPresent(call.headers, call.body), headers: call.headers, principal }),
-    );
+    const jsonBody = parseJsonBodyIfPresent(call.headers, call.body);
+    const request = { method: call.method, path: call.path, params: matched.params, query: call.query, jsonBody, headers: call.headers, principal };
+    if (principal && doesApiCallRequireStepUp(call.method, call.path, jsonBody)) requireMockStepUp(request);
+    return await replayOrRememberIdempotentResponse(call, principal, async () => matched.route.handler(request));
   } catch (error) {
     if (error instanceof MockHttpError) return respondWithError(error.status, error.code, error.message, error.issues, error.extra);
     console.error("Mock handler failed", error);
