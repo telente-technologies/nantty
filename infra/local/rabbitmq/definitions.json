@@ -3208,6 +3208,38 @@
       "arguments": {}
     },
     {
+      "source": "zudomart.events",
+      "vhost": "zudomart",
+      "destination": "money-domain-events",
+      "destination_type": "queue",
+      "routing_key": "paymentRefund.requested",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.events",
+      "vhost": "zudomart",
+      "destination": "money-domain-events",
+      "destination_type": "queue",
+      "routing_key": "paymentRefund.failed",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.events",
+      "vhost": "zudomart",
+      "destination": "money-domain-events",
+      "destination_type": "queue",
+      "routing_key": "orderGroup.delivered",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.events",
+      "vhost": "zudomart",
+      "destination": "money-domain-events",
+      "destination_type": "queue",
+      "routing_key": "orderGroup.shipped",
+      "arguments": {}
+    },
+    {
       "source": "zudomart.dlx",
       "vhost": "zudomart",
       "destination": "ads-domain-events.dlq",
@@ -3277,6 +3309,22 @@
       "destination": "ads-domain-events",
       "destination_type": "queue",
       "routing_key": "adBalance.topUpFailed",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.events",
+      "vhost": "zudomart",
+      "destination": "ads-domain-events",
+      "destination_type": "queue",
+      "routing_key": "post.deleted",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.events",
+      "vhost": "zudomart",
+      "destination": "ads-domain-events",
+      "destination_type": "queue",
+      "routing_key": "adBoost.cancelled",
       "arguments": {}
     },
     {
@@ -3357,6 +3405,14 @@
       "destination": "commerce-domain-events",
       "destination_type": "queue",
       "routing_key": "escrow.partiallyRefunded",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.events",
+      "vhost": "zudomart",
+      "destination": "commerce-domain-events",
+      "destination_type": "queue",
+      "routing_key": "escrow.releaseScheduled",
       "arguments": {}
     },
     {
@@ -3589,6 +3645,14 @@
       "destination": "notifications-domain-events",
       "destination_type": "queue",
       "routing_key": "messageRequest.received",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.events",
+      "vhost": "zudomart",
+      "destination": "notifications-domain-events",
+      "destination_type": "queue",
+      "routing_key": "post.created",
       "arguments": {}
     },
     {
@@ -4373,6 +4437,30 @@
       "destination": "social-domain-events",
       "destination_type": "queue",
       "routing_key": "copyrightClaim.restored",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.events",
+      "vhost": "zudomart",
+      "destination": "social-domain-events",
+      "destination_type": "queue",
+      "routing_key": "chatReport.received",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.events",
+      "vhost": "zudomart",
+      "destination": "social-domain-events",
+      "destination_type": "queue",
+      "routing_key": "store.staff_removed",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.events",
+      "vhost": "zudomart",
+      "destination": "social-domain-events",
+      "destination_type": "queue",
+      "routing_key": "store.staff_updated",
       "arguments": {}
     },
     {

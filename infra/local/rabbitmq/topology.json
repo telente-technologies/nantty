@@ -28,27 +28,15 @@
       "consent.granted", "consent.withdrawn"
     ],
     "support-domain-events": ["account.deletionExecuted"],
-    "money-domain-events": ["orderGroup.refundRequested", "businessVerification.approved", "businessVerification.revoked", "creatorApplication.approved", "adSpend.batched", "verificationCase.refundRequested", "accountHealth.changed", "creatorSubscription.paid", "creatorSubscription.refunded", "adCreatorEarnings.posted", "orderGroup.completed", "escrow.refunded", "escrow.partiallyRefunded", "verificationCase.decided", "checkmark.revoked"],
-    "ads-domain-events": ["accountHealth.changed", "adBalance.toppedUp", "adBalance.topUpFailed"],
-    "commerce-domain-events": [
-      "escrow.held", "escrow.released", "escrow.refunded", "escrow.partiallyRefunded",
-      "directPayment.received", "dispute.opened", "dispute.closed"
-    ],
-    "notifications-domain-events": [
-      "account.*", "adInvite.created", "appeal.*", "cardVerification.*", "checkmark.*", "coinPurchase.*", "comment.created",
-      "creatorApplication.*", "creatorSubscription.started", "affiliateCommission.credited", "dataExport.*", "dispute.*", "disputeMessage.*", "escrow.*", "follow.created",
-      "followRequest.created", "gift.sent", "live.started", "mention.created", "messageRequest.received",
-      "order.*", "otp.issued", "post.tagged", "payment.*", "paymentRefund.bankDetailsRequired", "payout.*", "payoutAccount.*", "planInvoice.*", "planTrial.*", "subscriptionInvoice.*", "subscriptionPayment.*", "subscriptionTrial.*", "subscriptionRenewal.*", "subscriptionGrace.*", "subscriptionCard.*", "subscriptionPrice.*", "subscription.downgraded", "tip.sent", "policyVersion.published",
-      "report.closed", "review.created", "review.replied", "sellerApplication.reviewed", "creator.standingChanged", "message.sent", "sellerDocuments.*", "session.*", "signIn.*", "ticket.created", "ticket.replied", "ticket.resolved", "twoFactor.*", "videoReply.created",
-      "withdrawal.*", "copyrightClaim.warningIssued", "copyrightClaim.audioMuteOrdered", "copyrightClaim.contentTakenDown", "copyrightClaim.counterNoticeReceived",
-      "copyrightClaim.restored", "strike.issued", "strike.expired",
-      "verification.eligible", "verification.underReview", "verification.approved", "verification.rejectedRefunded"
-    ],
+    "money-domain-events": ["orderGroup.refundRequested", "businessVerification.approved", "businessVerification.revoked", "creatorApplication.approved", "adSpend.batched", "verificationCase.refundRequested", "accountHealth.changed", "creatorSubscription.paid", "creatorSubscription.refunded", "adCreatorEarnings.posted", "orderGroup.completed", "escrow.refunded", "escrow.partiallyRefunded", "verificationCase.decided", "checkmark.revoked", "paymentRefund.requested", "paymentRefund.failed", "orderGroup.delivered", "orderGroup.shipped"],
+    "ads-domain-events": ["accountHealth.changed", "adBalance.toppedUp", "adBalance.topUpFailed", "post.deleted", "adBoost.cancelled"],
+    "commerce-domain-events": ["escrow.held", "escrow.released", "escrow.refunded", "escrow.partiallyRefunded", "escrow.releaseScheduled", "directPayment.received", "dispute.opened", "dispute.closed"],
+    "notifications-domain-events": ["account.*", "adInvite.created", "appeal.*", "cardVerification.*", "checkmark.*", "coinPurchase.*", "comment.created", "creatorApplication.*", "creatorSubscription.started", "affiliateCommission.credited", "dataExport.*", "dispute.*", "disputeMessage.*", "escrow.*", "follow.created", "followRequest.created", "gift.sent", "live.started", "mention.created", "messageRequest.received", "post.created", "order.*", "otp.issued", "post.tagged", "payment.*", "paymentRefund.bankDetailsRequired", "payout.*", "payoutAccount.*", "planInvoice.*", "planTrial.*", "subscriptionInvoice.*", "subscriptionPayment.*", "subscriptionTrial.*", "subscriptionRenewal.*", "subscriptionGrace.*", "subscriptionCard.*", "subscriptionPrice.*", "subscription.downgraded", "tip.sent", "policyVersion.published", "report.closed", "review.created", "review.replied", "sellerApplication.reviewed", "creator.standingChanged", "message.sent", "sellerDocuments.*", "session.*", "signIn.*", "ticket.created", "ticket.replied", "ticket.resolved", "twoFactor.*", "videoReply.created", "withdrawal.*", "copyrightClaim.warningIssued", "copyrightClaim.audioMuteOrdered", "copyrightClaim.contentTakenDown", "copyrightClaim.counterNoticeReceived", "copyrightClaim.restored", "strike.issued", "strike.expired", "verification.eligible", "verification.underReview", "verification.approved", "verification.rejectedRefunded"],
     "media-domain-events": ["chatMedia.expired", "clipAudio.muteRequested", "clipAudio.restoreRequested"],
     "identity-domain-events": ["entitlement.granted", "entitlement.revoked", "entitlement.graceStarted", "account.registered", "verificationRefund.*", "sellerApplication.reviewed"],
     "catalog-domain-events": ["content.visibilityChanged"],
     "live-domain-events": ["content.visibilityChanged", "accountHealth.changed", "live.safetyHold", "live.safetyReleased", "live.safetyWarning", "live.samplingBoosted", "live.moderatorEnded"],
-    "social-domain-events": ["content.visibilityChanged", "content.sensitivityAdvised", "media.processed", "media.rejected", "copyrightClaim.audioMuteOrdered", "copyrightClaim.restored"],
+    "social-domain-events": ["content.visibilityChanged", "content.sensitivityAdvised", "media.processed", "media.rejected", "copyrightClaim.audioMuteOrdered", "copyrightClaim.restored", "chatReport.received", "store.staff_removed", "store.staff_updated"],
     "realtime-domain-events": [
       "battle.*", "gift.sent", "goal.*", "guest.*", "leaderboard.updated", "live.*", "stage.updated",
       "liveComment.*", "liveRoomSettings.updated", "liveViewer.*", "liveRecording.*", "overlayScene.*", "liveSafety.*",
