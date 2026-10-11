@@ -24,6 +24,12 @@ export function convertCurrentAdminResponse(response: CurrentAdminResponse): Sig
   return { id: response.id, email: response.email, name: response.name, role: response.role, permissions: response.permissions.filter(isKnownAdminPermission) };
 }
 
+export function havePrivilegesChanged(previous: SignedInAdmin, current: SignedInAdmin): boolean {
+  if (previous.id !== current.id || previous.role !== current.role) return true;
+  const before = new Set(previous.permissions);
+  return before.size !== new Set(current.permissions).size || current.permissions.some((permission) => !before.has(permission));
+}
+
 export async function exchangeRefreshTokenForNewTokenPair(refreshToken: string): Promise<ApiTokenPair | null> {
   const result = await callAdminBackend({ method: "POST", path: "/admin/auth/refresh", body: encodeJsonRequestBody({ refreshToken }), contentType: "application/json" });
   if (result.status !== 200) return null;
