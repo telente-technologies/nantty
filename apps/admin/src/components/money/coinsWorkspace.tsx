@@ -44,7 +44,7 @@ export function CoinsWorkspace() {
   const [cursor, setCursor] = useState<string | undefined>();
   const [openTransactionId, setOpenTransactionId] = useState<string | null>(null);
   const filters = { status: status === "all" ? undefined : status, kind: kind || undefined, cursor };
-  const { data, errorMessage, isLoading, reload } = useAdminQuery((signal) => fetchCoinTransactions(filters, signal), JSON.stringify(filters));
+  const { data, errorMessage, error: queryError, isLoading, reload } = useAdminQuery((signal) => fetchCoinTransactions(filters, signal), JSON.stringify(filters));
   const tabs = [
     { key: "pending_review" as const, label: "Needs review", count: data?.counts.pending_review ?? null },
     { key: "reviewed" as const, label: "Reviewed", count: data?.counts.reviewed ?? null },
@@ -60,7 +60,7 @@ export function CoinsWorkspace() {
       <Toolbar>
         <SelectField label="Kind" isLabelHidden options={kindOptions} value={kind} onChange={(event) => { setKind(event.target.value); setCursor(undefined); }} className={styles.filterField} />
       </Toolbar>
-      {errorMessage ? <ErrorBlock message={errorMessage} onRetry={reload} /> : null}
+      {errorMessage ? <ErrorBlock error={queryError} message={errorMessage} onRetry={reload} /> : null}
       <DataTable caption="Coin transactions" columns={coinColumns} rows={data?.items ?? []} readRowKey={(coin) => coin.id} isLoading={isLoading} selectedRowKey={openTransactionId} onRowOpen={(coin) => setOpenTransactionId(coin.id)} readRowTone={(coin) => (coin.chargebackRisk === "high" && coin.reviewStatus === "pending_review" ? "danger" : null)} emptyMessage="Nothing to review." />
       <CursorPagination cursor={cursor} nextCursor={data?.nextCursor} onCursorChange={setCursor} />
       {openTransactionId ? <CoinDetailPanel key={openTransactionId} transactionId={openTransactionId} onClose={() => setOpenTransactionId(null)} onChanged={reload} /> : null}

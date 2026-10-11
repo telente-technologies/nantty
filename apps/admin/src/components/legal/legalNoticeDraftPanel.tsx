@@ -45,7 +45,7 @@ function DraftForm({ initial, versionId, canEdit, canSendTest }: { readonly init
         <TextAreaField label="Summary of changes" rows={3} value={summaryText} disabled={!canEdit} onChange={(event) => setSummaryText(event.target.value)} />
         <TextAreaField label="What changed (one line each, generated from the version diff)" rows={6} value={changesText} disabled={!canEdit} onChange={(event) => setChangesText(event.target.value)} />
         <TextAreaField label="Re-accept note (material changes)" rows={3} value={reacceptNote} disabled={!canEdit} onChange={(event) => setReacceptNote(event.target.value)} hint="The effective date comes from the version." />
-        {saveMutation.errorMessage ?? testMutation.errorMessage ? <ErrorBlock message={saveMutation.errorMessage ?? testMutation.errorMessage ?? ""} /> : null}
+        {saveMutation.errorMessage ?? testMutation.errorMessage ? <ErrorBlock error={saveMutation.error} message={saveMutation.errorMessage ?? testMutation.errorMessage ?? ""} /> : null}
         <div className={styles.row}>
           {canEdit ? <Button isBusy={saveMutation.isRunning} onClick={() => void save()}>Save email draft</Button> : null}
           {canSendTest ? <Button variant="secondary" iconName="export24" isBusy={testMutation.isRunning} onClick={() => void sendTest()}>Send a test to myself</Button> : null}
@@ -61,6 +61,6 @@ function DraftForm({ initial, versionId, canEdit, canSendTest }: { readonly init
 export function LegalNoticeDraftPanel({ versionId, canEdit, canSendTest }: { readonly versionId: string; readonly canEdit: boolean; readonly canSendTest: boolean }) {
   const { data, errorMessage, isLoading, reload } = useAdminQuery((signal) => fetchLegalNoticeDraft(versionId, signal), versionId);
   if (isLoading) return <LoadingBlock label="Loading the email draft" lines={4} />;
-  if (errorMessage || !data) return <ErrorBlock message={errorMessage ?? "No draft."} onRetry={reload} />;
+  if (errorMessage || !data) return <ErrorBlock variant="section" message={errorMessage ?? "No draft."} onRetry={reload} />;
   return <DraftForm key={versionId} initial={data} versionId={versionId} canEdit={canEdit} canSendTest={canSendTest} />;
 }

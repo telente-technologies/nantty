@@ -17,7 +17,7 @@ import styles from "./money.module.css";
 
 export function PaymentWebhookDetailPanel({ webhookId, onClose, onReplayed }: { readonly webhookId: string; readonly onClose: () => void; readonly onReplayed: () => void }) {
   const { showToast } = useToast();
-  const { data: webhook, errorMessage, isLoading, reload, replaceData } = useAdminQuery((signal) => fetchDeadLetteredWebhook(webhookId, signal), webhookId);
+  const { data: webhook, errorMessage, error: queryError, isLoading, reload, replaceData } = useAdminQuery((signal) => fetchDeadLetteredWebhook(webhookId, signal), webhookId);
   const [isConfirming, setIsConfirming] = useState(false);
   const replay = useAdminMutation((reason: string) => replayDeadLetteredWebhook(webhookId, reason));
   const isProcessed = webhook?.processedAt !== null && webhook?.processedAt !== undefined;
@@ -40,7 +40,7 @@ export function PaymentWebhookDetailPanel({ webhookId, onClose, onReplayed }: { 
       width="wide"
       footer={webhook && !isProcessed ? <Button variant="primary" iconName="shield24" onClick={() => setIsConfirming(true)}>Replay</Button> : null}
     >
-      {errorMessage ? <ErrorBlock message={errorMessage} onRetry={reload} /> : null}
+      {errorMessage ? <ErrorBlock error={queryError} message={errorMessage} onRetry={reload} /> : null}
       {isLoading && !webhook ? <LoadingBlock /> : null}
       {webhook ? (
         <>

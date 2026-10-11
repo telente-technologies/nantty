@@ -42,7 +42,7 @@ export function LegalPublishDialog({ version, onClose, onPublished }: LegalPubli
         {willNotifyUsers ? (
           <>
             {preview.isLoading ? <LoadingBlock label="Preparing the send preview" lines={3} /> : null}
-            {preview.errorMessage ? <ErrorBlock message={preview.errorMessage} onRetry={preview.reload} /> : null}
+            {preview.errorMessage ? <ErrorBlock error={preview.error} message={preview.errorMessage} onRetry={preview.reload} /> : null}
             {preview.data ? (
               <>
                 <NoticeBanner tone="info" title="Sent through AWS SES, even without marketing consent">Hard bounces and suppressed addresses are skipped. Sending is rate-limited and batched.</NoticeBanner>

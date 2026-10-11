@@ -27,13 +27,13 @@ const webhookColumns: readonly DataTableColumn<DeadLetteredWebhook>[] = [
 export function PaymentWebhooksWorkspace() {
   const [provider, setProvider] = useState<ProviderTab>("all");
   const [openWebhookId, setOpenWebhookId] = useState<string | null>(null);
-  const { data, errorMessage, isLoading, reload } = useAdminQuery((signal) => fetchDeadLetteredWebhooks(provider === "all" ? undefined : provider, signal), provider);
+  const { data, errorMessage, error: queryError, isLoading, reload } = useAdminQuery((signal) => fetchDeadLetteredWebhooks(provider === "all" ? undefined : provider, signal), provider);
 
   return (
     <>
       <PageHeader area="Money" title="Payment webhooks" description="Provider events that failed 12 times and stopped retrying. Fix the cause first, then replay; a replay re-checks the payment with the provider before any money moves." />
       <SegmentedTabs label="Provider" items={[{ key: "all", label: "All" }, { key: "flutterwave", label: "Flutterwave" }]} activeKey={provider} onChange={setProvider} />
-      {errorMessage ? <ErrorBlock message={errorMessage} onRetry={reload} /> : null}
+      {errorMessage ? <ErrorBlock error={queryError} message={errorMessage} onRetry={reload} /> : null}
       <DataTable caption="Dead-lettered payment webhooks" columns={webhookColumns} rows={data?.items ?? []} readRowKey={(webhook) => webhook.id} isLoading={isLoading} selectedRowKey={openWebhookId} onRowOpen={(webhook) => setOpenWebhookId(webhook.id)} emptyMessage="No failed webhooks. Every provider event was processed." />
       {openWebhookId ? <PaymentWebhookDetailPanel key={openWebhookId} webhookId={openWebhookId} onClose={() => setOpenWebhookId(null)} onReplayed={reload} /> : null}
     </>

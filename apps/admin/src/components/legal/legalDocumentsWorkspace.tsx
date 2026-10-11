@@ -22,11 +22,11 @@ const columns: readonly DataTableColumn<LegalDocumentSummary>[] = [
 
 export function LegalDocumentsWorkspace() {
   const router = useRouter();
-  const { data, errorMessage, isLoading, reload } = useAdminQuery((signal) => fetchLegalDocuments(signal), "legal-documents");
+  const { data, errorMessage, error: queryError, isLoading, reload } = useAdminQuery((signal) => fetchLegalDocuments(signal), "legal-documents");
   return (
     <>
       <PageHeader area="Legal" title="Legal documents" description="Terms, privacy and every other policy users agree to. Each change is a new version with a summary, an effective date and a second-person publish." actions={<ButtonLink href="/legal/notices">Policy notices</ButtonLink>} />
-      {errorMessage ? <ErrorBlock message={errorMessage} onRetry={reload} /> : null}
+      {errorMessage ? <ErrorBlock error={queryError} message={errorMessage} onRetry={reload} /> : null}
       <DataTable caption="Legal documents" columns={columns} rows={data?.items ?? []} readRowKey={(document) => document.key} onRowOpen={(document) => router.push(`/legal/${document.key}`)} isLoading={isLoading} />
     </>
   );

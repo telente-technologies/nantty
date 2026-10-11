@@ -41,7 +41,7 @@ export function OrdersWorkspace() {
   const [currency, setCurrency] = useState("");
   const [cursor, setCursor] = useState<string | undefined>();
   const filters = { search: appliedSearch || undefined, status: status || undefined, currency: currency || undefined, cursor };
-  const { data, errorMessage, isLoading, reload } = useAdminQuery((signal) => fetchOrders(filters, signal), JSON.stringify(filters));
+  const { data, errorMessage, error: queryError, isLoading, reload } = useAdminQuery((signal) => fetchOrders(filters, signal), JSON.stringify(filters));
 
   function applySearch(event: FormEvent) {
     event.preventDefault();
@@ -60,7 +60,7 @@ export function OrdersWorkspace() {
           <SelectField label="Currency" isLabelHidden options={currencyOptions} value={currency} onChange={(event) => { setCurrency(event.target.value); setCursor(undefined); }} className={styles.filterField} />
         </Toolbar>
       </form>
-      {errorMessage ? <ErrorBlock message={errorMessage} onRetry={reload} /> : null}
+      {errorMessage ? <ErrorBlock error={queryError} message={errorMessage} onRetry={reload} /> : null}
       <DataTable caption="Orders" columns={orderColumns} rows={data?.items ?? []} readRowKey={(order) => order.id} isLoading={isLoading} onRowOpen={(order) => router.push(`/commerce/orders/${order.id}`)} readRowTone={(order) => (order.status === "disputed" ? "danger" : null)} emptyMessage="No orders match these filters." />
       <CursorPagination cursor={cursor} nextCursor={data?.nextCursor} onCursorChange={setCursor} />
     </>

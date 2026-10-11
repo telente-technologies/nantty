@@ -66,7 +66,7 @@ function LedgerForCurrency({ currency }: { readonly currency: string }) {
   return (
     <div className={ledgerStyles.ledgerLayout}>
       <Card title={`Accounts · ${currency}`} isFlush>
-        {accounts.errorMessage ? <ErrorBlock message={accounts.errorMessage} onRetry={accounts.reload} /> : null}
+        {accounts.errorMessage ? <ErrorBlock error={accounts.error} message={accounts.errorMessage} onRetry={accounts.reload} /> : null}
         {accounts.isLoading && !accounts.data ? <LoadingBlock /> : null}
         <button type="button" className={`${ledgerStyles.accountButton} ${accountCode === null ? ledgerStyles.accountButtonActive : ""}`} onClick={() => chooseAccount(null)} aria-pressed={accountCode === null}>
           <strong>All accounts</strong>
@@ -83,7 +83,7 @@ function LedgerForCurrency({ currency }: { readonly currency: string }) {
         <div className={ledgerStyles.journal}><CursorPagination cursor={accountCursor} nextCursor={accounts.data?.nextCursor} onCursorChange={setAccountCursor} /></div>
       </Card>
       <Card title="Journal entries" isFlush>
-        {entries.errorMessage ? <ErrorBlock message={entries.errorMessage} onRetry={entries.reload} /> : null}
+        {entries.errorMessage ? <ErrorBlock error={entries.error} message={entries.errorMessage} onRetry={entries.reload} /> : null}
         {entries.isLoading && !entries.data ? <LoadingBlock lines={6} /> : null}
         {entries.data?.items.map((journal) => <JournalEntryCard key={journal.id} journal={journal} />)}
         {entries.data && entries.data.items.length === 0 ? <p className={ledgerStyles.journal}>No entries for this account.</p> : null}
@@ -101,7 +101,7 @@ export function LedgerWorkspace() {
   return (
     <>
       <PageHeader area="Money" title="Ledger" description="Read-only double-entry ledger, one currency at a time. Every journal must balance: total debits equal total credits." />
-      {currencies.errorMessage ? <ErrorBlock message={currencies.errorMessage} onRetry={currencies.reload} /> : null}
+      {currencies.errorMessage ? <ErrorBlock error={currencies.error} message={currencies.errorMessage} onRetry={currencies.reload} /> : null}
       {currencies.data ? <SegmentedTabs label="Currency" items={currencies.data.items.map((code) => ({ key: code, label: code }))} activeKey={currency ?? ""} onChange={setSelectedCurrency} /> : null}
       {currency ? <LedgerForCurrency key={currency} currency={currency} /> : currencies.isLoading ? <LoadingBlock /> : null}
     </>

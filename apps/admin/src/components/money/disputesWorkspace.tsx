@@ -52,7 +52,7 @@ export function DisputesWorkspace() {
   const [appliedSearch, setAppliedSearch] = useState("");
   const [cursor, setCursor] = useState<string | undefined>();
   const filters = { status, search: appliedSearch || undefined, cursor };
-  const { data, errorMessage, isLoading, reload } = useAdminQuery((signal) => fetchDisputes(filters, signal), JSON.stringify(filters));
+  const { data, errorMessage, error: queryError, isLoading, reload } = useAdminQuery((signal) => fetchDisputes(filters, signal), JSON.stringify(filters));
   const counts = data?.counts;
   const openCount = counts ? (counts.awaiting_seller ?? 0) + (counts.under_review ?? 0) : null;
   const tabs = [
@@ -79,7 +79,7 @@ export function DisputesWorkspace() {
           <Button type="submit" iconName="magnifyingGlass16">Search</Button>
         </Toolbar>
       </form>
-      {errorMessage ? <ErrorBlock message={errorMessage} onRetry={reload} /> : null}
+      {errorMessage ? <ErrorBlock error={queryError} message={errorMessage} onRetry={reload} /> : null}
       <DataTable caption="Disputes" columns={disputeColumns} rows={data?.items ?? []} readRowKey={(dispute) => dispute.id} isLoading={isLoading} onRowOpen={(dispute) => router.push(`/commerce/disputes/${dispute.id}`)} readRowTone={(dispute) => (isDisputeOpen(dispute) && dispute.isSlaBreached ? "danger" : dispute.priority !== "normal" && isDisputeOpen(dispute) ? "caution" : null)} emptyMessage="No disputes here. Nice." />
       <CursorPagination cursor={cursor} nextCursor={data?.nextCursor} onCursorChange={setCursor} />
     </>

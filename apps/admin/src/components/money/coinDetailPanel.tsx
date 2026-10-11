@@ -58,7 +58,7 @@ function CoinTransactionBody({ coin }: { readonly coin: CoinTransactionDetail })
 
 export function CoinDetailPanel({ transactionId, onClose, onChanged }: { readonly transactionId: string; readonly onClose: () => void; readonly onChanged: () => void }) {
   const { showToast } = useToast();
-  const { data: coin, errorMessage, isLoading, reload, replaceData } = useAdminQuery((signal) => fetchCoinTransactionDetail(transactionId, signal), transactionId);
+  const { data: coin, errorMessage, error: queryError, isLoading, reload, replaceData } = useAdminQuery((signal) => fetchCoinTransactionDetail(transactionId, signal), transactionId);
   const [openAction, setOpenAction] = useState<"review" | "reverse" | null>(null);
   const [idempotencyKey, setIdempotencyKey] = useState(createIdempotencyKey);
   const reviewMutation = useAdminMutation((note: string) => markCoinTransactionReviewed(transactionId, note));
@@ -89,7 +89,7 @@ export function CoinDetailPanel({ transactionId, onClose, onChanged }: { readonl
         ) : null
       }
     >
-      {errorMessage ? <ErrorBlock message={errorMessage} onRetry={reload} /> : null}
+      {errorMessage ? <ErrorBlock error={queryError} message={errorMessage} onRetry={reload} /> : null}
       {isLoading && !coin ? <LoadingBlock /> : null}
       {coin ? (
         <>

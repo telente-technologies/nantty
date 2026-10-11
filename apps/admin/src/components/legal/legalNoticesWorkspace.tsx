@@ -33,7 +33,7 @@ const columns: readonly DataTableColumn<LegalNoticeProgress>[] = [
 ];
 
 export function LegalNoticesWorkspace() {
-  const { data, errorMessage, isLoading, reload } = useAdminQuery((signal) => fetchLegalNotices(signal), "legal-notices");
+  const { data, errorMessage, error: queryError, isLoading, reload } = useAdminQuery((signal) => fetchLegalNotices(signal), "legal-notices");
   const isSending = data?.items.some((notice) => notice.status !== "COMPLETED") ?? false;
   useEffect(() => {
     if (!isSending) return;
@@ -44,7 +44,7 @@ export function LegalNoticesWorkspace() {
     <>
       <PageHeader area="Legal" title="Policy notices" description="Policy updated emails to all users through AWS SES. They are legal notices, so they ignore marketing consent but never go to hard bounces or suppressed addresses." />
       <NoticeBanner tone="info" title="Queued on publish">Publishing Terms or Privacy (or any material change) queues the email automatically. Edit the email draft on the document page before publishing.</NoticeBanner>
-      {errorMessage ? <ErrorBlock message={errorMessage} onRetry={reload} /> : null}
+      {errorMessage ? <ErrorBlock error={queryError} message={errorMessage} onRetry={reload} /> : null}
       <DataTable caption="Policy notices" columns={columns} rows={data?.items ?? []} readRowKey={(notice) => notice.id} isLoading={isLoading} emptyMessage="No notices yet." />
     </>
   );

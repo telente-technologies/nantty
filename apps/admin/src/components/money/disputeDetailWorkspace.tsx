@@ -24,7 +24,7 @@ export function DisputeDetailWorkspace({ disputeId }: { readonly disputeId: stri
   const { data: dispute, errorMessage, isLoading, reload, replaceData } = useAdminQuery((signal) => fetchDisputeDetail(disputeId, signal), disputeId);
   const [isResolveDialogOpen, setIsResolveDialogOpen] = useState(false);
 
-  if (errorMessage) return <ErrorBlock message={errorMessage} onRetry={reload} />;
+  if (errorMessage) return <ErrorBlock variant="section" message={errorMessage} onRetry={reload} />;
   if (isLoading || !dispute) return <LoadingBlock lines={8} />;
   const isOpen = isDisputeOpen(dispute);
   const resolution = dispute.resolution;

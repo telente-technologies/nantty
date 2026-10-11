@@ -79,7 +79,7 @@ export function LegalOpenVersionPanel({ documentKey, currentVersion, openVersion
         {canPublish ? <Button variant="primary" iconName="shield24" disabled={isOwnSubmission} onClick={() => setIsPublishing(true)}>Publish</Button> : null}
         {canPublish ? <Button variant="quietDanger" disabled={isOwnSubmission} onClick={() => setIsReturning(true)}>Return to draft</Button> : null}
       </div>
-      {returnMutation.errorMessage ? <ErrorBlock message={returnMutation.errorMessage} /> : null}
+      {returnMutation.errorMessage ? <ErrorBlock error={returnMutation.error} message={returnMutation.errorMessage} /> : null}
       {currentVersion ? <><SectionHeading>Changes from the current version</SectionHeading><LegalVersionDiff leftLabel={`v${currentVersion.versionNumber} (current)`} rightLabel={`v${openVersion.versionNumber} (proposed)`} leftMarkdown={currentVersion.bodyMarkdown} rightMarkdown={openVersion.bodyMarkdown} /></> : <LegalMarkdownPreview markdown={openVersion.bodyMarkdown} />}
       {isPublishing ? <LegalPublishDialog version={openVersion} onClose={() => setIsPublishing(false)} onPublished={() => { setIsPublishing(false); showToast("Published. The Policy updated email is queued."); onChanged(); }} /> : null}
       {isReturning ? <ConfirmActionDialog intent="legal" isOpen title="Return to draft" confirmLabel="Return" reasonHint="Tell the author what to fix." isBusy={returnMutation.isRunning} errorMessage={returnMutation.errorMessage} onConfirm={async (reason) => { const result = await returnMutation.run(reason); if (result) { setIsReturning(false); onChanged(); } }} onClose={() => setIsReturning(false)} /> : null}

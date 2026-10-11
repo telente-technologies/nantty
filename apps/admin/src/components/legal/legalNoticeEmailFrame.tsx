@@ -39,7 +39,7 @@ export function LegalNoticeEmailFrame({ draft }: { readonly draft: LegalNoticeDr
       <EmailThemeToggle theme={theme} onChange={setTheme} />
       {preview.data ? <EmailPreviewFrame preview={preview.data} title="Policy update email preview" height={640} /> : null}
       {!preview.data && preview.isLoading ? <LoadingBlock label="Rendering the email" lines={6} /> : null}
-      {preview.errorMessage ? <ErrorBlock message={preview.errorMessage} onRetry={preview.reload} /> : null}
+      {preview.errorMessage ? <ErrorBlock error={preview.error} message={preview.errorMessage} onRetry={preview.reload} /> : null}
       <p className={styles.emailFrameNote}>Rendered with the policyUpdated template. Legal notices are sent even to people who opted out of marketing emails.</p>
     </div>
   );

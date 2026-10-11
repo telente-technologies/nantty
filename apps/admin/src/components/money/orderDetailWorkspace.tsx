@@ -58,7 +58,7 @@ export function OrderDetailWorkspace({ orderId }: { readonly orderId: string }) 
   const { data: order, errorMessage, isLoading, reload } = useAdminQuery((signal) => fetchOrderDetail(orderId, signal), orderId);
   const [isRefundDialogOpen, setIsRefundDialogOpen] = useState(false);
 
-  if (errorMessage) return <ErrorBlock message={errorMessage} onRetry={reload} />;
+  if (errorMessage) return <ErrorBlock variant="section" message={errorMessage} onRetry={reload} />;
   if (isLoading || !order) return <LoadingBlock lines={8} />;
   const canRefund = can("refunds:issue") && order.refundable.amountMinor > 0 && order.status !== "disputed";
 
