@@ -5,6 +5,15 @@ All notable changes to Zudomart are documented here. Format follows
 
 ## [Unreleased] — 2026-10-11
 
+### Payments — Flutterwave only
+
+- 2026-10-11: the previous provider was removed; Flutterwave is the sole
+  provider. Defaults (`PAYMENTS_PROVIDER=flutterwave`), Terraform secrets and
+  WAF rules, the sandbox stack, smoke journeys and docs now cover Flutterwave
+  only; the old adapter, webhook route, IP allowlist and secrets are gone.
+  Production go-live still needs live Flutterwave keys, IP whitelisting and
+  Flutterwave's written answers (`integrations/flutterwaveMigration.md`).
+
 ### Docs — cleanup
 
 - Removed finished or superseded docs: `integrations/bachsMigrationCase.md`
@@ -15,7 +24,7 @@ All notable changes to Zudomart are documented here. Format follows
   `verification/securityReview.md` (merged into `security/README.md`).
 - Merged `architecture/awsServicesAndIntegrations.md` into
   `awsAndThirdPartyIntegrations.md`.
-- Paystack-era docs now carry a Flutterwave provider-change note.
+- Docs from before the provider change now describe Flutterwave.
 - New single index: `docs/README.md`; the root README links to it.
 
 ## [Unreleased] — 2026-10-09 (batch 3)
