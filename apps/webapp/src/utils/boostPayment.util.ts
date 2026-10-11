@@ -39,9 +39,9 @@ const BOOST_ERROR_MESSAGES: Readonly<Record<string, string>> = {
   FREE_BOOST_USED: "You've already used this month's free boost. Choose another way to pay.",
   FREE_BOOST_TOO_LARGE: "This promotion costs more than your free boost covers. Lower the budget or the number of days.",
   VERIFICATION_REQUIRED: "Verify your payout details to pay from your Zudomart balance.",
-  VERIFICATION_UNAVAILABLE: "We couldn't check your verification just now. Try again in a moment, or pay with Paystack.",
-  INSUFFICIENT_FUNDS: "Your available balance is less than this promotion costs. Pay with Paystack instead.",
-  PAYMENT_METHOD_NOT_AVAILABLE_IN_APP: "This way of paying isn't available here. Pay with Paystack instead.",
+  VERIFICATION_UNAVAILABLE: "We couldn't check your verification just now. Try again in a moment, or pay by card or bank transfer.",
+  INSUFFICIENT_FUNDS: "Your available balance is less than this promotion costs. Pay by card or bank transfer instead.",
+  PAYMENT_METHOD_NOT_AVAILABLE_IN_APP: "This way of paying isn't available here. Pay by card or bank transfer instead.",
 };
 
 export function boostErrorMessageForCode(code: string | null | undefined): string | null {
@@ -49,7 +49,7 @@ export function boostErrorMessageForCode(code: string | null | undefined): strin
 }
 
 export function describeBoostPaymentMethod(method: string | null | undefined): string | null {
-  if (method === "card") return "Paystack";
+  if (method === "card") return "card or bank transfer";
   if (method === "balance" || method === "wallet") return "your Zudomart balance";
   if (method === "free") return "your free Premium boost";
   return null;
