@@ -56,7 +56,7 @@ Rounding (`RoundToPricePoint`): naira up to the next ₦100 (₦500 from ₦10,0
 
 ## 3. Coin packs (channel × currency)
 
-Coins are never money. A pack has the same number of coins everywhere; only the price changes. Web packs are cheaper and add bonus coins because Paystack costs ~2–4% against a 15–30% store fee. The iOS and Android prices are equal (assumes Apple's Small Business Program at 15%; see §6).
+Coins are never money. A pack has the same number of coins everywhere; only the price changes. Web packs are cheaper and add bonus coins because the card processing fee (Flutterwave) is a few percent against a 15–30% store fee. The iOS and Android prices are equal (assumes Apple's Small Business Program at 15%; see §6).
 
 | Coins (web bonus) | NGN | GHS | KES | ZAR | GBP | EUR | USD |
 |---|---|---|---|---|---|---|---|
@@ -78,7 +78,7 @@ Store product ids: `com.zudomart.app.coins.tier1` … `tier6` (one id per tier; 
 | Superfan | ₦2,000 / ₦2,400 | GH₵25 / GH₵30 | KSh 400 / KSh 500 | R59.99 / R69.99 | £7.99 / £9.99 | €8.99 / €10.99 | $9.99 / $11.99 |
 | VIP | ₦5,000 / ₦5,900 | GH₵60 / GH₵70 | KSh 1,000 / KSh 1,200 | R149.99 / R179.99 | £15.99 / £19.99 | €17.99 / €21.99 | $19.99 / $24.99 |
 
-The creator keeps 80% of net (after the store or Paystack fee) everywhere. US bands mirror Patreon/YouTube norms ($4.99 is YouTube's lowest membership price point).
+The creator keeps 80% of net (after the store or Flutterwave fee) everywhere. US bands mirror Patreon/YouTube norms ($4.99 is YouTube's lowest membership price point).
 
 Since 2026-10-05 creators pick a plan price from a fixed tier ladder (₦500, ₦1,000, ₦1,500, ₦2,000, ₦3,000, ₦4,000, ₦5,000 and the regional equivalents; yearly = 10 months) instead of typing one, so each price maps to an App Store / Google Play product. In the apps the price is grossed up by the store fee (admin setting `appStore.fees`: Apple 30%, or 15% in the Small Business Program; Google 15%), so the creator's net matches the web. Ladder, product ids and store setup: [integrations/appStoreProducts.md](integrations/appStoreProducts.md).
 
@@ -154,26 +154,25 @@ Billing: an advertiser spends in the ad account currency; another region's floor
 
 Decisions: join Apple's Small Business Program before launch (then `COIN_CHANNEL_FEE_BPS=ios:1500`); set every storefront's price manually to the app column. **Verify:** if Apple still bills Ghana in USD, set the GH app prices to the US column in App Store Connect and change the GH row's iOS amounts in admin (est. risk).
 
-## 7. Web payments: Paystack currency constraints
+## 7. Web payments: Flutterwave currency constraints
 
-> Payments are moving to Flutterwave (owner, 2026-10-10); re-check these currency rules against [`flutterwaveMigration.md`](integrations/flutterwaveMigration.md) §6.
+Flutterwave is the only web payment provider (owner, 2026-10-11). Country details: [`flutterwaveMigration.md`](integrations/flutterwaveMigration.md) §6.
 
-| Business country | Charge | Settle | Source |
-|---|---|---|---|
-| Nigeria (Zudomart's entity) | NGN and **USD (enabled by the owner, 4 Oct 2026)** | NGN; USD to a domiciliary account | Paystack support "What currency is available to my business?", "Can I accept payments in USD?" (fetched 4 Oct 2026) |
-| Ghana / Kenya / South Africa | GHS / KES / ZAR plus USD, each needing a Paystack business in that country | local, USD | same; Paystack is licensed in NG, GH, KE, ZA, CI (2026) |
-| GBP / EUR | **not supported** | – | Paystack lists five currencies only: NGN, GHS, KES, ZAR, USD |
+| Region | Charge | Notes |
+|---|---|---|
+| Nigeria (Zudomart's entity) | NGN, and USD for international cards | Card, bank transfer, USSD; payout subaccounts (wallets) are NGN only |
+| Ghana / Kenya / South Africa | GHS / KES / ZAR | Card plus MoMo (GH), M-Pesa (KE), account (ZA); each currency must be activated on the Flutterwave account. Direct mode, no wallet or escrow (§6 of the spec) |
+| GBP / EUR | **not enabled** | Not in `FLUTTERWAVE_SUPPORTED_CURRENCIES`; UK/EU web buyers pay in USD |
 
-**Owner decision (4 Oct 2026):** UK, Eurozone and (until local Paystack accounts exist) Ghana, Kenya and South Africa web buyers **pay the US price in USD** through Paystack. The apps keep store-local prices.
+**Owner decision (4 Oct 2026, kept):** UK and Eurozone web buyers **pay the US price in USD**. The apps keep store-local prices.
 
-- `PAYSTACK_SUPPORTED_CURRENCIES` (default `NGN,USD`) is the switch. For each web price the server decides: region currency if Paystack can charge it, otherwise the US price in USD, labelled **"Billed in USD"** (`billingNote` on `/api/v1/pricing/plans`, coin packs, creator bands and checkout).
+- `FLUTTERWAVE_SUPPORTED_CURRENCIES` (default `NGN,GHS,KES,ZAR,USD`) is the switch. For each web price the server decides: region currency if Flutterwave can charge it, otherwise the US price in USD, labelled **"Billed in USD"** (`billingNote` on `/api/v1/pricing/plans`, coin packs, creator bands and checkout). Remove a currency from the list until Flutterwave has activated it on the account.
 - If USD is switched off, those regions show their local price with `canBuyOnWeb: false` and the note "Web checkout isn't available in your currency or in USD yet. Buy in the Zudomart app, or try again later."; checkout returns `422 WEB_CURRENCY_NOT_ENABLED` and the coin pack list returns the same error instead of an empty list.
-- Charging GBP/EUR on the web would need a second provider (e.g. Stripe); not planned.
 
 ### 7.1 Owner setup checklist
 
-1. **Paystack USD:** add the USD domiciliary account in the Paystack dashboard (Settings → Preferences/Payouts → add domiciliary account; Paystack enables USD after confirming it). Keep `PAYSTACK_SUPPORTED_CURRENCIES=NGN,USD` in go-money's environment. Test a USD card payment in test mode before launch; international cards pay 3.9% + VAT on fees.
-2. **Paystack GH/KE/ZA (later):** register a Paystack business per country, then add `GHS`, `KES`, `ZAR` to `PAYSTACK_SUPPORTED_CURRENCIES` for the matching account (one account per currency).
+1. **Flutterwave currencies:** ask Flutterwave to activate USD (international cards), GHS, KES and ZAR collections on the live account, then set `FLUTTERWAVE_SUPPORTED_CURRENCIES` in go-money's environment to the activated list. Test each currency in test mode before launch.
+2. **Flutterwave fees:** read the processing fees per method and currency from the Flutterwave dashboard and confirm them in writing (question Q5 in the spec); the server reads the actual fee from each verified charge (`app_fee`), never a hardcoded rate.
 3. **App Store Connect:** create the in-app products with exactly these ids: subscriptions `com.zudomart.app.blue_essential.monthly|yearly`, `com.zudomart.app.blue.monthly|yearly`, `com.zudomart.app.premium.monthly|yearly` (one subscription group), coins `com.zudomart.app.coins.tier1` … `tier6` (consumables). For each storefront (Nigeria, Ghana, Kenya, South Africa, UK, every eurozone country, US) set the price manually to the app column in §2 and §3; leave all other storefronts on the US price. Join the Small Business Program.
 4. **Google Play Console:** create the same product ids (subscriptions with monthly and yearly base plans; coins as one-time products). Set per-country prices from §2/§3 for NG, GH, KE, ZA, GB, eurozone countries and US; use "US price" for other countries.
 5. **Per-storefront overrides:** if a store forces a different id or price for one region, edit that region's row in Admin → Regional pricing (store product ids per `ios.month`, `ios.year`, `android.month`, `android.year`).
@@ -218,7 +217,7 @@ FX used for conversions and the cross-region checks: the currency module's seed 
 
 ## 9. Nigeria-specific fees (unchanged, 3 Oct)
 
-- **0% commission on products.** Escrow fee 1.5% of the seller-group total incl. shipping (1% on Business), paid by the seller, plus Paystack's processing fee (1.5% + ₦100, capped at ₦2,000; ₦100 waived under ₦2,500). Direct payments: Paystack processing only. Buyers pay no fee. Daily automatic payout free.
+- **0% commission on products.** Escrow fee 1.5% of the seller-group total incl. shipping (1% on Business), paid by the seller, plus Flutterwave's processing fee (taken from each verified charge). Direct payments: Flutterwave processing only. Buyers pay no fee. Daily automatic payout free.
 - Launch promotions (Blue first month ₦1,000 for 90 days, founding sellers Pro ₦2,500 for 3 months, founding creators 10% share for 6 months, double first web coin pack, Black first year ₦400,000) stay Nigeria-only.
 
 ## 10. Where it lives
@@ -237,14 +236,13 @@ go-money reads prices **only** from this price book: the old NGN overrides in `c
 
 - Every 6 months, or when FX moves more than 10% (naira, cedi and shilling prices first).
 - Apple Small Business Program enrolment; Ghana App Store currency.
-- A GBP/EUR web provider (owner decision); Paystack GH/KE/ZA business accounts.
+- GBP/EUR web charging (owner decision); Flutterwave GHS/KES/ZAR activation.
 - Live CPM/CPC data per region after the first month: compare with §5.1, raise floors past 70% fill, and recalibrate the estimate assumptions (§5.3) from delivered campaigns.
 - Legal and tax: VAT/GST on digital services in GB/EU (price displayed VAT-inclusive), Kenya DST, Nigerian VAT on coins and subscriptions.
 
 ## Sources
 
-- Paystack support, currencies per business country: https://support.paystack.com/hc/en-us/articles/360009973779 (4 Oct 2026); USD: https://support.paystack.com/hc/en-us/articles/360009973799 ; international payments: https://support.paystack.com/hc/en-us/articles/360009882000
-- Paystack currency overview (2026): https://mctaba.com/learn/paystack/paystack-currency-not-supported-error ; https://learnwithhasan.com/payment-gateways/paystack/
+- Flutterwave v3 API reference and country support: [`integrations/flutterwaveApiReference.md`](integrations/flutterwaveApiReference.md) (read 2026-10-10).
 - X Premium regional prices: https://help.x.com/premium-plus-price-update (18 Feb 2025); Kenya: https://tech-ish.com/2025/12/29/how-much-x-basic-premium-cost-in-kenya-in-2026/ ; https://opentherank.com/ai-pricing/x/
 - TechEconomy, X Premium Nigeria: https://techeconomy.ng/nigerians-face-51-hike-as-x-raises-premium-monthly-subscription-to-34000
 - Meta Verified 2026: https://handles.gg/blog/instagram-verification-cost-how-much-2026-actual-price ; https://www.primebusiness.africa/facebook-instagram-verified-users-to-pay-monthly/
