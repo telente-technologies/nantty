@@ -16,6 +16,7 @@ import type { MainScreenProps } from "@/navigation/navigation.types";
 import { channelsService } from "@/services/social/channels.service";
 import { groupsService } from "@/services/social/groups.service";
 import { enqueueLocalMediaForUpload, waitForUploadedMediaId } from "@/services/media/mediaUploadQueue.service";
+import type { LocalMediaFile } from "@/services/media/mediaPreparation.service";
 import type { UserSummary } from "@/types";
 
 const MAXIMUM_GROUP_NAME_LENGTH = 60;
@@ -28,13 +29,13 @@ export function NewGroupScreen({ navigation, route }: MainScreenProps<"NewGroup"
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [selectedPeople, setSelectedPeople] = useState<readonly UserSummary[]>([]);
-  const [photo, setPhoto] = useState<{ previewUri: string; uploadJobId: string } | null>(null);
+  const [photo, setPhoto] = useState<{ previewUri: string; uploadJobId: string | null; file: LocalMediaFile } | null>(null);
 
   const pickGroupPhotoAndStartUploading = async () => {
     const [pickedPhoto] = await pickPhotosAndVideosFromLibrary(1);
     if (!pickedPhoto || pickedPhoto.mediaType !== "image") return;
-    const uploadJobId = await enqueueLocalMediaForUpload(pickedPhoto, "chat");
-    setPhoto({ previewUri: pickedPhoto.uri, uploadJobId });
+    const uploadJobId = isChannel ? await enqueueLocalMediaForUpload(pickedPhoto, "chat") : null;
+    setPhoto({ previewUri: pickedPhoto.uri, uploadJobId, file: pickedPhoto });
   };
 
   const toggleSelectedPerson = (person: UserSummary) =>
@@ -44,10 +45,9 @@ export function NewGroupScreen({ navigation, route }: MainScreenProps<"NewGroup"
 
   const createConversation = useMutation({
     mutationFn: async () => {
-      const photoMediaId = photo ? await waitForUploadedMediaId(photo.uploadJobId) : undefined;
-      return isChannel
-        ? channelsService.createBroadcastChannel({ name: name.trim(), description: description.trim() || undefined, photoMediaId })
-        : groupsService.createGroupConversation({ name: name.trim(), photoMediaId, memberIds: selectedPeople.map((person) => person.id) });
+      if (!isChannel) return groupsService.createGroupConversation({ name: name.trim(), memberIds: selectedPeople.map((person) => person.id), photo: photo?.file ?? null });
+      const photoMediaId = photo?.uploadJobId ? await waitForUploadedMediaId(photo.uploadJobId) : undefined;
+      return channelsService.createBroadcastChannel({ name: name.trim(), description: description.trim() || undefined, photoMediaId });
     },
     onSuccess: (conversation) => {
       queryClient.invalidateQueries({ queryKey: ["conversations"] });
@@ -88,7 +88,7 @@ export function NewGroupScreen({ navigation, route }: MainScreenProps<"NewGroup"
             style={styles.nameInput}
           />
         </View>
-        {photo ? <UploadProgressBar jobId={photo.uploadJobId} /> : null}
+        {photo?.uploadJobId ? <UploadProgressBar jobId={photo.uploadJobId} /> : null}
         {isChannel ? (
           <TextInput
             value={description}

@@ -62,6 +62,7 @@ export function MySubscriptionsScreen({ navigation }: MainScreenProps<"MySubscri
         { text: "Not now", style: "cancel" },
         { text: "Cancel subscription", style: "destructive", onPress: () => cancel.mutate(subscription.subscriptionId) },
       ],
+      { intent: "subscribe" },
     );
   };
 

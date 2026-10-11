@@ -69,7 +69,7 @@ export function DisputeDetailScreen({ navigation, route }: MainScreenProps<"Disp
           onLayout={keepLatestMessageVisible}
           keyboardDismissMode="interactive"
           contentContainerStyle={styles.content}
-          refreshControl={<RefreshControl refreshing={disputeQuery.isRefetching} onRefresh={() => disputeQuery.refetch()} tintColor={colors.primary} />}
+          refreshControl={<RefreshControl refreshing={disputeQuery.isRefetching} onRefresh={() => disputeQuery.refetch()} tintColor={colors.primary} colors={[colors.primary]} />}
         >
           <View style={styles.card}>
             <View style={styles.row}>

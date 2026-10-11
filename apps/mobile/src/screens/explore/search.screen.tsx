@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { ScrollView, StyleSheet, View } from "react-native";
 
 import { ExploreHome } from "@/components/explore/exploreHome";
+import { PostSurfaceProvider } from "@/components/feed/interactions/postSurface.context";
 import { RecentSearchList } from "@/components/search/recentSearchList";
 import { useRecentSearches } from "@/components/search/recentSearches.hook";
 import { SearchBar } from "@/components/search/searchBar";
@@ -117,7 +118,9 @@ export function SearchScreen({ navigation, route }: MainScreenProps<"Search">) {
           </View>
         ) : (
           <>
-            <SearchResultSections items={items} handlers={handlers} />
+            <PostSurfaceProvider surface={debouncedQuery.trim().startsWith("#") ? "hashtag" : "search"}>
+              <SearchResultSections items={items} handlers={handlers} />
+            </PostSurfaceProvider>
             {results.hasNextPage ? (
               <View style={styles.more}>
                 <Button title="Show more" variant="outline" loading={results.isFetchingNextPage} onPress={() => void results.fetchNextPage()} />

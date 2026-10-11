@@ -1,9 +1,10 @@
 import { useIsFocused } from "@react-navigation/native";
 import { useCameraPermissions } from "expo-camera";
 import { useEffect, useRef, useState } from "react";
-import { ActivityIndicator, Pressable, StyleSheet, View } from "react-native";
+import { Pressable, StyleSheet, View } from "react-native";
 import { useShareToChat } from "@/components/chatSafety/shareToChat.hook";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { BrandLoader } from "@/components/ui/brandLoader";
 import { showToast } from "@/store/toast.store";
 import { ErrorState } from "@/components/ui/errorState";
 import { Header } from "@/components/ui/header";
@@ -118,7 +119,7 @@ export function LiveScreen({ navigation, route }: MainScreenProps<"Live">) {
       showAlertWithButtons("End live?", "Viewers will be told the live has ended.", [
         { text: "Cancel", style: "cancel" },
         { text: "End live", style: "destructive", onPress: endLiveAsHost },
-      ]);
+      ], { intent: "stop" });
     } else {
       setShowViewerLiveOptions(true);
     }
@@ -168,7 +169,7 @@ export function LiveScreen({ navigation, route }: MainScreenProps<"Live">) {
         {sessionQuery.isError ? (
           <ErrorState message="Couldn't load this live." onRetry={() => sessionQuery.refetch()} retrying={sessionQuery.isRefetching} />
         ) : (
-          <ActivityIndicator style={styles.loading} color={colors.primary} accessibilityLabel="Loading live" />
+          <BrandLoader size="lg" style={styles.loading} accessibilityLabel="Loading live" />
         )}
       </View>
     );

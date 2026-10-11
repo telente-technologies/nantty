@@ -61,7 +61,7 @@ export function OrderDetailScreen({ navigation, route }: MainScreenProps<"OrderD
       <ScrollView
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
-        refreshControl={<RefreshControl refreshing={order.isRefetching} onRefresh={() => Promise.all([order.refetch(), escrow.refetch()])} tintColor={colors.primary} />}
+        refreshControl={<RefreshControl refreshing={order.isRefetching} onRefresh={() => Promise.all([order.refetch(), escrow.refetch()])} tintColor={colors.primary} colors={[colors.primary]} />}
       >
         <Pressable
           accessibilityRole="button"
@@ -101,17 +101,19 @@ export function OrderDetailScreen({ navigation, route }: MainScreenProps<"OrderD
         />
       </ScrollView>
       <View style={styles.footer}>
+        {detail.status === "pending" ? <Button title="Check payment" onPress={() => navigation.navigate("Payment", { orderId })} /> : null}
         {canConfirm ? <Button title="Confirm receipt" onPress={() => setConfirmSheetVisible(true)} /> : null}
         {escrow.data?.disputeId ? (
           <Button variant="subtle" title="View dispute" onPress={() => navigation.navigate("DisputeDetail", { disputeId: escrow.data!.disputeId! })} />
         ) : null}
         <View style={styles.footerRow}>
-          <Button variant="subtle" title="Contact seller" style={styles.flex} onPress={() => escrow.data && navigation.navigate("Chat", { userId: escrow.data.sellerUserId, name: detail.store.name })} />
+          <Button variant="subtle" title="Contact seller" style={styles.flex} onPress={() => navigation.navigate("Chat", { storeId: detail.store.id, name: detail.store.name })} />
           {canDispute ? <Button variant="subtle" title="Open a dispute" style={styles.flex} onPress={() => navigation.navigate("OpenDispute", { orderId })} /> : null}
         </View>
         <Button variant="subtle" title="Get help with this order" onPress={() => navigation.navigate("NewSupportTicket", { category: "order", linkedReference: { kind: "order", id: orderId, label: `Order ${detail.reference}` } })} />
       </View>
       <ConfirmActionSheet
+        intent="naira"
         visible={confirmSheetVisible}
         title="Confirm you received it?"
         message={isDirect ? "Only confirm if everything arrived as described." : `Only confirm if everything arrived as described. ${detail.store.name} will be paid right away and this can't be undone.`}

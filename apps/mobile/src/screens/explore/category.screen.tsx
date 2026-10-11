@@ -1,9 +1,10 @@
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { useEffect } from "react";
-import { ActivityIndicator, FlatList, StyleSheet } from "react-native";
+import { FlatList, StyleSheet } from "react-native";
 
 import { ProductMasonry } from "@/components/home/productMasonry";
 import { ShoppingCart24Icon } from "@/components/icons";
+import { BrandLoader } from "@/components/ui/brandLoader";
 import { EmptyState } from "@/components/ui/emptyState";
 import { ErrorState } from "@/components/ui/errorState";
 import { GridSkeleton } from "@/components/ui/gridSkeleton";
@@ -59,7 +60,7 @@ export function CategoryScreen({ navigation, route }: MainScreenProps<"Category"
         onEndReachedThreshold={0.5}
         refreshControl={refreshControl}
         contentContainerStyle={styles.content}
-        ListFooterComponent={products.isFetchingNextPage ? <ActivityIndicator style={styles.footer} color={colors.primary} /> : null}
+        ListFooterComponent={products.isFetchingNextPage ? <BrandLoader size="sm" style={styles.footer} /> : null}
       />
     </Screen>
   );

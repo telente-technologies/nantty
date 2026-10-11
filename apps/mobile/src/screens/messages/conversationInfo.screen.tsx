@@ -9,6 +9,7 @@ import { SecurityCodeRow } from "@/components/chatSafety/securityCode";
 import { useChatReportLauncher } from "@/components/chatReport/chatReportLauncher.hook";
 import { GroupMemberPicker } from "@/components/chat/groupMemberPicker";
 import { GroupMemberRow } from "@/components/chat/groupMemberRow";
+import { pickPhotosAndVideosFromLibrary } from "@/components/create/pickMedia.util";
 import { ConsentToggleRow } from "@/components/settings/consentToggleRow";
 import { ArrowLeft24Icon } from "@/components/icons";
 import { Avatar } from "@/components/ui/avatar";
@@ -59,13 +60,34 @@ export function ConversationInfoScreen({ navigation, route }: MainScreenProps<"C
   };
 
   const updateSettings = useMutation({
-    mutationFn: (update: ConversationSettingsUpdate) => messagesService.updateConversationSettings(conversationId, update),
+    mutationFn: (update: ConversationSettingsUpdate) =>
+      display?.isGroup && update.name !== undefined && conversation.data
+        ? groupsService.renameGroup(conversation.data, update.name)
+        : messagesService.updateConversationSettings(conversationId, update),
     onSuccess: (updated: Conversation) => {
       queryClient.setQueryData(["conversation", conversationId], updated);
       setRenamedTitle(null);
       refreshConversationEverywhere();
     },
   });
+  const changeGroupPhoto = useMutation({
+    mutationFn: async (remove: boolean) => {
+      if (!conversation.data) throw new Error("Conversation not loaded.");
+      if (remove) return groupsService.changeGroupPhoto(conversation.data, null);
+      const [picked] = await pickPhotosAndVideosFromLibrary(1);
+      return picked && picked.mediaType === "image" ? groupsService.changeGroupPhoto(conversation.data, picked) : conversation.data;
+    },
+    onSuccess: (updated: Conversation) => {
+      queryClient.setQueryData(["conversation", conversationId], updated);
+      refreshConversationEverywhere();
+    },
+  });
+  const openGroupPhotoOptions = () =>
+    showAlertWithButtons("Group photo", "The photo is end-to-end encrypted. Only members can see it.", [
+      { text: "Choose photo", onPress: () => changeGroupPhoto.mutate(false) },
+      ...(conversation.data?.photoMediaId ? [{ text: "Remove photo", style: "destructive" as const, onPress: () => changeGroupPhoto.mutate(true) }] : []),
+      { text: "Cancel", style: "cancel" as const },
+    ], { intent: "camera" });
   const runMemberAction = useMutation({
     mutationFn: (action: () => Promise<unknown>) => action(),
     onSuccess: refreshConversationEverywhere,
@@ -118,7 +140,18 @@ export function ConversationInfoScreen({ navigation, route }: MainScreenProps<"C
           </IconRow>
         </View>
         <View style={styles.identity}>
-          <Avatar uri={display?.avatarUrl ?? null} size={72} placeholderColor={colors.placeholder} />
+          {display?.isGroup && display.isAdmin && conversation.data?.hasGroupKey ? (
+            <Pressable accessibilityRole="button" accessibilityLabel="Change group photo" disabled={changeGroupPhoto.isPending} onPress={openGroupPhotoOptions}>
+              <Avatar uri={display.avatarUrl ?? null} size={72} placeholderColor={colors.placeholder} />
+            </Pressable>
+          ) : (
+            <Avatar uri={display?.avatarUrl ?? null} size={72} placeholderColor={colors.placeholder} />
+          )}
+          {changeGroupPhoto.error ? (
+            <Text size={typeScale.sm} lineHeight={16.9} color={colors.error}>
+              {changeGroupPhoto.error.message}
+            </Text>
+          ) : null}
           <View style={styles.nameRow}>
             <Text size={18} weight={600} lineHeight={21.6} align="center">
               {display?.displayName ?? ""}
@@ -211,7 +244,7 @@ export function ConversationInfoScreen({ navigation, route }: MainScreenProps<"C
                   showAlertWithButtons(`Remove ${member.user.name}?`, "They'll stop getting messages from this group.", [
                     { text: "Cancel", style: "cancel" },
                     { text: "Remove", style: "destructive", onPress: () => runMemberAction.mutate(() => groupsService.removeMemberFromGroup(conversationId, member.user.id)) },
-                  ])
+                  ], { intent: "removeMember" })
                 }
               />
             ))}
@@ -234,7 +267,7 @@ export function ConversationInfoScreen({ navigation, route }: MainScreenProps<"C
               showAlertWithButtons(`${leaveLabel}?`, display.isChannel ? "You'll stop getting new posts from this channel." : "You'll stop getting messages from this group. Someone will need to add you back.", [
                 { text: "Cancel", style: "cancel" },
                 { text: leaveLabel, style: "destructive", onPress: () => leaveConversation.mutate() },
-              ]);
+              ], { intent: "leave" });
             }}
           />
         ) : null}

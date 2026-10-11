@@ -54,7 +54,7 @@ export function EscrowStatusScreen({ navigation, route }: MainScreenProps<"Escro
       <Header title="Payment protection" />
       <ScrollView
         contentContainerStyle={styles.content}
-        refreshControl={<RefreshControl refreshing={escrowQuery.isRefetching} onRefresh={() => escrowQuery.refetch()} tintColor={colors.primary} />}
+        refreshControl={<RefreshControl refreshing={escrowQuery.isRefetching} onRefresh={() => escrowQuery.refetch()} tintColor={colors.primary} colors={[colors.primary]} />}
       >
         <EscrowSummaryCard escrow={escrow} viewerRole={viewerRole} />
         <View style={styles.card}>
@@ -86,6 +86,7 @@ export function EscrowStatusScreen({ navigation, route }: MainScreenProps<"Escro
         </View>
       </ScrollView>
       <ConfirmActionSheet
+        intent="naira"
         visible={confirmSheetVisible}
         title="Confirm you received it?"
         message={`Only confirm if everything arrived as described. ${escrow.store.name} will be paid right away and this can't be undone.`}

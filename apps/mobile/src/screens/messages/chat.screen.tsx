@@ -6,10 +6,11 @@ import type { LocallyStoredMessage } from "@/cache/messageHistory.type";
 import { removeExpiredMessagesFromCaches } from "@/cache/messageRealtimeCache.util";
 import { readSavedMessagesForInstantDisplay, syncConversationMessagesIncrementallyAndReadLocalHistory } from "@/cache/messageSync.util";
 import { ChatBubble } from "@/components/chat/chatBubble";
+import { foldConversationMessages } from "@/components/chat/chatControlFold.util";
 import { ChatComposerWithVoiceNotes } from "@/components/chat/chatComposerWithVoiceNotes";
 import { SecurityCodeChangedBanner } from "@/components/chatSafety/securityCode";
 import { ChatHeader } from "@/components/chat/chatHeader";
-import { describeConversationForDisplay, describeDisappearingMessagesDuration } from "@/components/chat/conversationDisplay.util";
+import { asSeenFromStoreChat, describeConversationForDisplay, describeDisappearingMessagesDuration } from "@/components/chat/conversationDisplay.util";
 import { ConversationIntro } from "@/components/chat/conversationIntro";
 import { ChatActionsMenu } from "@/components/chatReport/chatActionsMenu";
 import { useChatReportLauncher } from "@/components/chatReport/chatReportLauncher.hook";
@@ -28,6 +29,7 @@ import { useOptimisticLocationAndPollSender } from "@/components/chat/optimistic
 import { useOptimisticVoiceNoteSender } from "@/components/chat/optimisticVoiceNoteSender.hook";
 import { useUsersTypingInConversation } from "@/components/chat/typingIndicators.store";
 import { TypingDots } from "@/components/chat/typingDots";
+import { BrandLoader } from "@/components/ui/brandLoader";
 import { KeyboardSpacer } from "@/components/ui/keyboardSpacer";
 import { Screen } from "@/components/ui/screen";
 import { Text } from "@/components/ui/text";
@@ -69,11 +71,13 @@ export function ChatScreen({ navigation, route }: MainScreenProps<"Chat">) {
   const [isCelebrationDismissed, setIsCelebrationDismissed] = useState(false);
 
   const conversation = useQuery({
-    queryKey: ["conversation", route.params.conversationId ?? `user:${userId}`],
+    queryKey: ["conversation", route.params.conversationId ?? (route.params.storeId ? `store:${route.params.storeId}` : `user:${userId}`)],
     queryFn: () =>
       route.params.conversationId
         ? messagesService.fetchConversationById(route.params.conversationId)
-        : messagesService.startConversationWithUser(userId!),
+        : route.params.storeId
+          ? messagesService.openStoreConversation(route.params.storeId)
+          : messagesService.startConversationWithUser(userId!),
   });
   const conversationId = conversation.data?.id;
   const messages = useQuery({
@@ -108,9 +112,16 @@ export function ChatScreen({ navigation, route }: MainScreenProps<"Chat">) {
 
   const display = conversation.data ? describeConversationForDisplay(conversation.data) : null;
   const isGroupLike = !!display && (display.isGroup || display.isChannel);
-  const peer = conversation.data?.peer;
-  const items = messages.data ?? [];
+  const peer = display?.isBusiness ? undefined : conversation.data?.peer;
+  const folded = useMemo(() => foldConversationMessages(messages.data ?? [], myUserId), [messages.data, myUserId]);
+  const items = folded.visibleMessages;
   const newestFirstItems = useMemo(() => [...items].reverse(), [items]);
+  const { refetch: refetchConversation } = conversation;
+  const needsGroupKeyRefresh = folded.groupUpdateCount > 0 && conversation.data?.kind === "group" && !conversation.data.hasGroupKey;
+  useEffect(() => {
+    if (needsGroupKeyRefresh) void refetchConversation();
+  }, [needsGroupKeyRefresh, folded.groupUpdateCount, refetchConversation]);
+  const isThreadLoading = !messages.data?.length && (conversation.isLoading || messages.isLoading);
   const disappearingSeconds = conversation.data?.disappearingMessagesSeconds ?? null;
   const isMyMessage = (message: LocallyStoredMessage) => message.senderId === myUserId || message.senderId === "u_me";
   const inboxFolder = conversation.data?.inboxFolder ?? "chats";
@@ -148,50 +159,53 @@ export function ChatScreen({ navigation, route }: MainScreenProps<"Chat">) {
         ) : null}
         {peer && !isGroupLike ? <SecurityCodeChangedBanner peerIds={[peer.id]} peerName={peer.name} /> : null}
 
-        <FlatList
-          ref={listRef}
-          style={styles.flex}
-          data={newestFirstItems}
-          inverted
-          keyExtractor={(m) => m.id}
-          keyboardShouldPersistTaps="handled"
-          keyboardDismissMode={Platform.OS === "ios" ? "interactive" : "on-drag"}
-          ListFooterComponent={
-            <View>
-              {peer && !isGroupLike ? (
-                <ConversationIntro
-                  peer={peer}
-                  isFriend={conversation.data?.isFriend ?? false}
-                  onPressViewProfile={() => navigation.navigate("UserProfile", { userId: peer.id })}
-                />
-              ) : null}
-              {items.length > 0 ? (
-                <View style={styles.dayDivider}>
-                  <View style={styles.line} />
-                  <Text size={11} weight={500} lineHeight={15.4} letterSpacing={0} color={colors.textMuted} align="center">
-                    {formatConversationDayLabel(items[0]!.createdAt)}
-                  </Text>
-                </View>
-              ) : null}
-            </View>
-          }
-          ItemSeparatorComponent={() => <View style={styles.bubbleGap} />}
-          contentContainerStyle={styles.listContent}
-          ListHeaderComponent={usersTyping.length > 0 && !isGroupLike ? <TypingRow /> : null}
-          renderItem={({ item }) => (
-            <ChatBubble
-              message={item}
-              deliveryStatus={item.deliveryStatus}
-              isMine={isMyMessage(item)}
-              showSenderIdentity={isGroupLike}
-              showReadReceipt={inboxFolder === "chats"}
-              onLongPress={item.deliveryStatus === "sent" && item.kind !== "system" ? () => setMessageBeingReactedTo(item) : undefined}
-              onToggleReaction={(emoji, shouldReact) => toggleReactionOnMessage(item, emoji, shouldReact).catch(() => undefined)}
-              onRetryDocument={() => void retryDocument(item.id)}
-              onDiscardDocument={() => discardDocument(item.id)}
-            />
-          )}
-        />
+        <View style={styles.flex}>
+          <FlatList
+            ref={listRef}
+            style={styles.flex}
+            data={newestFirstItems}
+            inverted
+            keyExtractor={(m) => m.id}
+            keyboardShouldPersistTaps="handled"
+            keyboardDismissMode={Platform.OS === "ios" ? "interactive" : "on-drag"}
+            ListFooterComponent={
+              <View>
+                {peer && !isGroupLike ? (
+                  <ConversationIntro
+                    peer={peer}
+                    isFriend={conversation.data?.isFriend ?? false}
+                    onPressViewProfile={() => navigation.navigate("UserProfile", { userId: peer.id })}
+                  />
+                ) : null}
+                {items.length > 0 ? (
+                  <View style={styles.dayDivider}>
+                    <View style={styles.line} />
+                    <Text size={11} weight={500} lineHeight={15.4} letterSpacing={0} color={colors.textMuted} align="center">
+                      {formatConversationDayLabel(items[0]!.createdAt)}
+                    </Text>
+                  </View>
+                ) : null}
+              </View>
+            }
+            ItemSeparatorComponent={() => <View style={styles.bubbleGap} />}
+            contentContainerStyle={styles.listContent}
+            ListHeaderComponent={usersTyping.length > 0 && !isGroupLike ? <TypingRow /> : null}
+            renderItem={({ item }) => (
+              <ChatBubble
+                message={display?.isBusiness && conversation.data ? asSeenFromStoreChat(item, conversation.data, myUserId) : item}
+                deliveryStatus={item.deliveryStatus}
+                isMine={isMyMessage(item)}
+                showSenderIdentity={isGroupLike || !!display?.isBusiness}
+                showReadReceipt={inboxFolder === "chats"}
+                onLongPress={item.deliveryStatus === "sent" && item.kind !== "system" ? () => setMessageBeingReactedTo(item) : undefined}
+                onToggleReaction={(emoji, shouldReact) => toggleReactionOnMessage(item, emoji, shouldReact).catch(() => undefined)}
+                onRetryDocument={() => void retryDocument(item.id)}
+                onDiscardDocument={() => discardDocument(item.id)}
+              />
+            )}
+          />
+          {isThreadLoading ? <BrandLoader accessibilityLabel="Loading messages" style={styles.threadLoader} /> : null}
+        </View>
 
         {conversation.data && inboxFolder !== "chats" ? (
           <View style={styles.readOnlyNotice}>
@@ -277,5 +291,6 @@ const useStyles = makeThemedStyles((colors) => StyleSheet.create({
   bubbleGap: { height: 4 },
   typingRow: { paddingHorizontal: 20, paddingTop: 4, flexDirection: "row", justifyContent: "flex-start" },
   listContent: { paddingTop: 12 },
+  threadLoader: { position: "absolute", top: 0, right: 0, bottom: 0, left: 0, backgroundColor: colors.surface },
   readOnlyNotice: { paddingHorizontal: 24, paddingVertical: 16, borderTopWidth: 1, borderTopColor: colors.divider },
 }));
