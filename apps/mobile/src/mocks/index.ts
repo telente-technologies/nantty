@@ -14,6 +14,7 @@ import { marketingPreferencesMocks } from "./marketingPreferences.mock";
 import { adEventsMocks } from "./adEvents.mock";
 import { authMocks } from "./auth.mock";
 import { banksMocks } from "./banks.mock";
+import { providerWalletMocks } from "./providerWallet.mock";
 import { boostsMocks } from "./boosts.mock";
 import { businessProfilesMocks } from "./businessProfiles.mock";
 import { brandsMocks } from "./brands.mock";
@@ -35,6 +36,7 @@ import { creatorSubscriptionsMocks } from "./creatorSubscriptions.mock";
 import { disputesMocks } from "./disputes.mock";
 import { followGraphMocks } from "./followGraph.mock";
 import { feedMocks } from "./feed.mock";
+import { feedInteractionsMocks } from "./feedInteractions.mock";
 import { giftsMocks } from "./gifts.mock";
 import { liveMocks } from "./live.mock";
 import { liveBattleMocks } from "./liveBattle.mock";
@@ -57,6 +59,7 @@ import { storeRewardsMocks } from "./storeRewards.mock";
 import { savesMocks } from "./saves.mock";
 import { guestAccessMocks } from "./guestAccess.mock";
 import { matchMockPathAndExtractParams, type MockRoute } from "./registry.mock";
+import { sellerCatalogMocks } from "./sellerCatalog.mock";
 import { sellerMocks } from "./seller.mock";
 import { geoMocks } from "./geo.mock";
 import { legalMocks } from "./legal.mock";
@@ -69,6 +72,7 @@ import { usersMocks } from "./users.mock";
 import { verificationMocks } from "./verification.mock";
 import { zudoPointsMocks } from "./zudoPoints.mock";
 import { walletMocks } from "./wallet.mock";
+import { widgetsMocks } from "./widgets.mock";
 import { payoutOnboardingMocks } from "./payoutOnboarding.mock";
 import { chatReportsMocks } from "./chatReports.mock";
 import { reportsMocks } from "./reports.mock";
@@ -90,6 +94,7 @@ const routes: MockRoute[] = [
   ...followGraphMocks,
   ...usersMocks,
   ...feedMocks,
+  ...feedInteractionsMocks,
   ...exploreMocks,
   ...postAudienceMocks,
   ...placesMocks,
@@ -146,7 +151,10 @@ const routes: MockRoute[] = [
   ...legalMocks,
   ...walletMocks,
   ...payoutOnboardingMocks,
+  ...providerWalletMocks,
+  ...sellerCatalogMocks,
   ...sellerMocks,
+  ...widgetsMocks,
 ];
 
 export async function resolveMockApiRequest<T>(method: string, url: string, body: unknown, idempotencyKey?: string, isGuest = false): Promise<T> {

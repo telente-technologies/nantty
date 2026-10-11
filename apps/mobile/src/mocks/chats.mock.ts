@@ -2,7 +2,7 @@ import type { Conversation, Message, UserSummary } from "@/types";
 
 import { ApiError } from "@/errors/api.error";
 
-import { buildAttachmentSeedMessages, buildMessagePreviewText, buildPollFromInput, type PollInput } from "./chatAttachments.mock";
+import { buildAttachmentSeedMessages, buildMessagePreviewText } from "./chatAttachments.mock";
 import { buildExpiredMediaSeedMessages, buildLinkSeedMessages } from "./chatRichSeedMessages.mock";
 import { decorateConversation, isConversationHidden, isHiddenByMessageRequestAudience, isOutgoingRequestAllowedByPeer } from "./chatInboxState.mock";
 import { conversationHasStreak, recordStreakSendByMe, seedStreak } from "./chatStreakEngine.mock";
@@ -24,13 +24,13 @@ const directConversation = (id: string, peerId: string, lastMessage: string, hou
   disappearingMessagesSeconds: null,
 });
 
+const mockStoreConversation = (conversation: Conversation, store: NonNullable<Conversation["store"]>): Conversation => ({
+  ...conversation, kind: "business", store, peer: { ...conversation.peer, id: store.id, name: store.name, username: "", avatarUrl: store.avatarUrl ?? null },
+});
+
 export const mockConversations: Conversation[] = [
   directConversation("c_1", "u_21", "Abeg send me the pictures of the aso-ebi when you can 🙏", 0.4, 3, true),
-  {
-    ...directConversation("c_2", "u_1", "Your order has been packed and will ship tomorrow morning", 2, 1, false),
-    kind: "business",
-    store: { id: "s_ada", name: "Adaeze Styles" },
-  },
+  mockStoreConversation(directConversation("c_2", "u_1", "Your order has been packed and will ship tomorrow morning", 2, 1, false), { id: "s_ada", name: "Adaeze Styles", avatarUrl: null }),
   {
     ...directConversation("g_owambe", "u_21", "Blessing: Venue is confirmed for Saturday 🎉", 1, 5, true),
     kind: "group",
@@ -46,7 +46,7 @@ export const mockConversations: Conversation[] = [
     myRole: "subscriber",
   },
   directConversation("c_3", "u_7", "Arsenal no go carry last this season, trust me", 8, 0, true),
-  { ...directConversation("c_4", "u_2", "Yes, the earbuds come with a 1-year warranty", 30, 0, false), kind: "business", store: { id: "s_tunde", name: "TundeTech Gadgets" } },
+  mockStoreConversation(directConversation("c_4", "u_2", "Yes, the earbuds come with a 1-year warranty", 30, 0, false), { id: "s_tunde", name: "TundeTech Gadgets", avatarUrl: null }),
   directConversation("c_susp", "u_22", "Thanks, I'll send the invoice tomorrow", 48, 0, true),
   directConversation("c_req_1", "u_20", "Hi! I saw your store, do you ship to Abuja?", 3, 1, false),
   directConversation("c_req_2", "u_9", "Hello, I'd love to shoot your next collection", 6, 1, false),
@@ -137,7 +137,7 @@ export const findMockConversation = (conversationId: string): Conversation =>
 export function appendMockMessageAndUpdateConversation(message: Message) {
   mockMessagesByConversation.set(message.conversationId, [...(mockMessagesByConversation.get(message.conversationId) ?? []), message]);
   const index = mockConversations.findIndex((c) => c.id === message.conversationId);
-  if (index >= 0) {
+  if (index >= 0 && message.kind !== "control") {
     const current = mockConversations[index]!;
     mockConversations[index] = { ...current, lastMessage: buildMessagePreviewText(message), lastMessageAt: message.createdAt };
   }
@@ -188,9 +188,11 @@ export const chatsMocks: MockRoute[] = [
     return conversation;
   }),
   createMockRoute("POST", "/api/v1/conversations/:conversationId/messages", ({ params, body }) => {
-    const input = body as { text?: string; encryption?: { deviceId: string; ciphertext: string; protocol?: string }; kind?: "text" | "voice" | "image" | "shared" | "location" | "liveLocation" | "document" | "poll"; location?: Message["location"]; document?: Message["document"]; poll?: PollInput; mediaId?: string; durationSeconds?: number; linkPreview?: string | null; sharedContent?: Message["sharedContent"]; mentions?: Message["mentions"] };
-    if (input.text && input.kind !== "poll") throw new ApiError(422, "Messages are end-to-end encrypted: send an encryption envelope, never text.", "PLAINTEXT_NOT_ACCEPTED");
-    if ((input.kind ?? "text") === "text" && !input.encryption?.ciphertext) throw new ApiError(422, "A text message needs an encryption envelope.", "ENCRYPTION_REQUIRED");
+    const input = body as { text?: unknown; location?: unknown; poll?: unknown; document?: unknown; sharedContent?: unknown; encryption?: { deviceId: string; ciphertext: string; protocol?: string }; kind?: NonNullable<Message["kind"]>; mediaId?: string; durationSeconds?: number; linkPreview?: string | null; mentions?: Message["mentions"] };
+    const plaintextFields = (["text", "location", "poll", "document", "sharedContent"] as const).filter((field) => input[field] !== undefined && input[field] !== null && input[field] !== "");
+    if (plaintextFields.length > 0) throw new ApiError(422, "Chats are end-to-end encrypted. Update Zudomart to send this.", "PLAINTEXT_NOT_ACCEPTED");
+    if (!input.encryption?.ciphertext) throw new ApiError(422, "Every chat message needs an encryption envelope.", "ENCRYPTION_REQUIRED");
+    if (input.kind === "control" && input.mediaId) throw new ApiError(422, "This message kind has no media.", "MEDIA_NOT_ALLOWED");
     const conversation = findMockConversation(params.conversationId!);
     if (outgoingRequestConversationIds.has(conversation.id) && !isOutgoingRequestAllowedByPeer(conversation.peer.id)) {
       throw new ApiError(403, `${conversation.peer.name} isn't accepting message requests from you`);
@@ -205,22 +207,19 @@ export const chatsMocks: MockRoute[] = [
     const isGroupConversation = conversation.kind === "group";
     const sanitizedMentions = sanitizeMentionsForWrite(getSignedInMockUser(), input.mentions, isGroupConversation ? "group" : "direct", conversation.id);
     if (isGroupConversation) notifyMentionedUsers(getSignedInMockUser(), sanitizedMentions, "group", conversation.id);
-    if (conversationHasStreak(conversation.id)) recordStreakSendByMe(conversation.id);
+    if (conversationHasStreak(conversation.id) && input.kind !== "control") recordStreakSendByMe(conversation.id);
     return appendMockMessageAndUpdateConversation({
       id: `m_${Date.now()}`,
       conversationId: params.conversationId!,
       senderId: getSignedInMockUser().id,
-      text: input.kind === "poll" ? (input.text ?? "") : "",
+      text: "",
       createdAt,
       ...(sanitizedMentions.mentions.length ? { mentions: sanitizedMentions.mentions } : {}),
       kind: input.kind ?? "text",
       media,
-      mediaExpiresAt: media || input.document ? new Date(Date.now() + 30 * 86_400_000).toISOString() : null,
-      location: input.location ? { ...input.location, updatedAt: createdAt } : null,
-      document: input.document ?? null,
-      poll: input.poll ? buildPollFromInput(input.poll) : null,
+      mediaExpiresAt: media || input.kind === "document" ? new Date(Date.now() + 30 * 86_400_000).toISOString() : null,
+      document: input.kind === "document" ? ({ url: null } as unknown as Message["document"]) : null,
       linkPreview: typeof input.linkPreview === "string" ? (input.linkPreview as never) : null,
-      sharedContent: input.sharedContent ?? null,
       encryption: input.encryption ? { deviceId: input.encryption.deviceId, ciphertext: input.encryption.ciphertext, protocol: input.encryption.protocol ?? "signal-v1" } : null,
       expiresAt: withExpiryForConversation(params.conversationId!, createdAt),
     });

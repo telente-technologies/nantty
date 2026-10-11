@@ -51,6 +51,11 @@ export const authMocks: MockRoute[] = [
     signInDemoAccountMatchingIdentifier(identifier);
     return buildMockAuthSession();
   }),
+  createMockRoute("POST", "/api/v1/auth/step-up", ({ body }) => {
+    const proof = (body ?? {}) as { password?: string; otpToken?: string };
+    if (!proof.password && !proof.otpToken) throw new ApiError(400, "Enter your password or the code we emailed you.", "STEP_UP_PROOF_REQUIRED");
+    return { stepUpToken: `mock-step-up-${Date.now()}`, expiresIn: 300, method: proof.password ? "password" : "emailCode" };
+  }),
   createMockRoute("POST", "/api/v1/auth/register", ({ body }) => {
     const { username, email } = body as { username?: string; email?: string };
     const availability = username?.trim() ? checkAvailability(username) : null;

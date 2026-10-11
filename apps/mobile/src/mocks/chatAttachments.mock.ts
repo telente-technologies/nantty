@@ -1,28 +1,16 @@
-import type { Message, MessagePoll } from "@/types";
+import type { Message } from "@/types";
 
 import { isoDateHoursAgo } from "./fixtures.mock";
 
-export interface PollInput {
-  readonly question: string;
-  readonly allowMultipleAnswers: boolean;
-  readonly options: readonly string[];
-}
-
 const SAMPLE_PDF_URL = "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf";
 const DOCUMENT_RETENTION_MS = 30 * 86_400_000;
-
-export const buildPollFromInput = (input: PollInput): MessagePoll => ({
-  question: input.question,
-  allowMultipleAnswers: input.allowMultipleAnswers,
-  options: input.options.map((text, index) => ({ id: `opt_${Date.now().toString(36)}_${index}`, text, voteCount: 0, votedByMe: false })),
-});
 
 export const buildMessagePreviewText = (message: Message) => {
   if (message.kind === "voice") return "🎤 Voice note";
   if (message.kind === "location") return "📍 Location";
   if (message.kind === "liveLocation") return "📍 Live location";
   if (message.kind === "document") return `📄 ${message.document?.fileName ?? "Document"}`;
-  if (message.kind === "poll") return `📊 ${message.poll?.question ?? "Poll"}`;
+  if (message.kind === "poll") return `📊 ${message.pollDefinition?.question ?? "Poll"}`;
   if (message.kind === "shared") return message.text || "Shared content";
   return message.text;
 };
@@ -61,13 +49,13 @@ export const buildAttachmentSeedMessages = (conversationId: string, peerId: stri
   {
     ...buildText("m_poll_peer", conversationId, peerId, "Which colour for the aso-ebi?", 3),
     kind: "poll",
-    poll: {
+    pollDefinition: {
       question: "Which colour for the aso-ebi?",
       allowMultipleAnswers: false,
       options: [
-        { id: "opt_gold", text: "Gold and ivory", voteCount: 3, votedByMe: false },
-        { id: "opt_green", text: "Emerald green", voteCount: 5, votedByMe: false },
-        { id: "opt_red", text: "Wine red", voteCount: 1, votedByMe: false },
+        { id: "opt_gold", text: "Gold and ivory" },
+        { id: "opt_green", text: "Emerald green" },
+        { id: "opt_red", text: "Wine red" },
       ],
     },
   },

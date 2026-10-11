@@ -3,13 +3,10 @@ import type {
   Conversation,
   ConversationMember,
   ConversationSettingsUpdate,
-  Message,
-  MessageReactionSummary,
   NewChannelInput,
-  NewGroupConversationInput,
 } from "@/types";
 
-import { appendMockMessageAndUpdateConversation, findMockConversation, mockChatUser, mockConversations, mockMessagesByConversation } from "./chats.mock";
+import { appendMockMessageAndUpdateConversation, findMockConversation, mockChatUser, mockConversations } from "./chats.mock";
 import { getSignedInMockUser } from "./fixtures.mock";
 import { registerGroupMentionLookup } from "./mentionRules.mock";
 import { createMockRoute, type MockRoute } from "./registry.mock";
@@ -73,41 +70,58 @@ const setMemberRole = (conversationId: string, userId: string, role: Conversatio
     (membersByConversationId.get(conversationId) ?? []).map((member) => (member.user.id === userId ? { ...member, role } : member)),
   );
 
-function toggleMockReaction(messageId: string, emoji: string, shouldReact: boolean): MessageReactionSummary[] {
-  for (const [conversationId, messages] of mockMessagesByConversation) {
-    const message = messages.find((m) => m.id === messageId);
-    if (!message) continue;
-    const reactions = [...(message.reactions ?? [])];
-    const existing = reactions.find((r) => r.emoji === emoji);
-    const updatedReactions = existing
-      ? reactions
-          .map((r) => (r.emoji === emoji && r.reactedByMe !== shouldReact ? { ...r, count: r.count + (shouldReact ? 1 : -1), reactedByMe: shouldReact } : r))
-          .filter((r) => r.count > 0)
-      : shouldReact
-        ? [...reactions, { emoji, count: 1, reactedByMe: true }]
-        : reactions;
-    const updatedMessage: Message = { ...message, reactions: updatedReactions };
-    mockMessagesByConversation.set(conversationId, messages.map((m) => (m.id === messageId ? updatedMessage : m)));
-    return updatedReactions;
-  }
-  throw new ApiError(404, "Message not found", "MESSAGE_NOT_FOUND");
+const signedGroupPhotoUrl = (mediaId: string | null) => (mediaId ? `https://mock-media.zudomart.local/chat/${mediaId}?signature=member` : null);
+
+export const mockStoreInboxTeam = ["u_store_owner", "u_store_agent"];
+
+function openMockStoreConversation(storeId: string): Conversation {
+  const id = `biz_${storeId}`;
+  const existing = mockConversations.find((conversation) => conversation.id === id);
+  if (existing) return existing;
+  const storeName = "Ada Fabrics";
+  const conversation: Conversation = {
+    id, peer: { ...mockChatUser("u_20"), id: storeId, name: storeName, username: "" }, lastMessage: "", lastMessageAt: new Date().toISOString(), unread: 0, isFriend: false, kind: "business", title: null,
+    store: { id: storeId, name: storeName, avatarUrl: null },
+  };
+  mockConversations.push(conversation);
+  return conversation;
+}
+
+function mockEncryptionRecipients(conversationId: string) {
+  const me = getSignedInMockUser().id;
+  const conversation = findMockConversation(conversationId);
+  if (conversation.kind === "business") return { userIds: [me, ...mockStoreInboxTeam], storeTeamUserIds: mockStoreInboxTeam };
+  if (conversation.kind === "group" || conversation.kind === "channel") return { userIds: (membersByConversationId.get(conversationId) ?? []).map((member) => member.user.id), storeTeamUserIds: [] };
+  return { userIds: [me, conversation.peer.id], storeTeamUserIds: [] };
 }
 
 export const groupsMocks: MockRoute[] = [
+  createMockRoute("GET", "/api/v1/conversations/:conversationId/recipients", ({ params }) => mockEncryptionRecipients(params.conversationId!)),
+  createMockRoute("POST", "/api/v1/conversations/stores/:storeId", ({ params }) => openMockStoreConversation(params.storeId!)),
+  createMockRoute("POST", "/api/v1/conversations/stores/:storeId/messages", ({ body }) => {
+    const input = (body ?? {}) as Record<string, unknown>;
+    if (["body", "text", "location", "poll", "document", "sharedContent"].some((field) => input[field] !== undefined && input[field] !== null && input[field] !== "")) {
+      throw new ApiError(422, "Chats are end-to-end encrypted. Update Zudomart to send this.", "PLAINTEXT_NOT_ACCEPTED");
+    }
+    throw new ApiError(422, "Open the store chat and send an encrypted message.", "ENCRYPTION_REQUIRED");
+  }),
   createMockRoute("POST", "/api/v1/conversations/groups", ({ body }) => {
-    const input = body as NewGroupConversationInput;
-    if (!input.name.trim()) throw new ApiError(422, "Give your group a name", "GROUP_NAME_REQUIRED");
+    const input = body as { readonly name?: unknown; readonly encryptedAttributes?: string; readonly memberIds: readonly string[]; readonly photoMediaId?: string };
+    if (input.name !== undefined && input.name !== "") throw new ApiError(422, "Group names and photos are end-to-end encrypted. Update Zudomart to create or rename groups.", "PLAINTEXT_NOT_ACCEPTED");
+    if (!input.encryptedAttributes || input.encryptedAttributes.length < 64) throw new ApiError(422, "A new group needs its encrypted details.", "ENCRYPTION_REQUIRED");
     const me = getSignedInMockUser();
     const conversation: Conversation = {
       id: nextMockId("g"),
       peer: mockChatUser(input.memberIds[0] ?? "u_20"),
-      lastMessage: `${me.name} created the group`,
+      lastMessage: "",
       lastMessageAt: new Date().toISOString(),
       unread: 0,
       isFriend: true,
       kind: "group",
-      title: input.name.trim(),
-      photoUrl: null,
+      title: null,
+      encryptedAttributes: input.encryptedAttributes,
+      photoMediaId: input.photoMediaId ?? null,
+      photoUrl: signedGroupPhotoUrl(input.photoMediaId ?? null),
       memberCount: input.memberIds.length + 1,
       myRole: "owner",
       disappearingMessagesSeconds: null,
@@ -117,7 +131,6 @@ export const groupsMocks: MockRoute[] = [
       { user: mockChatUser(me.id), role: "owner" },
       ...input.memberIds.map((userId) => ({ user: mockChatUser(userId), role: "member" as const })),
     ]);
-    postSystemNotice(conversation.id, `${me.name} created the group`);
     return conversation;
   }),
   createMockRoute("GET", "/api/v1/conversations/:conversationId/members", ({ params }) => membersByConversationId.get(params.conversationId!) ?? []),
@@ -153,7 +166,10 @@ export const groupsMocks: MockRoute[] = [
     if (index >= 0) mockConversations.splice(index, 1);
   }),
   createMockRoute("PATCH", "/api/v1/conversations/:conversationId", ({ params, body }) => {
-    const update = body as ConversationSettingsUpdate;
+    const update = body as ConversationSettingsUpdate & { readonly encryptedAttributes?: string; readonly photoMediaId?: string | null };
+    const target = mockConversations.find((c) => c.id === params.conversationId);
+    if (target?.kind === "group" && update.name !== undefined) throw new ApiError(422, "Group names and photos are end-to-end encrypted. Update Zudomart to create or rename groups.", "PLAINTEXT_NOT_ACCEPTED");
+    if (update.encryptedAttributes !== undefined || (target?.kind === "group" && update.photoMediaId !== undefined)) requireGroupAdmin(params.conversationId!);
     const me = getSignedInMockUser();
     const conversationNoun = mockConversations.find((c) => c.id === params.conversationId)?.kind === "channel" ? "channel" : "group";
     if (update.onlyAdminsCanMentionAll !== undefined) requireGroupAdmin(params.conversationId!);
@@ -164,6 +180,8 @@ export const groupsMocks: MockRoute[] = [
     return replaceMockConversation(params.conversationId!, (c) => ({
       ...c,
       ...(update.name !== undefined ? { title: update.name } : {}),
+      ...(update.encryptedAttributes !== undefined ? { encryptedAttributes: update.encryptedAttributes } : {}),
+      ...(update.photoMediaId !== undefined ? { photoMediaId: update.photoMediaId, photoUrl: signedGroupPhotoUrl(update.photoMediaId) } : {}),
       ...(update.disappearingMessagesSeconds !== undefined ? { disappearingMessagesSeconds: update.disappearingMessagesSeconds } : {}),
       ...(update.onlyAdminsCanMentionAll !== undefined ? { onlyAdminsCanMentionAll: update.onlyAdminsCanMentionAll } : {}),
     }));
@@ -194,8 +212,4 @@ export const groupsMocks: MockRoute[] = [
     const index = mockConversations.findIndex((c) => c.id === params.channelId);
     if (index >= 0) mockConversations.splice(index, 1);
   }),
-  createMockRoute("POST", "/api/v1/messages/:messageId/reactions", ({ params, body }) =>
-    toggleMockReaction(params.messageId!, (body as { emoji: string }).emoji, true),
-  ),
-  createMockRoute("DELETE", "/api/v1/messages/:messageId/reactions/:emoji", ({ params }) => toggleMockReaction(params.messageId!, params.emoji!, false)),
 ];

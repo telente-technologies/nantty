@@ -34,6 +34,10 @@ const buildPostCard = (reference: SharedContentReference, post: Post | undefined
 
 export const resolveSharedContentCard = (reference: SharedContentReference): SharedContentCard => {
   switch (reference.kind) {
+    case "order":
+      return reference.id.startsWith("gone")
+        ? unavailableCard(reference, "unavailable")
+        : { reference, availability: "available", title: "Order ZM-1042", subtitle: "3 items · shipped", imageUrl: null, priceLabel: "₦54,000" };
     case "product": {
       const product = buildCatalogProductDetail(reference.id);
       if (!product) return unavailableCard(reference, "unavailable");
@@ -75,6 +79,9 @@ export const chatContentMocks: MockRoute[] = [
     const input = body as SendToChatsInput & { readonly note?: string };
     if (input.note) throw new ApiError(400, "Notes travel encrypted, never as plain text.", "VALIDATION_FAILED");
     if (input.conversationIds.length === 0) throw new ApiError(400, "Pick at least one chat");
+    if (input.conversationIds.some((conversationId) => !input.encryptions?.some((entry) => entry.conversationId === conversationId))) {
+      throw new ApiError(422, "Shared items are end-to-end encrypted. Update Zudomart to share to chats.", "ENCRYPTION_REQUIRED");
+    }
     const card = resolveSharedContentCard(input.reference);
     if (card.availability !== "available") throw new ApiError(409, card.title);
     input.conversationIds.forEach((conversationId, index) => {
@@ -87,7 +94,6 @@ export const chatContentMocks: MockRoute[] = [
         text: "",
         createdAt: new Date().toISOString(),
         kind: "shared",
-        sharedContent: card,
         encryption: sealed ? { deviceId: sealed.deviceId, ciphertext: sealed.ciphertext, protocol: "signal-v1" } : null,
       });
     });
