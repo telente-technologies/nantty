@@ -14,6 +14,8 @@ let alice: UserActor;
 let bob: UserActor;
 let carol: UserActor;
 let conversationId = "";
+// Bob's first browser is his first E2EE device; later tests reuse it so it can still decrypt the earlier messages.
+let bobFirstDevice: { context: BrowserContext; page: Page } | null = null;
 const watch: PlaintextLeakWatch = { leaks: [], secrets: new Set() };
 
 async function deviceFor(browser: Browser, user: UserActor, watchPage: (page: Page) => void): Promise<{ context: BrowserContext; page: Page }> {
@@ -36,7 +38,8 @@ test.beforeAll(async () => {
   [alice, bob, carol] = await Promise.all([registerUser("alice"), registerUser("bob"), registerUser("carol")]);
 });
 
-test.afterAll(() => {
+test.afterAll(async () => {
+  await bobFirstDevice?.context.close();
   expect(watch.leaks, "no chat plaintext ever crossed the network").toEqual([]);
 });
 
@@ -51,6 +54,10 @@ test("two devices: start a DM and see messages live on both sides", async ({ bro
   const hello = secret("hello");
   await sendChatMessage(a.page, hello);
   await expect(b.page.getByText(hello, { exact: true }), "Bob decrypts Alice's message live").toBeVisible({ timeout: 8_000 });
+  const request = b.page.getByRole("region", { name: "Message request" });
+  await expect(request, "a first message from a stranger arrives as a request").toBeVisible();
+  await request.getByRole("button", { name: "Accept" }).click();
+  await expect(request, "accepting clears the request").toHaveCount(0);
   const answer = secret("answer");
   await sendChatMessage(b.page, answer);
   await expect(a.page.getByText(answer, { exact: true }), "Alice decrypts Bob's reply live").toBeVisible({ timeout: 8_000 });
@@ -66,20 +73,18 @@ test("two devices: start a DM and see messages live on both sides", async ({ bro
   await a.page.reload();
   await expect(a.page.getByText(hello, { exact: true }), "history decrypts after a refresh").toBeVisible();
   await a.context.close();
-  await b.context.close();
+  bobFirstDevice = b;
 });
 
-test("a first message from a stranger waits under Requests until accepted", async ({ browser, watch: watchPage }) => {
+test("an accepted request lives in Chats, not under Requests", async ({ browser, watch: watchPage }) => {
   test.skip(conversationId === "", "needs the conversation");
   const b = await deviceFor(browser, bob, watchPage);
   await b.page.goto("/chats");
-  const filters = b.page.getByRole("group", { name: "Filter conversations" });
-  await filters.getByRole("button", { name: "Requests" }).click();
-  await b.page.locator(`a[href="/chats/${conversationId}"]`).first().click();
-  await b.page.getByRole("region", { name: "Message request" }).getByRole("button", { name: "Accept" }).click();
-  await expect(b.page.getByRole("region", { name: "Message request" })).toHaveCount(0);
-  await b.page.goto("/chats");
-  await expect(b.page.locator(`a[href="/chats/${conversationId}"]`).first(), "accepted chat moves to the inbox").toBeVisible();
+  await expect(b.page.locator(`a[href="/chats/${conversationId}"]`).first(), "accepted chat is in the inbox").toBeVisible();
+  await b.page.getByRole("button", { name: /change inbox folder$/ }).click();
+  await b.page.getByRole("menuitemradio", { name: /Requests/ }).click();
+  await expect(b.page.getByRole("button", { name: "Requests, change inbox folder" })).toBeVisible();
+  await expect(b.page.locator(`a[href="/chats/${conversationId}"]`), "nothing left under Requests").toHaveCount(0);
   await b.context.close();
 });
 
@@ -116,7 +121,6 @@ test("share a post into the chat", async ({ browser, watch: watchPage }) => {
 });
 
 test("send a photo in the chat, end-to-end encrypted", async ({ browser, watch: watchPage }) => {
-  test.fail(true, "Known gap: the web chat can decrypt media but cannot send it yet (no attachment control).");
   test.skip(conversationId === "", "needs the conversation");
   const a = await deviceFor(browser, alice, watchPage);
   await a.page.goto(`/chats/${conversationId}`);
@@ -154,6 +158,10 @@ test("a new device for the other person shows a safety warning", async ({ browse
   await sendChatMessage(a.page, secret("before-new-device"));
   const freshBobDevice = await deviceFor(browser, bob, watchPage);
   await freshBobDevice.page.goto(`/chats/${conversationId}`);
+  await expect(
+    freshBobDevice.page.getByText("Sent before this device joined secure chat").first(),
+    "a brand-new device cannot read history and says so",
+  ).toBeVisible({ timeout: 10_000 });
   await sendChatMessage(freshBobDevice.page, secret("new-device"));
   await a.page.reload();
   await expect(a.page.getByText(/security (code|number) (changed|has changed)|new device|safety number/i).first(), "Alice is warned that Bob's keys changed").toBeVisible({ timeout: 10_000 });
@@ -163,7 +171,7 @@ test("a new device for the other person shows a safety warning", async ({ browse
 
 test("report: pick messages, see consent, and the report carries only those messages", async ({ browser, watch: watchPage }) => {
   test.skip(conversationId === "", "needs the conversation");
-  const b = await deviceFor(browser, bob, watchPage);
+  const b = bobFirstDevice ?? (await deviceFor(browser, bob, watchPage));
   await b.page.goto(`/chats/${conversationId}`);
   let reportBody = "";
   b.page.on("request", (request) => {
@@ -186,5 +194,5 @@ test("report: pick messages, see consent, and the report carries only those mess
   const parsed = JSON.parse(reportBody || "{}") as { evidence?: unknown[] | { messages?: unknown[] }; messages?: unknown[] };
   const sentMessages = Array.isArray(parsed.evidence) ? parsed.evidence : (parsed.evidence?.messages ?? parsed.messages ?? []);
   expect(sentMessages, "exactly the one picked message is submitted").toHaveLength(1);
-  await b.context.close();
+  if (b !== bobFirstDevice) await b.context.close();
 });

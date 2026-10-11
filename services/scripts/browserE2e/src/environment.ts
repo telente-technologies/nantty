@@ -5,7 +5,7 @@ const scratchpad = "/tmp/claude-1000/-home-oyinlola-Desktop-zudomart/2de9a368-cb
 
 process.env["SMOKE_IDENTITY_LOG"] ??= `${scratchpad}/logs/goIdentity.log`;
 process.env["SMOKE_GATEWAY_URL"] ??= "http://127.0.0.1:8080";
-process.env["SMOKE_FAKE_PAYSTACK_URL"] ??= "http://127.0.0.1:18999";
+process.env["SMOKE_FAKE_FLUTTERWAVE_URL"] ??= "http://127.0.0.1:18998";
 
 export type AppName = "webapp" | "studio" | "seller" | "ads" | "admin" | "web";
 
@@ -16,5 +16,5 @@ export function appUrl(app: AppName): string {
 }
 
 export const gatewayUrl = process.env["SMOKE_GATEWAY_URL"];
-export const fakePaystackUrl = process.env["SMOKE_FAKE_PAYSTACK_URL"];
+export const fakeFlutterwaveUrl = process.env["SMOKE_FAKE_FLUTTERWAVE_URL"];
 export const socialDatabaseUrl = process.env["E2E_SOCIAL_DATABASE_URL"] ?? "postgres://svc_social:svc_social_local_only@localhost:15432/zudomart";

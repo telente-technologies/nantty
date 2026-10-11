@@ -1,9 +1,9 @@
 import { addDefaultAddress, seedStoreWithProduct, type SeededStore } from "../../src/data/commerce.data.js";
 import { doubleClickSubmit } from "../../src/helpers/abuse.helper.js";
-import { routePaystackToFake } from "../../src/helpers/paystack.helper.js";
+import { routeFlutterwaveToFake } from "../../src/helpers/flutterwave.helper.js";
 import { expectReadableMessages } from "../../src/helpers/rendering.helper.js";
 import { logInThroughLoginPage } from "../../src/helpers/webappAuth.helper.js";
-import { callApi, readFakePaystackState, registerUser, waitFor, type UserActor } from "../../src/smokeBridge.js";
+import { callApi, registerUser, waitFor, type UserActor } from "../../src/smokeBridge.js";
 import { expect, test } from "../../src/test.js";
 
 test.describe.configure({ mode: "serial" });
@@ -22,7 +22,7 @@ test("empty cart and checkout deep link are handled", async ({ page }) => {
   await page.goto("/cart");
   await expect(page.getByText("Your cart is empty")).toBeVisible();
   await page.goto("/checkout");
-  await expect(page.getByRole("button", { name: "Pay now" }), "no Pay button with an empty cart").toHaveCount(0);
+  await expect(page.getByRole("button", { name: /^Pay (now|securely)$/ }), "no Pay button with an empty cart").toHaveCount(0);
   await expectReadableMessages(page);
 });
 
@@ -43,21 +43,24 @@ test("add to cart, quantity abuse, refresh keeps the cart", async ({ page }) => 
   await expect(page.getByText(store.productName).first()).toBeVisible();
 });
 
-test("checkout through fake Paystack with a double-tapped Pay", async ({ page }) => {
+test("checkout through fake Flutterwave hosted checkout with a double-tapped Pay", async ({ page }) => {
   await logInThroughLoginPage(page, buyer.email);
-  const before = await readFakePaystackState();
-  const paystack = await routePaystackToFake(page, "/pay/return");
+  const flutterwave = await routeFlutterwaveToFake(page, "/pay/return");
   await page.goto("/cart");
   await page.getByRole("button", { name: "Proceed to checkout" }).click();
   await expect(page.getByRole("heading", { name: "Checkout" })).toBeVisible();
-  const pay = page.getByRole("button", { name: "Pay now" });
+  const pay = page.getByRole("button", { name: /^Pay (now|securely)$/ });
   await expect(pay).toBeEnabled({ timeout: 30_000 });
   const checkouts = await doubleClickSubmit(page, pay, /\/orders\/checkout$/, 500);
   expect(checkouts, "double-tapping Pay creates one checkout").toBeLessThanOrEqual(1);
-  await page.waitForURL(/\/orders/, { timeout: 60_000 });
-  expect(paystack.references, "exactly one Paystack charge").toHaveLength(1);
-  const after = await readFakePaystackState();
-  expect(after.transactions - before.transactions).toBeLessThanOrEqual(1);
+  await expect(page.getByRole("heading", { name: "Payment confirmed" }), "the return page confirms the payment").toBeVisible({ timeout: 60_000 });
+  expect(flutterwave.references, "exactly one hosted checkout").toHaveLength(1);
+  const reference = flutterwave.references[0] ?? "";
+  const settled = await waitFor(async () => {
+    const status = await callApi("GET", `/api/v1/payments/${encodeURIComponent(reference)}`, { token: buyer.accessToken });
+    return status.body?.status === "succeeded" ? true : undefined;
+  }, 30_000, 1000);
+  expect(settled, "GET /payments/{reference} reports the charge as succeeded").toBe(true);
   await page.goto("/orders");
   await expect(page.getByRole("heading", { name: "Your orders" })).toBeVisible();
   const paid = await waitFor(async () => {
@@ -73,31 +76,32 @@ test("checkout through fake Paystack with a double-tapped Pay", async ({ page })
 
 test("refresh and back during payment do not double charge", async ({ page }) => {
   await logInThroughLoginPage(page, buyer.email);
-  const paystack = await routePaystackToFake(page, "/pay/return");
+  const flutterwave = await routeFlutterwaveToFake(page, "/pay/return");
   await page.goto(`/product/${store.productId}`);
   await page.getByRole("button", { name: "Add to cart" }).click();
   await expect(page.getByRole("status").filter({ hasText: "Added to cart." })).toBeVisible();
   await page.goto("/checkout");
-  const pay = page.getByRole("button", { name: "Pay now" });
+  const pay = page.getByRole("button", { name: /^Pay (now|securely)$/ });
   await expect(pay).toBeEnabled({ timeout: 30_000 });
   await pay.click();
-  await page.waitForURL(/\/orders/, { timeout: 60_000 });
+  await expect(page.getByRole("heading", { name: "Payment confirmed" })).toBeVisible({ timeout: 60_000 });
   await page.goBack().catch(() => null);
   await page.goBack().catch(() => null);
   await page.reload().catch(() => null);
   await page.waitForTimeout(2000);
-  expect(new Set(paystack.references).size, "going back to checkout does not start a second payment").toBe(1);
+  expect(new Set(flutterwave.references).size, "going back to checkout does not start a second payment").toBe(1);
 });
 
-test("declined card leaves the order unpaid with a readable message", async ({ page }) => {
+test("an abandoned hosted checkout leaves the order unpaid with a readable message", async ({ page }) => {
   await logInThroughLoginPage(page, buyer.email);
-  await routePaystackToFake(page, "/pay/return", "decline");
+  await routeFlutterwaveToFake(page, "/pay/return", "abandoned");
   await page.goto(`/product/${store.productId}`);
   await page.getByRole("button", { name: "Add to cart" }).click();
   await expect(page.getByRole("status").filter({ hasText: "Added to cart." })).toBeVisible();
   await page.goto("/checkout");
-  await page.getByRole("button", { name: "Pay now" }).click();
-  await page.waitForURL(/\/orders/, { timeout: 60_000 });
+  await page.getByRole("button", { name: /^Pay (now|securely)$/ }).click();
+  await page.waitForURL(/\/pay\/return/, { timeout: 60_000 });
+  await page.goto("/orders");
   await page.locator('a[href^="/orders/"]').first().click();
   await expect(page.getByText(/Complete your payment|failed|declined/i).first()).toBeVisible();
   await expectReadableMessages(page);

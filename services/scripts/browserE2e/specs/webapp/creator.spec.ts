@@ -1,6 +1,7 @@
 import { createSubscriptionPlan, promoteToCreator } from "../../src/data/creator.data.js";
 import { doubleClickSubmit } from "../../src/helpers/abuse.helper.js";
-import { routePaystackToFake } from "../../src/helpers/paystack.helper.js";
+import { routeFlutterwaveToFake } from "../../src/helpers/flutterwave.helper.js";
+import { verifyNigerianUserToLevelOne } from "../../../apiSmoke/src/fakeFlutterwave.util.js";
 import { logInThroughLoginPage } from "../../src/helpers/webappAuth.helper.js";
 import { callApi, registerUser, uniqueSuffix, waitFor, type UserActor } from "../../src/smokeBridge.js";
 import { expect, test } from "../../src/test.js";
@@ -16,6 +17,7 @@ test.beforeAll(async () => {
   applicant = await registerUser("applicant");
   creator = await registerUser("creator");
   restoreThresholds = (await promoteToCreator(creator)).restore;
+  await verifyNigerianUserToLevelOne(creator);
   await createSubscriptionPlan(creator, planName);
 });
 
@@ -42,10 +44,10 @@ test("creator dashboard loads for an approved creator", async ({ page }) => {
   for (const period of ["This week", "This month", "All time"]) await page.getByRole("group", { name: "Filter dashboard period" }).getByRole("button", { name: period }).click();
 });
 
-test("a fan subscribes to the creator through fake Paystack", async ({ page }) => {
+test("a fan subscribes to the creator through fake Flutterwave", async ({ page }) => {
   const fan = await registerUser("fan");
   await logInThroughLoginPage(page, fan.email);
-  await routePaystackToFake(page, "/pay/return");
+  await routeFlutterwaveToFake(page, "/pay/return");
   await page.goto(`/${creator.username}`);
   await page.getByRole("button", { name: "Subscribe", exact: true }).click();
   const dialog = page.getByRole("dialog", { name: /^Subscribe to/ });

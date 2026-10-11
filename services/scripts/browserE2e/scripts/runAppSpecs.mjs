@@ -44,7 +44,7 @@ function environmentFor(app) {
     case "seller":
       return { ...shared, ...urls, DASHBOARD_ORIGIN: origin, SELLER_API_URL: gateway, SELLER_MEDIA_URL: mediaOrigin, SELLER_UPLOAD_ORIGINS: mediaOrigin, SELLER_USE_MOCKS: "false", SELLER_REAL_API_PREFIXES: "", SELLER_SESSION_SECRET: secret() };
     case "ads":
-      return { ...shared, ADS_ORIGIN: origin, ADS_API_URL: gateway, ADS_MEDIA_URL: mediaOrigin, ADS_UPLOAD_URL: mediaOrigin, ADS_USE_MOCKS: "false", ADS_REAL_API_PREFIXES: "", ADS_SESSION_SECRET: secret(), ADS_CHECKOUT_HOSTS: "checkout.paystack.com,checkout.flutterwave.com,checkout.paystack.test", NEXT_PUBLIC_ADS_CHECKOUT_HOSTS: "checkout.paystack.com,checkout.paystack.test" };
+      return { ...shared, ADS_ORIGIN: origin, ADS_API_URL: gateway, ADS_MEDIA_URL: mediaOrigin, ADS_UPLOAD_URL: mediaOrigin, ADS_USE_MOCKS: "false", ADS_REAL_API_PREFIXES: "", ADS_SESSION_SECRET: secret(), ADS_CHECKOUT_HOSTS: "checkout.flutterwave.com,checkout-testing.flutterwave.com", NEXT_PUBLIC_ADS_CHECKOUT_HOSTS: "checkout.flutterwave.com,checkout-testing.flutterwave.com" };
     case "admin":
       return { ...shared, ADMIN_ORIGIN: origin, ADMIN_API_URL: gateway, ADMIN_MEDIA_URL: mediaOrigin, ADMIN_USE_MOCKS: "false", ADMIN_REAL_API_PREFIXES: "", ADMIN_SESSION_SECRET: secret(), ADMIN_ENVIRONMENT: "development", ADMIN_IP_ALLOWLIST: "" };
     case "web":

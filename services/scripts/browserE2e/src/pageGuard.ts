@@ -11,7 +11,7 @@ const ignoredConsolePatterns: readonly RegExp[] = [
   /\[HMR\]/i,
   /challenges\.cloudflare\.com/i,
   /net::ERR_BLOCKED_BY_CLIENT/i,
-  /checkout\.paystack\.test/i,
+  /checkout-testing\.flutterwave\.com/i,
   /status of 404 .*\/bff\/api\/v1\/chat\/keys\/devices\/[0-9a-f]+$/i,
 ];
 

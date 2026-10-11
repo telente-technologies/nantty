@@ -1,6 +1,6 @@
 import { doubleClickSubmit, expireSession, malformedInputs, oversizedText } from "../../src/helpers/abuse.helper.js";
 import { expectRedirectedToLogin, logInWithZudomartAccount } from "../../src/helpers/appLogin.helper.js";
-import { routePaystackToFake } from "../../src/helpers/paystack.helper.js";
+import { routeFlutterwaveToFake } from "../../src/helpers/flutterwave.helper.js";
 import { expectReadableMessages } from "../../src/helpers/rendering.helper.js";
 import { toggleDarkModeOnce } from "../../src/helpers/theme.helper.js";
 import { createSamplePng, registerUser, uniqueSuffix, type UserActor } from "../../src/smokeBridge.js";
@@ -119,11 +119,11 @@ test("invite a member, reject bad emails, and the invitee cannot see the account
   await otherContext.close();
 });
 
-test("top up through fake Paystack, double-tap Pay, expired session", async ({ page }) => {
+test("top up through fake Flutterwave, double-tap Pay, expired session", async ({ page }) => {
   test.skip(accountPath === "", "needs the ad account");
   await logInWithZudomartAccount(page, advertiser.email);
   const accountId = accountPath.split("/").at(-1) ?? "";
-  const paystack = await routePaystackToFake(page, `/accounts/${accountId}/billing/return`);
+  const flutterwave = await routeFlutterwaveToFake(page, `/accounts/${accountId}/billing/return`);
   await page.goto(`${accountPath}/billing`);
   await page.getByRole("button", { name: "Add funds" }).click();
   const dialog = page.getByRole("dialog", { name: "Add funds" });
@@ -136,7 +136,7 @@ test("top up through fake Paystack, double-tap Pay, expired session", async ({ p
   const topUps = await doubleClickSubmit(page, pay, /\/billing\/top-ups$/, 500);
   expect(topUps, "double-tapping Pay starts one top-up").toBeLessThanOrEqual(1);
   await page.waitForURL(/billing\/return/, { timeout: 60_000 });
-  expect(paystack.references.length).toBe(1);
+  expect(flutterwave.references.length).toBe(1);
   await expect(page.getByRole("status").filter({ hasText: /added|Still confirming/ }).first()).toBeVisible({ timeout: 30_000 });
   await expireSession(page);
   await page.goto(`${accountPath}/billing`);
