@@ -6,7 +6,7 @@ export const maximumProductImageBytes = 10 * 1024 * 1024;
 const maximumAttemptsPerChunk = 4;
 const maximumChunkUrlsPerRequest = 16;
 
-async function hashArrayBufferAsHex(buffer: ArrayBuffer): Promise<string> {
+export async function hashArrayBufferAsHex(buffer: ArrayBuffer): Promise<string> {
   const digest = await crypto.subtle.digest("SHA-256", buffer);
   return [...new Uint8Array(digest)].map((byte) => byte.toString(16).padStart(2, "0")).join("");
 }
@@ -22,7 +22,7 @@ export function describeProductImageProblem(file: File): string | null {
   return null;
 }
 
-async function sendBytesToUploadTarget(url: string, bytes: BodyInit, headers: Record<string, string>, signal?: AbortSignal): Promise<void> {
+export async function sendBytesToUploadTarget(url: string, bytes: BodyInit, headers: Record<string, string>, signal?: AbortSignal): Promise<void> {
   if (url.startsWith("/")) {
     await sendRequestToDashboardServer(url, { method: "PUT", rawBody: bytes, headers, signal });
     return;
@@ -37,7 +37,7 @@ async function sendBytesToUploadTarget(url: string, bytes: BodyInit, headers: Re
   if (!response.ok) throw new SellerApiRequestError(response.status >= 500 ? response.status : 400, "UPLOAD_FAILED", "The image could not be uploaded. Try again.");
 }
 
-async function retryChunk(send: () => Promise<void>): Promise<void> {
+export async function retryChunk(send: () => Promise<void>): Promise<void> {
   for (let attempt = 1; attempt <= maximumAttemptsPerChunk; attempt += 1) {
     try {
       await send();
@@ -62,7 +62,7 @@ async function sendProxiedChunk(uploadId: string, chunkIndex: number, chunkBuffe
   );
 }
 
-async function sendMultipartChunks(session: MediaUploadSession, fileBuffer: ArrayBuffer, onProgress: (fraction: number) => void, signal?: AbortSignal): Promise<void> {
+export async function sendMultipartChunks(session: MediaUploadSession, fileBuffer: ArrayBuffer, onProgress: (fraction: number) => void, signal?: AbortSignal): Promise<void> {
   const pendingChunkIndexes = Array.from({ length: session.totalChunks }, (_, index) => index).filter((index) => !session.uploadedChunks.includes(index));
   const readChunk = (chunkIndex: number) => fileBuffer.slice(chunkIndex * session.chunkSizeBytes, (chunkIndex + 1) * session.chunkSizeBytes);
   let sentCount = session.totalChunks - pendingChunkIndexes.length;

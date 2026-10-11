@@ -1,5 +1,7 @@
 import { isBrowserOffline } from "@zudomart/web-kit";
 
+import { describeLimitError } from "@/utils/limitErrors.util";
+
 import type { ApiErrorBody } from "@/types/pagination.type";
 
 let currentCsrfToken: string | null = null;
@@ -14,8 +16,9 @@ export class SellerApiRequestError extends Error {
     public readonly code: string,
     message: string,
     public readonly issues: ApiErrorBody["issues"] = [],
+    public readonly details?: Readonly<Record<string, unknown>>,
   ) {
-    super(message);
+    super(describeLimitError(code, details) ?? message);
     this.name = "SellerApiRequestError";
   }
 
@@ -75,7 +78,7 @@ export async function sendRequestToDashboardServer<Payload>(bffPath: string, opt
   }
   if (!response.ok) {
     const errorBody = (await response.json().catch(() => null)) as ApiErrorBody | null;
-    throw new SellerApiRequestError(response.status, errorBody?.code ?? `HTTP_${response.status}`, errorBody?.message ?? "Something went wrong. Try again.", errorBody?.issues ?? []);
+    throw new SellerApiRequestError(response.status, errorBody?.code ?? `HTTP_${response.status}`, errorBody?.message ?? "Something went wrong. Try again.", errorBody?.issues ?? [], errorBody?.details);
   }
   if (response.status === 204) return undefined as Payload;
   if (options.expect === "text") return (await response.text()) as Payload;

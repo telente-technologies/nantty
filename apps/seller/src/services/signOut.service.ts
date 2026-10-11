@@ -7,6 +7,8 @@ async function deleteCachedDashboardPages(): Promise<void> {
 }
 
 export async function signOutOfDashboardAndClearCachedPages(): Promise<void> {
+  await import("@/services/chatCrypto/storeChatEngine").then(({ storeChatEngine }) => storeChatEngine.shutdown()).catch(() => undefined);
+  await import("@/services/chatCrypto/storeChatCrypto.service").then(({ storeChatCrypto }) => storeChatCrypto.signOut()).catch(() => undefined);
   await sendRequestToDashboardServer("/bff/auth/logout", { method: "POST" }).catch(() => undefined);
   await deleteCachedDashboardPages().catch(() => undefined);
   window.location.assign("/login");
