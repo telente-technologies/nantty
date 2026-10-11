@@ -36,7 +36,7 @@ export function StoryAnalyticsScreen({ navigation, route }: MainScreenProps<"Sto
       <Screen>
         <Header title="Story analytics" />
         {analytics.isError ? (
-          <ErrorState message={analytics.error.message} onRetry={() => analytics.refetch()} />
+          <ErrorState error={analytics.error} onRetry={() => analytics.refetch()} />
         ) : (
           <ListSkeleton />
         )}

@@ -15,6 +15,7 @@ import { useTheme } from "@/theme";
 import type { MainScreenProps } from "@/navigation/navigation.types";
 import { usersService } from "@/services/account/users.service";
 import type { ShippingAddressInput } from "@/types/account.type";
+import { describeActionFailure } from "@/errors/errorExperience/describeError";
 
 const EMPTY_ADDRESS: ShippingAddressInput = {
   fullName: "", phone: "", line1: "", postalCode: "", details: "", isDefault: false, countryId: "ng", stateId: null, lgaId: null, cityId: null,
@@ -73,7 +74,7 @@ export function AddressFormScreen({ navigation, route }: MainScreenProps<"Addres
       </SettingsGroup>
       {saveAddress.isError ? (
         <Text size={12} lineHeight={14.4} color={colors.error}>
-          {saveAddress.error.message}
+          {describeActionFailure(saveAddress.error)}
         </Text>
       ) : null}
       <Button title="Save" disabled={!formIsComplete} loading={saveAddress.isPending} onPress={() => saveAddress.mutate()} />

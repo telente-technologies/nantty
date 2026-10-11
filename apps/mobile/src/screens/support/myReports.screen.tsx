@@ -35,7 +35,7 @@ export function MyReportsScreen() {
             {item.outcomeNote ? <Text size={13} lineHeight={17.5}>{item.outcomeNote}</Text> : null}
           </View>
         )}
-        ListEmptyComponent={reports.isLoading ? <ListSkeleton rows={3} /> : reports.isError ? <ErrorState message="Couldn't load your reports." onRetry={() => reports.refetch()} /> : <Text align="center" color={colors.textSubtle}>You haven't reported anything.</Text>}
+        ListEmptyComponent={reports.isLoading ? <ListSkeleton rows={3} /> : reports.isError ? <ErrorState error={reports.error} message="Couldn't load your reports." onRetry={() => reports.refetch()} /> : <Text align="center" color={colors.textSubtle}>You haven't reported anything.</Text>}
       />
     </Screen>
   );

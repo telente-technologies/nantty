@@ -18,7 +18,7 @@ const BLOCKED_USERS_QUERY_KEY = ["users", "me", "blocked"] as const;
 export function BlockedUsersScreen() {
   const { colors } = useTheme();
   const queryClient = useQueryClient();
-  const { data: blockedUsers = [], isLoading, isError, refetch, isRefetching } = useQuery({ queryKey: BLOCKED_USERS_QUERY_KEY, queryFn: followsService.listMyBlockedUsers });
+  const { data: blockedUsers = [], isLoading, isError, error, refetch, isRefetching } = useQuery({ queryKey: BLOCKED_USERS_QUERY_KEY, queryFn: followsService.listMyBlockedUsers });
   const refreshControl = usePullToRefresh(refetch);
   const unblockUser = useMutation({
     mutationFn: followsService.unblockUser,
@@ -45,7 +45,7 @@ export function BlockedUsersScreen() {
           isLoading ? (
             <ListSkeleton />
           ) : isError ? (
-            <ErrorState compact message="Couldn't load blocked accounts." onRetry={() => refetch()} retrying={isRefetching} />
+            <ErrorState error={error} compact message="Couldn't load blocked accounts." onRetry={() => refetch()} retrying={isRefetching} />
           ) : (
             <EmptyState compact title="You haven't blocked anyone" body="People you block can't find your profile, posts or store, or message you." />
           )

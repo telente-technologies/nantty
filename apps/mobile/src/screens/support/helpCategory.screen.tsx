@@ -31,7 +31,7 @@ export function HelpCategoryScreen({ navigation, route }: MainScreenProps<"HelpC
             {item.fromResolvedQuestion ? <View><Text size={11} lineHeight={14} color={colors.textSubtle}>{item.sourceLabel}</Text></View> : null}
           </Pressable>
         )}
-        ListEmptyComponent={category.isLoading ? <ListSkeleton rows={5} /> : category.isError ? <ErrorState message="Couldn't load this category." onRetry={() => category.refetch()} /> : <Text align="center" color={colors.textSubtle}>No topics here yet.</Text>}
+        ListEmptyComponent={category.isLoading ? <ListSkeleton rows={5} /> : category.isError ? <ErrorState error={category.error} message="Couldn't load this category." onRetry={() => category.refetch()} /> : <Text align="center" color={colors.textSubtle}>No topics here yet.</Text>}
       />
     </Screen>
   );

@@ -7,6 +7,7 @@ import { Text } from "@/components/ui/text";
 import { useContentPreferences } from "@/hooks/useContentPreferences.hook";
 import type { MainScreenProps } from "@/navigation/navigation.types";
 import { useTheme } from "@/theme";
+import { describeActionFailure } from "@/errors/errorExperience/describeError";
 
 export function ContentPreferencesScreen(_props: MainScreenProps<"ContentPreferences">) {
   const { colors } = useTheme();
@@ -37,7 +38,7 @@ export function ContentPreferencesScreen(_props: MainScreenProps<"ContentPrefere
           )}
           {update.isError ? (
             <Text size={12} lineHeight={16.8} color={colors.error} accessibilityLiveRegion="polite">
-              {update.error.message}
+              {describeActionFailure(update.error)}
             </Text>
           ) : null}
           <Text size={12} lineHeight={16.8} color={colors.textMuted}>

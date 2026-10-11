@@ -179,7 +179,7 @@ function StoryViewer({ navigation, route }: MainScreenProps<"Story">) {
         {stories.isPending ? (
           <BrandLoader size="md" accessibilityLabel="Loading stories" />
         ) : stories.isError ? (
-          <ErrorState message="Couldn't load stories." onRetry={() => stories.refetch()} retrying={stories.isRefetching} />
+          <ErrorState error={stories.error} message="Couldn't load stories." onRetry={() => stories.refetch()} retrying={stories.isRefetching} />
         ) : (
           <EmptyState title="No stories right now" body="Stories disappear after 24 hours." actionLabel="Close" onAction={closeStoryViewer} />
         )}

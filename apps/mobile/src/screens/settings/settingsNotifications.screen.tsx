@@ -20,7 +20,7 @@ export function SettingsNotificationsScreen() {
   return (
     <SettingsPage title="Notifications" refreshControl={refreshControl}>
       {settingsQuery.isError && !settings ? (
-        <ErrorState compact message="Couldn't load your notification settings." onRetry={() => settingsQuery.refetch()} retrying={settingsQuery.isRefetching} />
+        <ErrorState error={settingsQuery.error} compact message="Couldn't load your notification settings." onRetry={() => settingsQuery.refetch()} retrying={settingsQuery.isRefetching} />
       ) : null}
       <SettingsGroup>
         <SettingsRow

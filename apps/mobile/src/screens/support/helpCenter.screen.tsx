@@ -81,7 +81,7 @@ export function HelpCenterScreen({ navigation }: MainScreenProps<"HelpCenter">) 
         )}
         ListEmptyComponent={
           activeQuery.isLoading ? <ListSkeleton rows={5} />
-            : activeQuery.isError ? <ErrorState message="Couldn't load the help centre." onRetry={() => activeQuery.refetch()} />
+            : activeQuery.isError ? <ErrorState error={activeQuery.error} message="Couldn't load the help centre." onRetry={() => activeQuery.refetch()} />
             : <Text align="center" color={colors.textSubtle}>{isSearching ? "No topics match your search. Try other words or contact support." : "No help topics yet."}</Text>
         }
       />

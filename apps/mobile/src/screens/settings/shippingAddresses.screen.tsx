@@ -21,7 +21,7 @@ import { typeScale } from "@/constants/typography.constant";
 
 export function ShippingAddressesScreen({ navigation }: MainScreenProps<"ShippingAddresses">) {
   const { colors } = useTheme();
-  const { data: addresses = [], isLoading, isError, refetch, isRefetching } = useQuery({
+  const { data: addresses = [], isLoading, isError, error, refetch, isRefetching } = useQuery({
     queryKey: profileQueryKeys.addresses,
     queryFn: usersService.listMyShippingAddresses,
   });
@@ -48,7 +48,7 @@ export function ShippingAddressesScreen({ navigation }: MainScreenProps<"Shippin
           <Skeleton height={56} radius={12} />
         </View>
       ) : isError ? (
-        <ErrorState compact message="Couldn't load your addresses." onRetry={() => refetch()} retrying={isRefetching} />
+        <ErrorState error={error} compact message="Couldn't load your addresses." onRetry={() => refetch()} retrying={isRefetching} />
       ) : (
         <View style={styles.empty}>
           <Text size={typeScale.base} weight={500} lineHeight={19.2} align="center">

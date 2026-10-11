@@ -34,7 +34,7 @@ export function HelpArticleScreen({ navigation, route }: MainScreenProps<"HelpAr
       <Header title="Help" />
       <ScrollView contentContainerStyle={styles.content}>
         {topic.isLoading ? <ListSkeleton rows={4} /> : null}
-        {topic.isError ? <ErrorState message="Couldn't load this topic." onRetry={() => topic.refetch()} /> : null}
+        {topic.isError ? <ErrorState error={topic.error} message="Couldn't load this topic." onRetry={() => topic.refetch()} /> : null}
         {detail ? (
           <>
             <Text size={12} lineHeight={14.4} color={colors.textSubtle}>{detail.categoryTitle}</Text>

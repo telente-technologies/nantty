@@ -42,7 +42,7 @@ export function SettingsPrivacyDataScreen({ navigation }: MainScreenProps<"Setti
       <View style={styles.block}>
         <Text size={14} weight={600} lineHeight={16.8} accessibilityRole="header">Your choices</Text>
         {consents.isLoading ? <ListSkeleton /> : null}
-        {consents.isError ? <ErrorState message="Couldn't load your privacy choices." onRetry={() => consents.refetch()} /> : null}
+        {consents.isError ? <ErrorState error={consents.error} message="Couldn't load your privacy choices." onRetry={() => consents.refetch()} /> : null}
         {consents.data
           ? CONSENT_OPTIONS.map((option) => (
               <View key={option.key}>

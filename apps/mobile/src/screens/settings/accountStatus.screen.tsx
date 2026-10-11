@@ -19,14 +19,14 @@ const HELP_TOPIC_SLUG = "copyright-and-account-status";
 
 export function AccountStatusScreen({ navigation }: MainScreenProps<"AccountStatus">) {
   const { colors } = useTheme();
-  const { data: health, isPending, isError, refetch } = useMyAccountHealth();
+  const { data: health, isPending, isError, error, refetch } = useMyAccountHealth();
   const [appealTarget, setAppealTarget] = useState<AccountStrike | null>(null);
   const [counterNoticeTarget, setCounterNoticeTarget] = useState<CopyrightNotice | null>(null);
 
   return (
     <SettingsPage title="Account status" contentTopSpacing={24} gap={28}>
       {isPending ? <BrandLoader size="md" /> : null}
-      {isError ? <ErrorState onRetry={() => refetch()} /> : null}
+      {isError ? <ErrorState error={error} variant="section" message="Couldn't load your account status." onRetry={() => refetch()} /> : null}
       {health ? (
         <>
           <AccountStandingCard health={health} />

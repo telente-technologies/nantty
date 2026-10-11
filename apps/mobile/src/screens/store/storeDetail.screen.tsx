@@ -67,7 +67,7 @@ export function StoreScreen({ navigation, route }: MainScreenProps<"Store">) {
       <Screen background={colors.surface}>
         {topBar}
         {store.isError ? (
-          <ErrorState message="Couldn't load this store." onRetry={() => store.refetch()} />
+          <ErrorState error={store.error} message="Couldn't load this store." onRetry={() => store.refetch()} />
         ) : (
           <ListSkeleton />
         )}

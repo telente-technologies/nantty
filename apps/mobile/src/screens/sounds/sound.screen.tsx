@@ -23,6 +23,7 @@ import { usePullToRefresh } from "@/components/ui/pullToRefresh.hook";
 import { requireAuthThen } from "@/utils/requireAuth.util";
 import { spacing } from "@/constants/spacing.constant";
 import { typeScale } from "@/constants/typography.constant";
+import { describeActionFailure } from "@/errors/errorExperience/describeError";
 
 const GRID_COLUMNS = 3;
 const GRID_GAP = 2;
@@ -55,7 +56,7 @@ export function SoundScreen({ navigation, route }: MainScreenProps<"Sound">) {
       {sound.isPending ? (
         <ListSkeleton />
       ) : !soundData ? (
-        <ErrorState message="This sound isn't available right now." onRetry={() => sound.refetch()} retrying={sound.isRefetching} />
+        <ErrorState error={sound.error} message="This sound isn't available right now." onRetry={() => sound.refetch()} retrying={sound.isRefetching} />
       ) : (
         <FlatList
           data={clips}
@@ -80,7 +81,7 @@ export function SoundScreen({ navigation, route }: MainScreenProps<"Sound">) {
                 <SoundOwnerControls
                   sound={soundData}
                   isSaving={updateSoundAsOwner.isPending}
-                  errorMessage={updateSoundAsOwner.error ? updateSoundAsOwner.error.message : null}
+                  errorMessage={updateSoundAsOwner.error ? describeActionFailure(updateSoundAsOwner.error) : null}
                   onUpdate={(input) => updateSoundAsOwner.mutate(input)}
                 />
               ) : null}
