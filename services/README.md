@@ -10,13 +10,14 @@ and the contract inventory is in [`docs/backendPlan.md`](../docs/backendPlan.md)
 Requirements: Docker, Go 1.26, Node 24 + pnpm 11. Elixir runs in the `elixir:1.19` image, so it does not need a local install.
 
 ```bash
-pnpm backend:up                # Postgres+PostGIS, Valkey, RabbitMQ, LocalStack (SES), SeaweedFS (S3), LiveKit, OTel collector, Jaeger
+pnpm backend:up                # everything below in one go on 127.0.0.1, plus migrations and demo seed (docs/runningLocally.md)
+pnpm backend:infra:up          # infra only: Postgres+PostGIS, Valkey, RabbitMQ, LocalStack (SES), SeaweedFS (S3), LiveKit, OTel collector, Jaeger
 pnpm backend:dev:identity      # go-identity on :8101 (account directory gRPC :9101) (auth module), reads services/go/.env.example
 pnpm backend:dev:social       # ts-social on :8105 (needs go-identity data for profiles), reads services/typescript/social/.env.example
 pnpm backend:dev:media        # ts-media on :8108 (S3 multipart uploads to SeaweedFS, sharp, ffmpeg if installed), reads services/typescript/media/.env.example
 pnpm backend:dev:gateway       # gateway on :8080, verifies JWTs via JWKS and proxies /api/v1/auth/* to go-identity
 pnpm backend:dev:trust         # go-trust (chat reports, advisory suspension cases) on :8106
-pnpm backend:dev:money         # go-money on :8103 (HTTP) and :9103 (internal gRPC); Paystack test keys are empty by default
+pnpm backend:dev:money         # go-money on :8103 (HTTP) and :9103 (internal gRPC); Flutterwave test keys are empty by default (`PAYMENTS_PROVIDER=flutterwave`)
 pnpm backend:dev:notifications # ts.notifications on :8104; consumes RabbitMQ, sends email through SES (LocalStack), needs `prisma migrate deploy` once
 ```
 
@@ -47,7 +48,7 @@ OpenSearch and ClickHouse. Traces: http://localhost:16686.
 | 4317/4318 | OTel collector |
 
 Tests: `pnpm backend:test:go` (unit + integration against the compose Postgres; integration tests skip when it is down),
-`pnpm backend:test:gateway`, `pnpm backend:test:notifications`, `pnpm backend:test:realtime`, and `pnpm backend:check` (300-line limit, no raw SQL in TS).
+`pnpm backend:test:gateway`, `pnpm backend:test:notifications`, `pnpm backend:test:realtime`, and `pnpm backend:lint` (300-line limit, no raw SQL in TS).
 
 ## Layout
 
@@ -145,7 +146,7 @@ A module never imports another module's packages (use `platform/identityports`, 
 ```bash
 cd services/go/modules/<service>
 (cd src/databases && go generate ./)                      # after editing src/databases/schema, writes src/generated/ent
-go run ./cmd/generateMigration <name>                     # Atlas diff → src/migrations (needs pnpm backend:up)
+go run ./cmd/generateMigration <name>                     # Atlas diff → src/migrations (needs pnpm backend:infra:up)
 go run ./cmd/generateMigration -rehash                    # after adding a manual migration file
 ```
 
@@ -283,7 +284,7 @@ Terraform creates the gateway secret with `CHANGE_ME` placeholders (`infra/aws/m
 5. Infra: if the service consumes events or jobs, add its queue, bindings and service grants to
    `infra/local/rabbitmq/topology.json`, run `pnpm backend:rabbitmq:definitions`, and recreate the broker (`pnpm backend:reset` drops data).
 6. Gateway: add the route prefix with `authentication: "required"` unless the endpoint is public.
-7. Prove it: unit table tests, an integration test, `pnpm backend:check`, and the frontend mock for that domain switched off.
+7. Prove it: unit table tests, an integration test, `pnpm backend:lint`, and the frontend mock for that domain switched off.
 
 ## go-live: live (`modules/live`)
 
@@ -318,17 +319,16 @@ return the original; different lines are rejected. Reversals post an opposite en
 Integrity: `VerifyTrialBalanceAndCachedBalances` pages accounts by id (500 per page) and compares cached balances with their
 lines; it runs daily, also runs the provider mirror reconciliation, and is exposed at `GET /api/v1/admin/ledger/integrity`.
 
-**Paystack, Zudomart holding as little as possible.** Direct orders (verified stores) split the whole charge to the
-seller's Paystack settlement subaccount (`bearer: subaccount`, the seller pays Paystack's fee, Zudomart adds nothing); the
-ledger records `seller:{id}:providerHeld` / `seller:{id}:settlingByPaystack` until the nightly reconciliation sees the
-subaccount settlement (`GET /settlement?subaccount=`). Escrow orders (launch path E2, `ESCROW_MODE=e2`; `e1` would add a
-manual-settlement escrow subaccount once Paystack confirms) stay in Zudomart's Paystack balance
-(`asset:providerBalance:paystack`) and are paid out by transfer after release + 24h. The escrow fee is 1.5% of the
-seller-group total incl. shipping (`ESCROW_FEE_BPS`), 1% on the Business plan (`ESCROW_FEE_BUSINESS_PLAN_BPS`, looked up
-through subscriptions); the seller also pays Paystack's processing fee; both are separate ledger lines
-(`liability:platformFeesUnearned` → `revenue:escrowFees` at release, and the recovered `expense:paymentProcessingFees`).
-The nightly reconciliation (`POST /api/v1/admin/payments/reconciliations`, also the ledger integrity job) verifies pending
-intents and transfers by reference, compares `GET /balance` with the ledger and mirrors direct settlements.
+**Flutterwave, Zudomart holding no customer money.** Flutterwave is the only payment provider. Each verified user in
+Nigeria gets a Flutterwave payout subaccount (PSA, `WALLET_PSA_COUNTRIES`); the ledger mirrors it as
+`asset:providerWallet:flutterwave:{ref}` against the user's liability accounts. Escrow money stays locked (in the ledger)
+inside the buyer's own PSA and moves buyer PSA → seller PSA on release, with the escrow fee sent PSA → main. Card checkouts
+settle to the main balance and are then moved into the buyer's PSA. The escrow fee is 1.5% of the seller-group total incl.
+shipping (`ESCROW_FEE_BPS`), 1% on the Business plan (`ESCROW_FEE_BUSINESS_PLAN_BPS`, looked up through subscriptions); the
+seller also pays Flutterwave's processing fee; both are separate ledger lines (`liability:platformFeesUnearned` →
+`revenue:escrowFees` at release, and the recovered `expense:paymentProcessingFees`). The daily reconciliation compares every
+PSA balance and statement, the main balance and settlements with the ledger, opens cases and freezes wallets on any break
+(design: [`docs/integrations/flutterwaveMigration.md`](../docs/integrations/flutterwaveMigration.md) §2.3).
 
 Seller money follows the owner's checkout plan as ledger accounts: `seller:{id}:escrow:{escrowId}` → `seller:{id}:pending`
 (locked; a maturity row per credit, `SELLER_CREDIT_HOLD_PERIOD` 24h, matured every 5 min) → `seller:{id}:available` →
@@ -337,27 +337,20 @@ Seller money follows the owner's checkout plan as ledger accounts: `seller:{id}:
 `user:{id}:coins`, `creator:{id}:earnedCoins`, `live:battle:{battleId}:holding:{userId}`, `platform:giftRevenue`,
 `platform:coinTransferFees`, `platform:coinsInCirculation`.
 
-**Payments** (`modules/payments`). Provider interfaces (`PaymentProvider`, `PayeeProvider`, `MoneyMovementProvider`,
-`DisputeProvider`, `SubscriptionProvider`, `SavedCardProvider`, combined as `FullPaymentProvider`) with one adapter,
-`paystack` (`src/integrations/paystack*.integration.go`, fake API in `paymentsTesting/fakePaystack*.util.go`, recorded
-fixtures in `testdata/paystack`). Review, fees and go-live checklist: [`docs/integrations/flutterwaveMigration.md` Appendix B](../docs/integrations/flutterwaveMigration.md#appendix-b-paystack-reference-fallback-provider).
-Money is int64 kobo end to end. The HTTP client has a 15s timeout and retries GETs and reference-keyed POSTs (initialize,
-charge_authorization, transfer) on network errors, 429 and 5xx; Paystack's idempotency is the `reference`. One transaction
-per seller order: the intent and an outbox row commit first, then `POST /transaction/initialize` (account email from the
-identity directory, channels `card,bank,ussd,bank_transfer`, subaccount split for direct orders). Paid only after a webhook
-verified with HMAC-SHA512 of the raw body (`x-paystack-signature`, the previous secret during rotation, optional
-`PAYSTACK_WEBHOOK_IP_ALLOWLIST`), deduplicated on `event:data.id:data.status`, then `GET /transaction/verify`. `abandoned`
-stays pending. Refunds are `POST /refund` from the main balance; `needs-attention` bank-transfer refunds ask the buyer for an
-account (`POST /api/v1/payments/refunds/{id}/bank-destination`, resolved, then `retry_with_customer_details`). Disputes:
-`charge.dispute.*` plus a daily poll; `merchant-accepted` is a lost chargeback. Payout accounts (sellers and creators, one per
-person) follow plans §38 (`/api/v1/payments/payout-onboarding/me*`, `GET /api/v1/payments/payout-fees`): identity and
-business are stored locally (BVN/NIN only last 4 kept, the rest sealed with `DATA_ENCRYPTION_KEY`), the bank step queues
-`createRecipient` and, for sellers, `createSettlementSubaccount` jobs (`connected_account_jobs`: look up before create,
-backoff 1m/5m/30m/2h/6h, dead letter, "Try again", daily requeue, admin `GET /api/v1/admin/payments/payout-accounts/stuck`).
-Withdrawals are refused until the account is verified. Saved cards: a NGN 50 verification charge (refunded at once) hands
-the Paystack `authorization_code` to the device once (`POST /api/v1/payments/saved-cards/setups[/{ref}/complete]`), never
-stored; `POST /api/v1/payments/saved-cards/charges` passes it to `charge_authorization` (paused → 2FA URL, failure → new
-hosted checkout). IAP: Apple JWS + App Store Server API and Google Play Developer API verifiers with refund claw-back.
+**Payments** (`modules/payments`). Capability interfaces (`PaymentProvider`, `WalletProvider`, `PayoutProvider`,
+`IdentityVerifier`, `DisputeProvider`, `SavedCardProvider`, …) with one adapter, `flutterwave` v3
+(`src/integrations/flutterwave*.integration.go`, fake API in `paymentsTesting/fakeFlutterwave*.util.go`). Design, flows and
+go-live checklist: [`docs/integrations/flutterwaveMigration.md`](../docs/integrations/flutterwaveMigration.md).
+Money is int64 minor units end to end; Flutterwave's decimal major units are parsed exactly (`platform/money`). Money-moving
+POSTs are sent once; an unknown outcome is resolved by a GET by our reference, never by a blind retry. One intent per
+checkout: the intent and an outbox row commit first, then Standard checkout (`POST /v3/payments`, `payload_hash`) returns a
+hosted link. Webhooks (`POST /webhooks/flutterwave`) are checked against `verif-hash` (`FLUTTERWAVE_WEBHOOK_HASH`) in constant
+time, stored in the webhook inbox and only used as a trigger: every charge is re-verified by id (`GET /transactions/{id}/verify`)
+and must match reference, amount, currency and customer. Refunds go through `POST /transactions/{id}/refund` and are polled;
+chargebacks are polled hourly and answered with evidence. Payout identity is BVN consent plus bank-account resolve (name
+match, watchlist → manual review); BVN/NIN are sealed with `DATA_ENCRYPTION_KEY`. Saved cards: the Flutterwave card token is
+stored encrypted and pinned to the issuing email; renewals use tokenized charges keyed per subscription period. IAP: Apple
+JWS + App Store Server API and Google Play Developer API verifiers with refund claw-back.
 
 **Escrow** (`modules/escrow`). One escrow per order, split computed at funding (seller rounds down, platform takes the
 remainder, `ESCROW_FEE_BPS` 150; commerce refunds arrive as `orderGroup.refundRequested` on `money-domain-events` or at
@@ -377,16 +370,16 @@ back coins and record the spent part as `user:{id}:coinDebt` plus a `wallet_risk
 `CREATOR_MINIMUM_PAYOUTS`) into `creator:{id}:earningsPayable` (Zudomart owes it); the daily run moves it to `seller:{id}:available` once
 the creator's payout account is verified (`CREATOR_TRANSFER_MINIMUMS`); gap earnings stay payable until then. Payout accounts are AES-256-GCM encrypted (owner id as associated
 data, `DATA_ENCRYPTION_KEY`), the name comes from the provider's resolve call. Withdrawals take only available money capped
-by the Paystack balance minus withdrawals not yet sent (read before the transaction; the Paystack transfer fee band on top), go `pending_review → queued → processing → paid | failed`, can be cancelled before processing, and
+by the user's PSA balance (read before the transaction; the Flutterwave transfer fee quoted on top), go `pending_review → queued → processing → paid | failed`, can be cancelled before processing, and
 are paid by the daily payout run (`WALLET_PAYOUT_RUN_INTERVAL`, or `POST /api/v1/admin/payouts/run`) through the
-`SellerSettlementAdapter` (`paystackTransfer`, the only code path that creates a Paystack transfer). Prepaid ad balances:
+payments module's Flutterwave transfer (`debit_subaccount` = the user's PSA; go-money is the only caller of the transfer API). Prepaid ad balances:
 `POST /api/v1/ads/balance/top-ups`, `adSpend.batched` debits (or `POST /api/v1/internal/ads/spend-batches`), boost
 debit/refund per `ads_money.proto` at `POST /api/v1/internal/ads/boost-{debits,refunds}`, unused-balance refunds behind
 `ADS_PREPAID_REFUNDS_ENABLED` (legal review). Seller reserve: `PUT /api/v1/admin/wallet/seller-reserves/{sellerUserId}`
 keeps the reserve % locked for `holdDays` when credits mature.
 
 **Subscriptions** (`modules/subscriptions`). Admin price table per country (`/api/v1/admin/subscriptions/price-table`,
-seeded from docs/pricing.md), per-profile billing on Paystack plans, trials (card verification, eligibility, reminders,
+seeded from docs/pricing.md), per-profile billing through our own renewal engine (Flutterwave tokenized charges), trials (card verification, eligibility, reminders,
 `start_date`), best-of bundle vs yearly, Black grace, IAP for Blue/Premium, and `GET /api/v1/internal/entitlements/{userId}`
 (`X-Internal-Token`: `sellerPlan`, `premium`, `blue`, `gold[]`, `black[]`, `trial`).
 
