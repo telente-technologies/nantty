@@ -47,6 +47,13 @@ export class InMemoryNotificationRepository implements NotificationRepository {
 
   public async countUnread(userId: string) { return this.rows.filter((row) => row.userId === userId && row.readAt === null).length; }
 
+  public async deleteForContent(contentId: string) {
+    const keep = this.rows.filter((row) => !["postId", "originalPostId", "replyClipId", "originalClipId"].some((key) => row.data[key] === contentId));
+    const removed = this.rows.length - keep.length;
+    this.rows.splice(0, this.rows.length, ...keep);
+    return removed;
+  }
+
   private replace(index: number, next: StoredNotification) {
     const previous = this.rows[index];
     this.rows[index] = next;

@@ -4,6 +4,8 @@ import type { ActorSummary } from "../../../types/notification.type.js";
 import { Prisma } from "../../../generated/prisma/client.js";
 import { buildNotificationCreatedOutboxRow } from "../../../events/notificationCreated.event.js";
 
+const contentReferenceKeys = ["postId", "originalPostId", "replyClipId", "originalClipId"] as const;
+
 type Row = Awaited<ReturnType<PrismaClient["notification"]["findFirstOrThrow"]>>;
 
 function convertRow(row: Row): StoredNotification {
@@ -82,5 +84,10 @@ export class NotificationPrismaRepository implements NotificationRepository {
 
   public countUnread(userId: string): Promise<number> {
     return this.prisma.notification.count({ where: { userId, readAt: null } });
+  }
+
+  public async deleteForContent(contentId: string): Promise<number> {
+    const references = contentReferenceKeys.map((key) => ({ data: { path: [key], equals: contentId } }));
+    return (await this.prisma.notification.deleteMany({ where: { OR: references } })).count;
   }
 }

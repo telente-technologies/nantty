@@ -16,7 +16,9 @@ export class RecordingEmailSender implements EmailSender {
 
 export class RecordingPushSender implements PushSender {
   public readonly sent: { tokens: readonly string[]; content: PushContent }[] = [];
+  public readonly silent: { tokens: readonly string[]; data: Readonly<Record<string, unknown>> }[] = [];
   public async send(tokens: readonly string[], content: PushContent) { this.sent.push({ tokens, content }); }
+  public async sendSilent(tokens: readonly string[], data: Readonly<Record<string, unknown>>) { this.silent.push({ tokens, data }); }
 }
 
 export class RecordingJobQueue implements JobQueue {
