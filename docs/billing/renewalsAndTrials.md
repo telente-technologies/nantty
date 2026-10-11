@@ -1,23 +1,23 @@
 # Renewals and free trials
 
-> **Provider change (owner, 2026-10-10):** the payment provider is moving from Paystack to Flutterwave. The billing rules below (full-price renewals, retries, grace, trials) stay; the Paystack-specific mechanics change per [`flutterwaveMigration.md`](../integrations/flutterwaveMigration.md).
+> **Provider (owner, 2026-10-11):** Flutterwave is the only payment provider. Renewals use Flutterwave tokenized charges; details in [`flutterwaveMigration.md`](../integrations/flutterwaveMigration.md) §3.6.
 
 Status: built 4 October 2026 (go-money `subscriptions` and `payments` modules, notifications, email templates). This page explains, in plain words, how Zudomart charges plans on the web, how free trials turn into paid plans, and what happens when a payment fails. App Store and Google Play purchases are covered in section 8.
 
-Prices below are Nigeria web prices from [pricing.md](../pricing.md). Every other region works the same way in its own currency (or in USD where Paystack can't charge the local currency).
+Prices below are Nigeria web prices from [pricing.md](../pricing.md). Every other region works the same way in its own currency (or in USD where Flutterwave can't charge the local currency).
 
 ## 1. The short version
 
-- We keep the card the customer used (as a Paystack "authorization", encrypted on our side) and **we decide when and how much to charge**. Paystack only moves the money.
+- We keep the card the customer used (as a Flutterwave card token, encrypted on our side and pinned to the email it was issued for) and **we decide when and how much to charge**. Flutterwave only moves the money.
 - Every billing period is a small invoice made of **line items**: the plan itself, plus the checkmark part of the plan, minus any discount or credit. The lines always add up to the full plan price (before discounts and credits).
 - **Plans always renew at the full plan price** (owner decision, 4 Oct 2026). Pro, Business and Premium cost the same at renewal whether the checkmark is verified, in review or rejected. The checkmark line stays on the receipt so customers can see what it covers. The only money back is the one-time refund of the checkmark share for the current period when a verification is rejected (unchanged).
 - If a renewal payment fails we try again **1, 3 and 5 days** later. Then the plan stays on for a **7-day grace period**. If it's still unpaid after that, the account moves to **Free**.
 - Customers can cancel any time. They keep the plan until the end of the period they paid for. No partial refunds, except the existing rule for a rejected verification.
 - Free trials are 7 days (or 1 month where an admin sets it). A ₦50 card check is taken and refunded straight away. Reminders go out **3 days** and **24 hours** before the trial ends. Cancel during the trial and you're never charged.
 
-## 2. Why we run our own scheduler instead of Paystack Plans
+## 2. Why we run our own scheduler instead of Flutterwave payment plans
 
-Paystack Plans charge the same fixed amount every period. Our amount changes:
+Flutterwave payment plans charge the same fixed amount every period, auto-cancel after 3 failures and let customers cancel from email links outside our state. Our amount changes:
 
 | Reason the amount changes | Example |
 |---|---|
@@ -25,15 +25,13 @@ Paystack Plans charge the same fixed amount every period. Our amount changes:
 | Credit from an upgrade | Upgrading leaves a credit that comes off the next charge |
 | Downgrade at renewal | Business ₦15,000 becomes Pro ₦5,000 at the next renewal |
 | Price change after notice | New price only from the first renewal at least 30 days after we emailed |
-| Customer moved country | New region's price (USD where Paystack can't charge the currency) |
+| Customer moved country | New region's price (USD where Flutterwave can't charge the currency) |
 
-With Plans we'd have to cancel and recreate a Paystack subscription each time one of these happens. That's fragile and easy to double-charge. So we keep the schedule ourselves and charge each period with Paystack's `charge_authorization` for the exact amount. That also gives us:
+With plans we'd have to cancel and recreate a provider subscription each time one of these happens. That's fragile and easy to double-charge. So we keep the schedule ourselves and charge each period with a Flutterwave tokenized charge (`POST /v3/tokenized-charges`) for the exact amount. That also gives us:
 
-- one **idempotency key per subscription and period** (`renewal:{subscriptionId}:{periodStart}`), so a period can never be charged twice, even if a job runs twice or Paystack times out;
-- our own dunning dates, emails and grace rules (Paystack's are fixed);
+- one **idempotency key per subscription and period** (`renewal:{subscriptionId}:{periodStart}`), so a period can never be charged twice, even if a job runs twice or Flutterwave times out;
+- our own dunning dates, emails and grace rules (the provider's are fixed);
 - one ledger entry per paid period, matched to the payment.
-
-Older subscriptions created on Paystack Plans before this change keep running on Plans until they end.
 
 ## 3. What a period's charge is made of
 
@@ -66,7 +64,7 @@ Older subscriptions created on Paystack Plans before this change keep running on
 | 11 Nov | – | "Your plan ends in 2 days" |
 | 13 Nov | Grace ends unpaid → Free plan | "You're on the Free plan"; checkmark removed unless they also own it separately |
 
-At any point the customer can tap **Pay now** (`POST /api/v1/subscriptions/{id}/pay-now`). That opens Paystack checkout for the unpaid period with any card. Paying restores the plan straight away.
+At any point the customer can tap **Pay now** (`POST /api/v1/subscriptions/{id}/pay-now`). That opens Flutterwave checkout for the unpaid period with any card. Paying restores the plan straight away.
 
 **Yearly plans**: one charge per year. A reminder goes out **7 days before** with the exact amount and a cancel link (UK and EU consumer law requires it). Monthly plans get no reminder, except trials that are about to convert.
 
@@ -76,7 +74,7 @@ At any point the customer can tap **Pay now** (`POST /api/v1/subscriptions/{id}/
 
 | When | What happens |
 |---|---|
-| Day 0 | Seller starts the trial on the web. Paystack takes a **₦50 card check** (regional amount elsewhere). It's refunded straight away, and the card is saved for later charges |
+| Day 0 | Seller starts the trial on the web. Flutterwave takes a **₦50 card check** (regional amount elsewhere). It's refunded straight away, and the card is saved for later charges |
 | Day 0 | Trial starts, Pro features on, "Your trial has started" email |
 | Day 4 | Reminder: "3 days left", with the exact first charge (₦5,000), date and a cancel link |
 | Day 6 | Reminder: "ends tomorrow" (24 hours before) |
@@ -84,7 +82,7 @@ At any point the customer can tap **Pay now** (`POST /api/v1/subscriptions/{id}/
 | Day 7 (fails) | Retries on day 8 and day 10. Features stay on for at most **3 days** after the trial ends. If day 10 fails, the seller moves to Free (no 7-day grace for trials) |
 
 - **Cancelling during the trial means no charge, ever.** Features stay until the trial end, then the plan ends.
-- **One trial per person.** We block a second trial by account, device, phone number and card (a keyed fingerprint of Paystack's card signature, so the same card on another account is caught).
+- **One trial per person.** We block a second trial by account, device, phone number and card (a keyed fingerprint of the card details Flutterwave returns, so the same card on another account is caught).
 
 ## 6. Price changes
 
@@ -148,7 +146,7 @@ stateDiagram-v2
 
 | Case | What we do |
 |---|---|
-| Job runs twice, or Paystack times out after charging | The period has one idempotency key. Each attempt has a fixed Paystack reference (`ren-…` derived from the key and attempt), so Paystack rejects a duplicate. The next run checks the earlier attempt before trying again |
+| Job runs twice, or Flutterwave times out after charging | The period has one idempotency key. Each attempt has a fixed `tx_ref` (`ren-…` derived from the subscription and period). A charge whose outcome is unknown is never re-sent: the next run verifies the earlier attempt by reference first |
 | Bank asks for 3-D Secure on a renewal | Counted as a failed attempt. The email's button opens the bank's confirmation page. If the customer confirms later, the payment still settles and the plan is restored |
 | Saved card deleted or no longer valid | Counted as a failed attempt. The customer pays with a new card through Pay now, and that card is saved for next time |
 | Verification approved or still in review at renewal | Full plan price, as always |
@@ -158,7 +156,7 @@ stateDiagram-v2
 | Seller plan lapses but they also have Gold-only | The plan ends but the Gold badge stays (we tell identity which subscription still covers it) |
 | Upgrade credit bigger than the next charge | The rest carries over to the following period |
 | Customer moves region | Next renewal uses the new region's price and currency. Credits in the old currency are dropped (rare; support can re-credit) |
-| Region currency Paystack can't charge (GBP, EUR, and GHS/KES/ZAR for now) | Charged in USD at the US price, labelled "Billed in USD" |
+| Region currency Flutterwave can't charge (GBP, EUR) | Charged in USD at the US price, labelled "Billed in USD" |
 | USD switched off for a region | The renewal can't be priced, so the job fails and retries, then lands in the dead-letter queue for support. Nothing is charged |
 | Price raised twice before the notice runs out | The latest price gets its own 30-day notice. The customer is never charged a price they weren't told about 30 days ahead |
 | Black (government) | Invoiced by admins, not charged by this engine. Its 14-day grace stays as before |
@@ -166,9 +164,9 @@ stateDiagram-v2
 ## 11. Where it lives (for engineers)
 
 - `services/go/modules/subscriptions/src/models/`: line items, proration, dunning schedule, price grandfathering, idempotency keys (pure functions, unit tested).
-- `.../modules/billing/services/renewalEngine.service.go` (scheduler and charge), `renewalSettlement.service.go` (Paystack outcome, ledger entry `subscription.periodBilled`: Dr payments awaiting application / Cr `revenue:planSubscriptions`), `dunning.service.go`, `planChange.service.go`, `billingNotices.service.go`, `billingJobs.service.go`.
+- `.../modules/billing/services/renewalEngine.service.go` (scheduler and charge), `renewalSettlement.service.go` (charge outcome, ledger entry `subscription.periodBilled`: Dr payments awaiting application / Cr `revenue:planSubscriptions`), `dunning.service.go`, `planChange.service.go`, `billingNotices.service.go`, `billingJobs.service.go`.
 - Table `subscriptions.subscription_periods` (one row per invoice, unique `idempotency_key`). New columns on `subscriptions` (`next_charge_at`, `dunning_attempts`, `credit_minor`, `pending_plan_code`, `price_effective_at`, …).
-- `payments.billing_authorizations`: the Paystack authorization code sealed with AES-GCM (`DATA_ENCRYPTION_KEY`), with a keyed card fingerprint. Charges go through `PaymentGateway.ChargeBillingAuthorization`. Refunds of renewal payments go through `RefundSubscriptionPayment` (ledger first, under the caller's idempotency key).
+- `payments.billing_authorizations`: the Flutterwave card token sealed with AES-GCM (`DATA_ENCRYPTION_KEY`), with a keyed card fingerprint. Charges go through `PaymentGateway.ChargeBillingAuthorization`. Refunds of renewal payments go through `RefundSubscriptionPayment` (ledger first, under the caller's idempotency key).
 - Jobs: every minute the module finds due subscriptions, takes a 15-minute lease, and puts one job per subscription on the RabbitMQ queue `jobs-subscription-billing` (`zudomart.jobs` exchange, retries at 30 s/2 m/10 m/30 m, then the `.dlq`). Without a broker (local tests) the job runs inline.
 - Events → emails: `subscriptionTrial.ending`, `subscriptionRenewal.upcoming`, `subscriptionInvoice.paid`, `subscriptionPayment.failed`, `subscriptionGrace.ending`, `subscription.downgraded`, `subscriptionCard.expiring`, `subscriptionPrice.changeNotice` (templates in `packages/emailTemplates/src/templates/subscriptionBilling.template.tsx`).
 - Endpoints: `POST /api/v1/subscriptions/{id}/change-plan`, `POST /api/v1/subscriptions/{id}/pay-now`, `GET /api/v1/subscriptions/{id}/periods`, `GET /api/v1/subscriptions/{id}/upcoming-charge`.
