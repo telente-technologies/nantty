@@ -34,6 +34,9 @@ defmodule Realtime.Events.AmqpConsumer do
   def handle_continue(:connect, state), do: connect(state)
 
   @impl true
+  def handle_call(:connected?, _from, state), do: {:reply, state.channel != nil, state}
+
+  @impl true
   def handle_info(:connect, state), do: connect(state)
 
   def handle_info({:basic_consume_ok, _meta}, state), do: {:noreply, state}

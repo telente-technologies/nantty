@@ -3,6 +3,7 @@ defmodule Realtime.Auth.JwksKeyCache do
   require Logger
 
   @refresh_interval_ms :timer.minutes(5)
+  @on_demand_refresh_gap_ms :timer.seconds(30)
   @table __MODULE__
 
   def start_link(options), do: GenServer.start_link(__MODULE__, options, name: __MODULE__)
@@ -20,7 +21,7 @@ defmodule Realtime.Auth.JwksKeyCache do
   def init(options) do
     :ets.new(@table, [:named_table, :public, read_concurrency: true])
     send(self(), :refresh)
-    {:ok, %{jwks_url: Keyword.fetch!(options, :jwks_url)}}
+    {:ok, %{jwks_url: Keyword.fetch!(options, :jwks_url), on_demand_at: nil}}
   end
 
   @impl true
@@ -31,8 +32,13 @@ defmodule Realtime.Auth.JwksKeyCache do
   end
 
   @impl true
-  def handle_call(:refresh_now, _from, state),
-    do: {:reply, fetch_and_store_keys(state.jwks_url), state}
+  def handle_call(:refresh_now, _from, state) do
+    now = System.monotonic_time(:millisecond)
+
+    if state.on_demand_at != nil and now - state.on_demand_at < @on_demand_refresh_gap_ms,
+      do: {:reply, :throttled, state},
+      else: {:reply, fetch_and_store_keys(state.jwks_url), %{state | on_demand_at: now}}
+  end
 
   defp refresh_now_and_find(key_id) do
     GenServer.call(__MODULE__, :refresh_now, 10_000)

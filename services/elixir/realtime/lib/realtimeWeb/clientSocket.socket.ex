@@ -3,6 +3,7 @@ defmodule RealtimeWeb.ClientSocket do
 
   alias Phoenix.PubSub
   alias Realtime.Auth.AccessTokenVerifier
+  alias Realtime.Auth.RevocationList
   alias Realtime.Connections.ConnectionLimiter
   alias Realtime.Events.ConversationEventRouter
   alias Realtime.Presence
@@ -60,7 +61,10 @@ defmodule RealtimeWeb.ClientSocket do
 
   def handle_info(:recheck_subscriptions, state) do
     schedule_subscription_recheck()
-    revoke(state, MapSet.to_list(state.topics))
+
+    if RevocationList.revoked?(state.principal),
+      do: close(@close_forbidden, %{type: "session.ended", reason: "session.revoked"}, state),
+      else: revoke(state, MapSet.to_list(state.topics))
   end
 
   def handle_info(
@@ -133,20 +137,18 @@ defmodule RealtimeWeb.ClientSocket do
     end
   end
 
-  defp handle_client_frame("unsubscribe", %{"topic" => topic}, state) do
-    PubSub.unsubscribe(Realtime.PubSub, topic)
-
-    reply(%{type: "unsubscribed", topic: topic}, %{
-      state
-      | topics: MapSet.delete(state.topics, topic)
-    })
+  defp handle_client_frame("unsubscribe", %{"topic" => topic}, state) when is_binary(topic) do
+    if topic == "user:#{state.principal.account_id}",
+      do: reply(%{type: "error", code: "FORBIDDEN", topic: topic}, state),
+      else: unsubscribe_from_topic(state, topic)
   end
 
   defp handle_client_frame(
          "typing",
          %{"conversationId" => conversation_id, "isTyping" => typing?},
          state
-       ) do
+       )
+       when is_binary(conversation_id) do
     topic = "conversation:#{conversation_id}"
 
     if MapSet.member?(state.topics, topic) do
@@ -180,6 +182,18 @@ defmodule RealtimeWeb.ClientSocket do
 
   defp authenticated(_principal, state),
     do: close(@close_forbidden, %{type: "auth.failed"}, state)
+
+  defp unsubscribe_from_topic(state, topic) do
+    if String.starts_with?(topic, "live:") and MapSet.member?(state.topics, topic),
+      do: Presence.untrack(self(), topic, state.principal.account_id)
+
+    PubSub.unsubscribe(Realtime.PubSub, topic)
+
+    reply(%{type: "unsubscribed", topic: topic}, %{
+      state
+      | topics: MapSet.delete(state.topics, topic)
+    })
+  end
 
   defp subscribe_to_topic(state, topic) do
     if MapSet.member?(state.topics, topic) do

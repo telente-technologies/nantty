@@ -8,5 +8,7 @@ defmodule RealtimeWeb.Router do
   scope "/", RealtimeWeb do
     pipe_through :api
     get "/healthz", HealthController, :show
+    get "/readyz", HealthController, :ready
+    get "/metrics", HealthController, :metrics
   end
 end

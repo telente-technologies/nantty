@@ -22,6 +22,7 @@ defmodule Realtime.MixProject do
       {:phoenix, "~> 1.8.15"},
       {:telemetry_metrics, "~> 1.0"},
       {:telemetry_poller, "~> 1.0"},
+      {:telemetry_metrics_prometheus_core, "~> 1.2"},
       {:jason, "~> 1.4"},
       {:jose, "~> 1.11"},
       {:dns_cluster, "~> 0.2.0"},

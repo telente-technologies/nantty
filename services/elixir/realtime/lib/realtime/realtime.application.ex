@@ -28,6 +28,7 @@ defmodule Realtime.Application do
     if settings[:enabled] do
       [
         {Realtime.Events.AmqpConsumer,
+         name: Realtime.Events.AmqpConsumer,
          client: Realtime.Events.AmqpBrokerClient,
          settings: [url: settings[:url]],
          queue_name: settings[:queue_name],

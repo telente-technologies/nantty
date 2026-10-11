@@ -182,4 +182,35 @@ defmodule RealtimeWeb.ClientSocketTest do
     assert {:stop, :normal, 4409, _, _} =
              ClientSocket.handle_info(:connection_replaced, new_socket())
   end
+
+  test "the socket cannot drop its own user topic and so always hears revocations", %{jwk: jwk} do
+    state = authenticated(jwk, "acc-keep", "sid-keep")
+
+    {:reply, :ok, {:text, reply}, state} =
+      frame(state, %{type: "unsubscribe", topic: "user:acc-keep"})
+
+    assert %{"code" => "FORBIDDEN"} = Jason.decode!(reply)
+    assert MapSet.member?(state.topics, "user:acc-keep")
+  end
+
+  test "the periodic recheck closes a socket whose session was revoked", %{jwk: jwk} do
+    state = authenticated(jwk, "acc-recheck", "sid-recheck")
+    assert {:ok, _} = ClientSocket.handle_info(:recheck_subscriptions, state)
+
+    RevocationList.revoke_session("sid-recheck")
+
+    assert {:stop, :normal, 4403, [{:text, body}], _} =
+             ClientSocket.handle_info(:recheck_subscriptions, state)
+
+    assert Jason.decode!(body)["type"] == "session.ended"
+  end
+
+  test "a typing frame with a non-string conversation id is ignored", %{jwk: jwk} do
+    state = authenticated(jwk, "acc-typing-bad")
+
+    assert {:reply, :ok, {:text, reply}, _} =
+             frame(state, %{type: "typing", conversationId: %{"x" => 1}, isTyping: true})
+
+    assert %{"code" => "UNKNOWN_FRAME_TYPE"} = Jason.decode!(reply)
+  end
 end

@@ -77,4 +77,10 @@ defmodule Realtime.Auth.AccessTokenVerifierTest do
                sign(jwk, %{} |> Map.put("scope", nil))
              )
   end
+
+  test "unknown key ids cannot force a JWKS fetch on every frame" do
+    GenServer.call(JwksKeyCache, :refresh_now)
+    assert GenServer.call(JwksKeyCache, :refresh_now) == :throttled
+    assert {:error, :unknown_signing_key} = JwksKeyCache.find_signing_key_by_id("no-such-kid")
+  end
 end
