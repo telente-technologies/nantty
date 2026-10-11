@@ -44,6 +44,7 @@ const securityHeaders = [
 ];
 
 const nextConfig: NextConfig = {
+  experimental: { authInterrupts: true },
   reactStrictMode: true,
   transpilePackages: ["@zudomart/web-kit"],
   poweredByHeader: false,
