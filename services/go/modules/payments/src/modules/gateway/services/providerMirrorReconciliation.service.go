@@ -94,7 +94,7 @@ func (gateway *PaymentGateway) ReconcileProviderMirror(ctx context.Context) (Pro
 		}
 	}
 	if len(report.BalanceBreaks) > 0 {
-		gateway.Container.Resources.Logger.WarnContext(ctx, "paystack balance does not match the ledger", slog.Any("breaks", report.BalanceBreaks))
+		gateway.Container.Resources.Logger.WarnContext(ctx, "provider balance does not match the ledger", slog.Any("breaks", report.BalanceBreaks))
 	}
 	return report, errors.Join(failures...)
 }
@@ -170,9 +170,9 @@ func (gateway *PaymentGateway) postDirectChargeSettled(ctx context.Context, refe
 		}
 		err := databases.RunInMoneyTransaction(ctx, gateway.Container.Resources.Database, func(ctx context.Context, transaction *sql.Tx) error {
 			_, err := gateway.Container.Ledger.PostBalancedJournalEntry(ctx, transaction, ledgermodels.JournalEntryRequest{
-				Reference: settlement.journalReference, Kind: "directPayment.settledByPaystack", ExternalReference: settlementId, Description: "Paystack settled the direct payment to the seller's bank",
+				Reference: settlement.journalReference, Kind: "directPayment.settledByProvider", ExternalReference: settlementId, Description: "The provider settled the direct payment to the seller's bank",
 				Lines: []ledgermodels.JournalLineRequest{
-					{Account: ledgermodels.SellerSettlingByPaystackAccount(settlement.sellerUserId, intent.Currency), Direction: ledgermodels.Debit, AmountMinor: settlement.amountMinor},
+					{Account: ledgermodels.SellerSettlingByProviderAccount(settlement.sellerUserId, intent.Currency), Direction: ledgermodels.Debit, AmountMinor: settlement.amountMinor},
 					{Account: ledgermodels.SellerProviderHeldFundsAccount(settlement.sellerUserId, intent.Currency), Direction: ledgermodels.Credit, AmountMinor: settlement.amountMinor},
 				},
 			})
