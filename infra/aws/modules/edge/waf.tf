@@ -132,6 +132,83 @@ resource "aws_wafv2_web_acl" "this" {
     }
   }
 
+  rule {
+    name     = "flutterwave-webhook-requires-hash"
+    priority = 4
+    action {
+      block {}
+    }
+    statement {
+      and_statement {
+        statement {
+          byte_match_statement {
+            search_string         = "/webhooks/flutterwave"
+            positional_constraint = "STARTS_WITH"
+            field_to_match {
+              uri_path {}
+            }
+            text_transformation {
+              priority = 0
+              type     = "LOWERCASE"
+            }
+          }
+        }
+        statement {
+          size_constraint_statement {
+            comparison_operator = "LT"
+            size                = 16
+            field_to_match {
+              single_header {
+                name = "verif-hash"
+              }
+            }
+            text_transformation {
+              priority = 0
+              type     = "NONE"
+            }
+          }
+        }
+      }
+    }
+    visibility_config {
+      cloudwatch_metrics_enabled = true
+      metric_name                = "flutterwave-webhook-requires-hash"
+      sampled_requests_enabled   = true
+    }
+  }
+
+  rule {
+    name     = "rate-limit-flutterwave-webhooks"
+    priority = 5
+    action {
+      block {}
+    }
+    statement {
+      rate_based_statement {
+        limit              = var.flutterwave_webhook_rate_limit_per_five_minutes
+        aggregate_key_type = "IP"
+        scope_down_statement {
+          byte_match_statement {
+            search_string         = "/webhooks/flutterwave"
+            positional_constraint = "STARTS_WITH"
+            field_to_match {
+              uri_path {}
+            }
+            text_transformation {
+              priority = 0
+              type     = "LOWERCASE"
+            }
+          }
+        }
+      }
+    }
+    visibility_config {
+      cloudwatch_metrics_enabled = true
+      metric_name                = "rate-limit-flutterwave-webhooks"
+      sampled_requests_enabled   = true
+    }
+  }
+
   dynamic "rule" {
     for_each = {
       ip-reputation    = { priority = 10, name = "AWSManagedRulesAmazonIpReputationList" }
@@ -195,7 +272,7 @@ resource "aws_wafv2_web_acl_logging_configuration" "this" {
     }
   }
   dynamic "redacted_fields" {
-    for_each = toset(["x-paystack-signature", "cookie", "x-step-up-token"])
+    for_each = toset(["x-paystack-signature", "verif-hash", "cookie", "x-step-up-token"])
     content {
       single_header {
         name = redacted_fields.value

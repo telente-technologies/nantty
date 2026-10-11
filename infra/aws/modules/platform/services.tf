@@ -18,7 +18,7 @@ locals {
     go-money = {
       port         = 8080, cpu = 1024, memory = 2048, health = "/healthz", database = true, rabbit = true, min = 2, max = 8, extra_ports = [9103]
       public_rules = [], internal = true, request_target = 0, valkey = true, node = false, blue_green = true
-      secret_keys  = ["PAYSTACK_SECRET_KEY", "MONEY_INTERNAL_GRPC_TOKEN", "MONEY_INTERNAL_API_TOKEN", "DATA_ENCRYPTION_KEY", "ADMIN_INTERNAL_API_TOKEN"]
+      secret_keys  = ["PAYSTACK_SECRET_KEY", "FLUTTERWAVE_SECRET_KEY", "FLUTTERWAVE_WEBHOOK_HASH", "MONEY_INTERNAL_GRPC_TOKEN", "MONEY_INTERNAL_API_TOKEN", "DATA_ENCRYPTION_KEY", "ADMIN_INTERNAL_API_TOKEN"]
     }
     go-live = {
       port         = 8080, cpu = 1024, memory = 2048, health = "/healthz", database = true, rabbit = true, min = 2, max = 10

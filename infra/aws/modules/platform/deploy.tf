@@ -68,7 +68,7 @@ locals {
     elixir = { PHX_SERVER = "true", PHX_HOST = local.api_domain, DNS_CLUSTER_QUERY = "realtime.${module.cluster.namespace_name}" }
     python = { INTELLIGENCE_ENVIRONMENT = var.environment, INTELLIGENCE_HOST = "0.0.0.0", INTELLIGENCE_EVENT_STORAGE_URI = "s3://${module.storage.media_bucket.id}/intelligence" }
     gateway_only = merge(
-      { CORS_ORIGINS = join(",", values(var.app_origins)), RATE_LIMIT_MAX_PER_MINUTE = "600" },
+      { CORS_ORIGINS = join(",", values(var.app_origins)), RATE_LIMIT_MAX_PER_MINUTE = "600", TRUSTED_PROXY_HOPS = "1" },
       { for name, url in local.internal_url : "UPSTREAM_${upper(replace(replace(name, "go-", ""), "-", "_"))}_URL" => url if contains(["go-identity", "go-live", "go-money", "go-trust", "go-commerce", "social", "notifications", "media", "search", "support"], name) },
     )
   }
@@ -90,7 +90,7 @@ locals {
       LIVE_SAFETY_FRAMES_QUEUE     = "jobs-live-frames"
       LIVE_SAFETY_AUDIO_QUEUE      = "jobs-live-audio"
     }
-    go-money = { MONEY_GRPC_ADDRESS = ":9103", PAYMENTS_DEFAULT_PROVIDER = "paystack" }
+    go-money = { MONEY_GRPC_ADDRESS = ":9103", PAYMENTS_PROVIDER = "paystack" }
   }
 
   runtime_of = { for name, definition in local.services : name => (

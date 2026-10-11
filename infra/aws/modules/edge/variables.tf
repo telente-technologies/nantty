@@ -17,6 +17,10 @@ variable "auth_rate_limit_per_five_minutes" {
   type    = number
   default = 300
 }
+variable "flutterwave_webhook_rate_limit_per_five_minutes" {
+  type    = number
+  default = 600
+}
 variable "global_rate_limit_per_five_minutes" {
   type    = number
   default = 6000
