@@ -1,35 +1,28 @@
 #!/usr/bin/env bash
 # Test name:           Sandbox stack launcher for live phases (apiSmoke procedure, loopback-pinned)
 # Target:              127.0.0.1 only; compose infra must already be up (postgres valkey rabbitmq localstack object-storage)
-# Expected behavior:   Starts fake Paystack (127.0.0.1:18999) and, with SANDBOX_PAYMENTS_PROVIDER=flutterwave, fake Flutterwave
-#                      (127.0.0.1:18998, PAYMENTS_PROVIDER=flutterwave for go-money), six Go deployables, gateway + five TS services,
+# Expected behavior:   Starts fake Flutterwave (127.0.0.1:18998, PAYMENTS_PROVIDER=flutterwave for go-money),
+#                      six Go deployables, gateway + five TS services,
 #                      Phoenix realtime (127.0.0.1:4000, elixir:1.19 container on the host network) and Python
-#                      intelligence (127.0.0.1:8090), every listener pinned to 127.0.0.1, PAYSTACK_API_BASE_URL
+#                      intelligence (127.0.0.1:8090), every listener pinned to 127.0.0.1, FLUTTERWAVE_API_BASE_URL
 #                      forced to the fake. Writes PIDs + logs to $ZLOGS. SANDBOX_RELAXED_LIMITS=1 raises gateway
 #                      route limits so a single-IP smoke run is not throttled.
-# Dangerous behavior:  A listener on 0.0.0.0, or goMoney reaching api.paystack.co or api.flutterwave.com. Pre-flight refuses either.
+# Dangerous behavior:  A listener on 0.0.0.0, or goMoney reaching api.flutterwave.com. Pre-flight refuses either.
 # Cleanup:             kill $(cat "$ZLOGS"/*.pid); docker stop zudomart-realtime-smoke;
 #                      then docker compose -f infra/local/docker-compose.yml stop
-# Financial safety:    SANDBOX-ONLY (fake Paystack, sk_test_ fake key; snapshot money tables before tests)
+# Financial safety:    SANDBOX-ONLY (fake Flutterwave, FLWSECK_TEST- fake key; snapshot money tables before tests)
 set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
 ZBIN="${ZBIN:?set ZBIN to the directory holding goIdentity goCommerce goMoney goLive goAds goTrust}"
 ZLOGS="${ZLOGS:?set ZLOGS to a log directory}"
 mkdir -p "$ZLOGS"
-export PAYSTACK_API_BASE_URL="http://127.0.0.1:18999"
-SANDBOX_PAYMENTS_PROVIDER="${SANDBOX_PAYMENTS_PROVIDER:-paystack}"
-case "$SANDBOX_PAYMENTS_PROVIDER" in paystack|flutterwave) ;; *) echo "SANDBOX_PAYMENTS_PROVIDER must be paystack or flutterwave" >&2; exit 1 ;; esac
 export FLUTTERWAVE_API_BASE_URL="http://127.0.0.1:18998/v3"
 bash "$ROOT/security/authorization/preflight.sh"
 
 start() { local name="$1"; shift; nice -n 5 "$@" >"$ZLOGS/$name.log" 2>&1 & echo $! >"$ZLOGS/$name.pid"; }
 
-(cd "$ROOT/services/go/modules/payments" && export FAKE_PAYSTACK_LISTEN_ADDRESS=127.0.0.1:18999 && \
-  start fakePaystack go test -count=1 -timeout 0 -run TestServeFakePaystackForLocalApiSmoke ./src/integrations/paymentsTesting/)
-if [ "$SANDBOX_PAYMENTS_PROVIDER" = flutterwave ]; then
-  (cd "$ROOT/services/go/modules/payments" && export FAKE_FLUTTERWAVE_LISTEN_ADDRESS=127.0.0.1:18998 && \
-    start fakeFlutterwave go test -count=1 -timeout 0 -run TestServeFakeFlutterwaveForLocalApiSmoke ./src/integrations/paymentsTesting/)
-fi
+(cd "$ROOT/services/go/modules/payments" && export FAKE_FLUTTERWAVE_LISTEN_ADDRESS=127.0.0.1:18998 && \
+  start fakeFlutterwave go test -count=1 -timeout 0 -run TestServeFakeFlutterwaveForLocalApiSmoke ./src/integrations/paymentsTesting/)
 
 goEnv() {
   set -a; . "$ROOT/services/go/.env.example"; set +a
@@ -38,22 +31,18 @@ goEnv() {
     name="${line%%=*}"
     if [ -z "${!name:-}" ]; then export "$line"; fi
   done <"$ROOT/security/regression/sandboxSecrets.env"
-  export PAYSTACK_API_BASE_URL="http://127.0.0.1:18999" PAYSTACK_SECRET_KEY="sk_test_fake_paystack"
-  export PAYSTACK_WEBHOOK_IP_ALLOWLIST="${PAYSTACK_WEBHOOK_IP_ALLOWLIST:-127.0.0.1}"
-  if [ "$SANDBOX_PAYMENTS_PROVIDER" = flutterwave ]; then
-    export PAYMENTS_PROVIDER=flutterwave FLUTTERWAVE_API_BASE_URL="http://127.0.0.1:18998/v3"
-    export FLUTTERWAVE_SECRET_KEY="FLWSECK_TEST-fakeflutterwave0000000000-X" FLUTTERWAVE_WEBHOOK_HASH="fake-flutterwave-webhook-hash-0123456789abcdef"
-    export FLUTTERWAVE_MERCHANT_ID="F400000001" WALLET_ALIAS_EMAIL_DOMAIN="wallets.zudomart.test" PAYMENTS_PROCESS_WEBHOOKS_IN_BACKGROUND=false
-    if [ "${SANDBOX_RELAXED_LIMITS:-0}" = 1 ]; then
-      export DEPOSIT_WITHDRAWAL_COOLDOWN=1s FIRST_DEPOSIT_WITHDRAWAL_COOLDOWN=1s NEW_PAYOUT_ACCOUNT_COOLDOWN=1s SELLER_CREDIT_HOLD_PERIOD=1s WALLET_WITHDRAWAL_MINIMUM_GAP=1s
-    fi
+  export PAYMENTS_PROVIDER=flutterwave FLUTTERWAVE_API_BASE_URL="http://127.0.0.1:18998/v3"
+  export FLUTTERWAVE_SECRET_KEY="FLWSECK_TEST-fakeflutterwave0000000000-X" FLUTTERWAVE_WEBHOOK_HASH="fake-flutterwave-webhook-hash-0123456789abcdef"
+  export FLUTTERWAVE_MERCHANT_ID="F400000001" WALLET_ALIAS_EMAIL_DOMAIN="wallets.zudomart.test" PAYMENTS_PROCESS_WEBHOOKS_IN_BACKGROUND=false
+  if [ "${SANDBOX_RELAXED_LIMITS:-0}" = 1 ]; then
+    export DEPOSIT_WITHDRAWAL_COOLDOWN=1s FIRST_DEPOSIT_WITHDRAWAL_COOLDOWN=1s NEW_PAYOUT_ACCOUNT_COOLDOWN=1s SELLER_CREDIT_HOLD_PERIOD=1s WALLET_WITHDRAWAL_MINIMUM_GAP=1s
   fi
   export AUTH_ACCOUNT_DIRECTORY_GRPC_ADDRESS=127.0.0.1:9101 MONEY_GRPC_ADDRESS=127.0.0.1:9103
   export ORDERS_MONEY_GRPC_ADDRESS=localhost:9103 AUTH_SESSION_DENYLIST_URL=redis://127.0.0.1:16379
   export LIVE_MONEY_GRPC_ADDRESS=127.0.0.1:9103 ADS_MONEY_GRPC_ADDRESS=127.0.0.1:9103
   export SELLER_PLAN_ENTITLEMENTS_URL=http://127.0.0.1:8103 SELLER_PLAN_ENTITLEMENTS_TOKEN="$MONEY_INTERNAL_API_TOKEN"
   export CATALOG_ADS_INTERNAL_URL=http://127.0.0.1:8110 ORDERS_ADS_INTERNAL_URL=http://127.0.0.1:8110
-  if [ "${SANDBOX_RELAXED_LIMITS:-0}" = 1 ]; then export LEDGER_SELLER_CREDIT_MATURING_INTERVAL=5s; fi
+  if [ "${SANDBOX_RELAXED_LIMITS:-0}" = 1 ]; then export LEDGER_SELLER_CREDIT_MATURING_INTERVAL=5s NEW_PAYOUT_ACCOUNT_COOLDOWN=1s; fi
 }
 for spec in goIdentity:8101:go-identity goLive:8102:go-live goMoney:8103:go-money goTrust:8106:go-trust goCommerce:8107:go-commerce goAds:8110:go-ads; do
   IFS=: read -r bin port user <<<"$spec"
