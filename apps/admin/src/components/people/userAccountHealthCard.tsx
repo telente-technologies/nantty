@@ -57,7 +57,7 @@ export function UserAccountHealthCard({ userId }: { readonly userId: string }) {
           ) : null}
         </div>
       ))}
-      <ConfirmActionDialog
+      <ConfirmActionDialog intent="moderation"
         isOpen={pending !== null}
         title={pending?.decision === "overturn" ? "Overturn this strike" : "Keep this strike"}
         consequences={pending?.decision === "overturn" ? ["The strike is revoked and no longer counts toward restrictions.", "The user is notified."] : ["The strike stays until it expires.", "The user is notified."]}

@@ -116,14 +116,14 @@ export function UserUsernamePanel({ detail, canManageUsernames, onUpdated, onRel
         {withheld ? <p className={styles.faint}>Withheld {formatDateTime(withheld.withheldAt)} by {withheld.withheldByName}: “{withheld.reason}”</p> : null}
       </Card>
       {isAssignHeldOpen ? (
-        <ConfirmActionDialog isOpen title={`Assign a username to @${detail.user.username}`} consequences={["Their current username is held for 120 days before anyone else can claim it.", "The person is notified and the username history is kept."]} confirmLabel={isInHold ? "Assign and bypass hold" : "Assign username"} tone={isInHold ? "danger" : "default"} requiresStepUp isConfirmDisabled={heldCandidate.trim().length < 3 || (isInHold && !bypassHold)} isBusy={assignHeldMutation.isRunning} errorMessage={assignHeldMutation.errorMessage} onConfirm={assignHeld} onClose={() => { assignHeldMutation.clearError(); setIsAssignHeldOpen(false); }}>
+        <ConfirmActionDialog intent="edit" isOpen title={`Assign a username to @${detail.user.username}`} consequences={["Their current username is held for 120 days before anyone else can claim it.", "The person is notified and the username history is kept."]} confirmLabel={isInHold ? "Assign and bypass hold" : "Assign username"} tone={isInHold ? "danger" : "default"} requiresStepUp isConfirmDisabled={heldCandidate.trim().length < 3 || (isInHold && !bypassHold)} isBusy={assignHeldMutation.isRunning} errorMessage={assignHeldMutation.errorMessage} onConfirm={assignHeld} onClose={() => { assignHeldMutation.clearError(); setIsAssignHeldOpen(false); }}>
           <TextField label="Username to assign" value={heldCandidate} onChange={(event) => { setHeldCandidate(event.target.value.toLowerCase().replace(/^@/, "")); setBypassHold(false); }} autoComplete="off" />
           {hold && hold.releasedAt ? <NoticeBanner tone={isInHold ? "caution" : "info"} title={isInHold ? "In its 120-day hold" : "Hold has ended"}>{isInHold ? `Released ${formatDateTime(hold.releasedAt)}, available ${formatDateTime(hold.availableAt)}.` : `Available since ${formatDateTime(hold.availableAt)}.`}</NoticeBanner> : null}
           {isInHold ? <CheckboxField label="Assign it anyway (hold bypassed)" description="Needs a reason and is flagged in the audit log." checked={bypassHold} onChange={(event) => setBypassHold(event.target.checked)} /> : null}
         </ConfirmActionDialog>
       ) : null}
       {isReassignOpen ? (
-        <ConfirmActionDialog isOpen title={`Move @${detail.user.username} to another account`} consequences={["The other account takes this username and its earlier username is released.", "This account gets an auto-generated username and a notification.", "Both accounts keep the username history. Use this for verified brand claims."]} confirmLabel="Reassign username" tone="danger" requiresStepUp isConfirmDisabled={recipientUserId.trim().length < 4} isBusy={reassignMutation.isRunning} errorMessage={reassignMutation.errorMessage} onConfirm={reassignUsername} onClose={() => { reassignMutation.clearError(); setIsReassignOpen(false); }}>
+        <ConfirmActionDialog intent="transfer" isOpen title={`Move @${detail.user.username} to another account`} consequences={["The other account takes this username and its earlier username is released.", "This account gets an auto-generated username and a notification.", "Both accounts keep the username history. Use this for verified brand claims."]} confirmLabel="Reassign username" tone="danger" requiresStepUp isConfirmDisabled={recipientUserId.trim().length < 4} isBusy={reassignMutation.isRunning} errorMessage={reassignMutation.errorMessage} onConfirm={reassignUsername} onClose={() => { reassignMutation.clearError(); setIsReassignOpen(false); }}>
           <TextField label="Receiving account ID" placeholder="usr_0001" value={recipientUserId} onChange={(event) => setRecipientUserId(event.target.value)} autoComplete="off" />
         </ConfirmActionDialog>
       ) : null}
@@ -149,7 +149,7 @@ export function UserUsernamePanel({ detail, canManageUsernames, onUpdated, onRel
           </ul>
         )}
       </Card>
-      <ConfirmActionDialog
+      <ConfirmActionDialog intent="lock"
         isOpen={isWithholdOpen}
         title={`Withhold @${detail.user.username}`}
         consequences={["The user immediately gets an auto-generated username like @user_8k2m4q.", "They receive an in-app and email notification with your reason.", "Nobody can register the withheld username until it is restored or reassigned."]}
@@ -163,7 +163,7 @@ export function UserUsernamePanel({ detail, canManageUsernames, onUpdated, onRel
         onClose={() => setIsWithholdOpen(false)}
       />
       {withheld ? (
-        <ConfirmActionDialog
+        <ConfirmActionDialog intent="restore"
           isOpen={isReclaimOpen}
           title={`Reclaim @${withheld.username}`}
           confirmLabel={reclaimMode === "RESTORE_TO_OWNER" ? "Restore to owner" : "Assign to claimant"}

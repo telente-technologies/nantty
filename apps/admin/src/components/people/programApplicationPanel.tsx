@@ -94,7 +94,7 @@ export function ProgramApplicationPanel({ kind, applicationId, onClose, onDecide
           />
           <SectionHeading>History</SectionHeading>
           <AuditHistoryList entries={application.history} emptyMessage="No decisions yet." />
-          <ConfirmActionDialog
+          <ConfirmActionDialog intent="verify"
             isOpen={decision !== null}
             title={decision === "approve" ? `Approve @${application.user.username} for ${programName}` : `Reject @${application.user.username}`}
             consequences={decision === "approve" ? (kind === "sellers" ? ["They can open a store and list products.", "Payouts still require a verified bank account."] : ["They can go live, receive gifts and earn ad revenue share."]) : ["They are told the application was not approved, with your reason.", "They can apply again after 30 days."]}

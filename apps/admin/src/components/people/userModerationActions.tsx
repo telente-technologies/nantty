@@ -97,7 +97,7 @@ export function UserModerationActions({ detail, onUpdated }: { readonly detail: 
       {canDelete && !isDeleted ? <Button size="small" variant="danger" iconName="shield24" onClick={() => openAction("delete")}>Delete</Button> : null}
       {canBan && isBanned ? <Button size="small" iconName="shield24" onClick={() => openAction("unban")}>Unban</Button> : null}
       {copy && activeAction ? (
-        <ConfirmActionDialog
+        <ConfirmActionDialog intent="moderation"
           isOpen
           title={`${copy.title} @${user.username}`}
           consequences={copy.consequences}

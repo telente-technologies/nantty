@@ -129,7 +129,7 @@ export function IdentityCheckDetailWorkspace({ caseId }: { readonly caseId: stri
         }
       />
       {decision ? (
-        <ConfirmActionDialog
+        <ConfirmActionDialog intent="verify"
           isOpen
           title={decision === "approve" ? `Approve @${detail.profile.handle}` : `Reject @${detail.profile.handle}`}
           consequences={describeDecision(detail, decision)}

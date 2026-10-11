@@ -72,7 +72,7 @@ export function BusinessDocumentsReviewPanel({ submission, onClose, onChanged }:
       </ul>
       {viewing ? <DocumentViewer submissionId={submission.id} item={viewing} onClose={() => setViewing(null)} /> : null}
       {decision ? (
-        <ConfirmActionDialog isOpen title={`${decision.kind === "approve" ? "Approve" : "Reject"} ${kindLabels[decision.item.kind]}`} confirmLabel={decision.kind === "approve" ? "Approve document" : "Reject document"} tone={decision.kind === "reject" ? "danger" : "default"} reasonLabel={decision.kind === "reject" ? "Why it was rejected (the seller sees this)" : "Note (saved to the audit log)"} consequences={decision.kind === "reject" ? ["The seller is told what to fix and can upload a new file."] : []} isBusy={mutation.isRunning} errorMessage={mutation.errorMessage} onConfirm={confirm} onClose={() => { mutation.clearError(); setDecision(null); }} />
+        <ConfirmActionDialog intent="verify" isOpen title={`${decision.kind === "approve" ? "Approve" : "Reject"} ${kindLabels[decision.item.kind]}`} confirmLabel={decision.kind === "approve" ? "Approve document" : "Reject document"} tone={decision.kind === "reject" ? "danger" : "default"} reasonLabel={decision.kind === "reject" ? "Why it was rejected (the seller sees this)" : "Note (saved to the audit log)"} consequences={decision.kind === "reject" ? ["The seller is told what to fix and can upload a new file."] : []} isBusy={mutation.isRunning} errorMessage={mutation.errorMessage} onConfirm={confirm} onClose={() => { mutation.clearError(); setDecision(null); }} />
       ) : null}
     </SidePanel>
   );

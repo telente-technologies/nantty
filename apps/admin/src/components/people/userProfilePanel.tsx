@@ -81,7 +81,7 @@ export function UserProfilePanel({ detail, canRevealPersonalData }: { readonly d
           {revealed ? `Revealed at ${formatDateTime(revealed.revealedAt)}. Hides automatically after ${revealed.expiresInSeconds} seconds.` : canRevealPersonalData ? "Revealing is recorded in the audit log with your purpose." : "You don't have permission to reveal personal data."}
         </p>
       </Card>
-      <ConfirmActionDialog
+      <ConfirmActionDialog intent="lock"
         isOpen={isRevealDialogOpen}
         title="Reveal personal data"
         description={`Show @${user.username}'s email, phone, legal name and date of birth for 60 seconds.`}

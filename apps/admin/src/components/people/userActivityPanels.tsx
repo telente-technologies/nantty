@@ -42,7 +42,7 @@ export function UserSessionsPanel({ detail, canForceLogout, onUpdated }: { reado
   return (
     <Card title="Active sessions" isFlush actions={canForceLogout && detail.sessions.length > 0 ? <Button size="small" variant="quietDanger" onClick={() => setTargetSession("ALL")}>Sign out everywhere</Button> : null}>
       <DataTable caption="Active sessions" columns={columns} rows={detail.sessions} readRowKey={(session) => session.id} emptyMessage="No active sessions." />
-      <ConfirmActionDialog
+      <ConfirmActionDialog intent="signOut"
         isOpen={targetSession !== null}
         title={targetSession === "ALL" ? "Sign out of every device" : "Sign out this session"}
         description={targetSession === "ALL" ? `@${detail.user.username} will need to sign in again on every device.` : targetSession ? `${targetSession.device} · ${targetSession.location}` : undefined}
