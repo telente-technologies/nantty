@@ -16,7 +16,13 @@ function openDatabase(): Promise<IDBDatabase> {
   databasePromise ??= new Promise((resolve, reject) => {
     const request = indexedDB.open(databaseName, 1);
     request.onupgradeneeded = () => storeNames.forEach((name) => request.result.objectStoreNames.contains(name) || request.result.createObjectStore(name));
-    request.onsuccess = () => resolve(request.result);
+    request.onsuccess = () => {
+      request.result.onversionchange = () => {
+        request.result.close();
+        databasePromise = null;
+      };
+      resolve(request.result);
+    };
     request.onerror = () => reject(request.error);
   });
   return databasePromise;

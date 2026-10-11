@@ -14,7 +14,8 @@ export function isWalletNotReadyError(error: unknown): boolean {
 export const providerWalletService = {
   fetchMyWallet: async (): Promise<ProviderWalletResponse | null> => {
     try {
-      return await sendRequestToWebappServer<ProviderWalletResponse>("/api/v1/payments/wallet/me");
+      const response = await sendRequestToWebappServer<ProviderWalletResponse | { readonly wallet: null; readonly status: "not_ready" }>("/api/v1/payments/wallet/me");
+      return response.wallet === null ? null : (response as ProviderWalletResponse);
     } catch (error) {
       if (isWalletNotReadyError(error)) return null;
       throw error;

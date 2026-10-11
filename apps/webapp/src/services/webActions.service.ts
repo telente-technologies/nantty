@@ -73,6 +73,7 @@ export const chatSharesService = {
 export const liveService = {
   fetchLiveSession: (liveId: ID) => sendRequestToWebappServer<LiveSessionDetails>(`/api/v1/lives/${liveId}`),
   fetchLiveComments: (liveId: ID) => sendRequestToWebappServer<Page<LiveComment>>(`/api/v1/lives/${liveId}/comments`),
+  issueMediaToken: (liveId: ID) => sendRequestToWebappServer<{ url: string; token: string; canPublish: boolean; role: string }>(`/api/v1/lives/${liveId}/media-token`, { method: "POST" }),
   postLiveComment: (liveId: ID, text: string) => sendRequestToWebappServer<LiveComment>(`/api/v1/lives/${liveId}/comments`, { method: "POST", body: { text } }),
   fetchGiftCatalog: () => sendListRequestToWebappServer<LiveGift>("/api/v1/gifts"),
   sendGift: (liveId: ID, giftId: ID, quantity: number) =>
@@ -90,7 +91,7 @@ export const coinsService = {
 };
 
 export const creatorSubscriptionsService = {
-  fetchPlans: (creatorId: ID) => sendRequestToWebappServer<CreatorSubscriptionPlan[]>(`/api/v1/creators/${creatorId}/subscription-plans`),
+  fetchPlans: (creatorId: ID) => sendListRequestToWebappServer<CreatorSubscriptionPlan>(`/api/v1/creators/${creatorId}/subscription-plans`),
   startSubscription: (creatorId: ID, planId: ID) =>
     sendRequestToWebappServer<CreatorSubscriptionCheckout>(`/api/v1/creators/${creatorId}/subscriptions`, { method: "POST", body: { planId }, idempotencyKey: createIdempotencyKey("subscribe") }),
   fetchSubscriptionState: (subscriptionId: ID) => sendRequestToWebappServer<CreatorSubscriptionState>(`/api/v1/creator-subscriptions/${encodeURIComponent(subscriptionId)}`),

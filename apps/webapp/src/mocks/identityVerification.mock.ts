@@ -20,7 +20,7 @@ export const identityVerificationMocks: MockRoute[] = [
   }),
   createMockRoute("POST", "/api/v1/verification/eligibility/request", () => {
     eligibility = { ...eligibility, state: "eligible", tier: "buy_now", trustScore: 81, canBuyNow: true, requestedAt: new Date().toISOString(), reasons: [] };
-    verificationCase = { id: "vc_mock", color: "blue", planCode: "blue", paymentChannel: "web_paystack", status: "awaiting_consent", refundStatus: "not_applicable", refundMethod: "card", refundScope: "full", consentGiven: false, decisionReason: "", createdAt: new Date().toISOString(), decidedAt: null, verifiedAt: null, canRetry: true };
+    verificationCase = { id: "vc_mock", color: "blue", planCode: "blue", paymentChannel: "web_checkout", status: "awaiting_consent", refundStatus: "not_applicable", refundMethod: "card", refundScope: "full", consentGiven: false, decisionReason: "", createdAt: new Date().toISOString(), decidedAt: null, verifiedAt: null, canRetry: true };
     return eligibility;
   }),
   createMockRoute("GET", "/api/v1/verification/document-types", ({ query }) => {

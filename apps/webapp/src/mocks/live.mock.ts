@@ -1,3 +1,4 @@
+import { ApiError } from "@/errors/api.error";
 import type { LiveComment, LiveHostRanking, LiveSafetyState, LiveSessionDetails } from "@/types";
 
 import { clipVideoSeeds } from "./clipsVideoCatalog.mock";
@@ -105,6 +106,9 @@ export const liveMocks: MockRoute[] = [
     };
     hostedLives.set(session.id, session);
     return session;
+  }),
+  createMockRoute("POST", "/api/v1/lives/:liveId/media-token", () => {
+    throw new ApiError(409, "Live video isn't streamed in mock mode, so you see the cover photo.", "LIVE_VIDEO_MOCK_PREVIEW");
   }),
   createMockRoute("POST", "/api/v1/lives/:liveId/join", () => undefined),
   createMockRoute("POST", "/api/v1/lives/:liveId/leave", () => undefined),

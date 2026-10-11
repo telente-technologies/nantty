@@ -1,4 +1,4 @@
-import { ChatCryptoClient, type ChatPayload, type ChatPayloadInput, createHttpKeyDirectory, describeDecryptionFailure, type EncryptedOutgoingMessage, type GroupAttributes } from "@zudomart/chat-crypto";
+import { ChatCryptoClient, type ChatPayload, type ChatPayloadInput, createHttpKeyDirectory, createWebLocksMutex, describeDecryptionFailure, type EncryptedOutgoingMessage, type GroupAttributes } from "@zudomart/chat-crypto";
 
 import type { Conversation, ID, Message, SharedContentKind } from "@/types";
 
@@ -15,7 +15,8 @@ const directory = createHttpKeyDirectory({
   isNotFound: (error) => error instanceof WebappRequestError && error.status === 404,
 });
 
-const getClient = () => (client ??= new ChatCryptoClient({ storage: createWebChatCryptoStorage(), directory }));
+const crossTabLock = createWebLocksMutex("zudomart-chat-crypto");
+const getClient = () => (client ??= new ChatCryptoClient({ storage: createWebChatCryptoStorage(), directory, ...(crossTabLock === undefined ? {} : { lock: crossTabLock }) }));
 
 export interface EncryptionRecipients {
   readonly userIds: readonly ID[];
@@ -88,7 +89,7 @@ export const chatCryptoService = {
   acknowledgeIdentityChange: (userId: ID) => getClient().acknowledgeIdentityChange(userId),
   securityCode: (userId: ID) => getClient().securityCode(userId),
   signOut: async () => {
-    await client?.signOut({ removeFromDirectory: true }).catch(() => undefined);
+    await getClient().signOut({ removeFromDirectory: true }).catch(() => undefined);
     client = null;
     await deleteWebChatCryptoDatabase();
   },

@@ -1,7 +1,7 @@
 import type { CommentWithReplies, FollowState, Page, Post, PostAnalytics, PostNotificationLevel, ReplyPolicy, TaggedUser } from "@/types";
 import type { ConnectionEntry, ConnectionTab, FollowRequest } from "@/types/account.type";
 
-import { createIdempotencyKey, sendRequestToWebappServer } from "./clientApi.service";
+import { createIdempotencyKey, sendListRequestToWebappServer, sendRequestToWebappServer } from "./clientApi.service";
 import type { LinkPreview } from "@/types/linkPreview.type";
 
 export const postsService = {
@@ -39,8 +39,8 @@ export const followsService = {
   listFollowingOfUser: (userId: string, query: string, cursor?: string) =>
     sendRequestToWebappServer<Page<ConnectionEntry>>(`/api/v1/users/${userId}/following`, { query: { q: query || undefined, cursor } }),
   listConnectionsOfUser: (userId: string, tab: ConnectionTab) =>
-    sendRequestToWebappServer<ConnectionEntry[]>(`/api/v1/users/${userId}/connections`, { query: { tab } }),
-  listMyBlockedUsers: () => sendRequestToWebappServer<ConnectionEntry[]>("/api/v1/users/me/blocked"),
+    sendListRequestToWebappServer<ConnectionEntry>(`/api/v1/users/${userId}/connections`, { query: { tab } }),
+  listMyBlockedUsers: () => sendListRequestToWebappServer<ConnectionEntry>("/api/v1/users/me/blocked"),
   listMyFollowRequests: (cursor?: string) => sendRequestToWebappServer<Page<FollowRequest>>("/api/v1/users/me/follow-requests", { query: { cursor } }),
   acceptFollowRequest: (requestId: string) => sendRequestToWebappServer<void>(`/api/v1/follow-requests/${requestId}/accept`, { method: "POST" }),
   rejectFollowRequest: (requestId: string) => sendRequestToWebappServer<void>(`/api/v1/follow-requests/${requestId}/reject`, { method: "POST" }),

@@ -2,6 +2,7 @@ import { NextResponse, type NextRequest } from "next/server";
 
 import { isGuestBrowsablePage } from "@/config/guestBrowsing.config";
 import { resolveLegacyPublicPathRedirect } from "@/server/legacyRedirects.service";
+import { buildContentSecurityPolicyHeaderValue } from "@/server/contentSecurityPolicy.service";
 import { readApiTokensFromCookies, readCachedViewerFromCookies, readSessionIdFromCookies } from "@/server/session.service";
 
 const publicPagePaths = new Set(["/welcome", "/login", "/signup", "/forgot-password", "/reset-password"]);
@@ -15,6 +16,12 @@ function redirectTo(request: NextRequest, pathname: string, searchParams?: Recor
 }
 
 export async function proxy(request: NextRequest) {
+  const response = await routeRequest(request);
+  response.headers.set("Content-Security-Policy", buildContentSecurityPolicyHeaderValue({ isIdentityVerification: request.nextUrl.pathname === "/settings/verification" }));
+  return response;
+}
+
+async function routeRequest(request: NextRequest): Promise<NextResponse> {
   const { pathname, search } = request.nextUrl;
   const requestedPathWithQuery = `${pathname}${search}`;
   const sessionId = readSessionIdFromCookies(request.cookies);

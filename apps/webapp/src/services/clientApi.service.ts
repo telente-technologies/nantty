@@ -1,6 +1,7 @@
 import { useAuthPromptStore } from "@/components/auth/authPrompt.store";
 import { useHumanVerificationStore } from "@/components/security/humanVerification.store";
 import { describeLimitError } from "@/utils/limitErrors.util";
+import { decideSessionExpiredAction } from "@/utils/sessionExpiry.util";
 
 export interface ApiErrorBody {
   readonly message: string;
@@ -62,6 +63,19 @@ function promptSignInAfterUnauthenticatedResponse(): void {
   useAuthPromptStore.getState().openAuthPrompt("Sign in to continue. Anything you were doing will pick up where you left off.");
 }
 
+let isLeavingForSignIn = false;
+
+function handleExpiredSession(): void {
+  if (typeof window === "undefined" || isLeavingForSignIn) return;
+  const action = decideSessionExpiredAction(window.location.pathname, window.location.search);
+  if (action.kind === "prompt") {
+    promptSignInAfterUnauthenticatedResponse();
+    return;
+  }
+  isLeavingForSignIn = true;
+  window.location.assign(action.href);
+}
+
 export async function sendRequestToWebappServer<Payload>(apiPath: string, options: WebappRequestOptions = {}): Promise<Payload> {
   const method = options.method ?? "GET";
   const headers: Record<string, string> = { Accept: "application/json" };
@@ -91,7 +105,8 @@ export async function sendRequestToWebappServer<Payload>(apiPath: string, option
 
   if (response.status === 401) {
     const errorBody = (await response.json().catch(() => null)) as ApiErrorBody | null;
-    if (method !== "GET" && (errorBody?.code === "SESSION_EXPIRED" || errorBody?.code === "UNAUTHENTICATED")) promptSignInAfterUnauthenticatedResponse();
+    if (errorBody?.code === "SESSION_EXPIRED") handleExpiredSession();
+    else if (method !== "GET" && errorBody?.code === "UNAUTHENTICATED") promptSignInAfterUnauthenticatedResponse();
     throw new WebappRequestError(401, errorBody?.code ?? "UNAUTHENTICATED", errorBody?.message ?? "Sign in to continue.");
   }
   if (!response.ok) {

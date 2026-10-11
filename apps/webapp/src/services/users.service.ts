@@ -1,5 +1,14 @@
 import type { AccountSettings, CountryOption, ShippingAddressInput, UsernamePolicy } from "@/types/account.type";
-import type { Address, Clip, Page, Post, User } from "@/types";
+import type { Address, Clip, FollowState, Page, Post, User } from "@/types";
+
+// Follows live in the social service; user profiles do not carry the viewer's follow state or a fresh follower count.
+export interface FollowStatus {
+  readonly state: FollowState;
+  readonly followedBy: boolean;
+  readonly followersCount: number;
+  readonly followingCount: number;
+  readonly viewerPostNotifications: "off" | "posts" | "posts_and_lives";
+}
 
 import { sendRequestToWebappServer, sendListRequestToWebappServer } from "./clientApi.service";
 
@@ -16,6 +25,7 @@ const withDisplayNameFallback = (user: User): User => (user.name ? user : { ...u
 export const usersService = {
   fetchMyProfile: () => sendRequestToWebappServer<User>("/api/v1/users/me").then(withDisplayNameFallback),
   fetchUserProfileById: (userId: string) => sendRequestToWebappServer<User>(`/api/v1/users/${userId}`),
+  fetchFollowStatus: (userId: string) => sendRequestToWebappServer<FollowStatus>(`/api/v1/users/${encodeURIComponent(userId)}/follow-status`),
   fetchUserIdByUsername: (username: string) => sendRequestToWebappServer<{ id: string }>(`/api/v1/users/by-username/${encodeURIComponent(username)}`),
   fetchPostsByUserId: (userId: string, cursor?: string) =>
     sendRequestToWebappServer<Page<Post>>(`/api/v1/users/${userId}/posts`, { query: { cursor } }),

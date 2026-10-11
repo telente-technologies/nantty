@@ -5,6 +5,7 @@ import { callWebappBackend, type BackendResult } from "@/server/apiTransport.ser
 import { isPublicApiRead } from "@/config/guestBrowsing.config";
 import { resetViewerFieldsForAnonymousResult } from "@/server/anonymousViewerFields.service";
 import { isMutationProtectedAgainstCsrf, isRequestFromWebappOrigin, isSafeHttpMethod } from "@/server/requestOriginGuard.service";
+import { isAccessTokenKnownExpired } from "@/server/accessTokenExpiry.service";
 import { clearEverySessionCookie, readApiTokensFromCookies, readCachedViewerFromCookies, readSessionIdFromCookies, writeApiTokenCookies } from "@/server/session.service";
 
 const maximumForwardedBodyBytes = 8 * 1024 * 1024;
@@ -67,17 +68,41 @@ export async function forwardBffRequestToWebappApi(request: NextRequest, pathSeg
 
   const tokens = readApiTokensFromCookies(request.cookies);
   const cachedViewer = readCachedViewerFromCookies(request.cookies);
+  const allowsAnonymous = isPublicApiRequest(request.method, apiPath) || isPublicApiRead(request.method, apiPath);
   let accessToken = tokens.accessToken;
   let renewedSession = null as Awaited<ReturnType<typeof renewViewerSession>>;
+  let rotatedTokens: Awaited<ReturnType<typeof exchangeRefreshTokenForNewTokenPair>> = null;
+  let refreshAttempted = false;
+  let sessionLost = false;
+  const rotateTokensOnce = async (): Promise<boolean> => {
+    const refreshToken = renewedSession?.tokens?.refreshToken ?? tokens.refreshToken;
+    if (refreshAttempted || !refreshToken) return false;
+    refreshAttempted = true;
+    rotatedTokens = await exchangeRefreshTokenForNewTokenPair(refreshToken);
+    if (rotatedTokens) accessToken = rotatedTokens.accessToken;
+    return rotatedTokens !== null;
+  };
+  const respondSessionExpired = () => {
+    const expiredResponse = respondWithBffError(401, "SESSION_EXPIRED", "Your session has ended. Sign in again.");
+    clearEverySessionCookie(expiredResponse);
+    return expiredResponse;
+  };
 
-  if (!isPublicRoute && (!cachedViewer || !accessToken)) {
-    renewedSession = await renewViewerSession({ sessionId: sessionId!, accessToken, refreshToken: tokens.refreshToken });
+  if (isAccessTokenKnownExpired(accessToken) && !(await rotateTokensOnce())) {
+    accessToken = null;
+    sessionLost = true;
+  }
+  if (sessionLost && !allowsAnonymous) return respondSessionExpired();
+
+  if (!isPublicRoute && !sessionLost && (!cachedViewer || !accessToken)) {
+    renewedSession = await renewViewerSession({ sessionId: sessionId!, accessToken, refreshToken: rotatedTokens ? null : tokens.refreshToken });
     if (!renewedSession) {
-      const expiredResponse = respondWithBffError(401, "SESSION_EXPIRED", "Your session has ended. Sign in again.");
-      clearEverySessionCookie(expiredResponse);
-      return expiredResponse;
+      if (!allowsAnonymous) return respondSessionExpired();
+      accessToken = null;
+      sessionLost = true;
+    } else {
+      accessToken = renewedSession.tokens?.accessToken ?? accessToken;
     }
-    accessToken = renewedSession.tokens?.accessToken ?? accessToken;
   }
 
   const body = await readRequestBodyWithinLimit(request);
@@ -102,19 +127,24 @@ export async function forwardBffRequestToWebappApi(request: NextRequest, pathSeg
     });
 
   let backendResult = await sendToBackend();
-  let rotatedTokens: Awaited<ReturnType<typeof exchangeRefreshTokenForNewTokenPair>> = null;
-  const refreshTokenToExchange = renewedSession?.tokens?.refreshToken ?? tokens.refreshToken;
-  if (backendResult.status === 401 && refreshTokenToExchange) {
-    rotatedTokens = await exchangeRefreshTokenForNewTokenPair(refreshTokenToExchange);
-    if (rotatedTokens) {
-      accessToken = rotatedTokens.accessToken;
-      backendResult = await sendToBackend();
+  if (backendResult.status === 401 && accessToken) {
+    if (await rotateTokensOnce()) backendResult = await sendToBackend();
+    else {
+      sessionLost = true;
+      if (allowsAnonymous) {
+        accessToken = null;
+        backendResult = await sendToBackend();
+      }
     }
   }
 
-  const response = convertBackendResultToResponse(isAnonymousPublicRead ? resetViewerFieldsForAnonymousResult(backendResult) : backendResult);
+  const answeredAnonymously = isAnonymousPublicRead || (sessionLost && accessToken === null);
+  const response = convertBackendResultToResponse(answeredAnonymously ? resetViewerFieldsForAnonymousResult(backendResult) : backendResult);
+  if (sessionLost) {
+    clearEverySessionCookie(response);
+    return response;
+  }
   if (renewedSession) writeRenewedSessionCookies(response, renewedSession);
   if (rotatedTokens) writeApiTokenCookies(response, rotatedTokens);
-  if (backendResult.status === 401 && !rotatedTokens) clearEverySessionCookie(response);
   return response;
 }
