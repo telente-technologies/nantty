@@ -79,7 +79,7 @@ export function HelpTopicLifecycleCard({ detail, onChanged }: { readonly detail:
           ))}
         </ol>
       </Card>
-      <ConfirmActionDialog
+      <ConfirmActionDialog intent="delete"
         isOpen={isDeleting}
         title="Delete this topic?"
         description="It disappears from the Help Centre straight away and its history is deleted. Unpublish instead if you might need it again."

@@ -20,7 +20,7 @@ interface SaveVersionedChangesDialogProps {
 
 export function SaveVersionedChangesDialog({ isOpen, title, beforeContent, afterContent, nextVersionNumber, isSaving, errorMessage, confirmLabel, onConfirm, onClose }: SaveVersionedChangesDialogProps) {
   return (
-    <ConfirmActionDialog
+    <ConfirmActionDialog intent="publish"
       isOpen={isOpen}
       title={title}
       description={`This creates version ${nextVersionNumber}. Earlier versions stay in the history and can be restored.`}

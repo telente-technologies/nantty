@@ -116,7 +116,7 @@ export function VersionedRecordPanel<Content>({ endpoint, record, blankContent, 
         onConfirm={(reason) => void confirmSave(reason)}
         onClose={() => setIsSaveOpen(false)}
       />
-      <ConfirmActionDialog
+      <ConfirmActionDialog intent="archive"
         isOpen={isArchiveOpen}
         title={`Archive ${title.toLowerCase()}?`}
         description="It stops applying immediately. The history is kept and the audit log records who archived it."

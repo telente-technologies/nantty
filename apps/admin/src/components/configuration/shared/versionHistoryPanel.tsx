@@ -89,7 +89,7 @@ function OpenVersionHistoryPanel<Content>({ title, endpoint, currentRecord, canW
           </div>
         </section>
       ) : null}
-      <ConfirmActionDialog
+      <ConfirmActionDialog intent="restore"
         isOpen={isRestoreOpen}
         title={`Restore version ${selectedVersion}?`}
         description={`The content of v${selectedVersion} becomes the new version ${currentRecord.version + 1}. Nothing in the history is deleted.`}

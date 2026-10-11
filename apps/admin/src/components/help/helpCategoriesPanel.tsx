@@ -29,7 +29,7 @@ function CategoryFormDialog({ category, onClose, onSaved }: { readonly category:
   }
 
   return (
-    <ModalDialog isOpen title={category ? "Edit category" : "New category"} onClose={onClose}>
+    <ModalDialog intent="edit" isOpen title={category ? "Edit category" : "New category"} onClose={onClose}>
       <form className={styles.stack} onSubmit={submit}>
         <TextField label="Title" value={form.title} onChange={(event) => update({ title: event.target.value })} required maxLength={80} />
         <TextField label="Address" hint="Lowercase words joined by dashes, used in the web link." value={form.slug} onChange={(event) => update({ slug: event.target.value })} required pattern="[a-z0-9]+(-[a-z0-9]+)*" />
@@ -76,7 +76,7 @@ export function HelpCategoriesPanel({ canEdit }: { readonly canEdit: boolean }) 
       {categories.errorMessage ? <ErrorBlock message={categories.errorMessage} onRetry={categories.reload} /> : null}
       <DataTable caption="Help categories" columns={columns} rows={categories.data?.items ?? []} readRowKey={(category) => category.id} isLoading={categories.isLoading} emptyMessage="No categories yet." />
       {editing ? <CategoryFormDialog category={editing === "new" ? null : editing} onClose={() => setEditing(null)} onSaved={finish} /> : null}
-      <ConfirmActionDialog
+      <ConfirmActionDialog intent="delete"
         isOpen={deleting !== null}
         title={`Delete ${deleting?.title ?? "category"}?`}
         description="A category can only be deleted when it has no topics."
