@@ -9,5 +9,6 @@
     "noEmit": true,
     "skipLibCheck": true
   },
-  "include": ["src", "cssModules.d.ts"]
+  "include": ["src", "cssModules.d.ts"],
+  "exclude": ["src/**/__tests__"]
 }
