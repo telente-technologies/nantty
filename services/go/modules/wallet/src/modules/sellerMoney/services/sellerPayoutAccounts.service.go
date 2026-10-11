@@ -71,7 +71,7 @@ func (accounts SellerPayoutAccounts) Resolve(ctx context.Context, seller dtos.Se
 	if !known {
 		return dtos.ResolvedPayoutAccountView{}, httpserver.NewValidationFailedError([]httpserver.ValidationIssue{{Path: "bankCode", Message: "must be a bank from the list"}})
 	}
-	name, err := accounts.Payouts.Accounts.Banks.Provider.ResolveBankAccountName(ctx, body.BankCode, body.AccountNumber)
+	name, err := accounts.Payouts.Accounts.ResolveAccountName(ctx, body.BankCode, body.AccountNumber)
 	if errors.Is(err, interfaces.ErrBankAccountNotFound) || (err == nil && name == "") {
 		return dtos.ResolvedPayoutAccountView{}, ErrAccountNotResolved
 	}
@@ -150,6 +150,11 @@ func (accounts SellerPayoutAccounts) MakeDefault(ctx context.Context, seller dto
 	updated, err := target.Update().SetIsDefault(true).Save(ctx)
 	if err != nil {
 		return dtos.PayoutAccountView{}, err
+	}
+	if !target.IsDefault {
+		if err := accounts.Payouts.Accounts.EnqueuePayoutAccountChanged(ctx, tx, "payoutAccount.defaultChanged", updated, accounts.Payouts.Container.Now().UTC()); err != nil {
+			return dtos.PayoutAccountView{}, err
+		}
 	}
 	return PayoutAccountViewOf(updated), tx.Commit()
 }

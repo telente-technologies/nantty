@@ -22,7 +22,7 @@ func TestRestrictedCreatorEarningsStayPendingUntilMonetisationIsRestored(t *test
 	token := harness.Tokens.UserAccessToken(creator)
 	harness.creditEarnedCoins(creator, 180)
 	harness.OnboardConnectedAccount(creator, false)
-	if converted := harness.Call(http.MethodPost, "/api/v1/creators/earnings/convert", token, "convert-held-1", map[string]any{"coins": 180, "currency": "NGN"}); converted.Status != http.StatusCreated {
+	if converted := harness.Call(http.MethodPost, "/api/v1/creators/earnings/convert", token, "convert-held-1", map[string]any{"coins": 180, "currency": "NGN"}, http.Header{"CloudFront-Viewer-Country": {"NG"}}); converted.Status != http.StatusCreated {
 		t.Fatalf("convert: %d %s", converted.Status, converted.Raw)
 	}
 	harness.Paystack.FundPlatformBalance("NGN", 175_000)
@@ -32,8 +32,8 @@ func TestRestrictedCreatorEarningsStayPendingUntilMonetisationIsRestored(t *test
 		t.Fatal(err)
 	}
 	staff := harness.Tokens.StaffTokens(uuid.NewString(), "money.withdrawals.process")
-	stepUp := http.Header{"X-Step-Up-Token": {staff.StepUpToken}}
-	if report := harness.Call(http.MethodPost, "/api/v1/admin/payouts/run", staff.AccessToken, "", nil, stepUp); report.Body["creatorTransfers"].(float64) != 0 {
+	stepUp := staff.StepUp
+	if report := harness.Call(http.MethodPost, "/api/v1/admin/payouts/run", staff.AccessToken, "", nil, stepUp()); report.Body["creatorTransfers"].(float64) != 0 {
 		t.Fatalf("a restricted creator's earnings must stay pending: %v", report.Body)
 	}
 	if harness.balance(ledgermodels.CreatorEarningsPayableAccount(creator, "NGN")) != 180_000 {
@@ -48,7 +48,7 @@ func TestRestrictedCreatorEarningsStayPendingUntilMonetisationIsRestored(t *test
 	if err := holds.ApplyAccountHealthChange(context.Background(), payoutservices.AccountHealthChange{AccountId: creator, Status: "AT_RISK", CanMonetise: true, OccurredAt: restrictedAt.Add(time.Hour)}); err != nil {
 		t.Fatal(err)
 	}
-	if report := harness.Call(http.MethodPost, "/api/v1/admin/payouts/run", staff.AccessToken, "", nil, stepUp); report.Body["creatorTransfers"].(float64) != 1 {
+	if report := harness.Call(http.MethodPost, "/api/v1/admin/payouts/run", staff.AccessToken, "", nil, stepUp()); report.Body["creatorTransfers"].(float64) != 1 {
 		t.Fatalf("earnings are released once monetisation is restored: %v", report.Body)
 	}
 }

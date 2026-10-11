@@ -18,7 +18,11 @@ func (harness *walletHarness) creditEarnedCoins(userId string, coins int64) {
 }
 
 func (harness *walletHarness) withdraw(token, key, accountId string, amountMinor int64) paymentstesting.HarnessResponse {
-	return (harness.Call(http.MethodPost, "/api/v1/wallets/me/withdrawals", token, key, map[string]any{"payoutAccountId": accountId, "amount": map[string]any{"amountMinor": amountMinor, "currency": "NGN"}}))
+	return harness.Call(http.MethodPost, "/api/v1/wallets/me/withdrawals", token, key, map[string]any{"payoutAccountId": accountId, "amount": map[string]any{"amountMinor": amountMinor, "currency": "NGN"}}, harness.stepUp(token))
+}
+
+func (harness *walletHarness) stepUp(accessToken string) http.Header {
+	return harness.StepUpFor(accessToken)
 }
 
 func TestCreatorEarningsBecomeWithdrawableAfterVerificationAndArePaidByTransfer(t *testing.T) {
@@ -29,27 +33,27 @@ func TestCreatorEarningsBecomeWithdrawableAfterVerificationAndArePaidByTransfer(
 	creator := uuid.NewString()
 	token := harness.Tokens.UserAccessToken(creator)
 	harness.creditEarnedCoins(creator, 180)
-	if refused := harness.Call(http.MethodPost, "/api/v1/creators/earnings/convert", token, "convert-key-0", map[string]any{"coins": 180, "currency": "NGN"}); refused.Status != http.StatusForbidden || refused.Body["code"] != "VERIFICATION_REQUIRED" {
+	if refused := harness.Call(http.MethodPost, "/api/v1/creators/earnings/convert", token, "convert-key-0", map[string]any{"coins": 180, "currency": "NGN"}, http.Header{"CloudFront-Viewer-Country": {"NG"}}); refused.Status != http.StatusForbidden || refused.Body["code"] != "VERIFICATION_REQUIRED" {
 		t.Fatalf("an unverified creator converted coins to cash: %d %s", refused.Status, refused.Raw)
 	}
 	if harness.balance(ledgermodels.CreatorEarnedCoinsAccount(creator)) != 180 {
 		t.Fatal("an unverified creator's earned coins must stay as coins")
 	}
 	harness.OnboardConnectedAccount(creator, false)
-	converted := harness.Call(http.MethodPost, "/api/v1/creators/earnings/convert", token, "convert-key-1", map[string]any{"coins": 180, "currency": "NGN"})
+	converted := harness.Call(http.MethodPost, "/api/v1/creators/earnings/convert", token, "convert-key-1", map[string]any{"coins": 180, "currency": "NGN"}, http.Header{"CloudFront-Viewer-Country": {"NG"}})
 	if converted.Status != http.StatusCreated || converted.Body["cash"].(map[string]any)["amountMinor"].(float64) != 180_000 {
 		t.Fatalf("convert: %d %s", converted.Status, converted.Raw)
 	}
 	staff := harness.Tokens.StaffTokens(uuid.NewString(), "money.withdrawals.process")
-	stepUp := http.Header{"X-Step-Up-Token": {staff.StepUpToken}}
+	stepUp := staff.StepUp
 	harness.Paystack.FundPlatformBalance("NGN", 175_000)
-	if report := harness.Call(http.MethodPost, "/api/v1/admin/payouts/run", staff.AccessToken, "", nil, stepUp); report.Body["creatorTransfers"].(float64) != 1 {
+	if report := harness.Call(http.MethodPost, "/api/v1/admin/payouts/run", staff.AccessToken, "", nil, stepUp()); report.Body["creatorTransfers"].(float64) != 1 {
 		t.Fatalf("creator earnings: %v", report.Body)
 	}
 	if harness.balance(ledgermodels.CreatorEarningsPayableAccount(creator, "NGN")) != 0 || harness.balance(ledgermodels.SellerAvailableAccount(creator, "NGN")) != 180_000 {
 		t.Fatal("creator share not made withdrawable")
 	}
-	account := harness.Call(http.MethodPost, "/api/v1/wallets/me/payout-accounts", token, "", map[string]any{"bankCode": "058", "accountNumber": "0123454821"})
+	account := harness.Call(http.MethodPost, "/api/v1/wallets/me/payout-accounts", token, "", map[string]any{"bankCode": "058", "accountNumber": "0123454821"}, harness.stepUp(token))
 	if account.Status != http.StatusCreated || account.Body["accountName"] != "TEMITOPE ADEYEMI" {
 		t.Fatalf("payout account: %d %s", account.Status, account.Raw)
 	}
@@ -67,8 +71,8 @@ func TestCreatorEarningsBecomeWithdrawableAfterVerificationAndArePaidByTransfer(
 		t.Fatalf("queued withdrawals were not subtracted from the Paystack balance: %d", beyondProvider.Status)
 	}
 	harness.Call(http.MethodPost, "/api/v1/wallets/me/withdrawals/"+second.Body["id"].(string)+"/cancel", token, "", nil)
-	harness.Call(http.MethodPost, "/api/v1/admin/withdrawals/"+first.Body["id"].(string)+"/review", staff.AccessToken, "review-key-1", map[string]any{"decision": "approve"}, stepUp)
-	if report := harness.Call(http.MethodPost, "/api/v1/admin/payouts/run", staff.AccessToken, "", nil, stepUp); report.Body["processing"].(float64) != 1 || harness.Paystack.Calls("POST /transfer") != 1 {
+	harness.Call(http.MethodPost, "/api/v1/admin/withdrawals/"+first.Body["id"].(string)+"/review", staff.AccessToken, "review-key-1", map[string]any{"decision": "approve"}, stepUp())
+	if report := harness.Call(http.MethodPost, "/api/v1/admin/payouts/run", staff.AccessToken, "", nil, stepUp()); report.Body["processing"].(float64) != 1 || harness.Paystack.Calls("POST /transfer") != 1 {
 		t.Fatalf("payout run: %v", report.Body)
 	}
 	if harness.balance(ledgermodels.SellerReservedPayoutAccount(creator, "NGN")) != 100_000 {
@@ -81,8 +85,8 @@ func TestCreatorEarningsBecomeWithdrawableAfterVerificationAndArePaidByTransfer(
 		t.Fatal("payout not booked from reserved payout")
 	}
 	third := harness.withdraw(token, "withdraw-key-3", accountId, 60_000)
-	harness.Call(http.MethodPost, "/api/v1/admin/withdrawals/"+third.Body["id"].(string)+"/review", staff.AccessToken, "review-key-3", map[string]any{"decision": "approve"}, stepUp)
-	harness.Call(http.MethodPost, "/api/v1/admin/payouts/run", staff.AccessToken, "", nil, stepUp)
+	harness.Call(http.MethodPost, "/api/v1/admin/withdrawals/"+third.Body["id"].(string)+"/review", staff.AccessToken, "review-key-3", map[string]any{"decision": "approve"}, stepUp())
+	harness.Call(http.MethodPost, "/api/v1/admin/payouts/run", staff.AccessToken, "", nil, stepUp())
 	failed := harness.Paystack.SetTransferStatus(third.Body["reference"].(string), "failed")
 	harness.DeliverPaystackEvent("transfer.failed", map[string]any{"reference": third.Body["reference"], "transfer_code": failed.Code, "status": "failed"})
 	if harness.balance(ledgermodels.SellerAvailableAccount(creator, "NGN")) != 80_000 {

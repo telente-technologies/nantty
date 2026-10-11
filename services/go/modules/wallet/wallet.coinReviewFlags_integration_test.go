@@ -34,7 +34,7 @@ func (harness *walletHarness) staffCoinRows(token, query string) []map[string]an
 
 func (harness *walletHarness) buyCoinsWithKey(userId, packageId, key string) {
 	harness.T.Helper()
-	started := harness.Call(http.MethodPost, "/api/v1/coins/purchases", harness.Tokens.UserAccessToken(userId), key, map[string]any{"packageId": packageId}, http.Header{"X-Client-Region": {"NG"}})
+	started := harness.Call(http.MethodPost, "/api/v1/coins/purchases", harness.Tokens.UserAccessToken(userId), key, map[string]any{"packageId": packageId}, http.Header{"CloudFront-Viewer-Country": {"NG"}})
 	if started.Status != http.StatusCreated {
 		harness.T.Fatalf("start purchase: %d %s", started.Status, started.Raw)
 	}

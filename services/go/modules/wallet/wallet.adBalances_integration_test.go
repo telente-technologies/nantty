@@ -76,8 +76,8 @@ func TestFlaggedSellersKeepTheReservePercentageLockedWhenCreditsMature(t *testin
 	harness := startWalletHarness(t, true)
 	seller := uuid.NewString()
 	staff := harness.Tokens.StaffTokens(uuid.NewString(), "money.withdrawals.process", "money.withdrawals.read")
-	stepUp := http.Header{"X-Step-Up-Token": {staff.StepUpToken}}
-	flagged := harness.Call(http.MethodPut, "/api/v1/admin/wallet/seller-reserves/"+seller, staff.AccessToken, "", map[string]any{"reason": "High chargeback rate", "reserveBps": 1000, "holdDays": 30}, stepUp)
+	stepUp := staff.StepUp
+	flagged := harness.Call(http.MethodPut, "/api/v1/admin/wallet/seller-reserves/"+seller, staff.AccessToken, "", map[string]any{"reason": "High chargeback rate", "reserveBps": 1000, "holdDays": 30}, stepUp())
 	if flagged.Status != http.StatusCreated {
 		t.Fatalf("flag: %d %s", flagged.Status, flagged.Raw)
 	}

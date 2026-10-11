@@ -21,7 +21,7 @@ func (harness *walletHarness) fundWithdrawableBalance(userId string, amountMinor
 	harness.OnboardConnectedAccount(userId, false)
 	harness.Paystack.FundPlatformBalance("NGN", 100_000_000)
 	token := harness.Tokens.UserAccessToken(userId)
-	account := harness.Call(http.MethodPost, "/api/v1/wallets/me/payout-accounts", token, "", map[string]any{"bankCode": "058", "accountNumber": "0123454821"})
+	account := harness.Call(http.MethodPost, "/api/v1/wallets/me/payout-accounts", token, "", map[string]any{"bankCode": "058", "accountNumber": "0123454821"}, harness.stepUp(token))
 	if account.Status != http.StatusCreated {
 		harness.T.Fatalf("payout account: %d %s", account.Status, account.Raw)
 	}
@@ -77,15 +77,26 @@ func TestStaffSeeWithdrawalDetailsAndCanHoldThenApproveOrRejectWithFundsReturned
 	if list.Status != http.StatusOK || len(rows) != 2 || list.Body["counts"].(map[string]any)["pending_review"].(float64) < 2 {
 		t.Fatalf("staff list: %d %s", list.Status, list.Raw)
 	}
+	queue := harness.Call(http.MethodGet, "/api/v1/admin/withdrawals?status=pending_review&search="+user, reader.AccessToken, "", nil)
+	queued := queue.Body["data"].([]any)
+	if len(queued) != 2 || queued[0].(map[string]any)["id"] != first.Body["id"] || queued[1].(map[string]any)["id"] != second.Body["id"] {
+		t.Fatalf("the pending queue is oldest first so staff work the longest wait first: %s", queue.Raw)
+	}
+	if _, hasAge := queued[0].(map[string]any)["ageHours"].(float64); !hasAge {
+		t.Fatalf("queue rows carry their waiting age: %v", queued[0])
+	}
+	if rows[0].(map[string]any)["id"] != second.Body["id"] {
+		t.Fatalf("the unfiltered history stays newest first: %s", list.Raw)
+	}
 	row := rows[0].(map[string]any)
 	destination := row["destination"].(map[string]any)
 	if row["userId"] != user || row["provider"] != "paystack" || destination["accountLast4"] != "4821" || destination["bankName"] == "" || destination["addedAt"] == nil {
 		t.Fatalf("staff row: %v", row)
 	}
 	staff := harness.Tokens.StaffTokens(uuid.NewString(), "money.withdrawals.process")
-	stepUp := http.Header{"X-Step-Up-Token": {staff.StepUpToken}}
+	stepUp := staff.StepUp
 	firstId, secondId := first.Body["id"].(string), second.Body["id"].(string)
-	held := harness.Call(http.MethodPost, "/api/v1/admin/withdrawals/"+firstId+"/review", staff.AccessToken, "hold-key-1", map[string]any{"decision": "hold", "reason": "Checking the account name"}, stepUp)
+	held := harness.Call(http.MethodPost, "/api/v1/admin/withdrawals/"+firstId+"/review", staff.AccessToken, "hold-key-1", map[string]any{"decision": "hold", "reason": "Checking the account name"}, stepUp())
 	if held.Status != http.StatusOK || held.Body["withdrawalStatus"] != "on_hold" || held.Body["reviewNote"] != "Checking the account name" {
 		t.Fatalf("hold: %d %s", held.Status, held.Raw)
 	}
@@ -95,11 +106,11 @@ func TestStaffSeeWithdrawalDetailsAndCanHoldThenApproveOrRejectWithFundsReturned
 	if beyond := harness.withdraw(token, "staff-view-key-3", accountId, 111_000); beyond.Status != http.StatusUnprocessableEntity {
 		t.Fatalf("held money was spendable again: %d", beyond.Status)
 	}
-	approved := harness.Call(http.MethodPost, "/api/v1/admin/withdrawals/"+firstId+"/review", staff.AccessToken, "approve-key-1", map[string]any{"decision": "approve"}, stepUp)
+	approved := harness.Call(http.MethodPost, "/api/v1/admin/withdrawals/"+firstId+"/review", staff.AccessToken, "approve-key-1", map[string]any{"decision": "approve"}, stepUp())
 	if approved.Status != http.StatusOK || approved.Body["withdrawalStatus"] != "queued" {
 		t.Fatalf("approve from hold: %d %s", approved.Status, approved.Raw)
 	}
-	rejected := harness.Call(http.MethodPost, "/api/v1/admin/withdrawals/"+secondId+"/review", staff.AccessToken, "reject-key-1", map[string]any{"decision": "reject", "reason": "Account under review"}, stepUp)
+	rejected := harness.Call(http.MethodPost, "/api/v1/admin/withdrawals/"+secondId+"/review", staff.AccessToken, "reject-key-1", map[string]any{"decision": "reject", "reason": "Account under review"}, stepUp())
 	if rejected.Status != http.StatusOK || rejected.Body["withdrawalStatus"] != "failed" {
 		t.Fatalf("reject: %d %s", rejected.Status, rejected.Raw)
 	}
@@ -107,10 +118,10 @@ func TestStaffSeeWithdrawalDetailsAndCanHoldThenApproveOrRejectWithFundsReturned
 	if detail.Status != http.StatusOK || detail.Body["availableBalance"].(map[string]any)["amountMinor"].(float64) != 150_000 || len(detail.Body["recentWithdrawals"].([]any)) != 1 {
 		t.Fatalf("detail: %d %s", detail.Status, detail.Raw)
 	}
-	if again := harness.Call(http.MethodPost, "/api/v1/admin/withdrawals/"+secondId+"/review", staff.AccessToken, "reject-key-2", map[string]any{"decision": "reject", "reason": "Again"}, stepUp); again.Status != http.StatusConflict {
+	if again := harness.Call(http.MethodPost, "/api/v1/admin/withdrawals/"+secondId+"/review", staff.AccessToken, "reject-key-2", map[string]any{"decision": "reject", "reason": "Again"}, stepUp()); again.Status != http.StatusConflict {
 		t.Fatalf("a rejected withdrawal was reversed twice: %d", again.Status)
 	}
-	harness.Call(http.MethodPost, "/api/v1/admin/payouts/run", staff.AccessToken, "", nil, stepUp)
+	harness.Call(http.MethodPost, "/api/v1/admin/payouts/run", staff.AccessToken, "", nil, stepUp())
 	failed := harness.Paystack.SetTransferStatus(first.Body["reference"].(string), "failed")
 	harness.DeliverPaystackEvent("transfer.failed", map[string]any{"reference": first.Body["reference"], "transfer_code": failed.Code, "status": "failed"})
 	if harness.balance(ledgermodels.SellerAvailableAccount(user, "NGN")) != 200_000 || harness.balance(ledgermodels.SellerReservedPayoutAccount(user, "NGN")) != 0 {

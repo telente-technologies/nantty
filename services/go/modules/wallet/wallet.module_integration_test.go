@@ -46,7 +46,7 @@ type walletHarness struct {
 	wallet *src.Module
 }
 
-func startWalletHarness(t *testing.T, requireReview bool) *walletHarness {
+func startWalletHarness(t *testing.T, requireReview bool, adjustments ...func(*configs.WalletSettings)) *walletHarness {
 	t.Helper()
 	money := paymentstesting.StartMoneyHarnessWithPayments(t, map[string]interfaces.StoreReceiptVerifier{"apple_iap": fakeStoreVerifier{store: "apple_iap"}})
 	settings := configs.WalletSettings{
@@ -55,11 +55,14 @@ func startWalletHarness(t *testing.T, requireReview bool) *walletHarness {
 		CoinCashValueMinorByCurrency: configs.ParseCurrencyAmounts("NGN:1000,USD:1"),
 		MinimumPayoutMinorByCurrency: configs.ParseCurrencyAmounts("NGN:1000,USD:1000"),
 		MinimumWithdrawalMinor:       100, DataEncryptionKey: bytes.Repeat([]byte{9}, 32),
-		DefaultCurrency: "NGN", WithdrawalsRequireReview: requireReview, PayoutRunInterval: time.Hour,
+		DefaultCurrency: "NGN", TrustedCountryHeader: "CloudFront-Viewer-Country", WithdrawalsRequireReview: requireReview, PayoutRunInterval: time.Hour,
 		CreatorTransferMinimum:      configs.ParseCurrencyAmounts("NGN:10000"),
 		CoinNetValueMinorByCurrency: configs.ParseCurrencyAmounts("NGN:1000,USD:1"),
 		CoinChannelFeeBps:           configs.ParseChannelFees("web:200,ios:3000,android:1500"),
 		InternalApiToken:            strings.Repeat("w", 32), AdPrepaidRefundsEnabled: true, SellerReserveHoldDays: 90,
+	}
+	for _, adjust := range adjustments {
+		adjust(&settings)
 	}
 	module, err := src.StartWalletModuleWithSettings(context.Background(), settings, money.Dependencies, money.Overrides(), money.Payments.Application.Gateway)
 	if err != nil {
@@ -90,7 +93,7 @@ func (harness *walletHarness) balance(account ledgermodels.AccountRef) int64 {
 
 func (harness *walletHarness) buyCoinsOnTheWeb(userId, packageId string) {
 	harness.T.Helper()
-	started := harness.Call(http.MethodPost, "/api/v1/coins/purchases", harness.Tokens.UserAccessToken(userId), "buy-"+userId[:8], map[string]any{"packageId": packageId}, http.Header{"X-Client-Region": {"NG"}})
+	started := harness.Call(http.MethodPost, "/api/v1/coins/purchases", harness.Tokens.UserAccessToken(userId), "buy-"+userId[:8], map[string]any{"packageId": packageId}, http.Header{"CloudFront-Viewer-Country": {"NG"}})
 	if started.Status != http.StatusCreated || started.Body["purchaseChannel"] != "web_checkout" {
 		harness.T.Fatalf("start purchase: %d %s", started.Status, started.Raw)
 	}
@@ -104,7 +107,7 @@ func TestWebCoinPurchaseCreditsOnceAndAppClientsMustUseInAppPurchase(t *testing.
 	harness := startWalletHarness(t, true)
 	buyer := uuid.NewString()
 	token := harness.Tokens.UserAccessToken(buyer)
-	packages := harness.Call(http.MethodGet, "/api/v1/coins/packages", "", "", nil, http.Header{"X-Client-Region": {"NG"}})
+	packages := harness.Call(http.MethodGet, "/api/v1/coins/packages", "", "", nil, http.Header{"CloudFront-Viewer-Country": {"NG"}})
 	first := packages.Body["data"].([]any)[0].(map[string]any)
 	if first["id"] != "web-coins-1" || first["coins"].(float64) != 100 || first["price"].(map[string]any)["currency"] != "NGN" || first["price"].(map[string]any)["amountMinor"].(float64) != 100_000 {
 		t.Fatalf("web packages: %v", packages.Body)
@@ -113,7 +116,7 @@ func TestWebCoinPurchaseCreditsOnceAndAppClientsMustUseInAppPurchase(t *testing.
 	if iosPack := appPackages.Body["data"].([]any)[0].(map[string]any); iosPack["purchaseChannel"] != "store_iap" || iosPack["clientPlatform"] != "ios" || iosPack["coins"].(float64) != 100 || iosPack["storeProductId"] != "com.zudomart.app.coins.tier1" {
 		t.Fatalf("app packages: %v", appPackages.Body)
 	}
-	if blocked := harness.Call(http.MethodPost, "/api/v1/coins/purchases", token, "app-web-key", map[string]any{"packageId": "web-coins-1"}, http.Header{"X-Client-Platform": {"android"}}); blocked.Status != http.StatusConflict {
+	if blocked := harness.Call(http.MethodPost, "/api/v1/coins/purchases", token, "app-web-key", map[string]any{"packageId": "web-coins-1"}, http.Header{"X-Client-Platform": {"android"}, "CloudFront-Viewer-Country": {"NG"}}); blocked.Status != http.StatusConflict {
 		t.Fatalf("app client bought a web pack: %d", blocked.Status)
 	}
 	harness.buyCoinsOnTheWeb(buyer, "web-coins-3")

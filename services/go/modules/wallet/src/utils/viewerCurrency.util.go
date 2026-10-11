@@ -30,11 +30,18 @@ func (resolver RegionHeaderCurrencyResolver) ResolveViewerCurrency(request *http
 }
 
 func (resolver RegionHeaderCurrencyResolver) ResolvePricingRegion(request *http.Request) regionpricing.Resolution {
-	profileCountry := ""
+	return regionpricing.ResolvePricingRegion(regionpricing.ReadSignalsFromRequest(request, resolver.TrustedCountryHeader, resolver.profileCountry(request)))
+}
+
+func (resolver RegionHeaderCurrencyResolver) ResolveChargingRegion(request *http.Request) regionpricing.Resolution {
+	return regionpricing.ResolveChargingRegion(regionpricing.ReadSignalsFromRequest(request, resolver.TrustedCountryHeader, resolver.profileCountry(request)))
+}
+
+func (resolver RegionHeaderCurrencyResolver) profileCountry(request *http.Request) string {
 	if userId := ledgerutils.ReadOptionalPrincipalUserId(request, resolver.AccessVerifier); userId != "" && resolver.ProfileCountry != nil {
-		profileCountry = resolver.ProfileCountry(request.Context(), userId)
+		return resolver.ProfileCountry(request.Context(), userId)
 	}
-	return regionpricing.ResolvePricingRegion(regionpricing.ReadSignalsFromRequest(request, resolver.TrustedCountryHeader, profileCountry))
+	return ""
 }
 
 func ProfileCountryFromUsersSchema(database *sql.DB, usersSchema string) ProfileCountryLookup {

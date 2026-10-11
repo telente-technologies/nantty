@@ -52,7 +52,7 @@ func TestStaffReviewAndReverseCoinTransactionsWithClawbackAndRefund(t *testing.T
 		t.Fatalf("recipient spend: %s", spent.Raw)
 	}
 	reviewer := harness.Tokens.StaffTokens(uuid.NewString(), "money.coins.review")
-	stepUp := http.Header{"X-Step-Up-Token": {reviewer.StepUpToken}}
+	stepUp := reviewer.StepUp
 	if denied := harness.Call(http.MethodGet, "/api/v1/admin/coins/transactions", harness.Tokens.StaffTokens(uuid.NewString(), "money.ledger.read").AccessToken, "", nil); denied.Status != http.StatusForbidden {
 		t.Fatalf("staff without coins:review listed coin transactions: %d", denied.Status)
 	}
@@ -78,15 +78,15 @@ func TestStaffReviewAndReverseCoinTransactionsWithClawbackAndRefund(t *testing.T
 	if noStepUp := harness.Call(http.MethodPost, "/api/v1/admin/coins/transactions/"+transferId+"/reverse", reviewer.AccessToken, "reverse-key-1", body); noStepUp.Status != http.StatusForbidden {
 		t.Fatalf("reversal without step-up: %d", noStepUp.Status)
 	}
-	if noKey := harness.Call(http.MethodPost, "/api/v1/admin/coins/transactions/"+transferId+"/reverse", reviewer.AccessToken, "", body, stepUp); noKey.Status != http.StatusBadRequest {
+	if noKey := harness.Call(http.MethodPost, "/api/v1/admin/coins/transactions/"+transferId+"/reverse", reviewer.AccessToken, "", body, stepUp()); noKey.Status != http.StatusBadRequest {
 		t.Fatalf("reversal without idempotency key: %d", noKey.Status)
 	}
-	reversed := harness.Call(http.MethodPost, "/api/v1/admin/coins/transactions/"+transferId+"/reverse", reviewer.AccessToken, "reverse-key-1", body, stepUp)
-	replay := harness.Call(http.MethodPost, "/api/v1/admin/coins/transactions/"+transferId+"/reverse", reviewer.AccessToken, "reverse-key-1", body, stepUp)
+	reversed := harness.Call(http.MethodPost, "/api/v1/admin/coins/transactions/"+transferId+"/reverse", reviewer.AccessToken, "reverse-key-1", body, stepUp())
+	replay := harness.Call(http.MethodPost, "/api/v1/admin/coins/transactions/"+transferId+"/reverse", reviewer.AccessToken, "reverse-key-1", body, stepUp())
 	if reversed.Status != http.StatusOK || reversed.Body["reviewStatus"] != "reversed" || reversed.Body["clawbackShortfallCoins"].(float64) != 20 || replay.Headers.Get("Idempotent-Replayed") != "true" {
 		t.Fatalf("reverse transfer: %d %s / %s", reversed.Status, reversed.Raw, replay.Raw)
 	}
-	if again := harness.Call(http.MethodPost, "/api/v1/admin/coins/transactions/"+transferId+"/reverse", reviewer.AccessToken, "reverse-key-2", body, stepUp); again.Status != http.StatusConflict || again.Body["code"] != "COIN_TRANSACTION_REVERSED" {
+	if again := harness.Call(http.MethodPost, "/api/v1/admin/coins/transactions/"+transferId+"/reverse", reviewer.AccessToken, "reverse-key-2", body, stepUp()); again.Status != http.StatusConflict || again.Body["code"] != "COIN_TRANSACTION_REVERSED" {
 		t.Fatalf("reversed twice: %d %s", again.Status, again.Raw)
 	}
 	if harness.balance(ledgermodels.UserSpendableCoinsAccount(buyer)) != 100 || harness.balance(ledgermodels.UserSpendableCoinsAccount(recipient)) != 0 || harness.balance(ledgermodels.UserCoinDebtAccount(recipient)) != 20 {
@@ -95,7 +95,7 @@ func TestStaffReviewAndReverseCoinTransactionsWithClawbackAndRefund(t *testing.T
 	if spend := harness.Call(http.MethodPost, "/api/v1/coins/transfers", buyerToken, "spend-before-reversal", map[string]any{"recipientUserId": other, "coins": 30}); spend.Status != http.StatusCreated {
 		t.Fatalf("spend: %s", spend.Raw)
 	}
-	purchaseReversal := harness.Call(http.MethodPost, "/api/v1/admin/coins/transactions/"+purchaseId+"/reverse", reviewer.AccessToken, "reverse-key-3", body, stepUp)
+	purchaseReversal := harness.Call(http.MethodPost, "/api/v1/admin/coins/transactions/"+purchaseId+"/reverse", reviewer.AccessToken, "reverse-key-3", body, stepUp())
 	if purchaseReversal.Status != http.StatusOK || purchaseReversal.Body["transactionStatus"] != "refunded" || purchaseReversal.Body["clawbackShortfallCoins"].(float64) != 30 {
 		t.Fatalf("reverse purchase: %d %s", purchaseReversal.Status, purchaseReversal.Raw)
 	}
