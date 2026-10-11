@@ -20,6 +20,7 @@ import { toIdentityUser } from "@/utils/partySummary.util";
 
 import styles from "./money.module.css";
 import { WithdrawalDetailPanel } from "./withdrawalDetailPanel";
+import { formatWaitingAge, hoursSince } from "@/utils/queueOrder.util";
 
 type WithdrawalTabKey = WithdrawalStatus | "all";
 
@@ -32,6 +33,7 @@ const withdrawalColumns: readonly DataTableColumn<StaffWithdrawal>[] = [
   { key: "reference", header: "Reference", render: (withdrawal) => withdrawal.reference, isMono: true },
   { key: "status", header: "Status", render: (withdrawal) => <StatusBadge status={withdrawal.withdrawalStatus} /> },
   { key: "requested", header: "Requested", render: (withdrawal) => <span className={styles.muted}>{formatRelativeTimeFromNow(withdrawal.createdAt)}</span> },
+  { key: "waiting", header: "Waiting", render: (withdrawal) => <span className={styles.muted}>{formatWaitingAge(withdrawal.ageHours ?? hoursSince(withdrawal.createdAt))}</span>, align: "end" },
 ];
 
 export function WithdrawalsWorkspace() {

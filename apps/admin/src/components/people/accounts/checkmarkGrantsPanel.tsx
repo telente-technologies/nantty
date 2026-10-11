@@ -69,12 +69,12 @@ export function CheckmarkGrantsPanel() {
       {errorMessage ? <ErrorBlock message={errorMessage} onRetry={reload} /> : null}
       <DataTable caption="Lifetime checkmark grants" columns={columns} rows={data?.items ?? []} readRowKey={(item) => item.id} isLoading={isLoading} emptyMessage={status === "ACTIVE" ? "No free checkmarks granted yet." : "Nothing revoked."} />
       {isGrantOpen ? (
-        <ConfirmActionDialog isOpen title="Grant a lifetime free checkmark" confirmLabel="Grant checkmark" requiresStepUp reasonLabel="Reason (saved to the audit log)" isConfirmDisabled={username.trim().length < 3} isBusy={grantMutation.isRunning} errorMessage={grantMutation.errorMessage} onConfirm={grant} onClose={() => { grantMutation.clearError(); setIsGrantOpen(false); }}>
+        <ConfirmActionDialog intent="verify" isOpen title="Grant a lifetime free checkmark" confirmLabel="Grant checkmark" requiresStepUp reasonLabel="Reason (saved to the audit log)" isConfirmDisabled={username.trim().length < 3} isBusy={grantMutation.isRunning} errorMessage={grantMutation.errorMessage} onConfirm={grant} onClose={() => { grantMutation.clearError(); setIsGrantOpen(false); }}>
           <TextField label="Username" value={username} onChange={(event) => setUsername(event.target.value.replace(/^@/, ""))} autoComplete="off" error={readIssueMessageForField(grantMutation.validationIssues, "username")} />
           <SelectField label="Checkmark" hint="Must match the profile type: Blue for personal (including creator accounts), Gold for business or brand, Black for government." value={color} onChange={(event) => setColor(event.target.value as VerificationColor)} options={colorOptions.filter((option) => option.value !== "BLACK" || isSuperadmin)} />
         </ConfirmActionDialog>
       ) : null}
-      {toRevoke ? <ConfirmActionDialog isOpen title="Revoke this checkmark" consequences={[`@${toRevoke.user.username} loses the ${humanizeConstantName(toRevoke.color)} badge straight away.`, "Any verification they held before the grant is restored."]} confirmLabel="Revoke checkmark" tone="danger" requiresStepUp isBusy={revokeMutation.isRunning} errorMessage={revokeMutation.errorMessage} onConfirm={revoke} onClose={() => { revokeMutation.clearError(); setToRevoke(null); }} /> : null}
+      {toRevoke ? <ConfirmActionDialog intent="verify" isOpen title="Revoke this checkmark" consequences={[`@${toRevoke.user.username} loses the ${humanizeConstantName(toRevoke.color)} badge straight away.`, "Any verification they held before the grant is restored."]} confirmLabel="Revoke checkmark" tone="danger" requiresStepUp isBusy={revokeMutation.isRunning} errorMessage={revokeMutation.errorMessage} onConfirm={revoke} onClose={() => { revokeMutation.clearError(); setToRevoke(null); }} /> : null}
     </>
   );
 }

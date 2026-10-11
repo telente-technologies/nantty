@@ -38,7 +38,7 @@ export function CreateAccountDialog({ onClose, onCreated }: { readonly onClose: 
   }
 
   return (
-    <ConfirmActionDialog
+    <ConfirmActionDialog intent="addMember"
       isOpen
       title="Create an account"
       description="Use this for official, partner or support accounts. The password is shown nowhere after this step."

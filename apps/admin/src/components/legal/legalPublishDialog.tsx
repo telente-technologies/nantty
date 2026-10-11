@@ -35,7 +35,7 @@ export function LegalPublishDialog({ version, onClose, onPublished }: LegalPubli
   }
 
   return (
-    <ConfirmActionDialog isOpen title={`Publish version ${version.versionNumber}`} confirmLabel="Publish" requiresStepUp isBusy={publishMutation.isRunning} errorMessage={publishMutation.errorMessage} isConfirmDisabled={isShortNotice && !hasAcknowledgedShortNotice} onConfirm={publish} onClose={onClose}
+    <ConfirmActionDialog intent="publish" isOpen title={`Publish version ${version.versionNumber}`} confirmLabel="Publish" requiresStepUp isBusy={publishMutation.isRunning} errorMessage={publishMutation.errorMessage} isConfirmDisabled={isShortNotice && !hasAcknowledgedShortNotice} onConfirm={publish} onClose={onClose}
       consequences={[`It becomes the version everyone sees on the website and in the apps from ${formatDateOnly(version.effectiveAt)}.`, willNotifyUsers ? "A Policy updated email is queued to all users right away." : "No email is sent for this document. You can still send one from Policy notices.", ...(version.isMaterialChange ? ["Users must accept the new version by the effective date."] : [])]}>
       <div className={styles.stack}>
         {isShortNotice ? <CheckboxField label={<strong>Legal cleared less than {materialChangeNoticeDays} days of notice</strong>} description="Required for a material change with a short notice period." checked={hasAcknowledgedShortNotice} onChange={(event) => setHasAcknowledgedShortNotice(event.target.checked)} /> : null}

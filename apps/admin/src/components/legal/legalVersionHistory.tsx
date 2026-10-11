@@ -92,7 +92,7 @@ export function LegalVersionHistory({ documentKey, versions, canEdit, hasOpenVer
       </div>
       {left && right ? <LegalVersionDiff leftLabel={versionLabel(left)} rightLabel={versionLabel(right)} leftMarkdown={left.bodyMarkdown} rightMarkdown={right.bodyMarkdown} /> : null}
       {versions.find((version) => version.id === openedId) ? <VersionDetailPanel version={versions.find((version) => version.id === openedId) as LegalVersion} onClose={() => setOpenedId(null)} /> : null}
-      {rollbackTarget ? <ConfirmActionDialog isOpen title={`Roll back to version ${rollbackTarget.versionNumber}`} confirmLabel="Create draft" isBusy={rollbackMutation.isRunning} errorMessage={rollbackMutation.errorMessage} consequences={["A new draft version is created with the old wording. Nothing changes for users until it is reviewed and published.", "The old version is never edited or deleted."]} onConfirm={rollback} onClose={() => { rollbackMutation.clearError(); setRollbackTarget(null); }} /> : null}
+      {rollbackTarget ? <ConfirmActionDialog intent="restore" isOpen title={`Roll back to version ${rollbackTarget.versionNumber}`} confirmLabel="Create draft" isBusy={rollbackMutation.isRunning} errorMessage={rollbackMutation.errorMessage} consequences={["A new draft version is created with the old wording. Nothing changes for users until it is reviewed and published.", "The old version is never edited or deleted."]} onConfirm={rollback} onClose={() => { rollbackMutation.clearError(); setRollbackTarget(null); }} /> : null}
     </div>
   );
 }

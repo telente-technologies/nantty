@@ -20,6 +20,7 @@ import { formatMoneyForDisplay, formatRelativeTimeFromNow, humanizeConstantName 
 import { toIdentityUser } from "@/utils/partySummary.util";
 
 import styles from "./money.module.css";
+import { formatWaitingAge, hoursSince } from "@/utils/queueOrder.util";
 
 export function isDisputeOpen(dispute: Pick<DisputeSummary, "status">): boolean {
   return dispute.status === "awaiting_seller" || dispute.status === "under_review";
@@ -40,6 +41,7 @@ const disputeColumns: readonly DataTableColumn<DisputeSummary>[] = [
   { key: "escrow", header: "In escrow", render: (dispute) => <span className={styles.amount}>{formatMoneyForDisplay(dispute.escrowAmount)}</span>, align: "end" },
   { key: "priority", header: "Priority", render: (dispute) => <StatusBadge status={dispute.priority} hasDot={false} /> },
   { key: "status", header: "Status", render: (dispute) => <StatusBadge status={dispute.status} /> },
+  { key: "waiting", header: "Waiting", render: (dispute) => <span className={styles.muted}>{formatWaitingAge(dispute.ageHours ?? hoursSince(dispute.openedAt))}</span>, align: "end" },
   { key: "sla", header: "SLA", render: renderSla },
 ];
 

@@ -222,3 +222,16 @@
 .spacedTop {
   margin-top: var(--space-3);
 }
+
+.payload {
+  margin: 0;
+  padding: var(--space-3);
+  max-height: 420px;
+  overflow: auto;
+  border-radius: var(--radius-medium);
+  background: var(--surface-sunken);
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: var(--fs-12);
+  white-space: pre-wrap;
+  word-break: break-all;
+}
