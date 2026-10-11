@@ -1,13 +1,13 @@
 ---
 title: Copyright and account status
 summary: How copyright claims on videos, clips and sounds work, what happens to your content, how strikes and warnings affect your account, and how to send a counter-notice or appeal.
-tags: copyright, claim, strike, warning, counter-notice, account status, muted, takedown, appeal
-related: sounds-and-copyright, suspensions-and-appeals, report-a-problem, community-guidelines
+tags: copyright, claim, strike, warning, counter-notice, account status, muted, takedown, appeal, my video was removed, sound muted
+related: sounds-and-copyright, account-health-and-strikes, copyright-takedown-request, appeal-a-decision, suspensions-and-appeals, community-guidelines
 ---
 
 ## Report content that uses your work
 
-If someone posts your music, video or other creative work without permission, open the post, clip or sound menu and choose **Report copyright**. You need to be signed in.
+If someone posts your music, video or other creative work without permission, open the post, clip or sound menu and choose **Report copyright**. You need to be signed in. For the full step-by-step, see [Send a copyright takedown request](/help/safety-and-reporting/copyright-takedown-request).
 
 The form asks for:
 
@@ -32,20 +32,24 @@ We keep the video up and replace its soundtrack with silence. The sound can no l
 
 The uploader gets a warning, in the app and by email, to remove the content within **48 hours**. The post shows a countdown to its owner.
 
-- Remove it before the deadline: no strike. The warning stays on your record for 180 days.
+- Remove it before the deadline: no strike. The warning stays on your record for 12 months.
 - Still up at the deadline: we take it down automatically and add a **copyright strike**.
 
 Claims about live videos are taken down straight away.
 
 ## Strikes and your account status
 
-Open **Settings > Account status** to see where you stand:
+Open **Settings > Account status** in the app, or **Settings > Account status** on **app.zudomart.com**, to see where you stand:
 
 - **Good standing**: no active strikes and no pending deadlines.
 - **At risk**: you have an active strike, or a takedown deadline is running.
-- **Restricted**: you have 3 active copyright strikes within 90 days. Earning money (gifts, ads revenue share, subscriptions) and going live are paused, and your account is reviewed for suspension.
+- **Restricted**: a repeat copyright infringement (2 copyright strikes within 12 months), or 3 active strikes of any kind. Earning money (gifts, ads revenue share, subscriptions) and going live are paused while you're restricted. When a copyright strike puts you there, posting, going live, selling and earning are suspended for at least 30 days, as Nigerian copyright law requires. A third copyright strike sends your account for review for permanent closure. Money in your wallet stays yours.
 
-Each strike expires after 90 days. Your account status page lists every warning and strike with the reason, the affected content and the expiry date. Studio and the seller dashboard show a summary too. These limits can change; the page always shows the current ones.
+Copyright strikes and copyright warnings expire after 12 months. The top of the page shows, for example, "1 of 2 active strikes". The page lists every copyright notice, active strike and warning with the reason, the affected content and the expiry date. Studio and the seller dashboard show a summary too. These limits can change; the page always shows the current ones.
+
+## Repeat notices (Nigeria)
+
+Nigeria's Copyright Act 2022 sets extra steps for accounts that keep getting valid notices. We warn you that another notice will lead to suspension and ask you to confirm you've seen the warning. You can challenge the warning within 10 days with a counter-notice. If a further valid notice arrives and no challenge is pending, the account is suspended for at least one month. Full details are in our Copyright and IP Policy.
 
 ## Counter-notices
 
@@ -55,8 +59,8 @@ If our team accepts your counter-notice, we tell the claimant. Unless they tell 
 
 ## Appeals
 
-You can appeal any active strike or warning from your Account status page. A different reviewer looks at it. If your appeal succeeds, the strike is removed straight away.
+You can appeal any active strike or warning from your Account status page: tap **Appeal**, explain why in at least 20 characters, then tap **Send appeal**. A different reviewer looks at it, and we tell you the outcome by email and in your notifications. If your appeal succeeds, the strike is removed straight away. See [Appeal a decision](/help/safety-and-reporting/appeal-a-decision).
 
 ## Need help?
 
-Contact support from the Help Centre and choose **Copyright**.
+Go to **Settings > Support > Contact support** and choose **Safety**, or email copyright@zudomart.com.
