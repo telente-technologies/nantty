@@ -26,8 +26,20 @@ type PolicySettings struct {
 	UpdatedAt                 string `json:"updatedAt,omitempty"`
 }
 
+// Nigeria's Copyright Act 2022 requires a warning, then at least a one-month suspension for a repeat infringer.
+const (
+	LegalRepeatInfringerThreshold = 2
+	LegalMinimumSuspensionDays    = 30
+)
+
 func DefaultPolicySettings() PolicySettings {
-	return PolicySettings{TakedownDeadlineHours: 48, StrikeLifetimeDays: 90, WarningLifetimeDays: 180, StrikeWindowDays: 90, RestrictionThreshold: 3, SuspensionReviewThreshold: 3, RestrictionDays: 30}
+	return PolicySettings{TakedownDeadlineHours: 48, StrikeLifetimeDays: 365, WarningLifetimeDays: 365, StrikeWindowDays: 365, RestrictionThreshold: LegalRepeatInfringerThreshold, SuspensionReviewThreshold: 3, RestrictionDays: LegalMinimumSuspensionDays}
+}
+
+func withLegalFloor(settings PolicySettings) PolicySettings {
+	settings.RestrictionThreshold = min(settings.RestrictionThreshold, LegalRepeatInfringerThreshold)
+	settings.RestrictionDays = max(settings.RestrictionDays, LegalMinimumSuspensionDays)
+	return settings
 }
 
 func LoadPolicySettings(ctx context.Context, client *ent.Client) (PolicySettings, error) {
@@ -38,10 +50,10 @@ func LoadPolicySettings(ctx context.Context, client *ent.Client) (PolicySettings
 	if err != nil {
 		return PolicySettings{}, err
 	}
-	return PolicySettings{
+	return withLegalFloor(PolicySettings{
 		TakedownDeadlineHours: row.TakedownDeadlineHours, StrikeLifetimeDays: row.StrikeLifetimeDays, WarningLifetimeDays: row.WarningLifetimeDays, StrikeWindowDays: row.StrikeWindowDays,
 		RestrictionThreshold: row.RestrictionThreshold, SuspensionReviewThreshold: row.SuspensionReviewThreshold, RestrictionDays: row.RestrictionDays, UpdatedBy: row.UpdatedBy, UpdatedAt: row.UpdatedAt.UTC().Format(time.RFC3339),
-	}, nil
+	}), nil
 }
 
 func ValidatePolicySettings(settings PolicySettings) (string, bool) {
@@ -53,9 +65,9 @@ func ValidatePolicySettings(settings PolicySettings) (string, bool) {
 		{"strikeLifetimeDays", settings.StrikeLifetimeDays, 7, 730},
 		{"warningLifetimeDays", settings.WarningLifetimeDays, 7, 730},
 		{"strikeWindowDays", settings.StrikeWindowDays, 7, 730},
-		{"restrictionThreshold", settings.RestrictionThreshold, 1, 20},
+		{"restrictionThreshold", settings.RestrictionThreshold, 1, LegalRepeatInfringerThreshold},
 		{"suspensionReviewThreshold", settings.SuspensionReviewThreshold, 1, 20},
-		{"restrictionDays", settings.RestrictionDays, 1, 90},
+		{"restrictionDays", settings.RestrictionDays, LegalMinimumSuspensionDays, 90},
 	}
 	for _, check := range checks {
 		if check.value < check.lo || check.value > check.hi {

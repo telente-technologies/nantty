@@ -9,6 +9,7 @@ import (
 
 	"zudomart/modules/moderation/src/container"
 	"zudomart/modules/moderation/src/generated/ent"
+	healthservices "zudomart/modules/moderation/src/modules/accountHealth/services"
 	"zudomart/modules/moderation/src/modules/strikes/services"
 	"zudomart/platform/httpserver"
 )
@@ -57,6 +58,9 @@ func (handler Handler) Execute(ctx context.Context, command Command) (Result, er
 	})
 	if err != nil {
 		return Result{}, err
+	}
+	if created {
+		healthservices.RefreshStandingAfterStrikeChange(ctx, handler.Container, account, command.Kind+"_issued")
 	}
 	counts, err := services.ActiveCounts(ctx, handler.Container.Client, handler.Container.Now(), []uuid.UUID{account})
 	if err != nil {

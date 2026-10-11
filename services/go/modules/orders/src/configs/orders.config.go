@@ -39,6 +39,7 @@ type OrdersSettings struct {
 	AdsInternalToken        string
 	AdminInternalUrl        string
 	AdminInternalToken      string
+	CheckoutCurrencies      []string
 }
 
 func (settings OrdersSettings) IsProduction() bool { return settings.Environment == "production" }
@@ -75,6 +76,7 @@ func ReadOrdersSettingsFromEnvironment(reader *platformconfig.EnvironmentReader)
 		AdsInternalToken:        reader.ReadStringOrDefault("ADS_INTERNAL_SHARED_SECRET", ""),
 		AdminInternalUrl:        reader.ReadStringOrDefault("ADMIN_INTERNAL_URL", ""),
 		AdminInternalToken:      reader.ReadStringOrDefault("ADMIN_INTERNAL_API_TOKEN", ""),
+		CheckoutCurrencies:      reader.ReadCommaSeparatedListOrDefault("ORDERS_CHECKOUT_CURRENCIES", []string{"NGN", "USD"}),
 	}
 	settings.AllowInMemoryMoneyFake = !settings.IsProduction()
 	if settings.IsProduction() {

@@ -41,6 +41,7 @@ import (
 	"zudomart/modules/orders/src/modules/sellerOrders"
 	"zudomart/modules/orders/src/modules/shipping"
 	"zudomart/modules/orders/src/modules/storeRewards"
+	orderwidgets "zudomart/modules/orders/src/modules/widgets"
 	"zudomart/modules/orders/src/services"
 	"zudomart/platform/commerceports"
 	platformevents "zudomart/platform/events"
@@ -171,6 +172,7 @@ func (module *Module) MountRoutes(mux *http.ServeMux) {
 	sellerconversations.Mount(mux, module.Container)
 	returns.Mount(mux, module.Container)
 	adminorders.Mount(mux, module.Container)
+	orderwidgets.Mount(mux, module.Container)
 }
 
 func (module *Module) RunBackgroundWorkersUntilContextDone(ctx context.Context) error {

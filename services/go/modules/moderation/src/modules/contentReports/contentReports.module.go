@@ -2,7 +2,6 @@ package contentreports
 
 import (
 	"context"
-	"log/slog"
 	"net/http"
 	"sync"
 	accesssecurity "zudomart/modules/moderation/src/modules/accessSecurity"
@@ -16,6 +15,7 @@ import (
 	livesafety "zudomart/modules/moderation/src/modules/liveSafety"
 	suspensionjobs "zudomart/modules/moderation/src/modules/suspensionCases/jobs"
 	platformevents "zudomart/platform/events"
+	"zudomart/platform/servicemodule"
 )
 
 func Mount(mux *http.ServeMux, c *container.Container) {
@@ -44,9 +44,9 @@ func RunConsumersUntilContextDone(ctx context.Context, c *container.Container, q
 		group.Add(1)
 		go func() {
 			defer group.Done()
-			if err := queues.ConsumeQueueUntilContextDone(ctx, queueName, handler, c.Logger); err != nil && ctx.Err() == nil {
-				c.Logger.ErrorContext(ctx, "moderation queue consumer stopped", slog.String("queue", queueName), slog.Any("error", err))
-			}
+			servicemodule.SuperviseWorkerUntilContextDone(ctx, c.Logger, "moderation queue "+queueName, func(ctx context.Context) error {
+				return queues.ConsumeQueueUntilContextDone(ctx, queueName, handler, c.Logger)
+			})
 		}()
 	}
 	consume(c.Settings.ReportEventsQueue, ReportCreatedHandler(c))
