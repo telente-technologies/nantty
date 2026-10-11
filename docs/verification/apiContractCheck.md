@@ -15,7 +15,7 @@ Statuses: **matches** (path, method and gateway route agree), **fixed** (was wro
 | ads | 81 | 54 | 4 | 0 | 23 |
 | admin | 191 | 134 | 5 | 2 | 50 |
 
-Counts updated 2026-10-05 after the theme, ads-invite and guest-read fixes (see [finalCheckReport.md](finalCheckReport.md), section 0.6).
+Counts updated 2026-10-05 after the theme, ads-invite and guest-read fixes.
 
 ## Live run against the real gateway
 
@@ -95,6 +95,13 @@ Tests: Go integration tests per domain (catalog team/settings, wallet seller mon
 
 Live run (sandbox via `startSandboxStack.sh`, then `docker compose stop`): full apiSmoke 94 tests, 89 pass. After fixing literal route registration for the route sweep, the route sweep, the new seller journey, seller edge, commerce journey and frontend contracts pass (24/24). The 4 other failures are environmental: the realtime container could not install Hex, so live socket and event-flow consumer checks failed. The happy-path seller payout cannot run in smoke (credits stay pending for days and payout verification is asynchronous), so the journey checks clear refusals and the schedule; the paid path is covered by `wallet.sellerMoney_integration_test.go`.
 
+## Flutterwave stage 1 changes (2026-10-10)
+
+- `POST /api/v1/payments/saved-cards/charges` and `POST /api/v1/payments/subscriptions/checkout` require `Idempotency-Key`. The second has no frontend caller.
+- Withdrawals, adding a payout account and `PUT /api/v1/payments/payout-onboarding/me/bank` require `X-Step-Up-Token` from `POST /api/v1/auth/step-up`.
+- Coin purchases, boosts and earnings conversion price from the server by the verified country; `X-Client-Region` is display-only.
+- Staff journal reversal (`POST /api/v1/admin/ledger/journal-entries/{entryId}/reversal`) returns 409 `JOURNAL_KIND_NOT_REVERSIBLE` for any entry a payment, escrow or wallet flow owns.
+
 ## Checks that passed in every app
 
 - **Money**: every app's `Money` is `{amountMinor, currency}`, the same as `platform/money` and the service DTOs. No request sends major units.
@@ -119,7 +126,7 @@ Grouped by area (the per-app tables have the full list):
 | Endpoint | Status | Fix / note |
 | --- | --- | --- |
 | `POST /api/v1/payments/initialize` | fixed | Fixed: dropped `saveCard` (backend rejects unknown fields). |
-| `POST /api/v1/payments/saved-cards/charges` | fixed | Fixed: was `POST /payments/charge-saved-card {orderId}`; now initialize, then charge `{paymentReference, savedCardId}`. |
+| `POST /api/v1/payments/saved-cards/charges` | fixed | Fixed: was `POST /payments/charge-saved-card {orderId}`; now initialize, then charge `{paymentReference, savedCardId}`. Requires `Idempotency-Key` since 2026-10-10 (400 `IDEMPOTENCY_KEY_REQUIRED`); mobile sends `{key}-card`. A replay or a second tap returns the current status (`processing` while pending) and never charges twice. |
 | `GET /api/v1/users/me/data-exports` | fixed | Fixed: was `/privacy/exports/latest` (mock had a different POST path too). |
 | `POST /api/v1/users/me/data-exports` | fixed | Fixed: was `POST /privacy/exports/latest`. |
 | `POST /api/v1/users/me/deletion-request` | fixed | Fixed: was `POST /privacy/deletion {confirmation}`. |
@@ -177,10 +184,10 @@ Grouped by area (the per-app tables have the full list):
 | `POST /api/v1/verification/subscription/cancel` | mock-only | No backend route. |
 | `GET /api/v1/account/status` | matches |  |
 | `POST /api/v1/account/status/strikes/:p/appeal` | matches |  |
-| `POST /api/v1/ads/boosts` | matches |  |
+| `POST /api/v1/ads/boosts` | matches | Server prices in the verified country's currency (profile, then CDN country); `dailyBudget.currency` must match it or 422 `BOOST_CURRENCY_NOT_ALLOWED`. `X-Client-Region` is ignored. |
 | `GET /api/v1/ads/boosts/:p` | matches |  |
 | `POST /api/v1/ads/boosts/estimate` | matches |  |
-| `GET /api/v1/ads/boosts/options` | matches |  |
+| `GET /api/v1/ads/boosts/options` | matches | `currency` query and `X-Client-Region` no longer change the billing currency; it is the verified country's. |
 | `POST /api/v1/ads/decide` | matches |  |
 | `POST /api/v1/ads/events` | matches |  |
 | `POST /api/v1/analytics/product-interactions` | matches |  |
@@ -214,7 +221,7 @@ Grouped by area (the per-app tables have the full list):
 | `GET /api/v1/coins/balance` | matches |  |
 | `POST /api/v1/coins/iap/receipts` | matches |  |
 | `GET /api/v1/coins/packages` | matches |  |
-| `POST /api/v1/coins/purchases` | matches |  |
+| `POST /api/v1/coins/purchases` | matches | Price and currency come from the verified country (profile, then CDN country), never `X-Client-Region`. |
 | `POST /api/v1/coins/purchases/:p/verify` | matches |  |
 | `GET /api/v1/coins/transactions` | matches |  |
 | `POST /api/v1/coins/transfers` | matches |  |
@@ -252,7 +259,7 @@ Grouped by area (the per-app tables have the full list):
 | `POST /api/v1/copyright/claims/:p/counter-notices` | matches |  |
 | `POST /api/v1/creators/applications` | matches |  |
 | `GET /api/v1/creators/applications/me` | matches |  |
-| `POST /api/v1/creators/earnings/convert` | matches |  |
+| `POST /api/v1/creators/earnings/convert` | matches | Converts into the verified country's currency; a different `currency` returns 422 `CURRENCY_NOT_ALLOWED`. |
 | `GET /api/v1/creators/eligibility` | matches |  |
 | `GET /api/v1/creators/me/analytics/gifts/streams/:p` | matches |  |
 | `GET /api/v1/disputes` | matches |  |
@@ -265,6 +272,7 @@ Grouped by area (the per-app tables have the full list):
 | `GET /api/v1/explore/who-to-follow` | matches |  |
 | `POST /api/v1/feeds/feedback` | matches |  |
 | `GET /api/v1/feeds/following` | matches |  |
+| `POST /api/v1/feeds/interactions/batch` | matches | 2026-10-10: batched view/dwell/watch/link_click/profile_click/follow, 1 to 50 events, signed-in only (gateway `required`, 60/min per account). Values are bounded (ms <= 3,600,000, watchFraction 0..1, loopCount <= 100); one bad value rejects the batch with 400, so clients clamp first. Returns `{ accepted, skipped }`; deleted or hidden posts are skipped. Views, watches, link and profile clicks count once per viewer per post per 10 minutes; a follow counts once per viewer per post and only if the follow exists. |
 | `GET /api/v1/feeds/for-you` | matches |  |
 | `GET /api/v1/feeds/suggested-clips` | matches |  |
 | `POST /api/v1/follow-requests/:p/accept` | matches |  |
@@ -346,7 +354,7 @@ Grouped by area (the per-app tables have the full list):
 | `POST /api/v1/payments/payout-onboarding/me/retry` | matches |  |
 | `POST /api/v1/posts` | matches | 2026-10-10: optional `quotedPostId` (uuid or null). A Zudomart post link in `text` becomes a quote server-side; a trailing link is stripped; `null` keeps the link as text. Errors: 422 `QUOTED_POST_UNAVAILABLE`, 422 `QUOTE_REQUIRES_POST`. |
 | `GET /api/v1/posts/:p` | matches |  |
-| `GET /api/v1/posts/:p/analytics` | matches |  |
+| `GET /api/v1/posts/:p/analytics` | matches | 2026-10-10: adds `kind`, `hasLink`, and `video.averageWatchSeconds`, `video.completedViews`, `video.completionRate`. Non-owners get 403 `NOT_POST_OWNER` (owner includes a profile the viewer can post as). |
 | `GET /api/v1/posts/:p/comments` | matches | 2026-10-10: ranked (pinned, author, author-joined, engagement plus recency) with an opaque snapshot cursor (string, max 300); 400 `CURSOR_EXPIRED` after 6 h. `previewReplies` is the conversation chain (max 3). Comments carry `isPostAuthor`, `quotedPost`, `quotedPostUnavailable`. |
 | `POST /api/v1/posts/:p/comments` | matches | 2026-10-10: optional `quotedPostId` (uuid or null), same rules as posts. |
 | `DELETE /api/v1/posts/:p/like` | matches |  |
@@ -418,6 +426,9 @@ Grouped by area (the per-app tables have the full list):
 | `POST /api/v1/users/:p/follow` | matches |  |
 | `GET /api/v1/users/:p/followers` | matches |  |
 | `GET /api/v1/users/:p/following` | matches |  |
+| `GET /api/v1/users/:p/follow-status` | matches | Adds `viewerPostNotifications` (`off`, `posts`, `posts_and_lives`). |
+| `GET /api/v1/users/:p/post-notifications` | matches | `{level, following}`. Signed-in only. |
+| `PUT /api/v1/users/:p/post-notifications` | matches | Body `{level}`, Idempotency-Key. 409 `NOT_FOLLOWING` without an accepted follow, 403 `POST_NOTIFICATIONS_NOT_ALLOWED` when either side blocked, 422 `CANNOT_SUBSCRIBE_TO_SELF`. Unfollowing deletes the level. |
 | `GET /api/v1/users/:p/posts` | matches |  |
 | `GET /api/v1/users/:p/stories` | matches |  |
 | `GET /api/v1/users/by-username/:p` | matches |  |
@@ -460,7 +471,7 @@ Grouped by area (the per-app tables have the full list):
 | `POST /api/v1/wallets/me/payout-accounts` | matches |  |
 | `DELETE /api/v1/wallets/me/payout-accounts/:p` | matches |  |
 | `GET /api/v1/wallets/me/transactions` | matches |  |
-| `POST /api/v1/wallets/me/withdrawals` | matches |  |
+| `POST /api/v1/wallets/me/withdrawals` | matches | Requires `Idempotency-Key` and `X-Step-Up-Token` (from `POST /api/v1/auth/step-up`, 5 minutes); 403 `STEP_UP_REQUIRED` otherwise. |
 
 ## webapp
 
@@ -540,6 +551,7 @@ Grouped by area (the per-app tables have the full list):
 | `GET /api/v1/explore/trends` | matches |  |
 | `GET /api/v1/explore/who-to-follow` | matches |  |
 | `GET /api/v1/feeds/following` | matches |  |
+| `POST /api/v1/feeds/interactions/batch` | matches | 2026-10-10: batched view/dwell/watch/link_click/profile_click/follow, 1 to 50 events, signed-in only (gateway `required`, 60/min per account). Values are bounded (ms <= 3,600,000, watchFraction 0..1, loopCount <= 100); one bad value rejects the batch with 400, so clients clamp first. Returns `{ accepted, skipped }`; deleted or hidden posts are skipped. Views, watches, link and profile clicks count once per viewer per post per 10 minutes; a follow counts once per viewer per post and only if the follow exists. |
 | `GET /api/v1/feeds/for-you` | matches |  |
 | `GET /api/v1/feeds/popular` | matches |  |
 | `GET /api/v1/feeds/suggested-clips` | matches |  |
@@ -582,7 +594,7 @@ Grouped by area (the per-app tables have the full list):
 | `POST /api/v1/payments/initialize` | matches |  |
 | `POST /api/v1/payments/orders/:p/verify` | matches |  |
 | `GET /api/v1/posts/:p` | matches |  |
-| `GET /api/v1/posts/:p/analytics` | matches |  |
+| `GET /api/v1/posts/:p/analytics` | matches | 2026-10-10: adds `kind`, `hasLink`, and `video.averageWatchSeconds`, `video.completedViews`, `video.completionRate`. Non-owners get 403 `NOT_POST_OWNER` (owner includes a profile the viewer can post as). |
 | `GET /api/v1/posts/:p/comments` | matches | 2026-10-10: ranked (pinned, author, author-joined, engagement plus recency) with an opaque snapshot cursor (string, max 300); 400 `CURSOR_EXPIRED` after 6 h. `previewReplies` is the conversation chain (max 3). Comments carry `isPostAuthor`, `quotedPost`, `quotedPostUnavailable`. |
 | `POST /api/v1/posts/:p/comments` | matches | 2026-10-10: optional `quotedPostId` (uuid or null), same rules as posts. |
 | `DELETE /api/v1/posts/:p/like` | matches |  |
@@ -1218,3 +1230,39 @@ Grouped by area (the per-app tables have the full list):
 - **ty:notifications** (10): `DELETE /api/v1/notifications/device-tokens`, `GET /api/v1/admin/legal/notices/:noticeId`, `GET /api/v1/admin/legal/versions/:versionId/notice-draft`, `GET /api/v1/admin/legal/versions/:versionId/notice-preview`, `GET /api/v1/email/unsubscribe`, `GET /api/v1/notifications/unread-count`, `POST /api/v1/admin/legal/versions/:versionId/notice-draft/test-send`, `POST /api/v1/email/unsubscribe`, `POST /api/v1/notifications/device-tokens`, `PUT /api/v1/admin/legal/versions/:versionId/notice-draft`
 - **ty:search** (1): `GET /api/v1/search/suggest`
 - **ty:social** (9): `DELETE /api/v1/posts/:postId/tags/me`, `DELETE /api/v1/posts/:postId`, `GET /api/v1/me/tagging-settings`, `GET /api/v1/users/:userId/follow-status`, `POST /api/v1/posts/:postId/impressions`, `POST /api/v1/posts/:postId/profile-visits`, `POST /api/v1/sounds`, `PUT /api/v1/me/tagging-settings`, `PUT /api/v1/posts/:postId/tags`
+
+## Flutterwave stage 2 changes (2026-10-10)
+
+Behind `PAYMENTS_PROVIDER=flutterwave`; Paystack behaviour is unchanged.
+
+| Endpoint | Change | Clients |
+|---|---|---|
+| `POST /api/v1/payments/payout-onboarding/me/bank-validation?returnTo=` | Response is now `{ status, consentUrl?, reference? }`. Under Flutterwave it starts the BVN consent; open `consentUrl` in a browser, then poll the GET below | mobile, webapp, seller, studio payout setup (open the URL when present) |
+| `GET /api/v1/payments/payout-onboarding/me/bank-validation` | New: `{ status: not_started\|pending\|verified\|failed }` (reads the BVN result) | same |
+| `GET /api/v1/payments/wallet/me` | New: `{ wallet: { provider, currency, status, accountName, accountNumber, bankName, bankCode, fundingNumbers[], createdAt, frozenAt }, balances: { currency, availableMinor, depositHoldMinor, escrowLockedMinor, outgoingMinor, reservedPayoutMinor, debtMinor } }`; `409 WALLET_NOT_READY` before L1 | wallet screens (stage 4) |
+| `POST /api/v1/payments/wallet/me/activate` | New: creates the PSA once the user is L1; idempotent | wallet screens |
+| `POST /api/v1/payments/wallet-payments/{reference}` | New, `Idempotency-Key` required: pays a pending intent (order, coins, ads top-up, boost, subscription) from the wallet. `422 INSUFFICIENT_WALLET_FUNDS`, `409 WALLET_ON_HOLD`, `422 WALLET_PAYMENT_NOT_ALLOWED`, `409 ALREADY_PAID` | checkout (stage 4) |
+| `POST /api/v1/orders/checkout`, `POST /api/v1/coins/purchases`, `POST /api/v1/creators/earnings/convert`, `POST /api/v1/boosts` | `422 COUNTRY_REQUIRED` when neither the address nor the profile (nor a trusted CDN header) gives a country; save it with `PATCH /api/v1/users/me/preferences { countryCode }` and retry | mobile + webapp checkout show a country picker (done); coins/boost dialogs still show the message |
+| Order checkout, catalog publish, bulk publish | `403 VERIFICATION_REQUIRED` with `verifyUrl` when a seller outside Nigeria is not L1 | seller dashboard (show `verifyUrl`), webapp/mobile cart |
+| `POST /api/v1/wallets/me/withdrawals` | New errors under Flutterwave: `409 WALLET_DEBT_OUTSTANDING`, `422 PAYOUT_ACCOUNT_NAME_MISMATCH`, `409 WALLET_ON_HOLD` | wallet withdraw screens |
+| `POST /webhooks/flutterwave` | New; the gateway forwards `verif-hash` (and only on webhook routes) | — |
+| Admin: `/api/v1/admin/payments/...` | See `apps/admin/apiContract.md` (dead-letter list/inspect/replay, funding reject, wallet unfreeze, reconciliation run) | admin console page `/commerce/webhooks` |
+| Internal: `GET /api/v1/internal/sellers/{userId}/selling-eligibility` | New, `x-internal-token` = `MONEY_INTERNAL_API_TOKEN`: `{ canSell, country, level, reason, verifyUrl }` | catalog (go-commerce) via `platform/sellingeligibility` |
+
+## Stage 2 security follow-ups and boost cancel (2026-10-11)
+
+| Endpoint | Change | Clients |
+|---|---|---|
+| `POST /api/v1/subscriptions/checkout`, `POST /api/v1/seller/subscription/checkout`, `.../trial/checkout` | Web price comes from the account or profile country (or a trusted CDN header), never `X-Client-Region`. `422 COUNTRY_REQUIRED` when none is known (FLOW-001) | seller, webapp plan checkout: show the country picker and retry |
+| Order checkout, catalog publish (all paths that check selling eligibility) | `403 SELLER_DEBT_LIMIT` when the seller owes (seller debt + wallet debt) more than their level allows: NG L0 ₦10,000, L1 ₦50,000, L2 or trusted (90+ days, no upheld disputes or lost chargebacks in 90 days) ₦200,000; elsewhere half, converted, unless overridden. Shipping, delivery and dispute replies on existing orders are not gated. Internal eligibility response gains `blockedBy: "debt"` | seller dashboard, webapp/mobile cart: shared error copy |
+| `POST /api/v1/orders/checkout` | `422 PAYMENT_AMOUNT_OUT_OF_RANGE` with `details: { reason: "contactSupportForLargeOrders", maximum: Money }` when one store's order is above ₦5,000,000 (converted elsewhere) | mobile, webapp checkout: shared error copy |
+| Coin purchases, ads top-ups (payment intents) | `422 PAYMENT_AMOUNT_OUT_OF_RANGE` with `details: { maximum \| minimum: Money }`: coins ₦500,000, ads top-up ₦10,000,000 (verified advertisers only); creator subscriptions keep their tier prices. Ads console top-up form now allows up to ₦10m | webapp/mobile coin dialogs, ads console |
+| `POST /api/v1/payments/wallet-payments/{reference}` | `422 WALLET_DAILY_LIMIT` with `details: { tier, limit: Money, remaining: Money, resetsAt }`; tiers basic (L1) ₦50,000/day, mid (L2) ₦200,000, full (L2 + business verified) ₦5,000,000; day is Lagos time | wallet checkout (stage 4): shared error copy |
+| All API errors | Optional `details` object on the error body | mobile, webapp, seller and ads error classes keep it and show limit copy |
+| Admin: `GET/PUT /api/v1/admin/config/seller.debtLimits`, `.../payments.limits` | New settings (permission `config:revenue`, step-up on save); env values are fallbacks only | admin Regional pricing → Limits tab |
+| `POST /api/v1/ads/boosts/{boostId}/cancel` | New, owner only, `Idempotency-Key` required. Stops the boost; returns the boost (`status: "cancelled"`). `409 BOOST_NOT_CANCELLABLE` once completed or rejected; `404` for other users | mobile + webapp boost status (stage 4 button); `cancelled` added to the boost status types |
+| Boost `status` | New value `cancelled` (owner cancel or post deleted) | mobile label "Stopped"; webapp type updated |
+| Event `post.deleted` → go-ads; event `adBoost.cancelled` (new, `services/contracts/events/schemas/adBoost.cancelled.v1.json`) | Both bound to `ads-domain-events` | — |
+| Ad billing history | New transaction type `ad_spend_debt` (TRU-001) | ads console label "Unpaid ad delivery" |
+| Staff money actions: `POST /api/v1/admin/withdrawals/{id}/review`, `/admin/payouts/run`, `/admin/orders/{id}/escrow/refund`, `/admin/disputes/{id}/resolve`, `/admin/ledger/journal-entries/{id}/reversal`, `/admin/payments/webhooks/dead-letters/{id}/replay`, `/admin/payments/wallet-fundings/{ref}/reject`, `/admin/coins/transactions/{id}/reverse` | Step-up token is single-use (consumed in `ledger.step_up_consumptions`); a replay gets `401 STEP_UP_REUSED`. Other step-up routes keep the 5-minute window | admin BFF clears the step-up cookie after a money action and turns `STEP_UP_REUSED` into `STEP_UP_REQUIRED` (prompt again, no sign-out) |
+| `GET /api/v1/admin/withdrawals?status=pending_review\|on_hold\|queued`, `GET /api/v1/admin/disputes?status=open\|awaiting_seller\|under_review` | Queues are oldest first (cursor moves forward); rows gain `ageHours`. History filters stay newest first | admin tables show a "Waiting" column |
