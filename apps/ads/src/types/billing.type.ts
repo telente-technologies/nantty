@@ -1,7 +1,7 @@
 import type { Money } from "@/types/money.type";
 
 export type FundingMode = "prepaid" | "card" | "prepaid_and_card";
-export type PaymentProvider = "paystack";
+export type PaymentProvider = "paystack" | "flutterwave";
 
 export interface PaymentMethod {
   readonly id: string;
@@ -44,8 +44,9 @@ export interface TopUpCheckout {
   readonly topUpId: string;
   readonly reference: string;
   readonly provider: PaymentProvider;
+  readonly checkoutUrl?: string | null;
   readonly authorizationUrl: string;
-  readonly accessCode: string;
+  readonly accessCode?: string;
 }
 
 export interface TopUp {
@@ -59,7 +60,7 @@ export interface TopUp {
   readonly failureReason: string | null;
 }
 
-export type BillingTransactionType = "top_up" | "ad_spend" | "credit_grant" | "credit_spend" | "refund" | "card_charge";
+export type BillingTransactionType = "top_up" | "ad_spend" | "credit_grant" | "credit_spend" | "refund" | "card_charge" | "ad_spend_debt";
 
 export interface BillingTransaction {
   readonly id: string;
