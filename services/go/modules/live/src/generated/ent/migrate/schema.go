@@ -623,6 +623,7 @@ var (
 		{Name: "accepted_live_ad_terms_at", Type: field.TypeTime, Nullable: true},
 		{Name: "sponsorship_line", Type: field.TypeString, Nullable: true, Size: 200},
 		{Name: "moderation_visibility", Type: field.TypeString, Default: "visible"},
+		{Name: "moderation_visibility_at", Type: field.TypeTime, Nullable: true},
 		{Name: "updated_at", Type: field.TypeTime},
 	}
 	// LiveSessionsTable holds the schema information for the "live_sessions" table.

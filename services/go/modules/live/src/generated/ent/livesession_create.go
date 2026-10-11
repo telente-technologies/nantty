@@ -356,6 +356,20 @@ func (_c *LiveSessionCreate) SetNillableModerationVisibility(v *string) *LiveSes
 	return _c
 }
 
+// SetModerationVisibilityAt sets the "moderation_visibility_at" field.
+func (_c *LiveSessionCreate) SetModerationVisibilityAt(v time.Time) *LiveSessionCreate {
+	_c.mutation.SetModerationVisibilityAt(v)
+	return _c
+}
+
+// SetNillableModerationVisibilityAt sets the "moderation_visibility_at" field if the given value is not nil.
+func (_c *LiveSessionCreate) SetNillableModerationVisibilityAt(v *time.Time) *LiveSessionCreate {
+	if v != nil {
+		_c.SetModerationVisibilityAt(*v)
+	}
+	return _c
+}
+
 // SetUpdatedAt sets the "updated_at" field.
 func (_c *LiveSessionCreate) SetUpdatedAt(v time.Time) *LiveSessionCreate {
 	_c.mutation.SetUpdatedAt(v)
@@ -708,6 +722,10 @@ func (_c *LiveSessionCreate) createSpec() (*LiveSession, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.ModerationVisibility(); ok {
 		_spec.SetField(livesession.FieldModerationVisibility, field.TypeString, value)
 		_node.ModerationVisibility = value
+	}
+	if value, ok := _c.mutation.ModerationVisibilityAt(); ok {
+		_spec.SetField(livesession.FieldModerationVisibilityAt, field.TypeTime, value)
+		_node.ModerationVisibilityAt = &value
 	}
 	if value, ok := _c.mutation.UpdatedAt(); ok {
 		_spec.SetField(livesession.FieldUpdatedAt, field.TypeTime, value)
@@ -1128,6 +1146,24 @@ func (u *LiveSessionUpsert) SetModerationVisibility(v string) *LiveSessionUpsert
 // UpdateModerationVisibility sets the "moderation_visibility" field to the value that was provided on create.
 func (u *LiveSessionUpsert) UpdateModerationVisibility() *LiveSessionUpsert {
 	u.SetExcluded(livesession.FieldModerationVisibility)
+	return u
+}
+
+// SetModerationVisibilityAt sets the "moderation_visibility_at" field.
+func (u *LiveSessionUpsert) SetModerationVisibilityAt(v time.Time) *LiveSessionUpsert {
+	u.Set(livesession.FieldModerationVisibilityAt, v)
+	return u
+}
+
+// UpdateModerationVisibilityAt sets the "moderation_visibility_at" field to the value that was provided on create.
+func (u *LiveSessionUpsert) UpdateModerationVisibilityAt() *LiveSessionUpsert {
+	u.SetExcluded(livesession.FieldModerationVisibilityAt)
+	return u
+}
+
+// ClearModerationVisibilityAt clears the value of the "moderation_visibility_at" field.
+func (u *LiveSessionUpsert) ClearModerationVisibilityAt() *LiveSessionUpsert {
+	u.SetNull(livesession.FieldModerationVisibilityAt)
 	return u
 }
 
@@ -1624,6 +1660,27 @@ func (u *LiveSessionUpsertOne) SetModerationVisibility(v string) *LiveSessionUps
 func (u *LiveSessionUpsertOne) UpdateModerationVisibility() *LiveSessionUpsertOne {
 	return u.Update(func(s *LiveSessionUpsert) {
 		s.UpdateModerationVisibility()
+	})
+}
+
+// SetModerationVisibilityAt sets the "moderation_visibility_at" field.
+func (u *LiveSessionUpsertOne) SetModerationVisibilityAt(v time.Time) *LiveSessionUpsertOne {
+	return u.Update(func(s *LiveSessionUpsert) {
+		s.SetModerationVisibilityAt(v)
+	})
+}
+
+// UpdateModerationVisibilityAt sets the "moderation_visibility_at" field to the value that was provided on create.
+func (u *LiveSessionUpsertOne) UpdateModerationVisibilityAt() *LiveSessionUpsertOne {
+	return u.Update(func(s *LiveSessionUpsert) {
+		s.UpdateModerationVisibilityAt()
+	})
+}
+
+// ClearModerationVisibilityAt clears the value of the "moderation_visibility_at" field.
+func (u *LiveSessionUpsertOne) ClearModerationVisibilityAt() *LiveSessionUpsertOne {
+	return u.Update(func(s *LiveSessionUpsert) {
+		s.ClearModerationVisibilityAt()
 	})
 }
 
@@ -2289,6 +2346,27 @@ func (u *LiveSessionUpsertBulk) SetModerationVisibility(v string) *LiveSessionUp
 func (u *LiveSessionUpsertBulk) UpdateModerationVisibility() *LiveSessionUpsertBulk {
 	return u.Update(func(s *LiveSessionUpsert) {
 		s.UpdateModerationVisibility()
+	})
+}
+
+// SetModerationVisibilityAt sets the "moderation_visibility_at" field.
+func (u *LiveSessionUpsertBulk) SetModerationVisibilityAt(v time.Time) *LiveSessionUpsertBulk {
+	return u.Update(func(s *LiveSessionUpsert) {
+		s.SetModerationVisibilityAt(v)
+	})
+}
+
+// UpdateModerationVisibilityAt sets the "moderation_visibility_at" field to the value that was provided on create.
+func (u *LiveSessionUpsertBulk) UpdateModerationVisibilityAt() *LiveSessionUpsertBulk {
+	return u.Update(func(s *LiveSessionUpsert) {
+		s.UpdateModerationVisibilityAt()
+	})
+}
+
+// ClearModerationVisibilityAt clears the value of the "moderation_visibility_at" field.
+func (u *LiveSessionUpsertBulk) ClearModerationVisibilityAt() *LiveSessionUpsertBulk {
+	return u.Update(func(s *LiveSessionUpsert) {
+		s.ClearModerationVisibilityAt()
 	})
 }
 

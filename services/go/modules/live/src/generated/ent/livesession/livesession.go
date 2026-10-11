@@ -67,6 +67,8 @@ const (
 	FieldSponsorshipLine = "sponsorship_line"
 	// FieldModerationVisibility holds the string denoting the moderation_visibility field in the database.
 	FieldModerationVisibility = "moderation_visibility"
+	// FieldModerationVisibilityAt holds the string denoting the moderation_visibility_at field in the database.
+	FieldModerationVisibilityAt = "moderation_visibility_at"
 	// FieldUpdatedAt holds the string denoting the updated_at field in the database.
 	FieldUpdatedAt = "updated_at"
 	// Table holds the table name of the livesession in the database.
@@ -102,6 +104,7 @@ var Columns = []string{
 	FieldAcceptedLiveAdTermsAt,
 	FieldSponsorshipLine,
 	FieldModerationVisibility,
+	FieldModerationVisibilityAt,
 	FieldUpdatedAt,
 }
 
@@ -368,6 +371,11 @@ func BySponsorshipLine(opts ...sql.OrderTermOption) OrderOption {
 // ByModerationVisibility orders the results by the moderation_visibility field.
 func ByModerationVisibility(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldModerationVisibility, opts...).ToFunc()
+}
+
+// ByModerationVisibilityAt orders the results by the moderation_visibility_at field.
+func ByModerationVisibilityAt(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldModerationVisibilityAt, opts...).ToFunc()
 }
 
 // ByUpdatedAt orders the results by the updated_at field.

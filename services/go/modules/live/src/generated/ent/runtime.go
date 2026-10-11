@@ -697,7 +697,7 @@ func init() {
 	// livesession.DefaultModerationVisibility holds the default value on creation for the moderation_visibility field.
 	livesession.DefaultModerationVisibility = livesessionDescModerationVisibility.Default.(string)
 	// livesessionDescUpdatedAt is the schema descriptor for updated_at field.
-	livesessionDescUpdatedAt := livesessionFields[25].Descriptor()
+	livesessionDescUpdatedAt := livesessionFields[26].Descriptor()
 	// livesession.DefaultUpdatedAt holds the default value on creation for the updated_at field.
 	livesession.DefaultUpdatedAt = livesessionDescUpdatedAt.Default.(func() time.Time)
 	// livesession.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.

@@ -123,3 +123,15 @@ func (relations *InMemorySocialRelations) ListLiveAlertRecipients(_ context.Cont
 	}
 	return recipients, false, nil
 }
+
+func (relations *InMemorySocialRelations) FollowedAmong(_ context.Context, followerId uuid.UUID, candidates []uuid.UUID) (map[uuid.UUID]bool, error) {
+	relations.mutex.Lock()
+	defer relations.mutex.Unlock()
+	followed := map[uuid.UUID]bool{}
+	for _, candidate := range candidates {
+		if relations.follows[[2]uuid.UUID{followerId, candidate}] {
+			followed[candidate] = true
+		}
+	}
+	return followed, nil
+}

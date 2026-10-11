@@ -71,6 +71,8 @@ type LiveSession struct {
 	SponsorshipLine *string `json:"sponsorship_line,omitempty"`
 	// ModerationVisibility holds the value of the "moderation_visibility" field.
 	ModerationVisibility string `json:"moderation_visibility,omitempty"`
+	// ModerationVisibilityAt holds the value of the "moderation_visibility_at" field.
+	ModerationVisibilityAt *time.Time `json:"moderation_visibility_at,omitempty"`
 	// UpdatedAt holds the value of the "updated_at" field.
 	UpdatedAt    time.Time `json:"updated_at,omitempty"`
 	selectValues sql.SelectValues
@@ -91,7 +93,7 @@ func (*LiveSession) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullInt64)
 		case livesession.FieldTitle, livesession.FieldCategory, livesession.FieldVisibility, livesession.FieldState, livesession.FieldCoverURL, livesession.FieldLivekitRoom, livesession.FieldCountryCode, livesession.FieldAcceptedLiveAdTermsVersion, livesession.FieldSponsorshipLine, livesession.FieldModerationVisibility:
 			values[i] = new(sql.NullString)
-		case livesession.FieldCreatedAt, livesession.FieldStartedAt, livesession.FieldEndedAt, livesession.FieldAcceptedLiveAdTermsAt, livesession.FieldUpdatedAt:
+		case livesession.FieldCreatedAt, livesession.FieldStartedAt, livesession.FieldEndedAt, livesession.FieldAcceptedLiveAdTermsAt, livesession.FieldModerationVisibilityAt, livesession.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
 		case livesession.FieldID, livesession.FieldHostID:
 			values[i] = new(uuid.UUID)
@@ -283,6 +285,13 @@ func (_m *LiveSession) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.ModerationVisibility = value.String
 			}
+		case livesession.FieldModerationVisibilityAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field moderation_visibility_at", values[i])
+			} else if value.Valid {
+				_m.ModerationVisibilityAt = new(time.Time)
+				*_m.ModerationVisibilityAt = value.Time
+			}
 		case livesession.FieldUpdatedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field updated_at", values[i])
@@ -420,6 +429,11 @@ func (_m *LiveSession) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("moderation_visibility=")
 	builder.WriteString(_m.ModerationVisibility)
+	builder.WriteString(", ")
+	if v := _m.ModerationVisibilityAt; v != nil {
+		builder.WriteString("moderation_visibility_at=")
+		builder.WriteString(v.Format(time.ANSIC))
+	}
 	builder.WriteString(", ")
 	builder.WriteString("updated_at=")
 	builder.WriteString(_m.UpdatedAt.Format(time.ANSIC))

@@ -438,6 +438,26 @@ func (_u *LiveSessionUpdate) SetNillableModerationVisibility(v *string) *LiveSes
 	return _u
 }
 
+// SetModerationVisibilityAt sets the "moderation_visibility_at" field.
+func (_u *LiveSessionUpdate) SetModerationVisibilityAt(v time.Time) *LiveSessionUpdate {
+	_u.mutation.SetModerationVisibilityAt(v)
+	return _u
+}
+
+// SetNillableModerationVisibilityAt sets the "moderation_visibility_at" field if the given value is not nil.
+func (_u *LiveSessionUpdate) SetNillableModerationVisibilityAt(v *time.Time) *LiveSessionUpdate {
+	if v != nil {
+		_u.SetModerationVisibilityAt(*v)
+	}
+	return _u
+}
+
+// ClearModerationVisibilityAt clears the value of the "moderation_visibility_at" field.
+func (_u *LiveSessionUpdate) ClearModerationVisibilityAt() *LiveSessionUpdate {
+	_u.mutation.ClearModerationVisibilityAt()
+	return _u
+}
+
 // SetUpdatedAt sets the "updated_at" field.
 func (_u *LiveSessionUpdate) SetUpdatedAt(v time.Time) *LiveSessionUpdate {
 	_u.mutation.SetUpdatedAt(v)
@@ -645,6 +665,12 @@ func (_u *LiveSessionUpdate) sqlSave(ctx context.Context) (_node int, err error)
 	}
 	if value, ok := _u.mutation.ModerationVisibility(); ok {
 		_spec.SetField(livesession.FieldModerationVisibility, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.ModerationVisibilityAt(); ok {
+		_spec.SetField(livesession.FieldModerationVisibilityAt, field.TypeTime, value)
+	}
+	if _u.mutation.ModerationVisibilityAtCleared() {
+		_spec.ClearField(livesession.FieldModerationVisibilityAt, field.TypeTime)
 	}
 	if value, ok := _u.mutation.UpdatedAt(); ok {
 		_spec.SetField(livesession.FieldUpdatedAt, field.TypeTime, value)
@@ -1078,6 +1104,26 @@ func (_u *LiveSessionUpdateOne) SetNillableModerationVisibility(v *string) *Live
 	return _u
 }
 
+// SetModerationVisibilityAt sets the "moderation_visibility_at" field.
+func (_u *LiveSessionUpdateOne) SetModerationVisibilityAt(v time.Time) *LiveSessionUpdateOne {
+	_u.mutation.SetModerationVisibilityAt(v)
+	return _u
+}
+
+// SetNillableModerationVisibilityAt sets the "moderation_visibility_at" field if the given value is not nil.
+func (_u *LiveSessionUpdateOne) SetNillableModerationVisibilityAt(v *time.Time) *LiveSessionUpdateOne {
+	if v != nil {
+		_u.SetModerationVisibilityAt(*v)
+	}
+	return _u
+}
+
+// ClearModerationVisibilityAt clears the value of the "moderation_visibility_at" field.
+func (_u *LiveSessionUpdateOne) ClearModerationVisibilityAt() *LiveSessionUpdateOne {
+	_u.mutation.ClearModerationVisibilityAt()
+	return _u
+}
+
 // SetUpdatedAt sets the "updated_at" field.
 func (_u *LiveSessionUpdateOne) SetUpdatedAt(v time.Time) *LiveSessionUpdateOne {
 	_u.mutation.SetUpdatedAt(v)
@@ -1315,6 +1361,12 @@ func (_u *LiveSessionUpdateOne) sqlSave(ctx context.Context) (_node *LiveSession
 	}
 	if value, ok := _u.mutation.ModerationVisibility(); ok {
 		_spec.SetField(livesession.FieldModerationVisibility, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.ModerationVisibilityAt(); ok {
+		_spec.SetField(livesession.FieldModerationVisibilityAt, field.TypeTime, value)
+	}
+	if _u.mutation.ModerationVisibilityAtCleared() {
+		_spec.ClearField(livesession.FieldModerationVisibilityAt, field.TypeTime)
 	}
 	if value, ok := _u.mutation.UpdatedAt(); ok {
 		_spec.SetField(livesession.FieldUpdatedAt, field.TypeTime, value)

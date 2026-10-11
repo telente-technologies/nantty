@@ -16456,6 +16456,7 @@ type LiveSessionMutation struct {
 	accepted_live_ad_terms_at      *time.Time
 	sponsorship_line               *string
 	moderation_visibility          *string
+	moderation_visibility_at       *time.Time
 	updated_at                     *time.Time
 	clearedFields                  map[string]struct{}
 	done                           bool
@@ -17733,6 +17734,55 @@ func (m *LiveSessionMutation) ResetModerationVisibility() {
 	m.moderation_visibility = nil
 }
 
+// SetModerationVisibilityAt sets the "moderation_visibility_at" field.
+func (m *LiveSessionMutation) SetModerationVisibilityAt(t time.Time) {
+	m.moderation_visibility_at = &t
+}
+
+// ModerationVisibilityAt returns the value of the "moderation_visibility_at" field in the mutation.
+func (m *LiveSessionMutation) ModerationVisibilityAt() (r time.Time, exists bool) {
+	v := m.moderation_visibility_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldModerationVisibilityAt returns the old "moderation_visibility_at" field's value of the LiveSession entity.
+// If the LiveSession object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *LiveSessionMutation) OldModerationVisibilityAt(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldModerationVisibilityAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldModerationVisibilityAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldModerationVisibilityAt: %w", err)
+	}
+	return oldValue.ModerationVisibilityAt, nil
+}
+
+// ClearModerationVisibilityAt clears the value of the "moderation_visibility_at" field.
+func (m *LiveSessionMutation) ClearModerationVisibilityAt() {
+	m.moderation_visibility_at = nil
+	m.clearedFields[livesession.FieldModerationVisibilityAt] = struct{}{}
+}
+
+// ModerationVisibilityAtCleared returns if the "moderation_visibility_at" field was cleared in this mutation.
+func (m *LiveSessionMutation) ModerationVisibilityAtCleared() bool {
+	_, ok := m.clearedFields[livesession.FieldModerationVisibilityAt]
+	return ok
+}
+
+// ResetModerationVisibilityAt resets all changes to the "moderation_visibility_at" field.
+func (m *LiveSessionMutation) ResetModerationVisibilityAt() {
+	m.moderation_visibility_at = nil
+	delete(m.clearedFields, livesession.FieldModerationVisibilityAt)
+}
+
 // SetUpdatedAt sets the "updated_at" field.
 func (m *LiveSessionMutation) SetUpdatedAt(t time.Time) {
 	m.updated_at = &t
@@ -17803,7 +17853,7 @@ func (m *LiveSessionMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *LiveSessionMutation) Fields() []string {
-	fields := make([]string, 0, 27)
+	fields := make([]string, 0, 28)
 	if m.created_at != nil {
 		fields = append(fields, livesession.FieldCreatedAt)
 	}
@@ -17882,6 +17932,9 @@ func (m *LiveSessionMutation) Fields() []string {
 	if m.moderation_visibility != nil {
 		fields = append(fields, livesession.FieldModerationVisibility)
 	}
+	if m.moderation_visibility_at != nil {
+		fields = append(fields, livesession.FieldModerationVisibilityAt)
+	}
 	if m.updated_at != nil {
 		fields = append(fields, livesession.FieldUpdatedAt)
 	}
@@ -17945,6 +17998,8 @@ func (m *LiveSessionMutation) Field(name string) (ent.Value, bool) {
 		return m.SponsorshipLine()
 	case livesession.FieldModerationVisibility:
 		return m.ModerationVisibility()
+	case livesession.FieldModerationVisibilityAt:
+		return m.ModerationVisibilityAt()
 	case livesession.FieldUpdatedAt:
 		return m.UpdatedAt()
 	}
@@ -18008,6 +18063,8 @@ func (m *LiveSessionMutation) OldField(ctx context.Context, name string) (ent.Va
 		return m.OldSponsorshipLine(ctx)
 	case livesession.FieldModerationVisibility:
 		return m.OldModerationVisibility(ctx)
+	case livesession.FieldModerationVisibilityAt:
+		return m.OldModerationVisibilityAt(ctx)
 	case livesession.FieldUpdatedAt:
 		return m.OldUpdatedAt(ctx)
 	}
@@ -18201,6 +18258,13 @@ func (m *LiveSessionMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetModerationVisibility(v)
 		return nil
+	case livesession.FieldModerationVisibilityAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetModerationVisibilityAt(v)
+		return nil
 	case livesession.FieldUpdatedAt:
 		v, ok := value.(time.Time)
 		if !ok {
@@ -18331,6 +18395,9 @@ func (m *LiveSessionMutation) ClearedFields() []string {
 	if m.FieldCleared(livesession.FieldSponsorshipLine) {
 		fields = append(fields, livesession.FieldSponsorshipLine)
 	}
+	if m.FieldCleared(livesession.FieldModerationVisibilityAt) {
+		fields = append(fields, livesession.FieldModerationVisibilityAt)
+	}
 	return fields
 }
 
@@ -18374,6 +18441,9 @@ func (m *LiveSessionMutation) ClearField(name string) error {
 		return nil
 	case livesession.FieldSponsorshipLine:
 		m.ClearSponsorshipLine()
+		return nil
+	case livesession.FieldModerationVisibilityAt:
+		m.ClearModerationVisibilityAt()
 		return nil
 	}
 	return fmt.Errorf("unknown LiveSession nullable field %s", name)
@@ -18460,6 +18530,9 @@ func (m *LiveSessionMutation) ResetField(name string) error {
 		return nil
 	case livesession.FieldModerationVisibility:
 		m.ResetModerationVisibility()
+		return nil
+	case livesession.FieldModerationVisibilityAt:
+		m.ResetModerationVisibilityAt()
 		return nil
 	case livesession.FieldUpdatedAt:
 		m.ResetUpdatedAt()
