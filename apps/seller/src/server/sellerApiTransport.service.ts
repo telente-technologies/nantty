@@ -38,6 +38,10 @@ async function callMockBackend(call: BackendCall, headers: Headers): Promise<Bac
   const mockResponse = await dispatchMockApiRequest({ method: call.method, path: call.path, query: call.query ?? new URLSearchParams(), headers, body: call.body ?? null });
   const responseHeaders = new Headers(mockResponse.headers);
   if (mockResponse.status === 204 || mockResponse.body === null || mockResponse.body === undefined) return { status: mockResponse.status, headers: responseHeaders, body: new Uint8Array() };
+  if (mockResponse.body instanceof Uint8Array) {
+    responseHeaders.set("Content-Type", mockResponse.contentType ?? "application/octet-stream");
+    return { status: mockResponse.status, headers: responseHeaders, body: mockResponse.body };
+  }
   if (typeof mockResponse.body === "string") {
     responseHeaders.set("Content-Type", mockResponse.contentType ?? "text/plain; charset=utf-8");
     return { status: mockResponse.status, headers: responseHeaders, body: textEncoder.encode(mockResponse.body) };
