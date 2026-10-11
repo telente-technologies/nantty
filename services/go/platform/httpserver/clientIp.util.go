@@ -62,9 +62,14 @@ func isTrustedPeer(remoteAddr string) bool {
 	return false
 }
 
-// ClientIP resolves the client's true IP address safely.
-// Forwarded headers (X-Forwarded-For, X-Real-Ip) are only honored if RemoteAddr
-// is from a trusted proxy CIDR.
+func IsFromTrustedProxy(req *http.Request) bool {
+	return isTrustedPeer(req.RemoteAddr)
+}
+
+func IsFromTrustedNetwork(req *http.Request) bool {
+	return isTrustedPeer(req.RemoteAddr) && req.Header.Get("X-Forwarded-For") == ""
+}
+
 func ClientIP(req *http.Request) string {
 	remoteHost, _, err := net.SplitHostPort(req.RemoteAddr)
 	if err != nil {
@@ -78,7 +83,6 @@ func ClientIP(req *http.Request) string {
 	xff := req.Header.Get("X-Forwarded-For")
 	if xff != "" {
 		hops := strings.Split(xff, ",")
-		// Take rightmost untrusted hop or last hop
 		for i := len(hops) - 1; i >= 0; i-- {
 			hop := strings.TrimSpace(hops[i])
 			if hop != "" {
@@ -88,7 +92,6 @@ func ClientIP(req *http.Request) string {
 				}
 			}
 		}
-		// Fallback to first non-empty hop
 		for _, hop := range hops {
 			trimmed := strings.TrimSpace(hop)
 			if trimmed != "" {

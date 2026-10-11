@@ -79,3 +79,27 @@ func (connection *fakeAmqpConnection) OpenChannel() (amqpChannel, error) {
 }
 func (connection *fakeAmqpConnection) Close() error   { connection.closed = true; return nil }
 func (connection *fakeAmqpConnection) IsClosed() bool { return connection.closed }
+
+func TestMissingBrokerUrlIsRefusedInStagingInsteadOfDiscardingEvents(t *testing.T) {
+	t.Setenv("EVENT_BUS", "rabbitmq")
+	t.Setenv("RABBITMQ_URL", "")
+	t.Setenv("APP_ENV", "staging")
+	if publisher, err := CreateDomainEventPublisherFromEnvironment(context.Background(), MessageBusSelection{Logger: discardLogger()}); err == nil {
+		t.Fatalf("staging must not silently discard events, got %T", publisher)
+	}
+}
+
+func TestSqsReceivesOneMessageAtATimeUnlessConfigured(t *testing.T) {
+	t.Setenv("SQS_RECEIVE_BATCH_SIZE", "")
+	if size := sqsReceiveBatchSizeFromEnvironment(); size != 1 {
+		t.Fatalf("default batch = %d, want 1 so a slow message cannot outlive the visibility of the rest", size)
+	}
+	t.Setenv("SQS_RECEIVE_BATCH_SIZE", "50")
+	if size := sqsReceiveBatchSizeFromEnvironment(); size != 1 {
+		t.Fatalf("out-of-range batch = %d, want 1", size)
+	}
+	t.Setenv("SQS_RECEIVE_BATCH_SIZE", "5")
+	if size := sqsReceiveBatchSizeFromEnvironment(); size != 5 {
+		t.Fatalf("configured batch = %d, want 5", size)
+	}
+}

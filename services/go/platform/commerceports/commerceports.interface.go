@@ -111,6 +111,7 @@ type CatalogReader interface {
 	DescribeVariants(ctx context.Context, storeId uuid.UUID, variantIds []uuid.UUID) (map[uuid.UUID]VariantDescription, error)
 	DescribeStores(ctx context.Context, storeIds []uuid.UUID) (map[uuid.UUID]StoreSnapshot, error)
 	FindStoreAccessForAccount(ctx context.Context, accountId uuid.UUID, requestedStoreId *uuid.UUID) (StoreAccess, bool, error)
+	ListStoreTeamWithPermission(ctx context.Context, storeId uuid.UUID, permission string) ([]uuid.UUID, error)
 }
 
 type StockLine struct {

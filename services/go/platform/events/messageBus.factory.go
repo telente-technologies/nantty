@@ -88,11 +88,15 @@ func CreateJobQueueAndConsumerFromEnvironment(ctx context.Context, selection Mes
 }
 
 func discardWhenNotProduction(selection MessageBusSelection, missingVariable string) (DomainEventPublisher, error) {
-	if selection.IsProduction {
-		return nil, fmt.Errorf("%s is required in production", missingVariable)
+	if selection.IsProduction || isStagingEnvironment() {
+		return nil, fmt.Errorf("%s is required in production and staging", missingVariable)
 	}
 	if selection.Logger != nil {
 		selection.Logger.Warn(missingVariable + " is not set: outbox events are marked published without leaving the process")
 	}
 	return DiscardingPublisher{}, nil
+}
+
+func isStagingEnvironment() bool {
+	return strings.EqualFold(strings.TrimSpace(os.Getenv("APP_ENV")), "staging")
 }

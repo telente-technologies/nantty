@@ -33,7 +33,7 @@ func (registry *Registry) MountLivenessAndReadinessRoutes(mux *http.ServeMux) {
 }
 
 func (registry *Registry) respondWithLiveness(writer http.ResponseWriter, _ *http.Request) {
-	httpserver.WriteJsonResponse(writer, http.StatusOK, map[string]string{"status": "up", "service": registry.serviceName})
+	httpserver.WriteJsonResponse(writer, http.StatusOK, map[string]string{"status": "up"})
 }
 
 func (registry *Registry) respondWithReadiness(writer http.ResponseWriter, request *http.Request) {
@@ -51,5 +51,9 @@ func (registry *Registry) respondWithReadiness(writer http.ResponseWriter, reque
 		}
 		results[name] = "up"
 	}
-	httpserver.WriteJsonResponse(writer, status, map[string]any{"service": registry.serviceName, "ready": status == http.StatusOK, "checks": results})
+	body := map[string]any{"ready": status == http.StatusOK}
+	if httpserver.IsFromTrustedNetwork(request) {
+		body["checks"] = results
+	}
+	httpserver.WriteJsonResponse(writer, status, body)
 }

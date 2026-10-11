@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"os"
+	"strings"
 	"testing"
 )
 
@@ -48,5 +49,24 @@ func TestApplyCorsHonorsConfiguredAllowlist(t *testing.T) {
 	}
 	if recorder.Code != http.StatusNoContent {
 		t.Fatalf("OPTIONS response code = %d, want %d", recorder.Code, http.StatusNoContent)
+	}
+}
+
+func TestForgedRequestIdsAreReplacedBeforeAuditsCanRecordThem(t *testing.T) {
+	var seen string
+	handler := AssignRequestIdToEveryRequest(http.HandlerFunc(func(_ http.ResponseWriter, request *http.Request) {
+		seen = RequestIdFromContext(request.Context())
+	}))
+	request := httptest.NewRequest(http.MethodGet, "/", nil)
+	request.Header.Set("X-Request-Id", "evil\nINFO forged audit line")
+	handler.ServeHTTP(httptest.NewRecorder(), request)
+	if seen == "" || strings.ContainsAny(seen, "\n ") {
+		t.Fatalf("request id %q must be server generated when the header is malformed", seen)
+	}
+	request = httptest.NewRequest(http.MethodGet, "/", nil)
+	request.Header.Set("X-Request-Id", "gateway-req-12345")
+	handler.ServeHTTP(httptest.NewRecorder(), request)
+	if seen != "gateway-req-12345" {
+		t.Fatalf("a well-formed upstream id should be kept, got %q", seen)
 	}
 }

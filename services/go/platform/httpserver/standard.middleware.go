@@ -35,13 +35,16 @@ func AssignRequestIdToEveryRequest(next http.Handler) http.Handler {
 func RecoverFromPanicsAsInternalErrors(logger *slog.Logger) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
+			tracker := &headerTrackingResponseWriter{ResponseWriter: writer}
 			defer func() {
 				if recovered := recover(); recovered != nil {
 					logger.ErrorContext(request.Context(), "panic while handling request", slog.Any("panic", recovered), slog.String("path", request.URL.Path))
-					WriteJsonResponse(writer, http.StatusInternalServerError, ConvertErrorToApiError(nil))
+					if !tracker.wroteHeader {
+						WriteJsonResponse(writer, http.StatusInternalServerError, ConvertErrorToApiError(nil))
+					}
 				}
 			}()
-			next.ServeHTTP(writer, request)
+			next.ServeHTTP(tracker, request)
 		})
 	}
 }

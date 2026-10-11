@@ -5,7 +5,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"log/slog"
+	"os"
 	"runtime/debug"
+	"strconv"
+	"strings"
 	"sync"
 	"time"
 
@@ -43,7 +46,7 @@ func (queues *SqsQueues) ConsumeQueueUntilContextDone(ctx context.Context, queue
 	}
 	receiveErrCount := 0
 	for ctx.Err() == nil {
-		output, err := queues.client.ReceiveMessage(ctx, &sqs.ReceiveMessageInput{QueueUrl: aws.String(queueUrl), MaxNumberOfMessages: 10, WaitTimeSeconds: 20})
+		output, err := queues.client.ReceiveMessage(ctx, &sqs.ReceiveMessageInput{QueueUrl: aws.String(queueUrl), MaxNumberOfMessages: sqsReceiveBatchSizeFromEnvironment(), WaitTimeSeconds: 20})
 		if err != nil {
 			if ctx.Err() == nil {
 				logger.WarnContext(ctx, "receive from queue failed", slog.String("queue", queueName), slog.Any("error", err))
@@ -92,4 +95,11 @@ func (queues *SqsQueues) resolveQueueUrl(ctx context.Context, queueName string) 
 	}
 	queues.queueUrls[queueName] = aws.ToString(output.QueueUrl)
 	return queues.queueUrls[queueName], nil
+}
+
+func sqsReceiveBatchSizeFromEnvironment() int32 {
+	if parsed, err := strconv.Atoi(strings.TrimSpace(os.Getenv("SQS_RECEIVE_BATCH_SIZE"))); err == nil && parsed >= 1 && parsed <= 10 {
+		return int32(parsed)
+	}
+	return 1
 }
