@@ -1,7 +1,8 @@
 import type { ReactElement, ReactNode } from "react";
-import { ScrollView, StyleSheet, type RefreshControlProps } from "react-native";
+import { StyleSheet, type RefreshControlProps } from "react-native";
 
 import { Header } from "@/components/ui/header";
+import { KeyboardAwareForm } from "@/components/ui/keyboardAwareForm";
 import { Screen } from "@/components/ui/screen";
 import { spacing } from "@/constants/spacing.constant";
 
@@ -18,9 +19,9 @@ export function SettingsPage({ title, children, right, contentTopSpacing = 40, g
   return (
     <Screen>
       <Header title={title} right={right} />
-      <ScrollView contentContainerStyle={[styles.content, { paddingTop: contentTopSpacing, gap }]} keyboardShouldPersistTaps="handled" refreshControl={refreshControl}>
+      <KeyboardAwareForm contentContainerStyle={[styles.content, { paddingTop: contentTopSpacing, gap }]} refreshControl={refreshControl}>
         {children}
-      </ScrollView>
+      </KeyboardAwareForm>
     </Screen>
   );
 }

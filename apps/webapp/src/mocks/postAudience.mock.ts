@@ -41,11 +41,18 @@ if (mockPostsState.has("post_14")) updatePost("post_14", (post) => ({ ...post, s
 seedQuote("quote_post_3_a", "post_3", "post_2", 7, "Surulere is underrated for jollof. Try the spot by the stadium next, the plantain alone is worth it.", 86);
 seedQuote("quote_post_3_b", "post_3", "post_8", 5, "Part 7 and still no Ibadan entry? We need to talk.", 41);
 
+export const findSeededMockQuote = (quoteId: string): Post | undefined => [...quotesByOriginalId.values()].flat().find((quote) => quote.id === quoteId);
+
+export const mockQuotesOf = (postId: string): Post[] => [
+  ...(quotesByOriginalId.get(postId) ?? []),
+  ...[...mockPostsState.values()].filter((post) => post.isQuote === true && post.resharedFrom?.id === postId),
+];
+
 const describePreferences = (): ContentPreferences => ({ showSensitiveWithoutWarning: contentPreferences.showSensitiveWithoutWarning, canChangeSensitiveContentSetting: true, ageBracket: "adult" });
 
 export const postAudienceMocks: MockRoute[] = [
   createMockRoute("GET", "/api/v1/posts/:postId/quotes", ({ params, query }) => {
-    const quotes = [...(quotesByOriginalId.get(params.postId!) ?? [])].sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+    const quotes = mockQuotesOf(params.postId!).sort((a, b) => b.createdAt.localeCompare(a.createdAt));
     const start = Number(query.get("cursor") ?? 0);
     const page: Page<Post> = { data: quotes.slice(start, start + QUOTES_PAGE_SIZE).map(withCurrentProductPrices), nextCursor: start + QUOTES_PAGE_SIZE < quotes.length ? String(start + QUOTES_PAGE_SIZE) : null };
     return page;

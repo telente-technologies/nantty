@@ -9,6 +9,7 @@ import { makeThemedStyles, useTheme } from "@/theme";
 
 import { useAccessibilityFocusOnOpen } from "./accessibilityFocus.hook";
 import { FrameAwareModal } from "./frameAwareModal";
+import { useKeepFocusedInputVisible } from "./keepFocusedInputVisible.hook";
 import { KeyboardSpacer } from "./keyboardSpacer";
 import { ModalActionStack, type ModalAction } from "./modalActions";
 import { buildModalElevation, buildModalPalette, modalMotion, modalRadius, modalSpacing } from "./modalChrome.constant";
@@ -55,6 +56,7 @@ export function BottomSheet({
   const insets = useSafeAreaInsets();
   const frame = useSafeAreaFrame();
   const reduceMotion = useReducedMotionPreference();
+  const keepFocusedInputVisible = useKeepFocusedInputVisible({ enabled: visible && scrollable });
   const tallestSheetHeight = Math.min(frame.height * MAX_HEIGHT_RATIO, frame.height - insets.top - SHEET_TOP_GAP);
   const hasFooter = !!footer || (footerActions?.length ?? 0) > 0;
   const closeIfDismissible = () => {
@@ -101,7 +103,7 @@ export function BottomSheet({
               ) : null}
             </View>
             {scrollable ? (
-              <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
+              <ScrollView {...keepFocusedInputVisible.scrollProps} style={styles.scroll} contentContainerStyle={styles.scrollContent} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
                 {children}
               </ScrollView>
             ) : (

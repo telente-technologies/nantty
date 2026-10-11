@@ -117,7 +117,7 @@ function VideoDetails({ video }: { readonly video: Post }) {
           <ContentActionsMenu shareKind={null} reportTargetType="post" targetId={video.id} canonicalPath={`/watch/${video.id}`} downloadTarget={findDownloadTargetForPost(video)} />
         </div>
       </div>
-      <CommentsPanel postId={video.id} postAuthorId={video.author.id} totalComments={video.comments} />
+      <CommentsPanel postId={video.id} postAuthorId={video.author.id} totalComments={video.comments} quoteCount={video.quotes} />
     </div>
   );
 }

@@ -190,6 +190,7 @@ export default function ClipsPage() {
         postId={commentsForClip?.id ?? null}
         postAuthorId={commentsForClip?.author.id}
         totalComments={commentsForClip?.comments ?? 0}
+        quoteCount={commentsForClip?.quotes}
         onClose={() => setCommentsForClip(null)}
       />
     </div>

@@ -5,6 +5,7 @@ import { getSignedInMockUser } from "./fixtures.mock";
 import { convertMediaAssetToPostMedia, currentMediaAsset } from "./media.mock";
 import { mockPostsState } from "./postCatalog.mock";
 import { buildCatalogProductSummary, findCatalogSeedByProductId } from "./productCatalog.mock";
+import { resolveMockQuote } from "./quoteLinks.mock";
 import { createMockRoute, type MockRoute } from "./registry.mock";
 import { findMutableSoundState } from "./soundCatalog.mock";
 import { directoryUsersExcludingAccounts, summariseUser } from "./userDirectory.mock";
@@ -51,8 +52,8 @@ export function createMockPostFromInput(input: NewPostInput): Post {
     if (!sound.allowReuse || sound.status !== "available") throw new ApiError(403, "This sound can't be used.", "SOUND_NOT_REUSABLE");
   }
   if (kind !== "post" && typeof input.quotedPostId === "string") throw new ApiError(422, "Only posts can quote another post.", "QUOTE_REQUIRES_POST");
-  const quoted = typeof input.quotedPostId === "string" ? mockPostsState.get(input.quotedPostId) : undefined;
-  if (typeof input.quotedPostId === "string" && !quoted) throw new ApiError(404, "This post is unavailable.", "POST_NOT_FOUND");
+  const quote = kind === "post" ? resolveMockQuote(text, input.quotedPostId) : null;
+  const quoted = quote ? mockPostsState.get(quote.original.id) : undefined;
   const products = resolveTaggedProducts(input.productIds ?? []);
   const taggedUsers = (input.taggedUserIds ?? []).flatMap((userId) => {
     const user = directoryUsersExcludingAccounts.find((candidate) => candidate.id === userId);
@@ -64,7 +65,7 @@ export function createMockPostFromInput(input: NewPostInput): Post {
     kind,
     author: getSignedInMockUser(),
     createdAt: new Date().toISOString(),
-    text,
+    text: quote?.text ?? text,
     media,
     likes: 0,
     comments: 0,
@@ -86,12 +87,12 @@ export function createMockPostFromInput(input: NewPostInput): Post {
     sensitive: sensitiveLabels.length > 0 ? { labels: sensitiveLabels, requiresInterstitial: false } : null,
     taggedUsers,
     taggedUsersCount: taggedUsers.length,
-    isQuote: quoted !== undefined,
+    isQuote: quote !== null,
     quotes: 0,
-    resharedFrom: quoted ?? null,
+    resharedFrom: quote?.original ?? null,
   };
   mockPostsState.set(post.id, post);
-  if (quoted) mockPostsState.set(quoted.id, { ...quoted, quotes: (quoted.quotes ?? 0) + 1 });
+  if (quoted) mockPostsState.set(quoted.id, { ...quoted, reposts: quoted.reposts + 1, quotes: (quoted.quotes ?? 0) + 1 });
   return post;
 }
 

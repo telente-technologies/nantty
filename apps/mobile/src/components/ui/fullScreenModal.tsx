@@ -8,6 +8,7 @@ import { makeThemedStyles, useTheme } from "@/theme";
 
 import { useAccessibilityFocusOnOpen } from "./accessibilityFocus.hook";
 import { FrameAwareModal } from "./frameAwareModal";
+import { useKeepFocusedInputVisible } from "./keepFocusedInputVisible.hook";
 import { KeyboardSpacer } from "./keyboardSpacer";
 import { ModalActionStack, type ModalAction } from "./modalActions";
 import { buildModalPalette, modalSpacing } from "./modalChrome.constant";
@@ -42,6 +43,7 @@ export function FullScreenModal({
   const { colors } = useTheme();
   const insets = useSafeAreaInsets();
   const reduceMotion = useReducedMotionPreference();
+  const keepFocusedInputVisible = useKeepFocusedInputVisible({ enabled: visible && scrollable });
   const hasFooter = !!footer || (footerActions?.length ?? 0) > 0;
   const titleRef = useAccessibilityFocusOnOpen(visible && !!title);
   return (
@@ -63,7 +65,7 @@ export function FullScreenModal({
           <View style={styles.accessory}>{headerAccessory}</View>
         </View>
         {scrollable ? (
-          <ScrollView style={styles.flex} contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
+          <ScrollView {...keepFocusedInputVisible.scrollProps} style={styles.flex} contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
             {children}
           </ScrollView>
         ) : (

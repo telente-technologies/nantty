@@ -1,15 +1,16 @@
 "use client";
 
-import { useInfiniteQuery } from "@tanstack/react-query";
 import { useModalFocusTrap } from "@zudomart/web-kit";
-import { useRef } from "react";
+import { useRef, useState } from "react";
 
 import { EmptyState, ErrorState, Skeleton } from "@/components/ui/feedback";
 import { CloseIcon } from "@/components/ui/icons";
 import { CommentComposer } from "@/components/feed/commentComposer";
+import { commentSectionFilterOptions, useCommentSection } from "@/components/feed/commentSection.hook";
 import { CommentThread } from "@/components/feed/commentThread";
-import { retryCommentsPageUnlessCursorExpired, useRestartCommentsOnExpiredCursor } from "@/components/feed/restartCommentsOnExpiredCursor.hook";
-import { postsService } from "@/services/posts.service";
+import { QuoteThreadItemRow } from "@/components/feed/thread/quoteThreadItem";
+import { UnderlineTabs } from "@/components/ui/underlineTabs";
+import { isQuoteThreadItem, type CommentSectionFilter } from "@/types/postThread.type";
 import { formatCountWithThousandsSuffix } from "@/utils/formatDate.util";
 
 import styles from "./page.module.css";
@@ -18,22 +19,14 @@ interface ClipCommentsSheetProps {
   readonly postId: string | null;
   readonly postAuthorId?: string;
   readonly totalComments: number;
+  readonly quoteCount?: number;
   readonly onClose: () => void;
 }
 
-export function ClipCommentsSheet({ postId, postAuthorId, totalComments, onClose }: ClipCommentsSheetProps) {
-  const commentsQuery = useInfiniteQuery({
-    queryKey: ["comments", postId ?? "none"],
-    queryFn: ({ pageParam }) => postsService.fetchCommentsPage(postId as string, pageParam),
-    initialPageParam: null as string | null,
-    getNextPageParam: (lastPage) => lastPage.nextCursor,
-    retry: retryCommentsPageUnlessCursorExpired,
-    enabled: postId !== null,
-  });
+export function ClipCommentsSheet({ postId, postAuthorId, totalComments, quoteCount, onClose }: ClipCommentsSheetProps) {
   const listRef = useRef<HTMLDivElement | null>(null);
-  const { isRestartingFromTop } = useRestartCommentsOnExpiredCursor(["comments", postId ?? "none"], commentsQuery.error, () => listRef.current?.scrollTo({ top: 0 }));
-  const comments = (commentsQuery.data?.pages ?? []).flatMap((page) => page.data);
-  const orderedComments = [...comments].sort((a, b) => Number(b.isPinned === true) - Number(a.isPinned === true));
+  const [filter, setFilter] = useState<CommentSectionFilter>("all");
+  const { query: commentsQuery, items: orderedComments, isRestartingFromTop } = useCommentSection(postId, filter, () => listRef.current?.scrollTo({ top: 0 }));
 
   const sheetRef = useRef<HTMLElement | null>(null);
   useModalFocusTrap(sheetRef, postId !== null, onClose);
@@ -59,18 +52,19 @@ export function ClipCommentsSheet({ postId, postAuthorId, totalComments, onClose
             <CloseIcon size={18} />
           </button>
         </div>
-        <div ref={listRef} className={styles.sheetList}>
+        <UnderlineTabs options={commentSectionFilterOptions(quoteCount)} value={filter} onChange={setFilter} label="Show replies or quotes" panelId={`clip-comments-${postId}`} />
+        <div ref={listRef} className={styles.sheetList} id={`clip-comments-${postId}`} role="tabpanel">
           {commentsQuery.isLoading ? (
             [0, 1, 2].map((index) => <Skeleton key={index} height={48} />)
           ) : commentsQuery.isError && !isRestartingFromTop ? (
             <ErrorState description="We couldn't load comments." error={commentsQuery.error} onRetry={() => void commentsQuery.refetch()} />
-          ) : comments.length === 0 ? (
-            <EmptyState title="No comments yet" description="Start the conversation." />
+          ) : orderedComments.length === 0 ? (
+            filter === "quotes" ? <EmptyState title="No quotes yet" description="When someone quotes this clip, it shows up here." /> : <EmptyState title="No comments yet" description="Start the conversation." />
           ) : (
             <>
-              {orderedComments.map((comment) => (
-                <CommentThread key={comment.id} comment={comment} postId={postId} postAuthorId={postAuthorId} />
-              ))}
+              {orderedComments.map((item) =>
+                isQuoteThreadItem(item) ? <QuoteThreadItemRow key={`quote-${item.id}`} item={item} /> : <CommentThread key={item.id} comment={item} postId={postId} postAuthorId={postAuthorId} />,
+              )}
               {commentsQuery.hasNextPage ? (
                 <button
                   type="button"

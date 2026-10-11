@@ -1,29 +1,23 @@
 "use client";
 
-import { useInfiniteQuery } from "@tanstack/react-query";
-import { useRef } from "react";
+import { useRef, useState } from "react";
 
 import { EmptyState, ErrorState, Skeleton } from "@/components/ui/feedback";
-import { retryCommentsPageUnlessCursorExpired, useRestartCommentsOnExpiredCursor } from "@/components/feed/restartCommentsOnExpiredCursor.hook";
-import { postsService } from "@/services/posts.service";
+import { UnderlineTabs } from "@/components/ui/underlineTabs";
+import { isQuoteThreadItem, type CommentSectionFilter } from "@/types/postThread.type";
 import { formatCountWithThousandsSuffix } from "@/utils/formatDate.util";
 
 import { CommentComposer } from "./commentComposer";
+import { commentSectionFilterOptions, useCommentSection } from "./commentSection.hook";
 import { CommentThread } from "./commentThread";
+import { QuoteThreadItemRow } from "./thread/quoteThreadItem";
 import styles from "./commentsPanel.module.css";
 
-export function CommentsPanel({ postId, postAuthorId, totalComments }: { readonly postId: string; readonly postAuthorId?: string; readonly totalComments: number }) {
-  const commentsQuery = useInfiniteQuery({
-    queryKey: ["comments", postId],
-    queryFn: ({ pageParam }) => postsService.fetchCommentsPage(postId, pageParam),
-    initialPageParam: null as string | null,
-    getNextPageParam: (lastPage) => lastPage.nextCursor,
-    retry: retryCommentsPageUnlessCursorExpired,
-  });
+export function CommentsPanel({ postId, postAuthorId, totalComments, quoteCount }: { readonly postId: string; readonly postAuthorId?: string; readonly totalComments: number; readonly quoteCount?: number }) {
   const panelRef = useRef<HTMLElement | null>(null);
-  const { isRestartingFromTop } = useRestartCommentsOnExpiredCursor(["comments", postId], commentsQuery.error, () => panelRef.current?.scrollIntoView({ block: "start" }));
-  const comments = (commentsQuery.data?.pages ?? []).flatMap((page) => page.data);
-  const orderedComments = [...comments].sort((a, b) => Number(b.isPinned === true) - Number(a.isPinned === true));
+  const [filter, setFilter] = useState<CommentSectionFilter>("all");
+  const { query: commentsQuery, items: orderedComments, isRestartingFromTop } = useCommentSection(postId, filter, () => panelRef.current?.scrollIntoView({ block: "start" }));
+  const listId = `comments-list-${postId}`;
 
   return (
     <section ref={panelRef} className={styles.panel} id="comments" aria-labelledby={`comments-${postId}`}>
@@ -31,6 +25,7 @@ export function CommentsPanel({ postId, postAuthorId, totalComments }: { readonl
         Comments <span className={styles.count}>{formatCountWithThousandsSuffix(totalComments)}</span>
       </h2>
       <CommentComposer postId={postId} />
+      <UnderlineTabs options={commentSectionFilterOptions(quoteCount)} value={filter} onChange={setFilter} label="Show replies or quotes" panelId={listId} />
       {commentsQuery.isLoading ? (
         <div className={styles.list}>
           {[0, 1, 2].map((index) => (
@@ -39,13 +34,13 @@ export function CommentsPanel({ postId, postAuthorId, totalComments }: { readonl
         </div>
       ) : commentsQuery.isError && !isRestartingFromTop ? (
         <ErrorState description="We couldn't load comments." error={commentsQuery.error} onRetry={() => void commentsQuery.refetch()} />
-      ) : comments.length === 0 ? (
-        <EmptyState title="No comments yet" description="Start the conversation." />
+      ) : orderedComments.length === 0 ? (
+        filter === "quotes" ? <EmptyState title="No quotes yet" description="When someone quotes this, it shows up here." /> : <EmptyState title="No comments yet" description="Start the conversation." />
       ) : (
-        <div className={styles.list}>
-          {orderedComments.map((comment) => (
-            <CommentThread key={comment.id} comment={comment} postId={postId} postAuthorId={postAuthorId} />
-          ))}
+        <div className={styles.list} id={listId} role="tabpanel">
+          {orderedComments.map((item) =>
+            isQuoteThreadItem(item) ? <QuoteThreadItemRow key={`quote-${item.id}`} item={item} /> : <CommentThread key={item.id} comment={item} postId={postId} postAuthorId={postAuthorId} />,
+          )}
           {commentsQuery.hasNextPage ? (
             <button type="button" className={styles.more} onClick={() => commentsQuery.fetchNextPage()} disabled={commentsQuery.isFetchingNextPage}>
               {commentsQuery.isFetchingNextPage ? "Loading…" : "Show more comments"}

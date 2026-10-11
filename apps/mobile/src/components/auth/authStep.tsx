@@ -1,16 +1,11 @@
 import type { ReactNode } from "react";
-import {
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  View,
-} from "react-native";
+import { Pressable, StyleSheet, View } from "react-native";
 import { useNavigation } from "@react-navigation/native";
-import { KeyboardAvoidingView } from "react-native-keyboard-controller";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { ArrowLeft24Icon } from "@/components/icons";
 import { Button } from "@/components/ui/button";
+import { KeyboardAwareForm } from "@/components/ui/keyboardAwareForm";
 import { Screen } from "@/components/ui/screen";
 import { Text } from "@/components/ui/text";
 import { useTheme } from "@/theme";
@@ -45,64 +40,57 @@ export function AuthStep({
   const insets = useSafeAreaInsets();
   return (
     <Screen>
-      <KeyboardAvoidingView
-        style={styles.flex}
-        behavior="padding"
+      <View style={styles.top}>
+        {navigation.canGoBack() ? (
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Go back"
+            hitSlop={12}
+            onPress={() => navigation.goBack()}
+          >
+            <ArrowLeft24Icon />
+          </Pressable>
+        ) : (
+          <View />
+        )}
+        {right}
+      </View>
+      <KeyboardAwareForm
+        contentContainerStyle={[
+          styles.scrollContent,
+          { paddingBottom: Math.max(insets.bottom, 12) },
+        ]}
       >
-        <View style={styles.top}>
-          {navigation.canGoBack() ? (
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel="Go back"
-              hitSlop={12}
-              onPress={() => navigation.goBack()}
-            >
-              <ArrowLeft24Icon />
-            </Pressable>
-          ) : (
-            <View />
-          )}
-          {right}
-        </View>
-        <ScrollView
-          style={styles.flex}
-          contentContainerStyle={[
-            styles.scrollContent,
-            { paddingBottom: Math.max(insets.bottom, 12) },
-          ]}
-          keyboardShouldPersistTaps="handled"
-        >
-          <View style={[styles.form, { gap: contentGap }]}>
-            {title ? (
-              <View style={styles.heading}>
-                <Text
-                  size={16}
-                  weight={500}
-                  lineHeight={19.2}
-                  accessibilityRole="header"
-                >
-                  {title}
+        <View style={[styles.form, { gap: contentGap }]}>
+          {title ? (
+            <View style={styles.heading}>
+              <Text
+                size={16}
+                weight={500}
+                lineHeight={19.2}
+                accessibilityRole="header"
+              >
+                {title}
+              </Text>
+              {subtitle ? (
+                <Text size={14} lineHeight={16.8} color={colors.textSubtle}>
+                  {subtitle}
                 </Text>
-                {subtitle ? (
-                  <Text size={14} lineHeight={16.8} color={colors.textSubtle}>
-                    {subtitle}
-                  </Text>
-                ) : null}
-              </View>
-            ) : null}
-            {children}
-          </View>
-          <View style={styles.action}>
-            {footer}
-            <Button
-              title={actionTitle}
-              onPress={onAction}
-              disabled={actionDisabled}
-              loading={loading}
-            />
-          </View>
-        </ScrollView>
-      </KeyboardAvoidingView>
+              ) : null}
+            </View>
+          ) : null}
+          {children}
+        </View>
+        <View style={styles.action}>
+          {footer}
+          <Button
+            title={actionTitle}
+            onPress={onAction}
+            disabled={actionDisabled}
+            loading={loading}
+          />
+        </View>
+      </KeyboardAwareForm>
     </Screen>
   );
 }
@@ -110,7 +98,6 @@ export function AuthStep({
 const FORM_HEIGHT_ABOVE_ACTION_BUTTON = 340;
 
 const styles = StyleSheet.create({
-  flex: { flex: 1 },
   top: {
     height: 24,
     marginTop: 16,
