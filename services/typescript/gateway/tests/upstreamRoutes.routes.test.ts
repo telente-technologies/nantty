@@ -5,6 +5,7 @@ import { resolveUpstreamRouteForRequest } from "../src/routes/upstream.routes.js
 describe("identity routes", () => {
   const cases: ReadonlyArray<readonly [string, string, "required" | "optional" | undefined]> = [
     ["POST", "/api/v1/auth/password/change", "required"],
+    ["POST", "/api/v1/auth/step-up", "required"],
     ["POST", "/api/v1/auth/password/reset", "optional"],
     ["POST", "/api/v1/auth/google", "optional"],
     ["GET", "/api/v1/auth/sessions", "required"],
@@ -110,6 +111,8 @@ describe("social routes", () => {
     ["GET", "/api/v1/users/u_1/followers", "optional"],
     ["GET", "/api/v1/users/me/follow-requests", "required"],
     ["GET", "/api/v1/users/me/blocked", "required"],
+    ["GET", "/api/v1/users/u_1/post-notifications", "required"],
+    ["PUT", "/api/v1/users/u_1/post-notifications", "required"],
     ["GET", "/api/v1/posts/p_1/comments", "optional"],
     ["GET", "/api/v1/feeds/popular", "optional"],
     ["GET", "/api/v1/saves/collections", "required"],
@@ -165,6 +168,7 @@ describe("wallet and verification internals stay private", () => {
     ["GET", "/api/v1/internal/users/u_1/verification-level"],
     ["POST", "/api/v1/internal/ads/accounts/acc_1/earnings-fundings"],
     ["POST", "/api/v1/internal/ads/boost-earnings-debits"],
+    ["GET", "/api/v1/internal/post-notification-subscribers/u_1"],
   ])("%s %s is not routed", (method, path) => {
     expect(resolveUpstreamRouteForRequest(method, path)).toBeUndefined();
   });

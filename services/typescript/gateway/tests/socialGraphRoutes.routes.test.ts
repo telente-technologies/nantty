@@ -26,6 +26,12 @@ describe("social graph routes", () => {
     }
   });
 
+  it("sends place search to social for signed-in readers only", () => {
+    expect(resolveUpstreamRouteForRequest("GET", "/api/v1/places/search")).toMatchObject({ upstream: "social", authentication: "required" });
+    expect(resolveUpstreamRouteForRequest("POST", "/api/v1/places/search")).toBeUndefined();
+    expect(resolveUpstreamRouteForRequest("GET", "/api/v1/places/search/extra")).toBeUndefined();
+  });
+
   it("never exposes social internal routes", () => {
     expect(resolveUpstreamRouteForRequest("GET", `/api/v1/internal/conversations/${storeId}/members/${storeId}`)).toBeUndefined();
     expect(resolveUpstreamRouteForRequest("GET", `/api/v1/internal/stores/${storeId}/follow-stats`)).toBeUndefined();

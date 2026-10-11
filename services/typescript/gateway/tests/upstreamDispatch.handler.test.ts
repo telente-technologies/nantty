@@ -142,14 +142,14 @@ describe("guest browsing", () => {
     expect(recorded.length).toBe(before);
   });
 
-  it("rate limits anonymous callers per ip and device with a stricter limit on feeds", async () => {
+  it("rate limits anonymous callers per ip with a stricter limit on feeds, whatever device id they send", async () => {
     const statuses: number[] = [];
     for (let attempt = 0; attempt < 5; attempt += 1) statuses.push((await fetch(`${gatewayUrl}/api/v1/feeds/popular`, { headers: { "x-device-id": "device-limited-1" } })).status);
     expect(statuses.slice(0, 3)).toEqual([200, 200, 200]);
     const refused = await fetch(`${gatewayUrl}/api/v1/feeds/popular`, { headers: { "x-device-id": "device-limited-1" } });
     expect(refused.status).toBe(429);
     expect(refused.headers.get("retry-after")).toBeTruthy();
-    expect((await fetch(`${gatewayUrl}/api/v1/feeds/popular`, { headers: { "x-device-id": "device-other-2" } })).status).toBe(200);
+    expect((await fetch(`${gatewayUrl}/api/v1/feeds/popular`, { headers: { "x-device-id": "device-other-2" } })).status).toBe(429);
   });
 
   it("does not rate limit signed-in callers with the guest limiter", async () => {

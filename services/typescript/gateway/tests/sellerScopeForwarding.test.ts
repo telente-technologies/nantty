@@ -15,4 +15,10 @@ describe("seller scope forwarding", () => {
     expect(headers["x-seller-store-id"]).toBeUndefined();
     expect(headers["x-internal-token"]).toBeUndefined();
   });
+
+  it("drops a client-sent CDN country unless the gateway sits behind a CDN that overwrites it", () => {
+    expect(buildUpstreamRequestHeaders(request({ "cloudfront-viewer-country": "GH" }))["cloudfront-viewer-country"]).toBeUndefined();
+    const trusted = buildUpstreamRequestHeaders({ ...request({ "cloudfront-viewer-country": "NG" }), trustCdnCountryHeader: true });
+    expect(trusted["cloudfront-viewer-country"]).toBe("NG");
+  });
 });
