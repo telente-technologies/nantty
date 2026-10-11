@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 
+import { buildContentSecurityPolicyHeaderValue } from "@/server/contentSecurityPolicy.service";
 import { doesAccessGrantPermission, findFirstPageAllowedForAccess, findPermissionRequiredForPage } from "@/config/rolePermissions.config";
 import { readCachedSellerAccessFromCookies, readSessionIdFromCookies } from "@/server/sellerSession.service";
 import { decideSellerAccessDestination, gatePagePathByDestination } from "@/utils/sellerAccessDestination.util";
@@ -13,6 +14,12 @@ function redirectTo(request: NextRequest, pathname: string, searchParams?: Recor
 }
 
 export function proxy(request: NextRequest) {
+  const response = routeRequest(request);
+  response.headers.set("Content-Security-Policy", buildContentSecurityPolicyHeaderValue());
+  return response;
+}
+
+function routeRequest(request: NextRequest): NextResponse {
   const { pathname, search } = request.nextUrl;
   const requestedPathWithQuery = `${pathname}${search}`;
   const sessionId = readSessionIdFromCookies(request.cookies);

@@ -78,9 +78,17 @@ async function callRealBackend(call: BackendCall, headers: Headers): Promise<Bac
   }
 }
 
+function stampRequestId(result: BackendResult, requestId: string | null): BackendResult {
+  if (!requestId || result.headers.has("x-request-id")) return result;
+  const headers = new Headers(result.headers);
+  headers.set("x-request-id", requestId);
+  return { ...result, headers };
+}
+
 export async function callSellerBackend(call: BackendCall): Promise<BackendResult> {
   const headers = buildOutgoingHeaders(call);
-  return shouldUseRealBackend(`/api/v1${call.path}`) ? callRealBackend(call, headers) : callMockBackend(call, headers);
+  const result = await (shouldUseRealBackend(`/api/v1${call.path}`) ? callRealBackend(call, headers) : callMockBackend(call, headers));
+  return stampRequestId(result, headers.get("X-Request-Id"));
 }
 
 export function readJsonFromBackendResult<Payload>(result: BackendResult): Payload | null {

@@ -10,6 +10,7 @@ import type { CursorPage } from "@/types/pagination.type";
 export interface CursorPagedListState<Item> {
   readonly items: Item[] | null;
   readonly errorMessage: string | null;
+  readonly error: unknown;
   readonly isLoading: boolean;
   readonly isLoadingMore: boolean;
   readonly hasMore: boolean;
@@ -21,6 +22,7 @@ export function useCursorPagedList<Item>(apiPath: string, query: SellerApiReques
   const [items, setItems] = useState<Item[] | null>(null);
   const [nextCursor, setNextCursor] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [error, setError] = useState<unknown>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [reloadCounter, setReloadCounter] = useState(0);
@@ -32,6 +34,7 @@ export function useCursorPagedList<Item>(apiPath: string, query: SellerApiReques
     const abortController = new AbortController();
     setIsLoading(true);
     setErrorMessage(null);
+    setError(null);
     sendSellerApiRequest<CursorPage<Item>>(apiPath, { query: latestQueryRef.current, signal: abortController.signal })
       .then((page) => {
         setItems(page.data);
@@ -39,6 +42,7 @@ export function useCursorPagedList<Item>(apiPath: string, query: SellerApiReques
       })
       .catch((error: unknown) => {
         if (error instanceof DOMException && error.name === "AbortError") return;
+        setError(error);
         setErrorMessage(readErrorMessageForDisplay(error));
       })
       .finally(() => {
@@ -55,7 +59,10 @@ export function useCursorPagedList<Item>(apiPath: string, query: SellerApiReques
         setItems((current) => [...(current ?? []), ...page.data]);
         setNextCursor(page.nextCursor);
       })
-      .catch((error: unknown) => setErrorMessage(readErrorMessageForDisplay(error)))
+      .catch((error: unknown) => {
+        setError(error);
+        setErrorMessage(readErrorMessageForDisplay(error));
+      })
       .finally(() => setIsLoadingMore(false));
   }, [apiPath, nextCursor]);
 
@@ -63,5 +70,5 @@ export function useCursorPagedList<Item>(apiPath: string, query: SellerApiReques
   useOnReconnect(() => {
     if (errorMessage) reload();
   });
-  return { items, errorMessage, isLoading, isLoadingMore, hasMore: nextCursor !== null, loadMore, reload };
+  return { items, errorMessage, error, isLoading, isLoadingMore, hasMore: nextCursor !== null, loadMore, reload };
 }

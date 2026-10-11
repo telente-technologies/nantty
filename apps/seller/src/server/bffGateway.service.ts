@@ -20,14 +20,14 @@ import { decideSellerAccessDestination } from "@/utils/sellerAccessDestination.u
 const maximumForwardedBodyBytes = 12 * 1024 * 1024;
 const forwardedRequestHeaderNames = ["idempotency-key", "x-chunk-sha256", "if-match", "x-step-up-token"];
 const longForwardedHeaderNames = new Set(["x-step-up-token"]);
-const returnedResponseHeaderNames = ["content-type", "content-disposition", "idempotent-replayed", "retry-after", "etag"];
+const returnedResponseHeaderNames = ["content-type", "content-disposition", "idempotent-replayed", "retry-after", "etag", "x-request-id"];
 export const allowedApiPathPattern = /^\/(seller|media|chat\/keys)(\/[A-Za-z0-9._~:@%-]+)+$|^\/chat\/content$|^\/payments\/(payout-onboarding\/me(\/[A-Za-z0-9._~:@%-]+)*|payout-fees|wallet\/me|verification\/me)$|^\/wallets\/me$/;
 const readOnlyAccountApiPaths: ReadonlySet<string> = new Set(["/account/status"]);
 const accountWriteApiCalls: ReadonlySet<string> = new Set(["PATCH /users/me/preferences", "PUT /users/me/consents", "POST /auth/step-up", "POST /auth/otp/send", "POST /auth/otp/verify"]);
 const gateApiPathPattern = /^\/seller\/(access|verification|subscription|stores\/mine)(\/|$)/;
 
 export function respondWithBffError(status: number, code: string, message: string): NextResponse {
-  return NextResponse.json({ message, code }, { status, headers: { "Cache-Control": "no-store" } });
+  return NextResponse.json({ message, code }, { status, headers: { "Cache-Control": "no-store", "x-request-id": crypto.randomUUID() } });
 }
 
 function convertBackendResultToResponse(result: BackendResult): NextResponse {

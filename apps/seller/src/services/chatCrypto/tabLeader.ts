@@ -47,7 +47,7 @@ export class TabLeaderError extends Error {
 const serializeError = (error: unknown): SerializedError => {
   const candidate = error as { message?: unknown; code?: unknown; status?: unknown } | null;
   return {
-    message: typeof candidate?.message === "string" ? candidate.message : "Something went wrong.",
+    message: typeof candidate?.message === "string" ? candidate.message : "Secure chat couldn't finish that in another tab. Try again.",
     ...(typeof candidate?.code === "string" ? { code: candidate.code } : {}),
     ...(typeof candidate?.status === "number" ? { status: candidate.status } : {}),
   };
@@ -89,7 +89,7 @@ export function createTabLeader(options: TabLeaderOptions) {
     pending.delete(id);
     clearTimeout(call.timer);
     if (ok) call.resolve(value);
-    else call.reject(new TabLeaderError(error?.message ?? "Something went wrong.", error?.code, error?.status));
+    else call.reject(new TabLeaderError(error?.message ?? "Secure chat couldn't finish that in another tab. Try again.", error?.code, error?.status));
   }
 
   function sendPending(id: string, call: PendingCall) {

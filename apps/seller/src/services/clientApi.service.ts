@@ -1,4 +1,4 @@
-import { isBrowserOffline } from "@zudomart/web-kit";
+import { isBrowserOffline, parseRetryAfterHeader, readFriendlyErrorMessage, readRequestIdHeader } from "@zudomart/web-kit";
 
 import { describeLimitError } from "@/utils/limitErrors.util";
 
@@ -17,6 +17,8 @@ export class SellerApiRequestError extends Error {
     message: string,
     public readonly issues: ApiErrorBody["issues"] = [],
     public readonly details?: Readonly<Record<string, unknown>>,
+    public readonly requestId?: string,
+    public readonly retryAfterSeconds?: number,
   ) {
     super(describeLimitError(code, details) ?? message);
     this.name = "SellerApiRequestError";
@@ -74,11 +76,11 @@ export async function sendRequestToDashboardServer<Payload>(bffPath: string, opt
   if (response.status === 401) {
     const errorBody = (await response.json().catch(() => null)) as ApiErrorBody | null;
     if (errorBody?.code === "SESSION_EXPIRED" || errorBody?.code === "UNAUTHENTICATED") redirectToLoginAfterSessionEnded();
-    throw new SellerApiRequestError(401, errorBody?.code ?? "UNAUTHENTICATED", errorBody?.message ?? "Sign in to continue.");
+    throw new SellerApiRequestError(401, errorBody?.code ?? "UNAUTHENTICATED", errorBody?.message ?? "Sign in to continue.", [], undefined, readRequestIdHeader(response.headers));
   }
   if (!response.ok) {
     const errorBody = (await response.json().catch(() => null)) as ApiErrorBody | null;
-    throw new SellerApiRequestError(response.status, errorBody?.code ?? `HTTP_${response.status}`, errorBody?.message ?? "Something went wrong. Try again.", errorBody?.issues ?? [], errorBody?.details);
+    throw new SellerApiRequestError(response.status, errorBody?.code ?? `HTTP_${response.status}`, errorBody?.message ?? "That didn't work. Try again.", errorBody?.issues ?? [], errorBody?.details, readRequestIdHeader(response.headers), parseRetryAfterHeader(response.headers.get("retry-after")));
   }
   if (response.status === 204) return undefined as Payload;
   if (options.expect === "text") return (await response.text()) as Payload;
@@ -110,7 +112,5 @@ export function createIdempotencyKey(prefix = "idem"): string {
 
 export function readErrorMessageForDisplay(error: unknown): string {
   if (isBrowserOffline()) return "You're offline. Check your connection and we'll retry when you're back.";
-  if (error instanceof SellerApiRequestError) return error.message;
-  if (error instanceof Error && error.name !== "AbortError") return "Something went wrong. Try again.";
-  return "Something went wrong. Try again.";
+  return readFriendlyErrorMessage(error);
 }

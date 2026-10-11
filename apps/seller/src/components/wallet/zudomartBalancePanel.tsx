@@ -54,7 +54,7 @@ export function ZudomartBalancePanel({ walletQuery }: { readonly walletQuery: Se
             </ul>
           )
         ) : walletQuery.errorMessage ? (
-          <ErrorCallout message={walletQuery.errorMessage} onRetry={walletQuery.reload} />
+          <ErrorCallout error={walletQuery.error} message={walletQuery.errorMessage} onRetry={walletQuery.reload} />
         ) : (
           <LoadingBlock label="Loading your Zudomart balance" />
         )}

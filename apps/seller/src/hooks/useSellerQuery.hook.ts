@@ -9,6 +9,7 @@ import { readErrorMessageForDisplay, sendSellerApiRequest, type SellerApiRequest
 export interface SellerQueryState<Payload> {
   readonly data: Payload | null;
   readonly errorMessage: string | null;
+  readonly error: unknown;
   readonly isLoading: boolean;
   readonly reload: () => void;
   readonly replaceData: (updater: (current: Payload | null) => Payload | null) => void;
@@ -17,6 +18,7 @@ export interface SellerQueryState<Payload> {
 export function useSellerQuery<Payload>(apiPath: string | null, query?: SellerApiRequestOptions["query"]): SellerQueryState<Payload> {
   const [data, setData] = useState<Payload | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [error, setError] = useState<unknown>(null);
   const [isLoading, setIsLoading] = useState(apiPath !== null);
   const [reloadCounter, setReloadCounter] = useState(0);
   const serialisedQuery = JSON.stringify(query ?? {});
@@ -31,10 +33,12 @@ export function useSellerQuery<Payload>(apiPath: string | null, query?: SellerAp
     const abortController = new AbortController();
     setIsLoading(true);
     setErrorMessage(null);
+    setError(null);
     sendSellerApiRequest<Payload>(apiPath, { query: latestQueryRef.current, signal: abortController.signal })
       .then((payload) => setData(payload))
       .catch((error: unknown) => {
         if (error instanceof DOMException && error.name === "AbortError") return;
+        setError(error);
         setErrorMessage(readErrorMessageForDisplay(error));
       })
       .finally(() => {
@@ -48,5 +52,5 @@ export function useSellerQuery<Payload>(apiPath: string | null, query?: SellerAp
     if (errorMessage) reload();
   });
   const replaceData = useCallback((updater: (current: Payload | null) => Payload | null) => setData((current) => updater(current)), []);
-  return { data, errorMessage, isLoading, reload, replaceData };
+  return { data, errorMessage, error, isLoading, reload, replaceData };
 }
