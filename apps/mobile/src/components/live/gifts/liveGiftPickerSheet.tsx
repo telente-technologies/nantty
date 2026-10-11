@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
-import { ActivityIndicator, Pressable, StyleSheet, View } from "react-native";
+import { Pressable, StyleSheet, View } from "react-native";
 
 import { Flame24Icon, Medal24Icon, Trophy24Icon } from "@/components/icons";
 import { BuyCoinsSheet } from "@/components/coins/buyCoinsSheet";
 import { CoinBalanceChip } from "@/components/coins/coinBalanceChip";
 import { useCoinBalance } from "@/components/coins/coinWallet.hook";
 import { BottomSheet } from "@/components/ui/bottomSheet";
+import { BrandLoader } from "@/components/ui/brandLoader";
 import { Text } from "@/components/ui/text";
 import type { LiveGift } from "@/types";
 import { makeThemedStyles, useTheme } from "@/theme";
@@ -83,7 +84,7 @@ export function LiveGiftPickerSheet({ liveId, recipientUserId, visible, onClose 
               </Pressable>
             ))}
           </View>
-          {catalog.isPending ? <ActivityIndicator color={colors.primary} /> : null}
+          {catalog.isPending ? <BrandLoader size="md" /> : null}
           <View style={styles.grid}>
             {giftsBySection[section].map((gift) => (
               <LiveGiftPickerTile key={gift.id} gift={gift} isSelected={gift.id === selectedGiftId} onSendOnce={sendGiftOnce} />

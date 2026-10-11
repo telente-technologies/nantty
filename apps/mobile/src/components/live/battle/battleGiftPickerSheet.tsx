@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ActivityIndicator, Pressable, StyleSheet, View } from "react-native";
+import { Pressable, StyleSheet, View } from "react-native";
 
 import { BuyCoinsSheet } from "@/components/coins/buyCoinsSheet";
 import { CoinBalanceChip } from "@/components/coins/coinBalanceChip";
@@ -7,6 +7,7 @@ import { formatCoinAmount } from "@/components/coins/coinWallet.hook";
 import { Avatar } from "@/components/ui/avatar";
 import { LiveGiftArtwork } from "@/components/live/gifts/liveGiftArtwork";
 import { BottomSheet } from "@/components/ui/bottomSheet";
+import { BrandLoader } from "@/components/ui/brandLoader";
 import { Button } from "@/components/ui/button";
 import { Text } from "@/components/ui/text";
 import type { LiveBattle, LiveStage, LiveStageStreamer } from "@/types/liveStage.type";
@@ -60,7 +61,7 @@ export function BattleGiftPickerSheet(props: BattleGiftPickerSheetProps) {
               {recipientName} isn't in the Creator Program yet, so coins from this gift are paid to the host, {props.hostName}. It still counts toward {recipientName}'s score.
             </Text>
           ) : null}
-          {gifting.isLoadingGifts ? <ActivityIndicator color={colors.primary} /> : null}
+          {gifting.isLoadingGifts ? <BrandLoader size="md" /> : null}
           <View style={styles.grid}>
             {gifts.map((gift) => {
               const isSelected = gift.id === selectedGiftId;

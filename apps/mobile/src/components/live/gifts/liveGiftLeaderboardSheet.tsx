@@ -1,7 +1,8 @@
-import { ActivityIndicator, StyleSheet, View } from "react-native";
+import { StyleSheet, View } from "react-native";
 
 import { Trophy24Icon } from "@/components/icons";
 import { BottomSheet } from "@/components/ui/bottomSheet";
+import { BrandLoader } from "@/components/ui/brandLoader";
 import { Text } from "@/components/ui/text";
 import { makeThemedStyles, useTheme } from "@/theme";
 
@@ -19,7 +20,7 @@ export function LiveGiftLeaderboardSheet({ liveId, visible, onClose }: { liveId:
         <View style={{ width: 40, height: 40, borderRadius: 20, alignSelf: "center", alignItems: "center", justifyContent: "center", backgroundColor: colors.chip }}>
           <Trophy24Icon size={22} color={colors.textMuted} />
         </View>
-        {leaderboard.isPending ? <ActivityIndicator color={colors.primary} /> : null}
+        {leaderboard.isPending ? <BrandLoader size="md" /> : null}
         <LiveGiftLeaderboardList entries={leaderboard.data?.data ?? []} emptyMessage="No points yet. Send a gift, like or share to top the ranking." />
         {viewerRank ? (
           <Text size={13} weight={600} lineHeight={18} color={colors.primary} align="center">

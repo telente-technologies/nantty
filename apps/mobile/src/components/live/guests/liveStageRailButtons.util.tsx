@@ -13,7 +13,7 @@ const confirmEndingBattleEarly = (stage: LiveStage, controller: LiveStageControl
   showAlertWithButtons("End battle now?", "Scores are final as they are right now, and the battle is settled immediately.", [
     { text: "Keep going", style: "cancel" },
     { text: "End battle", style: "destructive", onPress: () => stage.activeBattle && controller.endLiveBattleEarly(stage.activeBattle.id) },
-  ]);
+  ], { intent: "battle" });
 
 const confirmLeavingStage = (stage: LiveStage, controller: LiveStageController) => {
   const isInRunningBattle =
@@ -27,6 +27,7 @@ const confirmLeavingStage = (stage: LiveStage, controller: LiveStageController) 
       { text: "Stay", style: "cancel" },
       { text: "Leave", style: "destructive", onPress: controller.leaveStage },
     ],
+    { intent: "stop" },
   );
 };
 

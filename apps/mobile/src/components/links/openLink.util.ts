@@ -49,7 +49,7 @@ export function confirmRiskyLink(url: string, onOpen: () => void) {
       risk === "shortened"
         ? `This link hides its real destination (${domain}). Only open it if you trust the person who shared it.`
         : `${domain} looks unusual and may be unsafe. Do not enter passwords or payment details.`,
-    tone: "caution",
+    intent: "link",
     actions: [
       { label: "Open anyway", style: "destructive", onPress: onOpen },
       { label: "Cancel", style: "secondary" },

@@ -121,6 +121,14 @@ import {
   TrademarkRegisteredIcon,
   TranslateIcon,
   UserMinusIcon,
+  CheckCircleIcon,
+  CurrencyNgnIcon,
+  LinkIcon,
+  SignInIcon,
+  StopCircleIcon,
+  WarningOctagonIcon,
+  XCircleIcon,
+  PaperclipIcon,
 } from "./phosphorGlyphs";
 import { phosphorIcon } from "./phosphorIcon";
 
@@ -276,3 +284,13 @@ export const Ticket24Icon = phosphorIcon(TicketIcon);
 export const TrademarkRegistered24Icon = phosphorIcon(TrademarkRegisteredIcon);
 export const Translate24Icon = phosphorIcon(TranslateIcon);
 export const UserMinus24Icon = phosphorIcon(UserMinusIcon);
+export const CheckCircle24Icon = phosphorIcon(CheckCircleIcon);
+export const CurrencyNgn24Icon = phosphorIcon(CurrencyNgnIcon);
+export const Link24Icon = phosphorIcon(LinkIcon);
+export const SignIn24Icon = phosphorIcon(SignInIcon);
+export const StopCircle24Icon = phosphorIcon(StopCircleIcon);
+export const WarningOctagon24Icon = phosphorIcon(WarningOctagonIcon);
+export const XCircle24Icon = phosphorIcon(XCircleIcon);
+export const SealCheck24Icon = phosphorIcon(SealCheckIcon);
+export const ShareFat24Icon = phosphorIcon(ShareFatIcon);
+export const Paperclip24Icon = phosphorIcon(PaperclipIcon);

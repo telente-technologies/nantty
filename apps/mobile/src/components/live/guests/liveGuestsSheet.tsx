@@ -55,7 +55,7 @@ export function LiveGuestsSheet({ liveId, visible, controller, onClose }: { live
                   showAlertWithButtons(`Remove ${streamer.user.name} from the stage?`, "Their camera and mic stop showing right away. They go back to watching.", [
                     { text: "Cancel", style: "cancel" },
                     { text: "Remove", style: "destructive", onPress: () => controller.removeGuestFromStage(streamer.user.id) },
-                  ])
+                  ], { intent: "removeMember" })
                 }
               /> : null}
           </PersonRow>

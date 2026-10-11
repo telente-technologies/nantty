@@ -1,9 +1,10 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Image } from "expo-image";
-import { ActivityIndicator, Pressable, StyleSheet, View } from "react-native";
+import { Pressable, StyleSheet, View } from "react-native";
 
 import { Check16Icon, PushPin24Icon } from "@/components/icons";
 import { BottomSheet } from "@/components/ui/bottomSheet";
+import { BrandLoader } from "@/components/ui/brandLoader";
 import { Text } from "@/components/ui/text";
 import { creatorsService } from "@/services/creators/creators.service";
 import { storesService } from "@/services/sellers/stores.service";
@@ -37,7 +38,7 @@ export function LivePinProductsSheet({ visible, liveId, storeId, pinnedProductId
   return (
     <BottomSheet visible={visible} onClose={onClose} title="Pin a product" floating>
       <View style={styles.list}>
-        {storeProducts.isPending ? <ActivityIndicator color={colors.primary} /> : null}
+        {storeProducts.isPending ? <BrandLoader size="md" /> : null}
         {storeProducts.data?.length === 0 ? (
           <Text size={13} lineHeight={16.9} color={colors.textMuted}>
             Your store has no published products yet.

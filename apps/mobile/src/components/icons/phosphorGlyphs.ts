@@ -3,9 +3,12 @@ import type { Icon } from "phosphor-react-native";
 
 // Per-icon requires keep the bundle to the glyphs we use; the package index pulls in every icon and its .tsx sources fail tsc.
 export const AppleLogoIcon: Icon = require("phosphor-react-native/src/icons/AppleLogo").AppleLogoIcon;
+export const ArrowClockwiseIcon: Icon = require("phosphor-react-native/src/icons/ArrowClockwise").ArrowClockwiseIcon;
+export const ArrowCounterClockwiseIcon: Icon = require("phosphor-react-native/src/icons/ArrowCounterClockwise").ArrowCounterClockwiseIcon;
 export const ArrowDownIcon: Icon = require("phosphor-react-native/src/icons/ArrowDown").ArrowDownIcon;
 export const ArrowLeftIcon: Icon = require("phosphor-react-native/src/icons/ArrowLeft").ArrowLeftIcon;
 export const ArrowsClockwiseIcon: Icon = require("phosphor-react-native/src/icons/ArrowsClockwise").ArrowsClockwiseIcon;
+export const ArrowsInSimpleIcon: Icon = require("phosphor-react-native/src/icons/ArrowsInSimple").ArrowsInSimpleIcon;
 export const ArrowsOutSimpleIcon: Icon = require("phosphor-react-native/src/icons/ArrowsOutSimple").ArrowsOutSimpleIcon;
 export const ArrowUpIcon: Icon = require("phosphor-react-native/src/icons/ArrowUp").ArrowUpIcon;
 export const ArrowUpRightIcon: Icon = require("phosphor-react-native/src/icons/ArrowUpRight").ArrowUpRightIcon;
@@ -81,6 +84,7 @@ export const SignOutIcon: Icon = require("phosphor-react-native/src/icons/SignOu
 export const SlidersHorizontalIcon: Icon = require("phosphor-react-native/src/icons/SlidersHorizontal").SlidersHorizontalIcon;
 export const SmileyIcon: Icon = require("phosphor-react-native/src/icons/Smiley").SmileyIcon;
 export const SpeakerHighIcon: Icon = require("phosphor-react-native/src/icons/SpeakerHigh").SpeakerHighIcon;
+export const SpeakerXIcon: Icon = require("phosphor-react-native/src/icons/SpeakerX").SpeakerXIcon;
 export const SquaresFourIcon: Icon = require("phosphor-react-native/src/icons/SquaresFour").SquaresFourIcon;
 export const StarIcon: Icon = require("phosphor-react-native/src/icons/Star").StarIcon;
 export const StorefrontIcon: Icon = require("phosphor-react-native/src/icons/Storefront").StorefrontIcon;
@@ -130,3 +134,11 @@ export const TicketIcon: Icon = require("phosphor-react-native/src/icons/Ticket"
 export const TrademarkRegisteredIcon: Icon = require("phosphor-react-native/src/icons/TrademarkRegistered").TrademarkRegisteredIcon;
 export const TranslateIcon: Icon = require("phosphor-react-native/src/icons/Translate").TranslateIcon;
 export const UserMinusIcon: Icon = require("phosphor-react-native/src/icons/UserMinus").UserMinusIcon;
+export const CheckCircleIcon: Icon = require("phosphor-react-native/src/icons/CheckCircle").CheckCircleIcon;
+export const CurrencyNgnIcon: Icon = require("phosphor-react-native/src/icons/CurrencyNgn").CurrencyNgnIcon;
+export const LinkIcon: Icon = require("phosphor-react-native/src/icons/Link").LinkIcon;
+export const SignInIcon: Icon = require("phosphor-react-native/src/icons/SignIn").SignInIcon;
+export const StopCircleIcon: Icon = require("phosphor-react-native/src/icons/StopCircle").StopCircleIcon;
+export const WarningOctagonIcon: Icon = require("phosphor-react-native/src/icons/WarningOctagon").WarningOctagonIcon;
+export const XCircleIcon: Icon = require("phosphor-react-native/src/icons/XCircle").XCircleIcon;
+export const PaperclipIcon: Icon = require("phosphor-react-native/src/icons/Paperclip").PaperclipIcon;
