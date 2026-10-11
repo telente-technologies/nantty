@@ -16,7 +16,7 @@ Every backend (Go, TypeScript, Elixir, Python) uses the same Zudojs layout. A de
 │   ├── enums/                <name>.enum.<ext>
 │   ├── errors/               <name>.error.<ext>
 │   ├── events/               shared event bus/outbox wiring
-│   ├── integrations/         <provider>.integration.<ext>  (paystack, livekit, rabbitmq, …)
+│   ├── integrations/         <provider>.integration.<ext>  (flutterwave, livekit, rabbitmq, …)
 │   ├── interfaces/           <name>.interface.<ext>
 │   ├── jobs/                 <name>.job.<ext>
 │   ├── loaders/              <name>.loader.<ext>
