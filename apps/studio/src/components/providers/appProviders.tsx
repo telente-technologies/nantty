@@ -7,7 +7,7 @@ import { isRetryableApiFailure } from "@/services/clientApi.service";
 
 import { ConsentBannerHost } from "@/components/privacy/consentBannerHost";
 import { StudioThemeProvider } from "@/components/theme/studioThemeProvider";
-import type { ThemePreference } from "@zudomart/web-kit";
+import { ConfirmDialogHost, type ThemePreference } from "@zudomart/web-kit";
 
 import { SessionProvider } from "./sessionProvider";
 import type { User } from "@/types";
@@ -33,6 +33,7 @@ export function AppProviders({ viewer, csrfToken, themePreference, children }: {
       <SessionProvider viewer={viewer} csrfToken={csrfToken}>
         <StudioThemeProvider initialPreference={themePreference}>
           {children}
+          <ConfirmDialogHost />
           <ConsentBannerHost />
         </StudioThemeProvider>
       </SessionProvider>

@@ -34,7 +34,7 @@ export function LoginForm() {
     setBusy(true);
     try {
       await sendRequestToStudioServer<{ user: User }>("/auth/login", { method: "POST", body: { identifier: identifier.trim(), password } });
-      router.push(readSafeRelativeRedirectPath(searchParams.get("next"), "/lives"));
+      router.push(readSafeRelativeRedirectPath(searchParams.get("next"), "/home"));
       router.refresh();
     } catch (error) {
       setFormError(error instanceof StudioRequestError ? error.message : "Couldn't log in. Check your connection and try again.");
@@ -49,7 +49,7 @@ export function LoginForm() {
     setSigningInWith(provider);
     try {
       await signInWithSocialProvider(provider);
-      router.push(readSafeRelativeRedirectPath(searchParams.get("next"), "/lives"));
+      router.push(readSafeRelativeRedirectPath(searchParams.get("next"), "/home"));
       router.refresh();
     } catch (error) {
       setNotice(error instanceof StudioRequestError ? error.message : "Sign-in failed");

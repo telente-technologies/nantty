@@ -12,7 +12,7 @@ import styles from "./payoutOnboarding.module.css";
 const copy = {
   pending_review: { title: "Pending review", withdrawals: "Withdrawals stay locked until review finishes. Your earnings keep building and nothing is lost." },
   action_needed: { title: "Action needed", withdrawals: "Withdrawals stay locked until you fix these. Your earnings keep building in the meantime." },
-  verified: { title: "You're verified", withdrawals: "You can withdraw available earnings to your bank account in the Zudomart app. Your first withdrawal is held for one quick safety review." },
+  verified: { title: "You're verified", withdrawals: "You can withdraw available earnings to your bank account from your Zudomart wallet. Your first withdrawal is held for one quick safety review." },
 } as const;
 
 const stepLabels: Record<PayoutOnboardingStep, string> = { identity: "Personal details", business: "Business details", bank: "Bank account", document: "ID document" };

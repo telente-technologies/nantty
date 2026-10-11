@@ -11,6 +11,7 @@ import { doPayoutNamesMatch } from "@/utils/payoutName.util";
 
 import styles from "./payoutOnboarding.module.css";
 import { PayoutStepFrame } from "./payoutStepFrame";
+import { StepUpCancelledError, useStepUpPrompt } from "./stepUpPrompt";
 
 interface PayoutBankFormProps {
   readonly state: PayoutOnboardingState;
@@ -33,7 +34,8 @@ export function PayoutBankForm({ state, stepNumber, stepCount, onSaved }: Payout
   const resolvedName = isLookupReady ? resolved.data?.accountName ?? "" : "";
   const matches = doPayoutNamesMatch(resolvedName, state.legalName ?? "");
   const bankName = banks.data?.find((bank) => bank.code === bankCode)?.name ?? "";
-  const save = useMutation({ mutationFn: () => payoutOnboardingService.saveBank({ bankCode, bankName, accountNumber, resolvedAccountName: resolvedName }), onSuccess: onSaved });
+  const { withStepUp, stepUpDialog } = useStepUpPrompt();
+  const save = useMutation({ mutationFn: () => withStepUp((token) => payoutOnboardingService.saveBank({ bankCode, bankName, accountNumber, resolvedAccountName: resolvedName }, token)), onSuccess: onSaved });
 
   return (
     <PayoutStepFrame stepNumber={stepNumber} stepCount={stepCount} title="Where to send your money" why="Payouts only go to a bank account in your own name. We check the account name with your bank so nothing is sent to the wrong person.">
@@ -53,7 +55,8 @@ export function PayoutBankForm({ state, stepNumber, stepCount, onSaved }: Payout
           <p className={`${styles.notice} ${matches ? styles.noticeSuccess : styles.noticeError}`}>{matches ? "This matches your legal name." : `This does not match "${state.legalName}". Use an account in your own name, or go back and fix your legal name.`}</p>
         </div>
       ) : null}
-      {save.isError ? <p className={`${styles.notice} ${styles.noticeError}`} role="alert">{save.error.message}</p> : null}
+      {stepUpDialog}
+      {save.isError && !(save.error instanceof StepUpCancelledError) ? <p className={`${styles.notice} ${styles.noticeError}`} role="alert">{save.error.message}</p> : null}
       <div className={styles.actions}><Button busy={save.isPending} disabled={!matches} onClick={() => save.mutate()}>Save account</Button></div>
     </PayoutStepFrame>
   );
