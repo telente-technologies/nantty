@@ -26,6 +26,7 @@ export interface ComposerDraft {
   readonly trim: ClipEdits["trim"];
   readonly transition: ClipEdits["transition"];
   readonly look: ClipEdits["look"];
+  readonly quotedPostId?: ID | null;
 }
 
 export interface ComposerDraftInput extends Omit<ComposerDraft, "id" | "updatedAt"> {}

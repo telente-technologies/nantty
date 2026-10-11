@@ -1,5 +1,5 @@
 import type { AdAppInstall, AdClickLinks, AdCreativeType, AdDestination } from "./adCreative.type";
-import type { Comment, ID, Media } from "./models.type";
+import type { Comment, ID, Media, QuotedPostSummary } from "./models.type";
 
 export type ThreadSort = "relevant" | "latest" | "likes";
 
@@ -13,6 +13,21 @@ export interface CommentThreadPage {
   readonly maximumVisibleDepth: number;
 }
 
+export type CommentSectionFilter = "all" | "quotes";
+
+export interface QuoteThreadItem {
+  readonly type: "quote";
+  readonly id: ID;
+  readonly postId: ID;
+  readonly quotePost: QuotedPostSummary;
+  readonly likes: number;
+  readonly commentCount: number;
+  readonly isPostAuthor: boolean;
+  readonly createdAt: string;
+}
+
+export const isQuoteThreadItem = (item: { readonly type?: string }): item is QuoteThreadItem => item.type === "quote";
+
 export interface ThreadConnector {
   readonly depth: number;
   readonly hasParentAbove: boolean;
@@ -21,6 +36,7 @@ export interface ThreadConnector {
 }
 
 export interface ThreadReply extends Comment {
+  readonly type?: "comment";
   readonly media?: readonly Media[];
   readonly isPostAuthor: boolean;
   readonly connector: ThreadConnector;
@@ -81,4 +97,5 @@ export interface ThreadAdDecision {
 
 export type ThreadRow =
   | { readonly kind: "reply"; readonly key: string; readonly reply: ThreadReply }
+  | { readonly kind: "quote"; readonly key: string; readonly quote: QuoteThreadItem }
   | { readonly kind: "sponsored"; readonly key: string; readonly ad: ThreadDecidedAd };

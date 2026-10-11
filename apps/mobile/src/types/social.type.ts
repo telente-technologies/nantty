@@ -46,6 +46,7 @@ export interface Clip extends Post {
 }
 
 export interface CommentWithReplies extends Comment {
+  readonly type?: "comment";
   readonly previewReplies: readonly Comment[];
 }
 
