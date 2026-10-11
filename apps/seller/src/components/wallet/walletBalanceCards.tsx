@@ -14,7 +14,7 @@ export function WalletBalanceCards({ balances }: { readonly balances: WalletBala
         <p className={styles.balanceLabel}>In escrow</p>
         <p className={styles.balanceAmount}>{formatMoney(balances.escrow)}</p>
         <p className={styles.balanceExplanation}>
-          Buyers paid for these app orders. Zudomart holds the money until the buyer confirms delivery
+          Buyers paid for these app orders. The money stays locked in the buyer's own wallet, held by our licensed payment partner, until they confirm delivery
           {balances.nextEscrowReleaseAt ? `; the next release is due ${formatDateTimeForDisplay(balances.nextEscrowReleaseAt)}` : ""}.
         </p>
       </section>

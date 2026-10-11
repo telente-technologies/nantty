@@ -1,6 +1,6 @@
 import type { StatusTone } from "@/components/ui/statusBadge";
 import type { DeliveryStatus } from "@/types/delivery.type";
-import type { DisputeStatus, EscrowStatus, OnlineOrderStatus, OrderPaymentStatus, ReturnRequestStatus } from "@/types/order.type";
+import type { DisputeStatus, EscrowStatus, OnlineOrderStatus, OrderPaymentProvider, OrderPaymentStatus, ReturnRequestStatus } from "@/types/order.type";
 
 export const orderStatusPresentation: Record<OnlineOrderStatus, { readonly label: string; readonly tone: StatusTone }> = {
   new: { label: "New", tone: "highlight" },
@@ -16,7 +16,7 @@ export const orderStatusPresentation: Record<OnlineOrderStatus, { readonly label
 };
 
 export const escrowStatusPresentation: Record<EscrowStatus, { readonly label: string; readonly tone: StatusTone; readonly explanation: string }> = {
-  held: { label: "In escrow", tone: "caution", explanation: "The buyer has paid. Zudomart holds the money until they confirm delivery, then it moves to your wallet." },
+  held: { label: "In escrow", tone: "caution", explanation: "The buyer has paid. The money stays locked in the buyer's own wallet until they confirm delivery, then it moves to your wallet." },
   released: { label: "Paid out", tone: "success", explanation: "The buyer confirmed delivery and the money is in your wallet." },
   refunded: { label: "Refunded", tone: "neutral", explanation: "The money went back to the buyer." },
   disputed: { label: "On hold", tone: "error", explanation: "The buyer opened a dispute. Release is paused until Zudomart decides." },
@@ -65,4 +65,4 @@ export const deliveryStatusPresentation: Record<DeliveryStatus, { readonly label
   returned: { label: "Returned", tone: "caution" },
 };
 
-export const paymentProviderLabels: Record<"paystack", string> = { paystack: "Paystack" };
+export const paymentProviderLabels: Record<OrderPaymentProvider, string> = { paystack: "Card / bank transfer", flutterwave: "Flutterwave" };

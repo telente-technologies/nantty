@@ -95,7 +95,7 @@ export function registerBillingOfferMockHandlers(): void {
     if (!isGoldOnly && !offer.isEligible) throw new MockHttpError(409, "TRIAL_NOT_AVAILABLE", offer.ineligibleReasons[0]?.message ?? "A free trial is not available.");
     const reference = `${isGoldOnly ? "GLD" : "TRL"}_${randomBytes(8).toString("hex").toUpperCase()}`;
     readHolder().pending.set(reference, { storeId: gateStore.storeId, planId, kind: isGoldOnly ? "gold_only" : "trial" });
-    return respondWithJson(201, { authorizationUrl: `/billing-checkout/demo?reference=${reference}`, accessCode: "", reference, provider: "paystack" });
+    return respondWithJson(201, { checkoutUrl: `/billing-checkout/demo?reference=${reference}`, authorizationUrl: `/billing-checkout/demo?reference=${reference}`, reference, provider: "flutterwave" });
   });
 
   registerMockRoute("POST", "/seller/subscription/trial/verify", (request) => {
@@ -112,7 +112,7 @@ export function registerBillingOfferMockHandlers(): void {
     if (!plan) throw new MockHttpError(404, "PLAN_NOT_FOUND", "That plan is no longer available.");
     const endsAt = new Date(Date.now() + trialDays * dayMs).toISOString();
     state.trial = { planId: plan.id, tier: plan.tier, interval: plan.interval, startedAt: new Date().toISOString(), endsAt, isCancelled: false, priceMinor: plan.price.amountMinor };
-    gateStore.subscription = { ...gateStore.subscription, subscription: { status: "trialing", plan: plan.tier, currentPeriodEnd: endsAt }, planId: plan.id, cancelAtPeriodEnd: false, provider: "paystack", paymentMethodSummary: "Visa •••• 4081" };
+    gateStore.subscription = { ...gateStore.subscription, subscription: { status: "trialing", plan: plan.tier, currentPeriodEnd: endsAt }, planId: plan.id, cancelAtPeriodEnd: false, provider: "flutterwave", paymentMethodSummary: "Visa •••• 4081" };
     return respondWithJson(200, presentOffer(request));
   });
 

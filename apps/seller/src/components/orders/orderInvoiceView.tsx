@@ -116,7 +116,7 @@ export function OrderInvoiceView({ orderId, documentKind }: { readonly orderId: 
         </table>
         <footer className={styles.slipFooter}>
           <p className={styles.small}>
-            Paid through Zudomart escrow with {paymentProviderLabels[order.paymentProvider]} · reference {order.paymentReference}
+            {order.paymentMode === "escrow" ? "Paid with escrow protection" : "Paid directly"} · {paymentProviderLabels[order.paymentProvider]} · reference {order.paymentReference}
           </p>
           <p className={styles.small}>Questions? Message us on Zudomart @{settings?.handle}.</p>
         </footer>

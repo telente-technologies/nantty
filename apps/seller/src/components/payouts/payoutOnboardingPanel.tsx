@@ -10,6 +10,7 @@ import { useSellerQuery } from "@/hooks/useSellerQuery.hook";
 import { sendSellerApiRequest } from "@/services/clientApi.service";
 import type { PayoutOnboardingState } from "@/types/payoutOnboarding.type";
 
+import { BvnConsentPanel } from "./bvnConsentPanel";
 import { PayoutBankForm } from "./payoutBankForm";
 import { PayoutBusinessForm } from "./payoutBusinessForm";
 import { PayoutDocumentStep, PAYOUT_VERIFICATION_CHANNEL } from "./payoutDocumentStep";
@@ -61,7 +62,14 @@ export function PayoutOnboardingPanel({ context }: { readonly context: "seller" 
   const showStatus = state.status === "pending_review" || state.status === "verified" || (state.status === "action_needed" && !isEditing);
   const { stepCount, stepNumber } = stepOrderNumbers(state);
 
-  if (showStatus) return <PayoutStatusSummary state={state} context={context} onFix={() => setIsEditing(true)} onChanged={reload} />;
+  if (showStatus) {
+    return (
+      <>
+        {state.idType === "bvn" && state.bankSummary ? <BvnConsentPanel /> : null}
+        <PayoutStatusSummary state={state} context={context} onFix={() => setIsEditing(true)} onChanged={reload} />
+      </>
+    );
+  }
   return (
     <Panel title="Get paid" description="Set up once. The same details cover everything you earn on Zudomart.">
       <PayoutSyncList state={state} />

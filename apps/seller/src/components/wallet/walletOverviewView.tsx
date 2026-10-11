@@ -6,6 +6,7 @@ import { AccountingExportPanel, FinanceSummarySection, UpcomingEscrowReleasesPan
 import { WalletBalanceCards } from "@/components/wallet/walletBalanceCards";
 import { walletBalanceBucketLabels, walletTransactionKindLabels } from "@/components/wallet/walletPresentation.constant";
 import { PayoutSetupBanner } from "@/components/payouts/payoutSetupBanner";
+import { WalletAccountCard } from "@/components/wallet/walletAccountCard";
 import { WalletTabs } from "@/components/wallet/walletTabs";
 import { WalletVerificationCallout, ZudomartBalancePanel } from "@/components/wallet/zudomartBalancePanel";
 import { useWalletCursorPages } from "@/components/wallet/useWalletCursorPages.hook";
@@ -86,7 +87,7 @@ export function WalletOverviewView() {
     <PageStack>
       <PageHeader
         title="Payments & finance"
-        description="Buyers pay into escrow when they order in the Zudomart app. Money moves to your available balance after delivery, then you withdraw it to your bank."
+        description="In Nigeria, buyers' payments stay locked in their own wallet until delivery, then move to yours. Outside Nigeria buyers pay you directly. You withdraw to your verified bank."
         actions={
           <>
             <ButtonLink href="/wallet/statements" iconName="export24">Statements</ButtonLink>
@@ -102,6 +103,7 @@ export function WalletOverviewView() {
       <div className={styles.overviewGrid}>
         <WalletTransactionsPanel />
         <div className={styles.sideStack}>
+          {can("wallet:withdraw") ? <WalletAccountCard /> : null}
           {can("wallet:view") ? <ZudomartBalancePanel walletQuery={walletQuery} /> : null}
           {summaryQuery.data ? <UpcomingEscrowReleasesPanel summary={summaryQuery.data} /> : null}
           <AccountingExportPanel />
