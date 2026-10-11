@@ -34,11 +34,11 @@ func TestRestrictSuspendAppealAndReinstate(t *testing.T) {
 	}
 
 	suspendPath := "/api/v1/admin/users/" + targetId + "/suspend"
-	suspended := harness.expect("POST", suspendPath, trust, map[string]any{"durationDays": 30, "reasonCode": "SCAM", "reason": "scam listings"}, http.StatusOK)
+	suspended := harness.expect("POST", suspendPath, trust, map[string]any{"durationDays": 30, "reasonCode": "SCAM", "reason": "scam listings"}, http.StatusOK, trustStepUp...)
 	if suspended["user"].(map[string]any)["status"] != "SUSPENDED" || suspended["restriction"].(map[string]any)["kind"] != "SUSPENSION" {
 		t.Fatalf("unexpected suspension %v", suspended)
 	}
-	harness.expect("POST", suspendPath, trust, map[string]any{"durationDays": 30, "reason": "again please"}, http.StatusConflict)
+	harness.expect("POST", suspendPath, trust, map[string]any{"durationDays": 30, "reason": "again please"}, http.StatusConflict, trustStepUp...)
 	notice := harness.expect("GET", "/api/v1/users/me/suspension", targetToken, nil, http.StatusOK)
 	if notice["retentionDays"] != float64(120) || notice["reason"] != "scam listings" {
 		t.Fatalf("the suspended user sees the 120 day notice: %v", notice)
@@ -120,7 +120,7 @@ func TestSuspendedAccountIsDeletedAfter120DaysAndReinstatingStopsTheClock(t *tes
 	savedId, _ := harness.newAccount("clock.saved", "Clock Saved")
 	admin, stepUp := harness.staff("admin", "users:suspend", "users:read")
 	for _, id := range []string{dueId, savedId} {
-		harness.expect("POST", "/api/v1/admin/users/"+id+"/suspend", admin, map[string]any{"durationDays": 0, "reasonCode": "FRAUD", "reason": "payment fraud pattern"}, http.StatusOK)
+		harness.expect("POST", "/api/v1/admin/users/"+id+"/suspend", admin, map[string]any{"durationDays": 0, "reasonCode": "FRAUD", "reason": "payment fraud pattern"}, http.StatusOK, stepUp...)
 	}
 	cases := harness.expect("GET", "/api/v1/admin/suspensions/accounts", admin, nil, http.StatusOK)["data"].([]any)
 	if len(cases) != 2 || cases[0].(map[string]any)["daysUntilDeletion"].(float64) < 118 {

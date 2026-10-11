@@ -1,6 +1,8 @@
 package controllers
 
 import (
+	"zudomart/platform/regionpricing"
+
 	"net/http"
 	"strconv"
 	"strings"
@@ -23,6 +25,8 @@ import (
 	"zudomart/platform/httpserver"
 )
 
+var ErrConversionCurrencyNotAllowed = httpserver.NewApiError(http.StatusUnprocessableEntity, "CURRENCY_NOT_ALLOWED", "Earned coins convert into the currency of your verified country.")
+
 type CoinsController struct {
 	Application *coins.Application
 }
@@ -35,9 +39,16 @@ func clientPlatform(request *http.Request) string {
 	return strings.ToLower(strings.TrimSpace(request.Header.Get("X-Client-Platform")))
 }
 
+func (controller CoinsController) listingCurrency(request *http.Request) string {
+	if platform := clientPlatform(request); platform == "ios" || platform == "android" {
+		return controller.Application.Container.Currency.ResolvePricingRegion(request).Currency
+	}
+	return controller.Application.Container.Currency.ResolveChargingRegion(request).Currency
+}
+
 func (controller CoinsController) ListCoinPackages(writer http.ResponseWriter, request *http.Request) {
 	packages, err := listcoinpackages.Handler{Application: controller.Application}.Execute(request.Context(), listcoinpackages.Query{
-		ClientPlatform: clientPlatform(request), Currency: controller.Application.Container.Currency.ResolvePricingRegion(request).Currency,
+		ClientPlatform: clientPlatform(request), Currency: controller.listingCurrency(request),
 	})
 	if err != nil {
 		controller.fail(writer, request, err)
@@ -94,13 +105,15 @@ func (controller CoinsController) StartCoinPurchase(writer http.ResponseWriter, 
 		controller.fail(writer, request, err)
 		return
 	}
-	provider := body.Provider
-	if provider == "" {
-		provider = controller.Application.Container.Payments.Container.Settings.DefaultProvider
+	charging, err := regionpricing.RequireChargingCountry(controller.Application.Container.Currency.ResolveChargingRegion(request))
+	if err != nil {
+		controller.fail(writer, request, err)
+		return
 	}
+	provider := controller.Application.Container.Payments.Container.Settings.DefaultProvider
 	started, replayed, err := startcoinpurchase.Handler{Application: controller.Application}.Execute(request.Context(), startcoinpurchase.Command{
 		UserId: principal, ClientPlatform: clientPlatform(request), PackageId: body.PackageId, Provider: provider,
-		Currency: controller.Application.Container.Currency.ResolvePricingRegion(request).Currency, ReturnTo: body.ReturnTo, IdempotencyKey: key,
+		Currency: charging.Currency, ReturnTo: body.ReturnTo, IdempotencyKey: key,
 	})
 	if err != nil {
 		controller.fail(writer, request, err)
@@ -192,9 +205,15 @@ func (controller CoinsController) ConvertEarnedCoins(writer http.ResponseWriter,
 		controller.fail(writer, request, err)
 		return
 	}
-	currency := body.Currency
-	if currency == "" {
-		currency = controller.Application.Container.Currency.ResolveViewerCurrency(request)
+	charging, err := regionpricing.RequireChargingCountry(controller.Application.Container.Currency.ResolveChargingRegion(request))
+	if err != nil {
+		controller.fail(writer, request, err)
+		return
+	}
+	currency := charging.Currency
+	if body.Currency != "" && body.Currency != currency {
+		controller.fail(writer, request, ErrConversionCurrencyNotAllowed)
+		return
 	}
 	receipt, replayed, err := convertearnedcoins.Handler{Application: controller.Application}.Execute(request.Context(), convertearnedcoins.Command{Input: services.EarnedCoinConversionInput{
 		UserId: principal, Coins: body.Coins, Currency: currency, IdempotencyKey: key,

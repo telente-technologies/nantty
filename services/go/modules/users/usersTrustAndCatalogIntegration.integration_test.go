@@ -70,7 +70,7 @@ func TestTrustEnforcementActionsAndAppealDecisions(t *testing.T) {
 		t.Fatalf("the summary carries emailVerified and the revoked checkmark: %v", summaries)
 	}
 
-	harness.expect("POST", "/api/v1/admin/users/"+authorId+"/suspend", staffToken, map[string]any{"durationDays": 30, "reasonCode": "SCAM", "reason": "scam listings"}, http.StatusOK)
+	harness.expect("POST", "/api/v1/admin/users/"+authorId+"/suspend", staffToken, map[string]any{"durationDays": 30, "reasonCode": "SCAM", "reason": "scam listings"}, http.StatusOK, stepUp...)
 	harness.expect("POST", "/api/v1/users/me/suspension/appeal", authorToken, map[string]string{"message": "These were my own products, please look again."}, http.StatusNoContent)
 	harness.waitForPublishedEvents("suspensionAppeal.submitted")
 	caseId := harness.expect("GET", "/api/v1/admin/suspensions/accounts?appeal=PENDING", staffToken, nil, http.StatusOK)["data"].([]any)[0].(map[string]any)["caseId"].(string)
@@ -90,7 +90,7 @@ func TestTrustEnforcementActionsAndAppealDecisions(t *testing.T) {
 	if reinstated["alreadyApplied"] != true {
 		t.Fatalf("the overturned suspension is already lifted: %v", reinstated)
 	}
-	harness.expect("POST", "/api/v1/admin/users/"+authorId+"/suspend", staffToken, map[string]any{"durationDays": 30, "reasonCode": "SCAM", "reason": "scam listings again"}, http.StatusOK)
+	harness.expect("POST", "/api/v1/admin/users/"+authorId+"/suspend", staffToken, map[string]any{"durationDays": 30, "reasonCode": "SCAM", "reason": "scam listings again"}, http.StatusOK, stepUp...)
 	lifted := harness.expect("POST", "/api/v1/internal/enforcement/actions", "", action("reinstate", "appeal"), http.StatusOK, internalToken...)
 	if lifted["user"].(map[string]any)["status"] != "ACTIVE" || !harness.audit.has("user.reinstated.appeal") {
 		t.Fatalf("reinstate lifts the suspension with an audit entry: %v %v", lifted, harness.audit.actions)

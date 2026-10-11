@@ -34,6 +34,7 @@ type WalletSettings struct {
 	TrustedCountryHeader         string
 	AdminInternalUrl             string
 	AdminInternalToken           string
+	WithdrawalLimits             WithdrawalLimits
 }
 
 const defaultCoinCashValues = "NGN:1000,GHS:10,KES:100,ZAR:15,GBP:1,EUR:1,USD:1"
@@ -64,6 +65,7 @@ func ReadWalletSettingsFromEnvironment(reader *platformconfig.EnvironmentReader)
 		AdminInternalUrl:             reader.ReadStringOrDefault("ADMIN_INTERNAL_URL", ""),
 		AdminInternalToken:           reader.ReadStringOrDefault("ADMIN_INTERNAL_API_TOKEN", ""),
 	}
+	settings.WithdrawalLimits = ReadWithdrawalLimitsFromEnvironment(reader)
 	if settings.CoinTransferFeeBps < 0 || settings.CoinTransferFeeBps >= 10_000 {
 		reader.ReadRequiredString("COIN_TRANSFER_FEE_BPS_BETWEEN_0_AND_9999")
 	}

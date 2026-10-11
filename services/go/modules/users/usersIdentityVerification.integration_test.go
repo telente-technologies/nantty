@@ -52,14 +52,14 @@ func (harness *usersTestHarness) enableIdentityVerification() *scriptedEligibili
 	return eligibility
 }
 
-func signedSmileCallback(jobId, fullName, liveness, idNumber string) map[string]any {
+func signedSmileCallback(jobId, accountId, fullName, liveness, idNumber string) map[string]any {
 	timestamp := time.Now().UTC().Format(time.RFC3339Nano)
 	return map[string]any{
 		"signature": integrations.ComputeSmileIdSignature("api-key", "partner-1", timestamp), "timestamp": timestamp, "SmileJobID": "smile-" + jobId, "ResultCode": "0810",
 		"Country": "NG", "IDType": "NIN_SLIP", "IDNumber": idNumber, "FullName": fullName, "ConfidenceValue": "99",
 		"Actions":       map[string]string{"Liveness_Check": liveness, "Verify_Document": "Passed", "Selfie_To_ID_Card_Compare": "Completed", "Verify_ID_Number": "Verified"},
 		"ImageLinks":    map[string]string{"selfie_image": "https://smile.test/selfie.jpg"},
-		"PartnerParams": map[string]any{"job_id": jobId, "job_type": 11},
+		"PartnerParams": map[string]any{"job_id": jobId, "user_id": accountId, "job_type": 11},
 	}
 }
 
@@ -115,10 +115,10 @@ func TestIdentityVerificationJourneyFromRequestToAutoApproval(t *testing.T) {
 		t.Fatal("no badge before the identity check")
 	}
 	jobId := harness.captureFor(token, cases[0].ID.String())
-	forged := signedSmileCallback(jobId, "OBI AMAKA GRACE", "Passed", "12345678901")
+	forged := signedSmileCallback(jobId, cases[0].AccountID.String(), "OBI AMAKA GRACE", "Passed", "12345678901")
 	forged["signature"] = "forged"
 	harness.expect("POST", "/api/v1/webhooks/smile-id", "", forged, http.StatusUnauthorized)
-	callback := signedSmileCallback(jobId, "OBI AMAKA GRACE", "Passed", "12345678901")
+	callback := signedSmileCallback(jobId, cases[0].AccountID.String(), "OBI AMAKA GRACE", "Passed", "12345678901")
 	if harness.expect("POST", "/api/v1/webhooks/smile-id", "", callback, http.StatusOK)["outcome"] != "approved" {
 		t.Fatal("a clean result auto-approves")
 	}
@@ -147,7 +147,7 @@ func TestRejectedVerificationRequestsARefund(t *testing.T) {
 	container := harness.module.Container()
 	row := container.Client.VerificationCase.Query().Where(verificationcase.SubscriptionID("sub_tobi")).OnlyX(context.Background())
 	jobId := harness.captureFor(token, row.ID.String())
-	if harness.expect("POST", "/api/v1/webhooks/smile-id", "", signedSmileCallback(jobId, "IBRAHIM MUSA", "Passed", "999"), http.StatusOK)["outcome"] != "under_review" {
+	if harness.expect("POST", "/api/v1/webhooks/smile-id", "", signedSmileCallback(jobId, row.AccountID.String(), "IBRAHIM MUSA", "Passed", "999"), http.StatusOK)["outcome"] != "under_review" {
 		t.Fatal("a name mismatch goes to review")
 	}
 	harness.waitForPublishedEvents("verification.underReview", "verification.fraudSignalDetected")

@@ -10,12 +10,13 @@ func TestStaffRevealsPersonalDataWarnsAndForcesLogoutWithAudit(t *testing.T) {
 	harness := startUsersModuleAgainstFreshSchema(t)
 	userId, _ := harness.newAccount("pii.owner", "Pii Owner")
 	reader, _ := harness.staffHeaders("users:read")
-	revealer, _ := harness.staffHeaders("users:read-pii")
+	revealer, revealerStepUp := harness.staffHeaders("users:read-pii")
 	moderator, _ := harness.staffHeaders("users:moderate")
 
 	harness.expect("GET", "/api/v1/admin/users/"+userId+"/personal-data?purpose=support+ticket+123", reader, nil, http.StatusForbidden)
-	harness.expect("GET", "/api/v1/admin/users/"+userId+"/personal-data", revealer, nil, http.StatusBadRequest)
-	revealed := harness.expect("GET", "/api/v1/admin/users/"+userId+"/personal-data?purpose=support+ticket+123", revealer, nil, http.StatusOK)
+	harness.expect("GET", "/api/v1/admin/users/"+userId+"/personal-data?purpose=support+ticket+123", revealer, nil, http.StatusForbidden)
+	harness.expect("GET", "/api/v1/admin/users/"+userId+"/personal-data", revealer, nil, http.StatusBadRequest, revealerStepUp...)
+	revealed := harness.expect("GET", "/api/v1/admin/users/"+userId+"/personal-data?purpose=support+ticket+123", revealer, nil, http.StatusOK, revealerStepUp...)
 	if revealed["email"] != "pii.owner@example.com" || revealed["legalName"] != "Pii Owner" || revealed["expiresInSeconds"] != float64(300) || revealed["phone"] != "" {
 		t.Fatalf("unexpected personal data %v", revealed)
 	}
@@ -104,8 +105,8 @@ func TestAdminUserListFiltersAndSuspendedSearch(t *testing.T) {
 		t.Fatalf("no account is banned: %v", banned)
 	}
 	harness.expect("GET", "/api/v1/admin/users?risk=EXTREME", reader, nil, http.StatusBadRequest)
-	suspender, _ := harness.staffHeaders("users:suspend")
-	harness.expect("POST", "/api/v1/admin/users/"+creatorId+"/suspend", suspender, map[string]any{"reason": "repeated fraud reports", "durationDays": 7, "reasonCode": "SCAM"}, http.StatusOK)
+	suspender, suspenderStepUp := harness.staffHeaders("users:suspend")
+	harness.expect("POST", "/api/v1/admin/users/"+creatorId+"/suspend", suspender, map[string]any{"reason": "repeated fraud reports", "durationDays": 7, "reasonCode": "SCAM"}, http.StatusOK, suspenderStepUp...)
 	if found := harness.expect("GET", "/api/v1/admin/suspensions/accounts?search=star", suspender, nil, http.StatusOK)["data"].([]any); len(found) != 1 {
 		t.Fatalf("search finds the suspended account: %v", found)
 	}
