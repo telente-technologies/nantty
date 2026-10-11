@@ -1,5 +1,5 @@
 import { recordMockAuditEntry } from "@/mocks/mockAudit.mock";
-import { requireMockPermission, requireMockStepUp } from "@/mocks/mockGuards.mock";
+import { requireMockPermission, requireMockSingleUseStepUp } from "@/mocks/mockGuards.mock";
 import { failConflict, failNotFound, failValidation, matchesSearchText, paginateByCursor, readIsoNow, readJsonObjectBody, readOptionalTrimmedString, readRequiredTrimmedString, respondWithJson } from "@/mocks/mockResponses.mock";
 import { registerMockRoute } from "@/mocks/mockRouter.mock";
 import type { CoinReviewStatus } from "@/types/coins.type";
@@ -64,7 +64,7 @@ export function registerCoinMockHandlers(): void {
 
   registerMockRoute("POST", "/admin/coins/transactions/:transactionId/reverse", (request) => {
     requireMockPermission(request, "coins:review");
-    requireMockStepUp(request);
+    requireMockSingleUseStepUp(request);
     requireIdempotencyKeyHeader(request.headers);
     const coin = findMockCoinTransactionOrFail(request.params.transactionId ?? "");
     if (coin.reviewStatus === "reversed") failConflict("COIN_TRANSACTION_REVERSED", "This transaction was already reversed.");

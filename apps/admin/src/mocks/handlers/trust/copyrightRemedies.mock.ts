@@ -9,9 +9,9 @@ import type { CopyrightPolicySettings, CopyrightRemedy } from "@/types/copyright
 import { readEffectiveStrikeCount, readTrustStore } from "./trustStore.mock";
 
 const holder = globalThis as typeof globalThis & { __zudomartAdminCopyrightPolicy?: CopyrightPolicySettings; __zudomartAdminStrikeAppeals?: Map<string, AccountHealthStrike["appealStatus"]> };
-const defaultPolicy: CopyrightPolicySettings = { takedownDeadlineHours: 48, strikeLifetimeDays: 90, warningLifetimeDays: 180, strikeWindowDays: 90, restrictionThreshold: 3, suspensionReviewThreshold: 3, restrictionDays: 30 };
+const defaultPolicy: CopyrightPolicySettings = { takedownDeadlineHours: 48, strikeLifetimeDays: 365, warningLifetimeDays: 365, strikeWindowDays: 365, restrictionThreshold: 2, suspensionReviewThreshold: 3, restrictionDays: 30 };
 const ranges: Record<keyof Omit<CopyrightPolicySettings, "updatedBy" | "updatedAt">, readonly [number, number]> = {
-  takedownDeadlineHours: [1, 720], strikeLifetimeDays: [7, 730], warningLifetimeDays: [7, 730], strikeWindowDays: [7, 730], restrictionThreshold: [1, 20], suspensionReviewThreshold: [1, 20], restrictionDays: [1, 90],
+  takedownDeadlineHours: [1, 720], strikeLifetimeDays: [7, 730], warningLifetimeDays: [7, 730], strikeWindowDays: [7, 730], restrictionThreshold: [1, 2], suspensionReviewThreshold: [1, 20], restrictionDays: [30, 90],
 };
 
 export const readMockCopyrightPolicy = (): CopyrightPolicySettings => (holder.__zudomartAdminCopyrightPolicy ??= { ...defaultPolicy });

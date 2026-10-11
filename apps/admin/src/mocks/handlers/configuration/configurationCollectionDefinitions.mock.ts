@@ -1,26 +1,23 @@
 import type { AdminPermission } from "@/constants/adminPermissions.constant";
 import { buildInitialConfigurationDocuments } from "@/mocks/seed/configurationDocuments.mock";
 import { buildInitialAutomationRules } from "@/mocks/seed/configurationAutomation.mock";
-import { buildInitialExperiments, buildInitialFeatureFlags } from "@/mocks/seed/configurationFlagsAndExperiments.mock";
-import { buildInitialNotificationTemplates } from "@/mocks/seed/configurationTemplates.mock";
 import { failNotFound } from "@/mocks/mockResponses.mock";
 import type { AutomationRuleContent } from "@/types/automation.type";
-import type { ExperimentContent, FeatureFlagContent } from "@/types/featureFlags.type";
-import type { NotificationTemplateContent } from "@/types/notificationTemplate.type";
 import type { ConfigurationDocumentContentByKey, CreatorEligibilityRules, PlansConfiguration, RevenueRulesConfiguration } from "@/types/platformConfiguration.type";
 
 import { validateCheckmarkPricing, validateCheckmarkSuggestionRules, validateCreatorThresholds, validateTrialRules } from "./configurationTrustRulesValidation.mock";
 import { validateCreatorEligibilityRules, validatePlansConfiguration, validateRevenueRules, validateUsernameRules } from "./configurationDocumentValidation.mock";
-import { configurationRecordIdPattern, validateAutomationRuleContent, validateExperimentContent, validateFeatureFlagContent, validateNotificationTemplateContent } from "./configurationEntityValidation.mock";
+import { validateAutomationRuleContent } from "./configurationEntityValidation.mock";
 import { validateAppStoreFees } from "./appStoreFeesValidation.mock";
+import { validatePaymentLimits, validateSellerDebtLimits } from "./moneyLimitsValidation.mock";
 import { validateFeedRankingPolicy } from "./rankingSettingsValidation.mock";
 import { validateRegionalPricingDocument } from "./regionalPricingValidation.mock";
 import type { VersionedCollectionDefinition } from "./versionedCollections.mock";
 
 type AnyDocumentContent = ConfigurationDocumentContentByKey[keyof ConfigurationDocumentContentByKey];
 
-const writePermissionByDocumentKey: Record<string, AdminPermission> = { plans: "config:plans", revenue: "config:revenue", "creator-eligibility": "config:rules", "username-rules": "config:rules", "checkmark-suggestions": "config:rules", "creator-thresholds": "config:rules", "trial-rules": "config:rules", "checkmark-pricing": "config:plans", "regional-pricing": "config:revenue", "feed.ranking": "config:rules", "appStore.fees": "config:revenue" };
-const documentLabels: Record<string, string> = { plans: "Plans & prices", revenue: "Revenue rules", "creator-eligibility": "Creator eligibility rules", "username-rules": "Username rules", "checkmark-suggestions": "Checkmark suggestion thresholds", "creator-thresholds": "Creator Program thresholds", "trial-rules": "Trial rules", "checkmark-pricing": "Checkmark pricing", "regional-pricing": "Regional ad floors and creator bands", "feed.ranking": "Feed ranking boosts", "appStore.fees": "App store fees" };
+const writePermissionByDocumentKey: Record<string, AdminPermission> = { plans: "config:plans", revenue: "config:revenue", "creator-eligibility": "config:rules", "username-rules": "config:rules", "checkmark-suggestions": "config:rules", "creator-thresholds": "config:rules", "trial-rules": "config:rules", "checkmark-pricing": "config:plans", "regional-pricing": "config:revenue", "feed.ranking": "config:rules", "appStore.fees": "config:revenue", "seller.debtLimits": "config:revenue", "payments.limits": "config:revenue" };
+const documentLabels: Record<string, string> = { plans: "Plans & prices", revenue: "Revenue rules", "creator-eligibility": "Creator eligibility rules", "username-rules": "Username rules", "checkmark-suggestions": "Checkmark suggestion thresholds", "creator-thresholds": "Creator Program thresholds", "trial-rules": "Trial rules", "checkmark-pricing": "Checkmark pricing", "regional-pricing": "Regional ad floors and creator bands", "feed.ranking": "Feed ranking boosts", "appStore.fees": "App store fees", "seller.debtLimits": "Seller debt limits", "payments.limits": "Payment limits" };
 
 export const configurationDocumentsDefinition: VersionedCollectionDefinition<AnyDocumentContent> = {
   storeName: "documents",
@@ -43,40 +40,12 @@ export const configurationDocumentsDefinition: VersionedCollectionDefinition<Any
     if (recordId === "regional-pricing") return validateRegionalPricingDocument(rawContent);
     if (recordId === "feed.ranking") return validateFeedRankingPolicy(rawContent);
     if (recordId === "appStore.fees") return validateAppStoreFees(rawContent);
+    if (recordId === "seller.debtLimits") return validateSellerDebtLimits(rawContent);
+    if (recordId === "payments.limits") return validatePaymentLimits(rawContent);
     failNotFound("Configuration document");
   },
   isValidNewRecordId: () => false,
   canCreate: false,
-  canArchive: false,
-};
-
-export const featureFlagsDefinition: VersionedCollectionDefinition<FeatureFlagContent> = {
-  storeName: "flags",
-  basePath: "/admin/flags",
-  readPermissions: ["flags:manage", "config:read"],
-  readWritePermissionForRecord: () => "flags:manage",
-  auditActionPrefix: "config.flag",
-  auditTargetType: "featureFlag",
-  describeRecordForAudit: (recordId) => `Flag ${recordId}`,
-  createInitialRecords: buildInitialFeatureFlags,
-  validateIncomingContent: (rawContent) => validateFeatureFlagContent(rawContent),
-  isValidNewRecordId: (recordId) => configurationRecordIdPattern.test(recordId),
-  canCreate: true,
-  canArchive: true,
-};
-
-export const experimentsDefinition: VersionedCollectionDefinition<ExperimentContent> = {
-  storeName: "experiments",
-  basePath: "/admin/experiments",
-  readPermissions: ["flags:manage", "config:read"],
-  readWritePermissionForRecord: () => "flags:manage",
-  auditActionPrefix: "config.experiment",
-  auditTargetType: "experiment",
-  describeRecordForAudit: (recordId, content) => `Experiment ${content.name || recordId}`,
-  createInitialRecords: buildInitialExperiments,
-  validateIncomingContent: (rawContent, _recordId, currentContent) => validateExperimentContent(rawContent, currentContent),
-  isValidNewRecordId: (recordId) => configurationRecordIdPattern.test(recordId),
-  canCreate: true,
   canArchive: false,
 };
 
@@ -93,19 +62,4 @@ export const automationRulesDefinition: VersionedCollectionDefinition<Automation
   isValidNewRecordId: (recordId) => /^rule_[a-z0-9_]{3,58}$/.test(recordId),
   canCreate: true,
   canArchive: true,
-};
-
-export const notificationTemplatesDefinition: VersionedCollectionDefinition<NotificationTemplateContent> = {
-  storeName: "notificationTemplates",
-  basePath: "/admin/notification-templates",
-  readPermissions: ["templates:manage", "config:read"],
-  readWritePermissionForRecord: () => "templates:manage",
-  auditActionPrefix: "config.notification_template",
-  auditTargetType: "notificationTemplate",
-  describeRecordForAudit: (recordId) => `Template ${recordId}`,
-  createInitialRecords: buildInitialNotificationTemplates,
-  validateIncomingContent: (rawContent, recordId, currentContent) => validateNotificationTemplateContent(rawContent, recordId, currentContent),
-  isValidNewRecordId: (recordId) => /^[a-z][a-z_.]+\.(push|email|sms|in_app)\.(en|fr|pcm)$/.test(recordId),
-  canCreate: true,
-  canArchive: false,
 };

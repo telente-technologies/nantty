@@ -1,5 +1,5 @@
 import { recordMockAuditEntry } from "@/mocks/mockAudit.mock";
-import { requireMockPermission, requireMockStepUp } from "@/mocks/mockGuards.mock";
+import { requireMockPermission, requireMockSingleUseStepUp } from "@/mocks/mockGuards.mock";
 import { createMockId, failConflict, failNotFound, failValidation, matchesSearchText, paginateByCursor, readIsoNow, readJsonObjectBody, readRequiredTrimmedString, respondWithJson } from "@/mocks/mockResponses.mock";
 import { registerMockRoute, type MockRequest } from "@/mocks/mockRouter.mock";
 import type { DisputeOutcome, DisputeStatus } from "@/types/commerce.type";
@@ -8,6 +8,7 @@ import type { MockDisputeRecord } from "./moneyRecords.mock";
 import { findMockOrderOrFail, presentDisputeDetail, presentDisputeSummary } from "./moneyPresenters.mock";
 import { calculateCommissionInMinorUnits, calculateEscrowHeldMinor, postMockLedgerJournal, readMockMoneyStore, requireIdempotencyKeyHeader } from "./moneyStore.mock";
 import { appendEscrowTimelineEvent, readMoneyAmountInOrderCurrency, readPageFilterValue } from "./moneyValidation.mock";
+import { compareForQueue, isOldestFirstQueue, openDisputeStatuses } from "@/utils/queueOrder.util";
 
 const disputeStatuses: readonly DisputeStatus[] = ["awaiting_seller", "under_review", "resolved_refunded", "resolved_released", "closed"];
 const statusGroups: Record<string, readonly DisputeStatus[]> = { open: ["awaiting_seller", "under_review"], resolved: ["resolved_refunded", "resolved_released", "closed"], ...Object.fromEntries(disputeStatuses.map((status) => [status, [status]])) };
@@ -66,7 +67,7 @@ export function registerDisputeMockHandlers(): void {
     const disputes = presented
       .filter((dispute) => !allowed || allowed.includes(dispute.status))
       .filter((dispute) => matchesSearchText(search, dispute.id, dispute.orderNumber, dispute.productName))
-      .sort((first, second) => second.openedAt.localeCompare(first.openedAt));
+      .sort((first, second) => compareForQueue(first.openedAt, second.openedAt, isOldestFirstQueue(allowed ?? null, openDisputeStatuses)));
     const counts = Object.fromEntries(disputeStatuses.map((candidate) => [candidate, presented.filter((dispute) => dispute.status === candidate).length]));
     return respondWithJson(200, { ...paginateByCursor(disputes, request), counts });
   });
@@ -78,7 +79,7 @@ export function registerDisputeMockHandlers(): void {
 
   registerMockRoute("POST", "/admin/disputes/:disputeId/resolve", (request) => {
     requireMockPermission(request, "disputes:resolve");
-    requireMockStepUp(request);
+    requireMockSingleUseStepUp(request);
     requireIdempotencyKeyHeader(request.headers);
     const dispute = findMockDisputeOrFail(request.params.disputeId ?? "");
     if (dispute.status === "RESOLVED") failConflict("DISPUTE_ALREADY_RESOLVED", "This dispute has already been resolved.");

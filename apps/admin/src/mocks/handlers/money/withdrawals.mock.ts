@@ -1,5 +1,5 @@
 import { recordMockAuditEntry } from "@/mocks/mockAudit.mock";
-import { requireMockPermission, requireMockStepUp } from "@/mocks/mockGuards.mock";
+import { requireMockPermission, requireMockSingleUseStepUp } from "@/mocks/mockGuards.mock";
 import { failConflict, failNotFound, failValidation, matchesSearchText, paginateByCursor, readIsoNow, readJsonObjectBody, readOptionalTrimmedString, respondWithJson } from "@/mocks/mockResponses.mock";
 import { registerMockRoute } from "@/mocks/mockRouter.mock";
 import type { WithdrawalDecision, WithdrawalStatus } from "@/types/withdrawals.type";
@@ -8,6 +8,7 @@ import type { MockWithdrawalRecord } from "./moneyRecords.mock";
 import { presentWithdrawal } from "./moneyPresenters.mock";
 import { postMockLedgerJournal, readMockMoneyStore, requireIdempotencyKeyHeader } from "./moneyStore.mock";
 import { readPageFilterValue } from "./moneyValidation.mock";
+import { compareForQueue, isOldestFirstQueue, withdrawalQueueStatuses } from "@/utils/queueOrder.util";
 
 const withdrawalStatuses: readonly WithdrawalStatus[] = ["pending_review", "on_hold", "queued", "processing", "paid", "failed", "cancelled"];
 const allowedFrom: Record<WithdrawalDecision, readonly WithdrawalStatus[]> = { approve: ["pending_review", "on_hold"], reject: ["pending_review", "on_hold"], hold: ["pending_review", "queued"] };
@@ -35,7 +36,7 @@ export function registerWithdrawalMockHandlers(): void {
     const search = request.query.get("search");
     const withdrawals = store.withdrawals
       .filter((withdrawal) => (!status || withdrawal.withdrawalStatus === status) && matchesSearchText(search, withdrawal.id, withdrawal.userId, withdrawal.reference))
-      .sort((first, second) => second.createdAt.localeCompare(first.createdAt))
+      .sort((first, second) => compareForQueue(first.createdAt, second.createdAt, isOldestFirstQueue(status ? [status] : null, withdrawalQueueStatuses)))
       .map(presentWithdrawal);
     const counts = Object.fromEntries(withdrawalStatuses.map((candidate) => [candidate, store.withdrawals.filter((withdrawal) => withdrawal.withdrawalStatus === candidate).length]));
     return respondWithJson(200, { ...paginateByCursor(withdrawals, request), counts });
@@ -48,7 +49,7 @@ export function registerWithdrawalMockHandlers(): void {
 
   registerMockRoute("POST", "/admin/withdrawals/:withdrawalId/review", (request) => {
     requireMockPermission(request, "payouts:approve");
-    requireMockStepUp(request);
+    requireMockSingleUseStepUp(request);
     requireIdempotencyKeyHeader(request.headers);
     const withdrawal = findMockWithdrawalOrFail(request.params.withdrawalId ?? "");
     const body = readJsonObjectBody(request);

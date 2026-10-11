@@ -3,9 +3,8 @@ import { requireMockPermission } from "@/mocks/mockGuards.mock";
 import { respondWithJson } from "@/mocks/mockResponses.mock";
 import { registerMockRoute } from "@/mocks/mockRouter.mock";
 import { automationCatalog, automationSampleEvents, buildInitialAutomationExecutions } from "@/mocks/seed/configurationAutomation.mock";
-import { readTemplateVariablesForEvent } from "@/mocks/seed/configurationTemplates.mock";
 
-import { automationRulesDefinition, configurationDocumentsDefinition, experimentsDefinition, featureFlagsDefinition, notificationTemplatesDefinition } from "./configurationCollectionDefinitions.mock";
+import { automationRulesDefinition, configurationDocumentsDefinition } from "./configurationCollectionDefinitions.mock";
 import { registerVersionedCollectionRoutes } from "./versionedCollections.mock";
 
 function registerAutomationReferenceMockHandlers(): void {
@@ -25,19 +24,8 @@ function registerAutomationReferenceMockHandlers(): void {
   });
 }
 
-function registerNotificationTemplateReferenceMockHandlers(): void {
-  registerMockRoute("GET", "/admin/notification-templates/events/:event/variables", (request) => {
-    requireMockPermission(request, "templates:manage", "config:read");
-    return respondWithJson(200, { items: readTemplateVariablesForEvent(request.params.event ?? "") });
-  });
-}
-
 export function registerConfigurationMockHandlers(): void {
   registerAutomationReferenceMockHandlers();
-  registerNotificationTemplateReferenceMockHandlers();
   registerVersionedCollectionRoutes(configurationDocumentsDefinition);
-  registerVersionedCollectionRoutes(featureFlagsDefinition);
-  registerVersionedCollectionRoutes(experimentsDefinition);
   registerVersionedCollectionRoutes(automationRulesDefinition);
-  registerVersionedCollectionRoutes(notificationTemplatesDefinition);
 }

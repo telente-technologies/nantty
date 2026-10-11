@@ -11,6 +11,9 @@ function filterAuditEntries(request: MockRequest): AuditLogEntry[] {
   const actorId = request.query.get("actorId");
   const targetType = request.query.get("targetType");
   const targetId = request.query.get("targetId");
+  const action = request.query.get("action");
+  const requestId = request.query.get("requestId");
+  const stepUpOnly = request.query.get("stepUp") === "true";
   const from = request.query.get("from");
   const to = request.query.get("to");
   return readMockDatabase().auditEntries.filter(
@@ -20,6 +23,9 @@ function filterAuditEntries(request: MockRequest): AuditLogEntry[] {
       (!actorId || entry.actor.id === actorId) &&
       (!targetType || entry.target.type === targetType) &&
       (!targetId || entry.target.id === targetId) &&
+      (!action || entry.action === action) &&
+      (!requestId || entry.requestId === requestId) &&
+      (!stepUpOnly || entry.stepUpVerified) &&
       (!from || entry.occurredAt >= from) &&
       (!to || entry.occurredAt <= to),
   );

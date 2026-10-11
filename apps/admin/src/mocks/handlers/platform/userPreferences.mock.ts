@@ -1,4 +1,4 @@
-import { isThemePreference } from "@zudomart/web-kit";
+import { isThemePreference } from "@zudomart/web-kit/src/theme/themePreference.constant";
 
 import { requireMockPrincipal } from "@/mocks/mockGuards.mock";
 import { failValidation, readIsoNow, readJsonObjectBody, respondWithJson } from "@/mocks/mockResponses.mock";
