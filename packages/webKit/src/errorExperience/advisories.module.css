@@ -1,0 +1,83 @@
+.maintenance {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-4);
+  background: var(--color-warn-tint);
+  color: var(--color-warn-text);
+  font-size: var(--fs-13);
+  font-weight: 600;
+  text-align: center;
+}
+
+.dismiss {
+  display: inline-grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+}
+
+.dismiss:focus-visible,
+.reveal:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.sensitive {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--radius-md);
+}
+
+.blurred {
+  filter: blur(24px) saturate(0.6);
+  transform: scale(1.05);
+  pointer-events: none;
+  user-select: none;
+}
+
+.sensitiveOverlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  padding: var(--space-5);
+  background: color-mix(in srgb, var(--color-overlay) 70%, transparent);
+  color: var(--color-on-inverse);
+  text-align: center;
+}
+
+.sensitiveTitle {
+  margin: 0;
+  font-size: var(--fs-16);
+  font-weight: 800;
+}
+
+.sensitiveText {
+  max-width: 32ch;
+  margin: 0;
+  font-size: var(--fs-13);
+}
+
+.reveal {
+  min-height: var(--control-sm);
+  margin-top: var(--space-2);
+  padding: 0 var(--space-4);
+  border: 1px solid currentColor;
+  border-radius: var(--radius-pill);
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-size: var(--fs-13);
+  font-weight: 700;
+  cursor: pointer;
+}

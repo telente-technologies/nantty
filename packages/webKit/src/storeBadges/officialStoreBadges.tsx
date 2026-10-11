@@ -1,3 +1,5 @@
+/** @jsxRuntime automatic */
+/** @jsxImportSource react */
 import type { StoreLinks } from "./storeLinks";
 import styles from "./officialStoreBadges.module.css";
 

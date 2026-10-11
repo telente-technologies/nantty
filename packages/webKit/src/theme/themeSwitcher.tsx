@@ -1,3 +1,5 @@
+/** @jsxRuntime automatic */
+/** @jsxImportSource react */
 "use client";
 
 import { Monitor, Moon, Sun, type Icon } from "@phosphor-icons/react";

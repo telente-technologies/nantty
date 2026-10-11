@@ -1,3 +1,5 @@
+/** @jsxRuntime automatic */
+/** @jsxImportSource react */
 import { defaultZudomartWordmarkVariant, zudomartWordmarkFor, type ZudomartWordmarkVariant } from "./brand/zudomartBrand.path";
 import { zudomartSymbolBounds, zudomartSymbolPath, zudomartSymbolTileRadius, zudomartSymbolViewBox } from "./brand/zudomartSymbol.path";
 import styles from "./zudomartWordmark.module.css";
