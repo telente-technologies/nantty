@@ -46,7 +46,7 @@ export function PlanPriceRowDialog({ row, planLabel, onClose, onSaved }: PlanPri
     onSaved(saved);
   };
   return (
-    <ModalDialog
+    <ModalDialog intent="naira"
       isOpen
       width="wide"
       title={`${planLabel} in ${row.countryCode} (${row.currency})`}
@@ -55,7 +55,7 @@ export function PlanPriceRowDialog({ row, planLabel, onClose, onSaved }: PlanPri
       footer={
         <>
           <Button variant="ghost" onClick={onClose}>Cancel</Button>
-          <Button variant="primary" isBusy={save.isRunning} disabled={reason.trim().length < 3 || draft.monthlyAmountMinor <= 0} onClick={() => void submit()}>Save prices</Button>
+          <Button variant="primary" isBusy={save.isRunning} disabled={reason.trim().length < 5 || draft.monthlyAmountMinor <= 0} onClick={() => void submit()}>Save prices</Button>
         </>
       }
     >

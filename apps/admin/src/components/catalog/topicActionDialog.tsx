@@ -43,7 +43,7 @@ export function TopicActionDialog({ action, onClose, onDone }: { readonly action
   }
 
   return (
-    <ConfirmActionDialog
+    <ConfirmActionDialog intent="edit"
       isOpen
       title={description.title}
       consequences={description.consequences}

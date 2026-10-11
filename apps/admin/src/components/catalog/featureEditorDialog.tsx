@@ -63,7 +63,7 @@ export function FeatureEditorDialog({ editingFeature, imageLibrary, supportedCou
   }
 
   return (
-    <ModalDialog isOpen width="wide" title={editingFeature ? `Edit “${editingFeature.title}”` : "New Mart home feature"} description={editingFeature?.isPublished ? "This feature is published. Saved changes reach buyers within a few minutes." : "New features start as drafts. Publish when the schedule and preview look right."} onClose={onClose}>
+    <ModalDialog intent="edit" isOpen width="wide" title={editingFeature ? `Edit “${editingFeature.title}”` : "New Mart home feature"} description={editingFeature?.isPublished ? "This feature is published. Saved changes reach buyers within a few minutes." : "New features start as drafts. Publish when the schedule and preview look right."} onClose={onClose}>
       <form className={styles.form} onSubmit={submitFeature}>
         <FeaturePreviewCard feature={{ title, subtitle: subtitle || null, kind, imageUrl: selectedImageUrl }} />
         <div className={styles.twoColumns}>

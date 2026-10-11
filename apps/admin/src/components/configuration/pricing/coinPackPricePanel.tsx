@@ -21,7 +21,7 @@ import styles from "./regionalPricing.module.css";
 
 const currencies = ["NGN", "GHS", "KES", "ZAR", "GBP", "EUR", "USD"] as const;
 const platformOptions = [
-  { value: "web", label: "Web (Paystack)" },
+  { value: "web", label: "Web checkout" },
   { value: "ios", label: "iOS (App Store)" },
   { value: "android", label: "Android (Google Play)" },
 ];
@@ -38,16 +38,16 @@ function CoinPackDialog({ pack, onClose, onSaved }: { readonly pack: CoinPackPri
     onSaved(saved);
   };
   return (
-    <ModalDialog
+    <ModalDialog intent="coins"
       isOpen
       width="wide"
       title={`${pack.name} · ${pack.clientPlatform}`}
-      description={pack.storeProductId ? `Store product id ${pack.storeProductId}. The store charges the price set for each storefront; keep these in step.` : "Charged on the web through Paystack."}
+      description={pack.storeProductId ? `Store product id ${pack.storeProductId}. The store charges the price set for each storefront; keep these in step.` : "Charged on the web through the payment partner's checkout."}
       onClose={onClose}
       footer={
         <>
           <Button variant="ghost" onClick={onClose}>Cancel</Button>
-          <Button variant="primary" isBusy={save.isRunning} disabled={reason.trim().length < 3} onClick={() => void submit()}>Save prices</Button>
+          <Button variant="primary" isBusy={save.isRunning} disabled={reason.trim().length < 5} onClick={() => void submit()}>Save prices</Button>
         </>
       }
     >
@@ -84,7 +84,7 @@ export function CoinPackPricePanel() {
   const rows = (table.data?.data ?? []).filter((pack) => pack.clientPlatform === platform);
   return (
     <Card title="Coin packs per channel and currency">
-      <p className={styles.note}>A coin pack has the same number of coins everywhere; only the price changes by currency. Web packs are cheaper and carry bonus coins because Paystack costs far less than the 15–30% store fee.</p>
+      <p className={styles.note}>A coin pack has the same number of coins everywhere; only the price changes by currency. Web packs are cheaper and carry bonus coins because web checkout costs far less than the 15–30% store fee.</p>
       <div className={styles.toolbar}>
         <SelectField label="Channel" value={platform} onChange={(event) => setPlatform(event.target.value)} options={platformOptions} />
       </div>
