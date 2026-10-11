@@ -32,7 +32,7 @@ func statusPredicate(status string) predicate.Escrow {
 	case "released":
 		return escrow.Or(escrow.StatusEQ(escrow.StatusReleased), escrow.And(escrow.StatusEQ(escrow.StatusPartiallyRefunded), escrow.ReleasedToSellerMinorGT(0)))
 	}
-	return escrow.Or(escrow.StatusEQ(escrow.StatusRefunded), escrow.And(escrow.StatusEQ(escrow.StatusPartiallyRefunded), escrow.ReleasedToSellerMinor(0)))
+	return escrow.Or(escrow.StatusIn(escrow.StatusRefunded, escrow.StatusClawedBack), escrow.And(escrow.StatusEQ(escrow.StatusPartiallyRefunded), escrow.ReleasedToSellerMinor(0)))
 }
 
 func (finance SellerFinance) ListEscrow(ctx context.Context, seller dtos.SellerContext, status, text string, after *uuid.UUID, limit int) (dtos.EscrowEntriesPage, error) {

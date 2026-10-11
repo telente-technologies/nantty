@@ -47,7 +47,7 @@ func (transfers CreatorEarningsTransfers) TransferCreatorEarningsToConnectedAcco
 				report.Skipped++
 				continue
 			}
-			if err := transfers.moveEarningsToWithdrawable(ctx, userId, currency, balance.BalanceMinor, fmt.Sprintf("creator-earnings-%s-%s-%s", runId, userId, currency)); err != nil {
+			if err := transfers.moveEarningsToWithdrawable(ctx, userId, currency, balance.BalanceMinor, CreatorEarningsMoveReference(userId, currency, balance.CreditsTotalMinor)); err != nil {
 				transfers.Container.Resources.Logger.WarnContext(ctx, "creator earnings move failed", slog.String("userId", userId), slog.Any("error", err))
 				report.Failed++
 				continue
@@ -60,6 +60,9 @@ func (transfers CreatorEarningsTransfers) TransferCreatorEarningsToConnectedAcco
 
 func (transfers CreatorEarningsTransfers) moveEarningsToWithdrawable(ctx context.Context, userId, currency string, amountMinor int64, reference string) error {
 	return databases.RunInMoneyTransaction(ctx, transfers.Container.Resources.Database, func(ctx context.Context, transaction *sql.Tx) error {
+		if transfers.Container.Payments.Container.UsesProviderWallets() {
+			return transfers.payEarningsIntoProviderWallet(ctx, transaction, userId, currency, amountMinor, reference)
+		}
 		if _, err := transfers.Container.Ledger.PostBalancedJournalEntry(ctx, transaction, ledgermodels.JournalEntryRequest{
 			Reference: reference, Kind: "creatorEarnings.madeWithdrawable", Description: "Creator earnings ready to pay out",
 			Lines: []ledgermodels.JournalLineRequest{
@@ -81,4 +84,23 @@ func (transfers CreatorEarningsTransfers) HandleTransferSucceeded(context.Contex
 
 func (transfers CreatorEarningsTransfers) HandleTransferFailed(context.Context, *sql.Tx, paymentmodels.FinishedTransfer) error {
 	return nil
+}
+
+func (transfers CreatorEarningsTransfers) payEarningsIntoProviderWallet(ctx context.Context, transaction *sql.Tx, userId, currency string, amountMinor int64, reference string) error {
+	inFlight, err := transfers.Container.Payments.HasOpenMovement(ctx, transaction, paymentmodels.MovementCreatorPayout, userId)
+	if err != nil || inFlight {
+		return err
+	}
+	if _, err := transfers.Container.Payments.EnqueueMovementInTransaction(ctx, transaction, paymentmodels.MovementRequest{
+		Kind: paymentmodels.MovementCreatorPayout, SubjectId: reference, UserId: userId, ToUserId: userId, AmountMinor: amountMinor, Currency: currency,
+	}); err != nil {
+		return err
+	}
+	return transfers.Container.Outbox.EnqueueInTransaction(ctx, transaction, "creatorEarnings.transferred", userId, transfers.Container.Now().UTC(), map[string]any{
+		"userId": userId, "reference": reference, "amount": map[string]any{"amountMinor": amountMinor, "currency": currency},
+	})
+}
+
+func CreatorEarningsMoveReference(userId, currency string, creditsTotalMinor int64) string {
+	return fmt.Sprintf("creator-earnings-%s-%s-%d", userId, currency, creditsTotalMinor)
 }

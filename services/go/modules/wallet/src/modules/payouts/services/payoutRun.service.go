@@ -29,25 +29,37 @@ type PayoutRunReport struct {
 
 func (withdrawals Withdrawals) RunPayoutBatch(ctx context.Context, maximum int) PayoutRunReport {
 	report := PayoutRunReport{}
+	var skipped []uuid.UUID
 	for report.Started < maximum {
-		claimed, err := withdrawals.claimNextQueuedWithdrawal(ctx)
+		claimed, prepared, err := withdrawals.claimNextQueuedWithdrawal(ctx, skipped)
+		if claimed != nil && errors.Is(err, interfaces.ErrPayoutNotSentRetryLater) {
+			skipped = append(skipped, claimed.ID)
+			withdrawals.noteWithdrawalNotSent(ctx, claimed, err.Error())
+			report.Errors++
+			continue
+		}
 		if err != nil {
 			withdrawals.Container.Resources.Logger.WarnContext(ctx, "payout run could not claim a withdrawal", slog.Any("error", err))
 			report.Errors++
-			return report
+			if claimed == nil {
+				return report
+			}
+			skipped = append(skipped, claimed.ID)
+			continue
 		}
 		if claimed == nil {
 			return report
 		}
 		report.Started++
-		status, err := withdrawals.sendWithdrawalToProvider(ctx, claimed)
+		status, err := withdrawals.sendClaimedWithdrawal(ctx, claimed, prepared)
 		if errors.Is(err, interfaces.ErrPayoutNotSentRetryLater) {
 			withdrawals.returnWithdrawalToQueue(ctx, claimed, err.Error())
+			skipped = append(skipped, claimed.ID)
 			report.Errors++
 			continue
 		}
 		if err != nil {
-			withdrawals.Container.Resources.Logger.WarnContext(ctx, "payout transfer could not be started", slog.String("withdrawalId", claimed.ID.String()), slog.Any("error", err))
+			withdrawals.Container.Resources.Logger.WarnContext(ctx, "payout transfer could not be started; the reconciler resolves it", slog.String("withdrawalId", claimed.ID.String()), slog.Any("error", err))
 			report.Errors++
 			continue
 		}
@@ -63,11 +75,12 @@ func (withdrawals Withdrawals) RunPayoutBatch(ctx context.Context, maximum int) 
 	return report
 }
 
-func (withdrawals Withdrawals) claimNextQueuedWithdrawal(ctx context.Context) (*ent.Withdrawal, error) {
-	var claimed *ent.Withdrawal
+func (withdrawals Withdrawals) claimNextQueuedWithdrawal(ctx context.Context, skipped []uuid.UUID) (*ent.Withdrawal, bool, error) {
+	var claimed, candidate *ent.Withdrawal
+	prepared := false
 	err := databases.RunInMoneyTransaction(ctx, withdrawals.Container.Resources.Database, func(ctx context.Context, transaction *sql.Tx) error {
-		claimed = nil
-		next, err := withdrawals.Container.Client(transaction).Withdrawal.Query().Where(withdrawal.StatusEQ(withdrawal.StatusQueued)).
+		claimed, candidate, prepared = nil, nil, false
+		next, err := withdrawals.Container.Client(transaction).Withdrawal.Query().Where(withdrawal.StatusEQ(withdrawal.StatusQueued), withdrawal.IDNotIn(skipped...)).
 			Order(ent.Asc(withdrawal.FieldCreatedAt)).ForUpdate(entsql.WithLockAction(entsql.SkipLocked)).First(ctx)
 		if ent.IsNotFound(err) {
 			return nil
@@ -75,25 +88,58 @@ func (withdrawals Withdrawals) claimNextQueuedWithdrawal(ctx context.Context) (*
 		if err != nil {
 			return err
 		}
+		candidate = next
+		if adapter, transactional := withdrawals.Container.Settlement.(interfaces.TransactionalSettlementAdapter); transactional {
+			instruction, err := withdrawals.payoutInstruction(ctx, transaction, next)
+			if err != nil {
+				return err
+			}
+			if err := adapter.PrepareSellerPayoutInTransaction(ctx, transaction, instruction); err != nil {
+				return err
+			}
+			prepared = true
+		}
 		claimed, err = next.Update().AddVersion(1).SetStatus(withdrawal.StatusProcessing).Save(ctx)
 		return err
 	})
-	return claimed, err
+	if err != nil {
+		return candidate, false, err
+	}
+	return claimed, prepared, nil
 }
 
-func (withdrawals Withdrawals) sendWithdrawalToProvider(ctx context.Context, claimed *ent.Withdrawal) (string, error) {
-	account, err := withdrawals.Container.Client(withdrawals.Container.Resources.Database).PayoutAccount.Get(ctx, claimed.PayoutAccountID)
+func (withdrawals Withdrawals) payoutInstruction(ctx context.Context, executor databases.ExecutorQuerier, claimed *ent.Withdrawal) (interfaces.SellerPayoutInstruction, error) {
+	account, err := withdrawals.Container.Client(executor).PayoutAccount.Get(ctx, claimed.PayoutAccountID)
 	if err != nil {
-		return "", err
+		return interfaces.SellerPayoutInstruction{}, err
 	}
 	accountNumber, err := withdrawals.Container.Encryptor.Decrypt(account.AccountNumberCiphertext, account.ID.String())
 	if err != nil {
-		return "", err
+		return interfaces.SellerPayoutInstruction{}, err
 	}
-	return withdrawals.Container.Settlement.SettleSellerPayout(ctx, interfaces.SellerPayoutInstruction{
+	return interfaces.SellerPayoutInstruction{
 		WithdrawalId: claimed.ID.String(), UserId: claimed.UserID, Reference: claimed.Reference, AmountMinor: claimed.NetMinor, FeeMinor: claimed.FeeMinor,
 		Currency: claimed.Currency, BankCode: account.BankCode, AccountNumber: accountNumber,
-	})
+	}, nil
+}
+
+func (withdrawals Withdrawals) sendClaimedWithdrawal(ctx context.Context, claimed *ent.Withdrawal, prepared bool) (string, error) {
+	if adapter, transactional := withdrawals.Container.Settlement.(interfaces.TransactionalSettlementAdapter); transactional && prepared {
+		return adapter.SendPreparedSellerPayout(ctx, claimed.Reference)
+	}
+	instruction, err := withdrawals.payoutInstruction(ctx, withdrawals.Container.Resources.Database, claimed)
+	if err != nil {
+		return "", err
+	}
+	return withdrawals.Container.Settlement.SettleSellerPayout(ctx, instruction)
+}
+
+func (withdrawals Withdrawals) noteWithdrawalNotSent(ctx context.Context, queued *ent.Withdrawal, reason string) {
+	err := withdrawals.Container.Client(withdrawals.Container.Resources.Database).Withdrawal.Update().
+		Where(withdrawal.ID(queued.ID), withdrawal.StatusEQ(withdrawal.StatusQueued)).SetFailureReason(truncate(reason, 300)).Exec(ctx)
+	if err != nil {
+		withdrawals.Container.Resources.Logger.WarnContext(ctx, "could not note why a withdrawal was not sent", slog.String("withdrawalId", queued.ID.String()), slog.Any("error", err))
+	}
 }
 
 func (withdrawals Withdrawals) returnWithdrawalToQueue(ctx context.Context, claimed *ent.Withdrawal, reason string) {
@@ -114,9 +160,13 @@ func (withdrawals Withdrawals) HandleTransferSucceeded(ctx context.Context, tran
 	if err != nil {
 		return err
 	}
+	source, err := withdrawals.payoutSourceAccount(ctx, transaction, locked, transfer.Provider)
+	if err != nil {
+		return err
+	}
 	lines := []ledgermodels.JournalLineRequest{
-		{Account: ledgermodels.SellerReservedPayoutAccount(locked.UserID, locked.Currency), Direction: ledgermodels.Debit, AmountMinor: locked.AmountMinor},
-		{Account: ledgermodels.PlatformProviderBalanceAccount(transfer.Provider, locked.Currency), Direction: ledgermodels.Credit, AmountMinor: locked.AmountMinor},
+		{Account: ledgermodels.UserCashAccountsForProvider(locked.Provider, locked.UserID, locked.Currency).ReservedPayout, Direction: ledgermodels.Debit, AmountMinor: locked.AmountMinor},
+		{Account: source, Direction: ledgermodels.Credit, AmountMinor: locked.AmountMinor},
 	}
 	if _, err := withdrawals.Container.Ledger.PostBalancedJournalEntry(ctx, transaction, ledgermodels.JournalEntryRequest{
 		Reference: "withdrawal-paid:" + locked.ID.String(), Kind: "withdrawal.paid", ExternalReference: locked.Reference,
@@ -146,8 +196,13 @@ func (withdrawals Withdrawals) FinalizeProcessingWithdrawalsOlderThan(ctx contex
 		return
 	}
 	for _, row := range rows {
-		if _, err := withdrawals.Container.Payments.FinalizeTransferByReferenceWithProvider(ctx, row.Reference); err != nil {
+		status, err := withdrawals.Container.Payments.FinalizeTransferByReferenceWithProvider(ctx, row.Reference)
+		if err != nil {
 			withdrawals.Container.Resources.Logger.WarnContext(ctx, "could not confirm a payout with the provider", slog.String("withdrawalId", row.ID.String()), slog.Any("error", err))
+			continue
+		}
+		if status.Status == interfaces.PayoutTransferMissing {
+			withdrawals.returnWithdrawalToQueue(ctx, row, "no payout transfer was created; queued again")
 		}
 	}
 }

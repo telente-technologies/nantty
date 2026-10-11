@@ -34,10 +34,19 @@ func (withdrawals Withdrawals) ListWithdrawalsForStaff(ctx context.Context, filt
 			query.Where(withdrawal.Reference(search))
 		}
 	}
+	oldestFirst := IsWithdrawalQueueStatus(filter.Status)
 	if filter.AfterId != nil {
-		query.Where(withdrawal.IDLT(*filter.AfterId))
+		if oldestFirst {
+			query.Where(withdrawal.IDGT(*filter.AfterId))
+		} else {
+			query.Where(withdrawal.IDLT(*filter.AfterId))
+		}
 	}
-	rows, err := query.Order(ent.Desc(withdrawal.FieldID)).Limit(filter.Limit + 1).All(ctx)
+	order := ent.Desc(withdrawal.FieldID)
+	if oldestFirst {
+		order = ent.Asc(withdrawal.FieldID)
+	}
+	rows, err := query.Order(order).Limit(filter.Limit + 1).All(ctx)
 	if err != nil {
 		return dtos.StaffWithdrawalListDto{}, err
 	}
@@ -108,7 +117,8 @@ func (withdrawals Withdrawals) convertForStaff(ctx context.Context, client *ent.
 	parties := withdrawals.Container.Parties.DescribeAccounts(ctx, userIds)
 	views := make([]dtos.StaffWithdrawalDto, len(rows))
 	for index, row := range rows {
-		view := dtos.StaffWithdrawalDto{WithdrawalDto: ConvertWithdrawal(row), UserId: row.UserID, User: parties[row.UserID], Provider: row.Provider, ReviewedAt: row.ReviewedAt}
+		view := dtos.StaffWithdrawalDto{WithdrawalDto: ConvertWithdrawal(row), UserId: row.UserID, User: parties[row.UserID], Provider: row.Provider, ReviewedAt: row.ReviewedAt,
+			AgeHours: int(withdrawals.Container.Now().Sub(row.CreatedAt).Hours())}
 		if account := accountsById[row.PayoutAccountID]; account != nil {
 			view.Destination = &dtos.PayoutDestinationDto{
 				PayoutAccountId: account.ID.String(), BankName: account.BankName, AccountLast4: account.AccountNumberLast4, AccountName: account.AccountName,
@@ -144,4 +154,12 @@ func countWithdrawalsByStatus(ctx context.Context, client *ent.Client) (map[stri
 		counts[row.Status] = row.Count
 	}
 	return counts, nil
+}
+
+func IsWithdrawalQueueStatus(status string) bool {
+	switch withdrawal.Status(status) {
+	case withdrawal.StatusPendingReview, withdrawal.StatusOnHold, withdrawal.StatusQueued:
+		return true
+	}
+	return false
 }

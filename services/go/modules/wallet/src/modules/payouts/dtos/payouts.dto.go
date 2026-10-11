@@ -120,6 +120,7 @@ type StaffWithdrawalDto struct {
 	ReviewedByStaffId *string                         `json:"reviewedByStaffId"`
 	ReviewedAt        *time.Time                      `json:"reviewedAt"`
 	ReviewNote        *string                         `json:"reviewNote"`
+	AgeHours          int                             `json:"ageHours"`
 }
 
 type RecentWithdrawalDto struct {

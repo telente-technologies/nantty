@@ -54,12 +54,18 @@ func (withdrawals Withdrawals) QuoteWithdrawal(ctx context.Context, userId strin
 	}, account, nil
 }
 
-func (withdrawals Withdrawals) RequestWithdrawalInTransaction(ctx context.Context, transaction *sql.Tx, userId string, accountId uuid.UUID, amountMinor int64, currency string, providerAvailableMinor int64) (dtos.WithdrawalDto, error) {
+func (withdrawals Withdrawals) RequestWithdrawalInTransaction(ctx context.Context, transaction *sql.Tx, userId string, accountId uuid.UUID, amountMinor int64, currency string, providerAvailableMinor int64, level int) (dtos.WithdrawalDto, error) {
 	quote, account, err := withdrawals.QuoteWithdrawal(ctx, userId, accountId, amountMinor, currency)
 	if err != nil {
 		return dtos.WithdrawalDto{}, err
 	}
+	if err := withdrawals.LockUserForWithdrawal(ctx, transaction, userId); err != nil {
+		return dtos.WithdrawalDto{}, err
+	}
 	if err := withdrawals.LockUserCashForWithdrawal(ctx, transaction, userId, currency); err != nil {
+		return dtos.WithdrawalDto{}, err
+	}
+	if err := withdrawals.enforceWithdrawalLimits(ctx, transaction, userId, account, amountMinor, currency, level); err != nil {
 		return dtos.WithdrawalDto{}, err
 	}
 	alreadyReserved, err := withdrawals.sumWithdrawalsNotYetSentToProvider(ctx, transaction, userId, currency)
@@ -82,15 +88,20 @@ func (withdrawals Withdrawals) RequestWithdrawalInTransaction(ctx context.Contex
 	if err != nil {
 		return dtos.WithdrawalDto{}, err
 	}
-	if _, err := withdrawals.settleDebtsBeforeWithdrawal(ctx, transaction, userId, currency, created.ID.String()); err != nil {
+	cash := ledgermodels.UserCashAccountsForProvider(created.Provider, userId, currency)
+	if cash.DepositHold == nil {
+		if _, err := withdrawals.settleDebtsBeforeWithdrawal(ctx, transaction, userId, currency, created.ID.String()); err != nil {
+			return dtos.WithdrawalDto{}, err
+		}
+	} else if err := withdrawals.requireProviderWalletPayoutAllowed(ctx, transaction, userId, currency, account); err != nil {
 		return dtos.WithdrawalDto{}, err
 	}
 	_, err = withdrawals.Container.Ledger.PostBalancedJournalEntry(ctx, transaction, ledgermodels.JournalEntryRequest{
 		Reference: "withdrawal-requested:" + created.ID.String(), Kind: "withdrawal.requested", Description: created.DestinationLabel,
 		Metadata: map[string]any{"withdrawalId": created.ID.String()},
 		Lines: []ledgermodels.JournalLineRequest{
-			{Account: ledgermodels.SellerAvailableAccount(userId, currency), Direction: ledgermodels.Debit, AmountMinor: amountMinor},
-			{Account: ledgermodels.SellerReservedPayoutAccount(userId, currency), Direction: ledgermodels.Credit, AmountMinor: amountMinor},
+			{Account: cash.Available, Direction: ledgermodels.Debit, AmountMinor: amountMinor},
+			{Account: cash.ReservedPayout, Direction: ledgermodels.Credit, AmountMinor: amountMinor},
 		},
 	})
 	if errors.Is(err, ledgermodels.ErrInsufficientBalance) {
@@ -162,8 +173,8 @@ func (withdrawals Withdrawals) reverseWithdrawalInTransaction(ctx context.Contex
 		Reference: "withdrawal-reversed:" + locked.ID.String(), Kind: "withdrawal.reversed", Description: "Withdrawal returned to your balance",
 		Metadata: map[string]any{"withdrawalId": locked.ID.String(), "reason": reason},
 		Lines: []ledgermodels.JournalLineRequest{
-			{Account: ledgermodels.SellerReservedPayoutAccount(locked.UserID, locked.Currency), Direction: ledgermodels.Debit, AmountMinor: locked.AmountMinor},
-			{Account: ledgermodels.SellerAvailableAccount(locked.UserID, locked.Currency), Direction: ledgermodels.Credit, AmountMinor: locked.AmountMinor},
+			{Account: ledgermodels.UserCashAccountsForProvider(locked.Provider, locked.UserID, locked.Currency).ReservedPayout, Direction: ledgermodels.Debit, AmountMinor: locked.AmountMinor},
+			{Account: ledgermodels.UserCashAccountsForProvider(locked.Provider, locked.UserID, locked.Currency).Available, Direction: ledgermodels.Credit, AmountMinor: locked.AmountMinor},
 		},
 	}); err != nil {
 		return dtos.WithdrawalDto{}, err

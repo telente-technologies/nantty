@@ -2,11 +2,14 @@ package services
 
 import (
 	"context"
+	"database/sql"
 	"errors"
 	"net/http"
+	"time"
 
 	"github.com/google/uuid"
 
+	"zudomart/modules/ledger/src/databases"
 	"zudomart/modules/payments/src/interfaces"
 	bankservices "zudomart/modules/payments/src/modules/banks/services"
 	"zudomart/modules/wallet/src/container"
@@ -33,7 +36,7 @@ func (accounts PayoutAccounts) AddPayoutAccount(ctx context.Context, userId, cou
 	if !known {
 		return dtos.PayoutAccountDto{}, ErrUnknownBank
 	}
-	accountName, err := accounts.Banks.Provider.ResolveBankAccountName(ctx, bankCode, accountNumber)
+	accountName, err := accounts.ResolveAccountName(ctx, bankCode, accountNumber)
 	if errors.Is(err, interfaces.ErrBankAccountNotFound) {
 		return dtos.PayoutAccountDto{}, ErrBankAccountNotFound
 	}
@@ -61,10 +64,18 @@ func (accounts PayoutAccounts) AddPayoutAccount(ctx context.Context, userId, cou
 	if err != nil {
 		return dtos.PayoutAccountDto{}, err
 	}
-	created, err := client.PayoutAccount.Create().SetID(identifier).SetUserID(userId).SetCountryCode(countryCode).SetBankCode(bankCode).
-		SetBankName(bank.Name).SetAccountNumberCiphertext(ciphertext).SetAccountNumberFingerprint(fingerprint).
-		SetAccountNumberLast4(accountNumber[len(accountNumber)-4:]).SetAccountName(accountName).SetIsDefault(count == 0).
-		SetCreatedAt(accounts.Container.Now().UTC()).Save(ctx)
+	var created *ent.PayoutAccount
+	err = databases.RunInMoneyTransaction(ctx, accounts.Container.Resources.Database, func(ctx context.Context, transaction *sql.Tx) error {
+		now := accounts.Container.Now().UTC()
+		created, err = accounts.Container.Client(transaction).PayoutAccount.Create().SetID(identifier).SetUserID(userId).SetCountryCode(countryCode).SetBankCode(bankCode).
+			SetBankName(bank.Name).SetAccountNumberCiphertext(ciphertext).SetAccountNumberFingerprint(fingerprint).
+			SetAccountNumberLast4(accountNumber[len(accountNumber)-4:]).SetAccountName(accountName).SetIsDefault(count == 0).
+			SetCreatedAt(now).Save(ctx)
+		if err != nil {
+			return err
+		}
+		return accounts.EnqueuePayoutAccountChanged(ctx, transaction, "payoutAccount.added", created, now)
+	})
 	if err != nil {
 		return dtos.PayoutAccountDto{}, err
 	}
@@ -72,6 +83,18 @@ func (accounts PayoutAccounts) AddPayoutAccount(ctx context.Context, userId, cou
 		accounts.Container.Resources.Logger.WarnContext(ctx, "requesting the payout account failed", "error", err)
 	}
 	return ConvertPayoutAccount(created), nil
+}
+
+func (accounts PayoutAccounts) EnqueuePayoutAccountChanged(ctx context.Context, transaction *sql.Tx, eventType string, account *ent.PayoutAccount, at time.Time) error {
+	cooldown := accounts.Container.Settings.WithdrawalLimits.NewAccountCooldown
+	return accounts.Container.Outbox.EnqueueInTransaction(ctx, transaction, eventType, account.ID.String(), at, map[string]any{
+		"payoutAccountId": account.ID.String(), "userId": account.UserID, "bankName": account.BankName, "accountNumberLast4": account.AccountNumberLast4,
+		"withdrawableFrom": account.CreatedAt.Add(cooldown).UTC().Format(time.RFC3339),
+	})
+}
+
+func (accounts PayoutAccounts) ResolveAccountName(ctx context.Context, bankCode, accountNumber string) (string, error) {
+	return accounts.Banks.ResolveAccountName(ctx, bankCode, accountNumber)
 }
 
 func (accounts PayoutAccounts) ListPayoutAccounts(ctx context.Context, userId string) ([]dtos.PayoutAccountDto, error) {

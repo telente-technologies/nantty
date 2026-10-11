@@ -12,10 +12,10 @@ import (
 func MountCoinsRoutes(mux *http.ServeMux, application *coins.Application) {
 	controller := controllers.CoinsController{Application: application}
 	requireUser := middlewares.RequireUserAccessToken(application.Container.Resources.AccessVerifier)
-	requirePricingRead := middlewares.RequireStaffPermission(application.Container.Resources.StaffVerifiers, constants.PermissionManageMonetization, false)
+	requirePricingRead := middlewares.RequireStaffWithAnyPermission(application.Container.Resources.StaffVerifiers, []string{constants.PermissionReadMonetization, constants.PermissionManageMonetization}, false)
 	requirePricingWrite := middlewares.RequireStaffPermission(application.Container.Resources.StaffVerifiers, constants.PermissionManageMonetization, true)
 	requireCoinReview := middlewares.RequireStaffPermission(application.Container.Resources.StaffVerifiers, constants.PermissionReviewCoins, false)
-	requireCoinReversal := middlewares.RequireStaffPermission(application.Container.Resources.StaffVerifiers, constants.PermissionReviewCoins, true)
+	requireCoinReversal := middlewares.RequireStaffPermissionWithSingleUseStepUp(application.Container.Resources.StaffVerifiers, constants.PermissionReviewCoins)
 	mux.Handle("GET /api/v1/admin/coins/transactions", requireCoinReview(http.HandlerFunc(controller.ListCoinTransactionsForStaff)))
 	mux.Handle("GET /api/v1/admin/coins/transactions/{transactionId}", requireCoinReview(http.HandlerFunc(controller.GetCoinTransactionForStaff)))
 	mux.Handle("POST /api/v1/admin/coins/transactions/{transactionId}/mark-reviewed", requireCoinReview(http.HandlerFunc(controller.MarkCoinTransactionReviewed)))
