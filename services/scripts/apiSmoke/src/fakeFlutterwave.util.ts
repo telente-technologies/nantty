@@ -4,7 +4,6 @@ import { bankAccountNumberFor } from "./commerceFixtures.util.js";
 
 const fakeFlutterwaveUrl = process.env["SMOKE_FAKE_FLUTTERWAVE_URL"] ?? "http://127.0.0.1:18998";
 
-export const flutterwaveJourneysEnabled = process.env["SMOKE_PAYMENTS_PROVIDER"] === "flutterwave";
 
 interface SignedWebhook {
   readonly body: string;
@@ -35,8 +34,32 @@ export async function fundWallet(nuban: string, amountMinor: number, reference: 
   await deliverOrThrow(await signFunding(nuban, amountMinor, reference));
 }
 
-export async function payCardCheckout(reference: string, feeMinor = 0, amountOverrideMinor = 0): Promise<void> {
-  await deliverOrThrow(await controlFake(`/__smoke/charges/${encodeURIComponent(reference)}/complete?fee=${feeMinor}&amount=${amountOverrideMinor}`));
+export async function payCardCheckout(reference: string, feeMinor = 0, amountOverrideMinor = 0, card: "good" | "decline" = "good"): Promise<void> {
+  await deliverOrThrow(await controlFake(`/__smoke/charges/${encodeURIComponent(reference)}/complete?fee=${feeMinor}&amount=${amountOverrideMinor}&card=${card}`));
+}
+
+export function payCheckoutThroughProvider(reference: string, feeMinor = 0, card: "good" | "decline" = "good"): Promise<void> {
+  return payCardCheckout(reference, feeMinor, 0, card);
+}
+
+export function settleTransferThroughProvider(reference: string, status: "success" | "failed" = "success"): Promise<void> {
+  return finishTransfer(reference, status === "success" ? "successful" : "failed");
+}
+
+export interface ProviderTransfer {
+  readonly Reference: string;
+  readonly Status: string;
+  readonly AmountMinor: number;
+  readonly DebitSubaccount: string;
+  readonly SkipBeneficiary: boolean;
+}
+
+export async function readProviderState(): Promise<{ readonly transactions: number; readonly transfers: Record<string, ProviderTransfer>; readonly refunds: Array<Record<string, unknown>> | null; readonly requests: string[] }> {
+  return (await fetch(`${fakeFlutterwaveUrl}/__smoke/state`)).json() as never;
+}
+
+export function isOpenProviderTransfer(transfer: ProviderTransfer): boolean {
+  return transfer.Status === "NEW" || transfer.Status === "PENDING";
 }
 
 export async function finishTransfer(reference: string, outcome: "successful" | "failed" = "successful"): Promise<void> {
@@ -47,8 +70,8 @@ export function settle(currency: string): Promise<{ settlementId: string }> {
   return controlFake(`/__smoke/settle/${currency}`);
 }
 
-export async function readFakeFlutterwaveState(): Promise<{ readonly refunds: Array<Record<string, unknown>> | null; readonly transfers: Record<string, { Status: string; DebitSubaccount: string; SkipBeneficiary: boolean }>; readonly requests: string[] }> {
-  return (await fetch(`${fakeFlutterwaveUrl}/__smoke/state`)).json() as never;
+export function readFakeFlutterwaveState(): ReturnType<typeof readProviderState> {
+  return readProviderState();
 }
 
 export function userStepUp(user: UserActor): Promise<string> {

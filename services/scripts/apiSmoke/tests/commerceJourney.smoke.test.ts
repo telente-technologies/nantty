@@ -3,7 +3,7 @@ import { beforeAll, describe, expect, it } from "vitest";
 import { registerUser, stepUpUser, type UserActor } from "../src/actors.util.js";
 import { callApi, describeResponse, uniqueSuffix, waitFor } from "../src/apiClient.util.js";
 import { bankAccountNumberFor } from "../src/commerceFixtures.util.js";
-import { payCheckoutThroughFakePaystack, readFakePaystackState, settleTransferThroughFakePaystack } from "../src/fakePaystack.util.js";
+import { payCheckoutThroughProvider, readProviderState, settleTransferThroughProvider, isOpenProviderTransfer } from "../src/fakeFlutterwave.util.js";
 import { uploadSampleImage } from "../src/mediaUpload.util.js";
 import { isListEnvelope } from "../src/smokeReport.util.js";
 
@@ -98,7 +98,7 @@ describe("commerce journey: seller onboarding → product → cart → checkout 
     paymentReference = initialized.body.reference;
     orderTotalMinor = initialized.body.payment?.amount?.amountMinor ?? 0;
     expect(orderTotalMinor).toBeGreaterThanOrEqual(2_500_000);
-    await payCheckoutThroughFakePaystack(paymentReference);
+    await payCheckoutThroughProvider(paymentReference);
     const paid = await waitFor(async () => {
       const orders = await callApi("GET", "/api/v1/orders", { token: buyer.accessToken });
       expect(isListEnvelope(orders.body), describeResponse(orders)).toBe(true);
@@ -150,8 +150,8 @@ describe("commerce journey: seller onboarding → product → cart → checkout 
     expect(wallet, "seller wallet never showed the released funds").toBeDefined();
     const accounts = await callApi("GET", "/api/v1/wallets/me/payout-accounts", { token: seller.accessToken });
     expect(accounts.status, describeResponse(accounts)).toBe(200);
-    const state = await readFakePaystackState();
+    const state = await readProviderState();
     expect(state.transactions).toBeGreaterThan(0);
-    for (const transfer of Object.values(state.transfers)) if (transfer.Status === "pending" || transfer.Status === "otp") await settleTransferThroughFakePaystack(transfer.Reference);
+    for (const transfer of Object.values(state.transfers)) if (isOpenProviderTransfer(transfer)) await settleTransferThroughProvider(transfer.Reference);
   });
 });

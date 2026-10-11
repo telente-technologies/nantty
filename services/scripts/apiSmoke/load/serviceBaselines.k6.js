@@ -70,9 +70,8 @@ const scenarios = {
     check(http.post(`${gateway}/api/v1/payments/initialize`, JSON.stringify({ checkoutId }), { headers: headersFor(user()), tags: { name: "payment_initialize" } }), { ok: (r) => r.status === 201 });
   },
   money_webhook: () => {
-    const body = JSON.stringify({ event: "charge.success", data: { id: __VU * 1000000 + __ITER, reference: `k6-unknown-${__VU}-${__ITER}`, status: "success", amount: 100000, currency: "NGN" } });
-    const signature = crypto.hmac("sha512", fixtures.paystackSecret, body, "hex");
-    check(http.post(`${gateway}/webhooks/paystack`, body, { headers: { "content-type": "application/json", "x-paystack-signature": signature }, tags: { name: "paystack_webhook" } }), { ok: (r) => r.status === 200 });
+    const body = JSON.stringify({ event: "charge.completed", data: { id: __VU * 1000000 + __ITER, tx_ref: `k6-unknown-${__VU}-${__ITER}`, status: "successful", amount: 1000, currency: "NGN" } });
+    check(http.post(`${gateway}/webhooks/flutterwave`, body, { headers: { "content-type": "application/json", "verif-hash": fixtures.flutterwaveWebhookHash }, tags: { name: "flutterwave_webhook" } }), { ok: (r) => r.status === 200 });
   },
   live_gift: () => check(http.post(`${gateway}/api/v1/lives/${fixtures.liveId}/gifts`, JSON.stringify({ giftId: fixtures.giftId, quantity: 1, receiverUserId: fixtures.host.accountId }), { headers: headersFor(user()), tags: { name: "gift_send" } }), { answered: (r) => r.status === 201 || r.status === 200 || r.status === 402 }),
   notifications_inbox: () => check(http.get(`${gateway}/api/v1/notifications`, { headers: headersFor(user()), tags: { name: "inbox" } }), { ok: (r) => r.status === 200 }),

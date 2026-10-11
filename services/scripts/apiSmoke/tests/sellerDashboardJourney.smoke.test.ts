@@ -3,7 +3,7 @@ import { beforeAll, describe, expect, it } from "vitest";
 import type { UserActor } from "../src/actors.util.js";
 import { callApi, describeResponse, uniqueSuffix, waitFor } from "../src/apiClient.util.js";
 import { addToCart, adjustStock, bankAccountNumberFor, checkout, createBuyerWithAddress, createStoreWithProduct, onboardPayoutAccount, psql, shipAndDeliver, type SmokeStore } from "../src/commerceFixtures.util.js";
-import { payCheckoutThroughFakePaystack } from "../src/fakePaystack.util.js";
+import { payCheckoutThroughProvider } from "../src/fakeFlutterwave.util.js";
 import { expectClearError, expectLedgerBalancedSince } from "../src/journeyChecks.util.js";
 
 describe("seller dashboard journey: product → stock → order → fulfil → payout view, on the free plan", () => {
@@ -51,7 +51,7 @@ describe("seller dashboard journey: product → stock → order → fulfil → p
     orderId = placed.orderIds[0]!;
     const initialized = await callApi("POST", "/api/v1/payments/initialize", { token: buyer.accessToken, body: { checkoutId: placed.checkoutId } });
     expect(initialized.status, describeResponse(initialized)).toBe(201);
-    await payCheckoutThroughFakePaystack(initialized.body.reference);
+    await payCheckoutThroughProvider(initialized.body.reference);
     expect(await waitFor(async () => (psql(`select payment_status from orders.order_groups where id = '${orderId}'`)[0]?.[0] === "paid" ? true : undefined), 20_000, 500)).toBe(true);
     const dashboard = await seller("GET", "/api/v1/seller/dashboard");
     expect(dashboard.status, describeResponse(dashboard)).toBe(200);

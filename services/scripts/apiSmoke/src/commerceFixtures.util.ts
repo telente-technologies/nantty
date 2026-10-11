@@ -3,7 +3,6 @@ import { expect } from "vitest";
 
 import { registerUser, stepUpUser, type UserActor } from "./actors.util.js";
 import { callApi, describeResponse, uniqueSuffix, waitFor } from "./apiClient.util.js";
-import { completeBankValidationThroughFakePaystack } from "./fakePaystack.util.js";
 import { uploadSampleImage } from "./mediaUpload.util.js";
 
 export interface SmokeStore {
@@ -111,6 +110,7 @@ export function bankAccountNumberFor(accountId: string): string {
 }
 
 export async function onboardPayoutAccount(seller: UserActor, role?: "seller"): Promise<void> {
+  await callApi("PATCH", "/api/v1/users/me/preferences", { token: seller.accessToken, body: { countryCode: "NG" } });
   const accountNumber = bankAccountNumberFor(seller.accountId);
   const identity = await callApi("PUT", `/api/v1/payments/payout-onboarding/me/identity${role === undefined ? "" : `?role=${role}`}`, { token: seller.accessToken, body: { legalName: "Temitope Adeyemi", dateOfBirth: "1994-02-03", addressLine1: "4 Allen Avenue", city: "Ikeja", state: "Lagos", idType: "bvn", idNumber: "22212345678", registeredBusiness: false } });
   expect([200, 201], describeResponse(identity)).toContain(identity.status);
@@ -118,8 +118,11 @@ export async function onboardPayoutAccount(seller: UserActor, role?: "seller"): 
   expect(resolved.status, describeResponse(resolved)).toBe(200);
   const bank = await callApi("PUT", "/api/v1/payments/payout-onboarding/me/bank", { token: seller.accessToken, headers: { "x-step-up-token": await stepUpUser(seller) }, body: { bankCode: "058", bankName: "Guaranty Trust Bank", accountNumber, resolvedAccountName: resolved.body.accountName ?? "Temitope Adeyemi" } });
   expect([200, 201], describeResponse(bank)).toContain(bank.status);
-  if (process.env["SMOKE_PAYMENTS_PROVIDER"] === "flutterwave") return;
   const validation = await callApi("POST", "/api/v1/payments/payout-onboarding/me/bank-validation", { token: seller.accessToken });
   expect([200, 201, 202], describeResponse(validation)).toContain(validation.status);
-  if (validation.body?.status !== "verified") await completeBankValidationThroughFakePaystack(seller.email);
+  const verified = await waitFor(async () => {
+    const state = await callApi("GET", "/api/v1/payments/payout-onboarding/me/bank-validation", { token: seller.accessToken });
+    return state.body?.status === "verified" ? state : undefined;
+  }, 30_000, 1000);
+  expect(verified, "the BVN consent never verified").toBeDefined();
 }

@@ -2,7 +2,7 @@ import { expect } from "vitest";
 
 import { registerUser, stepUpStaff, type StaffActor, type UserActor } from "./actors.util.js";
 import { callApi, describeResponse, uniqueSuffix, waitFor } from "./apiClient.util.js";
-import { payCheckoutThroughFakePaystack } from "./fakePaystack.util.js";
+import { payCheckoutThroughProvider } from "./fakeFlutterwave.util.js";
 
 export async function refreshAccessToken(actor: UserActor): Promise<UserActor> {
   const refreshed = await callApi("POST", "/api/v1/auth/refresh", { body: { refreshToken: actor.refreshToken } });
@@ -50,7 +50,7 @@ export async function buyCoins(viewer: UserActor, packageId: string, expectedCoi
   await callApi("PATCH", "/api/v1/users/me/preferences", { token: viewer.accessToken, body: { countryCode: "NG" } });
   const purchase = await callApi("POST", "/api/v1/coins/purchases", { token: viewer.accessToken, headers: { "x-client-region": "NG" }, body: { packageId } });
   expect([200, 201], describeResponse(purchase)).toContain(purchase.status);
-  await payCheckoutThroughFakePaystack(purchase.body.reference ?? purchase.body.purchase?.reference);
+  await payCheckoutThroughProvider(purchase.body.reference ?? purchase.body.purchase?.reference);
   const funded = await waitFor(async () => ((await coinBalance(viewer)).coins >= expectedCoins ? true : undefined), 15_000, 500);
   expect(funded, "coins never arrived").toBe(true);
 }

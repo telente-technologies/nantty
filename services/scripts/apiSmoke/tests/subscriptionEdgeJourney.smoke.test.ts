@@ -4,7 +4,7 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { createSuperadmin, stepUpStaff, type StaffActor } from "../src/actors.util.js";
 import { callApi, describeResponse, waitFor } from "../src/apiClient.util.js";
 import { createStoreWithProduct, psql, type SmokeStore } from "../src/commerceFixtures.util.js";
-import { payCheckoutThroughFakePaystack, readFakePaystackState } from "../src/fakePaystack.util.js";
+import { payCheckoutThroughProvider, readProviderState } from "../src/fakeFlutterwave.util.js";
 import { expectClearError, expectLedgerBalancedSince } from "../src/journeyChecks.util.js";
 
 const moneyUrl = process.env["SMOKE_MONEY_URL"] ?? "http://127.0.0.1:8103";
@@ -47,14 +47,14 @@ describe("subscriptions and trials when people cancel early or their card fails"
   it("ends a trial cancelled during the trial without charging, and refuses a second trial", { timeout: 180_000 }, async () => {
     const store: SmokeStore = await createStoreWithProduct("edgetrial", 500_000);
     const web = { "x-client-platform": "web", "x-client-region": "NG", "x-device-id": `smoke-trial-${randomUUID()}` };
-    const refundsBefore = ((await readFakePaystackState()).refunds ?? []).length;
+    const refundsBefore = ((await readProviderState()).refunds ?? []).length;
     const started = await callApi("POST", "/api/v1/seller/subscription/trial/checkout", { token: store.seller.accessToken, headers: web, body: { profileId: store.businessProfileId, planId: "seller_pro_monthly" } });
     expect(started.status, describeResponse(started)).toBe(201);
     expect(started.body.trial).toBe(true);
-    await payCheckoutThroughFakePaystack(started.body.reference);
+    await payCheckoutThroughProvider(started.body.reference);
     const subscriptionId = (await waitFor(async () => psql(`select id from subscriptions.subscriptions where profile_id = '${store.businessProfileId}' and status = 'trialing'`)[0]?.[0], 30_000, 1000))!;
     expect(subscriptionId, "the card check starts the trial").toBeDefined();
-    expect(await waitFor(async () => (((await readFakePaystackState()).refunds ?? []).length > refundsBefore ? true : undefined), 20_000, 500), "the card check is refunded at once").toBe(true);
+    expect(await waitFor(async () => (((await readProviderState()).refunds ?? []).length > refundsBefore ? true : undefined), 20_000, 500), "the card check is refunded at once").toBe(true);
     expect(await sellerPlanOf(store.seller.accountId)).toBe("pro");
     const cancelled = await callApi("POST", `/api/v1/subscriptions/${subscriptionId}/cancel`, { token: store.seller.accessToken, body: {} });
     expect(cancelled.status, describeResponse(cancelled)).toBe(200);
@@ -74,7 +74,7 @@ describe("subscriptions and trials when people cancel early or their card fails"
     const web = { "x-client-platform": "web", "x-client-region": "NG", "x-device-id": `smoke-renew-${randomUUID()}` };
     const started = await callApi("POST", "/api/v1/seller/subscription/checkout", { token: store.seller.accessToken, headers: web, body: { profileId: store.businessProfileId, planId: "seller_pro_monthly" } });
     expect(started.status, describeResponse(started)).toBe(201);
-    await payCheckoutThroughFakePaystack(started.body.reference, 0, "decline");
+    await payCheckoutThroughProvider(started.body.reference, 0, "decline");
     const subscriptionId: string = started.body.subscriptionId;
     expect(await waitFor(async () => (subscription(subscriptionId).status === "active" ? true : undefined), 30_000, 1000), "first payment activates the plan").toBe(true);
     makeDueNow(subscriptionId);
@@ -90,7 +90,7 @@ describe("subscriptions and trials when people cancel early or their card fails"
     expect([200, 201], describeResponse(payNow)).toContain(payNow.status);
     const reference: string | undefined = payNow.body.reference ?? payNow.body.payment?.reference;
     if (reference !== undefined) {
-      await payCheckoutThroughFakePaystack(reference);
+      await payCheckoutThroughProvider(reference);
       const recovered = await waitFor(async () => (subscription(subscriptionId).status === "active" ? true : undefined), 30_000, 1000);
       expect(recovered, `paying the failed renewal restores the plan: ${JSON.stringify(subscription(subscriptionId))}`).toBe(true);
     }

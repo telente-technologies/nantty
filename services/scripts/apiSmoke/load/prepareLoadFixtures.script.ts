@@ -57,7 +57,7 @@ async function main(): Promise<void> {
     await callApi("POST", `/api/v1/lives/${live.id}/join`, { token: user.accessToken, body: {} });
     users.push({ ...user, addressId: await createBuyerAddress(user) });
   }
-  const fixtures = { generatedAt: new Date().toISOString(), host, liveId: live.id, giftId, seller, store, users, intelligenceSecret: process.env["LOAD_INTELLIGENCE_SECRET"] ?? "local-only-intelligence-shared-secret-0123456789", paystackSecret: "sk_test_fake_paystack" };
+  const fixtures = { generatedAt: new Date().toISOString(), host, liveId: live.id, giftId, seller, store, users, intelligenceSecret: process.env["LOAD_INTELLIGENCE_SECRET"] ?? "local-only-intelligence-shared-secret-0123456789", flutterwaveWebhookHash: "fake-flutterwave-webhook-hash-0123456789abcdef" };
   writeFileSync(outputPath, JSON.stringify(fixtures, null, 1));
   console.log(`fixtures written to ${outputPath} (${users.length} users, live ${live.id}, product ${store.productId})`);
 }

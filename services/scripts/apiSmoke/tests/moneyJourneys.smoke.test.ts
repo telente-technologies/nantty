@@ -3,7 +3,7 @@ import { beforeAll, describe, expect, it } from "vitest";
 import { createSuperadmin, stepUpStaff, stepUpStaffForMoneyAction, stepUpUser, type StaffActor, type UserActor } from "../src/actors.util.js";
 import { callApi, describeResponse, waitFor } from "../src/apiClient.util.js";
 import { addToCart, checkout, createBuyerWithAddress, createStoreWithProduct, onboardPayoutAccount, psql, shipAndDeliver, type SmokeStore } from "../src/commerceFixtures.util.js";
-import { payCheckoutThroughFakePaystack, readFakePaystackState, settleTransferThroughFakePaystack } from "../src/fakePaystack.util.js";
+import { payCheckoutThroughProvider, readProviderState, settleTransferThroughProvider, isOpenProviderTransfer } from "../src/fakeFlutterwave.util.js";
 import { expectClearError } from "../src/journeyChecks.util.js";
 import { verifySellerBusiness } from "../src/sellerVerification.util.js";
 
@@ -14,7 +14,7 @@ const ngn = { "x-client-region": "NG" };
 async function initializeAndPay(buyer: UserActor, checkoutId: string, feeMinor: number): Promise<{ reference: string; amountMinor: number }> {
   const initialized = await callApi("POST", "/api/v1/payments/initialize", { token: buyer.accessToken, body: { checkoutId } });
   expect(initialized.status, describeResponse(initialized)).toBe(201);
-  await payCheckoutThroughFakePaystack(initialized.body.reference, feeMinor);
+  await payCheckoutThroughProvider(initialized.body.reference, feeMinor);
   return { reference: initialized.body.reference, amountMinor: initialized.body.payment?.amount?.amountMinor ?? 0 };
 }
 
@@ -124,11 +124,11 @@ describe("money journeys: multi-seller checkout, escrow timers, fees, payout, re
     const run = await callApi("POST", "/api/v1/admin/payouts/run", { token: staff.accessToken, headers: { "x-step-up-token": await stepUpStaffForMoneyAction(staff) }, body: {} });
     expect([200, 201, 202, 204, 404], describeResponse(run)).toContain(run.status);
     const transfer = await waitFor(async () => {
-      const state = await readFakePaystackState();
-      return Object.values(state.transfers).find((candidate) => candidate.Status !== "success" && candidate.AmountMinor === requested.body.netAmount?.amountMinor);
+      const state = await readProviderState();
+      return Object.values(state.transfers).find((candidate) => isOpenProviderTransfer(candidate) && candidate.AmountMinor === requested.body.netAmount?.amountMinor);
     }, 60_000, 1000);
     expect(transfer, "no payout transfer reached the provider").toBeDefined();
-    await settleTransferThroughFakePaystack(transfer!.Reference);
+    await settleTransferThroughProvider(transfer!.Reference);
     const completed = await waitFor(async () => {
       const response = await callApi("GET", "/api/v1/wallets/me/withdrawals", { token: storeA.seller.accessToken });
       return /completed|paid|success/i.test(JSON.stringify(response.body)) ? response : undefined;
@@ -149,8 +149,11 @@ describe("money journeys: multi-seller checkout, escrow timers, fees, payout, re
     expect([200, 201, 204], rejected === undefined ? "order never became rejectable" : describeResponse(rejected)).toContain(rejected?.status);
     const refunded = await waitForEscrowStatus(orderId, "refunded", 30_000);
     expect(refunded, "escrow was not refunded").toBeDefined();
-    const state = await readFakePaystackState();
-    expect(Array.isArray(state.refunds) && state.refunds.length > 0, "provider never received a refund").toBe(true);
+    const state = await waitFor(async () => {
+      const current = await readProviderState();
+      return Array.isArray(current.refunds) && current.refunds.length > 0 ? current : undefined;
+    }, 30_000, 500);
+    expect(state, "provider never received the refund sent through the outbox").toBeDefined();
     const feeLines = psql(`select a.code, l.amount_minor from escrow.escrows x join ledger.journal_entries e on e.reference like '%' || x.id::text || '%' join ledger.journal_lines l on l.entry_id = e.id join ledger.ledger_accounts a on a.id = l.account_id where x.order_id = '${orderId}' and e.kind like 'escrow.refund%' and a.code like 'revenue:escrowFees%'`);
     expect(feeLines.length, "refunds must not earn an escrow fee").toBe(0);
   });
@@ -172,7 +175,7 @@ describe("money journeys: multi-seller checkout, escrow timers, fees, payout, re
       return response.body?.code === "SELLER_NOT_READY_FOR_PAYMENTS" ? undefined : response;
     }, 30_000, 1000);
     expect(initialized?.status, initialized === undefined ? "the seller subaccount never became ready" : describeResponse(initialized)).toBe(201);
-    await payCheckoutThroughFakePaystack(initialized!.body.reference, 20_000);
+    await payCheckoutThroughProvider(initialized!.body.reference, 20_000);
     const released = await waitForEscrowStatus(orderId, "released");
     expect(released, "direct order must be released to the seller immediately").toBeDefined();
     expect(psql(`select payment_mode, release_trigger from escrow.escrows where order_id = '${orderId}'`)[0]).toEqual(["direct", "directPayment"]);

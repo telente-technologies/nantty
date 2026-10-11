@@ -3,7 +3,7 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { createSuperadmin, registerUser, stepUpStaff, stepUpStaffForMoneyAction, type StaffActor, type UserActor } from "../src/actors.util.js";
 import { callApi, describeResponse, uniqueSuffix, waitFor } from "../src/apiClient.util.js";
 import { onboardPayoutAccount, psql } from "../src/commerceFixtures.util.js";
-import { payCheckoutThroughFakePaystack, readFakePaystackState, settleTransferThroughFakePaystack } from "../src/fakePaystack.util.js";
+import { payCheckoutThroughProvider, readProviderState, settleTransferThroughProvider, isOpenProviderTransfer } from "../src/fakeFlutterwave.util.js";
 import { connectRealtimeClient, type RealtimeClient } from "../src/realtimeClient.util.js";
 
 async function refreshAccessToken(actor: UserActor): Promise<UserActor> {
@@ -108,7 +108,7 @@ describe("live journey: creator approval → live start → coins → gift with 
     const purchase = await callApi("POST", "/api/v1/coins/purchases", { token: viewer.accessToken, headers: { "x-client-region": "NG" }, body: { packageId } });
     expect([200, 201], describeResponse(purchase)).toContain(purchase.status);
     const reference = purchase.body.reference ?? purchase.body.purchase?.reference;
-    await payCheckoutThroughFakePaystack(reference);
+    await payCheckoutThroughProvider(reference);
     const funded = await waitFor(async () => {
       const balance = await callApi("GET", "/api/v1/coins/balance", { token: viewer.accessToken });
       return balance.body?.coins >= 100 ? balance : undefined;
@@ -167,7 +167,7 @@ describe("live journey: creator approval → live start → coins → gift with 
     expect([200, 201], describeResponse(purchase)).toContain(purchase.status);
     const reference = purchase.body.reference ?? purchase.body.purchase?.reference;
     expect(JSON.stringify(purchase.body), "web purchase outside Nigeria is priced in USD").toMatch(/USD/);
-    await payCheckoutThroughFakePaystack(reference);
+    await payCheckoutThroughProvider(reference);
     const credited = await waitFor(async () => {
       const balance = await callApi("GET", "/api/v1/coins/balance", { token: usdBuyer.accessToken });
       return balance.body?.coins >= before + 50 ? balance : undefined;
@@ -206,9 +206,9 @@ describe("live journey: creator approval → live start → coins → gift with 
       expect([200, 201, 204], describeResponse(review)).toContain(review.status);
     }
     await callApi("POST", "/api/v1/admin/payouts/run", { token: staff.accessToken, headers: { "x-step-up-token": await stepUpStaffForMoneyAction(staff) }, body: {} });
-    const transfer = await waitFor(async () => Object.values((await readFakePaystackState()).transfers).find((candidate) => candidate.Status !== "success" && candidate.AmountMinor === requested.body.netAmount?.amountMinor), 60_000, 1000);
+    const transfer = await waitFor(async () => Object.values((await readProviderState()).transfers).find((candidate) => isOpenProviderTransfer(candidate) && candidate.AmountMinor === requested.body.netAmount?.amountMinor), 60_000, 1000);
     expect(transfer, "no creator payout transfer reached the provider").toBeDefined();
-    await settleTransferThroughFakePaystack(transfer!.Reference);
+    await settleTransferThroughProvider(transfer!.Reference);
     const completed = await waitFor(async () => {
       const response = await callApi("GET", "/api/v1/wallets/me/withdrawals", { token: host.accessToken, headers: ngn });
       return /completed|paid|success/i.test(JSON.stringify(response.body)) ? response : undefined;

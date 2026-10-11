@@ -5,7 +5,7 @@ import { callApi, describeResponse, uniqueSuffix, waitFor } from "../src/apiClie
 import { addToCart, approveSellerApplication, checkout, createBuyerWithAddress, createStoreWithProduct, psql, shipAndDeliver, type SmokeStore } from "../src/commerceFixtures.util.js";
 import { uploadSampleImage } from "../src/mediaUpload.util.js";
 import {
-  deliverFlutterwaveWebhook, finishTransfer, flutterwaveJourneysEnabled, fundWallet, payCardCheckout, readFakeFlutterwaveState, readWallet, settle, signFunding,
+  deliverFlutterwaveWebhook, finishTransfer, fundWallet, payCardCheckout, readFakeFlutterwaveState, readWallet, settle, signFunding,
   userStepUp, verifyNigerianUserToLevelOne,
 } from "../src/fakeFlutterwave.util.js";
 import { verifySellerBusiness } from "../src/sellerVerification.util.js";
@@ -20,7 +20,7 @@ async function placeOrder(buyer: UserActor, addressId: string, store: SmokeStore
   return { orderId: placed.orderIds[0]!, reference: initialized.body.reference };
 }
 
-describe.skipIf(!flutterwaveJourneysEnabled)("Flutterwave money journeys through the gateway", () => {
+describe("Flutterwave money journeys through the gateway", () => {
   let staff: StaffActor;
   let store: SmokeStore;
   let buyer: UserActor;

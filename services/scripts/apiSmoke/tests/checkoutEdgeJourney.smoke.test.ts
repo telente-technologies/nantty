@@ -3,7 +3,7 @@ import { beforeAll, describe, expect, it } from "vitest";
 import { createSuperadmin, type UserActor } from "../src/actors.util.js";
 import { callApi, describeResponse, waitFor } from "../src/apiClient.util.js";
 import { addToCart, adjustStock, changeVariantPrice, createBuyerWithAddress, createStoreWithProduct, psql, type SmokeStore } from "../src/commerceFixtures.util.js";
-import { payCheckoutThroughFakePaystack, readFakePaystackState } from "../src/fakePaystack.util.js";
+import { payCheckoutThroughProvider, readProviderState } from "../src/fakeFlutterwave.util.js";
 import { expectClearError, expectLedgerBalancedSince } from "../src/journeyChecks.util.js";
 import { revokeSellerBusinessVerification, verifySellerBusiness } from "../src/sellerVerification.util.js";
 
@@ -25,7 +25,7 @@ function escrowOf(orderId: string): { status: string; amountMinor: number } | un
 }
 
 async function refundCount(): Promise<number> {
-  return ((await readFakePaystackState()).refunds ?? []).length;
+  return ((await readProviderState()).refunds ?? []).length;
 }
 
 describe("buying when real life gets in the way: stock, prices, double taps, late payments and late cancels", () => {
@@ -71,7 +71,7 @@ describe("buying when real life gets in the way: stock, prices, double taps, lat
     const initialized = await initialize(buyer, placed.checkoutId);
     expect(initialized.status, describeResponse(initialized)).toBe(201);
     expect(initialized.body.payment.amount.amountMinor, "the price agreed at checkout is what gets charged").toBe(placed.totalMinor);
-    await payCheckoutThroughFakePaystack(initialized.body.reference);
+    await payCheckoutThroughProvider(initialized.body.reference);
     const held = await waitFor(async () => (escrowOf(placed.orderId)?.status === "held" ? escrowOf(placed.orderId) : undefined), 20_000, 500);
     expect(held?.amountMinor).toBe(placed.totalMinor);
     await changeVariantPrice(store, 1_000_000);
@@ -87,8 +87,8 @@ describe("buying when real life gets in the way: stock, prices, double taps, lat
     const [tapA, tapB] = await Promise.all([initialize(buyer, placed.checkoutId), initialize(buyer, placed.checkoutId)]);
     expect([tapA.status, tapB.status], `${describeResponse(tapA)} / ${describeResponse(tapB)}`).toEqual([201, 201]);
     const refundsBefore = await refundCount();
-    await payCheckoutThroughFakePaystack(tapA.body.reference);
-    await payCheckoutThroughFakePaystack(tapB.body.reference);
+    await payCheckoutThroughProvider(tapA.body.reference);
+    await payCheckoutThroughProvider(tapB.body.reference);
     const held = await waitFor(async () => (escrowOf(placed.orderId)?.status === "held" ? escrowOf(placed.orderId) : undefined), 20_000, 500);
     expect(held?.amountMinor, "escrow holds the order total once").toBe(placed.totalMinor);
     const succeeded = (await waitFor(async () => {
@@ -113,7 +113,7 @@ describe("buying when real life gets in the way: stock, prices, double taps, lat
     const payAgain = await initialize(buyer, placed.checkoutId);
     expectClearError(payAgain, [409, 410, 422], ["ORDER_CANCELLED", "CHECKOUT_CLOSED", "NOTHING_TO_PAY"]);
     const refundsBefore = await refundCount();
-    await payCheckoutThroughFakePaystack(initialized.body.reference);
+    await payCheckoutThroughProvider(initialized.body.reference);
     const refunded = await waitFor(async () => (escrowOf(placed.orderId)?.status === "refunded" ? escrowOf(placed.orderId) : undefined), 30_000, 500);
     expect(refunded, `late payment must be refunded: ${JSON.stringify(escrowOf(placed.orderId))}`).toBeDefined();
     const providerRefunds = await waitFor(async () => {
@@ -130,7 +130,7 @@ describe("buying when real life gets in the way: stock, prices, double taps, lat
     await addToCart(buyer, store, 1);
     const placed = await placeOrder(buyer, addressId);
     const initialized = await initialize(buyer, placed.checkoutId);
-    await payCheckoutThroughFakePaystack(initialized.body.reference);
+    await payCheckoutThroughProvider(initialized.body.reference);
     expect(await waitFor(async () => (escrowOf(placed.orderId)?.status === "held" ? true : undefined), 20_000, 500)).toBe(true);
     const headers = { "x-store-id": store.storeId };
     const accepted = await waitFor(async () => {

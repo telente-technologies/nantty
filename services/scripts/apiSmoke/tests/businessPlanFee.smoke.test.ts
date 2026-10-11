@@ -3,7 +3,7 @@ import { beforeAll, describe, expect, it } from "vitest";
 import type { UserActor } from "../src/actors.util.js";
 import { callApi, describeResponse, waitFor } from "../src/apiClient.util.js";
 import { addToCart, checkout, createBuyerWithAddress, createStoreWithProduct, psql, shipAndDeliver, type SmokeStore } from "../src/commerceFixtures.util.js";
-import { payCheckoutThroughFakePaystack } from "../src/fakePaystack.util.js";
+import { payCheckoutThroughProvider } from "../src/fakeFlutterwave.util.js";
 
 const itemPriceMinor = 1_000_000;
 const shippingMinor = 150_000;
@@ -25,10 +25,10 @@ describe("Business plan: a seller on Business pays the 1% escrow fee end to end"
     ({ buyer, addressId } = await createBuyerWithAddress());
   });
 
-  it("activates the Business plan from the paid checkout, with no Paystack plan subscription", async () => {
+  it("activates the Business plan from the paid checkout, with no provider-managed plan subscription", async () => {
     const started = await callApi("POST", "/api/v1/seller/subscription/checkout", { token: store.seller.accessToken, headers: web, body: { profileId: store.businessProfileId, planId: "seller_business_monthly" } });
     expect(started.status, describeResponse(started)).toBe(201);
-    await payCheckoutThroughFakePaystack(started.body.reference);
+    await payCheckoutThroughProvider(started.body.reference);
     const active = await waitFor(async () => {
       const row = psql(`select plan_code, status from subscriptions.subscriptions where id = '${started.body.subscriptionId}'`)[0];
       return row?.[1] === "active" ? row : undefined;
@@ -42,7 +42,7 @@ describe("Business plan: a seller on Business pays the 1% escrow fee end to end"
     orderId = placed.orderIds[0]!;
     const initialized = await callApi("POST", "/api/v1/payments/initialize", { token: buyer.accessToken, body: { checkoutId: placed.checkoutId } });
     expect(initialized.status, describeResponse(initialized)).toBe(201);
-    await payCheckoutThroughFakePaystack(initialized.body.reference, 20_000);
+    await payCheckoutThroughProvider(initialized.body.reference, 20_000);
     const held = await waitFor(async () => (escrowRow(orderId)?.[0] === "held" ? escrowRow(orderId) : undefined), 20_000, 500);
     expect(held, "escrow was not held").toBeDefined();
     expect(Number(held![1]), "Business escrow fee bps").toBe(100);
