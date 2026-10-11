@@ -26,6 +26,7 @@ import { invalidateQueriesAffectedByReplayedOfflineMutation } from "@/cache/offl
 import { BootSplash } from "@/components/brand/bootSplash";
 import { KeepRealtimeMessagingConnectedWhileSignedIn } from "@/components/chat/appWideRealtimeConnection";
 import { DeviceFrame } from "@/components/ui/deviceFrame";
+import { ErrorBoundary } from "@/components/ui/errorBoundary";
 import { CelebrationHost } from "@/components/celebrations/celebrationHost";
 import { RootNavigator } from "@/navigation/root.navigator";
 import { localeService } from "@/services/geo/locale.service";
@@ -118,6 +119,7 @@ export default function App() {
   return (
     <ThemeProvider>
       <SafeAreaProvider>
+        <ErrorBoundary>
         <KeyboardProvider statusBarTranslucent navigationBarTranslucent preserveEdgeToEdge>
         <DeviceFrame>
           <PersistQueryClientProvider client={queryClient} persistOptions={reactQueryPersistOptions}>
@@ -129,6 +131,7 @@ export default function App() {
           </PersistQueryClientProvider>
         </DeviceFrame>
         </KeyboardProvider>
+        </ErrorBoundary>
       </SafeAreaProvider>
     </ThemeProvider>
   );
