@@ -195,7 +195,7 @@ export function ClipComposer({ mode, initialSoundId, initialDraft = null, onChan
           publishing={publish.mutation.isPending}
           publishButtonTitle={publish.buttonTitle}
           publishErrorMessage={publish.errorMessage ?? validationMessage}
-          onPublish={() => publish.mutation.mutate()}
+          onPublish={() => publish.publish()}
           onSaveDraft={
             onSaveDraft
               ? () =>

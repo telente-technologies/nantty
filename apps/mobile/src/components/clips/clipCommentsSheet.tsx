@@ -83,7 +83,18 @@ export function ClipCommentsSheet({ postId, myAvatarUrl, clip, highlightCommentI
                 </Text>
               </Pressable>
             ) : null}
-            {postId ? <ThreadedCommentList contentContainerStyle={styles.list} /> : <View style={styles.flexFill} />}
+            {postId ? (
+              <ThreadedCommentList
+                contentContainerStyle={styles.list}
+                quoteCount={clip?.quotes}
+                onOpenQuote={(quotePostId) => {
+                  onClose();
+                  navigation.navigate("PostDetail", { postId: quotePostId });
+                }}
+              />
+            ) : (
+              <View style={styles.flexFill} />
+            )}
             <CommentComposer
               avoidKeyboard={false}
               myAvatarUrl={myAvatarUrl}

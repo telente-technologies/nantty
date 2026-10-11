@@ -1,12 +1,12 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import NetInfo from "@react-native-community/netinfo";
 import { createAsyncStoragePersister } from "@tanstack/query-async-storage-persister";
-import { QueryClient, focusManager, onlineManager, type Query } from "@tanstack/react-query";
+import { MutationCache, QueryCache, QueryClient, focusManager, onlineManager, type Query } from "@tanstack/react-query";
 import type { PersistQueryClientOptions } from "@tanstack/react-query-persist-client";
 import Constants from "expo-constants";
 import { AppState, Platform } from "react-native";
 
-import { ApiError } from "@/errors/api.error";
+import { handleGlobalApiError, shouldRetryQuery } from "@/errors/errorExperience/globalErrorHandler";
 import { isDeviceConnectedAccordingToNetInfo } from "@/store/offline.store";
 
 const ONE_SECOND_MS = 1_000;
@@ -43,8 +43,10 @@ export const isQuerySafeToPersistOnDevice = (query: Query) =>
 
 export function createZudomartQueryClient() {
   const queryClient = new QueryClient({
+    queryCache: new QueryCache({ onError: (error) => handleGlobalApiError(error) }),
+    mutationCache: new MutationCache({ onError: (error) => handleGlobalApiError(error) }),
     defaultOptions: {
-      queries: { staleTime: 30 * ONE_SECOND_MS, gcTime: ONE_DAY_MS, retry: (failureCount, error) => !(error instanceof ApiError && error.status === 401) && failureCount < 1, networkMode: "offlineFirst" },
+      queries: { staleTime: 30 * ONE_SECOND_MS, gcTime: ONE_DAY_MS, retry: shouldRetryQuery, networkMode: "offlineFirst" },
       mutations: { networkMode: "offlineFirst" },
     },
   });

@@ -25,6 +25,7 @@ export interface PostSettingsStepProps {
   readonly thumbnailUri: string | null;
   readonly mediaSummary: string | null;
   readonly preview?: ReactNode;
+  readonly quotePreview?: ReactNode;
   readonly publishing: boolean;
   readonly publishButtonTitle: string;
   readonly publishErrorMessage: string | null;
@@ -62,6 +63,7 @@ export function PostSettingsStep(props: PostSettingsStepProps) {
             </View>
           </View>
         )}
+        {props.quotePreview ?? null}
         <View>
           <SettingsLinkRow icon={<Users24Icon size={22} />} label="Tag people" value={describeTagged(value)} hint="Search for people to tag in this post" onPress={() => setOpenSheet("tags")} />
           <SettingsLinkRow

@@ -24,38 +24,41 @@ export interface PostActionRowProps {
 
 export function PostActionRow({ post, isOwnPost, onToggleLike, onPressComments, onRepost, onShare, onPressAnalytics, likePopKey }: PostActionRowProps) {
   const [viewsInfoOpen, setViewsInfoOpen] = useState(false);
-  const { isSaved, savedDelta, toggleSaved } = useSaveToggle(saveTargetForPost(post), post.bookmarked);
+  const { isSaved, toggleSaved } = useSaveToggle(saveTargetForPost(post), post.bookmarked);
   return (
     <View style={styles.row}>
-      <PostActionButton
-        label={post.liked ? "Unlike" : "Like"}
-        tone="like"
-        count={post.likes}
-        active={post.liked}
-        popOnActivate
-        popKey={likePopKey}
-        onPress={onToggleLike}
-        renderIcon={(ink) => <LikeActionIcon size={ICON_SIZE} color={ink} filled={post.liked} />}
-      />
-      <PostActionButton label="Reply" tone="reply" count={post.comments} onPress={onPressComments} renderIcon={(ink) => <ReplyActionIcon size={ICON_SIZE} color={ink} />} />
-      <PostActionButton label="Repost" tone="repost" count={post.reposts} onPress={onRepost} renderIcon={(ink) => <RepostActionIcon size={ICON_SIZE} color={ink} />} />
-      <PostActionButton
-        label={isOwnPost ? "Views, open post analytics" : "Views, what are views"}
-        tone="reply"
-        count={post.views}
-        onPress={isOwnPost ? onPressAnalytics : () => setViewsInfoOpen(true)}
-        renderIcon={(ink) => <ViewsActionIcon size={ICON_SIZE} color={ink} />}
-      />
-      <PostActionButton
-        label={isSaved ? "Remove post from saved" : "Save post"}
-        tone="bookmark"
-        count={Math.max((post.saveCount ?? 0) + savedDelta, 0)}
-        active={isSaved}
-        popOnActivate
-        onPress={() => void toggleSaved()}
-        renderIcon={(ink) => <BookmarkActionIcon size={ICON_SIZE} color={ink} filled={isSaved} />}
-      />
-      <PostActionButton label="Share" tone="reply" onPress={onShare} renderIcon={(ink) => <ShareActionIcon size={ICON_SIZE} color={ink} />} />
+      <View style={styles.primaryActions}>
+        <PostActionButton
+          label={post.liked ? "Unlike" : "Like"}
+          tone="like"
+          count={post.likes}
+          active={post.liked}
+          popOnActivate
+          popKey={likePopKey}
+          onPress={onToggleLike}
+          renderIcon={(ink) => <LikeActionIcon size={ICON_SIZE} color={ink} filled={post.liked} />}
+        />
+        <PostActionButton label="Reply" tone="reply" count={post.comments} onPress={onPressComments} renderIcon={(ink) => <ReplyActionIcon size={ICON_SIZE} color={ink} />} />
+        <PostActionButton label="Repost" tone="repost" count={post.reposts} onPress={onRepost} renderIcon={(ink) => <RepostActionIcon size={ICON_SIZE} color={ink} />} />
+        <PostActionButton
+          label={isOwnPost ? "Views, open post analytics" : "Views, what are views"}
+          tone="reply"
+          count={post.views}
+          onPress={isOwnPost ? onPressAnalytics : () => setViewsInfoOpen(true)}
+          renderIcon={(ink) => <ViewsActionIcon size={ICON_SIZE} color={ink} />}
+        />
+      </View>
+      <View style={styles.secondaryActions}>
+        <PostActionButton
+          label={isSaved ? "Remove post from saved" : "Save post"}
+          tone="bookmark"
+          active={isSaved}
+          popOnActivate
+          onPress={() => void toggleSaved()}
+          renderIcon={(ink) => <BookmarkActionIcon size={ICON_SIZE} color={ink} filled={isSaved} />}
+        />
+        <PostActionButton label="Share" tone="reply" onPress={onShare} renderIcon={(ink) => <ShareActionIcon size={ICON_SIZE} color={ink} />} />
+      </View>
       <ViewsExplainerSheet visible={viewsInfoOpen} onClose={() => setViewsInfoOpen(false)} />
     </View>
   );
@@ -63,4 +66,6 @@ export function PostActionRow({ post, isOwnPost, onToggleLike, onPressComments, 
 
 const styles = StyleSheet.create({
   row: { paddingHorizontal: 16, flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
+  primaryActions: { flexDirection: "row", alignItems: "center", gap: 20 },
+  secondaryActions: { flexDirection: "row", alignItems: "center", gap: 0 },
 });

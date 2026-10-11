@@ -76,6 +76,7 @@ export function PostComposerPanel(props: PostComposerPanelProps) {
         thumbnailUri={draftMediaItems[0]?.previewUri ?? null}
         mediaSummary={describeDraftMedia(draftMediaItems)}
         preview={videoReplyStage}
+        quotePreview={props.quotePreview}
         publishing={props.publishing}
         publishButtonTitle={props.publishButtonTitle}
         publishErrorMessage={props.publishErrorMessage}

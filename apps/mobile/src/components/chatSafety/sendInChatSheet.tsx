@@ -72,7 +72,7 @@ export function SendInChatSheet({ reference, onClose }: SendInChatSheetProps) {
         {chats.isLoading ? (
           <ListSkeleton rows={4} avatarSize={40} />
         ) : chats.isError ? (
-          <ErrorState message="Couldn't load your chats." onRetry={() => chats.refetch()} />
+          <ErrorState error={chats.error} message="Couldn't load your chats." onRetry={() => chats.refetch()} />
         ) : (
           <FlatList
             style={styles.list}

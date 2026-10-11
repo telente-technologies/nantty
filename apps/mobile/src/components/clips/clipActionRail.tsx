@@ -4,7 +4,7 @@ import { Pressable, StyleSheet, View } from "react-native";
 import { SaveToggleButton } from "@/components/saves/saveToggleButton";
 import { Text } from "@/components/ui/text";
 import { usePostActionTint } from "@/components/feed/postActionButton";
-import { DotsThreeVertical24Icon, GiftActionIcon, LikeActionIcon, ReplyActionIcon, SendActionIcon, ViewsActionIcon } from "@/components/icons";
+import { DotsThreeVertical24Icon, GiftActionIcon, LikeActionIcon, ReplyActionIcon, ShareActionIcon, ViewsActionIcon } from "@/components/icons";
 import type { SaveTarget } from "@/types";
 import { formatCompactCount } from "@/utils/formatCount.util";
 
@@ -77,7 +77,7 @@ export function ClipActionRail(props: ClipActionRailProps) {
         <ReplyActionIcon size={RAIL_ICON_SIZE} color={color} />
       </RailButton>
       <RailButton label="Share" count={props.shares} onPress={props.onShare} foregroundColor={color}>
-        <SendActionIcon size={RAIL_ICON_SIZE} color={color} />
+        <ShareActionIcon size={RAIL_ICON_SIZE} color={color} />
       </RailButton>
       {props.saveTarget ? (
         <SaveToggleButton target={props.saveTarget} savedAccordingToServer={props.savedAccordingToServer ?? false} foregroundColor={color} saveCount={props.saveCount ?? 0} />

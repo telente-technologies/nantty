@@ -1,4 +1,4 @@
-import { StyleSheet, View } from "react-native";
+import { Pressable, StyleSheet, View } from "react-native";
 
 import { Text } from "@/components/ui/text";
 import { makeThemedStyles, useTheme } from "@/theme";
@@ -12,21 +12,21 @@ export function CreateModePill({ mode, onChangeMode }: { mode: CreateMode; onCha
   return (
     <View style={styles.pill} accessibilityRole="tablist">
       {availableModes.map((m) => {
+        const selected = m === mode;
         return (
-          <View key={m} style={styles.modeItem}>
-            <Text
-              size={13}
-              weight={500}
-              lineHeight={16.9}
-              color={m === mode ? colors.black : colors.textMuted}
-              accessibilityRole="tab"
-              accessibilityLabel={m.toUpperCase()}
-              accessibilityState={{ selected: m === mode }}
-              onPress={() => onChangeMode(m)}
-            >
+          <Pressable
+            key={m}
+            accessibilityRole="tab"
+            accessibilityLabel={m.toUpperCase()}
+            accessibilityState={{ selected }}
+            hitSlop={{ top: 6, bottom: 6 }}
+            onPress={() => onChangeMode(m)}
+            style={[styles.modeItem, selected ? styles.modeItemSelected : null]}
+          >
+            <Text size={13} weight={selected ? 700 : 500} lineHeight={16.9} color={selected ? colors.onPrimary : colors.textMuted}>
               {m.toUpperCase()}
             </Text>
-          </View>
+          </Pressable>
         );
       })}
     </View>
@@ -37,12 +37,13 @@ const useStyles = makeThemedStyles((colors) => StyleSheet.create({
   pill: {
     alignSelf: "center",
     height: 33,
-    paddingHorizontal: 12,
+    paddingHorizontal: 4,
     borderRadius: 999,
     backgroundColor: colors.textSubtle,
     flexDirection: "row",
     alignItems: "center",
-    gap: 12,
+    gap: 2,
   },
-  modeItem: { flexDirection: "row", alignItems: "center", gap: 3 },
+  modeItem: { height: 25, paddingHorizontal: 10, borderRadius: 999, alignItems: "center", justifyContent: "center" },
+  modeItemSelected: { backgroundColor: colors.primarySolid },
 }));
