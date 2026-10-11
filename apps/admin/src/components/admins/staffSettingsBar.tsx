@@ -30,7 +30,7 @@ export function StaffSettingsBar() {
   return (
     <>
       <CheckboxField label="A second superadmin must approve new superadmins" description={isSuperadmin ? "On by default. The creator cannot approve their own invitation." : "Only a superadmin can change this."} checked={settings.data.requireSecondSuperadminApproval} disabled={!isSuperadmin} onChange={(event) => setPendingValue(event.target.checked)} />
-      {pendingValue !== null ? <ConfirmActionDialog isOpen title="Change superadmin approval" confirmLabel="Save setting" requiresStepUp isBusy={mutation.isRunning} errorMessage={mutation.errorMessage} onConfirm={confirm} onClose={() => { mutation.clearError(); setPendingValue(null); }} /> : null}
+      {pendingValue !== null ? <ConfirmActionDialog intent="security" isOpen title="Change superadmin approval" confirmLabel="Save setting" requiresStepUp isBusy={mutation.isRunning} errorMessage={mutation.errorMessage} onConfirm={confirm} onClose={() => { mutation.clearError(); setPendingValue(null); }} /> : null}
     </>
   );
 }

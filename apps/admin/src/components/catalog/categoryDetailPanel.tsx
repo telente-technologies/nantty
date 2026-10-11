@@ -71,7 +71,7 @@ export function CategoryDetailPanel({ category, parentName, changeCounter, onClo
       {detail.errorMessage ? <ErrorBlock message={detail.errorMessage} onRetry={detail.reload} /> : null}
       {detail.isLoading && !detail.data ? <LoadingBlock lines={3} /> : null}
       {detail.data ? <AuditHistoryList entries={detail.data.history} /> : null}
-      <ConfirmActionDialog
+      <ConfirmActionDialog intent="tag"
         isOpen={isConfirmOpen}
         title={category.isActive ? `Deactivate ${category.name}?` : `Activate ${category.name}?`}
         consequences={

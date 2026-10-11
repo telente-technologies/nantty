@@ -69,7 +69,7 @@ export function IpClaimDecisionPanel({ claim, onDecided }: { readonly claim: IpC
         )}
       </div>
       {pendingAction ? (
-        <ConfirmActionDialog
+        <ConfirmActionDialog intent="copyright"
           isOpen
           title={decisionCopy[pendingAction].title}
           confirmLabel={decisionCopy[pendingAction].confirmLabel}

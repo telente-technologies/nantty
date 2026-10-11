@@ -44,10 +44,14 @@ export function AuditLogWorkspace() {
   const [actorId, setActorId] = useState("");
   const [fromDate, setFromDate] = useState("");
   const [toDate, setToDate] = useState("");
+  const [action, setAction] = useState("");
+  const [targetId, setTargetId] = useState(searchParams.get("targetId") ?? "");
+  const [requestId, setRequestId] = useState("");
+  const [stepUpOnly, setStepUpOnly] = useState(false);
   const [cursor, setCursor] = useState<string | undefined>();
   const [selectedEntry, setSelectedEntry] = useState<AuditLogEntry | null>(null);
   const [isExporting, setIsExporting] = useState(false);
-  const filters: AuditLogFilters = { search, area, actorId, from: convertDateInputToIso(fromDate, false), to: convertDateInputToIso(toDate, true), targetType: searchParams.get("targetType") ?? undefined, targetId: searchParams.get("targetId") ?? undefined, cursor };
+  const filters: AuditLogFilters = { search, area, actorId, from: convertDateInputToIso(fromDate, false), to: convertDateInputToIso(toDate, true), targetType: searchParams.get("targetType") ?? undefined, targetId: targetId.trim() || undefined, action: action.trim() || undefined, requestId: requestId.trim() || undefined, stepUp: stepUpOnly || undefined, cursor };
   const list = useAdminQuery((signal) => fetchAuditLog(filters, signal), JSON.stringify(filters));
   const facets = useAdminQuery((signal) => fetchAuditFacets(signal), "facets");
 
@@ -82,6 +86,10 @@ export function AuditLogWorkspace() {
         <SelectField label="Admin" isLabelHidden value={actorId} onChange={(event) => resetToFirstPage(setActorId)(event.target.value)} options={[{ value: "", label: "All admins" }, ...(facets.data?.actors ?? []).map((actor) => ({ value: actor.id, label: actor.name }))]} />
         <TextField label="From" type="date" value={fromDate} onChange={(event) => resetToFirstPage(setFromDate)(event.target.value)} />
         <TextField label="To" type="date" value={toDate} onChange={(event) => resetToFirstPage(setToDate)(event.target.value)} />
+        <TextField label="Action" isLabelHidden placeholder="Exact action, e.g. user.banned" value={action} onChange={(event) => resetToFirstPage(setAction)(event.target.value)} />
+        <TextField label="Target ID" isLabelHidden placeholder="Target ID" value={targetId} onChange={(event) => resetToFirstPage(setTargetId)(event.target.value)} />
+        <TextField label="Request ID" isLabelHidden placeholder="Request ID" value={requestId} onChange={(event) => resetToFirstPage(setRequestId)(event.target.value)} />
+        <SelectField label="Step-up" isLabelHidden value={stepUpOnly ? "yes" : ""} onChange={(event) => resetToFirstPage(setStepUpOnly)(event.target.value === "yes")} options={[{ value: "", label: "All actions" }, { value: "yes", label: "Step-up actions only" }]} />
       </Toolbar>
       {list.errorMessage ? <ErrorBlock message={list.errorMessage} onRetry={list.reload} /> : null}
       <DataTable caption="Audit log entries" columns={columns} rows={list.data?.items ?? []} readRowKey={(entry) => entry.id} isLoading={list.isLoading} onRowOpen={setSelectedEntry} selectedRowKey={selectedEntry?.id ?? null} emptyMessage="No entries match these filters." />

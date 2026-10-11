@@ -104,7 +104,7 @@ export function OfficialStorePanel({ brand, onChanged }: { readonly brand: Brand
       ) : null}
       {openDocument ? <BrandDocumentViewer brandId={brand.id} request={request} document={openDocument} onClose={() => setOpenDocument(null)} /> : null}
       {pendingAction ? (
-        <ConfirmActionDialog
+        <ConfirmActionDialog intent="store"
           isOpen
           title={decisionCopy[pendingAction].title}
           confirmLabel={decisionCopy[pendingAction].confirmLabel}

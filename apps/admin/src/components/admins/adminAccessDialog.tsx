@@ -59,7 +59,7 @@ export function AdminAccessDialog({ existingAdmin, onClose, onSaved }: AdminAcce
 
   const canSave = (role === "SUPERADMIN" || permissions.length > 0) && reason.trim().length >= 5 && (isEditing || (name.trim().length >= 2 && email.includes("@")));
   return (
-    <ModalDialog
+    <ModalDialog intent="team"
       isOpen
       width="wide"
       tone="secure"

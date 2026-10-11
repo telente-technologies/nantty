@@ -73,7 +73,7 @@ export function FeatureDetailPanel({ feature, changeCounter, onClose, onEdit, on
       {detail.isLoading && !detail.data ? <LoadingBlock lines={3} /> : null}
       {detail.errorMessage ? <ErrorBlock message={detail.errorMessage} onRetry={detail.reload} /> : null}
       {detail.data ? <AuditHistoryList entries={detail.data.history} /> : null}
-      <ConfirmActionDialog
+      <ConfirmActionDialog intent="publish"
         isOpen={isConfirmOpen}
         title={feature.isPublished ? `Unpublish “${feature.title}”?` : `Publish “${feature.title}”?`}
         consequences={feature.isPublished ? ["It disappears from Mart home for every country within a few minutes.", "It stays here as a draft you can publish again."] : [`Buyers in ${feature.countries.join(", ")} see it from ${formatDateTime(feature.startsAt)}${feature.endsAt ? ` until ${formatDateTime(feature.endsAt)}` : ""}.`]}

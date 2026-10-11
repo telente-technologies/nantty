@@ -37,7 +37,7 @@ export function CategoryEditorDialog({ editingCategory, categories, onClose, onS
   }
 
   return (
-    <ModalDialog isOpen title={editingCategory ? `Edit ${editingCategory.name}` : "Add category"} description="Categories organise products in Mart and seller dashboards. Changes show in the app within a few minutes." onClose={onClose}>
+    <ModalDialog intent="tag" isOpen title={editingCategory ? `Edit ${editingCategory.name}` : "Add category"} description="Categories organise products in Mart and seller dashboards. Changes show in the app within a few minutes." onClose={onClose}>
       <form className={styles.form} onSubmit={submitCategory}>
         <div className={styles.twoColumns}>
           <TextField label="Name" value={name} onChange={(event) => setName(event.target.value)} maxLength={60} required error={readIssueMessageForField(saveMutation.validationIssues, "name")} />

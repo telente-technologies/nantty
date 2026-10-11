@@ -103,7 +103,7 @@ export function AdminDetailPanel({ adminId, onClose, onEditAccess, onChanged }: 
         </>
       ) : null}
       {pendingAction ? (
-        <ConfirmActionDialog
+        <ConfirmActionDialog intent="security"
           isOpen
           title={stateActionCopy[pendingAction].title}
           confirmLabel={stateActionCopy[pendingAction].confirmLabel}

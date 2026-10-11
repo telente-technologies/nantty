@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 
+import { requestConfirmation } from "@zudomart/web-kit";
+
 import { Button } from "@/components/ui/button";
 import { InlineError } from "@/components/ui/feedback";
 import { TextField } from "@/components/ui/formFields";
@@ -39,14 +41,18 @@ export function PasskeysCard({ passkeys, onChanged }: { readonly passkeys: reado
   }
 
   async function removePasskey(passkey: AdminPasskey) {
-    if (!window.confirm(`Remove the passkey "${passkey.label}"?`)) return;
-    try {
-      await removeOwnPasskey(passkey.id);
-      showToast("Passkey removed.");
-      onChanged();
-    } catch (error) {
-      showToast(readErrorMessageForDisplay(error), "error");
-    }
+    const removed = await requestConfirmation({
+      title: `Remove "${passkey.label}"?`,
+      description: "You won't be able to sign in with this passkey any more.",
+      confirmLabel: "Remove passkey",
+      tone: "danger",
+      intent: "passkey",
+      onConfirm: () => removeOwnPasskey(passkey.id),
+      describeError: readErrorMessageForDisplay,
+    });
+    if (!removed) return;
+    showToast("Passkey removed.");
+    onChanged();
   }
 
   return (
