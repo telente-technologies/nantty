@@ -8,14 +8,13 @@ import { useSession } from "@/components/providers/sessionProvider";
 import { FeedTopicFilterRow, type FeedMode } from "@/components/feed/feedTopicFilterRow";
 import { PostCard } from "@/components/feed/postCard";
 import { PostFeedSkeleton } from "@/components/feed/postCardSkeleton";
-import { RetryButton, InlineLink } from "@/components/ui/controls";
+import { InlineLink } from "@/components/ui/controls";
 import { EmptyState, ErrorState, Spinner } from "@/components/ui/feedback";
 import { useInfiniteScrollSentinel } from "@/components/ui/useInfiniteScrollSentinel.hook";
 import { feedsService } from "@/services/feeds.service";
 import type { Post } from "@/types";
 
 import styles from "./home.module.css";
-import { AppIcon } from "@/components/ui/appIcon";
 
 function removeDuplicatePosts(posts: readonly Post[]): Post[] {
   const seenPostIds = new Set<string>();
@@ -47,9 +46,9 @@ function FeedSection({ feedMode, topicId, isGuest }: { readonly feedMode: FeedMo
   const posts = removeDuplicatePosts((feedQuery.data?.pages ?? []).flatMap((page) => page.data));
 
   if (feedQuery.isLoading) return <PostFeedSkeleton />;
-  if (feedQuery.isError) return <ErrorState description="We couldn't load your feed." action={<RetryButton onRetry={() => feedQuery.refetch()} />} />;
+  if (feedQuery.isError) return <ErrorState description="We couldn't load your feed." error={feedQuery.error} onRetry={() => void feedQuery.refetch()} />;
   if (posts.length === 0) {
-    return <EmptyState icon={<AppIcon name="sparkle24" size={28} />} title="Your feed is warming up" description="Follow a few people or topics and their posts will show up here." action={<InlineLink href="/explore">Find people to follow</InlineLink>} />;
+    return <EmptyState kind="feed" title="Your feed is warming up" description="Follow a few people or topics and their posts will show up here." action={<InlineLink href="/explore">Find people to follow</InlineLink>} />;
   }
 
   return (

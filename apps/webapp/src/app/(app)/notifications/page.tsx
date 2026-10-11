@@ -3,7 +3,6 @@
 import { MentionText } from "@/components/mentions/mentionText";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
-import { RetryButton } from "@/components/ui/controls";
 import { Button } from "@/components/ui/button";
 import { EmptyState, ErrorState, Skeleton } from "@/components/ui/feedback";
 import { notificationsService } from "@/services/notifications.service";
@@ -55,9 +54,9 @@ export default function NotificationsPage() {
       {notificationsQuery.isLoading ? (
         <NotificationListSkeleton />
       ) : notificationsQuery.isError ? (
-        <ErrorState description="We couldn't load your notifications." action={<RetryButton onRetry={() => notificationsQuery.refetch()} />} />
+        <ErrorState description="We couldn't load your notifications." error={notificationsQuery.error} onRetry={() => void notificationsQuery.refetch()} />
       ) : notifications.length === 0 ? (
-        <EmptyState title="You're all caught up" description="Order updates, replies and system messages will show up here." />
+        <EmptyState kind="notifications" title="You're all caught up" description="Order updates, replies and system messages will show up here." />
       ) : (
         <ul className={styles.list}>
           {notifications.map((notification) => (

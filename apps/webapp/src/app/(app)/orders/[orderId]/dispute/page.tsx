@@ -83,7 +83,7 @@ export default function OpenDisputePage({ params }: { readonly params: Promise<{
     return (
       <div className={styles.page}>
         {header}
-        <ErrorState title="A dispute is already open for this order" description="You can follow it and message support from the dispute page." action={<Link href={`/disputes/${encodeURIComponent(escrowQuery.data.disputeId)}`}>View dispute</Link>} />
+        <ErrorState kind="alreadyDone" title="A dispute is already open for this order" description="You can follow it and message support from the dispute page." action={<Link href={`/disputes/${encodeURIComponent(escrowQuery.data.disputeId)}`}>View dispute</Link>} />
       </div>
     );
   }

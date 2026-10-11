@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState, type FormEvent } from "react";
 
 import { Button } from "@/components/ui/button";
-import { RetryButton } from "@/components/ui/controls";
 import { ErrorState } from "@/components/ui/feedback";
 import { TextAreaField, TextField } from "@/components/ui/field";
 import { AppIcon } from "@/components/ui/appIcon";
@@ -86,7 +85,7 @@ export default function EditProfilePage() {
   };
 
   if (profile.isLoading) return <ProfileSkeleton label="Loading your profile" />;
-  if (profile.isError || !profile.data) return <ErrorState description="Couldn't load your profile." action={<RetryButton onRetry={() => profile.refetch()} />} />;
+  if (profile.isError || !profile.data) return <ErrorState description="Couldn't load your profile." error={profile.error} onRetry={() => void profile.refetch()} />;
   const bannerUrl = banner?.previewUrl ?? profile.data.bannerUrl;
 
   return (

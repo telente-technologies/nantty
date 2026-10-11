@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 
 import { SignInRequiredState } from "@/components/auth/signInRequiredState";
-import { RetryButton, InlineLink } from "@/components/ui/controls";
+import { InlineLink } from "@/components/ui/controls";
 import { EmptyState, ErrorState, Skeleton } from "@/components/ui/feedback";
 import { LiveIcon } from "@/components/ui/icons";
 import { Avatar, MediaImage } from "@/components/ui/media";
@@ -44,9 +44,9 @@ export default function LivePage() {
           ))}
         </div>
       ) : livesQuery.isError ? (
-        <ErrorState error={livesQuery.error} description="We couldn't load live streams." action={<RetryButton onRetry={() => livesQuery.refetch()} />} />
+        <ErrorState error={livesQuery.error} description="We couldn't load live streams." onRetry={() => void livesQuery.refetch()} />
       ) : (livesQuery.data ?? []).length === 0 ? (
-        <EmptyState icon={<LiveIcon size={28} />} title="Nobody is live right now" description="Follow creators to hear when they go live." action={<InlineLink href="/clips">Watch clips instead</InlineLink>} />
+        <EmptyState kind="lives" title="Nobody is live right now" description="Follow creators to hear when they go live." action={<InlineLink href="/clips">Watch clips instead</InlineLink>} />
       ) : (
         <ul className={styles.grid}>
           {livesQuery.data?.map((live) => (

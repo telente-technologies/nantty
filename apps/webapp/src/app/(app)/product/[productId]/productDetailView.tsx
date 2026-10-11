@@ -11,7 +11,6 @@ import { ContentActionsMenu } from "@/components/actions/contentActionsMenu";
 import { ShareToChatButton } from "@/components/actions/shareToChatButton";
 import { SaveToggleButton } from "@/components/saves/saveToggleButton";
 import { Button } from "@/components/ui/button";
-import { RetryButton } from "@/components/ui/controls";
 import { ErrorState, Badge } from "@/components/ui/feedback";
 import { Avatar } from "@/components/ui/media";
 import { StarIcon, StoreIcon } from "@/components/ui/icons";
@@ -59,7 +58,7 @@ export function ProductDetailView({ productId, initialProduct }: { readonly prod
 
   if (productQuery.isLoading) return <ProductDetailSkeleton />;
   if (productQuery.isError || !productQuery.data) {
-    return <ErrorState title="Product unavailable" description="This product may have been removed." action={<RetryButton onRetry={() => productQuery.refetch()} />} />;
+    return <ErrorState title="Product unavailable" description="This product may have been removed." error={productQuery.error} onRetry={() => void productQuery.refetch()} />;
   }
 
   const product = productQuery.data;

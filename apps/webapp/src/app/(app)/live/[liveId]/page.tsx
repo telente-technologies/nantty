@@ -2,7 +2,8 @@
 
 import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
-import { use, useState } from "react";
+import { use, useEffect, useState } from "react";
+import { isLiveVideoSupported } from "@zudomart/web-kit";
 
 import { ContentActionsMenu } from "@/components/actions/contentActionsMenu";
 import { useFollowUser } from "@/components/follow/useFollowUser.hook";
@@ -14,7 +15,6 @@ import { LiveReportDialog } from "@/components/live/liveReportDialog";
 import { LiveVideoPlayer } from "@/components/live/liveVideoPlayer";
 import { LiveSafetyHostBanner, LiveSafetyOverlay } from "@/components/live/liveSafetyNotices";
 import styles from "@/components/live/liveRoom.module.css";
-import { RetryButton } from "@/components/ui/controls";
 import { ErrorState, Skeleton } from "@/components/ui/feedback";
 import { MediaImage } from "@/components/ui/media";
 import { liveService } from "@/services/webActions.service";
@@ -36,6 +36,8 @@ export default function LiveRoomPage({ params }: { readonly params: Promise<{ re
   const liveQuery = useQuery({ queryKey: ["live", liveId], queryFn: () => liveService.fetchLiveSession(liveId), retry: false, refetchInterval: (query) => pollIntervalForLiveStatus(query.state.data?.status) });
   const [isReportOpen, setIsReportOpen] = useState(false);
   const { viewer } = useSession();
+  const [canPlayLiveVideo, setCanPlayLiveVideo] = useState(true);
+  useEffect(() => setCanPlayLiveVideo(isLiveVideoSupported()), []);
 
   if (liveQuery.isLoading) {
     return (
@@ -45,7 +47,7 @@ export default function LiveRoomPage({ params }: { readonly params: Promise<{ re
       </div>
     );
   }
-  if (shouldShowLiveRoomError(!!liveQuery.data, liveQuery.isError) || !liveQuery.data) return <ErrorState description="This live isn't available." action={<RetryButton onRetry={() => liveQuery.refetch()} />} />;
+  if (shouldShowLiveRoomError(!!liveQuery.data, liveQuery.isError) || !liveQuery.data) return <ErrorState subject="live" description="This live isn't available." error={liveQuery.error} onRetry={() => void liveQuery.refetch()} />;
 
   const live = liveQuery.data;
   const roomStatus = readLiveRoomStatus(live.status);
@@ -58,7 +60,9 @@ export default function LiveRoomPage({ params }: { readonly params: Promise<{ re
     <div className={styles.room}>
       <div className={styles.main}>
         <div className={styles.stage}>
-          {isLive && !(isPausedForSafety && !isHostView) ? (
+          {isLive && !canPlayLiveVideo ? (
+            <ErrorState variant="compact" error={{ code: "WEBRTC_UNAVAILABLE" }} />
+          ) : isLive && !(isPausedForSafety && !isHostView) ? (
             <LiveVideoPlayer
               liveId={live.id}
               hostId={live.host.id}

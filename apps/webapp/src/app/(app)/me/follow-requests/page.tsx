@@ -5,7 +5,6 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
-import { RetryButton } from "@/components/ui/controls";
 import { EmptyState, ErrorState, Skeleton } from "@/components/ui/feedback";
 import { ArrowLeftIcon } from "@/components/ui/icons";
 import { Avatar } from "@/components/ui/media";
@@ -39,7 +38,7 @@ export default function FollowRequestsPage() {
       {requests.isPending ? (
         <div className={styles.list} aria-hidden="true">{[0, 1, 2].map((index) => <Skeleton key={index} height={56} />)}</div>
       ) : requests.isError ? (
-        <ErrorState description="Couldn't load follow requests." action={<RetryButton onRetry={() => requests.refetch()} />} />
+        <ErrorState description="Couldn't load follow requests." error={requests.error} onRetry={() => void requests.refetch()} />
       ) : requests.data.data.length === 0 ? (
         <EmptyState title="No pending requests" />
       ) : (

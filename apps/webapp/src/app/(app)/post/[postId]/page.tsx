@@ -7,11 +7,9 @@ import { use } from "react";
 import { ConversationPanel } from "@/components/feed/thread/conversationPanel";
 import { PostCard } from "@/components/feed/postCard";
 import { PostCardSkeleton } from "@/components/feed/postCardSkeleton";
-import { RetryButton } from "@/components/ui/controls";
 import { ErrorState } from "@/components/ui/feedback";
 import { ArrowLeftIcon } from "@/components/ui/icons";
 import { postsService } from "@/services/posts.service";
-import { classifyContentLoadFailure, contentLoadFailureCopy } from "@/utils/contentAvailability.util";
 
 import styles from "./page.module.css";
 
@@ -28,11 +26,7 @@ export default function PostDetailPage({ params }: { readonly params: Promise<{ 
       {postQuery.isLoading ? (
         <PostCardSkeleton />
       ) : postQuery.isError || !postQuery.data ? (
-        (() => {
-          const failure = classifyContentLoadFailure(postQuery.error);
-          const copy = contentLoadFailureCopy.post[failure];
-          return <ErrorState title={copy.title} description={copy.description} action={failure === "failed" ? <RetryButton onRetry={() => postQuery.refetch()} /> : undefined} />;
-        })()
+        <ErrorState error={postQuery.error} subject="post" onRetry={() => void postQuery.refetch()} />
       ) : (
         <>
           <h1 className="visuallyHidden">Post by {postQuery.data.author.name}</h1>

@@ -11,7 +11,6 @@ import { EscrowExplainerCard, EscrowSummaryCard, EscrowTimeline } from "@/compon
 import styles from "@/components/escrow/escrow.module.css";
 import { useSession } from "@/components/providers/sessionProvider";
 import { Button } from "@/components/ui/button";
-import { RetryButton } from "@/components/ui/controls";
 import { Dialog } from "@/components/ui/dialog";
 import { ErrorState } from "@/components/ui/feedback";
 import { ArrowLeftIcon } from "@/components/ui/icons";
@@ -51,9 +50,9 @@ export default function EscrowStatusPage({ params }: { readonly params: Promise<
       <div className={styles.page}>
         {header}
         {gone ? (
-          <ErrorState title="No payment protection for this order" description="This order was paid directly, or it belongs to another account." action={<Link href="/orders">Your orders</Link>} />
+          <ErrorState kind="orderNotFound" title="No payment protection for this order" description="This order was paid directly, or it belongs to another account." action={<Link href="/orders">Your orders</Link>} />
         ) : (
-          <ErrorState title="Couldn't load the escrow status." error={escrowQuery.error} action={<RetryButton onRetry={() => escrowQuery.refetch()} />} />
+          <ErrorState title="Couldn't load the escrow status." error={escrowQuery.error} onRetry={() => void escrowQuery.refetch()} />
         )}
       </div>
     );

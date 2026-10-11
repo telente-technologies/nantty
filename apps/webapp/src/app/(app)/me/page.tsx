@@ -2,7 +2,6 @@
 
 import { ProfileView } from "@/components/profile/profileView";
 import { ErrorState } from "@/components/ui/feedback";
-import { RetryButton } from "@/components/ui/controls";
 import { usersService } from "@/services/users.service";
 import { useQuery } from "@tanstack/react-query";
 
@@ -14,7 +13,7 @@ export default function MePage() {
 
   if (profileQuery.isLoading) return <ProfileSkeleton label="Loading your profile" />;
   if (profileQuery.isError || !profileQuery.data) {
-    return <ErrorState description="Couldn't load your profile." action={<RetryButton onRetry={() => profileQuery.refetch()} />} />;
+    return <ErrorState description="Couldn't load your profile." error={profileQuery.error} onRetry={() => void profileQuery.refetch()} />;
   }
 
   return (

@@ -1,7 +1,6 @@
 "use client";
 
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { use, useState } from "react";
 
@@ -9,7 +8,6 @@ import { PostCard } from "@/components/feed/postCard";
 import { PostCardSkeleton } from "@/components/feed/postCardSkeleton";
 import { ThreadComposer } from "@/components/feed/thread/threadComposer";
 import { ThreadReplyBranch } from "@/components/feed/thread/threadReply";
-import { RetryButton } from "@/components/ui/controls";
 import { ErrorState } from "@/components/ui/feedback";
 import { ArrowLeftIcon } from "@/components/ui/icons";
 import { useInfiniteScrollSentinel } from "@/components/ui/useInfiniteScrollSentinel.hook";
@@ -17,7 +15,7 @@ import { postsService } from "@/services/posts.service";
 import { postThreadService } from "@/services/postThread.service";
 import type { Comment } from "@/types";
 import type { ThreadReply } from "@/types/postThread.type";
-import { classifyContentLoadFailure, contentLoadFailureCopy } from "@/utils/contentAvailability.util";
+import { classifyContentLoadFailure } from "@/utils/contentAvailability.util";
 
 import styles from "../../page.module.css";
 
@@ -56,16 +54,12 @@ export default function CommentThreadPage({ params }: { readonly params: Promise
       <h1 className="visuallyHidden">Thread</h1>
       {post.isLoading ? <PostCardSkeleton /> : post.data ? <PostCard post={post.data} surface="post_detail" /> : null}
       {postFailure && !threadFailure ? (
-        <ErrorState title={contentLoadFailureCopy.post[postFailure].title} description={contentLoadFailureCopy.post[postFailure].description} action={postFailure === "failed" ? <RetryButton onRetry={() => post.refetch()} /> : undefined} />
+        <ErrorState error={post.error} subject="post" onRetry={() => void post.refetch()} />
       ) : null}
       {thread.isLoading ? (
         <PostCardSkeleton />
       ) : threadFailure ? (
-        <ErrorState
-          title={contentLoadFailureCopy.reply[threadFailure].title}
-          description={contentLoadFailureCopy.reply[threadFailure].description}
-          action={threadFailure === "failed" ? <RetryButton onRetry={() => thread.refetch()} /> : <Link href="/">Go to your feed</Link>}
-        />
+        <ErrorState error={thread.error} subject="comment" onRetry={() => void thread.refetch()} />
       ) : focus && firstPage ? (
         <section aria-label="Replies in this thread">
           {firstPage.ancestors.map((ancestor, index) => (

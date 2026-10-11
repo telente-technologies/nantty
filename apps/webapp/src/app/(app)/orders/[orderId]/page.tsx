@@ -4,7 +4,6 @@ import Link from "next/link";
 import { use, useEffect, useState } from "react";
 
 import { Badge, ErrorState } from "@/components/ui/feedback";
-import { RetryButton } from "@/components/ui/controls";
 import { Button } from "@/components/ui/button";
 import { requestConfirmation } from "@/components/ui/confirmDialog";
 import { MediaImage } from "@/components/ui/media";
@@ -118,7 +117,7 @@ export default function OrderDetailPage({ params }: { readonly params: Promise<{
 
   if (orderQuery.isLoading) return <DetailSkeleton label="Loading order" blocks={3} />;
   if (orderQuery.isError || !orderQuery.data) {
-    return <ErrorState title="Order not found" description="This order may belong to another account." action={<RetryButton onRetry={() => orderQuery.refetch()} />} />;
+    return <ErrorState title="Order not found" description="This order may belong to another account." error={orderQuery.error} onRetry={() => void orderQuery.refetch()} />;
   }
 
   const order = orderQuery.data;

@@ -6,7 +6,6 @@ import { use } from "react";
 
 import { PostCard } from "@/components/feed/postCard";
 import { PostCardSkeleton } from "@/components/feed/postCardSkeleton";
-import { RetryButton } from "@/components/ui/controls";
 import { EmptyState, ErrorState } from "@/components/ui/feedback";
 import { ArrowLeftIcon } from "@/components/ui/icons";
 import { useInfiniteScrollSentinel } from "@/components/ui/useInfiniteScrollSentinel.hook";
@@ -35,7 +34,7 @@ export default function PostQuotesPage({ params }: { readonly params: Promise<{ 
       {quotesQuery.isLoading ? (
         <PostCardSkeleton />
       ) : quotesQuery.isError ? (
-        <ErrorState description="Quotes didn't load." action={<RetryButton onRetry={() => quotesQuery.refetch()} />} />
+        <ErrorState description="Quotes didn't load." error={quotesQuery.error} onRetry={() => void quotesQuery.refetch()} />
       ) : quotes.length === 0 ? (
         <EmptyState title="No quotes to show" description="Quotes from private accounts or ones you can't see stay hidden." />
       ) : (
