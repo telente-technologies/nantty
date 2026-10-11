@@ -2,7 +2,7 @@
 
 Phase 1 spec (research and design, no code changed). Written 2026-10-10. It replaces Paystack with Flutterwave in go-money. Each user's money sits in their own Flutterwave **payout subaccount (PSA)**. Our double-entry ledger stays the source of truth.
 
-Related: [`paystack.md`](paystack.md), [`paystackWalletKycPlan.md`](paystackWalletKycPlan.md) (licence analysis, CBN tiers), [`smileId.md`](smileId.md).
+Related: [`smileId.md`](smileId.md). The licence analysis and CBN tiers, the Paystack reference and the checkout and payout rules that used to live in separate documents are Appendices A, B and C below.
 
 **Not legal advice.** Fund ownership in a PSA is undocumented (section 9). Counsel must confirm the model before launch.
 
@@ -379,7 +379,7 @@ We keep **our own renewal engine** (`subscriptions/.../renewalEngine.service.go`
 
 | Level | What the user can do | NG | GH | KE | ZA | Others |
 |---|---|---|---|---|---|---|
-| **L0** (email + phone OTP) | Browse; buy by card or checkout methods; coins and boosts by card. **No PSA, no deposits, no withdrawals** | — | — | — | — | — |
+| **L0** (email only) | Browse; buy by card or checkout methods; coins and boosts by card. **No PSA, no deposits, no withdrawals** | — | — | — | — | — |
 | **L1** (payout identity) | PSA created; deposits; withdrawals to an own-name account up to the tier caps; receive seller and creator earnings | BVN consent `POST /v3/bvn/verifications` → `GET /v3/bvn/verifications/{ref}` (name, DOB, phone, NIN, `watchlisted`) + `POST /v3/accounts/resolve` name match. Option: Mono Lookup (separate contract) if the BVN feature is refused | Smile ID Ghana Card + Flutterwave `accounts/resolve` (GH bank or MoMo) name match | Smile ID national ID; bank-name check not available in Flutterwave (Q16) | Smile ID SA ID; bank check through Smile ID or manual review | Smile ID |
 | **L2** (biometric) | Higher caps, the checkmark, business plans | Smile ID Biometric KYC (liveness + BVN/NIN photo match). Flutterwave's BVN `faceImage` can be a second match source | Smile ID biometric | Smile ID | Smile ID | Smile ID |
 
@@ -391,7 +391,7 @@ Identity sources confirmed against every reference page (updated from API refere
 - **KE and ZA:** no name check in either version, so the Smile ID path or manual review stays.
 - There is no NIN, Ghana Card, Kenyan ID or SA ID endpoint in v2, v3 or v4, so Smile ID remains the L1 check outside NG. That keeps the owner's rule (no selling outside NG without identity verification) unchanged.
 
-The `watchlisted` flag or a sanctions hit means a manual review before any PSA is created. Starting caps are the CBN-tier-modelled limits in `paystackWalletKycPlan.md` §5.2; confirm the PSA tier with Flutterwave (Q3). BVN data (including the face image) is sensitive personal data under NDPA s.30. Store only what the decision needs, encrypted with `secretbox`, and discard the image after the match.
+The `watchlisted` flag or a sanctions hit means a manual review before any PSA is created. Starting caps are the CBN-tier-modelled limits in [Appendix A.3](#a3-cbn-kyc-tiers-and-zudomart-limits), now replaced by the owner-approved limits; confirm the PSA tier with Flutterwave (Q3). BVN data (including the face image) is sensitive personal data under NDPA s.30. Store only what the decision needs, encrypted with `secretbox`, and discard the image after the match.
 
 ---
 
@@ -520,38 +520,38 @@ The email above has been sent and stays unchanged. These came out of reading the
 
 ## 9. Bug classes in the current Paystack system, and the control for each
 
-Every row was checked in the code on 2026-10-10, not taken from the reports. The reports are `security/audit/reports/GO_BACKEND_DEEP_SCAN.md`, `GO_FINANCIAL_AUDIT_REPORT.md`, `GO_DEEPSCAN_REPORT.md` and `DEEPSCAN_REPORT.md`. `docs/CHANGELOG.md` has no payment entries.
+Every row was checked in the code on 2026-10-10, not taken from the reports. Rows marked "stage 1" were fixed and regression-tested in the phase 2 stage 1 build the same day. The reports are `security/audit/reports/GO_BACKEND_DEEP_SCAN.md`, `GO_FINANCIAL_AUDIT_REPORT.md`, `GO_DEEPSCAN_REPORT.md` and `DEEPSCAN_REPORT.md`. `docs/CHANGELOG.md` has no payment entries.
 
 | # | Bug class | Finding | Status today | Control in this design |
 |---|---|---|---|---|
-| B1 | Payout retried after a timeout pays twice, or is marked failed after the money left | MONEY-001 | **Fixed** (single-attempt POST, verify before fail) | S6 |
-| B2 | Webhook claimed before processing; redeliveries and the sweeper both process | MONEY-003 | **Open** (`webhookProcessing.service.go:44-68,148-172`: no lease, no `SKIP LOCKED`, bare goroutine) | S3 |
-| B3 | Amount or currency not verified | class | **Fixed for charges** (`paymentSettlement.service.go:113`). The webhook's charge id overrides the verified one (`:43`) | S2 (use the id from the verify response) |
-| B4 | Refund capacity consumed at request, never released on failure | MONEY-004 | **Open** (`paymentRefunds.service.go:54, 237-241`) | S8 |
-| B5 | Saved-card charge without an idempotency key or row lock | MONEY-005 | **Open** (`savedCards.controller.go:61-80`) | S4 |
-| B6 | Subscription checkout double-tap | MONEY-007 | **Open** (`connectedAccounts.routes.go:28`) | S4 |
+| B1 | Payout retried after a timeout pays twice, or is marked failed after the money left | MONEY-001 | **Fixed** (single-attempt POST, verify before fail). Stage 1 also: a failed verify GET keeps the payout processing; the saved-card charge POST is no longer retried blindly; all provider POSTs go through `providerHttp` (one attempt, unknown outcome → verify by reference) (`TestWithdrawalTimeoutThenProviderSuccessIsPaidExactlyOnce`) | S6 |
+| B2 | Webhook claimed before processing; redeliveries and the sweeper both process | MONEY-003 | **Fixed (stage 1, 2026-10-10)**: store-first inbox; `webhookInbox.service.go` claims with `FOR UPDATE SKIP LOCKED` + 5-minute lease token, bounded worker pool, backoff, dead letter after 12 attempts (`payments.webhookInboxAndRefunds_integration_test.go`) | S3 |
+| B3 | Amount or currency not verified | class | **Fixed (stage 1)**: the verified charge id wins over the webhook hint, and a provider charge already used by another intent fails the new intent (`chargeReused`) | S2 (use the id from the verify response) |
+| B4 | Refund capacity consumed at request, never released on failure | MONEY-004 | **Fixed (stage 1)**: `refunded_minor` = succeeded only, new `refund_in_flight_minor`; a failure releases it in the same transaction; `paymentRefund.failed` consumer alerts (`TestRefundFailingThenRetriedReleasesCapacityAndPaysOnce`) | S8 |
+| B5 | Saved-card charge without an idempotency key or row lock | MONEY-005 | **Fixed (stage 1)**: `Idempotency-Key` required, intent row locked and claimed once (`saved_card_charge_started_at`), single-attempt POST (`TestSavedCardDoubleTapChargesTheCardOnce`) | S4 |
+| B6 | Subscription checkout double-tap | MONEY-007 | **Fixed (stage 1)**: `Idempotency-Key` required on `POST /payments/subscriptions/checkout`, run through `RunIdempotentMoneyCommand` | S4 |
 | B7 | Webhook IP allowlist trusted `X-Forwarded-For`; open when unset | MONEY-006 | **Fixed** (REMEDIATIONS) | S1 |
-| B8 | Client header decides the charged price and currency | FLOW-001 | **Open for coins and ads** (`coins.controller.go:40,103`, `ads/.../httpRequest.util.go:89`). `ResolveChargingRegion` exists but is unused | S9 |
-| B9 | Second partial refund reports success without moving money | FLOW-002 | **Open** (`escrowSettlement.service.go:105-107`) | 3.3 |
-| B10 | Withdrawal stuck in `processing` with no transfer row | FLOW-003 | **Open** (`sellerPayouts.service.go:151-154` returns nil) | 3.4 step 2 |
-| B11 | Staff can reverse any journal kind, so ledger and module state diverge | MONEY-002 | **Open** (no allowlist in `journalReversal.service.go`) | S12 |
-| B12 | Paid order with no stock held | COM-001/002 | **COM-002 fixed**. **COM-001 partly**: no longer swallowed, but the payment is captured and the webhook retries forever with no refund | 3.3 |
+| B8 | Client header decides the charged price and currency | FLOW-001 | **Fixed (stage 1)**: coins, boosts and earnings conversion use `ResolveChargingRegion`; the gateway drops a client-sent CDN country unless `TRUST_CDN_COUNTRY_HEADER=true` (`TestCoinPurchasePriceComesFromTheServerNotTheRegionHeader`, `TestBoostPriceIgnoresATamperedRegionHeader`) | S9 |
+| B9 | Second partial refund reports success without moving money | FLOW-002 | **Fixed (stage 1)**: 409 `ESCROW_ALREADY_PARTIALLY_REFUNDED` unless an exact replay (`TestSecondDistinctPartialRefundIsRejectedAndMovesNoMoney`) | 3.3 |
+| B10 | Withdrawal stuck in `processing` with no transfer row | FLOW-003 | **Fixed (stage 1)**: transfer row created in the claim transaction; reconciler requeues a processing withdrawal with no row (`TestProcessingWithdrawalWithoutATransferRowIsQueuedAgainAndPaidOnce`) | 3.4 step 2 |
+| B11 | Staff can reverse any journal kind, so ledger and module state diverge | MONEY-002 | **Fixed (stage 1)**: staff reversal only for `ledger.correction`, `staff.adjustment`, `reconciliation.correction`; else 409 `JOURNAL_KIND_NOT_REVERSIBLE` (`TestStaffCanReverseOnlyAllowlistedJournalKinds`) | S12 |
+| B12 | Paid order with no stock held | COM-001/002 | **Fixed (stage 1)**: the same transaction cancels the order and enqueues `orderGroup.refundRequested`; the consumer acks (`TestPaidOrderWithoutStockIsCancelledAndRefundedExactlyOnce`) | 3.3 |
 | B13 | Store credit over-redeemed concurrently | COM-003 | **Appears fixed** (`storeCreditBalance.service.go:39` `FOR UPDATE`) | S5 |
-| B14 | Escrow fulfilment or timer set before the order transition commits; a repeated "delivered" resets the timer | COM-004/005, F12 | **Open** (`sellerOrderOperations.service.go:74-80,119-128`; `escrowFulfilment.service.go:48-50`) | S5, 3.3 |
+| B14 | Escrow fulfilment or timer set before the order transition commits; a repeated "delivered" resets the timer | COM-004/005, F12 | **Fixed (stage 1)**: escrow is driven by committed `orderGroup.shipped/delivered` outbox events; the timer is set once (`TestDeliveredEventSetsTheReleaseTimerOnceEvenAcrossReplaysAndDisputes`) | S5, 3.3 |
 | B15 | Integer overflow or underflow in money maths | F1/F2/F3/F5/F6 | **Fixed** with tests | decimal parser (2.1) |
 | B16 | Unbalanced journal entry on partial refund | F4 | **Fixed** (`escrowSettlement.service.go:150-154`) | — |
 | B17 | Escrow split loses minor units | F7 | **Fixed** (`AllocateByWeightsWithoutLosingMinorUnits`) | — |
 | B18 | Debt repaid then the full amount debited at withdrawal | F8 | **Not a money loss**: the ledger refuses a negative balance, so the user gets `INSUFFICIENT_FUNDS`. UX bug | 3.4 quote |
 | B19 | Clawback reuses `refunded` | F9 | By design, undocumented | `clawedBack` status |
 | B20 | Idempotency insert race | F10 | **Low risk**: Postgres serialises the conflicting insert, and the hash check runs | — |
-| B21 | Unsupported currency | F11 / F17 | F11 **fixed**; F17 (orders checkout) **open** | S9 |
-| B22 | Refund sent after commit without an outbox | F14 | **Partly** (resend relies on sweeps) | S3 |
-| B23 | Reconciliation by posted date, 72 h lag | F18 | **Open** | 2.3 |
-| B24 | Ads served on expired credit; shortfall written off | TRU-001 | **Partly fixed** (shortfall disables the account and is recorded); the serve-time gate still ignores expiry | 3.5 |
-| B25 | No withdrawal velocity limits, step-up or new-account cooldown | A9 + Go routes | **Open** (`POST /wallets/me/withdrawals` and `/payout-accounts` are `requireUser` only) | S7 |
-| B26 | Webhook processed in a goroutine that dies with the process | MONEY-003 | **Open** | S3 |
+| B21 | Unsupported currency | F11 / F17 | **Fixed (stage 1)**: checkout rejects a currency outside `ORDERS_CHECKOUT_CURRENCIES` with 422 `CHECKOUT_CURRENCY_NOT_SUPPORTED` before saving | S9 |
+| B22 | Refund sent after commit without an outbox | F14 | **Fixed (stage 1)**: `RequestRefundInTransaction` enqueues `paymentRefund.requested` in the same transaction; a go-money consumer sends it (post-commit sends remain as a fast path, claim-guarded) | S3 |
+| B23 | Reconciliation by posted date, 72 h lag | F18 | **Fixed (stage 1)**: settlements match by provider reference whatever the posting date; fresh entries inside `SettlementGrace` are `awaitingSettlement`, not breaks; pending intents re-verified for 30 days (`TestReconciliationMatchesByReferenceWhateverThePostedDate`) | 2.3 |
+| B24 | Ads served on expired credit; shortfall written off | TRU-001 | **Fixed (stage 1)**: the serve gate evaluates credit expiry at the slot's server time (`TestServeGateIgnoresExpiredAdCredit`) | 3.5 |
+| B25 | No withdrawal velocity limits, step-up or new-account cooldown | A9 + Go routes | **Fixed (stage 1)**: `X-Step-Up-Token` (`POST /auth/step-up`) on withdraw and payout-account changes; 3/day, 10-min gap, per-level daily cap, one in flight, 48 h new-account cooldown (`wallet.withdrawalSafety_integration_test.go`) | S7 |
+| B26 | Webhook processed in a goroutine that dies with the process | MONEY-003 | **Fixed (stage 1)**: no bare goroutine; the row is stored before 200 and a supervised worker loop claims it (see B2) | S3 |
 | B27 | A panic in a message handler crash-loops go-money | INFRA-001 | **Fixed** | — |
-| B28 | Float money | class | **Not present** (no `float64` outside a test fake) | decimal parser |
+| B28 | Float money | class | **Fixed (stage 1)**: Paystack `numberValue` no longer falls back to float; `platform/money.ParseMajorUnits` is exact | decimal parser |
 
 ---
 
@@ -564,31 +564,153 @@ Sizes: S ≤1 day, M 2–3 days, L 4–6 days. Run them in order; heavy test run
 - `Idempotency-Key` on every mutation and `x-step-up-token` for step-up;
 - decoders reject unknown fields.
 
-| # | Task | Files / modules | Size |
-|---|---|---|---|
-| P2.0 | Sandbox spike for Q1, Q4, Q8, Q9, Q10; record the results in §1. Also test F4 (`debit_subaccount` as `account_reference`), F9 (funding reference format) and `GET /payout-subaccounts?nuban=` (updated from API reference 2026-10-10) | scratch scripts only | S |
-| P2.1 | `ParseMajorUnits` and `FormatMajorUnits` (exact, currency exponent, comma-tolerant), with tests | `services/go/platform/money/money.decimal.go` (+_test) | S |
-| P2.2 | Webhook inbox: claim with lease and `SKIP LOCKED`; worker instead of goroutine; the sweeper claims too (B2, B26) | `payments/src/modules/gateway/services/webhookProcessing.service.go`, new `webhookInbox.service.go`; ent `webhookevent` + Atlas migration (`locked_until`) | M |
-| P2.3 | Split `FullPaymentProvider` into `PaymentProvider`, `WalletProvider`, `PayoutProvider`, `IdentityVerifier`; Paystack adapter keeps compiling | `payments/src/interfaces/*.interface.go`, `payments/src/container/payments.container.go` | M |
-| P2.4 | Flutterwave config + HTTP client (no retry on POST, 429 backoff on GET, env/key guard) | `payments/src/configs/payments.config.go` (`FLUTTERWAVE_*`), `payments/src/integrations/flutterwaveHttpClient.integration.go` | M |
-| P2.5 | Collections: Standard init with `payload_hash`, verify by id and by ref, tokenized charge, refund, chargebacks, banks, resolve; webhook `verif-hash` + parse (`charge.completed`, `transfer.completed`, PSA funding, `subscription.cancelled`, refund, chargeback) | `flutterwaveCharges.integration.go`, `flutterwaveRefunds.integration.go`, `flutterwaveDisputes.integration.go`, `flutterwaveWebhooks.integration.go` | L |
-| P2.6 | Wallet + payout adapter: PSA create/fetch/static accounts/balances/transactions, wallet moves, funding reversals, close; transfers with `debit_subaccount`, find by reference, fee | `flutterwaveWallets.integration.go`, `flutterwaveTransfers.integration.go` | L |
-| P2.7 | Fake Flutterwave server for tests (PSAs, fundings, transfers with injected timeouts, chargebacks) | `payments/src/integrations/paymentsTesting/fakeFlutterwave*.util.go` | L |
-| P2.8 | Schemas: `provider_wallets` (user, currency, provider, account_ref, barter_id, status, frozen_at), `provider_wallet_numbers`, `wallet_fundings` (unique provider ref), `provider_movements` (unique reference, kind, from/to, amount, status, attempts), `expected_migrations`; Atlas migration | `payments/src/databases/schema/*.schema.go`, `payments/src/migrations/` | M |
-| P2.9 | Ledger accounts and an allowlist of reversible kinds (B11) | `ledger/src/modules/journal/models/chartOfAccounts.model.go`, `journalReversal.service.go` | S |
-| P2.10 | KYC L1: BVN consent, result, resolve, name match; create the PSA at L1 | `payments/.../customerValidation.service.go`, `verificationLevels.service.go`, new `walletProvisioning.service.go`; `users` webhook for `bvn.completed` | M |
-| P2.11 | Deposits: funding handler, verify via the transactions list, deposit hold, fee sweep, rejection reversal | new `payments/.../walletFundings.service.go`, `wallet/src/modules/payouts/services/depositHolds.service.go` | L |
-| P2.12 | Escrow locked in the buyer's PSA: lock (card after settlement into the buyer PSA, wallet at once), release, refund, clawback status; drive delivery from the committed outbox event; fix B9, B12, B14 | `escrow/src/modules/escrows/services/escrowHolding|escrowSettlement|escrowFulfilment.service.go`, `orders/.../sellerOrderOperations.service.go`, `orders/.../orderPayment.service.go` | L |
-| P2.13 | Withdrawals on PSAs: step-up, velocity, 48 h new-account cooldown, name match, balance pre-check, one-row creation (B10, B18, B25) | `wallet/src/modules/payouts/routes/*`, `withdrawals.service.go`, `payoutRun.service.go`, `payments/.../sellerPayouts.service.go` | L |
-| P2.14 | Refund accounting fix (B4) and idempotency on saved-card charge and subscription checkout (B5, B6) | `paymentRefunds.service.go`, `savedCards.routes.go`, `savedCardCharges.service.go`, `connectedAccounts.routes.go`, `webSubscriptions.service.go` | M |
-| P2.15 | Renewals through tokenized charges; creator share hold and payout to the creator PSA | `subscriptions/.../renewalEngine.service.go`, `creators` payout run | M |
-| P2.16 | Ads, coins and boosts: card, plus wallet-to-main funding; use `ResolveChargingRegion` (B8); expiry-aware ad serve gate (B24) | `wallet/src/modules/adBalances/services/*`, `coins.controller.go`, `ads/src/utils/httpRequest.util.go`, `ads/.../adSettlement.service.go` | M |
-| P2.17 | Chargeback polling and responses (evidence via `POST /v3/upload_image`, then `PUT /v3/chargebacks/{id}`; updated from API reference 2026-10-10); recovery chain | `payments/.../providerDisputes.service.go`, `escrow/.../escrowChargebacks.service.go` | M |
-| P2.18 | Reconciliation jobs (section 2.3): per-PSA, main, settlements; cases and wallet freeze; alerts | new `payments/.../flutterwaveReconciliation.service.go`, `ledger/.../providerReconciliation.service.go` (B23) | M |
-| P2.19 | Feature flags and provider routing per flow; admin config UI | `payments` container, `apps/admin` configuration | S |
-| P2.20 | Frontends: replace `@paystack/inline-js` with the Standard link redirect; wallet screen shows the PSA account number, deposit hold and fees; withdrawal step-up; update `apiContract.md` files | `apps/webapp/src/utils/paystackCheckout.util.ts`, `apps/seller/src/utils/paystackCheckout.util.ts`, `apps/mobile/src/utils/savedCard.util.ts`, `apps/mobile/src/services/payments.service.ts`, wallet screens, `apps/*/package.json` | L |
-| P2.21 | Infra: secrets, NAT EIPs for whitelisting, WAF rule `/webhooks/flutterwave` (rate limit + header), egress allowlist `api.flutterwave.com` | `infra/aws/modules/platform/services.tf`, `variables.tf`, `infra/aws/modules/edge/waf.tf` | S |
-| P2.22 | Migration tooling: Paystack → PSA balance transfer job with `expected_migrations`; subscription re-card prompts | `wallet` + `subscriptions` jobs | M |
-| P2.23 | QA: frontend↔backend contract check; adversarial end-to-end runs (forged and replayed webhooks, timeout then retry, concurrent withdrawals, wrong-amount funding, reconciliation drift) against the fake server, then sandbox | `security/regression/*`, integration tests per module | L |
+| # | Task | Files / modules | Size | Status |
+|---|---|---|---|---|
+| P2.0 | Sandbox spike for Q1, Q4, Q8, Q9, Q10; record the results in §1. Also test F4 (`debit_subaccount` as `account_reference`), F9 (funding reference format) and `GET /payout-subaccounts?nuban=` (updated from API reference 2026-10-10) | scratch scripts only | S | **Open**: needs real sandbox keys (no code can prove Q1/Q4/Q8/Q9/Q10, F4, F9). |
+| P2.1 | `ParseMajorUnits` and `FormatMajorUnits` (exact, currency exponent, comma-tolerant), with tests | `services/go/platform/money/money.decimal.go` (+_test) | S | **Done (stage 1).** |
+| P2.2 | Webhook inbox: claim with lease and `SKIP LOCKED`; worker instead of goroutine; the sweeper claims too (B2, B26) | `payments/src/modules/gateway/services/webhookProcessing.service.go`, new `webhookInbox.service.go`; ent `webhookevent` + Atlas migration (`locked_until`) | M | **Done (stage 1).** Stage 2: dead letters listable, inspectable (redacted) and replayable by staff. |
+| P2.3 | Split `FullPaymentProvider` into `PaymentProvider`, `WalletProvider`, `PayoutProvider`, `IdentityVerifier`; Paystack adapter keeps compiling | `payments/src/interfaces/*.interface.go`, `payments/src/container/payments.container.go` | M | **Done (stage 1).** |
+| P2.4 | Flutterwave config + HTTP client (no retry on POST, 429 backoff on GET, env/key guard) | `payments/src/configs/payments.config.go` (`FLUTTERWAVE_*`), `payments/src/integrations/flutterwaveHttpClient.integration.go` | M | **Done (stages 1–2)**: `FLUTTERWAVE_*` config with test/live key guard, hash and merchant-id checks; adapter on the hardened client. |
+| P2.5 | Collections: Standard init with `payload_hash`, verify by id and by ref, tokenized charge, refund, chargebacks, banks, resolve; webhook `verif-hash` + parse (`charge.completed`, `transfer.completed`, PSA funding, `subscription.cancelled`, refund, chargeback) | `flutterwaveCharges.integration.go`, `flutterwaveRefunds.integration.go`, `flutterwaveDisputes.integration.go`, `flutterwaveWebhooks.integration.go` | L | **Done (stage 2)**: Standard checkout with `payload_hash`, verify by id then by `tx_ref`, tokenized charges pinned to the issuing email, refunds and refund lookup, chargebacks (poll + webhooks), banks, resolve (NG/GH), `verif-hash` + parser. UG resolve needs v4 (not built). |
+| P2.6 | Wallet + payout adapter: PSA create/fetch/static accounts/balances/transactions, wallet moves, funding reversals, close; transfers with `debit_subaccount`, find by reference, fee | `flutterwaveWallets.integration.go`, `flutterwaveTransfers.integration.go` | L | **Done (stage 2)**: PSA create (idempotent by alias email)/fetch/find-by-NUBAN/static accounts/balance/statement, PSA↔PSA, PSA→main and main→PSA moves, funding reversals and their listing, close; transfers always `skip_beneficiary_creation`, never the retry endpoint, verify by reference. |
+| P2.7 | Fake Flutterwave server for tests (PSAs, fundings, transfers with injected timeouts, chargebacks) | `payments/src/integrations/paymentsTesting/fakeFlutterwave*.util.go` | L | **Done (stage 2)**: `paymentsTesting/fakeFlutterwave*.util.go` + sandbox server (`TestServeFakeFlutterwaveForLocalApiSmoke`, `SANDBOX_PAYMENTS_PROVIDER=flutterwave`). |
+| P2.8 | Schemas: `provider_wallets` (user, currency, provider, account_ref, barter_id, status, frozen_at), `provider_wallet_numbers`, `wallet_fundings` (unique provider ref), `provider_movements` (unique reference, kind, from/to, amount, status, attempts), `expected_migrations`; Atlas migration | `payments/src/databases/schema/*.schema.go`, `payments/src/migrations/` | M | **Done (stage 2)**: `provider_wallets`, `provider_wallet_numbers`, `wallet_fundings`, `provider_movements`, `reconciliation_runs`, `reconciliation_cases`; unique provider charge id (with duplicate clean-up), unique transfer and funding references. `expected_migrations` not built (P2.22). |
+| P2.9 | Ledger accounts and an allowlist of reversible kinds (B11) | `ledger/src/modules/journal/models/chartOfAccounts.model.go`, `journalReversal.service.go` | S | **Done (stages 1–2)**: wallet outgoing/inbound/debt, direct-sale payable, chargeback receivable accounts. |
+| P2.10 | KYC L1: BVN consent, result, resolve, name match; create the PSA at L1 | `payments/.../customerValidation.service.go`, `verificationLevels.service.go`, new `walletProvisioning.service.go`; `users` webhook for `bvn.completed` | M | **Done (stage 2)**: BVN consent start/poll/webhook, name match (BVN vs legal name vs bank name, ≥0.85), watchlist → manual review, PSA at L1 plus a provisioning worker. |
+| P2.11 | Deposits: funding handler, verify via the transactions list, deposit hold, fee sweep, rejection reversal | new `payments/.../walletFundings.service.go`, `wallet/src/modules/payouts/services/depositHolds.service.go` | L | **Done (stage 2)**: funding webhook → NUBAN map → provider owner cross-check → statement verification → hold (24 h / 72 h first) → fee sweep movement → hold release job; staff rejection and bank reversals (debt + alert). |
+| P2.12 | Escrow locked in the buyer's PSA: lock (card after settlement into the buyer PSA, wallet at once), release, refund, clawback status; drive delivery from the committed outbox event; fix B9, B12, B14 | `escrow/src/modules/escrows/services/escrowHolding|escrowSettlement|escrowFulfilment.service.go`, `orders/.../sellerOrderOperations.service.go`, `orders/.../orderPayment.service.go` | L | **Done (stage 2)**: buyer-PSA lock (wallet and card after settlement), release PSA→PSA then commission PSA→main, refund unlock / card refund before settlement, partial refund, clawback (`clawedBack`) with seller debt, chargeback recovery chain; escrow refunds now outbox-only; seller-silence escalation after 48 h. |
+| P2.13 | Withdrawals on PSAs: step-up, velocity, 48 h new-account cooldown, name match, balance pre-check, one-row creation (B10, B18, B25) | `wallet/src/modules/payouts/routes/*`, `withdrawals.service.go`, `payoutRun.service.go`, `payments/.../sellerPayouts.service.go` | L | **Done (stage 2)**: withdrawals debit the user's PSA (`debit_subaccount`), balance pre-check, wallet debt and own-name checks, stage 1 step-up/velocity/cooldown kept. |
+| P2.14 | Refund accounting fix (B4) and idempotency on saved-card charge and subscription checkout (B5, B6) | `paymentRefunds.service.go`, `savedCards.routes.go`, `savedCardCharges.service.go`, `connectedAccounts.routes.go`, `webSubscriptions.service.go` | M | **Done (stage 1).** |
+| P2.15 | Renewals through tokenized charges; creator share hold and payout to the creator PSA | `subscriptions/.../renewalEngine.service.go`, `creators` payout run | M | **Partly (stage 2)**: renewals via tokenized charges with the pinned email; creator earnings paid main→creator PSA. Legacy Paystack-plan trials/bundles still need the Paystack Subscriptions API. |
+| P2.16 | Ads, coins and boosts: card, plus wallet-to-main funding; use `ResolveChargingRegion` (B8); expiry-aware ad serve gate (B24) | `wallet/src/modules/adBalances/services/*`, `coins.controller.go`, `ads/src/utils/httpRequest.util.go`, `ads/.../adSettlement.service.go` | M | **Done (stage 2)**: card paths unchanged through the adapter; wallet payment (`/payments/wallet-payments/{ref}`) and ads-from-wallet move PSA→main; COUNTRY_REQUIRED instead of a USD fallback (subscriptions too). Boosts stop when the post is deleted (`post.deleted`) or the owner cancels; unspent wallet/balance budget is refunded through the outbox, card budget stays in the ad balance, an undelivered free boost gives the month back. Owner-approved limits, admin-configurable (`payments.limits`, `seller.debtLimits`): order ₦5m, coins ₦500k, ads top-up ₦10m, wallet ₦50k/₦200k/₦5m a day by KYC tier, seller debt ₦10k/₦50k/₦200k by level (half elsewhere, converted). |
+| P2.17 | Chargeback polling and responses (evidence via `POST /v3/upload_image`, then `PUT /v3/chargebacks/{id}`; updated from API reference 2026-10-10); recovery chain | `payments/.../providerDisputes.service.go`, `escrow/.../escrowChargebacks.service.go` | M | **Done (stage 2)**: hourly poll of open and resolved chargebacks, withholding to `chargebackReceivable`, recovery buyer PSA → seller PSA → debt; evidence upload (`/upload_image`) not built. |
+| P2.18 | Reconciliation jobs (section 2.3): per-PSA, main, settlements; cases and wallet freeze; alerts | new `payments/.../flutterwaveReconciliation.service.go`, `ledger/.../providerReconciliation.service.go` (B23) | M | **Done (stage 2)**: daily run (wallet vs provider vs liabilities, below-locked, debt, unknown statement lines incl. `_RETRY_`, main balance, settlements, reversals, stuck movements) with cases, wallet freezes, outbox `reconciliation.alertRaised` and an EMF metric. |
+| P2.19 | Feature flags and provider routing per flow; admin config UI | `payments` container, `apps/admin` configuration | S | **Open**: per-flow flags not built; `PAYMENTS_PROVIDER` routes new intents. |
+| P2.20 | Frontends: replace `@paystack/inline-js` with the Standard link redirect; wallet screen shows the PSA account number, deposit hold and fees; withdrawal step-up; update `apiContract.md` files | `apps/webapp/src/utils/paystackCheckout.util.ts`, `apps/seller/src/utils/paystackCheckout.util.ts`, `apps/mobile/src/utils/savedCard.util.ts`, `apps/mobile/src/services/payments.service.ts`, wallet screens, `apps/*/package.json` | L | **Partly (stage 2)**: country picker in mobile and webapp checkout. Hosted-link redirect, wallet screens and copy are stage 4. |
+| P2.21 | Infra: secrets, NAT EIPs for whitelisting, WAF rule `/webhooks/flutterwave` (rate limit + header), egress allowlist `api.flutterwave.com` | `infra/aws/modules/platform/services.tf`, `variables.tf`, `infra/aws/modules/edge/waf.tf` | S | **Partly (stage 2)**: secrets wired, WAF hash rule + rate limit + log redaction. NAT EIPs and egress allowlist not done. |
+| P2.22 | Migration tooling: Paystack → PSA balance transfer job with `expected_migrations`; subscription re-card prompts | `wallet` + `subscriptions` jobs | M | **Open.** |
+| P2.23 | QA: frontend↔backend contract check; adversarial end-to-end runs (forged and replayed webhooks, timeout then retry, concurrent withdrawals, wrong-amount funding, reconciliation drift) against the fake server, then sandbox | `security/regression/*`, integration tests per module | L | **Done against the fake (stage 2)**; sandbox pending keys. |
 
 Critical path: P2.0 → P2.1–P2.4 → P2.5–P2.8 → P2.10–P2.13 → P2.18 → P2.23. The others run alongside once P2.8 lands.
+
+## Appendix A. Licence analysis and CBN tiers
+
+Moved here from the former `paystackWalletKycPlan.md` (2026-10-11). Sources and citations are in the git history of that file.
+
+### A.1 Where stored value starts
+
+1. **Holding funds.** A per-user balance that can be spent later, withdrawn or sent to others is stored value. CBN puts wallet and e-money issuing under the MMO licence (₦2bn capital per secondary sources), with nominee settlement accounts and NDIC pass-through cover (CBN 2020 licence categories, 2021 MMS Guidelines). A PSSP licence does not cover it. With Flutterwave the PSA is held **in the user's own name** by the licensed partner, so Zudomart keeps a ledger mirror and never holds the money (§1).
+2. **Outside stored value** (strongest to weakest; counsel to confirm): split at charge time to the seller; spend-from-earnings (set-off of money Zudomart already owes a seller or creator); prepaid ad credit usable only on Zudomart's ads, not transferable or withdrawable, refundable on closure; coins as closed-loop virtual items; escrow in a merchant balance (the old Paystack E2 grey area, removed by locking escrow in the buyer's own PSA).
+3. **Would cross the line:** cash top-ups into a balance Zudomart controls that become withdrawable; user-to-user cash transfers from such a balance; interest.
+
+### A.2 Verification levels
+
+| Level | Who | How (NG) | Unlocks |
+| --- | --- | --- | --- |
+| L0 Account | Everyone | Verified email (email-only login) | Browse, buy by card, coins, gifts sent, sell escrow-only under the debt and sales limits |
+| L1 Payout-verified | Sellers, creators, advertisers, wallet users | BVN consent and match against the legal and bank-account names (§5) | Wallet (PSA), withdrawals, creator cash, ads |
+| L2 Identity-verified | Checkmarks; anyone above the L1 limits | Smile ID Biometric KYC with BVN or NIN (liveness and face match) | Checkmarks, higher limits |
+| KYB | Gold business | Business-documents review | Gold; direct (non-escrow) payments |
+
+Bank-account validation answers "does this account belong to the BVN holder?", never "is this person present?". A stolen BVN plus a mule account passes it; it fails Smile ID's liveness and face match. So payouts use provider validation and checkmarks and high limits use Smile ID.
+
+### A.3 CBN KYC tiers and Zudomart limits
+
+Zudomart is not a wallet issuer, so CBN tier limits bind its licensed partner rather than Zudomart directly. Mirroring them keeps the AML posture defensible. The owner approved these limits on 2026-10-11; all are admin settings (`seller.debtLimits`, `payments.limits`):
+
+- **Wallet payments per day:** basic (L1) ₦50,000, mid (L2) ₦200,000, full (L2 + business verified) ₦5,000,000.
+- **One payment:** order ₦5,000,000, coins ₦500,000, ads top-up ₦10,000,000.
+- **Seller debt:** ₦10,000 (L0), ₦50,000 (L1), ₦200,000 (L2 or trusted); outside Nigeria half, converted.
+
+CBN tiers for reference (figures conflict between sources; confirm the current CDD Regulations text):
+
+| Tier | Identity | Single / daily limit | Max balance |
+| --- | --- | --- | --- |
+| 1 | Name, DOB, address, phone, photo; BVN **or** NIN mandatory since Dec 2023 | ₦50,000 single deposit / daily (some sources ₦30,000) | ₦300,000 |
+| 2 | BVN **and** NIN, verified ID | ₦200,000 daily (some sources ₦500,000) | ₦500,000 |
+| 3 | Full KYC (ID, address verification, BVN and NIN) | ₦5,000,000 daily | Unlimited |
+
+The CBN Dec 2023 circular: no new Tier 1 accounts or wallets without BVN or NIN; funded accounts without one go on "Post No Debit or Credit".
+
+### A.4 Unverified users and dormant balances (no forfeiture)
+
+- **Sales:** an unverified seller sells escrow-only; proceeds are kept for them and shown as "Ready once you verify". Nothing is forfeited (forfeiture is void and an offence risk under FCCPA ss.127, 129, 155). Terms state this before the first sale (FCCPA s.128).
+- **Creator cash:** earning features that create a cash liability (gift cash-out, creator subscriptions, ads revenue share) need L1 first. Unverified creators can still receive gifts as coins.
+- **Refunding the payer** is right only for undelivered orders, which escrow already handles.
+- **Dormant balances:** stay a liability; 12 months without login or verification marks the account dormant for reporting only; on deletion the balance stays payable within the retention period. The CBN July 2024 dormant-accounts guidelines (10 years to the Unclaimed Balances Trust Fund) and Finance Act 2020 s.77 (6 years, deposit money banks) probably bind the licensed partner rather than Zudomart; counsel decides. Never credit an unclaimed balance to revenue.
+- **Prepaid ad credit:** refund unused credit on account closure or on request after 30 days of inactivity (card-funded to source, earnings-funded back to Available), deducting the disclosed processing fee.
+
+### A.5 Questions for a Nigerian fintech lawyer
+
+1. Does spend-from-earnings (set-off against our own ad services) count as mobile money or e-money business under the CBN 2020 licence categories and the 2021 MMS Guidelines?
+2. Are prepaid ad credit and coins, usable only on Zudomart and not transferable or withdrawable, outside "e-money"?
+3. Is locking escrow in the buyer's own PSA (held by the licensed partner) free of any escrow licence, and how long may a lock last?
+4. Which KYC and AML duties apply to us as a marketplace (DNFBP and SCUML registration, NFIU reporting, applying CBN tier limits to payouts)?
+5. Unverified users' balances: the right disclosure under FCCPA ss.127–128, and any dormancy destination (CBN UBTF, Finance Act 2020 s.77, or neither).
+6. Is a "non-refundable prepaid balance" enforceable under FCCPA s.127?
+7. Data: NDPA s.30 consent for biometrics; ss.41–43 basis for transfers to Smile ID, Flutterwave and AWS; DPIA and NDPC registration.
+8. Ghana (local counsel): entity form, BoG PSP or PFTSP licensing under Act 987, DPC registration (Act 843), VAT Act 1151.
+
+## Appendix B. Paystack reference (fallback provider)
+
+Moved here from the former `docs/integrations/paystack.md` (2026-10-11). Paystack stays selectable with `PAYMENTS_PROVIDER=paystack` until P2.22 finishes the migration.
+
+### B.1 Fees (Nigeria, snapshot 2026-02-05)
+
+| Item | Fee |
+| --- | --- |
+| Local transactions (card, bank, USSD, bank transfer) | 1.5% + ₦100, ₦100 waived under ₦2,500, capped at ₦2,000 |
+| International cards | 3.9% + ₦100 |
+| Transfers | ₦10 (up to ₦5,000), ₦25 (₦5,001 to ₦50,000), ₦50 (above ₦50,000) |
+| Dedicated Virtual Accounts | 1% per transaction, capped at ₦300 |
+| Settlement | T+1, free |
+
+Currencies: transactions and refunds NGN, GHS, ZAR, KES, USD; splits NGN, GHS, ZAR, USD; transfers NGN, ZAR, KES, GHS. Rate limits are not documented.
+
+### B.2 Webhooks
+
+`POST /webhooks/paystack` in go-money. Verify `x-paystack-signature` = hex(HMAC-SHA512(raw body, secret key)) in constant time (accept the previous key during rotation), optionally allowlist Paystack's IPs (`PAYSTACK_WEBHOOK_IP_ALLOWLIST`), dedupe on `event:data.id:data.status`, store the raw event, re-fetch the resource before posting ledger and outbox in one transaction. Live retries last 72 hours; sweepers cover longer outages. Transaction and transfer `reference`s are the idempotency keys (`chk-`, `po-`, `cr-`, `rf-`, `sub-` prefixes).
+
+### B.3 Go-live checklist (Paystack)
+
+Registered business activated with CAC documents; marketplace model explained to Paystack compliance in writing; live keys only in Secrets Manager and only in go-money; webhook and callback URLs set; transfer OTP disabled for automation; payment session timeout set; volume pricing requested; policies published; test-mode rehearsal of cards, transfers and webhook retries.
+
+### B.4 What is built on Paystack (go-money, 2026-10-03)
+
+Adapter (`payments/src/integrations/paystack*.integration.go`): initialize with splits, verify, charge authorization, refunds, banks and resolve, recipients and subaccounts, transfers, balance, settlements, plans, subscriptions, disputes. Escrow E2 (money in Zudomart's main balance, transfer after the 24 h lock); one payment per checkout with flat dynamic-split shares for direct groups; saved cards keep the `authorization_code` on the device only; reconciliation verifies pending intents and transfers by reference. Open with Paystack: checking the `split` object on verify, BVN validation for payees, E1 manual settlement, refund and chargeback treatment of split shares, and balance float for creator payouts.
+
+## Appendix C. Checkout and payout rules
+
+Moved here from the former `docs/checkoutPaymentFlowPlan.md` (2026-10-11). Provider-specific steps for Flutterwave are in §4; for Paystack in Appendix B.
+
+### C.1 Rules
+
+| Rule | Detail |
+|---|---|
+| Unverified store | Escrow is the only payment mode. |
+| Verified store | The buyer picks Escrow or Pay directly. Verified = gold business checkmark after Zudomart KYB. |
+| Escrow | Release when the buyer confirms delivery, or automatically 3 days after delivery (`escrow.policy`). A dispute pauses the timer; the seller has 48 h to answer before it escalates. |
+| Direct | The seller is paid at charge time (Paystack split) or by PSA move (Flutterwave); Zudomart never holds that money. |
+| Seller credit hold | Escrow releases become withdrawable after the hold in `escrow.policy` (default 24 h). |
+| Payouts | Withdrawals and creator payouts run as provider transfers; only go-money calls the transfer API. |
+| Visibility | Sellers see balances and payouts. Buyers see "Pay". No provider names in UI copy. |
+| Digital goods | Coins, gifts, premium, boosts and creator subscriptions: in-app purchase in the apps, web checkout or wallet on the web. |
+| Saved cards | The device stores the provider token only, never card data. |
+
+### C.2 Who pays the fees
+
+0% commission on products (owner, 2026-10-03). Escrow groups pay an escrow fee of 1.5% of the group total including shipping (1% for Business-plan sellers), deducted from the seller payout at release; no fee on refunded amounts. Direct groups pay no Zudomart fee; the seller covers only the provider's processing fee. Buyers pay nothing extra. A checkout's processing fee is allocated across its groups pro rata with the largest-remainder method.
+
+### C.3 Escrow mechanics
+
+Flutterwave: escrow is locked in the buyer's own PSA and moves PSA→PSA on release (§4). Paystack: E2, money in Zudomart's main balance until release, paid out by transfer after the hold; E1 manual-settlement subaccounts were never confirmed. Either way: unverified stores always escrow; a dispute or chargeback freezes the group; a refund after release is a clawback that can leave seller debt.
+
+### C.4 Edge cases
+
+- Webhook and callback both arrive: idempotent on reference and event key.
+- Buyer pays twice for one checkout: refund the second payment.
+- Chargeback after a direct share settled: seller debt, recovered from later earnings; above the debt limit new sales pause.
+- Store loses verification: new checkouts are escrow-only; existing orders keep their mode.
+- Provider outage: hide Pay, keep browse and cart; sweepers verify pending intents and transfers by reference afterwards.
+- Amount mismatch: no fulfilment, refund, admin notice.
+
