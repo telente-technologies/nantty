@@ -28,6 +28,7 @@ const requiredCodes: Readonly<Record<string, ErrorKind>> = {
   CLOCK_SKEW: "clockSkew", NOT_DELIVERABLE: "deliveryUnavailable", EMAIL_NOT_VERIFIED: "emailNotVerified", VERIFY_EMAIL_REQUIRED: "emailNotVerified", TOO_MANY_LOGIN_ATTEMPTS: "tooManyAttempts",
   ACCOUNT_LOCKED: "tooManyAttempts", HUMAN_VERIFICATION_FAILED: "securityCheckFailed", EMBED_UNAVAILABLE: "embedUnavailable", PAYMENT_FAILED: "paymentFailed", PAYMENT_PENDING: "paymentPending",
   CAMERA_PERMISSION_DENIED: "permissionDenied", MEDIA_UNAVAILABLE: "mediaFailed", NOT_FOUND: "notFound", PRODUCT_NOT_FOUND: "contentGone", INTERNAL: "serverError",
+  PROFILE_LIMIT_STORE_OR_BUSINESS: "profileLimit", PROFILE_LIMIT_ONE_BRAND: "profileLimit", PROFILE_ON_HOLD: "profileLimit", BRAND_SELLING_OFF: "profileLimit",
 };
 
 describe("code → screen mapper", () => {

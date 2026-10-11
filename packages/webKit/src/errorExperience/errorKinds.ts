@@ -5,7 +5,7 @@ export const errorKinds = [
   "accountSuspended", "accountRestricted",
   "contentGone", "contentPrivate", "contentBlocked", "contentRemoved", "sensitiveContent", "mediaFailed", "decryptionFailed", "liveUnavailable",
   "orderNotFound", "storeClosed", "outOfStock", "regionUnavailable", "deliveryUnavailable", "checkoutExpired", "cartChanged",
-  "paymentFailed", "paymentPending", "paymentLimit", "sellerDebtLimit", "countryRequired",
+  "paymentFailed", "paymentPending", "paymentLimit", "sellerDebtLimit", "countryRequired", "profileLimit",
   "planFeatureRequired", "quotaReached",
   "fileTooLarge", "unsupportedFile", "uploadFailed",
   "alreadyDone", "versionConflict",
@@ -22,7 +22,7 @@ export type ErrorMotion = "float" | "glitch" | "breathe";
 
 export const errorActionIntents = [
   "retry", "reload", "home", "back", "search", "signIn", "verify", "stepUp", "openSettings", "accountStatus", "appeal", "support", "update", "upgrade",
-  "resendEmail", "chooseCountry", "payByCard", "viewCart", "showAnyway", "checkAgain", "browse", "viewOrders", "changeAddress", "chooseFile", "useApp", "clearDebt",
+  "resendEmail", "chooseCountry", "payByCard", "viewCart", "showAnyway", "checkAgain", "browse", "viewOrders", "changeAddress", "chooseFile", "useApp", "clearDebt", "manageProfiles",
 ] as const;
 
 export type ErrorActionIntent = (typeof errorActionIntents)[number];
@@ -91,4 +91,5 @@ export const defaultActionLabels: Readonly<Record<ErrorActionIntent, string>> = 
   chooseFile: "Choose another file",
   useApp: "Open in the app",
   clearDebt: "Settle balance",
+  manageProfiles: "Manage profiles",
 };
