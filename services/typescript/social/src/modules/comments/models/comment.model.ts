@@ -58,3 +58,18 @@ export interface CommentThreadPage {
   readonly ancestors: readonly CommentView[];
   readonly maximumVisibleDepth: number;
 }
+
+export interface QuoteThreadItem {
+  readonly type: "quote";
+  readonly id: string;
+  readonly postId: string;
+  readonly quotePost: QuotedPostSummary;
+  readonly likes: number;
+  readonly commentCount: number;
+  readonly isPostAuthor: boolean;
+  readonly createdAt: string;
+}
+
+export type ConversationFilter = "all" | "quotes";
+export type RankedCommentItem = CommentWithReplies & { readonly type: "comment" };
+export type RankedThreadItem = ThreadReplyView & { readonly type: "comment" };

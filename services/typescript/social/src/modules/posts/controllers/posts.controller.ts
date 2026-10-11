@@ -12,6 +12,7 @@ import type { PublishStoryCommand } from "../commands/publishStory/publishStory.
 import type { ListStoryViewersQuery } from "../queries/listStoryViewers/listStoryViewers.query.js";
 import type { StoryViewersPage } from "../queries/listStoryViewers/listStoryViewers.handler.js";
 import type { ResharePostCommand } from "../commands/resharePost/resharePost.command.js";
+import type { UndoRepostCommand } from "../commands/undoRepost/undoRepost.command.js";
 import type { SharePostCommand } from "../commands/sharePost/sharePost.command.js";
 import type { UnlikePostCommand } from "../commands/unlikePost/unlikePost.command.js";
 import type { UnpinPostCommand } from "../commands/unpinPost/unpinPost.command.js";
@@ -35,6 +36,7 @@ export interface PostsHandlers {
   readonly createPost: Handler<CreatePostCommand, PostView>;
   readonly deletePost: Handler<DeletePostCommand, void>;
   readonly resharePost: Handler<ResharePostCommand, PostView>;
+  readonly undoRepost: Handler<UndoRepostCommand, void>;
   readonly likePost: Handler<LikePostCommand, void>;
   readonly unlikePost: Handler<UnlikePostCommand, void>;
   readonly pinPost: Handler<PinPostCommand, PostView>;
@@ -92,6 +94,7 @@ export function createPostsController(route: RouteFactory, handlers: PostsHandle
     unpinPost: route({ authentication: "required", params: postIdParamsSchema }, ({ principal, params }) => handlers.unpinPost({ actorId: principal.accountId, postId: params.postId })),
     sharePost: route({ authentication: "optional", params: postIdParamsSchema, body: shareBodySchema }, ({ principal, params, body }) => handlers.sharePost({ actorId: principal?.accountId, postId: params.postId, channel: body?.channel ?? "link" })),
     resharePost: route({ authentication: "required", params: postIdParamsSchema, body: repostBodySchema, successStatus: 201 }, ({ principal, params, body }) => handlers.resharePost({ actorId: principal.accountId, postId: params.postId, text: body?.text ?? "" })),
+    undoRepost: route({ authentication: "required", params: postIdParamsSchema, successStatus: 204 }, ({ principal, params }) => handlers.undoRepost({ actorId: principal.accountId, postId: params.postId })),
     listUserPosts: route({ authentication: "optional", params: userIdParamsSchema, query: userPostsQuerySchema }, ({ principal, params, query }) =>
       handlers.listUserPosts({ viewerId: principal?.accountId, ownerId: params.userId === "me" ? (principal?.accountId ?? params.userId) : params.userId, cursor: query.cursor, limit: clampPageSize(query.limit), kind: query.kind })),
     publishStory: route({ authentication: "required", body: publishStoryBodySchema, successStatus: 201 }, ({ principal, body }) => handlers.publishStory({ authorId: principal.accountId, mediaId: body.mediaId, soundId: body.soundId, look: body.look })),

@@ -74,6 +74,12 @@ export const postRepository = {
 
   countByAuthor: (db: Db, authorId: string) => db.post.count({ where: { authorId, ...shownToViewers, kind: { in: ["post", "clip"] } } }),
 
+  repostedOriginalIds: async (db: Db, userId: string, originalIds: readonly string[]): Promise<Set<string>> => {
+    if (originalIds.length === 0) return new Set();
+    const rows = await db.post.findMany({ where: { authorId: userId, resharedFromId: { in: [...originalIds] }, isQuote: false, kind: "post", ...shownToViewers }, select: { authorId: true, resharedFromId: true, isQuote: true } });
+    return new Set(rows.flatMap((row) => (row.authorId === userId && !row.isQuote && row.resharedFromId !== null && originalIds.includes(row.resharedFromId) ? [row.resharedFromId] : [])));
+  },
+
   likedPostIds: async (db: Db, userId: string, postIds: readonly string[]) => {
     const rows = await db.postLike.findMany({ where: { userId, postId: { in: [...postIds] } }, select: { postId: true } });
     return new Set(rows.map((row) => row.postId));

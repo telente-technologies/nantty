@@ -16,6 +16,7 @@ import { loadTaggedPreviews } from "./postTagView.service.js";
 import { authorsFollowingViewer, decideReplyPermission, mentionedUserIdsFromEntities } from "./replyPolicy.service.js";
 import { buildSensitiveContentView, isPostWithheldFromViewer, resolveCurrentViewerContentPolicy, type ViewerContentPolicy } from "./sensitiveContent.service.js";
 import { selectPostsViewerMayEmbed } from "./quotedPostEmbed.service.js";
+import { quoteOriginalIdFor } from "./quoteTarget.service.js";
 import { postNotificationMuteRepository } from "../repositories/postNotificationMute.repository.js";
 
 type MediaRow = PostRow["media"][number];
@@ -51,7 +52,8 @@ export async function buildPostViews(context: HandlerContext, viewerId: string |
   const postIds = everyRow.map((row) => row.id);
   const authorIds = [...new Set(everyRow.map((row) => row.authorId))];
   const postedAsIds = [...new Set(everyRow.flatMap((row) => (row.authorProfileId === null ? [] : [row.authorProfileId])))];
-  const [authors, postedAsProfiles, liked, saved, followed, followingViewer, tagged, downloadsOff, privateAuthors, products, mutedPosts] = await Promise.all([
+  const repostTargets = [...new Set(rows.map(quoteOriginalIdFor))];
+  const [authors, postedAsProfiles, liked, saved, followed, followingViewer, tagged, downloadsOff, privateAuthors, products, mutedPosts, reposted] = await Promise.all([
     context.directory.findUserSummaries(authorIds),
     postedAsIds.length === 0 ? new Map() : await (context.directory.findProfilesByIds?.(postedAsIds) ?? new Map()),
     viewerId === undefined ? new Set<string>() : postRepository.likedPostIds(db, viewerId, postIds),
@@ -63,6 +65,7 @@ export async function buildPostViews(context: HandlerContext, viewerId: string |
     viewerId === undefined ? new Set<string>() : context.directory.findPrivateAccountIds(authorIds),
     loadTaggedProducts(context, everyRow),
     viewerId === undefined ? new Set<string>() : postNotificationMuteRepository.mutedPostIds(db, viewerId, rows.map((row) => row.id)),
+    viewerId === undefined ? new Set<string>() : postRepository.repostedOriginalIds(db, viewerId, repostTargets),
   ]);
   const soundIds = [...new Set(rows.flatMap((row) => (row.soundId === null ? [] : [row.soundId])))];
   const soundRows = soundIds.length === 0 ? [] : await db.sound.findMany({ where: { id: { in: soundIds } } });
@@ -95,6 +98,7 @@ export async function buildPostViews(context: HandlerContext, viewerId: string |
       likes: row.likeCount,
       comments: row.commentCount,
       reposts: row.repostCount,
+      reposted: reposted.has(quoteOriginalIdFor(row)),
       views: row.viewCount,
       liked: liked.has(row.id),
       bookmarked: saved.has(row.id),

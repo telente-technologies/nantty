@@ -3,13 +3,21 @@ import type { HandlerContext } from "../../../types/handlerContext.type.js";
 import { filterAuthorsVisibleToViewer } from "../../follows/services/profileAccess.service.js";
 import type { CommentRow } from "../repositories/comment.repository.js";
 import { commentRankingRepository, rankingCandidateLimit, rankSnapshotLifetimeMs, rankSnapshotReuseMs } from "../repositories/commentRanking.repository.js";
+import type { QuoteThreadItem } from "../models/comment.model.js";
 import { chooseConversationChain, maximumPreviewChainLength } from "./commentChain.service.js";
+import { isQuoteSnapshotKey, loadQuoteItemsByIds, quoteIdFromSnapshotKey, rankableQuotesForViewer } from "./conversationQuotes.service.js";
 import { decodeRankedCursor, encodeRankedCursor, rankConversationRoots, type RankedPageCursor } from "./commentRanking.service.js";
+
+export type RankedEntry = { readonly type: "comment"; readonly id: string } | { readonly type: "quote"; readonly id: string };
 
 export interface RankedRootsPage {
   readonly roots: readonly CommentRow[];
+  readonly quotes: ReadonlyMap<string, QuoteThreadItem>;
+  readonly order: readonly RankedEntry[];
   readonly nextCursor: string | null;
 }
+
+const commentKeysIn = (keys: readonly string[]) => keys.filter((key) => !isQuoteSnapshotKey(key));
 
 interface ConversationPost {
   readonly id: string;
@@ -25,12 +33,13 @@ async function createRankedSnapshot(context: HandlerContext, viewerId: string | 
   const db = context.database.client;
   const now = context.clock.now();
   const reusable = await commentRankingRepository.findReusableSnapshot(db, post.id, viewerId, new Date(now.getTime() - rankSnapshotReuseMs));
-  if (reusable !== null) return { snapshot: reusable, hasTail: (await commentRankingRepository.countRootsUpTo(db, post.id, reusable.createdAt)) > reusable.commentIds.length };
-  const [candidates, authorRepliedRootIds] = await Promise.all([
+  if (reusable !== null) return { snapshot: reusable, hasTail: (await commentRankingRepository.countRootsUpTo(db, post.id, reusable.createdAt)) > commentKeysIn(reusable.commentIds).length };
+  const [candidates, authorRepliedRootIds, quotes] = await Promise.all([
     commentRankingRepository.rankingCandidates(db, post.id, post.authorId),
     commentRankingRepository.rootsWithAuthorReplies(db, post.id, post.authorId),
+    rankableQuotesForViewer(context, viewerId, post),
   ]);
-  const ranked = rankConversationRoots(await keepVisibleAuthors(context, viewerId, candidates), { postAuthorId: post.authorId, authorRepliedRootIds, now });
+  const ranked = rankConversationRoots([...(await keepVisibleAuthors(context, viewerId, candidates)), ...quotes], { postAuthorId: post.authorId, authorRepliedRootIds, now });
   const snapshot = await commentRankingRepository.createSnapshot(db, { postId: post.id, viewerId, pinnedCommentId: ranked.find((row) => row.isPinned)?.id ?? null, commentIds: ranked.map((row) => row.id), createdAt: now });
   return { snapshot, hasTail: candidates.length >= rankingCandidateLimit };
 }
@@ -53,18 +62,30 @@ export async function loadRankedRootsPage(context: HandlerContext, viewerId: str
   }
   const ids = snapshot.commentIds;
   if (cursor.offset < ids.length) {
-    const pageIds = ids.slice(cursor.offset, cursor.offset + limit);
-    const byId = new Map((await keepVisibleAuthors(context, viewerId, await commentRankingRepository.rootsByIds(db, pageIds))).map((row) => [row.id, row]));
-    const nextOffset = cursor.offset + pageIds.length;
+    const pageKeys = ids.slice(cursor.offset, cursor.offset + limit);
+    const quoteIds = pageKeys.filter(isQuoteSnapshotKey).map(quoteIdFromSnapshotKey);
+    const [rows, quotes] = await Promise.all([
+      commentRankingRepository.rootsByIds(db, commentKeysIn(pageKeys)).then((found) => keepVisibleAuthors(context, viewerId, found)),
+      loadQuoteItemsByIds(context, viewerId, post, quoteIds),
+    ]);
+    const byId = new Map(rows.map((row) => [row.id, row]));
+    const order = pageKeys.flatMap((key): RankedEntry[] => {
+      if (isQuoteSnapshotKey(key)) return quotes.has(quoteIdFromSnapshotKey(key)) ? [{ type: "quote", id: quoteIdFromSnapshotKey(key) }] : [];
+      return byId.has(key) ? [{ type: "comment", id: key }] : [];
+    });
+    const nextOffset = cursor.offset + pageKeys.length;
     const more = nextOffset < ids.length || cursor.hasTail;
-    return { roots: pageIds.flatMap((id) => byId.get(id) ?? []), nextCursor: more ? encodeRankedCursor({ ...cursor, offset: nextOffset }) : null };
+    return { roots: order.flatMap((entry) => (entry.type === "comment" ? (byId.get(entry.id) ?? []) : [])), quotes, order, nextCursor: more ? encodeRankedCursor({ ...cursor, offset: nextOffset }) : null };
   }
-  if (!cursor.hasTail) return { roots: [], nextCursor: null };
-  const tail = await commentRankingRepository.tailRoots(db, post.id, ids, snapshot.createdAt, cursor.tailAfterId, limit);
+  if (!cursor.hasTail) return { roots: [], quotes: new Map(), order: [], nextCursor: null };
+  const tail = await commentRankingRepository.tailRoots(db, post.id, commentKeysIn(ids), snapshot.createdAt, cursor.tailAfterId, limit);
   const pageRows = tail.slice(0, limit);
   const last = pageRows.at(-1);
+  const roots = await keepVisibleAuthors(context, viewerId, pageRows);
   return {
-    roots: await keepVisibleAuthors(context, viewerId, pageRows),
+    roots,
+    quotes: new Map(),
+    order: roots.map((row) => ({ type: "comment" as const, id: row.id })),
     nextCursor: tail.length > limit && last !== undefined ? encodeRankedCursor({ ...cursor, tailAfterId: last.id }) : null,
   };
 }

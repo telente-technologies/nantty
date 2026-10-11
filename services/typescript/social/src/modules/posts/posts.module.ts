@@ -9,6 +9,7 @@ import { createPinPostHandler } from "./commands/pinPost/pinPost.handler.js";
 import { createMarkStorySeenHandler } from "./commands/markStorySeen/markStorySeen.handler.js";
 import { createPublishStoryHandler } from "./commands/publishStory/publishStory.handler.js";
 import { createResharePostHandler } from "./commands/resharePost/resharePost.handler.js";
+import { createUndoRepostHandler } from "./commands/undoRepost/undoRepost.handler.js";
 import { createRecordPostImpressionHandler } from "./commands/recordPostImpression/recordPostImpression.handler.js";
 import { createRecordProfileVisitFromPostHandler } from "./commands/recordProfileVisitFromPost/recordProfileVisitFromPost.handler.js";
 import { createGetPostAnalyticsHandler } from "./queries/getPostAnalytics/getPostAnalytics.handler.js";
@@ -42,13 +43,15 @@ import { createSetPostNotificationMuteHandler } from "./commands/setPostNotifica
 import { createGetPostNotificationMuteHandler } from "./queries/getPostNotificationMute/getPostNotificationMute.handler.js";
 
 export function mountPostsModule(router: HttpRouter, route: RouteFactory, context: HandlerContext): void {
+  const deletePost = createDeletePostHandler(context);
   registerPostsRoutes(router, createPostsController(route, {
     createPost: createCreatePostHandler(context),
     recordPostImpression: createRecordPostImpressionHandler(context),
     recordProfileVisitFromPost: createRecordProfileVisitFromPostHandler(context),
     getPostAnalytics: createGetPostAnalyticsHandler(context),
-    deletePost: createDeletePostHandler(context),
+    deletePost,
     resharePost: createResharePostHandler(context),
+    undoRepost: createUndoRepostHandler(context, deletePost),
     likePost: createLikePostHandler(context),
     unlikePost: createUnlikePostHandler(context),
     pinPost: createPinPostHandler(context),

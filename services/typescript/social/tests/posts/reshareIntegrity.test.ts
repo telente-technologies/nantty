@@ -1,6 +1,9 @@
 import { describe, expect, it } from "vitest";
 
+import { createDeletePostHandler } from "../../src/modules/posts/commands/deletePost/deletePost.handler.js";
 import { createResharePostHandler } from "../../src/modules/posts/commands/resharePost/resharePost.handler.js";
+import { createUndoRepostHandler } from "../../src/modules/posts/commands/undoRepost/undoRepost.handler.js";
+import { buildPostViews } from "../../src/modules/posts/services/postView.service.js";
 import { createMemoryStore, type Row } from "../comments/memoryDb.fake.js";
 import { authorId, buildPostRow, viewerId } from "./socialPostFakes.fake.js";
 
@@ -45,5 +48,22 @@ describe("reshare integrity", () => {
     await expect(reshare({ actorId: viewerId, postId: followerRepostId, text: "" })).rejects.toMatchObject({ status: 403 });
     await expect(reshare({ actorId: viewerId, postId: followerRepostId, text: "look" })).rejects.toMatchObject({ status: 403 });
     expect(original()["repostCount"]).toBe(0);
+  });
+
+  it("undo repost removes only the viewer's plain repost and flips the reposted flag", async () => {
+    const { store, reshare, original } = setup();
+    original()["audience"] = "everyone";
+    const quote = await reshare({ actorId: viewerId, postId: originalId, text: "my take" });
+    const repost = await reshare({ actorId: viewerId, postId: originalId, text: "" });
+    const views = () => buildPostViews(store.context, viewerId, store.posts.filter((row) => row["id"] === originalId) as never);
+    expect((await views())[0]?.reposted).toBe(true);
+    const undo = createUndoRepostHandler(store.context, createDeletePostHandler(store.context));
+    await undo({ actorId: viewerId, postId: followerRepostId });
+    await undo({ actorId: viewerId, postId: originalId });
+    expect(store.posts.find((row) => row["id"] === repost.id)?.["deletedAt"]).not.toBeNull();
+    expect(store.posts.find((row) => row["id"] === quote.id)?.["deletedAt"]).toBeNull();
+    expect(original()["repostCount"]).toBe(1);
+    expect(original()["quoteCount"]).toBe(1);
+    expect((await views())[0]?.reposted).toBe(false);
   });
 });

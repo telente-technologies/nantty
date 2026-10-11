@@ -107,6 +107,7 @@ export interface PostView {
   readonly likes: number;
   readonly comments: number;
   readonly reposts: number;
+  readonly reposted: boolean;
   readonly views: number;
   readonly liked: boolean;
   readonly bookmarked: boolean;

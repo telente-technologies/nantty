@@ -15,6 +15,7 @@ export function registerPostsRoutes(router: HttpRouter, controller: ReturnType<t
   router.delete("/api/v1/posts/:postId/pin", controller.unpinPost);
   router.post("/api/v1/posts/:postId/share", controller.sharePost);
   router.post("/api/v1/posts/:postId/repost", controller.resharePost);
+  router.delete("/api/v1/posts/:postId/repost", controller.undoRepost);
   router.get("/api/v1/users/:userId/posts", controller.listUserPosts);
   router.post("/api/v1/stories", controller.publishStory);
   router.get("/api/v1/stories/tray", controller.listStoryTray);
