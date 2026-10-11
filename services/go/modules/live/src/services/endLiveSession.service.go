@@ -19,20 +19,24 @@ import (
 const finalLeaderboardSize = 20
 
 func (service *LiveService) EndLiveSession(ctx context.Context, actor types.Actor, liveId uuid.UUID) error {
-	var room string
+	return service.endLive(ctx, liveId, func(session *ent.LiveSession) (bool, error) {
+		if session.HostID != actor.UserId {
+			return false, liveerrors.NotLiveHost
+		}
+		return true, nil
+	})
+}
+
+func (service *LiveService) endLive(ctx context.Context, liveId uuid.UUID, shouldEnd func(*ent.LiveSession) (bool, error)) error {
 	var ended *ent.LiveSession
 	err := service.RunInTransaction(ctx, func(tx *ent.Tx) error {
 		session, err := service.lockLiveSession(ctx, tx, liveId)
 		if err != nil {
 			return err
 		}
-		room = session.LivekitRoom
-		ended = session
-		if session.HostID != actor.UserId {
-			return liveerrors.NotLiveHost
-		}
-		if session.State == livesession.StateEnded {
-			return nil
+		proceed, err := shouldEnd(session)
+		if err != nil || !proceed || session.State == livesession.StateEnded {
+			return err
 		}
 		if err := service.closeBattleBecauseLiveEnded(ctx, tx, liveId); err != nil {
 			return err
@@ -45,14 +49,15 @@ func (service *LiveService) EndLiveSession(ctx context.Context, actor types.Acto
 		if err := tx.LiveViewer.Update().Where(liveviewer.LiveID(liveId), liveviewer.LeftAtIsNil()).SetLeftAt(now).Exec(ctx); err != nil {
 			return err
 		}
+		ended = session
 		return service.finishLiveAndStoreFinalBoard(ctx, tx, session, now)
 	})
-	if err != nil {
+	if err != nil || ended == nil {
 		return err
 	}
 	service.afterLiveEnded(ctx, ended)
 	service.settleEndedBattlesQuietly(ctx, liveId)
-	service.bestEffortMedia(ctx, "remove host participant", service.Media.RemoveParticipant(ctx, room, actor.UserId.String()))
+	service.bestEffortMedia(ctx, "close media room", service.Media.DeleteRoom(ctx, ended.LivekitRoom))
 	return nil
 }
 

@@ -94,3 +94,10 @@ type SuggestedLiveView struct {
 	Title    string      `json:"title"`
 	CoverUrl *string     `json:"coverUrl"`
 }
+
+type HostHeartbeatView struct {
+	LiveId         string  `json:"liveId"`
+	Status         string  `json:"status"`
+	LeaseExpiresAt *string `json:"leaseExpiresAt"`
+	TimeoutSeconds int     `json:"timeoutSeconds"`
+}

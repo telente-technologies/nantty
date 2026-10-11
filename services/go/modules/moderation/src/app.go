@@ -186,9 +186,8 @@ func (module *Module) consumeAdvisorySuggestions(ctx context.Context) {
 	if module.container.Settings.AdvisoryQueueName == "" {
 		return
 	}
-	_, queues, err := platformevents.CreateJobQueueAndConsumerFromEnvironment(ctx, module.bus)
-	if err != nil || queues == nil {
-		module.container.Logger.WarnContext(ctx, "advisory queue consumer disabled: no message broker configured", slog.Any("error", err))
+	queues := openQueueConsumerWithRetry(ctx, module.container.Logger, "advisory queue consumer", module.bus, platformevents.CreateJobQueueAndConsumerFromEnvironment, time.Second)
+	if queues == nil {
 		return
 	}
 	consumer := suspensioncases.AdvisoryConsumer{Container: module.container, Queues: queues}
@@ -204,12 +203,14 @@ func (module *Module) consumeAdvisorySuggestions(ctx context.Context) {
 }
 
 func (module *Module) consumeContentSignals(ctx context.Context) {
-	_, queues, err := platformevents.CreateJobQueueAndConsumerFromEnvironment(ctx, module.bus)
-	if err != nil || queues == nil {
-		module.container.Logger.WarnContext(ctx, "content report and score consumers disabled: no message broker configured", slog.Any("error", err))
+	queues := openQueueConsumerWithRetry(ctx, module.container.Logger, "content report and score consumers", module.bus, platformevents.CreateJobQueueAndConsumerFromEnvironment, time.Second)
+	if queues == nil {
 		return
 	}
-	go livesafety.RunConsumerUntilContextDone(ctx, module.container, queues)
+	go servicemodule.SuperviseWorkerUntilContextDone(ctx, module.container.Logger, "live safety score consumer", func(ctx context.Context) error {
+		livesafety.RunConsumerUntilContextDone(ctx, module.container, queues)
+		return nil
+	})
 	go accesssecurity.RunConsumersUntilContextDone(ctx, module.container, queues)
 	contentreports.RunConsumersUntilContextDone(ctx, module.container, queues)
 }

@@ -11,6 +11,7 @@ import (
 	"zudomart/modules/live/src/container"
 	issuestreamkey "zudomart/modules/live/src/modules/studio/commands/issueStreamKey"
 	recordegressoutcome "zudomart/modules/live/src/modules/studio/commands/recordEgressOutcome"
+	recordmediaroomevent "zudomart/modules/live/src/modules/studio/commands/recordMediaRoomEvent"
 	revokestreamkey "zudomart/modules/live/src/modules/studio/commands/revokeStreamKey"
 	setrecordingenabled "zudomart/modules/live/src/modules/studio/commands/setRecordingEnabled"
 	getstreamkey "zudomart/modules/live/src/modules/studio/queries/getStreamKey"
@@ -132,6 +133,16 @@ func (controller StudioController) ReceiveLiveKitWebhook(writer http.ResponseWri
 			outcome.DurationNanos, outcome.SizeBytes = files[0].Duration, files[0].Size
 		}
 		if err := (recordegressoutcome.Handler{Container: controller.Container}).Execute(request.Context(), recordegressoutcome.Command{Outcome: outcome}); err != nil {
+			controller.responder().Error(writer, request, err)
+			return
+		}
+	}
+	if event.Room != nil && (event.Event == webhook.EventRoomFinished || event.Event == webhook.EventParticipantLeft) {
+		roomEvent := services.MediaRoomEvent{Kind: event.Event, Room: event.Room.Name}
+		if event.Participant != nil {
+			roomEvent.Identity = event.Participant.Identity
+		}
+		if err := (recordmediaroomevent.Handler{Container: controller.Container}).Execute(request.Context(), recordmediaroomevent.Command{Event: roomEvent}); err != nil {
 			controller.responder().Error(writer, request, err)
 			return
 		}

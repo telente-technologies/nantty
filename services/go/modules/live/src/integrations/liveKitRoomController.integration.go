@@ -24,8 +24,12 @@ func NewLiveKitRoomController(serverUrl, apiKey, apiSecret string) *LiveKitRoomC
 }
 
 func (controller *LiveKitRoomController) authorisedContext(ctx context.Context, room string) (context.Context, error) {
+	return controller.authorisedContextWithGrant(ctx, room, false)
+}
+
+func (controller *LiveKitRoomController) authorisedContextWithGrant(ctx context.Context, room string, canCreate bool) (context.Context, error) {
 	token, err := auth.NewAccessToken(controller.apiKey, controller.apiSecret).
-		SetVideoGrant(&auth.VideoGrant{RoomAdmin: true, Room: room}).SetValidFor(time.Minute).ToJWT()
+		SetVideoGrant(&auth.VideoGrant{RoomAdmin: true, RoomCreate: canCreate, Room: room}).SetValidFor(time.Minute).ToJWT()
 	if err != nil {
 		return ctx, err
 	}

@@ -87,9 +87,15 @@ func (service *LiveService) CreateLiveSession(ctx context.Context, actor types.A
 	}
 	var created *ent.LiveSession
 	err = service.RunInTransaction(ctx, func(tx *ent.Tx) error {
-		running, err := tx.LiveSession.Query().Where(livesession.HostID(actor.UserId), livesession.StateIn(livesession.StateLive, livesession.StateConnecting)).Exist(ctx)
-		if err != nil || running {
-			return orLiveAlreadyRunning(err)
+		if _, err := tx.ExecContext(ctx, "SELECT pg_advisory_xact_lock(hashtextextended($1, 0))", "live-host:"+actor.UserId.String()); err != nil {
+			return err
+		}
+		running, err := tx.LiveSession.Query().Where(livesession.HostID(actor.UserId), livesession.StateIn(livesession.StateLive, livesession.StateConnecting)).First(ctx)
+		if err == nil {
+			return liveAlreadyRunning(running.ID)
+		}
+		if !ent.IsNotFound(err) {
+			return err
 		}
 		identifier := schema.NewTimeOrderedUuid()
 		builder := tx.LiveSession.Create().SetID(identifier).SetHostID(actor.UserId).SetTitle(strings.TrimSpace(input.Title)).
@@ -134,9 +140,8 @@ func (service *LiveService) CreateLiveSession(ctx context.Context, actor types.A
 	return service.presentLiveSession(ctx, created)
 }
 
-func orLiveAlreadyRunning(err error) error {
-	if err != nil {
-		return err
-	}
-	return liveerrors.LiveAlreadyRunning
+func liveAlreadyRunning(liveId uuid.UUID) error {
+	failure := liveerrors.Api(liveerrors.LiveAlreadyRunning.Status, liveerrors.LiveAlreadyRunning.Code, liveerrors.LiveAlreadyRunning.Message)
+	failure.Details = map[string]any{"liveId": liveId.String()}
+	return failure
 }

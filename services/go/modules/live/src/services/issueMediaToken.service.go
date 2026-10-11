@@ -49,6 +49,9 @@ func (service *LiveService) IssueMediaToken(ctx context.Context, actor types.Act
 		}
 		canPublish = !held
 	}
+	if canPublish {
+		service.bestEffortMedia(ctx, "ensure room", service.Media.EnsureRoom(ctx, session.LivekitRoom))
+	}
 	participants, err := service.lookupParticipants(ctx, actor.UserId)
 	if err != nil {
 		return types.MediaTokenView{}, err

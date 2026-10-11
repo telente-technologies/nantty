@@ -38,7 +38,7 @@ func (targets *fakeTargets) Resolve(_ context.Context, targetType, targetId stri
 		return nil, nil
 	}
 	title := "Preview of " + targetId
-	return &integrations.TargetPreview{OwnerId: owner, Title: &title, MediaUrls: []string{"https://cdn.example/" + targetId}, CreatedAt: "2026-10-01T00:00:00Z"}, nil
+	return &integrations.TargetPreview{OwnerId: owner, Title: &title, MediaUrls: []string{"https://cdn.example/" + targetId}, MediaIds: []string{"media-" + targetId}, CreatedAt: "2026-10-01T00:00:00Z"}, nil
 }
 
 func (harness *moderationHarness) contentReportHandler() platformevents.MessageHandler {

@@ -26,7 +26,7 @@ func (service *LiveService) RunDueTimerSweepsUntilContextDone(ctx context.Contex
 			return nil
 		case <-ticker.C:
 			for name, sweep := range map[string]func(context.Context) error{
-				"guest slots": service.sweepDueGuestSlots, "battles": service.sweepDueBattles, "settlements": service.SettleDueBattles,
+				"guest slots": service.sweepDueGuestSlots, "silent hosts": service.sweepSilentHosts, "battles": service.sweepDueBattles, "settlements": service.SettleDueBattles,
 			} {
 				if err := sweep(ctx); err != nil && ctx.Err() == nil {
 					service.Logger.WarnContext(ctx, "timer sweep failed", slog.String("sweep", name), slog.Any("error", err))
@@ -37,7 +37,7 @@ func (service *LiveService) RunDueTimerSweepsUntilContextDone(ctx context.Contex
 }
 
 func (service *LiveService) AdvanceDueTimersOnce(ctx context.Context) error {
-	for _, sweep := range []func(context.Context) error{service.sweepDueGuestSlots, service.sweepDueBattles, service.SettleDueBattles} {
+	for _, sweep := range []func(context.Context) error{service.sweepDueGuestSlots, service.sweepSilentHosts, service.sweepDueBattles, service.SettleDueBattles} {
 		if err := sweep(ctx); err != nil {
 			return err
 		}

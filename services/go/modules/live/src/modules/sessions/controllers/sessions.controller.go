@@ -10,6 +10,7 @@ import (
 	joinliveasviewer "zudomart/modules/live/src/modules/sessions/commands/joinLiveAsViewer"
 	leaveliveasviewer "zudomart/modules/live/src/modules/sessions/commands/leaveLiveAsViewer"
 	pinproducttolive "zudomart/modules/live/src/modules/sessions/commands/pinProductToLive"
+	recordhostheartbeat "zudomart/modules/live/src/modules/sessions/commands/recordHostHeartbeat"
 	startlivesession "zudomart/modules/live/src/modules/sessions/commands/startLiveSession"
 	unpinproductfromlive "zudomart/modules/live/src/modules/sessions/commands/unpinProductFromLive"
 	updatelivemonetization "zudomart/modules/live/src/modules/sessions/commands/updateLiveMonetization"
@@ -107,6 +108,16 @@ func (controller SessionsController) EndLiveSession(writer http.ResponseWriter, 
 		err := (endlivesession.Handler{Container: controller.Container}).Execute(request.Context(), endlivesession.Command{Actor: actor, LiveId: liveId})
 		if err == nil {
 			httpserver.WriteNoContentResponse(writer)
+		}
+		return err
+	})
+}
+
+func (controller SessionsController) RecordHostHeartbeat(writer http.ResponseWriter, request *http.Request) {
+	controller.responder().WithActorAndLive(writer, request, func(actor types.Actor, liveId uuid.UUID) error {
+		view, err := (recordhostheartbeat.Handler{Container: controller.Container}).Execute(request.Context(), recordhostheartbeat.Command{Actor: actor, LiveId: liveId})
+		if err == nil {
+			httpserver.WriteJsonResponse(writer, http.StatusOK, view)
 		}
 		return err
 	})

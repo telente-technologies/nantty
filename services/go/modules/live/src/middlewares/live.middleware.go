@@ -51,6 +51,10 @@ func Admin(deployed *container.Container) func(http.HandlerFunc) http.Handler {
 				customerAdmin.ServeHTTP(writer, request)
 				return
 			}
+			if failure := staffauth.RefuseDisallowedStaffNetwork(request, principal.UserId); failure != nil {
+				httpserver.WriteJsonResponse(writer, failure.Status, failure)
+				return
+			}
 			if !slices.ContainsFunc(principal.Roles, func(role string) bool {
 				permission, isPermission := strings.CutPrefix(role, "perm:")
 				return role == staffauth.SuperadminRole || isPermission && slices.Contains(giftCatalogStaffPermissions, permission)

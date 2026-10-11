@@ -38,6 +38,10 @@ func RequireStaffWithAnyPermission(verifiers StaffTokenVerifiers, permissions []
 				return
 			}
 			staff := staffFromPrincipal(principal)
+			if failure := staffauth.RefuseDisallowedStaffNetwork(request, staff.Id); failure != nil {
+				httpserver.WriteJsonResponse(writer, failure.Status, failure)
+				return
+			}
 			ctx := request.Context()
 			if stepUpToken := strings.TrimSpace(request.Header.Get(staffauth.StepUpHeader)); requireStepUp || stepUpToken != "" {
 				stepUp, err := verifiers.StepUp.VerifyAccessTokenAndExtractPrincipal(request.Context(), stepUpToken)
