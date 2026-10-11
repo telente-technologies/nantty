@@ -39,7 +39,7 @@ a{color:inherit;text-decoration:none}.zd{padding:12px}.card{display:flex;gap:12p
 .carousel{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(150px,46%);gap:10px;overflow-x:auto;scroll-snap-type:x mandatory}.carousel>*{scroll-snap-align:start}
 .tile{border:1px solid var(--border);border-radius:14px;overflow:hidden;display:flex;flex-direction:column;background:var(--bg)}.thumb{width:100%;aspect-ratio:1/1;object-fit:cover;background:var(--surface);display:block}
 .tile .body{padding:8px 10px 10px;display:flex;flex-direction:column;gap:6px}.price{font-weight:700}.foot{display:flex;justify-content:space-between;align-items:center;margin-top:10px}
-.brandmark{display:inline-flex;gap:4px;align-items:center;color:var(--muted);font-size:11px}.unavailable{border:1px dashed var(--border);border-radius:14px;padding:16px;text-align:center;color:var(--muted)}`;
+.brandmark{display:inline-flex;gap:4px;align-items:center;color:var(--muted);font-size:11px}.unavailable{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;border:1px dashed var(--border);border-radius:14px;padding:20px 16px;text-align:center;color:var(--muted);font-size:13px}.unavailable strong{color:var(--text);font-size:14px}.unavailableIcon{display:grid;place-items:center;width:44px;height:44px;border-radius:50%;background:var(--surface);color:var(--brand)}`;
 
 export function escapeHtml(value: string): string {
   return value.replace(/[&<>"'`]/g, (character) => `&#${character.charCodeAt(0)};`);
@@ -95,5 +95,5 @@ export function renderBuyButtonMarkup(product: EmbedProductCard, view: "button" 
 }
 
 export function renderUnavailableMarkup(message: string): string {
-  return `<div class="unavailable">${escapeHtml(message)}</div>`;
+  return `<div class="unavailable" role="status"><span class="unavailableIcon">${renderEmbedIcon("storefrontBold", 22, "")}</span><strong>${escapeHtml(message)}</strong><span>It may have moved or closed. Visit Zudomart to keep shopping.</span></div>`;
 }

@@ -11,7 +11,7 @@ import { clearEverySessionCookie, readApiTokensFromCookies, readCachedViewerFrom
 const maximumForwardedBodyBytes = 8 * 1024 * 1024;
 const forwardedRequestHeaderNames = ["idempotency-key", "x-client-region", "if-match", "x-step-up-token"];
 const longForwardedHeaderNames = new Set(["x-step-up-token"]);
-const returnedResponseHeaderNames = ["content-type", "content-disposition", "idempotent-replayed", "retry-after", "etag"];
+const returnedResponseHeaderNames = ["content-type", "content-disposition", "idempotent-replayed", "retry-after", "etag", "x-request-id"];
 const allowedApiPathPattern = /^\/api\/v1(\/[A-Za-z0-9._~:@%,-]+)+$/;
 
 const publicApiRoutes = [
@@ -28,7 +28,7 @@ function isPublicApiRequest(method: string, apiPath: string): boolean {
 }
 
 export function respondWithBffError(status: number, code: string, message: string, suggestions?: readonly string[]): NextResponse {
-  return NextResponse.json({ message, code, ...(suggestions ? { suggestions } : {}) }, { status, headers: { "Cache-Control": "no-store" } });
+  return NextResponse.json({ message, code, ...(suggestions ? { suggestions } : {}) }, { status, headers: { "Cache-Control": "no-store", "X-Request-Id": crypto.randomUUID() } });
 }
 
 function convertBackendResultToResponse(result: BackendResult): NextResponse {

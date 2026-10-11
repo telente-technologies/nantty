@@ -1,3 +1,5 @@
+import { describeErrorSignal, parseRetryAfterHeader, readRequestIdHeader } from "@zudomart/web-kit/src/errorExperience/core";
+
 import { useAuthPromptStore } from "@/components/auth/authPrompt.store";
 import { useHumanVerificationStore } from "@/components/security/humanVerification.store";
 import { describeLimitError } from "@/utils/limitErrors.util";
@@ -28,14 +30,29 @@ export class WebappRequestError extends Error {
     message: string,
     public readonly suggestions?: readonly string[],
     public readonly details?: Readonly<Record<string, unknown>>,
+    meta: WebappRequestErrorMeta = {},
   ) {
     super(describeLimitError(code, details) ?? message);
     this.name = "WebappRequestError";
+    this.requestId = meta.requestId;
+    this.retryAfterSeconds = meta.retryAfterSeconds;
   }
+
+  public readonly requestId?: string;
+  public readonly retryAfterSeconds?: number;
 
   public get isNetworkFailure(): boolean {
     return this.status === 0;
   }
+}
+
+export interface WebappRequestErrorMeta {
+  readonly requestId?: string;
+  readonly retryAfterSeconds?: number;
+}
+
+function readResponseMeta(response: Response): WebappRequestErrorMeta {
+  return { requestId: readRequestIdHeader(response.headers), retryAfterSeconds: parseRetryAfterHeader(response.headers.get("retry-after")) };
 }
 
 export interface WebappRequestOptions {
@@ -107,7 +124,7 @@ export async function sendRequestToWebappServer<Payload>(apiPath: string, option
     const errorBody = (await response.json().catch(() => null)) as ApiErrorBody | null;
     if (errorBody?.code === "SESSION_EXPIRED") handleExpiredSession();
     else if (method !== "GET" && errorBody?.code === "UNAUTHENTICATED") promptSignInAfterUnauthenticatedResponse();
-    throw new WebappRequestError(401, errorBody?.code ?? "UNAUTHENTICATED", errorBody?.message ?? "Sign in to continue.");
+    throw new WebappRequestError(401, errorBody?.code ?? "UNAUTHENTICATED", errorBody?.message ?? "Sign in to continue.", undefined, undefined, readResponseMeta(response));
   }
   if (!response.ok) {
     const errorBody = (await response.json().catch(() => null)) as (ApiErrorBody & { readonly reason?: string }) | null;
@@ -115,7 +132,8 @@ export async function sendRequestToWebappServer<Payload>(apiPath: string, option
       const passed = await useHumanVerificationStore.getState().requestHumanVerification(errorBody.reason ?? "security_check");
       if (passed) return sendRequestToWebappServer<Payload>(apiPath, { ...options, skipHumanVerification: true });
     }
-    throw new WebappRequestError(response.status, errorBody?.code ?? `HTTP_${response.status}`, errorBody?.message ?? "Something went wrong. Try again.", errorBody?.suggestions, errorBody?.details);
+    const code = errorBody?.code ?? `HTTP_${response.status}`;
+    throw new WebappRequestError(response.status, code, errorBody?.message ?? describeErrorSignal({ status: response.status, code }).description, errorBody?.suggestions, errorBody?.details, readResponseMeta(response));
   }
   if (response.status === 204) return undefined as Payload;
   return (await response.json()) as Payload;
@@ -130,10 +148,18 @@ export function createIdempotencyKey(prefix = "idem"): string {
   return `${prefix}_${crypto.randomUUID().replace(/-/g, "")}`;
 }
 
+const kindsWithBetterCopy = new Set(["offline", "timeout", "rateLimited", "serverError", "maintenance", "unknown", "tooManyAttempts", "clockSkew"]);
+
 export function readErrorMessageForDisplay(error: unknown): string {
-  if (error instanceof WebappRequestError) return error.message;
-  if (error instanceof Error && error.name !== "AbortError") return "Something went wrong. Try again.";
-  return "Something went wrong. Try again.";
+  if (!(error instanceof WebappRequestError)) {
+    const isOffline = typeof navigator !== "undefined" && navigator.onLine === false;
+    return describeErrorSignal(isOffline ? { status: 0 } : {}).description;
+  }
+  if (describeLimitError(error.code, error.details)) return error.message;
+  const descriptor = describeErrorSignal(error);
+  const isGenericFailure = error.status === 0 || error.status >= 500 || error.code.startsWith("HTTP_");
+  if (isGenericFailure || (kindsWithBetterCopy.has(descriptor.kind) && descriptor.kind !== "unknown")) return descriptor.description;
+  return error.message;
 }
 
 export function isSignInRequiredError(error: unknown): boolean {

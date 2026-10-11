@@ -22,7 +22,7 @@ export function readAuthEndpointResult(result: BackendResult): AuthEndpointResul
   return {
     status: result.status,
     session: !isError && payload ? payload : null,
-    error: isError ? { message: payload?.message ?? "Something went wrong. Try again.", code: payload?.code } : null,
+    error: isError ? { message: payload?.message ?? "We couldn't sign you in just now. Try again in a moment.", code: payload?.code } : null,
   };
 }
 

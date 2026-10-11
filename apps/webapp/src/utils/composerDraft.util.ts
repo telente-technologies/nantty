@@ -23,6 +23,7 @@ export interface ComposerDraft {
   readonly tagged: readonly UserSummary[];
   readonly products: readonly ComposerTaggedProduct[];
   readonly location: PostLocationTag | null;
+  readonly quotedPostId?: string | null;
 }
 
 export const EMPTY_COMPOSER_DRAFT: ComposerDraft = {
@@ -38,10 +39,14 @@ export const EMPTY_COMPOSER_DRAFT: ComposerDraft = {
   location: null,
 };
 
-const draftStorageKey = (viewerId: string) => `zudomart.composerDraft.${viewerId}`;
+const draftStorageKey = (viewerId: string, quoteSlot?: string | null) => (quoteSlot ? `zudomart.composerDraft.${viewerId}.quote.${quoteSlot}` : `zudomart.composerDraft.${viewerId}`);
 
 export const isComposerDraftEmpty = (draft: ComposerDraft) =>
-  draft.text.trim() === "" && draft.tagged.length === 0 && draft.products.length === 0 && draft.sensitiveLabels.length === 0 && draft.location === null;
+  draft.text.trim() === "" && draft.tagged.length === 0 && draft.products.length === 0 && draft.sensitiveLabels.length === 0 && draft.location === null && !draft.quotedPostId;
+
+const quoteParamPattern = /^[A-Za-z0-9_-]{1,64}$/;
+
+export const readQuoteParam = (value: string | null | undefined): string | null => (value && quoteParamPattern.test(value) ? value : null);
 
 function readSavedLocation(value: unknown): PostLocationTag | null {
   if (!value || typeof value !== "object") return null;
@@ -50,30 +55,31 @@ function readSavedLocation(value: unknown): PostLocationTag | null {
   return { placeId: candidate.placeId.slice(0, 200), name: candidate.name.slice(0, 120), area: typeof candidate.area === "string" ? candidate.area.slice(0, 120) : null };
 }
 
-export function readSavedComposerDraft(storage: Pick<Storage, "getItem"> | undefined, viewerId: string): ComposerDraft | null {
+export function readSavedComposerDraft(storage: Pick<Storage, "getItem"> | undefined, viewerId: string, quoteSlot?: string | null): ComposerDraft | null {
   try {
-    const raw = storage?.getItem(draftStorageKey(viewerId));
+    const raw = storage?.getItem(draftStorageKey(viewerId, quoteSlot));
     if (!raw) return null;
     const parsed = JSON.parse(raw) as Partial<ComposerDraft>;
     if (typeof parsed.text !== "string") return null;
-    return { ...EMPTY_COMPOSER_DRAFT, ...parsed, text: parsed.text.slice(0, PREMIUM_POST_TEXT_LIMIT), location: readSavedLocation(parsed.location) };
+    return { ...EMPTY_COMPOSER_DRAFT, ...parsed, text: parsed.text.slice(0, PREMIUM_POST_TEXT_LIMIT), location: readSavedLocation(parsed.location), quotedPostId: readQuoteParam(parsed.quotedPostId) };
   } catch {
     return null;
   }
 }
 
-export function saveComposerDraft(storage: Pick<Storage, "setItem" | "removeItem"> | undefined, viewerId: string, draft: ComposerDraft): void {
+export function saveComposerDraft(storage: Pick<Storage, "setItem" | "removeItem"> | undefined, viewerId: string, draft: ComposerDraft, quoteSlot?: string | null): void {
   try {
-    if (isComposerDraftEmpty(draft)) storage?.removeItem(draftStorageKey(viewerId));
-    else storage?.setItem(draftStorageKey(viewerId), JSON.stringify(draft));
+    const key = draftStorageKey(viewerId, quoteSlot);
+    if (isComposerDraftEmpty(draft) || (quoteSlot && draft.text.trim() === "" && draft.tagged.length === 0 && draft.products.length === 0 && draft.location === null)) storage?.removeItem(key);
+    else storage?.setItem(key, JSON.stringify(draft));
   } catch {
     return;
   }
 }
 
-export function clearSavedComposerDraft(storage: Pick<Storage, "removeItem"> | undefined, viewerId: string): void {
+export function clearSavedComposerDraft(storage: Pick<Storage, "removeItem"> | undefined, viewerId: string, quoteSlot?: string | null): void {
   try {
-    storage?.removeItem(draftStorageKey(viewerId));
+    storage?.removeItem(draftStorageKey(viewerId, quoteSlot));
   } catch {
     return;
   }
