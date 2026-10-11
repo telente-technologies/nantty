@@ -17,6 +17,7 @@ class RabbitMqChannelProvider:
         self.connection: AbstractRobustConnection | None = None
         self.publish_channel: AbstractChannel | None = None
         self.lock = asyncio.Lock()
+        self.publish_lock = asyncio.Lock()
 
     async def connected(self) -> AbstractRobustConnection:
         async with self.lock:
@@ -31,9 +32,10 @@ class RabbitMqChannelProvider:
         return await connection.channel(publisher_confirms=True, on_return_raises=True)
 
     async def channel_for_publishing(self) -> AbstractChannel:
-        if self.publish_channel is None or self.publish_channel.is_closed:
-            self.publish_channel = await self.open_channel()
-        return self.publish_channel
+        async with self.publish_lock:
+            if self.publish_channel is None or self.publish_channel.is_closed:
+                self.publish_channel = await self.open_channel()
+            return self.publish_channel
 
     async def close(self) -> None:
         if self.connection is not None and not self.connection.is_closed:

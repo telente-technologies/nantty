@@ -9,6 +9,7 @@ from fastapi import FastAPI
 from src.container import ApplicationContainer
 from src.integrations.dataset_storage_integration import build_dataset_storage_location
 from src.jobs.compact_datasets_job import run_periodic_retention_loop
+from src.jobs.erase_personal_data_job import run_periodic_erasure_loop
 from src.modules.domain_events.repositories.amqp_domain_event_queue_repository import AmqpDomainEventQueueConsumer
 from src.modules.domain_events.repositories.sqs_domain_event_queue_repository import (
     SqsDomainEventQueuePoller,
@@ -37,17 +38,30 @@ def build_application_lifespan(
             settings = container.settings
             background_jobs = [
                 asyncio.create_task(
-                    container.model_holder.run_periodic_reload_loop(settings.model_reload_interval_seconds)
+                    container.model_holder.run_periodic_reload_loop(settings.model_reload_interval_seconds),
+                    name="model_reload",
                 ),
                 asyncio.create_task(
-                    container.feature_log_sink.run_periodic_flush_loop(settings.feature_log_flush_interval_seconds)
+                    container.feature_log_sink.run_periodic_flush_loop(settings.feature_log_flush_interval_seconds),
+                    name="feature_log_flush",
                 ),
                 asyncio.create_task(
                     run_periodic_retention_loop(
                         build_dataset_storage_location(settings),
                         settings.dataset_retention_days,
                         settings.dataset_retention_interval_seconds,
-                    )
+                    ),
+                    name="dataset_retention",
+                ),
+                asyncio.create_task(
+                    run_periodic_erasure_loop(
+                        build_dataset_storage_location(settings),
+                        container.feature_backend,
+                        container.feature_store.keyspace,
+                        settings.dataset_retention_days,
+                        settings.dataset_erasure_interval_seconds,
+                    ),
+                    name="dataset_erasure",
                 ),
             ]
             if container.rabbitmq_channels is not None:
@@ -57,7 +71,7 @@ def build_application_lifespan(
                     container.domain_event_consumer_service,
                     settings.rabbitmq_prefetch,
                 )
-                background_jobs.append(asyncio.create_task(amqp_consumer.run_consume_loop()))
+                background_jobs.append(asyncio.create_task(amqp_consumer.run_consume_loop(), name="domain_events_amqp"))
                 background_jobs += start_live_safety_consumers(
                     settings, container.rabbitmq_channels, container.live_safety_scoring_service
                 )
@@ -69,13 +83,15 @@ def build_application_lifespan(
                     dlq_queue_url=settings.domain_events_dlq_queue_url,
                     max_delivery_attempts=settings.sqs_max_delivery_attempts,
                 )
-                background_jobs.append(asyncio.create_task(poller.run_poll_loop()))
+                background_jobs.append(asyncio.create_task(poller.run_poll_loop(), name="domain_events_sqs"))
             for background_job in background_jobs:
                 background_job.add_done_callback(log_background_task_exit)
+                container.background_job_monitor.track(background_job.get_name(), background_job)
         lifespan_logger.info("intelligence_started", extra={"environment": container.settings.environment})
         try:
             yield
         finally:
+            container.background_job_monitor.forget_all()
             for background_job in background_jobs:
                 background_job.cancel()
                 with contextlib.suppress(asyncio.CancelledError):

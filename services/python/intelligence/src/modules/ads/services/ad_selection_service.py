@@ -152,6 +152,11 @@ class AdSelectionService:
             impressions_today_by_campaign=impressions_today,
             online_spend_today_by_campaign=signals.spend_today_by_campaign,
             store_customer_topic_centroids=centroids,
+            frequency_unknown_campaigns=frozenset(
+                candidate.campaign_id
+                for candidate in request.candidates
+                if degraded and candidate.campaign_id not in request.viewer_impressions_today_by_campaign
+            ),
         )
         rejected: list[RejectedAd] = []
         eligible_ads: list[EligibleAd] = []

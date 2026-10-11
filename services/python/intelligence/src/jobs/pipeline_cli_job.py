@@ -73,7 +73,11 @@ def main(argument_values: list[str] | None = None) -> int:
     arguments = build_argument_parser().parse_args(argument_values)
     configure_structured_logging("WARNING")
     if arguments.command == "generate-synthetic-data":
-        storage_directory = Path(arguments.storage or load_intelligence_settings().event_storage_uri)
+        storage_target = arguments.storage or load_intelligence_settings().event_storage_uri
+        if "://" in storage_target:
+            sys.stderr.write("generate-synthetic-data writes to a local directory; pass --storage <path>\n")
+            return 2
+        storage_directory = Path(storage_target)
         run_synthetic_data_generation(storage_directory, arguments.users, arguments.sessions_per_user, arguments.seed)
         return 0
     location, registry = resolve_storage_and_registry(arguments)

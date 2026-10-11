@@ -104,7 +104,7 @@ class BotScoringService:
         claim_key = None
         try:
             if self.backend is not None and self.keyspace is not None:
-                claim_key = self.keyspace.event_deduplication_key(f"bot-score:{score_id}")
+                claim_key = self.keyspace.internal_claim_key("bot-score", score_id)
                 claimed = await self.backend.claim_keys_if_absent([claim_key], PUBLISH_DEDUPLICATION_TTL_SECONDS)
                 if not claimed[0]:
                     return False
@@ -129,4 +129,7 @@ class BotScoringService:
                 with contextlib.suppress(Exception):
                     await self.backend.delete_keys([claim_key])
             return False
+        if not self.publisher.delivers and claim_key is not None and self.backend is not None:
+            with contextlib.suppress(Exception):
+                await self.backend.delete_keys([claim_key])
         return self.publisher.delivers

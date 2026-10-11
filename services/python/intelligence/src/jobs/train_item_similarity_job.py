@@ -143,22 +143,22 @@ def evaluate_leave_last_out_recall(
     return hits / trials if trials else None
 
 
-def train_item_similarity_model(
-    location: DatasetStorageLocation, registry: ModelRegistry, force_activation: bool
-) -> dict[str, Any]:
-    interactions = load_product_interactions(location)
-    if interactions.height < 20:
-        return {"modelName": "item_similarity", "skipped": "not_enough_rows", "rows": interactions.height}
-    now = datetime.now(UTC)
-    weighted = interactions.with_columns(
-        pl.col("event_type").replace_strict(INTERACTION_WEIGHTS, return_dtype=pl.Float64).alias("weight"),
-        ((pl.lit(now) - pl.col("occurred_at")).dt.total_seconds() / 86_400).alias("age_days"),
+def select_held_out_interactions(interactions: pl.DataFrame) -> pl.DataFrame:
+    held_out: list[tuple[str, str]] = []
+    for _actor, history in interactions.sort("occurred_at").group_by("actor_id", maintain_order=True):
+        products = list(dict.fromkeys(history.get_column("product_id").to_list()))
+        if len(products) >= 2:
+            held_out.append((str(history.get_column("actor_id")[0]), str(products[-1])))
+    return pl.DataFrame(
+        {"actor_id": [actor for actor, _ in held_out], "product_id": [product for _, product in held_out]},
+        schema={"actor_id": pl.String, "product_id": pl.String},
     )
-    user_ids = sorted(weighted.get_column("actor_id").unique().to_list())
-    item_ids = sorted(weighted.get_column("product_id").unique().to_list())
+
+
+def build_similar_items(aggregated: pl.DataFrame, item_ids: list[str]) -> dict[str, list[tuple[str, float]]]:
+    user_ids = sorted(aggregated.get_column("actor_id").unique().to_list())
     user_index = {user_id: index for index, user_id in enumerate(user_ids)}
     item_index = {item_id: index for index, item_id in enumerate(item_ids)}
-    aggregated = weighted.group_by("actor_id", "product_id").agg(pl.col("weight").sum())
     interaction_matrix = sparse.csr_matrix(
         (
             aggregated.get_column("weight").to_numpy(),
@@ -176,11 +176,31 @@ def train_item_similarity_model(
     blended = COOCCURRENCE_BLEND_WEIGHT * cooccurrence + (1 - COOCCURRENCE_BLEND_WEIGHT) * np.clip(
         calculate_row_cosine_similarity(item_factors), 0, 1
     ) * (cooccurrence > 0)
-    similar_items = {
+    return {
         item_id: neighbours
         for index, item_id in enumerate(item_ids)
         if (neighbours := build_top_neighbours(blended[index], item_ids, index, NEIGHBOUR_COUNT))
     }
+
+
+def train_item_similarity_model(
+    location: DatasetStorageLocation, registry: ModelRegistry, force_activation: bool
+) -> dict[str, Any]:
+    interactions = load_product_interactions(location)
+    if interactions.height < 20:
+        return {"modelName": "item_similarity", "skipped": "not_enough_rows", "rows": interactions.height}
+    now = datetime.now(UTC)
+    weighted = interactions.with_columns(
+        pl.col("event_type").replace_strict(INTERACTION_WEIGHTS, return_dtype=pl.Float64).alias("weight"),
+        ((pl.lit(now) - pl.col("occurred_at")).dt.total_seconds() / 86_400).alias("age_days"),
+    )
+    item_ids = sorted(weighted.get_column("product_id").unique().to_list())
+    aggregated = weighted.group_by("actor_id", "product_id").agg(pl.col("weight").sum())
+    similar_items = build_similar_items(aggregated, item_ids)
+    held_out = select_held_out_interactions(interactions)
+    evaluation_neighbours = build_similar_items(
+        aggregated.join(held_out, on=["actor_id", "product_id"], how="anti"), item_ids
+    )
     popularity = (
         weighted.with_columns(
             (pl.col("weight") * (0.5 ** (pl.col("age_days") / POPULARITY_HALF_LIFE_DAYS))).alias("decayed")
@@ -198,7 +218,7 @@ def train_item_similarity_model(
     )
     store_by_item = dict(interactions.select("product_id", "store_id").unique(subset=["product_id"]).iter_rows())
     neighbour_lists = {item: [neighbour for neighbour, _score in pairs] for item, pairs in similar_items.items()}
-    recall_at_ten = evaluate_leave_last_out_recall(interactions, similar_items)
+    recall_at_ten = evaluate_leave_last_out_recall(interactions, evaluation_neighbours)
     metrics = {
         "recallAt10": recall_at_ten,
         "catalogCoverage": calculate_catalog_coverage(neighbour_lists, set(item_ids)),
@@ -213,6 +233,11 @@ def train_item_similarity_model(
         metrics,
         "recallAt10",
         recall_at_ten,
-        {"rows": interactions.height, "users": len(user_ids), "items": len(item_ids), "alsFactors": 16},
+        {
+            "rows": interactions.height,
+            "users": aggregated.get_column("actor_id").n_unique(),
+            "items": len(item_ids),
+            "alsFactors": 16,
+        },
         force_activation,
     )

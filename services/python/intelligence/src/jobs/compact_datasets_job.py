@@ -1,4 +1,5 @@
 import asyncio
+import json
 import logging
 from datetime import UTC, date, datetime, timedelta
 
@@ -12,10 +13,11 @@ from src.modules.events_ingestion.repositories.raw_event_parquet_repository impo
     RAW_EVENTS_DATASET_NAME,
 )
 from src.repositories.feature_log_parquet_repository import FEATURE_LOG_ARROW_SCHEMA, FEATURE_LOGS_DATASET_NAME
-from src.utils.parquet_storage_util import write_parquet_table_atomically
+from src.utils.parquet_storage_util import new_parquet_part_file_name, write_parquet_table_atomically
 
 MINIMUM_FILES_WORTH_COMPACTING = 4
 ORPHAN_INPROGRESS_PREFIX = ".inprogress-"
+COMPACTION_MANIFEST_NAME = "_compaction-manifest.json"
 
 retention_logger = logging.getLogger("intelligence.datasets.retention")
 
@@ -39,7 +41,30 @@ def partition_date_of(directory: str) -> date | None:
         return None
 
 
+def file_exists(location: DatasetStorageLocation, path: str) -> bool:
+    return bool(location.filesystem.get_file_info(path).type == arrow_filesystem.FileType.File)
+
+
+def write_compaction_manifest(location: DatasetStorageLocation, directory: str, manifest: dict[str, object]) -> None:
+    with location.filesystem.open_output_stream(f"{directory}/{COMPACTION_MANIFEST_NAME}") as stream:
+        stream.write(json.dumps(manifest).encode("utf-8"))
+
+
+def finish_interrupted_compaction(location: DatasetStorageLocation, directory: str) -> None:
+    manifest_path = f"{directory}/{COMPACTION_MANIFEST_NAME}"
+    if not file_exists(location, manifest_path):
+        return
+    with location.filesystem.open_input_stream(manifest_path) as stream:
+        manifest = json.loads(stream.read().decode("utf-8"))
+    if file_exists(location, f"{directory}/{manifest['merged']}"):
+        for path in manifest["sources"]:
+            if file_exists(location, path):
+                location.filesystem.delete_file(path)
+    location.filesystem.delete_file(manifest_path)
+
+
 def compact_partition_directory(location: DatasetStorageLocation, directory: str, schema: arrow.Schema) -> int:
+    finish_interrupted_compaction(location, directory)
     selector = arrow_filesystem.FileSelector(directory, recursive=False)
     part_files = sorted(
         info.path
@@ -49,9 +74,12 @@ def compact_partition_directory(location: DatasetStorageLocation, directory: str
     if len(part_files) < MINIMUM_FILES_WORTH_COMPACTING:
         return 0
     tables = [arrow_parquet.read_table(path, filesystem=location.filesystem, schema=schema) for path in part_files]
-    write_parquet_table_atomically(location, arrow.concat_tables(tables), directory)
+    merged_name = new_parquet_part_file_name()
+    write_compaction_manifest(location, directory, {"merged": merged_name, "sources": part_files})
+    write_parquet_table_atomically(location, arrow.concat_tables(tables), directory, merged_name)
     for path in part_files:
         location.filesystem.delete_file(path)
+    location.filesystem.delete_file(f"{directory}/{COMPACTION_MANIFEST_NAME}")
     return len(part_files)
 
 

@@ -54,7 +54,9 @@ def list_intelligence_modules() -> list[IntelligenceModule]:
 
 
 def load_intelligence_modules(application: FastAPI, container: ApplicationContainer) -> None:
-    application.include_router(build_health_router(HealthController(container.feature_backend)))
+    application.include_router(
+        build_health_router(HealthController(container.feature_backend, container.background_job_monitor))
+    )
     for module in list_intelligence_modules():
         module.register_handlers(container)
         application.include_router(module.build_router(container))

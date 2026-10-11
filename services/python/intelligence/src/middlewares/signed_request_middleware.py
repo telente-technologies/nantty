@@ -8,9 +8,23 @@ from src.constants.signed_request_header_constant import NONCE_HEADER_NAME, SIGN
 from src.interfaces.feature_backend_interface import FeatureBackend, FeatureBackendUnavailableError
 from src.repositories.online_feature_keyspace_repository import OnlineFeatureKeyspace
 from src.utils.asgi_response_util import read_header_value, send_json_error_response
-from src.utils.request_signature_util import verify_signed_request_headers
+from src.utils.request_signature_util import (
+    SignatureVerificationOutcome,
+    precheck_signature_headers,
+    verify_signed_request_headers,
+)
 
 security_logger = logging.getLogger("intelligence.security")
+
+
+def signed_path_candidates(scope: Scope) -> list[str]:
+    decoded_path = str(scope["path"])
+    raw_path = scope.get("raw_path")
+    if isinstance(raw_path, bytes) and raw_path.decode("latin-1") != decoded_path:
+        return [decoded_path, raw_path.decode("latin-1")]
+    return [decoded_path]
+
+
 PROTECTED_PATH_PREFIX = "/v1/"
 EVENT_INGESTION_PATH = "/v1/events"
 
@@ -56,24 +70,39 @@ class SignedRequestMiddleware:
         if declared_length is not None and (not declared_length.isdigit() or int(declared_length) > body_limit):
             await send_json_error_response(send, 413, "request_body_too_large")
             return
+        precheck_failure = precheck_signature_headers(
+            read_header_value(raw_headers, TIMESTAMP_HEADER_NAME.encode()),
+            read_header_value(raw_headers, NONCE_HEADER_NAME.encode()),
+            read_header_value(raw_headers, SIGNATURE_HEADER_NAME.encode()),
+            self.current_time_provider(),
+            self.maximum_clock_skew_seconds,
+        )
+        if precheck_failure is not None:
+            security_logger.warning("signature_rejected", extra={"reason": precheck_failure, "path": scope["path"]})
+            await send_json_error_response(send, 401, "unauthenticated")
+            return
         try:
             body_bytes = await self.read_request_body_with_limit(receive, body_limit)
         except RequestBodyTooLargeError:
             await send_json_error_response(send, 413, "request_body_too_large")
             return
         query_string = scope.get("query_string", b"").decode("latin-1")
-        path_with_query = f"{scope['path']}?{query_string}" if query_string else str(scope["path"])
-        outcome = verify_signed_request_headers(
-            self.accepted_shared_secrets,
-            str(scope["method"]),
-            path_with_query,
-            read_header_value(raw_headers, TIMESTAMP_HEADER_NAME.encode()),
-            read_header_value(raw_headers, NONCE_HEADER_NAME.encode()),
-            read_header_value(raw_headers, SIGNATURE_HEADER_NAME.encode()),
-            body_bytes,
-            self.current_time_provider(),
-            self.maximum_clock_skew_seconds,
-        )
+        outcome = SignatureVerificationOutcome(False, "missing_signature_headers")
+        for candidate_path in signed_path_candidates(scope):
+            path_with_query = f"{candidate_path}?{query_string}" if query_string else candidate_path
+            outcome = verify_signed_request_headers(
+                self.accepted_shared_secrets,
+                str(scope["method"]),
+                path_with_query,
+                read_header_value(raw_headers, TIMESTAMP_HEADER_NAME.encode()),
+                read_header_value(raw_headers, NONCE_HEADER_NAME.encode()),
+                read_header_value(raw_headers, SIGNATURE_HEADER_NAME.encode()),
+                body_bytes,
+                self.current_time_provider(),
+                self.maximum_clock_skew_seconds,
+            )
+            if outcome.is_valid:
+                break
         if not outcome.is_valid or outcome.nonce is None:
             security_logger.warning(
                 "signature_rejected", extra={"reason": outcome.failure_reason, "path": scope["path"]}

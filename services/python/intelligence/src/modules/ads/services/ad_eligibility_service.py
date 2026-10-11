@@ -30,6 +30,7 @@ class AdEligibilityContext:
     impressions_today_by_campaign: Mapping[str, float]
     online_spend_today_by_campaign: Mapping[str, Mapping[str, float]]
     store_customer_topic_centroids: Mapping[str, Mapping[str, float]]
+    frequency_unknown_campaigns: frozenset[str] = frozenset()
 
 
 @dataclass(frozen=True, slots=True)
@@ -109,6 +110,8 @@ def evaluate_ad_eligibility(candidate: AdCandidate, context: AdEligibilityContex
     )
     if not has_budget_for_one_more_charge(candidate, effective_spent_today, effective_spent_total):
         return "budget_exhausted"
+    if candidate.campaign_id in context.frequency_unknown_campaigns:
+        return "frequency_unavailable"
     impressions_today = context.impressions_today_by_campaign.get(candidate.campaign_id, 0.0)
     if impressions_today >= candidate.frequency_cap_per_day:
         return "frequency_capped"
