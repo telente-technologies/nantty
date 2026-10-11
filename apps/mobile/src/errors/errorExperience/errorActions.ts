@@ -64,6 +64,7 @@ const defaultHandlers: Partial<Record<ErrorActionIntent, () => void>> = {
   viewOrders: () => navigateTo("Orders"),
   changeAddress: () => navigateTo("ShippingAddresses"),
   clearDebt: () => navigateTo("Wallet"),
+  manageProfiles: () => navigateTo("ManageProfiles"),
   upgrade: () => navigateTo("SellerDashboard"),
 };
 

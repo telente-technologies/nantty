@@ -21,6 +21,17 @@ const createPost = (text: string, quotedPostId?: string | null) =>
 const listComments = (postId: string, query = "") => resolveMockApiRequest<Page<SectionItem>>("GET", `/api/v1/posts/${postId}/comments${query}`, undefined);
 const listThread = (postId: string, query = "") => resolveMockApiRequest<Page<ThreadReply | QuoteThreadItem>>("GET", `/api/v1/posts/${postId}/thread${query}`, undefined);
 const quoteIds = (items: readonly object[]) => items.filter(isQuoteThreadItem).map((item) => item.id);
+async function everyItem<T>(list: (query: string) => Promise<Page<T>>, base: string): Promise<T[]> {
+  const items: T[] = [];
+  let cursor: string | null = null;
+  for (let page = 0; page < 40; page += 1) {
+    const result: Page<T> = await list(`${base}${cursor === null ? "" : `${base ? "&" : "?"}cursor=${cursor}`}`);
+    items.push(...result.data);
+    cursor = result.nextCursor;
+    if (cursor === null) break;
+  }
+  return items;
+}
 const getPost = (postId: string) => resolveMockApiRequest<Post>("GET", `/api/v1/posts/${postId}`, undefined);
 
 describe("quotes in the comment section (mocks)", () => {
@@ -31,11 +42,12 @@ describe("quotes in the comment section (mocks)", () => {
     const viaButton = await createPost("my take", original.id);
     const viaLink = await createPost(`hot take https://app.zudomart.com/post/${original.id}`);
     expect(viaLink).toMatchObject({ text: "hot take", isQuote: true, resharedFrom: { id: original.id } });
-    const listed = await listComments(original.id);
-    expect(quoteIds(listed.data).sort()).toEqual([viaButton.id, viaLink.id].sort());
-    for (const item of listed.data.filter(isQuoteThreadItem)) expect(validateAgainstContract(quoteItemContract, item)).toEqual([]);
-    expect(quoteIds((await listThread(original.id, "?sort=relevant")).data)).toHaveLength(2);
-    expect(quoteIds((await listThread(original.id, "?sort=latest")).data)).toHaveLength(0);
+    const listed = await everyItem((query) => listComments(original.id, query), "");
+    expect(quoteIds(listed).sort()).toEqual([viaButton.id, viaLink.id].sort());
+    expect(new Set(listed.map((item) => item.id)).size).toBe(listed.length);
+    for (const item of listed.filter(isQuoteThreadItem)) expect(validateAgainstContract(quoteItemContract, item)).toEqual([]);
+    expect(quoteIds(await everyItem((query) => listThread(original.id, query), "?sort=relevant"))).toHaveLength(2);
+    expect(quoteIds(await everyItem((query) => listThread(original.id, query), "?sort=latest"))).toHaveLength(0);
     const onlyQuotes = await listComments(original.id, "?filter=quotes");
     expect(onlyQuotes.data.every((item) => isQuoteThreadItem(item))).toBe(true);
     expect(onlyQuotes.data[0]?.id).toBe(viaLink.id);
@@ -46,7 +58,7 @@ describe("quotes in the comment section (mocks)", () => {
     const quote = await createPost("quoting", original.id);
     expect((await getPost(original.id)).quotes).toBe(1);
     await resolveMockApiRequest("DELETE", `/api/v1/posts/${quote.id}`, undefined);
-    expect(quoteIds((await listComments(original.id)).data)).toEqual([]);
+    expect(quoteIds(await everyItem((query) => listComments(original.id, query), ""))).toEqual([]);
     expect((await getPost(original.id)).quotes).toBe(0);
   });
 
@@ -56,7 +68,7 @@ describe("quotes in the comment section (mocks)", () => {
     const quoteOfQuote = await createPost("and again", quote.id);
     expect(quoteOfQuote.resharedFrom?.id).toBe(quote.id);
     expect(quoteOfQuote.resharedFrom?.resharedFrom ?? null).toBeNull();
-    expect(quoteIds((await listComments(quote.id)).data)).toEqual([quoteOfQuote.id]);
+    expect(quoteIds(await everyItem((query) => listComments(quote.id, query), ""))).toEqual([quoteOfQuote.id]);
   });
 
   it("refuses an explicit quote of a post deleted while composing", async () => {

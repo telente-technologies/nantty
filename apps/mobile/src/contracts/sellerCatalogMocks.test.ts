@@ -1,5 +1,6 @@
 import { resolveMockApiRequest } from "@/mocks";
 import type { CatalogProduct } from "@/types/sellerCatalog.type";
+import { createOptionGroupDraft } from "@/utils/productOptions.util";
 import { buildCatalogProductUpsertRequest, EMPTY_PRODUCT_FORM, formValuesFromCatalogProduct } from "@/utils/sellerProductForm.util";
 
 const listProducts = async () => resolveMockApiRequest<CatalogProduct[] | { data: CatalogProduct[] }>("GET", "/api/v1/seller/products", undefined).then((payload) => (Array.isArray(payload) ? payload : payload.data));
@@ -24,5 +25,28 @@ describe("seller catalog mocks", () => {
     await resolveMockApiRequest("DELETE", `/api/v1/seller/products/${created.id}`, undefined);
     expect((await listProducts()).some((product) => product.id === created.id)).toBe(false);
     await expect(resolveMockApiRequest("GET", `/api/v1/seller/products/${created.id}x`, undefined)).rejects.toMatchObject({ code: "PRODUCT_NOT_FOUND" });
+  });
+
+  it("round-trips option chips as options[{name, values}] and keeps variant ids on edit", async () => {
+    const locationId = "0190f3a2-7b1c-7cde-9f00-0000000000a1";
+    const form = { ...EMPTY_PRODUCT_FORM, name: "Ankara tee", priceInMajorUnits: "20", stock: "0", optionGroups: [createOptionGroupDraft("Size", ["S", "M"]), createOptionGroupDraft("Colour", ["Red", "🔵 Blue"])] };
+    const body = buildCatalogProductUpsertRequest({ form, images: [], brand: null, existing: null, defaultLocationId: locationId, skuSeed: "OPT" });
+    expect(Object.keys(body).sort()).toEqual(["brand", "categoryId", "description", "imageMediaIds", "name", "options", "publishedOnline", "status", "tags", "taxable", "trackInventory", "variants"]);
+    const created = await resolveMockApiRequest<CatalogProduct>("POST", "/api/v1/seller/products", body);
+    expect(created.options).toEqual([{ name: "Size", values: ["S", "M"] }, { name: "Colour", values: ["Red", "🔵 Blue"] }]);
+    expect(created.variants).toHaveLength(4);
+    const edited = formValuesFromCatalogProduct(created);
+    const withLarge = { ...edited, optionGroups: edited.optionGroups.map((group) => (group.name === "Size" ? { ...group, values: [...group.values, "L"] } : group)) };
+    const updated = await resolveMockApiRequest<CatalogProduct>("PATCH", `/api/v1/seller/products/${created.id}`, buildCatalogProductUpsertRequest({ form: withLarge, images: [], brand: null, existing: created, defaultLocationId: null, skuSeed: "OPT2" }));
+    expect(updated.variants).toHaveLength(6);
+    expect(created.variants.every((variant) => updated.variants.some((kept) => kept.id === variant.id && kept.sku === variant.sku))).toBe(true);
+  });
+
+  it("rejects option bodies catalog would reject", async () => {
+    const base = buildCatalogProductUpsertRequest({ form: { ...EMPTY_PRODUCT_FORM, name: "Clay pot", priceInMajorUnits: "12", stock: "0" }, images: [], brand: null, existing: null, defaultLocationId: null, skuSeed: "R" });
+    const variant = base.variants[0]!;
+    await expect(resolveMockApiRequest("POST", "/api/v1/seller/products", { ...base, options: [{ name: "Size", values: ["🔥".repeat(11)] }], variants: [{ ...variant, optionValues: { Size: "🔥".repeat(11) } }] })).rejects.toMatchObject({ status: 400 });
+    await expect(resolveMockApiRequest("POST", "/api/v1/seller/products", { ...base, options: [{ name: "Size", values: ["S", "S"] }], variants: [{ ...variant, optionValues: { Size: "S" } }] })).rejects.toMatchObject({ status: 400 });
+    await expect(resolveMockApiRequest("POST", "/api/v1/seller/products", { ...base, options: [{ name: "Size", values: ["S"] }], variants: [variant] })).rejects.toMatchObject({ status: 400 });
   });
 });

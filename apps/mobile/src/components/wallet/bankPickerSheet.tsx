@@ -69,8 +69,8 @@ export function BankPickerField({ selectedBankCode, selectedBankName, onSelectBa
 const useStyles = makeThemedStyles((colors) => StyleSheet.create({
   field: { gap: 8 },
   box: { height: 42, borderWidth: 1, borderColor: colors.textSubtle, borderRadius: 8, paddingHorizontal: 12, backgroundColor: colors.surface, flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
-  sheetBody: { paddingHorizontal: 16, paddingBottom: 16, gap: 12 },
+  sheetBody: { flexShrink: 1, paddingHorizontal: 16, paddingBottom: 16, gap: 12 },
   loading: { marginVertical: 16 },
-  list: { maxHeight: 380 },
+  list: { flexShrink: 1, maxHeight: 380 },
   option: { minHeight: 48, flexDirection: "row", alignItems: "center", justifyContent: "space-between", borderBottomWidth: 1, borderBottomColor: colors.background },
 }));

@@ -3,7 +3,10 @@ import type { StyleProp, ViewStyle } from "react-native";
 import Animated, { useAnimatedStyle, useReducedMotion, useSharedValue } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import { useKeyboardAnimation, useKeyboardHandler } from "./keyboardController";
+import { keyboardControllerIsNative, useKeyboardAnimation, useKeyboardHandler } from "./keyboardController";
+import { fallbackLiftsLayoutItself } from "./keyboardControllerFallback";
+
+const spacerLiftsForKeyboard = keyboardControllerIsNative || fallbackLiftsLayoutItself();
 
 export interface KeyboardSpacerProps {
   readonly restingHeight?: number;
@@ -36,7 +39,7 @@ export function KeyboardSpacer({ restingHeight, openedGap = 0, offset = 0, reser
   );
 
   const animatedStyle = useAnimatedStyle(() => {
-    const keyboard = reduceMotion ? snappedHeight.value : Math.abs(height.value);
+    const keyboard = reduceMotion ? (spacerLiftsForKeyboard ? snappedHeight.value : 0) : Math.abs(height.value);
     const openness = reduceMotion ? (snappedHeight.value > 0 ? 1 : 0) : progress.value;
     const lifted = Math.max(keyboard - offset, 0) + openedGap * openness;
     return { height: Math.max(lifted, resting, reservedHeight) };

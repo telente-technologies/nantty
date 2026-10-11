@@ -12,6 +12,13 @@ const geoCountry = c.object({ id: c.string(), code: c.string(), name: c.string()
 const geoArea = c.object({ id: c.string(), name: c.string(), parentId: c.string() });
 const countryOption = c.object({ countryCode: c.string(), countryName: c.string(), currency: c.string(), currencyName: c.string() });
 const actingProfile = c.object({ kind: c.string(["person", "business", "brand", "store", "government"]), id: c.string(), name: c.string(), handle: c.string(), avatarUrl: c.nullable(c.string()) }, ["verification"]);
+const linkedProfileItem = c.object({
+  kind: c.string(["store", "business", "brand"]), profileId: c.string(), storeId: c.nullable(c.string()), status: c.string(["active", "held", "retired"]),
+  holdReason: c.nullable(c.string()), name: c.string(), handle: c.string(), showsMart: c.boolean(),
+});
+const linkedProfiles = c.object({
+  accountId: c.string(), items: c.array(linkedProfileItem), canCreate: c.object({ store: c.boolean(), business: c.boolean(), brand: c.boolean() }), choiceRequired: c.boolean(),
+});
 const usernameReason = c.string(["taken", "reserved", "invalid", "recently_used", "withheld"]);
 const usernamePolicy = c.object({
   username: c.string(), canChangeNow: c.boolean(), nextChangeAvailableAt: c.nullable(c.string()), changesRemainingThisYear: c.number(), cooldownDays: c.number(),
@@ -22,6 +29,7 @@ export const identityContracts: readonly EndpointContract[] = [
   { domain: "users", method: "GET", path: "/api/v1/users/me", schema: user },
   { domain: "users", method: "GET", path: "/api/v1/users/me/profiles", schema: c.page(actingProfile) },
   { domain: "users", method: "GET", path: "/api/v1/users/me/addresses", schema: c.page(address) },
+  { domain: "users", method: "GET", path: "/api/v1/users/me/linked-profiles", schema: linkedProfiles },
   { domain: "users", method: "GET", path: "/api/v1/users/me/username-policy", schema: usernamePolicy },
   { domain: "users", method: "POST", path: "/api/v1/users/me/media/upload-intents", body: { purpose: "avatar", contentType: "image/png", sizeBytes: 1, previewUri: "file:///a.png" }, schema: c.object({ mediaId: c.string(), uploadUrl: c.string(), method: c.string(), headers: c.any(), publicUrl: c.string(), expiresAt: c.string(), maximumSize: c.number() }, ["maximumSize"]) },
   { domain: "users", method: "GET", path: "/api/v1/locale/countries", schema: c.page(countryOption) },

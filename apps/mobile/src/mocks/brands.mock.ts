@@ -2,7 +2,8 @@ import { ApiError } from "@/errors/api.error";
 import { verificationForProfileKind } from "@/utils/verificationProfile.util";
 import type { ActingProfile, BrandProducts, NewBrandInput } from "@/types/brand.type";
 
-import { BRAND_ID_BY_PRODUCT_KEY, findBrandRecord, isVerifiedOfficialStoreOfBrand, mockBrandRecords, presentBrandDetail, presentBrandSummary } from "./brandDirectory.mock";
+import { BRAND_ID_BY_PRODUCT_KEY, brandSellingOverrides, findBrandRecord, isBrandSelling, isVerifiedOfficialStoreOfBrand, mockBrandRecords, presentBrandDetail, presentBrandSummary } from "./brandDirectory.mock";
+import { assertMockCanCreate, isRetiredMockProfile } from "./linkedProfiles.mock";
 import { mockBusinessProfiles } from "./businessProfiles.mock";
 import { resolveMockCreatorStatusForSignedInUser } from "./creators.mock";
 import { getSignedInMockUser } from "./fixtures.mock";
@@ -57,6 +58,7 @@ export const brandsMocks: MockRoute[] = [
     const input = body as NewBrandInput;
     const handle = input.handle.trim().toLowerCase();
     if (input.name.trim().length < 2) throw new ApiError(422, "Add your brand name");
+    assertMockCanCreate("brand");
     const availability = checkAvailability(handle);
     if (!availability.available || mockBrandRecords.some((brand) => brand.handle === handle)) throw new ApiError(409, "That handle isn't available");
     const brand = {
@@ -67,11 +69,20 @@ export const brandsMocks: MockRoute[] = [
     return presentBrandDetail(brand, followedBrandIds);
   }),
   createMockRoute("GET", "/api/v1/brands/:brandId", ({ params }) => presentBrandDetail(findBrandOrThrow(params.brandId!), followedBrandIds)),
+  createMockRoute("PATCH", "/api/v1/brands/:brandId", ({ params, body }) => {
+    const brand = findBrandOrThrow(params.brandId!);
+    if (brand.ownerUserKey !== getSignedInMockUser().id) throw new ApiError(403, "Only the brand owner can do that.", "OWNER_ONLY");
+    const { sellingEnabled } = body as { sellingEnabled?: unknown };
+    if (typeof sellingEnabled !== "boolean") throw new ApiError(400, "sellingEnabled is required", "VALIDATION_FAILED");
+    if (sellingEnabled && isRetiredMockProfile(brand.id)) throw new ApiError(409, "Choose which profiles to keep before using this one.", "PROFILE_ON_HOLD");
+    brandSellingOverrides.set(brand.id, sellingEnabled);
+    return presentBrandDetail(brand, followedBrandIds);
+  }),
   createMockRoute("GET", "/api/v1/brands/:brandId/products", ({ params }): BrandProducts => {
     const brand = findBrandOrThrow(params.brandId!);
     const tagged = catalogProductSeeds.filter((seed) => BRAND_ID_BY_PRODUCT_KEY[seed.key] === brand.id);
     return {
-      officialStoreProducts: tagged.filter((seed) => isVerifiedOfficialStoreOfBrand(brand, seed.storeId)).map((seed) => buildCatalogProductSummary(seed)),
+      officialStoreProducts: tagged.filter((seed) => isBrandSelling(brand) && isVerifiedOfficialStoreOfBrand(brand, seed.storeId)).map((seed) => buildCatalogProductSummary(seed)),
       otherSellersProducts: tagged.filter((seed) => !isVerifiedOfficialStoreOfBrand(brand, seed.storeId)).map((seed) => buildCatalogProductSummary(seed)),
     };
   }),

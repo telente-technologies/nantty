@@ -82,7 +82,7 @@ export function useStepUpPrompt(): { readonly withStepUp: <Result>(action: (toke
   };
 
   const stepUpSheet = (
-    <BottomSheet visible={visible} onClose={close} title="Confirm it's you" subtitle="We check again before money leaves your wallet or a payout account changes.">
+    <BottomSheet visible={visible} onClose={close} title="Confirm it's you" subtitle="We check again before money leaves your wallet or a payout account changes." scrollable>
       <View style={{ gap: spacing[3] }}>
         {mode === "password" ? (
           <TextField label="Password" password value={password} onChangeText={setPassword} autoComplete="current-password" invalid={!!error} />

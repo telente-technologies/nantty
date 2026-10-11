@@ -89,5 +89,14 @@ export const contentAndCommerceCatalog: Partial<Record<ErrorKind, (context: Cata
   sellerDebtLimit: (context) => context.details?.["audience"] === "buyer"
     ? { title: "This seller can't take orders right now", description: "Remove their items from your cart, or try again later.", icon: "storefront", tone: "caution", motion: "breathe", primary: "viewCart" }
     : { title: "Selling is paused", description: "You owe more than your selling limit allows. Clear what you owe to list items and take new orders again. Orders you already have aren't affected.", icon: "wallet", tone: "danger", motion: "breathe", primary: "clearDebt" },
+  profileLimit: (context) => describeProfileLimit(context.code),
   countryRequired: () => ({ title: "Choose your country", description: "We need your country to show the right prices, payment methods and delivery options.", icon: "globe", tone: "brand", motion: "float", primary: "chooseCountry" }),
 };
+
+function describeProfileLimit(code: string | undefined): CatalogEntry {
+  const shared = { icon: "storefront", tone: "neutral", motion: "float", primary: "manageProfiles", secondary: "back" } as const;
+  if (code === "PROFILE_LIMIT_ONE_BRAND") return { ...shared, title: "You already have a Brand", description: "Each account can have one Brand, alongside one Store or one Business page. Manage your Brand from your profiles." };
+  if (code === "PROFILE_ON_HOLD") return { ...shared, title: "Choose which profiles to keep", description: "Your account has more profiles than the rule allows. Choose which to keep, and you can post and list from them again." };
+  if (code === "BRAND_SELLING_OFF") return { ...shared, title: "Selling is off for this brand", description: "Turn on Sell products with this brand in your brand settings before adding listings." };
+  return { ...shared, title: "You can have one Store or one Business page", description: "Your account already has a Store or a Business page. You can keep one of them, plus one Brand." };
+}

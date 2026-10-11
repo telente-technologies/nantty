@@ -56,6 +56,10 @@ export const BRAND_ID_BY_PRODUCT_KEY: Partial<Record<CatalogProductKey, string>>
   g4: "br_lekki", g5: "br_lekki",
 };
 
+export const brandSellingOverrides = new Map<string, boolean>();
+
+export const isBrandSelling = (brand: MockBrandRecord) => brandSellingOverrides.get(brand.id) ?? brand.officialStoreId !== null;
+
 export const findBrandRecord = (brandId: string) => mockBrandRecords.find((brand) => brand.id === brandId);
 
 export const isVerifiedOfficialStoreOfBrand = (brand: MockBrandRecord, storeId: string) =>
@@ -69,6 +73,8 @@ export const presentBrandSummary = (brand: MockBrandRecord, followedBrandIds: Re
   verification: brand.verification,
   followers: brand.followers + (followedBrandIds.has(brand.id) ? 1 : 0),
   officialStoreId: brand.verification?.badgeVisible ? brand.officialStoreId : null,
+  sellingEnabled: isBrandSelling(brand),
+  showsMart: isBrandSelling(brand),
 });
 
 export const presentBrandDetail = (brand: MockBrandRecord, followedBrandIds: ReadonlySet<string>): BrandDetail => ({

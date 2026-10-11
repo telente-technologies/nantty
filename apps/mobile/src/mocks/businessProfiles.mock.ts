@@ -4,6 +4,7 @@ import type { BusinessCategory, BusinessProfileInput } from "@/types/socialGraph
 
 import { createMockRoute, type MockRoute } from "./registry.mock";
 import { checkAvailability } from "./username.mock";
+import { assertMockCanCreate } from "./linkedProfiles.mock";
 
 const category = (id: string, parentId: string | null, name: string): BusinessCategory => ({
   id,
@@ -41,6 +42,7 @@ export const businessProfilesMocks: MockRoute[] = [
     const handle = input.handle.trim().toLowerCase();
     if (input.displayName.trim().length < 2) throw new ApiError(422, "Add your business name");
     if (input.categories.length === 0) throw new ApiError(422, "Pick at least one category");
+    assertMockCanCreate(input.purpose === "store" ? "store" : "business");
     const availability = checkAvailability(handle);
     if (!availability.available || mockBusinessProfiles.some((profile) => profile.handle === handle)) throw new ApiError(409, "That handle isn't available");
     const profile: ActingProfile = { kind: "business", id: `bp_${Date.now()}`, name: input.displayName.trim(), handle, avatarUrl: null, verification: null };
