@@ -40,6 +40,8 @@ const (
 	FieldProductSummary = "product_summary"
 	// FieldPaymentMode holds the string denoting the payment_mode field in the database.
 	FieldPaymentMode = "payment_mode"
+	// FieldCustody holds the string denoting the custody field in the database.
+	FieldCustody = "custody"
 	// FieldAmountMinor holds the string denoting the amount_minor field in the database.
 	FieldAmountMinor = "amount_minor"
 	// FieldCurrency holds the string denoting the currency field in the database.
@@ -82,6 +84,14 @@ const (
 	FieldRefundedAt = "refunded_at"
 	// FieldReleaseTrigger holds the string denoting the release_trigger field in the database.
 	FieldReleaseTrigger = "release_trigger"
+	// FieldWalletFundedAt holds the string denoting the wallet_funded_at field in the database.
+	FieldWalletFundedAt = "wallet_funded_at"
+	// FieldWalletHoldMinor holds the string denoting the wallet_hold_minor field in the database.
+	FieldWalletHoldMinor = "wallet_hold_minor"
+	// FieldDirectPayoutReference holds the string denoting the direct_payout_reference field in the database.
+	FieldDirectPayoutReference = "direct_payout_reference"
+	// FieldDirectPaidOutAt holds the string denoting the direct_paid_out_at field in the database.
+	FieldDirectPaidOutAt = "direct_paid_out_at"
 	// FieldVersion holds the string denoting the version field in the database.
 	FieldVersion = "version"
 	// FieldUpdatedAt holds the string denoting the updated_at field in the database.
@@ -114,6 +124,7 @@ var Columns = []string{
 	FieldSellerUserID,
 	FieldProductSummary,
 	FieldPaymentMode,
+	FieldCustody,
 	FieldAmountMinor,
 	FieldCurrency,
 	FieldCommissionBps,
@@ -135,6 +146,10 @@ var Columns = []string{
 	FieldReleasedAt,
 	FieldRefundedAt,
 	FieldReleaseTrigger,
+	FieldWalletFundedAt,
+	FieldWalletHoldMinor,
+	FieldDirectPayoutReference,
+	FieldDirectPaidOutAt,
 	FieldVersion,
 	FieldUpdatedAt,
 }
@@ -196,6 +211,12 @@ var (
 	DefaultReleaseTrigger string
 	// ReleaseTriggerValidator is a validator for the "release_trigger" field. It is called by the builders before save.
 	ReleaseTriggerValidator func(string) error
+	// DefaultWalletHoldMinor holds the default value on creation for the "wallet_hold_minor" field.
+	DefaultWalletHoldMinor int64
+	// DefaultDirectPayoutReference holds the default value on creation for the "direct_payout_reference" field.
+	DefaultDirectPayoutReference string
+	// DirectPayoutReferenceValidator is a validator for the "direct_payout_reference" field. It is called by the builders before save.
+	DirectPayoutReferenceValidator func(string) error
 	// DefaultVersion holds the default value on creation for the "version" field.
 	DefaultVersion int64
 	// DefaultUpdatedAt holds the default value on creation for the "updated_at" field.
@@ -232,6 +253,32 @@ func PaymentModeValidator(pm PaymentMode) error {
 	}
 }
 
+// Custody defines the type for the "custody" enum field.
+type Custody string
+
+// CustodySellerEscrow is the default value of the Custody enum.
+const DefaultCustody = CustodySellerEscrow
+
+// Custody values.
+const (
+	CustodySellerEscrow    Custody = "sellerEscrow"
+	CustodyBuyerWalletLock Custody = "buyerWalletLock"
+)
+
+func (c Custody) String() string {
+	return string(c)
+}
+
+// CustodyValidator is a validator for the "custody" field enum values. It is called by the builders before save.
+func CustodyValidator(c Custody) error {
+	switch c {
+	case CustodySellerEscrow, CustodyBuyerWalletLock:
+		return nil
+	default:
+		return fmt.Errorf("escrow: invalid enum value for custody field: %q", c)
+	}
+}
+
 // Status defines the type for the "status" enum field.
 type Status string
 
@@ -245,6 +292,7 @@ const (
 	StatusReleased          Status = "released"
 	StatusRefunded          Status = "refunded"
 	StatusPartiallyRefunded Status = "partiallyRefunded"
+	StatusClawedBack        Status = "clawedBack"
 )
 
 func (s Status) String() string {
@@ -254,7 +302,7 @@ func (s Status) String() string {
 // StatusValidator is a validator for the "status" field enum values. It is called by the builders before save.
 func StatusValidator(s Status) error {
 	switch s {
-	case StatusHeld, StatusDisputed, StatusReleased, StatusRefunded, StatusPartiallyRefunded:
+	case StatusHeld, StatusDisputed, StatusReleased, StatusRefunded, StatusPartiallyRefunded, StatusClawedBack:
 		return nil
 	default:
 		return fmt.Errorf("escrow: invalid enum value for status field: %q", s)
@@ -327,6 +375,11 @@ func ByProductSummary(opts ...sql.OrderTermOption) OrderOption {
 // ByPaymentMode orders the results by the payment_mode field.
 func ByPaymentMode(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldPaymentMode, opts...).ToFunc()
+}
+
+// ByCustody orders the results by the custody field.
+func ByCustody(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldCustody, opts...).ToFunc()
 }
 
 // ByAmountMinor orders the results by the amount_minor field.
@@ -432,6 +485,26 @@ func ByRefundedAt(opts ...sql.OrderTermOption) OrderOption {
 // ByReleaseTrigger orders the results by the release_trigger field.
 func ByReleaseTrigger(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldReleaseTrigger, opts...).ToFunc()
+}
+
+// ByWalletFundedAt orders the results by the wallet_funded_at field.
+func ByWalletFundedAt(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldWalletFundedAt, opts...).ToFunc()
+}
+
+// ByWalletHoldMinor orders the results by the wallet_hold_minor field.
+func ByWalletHoldMinor(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldWalletHoldMinor, opts...).ToFunc()
+}
+
+// ByDirectPayoutReference orders the results by the direct_payout_reference field.
+func ByDirectPayoutReference(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldDirectPayoutReference, opts...).ToFunc()
+}
+
+// ByDirectPaidOutAt orders the results by the direct_paid_out_at field.
+func ByDirectPaidOutAt(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldDirectPaidOutAt, opts...).ToFunc()
 }
 
 // ByVersion orders the results by the version field.

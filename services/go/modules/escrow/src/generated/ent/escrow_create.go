@@ -121,6 +121,20 @@ func (_c *EscrowCreate) SetNillablePaymentMode(v *escrow.PaymentMode) *EscrowCre
 	return _c
 }
 
+// SetCustody sets the "custody" field.
+func (_c *EscrowCreate) SetCustody(v escrow.Custody) *EscrowCreate {
+	_c.mutation.SetCustody(v)
+	return _c
+}
+
+// SetNillableCustody sets the "custody" field if the given value is not nil.
+func (_c *EscrowCreate) SetNillableCustody(v *escrow.Custody) *EscrowCreate {
+	if v != nil {
+		_c.SetCustody(*v)
+	}
+	return _c
+}
+
 // SetAmountMinor sets the "amount_minor" field.
 func (_c *EscrowCreate) SetAmountMinor(v int64) *EscrowCreate {
 	_c.mutation.SetAmountMinor(v)
@@ -375,6 +389,62 @@ func (_c *EscrowCreate) SetNillableReleaseTrigger(v *string) *EscrowCreate {
 	return _c
 }
 
+// SetWalletFundedAt sets the "wallet_funded_at" field.
+func (_c *EscrowCreate) SetWalletFundedAt(v time.Time) *EscrowCreate {
+	_c.mutation.SetWalletFundedAt(v)
+	return _c
+}
+
+// SetNillableWalletFundedAt sets the "wallet_funded_at" field if the given value is not nil.
+func (_c *EscrowCreate) SetNillableWalletFundedAt(v *time.Time) *EscrowCreate {
+	if v != nil {
+		_c.SetWalletFundedAt(*v)
+	}
+	return _c
+}
+
+// SetWalletHoldMinor sets the "wallet_hold_minor" field.
+func (_c *EscrowCreate) SetWalletHoldMinor(v int64) *EscrowCreate {
+	_c.mutation.SetWalletHoldMinor(v)
+	return _c
+}
+
+// SetNillableWalletHoldMinor sets the "wallet_hold_minor" field if the given value is not nil.
+func (_c *EscrowCreate) SetNillableWalletHoldMinor(v *int64) *EscrowCreate {
+	if v != nil {
+		_c.SetWalletHoldMinor(*v)
+	}
+	return _c
+}
+
+// SetDirectPayoutReference sets the "direct_payout_reference" field.
+func (_c *EscrowCreate) SetDirectPayoutReference(v string) *EscrowCreate {
+	_c.mutation.SetDirectPayoutReference(v)
+	return _c
+}
+
+// SetNillableDirectPayoutReference sets the "direct_payout_reference" field if the given value is not nil.
+func (_c *EscrowCreate) SetNillableDirectPayoutReference(v *string) *EscrowCreate {
+	if v != nil {
+		_c.SetDirectPayoutReference(*v)
+	}
+	return _c
+}
+
+// SetDirectPaidOutAt sets the "direct_paid_out_at" field.
+func (_c *EscrowCreate) SetDirectPaidOutAt(v time.Time) *EscrowCreate {
+	_c.mutation.SetDirectPaidOutAt(v)
+	return _c
+}
+
+// SetNillableDirectPaidOutAt sets the "direct_paid_out_at" field if the given value is not nil.
+func (_c *EscrowCreate) SetNillableDirectPaidOutAt(v *time.Time) *EscrowCreate {
+	if v != nil {
+		_c.SetDirectPaidOutAt(*v)
+	}
+	return _c
+}
+
 // SetVersion sets the "version" field.
 func (_c *EscrowCreate) SetVersion(v int64) *EscrowCreate {
 	_c.mutation.SetVersion(v)
@@ -479,6 +549,10 @@ func (_c *EscrowCreate) defaults() {
 		v := escrow.DefaultPaymentMode
 		_c.mutation.SetPaymentMode(v)
 	}
+	if _, ok := _c.mutation.Custody(); !ok {
+		v := escrow.DefaultCustody
+		_c.mutation.SetCustody(v)
+	}
 	if _, ok := _c.mutation.ProcessingFeeMinor(); !ok {
 		v := escrow.DefaultProcessingFeeMinor
 		_c.mutation.SetProcessingFeeMinor(v)
@@ -510,6 +584,14 @@ func (_c *EscrowCreate) defaults() {
 	if _, ok := _c.mutation.ReleaseTrigger(); !ok {
 		v := escrow.DefaultReleaseTrigger
 		_c.mutation.SetReleaseTrigger(v)
+	}
+	if _, ok := _c.mutation.WalletHoldMinor(); !ok {
+		v := escrow.DefaultWalletHoldMinor
+		_c.mutation.SetWalletHoldMinor(v)
+	}
+	if _, ok := _c.mutation.DirectPayoutReference(); !ok {
+		v := escrow.DefaultDirectPayoutReference
+		_c.mutation.SetDirectPayoutReference(v)
 	}
 	if _, ok := _c.mutation.Version(); !ok {
 		v := escrow.DefaultVersion
@@ -613,6 +695,14 @@ func (_c *EscrowCreate) check() error {
 			return &ValidationError{Name: "payment_mode", err: fmt.Errorf(`ent: validator failed for field "Escrow.payment_mode": %w`, err)}
 		}
 	}
+	if _, ok := _c.mutation.Custody(); !ok {
+		return &ValidationError{Name: "custody", err: errors.New(`ent: missing required field "Escrow.custody"`)}
+	}
+	if v, ok := _c.mutation.Custody(); ok {
+		if err := escrow.CustodyValidator(v); err != nil {
+			return &ValidationError{Name: "custody", err: fmt.Errorf(`ent: validator failed for field "Escrow.custody": %w`, err)}
+		}
+	}
 	if _, ok := _c.mutation.AmountMinor(); !ok {
 		return &ValidationError{Name: "amount_minor", err: errors.New(`ent: missing required field "Escrow.amount_minor"`)}
 	}
@@ -680,6 +770,17 @@ func (_c *EscrowCreate) check() error {
 	if v, ok := _c.mutation.ReleaseTrigger(); ok {
 		if err := escrow.ReleaseTriggerValidator(v); err != nil {
 			return &ValidationError{Name: "release_trigger", err: fmt.Errorf(`ent: validator failed for field "Escrow.release_trigger": %w`, err)}
+		}
+	}
+	if _, ok := _c.mutation.WalletHoldMinor(); !ok {
+		return &ValidationError{Name: "wallet_hold_minor", err: errors.New(`ent: missing required field "Escrow.wallet_hold_minor"`)}
+	}
+	if _, ok := _c.mutation.DirectPayoutReference(); !ok {
+		return &ValidationError{Name: "direct_payout_reference", err: errors.New(`ent: missing required field "Escrow.direct_payout_reference"`)}
+	}
+	if v, ok := _c.mutation.DirectPayoutReference(); ok {
+		if err := escrow.DirectPayoutReferenceValidator(v); err != nil {
+			return &ValidationError{Name: "direct_payout_reference", err: fmt.Errorf(`ent: validator failed for field "Escrow.direct_payout_reference": %w`, err)}
 		}
 	}
 	if _, ok := _c.mutation.Version(); !ok {
@@ -773,6 +874,10 @@ func (_c *EscrowCreate) createSpec() (*Escrow, *sqlgraph.CreateSpec) {
 		_spec.SetField(escrow.FieldPaymentMode, field.TypeEnum, value)
 		_node.PaymentMode = value
 	}
+	if value, ok := _c.mutation.Custody(); ok {
+		_spec.SetField(escrow.FieldCustody, field.TypeEnum, value)
+		_node.Custody = value
+	}
 	if value, ok := _c.mutation.AmountMinor(); ok {
 		_spec.SetField(escrow.FieldAmountMinor, field.TypeInt64, value)
 		_node.AmountMinor = value
@@ -856,6 +961,22 @@ func (_c *EscrowCreate) createSpec() (*Escrow, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.ReleaseTrigger(); ok {
 		_spec.SetField(escrow.FieldReleaseTrigger, field.TypeString, value)
 		_node.ReleaseTrigger = value
+	}
+	if value, ok := _c.mutation.WalletFundedAt(); ok {
+		_spec.SetField(escrow.FieldWalletFundedAt, field.TypeTime, value)
+		_node.WalletFundedAt = &value
+	}
+	if value, ok := _c.mutation.WalletHoldMinor(); ok {
+		_spec.SetField(escrow.FieldWalletHoldMinor, field.TypeInt64, value)
+		_node.WalletHoldMinor = value
+	}
+	if value, ok := _c.mutation.DirectPayoutReference(); ok {
+		_spec.SetField(escrow.FieldDirectPayoutReference, field.TypeString, value)
+		_node.DirectPayoutReference = value
+	}
+	if value, ok := _c.mutation.DirectPaidOutAt(); ok {
+		_spec.SetField(escrow.FieldDirectPaidOutAt, field.TypeTime, value)
+		_node.DirectPaidOutAt = &value
 	}
 	if value, ok := _c.mutation.Version(); ok {
 		_spec.SetField(escrow.FieldVersion, field.TypeInt64, value)
@@ -1180,6 +1301,72 @@ func (u *EscrowUpsert) UpdateReleaseTrigger() *EscrowUpsert {
 	return u
 }
 
+// SetWalletFundedAt sets the "wallet_funded_at" field.
+func (u *EscrowUpsert) SetWalletFundedAt(v time.Time) *EscrowUpsert {
+	u.Set(escrow.FieldWalletFundedAt, v)
+	return u
+}
+
+// UpdateWalletFundedAt sets the "wallet_funded_at" field to the value that was provided on create.
+func (u *EscrowUpsert) UpdateWalletFundedAt() *EscrowUpsert {
+	u.SetExcluded(escrow.FieldWalletFundedAt)
+	return u
+}
+
+// ClearWalletFundedAt clears the value of the "wallet_funded_at" field.
+func (u *EscrowUpsert) ClearWalletFundedAt() *EscrowUpsert {
+	u.SetNull(escrow.FieldWalletFundedAt)
+	return u
+}
+
+// SetWalletHoldMinor sets the "wallet_hold_minor" field.
+func (u *EscrowUpsert) SetWalletHoldMinor(v int64) *EscrowUpsert {
+	u.Set(escrow.FieldWalletHoldMinor, v)
+	return u
+}
+
+// UpdateWalletHoldMinor sets the "wallet_hold_minor" field to the value that was provided on create.
+func (u *EscrowUpsert) UpdateWalletHoldMinor() *EscrowUpsert {
+	u.SetExcluded(escrow.FieldWalletHoldMinor)
+	return u
+}
+
+// AddWalletHoldMinor adds v to the "wallet_hold_minor" field.
+func (u *EscrowUpsert) AddWalletHoldMinor(v int64) *EscrowUpsert {
+	u.Add(escrow.FieldWalletHoldMinor, v)
+	return u
+}
+
+// SetDirectPayoutReference sets the "direct_payout_reference" field.
+func (u *EscrowUpsert) SetDirectPayoutReference(v string) *EscrowUpsert {
+	u.Set(escrow.FieldDirectPayoutReference, v)
+	return u
+}
+
+// UpdateDirectPayoutReference sets the "direct_payout_reference" field to the value that was provided on create.
+func (u *EscrowUpsert) UpdateDirectPayoutReference() *EscrowUpsert {
+	u.SetExcluded(escrow.FieldDirectPayoutReference)
+	return u
+}
+
+// SetDirectPaidOutAt sets the "direct_paid_out_at" field.
+func (u *EscrowUpsert) SetDirectPaidOutAt(v time.Time) *EscrowUpsert {
+	u.Set(escrow.FieldDirectPaidOutAt, v)
+	return u
+}
+
+// UpdateDirectPaidOutAt sets the "direct_paid_out_at" field to the value that was provided on create.
+func (u *EscrowUpsert) UpdateDirectPaidOutAt() *EscrowUpsert {
+	u.SetExcluded(escrow.FieldDirectPaidOutAt)
+	return u
+}
+
+// ClearDirectPaidOutAt clears the value of the "direct_paid_out_at" field.
+func (u *EscrowUpsert) ClearDirectPaidOutAt() *EscrowUpsert {
+	u.SetNull(escrow.FieldDirectPaidOutAt)
+	return u
+}
+
 // SetVersion sets the "version" field.
 func (u *EscrowUpsert) SetVersion(v int64) *EscrowUpsert {
 	u.Set(escrow.FieldVersion, v)
@@ -1262,6 +1449,9 @@ func (u *EscrowUpsertOne) UpdateNewValues() *EscrowUpsertOne {
 		}
 		if _, exists := u.create.mutation.PaymentMode(); exists {
 			s.SetIgnore(escrow.FieldPaymentMode)
+		}
+		if _, exists := u.create.mutation.Custody(); exists {
+			s.SetIgnore(escrow.FieldCustody)
 		}
 		if _, exists := u.create.mutation.AmountMinor(); exists {
 			s.SetIgnore(escrow.FieldAmountMinor)
@@ -1599,6 +1789,83 @@ func (u *EscrowUpsertOne) UpdateReleaseTrigger() *EscrowUpsertOne {
 	})
 }
 
+// SetWalletFundedAt sets the "wallet_funded_at" field.
+func (u *EscrowUpsertOne) SetWalletFundedAt(v time.Time) *EscrowUpsertOne {
+	return u.Update(func(s *EscrowUpsert) {
+		s.SetWalletFundedAt(v)
+	})
+}
+
+// UpdateWalletFundedAt sets the "wallet_funded_at" field to the value that was provided on create.
+func (u *EscrowUpsertOne) UpdateWalletFundedAt() *EscrowUpsertOne {
+	return u.Update(func(s *EscrowUpsert) {
+		s.UpdateWalletFundedAt()
+	})
+}
+
+// ClearWalletFundedAt clears the value of the "wallet_funded_at" field.
+func (u *EscrowUpsertOne) ClearWalletFundedAt() *EscrowUpsertOne {
+	return u.Update(func(s *EscrowUpsert) {
+		s.ClearWalletFundedAt()
+	})
+}
+
+// SetWalletHoldMinor sets the "wallet_hold_minor" field.
+func (u *EscrowUpsertOne) SetWalletHoldMinor(v int64) *EscrowUpsertOne {
+	return u.Update(func(s *EscrowUpsert) {
+		s.SetWalletHoldMinor(v)
+	})
+}
+
+// AddWalletHoldMinor adds v to the "wallet_hold_minor" field.
+func (u *EscrowUpsertOne) AddWalletHoldMinor(v int64) *EscrowUpsertOne {
+	return u.Update(func(s *EscrowUpsert) {
+		s.AddWalletHoldMinor(v)
+	})
+}
+
+// UpdateWalletHoldMinor sets the "wallet_hold_minor" field to the value that was provided on create.
+func (u *EscrowUpsertOne) UpdateWalletHoldMinor() *EscrowUpsertOne {
+	return u.Update(func(s *EscrowUpsert) {
+		s.UpdateWalletHoldMinor()
+	})
+}
+
+// SetDirectPayoutReference sets the "direct_payout_reference" field.
+func (u *EscrowUpsertOne) SetDirectPayoutReference(v string) *EscrowUpsertOne {
+	return u.Update(func(s *EscrowUpsert) {
+		s.SetDirectPayoutReference(v)
+	})
+}
+
+// UpdateDirectPayoutReference sets the "direct_payout_reference" field to the value that was provided on create.
+func (u *EscrowUpsertOne) UpdateDirectPayoutReference() *EscrowUpsertOne {
+	return u.Update(func(s *EscrowUpsert) {
+		s.UpdateDirectPayoutReference()
+	})
+}
+
+// SetDirectPaidOutAt sets the "direct_paid_out_at" field.
+func (u *EscrowUpsertOne) SetDirectPaidOutAt(v time.Time) *EscrowUpsertOne {
+	return u.Update(func(s *EscrowUpsert) {
+		s.SetDirectPaidOutAt(v)
+	})
+}
+
+// UpdateDirectPaidOutAt sets the "direct_paid_out_at" field to the value that was provided on create.
+func (u *EscrowUpsertOne) UpdateDirectPaidOutAt() *EscrowUpsertOne {
+	return u.Update(func(s *EscrowUpsert) {
+		s.UpdateDirectPaidOutAt()
+	})
+}
+
+// ClearDirectPaidOutAt clears the value of the "direct_paid_out_at" field.
+func (u *EscrowUpsertOne) ClearDirectPaidOutAt() *EscrowUpsertOne {
+	return u.Update(func(s *EscrowUpsert) {
+		s.ClearDirectPaidOutAt()
+	})
+}
+
 // SetVersion sets the "version" field.
 func (u *EscrowUpsertOne) SetVersion(v int64) *EscrowUpsertOne {
 	return u.Update(func(s *EscrowUpsert) {
@@ -1852,6 +2119,9 @@ func (u *EscrowUpsertBulk) UpdateNewValues() *EscrowUpsertBulk {
 			}
 			if _, exists := b.mutation.PaymentMode(); exists {
 				s.SetIgnore(escrow.FieldPaymentMode)
+			}
+			if _, exists := b.mutation.Custody(); exists {
+				s.SetIgnore(escrow.FieldCustody)
 			}
 			if _, exists := b.mutation.AmountMinor(); exists {
 				s.SetIgnore(escrow.FieldAmountMinor)
@@ -2187,6 +2457,83 @@ func (u *EscrowUpsertBulk) SetReleaseTrigger(v string) *EscrowUpsertBulk {
 func (u *EscrowUpsertBulk) UpdateReleaseTrigger() *EscrowUpsertBulk {
 	return u.Update(func(s *EscrowUpsert) {
 		s.UpdateReleaseTrigger()
+	})
+}
+
+// SetWalletFundedAt sets the "wallet_funded_at" field.
+func (u *EscrowUpsertBulk) SetWalletFundedAt(v time.Time) *EscrowUpsertBulk {
+	return u.Update(func(s *EscrowUpsert) {
+		s.SetWalletFundedAt(v)
+	})
+}
+
+// UpdateWalletFundedAt sets the "wallet_funded_at" field to the value that was provided on create.
+func (u *EscrowUpsertBulk) UpdateWalletFundedAt() *EscrowUpsertBulk {
+	return u.Update(func(s *EscrowUpsert) {
+		s.UpdateWalletFundedAt()
+	})
+}
+
+// ClearWalletFundedAt clears the value of the "wallet_funded_at" field.
+func (u *EscrowUpsertBulk) ClearWalletFundedAt() *EscrowUpsertBulk {
+	return u.Update(func(s *EscrowUpsert) {
+		s.ClearWalletFundedAt()
+	})
+}
+
+// SetWalletHoldMinor sets the "wallet_hold_minor" field.
+func (u *EscrowUpsertBulk) SetWalletHoldMinor(v int64) *EscrowUpsertBulk {
+	return u.Update(func(s *EscrowUpsert) {
+		s.SetWalletHoldMinor(v)
+	})
+}
+
+// AddWalletHoldMinor adds v to the "wallet_hold_minor" field.
+func (u *EscrowUpsertBulk) AddWalletHoldMinor(v int64) *EscrowUpsertBulk {
+	return u.Update(func(s *EscrowUpsert) {
+		s.AddWalletHoldMinor(v)
+	})
+}
+
+// UpdateWalletHoldMinor sets the "wallet_hold_minor" field to the value that was provided on create.
+func (u *EscrowUpsertBulk) UpdateWalletHoldMinor() *EscrowUpsertBulk {
+	return u.Update(func(s *EscrowUpsert) {
+		s.UpdateWalletHoldMinor()
+	})
+}
+
+// SetDirectPayoutReference sets the "direct_payout_reference" field.
+func (u *EscrowUpsertBulk) SetDirectPayoutReference(v string) *EscrowUpsertBulk {
+	return u.Update(func(s *EscrowUpsert) {
+		s.SetDirectPayoutReference(v)
+	})
+}
+
+// UpdateDirectPayoutReference sets the "direct_payout_reference" field to the value that was provided on create.
+func (u *EscrowUpsertBulk) UpdateDirectPayoutReference() *EscrowUpsertBulk {
+	return u.Update(func(s *EscrowUpsert) {
+		s.UpdateDirectPayoutReference()
+	})
+}
+
+// SetDirectPaidOutAt sets the "direct_paid_out_at" field.
+func (u *EscrowUpsertBulk) SetDirectPaidOutAt(v time.Time) *EscrowUpsertBulk {
+	return u.Update(func(s *EscrowUpsert) {
+		s.SetDirectPaidOutAt(v)
+	})
+}
+
+// UpdateDirectPaidOutAt sets the "direct_paid_out_at" field to the value that was provided on create.
+func (u *EscrowUpsertBulk) UpdateDirectPaidOutAt() *EscrowUpsertBulk {
+	return u.Update(func(s *EscrowUpsert) {
+		s.UpdateDirectPaidOutAt()
+	})
+}
+
+// ClearDirectPaidOutAt clears the value of the "direct_paid_out_at" field.
+func (u *EscrowUpsertBulk) ClearDirectPaidOutAt() *EscrowUpsertBulk {
+	return u.Update(func(s *EscrowUpsert) {
+		s.ClearDirectPaidOutAt()
 	})
 }
 

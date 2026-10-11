@@ -212,6 +212,26 @@ func ReleaseTrigger(v string) predicate.Escrow {
 	return predicate.Escrow(sql.FieldEQ(FieldReleaseTrigger, v))
 }
 
+// WalletFundedAt applies equality check predicate on the "wallet_funded_at" field. It's identical to WalletFundedAtEQ.
+func WalletFundedAt(v time.Time) predicate.Escrow {
+	return predicate.Escrow(sql.FieldEQ(FieldWalletFundedAt, v))
+}
+
+// WalletHoldMinor applies equality check predicate on the "wallet_hold_minor" field. It's identical to WalletHoldMinorEQ.
+func WalletHoldMinor(v int64) predicate.Escrow {
+	return predicate.Escrow(sql.FieldEQ(FieldWalletHoldMinor, v))
+}
+
+// DirectPayoutReference applies equality check predicate on the "direct_payout_reference" field. It's identical to DirectPayoutReferenceEQ.
+func DirectPayoutReference(v string) predicate.Escrow {
+	return predicate.Escrow(sql.FieldEQ(FieldDirectPayoutReference, v))
+}
+
+// DirectPaidOutAt applies equality check predicate on the "direct_paid_out_at" field. It's identical to DirectPaidOutAtEQ.
+func DirectPaidOutAt(v time.Time) predicate.Escrow {
+	return predicate.Escrow(sql.FieldEQ(FieldDirectPaidOutAt, v))
+}
+
 // Version applies equality check predicate on the "version" field. It's identical to VersionEQ.
 func Version(v int64) predicate.Escrow {
 	return predicate.Escrow(sql.FieldEQ(FieldVersion, v))
@@ -905,6 +925,26 @@ func PaymentModeIn(vs ...PaymentMode) predicate.Escrow {
 // PaymentModeNotIn applies the NotIn predicate on the "payment_mode" field.
 func PaymentModeNotIn(vs ...PaymentMode) predicate.Escrow {
 	return predicate.Escrow(sql.FieldNotIn(FieldPaymentMode, vs...))
+}
+
+// CustodyEQ applies the EQ predicate on the "custody" field.
+func CustodyEQ(v Custody) predicate.Escrow {
+	return predicate.Escrow(sql.FieldEQ(FieldCustody, v))
+}
+
+// CustodyNEQ applies the NEQ predicate on the "custody" field.
+func CustodyNEQ(v Custody) predicate.Escrow {
+	return predicate.Escrow(sql.FieldNEQ(FieldCustody, v))
+}
+
+// CustodyIn applies the In predicate on the "custody" field.
+func CustodyIn(vs ...Custody) predicate.Escrow {
+	return predicate.Escrow(sql.FieldIn(FieldCustody, vs...))
+}
+
+// CustodyNotIn applies the NotIn predicate on the "custody" field.
+func CustodyNotIn(vs ...Custody) predicate.Escrow {
+	return predicate.Escrow(sql.FieldNotIn(FieldCustody, vs...))
 }
 
 // AmountMinorEQ applies the EQ predicate on the "amount_minor" field.
@@ -1930,6 +1970,211 @@ func ReleaseTriggerEqualFold(v string) predicate.Escrow {
 // ReleaseTriggerContainsFold applies the ContainsFold predicate on the "release_trigger" field.
 func ReleaseTriggerContainsFold(v string) predicate.Escrow {
 	return predicate.Escrow(sql.FieldContainsFold(FieldReleaseTrigger, v))
+}
+
+// WalletFundedAtEQ applies the EQ predicate on the "wallet_funded_at" field.
+func WalletFundedAtEQ(v time.Time) predicate.Escrow {
+	return predicate.Escrow(sql.FieldEQ(FieldWalletFundedAt, v))
+}
+
+// WalletFundedAtNEQ applies the NEQ predicate on the "wallet_funded_at" field.
+func WalletFundedAtNEQ(v time.Time) predicate.Escrow {
+	return predicate.Escrow(sql.FieldNEQ(FieldWalletFundedAt, v))
+}
+
+// WalletFundedAtIn applies the In predicate on the "wallet_funded_at" field.
+func WalletFundedAtIn(vs ...time.Time) predicate.Escrow {
+	return predicate.Escrow(sql.FieldIn(FieldWalletFundedAt, vs...))
+}
+
+// WalletFundedAtNotIn applies the NotIn predicate on the "wallet_funded_at" field.
+func WalletFundedAtNotIn(vs ...time.Time) predicate.Escrow {
+	return predicate.Escrow(sql.FieldNotIn(FieldWalletFundedAt, vs...))
+}
+
+// WalletFundedAtGT applies the GT predicate on the "wallet_funded_at" field.
+func WalletFundedAtGT(v time.Time) predicate.Escrow {
+	return predicate.Escrow(sql.FieldGT(FieldWalletFundedAt, v))
+}
+
+// WalletFundedAtGTE applies the GTE predicate on the "wallet_funded_at" field.
+func WalletFundedAtGTE(v time.Time) predicate.Escrow {
+	return predicate.Escrow(sql.FieldGTE(FieldWalletFundedAt, v))
+}
+
+// WalletFundedAtLT applies the LT predicate on the "wallet_funded_at" field.
+func WalletFundedAtLT(v time.Time) predicate.Escrow {
+	return predicate.Escrow(sql.FieldLT(FieldWalletFundedAt, v))
+}
+
+// WalletFundedAtLTE applies the LTE predicate on the "wallet_funded_at" field.
+func WalletFundedAtLTE(v time.Time) predicate.Escrow {
+	return predicate.Escrow(sql.FieldLTE(FieldWalletFundedAt, v))
+}
+
+// WalletFundedAtIsNil applies the IsNil predicate on the "wallet_funded_at" field.
+func WalletFundedAtIsNil() predicate.Escrow {
+	return predicate.Escrow(sql.FieldIsNull(FieldWalletFundedAt))
+}
+
+// WalletFundedAtNotNil applies the NotNil predicate on the "wallet_funded_at" field.
+func WalletFundedAtNotNil() predicate.Escrow {
+	return predicate.Escrow(sql.FieldNotNull(FieldWalletFundedAt))
+}
+
+// WalletHoldMinorEQ applies the EQ predicate on the "wallet_hold_minor" field.
+func WalletHoldMinorEQ(v int64) predicate.Escrow {
+	return predicate.Escrow(sql.FieldEQ(FieldWalletHoldMinor, v))
+}
+
+// WalletHoldMinorNEQ applies the NEQ predicate on the "wallet_hold_minor" field.
+func WalletHoldMinorNEQ(v int64) predicate.Escrow {
+	return predicate.Escrow(sql.FieldNEQ(FieldWalletHoldMinor, v))
+}
+
+// WalletHoldMinorIn applies the In predicate on the "wallet_hold_minor" field.
+func WalletHoldMinorIn(vs ...int64) predicate.Escrow {
+	return predicate.Escrow(sql.FieldIn(FieldWalletHoldMinor, vs...))
+}
+
+// WalletHoldMinorNotIn applies the NotIn predicate on the "wallet_hold_minor" field.
+func WalletHoldMinorNotIn(vs ...int64) predicate.Escrow {
+	return predicate.Escrow(sql.FieldNotIn(FieldWalletHoldMinor, vs...))
+}
+
+// WalletHoldMinorGT applies the GT predicate on the "wallet_hold_minor" field.
+func WalletHoldMinorGT(v int64) predicate.Escrow {
+	return predicate.Escrow(sql.FieldGT(FieldWalletHoldMinor, v))
+}
+
+// WalletHoldMinorGTE applies the GTE predicate on the "wallet_hold_minor" field.
+func WalletHoldMinorGTE(v int64) predicate.Escrow {
+	return predicate.Escrow(sql.FieldGTE(FieldWalletHoldMinor, v))
+}
+
+// WalletHoldMinorLT applies the LT predicate on the "wallet_hold_minor" field.
+func WalletHoldMinorLT(v int64) predicate.Escrow {
+	return predicate.Escrow(sql.FieldLT(FieldWalletHoldMinor, v))
+}
+
+// WalletHoldMinorLTE applies the LTE predicate on the "wallet_hold_minor" field.
+func WalletHoldMinorLTE(v int64) predicate.Escrow {
+	return predicate.Escrow(sql.FieldLTE(FieldWalletHoldMinor, v))
+}
+
+// DirectPayoutReferenceEQ applies the EQ predicate on the "direct_payout_reference" field.
+func DirectPayoutReferenceEQ(v string) predicate.Escrow {
+	return predicate.Escrow(sql.FieldEQ(FieldDirectPayoutReference, v))
+}
+
+// DirectPayoutReferenceNEQ applies the NEQ predicate on the "direct_payout_reference" field.
+func DirectPayoutReferenceNEQ(v string) predicate.Escrow {
+	return predicate.Escrow(sql.FieldNEQ(FieldDirectPayoutReference, v))
+}
+
+// DirectPayoutReferenceIn applies the In predicate on the "direct_payout_reference" field.
+func DirectPayoutReferenceIn(vs ...string) predicate.Escrow {
+	return predicate.Escrow(sql.FieldIn(FieldDirectPayoutReference, vs...))
+}
+
+// DirectPayoutReferenceNotIn applies the NotIn predicate on the "direct_payout_reference" field.
+func DirectPayoutReferenceNotIn(vs ...string) predicate.Escrow {
+	return predicate.Escrow(sql.FieldNotIn(FieldDirectPayoutReference, vs...))
+}
+
+// DirectPayoutReferenceGT applies the GT predicate on the "direct_payout_reference" field.
+func DirectPayoutReferenceGT(v string) predicate.Escrow {
+	return predicate.Escrow(sql.FieldGT(FieldDirectPayoutReference, v))
+}
+
+// DirectPayoutReferenceGTE applies the GTE predicate on the "direct_payout_reference" field.
+func DirectPayoutReferenceGTE(v string) predicate.Escrow {
+	return predicate.Escrow(sql.FieldGTE(FieldDirectPayoutReference, v))
+}
+
+// DirectPayoutReferenceLT applies the LT predicate on the "direct_payout_reference" field.
+func DirectPayoutReferenceLT(v string) predicate.Escrow {
+	return predicate.Escrow(sql.FieldLT(FieldDirectPayoutReference, v))
+}
+
+// DirectPayoutReferenceLTE applies the LTE predicate on the "direct_payout_reference" field.
+func DirectPayoutReferenceLTE(v string) predicate.Escrow {
+	return predicate.Escrow(sql.FieldLTE(FieldDirectPayoutReference, v))
+}
+
+// DirectPayoutReferenceContains applies the Contains predicate on the "direct_payout_reference" field.
+func DirectPayoutReferenceContains(v string) predicate.Escrow {
+	return predicate.Escrow(sql.FieldContains(FieldDirectPayoutReference, v))
+}
+
+// DirectPayoutReferenceHasPrefix applies the HasPrefix predicate on the "direct_payout_reference" field.
+func DirectPayoutReferenceHasPrefix(v string) predicate.Escrow {
+	return predicate.Escrow(sql.FieldHasPrefix(FieldDirectPayoutReference, v))
+}
+
+// DirectPayoutReferenceHasSuffix applies the HasSuffix predicate on the "direct_payout_reference" field.
+func DirectPayoutReferenceHasSuffix(v string) predicate.Escrow {
+	return predicate.Escrow(sql.FieldHasSuffix(FieldDirectPayoutReference, v))
+}
+
+// DirectPayoutReferenceEqualFold applies the EqualFold predicate on the "direct_payout_reference" field.
+func DirectPayoutReferenceEqualFold(v string) predicate.Escrow {
+	return predicate.Escrow(sql.FieldEqualFold(FieldDirectPayoutReference, v))
+}
+
+// DirectPayoutReferenceContainsFold applies the ContainsFold predicate on the "direct_payout_reference" field.
+func DirectPayoutReferenceContainsFold(v string) predicate.Escrow {
+	return predicate.Escrow(sql.FieldContainsFold(FieldDirectPayoutReference, v))
+}
+
+// DirectPaidOutAtEQ applies the EQ predicate on the "direct_paid_out_at" field.
+func DirectPaidOutAtEQ(v time.Time) predicate.Escrow {
+	return predicate.Escrow(sql.FieldEQ(FieldDirectPaidOutAt, v))
+}
+
+// DirectPaidOutAtNEQ applies the NEQ predicate on the "direct_paid_out_at" field.
+func DirectPaidOutAtNEQ(v time.Time) predicate.Escrow {
+	return predicate.Escrow(sql.FieldNEQ(FieldDirectPaidOutAt, v))
+}
+
+// DirectPaidOutAtIn applies the In predicate on the "direct_paid_out_at" field.
+func DirectPaidOutAtIn(vs ...time.Time) predicate.Escrow {
+	return predicate.Escrow(sql.FieldIn(FieldDirectPaidOutAt, vs...))
+}
+
+// DirectPaidOutAtNotIn applies the NotIn predicate on the "direct_paid_out_at" field.
+func DirectPaidOutAtNotIn(vs ...time.Time) predicate.Escrow {
+	return predicate.Escrow(sql.FieldNotIn(FieldDirectPaidOutAt, vs...))
+}
+
+// DirectPaidOutAtGT applies the GT predicate on the "direct_paid_out_at" field.
+func DirectPaidOutAtGT(v time.Time) predicate.Escrow {
+	return predicate.Escrow(sql.FieldGT(FieldDirectPaidOutAt, v))
+}
+
+// DirectPaidOutAtGTE applies the GTE predicate on the "direct_paid_out_at" field.
+func DirectPaidOutAtGTE(v time.Time) predicate.Escrow {
+	return predicate.Escrow(sql.FieldGTE(FieldDirectPaidOutAt, v))
+}
+
+// DirectPaidOutAtLT applies the LT predicate on the "direct_paid_out_at" field.
+func DirectPaidOutAtLT(v time.Time) predicate.Escrow {
+	return predicate.Escrow(sql.FieldLT(FieldDirectPaidOutAt, v))
+}
+
+// DirectPaidOutAtLTE applies the LTE predicate on the "direct_paid_out_at" field.
+func DirectPaidOutAtLTE(v time.Time) predicate.Escrow {
+	return predicate.Escrow(sql.FieldLTE(FieldDirectPaidOutAt, v))
+}
+
+// DirectPaidOutAtIsNil applies the IsNil predicate on the "direct_paid_out_at" field.
+func DirectPaidOutAtIsNil() predicate.Escrow {
+	return predicate.Escrow(sql.FieldIsNull(FieldDirectPaidOutAt))
+}
+
+// DirectPaidOutAtNotNil applies the NotNil predicate on the "direct_paid_out_at" field.
+func DirectPaidOutAtNotNil() predicate.Escrow {
+	return predicate.Escrow(sql.FieldNotNull(FieldDirectPaidOutAt))
 }
 
 // VersionEQ applies the EQ predicate on the "version" field.

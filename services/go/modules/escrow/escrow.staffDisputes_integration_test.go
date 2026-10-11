@@ -82,15 +82,15 @@ func TestStaffDisputeViewHasPartiesEscrowSlaAndAcceptsTheConsoleResolveBody(t *t
 		escrowView["heldAmount"].(map[string]any)["amountMinor"].(float64) != 1_000_000 || detail.Body["resolution"] != nil || len(detail.Body["history"].([]any)) < 2 {
 		t.Fatalf("staff detail: %d %s", detail.Status, detail.Raw)
 	}
-	stepUp := http.Header{"X-Step-Up-Token": {staff.StepUpToken}}
+	stepUp := staff.StepUp
 	resolveUrl := "/api/v1/admin/disputes/" + disputeId + "/resolve"
-	if wrongCurrency := harness.Call(http.MethodPost, resolveUrl, staff.AccessToken, "console-resolve-1", map[string]any{"outcome": "REFUND_PARTIAL", "refundAmount": map[string]any{"amountMinor": 250_000, "currency": "USD"}, "reason": "Partial refund for the tear"}, stepUp); wrongCurrency.Status != http.StatusBadRequest {
+	if wrongCurrency := harness.Call(http.MethodPost, resolveUrl, staff.AccessToken, "console-resolve-1", map[string]any{"outcome": "REFUND_PARTIAL", "refundAmount": map[string]any{"amountMinor": 250_000, "currency": "USD"}, "reason": "Partial refund for the tear"}, stepUp()); wrongCurrency.Status != http.StatusBadRequest {
 		t.Fatalf("refund in the wrong currency: %d %s", wrongCurrency.Status, wrongCurrency.Raw)
 	}
-	if mixed := harness.Call(http.MethodPost, resolveUrl, staff.AccessToken, "console-resolve-2", map[string]any{"outcome": "REFUND_PARTIAL", "refundAmount": map[string]any{"amountMinor": 250_000, "currency": "NGN"}, "refundAmountMinor": 250_000, "reason": "Partial"}, stepUp); mixed.Status != http.StatusBadRequest {
+	if mixed := harness.Call(http.MethodPost, resolveUrl, staff.AccessToken, "console-resolve-2", map[string]any{"outcome": "REFUND_PARTIAL", "refundAmount": map[string]any{"amountMinor": 250_000, "currency": "NGN"}, "refundAmountMinor": 250_000, "reason": "Partial"}, stepUp()); mixed.Status != http.StatusBadRequest {
 		t.Fatalf("both amount fields accepted: %d", mixed.Status)
 	}
-	resolved := harness.Call(http.MethodPost, resolveUrl, staff.AccessToken, "console-resolve-3", map[string]any{"outcome": "REFUND_PARTIAL", "refundAmount": map[string]any{"amountMinor": 250_000, "currency": "NGN"}, "reason": "Partial refund for the tear"}, stepUp)
+	resolved := harness.Call(http.MethodPost, resolveUrl, staff.AccessToken, "console-resolve-3", map[string]any{"outcome": "REFUND_PARTIAL", "refundAmount": map[string]any{"amountMinor": 250_000, "currency": "NGN"}, "reason": "Partial refund for the tear"}, stepUp())
 	resolution, _ := resolved.Body["resolution"].(map[string]any)
 	if resolved.Status != http.StatusOK || resolved.Body["status"] != "resolved_refunded" || resolution == nil || resolution["outcome"] != "partial" ||
 		resolution["buyerRefund"].(map[string]any)["amountMinor"].(float64) != 250_000 || resolved.Body["escrow"].(map[string]any)["heldAmount"].(map[string]any)["amountMinor"].(float64) != 0 {
@@ -101,4 +101,32 @@ func TestStaffDisputeViewHasPartiesEscrowSlaAndAcceptsTheConsoleResolveBody(t *t
 		t.Fatalf("resolution split does not add up: payout %v commission %v", payout, commission)
 	}
 	harness.AssertLedgerHealthy()
+}
+
+func TestOpenDisputesAreListedOldestFirstWithTheirWaitingAge(t *testing.T) {
+	harness := startEscrowHarness(t)
+	staff := harness.Tokens.StaffTokens(uuid.NewString(), "money.disputes.resolve")
+	opened := []string{}
+	for index := range 3 {
+		buyer, orderId := uuid.NewString(), uuid.NewString()
+		harness.registerCheckout(buyer, map[string]int64{orderId: 300_000})
+		harness.payCheckoutThroughWebhook(buyer, orderId, 0)
+		response := harness.Call(http.MethodPost, "/api/v1/orders/"+orderId+"/disputes", harness.Tokens.UserAccessToken(buyer), "queue-dispute-"+string(rune('a'+index)), map[string]any{"reason": "not_received", "description": "Nothing came", "evidenceUrls": []string{}})
+		if response.Status != http.StatusCreated {
+			t.Fatalf("open dispute: %d %s", response.Status, response.Raw)
+		}
+		opened = append(opened, response.Body["id"].(string))
+	}
+	queue := harness.Call(http.MethodGet, "/api/v1/admin/disputes?status=open&limit=2", staff.AccessToken, "", nil)
+	rows := queue.Body["data"].([]any)
+	if len(rows) != 2 || rows[0].(map[string]any)["id"] != opened[0] || rows[1].(map[string]any)["id"] != opened[1] {
+		t.Fatalf("open disputes come oldest first: %s", queue.Raw)
+	}
+	if _, hasAge := rows[0].(map[string]any)["ageHours"].(float64); !hasAge {
+		t.Fatalf("rows carry their waiting age: %v", rows[0])
+	}
+	next := harness.Call(http.MethodGet, "/api/v1/admin/disputes?status=open&limit=2&cursor="+queue.Body["nextCursor"].(string), staff.AccessToken, "", nil)
+	if later := next.Body["data"].([]any); len(later) != 1 || later[0].(map[string]any)["id"] != opened[2] {
+		t.Fatalf("the next page continues forward in time: %s", next.Raw)
+	}
 }

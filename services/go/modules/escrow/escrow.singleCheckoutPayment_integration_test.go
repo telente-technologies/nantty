@@ -53,10 +53,11 @@ func TestOneCheckoutPaymentSplitsDirectGroupsAndHoldsEscrowGroupsWithPerGroupRef
 		t.Fatal("the ledger must mirror only the part of the payment that stayed in Zudomart's balance")
 	}
 	staff := harness.Tokens.StaffTokens(uuid.NewString(), "money.disputes.resolve")
-	refund := harness.Call(http.MethodPost, "/api/v1/admin/orders/"+escrowOrder+"/escrow/refund", staff.AccessToken, "single-refund-1", map[string]any{"reason": "Out of stock"}, http.Header{"X-Step-Up-Token": {staff.StepUpToken}})
+	refund := harness.Call(http.MethodPost, "/api/v1/admin/orders/"+escrowOrder+"/escrow/refund", staff.AccessToken, "single-refund-1", map[string]any{"reason": "Out of stock"}, staff.StepUp())
 	if refund.Status != http.StatusOK {
 		t.Fatalf("refund of one group: %d %s", refund.Status, refund.Raw)
 	}
+	harness.relayQueuedRefunds()
 	if len(harness.Paystack.Refunds) != 1 || harness.Paystack.Refunds[0]["amount"] != int64(100_000) {
 		t.Fatalf("a partial Paystack refund for one group expected: %+v", harness.Paystack.Refunds)
 	}

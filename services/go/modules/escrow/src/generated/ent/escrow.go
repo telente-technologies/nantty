@@ -42,6 +42,8 @@ type Escrow struct {
 	ProductSummary string `json:"product_summary,omitempty"`
 	// PaymentMode holds the value of the "payment_mode" field.
 	PaymentMode escrow.PaymentMode `json:"payment_mode,omitempty"`
+	// Custody holds the value of the "custody" field.
+	Custody escrow.Custody `json:"custody,omitempty"`
 	// AmountMinor holds the value of the "amount_minor" field.
 	AmountMinor int64 `json:"amount_minor,omitempty"`
 	// Currency holds the value of the "currency" field.
@@ -84,6 +86,14 @@ type Escrow struct {
 	RefundedAt *time.Time `json:"refunded_at,omitempty"`
 	// ReleaseTrigger holds the value of the "release_trigger" field.
 	ReleaseTrigger string `json:"release_trigger,omitempty"`
+	// WalletFundedAt holds the value of the "wallet_funded_at" field.
+	WalletFundedAt *time.Time `json:"wallet_funded_at,omitempty"`
+	// WalletHoldMinor holds the value of the "wallet_hold_minor" field.
+	WalletHoldMinor int64 `json:"wallet_hold_minor,omitempty"`
+	// DirectPayoutReference holds the value of the "direct_payout_reference" field.
+	DirectPayoutReference string `json:"direct_payout_reference,omitempty"`
+	// DirectPaidOutAt holds the value of the "direct_paid_out_at" field.
+	DirectPaidOutAt *time.Time `json:"direct_paid_out_at,omitempty"`
 	// Version holds the value of the "version" field.
 	Version int64 `json:"version,omitempty"`
 	// UpdatedAt holds the value of the "updated_at" field.
@@ -117,11 +127,11 @@ func (*Escrow) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case escrow.FieldAmountMinor, escrow.FieldCommissionBps, escrow.FieldCommissionMinor, escrow.FieldSellerAmountMinor, escrow.FieldProcessingFeeMinor, escrow.FieldRefundedMinor, escrow.FieldReleasedToSellerMinor, escrow.FieldPausedReleaseRemainingSeconds, escrow.FieldVersion:
+		case escrow.FieldAmountMinor, escrow.FieldCommissionBps, escrow.FieldCommissionMinor, escrow.FieldSellerAmountMinor, escrow.FieldProcessingFeeMinor, escrow.FieldRefundedMinor, escrow.FieldReleasedToSellerMinor, escrow.FieldPausedReleaseRemainingSeconds, escrow.FieldWalletHoldMinor, escrow.FieldVersion:
 			values[i] = new(sql.NullInt64)
-		case escrow.FieldOrderID, escrow.FieldOrderReference, escrow.FieldCheckoutID, escrow.FieldPaymentReference, escrow.FieldProvider, escrow.FieldBuyerUserID, escrow.FieldStoreID, escrow.FieldSellerUserID, escrow.FieldProductSummary, escrow.FieldPaymentMode, escrow.FieldCurrency, escrow.FieldStatus, escrow.FieldCourierName, escrow.FieldTrackingNumber, escrow.FieldTrackingURL, escrow.FieldReleaseTrigger:
+		case escrow.FieldOrderID, escrow.FieldOrderReference, escrow.FieldCheckoutID, escrow.FieldPaymentReference, escrow.FieldProvider, escrow.FieldBuyerUserID, escrow.FieldStoreID, escrow.FieldSellerUserID, escrow.FieldProductSummary, escrow.FieldPaymentMode, escrow.FieldCustody, escrow.FieldCurrency, escrow.FieldStatus, escrow.FieldCourierName, escrow.FieldTrackingNumber, escrow.FieldTrackingURL, escrow.FieldReleaseTrigger, escrow.FieldDirectPayoutReference:
 			values[i] = new(sql.NullString)
-		case escrow.FieldCreatedAt, escrow.FieldShippedAt, escrow.FieldEstimatedDeliveryAt, escrow.FieldDeliveredAt, escrow.FieldAutoReleaseAt, escrow.FieldBuyerConfirmedAt, escrow.FieldReleasedAt, escrow.FieldRefundedAt, escrow.FieldUpdatedAt:
+		case escrow.FieldCreatedAt, escrow.FieldShippedAt, escrow.FieldEstimatedDeliveryAt, escrow.FieldDeliveredAt, escrow.FieldAutoReleaseAt, escrow.FieldBuyerConfirmedAt, escrow.FieldReleasedAt, escrow.FieldRefundedAt, escrow.FieldWalletFundedAt, escrow.FieldDirectPaidOutAt, escrow.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
 		case escrow.FieldID, escrow.FieldPaymentIntentID:
 			values[i] = new(uuid.UUID)
@@ -217,6 +227,12 @@ func (_m *Escrow) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field payment_mode", values[i])
 			} else if value.Valid {
 				_m.PaymentMode = escrow.PaymentMode(value.String)
+			}
+		case escrow.FieldCustody:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field custody", values[i])
+			} else if value.Valid {
+				_m.Custody = escrow.Custody(value.String)
 			}
 		case escrow.FieldAmountMinor:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
@@ -352,6 +368,32 @@ func (_m *Escrow) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.ReleaseTrigger = value.String
 			}
+		case escrow.FieldWalletFundedAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field wallet_funded_at", values[i])
+			} else if value.Valid {
+				_m.WalletFundedAt = new(time.Time)
+				*_m.WalletFundedAt = value.Time
+			}
+		case escrow.FieldWalletHoldMinor:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field wallet_hold_minor", values[i])
+			} else if value.Valid {
+				_m.WalletHoldMinor = value.Int64
+			}
+		case escrow.FieldDirectPayoutReference:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field direct_payout_reference", values[i])
+			} else if value.Valid {
+				_m.DirectPayoutReference = value.String
+			}
+		case escrow.FieldDirectPaidOutAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field direct_paid_out_at", values[i])
+			} else if value.Valid {
+				_m.DirectPaidOutAt = new(time.Time)
+				*_m.DirectPaidOutAt = value.Time
+			}
 		case escrow.FieldVersion:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field version", values[i])
@@ -441,6 +483,9 @@ func (_m *Escrow) String() string {
 	builder.WriteString("payment_mode=")
 	builder.WriteString(fmt.Sprintf("%v", _m.PaymentMode))
 	builder.WriteString(", ")
+	builder.WriteString("custody=")
+	builder.WriteString(fmt.Sprintf("%v", _m.Custody))
+	builder.WriteString(", ")
 	builder.WriteString("amount_minor=")
 	builder.WriteString(fmt.Sprintf("%v", _m.AmountMinor))
 	builder.WriteString(", ")
@@ -519,6 +564,22 @@ func (_m *Escrow) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("release_trigger=")
 	builder.WriteString(_m.ReleaseTrigger)
+	builder.WriteString(", ")
+	if v := _m.WalletFundedAt; v != nil {
+		builder.WriteString("wallet_funded_at=")
+		builder.WriteString(v.Format(time.ANSIC))
+	}
+	builder.WriteString(", ")
+	builder.WriteString("wallet_hold_minor=")
+	builder.WriteString(fmt.Sprintf("%v", _m.WalletHoldMinor))
+	builder.WriteString(", ")
+	builder.WriteString("direct_payout_reference=")
+	builder.WriteString(_m.DirectPayoutReference)
+	builder.WriteString(", ")
+	if v := _m.DirectPaidOutAt; v != nil {
+		builder.WriteString("direct_paid_out_at=")
+		builder.WriteString(v.Format(time.ANSIC))
+	}
 	builder.WriteString(", ")
 	builder.WriteString("version=")
 	builder.WriteString(fmt.Sprintf("%v", _m.Version))

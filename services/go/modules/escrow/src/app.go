@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"net/http"
 	"time"
-	refundordergroup "zudomart/modules/escrow/src/modules/escrows/commands/refundOrderGroup"
+	escrowservices "zudomart/modules/escrow/src/modules/escrows/services"
 
 	"google.golang.org/grpc"
 
@@ -17,6 +17,8 @@ import (
 	"zudomart/modules/escrow/src/migrations"
 	disputeroutes "zudomart/modules/escrow/src/modules/disputes/routes"
 	"zudomart/modules/escrow/src/modules/escrows"
+	recordorderfulfilment "zudomart/modules/escrow/src/modules/escrows/commands/recordOrderFulfilment"
+	refundordergroup "zudomart/modules/escrow/src/modules/escrows/commands/refundOrderGroup"
 	escrowcontrollers "zudomart/modules/escrow/src/modules/escrows/controllers"
 	escrowroutes "zudomart/modules/escrow/src/modules/escrows/routes"
 	ledgerevents "zudomart/modules/ledger/src/events"
@@ -57,6 +59,10 @@ func NewEscrowModule(ctx context.Context, dependencies servicemodule.Dependencie
 		}
 		return err
 	})
+	fulfilment := recordorderfulfilment.Handler{Application: application}
+	for _, eventType := range []string{"orderGroup.shipped", "orderGroup.delivered"} {
+		loaders.RegisterMoneyDomainEventHandler(eventType, fulfilment.HandleCommittedOrderEvent)
+	}
 	return module, nil
 }
 
@@ -72,6 +78,8 @@ func StartEscrowModuleWithSettings(ctx context.Context, settings configs.EscrowS
 	application := escrows.NewEscrowApplication(container.NewEscrowContainer(resources, settings, payments))
 	payments.RegisterPaymentPurposeHandler(paymentconstants.PurposeOrderCheckout, application.Escrows)
 	payments.RegisterProviderDisputeHandler(paymentconstants.PurposeOrderCheckout, application.Escrows)
+	application.Escrows.RegisterMovementHandlers(payments)
+	payments.RegisterTransferOutcomeHandler(escrowservices.PurposeDirectSale, escrowservices.DirectSalePayouts{Service: application.Escrows})
 	return &Module{Application: application}, nil
 }
 
@@ -85,6 +93,8 @@ func (module *Module) MountRoutes(mux *http.ServeMux) {
 func (module *Module) RunBackgroundWorkersUntilContextDone(ctx context.Context) error {
 	container := module.Application.Container
 	go module.Application.Escrows.RunAutoReleaseSweepUntilContextDone(ctx)
+	go runDirectPayoutsUntilContextDone(ctx, module.Application.Escrows)
+	go runDisputeDeadlinesUntilContextDone(ctx, module.Application)
 	return platformevents.RelayOutboxEventsUntilContextDone(ctx, platformevents.OutboxRelayOptions{
 		Store:     ledgerevents.OutboxRelayStore{Database: container.Resources.Database, Table: container.Outbox, Now: time.Now},
 		Publisher: container.Resources.Publisher,
@@ -94,4 +104,30 @@ func (module *Module) RunBackgroundWorkersUntilContextDone(ctx context.Context) 
 
 func (module *Module) Close(context.Context) error {
 	return module.Application.Container.Resources.Close()
+}
+
+func runDirectPayoutsUntilContextDone(ctx context.Context, service escrowservices.EscrowService) {
+	ticker := time.NewTicker(10 * time.Minute)
+	defer ticker.Stop()
+	for {
+		select {
+		case <-ctx.Done():
+			return
+		case <-ticker.C:
+			service.PayDirectSellersAfterSettlement(ctx, 50)
+		}
+	}
+}
+
+func runDisputeDeadlinesUntilContextDone(ctx context.Context, application *escrows.Application) {
+	ticker := time.NewTicker(5 * time.Minute)
+	defer ticker.Stop()
+	for {
+		select {
+		case <-ctx.Done():
+			return
+		case <-ticker.C:
+			application.Disputes.EscalateDisputesPastSellerDeadline(ctx, 100)
+		}
+	}
 }

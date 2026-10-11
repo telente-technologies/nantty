@@ -123,6 +123,7 @@ var (
 		{Name: "seller_user_id", Type: field.TypeString, Size: 80},
 		{Name: "product_summary", Type: field.TypeString, Size: 300, Default: ""},
 		{Name: "payment_mode", Type: field.TypeEnum, Enums: []string{"escrow", "direct"}, Default: "escrow"},
+		{Name: "custody", Type: field.TypeEnum, Enums: []string{"sellerEscrow", "buyerWalletLock"}, Default: "sellerEscrow"},
 		{Name: "amount_minor", Type: field.TypeInt64},
 		{Name: "currency", Type: field.TypeString, Size: 3},
 		{Name: "commission_bps", Type: field.TypeInt64},
@@ -131,7 +132,7 @@ var (
 		{Name: "processing_fee_minor", Type: field.TypeInt64, Default: 0},
 		{Name: "refunded_minor", Type: field.TypeInt64, Default: 0},
 		{Name: "released_to_seller_minor", Type: field.TypeInt64, Default: 0},
-		{Name: "status", Type: field.TypeEnum, Enums: []string{"held", "disputed", "released", "refunded", "partiallyRefunded"}, Default: "held"},
+		{Name: "status", Type: field.TypeEnum, Enums: []string{"held", "disputed", "released", "refunded", "partiallyRefunded", "clawedBack"}, Default: "held"},
 		{Name: "shipped_at", Type: field.TypeTime, Nullable: true},
 		{Name: "estimated_delivery_at", Type: field.TypeTime, Nullable: true},
 		{Name: "courier_name", Type: field.TypeString, Size: 120, Default: ""},
@@ -144,6 +145,10 @@ var (
 		{Name: "released_at", Type: field.TypeTime, Nullable: true},
 		{Name: "refunded_at", Type: field.TypeTime, Nullable: true},
 		{Name: "release_trigger", Type: field.TypeString, Size: 40, Default: ""},
+		{Name: "wallet_funded_at", Type: field.TypeTime, Nullable: true},
+		{Name: "wallet_hold_minor", Type: field.TypeInt64, Default: 0},
+		{Name: "direct_payout_reference", Type: field.TypeString, Size: 120, Default: ""},
+		{Name: "direct_paid_out_at", Type: field.TypeTime, Nullable: true},
 		{Name: "version", Type: field.TypeInt64, Default: 0},
 		{Name: "updated_at", Type: field.TypeTime},
 	}
@@ -161,12 +166,12 @@ var (
 			{
 				Name:    "escrow_status_auto_release_at",
 				Unique:  false,
-				Columns: []*schema.Column{EscrowsColumns[21], EscrowsColumns[28]},
+				Columns: []*schema.Column{EscrowsColumns[22], EscrowsColumns[29]},
 			},
 			{
 				Name:    "escrow_seller_user_id_status_id",
 				Unique:  false,
-				Columns: []*schema.Column{EscrowsColumns[10], EscrowsColumns[21], EscrowsColumns[0]},
+				Columns: []*schema.Column{EscrowsColumns[10], EscrowsColumns[22], EscrowsColumns[0]},
 				Annotation: &entsql.IndexAnnotation{
 					DescColumns: map[string]bool{
 						EscrowsColumns[0].Name: true,
