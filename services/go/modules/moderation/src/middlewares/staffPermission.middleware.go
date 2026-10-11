@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"strings"
 
+	"zudomart/modules/moderation/src/integrations"
 	"zudomart/platform/httpserver"
 	"zudomart/platform/jwtauth"
 	"zudomart/platform/staffauth"
@@ -37,10 +38,12 @@ func RequireStaffWithAnyPermission(verifiers StaffTokenVerifiers, permissions []
 				return
 			}
 			staff := staffFromPrincipal(principal)
+			ctx := request.Context()
 			if stepUpToken := strings.TrimSpace(request.Header.Get(staffauth.StepUpHeader)); requireStepUp || stepUpToken != "" {
 				stepUp, err := verifiers.StepUp.VerifyAccessTokenAndExtractPrincipal(request.Context(), stepUpToken)
 				if err == nil && stepUp.UserId == staff.Id && stepUp.SessionId == staff.SessionId {
 					staff.SteppedUp = true
+					ctx = integrations.ContextWithStepUpToken(ctx, stepUpToken)
 				} else if requireStepUp {
 					httpserver.WriteJsonResponse(writer, http.StatusForbidden, httpserver.NewApiError(http.StatusForbidden, "STEP_UP_REQUIRED", "Confirm your identity again to continue."))
 					return
@@ -50,7 +53,7 @@ func RequireStaffWithAnyPermission(verifiers StaffTokenVerifiers, permissions []
 				httpserver.WriteJsonResponse(writer, http.StatusForbidden, httpserver.ErrForbidden)
 				return
 			}
-			next.ServeHTTP(writer, request.WithContext(staffauth.ContextWithStaff(request.Context(), staff)))
+			next.ServeHTTP(writer, request.WithContext(staffauth.ContextWithStaff(ctx, staff)))
 		})
 	}
 }

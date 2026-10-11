@@ -24,6 +24,7 @@ type Container struct {
 	Users             integrations.UsersService
 	Audit             integrations.AuditService
 	Targets           integrations.TargetResolver
+	ChatReportability integrations.ChatReportabilityChecker
 	EvidenceVault     integrations.EvidenceVault
 	FramePreviews     integrations.FramePreviewSigner
 	DeviceAttestation integrations.DeviceAttestationVerifier

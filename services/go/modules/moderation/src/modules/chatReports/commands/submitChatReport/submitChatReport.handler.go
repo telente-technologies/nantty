@@ -13,6 +13,7 @@ import (
 	"zudomart/modules/moderation/src/events"
 	"zudomart/modules/moderation/src/generated/ent"
 	"zudomart/modules/moderation/src/generated/ent/chatreport"
+	"zudomart/modules/moderation/src/integrations"
 	chatevents "zudomart/modules/moderation/src/modules/chatReports/events"
 	"zudomart/modules/moderation/src/modules/chatReports/services"
 	"zudomart/platform/httpserver"
@@ -40,6 +41,9 @@ func (handler Handler) Execute(ctx context.Context, command Command) (Result, er
 		return Result{}, err
 	}
 	if err := handler.enforceRateLimit(ctx, reporter); err != nil {
+		return Result{}, err
+	}
+	if err := handler.requireReportable(ctx, command, reporter); err != nil {
 		return Result{}, err
 	}
 	retentionDays, _, err := services.LoadRetentionSettings(ctx, handler.Container.Client)
@@ -146,4 +150,18 @@ func (handler Handler) validate(command Command) (*uuid.UUID, []services.Evidenc
 		return nil, nil, invalid("reportedUserId", "must be a user id")
 	}
 	return &reported, evidence, nil
+}
+
+func (handler Handler) requireReportable(ctx context.Context, command Command, reporter uuid.UUID) error {
+	if command.ConversationId == "" {
+		if slices.Contains(services.EvidenceRequiredTargets, command.TargetType) {
+			return httpserver.NewValidationFailedError([]httpserver.ValidationIssue{{Path: "conversationId", Message: "is required for this report"}})
+		}
+		return nil
+	}
+	request := integrations.ChatReportabilityRequest{ConversationId: command.ConversationId, ReporterId: reporter.String(), ReportedUserId: command.ReportedUserId}
+	if command.TargetType == "message" {
+		request.MessageId = command.TargetId
+	}
+	return handler.Container.ChatReportability.RequireReportable(ctx, request)
 }

@@ -27,7 +27,8 @@ func TestHealthStatusMovesFromGoodStandingToAtRiskToRestricted(t *testing.T) {
 		{"clean account", StandingInput{}, StatusGoodStanding},
 		{"pending takedown deadline", StandingInput{PendingTakedowns: 1}, StatusAtRisk},
 		{"one strike", StandingInput{ActiveStrikes: 1, CopyrightStrikesInWindow: 1}, StatusAtRisk},
-		{"two strikes", StandingInput{ActiveStrikes: 2, CopyrightStrikesInWindow: 2}, StatusAtRisk},
+		{"a repeat copyright infringement is suspended, as Nigerian law requires", StandingInput{ActiveStrikes: 2, CopyrightStrikesInWindow: 2}, StatusRestricted},
+		{"two strikes from other policies", StandingInput{ActiveStrikes: 2}, StatusAtRisk},
 		{"three copyright strikes in the window", StandingInput{ActiveStrikes: 3, CopyrightStrikesInWindow: 3}, StatusRestricted},
 		{"three strikes from any policy", StandingInput{ActiveStrikes: 3}, StatusRestricted},
 	}
@@ -44,8 +45,8 @@ func TestHealthStatusMovesFromGoodStandingToAtRiskToRestricted(t *testing.T) {
 
 func TestThresholdsAreAdminConfigurable(t *testing.T) {
 	settings := copyrightservices.DefaultPolicySettings()
-	settings.RestrictionThreshold, settings.SuspensionReviewThreshold = 2, 4
-	standing := ComputeStanding(StandingInput{ActiveStrikes: 2, CopyrightStrikesInWindow: 2}, settings)
+	settings.RestrictionThreshold, settings.SuspensionReviewThreshold = 1, 4
+	standing := ComputeStanding(StandingInput{ActiveStrikes: 1, CopyrightStrikesInWindow: 1}, settings)
 	if standing.Status != StatusRestricted || standing.NeedsSuspensionReview {
 		t.Fatalf("a lower restriction threshold restricts earlier and review waits for its own threshold: %+v", standing)
 	}

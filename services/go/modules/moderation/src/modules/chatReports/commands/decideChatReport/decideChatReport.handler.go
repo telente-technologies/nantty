@@ -56,6 +56,9 @@ func (handler Handler) Execute(ctx context.Context, command Command) error {
 	if services.IsDecidedStatus(string(report.Status)) {
 		return apiError(http.StatusConflict, "REPORT_ALREADY_DECIDED", "This report was already decided.")
 	}
+	if staff, err := uuid.Parse(command.Staff.Id); err == nil && (report.ReporterID == staff || (report.ReportedUserID != nil && *report.ReportedUserID == staff)) {
+		return apiError(http.StatusConflict, "OWN_REPORT", "Another reviewer must decide a report you filed or one about you.")
+	}
 	if rule.NeedsUser && report.ReportedUserID == nil {
 		return apiError(http.StatusConflict, "NO_REPORTED_USER", "This report has no reported user.")
 	}

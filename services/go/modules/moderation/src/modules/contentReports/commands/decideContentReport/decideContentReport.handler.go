@@ -18,6 +18,7 @@ import (
 	"zudomart/modules/moderation/src/integrations"
 	reportevents "zudomart/modules/moderation/src/modules/contentReports/events"
 	"zudomart/modules/moderation/src/modules/contentReports/services"
+	healthservices "zudomart/modules/moderation/src/modules/accountHealth/services"
 	strikeservices "zudomart/modules/moderation/src/modules/strikes/services"
 	"zudomart/platform/httpserver"
 )
@@ -38,9 +39,9 @@ var actionRules = map[string]actionRule{
 	"DISMISS":                    {},
 	"HIDE":                       {visibility: "hidden"},
 	"RESTRICT":                   {visibility: "restricted"},
-	"REMOVE":                     {visibility: "removed", addsStrike: true, needsStepUp: true},
-	"WARN_AUTHOR":                {addsStrike: true, needsAuthor: true, needsStepUp: true},
-	"SUSPEND_AUTHOR":             {visibility: "hidden", addsStrike: true, needsAuthor: true, needsStepUp: true},
+	"REMOVE":                     {visibility: "removed", addsStrike: true, needsStepUp: true, permission: "users:moderate"},
+	"WARN_AUTHOR":                {addsStrike: true, needsAuthor: true, needsStepUp: true, permission: "users:moderate"},
+	"SUSPEND_AUTHOR":             {visibility: "hidden", addsStrike: true, needsAuthor: true, needsStepUp: true, permission: "users:suspend"},
 	"REVOKE_AUTHOR_VERIFICATION": {needsAuthor: true, needsStepUp: true, permission: "verification:revoke"},
 }
 
@@ -80,6 +81,12 @@ func (handler Handler) Execute(ctx context.Context, command Command) error {
 	}
 	if services.IsDecided(report.Status) {
 		return conflict("REPORT_ALREADY_DECIDED", "This report was already decided.")
+	}
+	if ownReport, err := handler.isOwnReport(ctx, command.Staff.Id, report); err != nil || ownReport {
+		if err != nil {
+			return err
+		}
+		return conflict("OWN_REPORT", "Another reviewer must decide a report you filed or one about your own content.")
 	}
 	if rule.needsAuthor && report.AuthorID == nil {
 		return conflict("AUTHOR_UNKNOWN", "The author of this content could not be determined.")
@@ -133,7 +140,7 @@ func (handler Handler) record(ctx context.Context, command Command, report *ent.
 		}
 	}
 	decision, _ := json.Marshal(services.Decision{Action: command.Action, Reason: reason, DecidedByName: command.Staff.Name, DecidedByStaffId: command.Staff.Id, DecidedAt: now.UTC().Format(time.RFC3339), SuspensionDays: command.DurationDays})
-	return handler.Container.RunInTransaction(ctx, func(tx *ent.Tx) error {
+	err := handler.Container.RunInTransaction(ctx, func(tx *ent.Tx) error {
 		update := tx.ContentReport.UpdateOne(report).SetStatus(status).SetDecision(decision)
 		if visibility != "" {
 			update.SetVisibility(contentreport.Visibility(visibility))
@@ -167,6 +174,13 @@ func (handler Handler) record(ctx context.Context, command Command, report *ent.
 		}
 		return handler.audit(ctx, command, report, status, visibility, reason)
 	})
+	if err != nil {
+		return err
+	}
+	if rule.addsStrike && report.AuthorID != nil {
+		healthservices.RefreshStandingAfterStrikeChange(ctx, handler.Container, *report.AuthorID, "strike_issued")
+	}
+	return nil
 }
 
 func (handler Handler) notifyReporters(ctx context.Context, tx *ent.Tx, report *ent.ContentReport, outcome string, now time.Time) error {
@@ -200,4 +214,15 @@ func (handler Handler) audit(ctx context.Context, command Command, report *ent.C
 	}
 	record.Action, record.SubjectType, record.SubjectId, record.SubjectLabel = "user.moderated."+action, "user", report.AuthorID.String(), "content report"
 	return handler.Container.Audit.Record(ctx, record)
+}
+
+func (handler Handler) isOwnReport(ctx context.Context, staffId string, report *ent.ContentReport) (bool, error) {
+	staff, err := uuid.Parse(staffId)
+	if err != nil {
+		return false, nil
+	}
+	if report.AuthorID != nil && *report.AuthorID == staff {
+		return true, nil
+	}
+	return handler.Container.Client.ContentReportEntry.Query().Where(contentreportentry.ReportID(report.ID), contentreportentry.ReporterID(staff)).Exist(ctx)
 }

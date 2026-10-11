@@ -68,6 +68,12 @@ func PublishHealthChanged(ctx context.Context, c *container.Container, accountId
 	})
 }
 
+func RefreshStandingAfterStrikeChange(ctx context.Context, c *container.Container, accountId uuid.UUID, reason string) {
+	if _, err := PublishHealthChanged(ctx, c, accountId, reason); err != nil {
+		c.Logger.WarnContext(ctx, "account health event failed", "error", err.Error())
+	}
+}
+
 func EnforceCopyrightStanding(ctx context.Context, c *container.Container, accountId uuid.UUID, triggeringStrikeId string) error {
 	snapshot, err := PublishHealthChanged(ctx, c, accountId, "copyright_strike_issued")
 	if err != nil {
@@ -76,8 +82,8 @@ func EnforceCopyrightStanding(ctx context.Context, c *container.Container, accou
 	if snapshot.Standing.Status == StatusRestricted {
 		days := snapshot.Settings.RestrictionDays
 		if err := c.Users.Enforce(ctx, integrations.EnforcementRequest{
-			Action: "restrict", UserId: accountId.String(), Actor: integrations.StaffActor{Id: "system", Name: "Copyright policy", Role: "system"}, Features: []string{"GOING_LIVE"}, DurationDays: &days,
-			Reason: "Repeated copyright strikes: monetisation and live are paused", Source: "copyright", CaseId: triggeringStrikeId,
+			Action: "restrict", UserId: accountId.String(), Actor: integrations.StaffActor{Id: "system", Name: "Copyright policy", Role: "system"}, Features: []string{"POSTING", "GOING_LIVE", "SELLING"}, DurationDays: &days,
+			Reason: "Repeated copyright infringement: posting, live, selling and monetisation are suspended", Source: "copyright", CaseId: triggeringStrikeId,
 		}); err != nil {
 			return err
 		}

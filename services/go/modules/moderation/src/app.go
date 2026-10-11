@@ -42,13 +42,14 @@ type Module struct {
 }
 
 type Overrides struct {
-	AccessVerifier *jwtauth.AccessTokenVerifier
-	StaffVerifiers *middlewares.StaffTokenVerifiers
-	Users          integrations.UsersService
-	Audit          integrations.AuditService
-	Targets        integrations.TargetResolver
-	LiveSafety     LiveSafetyStorage
-	AudioMatches   integrations.AudioMatchAdvisor
+	AccessVerifier    *jwtauth.AccessTokenVerifier
+	StaffVerifiers    *middlewares.StaffTokenVerifiers
+	Users             integrations.UsersService
+	Audit             integrations.AuditService
+	Targets           integrations.TargetResolver
+	ChatReportability integrations.ChatReportabilityChecker
+	LiveSafety        LiveSafetyStorage
+	AudioMatches      integrations.AudioMatchAdvisor
 }
 
 type LiveSafetyStorage interface {
@@ -97,6 +98,10 @@ func StartModerationModuleWithSettings(ctx context.Context, settings configs.Mod
 	moderationContainer.Targets = overrides.Targets
 	if moderationContainer.Targets == nil {
 		moderationContainer.Targets = integrations.NewHttpTargetResolver(settings.TargetSources)
+	}
+	moderationContainer.ChatReportability = overrides.ChatReportability
+	if moderationContainer.ChatReportability == nil {
+		moderationContainer.ChatReportability = integrations.NewHttpChatReportability(settings.TargetSources, settings.IsProduction())
 	}
 	moderationContainer.DeviceAttestation = integrations.ProviderDeviceAttestationVerifier{}
 	moderationContainer.AudioMatches = overrides.AudioMatches

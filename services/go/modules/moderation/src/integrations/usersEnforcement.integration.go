@@ -64,6 +64,9 @@ func (service HttpUsersService) post(ctx context.Context, path string, body any,
 	}
 	request.Header.Set("Content-Type", "application/json")
 	request.Header.Set("X-Internal-Token", service.Token)
+	if token := StepUpTokenFromContext(ctx); token != "" {
+		request.Header.Set("X-Step-Up-Token", token)
+	}
 	response, err := service.Client.Do(request)
 	if err != nil {
 		return httpserver.NewApiError(http.StatusBadGateway, "UPSTREAM_UNAVAILABLE", "The account service is unavailable. Try again.")
