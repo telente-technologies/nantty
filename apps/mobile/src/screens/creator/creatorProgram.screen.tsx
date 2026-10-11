@@ -46,7 +46,7 @@ export function CreatorProgramScreen({ navigation }: MainScreenProps<"CreatorPro
       <Header title="Creator Program" />
       <ScrollView
         contentContainerStyle={styles.content}
-        refreshControl={<RefreshControl refreshing={eligibility.isRefetching} onRefresh={() => Promise.all([eligibility.refetch(), application.refetch()])} tintColor={colors.primary} />}
+        refreshControl={<RefreshControl refreshing={eligibility.isRefetching} onRefresh={() => Promise.all([eligibility.refetch(), application.refetch()])} tintColor={colors.primary} colors={[colors.primary]} />}
       >
         <View style={styles.hero}>
           {approved ? <StatusPill label="You're a Zudomart Creator" tone="success" /> : null}

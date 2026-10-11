@@ -1,12 +1,13 @@
 import { inAppBrowserColorsFromTheme, openUserSuppliedWebLink } from "@/components/links/openLink.util";
 import { MentionText } from "@/components/mentions/mentionText";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Image } from "expo-image";
 import { ScrollView, StyleSheet, View } from "react-native";
 
 import { PostCard } from "@/components/feed/postCard";
 import { ProductMasonry } from "@/components/home/productMasonry";
 import { useUserPostsQuery } from "@/components/profile/profileQueries.hook";
+import { useConfirmedFollowToggle } from "@/components/profile/confirmedFollowToggle.hook";
 import { VerificationBadge } from "@/components/profile/verificationBadge";
 import { OfficialStoreBadge } from "@/components/store/officialStoreBadge";
 import { webHandoffService } from "@/services/core/webHandoff.service";
@@ -19,6 +20,7 @@ import type { MainScreenProps } from "@/navigation/navigation.types";
 import { brandsService } from "@/services/sellers/brands.service";
 import { useAuthStore } from "@/store/auth.store";
 import type { BrandDetail } from "@/types/brand.type";
+import type { FollowState } from "@/types/socialGraph.type";
 import { formatCountWithThousandsSuffix } from "@/utils/formatDate.util";
 import { ListSkeleton } from "@/components/ui/listSkeleton";
 import { ErrorState } from "@/components/ui/errorState";
@@ -34,11 +36,12 @@ export function BrandProfileScreen({ navigation, route }: MainScreenProps<"Brand
   const brand = useQuery({ queryKey: ["brands", brandId], queryFn: () => brandsService.fetchBrandById(brandId) });
   const products = useQuery({ queryKey: ["brands", brandId, "products"], queryFn: () => brandsService.fetchBrandProducts(brandId) });
   const posts = useUserPostsQuery(brand.data?.ownerUserId ?? undefined);
-  const toggleFollow = useMutation({
-    mutationFn: (followNow: boolean) => (followNow ? brandsService.followBrand(brandId) : brandsService.unfollowBrand(brandId)),
-    onMutate: (followNow) =>
-      queryClient.setQueryData<BrandDetail>(["brands", brandId], (cached) => (cached ? { ...cached, isFollowing: followNow, followers: cached.followers + (followNow ? 1 : -1) } : cached)),
-  });
+  const { toggle: toggleFollow } = useConfirmedFollowToggle();
+  const applyBrandFollow = (state: FollowState) =>
+    queryClient.setQueryData<BrandDetail>(["brands", brandId], (cached) => {
+      const following = state === "accepted";
+      return cached && cached.isFollowing !== following ? { ...cached, isFollowing: following, followers: Math.max(0, cached.followers + (following ? 1 : -1)) } : cached;
+    });
 
   if (!brand.data) {
     return (
@@ -80,7 +83,10 @@ export function BrandProfileScreen({ navigation, route }: MainScreenProps<"Brand
           <Text size={13} lineHeight={17.5} color={colors.primary} style={styles.padded} accessibilityRole="link" onPress={() => openUserSuppliedWebLink(details.website!, inAppBrowserColorsFromTheme(colors))}>{details.website}</Text>
         ) : null}
         <View style={[styles.actions, styles.padded]}>
-          <Button variant={details.isFollowing ? "subtle" : "primary"} title={details.isFollowing ? "Following" : "Follow"} style={styles.flex} onPress={() => requireAuthThen(() => toggleFollow.mutate(!details.isFollowing), undefined, "follow brands")} />
+          <Button variant={details.isFollowing ? "subtle" : "primary"} title={details.isFollowing ? "Following" : "Follow"} style={styles.flex} onPress={() => requireAuthThen(() => toggleFollow({
+            subjectLabel: details.name, state: details.isFollowing ? "accepted" : "none", apply: applyBrandFollow,
+            follow: () => brandsService.followBrand(brandId), unfollow: () => brandsService.unfollowBrand(brandId),
+          }), undefined, "follow brands")} />
           {ownsBrand && !details.verification?.badgeVisible ? (
             <Button variant="subtle" title="Manage on the web" style={styles.flex} onPress={() => webHandoffService.openManageBilling(details.id)} />
           ) : null}
@@ -113,7 +119,7 @@ export function BrandProfileScreen({ navigation, route }: MainScreenProps<"Brand
           <View style={styles.section}>
             <Text size={16} weight={600} lineHeight={19.2} style={styles.padded}>Posts</Text>
             {posts.data!.data.slice(0, 3).map((post) => (
-              <PostCard key={post.id} post={post} onPress={() => navigation.navigate("PostDetail", { postId: post.id })} />
+              <PostCard key={post.id} post={post} surface="profile" onPress={() => navigation.navigate("PostDetail", { postId: post.id })} />
             ))}
           </View>
         ) : null}

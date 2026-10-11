@@ -24,6 +24,7 @@ const STATUS_APPEARANCE: Record<Boost["status"], { label: string; tone: StatusTo
   active: { label: "Running", tone: "primary" },
   completed: { label: "Completed", tone: "success" },
   rejected: { label: "Not approved", tone: "error" },
+  cancelled: { label: "Stopped", tone: "neutral" },
 };
 
 export function BoostStatusScreen({ navigation, route }: MainScreenProps<"BoostStatus">) {
@@ -48,7 +49,7 @@ export function BoostStatusScreen({ navigation, route }: MainScreenProps<"BoostS
   return (
     <Screen>
       <Header title="Boost results" />
-      <ScrollView contentContainerStyle={styles.content} refreshControl={<RefreshControl refreshing={boost.isRefetching} onRefresh={() => boost.refetch()} tintColor={colors.primary} />}>
+      <ScrollView contentContainerStyle={styles.content} refreshControl={<RefreshControl refreshing={boost.isRefetching} onRefresh={() => boost.refetch()} tintColor={colors.primary} colors={[colors.primary]} />}>
         <View style={styles.card}>
           <StatusPill label={STATUS_APPEARANCE[details.status].label} tone={STATUS_APPEARANCE[details.status].tone} />
           <Text size={typeScale.md} lineHeight={16.8} color={colors.textMuted}>

@@ -25,9 +25,17 @@ import type { PaymentMode } from "@/types";
 import { directChoicesFor } from "@/utils/paymentMode.util";
 import { readSavedCardDisplay, saveCardOnThisDevice, unlockSavedCardId } from "@/utils/savedCard.util";
 import { ErrorState } from "@/components/ui/errorState";
+import { CountryRequiredPicker, isCountryRequiredError } from "@/components/checkout/countryRequiredPicker";
+import { useProviderWallet, providerWalletQueryKeys } from "@/components/wallet/providerWalletQueries.hook";
+import { providerWalletService } from "@/services/money/providerWallet.service";
+import { formatMoneyForDisplay } from "@/utils/formatMoney.util";
+import { describePaymentProblem, presentPaymentProblem } from "@/utils/paymentProblem.util";
+import { checkoutEscrowNote } from "@/utils/paymentCopy.util";
 import { ListSkeleton } from "@/components/ui/listSkeleton";
 import { spacing } from "@/constants/spacing.constant";
 import { typeScale } from "@/constants/typography.constant";
+
+const isHandledProblem = (error: unknown) => describePaymentProblem(error) !== null;
 
 const CHANNEL_LABELS: Record<PaymentChannel, { name: string; note: string }> = {
   card: { name: "Card", note: "Debit or credit card" },
@@ -44,6 +52,10 @@ export function CheckoutScreen({ navigation }: MainScreenProps<"Checkout">) {
   const [savedCard, setSavedCard] = useState<SavedCardDisplay | null>(null);
   const [useSavedCard, setUseSavedCard] = useState(false);
   const [saveNewCard, setSaveNewCard] = useState(false);
+  const [payFromWallet, setPayFromWallet] = useState(false);
+  const inFlight = useRef(false);
+  const providerWallet = useProviderWallet();
+  const [countryNeeded, setCountryNeeded] = useState(false);
   useEffect(() => {
     void readSavedCardDisplay().then((card) => {
       setSavedCard(card);
@@ -58,10 +70,18 @@ export function CheckoutScreen({ navigation }: MainScreenProps<"Checkout">) {
   };
   const addressId = chosenAddressId ?? addresses.data?.find((a) => a.isDefault)?.id ?? addresses.data?.[0]?.id ?? null;
   const cart = useMyCart(addressId);
+  const totalMinor = cart.data?.total.amountMinor ?? 0;
+  const walletCovers = !!providerWallet.active && totalMinor > 0 && providerWallet.spendableMinor >= totalMinor;
+  const usingWallet = payFromWallet && walletCovers;
 
   const placeOrderAndStartPayment = useMutation({
     mutationFn: async () => {
       const result = await ordersService.checkoutCartIntoOrders(addressId!, checkoutKey.current, directChoicesFor(cart.data?.groups ?? [], paymentModes));
+      if (usingWallet) {
+        const payment = await paymentsService.initializeOrderPayment(result.payableOrderId, `${checkoutKey.current}-pay`);
+        await providerWalletService.payFromWallet(payment.reference, `${checkoutKey.current}-wallet`);
+        return { orderId: payment.orderId, authorizationUrl: undefined };
+      }
       if (useSavedCard && savedCard) {
         const code = await unlockSavedCardId();
         if (!code) throw new Error("Saved card not unlocked");
@@ -75,18 +95,39 @@ export function CheckoutScreen({ navigation }: MainScreenProps<"Checkout">) {
         const charge = await paymentsService.chargeSavedCard(result.payableOrderId, newCard.savedCardId, `${checkoutKey.current}-saved`);
         return { orderId: result.payableOrderId, authorizationUrl: charge.status === "action_required" ? charge.authorizationUrl : undefined };
       }
-      const payment = await paymentsService.initializeOrderPayment(result.payableOrderId, "paystack", `${checkoutKey.current}-pay`);
-      return { orderId: payment.orderId, authorizationUrl: payment.authorizationUrl };
+      const payment = await paymentsService.initializeOrderPayment(result.payableOrderId, `${checkoutKey.current}-pay`);
+      return { orderId: payment.orderId, authorizationUrl: paymentsService.hostedCheckoutUrlOf(payment) };
     },
     onSuccess: (payment) => {
       queryClient.invalidateQueries({ queryKey: cartQueryKey });
+      queryClient.invalidateQueries({ queryKey: providerWalletQueryKeys.wallet });
       cart.data?.groups
         .filter((group) => group.shipping.status === "calculated")
         .flatMap((group) => group.items)
         .forEach((item) => void trackProductInteraction("product.purchased", { productId: item.product.id, quantity: item.quantity }));
       navigation.replace("Payment", { orderId: payment.orderId, authorizationUrl: payment.authorizationUrl });
     },
+    onError: (error) => {
+      const needsCountry = isCountryRequiredError(error);
+      setCountryNeeded(needsCountry);
+      if (needsCountry) return;
+      presentPaymentProblem(error, {
+        onVerify: () => navigation.navigate("PayoutSetup"),
+        onPayByCard: () => {
+          setPayFromWallet(false);
+          checkoutKey.current = generateIdempotencyKey();
+        },
+      });
+    },
+    onSettled: () => {
+      inFlight.current = false;
+    },
   });
+  const startPayment = () => {
+    if (inFlight.current || placeOrderAndStartPayment.isPending) return;
+    inFlight.current = true;
+    placeOrderAndStartPayment.mutate();
+  };
 
   if (cart.isLoading || addresses.isLoading || (cart.isError && !cart.data)) {
     return (
@@ -101,6 +142,15 @@ export function CheckoutScreen({ navigation }: MainScreenProps<"Checkout">) {
     <Screen>
       <Header title="Checkout" paddingHorizontal={12} />
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+        {countryNeeded ? (
+          <CountryRequiredPicker
+            onSaved={() => {
+              setCountryNeeded(false);
+              checkoutKey.current = generateIdempotencyKey();
+              startPayment();
+            }}
+          />
+        ) : null}
         <View style={styles.section}>
           <Text size={typeScale.md} weight={600} lineHeight={16.8} accessibilityRole="header">Shipping address</Text>
           {(addresses.data ?? []).map((address) => (
@@ -121,19 +171,27 @@ export function CheckoutScreen({ navigation }: MainScreenProps<"Checkout">) {
         </View>
         <View style={styles.section}>
           <Text size={typeScale.md} weight={600} lineHeight={16.8} accessibilityRole="header">Payment method</Text>
+          {walletCovers && providerWallet.active ? (
+            <SelectableRow selected={usingWallet} onPress={() => setPayFromWallet(true)} accessibilityLabel="Pay from your wallet">
+              <Text size={typeScale.md} weight={500} lineHeight={16.8}>Pay from wallet</Text>
+              <Text size={typeScale.sm} lineHeight={16.9} color={colors.textMuted}>
+                {formatMoneyForDisplay({ amountMinor: providerWallet.spendableMinor, currency: cart.data!.total.currency })} available. The payment stays locked in your wallet until delivery.
+              </Text>
+            </SelectableRow>
+          ) : null}
           {savedCard ? (
-            <SelectableRow selected={useSavedCard} onPress={() => setUseSavedCard(true)} accessibilityLabel={`Saved ${savedCard.brand} card ending ${savedCard.last4}`}>
+            <SelectableRow selected={useSavedCard && !usingWallet} onPress={() => { setPayFromWallet(false); setUseSavedCard(true); }} accessibilityLabel={`Saved ${savedCard.brand} card ending ${savedCard.last4}`}>
               <Text size={typeScale.md} weight={500} lineHeight={16.8}>{savedCard.brand} ending {savedCard.last4}</Text>
               <Text size={typeScale.sm} lineHeight={16.9} color={colors.textMuted}>Saved on this device. Confirmed with your fingerprint or face.</Text>
             </SelectableRow>
           ) : null}
-          <SelectableRow selected={!useSavedCard} onPress={() => setUseSavedCard(false)} accessibilityLabel="Pay in the secure payment window">
+          <SelectableRow selected={!useSavedCard && !usingWallet} onPress={() => { setPayFromWallet(false); setUseSavedCard(false); }} accessibilityLabel="Pay in the secure payment window">
             <Text size={typeScale.md} weight={500} lineHeight={16.8}>{savedCard ? "Another way to pay" : "Secure payment window"}</Text>
             <Text size={typeScale.sm} lineHeight={16.9} color={colors.textMuted}>
               {(channels.data?.channels ?? []).map((channel) => CHANNEL_LABELS[channel].name).join(", ") || "Card, bank transfer or USSD"}
             </Text>
           </SelectableRow>
-          {!useSavedCard ? (
+          {!useSavedCard && !usingWallet ? (
             <SelectableRow selected={saveNewCard} onPress={() => setSaveNewCard((value) => !value)} accessibilityLabel="Save this card on this device">
               <Text size={typeScale.sm} lineHeight={16.9}>Save my card on this device for next time</Text>
             </SelectableRow>
@@ -157,21 +215,21 @@ export function CheckoutScreen({ navigation }: MainScreenProps<"Checkout">) {
           </View>
         ) : null}
         <Text size={typeScale.xs} lineHeight={16.8} color={colors.textMuted}>
-          Escrow orders are held until you confirm delivery. Direct orders pay the seller right away.
+          {checkoutEscrowNote(providerWallet.isNigeria)}
         </Text>
         <PurchaseTermsText />
       </ScrollView>
       <View style={styles.footer}>
-        {placeOrderAndStartPayment.isError ? (
+        {placeOrderAndStartPayment.isError && !countryNeeded && !isHandledProblem(placeOrderAndStartPayment.error) ? (
           <Text size={typeScale.xs} lineHeight={14.4} color={colors.error} align="center" accessibilityRole="alert">
             Couldn't place your order. Please try again.
           </Text>
         ) : null}
         <Button
-          title="Place order and pay"
+          title={usingWallet ? "Pay from wallet" : "Pay securely"}
           disabled={!addressId || !cart.data || cart.data.payableGroupCount === 0}
           loading={placeOrderAndStartPayment.isPending}
-          onPress={() => placeOrderAndStartPayment.mutate()}
+          onPress={startPayment}
         />
       </View>
     </Screen>

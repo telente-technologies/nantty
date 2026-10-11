@@ -174,7 +174,6 @@ export function CreatePostScreen({ navigation, route }: MainScreenProps<"CreateP
       const mediaId = await waitForUploadedMediaId(jobId);
       return storiesService.publishStory({
         mediaId,
-        media: { id: mediaId, type: file.mediaType === "video" ? "video" : "image", url: null },
         ...(soundId ? { soundId } : {}),
         ...(look !== "none" ? { look } : {}),
       });

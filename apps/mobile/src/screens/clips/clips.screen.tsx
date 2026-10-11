@@ -1,7 +1,7 @@
 import type { BottomTabScreenProps } from "@react-navigation/bottom-tabs";
 import { useIsFocused, type CompositeScreenProps } from "@react-navigation/native";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { useInfiniteQuery } from "@tanstack/react-query";
+import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { AppState, FlatList, Share, StyleSheet, View, type ViewToken, type ViewabilityConfigCallbackPairs } from "react-native";
 import { useShareToChat } from "@/components/chatSafety/shareToChat.hook";
@@ -22,6 +22,8 @@ import { claimAudioFocusForVideoPlayback } from "@/services/clips/videoAudio.ser
 import { useOpenUserProfile } from "@/hooks/useOpenUserProfile.hook";
 import { usePostInteractions } from "@/hooks/usePostInteractions.hook";
 import { useAuthStore } from "@/store/auth.store";
+import { isCommentsCursorExpiredError } from "@/hooks/useRestartCommentsOnExpiredCursor.hook";
+import { requireAuthThen } from "@/utils/requireAuth.util";
 import { useVideoAudioStore } from "@/store/videoAudio.store";
 import type { Clip, ClipsFeedTab } from "@/types";
 
@@ -35,6 +37,7 @@ type ClipsScreenProps = CompositeScreenProps<
 
 const NUMBER_OF_UPCOMING_CLIPS_TO_PRELOAD = 2;
 const ACTIVE_CLIP_MINIMUM_VISIBLE_PERCENT = 60;
+const PAGE_RESIZE_SETTLE_MS = 600;
 
 export function ClipsScreen({ navigation, route }: ClipsScreenProps) {
   const requestedStartClipId = route.params?.startId;
@@ -49,6 +52,11 @@ export function ClipsScreen({ navigation, route }: ClipsScreenProps) {
   const [tab, setTab] = useState<ClipsFeedTab>("forYou");
   const [pageHeight, setPageHeight] = useState(0);
   const [activeClipIndex, setActiveClipIndex] = useState(0);
+  const queryClient = useQueryClient();
+  const activeClipIndexRef = useRef(0);
+  activeClipIndexRef.current = activeClipIndex;
+  const ignoreViewabilityUntilRef = useRef(0);
+  const previousPageHeightRef = useRef(0);
   const [isAppInForeground, setIsAppInForeground] = useState(AppState.currentState === "active");
   const isMuted = useVideoAudioStore((state) => state.isMuted);
   const toggleMute = useVideoAudioStore((state) => state.toggleMute);
@@ -65,6 +73,12 @@ export function ClipsScreen({ navigation, route }: ClipsScreenProps) {
     getNextPageParam: (lastPage) => lastPage.nextCursor ?? undefined,
   });
   const clips = useMemo(() => clipsFeed.data?.pages.flatMap((page) => page.data) ?? [], [clipsFeed.data]);
+  const clipsCursorExpired = isCommentsCursorExpiredError(clipsFeed.error);
+  useEffect(() => {
+    if (!clipsCursorExpired) return;
+    setActiveClipIndex(0);
+    void queryClient.resetQueries({ queryKey: ["clips", tab], exact: true });
+  }, [clipsCursorExpired, queryClient, tab]);
 
   useEffect(() => {
     if (!requestedStartClipId || pageHeight === 0 || !clipsFeed.isSuccess) return;
@@ -96,14 +110,23 @@ export function ClipsScreen({ navigation, route }: ClipsScreenProps) {
     prefetchUpcomingClipPosters(clips, activeClipIndex, NUMBER_OF_UPCOMING_CLIPS_TO_PRELOAD + 2);
   }, [clips, activeClipIndex]);
 
-  const switchFeedTabAndScrollToTop = (nextTab: ClipsFeedTab) => {
+  const showFeedTabFromTop = (nextTab: ClipsFeedTab) => {
     setTab(nextTab);
     setActiveClipIndex(0);
     setClipIndexToOpenListAt(0);
     clipsListRef.current?.scrollToOffset({ offset: 0, animated: false });
   };
+  const switchFeedTabAndScrollToTop = (nextTab: ClipsFeedTab) => {
+    if (nextTab === "following") requireAuthThen(() => showFeedTabFromTop("following"), undefined, "see clips from people you follow");
+    else showFeedTabFromTop(nextTab);
+  };
+  const isSignedIn = useAuthStore((s) => s.status === "signedIn");
+  useEffect(() => {
+    if (!isSignedIn && tab === "following") setTab("forYou");
+  }, [isSignedIn, tab]);
 
   const updateActiveClipFromViewableItems = useCallback(({ viewableItems }: { viewableItems: ViewToken[] }) => {
+    if (Date.now() < ignoreViewabilityUntilRef.current) return;
     const mostVisible = viewableItems.find((token) => token.isViewable && token.index !== null);
     if (mostVisible?.index !== undefined && mostVisible.index !== null) setActiveClipIndex(mostVisible.index);
   }, []);
@@ -147,6 +170,21 @@ export function ClipsScreen({ navigation, route }: ClipsScreenProps) {
     setShowGestureTips(false);
   };
 
+  const keepActiveClipWhenPageHeightChanges = (nextHeight: number) => {
+    if (nextHeight === pageHeight) return;
+    ignoreViewabilityUntilRef.current = Date.now() + PAGE_RESIZE_SETTLE_MS;
+    setPageHeight(nextHeight);
+  };
+
+  useEffect(() => {
+    const previousHeight = previousPageHeightRef.current;
+    previousPageHeightRef.current = pageHeight;
+    if (pageHeight === 0 || previousHeight === 0) return;
+    const anchoredIndex = activeClipIndexRef.current;
+    const frame = requestAnimationFrame(() => clipsListRef.current?.scrollToOffset({ offset: anchoredIndex * pageHeight, animated: false }));
+    return () => cancelAnimationFrame(frame);
+  }, [pageHeight]);
+
   const isPlaybackAllowed = isScreenFocused && isAppInForeground && commentsForClipId === null;
 
   useEffect(() => {
@@ -155,7 +193,7 @@ export function ClipsScreen({ navigation, route }: ClipsScreenProps) {
   }, [isPlaybackAllowed, isMuted]);
 
   return (
-    <View style={styles.root} onLayout={(e) => setPageHeight(e.nativeEvent.layout.height)}>
+    <View style={styles.root} onLayout={(e) => keepActiveClipWhenPageHeightChanges(e.nativeEvent.layout.height)}>
       {sendInChatElement}
       {pageHeight > 0 ? (
         <FlatList
@@ -235,5 +273,5 @@ export function ClipsScreen({ navigation, route }: ClipsScreenProps) {
 
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: colors.black },
-  header: { position: "absolute", top: 0, left: 0, right: 0 },
+  header: { position: "absolute", top: 0, left: 0, right: 0, zIndex: 10, elevation: 10 },
 });

@@ -6,6 +6,7 @@ import { SelectableRow } from "@/components/cart/selectableRow";
 import { AdsManagerBanner } from "@/components/boost/adsManagerBanner";
 import { BoostAudiencePicker } from "@/components/boost/boostAudiencePicker";
 import { BoostPaymentPicker } from "@/components/boost/boostPaymentPicker";
+import { useCountryRequiredRetry } from "@/components/checkout/countryRequiredSheet";
 import { Button } from "@/components/ui/button";
 import { Chip } from "@/components/ui/chip";
 import { Header } from "@/components/ui/header";
@@ -80,6 +81,7 @@ export function PromotePostScreen({ navigation, route }: MainScreenProps<"Promot
     setChosenDailyBudget(freeSelection.dailyBudget);
     setChosenDurationDays(freeSelection.durationDays);
   };
+  const { retry: countryRetry, sheet: countrySheet } = useCountryRequiredRetry();
   const idempotencyKeyFor = (body: CreateBoostRequest) => {
     const signature = JSON.stringify(body);
     if (idempotency.current?.body !== signature) idempotency.current = { body: signature, key: generateIdempotencyKey() };
@@ -98,6 +100,10 @@ export function PromotePostScreen({ navigation, route }: MainScreenProps<"Promot
       navigation.replace("BoostStatus", { boostId: boost.id });
     },
     onError: (error) => {
+      if (error instanceof ApiError && countryRetry.handle(error.code, () => {
+        idempotency.current = null;
+        startBoost.mutate();
+      })) return;
       if (!(error instanceof ApiError) || !error.code || !FREE_BOOST_ERROR_CODES.has(error.code)) return;
       queryClient.invalidateQueries({ queryKey: ["boosts", "options"] });
       if (error.code !== "FREE_BOOST_TOO_LARGE" && cardAllowed) setChosenPaymentMethod("card");
@@ -116,6 +122,7 @@ export function PromotePostScreen({ navigation, route }: MainScreenProps<"Promot
   return (
     <Screen>
       <Header title="Promote post" />
+      {countrySheet}
       <ScrollView contentContainerStyle={styles.content}>
         {signedInUser?.isSeller || signedInUser?.verification?.color === "gold" ? <AdsManagerBanner /> : null}
         <Text size={16} weight={600} lineHeight={19.2}>Goal</Text>

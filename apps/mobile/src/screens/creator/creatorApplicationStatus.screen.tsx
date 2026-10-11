@@ -45,7 +45,7 @@ export function CreatorApplicationStatusScreen({ navigation }: MainScreenProps<"
   return (
     <Screen>
       <Header title="Creator application" />
-      <ScrollView contentContainerStyle={styles.content} refreshControl={<RefreshControl refreshing={application.isRefetching} onRefresh={() => application.refetch()} tintColor={colors.primary} />}>
+      <ScrollView contentContainerStyle={styles.content} refreshControl={<RefreshControl refreshing={application.isRefetching} onRefresh={() => application.refetch()} tintColor={colors.primary} colors={[colors.primary]} />}>
         <View style={styles.card}>
           <StatusPill label={copy.label} tone={copy.tone} />
           <Text size={21} weight={600} lineHeight={25.2} accessibilityRole="header">{copy.title}</Text>

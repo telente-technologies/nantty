@@ -1,10 +1,11 @@
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
-import { ActivityIndicator, Pressable, ScrollView, StyleSheet, View } from "react-native";
+import { Pressable, ScrollView, StyleSheet, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { CustomizingFeedIllustration } from "@/components/auth/customizingFeedIllustration";
 import { ArrowLeft24Icon } from "@/components/icons";
+import { BrandLoader } from "@/components/ui/brandLoader";
 import { Button } from "@/components/ui/button";
 import { Chip, chipStyles } from "@/components/ui/chip";
 import { Screen } from "@/components/ui/screen";
@@ -80,7 +81,7 @@ export function PersonalizationScreen({ navigation }: AuthScreenProps<"Personali
             <CustomizingFeedIllustration />
           </View>
         ) : topicsQuery.isLoading ? (
-          <ActivityIndicator color={colors.primary} style={styles.loader} />
+          <BrandLoader size="md" style={styles.loader} />
         ) : (
           <View style={[chipStyles.row, styles.topics]}>
             {(topicsQuery.data ?? []).map((topic) => (
