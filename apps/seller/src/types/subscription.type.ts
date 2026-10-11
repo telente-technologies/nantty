@@ -30,6 +30,6 @@ export interface SubscriptionDetails {
   readonly planId: string | null;
   readonly cancelAtPeriodEnd: boolean;
   readonly paymentMethodSummary: string | null;
-  readonly provider: "paystack" | null;
+  readonly provider: "paystack" | "flutterwave" | null;
   readonly invoices: SubscriptionInvoice[];
 }
