@@ -2,10 +2,10 @@
 # Test name:           Phase 0 pre-flight (environment safety gate)
 # Target:              127.0.0.1 only (local compose + locally started services)
 # Expected behavior:   Exits 0 only when every target is loopback, no live key is present,
-#                      APP_ENV is not production, PAYSTACK_API_BASE_URL is loopback, and
+#                      APP_ENV is not production, FLUTTERWAVE_API_BASE_URL is loopback, and
 #                      GATEWAY_IDENTITY_SECRET is set. Prints a redacted report.
 # Dangerous behavior:  A failure would be proceeding against a live key, a production env,
-#                      a non-loopback Paystack URL, or the out-of-scope betng-* containers.
+#                      a non-loopback Flutterwave URL, or the out-of-scope betng-* containers.
 # Cleanup:             None (read-only; starts and stops nothing).
 # Financial safety:    SAFE (no money moves; reads env + listening sockets only)
 set -euo pipefail
@@ -17,7 +17,7 @@ bad()  { printf 'REFUSE: %s\n' "$*"; fail=1; }
 # 1. Refuse live payment keys anywhere in the current environment (value redacted).
 while IFS='=' read -r name value; do
   case "${value:-}" in
-    sk_live_*|pk_live_*) bad "env ${name} is a LIVE Paystack key";;
+    sk_live_*|pk_live_*) bad "env ${name} looks like a LIVE payment key";;
     FLWSECK-*|FLWPUBK-*) bad "env ${name} is a LIVE Flutterwave key";;
   esac
 done < <(env)
@@ -25,15 +25,7 @@ done < <(env)
 # 2. Refuse production.
 if [ "${APP_ENV:-}" = "production" ]; then bad "APP_ENV=production"; fi
 
-# 3. Paystack base URL must be loopback (fake server) when set.
-if [ -n "${PAYSTACK_API_BASE_URL:-}" ]; then
-  case "${PAYSTACK_API_BASE_URL}" in
-    http://127.0.0.1*|http://localhost*|https://127.0.0.1*|https://localhost*) note "paystack base: loopback OK";;
-    *) bad "PAYSTACK_API_BASE_URL is not loopback (got non-loopback host)";;
-  esac
-fi
-
-# 3b. Flutterwave base URL must be loopback (fake server) when set.
+# 3. Flutterwave base URL must be loopback (fake server) when set.
 if [ -n "${FLUTTERWAVE_API_BASE_URL:-}" ]; then
   case "${FLUTTERWAVE_API_BASE_URL}" in
     http://127.0.0.1*|http://localhost*|https://127.0.0.1*|https://localhost*) note "flutterwave base: loopback OK";;
