@@ -3,6 +3,7 @@ import {
   clipCaptionMaxHeight,
   clipOverlayBottomOffset,
 } from "../clipPageLayout.util";
+import { VIDEO_SEEK_BAR_TOUCH_HEIGHT } from "@/utils/videoSeek.util";
 
 const TAB_BAR_CONTENT_HEIGHT = 1 + 12 + 44;
 const tabBarHeight = (safeAreaBottom: number) => TAB_BAR_CONTENT_HEIGHT + Math.max(safeAreaBottom, 12);
@@ -32,6 +33,19 @@ describe("clip page layout", () => {
     const pageHeight = 667 - tabBarHeight(0);
     const captionMax = clipCaptionMaxHeight(pageHeight, 20, 12);
     expect(20 + 64 + captionMax + 150 + 12).toBeLessThanOrEqual(pageHeight);
+  });
+
+  it.each(devices)("lifts the overlay clear of the seek bar on $name", ({ height, top, bottom }) => {
+    const pageHeight = height - tabBarHeight(bottom);
+    const uncovered = bottomSafeAreaNotCoveredByTabBar(bottom, height, pageHeight);
+    const offset = clipOverlayBottomOffset(uncovered, true);
+    expect(offset).toBe(uncovered + VIDEO_SEEK_BAR_TOUCH_HEIGHT + 4);
+    expect(offset).toBeGreaterThan(clipOverlayBottomOffset(uncovered));
+    expect(top + 64 + clipCaptionMaxHeight(pageHeight, top, offset) + 150 + offset).toBeLessThanOrEqual(pageHeight);
+  });
+
+  it("keeps the seek bar above the home indicator when the page runs to the bottom edge", () => {
+    expect(clipOverlayBottomOffset(34, true)).toBe(34 + VIDEO_SEEK_BAR_TOUCH_HEIGHT + 4);
   });
 
   it("never returns a negative inset", () => {

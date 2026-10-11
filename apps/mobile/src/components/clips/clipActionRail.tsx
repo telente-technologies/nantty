@@ -11,6 +11,7 @@ import { formatCompactCount } from "@/utils/formatCount.util";
 import { RAIL_ITEM_WIDTH, clipRailStyles } from "./clipRail.constant";
 
 const RAIL_ICON_SIZE = 26;
+const noop = () => undefined;
 
 export interface ClipActionRailProps {
   readonly liked: boolean;
@@ -22,6 +23,8 @@ export interface ClipActionRailProps {
   readonly onOpenComments: () => void;
   readonly onShare: () => void;
   readonly onMore: () => void;
+  readonly onPressViews?: () => void;
+  readonly isOwnClip?: boolean;
   readonly onTip?: () => void;
   readonly saveTarget?: SaveTarget;
   readonly savedAccordingToServer?: boolean;
@@ -79,12 +82,9 @@ export function ClipActionRail(props: ClipActionRailProps) {
       {props.saveTarget ? (
         <SaveToggleButton target={props.saveTarget} savedAccordingToServer={props.savedAccordingToServer ?? false} foregroundColor={color} saveCount={props.saveCount ?? 0} />
       ) : null}
-      <View accessible accessibilityLabel={`Views, ${props.views}`} style={clipRailStyles.item}>
+      <RailButton label={props.isOwnClip ? "Views, open clip analytics" : "Views, what are views"} count={props.views} onPress={props.onPressViews ?? noop} foregroundColor={color}>
         <ViewsActionIcon size={RAIL_ICON_SIZE} color={color} />
-        <Text size={13} lineHeight={16.9} color={color} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8} style={[clipRailStyles.count, color ? clipRailStyles.readableOnVideo : null]}>
-          {formatCompactCount(props.views)}
-        </Text>
-      </View>
+      </RailButton>
       {props.onTip ? (
         <Pressable accessibilityRole="button" accessibilityLabel="Tip this creator with coins" hitSlop={{ top: 11, bottom: 11 }} onPress={props.onTip} style={clipRailStyles.item}>
           <GiftActionIcon size={RAIL_ICON_SIZE} color={color} />

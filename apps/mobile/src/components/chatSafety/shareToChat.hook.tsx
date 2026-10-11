@@ -1,7 +1,7 @@
 import * as Clipboard from "expo-clipboard";
 import { useState } from "react";
 
-import { ChatTeardropText24Icon, Copy24Icon, Share24Icon } from "@/components/icons";
+import { ChatTeardropText24Icon, Link24Icon, ShareFat24Icon } from "@/components/icons";
 import { ActionSheet } from "@/components/ui/actionSheet";
 import { webAppLinks } from "@/config/webAppLinks.config";
 import { showToast } from "@/store/toast.store";
@@ -44,8 +44,8 @@ export function useShareToChat() {
   const options = offer
     ? [
         { label: "Send in chat", icon: <ChatTeardropText24Icon size={20} />, onPress: () => afterSheetCloses(() => requireAuthThen(() => setReference(offer.target), undefined, "send this in chat")) },
-        { label: "Copy link", icon: <Copy24Icon size={20} />, onPress: () => void copyLinkFor(offer.target) },
-        ...(offer.shareElsewhere ? [{ label: "Share link", icon: <Share24Icon size={20} />, onPress: () => afterSheetCloses(() => offer.shareElsewhere?.()) }] : []),
+        { label: "Copy link", icon: <Link24Icon size={20} />, onPress: () => void copyLinkFor(offer.target) },
+        ...(offer.shareElsewhere ? [{ label: "Share link", icon: <ShareFat24Icon size={20} />, onPress: () => afterSheetCloses(() => offer.shareElsewhere?.()) }] : []),
       ]
     : [];
   const sendInChatElement = (

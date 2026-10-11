@@ -48,9 +48,9 @@ export function SendInChatSheet({ reference, onClose }: SendInChatSheetProps) {
     onSuccess: (result) => {
       queryClient.invalidateQueries({ queryKey: ["conversations"] });
       onClose();
-      showAlertWithButtons("Sent", `Shared in ${result.sentCount} ${result.sentCount === 1 ? "chat" : "chats"}.`);
+      showAlertWithButtons("Sent", `Shared in ${result.sentCount} ${result.sentCount === 1 ? "chat" : "chats"}.`, undefined, { intent: "share" });
     },
-    onError: (error) => showAlertWithButtons("Couldn't send", readChatCryptoErrorMessage(error) ?? (error instanceof Error ? error.message : undefined)),
+    onError: (error) => showAlertWithButtons("Couldn't send", readChatCryptoErrorMessage(error) ?? (error instanceof Error ? error.message : undefined), undefined, { intent: "share" }),
   });
 
   useEffect(() => {

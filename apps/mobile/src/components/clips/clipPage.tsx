@@ -1,7 +1,9 @@
-import { memo, useRef, useState } from "react";
+import { useNavigation, type NavigationProp } from "@react-navigation/native";
+import { memo, useMemo, useState } from "react";
 import { Pressable, StyleSheet, View, useWindowDimensions } from "react-native";
 
-import { Bell24Icon, BellSlash24Icon, BoxArrowDown24Icon, Play24Icon } from "@/components/icons";
+import { Bell24Icon, BellSlash24Icon, BoxArrowDown24Icon, Play24Icon, Trash24Icon } from "@/components/icons";
+import { useDeleteOwnPost } from "@/components/feed/useDeleteOwnPost.hook";
 import { postNotificationMuteLabel, usePostNotificationMute } from "@/components/feed/postNotificationMute.hook";
 import { canOfferPostNotificationMute } from "@/utils/postNotificationMute.util";
 import { ClipLookOverlay, isClipLookId } from "@/components/create/clip/clipLook.constant";
@@ -10,6 +12,8 @@ import { ClipVideoPlayer, VideoPosterOnly, type VideoPlaybackProgress } from "@/
 import { LandscapeVideoFullScreenModal } from "@/components/media/landscapeVideoFullScreenModal";
 import { isLandscapeMedia } from "@/components/media/videoOrientation.util";
 import { ViewFullScreenButton } from "@/components/media/viewFullScreenButton";
+import { VideoSeekBar } from "@/components/media/videoSeekBar";
+import { isScrubbableDuration } from "@/utils/videoSeek.util";
 import { isContentLockedForViewer, SubscriberOnlyLock } from "@/components/coins/subscriberOnlyLock";
 import { TipSheet } from "@/components/coins/tipSheet";
 import { ContentOptionsSheet } from "@/components/moderation/contentOptionsSheet";
@@ -24,14 +28,22 @@ import type { Clip } from "@/types";
 
 import { ClipActionRail } from "./clipActionRail";
 import { ClipDetails } from "./clipDetails";
-import { ClipPlaybackControls } from "./clipPlaybackControls";
+import { CLIP_PLAYBACK_CONTROLS_HEIGHT, ClipPlaybackControls } from "./clipPlaybackControls";
 import { clipCaptionMaxHeight, clipOverlayBottomOffset } from "./clipPageLayout.util";
 import { ClipReadabilityScrim } from "./clipReadabilityScrim";
 import { LikeBurst } from "./likeBurst";
+import { SeekRipple } from "./seekRipple";
+import { useClipSeekGestures } from "./clipSeekGestures.hook";
 import { CommentStickerOverlay } from "./videoReply/commentStickerOverlay";
 import { PromotedLiveOverlay } from "./promotedLiveOverlay";
 import { webAppLinks } from "@/config/webAppLinks.config";
 import { TaggedPeopleSheet } from "@/components/taggedPeople/taggedPeopleSheet";
+import { ViewsExplainerSheet } from "@/components/feed/viewsExplainerSheet";
+import { useIsOwnPost } from "@/hooks/useIsOwnPost.hook";
+import type { MainStackParamList } from "@/navigation/navigation.types";
+import { feedInteractionsService, interactionTargetOf } from "@/services/feed/feedInteractions.service";
+
+import { useClipWatchTracking } from "./useClipWatchTracking.hook";
 
 export interface ClipEngagement {
   readonly liked: boolean;
@@ -59,7 +71,6 @@ export interface ClipPageProps {
   readonly onOpenPromotedLive?: (liveSessionId: string) => void;
 }
 
-const DOUBLE_TAP_WINDOW_MS = 280;
 const PLAYBACK_SPEED_STEPS = [1, 1.5, 2, 0.5] as const;
 const FOREGROUND_ON_VIDEO = colors.white;
 
@@ -80,8 +91,6 @@ function ClipPageComponent(props: ClipPageProps) {
   const startBrandedDownload = useMediaDownloadStore((state) => state.startBrandedDownload);
   const downloadableVideo = canOfferDownloadForPost(clip) ? findFirstDownloadableMedia(clip) : undefined;
   useScreenshotSharePrompt(clip, isActive);
-  const lastTapAt = useRef(0);
-  const singleTapTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const video = clip.media.find((item) => item.type === "video") ?? clip.media[0];
   const isLandscapeVideo = isLandscapeMedia(video);
   const { width: windowWidth } = useWindowDimensions();
@@ -94,32 +103,48 @@ function ClipPageComponent(props: ClipPageProps) {
   const [isTaggedSheetOpen, setIsTaggedSheetOpen] = useState(false);
   const canTipAuthor = clip.author.isCreator === true && clip.author.id !== signedInUserId;
   const isClipLockedForViewer = isContentLockedForViewer(clip);
-
-  const handleTapOnClipMedia = () => {
-    const now = Date.now();
-    if (now - lastTapAt.current < DOUBLE_TAP_WINDOW_MS) {
-      if (singleTapTimer.current) clearTimeout(singleTapTimer.current);
-      lastTapAt.current = 0;
-      setBurstKey((k) => k + 1);
-      props.onLikeByDoubleTap();
-      return;
-    }
-    lastTapAt.current = now;
-    singleTapTimer.current = setTimeout(() => {
+  const navigation = useNavigation<NavigationProp<MainStackParamList>>();
+  const isOwnClip = useIsOwnPost(clip);
+  const { confirmAndDelete } = useDeleteOwnPost();
+  const [isViewsSheetOpen, setIsViewsSheetOpen] = useState(false);
+  const interactionTarget = useMemo(() => interactionTargetOf(clip), [clip]);
+  const durationSeconds = playbackProgress.durationSeconds || clip.durationSeconds;
+  const markWatchSeek = useClipWatchTracking(interactionTarget, isActive && !isClipLockedForViewer, playbackProgress.currentSeconds, durationSeconds);
+  const isSeekAllowed = !!video && !isClipLockedForViewer && !clip.sponsored && !clip.promotedLive;
+  const showSeekBar = !!video && !isClipLockedForViewer && !clip.promotedLive && props.shouldMountVideoPlayer;
+  const seekGestures = useClipSeekGestures({
+    isActive,
+    canSeek: isSeekAllowed && isScrubbableDuration(durationSeconds),
+    pageWidth: windowWidth,
+    onSingleTap: () => {
       if (clip.promotedLive && props.onOpenPromotedLive) props.onOpenPromotedLive(clip.promotedLive.liveSessionId);
       else setIsPausedByUser((paused) => !paused);
-    }, DOUBLE_TAP_WINDOW_MS);
+    },
+    onDoubleTapLike: () => {
+      setBurstKey((k) => k + 1);
+      props.onLikeByDoubleTap();
+    },
+    onSeeked: markWatchSeek,
+  });
+  const openViews = () => (isOwnClip ? navigation.navigate("PostAnalytics", { postId: clip.id }) : setIsViewsSheetOpen(true));
+  const openAuthorProfile = () => {
+    feedInteractionsService.recordProfileClick(interactionTarget, "clips");
+    props.onPressAuthor();
+  };
+  const toggleFollowAuthor = () => {
+    if (!engagement.isFollowing) feedInteractionsService.recordFollow(interactionTarget, "clips");
+    props.onToggleFollow();
   };
 
   const showPlaybackControls = isActive && isPausedByUser;
-  const durationSeconds = playbackProgress.durationSeconds || clip.durationSeconds;
-  const overlayBottomOffset = clipOverlayBottomOffset(props.bottomInset);
+  const overlayBottomOffset = clipOverlayBottomOffset(props.bottomInset, showSeekBar);
+  const tapHint = isSeekAllowed ? "double tap the middle to like, double tap the left or right side to skip 10 seconds" : "double tap to like";
 
   return (
     <View style={[styles.page, { height: props.height }]}>
       <Pressable
-        accessibilityLabel={isPausedByUser ? "Clip paused. Tap to play, double tap to like, hold to play at 2x" : "Clip. Tap to pause, double tap to like, hold to play at 2x"}
-        onPress={handleTapOnClipMedia}
+        accessibilityLabel={isPausedByUser ? `Clip paused. Tap to play, ${tapHint}, hold to play at 2x` : `Clip. Tap to pause, ${tapHint}, hold to play at 2x`}
+        onPress={(event) => seekGestures.handleTap(event.nativeEvent.pageX)}
         onLongPress={() => setIsHeldForFastForward(true)}
         onPressOut={() => setIsHeldForFastForward(false)}
         delayLongPress={300}
@@ -133,9 +158,10 @@ function ClipPageComponent(props: ClipPageProps) {
             isActive={isActive && !isFullScreenPlayerOpen}
             contentFit={isLandscapeVideo ? "contain" : "cover"}
             isMuted={props.isMuted || clip.sound?.status === "under_copyright_review"}
-            isPausedByUser={isPausedByUser || isTaggedSheetOpen}
+            isPausedByUser={isPausedByUser || isTaggedSheetOpen || seekGestures.isScrubbing}
             playbackRate={isHeldForFastForward ? 2 : PLAYBACK_SPEED_STEPS[playbackSpeedStepIndex]}
             onPlaybackProgress={isActive ? setPlaybackProgress : undefined}
+            controllerRef={seekGestures.controllerRef}
             style={StyleSheet.absoluteFill}
           />
         ) : video ? (
@@ -157,6 +183,7 @@ function ClipPageComponent(props: ClipPageProps) {
           </View>
         ) : null}
         <LikeBurst burstKey={burstKey} />
+        <SeekRipple ripple={seekGestures.seekRipple} />
         <ClipLookOverlay look={isClipLookId(clip.look) ? clip.look : "none"} />
       </Pressable>
       {clip.promotedLive ? (
@@ -171,13 +198,13 @@ function ClipPageComponent(props: ClipPageProps) {
           <ViewFullScreenButton onPress={() => setIsFullScreenPlayerOpen(true)} />
         </View>
       ) : null}
-      <View style={[styles.overlay, { bottom: overlayBottomOffset }]} pointerEvents="box-none">
+      <View style={[styles.overlay, { bottom: overlayBottomOffset }, seekGestures.isScrubbing ? styles.hiddenWhileScrubbing : null]} pointerEvents="box-none">
         <ClipDetails
           isActive={isActive}
           clip={clip}
           isFollowing={engagement.isFollowing}
-          onToggleFollow={props.onToggleFollow}
-          onPressAuthor={props.onPressAuthor}
+          onToggleFollow={toggleFollowAuthor}
+          onPressAuthor={openAuthorProfile}
           foregroundColor={FOREGROUND_ON_VIDEO}
           onOpenTaggedPeople={() => setIsTaggedSheetOpen(true)}
           captionMaxHeight={clipCaptionMaxHeight(props.height, props.topInset, overlayBottomOffset)}
@@ -192,6 +219,8 @@ function ClipPageComponent(props: ClipPageProps) {
           onOpenComments={props.onOpenComments}
           onShare={props.onShare}
           onMore={openClipOptions}
+          onPressViews={openViews}
+          isOwnClip={isOwnClip}
           onTip={canTipAuthor ? () => setIsTipSheetOpen(true) : undefined}
           saveTarget={{ type: "clip", targetId: clip.id }}
           savedAccordingToServer={clip.bookmarked}
@@ -200,11 +229,22 @@ function ClipPageComponent(props: ClipPageProps) {
           minimal={!!clip.sponsored}
         />
       </View>
+      {showSeekBar ? (
+        <VideoSeekBar
+          currentSeconds={playbackProgress.currentSeconds}
+          durationSeconds={durationSeconds}
+          bufferedSeconds={playbackProgress.bufferedSeconds}
+          canSeek={isSeekAllowed && isActive}
+          onScrubStart={seekGestures.scrubHandlers.onScrubStart}
+          onScrubEnd={seekGestures.scrubHandlers.onScrubEnd}
+          onSeekBy={seekGestures.seekBy}
+          style={[styles.seekBar, { bottom: showPlaybackControls ? CLIP_PLAYBACK_CONTROLS_HEIGHT + props.bottomInset : props.bottomInset }]}
+        />
+      ) : null}
       {showPlaybackControls ? (
         <View style={[styles.bottomChrome, { paddingBottom: props.bottomInset, backgroundColor: themeColors.surface }]}>
           <ClipPlaybackControls
             remainingSeconds={Math.max(durationSeconds - playbackProgress.currentSeconds, 0)}
-            progress={durationSeconds > 0 ? playbackProgress.currentSeconds / durationSeconds : 0}
             isMuted={props.isMuted}
             playbackSpeed={PLAYBACK_SPEED_STEPS[playbackSpeedStepIndex]}
             onPressPlay={() => setIsPausedByUser(false)}
@@ -227,6 +267,7 @@ function ClipPageComponent(props: ClipPageProps) {
             ...(canOfferPostNotificationMute(isSignedIn, clip)
               ? [{ label: postNotificationMuteLabel(clip.viewerNotificationsMuted === true), icon: clip.viewerNotificationsMuted === true ? <Bell24Icon size={20} /> : <BellSlash24Icon size={20} />, onPress: () => togglePostNotifications(clip) }]
               : []),
+            ...(isOwnClip ? [{ label: "Delete", icon: <Trash24Icon size={20} />, destructive: true, onPress: () => confirmAndDelete({ id: clip.id, kind: "clip" }) }] : []),
           ]}
         />
       ) : null}
@@ -235,9 +276,16 @@ function ClipPageComponent(props: ClipPageProps) {
         saveTarget={{ type: "clip", targetId: clip.id }}
         savedAccordingToServer={clip.bookmarked}
         isMuted={props.isMuted}
-        onClose={() => setIsFullScreenPlayerOpen(false)}
+        onToggleMute={props.onToggleMute}
+        canSeek={isSeekAllowed}
+        startAtSeconds={playbackProgress.currentSeconds}
+        onClose={(positionSeconds) => {
+          setIsFullScreenPlayerOpen(false);
+          if (positionSeconds !== undefined && isSeekAllowed) seekGestures.seekTo(positionSeconds);
+        }}
         look={clip.look}
       />
+      {isViewsSheetOpen ? <ViewsExplainerSheet visible onClose={() => setIsViewsSheetOpen(false)} /> : null}
       {isTaggedSheetOpen ? <TaggedPeopleSheet post={clip} visible onClose={() => setIsTaggedSheetOpen(false)} /> : null}
       {isTipSheetOpen ? (
         <TipSheet target={{ targetType: "clip", targetId: clip.id, creatorName: clip.author.name }} onClose={() => setIsTipSheetOpen(false)} />
@@ -270,4 +318,6 @@ const styles = StyleSheet.create({
   },
   fullScreenButtonRow: { position: "absolute", left: 0, right: 0, alignItems: "center" },
   bottomChrome: { position: "absolute", left: 0, right: 0, bottom: 0 },
+  seekBar: { position: "absolute", left: 0, right: 0 },
+  hiddenWhileScrubbing: { opacity: 0 },
 });

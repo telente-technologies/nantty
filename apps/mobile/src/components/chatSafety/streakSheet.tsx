@@ -31,7 +31,7 @@ export function StreakSheet({ visible, onClose, conversationId, streak, peerName
       queryClient.invalidateQueries({ queryKey: ["conversations"] });
       onClose();
     },
-    onError: (error) => showAlertWithButtons("Couldn't restore streak", error instanceof Error ? error.message : undefined),
+    onError: (error) => showAlertWithButtons("Couldn't restore streak", error instanceof Error ? error.message : undefined, undefined, { intent: "streak" }),
   });
   const canRestore = streak.state === "broken" && !!streak.restorableUntil && streak.restoresRemaining > 0;
   return (

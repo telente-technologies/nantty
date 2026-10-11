@@ -45,7 +45,7 @@ export function InboxRequestActions({ conversation, onRemoved, showExplanation =
     showAlertWithButtons(`Block ${conversation.peer.name}?`, "They won't be able to message you. You can unblock them in chat settings.", [
       { text: "Cancel", style: "cancel" },
       { text: "Block", style: "destructive", onPress: () => block.mutate() },
-    ]);
+    ], { intent: "block" });
   const isBusy = accept.isPending || notSpam.isPending || remove.isPending || block.isPending;
   return (
     <View style={styles.root}>

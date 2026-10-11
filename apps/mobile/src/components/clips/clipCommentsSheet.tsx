@@ -88,6 +88,7 @@ export function ClipCommentsSheet({ postId, myAvatarUrl, clip, highlightCommentI
               avoidKeyboard={false}
               myAvatarUrl={myAvatarUrl}
               replyTarget={commentThread.replyTarget}
+              focusRequest={commentThread.replyFocusRequest}
               onCancelReply={commentThread.cancelReplyingToComment}
               onSubmit={commentThread.submitCommentOrReplyText}
             />
