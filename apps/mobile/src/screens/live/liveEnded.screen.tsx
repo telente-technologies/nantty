@@ -37,7 +37,7 @@ export function LiveEndedScreen({ navigation, route }: MainScreenProps<"LiveEnde
         </Pressable>
       </View>
       {session.isError && !session.data ? (
-        <ErrorState compact message="Couldn't load this live." onRetry={() => session.refetch()} retrying={session.isRefetching} />
+        <ErrorState error={session.error} compact message="Couldn't load this live." onRetry={() => session.refetch()} retrying={session.isRefetching} />
       ) : null}
       <View style={styles.host}>
         <Avatar uri={session.data?.host.avatarUrl} size={72} />

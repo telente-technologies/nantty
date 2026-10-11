@@ -23,6 +23,7 @@ import type { CreatorDashboardPeriod } from "@/types/creator.type";
 import { formatCountWithThousandsSuffix } from "@/utils/formatDate.util";
 import { formatMoneyForDisplay } from "@/utils/formatMoney.util";
 import { ListSkeleton } from "@/components/ui/listSkeleton";
+import { describeActionFailure } from "@/errors/errorExperience/describeError";
 
 const PERIODS: readonly { readonly key: CreatorDashboardPeriod; readonly label: string }[] = [
   { key: "week", label: "This week" },
@@ -48,7 +49,7 @@ export function CreatorDashboardScreen({ navigation }: MainScreenProps<"CreatorD
       {!dashboard.data ? (
         dashboard.isError ? (
           <View style={styles.state}>
-            <Text align="center" color={colors.textSubtle}>{dashboard.error.message}</Text>
+            <Text align="center" color={colors.textSubtle}>{describeActionFailure(dashboard.error)}</Text>
             <Button title="See the Creator Program" onPress={() => navigation.replace("CreatorProgram")} />
           </View>
         ) : <ListSkeleton />

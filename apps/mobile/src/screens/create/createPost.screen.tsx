@@ -11,7 +11,8 @@ import type { ClipLookId } from "@/components/create/clip/clipLook.constant";
 import { DraftsButton, DraftsSheet } from "@/components/create/draftsSheet";
 import { PostComposerPanel, type PostComposerDraft } from "@/components/create/postComposerPanel";
 import { QuotedPostCard } from "@/components/feed/quotedPostCard";
-import { useQuotedPostPreview } from "@/components/feed/quotedPostPreview.hook";
+import { QUOTE_UNAVAILABLE_MESSAGE, useQuotedPostPreview } from "@/components/feed/quotedPostPreview.hook";
+import { ApiError } from "@/errors/api.error";
 import { usePostDraftMediaUploads } from "@/components/create/postDraftUploads.hook";
 import { usePublishPost } from "@/components/create/publishPost.hook";
 import { buildPostSettingsFields, DEFAULT_POST_SETTINGS } from "@/components/create/settings/postSettings.type";
@@ -85,6 +86,9 @@ export function CreatePostScreen({ navigation, route }: MainScreenProps<"CreateP
   const saveDraft = useComposerDraftsStore((s) => s.saveDraft);
   const closeDraftsSheet = useComposerDraftsStore((s) => s.closeDraftsSheet);
   const [clipSeed, setClipSeed] = useState<{ seed: ClipComposerSeed; key: number } | null>(null);
+  const quoteApplies = mode === "post" && !videoReply && postDraft.kind !== "clip";
+  const quote = useQuotedPostPreview(quoteApplies ? postDraft.text : "", videoReply ? null : route.params?.quotePostId);
+  const isQuoteBlocked = quoteApplies && quote.isUnavailable;
 
   const savePostDraft = () => {
     const { text, mentions, audience, kind: _kind, ...settings } = postDraft;
@@ -98,7 +102,7 @@ export function CreatePostScreen({ navigation, route }: MainScreenProps<"CreateP
       height: item.height,
       durationSeconds: item.durationSeconds,
     }));
-    saveDraft({ kind: "post", text, mentions, audience, settings, soundId: null, files, photoDurations: [], trim: null, transition: "crossfade", look: "none" });
+    saveDraft({ kind: "post", text, mentions, audience, settings, soundId: null, files, photoDurations: [], trim: null, transition: "crossfade", look: "none", quotedPostId: quoteApplies ? quote.attachedPostId : null });
     showToast("Draft saved");
     navigation.goBack();
   };
@@ -144,15 +148,18 @@ export function CreatePostScreen({ navigation, route }: MainScreenProps<"CreateP
     setMode("post");
     setPostStage("compose");
     setPostDraft({ ...draft.settings, text: draft.text, mentions: draft.mentions, audience: draft.audience, kind: "photo" });
+    quote.attach(draft.quotedPostId ?? null);
     if (draft.files.length > 0) void postDraftUploads.addPickedMediaAndStartUploading(draft.files.map((file) => ({ ...file })));
   };
 
-  const quote = useQuotedPostPreview(mode === "post" && !videoReply && postDraft.kind !== "clip" ? postDraft.text : "");
   const publishPost = usePublishPost({
     draftMediaItems: postDraftUploads.draftMediaItems,
     combinedUploadedFraction: postDraftUploads.combinedUploadedFraction,
     waitForAllDraftMediaIds: postDraftUploads.waitForAllDraftMediaIds,
     onPublished: (post) => navigation.replace("PostDetail", { postId: post.id }),
+    onError: (error) => {
+      if (error instanceof ApiError && error.code === "QUOTED_POST_UNAVAILABLE") quote.refresh();
+    },
     buildInput: (mediaIds) => {
       const trimmedDraft = shiftMentionsAfterTrimmingStart(postDraft.text, postDraft.mentions);
       return {
@@ -167,7 +174,7 @@ export function CreatePostScreen({ navigation, route }: MainScreenProps<"CreateP
           ? { replyToComment: { commentId: videoReply.commentId, clipId: videoReply.clipId, commenterUserId: videoReply.commenterUserId }, stickerLayout }
           : {}),
         ...(videoReply && selectedSoundId ? { soundId: selectedSoundId } : {}),
-        ...(quote.quotedPostId === undefined || postDraft.kind === "clip" || videoReply ? {} : { quotedPostId: quote.quotedPostId }),
+        ...(quote.quotedPostId === undefined || !quoteApplies ? {} : { quotedPostId: quote.quotedPostId }),
       };
     },
   });
@@ -267,7 +274,7 @@ export function CreatePostScreen({ navigation, route }: MainScreenProps<"CreateP
   };
 
   const canContinuePost =
-    mode === "clip" ? hasExactlyOneClipVideo : postDraft.text.trim().length > 0 || postDraftUploads.draftMediaItems.length > 0;
+    mode === "clip" ? hasExactlyOneClipVideo : !isQuoteBlocked && (postDraft.text.trim().length > 0 || postDraftUploads.draftMediaItems.length > 0);
   if (requestedMode === "product" && isProductModeLockedForViewer) return <RoleGateScreen kind="seller" />;
   if (requestedMode === "live" && isLiveModeLockedForViewer) return <RoleGateScreen kind="creator" />;
 
@@ -302,7 +309,7 @@ export function CreatePostScreen({ navigation, route }: MainScreenProps<"CreateP
           />
         ) : (
           <CreateHeader
-            title={videoReply ? `Reply to @${videoReply.commenterUsername}'s comment` : mode === "story" ? "Story" : mode === "clip" ? "Clip" : "Post"}
+            title={videoReply ? `Reply to @${videoReply.commenterUsername}'s comment` : mode === "story" ? "Story" : mode === "clip" ? "Clip" : quoteApplies && quote.preview ? "Quote" : "Post"}
             onClose={closeOrStepBack}
             afterTitle={mode === "post" && !videoReply ? <DraftsButton /> : undefined}
             actionLabel={(mode === "post" || mode === "clip") && postStage === "compose" ? "Next" : undefined}
@@ -317,7 +324,7 @@ export function CreatePostScreen({ navigation, route }: MainScreenProps<"CreateP
             draft={postDraft}
             onChangeDraft={setPostDraft}
             quotePreview={
-              quote.preview ? (
+              quoteApplies && quote.preview ? (
                 <QuotedPostCard compact quoted={quote.preview.quoted} loading={quote.preview.status === "loading"} unavailable={quote.preview.status === "unavailable"} onRemove={quote.remove} />
               ) : null
             }
@@ -328,7 +335,7 @@ export function CreatePostScreen({ navigation, route }: MainScreenProps<"CreateP
             publishing={publishPost.mutation.isPending}
             publishButtonTitle={publishPost.buttonTitle}
             publishErrorMessage={publishPost.errorMessage}
-            validationHint={clipValidationHint}
+            validationHint={clipValidationHint ?? (isQuoteBlocked ? QUOTE_UNAVAILABLE_MESSAGE : null)}
             videoReplyStage={
               videoReply ? (
                 <VideoReplyStage
@@ -340,7 +347,9 @@ export function CreatePostScreen({ navigation, route }: MainScreenProps<"CreateP
                 />
               ) : undefined
             }
-            onPublish={() => publishPost.mutation.mutate()}
+            onPublish={() => {
+              if (!isQuoteBlocked) publishPost.publish();
+            }}
             onSaveDraft={videoReply ? undefined : savePostDraft}
             soundPicker={videoReply ? <SoundPickerRow selectedSoundId={selectedSoundId} onChangeSelectedSoundId={setSelectedSoundId} /> : null}
           />

@@ -133,7 +133,7 @@ export function CheckoutScreen({ navigation }: MainScreenProps<"Checkout">) {
     return (
       <Screen>
         <Header title="Checkout" paddingHorizontal={12} />
-        {cart.isError ? <ErrorState message="Couldn't load your cart." onRetry={() => cart.refetch()} retrying={cart.isRefetching} /> : <ListSkeleton />}
+        {cart.isError ? <ErrorState error={cart.error} message="Couldn't load your cart." onRetry={() => cart.refetch()} retrying={cart.isRefetching} /> : <ListSkeleton />}
       </Screen>
     );
   }

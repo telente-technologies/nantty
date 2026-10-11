@@ -30,7 +30,7 @@ export function CreatorApplicationStatusScreen({ navigation }: MainScreenProps<"
       <Screen>
         <Header title="Creator application" />
         {application.isLoading ? <ListSkeleton /> : application.isError ? (
-          <ErrorState message="Couldn't load your application." onRetry={() => application.refetch()} retrying={application.isRefetching} />
+          <ErrorState error={application.error} message="Couldn't load your application." onRetry={() => application.refetch()} retrying={application.isRefetching} />
         ) : (
           <View style={styles.empty}>
             <Text align="center" color={colors.textSubtle}>You haven't applied yet.</Text>

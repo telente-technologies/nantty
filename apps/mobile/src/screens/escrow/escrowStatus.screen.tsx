@@ -15,6 +15,7 @@ import type { MainScreenProps } from "@/navigation/navigation.types";
 import { useAuthStore } from "@/store/auth.store";
 import { ListSkeleton } from "@/components/ui/listSkeleton";
 import { ErrorState } from "@/components/ui/errorState";
+import { describeActionFailure } from "@/errors/errorExperience/describeError";
 
 const STAGES_BUYER_CAN_CONFIRM = new Set(["shipped", "delivered"]);
 const STAGES_BUYER_CAN_DISPUTE = new Set(["seller_preparing", "paid_into_escrow", "shipped", "delivered"]);
@@ -33,7 +34,7 @@ export function EscrowStatusScreen({ navigation, route }: MainScreenProps<"Escro
       <Screen>
         <Header title="Payment protection" />
         {escrowQuery.isError ? (
-          <ErrorState message="Couldn't load the escrow status." onRetry={() => escrowQuery.refetch()} />
+          <ErrorState error={escrowQuery.error} message="Couldn't load the escrow status." onRetry={() => escrowQuery.refetch()} />
         ) : (
           <ListSkeleton />
         )}
@@ -92,7 +93,7 @@ export function EscrowStatusScreen({ navigation, route }: MainScreenProps<"Escro
         message={`Only confirm if everything arrived as described. ${escrow.store.name} will be paid right away and this can't be undone.`}
         confirmTitle="Yes, release payment"
         confirming={confirmReceipt.isPending}
-        errorMessage={confirmReceipt.isError ? confirmReceipt.error.message : null}
+        errorMessage={confirmReceipt.isError ? describeActionFailure(confirmReceipt.error) : null}
         onConfirm={confirmAndReleasePayment}
         onClose={() => setConfirmSheetVisible(false)}
       />

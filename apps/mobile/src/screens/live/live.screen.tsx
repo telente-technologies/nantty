@@ -212,7 +212,7 @@ export function LiveScreen({ navigation, route }: MainScreenProps<"Live">) {
       <View style={[styles.root, { paddingTop: insets.top }]}>
         <Header title="Live" onBack={() => navigation.goBack()} />
         {sessionQuery.isError ? (
-          <ErrorState message="Couldn't load this live." onRetry={() => sessionQuery.refetch()} retrying={sessionQuery.isRefetching} />
+          <ErrorState error={sessionQuery.error} message="Couldn't load this live." onRetry={() => sessionQuery.refetch()} retrying={sessionQuery.isRefetching} />
         ) : (
           <BrandLoader size="lg" style={styles.loading} accessibilityLabel="Loading live" />
         )}

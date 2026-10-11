@@ -108,7 +108,7 @@ export function SearchScreen({ navigation, route }: MainScreenProps<"Search">) {
             ) : null}
           </>
         ) : results.isError ? (
-          <ErrorState message="Search is unavailable right now." onRetry={() => void results.refetch()} />
+          <ErrorState error={results.error} message="Search is unavailable right now." onRetry={() => void results.refetch()} />
         ) : results.isLoading ? (
           <ListSkeleton />
         ) : items.length === 0 ? (

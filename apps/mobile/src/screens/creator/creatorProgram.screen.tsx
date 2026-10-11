@@ -73,7 +73,7 @@ export function CreatorProgramScreen({ navigation }: MainScreenProps<"CreatorPro
             {eligibility.data ? (
               <EligibilityChecklist requirements={eligibility.data.requirements} />
             ) : eligibility.isError ? (
-              <ErrorState compact message="Couldn't check your eligibility." onRetry={() => eligibility.refetch()} retrying={eligibility.isRefetching} />
+              <ErrorState error={eligibility.error} compact message="Couldn't check your eligibility." onRetry={() => eligibility.refetch()} retrying={eligibility.isRefetching} />
             ) : (
               <ListSkeleton rows={3} />
             )}

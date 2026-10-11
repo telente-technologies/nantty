@@ -25,7 +25,7 @@ export function ChatNotificationSettingsScreen() {
       {settings.isLoading ? (
         <ListSkeleton rows={5} avatarSize={24} />
       ) : settings.isError || !settings.data ? (
-        <ErrorState message="Couldn't load notification settings." onRetry={() => settings.refetch()} />
+        <ErrorState error={settings.error} message="Couldn't load notification settings." onRetry={() => settings.refetch()} />
       ) : (
         <>
           <SettingsGroup>

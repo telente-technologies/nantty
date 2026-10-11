@@ -47,7 +47,7 @@ export function DisputeDetailScreen({ navigation, route }: MainScreenProps<"Disp
       <Screen>
         <Header title="Dispute" />
         {disputeQuery.isError ? (
-          <ErrorState message="Couldn't load this dispute." onRetry={() => disputeQuery.refetch()} />
+          <ErrorState error={disputeQuery.error} message="Couldn't load this dispute." onRetry={() => disputeQuery.refetch()} />
         ) : (
           <ListSkeleton />
         )}

@@ -22,6 +22,7 @@ import { formatMoneyForDisplay } from "@/utils/formatMoney.util";
 import { showAlertWithButtons } from "@/utils/crossPlatformAlert.util";
 import { spacing } from "@/constants/spacing.constant";
 import { typeScale } from "@/constants/typography.constant";
+import { describeActionFailure } from "@/errors/errorExperience/describeError";
 
 const STATUS_PRESENTATION: Record<CreatorSubscriptionState["status"], { label: string; tone: StatusTone }> = {
   pending: { label: "Pending", tone: "caution" },
@@ -45,7 +46,7 @@ export function MySubscriptionsScreen({ navigation }: MainScreenProps<"MySubscri
   const { colors } = useTheme();
   const styles = useStyles();
   const queryClient = useQueryClient();
-  const { data: subscriptions = [], isLoading, isError, refetch, isRefetching } = useMySubscriptionsQuery();
+  const { data: subscriptions = [], isLoading, isError, error, refetch, isRefetching } = useMySubscriptionsQuery();
   const refreshControl = usePullToRefresh(refetch);
   const invalidate = () => queryClient.invalidateQueries({ queryKey: creatorQueryKeys.mySubscriptions });
 
@@ -72,7 +73,7 @@ export function MySubscriptionsScreen({ navigation }: MainScreenProps<"MySubscri
       <ScrollView contentContainerStyle={styles.content} refreshControl={refreshControl}>
         {isLoading ? <ListSkeleton rows={3} padding={0} /> : null}
         {isError && subscriptions.length === 0 ? (
-          <ErrorState compact message="Couldn't load your subscriptions." onRetry={() => refetch()} retrying={isRefetching} />
+          <ErrorState error={error} compact message="Couldn't load your subscriptions." onRetry={() => refetch()} retrying={isRefetching} />
         ) : null}
         {subscriptions.length === 0 && !isLoading && !isError ? (
           <EmptyState compact icon={<Crown24Icon color={colors.textMuted} />} title="No subscriptions yet" body="Subscribe to a creator from their profile to unlock members-only posts." />
@@ -87,8 +88,8 @@ export function MySubscriptionsScreen({ navigation }: MainScreenProps<"MySubscri
             onResume={() => resume.mutate(subscription.subscriptionId)}
           />
         ))}
-        {cancel.isError ? <Text size={typeScale.xs} color={colors.error}>{cancel.error.message}</Text> : null}
-        {resume.isError ? <Text size={typeScale.xs} color={colors.error}>{resume.error.message}</Text> : null}
+        {cancel.isError ? <Text size={typeScale.xs} color={colors.error}>{describeActionFailure(cancel.error)}</Text> : null}
+        {resume.isError ? <Text size={typeScale.xs} color={colors.error}>{describeActionFailure(resume.error)}</Text> : null}
       </ScrollView>
     </Screen>
   );

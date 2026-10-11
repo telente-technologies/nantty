@@ -18,6 +18,7 @@ import type { MainScreenProps } from "@/navigation/navigation.types";
 import { generateIdempotencyKey } from "@/services/core/apiClient.service";
 import { creatorProgramService } from "@/services/creators/creatorProgram.service";
 import type { CreatorContentCategory, CreatorSocialLink } from "@/types/creator.type";
+import { describeActionFailure } from "@/errors/errorExperience/describeError";
 
 const CREATOR_TERMS_VERSION = "2026-09";
 const CONTENT_CATEGORIES: readonly { readonly id: CreatorContentCategory; readonly label: string }[] = [
@@ -121,7 +122,7 @@ export function CreatorApplicationScreen({ navigation }: MainScreenProps<"Creato
         </SelectableRow>
       </ScrollView>
       <View style={styles.footer}>
-        {submitApplication.isError ? <Text size={12} lineHeight={16} color={colors.error} align="center">{submitApplication.error.message}</Text> : null}
+        {submitApplication.isError ? <Text size={12} lineHeight={16} color={colors.error} align="center">{describeActionFailure(submitApplication.error)}</Text> : null}
         <Button title="Submit application" disabled={!readyToSubmit} loading={submitApplication.isPending} onPress={() => submitApplication.mutate()} />
       </View>
     </Screen>

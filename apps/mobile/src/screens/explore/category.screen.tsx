@@ -42,7 +42,7 @@ export function CategoryScreen({ navigation, route }: MainScreenProps<"Category"
           products.isLoading ? (
             <GridSkeleton />
           ) : products.isError && allProducts.length === 0 ? (
-            <ErrorState compact message="Couldn't load products." onRetry={() => products.refetch()} retrying={products.isRefetching} />
+            <ErrorState error={products.error} compact message="Couldn't load products." onRetry={() => products.refetch()} retrying={products.isRefetching} />
           ) : allProducts.length === 0 ? (
             <EmptyState
               compact

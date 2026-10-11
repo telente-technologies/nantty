@@ -113,7 +113,7 @@ export function CreatorSubscribeScreen({ navigation, route }: MainScreenProps<"C
           </View>
         ) : null}
         {plans.isLoading ? <ListSkeleton rows={3} /> : null}
-        {plans.isError && !plans.data ? <ErrorState compact message="Couldn't load subscription plans." onRetry={() => plans.refetch()} retrying={plans.isRefetching} /> : null}
+        {plans.isError && !plans.data ? <ErrorState error={plans.error} compact message="Couldn't load subscription plans." onRetry={() => plans.refetch()} retrying={plans.isRefetching} /> : null}
         {plans.data?.length === 0 ? <Text color={colors.textSubtle}>This creator doesn't offer subscriptions yet.</Text> : null}
         {(plans.data ?? []).map((plan) => (
           <SelectableRow key={plan.id} selected={plan.id === planId} onPress={() => setChosenPlanId(plan.id)} accessibilityLabel={`${plan.name}, ${priceLabelOf(plan)} per ${plan.interval}`}>
