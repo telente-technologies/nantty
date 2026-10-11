@@ -1,7 +1,7 @@
 "use client";
 
-import { ErrorBlock } from "@/components/ui/feedback";
+import { RouteErrorScreen } from "@zudomart/web-kit";
 
-export default function ConsoleError({ error, reset }: { readonly error: Error & { readonly digest?: string }; readonly reset: () => void }) {
-  return <ErrorBlock message={`This page failed to render. Nothing was changed. Reference: ${error.digest ?? "CLIENT_RENDER_ERROR"}.`} onRetry={reset} />;
+export default function ConsoleRouteError({ error, retry }: { readonly error: Error & { readonly digest?: string }; readonly retry: () => void }) {
+  return <RouteErrorScreen error={error} retry={retry} />;
 }

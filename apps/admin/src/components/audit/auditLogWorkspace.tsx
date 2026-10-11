@@ -91,7 +91,7 @@ export function AuditLogWorkspace() {
         <TextField label="Request ID" isLabelHidden placeholder="Request ID" value={requestId} onChange={(event) => resetToFirstPage(setRequestId)(event.target.value)} />
         <SelectField label="Step-up" isLabelHidden value={stepUpOnly ? "yes" : ""} onChange={(event) => resetToFirstPage(setStepUpOnly)(event.target.value === "yes")} options={[{ value: "", label: "All actions" }, { value: "yes", label: "Step-up actions only" }]} />
       </Toolbar>
-      {list.errorMessage ? <ErrorBlock message={list.errorMessage} onRetry={list.reload} /> : null}
+      {list.errorMessage ? <ErrorBlock error={list.error} message={list.errorMessage} onRetry={list.reload} /> : null}
       <DataTable caption="Audit log entries" columns={columns} rows={list.data?.items ?? []} readRowKey={(entry) => entry.id} isLoading={list.isLoading} onRowOpen={setSelectedEntry} selectedRowKey={selectedEntry?.id ?? null} emptyMessage="No entries match these filters." />
       <CursorPagination cursor={cursor} nextCursor={list.data?.nextCursor} onCursorChange={setCursor} />
       {selectedEntry ? <AuditEntryPanel entry={selectedEntry} onClose={() => setSelectedEntry(null)} /> : null}

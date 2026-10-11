@@ -1,12 +1,13 @@
-import Link from "next/link";
+import type { Metadata } from "next";
 
-export default function NotFound() {
+import { NotFoundScreen } from "@zudomart/web-kit";
+
+export const metadata: Metadata = { title: "Page not found", robots: { index: false } };
+
+export default function NotFoundPage() {
   return (
-    <main style={{ padding: 48 }}>
-      <h1>Page not found</h1>
-      <p>
-        This admin page does not exist. <Link href="/">Go to your start page</Link>.
-      </p>
+    <main id="main-content">
+      <NotFoundScreen title="This console page doesn't exist" description="The link may be old, or the record moved. Nothing was changed." />
     </main>
   );
 }

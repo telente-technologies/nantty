@@ -53,7 +53,7 @@ export function AccountSecurityWorkspace() {
   return (
     <>
       <PageHeader area="Your account" title="Security" description="Your sign-in methods, recovery codes and where you're signed in." />
-      {account.errorMessage ? <ErrorBlock message={account.errorMessage} onRetry={account.reload} /> : null}
+      {account.errorMessage ? <ErrorBlock error={account.error} message={account.errorMessage} onRetry={account.reload} /> : null}
       {account.isLoading && !account.data ? <LoadingBlock /> : null}
       <div className={styles.grid}>
         <Card title="Profile">

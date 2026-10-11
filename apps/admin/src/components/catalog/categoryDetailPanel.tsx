@@ -68,7 +68,7 @@ export function CategoryDetailPanel({ category, parentName, changeCounter, onClo
         ]}
       />
       <SectionHeading>History</SectionHeading>
-      {detail.errorMessage ? <ErrorBlock message={detail.errorMessage} onRetry={detail.reload} /> : null}
+      {detail.errorMessage ? <ErrorBlock error={detail.error} message={detail.errorMessage} onRetry={detail.reload} /> : null}
       {detail.isLoading && !detail.data ? <LoadingBlock lines={3} /> : null}
       {detail.data ? <AuditHistoryList entries={detail.data.history} /> : null}
       <ConfirmActionDialog intent="tag"

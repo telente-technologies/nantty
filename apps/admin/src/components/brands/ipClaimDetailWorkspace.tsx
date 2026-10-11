@@ -59,7 +59,7 @@ function EvidenceCard({ claim }: { readonly claim: IpClaimDetail }) {
 export function IpClaimDetailWorkspace({ claimId }: { readonly claimId: string }) {
   const detail = useAdminQuery((signal) => fetchIpClaimDetail(claimId, signal), claimId);
   const claim = detail.data;
-  if (detail.errorMessage) return <ErrorBlock message={detail.errorMessage} onRetry={detail.reload} />;
+  if (detail.errorMessage) return <ErrorBlock variant="section" error={detail.error} message={detail.errorMessage} onRetry={detail.reload} />;
   if (!claim) return <LoadingBlock lines={6} />;
   return (
     <>

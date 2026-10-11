@@ -54,7 +54,7 @@ export function AdminsWorkspace() {
         <TextField label="Search admins" isLabelHidden placeholder="Search by name or email" value={search} onChange={(event) => { setSearch(event.target.value); setCursor(undefined); }} />
         <SelectField label="Status" isLabelHidden value={status} onChange={(event) => { setStatus(event.target.value); setCursor(undefined); }} options={[{ value: "", label: "All statuses" }, { value: "ACTIVE", label: "Active" }, { value: "INVITED", label: "Invited" }, { value: "DISABLED", label: "Disabled" }, { value: "SUSPENDED", label: "Suspended" }, { value: "REVOKED", label: "Revoked" }, { value: "PENDING_APPROVAL", label: "Awaiting approval" }]} />
       </Toolbar>
-      {list.errorMessage ? <ErrorBlock message={list.errorMessage} onRetry={list.reload} /> : null}
+      {list.errorMessage ? <ErrorBlock error={list.error} message={list.errorMessage} onRetry={list.reload} /> : null}
       <DataTable caption="Admin accounts" columns={columns} rows={list.data?.items ?? []} readRowKey={(admin) => admin.id} isLoading={list.isLoading} onRowOpen={(admin) => setSelectedAdminId(admin.id)} selectedRowKey={selectedAdminId} readRowTone={(admin) => (admin.status === "LOCKED" ? "danger" : !admin.mfaEnrolled ? "caution" : null)} />
       <CursorPagination cursor={cursor} nextCursor={list.data?.nextCursor} onCursorChange={setCursor} />
       {selectedAdminId ? <AdminDetailPanel key={`${selectedAdminId}-${detailRefreshCount}`} adminId={selectedAdminId} onClose={() => setSelectedAdminId(null)} onEditAccess={(admin) => setAccessDialogAdmin(admin)} onChanged={list.reload} /> : null}

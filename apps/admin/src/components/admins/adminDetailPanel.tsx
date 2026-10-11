@@ -77,7 +77,7 @@ export function AdminDetailPanel({ adminId, onClose, onEditAccess, onChanged }: 
         ) : null
       }
     >
-      {detail.errorMessage ? <ErrorBlock message={detail.errorMessage} onRetry={detail.reload} /> : null}
+      {detail.errorMessage ? <ErrorBlock error={detail.error} message={detail.errorMessage} onRetry={detail.reload} /> : null}
       {detail.isLoading && !account ? <LoadingBlock /> : null}
       {account ? (
         <>

@@ -4,13 +4,15 @@ import { connection } from "next/server";
 import { cookies, headers } from "next/headers";
 import type { ReactNode } from "react";
 
-import { OfflineBanner, ThemeInitScript, parseThemePreference, readHtmlThemeAttribute, themeCookieName, themeViewport } from "@zudomart/web-kit";
+import { ConnectionStatus, ThemeInitScript, parseThemePreference, readHtmlThemeAttribute, themeCookieName, themeViewport } from "@zudomart/web-kit";
 
 import { ConsentBannerHost } from "@/components/privacy/consentBannerHost";
 import { AppThemeProvider } from "@/components/theme/appThemeProvider";
 import { buildAdminSessionViewFromCookies } from "@/server/adminSessionView.service";
 
 import { adminProductName } from "@/config/siteMetadata.config";
+
+import { AdminErrorExperienceProvider } from "@/components/errors/errorExperience.provider";
 
 import "./globals.css";
 
@@ -46,9 +48,9 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
         <ThemeInitScript nonce={nonce} />
       </head>
       <body>
-        <OfflineBanner />
+        <ConnectionStatus />
         <AppThemeProvider initialPreference={themePreference} isSignedIn={isSignedIn}>
-          {children}
+          <AdminErrorExperienceProvider>{children}</AdminErrorExperienceProvider>
           <ConsentBannerHost isSignedIn={isSignedIn} />
         </AppThemeProvider>
       </body>

@@ -41,7 +41,7 @@ export function IpClaimsQueueWorkspace() {
         <TextField label="Search claims" isLabelHidden placeholder="Search claim ID, listing, brand or seller" value={search} onChange={(event) => { setSearch(event.target.value); setCursor(undefined); }} />
         <SelectField label="Claim type" isLabelHidden value={type} onChange={(event) => { setType(event.target.value); setCursor(undefined); }} options={[{ value: "", label: "All types" }, { value: "COUNTERFEIT", label: "Counterfeit" }, { value: "TRADEMARK", label: "Trademark" }]} />
       </Toolbar>
-      {list.errorMessage ? <ErrorBlock message={list.errorMessage} onRetry={list.reload} /> : null}
+      {list.errorMessage ? <ErrorBlock error={list.error} message={list.errorMessage} onRetry={list.reload} /> : null}
       <DataTable
         caption="Trademark and counterfeit claims"
         columns={ipClaimColumns}

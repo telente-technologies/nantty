@@ -58,7 +58,7 @@ export function BrandDirectoryWorkspace() {
       <Toolbar>
         <TextField label="Search brands" isLabelHidden placeholder="Search by brand name, slug or category" value={search} onChange={(event) => { setSearch(event.target.value); setCursor(undefined); }} />
       </Toolbar>
-      {list.errorMessage ? <ErrorBlock message={list.errorMessage} onRetry={list.reload} /> : null}
+      {list.errorMessage ? <ErrorBlock error={list.error} message={list.errorMessage} onRetry={list.reload} /> : null}
       <DataTable
         caption="Brands"
         columns={columns}

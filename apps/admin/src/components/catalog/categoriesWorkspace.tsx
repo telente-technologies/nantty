@@ -34,7 +34,7 @@ export function CategoriesWorkspace() {
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
   const [editor, setEditor] = useState<{ category: CatalogCategory | null } | null>(null);
   const [changeCounter, setChangeCounter] = useState(0);
-  const { data, errorMessage, isLoading, reload, replaceData } = useAdminQuery((signal) => fetchCatalogCategories(signal), "categories");
+  const { data, errorMessage, error: queryError, isLoading, reload, replaceData } = useAdminQuery((signal) => fetchCatalogCategories(signal), "categories");
   const categories = useMemo(() => data?.items ?? [], [data]);
   const rows = useMemo(() => filterCategoryTreeRowsBySearch(flattenCategoriesIntoTreeRows(categories), searchText), [categories, searchText]);
   const selectedRow = rows.find((row) => row.category.id === selectedCategoryId) ?? null;
@@ -90,7 +90,7 @@ export function CategoriesWorkspace() {
         <TextField label="Filter categories" isLabelHidden placeholder="Filter by name or slug" value={searchText} onChange={(event) => setSearchText(event.target.value)} className={styles.search} />
         <span className={styles.muted}>{categories.filter((category) => category.parentId === null).length} departments · {categories.filter((category) => category.parentId !== null).length} subcategories</span>
       </Toolbar>
-      {errorMessage ? <ErrorBlock message={errorMessage} onRetry={reload} /> : null}
+      {errorMessage ? <ErrorBlock error={queryError} message={errorMessage} onRetry={reload} /> : null}
       <DataTable caption="Product categories" columns={columns} rows={rows} readRowKey={(row) => row.category.id} onRowOpen={(row) => setSelectedCategoryId(row.category.id)} selectedRowKey={selectedCategoryId} isLoading={isLoading} emptyMessage="No categories match this filter." readRowTone={(row) => (row.category.isActive ? null : "caution")} />
       {selectedRow ? (
         <CategoryDetailPanel category={selectedRow.category} parentName={selectedRow.parentName} changeCounter={changeCounter} onClose={() => setSelectedCategoryId(null)} onEdit={() => setEditor({ category: selectedRow.category })} onChanged={refreshAfterChange} />

@@ -34,7 +34,7 @@ export function BrandDetailWorkspace({ brandId }: { readonly brandId: string }) 
     detail.replaceData(() => updated);
   }
 
-  if (detail.errorMessage) return <ErrorBlock message={detail.errorMessage} onRetry={detail.reload} />;
+  if (detail.errorMessage) return <ErrorBlock variant="section" error={detail.error} message={detail.errorMessage} onRetry={detail.reload} />;
   if (!brand) return <LoadingBlock lines={6} />;
   const tabs = [
     { key: "official" as const, label: "Official Store" },
