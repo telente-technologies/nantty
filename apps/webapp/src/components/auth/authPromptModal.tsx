@@ -62,7 +62,7 @@ export function AuthPromptModal() {
   }
 
   return (
-    <Dialog isOpen={isOpen} onClose={closeAuthPrompt} title="Sign in to Zudomart" description={reason ?? undefined} layout="sheet" showCloseButton>
+    <Dialog isOpen={isOpen} onClose={closeAuthPrompt} title="Sign in to Zudomart" description={reason ?? undefined} layout="sheet" intent="signIn">
       <form className={styles.form} onSubmit={signInWithoutLeavingThePage} noValidate>
         {formError ? (
           <p className={styles.error} role="alert">

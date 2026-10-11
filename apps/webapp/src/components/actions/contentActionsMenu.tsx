@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import Link from "next/link";
+import { useState, type ReactNode } from "react";
 
 import { requireAuthThen } from "@/components/auth/authPrompt.store";
 import { AppIcon } from "@/components/ui/appIcon";
@@ -33,11 +34,13 @@ interface ContentActionsMenuProps {
   readonly downloadTarget?: DownloadTarget | null;
   readonly pinAction?: { readonly isPinned: boolean; readonly onTogglePin: () => void; readonly disabled?: boolean };
   readonly notificationMuteAction?: { readonly isMuted: boolean; readonly onToggle: () => void };
+  readonly promoteHref?: string | null;
+  readonly extraDangerActions?: readonly { readonly label: string; readonly icon: ReactNode; readonly onSelect: () => void }[];
 }
 
 type CopyrightDialogTarget = { readonly targetType: "post" | "clip" | "live" | "sound"; readonly targetId: string };
 
-export function ContentActionsMenu({ shareKind, reportTargetType, targetId, canonicalPath, isOwnContent = false, triggerClassName, onReport, soundId, downloadTarget = null, pinAction, notificationMuteAction }: ContentActionsMenuProps) {
+export function ContentActionsMenu({ shareKind, reportTargetType, targetId, canonicalPath, isOwnContent = false, triggerClassName, onReport, soundId, downloadTarget = null, pinAction, notificationMuteAction, promoteHref = null, extraDangerActions = [] }: ContentActionsMenuProps) {
   const { activeDownload, startDownload, cancelDownload } = useBrandedMediaDownload();
   const { isOpen: menuIsOpen, close: menuClose, containerRef: menuContainerRef, triggerRef: menuTriggerRef, menuRef: menuMenuRef, triggerProps: menuTriggerProps, menuProps: menuMenuProps } = usePopoverMenu();
   const [copyrightTarget, setCopyrightTarget] = useState<CopyrightDialogTarget | null>(null);
@@ -82,6 +85,12 @@ export function ContentActionsMenu({ shareKind, reportTargetType, targetId, cano
               <span>Download</span>
             </button>
           ) : null}
+          {isOwnContent && promoteHref ? (
+            <Link href={promoteHref} role="menuitem" className={styles.item} onClick={() => menuClose(true)}>
+              <AppIcon name="rocketLaunch16" size={18} />
+              <span>Promote this post</span>
+            </Link>
+          ) : null}
           {isOwnContent && pinAction ? (
             <button type="button" role="menuitem" className={styles.item} onClick={() => chooseAction(pinAction.onTogglePin)} disabled={pinAction.disabled}>
               <AppIcon name="pushPin24" size={18} />
@@ -94,6 +103,12 @@ export function ContentActionsMenu({ shareKind, reportTargetType, targetId, cano
               <span>{postNotificationMuteLabel(notificationMuteAction.isMuted)}</span>
             </button>
           ) : null}
+          {extraDangerActions.map((action) => (
+            <button key={action.label} type="button" role="menuitem" className={[styles.item, styles.itemDanger].join(" ")} onClick={() => chooseAction(action.onSelect)}>
+              {action.icon}
+              <span>{action.label}</span>
+            </button>
+          ))}
           {isOwnContent ? null : (
             <button type="button" role="menuitem" className={[styles.item, styles.itemDanger].join(" ")} onClick={() => chooseAction(() => requireAuthThen(onReport ?? (() => setOpenDialog("report")), "Sign in to report content."))}>
               <FlagIcon size={18} aria-hidden="true" />

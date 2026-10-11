@@ -5,7 +5,6 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import { Button } from "@/components/ui/button";
-import { FlagIcon } from "@/components/ui/icons";
 import { ModalDialog } from "@/components/ui/modalDialog";
 import { createIdempotencyKey, readErrorMessageForDisplay } from "@/services/clientApi.service";
 import { chatReportsService } from "@/services/chatReports.service";
@@ -17,7 +16,6 @@ import { ChatReportEvidenceFields } from "./chatReportEvidenceFields";
 import { ChatReportReasonFields } from "./chatReportReasonFields";
 import { DEFAULT_LAST_MESSAGES_COUNT } from "./chatReportReasons.constant";
 import { describeChatReportTarget, doesChatReportTargetCarryEvidence, type ChatReportEvidenceMode, type ChatReportTarget } from "./chatReportTarget.type";
-import styles from "./chatReport.module.css";
 
 type Step = "reason" | "evidence" | "done";
 
@@ -91,7 +89,9 @@ export function ChatReportDialog({ target, messages, viewerId, onClose }: ChatRe
       onClose={closeAndReset}
       title={step === "done" ? "Thanks, we'll review this" : target ? `Report ${describeChatReportTarget(target)}` : "Report"}
       description={step === "done" ? undefined : "Reports are anonymous. The other person won't be told who reported them."}
-      icon={step === "done" ? undefined : <FlagIcon size={24} />}
+      intent={step === "done" ? "success" : "report"}
+      busy={submission.isPending}
+      errorMessage={submission.isError ? readErrorMessageForDisplay(submission.error) : null}
       footer={
         step === "done" ? (
           <>
@@ -136,7 +136,6 @@ export function ChatReportDialog({ target, messages, viewerId, onClose }: ChatRe
         />
       ) : null}
       {target && step === "done" ? <ChatReportDoneActions target={target} isUrgent={reason === "child_safety"} /> : null}
-      {submission.isError ? <p className={styles.error} role="alert">{readErrorMessageForDisplay(submission.error)}</p> : null}
     </ModalDialog>
   );
 }

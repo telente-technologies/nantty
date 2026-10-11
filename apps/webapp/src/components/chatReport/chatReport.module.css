@@ -19,7 +19,6 @@
 .doneActions { display: flex; flex-direction: column; gap: var(--space-2); margin-top: var(--space-3); }
 .doneAction { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; padding: var(--space-3); border: 1px solid var(--divider); border-radius: var(--radius-medium); background: transparent; color: inherit; text-align: left; }
 .doneAction:disabled { opacity: 0.6; }
-.error { margin: var(--space-3) 0 0; color: var(--color-danger-text); }
 .menuHost { position: relative; margin-left: auto; }
 .messageReport { align-self: center; border: 0; background: transparent; color: var(--ink-muted); font-size: var(--text-xs); opacity: 0.6; }
 .messageReport:hover, .messageReport:focus-visible { opacity: 1; color: var(--color-danger-text); }

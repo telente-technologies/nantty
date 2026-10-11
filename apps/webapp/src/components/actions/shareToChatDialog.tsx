@@ -5,14 +5,15 @@ import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { EmptyState, Skeleton } from "@/components/ui/feedback";
-import { ShareActionIcon } from "@/components/ui/icons";
 import { Avatar } from "@/components/ui/media";
 import { ModalDialog } from "@/components/ui/modalDialog";
 import { showToast } from "@/components/ui/toast";
 import { readErrorMessageForDisplay } from "@/services/clientApi.service";
 import { useSession } from "@/components/providers/sessionProvider";
 import { chatCryptoService, readChatCryptoErrorMessage } from "@/services/chatCrypto/chatCrypto.service";
+import { useConversationDisplay } from "@/components/messages/conversationDisplay.hook";
 import { messagesService } from "@/services/messages.service";
+import type { Conversation } from "@/types";
 import { chatSharesService, toShareReferenceKind, type ShareReferenceKind } from "@/services/webActions.service";
 
 import styles from "./actionDialogs.module.css";
@@ -27,6 +28,19 @@ const shareLinkPathFor = (kind: ShareReferenceKind, referenceId: string): string
 };
 
 const maximumChatsPerShare = 20;
+
+function ShareConversationIdentity({ conversation }: { readonly conversation: Conversation }) {
+  const display = useConversationDisplay(conversation, { loadMembersForFallback: false });
+  return (
+    <>
+      <Avatar name={display.name} src={display.avatarSrc} size="sm" />
+      <span className={styles.optionText}>
+        <span className={styles.optionTitle}>{display.name}</span>
+        {display.subtitle ? <span className={styles.optionMeta}>{display.subtitle}</span> : null}
+      </span>
+    </>
+  );
+}
 
 interface ShareToChatDialogProps {
   readonly isOpen: boolean;
@@ -44,8 +58,7 @@ export function ShareToChatDialog({ isOpen, onClose, kind, referenceId }: ShareT
   const shareMutation = useMutation({
     mutationFn: async () => {
       const text = note.trim();
-      if (!text) return chatSharesService.shareIntoChats(selectedConversationIds, kind, referenceId);
-      if (!viewer?.id) throw new Error("Sign in to send a note.");
+      if (!viewer?.id) throw new Error("Sign in to share in chats.");
       const conversations = (conversationsQuery.data ?? []).filter((conversation) => selectedConversationIds.includes(conversation.id));
       const sealed = await Promise.all(
         conversations.map(async (conversation) => ({
@@ -88,8 +101,9 @@ export function ShareToChatDialog({ isOpen, onClose, kind, referenceId }: ShareT
       onClose={onClose}
       title="Send in chat"
       description={`Pick up to ${maximumChatsPerShare} chats.`}
-      tone="brand"
-      icon={<ShareActionIcon size={24} />}
+      intent="share"
+      busy={shareMutation.isPending}
+      errorMessage={shareMutation.isError ? (readChatCryptoErrorMessage(shareMutation.error) ?? readErrorMessageForDisplay(shareMutation.error)) : null}
       footer={
         <>
           {shareLinkPath ? (
@@ -120,11 +134,7 @@ export function ShareToChatDialog({ isOpen, onClose, kind, referenceId }: ShareT
           {conversationsQuery.data?.map((conversation) => (
             <label key={conversation.id} className={styles.option}>
               <input type="checkbox" checked={selectedConversationIds.includes(conversation.id)} onChange={() => toggleConversation(conversation.id)} />
-              <Avatar name={conversation.title ?? conversation.peer.name} src={conversation.photoUrl ?? conversation.peer.avatarUrl} size="sm" />
-              <span className={styles.optionText}>
-                <span className={styles.optionTitle}>{conversation.title ?? conversation.peer.name}</span>
-                <span className={styles.optionMeta}>@{conversation.peer.username}</span>
-              </span>
+              <ShareConversationIdentity conversation={conversation} />
             </label>
           ))}
         </fieldset>
@@ -133,11 +143,6 @@ export function ShareToChatDialog({ isOpen, onClose, kind, referenceId }: ShareT
         Add a note (optional)
       </label>
       <textarea id="share-note" className={styles.textarea} maxLength={1000} value={note} onChange={(event) => setNote(event.target.value)} />
-      {shareMutation.isError ? (
-        <p className={styles.error} role="alert">
-          {readChatCryptoErrorMessage(shareMutation.error) ?? readErrorMessageForDisplay(shareMutation.error)}
-        </p>
-      ) : null}
     </ModalDialog>
   );
 }

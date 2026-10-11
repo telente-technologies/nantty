@@ -2,12 +2,10 @@
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
 
 import { requireAuthThen } from "@/components/auth/authPrompt.store";
-import { Button } from "@/components/ui/button";
 import { FlagIcon, MoreIcon, ProhibitIcon } from "@/components/ui/icons";
-import { ModalDialog } from "@/components/ui/modalDialog";
+import { requestConfirmation } from "@/components/ui/confirmDialog";
 import { usePopoverMenu } from "@/components/ui/popoverMenu.hook";
 import sheetStyles from "@/components/ui/popoverMenu.module.css";
 import { chatReportsService } from "@/services/chatReports.service";
@@ -27,7 +25,6 @@ export function ChatActionsMenu({ conversation, onStartReport }: ChatActionsMenu
   const router = useRouter();
   const queryClient = useQueryClient();
   const { isOpen: menuIsOpen, close: menuClose, containerRef: menuContainerRef, triggerRef: menuTriggerRef, menuRef: menuMenuRef, triggerProps: menuTriggerProps, menuProps: menuMenuProps } = usePopoverMenu();
-  const [isBlockDialogOpen, setIsBlockDialogOpen] = useState(false);
   const isGroupLike = conversation.kind === "group" || conversation.kind === "channel";
   const block = useMutation({
     mutationFn: () => chatReportsService.blockConversationPeer(conversation.id),
@@ -37,6 +34,15 @@ export function ChatActionsMenu({ conversation, onStartReport }: ChatActionsMenu
     },
   });
 
+  const confirmBlock = () =>
+    void requestConfirmation({
+      title: `Block ${conversation.peer.name}?`,
+      description: "They won't be able to message you. You can unblock them in chat settings. They won't be told you blocked them.",
+      confirmLabel: "Block",
+      intent: "block",
+      onConfirm: () => block.mutateAsync(),
+      describeError: readErrorMessageForDisplay,
+    });
   const startReport = (kind: ChatReportTarget["kind"], alsoBlock = false) => {
     menuClose(true);
     requireAuthThen(
@@ -50,7 +56,7 @@ export function ChatActionsMenu({ conversation, onStartReport }: ChatActionsMenu
         { label: "Report user", icon: <FlagIcon size={18} aria-hidden="true" />, onSelect: () => startReport("user") },
         { label: "Report and block", icon: <FlagIcon size={18} aria-hidden="true" />, onSelect: () => startReport("user", true) },
         { label: "Report conversation", icon: <FlagIcon size={18} aria-hidden="true" />, onSelect: () => startReport("conversation") },
-        { label: "Block", icon: <ProhibitIcon size={18} aria-hidden="true" />, onSelect: () => { menuClose(true); setIsBlockDialogOpen(true); } },
+        { label: "Block", icon: <ProhibitIcon size={18} aria-hidden="true" />, onSelect: () => { menuClose(true); confirmBlock(); } },
       ];
 
   return (
@@ -69,22 +75,6 @@ export function ChatActionsMenu({ conversation, onStartReport }: ChatActionsMenu
           ))}
         </div>
       ) : null}
-      <ModalDialog
-        isOpen={isBlockDialogOpen}
-        onClose={() => setIsBlockDialogOpen(false)}
-        title={`Block ${conversation.peer.name}?`}
-        description="They won't be able to message you. You can unblock them in chat settings. They won't be told you blocked them."
-        tone="danger"
-        icon={<ProhibitIcon size={24} />}
-        footer={
-          <>
-            <Button variant="secondary" onClick={() => setIsBlockDialogOpen(false)}>Cancel</Button>
-            <Button variant="danger" onClick={() => block.mutate()} busy={block.isPending}>Block</Button>
-          </>
-        }
-      >
-        {block.isError ? <p className={styles.error} role="alert">{readErrorMessageForDisplay(block.error)}</p> : null}
-      </ModalDialog>
     </div>
   );
 }

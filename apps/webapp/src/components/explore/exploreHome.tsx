@@ -1,15 +1,14 @@
 "use client";
 
-import { useInfiniteQuery, useMutation, useQuery } from "@tanstack/react-query";
+import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import { useState, type ReactNode } from "react";
 
-import { requireAuthThen } from "@/components/auth/authPrompt.store";
+import { useFollowUser } from "@/components/follow/useFollowUser.hook";
 import { PostCard } from "@/components/feed/postCard";
 import { Skeleton } from "@/components/ui/feedback";
 import { Avatar, SafeImage } from "@/components/ui/media";
 import { exploreService } from "@/services/explore.service";
-import { followsService } from "@/services/posts.service";
 import type { ExploreCategory, ExploreCategoryId, FollowSuggestion, RankingExplanation } from "@/types/explore.type";
 
 import styles from "./exploreHome.module.css";
@@ -63,12 +62,7 @@ function WhyShown({ explanations }: { readonly explanations: readonly RankingExp
 }
 
 function SuggestionRow({ suggestion }: { readonly suggestion: FollowSuggestion }) {
-  const [following, setFollowing] = useState(false);
-  const follow = useMutation({
-    mutationFn: (next: boolean) => (next ? followsService.followUser(suggestion.user.id) : followsService.unfollowUser(suggestion.user.id)),
-    onMutate: (next) => setFollowing(next),
-    onError: (_error, next) => setFollowing(!next),
-  });
+  const follow = useFollowUser({ userId: suggestion.user.id, username: suggestion.user.username, displayName: suggestion.user.name, initialState: "none" });
   return (
     <div className={styles.person}>
       <Link href={`/${suggestion.user.username}`} className={styles.personLink}>
@@ -82,8 +76,8 @@ function SuggestionRow({ suggestion }: { readonly suggestion: FollowSuggestion }
           <span className={styles.meta}>{suggestion.reason.label}</span>
         </span>
       </Link>
-      <button type="button" className={[styles.followButton, following ? styles.followButtonActive : ""].join(" ")} aria-pressed={following} onClick={() => requireAuthThen(() => follow.mutate(!following), `Sign in to follow ${suggestion.user.name}.`)}>
-        {following ? "Following" : "Follow"}
+      <button type="button" className={[styles.followButton, follow.isActive ? styles.followButtonActive : ""].join(" ")} aria-pressed={follow.isActive} disabled={follow.isPending} onClick={follow.toggle}>
+        {follow.label}
       </button>
     </div>
   );
@@ -169,7 +163,7 @@ export function ExploreHome() {
             {postItems.map((post) => (
               <div key={post.id}>
                 <WhyShown explanations={post.ranking?.explanations ?? []} />
-                <PostCard post={post} />
+                <PostCard post={post} surface="explore" />
               </div>
             ))}
             {posts.hasNextPage ? <button type="button" className={styles.linkButton} disabled={posts.isFetchingNextPage} onClick={() => void posts.fetchNextPage()}>{posts.isFetchingNextPage ? "Loading…" : "Show more posts"}</button> : null}
