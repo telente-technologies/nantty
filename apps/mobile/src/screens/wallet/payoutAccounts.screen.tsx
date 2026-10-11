@@ -64,7 +64,7 @@ export function PayoutAccountsScreen() {
         {accountsQuery.isPending ? (
           <Skeleton height={48} radius={12} />
         ) : accountsQuery.isError ? (
-          <ErrorState compact message="Couldn't load your payout accounts." onRetry={() => accountsQuery.refetch()} retrying={accountsQuery.isRefetching} />
+          <ErrorState error={accountsQuery.error} compact message="Couldn't load your payout accounts." onRetry={() => accountsQuery.refetch()} retrying={accountsQuery.isRefetching} />
         ) : accounts.length ? (
           <SettingsGroup>
             {accounts.map((account) => (

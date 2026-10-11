@@ -1,13 +1,13 @@
 import type { ID, Page } from "@/types";
-import { THREAD_AD_SLOT_KIND, type CommentThreadPage, type ThreadAdDecision, type ThreadReply, type ThreadSort } from "@/types/postThread.type";
+import { THREAD_AD_SLOT_KIND, type CommentSectionFilter, type CommentThreadPage, type QuoteThreadItem, type ThreadAdDecision, type ThreadReply, type ThreadSort } from "@/types/postThread.type";
 
 import { api } from "../core/apiClient.service";
 
 const adSessionId = `ads_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 10)}`;
 
 export const postThreadService = {
-  fetchConversation: (postId: ID, sort: ThreadSort, cursor?: string) =>
-    api.get<Page<ThreadReply>>(`/api/v1/posts/${postId}/thread`, { sort, cursor }),
+  fetchConversation: (postId: ID, sort: ThreadSort, cursor?: string, filter: CommentSectionFilter = "all") =>
+    api.get<Page<ThreadReply | QuoteThreadItem>>(`/api/v1/posts/${postId}/thread`, { sort, cursor, ...(filter === "all" ? {} : { filter }) }),
   fetchThreadReplies: (commentId: ID, cursor?: string) => api.get<Page<ThreadReply>>(`/api/v1/comments/${commentId}/thread`, { cursor }),
   fetchCommentThread: (commentId: ID, cursor?: string) => api.get<CommentThreadPage>(`/api/v1/comments/${commentId}/thread`, { cursor }),
   decideThreadAd: (postId: ID, slotsSinceLastAd: number, neighbourContentIds: readonly ID[]) =>

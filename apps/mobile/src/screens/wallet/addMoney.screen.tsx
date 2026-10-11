@@ -41,7 +41,7 @@ export function AddMoneyScreen({ navigation }: MainScreenProps<"AddMoney">) {
       <Header title="Add money" />
       <ScrollView contentContainerStyle={styles.content}>
         {loading ? <ActivityIndicator color={colors.primary} style={styles.loading} /> : null}
-        {verification.isError ? <ErrorState message="Couldn't load your wallet." onRetry={() => verification.refetch()} retrying={verification.isRefetching} /> : null}
+        {verification.isError ? <ErrorState error={verification.error} message="Couldn't load your wallet." onRetry={() => verification.refetch()} retrying={verification.isRefetching} /> : null}
         {isNigeria === false ? <Text size={14} lineHeight={20}>{OUTSIDE_NIGERIA_NOTE}</Text> : null}
         {isNigeria && isMissing ? (
           <View style={styles.section}>
@@ -56,7 +56,7 @@ export function AddMoneyScreen({ navigation }: MainScreenProps<"AddMoney">) {
             )}
           </View>
         ) : null}
-        {isNigeria && wallet.isError && !isMissing ? <ErrorState message={wallet.error.message} onRetry={() => wallet.refetch()} retrying={wallet.isRefetching} /> : null}
+        {isNigeria && wallet.isError && !isMissing ? <ErrorState error={wallet.error} onRetry={() => wallet.refetch()} retrying={wallet.isRefetching} /> : null}
         {data ? (
           <View style={styles.section}>
             {data.wallet.status !== "active" ? (

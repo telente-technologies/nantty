@@ -17,6 +17,7 @@ export const postsService = {
     );
   },
   repostPost: (postId: string, text?: string) => api.post<Post>(`/api/v1/posts/${postId}/repost`, text ? { text } : {}, { idempotencyKey: generateIdempotencyKey() }),
+  undoRepost: (postId: string) => api.delete<void>(`/api/v1/posts/${postId}/repost`),
   fetchPostQuotes: (postId: string, cursor?: string) => api.get<Page<Post>>(`/api/v1/posts/${postId}/quotes`, { cursor }),
   fetchPostTaggedUsers: (postId: string, cursor?: string) => api.get<Page<TaggedUser>>(`/api/v1/posts/${encodeURIComponent(postId)}/tagged-users`, { cursor }),
   updateReplySettings: (postId: string, replyPolicy: ReplyPolicy) => api.patch<Post>(`/api/v1/posts/${postId}/reply-settings`, { replyPolicy }),

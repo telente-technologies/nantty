@@ -5,6 +5,8 @@ import { useLocaleStore } from "@/store/locale.store";
 import { usePendingAuthIntentStore } from "@/store/pendingAuthIntent.store";
 
 import { ApiError } from "@/errors/api.error";
+import { parseRetryAfterHeader } from "@/errors/errorExperience/retryCountdown";
+import { readRequestIdHeader } from "@/errors/errorExperience/errorSignal";
 import type { Page } from "@/types";
 import { isBackgroundCallSkippedForGuests } from "@/config/guestAccess.config";
 import { readStoreBillingRequestHeaders, readStorePlatformName } from "../money/storeBilling.service";
@@ -62,6 +64,8 @@ async function sendHttpRequest<T>(method: Method, path: string, options: Request
   if (options.body !== undefined) headers["Content-Type"] = "application/json";
   if (options.idempotencyKey) headers["Idempotency-Key"] = options.idempotencyKey;
   Object.assign(headers, options.headers);
+  const requestId = generateRequestId();
+  headers["X-Request-Id"] = requestId;
 
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), apiConfig.timeoutMs);
@@ -75,7 +79,10 @@ async function sendHttpRequest<T>(method: Method, path: string, options: Request
     const payload = response.status === 204 ? undefined : await response.json().catch(() => undefined);
     if (!response.ok) {
       const error = (payload ?? {}) as { message?: string; code?: string; suggestions?: string[]; details?: Record<string, unknown> };
-      throw new ApiError(response.status, error.message ?? "Something went wrong", error.code, error.suggestions, error.details);
+      throw new ApiError(response.status, error.message ?? `Request failed (HTTP ${response.status})`, error.code, error.suggestions, error.details, {
+        requestId: readRequestIdHeader(response.headers) ?? requestId,
+        retryAfterSeconds: parseRetryAfterHeader(response.headers.get("retry-after")),
+      });
     }
     return unwrapApiPayload<T>(payload);
   } finally {
@@ -153,3 +160,5 @@ export const isRetryableApiFailure = (error: unknown) =>
   isNetworkFailureError(error) || (error instanceof ApiError && (error.status === 408 || error.status === 429 || error.status >= 500));
 
 export const generateIdempotencyKey = () => `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 12)}`;
+
+export const generateRequestId = () => `zm-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`;

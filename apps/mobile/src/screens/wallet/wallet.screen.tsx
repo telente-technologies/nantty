@@ -43,7 +43,7 @@ export function WalletScreen({ navigation }: MainScreenProps<"Wallet">) {
     <Screen>
       <Header title="Wallet" />
       {balance.isError && !wallet ? (
-        <ErrorState message="Couldn't load your wallet." onRetry={() => balance.refetch()} retrying={balance.isRefetching} />
+        <ErrorState error={balance.error} message="Couldn't load your wallet." onRetry={() => balance.refetch()} retrying={balance.isRefetching} />
       ) : (
       <ScrollView contentContainerStyle={styles.content} refreshControl={refreshControl}>
         {walletVerificationMessage(wallet) ? <VerifyToWithdrawBanner wallet={wallet} /> : <PayoutSetupCard />}
@@ -84,7 +84,7 @@ export function WalletScreen({ navigation }: MainScreenProps<"Wallet">) {
           {transactionsQuery.isPending ? (
             <ListSkeleton rows={3} avatarSize={40} padding={0} />
           ) : transactionsQuery.isError ? (
-            <ErrorState compact message="Couldn't load recent activity." onRetry={() => transactionsQuery.refetch()} retrying={transactionsQuery.isRefetching} />
+            <ErrorState error={transactionsQuery.error} compact message="Couldn't load recent activity." onRetry={() => transactionsQuery.refetch()} retrying={transactionsQuery.isRefetching} />
           ) : transactions.length === 0 ? (
             <Text size={typeScale.sm} lineHeight={18} color={colors.textMuted}>No activity yet. Payments, refunds and payouts will show up here.</Text>
           ) : (

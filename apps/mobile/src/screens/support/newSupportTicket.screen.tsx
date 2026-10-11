@@ -18,6 +18,7 @@ import { supportService } from "@/services/support/support.service";
 import type { SupportLinkedReference, SupportTicketCategory } from "@/types/support.type";
 
 import { supportTicketsQueryKey } from "./supportTickets.screen";
+import { describeActionFailure } from "@/errors/errorExperience/describeError";
 
 export function NewSupportTicketScreen({ navigation, route }: MainScreenProps<"NewSupportTicket">) {
   const { colors } = useTheme();
@@ -67,7 +68,7 @@ export function NewSupportTicketScreen({ navigation, route }: MainScreenProps<"N
         <Text size={12} lineHeight={16.8} color={colors.textSubtle}>Never share your password, card PIN or OTP. Zudomart will never ask for them.</Text>
       </ScrollView>
       <View style={styles.footer}>
-        {createTicket.isError ? <Text size={12} color={colors.error} align="center">{createTicket.error.message}</Text> : null}
+        {createTicket.isError ? <Text size={12} color={colors.error} align="center">{describeActionFailure(createTicket.error)}</Text> : null}
         <Button title="Send" disabled={subject.trim().length < 4 || message.trim().length < 10 || uploading} loading={createTicket.isPending} onPress={() => createTicket.mutate()} />
       </View>
     </Screen>

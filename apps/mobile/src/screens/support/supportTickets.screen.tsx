@@ -42,7 +42,7 @@ export function SupportTicketsScreen({ navigation }: MainScreenProps<"SupportTic
             <Text size={12} lineHeight={16.8} color={colors.textSubtle}>{item.reference ? `${item.reference} · ` : ""}Updated {formatFriendlyDate(item.updatedAt)}</Text>
           </Pressable>
         )}
-        ListEmptyComponent={tickets.isLoading ? <ListSkeleton rows={3} /> : tickets.isError ? <ErrorState message="Couldn't load your requests." onRetry={() => tickets.refetch()} /> : <Text align="center" color={colors.textSubtle}>No support requests yet.</Text>}
+        ListEmptyComponent={tickets.isLoading ? <ListSkeleton rows={3} /> : tickets.isError ? <ErrorState error={tickets.error} message="Couldn't load your requests." onRetry={() => tickets.refetch()} /> : <Text align="center" color={colors.textSubtle}>No support requests yet.</Text>}
       />
     </Screen>
   );

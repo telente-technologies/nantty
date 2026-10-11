@@ -54,7 +54,7 @@ export function VerificationScreen({ navigation }: MainScreenProps<"Verification
       <Header title="Verification" />
       <ScrollView contentContainerStyle={styles.content} refreshControl={refreshControl}>
         {loadFailed ? (
-          <ErrorState compact message="Couldn't load verification details." onRetry={() => Promise.all([plans.refetch(), mine.refetch()])} retrying={plans.isRefetching || mine.isRefetching} />
+          <ErrorState error={plans.error ?? mine.error} compact message="Couldn't load verification details." onRetry={() => Promise.all([plans.refetch(), mine.refetch()])} retrying={plans.isRefetching || mine.isRefetching} />
         ) : null}
         {type === "personal" && (currentForProfile || application) ? (
           <View style={styles.card}>

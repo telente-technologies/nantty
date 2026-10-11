@@ -56,7 +56,7 @@ export function SupportTicketDetailScreen({ route }: MainScreenProps<"SupportTic
     return (
       <Screen>
         <Header title="Support" />
-        {ticket.isError ? <ErrorState message="Couldn't load this ticket." onRetry={() => ticket.refetch()} retrying={ticket.isRefetching} /> : <ListSkeleton />}
+        {ticket.isError ? <ErrorState error={ticket.error} message="Couldn't load this ticket." onRetry={() => ticket.refetch()} retrying={ticket.isRefetching} /> : <ListSkeleton />}
       </Screen>
     );
   }

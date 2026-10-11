@@ -18,7 +18,7 @@ import { typeScale } from "@/constants/typography.constant";
 export function StoreRewardsScreen() {
   const { colors } = useTheme();
   const styles = useStyles();
-  const { data: balances = [], isLoading, isError, refetch, isRefetching } = useStoreCreditBalancesQuery();
+  const { data: balances = [], isLoading, isError, error, refetch, isRefetching } = useStoreCreditBalancesQuery();
   const refreshControl = usePullToRefresh(refetch);
   return (
     <Screen>
@@ -46,7 +46,7 @@ export function StoreRewardsScreen() {
           isLoading ? (
             <ListSkeleton rows={4} avatarSize={40} padding={0} />
           ) : isError ? (
-            <ErrorState compact message="Couldn't load store rewards." onRetry={() => refetch()} retrying={isRefetching} />
+            <ErrorState error={error} compact message="Couldn't load store rewards." onRetry={() => refetch()} retrying={isRefetching} />
           ) : (
             <EmptyState compact icon={<Gift24Icon color={colors.textMuted} />} title="No store credit yet" body="Credit a seller gives you will appear here." />
           )

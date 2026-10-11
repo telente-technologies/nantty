@@ -52,7 +52,7 @@ export function CoinActivityScreen() {
           activity.isPending ? (
             <ListSkeleton rows={8} avatarSize={0} padding={12} />
           ) : activity.isError ? (
-            <ErrorState compact message="Couldn't load coin activity." onRetry={() => activity.refetch()} retrying={activity.isRefetching} />
+            <ErrorState error={activity.error} compact message="Couldn't load coin activity." onRetry={() => activity.refetch()} retrying={activity.isRefetching} />
           ) : (
             <EmptyState compact icon={<Coin24Icon color={colors.textMuted} />} title="No coin activity yet" body="Coins you buy, send and receive will show up here." />
           )

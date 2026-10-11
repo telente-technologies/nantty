@@ -15,7 +15,7 @@ import { spacing } from "@/constants/spacing.constant";
 export function TransactionsScreen() {
   const { colors } = useTheme();
   const styles = useStyles();
-  const { data: transactions = [], isLoading, isError, refetch, isRefetching } = useWalletTransactionsQuery();
+  const { data: transactions = [], isLoading, isError, error, refetch, isRefetching } = useWalletTransactionsQuery();
   const refreshControl = usePullToRefresh(refetch);
   return (
     <Screen>
@@ -31,7 +31,7 @@ export function TransactionsScreen() {
           isLoading ? (
             <ListSkeleton rows={8} avatarSize={40} padding={0} />
           ) : isError ? (
-            <ErrorState compact message="Couldn't load transactions." onRetry={() => refetch()} retrying={isRefetching} />
+            <ErrorState error={error} compact message="Couldn't load transactions." onRetry={() => refetch()} retrying={isRefetching} />
           ) : (
             <EmptyState compact icon={<CreditCard24Icon color={colors.textMuted} />} title="No transactions yet" body="Payments, refunds and payouts will show up here." />
           )

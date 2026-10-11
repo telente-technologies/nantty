@@ -1,10 +1,11 @@
 import type { Comment, CommentWithReplies, NewCommentInput, Page } from "@/types";
+import type { CommentSectionFilter, QuoteThreadItem } from "@/types/postThread.type";
 
 import { api } from "../core/apiClient.service";
 
 export const postCommentsService = {
-  fetchTopLevelCommentsForPost: (postId: string, cursor?: string) =>
-    api.get<Page<CommentWithReplies>>(`/api/v1/posts/${postId}/comments`, { cursor }),
+  fetchTopLevelCommentsForPost: (postId: string, cursor?: string, filter: CommentSectionFilter = "all") =>
+    api.get<Page<CommentWithReplies | QuoteThreadItem>>(`/api/v1/posts/${postId}/comments`, { cursor, ...(filter === "all" ? {} : { filter }) }),
   fetchComment: (commentId: string) => api.get<Comment>(`/api/v1/comments/${commentId}`),
   fetchRepliesForComment: (commentId: string, cursor?: string) => api.get<Page<Comment>>(`/api/v1/comments/${commentId}/replies`, { cursor }),
   addCommentToPost: (postId: string, input: NewCommentInput) => api.post<Comment>(`/api/v1/posts/${postId}/comments`, input),
