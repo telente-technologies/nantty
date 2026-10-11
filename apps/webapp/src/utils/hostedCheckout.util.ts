@@ -6,7 +6,7 @@ export interface HostedCheckoutSession {
 
 export type HostedCheckoutOutcome = "redirected" | "blocked";
 
-export const hostedCheckoutHosts: readonly string[] = ["checkout.flutterwave.com", "checkout-testing.flutterwave.com", "checkout.paystack.com"];
+export const hostedCheckoutHosts: readonly string[] = ["checkout.flutterwave.com", "checkout-testing.flutterwave.com"];
 
 export function readHostedCheckoutUrl(session: HostedCheckoutSession, origin: string): string | null {
   const raw = session.checkoutUrl || session.authorizationUrl || "";

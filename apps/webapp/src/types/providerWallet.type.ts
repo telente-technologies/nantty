@@ -1,3 +1,5 @@
+import type { WalletDailyLimits } from "@/utils/walletLimits.util";
+
 export interface WalletFundingNumber {
   readonly accountNumber: string;
   readonly bankName: string;
@@ -29,6 +31,7 @@ export interface ProviderWalletBalances {
 export interface ProviderWalletResponse {
   readonly wallet: ProviderWallet;
   readonly balances: ProviderWalletBalances;
+  readonly limits?: WalletDailyLimits;
 }
 
 export interface PaymentVerificationLevel {

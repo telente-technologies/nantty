@@ -6,9 +6,9 @@ import { readHostedCheckoutUrl } from "./hostedCheckout.util";
 const origin = "https://zudomart.com";
 
 describe("readHostedCheckoutUrl", () => {
-  it("prefers the provider-neutral checkoutUrl and allows the payment partners' hosts", () => {
-    assert.equal(readHostedCheckoutUrl({ checkoutUrl: "https://checkout.flutterwave.com/v3/hosted/pay/abc", authorizationUrl: "https://checkout.paystack.com/x", reference: "r" }, origin), "https://checkout.flutterwave.com/v3/hosted/pay/abc");
-    assert.equal(readHostedCheckoutUrl({ authorizationUrl: "https://checkout.paystack.com/x", reference: "r" }, origin), "https://checkout.paystack.com/x");
+  it("prefers the provider-neutral checkoutUrl and allows only Flutterwave's hosts", () => {
+    assert.equal(readHostedCheckoutUrl({ checkoutUrl: "https://checkout.flutterwave.com/v3/hosted/pay/abc", authorizationUrl: "https://checkout-testing.flutterwave.com/x", reference: "r" }, origin), "https://checkout.flutterwave.com/v3/hosted/pay/abc");
+    assert.equal(readHostedCheckoutUrl({ authorizationUrl: "https://checkout-testing.flutterwave.com/x", reference: "r" }, origin), "https://checkout-testing.flutterwave.com/x");
   });
 
   it("allows same-origin demo pages", () => {

@@ -80,7 +80,7 @@ export interface StoreDetail extends StoreSummary {
   readonly posts: readonly Post[];
 }
 
-export type PaymentProvider = "paystack" | "flutterwave";
+export type PaymentProvider = "flutterwave";
 
 export type PaymentChannel = "card" | "bank" | "bank_transfer" | "ussd";
 

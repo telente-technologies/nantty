@@ -112,7 +112,21 @@ export async function setPostLiked(queryClient: QueryClient, postId: string, lik
   }
 }
 
-export const resetPostLikeSyncForTests = () => likeSyncByPostId.clear();
+export const DOUBLE_TAP_WINDOW_MS = 400;
+const lastToggleAtByPostId = new Map<string, number>();
+
+// A second tap on the same like button inside the double-tap window is the same intent, not an unlike.
+export function togglePostLiked(queryClient: QueryClient, postId: string, fallbackLiked: boolean, sender: LikeSender, now = Date.now()): Promise<void> {
+  const lastToggleAt = lastToggleAtByPostId.get(postId);
+  if (lastToggleAt !== undefined && now - lastToggleAt < DOUBLE_TAP_WINDOW_MS) return Promise.resolve();
+  lastToggleAtByPostId.set(postId, now);
+  return setPostLiked(queryClient, postId, !currentLikedState(queryClient, postId, fallbackLiked), fallbackLiked, sender);
+}
+
+export const resetPostLikeSyncForTests = () => {
+  likeSyncByPostId.clear();
+  lastToggleAtByPostId.clear();
+};
 
 export function setFollowingAuthorEverywhere(queryClient: QueryClient, authorId: string, isFollowingAuthor: boolean) {
   updateMatchingRecordsInEveryQuery(

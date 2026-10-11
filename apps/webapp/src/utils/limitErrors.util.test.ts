@@ -20,6 +20,7 @@ describe("limit error copy", () => {
 
   it("explains the seller debt block without touching existing orders, and ignores other codes", () => {
     assert.match(describeLimitError("SELLER_DEBT_LIMIT", null) ?? "", /aren't affected/);
+    assert.match(describeLimitError("SELLER_DEBT_LIMIT", { audience: "buyer" }) ?? "", /This seller can't take new orders/);
     assert.equal(describeLimitError("VERIFICATION_REQUIRED", null), null);
   });
 });

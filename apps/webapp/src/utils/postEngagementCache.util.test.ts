@@ -3,7 +3,7 @@ import { beforeEach, describe, it } from "node:test";
 
 import { QueryClient } from "@tanstack/react-query";
 
-import { addRepostEverywhere, currentLikedState, resetPostLikeSyncForTests, setPostLiked, type LikeSender } from "./postEngagementCache.util";
+import { addRepostEverywhere, currentLikedState, DOUBLE_TAP_WINDOW_MS, resetPostLikeSyncForTests, setPostLiked, togglePostLiked, type LikeSender } from "./postEngagementCache.util";
 
 const FEED_KEY = ["feed", "for-you", null];
 const PROFILE_KEY = ["profile", "posts", "u_1"];
@@ -78,6 +78,24 @@ describe("post engagement cache", () => {
     pendingRelease();
     pendingRelease = null;
     await Promise.all([first, second]);
+    assert.deepEqual(sent, [["p_1", true], ["p_1", false]]);
+    assert.deepEqual([feedPost().liked, feedPost().likes], [false, 10]);
+  });
+
+  it("a double click on the like button is one like, not like then unlike", async () => {
+    pendingRelease = () => undefined;
+    const first = togglePostLiked(client, "p_1", false, sender, 1_000);
+    const second = togglePostLiked(client, "p_1", false, sender, 1_000 + DOUBLE_TAP_WINDOW_MS - 1);
+    pendingRelease();
+    pendingRelease = null;
+    await Promise.all([first, second]);
+    assert.deepEqual(sent, [["p_1", true]]);
+    for (const post of [feedPost(), profilePost(), detailPost()]) assert.deepEqual([post.liked, post.likes], [true, 11]);
+  });
+
+  it("two taps further apart than the double-tap window like and then unlike", async () => {
+    await togglePostLiked(client, "p_1", false, sender, 1_000);
+    await togglePostLiked(client, "p_1", false, sender, 1_000 + DOUBLE_TAP_WINDOW_MS);
     assert.deepEqual(sent, [["p_1", true], ["p_1", false]]);
     assert.deepEqual([feedPost().liked, feedPost().likes], [false, 10]);
   });
