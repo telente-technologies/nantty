@@ -36,7 +36,7 @@ export function PlanPriceBookPanel() {
   const rows = (table.data?.data ?? []).filter((row) => row.planCode === planCode);
   return (
     <Card title="Plan price book">
-      <p className={styles.note}>Web prices are charged by Paystack. When Paystack can&apos;t charge a region&apos;s currency (GBP and EUR today), web buyers there see and pay the US price in USD. App prices must match the price set for that storefront in App Store Connect and Play Console.</p>
+      <p className={styles.note}>Web prices are charged by the payment partner (Flutterwave, or Paystack while the move finishes). When the partner can&apos;t charge a region&apos;s currency, web buyers there see and pay the US price in USD. App prices must match the price set for that storefront in App Store Connect and Play Console.</p>
       <div className={styles.toolbar}>
         <SelectField label="Plan" value={planCode} onChange={(event) => setPlanCode(event.target.value)} options={Object.entries(planLabels).map(([value, label]) => ({ value, label }))} />
       </div>

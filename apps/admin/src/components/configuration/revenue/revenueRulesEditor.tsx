@@ -33,11 +33,11 @@ export function RevenueRulesEditor({ rules, canWrite, onChange }: RevenueRulesEd
             <BasisPointsField label="Escrow fee (Free and Pro)" hint="Paid by the seller on escrow orders, including shipping. Zudomart takes no commission on products." basisPoints={rules.escrowFee.defaultBasisPoints} maximumBasisPoints={500} isDisabled={isDisabled} onChange={(value) => onChange((current) => ({ ...current, escrowFee: { ...current.escrowFee, defaultBasisPoints: value } }))} />
             <BasisPointsField label="Escrow fee (Business plan)" basisPoints={rules.escrowFee.businessPlanBasisPoints} maximumBasisPoints={500} isDisabled={isDisabled} onChange={(value) => onChange((current) => ({ ...current, escrowFee: { ...current.escrowFee, businessPlanBasisPoints: value } }))} />
           </div>
-          <NoticeBanner tone="info">Direct payments from verified stores carry no Zudomart fee. The seller covers only Paystack's processing fee.</NoticeBanner>
+          <NoticeBanner tone="info">Direct payments from verified stores carry no Zudomart fee. The seller covers only the payment processing fee.</NoticeBanner>
         </Card>
         <Card title="Withdrawal fee">
           <SelectField label="How the fee is set" value={rules.withdrawalFee.mode} disabled options={[{ value: "PASS_THROUGH", label: "Pass through the payment provider's fee" }]} />
-          <NoticeBanner tone="info">The fee is whatever Paystack or Flutterwave charges for the transfer, shown to the person before they confirm. Zudomart adds no margin.</NoticeBanner>
+          <NoticeBanner tone="info">The fee is whatever the payment partner charges for the transfer, shown to the person before they confirm. Zudomart adds no margin.</NoticeBanner>
           <TextAreaField label="Note shown to sellers and creators" value={rules.withdrawalFee.note} rows={2} maxLength={300} disabled={isDisabled} onChange={(event) => onChange((current) => ({ ...current, withdrawalFee: { ...current.withdrawalFee, note: event.target.value } }))} />
         </Card>
       </div>

@@ -90,7 +90,7 @@ export function TrialRulesEditor({ rules, canWrite, onChange }: EditorProps<Tria
       <div className={styles.checks}>
         {toggles.map((toggle) => <CheckboxField key={toggle.key} label={toggle.label} checked={rules[toggle.key]} disabled={disabled} onChange={(event) => set(toggle.key, event.target.checked)} />)}
       </div>
-      <p className={styles.summary}>Trials need a card saved on the web through Paystack. A small verification charge is made and refunded automatically. Risk scores come from the intelligence service.</p>
+      <p className={styles.summary}>Trials need a card saved on the web through the payment partner&apos;s checkout. A small verification charge is made and refunded automatically. Risk scores come from the intelligence service.</p>
     </div>
   );
 }

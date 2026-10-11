@@ -73,7 +73,7 @@ export function registerPlatformMetricsMockHandlers(): void {
       queues,
       health: [
         { name: "API", status: "OPERATIONAL", latencyMs: 84, note: null },
-        { name: "Payments (Paystack)", status: "OPERATIONAL", latencyMs: 312, note: null },
+        { name: "Payments (Flutterwave)", status: "OPERATIONAL", latencyMs: 312, note: null },
         { name: "Payments (Flutterwave)", status: "DEGRADED", latencyMs: 1_840, note: "Transfers to GTBank slower than usual since 09:40." },
         { name: "Media processing", status: "OPERATIONAL", latencyMs: null, note: "HLS queue 214 jobs" },
         { name: "Intelligence service", status: "OPERATIONAL", latencyMs: 46, note: null },

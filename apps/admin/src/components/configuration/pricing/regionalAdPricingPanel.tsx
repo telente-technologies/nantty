@@ -63,7 +63,7 @@ export function RegionalAdPricingPanel() {
                 </tbody>
               </table>
             </div>
-            <p className={styles.note}>Creator subscription bands are suggestions a creator picks from. The creator keeps 80% of net after the store or Paystack fee in every region.</p>
+            <p className={styles.note}>Creator subscription bands are suggestions a creator picks from. The creator keeps 80% of net after the store or payment processing fee in every region.</p>
             <div className={styles.tableScroller}>
               <table className={styles.priceTable}>
                 <caption className="visuallyHidden">Creator subscription bands per region</caption>
