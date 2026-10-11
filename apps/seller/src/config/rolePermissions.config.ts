@@ -126,9 +126,12 @@ const apiPermissionRules: ApiPermissionRule[] = [
   { method: "ANY", pathPattern: /^\/seller\/shipping/, permission: "delivery:manage" },
   { method: "PUT", pathPattern: /^\/users\/me\/consents$/, permission: "signed_in" },
   { method: "PATCH", pathPattern: /^\/users\/me\/preferences$/, permission: "signed_in" },
+  { method: "POST", pathPattern: /^\/auth\/(step-up|otp\/send|otp\/verify)$/, permission: "signed_in" },
   { method: "GET", pathPattern: /^\/seller\/customers/, permission: "customers:view" },
   { method: "ANY", pathPattern: /^\/seller\/customers/, permission: "customers:manage" },
   { method: "ANY", pathPattern: /^\/seller\/conversations/, permission: "messages:manage" },
+  { method: "ANY", pathPattern: /^\/chat\/keys\//, permission: "messages:manage" },
+  { method: "GET", pathPattern: /^\/chat\/content$/, permission: "messages:manage" },
   { method: "ANY", pathPattern: /^\/seller\/reviews/, permission: "reviews:manage" },
   { method: "GET", pathPattern: /^\/seller\/analytics/, permission: "analytics:view" },
   { method: "ANY", pathPattern: /^\/seller\/(promotions|marketing)/, permission: "promotions:manage" },
@@ -152,6 +155,7 @@ const apiPermissionRules: ApiPermissionRule[] = [
   { method: "ANY", pathPattern: /^\/media\//, permission: "media:upload" },
   { method: "ANY", pathPattern: /^\/payments\/(payout-onboarding\/me|payout-fees)/, permission: "wallet:withdraw" },
   { method: "GET", pathPattern: /^\/wallets\/me$/, permission: "wallet:view" },
+  { method: "GET", pathPattern: /^\/payments\/(wallet|verification)\/me$/, permission: "wallet:withdraw" },
 ];
 
 function doesMethodMatchPattern(method: string, pattern: HttpMethodPattern): boolean {
@@ -166,4 +170,10 @@ export function findPermissionRequiredForApiCall(method: string, apiPath: string
     (rule) => doesMethodMatchPattern(method, rule.method) && rule.pathPattern.test(apiPath),
   );
   return matchingRule?.permission ?? null;
+}
+
+const chatMediaApiPathPattern = /^\/media\/(uploads(\/[A-Za-z0-9._~:@%-]+)*|[A-Za-z0-9._~:@%-]+\/encrypted-blob)$/;
+
+export function grantsChatMediaAccess(access: SellerAccess, apiPath: string): boolean {
+  return chatMediaApiPathPattern.test(apiPath) && doesAccessGrantPermission(access, "messages:manage");
 }

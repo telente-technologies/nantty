@@ -36,6 +36,7 @@ export function buildNavigationGroups(): NavigationGroup[] {
         { label: "Products", href: "/products", iconName: "tag24", permission: "products:manage", keywords: "items variants sku categories brands import export" },
         { label: "Inventory", href: "/inventory", iconName: "boxArrowDown24", permission: "inventory:manage", keywords: "stock adjustments transfers warehouses suppliers reorder" },
         { label: "Storefront", href: "/storefront", iconName: "buildingStore20", permission: "storefront:manage", keywords: "store page logo cover policies hours" },
+        { label: "Embed on your site", href: "/storefront/embed", iconName: "code20", permission: "storefront:manage", keywords: "embed widget website snippet iframe buy button html code" },
       ],
     },
     {

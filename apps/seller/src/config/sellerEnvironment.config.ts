@@ -7,6 +7,11 @@ export function readSellerApiBaseUrl(): string {
   return configuredUrl.replace(/\/+$/, "");
 }
 
+export function readRealtimeSocketUrl(): string {
+  const configured = process.env.SELLER_REALTIME_URL ?? `${readSellerApiBaseUrl()}/ws`;
+  return configured.replace(/^http(s?):\/\//i, (_, secure: string) => (secure ? "wss://" : "ws://"));
+}
+
 export function isMockBackendEnabled(): boolean {
   const configuredValue = process.env.SELLER_USE_MOCKS;
   if (configuredValue === undefined || configuredValue === "") return !isProductionRuntime;
