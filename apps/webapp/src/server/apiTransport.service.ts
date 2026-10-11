@@ -52,7 +52,7 @@ async function callMockBackend(call: BackendCall): Promise<BackendResult> {
     return buildJsonResult(200, value);
   } catch (error) {
     if (error instanceof ApiError) return buildErrorResult(error.status, error.message, error.code ?? "MOCK_ERROR", error.suggestions, error.details);
-    return buildErrorResult(500, error instanceof Error ? error.message : "Something went wrong", "MOCK_FAILURE");
+    return buildErrorResult(500, "The mock backend failed to answer this request.", "MOCK_FAILURE");
   }
 }
 
@@ -79,9 +79,18 @@ async function callRealBackend(call: BackendCall, headers: Headers): Promise<Bac
   }
 }
 
+function withRequestId(result: BackendResult, requestId: string): BackendResult {
+  if (result.headers.get("x-request-id")) return result;
+  const headers = new Headers(result.headers);
+  headers.set("x-request-id", requestId);
+  return { ...result, headers };
+}
+
 export async function callWebappBackend(call: BackendCall): Promise<BackendResult> {
   const headers = buildOutgoingHeaders(call);
-  return shouldUseRealBackend(call.path) ? callRealBackend(call, headers) : callMockBackend(call);
+  const requestId = headers.get("X-Request-Id")!;
+  const result = shouldUseRealBackend(call.path) ? await callRealBackend(call, headers) : await callMockBackend(call);
+  return withRequestId(result, requestId);
 }
 
 export function readJsonFromBackendResult<Payload>(result: BackendResult): Payload | null {

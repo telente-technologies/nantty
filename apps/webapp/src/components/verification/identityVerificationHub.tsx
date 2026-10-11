@@ -5,7 +5,6 @@ import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
-import { RetryButton } from "@/components/ui/controls";
 import { ErrorState } from "@/components/ui/feedback";
 import styles from "@/components/settings/settings.module.css";
 import { legalLinks } from "@/config/legalLinks.config";
@@ -68,7 +67,7 @@ export function IdentityVerificationHub() {
   });
 
   if (journeyQuery.isLoading) return <DetailSkeleton label="Checking your eligibility" blocks={2} />;
-  if (journeyQuery.isError || !journeyQuery.data) return <ErrorState description="We couldn't load your verification." action={<RetryButton onRetry={() => journeyQuery.refetch()} />} />;
+  if (journeyQuery.isError || !journeyQuery.data) return <ErrorState description="We couldn't load your verification." error={journeyQuery.error} onRetry={() => void journeyQuery.refetch()} />;
   const journey = journeyQuery.data;
   const badge = journey.color === "gold" ? "Gold" : "Blue";
 

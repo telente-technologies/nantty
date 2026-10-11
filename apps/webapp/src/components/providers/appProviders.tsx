@@ -6,6 +6,7 @@ import { Suspense, useCallback, useState, type ReactNode } from "react";
 
 import { isRetryableApiFailure, sendRequestToWebappServer } from "@/services/clientApi.service";
 
+import { WebappErrorExperienceProvider } from "@/components/errors/errorExperience.provider";
 import { ConsentBannerHost } from "@/components/privacy/consentBannerHost";
 import { CelebrationHost } from "@/components/celebrations/celebrationHost";
 import { AuthPromptModal } from "@/components/auth/authPromptModal";
@@ -52,7 +53,7 @@ export function AppProviders({ viewer, csrfToken, themePreference, children }: A
     <ThemeProvider initialPreference={themePreference} onPreferenceChange={saveThemePreferenceToProfile}>
       <QueryClientProvider client={queryClient}>
         <SessionProvider viewer={viewer} csrfToken={csrfToken}>
-          {children}
+          <WebappErrorExperienceProvider>{children}</WebappErrorExperienceProvider>
           <ConsentBannerHost />
           <ToastViewport />
           <ConfirmDialogHost />

@@ -2,6 +2,7 @@ import Image from "next/image";
 import type { ReactNode } from "react";
 
 import styles from "./media.module.css";
+import { ResilientImage } from "./resilientImage";
 
 export function getInitialsForName(name: string): string {
   const parts = name.trim().split(/\s+/).filter(Boolean);
@@ -22,7 +23,7 @@ export function MediaImage({ src, alt, sizes, className, priority = false }: Med
   if (!src) return null;
   return (
     <>
-      <Image src={src} alt={alt} fill sizes={sizes} className={[styles.fill, className ?? ""].filter(Boolean).join(" ")} priority={priority} />
+      <ResilientImage src={src} alt={alt} sizes={sizes} className={className} priority={priority} />
       <span aria-hidden className={styles.frame} />
     </>
   );

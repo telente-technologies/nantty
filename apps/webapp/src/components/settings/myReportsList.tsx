@@ -2,7 +2,6 @@
 
 import { useQuery } from "@tanstack/react-query";
 
-import { RetryButton } from "@/components/ui/controls";
 import { EmptyState, ErrorState } from "@/components/ui/feedback";
 import { chatReportsService } from "@/services/chatReports.service";
 import type { ContentReportStatus } from "@/types/support.type";
@@ -21,7 +20,7 @@ const statusLabels: Record<ContentReportStatus, string> = {
 export function MyReportsList() {
   const reports = useQuery({ queryKey: ["reports", "mine"], queryFn: chatReportsService.listMyReports });
   if (reports.isLoading) return <ListRowsSkeleton label="Loading your reports" rows={4} withAvatar={false} />;
-  if (reports.isError) return <ErrorState description="We couldn't load your reports." action={<RetryButton onRetry={() => reports.refetch()} />} />;
+  if (reports.isError) return <ErrorState description="We couldn't load your reports." error={reports.error} onRetry={() => void reports.refetch()} />;
   if (!reports.data?.length) return <EmptyState icon={<AppIcon name="shield24" size={28} />} title="No reports" description="You haven't reported anything." />;
   return (
     <ul className={styles.list}>

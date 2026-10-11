@@ -18,7 +18,11 @@ export class StepUpCancelledError extends Error {
 
 type Pending = { readonly resolve: (token: string) => void; readonly reject: (error: Error) => void };
 
-export function useStepUpPrompt(): { readonly withStepUp: <Result>(action: (token: string) => Promise<Result>) => Promise<Result>; readonly stepUpDialog: ReactNode } {
+export function useStepUpPrompt(): {
+  readonly withStepUp: <Result>(action: (token: string) => Promise<Result>) => Promise<Result>;
+  readonly withStepUpIfRequired: <Result>(action: (token: string | undefined) => Promise<Result>) => Promise<Result>;
+  readonly stepUpDialog: ReactNode;
+} {
   const viewerEmail = useAuthStore((state) => state.user?.email ?? "");
   const pending = useRef<Pending | null>(null);
   const [isOpen, setIsOpen] = useState(false);
@@ -51,6 +55,15 @@ export function useStepUpPrompt(): { readonly withStepUp: <Result>(action: (toke
       return action(await askForToken());
     }
   }, [askForToken]);
+
+  const withStepUpIfRequired = useCallback(async <Result,>(action: (token: string | undefined) => Promise<Result>) => {
+    try {
+      return await action(undefined);
+    } catch (error) {
+      if (!isStepUpRequiredError(error)) throw error;
+      return withStepUp((token) => action(token));
+    }
+  }, [withStepUp]);
 
   const close = () => {
     setIsOpen(false);
@@ -102,5 +115,5 @@ export function useStepUpPrompt(): { readonly withStepUp: <Result>(action: (toke
     </ModalDialog>
   );
 
-  return { withStepUp, stepUpDialog };
+  return { withStepUp, withStepUpIfRequired, stepUpDialog };
 }

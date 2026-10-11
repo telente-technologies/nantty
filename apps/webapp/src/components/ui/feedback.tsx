@@ -1,23 +1,19 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { BrandLoader, ErrorState as KitErrorState, type BrandLoaderSize } from "@zudomart/web-kit";
+import { BrandLoader, ErrorState as KitErrorState, type BrandLoaderSize, type ErrorStateProps as KitErrorStateProps } from "@zudomart/web-kit";
 
-import { SignInRequiredState } from "@/components/auth/signInRequiredState";
 import { isSignInRequiredError } from "@/services/clientApi.service";
 
 import styles from "./feedback.module.css";
-import { useIsOnline } from "./onlineStatus.hook";
 
-export { EmptyState, Skeleton } from "@zudomart/web-kit";
+export { EmptyState, ErrorScreen, NotFoundScreen, Skeleton } from "@zudomart/web-kit";
 
-type ErrorStateProps = Parameters<typeof KitErrorState>[0] & { readonly error?: unknown; readonly signInDescription?: string };
+type ErrorStateProps = KitErrorStateProps & { readonly signInDescription?: string };
 
-export function ErrorState({ error, signInDescription, ...props }: ErrorStateProps) {
-  const isOnline = useIsOnline();
-  if (isSignInRequiredError(error)) return <SignInRequiredState description={signInDescription} />;
-  if (isOnline) return <KitErrorState {...props} />;
-  return <KitErrorState {...props} title="You're offline" description="Check your connection. This will load again when you're back online." />;
+export function ErrorState({ signInDescription, ...props }: ErrorStateProps) {
+  if (signInDescription && isSignInRequiredError(props.error)) return <KitErrorState {...props} kind="signedOut" title="Sign in to see this" description={signInDescription} />;
+  return <KitErrorState {...props} />;
 }
 
 export function Spinner({ label = "Loading", size = "md" }: { readonly label?: string; readonly size?: BrandLoaderSize }) {

@@ -6,7 +6,6 @@ import { useState } from "react";
 
 import { PostCard } from "@/components/feed/postCard";
 import { PostFeedSkeleton } from "@/components/feed/postCardSkeleton";
-import { RetryButton } from "@/components/ui/controls";
 import { EmptyState, ErrorState } from "@/components/ui/feedback";
 import { BookmarkIcon, ClipsIcon } from "@/components/ui/icons";
 import { MediaImage } from "@/components/ui/media";
@@ -62,6 +61,7 @@ export function ProfileContentTabs({ user, isSelf }: { readonly user: User; read
   const isLoading = tab === "clips" ? clipsQuery.isLoading : postsQuery.isLoading;
   const isError = tab === "clips" ? clipsQuery.isError : postsQuery.isError;
   const refetch = tab === "clips" ? clipsQuery.refetch : postsQuery.refetch;
+  const loadError = tab === "clips" ? clipsQuery.error : postsQuery.error;
   const isEmpty = tab === "clips" ? clips.length === 0 : tab === "media" ? posts.length === 0 : visiblePosts.length === 0;
 
   return (
@@ -78,7 +78,7 @@ export function ProfileContentTabs({ user, isSelf }: { readonly user: User; read
         {isLoading ? (
           <PostFeedSkeleton count={2} />
         ) : isError ? (
-          <ErrorState description="We couldn't load this section." action={<RetryButton onRetry={() => refetch()} />} />
+          <ErrorState error={loadError} description="We couldn't load this section." onRetry={() => void refetch()} />
         ) : isEmpty ? (
           <EmptyState
             icon={tab === "clips" ? <ClipsIcon size={28} /> : <AppIcon name="note24" size={28} />}

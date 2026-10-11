@@ -3,7 +3,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { ConsentToggleRow } from "@/components/settings/consentToggleRow";
-import { RetryButton } from "@/components/ui/controls";
 import { ErrorState } from "@/components/ui/feedback";
 import { privacyService } from "@/services/privacy.service";
 import type { ConsentKey, ConsentRecord } from "@/types/privacy.type";
@@ -39,7 +38,7 @@ export function ConsentChoicesSection() {
     <section className={styles.block} aria-labelledby="privacy-choices-heading">
       <h2 id="privacy-choices-heading" className={styles.blockHeading}>Your choices</h2>
       {consentsQuery.isLoading ? <ListRowsSkeleton label="Loading your privacy choices" rows={4} withAvatar={false} /> : null}
-      {consentsQuery.isError ? <ErrorState description="We couldn't load your privacy choices." action={<RetryButton onRetry={() => consentsQuery.refetch()} />} /> : null}
+      {consentsQuery.isError ? <ErrorState description="We couldn't load your privacy choices." error={consentsQuery.error} onRetry={() => void consentsQuery.refetch()} /> : null}
       {consentsQuery.data ? consentOptions.map((option) => <ConsentToggleRow key={option.key} label={option.label} description={option.description} enabled={consentsQuery.data.consents[option.key]} onChange={(enabled) => updateConsent.mutate({ key: option.key, enabled })} />) : null}
       {updateConsent.isError ? <p className={styles.errorText} role="alert">We couldn&apos;t save that choice. Try again.</p> : null}
     </section>

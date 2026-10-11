@@ -3,7 +3,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { Button } from "@/components/ui/button";
-import { RetryButton } from "@/components/ui/controls";
 import { ErrorState } from "@/components/ui/feedback";
 import { privacyService } from "@/services/privacy.service";
 import type { DataExportStatus } from "@/types/privacy.type";
@@ -30,7 +29,7 @@ export function DataExportSection() {
   const requestExport = useMutation({ mutationFn: privacyService.requestMyDataExport, onSuccess: (request) => queryClient.setQueryData(dataExportQueryKey, request) });
 
   if (exportQuery.isLoading) return <ListRowsSkeleton label="Loading your data export" rows={2} withAvatar={false} />;
-  if (exportQuery.isError || !exportQuery.data) return <ErrorState description="We couldn't load your data export." action={<RetryButton onRetry={() => exportQuery.refetch()} />} />;
+  if (exportQuery.isError || !exportQuery.data) return <ErrorState description="We couldn't load your data export." error={exportQuery.error} onRetry={() => void exportQuery.refetch()} />;
 
   const { status, downloadUrl, expiresAt } = exportQuery.data;
   const isInProgress = status === "requested" || status === "processing";
