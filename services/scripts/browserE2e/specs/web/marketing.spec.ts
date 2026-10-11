@@ -2,7 +2,7 @@ import { toggleDarkModeOnce } from "../../src/helpers/theme.helper.js";
 import { expectNoHorizontalOverflow } from "../../src/helpers/rendering.helper.js";
 import { expect, test } from "../../src/test.js";
 
-const pages = ["/", "/about", "/contact", "/sellers", "/privacy", "/cookies", "/terms", "/community-guidelines", "/seller-terms", "/creator-terms", "/ads-policy", "/refund-escrow-policy"];
+const pages = ["/", "/about", "/contact", "/sellers", "/privacy", "/cookies", "/terms", "/community-guidelines", "/seller-terms", "/creator-terms", "/ads-policy", "/refund-escrow-policy", "/copyright-policy", "/data-rights"];
 
 test.describe("guest on the marketing site", () => {
   test("every page loads and has no waitlist", async ({ page }) => {
