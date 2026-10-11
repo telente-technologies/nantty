@@ -2,6 +2,24 @@ import type { NextConfig } from "next";
 
 const isDevelopmentBuild = process.env.NODE_ENV === "development";
 
+function readOriginOrEmpty(configuredUrl: string | undefined): string {
+  if (!configuredUrl) return "";
+  try {
+    return new URL(configuredUrl).origin;
+  } catch {
+    return "";
+  }
+}
+
+function readMediaUploadOrigins(): string[] {
+  const listed = (process.env.WEBAPP_UPLOAD_ORIGINS ?? "").split(",").map((origin) => readOriginOrEmpty(origin.trim()));
+  const publicEndpoint = readOriginOrEmpty(process.env.S3_PUBLIC_ENDPOINT ?? (isDevelopmentBuild ? "http://localhost:18333" : undefined));
+  const bucket = process.env.MEDIA_QUARANTINE_BUCKET ?? "zudomart-media-quarantine";
+  const region = process.env.S3_REGION ?? "eu-west-1";
+  const awsBucketOrigin = publicEndpoint === "" ? `https://${bucket}.s3.${region}.amazonaws.com` : "";
+  return [...new Set([...listed, publicEndpoint, awsBucketOrigin].filter(Boolean))];
+}
+
 const contentSecurityPolicyDirectives: Record<string, string[]> = {
   "default-src": ["'self'"],
   "script-src": ["'self'", "'unsafe-inline'", "https://challenges.cloudflare.com", ...(isDevelopmentBuild ? ["'unsafe-eval'"] : [])],
@@ -9,7 +27,7 @@ const contentSecurityPolicyDirectives: Record<string, string[]> = {
   "style-src": ["'self'", "'unsafe-inline'"],
   "img-src": ["'self'", "data:", "blob:", "https:", ...(isDevelopmentBuild ? ["http:"] : [])],
   "font-src": ["'self'"],
-  "connect-src": ["'self'"],
+  "connect-src": ["'self'", ...readMediaUploadOrigins()],
   "media-src": ["'self'", "https:", ...(isDevelopmentBuild ? ["http:"] : [])],
   "object-src": ["'none'"],
   "base-uri": ["'self'"],
@@ -49,6 +67,14 @@ const securityHeaders = [
   { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=(), payment=()" },
 ];
 
+const embedBaselineHeaders = [
+  { key: "Strict-Transport-Security", value: "max-age=63072000; includeSubDomains; preload" },
+  { key: "X-Content-Type-Options", value: "nosniff" },
+  { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+];
+
+const everyPathExceptEmbeds = "/:path((?!embed(?:/|$)|oembed(?:/|$)).*)";
+
 const nextConfig: NextConfig = {
   reactStrictMode: true,
   transpilePackages: ["@zudomart/web-kit", "@zudomart/chat-crypto"],
@@ -59,7 +85,12 @@ const nextConfig: NextConfig = {
     dangerouslyAllowLocalIP: isDevelopmentBuild,
   },
   async headers() {
-    return [{ source: "/:path*", headers: securityHeaders }, { source: "/settings/verification", headers: identityVerificationHeaders }];
+    return [
+      { source: everyPathExceptEmbeds, headers: securityHeaders },
+      { source: "/settings/verification", headers: identityVerificationHeaders },
+      { source: "/embed/:path*", headers: embedBaselineHeaders },
+      { source: "/oembed", headers: embedBaselineHeaders },
+    ];
   },
 };
 
