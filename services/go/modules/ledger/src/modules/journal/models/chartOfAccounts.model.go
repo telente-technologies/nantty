@@ -104,8 +104,11 @@ const (
 )
 
 func (account AccountRef) Custody() AccountCustody {
-	if account.OwnerType == OwnerTypeProviderHeldSellerFunds {
+	switch account.OwnerType {
+	case OwnerTypeProviderHeldSellerFunds:
 		return CustodyProviderHeldSellerOwned
+	case OwnerTypeUserProviderWallet, OwnerTypeProviderWallet:
+		return CustodyProviderHeldUserOwned
 	}
 	return CustodyPlatformOwned
 }

@@ -16,6 +16,7 @@ import (
 	"zudomart/modules/ledger/src/generated/ent/journalentry"
 	"zudomart/modules/ledger/src/generated/ent/journalline"
 	"zudomart/modules/ledger/src/generated/ent/ledgeraccount"
+	"zudomart/modules/ledger/src/generated/ent/predicate"
 	"zudomart/modules/ledger/src/generated/ent/reconciliationbreak"
 	"zudomart/platform/events"
 )
@@ -27,10 +28,11 @@ type ProviderSettlementItem struct {
 }
 
 type ReconcileProviderSettlementsRequest struct {
-	Provider       string
-	WindowStartsAt time.Time
-	WindowEndsAt   time.Time
-	Items          []ProviderSettlementItem
+	Provider        string
+	WindowStartsAt  time.Time
+	WindowEndsAt    time.Time
+	Items           []ProviderSettlementItem
+	SettlementGrace time.Duration
 }
 
 type ReconciliationBreakSummary struct {
@@ -42,10 +44,11 @@ type ReconciliationBreakSummary struct {
 }
 
 type ReconciliationReport struct {
-	RunId        uuid.UUID                    `json:"runId"`
-	Provider     string                       `json:"provider"`
-	MatchedCount int                          `json:"matchedCount"`
-	Breaks       []ReconciliationBreakSummary `json:"breaks"`
+	RunId              uuid.UUID                    `json:"runId"`
+	Provider           string                       `json:"provider"`
+	MatchedCount       int                          `json:"matchedCount"`
+	AwaitingSettlement int                          `json:"awaitingSettlement"`
+	Breaks             []ReconciliationBreakSummary `json:"breaks"`
 }
 
 type collectedAmount struct {
@@ -60,8 +63,11 @@ func (ledger *Ledger) ReconcileProviderSettlements(ctx context.Context, transact
 		return ReconciliationReport{}, models.NewInvalidJournalEntryError("reconciliation needs a provider and a window that ends after it starts")
 	}
 	client := ledger.clientFor(transaction)
-	collected, err := ledger.collectPlatformProviderBalanceDebitsByExternalReference(ctx, client, request.Provider, request.WindowStartsAt.Add(-reconciliationSettlementLag), request.WindowEndsAt.Add(reconciliationSettlementLag))
+	collected, err := ledger.collectPlatformProviderBalanceDebits(ctx, client, request.Provider, journalentry.PostedAtGTE(request.WindowStartsAt), journalentry.PostedAtLT(request.WindowEndsAt))
 	if err != nil {
+		return ReconciliationReport{}, err
+	}
+	if err := ledger.collectProviderReferencesPostedOutsideTheWindow(ctx, client, request, collected); err != nil {
 		return ReconciliationReport{}, err
 	}
 	report := ReconciliationReport{Provider: request.Provider, Breaks: []ReconciliationBreakSummary{}}
@@ -82,6 +88,10 @@ func (ledger *Ledger) ReconcileProviderSettlements(ctx context.Context, transact
 	}
 	for reference, ledgerAmount := range collected {
 		inWindow := !ledgerAmount.postedAt.Before(request.WindowStartsAt) && ledgerAmount.postedAt.Before(request.WindowEndsAt)
+		if inWindow && !seen[reference] && ledger.now().Sub(ledgerAmount.postedAt) < request.SettlementGrace {
+			report.AwaitingSettlement++
+			continue
+		}
 		if inWindow && !seen[reference] {
 			report.Breaks = append(report.Breaks, ReconciliationBreakSummary{Kind: "missingAtProvider", ProviderReference: reference, Currency: ledgerAmount.currency, ExpectedAmountMinor: ledgerAmount.amountMinor})
 		}
@@ -92,14 +102,35 @@ func (ledger *Ledger) ReconcileProviderSettlements(ctx context.Context, transact
 	return report, ledger.persistReconciliationRun(ctx, client, request, &report, collected)
 }
 
-const reconciliationSettlementLag = 72 * time.Hour
+const referencesPerLookup = 500
 
-func (ledger *Ledger) collectPlatformProviderBalanceDebitsByExternalReference(ctx context.Context, client *ent.Client, provider string, from, to time.Time) (map[string]collectedAmount, error) {
+func (ledger *Ledger) collectProviderReferencesPostedOutsideTheWindow(ctx context.Context, client *ent.Client, request ReconcileProviderSettlementsRequest, collected map[string]collectedAmount) error {
+	var missing []string
+	for _, item := range request.Items {
+		if _, found := collected[item.ProviderReference]; !found && item.ProviderReference != "" {
+			missing = append(missing, item.ProviderReference)
+		}
+	}
+	for start := 0; start < len(missing); start += referencesPerLookup {
+		batch := missing[start:min(start+referencesPerLookup, len(missing))]
+		found, err := ledger.collectPlatformProviderBalanceDebits(ctx, client, request.Provider, journalentry.ExternalReferenceIn(batch...))
+		if err != nil {
+			return err
+		}
+		for reference, amount := range found {
+			collected[reference] = amount
+		}
+	}
+	return nil
+}
+
+func (ledger *Ledger) collectPlatformProviderBalanceDebits(ctx context.Context, client *ent.Client, provider string, entryFilters ...predicate.JournalEntry) (map[string]collectedAmount, error) {
+	filters := append([]predicate.JournalEntry{journalentry.ExternalReferenceNEQ(""), journalentry.ReversesEntryIDIsNil()}, entryFilters...)
 	lines, err := client.JournalLine.Query().
 		Where(
 			journalline.DirectionEQ(journalline.DirectionDebit),
 			journalline.HasAccountWith(ledgeraccount.CodeIn(models.PlatformAccountStripeCodes(models.PlatformProviderBalanceAccount(provider, "").Code)...)),
-			journalline.HasEntryWith(journalentry.ExternalReferenceNEQ(""), journalentry.ReversesEntryIDIsNil(), journalentry.PostedAtGTE(from), journalentry.PostedAtLT(to)),
+			journalline.HasEntryWith(filters...),
 		).
 		WithEntry().All(ctx)
 	if err != nil {

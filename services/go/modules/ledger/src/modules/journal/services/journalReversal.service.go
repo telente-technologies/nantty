@@ -67,6 +67,7 @@ type ReverseJournalEntryRequest struct {
 	ReversalReference string
 	Reason            string
 	Metadata          map[string]any
+	StaffInitiated    bool
 }
 
 func (ledger *Ledger) ReverseJournalEntry(ctx context.Context, transaction *sql.Tx, request ReverseJournalEntryRequest) (models.PostedJournalEntry, error) {
@@ -82,6 +83,9 @@ func (ledger *Ledger) ReverseJournalEntry(ctx context.Context, transaction *sql.
 	}
 	if err != nil {
 		return models.PostedJournalEntry{}, err
+	}
+	if request.StaffInitiated && !models.IsStaffReversibleJournalKind(original.Kind) {
+		return models.PostedJournalEntry{}, models.ErrJournalKindNotStaffReversible
 	}
 	reversedAlready, err := client.JournalEntry.Query().Where(journalentry.ReversesEntryID(original.ID)).Only(ctx)
 	if err == nil && reversedAlready.Reference != request.ReversalReference {

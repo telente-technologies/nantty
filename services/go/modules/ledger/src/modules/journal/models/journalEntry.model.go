@@ -56,6 +56,7 @@ var (
 	ErrJournalReferenceReusedWithDifferentLines = errors.New("journal reference already posted with different lines")
 	ErrJournalEntryNotFound                     = errors.New("journal entry not found")
 	ErrJournalEntryAlreadyReversed              = errors.New("journal entry already reversed")
+	ErrJournalKindNotStaffReversible            = errors.New("this journal kind belongs to a module; reverse it with that module's compensating command")
 	ErrAccountDefinitionConflict                = errors.New("ledger account exists with a different definition")
 )
 
@@ -95,4 +96,10 @@ func OppositeDirection(direction Direction) Direction {
 		return Credit
 	}
 	return Debit
+}
+
+var staffReversibleJournalKinds = map[string]bool{"ledger.correction": true, "staff.adjustment": true, "reconciliation.correction": true}
+
+func IsStaffReversibleJournalKind(kind string) bool {
+	return staffReversibleJournalKinds[kind]
 }

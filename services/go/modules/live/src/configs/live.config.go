@@ -100,6 +100,7 @@ func ReadLiveSettingsFromEnvironment(reader *platformconfig.EnvironmentReader) L
 	settings.Safety = readLiveSafetySettings(reader)
 	settings.AllowInMemoryMoneyFake = !settings.IsProduction()
 	if settings.IsProduction() {
+		settings.RedisUrl = reader.ReadRequiredString("LIVE_REDIS_URL")
 		settings.MoneyGrpcAddress = reader.ReadRequiredString("LIVE_MONEY_GRPC_ADDRESS")
 		settings.AccountDirectoryGrpcAddress = reader.ReadRequiredString("LIVE_ACCOUNT_DIRECTORY_GRPC_ADDRESS")
 		settings.CatalogInternalUrl = reader.ReadRequiredString("LIVE_CATALOG_INTERNAL_URL")

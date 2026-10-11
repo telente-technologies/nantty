@@ -52,9 +52,10 @@ func (ledger *Ledger) ReadAccountBalances(ctx context.Context, executor database
 }
 
 type AccountBalance struct {
-	Code         string `json:"code"`
-	Currency     string `json:"currency"`
-	BalanceMinor int64  `json:"balanceMinor"`
+	Code              string `json:"code"`
+	Currency          string `json:"currency"`
+	BalanceMinor      int64  `json:"balanceMinor"`
+	CreditsTotalMinor int64  `json:"-"`
 }
 
 func (ledger *Ledger) ListBalancesOfAccountsWithCode(ctx context.Context, executor databases.ExecutorQuerier, code string) ([]AccountBalance, error) {
@@ -174,7 +175,7 @@ func (ledger *Ledger) ListBalancesOfAccountsWithCodePrefix(ctx context.Context, 
 	}
 	balances := make([]AccountBalance, len(rows))
 	for index, row := range rows {
-		balances[index] = AccountBalance{Code: row.Code, Currency: row.Currency, BalanceMinor: row.BalanceMinor}
+		balances[index] = AccountBalance{Code: row.Code, Currency: row.Currency, BalanceMinor: row.BalanceMinor, CreditsTotalMinor: row.CreditsTotalMinor}
 	}
 	return balances, nil
 }

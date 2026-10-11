@@ -13,7 +13,7 @@ func MountJournalRoutes(mux *http.ServeMux, container *container.Container) {
 	controller := controllers.JournalController{Container: container}
 	staff := container.Resources.StaffVerifiers
 	requireRead := middlewares.RequireStaffPermission(staff, constants.PermissionReadLedger, false)
-	requireReverse := middlewares.RequireStaffPermission(staff, constants.PermissionReverseJournalEntry, true)
+	requireReverse := middlewares.RequireStaffPermissionWithSingleUseStepUp(staff, constants.PermissionReverseJournalEntry)
 	mux.Handle("GET /api/v1/admin/ledger/integrity", requireRead(http.HandlerFunc(controller.GetLedgerIntegrityReport)))
 	mux.Handle("GET /api/v1/admin/ledger/statement", requireRead(http.HandlerFunc(controller.GetAccountStatement)))
 	mux.Handle("GET /api/v1/admin/ledger/currencies", requireRead(http.HandlerFunc(controller.ListLedgerCurrencies)))

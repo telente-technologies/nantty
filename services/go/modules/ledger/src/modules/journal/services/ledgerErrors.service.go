@@ -22,6 +22,8 @@ func ConvertLedgerErrorToApiError(err error) error {
 		return httpserver.NewApiError(http.StatusNotFound, "JOURNAL_ENTRY_NOT_FOUND", "Journal entry was not found.")
 	case errors.Is(err, models.ErrJournalEntryAlreadyReversed):
 		return httpserver.NewApiError(http.StatusConflict, "JOURNAL_ENTRY_ALREADY_REVERSED", "This journal entry has already been reversed.")
+	case errors.Is(err, models.ErrJournalKindNotStaffReversible):
+		return httpserver.NewApiError(http.StatusConflict, "JOURNAL_KIND_NOT_REVERSIBLE", "This entry belongs to a payment, escrow or wallet flow. Use that flow's refund or adjustment action instead.")
 	case errors.Is(err, models.ErrJournalReferenceReusedWithDifferentLines):
 		return httpserver.NewApiError(http.StatusConflict, "IDEMPOTENCY_KEY_REUSED", "This Idempotency-Key was already used with a different request.")
 	}

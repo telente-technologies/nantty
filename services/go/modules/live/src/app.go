@@ -30,6 +30,7 @@ import (
 	"zudomart/modules/live/src/modules/sessions"
 	"zudomart/modules/live/src/modules/stage"
 	"zudomart/modules/live/src/modules/studio"
+	livewidgets "zudomart/modules/live/src/modules/widgets"
 	"zudomart/modules/live/src/services"
 	platformevents "zudomart/platform/events"
 	"zudomart/platform/idempotency"
@@ -193,6 +194,7 @@ func (module *Module) MountRoutes(mux *http.ServeMux) {
 	studio.Mount(mux, module.Container)
 	overlays.Mount(mux, module.Container)
 	internalapi.Mount(mux, module.Container)
+	livewidgets.Mount(mux, module.Container)
 }
 
 func (module *Module) RunBackgroundWorkersUntilContextDone(ctx context.Context) error {
