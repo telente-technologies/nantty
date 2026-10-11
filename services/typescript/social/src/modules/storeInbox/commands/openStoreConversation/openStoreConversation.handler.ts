@@ -1,11 +1,14 @@
+import { forbidden } from "../../../../errors/social.error.js";
 import type { Handler, HandlerContext } from "../../../../types/handlerContext.type.js";
 import type { Db } from "../../../../types/database.type.js";
+import { blockRepository } from "../../../blocks/repositories/block.repository.js";
 import { conversationRepository, type ConversationRow } from "../../../conversations/repositories/conversation.repository.js";
 import { storeConversationKey, type StoreConversationView } from "../../models/storeInbox.model.js";
 import { buildStoreConversationViews } from "../../services/storeInboxView.service.js";
 import type { OpenStoreConversationCommand } from "./openStoreConversation.command.js";
 
 export async function openStoreConversationRow(db: Db, command: OpenStoreConversationCommand): Promise<ConversationRow> {
+  if (await blockRepository.eitherDirection(db, command.buyerAccountId, command.storeId)) throw forbidden("MESSAGE_NOT_ALLOWED", "You can't message this account.");
   const directKey = storeConversationKey(command.storeId, command.buyerAccountId);
   const existing = await conversationRepository.findDirectByKey(db, directKey);
   if (existing !== null) {
