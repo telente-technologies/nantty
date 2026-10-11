@@ -4,29 +4,43 @@ import { evaluateSenderBehaviour } from "../../src/modules/conversations/service
 import { validateOutgoingMessage, type OutgoingMessageInput } from "../../src/modules/messages/services/messageValidation.service.js";
 
 const now = new Date("2026-10-03T10:00:00Z");
-const base: OutgoingMessageInput = { kind: "text", text: undefined, encryption: { deviceId: "d1", ciphertext: "Zm9v" }, media: undefined, linkPreview: undefined, sharedContent: undefined, location: undefined, document: undefined, poll: undefined };
+const base: OutgoingMessageInput = { kind: "text", encryption: { deviceId: "d1", ciphertext: "Zm9v" }, media: undefined, linkPreview: undefined };
 
 describe("validateOutgoingMessage", () => {
   it("accepts a ciphertext envelope", () => {
-    expect(validateOutgoingMessage(base, now)).toMatchObject({ kind: "text", ciphertext: "Zm9v", protocol: "signal-v1-pending", mediaExpiresAt: null });
+    expect(validateOutgoingMessage(base, now)).toMatchObject({ kind: "text", ciphertext: "Zm9v", protocol: "signal-v1", mediaExpiresAt: null });
   });
-  it("refuses plaintext and missing envelopes", () => {
-    expect(() => validateOutgoingMessage({ ...base, text: "hello" }, now)).toThrow(/end-to-end/);
-    expect(() => validateOutgoingMessage({ ...base, encryption: undefined }, now)).toThrow(/envelope/);
+  it("refuses missing envelopes for every kind, including locations, polls and controls", () => {
+    for (const kind of ["text", "location", "liveLocation", "poll", "shared", "control"] as const) {
+      expect(() => validateOutgoingMessage({ ...base, kind, encryption: undefined }, now)).toThrow(/encryption envelope/);
+    }
+    expect(() => validateOutgoingMessage({ ...base, encryption: { deviceId: "d1", ciphertext: "x", protocol: "signal-v1-pending" } }, now)).toThrow(/protocol/);
   });
-  it("expires chat media after 30 days", () => {
+  it("rejects an old client's plaintext poll, location, document, shared item or text with a clear error", () => {
+    const plaintext = {
+      text: "hello", location: { latitude: 6.5, longitude: 3.3, address: "Lekki" }, poll: { question: "q", allowMultipleAnswers: false, options: ["a", "b"] },
+      document: { fileName: "a.pdf", mimeType: "application/pdf", sizeBytes: 10 }, sharedContent: { kind: "post", id: "p1" },
+    };
+    for (const [field, value] of Object.entries(plaintext)) {
+      let error: unknown;
+      try {
+        validateOutgoingMessage({ ...base, kind: field === "poll" ? "poll" : "location", encryption: undefined, plaintext: { [field]: value } }, now);
+      } catch (caught) {
+        error = caught;
+      }
+      expect(error).toMatchObject({ status: 422, code: "PLAINTEXT_NOT_ACCEPTED", details: { fields: [field] } });
+    }
+    expect(() => validateOutgoingMessage({ ...base, plaintext: { text: "", location: null } }, now)).not.toThrow();
+  });
+  it("expires chat media after 30 days and needs media for documents", () => {
     const image = validateOutgoingMessage({ ...base, kind: "image", media: { mediaId: "m", durationSeconds: undefined } }, now);
     expect(image.mediaExpiresAt?.toISOString()).toBe("2026-11-02T10:00:00.000Z");
+    expect(() => validateOutgoingMessage({ ...base, kind: "document" }, now)).toThrow(/encrypted document/);
   });
-  it("limits live location to 8 hours", () => {
-    const location = { latitude: 6.5, longitude: 3.3, address: null };
-    expect(() => validateOutgoingMessage({ ...base, kind: "liveLocation", location: { ...location, liveUntil: "2026-10-03T19:00:00Z" } }, now)).toThrow(/8 hours/);
-    expect(validateOutgoingMessage({ ...base, kind: "liveLocation", location: { ...location, liveUntil: "2026-10-03T11:00:00Z" } }, now).location?.liveUntil).toBe("2026-10-03T11:00:00.000Z");
-  });
-  it("validates polls and documents", () => {
-    expect(() => validateOutgoingMessage({ ...base, kind: "poll", poll: { question: "q", allowMultipleAnswers: false, options: ["a", "A"] } }, now)).toThrow(/different/);
-    expect(() => validateOutgoingMessage({ ...base, kind: "poll", poll: { question: "q", allowMultipleAnswers: false, options: ["a"] } }, now)).toThrow(/2 to 6/);
-    expect(() => validateOutgoingMessage({ ...base, kind: "document", document: { fileName: "a.pdf", mimeType: "application/pdf", sizeBytes: 200 * 1024 * 1024 } }, now)).toThrow(/100 MB/);
+  it("keeps control messages small and media-free", () => {
+    expect(validateOutgoingMessage({ ...base, kind: "control" }, now)).toMatchObject({ kind: "control", mediaExpiresAt: null });
+    expect(() => validateOutgoingMessage({ ...base, kind: "control", media: { mediaId: "m", durationSeconds: undefined } }, now)).toThrow(/no media/);
+    expect(() => validateOutgoingMessage({ ...base, kind: "control", linkPreview: "sealed" }, now)).toThrow(/link preview/);
   });
 });
 

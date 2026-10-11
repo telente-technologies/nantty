@@ -33,7 +33,8 @@ describe("message push recipients", () => {
       [{ accountId: "off", notifyMessages: true, notifyGroups: false, showMessagePreview: true }, { accountId: "private", notifyMessages: true, notifyGroups: true, showMessagePreview: false }],
     );
     expect(data["pushRecipients"]).toEqual([{ userId: "a", showPreview: true }, { userId: "expired", showPreview: true }, { userId: "private", showPreview: false }]);
-    expect(data).toMatchObject({ senderName: "Ada", conversationKind: "group", conversationTitle: "Fabric lovers" });
+    expect(data).toMatchObject({ senderName: "Ada", conversationKind: "group", conversationTitle: null });
+    expect(JSON.stringify(data)).not.toContain("Fabric lovers");
     expect(JSON.stringify(data)).not.toContain("ciphertext");
   });
 

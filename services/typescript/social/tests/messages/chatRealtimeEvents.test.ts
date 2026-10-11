@@ -1,22 +1,19 @@
 import { describe, expect, it } from "vitest";
 
 import { createGetInternalMembershipHandler } from "../../src/modules/conversations/queries/getInternalMembership/getInternalMembership.handler.js";
-import { conversationReadEvent, conversationUpdatedEvent, membershipEndedEvent, messageRemovedEvent, reactionsChangedEvent, realtimeMessageEnvelope } from "../../src/modules/messages/services/chatRealtimeEvents.service.js";
+import { conversationReadEvent, conversationUpdatedEvent, membershipEndedEvent, messageRemovedEvent, realtimeMessageEnvelope } from "../../src/modules/messages/services/chatRealtimeEvents.service.js";
 import type { MessageRow } from "../../src/modules/messages/repositories/message.repository.js";
 import type { HandlerContext } from "../../src/types/handlerContext.type.js";
 
 const now = new Date("2026-10-05T12:00:00Z");
 const conversationId = "0192f0a0-0000-7000-8000-0000000000c1";
 const row = {
-  id: "0192f0a0-0000-7000-8000-0000000000d1", conversationId, senderId: "s1", kind: "text", createdAt: now, deviceId: "d", ciphertext: "x", protocol: "signal-v1", location: null,
-  pollQuestion: null, pollAllowMultiple: false, pollOptions: [], hiddenAt: null, reactions: [{ emoji: "🔥", userId: "a" }, { emoji: "🔥", userId: "b" }, { emoji: "👍", userId: "a" }],
+  id: "0192f0a0-0000-7000-8000-0000000000d1", conversationId, senderId: "s1", kind: "text", createdAt: now, deviceId: "d", ciphertext: "x", protocol: "signal-v1", hiddenAt: null,
 } as unknown as MessageRow;
 
 describe("chat realtime events", () => {
-  it("groups reactions with the accounts realtime personalises", () => {
-    const event = reactionsChangedEvent(row, ["a", "b"], now);
-    expect(event.eventType).toBe("message.reactionsChanged");
-    expect(event.data).toEqual({ conversationId, messageId: row.id, reactions: [{ emoji: "🔥", count: 2, accountIds: ["a", "b"] }, { emoji: "👍", count: 1, accountIds: ["a"] }], memberIds: ["a", "b"] });
+  it("puts only the envelope and routing metadata into realtime events", () => {
+    expect(Object.keys(realtimeMessageEnvelope(row)).sort()).toEqual(["conversationId", "createdAt", "encryption", "id", "kind", "moderationHidden", "senderId"]);
   });
 
   it("never puts ciphertext of a hidden message into an event", () => {
@@ -34,7 +31,7 @@ describe("chat realtime events", () => {
 
 describe("internal membership lookup", () => {
   const context = (member: unknown) => ({
-    database: { client: { conversationMember: { findFirst: async () => member } } },
+    database: { client: { conversationMember: { findFirst: async () => member }, conversation: { findUnique: async () => null } } },
     directory: { findUserSummaries: async () => new Map([["a", { id: "a", name: "Ada", username: "ada", avatarUrl: null, verified: true, isCreator: false }]]) },
   }) as unknown as HandlerContext;
 

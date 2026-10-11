@@ -51,15 +51,14 @@ describe("chat media ownership", () => {
     expect((await signChatMediaUrls(undefined, otherId, [mediaId])).size).toBe(0);
   });
 
-  it("ignores client-supplied media and document URLs", () => {
-    const parsed = sendMessageBodySchema.parse({ kind: "voice", mediaId, mediaUrl: "https://evil.example/a.mp3", document: { fileName: "a.pdf", mimeType: "application/pdf", sizeBytes: 10, url: "file:///x" } }) as Record<string, unknown>;
+  it("ignores client-supplied media URLs", () => {
+    const parsed = sendMessageBodySchema.parse({ kind: "voice", mediaId, mediaUrl: "https://evil.example/a.mp3" }) as Record<string, unknown>;
     expect(parsed["mediaUrl"]).toBeUndefined();
-    expect((parsed["document"] as Record<string, unknown>)["url"]).toBeUndefined();
   });
 
   it("requires an uploaded media id for documents", () => {
-    const base: OutgoingMessageInput = { kind: "document", text: undefined, encryption: undefined, media: undefined, linkPreview: undefined, sharedContent: undefined, location: undefined, document: { fileName: "a.pdf", mimeType: "application/pdf", sizeBytes: 10 }, poll: undefined };
-    expect(() => validateOutgoingMessage(base, new Date())).toThrow(/Upload the document/);
-    expect(validateOutgoingMessage({ ...base, media: { mediaId, durationSeconds: undefined } }, new Date()).document?.url).toBeNull();
+    const base: OutgoingMessageInput = { kind: "document", encryption: { deviceId: "d1", ciphertext: "sealed" }, media: undefined, linkPreview: undefined };
+    expect(() => validateOutgoingMessage(base, new Date())).toThrow(/Upload the encrypted document/);
+    expect(validateOutgoingMessage({ ...base, media: { mediaId, durationSeconds: undefined } }, new Date()).mediaExpiresAt).not.toBeNull();
   });
 });
