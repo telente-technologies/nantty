@@ -6,7 +6,9 @@ import (
 	"fmt"
 
 	"zudomart/modules/ads/src/container"
+	"zudomart/modules/ads/src/events"
 	billingservices "zudomart/modules/ads/src/modules/billing/services"
+	boostservices "zudomart/modules/ads/src/modules/boosts/services"
 	"zudomart/modules/ads/src/services"
 	platformevents "zudomart/platform/events"
 )
@@ -23,7 +25,22 @@ func HandleDomainEventMessage(deployed *container.Container) func(context.Contex
 			return holds.HandleAccountHealthMessage(ctx, body)
 		case billingservices.AdBalanceToppedUp:
 			return billingservices.HandleToppedUpEvent(ctx, deployed, envelope)
+		case "post.deleted":
+			return handlePostDeleted(ctx, deployed, envelope)
+		case events.AdBoostCancelled:
+			return boostservices.HandleBoostCancelledEvent(ctx, deployed, envelope)
 		}
 		return nil
 	}
+}
+
+func handlePostDeleted(ctx context.Context, deployed *container.Container, envelope platformevents.EventEnvelope) error {
+	var data struct {
+		PostId string `json:"postId"`
+	}
+	if err := json.Unmarshal(envelope.Data, &data); err != nil || data.PostId == "" {
+		return fmt.Errorf("%w: post.deleted data is malformed", platformevents.ErrPoisonMessage)
+	}
+	_, err := boostservices.CancelBoostsForPost(ctx, deployed, data.PostId, boostservices.CancelReasonPostDeleted)
+	return err
 }

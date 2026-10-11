@@ -164,6 +164,7 @@ const (
 	StatusActive         Status = "active"
 	StatusCompleted      Status = "completed"
 	StatusRejected       Status = "rejected"
+	StatusCancelled      Status = "cancelled"
 )
 
 func (s Status) String() string {
@@ -173,7 +174,7 @@ func (s Status) String() string {
 // StatusValidator is a validator for the "status" field enum values. It is called by the builders before save.
 func StatusValidator(s Status) error {
 	switch s {
-	case StatusPendingPayment, StatusInReview, StatusActive, StatusCompleted, StatusRejected:
+	case StatusPendingPayment, StatusInReview, StatusActive, StatusCompleted, StatusRejected, StatusCancelled:
 		return nil
 	default:
 		return fmt.Errorf("adboost: invalid enum value for status field: %q", s)

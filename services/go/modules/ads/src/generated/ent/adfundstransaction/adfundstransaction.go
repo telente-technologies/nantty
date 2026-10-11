@@ -79,6 +79,7 @@ const (
 	TypeCreditSpend Type = "credit_spend"
 	TypeRefund      Type = "refund"
 	TypeCardCharge  Type = "card_charge"
+	TypeAdSpendDebt Type = "ad_spend_debt"
 )
 
 func (_type Type) String() string {
@@ -88,7 +89,7 @@ func (_type Type) String() string {
 // TypeValidator is a validator for the "type" field enum values. It is called by the builders before save.
 func TypeValidator(_type Type) error {
 	switch _type {
-	case TypeTopUp, TypeAdSpend, TypeCreditGrant, TypeCreditSpend, TypeRefund, TypeCardCharge:
+	case TypeTopUp, TypeAdSpend, TypeCreditGrant, TypeCreditSpend, TypeRefund, TypeCardCharge, TypeAdSpendDebt:
 		return nil
 	default:
 		return fmt.Errorf("adfundstransaction: invalid enum value for type field: %q", _type)

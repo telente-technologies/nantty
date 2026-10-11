@@ -27,6 +27,7 @@ type Collaborators struct {
 	Publisher    platformevents.DomainEventPublisher
 	Funding      interfaces.FundingGateway
 	Consent      interfaces.ConsentReader
+	Countries    interfaces.ProfileCountryReader
 	Stores       interfaces.StoreDirectory
 	Pctr         interfaces.PctrScorer
 	Fraud        interfaces.FraudModelScorer
@@ -125,6 +126,10 @@ func completeCollaborators(deployed *container.Container, collaborators Collabor
 	deployed.Consent = collaborators.Consent
 	if deployed.Consent == nil {
 		deployed.Consent = integrations.UsersSchemaConsentReader{Database: database, Schema: settings.UsersSchema}
+	}
+	deployed.Countries = collaborators.Countries
+	if deployed.Countries == nil {
+		deployed.Countries = integrations.UsersSchemaProfileCountryReader{Database: database, Schema: settings.UsersSchema}
 	}
 	deployed.AudienceSource = collaborators.Source
 	if deployed.AudienceSource == nil {

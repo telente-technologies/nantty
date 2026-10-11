@@ -10,6 +10,7 @@ import (
 	advanceexperiments "zudomart/modules/ads/src/modules/tools/commands/advanceExperiments"
 	evaluaterules "zudomart/modules/ads/src/modules/tools/commands/evaluateRules"
 	"zudomart/modules/ads/src/services"
+	"zudomart/platform/servicemodule"
 )
 
 func RunBackgroundJobsUntilContextDone(ctx context.Context, deployed *container.Container) {
@@ -27,16 +28,12 @@ func RunBackgroundJobsUntilContextDone(ctx context.Context, deployed *container.
 	go runEvery(ctx, time.Minute, deployed, "experiments", func(ctx context.Context) error { return (advanceexperiments.Handler{Container: deployed}).Execute(ctx) })
 	go runEvery(ctx, deployed.Settings.ReportSweepInterval, deployed, "scheduled reports", func(ctx context.Context) error { return delivery.EnqueueDueReports(ctx, deployed) })
 	if deployed.QueueConsumer != nil {
-		go func() {
-			if err := deployed.QueueConsumer.ConsumeQueueUntilContextDone(ctx, deployed.Settings.ReportQueueName, delivery.HandleQueueMessage(deployed), deployed.Logger); err != nil {
-				deployed.Logger.Warn("scheduled report consumer stopped", slog.Any("error", err))
-			}
-		}()
-		go func() {
-			if err := deployed.QueueConsumer.ConsumeQueueUntilContextDone(ctx, deployed.Settings.DomainEventsQueueName, HandleDomainEventMessage(deployed), deployed.Logger); err != nil {
-				deployed.Logger.Warn("ads domain event consumer stopped", slog.Any("error", err))
-			}
-		}()
+		go servicemodule.SuperviseWorkerUntilContextDone(ctx, deployed.Logger, "ads scheduled report consumer", func(ctx context.Context) error {
+			return deployed.QueueConsumer.ConsumeQueueUntilContextDone(ctx, deployed.Settings.ReportQueueName, delivery.HandleQueueMessage(deployed), deployed.Logger)
+		})
+		go servicemodule.SuperviseWorkerUntilContextDone(ctx, deployed.Logger, "ads domain event consumer", func(ctx context.Context) error {
+			return deployed.QueueConsumer.ConsumeQueueUntilContextDone(ctx, deployed.Settings.DomainEventsQueueName, HandleDomainEventMessage(deployed), deployed.Logger)
+		})
 	}
 	go runEvery(ctx, deployed.Settings.RetentionInterval, deployed, "raw impression retention", func(ctx context.Context) error {
 		_, err := PruneSettledRawImpressions(ctx, deployed)

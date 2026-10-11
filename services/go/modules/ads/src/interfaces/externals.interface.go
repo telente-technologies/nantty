@@ -12,6 +12,10 @@ type ConsentReader interface {
 	PersonalizedAdsEnabled(ctx context.Context, userId string) (bool, error)
 }
 
+type ProfileCountryReader interface {
+	ProfileCountry(ctx context.Context, userId string) string
+}
+
 type ContentSignalReader interface {
 	FindContentSignal(ctx context.Context, contentId string) (types.ContentSignal, bool, error)
 }
@@ -139,6 +143,7 @@ type StartedTopUp struct {
 	TopUpId     string
 	Reference   string
 	CheckoutUrl string
+	Provider    string
 }
 
 type TopUpStatus struct {
