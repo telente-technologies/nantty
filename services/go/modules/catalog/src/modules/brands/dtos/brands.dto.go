@@ -13,3 +13,16 @@ type CreateBrandRequest struct {
 type OfficialDecisionRequest struct {
 	Reason string `json:"reason"`
 }
+
+type UpdateBrandRequest struct {
+	SellingEnabled *bool `json:"sellingEnabled"`
+}
+
+type CreateStorefrontRequest struct {
+	CountryCode *string `json:"countryCode"`
+}
+
+type ReassignBrandRequest struct {
+	ToAccountId string `json:"toAccountId"`
+	Reason      string `json:"reason"`
+}

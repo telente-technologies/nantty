@@ -38,6 +38,8 @@ const (
 	FieldTimezone = "timezone"
 	// FieldStatus holds the string denoting the status field in the database.
 	FieldStatus = "status"
+	// FieldChannel holds the string denoting the channel field in the database.
+	FieldChannel = "channel"
 	// FieldStatusReason holds the string denoting the status_reason field in the database.
 	FieldStatusReason = "status_reason"
 	// FieldStatusChangedAt holds the string denoting the status_changed_at field in the database.
@@ -101,6 +103,7 @@ var Columns = []string{
 	FieldCurrency,
 	FieldTimezone,
 	FieldStatus,
+	FieldChannel,
 	FieldStatusReason,
 	FieldStatusChangedAt,
 	FieldBrandID,
@@ -160,6 +163,10 @@ var (
 	TimezoneValidator func(string) error
 	// DefaultStatus holds the default value on creation for the "status" field.
 	DefaultStatus string
+	// DefaultChannel holds the default value on creation for the "channel" field.
+	DefaultChannel string
+	// ChannelValidator is a validator for the "channel" field. It is called by the builders before save.
+	ChannelValidator func(string) error
 	// StatusReasonValidator is a validator for the "status_reason" field. It is called by the builders before save.
 	StatusReasonValidator func(string) error
 	// DefaultHasOfficialBadge holds the default value on creation for the "has_official_badge" field.
@@ -268,6 +275,11 @@ func ByTimezone(opts ...sql.OrderTermOption) OrderOption {
 // ByStatus orders the results by the status field.
 func ByStatus(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldStatus, opts...).ToFunc()
+}
+
+// ByChannel orders the results by the channel field.
+func ByChannel(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldChannel, opts...).ToFunc()
 }
 
 // ByStatusReason orders the results by the status_reason field.

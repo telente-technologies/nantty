@@ -145,6 +145,20 @@ func (_c *StoreCreate) SetNillableStatus(v *string) *StoreCreate {
 	return _c
 }
 
+// SetChannel sets the "channel" field.
+func (_c *StoreCreate) SetChannel(v string) *StoreCreate {
+	_c.mutation.SetChannel(v)
+	return _c
+}
+
+// SetNillableChannel sets the "channel" field if the given value is not nil.
+func (_c *StoreCreate) SetNillableChannel(v *string) *StoreCreate {
+	if v != nil {
+		_c.SetChannel(*v)
+	}
+	return _c
+}
+
 // SetStatusReason sets the "status_reason" field.
 func (_c *StoreCreate) SetStatusReason(v string) *StoreCreate {
 	_c.mutation.SetStatusReason(v)
@@ -478,6 +492,10 @@ func (_c *StoreCreate) defaults() {
 		v := store.DefaultStatus
 		_c.mutation.SetStatus(v)
 	}
+	if _, ok := _c.mutation.Channel(); !ok {
+		v := store.DefaultChannel
+		_c.mutation.SetChannel(v)
+	}
 	if _, ok := _c.mutation.HasOfficialBadge(); !ok {
 		v := store.DefaultHasOfficialBadge
 		_c.mutation.SetHasOfficialBadge(v)
@@ -603,6 +621,14 @@ func (_c *StoreCreate) check() error {
 	}
 	if _, ok := _c.mutation.Status(); !ok {
 		return &ValidationError{Name: "status", err: errors.New(`ent: missing required field "Store.status"`)}
+	}
+	if _, ok := _c.mutation.Channel(); !ok {
+		return &ValidationError{Name: "channel", err: errors.New(`ent: missing required field "Store.channel"`)}
+	}
+	if v, ok := _c.mutation.Channel(); ok {
+		if err := store.ChannelValidator(v); err != nil {
+			return &ValidationError{Name: "channel", err: fmt.Errorf(`ent: validator failed for field "Store.channel": %w`, err)}
+		}
 	}
 	if v, ok := _c.mutation.StatusReason(); ok {
 		if err := store.StatusReasonValidator(v); err != nil {
@@ -753,6 +779,10 @@ func (_c *StoreCreate) createSpec() (*Store, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.Status(); ok {
 		_spec.SetField(store.FieldStatus, field.TypeString, value)
 		_node.Status = value
+	}
+	if value, ok := _c.mutation.Channel(); ok {
+		_spec.SetField(store.FieldChannel, field.TypeString, value)
+		_node.Channel = value
 	}
 	if value, ok := _c.mutation.StatusReason(); ok {
 		_spec.SetField(store.FieldStatusReason, field.TypeString, value)
@@ -1011,6 +1041,18 @@ func (u *StoreUpsert) SetStatus(v string) *StoreUpsert {
 // UpdateStatus sets the "status" field to the value that was provided on create.
 func (u *StoreUpsert) UpdateStatus() *StoreUpsert {
 	u.SetExcluded(store.FieldStatus)
+	return u
+}
+
+// SetChannel sets the "channel" field.
+func (u *StoreUpsert) SetChannel(v string) *StoreUpsert {
+	u.Set(store.FieldChannel, v)
+	return u
+}
+
+// UpdateChannel sets the "channel" field to the value that was provided on create.
+func (u *StoreUpsert) UpdateChannel() *StoreUpsert {
+	u.SetExcluded(store.FieldChannel)
 	return u
 }
 
@@ -1544,6 +1586,20 @@ func (u *StoreUpsertOne) SetStatus(v string) *StoreUpsertOne {
 func (u *StoreUpsertOne) UpdateStatus() *StoreUpsertOne {
 	return u.Update(func(s *StoreUpsert) {
 		s.UpdateStatus()
+	})
+}
+
+// SetChannel sets the "channel" field.
+func (u *StoreUpsertOne) SetChannel(v string) *StoreUpsertOne {
+	return u.Update(func(s *StoreUpsert) {
+		s.SetChannel(v)
+	})
+}
+
+// UpdateChannel sets the "channel" field to the value that was provided on create.
+func (u *StoreUpsertOne) UpdateChannel() *StoreUpsertOne {
+	return u.Update(func(s *StoreUpsert) {
+		s.UpdateChannel()
 	})
 }
 
@@ -2300,6 +2356,20 @@ func (u *StoreUpsertBulk) SetStatus(v string) *StoreUpsertBulk {
 func (u *StoreUpsertBulk) UpdateStatus() *StoreUpsertBulk {
 	return u.Update(func(s *StoreUpsert) {
 		s.UpdateStatus()
+	})
+}
+
+// SetChannel sets the "channel" field.
+func (u *StoreUpsertBulk) SetChannel(v string) *StoreUpsertBulk {
+	return u.Update(func(s *StoreUpsert) {
+		s.SetChannel(v)
+	})
+}
+
+// UpdateChannel sets the "channel" field to the value that was provided on create.
+func (u *StoreUpsertBulk) UpdateChannel() *StoreUpsertBulk {
+	return u.Update(func(s *StoreUpsert) {
+		s.UpdateChannel()
 	})
 }
 

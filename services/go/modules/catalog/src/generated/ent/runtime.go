@@ -127,8 +127,12 @@ func init() {
 	brandDescFollowerCount := brandFields[14].Descriptor()
 	// brand.DefaultFollowerCount holds the default value on creation for the follower_count field.
 	brand.DefaultFollowerCount = brandDescFollowerCount.Default.(int)
+	// brandDescSellingEnabled is the schema descriptor for selling_enabled field.
+	brandDescSellingEnabled := brandFields[15].Descriptor()
+	// brand.DefaultSellingEnabled holds the default value on creation for the selling_enabled field.
+	brand.DefaultSellingEnabled = brandDescSellingEnabled.Default.(bool)
 	// brandDescUpdatedAt is the schema descriptor for updated_at field.
-	brandDescUpdatedAt := brandFields[15].Descriptor()
+	brandDescUpdatedAt := brandFields[16].Descriptor()
 	// brand.DefaultUpdatedAt holds the default value on creation for the updated_at field.
 	brand.DefaultUpdatedAt = brandDescUpdatedAt.Default.(func() time.Time)
 	// brand.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
@@ -1315,66 +1319,72 @@ func init() {
 	storeDescStatus := storeFields[10].Descriptor()
 	// store.DefaultStatus holds the default value on creation for the status field.
 	store.DefaultStatus = storeDescStatus.Default.(string)
+	// storeDescChannel is the schema descriptor for channel field.
+	storeDescChannel := storeFields[11].Descriptor()
+	// store.DefaultChannel holds the default value on creation for the channel field.
+	store.DefaultChannel = storeDescChannel.Default.(string)
+	// store.ChannelValidator is a validator for the "channel" field. It is called by the builders before save.
+	store.ChannelValidator = storeDescChannel.Validators[0].(func(string) error)
 	// storeDescStatusReason is the schema descriptor for status_reason field.
-	storeDescStatusReason := storeFields[11].Descriptor()
+	storeDescStatusReason := storeFields[12].Descriptor()
 	// store.StatusReasonValidator is a validator for the "status_reason" field. It is called by the builders before save.
 	store.StatusReasonValidator = storeDescStatusReason.Validators[0].(func(string) error)
 	// storeDescHasOfficialBadge is the schema descriptor for has_official_badge field.
-	storeDescHasOfficialBadge := storeFields[14].Descriptor()
+	storeDescHasOfficialBadge := storeFields[15].Descriptor()
 	// store.DefaultHasOfficialBadge holds the default value on creation for the has_official_badge field.
 	store.DefaultHasOfficialBadge = storeDescHasOfficialBadge.Default.(bool)
 	// storeDescVerified is the schema descriptor for verified field.
-	storeDescVerified := storeFields[15].Descriptor()
+	storeDescVerified := storeFields[16].Descriptor()
 	// store.DefaultVerified holds the default value on creation for the verified field.
 	store.DefaultVerified = storeDescVerified.Default.(bool)
 	// storeDescRatingSum is the schema descriptor for rating_sum field.
-	storeDescRatingSum := storeFields[16].Descriptor()
+	storeDescRatingSum := storeFields[17].Descriptor()
 	// store.DefaultRatingSum holds the default value on creation for the rating_sum field.
 	store.DefaultRatingSum = storeDescRatingSum.Default.(int64)
 	// storeDescRatingCount is the schema descriptor for rating_count field.
-	storeDescRatingCount := storeFields[17].Descriptor()
+	storeDescRatingCount := storeFields[18].Descriptor()
 	// store.DefaultRatingCount holds the default value on creation for the rating_count field.
 	store.DefaultRatingCount = storeDescRatingCount.Default.(int)
 	// storeDescModerationVisibility is the schema descriptor for moderation_visibility field.
-	storeDescModerationVisibility := storeFields[18].Descriptor()
+	storeDescModerationVisibility := storeFields[19].Descriptor()
 	// store.DefaultModerationVisibility holds the default value on creation for the moderation_visibility field.
 	store.DefaultModerationVisibility = storeDescModerationVisibility.Default.(string)
 	// storeDescLocale is the schema descriptor for locale field.
-	storeDescLocale := storeFields[21].Descriptor()
+	storeDescLocale := storeFields[22].Descriptor()
 	// store.DefaultLocale holds the default value on creation for the locale field.
 	store.DefaultLocale = storeDescLocale.Default.(string)
 	// store.LocaleValidator is a validator for the "locale" field. It is called by the builders before save.
 	store.LocaleValidator = storeDescLocale.Validators[0].(func(string) error)
 	// storeDescContactPhone is the schema descriptor for contact_phone field.
-	storeDescContactPhone := storeFields[22].Descriptor()
+	storeDescContactPhone := storeFields[23].Descriptor()
 	// store.DefaultContactPhone holds the default value on creation for the contact_phone field.
 	store.DefaultContactPhone = storeDescContactPhone.Default.(string)
 	// store.ContactPhoneValidator is a validator for the "contact_phone" field. It is called by the builders before save.
 	store.ContactPhoneValidator = storeDescContactPhone.Validators[0].(func(string) error)
 	// storeDescContactEmail is the schema descriptor for contact_email field.
-	storeDescContactEmail := storeFields[23].Descriptor()
+	storeDescContactEmail := storeFields[24].Descriptor()
 	// store.DefaultContactEmail holds the default value on creation for the contact_email field.
 	store.DefaultContactEmail = storeDescContactEmail.Default.(string)
 	// store.ContactEmailValidator is a validator for the "contact_email" field. It is called by the builders before save.
 	store.ContactEmailValidator = storeDescContactEmail.Validators[0].(func(string) error)
 	// storeDescContactAddress is the schema descriptor for contact_address field.
-	storeDescContactAddress := storeFields[24].Descriptor()
+	storeDescContactAddress := storeFields[25].Descriptor()
 	// store.DefaultContactAddress holds the default value on creation for the contact_address field.
 	store.DefaultContactAddress = storeDescContactAddress.Default.(string)
 	// store.ContactAddressValidator is a validator for the "contact_address" field. It is called by the builders before save.
 	store.ContactAddressValidator = storeDescContactAddress.Validators[0].(func(string) error)
 	// storeDescPricesIncludeTax is the schema descriptor for prices_include_tax field.
-	storeDescPricesIncludeTax := storeFields[26].Descriptor()
+	storeDescPricesIncludeTax := storeFields[27].Descriptor()
 	// store.DefaultPricesIncludeTax holds the default value on creation for the prices_include_tax field.
 	store.DefaultPricesIncludeTax = storeDescPricesIncludeTax.Default.(bool)
 	// storeDescTagline is the schema descriptor for tagline field.
-	storeDescTagline := storeFields[29].Descriptor()
+	storeDescTagline := storeFields[30].Descriptor()
 	// store.DefaultTagline holds the default value on creation for the tagline field.
 	store.DefaultTagline = storeDescTagline.Default.(string)
 	// store.TaglineValidator is a validator for the "tagline" field. It is called by the builders before save.
 	store.TaglineValidator = storeDescTagline.Validators[0].(func(string) error)
 	// storeDescUpdatedAt is the schema descriptor for updated_at field.
-	storeDescUpdatedAt := storeFields[32].Descriptor()
+	storeDescUpdatedAt := storeFields[33].Descriptor()
 	// store.DefaultUpdatedAt holds the default value on creation for the updated_at field.
 	store.DefaultUpdatedAt = storeDescUpdatedAt.Default.(func() time.Time)
 	// store.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.

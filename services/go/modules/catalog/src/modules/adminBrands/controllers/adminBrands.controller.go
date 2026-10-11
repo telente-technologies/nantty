@@ -5,6 +5,7 @@ import (
 
 	"zudomart/modules/catalog/src/container"
 	decideofficialstatus "zudomart/modules/catalog/src/modules/adminBrands/commands/decideOfficialStatus"
+	reassignbrand "zudomart/modules/catalog/src/modules/adminBrands/commands/reassignBrand"
 	getbrand "zudomart/modules/catalog/src/modules/adminBrands/queries/getBrand"
 	listbrands "zudomart/modules/catalog/src/modules/adminBrands/queries/listBrands"
 	viewdocument "zudomart/modules/catalog/src/modules/adminBrands/queries/viewDocument"
@@ -75,4 +76,21 @@ func (controller AdminBrandsController) Decide(action string) http.HandlerFunc {
 		}
 		controller.respond(writer, request, result, err)
 	}
+}
+
+func acceptReassign(dtos.ReassignBrandRequest) error { return nil }
+
+func (controller AdminBrandsController) Reassign(writer http.ResponseWriter, request *http.Request) {
+	brandId, err := utils.PathIdentifier(request, "brandId")
+	var body dtos.ReassignBrandRequest
+	if err == nil {
+		body, err = utils.DecodeAndValidate(writer, request, acceptReassign)
+	}
+	var result any
+	if err == nil {
+		result, err = (reassignbrand.Handler{Container: controller.Container}).Execute(request.Context(), reassignbrand.Command{
+			Actor: services.StaffActorFrom(request), BrandId: brandId, ToAccountId: body.ToAccountId, Reason: body.Reason,
+		})
+	}
+	controller.respond(writer, request, result, err)
 }

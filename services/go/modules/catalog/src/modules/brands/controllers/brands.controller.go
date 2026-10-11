@@ -8,6 +8,9 @@ import (
 	"zudomart/modules/catalog/src/container"
 	"zudomart/modules/catalog/src/middlewares"
 	createbrand "zudomart/modules/catalog/src/modules/brands/commands/createBrand"
+	createbrandstorefront "zudomart/modules/catalog/src/modules/brands/commands/createBrandStorefront"
+	setbrandselling "zudomart/modules/catalog/src/modules/brands/commands/setBrandSelling"
+	"zudomart/modules/catalog/src/modules/brands/dtos"
 	getbrand "zudomart/modules/catalog/src/modules/brands/queries/getBrand"
 	listbrandproducts "zudomart/modules/catalog/src/modules/brands/queries/listBrandProducts"
 	listbrands "zudomart/modules/catalog/src/modules/brands/queries/listBrands"
@@ -67,6 +70,34 @@ func (controller BrandsController) CreateBrand(writer http.ResponseWriter, reque
 		result, err = (createbrand.Handler{Container: controller.Container}).Execute(request.Context(), createbrand.Command{
 			AccountId: middlewares.AccountIdFrom(request.Context()), IdempotencyKey: request.Header.Get("Idempotency-Key"), Request: body,
 		})
+	}
+	controller.respond(writer, request, http.StatusCreated, result, err)
+}
+
+func (controller BrandsController) UpdateBrand(writer http.ResponseWriter, request *http.Request) {
+	brandId, err := utils.PathIdentifier(request, "brandId")
+	var result any
+	if err == nil {
+		var body dtos.UpdateBrandRequest
+		if body, err = utils.DecodeAndValidate(writer, request, validators.ValidateUpdateBrand); err == nil {
+			result, err = (setbrandselling.Handler{Container: controller.Container}).Execute(request.Context(), setbrandselling.Command{
+				AccountId: middlewares.AccountIdFrom(request.Context()), BrandId: brandId, SellingEnabled: *body.SellingEnabled,
+			})
+		}
+	}
+	controller.respond(writer, request, http.StatusOK, result, err)
+}
+
+func (controller BrandsController) CreateStorefront(writer http.ResponseWriter, request *http.Request) {
+	brandId, err := utils.PathIdentifier(request, "brandId")
+	var result any
+	if err == nil {
+		var body dtos.CreateStorefrontRequest
+		if body, err = utils.DecodeAndValidate(writer, request, validators.ValidateCreateStorefront); err == nil {
+			result, err = (createbrandstorefront.Handler{Container: controller.Container}).Execute(request.Context(), createbrandstorefront.Command{
+				AccountId: middlewares.AccountIdFrom(request.Context()), BrandId: brandId, CountryCode: body.CountryCode,
+			})
+		}
 	}
 	controller.respond(writer, request, http.StatusCreated, result, err)
 }

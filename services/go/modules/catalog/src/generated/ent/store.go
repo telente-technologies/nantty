@@ -44,6 +44,8 @@ type Store struct {
 	Timezone string `json:"timezone,omitempty"`
 	// Status holds the value of the "status" field.
 	Status string `json:"status,omitempty"`
+	// Channel holds the value of the "channel" field.
+	Channel string `json:"channel,omitempty"`
 	// StatusReason holds the value of the "status_reason" field.
 	StatusReason *string `json:"status_reason,omitempty"`
 	// StatusChangedAt holds the value of the "status_changed_at" field.
@@ -104,7 +106,7 @@ func (*Store) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullBool)
 		case store.FieldRatingSum, store.FieldRatingCount:
 			values[i] = new(sql.NullInt64)
-		case store.FieldName, store.FieldSlug, store.FieldDescription, store.FieldLogoURL, store.FieldBannerURL, store.FieldCountryCode, store.FieldCurrency, store.FieldTimezone, store.FieldStatus, store.FieldStatusReason, store.FieldModerationVisibility, store.FieldLocale, store.FieldContactPhone, store.FieldContactEmail, store.FieldContactAddress, store.FieldTagline:
+		case store.FieldName, store.FieldSlug, store.FieldDescription, store.FieldLogoURL, store.FieldBannerURL, store.FieldCountryCode, store.FieldCurrency, store.FieldTimezone, store.FieldStatus, store.FieldChannel, store.FieldStatusReason, store.FieldModerationVisibility, store.FieldLocale, store.FieldContactPhone, store.FieldContactEmail, store.FieldContactAddress, store.FieldTagline:
 			values[i] = new(sql.NullString)
 		case store.FieldCreatedAt, store.FieldStatusChangedAt, store.FieldModerationVisibilityAt, store.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
@@ -204,6 +206,12 @@ func (_m *Store) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field status", values[i])
 			} else if value.Valid {
 				_m.Status = value.String
+			}
+		case store.FieldChannel:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field channel", values[i])
+			} else if value.Valid {
+				_m.Channel = value.String
 			}
 		case store.FieldStatusReason:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -428,6 +436,9 @@ func (_m *Store) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("status=")
 	builder.WriteString(_m.Status)
+	builder.WriteString(", ")
+	builder.WriteString("channel=")
+	builder.WriteString(_m.Channel)
 	builder.WriteString(", ")
 	if v := _m.StatusReason; v != nil {
 		builder.WriteString("status_reason=")

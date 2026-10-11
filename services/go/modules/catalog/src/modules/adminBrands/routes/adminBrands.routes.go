@@ -20,4 +20,5 @@ func MountAdminBrandsRoutes(mux *http.ServeMux, deployed *container.Container) {
 	mux.Handle("POST /api/v1/admin/brands/{brandId}/official-status/reject", review(controller.Decide("reject")))
 	mux.Handle("POST /api/v1/admin/brands/{brandId}/official-status/request-info", review(controller.Decide("request-info")))
 	mux.Handle("POST /api/v1/admin/brands/{brandId}/official-status/revoke", revoke(controller.Decide("revoke")))
+	mux.Handle("POST /api/v1/admin/brands/{brandId}/reassign", revoke(controller.Reassign))
 }

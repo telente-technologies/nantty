@@ -92,6 +92,7 @@ type BrandMutation struct {
 	official_status   *string
 	follower_count    *int
 	addfollower_count *int
+	selling_enabled   *bool
 	updated_at        *time.Time
 	clearedFields     map[string]struct{}
 	done              bool
@@ -877,6 +878,42 @@ func (m *BrandMutation) ResetFollowerCount() {
 	m.addfollower_count = nil
 }
 
+// SetSellingEnabled sets the "selling_enabled" field.
+func (m *BrandMutation) SetSellingEnabled(b bool) {
+	m.selling_enabled = &b
+}
+
+// SellingEnabled returns the value of the "selling_enabled" field in the mutation.
+func (m *BrandMutation) SellingEnabled() (r bool, exists bool) {
+	v := m.selling_enabled
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSellingEnabled returns the old "selling_enabled" field's value of the Brand entity.
+// If the Brand object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *BrandMutation) OldSellingEnabled(ctx context.Context) (v bool, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSellingEnabled is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSellingEnabled requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSellingEnabled: %w", err)
+	}
+	return oldValue.SellingEnabled, nil
+}
+
+// ResetSellingEnabled resets all changes to the "selling_enabled" field.
+func (m *BrandMutation) ResetSellingEnabled() {
+	m.selling_enabled = nil
+}
+
 // SetUpdatedAt sets the "updated_at" field.
 func (m *BrandMutation) SetUpdatedAt(t time.Time) {
 	m.updated_at = &t
@@ -947,7 +984,7 @@ func (m *BrandMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *BrandMutation) Fields() []string {
-	fields := make([]string, 0, 17)
+	fields := make([]string, 0, 18)
 	if m.created_at != nil {
 		fields = append(fields, brand.FieldCreatedAt)
 	}
@@ -996,6 +1033,9 @@ func (m *BrandMutation) Fields() []string {
 	if m.follower_count != nil {
 		fields = append(fields, brand.FieldFollowerCount)
 	}
+	if m.selling_enabled != nil {
+		fields = append(fields, brand.FieldSellingEnabled)
+	}
 	if m.updated_at != nil {
 		fields = append(fields, brand.FieldUpdatedAt)
 	}
@@ -1039,6 +1079,8 @@ func (m *BrandMutation) Field(name string) (ent.Value, bool) {
 		return m.OfficialStatus()
 	case brand.FieldFollowerCount:
 		return m.FollowerCount()
+	case brand.FieldSellingEnabled:
+		return m.SellingEnabled()
 	case brand.FieldUpdatedAt:
 		return m.UpdatedAt()
 	}
@@ -1082,6 +1124,8 @@ func (m *BrandMutation) OldField(ctx context.Context, name string) (ent.Value, e
 		return m.OldOfficialStatus(ctx)
 	case brand.FieldFollowerCount:
 		return m.OldFollowerCount(ctx)
+	case brand.FieldSellingEnabled:
+		return m.OldSellingEnabled(ctx)
 	case brand.FieldUpdatedAt:
 		return m.OldUpdatedAt(ctx)
 	}
@@ -1204,6 +1248,13 @@ func (m *BrandMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetFollowerCount(v)
+		return nil
+	case brand.FieldSellingEnabled:
+		v, ok := value.(bool)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSellingEnabled(v)
 		return nil
 	case brand.FieldUpdatedAt:
 		v, ok := value.(time.Time)
@@ -1362,6 +1413,9 @@ func (m *BrandMutation) ResetField(name string) error {
 		return nil
 	case brand.FieldFollowerCount:
 		m.ResetFollowerCount()
+		return nil
+	case brand.FieldSellingEnabled:
+		m.ResetSellingEnabled()
 		return nil
 	case brand.FieldUpdatedAt:
 		m.ResetUpdatedAt()
@@ -17144,6 +17198,7 @@ type StoreMutation struct {
 	currency                     *string
 	timezone                     *string
 	status                       *string
+	channel                      *string
 	status_reason                *string
 	status_changed_at            *time.Time
 	brand_id                     *uuid.UUID
@@ -17737,6 +17792,42 @@ func (m *StoreMutation) OldStatus(ctx context.Context) (v string, err error) {
 // ResetStatus resets all changes to the "status" field.
 func (m *StoreMutation) ResetStatus() {
 	m.status = nil
+}
+
+// SetChannel sets the "channel" field.
+func (m *StoreMutation) SetChannel(s string) {
+	m.channel = &s
+}
+
+// Channel returns the value of the "channel" field in the mutation.
+func (m *StoreMutation) Channel() (r string, exists bool) {
+	v := m.channel
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldChannel returns the old "channel" field's value of the Store entity.
+// If the Store object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *StoreMutation) OldChannel(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldChannel is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldChannel requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldChannel: %w", err)
+	}
+	return oldValue.Channel, nil
+}
+
+// ResetChannel resets all changes to the "channel" field.
+func (m *StoreMutation) ResetChannel() {
+	m.channel = nil
 }
 
 // SetStatusReason sets the "status_reason" field.
@@ -18783,7 +18874,7 @@ func (m *StoreMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *StoreMutation) Fields() []string {
-	fields := make([]string, 0, 34)
+	fields := make([]string, 0, 35)
 	if m.created_at != nil {
 		fields = append(fields, store.FieldCreatedAt)
 	}
@@ -18819,6 +18910,9 @@ func (m *StoreMutation) Fields() []string {
 	}
 	if m.status != nil {
 		fields = append(fields, store.FieldStatus)
+	}
+	if m.channel != nil {
+		fields = append(fields, store.FieldChannel)
 	}
 	if m.status_reason != nil {
 		fields = append(fields, store.FieldStatusReason)
@@ -18918,6 +19012,8 @@ func (m *StoreMutation) Field(name string) (ent.Value, bool) {
 		return m.Timezone()
 	case store.FieldStatus:
 		return m.Status()
+	case store.FieldChannel:
+		return m.Channel()
 	case store.FieldStatusReason:
 		return m.StatusReason()
 	case store.FieldStatusChangedAt:
@@ -18995,6 +19091,8 @@ func (m *StoreMutation) OldField(ctx context.Context, name string) (ent.Value, e
 		return m.OldTimezone(ctx)
 	case store.FieldStatus:
 		return m.OldStatus(ctx)
+	case store.FieldChannel:
+		return m.OldChannel(ctx)
 	case store.FieldStatusReason:
 		return m.OldStatusReason(ctx)
 	case store.FieldStatusChangedAt:
@@ -19131,6 +19229,13 @@ func (m *StoreMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetStatus(v)
+		return nil
+	case store.FieldChannel:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetChannel(v)
 		return nil
 	case store.FieldStatusReason:
 		v, ok := value.(string)
@@ -19472,6 +19577,9 @@ func (m *StoreMutation) ResetField(name string) error {
 		return nil
 	case store.FieldStatus:
 		m.ResetStatus()
+		return nil
+	case store.FieldChannel:
+		m.ResetChannel()
 		return nil
 	case store.FieldStatusReason:
 		m.ResetStatusReason()

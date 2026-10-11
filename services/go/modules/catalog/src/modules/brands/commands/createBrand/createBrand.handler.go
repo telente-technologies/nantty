@@ -2,16 +2,19 @@ package createbrand
 
 import (
 	"context"
+	"log/slog"
 	"strings"
 
 	"github.com/google/uuid"
 
 	"zudomart/modules/catalog/src/container"
+	"zudomart/modules/catalog/src/databases/schema"
 	catalogerrors "zudomart/modules/catalog/src/errors"
 	"zudomart/modules/catalog/src/events"
 	"zudomart/modules/catalog/src/generated/ent"
 	"zudomart/modules/catalog/src/generated/ent/brand"
 	"zudomart/modules/catalog/src/generated/ent/category"
+	"zudomart/modules/catalog/src/interfaces"
 	brandservices "zudomart/modules/catalog/src/modules/brands/services"
 )
 
@@ -23,6 +26,7 @@ func (handler Handler) Execute(ctx context.Context, command Command) (brandservi
 	request := command.Request
 	scope := "brands.create:" + command.AccountId.String()
 	hash := container.FingerprintOfRequest(request)
+	var claimed *uuid.UUID
 	brandId, err := container.RunIdempotently(ctx, handler.Container, scope, command.IdempotencyKey, hash, func(tx *ent.Tx) (string, error) {
 		handle := strings.ToLower(strings.TrimPrefix(strings.TrimSpace(request.Handle), "@"))
 		taken, err := tx.Brand.Query().Where(brand.Slug(handle)).Exist(ctx)
@@ -32,8 +36,20 @@ func (handler Handler) Execute(ctx context.Context, command Command) (brandservi
 		if taken {
 			return "", catalogerrors.BrandHandleTaken
 		}
+		owned, err := tx.Brand.Query().Where(brand.OwnerAccountID(command.AccountId), brand.Active(true)).Exist(ctx)
+		if err != nil {
+			return "", err
+		}
+		if owned {
+			return "", catalogerrors.ProfileLimitOneBrand
+		}
 		categoryId := uuid.MustParse(request.CategoryId)
-		created, err := tx.Brand.Create().SetName(strings.TrimSpace(request.Name)).SetSlug(handle).SetNillableLogoURL(blankToNil(request.LogoUrl)).
+		brandId := schema.NewTimeOrderedUuid()
+		if err := handler.Container.LinkedProfiles.Claim(ctx, command.AccountId, interfaces.LinkedClaim{Kind: "brand", ProfileId: brandId}); err != nil {
+			return "", err
+		}
+		claimed = &brandId
+		created, err := tx.Brand.Create().SetID(brandId).SetName(strings.TrimSpace(request.Name)).SetSlug(handle).SetNillableLogoURL(blankToNil(request.LogoUrl)).
 			SetNillableCoverURL(blankToNil(request.CoverUrl)).SetNillableWebsite(blankToNil(request.Website)).SetDescription(strings.TrimSpace(request.Description)).
 			SetCategoryID(categoryId).SetCategoryName(handler.categoryName(ctx, categoryId)).SetOwnerAccountID(command.AccountId).Save(ctx)
 		if err != nil {
@@ -41,6 +57,11 @@ func (handler Handler) Execute(ctx context.Context, command Command) (brandservi
 		}
 		return created.ID.String(), events.EnqueueOutboxEventInTransaction(ctx, tx, "brand.updated", created.ID.String(), handler.Container.Now(), map[string]any{"brandId": created.ID})
 	})
+	if err != nil && claimed != nil {
+		if releaseErr := handler.Container.LinkedProfiles.Release(ctx, command.AccountId, interfaces.LinkedClaim{Kind: "brand", ProfileId: *claimed}); releaseErr != nil {
+			handler.Container.Logger.Error("release linked brand claim", slog.Any("error", releaseErr))
+		}
+	}
 	if ent.IsConstraintError(err) {
 		return brandservices.BrandDetail{}, catalogerrors.BrandHandleTaken
 	}

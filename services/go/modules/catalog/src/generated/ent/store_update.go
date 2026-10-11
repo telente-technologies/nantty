@@ -169,6 +169,20 @@ func (_u *StoreUpdate) SetNillableStatus(v *string) *StoreUpdate {
 	return _u
 }
 
+// SetChannel sets the "channel" field.
+func (_u *StoreUpdate) SetChannel(v string) *StoreUpdate {
+	_u.mutation.SetChannel(v)
+	return _u
+}
+
+// SetNillableChannel sets the "channel" field if the given value is not nil.
+func (_u *StoreUpdate) SetNillableChannel(v *string) *StoreUpdate {
+	if v != nil {
+		_u.SetChannel(*v)
+	}
+	return _u
+}
+
 // SetStatusReason sets the "status_reason" field.
 func (_u *StoreUpdate) SetStatusReason(v string) *StoreUpdate {
 	_u.mutation.SetStatusReason(v)
@@ -604,6 +618,11 @@ func (_u *StoreUpdate) check() error {
 			return &ValidationError{Name: "timezone", err: fmt.Errorf(`ent: validator failed for field "Store.timezone": %w`, err)}
 		}
 	}
+	if v, ok := _u.mutation.Channel(); ok {
+		if err := store.ChannelValidator(v); err != nil {
+			return &ValidationError{Name: "channel", err: fmt.Errorf(`ent: validator failed for field "Store.channel": %w`, err)}
+		}
+	}
 	if v, ok := _u.mutation.StatusReason(); ok {
 		if err := store.StatusReasonValidator(v); err != nil {
 			return &ValidationError{Name: "status_reason", err: fmt.Errorf(`ent: validator failed for field "Store.status_reason": %w`, err)}
@@ -681,6 +700,9 @@ func (_u *StoreUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	}
 	if value, ok := _u.mutation.Status(); ok {
 		_spec.SetField(store.FieldStatus, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.Channel(); ok {
+		_spec.SetField(store.FieldChannel, field.TypeString, value)
 	}
 	if value, ok := _u.mutation.StatusReason(); ok {
 		_spec.SetField(store.FieldStatusReason, field.TypeString, value)
@@ -953,6 +975,20 @@ func (_u *StoreUpdateOne) SetStatus(v string) *StoreUpdateOne {
 func (_u *StoreUpdateOne) SetNillableStatus(v *string) *StoreUpdateOne {
 	if v != nil {
 		_u.SetStatus(*v)
+	}
+	return _u
+}
+
+// SetChannel sets the "channel" field.
+func (_u *StoreUpdateOne) SetChannel(v string) *StoreUpdateOne {
+	_u.mutation.SetChannel(v)
+	return _u
+}
+
+// SetNillableChannel sets the "channel" field if the given value is not nil.
+func (_u *StoreUpdateOne) SetNillableChannel(v *string) *StoreUpdateOne {
+	if v != nil {
+		_u.SetChannel(*v)
 	}
 	return _u
 }
@@ -1405,6 +1441,11 @@ func (_u *StoreUpdateOne) check() error {
 			return &ValidationError{Name: "timezone", err: fmt.Errorf(`ent: validator failed for field "Store.timezone": %w`, err)}
 		}
 	}
+	if v, ok := _u.mutation.Channel(); ok {
+		if err := store.ChannelValidator(v); err != nil {
+			return &ValidationError{Name: "channel", err: fmt.Errorf(`ent: validator failed for field "Store.channel": %w`, err)}
+		}
+	}
 	if v, ok := _u.mutation.StatusReason(); ok {
 		if err := store.StatusReasonValidator(v); err != nil {
 			return &ValidationError{Name: "status_reason", err: fmt.Errorf(`ent: validator failed for field "Store.status_reason": %w`, err)}
@@ -1499,6 +1540,9 @@ func (_u *StoreUpdateOne) sqlSave(ctx context.Context) (_node *Store, err error)
 	}
 	if value, ok := _u.mutation.Status(); ok {
 		_spec.SetField(store.FieldStatus, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.Channel(); ok {
+		_spec.SetField(store.FieldChannel, field.TypeString, value)
 	}
 	if value, ok := _u.mutation.StatusReason(); ok {
 		_spec.SetField(store.FieldStatusReason, field.TypeString, value)
