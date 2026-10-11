@@ -85,7 +85,7 @@ export function StaffMemberDialog({ member: initialMember, hasFreeSeat, onClose,
   const roleOptions = (assignableRoles.includes(member.role) ? assignableRoles : [member.role, ...assignableRoles]).map((assignableRole) => ({ value: assignableRole, label: staffRoleLabels[assignableRole] }));
 
   return (
-    <ModalDialog
+    <ModalDialog intent="team"
       isOpen
       onClose={onClose}
       width="large"

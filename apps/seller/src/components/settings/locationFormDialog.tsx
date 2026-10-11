@@ -52,7 +52,7 @@ export function LocationFormDialog({ location, isOpen, onClose, onSaved }: { rea
   }
 
   return (
-    <ModalDialog
+    <ModalDialog intent="location"
       isOpen={isOpen}
       onClose={onClose}
       title={location ? `Edit ${location.name}` : "Add a location"}

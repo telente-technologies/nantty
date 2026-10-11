@@ -16,6 +16,9 @@ import { StatusBadge } from "@/components/ui/statusBadge";
 import { useToast } from "@/components/ui/toastProvider";
 import { useMoneyFormatter } from "@/hooks/useMoneyFormatter.hook";
 import { useSellerQuery } from "@/hooks/useSellerQuery.hook";
+import { StepUpCancelledError, useStepUpPrompt } from "@/components/wallet/stepUpDialog";
+import { stepUpHeaders } from "@/services/stepUp.service";
+import { presentPaymentProblem } from "@/utils/paymentProblem.util";
 import { createIdempotencyKey, readErrorMessageForDisplay, sendSellerApiRequest } from "@/services/clientApi.service";
 import type { CursorPage } from "@/types/pagination.type";
 import type { Payout, PayoutAccount, WalletBalances } from "@/types/wallet.type";
@@ -31,6 +34,7 @@ export function WithdrawView() {
   const { can } = useSellerSession();
   const { formatMoney } = useMoneyFormatter();
   const { showToast } = useToast();
+  const { withStepUp, stepUpDialog } = useStepUpPrompt();
   const balancesQuery = useSellerQuery<WalletBalances>("/seller/wallet/balances");
   const settingsQuery = useSellerQuery<WalletPayoutSettings>("/seller/wallet/payout-settings");
   const accountsQuery = useSellerQuery<CursorPage<PayoutAccount>>("/seller/wallet/payout-accounts");
@@ -91,7 +95,8 @@ export function WithdrawView() {
     setIsSubmitting(true);
     setSubmitError(null);
     try {
-      const payout = await sendSellerApiRequest<Payout>("/seller/wallet/payouts", { method: "POST", body: { amountMinor, accountId: selectedAccount.id }, idempotencyKey: idempotencyKeyRef.current });
+      const idempotencyKey = idempotencyKeyRef.current;
+      const payout = await withStepUp((token) => sendSellerApiRequest<Payout>("/seller/wallet/payouts", { method: "POST", body: { amountMinor, accountId: selectedAccount.id }, idempotencyKey, headers: stepUpHeaders(token) }));
       showToast(`Withdrawal of ${formatMoney(payout.amount)} is on its way.`);
       setIsConfirming(false);
       setAmountText("");
@@ -100,7 +105,9 @@ export function WithdrawView() {
       balancesQuery.reload();
       payoutsQuery.reload();
     } catch (error) {
-      setSubmitError(readErrorMessageForDisplay(error));
+      if (error instanceof StepUpCancelledError) return;
+      if (await presentPaymentProblem(error)) setIsConfirming(false);
+      else setSubmitError(readErrorMessageForDisplay(error));
     } finally {
       setIsSubmitting(false);
     }
@@ -108,6 +115,7 @@ export function WithdrawView() {
 
   return (
     <PageStack>
+      {stepUpDialog}
       <PageHeader title="Withdraw & payouts" description={payoutSettings.schedule} actions={<ButtonLink href="/settings/payouts">Payout preferences</ButtonLink>} />
       <WalletTabs />
       {isPayoutLocked ? <PayoutSetupBanner /> : null}

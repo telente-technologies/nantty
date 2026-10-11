@@ -31,7 +31,7 @@ export function WithdrawConfirmationDialog({ isOpen, amount, fee, account, isSub
   const doesRetypedAmountMatch = retypedAmountMinor === amount.amountMinor;
 
   return (
-    <ModalDialog
+    <ModalDialog intent="naira"
       isOpen={isOpen}
       title="Confirm withdrawal"
       description="Money sent to a bank cannot be pulled back. Check the details."

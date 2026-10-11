@@ -10,6 +10,8 @@ import { KeyValueList } from "@/components/ui/panel";
 import { readPayoutAccountNumberRuleForCountry } from "@/constants/walletBankRules.constant";
 import { useSellerQuery } from "@/hooks/useSellerQuery.hook";
 import { useStoreContext } from "@/hooks/useStoreSettings.hook";
+import { StepUpCancelledError, useStepUpPrompt } from "@/components/wallet/stepUpDialog";
+import { stepUpHeaders } from "@/services/stepUp.service";
 import { createIdempotencyKey, readErrorMessageForDisplay, sendSellerApiRequest, SellerApiRequestError } from "@/services/clientApi.service";
 import type { CursorPage } from "@/types/pagination.type";
 import type { PayoutAccount } from "@/types/wallet.type";
@@ -28,6 +30,7 @@ export function AddPayoutAccountDialog({ isOpen, onClose, onAccountAdded }: { re
   const [isWorking, setIsWorking] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const idempotencyKeyRef = useRef(createIdempotencyKey("payout_account"));
+  const { withStepUp, stepUpDialog } = useStepUpPrompt();
 
   function resetDialogState() {
     setBankCode("");
@@ -61,17 +64,21 @@ export function AddPayoutAccountDialog({ isOpen, onClose, onAccountAdded }: { re
     setIsWorking(true);
     setErrorMessage(null);
     try {
-      const account = await sendSellerApiRequest<PayoutAccount>("/seller/wallet/payout-accounts", { method: "POST", body: { resolutionId: resolvedAccount.resolutionId }, idempotencyKey: idempotencyKeyRef.current });
+      const idempotencyKey = idempotencyKeyRef.current;
+      const resolutionId = resolvedAccount.resolutionId;
+      const account = await withStepUp((token) => sendSellerApiRequest<PayoutAccount>("/seller/wallet/payout-accounts", { method: "POST", body: { resolutionId }, idempotencyKey, headers: stepUpHeaders(token) }));
       resetDialogState();
       onAccountAdded(account);
     } catch (error) {
-      setErrorMessage(readErrorMessageForDisplay(error));
+      if (!(error instanceof StepUpCancelledError)) setErrorMessage(readErrorMessageForDisplay(error));
     } finally {
       setIsWorking(false);
     }
   }
 
   return (
+    <>
+    {stepUpDialog}
     <ModalDialog
       isOpen={isOpen}
       title="Add payout account"
@@ -113,5 +120,6 @@ export function AddPayoutAccountDialog({ isOpen, onClose, onAccountAdded }: { re
         {errorMessage ? <Callout tone="error">{errorMessage}</Callout> : null}
       </div>
     </ModalDialog>
+    </>
   );
 }

@@ -12,6 +12,8 @@ import { PageHeader, PageStack, Panel } from "@/components/ui/panel";
 import { StatusBadge } from "@/components/ui/statusBadge";
 import { useToast } from "@/components/ui/toastProvider";
 import { useSellerQuery } from "@/hooks/useSellerQuery.hook";
+import { StepUpCancelledError, useStepUpPrompt } from "@/components/wallet/stepUpDialog";
+import { stepUpHeaders } from "@/services/stepUp.service";
 import { readErrorMessageForDisplay, sendSellerApiRequest } from "@/services/clientApi.service";
 import type { CursorPage } from "@/types/pagination.type";
 import type { PayoutAccount } from "@/types/wallet.type";
@@ -21,6 +23,7 @@ import styles from "./wallet.module.css";
 export function PayoutAccountsView({ embedded = false }: { readonly embedded?: boolean }) {
   const { can } = useSellerSession();
   const { showToast } = useToast();
+  const { withStepUp, stepUpDialog } = useStepUpPrompt();
   const accountsQuery = useSellerQuery<CursorPage<PayoutAccount>>("/seller/wallet/payout-accounts");
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [accountPendingRemoval, setAccountPendingRemoval] = useState<PayoutAccount | null>(null);
@@ -31,11 +34,11 @@ export function PayoutAccountsView({ embedded = false }: { readonly embedded?: b
   async function makeAccountTheDefault(account: PayoutAccount) {
     setBusyAccountId(account.id);
     try {
-      await sendSellerApiRequest(`/seller/wallet/payout-accounts/${encodeURIComponent(account.id)}`, { method: "PATCH", body: { isDefault: true } });
+      await withStepUp((token) => sendSellerApiRequest(`/seller/wallet/payout-accounts/${encodeURIComponent(account.id)}`, { method: "PATCH", body: { isDefault: true }, headers: stepUpHeaders(token) }));
       showToast(`${account.bankName} ${account.accountNumberMasked} is now your default payout account.`);
       accountsQuery.reload();
     } catch (error) {
-      showToast(readErrorMessageForDisplay(error), "error");
+      if (!(error instanceof StepUpCancelledError)) showToast(readErrorMessageForDisplay(error), "error");
     } finally {
       setBusyAccountId(null);
     }
@@ -59,6 +62,7 @@ export function PayoutAccountsView({ embedded = false }: { readonly embedded?: b
   const Wrapper = embedded ? EmbeddedFragment : PageStack;
   return (
     <Wrapper>
+      {stepUpDialog}
       {embedded ? null : <PageHeader title="Payout accounts" description="Account numbers are always partly hidden. Zudomart stores them encrypted." actions={addAccountButton} />}
       {embedded ? null : <WalletTabs />}
       {!canManageAccounts ? <Callout tone="info">Only the store owner can add or remove payout accounts.</Callout> : null}
@@ -104,7 +108,7 @@ export function PayoutAccountsView({ embedded = false }: { readonly embedded?: b
           accountsQuery.reload();
         }}
       />
-      <ModalDialog
+      <ModalDialog intent="delete"
         isOpen={accountPendingRemoval !== null}
         title="Remove payout account?"
         onClose={() => setAccountPendingRemoval(null)}
