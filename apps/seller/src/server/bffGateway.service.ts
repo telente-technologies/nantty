@@ -24,6 +24,7 @@ const returnedResponseHeaderNames = ["content-type", "content-disposition", "ide
 export const allowedApiPathPattern = /^\/(seller|media|chat\/keys)(\/[A-Za-z0-9._~:@%-]+)+$|^\/chat\/content$|^\/payments\/(payout-onboarding\/me(\/[A-Za-z0-9._~:@%-]+)*|payout-fees|wallet\/me|verification\/me)$|^\/wallets\/me$/;
 const readOnlyAccountApiPaths: ReadonlySet<string> = new Set(["/account/status"]);
 const accountWriteApiCalls: ReadonlySet<string> = new Set(["PATCH /users/me/preferences", "PUT /users/me/consents", "POST /auth/step-up", "POST /auth/otp/send", "POST /auth/otp/verify"]);
+const brandSellingApiPattern = /^\/brands\/[A-Za-z0-9-]+$/;
 const gateApiPathPattern = /^\/seller\/(access|verification|subscription|stores\/mine)(\/|$)/;
 
 export function respondWithBffError(status: number, code: string, message: string): NextResponse {
@@ -50,7 +51,7 @@ async function readRequestBodyWithinLimit(request: NextRequest): Promise<Uint8Ar
 
 export async function forwardBffRequestToSellerApi(request: NextRequest, pathSegments: readonly string[]): Promise<NextResponse> {
   const apiPath = `/${pathSegments.map((segment) => encodeURIComponent(segment)).join("/")}`;
-  const isReadOnlyAccountPath = (readOnlyAccountApiPaths.has(apiPath) && request.method === "GET") || accountWriteApiCalls.has(`${request.method} ${apiPath}`);
+  const isReadOnlyAccountPath = (readOnlyAccountApiPaths.has(apiPath) && request.method === "GET") || accountWriteApiCalls.has(`${request.method} ${apiPath}`) || (request.method === "PATCH" && brandSellingApiPattern.test(apiPath));
   if ((!allowedApiPathPattern.test(apiPath) && !isReadOnlyAccountPath) || apiPath.includes("..")) {
     return respondWithBffError(404, "NOT_FOUND", "This endpoint is not available.");
   }

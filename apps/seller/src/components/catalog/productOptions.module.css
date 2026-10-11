@@ -1,0 +1,173 @@
+.groupList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--divider-soft);
+  border-radius: var(--radius-medium);
+  background: var(--surface-card);
+}
+
+.groupHeader {
+  display: grid;
+  grid-template-columns: minmax(0, 260px) auto;
+  justify-content: space-between;
+  align-items: end;
+  gap: var(--space-2);
+}
+
+.nameSuggestions,
+.addOptionRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+
+.addOptionLabel {
+  font-size: var(--fs-13);
+  font-weight: 600;
+  color: var(--ink-strong);
+  margin-right: var(--space-1);
+}
+
+.valuesField {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.valuesLabel {
+  font-size: var(--fs-13);
+  font-weight: 600;
+  color: var(--ink-strong);
+}
+
+.chipList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  max-width: 100%;
+  height: 30px;
+  padding: 0 4px 0 2px;
+  border: 1px solid var(--divider);
+  border-radius: var(--radius-pill, 999px);
+  background: var(--surface-sunken);
+  font-size: var(--fs-13);
+  color: var(--ink-strong);
+}
+
+.chipDragging {
+  opacity: 0.5;
+  border-style: dashed;
+}
+
+.chipText {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  padding: 0 4px;
+}
+
+.chipHandle,
+.chipRemove {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--ink-faint);
+  cursor: pointer;
+}
+
+.chipHandle {
+  cursor: grab;
+}
+
+.chipHandle:hover,
+.chipRemove:hover {
+  background: var(--surface-hover);
+  color: var(--ink-strong);
+}
+
+.chipHandle:focus-visible,
+.chipRemove:focus-visible {
+  outline: 2px solid var(--color-brand);
+  outline-offset: 1px;
+}
+
+.addRow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  height: 40px;
+  padding-right: 4px;
+  border: 1px solid var(--divider);
+  border-radius: var(--radius-small);
+  background: var(--surface-card);
+  transition: border-color 120ms ease, box-shadow 120ms ease;
+}
+
+.addRow:focus-within {
+  border-color: var(--color-brand);
+  box-shadow: 0 0 0 3px var(--focus-halo);
+}
+
+.addRowInvalid {
+  border-color: var(--error);
+}
+
+.addInput {
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  padding: 0 var(--space-3);
+  border: 0;
+  background: transparent;
+  outline: none;
+}
+
+.valuesHint {
+  font-size: var(--fs-12);
+  color: var(--ink-faint);
+}
+
+.valuesError,
+.groupError {
+  font-size: var(--fs-12);
+  font-weight: 500;
+  color: var(--error-ink);
+}
+
+.footerNote {
+  margin-top: var(--space-3);
+  font-size: var(--fs-12);
+  color: var(--ink-faint);
+}
+
+@media (max-width: 700px) {
+  .groupHeader {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+}

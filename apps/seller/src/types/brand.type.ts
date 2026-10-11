@@ -50,6 +50,7 @@ export interface Brand {
   readonly officialStore: BrandOfficialStore;
   readonly members: BrandMember[];
   readonly storeIds: string[];
+  readonly sellingEnabled?: boolean;
 }
 
 export interface BrandSummary {

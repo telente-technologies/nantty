@@ -101,11 +101,11 @@ export function validateProductUpsertRequest(request: ProductUpsertRequest, cont
   const optionNames = options.map((option) => option.name?.trim() ?? "");
   options.forEach((option, optionIndex) => {
     const optionName = optionNames[optionIndex] ?? "";
-    if (optionName.length < 1 || optionName.length > 30) addIssue(`options.${optionIndex}.name`, "Option names need 1 to 30 characters.");
+    if (optionName.length < 1 || new TextEncoder().encode(optionName).length > 30) addIssue(`options.${optionIndex}.name`, "Option names need 1 to 30 characters.");
     const values = Array.isArray(option.values) ? option.values : [];
     if (values.length < 1 || values.length > 30) addIssue(`options.${optionIndex}.values`, `Give ${optionName || "this option"} between 1 and 30 values.`);
     if (new Set(values.map((value) => value.trim().toLowerCase())).size !== values.length) addIssue(`options.${optionIndex}.values`, `${optionName || "This option"} has repeated values.`);
-    if (values.some((value) => value.trim().length === 0 || value.length > 40)) addIssue(`options.${optionIndex}.values`, "Option values need 1 to 40 characters.");
+    if (values.some((value) => value.trim().length === 0 || new TextEncoder().encode(value).length > 40)) addIssue(`options.${optionIndex}.values`, "Option values need 1 to 40 characters.");
   });
   if (new Set(optionNames.map((name) => name.toLowerCase())).size !== optionNames.length) addIssue("options", "Option names must be different from each other.");
 
