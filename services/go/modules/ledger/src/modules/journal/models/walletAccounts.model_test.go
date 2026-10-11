@@ -28,13 +28,11 @@ func TestEscrowHoldingAccountKeepsLegacySellerEscrowByDefault(t *testing.T) {
 	}
 }
 
-func TestUserCashAccountsFollowTheProviderFlag(t *testing.T) {
-	pooled := UserCashAccountsForProvider("pooled", "u1", "NGN")
-	if pooled.Available.Code != "seller:u1:available" || pooled.DepositHold != nil {
-		t.Errorf("pooled accounts = %+v", pooled)
-	}
-	flutterwave := UserCashAccountsForProvider("flutterwave", "u1", "NGN")
-	if flutterwave.Available.Code != "wallet:u1:available" || flutterwave.DepositHold == nil || flutterwave.DepositHold.Code != "wallet:u1:depositHold" {
-		t.Errorf("flutterwave accounts = %+v", flutterwave)
+func TestUserCashAccountsAreAlwaysTheFlutterwaveWallet(t *testing.T) {
+	for _, provider := range []string{"flutterwave", "anything"} {
+		cash := UserCashAccountsForProvider(provider, "u1", "NGN")
+		if cash.Available.Code != "wallet:u1:available" || cash.DepositHold == nil || cash.DepositHold.Code != "wallet:u1:depositHold" || cash.ReservedPayout.Code != "wallet:u1:reservedPayout" {
+			t.Errorf("%s accounts = %+v", provider, cash)
+		}
 	}
 }

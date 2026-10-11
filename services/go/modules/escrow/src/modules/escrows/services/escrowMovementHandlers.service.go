@@ -56,7 +56,7 @@ func (handler EscrowMovementHandler) HandleMovementSucceeded(ctx context.Context
 		if err := handler.post(ctx, transaction, held, movement, "succeeded", moveLines(buyerOutgoing, ledgermodels.WalletDepositHoldAccount(held.SellerUserID, currency), movement.AmountMinor)); err != nil {
 			return err
 		}
-		if err := handler.Service.Container.Payments.RecordWalletCreditHoldInTransaction(ctx, transaction, held.SellerUserID, movement.Reference, "sale", movement.AmountMinor, currency, handler.Service.Container.Policy(ctx).SellerCreditHoldPeriod); err != nil {
+		if err := handler.Service.holdSaleInSellerWallet(ctx, transaction, held.SellerUserID, movement.Reference, movement.AmountMinor, currency); err != nil {
 			return err
 		}
 		platform := movement.MetadataAmount("commissionMinor") + movement.MetadataAmount("processingFeeMinor")
@@ -75,7 +75,7 @@ func (handler EscrowMovementHandler) HandleMovementSucceeded(ctx context.Context
 		if err := handler.post(ctx, transaction, held, movement, "succeeded", moveLines(ledgermodels.DirectSellerPayableAccount(held.SellerUserID, currency), ledgermodels.WalletDepositHoldAccount(held.SellerUserID, currency), movement.AmountMinor)); err != nil {
 			return err
 		}
-		return handler.Service.Container.Payments.RecordWalletCreditHoldInTransaction(ctx, transaction, held.SellerUserID, movement.Reference, "sale", movement.AmountMinor, currency, handler.Service.Container.Policy(ctx).SellerCreditHoldPeriod)
+		return handler.Service.holdSaleInSellerWallet(ctx, transaction, held.SellerUserID, movement.Reference, movement.AmountMinor, currency)
 	}
 	return nil
 }

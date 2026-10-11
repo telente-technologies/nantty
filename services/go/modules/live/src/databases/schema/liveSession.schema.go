@@ -45,10 +45,12 @@ func (LiveSession) Fields() []ent.Field {
 		field.String("sponsorship_line").Optional().Nillable().MaxLen(200),
 		field.String("moderation_visibility").Default("visible"),
 		field.Time("moderation_visibility_at").Optional().Nillable(),
+		field.Time("scheduled_at").Optional().Nillable(),
+		field.Time("reminder_sent_at").Optional().Nillable(),
 		field.Time("updated_at").Default(time.Now).UpdateDefault(time.Now),
 	}
 }
 
 func (LiveSession) Indexes() []ent.Index {
-	return []ent.Index{index.Fields("state", "created_at"), index.Fields("host_id", "state")}
+	return []ent.Index{index.Fields("state", "created_at"), index.Fields("host_id", "state"), index.Fields("state", "scheduled_at")}
 }

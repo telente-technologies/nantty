@@ -18,7 +18,6 @@ import (
 type Module struct {
 	Container              *container.Container
 	integrityCheckInterval time.Duration
-	maturingInterval       time.Duration
 	grpcAddress            string
 	grpcToken              string
 }
@@ -26,7 +25,6 @@ type Module struct {
 func NewLedgerModule(ctx context.Context, dependencies servicemodule.Dependencies) (servicemodule.Module, error) {
 	settings := loaders.ReadMoneyModuleSettingsFromEnvironment(dependencies.Environment, "ledger")
 	interval := dependencies.Environment.ReadDurationOrDefault("LEDGER_INTEGRITY_CHECK_INTERVAL", 24*time.Hour)
-	maturingInterval := dependencies.Environment.ReadDurationOrDefault("LEDGER_SELLER_CREDIT_MATURING_INTERVAL", 5*time.Minute)
 	grpcAddress := dependencies.Environment.ReadStringOrDefault("MONEY_GRPC_ADDRESS", "127.0.0.1:9103")
 	grpcToken := dependencies.Environment.ReadStringOrDefault("MONEY_INTERNAL_GRPC_TOKEN", "")
 	if settings.IsProduction() && (len(grpcToken) < 32 || grpcToken == "local-only-money-internal-grpc-token-0123") {
@@ -40,7 +38,6 @@ func NewLedgerModule(ctx context.Context, dependencies servicemodule.Dependencie
 		return nil, err
 	}
 	module.integrityCheckInterval = interval
-	module.maturingInterval = maturingInterval
 	module.grpcAddress, module.grpcToken = grpcAddress, grpcToken
 	return module, nil
 }
@@ -50,7 +47,7 @@ func StartLedgerModuleWithSettings(ctx context.Context, settings loaders.MoneyMo
 	if err != nil {
 		return nil, err
 	}
-	return &Module{Container: container.NewLedgerContainer(resources, settings), integrityCheckInterval: 24 * time.Hour, maturingInterval: 5 * time.Minute}, nil
+	return &Module{Container: container.NewLedgerContainer(resources, settings), integrityCheckInterval: 24 * time.Hour}, nil
 }
 
 func (module *Module) Name() string { return "ledger" }
@@ -61,10 +58,6 @@ func (module *Module) RunBackgroundWorkersUntilContextDone(ctx context.Context) 
 	logger := module.Container.Resources.Logger
 	go servicemodule.SuperviseWorkerUntilContextDone(ctx, logger, "ledger integrity check", func(ctx context.Context) error {
 		jobs.RunLedgerIntegrityCheckEveryIntervalUntilContextDone(ctx, module.Container, module.integrityCheckInterval)
-		return nil
-	})
-	go servicemodule.SuperviseWorkerUntilContextDone(ctx, logger, "seller credit maturing", func(ctx context.Context) error {
-		jobs.RunSellerCreditMaturingEveryIntervalUntilContextDone(ctx, module.Container, module.maturingInterval)
 		return nil
 	})
 	go servicemodule.SuperviseWorkerUntilContextDone(ctx, logger, "money domain event consumer", func(ctx context.Context) error {

@@ -3,6 +3,7 @@ package services
 import (
 	"context"
 	"database/sql"
+	"errors"
 
 	"github.com/google/uuid"
 
@@ -10,10 +11,10 @@ import (
 	"zudomart/modules/escrow/src/generated/ent/escrow"
 	"zudomart/modules/escrow/src/modules/escrows/models"
 	ledgermodels "zudomart/modules/ledger/src/modules/journal/models"
-	sellerbalances "zudomart/modules/ledger/src/modules/sellerBalances/services"
 	paymentmodels "zudomart/modules/payments/src/modules/gateway/models"
-	paymentservices "zudomart/modules/payments/src/modules/gateway/services"
 )
+
+var ErrLegacyEscrowCustody = errors.New("this escrow was held in the previous provider's pooled account, which is no longer supported")
 
 type EscrowActor struct {
 	Type string
@@ -43,25 +44,11 @@ func (service EscrowService) ReleaseEscrowInTransaction(ctx context.Context, tra
 	if err := models.AssertEscrowTransitionAllowed(models.EscrowStatus(held.Status), models.EscrowReleased); err != nil {
 		return EscrowSettlementResult{}, err
 	}
-	if IsWalletLocked(held) {
-		released, err := service.releaseFromBuyerWalletInTransaction(ctx, transaction, held, trigger)
-		if err != nil {
-			return EscrowSettlementResult{}, err
-		}
-		return service.finishSettlement(ctx, transaction, client, released, "released", trigger, actor, nil)
+	if !IsWalletLocked(held) {
+		return EscrowSettlementResult{}, ErrLegacyEscrowCustody
 	}
-	now := service.Container.Now().UTC()
-	update := held.Update().Where(escrow.Version(held.Version)).AddVersion(1).
-		SetStatus(escrow.StatusReleased).SetReleasedAt(now).SetReleaseTrigger(trigger).SetReleasedToSellerMinor(held.SellerAmountMinor).ClearAutoReleaseAt()
-	if trigger == "buyerConfirmed" {
-		update.SetBuyerConfirmedAt(now)
-	}
-	released, err := update.Save(ctx)
+	released, err := service.releaseFromBuyerWalletInTransaction(ctx, transaction, held, trigger)
 	if err != nil {
-		return EscrowSettlementResult{}, err
-	}
-	fromEscrow := ledgermodels.JournalLineRequest{Account: escrowHoldingAccount(held), Direction: ledgermodels.Debit, AmountMinor: held.SellerAmountMinor}
-	if err := service.creditSellerAndPlatform(ctx, transaction, held, fromEscrow, ledgermodels.PlatformFeesUnearnedAccount(held.Currency), "escrow-release:"+held.ID.String(), "Order "+held.OrderReference+" released to seller"); err != nil {
 		return EscrowSettlementResult{}, err
 	}
 	return service.finishSettlement(ctx, transaction, client, released, "released", trigger, actor, nil)
@@ -83,34 +70,13 @@ func (service EscrowService) RefundEscrowInTransaction(ctx context.Context, tran
 	if err := models.AssertEscrowTransitionAllowed(models.EscrowStatus(held.Status), target); err != nil {
 		return EscrowSettlementResult{}, err
 	}
-	if IsWalletLocked(held) {
-		return service.refundWalletLockedEscrow(ctx, transaction, client, held, reason, actor)
+	if isDirectSale(held) {
+		return service.refundDirectSaleInTransaction(ctx, transaction, client, held, reason, actor)
 	}
-	wasReleased := held.Status == escrow.StatusReleased
-	finalStatus := escrow.StatusRefunded
-	if wasReleased && held.PaymentMode == escrow.PaymentModeEscrow {
-		finalStatus = escrow.StatusClawedBack
+	if !IsWalletLocked(held) {
+		return EscrowSettlementResult{}, ErrLegacyEscrowCustody
 	}
-	now := service.Container.Now().UTC()
-	refunded, err := held.Update().Where(escrow.Version(held.Version)).AddVersion(1).
-		SetStatus(finalStatus).SetRefundedAt(now).SetRefundedMinor(held.AmountMinor).ClearAutoReleaseAt().Save(ctx)
-	if err != nil {
-		return EscrowSettlementResult{}, err
-	}
-	reference := "escrow-refund:" + held.ID.String()
-	if wasReleased {
-		err = service.takeReleasedFundsBackForRefund(ctx, transaction, held, reference, reason, actor)
-	} else {
-		err = service.postEscrowSplit(ctx, transaction, held, held.AmountMinor, 0, 0, reference, reason, actor)
-	}
-	if err != nil {
-		return EscrowSettlementResult{}, err
-	}
-	refundId, err := service.requestProviderRefund(ctx, transaction, held, held.AmountMinor, reference, reason)
-	if err != nil {
-		return EscrowSettlementResult{}, err
-	}
-	return service.finishSettlement(ctx, transaction, client, refunded, "refunded", reason, actor, &refundId)
+	return service.refundWalletLockedEscrow(ctx, transaction, client, held, reason, actor)
 }
 
 func (service EscrowService) ResolveEscrowPartiallyInTransaction(ctx context.Context, transaction *sql.Tx, orderId string, refundMinor int64, reason string, actor EscrowActor) (EscrowSettlementResult, error) {
@@ -135,39 +101,16 @@ func (service EscrowService) ResolveEscrowPartiallyInTransaction(ctx context.Con
 	if err != nil {
 		return EscrowSettlementResult{}, err
 	}
-	if IsWalletLocked(held) {
-		commissionKept := min(resolution.CommissionMinor, held.CommissionMinor)
-		sellerKeeps := max(held.AmountMinor-resolution.RefundMinor-commissionKept-held.ProcessingFeeMinor, 0)
-		resolved, err := service.partiallyRefundBuyerWalletInTransaction(ctx, transaction, held, resolution.RefundMinor, sellerKeeps, commissionKept)
-		if err != nil {
-			return EscrowSettlementResult{}, err
-		}
-		return service.finishSettlement(ctx, transaction, client, resolved, "partiallyRefunded", reason, actor, nil)
+	if !IsWalletLocked(held) {
+		return EscrowSettlementResult{}, ErrLegacyEscrowCustody
 	}
-	now := service.Container.Now().UTC()
-	resolved, err := held.Update().Where(escrow.Version(held.Version)).AddVersion(1).
-		SetStatus(escrow.StatusPartiallyRefunded).SetRefundedAt(now).SetReleasedAt(now).SetReleaseTrigger("disputeResolved").
-		SetRefundedMinor(resolution.RefundMinor).SetReleasedToSellerMinor(max(held.AmountMinor-resolution.RefundMinor-min(resolution.CommissionMinor, held.CommissionMinor)-held.ProcessingFeeMinor, 0)).ClearAutoReleaseAt().Save(ctx)
-	if err != nil {
-		return EscrowSettlementResult{}, err
-	}
-	reference := "escrow-partial-refund:" + held.ID.String()
 	commissionKept := min(resolution.CommissionMinor, held.CommissionMinor)
 	sellerKeeps := max(held.AmountMinor-resolution.RefundMinor-commissionKept-held.ProcessingFeeMinor, 0)
-	if err := service.postEscrowSplit(ctx, transaction, held, resolution.RefundMinor, sellerKeeps, commissionKept, reference, reason, actor); err != nil {
-		return EscrowSettlementResult{}, err
-	}
-	if err := service.Container.Sellers.ScheduleLockedCreditInTransaction(ctx, transaction, sellerbalances.LockedSellerCredit{
-		SellerUserId: held.SellerUserID, Currency: held.Currency, AmountMinor: sellerKeeps,
-		SourceReference: OrderCreditReference(held.OrderID), AvailableAt: now.Add(service.Container.Policy(ctx).SellerCreditHoldPeriod),
-	}); err != nil {
-		return EscrowSettlementResult{}, err
-	}
-	refundId, err := service.requestProviderRefund(ctx, transaction, held, resolution.RefundMinor, reference, reason)
+	resolved, err := service.partiallyRefundBuyerWalletInTransaction(ctx, transaction, held, resolution.RefundMinor, sellerKeeps, commissionKept)
 	if err != nil {
 		return EscrowSettlementResult{}, err
 	}
-	return service.finishSettlement(ctx, transaction, client, resolved, "partiallyRefunded", reason, actor, &refundId)
+	return service.finishSettlement(ctx, transaction, client, resolved, "partiallyRefunded", reason, actor, nil)
 }
 
 func (service EscrowService) refundWalletLockedEscrow(ctx context.Context, transaction *sql.Tx, client *ent.Client, held *ent.Escrow, reason string, actor EscrowActor) (EscrowSettlementResult, error) {
@@ -190,60 +133,6 @@ func (service EscrowService) refundWalletLockedEscrow(ctx context.Context, trans
 		return EscrowSettlementResult{}, err
 	}
 	return service.finishSettlement(ctx, transaction, client, refunded, "refunded", reason, actor, &refundId)
-}
-
-func (service EscrowService) postEscrowSplit(ctx context.Context, transaction *sql.Tx, held *ent.Escrow, refundMinor, sellerMinor, commissionKeptMinor int64, reference, reason string, actor EscrowActor) error {
-	absorbedProcessingFee := refundMinor + sellerMinor + commissionKeptMinor - held.SellerAmountMinor - held.CommissionMinor
-	lines := []ledgermodels.JournalLineRequest{
-		{Account: escrowHoldingAccount(held), Direction: ledgermodels.Debit, AmountMinor: held.SellerAmountMinor},
-	}
-	lines = paymentservices.AppendPositiveLine(lines, ledgermodels.PlatformFeesUnearnedAccount(held.Currency), ledgermodels.Debit, held.CommissionMinor)
-	if absorbedProcessingFee >= 0 {
-		lines = paymentservices.AppendPositiveLine(lines, ledgermodels.RefundedProcessingFeesExpenseAccount(held.Currency), ledgermodels.Debit, absorbedProcessingFee)
-	} else {
-		lines = paymentservices.AppendPositiveLine(lines, ledgermodels.RefundedProcessingFeesExpenseAccount(held.Currency), ledgermodels.Credit, -absorbedProcessingFee)
-	}
-	lines = paymentservices.AppendPositiveLine(lines, ledgermodels.PlatformEscrowFeeRevenueAccount(held.Currency), ledgermodels.Credit, commissionKeptMinor)
-	lines = paymentservices.AppendPositiveLine(lines, ledgermodels.RefundsPayableAccount(held.Provider, held.Currency), ledgermodels.Credit, refundMinor)
-	lines = paymentservices.AppendPositiveLine(lines, ledgermodels.SellerPendingAccount(held.SellerUserID, held.Currency), ledgermodels.Credit, sellerMinor)
-	_, err := service.Container.Ledger.PostBalancedJournalEntry(ctx, transaction, ledgermodels.JournalEntryRequest{
-		Reference: reference, Kind: "escrow.refunded", Description: "Order " + held.OrderReference + " refunded to buyer",
-		Metadata: map[string]any{"escrowId": held.ID.String(), "orderId": held.OrderID, "reason": reason, "actorType": actor.Type, "actorId": actor.Id, "absorbedProcessingFeeMinor": absorbedProcessingFee},
-		Lines:    lines,
-	})
-	return err
-}
-
-func (service EscrowService) takeReleasedFundsBackForRefund(ctx context.Context, transaction *sql.Tx, held *ent.Escrow, reference, reason string, actor EscrowActor) error {
-	metadata := map[string]any{"escrowId": held.ID.String(), "orderId": held.OrderID, "reason": reason, "actorType": actor.Type, "actorId": actor.Id}
-	refundsPayable := ledgermodels.RefundsPayableAccount(held.Provider, held.Currency)
-	if held.PaymentMode == escrow.PaymentModeDirect {
-		_, err := service.Container.Ledger.PostBalancedJournalEntry(ctx, transaction, ledgermodels.JournalEntryRequest{
-			Reference: reference + ":sellerDebt", Kind: "directPayment.refundedFromPlatform", Description: "Refund of direct order " + held.OrderReference + " recovered from the seller", Metadata: metadata,
-			Lines: paymentservices.AppendPositiveLine([]ledgermodels.JournalLineRequest{
-				{Account: ledgermodels.SellerDebtAccount(held.SellerUserID, held.Currency), Direction: ledgermodels.Debit, AmountMinor: held.SellerAmountMinor},
-				{Account: refundsPayable, Direction: ledgermodels.Credit, AmountMinor: held.AmountMinor},
-			}, ledgermodels.RefundedProcessingFeesExpenseAccount(held.Currency), ledgermodels.Debit, held.AmountMinor-held.SellerAmountMinor),
-		})
-		return err
-	}
-	if _, err := service.Container.Sellers.TakeSellerFundsForRefundInTransaction(ctx, transaction, sellerbalances.SellerRefundDebit{
-		SellerUserId: held.SellerUserID, Currency: held.Currency, AmountMinor: held.SellerAmountMinor, PreferredSourceReference: OrderCreditReference(held.OrderID),
-		Reference: reference + ":seller", Description: "Refund of order " + held.OrderReference, Metadata: metadata, CreditAccount: refundsPayable,
-	}); err != nil {
-		return err
-	}
-	feesReturned := held.CommissionMinor + held.ProcessingFeeMinor
-	if feesReturned == 0 {
-		return nil
-	}
-	lines := paymentservices.AppendPositiveLine(nil, ledgermodels.PlatformEscrowFeeRevenueAccount(held.Currency), ledgermodels.Debit, held.CommissionMinor)
-	lines = paymentservices.AppendPositiveLine(lines, ledgermodels.RefundedProcessingFeesExpenseAccount(held.Currency), ledgermodels.Debit, held.ProcessingFeeMinor)
-	lines = append(lines, ledgermodels.JournalLineRequest{Account: refundsPayable, Direction: ledgermodels.Credit, AmountMinor: feesReturned})
-	_, err := service.Container.Ledger.PostBalancedJournalEntry(ctx, transaction, ledgermodels.JournalEntryRequest{
-		Reference: reference + ":fees", Kind: "escrowFee.returnedForRefund", Description: "Escrow and processing fees returned for order " + held.OrderReference, Metadata: metadata, Lines: lines,
-	})
-	return err
 }
 
 func (service EscrowService) requestProviderRefund(ctx context.Context, transaction *sql.Tx, held *ent.Escrow, amountMinor int64, reference, reason string) (uuid.UUID, error) {

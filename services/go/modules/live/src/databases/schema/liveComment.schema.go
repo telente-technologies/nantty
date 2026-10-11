@@ -44,6 +44,7 @@ func (LiveRoomSetting) Fields() []ent.Field {
 		field.JSON("blocked_words", []string{}).Optional().SchemaType(map[string]string{dialect.Postgres: "jsonb"}),
 		field.UUID("pinned_comment_id", uuid.UUID{}).Optional().Nillable(),
 		field.Bool("record_enabled").Default(false),
+		field.Enum("comment_audience").Values("everyone", "followers", "subscribers").Default("everyone"),
 	}
 }
 

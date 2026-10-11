@@ -66,18 +66,3 @@ func checkLedgerIntegrityOnce(ctx context.Context, container *container.Containe
 		return container.Outbox.EnqueueInTransaction(ctx, transaction, "ledgerIntegrityCheck.failed", "ledger", container.Now(), report)
 	})
 }
-
-func RunSellerCreditMaturingEveryIntervalUntilContextDone(ctx context.Context, container *container.Container, interval time.Duration) {
-	ticker := time.NewTicker(interval)
-	defer ticker.Stop()
-	for {
-		select {
-		case <-ctx.Done():
-			return
-		case <-ticker.C:
-			if _, err := container.Sellers.MatureDueCredits(ctx, container.Resources.Database, 500); err != nil && ctx.Err() == nil {
-				container.Resources.Logger.WarnContext(ctx, "seller credit maturing failed", slog.Any("error", err))
-			}
-		}
-	}
-}

@@ -64,12 +64,9 @@ type UserCashAccounts struct {
 	DepositHold    *AccountRef
 }
 
-func UserCashAccountsForProvider(provider, userId, currency string) UserCashAccounts {
-	if provider == "flutterwave" {
-		hold := WalletDepositHoldAccount(userId, currency)
-		return UserCashAccounts{Available: WalletAvailableAccount(userId, currency), ReservedPayout: WalletReservedPayoutAccount(userId, currency), DepositHold: &hold}
-	}
-	return UserCashAccounts{Available: SellerAvailableAccount(userId, currency), ReservedPayout: SellerReservedPayoutAccount(userId, currency)}
+func UserCashAccountsForProvider(_, userId, currency string) UserCashAccounts {
+	hold := WalletDepositHoldAccount(userId, currency)
+	return UserCashAccounts{Available: WalletAvailableAccount(userId, currency), ReservedPayout: WalletReservedPayoutAccount(userId, currency), DepositHold: &hold}
 }
 
 func WalletAccountCodePrefix(userId string) string {
