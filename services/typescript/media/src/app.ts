@@ -37,6 +37,7 @@ import { registerRoutes } from "./routes/index.js";
 import type { HandlerContext } from "./types/handlerContext.type.js";
 import { errorToResponse, json } from "./utils/http.util.js";
 import { createRouteFactory } from "./utils/route.util.js";
+import { dispatchWithRoute, withRequestMetrics } from "./telemetry/requestMetrics.js";
 
 const bodyAllowanceBytes = 1024 * 1024;
 const proxiedChunkLimitBytes = 65 * 1024 * 1024;
@@ -69,7 +70,7 @@ export function createMediaApp(config: MediaConfig, logger: Logger = createLogge
   registerRoutes(router, createRouteFactory(config.internalToken), context, database);
   const dispatch: HttpMiddleware = async (requestContext) => {
     try {
-      return (await router.dispatch(requestContext.request, { signal: requestContext.signal })).response;
+      return (await dispatchWithRoute(router, requestContext.request, requestContext.signal)).response;
     } catch (error) {
       logger.error("unhandled error", { path: requestContext.request.path, error: error instanceof Error ? error.message : String(error) });
       return json(500, { message: "Internal Server Error", code: "INTERNAL_ERROR" });
@@ -78,7 +79,7 @@ export function createMediaApp(config: MediaConfig, logger: Logger = createLogge
   const pipeline = new HttpMiddlewarePipeline({ middlewares: [createGatewayIdentityMiddleware(config.gatewayIdentitySecrets ?? []), dispatch] });
   const server = createHttpServer({
     adapter: createNodeHttpAdapter({ host: config.host, port: config.port, maxBodySize: config.allowProxiedChunks ? proxiedChunkLimitBytes : bodyAllowanceBytes, trustProxy: true }),
-    handler: (request: HttpRequestContext) => pipeline.execute(request, createResponseContext()),
+    handler: withRequestMetrics((request: HttpRequestContext) => pipeline.execute(request, createResponseContext())),
   });
   const stoppers: (() => void | Promise<void>)[] = [];
   return {

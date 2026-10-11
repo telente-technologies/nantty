@@ -2,7 +2,10 @@ import { createLogger } from "@zudojs/logger";
 
 import { createMediaApp } from "./app.js";
 import { loadMediaConfigFromEnvironment } from "./configs/media.config.js";
+import { startTelemetry } from "./telemetry/telemetry.js";
 
+// ESM imports load before this runs, so node:http auto-instrumentation may miss; RED metrics are recorded explicitly.
+const stopTelemetry = startTelemetry("media");
 const logger = createLogger({ name: "media" });
 const config = loadMediaConfigFromEnvironment();
 const app = createMediaApp(config, logger);
@@ -15,7 +18,7 @@ for (const signal of ["SIGINT", "SIGTERM"] as const) {
   process.on(signal, () => {
     if (stopping) return;
     stopping = true;
-    void app.stop().then(
+    void app.stop().finally(stopTelemetry).then(
       () => process.exit(0),
       (error: unknown) => {
         logger.error("media shutdown failed", { error: error instanceof Error ? error.message : String(error) });
