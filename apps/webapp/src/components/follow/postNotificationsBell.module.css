@@ -1,0 +1,82 @@
+.container {
+  position: relative;
+  display: inline-flex;
+}
+
+.trigger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--control-md);
+  height: var(--control-md);
+  border: 1px solid var(--divider-strong);
+  border-radius: var(--radius-pill);
+  background: transparent;
+  color: var(--ink-strong);
+}
+
+.trigger:hover {
+  background: var(--color-surface-hover);
+}
+
+.triggerActive {
+  border-color: var(--color-brand);
+  color: var(--color-brand);
+}
+
+.menu {
+  position: absolute;
+  top: calc(100% + var(--space-1));
+  right: 0;
+  z-index: var(--z-sheet);
+  display: flex;
+  flex-direction: column;
+  min-width: 260px;
+  padding: var(--space-1);
+  border: 1px solid var(--divider);
+  border-radius: var(--radius-medium);
+  background: var(--color-elevated);
+  box-shadow: var(--shadow-float);
+}
+
+.heading {
+  margin: 0;
+  padding: var(--space-2) var(--space-3);
+  color: var(--ink-muted);
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: var(--control-lg);
+  padding: var(--space-2) var(--space-3);
+  border: 0;
+  border-radius: var(--radius-small);
+  background: transparent;
+  color: var(--ink-strong);
+  font-weight: 600;
+  text-align: left;
+}
+
+.item:hover {
+  background: var(--color-surface-hover);
+}
+
+.item svg {
+  flex: none;
+}
+
+.itemText {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+}
+
+.detail {
+  color: var(--ink-muted);
+  font-size: 0.8125rem;
+  font-weight: 400;
+}
