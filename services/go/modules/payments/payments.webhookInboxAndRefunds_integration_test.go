@@ -21,7 +21,7 @@ import (
 	paymentservices "zudomart/modules/payments/src/modules/gateway/services"
 )
 
-func startPaidCardVerification(t *testing.T, harness *paymentstesting.MoneyHarness) (string, *paymentstesting.FakeTransaction) {
+func startPaidCardVerification(t *testing.T, harness *paymentstesting.MoneyHarness) (string, *paymentstesting.FakeFlwTransaction) {
 	t.Helper()
 	token := harness.Tokens.UserAccessToken(uuid.NewString())
 	started := harness.Call(http.MethodPost, "/api/v1/payments/saved-cards/setups", token, "", map[string]any{"returnTo": "https://zudomart.test/pay/return"})
@@ -29,7 +29,7 @@ func startPaidCardVerification(t *testing.T, harness *paymentstesting.MoneyHarne
 		t.Fatalf("setup: %d %s", started.Status, started.Raw)
 	}
 	reference := started.Body["reference"].(string)
-	return reference, harness.Paystack.CompleteCheckout(reference, 0, 0, "card")
+	return reference, harness.Flutterwave.CompleteCheckout(reference, 0, 0, "card")
 }
 
 func webhookRow(t *testing.T, harness *paymentstesting.MoneyHarness, reference string) *ent.WebhookEvent {
@@ -45,13 +45,13 @@ func TestWebhookDeliveredTwiceAndConcurrentlyIsProcessedOnce(t *testing.T) {
 	skipIntegrationWhenShort(t)
 	harness := paymentstesting.StartMoneyHarnessWithPayments(t, nil)
 	reference, transaction := startPaidCardVerification(t, harness)
-	body, headers := harness.Paystack.SignWebhook("charge.success", map[string]any{"id": transaction.Id, "reference": reference, "status": "success", "amount": transaction.AmountMinor, "currency": "NGN"})
+	body, headers := harness.Flutterwave.ChargeWebhook(transaction)
 	var group sync.WaitGroup
 	for range 6 {
 		group.Add(1)
 		go func() {
 			defer group.Done()
-			if response := harness.Call(http.MethodPost, "/webhooks/paystack", "", "", body, headers); response.Status != http.StatusOK {
+			if response := harness.Call(http.MethodPost, "/webhooks/flutterwave", "", "", body, headers); response.Status != http.StatusOK {
 				t.Errorf("delivery: %d %s", response.Status, response.Raw)
 			}
 		}()
@@ -61,7 +61,7 @@ func TestWebhookDeliveredTwiceAndConcurrentlyIsProcessedOnce(t *testing.T) {
 	if row.ProcessedAt == nil || row.AttemptCount != 1 || row.LeaseToken != "" {
 		t.Fatalf("one claim must process the event exactly once: processed=%v attempts=%d lease=%q", row.ProcessedAt, row.AttemptCount, row.LeaseToken)
 	}
-	if refunds := len(harness.Paystack.Refunds); refunds != 1 {
+	if refunds := len(harness.Flutterwave.Refunds); refunds != 1 {
 		t.Fatalf("the verification charge must be refunded once, got %d refunds", refunds)
 	}
 }
@@ -73,11 +73,11 @@ func TestSweeperRacingARedeliveryNeverDoubleProcesses(t *testing.T) {
 	gateway := harness.Payments.Application.Gateway
 	container.Settings.ProcessWebhooksInBackground = true
 	reference, transaction := startPaidCardVerification(t, harness)
-	body, headers := harness.Paystack.SignWebhook("charge.success", map[string]any{"id": transaction.Id, "reference": reference, "status": "success", "amount": transaction.AmountMinor, "currency": "NGN"})
-	if response := harness.Call(http.MethodPost, "/webhooks/paystack", "", "", body, headers); response.Status != http.StatusOK || response.Body["duplicate"] == true {
+	body, headers := harness.Flutterwave.ChargeWebhook(transaction)
+	if response := harness.Call(http.MethodPost, "/webhooks/flutterwave", "", "", body, headers); response.Status != http.StatusOK || response.Body["duplicate"] == true {
 		t.Fatalf("first delivery: %d %s", response.Status, response.Raw)
 	}
-	verifiesBefore := harness.Paystack.CallCount("GET /transaction")
+	verifiesBefore := harness.Flutterwave.CallCount("GET /transactions")
 	var group sync.WaitGroup
 	for index := range 8 {
 		group.Add(1)
@@ -87,7 +87,7 @@ func TestSweeperRacingARedeliveryNeverDoubleProcesses(t *testing.T) {
 				gateway.ProcessDueWebhooks(context.Background(), 10)
 				return
 			}
-			if response := harness.Call(http.MethodPost, "/webhooks/paystack", "", "", body, headers); response.Body["duplicate"] != true {
+			if response := harness.Call(http.MethodPost, "/webhooks/flutterwave", "", "", body, headers); response.Body["duplicate"] != true {
 				t.Errorf("a redelivery must be recorded as a duplicate: %s", response.Raw)
 			}
 		}()
@@ -97,7 +97,7 @@ func TestSweeperRacingARedeliveryNeverDoubleProcesses(t *testing.T) {
 	if row.ProcessedAt == nil || row.AttemptCount != 1 {
 		t.Fatalf("sweepers and redeliveries must not double-process: processed=%v attempts=%d", row.ProcessedAt, row.AttemptCount)
 	}
-	if verifies := harness.Paystack.CallCount("GET /transaction") - verifiesBefore; verifies != 1 {
+	if verifies := harness.Flutterwave.CallCount("GET /transactions") - verifiesBefore; verifies != 1 {
 		t.Fatalf("the charge must be verified once, got %d verifications", verifies)
 	}
 	if processed := gateway.ProcessDueWebhooks(context.Background(), 10); processed != 0 {
@@ -112,11 +112,11 @@ func TestFailingWebhookIsRetriedWithBackoffThenDeadLettered(t *testing.T) {
 	gateway := harness.Payments.Application.Gateway
 	container.Settings.ProcessWebhooksInBackground = true
 	reference, transaction := startPaidCardVerification(t, harness)
-	body, headers := harness.Paystack.SignWebhook("charge.success", map[string]any{"id": transaction.Id, "reference": reference, "status": "success", "amount": transaction.AmountMinor, "currency": "NGN"})
-	harness.Call(http.MethodPost, "/webhooks/paystack", "", "", body, headers)
+	body, headers := harness.Flutterwave.ChargeWebhook(transaction)
+	harness.Call(http.MethodPost, "/webhooks/flutterwave", "", "", body, headers)
 	client := container.Client(harness.Database)
 	for attempt := 1; attempt <= paymentservices.MaximumWebhookAttempts; attempt++ {
-		harness.Paystack.FailNextRequests = 3
+		harness.Flutterwave.FailNextRequests = 3
 		if claimed := gateway.ProcessDueWebhooks(context.Background(), 10); claimed != 1 {
 			t.Fatalf("attempt %d: claimed %d", attempt, claimed)
 		}
@@ -151,8 +151,9 @@ func TestRefundFailingThenRetriedReleasesCapacityAndPaysOnce(t *testing.T) {
 	gateway := harness.Payments.Application.Gateway
 	client := harness.Payments.Application.Container.Client(harness.Database)
 	ctx := context.Background()
+	harness.Flutterwave.RefundStatus = "pending"
 	reference, transaction := startPaidCardVerification(t, harness)
-	harness.DeliverPaystackEvent("charge.success", map[string]any{"id": transaction.Id, "reference": reference, "status": "success", "amount": transaction.AmountMinor, "currency": "NGN"})
+	harness.DeliverWebhook(harness.Flutterwave.ChargeWebhook(transaction))
 	intent, err := client.PaymentIntent.Query().Where(paymentintent.Reference(reference)).Only(ctx)
 	if err != nil || intent.Status != paymentintent.StatusSucceeded {
 		t.Fatalf("intent: %+v %v", intent, err)
@@ -161,6 +162,7 @@ func TestRefundFailingThenRetriedReleasesCapacityAndPaysOnce(t *testing.T) {
 	if err != nil || first.ProviderRefundID == "" {
 		t.Fatalf("the automatic refund must have been sent: %+v %v", first, err)
 	}
+	harness.Flutterwave.MarkRefundFailed(first.ProviderRefundID)
 	if err := gateway.HandleRefundNotification(ctx, interfaces.WebhookNotification{EventType: "refund.failed", Status: "failed", ProviderObjectId: first.ProviderRefundID}); err != nil {
 		t.Fatal(err)
 	}

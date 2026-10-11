@@ -15,15 +15,10 @@ import (
 var ErrProviderCapabilityMissing = httpserver.NewApiError(http.StatusUnprocessableEntity, "PAYMENT_PROVIDER_CAPABILITY_MISSING", "This payment provider does not support this operation.")
 
 func NewProvidersFromSettings(settings configs.PaymentsSettings) (map[string]interfaces.PaymentProvider, error) {
-	providers := map[string]interfaces.PaymentProvider{constants.ProviderPaystack: NewPaystackProviderFromSettings(settings)}
-	if settings.Flutterwave.SecretKey != "" || settings.DefaultProvider == constants.ProviderFlutterwave {
-		providers[constants.ProviderFlutterwave] = NewFlutterwaveProviderFromSettings(settings)
+	if settings.DefaultProvider != constants.ProviderFlutterwave {
+		return nil, fmt.Errorf("PAYMENTS_PROVIDER must be flutterwave, got %q", settings.DefaultProvider)
 	}
-	switch settings.DefaultProvider {
-	case constants.ProviderPaystack, constants.ProviderFlutterwave:
-		return providers, nil
-	}
-	return nil, fmt.Errorf("PAYMENTS_PROVIDER must be paystack or flutterwave, got %q", settings.DefaultProvider)
+	return map[string]interfaces.PaymentProvider{constants.ProviderFlutterwave: NewFlutterwaveProviderFromSettings(settings)}, nil
 }
 
 func NewFlutterwaveProviderFromSettings(settings configs.PaymentsSettings) *integrations.FlutterwaveProvider {

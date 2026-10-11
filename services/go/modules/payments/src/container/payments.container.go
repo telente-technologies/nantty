@@ -14,7 +14,6 @@ import (
 	"zudomart/modules/payments/src/constants"
 	"zudomart/modules/payments/src/generated/ent"
 	_ "zudomart/modules/payments/src/generated/ent/runtime"
-	"zudomart/modules/payments/src/integrations"
 	"zudomart/modules/payments/src/interfaces"
 	"zudomart/modules/payments/src/repositories"
 	"zudomart/modules/payments/src/utils"
@@ -49,19 +48,10 @@ type Overrides struct {
 	Audit          staffaudit.Recorder
 }
 
-func NewPaystackProviderFromSettings(settings configs.PaymentsSettings) *integrations.PaystackProvider {
-	paystack := settings.Paystack
-	return integrations.NewPaystackProvider(integrations.PaystackSettings{
-		BaseUrl: paystack.BaseUrl, SecretKey: paystack.SecretKey, PreviousSecretKey: paystack.PreviousSecretKey, Channels: paystack.Channels,
-		TransferFeeBands: integrations.ParseTransferFeeBands(paystack.TransferFeeBands), MaximumAttempts: paystack.MaximumAttempts, RetryBaseDelay: 250 * time.Millisecond,
-		SupportedCurrencies: paystack.SupportedCurrencies,
-	})
-}
-
 func NewPaymentsContainer(resources loaders.MoneyModuleResources, settings configs.PaymentsSettings, overrides Overrides) (*Container, error) {
 	schema := settings.Money.DatabaseSchema
 	if settings.DefaultProvider == "" {
-		settings.DefaultProvider = constants.ProviderPaystack
+		settings.DefaultProvider = constants.ProviderFlutterwave
 	}
 	providers := overrides.Providers
 	if providers == nil {

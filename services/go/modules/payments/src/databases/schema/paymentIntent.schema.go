@@ -69,5 +69,7 @@ func (PaymentIntent) Indexes() []ent.Index {
 		index.Fields("provider_checkout_id"),
 		index.Fields("provider_transaction_id"),
 		index.Fields("provider", "provider_transaction_id").Unique().Annotations(entsql.IndexWhere("provider_transaction_id <> ''")).StorageKey("payment_intents_provider_charge_unique"),
+		index.Fields("purpose", "subject_id").Unique().
+			Annotations(entsql.IndexWhere("status = 'succeeded' AND failure_reason NOT LIKE 'duplicate%'")).StorageKey("payment_intents_one_settlement_per_subject"),
 	}
 }

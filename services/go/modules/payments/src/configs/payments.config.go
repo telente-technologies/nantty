@@ -9,17 +9,17 @@ import (
 	platformconfig "zudomart/platform/config"
 )
 
-const PaystackBaseUrl = "https://api.paystack.co"
-
 type PaymentsSettings struct {
 	Money                       loaders.MoneyModuleSettings
-	Paystack                    PaystackSettings
 	Flutterwave                 FlutterwaveSettings
 	Wallets                     WalletSettings
 	PublicWebhookBaseUrl        string
 	AdminInternalUrl            string
 	AdminInternalToken          string
 	DefaultProvider             string
+	CheckoutChannels            []string
+	SubaccountBearsFee          bool
+	CardVerificationAmount      int64
 	AllowedReturnUrls           []string
 	AdsReturnOrigins            []string
 	OnboardingReturnUrl         string
@@ -54,21 +54,6 @@ type PaymentsSettings struct {
 	PayoutArrivalEstimate       string
 }
 
-type PaystackSettings struct {
-	BaseUrl                string
-	SecretKey              string
-	PublicKey              string
-	PreviousSecretKey      string
-	WebhookIpAllowlist     []string
-	SessionTimeoutSeconds  int
-	TransferFeeBands       string
-	Channels               []string
-	SubaccountBearsFee     bool
-	MaximumAttempts        int
-	CardVerificationAmount int64
-	SupportedCurrencies    []string
-}
-
 type AppleStoreSettings struct {
 	BundleId            string
 	Environment         string
@@ -93,25 +78,16 @@ type GooglePlaySettings struct {
 
 func ReadPaymentsSettingsFromEnvironment(reader *platformconfig.EnvironmentReader) PaymentsSettings {
 	settings := PaymentsSettings{
-		Money: loaders.ReadMoneyModuleSettingsFromEnvironment(reader, "payments"),
-		Paystack: PaystackSettings{
-			BaseUrl: reader.ReadStringOrDefault("PAYSTACK_API_BASE_URL", PaystackBaseUrl), SecretKey: reader.ReadStringOrDefault("PAYSTACK_SECRET_KEY", ""),
-			PublicKey: reader.ReadStringOrDefault("PAYSTACK_PUBLIC_KEY", ""), PreviousSecretKey: reader.ReadStringOrDefault("PAYSTACK_PREVIOUS_SECRET_KEY", ""),
-			WebhookIpAllowlist:     reader.ReadCommaSeparatedListOrDefault("PAYSTACK_WEBHOOK_IP_ALLOWLIST", nil),
-			SessionTimeoutSeconds:  reader.ReadIntegerOrDefault("PAYSTACK_PAYMENT_SESSION_TIMEOUT_SECONDS", 1800),
-			TransferFeeBands:       reader.ReadStringOrDefault("PAYSTACK_TRANSFER_FEE_BANDS", "500000:1000;5000000:2500;*:5000"),
-			Channels:               reader.ReadCommaSeparatedListOrDefault("PAYSTACK_CHECKOUT_CHANNELS", []string{"card", "bank", "ussd", "bank_transfer"}),
-			SubaccountBearsFee:     reader.ReadStringOrDefault("PAYSTACK_SPLIT_BEARER", "subaccount") == "subaccount",
-			MaximumAttempts:        reader.ReadIntegerOrDefault("PAYSTACK_MAXIMUM_ATTEMPTS", 3),
-			CardVerificationAmount: int64(reader.ReadIntegerOrDefault("PAYSTACK_CARD_VERIFICATION_AMOUNT_MINOR", 5000)),
-			SupportedCurrencies:    reader.ReadCommaSeparatedListOrDefault("PAYSTACK_SUPPORTED_CURRENCIES", []string{"NGN", "USD"}),
-		},
+		Money:                     loaders.ReadMoneyModuleSettingsFromEnvironment(reader, "payments"),
 		Flutterwave:               ReadFlutterwaveSettings(reader),
 		Wallets:                   ReadWalletSettings(reader),
 		PublicWebhookBaseUrl:      reader.ReadStringOrDefault("PAYMENTS_PUBLIC_WEBHOOK_BASE_URL", ""),
 		AdminInternalUrl:          reader.ReadStringOrDefault("ADMIN_INTERNAL_URL", ""),
 		AdminInternalToken:        reader.ReadStringOrDefault("ADMIN_INTERNAL_API_TOKEN", ""),
-		DefaultProvider:           reader.ReadStringOrDefault("PAYMENTS_PROVIDER", reader.ReadStringOrDefault("PAYMENTS_DEFAULT_PROVIDER", "paystack")),
+		DefaultProvider:           reader.ReadStringOrDefault("PAYMENTS_PROVIDER", "flutterwave"),
+		CheckoutChannels:          reader.ReadCommaSeparatedListOrDefault("CHECKOUT_CHANNELS", []string{"card", "bank", "ussd", "bank_transfer"}),
+		SubaccountBearsFee:        reader.ReadStringOrDefault("PAYMENT_SPLIT_BEARER", "subaccount") == "subaccount",
+		CardVerificationAmount:    int64(reader.ReadIntegerOrDefault("CARD_VERIFICATION_AMOUNT_MINOR", 5000)),
 		AllowedReturnUrls:         reader.ReadCommaSeparatedListOrDefault("PAYMENT_RETURN_URLS", []string{"https://zudomart.com/pay/return", "https://app.zudomart.com/pay/return"}),
 		AdsReturnOrigins:          reader.ReadCommaSeparatedListOrDefault("PAYMENT_ADS_RETURN_ORIGINS", []string{"https://ads.zudomart.com"}),
 		OnboardingReturnUrl:       reader.ReadStringOrDefault("CONNECT_ONBOARDING_RETURN_URL", "https://zudomart.com/seller/verification/return"),
@@ -132,7 +108,7 @@ func ReadPaymentsSettingsFromEnvironment(reader *platformconfig.EnvironmentReade
 			reader.ReadStringOrDefault("WALLET_DAILY_LIMITS_NGN", "basic:5000000,mid:20000000,full:500000000")),
 		EscrowSchema:                reader.ReadStringOrDefault("PAYMENTS_ESCROW_SCHEMA", "escrow"),
 		CustomerValidationMode:      reader.ReadStringOrDefault("PAYOUT_BANK_VALIDATION", "required"),
-		WebSubscriptionPlanProducts: parsePlanProducts(reader.ReadStringOrDefault("PAYSTACK_PLAN_CODES", "")),
+		WebSubscriptionPlanProducts: parsePlanProducts(reader.ReadStringOrDefault("PAYMENT_PLAN_CODES", "")),
 		AppleInAppPurchaseFeeBps:    int64(reader.ReadIntegerOrDefault("APPLE_IAP_STORE_FEE_BPS", 3000)),
 		GooglePlayBillingFeeBps:     int64(reader.ReadIntegerOrDefault("GOOGLE_PLAY_STORE_FEE_BPS", 1500)),
 		AppleStore: AppleStoreSettings{
@@ -168,20 +144,12 @@ func ReadPaymentsSettingsFromEnvironment(reader *platformconfig.EnvironmentReade
 }
 
 func ProviderKeyEnvironmentMismatches(settings PaymentsSettings) []string {
-	production := settings.Money.IsProduction()
 	var problems []string
-	key := settings.Paystack.SecretKey
-	if key != "" && ((production && !strings.HasPrefix(key, "sk_live_")) || (!production && !strings.HasPrefix(key, "sk_test_"))) {
-		problems = append(problems, "PAYSTACK_SECRET_KEY_MUST_MATCH_APP_ENV")
-	}
-	if production && key == "" {
-		problems = append(problems, "PAYSTACK_SECRET_KEY")
-	}
 	if settings.EscrowFeeBps < 0 || settings.EscrowFeeBps >= 10_000 || settings.BusinessEscrowFeeBps < 0 || settings.BusinessEscrowFeeBps > settings.EscrowFeeBps {
 		problems = append(problems, "ESCROW_FEE_BPS_BETWEEN_0_AND_9999_AND_BUSINESS_NOT_ABOVE_DEFAULT")
 	}
-	if settings.DefaultProvider != "" && settings.DefaultProvider != "paystack" && settings.DefaultProvider != "flutterwave" {
-		problems = append(problems, "PAYMENTS_PROVIDER_PAYSTACK_OR_FLUTTERWAVE")
+	if settings.DefaultProvider != "" && settings.DefaultProvider != "flutterwave" {
+		problems = append(problems, "PAYMENTS_PROVIDER_MUST_BE_FLUTTERWAVE")
 	}
 	problems = append(problems, flutterwaveKeyProblems(settings)...)
 	if settings.EscrowMode != "e2" && settings.EscrowMode != "e1" {

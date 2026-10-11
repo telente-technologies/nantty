@@ -34,7 +34,7 @@ func verificationLevelOf(t *testing.T, harness *paymentstesting.MoneyHarness, to
 	return response.Body
 }
 
-func TestBankValidationMakesUsersPayoutVerifiedAndSmileIdMakesThemIdentityVerified(t *testing.T) {
+func TestBvnConsentMakesUsersPayoutVerifiedAndSmileIdMakesThemIdentityVerified(t *testing.T) {
 	skipIntegrationWhenShort(t)
 	harness := paymentstesting.StartMoneyHarnessWithPayments(t, nil)
 	paymentsContainer := harness.Payments.Application.Container
@@ -45,30 +45,19 @@ func TestBankValidationMakesUsersPayoutVerifiedAndSmileIdMakesThemIdentityVerifi
 	if level := verificationLevelOf(t, harness, token); level["level"].(float64) != 0 || level["nextStep"] != "payout_setup" {
 		t.Fatalf("a new user is L0: %v", level)
 	}
-	harness.OnboardConnectedAccount(creator, false)
-	customer, _ := gateway.FindProviderCustomerId(context.Background(), creator)
-	identification := harness.Paystack.Identifications[customer]
-	if identification["bvn"] != "22212345678" || identification["bank_code"] != "058" || identification["first_name"] != "Temitope" || identification["last_name"] != "Adeyemi" || identification["type"] != "bank_account" {
-		t.Fatalf("Paystack customer validation was not requested with the BVN and bank account: %v", identification)
-	}
+	harness.PreparePayoutOnboarding(creator, false)
 	if level := verificationLevelOf(t, harness, token); level["level"].(float64) != 0 || level["nextStep"] != "bank_validation" {
-		t.Fatalf("a ready payout account without bank validation is not L1 yet: %v", level)
+		t.Fatalf("a ready payout account without the BVN consent is not L1 yet: %v", level)
 	}
 	if err := gateway.RequireVerificationLevel(context.Background(), creator, 1); err != services.ErrVerificationRequired {
 		t.Fatalf("L1 actions must be refused: %v", err)
 	}
-	harness.DeliverBankValidationResult(creator, false)
-	state := harness.Call(http.MethodGet, "/api/v1/payments/payout-onboarding/me", token, "", nil)
-	if validation := state.Body["bankValidation"].(map[string]any); validation["status"] != "failed" || validation["failureReason"] == "" {
-		t.Fatalf("failed validation: %s", state.Raw)
+	harness.CompleteBvnConsent(creator)
+	if repeated := harness.Call(http.MethodGet, "/api/v1/payments/payout-onboarding/me/bank-validation", token, "", nil); repeated.Body["status"] != "verified" {
+		t.Fatalf("polling again keeps the verified result: %s", repeated.Raw)
 	}
-	if retried := harness.Call(http.MethodPost, "/api/v1/payments/payout-onboarding/me/bank-validation", token, "", nil); retried.Status != http.StatusAccepted || retried.Body["status"] != "pending" {
-		t.Fatalf("retry validation: %d %s", retried.Status, retried.Raw)
-	}
-	harness.DeliverBankValidationResult(creator, true)
-	harness.DeliverBankValidationResult(creator, true)
-	if level := verificationLevelOf(t, harness, token); level["level"].(float64) != 1 || level["method"] != "bank_account" || level["unlocks"].(map[string]any)["ads"] != true {
-		t.Fatalf("validated users are payout-verified: %v", level)
+	if level := verificationLevelOf(t, harness, token); level["level"].(float64) != 1 || level["unlocks"].(map[string]any)["ads"] != true {
+		t.Fatalf("BVN-verified users are payout-verified: %v", level)
 	}
 	if changed := countPaymentsOutbox(t, harness, "verificationLevel.changed", creator); changed != 1 {
 		t.Fatalf("one level change must emit one event, got %d", changed)

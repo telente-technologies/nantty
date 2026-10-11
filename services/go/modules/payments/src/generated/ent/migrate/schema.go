@@ -393,6 +393,14 @@ var (
 					Where: "provider_transaction_id <> ''",
 				},
 			},
+			{
+				Name:    "payment_intents_one_settlement_per_subject",
+				Unique:  true,
+				Columns: []*schema.Column{PaymentIntentsColumns[3], PaymentIntentsColumns[5]},
+				Annotation: &entsql.IndexAnnotation{
+					Where: "status = 'succeeded' AND failure_reason NOT LIKE 'duplicate%'",
+				},
+			},
 		},
 	}
 	// PaymentRefundsColumns holds the columns for the "payment_refunds" table.

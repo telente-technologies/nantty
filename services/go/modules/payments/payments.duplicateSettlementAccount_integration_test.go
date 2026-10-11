@@ -75,9 +75,6 @@ func TestSecondStoreWithTheSameBankAccountIsRefusedAndSentToTrustReview(t *testi
 	if requeued, err := gateway.ReconcileStuckConnectedAccounts(ctx, 0); err != nil || requeued != 0 {
 		t.Fatalf("reconciliation must not retry a duplicate account forever: requeued=%d err=%v", requeued, err)
 	}
-	if harness.Paystack.SubaccountCreations != 1 {
-		t.Fatalf("only the first store gets a subaccount: %d", harness.Paystack.SubaccountCreations)
-	}
 	state := harness.Call(http.MethodGet, "/api/v1/payments/payout-onboarding/me", legacyToken, "", nil)
 	if !strings.Contains(string(state.Raw), "BANK_ACCOUNT_ALREADY_LINKED") {
 		t.Fatalf("the onboarding state explains why: %s", state.Raw)

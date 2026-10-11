@@ -82,8 +82,8 @@ func flutterwaveKeyProblems(settings PaymentsSettings) []string {
 	if key != "" && ((production && (!strings.HasPrefix(key, "FLWSECK-") || strings.Contains(key, "_TEST"))) || (!production && !strings.HasPrefix(key, "FLWSECK_TEST-"))) {
 		problems = append(problems, "FLUTTERWAVE_SECRET_KEY_MUST_MATCH_APP_ENV")
 	}
-	if settings.DefaultProvider != "flutterwave" {
-		return problems
+	if key == "" && !production {
+		return append(problems, depositFeeProblems(settings)...)
 	}
 	if key == "" {
 		problems = append(problems, "FLUTTERWAVE_SECRET_KEY")
@@ -94,6 +94,11 @@ func flutterwaveKeyProblems(settings PaymentsSettings) []string {
 	if settings.Flutterwave.MerchantId == "" {
 		problems = append(problems, "FLUTTERWAVE_MERCHANT_ID")
 	}
+	return append(problems, depositFeeProblems(settings)...)
+}
+
+func depositFeeProblems(settings PaymentsSettings) []string {
+	var problems []string
 	if settings.Wallets.DepositFeeBps < 0 || settings.Wallets.DepositFeeBps >= 10_000 {
 		problems = append(problems, "WALLET_DEPOSIT_FEE_BPS_BETWEEN_0_AND_9999")
 	}

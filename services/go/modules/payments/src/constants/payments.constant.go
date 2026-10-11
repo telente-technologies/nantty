@@ -13,7 +13,6 @@ const (
 	PurposeCardVerification    = "card_verification"
 	PurposeSubscriptionRenewal = "subscription_renewal"
 
-	ProviderPaystack    = "paystack"
 	ProviderFlutterwave = "flutterwave"
 	StoreAppleIap       = "apple_iap"
 	StoreGooglePlay     = "google_play"

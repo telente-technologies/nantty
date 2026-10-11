@@ -33,7 +33,7 @@ func TestSavedCardDoubleTapChargesTheCardOnce(t *testing.T) {
 	err := databases.RunInMoneyTransaction(context.Background(), harness.Database, func(ctx context.Context, transaction *sql.Tx) error {
 		var err error
 		intent, err = gateway.CreatePendingPaymentIntentInTransaction(ctx, transaction, models.CreatePaymentIntentRequest{
-			Purpose: "card_verification", OwnerUserId: buyer, SubjectId: uuid.NewString(), Provider: "paystack", AmountMinor: 5000, Currency: "NGN",
+			Purpose: "card_verification", OwnerUserId: buyer, SubjectId: uuid.NewString(), Provider: "flutterwave", AmountMinor: 5000, Currency: "NGN",
 		})
 		return err
 	})
@@ -43,7 +43,7 @@ func TestSavedCardDoubleTapChargesTheCardOnce(t *testing.T) {
 	if missing := harness.Call(http.MethodPost, "/api/v1/payments/saved-cards/charges", token, "", map[string]any{"paymentReference": intent.Reference, "savedCardId": savedCardId}); missing.Status != http.StatusBadRequest || missing.Body["code"] != "IDEMPOTENCY_KEY_REQUIRED" {
 		t.Fatalf("a charge without an Idempotency-Key is refused: %d %s", missing.Status, missing.Raw)
 	}
-	chargesBefore := harness.Paystack.CallCount("POST /transaction")
+	chargesBefore := harness.Flutterwave.CallCount("POST /tokenized-charges")
 	var group sync.WaitGroup
 	for index := range 8 {
 		group.Add(1)
@@ -57,7 +57,7 @@ func TestSavedCardDoubleTapChargesTheCardOnce(t *testing.T) {
 		}()
 	}
 	group.Wait()
-	if charges := harness.Paystack.CallCount("POST /transaction") - chargesBefore; charges != 1 {
+	if charges := harness.Flutterwave.CallCount("POST /tokenized-charges") - chargesBefore; charges != 1 {
 		t.Fatalf("a double tap must charge the saved card once, got %d charge calls", charges)
 	}
 	assertLedgerHealthy(t, harness)

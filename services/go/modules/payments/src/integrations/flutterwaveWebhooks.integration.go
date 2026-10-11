@@ -118,8 +118,12 @@ func parseFlutterwaveRefundHook(rawBody []byte) (interfaces.WebhookNotification,
 		return interfaces.WebhookNotification{}, interfaces.ErrMalformedWebhookPayload
 	}
 	status := strings.ToLower(refund.Status)
+	normalized := map[interfaces.ProviderOutcome]string{interfaces.OutcomeSucceeded: "processed", interfaces.OutcomeFailed: "failed"}[convertFlutterwaveRefundStatus(status)]
+	if normalized == "" {
+		normalized = "pending"
+	}
 	return interfaces.WebhookNotification{
-		EventKey: truncate("refund:"+refund.Id.String()+":"+status, 255), EventType: "refund." + status, Kind: interfaces.WebhookKindRefund,
-		ProviderObjectId: refund.Id.String(), ProviderChargeId: refund.TransactionId.String(), Status: status,
+		EventKey: truncate("refund:"+refund.Id.String()+":"+status, 255), EventType: "refund." + normalized, Kind: interfaces.WebhookKindRefund,
+		ProviderObjectId: refund.Id.String(), ProviderChargeId: refund.TransactionId.String(), Status: normalized,
 	}, nil
 }

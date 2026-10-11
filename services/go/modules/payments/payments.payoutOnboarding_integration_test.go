@@ -36,15 +36,16 @@ func TestPayoutAccountCreationIsQueuedAndNeverDuplicatedAcrossRetries(t *testing
 	if saved.Status != http.StatusOK || saved.Body["accountStatus"] != "pending_creation" || saved.Body["idLast4"] != "5678" || saved.Body["currentStep"] != "bank" {
 		t.Fatalf("identity: %d %s", saved.Status, saved.Raw)
 	}
+	harness.Flutterwave.BankAccountNames["058:1112223334"] = "CHIDI OKAFOR"
 	if mismatch := harness.Call(http.MethodPut, "/api/v1/payments/payout-onboarding/me/bank", token, "", map[string]any{"bankCode": "058", "bankName": "GTBank", "accountNumber": "1112223334"}, harness.StepUpFor(token)); mismatch.Status != http.StatusUnprocessableEntity || mismatch.Body["code"] != "NAME_MISMATCH" {
 		t.Fatalf("name mismatch: %d %s", mismatch.Status, mismatch.Raw)
 	}
-	harness.Paystack.Recipients["RCP_pre_existing"] = map[string]any{"recipient_code": "RCP_pre_existing", "metadata": map[string]any{"zudomartUserId": seller}, "details": map[string]any{"account_number": "0123456789", "bank_code": "058"}}
+	harness.SetCountry(seller, "NG")
 	bank := harness.Call(http.MethodPut, "/api/v1/payments/payout-onboarding/me/bank", token, "", map[string]any{"bankCode": "058", "bankName": "GTBank", "accountNumber": "0123456789"}, harness.StepUpFor(token))
 	if bank.Status != http.StatusOK || bank.Body["syncByStep"].(map[string]any)["bank"] != "sending" || bank.Body["withdrawalsEnabled"] != false {
 		t.Fatalf("bank: %d %s", bank.Status, bank.Raw)
 	}
-	harness.Paystack.FailNextRequests = 3
+	harness.Flutterwave.FailNextRequests = 3
 	gateway.ProcessDueConnectedAccountJobs(context.Background(), 1)
 	if err := gateway.RequirePayoutAccountVerified(context.Background(), seller); err == nil {
 		t.Fatal("withdrawals must stay refused until the payout account exists")
@@ -56,9 +57,11 @@ func TestPayoutAccountCreationIsQueuedAndNeverDuplicatedAcrossRetries(t *testing
 	}
 	gateway.ProcessDueConnectedAccountJobs(context.Background(), 20)
 	gateway.ProcessDueConnectedAccountJobs(context.Background(), 20)
-	if harness.Paystack.RecipientCreations != 0 || harness.Paystack.SubaccountCreations != 1 {
-		t.Fatalf("a retried job must reuse the existing recipient: recipients %d subaccounts %d", harness.Paystack.RecipientCreations, harness.Paystack.SubaccountCreations)
+	if err := gateway.RequirePayoutAccountVerified(context.Background(), seller); err == nil {
+		t.Fatal("withdrawals stay refused until the BVN consent gives the seller a wallet")
 	}
+	harness.Flutterwave.FailNextRequests = 0
+	harness.CompleteBvnConsent(seller)
 	state := harness.Call(http.MethodGet, "/api/v1/payments/payout-onboarding/me", token, "", nil)
 	if state.Body["accountStatus"] != "verified" || state.Body["withdrawalsEnabled"] != true || state.Body["syncByStep"].(map[string]any)["bank"] != "done" {
 		t.Fatalf("state after the worker: %s", state.Raw)
@@ -70,7 +73,7 @@ func TestPayoutAccountCreationIsQueuedAndNeverDuplicatedAcrossRetries(t *testing
 		t.Fatalf("document link: %d %s", link.Status, link.Raw)
 	}
 	fees := harness.Call(http.MethodGet, "/api/v1/payments/payout-fees", "", "", nil)
-	if fees.Status != http.StatusOK || fees.Body["fee"].(map[string]any)["amountMinor"].(float64) != 5000 {
+	if fees.Status != http.StatusOK || fees.Body["fee"].(map[string]any)["amountMinor"].(float64) != 1075 {
 		t.Fatalf("fees: %d %s", fees.Status, fees.Raw)
 	}
 }
@@ -88,7 +91,7 @@ func TestFailedPayoutAccountJobsAreRequeuedByReconciliation(t *testing.T) {
 	}
 	schema := harness.Payments.Application.Container.Settings.Money.DatabaseSchema
 	table := pgx.Identifier{schema, "connected_account_jobs"}.Sanitize()
-	if _, err := harness.Database.Exec(`UPDATE `+table+` SET status = 'failed', attempt_count = 5, last_error = 'paystack 502', updated_at = now() - interval '2 days' WHERE user_id = $1`, creator); err != nil {
+	if _, err := harness.Database.Exec(`UPDATE `+table+` SET status = 'failed', attempt_count = 5, last_error = 'provider 502', updated_at = now() - interval '2 days' WHERE user_id = $1`, creator); err != nil {
 		t.Fatal(err)
 	}
 	requeued, err := gateway.ReconcileStuckConnectedAccounts(context.Background(), 24*time.Hour)
@@ -116,7 +119,7 @@ func TestSavedCardAuthorizationNeverLeavesTheServerAndChargesUseTheOwnersSavedCa
 	transaction := harness.PayCheckout(reference, 75, "card")
 	completed := harness.Call(http.MethodPost, "/api/v1/payments/saved-cards/setups/"+reference+"/complete", token, "", nil)
 	savedCardId, _ := completed.Body["savedCardId"].(string)
-	if completed.Status != http.StatusOK || savedCardId == "" || completed.Body["last4"] != "4081" || strings.Contains(string(completed.Raw), transaction.AuthorizationCode) || completed.Body["authorizationCode"] != nil {
+	if completed.Status != http.StatusOK || savedCardId == "" || completed.Body["last4"] != "8381" || strings.Contains(string(completed.Raw), transaction.CardToken) || completed.Body["authorizationCode"] != nil {
 		t.Fatalf("complete must return our saved card id, never the provider authorization: %d %s", completed.Status, completed.Raw)
 	}
 	if again := harness.Call(http.MethodPost, "/api/v1/payments/saved-cards/setups/"+reference+"/complete", token, "", nil); again.Status != http.StatusOK || again.Body["savedCardId"] != savedCardId {
@@ -127,15 +130,15 @@ func TestSavedCardAuthorizationNeverLeavesTheServerAndChargesUseTheOwnersSavedCa
 	if stolen := harness.Call(http.MethodPost, "/api/v1/payments/saved-cards/charges", strangerToken, "stolen-card-charge-1", map[string]any{"paymentReference": otherReference, "savedCardId": savedCardId}); stolen.Status != http.StatusConflict || stolen.Body["code"] != "BILLING_CARD_MISSING" {
 		t.Fatalf("another account cannot charge this saved card: %d %s", stolen.Status, stolen.Raw)
 	}
-	if legacy := harness.Call(http.MethodPost, "/api/v1/payments/saved-cards/charges", strangerToken, "legacy-card-charge-1", map[string]any{"paymentReference": otherReference, "authorizationCode": transaction.AuthorizationCode}); legacy.Status != http.StatusBadRequest {
+	if legacy := harness.Call(http.MethodPost, "/api/v1/payments/saved-cards/charges", strangerToken, "legacy-card-charge-1", map[string]any{"paymentReference": otherReference, "authorizationCode": transaction.CardToken}); legacy.Status != http.StatusBadRequest {
 		t.Fatalf("a provider authorization from a client is refused: %d %s", legacy.Status, legacy.Raw)
 	}
 	harness.Payments.Application.Gateway.RetryPendingRefunds(context.Background(), 10)
-	if len(harness.Paystack.Refunds) != 1 {
-		t.Fatalf("the verification charge must be refunded: %+v", harness.Paystack.Refunds)
+	if len(harness.Flutterwave.Refunds) != 1 {
+		t.Fatalf("the verification charge must be refunded: %+v", harness.Flutterwave.Refunds)
 	}
-	assertNoColumnContains(t, harness.Database, harness.Payments.Application.Container.Settings.Money.DatabaseSchema, transaction.AuthorizationCode)
-	if strings.Contains(logs.String(), transaction.AuthorizationCode) || strings.Contains(logs.String(), "AUTH_") {
+	assertNoColumnContains(t, harness.Database, harness.Payments.Application.Container.Settings.Money.DatabaseSchema, transaction.CardToken)
+	if strings.Contains(logs.String(), transaction.CardToken) || strings.Contains(logs.String(), "flw-t1nf") {
 		t.Fatal("the provider authorization must never be logged")
 	}
 	harness.AssertLedgerHealthy()

@@ -212,6 +212,15 @@ func convertFlutterwaveRefundStatus(status string) interfaces.ProviderOutcome {
 }
 
 func (provider *FlutterwaveProvider) RefundCharge(ctx context.Context, request interfaces.RefundRequest) (interfaces.RefundResult, error) {
+	if request.ProviderChargeId == "" && request.ChargeReference != "" {
+		verification, err := provider.VerifyCharge(ctx, interfaces.ChargeLookup{Reference: request.ChargeReference})
+		if err != nil {
+			return interfaces.RefundResult{}, err
+		}
+		if verification.Outcome == interfaces.OutcomeSucceeded {
+			request.ProviderChargeId = verification.ProviderChargeId
+		}
+	}
 	if !flutterwaveChargeIdPattern.MatchString(request.ProviderChargeId) {
 		return interfaces.RefundResult{}, errors.New("flutterwave: a refund needs the verified transaction id")
 	}
