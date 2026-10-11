@@ -1,0 +1,1 @@
+ALTER TABLE "ad_top_ups" ALTER COLUMN "provider" DROP DEFAULT;

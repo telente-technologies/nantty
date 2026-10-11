@@ -55,7 +55,7 @@ func TestWithdrawalAndNewPayoutAccountNeedAStepUpForTheSameSession(t *testing.T)
 	if allowed := harness.withdraw(token, "step-up-ok", accountId, 20_000); allowed.Status != http.StatusCreated {
 		t.Fatalf("stepped-up withdrawal: %d %s", allowed.Status, allowed.Raw)
 	}
-	if harness.balance(ledgermodels.SellerAvailableAccount(user, "NGN")) != 80_000 {
+	if harness.balance(ledgermodels.WalletAvailableAccount(user, "NGN")) != 80_000 {
 		t.Fatal("only the stepped-up withdrawal may reserve money")
 	}
 	harness.AssertLedgerHealthy()
@@ -103,7 +103,7 @@ func TestWithdrawalVelocityDailyCapAndNewAccountCooldown(t *testing.T) {
 		t.Fatal(err)
 	}
 	expect("next-day", 50_000, http.StatusCreated, "")
-	if harness.balance(ledgermodels.SellerReservedPayoutAccount(user, "NGN")) != 120_000 {
+	if harness.balance(ledgermodels.WalletReservedPayoutAccount(user, "NGN")) != 120_000 {
 		t.Fatal("refused withdrawals must not reserve money")
 	}
 	harness.AssertLedgerHealthy()
@@ -130,7 +130,7 @@ func TestConcurrentWithdrawalsRespectTheMinimumGap(t *testing.T) {
 		}()
 	}
 	group.Wait()
-	if created.Load() != 1 || harness.balance(ledgermodels.SellerAvailableAccount(user, "NGN")) != 70_000 {
+	if created.Load() != 1 || harness.balance(ledgermodels.WalletAvailableAccount(user, "NGN")) != 70_000 {
 		t.Fatalf("created %d withdrawals inside one gap", created.Load())
 	}
 	harness.AssertLedgerHealthy()
@@ -142,7 +142,7 @@ func TestWithdrawalTimeoutThenProviderSuccessIsPaidExactlyOnce(t *testing.T) {
 	token, accountId := harness.fundWithdrawableBalance(user, 100_000)
 	created := harness.withdraw(token, "timeout-withdraw", accountId, 50_000)
 	reference := created.Body["reference"].(string)
-	harness.Paystack.LoseNextTransferReply = true
+	harness.Flutterwave.LoseNextTransferReply = true
 	harness.wallet.Payouts.Withdrawals.RunPayoutBatch(context.Background(), 10)
 	if status := harness.withdrawalStatus(reference); status != "processing" {
 		t.Fatalf("a lost transfer reply must stay processing, got %s", status)
@@ -152,15 +152,14 @@ func TestWithdrawalTimeoutThenProviderSuccessIsPaidExactlyOnce(t *testing.T) {
 	if status := harness.withdrawalStatus(reference); status != "processing" {
 		t.Fatalf("pending at the provider must stay processing, got %s", status)
 	}
-	transfer := harness.Paystack.SetTransferStatus(reference, "success")
 	for range 2 {
-		harness.DeliverPaystackEvent("transfer.success", map[string]any{"reference": reference, "transfer_code": transfer.Code, "status": "success", "amount": transfer.AmountMinor})
+		harness.FinishTransfer(reference, true)
 		harness.wallet.Payouts.Withdrawals.FinalizeProcessingWithdrawalsOlderThan(context.Background(), -time.Minute)
 	}
-	if status := harness.withdrawalStatus(reference); status != "paid" || harness.Paystack.Calls("POST /transfer") != 1 {
-		t.Fatalf("status %s after %d transfer posts", status, harness.Paystack.Calls("POST /transfer"))
+	if status := harness.withdrawalStatus(reference); status != "paid" || harness.Flutterwave.Calls("POST /transfers") != 1 {
+		t.Fatalf("status %s after %d transfer posts", status, harness.Flutterwave.Calls("POST /transfers"))
 	}
-	if harness.balance(ledgermodels.SellerReservedPayoutAccount(user, "NGN")) != 0 || harness.balance(ledgermodels.SellerAvailableAccount(user, "NGN")) != 50_000 {
+	if harness.balance(ledgermodels.WalletReservedPayoutAccount(user, "NGN")) != 0 || harness.balance(ledgermodels.WalletAvailableAccount(user, "NGN")) != 50_000 {
 		t.Fatal("a paid withdrawal must leave reserved at zero and never return money")
 	}
 	harness.AssertLedgerHealthy()
@@ -176,15 +175,14 @@ func TestProcessingWithdrawalWithoutATransferRowIsQueuedAgainAndPaidOnce(t *test
 		t.Fatal(err)
 	}
 	harness.wallet.Payouts.Withdrawals.FinalizeProcessingWithdrawalsOlderThan(context.Background(), 10*time.Minute)
-	if status := harness.withdrawalStatus(reference); status != "queued" || harness.Paystack.Calls("POST /transfer") != 0 {
+	if status := harness.withdrawalStatus(reference); status != "queued" || harness.Flutterwave.Calls("POST /transfers") != 0 {
 		t.Fatalf("an orphaned withdrawal must go back to the queue without a provider call, got %s", status)
 	}
 	harness.wallet.Payouts.Withdrawals.RunPayoutBatch(context.Background(), 10)
 	harness.wallet.Payouts.Withdrawals.RunPayoutBatch(context.Background(), 10)
-	transfer := harness.Paystack.SetTransferStatus(reference, "success")
-	harness.DeliverPaystackEvent("transfer.success", map[string]any{"reference": reference, "transfer_code": transfer.Code, "status": "success", "amount": transfer.AmountMinor})
-	if status := harness.withdrawalStatus(reference); status != "paid" || harness.Paystack.Calls("POST /transfer") != 1 {
-		t.Fatalf("status %s after %d transfer posts", status, harness.Paystack.Calls("POST /transfer"))
+	harness.FinishTransfer(reference, true)
+	if status := harness.withdrawalStatus(reference); status != "paid" || harness.Flutterwave.Calls("POST /transfers") != 1 {
+		t.Fatalf("status %s after %d transfer posts", status, harness.Flutterwave.Calls("POST /transfers"))
 	}
 	harness.AssertLedgerHealthy()
 }
