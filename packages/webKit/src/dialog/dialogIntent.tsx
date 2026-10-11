@@ -1,3 +1,5 @@
+/** @jsxRuntime automatic */
+/** @jsxImportSource react */
 import {
   ArchiveIcon, ArrowCounterClockwiseIcon, ArrowsLeftRightIcon, ArrowUUpLeftIcon, BankIcon, BellSlashIcon, BroadcastIcon, CalendarDotsIcon, CameraIcon, ChartBarHorizontalIcon, ChartLineUpIcon,
   ChatCircleTextIcon, CheckCircleIcon, ClipboardTextIcon, CoinsIcon, CopyrightIcon, CreditCardIcon, CrownIcon, CurrencyNgnIcon, EyeIcon, FingerprintIcon, FlagIcon, FlaskIcon,

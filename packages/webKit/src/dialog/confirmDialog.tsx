@@ -1,3 +1,5 @@
+/** @jsxRuntime automatic */
+/** @jsxImportSource react */
 "use client";
 
 import { useSyncExternalStore } from "react";

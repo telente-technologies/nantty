@@ -29,7 +29,7 @@ export interface ConfirmationSnapshot {
 const closedSnapshot: ConfirmationSnapshot = { pending: null, isOpen: false, isSubmitting: false, errorMessage: null };
 
 function defaultErrorMessage(error: unknown): string {
-  return error instanceof Error && error.message ? error.message : "Something went wrong. Please try again.";
+  return error instanceof Error && error.message ? error.message : "That didn't work. Nothing was changed. Please try again.";
 }
 
 export function createConfirmationStore() {

@@ -4,8 +4,8 @@ export { defaultZudomartWordmarkVariant, zudomartWordmarkFor, zudomartWordmarkPa
 export type { ZudomartBrandPath, ZudomartWordmarkVariant } from "./brand/zudomartBrand.path";
 export { Skeleton } from "./skeleton";
 export { EmptyState } from "./emptyState";
-export { ErrorState } from "./errorState";
-export { OfflineBanner } from "./network/offlineBanner";
+export * from "./errorExperience";
+export { ConnectionStatus, OfflineBanner } from "./network/offlineBanner";
 export { isBrowserOffline, useIsOnline, useOnReconnect } from "./network/useIsOnline";
 export { CookieConsentBanner } from "./consent/cookieConsentBanner";
 export type { CookieConsentBannerProps } from "./consent/cookieConsentBanner";

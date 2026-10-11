@@ -1,3 +1,5 @@
+/** @jsxRuntime automatic */
+/** @jsxImportSource react */
 "use client";
 
 import { useCallback, useId, type ReactNode } from "react";

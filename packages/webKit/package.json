@@ -6,7 +6,7 @@
   "main": "./src/index.ts",
   "types": "./src/index.ts",
   "scripts": {
-    "test": "tsx --import ./src/dialog/__tests__/registerCssStub.mjs --test src/dialog/__tests__/dialog.test.tsx src/loader/__tests__/brandLoader.test.tsx"
+    "test": "tsx --import ./src/dialog/__tests__/registerCssStub.mjs --test src/dialog/__tests__/dialog.test.tsx src/loader/__tests__/brandLoader.test.tsx src/errorExperience/__tests__/*.tsx"
   },
   "peerDependencies": {
     "react": "^19.3.0",

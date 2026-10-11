@@ -1,3 +1,5 @@
+/** @jsxRuntime automatic */
+/** @jsxImportSource react */
 import { ZudomartLogoMark } from "../zudomartWordmark";
 import styles from "./brandLoader.module.css";
 

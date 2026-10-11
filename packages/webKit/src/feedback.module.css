@@ -30,94 +30,53 @@
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
   gap: var(--space-3);
-  padding: var(--space-9) var(--space-5);
+  min-height: 240px;
+  margin-inline: auto;
+  padding: var(--space-8) var(--space-4);
   text-align: center;
 }
 
+.emptyCompact {
+  min-height: 0;
+  padding: var(--space-6) var(--space-4);
+}
+
 .emptyIcon {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 62px;
-  height: 62px;
-  border-radius: var(--radius-lg);
-  background: var(--color-brand-tint);
+  display: inline-grid;
+  place-items: center;
+  width: 72px;
+  height: 72px;
+  margin-bottom: var(--space-2);
+  border-radius: 50%;
+  background: radial-gradient(circle at 30% 25%, var(--color-surface) 0%, var(--color-brand-tint) 70%);
   color: var(--color-brand);
   font-size: var(--fs-24);
+  box-shadow: 0 0 0 8px color-mix(in srgb, var(--color-brand-tint) 50%, transparent);
+}
+
+.emptyCompact .emptyIcon {
+  width: 56px;
+  height: 56px;
 }
 
 .emptyTitle {
+  margin: 0;
   font-size: var(--fs-20);
   font-weight: 800;
+  text-wrap: balance;
 }
 
 .emptyDescription {
-  max-width: 46ch;
+  max-width: 44ch;
+  margin: 0;
   font-size: var(--fs-14);
+  line-height: 1.55;
   color: var(--color-text-muted);
+  text-wrap: pretty;
 }
 
 .emptyAction {
-  margin-top: var(--space-2);
-}
-
-.errorState {
-  display: flex;
-  gap: var(--space-3);
-  align-items: flex-start;
-  margin: var(--space-5) 0;
-  padding: var(--space-4);
-  border: 1px solid var(--color-danger);
-  border-radius: var(--radius-md);
-  background: var(--color-danger-tint);
-}
-
-.errorMark {
-  display: inline-flex;
-  flex: none;
-  align-items: center;
-  justify-content: center;
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  background: var(--color-danger-text);
-  color: var(--color-on-brand);
-  font-weight: 800;
-  font-size: var(--fs-13);
-}
-
-.errorBody {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-1);
-}
-
-.errorTitle {
-  font-weight: 700;
-  color: var(--color-danger-text);
-}
-
-.errorDescription {
-  font-size: var(--fs-13);
-  color: var(--color-danger-text);
-}
-
-.errorActions {
-  display: flex;
-  gap: var(--space-2);
-  margin-top: var(--space-2);
-}
-
-.retryButton {
-  min-height: var(--control-md);
-  padding: 0 var(--space-4);
-  border: 1px solid var(--color-danger-text);
-  border-radius: var(--radius-md);
-  background: var(--color-surface);
-  color: var(--color-danger-text);
-  font: inherit;
-  font-size: var(--fs-13);
-  font-weight: 700;
-  cursor: pointer;
+  margin-top: var(--space-3);
 }
