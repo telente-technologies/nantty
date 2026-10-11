@@ -60,7 +60,7 @@ export function BrandClaimDialog({ isOpen, selectedListings, onClose, onFiled }:
   }
 
   return (
-    <ModalDialog
+    <ModalDialog intent="copyright"
       isOpen={isOpen}
       onClose={onClose}
       title="File a brand claim"

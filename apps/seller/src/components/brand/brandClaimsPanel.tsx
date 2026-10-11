@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 
+import { requestConfirmation } from "@zudomart/web-kit";
+
 import { useBrandWorkspace } from "@/components/brand/brandWorkspace";
 import { Button } from "@/components/ui/button";
 import { DataTable } from "@/components/ui/dataTable";
@@ -22,7 +24,7 @@ export function BrandClaimsPanel({ canWithdraw, onChanged }: { readonly canWithd
   const [withdrawingClaimId, setWithdrawingClaimId] = useState<string | null>(null);
 
   async function withdrawClaim(claim: BrandClaim) {
-    if (!window.confirm("Withdraw this claim? The listings stay up and you can file again later.")) return;
+    if (!(await requestConfirmation({ title: "Withdraw this claim?", description: "The listings stay up and you can file again later.", confirmLabel: "Withdraw claim", intent: "copyright" }))) return;
     setWithdrawingClaimId(claim.id);
     try {
       await sendSellerApiRequest(`/seller/brands/${encodeURIComponent(brand.id)}/protection/claims/${encodeURIComponent(claim.id)}/withdraw`, { method: "POST", body: {} });

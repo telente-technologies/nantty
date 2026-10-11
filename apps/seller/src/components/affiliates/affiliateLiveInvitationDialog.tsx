@@ -77,7 +77,7 @@ export function AffiliateLiveInvitationDialog({ isOpen, onClose, onInvited }: { 
   }
 
   return (
-    <ModalDialog
+    <ModalDialog intent="live"
       isOpen={isOpen}
       title="Invite a creator to live-sell"
       description="The creator gets your invitation in the Zudomart app and can accept or decline."

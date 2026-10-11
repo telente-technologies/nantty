@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 
+import { requestConfirmation } from "@zudomart/web-kit";
+
 import { useBrandWorkspace } from "@/components/brand/brandWorkspace";
 import { Button, IconButton } from "@/components/ui/button";
 import { DataTable } from "@/components/ui/dataTable";
@@ -49,7 +51,7 @@ function InviteBrandMemberDialog({ isOpen, onClose, allowAdmin }: { readonly isO
   }
 
   return (
-    <ModalDialog isOpen={isOpen} onClose={onClose} title="Add someone to the brand" description="Add someone who already uses the Zudomart app. They accept in the app and sign in with their own account." width="small" footer={<><Button onClick={onClose}>Cancel</Button><Button variant="primary" isBusy={isSending} onClick={() => void sendBrandInvitation()}>Send invitation</Button></>}>
+    <ModalDialog intent="addMember" isOpen={isOpen} onClose={onClose} title="Add someone to the brand" description="Add someone who already uses the Zudomart app. They accept in the app and sign in with their own account." width="small" footer={<><Button onClick={onClose}>Cancel</Button><Button variant="primary" isBusy={isSending} onClick={() => void sendBrandInvitation()}>Send invitation</Button></>}>
       <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
         <FormErrorSummary messages={errors} />
         <ZudomartUserPicker selectedUser={selectedUser} onSelectUser={setSelectedUser} />
@@ -87,7 +89,7 @@ export function BrandMembersView() {
   }
 
   async function removeMember(member: BrandMember) {
-    if (!window.confirm(`Remove ${member.name} from ${brand.name}? They lose access to the brand straight away.`)) return;
+    if (!(await requestConfirmation({ title: `Remove ${member.name} from ${brand.name}?`, description: "They lose access to the brand straight away.", confirmLabel: "Remove", tone: "danger", intent: "removeMember" }))) return;
     setBusyMemberId(member.id);
     try {
       await sendSellerApiRequest(`/seller/brands/${encodeURIComponent(brand.id)}/members/${encodeURIComponent(member.id)}`, { method: "DELETE" });

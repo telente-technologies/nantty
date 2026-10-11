@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 
+import { requestConfirmation } from "@zudomart/web-kit";
+
 import { PlanLockedNotice } from "@/components/billing/planGate";
 import { CompactSelect } from "@/components/catalog/productListFilters";
 import { Button } from "@/components/ui/button";
@@ -38,7 +40,7 @@ export function ProductBulkActionBar({ selectedProductIds, onFinished }: { reado
   }
 
   async function applyBulkActionToSelectedProducts(action: ProductBulkAction, extra: Omit<ProductBulkActionRequest, "action" | "productIds"> = {}) {
-    if (action === "archive" && !window.confirm(`Archive ${selectedProductIds.length} product(s)? They are removed from the marketplace.`)) return;
+    if (action === "archive" && !(await requestConfirmation({ title: `Archive ${selectedProductIds.length} product(s)?`, description: "They are removed from the marketplace.", confirmLabel: "Archive", intent: "archive" }))) return;
     setRunningAction(action);
     try {
       const result = await sendSellerApiRequest<ProductBulkActionResult>("/seller/products/bulk", { method: "POST", body: { action, productIds: selectedProductIds, ...extra } });
@@ -52,13 +54,13 @@ export function ProductBulkActionBar({ selectedProductIds, onFinished }: { reado
     }
   }
 
-  function applyPercentagePriceChange() {
+  async function applyPercentagePriceChange() {
     const percent = Number(percentText.replace(",", "."));
     if (!Number.isFinite(percent) || percent === 0 || percent < -90 || percent > 500) {
       showToast("Enter a change between −90 and 500 percent, for example 10 or −15.", "error");
       return;
     }
-    if (!window.confirm(`Change the price of every variant in ${selectedProductIds.length} product(s) by ${percent > 0 ? "+" : ""}${percent}%?`)) return;
+    if (!(await requestConfirmation({ title: `Change prices by ${percent > 0 ? "+" : ""}${percent}%?`, description: `Every variant in ${selectedProductIds.length} product(s) gets the new price.`, confirmLabel: "Change prices", intent: "tag" }))) return;
     void applyBulkActionToSelectedProducts("change_price_percent", { pricePercentBasisPoints: Math.round(percent * 100) });
   }
 

@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 
+import { requestConfirmation } from "@zudomart/web-kit";
+
 import { useBrandWorkspace } from "@/components/brand/brandWorkspace";
 import { Button } from "@/components/ui/button";
 import { Callout, EmptyState } from "@/components/ui/feedback";
@@ -41,7 +43,7 @@ export function BrandStoresView() {
   }
 
   async function unlinkStoreFromBrand(storeId: string, storeName: string) {
-    if (!window.confirm(`Unlink ${storeName} from ${brand.name}? Its products tagged as your own brand will need a new tag.`)) return;
+    if (!(await requestConfirmation({ title: `Unlink ${storeName} from ${brand.name}?`, description: "Its products tagged as your own brand will need a new tag.", confirmLabel: "Unlink store", tone: "danger", intent: "remove" }))) return;
     setBusyStoreId(storeId);
     try {
       await sendSellerApiRequest(`/seller/brands/${encodeURIComponent(brand.id)}/stores/${encodeURIComponent(storeId)}`, { method: "DELETE" });

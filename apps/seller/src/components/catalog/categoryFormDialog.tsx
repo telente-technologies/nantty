@@ -39,7 +39,7 @@ export function CategoryFormDialog({ category, onClose, onSaved }: { readonly ca
   }
 
   return (
-    <ModalDialog
+    <ModalDialog intent="tag"
       isOpen
       onClose={onClose}
       width="small"

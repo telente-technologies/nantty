@@ -11,11 +11,13 @@ import { planHighlightsByPlan, sellerPlanLabels, type SellerPlan } from "@/confi
 import { useSellerQuery } from "@/hooks/useSellerQuery.hook";
 import { readErrorMessageForDisplay, sendSellerApiRequest } from "@/services/clientApi.service";
 import { computeDisplayedPrice } from "@/components/billing/billingPricing.util";
+import { isCountryRequiredError, useCountryRequiredRetry } from "@/components/billing/countryRequiredDialog";
+import { countryRequiredCode as COUNTRY_REQUIRED } from "@/utils/countryRequired.util";
 import type { BillingOffer } from "@/types/billingOffer.type";
 import type { CursorPage } from "@/types/pagination.type";
 import type { SubscriptionPlan } from "@/types/subscription.type";
 import { formatMoneyForDisplay } from "@/utils/money.util";
-import { openPaystackCheckout } from "@/utils/paystackCheckout.util";
+import { openHostedCheckout } from "@/utils/hostedCheckout.util";
 
 import styles from "./subscriptionPlanPicker.module.css";
 
@@ -40,21 +42,19 @@ export function SubscriptionPlanPicker({ currentPlanId, currentPlan, offer }: { 
   const [billingInterval, setBillingInterval] = useState<"month" | "year">("month");
   const [pendingPlanId, setPendingPlanId] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const { retry: countryRetry, dialog: countryDialog } = useCountryRequiredRetry();
 
   async function startHostedCheckoutForPlan(planId: string) {
     setPendingPlanId(planId);
     setErrorMessage(null);
     try {
       const isTrialStart = planId.startsWith("gold_only") || (offer?.isEligible ?? false);
-      const checkout = await sendSellerApiRequest<{ authorizationUrl: string; accessCode?: string; reference: string }>(isTrialStart ? "/seller/subscription/trial/checkout" : "/seller/subscription/checkout", { method: "POST", body: { planId } });
-      const checkoutUrl = new URL(checkout.authorizationUrl, window.location.origin);
-      if (checkoutUrl.protocol !== "https:" && checkoutUrl.origin !== window.location.origin) throw new Error("Unexpected payment page.");
-      const outcome = await openPaystackCheckout({ accessCode: checkout.accessCode ?? "", authorizationUrl: checkoutUrl.toString(), reference: checkout.reference });
-      if (outcome === "completed") window.location.assign(`/billing-checkout/callback?reference=${encodeURIComponent(checkout.reference)}`);
-      else if (outcome === "closed") setPendingPlanId(null);
+      const checkout = await sendSellerApiRequest<{ authorizationUrl?: string; checkoutUrl?: string; reference: string }>(isTrialStart ? "/seller/subscription/trial/checkout" : "/seller/subscription/checkout", { method: "POST", body: { planId } });
+      if (openHostedCheckout(checkout) === "blocked") throw new Error("Unexpected payment page.");
     } catch (error) {
-      setErrorMessage(readErrorMessageForDisplay(error));
       setPendingPlanId(null);
+      if (isCountryRequiredError(error) && countryRetry.handle(COUNTRY_REQUIRED, () => void startHostedCheckoutForPlan(planId))) return;
+      setErrorMessage(readErrorMessageForDisplay(error));
     }
   }
 
@@ -65,6 +65,7 @@ export function SubscriptionPlanPicker({ currentPlanId, currentPlan, offer }: { 
 
   return (
     <div className={styles.picker}>
+      {countryDialog}
       {hasYearlyPlans ? (
         <SegmentedControl label="Billing period" value={billingInterval} onValueChange={setBillingInterval} options={[{ value: "month", label: "Monthly" }, { value: "year", label: offer ? `Yearly (save ${offer.yearlyDiscountPercent}%)` : "Yearly" }]} />
       ) : null}

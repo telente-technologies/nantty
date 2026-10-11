@@ -97,7 +97,7 @@ export function AffiliateCreatorsView() {
           ]}
         />
       </Panel>
-      <ModalDialog
+      <ModalDialog intent="removeMember"
         isOpen={creatorBeingRemoved !== null}
         title={`Remove @${creatorBeingRemoved?.creator.username ?? ""} from your program?`}
         description="Their links stop earning straight away. Commission already owed is still paid when escrow is released."

@@ -85,7 +85,7 @@ export function AffiliateRequestsView() {
           ))}
         </ul>
       </Panel>
-      <ModalDialog
+      <ModalDialog intent="remove"
         isOpen={requestBeingDeclined !== null}
         title={`Decline @${requestBeingDeclined?.creator.username ?? ""}?`}
         description="The creator is told you declined. A reason is optional but helps them."
