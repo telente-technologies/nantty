@@ -5,6 +5,7 @@ import { useState } from "react";
 import { useIsOnline } from "@zudomart/web-kit";
 
 import { WebappRequestError } from "@/services/clientApi.service";
+import { nextPaymentPollDelay } from "@/utils/paymentPollSchedule.util";
 
 export type PaymentPollOutcome = "pending" | "succeeded" | "failed";
 
@@ -35,11 +36,8 @@ export function usePaymentPoll<Result>({ queryKey, enabled, fetch, readOutcome }
     queryFn: fetch,
     enabled,
     retry: (failureCount, error) => isTransientFailure(error) && failureCount < 3,
-    refetchInterval: (current) => {
-      const data = current.state.data;
-      const stillPending = data === undefined || readOutcome(data) === "pending";
-      return stillPending && current.state.dataUpdateCount < paymentPollMaxAttempts ? paymentPollIntervalMs : false;
-    },
+    refetchInterval: (current) =>
+      nextPaymentPollDelay(current.state, (result) => readOutcome(result) === "pending", isTransientFailure, paymentPollIntervalMs, paymentPollMaxAttempts),
     refetchIntervalInBackground: false,
   });
   const outcome: PaymentPollOutcome = query.data ? readOutcome(query.data) : "pending";

@@ -1,7 +1,7 @@
 "use client";
 
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { useState } from "react";
+import { useRef, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { EmptyState, Skeleton } from "@/components/ui/feedback";
@@ -11,6 +11,7 @@ import { readErrorMessageForDisplay } from "@/services/clientApi.service";
 import { creatorSubscriptionsService } from "@/services/webActions.service";
 import { formatMoneyForDisplay } from "@/utils/formatMoney.util";
 import { openHostedCheckout } from "@/utils/hostedCheckout.util";
+import { forgetPendingValue, pendingSubscriptionStorageKey, rememberPendingValue } from "@/utils/paymentReturn.util";
 
 import styles from "./actionDialogs.module.css";
 
@@ -24,10 +25,18 @@ interface SubscribeToCreatorDialogProps {
 export function SubscribeToCreatorDialog({ isOpen, onClose, creatorId, creatorName }: SubscribeToCreatorDialogProps) {
   const [selectedPlanId, setSelectedPlanId] = useState<string | null>(null);
   const plansQuery = useQuery({ queryKey: ["creatorPlans", creatorId], queryFn: () => creatorSubscriptionsService.fetchPlans(creatorId), enabled: isOpen, retry: false });
+  const isStartingRef = useRef(false);
   const subscribeMutation = useMutation({
+    onSettled: (_data, error) => {
+      if (error) isStartingRef.current = false;
+    },
     mutationFn: async (planId: string) => {
       const checkout = await creatorSubscriptionsService.startSubscription(creatorId, planId);
-      if (openHostedCheckout(checkout) === "blocked") throw new Error("Unexpected payment page.");
+      rememberPendingValue(pendingSubscriptionStorageKey, checkout.subscriptionId);
+      if (openHostedCheckout(checkout) === "blocked") {
+        forgetPendingValue(pendingSubscriptionStorageKey);
+        throw new Error("Unexpected payment page.");
+      }
       return checkout;
     },
   });
@@ -46,7 +55,15 @@ export function SubscribeToCreatorDialog({ isOpen, onClose, creatorId, creatorNa
           <Button variant="secondary" onClick={onClose}>
             Cancel
           </Button>
-          <Button onClick={() => selectedPlanId && subscribeMutation.mutate(selectedPlanId)} disabled={!selectedPlanId} busy={subscribeMutation.isPending}>
+          <Button
+            onClick={() => {
+              if (!selectedPlanId || isStartingRef.current) return;
+              isStartingRef.current = true;
+              subscribeMutation.mutate(selectedPlanId);
+            }}
+            disabled={!selectedPlanId}
+            busy={subscribeMutation.isPending}
+          >
             Continue to checkout
           </Button>
         </>

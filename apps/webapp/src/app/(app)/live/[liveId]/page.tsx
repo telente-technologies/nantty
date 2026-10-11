@@ -5,10 +5,13 @@ import Link from "next/link";
 import { use, useState } from "react";
 
 import { ContentActionsMenu } from "@/components/actions/contentActionsMenu";
+import { useFollowUser } from "@/components/follow/useFollowUser.hook";
+import { useSession } from "@/components/providers/sessionProvider";
 import { LiveChatPanel } from "@/components/live/liveChatPanel";
 import { LiveGiftTray } from "@/components/live/liveGiftTray";
 import { LiveHostRankAvatar } from "@/components/live/liveHostRankAvatar";
 import { LiveReportDialog } from "@/components/live/liveReportDialog";
+import { LiveVideoPlayer } from "@/components/live/liveVideoPlayer";
 import { LiveSafetyHostBanner, LiveSafetyOverlay } from "@/components/live/liveSafetyNotices";
 import styles from "@/components/live/liveRoom.module.css";
 import { RetryButton } from "@/components/ui/controls";
@@ -16,15 +19,23 @@ import { ErrorState, Skeleton } from "@/components/ui/feedback";
 import { MediaImage } from "@/components/ui/media";
 import { liveService } from "@/services/webActions.service";
 import { formatCountWithThousandsSuffix } from "@/utils/formatDate.util";
+import { liveRoomBadgeLabel, orderProductsWithPinnedFirst, pollIntervalForLiveStatus, readLiveRoomStatus, shouldShowLiveRoomError } from "@/utils/liveRoom.util";
+import type { LiveSessionDetails } from "@/types";
 
-function canPlayInBrowser(url: string | null | undefined): url is string {
-  return !!url && !url.endsWith(".m3u8");
+function FollowHostButton({ live }: { readonly live: LiveSessionDetails }) {
+  const follow = useFollowUser({ userId: live.host.id, username: live.host.username, displayName: live.host.name, initialState: live.isFollowingHost ? "accepted" : "none" });
+  return (
+    <button type="button" className={styles.followButton} aria-pressed={follow.isActive} disabled={follow.isPending} onClick={follow.toggle}>
+      {follow.label}
+    </button>
+  );
 }
 
 export default function LiveRoomPage({ params }: { readonly params: Promise<{ readonly liveId: string }> }) {
   const { liveId } = use(params);
-  const liveQuery = useQuery({ queryKey: ["live", liveId], queryFn: () => liveService.fetchLiveSession(liveId), retry: false, refetchInterval: 10_000 });
+  const liveQuery = useQuery({ queryKey: ["live", liveId], queryFn: () => liveService.fetchLiveSession(liveId), retry: false, refetchInterval: (query) => pollIntervalForLiveStatus(query.state.data?.status) });
   const [isReportOpen, setIsReportOpen] = useState(false);
+  const { viewer } = useSession();
 
   if (liveQuery.isLoading) {
     return (
@@ -34,10 +45,12 @@ export default function LiveRoomPage({ params }: { readonly params: Promise<{ re
       </div>
     );
   }
-  if (liveQuery.isError || !liveQuery.data) return <ErrorState description="This live isn't available." action={<RetryButton onRetry={() => liveQuery.refetch()} />} />;
+  if (shouldShowLiveRoomError(!!liveQuery.data, liveQuery.isError) || !liveQuery.data) return <ErrorState description="This live isn't available." action={<RetryButton onRetry={() => liveQuery.refetch()} />} />;
 
   const live = liveQuery.data;
-  const isLive = live.status === "live";
+  const roomStatus = readLiveRoomStatus(live.status);
+  const isLive = roomStatus === "live";
+  const products = orderProductsWithPinnedFirst(live.products, live.pinnedProductId);
   const safety = isLive ? live.safety ?? null : null;
   const isPausedForSafety = safety?.state === "paused";
   const isHostView = !!safety?.hostReason || !!safety?.warningMessage;
@@ -45,12 +58,19 @@ export default function LiveRoomPage({ params }: { readonly params: Promise<{ re
     <div className={styles.room}>
       <div className={styles.main}>
         <div className={styles.stage}>
-          {isLive && !(isPausedForSafety && !isHostView) && canPlayInBrowser(live.playbackUrl) ? (
-            <video className={styles.video} src={live.playbackUrl} poster={live.coverUrl ?? undefined} autoPlay muted loop playsInline controls />
+          {isLive && !(isPausedForSafety && !isHostView) ? (
+            <LiveVideoPlayer
+              liveId={live.id}
+              hostId={live.host.id}
+              coverUrl={live.coverUrl ?? null}
+              isSignedIn={!!viewer}
+              isOwnLive={viewer?.id === live.host.id}
+              onRoomClosed={() => void liveQuery.refetch()}
+            />
           ) : (
             <MediaImage src={live.coverUrl ?? null} alt="" sizes="(max-width: 1024px) 100vw, 720px" />
           )}
-          <span className={isLive ? styles.liveBadge : styles.endedBadge}>{isLive ? "LIVE" : "Ended"}</span>
+          <span className={isLive ? styles.liveBadge : styles.endedBadge}>{liveRoomBadgeLabel(roomStatus)}</span>
           {isLive ? <span className={styles.viewerBadge}>{formatCountWithThousandsSuffix(live.viewers)} watching</span> : null}
           {isPausedForSafety && !isHostView ? <LiveSafetyOverlay message={safety?.viewerMessage} /> : null}
         </div>
@@ -63,17 +83,19 @@ export default function LiveRoomPage({ params }: { readonly params: Promise<{ re
               <span className={styles.liveTitle}>{live.title}</span>
             </Link>
           </div>
+          {live.isFollowingHost === undefined || viewer?.id === live.host.id ? null : <FollowHostButton live={live} />}
           <ContentActionsMenu shareKind="live" reportTargetType="live" targetId={live.id} canonicalPath={`/live/${live.id}`} onReport={() => setIsReportOpen(true)} />
         </div>
-        {live.products.length > 0 ? (
+        {products.length > 0 ? (
           <ul className={styles.productStrip} aria-label="Products in this live">
-            {live.products.map((product) => (
+            {products.map((product) => (
               <li key={product.id}>
                 <Link href={`/product/${product.id}`} className={styles.productChip}>
                   <span className={styles.productThumb}>
                     <MediaImage src={product.imageUrl} alt="" sizes="40px" />
                   </span>
                   {product.name}
+                  {product.id === live.pinnedProductId ? <span className={styles.pinnedTag}>Pinned</span> : null}
                 </Link>
               </li>
             ))}

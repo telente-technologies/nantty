@@ -1,6 +1,8 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 
+import { isSameSiteHelpHref } from "@/utils/helpLinks.util";
+
 import styles from "./help.module.css";
 
 const inlinePattern = /(\*\*[^*]+\*\*|\*[^*]+\*|`[^`]+`|\[[^\]]+\]\([^)]+\))/g;
@@ -12,7 +14,7 @@ function renderInline(text: string): ReactNode[] {
     const link = /^\[([^\]]+)\]\(([^)]+)\)$/.exec(piece);
     if (link) {
       const href = link[2] ?? "";
-      if (href.startsWith("/")) return <Link key={index} href={href}>{link[1]}</Link>;
+      if (isSameSiteHelpHref(href)) return <Link key={index} href={href}>{link[1]}</Link>;
       if (/^https:\/\/\S+$/.test(href)) return <a key={index} href={href} target="_blank" rel="noopener noreferrer nofollow">{link[1]}</a>;
       return <span key={index}>{link[1]}</span>;
     }

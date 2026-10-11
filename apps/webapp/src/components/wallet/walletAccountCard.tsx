@@ -13,6 +13,7 @@ import type { ProviderWallet } from "@/types/providerWallet.type";
 import { presentPaymentProblem } from "@/utils/paymentProblem.util";
 
 import styles from "./walletAccountCard.module.css";
+import { describeWalletDailyLimit } from "@/utils/walletLimits.util";
 
 export const walletDepositNotes = [
   "Transfer from any Nigerian bank app to this account. It usually arrives within a few minutes.",
@@ -133,7 +134,8 @@ export function WalletAccountCard({ showNotes = true }: { readonly showNotes?: b
       )}
       {showNotes ? (
         <ul className={styles.notes}>
-          {walletDepositNotes.map((note) => <li key={note}>{note}</li>)}
+          {walletDepositNotes.slice(0, -1).map((note) => <li key={note}>{note}</li>)}
+          <li>{describeWalletDailyLimit(walletQuery.data?.limits) ?? walletDepositNotes[walletDepositNotes.length - 1]}</li>
           <li>{describePaymentPartner(wallet?.provider)}</li>
         </ul>
       ) : null}

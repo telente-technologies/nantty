@@ -223,7 +223,7 @@ export function ClipPlayerCard({
           </p>
           <p className={styles.clipSound}>
             <IconLabel name="musicNotes24" size={14}>
-              {clip.sound.title}
+              {clip.sound?.title ?? "Original audio"}
             </IconLabel>
           </p>
           {clip.products[0] ? (

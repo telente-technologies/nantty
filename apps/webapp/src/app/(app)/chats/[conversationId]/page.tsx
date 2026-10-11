@@ -40,7 +40,12 @@ export default function ConversationPage({ params }: { readonly params: Promise<
   const viewerId = viewer?.id ?? "";
   const router = useRouter();
   const queryClient = useQueryClient();
-  const [draft, setDraft] = useState("");
+  const [draft, setDraftState] = useState("");
+  const draftRef = useRef("");
+  const setDraft = (value: string) => {
+    draftRef.current = value;
+    setDraftState(value);
+  };
   const [reportTarget, setReportTarget] = useState<ChatReportTarget | null>(null);
   const bottomRef = useRef<HTMLDivElement | null>(null);
   const listRef = useRef<HTMLDivElement | null>(null);
@@ -97,7 +102,7 @@ export default function ConversationPage({ params }: { readonly params: Promise<
   }, [messages.length]);
 
   const sendDraft = () => {
-    const text = draft.trim();
+    const text = draftRef.current.trim();
     if (!text || !conversation || !viewer?.id) return;
     const sender = viewer.id;
     setDraft("");

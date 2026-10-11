@@ -28,6 +28,7 @@ const publicApiReadPatterns: readonly RegExp[] = [
   /^\/api\/v1\/comments\/[A-Za-z0-9_.~%-]+\/replies$/,
   /^\/api\/v1\/users\/by-username\/[A-Za-z0-9_.~%-]+$/,
   /^\/api\/v1\/users\/(?!me\/)[A-Za-z0-9_.~%-]+\/posts$/,
+  /^\/api\/v1\/legal\/policy-versions\/current$/,
 ];
 
 export function isGuestBrowsablePage(pathname: string): boolean {

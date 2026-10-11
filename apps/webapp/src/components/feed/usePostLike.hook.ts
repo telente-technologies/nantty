@@ -6,7 +6,7 @@ import { requireAuthThen } from "@/components/auth/authPrompt.store";
 import { showToast } from "@/components/ui/toast";
 import { WebappRequestError } from "@/services/clientApi.service";
 import { postsService } from "@/services/posts.service";
-import { currentLikedState, setPostLiked, type LikeSender } from "@/utils/postEngagementCache.util";
+import { setPostLiked, togglePostLiked, type LikeSender } from "@/utils/postEngagementCache.util";
 
 const describeLikeFailure = (error: unknown) =>
   error instanceof WebappRequestError && (error.status === 404 || error.status === 410) ? "This post isn't available anymore." : "Couldn't update your like. Try again.";
@@ -22,7 +22,8 @@ export function usePostLikeActions() {
   const queryClient = useQueryClient();
   const setLiked = (post: LikeablePost, liked: boolean, signInMessage: string) =>
     requireAuthThen(() => void setPostLiked(queryClient, post.id, liked, post.liked, likeSender), signInMessage);
-  const toggleLike = (post: LikeablePost, signInMessage = "Sign in to like posts.") => setLiked(post, !currentLikedState(queryClient, post.id, post.liked), signInMessage);
+  const toggleLike = (post: LikeablePost, signInMessage = "Sign in to like posts.") =>
+    requireAuthThen(() => void togglePostLiked(queryClient, post.id, post.liked, likeSender), signInMessage);
   const likeIfNotLiked = (post: LikeablePost, signInMessage = "Sign in to like posts.") => setLiked(post, true, signInMessage);
   return { toggleLike, likeIfNotLiked };
 }

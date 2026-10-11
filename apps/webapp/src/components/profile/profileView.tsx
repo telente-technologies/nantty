@@ -19,7 +19,8 @@ import { requestConfirmation } from "@/components/ui/confirmDialog";
 import { chatCryptoService } from "@/services/chatCrypto/chatCrypto.service";
 import { sendRequestToWebappServer } from "@/services/clientApi.service";
 import { messagesService } from "@/services/messages.service";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { usersService } from "@/services/users.service";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { formatCountWithThousandsSuffix, formatJoinedDate } from "@/utils/formatDate.util";
 import type { PostNotificationLevel, User } from "@/types";
 import { PostNotificationsBell } from "@/components/follow/postNotificationsBell";
@@ -61,14 +62,17 @@ export function ProfileView({ user, isSelf }: ProfileViewProps) {
   const router = useRouter();
   const queryClient = useQueryClient();
   const { viewer } = useSession();
-  const [postNotificationLevel, setPostNotificationLevel] = useState<PostNotificationLevel>(user.viewerPostNotifications ?? "off");
-  useEffect(() => setPostNotificationLevel(user.viewerPostNotifications ?? "off"), [user.viewerPostNotifications]);
+  const followStatus = useQuery({ queryKey: ["followStatus", user.id], queryFn: () => usersService.fetchFollowStatus(user.id), enabled: !isSelf && viewer !== null, retry: false });
+  const viewerPostNotifications = followStatus.data?.viewerPostNotifications ?? user.viewerPostNotifications ?? "off";
+  const [postNotificationLevel, setPostNotificationLevel] = useState<PostNotificationLevel>(viewerPostNotifications);
+  useEffect(() => setPostNotificationLevel(viewerPostNotifications), [viewerPostNotifications]);
   const follow = useFollowUser({
     userId: user.id, username: user.username, displayName: user.name,
-    initialState: user.followState ?? (user.isFollowing ? "accepted" : "none"),
+    initialState: followStatus.data?.state ?? user.followState ?? (user.isFollowing ? "accepted" : "none"),
     onStateChange: (state) => {
       if (state !== "accepted") setPostNotificationLevel("off");
       void queryClient.invalidateQueries({ queryKey: ["profile", user.id] });
+      void queryClient.invalidateQueries({ queryKey: ["followStatus", user.id] });
     },
   });
 
@@ -127,7 +131,7 @@ export function ProfileView({ user, isSelf }: ProfileViewProps) {
 
       <div className={styles.stats}>
         <Stat label="Posts" value={user.posts} />
-        <Stat label="Followers" value={user.followers} href={`/user/${encodeURIComponent(user.id)}/connections?tab=followers`} />
+        <Stat label="Followers" value={followStatus.data?.followersCount ?? user.followers} href={`/user/${encodeURIComponent(user.id)}/connections?tab=followers`} />
         <Stat label="Following" value={user.following} href={`/user/${encodeURIComponent(user.id)}/connections?tab=following`} />
       </div>
 

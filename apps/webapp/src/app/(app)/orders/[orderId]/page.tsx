@@ -62,7 +62,7 @@ export default function OrderDetailPage({ params }: { readonly params: Promise<{
   const escrowQuery = useQuery({
     queryKey: escrowQueryKeys.forOrder(orderId),
     queryFn: () => escrowsService.fetchEscrowForOrder(orderId),
-    enabled: orderQuery.isSuccess && !isDirectOrder,
+    enabled: orderQuery.isSuccess && !isDirectOrder && orderQuery.data?.status !== "pending",
     retry: false,
   });
 

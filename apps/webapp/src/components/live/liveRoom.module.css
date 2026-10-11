@@ -140,3 +140,58 @@
     top: calc(60px + var(--space-5));
   }
 }
+
+.followButton {
+  flex-shrink: 0;
+  padding: var(--space-1) var(--space-3);
+  border: 1px solid var(--color-brand);
+  border-radius: var(--radius-pill);
+  background: transparent;
+  color: var(--color-brand);
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.followButton[aria-pressed="true"] {
+  border-color: var(--divider);
+  color: var(--ink-muted);
+}
+
+.pinnedTag {
+  padding: 0 var(--space-2);
+  border-radius: var(--radius-pill);
+  background: var(--color-brand);
+  color: var(--color-on-brand);
+  font-size: var(--text-xs);
+}
+
+.videoNotice {
+  position: absolute;
+  inset-inline: var(--space-4);
+  bottom: var(--space-4);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-medium);
+  background: var(--color-overlay);
+  color: var(--color-on-brand);
+  font-size: var(--text-sm);
+  text-align: center;
+}
+
+.soundButton {
+  position: absolute;
+  left: 50%;
+  bottom: var(--space-4);
+  transform: translateX(-50%);
+  padding: var(--space-2) var(--space-4);
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: var(--color-overlay);
+  color: var(--color-on-brand);
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.soundButton:focus-visible {
+  outline: 2px solid var(--color-on-brand);
+  outline-offset: 2px;
+}

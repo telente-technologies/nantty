@@ -12,6 +12,7 @@ import { BvnConsentCard } from "@/components/wallet/bvnConsentCard";
 import { VerifyToWithdrawBanner } from "@/components/wallet/verifyToWithdrawBanner";
 import { createIdempotencyKey, readErrorMessageForDisplay } from "@/services/clientApi.service";
 import { walletsService } from "@/services/wallets.service";
+import { parseMajorAmountToMinorUnits } from "@/utils/amountInput.util";
 import { formatMoneyForDisplay } from "@/utils/formatMoney.util";
 import { readVerifyToWithdrawMessage, readWalletVerification, verifyActionForWallet } from "@/utils/walletLines.util";
 
@@ -53,7 +54,7 @@ export default function WalletPayoutsPage() {
     onError: (mutationError) => setError(readErrorMessageForDisplay(mutationError)),
   });
   const withdrawalAccountId = selectedAccountId ?? accounts.data?.[0]?.id ?? null;
-  const withdrawalAmountMinor = Math.round(Number.parseFloat(amountText || "0") * 100);
+  const withdrawalAmountMinor = parseMajorAmountToMinorUnits(amountText) ?? 0;
   const withdraw = useMutation({
     mutationFn: (payoutAccountId: string) => {
       const currency = summary.data?.available.currency ?? "NGN";
@@ -123,7 +124,7 @@ export default function WalletPayoutsPage() {
           onSubmit={(event) => {
             event.preventDefault();
             if (!withdrawalAccountId) return setError("Add a payout account first.");
-            if (!Number.isFinite(withdrawalAmountMinor) || withdrawalAmountMinor <= 0) return setError("Enter an amount greater than zero.");
+            if (!Number.isFinite(withdrawalAmountMinor) || withdrawalAmountMinor <= 0) return setError("Enter an amount such as 5000 or 5,000.50.");
             withdraw.mutate(withdrawalAccountId);
           }}
         >
