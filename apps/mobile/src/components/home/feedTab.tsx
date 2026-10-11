@@ -127,7 +127,7 @@ export function FeedTab() {
           feed.isLoading ? (
             <ListSkeleton />
           ) : feed.isError ? (
-            <ErrorState compact message="Couldn't load your feed." onRetry={() => feed.refetch()} retrying={feed.isRefetching} />
+            <ErrorState error={feed.error} compact message="Couldn't load your feed." onRetry={() => feed.refetch()} retrying={feed.isRefetching} />
           ) : (
             <EmptyState compact title="No posts yet" body="Follow people and stores to fill your feed." actionLabel="Find people" onAction={() => navigation.navigate("Search", { scope: "global" })} />
           )

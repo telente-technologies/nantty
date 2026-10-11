@@ -116,7 +116,7 @@ export function MartTab() {
         {products.isLoading ? (
           <GridSkeleton />
         ) : allProducts.length === 0 && products.isError ? (
-          <ErrorState compact message="Couldn't load products." onRetry={() => products.refetch()} retrying={products.isRefetching} />
+          <ErrorState error={products.error} compact message="Couldn't load products." onRetry={() => products.refetch()} retrying={products.isRefetching} />
         ) : allProducts.length === 0 ? (
           <EmptyState compact title="No products here yet" body="Try another category or search the mart." actionLabel="Search the mart" onAction={() => navigation.navigate("Search", { scope: "mart" })} />
         ) : (

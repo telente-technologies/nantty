@@ -2,7 +2,7 @@ import { Image } from "expo-image";
 import { useState } from "react";
 import { Pressable, StyleSheet, View } from "react-native";
 
-import { LikeActionIcon, BookmarkActionIcon, PushPin24Icon, ReplyActionIcon, RepostActionIcon, SendActionIcon, Trash24Icon } from "@/components/icons";
+import { LikeActionIcon, BookmarkActionIcon, PushPin24Icon, ReplyActionIcon, RepostActionIcon, ShareActionIcon, Trash24Icon } from "@/components/icons";
 import { MentionText } from "@/components/mentions/mentionText";
 import { VerificationBadge } from "@/components/profile/verificationBadge";
 import { ActionSheet, type ActionSheetOption } from "@/components/ui/actionSheet";
@@ -127,42 +127,46 @@ export function ThreadReplyRow({ reply, hasParentAbove, hasChildBelow, showReply
           </PreviewableImage>
         ) : null}
         <View style={styles.actions}>
-          <PostActionButton
-            label="Reply"
-            tone="reply"
-            count={reply.replyCount ?? 0}
-            onPress={isPending ? undefined : onReply}
-            renderIcon={(ink) => <ReplyActionIcon size={ACTION_ICON_SIZE} color={ink} />}
-          />
-          <PostActionButton
-            label="Repost reply"
-            tone="repost"
-            onPress={isPending ? undefined : onRepost}
-            renderIcon={(ink) => <RepostActionIcon size={ACTION_ICON_SIZE} color={ink} />}
-          />
-          <PostActionButton
-            label={reply.liked ? "Unlike reply" : "Like reply"}
-            tone="like"
-            count={reply.likes ?? 0}
-            active={reply.liked ?? false}
-            popOnActivate
-            onPress={isPending ? undefined : onToggleLike}
-            renderIcon={(ink) => <LikeActionIcon size={ACTION_ICON_SIZE} color={ink} filled={reply.liked ?? false} />}
-          />
-          <PostActionButton
-            label={isSaved ? "Remove reply from saved" : "Save reply"}
-            tone="bookmark"
-            active={isSaved}
-            popOnActivate
-            onPress={isPending ? undefined : () => void toggleSaved()}
-            renderIcon={(ink) => <BookmarkActionIcon size={ACTION_ICON_SIZE} color={ink} filled={isSaved} />}
-          />
-          <PostActionButton
-            label="Share reply"
-            tone="reply"
-            onPress={isPending ? undefined : onShare}
-            renderIcon={(ink) => <SendActionIcon size={ACTION_ICON_SIZE} color={ink} />}
-          />
+          <View style={styles.primaryActions}>
+            <PostActionButton
+              label="Reply"
+              tone="reply"
+              count={reply.replyCount ?? 0}
+              onPress={isPending ? undefined : onReply}
+              renderIcon={(ink) => <ReplyActionIcon size={ACTION_ICON_SIZE} color={ink} />}
+            />
+            <PostActionButton
+              label="Repost reply"
+              tone="repost"
+              onPress={isPending ? undefined : onRepost}
+              renderIcon={(ink) => <RepostActionIcon size={ACTION_ICON_SIZE} color={ink} />}
+            />
+            <PostActionButton
+              label={reply.liked ? "Unlike reply" : "Like reply"}
+              tone="like"
+              count={reply.likes ?? 0}
+              active={reply.liked ?? false}
+              popOnActivate
+              onPress={isPending ? undefined : onToggleLike}
+              renderIcon={(ink) => <LikeActionIcon size={ACTION_ICON_SIZE} color={ink} filled={reply.liked ?? false} />}
+            />
+          </View>
+          <View style={styles.secondaryActions}>
+            <PostActionButton
+              label={isSaved ? "Remove reply from saved" : "Save reply"}
+              tone="bookmark"
+              active={isSaved}
+              popOnActivate
+              onPress={isPending ? undefined : () => void toggleSaved()}
+              renderIcon={(ink) => <BookmarkActionIcon size={ACTION_ICON_SIZE} color={ink} filled={isSaved} />}
+            />
+            <PostActionButton
+              label="Share reply"
+              tone="reply"
+              onPress={isPending ? undefined : onShare}
+              renderIcon={(ink) => <ShareActionIcon size={ACTION_ICON_SIZE} color={ink} />}
+            />
+          </View>
         </View>
       </Pressable>
       <ActionSheet visible={isOptionsSheetOpen} onClose={() => setIsOptionsSheetOpen(false)} title="Reply options" options={replyOptions} />
@@ -186,5 +190,7 @@ const useStyles = makeThemedStyles((colors) =>
     mediaFrame: { marginTop: 8, borderRadius: 16, overflow: "hidden", borderWidth: StyleSheet.hairlineWidth, borderColor: colors.divider },
     media: { width: "100%", backgroundColor: colors.media },
     actions: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginLeft: -2, marginRight: 8 },
+    primaryActions: { flexDirection: "row", alignItems: "center", gap: 20 },
+    secondaryActions: { flexDirection: "row", alignItems: "center", gap: 0 },
   }),
 );

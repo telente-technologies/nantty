@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 
+import { describeActionFailure } from "@/errors/errorExperience/describeError";
 import { useDialogStore, type DialogRequest } from "@/store/dialog.store";
 
 import { Dialog } from "./dialog";
@@ -11,7 +12,7 @@ function isPromiseLike(value: unknown): value is PromiseLike<unknown> {
 }
 
 function describeActionError(error: unknown): string {
-  return error instanceof Error && error.message ? error.message : "Something went wrong. Please try again.";
+  return describeActionFailure(error);
 }
 
 function resolveIntent(request: DialogRequest) {

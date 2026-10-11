@@ -21,7 +21,7 @@ export function DataExportSection() {
   const requestExport = useRequestDataExportMutation();
 
   if (exportRequest.isLoading) return <ListSkeleton />;
-  if (exportRequest.isError || !exportRequest.data) return <ErrorState message="Couldn't load your data export." onRetry={() => exportRequest.refetch()} />;
+  if (exportRequest.isError || !exportRequest.data) return <ErrorState error={exportRequest.error} message="Couldn't load your data export." onRetry={() => exportRequest.refetch()} />;
 
   const { status, downloadUrl, expiresAt } = exportRequest.data;
   const isInProgress = status === "requested" || status === "processing";

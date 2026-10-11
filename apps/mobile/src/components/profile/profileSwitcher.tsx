@@ -55,7 +55,7 @@ export function ProfileSwitcherSheet() {
     <BottomSheet visible={isProfileSwitcherSheetVisible} onClose={closeProfileSwitcherSheet} title="Switch profile" subtitle="Posts, messages and store actions happen as the profile you choose." scrollable>
       <View style={styles.list}>
         {profiles.isPending ? <ListSkeleton rows={3} padding={0} /> : null}
-        {profiles.isError ? <ErrorState message="Couldn't load your profiles." onRetry={() => profiles.refetch()} /> : null}
+        {profiles.isError ? <ErrorState error={profiles.error} message="Couldn't load your profiles." onRetry={() => profiles.refetch()} /> : null}
         {(profiles.data ?? []).map((profile) => (
           <Pressable key={profile.id} accessibilityRole="radio" accessibilityState={{ checked: profile.id === active.id }} onPress={() => switchProfile.mutate(profile.id)} style={[styles.row, styles.profileRow, profile.id === active.id ? styles.profileRowActive : null]}>
             <Avatar uri={profile.avatarUrl} size={40} />

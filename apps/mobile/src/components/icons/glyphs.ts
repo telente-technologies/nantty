@@ -61,6 +61,7 @@ import {
   PlayIcon,
   PlusIcon,
   QuestionIcon,
+  QuotesIcon,
   RepeatIcon,
   SealCheckIcon,
   SelectionIcon,
@@ -204,6 +205,7 @@ export const Plus28Icon = phosphorIcon(PlusIcon, { ink: "#FFFFFF", width: 28 });
 export const Question24Icon = phosphorIcon(QuestionIcon);
 export const Refresh20Icon = phosphorIcon(ArrowsClockwiseIcon, { width: 20 });
 export const Refresh24Icon = phosphorIcon(ArrowsClockwiseIcon);
+export const Quotes24Icon = phosphorIcon(QuotesIcon);
 export const Repeat24Icon = phosphorIcon(RepeatIcon);
 export const SealCheck20Icon = phosphorIcon(SealCheckIcon, { weight: "fill", ink: "#2043F5", width: 20 });
 export const Search46Icon = phosphorIcon(PlusIcon, { width: 46, height: 28 });

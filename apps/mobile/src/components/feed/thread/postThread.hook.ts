@@ -5,12 +5,12 @@ import { retryCommentsPageUnlessCursorExpired, useRestartCommentsOnExpiredCursor
 import { postThreadService } from "@/services/content/postThread.service";
 import { useAuthStore } from "@/store/auth.store";
 import type { Comment } from "@/types";
-import type { ThreadReply, ThreadRow, ThreadSort } from "@/types/postThread.type";
+import { isQuoteThreadItem, type CommentSectionFilter, type ThreadReply, type ThreadRow, type ThreadSort } from "@/types/postThread.type";
 
 export const FIRST_AD_SLOT_AFTER_REPLIES = 3;
 export const REPLIES_BETWEEN_ADS = 8;
 
-export const postThreadQueryKey = (postId: string, sort: ThreadSort) => ["post-thread", postId, sort] as const;
+export const postThreadQueryKey = (postId: string, sort: ThreadSort, filter: CommentSectionFilter = "all") => ["post-thread", postId, sort, filter] as const;
 export const threadRepliesQueryKey = (commentId: string) => ["post-thread-replies", commentId] as const;
 
 export const adSlotPositionsFor = (replyCount: number): number[] => {
@@ -26,16 +26,16 @@ export const toLocalThreadReply = (comment: Comment, postAuthorId: string | unde
   inlineReplies: [],
 });
 
-export function usePostConversation(postId: string, sort: ThreadSort, onRestartedFromTop?: () => void) {
+export function usePostConversation(postId: string, sort: ThreadSort, onRestartedFromTop?: () => void, filter: CommentSectionFilter = "all") {
   const isSignedIn = useAuthStore((state) => state.status === "signedIn");
   const query = useInfiniteQuery({
-    queryKey: postThreadQueryKey(postId, sort),
-    queryFn: ({ pageParam }) => postThreadService.fetchConversation(postId, sort, pageParam),
+    queryKey: postThreadQueryKey(postId, sort, filter),
+    queryFn: ({ pageParam }) => postThreadService.fetchConversation(postId, sort, pageParam, filter),
     initialPageParam: undefined as string | undefined,
     getNextPageParam: (lastPage) => lastPage.nextCursor ?? undefined,
     retry: retryCommentsPageUnlessCursorExpired,
   });
-  const { isRestartingFromTop } = useRestartCommentsOnExpiredCursor(postThreadQueryKey(postId, sort), query.error, onRestartedFromTop);
+  const { isRestartingFromTop } = useRestartCommentsOnExpiredCursor(postThreadQueryKey(postId, sort, filter), query.error, onRestartedFromTop);
   const conversations = useMemo(() => {
     const seen = new Set<string>();
     return (query.data?.pages ?? []).flatMap((page) => page.data).filter((reply) => (seen.has(reply.id) ? false : (seen.add(reply.id), true)));
@@ -60,7 +60,7 @@ export function usePostConversation(postId: string, sort: ThreadSort, onRestarte
   const rows: ThreadRow[] = conversations.flatMap((reply, index): ThreadRow[] => {
     const slotIndex = slotPositions.indexOf(index);
     const ad = slotIndex >= 0 ? adDecisions[slotIndex]?.data?.ad : null;
-    const replyRow: ThreadRow = { kind: "reply", key: reply.id, reply };
+    const replyRow: ThreadRow = isQuoteThreadItem(reply) ? { kind: "quote", key: `quote-${reply.id}`, quote: reply } : { kind: "reply", key: reply.id, reply };
     return ad ? [{ kind: "sponsored", key: `ad-${ad.adId}`, ad }, replyRow] : [replyRow];
   });
 

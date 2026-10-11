@@ -69,7 +69,7 @@ export function useStepUpPrompt(): { readonly withStepUp: <Result>(action: (toke
         pending.current = null;
       }
     } catch (failure) {
-      setError(failure instanceof Error ? failure.message : "Something went wrong. Try again.");
+      setError(failure instanceof Error ? failure.message : "We couldn't confirm it's you. Try again.");
     } finally {
       setBusy(false);
     }
