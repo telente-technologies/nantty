@@ -94,6 +94,7 @@ const guestSkippedBackgroundCallPatterns: readonly RegExp[] = [
   /^\/api\/v1\/stories\/[^/]+\/seen$/,
   /^\/api\/v1\/posts\/[^/]+\/(share|impressions|profile-visits|link-preview)$/,
   /^\/api\/v1\/ads\/events$/,
+  /^\/api\/v1\/feeds\/interactions(\/batch)?$/,
   /^\/api\/v1\/analytics\/product-interactions$/,
   /^\/api\/v1\/users\/me\/preferences$/,
 ];
