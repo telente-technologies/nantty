@@ -35,7 +35,7 @@ export function SettingsPaymentMethodsScreen({ navigation }: MainScreenProps<"Se
         message={
           savedCard
             ? `${savedCard.brand} ending ${savedCard.last4}, expires ${String(savedCard.expMonth).padStart(2, "0")}/${savedCard.expYear}. Saved on this device and unlocked with your fingerprint or face. Zudomart never stores your card number.`
-            : "You pay securely in the Paystack payment window at checkout. Zudomart never stores your card number. You can choose to save a card on this device."
+            : "You pay securely in our payment partner's window at checkout. Zudomart never stores your card number. You can choose to save a card on this device."
         }
         actionTitle={savedCard ? "Remove from this device" : undefined}
         onAction={savedCard ? removeSavedCard : undefined}

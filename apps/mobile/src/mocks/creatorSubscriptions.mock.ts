@@ -180,7 +180,7 @@ export const creatorSubscriptionsMocks: MockRoute[] = [
     plan.subscriberCount += 1;
     const viewerId = getSignedInMockUser().id;
     subscribedCreatorIdsByViewerId.set(viewerId, new Set([...(subscribedCreatorIdsByViewerId.get(viewerId) ?? []), plan.creatorId]));
-    return { subscriptionId, checkoutUrl: `https://checkout.paystack.com/mock-subscription/${subscriptionId}`, reference, subscription: state };
+    return { subscriptionId, checkoutUrl: `https://checkout.flutterwave.com/v3/hosted/pay/mock-subscription-${subscriptionId}`, reference, subscription: state };
   }),
   createMockRoute("GET", "/api/v1/creator-subscriptions", () => [...subscriptionStates.values()]),
   createMockRoute("POST", "/api/v1/creator-subscriptions/verify", ({ body }) => {

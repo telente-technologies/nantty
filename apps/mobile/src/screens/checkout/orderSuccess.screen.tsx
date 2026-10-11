@@ -20,7 +20,7 @@ export function OrderSuccessScreen({ navigation, route }: MainScreenProps<"Order
           Order placed
         </Text>
         <Text size={13} lineHeight={16.9} color={colors.textSubtle} align="center">
-          Your payment is safe in Zudomart escrow. The seller is paid only after you confirm the order arrived as described — or 3 days after delivery if you don't report a problem.
+          In Nigeria your payment stays locked in your own wallet, held by our licensed payment partner. The seller is paid only after you confirm the order arrived as described, or 3 days after delivery if you don't report a problem.
         </Text>
       </View>
       <View style={styles.footer}>

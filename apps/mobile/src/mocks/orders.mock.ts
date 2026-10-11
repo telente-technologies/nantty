@@ -100,7 +100,15 @@ export const ordersMocks: MockRoute[] = [
   }),
   createMockRoute("POST", "/api/v1/payments/initialize", ({ body }) => {
     const { orderId } = body as { orderId: string };
-    return { orderId, reference: `chk-${orderId}`, authorizationUrl: "https://checkout.paystack.com/mock", accessCode: `ac_${orderId}` };
+    const reference = `chk-${orderId}`;
+    const checkoutUrl = `https://checkout.flutterwave.com/v3/hosted/pay/mock-${reference}`;
+    return { orderId, reference, checkoutUrl, authorizationUrl: checkoutUrl, payment: { reference, provider: "flutterwave", status: "pending", checkoutUrl, authorizationUrl: checkoutUrl } };
+  }),
+  createMockRoute("POST", "/api/v1/payments/wallet-payments/:reference", ({ params }) => {
+    const orderId = params.reference!.replace(/^chk-/, "");
+    findOrderRecordVisibleToSignedInUser(orderId);
+    markCheckoutGroupAsPaid(orderId);
+    return { reference: params.reference, provider: "flutterwave", status: "succeeded", checkoutUrl: null, authorizationUrl: null, amount: { amountMinor: 0, currency: "NGN" } };
   }),
   createMockRoute("GET", "/api/v1/payments/channels", () => ({ channels: ["card", "bank_transfer", "ussd"] })),
   createMockRoute("POST", "/api/v1/payments/saved-cards/charges", ({ body }) => {
@@ -111,7 +119,7 @@ export const ordersMocks: MockRoute[] = [
   }),
   createMockRoute("POST", "/api/v1/payments/saved-cards/setups", () => ({
     reference: `card-setup-${Date.now()}`,
-    checkoutUrl: "https://checkout.paystack.com/mock-card",
+    checkoutUrl: "https://checkout.flutterwave.com/v3/hosted/pay/mock-card-setup",
     verificationCharge: { amountMinor: 5000, currency: "NGN" },
     expiresAt: null,
   })),

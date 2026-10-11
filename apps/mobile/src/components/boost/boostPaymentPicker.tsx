@@ -46,7 +46,7 @@ export function BoostPaymentPicker({ paymentMethod, cardAllowed, freeBoost, free
       {cardAllowed ? (
         <SelectableRow selected={paymentMethod === "card"} onPress={onSelectCard} accessibilityLabel={`Card or bank transfer${totalCost ? `, ${formatMoneyForDisplay(totalCost)}` : ""}`}>
           <Text size={14} weight={500} lineHeight={16.8}>Card or bank transfer</Text>
-          <Text size={12} lineHeight={16.8} color={colors.textMuted}>{totalCost ? `${formatMoneyForDisplay(totalCost)} · secure Paystack window` : "Secure Paystack window"}</Text>
+          <Text size={12} lineHeight={16.8} color={colors.textMuted}>{totalCost ? `${formatMoneyForDisplay(totalCost)} · secure payment window` : "Secure payment window"}</Text>
         </SelectableRow>
       ) : freeBoost ? null : (
         <Text size={12} lineHeight={16.8} color={colors.error}>Boosts can't be paid for in the app right now. Please try again later.</Text>

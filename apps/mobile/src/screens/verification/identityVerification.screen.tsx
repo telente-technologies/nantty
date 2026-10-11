@@ -13,6 +13,7 @@ import { webAppBaseUrl } from "@/config/webAppLinks.config";
 import type { MainScreenProps } from "@/navigation/navigation.types";
 import { identityVerificationService } from "@/services/auth/identityVerification.service";
 import { webHandoffService } from "@/services/core/webHandoff.service";
+import { PAYMENT_RETURN_URL } from "@/services/commerce/payments.service";
 import { makeThemedStyles, useTheme } from "@/theme";
 import type { IdentityJourney } from "@/types/identityVerification.type";
 import { describeEligibilityReason, describeRefund } from "@/utils/identityVerificationCopy.util";
@@ -42,7 +43,10 @@ export function IdentityVerificationScreen({ route }: MainScreenProps<"IdentityV
     onSettled: () => queryClient.invalidateQueries({ queryKey: journeyKey }),
   });
   const data = journey.data;
-  const openPayment = () => WebBrowser.openBrowserAsync(`${webAppBaseUrl}/settings/verification?step=pay`).then(() => queryClient.invalidateQueries({ queryKey: journeyKey }));
+  const openPayment = () =>
+    WebBrowser.openAuthSessionAsync(`${webAppBaseUrl}/settings/verification?step=pay&return=${encodeURIComponent(PAYMENT_RETURN_URL)}`, PAYMENT_RETURN_URL)
+      .catch(() => null)
+      .then(() => queryClient.invalidateQueries({ queryKey: journeyKey }));
 
   return (
     <Screen>

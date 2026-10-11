@@ -66,7 +66,7 @@ export const verificationMocks: MockRoute[] = [
       subscription: { planId: plan.id, status: "active", renewsAt: isoDateHoursAgo(-24 * 30), cancelAtPeriodEnd: false },
       application: { id: applicationId, color: input.kind, status: "pending", submittedAt: new Date().toISOString(), rejectionReason: null },
     });
-    return { applicationId, checkoutUrl: `https://checkout.paystack.com/mock-verification/${applicationId}` };
+    return { applicationId, checkoutUrl: `https://checkout.flutterwave.com/v3/hosted/pay/mock-verification-${applicationId}` };
   }),
   createMockRoute("POST", "/api/v1/verification/subscription/cancel", () => {
     const state = myState();

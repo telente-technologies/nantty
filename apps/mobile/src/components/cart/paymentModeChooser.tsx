@@ -33,7 +33,7 @@ export function PaymentModeChooser({ group, mode, onChange }: PaymentModeChooser
           </SelectableRow>
         </>
       ) : (
-        <Text size={13} lineHeight={16.9} color={colors.textMuted}>Protected by Zudomart Escrow</Text>
+        <Text size={13} lineHeight={16.9} color={colors.textMuted}>Escrow: locked in your own wallet until delivery</Text>
       )}
     </View>
   );
