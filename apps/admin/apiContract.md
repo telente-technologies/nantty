@@ -35,7 +35,7 @@ The console ships a mock adapter (`ADMIN_USE_MOCKS=true`, default outside produc
 | Applications | `applications:sellers`, `applications:creators` |
 | Brands | `brands:review`, `brands:revoke`, `ip-claims:review` |
 | Moderation | `moderation:reports`, `moderation:appeals`, `copyright:review` |
-| Commerce | `orders:read`, `disputes:resolve`, `refunds:issue`, `payouts:approve`, `coins:review`, `ledger:read` |
+| Commerce | `orders:read`, `disputes:resolve`, `refunds:issue`, `payouts:approve`, `coins:review`, `ledger:read`, `payments:webhooks`, `payments:wallets` |
 | Ads | `ads:review`, `advertisers:manage` |
 | Catalog | `catalog:manage` |
 | Configuration | `config:read`, `config:plans`, `config:revenue`, `config:rules`, `flags:manage`, `automation:manage`, `templates:manage` |
@@ -51,9 +51,11 @@ Every mutation writes one append-only audit entry in the same transaction as the
 `before`/`after` hold only the changed fields, never secrets (no passwords, TOTP secrets, full bank numbers or document contents). Reading PII or opening identity documents is also audited. Detail endpoints return `history`: the audit entries for that target, newest first.
 
 ### Sessions and security expectations
-- Access token 10 min; refresh token rotates on every use, is stored hashed, and **reuse of a used refresh token revokes the whole session** (`401 REFRESH_TOKEN_REUSED`). Absolute session lifetime 12 h.
+- Access token 10 min; refresh token rotates on every use, is stored hashed, and **reuse of a used refresh token revokes the whole session** (`401 REFRESH_TOKEN_REUSED`). Absolute session lifetime 12 h on both the console and the API; the API refuses a refresh after 30 min without use and the console signs out after 15 min idle.
+- Changing an admin's role or permissions revokes all of that admin's sessions. The console also re-checks the signed-in admin every 5 minutes and signs them out (`SESSION_PRIVILEGES_CHANGED`) when their permissions differ from the cached copy.
 - Password + mandatory MFA. 5 failed passwords lock the account for 15 min (`423 ACCOUNT_LOCKED` with `lockedUntil`). 5 wrong MFA codes invalidate the `challengeToken`.
-- Optional IP allow-list (`ADMIN_IP_ALLOWLIST`): the API returns `403 IP_NOT_ALLOWED` for other addresses.
+- IP allow-list (`ADMIN_IP_ALLOWLIST`, IPs or IPv4 CIDRs): `403 IP_NOT_ALLOWED` for other addresses. Empty allows everyone outside production; production refuses to start without it.
+- Access is a method+path route table (`src/config/apiRoutes.config.ts`). A call not in the table is `404`; each route names its permissions, whether it needs step-up (`403 STEP_UP_REQUIRED`) and whether it needs a reason of 5+ characters (`400 REASON_REQUIRED`). The backend enforces the same permissions and step-up.
 - Login, MFA and step-up endpoints have their own strict rate limits (429).
 ## Authentication & MFA
 
@@ -592,6 +594,10 @@ Audit actions: `config.document.updated`, `config.document.restored` (target `{ 
 
 `GET/PUT /api/v1/admin/config/appStore.fees` (read: any config permission; write: `config:revenue`, step-up). Public setting read by the subscriptions module to take the store's cut before revenue shares.
 
+`GET/PUT /api/v1/admin/config/seller.debtLimits` and `/api/v1/admin/config/payments.limits` (read: any config permission; write: `config:revenue`, step-up, reason). Read by go-money (30 s cache) and go-ads; env values are fallbacks only.
+- `seller.debtLimits`: `{ baseMinor: { unverified, payoutVerified, identityVerified }, outsideNigeriaPercent (1–100), trustedSellerAgeDays, trustedSellerCleanDays (0–3650), currencyOverridesMinor: { "<ISO>": { …same three } } }`. Naira amounts in kobo; levels must not decrease; NGN cannot be an override. Defaults ₦10,000 / ₦50,000 / ₦200,000, 50 %, 90 / 90 days.
+- `payments.limits`: `{ baseMinor: { orderCheckout, coinPurchase, adsTopUp, walletDaily: { basic, mid, full } }, currencyOverridesMinor: { "<ISO>": { …same } } }`. Defaults ₦5,000,000 / ₦500,000 / ₦10,000,000 and wallet ₦50,000 / ₦200,000 / ₦5,000,000 a day; basic ≤ mid ≤ full. UI: Regional pricing → Limits.
+
 ```ts
 interface AppStoreFeeSettings {
   appleFeeBps: number;                // 0–5000, default 3000
@@ -1005,7 +1011,7 @@ A username a person gives up (including the earlier username of an account that 
 
 ## Legal documents and policy versioning
 
-Permissions: `legal.documents.view`, `legal.documents.edit`, `legal.documents.publish`, `legal.notices.send`. Superadmins implicitly hold every permission. The "Legal" role template carries all four. Documents: `terms`, `privacy`, `cookies`, `community-guidelines`, `seller-terms`, `creator-terms`, `ads-policy`, `refund-escrow-policy`.
+Permissions: `legal.documents.view`, `legal.documents.edit`, `legal.documents.publish`, `legal.notices.send`. Superadmins implicitly hold every permission. The "Legal" role template carries all four. Documents: `terms`, `privacy`, `cookies`, `community-guidelines`, `seller-terms`, `creator-terms`, `ads-policy`, `refund-escrow-policy`, `copyright-policy`, `data-rights`.
 
 `LegalVersion`: `{ id, documentKey, versionNumber, status: "DRAFT"|"IN_REVIEW"|"PUBLISHED"|"SUPERSEDED", bodyMarkdown, changeSummary, effectiveAt, isMaterialChange, isFlaggedForLegalReview, createdByName, createdAt, submittedByName, submittedAt, publishedByName, publishedAt, returnedReason, rolledBackFromVersionNumber, noticeId }`. One open (DRAFT or IN_REVIEW) version per document; versions are never edited after publish.
 
@@ -1073,3 +1079,21 @@ Paid Blue and Gold checkmarks verified with Smile ID. Served by go-identity. Per
 | POST | `/admin/verification-cases/{caseId}/reject` | `{ reason }`, step-up. Starts the automatic refund for `blue` / `gold_only`. Audited `identityVerification.rejected` |
 
 `case` fields: `status`, `refundStatus` (`not_applicable`, `requested`, `refunded`, `not_charged`, `failed`, `manual_store_refund`), `refundMethod`, `checks { liveness, document, faceMatch, databaseLookup, faceMatchConfidence, nameMatchScore }`, `trustScore`, `eligibleAtPayment`, `decisionReasons[]`, `fraudSignals[]`, `documentType`, `documentCountry`, `smileReference`, `smileResultCode`, dates. No images are served; reviewers open the Smile ID job in the Smile ID portal.
+
+
+## Payment webhooks and provider wallets (Flutterwave stage 2)
+
+All on go-money through `/bff/admin/payments/...`. Every write needs step-up (`x-step-up-token`) and writes a staff audit record.
+
+- `GET /admin/payments/webhooks/dead-letters?provider=flutterwave|paystack&limit=` (`payments:webhooks`): `{ items: DeadLetteredWebhook[] }`, newest dead letter first. `DeadLetteredWebhook = { id, provider, eventType, eventKey, reference, attempts, lastError, createdAt, deadLetteredAt, processedAt }`.
+- `GET /admin/payments/webhooks/dead-letters/{id}` (`payments:webhooks`): the same plus `payload`, with account numbers, BVN, names, emails, phones, card digits and tokens replaced by `"[redacted]"`. `404 WEBHOOK_NOT_FOUND`.
+- `POST /admin/payments/webhooks/dead-letters/{id}/replay` (`payments:webhooks`, step-up) body `{ reason }` (5–500 chars): clears the dead letter and processes the event once more (it is re-verified with the provider before any credit). Response: the list item. `404 WEBHOOK_NOT_FOUND` when it is not dead-lettered.
+- `POST /admin/payments/wallet-fundings/{reference}/reject` (`payments:wallets`, step-up) body `{ reason }`: sends an unspent deposit back to the sender (`POST /v3/payout-subaccounts/refunds`). `409 FUNDING_NOT_REJECTABLE` once spent or released.
+- `POST /admin/payments/wallets/{userId}/unfreeze` (`payments:wallets`, step-up) body `{ reason }`.
+- `POST /admin/payments/wallet-reconciliation/run` (`payments:wallets`, step-up): runs the daily wallet reconciliation now and returns `{ runId, status: clean|drift, walletsChecked, settlementsApplied, reversalsApplied, issues[] }`.
+
+
+## Money actions and staff queues (2026-10-11)
+
+- Single-use step-up: payout review and run, escrow refund, dispute resolve, ledger reversal, dead-letter replay, funding reject and coin reversal consume the step-up token. A second use gets `401 STEP_UP_REUSED` from the backend; the BFF clears the step-up cookie after each of these routes (`singleUseStepUp` in `apiRoutes.config.ts`) and maps `STEP_UP_REUSED` to `403 STEP_UP_REQUIRED` so the console asks for a new code instead of signing out.
+- Queues: pending withdrawals (`pending_review`, `on_hold`, `queued`) and open disputes (`awaiting_seller`, `under_review`) come back oldest first with `ageHours`; other filters stay newest first.
