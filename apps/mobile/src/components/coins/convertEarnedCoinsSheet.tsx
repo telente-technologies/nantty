@@ -2,6 +2,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRef, useState } from "react";
 import { StyleSheet, View } from "react-native";
 
+import { CountryRequiredPicker, isCountryRequiredError } from "@/components/checkout/countryRequiredPicker";
 import { Repeat24Icon, SealCheck20Icon } from "@/components/icons";
 import { BottomSheet } from "@/components/ui/bottomSheet";
 import { Button } from "@/components/ui/button";
@@ -24,6 +25,7 @@ export function ConvertEarnedCoinsSheet({ visible, onClose }: ConvertEarnedCoins
   const queryClient = useQueryClient();
   const [typedCoins, setTypedCoins] = useState("");
   const pendingIdempotencyKey = useRef<string | null>(null);
+  const [countryNeeded, setCountryNeeded] = useState(false);
   const balance = useCoinBalance(visible);
   const earned = balance.data?.earnedCoins ?? 0;
   const coins = Number.parseInt(typedCoins, 10);
@@ -34,6 +36,11 @@ export function ConvertEarnedCoinsSheet({ visible, onClose }: ConvertEarnedCoins
       pendingIdempotencyKey.current ??= generateIdempotencyKey();
       return coinsService.convertEarnedCoins(coins, pendingIdempotencyKey.current);
     },
+    onError: (error) => {
+      if (!isCountryRequiredError(error)) return;
+      pendingIdempotencyKey.current = null;
+      setCountryNeeded(true);
+    },
     onSuccess: () => {
       pendingIdempotencyKey.current = null;
       queryClient.invalidateQueries({ queryKey: COIN_BALANCE_QUERY_KEY });
@@ -43,6 +50,7 @@ export function ConvertEarnedCoinsSheet({ visible, onClose }: ConvertEarnedCoins
 
   const closeAndReset = () => {
     setTypedCoins("");
+    setCountryNeeded(false);
     pendingIdempotencyKey.current = null;
     convert.reset();
     onClose();
@@ -54,7 +62,14 @@ export function ConvertEarnedCoinsSheet({ visible, onClose }: ConvertEarnedCoins
         <View style={{ width: 40, height: 40, borderRadius: 20, alignItems: "center", justifyContent: "center", backgroundColor: colors.chip }}>
           {convert.isSuccess ? <SealCheck20Icon size={22} color={colors.textMuted} /> : <Repeat24Icon size={22} color={colors.textMuted} />}
         </View>
-        {convert.isSuccess ? (
+        {countryNeeded ? (
+          <CountryRequiredPicker
+            onSaved={() => {
+              setCountryNeeded(false);
+              convert.mutate();
+            }}
+          />
+        ) : convert.isSuccess ? (
           <View style={styles.receipt} accessibilityLiveRegion="polite">
             <Text size={16} weight={600} lineHeight={19.2} color={colors.success}>Converted</Text>
             <Text size={14} lineHeight={16.8}>
@@ -80,7 +95,7 @@ export function ConvertEarnedCoinsSheet({ visible, onClose }: ConvertEarnedCoins
             {typedCoins && !hasValidAmount ? (
               <Text size={12} lineHeight={16.8} color={colors.error}>Enter an amount up to your earned coins.</Text>
             ) : null}
-            {convert.isError ? (
+            {convert.isError && !isCountryRequiredError(convert.error) ? (
               <Text size={12} lineHeight={16.8} color={colors.error}>{describeCoinError(convert.error)}</Text>
             ) : null}
             <Button

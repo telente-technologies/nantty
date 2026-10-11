@@ -42,7 +42,7 @@ export function usePostDraftMediaUploads(purpose: MediaUploadPurpose = "post") {
           rejectedMessages.push(error instanceof MediaValidationError ? error.message : "We couldn't add one of the files.");
         }
       }
-      if (rejectedMessages.length > 0) showAlertWithButtons("Some files weren't added", [...new Set(rejectedMessages)].join("\n"));
+      if (rejectedMessages.length > 0) showAlertWithButtons("Some files weren't added", [...new Set(rejectedMessages)].join("\n"), undefined, { intent: "media" });
       return jobIds;
     },
     [purpose, setDraftMediaItems],

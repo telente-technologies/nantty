@@ -106,7 +106,7 @@ export function ClipComposer({ mode, initialSoundId, initialDraft = null, onChan
     onPublished,
     buildInput: (mediaIds) => {
       const trimmed = shiftMentionsAfterTrimmingStart(caption.text, caption.mentions);
-      const { slideshow } = buildClipCreateFields(items, mediaIds, edits);
+      const { media, slideshow } = buildClipCreateFields(items, mediaIds, edits);
       return {
         text: trimmed.text,
         mentions: trimmed.mentions,
@@ -114,7 +114,7 @@ export function ClipComposer({ mode, initialSoundId, initialDraft = null, onChan
         kind: "clip",
         mediaIds,
         ...(actingProfileId ? { asProfileId: actingProfileId } : {}),
-        ...(slideshow ? { slideshow } : {}),
+        ...(slideshow ? { slideshow } : { media }),
         ...(edits.look !== "none" ? { look: edits.look } : {}),
         ...buildPostSettingsFields(settings),
         ...(soundId ? { soundId } : {}),

@@ -1,6 +1,5 @@
 import { Dialog } from "@/components/ui/dialog";
-import { Text } from "@/components/ui/text";
-import { useTheme } from "@/theme";
+import type { ModalIntent } from "@/components/ui/modalIntent";
 
 export interface ConfirmActionSheetProps {
   readonly visible: boolean;
@@ -10,12 +9,12 @@ export interface ConfirmActionSheetProps {
   readonly confirming: boolean;
   readonly errorMessage?: string | null;
   readonly destructive?: boolean;
+  readonly intent?: ModalIntent;
   readonly onConfirm: () => void;
   readonly onClose: () => void;
 }
 
-export function ConfirmActionSheet({ visible, title, message, confirmTitle, confirming, errorMessage, destructive = false, onConfirm, onClose }: ConfirmActionSheetProps) {
-  const { colors } = useTheme();
+export function ConfirmActionSheet({ visible, title, message, confirmTitle, confirming, errorMessage, destructive = false, intent, onConfirm, onClose }: ConfirmActionSheetProps) {
   return (
     <Dialog
       visible={visible}
@@ -23,17 +22,13 @@ export function ConfirmActionSheet({ visible, title, message, confirmTitle, conf
       dismissible={!confirming}
       title={title}
       message={message}
-      tone={destructive ? "destructive" : "neutral"}
+      intent={intent}
+      tone={destructive ? "destructive" : undefined}
+      errorMessage={errorMessage}
       actions={[
         { label: confirmTitle, style: destructive ? "destructive" : "primary", loading: confirming, onPress: onConfirm },
         { label: "Not yet", style: "secondary", disabled: confirming, onPress: onClose },
       ]}
-    >
-      {errorMessage ? (
-        <Text size={13} lineHeight={18} align="center" color={colors.error} accessibilityRole="alert">
-          {errorMessage}
-        </Text>
-      ) : null}
-    </Dialog>
+    />
   );
 }

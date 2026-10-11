@@ -1,9 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
-import { ActivityIndicator, FlatList, Pressable, ScrollView, StyleSheet, View } from "react-native";
+import { FlatList, Pressable, ScrollView, StyleSheet, View } from "react-native";
 
 import { Cancel20Icon, Check16Icon } from "@/components/icons";
 import { Avatar } from "@/components/ui/avatar";
 import { BottomSheet } from "@/components/ui/bottomSheet";
+import { BrandLoader } from "@/components/ui/brandLoader";
 import { Text } from "@/components/ui/text";
 import { tagCandidatesService } from "@/services/content/tagCandidates.service";
 import { makeThemedStyles, useTheme } from "@/theme";
@@ -50,7 +51,7 @@ export function TagPeopleSheet({ visible, tagged, onChange, onClose }: TagPeople
         </Text>
         <SearchField value={search.typed} onChangeText={search.setTyped} label="Search people" />
         {candidates.isPending ? (
-          <ActivityIndicator color={colors.primary} style={styles.message} />
+          <BrandLoader size="md" style={styles.message} />
         ) : (
           <FlatList
             style={styles.list}

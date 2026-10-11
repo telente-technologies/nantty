@@ -1,14 +1,15 @@
-import { useInfiniteQuery, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { StyleSheet, View } from "react-native";
 
-import { setFollowingAuthorEverywhere } from "@/cache/postEngagementCache.util";
 import { PostCard } from "@/components/feed/postCard";
+import { isActiveFollowState, useFollowUserToggle } from "@/components/profile/confirmedFollowToggle.hook";
 import { Button } from "@/components/ui/button";
 import { useRequireAuth } from "@/hooks/useRequireAuth.hook";
 import { exploreService } from "@/services/feed/explore.service";
-import { followsService } from "@/services/social/follows.service";
+import type { UserSummary } from "@/types";
 import type { ExploreCategoryId } from "@/types/explore.type";
+import type { FollowState } from "@/types/socialGraph.type";
 
 import { DEFAULT_EXPLORE_CATEGORIES, ExploreCategoryTabs } from "./exploreCategoryTabs";
 import { ExploreSectionHeader, ExploreSectionState } from "./exploreSections";
@@ -27,10 +28,10 @@ const COLLAPSED_TREND_COUNT = 5;
 
 export function ExploreHome({ onSearchHashtag, onOpenPost, onOpenProfile }: ExploreHomeProps) {
   const { requireAuthThen } = useRequireAuth();
-  const queryClient = useQueryClient();
   const [category, setCategory] = useState<ExploreCategoryId>("for_you");
   const [showAllTrends, setShowAllTrends] = useState(false);
-  const [followed, setFollowed] = useState<ReadonlySet<string>>(new Set());
+  const [followStates, setFollowStates] = useState<ReadonlyMap<string, FollowState>>(new Map());
+  const { toggleUser } = useFollowUserToggle();
   const categories = useQuery({ queryKey: ["explore", "categories"], queryFn: exploreService.listExploreCategories, staleTime: 3_600_000 });
   const headlines = useQuery({ queryKey: ["explore", "headlines", category], queryFn: () => exploreService.fetchHeadlines(category), staleTime: 120_000 });
   const trends = useQuery({ queryKey: ["explore", "trends", category], queryFn: () => exploreService.fetchTrends(category, 10), staleTime: 60_000 });
@@ -44,27 +45,10 @@ export function ExploreHome({ onSearchHashtag, onOpenPost, onOpenProfile }: Expl
   const trendItems = trends.data?.items ?? [];
   const visibleTrends = showAllTrends ? trendItems : trendItems.slice(0, COLLAPSED_TREND_COUNT);
   const postItems = posts.data?.pages.flatMap((page) => page.data) ?? [];
-  const toggleFollow = (userId: string) =>
-    requireAuthThen(async () => {
-      const following = followed.has(userId);
-      setFollowed((current) => {
-        const next = new Set(current);
-        if (following) next.delete(userId);
-        else next.add(userId);
-        return next;
-      });
-      try {
-        const result = following ? await followsService.unfollowUser(userId) : await followsService.followUser(userId);
-        setFollowingAuthorEverywhere(queryClient, userId, result?.state === "accepted");
-      } catch {
-        setFollowed((current) => {
-          const next = new Set(current);
-          if (following) next.add(userId);
-          else next.delete(userId);
-          return next;
-        });
-      }
-    }, "follow accounts");
+  const toggleFollow = (user: UserSummary) =>
+    requireAuthThen(() => toggleUser({ id: user.id, username: user.username, followState: followStates.get(user.id) ?? "none" }, (state) =>
+      setFollowStates((current) => new Map(current).set(user.id, state)),
+    ), "follow accounts");
 
   return (
     <View style={styles.root}>
@@ -87,7 +71,7 @@ export function ExploreHome({ onSearchHashtag, onOpenPost, onOpenProfile }: Expl
       <ExploreSectionHeader title="Who to follow" />
       <ExploreSectionState loading={suggestions.isLoading} error={suggestions.isError} empty={(suggestions.data?.data.length ?? 0) === 0} emptyMessage="No suggestions right now." onRetry={() => void suggestions.refetch()} skeletonRows={2}>
         {suggestions.data?.data.map((suggestion) => (
-          <FollowSuggestionRow key={suggestion.user.id} suggestion={suggestion} following={followed.has(suggestion.user.id)} onPressProfile={() => onOpenProfile(suggestion.user.id)} onToggleFollow={() => toggleFollow(suggestion.user.id)} />
+          <FollowSuggestionRow key={suggestion.user.id} suggestion={suggestion} following={isActiveFollowState(followStates.get(suggestion.user.id))} onPressProfile={() => onOpenProfile(suggestion.user.id)} onToggleFollow={() => toggleFollow(suggestion.user)} />
         ))}
       </ExploreSectionState>
 
@@ -96,7 +80,7 @@ export function ExploreHome({ onSearchHashtag, onOpenPost, onOpenProfile }: Expl
         {postItems.map((post) => (
           <View key={post.id}>
             <WhyShownNotice explanations={post.ranking?.explanations ?? []} />
-            <PostCard post={post} onPress={() => onOpenPost(post.id)} onPressComments={() => onOpenPost(post.id)} onPressAuthor={() => onOpenProfile(post.author.id)} />
+            <PostCard post={post} surface="explore" onPress={() => onOpenPost(post.id)} onPressComments={() => onOpenPost(post.id)} onPressAuthor={() => onOpenProfile(post.author.id)} />
           </View>
         ))}
         {posts.hasNextPage ? (

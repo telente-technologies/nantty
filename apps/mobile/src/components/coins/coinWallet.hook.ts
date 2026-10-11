@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import * as WebBrowser from "expo-web-browser";
 import { useRef, useState } from "react";
 
+import { isCountryRequiredError } from "@/components/checkout/countryRequiredPicker";
 import { ApiError, generateIdempotencyKey } from "@/services/core/apiClient.service";
 import { coinsService } from "@/services/money/coins.service";
 import { finishStoreTransaction, isStoreBillingAvailable, purchaseStoreProduct, readStorePlatformName } from "@/services/money/storeBilling.service";
@@ -61,6 +62,7 @@ export function useBuyCoinsWithInAppBrowser() {
   const queryClient = useQueryClient();
   const pendingPurchaseIdempotencyKey = useRef<string | null>(null);
   const [lastOutcome, setLastOutcome] = useState<CoinPurchaseOutcome | null>(null);
+  const [countryNeededFor, setCountryNeededFor] = useState<CoinPackage | null>(null);
   const coinPackages = useQuery({ queryKey: ["coin-packages"], queryFn: coinsService.fetchCoinPackages, staleTime: 10 * 60_000 });
 
   const buyCoinPackage = useMutation({
@@ -76,12 +78,20 @@ export function useBuyCoinsWithInAppBrowser() {
       if (verified.status === "succeeded") return { kind: "credited", coins: verified.coins };
       return verified.status === "pending" ? { kind: "pending" } : { kind: "failed" };
     },
-    onMutate: () => setLastOutcome(null),
+    onMutate: () => {
+      setLastOutcome(null);
+      setCountryNeededFor(null);
+    },
+    onError: (error, coinPackage) => {
+      if (!isCountryRequiredError(error)) return;
+      pendingPurchaseIdempotencyKey.current = null;
+      setCountryNeededFor(coinPackage);
+    },
     onSuccess: (outcome) => {
       setLastOutcome(outcome);
       queryClient.invalidateQueries({ queryKey: COIN_BALANCE_QUERY_KEY });
     },
   });
 
-  return { coinPackages, buyCoinPackage, lastOutcome };
+  return { coinPackages, buyCoinPackage, lastOutcome, countryNeededFor, clearCountryNeeded: () => setCountryNeededFor(null) };
 }

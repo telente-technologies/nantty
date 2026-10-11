@@ -1,9 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
-import { ActivityIndicator, FlatList, Pressable, StyleSheet, TextInput, View } from "react-native";
+import { FlatList, Pressable, StyleSheet, TextInput, View } from "react-native";
 
 import { Check16Icon, MagnifyingGlass16Icon } from "@/components/icons";
 import { BottomSheet } from "@/components/ui/bottomSheet";
+import { BrandLoader } from "@/components/ui/brandLoader";
 import { Text } from "@/components/ui/text";
 import { makeThemedStyles, useTheme } from "@/theme";
 import { calculateDefaultLetterSpacing, fontFamily } from "@/constants/typography.constant";
@@ -84,7 +85,7 @@ export function SoundPickerSheet({ visible, selectedSoundId, onSelectSound, onCl
           onPress={() => onSelectSound(null)}
         />
         {sounds.isPending ? (
-          <ActivityIndicator color={colors.primary} style={styles.loading} />
+          <BrandLoader size="md" style={styles.loading} />
         ) : (
           <FlatList
             style={styles.list}

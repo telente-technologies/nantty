@@ -1,8 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
-import { ActivityIndicator, FlatList, Pressable, StyleSheet, View } from "react-native";
+import { FlatList, Pressable, StyleSheet, View } from "react-native";
 
 import { Check16Icon, MapPin24Icon, Trash24Icon } from "@/components/icons";
 import { BottomSheet } from "@/components/ui/bottomSheet";
+import { BrandLoader } from "@/components/ui/brandLoader";
 import { Text } from "@/components/ui/text";
 import { placesService } from "@/services/geo/places.service";
 import { makeThemedStyles, useTheme } from "@/theme";
@@ -42,7 +43,7 @@ export function PlaceSearchSheet({ visible, selected, onSelect, onClose }: Place
           </View>
         ) : null}
         {places.isFetching ? (
-          <ActivityIndicator color={colors.primary} style={styles.message} />
+          <BrandLoader size="md" style={styles.message} />
         ) : (
           <FlatList
             style={styles.list}
