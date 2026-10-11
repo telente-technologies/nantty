@@ -72,7 +72,7 @@ export function HelpTopicsPanel() {
         <SelectField label="Source" isLabelHidden options={originOptions} value={origin} onChange={(event) => change(() => setOrigin(event.target.value))} />
         <SelectField label="Category" isLabelHidden options={categoryOptions} value={categoryId} onChange={(event) => change(() => setCategoryId(event.target.value))} />
       </Toolbar>
-      {topics.errorMessage ? <ErrorBlock message={topics.errorMessage} onRetry={topics.reload} /> : null}
+      {topics.errorMessage ? <ErrorBlock error={topics.error} message={topics.errorMessage} onRetry={topics.reload} /> : null}
       <DataTable
         caption="Help topics"
         columns={columns}

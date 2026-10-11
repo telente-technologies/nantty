@@ -22,7 +22,7 @@ export function LegalDocumentWorkspace({ documentKey }: { readonly documentKey: 
   const permissions = useAdminPermissions();
   const { data, errorMessage, isLoading, reload } = useAdminQuery((signal) => fetchLegalDocumentDetail(documentKey, signal), documentKey);
   if (isLoading && !data) return <LoadingBlock label="Loading the document" />;
-  if (errorMessage || !data) return <ErrorBlock message={errorMessage ?? "Document not found."} onRetry={reload} />;
+  if (errorMessage || !data) return <ErrorBlock variant="section" message={errorMessage ?? "Document not found."} onRetry={reload} />;
   const { document, versions } = data;
   const emailVersion = document.openVersion ?? document.currentVersion;
   return (

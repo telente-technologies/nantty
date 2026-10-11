@@ -41,7 +41,7 @@ export function AutoTopicsPanel() {
   return (
     <>
       <p className={styles.muted}>Open a topic to edit, merge, unpublish or delete it.</p>
-      {log.errorMessage ? <ErrorBlock message={log.errorMessage} onRetry={log.reload} /> : null}
+      {log.errorMessage ? <ErrorBlock error={log.error} message={log.errorMessage} onRetry={log.reload} /> : null}
       <DataTable
         caption="Topics generated from resolved tickets"
         columns={columns}

@@ -63,7 +63,7 @@ function OpenVersionHistoryPanel<Content>({ title, endpoint, currentRecord, canW
         ) : null
       }
     >
-      {history.errorMessage ? <ErrorBlock message={history.errorMessage} onRetry={history.reload} /> : null}
+      {history.errorMessage ? <ErrorBlock error={history.error} message={history.errorMessage} onRetry={history.reload} /> : null}
       {history.isLoading && !history.data ? <LoadingBlock /> : null}
       <ul className={styles.historyList}>
         {versions.map((version) => (

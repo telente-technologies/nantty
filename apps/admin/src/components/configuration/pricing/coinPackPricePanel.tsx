@@ -80,7 +80,7 @@ export function CoinPackPricePanel() {
   const table = useAdminQuery((signal) => fetchCoinPackPriceTable(signal), "coin-pack-price-table");
   const [platform, setPlatform] = useState("web");
   const [editing, setEditing] = useState<CoinPackPriceRow | null>(null);
-  if (table.errorMessage) return <ErrorBlock message={table.errorMessage} onRetry={table.reload} />;
+  if (table.errorMessage) return <ErrorBlock variant="section" error={table.error} message={table.errorMessage} onRetry={table.reload} />;
   const rows = (table.data?.data ?? []).filter((pack) => pack.clientPlatform === platform);
   return (
     <Card title="Coin packs per channel and currency">

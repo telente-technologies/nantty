@@ -19,11 +19,12 @@ const debtLevels: readonly { readonly key: keyof DebtLevelAmounts; readonly labe
   { key: "identityVerified", label: "Identity-verified (L2) or trusted seller" },
 ];
 
-type PaymentField = "orderCheckout" | "coinPurchase" | "adsTopUp" | "basic" | "mid" | "full";
+type PaymentField = "orderCheckout" | "coinPurchase" | "adsTopUp" | "adsStepUpAbove" | "basic" | "mid" | "full";
 const paymentFields: readonly { readonly key: PaymentField; readonly label: string }[] = [
   { key: "orderCheckout", label: "One order (card or bank)" },
   { key: "coinPurchase", label: "One coin purchase" },
   { key: "adsTopUp", label: "One ads top-up" },
+  { key: "adsStepUpAbove", label: "Ads payment from balance that needs a step-up above" },
   { key: "basic", label: "Wallet per day, basic tier" },
   { key: "mid", label: "Wallet per day, mid tier" },
   { key: "full", label: "Wallet per day, full tier" },
@@ -32,7 +33,7 @@ const paymentFields: readonly { readonly key: PaymentField; readonly label: stri
 const naira = (amountMinor: number): Money => ({ amountMinor, currency: "NGN" });
 
 function readPaymentField(amounts: PaymentLimitAmounts, field: PaymentField): number {
-  return field === "basic" || field === "mid" || field === "full" ? amounts.walletDaily[field] : amounts[field];
+  return field === "basic" || field === "mid" || field === "full" ? amounts.walletDaily[field] : amounts[field] ?? 0;
 }
 
 function writePaymentField(amounts: PaymentLimitAmounts, field: PaymentField, value: number): PaymentLimitAmounts {

@@ -32,7 +32,7 @@ export function PlanPriceBookPanel() {
   const table = useAdminQuery((signal) => fetchPlanPriceTable(signal), "plan-price-table");
   const [planCode, setPlanCode] = useState("blue");
   const [editing, setEditing] = useState<PlanPriceRow | null>(null);
-  if (table.errorMessage) return <ErrorBlock message={table.errorMessage} onRetry={table.reload} />;
+  if (table.errorMessage) return <ErrorBlock variant="section" error={table.error} message={table.errorMessage} onRetry={table.reload} />;
   const rows = (table.data?.data ?? []).filter((row) => row.planCode === planCode);
   return (
     <Card title="Plan price book">

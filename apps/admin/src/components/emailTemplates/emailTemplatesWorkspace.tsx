@@ -20,7 +20,7 @@ function TemplatePreview({ template, theme }: { readonly template: EmailTemplate
   const preview = useAdminQuery((signal) => fetchEmailTemplatePreview(template.key, theme, signal), `${template.key}:${theme}`);
   const [isTextShown, setIsTextShown] = useState(false);
   if (preview.isLoading) return <LoadingBlock label="Rendering the email" lines={8} />;
-  if (preview.errorMessage || !preview.data) return <ErrorBlock message={preview.errorMessage ?? "The preview didn't render."} onRetry={preview.reload} />;
+  if (preview.errorMessage || !preview.data) return <ErrorBlock variant="section" error={preview.error} message={preview.errorMessage ?? "The preview didn't render."} onRetry={preview.reload} />;
   return (
     <div className={styles.previewColumn}>
       <dl className={styles.facts}>
@@ -62,7 +62,7 @@ export function EmailTemplatesWorkspace() {
         actions={<EmailThemeToggle theme={theme} onChange={setTheme} />}
       />
       {catalogue.isLoading ? <LoadingBlock label="Loading templates" /> : null}
-      {catalogue.errorMessage ? <ErrorBlock message={catalogue.errorMessage} onRetry={catalogue.reload} /> : null}
+      {catalogue.errorMessage ? <ErrorBlock error={catalogue.error} message={catalogue.errorMessage} onRetry={catalogue.reload} /> : null}
       {catalogue.data ? (
         <div className={styles.layout}>
           <Card isFlush className={styles.listCard}>

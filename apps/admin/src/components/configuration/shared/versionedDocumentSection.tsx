@@ -41,7 +41,7 @@ export function VersionedDocumentSection<Content>({ endpoint, recordId, title, c
     }
   }
 
-  if (query.errorMessage) return <ErrorBlock message={query.errorMessage} onRetry={query.reload} />;
+  if (query.errorMessage) return <ErrorBlock variant="section" error={query.error} message={query.errorMessage} onRetry={query.reload} />;
   if (!query.data || draft.draftContent === null) return <LoadingBlock lines={6} />;
   const record = query.data;
   return (

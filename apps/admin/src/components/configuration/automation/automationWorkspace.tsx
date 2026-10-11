@@ -49,7 +49,7 @@ export function AutomationWorkspace() {
         description="Rules that react to platform events: when something happens, check conditions, then act. Dry-run a rule against sample events before turning it on."
         actions={canWrite ? <Button variant="primary" iconName="plus16" onClick={() => setOpenRule("new")} disabled={!catalog.data}>New rule</Button> : null}
       />
-      {catalog.errorMessage || rules.errorMessage ? <ErrorBlock message={catalog.errorMessage ?? rules.errorMessage ?? ""} onRetry={() => { catalog.reload(); rules.reload(); }} /> : null}
+      {catalog.errorMessage || rules.errorMessage ? <ErrorBlock error={catalog.error} message={catalog.errorMessage ?? rules.errorMessage ?? ""} onRetry={() => { catalog.reload(); rules.reload(); }} /> : null}
       <div className={styles.layout}>
         <DataTable<RuleRecord>
           caption="Automation rules"

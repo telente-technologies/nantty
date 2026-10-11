@@ -70,7 +70,7 @@ export function FeaturedWorkspace() {
   return (
     <>
       <PageHeader area="Content" title="Mart home" description="Banners and featured slots on the Mart home screen, shown top to bottom in this order. Only live items within their schedule and country reach buyers." actions={<Button variant="primary" iconName="plus16" onClick={() => setEditor({ feature: null })} disabled={!library.data}>New feature</Button>} />
-      {features.errorMessage ? <ErrorBlock message={features.errorMessage} onRetry={features.reload} /> : null}
+      {features.errorMessage ? <ErrorBlock error={features.error} message={features.errorMessage} onRetry={features.reload} /> : null}
       <DataTable caption="Mart home features in display order" columns={columns} rows={rows} readRowKey={(feature) => feature.id} onRowOpen={(feature) => setSelectedFeatureId(feature.id)} selectedRowKey={selectedFeatureId} isLoading={features.isLoading} emptyMessage="No features yet. Add a banner to fill the Mart home screen." readRowTone={(feature) => (feature.status === "EXPIRED" ? "caution" : null)} />
       {selectedFeature ? <FeatureDetailPanel feature={selectedFeature} changeCounter={changeCounter} onClose={() => setSelectedFeatureId(null)} onEdit={() => setEditor({ feature: selectedFeature })} onChanged={(feature, message) => handleFeatureSaved(feature, message)} /> : null}
       {editor && library.data ? <FeatureEditorDialog editingFeature={editor.feature} imageLibrary={library.data.items} supportedCountries={library.data.countries} onClose={() => setEditor(null)} onSaved={(feature) => handleFeatureSaved(feature, editor.feature ? `${feature.title} saved` : `${feature.title} saved as draft`)} /> : null}

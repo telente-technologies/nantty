@@ -71,7 +71,7 @@ export function FeatureDetailPanel({ feature, changeCounter, onClose, onEdit, on
       />
       <SectionHeading>History</SectionHeading>
       {detail.isLoading && !detail.data ? <LoadingBlock lines={3} /> : null}
-      {detail.errorMessage ? <ErrorBlock message={detail.errorMessage} onRetry={detail.reload} /> : null}
+      {detail.errorMessage ? <ErrorBlock error={detail.error} message={detail.errorMessage} onRetry={detail.reload} /> : null}
       {detail.data ? <AuditHistoryList entries={detail.data.history} /> : null}
       <ConfirmActionDialog intent="publish"
         isOpen={isConfirmOpen}

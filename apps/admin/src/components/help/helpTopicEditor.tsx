@@ -118,7 +118,7 @@ function EditorBody({ detail, onSaved }: { readonly detail: HelpTopicDetail | nu
 export function HelpTopicEditor({ topicId }: { readonly topicId: string | null }) {
   const router = useRouter();
   const topic = useAdminQuery((signal) => fetchHelpTopic(topicId ?? "", signal), topicId ?? "new", topicId !== null);
-  if (topicId !== null && topic.errorMessage) return <ErrorBlock message={topic.errorMessage} onRetry={topic.reload} />;
+  if (topicId !== null && topic.errorMessage) return <ErrorBlock variant="section" error={topic.error} message={topic.errorMessage} onRetry={topic.reload} />;
   if (topicId !== null && (topic.isLoading || !topic.data)) return <LoadingBlock lines={10} label="Loading topic" />;
   const detail = topicId === null ? null : topic.data;
   return (

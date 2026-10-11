@@ -54,7 +54,7 @@ export function TopicsWorkspace() {
         <TextField label="Search topics" isLabelHidden placeholder="Search topics" value={searchText} onChange={(event) => setSearchText(event.target.value)} />
         <SelectField label="Status" isLabelHidden options={statusOptions} value={status} onChange={(event) => setStatus(event.target.value)} />
       </Toolbar>
-      {topics.errorMessage ? <ErrorBlock message={topics.errorMessage} onRetry={topics.reload} /> : null}
+      {topics.errorMessage ? <ErrorBlock error={topics.error} message={topics.errorMessage} onRetry={topics.reload} /> : null}
       <DataTable caption="Content topics" columns={columns} rows={topics.data?.items ?? []} readRowKey={(topic) => topic.id} onRowOpen={(topic) => setSelectedTopicId(topic.id)} selectedRowKey={selectedTopicId} isLoading={topics.isLoading} emptyMessage="No topics match these filters." />
       {selectedTopic ? (
         <SidePanel
@@ -87,7 +87,7 @@ export function TopicsWorkspace() {
           />
           <SectionHeading>History</SectionHeading>
           {detail.isLoading && !detail.data ? <LoadingBlock lines={3} /> : null}
-          {detail.errorMessage ? <ErrorBlock message={detail.errorMessage} onRetry={detail.reload} /> : null}
+          {detail.errorMessage ? <ErrorBlock error={detail.error} message={detail.errorMessage} onRetry={detail.reload} /> : null}
           {detail.data ? <AuditHistoryList entries={detail.data.history} /> : null}
         </SidePanel>
       ) : null}

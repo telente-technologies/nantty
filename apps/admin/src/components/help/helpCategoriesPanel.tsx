@@ -73,7 +73,7 @@ export function HelpCategoriesPanel({ canEdit }: { readonly canEdit: boolean }) 
   return (
     <>
       {canEdit ? <div className={styles.row}><Button onClick={() => setEditing("new")}>New category</Button></div> : null}
-      {categories.errorMessage ? <ErrorBlock message={categories.errorMessage} onRetry={categories.reload} /> : null}
+      {categories.errorMessage ? <ErrorBlock error={categories.error} message={categories.errorMessage} onRetry={categories.reload} /> : null}
       <DataTable caption="Help categories" columns={columns} rows={categories.data?.items ?? []} readRowKey={(category) => category.id} isLoading={categories.isLoading} emptyMessage="No categories yet." />
       {editing ? <CategoryFormDialog category={editing === "new" ? null : editing} onClose={() => setEditing(null)} onSaved={finish} /> : null}
       <ConfirmActionDialog intent="delete"
