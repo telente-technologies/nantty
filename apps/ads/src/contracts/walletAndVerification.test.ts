@@ -48,7 +48,7 @@ describe("wallet, verification and pay-from-balance mocks match the contract", (
   });
 
   it("L0 users get 403 VERIFICATION_REQUIRED on top-ups", async () => {
-    const response = await callMock("POST", `/ads/accounts/${accountId}/billing/top-ups`, { ...(await signIn("ibrahim@ifelifestyle.ng")), "idempotency-key": "k1" }, { amount: { amountMinor: 1_000_000, currency: "NGN" }, provider: "paystack" });
+    const response = await callMock("POST", `/ads/accounts/${accountId}/billing/top-ups`, { ...(await signIn("ibrahim@ifelifestyle.ng")), "idempotency-key": "k1" }, { amount: { amountMinor: 1_000_000, currency: "NGN" }, provider: "flutterwave" });
     assert.equal(response.status, 403);
     assert.equal(response.body.code, "VERIFICATION_REQUIRED");
     assert.deepEqual(validateAgainstContract(errorShape, response.body), []);

@@ -19,7 +19,7 @@ export function buildDemoAccountRecords(): MockAdAccountRecord[] {
       monthlyCreditMinor: 2_500_000,
       spendLimitMinor: 250_000_000,
       fundingMode: "prepaid_and_card",
-      paymentMethods: [{ id: "pm_ife_visa", brand: "Visa", last4: "4081", expMonth: 8, expYear: 2028, isDefault: true, provider: "paystack" }],
+      paymentMethods: [{ id: "pm_ife_visa", brand: "Visa", last4: "4081", expMonth: 8, expYear: 2028, isDefault: true, provider: "flutterwave" }],
     },
     {
       id: "act_adaeze",
@@ -73,7 +73,7 @@ export function buildDemoAccountRecords(): MockAdAccountRecord[] {
       monthlyCreditMinor: 50_000,
       spendLimitMinor: null,
       fundingMode: "card",
-      paymentMethods: [{ id: "pm_kente_mc", brand: "Mastercard", last4: "5512", expMonth: 3, expYear: 2027, isDefault: true, provider: "paystack" }],
+      paymentMethods: [{ id: "pm_kente_mc", brand: "Mastercard", last4: "5512", expMonth: 3, expYear: 2027, isDefault: true, provider: "flutterwave" }],
     },
   ];
 }

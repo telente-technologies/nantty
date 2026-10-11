@@ -1,6 +1,6 @@
 const isProductionRuntime = process.env.NODE_ENV === "production";
 const developmentOnlySessionSecret = "zudomart-ads-manager-development-only-secret-never-use-in-production";
-const defaultHostedCheckoutHosts = ["checkout.flutterwave.com", "checkout-testing.flutterwave.com", "checkout.paystack.com"];
+const defaultHostedCheckoutHosts = ["checkout.flutterwave.com", "checkout-testing.flutterwave.com"];
 
 export function readAdsApiBaseUrl(): string {
   const configuredUrl = process.env.ADS_API_URL ?? (isProductionRuntime ? "" : "http://localhost:8080");
@@ -9,8 +9,9 @@ export function readAdsApiBaseUrl(): string {
 }
 
 export function isMockBackendEnabled(): boolean {
+  if (isProductionRuntime) return false;
   const configuredValue = process.env.ADS_USE_MOCKS;
-  if (configuredValue === undefined || configuredValue === "") return !isProductionRuntime;
+  if (configuredValue === undefined || configuredValue === "") return true;
   return configuredValue === "true";
 }
 

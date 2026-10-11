@@ -53,7 +53,7 @@ export function TopUpDialog({ accountId, overview, isOpen, onClose }: TopUpDialo
     setErrorMessage(null);
     setVerificationMessage(null);
     try {
-      const checkout = await billingApi.startTopUpCheckout(accountId, amount, "paystack", idempotencyKey);
+      const checkout = await billingApi.startTopUpCheckout(accountId, amount, "flutterwave", idempotencyKey);
       if (!openHostedCheckoutIfSafe(checkout)) {
         setErrorMessage("The payment page address was not recognised, so we did not open it. Contact support.");
         startingRef.current = false;

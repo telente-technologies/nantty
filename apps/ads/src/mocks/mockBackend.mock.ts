@@ -68,3 +68,5 @@ export async function dispatchMockApiRequest(call: MockApiCall): Promise<MockRes
     return respondWithError(500, "MOCK_FAILURE", "The demo backend hit an error.");
   }
 }
+
+(globalThis as Record<string, unknown>).__zudomartMockBackend = "zudomart-mock-backend-bundled";

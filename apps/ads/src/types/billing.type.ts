@@ -1,7 +1,7 @@
 import type { Money } from "@/types/money.type";
 
 export type FundingMode = "prepaid" | "card" | "prepaid_and_card";
-export type PaymentProvider = "paystack" | "flutterwave";
+export type PaymentProvider = "flutterwave";
 
 export interface PaymentMethod {
   readonly id: string;

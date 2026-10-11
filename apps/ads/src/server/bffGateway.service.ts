@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 
 import { doesRoleHavePermission, findRequirementForApiCall } from "@/config/rolePermissions.config";
+import { isAccessTokenKnownExpired } from "@/server/accessTokenExpiry.service";
 import { exchangeRefreshTokenForNewTokenPair, renewCachedSessionView, writeRenewedSessionCookies, type RenewedAdsSession } from "@/server/adsAuthentication.service";
 import { callAdsBackend, type BackendResult } from "@/server/adsApiTransport.service";
 import { clearEverySessionCookie, readApiTokensFromCookies, readCachedSessionViewFromCookies, readSessionIdFromCookies, writeApiTokenCookies, type ApiTokenPair, type CachedSessionViewPayload } from "@/server/adsSession.service";
@@ -49,17 +50,24 @@ export async function forwardBffRequestToAdsApi(request: NextRequest, pathSegmen
     return respondWithBffError(403, "CSRF_REJECTED", "This request could not be verified. Reload the page and try again.");
   }
 
-  const tokens = readApiTokensFromCookies(request.cookies);
+  const cookieTokens = readApiTokensFromCookies(request.cookies);
+  const respondSessionExpired = () => {
+    const expiredResponse = respondWithBffError(401, "SESSION_EXPIRED", "Your session has ended. Sign in again.");
+    clearEverySessionCookie(expiredResponse);
+    return expiredResponse;
+  };
+  let rotatedTokens: ApiTokenPair | null = null;
+  if (isAccessTokenKnownExpired(cookieTokens.accessToken)) {
+    rotatedTokens = cookieTokens.refreshToken ? await exchangeRefreshTokenForNewTokenPair(cookieTokens.refreshToken) : null;
+    if (!rotatedTokens) return respondSessionExpired();
+  }
+  const tokens = rotatedTokens ?? cookieTokens;
   let renewedSession: RenewedAdsSession | null = null;
   let cachedView = readCachedSessionViewFromCookies(request.cookies);
   const needsFreshMemberships = requirement.kind === "account" && cachedView !== null && findRoleForAccount(cachedView, requirement.accountId) === null;
   if (!cachedView || needsFreshMemberships) {
     renewedSession = await renewCachedSessionView({ sessionId, accessToken: tokens.accessToken, refreshToken: tokens.refreshToken, knownUser: cachedView?.user ?? null });
-    if (!renewedSession) {
-      const expiredResponse = respondWithBffError(401, "SESSION_EXPIRED", "Your session has ended. Sign in again.");
-      clearEverySessionCookie(expiredResponse);
-      return expiredResponse;
-    }
+    if (!renewedSession) return respondSessionExpired();
     cachedView = renewedSession.cachedView;
   }
 
@@ -84,19 +92,17 @@ export async function forwardBffRequestToAdsApi(request: NextRequest, pathSegmen
     callAdsBackend({ method: request.method, path: apiPath, query: request.nextUrl.searchParams, body, contentType: request.headers.get("content-type"), accessToken, forwardedHeaders });
 
   let backendResult = await sendToBackend();
-  let rotatedTokens: ApiTokenPair | null = null;
+  const alreadyRefreshed = rotatedTokens !== null || Boolean(renewedSession?.tokens);
   const refreshTokenToUse = renewedSession?.tokens?.refreshToken ?? tokens.refreshToken;
-  if (backendResult.status === 401 && refreshTokenToUse) {
-    rotatedTokens = await exchangeRefreshTokenForNewTokenPair(refreshTokenToUse);
-    if (rotatedTokens) {
-      accessToken = rotatedTokens.accessToken;
-      backendResult = await sendToBackend();
-    }
+  if (backendResult.status === 401 && !alreadyRefreshed) {
+    rotatedTokens = refreshTokenToUse ? await exchangeRefreshTokenForNewTokenPair(refreshTokenToUse) : null;
+    if (!rotatedTokens) return respondSessionExpired();
+    accessToken = rotatedTokens.accessToken;
+    backendResult = await sendToBackend();
   }
 
   const response = convertBackendResultToResponse(backendResult);
   if (renewedSession) writeRenewedSessionCookies(response, renewedSession);
   if (rotatedTokens) writeApiTokenCookies(response, rotatedTokens);
-  if (backendResult.status === 401 && !rotatedTokens) clearEverySessionCookie(response);
   return response;
 }

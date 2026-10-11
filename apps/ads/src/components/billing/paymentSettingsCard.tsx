@@ -74,7 +74,7 @@ export function PaymentSettingsCard({ accountId, overview, canManageBilling, onO
 
   const startAddingCardThroughProvider = () =>
     runBillingChange("addCard", async () => {
-      const checkout = await billingApi.startAddingCard(accountId, "paystack", cardIdempotencyKey);
+      const checkout = await billingApi.startAddingCard(accountId, "flutterwave", cardIdempotencyKey);
       if (!openHostedCheckoutIfSafe(checkout)) showToast("The card page address was not recognised, so we did not open it.", "error");
     });
 
