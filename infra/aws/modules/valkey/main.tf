@@ -7,7 +7,7 @@ terraform {
 }
 
 locals {
-  name = "zudomart-${var.environment}"
+  name = "zudomart-${var.environment}${var.name_suffix}"
 }
 
 resource "aws_elasticache_subnet_group" "this" {
@@ -17,14 +17,24 @@ resource "aws_elasticache_subnet_group" "this" {
 
 resource "aws_security_group" "valkey" {
   name_prefix = "${local.name}-valkey-"
-  description = "Valkey, reachable from ECS tasks only"
+  description = "Valkey, reachable from the listed client security groups only"
   vpc_id      = var.vpc_id
   ingress {
-    description     = "Valkey TLS from ECS tasks"
+    description     = "Valkey TLS from client tasks"
     from_port       = 6379
     to_port         = 6379
     protocol        = "tcp"
-    security_groups = [var.tasks_security_group_id]
+    security_groups = var.client_security_group_ids
+  }
+  dynamic "ingress" {
+    for_each = var.payments_security_group_id == null ? [] : [var.payments_security_group_id]
+    content {
+      description     = "Valkey TLS from go-money (payments)"
+      from_port       = 6379
+      to_port         = 6379
+      protocol        = "tcp"
+      security_groups = [ingress.value]
+    }
   }
   lifecycle { create_before_destroy = true }
 }
@@ -39,13 +49,13 @@ resource "aws_elasticache_parameter_group" "this" {
   family = "valkey8"
   parameter {
     name  = "maxmemory-policy"
-    value = "volatile-lru"
+    value = var.maxmemory_policy
   }
 }
 
 resource "aws_elasticache_replication_group" "this" {
   replication_group_id       = local.name
-  description                = "zudomart ${var.environment} cache, rate limits, idempotency, presence"
+  description                = var.description
   engine                     = "valkey"
   engine_version             = var.engine_version
   node_type                  = var.node_type
@@ -75,17 +85,17 @@ resource "aws_elasticache_replication_group" "this" {
 }
 
 resource "aws_cloudwatch_log_group" "slow" {
-  name              = "/zudomart/${var.environment}/valkey-slow"
+  name              = "/zudomart/${var.environment}/valkey${var.name_suffix}-slow"
   retention_in_days = 30
   kms_key_id        = var.logs_kms_key_arn
 }
 
 resource "aws_secretsmanager_secret" "url" {
-  name       = "zudomart/${var.environment}/valkey/url"
+  name       = "zudomart/${var.environment}/valkey${var.name_suffix}/url"
   kms_key_id = var.secrets_kms_key_arn
 }
 
 resource "aws_secretsmanager_secret_version" "url" {
   secret_id     = aws_secretsmanager_secret.url.id
-  secret_string = "rediss://:${random_password.auth.result}@${aws_elasticache_replication_group.this.primary_endpoint_address}:6379"
+  secret_string = "rediss://:${random_password.auth.result}@${aws_elasticache_replication_group.this.primary_endpoint_address}:6379/${var.logical_database}"
 }

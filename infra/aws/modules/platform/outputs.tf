@@ -16,3 +16,4 @@ output "alarm_topic_arn" { value = module.observability.alarm_topic_arn }
 output "name_servers" { value = module.dns.name_servers }
 output "nat_public_ips" { value = module.network.nat_public_ips }
 output "service_names" { value = local.service_names }
+output "intelligence_valkey_endpoint" { value = module.valkey_intelligence.primary_endpoint }

@@ -7,3 +7,5 @@ output "media_distribution_zone_id" { value = aws_cloudfront_distribution.media.
 output "media_key_group_id" { value = try(aws_cloudfront_key_group.media_signing[0].id, null) }
 output "media_kms_key_arn" { value = aws_kms_key.media.arn }
 output "media_distribution_arn" { value = aws_cloudfront_distribution.media.arn }
+output "media_service_buckets" { value = { for name, bucket in aws_s3_bucket.media_service : name => { id = bucket.id, arn = bucket.arn } } }
+output "media_signing_public_key_id" { value = try(aws_cloudfront_public_key.media_signing[0].id, null) }

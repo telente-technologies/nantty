@@ -120,10 +120,6 @@ variable "media_signing_public_key_pem" {
   type    = string
   default = null
 }
-variable "paystack_webhook_ips" {
-  type    = list(string)
-  default = ["52.31.139.75", "52.49.173.169", "52.214.14.220"]
-}
 variable "ecr_pull_account_ids" {
   description = "Accounts that may pull this account's images (prod account id on staging)."
   type        = list(string)
@@ -138,4 +134,17 @@ variable "cdn_rate_limit_per_five_minutes" {
   description = "Per-IP request limit (5-minute window) on the media CloudFront WAF."
   type        = number
   default     = 10000
+}
+variable "intelligence_valkey" {
+  description = "Dedicated Valkey for the intelligence service (TLS + AUTH, reachable from the intelligence task only)."
+  type = object({
+    node_type  = string
+    node_count = number
+  })
+  default = { node_type = "cache.t4g.small", node_count = 1 }
+}
+variable "payments_internet_egress_cidrs" {
+  description = "Internet ranges go-money may reach on 443 (Flutterwave, Apple, Google). Narrow once the providers' ranges are confirmed; hostnames cannot be expressed in a security group."
+  type        = list(string)
+  default     = ["0.0.0.0/0"]
 }

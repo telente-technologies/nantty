@@ -17,8 +17,12 @@ locals {
       SMILE_ID_ENVIRONMENT                = var.environment == "prod" ? "production" : "sandbox"
       SMILE_ID_CALLBACK_URL               = "https://${local.api_domain}/api/v1/webhooks/smile-id"
       WEB_APP_BASE_URL                    = var.app_origins["webapp"]
+      USERS_SOCIAL_INTERNAL_URL           = local.internal_url["social"]
+      USERS_LIVE_INTERNAL_URL             = local.internal_url["go-live"]
     }
     go-money = {
+      SOCIAL_INTERNAL_URL = local.internal_url["social"]
+      ADMIN_INTERNAL_URL  = local.internal_url["go-identity"]
       PAYMENT_RETURN_URLS = join(",", ["${var.app_origins["web"]}/pay/return", "${var.app_origins["webapp"]}/pay/return", "${var.app_origins["webapp"]}/settings/verification"])
     }
     go-commerce = {
@@ -31,6 +35,8 @@ locals {
       CATALOG_ADS_INTERNAL_URL     = local.internal_url["go-ads"]
       ORDERS_EVENTS_QUEUE          = "commerce-domain-events"
       CATALOG_EVENTS_QUEUE         = "catalog-domain-events"
+      MEDIA_INTERNAL_URL           = local.internal_url["media"]
+      ORDERS_SOCIAL_INTERNAL_URL   = local.internal_url["social"]
     }
     go-live = {
       LIVE_MONEY_GRPC_ADDRESS             = local.grpc_address["go-money"]
@@ -45,6 +51,14 @@ locals {
       ADS_MONEY_HTTP_URL     = local.internal_url["go-money"]
       INTELLIGENCE_URL       = local.internal_url["intelligence"]
       ADS_REPORT_QUEUE_NAME  = "jobs-ads-reports"
+      ADS_ASSETS_BUCKET      = module.storage.media_bucket.id
+      ADS_STAFF_JWKS_URL     = "${local.internal_url["go-identity"]}/.well-known/jwks.json"
+      ADS_STAFF_TOKEN_ISSUER = "https://${local.api_domain}"
+      IDENTITY_INTERNAL_URL  = local.internal_url["go-identity"]
+      ADMIN_INTERNAL_URL     = local.internal_url["go-identity"]
+      ADS_PUBLIC_URL         = "https://${local.api_domain}"
+      ADS_APP_URL            = try(var.app_origins["ads"], "https://ads.${var.app_domain}")
+      ADS_VERIFY_URL         = "${try(var.app_origins["web"], "https://${var.app_domain}")}/wallet/payouts"
     }
     go-trust = {
       MODERATION_USERS_INTERNAL_URL           = local.internal_url["go-identity"]
@@ -52,6 +66,7 @@ locals {
       MODERATION_COMMERCE_INTERNAL_URL        = local.internal_url["go-commerce"]
       MODERATION_LIVE_INTERNAL_URL            = local.internal_url["go-live"]
       MODERATION_REPORT_EVENTS_QUEUE          = "trust-domain-events"
+      INTELLIGENCE_URL                        = local.internal_url["intelligence"]
       INTELLIGENCE_TRUST_ADVISORY_QUEUE       = "intelligence-trust-advisory"
       INTELLIGENCE_TRUST_CONTENT_SCORES_QUEUE = "intelligence-trust-content-scores"
       INTELLIGENCE_TRUST_LIVE_SAFETY_QUEUE    = "intelligence-trust-live-safety"
@@ -68,6 +83,8 @@ locals {
       ADMIN_INTERNAL_URL         = local.internal_url["go-identity"]
       INTELLIGENCE_URL           = local.internal_url["intelligence"]
       FEED_RANK_TIMEOUT_MS       = "250"
+      MEDIA_INTERNAL_URL         = local.internal_url["media"]
+      ADS_INTERNAL_URL           = local.internal_url["go-ads"]
       SOCIAL_DOMAIN_EVENTS_QUEUE = "social-domain-events"
     }
     search = {

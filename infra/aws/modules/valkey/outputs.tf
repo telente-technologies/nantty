@@ -5,3 +5,4 @@ output "auth_token" {
   value     = random_password.auth.result
   sensitive = true
 }
+output "security_group_id" { value = aws_security_group.valkey.id }

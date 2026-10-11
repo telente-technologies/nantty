@@ -33,6 +33,18 @@ resource "aws_cloudfront_distribution" "media" {
     origin_access_control_id = aws_cloudfront_origin_access_control.media.id
   }
 
+  origin {
+    origin_id                = "media-public"
+    domain_name              = aws_s3_bucket.media_service["public"].bucket_regional_domain_name
+    origin_access_control_id = aws_cloudfront_origin_access_control.media.id
+  }
+
+  origin {
+    origin_id                = "media-private"
+    domain_name              = aws_s3_bucket.media_service["private"].bucket_regional_domain_name
+    origin_access_control_id = aws_cloudfront_origin_access_control.media.id
+  }
+
   dynamic "origin" {
     for_each = var.enable_dr ? [1] : []
     content {
@@ -61,6 +73,32 @@ resource "aws_cloudfront_distribution" "media" {
     compress                   = true
     cache_policy_id            = "658327ea-f89d-4fab-a63d-7e88639e58f6"
     response_headers_policy_id = "67f7725c-6f97-4210-82d7-5512b31e9d03"
+  }
+
+  ordered_cache_behavior {
+    path_pattern               = "/m/*"
+    target_origin_id           = "media-public"
+    viewer_protocol_policy     = "redirect-to-https"
+    allowed_methods            = ["GET", "HEAD", "OPTIONS"]
+    cached_methods             = ["GET", "HEAD"]
+    compress                   = true
+    cache_policy_id            = "658327ea-f89d-4fab-a63d-7e88639e58f6"
+    response_headers_policy_id = "67f7725c-6f97-4210-82d7-5512b31e9d03"
+  }
+
+  dynamic "ordered_cache_behavior" {
+    for_each = var.media_signing_public_key_pem == null ? [] : [1]
+    content {
+      path_pattern               = "/p/*"
+      target_origin_id           = "media-private"
+      viewer_protocol_policy     = "https-only"
+      allowed_methods            = ["GET", "HEAD"]
+      cached_methods             = ["GET", "HEAD"]
+      compress                   = true
+      cache_policy_id            = "658327ea-f89d-4fab-a63d-7e88639e58f6"
+      response_headers_policy_id = "67f7725c-6f97-4210-82d7-5512b31e9d03"
+      trusted_key_groups         = [aws_cloudfront_key_group.media_signing[0].id]
+    }
   }
 
   dynamic "ordered_cache_behavior" {
