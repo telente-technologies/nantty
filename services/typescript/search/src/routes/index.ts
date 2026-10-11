@@ -10,6 +10,7 @@ import { registerSearchRoutes } from "../modules/search/routes/search.routes.js"
 import type { SearchQueryService } from "../modules/search/services/searchQuery.service.js";
 import type { RecentSearchStore } from "../interfaces/searchStore.interface.js";
 import { json } from "../utils/http.util.js";
+import { runReadinessChecks } from "../utils/readiness.util.js";
 
 export interface RouteDependencies {
   readonly searchService: SearchQueryService;
@@ -17,17 +18,17 @@ export interface RouteDependencies {
   readonly eventProcessor: SearchEventProcessor;
   readonly internalToken: string;
   readonly probeDatabase: (() => Promise<void>) | undefined;
+  readonly probeBroker?: () => Promise<void>;
 }
 
 export function registerRoutes(router: HttpRouter, dependencies: RouteDependencies): void {
   router.get("/healthz", () => json(200, { status: "up", service: "search" }));
   router.get("/readyz", async () => {
-    try {
-      await dependencies.probeDatabase?.();
-      return json(200, { status: "ready" });
-    } catch {
-      return json(503, { status: "unavailable" });
-    }
+    const { ready } = await runReadinessChecks({
+      database: async () => dependencies.probeDatabase?.(),
+      rabbitmq: async () => dependencies.probeBroker?.(),
+    });
+    return ready ? json(200, { status: "ready" }) : json(503, { status: "unavailable" });
   });
   registerRecentSearchesRoutes(router, createRecentSearchesController(dependencies.recentSearches));
   registerSearchRoutes(router, createSearchController(dependencies.searchService));

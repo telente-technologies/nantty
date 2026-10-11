@@ -11,6 +11,7 @@ import { createLogger, type Logger } from "@zudojs/logger";
 
 import type { SearchConfig } from "./configs/search.config.js";
 import { createGatewayIdentityMiddleware } from "./middlewares/gatewayIdentity.middleware.js";
+import { checkRabbitMqConnections } from "./integrations/rabbitMqConnection.integration.js";
 import { createSearchPrisma } from "./databases/prisma.database.js";
 import { createHttpSourceHydrator } from "./integrations/httpSourceHydrator.integration.js";
 import { createPythonSearchReranker } from "./integrations/pythonSearchReranker.integration.js";
@@ -24,6 +25,7 @@ import { createSearchQueryPostgresRepository } from "./modules/search/repositori
 import { createSearchQueryService } from "./modules/search/services/searchQuery.service.js";
 import { registerRoutes } from "./routes/index.js";
 import { errorToResponse, json } from "./utils/http.util.js";
+import { dispatchWithRoute, withRequestMetrics } from "./telemetry/requestMetrics.js";
 
 export interface SearchApp {
   readonly start: () => Promise<number>;
@@ -46,10 +48,11 @@ export function createSearchApp(config: SearchConfig, consumerFactory: MessageCo
     eventProcessor,
     internalToken: config.internalToken,
     probeDatabase: async () => void (await prisma.processedEvent.count({ take: 1 })),
+    ...(config.rabbitMq === undefined ? {} : { probeBroker: checkRabbitMqConnections }),
   });
   const dispatch: HttpMiddleware = async (requestContext) => {
     try {
-      return (await router.dispatch(requestContext.request, { signal: requestContext.signal })).response;
+      return (await dispatchWithRoute(router, requestContext.request, requestContext.signal)).response;
     } catch (error) {
       logger.error("unhandled error", { path: requestContext.request.path, error: error instanceof Error ? error.message : String(error) });
       return json(500, { message: "Internal Server Error", code: "INTERNAL_ERROR" });
@@ -58,7 +61,7 @@ export function createSearchApp(config: SearchConfig, consumerFactory: MessageCo
   const pipeline = new HttpMiddlewarePipeline({ middlewares: [createGatewayIdentityMiddleware(config.gatewayIdentitySecrets ?? []), dispatch] });
   const server = createHttpServer({
     adapter: createNodeHttpAdapter({ host: config.host, port: config.port, maxBodySize: 256 * 1024, trustProxy: true }),
-    handler: (request: HttpRequestContext) => pipeline.execute(request, createResponseContext()),
+    handler: withRequestMetrics((request: HttpRequestContext) => pipeline.execute(request, createResponseContext())),
   });
   const consumers: QueueConsumer[] = [];
   return {

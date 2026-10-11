@@ -3,7 +3,10 @@ import { createLogger } from "@zudojs/logger";
 import { createSearchApp } from "./app.js";
 import { createRabbitMqMessageConsumerFactory } from "./integrations/rabbitMqMessageConsumerFactory.integration.js";
 import { loadSearchConfigFromEnvironment } from "./configs/search.config.js";
+import { startTelemetry } from "./telemetry/telemetry.js";
 
+// ESM imports load before this runs, so node:http auto-instrumentation may miss; RED metrics are recorded explicitly.
+const stopTelemetry = startTelemetry("search");
 const logger = createLogger({ name: "search" });
 const config = loadSearchConfigFromEnvironment();
 const consumerFactory = config.rabbitMq === undefined ? undefined : createRabbitMqMessageConsumerFactory(config.rabbitMq.url, config.rabbitMq.prefetch, logger);
@@ -17,7 +20,7 @@ for (const signal of ["SIGINT", "SIGTERM"] as const) {
   process.on(signal, () => {
     if (stopping) return;
     stopping = true;
-    void app.stop().then(
+    void app.stop().finally(stopTelemetry).then(
       async () => {
         await consumerFactory?.close();
         process.exit(0);
