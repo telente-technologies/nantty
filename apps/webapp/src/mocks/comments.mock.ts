@@ -7,6 +7,8 @@ import { mockPostsState } from "./postCatalog.mock";
 import { createMockRoute, type MockRoute } from "./registry.mock";
 import { chooseMockChain, mockPostAuthorId, rankMockTopLevelComments, resolveMockQuote, withMockQuoteState } from "./quoteLinks.mock";
 import { quotedSummaryFromPost } from "@/utils/quotedPostLinks.util";
+import { isQuoteThreadItem, type QuoteThreadItem } from "@/types/postThread.type";
+import { mergeQuotesIntoRankedComments, mockQuoteItemsFor, newestQuotesFirst } from "./commentSectionQuotes.mock";
 
 const TOP_LEVEL_PAGE_SIZE = 6;
 const REPLIES_PAGE_SIZE = 4;
@@ -182,9 +184,12 @@ export const commentsMocks: MockRoute[] = [
     const postAuthorId = mockPostAuthorId(postId);
     const everyComment = commentsForPost(postId);
     const topLevel = rankMockTopLevelComments(everyComment.filter((c) => c.parentCommentId === null), everyComment, postAuthorId);
-    const page = paginateByOffset(topLevel, query.get("cursor"), TOP_LEVEL_PAGE_SIZE);
-    const withPreviews: CommentWithReplies[] = page.data.map((c) => ({
+    const quotes = mockQuoteItemsFor(postId, postAuthorId);
+    if (query.get("filter") === "quotes") return paginateByOffset(newestQuotesFirst(quotes), query.get("cursor"), TOP_LEVEL_PAGE_SIZE);
+    const page = paginateByOffset(mergeQuotesIntoRankedComments(topLevel, quotes, postAuthorId), query.get("cursor"), TOP_LEVEL_PAGE_SIZE);
+    const withPreviews: (CommentWithReplies | QuoteThreadItem)[] = page.data.map((c) => (isQuoteThreadItem(c) ? c : {
       ...withMockQuoteState(c, postAuthorId),
+      type: "comment" as const,
       previewReplies: chooseMockChain(c, everyComment, postAuthorId, PREVIEW_REPLY_COUNT).map((reply) => withMockQuoteState(reply, postAuthorId)),
     }));
     return { data: withPreviews, nextCursor: page.nextCursor };

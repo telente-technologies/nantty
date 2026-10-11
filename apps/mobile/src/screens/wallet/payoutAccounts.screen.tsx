@@ -1,9 +1,10 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
-import { ScrollView, StyleSheet } from "react-native";
+import { StyleSheet } from "react-native";
 
 import { SettingsGroup, SettingsRow } from "@/components/settings/settingsGroup";
 import { Button } from "@/components/ui/button";
+import { KeyboardAwareForm } from "@/components/ui/keyboardAwareForm";
 import { Header } from "@/components/ui/header";
 import { TextField } from "@/components/ui/input";
 import { Screen } from "@/components/ui/screen";
@@ -60,7 +61,7 @@ export function PayoutAccountsScreen() {
   return (
     <Screen>
       <Header title="Payout accounts" />
-      <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled" refreshControl={refreshControl}>
+      <KeyboardAwareForm contentContainerStyle={styles.content} refreshControl={refreshControl}>
         {accountsQuery.isPending ? (
           <Skeleton height={48} radius={12} />
         ) : accountsQuery.isError ? (
@@ -105,7 +106,7 @@ export function PayoutAccountsScreen() {
           </Text>
         ) : null}
         <Button title="Add account" disabled={!bankCode.trim() || accountNumber.length !== 10} loading={addAccount.isPending} onPress={() => addAccount.mutate()} />
-      </ScrollView>
+      </KeyboardAwareForm>
       {stepUpSheet}
     </Screen>
   );

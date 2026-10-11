@@ -1,12 +1,13 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRef, useState } from "react";
-import { ScrollView, StyleSheet, TextInput, View } from "react-native";
+import { StyleSheet, TextInput, View } from "react-native";
 
 import { SelectableRow } from "@/components/cart/selectableRow";
 import { escrowQueryKeys } from "@/components/escrow/escrowQueries.hook";
 import { DISPUTE_REASON_OPTIONS } from "@/components/escrow/escrowStage.util";
 import { PhotoEvidencePicker } from "@/components/escrow/photoEvidencePicker";
 import { Button } from "@/components/ui/button";
+import { KeyboardAwareForm } from "@/components/ui/keyboardAwareForm";
 import { Header } from "@/components/ui/header";
 import { Screen } from "@/components/ui/screen";
 import { Text } from "@/components/ui/text";
@@ -50,7 +51,20 @@ export function OpenDisputeScreen({ navigation, route }: MainScreenProps<"OpenDi
   return (
     <Screen>
       <Header title="Open a dispute" />
-      <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
+      <KeyboardAwareForm
+        contentContainerStyle={styles.content}
+        footerStyle={styles.footer}
+        footer={
+          <>
+            {submitDispute.isError ? (
+              <Text size={12} lineHeight={14.4} color={colors.error} align="center" accessibilityRole="alert">
+                {describeActionFailure(submitDispute.error) || "Couldn't open the dispute. Try again."}
+              </Text>
+            ) : null}
+            <Button title="Submit dispute" disabled={!readyToSubmit} loading={submitDispute.isPending} onPress={() => submitDispute.mutate()} />
+          </>
+        }
+      >
         <View style={styles.notice}>
           <Text size={13} weight={500} lineHeight={16.9} color={colors.primary}>
             Your payment is paused while we look into this
@@ -96,15 +110,7 @@ export function OpenDisputeScreen({ navigation, route }: MainScreenProps<"OpenDi
           </Text>
           <PhotoEvidencePicker photoUrls={evidenceUrls} onChangePhotoUrls={setEvidenceUrls} onUploadingChange={setUploadingEvidence} />
         </View>
-      </ScrollView>
-      <View style={styles.footer}>
-        {submitDispute.isError ? (
-          <Text size={12} lineHeight={14.4} color={colors.error} align="center" accessibilityRole="alert">
-            {describeActionFailure(submitDispute.error) || "Couldn't open the dispute. Try again."}
-          </Text>
-        ) : null}
-        <Button title="Submit dispute" disabled={!readyToSubmit} loading={submitDispute.isPending} onPress={() => submitDispute.mutate()} />
-      </View>
+      </KeyboardAwareForm>
     </Screen>
   );
 }
@@ -126,5 +132,5 @@ const useStyles = makeThemedStyles((colors) => StyleSheet.create({
     fontSize: 14,
     color: colors.text,
   },
-  footer: { paddingHorizontal: 16, paddingTop: 8, paddingBottom: 24, gap: 8 },
+  footer: { paddingHorizontal: 16, paddingTop: 8, paddingBottom: 12, gap: 8 },
 }));

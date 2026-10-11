@@ -1,10 +1,11 @@
 import { Image } from "expo-image";
 import { useRef, useState } from "react";
-import { ScrollView, StyleSheet, TextInput, View } from "react-native";
+import { StyleSheet, TextInput, View } from "react-native";
 
 import { useInvalidateProductReviews } from "@/components/reviews/reviewQueries.hook";
 import { StarPicker, ratingWord } from "@/components/reviews/starRating";
 import { Button } from "@/components/ui/button";
+import { KeyboardAwareForm } from "@/components/ui/keyboardAwareForm";
 import { EmptyState } from "@/components/ui/emptyState";
 import { Header } from "@/components/ui/header";
 import { Screen } from "@/components/ui/screen";
@@ -86,7 +87,16 @@ export function WriteReviewScreen({ navigation, route }: MainScreenProps<"WriteR
   return (
     <Screen>
       <Header title="Rate your purchase" />
-      <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
+      <KeyboardAwareForm
+        contentContainerStyle={styles.content}
+        footerStyle={styles.footer}
+        footer={
+          <>
+            {failure ? <Text size={12} lineHeight={16} color={colors.error} align="center" accessibilityRole="alert">{failure.message}</Text> : null}
+            <Button title="Post review" loading={submitting} disabled={submitting} onPress={() => void submit()} />
+          </>
+        }
+      >
         {productName ? (
           <View style={styles.product}>
             <View style={styles.thumb}>{imageUrl ? <Image source={{ uri: imageUrl }} style={StyleSheet.absoluteFill} contentFit="cover" /> : null}</View>
@@ -131,11 +141,7 @@ export function WriteReviewScreen({ navigation, route }: MainScreenProps<"WriteR
             {errors.text ?? `${textBytes}/${REVIEW_TEXT_MAX_BYTES}`}
           </Text>
         </View>
-      </ScrollView>
-      <View style={styles.footer}>
-        {failure ? <Text size={12} lineHeight={16} color={colors.error} align="center" accessibilityRole="alert">{failure.message}</Text> : null}
-        <Button title="Post review" loading={submitting} disabled={submitting} onPress={() => void submit()} />
-      </View>
+      </KeyboardAwareForm>
     </Screen>
   );
 }
@@ -159,5 +165,5 @@ const useStyles = makeThemedStyles((colors) => StyleSheet.create({
   titleInput: { height: 44, paddingVertical: 0 },
   bodyInput: { minHeight: 140, textAlignVertical: "top" },
   invalid: { borderColor: colors.error },
-  footer: { paddingHorizontal: 16, paddingTop: 8, paddingBottom: 24, gap: 8 },
+  footer: { paddingHorizontal: 16, paddingTop: 8, paddingBottom: 12, gap: 8 },
 }));

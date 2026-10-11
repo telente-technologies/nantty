@@ -1,12 +1,13 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Image } from "expo-image";
 import { useRef, useState } from "react";
-import { Pressable, ScrollView, StyleSheet, View } from "react-native";
+import { Pressable, StyleSheet, View } from "react-native";
 
 import { CameraBolt24Icon } from "@/components/icons";
 import { pickSquareOrWideImageFromLibrary } from "@/components/profile/pickImage.util";
 import { useUsernameAvailability } from "@/components/settings/usernameAvailability.hook";
 import { Button } from "@/components/ui/button";
+import { KeyboardAwareForm } from "@/components/ui/keyboardAwareForm";
 import { Chip } from "@/components/ui/chip";
 import { Header } from "@/components/ui/header";
 import { TextField } from "@/components/ui/input";
@@ -53,7 +54,16 @@ export function CreateBrandScreen({ navigation }: MainScreenProps<"CreateBrand">
   return (
     <Screen>
       <Header title="Create a brand" />
-      <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
+      <KeyboardAwareForm
+        contentContainerStyle={styles.content}
+        footerStyle={styles.footer}
+        footer={
+          <>
+            {createBrand.isError ? <Text size={12} color={colors.error} align="center">{createBrand.error.message}</Text> : null}
+            <Button title="Create brand" disabled={!ready} loading={createBrand.isPending} onPress={() => createBrand.mutate()} />
+          </>
+        }
+      >
         <Text size={13} lineHeight={17.5} color={colors.textMuted}>
           A brand profile represents your business or organisation. Verify it with Gold to open an Official Store.
         </Text>
@@ -76,11 +86,7 @@ export function CreateBrandScreen({ navigation }: MainScreenProps<"CreateBrand">
         </View>
         <TextField label="Description" placeholder="What does your brand make?" value={description} onChangeText={setDescription} multiline maxLength={300} boxStyle={styles.multiline} />
         <TextField label="Website (optional)" placeholder="https://" autoCapitalize="none" keyboardType="url" value={website} onChangeText={setWebsite} />
-      </ScrollView>
-      <View style={styles.footer}>
-        {createBrand.isError ? <Text size={12} color={colors.error} align="center">{createBrand.error.message}</Text> : null}
-        <Button title="Create brand" disabled={!ready} loading={createBrand.isPending} onPress={() => createBrand.mutate()} />
-      </View>
+      </KeyboardAwareForm>
     </Screen>
   );
 }
@@ -91,5 +97,5 @@ const useStyles = makeThemedStyles((colors) => StyleSheet.create({
   logo: { width: 72, height: 72, borderRadius: 8, marginTop: -40, marginLeft: 12, backgroundColor: colors.skeleton, borderWidth: 2, borderColor: colors.surface, overflow: "hidden", alignItems: "center", justifyContent: "center" },
   chips: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
   multiline: { height: 100, alignItems: "flex-start", paddingVertical: 12 },
-  footer: { paddingHorizontal: 16, paddingTop: 8, paddingBottom: 24, gap: 8 },
+  footer: { paddingHorizontal: 16, paddingTop: 8, paddingBottom: 12, gap: 8 },
 }));

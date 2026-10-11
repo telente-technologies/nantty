@@ -49,3 +49,26 @@ export interface PostVideoAnalyticsContract {
 }
 
 export const postAnalyticsPathContract = "/api/v1/posts/:postId/analytics";
+
+export type CommentSectionFilterContract = "all" | "quotes";
+
+export interface QuoteThreadItemContract {
+  readonly type: "quote";
+  readonly id: string;
+  readonly postId: string;
+  readonly quotePost: QuotedPostSummaryContract;
+  readonly likes: number;
+  readonly commentCount: number;
+  readonly isPostAuthor: boolean;
+  readonly createdAt: string;
+}
+
+export const commentSectionPathsContract = { comments: "/api/v1/posts/:postId/comments", thread: "/api/v1/posts/:postId/thread" } as const;
+export const commentSectionFilterQueryContract = "filter";
+
+export interface RepostStateContract {
+  readonly reposts: number;
+  readonly reposted: boolean;
+}
+
+export const repostPathContract = "/api/v1/posts/:postId/repost";

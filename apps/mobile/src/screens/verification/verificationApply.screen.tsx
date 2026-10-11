@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRef, useState } from "react";
-import { ScrollView, StyleSheet, View } from "react-native";
+import { StyleSheet, View } from "react-native";
 
 import { SelectableRow } from "@/components/cart/selectableRow";
 import { MockIapSheet } from "@/components/profile/mockIapSheet";
@@ -9,6 +9,7 @@ import { VerificationPlanCard } from "@/components/profile/verificationPlanCard"
 import { useVerificationPlansQuery, verificationQueryKeys } from "@/components/profile/verificationQueries.hook";
 import { IDENTITY_DOCUMENT_OPTIONS } from "@/components/seller/applicationIdentityStep";
 import { Button } from "@/components/ui/button";
+import { KeyboardAwareForm } from "@/components/ui/keyboardAwareForm";
 import { Header } from "@/components/ui/header";
 import { TextField } from "@/components/ui/input";
 import { Screen } from "@/components/ui/screen";
@@ -57,7 +58,11 @@ export function VerificationApplyScreen({ navigation, route }: MainScreenProps<"
   return (
     <Screen>
       <Header title="Get verified" />
-      <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
+      <KeyboardAwareForm
+        contentContainerStyle={styles.content}
+        footerStyle={styles.footer}
+        footer={<Button title="Continue" disabled={!planId || !formComplete || uploading} onPress={() => setIapVisible(true)} />}
+      >
         <Text size={16} weight={600} lineHeight={19.2}>Choose a plan</Text>
         {plansForColor.map((plan) => (
           <VerificationPlanCard key={plan.id} plan={plan} selected={plan.id === planId} onPress={() => setChosenPlanId(plan.id)} />
@@ -79,10 +84,7 @@ export function VerificationApplyScreen({ navigation, route }: MainScreenProps<"
         <Text size={12} lineHeight={16.8} color={colors.textSubtle}>
           Documents are encrypted and only seen by our verification team. You subscribe with your App Store or Google Play account; if we can't verify you, the purchase is refunded.
         </Text>
-      </ScrollView>
-      <View style={styles.footer}>
-        <Button title="Continue" disabled={!planId || !formComplete || uploading} onPress={() => setIapVisible(true)} />
-      </View>
+      </KeyboardAwareForm>
       <MockIapSheet visible={iapVisible} plan={plansForColor.find((plan) => plan.id === planId) ?? null} purchasing={applyAndPay.isPending} errorMessage={applyAndPay.isError ? applyAndPay.error.message : null} onConfirm={() => applyAndPay.mutate()} onClose={() => setIapVisible(false)} />
     </Screen>
   );
@@ -91,5 +93,5 @@ export function VerificationApplyScreen({ navigation, route }: MainScreenProps<"
 const styles = StyleSheet.create({
   content: { paddingHorizontal: 16, paddingTop: 8, paddingBottom: 24, gap: 12 },
   section: { gap: 10, marginTop: 8 },
-  footer: { paddingHorizontal: 16, paddingTop: 8, paddingBottom: 24, gap: 8 },
+  footer: { paddingHorizontal: 16, paddingTop: 8, paddingBottom: 12, gap: 8 },
 });

@@ -1,12 +1,13 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRef, useState } from "react";
-import { ScrollView, StyleSheet, View } from "react-native";
+import { StyleSheet, View } from "react-native";
 
 import { inAppBrowserColorsFromTheme, openTrustedWebPage } from "@/components/links/openLink.util";
 import { SelectableRow } from "@/components/cart/selectableRow";
 import { creatorQueryKeys } from "@/components/creator/creatorQueries.hook";
 import { PhotoEvidencePicker } from "@/components/escrow/photoEvidencePicker";
 import { Button } from "@/components/ui/button";
+import { KeyboardAwareForm } from "@/components/ui/keyboardAwareForm";
 import { Chip } from "@/components/ui/chip";
 import { Header } from "@/components/ui/header";
 import { TextField } from "@/components/ui/input";
@@ -74,7 +75,16 @@ export function CreatorApplicationScreen({ navigation }: MainScreenProps<"Creato
   return (
     <Screen>
       <Header title="Apply as a creator" />
-      <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
+      <KeyboardAwareForm
+        contentContainerStyle={styles.content}
+        footerStyle={styles.footer}
+        footer={
+          <>
+            {submitApplication.isError ? <Text size={12} lineHeight={16} color={colors.error} align="center">{describeActionFailure(submitApplication.error)}</Text> : null}
+            <Button title="Submit application" disabled={!readyToSubmit} loading={submitApplication.isPending} onPress={() => submitApplication.mutate()} />
+          </>
+        }
+      >
         <View style={styles.section}>
           <Text size={16} weight={600} lineHeight={19.2}>What do you create?</Text>
           <Text size={12} lineHeight={16.8} color={colors.textSubtle}>Pick up to {MAXIMUM_CATEGORIES}.</Text>
@@ -120,11 +130,7 @@ export function CreatorApplicationScreen({ navigation }: MainScreenProps<"Creato
             , including honest disclosure of sponsored and affiliate content.
           </Text>
         </SelectableRow>
-      </ScrollView>
-      <View style={styles.footer}>
-        {submitApplication.isError ? <Text size={12} lineHeight={16} color={colors.error} align="center">{describeActionFailure(submitApplication.error)}</Text> : null}
-        <Button title="Submit application" disabled={!readyToSubmit} loading={submitApplication.isPending} onPress={() => submitApplication.mutate()} />
-      </View>
+      </KeyboardAwareForm>
     </Screen>
   );
 }
@@ -133,5 +139,5 @@ const styles = StyleSheet.create({
   content: { paddingHorizontal: 16, paddingTop: 8, paddingBottom: 24, gap: 24 },
   section: { gap: 10 },
   chips: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
-  footer: { paddingHorizontal: 16, paddingTop: 8, paddingBottom: 24, gap: 8 },
+  footer: { paddingHorizontal: 16, paddingTop: 8, paddingBottom: 12, gap: 8 },
 });

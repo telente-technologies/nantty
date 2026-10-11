@@ -4,6 +4,7 @@ import type { Post, PostAnalytics, PostAnalyticsDaily } from "@/types";
 import { findMockClipsByIds } from "./clips.mock";
 import { getSignedInMockUser } from "./fixtures.mock";
 import { mockPostsState, sponsoredFeedPosts, withCurrentProductPrices } from "./postCatalog.mock";
+import { findSeededMockQuote } from "./postAudience.mock";
 import { createMockRoute, type MockRoute } from "./registry.mock";
 
 const deletedMockPostIds = new Set<string>();
@@ -74,7 +75,7 @@ const buildPostAnalytics = (post: Post): PostAnalytics => {
 
 export const postsMocks: MockRoute[] = [
   createMockRoute("GET", "/api/v1/posts/:postId", ({ params }) => {
-    const post = findPostIncludingSponsored(params.postId!) ?? findMockClipsByIds([params.postId!])[0];
+    const post = findPostIncludingSponsored(params.postId!) ?? findMockClipsByIds([params.postId!])[0] ?? findSeededMockQuote(params.postId!);
     if (!post) throw new ApiError(404, "This post was removed");
     return withCurrentProductPrices(post);
   }),
@@ -84,7 +85,13 @@ export const postsMocks: MockRoute[] = [
   createMockRoute("DELETE", "/api/v1/posts/:postId/like", ({ params }) =>
     updateMockPost(params.postId!, (p) => ({ ...p, liked: false, likes: p.liked ? p.likes - 1 : p.likes })),
   ),
-  createMockRoute("POST", "/api/v1/posts/:postId/repost", ({ params }) => updateMockPost(params.postId!, (p) => ({ ...p, reposts: p.reposts + 1 }))),
+  createMockRoute("POST", "/api/v1/posts/:postId/repost", ({ params }) =>
+    updateMockPost(params.postId!, (p) => (p.reposted === true ? p : { ...p, reposted: true, reposts: p.reposts + 1 })),
+  ),
+  createMockRoute("DELETE", "/api/v1/posts/:postId/repost", ({ params }) => {
+    updateMockPost(params.postId!, (p) => (p.reposted === true ? { ...p, reposted: false, reposts: Math.max(0, p.reposts - 1) } : p));
+    return undefined;
+  }),
   createMockRoute("POST", "/api/v1/posts/:postId/share", () => undefined),
   createMockRoute("GET", "/api/v1/posts/:postId/notifications-mute", ({ params }) => {
     return { postId: params.postId!, muted: mockPostsState.get(params.postId!)?.viewerNotificationsMuted === true };
@@ -124,6 +131,8 @@ export const postsMocks: MockRoute[] = [
     if (post.author.id !== getSignedInMockUser().id) throw new ApiError(403, "Only the author can delete this post.", "NOT_POST_OWNER");
     mockPostsState.delete(postId);
     deletedMockPostIds.add(postId);
+    const originalId = post.isQuote ? post.resharedFrom?.id : undefined;
+    if (originalId) updateMockPost(originalId, (p) => ({ ...p, reposts: Math.max(0, p.reposts - 1), quotes: Math.max(0, (p.quotes ?? 0) - 1) }));
     for (const [id, candidate] of mockPostsState) if (candidate.resharedFrom?.id === postId) mockPostsState.set(id, { ...candidate, resharedFrom: null, resharedFromUnavailable: true });
     return undefined;
   }),

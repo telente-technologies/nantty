@@ -356,7 +356,7 @@ Grouped by area (the per-app tables have the full list):
 | `POST /api/v1/posts` | matches | 2026-10-10: optional `quotedPostId` (uuid or null). A Zudomart post link in `text` becomes a quote server-side; a trailing link is stripped; `null` keeps the link as text. Errors: 422 `QUOTED_POST_UNAVAILABLE`, 422 `QUOTE_REQUIRES_POST`. |
 | `GET /api/v1/posts/:p` | matches |  |
 | `GET /api/v1/posts/:p/analytics` | matches | 2026-10-10: adds `kind`, `hasLink`, and `video.averageWatchSeconds`, `video.completedViews`, `video.completionRate`. Non-owners get 403 `NOT_POST_OWNER` (owner includes a profile the viewer can post as). |
-| `GET /api/v1/posts/:p/comments` | matches | 2026-10-10: ranked (pinned, author, author-joined, engagement plus recency) with an opaque snapshot cursor (string, max 300); 400 `CURSOR_EXPIRED` after 6 h. `previewReplies` is the conversation chain (max 3). Comments carry `isPostAuthor`, `quotedPost`, `quotedPostUnavailable`. |
+| `GET /api/v1/posts/:p/comments` | matches | 2026-10-10: ranked (pinned, author, author-joined, engagement plus recency) with an opaque snapshot cursor (string, max 300); 400 `CURSOR_EXPIRED` after 6 h. `previewReplies` is the conversation chain (max 3). Comments carry `isPostAuthor`, `quotedPost`, `quotedPostUnavailable`. 2026-10-11: items are typed; comments carry `type: "comment"` and quote posts of this post appear as `type: "quote"` items (`id`, `postId`, `quotePost` summary, `likes`, `commentCount`, `isPostAuthor`, `createdAt`) ranked in the same snapshot (after pinned and author items). `filter=quotes` returns only quote items, newest first, with a uuid cursor. Visibility (blocked, private, followers-only, subscriber-only, deleted, hidden) is applied per page. |
 | `POST /api/v1/posts/:p/comments` | matches | 2026-10-10: optional `quotedPostId` (uuid or null), same rules as posts. |
 | `DELETE /api/v1/posts/:p/like` | matches |  |
 | `POST /api/v1/posts/:p/like` | matches |  |
@@ -364,11 +364,12 @@ Grouped by area (the per-app tables have the full list):
 | `POST /api/v1/posts/:p/media/:p/download` | matches |  |
 | `GET /api/v1/posts/:p/quotes` | matches |  |
 | `PATCH /api/v1/posts/:p/reply-settings` | matches |  |
-| `POST /api/v1/posts/:p/repost` | matches |  |
+| `POST /api/v1/posts/:p/repost` | matches | 2026-10-11: posts now carry viewer `reposted` (true when the viewer has a plain repost of the original). Quoting from the apps opens the full composer and sends `quotedPostId` on `POST /api/v1/posts`. |
+| `DELETE /api/v1/posts/:p/repost` | matches | 2026-10-11: new. Undoes the viewer's plain repost of the post (or of its original); idempotent 204. Quotes are not touched. |
 | `PATCH /api/v1/posts/:p/sensitivity` | matches |  |
 | `POST /api/v1/posts/:p/share` | matches |  |
 | `GET /api/v1/posts/:p/tagged-users` | matches |  |
-| `GET /api/v1/posts/:p/thread` | matches | 2026-10-10: `sort=relevant` (and `top`) uses the ranked snapshot cursor and returns each root with its chain as nested `inlineReplies`. |
+| `GET /api/v1/posts/:p/thread` | matches | 2026-10-10: `sort=relevant` (and `top`) uses the ranked snapshot cursor and returns each root with its chain as nested `inlineReplies`. 2026-10-11: with `sort=relevant` quote items (`type: "quote"`) are ranked in alongside replies; `latest`/`likes` stay replies-only; `filter=quotes` as on `/comments`. |
 | `GET /api/v1/products` | matches |  |
 | `GET /api/v1/products/:p` | matches |  |
 | `DELETE /api/v1/products/:p/like` | matches |  |
@@ -596,7 +597,7 @@ Grouped by area (the per-app tables have the full list):
 | `POST /api/v1/payments/orders/:p/verify` | matches |  |
 | `GET /api/v1/posts/:p` | matches |  |
 | `GET /api/v1/posts/:p/analytics` | matches | 2026-10-10: adds `kind`, `hasLink`, and `video.averageWatchSeconds`, `video.completedViews`, `video.completionRate`. Non-owners get 403 `NOT_POST_OWNER` (owner includes a profile the viewer can post as). |
-| `GET /api/v1/posts/:p/comments` | matches | 2026-10-10: ranked (pinned, author, author-joined, engagement plus recency) with an opaque snapshot cursor (string, max 300); 400 `CURSOR_EXPIRED` after 6 h. `previewReplies` is the conversation chain (max 3). Comments carry `isPostAuthor`, `quotedPost`, `quotedPostUnavailable`. |
+| `GET /api/v1/posts/:p/comments` | matches | 2026-10-10: ranked (pinned, author, author-joined, engagement plus recency) with an opaque snapshot cursor (string, max 300); 400 `CURSOR_EXPIRED` after 6 h. `previewReplies` is the conversation chain (max 3). Comments carry `isPostAuthor`, `quotedPost`, `quotedPostUnavailable`. 2026-10-11: items are typed; comments carry `type: "comment"` and quote posts of this post appear as `type: "quote"` items (`id`, `postId`, `quotePost` summary, `likes`, `commentCount`, `isPostAuthor`, `createdAt`) ranked in the same snapshot (after pinned and author items). `filter=quotes` returns only quote items, newest first, with a uuid cursor. Visibility (blocked, private, followers-only, subscriber-only, deleted, hidden) is applied per page. |
 | `POST /api/v1/posts/:p/comments` | matches | 2026-10-10: optional `quotedPostId` (uuid or null), same rules as posts. |
 | `DELETE /api/v1/posts/:p/like` | matches |  |
 | `POST /api/v1/posts/:p/like` | matches |  |
@@ -604,10 +605,11 @@ Grouped by area (the per-app tables have the full list):
 | `POST /api/v1/posts/:p/media/:p/download` | matches |  |
 | `GET /api/v1/posts/:p/quotes` | matches |  |
 | `PATCH /api/v1/posts/:p/reply-settings` | matches |  |
-| `POST /api/v1/posts/:p/repost` | matches |  |
+| `POST /api/v1/posts/:p/repost` | matches | 2026-10-11: posts now carry viewer `reposted` (true when the viewer has a plain repost of the original). Quoting from the apps opens the full composer and sends `quotedPostId` on `POST /api/v1/posts`. |
+| `DELETE /api/v1/posts/:p/repost` | matches | 2026-10-11: new. Undoes the viewer's plain repost of the post (or of its original); idempotent 204. Quotes are not touched. |
 | `POST /api/v1/posts/:p/share` | matches |  |
 | `GET /api/v1/posts/:p/tagged-users` | matches |  |
-| `GET /api/v1/posts/:p/thread` | matches | 2026-10-10: `sort=relevant` (and `top`) uses the ranked snapshot cursor and returns each root with its chain as nested `inlineReplies`. |
+| `GET /api/v1/posts/:p/thread` | matches | 2026-10-10: `sort=relevant` (and `top`) uses the ranked snapshot cursor and returns each root with its chain as nested `inlineReplies`. 2026-10-11: with `sort=relevant` quote items (`type: "quote"`) are ranked in alongside replies; `latest`/`likes` stay replies-only; `filter=quotes` as on `/comments`. |
 | `GET /api/v1/products` | matches |  |
 | `GET /api/v1/products/:p` | matches |  |
 | `POST /api/v1/products/:p/bookmark` | matches |  |

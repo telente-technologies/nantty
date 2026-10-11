@@ -20,7 +20,7 @@ export interface QuoteThreadItem {
   readonly createdAt: string;
 }
 
-export const isQuoteThreadItem = (item: { readonly type?: string }): item is QuoteThreadItem => item.type === "quote";
+export const isQuoteThreadItem = (item: object): item is QuoteThreadItem => (item as { readonly type?: unknown }).type === "quote";
 
 export interface ThreadConnector {
   readonly depth: number;

@@ -23,7 +23,7 @@ export function CreateModePill({ mode, onChangeMode }: { mode: CreateMode; onCha
             onPress={() => onChangeMode(m)}
             style={[styles.modeItem, selected ? styles.modeItemSelected : null]}
           >
-            <Text size={13} weight={selected ? 700 : 500} lineHeight={16.9} color={selected ? colors.onPrimary : colors.textMuted}>
+            <Text size={13} weight={selected ? 700 : 500} lineHeight={16.9} color={selected ? colors.onPrimary : colors.white}>
               {m.toUpperCase()}
             </Text>
           </Pressable>
@@ -39,7 +39,9 @@ const useStyles = makeThemedStyles((colors) => StyleSheet.create({
     height: 33,
     paddingHorizontal: 4,
     borderRadius: 999,
-    backgroundColor: colors.textSubtle,
+    backgroundColor: colors.black,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: "rgba(255,255,255,0.16)",
     flexDirection: "row",
     alignItems: "center",
     gap: 2,

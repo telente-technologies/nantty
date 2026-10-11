@@ -1,10 +1,11 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRef, useState } from "react";
-import { ScrollView, StyleSheet, View } from "react-native";
+import { StyleSheet, View } from "react-native";
 
 import { BusinessCategoryPicker } from "@/components/profile/businessCategoryPicker";
 import { useUsernameAvailability } from "@/components/settings/usernameAvailability.hook";
 import { Button } from "@/components/ui/button";
+import { KeyboardAwareForm } from "@/components/ui/keyboardAwareForm";
 import { ErrorState } from "@/components/ui/errorState";
 import { Header } from "@/components/ui/header";
 import { TextField } from "@/components/ui/input";
@@ -56,7 +57,16 @@ export function CreateBusinessProfileScreen({ navigation }: MainScreenProps<"Cre
         <ErrorState error={categories.error} message="Couldn't load categories." onRetry={() => categories.refetch()} />
       ) : (
         <>
-          <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
+          <KeyboardAwareForm
+            contentContainerStyle={styles.content}
+            footerStyle={styles.footer}
+            footer={
+              <>
+                {createBusinessProfile.isError ? <Text size={12} color={colors.error} align="center">{describeActionFailure(createBusinessProfile.error)}</Text> : null}
+                <Button title="Create business profile" disabled={!isReady} loading={createBusinessProfile.isPending} onPress={() => createBusinessProfile.mutate()} />
+              </>
+            }
+          >
             <Text size={13} lineHeight={17.5} color={colors.textMuted}>
               For any organisation: brands, NGOs, media, venues and more. You can open a store later.
             </Text>
@@ -65,11 +75,7 @@ export function CreateBusinessProfileScreen({ navigation }: MainScreenProps<"Cre
             {message ? <Text size={12} lineHeight={16.8} color={isAvailable ? colors.success : colors.textMuted}>{message}</Text> : null}
             <TextField label="About (optional)" placeholder="What does your organisation do?" value={description} onChangeText={setDescription} multiline maxLength={300} boxStyle={styles.multiline} />
             <BusinessCategoryPicker categories={categories.data.data} value={selections} onChange={setSelections} />
-          </ScrollView>
-          <View style={styles.footer}>
-            {createBusinessProfile.isError ? <Text size={12} color={colors.error} align="center">{describeActionFailure(createBusinessProfile.error)}</Text> : null}
-            <Button title="Create business profile" disabled={!isReady} loading={createBusinessProfile.isPending} onPress={() => createBusinessProfile.mutate()} />
-          </View>
+          </KeyboardAwareForm>
         </>
       )}
     </Screen>
@@ -79,5 +85,5 @@ export function CreateBusinessProfileScreen({ navigation }: MainScreenProps<"Cre
 const styles = StyleSheet.create({
   content: { padding: 16, gap: 16, paddingBottom: 24 },
   multiline: { height: 100, alignItems: "flex-start", paddingVertical: 12 },
-  footer: { paddingHorizontal: 16, paddingTop: 8, paddingBottom: 24, gap: 8 },
+  footer: { paddingHorizontal: 16, paddingTop: 8, paddingBottom: 12, gap: 8 },
 });

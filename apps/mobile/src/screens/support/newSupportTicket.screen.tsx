@@ -1,10 +1,11 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRef, useState } from "react";
-import { ScrollView, StyleSheet, View } from "react-native";
+import { StyleSheet, View } from "react-native";
 
 import { PhotoEvidencePicker } from "@/components/escrow/photoEvidencePicker";
 import { TICKET_CATEGORY_OPTIONS } from "@/components/settings/supportAppearance.util";
 import { Button } from "@/components/ui/button";
+import { KeyboardAwareForm } from "@/components/ui/keyboardAwareForm";
 import { Chip } from "@/components/ui/chip";
 import { Header } from "@/components/ui/header";
 import { TextField } from "@/components/ui/input";
@@ -42,7 +43,16 @@ export function NewSupportTicketScreen({ navigation, route }: MainScreenProps<"N
   return (
     <Screen>
       <Header title="Contact support" />
-      <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
+      <KeyboardAwareForm
+        contentContainerStyle={styles.content}
+        footerStyle={styles.footer}
+        footer={
+          <>
+            {createTicket.isError ? <Text size={12} color={colors.error} align="center">{describeActionFailure(createTicket.error)}</Text> : null}
+            <Button title="Send" disabled={subject.trim().length < 4 || message.trim().length < 10 || uploading} loading={createTicket.isPending} onPress={() => createTicket.mutate()} />
+          </>
+        }
+      >
         <Text size={14} lineHeight={16.8}>What do you need help with?</Text>
         <View style={styles.chips}>
           {TICKET_CATEGORY_OPTIONS.map((option) => (
@@ -66,11 +76,7 @@ export function NewSupportTicketScreen({ navigation, route }: MainScreenProps<"N
         <Text size={14} lineHeight={16.8}>Screenshots (optional)</Text>
         <PhotoEvidencePicker photoUrls={attachmentUrls} onChangePhotoUrls={setAttachmentUrls} maximumPhotos={3} addLabel="Add screenshot" onUploadingChange={setUploading} />
         <Text size={12} lineHeight={16.8} color={colors.textSubtle}>Never share your password, card PIN or OTP. Zudomart will never ask for them.</Text>
-      </ScrollView>
-      <View style={styles.footer}>
-        {createTicket.isError ? <Text size={12} color={colors.error} align="center">{describeActionFailure(createTicket.error)}</Text> : null}
-        <Button title="Send" disabled={subject.trim().length < 4 || message.trim().length < 10 || uploading} loading={createTicket.isPending} onPress={() => createTicket.mutate()} />
-      </View>
+      </KeyboardAwareForm>
     </Screen>
   );
 }
@@ -79,5 +85,5 @@ const styles = StyleSheet.create({
   content: { paddingHorizontal: 16, paddingTop: 8, paddingBottom: 24, gap: 14 },
   chips: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
   multiline: { height: 140, alignItems: "flex-start", paddingVertical: 12 },
-  footer: { paddingHorizontal: 16, paddingTop: 8, paddingBottom: 24, gap: 8 },
+  footer: { paddingHorizontal: 16, paddingTop: 8, paddingBottom: 12, gap: 8 },
 });

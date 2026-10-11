@@ -11,6 +11,8 @@ import {
 } from "react-native";
 import { useSafeAreaInsets, type Edge } from "react-native-safe-area-context";
 
+import { useTheme } from "@/theme";
+
 import { FOCUSED_INPUT_BOTTOM_GAP, useKeepFocusedInputVisible } from "./keepFocusedInputVisible.hook";
 import { keyboardImplementation } from "./keyboardController";
 import { KeyboardFloatingFooter } from "./keyboardStickyFooter";
@@ -43,7 +45,9 @@ export function KeyboardAwareForm({
   keyboardDismissMode,
   testID,
 }: KeyboardAwareFormProps) {
+  const { colors } = useTheme();
   const [footerHeight, setFooterHeight] = useState(0);
+  const resolvedFooterStyle = [{ backgroundColor: colors.background }, footerStyle];
   const NativeAwareScrollView = keyboardImplementation.KeyboardAwareScrollView;
   const scrollProps: ScrollViewProps = {
     testID,
@@ -55,7 +59,7 @@ export function KeyboardAwareForm({
     keyboardShouldPersistTaps: "handled",
   };
   const footerNode = footer ? (
-    <KeyboardFloatingFooter style={footerStyle} safeAreaHandledByParent={safeAreaHandledByParent} onLayout={(event) => setFooterHeight(event.nativeEvent.layout.height)}>
+    <KeyboardFloatingFooter style={resolvedFooterStyle} safeAreaHandledByParent={safeAreaHandledByParent} onLayout={(event) => setFooterHeight(event.nativeEvent.layout.height)}>
       {footer}
     </KeyboardFloatingFooter>
   ) : null;
@@ -71,7 +75,7 @@ export function KeyboardAwareForm({
     );
   }
   return (
-    <FallbackKeyboardAwareForm scrollProps={scrollProps} bottomOffset={bottomOffset} style={style} footer={footer} footerStyle={footerStyle} safeAreaHandledByParent={safeAreaHandledByParent}>
+    <FallbackKeyboardAwareForm scrollProps={scrollProps} bottomOffset={bottomOffset} style={style} footer={footer} footerStyle={resolvedFooterStyle} safeAreaHandledByParent={safeAreaHandledByParent}>
       {children}
     </FallbackKeyboardAwareForm>
   );

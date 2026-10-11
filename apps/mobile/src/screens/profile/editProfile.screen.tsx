@@ -1,21 +1,19 @@
 import { Image } from "expo-image";
 import { useEffect, useState } from "react";
 import { Pressable, StyleSheet, TextInput, View } from "react-native";
-import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
 
 import { CameraBolt24Icon, SealCheck20Icon } from "@/components/icons";
 import { pickSquareOrWideImageFromLibrary, type PickedImage } from "@/components/profile/pickImage.util";
 import { useMyProfileQuery, useSaveProfileDetailsMutation } from "@/components/profile/profileQueries.hook";
 import { Button } from "@/components/ui/button";
 import { Header } from "@/components/ui/header";
+import { KeyboardAwareForm } from "@/components/ui/keyboardAwareForm";
 import { Screen } from "@/components/ui/screen";
 import { Text } from "@/components/ui/text";
 import { makeThemedStyles, useTheme } from "@/theme";
 import { fontFamily } from "@/constants/typography.constant";
 import type { MainScreenProps } from "@/navigation/navigation.types";
 import { uploadProfileImageAndReturnMediaId } from "@/services/chat/profileImageUpload.service";
-
-const KEYBOARD_BOTTOM_OFFSET = 24;
 
 export function EditProfileScreen({ navigation }: MainScreenProps<"EditProfile">) {
   const { colors } = useTheme();
@@ -56,64 +54,62 @@ export function EditProfileScreen({ navigation }: MainScreenProps<"EditProfile">
   return (
     <Screen background={colors.surface}>
       <Header title="Profile" paddingHorizontal={12} />
-      <View style={styles.flex}>
-        <KeyboardAwareScrollView bottomOffset={KEYBOARD_BOTTOM_OFFSET} contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
-          <Pressable accessibilityRole="button" accessibilityLabel="Change banner image" onPress={async () => setBanner((await pickSquareOrWideImageFromLibrary([3, 1])) ?? banner)} style={styles.banner}>
-            {bannerUri ? <Image source={{ uri: bannerUri }} style={StyleSheet.absoluteFill} contentFit="cover" /> : null}
+      <KeyboardAwareForm
+        contentContainerStyle={styles.content}
+        footerStyle={styles.footer}
+        footer={<Button title="Save" disabled={!name.trim()} loading={uploading} onPress={uploadPickedImagesAndSaveProfile} />}
+      >
+        <Pressable accessibilityRole="button" accessibilityLabel="Change banner image" onPress={async () => setBanner((await pickSquareOrWideImageFromLibrary([3, 1])) ?? banner)} style={styles.banner}>
+          {bannerUri ? <Image source={{ uri: bannerUri }} style={StyleSheet.absoluteFill} contentFit="cover" /> : null}
+          <CameraBolt24Icon />
+        </Pressable>
+
+        <View style={styles.identity}>
+          <Pressable accessibilityRole="button" accessibilityLabel="Change profile photo" onPress={async () => setAvatar((await pickSquareOrWideImageFromLibrary([1, 1])) ?? avatar)} style={styles.avatar}>
+            {avatarUri ? <Image source={{ uri: avatarUri }} style={StyleSheet.absoluteFill} contentFit="cover" /> : null}
             <CameraBolt24Icon />
           </Pressable>
-
-          <View style={styles.identity}>
-            <Pressable accessibilityRole="button" accessibilityLabel="Change profile photo" onPress={async () => setAvatar((await pickSquareOrWideImageFromLibrary([1, 1])) ?? avatar)} style={styles.avatar}>
-              {avatarUri ? <Image source={{ uri: avatarUri }} style={StyleSheet.absoluteFill} contentFit="cover" /> : null}
-              <CameraBolt24Icon />
-            </Pressable>
-            <View style={styles.names}>
-              <View style={styles.nameRow}>
-                <Text size={16} weight={500} lineHeight={19.2} numberOfLines={1}>
-                  {name || profile?.name}
-                </Text>
-                {profile?.verified ? <SealCheck20Icon /> : null}
-              </View>
-              <Text size={14} lineHeight={16.8} color={colors.textMuted}>
-                @{profile?.username}
+          <View style={styles.names}>
+            <View style={styles.nameRow}>
+              <Text size={16} weight={500} lineHeight={19.2} numberOfLines={1}>
+                {name || profile?.name}
               </Text>
-              <Text size={14} weight={500} lineHeight={16.8}>
-                {profile?.followers ?? 0} <Text size={14} lineHeight={16.8} color={colors.textMuted}>followers</Text>
-                {"  "}
-                {profile?.following ?? 0} <Text size={14} lineHeight={16.8} color={colors.textMuted}>following</Text>
-              </Text>
+              {profile?.verified ? <SealCheck20Icon /> : null}
             </View>
-          </View>
-
-          <View style={styles.field}>
             <Text size={14} lineHeight={16.8} color={colors.textMuted}>
-              Name
+              @{profile?.username}
             </Text>
-            <TextInput value={name} onChangeText={setName} maxLength={50} accessibilityLabel="Name" autoComplete="name" style={[styles.input, styles.nameInput]} placeholderTextColor={colors.textSubtle} />
+            <Text size={14} weight={500} lineHeight={16.8}>
+              {profile?.followers ?? 0} <Text size={14} lineHeight={16.8} color={colors.textMuted}>followers</Text>
+              {"  "}
+              {profile?.following ?? 0} <Text size={14} lineHeight={16.8} color={colors.textMuted}>following</Text>
+            </Text>
           </View>
-          <View style={styles.field}>
-            <Text size={14} lineHeight={16.8} color={colors.textMuted}>
-              Bio
-            </Text>
-            <TextInput value={bio} onChangeText={setBio} maxLength={160} multiline accessibilityLabel="Bio" style={[styles.input, styles.bioInput]} placeholderTextColor={colors.textSubtle} />
-          </View>
-          {error ? (
-            <Text size={12} lineHeight={14.4} color={colors.error}>
-              {error}
-            </Text>
-          ) : null}
-        </KeyboardAwareScrollView>
-        <View style={styles.footer}>
-          <Button title="Save" disabled={!name.trim()} loading={uploading} onPress={uploadPickedImagesAndSaveProfile} />
         </View>
-      </View>
+
+        <View style={styles.field}>
+          <Text size={14} lineHeight={16.8} color={colors.textMuted}>
+            Name
+          </Text>
+          <TextInput value={name} onChangeText={setName} maxLength={50} accessibilityLabel="Name" autoComplete="name" style={[styles.input, styles.nameInput]} placeholderTextColor={colors.textSubtle} />
+        </View>
+        <View style={styles.field}>
+          <Text size={14} lineHeight={16.8} color={colors.textMuted}>
+            Bio
+          </Text>
+          <TextInput value={bio} onChangeText={setBio} maxLength={160} multiline accessibilityLabel="Bio" style={[styles.input, styles.bioInput]} placeholderTextColor={colors.textSubtle} />
+        </View>
+        {error ? (
+          <Text size={12} lineHeight={14.4} color={colors.error}>
+            {error}
+          </Text>
+        ) : null}
+      </KeyboardAwareForm>
     </Screen>
   );
 }
 
 const useStyles = makeThemedStyles((colors) => StyleSheet.create({
-  flex: { flex: 1 },
   content: { paddingHorizontal: 12, paddingBottom: 24 },
   banner: { height: 123, marginTop: 1, borderRadius: 8, backgroundColor: colors.chip, overflow: "hidden", alignItems: "center", justifyContent: "center" },
   identity: { marginTop: 13, flexDirection: "row", alignItems: "center", gap: 12 },
@@ -134,5 +130,5 @@ const useStyles = makeThemedStyles((colors) => StyleSheet.create({
   },
   nameInput: { fontSize: 12, letterSpacing: -0.24 },
   bioInput: { fontSize: 13, letterSpacing: -0.26, textAlignVertical: "top" },
-  footer: { paddingHorizontal: 12, paddingBottom: 12 },
+  footer: { paddingHorizontal: 12, paddingTop: 8, paddingBottom: 12, backgroundColor: colors.surface },
 }));
