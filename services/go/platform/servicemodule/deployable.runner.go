@@ -26,7 +26,7 @@ func RunDeployableWithModulesUntilTerminationSignal(deployableName string, facto
 	environment := config.NewEnvironmentReader()
 	logger := logging.NewJsonLoggerForService(deployableName, environment.ReadStringOrDefault("LOG_LEVEL", "info"))
 	appEnv := environment.ReadStringOrDefault("APP_ENV", "")
-	if appEnv == "" {
+	if !IsKnownAppEnvironment(appEnv) {
 		environment.ReportProblem("APP_ENV must be set to development, staging, or production")
 	}
 	if appEnv == "production" {
@@ -40,7 +40,7 @@ func RunDeployableWithModulesUntilTerminationSignal(deployableName string, facto
 	if err != nil {
 		return err
 	}
-	closeDenylist, err := registerSessionDenylistFromEnvironment(environment, logger)
+	closeDenylist, pingDenylist, err := registerSessionDenylistFromEnvironment(environment, logger)
 	if err != nil {
 		return err
 	}
@@ -53,14 +53,19 @@ func RunDeployableWithModulesUntilTerminationSignal(deployableName string, facto
 	if err := environment.CombinedConfigurationError(); err != nil {
 		return err
 	}
+	registerSharedDependencyReadiness(dependencies.Health, pingDenylist, deployableName, logger)
 	isProduction := appEnv == "production"
 	mux := http.NewServeMux()
 	dependencies.Health.MountLivenessAndReadinessRoutes(mux)
+	httpMetrics := telemetry.NewHttpMetrics()
+	httpMetrics.AddCounter("auth_session_denylist_check_failed_total", jwtauth.SessionDenylistCheckFailures)
+	httpMetrics.AddCounter("auth_session_denylist_write_failed_total", jwtauth.SessionDenylistWriteFailures)
+	mux.HandleFunc("GET /metrics", httpMetrics.ServeLoopbackOnly)
 	for _, module := range modules {
 		module.MountRoutes(mux)
 		logger.Info("module mounted", slog.String("module", module.Name()))
 	}
-	handler := httpserver.ChainMiddlewares(mux,
+	handler := httpserver.ChainMiddlewares(httpMetrics.Middleware(mux),
 		httpserver.AssignRequestIdToEveryRequest,
 		telemetry.TraceEveryHttpRequest(deployableName),
 		httpserver.RecoverFromPanicsAsInternalErrors(logger),
@@ -109,19 +114,28 @@ func closersForModules(modules []Module) []func(context.Context) error {
 	}}
 }
 
-func registerSessionDenylistFromEnvironment(environment *config.EnvironmentReader, logger *slog.Logger) (func(), error) {
+func registerSessionDenylistFromEnvironment(environment *config.EnvironmentReader, logger *slog.Logger) (func(), health.ReadinessCheck, error) {
 	rawUrl := environment.ReadStringOrDefault("AUTH_SESSION_DENYLIST_URL", environment.ReadStringOrDefault("VALKEY_URL", ""))
 	if rawUrl == "" {
 		if environment.ReadStringOrDefault("APP_ENV", "development") == "production" {
-			return nil, errors.New("AUTH_SESSION_DENYLIST_URL or VALKEY_URL is required in production")
+			return nil, nil, errors.New("AUTH_SESSION_DENYLIST_URL or VALKEY_URL is required in production")
 		}
 		logger.Warn("no session denylist configured: revoked user sessions stay usable until their access token expires")
-		return func() {}, nil
+		return func() {}, nil, nil
 	}
 	denylist, err := jwtauth.NewRedisSessionDenylistFromUrl(rawUrl)
 	if err != nil {
-		return nil, fmt.Errorf("AUTH_SESSION_DENYLIST_URL: %w", err)
+		return nil, nil, fmt.Errorf("AUTH_SESSION_DENYLIST_URL: %w", err)
 	}
 	jwtauth.RegisterSessionDenylist(denylist)
-	return func() { _ = denylist.Close() }, nil
+	return func() { _ = denylist.Close() }, denylist.Ping, nil
+}
+
+func registerSharedDependencyReadiness(registry *health.Registry, pingDenylist health.ReadinessCheck, deployableName string, logger *slog.Logger) {
+	if pingDenylist != nil {
+		registry.AddReadinessCheck("valkey", pingDenylist)
+	}
+	if brokerCheck, ok := events.BrokerReadinessCheckFromEnvironment(deployableName, logger); ok {
+		registry.AddReadinessCheck("rabbitmq", brokerCheck)
+	}
 }

@@ -69,7 +69,7 @@ func requireIdempotencyKeyWithStore(store reservationStore, ttl time.Duration, l
 			}
 			request.Body = io.NopCloser(bytes.NewReader(body))
 			principal, _ := jwtauth.PrincipalFromContext(request.Context())
-			scopedKey := hashParts(principal.UserId, request.Method, request.Pattern, key)
+			scopedKey := hashParts(principal.UserId, request.Method, request.Pattern, request.URL.EscapedPath(), key)
 			requestHash := hashParts(string(body))
 			outcome, stored, owner, err := store.ReserveKeyOrLoadEarlierOutcome(request.Context(), scopedKey, requestHash, ttl)
 			if err != nil {

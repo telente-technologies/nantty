@@ -40,3 +40,23 @@ func TestSupervisorRestartsAWorkerThatFailsOrPanics(t *testing.T) {
 		t.Fatalf("runs = %d, want restarts after an error, a panic and an early return", runs.Load())
 	}
 }
+
+func TestSupervisorStopsAWorkerThatIsDisabledByConfiguration(t *testing.T) {
+	var runs atomic.Int32
+	done := make(chan struct{})
+	go func() {
+		defer close(done)
+		SuperviseWorkerWithOptions(context.Background(), slog.New(slog.NewTextHandler(io.Discard, nil)), "test", SupervisorOptions{InitialDelay: time.Millisecond}, func(context.Context) error {
+			runs.Add(1)
+			return ErrWorkerDisabled
+		})
+	}()
+	select {
+	case <-done:
+	case <-time.After(time.Second):
+		t.Fatal("a disabled worker must not be restarted forever")
+	}
+	if runs.Load() != 1 {
+		t.Fatalf("runs = %d", runs.Load())
+	}
+}

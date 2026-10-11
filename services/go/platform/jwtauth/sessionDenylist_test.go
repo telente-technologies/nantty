@@ -125,3 +125,16 @@ func TestDenylistWriteFailureIsCountedNotPanicking(t *testing.T) {
 		t.Fatal("write failure must be counted")
 	}
 }
+
+func TestDenylistPingFailsWhenValkeyIsUnreachable(t *testing.T) {
+	denylist, err := NewRedisSessionDenylistFromUrl("redis://127.0.0.1:1/0")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer denylist.Close()
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	defer cancel()
+	if err := denylist.Ping(ctx); err == nil {
+		t.Fatal("ping to a closed port must fail so readiness reports the cache as down")
+	}
+}

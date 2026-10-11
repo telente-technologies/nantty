@@ -133,3 +133,25 @@ func TestMissingStoreFailsClosed(t *testing.T) {
 		t.Fatalf("code=%d reached=%v", code, reached)
 	}
 }
+
+func TestTheSameKeyOnAnotherResourceIsNotAnsweredWithTheFirstResourcesResponse(t *testing.T) {
+	store := newFakeStore()
+	var served []string
+	handler := requireIdempotencyKeyWithStore(store, time.Hour, discardLogger())(http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
+		served = append(served, request.URL.Path)
+		_, _ = writer.Write([]byte(request.URL.Path))
+	}))
+	for _, path := range []string{"/orders/a/confirm", "/orders/b/confirm"} {
+		request := httptest.NewRequest(http.MethodPost, path, strings.NewReader(`{}`))
+		request.Pattern = "POST /orders/{orderId}/confirm"
+		request.Header.Set("Idempotency-Key", "key-00000005")
+		recorder := httptest.NewRecorder()
+		handler.ServeHTTP(recorder, request)
+		if recorder.Body.String() != path {
+			t.Fatalf("%s was answered with %q", path, recorder.Body.String())
+		}
+	}
+	if len(served) != 2 {
+		t.Fatalf("each resource must run its own action, ran %v", served)
+	}
+}

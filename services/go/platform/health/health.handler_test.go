@@ -7,6 +7,7 @@ import (
 	"net/http/httptest"
 	"strings"
 	"testing"
+	"time"
 )
 
 func newMuxWithFailingCheck() *http.ServeMux {
@@ -47,4 +48,49 @@ func TestReadinessHidesCheckNamesFromForwardedOrPublicCallers(t *testing.T) {
 	if !strings.Contains(recorder.Body.String(), "database") {
 		t.Fatalf("internal probes should see check names: %s", recorder.Body.String())
 	}
+}
+
+func TestReadinessFailsWhenADependencyIsDownAndPassesWhenAllAreUp(t *testing.T) {
+	registry := NewRegistryForService("svc")
+	registry.AddReadinessCheck("postgres", func(context.Context) error { return nil })
+	registry.AddReadinessCheck("rabbitmq", func(context.Context) error { return errors.New("connection refused") })
+	mux := http.NewServeMux()
+	registry.MountLivenessAndReadinessRoutes(mux)
+	recorder := httptest.NewRecorder()
+	mux.ServeHTTP(recorder, internalReadinessProbe())
+	if recorder.Code != http.StatusServiceUnavailable || !strings.Contains(recorder.Body.String(), `"rabbitmq":"down"`) {
+		t.Fatalf("status = %d body = %s", recorder.Code, recorder.Body.String())
+	}
+	registry.AddReadinessCheck("rabbitmq", func(context.Context) error { return nil })
+	recorder = httptest.NewRecorder()
+	mux.ServeHTTP(recorder, internalReadinessProbe())
+	if recorder.Code != http.StatusOK {
+		t.Fatalf("status = %d body = %s", recorder.Code, recorder.Body.String())
+	}
+	liveness := httptest.NewRecorder()
+	mux.ServeHTTP(liveness, httptest.NewRequest(http.MethodGet, "/healthz", nil))
+	if liveness.Code != http.StatusOK {
+		t.Fatalf("liveness must not depend on readiness checks: %d", liveness.Code)
+	}
+}
+
+func TestReadinessTimesOutAHangingDependency(t *testing.T) {
+	registry := NewRegistryForService("svc")
+	release := make(chan struct{})
+	defer close(release)
+	registry.AddReadinessCheck("valkey", func(context.Context) error { <-release; return nil })
+	mux := http.NewServeMux()
+	registry.MountLivenessAndReadinessRoutes(mux)
+	started := time.Now()
+	recorder := httptest.NewRecorder()
+	mux.ServeHTTP(recorder, internalReadinessProbe())
+	if recorder.Code != http.StatusServiceUnavailable || time.Since(started) > readinessDeadline {
+		t.Fatalf("status = %d after %s", recorder.Code, time.Since(started))
+	}
+}
+
+func internalReadinessProbe() *http.Request {
+	request := httptest.NewRequest(http.MethodGet, "/readyz", nil)
+	request.RemoteAddr = "10.0.0.5:1234"
+	return request
 }

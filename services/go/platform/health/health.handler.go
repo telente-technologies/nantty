@@ -9,6 +9,11 @@ import (
 	"zudomart/platform/httpserver"
 )
 
+const (
+	readinessDeadline     = 3 * time.Second
+	readinessCheckTimeout = 2 * time.Second
+)
+
 type ReadinessCheck func(ctx context.Context) error
 
 type Registry struct {
@@ -37,23 +42,56 @@ func (registry *Registry) respondWithLiveness(writer http.ResponseWriter, _ *htt
 }
 
 func (registry *Registry) respondWithReadiness(writer http.ResponseWriter, request *http.Request) {
-	ctx, cancel := context.WithTimeout(request.Context(), 3*time.Second)
+	ctx, cancel := context.WithTimeout(request.Context(), readinessDeadline)
 	defer cancel()
-	registry.mutex.RLock()
-	defer registry.mutex.RUnlock()
-	results := make(map[string]string, len(registry.checks))
+	results := registry.runChecksConcurrently(ctx)
 	status := http.StatusOK
-	for name, check := range registry.checks {
-		if err := check(ctx); err != nil {
-			results[name] = "down"
+	for _, result := range results {
+		if result != "up" {
 			status = http.StatusServiceUnavailable
-			continue
 		}
-		results[name] = "up"
 	}
 	body := map[string]any{"ready": status == http.StatusOK}
 	if httpserver.IsFromTrustedNetwork(request) {
 		body["checks"] = results
 	}
 	httpserver.WriteJsonResponse(writer, status, body)
+}
+
+func (registry *Registry) runChecksConcurrently(ctx context.Context) map[string]string {
+	registry.mutex.RLock()
+	checks := make(map[string]ReadinessCheck, len(registry.checks))
+	for name, check := range registry.checks {
+		checks[name] = check
+	}
+	registry.mutex.RUnlock()
+	var resultsMutex sync.Mutex
+	results := make(map[string]string, len(checks))
+	var wait sync.WaitGroup
+	for name, check := range checks {
+		wait.Go(func() {
+			result := "up"
+			if runCheckWithTimeout(ctx, check) != nil {
+				result = "down"
+			}
+			resultsMutex.Lock()
+			results[name] = result
+			resultsMutex.Unlock()
+		})
+	}
+	wait.Wait()
+	return results
+}
+
+func runCheckWithTimeout(ctx context.Context, check ReadinessCheck) error {
+	checkContext, cancel := context.WithTimeout(ctx, readinessCheckTimeout)
+	defer cancel()
+	outcome := make(chan error, 1)
+	go func() { outcome <- check(checkContext) }()
+	select {
+	case err := <-outcome:
+		return err
+	case <-checkContext.Done():
+		return checkContext.Err()
+	}
 }

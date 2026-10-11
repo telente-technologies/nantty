@@ -108,3 +108,7 @@ func (denylist *RedisSessionDenylist) RevokeSessions(ctx context.Context, sessio
 }
 
 func (denylist *RedisSessionDenylist) Close() error { return denylist.client.Close() }
+
+func (denylist *RedisSessionDenylist) Ping(ctx context.Context) error {
+	return denylist.client.Ping(ctx).Err()
+}

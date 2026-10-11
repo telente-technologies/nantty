@@ -2,11 +2,14 @@ package servicemodule
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log/slog"
 	"runtime/debug"
 	"time"
 )
+
+var ErrWorkerDisabled = errors.New("background worker disabled by configuration")
 
 type SupervisorOptions struct {
 	InitialDelay time.Duration
@@ -29,6 +32,10 @@ func SuperviseWorkerWithOptions(ctx context.Context, logger *slog.Logger, name s
 		startedAt := time.Now()
 		err := runWorkerRecoveringPanics(ctx, worker)
 		if ctx.Err() != nil {
+			return
+		}
+		if errors.Is(err, ErrWorkerDisabled) {
+			logger.WarnContext(ctx, "background worker disabled", slog.String("worker", name))
 			return
 		}
 		if time.Since(startedAt) > options.MaximumDelay {

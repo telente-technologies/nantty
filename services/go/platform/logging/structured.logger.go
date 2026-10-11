@@ -8,9 +8,12 @@ import (
 )
 
 var sensitiveAttributeKeyFragments = []string{
-	"password", "token", "secret", "authorization", "cookie", "otp", "code", "pin",
-	"cardnumber", "cvv", "accountnumber", "bvn", "privatekey",
+	"password", "passcode", "token", "secret", "authorization", "cookie", "otp", "code", "pin",
+	"cardnumber", "cvv", "accountnumber", "bvn", "privatekey", "apikey", "encryptionkey", "signingkey",
+	"signature", "verifhash", "webhookhash", "email", "phone", "dateofbirth", "expiry",
 }
+
+var sensitiveAttributeKeys = map[string]bool{"nin": true, "dob": true, "number": true, "pan": true, "cvc": true}
 
 func NewJsonLoggerForService(serviceName, level string) *slog.Logger {
 	return NewJsonLoggerWritingTo(os.Stdout, serviceName, level)
@@ -25,13 +28,26 @@ func NewJsonLoggerWritingTo(writer io.Writer, serviceName, level string) *slog.L
 }
 
 func IsSensitiveAttributeKey(key string) bool {
-	lowered := strings.ToLower(strings.ReplaceAll(key, "_", ""))
+	lowered := normalizeAttributeKey(key)
+	if sensitiveAttributeKeys[lowered] {
+		return true
+	}
 	for _, fragment := range sensitiveAttributeKeyFragments {
 		if strings.Contains(lowered, fragment) {
 			return true
 		}
 	}
 	return false
+}
+
+func normalizeAttributeKey(key string) string {
+	var normalized strings.Builder
+	for _, character := range strings.ToLower(key) {
+		if (character >= 'a' && character <= 'z') || (character >= '0' && character <= '9') {
+			normalized.WriteRune(character)
+		}
+	}
+	return normalized.String()
 }
 
 func redactSensitiveAttribute(_ []string, attribute slog.Attr) slog.Attr {

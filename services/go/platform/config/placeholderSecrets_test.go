@@ -14,7 +14,7 @@ func TestRejectPlaceholderSecretsReportsLocalAndExampleValues(t *testing.T) {
 		"AWS_SECRET_ACCESS_KEY=test",
 		"LIVEKIT_API_KEY=devkey",
 		"AUTH_OTP_EVENT_KEY_ID=otp-1",
-		"PAYSTACK_SECRET_KEY=sk_live_realistic_value_0123456789",
+		"FLUTTERWAVE_SECRET_KEY=FLWSECK-realistic-value-0123456789-X",
 		"APP_ENV=production",
 	})
 	err := reader.CombinedConfigurationError()
@@ -26,7 +26,7 @@ func TestRejectPlaceholderSecretsReportsLocalAndExampleValues(t *testing.T) {
 			t.Fatalf("%s should be reported: %v", name, err)
 		}
 	}
-	for _, name := range []string{"AUTH_OTP_EVENT_KEY_ID", "PAYSTACK_SECRET_KEY", "APP_ENV"} {
+	for _, name := range []string{"AUTH_OTP_EVENT_KEY_ID", "FLUTTERWAVE_SECRET_KEY", "APP_ENV"} {
 		if strings.Contains(err.Error(), name+" ") {
 			t.Fatalf("%s should not be reported: %v", name, err)
 		}

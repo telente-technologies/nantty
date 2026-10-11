@@ -64,7 +64,7 @@ func TestStorefrontCountryRejectsGarbage(t *testing.T) {
 }
 
 func TestWebBillingFallsBackToUsdThenRefuses(t *testing.T) {
-	paystack := func(enabled ...string) func(string) bool {
+	provider := func(enabled ...string) func(string) bool {
 		return func(currency string) bool {
 			for _, candidate := range enabled {
 				if candidate == currency {
@@ -74,18 +74,18 @@ func TestWebBillingFallsBackToUsdThenRefuses(t *testing.T) {
 			return false
 		}
 	}
-	if got := DecideWebBilling("NGN", paystack("NGN", "USD")); got.Currency != "NGN" || got.UsdFallback || got.NotAvailable {
+	if got := DecideWebBilling("NGN", provider("NGN", "USD")); got.Currency != "NGN" || got.UsdFallback || got.NotAvailable {
 		t.Fatalf("NGN %+v", got)
 	}
 	for _, currency := range []string{"GBP", "EUR", "GHS", "KES", "ZAR"} {
-		if got := DecideWebBilling(currency, paystack("NGN", "USD")); got.Currency != "USD" || !got.UsdFallback {
+		if got := DecideWebBilling(currency, provider("NGN", "USD")); got.Currency != "USD" || !got.UsdFallback {
 			t.Fatalf("%s should be billed in USD: %+v", currency, got)
 		}
 	}
-	if got := DecideWebBilling("GBP", paystack("NGN")); !got.NotAvailable {
+	if got := DecideWebBilling("GBP", provider("NGN")); !got.NotAvailable {
 		t.Fatalf("without USD enabled GBP can't be charged: %+v", got)
 	}
-	if got := DecideWebBilling("USD", paystack("NGN", "USD")); got.UsdFallback {
+	if got := DecideWebBilling("USD", provider("NGN", "USD")); got.UsdFallback {
 		t.Fatalf("US buyers aren't a fallback: %+v", got)
 	}
 }
