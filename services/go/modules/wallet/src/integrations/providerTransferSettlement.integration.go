@@ -11,11 +11,11 @@ import (
 	"zudomart/modules/wallet/src/interfaces"
 )
 
-type PaystackTransferSettlement struct {
+type ProviderTransferSettlement struct {
 	Payments *paymentservices.PaymentGateway
 }
 
-func (settlement PaystackTransferSettlement) Name() string { return "paystackTransfer" }
+func (settlement ProviderTransferSettlement) Name() string { return "providerTransfer" }
 
 func paymentInstruction(instruction interfaces.SellerPayoutInstruction) paymentmodels.SellerPayoutInstruction {
 	return paymentmodels.SellerPayoutInstruction{
@@ -31,17 +31,17 @@ func retryLaterWhenNotReady(err error) error {
 	return err
 }
 
-func (settlement PaystackTransferSettlement) SettleSellerPayout(ctx context.Context, instruction interfaces.SellerPayoutInstruction) (string, error) {
+func (settlement ProviderTransferSettlement) SettleSellerPayout(ctx context.Context, instruction interfaces.SellerPayoutInstruction) (string, error) {
 	status, err := settlement.Payments.InitiateSellerPayout(ctx, paymentInstruction(instruction))
 	return status.Status, retryLaterWhenNotReady(err)
 }
 
-func (settlement PaystackTransferSettlement) PrepareSellerPayoutInTransaction(ctx context.Context, transaction *sql.Tx, instruction interfaces.SellerPayoutInstruction) error {
+func (settlement ProviderTransferSettlement) PrepareSellerPayoutInTransaction(ctx context.Context, transaction *sql.Tx, instruction interfaces.SellerPayoutInstruction) error {
 	_, err := settlement.Payments.PrepareSellerPayoutInTransaction(ctx, transaction, paymentInstruction(instruction))
 	return retryLaterWhenNotReady(err)
 }
 
-func (settlement PaystackTransferSettlement) SendPreparedSellerPayout(ctx context.Context, reference string) (string, error) {
+func (settlement ProviderTransferSettlement) SendPreparedSellerPayout(ctx context.Context, reference string) (string, error) {
 	status, err := settlement.Payments.SendPreparedSellerPayout(ctx, reference)
 	return status.Status, err
 }
