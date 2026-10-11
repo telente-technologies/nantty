@@ -16,6 +16,7 @@ const securityHeaders = [
 ];
 
 const nextConfig: NextConfig = {
+  experimental: { authInterrupts: true },
   reactStrictMode: true,
   transpilePackages: ["@zudomart/web-kit", "@zudomart/email-templates"],
   poweredByHeader: false,
