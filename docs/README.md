@@ -5,6 +5,7 @@ Every maintained document in the repo, one line each. Third-party files (`deps/`
 ## Start here
 
 - [../README.md](../README.md): what Zudomart is, the apps, the architecture diagrams, getting started.
+- [runningLocally.md](runningLocally.md): switch the apps between mocks and the real backend, start the local stack, demo accounts, testing on a phone.
 - [plans.md](plans.md): the living work plan, with status markers and owner decisions.
 - [CHANGELOG.md](CHANGELOG.md): what changed, by date.
 - [../SECURITY.md](../SECURITY.md): baseline security rules for every module.
@@ -19,7 +20,7 @@ Every maintained document in the repo, one line each. Third-party files (`deps/`
 - [architecture/database.md](architecture/database.md): domain ERDs and schema ownership.
 - [architecture/events.md](architecture/events.md): outbox, event catalog, queues and background jobs.
 - [architecture/marketplace.md](architecture/marketplace.md): catalog, carts by seller, checkout, orders, shipping.
-- [architecture/payments.md](architecture/payments.md): ledger, escrow, wallets, coins, payouts (Paystack-era; see Flutterwave below).
+- [architecture/payments.md](architecture/payments.md): ledger, escrow, wallets, coins, payouts (architecture view; Flutterwave is the only provider).
 - [architecture/realtime.md](architecture/realtime.md): Phoenix realtime and the livestream stack.
 - [architecture/liveSafety.md](architecture/liveSafety.md): live reports, frame sampling, safety holds.
 - [architecture/media.md](architecture/media.md): uploads, processing, storage, delivery.
@@ -71,9 +72,9 @@ Every maintained document in the repo, one line each. Third-party files (`deps/`
 
 ## Payments, pricing and billing
 
-- [integrations/flutterwaveMigration.md](integrations/flutterwaveMigration.md): target payments design (payout subaccounts, escrow, payouts, KYC levels).
+- [integrations/flutterwaveMigration.md](integrations/flutterwaveMigration.md): payments design and cutover status (Flutterwave is the sole provider since 2026-10-11: payout subaccounts, escrow, payouts, KYC levels).
 - [integrations/flutterwaveApiReference.md](integrations/flutterwaveApiReference.md): Flutterwave v3/v4 API facts we rely on.
-- The spec's appendices hold the [licence analysis and CBN tiers](integrations/flutterwaveMigration.md#appendix-a-licence-analysis-and-cbn-tiers), the [Paystack reference](integrations/flutterwaveMigration.md#appendix-b-paystack-reference-fallback-provider) for the fallback provider, and the [checkout and payout rules](integrations/flutterwaveMigration.md#appendix-c-checkout-and-payout-rules).
+- The spec's appendices hold the [licence analysis and CBN tiers](integrations/flutterwaveMigration.md#appendix-a-licence-analysis-and-cbn-tiers), and the [checkout and payout rules](integrations/flutterwaveMigration.md#appendix-b-checkout-and-payout-rules).
 - [integrations/appStoreProducts.md](integrations/appStoreProducts.md): App Store and Google Play creator-subscription products.
 - [integrations/smileId.md](integrations/smileId.md): Smile ID identity verification for checkmarks and payouts.
 - [pricing.md](pricing.md): regional prices for every plan, coin pack, boost and ad floor.
