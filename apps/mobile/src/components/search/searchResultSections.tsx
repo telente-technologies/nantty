@@ -11,6 +11,9 @@ import type { SearchItem, SearchOrderItem, SearchPostItem } from "@/types/search
 import { orderStatusLabel } from "@/components/seller/orderStatusPill";
 import { formatMoneyForDisplay } from "@/utils/formatMoney.util";
 
+import { usePostSurface } from "@/components/feed/interactions/postSurface.context";
+import { usePostImpressionTracking } from "@/components/feed/interactions/usePostImpressionTracking.hook";
+
 import { PersonRow } from "./personRow";
 import { spacing } from "@/constants/spacing.constant";
 import { typeScale } from "@/constants/typography.constant";
@@ -39,10 +42,11 @@ function Section({ title, children }: { readonly title: string; readonly childre
   );
 }
 
-function PostRow({ item, onPress }: { readonly item: SearchPostItem; readonly onPress: () => void }) {
+function PostRow({ item, onPress, position }: { readonly item: SearchPostItem; readonly onPress: () => void; readonly position: number }) {
   const { colors } = useTheme();
+  const impressionRef = usePostImpressionTracking({ postId: item.id, authorId: item.authorId }, usePostSurface(), position);
   return (
-    <Pressable accessibilityRole="button" accessibilityLabel={item.caption || (item.type === "clip" ? "Clip" : "Post")} onPress={onPress} style={styles.postRow}>
+    <Pressable ref={impressionRef} collapsable={false} accessibilityRole="button" accessibilityLabel={item.caption || (item.type === "clip" ? "Clip" : "Post")} onPress={onPress} style={styles.postRow}>
       <Image source={item.thumbnailUrl ? { uri: item.thumbnailUrl } : null} style={[styles.thumb, { backgroundColor: colors.placeholder }]} contentFit="cover" />
       <View style={styles.postText}>
         <Text size={typeScale.md} numberOfLines={2}>{item.caption || (item.type === "clip" ? "Clip" : "Post")}</Text>
@@ -106,8 +110,8 @@ export function SearchResultSections({ items, handlers }: { readonly items: read
       {orders.length > 0 && handlers.onOpenOrder ? (
         <Section title="Orders">{orders.map((order) => <OrderRow key={order.id} item={order} onPress={() => handlers.onOpenOrder?.(order.id)} />)}</Section>
       ) : null}
-      {posts.length > 0 ? <Section title="Posts">{posts.map((post) => <PostRow key={post.id} item={post} onPress={() => handlers.onOpenPost(post)} />)}</Section> : null}
-      {clips.length > 0 ? <Section title="Clips">{clips.map((clip) => <PostRow key={clip.id} item={clip} onPress={() => handlers.onOpenPost(clip)} />)}</Section> : null}
+      {posts.length > 0 ? <Section title="Posts">{posts.map((post, index) => <PostRow key={post.id} item={post} position={index} onPress={() => handlers.onOpenPost(post)} />)}</Section> : null}
+      {clips.length > 0 ? <Section title="Clips">{clips.map((clip, index) => <PostRow key={clip.id} item={clip} position={index} onPress={() => handlers.onOpenPost(clip)} />)}</Section> : null}
       {hashtags.length > 0 ? (
         <Section title="Hashtags">
           {hashtags.map((hashtag) => (

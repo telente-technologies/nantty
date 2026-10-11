@@ -3,6 +3,7 @@ import { Modal, Platform, StyleSheet, View, type ModalProps } from "react-native
 
 import { useTheme } from "@/theme";
 
+import { dismissKeyboardOnEmptyTap } from "./dismissKeyboardOnEmptyTap.util";
 import { useDeviceFrameOverlayRootElement } from "./deviceFrameOverlayRoot";
 import { renderIntoDeviceFrameOverlay } from "./renderIntoDeviceFrameOverlay";
 
@@ -29,7 +30,9 @@ export function FrameAwareModal({ visible, onRequestClose, children, transparent
   if (Platform.OS !== "web" || !overlayRootElement) {
     return (
       <Modal visible={visible} transparent={transparent} onRequestClose={onRequestClose} {...modalProps}>
-        {children}
+        <View style={styles.fill} onStartShouldSetResponder={dismissKeyboardOnEmptyTap}>
+          {children}
+        </View>
       </Modal>
     );
   }
@@ -45,4 +48,5 @@ export function FrameAwareModal({ visible, onRequestClose, children, transparent
 
 const styles = StyleSheet.create({
   overlay: { ...StyleSheet.absoluteFill },
+  fill: { flex: 1 },
 });

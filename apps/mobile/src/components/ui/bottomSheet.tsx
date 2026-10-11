@@ -7,6 +7,7 @@ import { Cancel20Icon } from "@/components/icons";
 import { useReducedMotionPreference } from "@/hooks/useReducedMotionPreference.hook";
 import { makeThemedStyles, useTheme } from "@/theme";
 
+import { useAccessibilityFocusOnOpen } from "./accessibilityFocus.hook";
 import { FrameAwareModal } from "./frameAwareModal";
 import { KeyboardSpacer } from "./keyboardSpacer";
 import { ModalActionStack, type ModalAction } from "./modalActions";
@@ -60,6 +61,7 @@ export function BottomSheet({
     if (dismissible) onClose();
   };
   const { panHandlers, dragStyle } = useSheetDragDismiss(visible, dismissible, onClose);
+  const titleRef = useAccessibilityFocusOnOpen(visible && !!title);
   return (
     <FrameAwareModal visible={visible} transparent animationType={reduceMotion ? "none" : "fade"} onRequestClose={closeIfDismissible} statusBarTranslucent>
       <View style={[styles.flex, { paddingTop: insets.top + SHEET_TOP_GAP }]}>
@@ -79,9 +81,11 @@ export function BottomSheet({
               {title ? (
                 <View style={[styles.titleRow, showHandle ? styles.titleRowAfterHandle : null]}>
                   <View style={styles.titleText}>
-                    <Text size={titleSize} weight={600} lineHeight={Math.round(titleSize * 1.3)} accessibilityRole="header" maxFontSizeMultiplier={1.6}>
-                      {title}
-                    </Text>
+                    <View ref={titleRef} accessible accessibilityRole="header" accessibilityLabel={title}>
+                      <Text size={titleSize} weight={600} lineHeight={Math.round(titleSize * 1.3)} maxFontSizeMultiplier={1.6}>
+                        {title}
+                      </Text>
+                    </View>
                     {subtitle ? (
                       <Text size={13} lineHeight={18} color={colors.textMuted} maxFontSizeMultiplier={1.6}>
                         {subtitle}
@@ -89,7 +93,7 @@ export function BottomSheet({
                     ) : null}
                   </View>
                   {dismissible ? (
-                    <Pressable accessibilityRole="button" accessibilityLabel="Close" hitSlop={12} onPress={onClose} style={styles.closeButton}>
+                    <Pressable accessibilityRole="button" accessibilityLabel="Close" hitSlop={6} onPress={onClose} style={styles.closeButton}>
                       <Cancel20Icon size={18} color={colors.textMuted} />
                     </Pressable>
                   ) : null}
@@ -142,7 +146,7 @@ const useStyles = makeThemedStyles((colors, scheme) => {
     titleRow: { paddingHorizontal: 16, paddingTop: 16, paddingBottom: 12, flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 12 },
     titleRowAfterHandle: { paddingTop: 4 },
     titleText: { flex: 1, gap: 2 },
-    closeButton: { width: 32, height: 32, borderRadius: 16, alignItems: "center", justifyContent: "center", backgroundColor: palette.inset },
+    closeButton: { width: 36, height: 36, borderRadius: 18, alignItems: "center", justifyContent: "center", backgroundColor: palette.inset },
     scroll: { flexShrink: 1 },
     scrollContent: { paddingHorizontal: 16, paddingBottom: 16 },
     footer: { paddingHorizontal: modalSpacing.edge - 4, paddingTop: 12, gap: modalSpacing.actionGap, borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: colors.divider, backgroundColor: palette.surface },

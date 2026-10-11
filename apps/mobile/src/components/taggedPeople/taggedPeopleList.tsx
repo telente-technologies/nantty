@@ -1,5 +1,6 @@
-import { ActivityIndicator, Pressable, StyleSheet, View } from "react-native";
+import { Pressable, StyleSheet, View } from "react-native";
 
+import { BrandLoader } from "@/components/ui/brandLoader";
 import { Text } from "@/components/ui/text";
 import { useOpenUserProfile } from "@/hooks/useOpenUserProfile.hook";
 import { useTheme } from "@/theme";
@@ -27,7 +28,7 @@ export function TaggedPeopleList({ post, visible, onClose }: TaggedPeopleListPro
       {people.map((person) => (
         <TaggedPersonRow key={person.id} person={person} onPress={() => openProfile(person.id)} closeContainer={onClose} />
       ))}
-      {isLoadingMore ? <ActivityIndicator color={colors.primary} style={styles.more} accessibilityLabel="Loading tagged people" /> : null}
+      {isLoadingMore ? <BrandLoader size="sm" style={styles.more} accessibilityLabel="Loading tagged people" /> : null}
       {!isLoadingMore && hasMore ? (
         <Pressable accessibilityRole="button" onPress={loadMore} style={styles.more} hitSlop={8}>
           <Text size={14} weight={600} color={colors.primary} align="center">

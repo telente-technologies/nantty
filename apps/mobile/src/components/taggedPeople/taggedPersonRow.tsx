@@ -2,13 +2,14 @@ import { useState } from "react";
 import { Pressable, StyleSheet, View } from "react-native";
 
 import { FollowPill } from "@/components/clips/followPill";
+import { isActiveFollowState, useFollowUserToggle } from "@/components/profile/confirmedFollowToggle.hook";
 import { VerificationBadge } from "@/components/profile/verificationBadge";
 import { Avatar } from "@/components/ui/avatar";
 import { Text } from "@/components/ui/text";
-import { followsService } from "@/services/social/follows.service";
 import { useAuthStore } from "@/store/auth.store";
 import { useTheme } from "@/theme";
 import type { TaggedUser, Verification, VerificationColor } from "@/types";
+import type { FollowState } from "@/types/socialGraph.type";
 import { requireAuthAfterClosingModal } from "@/utils/requireAuth.util";
 
 const PROFILE_TYPE_BY_CHECKMARK: Record<VerificationColor, Verification["type"]> = { blue: "personal", gold: "business", black: "government" };
@@ -25,22 +26,10 @@ export interface TaggedPersonRowProps {
 export function TaggedPersonRow({ person, onPress, closeContainer }: TaggedPersonRowProps) {
   const { colors } = useTheme();
   const signedInUserId = useAuthStore((state) => state.user?.id ?? null);
-  const [isFollowing, setIsFollowing] = useState(person.isFollowing ?? false);
+  const [followState, setFollowState] = useState<FollowState>(person.isFollowing ? "accepted" : "none");
+  const { toggleUser } = useFollowUserToggle();
   const toggleFollow = () =>
-    requireAuthAfterClosingModal(
-      closeContainer,
-      async () => {
-        const next = !isFollowing;
-        setIsFollowing(next);
-        try {
-          if (next) await followsService.followUser(person.id);
-          else await followsService.unfollowUser(person.id);
-        } catch {
-          setIsFollowing(!next);
-        }
-      },
-      "follow people",
-    );
+    requireAuthAfterClosingModal(closeContainer, () => toggleUser({ id: person.id, username: person.username, followState }, setFollowState), "follow people");
   return (
     <View style={styles.row}>
       <Pressable
@@ -63,7 +52,7 @@ export function TaggedPersonRow({ person, onPress, closeContainer }: TaggedPerso
           </Text>
         </View>
       </Pressable>
-      {person.id !== signedInUserId ? <FollowPill isFollowing={isFollowing} onPress={toggleFollow} large /> : null}
+      {person.id !== signedInUserId ? <FollowPill isFollowing={isActiveFollowState(followState)} onPress={toggleFollow} large /> : null}
     </View>
   );
 }

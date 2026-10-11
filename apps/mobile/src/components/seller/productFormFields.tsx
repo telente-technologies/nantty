@@ -24,10 +24,11 @@ export interface ProductFormValues {
 export interface ProductFormFieldsProps {
   readonly values: ProductFormValues;
   readonly currency: string;
+  readonly stockEditable?: boolean;
   readonly onChange: (patch: Partial<ProductFormValues>) => void;
 }
 
-export function ProductFormFields({ values, currency, onChange }: ProductFormFieldsProps) {
+export function ProductFormFields({ values, currency, stockEditable = true, onChange }: ProductFormFieldsProps) {
   const { colors } = useTheme();
   const updateVariant = (index: number, patch: Partial<CustomVariantDraft>) => {
     onChange({ variants: values.variants.map((variant, i) => (i === index ? { ...variant, ...patch } : variant)) });
@@ -41,12 +42,12 @@ export function ProductFormFields({ values, currency, onChange }: ProductFormFie
       <TextField label="Description" placeholder="Describe your product" value={values.description} onChangeText={(description) => onChange({ description })} multiline boxStyle={styles.multiline} />
       <View style={styles.row}>
         <TextField label={`Price (${currency})`} placeholder="0.00" keyboardType="decimal-pad" value={values.priceInMajorUnits} onChangeText={(priceInMajorUnits) => onChange({ priceInMajorUnits: priceInMajorUnits.replace(/[^\d.]/g, "") })} style={styles.half} />
-        <TextField label="Stock" placeholder="0" keyboardType="number-pad" value={values.stock} onChangeText={(stock) => onChange({ stock: stock.replace(/\D/g, "") })} style={styles.half} />
+        <TextField label={stockEditable ? "Stock" : "In stock"} placeholder="0" keyboardType="number-pad" value={values.stock} editable={stockEditable} onChangeText={(stock) => onChange({ stock: stock.replace(/\D/g, "") })} style={styles.half} />
       </View>
       <TextField label="Sizes" placeholder="S, M, L" value={values.sizes} onChangeText={(sizes) => onChange({ sizes })} autoCapitalize="characters" />
       <TextField label="Colors" placeholder="Black, White" value={values.colors} onChangeText={(c) => onChange({ colors: c })} />
       <Text size={12} lineHeight={16.8} color={colors.textSubtle}>
-        Separate sizes and colors with commas. Leave them empty if this product has no size or color. Buyers will pick one at checkout.
+        {stockEditable ? "Stock is for each size and color. " : "Change stock from your inventory in the seller dashboard. "}Separate sizes and colors with commas. Leave them empty if this product has no size or color. Buyers will pick one at checkout.
       </Text>
       <View style={styles.variantsHeader}>
         <Text size={14} weight={600} lineHeight={16.8}>

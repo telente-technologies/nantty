@@ -11,7 +11,7 @@ import { typeScale } from "@/constants/typography.constant";
 
 const LOW_STOCK_THRESHOLD = 5;
 
-export function InventoryCard({ product, onPress }: { product: ProductSummary; onPress: () => void }) {
+export function InventoryCard({ product, onPress }: { product: Pick<ProductSummary, "name" | "imageUrl" | "price" | "stock">; onPress: () => void }) {
   const { colors } = useTheme();
   const styles = useStyles();
   const stock = product.stock ?? 0;
