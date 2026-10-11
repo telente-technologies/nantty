@@ -1,6 +1,7 @@
 import { useState } from "react";
-import { useKeyboardHandler } from "react-native-keyboard-controller";
 import { scheduleOnRN } from "react-native-worklets";
+
+import { useKeyboardHandler } from "@/components/ui/keyboardController";
 
 const FALLBACK_KEYBOARD_HEIGHT = 300;
 let lastKnownKeyboardHeight = FALLBACK_KEYBOARD_HEIGHT;

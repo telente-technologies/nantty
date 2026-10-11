@@ -1,6 +1,5 @@
 import { useRef, useState } from "react";
 import { Pressable, ScrollView, StyleSheet, TextInput, View } from "react-native";
-import { useKeyboardHandler } from "react-native-keyboard-controller";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { scheduleOnRN } from "react-native-worklets";
 
@@ -8,6 +7,7 @@ import { Plus24Icon, PaperPlaneTilt24Icon, Smiley24Icon, Microphone24Icon } from
 import { useMentionComposer } from "@/components/mentions/mentionComposer.hook";
 import { MentionCountLabel, MentionSuggestionList } from "@/components/mentions/mentionSuggestionList";
 import { ComposerSlot } from "@/components/ui/composerSlot";
+import { useKeyboardHandler } from "@/components/ui/keyboardController";
 import { KeyboardSpacer } from "@/components/ui/keyboardSpacer";
 import { Text } from "@/components/ui/text";
 import { useLastKeyboardHeight } from "@/hooks/useLastKeyboardHeight.hook";

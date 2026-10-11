@@ -1,8 +1,9 @@
 import type { ReactNode } from "react";
 import type { StyleProp, ViewStyle } from "react-native";
-import { useKeyboardHandler, useReanimatedKeyboardAnimation } from "react-native-keyboard-controller";
 import Animated, { useAnimatedStyle, useReducedMotion, useSharedValue } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+
+import { useKeyboardAnimation, useKeyboardHandler } from "./keyboardController";
 
 export interface KeyboardSpacerProps {
   readonly restingHeight?: number;
@@ -16,7 +17,7 @@ export interface KeyboardSpacerProps {
 export function KeyboardSpacer({ restingHeight, openedGap = 0, offset = 0, reservedHeight = 0, style, children }: KeyboardSpacerProps) {
   const insets = useSafeAreaInsets();
   const reduceMotion = useReducedMotion();
-  const { height, progress } = useReanimatedKeyboardAnimation();
+  const { height, progress } = useKeyboardAnimation();
   const snappedHeight = useSharedValue(0);
   const resting = restingHeight ?? insets.bottom;
 

@@ -11,7 +11,6 @@ import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
 import * as WebBrowser from "expo-web-browser";
 import { useEffect, useState } from "react";
-import { KeyboardProvider } from "react-native-keyboard-controller";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
 import { deleteAllLocallySavedMessageHistory } from "@/cache/messageSync.util";
@@ -26,6 +25,7 @@ import { invalidateQueriesAffectedByReplayedOfflineMutation } from "@/cache/offl
 import { BootSplash } from "@/components/brand/bootSplash";
 import { KeepRealtimeMessagingConnectedWhileSignedIn } from "@/components/chat/appWideRealtimeConnection";
 import { DeviceFrame } from "@/components/ui/deviceFrame";
+import { KeyboardProvider } from "@/components/ui/keyboardController";
 import { ErrorBoundary } from "@/components/ui/errorBoundary";
 import { CelebrationHost } from "@/components/celebrations/celebrationHost";
 import { RootNavigator } from "@/navigation/root.navigator";
