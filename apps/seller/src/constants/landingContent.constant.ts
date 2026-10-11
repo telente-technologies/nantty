@@ -43,8 +43,8 @@ export const landingFeatures: LandingFeature[] = [
 ];
 
 export const landingQuestions = [
-  { question: "Do I need a new account for the dashboard?", answer: "No. Sign in with the same email, username or phone number and password you use in the Zudomart app. Your store, products, orders and wallet are already here." },
-  { question: "Who can use Zudomart Dashboard?", answer: "Every approved Zudomart seller, free. You do not need Gold verification or a paid plan. Pro and Business only unlock extra tools such as bulk editing, advanced analytics, a team and API access." },
+  { question: "Do I need a new account for the dashboard?", answer: "No. Sign in with the same email or username and password you use in the Zudomart app. Your store, products, orders and wallet are already here." },
+  { question: "Who can use Zudomart Dashboard?", answer: "Every Zudomart seller, free. You do not need Gold verification or a paid plan. Pro and Business only unlock extra tools such as bulk editing, advanced analytics, a team and API access." },
   { question: "What is the difference between the app and the dashboard?", answer: "The Zudomart App lets you sell from anywhere — post products, chat and go live. The dashboard is where you run the business behind it: stock, orders, money, marketing, team and reports." },
   { question: "Are these the same orders as in the app?", answer: "Yes. Online orders are the marketplace orders customers place in the Zudomart app. Anything you do here shows up in the app straight away." },
   { question: "How do I add my team?", answer: "From Team, search a person's Zudomart username and pick a role. They accept in the app and sign in here with their own Zudomart account — there are no separate staff logins." },
