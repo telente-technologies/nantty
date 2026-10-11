@@ -1,18 +1,45 @@
 ---
 title: Mentions
-summary: Type @ to tag people in posts, comments and group chats. You choose who can mention you.
-tags: mentions, tag, @
-related: privacy-settings, blocking-people, group-chats
+summary: Type the at sign to mention people in posts, comments, clip captions and group chats, and choose who is allowed to mention you.
+tags: mentions, mention, tag someone, at sign, notify, who can mention me, @all
+related: privacy-settings, blocking-people, group-chats, tagged-people, reply-controls
 ---
+
+A mention links someone's name to their profile and sends them a notification. It's the quickest way to bring someone into a conversation.
 
 ## Mention someone
 
-Type @ and pick a person from the list. They get a notification and their name links to their profile.
+1. While writing, type the at sign (@).
+2. Start typing their name or username and pick them from the list.
+3. Finish your post, comment or message as usual.
 
-- In posts, comments and clip captions you can mention anyone, except people who blocked you or don't allow mentions.
-- In group chats you can mention members, and use **@all** to notify everyone. Group admins can limit @all to admins.
-- Up to 20 mentions per post, comment or message.
+Their name turns into a link and they get a notification.
+
+- You can mention people in posts, comments, clip captions and group chats.
+- You can mention up to 20 people in one post, comment or message.
+- People who blocked you, or whose settings don't allow you to mention them, can't be mentioned. The text stays plain and they aren't notified.
+
+## Mention everyone in a group
+
+In a group chat, type **@all** to notify every member. Group admins can turn on **Only admins can @all**: "When on, only admins can notify every member with @all." See [Group chats](/help/chat/group-chats).
 
 ## Control who can mention you
 
-Settings > Privacy > **Who can mention me**: Everyone, People you follow, or No one. If someone isn't allowed to mention you, their @ becomes plain text and you get no notification.
+Go to **Settings > Privacy > Who can mention me**:
+
+- **Everyone**: "Anyone on Zudomart can mention you in posts, comments and groups you are in."
+- **People I follow**: "Only people you follow can mention you. Other mentions show as plain text and you are not notified."
+- **No one**: "Mentions of you show as plain text and you are never notified."
+
+## Mentions and replies
+
+If a post's reply setting is **Only people you mention**, only the people mentioned in the post can reply. See [Who can reply](/help/posts-and-feed/reply-controls).
+
+## Mentions and tags
+
+A mention is part of the text. A tag is attached to a photo or video post and lists people under it. See [Tagged people](/help/profiles-and-privacy/tagged-people).
+
+## If something goes wrong
+
+- **"You can mention at most 20 people."** Remove some mentions and try again.
+- Someone says they didn't get notified: they may have limited who can mention them, or turned off notifications for that post.

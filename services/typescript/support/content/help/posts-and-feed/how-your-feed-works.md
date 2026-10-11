@@ -2,7 +2,7 @@
 title: How your feed works
 summary: Your feed follows what is trending and what you engage with. Checkmark and Official accounts get a small, capped boost that we disclose, and nobody can pay or ask us to push a post.
 tags: feed, for you, ranking, algorithm, trending, explore, boost, official, checkmark, why am I seeing this
-related: sensitive-content-and-age, privacy-settings, checkmarks-explained, community-guidelines, views-and-analytics
+related: sensitive-content-and-age, privacy-settings, checkmarks-explained, explore-and-trends, post-menu, views-and-analytics
 ---
 
 ## Our promise
@@ -54,7 +54,7 @@ Posts and hashtags with manipulated engagement can't trend. We may send the acco
 
 ## Why am I seeing this?
 
-Open the post menu and tap **Why am I seeing this?** You'll see the main reasons, for example:
+In Explore, under each post in **Posts for you**, tap **Why am I seeing this?** to see the main reasons, for example:
 
 - **You follow this account**
 - **Trending: #topic**
@@ -72,6 +72,7 @@ Trends are hashtags and topics that are taking off right now, by country and by 
 ## Shape your feed
 
 - Follow, block or unfollow accounts.
-- Use **Not interested** on a post's menu.
-- Turn personalisation off in Settings > Privacy & Data. Your feed then uses trends and popularity, not your activity.
-- Switch to the **Following** tab to see only accounts you follow, newest first.
+- Use **Not interested** ("See fewer posts like this") or **Hide this post** in a post's menu. See [The post menu](/help/posts-and-feed/post-menu).
+- Turn **Personalization** off in **Settings > Privacy & Data**. Your feed then uses trends and popularity, not your activity.
+- Tap **For You** at the top of the home feed and switch to **Following** to see only accounts you follow, newest first.
+- Browse trends and topics in [Explore](/help/posts-and-feed/explore-and-trends).
