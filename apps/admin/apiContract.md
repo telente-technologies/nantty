@@ -427,6 +427,7 @@ State machine: `PENDING → OFFICIAL | REJECTED | NEEDS_INFO`, `NEEDS_INFO → O
 | `POST /api/v1/admin/brands/:brandId/official-status/reject` | `brands:review` | no | `{ reason }` → `BrandDetail` | `brand.official_reject` |
 | `POST /api/v1/admin/brands/:brandId/official-status/request-info` | `brands:review` | no | `{ reason }` → `BrandDetail` (status `NEEDS_INFO`) | `brand.official_request_info` |
 | `POST /api/v1/admin/brands/:brandId/official-status/revoke` | `brands:revoke` | **yes** | `{ reason }` → `BrandDetail`. Removes every Official Store badge immediately. | `brand.official_revoke` |
+| `POST /api/v1/admin/brands/:brandId/reassign` | `brands:revoke` | **yes** | `{ toAccountId, reason }` → `{ brandId, ownerAccountId }`. `409 PROFILE_LIMIT_ONE_BRAND` when the receiving account already has a Brand. | `brand.reassigned` |
 
 `reason` is required (5–1000 chars). Audit `before`/`after` = `{ officialStatus, officialBadgeStores[] }`.
 
@@ -996,6 +997,10 @@ Every admin action records: admin name, staff id (`actor.id`), departments/roles
 | POST | `/admin/users/{id}/ban` | `users:ban`, step-up | `{ durationDays|null, reason }` | Permanent ban blocks re-signup by email and device fingerprint (stored hashed); unban clears the blocks. User notified. | `user.banned` |
 | POST | `/admin/users/{id}/delete` | `users:delete`, step-up | `{ confirmUsername, reason }` | Deletes profile, posts, media and messages now; anonymises and retains order/payment/ledger records for 7 years. `409 PENDING_WITHDRAWALS`. Response adds `deletion { removed, anonymizedRecords, retainedUntil }`. | `user.deleted` |
 | POST | `/admin/users/{id}/username/reassign` | `usernames:reassign`, step-up | `{ recipientUserId, reason }` | The owner gets an auto-generated username and a notification; the recipient gets the name and a notification; history kept (`REASSIGNED_AWAY` / `REASSIGNED_TO`). | `username.reassigned_between_accounts` |
+| GET | `/admin/users/{id}/linked-profiles` | `users:read`, `support:tickets` or `users:moderate` | — | `{ accountId, items: [{ kind: "store"|"business"|"brand", profileId, storeId, status: "active"|"held"|"retired", holdReason, name, handle, showsMart }], canCreate { store, business, brand }, choiceRequired }`. Rule: one Store or one Business page, plus one Brand. | — |
+| GET | `/admin/linked-profiles/conflicts` | same as above | — | `{ data: LinkedProfilesSummary[] }` for accounts with profiles on hold (grandfathered rule breakers). | — |
+| POST | `/admin/users/{id}/linked-profiles/convert` | `users:moderate`, step-up | `{ profileId, toKind: "store"|"business", reason }` | Store to Business page needs the store closed first (`409 STORE_STILL_OPEN`). | `linked_profiles.converted` |
+| POST | `/admin/users/{id}/linked-profiles/resolve` | `users:moderate`, step-up | `{ keep: profileId[], reason }` | Keeps at most one Store/Business page and one Brand (`409 PROFILE_LIMIT_STORE_OR_BUSINESS` / `PROFILE_LIMIT_ONE_BRAND`); the rest are retired and can't post or list. | `linked_profiles.resolved` |
 
 All require a reason (5–1000 characters). User statuses add `DELETED`.
 
