@@ -92,7 +92,16 @@ async def test_share_save_and_view_are_translated(
         envelope(
             "evt_save_1",
             "content.saved",
-            {"accountId": "fan_2", "targetType": "video", "targetId": "post_2", "authorId": "author_2"},
+            {
+                "actorId": "fan_2",
+                "targetType": "post",
+                "targetId": "post_2",
+                "postId": "post_2",
+                "postAuthorId": "author_2",
+                "kind": "post",
+                "topics": [],
+                "hashtags": [],
+            },
             reference_now,
         ),
         envelope(

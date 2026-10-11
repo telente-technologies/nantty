@@ -99,11 +99,14 @@ def normalize_social_engagement(event_type: Any, data: dict[str, Any], flat: dic
     elif event_type == "comment.created":
         return normalize_comment_created(data, flat)
     elif event_type == "content.saved":
-        flat["actorId"] = data.get("accountId") or data.get("userId")
+        flat["actorId"] = first_present(data, "actorId", "accountId", "userId")
+        target_type = (
+            "clip" if data.get("targetType") == "post" and data.get("kind") == "clip" else data.get("targetType")
+        )
         flat["payload"] = {
             "targetId": data.get("targetId"),
-            "targetType": SAVED_TARGET_TYPES.get(str(data.get("targetType")), data.get("targetType")),
-            "authorId": data.get("authorId"),
+            "targetType": SAVED_TARGET_TYPES.get(str(target_type), target_type),
+            "authorId": first_present(data, "authorId", "postAuthorId"),
             **item_topics(data),
         }
     elif event_type == "post.viewed":
