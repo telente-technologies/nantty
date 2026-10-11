@@ -29,7 +29,7 @@ export function SecurityCaseActionDialog({ securityCase, action, onClose, onComp
   }
 
   return (
-    <ConfirmActionDialog
+    <ConfirmActionDialog intent="security"
       isOpen
       title={`${securityActionLabels[action]} · security case`}
       description="Decide only after reading the timeline. Automation never bans or deletes accounts."

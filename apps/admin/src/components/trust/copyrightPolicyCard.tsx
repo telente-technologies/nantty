@@ -20,9 +20,9 @@ const fields: readonly { readonly key: EditableField; readonly label: string; re
   { key: "strikeLifetimeDays", label: "Strike lifetime (days)", min: 7, max: 730 },
   { key: "warningLifetimeDays", label: "Warning kept on record (days)", min: 7, max: 730 },
   { key: "strikeWindowDays", label: "Strike counting window (days)", min: 7, max: 730 },
-  { key: "restrictionThreshold", label: "Strikes before monetisation and live are paused", min: 1, max: 20 },
+  { key: "restrictionThreshold", label: "Strikes before suspension (Nigerian law: repeat = 2 at most)", min: 1, max: 2 },
   { key: "suspensionReviewThreshold", label: "Strikes before suspension review", min: 1, max: 20 },
-  { key: "restrictionDays", label: "Restriction length (days)", min: 1, max: 90 },
+  { key: "restrictionDays", label: "Suspension length (days, legal minimum 30)", min: 30, max: 90 },
 ];
 
 export function CopyrightPolicyCard() {
@@ -45,7 +45,7 @@ export function CopyrightPolicyCard() {
   return (
     <Card title="Copyright policy" actions={can("copyright:review") ? <Button size="small" onClick={() => setDraft(Object.fromEntries(fields.map((field) => [field.key, String(data[field.key])])) as Record<EditableField, string>)}>Change policy</Button> : null}>
       <KeyValueList columns={3} items={fields.map((field) => ({ label: field.label, value: String(data[field.key]) }))} />
-      <ConfirmActionDialog
+      <ConfirmActionDialog intent="copyright"
         isOpen={draft !== null}
         title="Change copyright policy"
         consequences={["New deadlines apply to warnings issued after this change.", "Strike thresholds apply the next time a strike is issued or expires."]}

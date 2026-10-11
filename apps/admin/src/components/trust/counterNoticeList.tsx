@@ -48,7 +48,7 @@ export function CounterNoticeList({ claim, onClaimUpdated }: { readonly claim: C
           </li>
         ))}
       </ul>
-      <ConfirmActionDialog
+      <ConfirmActionDialog intent="copyright"
         isOpen={pending !== null}
         title={pending?.decision === "accept" ? "Accept this counter-notice" : "Reject this counter-notice"}
         consequences={pending?.decision === "accept"

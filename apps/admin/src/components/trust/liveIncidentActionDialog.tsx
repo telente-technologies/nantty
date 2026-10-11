@@ -53,7 +53,7 @@ export function LiveIncidentActionDialog({ incident, action, onClose, onComplete
   }
 
   return (
-    <ConfirmActionDialog
+    <ConfirmActionDialog intent="live"
       isOpen
       title={presentation.title}
       consequences={presentation.consequences(incident)}

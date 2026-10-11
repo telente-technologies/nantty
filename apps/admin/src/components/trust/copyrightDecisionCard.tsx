@@ -72,7 +72,7 @@ export function CopyrightDecisionCard({ claim, onClaimUpdated }: { readonly clai
           ) : !claim.decision ? <p className={styles.muted}>No decision needed right now.</p> : null}
         </div>
       </Card>
-      <ConfirmActionDialog
+      <ConfirmActionDialog intent="copyright"
         isOpen={pendingDecision !== null}
         title={pendingDecision ? decisionLabels[pendingDecision] : ""}
         consequences={pendingDecision ? describeDecisionConsequences(claim, pendingDecision) : []}

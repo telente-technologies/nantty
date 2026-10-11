@@ -46,7 +46,7 @@ export function ChatReportActionDialog({ report, action, onClose, onCompleted }:
   }
 
   return (
-    <ConfirmActionDialog
+    <ConfirmActionDialog intent="report"
       isOpen
       title={presentation.title}
       consequences={presentation.consequences(report)}

@@ -38,7 +38,7 @@ export function ChatEvidenceRetentionCard() {
         <span>Kept {data.retentionDays} days after the report is closed. Reports escalated to legal are held {data.legalHoldDays} days.</span>
         {can("chat-reports:legal") ? <Button size="small" onClick={() => { setRetentionDays(String(data.retentionDays)); setIsEditing(true); }}>Change retention</Button> : null}
       </div>
-      <ConfirmActionDialog
+      <ConfirmActionDialog intent="settings"
         isOpen={isEditing}
         title="Change evidence retention"
         consequences={["Applies to evidence submitted from now on and to reports closed after this change.", "Legal holds are not shortened."]}

@@ -30,7 +30,7 @@ export function SuspensionActionDialog({ suspensionCase, decision, onClose, onCo
   }
 
   return (
-    <ConfirmActionDialog
+    <ConfirmActionDialog intent="suspend"
       isOpen
       title={presentation.title}
       consequences={presentation.consequences(suspensionCase.user.username)}
