@@ -1,7 +1,7 @@
 import type { QueryClient } from "@tanstack/react-query";
 
 import { chatCryptoService } from "@/services/chatCrypto/chatCrypto.service";
-import type { Conversation, Message, MessageReactionSummary, RealtimeServerEvent } from "@/types";
+import type { Conversation, Message, RealtimeServerEvent } from "@/types";
 
 import { messageHistoryStore } from "./messageHistory.database";
 import type { LocallyStoredMessage } from "./messageHistory.type";
@@ -16,21 +16,11 @@ export function insertOrReplaceCachedMessage(queryClient: QueryClient, message: 
   });
 }
 
-export function replaceCachedMessageReactions(
-  queryClient: QueryClient,
-  conversationId: string,
-  messageId: string,
-  reactions: readonly MessageReactionSummary[],
-) {
-  let updatedMessage: LocallyStoredMessage | null = null;
-  queryClient.setQueryData<LocallyStoredMessage[]>(["messages", conversationId], (existing) =>
-    existing?.map((cached) => {
-      if (cached.id !== messageId) return cached;
-      updatedMessage = { ...cached, reactions };
-      return updatedMessage;
-    }),
-  );
-  if (updatedMessage && (updatedMessage as LocallyStoredMessage).deliveryStatus === "sent") messageHistoryStore.saveDeliveredMessages([updatedMessage]);
+export function storeDeliveredMessage(queryClient: QueryClient, message: Message) {
+  const existing = queryClient.getQueryData<LocallyStoredMessage[]>(["messages", message.conversationId])?.find((cached) => cached.id === message.id);
+  if (message.decryptionNotice && existing && !existing.decryptionNotice) return;
+  messageHistoryStore.saveDeliveredMessages([message]);
+  insertOrReplaceCachedMessage(queryClient, message);
 }
 
 function applyConversationUpdate(queryClient: QueryClient, conversation: Conversation) {
@@ -43,15 +33,14 @@ export function applyRealtimeEventToLocalCaches(queryClient: QueryClient, event:
   switch (event.type) {
     case "message.created":
     case "message.updated":
-      messageHistoryStore.saveDeliveredMessages([event.message]);
-      insertOrReplaceCachedMessage(queryClient, event.message);
-      if (event.type === "message.created") queryClient.invalidateQueries({ queryKey: ["conversations"] });
+      storeDeliveredMessage(queryClient, event.message);
+      if (event.message.control?.type === "groupUpdate") {
+        queryClient.invalidateQueries({ queryKey: ["conversation", event.message.conversationId] });
+        queryClient.invalidateQueries({ queryKey: ["conversations"] });
+      } else if (event.type === "message.created" && event.message.kind !== "control") queryClient.invalidateQueries({ queryKey: ["conversations"] });
       return;
     case "conversation.updated":
       applyConversationUpdate(queryClient, event.conversation);
-      return;
-    case "reaction":
-      replaceCachedMessageReactions(queryClient, event.conversationId, event.messageId, event.reactions);
       return;
     default:
       return;

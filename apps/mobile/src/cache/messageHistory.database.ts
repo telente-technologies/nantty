@@ -6,7 +6,7 @@ import { openLocalText, sealLocalText } from "@/utils/localDataSealing.util";
 import { buildMessageSyncCursor, type LocalMessageDeliveryStatus, type LocallyStoredMessage, type MessageHistoryStore } from "./messageHistory.type";
 
 const MAXIMUM_SAVED_MESSAGES_PER_CONVERSATION = 500;
-const MESSAGE_HISTORY_SCHEMA_VERSION = 3;
+const MESSAGE_HISTORY_SCHEMA_VERSION = 4;
 
 interface SavedConversationRow {
   readonly id: string;
@@ -31,7 +31,7 @@ interface SavedMessageRow {
 }
 
 type ConversationExtras = Omit<Conversation, "id" | "peer" | "lastMessage" | "lastMessageAt" | "unread" | "isFriend">;
-type MessageExtras = Pick<Message, "sender" | "media" | "reactions" | "expiresAt" | "mediaExpiresAt" | "linkPreview" | "sharedContent" | "location" | "document" | "poll" | "readAt" | "encryption" | "mentions" | "decryptionNotice" | "attachment">;
+type MessageExtras = Pick<Message, "sender" | "media" | "expiresAt" | "mediaExpiresAt" | "linkPreview" | "sharedReference" | "location" | "document" | "pollDefinition" | "control" | "readAt" | "encryption" | "mentions" | "decryptionNotice" | "attachment">;
 
 let openedMessageHistoryDatabase: SQLiteDatabase | null = null;
 
@@ -78,6 +78,7 @@ function migrateMessageHistorySchemaToLatestVersion(database: SQLiteDatabase) {
       database.execSync("ALTER TABLE messages ADD COLUMN expires_at TEXT;");
       sealExistingPlaintextRows(database);
     }
+    if (currentVersion < 4) database.execSync("DELETE FROM messages;");
     database.execSync(`PRAGMA user_version = ${MESSAGE_HISTORY_SCHEMA_VERSION}`);
   });
 }
@@ -121,14 +122,14 @@ const extractConversationExtras = ({ id: _id, peer: _peer, lastMessage: _last, l
 const extractMessageExtras = (message: Message): MessageExtras => ({
   sender: message.sender,
   media: message.media,
-  reactions: message.reactions,
   expiresAt: message.expiresAt,
   mediaExpiresAt: message.mediaExpiresAt,
   linkPreview: message.linkPreview,
-  sharedContent: message.sharedContent,
+  sharedReference: message.sharedReference,
   location: message.location,
   document: message.document,
-  poll: message.poll,
+  pollDefinition: message.pollDefinition,
+  control: message.control,
   readAt: message.readAt,
   encryption: message.encryption,
   mentions: message.mentions,

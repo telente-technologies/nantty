@@ -80,3 +80,58 @@ export function setFollowingAuthorEverywhere(queryClient: QueryClient, authorId:
     post.isFollowingAuthor === isFollowingAuthor ? post : { ...post, isFollowingAuthor },
   );
 }
+
+const isRemovedPost = (postId: string) => (value: unknown) => isRecord(value) && !Array.isArray(value) && value.id === postId;
+
+function withoutPost(value: unknown, postId: string, depth: number): unknown {
+  if (!isRecord(value) || depth > MAXIMUM_WALK_DEPTH) return value;
+  if (Array.isArray(value)) {
+    let changed = false;
+    const next: unknown[] = [];
+    for (const item of value) {
+      if (isRemovedPost(postId)(item)) {
+        changed = true;
+        continue;
+      }
+      const mapped = withoutPost(item, postId, depth + 1);
+      if (mapped !== item) changed = true;
+      next.push(mapped);
+    }
+    return changed ? next : value;
+  }
+  let next: CachedRecord | null = null;
+  if (isRecord(value.resharedFrom) && value.resharedFrom.id === postId) next = { ...value, resharedFrom: null, resharedFromUnavailable: true };
+  const source = next ?? value;
+  for (const key of Object.keys(source)) {
+    if (key === "resharedFrom") continue;
+    const mapped = withoutPost(source[key], postId, depth + 1);
+    if (mapped === source[key]) continue;
+    next = next ?? { ...value };
+    next[key] = mapped;
+  }
+  return next ?? value;
+}
+
+export type CacheSnapshot = readonly (readonly [readonly unknown[], unknown])[];
+
+export function removePostEverywhere(queryClient: QueryClient, postId: string): CacheSnapshot {
+  const snapshot: [readonly unknown[], unknown][] = [];
+  for (const query of queryClient.getQueryCache().findAll()) {
+    const data = query.state.data;
+    if (data === undefined) continue;
+    if (isRemovedPost(postId)(data)) {
+      snapshot.push([query.queryKey, data]);
+      queryClient.removeQueries({ queryKey: query.queryKey, exact: true });
+      continue;
+    }
+    const next = withoutPost(data, postId, 0);
+    if (next === data) continue;
+    snapshot.push([query.queryKey, data]);
+    queryClient.setQueryData(query.queryKey, next);
+  }
+  return snapshot;
+}
+
+export function restoreCacheSnapshot(queryClient: QueryClient, snapshot: CacheSnapshot) {
+  for (const [queryKey, data] of snapshot) queryClient.setQueryData(queryKey, data);
+}
