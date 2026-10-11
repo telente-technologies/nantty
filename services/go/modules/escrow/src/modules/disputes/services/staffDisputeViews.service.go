@@ -50,7 +50,7 @@ func BuildStaffDisputeSummaries(ctx context.Context, settings *container.Contain
 		summary := dtos.StaffDisputeSummaryDto{
 			Id: row.ID.String(), OrderId: row.OrderID, OrderNumber: held.OrderReference, ProductName: held.ProductSummary,
 			Buyer: parties[held.BuyerUserID], Seller: parties[held.SellerUserID], Store: stores[held.StoreID],
-			Reason: string(row.Reason), Status: string(row.Status), Priority: "normal", OpenedAt: row.CreatedAt,
+			Reason: string(row.Reason), Status: string(row.Status), Priority: "normal", OpenedAt: row.CreatedAt, AgeHours: int(now.Sub(row.CreatedAt).Hours()),
 			EscrowAmount: escrowdtos.MoneyDto{AmountMinor: held.AmountMinor, Currency: held.Currency},
 		}
 		summary.SlaDueAt = slaDueAt(row, reviewStarted[row.ID], settings.Settings.StaffReviewWindow)

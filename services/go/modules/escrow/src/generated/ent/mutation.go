@@ -2406,6 +2406,7 @@ type EscrowMutation struct {
 	seller_user_id                      *string
 	product_summary                     *string
 	payment_mode                        *escrow.PaymentMode
+	custody                             *escrow.Custody
 	amount_minor                        *int64
 	addamount_minor                     *int64
 	currency                            *string
@@ -2435,6 +2436,11 @@ type EscrowMutation struct {
 	released_at                         *time.Time
 	refunded_at                         *time.Time
 	release_trigger                     *string
+	wallet_funded_at                    *time.Time
+	wallet_hold_minor                   *int64
+	addwallet_hold_minor                *int64
+	direct_payout_reference             *string
+	direct_paid_out_at                  *time.Time
 	version                             *int64
 	addversion                          *int64
 	updated_at                          *time.Time
@@ -2981,6 +2987,42 @@ func (m *EscrowMutation) OldPaymentMode(ctx context.Context) (v escrow.PaymentMo
 // ResetPaymentMode resets all changes to the "payment_mode" field.
 func (m *EscrowMutation) ResetPaymentMode() {
 	m.payment_mode = nil
+}
+
+// SetCustody sets the "custody" field.
+func (m *EscrowMutation) SetCustody(e escrow.Custody) {
+	m.custody = &e
+}
+
+// Custody returns the value of the "custody" field in the mutation.
+func (m *EscrowMutation) Custody() (r escrow.Custody, exists bool) {
+	v := m.custody
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCustody returns the old "custody" field's value of the Escrow entity.
+// If the Escrow object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *EscrowMutation) OldCustody(ctx context.Context) (v escrow.Custody, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCustody is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCustody requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCustody: %w", err)
+	}
+	return oldValue.Custody, nil
+}
+
+// ResetCustody resets all changes to the "custody" field.
+func (m *EscrowMutation) ResetCustody() {
+	m.custody = nil
 }
 
 // SetAmountMinor sets the "amount_minor" field.
@@ -4004,6 +4046,196 @@ func (m *EscrowMutation) ResetReleaseTrigger() {
 	m.release_trigger = nil
 }
 
+// SetWalletFundedAt sets the "wallet_funded_at" field.
+func (m *EscrowMutation) SetWalletFundedAt(t time.Time) {
+	m.wallet_funded_at = &t
+}
+
+// WalletFundedAt returns the value of the "wallet_funded_at" field in the mutation.
+func (m *EscrowMutation) WalletFundedAt() (r time.Time, exists bool) {
+	v := m.wallet_funded_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldWalletFundedAt returns the old "wallet_funded_at" field's value of the Escrow entity.
+// If the Escrow object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *EscrowMutation) OldWalletFundedAt(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldWalletFundedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldWalletFundedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldWalletFundedAt: %w", err)
+	}
+	return oldValue.WalletFundedAt, nil
+}
+
+// ClearWalletFundedAt clears the value of the "wallet_funded_at" field.
+func (m *EscrowMutation) ClearWalletFundedAt() {
+	m.wallet_funded_at = nil
+	m.clearedFields[escrow.FieldWalletFundedAt] = struct{}{}
+}
+
+// WalletFundedAtCleared returns if the "wallet_funded_at" field was cleared in this mutation.
+func (m *EscrowMutation) WalletFundedAtCleared() bool {
+	_, ok := m.clearedFields[escrow.FieldWalletFundedAt]
+	return ok
+}
+
+// ResetWalletFundedAt resets all changes to the "wallet_funded_at" field.
+func (m *EscrowMutation) ResetWalletFundedAt() {
+	m.wallet_funded_at = nil
+	delete(m.clearedFields, escrow.FieldWalletFundedAt)
+}
+
+// SetWalletHoldMinor sets the "wallet_hold_minor" field.
+func (m *EscrowMutation) SetWalletHoldMinor(i int64) {
+	m.wallet_hold_minor = &i
+	m.addwallet_hold_minor = nil
+}
+
+// WalletHoldMinor returns the value of the "wallet_hold_minor" field in the mutation.
+func (m *EscrowMutation) WalletHoldMinor() (r int64, exists bool) {
+	v := m.wallet_hold_minor
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldWalletHoldMinor returns the old "wallet_hold_minor" field's value of the Escrow entity.
+// If the Escrow object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *EscrowMutation) OldWalletHoldMinor(ctx context.Context) (v int64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldWalletHoldMinor is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldWalletHoldMinor requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldWalletHoldMinor: %w", err)
+	}
+	return oldValue.WalletHoldMinor, nil
+}
+
+// AddWalletHoldMinor adds i to the "wallet_hold_minor" field.
+func (m *EscrowMutation) AddWalletHoldMinor(i int64) {
+	if m.addwallet_hold_minor != nil {
+		*m.addwallet_hold_minor += i
+	} else {
+		m.addwallet_hold_minor = &i
+	}
+}
+
+// AddedWalletHoldMinor returns the value that was added to the "wallet_hold_minor" field in this mutation.
+func (m *EscrowMutation) AddedWalletHoldMinor() (r int64, exists bool) {
+	v := m.addwallet_hold_minor
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetWalletHoldMinor resets all changes to the "wallet_hold_minor" field.
+func (m *EscrowMutation) ResetWalletHoldMinor() {
+	m.wallet_hold_minor = nil
+	m.addwallet_hold_minor = nil
+}
+
+// SetDirectPayoutReference sets the "direct_payout_reference" field.
+func (m *EscrowMutation) SetDirectPayoutReference(s string) {
+	m.direct_payout_reference = &s
+}
+
+// DirectPayoutReference returns the value of the "direct_payout_reference" field in the mutation.
+func (m *EscrowMutation) DirectPayoutReference() (r string, exists bool) {
+	v := m.direct_payout_reference
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDirectPayoutReference returns the old "direct_payout_reference" field's value of the Escrow entity.
+// If the Escrow object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *EscrowMutation) OldDirectPayoutReference(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDirectPayoutReference is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDirectPayoutReference requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDirectPayoutReference: %w", err)
+	}
+	return oldValue.DirectPayoutReference, nil
+}
+
+// ResetDirectPayoutReference resets all changes to the "direct_payout_reference" field.
+func (m *EscrowMutation) ResetDirectPayoutReference() {
+	m.direct_payout_reference = nil
+}
+
+// SetDirectPaidOutAt sets the "direct_paid_out_at" field.
+func (m *EscrowMutation) SetDirectPaidOutAt(t time.Time) {
+	m.direct_paid_out_at = &t
+}
+
+// DirectPaidOutAt returns the value of the "direct_paid_out_at" field in the mutation.
+func (m *EscrowMutation) DirectPaidOutAt() (r time.Time, exists bool) {
+	v := m.direct_paid_out_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDirectPaidOutAt returns the old "direct_paid_out_at" field's value of the Escrow entity.
+// If the Escrow object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *EscrowMutation) OldDirectPaidOutAt(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDirectPaidOutAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDirectPaidOutAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDirectPaidOutAt: %w", err)
+	}
+	return oldValue.DirectPaidOutAt, nil
+}
+
+// ClearDirectPaidOutAt clears the value of the "direct_paid_out_at" field.
+func (m *EscrowMutation) ClearDirectPaidOutAt() {
+	m.direct_paid_out_at = nil
+	m.clearedFields[escrow.FieldDirectPaidOutAt] = struct{}{}
+}
+
+// DirectPaidOutAtCleared returns if the "direct_paid_out_at" field was cleared in this mutation.
+func (m *EscrowMutation) DirectPaidOutAtCleared() bool {
+	_, ok := m.clearedFields[escrow.FieldDirectPaidOutAt]
+	return ok
+}
+
+// ResetDirectPaidOutAt resets all changes to the "direct_paid_out_at" field.
+func (m *EscrowMutation) ResetDirectPaidOutAt() {
+	m.direct_paid_out_at = nil
+	delete(m.clearedFields, escrow.FieldDirectPaidOutAt)
+}
+
 // SetVersion sets the "version" field.
 func (m *EscrowMutation) SetVersion(i int64) {
 	m.version = &i
@@ -4184,7 +4416,7 @@ func (m *EscrowMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *EscrowMutation) Fields() []string {
-	fields := make([]string, 0, 35)
+	fields := make([]string, 0, 40)
 	if m.created_at != nil {
 		fields = append(fields, escrow.FieldCreatedAt)
 	}
@@ -4220,6 +4452,9 @@ func (m *EscrowMutation) Fields() []string {
 	}
 	if m.payment_mode != nil {
 		fields = append(fields, escrow.FieldPaymentMode)
+	}
+	if m.custody != nil {
+		fields = append(fields, escrow.FieldCustody)
 	}
 	if m.amount_minor != nil {
 		fields = append(fields, escrow.FieldAmountMinor)
@@ -4284,6 +4519,18 @@ func (m *EscrowMutation) Fields() []string {
 	if m.release_trigger != nil {
 		fields = append(fields, escrow.FieldReleaseTrigger)
 	}
+	if m.wallet_funded_at != nil {
+		fields = append(fields, escrow.FieldWalletFundedAt)
+	}
+	if m.wallet_hold_minor != nil {
+		fields = append(fields, escrow.FieldWalletHoldMinor)
+	}
+	if m.direct_payout_reference != nil {
+		fields = append(fields, escrow.FieldDirectPayoutReference)
+	}
+	if m.direct_paid_out_at != nil {
+		fields = append(fields, escrow.FieldDirectPaidOutAt)
+	}
 	if m.version != nil {
 		fields = append(fields, escrow.FieldVersion)
 	}
@@ -4322,6 +4569,8 @@ func (m *EscrowMutation) Field(name string) (ent.Value, bool) {
 		return m.ProductSummary()
 	case escrow.FieldPaymentMode:
 		return m.PaymentMode()
+	case escrow.FieldCustody:
+		return m.Custody()
 	case escrow.FieldAmountMinor:
 		return m.AmountMinor()
 	case escrow.FieldCurrency:
@@ -4364,6 +4613,14 @@ func (m *EscrowMutation) Field(name string) (ent.Value, bool) {
 		return m.RefundedAt()
 	case escrow.FieldReleaseTrigger:
 		return m.ReleaseTrigger()
+	case escrow.FieldWalletFundedAt:
+		return m.WalletFundedAt()
+	case escrow.FieldWalletHoldMinor:
+		return m.WalletHoldMinor()
+	case escrow.FieldDirectPayoutReference:
+		return m.DirectPayoutReference()
+	case escrow.FieldDirectPaidOutAt:
+		return m.DirectPaidOutAt()
 	case escrow.FieldVersion:
 		return m.Version()
 	case escrow.FieldUpdatedAt:
@@ -4401,6 +4658,8 @@ func (m *EscrowMutation) OldField(ctx context.Context, name string) (ent.Value, 
 		return m.OldProductSummary(ctx)
 	case escrow.FieldPaymentMode:
 		return m.OldPaymentMode(ctx)
+	case escrow.FieldCustody:
+		return m.OldCustody(ctx)
 	case escrow.FieldAmountMinor:
 		return m.OldAmountMinor(ctx)
 	case escrow.FieldCurrency:
@@ -4443,6 +4702,14 @@ func (m *EscrowMutation) OldField(ctx context.Context, name string) (ent.Value, 
 		return m.OldRefundedAt(ctx)
 	case escrow.FieldReleaseTrigger:
 		return m.OldReleaseTrigger(ctx)
+	case escrow.FieldWalletFundedAt:
+		return m.OldWalletFundedAt(ctx)
+	case escrow.FieldWalletHoldMinor:
+		return m.OldWalletHoldMinor(ctx)
+	case escrow.FieldDirectPayoutReference:
+		return m.OldDirectPayoutReference(ctx)
+	case escrow.FieldDirectPaidOutAt:
+		return m.OldDirectPaidOutAt(ctx)
 	case escrow.FieldVersion:
 		return m.OldVersion(ctx)
 	case escrow.FieldUpdatedAt:
@@ -4539,6 +4806,13 @@ func (m *EscrowMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetPaymentMode(v)
+		return nil
+	case escrow.FieldCustody:
+		v, ok := value.(escrow.Custody)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCustody(v)
 		return nil
 	case escrow.FieldAmountMinor:
 		v, ok := value.(int64)
@@ -4687,6 +4961,34 @@ func (m *EscrowMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetReleaseTrigger(v)
 		return nil
+	case escrow.FieldWalletFundedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetWalletFundedAt(v)
+		return nil
+	case escrow.FieldWalletHoldMinor:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetWalletHoldMinor(v)
+		return nil
+	case escrow.FieldDirectPayoutReference:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDirectPayoutReference(v)
+		return nil
+	case escrow.FieldDirectPaidOutAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDirectPaidOutAt(v)
+		return nil
 	case escrow.FieldVersion:
 		v, ok := value.(int64)
 		if !ok {
@@ -4733,6 +5035,9 @@ func (m *EscrowMutation) AddedFields() []string {
 	if m.addpaused_release_remaining_seconds != nil {
 		fields = append(fields, escrow.FieldPausedReleaseRemainingSeconds)
 	}
+	if m.addwallet_hold_minor != nil {
+		fields = append(fields, escrow.FieldWalletHoldMinor)
+	}
 	if m.addversion != nil {
 		fields = append(fields, escrow.FieldVersion)
 	}
@@ -4760,6 +5065,8 @@ func (m *EscrowMutation) AddedField(name string) (ent.Value, bool) {
 		return m.AddedReleasedToSellerMinor()
 	case escrow.FieldPausedReleaseRemainingSeconds:
 		return m.AddedPausedReleaseRemainingSeconds()
+	case escrow.FieldWalletHoldMinor:
+		return m.AddedWalletHoldMinor()
 	case escrow.FieldVersion:
 		return m.AddedVersion()
 	}
@@ -4827,6 +5134,13 @@ func (m *EscrowMutation) AddField(name string, value ent.Value) error {
 		}
 		m.AddPausedReleaseRemainingSeconds(v)
 		return nil
+	case escrow.FieldWalletHoldMinor:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddWalletHoldMinor(v)
+		return nil
 	case escrow.FieldVersion:
 		v, ok := value.(int64)
 		if !ok {
@@ -4866,6 +5180,12 @@ func (m *EscrowMutation) ClearedFields() []string {
 	if m.FieldCleared(escrow.FieldRefundedAt) {
 		fields = append(fields, escrow.FieldRefundedAt)
 	}
+	if m.FieldCleared(escrow.FieldWalletFundedAt) {
+		fields = append(fields, escrow.FieldWalletFundedAt)
+	}
+	if m.FieldCleared(escrow.FieldDirectPaidOutAt) {
+		fields = append(fields, escrow.FieldDirectPaidOutAt)
+	}
 	return fields
 }
 
@@ -4903,6 +5223,12 @@ func (m *EscrowMutation) ClearField(name string) error {
 		return nil
 	case escrow.FieldRefundedAt:
 		m.ClearRefundedAt()
+		return nil
+	case escrow.FieldWalletFundedAt:
+		m.ClearWalletFundedAt()
+		return nil
+	case escrow.FieldDirectPaidOutAt:
+		m.ClearDirectPaidOutAt()
 		return nil
 	}
 	return fmt.Errorf("unknown Escrow nullable field %s", name)
@@ -4947,6 +5273,9 @@ func (m *EscrowMutation) ResetField(name string) error {
 		return nil
 	case escrow.FieldPaymentMode:
 		m.ResetPaymentMode()
+		return nil
+	case escrow.FieldCustody:
+		m.ResetCustody()
 		return nil
 	case escrow.FieldAmountMinor:
 		m.ResetAmountMinor()
@@ -5010,6 +5339,18 @@ func (m *EscrowMutation) ResetField(name string) error {
 		return nil
 	case escrow.FieldReleaseTrigger:
 		m.ResetReleaseTrigger()
+		return nil
+	case escrow.FieldWalletFundedAt:
+		m.ResetWalletFundedAt()
+		return nil
+	case escrow.FieldWalletHoldMinor:
+		m.ResetWalletHoldMinor()
+		return nil
+	case escrow.FieldDirectPayoutReference:
+		m.ResetDirectPayoutReference()
+		return nil
+	case escrow.FieldDirectPaidOutAt:
+		m.ResetDirectPaidOutAt()
 		return nil
 	case escrow.FieldVersion:
 		m.ResetVersion()

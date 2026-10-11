@@ -22,6 +22,7 @@ type StaffDisputeSummaryDto struct {
 	OpenedAt      time.Time                       `json:"openedAt"`
 	SlaDueAt      *time.Time                      `json:"slaDueAt"`
 	IsSlaBreached bool                            `json:"isSlaBreached"`
+	AgeHours      int                             `json:"ageHours"`
 }
 
 type StaffDisputeEscrowDto struct {

@@ -359,7 +359,7 @@ func init() {
 	// escrow.ProductSummaryValidator is a validator for the "product_summary" field. It is called by the builders before save.
 	escrow.ProductSummaryValidator = escrowDescProductSummary.Validators[0].(func(string) error)
 	// escrowDescCurrency is the schema descriptor for currency field.
-	escrowDescCurrency := escrowFields[12].Descriptor()
+	escrowDescCurrency := escrowFields[13].Descriptor()
 	// escrow.CurrencyValidator is a validator for the "currency" field. It is called by the builders before save.
 	escrow.CurrencyValidator = func() func(string) error {
 		validators := escrowDescCurrency.Validators
@@ -377,47 +377,57 @@ func init() {
 		}
 	}()
 	// escrowDescProcessingFeeMinor is the schema descriptor for processing_fee_minor field.
-	escrowDescProcessingFeeMinor := escrowFields[16].Descriptor()
+	escrowDescProcessingFeeMinor := escrowFields[17].Descriptor()
 	// escrow.DefaultProcessingFeeMinor holds the default value on creation for the processing_fee_minor field.
 	escrow.DefaultProcessingFeeMinor = escrowDescProcessingFeeMinor.Default.(int64)
 	// escrowDescRefundedMinor is the schema descriptor for refunded_minor field.
-	escrowDescRefundedMinor := escrowFields[17].Descriptor()
+	escrowDescRefundedMinor := escrowFields[18].Descriptor()
 	// escrow.DefaultRefundedMinor holds the default value on creation for the refunded_minor field.
 	escrow.DefaultRefundedMinor = escrowDescRefundedMinor.Default.(int64)
 	// escrowDescReleasedToSellerMinor is the schema descriptor for released_to_seller_minor field.
-	escrowDescReleasedToSellerMinor := escrowFields[18].Descriptor()
+	escrowDescReleasedToSellerMinor := escrowFields[19].Descriptor()
 	// escrow.DefaultReleasedToSellerMinor holds the default value on creation for the released_to_seller_minor field.
 	escrow.DefaultReleasedToSellerMinor = escrowDescReleasedToSellerMinor.Default.(int64)
 	// escrowDescCourierName is the schema descriptor for courier_name field.
-	escrowDescCourierName := escrowFields[22].Descriptor()
+	escrowDescCourierName := escrowFields[23].Descriptor()
 	// escrow.DefaultCourierName holds the default value on creation for the courier_name field.
 	escrow.DefaultCourierName = escrowDescCourierName.Default.(string)
 	// escrow.CourierNameValidator is a validator for the "courier_name" field. It is called by the builders before save.
 	escrow.CourierNameValidator = escrowDescCourierName.Validators[0].(func(string) error)
 	// escrowDescTrackingNumber is the schema descriptor for tracking_number field.
-	escrowDescTrackingNumber := escrowFields[23].Descriptor()
+	escrowDescTrackingNumber := escrowFields[24].Descriptor()
 	// escrow.DefaultTrackingNumber holds the default value on creation for the tracking_number field.
 	escrow.DefaultTrackingNumber = escrowDescTrackingNumber.Default.(string)
 	// escrow.TrackingNumberValidator is a validator for the "tracking_number" field. It is called by the builders before save.
 	escrow.TrackingNumberValidator = escrowDescTrackingNumber.Validators[0].(func(string) error)
 	// escrowDescTrackingURL is the schema descriptor for tracking_url field.
-	escrowDescTrackingURL := escrowFields[24].Descriptor()
+	escrowDescTrackingURL := escrowFields[25].Descriptor()
 	// escrow.DefaultTrackingURL holds the default value on creation for the tracking_url field.
 	escrow.DefaultTrackingURL = escrowDescTrackingURL.Default.(string)
 	// escrow.TrackingURLValidator is a validator for the "tracking_url" field. It is called by the builders before save.
 	escrow.TrackingURLValidator = escrowDescTrackingURL.Validators[0].(func(string) error)
 	// escrowDescReleaseTrigger is the schema descriptor for release_trigger field.
-	escrowDescReleaseTrigger := escrowFields[31].Descriptor()
+	escrowDescReleaseTrigger := escrowFields[32].Descriptor()
 	// escrow.DefaultReleaseTrigger holds the default value on creation for the release_trigger field.
 	escrow.DefaultReleaseTrigger = escrowDescReleaseTrigger.Default.(string)
 	// escrow.ReleaseTriggerValidator is a validator for the "release_trigger" field. It is called by the builders before save.
 	escrow.ReleaseTriggerValidator = escrowDescReleaseTrigger.Validators[0].(func(string) error)
+	// escrowDescWalletHoldMinor is the schema descriptor for wallet_hold_minor field.
+	escrowDescWalletHoldMinor := escrowFields[34].Descriptor()
+	// escrow.DefaultWalletHoldMinor holds the default value on creation for the wallet_hold_minor field.
+	escrow.DefaultWalletHoldMinor = escrowDescWalletHoldMinor.Default.(int64)
+	// escrowDescDirectPayoutReference is the schema descriptor for direct_payout_reference field.
+	escrowDescDirectPayoutReference := escrowFields[35].Descriptor()
+	// escrow.DefaultDirectPayoutReference holds the default value on creation for the direct_payout_reference field.
+	escrow.DefaultDirectPayoutReference = escrowDescDirectPayoutReference.Default.(string)
+	// escrow.DirectPayoutReferenceValidator is a validator for the "direct_payout_reference" field. It is called by the builders before save.
+	escrow.DirectPayoutReferenceValidator = escrowDescDirectPayoutReference.Validators[0].(func(string) error)
 	// escrowDescVersion is the schema descriptor for version field.
-	escrowDescVersion := escrowFields[32].Descriptor()
+	escrowDescVersion := escrowFields[37].Descriptor()
 	// escrow.DefaultVersion holds the default value on creation for the version field.
 	escrow.DefaultVersion = escrowDescVersion.Default.(int64)
 	// escrowDescUpdatedAt is the schema descriptor for updated_at field.
-	escrowDescUpdatedAt := escrowFields[33].Descriptor()
+	escrowDescUpdatedAt := escrowFields[38].Descriptor()
 	// escrow.DefaultUpdatedAt holds the default value on creation for the updated_at field.
 	escrow.DefaultUpdatedAt = escrowDescUpdatedAt.Default.(func() time.Time)
 	// escrow.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.

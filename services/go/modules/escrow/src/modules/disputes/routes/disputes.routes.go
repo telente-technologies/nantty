@@ -14,7 +14,7 @@ func MountDisputesRoutes(mux *http.ServeMux, application *escrows.Application) {
 	resources := application.Container.Resources
 	requireUser := middlewares.RequireUserAccessToken(resources.AccessVerifier)
 	requireStaffRead := middlewares.RequireStaffPermission(resources.StaffVerifiers, constants.PermissionResolveDisputes, false)
-	requireStaffDecision := middlewares.RequireStaffPermission(resources.StaffVerifiers, constants.PermissionResolveDisputes, true)
+	requireStaffDecision := middlewares.RequireStaffPermissionWithSingleUseStepUp(resources.StaffVerifiers, constants.PermissionResolveDisputes)
 	mux.Handle("POST /api/v1/orders/{orderId}/disputes", requireUser(http.HandlerFunc(controller.OpenDispute)))
 	mux.Handle("GET /api/v1/disputes", requireUser(http.HandlerFunc(controller.ListDisputes)))
 	mux.Handle("GET /api/v1/disputes/{disputeId}", requireUser(http.HandlerFunc(controller.GetDispute)))

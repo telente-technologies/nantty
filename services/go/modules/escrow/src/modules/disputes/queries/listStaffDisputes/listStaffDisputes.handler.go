@@ -34,10 +34,19 @@ func (handler Handler) Execute(ctx context.Context, query Query) (dtos.StaffDisp
 	if search := strings.TrimSpace(query.Search); search != "" {
 		request.Where(searchPredicate(search))
 	}
+	oldestFirst := onlyOpenStatuses(query.Statuses)
 	if query.AfterId != nil {
-		request.Where(dispute.IDLT(*query.AfterId))
+		if oldestFirst {
+			request.Where(dispute.IDGT(*query.AfterId))
+		} else {
+			request.Where(dispute.IDLT(*query.AfterId))
+		}
 	}
-	rows, err := request.Order(ent.Desc(dispute.FieldID)).Limit(query.Limit + 1).All(ctx)
+	order := ent.Desc(dispute.FieldID)
+	if oldestFirst {
+		order = ent.Asc(dispute.FieldID)
+	}
+	rows, err := request.Order(order).Limit(query.Limit + 1).All(ctx)
 	if err != nil {
 		return dtos.StaffDisputeListDto{}, err
 	}
@@ -68,4 +77,16 @@ func searchPredicate(search string) predicate.Dispute {
 		)
 	}
 	return dispute.Or(dispute.OrderID(search), dispute.HasEscrowWith(escrow.OrderReferenceEqualFold(search)))
+}
+
+func onlyOpenStatuses(statuses []string) bool {
+	if len(statuses) == 0 {
+		return false
+	}
+	for _, status := range statuses {
+		if status != string(dispute.StatusAwaitingSeller) && status != string(dispute.StatusUnderReview) {
+			return false
+		}
+	}
+	return true
 }
