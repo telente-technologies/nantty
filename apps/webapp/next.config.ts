@@ -26,6 +26,7 @@ const backendForFrontendHeaders = [{ key: "Content-Security-Policy", value: "def
 const everyPathExceptEmbeds = "/:path((?!embed(?:/|$)|oembed(?:/|$)).*)";
 
 const nextConfig: NextConfig = {
+  experimental: { authInterrupts: true },
   reactStrictMode: true,
   transpilePackages: ["@zudomart/web-kit", "@zudomart/chat-crypto"],
   poweredByHeader: false,
