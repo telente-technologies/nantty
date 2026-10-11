@@ -1,0 +1,51 @@
+package middlewares
+
+import (
+	"context"
+	"crypto/sha256"
+	"encoding/hex"
+	"net/http"
+	"strings"
+	"time"
+
+	"zudomart/platform/httpserver"
+	"zudomart/platform/staffauth"
+)
+
+const singleUseStepUpRetention = 15 * time.Minute
+
+var (
+	ErrStepUpReused            = httpserver.NewApiError(http.StatusUnauthorized, "STEP_UP_REUSED", "This confirmation was already used. Confirm it's you again for each money action.")
+	ErrStepUpLedgerUnavailable = httpserver.NewApiError(http.StatusServiceUnavailable, "STEP_UP_UNAVAILABLE", "We couldn't confirm this action right now. Try again in a moment.")
+)
+
+type StepUpConsumer interface {
+	ConsumeStepUp(ctx context.Context, tokenHash, staffId, route string, expiresAt time.Time) (bool, error)
+}
+
+func RequireStaffPermissionWithSingleUseStepUp(verifiers StaffTokenVerifiers, permission string) func(http.Handler) http.Handler {
+	return requireStaffWithStepUpPolicy(verifiers, func(staff staffauth.Staff) bool { return permission == "" || staff.Can(permission) }, true, true)
+}
+
+func RequireStaffWithAnyPermissionAndSingleUseStepUp(verifiers StaffTokenVerifiers, permissions []string) func(http.Handler) http.Handler {
+	return requireStaffWithStepUpPolicy(verifiers, func(staff staffauth.Staff) bool { return staff.CanAny(permissions...) }, true, true)
+}
+
+func consumeStepUp(request *http.Request, consumer StepUpConsumer, staffId string) *httpserver.ApiError {
+	if consumer == nil {
+		return ErrStepUpLedgerUnavailable
+	}
+	digest := sha256.Sum256([]byte(strings.TrimSpace(request.Header.Get(staffauth.StepUpHeader))))
+	route := request.Method + " " + request.URL.Path
+	if len(route) > 200 {
+		route = route[:200]
+	}
+	first, err := consumer.ConsumeStepUp(request.Context(), hex.EncodeToString(digest[:]), staffId, route, time.Now().Add(singleUseStepUpRetention))
+	if err != nil {
+		return ErrStepUpLedgerUnavailable
+	}
+	if !first {
+		return ErrStepUpReused
+	}
+	return nil
+}
