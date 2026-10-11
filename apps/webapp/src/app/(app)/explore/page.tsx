@@ -8,9 +8,7 @@ import { ProductGridSkeleton } from "@/components/commerce/productCardSkeleton";
 import { ExploreHome } from "@/components/explore/exploreHome";
 import { useRecentSearches } from "@/components/search/recentSearches.hook";
 import { Button } from "@/components/ui/button";
-import { RetryButton } from "@/components/ui/controls";
 import { EmptyState, ErrorState } from "@/components/ui/feedback";
-import { AppIcon } from "@/components/ui/appIcon";
 import { searchService } from "@/services/search.service";
 import type { SearchResultType } from "@/types/search.type";
 import { buildExploreSearchHref, defaultSearchResultType, globalSearchContext, resolveSearchContext, searchResultTypesForScope } from "@/utils/searchScope.util";
@@ -51,7 +49,7 @@ function ExploreResults() {
   }
 
   if (resultsQuery.isLoading) return <ProductGridSkeleton gridClassName={styles.productGrid} />;
-  if (resultsQuery.isError) return <ErrorState description="Search is unavailable right now." action={<RetryButton onRetry={() => resultsQuery.refetch()} />} />;
+  if (resultsQuery.isError) return <ErrorState description="Search is unavailable right now." error={resultsQuery.error} onRetry={() => void resultsQuery.refetch()} />;
 
   const items = resultsQuery.data?.pages.flatMap((page) => page.data) ?? [];
   const scopeSuffix = context.scope === "global" ? "" : ` in ${context.label}`;
@@ -77,7 +75,7 @@ function ExploreResults() {
 
       {items.length === 0 ? (
         <EmptyState
-          icon={<AppIcon name="searchOff24" size={28} />}
+          kind="search"
           title={`No results for “${query}”${scopeSuffix}`}
           description="Try a different spelling or search everywhere."
           action={context.scope === "global" ? undefined : <Button variant="secondary" onClick={() => router.push(buildExploreSearchHref(query, globalSearchContext))}>Search everywhere</Button>}

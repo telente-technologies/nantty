@@ -3,7 +3,6 @@
 import { use } from "react";
 import Link from "next/link";
 
-import { RetryButton } from "@/components/ui/controls";
 import { ErrorState } from "@/components/ui/feedback";
 import { AnalyticsIcon, ArrowLeftIcon } from "@/components/ui/icons";
 import { postsService } from "@/services/posts.service";
@@ -27,7 +26,7 @@ export default function PostAnalyticsPage({ params }: { readonly params: Promise
   if (analytics.isLoading) return <StatGridSkeleton label="Loading analytics" />;
   if (analytics.isError || !analytics.data) {
     const failure = describeAnalyticsFailure(analytics.error);
-    return <ErrorState error={analytics.error} title={failure.title} description={failure.detail} action={failure.canRetry ? <RetryButton onRetry={() => analytics.refetch()} /> : undefined} />;
+    return <ErrorState error={analytics.error} title={failure.title} description={failure.detail} onRetry={failure.canRetry ? () => void analytics.refetch() : undefined} />;
   }
 
   const data = analytics.data;

@@ -156,12 +156,12 @@ export default function ClipsPage() {
           <Skeleton height="auto" className={styles.stageSkeleton} />
         </div>
       ) : clipsQuery.isError ? (
-        <ErrorState description="We couldn't load clips." action={<RetryButton onRetry={() => clipsQuery.refetch()} />} />
+        <ErrorState description="We couldn't load clips." error={clipsQuery.error} onRetry={() => void clipsQuery.refetch()} />
       ) : clips.length === 0 ? (
         tab === "following" ? (
           <EmptyState title="Nothing new from people you follow" description="Follow more creators to fill this feed." action={<InlineLink href="/explore">Explore creators</InlineLink>} />
         ) : (
-          <EmptyState title="No clips yet" description="Check back soon for fresh clips." action={<RetryButton onRetry={() => clipsQuery.refetch()} />} />
+          <EmptyState kind="clips" description="Check back soon for fresh clips." action={<RetryButton onRetry={() => void clipsQuery.refetch()} />} />
         )
       ) : (
         <div ref={feedRef} className={styles.feed} tabIndex={0} onKeyDown={handleFeedKeys} aria-label="Clips. Use the arrow keys to move between clips.">

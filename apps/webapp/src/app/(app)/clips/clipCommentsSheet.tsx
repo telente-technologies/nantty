@@ -4,7 +4,6 @@ import { useInfiniteQuery } from "@tanstack/react-query";
 import { useModalFocusTrap } from "@zudomart/web-kit";
 import { useRef } from "react";
 
-import { RetryButton } from "@/components/ui/controls";
 import { EmptyState, ErrorState, Skeleton } from "@/components/ui/feedback";
 import { CloseIcon } from "@/components/ui/icons";
 import { CommentComposer } from "@/components/feed/commentComposer";
@@ -64,7 +63,7 @@ export function ClipCommentsSheet({ postId, postAuthorId, totalComments, onClose
           {commentsQuery.isLoading ? (
             [0, 1, 2].map((index) => <Skeleton key={index} height={48} />)
           ) : commentsQuery.isError && !isRestartingFromTop ? (
-            <ErrorState description="We couldn't load comments." action={<RetryButton onRetry={() => commentsQuery.refetch()} />} />
+            <ErrorState description="We couldn't load comments." error={commentsQuery.error} onRetry={() => void commentsQuery.refetch()} />
           ) : comments.length === 0 ? (
             <EmptyState title="No comments yet" description="Start the conversation." />
           ) : (

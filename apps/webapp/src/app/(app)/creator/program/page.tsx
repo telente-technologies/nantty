@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
 
-import { RetryButton } from "@/components/ui/controls";
 import { ErrorState } from "@/components/ui/feedback";
 import { ListRowsSkeleton } from "@/components/ui/pageSkeletons";
 import { creatorProgramService } from "@/services/creatorProgram.service";
@@ -22,7 +21,7 @@ export default function CreatorProgramPage() {
   const application = useQuery({ queryKey: ["creator", "application"], queryFn: () => creatorProgramService.fetchMyCreatorApplication() });
   const rules = useQuery({ queryKey: ["creator", "revenue-rules"], queryFn: () => creatorProgramService.fetchCreatorRevenueRules() });
   if (eligibility.isLoading) return <ListRowsSkeleton label="Loading creator program" rows={5} />;
-  if (eligibility.isError) return <ErrorState description="We couldn't load the creator program." action={<RetryButton onRetry={() => eligibility.refetch()} />} />;
+  if (eligibility.isError) return <ErrorState description="We couldn't load the creator program." error={eligibility.error} onRetry={() => void eligibility.refetch()} />;
   const status = application.data?.status;
   return (
     <div className={styles.page}>

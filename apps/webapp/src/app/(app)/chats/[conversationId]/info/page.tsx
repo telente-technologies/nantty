@@ -73,7 +73,7 @@ export default function ConversationInfoPage({ params }: { readonly params: Prom
     },
   });
 
-  if (conversationQuery.isError) return <ErrorState description="Couldn't load chat info." />;
+  if (conversationQuery.isError) return <ErrorState error={conversationQuery.error} description="Couldn't load chat info." onRetry={() => void conversationQuery.refetch()} />;
   if (!conversation) return <ChatMessagesSkeleton label="Loading chat info" />;
   const error = rename.error ?? changePhoto.error ?? leave.error;
   const nameChanged = (name !== null && name.trim() !== "" && name.trim() !== display.name) || (description !== null && description.trim() !== (display.attributes?.description ?? ""));

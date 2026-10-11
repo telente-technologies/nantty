@@ -4,7 +4,6 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 
-import { RetryButton } from "@/components/ui/controls";
 import { ErrorState } from "@/components/ui/feedback";
 import { ListRowsSkeleton } from "@/components/ui/pageSkeletons";
 import { boostsService } from "@/services/boosts.service";
@@ -17,7 +16,7 @@ export default function BoostStatusPage() {
   const params = useParams<{ boostId: string }>();
   const boost = useQuery({ queryKey: ["boosts", params.boostId], queryFn: () => boostsService.fetchBoostById(params.boostId), refetchInterval: 15000 });
   if (boost.isLoading) return <ListRowsSkeleton label="Loading boost status" rows={4} />;
-  if (boost.isError || !boost.data) return <ErrorState description="We couldn't load this promotion." action={<RetryButton onRetry={() => boost.refetch()} />} />;
+  if (boost.isError || !boost.data) return <ErrorState description="We couldn't load this promotion." error={boost.error} onRetry={() => void boost.refetch()} />;
   const data = boost.data;
   const paidWith = describeBoostPaymentMethod(data.paymentMethod);
   return (

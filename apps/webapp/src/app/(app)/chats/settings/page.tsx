@@ -6,7 +6,6 @@ import Link from "next/link";
 import { ConsentToggleRow } from "@/components/settings/consentToggleRow";
 import settingsStyles from "@/components/settings/settings.module.css";
 import { ErrorState } from "@/components/ui/feedback";
-import { RetryButton } from "@/components/ui/controls";
 import { ChatMessagesSkeleton } from "@/components/ui/pageSkeletons";
 import { chatSettingsService } from "@/services/chatGroups.service";
 import { readErrorMessageForDisplay } from "@/services/clientApi.service";
@@ -46,7 +45,7 @@ export default function ChatSettingsPage() {
   });
 
   if (settings.isPending) return <ChatMessagesSkeleton label="Loading chat settings" />;
-  if (settings.isError) return <ErrorState description="Couldn't load chat settings." action={<RetryButton onRetry={() => settings.refetch()} />} />;
+  if (settings.isError) return <ErrorState description="Couldn't load chat settings." error={settings.error} onRetry={() => void settings.refetch()} />;
   const data = settings.data;
   return (
     <div className={settingsStyles.page}>

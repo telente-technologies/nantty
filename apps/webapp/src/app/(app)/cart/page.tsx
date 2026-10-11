@@ -8,7 +8,6 @@ import { useShippingQuote } from "@/components/address/shippingQuote.hook";
 import { SellerGroupedSummary } from "@/components/commerce/sellerGroupedSummary";
 import { Button } from "@/components/ui/button";
 import { EmptyState, ErrorState, Skeleton } from "@/components/ui/feedback";
-import { RetryButton } from "@/components/ui/controls";
 import { Avatar, MediaImage } from "@/components/ui/media";
 import { CloseIcon, StoreIcon } from "@/components/ui/icons";
 import { cartsService } from "@/services/carts.service";
@@ -18,7 +17,6 @@ import { formatMoneyForDisplay, multiplyMoneyByQuantity } from "@/utils/formatMo
 import { groupCartItemsByStore } from "@/utils/groupCartItemsByStore.util";
 
 import styles from "./page.module.css";
-import { AppIcon } from "@/components/ui/appIcon";
 
 function MoneyRow({
   label,
@@ -80,13 +78,13 @@ export default function CartPage() {
       </div>
     );
   }
-  if (cartQuery.isError) return <ErrorState description="We couldn't load your cart." action={<RetryButton onRetry={() => cartQuery.refetch()} />} />;
+  if (cartQuery.isError) return <ErrorState description="We couldn't load your cart." error={cartQuery.error} onRetry={() => void cartQuery.refetch()} />;
 
   const cart = cartQuery.data;
   if (!cart || cart.items.length === 0) {
     return (
       <EmptyState
-        icon={<AppIcon name="shoppingCart24" size={28} />}
+        kind="cart"
         title="Your cart is empty"
         description="Browse the mart and add something you love."
         action={<Button onClick={() => router.push("/mart")}>Start shopping</Button>}

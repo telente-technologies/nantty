@@ -11,7 +11,6 @@ import { PaymentModeChooser } from "@/components/commerce/paymentModeChooser";
 import { SellerGroupedSummary } from "@/components/commerce/sellerGroupedSummary";
 import { Button } from "@/components/ui/button";
 import { EmptyState, ErrorState, Skeleton } from "@/components/ui/feedback";
-import { RetryButton } from "@/components/ui/controls";
 import { MapPinIcon } from "@/components/ui/icons";
 import { cartsService } from "@/services/carts.service";
 import { createIdempotencyKey, readErrorMessageForDisplay, sendRequestToWebappServer, WebappRequestError } from "@/services/clientApi.service";
@@ -19,6 +18,7 @@ import { CountryRequiredPicker, countryRequiredCode } from "@/components/commerc
 import { ordersService } from "@/services/orders.service";
 import { emailVerificationService } from "@/services/webActions.service";
 import { useMutation, useQuery } from "@tanstack/react-query";
+import { describeErrorSignal, readErrorSignal } from "@zudomart/web-kit";
 import { CheckoutPaymentChoice, canPayFromWallet, type CheckoutPaymentSource } from "@/components/commerce/checkoutPaymentChoice";
 import { providerWalletQueryKeys, providerWalletService } from "@/services/providerWallet.service";
 import { formatMoneyForDisplay } from "@/utils/formatMoney.util";
@@ -32,7 +32,6 @@ import { forgetPendingValue, pendingSubscriptionStorageKey, rememberPendingOrder
 import { presentPaymentProblem } from "@/utils/paymentProblem.util";
 
 import styles from "./page.module.css";
-import { AppIcon } from "@/components/ui/appIcon";
 
 export default function CheckoutPage() {
   const router = useRouter();
@@ -46,6 +45,7 @@ export default function CheckoutPage() {
   const verificationQuery = useQuery({ queryKey: providerWalletQueryKeys.verification, queryFn: providerWalletService.fetchMyVerificationLevel, retry: false });
   const [paymentSource, setPaymentSource] = useState<CheckoutPaymentSource>("hosted");
   const [error, setError] = useState<string | null>(null);
+  const [checkoutProblem, setCheckoutProblem] = useState<unknown>(null);
   const [isCountryNeeded, setCountryNeeded] = useState(false);
   const checkoutKey = useRef(createIdempotencyKey("checkout"));
   const placeOrderInFlight = useRef(false);
@@ -104,6 +104,13 @@ export default function CheckoutPage() {
         setError(null);
         return;
       }
+      const problemKind = describeErrorSignal(readErrorSignal(caught)).kind;
+      if (problemKind === "cartChanged" || problemKind === "checkoutExpired") {
+        setError(null);
+        setCheckoutProblem(caught);
+        void cartQuery.refetch();
+        return;
+      }
       setError(readErrorMessageForDisplay(caught));
     },
   });
@@ -119,17 +126,18 @@ export default function CheckoutPage() {
       </div>
     );
   }
-  if (cartQuery.isError) return <ErrorState description="We couldn't load your cart." action={<RetryButton onRetry={() => cartQuery.refetch()} />} />;
+  if (cartQuery.isError) return <ErrorState description="We couldn't load your cart." error={cartQuery.error} onRetry={() => void cartQuery.refetch()} />;
 
   const cart = cartQuery.data;
   if (!cart || cart.items.length === 0) {
-    return <EmptyState icon={<AppIcon name="shoppingCart24" size={28} />} title="Nothing to check out" description="Add items to your cart first." action={<Button onClick={() => router.push("/")}>Browse the mart</Button>} />;
+    return <EmptyState kind="cart" title="Nothing to check out" description="Add items to your cart first." action={<Button onClick={() => router.push("/")}>Browse the mart</Button>} />;
   }
 
   return (
     <div className={styles.page}>
       <h1 className={styles.title}>Checkout</h1>
 
+      {checkoutProblem ? <ErrorState variant="inline" error={checkoutProblem} /> : null}
       {error ? (
         <p className={styles.error} role="alert">
           {error}
@@ -150,7 +158,7 @@ export default function CheckoutPage() {
           <section className={styles.section}>
             <h2 className={styles.sectionTitle}>Shipping address</h2>
             {addressesQuery.isError ? (
-              <ErrorState description="We couldn't load your addresses." action={<RetryButton onRetry={() => addressesQuery.refetch()} />} />
+              <ErrorState description="We couldn't load your addresses." error={addressesQuery.error} onRetry={() => void addressesQuery.refetch()} />
             ) : (addressesQuery.data ?? []).length === 0 ? (
               <div className={styles.emptyAddress}>
                 <p>You have no saved addresses yet.</p>

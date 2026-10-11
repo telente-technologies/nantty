@@ -57,7 +57,7 @@ export default function DisputeDetailPage({ params }: { readonly params: Promise
       <div className={styles.page}>
         {header("Dispute")}
         {gone ? (
-          <ErrorState title="This dispute isn't available" description="It may belong to another account, or the link is wrong." action={<Link href="/orders">Your orders</Link>} />
+          <ErrorState kind="orderNotFound" title="This dispute isn't available" description="It may belong to another account, or the link is wrong." action={<Link href="/orders">Your orders</Link>} />
         ) : (
           <ErrorState title="Couldn't load this dispute." error={disputeQuery.error} onRetry={() => void disputeQuery.refetch()} />
         )}

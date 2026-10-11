@@ -5,9 +5,9 @@ import { useParams, useRouter } from "next/navigation";
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
-import { RetryButton } from "@/components/ui/controls";
 import { useCountryRequiredRetry } from "@/components/commerce/countryRequiredDialog";
 import { ErrorState } from "@/components/ui/feedback";
+import { useStepUpPrompt } from "@/components/wallet/stepUpDialog";
 import { ListRowsSkeleton } from "@/components/ui/pageSkeletons";
 import { boostsService } from "@/services/boosts.service";
 import { readErrorMessageForDisplay, WebappRequestError } from "@/services/clientApi.service";
@@ -43,6 +43,7 @@ export default function PromotePostPage() {
   const [chosenMethod, setChosenMethod] = useState<BoostPaymentMethod | null>(null);
   const [error, setError] = useState<{ readonly text: string; readonly code: string | null } | null>(null);
   const { retry: countryRetry, dialog: countryDialog } = useCountryRequiredRetry();
+  const { withStepUpIfRequired, stepUpDialog } = useStepUpPrompt();
 
   const budgets = options.data?.suggestedDailyBudgets ?? [];
   const dayOptions = options.data?.durationDayOptions ?? [];
@@ -63,7 +64,7 @@ export default function PromotePostPage() {
     enabled: !!request,
   });
   const create = useMutation({
-    mutationFn: () => boostsService.createBoost({ ...request!, paymentMethod }),
+    mutationFn: () => withStepUpIfRequired((stepUpToken) => boostsService.createBoost({ ...request!, paymentMethod }, stepUpToken)),
     onSuccess: (created) => {
       if (paymentMethod === "balance") void queryClient.invalidateQueries({ queryKey: ["wallet"] });
       if (paymentMethod === "free") void queryClient.invalidateQueries({ queryKey: ["boosts", "options"] });
@@ -84,7 +85,7 @@ export default function PromotePostPage() {
     },
   });
   if (options.isLoading) return <ListRowsSkeleton label="Loading promotion options" rows={5} />;
-  if (options.isError || !options.data) return <ErrorState description="We couldn't load promotion options." action={<RetryButton onRetry={() => options.refetch()} />} />;
+  if (options.isError || !options.data) return <ErrorState description="We couldn't load promotion options." error={options.error} onRetry={() => void options.refetch()} />;
 
   const total: Money | null = estimate.data?.totalCost ?? (dailyBudget && days ? boostTotalFor(dailyBudget, days) : null);
   const fitsFree = (budget: Money, forDays: number) => !!freeBoost && fitsWithinMoney(boostTotalFor(budget, forDays), freeBoost.maxTotal);
@@ -118,6 +119,7 @@ export default function PromotePostPage() {
   return (
     <div className={styles.page}>
       {countryDialog}
+      {stepUpDialog}
       <h1 className={styles.title}>Promote post</h1>
       <FreeBoostNotice freeBoost={freeBoost} premiumUsed={!freeBoost && !!options.data.freeBoost?.premium && options.data.freeBoost.remainingThisMonth === 0} resetsAt={options.data.freeBoost?.resetsAt ?? null} />
       <section className={styles.section} aria-label="Goal">

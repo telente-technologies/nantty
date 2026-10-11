@@ -7,11 +7,10 @@ import { OfficialStoreBadges } from "@zudomart/web-kit";
 
 import { SubscriptionPlansSection } from "@/components/creator/subscriptionPlansSection";
 import { storeLinks } from "@/config/brandContact.config";
-import { RetryButton } from "@/components/ui/controls";
 import { ErrorState } from "@/components/ui/feedback";
 import { AnalyticsIcon } from "@/components/ui/icons";
 import { creatorProgramService } from "@/services/creatorProgram.service";
-import { readErrorMessageForDisplay, WebappRequestError } from "@/services/clientApi.service";
+import { WebappRequestError } from "@/services/clientApi.service";
 import { EmptyState } from "@/components/ui/feedback";
 import { CreatorIcon } from "@/components/ui/icons";
 import { formatCountWithThousandsSuffix } from "@/utils/formatDate.util";
@@ -50,11 +49,7 @@ export default function CreatorDashboardPage() {
   if (dashboard.isLoading) return <StatGridSkeleton label="Loading your dashboard" />;
   if (dashboard.isError || !dashboard.data) {
     return (
-      <ErrorState
-        title="Creator dashboard"
-        description={readErrorMessageForDisplay(dashboard.error)}
-        action={<RetryButton onRetry={() => dashboard.refetch()} />}
-      />
+      <ErrorState error={dashboard.error} description="We couldn't load your creator dashboard." onRetry={() => void dashboard.refetch()} />
     );
   }
 

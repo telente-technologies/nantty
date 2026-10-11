@@ -13,7 +13,6 @@ import { Avatar } from "@/components/ui/media";
 import { ArrowLeftIcon, SettingsIcon } from "@/components/ui/icons";
 import { ErrorState } from "@/components/ui/feedback";
 import { ChatMessagesSkeleton } from "@/components/ui/pageSkeletons";
-import { RetryButton } from "@/components/ui/controls";
 import { useSession } from "@/components/providers/sessionProvider";
 import { ChatComposerTools } from "@/components/messages/chatComposerTools";
 import { ChatMessageBubble } from "@/components/messages/chatMessageBubble";
@@ -181,7 +180,7 @@ export default function ConversationPage({ params }: { readonly params: Promise<
         {messagesQuery.isLoading ? (
           <ChatMessagesSkeleton label="Loading messages" />
         ) : messagesQuery.isError ? (
-          <ErrorState description="We couldn't load this conversation." action={<RetryButton onRetry={() => messagesQuery.refetch()} />} />
+          <ErrorState description="We couldn't load this conversation." error={messagesQuery.error} onRetry={() => void messagesQuery.refetch()} />
         ) : messages.length === 0 ? (
           <p className={styles.empty}>Say hello — messages you send are end-to-end encrypted.</p>
         ) : (

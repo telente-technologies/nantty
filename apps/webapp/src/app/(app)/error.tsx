@@ -1,7 +1,7 @@
 "use client";
 
-import { ErrorState } from "@/components/ui/feedback";
+import { RouteErrorScreen } from "@zudomart/web-kit";
 
-export default function AppRouteError({ reset }: { readonly error: Error; readonly reset: () => void }) {
-  return <ErrorState title="This page didn't load" description="Something went wrong on our side. Your data is safe." onRetry={reset} />;
+export default function AppRouteError({ error, retry }: { readonly error: Error & { readonly digest?: string }; readonly retry: () => void }) {
+  return <RouteErrorScreen error={error} retry={retry} />;
 }
