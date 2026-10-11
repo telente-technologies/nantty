@@ -21,6 +21,7 @@ export function formatLimitMoney(value: unknown): string | null {
 
 export function describeLimitError(code: string | null | undefined, details: Details): string | null {
   if (code === "SELLER_DEBT_LIMIT") {
+    if (details?.["audience"] === "buyer") return "This seller can't take new orders right now. Remove their items or try again later.";
     return "You owe more than your selling limit allows. Clear what you owe to list items and take new orders again. Orders you already have aren't affected.";
   }
   if (code === "WALLET_DAILY_LIMIT") {

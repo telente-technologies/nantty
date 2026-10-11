@@ -4,7 +4,7 @@ import type { Money } from "@/types/money.type";
 export type OnlineOrderStatus = "new" | "processing" | "ready" | "shipped" | "delivered" | "completed" | "cancelled" | "returned" | "refunded" | "disputed";
 export type EscrowStatus = "held" | "released" | "refunded" | "disputed";
 export type OrderPaymentStatus = "paid" | "partially_refunded" | "refunded";
-export type OrderPaymentProvider = "paystack" | "flutterwave";
+export type OrderPaymentProvider = "flutterwave";
 export type OrderTimelineEventKind = "placed" | "paid" | "accepted" | "rejected" | "processing" | "ready" | "shipped" | "delivery_failed" | "delivered" | "completed" | "cancelled" | "returned" | "refunded" | "disputed" | "note";
 
 export interface OrderTimelineEvent {
