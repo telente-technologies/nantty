@@ -17,7 +17,7 @@ export interface VersionedRecord<Content> {
   readonly content: Content;
 }
 
-export type ConfigurationDocumentKey = "plans" | "revenue" | "creator-eligibility" | "username-rules" | "checkmark-suggestions" | "creator-thresholds" | "trial-rules" | "checkmark-pricing" | "regional-pricing" | "feed.ranking" | "appStore.fees";
+export type ConfigurationDocumentKey = "plans" | "revenue" | "creator-eligibility" | "username-rules" | "checkmark-suggestions" | "creator-thresholds" | "trial-rules" | "checkmark-pricing" | "regional-pricing" | "feed.ranking" | "appStore.fees" | "seller.debtLimits" | "payments.limits";
 
 export interface DashboardEntitlement {
   readonly key: string;
@@ -134,6 +134,40 @@ export interface ConfigurationDocumentContentByKey {
   readonly "regional-pricing": RegionalPricingDocument;
   readonly "feed.ranking": import("./ranking.type").FeedRankingPolicy;
   readonly "appStore.fees": AppStoreFeeSettings;
+  readonly "seller.debtLimits": SellerDebtLimits;
+  readonly "payments.limits": PaymentLimits;
+}
+
+export interface DebtLevelAmounts {
+  readonly unverified: number;
+  readonly payoutVerified: number;
+  readonly identityVerified: number;
+}
+
+export interface SellerDebtLimits {
+  readonly baseMinor: DebtLevelAmounts;
+  readonly outsideNigeriaPercent: number;
+  readonly trustedSellerAgeDays: number;
+  readonly trustedSellerCleanDays: number;
+  readonly currencyOverridesMinor: Readonly<Record<string, DebtLevelAmounts>>;
+}
+
+export interface WalletDailyAmounts {
+  readonly basic: number;
+  readonly mid: number;
+  readonly full: number;
+}
+
+export interface PaymentLimitAmounts {
+  readonly orderCheckout: number;
+  readonly coinPurchase: number;
+  readonly adsTopUp: number;
+  readonly walletDaily: WalletDailyAmounts;
+}
+
+export interface PaymentLimits {
+  readonly baseMinor: PaymentLimitAmounts;
+  readonly currencyOverridesMinor: Readonly<Record<string, PaymentLimitAmounts>>;
 }
 
 export interface AppStoreFeeSettings {

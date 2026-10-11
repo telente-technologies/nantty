@@ -19,6 +19,7 @@ export interface StaffWithdrawal {
   readonly amount: Money;
   readonly description: string;
   readonly createdAt: string;
+  readonly ageHours?: number;
   readonly status: string;
   readonly reference: string;
   readonly fee: Money;

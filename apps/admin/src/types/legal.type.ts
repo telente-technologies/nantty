@@ -1,4 +1,4 @@
-export type LegalDocumentKey = "terms" | "privacy" | "cookies" | "community-guidelines" | "seller-terms" | "creator-terms" | "ads-policy" | "refund-escrow-policy";
+export type LegalDocumentKey = "terms" | "privacy" | "cookies" | "community-guidelines" | "seller-terms" | "creator-terms" | "ads-policy" | "refund-escrow-policy" | "copyright-policy" | "data-rights";
 export type LegalVersionStatus = "DRAFT" | "IN_REVIEW" | "PUBLISHED" | "SUPERSEDED";
 export type LegalNoticeStatus = "QUEUED" | "SENDING" | "COMPLETED";
 

@@ -113,6 +113,7 @@ export interface DisputeSummary {
   readonly openedAt: string;
   readonly slaDueAt: string | null;
   readonly isSlaBreached: boolean;
+  readonly ageHours?: number;
 }
 
 export interface DisputeEscrow {
