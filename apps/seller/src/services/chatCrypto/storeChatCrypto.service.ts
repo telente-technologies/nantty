@@ -1,10 +1,10 @@
-import { ChatCryptoClient, type ChatPayloadInput, createHttpKeyDirectory, describeDecryptionFailure, type EncryptedOutgoingMessage, type KeyValueStore } from "@zudomart/chat-crypto";
+import { ChatCryptoClient, type ChatPayloadInput, createHttpKeyDirectory, createWebLocksMutex, describeDecryptionFailure, type EncryptedOutgoingMessage, type KeyValueStore } from "@zudomart/chat-crypto";
 
 import { SellerApiRequestError, sendSellerApiRequest } from "@/services/clientApi.service";
 import type { ConversationMessage, ConversationMessageKind, ConversationRecipients, DecryptedConversationMessage, DecryptedPreview } from "@/types/conversation.type";
 import { withoutPayload, withPayload } from "@/utils/storeChat.util";
 
-import { createSealedPreviewStore, createSellerChatCryptoStorage, deleteSellerChatCryptoDatabase } from "./sellerKeyStore";
+import { closeSellerChatCryptoDatabase, createSealedPreviewStore, createSellerChatCryptoStorage, deleteSellerChatCryptoDatabase } from "./sellerKeyStore";
 
 const apiPrefix = /^\/api\/v1/;
 const toBffPath = (path: string) => path.replace(apiPrefix, "");
@@ -19,7 +19,8 @@ const directory = createHttpKeyDirectory({
 
 let client: ChatCryptoClient | null = null;
 let previews: KeyValueStore | null = null;
-const getClient = () => (client ??= new ChatCryptoClient({ storage: createSellerChatCryptoStorage(), directory }));
+const crossTabLock = createWebLocksMutex("zudomart-seller-chat-crypto");
+const getClient = () => (client ??= new ChatCryptoClient({ storage: createSellerChatCryptoStorage(), directory, ...(crossTabLock === undefined ? {} : { lock: crossTabLock }) }));
 const getPreviews = () => (previews ??= createSealedPreviewStore());
 
 async function readyClient(viewerId: string): Promise<ChatCryptoClient> {
@@ -85,8 +86,13 @@ export const storeChatCrypto = {
     return found;
   },
   savePreview: (conversationId: string, preview: DecryptedPreview) => getPreviews().set(`preview:${conversationId}`, JSON.stringify(preview)).catch(() => undefined),
+  discardLocalState: async () => {
+    client = null;
+    previews = null;
+    await closeSellerChatCryptoDatabase();
+  },
   signOut: async () => {
-    await client?.signOut({ removeFromDirectory: true }).catch(() => undefined);
+    await getClient().signOut({ removeFromDirectory: true }).catch(() => undefined);
     client = null;
     previews = null;
     await deleteSellerChatCryptoDatabase();

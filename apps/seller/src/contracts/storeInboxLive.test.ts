@@ -6,7 +6,7 @@ import { ChatCryptoClient, decryptAttachment, encryptAttachment, encryptedAttach
 import { grantsChatMediaAccess } from "@/config/rolePermissions.config";
 import { dispatchMockApiRequest } from "@/mocks/mockBackend.mock";
 import { allowedApiPathPattern } from "@/server/bffGateway.service";
-import { createTabLeader, type LeaderChannel, type LeaderLocks } from "@/services/chatCrypto/tabLeader";
+import { broadcastFrame, createTabLeader, type LeaderChannel, type LeaderLocks } from "@/services/chatCrypto/tabLeader";
 import { createInboxRealtimeConnection, reconnectDelay } from "@/services/realtime/inboxRealtimeConnection";
 import type { ConversationMessage, DecryptedConversationMessage } from "@/types/conversation.type";
 import { mergeThreadMessages, withoutDeliveredPending } from "@/utils/storeChat.util";
@@ -114,6 +114,28 @@ describe("two dashboard tabs share one secure chat device", () => {
     assert.deepEqual(ran, ["A", "B"]);
     (release as (() => void) | null)?.();
     tabB.close();
+  });
+
+  it("tells the leader tab to drop its keys when another tab, even one that never opened chat, signs out", async () => {
+    const browser = createBrowser();
+    const leader = createTabLeader({ name: "engine", channel: browser.channel(), locks: browser.locks, tabId: "A", handlers: {} });
+    const dropped: string[] = [];
+    leader.onBroadcast("signed-out", () => dropped.push("A"));
+    await flush();
+    const signingOutTab = browser.channel();
+    signingOutTab.postMessage(broadcastFrame("signed-out", null));
+    await flush();
+    assert.deepEqual(dropped, ["A"]);
+    leader.close();
+  });
+
+  it("removes this browser's device from the key directory on sign-out even when chat was never opened in this page", async () => {
+    const directory = new InMemoryKeyDirectory();
+    const storage = { secrets: new MemoryKeyValueStore(), records: new MemoryKeyValueStore() };
+    await new ChatCryptoClient({ storage, directory: directory.forUser("staff") }).ensureReady("staff");
+    assert.equal((await directory.forUser("x").listDevices(["staff"]))[0]?.devices.length, 1);
+    await new ChatCryptoClient({ storage, directory: directory.forUser("staff") }).signOut({ removeFromDirectory: true });
+    assert.equal((await directory.forUser("x").listDevices(["staff"]))[0]?.devices.length, 0);
   });
 });
 

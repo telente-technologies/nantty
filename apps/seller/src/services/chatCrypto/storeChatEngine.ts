@@ -5,7 +5,7 @@ import { createInboxRealtimeConnection, type RealtimeTicket, type TicketResult }
 import type { ConversationMessage, DecryptedConversationMessage, DecryptedPreview, InboxRealtimeEvent, InboxRealtimeStatus } from "@/types/conversation.type";
 
 import { type EncryptedSendRequest, storeChatCrypto } from "./storeChatCrypto.service";
-import { createTabLeader, type LeaderChannel, type LeaderLocks, type TabLeader } from "./tabLeader";
+import { broadcastFrame, createTabLeader, type LeaderChannel, type LeaderLocks, type TabLeader } from "./tabLeader";
 
 const channelName = "zudomart-seller-chat-engine";
 type TopicClaim = { readonly tabId: string; readonly topic: string; readonly on: boolean };
@@ -75,6 +75,7 @@ function getLeader(): TabLeader {
   });
   leader = engine;
   engine.onBroadcast("status", (status) => (currentStatus = status as InboxRealtimeStatus));
+  engine.onBroadcast("signed-out", () => void storeChatCrypto.discardLocalState());
   engine.onLeadershipChange((isLeader) => {
     if (isLeader) startLeaderDuties(engine);
     announceToLeader(engine);
@@ -122,6 +123,12 @@ export const storeChatEngine = {
   },
   sendTyping: (conversationId: string, isTyping: boolean) => getLeader().notifyLeader("typing", { conversationId, isTyping }),
   shutdown() {
+    if (leader !== null) leader.broadcast("signed-out", null);
+    else if (typeof BroadcastChannel !== "undefined") {
+      const channel = new BroadcastChannel(channelName);
+      channel.postMessage(broadcastFrame("signed-out", null));
+      channel.close();
+    }
     leader?.close();
     leader = null;
   },

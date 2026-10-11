@@ -65,4 +65,4 @@ export const deliveryStatusPresentation: Record<DeliveryStatus, { readonly label
   returned: { label: "Returned", tone: "caution" },
 };
 
-export const paymentProviderLabels: Record<OrderPaymentProvider, string> = { paystack: "Card / bank transfer", flutterwave: "Flutterwave" };
+export const paymentProviderLabels: Record<OrderPaymentProvider, string> = { flutterwave: "Flutterwave" };

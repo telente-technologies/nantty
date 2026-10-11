@@ -4,7 +4,6 @@ import { AuthSplitLayout } from "@/components/auth/authSplitLayout";
 import { LoginForm } from "@/components/auth/loginForm";
 import { isMockBackendEnabled } from "@/config/sellerEnvironment.config";
 import { readMarketingSiteUrl } from "@/config/siteMetadata.config";
-import { demoAccountPassword } from "@/mocks/seed/demoPeople.mock";
 
 import styles from "@/components/auth/authForms.module.css";
 
@@ -24,10 +23,11 @@ const demoAccounts = [
 
 export default async function LoginPage({ searchParams }: { readonly searchParams: Promise<{ next?: string; identifier?: string }> }) {
   const { next, identifier } = await searchParams;
+  const demoAccountPassword = process.env.NODE_ENV !== "production" && isMockBackendEnabled() ? (await import("@/mocks/seed/demoPeople.mock")).demoAccountPassword : null;
   return (
     <AuthSplitLayout>
       <LoginForm nextPath={next ?? null} initialIdentifier={typeof identifier === "string" ? identifier.slice(0, 254) : ""} getTheAppUrl={readMarketingSiteUrl()} />
-      {isMockBackendEnabled() ? (
+      {demoAccountPassword !== null ? (
         <details className={styles.demoAccounts} style={{ marginTop: 20 }}>
           <summary>Demo accounts (password {demoAccountPassword})</summary>
           <ul>

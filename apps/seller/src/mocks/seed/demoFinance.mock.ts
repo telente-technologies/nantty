@@ -69,7 +69,7 @@ export function buildDemoGateStores(): MockGateStore[] {
       storeName: "Adire Lab Studio",
       verificationStatus: "verified",
       verificationNote: null,
-      subscription: { subscription: { status: "active", plan: "PRO", currentPeriodEnd: buildIsoDateDaysAgo(-9, 0) }, planId: "pro_monthly", cancelAtPeriodEnd: false, paymentMethodSummary: "Mastercard •••• 2210", provider: "paystack", invoices: [] },
+      subscription: { subscription: { status: "active", plan: "PRO", currentPeriodEnd: buildIsoDateDaysAgo(-9, 0) }, planId: "pro_monthly", cancelAtPeriodEnd: false, paymentMethodSummary: "Mastercard •••• 2210", provider: "flutterwave", invoices: [] },
     },
   ];
 }

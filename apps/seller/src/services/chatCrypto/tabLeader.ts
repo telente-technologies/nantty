@@ -53,6 +53,8 @@ const serializeError = (error: unknown): SerializedError => {
   };
 };
 
+export const broadcastFrame = (topic: string, payload: unknown): Frame => ({ t: "broadcast", topic, payload });
+
 export function createTabLeader(options: TabLeaderOptions) {
   const tabId = options.tabId ?? crypto.randomUUID();
   const channel = options.channel ?? null;

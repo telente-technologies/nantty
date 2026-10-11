@@ -17,7 +17,10 @@ function openDatabase(): Promise<IDBDatabase> {
   databasePromise ??= new Promise((resolve, reject) => {
     const request = indexedDB.open(databaseName, 1);
     request.onupgradeneeded = () => storeNames.forEach((name) => request.result.objectStoreNames.contains(name) || request.result.createObjectStore(name));
-    request.onsuccess = () => resolve(request.result);
+    request.onsuccess = () => {
+      request.result.onversionchange = () => void closeSellerChatCryptoDatabase();
+      resolve(request.result);
+    };
     request.onerror = () => reject(request.error);
   });
   return databasePromise;
@@ -84,10 +87,15 @@ export function createSealedPreviewStore(): KeyValueStore {
   return new SealedKeyValueStore(new IndexedDbKeyValueStore("previews"), browserSealer());
 }
 
-export async function deleteSellerChatCryptoDatabase(): Promise<void> {
-  (await databasePromise?.catch(() => null))?.close();
+export async function closeSellerChatCryptoDatabase(): Promise<void> {
+  const open = databasePromise;
   databasePromise = null;
   sealer = null;
+  (await open?.catch(() => null))?.close();
+}
+
+export async function deleteSellerChatCryptoDatabase(): Promise<void> {
+  await closeSellerChatCryptoDatabase();
   await new Promise<void>((resolve) => {
     const request = indexedDB.deleteDatabase(databaseName);
     request.onsuccess = request.onerror = request.onblocked = () => resolve();

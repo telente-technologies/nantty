@@ -3,14 +3,14 @@ import type { Metadata } from "next";
 import { AuthSplitLayout } from "@/components/auth/authSplitLayout";
 import { PasswordResetForm } from "@/components/auth/passwordResetForm";
 import { isMockBackendEnabled } from "@/config/sellerEnvironment.config";
-import { demoPasswordResetCode } from "@/mocks/handlers/passwordReset.mock";
 
 export const metadata: Metadata = { title: "Reset your password" };
 
-export default function ForgotPasswordPage() {
+export default async function ForgotPasswordPage() {
+  const demoCode = process.env.NODE_ENV !== "production" && isMockBackendEnabled() ? (await import("@/mocks/handlers/passwordReset.mock")).demoPasswordResetCode : null;
   return (
     <AuthSplitLayout>
-      <PasswordResetForm demoCode={isMockBackendEnabled() ? demoPasswordResetCode : null} />
+      <PasswordResetForm demoCode={demoCode} />
     </AuthSplitLayout>
   );
 }

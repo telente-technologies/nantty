@@ -53,7 +53,7 @@ export function buildDemoOnlineOrders(products: readonly Product[], options: Dem
     const orderNumber = `ZM-${String(plan.firstOrderNumber + orderIndex)}`;
     const orderKey = buildStoreScopedRecordId("o", recordKey, orderIndex + 1);
     const courier = isShippedOrLater ? pickRandomItem(["GIG Logistics", "Kwik Delivery", "DHL Nigeria", "Sendbox"], random) : null;
-    const paymentProvider = orderIndex % 3 === 0 ? ("paystack" as const) : ("flutterwave" as const);
+    const paymentProvider = "flutterwave" as const;
     const isFailedAttempt = status === "shipped" && random() < 0.25;
     const isRefunded = status === "refunded" || status === "returned" || status === "cancelled";
     const buyerPhone = "+23480" + String(30000000 + orderIndex * 7919).slice(0, 8);

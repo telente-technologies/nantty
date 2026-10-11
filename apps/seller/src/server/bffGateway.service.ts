@@ -2,6 +2,7 @@ import { NextResponse, type NextRequest } from "next/server";
 
 import { doesAccessGrantPermission, findPermissionRequiredForApiCall, grantsChatMediaAccess } from "@/config/rolePermissions.config";
 import { isMutationProtectedAgainstCsrf, isSafeHttpMethod } from "@/server/requestOriginGuard.service";
+import { isAccessTokenKnownExpired } from "@/server/accessTokenExpiry.service";
 import { exchangeRefreshTokenForNewTokenPair, renewSellerAccessCache, writeRenewedSessionCookies, type RenewedSellerSession } from "@/server/sellerAuthentication.service";
 import { callSellerBackend, type BackendResult } from "@/server/sellerApiTransport.service";
 import {
@@ -59,16 +60,23 @@ export async function forwardBffRequestToSellerApi(request: NextRequest, pathSeg
     return respondWithBffError(403, "CSRF_REJECTED", "This request could not be verified. Reload the page and try again.");
   }
 
-  const tokens = readApiTokensFromCookies(request.cookies);
+  const cookieTokens = readApiTokensFromCookies(request.cookies);
+  const respondSessionExpired = () => {
+    const expiredResponse = respondWithBffError(401, "SESSION_EXPIRED", "Your session has ended. Sign in again.");
+    clearEverySessionCookie(expiredResponse);
+    return expiredResponse;
+  };
+  let rotatedTokens: ApiTokenPair | null = null;
+  if (isAccessTokenKnownExpired(cookieTokens.accessToken)) {
+    rotatedTokens = cookieTokens.refreshToken ? await exchangeRefreshTokenForNewTokenPair(cookieTokens.refreshToken) : null;
+    if (!rotatedTokens) return respondSessionExpired();
+  }
+  const tokens = rotatedTokens ?? cookieTokens;
   let renewedSession: RenewedSellerSession | null = null;
   let cachedAccess = readCachedSellerAccessFromCookies(request.cookies);
   if (!cachedAccess) {
     renewedSession = await renewSellerAccessCache({ sessionId, accessToken: tokens.accessToken, refreshToken: tokens.refreshToken, knownUser: null, storeId: readSelectedStoreIdFromCookies(request.cookies) });
-    if (!renewedSession) {
-      const expiredResponse = respondWithBffError(401, "SESSION_EXPIRED", "Your session has ended. Sign in again.");
-      clearEverySessionCookie(expiredResponse);
-      return expiredResponse;
-    }
+    if (!renewedSession) return respondSessionExpired();
     cachedAccess = renewedSession.cachedAccess;
   }
 
@@ -107,19 +115,17 @@ export async function forwardBffRequestToSellerApi(request: NextRequest, pathSeg
     });
 
   let backendResult = await sendToBackend();
-  let rotatedTokens: ApiTokenPair | null = null;
+  const alreadyRefreshed = rotatedTokens !== null || Boolean(renewedSession?.tokens);
   const refreshTokenToUse = renewedSession?.tokens?.refreshToken ?? tokens.refreshToken;
-  if (backendResult.status === 401 && refreshTokenToUse) {
-    rotatedTokens = await exchangeRefreshTokenForNewTokenPair(refreshTokenToUse);
-    if (rotatedTokens) {
-      accessToken = rotatedTokens.accessToken;
-      backendResult = await sendToBackend();
-    }
+  if (backendResult.status === 401 && !alreadyRefreshed) {
+    rotatedTokens = refreshTokenToUse ? await exchangeRefreshTokenForNewTokenPair(refreshTokenToUse) : null;
+    if (!rotatedTokens) return respondSessionExpired();
+    accessToken = rotatedTokens.accessToken;
+    backendResult = await sendToBackend();
   }
 
   const response = convertBackendResultToResponse(backendResult);
   if (renewedSession) writeRenewedSessionCookies(response, renewedSession);
   if (rotatedTokens) writeApiTokenCookies(response, rotatedTokens);
-  if (backendResult.status === 401 && !rotatedTokens) clearEverySessionCookie(response);
   return response;
 }
