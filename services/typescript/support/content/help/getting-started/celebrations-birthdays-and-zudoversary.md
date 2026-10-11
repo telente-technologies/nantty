@@ -1,18 +1,29 @@
 ---
 title: Birthday balloons and your Zudoversary
-summary: On your birthday and on each anniversary of joining, Zudomart shows a small celebration on your profile.
-tags: birthday, anniversary, zudoversary, celebration
-related: edit-your-profile
+summary: On your birthday, balloons can appear on your profile, and on each anniversary of joining you get a Happy Zudoversary celebration with highlights from your year.
+tags: birthday, anniversary, zudoversary, celebration, balloons, milestones, account anniversary
+related: edit-your-profile, notification-settings, settings-overview, privacy-settings, notifications-faq
 ---
 
-Zudomart celebrates two days with you.
+Zudomart celebrates two days with you: your birthday and the day you joined.
 
 ## Your birthday
 
-If your date of birth is on your account, balloons appear on your profile on your birthday along with a short message from the Zudomart team. Zudomart does not send a birthday email.
+On your birthday, balloons appear on your profile. You always see them yourself. Visitors see them too unless you turn this off. Your age and date of birth are never shown to others. Zudomart doesn't send a birthday email.
+
+**To turn off balloons for visitors:** go to **Settings > Privacy & Data** and switch off **Birthday balloons** ("Show balloons on your profile to visitors on your birthday").
 
 ## Your Zudoversary
 
-Each year on the day you joined, you see a "Happy Zudoversary" celebration with a few highlights from your year. You also receive an anniversary email.
+Each year on the day you joined, you see a **Happy Zudoversary!** celebration, for example "Thanks for being part of Zudomart for 1 year". It includes a few highlights from your year when you have them, such as posts, followers, orders and lives. You also get an anniversary email.
 
-Celebrations use your own time zone and are shown once per day on each surface, so they never get in the way.
+## Choose how you're told
+
+- **App**: **Settings > Notification**, then **Milestones: push** ("Birthdays and Zudoversaries, like your account anniversary") and **Milestones: email** ("A celebration email on your Zudoversary").
+- **Web**: **app.zudomart.com > Settings > Milestones**, with **Push notifications** and **Email**.
+
+## Good to know
+
+- Celebrations follow your own time zone, so they start at midnight where you are.
+- Each celebration shows once per day in the app and once on your profile, so it never gets in the way.
+- Your birthday comes from sign-up. If it's wrong, contact support under **My account**.
