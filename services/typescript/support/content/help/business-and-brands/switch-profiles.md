@@ -5,7 +5,7 @@ tags: switch profile, switch account, change profile, posting as, business profi
 related: business-profiles, brand-pages, profile-types, create-a-post, seller-team
 ---
 
-One Zudomart account can hold your personal profile and up to 10 business or brand profiles. You sign in once and switch between them.
+One Zudomart account can hold your personal profile plus at most two linked profiles: one Store or one Business page, and one Brand. The switcher labels each one Store, Business page or Brand. You sign in once and switch between them.
 
 ## Who this is for
 

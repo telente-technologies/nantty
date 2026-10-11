@@ -1,6 +1,6 @@
 ---
 title: Personal, creator, business and government profiles
-summary: One account can hold your personal profile and up to 10 business profiles. Creator status is an upgrade of your personal profile.
+summary: One account can hold your personal profile, plus one Store or one Business page and one Brand. Creator status is an upgrade of your personal profile.
 tags: profile, profile types, business profile, brand, creator, government, switch profile, create business profile
 related: edit-your-profile, creator-program, checkmarks-explained, business-profiles, switch-profiles, profile-menu-shortcuts
 ---
@@ -21,7 +21,7 @@ Your Zudomart account is the login. Inside it you can run more than one public p
 3. Pick 1 to 5 categories.
 4. Tap **Create business profile**.
 
-You can have up to 10 business profiles on one account. Selling is separate. See [Opening a store](/help/selling/start-selling).
+You can have one Store or one Business page, never both, plus one Brand. See [Stores, business pages and brands](/help/business-and-brands/stores-business-pages-and-brands). See [Opening a store](/help/selling/start-selling).
 
 ## Switch profiles
 

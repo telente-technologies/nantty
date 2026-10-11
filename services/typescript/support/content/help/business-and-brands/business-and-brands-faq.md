@@ -7,7 +7,7 @@ related: business-profiles, brand-pages, government-accounts, switch-profiles, m
 
 ## Do I need a separate account for my business?
 
-No. One account holds your personal profile and up to 10 business or brand profiles. You sign in once and switch between them. See [Switching between your profiles](/help/business-and-brands/switch-profiles).
+No. One account holds your personal profile, plus one Store or one Business page and one Brand. See [Stores, business pages and brands](/help/business-and-brands/stores-business-pages-and-brands). You sign in once and switch between them. See [Switching between your profiles](/help/business-and-brands/switch-profiles).
 
 ## Do I need a store to have a business profile?
 

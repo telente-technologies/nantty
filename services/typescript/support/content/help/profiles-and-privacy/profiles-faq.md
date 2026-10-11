@@ -55,7 +55,7 @@ Shortcuts to Saved, orders, wallet, verification and settings, plus creator and 
 
 ## Can I have a personal and a business profile?
 
-Yes. One account can run your personal profile and up to 10 business profiles. See [Profile types](/help/profiles-and-privacy/profile-types).
+Yes. One account can run your personal profile, plus one Store or one Business page and one Brand. See [Profile types](/help/profiles-and-privacy/profile-types).
 
 ## Can people download my photos and clips?
 
