@@ -85,7 +85,7 @@ function ReviewPanel({ application, onClose, onChanged }: { readonly application
           </li>
         ))}
       </ul>
-      {checklistMutation.errorMessage ? <ErrorBlock message={checklistMutation.errorMessage} /> : null}
+      {checklistMutation.errorMessage ? <ErrorBlock error={checklistMutation.error} message={checklistMutation.errorMessage} /> : null}
       {decision ? <ConfirmActionDialog intent="verify" isOpen title={decision === "approve" ? (isSecondApproval ? "Give the second approval" : "Give the first approval") : decision === "reject" ? "Reject this application" : "Revoke the Black checkmark"} consequences={decision === "approve" ? [isSecondApproval ? "The Black checkmark goes live and the handle is reserved." : "The application waits for a different admin to approve."] : decision === "revoke" ? ["The badge is removed straight away.", "The handle stays reserved."] : []} confirmLabel={decision === "approve" ? "Approve" : decision === "reject" ? "Reject" : "Revoke"} tone={decision === "approve" ? "default" : "danger"} requiresStepUp isBusy={decisionMutation.isRunning} errorMessage={decisionMutation.errorMessage} onConfirm={confirm} onClose={() => { decisionMutation.clearError(); setDecision(null); }} /> : null}
     </SidePanel>
   );
@@ -94,14 +94,14 @@ function ReviewPanel({ application, onClose, onChanged }: { readonly application
 export function BlackApplicationsWorkspace() {
   const [status, setStatus] = useState<(typeof tabs)[number]["key"]>("OPEN");
   const [selectedId, setSelectedId] = useState<string | null>(null);
-  const { data, errorMessage, isLoading, reload, replaceData } = useAdminQuery((signal) => fetchBlackApplications({ status }, signal), status);
+  const { data, errorMessage, error: queryError, isLoading, reload, replaceData } = useAdminQuery((signal) => fetchBlackApplications({ status }, signal), status);
   const selected = data?.items.find((item) => item.id === selectedId) ?? null;
   return (
     <>
       <PageHeader area="People" title="Black applications" description="Government and official accounts. Never suggested or self-serve, always vetted by hand and approved by two admins." />
       <LinkTabs label="Verification views" items={verificationViewTabs} />
       <SegmentedTabs label="Application status" items={tabs} activeKey={status} onChange={setStatus} />
-      {errorMessage ? <ErrorBlock message={errorMessage} onRetry={reload} /> : null}
+      {errorMessage ? <ErrorBlock error={queryError} message={errorMessage} onRetry={reload} /> : null}
       <DataTable caption="Black applications" columns={columns} rows={data?.items ?? []} readRowKey={(item) => item.id} onRowOpen={(item) => setSelectedId(item.id)} selectedRowKey={selectedId} isLoading={isLoading} emptyMessage="No applications here." />
       {selected ? <ReviewPanel key={selected.id} application={selected} onClose={() => setSelectedId(null)} onChanged={(updated) => { replaceData((current) => current ? { ...current, items: current.items.map((item) => item.id === updated.id ? updated : item) } : current); reload(); }} /> : null}
     </>

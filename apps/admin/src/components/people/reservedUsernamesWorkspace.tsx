@@ -78,7 +78,7 @@ export function ReservedUsernamesWorkspace() {
               <TextField label="Search" isLabelHidden type="search" placeholder="Search names on this page" value={search} onChange={(event) => setSearch(event.target.value)} />
               <SelectField label="Kind" isLabelHidden options={[{ value: "", label: "All kinds" }, ...kindOptions]} value={kindFilter} onChange={(event) => setKindFilter(event.target.value)} />
             </Toolbar>
-            {reserved.errorMessage ? <ErrorBlock message={reserved.errorMessage} onRetry={reserved.reload} /> : null}
+            {reserved.errorMessage ? <ErrorBlock error={reserved.error} message={reserved.errorMessage} onRetry={reserved.reload} /> : null}
             <DataTable caption="Reserved usernames" columns={columns} rows={visibleRules} readRowKey={(rule) => rule.id} isLoading={reserved.isLoading} emptyMessage="No reserved names match." />
             <Toolbar>
               <Button size="small" disabled={cursors.length < 2} onClick={() => setCursors((current) => current.slice(0, -1))}>Previous</Button>

@@ -25,12 +25,12 @@ const rangeTabs = [
 
 export function OverviewWorkspace() {
   const [range, setRange] = useState<MetricsRange>("24h");
-  const { data: metrics, errorMessage, isLoading, reload } = useAdminQuery((signal) => fetchOverviewMetrics(range, signal), range);
+  const { data: metrics, errorMessage, error: queryError, isLoading, reload } = useAdminQuery((signal) => fetchOverviewMetrics(range, signal), range);
 
   return (
     <>
       <PageHeader area="Platform" title="Overview" description="Health of Zudomart right now and the queues that need a person." meta={metrics ? <span className={styles.generated}>Updated {formatDateTime(metrics.generatedAt)}</span> : null} actions={<SegmentedTabs label="Time range" items={rangeTabs} activeKey={range} onChange={setRange} />} />
-      {errorMessage ? <ErrorBlock message={errorMessage} onRetry={reload} /> : null}
+      {errorMessage ? <ErrorBlock error={queryError} message={errorMessage} onRetry={reload} /> : null}
       {isLoading && !metrics ? <LoadingBlock lines={6} /> : null}
       {metrics ? (
         <div className={styles.layout}>

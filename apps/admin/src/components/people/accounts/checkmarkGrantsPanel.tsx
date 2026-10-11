@@ -30,7 +30,7 @@ export function CheckmarkGrantsPanel() {
   const [toRevoke, setToRevoke] = useState<CheckmarkGrant | null>(null);
   const [username, setUsername] = useState("");
   const [color, setColor] = useState<VerificationColor>("BLUE");
-  const { data, errorMessage, isLoading, reload } = useAdminQuery((signal) => fetchCheckmarkGrants(status, signal), status);
+  const { data, errorMessage, error: queryError, isLoading, reload } = useAdminQuery((signal) => fetchCheckmarkGrants(status, signal), status);
   const grantMutation = useAdminMutation((reason: string) => grantLifetimeCheckmark({ username, color, reason }));
   const revokeMutation = useAdminMutation((input: { grant: CheckmarkGrant; reason: string }) => revokeLifetimeCheckmark(input.grant.id, input.reason));
 
@@ -66,7 +66,7 @@ export function CheckmarkGrantsPanel() {
         <SegmentedTabs label="Grant status" items={statusTabs} activeKey={status} onChange={setStatus} />
         <Button variant="primary" iconName="shield24" onClick={() => setIsGrantOpen(true)}>Grant a checkmark</Button>
       </div>
-      {errorMessage ? <ErrorBlock message={errorMessage} onRetry={reload} /> : null}
+      {errorMessage ? <ErrorBlock error={queryError} message={errorMessage} onRetry={reload} /> : null}
       <DataTable caption="Lifetime checkmark grants" columns={columns} rows={data?.items ?? []} readRowKey={(item) => item.id} isLoading={isLoading} emptyMessage={status === "ACTIVE" ? "No free checkmarks granted yet." : "Nothing revoked."} />
       {isGrantOpen ? (
         <ConfirmActionDialog intent="verify" isOpen title="Grant a lifetime free checkmark" confirmLabel="Grant checkmark" requiresStepUp reasonLabel="Reason (saved to the audit log)" isConfirmDisabled={username.trim().length < 3} isBusy={grantMutation.isRunning} errorMessage={grantMutation.errorMessage} onConfirm={grant} onClose={() => { grantMutation.clearError(); setIsGrantOpen(false); }}>

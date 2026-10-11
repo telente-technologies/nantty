@@ -39,14 +39,14 @@ const columns: readonly DataTableColumn<IdentityCaseListItem>[] = [
 export function IdentityChecksWorkspace() {
   const router = useRouter();
   const [status, setStatus] = useState<IdentityCaseStatus>("under_review");
-  const { data, errorMessage, isLoading, reload } = useAdminQuery((signal) => fetchIdentityCases(status, signal), status);
+  const { data, errorMessage, error: queryError, isLoading, reload } = useAdminQuery((signal) => fetchIdentityCases(status, signal), status);
 
   return (
     <>
       <PageHeader area="People" title="Identity checks" description="Paid Blue and Gold checkmarks verified with Smile ID (selfie liveness, photo ID, face match and a government lookup where available). Clean results are approved automatically; everything else waits here. Rejecting refunds the payment automatically." />
       <LinkTabs label="Verification views" items={verificationViewTabs} />
       <SegmentedTabs label="Identity check status" items={identityCaseStatusTabs} activeKey={status} onChange={setStatus} />
-      {errorMessage ? <ErrorBlock message={errorMessage} onRetry={reload} /> : null}
+      {errorMessage ? <ErrorBlock error={queryError} message={errorMessage} onRetry={reload} /> : null}
       <DataTable
         caption="Identity checks"
         columns={columns}

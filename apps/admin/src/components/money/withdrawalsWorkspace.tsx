@@ -43,7 +43,7 @@ export function WithdrawalsWorkspace() {
   const [cursor, setCursor] = useState<string | undefined>();
   const [openWithdrawalId, setOpenWithdrawalId] = useState<string | null>(null);
   const filters = { status: status === "all" ? undefined : status, search: appliedSearch || undefined, cursor };
-  const { data, errorMessage, isLoading, reload } = useAdminQuery((signal) => fetchWithdrawals(filters, signal), JSON.stringify(filters));
+  const { data, errorMessage, error: queryError, isLoading, reload } = useAdminQuery((signal) => fetchWithdrawals(filters, signal), JSON.stringify(filters));
   const tabs = (Object.keys(tabLabels) as WithdrawalStatus[]).map((key) => ({ key: key as WithdrawalTabKey, label: tabLabels[key], count: data?.counts[key] ?? null }));
 
   function applySearch(event: FormEvent) {
@@ -62,7 +62,7 @@ export function WithdrawalsWorkspace() {
           <Button type="submit" iconName="magnifyingGlass16">Search</Button>
         </Toolbar>
       </form>
-      {errorMessage ? <ErrorBlock message={errorMessage} onRetry={reload} /> : null}
+      {errorMessage ? <ErrorBlock error={queryError} message={errorMessage} onRetry={reload} /> : null}
       <DataTable caption="Withdrawal requests" columns={withdrawalColumns} rows={data?.items ?? []} readRowKey={(withdrawal) => withdrawal.id} isLoading={isLoading} selectedRowKey={openWithdrawalId} onRowOpen={(withdrawal) => setOpenWithdrawalId(withdrawal.id)} readRowTone={(withdrawal) => (withdrawal.destination?.removed ? "caution" : null)} emptyMessage="No withdrawals in this state." />
       <CursorPagination cursor={cursor} nextCursor={data?.nextCursor} onCursorChange={setCursor} />
       {openWithdrawalId ? <WithdrawalDetailPanel key={openWithdrawalId} withdrawalId={openWithdrawalId} onClose={() => setOpenWithdrawalId(null)} onChanged={reload} /> : null}

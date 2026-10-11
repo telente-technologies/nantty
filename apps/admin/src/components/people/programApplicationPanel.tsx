@@ -31,7 +31,7 @@ interface ProgramApplicationPanelProps {
 export function ProgramApplicationPanel({ kind, applicationId, onClose, onDecided }: ProgramApplicationPanelProps) {
   const { showToast } = useToast();
   const [decision, setDecision] = useState<"approve" | "reject" | null>(null);
-  const { data: application, errorMessage, isLoading, reload, replaceData } = useAdminQuery((signal) => fetchProgramApplicationDetail(kind, applicationId, signal), `${kind}:${applicationId}`);
+  const { data: application, errorMessage, error: queryError, isLoading, reload, replaceData } = useAdminQuery((signal) => fetchProgramApplicationDetail(kind, applicationId, signal), `${kind}:${applicationId}`);
   const decisionMutation = useAdminMutation(({ choice, reason }: { choice: "approve" | "reject"; reason: string }) => decideProgramApplication(kind, applicationId, choice, reason));
   const programName = kind === "sellers" ? "selling" : "the Creator Program";
 
@@ -60,7 +60,7 @@ export function ProgramApplicationPanel({ kind, applicationId, onClose, onDecide
         ) : null
       }
     >
-      {errorMessage ? <ErrorBlock message={errorMessage} onRetry={reload} /> : null}
+      {errorMessage ? <ErrorBlock error={queryError} message={errorMessage} onRetry={reload} /> : null}
       {isLoading && !application ? <LoadingBlock /> : null}
       {application ? (
         <>

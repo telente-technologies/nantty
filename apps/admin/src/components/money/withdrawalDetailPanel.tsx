@@ -78,7 +78,7 @@ function WithdrawalDetailBody({ withdrawal }: { readonly withdrawal: StaffWithdr
 }
 
 export function WithdrawalDetailPanel({ withdrawalId, onClose, onChanged }: { readonly withdrawalId: string; readonly onClose: () => void; readonly onChanged: () => void }) {
-  const { data: withdrawal, errorMessage, isLoading, reload, replaceData } = useAdminQuery((signal) => fetchWithdrawalDetail(withdrawalId, signal), withdrawalId);
+  const { data: withdrawal, errorMessage, error: queryError, isLoading, reload, replaceData } = useAdminQuery((signal) => fetchWithdrawalDetail(withdrawalId, signal), withdrawalId);
   const [decision, setDecision] = useState<WithdrawalDecision | null>(null);
   const decisions = withdrawal ? (decisionsByStatus[withdrawal.withdrawalStatus] ?? []) : [];
 
@@ -98,7 +98,7 @@ export function WithdrawalDetailPanel({ withdrawalId, onClose, onChanged }: { re
         ) : null
       }
     >
-      {errorMessage ? <ErrorBlock message={errorMessage} onRetry={reload} /> : null}
+      {errorMessage ? <ErrorBlock error={queryError} message={errorMessage} onRetry={reload} /> : null}
       {isLoading && !withdrawal ? <LoadingBlock /> : null}
       {withdrawal ? <WithdrawalDetailBody withdrawal={withdrawal} /> : null}
       {withdrawal && decision ? (

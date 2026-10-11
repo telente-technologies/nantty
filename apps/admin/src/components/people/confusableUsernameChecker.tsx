@@ -22,14 +22,14 @@ export function ConfusableUsernameChecker() {
     return () => window.clearTimeout(timer);
   }, [candidate]);
 
-  const { data: preview, errorMessage } = useAdminQuery((signal) => previewUsernameConfusables(debouncedCandidate, signal), debouncedCandidate, debouncedCandidate.length > 0);
+  const { data: preview, errorMessage, error: queryError } = useAdminQuery((signal) => previewUsernameConfusables(debouncedCandidate, signal), debouncedCandidate, debouncedCandidate.length > 0);
   const isBlocked = preview ? preview.collisions.length > 0 || preview.takenByUserId !== null || preview.isWithheld : false;
 
   return (
     <Card title="Confusable preview">
       <div className={styles.stack}>
         <TextField label="Try a username" placeholder="e.g. zud0mart_supp0rt or dаngote (Cyrillic а)" value={candidate} onChange={(event) => setCandidate(event.target.value)} autoComplete="off" spellCheck={false} hint="Shows how the name normalizes and what it collides with." />
-        {errorMessage && debouncedCandidate ? <ErrorBlock message={errorMessage} /> : null}
+        {errorMessage && debouncedCandidate ? <ErrorBlock error={queryError} message={errorMessage} /> : null}
         {preview && debouncedCandidate ? (
           <>
             <StatusBadge tone={isBlocked ? "danger" : "success"} label={isBlocked ? "Would be blocked" : "Available"} />

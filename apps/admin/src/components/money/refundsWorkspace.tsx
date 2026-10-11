@@ -72,7 +72,7 @@ export function RefundsWorkspace() {
   const [source, setSource] = useState<(typeof sourceTabs)[number]["key"]>("all");
   const [cursor, setCursor] = useState<string | undefined>();
   const filters = { source: source === "all" ? undefined : source, cursor };
-  const { data, errorMessage, isLoading, reload } = useAdminQuery((signal) => fetchRefunds(filters, signal), JSON.stringify(filters));
+  const { data, errorMessage, error: queryError, isLoading, reload } = useAdminQuery((signal) => fetchRefunds(filters, signal), JSON.stringify(filters));
 
   return (
     <>
@@ -81,7 +81,7 @@ export function RefundsWorkspace() {
       <div className={styles.spacedTop}>
         <SegmentedTabs label="Refund source" items={sourceTabs} activeKey={source} onChange={(key) => { setSource(key); setCursor(undefined); }} />
       </div>
-      {errorMessage ? <ErrorBlock message={errorMessage} onRetry={reload} /> : null}
+      {errorMessage ? <ErrorBlock error={queryError} message={errorMessage} onRetry={reload} /> : null}
       <RefundsTable refunds={data?.items ?? []} isLoading={isLoading} emptyMessage="No refunds yet." />
       <CursorPagination cursor={cursor} nextCursor={data?.nextCursor} onCursorChange={setCursor} />
     </>

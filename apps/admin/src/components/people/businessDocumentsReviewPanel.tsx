@@ -22,10 +22,10 @@ import styles from "./peopleWorkspace.module.css";
 const kindLabels = { CAC_CERTIFICATE: "CAC certificate", ID: "Government ID", PROOF_OF_ADDRESS: "Proof of address" } as const;
 
 function DocumentViewer({ submissionId, item, onClose }: { readonly submissionId: string; readonly item: BusinessDocumentItem; readonly onClose: () => void }) {
-  const { data: access, errorMessage, isLoading, reload } = useAdminQuery((signal) => openBusinessDocument(submissionId, item.id, signal), item.id);
+  const { data: access, errorMessage, error: queryError, isLoading, reload } = useAdminQuery((signal) => openBusinessDocument(submissionId, item.id, signal), item.id);
   return (
     <ModalDialog isOpen title={kindLabels[item.kind]} description={access ? `Private link expires ${formatDateTime(access.expiresAt)}. This view is logged.` : "Opening a short-lived private link…"} onClose={onClose} width="wide" tone="secure">
-      {errorMessage ? <ErrorBlock message={errorMessage} onRetry={reload} /> : null}
+      {errorMessage ? <ErrorBlock error={queryError} message={errorMessage} onRetry={reload} /> : null}
       {isLoading && !access ? <LoadingBlock lines={5} /> : null}
       {access ? <div onContextMenu={(event) => event.preventDefault()} className={styles.stack}><p className={styles.muted}>{access.fileName}</p><p className={styles.faint}>{access.watermarkText}</p></div> : null}
     </ModalDialog>

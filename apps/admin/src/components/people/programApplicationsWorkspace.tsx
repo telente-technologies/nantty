@@ -62,7 +62,7 @@ export function ProgramApplicationsWorkspace({ kind }: { readonly kind: Applicat
   const [cursor, setCursor] = useState<string | undefined>();
   const [selectedApplicationId, setSelectedApplicationId] = useState<string | null>(null);
   const filters = { status: statusTab, search: search.trim() || undefined, cursor };
-  const { data, errorMessage, isLoading, reload } = useAdminQuery((signal) => fetchProgramApplications(kind, filters, signal), `${kind}:${JSON.stringify(filters)}`);
+  const { data, errorMessage, error: queryError, isLoading, reload } = useAdminQuery((signal) => fetchProgramApplications(kind, filters, signal), `${kind}:${JSON.stringify(filters)}`);
 
   return (
     <>
@@ -71,7 +71,7 @@ export function ProgramApplicationsWorkspace({ kind }: { readonly kind: Applicat
       <Toolbar>
         <TextField label="Search" isLabelHidden type="search" placeholder="Search @username or name" value={search} onChange={(event) => { setSearch(event.target.value); setCursor(undefined); }} />
       </Toolbar>
-      {errorMessage ? <ErrorBlock message={errorMessage} onRetry={reload} /> : null}
+      {errorMessage ? <ErrorBlock error={queryError} message={errorMessage} onRetry={reload} /> : null}
       <DataTable
         caption={pageCopy[kind].title}
         columns={buildColumns(kind)}

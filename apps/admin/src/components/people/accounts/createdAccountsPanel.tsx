@@ -29,13 +29,13 @@ export function CreatedAccountsPanel() {
   const { isSuperadmin } = useAdminPermissions();
   const { showToast } = useToast();
   const [isCreateOpen, setIsCreateOpen] = useState(false);
-  const { data, errorMessage, isLoading, reload } = useAdminQuery((signal) => fetchAdminCreatedAccounts(signal), "created");
+  const { data, errorMessage, error: queryError, isLoading, reload } = useAdminQuery((signal) => fetchAdminCreatedAccounts(signal), "created");
   return (
     <>
       <div style={{ display: "flex", justifyContent: "flex-end" }}>
         <Button variant="primary" iconName="shield24" disabled={!isSuperadmin} onClick={() => setIsCreateOpen(true)}>{isSuperadmin ? "Create an account" : "Superadmin only"}</Button>
       </div>
-      {errorMessage ? <ErrorBlock message={errorMessage} onRetry={reload} /> : null}
+      {errorMessage ? <ErrorBlock error={queryError} message={errorMessage} onRetry={reload} /> : null}
       <DataTable caption="Accounts created by admins" columns={columns} rows={data?.items ?? []} readRowKey={(item) => item.id} isLoading={isLoading} emptyMessage="No admin-created accounts yet." />
       {isCreateOpen ? <CreateAccountDialog onClose={() => setIsCreateOpen(false)} onCreated={(account) => { setIsCreateOpen(false); showToast(`@${account.user.username} created. They must change the password at first sign-in.`); reload(); }} /> : null}
     </>

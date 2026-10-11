@@ -47,7 +47,7 @@ export function IdentityCheckDetailWorkspace({ caseId }: { readonly caseId: stri
   const { data: detail, errorMessage, isLoading, reload, replaceData } = useAdminQuery((signal) => fetchIdentityCaseDetail(caseId, signal), caseId);
   const mutation = useAdminMutation(({ choice, reason }: { choice: IdentityCaseDecision; reason: string }) => decideIdentityCase(caseId, choice, reason));
 
-  if (errorMessage) return <ErrorBlock message={errorMessage} onRetry={reload} />;
+  if (errorMessage) return <ErrorBlock variant="section" message={errorMessage} onRetry={reload} />;
   if (isLoading || !detail) return <LoadingBlock lines={8} />;
   const item = detail.case;
   const checks = [

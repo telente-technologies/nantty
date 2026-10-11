@@ -37,7 +37,7 @@ export function BusinessDocumentsWorkspace() {
   const [cursor, setCursor] = useState<string | undefined>();
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const filters = { status, search: search || undefined, cursor };
-  const { data, errorMessage, isLoading, reload, replaceData } = useAdminQuery((signal) => fetchBusinessDocumentSubmissions(filters, signal), JSON.stringify(filters));
+  const { data, errorMessage, error: queryError, isLoading, reload, replaceData } = useAdminQuery((signal) => fetchBusinessDocumentSubmissions(filters, signal), JSON.stringify(filters));
   const selected = data?.items.find((item) => item.id === selectedId) ?? null;
 
   return (
@@ -48,7 +48,7 @@ export function BusinessDocumentsWorkspace() {
       <Toolbar>
         <TextField label="Search" isLabelHidden type="search" placeholder="Search store, @username or ID" value={search} onChange={(event) => { setSearch(event.target.value); setCursor(undefined); }} />
       </Toolbar>
-      {errorMessage ? <ErrorBlock message={errorMessage} onRetry={reload} /> : null}
+      {errorMessage ? <ErrorBlock error={queryError} message={errorMessage} onRetry={reload} /> : null}
       <DataTable caption="Business documents queue" columns={columns} rows={data?.items ?? []} readRowKey={(item) => item.id} onRowOpen={(item) => setSelectedId(item.id)} selectedRowKey={selectedId} isLoading={isLoading} emptyMessage="No business documents here." />
       <CursorPagination cursor={cursor} nextCursor={data?.nextCursor} onCursorChange={setCursor} />
       {selected ? <BusinessDocumentsReviewPanel key={selected.id} submission={selected} onClose={() => setSelectedId(null)} onChanged={(updated) => { replaceData((current) => current ? { ...current, items: current.items.map((item) => item.id === updated.id ? updated : item) } : current); reload(); }} /> : null}
