@@ -25,6 +25,10 @@ describe("internal link parsing", () => {
     expect(buildInternalRoute(reference!)).toEqual({ name: "UserProfileByUsername", params: { username: "ada.lovelace" } });
   });
 
+  it("opens a shared order card on the order screen", () => {
+    expect(buildInternalRoute({ kind: "order", id: "ord_1" })).toEqual({ name: "OrderDetail", params: { orderId: "ord_1" } });
+  });
+
   it("reads products from /p/<slug>-<id> and ignores external hosts", () => {
     expect(readInternalReferenceFromUrl("https://app.zudomart.com/p/ankara-wrap-midi-dress-pr_f1")).toEqual({ kind: "product", id: "pr_f1" });
     expect(readInternalReferenceFromUrl("https://evil.example/ada")).toBeNull();

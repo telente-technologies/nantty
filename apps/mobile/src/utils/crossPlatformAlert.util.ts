@@ -2,6 +2,7 @@ import type { AlertButton } from "react-native";
 
 import type { ModalAction } from "@/components/ui/modalActions";
 import type { ModalTone } from "@/components/ui/modalChrome.constant";
+import type { ModalIntent } from "@/components/ui/modalIntent";
 import { showDialog } from "@/store/dialog.store";
 
 const PROBLEM_TITLE_PATTERN = /^(couldn'?t|could not|can'?t|cannot|something went wrong)|not (sent|posted|added|saved)\b/i;
@@ -24,14 +25,20 @@ function orderButtonsAsModalActions(buttons: readonly AlertButton[]): ModalActio
   return actions;
 }
 
-export function showAlertWithButtons(title: string, message?: string, buttons?: AlertButton[]) {
+export interface AlertDialogOptions {
+  readonly intent?: ModalIntent;
+}
+
+export function showAlertWithButtons(title: string, message?: string, buttons?: AlertButton[], options: AlertDialogOptions = {}) {
   const providedButtons = buttons ?? [];
   const actions = providedButtons.length > 0 ? orderButtonsAsModalActions(providedButtons) : [{ label: "OK", style: "primary" as const }];
   const cancelButton = providedButtons.find((button) => button.style === "cancel");
+  const tone = inferDialogTone(title, providedButtons);
   showDialog({
     title,
     message,
-    tone: inferDialogTone(title, providedButtons),
+    tone: options.intent && tone === "neutral" ? undefined : tone,
+    intent: options.intent,
     actions,
     onDismiss: cancelButton?.onPress ? () => cancelButton.onPress?.() : undefined,
   });

@@ -18,7 +18,7 @@ const describeAttachments = (message: LocallyStoredMessage): ChatReportEvidenceA
   }
   if (message.location) return [{ ...empty, type: "location" }];
   if (message.poll) return [{ ...empty, type: "poll" }];
-  if (message.sharedContent) return [{ ...empty, type: "shared" }];
+  if (message.sharedReference) return [{ ...empty, type: "shared" }];
   return [];
 };
 
