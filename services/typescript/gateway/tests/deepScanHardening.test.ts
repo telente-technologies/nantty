@@ -76,8 +76,10 @@ describe("C1 proxy trust", () => {
   });
 
   it("refuses to start in production without an explicit hop count", () => {
-    expect(collectProductionHardeningProblems({ NODE_ENV: "production" })).toEqual([expect.stringMatching(/TRUSTED_PROXY_HOPS/)]);
-    expect(collectProductionHardeningProblems({ NODE_ENV: "production", TRUSTED_PROXY_HOPS: "1" })).toEqual([]);
+    const adminToken = { ADMIN_INTERNAL_API_TOKEN: "a".repeat(40) };
+    expect(collectProductionHardeningProblems({ NODE_ENV: "production", ...adminToken })).toEqual([expect.stringMatching(/TRUSTED_PROXY_HOPS/)]);
+    expect(collectProductionHardeningProblems({ NODE_ENV: "production", TRUSTED_PROXY_HOPS: "1", ...adminToken })).toEqual([]);
+    expect(collectProductionHardeningProblems({ NODE_ENV: "production", TRUSTED_PROXY_HOPS: "1" })).toEqual([expect.stringMatching(/ADMIN_INTERNAL_API_TOKEN/)]);
   });
 
   it("keeps one bucket when the right-most X-Forwarded-For entry rotates and no proxy is trusted", async () => {
@@ -92,8 +94,8 @@ describe("C1 proxy trust", () => {
 
 describe("H2 placeholder secrets", () => {
   it("rejects the published local-only values and short tokens in production", () => {
-    const problems = collectProductionHardeningProblems({ NODE_ENV: "production", TRUSTED_PROXY_HOPS: "1", GATEWAY_IDENTITY_SECRET: "local-only-gateway-identity-secret-0123456789", IDENTITY_INTERNAL_TOKEN: "short", TRUST_INTERNAL_TOKEN: "local-only-moderation-internal-token-0123456789" });
-    expect(problems).toHaveLength(3);
+    const problems = collectProductionHardeningProblems({ NODE_ENV: "production", TRUSTED_PROXY_HOPS: "1", GATEWAY_IDENTITY_SECRET: "local-only-gateway-identity-secret-0123456789", IDENTITY_INTERNAL_TOKEN: "short", TRUST_INTERNAL_TOKEN: "local-only-moderation-internal-token-0123456789", ADMIN_INTERNAL_API_TOKEN: "local-only-admin-internal-token-0123456789" });
+    expect(problems).toHaveLength(4);
     expect(collectProductionHardeningProblems({ NODE_ENV: "development", GATEWAY_IDENTITY_SECRET: "local-only-gateway-identity-secret-0123456789" })).toEqual([]);
   });
 });

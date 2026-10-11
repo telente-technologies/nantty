@@ -1,7 +1,7 @@
 import {
   ArrowRightIcon as PhArrowRight, ArrowSquareOutIcon, BookmarkSimpleIcon, CaretLeftIcon, ChartBarIcon, ChatCircleIcon, CheckCircleIcon as PhCheckCircle, CompassIcon as PhCompass, CopyIcon as PhCopy, CopyrightIcon as PhCopyright, DownloadSimpleIcon, EnvelopeIcon,
   ExportIcon, FileTextIcon, FlagIcon as PhFlag, GearIcon, GiftIcon as PhGift, HeartIcon as PhHeart, LinkSimpleIcon as PhLinkSimple, MonitorIcon as PhMonitor, MoonIcon as PhMoon, PackageIcon as PhPackage,
-  PaperPlaneTiltIcon, PauseIcon as PhPause, PhoneIcon as PhPhone, ProhibitIcon as PhProhibit, PushPinIcon as PhPushPin, RepeatIcon, ShieldCheckIcon, SignInIcon as PhSignIn, SignOutIcon, SpeakerHighIcon as PhSpeakerHigh, SpeakerXIcon as PhSpeakerX, SunIcon as PhSun, TrendUpIcon,
+  PaperPlaneTiltIcon, PauseIcon as PhPause, PhoneIcon as PhPhone, ProhibitIcon as PhProhibit, PushPinIcon as PhPushPin, QuotesIcon, RepeatIcon, ShieldCheckIcon, SignInIcon as PhSignIn, SignOutIcon, SpeakerHighIcon as PhSpeakerHigh, SpeakerXIcon as PhSpeakerX, SunIcon as PhSun, TrendUpIcon,
   UsersIcon, WalletIcon as PhWallet, WarningIcon, BellIcon as PhBell, BellRingingIcon, BellSlashIcon, UserMinusIcon,
   ArrowClockwiseIcon, ArrowCounterClockwiseIcon, CornersInIcon, CornersOutIcon,
 } from "@phosphor-icons/react/dist/ssr";
@@ -84,6 +84,7 @@ export const ArrowRightIcon = createIcon(PhArrowRight);
 
 export const ReplyActionIcon = createIcon(ChatCircleIcon);
 export const RepostActionIcon = createIcon(RepeatIcon);
+export const QuoteActionIcon = createIcon(QuotesIcon);
 export const LikeActionIcon = createIcon(PhHeart);
 export const LikeFilledActionIcon = createIcon(PhHeart, "fill");
 export const ViewsActionIcon = createIcon(ChartBarIcon);

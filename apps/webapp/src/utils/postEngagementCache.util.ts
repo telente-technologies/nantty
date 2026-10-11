@@ -66,7 +66,15 @@ export function setLikedStateEverywhere(queryClient: QueryClient, postId: string
 }
 
 export function addRepostEverywhere(queryClient: QueryClient, postId: string) {
-  updateMatchingRecordsInEveryQuery(queryClient, (record) => record.id === postId && typeof record.reposts === "number", (post) => ({ ...post, reposts: (post.reposts as number) + 1 }));
+  updateMatchingRecordsInEveryQuery(queryClient, (record) => record.id === postId && typeof record.reposts === "number", (post) =>
+    post.reposted === true ? post : { ...post, reposted: true, reposts: (post.reposts as number) + 1 },
+  );
+}
+
+export function removeRepostEverywhere(queryClient: QueryClient, postId: string) {
+  updateMatchingRecordsInEveryQuery(queryClient, (record) => record.id === postId && typeof record.reposts === "number", (post) =>
+    post.reposted === true ? { ...post, reposted: false, reposts: Math.max(0, (post.reposts as number) - 1) } : post,
+  );
 }
 
 interface LikeSyncState {

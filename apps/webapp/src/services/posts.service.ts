@@ -3,6 +3,7 @@ import type { ConnectionEntry, ConnectionTab, FollowRequest } from "@/types/acco
 
 import { createIdempotencyKey, sendListRequestToWebappServer, sendRequestToWebappServer } from "./clientApi.service";
 import type { LinkPreview } from "@/types/linkPreview.type";
+import type { CommentSectionFilter, QuoteThreadItem } from "@/types/postThread.type";
 
 export const postsService = {
   fetchPostById: (postId: string) => sendRequestToWebappServer<Post>(`/api/v1/posts/${postId}`),
@@ -14,8 +15,9 @@ export const postsService = {
   unpinPost: (postId: string) => sendRequestToWebappServer<Post>(`/api/v1/posts/${postId}/pin`, { method: "DELETE", idempotencyKey: createIdempotencyKey("unpin") }),
   refreshPostLinkPreview: (postId: string) => sendRequestToWebappServer<LinkPreview | null>(`/api/v1/posts/${postId}/link-preview`, { method: "POST" }),
   repostPost: (postId: string, text?: string) => sendRequestToWebappServer<Post>(`/api/v1/posts/${postId}/repost`, { method: "POST", body: text ? { text } : {}, idempotencyKey: createIdempotencyKey("repost") }),
-  fetchCommentsPage: (postId: string, cursor: string | null | undefined) =>
-    sendRequestToWebappServer<Page<CommentWithReplies>>(`/api/v1/posts/${postId}/comments`, { query: { cursor: cursor ?? undefined } }),
+  undoRepost: (postId: string) => sendRequestToWebappServer<void>(`/api/v1/posts/${postId}/repost`, { method: "DELETE" }),
+  fetchCommentsPage: (postId: string, cursor: string | null | undefined, filter: CommentSectionFilter = "all") =>
+    sendRequestToWebappServer<Page<CommentWithReplies | QuoteThreadItem>>(`/api/v1/posts/${postId}/comments`, { query: { cursor: cursor ?? undefined, filter: filter === "all" ? undefined : filter } }),
   fetchPostQuotes: (postId: string, cursor: string | null | undefined) => sendRequestToWebappServer<Page<Post>>(`/api/v1/posts/${postId}/quotes`, { query: { cursor: cursor ?? undefined } }),
   fetchPostTaggedUsers: (postId: string, cursor: string | null) =>
     sendRequestToWebappServer<Page<TaggedUser>>(`/api/v1/posts/${encodeURIComponent(postId)}/tagged-users`, { query: { cursor: cursor ?? undefined } }),

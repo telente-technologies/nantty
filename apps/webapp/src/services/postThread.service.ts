@@ -1,13 +1,13 @@
 import type { ID, Page } from "@/types";
-import { THREAD_AD_SLOT_KIND, type CommentThreadPage, type ThreadAdDecision, type ThreadReply, type ThreadSort } from "@/types/postThread.type";
+import { THREAD_AD_SLOT_KIND, type CommentSectionFilter, type CommentThreadPage, type QuoteThreadItem, type ThreadAdDecision, type ThreadReply, type ThreadSort } from "@/types/postThread.type";
 
 import { sendRequestToWebappServer } from "./clientApi.service";
 
 const adSessionId = `ads_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 10)}`;
 
 export const postThreadService = {
-  fetchConversation: (postId: ID, sort: ThreadSort, cursor: string | null | undefined) =>
-    sendRequestToWebappServer<Page<ThreadReply>>(`/api/v1/posts/${postId}/thread`, { query: { sort, cursor: cursor ?? undefined } }),
+  fetchConversation: (postId: ID, sort: ThreadSort, cursor: string | null | undefined, filter: CommentSectionFilter = "all") =>
+    sendRequestToWebappServer<Page<ThreadReply | QuoteThreadItem>>(`/api/v1/posts/${postId}/thread`, { query: { sort, cursor: cursor ?? undefined, filter: filter === "all" ? undefined : filter } }),
   fetchThreadReplies: (commentId: ID, cursor: string | null | undefined) =>
     sendRequestToWebappServer<Page<ThreadReply>>(`/api/v1/comments/${commentId}/thread`, { query: { cursor: cursor ?? undefined } }),
   fetchCommentThread: (commentId: ID, cursor: string | null | undefined) =>
