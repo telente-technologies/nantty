@@ -296,6 +296,18 @@ func (f LegalVersionFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.LegalVersionMutation", m)
 }
 
+// The LinkedProfileFunc type is an adapter to allow the use of ordinary
+// function as LinkedProfile mutator.
+type LinkedProfileFunc func(context.Context, *ent.LinkedProfileMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f LinkedProfileFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.LinkedProfileMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.LinkedProfileMutation", m)
+}
+
 // The OutboxEventFunc type is an adapter to allow the use of ordinary
 // function as OutboxEvent mutator.
 type OutboxEventFunc func(context.Context, *ent.OutboxEventMutation) (ent.Value, error)

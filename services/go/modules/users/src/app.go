@@ -31,6 +31,7 @@ import (
 	creatorstatus "zudomart/modules/users/src/modules/creatorStatus"
 	identityverification "zudomart/modules/users/src/modules/identityVerification"
 	"zudomart/modules/users/src/modules/legal"
+	linkedprofiles "zudomart/modules/users/src/modules/linkedProfiles"
 	notificationdirectory "zudomart/modules/users/src/modules/notificationDirectory"
 	"zudomart/modules/users/src/modules/privacy"
 	"zudomart/modules/users/src/modules/profiles"
@@ -81,6 +82,7 @@ func StartUsersModuleWithSettings(ctx context.Context, settings configs.UsersSet
 		Client: client, Settings: settings, Logger: logger, Now: time.Now,
 		PlatformSettings: identityports.NewCachedPlatformSettings(identityports.Default, settings.PlatformSettingsTtl, logger),
 		OwnedStores:      integrations.CatalogOwnedStores{Database: database, Schema: settings.CatalogSchema},
+		Catalog:          integrations.CatalogOwnedStores{Database: database, Schema: settings.CatalogSchema},
 		AccessVerifier:   jwtauth.NewAccessTokenVerifierFromKeySetProvider(publishedKeySetFromAuth, settings.TokenIssuer, settings.TokenAudience),
 	}
 	if err := legal.SeedReferenceData(ctx, usersContainer); err != nil {
@@ -98,6 +100,11 @@ func StartUsersModuleWithSettings(ctx context.Context, settings configs.UsersSet
 	if err := addresses.SealPlaintextPhones(ctx, usersContainer); err != nil {
 		_ = database.Close()
 		return nil, err
+	}
+	if report, err := linkedprofiles.BackfillRegistry(ctx, usersContainer); err != nil {
+		logger.Error("linked profile backfill failed", slog.Any("error", err))
+	} else if report.Registered > 0 {
+		logger.Info("linked profiles registered", slog.Int("registered", report.Registered), slog.Int("held", report.Held), slog.Int("heldAccounts", report.HeldAccounts))
 	}
 	if settings.Privacy.MoneyInternalUrl != "" {
 		usersContainer.PendingWithdrawals = integrations.NewHttpPendingWithdrawalChecker(settings.Privacy.MoneyInternalUrl, settings.Privacy.MoneyInternalToken)
@@ -121,6 +128,7 @@ func (module *Module) MountRoutes(mux *http.ServeMux) {
 	usernames.Mount(mux, module.container)
 	actingprofiles.Mount(mux, module.container)
 	businessprofiles.Mount(mux, module.container)
+	linkedprofiles.Mount(mux, module.container)
 	creatorstatus.Mount(mux, module.container)
 	privacy.Mount(mux, module.container)
 	accountenforcement.Mount(mux, module.container)

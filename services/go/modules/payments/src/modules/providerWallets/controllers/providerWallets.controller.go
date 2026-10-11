@@ -29,8 +29,9 @@ type walletResponse struct {
 
 // A wallet that is not provisioned yet is a normal state for a read, not a conflict: the clients show the verify prompt.
 type walletNotReadyResponse struct {
-	Wallet *models.ProviderWalletView `json:"wallet"`
-	Status string                     `json:"status"`
+	Wallet   *models.ProviderWalletView `json:"wallet"`
+	Status   string                     `json:"status"`
+	Balances models.WalletBalancesView  `json:"balances"`
 }
 
 func (controller ProviderWalletsController) GetMyWallet(writer http.ResponseWriter, request *http.Request) {
@@ -42,7 +43,7 @@ func (controller ProviderWalletsController) GetMyWallet(writer http.ResponseWrit
 	response, err := controller.readWallet(request, principal.UserId)
 	writer.Header().Set("Cache-Control", "no-store")
 	if errors.Is(err, services.ErrProviderWalletMissing) {
-		httpserver.WriteJsonResponse(writer, http.StatusOK, walletNotReadyResponse{Status: "not_ready"})
+		httpserver.WriteJsonResponse(writer, http.StatusOK, walletNotReadyResponse{Status: "not_ready", Balances: models.WalletBalancesView{Currency: "NGN"}})
 		return
 	}
 	if err != nil {

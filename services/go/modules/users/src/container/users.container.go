@@ -28,6 +28,12 @@ type Container struct {
 	Eligibility        VerificationEligibilityAssessor
 	PlatformSettings   *identityports.CachedPlatformSettings
 	OwnedStores        OwnedStoreLookup
+	Catalog            CatalogEntities
+}
+
+type CatalogEntities interface {
+	FindBrands(ctx context.Context, ownerAccountId *uuid.UUID, brandIds []uuid.UUID) ([]integrations.CatalogBrand, error)
+	FindStoresOfAccounts(ctx context.Context, accountIds []uuid.UUID) ([]integrations.CatalogStore, error)
 }
 
 type OwnedStoreLookup interface {

@@ -278,6 +278,20 @@ func (_c *ProfileCreate) SetNillableStatus(v *profile.Status) *ProfileCreate {
 	return _c
 }
 
+// SetPublishingHeld sets the "publishing_held" field.
+func (_c *ProfileCreate) SetPublishingHeld(v bool) *ProfileCreate {
+	_c.mutation.SetPublishingHeld(v)
+	return _c
+}
+
+// SetNillablePublishingHeld sets the "publishing_held" field if the given value is not nil.
+func (_c *ProfileCreate) SetNillablePublishingHeld(v *bool) *ProfileCreate {
+	if v != nil {
+		_c.SetPublishingHeld(*v)
+	}
+	return _c
+}
+
 // SetUpdatedAt sets the "updated_at" field.
 func (_c *ProfileCreate) SetUpdatedAt(v time.Time) *ProfileCreate {
 	_c.mutation.SetUpdatedAt(v)
@@ -399,6 +413,10 @@ func (_c *ProfileCreate) defaults() {
 	if _, ok := _c.mutation.Status(); !ok {
 		v := profile.DefaultStatus
 		_c.mutation.SetStatus(v)
+	}
+	if _, ok := _c.mutation.PublishingHeld(); !ok {
+		v := profile.DefaultPublishingHeld
+		_c.mutation.SetPublishingHeld(v)
 	}
 	if _, ok := _c.mutation.UpdatedAt(); !ok {
 		v := profile.DefaultUpdatedAt()
@@ -529,6 +547,9 @@ func (_c *ProfileCreate) check() error {
 			return &ValidationError{Name: "status", err: fmt.Errorf(`ent: validator failed for field "Profile.status": %w`, err)}
 		}
 	}
+	if _, ok := _c.mutation.PublishingHeld(); !ok {
+		return &ValidationError{Name: "publishing_held", err: errors.New(`ent: missing required field "Profile.publishing_held"`)}
+	}
 	if _, ok := _c.mutation.UpdatedAt(); !ok {
 		return &ValidationError{Name: "updated_at", err: errors.New(`ent: missing required field "Profile.updated_at"`)}
 	}
@@ -646,6 +667,10 @@ func (_c *ProfileCreate) createSpec() (*Profile, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.Status(); ok {
 		_spec.SetField(profile.FieldStatus, field.TypeEnum, value)
 		_node.Status = value
+	}
+	if value, ok := _c.mutation.PublishingHeld(); ok {
+		_spec.SetField(profile.FieldPublishingHeld, field.TypeBool, value)
+		_node.PublishingHeld = value
 	}
 	if value, ok := _c.mutation.UpdatedAt(); ok {
 		_spec.SetField(profile.FieldUpdatedAt, field.TypeTime, value)

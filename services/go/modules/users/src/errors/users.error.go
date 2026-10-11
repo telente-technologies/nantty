@@ -15,6 +15,12 @@ var (
 	ErrCreatorApplicationExists = httpserver.NewApiError(http.StatusConflict, "CREATOR_APPLICATION_EXISTS", "Your creator application is already pending or approved.")
 )
 
+var (
+	ErrProfileLimitStoreOrBusiness = httpserver.NewApiError(http.StatusConflict, "PROFILE_LIMIT_STORE_OR_BUSINESS", "You can have one Store or one Business page, not both.")
+	ErrProfileLimitOneBrand        = httpserver.NewApiError(http.StatusConflict, "PROFILE_LIMIT_ONE_BRAND", "You can have one Brand.")
+	ErrProfileOnHold               = httpserver.NewApiError(http.StatusConflict, "PROFILE_ON_HOLD", "Choose which profiles to keep before using this one.")
+)
+
 func Unprocessable(message string) *httpserver.ApiError {
 	return httpserver.NewApiError(http.StatusUnprocessableEntity, "UNPROCESSABLE", message)
 }

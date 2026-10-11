@@ -708,6 +708,52 @@ var (
 			},
 		},
 	}
+	// LinkedProfilesColumns holds the columns for the "linked_profiles" table.
+	LinkedProfilesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "account_id", Type: field.TypeUUID},
+		{Name: "kind", Type: field.TypeEnum, Enums: []string{"store", "business", "brand"}},
+		{Name: "profile_id", Type: field.TypeUUID},
+		{Name: "store_id", Type: field.TypeUUID, Nullable: true},
+		{Name: "status", Type: field.TypeEnum, Enums: []string{"active", "held", "retired"}, Default: "active"},
+		{Name: "hold_reason", Type: field.TypeString, Nullable: true, Size: 300},
+		{Name: "updated_at", Type: field.TypeTime},
+	}
+	// LinkedProfilesTable holds the schema information for the "linked_profiles" table.
+	LinkedProfilesTable = &schema.Table{
+		Name:       "linked_profiles",
+		Columns:    LinkedProfilesColumns,
+		PrimaryKey: []*schema.Column{LinkedProfilesColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "linkedprofile_kind_profile_id",
+				Unique:  true,
+				Columns: []*schema.Column{LinkedProfilesColumns[3], LinkedProfilesColumns[4]},
+			},
+			{
+				Name:    "linked_profile_one_kind_per_account",
+				Unique:  true,
+				Columns: []*schema.Column{LinkedProfilesColumns[2], LinkedProfilesColumns[3]},
+				Annotation: &entsql.IndexAnnotation{
+					Where: "status = 'active'",
+				},
+			},
+			{
+				Name:    "linked_profile_store_or_business",
+				Unique:  true,
+				Columns: []*schema.Column{LinkedProfilesColumns[2]},
+				Annotation: &entsql.IndexAnnotation{
+					Where: "status = 'active' AND kind IN ('store', 'business')",
+				},
+			},
+			{
+				Name:    "linkedprofile_account_id_status",
+				Unique:  false,
+				Columns: []*schema.Column{LinkedProfilesColumns[2], LinkedProfilesColumns[6]},
+			},
+		},
+	}
 	// OutboxEventsColumns holds the columns for the "outbox_events" table.
 	OutboxEventsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID},
@@ -809,6 +855,7 @@ var (
 		{Name: "verified", Type: field.TypeBool, Default: false},
 		{Name: "profile_type", Type: field.TypeEnum, Enums: []string{"personal", "business", "brand", "government"}, Default: "personal"},
 		{Name: "status", Type: field.TypeEnum, Enums: []string{"active", "archived"}, Default: "active"},
+		{Name: "publishing_held", Type: field.TypeBool, Default: false},
 		{Name: "updated_at", Type: field.TypeTime},
 	}
 	// ProfilesTable holds the schema information for the "profiles" table.
@@ -1323,6 +1370,7 @@ var (
 		LegalNoticesTable,
 		LegalNoticeDraftsTable,
 		LegalVersionsTable,
+		LinkedProfilesTable,
 		OutboxEventsTable,
 		PolicyVersionsTable,
 		PrivacySettingsTable,

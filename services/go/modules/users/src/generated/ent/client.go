@@ -35,6 +35,7 @@ import (
 	"zudomart/modules/users/src/generated/ent/legalnotice"
 	"zudomart/modules/users/src/generated/ent/legalnoticedraft"
 	"zudomart/modules/users/src/generated/ent/legalversion"
+	"zudomart/modules/users/src/generated/ent/linkedprofile"
 	"zudomart/modules/users/src/generated/ent/outboxevent"
 	"zudomart/modules/users/src/generated/ent/policyversion"
 	"zudomart/modules/users/src/generated/ent/privacysetting"
@@ -116,6 +117,8 @@ type Client struct {
 	LegalNoticeDraft *LegalNoticeDraftClient
 	// LegalVersion is the client for interacting with the LegalVersion builders.
 	LegalVersion *LegalVersionClient
+	// LinkedProfile is the client for interacting with the LinkedProfile builders.
+	LinkedProfile *LinkedProfileClient
 	// OutboxEvent is the client for interacting with the OutboxEvent builders.
 	OutboxEvent *OutboxEventClient
 	// PolicyVersion is the client for interacting with the PolicyVersion builders.
@@ -187,6 +190,7 @@ func (c *Client) init() {
 	c.LegalNotice = NewLegalNoticeClient(c.config)
 	c.LegalNoticeDraft = NewLegalNoticeDraftClient(c.config)
 	c.LegalVersion = NewLegalVersionClient(c.config)
+	c.LinkedProfile = NewLinkedProfileClient(c.config)
 	c.OutboxEvent = NewOutboxEventClient(c.config)
 	c.PolicyVersion = NewPolicyVersionClient(c.config)
 	c.PrivacySetting = NewPrivacySettingClient(c.config)
@@ -321,6 +325,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		LegalNotice:             NewLegalNoticeClient(cfg),
 		LegalNoticeDraft:        NewLegalNoticeDraftClient(cfg),
 		LegalVersion:            NewLegalVersionClient(cfg),
+		LinkedProfile:           NewLinkedProfileClient(cfg),
 		OutboxEvent:             NewOutboxEventClient(cfg),
 		PolicyVersion:           NewPolicyVersionClient(cfg),
 		PrivacySetting:          NewPrivacySettingClient(cfg),
@@ -382,6 +387,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		LegalNotice:             NewLegalNoticeClient(cfg),
 		LegalNoticeDraft:        NewLegalNoticeDraftClient(cfg),
 		LegalVersion:            NewLegalVersionClient(cfg),
+		LinkedProfile:           NewLinkedProfileClient(cfg),
 		OutboxEvent:             NewOutboxEventClient(cfg),
 		PolicyVersion:           NewPolicyVersionClient(cfg),
 		PrivacySetting:          NewPrivacySettingClient(cfg),
@@ -435,7 +441,7 @@ func (c *Client) Use(hooks ...Hook) {
 		c.CelebrationView, c.CheckmarkGrant, c.CreatorApplication, c.DataExportRequest,
 		c.DeletionRequest, c.GeoAdminArea, c.GeoCity, c.GeoCountry, c.GeoRegion,
 		c.LegalDocument, c.LegalNotice, c.LegalNoticeDraft, c.LegalVersion,
-		c.OutboxEvent, c.PolicyVersion, c.PrivacySetting, c.Profile,
+		c.LinkedProfile, c.OutboxEvent, c.PolicyVersion, c.PrivacySetting, c.Profile,
 		c.ProfileCheckmark, c.ProfileSignal, c.ReservedUsernameRule, c.RetentionPolicy,
 		c.ShippingAddress, c.SuggestionDismissal, c.TermsAcceptance, c.Topic,
 		c.UserConsent, c.UsernameChange, c.UsernameHold, c.VerificationApplication,
@@ -455,7 +461,7 @@ func (c *Client) Intercept(interceptors ...Interceptor) {
 		c.CelebrationView, c.CheckmarkGrant, c.CreatorApplication, c.DataExportRequest,
 		c.DeletionRequest, c.GeoAdminArea, c.GeoCity, c.GeoCountry, c.GeoRegion,
 		c.LegalDocument, c.LegalNotice, c.LegalNoticeDraft, c.LegalVersion,
-		c.OutboxEvent, c.PolicyVersion, c.PrivacySetting, c.Profile,
+		c.LinkedProfile, c.OutboxEvent, c.PolicyVersion, c.PrivacySetting, c.Profile,
 		c.ProfileCheckmark, c.ProfileSignal, c.ReservedUsernameRule, c.RetentionPolicy,
 		c.ShippingAddress, c.SuggestionDismissal, c.TermsAcceptance, c.Topic,
 		c.UserConsent, c.UsernameChange, c.UsernameHold, c.VerificationApplication,
@@ -516,6 +522,8 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.LegalNoticeDraft.mutate(ctx, m)
 	case *LegalVersionMutation:
 		return c.LegalVersion.mutate(ctx, m)
+	case *LinkedProfileMutation:
+		return c.LinkedProfile.mutate(ctx, m)
 	case *OutboxEventMutation:
 		return c.OutboxEvent.mutate(ctx, m)
 	case *PolicyVersionMutation:
@@ -3765,6 +3773,139 @@ func (c *LegalVersionClient) mutate(ctx context.Context, m *LegalVersionMutation
 	}
 }
 
+// LinkedProfileClient is a client for the LinkedProfile schema.
+type LinkedProfileClient struct {
+	config
+}
+
+// NewLinkedProfileClient returns a client for the LinkedProfile from the given config.
+func NewLinkedProfileClient(c config) *LinkedProfileClient {
+	return &LinkedProfileClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `linkedprofile.Hooks(f(g(h())))`.
+func (c *LinkedProfileClient) Use(hooks ...Hook) {
+	c.hooks.LinkedProfile = append(c.hooks.LinkedProfile, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `linkedprofile.Intercept(f(g(h())))`.
+func (c *LinkedProfileClient) Intercept(interceptors ...Interceptor) {
+	c.inters.LinkedProfile = append(c.inters.LinkedProfile, interceptors...)
+}
+
+// Create returns a builder for creating a LinkedProfile entity.
+func (c *LinkedProfileClient) Create() *LinkedProfileCreate {
+	mutation := newLinkedProfileMutation(c.config, OpCreate)
+	return &LinkedProfileCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of LinkedProfile entities.
+func (c *LinkedProfileClient) CreateBulk(builders ...*LinkedProfileCreate) *LinkedProfileCreateBulk {
+	return &LinkedProfileCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *LinkedProfileClient) MapCreateBulk(slice any, setFunc func(*LinkedProfileCreate, int)) *LinkedProfileCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &LinkedProfileCreateBulk{err: fmt.Errorf("calling to LinkedProfileClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*LinkedProfileCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &LinkedProfileCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for LinkedProfile.
+func (c *LinkedProfileClient) Update() *LinkedProfileUpdate {
+	mutation := newLinkedProfileMutation(c.config, OpUpdate)
+	return &LinkedProfileUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *LinkedProfileClient) UpdateOne(_m *LinkedProfile) *LinkedProfileUpdateOne {
+	mutation := newLinkedProfileMutation(c.config, OpUpdateOne, withLinkedProfile(_m))
+	return &LinkedProfileUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *LinkedProfileClient) UpdateOneID(id uuid.UUID) *LinkedProfileUpdateOne {
+	mutation := newLinkedProfileMutation(c.config, OpUpdateOne, withLinkedProfileID(id))
+	return &LinkedProfileUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for LinkedProfile.
+func (c *LinkedProfileClient) Delete() *LinkedProfileDelete {
+	mutation := newLinkedProfileMutation(c.config, OpDelete)
+	return &LinkedProfileDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *LinkedProfileClient) DeleteOne(_m *LinkedProfile) *LinkedProfileDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *LinkedProfileClient) DeleteOneID(id uuid.UUID) *LinkedProfileDeleteOne {
+	builder := c.Delete().Where(linkedprofile.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &LinkedProfileDeleteOne{builder}
+}
+
+// Query returns a query builder for LinkedProfile.
+func (c *LinkedProfileClient) Query() *LinkedProfileQuery {
+	return &LinkedProfileQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeLinkedProfile},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a LinkedProfile entity by its id.
+func (c *LinkedProfileClient) Get(ctx context.Context, id uuid.UUID) (*LinkedProfile, error) {
+	return c.Query().Where(linkedprofile.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *LinkedProfileClient) GetX(ctx context.Context, id uuid.UUID) *LinkedProfile {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *LinkedProfileClient) Hooks() []Hook {
+	return c.hooks.LinkedProfile
+}
+
+// Interceptors returns the client interceptors.
+func (c *LinkedProfileClient) Interceptors() []Interceptor {
+	return c.inters.LinkedProfile
+}
+
+func (c *LinkedProfileClient) mutate(ctx context.Context, m *LinkedProfileMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&LinkedProfileCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&LinkedProfileUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&LinkedProfileUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&LinkedProfileDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown LinkedProfile mutation op: %q", m.Op())
+	}
+}
+
 // OutboxEventClient is a client for the OutboxEvent schema.
 type OutboxEventClient struct {
 	config
@@ -6183,11 +6324,11 @@ type (
 		BusinessDocument, CelebrationSetting, CelebrationView, CheckmarkGrant,
 		CreatorApplication, DataExportRequest, DeletionRequest, GeoAdminArea, GeoCity,
 		GeoCountry, GeoRegion, LegalDocument, LegalNotice, LegalNoticeDraft,
-		LegalVersion, OutboxEvent, PolicyVersion, PrivacySetting, Profile,
-		ProfileCheckmark, ProfileSignal, ReservedUsernameRule, RetentionPolicy,
-		ShippingAddress, SuggestionDismissal, TermsAcceptance, Topic, UserConsent,
-		UsernameChange, UsernameHold, VerificationApplication, VerificationCase,
-		VerificationEligibility []ent.Hook
+		LegalVersion, LinkedProfile, OutboxEvent, PolicyVersion, PrivacySetting,
+		Profile, ProfileCheckmark, ProfileSignal, ReservedUsernameRule,
+		RetentionPolicy, ShippingAddress, SuggestionDismissal, TermsAcceptance, Topic,
+		UserConsent, UsernameChange, UsernameHold, VerificationApplication,
+		VerificationCase, VerificationEligibility []ent.Hook
 	}
 	inters struct {
 		AccountBan, AccountRemoval, AccountRestriction, AccountSuspension, AccountTopic,
@@ -6195,11 +6336,11 @@ type (
 		BusinessDocument, CelebrationSetting, CelebrationView, CheckmarkGrant,
 		CreatorApplication, DataExportRequest, DeletionRequest, GeoAdminArea, GeoCity,
 		GeoCountry, GeoRegion, LegalDocument, LegalNotice, LegalNoticeDraft,
-		LegalVersion, OutboxEvent, PolicyVersion, PrivacySetting, Profile,
-		ProfileCheckmark, ProfileSignal, ReservedUsernameRule, RetentionPolicy,
-		ShippingAddress, SuggestionDismissal, TermsAcceptance, Topic, UserConsent,
-		UsernameChange, UsernameHold, VerificationApplication, VerificationCase,
-		VerificationEligibility []ent.Interceptor
+		LegalVersion, LinkedProfile, OutboxEvent, PolicyVersion, PrivacySetting,
+		Profile, ProfileCheckmark, ProfileSignal, ReservedUsernameRule,
+		RetentionPolicy, ShippingAddress, SuggestionDismissal, TermsAcceptance, Topic,
+		UserConsent, UsernameChange, UsernameHold, VerificationApplication,
+		VerificationCase, VerificationEligibility []ent.Interceptor
 	}
 )
 

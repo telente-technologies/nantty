@@ -32,6 +32,7 @@ import (
 	"zudomart/modules/users/src/generated/ent/legalnotice"
 	"zudomart/modules/users/src/generated/ent/legalnoticedraft"
 	"zudomart/modules/users/src/generated/ent/legalversion"
+	"zudomart/modules/users/src/generated/ent/linkedprofile"
 	"zudomart/modules/users/src/generated/ent/outboxevent"
 	"zudomart/modules/users/src/generated/ent/policyversion"
 	"zudomart/modules/users/src/generated/ent/predicate"
@@ -90,6 +91,7 @@ const (
 	TypeLegalNotice             = "LegalNotice"
 	TypeLegalNoticeDraft        = "LegalNoticeDraft"
 	TypeLegalVersion            = "LegalVersion"
+	TypeLinkedProfile           = "LinkedProfile"
 	TypeOutboxEvent             = "OutboxEvent"
 	TypePolicyVersion           = "PolicyVersion"
 	TypePrivacySetting          = "PrivacySetting"
@@ -19590,6 +19592,757 @@ func (m *LegalVersionMutation) ResetEdge(name string) error {
 	return fmt.Errorf("unknown LegalVersion edge %s", name)
 }
 
+// LinkedProfileMutation represents an operation that mutates the LinkedProfile nodes in the graph.
+type LinkedProfileMutation struct {
+	config
+	op            Op
+	typ           string
+	id            *uuid.UUID
+	created_at    *time.Time
+	account_id    *uuid.UUID
+	kind          *linkedprofile.Kind
+	profile_id    *uuid.UUID
+	store_id      *uuid.UUID
+	status        *linkedprofile.Status
+	hold_reason   *string
+	updated_at    *time.Time
+	clearedFields map[string]struct{}
+	done          bool
+	oldValue      func(context.Context) (*LinkedProfile, error)
+	predicates    []predicate.LinkedProfile
+}
+
+var _ ent.Mutation = (*LinkedProfileMutation)(nil)
+
+// linkedprofileOption allows management of the mutation configuration using functional options.
+type linkedprofileOption func(*LinkedProfileMutation)
+
+// newLinkedProfileMutation creates new mutation for the LinkedProfile entity.
+func newLinkedProfileMutation(c config, op Op, opts ...linkedprofileOption) *LinkedProfileMutation {
+	m := &LinkedProfileMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeLinkedProfile,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withLinkedProfileID sets the ID field of the mutation.
+func withLinkedProfileID(id uuid.UUID) linkedprofileOption {
+	return func(m *LinkedProfileMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *LinkedProfile
+		)
+		m.oldValue = func(ctx context.Context) (*LinkedProfile, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().LinkedProfile.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withLinkedProfile sets the old LinkedProfile of the mutation.
+func withLinkedProfile(node *LinkedProfile) linkedprofileOption {
+	return func(m *LinkedProfileMutation) {
+		m.oldValue = func(context.Context) (*LinkedProfile, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m LinkedProfileMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m LinkedProfileMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of LinkedProfile entities.
+func (m *LinkedProfileMutation) SetID(id uuid.UUID) {
+	m.id = &id
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *LinkedProfileMutation) ID() (id uuid.UUID, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *LinkedProfileMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []uuid.UUID{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().LinkedProfile.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (m *LinkedProfileMutation) SetCreatedAt(t time.Time) {
+	m.created_at = &t
+}
+
+// CreatedAt returns the value of the "created_at" field in the mutation.
+func (m *LinkedProfileMutation) CreatedAt() (r time.Time, exists bool) {
+	v := m.created_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreatedAt returns the old "created_at" field's value of the LinkedProfile entity.
+// If the LinkedProfile object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *LinkedProfileMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
+	}
+	return oldValue.CreatedAt, nil
+}
+
+// ResetCreatedAt resets all changes to the "created_at" field.
+func (m *LinkedProfileMutation) ResetCreatedAt() {
+	m.created_at = nil
+}
+
+// SetAccountID sets the "account_id" field.
+func (m *LinkedProfileMutation) SetAccountID(u uuid.UUID) {
+	m.account_id = &u
+}
+
+// AccountID returns the value of the "account_id" field in the mutation.
+func (m *LinkedProfileMutation) AccountID() (r uuid.UUID, exists bool) {
+	v := m.account_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldAccountID returns the old "account_id" field's value of the LinkedProfile entity.
+// If the LinkedProfile object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *LinkedProfileMutation) OldAccountID(ctx context.Context) (v uuid.UUID, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldAccountID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldAccountID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldAccountID: %w", err)
+	}
+	return oldValue.AccountID, nil
+}
+
+// ResetAccountID resets all changes to the "account_id" field.
+func (m *LinkedProfileMutation) ResetAccountID() {
+	m.account_id = nil
+}
+
+// SetKind sets the "kind" field.
+func (m *LinkedProfileMutation) SetKind(l linkedprofile.Kind) {
+	m.kind = &l
+}
+
+// Kind returns the value of the "kind" field in the mutation.
+func (m *LinkedProfileMutation) Kind() (r linkedprofile.Kind, exists bool) {
+	v := m.kind
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldKind returns the old "kind" field's value of the LinkedProfile entity.
+// If the LinkedProfile object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *LinkedProfileMutation) OldKind(ctx context.Context) (v linkedprofile.Kind, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldKind is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldKind requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldKind: %w", err)
+	}
+	return oldValue.Kind, nil
+}
+
+// ResetKind resets all changes to the "kind" field.
+func (m *LinkedProfileMutation) ResetKind() {
+	m.kind = nil
+}
+
+// SetProfileID sets the "profile_id" field.
+func (m *LinkedProfileMutation) SetProfileID(u uuid.UUID) {
+	m.profile_id = &u
+}
+
+// ProfileID returns the value of the "profile_id" field in the mutation.
+func (m *LinkedProfileMutation) ProfileID() (r uuid.UUID, exists bool) {
+	v := m.profile_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldProfileID returns the old "profile_id" field's value of the LinkedProfile entity.
+// If the LinkedProfile object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *LinkedProfileMutation) OldProfileID(ctx context.Context) (v uuid.UUID, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldProfileID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldProfileID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldProfileID: %w", err)
+	}
+	return oldValue.ProfileID, nil
+}
+
+// ResetProfileID resets all changes to the "profile_id" field.
+func (m *LinkedProfileMutation) ResetProfileID() {
+	m.profile_id = nil
+}
+
+// SetStoreID sets the "store_id" field.
+func (m *LinkedProfileMutation) SetStoreID(u uuid.UUID) {
+	m.store_id = &u
+}
+
+// StoreID returns the value of the "store_id" field in the mutation.
+func (m *LinkedProfileMutation) StoreID() (r uuid.UUID, exists bool) {
+	v := m.store_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldStoreID returns the old "store_id" field's value of the LinkedProfile entity.
+// If the LinkedProfile object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *LinkedProfileMutation) OldStoreID(ctx context.Context) (v *uuid.UUID, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldStoreID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldStoreID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldStoreID: %w", err)
+	}
+	return oldValue.StoreID, nil
+}
+
+// ClearStoreID clears the value of the "store_id" field.
+func (m *LinkedProfileMutation) ClearStoreID() {
+	m.store_id = nil
+	m.clearedFields[linkedprofile.FieldStoreID] = struct{}{}
+}
+
+// StoreIDCleared returns if the "store_id" field was cleared in this mutation.
+func (m *LinkedProfileMutation) StoreIDCleared() bool {
+	_, ok := m.clearedFields[linkedprofile.FieldStoreID]
+	return ok
+}
+
+// ResetStoreID resets all changes to the "store_id" field.
+func (m *LinkedProfileMutation) ResetStoreID() {
+	m.store_id = nil
+	delete(m.clearedFields, linkedprofile.FieldStoreID)
+}
+
+// SetStatus sets the "status" field.
+func (m *LinkedProfileMutation) SetStatus(l linkedprofile.Status) {
+	m.status = &l
+}
+
+// Status returns the value of the "status" field in the mutation.
+func (m *LinkedProfileMutation) Status() (r linkedprofile.Status, exists bool) {
+	v := m.status
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldStatus returns the old "status" field's value of the LinkedProfile entity.
+// If the LinkedProfile object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *LinkedProfileMutation) OldStatus(ctx context.Context) (v linkedprofile.Status, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldStatus is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldStatus requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldStatus: %w", err)
+	}
+	return oldValue.Status, nil
+}
+
+// ResetStatus resets all changes to the "status" field.
+func (m *LinkedProfileMutation) ResetStatus() {
+	m.status = nil
+}
+
+// SetHoldReason sets the "hold_reason" field.
+func (m *LinkedProfileMutation) SetHoldReason(s string) {
+	m.hold_reason = &s
+}
+
+// HoldReason returns the value of the "hold_reason" field in the mutation.
+func (m *LinkedProfileMutation) HoldReason() (r string, exists bool) {
+	v := m.hold_reason
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldHoldReason returns the old "hold_reason" field's value of the LinkedProfile entity.
+// If the LinkedProfile object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *LinkedProfileMutation) OldHoldReason(ctx context.Context) (v *string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldHoldReason is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldHoldReason requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldHoldReason: %w", err)
+	}
+	return oldValue.HoldReason, nil
+}
+
+// ClearHoldReason clears the value of the "hold_reason" field.
+func (m *LinkedProfileMutation) ClearHoldReason() {
+	m.hold_reason = nil
+	m.clearedFields[linkedprofile.FieldHoldReason] = struct{}{}
+}
+
+// HoldReasonCleared returns if the "hold_reason" field was cleared in this mutation.
+func (m *LinkedProfileMutation) HoldReasonCleared() bool {
+	_, ok := m.clearedFields[linkedprofile.FieldHoldReason]
+	return ok
+}
+
+// ResetHoldReason resets all changes to the "hold_reason" field.
+func (m *LinkedProfileMutation) ResetHoldReason() {
+	m.hold_reason = nil
+	delete(m.clearedFields, linkedprofile.FieldHoldReason)
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (m *LinkedProfileMutation) SetUpdatedAt(t time.Time) {
+	m.updated_at = &t
+}
+
+// UpdatedAt returns the value of the "updated_at" field in the mutation.
+func (m *LinkedProfileMutation) UpdatedAt() (r time.Time, exists bool) {
+	v := m.updated_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUpdatedAt returns the old "updated_at" field's value of the LinkedProfile entity.
+// If the LinkedProfile object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *LinkedProfileMutation) OldUpdatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUpdatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUpdatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUpdatedAt: %w", err)
+	}
+	return oldValue.UpdatedAt, nil
+}
+
+// ResetUpdatedAt resets all changes to the "updated_at" field.
+func (m *LinkedProfileMutation) ResetUpdatedAt() {
+	m.updated_at = nil
+}
+
+// Where appends a list predicates to the LinkedProfileMutation builder.
+func (m *LinkedProfileMutation) Where(ps ...predicate.LinkedProfile) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the LinkedProfileMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *LinkedProfileMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.LinkedProfile, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *LinkedProfileMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *LinkedProfileMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (LinkedProfile).
+func (m *LinkedProfileMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *LinkedProfileMutation) Fields() []string {
+	fields := make([]string, 0, 8)
+	if m.created_at != nil {
+		fields = append(fields, linkedprofile.FieldCreatedAt)
+	}
+	if m.account_id != nil {
+		fields = append(fields, linkedprofile.FieldAccountID)
+	}
+	if m.kind != nil {
+		fields = append(fields, linkedprofile.FieldKind)
+	}
+	if m.profile_id != nil {
+		fields = append(fields, linkedprofile.FieldProfileID)
+	}
+	if m.store_id != nil {
+		fields = append(fields, linkedprofile.FieldStoreID)
+	}
+	if m.status != nil {
+		fields = append(fields, linkedprofile.FieldStatus)
+	}
+	if m.hold_reason != nil {
+		fields = append(fields, linkedprofile.FieldHoldReason)
+	}
+	if m.updated_at != nil {
+		fields = append(fields, linkedprofile.FieldUpdatedAt)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *LinkedProfileMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case linkedprofile.FieldCreatedAt:
+		return m.CreatedAt()
+	case linkedprofile.FieldAccountID:
+		return m.AccountID()
+	case linkedprofile.FieldKind:
+		return m.Kind()
+	case linkedprofile.FieldProfileID:
+		return m.ProfileID()
+	case linkedprofile.FieldStoreID:
+		return m.StoreID()
+	case linkedprofile.FieldStatus:
+		return m.Status()
+	case linkedprofile.FieldHoldReason:
+		return m.HoldReason()
+	case linkedprofile.FieldUpdatedAt:
+		return m.UpdatedAt()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *LinkedProfileMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case linkedprofile.FieldCreatedAt:
+		return m.OldCreatedAt(ctx)
+	case linkedprofile.FieldAccountID:
+		return m.OldAccountID(ctx)
+	case linkedprofile.FieldKind:
+		return m.OldKind(ctx)
+	case linkedprofile.FieldProfileID:
+		return m.OldProfileID(ctx)
+	case linkedprofile.FieldStoreID:
+		return m.OldStoreID(ctx)
+	case linkedprofile.FieldStatus:
+		return m.OldStatus(ctx)
+	case linkedprofile.FieldHoldReason:
+		return m.OldHoldReason(ctx)
+	case linkedprofile.FieldUpdatedAt:
+		return m.OldUpdatedAt(ctx)
+	}
+	return nil, fmt.Errorf("unknown LinkedProfile field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *LinkedProfileMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case linkedprofile.FieldCreatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatedAt(v)
+		return nil
+	case linkedprofile.FieldAccountID:
+		v, ok := value.(uuid.UUID)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetAccountID(v)
+		return nil
+	case linkedprofile.FieldKind:
+		v, ok := value.(linkedprofile.Kind)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetKind(v)
+		return nil
+	case linkedprofile.FieldProfileID:
+		v, ok := value.(uuid.UUID)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetProfileID(v)
+		return nil
+	case linkedprofile.FieldStoreID:
+		v, ok := value.(uuid.UUID)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetStoreID(v)
+		return nil
+	case linkedprofile.FieldStatus:
+		v, ok := value.(linkedprofile.Status)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetStatus(v)
+		return nil
+	case linkedprofile.FieldHoldReason:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetHoldReason(v)
+		return nil
+	case linkedprofile.FieldUpdatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUpdatedAt(v)
+		return nil
+	}
+	return fmt.Errorf("unknown LinkedProfile field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *LinkedProfileMutation) AddedFields() []string {
+	return nil
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *LinkedProfileMutation) AddedField(name string) (ent.Value, bool) {
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *LinkedProfileMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	}
+	return fmt.Errorf("unknown LinkedProfile numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *LinkedProfileMutation) ClearedFields() []string {
+	var fields []string
+	if m.FieldCleared(linkedprofile.FieldStoreID) {
+		fields = append(fields, linkedprofile.FieldStoreID)
+	}
+	if m.FieldCleared(linkedprofile.FieldHoldReason) {
+		fields = append(fields, linkedprofile.FieldHoldReason)
+	}
+	return fields
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *LinkedProfileMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *LinkedProfileMutation) ClearField(name string) error {
+	switch name {
+	case linkedprofile.FieldStoreID:
+		m.ClearStoreID()
+		return nil
+	case linkedprofile.FieldHoldReason:
+		m.ClearHoldReason()
+		return nil
+	}
+	return fmt.Errorf("unknown LinkedProfile nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *LinkedProfileMutation) ResetField(name string) error {
+	switch name {
+	case linkedprofile.FieldCreatedAt:
+		m.ResetCreatedAt()
+		return nil
+	case linkedprofile.FieldAccountID:
+		m.ResetAccountID()
+		return nil
+	case linkedprofile.FieldKind:
+		m.ResetKind()
+		return nil
+	case linkedprofile.FieldProfileID:
+		m.ResetProfileID()
+		return nil
+	case linkedprofile.FieldStoreID:
+		m.ResetStoreID()
+		return nil
+	case linkedprofile.FieldStatus:
+		m.ResetStatus()
+		return nil
+	case linkedprofile.FieldHoldReason:
+		m.ResetHoldReason()
+		return nil
+	case linkedprofile.FieldUpdatedAt:
+		m.ResetUpdatedAt()
+		return nil
+	}
+	return fmt.Errorf("unknown LinkedProfile field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *LinkedProfileMutation) AddedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *LinkedProfileMutation) AddedIDs(name string) []ent.Value {
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *LinkedProfileMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *LinkedProfileMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *LinkedProfileMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *LinkedProfileMutation) EdgeCleared(name string) bool {
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *LinkedProfileMutation) ClearEdge(name string) error {
+	return fmt.Errorf("unknown LinkedProfile unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *LinkedProfileMutation) ResetEdge(name string) error {
+	return fmt.Errorf("unknown LinkedProfile edge %s", name)
+}
+
 // OutboxEventMutation represents an operation that mutates the OutboxEvent nodes in the graph.
 type OutboxEventMutation struct {
 	config
@@ -21654,6 +22407,7 @@ type ProfileMutation struct {
 	verified                   *bool
 	profile_type               *profile.ProfileType
 	status                     *profile.Status
+	publishing_held            *bool
 	updated_at                 *time.Time
 	clearedFields              map[string]struct{}
 	categories                 map[uuid.UUID]struct{}
@@ -22566,6 +23320,42 @@ func (m *ProfileMutation) ResetStatus() {
 	m.status = nil
 }
 
+// SetPublishingHeld sets the "publishing_held" field.
+func (m *ProfileMutation) SetPublishingHeld(b bool) {
+	m.publishing_held = &b
+}
+
+// PublishingHeld returns the value of the "publishing_held" field in the mutation.
+func (m *ProfileMutation) PublishingHeld() (r bool, exists bool) {
+	v := m.publishing_held
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldPublishingHeld returns the old "publishing_held" field's value of the Profile entity.
+// If the Profile object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ProfileMutation) OldPublishingHeld(ctx context.Context) (v bool, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldPublishingHeld is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldPublishingHeld requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldPublishingHeld: %w", err)
+	}
+	return oldValue.PublishingHeld, nil
+}
+
+// ResetPublishingHeld resets all changes to the "publishing_held" field.
+func (m *ProfileMutation) ResetPublishingHeld() {
+	m.publishing_held = nil
+}
+
 // SetUpdatedAt sets the "updated_at" field.
 func (m *ProfileMutation) SetUpdatedAt(t time.Time) {
 	m.updated_at = &t
@@ -22690,7 +23480,7 @@ func (m *ProfileMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *ProfileMutation) Fields() []string {
-	fields := make([]string, 0, 21)
+	fields := make([]string, 0, 22)
 	if m.created_at != nil {
 		fields = append(fields, profile.FieldCreatedAt)
 	}
@@ -22751,6 +23541,9 @@ func (m *ProfileMutation) Fields() []string {
 	if m.status != nil {
 		fields = append(fields, profile.FieldStatus)
 	}
+	if m.publishing_held != nil {
+		fields = append(fields, profile.FieldPublishingHeld)
+	}
 	if m.updated_at != nil {
 		fields = append(fields, profile.FieldUpdatedAt)
 	}
@@ -22802,6 +23595,8 @@ func (m *ProfileMutation) Field(name string) (ent.Value, bool) {
 		return m.ProfileType()
 	case profile.FieldStatus:
 		return m.Status()
+	case profile.FieldPublishingHeld:
+		return m.PublishingHeld()
 	case profile.FieldUpdatedAt:
 		return m.UpdatedAt()
 	}
@@ -22853,6 +23648,8 @@ func (m *ProfileMutation) OldField(ctx context.Context, name string) (ent.Value,
 		return m.OldProfileType(ctx)
 	case profile.FieldStatus:
 		return m.OldStatus(ctx)
+	case profile.FieldPublishingHeld:
+		return m.OldPublishingHeld(ctx)
 	case profile.FieldUpdatedAt:
 		return m.OldUpdatedAt(ctx)
 	}
@@ -23003,6 +23800,13 @@ func (m *ProfileMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetStatus(v)
+		return nil
+	case profile.FieldPublishingHeld:
+		v, ok := value.(bool)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetPublishingHeld(v)
 		return nil
 	case profile.FieldUpdatedAt:
 		v, ok := value.(time.Time)
@@ -23158,6 +23962,9 @@ func (m *ProfileMutation) ResetField(name string) error {
 		return nil
 	case profile.FieldStatus:
 		m.ResetStatus()
+		return nil
+	case profile.FieldPublishingHeld:
+		m.ResetPublishingHeld()
 		return nil
 	case profile.FieldUpdatedAt:
 		m.ResetUpdatedAt()

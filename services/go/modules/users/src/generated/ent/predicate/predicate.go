@@ -78,6 +78,9 @@ type LegalNoticeDraft func(*sql.Selector)
 // LegalVersion is the predicate function for legalversion builders.
 type LegalVersion func(*sql.Selector)
 
+// LinkedProfile is the predicate function for linkedprofile builders.
+type LinkedProfile func(*sql.Selector)
+
 // OutboxEvent is the predicate function for outboxevent builders.
 type OutboxEvent func(*sql.Selector)
 

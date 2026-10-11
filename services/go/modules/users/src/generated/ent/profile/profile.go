@@ -56,6 +56,8 @@ const (
 	FieldProfileType = "profile_type"
 	// FieldStatus holds the string denoting the status field in the database.
 	FieldStatus = "status"
+	// FieldPublishingHeld holds the string denoting the publishing_held field in the database.
+	FieldPublishingHeld = "publishing_held"
 	// FieldUpdatedAt holds the string denoting the updated_at field in the database.
 	FieldUpdatedAt = "updated_at"
 	// EdgeCategories holds the string denoting the categories edge name in mutations.
@@ -92,6 +94,7 @@ var Columns = []string{
 	FieldVerified,
 	FieldProfileType,
 	FieldStatus,
+	FieldPublishingHeld,
 	FieldUpdatedAt,
 }
 
@@ -142,6 +145,8 @@ var (
 	DefaultPushNotificationsEnabled bool
 	// DefaultVerified holds the default value on creation for the "verified" field.
 	DefaultVerified bool
+	// DefaultPublishingHeld holds the default value on creation for the "publishing_held" field.
+	DefaultPublishingHeld bool
 	// DefaultUpdatedAt holds the default value on creation for the "updated_at" field.
 	DefaultUpdatedAt func() time.Time
 	// UpdateDefaultUpdatedAt holds the default value on update for the "updated_at" field.
@@ -413,6 +418,11 @@ func ByProfileType(opts ...sql.OrderTermOption) OrderOption {
 // ByStatus orders the results by the status field.
 func ByStatus(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldStatus, opts...).ToFunc()
+}
+
+// ByPublishingHeld orders the results by the publishing_held field.
+func ByPublishingHeld(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldPublishingHeld, opts...).ToFunc()
 }
 
 // ByUpdatedAt orders the results by the updated_at field.

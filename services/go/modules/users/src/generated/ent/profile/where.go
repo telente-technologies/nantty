@@ -126,6 +126,11 @@ func Verified(v bool) predicate.Profile {
 	return predicate.Profile(sql.FieldEQ(FieldVerified, v))
 }
 
+// PublishingHeld applies equality check predicate on the "publishing_held" field. It's identical to PublishingHeldEQ.
+func PublishingHeld(v bool) predicate.Profile {
+	return predicate.Profile(sql.FieldEQ(FieldPublishingHeld, v))
+}
+
 // UpdatedAt applies equality check predicate on the "updated_at" field. It's identical to UpdatedAtEQ.
 func UpdatedAt(v time.Time) predicate.Profile {
 	return predicate.Profile(sql.FieldEQ(FieldUpdatedAt, v))
@@ -1004,6 +1009,16 @@ func StatusIn(vs ...Status) predicate.Profile {
 // StatusNotIn applies the NotIn predicate on the "status" field.
 func StatusNotIn(vs ...Status) predicate.Profile {
 	return predicate.Profile(sql.FieldNotIn(FieldStatus, vs...))
+}
+
+// PublishingHeldEQ applies the EQ predicate on the "publishing_held" field.
+func PublishingHeldEQ(v bool) predicate.Profile {
+	return predicate.Profile(sql.FieldEQ(FieldPublishingHeld, v))
+}
+
+// PublishingHeldNEQ applies the NEQ predicate on the "publishing_held" field.
+func PublishingHeldNEQ(v bool) predicate.Profile {
+	return predicate.Profile(sql.FieldNEQ(FieldPublishingHeld, v))
 }
 
 // UpdatedAtEQ applies the EQ predicate on the "updated_at" field.

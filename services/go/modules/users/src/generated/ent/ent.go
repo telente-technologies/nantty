@@ -32,6 +32,7 @@ import (
 	"zudomart/modules/users/src/generated/ent/legalnotice"
 	"zudomart/modules/users/src/generated/ent/legalnoticedraft"
 	"zudomart/modules/users/src/generated/ent/legalversion"
+	"zudomart/modules/users/src/generated/ent/linkedprofile"
 	"zudomart/modules/users/src/generated/ent/outboxevent"
 	"zudomart/modules/users/src/generated/ent/policyversion"
 	"zudomart/modules/users/src/generated/ent/privacysetting"
@@ -138,6 +139,7 @@ func checkColumn(t, c string) error {
 			legalnotice.Table:             legalnotice.ValidColumn,
 			legalnoticedraft.Table:        legalnoticedraft.ValidColumn,
 			legalversion.Table:            legalversion.ValidColumn,
+			linkedprofile.Table:           linkedprofile.ValidColumn,
 			outboxevent.Table:             outboxevent.ValidColumn,
 			policyversion.Table:           policyversion.ValidColumn,
 			privacysetting.Table:          privacysetting.ValidColumn,

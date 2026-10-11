@@ -58,6 +58,8 @@ type Profile struct {
 	ProfileType profile.ProfileType `json:"profile_type,omitempty"`
 	// Status holds the value of the "status" field.
 	Status profile.Status `json:"status,omitempty"`
+	// PublishingHeld holds the value of the "publishing_held" field.
+	PublishingHeld bool `json:"publishing_held,omitempty"`
 	// UpdatedAt holds the value of the "updated_at" field.
 	UpdatedAt time.Time `json:"updated_at,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
@@ -89,7 +91,7 @@ func (*Profile) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case profile.FieldIsPrivate, profile.FieldPushNotificationsEnabled, profile.FieldVerified:
+		case profile.FieldIsPrivate, profile.FieldPushNotificationsEnabled, profile.FieldVerified, profile.FieldPublishingHeld:
 			values[i] = new(sql.NullBool)
 		case profile.FieldKind, profile.FieldCreatorStatus, profile.FieldHandle, profile.FieldDisplayName, profile.FieldBio, profile.FieldWebsite, profile.FieldAvatarMediaKey, profile.FieldAvatarURL, profile.FieldBannerMediaKey, profile.FieldBannerURL, profile.FieldCountryCode, profile.FieldTheme, profile.FieldLanguage, profile.FieldProfileType, profile.FieldStatus:
 			values[i] = new(sql.NullString)
@@ -244,6 +246,12 @@ func (_m *Profile) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.Status = profile.Status(value.String)
 			}
+		case profile.FieldPublishingHeld:
+			if value, ok := values[i].(*sql.NullBool); !ok {
+				return fmt.Errorf("unexpected type %T for field publishing_held", values[i])
+			} else if value.Valid {
+				_m.PublishingHeld = value.Bool
+			}
 		case profile.FieldUpdatedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field updated_at", values[i])
@@ -362,6 +370,9 @@ func (_m *Profile) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("status=")
 	builder.WriteString(fmt.Sprintf("%v", _m.Status))
+	builder.WriteString(", ")
+	builder.WriteString("publishing_held=")
+	builder.WriteString(fmt.Sprintf("%v", _m.PublishingHeld))
 	builder.WriteString(", ")
 	builder.WriteString("updated_at=")
 	builder.WriteString(_m.UpdatedAt.Format(time.ANSIC))

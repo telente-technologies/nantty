@@ -40,6 +40,7 @@ func (Profile) Fields() []ent.Field {
 		field.Bool("verified").Default(false),
 		field.Enum("profile_type").Values("personal", "business", "brand", "government").Default("personal"),
 		field.Enum("status").Values("active", "archived").Default("active"),
+		field.Bool("publishing_held").Default(false),
 		field.Time("updated_at").Default(time.Now).UpdateDefault(time.Now),
 	}
 }
