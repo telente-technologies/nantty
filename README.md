@@ -22,7 +22,7 @@ Nigeria first. One account to follow creators, watch clips and lives, buy from r
 <br />
 <img alt="PostgreSQL" src="https://img.shields.io/badge/PostgreSQL-17_%2B_PostGIS-4169E1?style=flat-square&logo=postgresql&logoColor=white" />
 <img alt="RabbitMQ" src="https://img.shields.io/badge/RabbitMQ-4-FF6600?style=flat-square&logo=rabbitmq&logoColor=white" />
-<img alt="Paystack" src="https://img.shields.io/badge/Payments-Paystack-0BA4DB?style=flat-square&logo=paystack&logoColor=white" />
+<img alt="Flutterwave" src="https://img.shields.io/badge/Payments-Flutterwave-F5A623?style=flat-square" />
 <img alt="AWS" src="https://img.shields.io/badge/Cloud-AWS_(planned)-232F3E?style=flat-square&logo=amazonwebservices&logoColor=white" />
 <img alt="pnpm" src="https://img.shields.io/badge/pnpm-11-F69220?style=flat-square&logo=pnpm&logoColor=white" />
 <img alt="Status" src="https://img.shields.io/badge/status-pre--launch-3A2BFF?style=flat-square" />
@@ -58,7 +58,7 @@ Nigeria first. One account to follow creators, watch clips and lives, buy from r
 Zudomart is a social network and a marketplace in one app, built for African buyers, sellers and creators, starting with Nigeria.
 
 - **Social first.** A feed, short clips, stories, chat and lives, so people discover products the way they discover everything else: from people they follow.
-- **Commerce built in.** Product posts carry a shop tag, carts group items by seller, sellers run their own shipping, and buyers pay through Paystack.
+- **Commerce built in.** Product posts carry a shop tag, carts group items by seller, sellers run their own shipping, and buyers pay through Flutterwave.
 - **Trust as the product.** Escrow holds the buyer's money until delivery is confirmed (or 3 days after delivery). Unverified stores can only sell through escrow.
 - **Fair money.** **0% commission** on products. Sellers pay an escrow fee only when escrow is used, and creators earn from gifts, subscriptions and an ads revenue share.
 - **Currency is never hardcoded.** The server resolves the viewer's country and currency (NGN, GHS, KES, ZAR, GBP, EUR, USD, falling back to USD). Every amount is `{ amountMinor, currency }`.
@@ -239,7 +239,7 @@ flowchart LR
     MQ[[RabbitMQ<br/>zudomart.events]]
     S3[(S3 media)]
   end
-  EXT[Paystack<br/>Apple / Google IAP<br/>LiveKit, SES]
+  EXT[Flutterwave<br/>Apple / Google IAP<br/>LiveKit, SES]
 
   MOB & WEB & STU & SEL & ADS & ADM --> CDN --> ALB
   ALB -- "/api/v1/*" --> GW --> GO & TS
@@ -325,39 +325,38 @@ flowchart LR
 - Envelope: `{ id, type, source, subject, schemaVersion, occurredAt, data }`. Consumers are idempotent on the event id.
 - Quorum queues, one least-privilege RabbitMQ user per service. Amazon MQ for RabbitMQ in production. Kafka/MSK only when a trigger fires (sustained > ~5k events/s or long replay needs).
 
-### Money flow (Paystack)
+### Money flow (Flutterwave)
 
-> Payments are moving from Paystack to Flutterwave (owner, 2026-10-10): each user's money sits in their own Flutterwave payout subaccount and Zudomart never holds customer money. Target design: [docs/integrations/flutterwaveMigration.md](docs/integrations/flutterwaveMigration.md). The diagram below shows the current Paystack code.
+> Flutterwave is the only payment provider (owner, 2026-10-11). Each verified user's money sits in their own Flutterwave payout subaccount (PSA) and Zudomart never holds customer money. Full design: [docs/integrations/flutterwaveMigration.md](docs/integrations/flutterwaveMigration.md).
 
 ```mermaid
 flowchart TB
-  B["Buyer pays once per checkout<br/>card, bank transfer, USSD"] --> TX["Paystack transaction<br/>verified by webhook (HMAC-SHA512)"]
-  TX -->|"Direct group<br/>(verified store, buyer chose direct)"| SA["Seller subaccount<br/>split at charge time"]
-  SA -->|"Paystack T+1 settlement"| BANK["Seller bank"]
-  TX -->|"Escrow group<br/>(always for unverified stores)"| ESC["Held in escrow<br/>Zudomart ledger"]
-  ESC -->|"buyer confirms, or 3 days<br/>after delivery, no open dispute"| REL["Released<br/>escrow fee deducted"]
+  B["Buyer pays once per checkout<br/>card, bank transfer, USSD, or wallet"] --> TX["Flutterwave Standard checkout<br/>webhook is a hint, verified by id"]
+  TX -->|"card: settles to main,<br/>then moved"| BPSA["Buyer's PSA<br/>escrow locked in our ledger"]
+  W["Wallet buyer<br/>(already funded PSA)"] --> BPSA
+  BPSA -->|"buyer confirms, or 3 days<br/>after delivery, no open dispute"| REL["Release: buyer PSA → seller PSA<br/>escrow fee → main"]
   REL --> LOCK["Locked 24h"]
-  LOCK -->|"daily payout run"| TRF["Paystack Transfer<br/>to seller recipient"]
-  TRF --> BANK
-  ESC -.->|dispute pauses the timer| DSP["Dispute"]
-  DSP -.->|refund| RF["Refund API to buyer"]
+  LOCK -->|"withdrawal (step-up)"| TRF["Flutterwave transfer<br/>debit_subaccount = seller PSA"]
+  TRF --> BANK["Seller bank"]
+  BPSA -.->|dispute pauses the timer| DSP["Dispute"]
+  DSP -.->|refund| RF["Unlock in buyer's PSA<br/>or refund to card"]
 ```
 
 | Path | Zudomart fee | Processing | Who pays |
 | --- | --- | --- | --- |
-| Escrow order group | **1.5%** escrow fee on the seller-group total incl. shipping (**1%** on the Business plan); no fee on refunded amounts | Paystack fee (1.5% + ₦100, capped at ₦2,000, ₦100 waived under ₦2,500) | Seller, deducted at payout, shown as two lines |
-| Direct order group | none | Paystack fee only | Seller |
+| Escrow order group | **1.5%** escrow fee on the seller-group total incl. shipping (**1%** on the Business plan); no fee on refunded amounts | Flutterwave processing fee | Seller, deducted at release, shown as two lines |
+| Direct order group | none | Flutterwave processing fee only | Seller |
 | Buyer | none | none | - |
 | Commission on products | **0%** | - | - |
 
-The **go-money ledger is the single financial truth**: append-only journal entries (database triggers refuse UPDATE and DELETE), balanced per currency, integer minor units, idempotency keys stored in Postgres. Paystack balances are reconciliation evidence, never shown as anyone's wallet. Coins are a separate unit priced per channel (web, iOS, Android); digital goods inside the mobile apps use Apple IAP / Google Play Billing.
+The **go-money ledger is the single financial truth**: append-only journal entries (database triggers refuse UPDATE and DELETE), balanced per currency, integer minor units, idempotency keys stored in Postgres. Flutterwave balances are reconciliation evidence; the ledger mirrors each PSA and reconciles it daily. Coins are a separate unit priced per channel (web, iOS, Android); digital goods inside the mobile apps use Apple IAP / Google Play Billing.
 
 <details>
 <summary><b>Seller balance states and open questions</b></summary>
 
 `inEscrow → locked (24h) → available → payoutRequested → paid`. Refunds after release take from pending, then available, then book a debt repaid from future credits, so no balance goes negative.
 
-Open with Paystack (see [docs/integrations/flutterwaveMigration.md Appendix B](docs/integrations/flutterwaveMigration.md#appendix-b-paystack-reference-fallback-provider)): whether escrow can be held in a per-seller subaccount with manual settlement (path E1). The launch path (E2) keeps escrow in Zudomart's Paystack balance and pays sellers by Transfer after release plus the 24h lock, which needs legal review. Per-plan escrow fee wiring (Business 1%) is still pending in go-money.
+Open with Flutterwave (see [docs/integrations/flutterwaveMigration.md §8](docs/integrations/flutterwaveMigration.md#8-email-to-flutterwave)): fund ownership in a PSA, PSA limits and fees, and whether a card charge can settle straight into a PSA. Licence questions for counsel are in Appendix A.
 
 </details>
 
@@ -466,7 +465,7 @@ Terraform module layout lives in [infra/aws/README.md](infra/aws/README.md); **n
 | Data | PostgreSQL 17 + PostGIS (Aurora in production), Valkey 9 |
 | Messaging | RabbitMQ 4 (Amazon MQ in production), transactional outbox |
 | Media | SeaweedFS locally, S3 + CloudFront in production, LiveKit for live video |
-| Payments | Paystack (cards, bank transfer, USSD, subaccount splits, transfers), Apple IAP, Google Play Billing |
+| Payments | Flutterwave v3 (Standard checkout: card, bank transfer, USSD; payout subaccounts as per-user wallets; transfers; BVN consent), Apple IAP, Google Play Billing |
 | Email | React Email templates (`packages/emailTemplates`), AWS SES |
 | Observability | OpenTelemetry, OTel collector, Jaeger locally, CloudWatch planned |
 | Tooling | pnpm 11 workspace, Node 24, TypeScript 7, Docker Compose, GitHub Actions |
@@ -582,7 +581,8 @@ pnpm --filter @zudomart/mobile dev     # Expo
 ### 3. Start the local backend
 
 ```bash
-pnpm backend:up                 # Postgres + PostGIS, Valkey, RabbitMQ, LocalStack (SES), SeaweedFS, LiveKit, OTel, Jaeger
+pnpm backend:up                 # whole stack: core infra, migrations, every service on 127.0.0.1, demo seed (docs/runningLocally.md)
+pnpm backend:infra:up           # infra only: Postgres + PostGIS, Valkey, RabbitMQ, LocalStack (SES), SeaweedFS, LiveKit, OTel, Jaeger
 pnpm backend:dev:identity       # go-identity      :8101 (auth, users, currency, admin)
 pnpm backend:dev:gateway        # gateway          :8080
 pnpm backend:dev:social         # ts social        :8105
@@ -591,7 +591,7 @@ pnpm backend:dev:live           # go-live          :8102
 pnpm backend:dev:money          # go-money         :8103, gRPC :9103
 pnpm backend:dev:trust          # go-trust         :8106
 pnpm backend:dev:commerce       # go-commerce      :8107
-pnpm backend:down               # stop  (backend:reset also wipes volumes, backend:logs follows logs)
+pnpm backend:down               # stop services and infra (backend:infra:down, backend:reset also wipes volumes, backend:logs follows logs)
 ```
 
 One-time codes are written to the go-identity log in development (`AUTH_OTP_DELIVERY=log`, refused in production). Traces: http://localhost:16686. RabbitMQ management: http://127.0.0.1:15672.
@@ -626,7 +626,8 @@ Expo inlines `EXPO_PUBLIC_*` at bundle time, so restart Metro after a change. Po
 | `pnpm backend:test:go` | Go unit + integration tests (integration tests skip when the compose Postgres is down) |
 | `pnpm backend:test:gateway` / `:social` / `:notifications` | TypeScript service tests |
 | `pnpm backend:test:realtime` | Phoenix tests in Docker |
-| `pnpm backend:check` | 300-line file limit and no raw SQL in TypeScript |
+| `pnpm backend:lint` | 300-line file limit and no raw SQL in TypeScript |
+| `pnpm check:no-mocks` | fails when a production `next build` contains mock code or an EAS profile other than `demo` enables mocks |
 | `pnpm lint:styles` | stylelint over every CSS Module and the web-kit styles |
 | `cd apps/mobile && npx jest` | mobile contract tests (mock responses vs per-endpoint schemas) |
 | `pnpm --filter @zudomart/<app> test:contracts` | contract tests for webapp, studio, seller, ads, admin |
@@ -642,14 +643,14 @@ Only `*.example` files are committed. Production secrets come from AWS Secrets M
 
 | File | Highlights |
 | --- | --- |
-| [`services/go/.env.example`](services/go/.env.example) | `APP_ENV`, `HTTP_ADDRESS`, per-module `<MODULE>_DATABASE_URL` + `_DATABASE_SCHEMA` (role `svc_<module>`), `AUTH_SIGNING_KEY_ENCRYPTION_KEY`, `AUTH_ONE_TIME_CODE_PEPPER`, `AUTH_GOOGLE_CLIENT_IDS`, `AUTH_APPLE_CLIENT_IDS`, `RABBITMQ_URL`, `LIVEKIT_*`, `MONEY_GRPC_ADDRESS`, `MONEY_INTERNAL_GRPC_TOKEN`, `PAYSTACK_SECRET_KEY`, `DATA_ENCRYPTION_KEY`, `ESCROW_INSPECTION_PERIOD`, `SELLER_CREDIT_HOLD_PERIOD`, `COIN_CHANNEL_FEE_BPS`, `OTEL_EXPORTER_OTLP_ENDPOINT` |
+| [`services/go/.env.example`](services/go/.env.example) | `APP_ENV`, `HTTP_ADDRESS`, per-module `<MODULE>_DATABASE_URL` + `_DATABASE_SCHEMA` (role `svc_<module>`), `AUTH_SIGNING_KEY_ENCRYPTION_KEY`, `AUTH_ONE_TIME_CODE_PEPPER`, `AUTH_GOOGLE_CLIENT_IDS`, `AUTH_APPLE_CLIENT_IDS`, `RABBITMQ_URL`, `LIVEKIT_*`, `MONEY_GRPC_ADDRESS`, `MONEY_INTERNAL_GRPC_TOKEN`, `PAYMENTS_PROVIDER` (`flutterwave`), `FLUTTERWAVE_SECRET_KEY`, `FLUTTERWAVE_WEBHOOK_HASH`, `FLUTTERWAVE_MERCHANT_ID`, `DATA_ENCRYPTION_KEY`, `ESCROW_INSPECTION_PERIOD`, `SELLER_CREDIT_HOLD_PERIOD`, `COIN_CHANNEL_FEE_BPS`, `OTEL_EXPORTER_OTLP_ENDPOINT` |
 | `services/typescript/gateway/.env.example` | `PORT`, `CORS_ORIGINS`, `AUTH_JWKS_URL`, `AUTH_TOKEN_ISSUER`, `AUTH_TOKEN_AUDIENCE`, `UPSTREAM_*_URL`, `RATE_LIMIT_MAX_PER_MINUTE` |
 | `services/typescript/{social,notifications}/.env.example` | Prisma database URL and schema, RabbitMQ, SES (LocalStack locally) |
 | [`apps/mobile/.env.example`](apps/mobile/.env.example) | `EXPO_PUBLIC_API_URL`, `EXPO_PUBLIC_USE_MOCKS`, `EXPO_PUBLIC_REAL_API_PREFIXES` |
 | [`apps/webapp/.env.example`](apps/webapp/.env.example) (and studio, seller, ads, admin) | `<APP>_API_URL`, `<APP>_USE_MOCKS`, `<APP>_REAL_API_PREFIXES`, `<APP>_SESSION_SECRET`, `NEXT_PUBLIC_*` site URLs |
 | [`services/python/intelligence/.env.example`](services/python/intelligence/.env.example) | `INTELLIGENCE_SHARED_SECRET` (HMAC requests), `INTELLIGENCE_REDIS_URL`, model registry and signing secret, rate limits |
 
-<sub>`services/go/.env.example` still lists legacy `BACHS_*` keys from an abandoned provider; they are being removed (see [docs/integrations/flutterwaveMigration.md Appendix C](docs/integrations/flutterwaveMigration.md#appendix-c-checkout-and-payout-rules) section 12).</sub>
+<sub>`services/go/.env.example` still lists legacy `BACHS_*` keys from an abandoned provider; they are being removed (see [docs/integrations/flutterwaveMigration.md Appendix B](docs/integrations/flutterwaveMigration.md#appendix-b-checkout-and-payout-rules) section 12).</sub>
 
 ---
 
@@ -659,7 +660,7 @@ Only `*.example` files are committed. Production secrets come from AWS Secrets M
 
 Recommended Nigeria launch defaults from [docs/pricing.md](docs/pricing.md). Every price is an admin-editable setting stored as `amountMinor` (kobo); none is hardcoded in a UI. The owner still has to confirm them.
 
-| Product | Web (Paystack) | In app (Apple / Google) | Yearly (web, 20% off) |
+| Product | Web (Flutterwave) | In app (Apple / Google) | Yearly (web, 20% off) |
 | --- | --- | --- | --- |
 | Blue Essential (no badge: account protection, edit window) | ₦1,000/mo | ₦1,200/mo | ₦9,600 |
 | **Blue Verified** (the blue checkmark) | **₦2,500/mo** | **₦2,900/mo** | ₦24,000 |
@@ -702,7 +703,7 @@ Zudomart is **designed for NDPA 2023 and GDPR (where applicable)**. It does not 
 | Staff | separate staff tokens, password + TOTP, step-up tokens for sensitive actions, superadmins bootstrapped from the CLI, every admin action audited |
 | Money | integer minor units only; prices recomputed on the server; paid only after a verified webhook or verify call; `Idempotency-Key` on every money-moving route; append-only ledger |
 | Data | every body, query and param validated, unknown fields rejected; no string-built SQL; bank details AES-256-GCM encrypted; logs redact passwords, tokens, codes, card and bank data |
-| Cards | card numbers are only entered on Paystack's hosted page; a saved card is a provider token in the device keystore, confirmed with biometrics |
+| Cards | card numbers are only entered on Flutterwave's hosted checkout page; a saved card is a provider token in the device keystore, confirmed with biometrics |
 | Privacy | versioned consents (never one boolean), server-enforced privacy settings, data export and account deletion with grace periods, per-category retention flagged for legal review |
 | Supply chain | pnpm with `minimumReleaseAge`, blocked exotic sub-dependencies, strict build scripts, frozen lockfile in CI |
 
@@ -725,7 +726,7 @@ Report a vulnerability privately by email (see [SECURITY.md](SECURITY.md) and [C
 | Marketing site | built |
 | Auth (register, login, OTP, refresh rotation, password reset, Google/Apple, sessions) | built in go-identity and served through the gateway |
 | Users, currency, admin RBAC, privacy and data rights | built in go-identity, being wired to the clients |
-| Money core (ledger, payments with the Paystack adapter, escrow, wallet, coins, creators) | code in go-money, being migrated from the abandoned provider to Paystack; needs human financial review before go-live |
+| Money core (ledger, payments with the Flutterwave adapter, escrow, wallet, coins, creators) | code in go-money; Flutterwave is the only provider (live keys, IP whitelisting and Flutterwave's written answers pending); needs human financial review before go-live |
 | Live (sessions, guests, battles, gifts, points, LiveKit tokens) | code in go-live, not wired to the clients yet |
 | Commerce, ads, trust, social, notifications, realtime | code landing in their services; not wired to the clients yet |
 | Intelligence | stateless scoring service built; deterministic fallbacks first |
@@ -750,8 +751,8 @@ flowchart LR
 <details>
 <summary><b>Top open items before launch</b></summary>
 
-- **Security P0s:** services verify JWTs themselves instead of trusting gateway headers; Paystack webhook HMAC with replay protection; per-route login and OTP rate limits in Valkey plus WAF rules; Phoenix topic authorization; upload pipeline (size and type policy, malware scan, moderation before publish, private KYC bucket).
-- **Money:** idempotency keys in Postgres in the same transaction as the write; gift rows owned by go-money; status and escrow on the order group; Paystack escrow model (E1 vs E2) confirmed; per-plan escrow fee; App Store and Play receipt verification before any mobile coin sales.
+- **Security P0s:** services verify JWTs themselves instead of trusting gateway headers; Flutterwave webhooks (`verif-hash`) treated as hints and re-verified by id, with replay protection; per-route login and OTP rate limits in Valkey plus WAF rules; Phoenix topic authorization; upload pipeline (size and type policy, malware scan, moderation before publish, private KYC bucket).
+- **Money:** idempotency keys in Postgres in the same transaction as the write; gift rows owned by go-money; status and escrow on the order group; escrow locked in the buyer's own Flutterwave payout subaccount; per-plan escrow fee; App Store and Play receipt verification before any mobile coin sales.
 - **Consent enforcement** before personalization, ads and analytics ingestion.
 - **Operations:** outbox dead-letter handling, trace ids in the event envelope, frontend tests and the six Next apps in CI, Terraform for staging.
 - **Contract drift** between mobile/web mocks and the new services: switch one domain at a time with contract tests.
@@ -774,7 +775,7 @@ Zudomart is a private, owner-led project. If you have been invited to contribute
 | Rule | Detail |
 | --- | --- |
 | Comments | Almost none. Only a non-obvious *why*. No docblocks restating code, no section banners |
-| File size | Every backend file is 300 lines or fewer (generated code excluded). `pnpm backend:check` enforces it |
+| File size | Every backend file is 300 lines or fewer (generated code excluded). `pnpm backend:lint` enforces it |
 | Persistence | TypeScript: Prisma only. Go: ent + Atlas. No raw or hand-written SQL (the exceptions are tool-generated migrations and the hand-written grants migration) |
 | Naming | `<name>.<kind>.<ext>`, camelCase multi-word names, long self-explanatory functions |
 | API shape | errors `{ message, code, issues? }`; lists `{ data, nextCursor }`; every route declares its permission and denies by default |

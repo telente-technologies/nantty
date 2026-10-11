@@ -30,6 +30,9 @@ allowBuilds:
   "unrs-resolver": true
   "lmdb": true
   "msgpackr-extract": true
+  # Denied on purpose: its postinstall only prints a version notice and is not needed at runtime
+  # (pulled in by the OpenTelemetry OTLP exporters). Listing it as false keeps strictDepBuilds passing.
+  "protobufjs": false
 
 # Refuse versions published less than 24h ago: most hijacked releases are
 # caught and unpublished within hours.

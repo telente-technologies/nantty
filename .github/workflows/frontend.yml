@@ -104,6 +104,8 @@ jobs:
         run: pnpm --filter "./apps/${{ matrix.app }}" run build
         env:
           NEXT_TELEMETRY_DISABLED: "1"
+      - name: No mock code in the production build
+        run: node scripts/checkNoMocksInBuild.mjs "${{ matrix.app }}" --require-build
 
   mobile:
     needs: changes
@@ -120,3 +122,5 @@ jobs:
       - run: pnpm --filter ./apps/mobile exec tsc --noEmit
       - run: pnpm --filter ./apps/mobile run --if-present lint
       - run: pnpm --filter ./apps/mobile test --ci
+      - name: Only the demo EAS profile may use mocks, and the production bundle has no mock modules
+        run: pnpm run check:no-mocks:mobile

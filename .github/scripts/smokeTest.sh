@@ -27,7 +27,7 @@ expect_status "unknown route is a gateway 404" 404 GET /api/v1/does-not-exist
 expect_status "internal routes are never exposed" 404 GET /api/v1/auth/internal/token
 expect_status "private route needs a token" 401 GET /api/v1/wallets/me
 expect_status "public JWKS route reaches identity" 200 GET /api/v1/policies/current -H "accept: application/json"
-expect_status "webhook route reaches go-money and rejects a bad signature" 401 POST /webhooks/paystack -H "content-type: application/json" -H "x-paystack-signature: invalid" --data '{"event":"smoke"}'
+expect_status "webhook route reaches go-money and rejects a bad signature" 401 POST /webhooks/flutterwave -H "content-type: application/json" -H "verif-hash: invalid" --data '{"event":"smoke"}'
 expect_status "disallowed origin is refused" 403 GET /healthz -H "origin: https://evil.example"
 
 if [ "$failures" -gt 0 ]; then

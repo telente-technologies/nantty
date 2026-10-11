@@ -3,5 +3,5 @@
 # internal ALB listens on HTTP inside the VPC.
 AWS-0053
 AWS-0054
-# Tasks need outbound 443 to AWS APIs, Paystack and push providers (no fixed IP ranges).
+# Tasks need outbound 443 to AWS APIs, Flutterwave and push providers (no fixed IP ranges).
 AWS-0104

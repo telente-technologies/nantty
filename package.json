@@ -14,8 +14,15 @@
     "typecheck": "pnpm -r --parallel run typecheck",
     "audit": "pnpm audit --audit-level=high",
     "lint:styles": "stylelint \"apps/*/src/**/*.module.css\" \"packages/webKit/src/**/*.css\" --allow-empty-input",
-    "backend:up": "docker compose -f infra/local/docker-compose.yml up -d --wait",
-    "backend:down": "docker compose -f infra/local/docker-compose.yml down",
+    "mode:backend": "node scripts/localMode/modeSwitch.mjs backend",
+    "mode:mock": "node scripts/localMode/modeSwitch.mjs mock",
+    "mode:status": "node scripts/localMode/modeSwitch.mjs status",
+    "backend:up": "bash scripts/localStack/backend.sh up",
+    "backend:down": "bash scripts/localStack/backend.sh down",
+    "backend:check": "node scripts/localStack/backendCheck.mjs",
+    "backend:seed": "SMOKE_IDENTITY_LOG=${SMOKE_IDENTITY_LOG:-.data/localStack/logs/goIdentity.log} SMOKE_BOOTSTRAP_SUPERADMIN_BINARY=${SMOKE_BOOTSTRAP_SUPERADMIN_BINARY:-.data/localStack/bin/bootstrapSuperadmin} services/scripts/apiSmoke/node_modules/.bin/tsx scripts/localStack/seedDemo.mts",
+    "backend:infra:up": "docker compose -f infra/local/docker-compose.yml up -d --wait",
+    "backend:infra:down": "docker compose -f infra/local/docker-compose.yml down",
     "backend:reset": "docker compose -f infra/local/docker-compose.yml down -v",
     "backend:logs": "docker compose -f infra/local/docker-compose.yml logs -f",
     "backend:rabbitmq:definitions": "node infra/local/rabbitmq/generateDefinitions.mjs",
@@ -39,7 +46,9 @@
     "backend:test:smoke": "pnpm --filter @zudomart/api-smoke test",
     "browser:e2e": "pnpm --filter @zudomart/browser-e2e app",
     "backend:dev:ads": "cd services/go && set -a && . ./.env.example && set +a && HTTP_ADDRESS=:8110 RABBITMQ_URL=amqp://go-ads:go-ads-local-only@localhost:5672/zudomart go run ./deployables/goAds",
-    "backend:check": "bash services/scripts/check-backend-file-lengths.sh && bash services/scripts/check-no-raw-sql-in-typescript.sh"
+    "backend:lint": "bash services/scripts/check-backend-file-lengths.sh && bash services/scripts/check-no-raw-sql-in-typescript.sh",
+    "check:no-mocks": "node scripts/checkNoMocksInBuild.mjs",
+    "check:no-mocks:mobile": "cd apps/mobile && EXPO_PUBLIC_USE_MOCKS=false NODE_ENV=production npx expo export --platform android --output-dir ../../.data/mobileExport --clear && cd ../.. && node scripts/checkNoMocksInBuild.mjs mobile --mobile-export .data/mobileExport"
   },
   "devDependencies": {
     "stylelint": "^17.16.0",

@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+# Runs ffmpeg/ffprobe from the local zudomart-local-ffmpeg image for hosts without them. Paths are mounted 1:1.
+set -euo pipefail
+tool="$(basename "$0")"
+root="$(cd "$(dirname "$(readlink -f "$0")")/../../../.." && pwd)"
+mounts=(-v /tmp:/tmp -v "$root:$root")
+case "$PWD" in "$root"*|/tmp*) ;; *) mounts+=(-v "$PWD:$PWD") ;; esac
+if [ -n "${TMPDIR:-}" ] && [ "${TMPDIR#/tmp}" = "$TMPDIR" ]; then mounts+=(-v "$TMPDIR:$TMPDIR"); fi
+exec docker run --rm -i --network none -u "$(id -u):$(id -g)" "${mounts[@]}" -w "$PWD" -e TMPDIR="${TMPDIR:-/tmp}" zudomart-local-ffmpeg:1 "$tool" "$@"
