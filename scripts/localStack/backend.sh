@@ -51,7 +51,8 @@ startRealtime() {
   [ -f "$ZLOGS/realtimeLogs.pid" ] && { killTree "$(cat "$ZLOGS/realtimeLogs.pid")"; rm -f "$ZLOGS/realtimeLogs.pid"; }
   if ! command -v mix >/dev/null; then log "mix not installed; realtime (chat, live sockets) stays down"; return 0; fi
   local liveToken socialToken
-  liveToken="$(grep -m1 '^LIVE_INTERNAL_API_TOKEN=' "$ROOT/services/go/.env.example" | cut -d= -f2-)"
+  liveToken="$(grep -m1 '^LIVE_INTERNAL_API_TOKEN=' "$ROOT/security/regression/sandboxSecrets.env" | cut -d= -f2-)"
+  [ -n "$liveToken" ] || liveToken="$(grep -m1 '^LIVE_INTERNAL_API_TOKEN=' "$ROOT/services/go/.env.example" | cut -d= -f2-)"
   socialToken="$(grep -m1 '^SOCIAL_INTERNAL_TOKEN=' "$ROOT/services/typescript/social/.env.example" | cut -d= -f2-)"
   ( cd "$ROOT/services/elixir/realtime"
     export MIX_ENV=dev PHX_SERVER=true REALTIME_HTTP_IP=127.0.0.1 PORT=4000
