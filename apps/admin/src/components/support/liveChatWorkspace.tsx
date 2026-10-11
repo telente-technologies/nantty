@@ -29,12 +29,12 @@ const columns: readonly DataTableColumn<LiveChatSummary>[] = [
 export function LiveChatWorkspace() {
   const [tab, setTab] = useState<(typeof tabs)[number]["key"]>("OPEN");
   const [selectedId, setSelectedId] = useState<string | null>(null);
-  const { data, errorMessage, isLoading, reload } = useAdminQuery((signal) => fetchLiveChats({ status: tab }, signal), tab);
+  const { data, errorMessage, error: queryError, isLoading, reload } = useAdminQuery((signal) => fetchLiveChats({ status: tab }, signal), tab);
   return (
     <>
       <PageHeader area="Support" title="Live chat" description="Talk to people in real time. Chats are recorded and kept for review, and they are not end-to-end encrypted." />
       <SegmentedTabs label="Chat status" items={tabs} activeKey={tab} onChange={setTab} />
-      {errorMessage ? <ErrorBlock message={errorMessage} onRetry={reload} /> : null}
+      {errorMessage ? <ErrorBlock error={queryError} message={errorMessage} onRetry={reload} /> : null}
       <DataTable caption="Live chats" columns={columns} rows={data?.items ?? []} readRowKey={(chat) => chat.id} onRowOpen={(chat) => setSelectedId(chat.id)} selectedRowKey={selectedId} isLoading={isLoading} readRowTone={(chat) => (chat.status === "WAITING" ? "danger" : null)} emptyMessage="No chats right now." />
       {selectedId ? <LiveChatPanel key={selectedId} chatId={selectedId} onClose={() => setSelectedId(null)} onChanged={reload} /> : null}
     </>

@@ -21,7 +21,7 @@ import { formatDateOnly, formatDateTime, formatMoneyForDisplay, formatRelativeTi
 import styles from "./adsReview.module.css";
 
 export function AdReviewPanel({ adId, policies, onClose, onAdChanged }: { readonly adId: string; readonly policies: readonly AdPolicyCategory[]; readonly onClose: () => void; readonly onAdChanged: () => void }) {
-  const { data: ad, errorMessage, isLoading, reload, replaceData } = useAdminQuery((signal) => fetchAdForReviewDetail(adId, signal), adId);
+  const { data: ad, errorMessage, error: queryError, isLoading, reload, replaceData } = useAdminQuery((signal) => fetchAdForReviewDetail(adId, signal), adId);
   const [pendingDecision, setPendingDecision] = useState<"approve" | "reject" | null>(null);
   const [policyCategoryId, setPolicyCategoryId] = useState("");
   const [isCriticalOverrideConfirmed, setIsCriticalOverrideConfirmed] = useState(false);
@@ -59,7 +59,7 @@ export function AdReviewPanel({ adId, policies, onClose, onAdChanged }: { readon
         </>
       ) : null}
     >
-      {errorMessage ? <ErrorBlock message={errorMessage} onRetry={reload} /> : null}
+      {errorMessage ? <ErrorBlock error={queryError} message={errorMessage} onRetry={reload} /> : null}
       {isLoading && !ad ? <LoadingBlock /> : null}
       {ad ? (
         <>

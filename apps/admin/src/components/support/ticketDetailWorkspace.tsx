@@ -28,7 +28,7 @@ export function TicketDetailWorkspace({ ticketId }: { readonly ticketId: string 
     showToast(message);
   }
 
-  if (errorMessage) return <ErrorBlock message={errorMessage} onRetry={reload} />;
+  if (errorMessage) return <ErrorBlock variant="section" message={errorMessage} onRetry={reload} />;
   if (isLoading || !data) return <LoadingBlock lines={8} label="Loading ticket" />;
   const { ticket } = data;
   return (

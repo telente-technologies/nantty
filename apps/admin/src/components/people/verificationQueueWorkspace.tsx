@@ -49,7 +49,7 @@ export function VerificationQueueWorkspace() {
   const [search, setSearch] = useState("");
   const [cursor, setCursor] = useState<string | undefined>();
   const filters = { status: statusTab, color: color || undefined, search: search.trim() || undefined, cursor };
-  const { data, errorMessage, isLoading, reload } = useAdminQuery((signal) => fetchVerificationApplications(filters, signal), JSON.stringify(filters));
+  const { data, errorMessage, error: queryError, isLoading, reload } = useAdminQuery((signal) => fetchVerificationApplications(filters, signal), JSON.stringify(filters));
 
   return (
     <>
@@ -60,7 +60,7 @@ export function VerificationQueueWorkspace() {
         <TextField label="Search" isLabelHidden type="search" placeholder="Search @username, legal or business name" value={search} onChange={(event) => { setSearch(event.target.value); setCursor(undefined); }} />
         <SelectField label="Badge" isLabelHidden options={verificationColorOptions} value={color} onChange={(event) => { setColor(event.target.value); setCursor(undefined); }} />
       </Toolbar>
-      {errorMessage ? <ErrorBlock message={errorMessage} onRetry={reload} /> : null}
+      {errorMessage ? <ErrorBlock error={queryError} message={errorMessage} onRetry={reload} /> : null}
       <DataTable
         caption="Verification requests"
         columns={verificationColumns}

@@ -65,7 +65,7 @@ export function UsersListWorkspace({ initialSearch }: { readonly initialSearch: 
   }, [searchText]);
 
   const filters = { search: debouncedSearch.trim() || undefined, status, verification, role, risk, cursor };
-  const { data, errorMessage, isLoading, reload } = useAdminQuery((signal) => fetchPlatformUsers(filters, signal), JSON.stringify(filters));
+  const { data, errorMessage, error: queryError, isLoading, reload } = useAdminQuery((signal) => fetchPlatformUsers(filters, signal), JSON.stringify(filters));
 
   function updateFilter(setter: (value: string) => void) {
     return (value: string) => {
@@ -84,7 +84,7 @@ export function UsersListWorkspace({ initialSearch }: { readonly initialSearch: 
         <SelectField label="Role" isLabelHidden options={userRoleOptions} value={role} onChange={(event) => updateFilter(setRole)(event.target.value)} />
         <SelectField label="Risk" isLabelHidden options={userRiskOptions} value={risk} onChange={(event) => updateFilter(setRisk)(event.target.value)} />
       </div>
-      {errorMessage ? <ErrorBlock message={errorMessage} onRetry={reload} /> : null}
+      {errorMessage ? <ErrorBlock error={queryError} message={errorMessage} onRetry={reload} /> : null}
       <DataTable
         caption="Users"
         columns={userColumns}

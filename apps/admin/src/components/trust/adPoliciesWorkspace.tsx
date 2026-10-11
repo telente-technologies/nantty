@@ -27,7 +27,7 @@ const policyColumns: readonly DataTableColumn<AdPolicyCategory>[] = [
 ];
 
 export function AdPoliciesWorkspace() {
-  const { data, errorMessage, isLoading, reload } = useAdminQuery((signal) => fetchAdPolicyCategories(signal), "ad-policies");
+  const { data, errorMessage, error: queryError, isLoading, reload } = useAdminQuery((signal) => fetchAdPolicyCategories(signal), "ad-policies");
   const [editingPolicy, setEditingPolicy] = useState<AdPolicyCategory | "new" | null>(null);
   const { can } = useAdminPermissions();
   const { showToast } = useToast();
@@ -37,7 +37,7 @@ export function AdPoliciesWorkspace() {
     <>
       <PageHeader area="Trust & safety · Ads" title="Policy categories" description="The rules reviewers cite when they reject an ad." actions={canManage ? <Button variant="primary" iconName="plus16" onClick={() => setEditingPolicy("new")}>New category</Button> : null} />
       <LinkTabs label="Ads administration" items={advertiserSectionTabs} />
-      {errorMessage ? <ErrorBlock message={errorMessage} onRetry={reload} /> : null}
+      {errorMessage ? <ErrorBlock error={queryError} message={errorMessage} onRetry={reload} /> : null}
       <DataTable caption="Ad policy categories" columns={policyColumns} rows={data?.items ?? []} readRowKey={(policy) => policy.id} onRowOpen={canManage ? (policy) => setEditingPolicy(policy) : undefined} isLoading={isLoading} emptyMessage="No policy categories yet." />
       {editingPolicy ? (
         <AdPolicyEditorDialog

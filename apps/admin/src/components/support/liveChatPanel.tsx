@@ -19,7 +19,7 @@ import { TicketConversation } from "./ticketConversation";
 
 export function LiveChatPanel({ chatId, onClose, onChanged }: { readonly chatId: string; readonly onClose: () => void; readonly onChanged: () => void }) {
   const { admin } = useAdminSession();
-  const { data: detail, errorMessage, isLoading, reload, replaceData } = useAdminQuery((signal) => fetchLiveChatDetail(chatId, signal), chatId);
+  const { data: detail, errorMessage, error: queryError, isLoading, reload, replaceData } = useAdminQuery((signal) => fetchLiveChatDetail(chatId, signal), chatId);
   const macros = useAdminQuery((signal) => fetchSupportMacros(signal), "chat-macros");
   const [body, setBody] = useState("");
   const mutation = useAdminMutation(async (action: { kind: "claim" | "end" | "send"; body?: string }) => {
@@ -56,7 +56,7 @@ export function LiveChatPanel({ chatId, onClose, onChanged }: { readonly chatId:
   return (
     <SidePanel isOpen onClose={onClose} width="wide" title={chat ? chat.topic : "Live chat"} subtitle={chat ? <UserIdentity user={chat.user} size={22} /> : null}
       footer={chat && chat.status !== "ENDED" ? (<>{!isMine ? <Button size="small" variant="primary" isBusy={mutation.isRunning} onClick={() => run({ kind: "claim" })}>Take this chat</Button> : null}{isMine ? <Button size="small" variant="quietDanger" onClick={() => run({ kind: "end" })}>End chat</Button> : null}</>) : null}>
-      {errorMessage ? <ErrorBlock message={errorMessage} onRetry={reload} /> : null}
+      {errorMessage ? <ErrorBlock error={queryError} message={errorMessage} onRetry={reload} /> : null}
       {isLoading && !detail ? <LoadingBlock /> : null}
       {detail && chat ? (
         <>

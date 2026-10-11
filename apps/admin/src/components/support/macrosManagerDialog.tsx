@@ -58,7 +58,7 @@ export function MacrosManagerDialog({ canManage, onClose }: { readonly canManage
 
   return (
     <ModalDialog intent="notes" isOpen width="wide" title="Reply macros" description="Saved replies agents insert into tickets. Variables are filled in for each customer." onClose={onClose} footer={canManage && !editingMacro ? <Button variant="primary" iconName="plus16" onClick={() => startEditing("new")}>New macro</Button> : undefined}>
-      {macros.errorMessage ? <ErrorBlock message={macros.errorMessage} onRetry={macros.reload} /> : null}
+      {macros.errorMessage ? <ErrorBlock error={macros.error} message={macros.errorMessage} onRetry={macros.reload} /> : null}
       {macros.isLoading && !macros.data ? <LoadingBlock lines={4} /> : null}
       {editingMacro ? (
         <form className={styles.form} onSubmit={saveMacro}>

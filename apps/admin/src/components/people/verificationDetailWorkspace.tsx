@@ -34,7 +34,7 @@ export function VerificationDetailWorkspace({ verificationId }: { readonly verif
   const [openDocument, setOpenDocument] = useState<VerificationDocumentSummary | null>(null);
   const { data: application, errorMessage, isLoading, reload, replaceData } = useAdminQuery((signal) => fetchVerificationApplicationDetail(verificationId, signal), verificationId);
 
-  if (errorMessage) return <ErrorBlock message={errorMessage} onRetry={reload} />;
+  if (errorMessage) return <ErrorBlock variant="section" message={errorMessage} onRetry={reload} />;
   if (isLoading || !application) return <LoadingBlock lines={8} />;
   const canViewDocuments = can("verification:documents");
 

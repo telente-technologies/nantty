@@ -37,7 +37,7 @@ export function ManipulationFlagsWorkspace() {
       <div className={styles.stack}>
         <NoticeBanner tone="info">Flags come from the intelligence service and open as suspension cases. Decide them in the suspension queue so the decision is audited with a reason.</NoticeBanner>
         <SelectField label="Status" options={statusOptions} value={status} onChange={(event) => setStatus(event.target.value)} />
-        {query.errorMessage ? <ErrorBlock message={query.errorMessage} onRetry={query.reload} /> : (
+        {query.errorMessage ? <ErrorBlock error={query.error} message={query.errorMessage} onRetry={query.reload} /> : (
           <DataTable<SuspensionCaseSummary>
             caption="Engagement manipulation flags"
             rows={query.data?.items ?? []}

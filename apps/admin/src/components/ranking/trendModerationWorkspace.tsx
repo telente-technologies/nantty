@@ -76,7 +76,7 @@ export function TrendModerationWorkspace() {
             </div>
           </Card>
         ) : null}
-        {query.isLoading ? <LoadingBlock /> : query.errorMessage ? <ErrorBlock message={query.errorMessage} onRetry={query.reload} /> : (
+        {query.isLoading ? <LoadingBlock /> : query.errorMessage ? <ErrorBlock error={query.error} message={query.errorMessage} onRetry={query.reload} /> : (
           <DataTable<TrendRemoval>
             caption={`Removed trends and headlines (version ${query.data?.version ?? 0}, last changed by ${query.data?.updatedBy ?? "nobody"})`}
             rows={removals}

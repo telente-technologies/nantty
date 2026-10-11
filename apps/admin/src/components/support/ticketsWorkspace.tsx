@@ -85,7 +85,7 @@ export function TicketsWorkspace() {
         <SelectField label="Priority" isLabelHidden options={supportPriorityOptions} value={priority} onChange={(event) => updateFilter(() => setPriority(event.target.value))} />
         <SelectField label="Category" isLabelHidden options={supportCategoryOptions} value={category} onChange={(event) => updateFilter(() => setCategory(event.target.value))} />
       </Toolbar>
-      {tickets.errorMessage ? <ErrorBlock message={tickets.errorMessage} onRetry={tickets.reload} /> : null}
+      {tickets.errorMessage ? <ErrorBlock error={tickets.error} message={tickets.errorMessage} onRetry={tickets.reload} /> : null}
       <DataTable
         caption="Support tickets"
         columns={columns}

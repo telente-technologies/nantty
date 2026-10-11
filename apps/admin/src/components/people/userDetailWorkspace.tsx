@@ -32,7 +32,7 @@ export function UserDetailWorkspace({ userId }: { readonly userId: string }) {
   const { data: detail, errorMessage, isLoading, reload, replaceData } = useAdminQuery((signal) => fetchPlatformUserDetail(userId, signal), userId);
   const acceptUpdatedDetail = (updated: UserDetail) => replaceData(() => updated);
 
-  if (errorMessage) return <ErrorBlock message={errorMessage} onRetry={reload} />;
+  if (errorMessage) return <ErrorBlock variant="section" message={errorMessage} onRetry={reload} />;
   if (isLoading || !detail) return <LoadingBlock lines={8} />;
   const { user } = detail;
   const tabs = [
