@@ -36,19 +36,8 @@ func startFlowHarness(t *testing.T) *flowHarness {
 	t.Helper()
 	money := paymentstesting.StartMoneyHarnessWithFlutterwave(t)
 	harness := &flowHarness{MoneyHarness: money, fake: money.Flutterwave, gateway: money.Payments.Application.Gateway, clock: time.Now().UTC()}
-	harness.usersSchema = moneytesting.CreateEmptySchema(t, money.Database, "users")
-	for _, statement := range []string{
-		`CREATE TABLE "` + harness.usersSchema + `".profiles (account_id uuid NOT NULL, kind text NOT NULL, country_code text)`,
-		`CREATE TABLE "` + harness.usersSchema + `".profile_checkmarks (account_id uuid NOT NULL, color text, status text)`,
-		`CREATE TABLE "` + harness.usersSchema + `".verification_cases (account_id uuid NOT NULL, status text, liveness_result text, face_match_result text)`,
-	} {
-		if _, err := money.Database.Exec(statement); err != nil {
-			t.Fatal(err)
-		}
-	}
+	harness.usersSchema = money.UsersSchema
 	container := money.Payments.Application.Container
-	container.Settings.UsersSchema = harness.usersSchema
-	container.Settings.Paystack.WebhookIpAllowlist = []string{"10.9.9.9"}
 	container.Now = func() time.Time { return harness.clock }
 	escrowSettings := escrowconfigs.EscrowSettings{
 		Money:                 moneytesting.MoneyModuleSettingsForTests("escrow", moneytesting.CreateEmptySchema(t, money.Database, "escrow"), money.LedgerSchema),
