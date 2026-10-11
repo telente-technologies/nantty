@@ -5,7 +5,9 @@ from pydantic import AwareDatetime, Field
 from src.dtos.common_dto import ContractModel, RankingResponseMetadata
 from src.validators.common_field_validator import OpaqueIdentifier
 
-ModerationCategory = Literal["scam", "spam", "harassment", "violence", "prohibited_goods", "personal_data"]
+ModerationCategory = Literal[
+    "scam", "spam", "harassment", "violence", "prohibited_goods", "personal_data", "self_harm", "hate"
+]
 ModerationContentType = Literal["post", "comment", "clip_caption", "bio", "product_listing", "store_description"]
 
 

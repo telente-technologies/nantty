@@ -26,7 +26,7 @@ class ContentModerationService:
             scores[category] = score
             signals[category] = matched_codes
         sources = ["heuristic"]
-        degraded = False
+        model_failed = False
         model = self.model_holder.active_model
         if model is not None:
             try:
@@ -38,7 +38,8 @@ class ContentModerationService:
                 logging.getLogger("intelligence.moderation").exception(
                     "text_moderation_model_failed", extra={"content_id": request.content_id}
                 )
-                degraded = True
+                model_failed = True
+        degraded = model is None or model_failed
         categories = sorted(
             (
                 CategoryScore(category=category, score=round(score, 6), signals=signals.get(category, []))
@@ -56,7 +57,7 @@ class ContentModerationService:
             if top_score >= REVIEW_SCORE_THRESHOLD
             else "allow"
         )
-        if degraded and action == "allow":
+        if model_failed and action == "allow":
             action = "review"
         return ContentModerationResponse(
             content_id=request.content_id,

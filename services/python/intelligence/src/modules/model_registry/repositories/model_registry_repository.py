@@ -3,6 +3,9 @@ import json
 import os
 import pickle
 import re
+import shutil
+import time
+import uuid
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
@@ -20,6 +23,7 @@ ARTIFACT_FILE_NAME = "artifact.pkl"
 METADATA_FILE_NAME = "metadata.json"
 ACTIVE_POINTER_FILE_NAME = "ACTIVE"
 LAST_GOOD_POINTER_FILE_NAME = "LAST_GOOD"
+STALE_STAGING_SECONDS = 3600
 VERSION_PATTERN = re.compile(r"^[0-9]{8}T[0-9]{6}Z-[0-9a-f]{8}$")
 
 
@@ -49,7 +53,8 @@ class ModelRegistry:
     def register_model_version(
         self, model_name: str, bundle: Any, metadata: dict[str, Any], created_at: datetime
     ) -> str:
-        staging_directory = self.model_directory(model_name) / f".staging-{os.getpid()}"
+        self.remove_stale_staging_directories(model_name)
+        staging_directory = self.model_directory(model_name) / f".staging-{os.getpid()}-{uuid.uuid4().hex[:8]}"
         staging_directory.mkdir(parents=True, exist_ok=True)
         staging_artifact_path = staging_directory / ARTIFACT_FILE_NAME
         with staging_artifact_path.open("wb") as artifact_file:
@@ -69,8 +74,21 @@ class ModelRegistry:
         (staging_directory / METADATA_FILE_NAME).write_text(
             json.dumps(complete_metadata, indent=2, sort_keys=True), encoding="utf-8"
         )
-        os.replace(staging_directory, self.model_directory(model_name) / version)
+        version_directory = self.model_directory(model_name) / version
+        if version_directory.is_dir():
+            shutil.rmtree(staging_directory, ignore_errors=True)
+            return version
+        os.replace(staging_directory, version_directory)
         return version
+
+    def remove_stale_staging_directories(self, model_name: str) -> None:
+        directory = self.model_directory(model_name)
+        if not directory.is_dir():
+            return
+        cutoff = time.time() - STALE_STAGING_SECONDS
+        for entry in directory.iterdir():
+            if entry.name.startswith(".staging-") and entry.is_dir() and entry.stat().st_mtime < cutoff:
+                shutil.rmtree(entry, ignore_errors=True)
 
     def read_active_version(self, model_name: str) -> str | None:
         pointer_path = self.model_directory(model_name) / ACTIVE_POINTER_FILE_NAME

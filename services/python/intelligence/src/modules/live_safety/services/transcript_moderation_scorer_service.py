@@ -14,6 +14,8 @@ TRANSCRIPT_CATEGORY_BY_TEXT_CATEGORY = {
     "spam": "spam",
     "prohibited_goods": "prohibited_goods",
     "personal_data": "personal_data",
+    "self_harm": "self_harm",
+    "hate": "hate_speech",
 }
 SELF_HARM_PATTERNS = tuple(
     re.compile(pattern, re.IGNORECASE)

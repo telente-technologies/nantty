@@ -4,6 +4,7 @@ from typing import Any
 
 from src.modules.model_registry.models.model_bundle_model import REGISTERED_MODEL_NAMES, LoadedModel
 from src.modules.model_registry.repositories.model_registry_repository import ModelRegistry
+from src.utils.background_executor_util import run_in_background_executor
 
 model_reload_logger = logging.getLogger("intelligence.model_reload")
 MAXIMUM_CONSECUTIVE_REJECTIONS_BEFORE_ROLLBACK = 3
@@ -93,7 +94,7 @@ class ActiveModelHolder:
         return reloaded_model_names
 
     async def reload_changed_models(self) -> list[str]:
-        return await asyncio.to_thread(self.reload_changed_models_synchronously)
+        return await run_in_background_executor(self.reload_changed_models_synchronously)
 
     async def run_periodic_reload_loop(self, reload_interval_seconds: float) -> None:
         while True:

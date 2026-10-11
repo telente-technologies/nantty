@@ -46,6 +46,20 @@ CATEGORY_RULES: dict[ModerationCategory, tuple[SignalRule, ...]] = {
         ),
         compile_rule("stolen_goods", 0.7, r"\b(stolen|hot) (phones?|goods|cards?)\b"),
     ),
+    "self_harm": (
+        compile_rule("self_harm_intent", 0.6, r"\b(kill|hurt|harm|cut)\s+my\s*self\b"),
+        compile_rule("end_life_statement", 0.6, r"\bend\s+(it\s+all|my\s+life)\b"),
+        compile_rule("wish_to_die", 0.55, r"\b(want|going)\s+to\s+die\b"),
+        compile_rule("suicide_mention", 0.5, r"\bsuicid(e|al)\b"),
+    ),
+    "hate": (
+        compile_rule(
+            "dehumanizing_generalization",
+            0.6,
+            r"\b(all|those|these)\s+\w+\s+(are|should be)\s+(vermin|animals|subhuman|exterminated|wiped out)\b",
+        ),
+        compile_rule("extermination_call", 0.55, r"\b(exterminate|eradicate)\s+(all|every)\s+\w+\b"),
+    ),
     "personal_data": (
         compile_rule("phone_number", 0.3, r"(?<!\d)(\+?\d[\d\s\-]{9,14}\d)(?!\d)"),
         compile_rule("email_address", 0.3, r"[\w.+-]+@[\w-]+\.[\w.]+"),

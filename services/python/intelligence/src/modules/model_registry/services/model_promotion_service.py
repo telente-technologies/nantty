@@ -50,6 +50,7 @@ def register_and_maybe_activate_model(
     training_details: dict[str, Any],
     force_activation: bool,
 ) -> dict[str, Any]:
+    active_before_decision = registry.read_active_version(model_name)
     should_activate, decision_reason = decide_whether_to_activate(
         registry, model_name, primary_metric_name, primary_metric_value
     )
@@ -60,11 +61,25 @@ def register_and_maybe_activate_model(
         "environment": describe_training_environment(),
     }
     version = registry.register_model_version(model_name, bundle, metadata, datetime.now(UTC))
-    activated = should_activate or force_activation
+    if should_activate and registry.read_active_version(model_name) != active_before_decision:
+        should_activate, decision_reason = decide_whether_to_activate(
+            registry, model_name, primary_metric_name, primary_metric_value
+        )
+    forced = force_activation and not should_activate
+    if forced and primary_metric_value is None and registry.read_active_version(model_name) is not None:
+        forced = False
+        decision_reason = "force_refused_without_primary_metric"
+    activated = should_activate or forced
     if activated:
         registry.activate_model_version(model_name, version)
-    promotion_logger.info(
+    promotion_logger.warning(
         "model_registered",
-        extra={"model_name": model_name, "model_version": version, "activated": activated, "reason": decision_reason},
+        extra={
+            "model_name": model_name,
+            "model_version": version,
+            "activated": activated,
+            "forced": forced,
+            "reason": decision_reason,
+        },
     )
     return {"modelName": model_name, "version": version, "activated": activated, "decision": decision_reason}

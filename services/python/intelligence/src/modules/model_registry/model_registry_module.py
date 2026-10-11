@@ -15,4 +15,6 @@ class ModelRegistryModule:
         container.query_bus.register_handler(DescribeActiveModelsHandler(container.model_holder))
 
     def build_router(self, container: ApplicationContainer) -> APIRouter:
-        return build_model_registry_router(ModelRegistryController(container.query_bus))
+        return build_model_registry_router(
+            ModelRegistryController(container.query_bus, container.settings.request_deadline_seconds)
+        )
