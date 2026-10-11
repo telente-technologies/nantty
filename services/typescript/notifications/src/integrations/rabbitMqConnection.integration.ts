@@ -20,6 +20,12 @@ export function reconnectDelayMs(attempt: number): number {
 
 export const sleep = (milliseconds: number) => new Promise<void>((resolve) => setTimeout(resolve, milliseconds));
 
+const liveConnections = new Set<RabbitMqConnection>();
+
+export async function checkRabbitMqConnections(): Promise<void> {
+  await Promise.all([...liveConnections].map((connection) => connection.checkReachable()));
+}
+
 export class RabbitMqConnection {
   private model: Promise<AmqpModel> | undefined;
   private closed = false;
@@ -30,7 +36,20 @@ export class RabbitMqConnection {
     private readonly logger: Logger,
     private readonly connectFn: AmqpConnect = connectToRabbitMq,
     private readonly delayMs: (attempt: number) => number = reconnectDelayMs,
-  ) {}
+  ) {
+    liveConnections.add(this);
+  }
+
+  public async checkReachable(): Promise<void> {
+    if (this.closed) throw new Error("rabbitmq connection is closed");
+    try {
+      const channel = await (await this.connected()).createConfirmChannel();
+      await channel.close();
+    } catch (error) {
+      this.model = undefined;
+      throw error;
+    }
+  }
 
   public async openChannel(): Promise<AmqpChannel> {
     for (let attempt = 0; ; attempt += 1) {
@@ -47,6 +66,7 @@ export class RabbitMqConnection {
 
   public async close(): Promise<void> {
     this.closed = true;
+    liveConnections.delete(this);
     const current = this.model;
     this.model = undefined;
     await current?.then((model) => model.close()).catch(() => undefined);

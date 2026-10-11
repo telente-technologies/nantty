@@ -3,7 +3,7 @@ import type { EmailTemplateKey } from "@zudomart/email-templates";
 export type InboxCategory = "orders" | "social" | "system";
 export type InboxKind = "mention" | "videoReply" | "quote" | "repost";
 export type MailKind = "transactional" | "security" | "legal" | "marketing";
-export type DeliveryChannel = "in_app" | "email" | "push";
+export type DeliveryChannel = "in_app" | "email" | "push" | "fanout";
 export type DeliveryStatus = "pending" | "sent" | "skipped" | "failed";
 
 export interface ActorSummary {

@@ -111,7 +111,7 @@ export function createContainer(config: NotificationsConfig, logger: Logger, ove
   const subscriberSource = overrides.postNotificationSubscribers !== undefined ? overrides.postNotificationSubscribers
     : config.digestSource === null ? null : new SocialHttpPostNotificationSubscribers(config.digestSource.baseUrl, config.digestSource.internalToken);
   const runPostNotificationFanout = subscriberSource === null ? null : new RunPostNotificationFanoutHandler({
-    source: subscriberSource, dispatcher, jobQueue, jobsQueueUrl: config.queues.jobs, batchSize: postNotificationFanoutBatchSize, lookupAuthor: (accountId) => identity.getRecipient(accountId),
+    source: subscriberSource, dispatcher, jobQueue, jobsQueueUrl: config.queues.jobs, batchSize: postNotificationFanoutBatchSize, lookupAuthor: (accountId) => identity.getRecipient(accountId), pages: deliveries,
   });
   const sendWidgetRefresh = new SendWidgetRefreshHandler({
     deliveries, deviceTokens, pushSender, jobQueue, jobsQueueUrl: config.queues.jobs, storyAudience: subscriberSource, batchSize: widgetRefreshFanoutBatchSize, maximumDirectRecipients: widgetRefreshMaximumDirectRecipients, logger,

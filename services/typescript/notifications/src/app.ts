@@ -3,6 +3,7 @@ import { createLogger, type Logger } from "@zudojs/logger";
 
 import type { NotificationsConfig } from "./configs/notifications.config.js";
 import { createGatewayIdentityMiddleware } from "./middlewares/gatewayIdentity.middleware.js";
+import { checkRabbitMqConnections } from "./integrations/rabbitMqConnection.integration.js";
 import { createContainer, type Container, type ContainerOverrides } from "./container.js";
 import { createDomainEventMessageHandler, createJobMessageHandler, createSesFeedbackMessageHandler } from "./jobs/messageRouting.job.js";
 import { DigestSchedulerJob } from "./jobs/digestScheduler.job.js";
@@ -15,27 +16,30 @@ import { createUnsubscribeRoutes } from "./modules/unsubscribe/routes/unsubscrib
 import type { RouteDefinition } from "./types/route.type.js";
 import { convertErrorToResponse, json } from "./utils/http.util.js";
 import { matchRoute } from "./utils/routeMatcher.util.js";
+import { runReadinessChecks } from "./utils/readiness.util.js";
+import { markRequestRoute, withRequestMetrics } from "./telemetry/requestMetrics.js";
 
 export function createRoutes(container: Container): readonly RouteDefinition[] {
   return [...createInboxRoutes(container), ...createUnsubscribeRoutes(container), ...createBulkCampaignRoutes(container), ...createEmailTemplateRoutes(container)];
 }
 
-async function checkDatabaseReadiness(container: Container | undefined) {
+async function checkReadiness(container: Container | undefined, checkBroker: () => Promise<void>) {
   if (container === undefined) return json(200, { status: "ready" });
-  try {
-    await container.prisma.notification.count({ take: 1 });
-    return json(200, { status: "ready" });
-  } catch {
-    return json(503, { status: "unavailable" });
-  }
+  const { ready } = await runReadinessChecks({
+    database: () => container.prisma.notification.count({ take: 1 }),
+    rabbitmq: checkBroker,
+  });
+  return ready ? json(200, { status: "ready" }) : json(503, { status: "unavailable" });
 }
 
-export function createRequestHandler(routes: readonly RouteDefinition[], logger: Logger, container?: Container) {
+export function createRequestHandler(routes: readonly RouteDefinition[], logger: Logger, container?: Container, checkBroker: () => Promise<void> = checkRabbitMqConnections) {
   return async (request: HttpRequestContext) => {
+    if (request.path === "/healthz" || request.path === "/readyz") markRequestRoute(request, request.path);
     if (request.path === "/healthz") return json(200, { status: "up", service: "notifications" });
-    if (request.path === "/readyz") return checkDatabaseReadiness(container);
+    if (request.path === "/readyz") return checkReadiness(container, checkBroker);
     const match = matchRoute(routes, request.method, request.path);
     if (match === undefined) return json(404, { message: "Not found.", code: "NOT_FOUND" });
+    markRequestRoute(request, match.route.path);
     try {
       return await match.route.handler({ request, params: match.params });
     } catch (error) {
@@ -59,7 +63,7 @@ export function createNotificationsApp(config: NotificationsConfig, options: { r
   });
   const server = createHttpServer({
     adapter: createNodeHttpAdapter({ host: config.host, port: config.port, maxBodySize: 1024 * 1024, trustProxy: true }),
-    handler: (request: HttpRequestContext) => pipeline.execute(request, createResponseContext()),
+    handler: withRequestMetrics((request: HttpRequestContext) => pipeline.execute(request, createResponseContext())),
   });
   const consumers = config.consumersEnabled
     ? [

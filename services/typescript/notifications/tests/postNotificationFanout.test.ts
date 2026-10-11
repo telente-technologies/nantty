@@ -15,10 +15,10 @@ const clip = { postId: "p1", authorId: author, kind: "clip", audience: "everyone
 const lookupAuthor = async (accountId: string) => (accountId === author ? { username: "adaeze" } : null);
 
 class PagedSubscribers implements PostNotificationSubscriberSource {
-  public readonly calls: { scope: PostNotificationScope; cursor: string | null; limit: number }[] = [];
+  public readonly calls: { scope: PostNotificationScope; cursor: string | null; limit: number; postId: string | undefined }[] = [];
   public constructor(private readonly userIds: readonly string[]) {}
-  public async listPage(_authorId: string, scope: PostNotificationScope, cursor: string | null, limit: number) {
-    this.calls.push({ scope, cursor, limit });
+  public async listPage(_authorId: string, scope: PostNotificationScope, cursor: string | null, limit: number, postId?: string) {
+    this.calls.push({ scope, cursor, limit, postId });
     const start = cursor === null ? 0 : Number(cursor);
     return { data: this.userIds.slice(start, start + limit).map((userId) => ({ userId })), nextCursor: start + limit < this.userIds.length ? String(start + limit) : null };
   }
@@ -26,7 +26,7 @@ class PagedSubscribers implements PostNotificationSubscriberSource {
 
 let harness: TestHarness;
 const fanoutFor = (source: PostNotificationSubscriberSource, batchSize = 200) =>
-  new RunPostNotificationFanoutHandler({ source, dispatcher: harness.dispatcher, jobQueue: harness.jobQueue, jobsQueueUrl: "jobs-queue", batchSize, lookupAuthor });
+  new RunPostNotificationFanoutHandler({ source, dispatcher: harness.dispatcher, jobQueue: harness.jobQueue, jobsQueueUrl: "jobs-queue", batchSize, lookupAuthor, pages: harness.deliveries });
 
 async function drain(fanout: RunPostNotificationFanoutHandler): Promise<number> {
   let pages = 0;
@@ -86,6 +86,31 @@ describe("batched fan-out", () => {
     expect(harness.notifications.rows).toHaveLength(1);
     expect(harness.notifications.rows[0]).toMatchObject({ body: "posted a new post.", data: { url: "/post/p1" } });
     expect(harness.pushSender.sent).toHaveLength(0);
+  });
+
+  it("does not fork a second page chain when a finished page job is redelivered", async () => {
+    const source = new PagedSubscribers(Array.from({ length: 5 }, (_, index) => `fan-${index}`));
+    const fanout = fanoutFor(source, 2);
+    await fanout.startFromEvent(makeEvent("post.created", clip));
+    await fanout.startFromEvent(makeEvent("post.created", clip));
+    const [first, second] = harness.jobQueue.takeAll();
+    await fanout.execute(first!.body as unknown as PostNotificationFanoutJob);
+    expect(await fanout.execute(second!.body as unknown as PostNotificationFanoutJob)).toEqual({ recipients: 0 });
+    await fanout.execute(first!.body as unknown as PostNotificationFanoutJob);
+    expect(await drain(fanout)).toBe(2);
+    expect(source.calls).toHaveLength(3);
+    expect(harness.notifications.rows).toHaveLength(5);
+  });
+
+  it("asks social to stop paging once the post is gone, and never sends a post id for lives", async () => {
+    const source = new PagedSubscribers(["fan-a"]);
+    await fanoutFor(source).startFromEvent(makeEvent("post.created", clip));
+    await drain(fanoutFor(source));
+    expect(source.calls[0]?.postId).toBe("p1");
+    const live = { liveId: "l1", hostId: author, title: "t", hostName: "A", hostHandle: "adaeze", visibility: "public", notifyUserIds: [] };
+    await fanoutFor(source).startFromEvent(makeEvent("live.started", live, "evt-live"));
+    await drain(fanoutFor(source));
+    expect(source.calls.at(-1)).toMatchObject({ scope: "lives", postId: undefined });
   });
 
   it("skips push when the recipient turned push off account-wide", async () => {

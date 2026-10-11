@@ -121,6 +121,14 @@ export const paymentSucceeded: EventMapping = (event, data) => {
   return [intentFor(event, data.text("ownerUserId"), { category: "payments", inApp: { category: "system", title, body: "Your payment was received.", data: { paymentId: data.text("paymentId") } } })];
 };
 
+export const paymentDuplicateRefunded: EventMapping = (event, data) => [
+  intentFor(event, data.text("ownerUserId"), {
+    category: "payments",
+    inApp: { category: "system", title: "Extra payment refunded", body: "You were charged twice for one purchase, so we are sending the extra payment back to you.", data: { paymentId: data.text("paymentId") } },
+    push: { title: "Extra payment refunded", body: "We are sending back a second payment for the same purchase.", data: { paymentId: data.text("paymentId") } },
+  }),
+];
+
 export const coinPurchaseCompleted: EventMapping = (event, data) => [
   intentFor(event, data.text("userId"), {
     category: "payments",

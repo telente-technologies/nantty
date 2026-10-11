@@ -1,5 +1,6 @@
 import { postNotificationDispatchConcurrency, postNotificationFanoutJobType } from "../../../../constants/delivery.constant.js";
 import type { JobQueue } from "../../../../interfaces/jobQueue.interface.js";
+import type { DeliveryRepository } from "../../../../interfaces/repositories.interface.js";
 import type { PostNotificationSubscriberSource } from "../../../../interfaces/postNotificationSubscribers.interface.js";
 import type { NotificationDispatcherService } from "../../../delivery/services/notificationDispatcher.service.js";
 import type { DomainEventEnvelope } from "../../../../types/domainEvent.type.js";
@@ -12,6 +13,7 @@ export interface RunPostNotificationFanoutDeps {
   readonly jobsQueueUrl: string;
   readonly batchSize: number;
   readonly lookupAuthor: AuthorLookup;
+  readonly pages?: Pick<DeliveryRepository, "claim" | "finish">;
 }
 
 export class RunPostNotificationFanoutHandler {
@@ -29,12 +31,16 @@ export class RunPostNotificationFanoutHandler {
   }
 
   public async execute(job: PostNotificationFanoutJob): Promise<{ readonly recipients: number }> {
-    const page = await this.deps.source.listPage(job.authorId, job.scope, job.cursor, this.deps.batchSize);
+    const claim = await this.deps.pages?.claim({ dedupeKey: `${job.eventId}:fanout:${job.scope}:${job.cursor ?? "start"}`, eventId: job.eventId, userId: null, channel: "fanout", templateKey: null, mailKind: null });
+    if (claim?.alreadyProcessed === true) return { recipients: 0 };
+    const postId = job.content.kind === "live" ? undefined : job.content.targetId;
+    const page = await this.deps.source.listPage(job.authorId, job.scope, job.cursor, this.deps.batchSize, postId);
     const recipients = page.data.map((entry) => entry.userId).filter((userId) => userId !== job.authorId);
     for (let start = 0; start < recipients.length; start += postNotificationDispatchConcurrency) {
       await Promise.all(recipients.slice(start, start + postNotificationDispatchConcurrency).map((userId) => this.deps.dispatcher.dispatch(postNotificationIntent(job, userId))));
     }
     if (page.nextCursor !== null) await this.enqueue({ ...job, cursor: page.nextCursor });
+    if (claim !== undefined) await this.deps.pages?.finish(claim.id, "sent", {});
     return { recipients: recipients.length };
   }
 }

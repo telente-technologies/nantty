@@ -37,6 +37,7 @@ export const eventMappings: Readonly<Record<string, EventMapping>> = {
   "dispute.sellerResponseOverdue": escrowMoney.disputeSellerResponseOverdue,
   "payment.failed": escrowMoney.paymentFailed,
   "payment.succeeded": escrowMoney.paymentSucceeded,
+  "payment.duplicateRefunded": escrowMoney.paymentDuplicateRefunded,
   "coinPurchase.completed": escrowMoney.coinPurchaseCompleted,
   "payout.completed": escrowMoney.payoutCompleted,
   "payout.failed": escrowMoney.payoutFailed,
