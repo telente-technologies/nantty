@@ -1,27 +1,36 @@
 ---
 title: Seller fees: 0% commission, escrow fee and processing
-summary: Zudomart takes no commission on products. Escrow orders pay a 1.5% escrow fee (1% on Business) plus payment processing.
-tags: fees, commission, escrow fee, processing fee
-related: seller-payouts, seller-plans, how-escrow-protects-your-order
+summary: Zudomart takes no commission on products. Escrow orders pay a 1.5% escrow fee (1% on Business) plus the payment processing fee.
+tags: fees, commission, escrow fee, processing fee, charges, how much una dey collect, deductions
+related: seller-payouts, seller-plans, how-escrow-protects-your-order, escrow-or-direct-payment, seller-refunds
 ---
 
-## No commission
+Zudomart takes **0% commission** on what you sell. You only see fees that pay for escrow protection and for moving money.
 
-Zudomart takes **0%** of what you sell.
+## Who this is for
 
-## Escrow orders
+Sellers in every country. Escrow, and so the escrow fee, only applies to orders paid in Nigeria. Orders paid directly (verified stores in Nigeria, and all orders outside Nigeria) only carry the processing fee.
 
-- **Escrow fee**: 1.5% of the order total for your store, including shipping. 1% on the Business plan.
-- **Payment processing fee**: the payment provider's actual fee, for example for Nigerian cards 1.5% + ₦100 (the ₦100 is waived under ₦2,500, and the fee is capped at ₦2,000).
+## The fees
 
-Both are deducted from your payout and shown as two separate lines. No escrow fee is charged on any part that's refunded.
+- **Escrow fee**: 1.5% of the escrow order total for your store, shipping included. On the Business seller plan it drops to 1%.
+- **Payment processing**: the actual card or transfer fee our payment partner charges to collect the buyer's payment. It varies by payment method and country.
+- **Withdrawals**: a flat bank transfer fee on each withdrawal, shown on the **Withdraw** screen before you confirm.
 
-## Direct payments (verified stores)
+The escrow fee and processing fee come off the order money before it is released to you. They show as two separate lines, so you can see exactly what each order cost.
 
-No Zudomart fee at all. You only cover the payment processing fee.
+## Where to see them
+
+In the seller dashboard on **dashboard.zudomart.com**, the fee breakdown lists **Escrow fee** ("Charged on each escrow order before the money is released."), **Payment processing** ("The payment provider's card and transfer fee."), **Withdrawals**, **Ads** and **Subscription** charges for the period, with your gross sales and net earnings.
 
 ## Example
 
-On a ₦20,000 escrow order: ₦300 escrow fee + ₦400 processing = ₦700. The same order paid directly costs ₦400 in processing.
+A ₦20,000 escrow order on the Free or Pro plan: the escrow fee is ₦300. On Business it is ₦200. The processing fee is added as its own line. The same order paid directly has no escrow fee, only processing.
 
-Buyers never pay a checkout fee or escrow fee.
+## Good to know
+
+- Buyers never pay a checkout fee or an escrow fee.
+- No escrow fee is charged on any part of an order that is refunded.
+- Plan charges and ads you pay from your wallet show in the same breakdown, but they are not order fees.
+
+See [Seller plans](/help/selling/seller-plans) for what Business includes and [Seller payouts](/help/selling/seller-payouts) for when money becomes yours to withdraw.
