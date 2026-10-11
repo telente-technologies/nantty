@@ -7,7 +7,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 
 import { createConfirmationStore } from "../confirmation.store";
 import { ConfirmDialogView } from "../confirmDialog";
-import { Dialog } from "../dialog";
+import { Dialog, respondToNativeClose } from "../dialog";
 import { nextTrappedFocus } from "../dialogFocus.util";
 import { dialogIntents, dialogIntentTone } from "../dialogIntent";
 import { shouldDismissSheetDrag } from "../sheetDrag.hook";
@@ -170,5 +170,14 @@ describe("Dialog in a DOM", { skip: jsdom ? false : "jsdom is not installed" }, 
     } finally {
       window.close();
     }
+  });
+});
+
+describe("native close (browser closes the dialog itself, e.g. a second Escape)", () => {
+  it("reports the close to the owner when the dialog may be dismissed", () => assert.equal(respondToNativeClose(true, false, true), "close"));
+  it("reopens a dialog that must not be dismissed so state and screen stay in sync", () => assert.equal(respondToNativeClose(true, false, false), "reopen"));
+  it("ignores the close it triggered itself while animating out", () => {
+    assert.equal(respondToNativeClose(false, true, true), "ignore");
+    assert.equal(respondToNativeClose(true, true, false), "ignore");
   });
 });

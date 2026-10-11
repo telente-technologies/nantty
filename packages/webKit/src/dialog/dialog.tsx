@@ -47,6 +47,11 @@ export function resolveDialogTone(tone: DialogTone | undefined, intent: DialogIn
   return tone ?? (intent ? dialogIntentTone(intent) : "neutral");
 }
 
+export function respondToNativeClose(isOpen: boolean, isClosing: boolean, canDismiss: boolean): "ignore" | "close" | "reopen" {
+  if (!isOpen || isClosing) return "ignore";
+  return canDismiss ? "close" : "reopen";
+}
+
 export function isDialogBusy(actions: readonly DialogAction[] | undefined): boolean {
   return (actions ?? []).some((action) => action.busy);
 }
@@ -112,6 +117,11 @@ export function Dialog({
       onCancel={(event) => {
         event.preventDefault();
         requestClose();
+      }}
+      onClose={() => {
+        const response = respondToNativeClose(isOpen, isClosing, canDismiss);
+        if (response === "close") onClose();
+        else if (response === "reopen" && typeof dialogRef.current?.showModal === "function") dialogRef.current.showModal();
       }}
       onClick={(event) => {
         if (event.target === dialogRef.current) requestClose();
