@@ -74,7 +74,7 @@ export function AdCreativeEditPanel({ ad, isOpen, onClose, onSaved }: { readonly
   }
 
   return (
-    <OverlayDialog
+    <OverlayDialog intent="edit"
       isOpen={isOpen}
       onClose={onClose}
       layout="sidePanel"

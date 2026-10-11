@@ -153,7 +153,7 @@ export function CampaignDetailPage({ campaignId }: { readonly campaignId: string
         <Card padded={false}>{adsQuery.isLoading && !adsQuery.data ? <LoadingBlock height={120} /> : <AdsTable ads={ads} campaignsById={campaignsById} adSetsById={adSetsById} onToggleAdDelivery={toggleAdDelivery} />}</Card>
       </section>
       <CampaignEditPanel campaign={campaign} isOpen={isEditPanelOpen} onClose={() => setIsEditPanelOpen(false)} onSaved={() => reloadCampaignTree()} />
-      <OverlayDialog
+      <OverlayDialog intent="delete"
         isOpen={isDeleteConfirmationOpen}
         onClose={() => setIsDeleteConfirmationOpen(false)}
         title="Delete this draft?"

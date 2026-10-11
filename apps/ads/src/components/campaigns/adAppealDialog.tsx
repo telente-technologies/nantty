@@ -42,7 +42,7 @@ export function AdAppealDialog({ ad, isOpen, onClose, onAppealed }: { readonly a
   }
 
   return (
-    <OverlayDialog
+    <OverlayDialog intent="dispute"
       isOpen={isOpen}
       onClose={onClose}
       title="Appeal this decision"

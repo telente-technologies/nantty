@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 
+import { requestConfirmation } from "@zudomart/web-kit";
+
 import { useAdAccount } from "@/components/session/adAccountProvider";
 import { Button } from "@/components/ui/button";
 import { DataTable, type DataTableColumn } from "@/components/ui/dataTable";
@@ -65,7 +67,7 @@ export function AudiencesPage() {
   }
 
   async function deleteAudience(audience: CustomAudience) {
-    if (!window.confirm(`Delete "${audience.name}"? Ad sets that use it will stop targeting it.`)) return;
+    if (!(await requestConfirmation({ title: `Delete "${audience.name}"?`, description: "Ad sets that use it will stop targeting it.", confirmLabel: "Delete audience", tone: "danger", intent: "delete" }))) return;
     try {
       await audiencesApi.deleteCustomAudience(accountId, audience.id);
       showToast("Audience deleted");
@@ -135,7 +137,7 @@ export function AudiencesPage() {
         )}
       </Card>
       {openDialog?.kind === "chooser" ? (
-        <OverlayDialog isOpen onClose={() => setOpenDialog(null)} title="Create an audience" width={640}>
+        <OverlayDialog intent="audience" isOpen onClose={() => setOpenDialog(null)} title="Create an audience" width={640}>
           <div className={styles.createGrid}>
             {createOptions.map((option) => {
               const isUnavailable = option.needsStore && !account.business;
@@ -152,7 +154,7 @@ export function AudiencesPage() {
       {openDialog?.kind === "create" ? <CreateAudienceDialog accountId={accountId} defaultCountryCode={account.countryCode} audienceType={openDialog.audienceType} sourceAudiences={audiences} onClose={() => setOpenDialog(null)} onCreated={handleAudienceCreated} /> : null}
       {openDialog?.kind === "customerList" ? <CustomerListUploadDialog accountId={accountId} defaultCountryCode={account.countryCode} onClose={() => setOpenDialog(null)} onCreated={handleAudienceCreated} /> : null}
       {openDialog?.kind === "rename" ? (
-        <OverlayDialog
+        <OverlayDialog intent="edit"
           isOpen
           onClose={() => setOpenDialog(null)}
           title="Rename audience"

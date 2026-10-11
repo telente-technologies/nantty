@@ -86,7 +86,7 @@ export function CampaignEditPanel({ campaign, isOpen, onClose, onSaved }: Campai
   }
 
   return (
-    <OverlayDialog
+    <OverlayDialog intent="ads"
       isOpen={isOpen}
       onClose={onClose}
       layout="sidePanel"

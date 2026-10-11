@@ -87,7 +87,7 @@ export function AdSetEditPanel({ adSet, isOpen, onClose, onSaved }: AdSetEditPan
   }
 
   return (
-    <OverlayDialog
+    <OverlayDialog intent="audience"
       isOpen={isOpen}
       onClose={onClose}
       layout="sidePanel"

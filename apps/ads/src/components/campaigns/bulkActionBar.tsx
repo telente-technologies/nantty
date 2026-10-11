@@ -81,7 +81,7 @@ export function BulkActionBar({ level, selectedIds, onClearSelection, onActionAp
       <Button size="small" variant="ghost" onClick={onClearSelection}>
         Clear
       </Button>
-      <OverlayDialog
+      <OverlayDialog intent="archive"
         isOpen={isArchiveConfirmationOpen}
         onClose={() => setIsArchiveConfirmationOpen(false)}
         title={`Archive ${selectedCount} ${noun}?`}

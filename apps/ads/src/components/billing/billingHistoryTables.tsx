@@ -24,6 +24,7 @@ const transactionTypeLabels: Record<BillingTransactionType, string> = {
   credit_spend: "Ad credit used",
   refund: "Refund",
   card_charge: "Card charge",
+  ad_spend_debt: "Unpaid ad delivery",
 };
 
 export function BillingHistoryTables({ accountId }: { readonly accountId: string }) {

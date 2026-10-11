@@ -81,7 +81,7 @@ export function CreateAudienceDialog({ accountId, defaultCountryCode, audienceTy
   }
 
   return (
-    <OverlayDialog
+    <OverlayDialog intent="audience"
       isOpen
       onClose={onClose}
       title={dialogTitles[audienceType]}

@@ -84,7 +84,7 @@ export function CustomerListUploadDialog({ accountId, defaultCountryCode, onClos
   }
 
   return (
-    <OverlayDialog
+    <OverlayDialog intent="upload"
       isOpen
       onClose={onClose}
       layout="sidePanel"
