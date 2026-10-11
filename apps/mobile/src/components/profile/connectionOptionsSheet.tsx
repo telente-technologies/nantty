@@ -31,7 +31,7 @@ export function ConnectionOptionsSheet({ entry, isBlockedTab, onClose, onOpenPro
     showAlertWithButtons(`Block ${entry.name}?`, "They won't be able to find your profile, see your posts or message you. They won't be told you blocked them.", [
       { text: "Cancel", style: "cancel" },
       { text: "Block", style: "destructive", onPress: () => block.mutate(entry) },
-    ]);
+    ], { intent: "block" });
   const options: ActionSheetOption[] = [
     { label: "View profile", icon: <UserCircle24Icon />, onPress: () => onOpenProfile(entry.id) },
     ...(isBlockedTab ? [] : [{ label: "Send message", icon: <ChatCircle24Icon />, onPress: () => requireAuthAfterClosingModal(onClose, () => onMessage(entry), "send messages") }]),

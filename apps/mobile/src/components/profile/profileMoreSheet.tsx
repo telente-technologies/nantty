@@ -2,7 +2,7 @@ import { useMutation } from "@tanstack/react-query";
 import { useState, type ReactNode } from "react";
 import { Pressable, ScrollView, Share, StyleSheet, View } from "react-native";
 
-import { ChatTeardropText24Icon, Coin24Icon, Flag24Icon, Prohibit24Icon, SealCheck20Icon, Share24Icon } from "@/components/icons";
+import { ChatTeardropText24Icon, Coin24Icon, Flag24Icon, Prohibit24Icon, SealCheck20Icon, ShareFat24Icon } from "@/components/icons";
 import { useShareToChat } from "@/components/chatSafety/shareToChat.hook";
 import { BottomSheet } from "@/components/ui/bottomSheet";
 import { Text } from "@/components/ui/text";
@@ -63,7 +63,7 @@ export function ProfileMoreSheet({ profile, visible, onClose, onBlocked, onSendC
             colors.text,
             <ChatTeardropText24Icon size={20} color={colors.textMuted} />,
           )}
-          {option("Share or copy profile link", shareProfileLink, colors.text, <Share24Icon size={20} color={colors.textMuted} />)}
+          {option("Share or copy profile link", shareProfileLink, colors.text, <ShareFat24Icon size={20} color={colors.textMuted} />)}
           {onSendCoins
             ? option(`Send coins to ${profile.name}`, () =>
                 requireSignIn(() => {
@@ -78,7 +78,7 @@ export function ProfileMoreSheet({ profile, visible, onClose, onBlocked, onSendC
           {option(block.isPending ? "Blocking…" : `Block ${profile.name}`, () => requireSignIn(() => showAlertWithButtons(`Block ${profile.name}?`, "They won't be able to find your profile, see your posts or message you. They won't be told you blocked them.", [
               { text: "Cancel", style: "cancel" },
               { text: "Block", style: "destructive", onPress: () => block.mutate() },
-            ]), "block accounts"), colors.error, <Prohibit24Icon size={20} color={colors.error} />)}
+            ], { intent: "block" }), "block accounts"), colors.error, <Prohibit24Icon size={20} color={colors.error} />)}
         </View>
       ) : mode === "report" ? (
         <ScrollView style={styles.list} contentContainerStyle={styles.menu}>

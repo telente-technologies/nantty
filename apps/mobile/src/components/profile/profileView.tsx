@@ -1,8 +1,9 @@
 import { useState, type ReactNode } from "react";
-import { ActivityIndicator, FlatList, RefreshControl, StyleSheet, View } from "react-native";
+import { FlatList, RefreshControl, StyleSheet, View } from "react-native";
 
 import { ProfileCelebration } from "@/components/celebrations/profileCelebration";
 import { PostCard } from "@/components/feed/postCard";
+import { BrandLoader } from "@/components/ui/brandLoader";
 import { Text } from "@/components/ui/text";
 import { useTheme } from "@/theme";
 import type { Post, User } from "@/types";
@@ -56,7 +57,7 @@ export function ProfileView(props: ProfileViewProps) {
   if (!props.profile) {
     return (
       <View style={styles.loading}>
-        <ActivityIndicator color={colors.primary} />
+        <BrandLoader size="lg" />
       </View>
     );
   }
@@ -65,7 +66,7 @@ export function ProfileView(props: ProfileViewProps) {
     <FlatList
       data={visiblePosts}
       keyExtractor={(post) => post.id}
-      refreshControl={<RefreshControl refreshing={props.refreshing} onRefresh={props.onRefresh} tintColor={colors.primary} />}
+      refreshControl={<RefreshControl refreshing={props.refreshing} onRefresh={props.onRefresh} tintColor={colors.primary} colors={[colors.primary]} />}
       ListHeaderComponent={
         <View style={styles.header}>
           <ProfileSummary
@@ -81,8 +82,8 @@ export function ProfileView(props: ProfileViewProps) {
           {props.isLocked ? null : <ProfileTabs tabs={props.tabs} activeTab={activeTab} onChangeTab={changeTabOrOpenStore} />}
         </View>
       }
-      renderItem={({ item }) => (
-        <PostCard post={item} showPinnedBadge onPress={() => props.onPressPost(item)} onPressMore={props.onPressPostMore ? () => props.onPressPostMore!(item) : undefined} />
+      renderItem={({ item, index }) => (
+        <PostCard post={item} surface="profile" position={index} showPinnedBadge onPress={() => props.onPressPost(item)} onPressMore={props.onPressPostMore ? () => props.onPressPostMore!(item) : undefined} />
       )}
       ListEmptyComponent={
         props.isLocked ? (
@@ -97,7 +98,7 @@ export function ProfileView(props: ProfileViewProps) {
         ) : activeTab === "sounds" ? (
           <ProfileSoundsList profile={props.profile} />
         ) : props.loading ? (
-          <ActivityIndicator style={styles.empty} color={colors.primary} />
+          <BrandLoader size="md" style={styles.empty} />
         ) : (
           <Text size={typeScale.md} lineHeight={16.8} color={colors.textSubtle} align="center" style={styles.empty}>
             {EMPTY_TAB_MESSAGES[activeTab]}

@@ -45,6 +45,7 @@ export function useDeleteOwnReview(productId: string) {
   const confirmDelete = (reviewId: string) =>
     showDialog({
       title: "Delete your review?",
+      intent: "delete",
       message: "Your rating and review will be removed from this product.",
       actions: [
         { label: "Cancel", style: "secondary" },

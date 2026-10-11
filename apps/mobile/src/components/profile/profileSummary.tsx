@@ -1,6 +1,7 @@
 import { MentionText } from "@/components/mentions/mentionText";
 import { useNavigation, type NavigationProp } from "@react-navigation/native";
 import { Image } from "expo-image";
+import type { ReactNode } from "react";
 import { Pressable, StyleSheet, View } from "react-native";
 
 import { CalendarDots16Icon } from "@/components/icons";
@@ -18,6 +19,8 @@ export interface ProfileAction {
   readonly label: string;
   readonly onPress: () => void;
   readonly highlighted?: boolean;
+  readonly icon?: ReactNode;
+  readonly accessibilityLabel?: string;
 }
 
 export interface ProfileSummaryProps {
@@ -127,17 +130,21 @@ export function ProfileSummary({ profile, variant, actions, identityAction, onPr
           <Pressable
             key={action.label}
             accessibilityRole="button"
+            accessibilityLabel={action.accessibilityLabel}
             onPress={action.onPress}
             style={({ pressed }) => [
               styles.action,
               { borderRadius: isOwn ? 8 : 4 },
+              action.icon !== undefined && styles.iconAction,
               action.highlighted && styles.highlightedAction,
               pressed && styles.pressed,
             ]}
           >
-            <Text size={14} lineHeight={16.8} color={action.highlighted ? colors.white : colors.text}>
-              {action.label}
-            </Text>
+            {action.icon ?? (
+              <Text size={14} lineHeight={16.8} color={action.highlighted ? colors.white : colors.text}>
+                {action.label}
+              </Text>
+            )}
           </Pressable>
         ))}
       </View>
@@ -185,6 +192,7 @@ const useStyles = makeThemedStyles((colors) => StyleSheet.create({
     justifyContent: "center",
     paddingHorizontal: 10,
   },
+  iconAction: { flex: 0, width: 37, paddingHorizontal: 0 },
   highlightedAction: { backgroundColor: colors.primarySolid, borderColor: colors.primary },
   pressed: { opacity: 0.7 },
 }));

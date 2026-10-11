@@ -13,6 +13,7 @@ import type { PayoutOnboardingState } from "@/types/payoutOnboarding.type";
 import { payoutNamesMatch } from "@/utils/payoutName.util";
 
 import { StepFrame } from "./stepFrame";
+import { StepUpCancelledError, useStepUpPrompt } from "@/components/wallet/stepUpSheet";
 
 interface BankStepProps {
   readonly state: PayoutOnboardingState;
@@ -35,8 +36,9 @@ export function BankStep({ state, stepNumber, stepCount, onSaved }: BankStepProp
   });
   const resolvedName = lookupReady ? resolved.data?.accountName ?? "" : "";
   const matches = payoutNamesMatch(resolvedName, state.legalName ?? "");
+  const { withStepUp, stepUpSheet } = useStepUpPrompt();
   const save = useMutation({
-    mutationFn: () => payoutOnboardingService.saveBank({ bankCode, bankName, accountNumber, resolvedAccountName: resolvedName }),
+    mutationFn: () => withStepUp((stepUpToken) => payoutOnboardingService.saveBank({ bankCode, bankName, accountNumber, resolvedAccountName: resolvedName }, stepUpToken)),
     onSuccess: onSaved,
   });
 
@@ -65,7 +67,8 @@ export function BankStep({ state, stepNumber, stepCount, onSaved }: BankStepProp
           </Text>
         </View>
       ) : null}
-      {save.isError ? <Text size={12} lineHeight={14.4} color={colors.error}>{save.error.message}</Text> : null}
+      {stepUpSheet}
+      {save.isError && !(save.error instanceof StepUpCancelledError) ? <Text size={12} lineHeight={14.4} color={colors.error}>{save.error.message}</Text> : null}
       <Button title="Save account" disabled={!matches} loading={save.isPending} onPress={() => save.mutate()} />
     </StepFrame>
   );

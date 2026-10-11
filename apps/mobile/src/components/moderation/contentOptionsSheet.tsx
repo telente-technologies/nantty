@@ -5,7 +5,7 @@ import type { ReactNode } from "react";
 import { useState } from "react";
 import { Share } from "react-native";
 
-import { Copy24Icon, RocketLaunch24Icon, EyeClosed20Icon, EyeSlash24Icon, Share24Icon, Warning20Icon } from "@/components/icons";
+import { Link24Icon, RocketLaunch24Icon, EyeClosed20Icon, EyeSlash24Icon, ShareFat24Icon, Warning20Icon } from "@/components/icons";
 import { ActionSheet } from "@/components/ui/actionSheet";
 import { feedFeedbackService, hidePostFromAllCachedFeeds, type FeedFeedbackType } from "@/services/feed/feedFeedback.service";
 import type { ReportTargetType } from "@/services/moderation/reports.service";
@@ -27,7 +27,7 @@ export interface ContentOptionsSheetProps {
   readonly target: ContentOptionsTarget | null;
   readonly onClose: () => void;
   readonly onContentHidden?: (targetId: ID) => void;
-  readonly additionalActions?: readonly { readonly label: string; readonly icon: ReactNode; readonly onPress: () => void }[];
+  readonly additionalActions?: readonly { readonly label: string; readonly icon: ReactNode; readonly onPress: () => void; readonly destructive?: boolean }[];
   readonly onReport?: () => void;
 }
 
@@ -105,15 +105,15 @@ export function ContentOptionsSheet({ target, onClose, onContentHidden, addition
         closeBeforeSelect={false}
         options={[
           ...(canPromote ? [{ label: "Promote post", icon: <RocketLaunch24Icon />, onPress: promoteOwnPost }] : []),
-          ...(target?.shareUrl ? [{ label: "Copy link", icon: <Copy24Icon />, onPress: copyLinkToContent }] : []),
-          ...additionalActions.map((action) => ({ label: action.label, icon: action.icon, onPress: () => { onClose(); action.onPress(); } })),
+          ...(target?.shareUrl ? [{ label: "Copy link", icon: <Link24Icon />, onPress: copyLinkToContent }] : []),
+          ...additionalActions.map((action) => ({ label: action.label, icon: action.icon, ...(action.destructive ? { destructive: true } : {}), onPress: () => { onClose(); action.onPress(); } })),
           ...(canGiveFeedFeedback
             ? [
                 { label: "Not interested", detail: `See fewer ${noun}s like this`, icon: <EyeClosed20Icon />, onPress: () => requireAuthAfterClosingModal(onClose, () => hideContentAndSendFeedback("not_interested"), "tune your feed") },
                 { label: `Hide this ${noun}`, icon: <EyeSlash24Icon />, onPress: () => requireAuthAfterClosingModal(onClose, () => hideContentAndSendFeedback("hide"), "tune your feed") },
               ]
             : []),
-          ...(target?.shareUrl ? [{ label: "Share via…", icon: <Share24Icon />, onPress: shareLinkToContent }] : []),
+          ...(target?.shareUrl ? [{ label: "Share via…", icon: <ShareFat24Icon />, onPress: shareLinkToContent }] : []),
           ...(!isOwnContent ? [{ label: "Report", detail: "Let us know what's wrong", icon: <Warning20Icon />, destructive: true, onPress: () => openReportSheetForTarget() }] : []),
           ...(!isOwnContent && canClaimCopyright ? [{ label: "Report copyright", icon: <Warning20Icon />, destructive: true, onPress: () => openReportSheetForTarget("intellectual_property") }] : []),
         ]}
