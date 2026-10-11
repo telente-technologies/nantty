@@ -28,6 +28,20 @@ describe("ChatCryptoClient", () => {
     expect(status?.oneTimePreKeyCount).toBe(100);
   });
 
+  it("reports whether this browser already holds a device identity without registering one", async () => {
+    const directory = new InMemoryKeyDirectory();
+    const storage = { secrets: new MemoryKeyValueStore(), records: new MemoryKeyValueStore() };
+    const fresh = new ChatCryptoClient({ storage, directory: directory.forUser("staff"), random: seededRandom("h1") });
+    expect(await fresh.hasDeviceIdentity("staff")).toBe(false);
+    expect(fresh.deviceId).toBeNull();
+    await fresh.ensureReady("staff");
+    const reopened = new ChatCryptoClient({ storage, directory: directory.forUser("staff"), random: seededRandom("h2") });
+    expect(await reopened.hasDeviceIdentity("staff")).toBe(true);
+    expect(await reopened.hasDeviceIdentity("someone-else")).toBe(false);
+    await reopened.signOut({ removeFromDirectory: true });
+    expect(await reopened.hasDeviceIdentity("staff")).toBe(false);
+  });
+
   it("delivers direct messages to every device of both users", async () => {
     const world = createWorld();
     const alice = await world.device("alice", "c2a");
