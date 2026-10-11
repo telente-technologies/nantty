@@ -47,7 +47,7 @@ export function BrandProfileScreen({ navigation, route }: MainScreenProps<"Brand
     return (
       <Screen>
         <Header title="Brand" />
-        {brand.isError ? <ErrorState message="Couldn't load this brand." onRetry={() => brand.refetch()} /> : <ListSkeleton />}
+        {brand.isError ? <ErrorState error={brand.error} message="Couldn't load this brand." onRetry={() => brand.refetch()} /> : <ListSkeleton />}
       </Screen>
     );
   }

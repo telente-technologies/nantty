@@ -30,6 +30,7 @@ export type MainTabParamList = {
 };
 
 export type MainStackParamList = {
+  NotFound: undefined;
   Tabs: NavigatorScreenParams<MainTabParamList> | undefined;
   Search: { scope?: SearchScopeKey | "all" | "messages"; scopeLabel?: string } | undefined;
   Notifications: undefined;
@@ -84,7 +85,7 @@ export type MainStackParamList = {
   NewMessage: undefined;
   NewGroup: { kind: "group" | "channel" };
   ConversationInfo: { conversationId: string };
-  CreatePost: { mode?: "story" | "post" | "clip" | "product" | "live"; soundId?: string; videoReply?: VideoReplyTarget } | undefined;
+  CreatePost: { mode?: "story" | "post" | "clip" | "product" | "live"; soundId?: string; videoReply?: VideoReplyTarget; quotePostId?: string } | undefined;
   PostDetail: { postId: string };
   PostAnalytics: { postId: string };
   PostQuotes: { postId: string };

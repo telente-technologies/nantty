@@ -33,6 +33,7 @@ export const deepLinking: LinkingOptions<RootStackParamList> = {
       ProductForm: "seller/products/new",
       CreatorProgram: "creator",
       UserProfileByUsername: { path: ":username", parse: { username: stripAtSign } },
+      NotFound: "*",
     },
   },
 };

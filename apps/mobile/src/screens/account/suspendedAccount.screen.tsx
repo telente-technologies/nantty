@@ -14,6 +14,7 @@ import { accountStatusService } from "@/services/account/accountStatus.service";
 import { generateIdempotencyKey } from "@/services/core/apiClient.service";
 import { supportService } from "@/services/support/support.service";
 import { useAuthStore } from "@/store/auth.store";
+import { describeActionFailure } from "@/errors/errorExperience/describeError";
 
 export function SuspendedAccountScreen() {
   const { colors } = useTheme();
@@ -52,7 +53,7 @@ export function SuspendedAccountScreen() {
         ) : (
           <Button title="Appeal this decision" loading={appeal.isPending} onPress={() => appeal.mutate()} />
         )}
-        {appeal.isError ? <Text size={12} color={colors.error} accessibilityRole="alert">{appeal.error.message}</Text> : null}
+        {appeal.isError ? <Text size={12} color={colors.error} accessibilityRole="alert">{describeActionFailure(appeal.error)}</Text> : null}
         <DataExportSection />
         {notice.data ? (
           <Text size={12} lineHeight={16.8} color={colors.textSubtle}>

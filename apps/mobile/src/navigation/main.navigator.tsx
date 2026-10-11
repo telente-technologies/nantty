@@ -98,6 +98,9 @@ import { SettingsPrivacyScreen } from "@/screens/settings/settingsPrivacy.screen
 import { CreateBrandScreen } from "@/screens/brand/createBrand.screen";
 
 import { guestGateScreenLayout } from "@/components/auth/guestGate";
+import { withScreenErrorBoundary } from "@/components/ui/errorBoundary";
+import { withConnectionRequirement } from "@/components/ui/requiresConnection";
+import { NotFoundScreen } from "@/screens/system/notFound.screen";
 import { AuthFlowScreen } from "@/screens/auth/authFlow.screen";
 
 import { MainTabsNavigator } from "./mainTabs.navigator";
@@ -107,12 +110,13 @@ import { SoundScreen } from "@/screens/sounds/sound.screen";
 const Stack = createNativeStackNavigator<MainStackParamList>();
 const modal = { presentation: "fullScreenModal", animation: "slide_from_bottom" } as const;
 const dark = { animation: "fade", contentStyle: { backgroundColor: colors.black } } as const;
-const keepOnDarkFirstPalette = ({ route, children }: { route: { name: string }; children: ReactNode }) =>
-  guestGateScreenLayout({ route, children: <ForcedColorSchemeScope scheme="light">{children}</ForcedColorSchemeScope> });
+const keepOnDarkFirstPalette = withConnectionRequirement(withScreenErrorBoundary(({ route, children }: { route: { name: string }; children: ReactNode }) =>
+  guestGateScreenLayout({ route, children: <ForcedColorSchemeScope scheme="light">{children}</ForcedColorSchemeScope> })));
+const screenLayout = withConnectionRequirement(withScreenErrorBoundary(guestGateScreenLayout));
 
 export function MainNavigator() {
   return (
-    <Stack.Navigator screenOptions={{ headerShown: false, animation: "slide_from_right" }} screenLayout={guestGateScreenLayout}>
+    <Stack.Navigator screenOptions={{ headerShown: false, animation: "slide_from_right" }} screenLayout={screenLayout}>
       <Stack.Screen name="Tabs" component={MainTabsNavigator} />
       <Stack.Screen name="Search" component={SearchScreen} />
       <Stack.Screen name="Notifications" component={NotificationsScreen} />
@@ -209,6 +213,7 @@ export function MainNavigator() {
       <Stack.Screen name="Saved" component={SavedScreen} />
       <Stack.Screen name="Sound" component={SoundScreen} />
       <Stack.Screen name="AuthFlow" component={AuthFlowScreen} options={modal} />
+      <Stack.Screen name="NotFound" component={NotFoundScreen} />
     </Stack.Navigator>
   );
 }

@@ -35,7 +35,7 @@ export function BoostStatusScreen({ navigation, route }: MainScreenProps<"BoostS
     return (
       <Screen>
         <Header title="Boost" />
-        {boost.isError ? <ErrorState message="Couldn't load this boost." onRetry={() => boost.refetch()} retrying={boost.isRefetching} /> : <ListSkeleton />}
+        {boost.isError ? <ErrorState error={boost.error} message="Couldn't load this boost." onRetry={() => boost.refetch()} retrying={boost.isRefetching} /> : <ListSkeleton />}
       </Screen>
     );
   }

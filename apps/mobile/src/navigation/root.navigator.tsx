@@ -8,6 +8,9 @@ import { PolicyReacceptScreen } from "@/components/legal/policyReacceptScreen";
 import { PolicyUpdateBanner } from "@/components/legal/policyUpdateBanner";
 import { DialogHost } from "@/components/ui/dialogHost";
 import { ToastHost } from "@/components/ui/toastHost";
+import { ErrorScreen } from "@/components/ui/errorState";
+import { Screen } from "@/components/ui/screen";
+import { useAppGateStore } from "@/store/appGate.store";
 import { SuspendedAccountScreen } from "@/screens/account/suspendedAccount.screen";
 import { usePolicyUpdates } from "@/hooks/usePolicyUpdates.hook";
 import { useAuthStore } from "@/store/auth.store";
@@ -39,6 +42,17 @@ export function RootNavigator() {
   const isAccountSuspended = useAuthStore((s) => s.status === "signedIn" && s.user?.account?.status === "suspended");
   const navigationTheme = useNavigationThemeFollowingAppTheme();
   const { blocking: blockingPolicyVersion } = usePolicyUpdates();
+  const isUpdateRequired = useAppGateStore((s) => s.isUpdateRequired);
+  if (isUpdateRequired) {
+    return (
+      <>
+        <Screen>
+          <ErrorScreen kind="updateRequired" />
+        </Screen>
+        <ToastHost />
+      </>
+    );
+  }
   if (isAccountSuspended || blockingPolicyVersion) {
     return (
       <>

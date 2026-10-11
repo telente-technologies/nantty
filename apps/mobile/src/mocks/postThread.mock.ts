@@ -1,5 +1,5 @@
 import type { Comment, Media, Page, UserSummary } from "@/types";
-import { THREAD_AD_SLOT_KIND, type ThreadAdDecision, type ThreadDecidedAd, type ThreadReply, type ThreadSort } from "@/types/postThread.type";
+import { THREAD_AD_SLOT_KIND, isQuoteThreadItem, type ThreadAdDecision, type ThreadDecidedAd, type ThreadReply, type ThreadSort } from "@/types/postThread.type";
 
 import { commentsForPost, directRepliesOf, findCommentAnywhere } from "./comments.mock";
 import { getSignedInMockUser, isoDateHoursAgo } from "./fixtures.mock";
@@ -7,6 +7,7 @@ import { withCommentViewerSavedState } from "./savedEntries.mock";
 import { postImageUrlsForPhotoKey } from "./mockImages.mock";
 import { findPostIncludingSponsored } from "./posts.mock";
 import { createMockRoute, type MockRoute } from "./registry.mock";
+import { mergeQuotesIntoRankedComments, mockQuoteItemsFor, newestQuotesFirst } from "./commentSectionQuotes.mock";
 import { decideStoryAdMock } from "./storyAds.mock";
 import { chooseMockChain, rankMockTopLevelComments, withMockQuoteState } from "./quoteLinks.mock";
 
@@ -169,19 +170,23 @@ const decideThreadAd = (slot: ThreadSlotRequest, viewerUserId: string | null): T
 };
 
 export const postThreadMocks: MockRoute[] = [
-  createMockRoute("GET", "/api/v1/posts/:postId/thread", ({ params, query }) => {
+  createMockRoute("GET", "/api/v1/posts/:postId/thread", ({ params, query, isGuest }) => {
     const postId = params.postId!;
     const postAuthorId = findPostIncludingSponsored(postId)?.author.id ?? null;
+    if (query.get("filter") === "quotes") return paginate(newestQuotesFirst(mockQuoteItemsFor(postId, postAuthorId, isGuest)), query.get("cursor"), CONVERSATION_PAGE_SIZE);
     const rawSort = query.get("sort");
     const sort: ThreadSort = rawSort === "latest" || rawSort === "likes" ? rawSort : "relevant";
     const everyComment = commentsForPost(postId);
     const roots = everyComment.filter((c) => c.parentCommentId === null);
     const topLevel = sort === "relevant" ? rankMockTopLevelComments(roots, everyComment, postAuthorId ?? undefined) : sortConversation(roots, sort);
-    const page = paginate(topLevel, query.get("cursor"), CONVERSATION_PAGE_SIZE);
-    if (sort !== "relevant") return { data: page.data.map((c) => toThreadReply(c, postAuthorId, 0, false)), nextCursor: page.nextCursor };
+    if (sort !== "relevant") {
+      const page = paginate(topLevel, query.get("cursor"), CONVERSATION_PAGE_SIZE);
+      return { data: page.data.map((c) => toThreadReply(c, postAuthorId, 0, false)), nextCursor: page.nextCursor };
+    }
+    const page = paginate(mergeQuotesIntoRankedComments(topLevel, mockQuoteItemsFor(postId, postAuthorId, isGuest), postAuthorId), query.get("cursor"), CONVERSATION_PAGE_SIZE);
     const withAuthorReplies = [...everyComment, ...(authorReplyFor(postId) ? [authorReplyFor(postId)!] : [])];
     return {
-      data: page.data.map((c) => toThreadReply(c, postAuthorId, 0, false, 3, false, new Set(chooseMockChain(c, withAuthorReplies, postAuthorId ?? undefined).map((reply) => reply.id)))),
+      data: page.data.map((c) => (isQuoteThreadItem(c) ? c : toThreadReply(c, postAuthorId, 0, false, 3, false, new Set(chooseMockChain(c, withAuthorReplies, postAuthorId ?? undefined).map((reply) => reply.id))))),
       nextCursor: page.nextCursor,
     };
   }),

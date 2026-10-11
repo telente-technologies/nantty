@@ -95,6 +95,9 @@ export const postsMocks: MockRoute[] = [
     const original = findPostIncludingSponsored(params.postId!);
     if (!original) throw new ApiError(404, "This post was removed");
     const quoteText = typeof (body as { text?: unknown } | null)?.text === "string" ? (body as { text: string }).text.trim() : "";
+    const me = getSignedInMockUser();
+    const existing = quoteText === "" ? [...mockPostsState.values()].find((post) => post.author.id === me.id && !post.isQuote && post.resharedFrom?.id === original.id) : undefined;
+    if (existing) return existing;
     const reshare: Post = {
       id: `reshare_${original.id}_${mockPostsState.size}`,
       kind: "post",
@@ -121,9 +124,18 @@ export const postsMocks: MockRoute[] = [
       replyRestriction: null,
       sensitive: null,
     };
-    updateMockPost(params.postId!, (p) => ({ ...p, reposts: p.reposts + 1, quotes: (p.quotes ?? 0) + (quoteText !== "" ? 1 : 0) }));
+    updateMockPost(params.postId!, (p) => ({ ...p, reposts: p.reposts + 1, quotes: (p.quotes ?? 0) + (quoteText !== "" ? 1 : 0), ...(quoteText === "" ? { reposted: true } : {}) }));
     mockPostsState.set(reshare.id, reshare);
     return reshare;
+  }),
+  createMockRoute("DELETE", "/api/v1/posts/:postId/repost", ({ params }) => {
+    const me = getSignedInMockUser();
+    const repost = [...mockPostsState.values()].find((post) => post.author.id === me.id && !post.isQuote && post.resharedFrom?.id === params.postId);
+    if (!repost) return undefined;
+    mockPostsState.delete(repost.id);
+    deletedMockPostIds.add(repost.id);
+    updateMockPost(params.postId!, (p) => ({ ...p, reposted: false, reposts: Math.max(0, p.reposts - 1) }));
+    return undefined;
   }),
   createMockRoute("POST", "/api/v1/posts/:postId/share", () => undefined),
   createMockRoute("GET", "/api/v1/posts/:postId/notifications-mute", ({ params, isGuest }) => {
@@ -168,6 +180,8 @@ export const postsMocks: MockRoute[] = [
     if (!ownsPost) throw new ApiError(403, "Only the author can delete this post.", "NOT_POST_OWNER");
     mockPostsState.delete(postId);
     deletedMockPostIds.add(postId);
+    const originalId = post.resharedFrom?.id;
+    if (originalId) updateMockPost(originalId, (p) => ({ ...p, reposts: Math.max(0, p.reposts - 1), quotes: post.isQuote ? Math.max(0, (p.quotes ?? 0) - 1) : p.quotes, ...(post.isQuote ? {} : { reposted: false }) }));
     for (const [id, candidate] of mockPostsState) if (candidate.resharedFrom?.id === postId) mockPostsState.set(id, { ...candidate, resharedFrom: null, resharedFromUnavailable: true });
     return undefined;
   }),

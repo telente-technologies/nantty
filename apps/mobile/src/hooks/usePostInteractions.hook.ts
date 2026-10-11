@@ -39,8 +39,18 @@ export function usePostInteractions() {
 
   const resharePost = async (post: Pick<Post, "id">, text?: string) => {
     const created = await postsService.repostPost(post.id, text);
-    updateMatchingRecordsInEveryQuery(queryClient, isPostWithRepostCount(post.id), (p) => ({ ...p, reposts: (p.reposts as number) + 1 }));
+    updateMatchingRecordsInEveryQuery(queryClient, isPostWithRepostCount(post.id), (p) =>
+      text ? { ...p, reposts: (p.reposts as number) + 1 } : p.reposted === true ? p : { ...p, reposted: true, reposts: (p.reposts as number) + 1 },
+    );
     prependToEveryCachedFeed(created);
+  };
+
+  const undoRepost = async (post: Pick<Post, "id">) => {
+    await postsService.undoRepost(post.id);
+    updateMatchingRecordsInEveryQuery(queryClient, isPostWithRepostCount(post.id), (p) =>
+      p.reposted === true ? { ...p, reposted: false, reposts: Math.max(0, (p.reposts as number) - 1) } : p,
+    );
+    queryClient.invalidateQueries({ queryKey: feedQueryKeyPrefix });
   };
 
   const sharePost = async (post: SharablePost) => {
@@ -51,5 +61,5 @@ export function usePostInteractions() {
   const togglePostLike = (post: LikeablePost) => requireAuthThen(() => togglePostLiked(queryClient, post), undefined, "like posts");
   const followPostAuthor = (post: SharablePost) => requireAuthThen(() => applyFollowPostAuthor(post), undefined, "follow creators");
 
-  return { togglePostLike, followPostAuthor, resharePost, sharePost };
+  return { togglePostLike, followPostAuthor, resharePost, undoRepost, sharePost };
 }

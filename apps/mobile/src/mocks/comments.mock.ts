@@ -8,6 +8,8 @@ import { mockPostsState } from "./postCatalog.mock";
 import { createMockRoute, type MockRoute } from "./registry.mock";
 import { chooseMockChain, mockPostAuthorId, rankMockTopLevelComments, resolveMockQuote, withMockQuoteState } from "./quoteLinks.mock";
 import { quotedSummaryFromPost } from "@/utils/postLinks.util";
+import { isQuoteThreadItem, type QuoteThreadItem } from "@/types/postThread.type";
+import { mergeQuotesIntoRankedComments, mockQuoteItemsFor, newestQuotesFirst } from "./commentSectionQuotes.mock";
 
 const TOP_LEVEL_PAGE_SIZE = 6;
 const REPLIES_PAGE_SIZE = 4;
@@ -196,14 +198,17 @@ const collectDescendantIds = (postId: string, commentId: string): string[] =>
   directRepliesOf(postId, commentId).flatMap((reply) => [reply.id, ...collectDescendantIds(postId, reply.id)]);
 
 export const commentsMocks: MockRoute[] = [
-  createMockRoute("GET", "/api/v1/posts/:postId/comments", ({ params, query }) => {
+  createMockRoute("GET", "/api/v1/posts/:postId/comments", ({ params, query, isGuest }) => {
     const postId = params.postId!;
     const postAuthorId = mockPostAuthorId(postId);
     const everyComment = commentsForPost(postId);
     const topLevel = rankMockTopLevelComments(everyComment.filter((c) => c.parentCommentId === null), everyComment, postAuthorId);
-    const page = paginateByOffset(topLevel, query.get("cursor"), TOP_LEVEL_PAGE_SIZE);
-    const withPreviews: CommentWithReplies[] = page.data.map((c) => ({
+    const quotes = mockQuoteItemsFor(postId, postAuthorId, isGuest);
+    if (query.get("filter") === "quotes") return paginateByOffset(newestQuotesFirst(quotes), query.get("cursor"), TOP_LEVEL_PAGE_SIZE);
+    const page = paginateByOffset(mergeQuotesIntoRankedComments(topLevel, quotes, postAuthorId), query.get("cursor"), TOP_LEVEL_PAGE_SIZE);
+    const withPreviews: (CommentWithReplies | QuoteThreadItem)[] = page.data.map((c) => (isQuoteThreadItem(c) ? c : {
       ...withMockQuoteState(withVideoReplyInfo(withCommentViewerSavedState(c)), postAuthorId),
+      type: "comment" as const,
       previewReplies: chooseMockChain(c, everyComment, postAuthorId, PREVIEW_REPLY_COUNT).map((reply) => withMockQuoteState(withVideoReplyInfo(reply), postAuthorId)),
     }));
     return { data: withPreviews, nextCursor: page.nextCursor };

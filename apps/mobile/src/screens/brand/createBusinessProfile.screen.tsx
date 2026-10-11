@@ -17,6 +17,7 @@ import { generateIdempotencyKey } from "@/services/core/apiClient.service";
 import { brandsService } from "@/services/sellers/brands.service";
 import { useActingProfileStore } from "@/store/actingProfile.store";
 import type { BusinessCategorySelection } from "@/types/socialGraph.type";
+import { describeActionFailure } from "@/errors/errorExperience/describeError";
 
 export function CreateBusinessProfileScreen({ navigation }: MainScreenProps<"CreateBusinessProfile">) {
   const { colors } = useTheme();
@@ -52,7 +53,7 @@ export function CreateBusinessProfileScreen({ navigation }: MainScreenProps<"Cre
       {categories.isPending ? (
         <ListSkeleton rows={4} />
       ) : categories.isError ? (
-        <ErrorState message="Couldn't load categories." onRetry={() => categories.refetch()} />
+        <ErrorState error={categories.error} message="Couldn't load categories." onRetry={() => categories.refetch()} />
       ) : (
         <>
           <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
@@ -66,7 +67,7 @@ export function CreateBusinessProfileScreen({ navigation }: MainScreenProps<"Cre
             <BusinessCategoryPicker categories={categories.data.data} value={selections} onChange={setSelections} />
           </ScrollView>
           <View style={styles.footer}>
-            {createBusinessProfile.isError ? <Text size={12} color={colors.error} align="center">{createBusinessProfile.error.message}</Text> : null}
+            {createBusinessProfile.isError ? <Text size={12} color={colors.error} align="center">{describeActionFailure(createBusinessProfile.error)}</Text> : null}
             <Button title="Create business profile" disabled={!isReady} loading={createBusinessProfile.isPending} onPress={() => createBusinessProfile.mutate()} />
           </View>
         </>

@@ -6,15 +6,17 @@ import { CreateScreen } from "@/screens/create/createPlaceholder.screen";
 import { ChatsScreen } from "@/screens/messages/chats.screen";
 import { MeScreen } from "@/screens/profile/myProfile.screen";
 import { guestGateScreenLayout } from "@/components/auth/guestGate";
+import { withScreenErrorBoundary } from "@/components/ui/errorBoundary";
 
 import type { MainTabParamList } from "./navigation.types";
 import { TabBar } from "./tabBar";
 
 const Tab = createBottomTabNavigator<MainTabParamList>();
+const tabScreenLayout = withScreenErrorBoundary(guestGateScreenLayout);
 
 export function MainTabsNavigator() {
   return (
-    <Tab.Navigator screenOptions={{ headerShown: false }} screenLayout={guestGateScreenLayout} tabBar={(props) => <TabBar {...props} />}>
+    <Tab.Navigator screenOptions={{ headerShown: false }} screenLayout={tabScreenLayout} tabBar={(props) => <TabBar {...props} />}>
       <Tab.Screen name="Home" component={HomeScreen} />
       <Tab.Screen name="Clips" component={ClipsScreen} />
       <Tab.Screen name="Create" component={CreateScreen} />

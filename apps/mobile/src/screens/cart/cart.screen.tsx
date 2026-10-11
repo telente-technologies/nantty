@@ -45,7 +45,7 @@ export function CartScreen({ navigation }: MainScreenProps<"Cart">) {
     return (
       <Screen>
         {header}
-        <ErrorState message="Couldn't load your cart." onRetry={() => cart.refetch()} />
+        <ErrorState error={cart.error} message="Couldn't load your cart." onRetry={() => cart.refetch()} />
       </Screen>
     );
   }

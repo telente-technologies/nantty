@@ -27,6 +27,7 @@ import {
 } from "@/utils/boostPayment.util";
 import { formatMoneyForDisplay } from "@/utils/formatMoney.util";
 import { ListSkeleton } from "@/components/ui/listSkeleton";
+import { describeActionFailure } from "@/errors/errorExperience/describeError";
 
 const GOALS: readonly { readonly id: BoostGoal; readonly label: string; readonly hint: string }[] = [
   { id: "views", label: "More views", hint: "Show your post to more people" },
@@ -182,7 +183,7 @@ export function PromotePostScreen({ navigation, route }: MainScreenProps<"Promot
               </Text>
             </>
           ) : null}
-          {estimate.isError ? <Text size={12} color={colors.error}>{estimate.error.message}</Text> : null}
+          {estimate.isError ? <Text size={12} color={colors.error}>{describeActionFailure(estimate.error)}</Text> : null}
         </View>
         <Text size={16} weight={600} lineHeight={19.2} style={styles.sectionTitle}>Pay with</Text>
         <BoostPaymentPicker
