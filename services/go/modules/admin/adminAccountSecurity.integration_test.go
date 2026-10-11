@@ -2,7 +2,10 @@ package admin
 
 import (
 	"net/http"
+	"strings"
 	"testing"
+
+	"github.com/google/uuid"
 )
 
 func withAddress(headers map[string]string, address string) map[string]string {
@@ -149,6 +152,19 @@ func TestIpAllowListIsEnforcedAtLoginAndOnEveryStaffRequest(t *testing.T) {
 	harness.expect("POST", "/api/v1/admin/auth/login", login, map[string]string{"X-Real-Ip": "198.51.100.9"}, http.StatusForbidden)
 	harness.expect("POST", "/api/v1/admin/auth/login", login, map[string]string{"X-Real-Ip": "203.0.113.40"}, http.StatusOK)
 	harness.expect("GET", "/api/v1/admin/auth/me", nil, withAddress(bearer(root.token), "198.51.100.9"), http.StatusOK)
+	internal := map[string]string{"X-Internal-Token": harness.settings.InternalApiToken}
+	policy := "/api/v1/internal/admins/" + member.id + "/network-policy?address="
+	if decision := harness.expect("GET", policy+"198.51.100.9", nil, internal, http.StatusOK); decision["allowed"] != false {
+		t.Fatalf("other services must be told the office-only admin is refused elsewhere: %v", decision)
+	}
+	if decision := harness.expect("GET", policy+"203.0.113.40", nil, internal, http.StatusOK); decision["allowed"] != true {
+		t.Fatalf("the office network is allowed: %v", decision)
+	}
+	harness.expect("GET", policy+"not-an-ip", nil, internal, http.StatusBadRequest)
+	harness.expect("GET", policy+"203.0.113.40", nil, map[string]string{"X-Internal-Token": strings.Repeat("x", 32)}, http.StatusUnauthorized)
+	if decision := harness.expect("GET", "/api/v1/internal/admins/"+uuid.NewString()+"/network-policy?address=203.0.113.40", nil, internal, http.StatusOK); decision["allowed"] != false {
+		t.Fatalf("an unknown staff id is never allowed: %v", decision)
+	}
 	harness.expect("PATCH", "/api/v1/admin/admins/"+root.id, map[string]any{"ipAllowList": []string{}, "reason": "edit myself"}, root.withStepUp(harness), http.StatusConflict)
 }
 
