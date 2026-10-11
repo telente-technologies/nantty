@@ -1,10 +1,11 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { Pressable, ScrollView, StyleSheet, View } from "react-native";
 
 import { useShareToChat } from "@/components/chatSafety/shareToChat.hook";
 import { BusinessDocumentsNudge } from "@/components/seller/businessDocumentsNudge";
 import { PostCard } from "@/components/feed/postCard";
+import { useConfirmedFollowToggle } from "@/components/profile/confirmedFollowToggle.hook";
 import { ProductMasonry } from "@/components/home/productMasonry";
 import { Frame75132Icon, Frame75232Icon, Frame75332Icon } from "@/components/icons";
 import { StoreProfileHeader } from "@/components/store/storeProfileHeader";
@@ -16,6 +17,7 @@ import type { MainScreenProps } from "@/navigation/navigation.types";
 import { trackProductInteraction } from "@/services/sellers/productInteractions.service";
 import { storesService } from "@/services/sellers/stores.service";
 import type { StoreDetail } from "@/types/commerce.type";
+import type { FollowState } from "@/types/socialGraph.type";
 import { ListSkeleton } from "@/components/ui/listSkeleton";
 import { ErrorState } from "@/components/ui/errorState";
 import { useAuthStore } from "@/store/auth.store";
@@ -34,14 +36,12 @@ export function StoreScreen({ navigation, route }: MainScreenProps<"Store">) {
     void trackProductInteraction("seller.viewed", { storeId });
   }, [storeId]);
 
-  const toggleStoreFollow = useMutation({
-    mutationFn: (followNow: boolean) => (followNow ? storesService.followStore(storeId) : storesService.unfollowStore(storeId)),
-    onMutate: (followNow) =>
-      queryClient.setQueryData<StoreDetail>(["stores", storeId], (cached) =>
-        cached ? { ...cached, isFollowing: followNow, followers: cached.followers + (followNow ? 1 : -1) } : cached,
-      ),
-    onSettled: () => queryClient.invalidateQueries({ queryKey: ["stores", storeId] }),
-  });
+  const { toggle: toggleFollow } = useConfirmedFollowToggle();
+  const applyStoreFollow = (state: FollowState) =>
+    queryClient.setQueryData<StoreDetail>(["stores", storeId], (cached) => {
+      const following = state === "accepted";
+      return cached && cached.isFollowing !== following ? { ...cached, isFollowing: following, followers: Math.max(0, cached.followers + (following ? 1 : -1)) } : cached;
+    });
 
   const { offerSendInChat, sendInChatElement } = useShareToChat();
 
@@ -83,8 +83,12 @@ export function StoreScreen({ navigation, route }: MainScreenProps<"Store">) {
         {detail.ownerUserId === signedInUserId ? <BusinessDocumentsNudge /> : null}
         <StoreProfileHeader
           store={detail}
-          onToggleFollow={() => requireAuthThen(() => toggleStoreFollow.mutate(!detail.isFollowing), undefined, "follow shops")}
-          onMessage={() => requireAuthThen(() => navigation.navigate("Chat", { userId: detail.ownerUserId, name: detail.name }), undefined, "message sellers")}
+          onToggleFollow={() => requireAuthThen(() => toggleFollow({
+            subjectLabel: detail.name, state: detail.isFollowing ? "accepted" : "none", apply: applyStoreFollow,
+            follow: () => storesService.followStore(storeId), unfollow: () => storesService.unfollowStore(storeId),
+            onSettled: () => void queryClient.invalidateQueries({ queryKey: ["stores", storeId] }),
+          }), undefined, "follow shops")}
+          onMessage={() => requireAuthThen(() => navigation.navigate("Chat", { storeId, name: detail.name }), undefined, "message sellers")}
         />
         <StoreTabs active={activeTab} onChange={setActiveTab} />
         <View style={styles.tabBody}>
@@ -92,7 +96,7 @@ export function StoreScreen({ navigation, route }: MainScreenProps<"Store">) {
             <ProductMasonry products={products.data ?? []} />
           ) : (
             detail.posts.map((post) => (
-              <PostCard key={post.id} post={post} onPress={() => navigation.navigate("PostDetail", { postId: post.id })} />
+              <PostCard key={post.id} post={post} surface="profile" onPress={() => navigation.navigate("PostDetail", { postId: post.id })} />
             ))
           )}
         </View>

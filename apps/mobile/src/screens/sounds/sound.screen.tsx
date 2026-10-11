@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ActivityIndicator, FlatList, StyleSheet, View, useWindowDimensions } from "react-native";
+import { FlatList, StyleSheet, View, useWindowDimensions } from "react-native";
 
 import { Warning20Icon } from "@/components/icons";
 import { ReportSheet, type ReportTarget } from "@/components/moderation/reportSheet";
@@ -9,6 +9,7 @@ import { useSoundDetails } from "@/components/sounds/soundDetails.hook";
 import { SoundHeaderCard } from "@/components/sounds/soundHeaderCard";
 import { openUserProfileOrMyProfile } from "@/components/sounds/soundNavigation.util";
 import { SoundOwnerControls } from "@/components/sounds/soundOwnerControls";
+import { BrandLoader } from "@/components/ui/brandLoader";
 import { Header, HeaderAction } from "@/components/ui/header";
 import { Screen } from "@/components/ui/screen";
 import { Text } from "@/components/ui/text";
@@ -90,12 +91,12 @@ export function SoundScreen({ navigation, route }: MainScreenProps<"Sound">) {
           }
           ListEmptyComponent={
             clipsUsingSound.isPending ? (
-              <ActivityIndicator color={colors.primary} />
+              <BrandLoader size="md" />
             ) : (
               <EmptyState compact title="No clips use this sound yet" body="Be the first. Tap Use sound to make a clip with it." />
             )
           }
-          ListFooterComponent={clipsUsingSound.isFetchingNextPage ? <ActivityIndicator color={colors.primary} style={styles.footer} /> : null}
+          ListFooterComponent={clipsUsingSound.isFetchingNextPage ? <BrandLoader size="sm" style={styles.footer} /> : null}
           renderItem={({ item }) => (
             <SoundClipThumbnail clip={item} width={tileWidth} onPress={() => navigation.navigate("Tabs", { screen: "Clips", params: { startId: item.id } })} />
           )}

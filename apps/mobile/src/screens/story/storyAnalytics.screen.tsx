@@ -1,8 +1,9 @@
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
-import { ActivityIndicator, FlatList, Pressable, RefreshControl, StyleSheet, View } from "react-native";
+import { FlatList, Pressable, RefreshControl, StyleSheet, View } from "react-native";
 
 import { Analytics24Icon } from "@/components/icons";
 import { Avatar } from "@/components/ui/avatar";
+import { BrandLoader } from "@/components/ui/brandLoader";
 import { ErrorState } from "@/components/ui/errorState";
 import { Header } from "@/components/ui/header";
 import { ListSkeleton } from "@/components/ui/listSkeleton";
@@ -60,7 +61,7 @@ export function StoryAnalyticsScreen({ navigation, route }: MainScreenProps<"Sto
         data={viewerList}
         keyExtractor={(viewer) => viewer.id}
         contentContainerStyle={styles.content}
-        refreshControl={<RefreshControl refreshing={analytics.isRefetching || viewers.isRefetching} onRefresh={() => { analytics.refetch(); viewers.refetch(); }} tintColor={colors.primary} />}
+        refreshControl={<RefreshControl refreshing={analytics.isRefetching || viewers.isRefetching} onRefresh={() => { analytics.refetch(); viewers.refetch(); }} tintColor={colors.primary} colors={[colors.primary]} />}
         ListHeaderComponent={
           <View style={styles.header}>
             <View style={styles.ownerNote}>
@@ -111,13 +112,13 @@ export function StoryAnalyticsScreen({ navigation, route }: MainScreenProps<"Sto
           </View>
         )}
         ListEmptyComponent={
-          viewers.isPending ? <ActivityIndicator color={colors.primary} style={styles.viewersLoading} /> : (
+          viewers.isPending ? <BrandLoader size="md" style={styles.viewersLoading} /> : (
             <Text size={13} lineHeight={18} color={colors.textMuted} align="center" style={styles.viewersEmpty}>
               No views yet. Share your story to get it seen.
             </Text>
           )
         }
-        ListFooterComponent={viewers.isFetchingNextPage ? <ActivityIndicator color={colors.primary} style={styles.viewersLoading} /> : null}
+        ListFooterComponent={viewers.isFetchingNextPage ? <BrandLoader size="sm" style={styles.viewersLoading} /> : null}
         onEndReached={() => { if (viewers.hasNextPage && !viewers.isFetchingNextPage) viewers.fetchNextPage().catch(() => undefined); }}
         onEndReachedThreshold={0.5}
       />

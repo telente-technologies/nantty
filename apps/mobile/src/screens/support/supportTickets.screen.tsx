@@ -27,7 +27,7 @@ export function SupportTicketsScreen({ navigation }: MainScreenProps<"SupportTic
         data={tickets.data ?? []}
         keyExtractor={(ticket) => ticket.id}
         contentContainerStyle={styles.list}
-        refreshControl={<RefreshControl refreshing={tickets.isRefetching} onRefresh={() => tickets.refetch()} tintColor={colors.primary} />}
+        refreshControl={<RefreshControl refreshing={tickets.isRefetching} onRefresh={() => tickets.refetch()} tintColor={colors.primary} colors={[colors.primary]} />}
         ListHeaderComponent={<Button title="Contact support" onPress={() => navigation.navigate("NewSupportTicket")} style={styles.header} />}
         ItemSeparatorComponent={() => <View style={styles.separator} />}
         renderItem={({ item }) => (

@@ -19,6 +19,8 @@ import { formatMoneyForDisplay } from "@/utils/formatMoney.util";
 import { walletVerificationMessage } from "@/utils/walletLines.util";
 import { spacing } from "@/constants/spacing.constant";
 import { typeScale } from "@/constants/typography.constant";
+import { StepUpCancelledError, useStepUpPrompt } from "@/components/wallet/stepUpSheet";
+import { presentPaymentProblem } from "@/utils/paymentProblem.util";
 
 const convertMajorUnitTextToMinorUnits = (value: string) => Math.round(Number.parseFloat(value || "0") * 100);
 
@@ -42,16 +44,21 @@ export function WithdrawScreen({ navigation }: MainScreenProps<"Withdraw">) {
   const feeMinor = fees && available && fees.fee.currency === available.currency ? fees.fee.amountMinor : 0;
   const exceedsBalance = !!available && amountMinor + feeMinor > available.amountMinor;
 
+  const { withStepUp, stepUpSheet } = useStepUpPrompt();
   const requestWithdrawal = useMutation({
     mutationFn: () =>
-      walletsService.requestWithdrawalToPayoutAccount(
-        { payoutAccountId: payoutAccountId!, amount: { amountMinor, currency: available!.currency } },
-        idempotencyKey.current,
+      withStepUp((stepUpToken) =>
+        walletsService.requestWithdrawalToPayoutAccount(
+          { payoutAccountId: payoutAccountId!, amount: { amountMinor, currency: available!.currency } },
+          stepUpToken,
+          idempotencyKey.current,
+        ),
       ),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["wallet"] });
       navigation.goBack();
     },
+    onError: (error) => presentPaymentProblem(error, { onVerify: () => navigation.navigate("PayoutSetup"), onConfirmAgain: () => requestWithdrawal.mutate() }),
   });
 
   return (
@@ -125,7 +132,7 @@ export function WithdrawScreen({ navigation }: MainScreenProps<"Withdraw">) {
             <CaretRight24Icon />
           </Pressable>
         </View>
-        {requestWithdrawal.isError ? (
+        {requestWithdrawal.isError && !(requestWithdrawal.error instanceof StepUpCancelledError) ? (
           <Text size={typeScale.xs} lineHeight={14.4} color={colors.error}>
             {requestWithdrawal.error.message}
           </Text>
@@ -141,6 +148,7 @@ export function WithdrawScreen({ navigation }: MainScreenProps<"Withdraw">) {
           />
         )}
       </ScrollView>
+      {stepUpSheet}
     </Screen>
   );
 }

@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { Image } from "expo-image";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { ActivityIndicator, PanResponder, Platform, Pressable, StyleSheet, View, useWindowDimensions } from "react-native";
+import { PanResponder, Platform, Pressable, StyleSheet, View, useWindowDimensions } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { MessageComposerBar } from "@/components/chat/messageComposerBar";
@@ -14,6 +14,7 @@ import { StoryOptionsSheet } from "@/components/story/storyOptionsSheet";
 import { StoryProgressBar } from "@/components/story/storyProgressBar";
 import { openTrustedWebPage } from "@/components/links/openLink.util";
 import { Avatar } from "@/components/ui/avatar";
+import { BrandLoader } from "@/components/ui/brandLoader";
 import { EmptyState } from "@/components/ui/emptyState";
 import { ErrorState } from "@/components/ui/errorState";
 import { useOpenUserProfile } from "@/hooks/useOpenUserProfile.hook";
@@ -122,7 +123,7 @@ function StoryViewer({ navigation, route }: MainScreenProps<"Story">) {
     }
     rewindStoryIndex();
   }, [adPage, rewindStoryIndex]);
-  const story = adPage ? undefined : list[activeIndex];
+  const story = adPage ? undefined : list[Math.min(activeIndex, Math.max(0, list.length - 1))];
 
   const openAdDestination = useCallback((ad: StoryDecidedAd) => {
     const destination = ad.creative.destination;
@@ -176,7 +177,7 @@ function StoryViewer({ navigation, route }: MainScreenProps<"Story">) {
   return (
       <View style={[styles.root, styles.centered, { paddingTop: insets.top }]}>
         {stories.isPending ? (
-          <ActivityIndicator color={colors.primary} accessibilityLabel="Loading stories" />
+          <BrandLoader size="md" accessibilityLabel="Loading stories" />
         ) : stories.isError ? (
           <ErrorState message="Couldn't load stories." onRetry={() => stories.refetch()} retrying={stories.isRefetching} />
         ) : (
@@ -290,6 +291,9 @@ function StoryViewer({ navigation, route }: MainScreenProps<"Story">) {
           navigation.navigate("StoryAnalytics", { storyId });
         }}
         onReportClosed={() => setIsOptionsOpen(false)}
+        onDeleted={() => {
+          if (list.length === 0) closeStoryViewer();
+        }}
       />
     </View>
   );

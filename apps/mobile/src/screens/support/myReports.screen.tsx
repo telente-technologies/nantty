@@ -23,7 +23,7 @@ export function MyReportsScreen() {
         data={reports.data ?? []}
         keyExtractor={(report) => report.id}
         contentContainerStyle={styles.list}
-        refreshControl={<RefreshControl refreshing={reports.isRefetching} onRefresh={() => reports.refetch()} tintColor={colors.primary} />}
+        refreshControl={<RefreshControl refreshing={reports.isRefetching} onRefresh={() => reports.refetch()} tintColor={colors.primary} colors={[colors.primary]} />}
         ItemSeparatorComponent={() => <View style={styles.separator} />}
         renderItem={({ item }) => (
           <View style={styles.row}>

@@ -112,6 +112,7 @@ export function VerificationScreen({ navigation }: MainScreenProps<"Verification
         ) : null}
       </ScrollView>
       <ConfirmActionSheet
+        intent="verify"
         visible={cancelSheetVisible}
         title="Cancel verification?"
         message="Your badge and perks stay until the end of the current billing period. You won't be charged again."

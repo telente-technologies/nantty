@@ -19,6 +19,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { showToast } from "@/store/toast.store";
 import { spacing } from "@/constants/spacing.constant";
 import { typeScale } from "@/constants/typography.constant";
+import { StepUpCancelledError, useStepUpPrompt } from "@/components/wallet/stepUpSheet";
 
 export function PayoutAccountsScreen() {
   const { colors } = useTheme();
@@ -31,8 +32,9 @@ export function PayoutAccountsScreen() {
   const [accountNumber, setAccountNumber] = useState("");
   const refreshPayoutAccounts = () => queryClient.invalidateQueries({ queryKey: walletQueryKeys.payoutAccounts });
 
+  const { withStepUp, stepUpSheet } = useStepUpPrompt();
   const addAccount = useMutation({
-    mutationFn: () => walletsService.addPayoutAccount({ bankCode: bankCode.trim(), accountNumber }),
+    mutationFn: () => withStepUp((stepUpToken) => walletsService.addPayoutAccount({ bankCode: bankCode.trim(), accountNumber }, stepUpToken)),
     onSuccess: () => {
       setBankCode("");
       setBankName("");
@@ -53,7 +55,7 @@ export function PayoutAccountsScreen() {
     showAlertWithButtons("Remove account?", `${label} will no longer receive withdrawals.`, [
       { text: "Cancel", style: "cancel" },
       { text: "Remove", style: "destructive", onPress: () => removeAccount.mutate(accountId) },
-    ]);
+    ], { intent: "delete" });
 
   return (
     <Screen>
@@ -97,13 +99,14 @@ export function PayoutAccountsScreen() {
         <Text size={typeScale.xs} lineHeight={16.8} color={colors.textSubtle}>
           We verify the account name with your bank. Withdrawals can only go to an account in your name.
         </Text>
-        {addAccount.isError ? (
+        {addAccount.isError && !(addAccount.error instanceof StepUpCancelledError) ? (
           <Text size={typeScale.xs} lineHeight={14.4} color={colors.error}>
             {addAccount.error.message}
           </Text>
         ) : null}
         <Button title="Add account" disabled={!bankCode.trim() || accountNumber.length !== 10} loading={addAccount.isPending} onPress={() => addAccount.mutate()} />
       </ScrollView>
+      {stepUpSheet}
     </Screen>
   );
 }
