@@ -10,7 +10,6 @@ export function describePlanEntitlements(entitlements: PlanEntitlements, locale 
     descriptions.push(`${formatMoneyForDisplay({ amountMinor: entitlements.adCredits.amountMinor, currency: entitlements.adCredits.currency }, locale)} ad credit every month`);
   }
   if (entitlements.reducedEscrowFee) descriptions.push("1% escrow fee instead of 1.5%");
-  if (entitlements.priorityPlacement) descriptions.push("Priority placement in Mart and search");
   if (entitlements.apiAccess) descriptions.push("API access");
   return descriptions;
 }
