@@ -25,6 +25,9 @@ import (
 	signingkeys "zudomart/modules/auth/src/modules/signingKeys"
 	signingkeyservices "zudomart/modules/auth/src/modules/signingKeys/services"
 	socialsignin "zudomart/modules/auth/src/modules/socialSignIn"
+	stepup "zudomart/modules/auth/src/modules/stepUp"
+	realtimetokens "zudomart/modules/auth/src/modules/realtimeTokens"
+	widgettokens "zudomart/modules/auth/src/modules/widgetTokens"
 	"zudomart/modules/auth/src/services"
 	"zudomart/modules/auth/src/utils"
 	platformevents "zudomart/platform/events"
@@ -65,9 +68,9 @@ func StartAuthModuleWithSettings(ctx context.Context, settings configs.AuthSetti
 		return nil, err
 	}
 	client := ent.NewClient(ent.Driver(entsql.OpenDB(dialect.Postgres, database)))
-	client.Session.Use(services.DenylistSessionsOnRevocation(services.SessionDenylistTtl(settings.AccessTokenTimeToLive)))
+	client.Session.Use(services.DenylistSessionsOnRevocation(services.SessionDenylistTtl(settings.LongestUserTokenTimeToLive())))
 	keys := signingkeyservices.NewSigningKeyService(client, signingkeyservices.Settings{
-		EncryptionKey: settings.SigningKeyEncryptionKey, RotationInterval: settings.SigningKeyRotationInterval, AccessTokenTimeToLive: settings.AccessTokenTimeToLive,
+		EncryptionKey: settings.SigningKeyEncryptionKey, RotationInterval: settings.SigningKeyRotationInterval, AccessTokenTimeToLive: settings.LongestUserTokenTimeToLive(),
 	}, time.Now)
 	if err := keys.RotateSigningKeyWhenDueAndReloadKeys(ctx); err != nil {
 		_ = database.Close()
@@ -106,6 +109,9 @@ func (module *Module) MountRoutes(mux *http.ServeMux) {
 	socialsignin.Mount(mux, module.container)
 	signingkeys.Mount(mux, module.container)
 	emailverification.Mount(mux, module.container)
+	stepup.Mount(mux, module.container)
+	widgettokens.Mount(mux, module.container)
+	realtimetokens.Mount(mux, module.container)
 }
 
 func (module *Module) RunBackgroundWorkersUntilContextDone(ctx context.Context) error {
@@ -114,7 +120,7 @@ func (module *Module) RunBackgroundWorkersUntilContextDone(ctx context.Context) 
 	}
 	go func() { _ = module.container.Keys.RunRotationAndReloadLoopUntilContextDone(ctx, reportError) }()
 	go services.RunRevokedSessionSweeperUntilContextDone(ctx, module.container.Client, module.container.Now,
-		services.SessionDenylistTtl(module.container.Settings.AccessTokenTimeToLive), module.container.Logger)
+		services.SessionDenylistTtl(module.container.Settings.LongestUserTokenTimeToLive()), module.container.Logger)
 	go func() {
 		settings := module.container.Settings
 		directory := services.AccountDirectoryService{Container: module.container}

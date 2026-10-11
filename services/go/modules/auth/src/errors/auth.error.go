@@ -12,6 +12,7 @@ var (
 	ErrRefreshTokenReused        = httpserver.NewApiError(http.StatusUnauthorized, "REFRESH_TOKEN_REUSED", "Your session has ended. Sign in again.")
 	ErrInvalidOneTimeCode        = httpserver.NewApiError(http.StatusBadRequest, "INVALID_CODE", "The code is invalid or has expired.")
 	ErrTooManyCodeAttempts       = httpserver.NewApiError(http.StatusTooManyRequests, "TOO_MANY_ATTEMPTS", "Too many incorrect attempts. Request a new code.")
+	ErrTooManyLoginAttempts      = httpserver.NewApiError(http.StatusTooManyRequests, "TOO_MANY_LOGIN_ATTEMPTS", "Too many incorrect sign-in attempts. Wait 15 minutes and try again.")
 	ErrDestinationNotProven      = httpserver.NewApiError(http.StatusBadRequest, "DESTINATION_NOT_VERIFIED", "Verify your email address first.")
 	ErrEmailAlreadyInUse         = httpserver.NewApiError(http.StatusConflict, "EMAIL_TAKEN", "An account with this email already exists.")
 	ErrUsernameAlreadyInUse      = httpserver.NewApiError(http.StatusConflict, "USERNAME_TAKEN", "That username is taken.")

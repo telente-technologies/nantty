@@ -30,6 +30,7 @@ type AuthSettings struct {
 	GoogleJwksUrl               string
 	AppleJwksUrl                string
 	StaffAccessTokenTimeToLive  time.Duration
+	WidgetTokenTimeToLive       time.Duration
 	DirectoryGrpcAddress        string
 	InternalGrpcToken           string
 	OtpEventKey                 []byte
@@ -37,6 +38,10 @@ type AuthSettings struct {
 }
 
 func (settings AuthSettings) IsProduction() bool { return settings.Environment == "production" }
+
+func (settings AuthSettings) LongestUserTokenTimeToLive() time.Duration {
+	return max(settings.AccessTokenTimeToLive, settings.WidgetTokenTimeToLive)
+}
 
 func ReadAuthSettingsFromEnvironment(reader *platformconfig.EnvironmentReader) AuthSettings {
 	settings := AuthSettings{
@@ -62,18 +67,22 @@ func ReadAuthSettingsFromEnvironment(reader *platformconfig.EnvironmentReader) A
 		GoogleJwksUrl:               reader.ReadStringOrDefault("AUTH_GOOGLE_JWKS_URL", "https://www.googleapis.com/oauth2/v3/certs"),
 		AppleJwksUrl:                reader.ReadStringOrDefault("AUTH_APPLE_JWKS_URL", "https://appleid.apple.com/auth/keys"),
 		StaffAccessTokenTimeToLive:  reader.ReadDurationOrDefault("AUTH_STAFF_ACCESS_TOKEN_TTL", 10*time.Minute),
+		WidgetTokenTimeToLive:       reader.ReadDurationOrDefault("AUTH_WIDGET_TOKEN_TTL", 24*time.Hour),
 		DirectoryGrpcAddress:        reader.ReadStringOrDefault("AUTH_ACCOUNT_DIRECTORY_GRPC_ADDRESS", ""),
 		InternalGrpcToken:           reader.ReadStringOrDefault("AUTH_INTERNAL_GRPC_TOKEN", ""),
 		OtpEventKeyId:               reader.ReadStringOrDefault("AUTH_OTP_EVENT_KEY_ID", "otp-1"),
+	}
+	if settings.WidgetTokenTimeToLive <= 0 || settings.WidgetTokenTimeToLive > 7*24*time.Hour {
+		reader.ReadRequiredString("AUTH_WIDGET_TOKEN_TTL_BETWEEN_1S_AND_7_DAYS")
 	}
 	if settings.OneTimeCodeDeliveryMode == "event" {
 		settings.OtpEventKey = readBase64Key(reader, "AUTH_OTP_EVENT_KEY", 32)
 	}
 	if settings.IsProduction() && settings.DirectoryGrpcAddress != "" && len(settings.InternalGrpcToken) < 32 {
-		reader.ReadRequiredString("AUTH_INTERNAL_GRPC_TOKEN_OF_AT_LEAST_32_CHARACTERS")
+		reader.ReportProblem("AUTH_INTERNAL_GRPC_TOKEN must be at least 32 characters in production")
 	}
 	if settings.IsProduction() && settings.OneTimeCodeDeliveryMode == "log" {
-		reader.ReadRequiredString("AUTH_OTP_DELIVERY_NOT_LOG_IN_PRODUCTION")
+		reader.ReportProblem("AUTH_OTP_DELIVERY must not be log in production")
 	}
 	return settings
 }

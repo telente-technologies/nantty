@@ -60,13 +60,15 @@ func (settlement AdSettlement) SettlePendingCharges(ctx context.Context) (int, e
 		return 0, err
 	}
 	settled := 0
+	var failures []error
 	for accountId, totals := range byAccount {
 		if err := settlement.settleAccount(ctx, accountId, totals); err != nil {
-			return settled, fmt.Errorf("settle account %s: %w", accountId, err)
+			failures = append(failures, fmt.Errorf("settle account %s: %w", accountId, err))
+			continue
 		}
 		settled += len(totals.ids)
 	}
-	return settled, nil
+	return settled, errors.Join(failures...)
 }
 
 func (settlement AdSettlement) settleAccount(ctx context.Context, accountId uuid.UUID, totals *accountSettlementTotals) error {
@@ -76,10 +78,6 @@ func (settlement AdSettlement) settleAccount(ctx context.Context, accountId uuid
 	}
 	if err := settlement.settleAccountInTransaction(ctx, tx, accountId, totals); err != nil {
 		_ = tx.Rollback()
-		var shortfall *insufficientFundsError
-		if errors.As(err, &shortfall) {
-			return settlement.disableAccountForShortfall(ctx, accountId, totals.currency, shortfall.shortfallMinor)
-		}
 		return err
 	}
 	return tx.Commit()
@@ -94,9 +92,9 @@ func (settlement AdSettlement) settleAccountInTransaction(ctx context.Context, t
 	debitMinor, carry := WholeMinorUnitsAndCarry(account.SpendCarryMicros + totals.spendMicros)
 	creditUsed := min(debitMinor, usableCreditMinor(account, now))
 	balanceUsed := min(debitMinor-creditUsed, account.BalanceMinor)
-	if debitMinor > creditUsed+balanceUsed {
-		shortfall := debitMinor - creditUsed - balanceUsed
-		return &insufficientFundsError{accountId: accountId, shortfallMinor: shortfall}
+	shortfallMinor := debitMinor - creditUsed - balanceUsed
+	if shortfallMinor > 0 {
+		totals.scaleSharesToCollected(creditUsed+balanceUsed, debitMinor)
 	}
 	batch, err := tx.AdSpendBatch.Create().SetAccountID(accountId).SetCurrency(totals.currency).SetImpressionCount(len(totals.ids)).SetSpendMicros(totals.spendMicros).
 		SetDebitedMinor(creditUsed + balanceUsed).SetCreatorShareMicros(totals.creatorMicros).SetPlatformShareMicros(totals.platformMicros).Save(ctx)
@@ -111,6 +109,11 @@ func (settlement AdSettlement) settleAccountInTransaction(ctx context.Context, t
 	}
 	if err := recordSpendTransactions(ctx, tx, accountId, totals.currency, batch.ID, creditUsed, balanceUsed); err != nil {
 		return err
+	}
+	if shortfallMinor > 0 {
+		if err := recordShortfallDebt(ctx, tx, accountId, totals.currency, batch.ID, shortfallMinor); err != nil {
+			return err
+		}
 	}
 	if err := settlement.accruePools(ctx, tx, totals, now); err != nil {
 		return err
@@ -129,34 +132,6 @@ func usableCreditMinor(account *ent.AdAccount, now time.Time) int64 {
 		return 0
 	}
 	return account.CreditMinor
-}
-
-type insufficientFundsError struct {
-	accountId      uuid.UUID
-	shortfallMinor int64
-}
-
-func (err *insufficientFundsError) Error() string {
-	return fmt.Sprintf("ad account %s has insufficient funds for %d minor units of spend; account disabled", err.accountId, err.shortfallMinor)
-}
-
-func (settlement AdSettlement) disableAccountForShortfall(ctx context.Context, accountId uuid.UUID, currency string, shortfallMinor int64) error {
-	tx, err := settlement.Client.Tx(ctx)
-	if err != nil {
-		return &insufficientFundsError{accountId: accountId, shortfallMinor: shortfallMinor}
-	}
-	defer func() { _ = tx.Rollback() }()
-	if err := tx.AdAccount.UpdateOneID(accountId).SetStatus(adaccount.StatusDisabled).Exec(ctx); err != nil {
-		return err
-	}
-	shortfallRef, _ := uuid.NewV7()
-	if err := tx.AdFundsTransaction.Create().SetAccountID(accountId).SetType("ad_spend_unrecoverable").SetAmountMinor(shortfallMinor).SetCurrency(currency).SetDescription("Ad spend paused due to insufficient funds").SetReference("shortfall:" + shortfallRef.String()).Exec(ctx); err != nil {
-		return err
-	}
-	if err := tx.Commit(); err != nil {
-		return err
-	}
-	return &insufficientFundsError{accountId: accountId, shortfallMinor: shortfallMinor}
 }
 
 func recordSpendTransactions(ctx context.Context, tx *ent.Tx, accountId uuid.UUID, currency string, batchId uuid.UUID, creditUsed, balanceUsed int64) error {

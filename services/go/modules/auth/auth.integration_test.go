@@ -13,6 +13,7 @@ import (
 	"regexp"
 	"strings"
 	"sync"
+	"sync/atomic"
 	"testing"
 	"time"
 
@@ -49,7 +50,10 @@ type authTestHarness struct {
 	logs      *lockedBuffer
 	publisher *events.RecordingPublisher
 	settings  configs.AuthSettings
+	clientIp  string
 }
+
+var harnessClientIpCounter atomic.Int64
 
 func startAuthModuleAgainstFreshSchema(t *testing.T, adjustments ...func(*configs.AuthSettings)) *authTestHarness {
 	t.Helper()
@@ -91,7 +95,9 @@ func startAuthModuleAgainstFreshSchema(t *testing.T, adjustments ...func(*config
 	module.MountRoutes(mux)
 	server := httptest.NewServer(mux)
 	t.Cleanup(func() { server.Close(); stopWorkers(); _ = module.Close(ctx) })
-	return &authTestHarness{t: t, server: server, logs: logs, publisher: publisher, settings: settings}
+	next := harnessClientIpCounter.Add(1)
+	clientIp := fmt.Sprintf("198.51.%d.%d", 100+next/250, 1+next%250)
+	return &authTestHarness{t: t, server: server, logs: logs, publisher: publisher, settings: settings, clientIp: clientIp}
 }
 
 func dropSchemaAndClose(administrator *sql.DB, schema string) {
@@ -110,6 +116,9 @@ func (harness *authTestHarness) call(method, path, accessToken string, body any)
 	}
 	request, _ := http.NewRequest(method, harness.server.URL+path, reader)
 	request.Header.Set("Content-Type", "application/json")
+	if harness.clientIp != "" {
+		request.Header.Set("X-Forwarded-For", harness.clientIp)
+	}
 	if accessToken != "" {
 		request.Header.Set("Authorization", "Bearer "+accessToken)
 	}

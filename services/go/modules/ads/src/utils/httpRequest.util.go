@@ -89,3 +89,14 @@ func ClientCountry(request *http.Request) string {
 func ResolvePricingRegion(request *http.Request) regionpricing.Resolution {
 	return regionpricing.ResolvePricingRegion(regionpricing.ReadSignalsFromRequest(request, regionpricing.DefaultTrustedCountryKey, ""))
 }
+
+func ResolveChargingRegion(request *http.Request, profileCountry string) regionpricing.Resolution {
+	return regionpricing.ResolveChargingRegion(regionpricing.ReadSignalsFromRequest(request, regionpricing.DefaultTrustedCountryKey, profileCountry))
+}
+
+func TrustedViewerCountry(request *http.Request) string {
+	if country := regionpricing.NormalizeCountryCode(request.Header.Get(regionpricing.DefaultTrustedCountryKey)); country != "" {
+		return country
+	}
+	return ClientCountry(request)
+}

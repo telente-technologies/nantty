@@ -34,7 +34,7 @@ func (controller DecisionController) DecideForSignedInViewer(writer http.Respons
 		if err := validators.ValidateSlot(body.Slot, body.SessionId); err != nil {
 			return err
 		}
-		viewer := types.Viewer{UserId: userId.String(), Country: utils.ClientCountry(request)}
+		viewer := types.Viewer{UserId: userId.String(), Country: utils.TrustedViewerCountry(request)}
 		if body.Viewer != nil {
 			viewer.Region, viewer.AgeBand, viewer.Gender, viewer.Topics, viewer.CustomAudienceIds = body.Viewer.Region, body.Viewer.AgeBand, body.Viewer.Gender, body.Viewer.Topics, body.Viewer.CustomAudienceIds
 		}

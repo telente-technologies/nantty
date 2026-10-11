@@ -25,7 +25,9 @@ type CandidateAd struct {
 	EndAt                 *time.Time
 	Currency              string
 	Timezone              string
-	AvailableFundsMicros  int64
+	BalanceFundsMicros    int64
+	CreditFundsMicros     int64
+	CreditExpiresAt       *time.Time
 	MonthlySpendLimit     *int64
 	VideoDurationSeconds  int
 	HistoricalImpressions int64
@@ -80,4 +82,12 @@ type PctrRequest struct {
 	SlotKind   string
 	Placement  string
 	Candidates []PctrCandidate
+}
+
+func (candidate CandidateAd) FundsAvailableMicrosAt(now time.Time) int64 {
+	credit := candidate.CreditFundsMicros
+	if candidate.CreditExpiresAt != nil && !candidate.CreditExpiresAt.After(now) {
+		credit = 0
+	}
+	return max(candidate.BalanceFundsMicros, 0) + max(credit, 0)
 }
