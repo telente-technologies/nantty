@@ -27,7 +27,7 @@ function buildContentSecurityPolicyHeaderValue(): string {
     "media-src": ["'self'", "blob:"],
     "object-src": ["'none'"],
     "base-uri": ["'self'"],
-    "form-action": ["'self'", "https://checkout.paystack.com", "https://checkout.flutterwave.com"],
+    "form-action": ["'self'", "https://checkout.flutterwave.com"],
     "frame-ancestors": ["'none'"],
     "frame-src": ["'self'", "blob:", embedOrigin].filter(Boolean),
     "manifest-src": ["'self'"],
