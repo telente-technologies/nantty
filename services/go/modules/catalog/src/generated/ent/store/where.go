@@ -155,6 +155,11 @@ func ModerationVisibility(v string) predicate.Store {
 	return predicate.Store(sql.FieldEQ(FieldModerationVisibility, v))
 }
 
+// ModerationVisibilityAt applies equality check predicate on the "moderation_visibility_at" field. It's identical to ModerationVisibilityAtEQ.
+func ModerationVisibilityAt(v time.Time) predicate.Store {
+	return predicate.Store(sql.FieldEQ(FieldModerationVisibilityAt, v))
+}
+
 // Locale applies equality check predicate on the "locale" field. It's identical to LocaleEQ.
 func Locale(v string) predicate.Store {
 	return predicate.Store(sql.FieldEQ(FieldLocale, v))
@@ -1253,6 +1258,56 @@ func ModerationVisibilityEqualFold(v string) predicate.Store {
 // ModerationVisibilityContainsFold applies the ContainsFold predicate on the "moderation_visibility" field.
 func ModerationVisibilityContainsFold(v string) predicate.Store {
 	return predicate.Store(sql.FieldContainsFold(FieldModerationVisibility, v))
+}
+
+// ModerationVisibilityAtEQ applies the EQ predicate on the "moderation_visibility_at" field.
+func ModerationVisibilityAtEQ(v time.Time) predicate.Store {
+	return predicate.Store(sql.FieldEQ(FieldModerationVisibilityAt, v))
+}
+
+// ModerationVisibilityAtNEQ applies the NEQ predicate on the "moderation_visibility_at" field.
+func ModerationVisibilityAtNEQ(v time.Time) predicate.Store {
+	return predicate.Store(sql.FieldNEQ(FieldModerationVisibilityAt, v))
+}
+
+// ModerationVisibilityAtIn applies the In predicate on the "moderation_visibility_at" field.
+func ModerationVisibilityAtIn(vs ...time.Time) predicate.Store {
+	return predicate.Store(sql.FieldIn(FieldModerationVisibilityAt, vs...))
+}
+
+// ModerationVisibilityAtNotIn applies the NotIn predicate on the "moderation_visibility_at" field.
+func ModerationVisibilityAtNotIn(vs ...time.Time) predicate.Store {
+	return predicate.Store(sql.FieldNotIn(FieldModerationVisibilityAt, vs...))
+}
+
+// ModerationVisibilityAtGT applies the GT predicate on the "moderation_visibility_at" field.
+func ModerationVisibilityAtGT(v time.Time) predicate.Store {
+	return predicate.Store(sql.FieldGT(FieldModerationVisibilityAt, v))
+}
+
+// ModerationVisibilityAtGTE applies the GTE predicate on the "moderation_visibility_at" field.
+func ModerationVisibilityAtGTE(v time.Time) predicate.Store {
+	return predicate.Store(sql.FieldGTE(FieldModerationVisibilityAt, v))
+}
+
+// ModerationVisibilityAtLT applies the LT predicate on the "moderation_visibility_at" field.
+func ModerationVisibilityAtLT(v time.Time) predicate.Store {
+	return predicate.Store(sql.FieldLT(FieldModerationVisibilityAt, v))
+}
+
+// ModerationVisibilityAtLTE applies the LTE predicate on the "moderation_visibility_at" field.
+func ModerationVisibilityAtLTE(v time.Time) predicate.Store {
+	return predicate.Store(sql.FieldLTE(FieldModerationVisibilityAt, v))
+}
+
+// ModerationVisibilityAtIsNil applies the IsNil predicate on the "moderation_visibility_at" field.
+func ModerationVisibilityAtIsNil() predicate.Store {
+	return predicate.Store(sql.FieldIsNull(FieldModerationVisibilityAt))
+}
+
+// ModerationVisibilityAtNotNil applies the NotNil predicate on the "moderation_visibility_at" field.
+func ModerationVisibilityAtNotNil() predicate.Store {
+	return predicate.Store(sql.FieldNotNull(FieldModerationVisibilityAt))
 }
 
 // ShippingCountryCodesIsNil applies the IsNil predicate on the "shipping_country_codes" field.

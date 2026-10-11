@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log/slog"
+	"time"
 
 	"github.com/google/uuid"
 
@@ -12,6 +13,8 @@ import (
 	"zudomart/modules/catalog/src/enums"
 	"zudomart/modules/catalog/src/events"
 	"zudomart/modules/catalog/src/generated/ent"
+	"zudomart/modules/catalog/src/generated/ent/product"
+	"zudomart/modules/catalog/src/generated/ent/store"
 	platformevents "zudomart/platform/events"
 )
 
@@ -38,16 +41,21 @@ func ApplyContentVisibilityChangedMessage(deployed *container.Container) platfor
 		if err != nil || (data.TargetType != "product" && data.TargetType != "store") {
 			return nil
 		}
+		occurredAt := envelope.OccurredAt
+		if occurredAt.IsZero() {
+			occurredAt = deployed.Now()
+		}
 		return deployed.RunInTransaction(ctx, func(tx *ent.Tx) error {
-			return applyModerationVisibility(ctx, deployed, tx, data.TargetType, targetId, data.Visibility)
+			return applyModerationVisibility(ctx, deployed, tx, data.TargetType, targetId, data.Visibility, occurredAt)
 		})
 	}
 }
 
-func applyModerationVisibility(ctx context.Context, deployed *container.Container, tx *ent.Tx, targetType string, targetId uuid.UUID, visibility string) error {
+func applyModerationVisibility(ctx context.Context, deployed *container.Container, tx *ent.Tx, targetType string, targetId uuid.UUID, visibility string, occurredAt time.Time) error {
 	now := deployed.Now()
 	if targetType == "store" {
-		affected, err := tx.Store.UpdateOneID(targetId).SetModerationVisibility(visibility).Save(ctx)
+		affected, err := tx.Store.UpdateOneID(targetId).Where(store.Or(store.ModerationVisibilityAtIsNil(), store.ModerationVisibilityAtLT(occurredAt))).
+			SetModerationVisibility(visibility).SetModerationVisibilityAt(occurredAt).Save(ctx)
 		if ent.IsNotFound(err) {
 			return nil
 		}
@@ -56,7 +64,8 @@ func applyModerationVisibility(ctx context.Context, deployed *container.Containe
 		}
 		return events.EnqueueOutboxEventInTransaction(ctx, tx, "store.updated", affected.ID.String(), now, map[string]any{"storeId": affected.ID, "moderationVisibility": visibility})
 	}
-	affected, err := tx.Product.UpdateOneID(targetId).SetModerationVisibility(visibility).Save(ctx)
+	affected, err := tx.Product.UpdateOneID(targetId).Where(product.Or(product.ModerationVisibilityAtIsNil(), product.ModerationVisibilityAtLT(occurredAt))).
+		SetModerationVisibility(visibility).SetModerationVisibilityAt(occurredAt).Save(ctx)
 	if ent.IsNotFound(err) {
 		return nil
 	}

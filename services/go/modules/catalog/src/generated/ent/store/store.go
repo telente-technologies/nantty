@@ -54,6 +54,8 @@ const (
 	FieldRatingCount = "rating_count"
 	// FieldModerationVisibility holds the string denoting the moderation_visibility field in the database.
 	FieldModerationVisibility = "moderation_visibility"
+	// FieldModerationVisibilityAt holds the string denoting the moderation_visibility_at field in the database.
+	FieldModerationVisibilityAt = "moderation_visibility_at"
 	// FieldShippingCountryCodes holds the string denoting the shipping_country_codes field in the database.
 	FieldShippingCountryCodes = "shipping_country_codes"
 	// FieldLocale holds the string denoting the locale field in the database.
@@ -107,6 +109,7 @@ var Columns = []string{
 	FieldRatingSum,
 	FieldRatingCount,
 	FieldModerationVisibility,
+	FieldModerationVisibilityAt,
 	FieldShippingCountryCodes,
 	FieldLocale,
 	FieldContactPhone,
@@ -305,6 +308,11 @@ func ByRatingCount(opts ...sql.OrderTermOption) OrderOption {
 // ByModerationVisibility orders the results by the moderation_visibility field.
 func ByModerationVisibility(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldModerationVisibility, opts...).ToFunc()
+}
+
+// ByModerationVisibilityAt orders the results by the moderation_visibility_at field.
+func ByModerationVisibilityAt(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldModerationVisibilityAt, opts...).ToFunc()
 }
 
 // ByLocale orders the results by the locale field.

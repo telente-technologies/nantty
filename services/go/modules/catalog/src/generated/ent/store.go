@@ -60,6 +60,8 @@ type Store struct {
 	RatingCount int `json:"rating_count,omitempty"`
 	// ModerationVisibility holds the value of the "moderation_visibility" field.
 	ModerationVisibility string `json:"moderation_visibility,omitempty"`
+	// ModerationVisibilityAt holds the value of the "moderation_visibility_at" field.
+	ModerationVisibilityAt *time.Time `json:"moderation_visibility_at,omitempty"`
 	// ShippingCountryCodes holds the value of the "shipping_country_codes" field.
 	ShippingCountryCodes []string `json:"shipping_country_codes,omitempty"`
 	// Locale holds the value of the "locale" field.
@@ -104,7 +106,7 @@ func (*Store) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullInt64)
 		case store.FieldName, store.FieldSlug, store.FieldDescription, store.FieldLogoURL, store.FieldBannerURL, store.FieldCountryCode, store.FieldCurrency, store.FieldTimezone, store.FieldStatus, store.FieldStatusReason, store.FieldModerationVisibility, store.FieldLocale, store.FieldContactPhone, store.FieldContactEmail, store.FieldContactAddress, store.FieldTagline:
 			values[i] = new(sql.NullString)
-		case store.FieldCreatedAt, store.FieldStatusChangedAt, store.FieldUpdatedAt:
+		case store.FieldCreatedAt, store.FieldStatusChangedAt, store.FieldModerationVisibilityAt, store.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
 		case store.FieldID, store.FieldOwnerAccountID, store.FieldBusinessProfileID:
 			values[i] = new(uuid.UUID)
@@ -253,6 +255,13 @@ func (_m *Store) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field moderation_visibility", values[i])
 			} else if value.Valid {
 				_m.ModerationVisibility = value.String
+			}
+		case store.FieldModerationVisibilityAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field moderation_visibility_at", values[i])
+			} else if value.Valid {
+				_m.ModerationVisibilityAt = new(time.Time)
+				*_m.ModerationVisibilityAt = value.Time
 			}
 		case store.FieldShippingCountryCodes:
 			if value, ok := values[i].(*[]byte); !ok {
@@ -449,6 +458,11 @@ func (_m *Store) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("moderation_visibility=")
 	builder.WriteString(_m.ModerationVisibility)
+	builder.WriteString(", ")
+	if v := _m.ModerationVisibilityAt; v != nil {
+		builder.WriteString("moderation_visibility_at=")
+		builder.WriteString(v.Format(time.ANSIC))
+	}
 	builder.WriteString(", ")
 	builder.WriteString("shipping_country_codes=")
 	builder.WriteString(fmt.Sprintf("%v", _m.ShippingCountryCodes))

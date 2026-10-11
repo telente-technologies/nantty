@@ -85,6 +85,10 @@ func (catalog CommerceCatalog) FindStoreAccessForAccount(ctx context.Context, ac
 	return services.FindStoreAccess(ctx, catalog.Container, accountId, requested)
 }
 
+func (catalog CommerceCatalog) ListStoreTeamWithPermission(ctx context.Context, storeId uuid.UUID, permission string) ([]uuid.UUID, error) {
+	return services.ListStoreTeamWithPermission(ctx, catalog.Container, storeId, permission)
+}
+
 func (catalog CommerceCatalog) DescribeStores(ctx context.Context, storeIds []uuid.UUID) (map[uuid.UUID]commerceports.StoreSnapshot, error) {
 	rows, err := catalog.Container.Client.Store.Query().Where(store.IDIn(storeIds...)).All(ctx)
 	if err != nil {

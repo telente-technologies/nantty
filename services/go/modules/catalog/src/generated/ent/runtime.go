@@ -636,7 +636,7 @@ func init() {
 	// product.DefaultModerationVisibility holds the default value on creation for the moderation_visibility field.
 	product.DefaultModerationVisibility = productDescModerationVisibility.Default.(string)
 	// productDescUpdatedAt is the schema descriptor for updated_at field.
-	productDescUpdatedAt := productFields[25].Descriptor()
+	productDescUpdatedAt := productFields[26].Descriptor()
 	// product.DefaultUpdatedAt holds the default value on creation for the updated_at field.
 	product.DefaultUpdatedAt = productDescUpdatedAt.Default.(func() time.Time)
 	// product.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
@@ -1340,41 +1340,41 @@ func init() {
 	// store.DefaultModerationVisibility holds the default value on creation for the moderation_visibility field.
 	store.DefaultModerationVisibility = storeDescModerationVisibility.Default.(string)
 	// storeDescLocale is the schema descriptor for locale field.
-	storeDescLocale := storeFields[20].Descriptor()
+	storeDescLocale := storeFields[21].Descriptor()
 	// store.DefaultLocale holds the default value on creation for the locale field.
 	store.DefaultLocale = storeDescLocale.Default.(string)
 	// store.LocaleValidator is a validator for the "locale" field. It is called by the builders before save.
 	store.LocaleValidator = storeDescLocale.Validators[0].(func(string) error)
 	// storeDescContactPhone is the schema descriptor for contact_phone field.
-	storeDescContactPhone := storeFields[21].Descriptor()
+	storeDescContactPhone := storeFields[22].Descriptor()
 	// store.DefaultContactPhone holds the default value on creation for the contact_phone field.
 	store.DefaultContactPhone = storeDescContactPhone.Default.(string)
 	// store.ContactPhoneValidator is a validator for the "contact_phone" field. It is called by the builders before save.
 	store.ContactPhoneValidator = storeDescContactPhone.Validators[0].(func(string) error)
 	// storeDescContactEmail is the schema descriptor for contact_email field.
-	storeDescContactEmail := storeFields[22].Descriptor()
+	storeDescContactEmail := storeFields[23].Descriptor()
 	// store.DefaultContactEmail holds the default value on creation for the contact_email field.
 	store.DefaultContactEmail = storeDescContactEmail.Default.(string)
 	// store.ContactEmailValidator is a validator for the "contact_email" field. It is called by the builders before save.
 	store.ContactEmailValidator = storeDescContactEmail.Validators[0].(func(string) error)
 	// storeDescContactAddress is the schema descriptor for contact_address field.
-	storeDescContactAddress := storeFields[23].Descriptor()
+	storeDescContactAddress := storeFields[24].Descriptor()
 	// store.DefaultContactAddress holds the default value on creation for the contact_address field.
 	store.DefaultContactAddress = storeDescContactAddress.Default.(string)
 	// store.ContactAddressValidator is a validator for the "contact_address" field. It is called by the builders before save.
 	store.ContactAddressValidator = storeDescContactAddress.Validators[0].(func(string) error)
 	// storeDescPricesIncludeTax is the schema descriptor for prices_include_tax field.
-	storeDescPricesIncludeTax := storeFields[25].Descriptor()
+	storeDescPricesIncludeTax := storeFields[26].Descriptor()
 	// store.DefaultPricesIncludeTax holds the default value on creation for the prices_include_tax field.
 	store.DefaultPricesIncludeTax = storeDescPricesIncludeTax.Default.(bool)
 	// storeDescTagline is the schema descriptor for tagline field.
-	storeDescTagline := storeFields[28].Descriptor()
+	storeDescTagline := storeFields[29].Descriptor()
 	// store.DefaultTagline holds the default value on creation for the tagline field.
 	store.DefaultTagline = storeDescTagline.Default.(string)
 	// store.TaglineValidator is a validator for the "tagline" field. It is called by the builders before save.
 	store.TaglineValidator = storeDescTagline.Validators[0].(func(string) error)
 	// storeDescUpdatedAt is the schema descriptor for updated_at field.
-	storeDescUpdatedAt := storeFields[31].Descriptor()
+	storeDescUpdatedAt := storeFields[32].Descriptor()
 	// store.DefaultUpdatedAt holds the default value on creation for the updated_at field.
 	store.DefaultUpdatedAt = storeDescUpdatedAt.Default.(func() time.Time)
 	// store.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
