@@ -77,7 +77,7 @@
     },
     "payments": {
       "paymentIntents": { "commands": ["initializePayment", "verifyPaymentWithProvider"], "queries": ["getPayment", "listOrderPayments"], "events": ["paymentSucceeded", "paymentFailed"] },
-      "providerWebhooks": { "commands": ["handlePaystackWebhook", "handleFlutterwaveWebhook"], "queries": [], "events": [] },
+      "providerWebhooks": { "commands": ["handleFlutterwaveWebhook"], "queries": [], "events": [] },
       "refunds": { "commands": ["refundPayment"], "queries": ["listRefunds"], "events": ["paymentRefunded"] },
       "banks": { "commands": ["resolveBankAccountName"], "queries": ["listBanksForCountry"], "events": [] },
       "storePurchases": { "commands": ["verifyAppStoreReceipt", "verifyPlayStoreReceipt"], "queries": [], "events": ["inAppPurchaseVerified"] }

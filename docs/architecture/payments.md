@@ -1,10 +1,8 @@
 # Payments architecture
 
-> **Provider change (owner, 2026-10-10):** payments are moving from Paystack to Flutterwave (per-user payout subaccounts; Zudomart never holds customer money). The Paystack design below describes the code being replaced; the target is [`flutterwaveMigration.md`](../integrations/flutterwaveMigration.md).
+> **Provider (owner, 2026-10-11):** Flutterwave is the only payment provider. Each verified user's money sits in their own Flutterwave payout subaccount (PSA) and Zudomart never holds customer money. Detailed flows, ledger mapping, reconciliation and go-live checklist: [`flutterwaveMigration.md`](../integrations/flutterwaveMigration.md). This file keeps the architecture view.
 
-Status date: 2026-10-03.
-
-> **Bachs and Anchor dropped; Paystack adopted (owner, 2026-10-03).** Paystack is the single provider. Provider facts: `docs/integrations/flutterwaveMigration.md` Appendix B; flows and code changes: `docs/integrations/flutterwaveMigration.md` Appendix C. Code still contains the Bachs adapter until the plan's section 12 is implemented.
+Status date: 2026-10-11.
 
 Labels: **EXISTING** (in code), **MOCK-ONLY** (frontend mocks), **PROPOSED**, **OPTIONAL FUTURE**.
 
@@ -17,8 +15,8 @@ Labels: **EXISTING** (in code), **MOCK-ONLY** (frontend mocks), **PROPOSED**, **
 | `LiveMoneyService` gRPC contract (`ChargeGiftAndCreditCreator`, `SettleBattle`, `GetBattleGiftTotals`, `GetCoinBalance`) | EXISTING proto, **no server or client implementation** | `services/contracts/proto/zudomart/money/v1/live_money.proto` |
 | `Money` proto and Go money package (int64 minor units + currency) | EXISTING, tested | `services/contracts/proto/zudomart/common/v1/money.proto`, `services/go/platform/money` |
 | Idempotency middleware (Redis) | EXISTING, wired to no route | `services/go/platform/idempotency` |
-| Webhook signature verification in new services | EXISTING for Bachs (to be replaced). PROPOSED: `POST /webhooks/paystack`, HMAC-SHA512 of the raw body with the secret key (`x-paystack-signature`), IP allowlist, `event + data.id + status` dedupe | `services/go/modules/payments/src/integrations/bachsConnectWebhooks.integration.go` (to delete) |
-| Legacy card gateways (to be replaced by the Paystack adapter in the new stack), double-entry ledger, escrow auto-release job, coin IAP receipt endpoint | Ported to go-money (payments, ledger, escrow auto-release sweep, coin IAP receipts); the old monolith was removed on 2026-10-10 | `services/go/modules/{payments,ledger,escrow,wallet}` |
+| Webhook verification | EXISTING: `POST /webhooks/flutterwave`, `verif-hash` compared in constant time, stored in the webhook inbox, used only as a trigger (every charge re-verified by id) | `services/go/modules/payments/src/integrations/flutterwaveWebhooks.integration.go` |
+| Legacy card gateways (replaced by the Flutterwave adapter), double-entry ledger, escrow auto-release job, coin IAP receipt endpoint | Ported to go-money (payments, ledger, escrow auto-release sweep, coin IAP receipts); the old monolith was removed on 2026-10-10 | `services/go/modules/{payments,ledger,escrow,wallet}` |
 | Risk scoring subjects `order, payout, account_event, coin_purchase, coin_transfer, gift` | EXISTING in Python, not called by any Go/TS caller | `services/python/intelligence/src/modules/risk/dtos/risk_scoring_dto.py` |
 | Wallet, escrow, coin, payout screens in mobile, seller, admin | MOCK-ONLY | `apps/mobile/src/screens/{wallet,escrow}`, `apps/seller` wallet pages, `apps/admin` commerce pages |
 | Everything below | PROPOSED | `docs/backendPlan.md` phases 5 and 6 |
@@ -31,11 +29,11 @@ Rule: **the product being sold decides the rail, not the app it is sold from.**
 | --- | --- | --- |
 | Goods | Marketplace products, shipping fees | ZudoCoins, gifts, premium, creator subscriptions, in-app boosts |
 | Unit | Fiat `Money` (int64 minor + currency, store currency) | Coins (plain integer, own unit; **never money, never mixed with fiat**) |
-| Rail | Paystack checkout (card, bank transfer, USSD), one transaction per checkout; direct groups split to the seller's subaccount | Mobile apps: Apple IAP / Google Play Billing. Web: Paystack checkout on Zudomart's main account |
-| Holding | Escrow per order group: launch path in Zudomart's Paystack balance until release + 24h lock (E2); manual-settlement seller subaccount if Paystack confirms (E1). Direct groups never touch Zudomart (T+1 subaccount settlement) | Spendable coins (bought) and earned coins (creator side) |
-| Payee | Seller's bank: split settlement (direct) or Paystack transfer to the seller's recipient (escrow). Commission stays in Zudomart's main account | Creator share of gifts, paid by Paystack transfer from Zudomart's balance to the creator's recipient |
+| Rail | Flutterwave Standard checkout (card, bank transfer, USSD) or the buyer's funded wallet (PSA), one intent per checkout | Mobile apps: Apple IAP / Google Play Billing. Web: Flutterwave checkout or wallet, into Zudomart's main balance |
+| Holding | Escrow per order group, locked in our ledger inside the buyer's own PSA until release; release moves buyer PSA → seller PSA. Card money settles to main and is moved into the buyer's PSA. Outside NG (no PSA): direct payment, no escrow | Spendable coins (bought) and earned coins (creator side) |
+| Payee | Seller's PSA, then a withdrawal transfer to their bank (`debit_subaccount`). Commission goes PSA → Zudomart's main balance | Creator share of gifts, paid main → creator PSA, then withdrawn |
 | Owner | go-money (payments, escrow, seller balances, payouts) + go-commerce (orders) | go-money (coins, gifts, subscriptions, creators) |
-| Refund | Paystack refund from Zudomart's balance, per order group; seller debt if a direct share already settled | Store refund notification: claw back coins or flag account |
+| Refund | Before release: unlock in the buyer's PSA (or refund to the card on request). After release: clawback seller PSA → buyer PSA, rest as seller debt | Store refund notification: claw back coins or flag account |
 
 ### 2.1 App-store rules (owner-relevant, verify before launch)
 
@@ -43,56 +41,55 @@ Store policies change and differ by region. **Re-check Apple App Review Guidelin
 
 | Rule | Consequence for design |
 | --- | --- |
-| Digital goods consumed inside the iOS/Android app (coins, gifts, premium, creator subscriptions, in-app boosts) must be sold with Apple IAP / Google Play Billing | Mobile coin store uses store products only. No Paystack checkout, no external payment link inside the apps |
-| Store takes about 15 to 30 percent | 1 coin is not NGN 1. Each channel has its own price and coin amount so that the **net value per coin after the channel cost is the same**: `coins = floor(price x (1 - channelFee) / netValuePerCoin)`. App packs give fewer coins per naira (store cut 15 to 30 percent); web packs through Paystack give more (1.5% + NGN 100, waived under NGN 2,500, capped NGN 2,000). `CoinPack` needs a `channel` (`app_ios`, `app_android`, `web`) and per-channel price and coin amount. Worked table: `docs/integrations/flutterwaveMigration.md` Appendix C section 8.2 |
+| Digital goods consumed inside the iOS/Android app (coins, gifts, premium, creator subscriptions, in-app boosts) must be sold with Apple IAP / Google Play Billing | Mobile coin store uses store products only. No web checkout, no external payment link inside the apps |
+| Store takes about 15 to 30 percent | 1 coin is not NGN 1. Each channel has its own price and coin amount so that the **net value per coin after the channel cost is the same**: `coins = floor(price x (1 - channelFee) / netValuePerCoin)`. App packs give fewer coins per naira (store cut 15 to 30 percent); web packs through Flutterwave give more (only the card processing fee). `CoinPack` needs a `channel` (`app_ios`, `app_android`, `web`) and per-channel price and coin amount. Rules: `docs/integrations/flutterwaveMigration.md` Appendix B |
 | Creator share must be computed after the store fee | Ledger records the store fee as an expense or contra account at purchase. The gift split applies to coins already minted, so the **coin-to-payout rate is a platform decision**: coins bought through stores must be backed at net-of-fee value. Finance sets the payout rate per coin; do not promise a rate in UI copy |
-| Physical goods and services delivered outside the app must use external payment | Marketplace checkout stays on Paystack checkout in the apps (`authorization_url` in an in-app browser with universal-link return) |
-| Web (webapp, ads., dashboard., web coin store) may use Paystack | Web coin pack is the better-value path for users. **In-app, never link to or mention the cheaper web price**, except in regions whose steering rules allow it (US and EU rules are the ones to check). **FLAG: re-check Apple 3.1, Google Play payments policy and each region's anti-steering rules before launch and on each major release.** Default is no steering anywhere |
+| Physical goods and services delivered outside the app must use external payment | Marketplace checkout stays on Flutterwave Standard checkout in the apps (the hosted link in an in-app browser with universal-link return) |
+| Web (webapp, ads., dashboard., web coin store) may use Flutterwave checkout | Web coin pack is the better-value path for users. **In-app, never link to or mention the cheaper web price**, except in regions whose steering rules allow it (US and EU rules are the ones to check). **FLAG: re-check Apple 3.1, Google Play payments policy and each region's anti-steering rules before launch and on each major release.** Default is no steering anywhere |
 | Seller dashboard plans (seller subscription tiers) | Safest to sell **only on web** (`apps/seller`), never as an in-app purchase prompt in the mobile app |
 | Refunds are store-initiated | Server-side receipt verification plus App Store Server Notifications v2 and Google Real-Time Developer Notifications (RTDN) are mandatory, not optional |
 
 ## 3. Provider adapters to ledger
 
-Owner direction (2026-10-03): **Zudomart holds as little user money as possible.** Payments run on Paystack only. Full flows, ledger mapping and citations: `docs/integrations/flutterwaveMigration.md` Appendix C and `docs/integrations/flutterwaveMigration.md` Appendix B. This file keeps the architecture view.
+Owner direction (2026-10-10): **Zudomart does not hold customer money.** Payments run on Flutterwave only. Full flows, ledger mapping and citations: `docs/integrations/flutterwaveMigration.md`. This file keeps the architecture view.
 
-Go interfaces in go-money: `PaymentProvider`, `PayeeProvider` (recipients, subaccounts, account resolve), `MoneyMovementProvider` (transfers, balance), `DisputeProvider`, `SubscriptionProvider`, `SavedCardProvider`. Active adapters: `paystack` (PROPOSED, replaces `bachsConnect`), Apple IAP, Google Play. The interfaces carry no Paystack types, so another provider can be added later; none is planned.
+Go capability interfaces in go-money: `PaymentProvider` (collections), `WalletProvider` (PSAs), `PayoutProvider` (transfers, fees, balances, settlements), `IdentityVerifier` (BVN consent, account resolve), `DisputeProvider`, `SavedCardProvider`. Active adapters: `flutterwave` (v3), Apple IAP, Google Play. The interfaces carry no provider-specific types.
 
 ```mermaid
 flowchart LR
   subgraph Providers
-    PS[paystack adapter]
+    FW[flutterwave adapter v3]
     AP[Apple IAP adapter]
     GP[Google Play adapter]
   end
-  PS --> PT[(payment_transaction<br/>provider, ref, status, amount, currency)]
+  FW --> PT[(payment_intent / provider_movement<br/>provider, ref, status, amount, currency)]
   AP --> PT
   GP --> PT
-  WH[Webhook / notification endpoints<br/>verify signature, dedupe] --> PT
+  WH[Webhook inbox<br/>verif-hash, store-first, re-verify by id] --> PT
   PT -->|"posts balanced entries"| LG[(Ledger<br/>source of truth for what money means)]
-  LG --> W[Seller and creator balance views<br/>derived, never edited directly]
-  W --> SS[Escrow, 24h lock, pending transfer<br/>in Zudomart's Paystack balance]
-  W --> DS[Direct shares settling by Paystack<br/>to seller subaccounts]
-  W --> CS[Creator payouts<br/>Paystack transfer]
+  LG --> W[User wallet views<br/>derived, never edited directly]
+  W --> SS[Escrow locked in the buyer's PSA]
+  W --> DS[Seller and creator PSAs<br/>available, 24h lock, reserved payout]
+  W --> CS[Withdrawals<br/>transfer with debit_subaccount]
   W --> PL[Zudomart revenue and store-fee accounts]
-  PB[(Paystack balance, settlements, transfers)] -.->|nightly reconcile| LG
+  PB[(PSA balances and statements,<br/>main balance, settlements)] -.->|daily reconcile| LG
 ```
 
-The ledger decides what every naira means; Paystack balances, settlements and transfers are reconciliation evidence. A mismatch opens a break and freezes the affected payouts; corrections are reversal entries only.
+The ledger decides what every naira means; Flutterwave balances, statements and settlements are reconciliation evidence. A mismatch opens a case and freezes the affected wallet; corrections are compensating commands only.
 
 | Adapter | Capabilities | Verification | Status |
 | --- | --- | --- | --- |
-| paystack | initialize and verify transaction (dynamic split), charge authorization, refunds (incl. retry with customer details), banks and account resolve, transfer recipients, transfers, balance, subaccounts (settlement schedule), settlements, disputes, plans and subscriptions, customer validation | `x-paystack-signature`: hex HMAC-SHA512 of the raw body with the secret key; IP allowlist (52.31.139.75, 52.49.173.169, 52.214.14.220); dedupe on `event + data.id + status`; re-fetch with `verify` before posting. Transaction and transfer `reference` are the idempotency keys | PROPOSED (replaces `bachsConnect*.integration.go`, which is deleted by the plan) |
+| flutterwave (v3) | Standard checkout (`payload_hash`), verify by id and by `tx_ref`, tokenized charges, refunds, chargebacks, banks and account resolve, BVN consent, PSAs (create, static accounts, balance, statement, close), PSA↔PSA and PSA↔main moves, funding reversals, transfers with `debit_subaccount`, fees, balances, settlements | `verif-hash` (shared secret, not an HMAC) checked in constant time; the webhook is only a hint, every credit is re-fetched by id or from the PSA statement. Our `tx_ref` / `reference` is stored before the call and is the idempotency key; money-moving POSTs are sent once | EXISTING |
 | Apple IAP | verify transaction, receive refund/revoke/renewal notifications | StoreKit 2 signed JWS verified against Apple chain on the server; App Store Server API for status; Notifications v2 | EXISTING verifier in go-money; notifications PROPOSED |
 | Google Play | verify purchase token, acknowledge, consume, RTDN via Pub/Sub push | Play Developer API `purchases.products/subscriptions` get; RTDN authenticated push | EXISTING verifier in go-money; RTDN PROPOSED |
 
-Paystack facts that shape the model (`docs/integrations/flutterwaveMigration.md` Appendix B):
+Flutterwave facts that shape the model (`docs/integrations/flutterwaveMigration.md` §1):
 
-- Direct mode: a dynamic `flat` split sends the seller share to the seller's subaccount, settled T+1 (`settlement_schedule: auto`). Commission is the remainder in Zudomart's main account.
-- Escrow: no escrow product. Launch path E2 keeps escrow in Zudomart's balance and pays sellers by transfer after release + 24h. E1 (manual-settlement subaccount: "payout to the subaccount should only be made when requested") removes that holding if Paystack confirms a per-order settlement request. UNCONFIRMED, ask Paystack.
-- Refunds debit Zudomart's balance; whether Paystack reverses a subaccount share is UNCONFIRMED, so settled direct shares become seller debt.
-- Transfers draw only on the balance; OTP must be disabled for automation.
-- Paystack does not KYC payees: seller and creator KYC is Zudomart's.
-- Control caveat: E2 means Zudomart controls escrowed buyer money in its Paystack balance. Legal review is required (`docs/integrations/flutterwaveMigration.md` Appendix C section 10).
+- PSAs exist only in v3 and hold NGN only; outside Nigeria sales use direct payment until a PSA exists in that currency.
+- v3 webhooks are unsigned (`verif-hash` is a plain secret), so they are triggers only.
+- PSAs cannot be frozen at Flutterwave; a freeze is enforced in our ledger.
+- Transfers need "Transfer via API" enabled and our NAT IPs whitelisted.
+- Fund ownership in a PSA is undocumented; counsel and Flutterwave's written answers must confirm it before launch.
 
 ### 3.1 Data model (PROPOSED, `money` schema owned by go-money)
 
@@ -141,9 +138,9 @@ erDiagram
 
 Key constraints: unique `(provider, provider_ref)`, unique `(provider, provider_event_id)`, unique journal `idempotency_key`; a deferred constraint or a code-level check that entries per journal sum to zero per currency; index on `(account_id, created_at)`; balances in a materialized row updated in the same transaction with a `version` column (optimistic lock, plus `SELECT ... FOR UPDATE` on debit paths). Reconciliation target: trial balance equals zero per currency.
 
-## 4. Payment flow (physical, Paystack checkout)
+## 4. Payment flow (physical, Flutterwave checkout)
 
-One Paystack transaction per **checkout** (whole cart). Direct groups appear in a dynamic split; escrow groups and commission stay with the main account.
+One payment intent per **checkout** (whole cart). Card money settles to the main balance and is moved into the buyer's PSA, where escrow is locked per group.
 
 ```mermaid
 sequenceDiagram
@@ -152,20 +149,20 @@ sequenceDiagram
   participant GW as Gateway
   participant CM as go-commerce
   participant M as go-money
-  participant P as Paystack
+  participant P as Flutterwave
   C->>GW: POST /orders/checkout, Idempotency-Key
   GW->>CM: forward
   CM->>CM: recompute totals, payment mode per group, reserve stock (session timeout)
   CM->>M: InitPayment(checkoutId, total, groups, key)
   M->>M: tx1: payment_transaction pending (unique key)
-  M->>P: POST /transaction/initialize (account email, amount, reference, split for direct groups)
-  P-->>M: authorization_url, access_code
-  M-->>C: url (popup on web, in-app browser on mobile)
+  M->>P: POST /v3/payments (tx_ref, amount, currency, customer, payload_hash)
+  P-->>M: data.link (hosted checkout)
+  M-->>C: link (redirect on web, in-app browser on mobile)
   C->>P: pays by card, bank transfer or USSD
-  P->>M: webhook charge.success (x-paystack-signature)
-  M->>M: verify HMAC-SHA512, insert payment_event (unique), 200
-  M->>P: GET /transaction/verify/{reference} (never trust body alone)
-  M->>M: tx: mark paid, ledger escrow or settlingByPaystack per group, commission, fee, outbox payment.succeeded
+  P->>M: webhook charge.completed (verif-hash)
+  M->>M: constant-time hash check, store in webhook inbox (unique), 200
+  M->>P: GET /v3/transactions/{id}/verify (never trust the body)
+  M->>M: tx: mark paid, lock escrow per group in the buyer's PSA, fee, outbox payment.succeeded
   M-->>CM: event via outbox, SQS
   CM->>CM: commit reservation, groups paid
 ```
@@ -173,11 +170,11 @@ sequenceDiagram
 | Concern | Control |
 | --- | --- |
 | Idempotency key | Required on every money-moving POST, scoped to actor, stored with the request hash; same key + different body returns `IDEMPOTENCY_KEY_REUSED`. Reuse `services/go/platform/idempotency` (EXISTING, unwired) but persist the durable record in Postgres, Redis is only the fast path |
-| Webhook verification | Raw body hex HMAC-SHA512 with the secret key compared to `x-paystack-signature` before parsing; reject on mismatch with 401; always re-fetch with `verify`; amount, currency, `reference` and split must match the pending row; no ordering guarantee, so transitions are conditional |
+| Webhook verification | `verif-hash` compared in constant time before parsing; reject on mismatch with 401; always re-fetch by id; status, `tx_ref`, amount, currency and customer email must match the pending row, and the charge id must be unused; no ordering guarantee, so transitions are conditional |
 | Duplicate protection | Unique `(provider, provider_event_id)` and `(provider, provider_ref)`; state transition is a conditional update (`WHERE status = 'pending'`), so replays are no-ops |
-| Reconciliation | Scheduled job (`jobs-payouts` queue, EXISTING locally) compares the ledger with Paystack daily: `GET /transaction`, `GET /balance` and `/balance/ledger`, `GET /settlement` per subaccount, `GET /transfer`, `GET /refund`, `GET /dispute`; raises `recon_break` rows and freezes affected payouts on mismatch; admin ledger page shows breaks (`apps/admin` commerce/ledger, MOCK-ONLY) |
+| Reconciliation | Scheduled job (`jobs-payouts` queue, EXISTING locally) compares the ledger with Flutterwave daily: every PSA balance and statement, `GET /v3/balances`, `GET /v3/settlements`, pending transfers, refunds and chargebacks; opens reconciliation cases and freezes affected wallets on mismatch; admin ledger page shows breaks (`apps/admin` commerce/ledger, MOCK-ONLY) |
 | Late or missed webhook | A sweeper verifies `pending` payments older than N minutes by API poll |
-| Failed payment | No `charge.success` before the session timeout; reservation released at TTL; no ledger entry; retry initializes a new transaction with a new reference |
+| Failed payment | No successful charge before the session timeout; reservation released at TTL; no ledger entry; retry opens a new checkout with a new reference |
 | Amount tampering | Amount comes from the server-computed checkout, never the client; provider amount compared before marking paid |
 
 ### 4.1 Refund and chargeback
@@ -187,23 +184,24 @@ sequenceDiagram
   autonumber
   participant A as Admin or seller return
   participant M as go-money
-  participant P as Paystack
+  participant P as Flutterwave
   participant L as Ledger
   A->>M: Refund(orderGroupId, amount, key)
   M->>M: check escrow state and refundable amount
-  M->>P: POST /refund (transaction reference, amount)
-  P-->>M: refund.pending, refund.processing, refund.processed or refund.failed
-  opt needs-attention (bank transfer)
-    M->>P: POST /refund/retry_with_customer_details/{id} (account entered by buyer in app)
+  alt before release
+    M->>L: unlock escrow in the buyer's PSA (no provider call)
+  else buyer asks for a card refund
+    M->>P: buyer PSA → main, then POST /v3/transactions/{id}/refund
+  else after release
+    M->>P: clawback seller PSA → buyer PSA, rest booked as seller debt
   end
-  M->>L: journal escrow to refunded, or seller debt if a direct share already settled
-  Note over P,M: dispute webhook
-  P->>M: charge.dispute.create
+  Note over P,M: chargeback (hourly poll + webhook)
+  P->>M: chargeback initiated
   M->>M: freeze matching escrow, pause auto-release, submit evidence
-  M->>L: record seller debt if lost after the seller was paid
+  M->>L: recover buyer PSA, then seller PSA, then seller debt
 ```
 
-Refund source: Zudomart's Paystack balance (escrow covers escrow groups). A direct share already settled to the seller becomes seller debt, recovered from later escrow payouts, and the store is escrow-only until it is repaid. Whether Paystack reverses a subaccount share on refund or chargeback is UNCONFIRMED. Chargebacks freeze remaining escrow, notify the seller and feed risk signals (fraud.md). Source: `docs/integrations/flutterwaveMigration.md` Appendix B sections 6.5 and 11.
+Refund capacity counts succeeded refunds only; in-flight amounts are released if a refund fails. Chargebacks are withheld from main at `initiated`, freeze remaining escrow, notify the seller and feed risk signals (fraud.md). Source: `docs/integrations/flutterwaveMigration.md` §3.3 and §3.8.
 
 ### 4.2 Fee lines: direct vs escrow (4 Oct 2026)
 
@@ -212,9 +210,9 @@ Product commission is 0%. Buyers pay nothing extra. The seller sees two separate
 | Line | Escrow group | Direct group (verified store only) |
 |---|---|---|
 | Escrow fee | 1.5% of the group total including shipping (1% for Business plan), deducted from the payout at release, none on refunded amounts | none |
-| Paystack processing fee | allocated pro rata across the checkout and deducted from the payout | borne by the seller: the dynamic split sends `groupTotal - allocatedPaystackFee`, `bearer_type: account` |
+| Flutterwave processing fee | allocated pro rata across the checkout and deducted from the payout | allocated pro rata and borne by the seller |
 
-Unverified stores are escrow only. All amounts are int64 minor units. Detail: `docs/integrations/flutterwaveMigration.md` Appendix C section 2.2.
+Unverified stores are escrow only. All amounts are int64 minor units. Detail: `docs/integrations/flutterwaveMigration.md` Appendix B.2.
 
 ### 4.3 Verification checkmark share refund
 
@@ -222,7 +220,7 @@ When an identity check is rejected, `subscriptions` emits `verificationCase.refu
 
 - Standalone Blue, Gold-only, Black and bundle tiers: the full charge, and the subscription is disabled.
 - Seller Pro, Seller Business and Premium: the plan keeps running and only the checkmark share is refunded, capped at the amount paid. Share = the standalone checkmark price for the buyer's region, channel and interval (Blue for Premium, Gold-only for Pro and Business), `regionpricing.CheckmarkShareMinor`. Example (NG, web, monthly): Pro refunds 300000 of 500000 minor units.
-- The ledger entry is posted first, under idempotency key `verification-share:{caseId}`, then a Paystack partial refund is requested. The Paystack subscription is not cancelled. Google Play and App Store purchases are flagged for manual review (no partial refund API wired).
+- The ledger entry is posted first, under idempotency key `verification-share:{caseId}`, then a Flutterwave partial refund is requested. The subscription keeps renewing. Google Play and App Store purchases are flagged for manual review (no partial refund API wired).
 - Outcome events carry `refundScope` (`full` or `checkmark_share`) and `refundAmount`. Code: `services/go/modules/subscriptions/src/modules/billing/services/verificationRefunds.service.go`, `checkmarkShare.service.go`. Test: `services/go/modules/payments/payments.checkmarkShareRefund_integration_test.go`. Product rules: `docs/pricing.md` section 2.1.
 
 ## 5. Digital economy flows
@@ -291,9 +289,9 @@ Errors per proto: `INSUFFICIENT_COINS`, `CANNOT_GIFT_SELF`, `BATTLE_ALREADY_SETT
 | --- | --- |
 | Coin pack bought in app, price P | Cash/store receivable +P, store fee expense -fee, revenue (deferred coins liability) +(P - fee), coins minted to buyer |
 | Gift of N coins | Buyer coins -N, creator earned coins +floor(N x share bps), platform coins +remainder |
-| Creator cash-out | Earned coins converted at the finance-set rate (minimum payout enforced). Zudomart pays from its Paystack balance: one `POST /transfer` per creator per run to the creator's transfer recipient (`reference = cr-<uuid>`), resolved by `transfer.success` / `transfer.failed`. Needs the Paystack balance funded first (IAP money arrives in Zudomart's bank, not Paystack) |
+| Creator cash-out | Earned coins converted at the finance-set rate (minimum payout enforced). The payout run moves main → creator PSA (free wallet transfer), after which the creator withdraws. Needs the Flutterwave main balance funded first (IAP money arrives in Zudomart's bank, not Flutterwave) |
 
-Coin purchases (web via Paystack, app via the stores) and gifts are Zudomart revenue in Zudomart's own account, so only the creator share is owed to anyone. The rate must keep payout cost below net revenue after the **worst-channel** store fee. This is a finance decision; flag it before pricing UI is built.
+Coin purchases (web via Flutterwave, app via the stores) and gifts are Zudomart revenue in Zudomart's own account, so only the creator share is owed to anyone. The rate must keep payout cost below net revenue after the **worst-channel** store fee. This is a finance decision; flag it before pricing UI is built.
 
 ## 6. Payout flow
 
@@ -304,7 +302,7 @@ sequenceDiagram
   participant M as go-money
   participant R as Risk and policy
   participant AD as Admin review
-  participant P as Paystack
+  participant P as Flutterwave
   U->>M: POST /withdrawals, Idempotency-Key, step-up re-auth (escrow releases after the 24h lock, creator earnings)
   M->>M: owner or finance role, verified recipient, available balance lock
   M->>R: score payout (timeout 50 ms, default by rules)
@@ -314,10 +312,10 @@ sequenceDiagram
     AD-->>M: approve or reject
   end
   M->>M: ledger available to payout requested
-  Note over M,P: daily payout run, one transfer per payee
-  M->>P: GET /balance, then POST /transfer (source balance, recipient, amount, reference po-uuid)
-  P-->>M: transfer.success, transfer.failed or transfer.reversed webhook (pending is not completion)
-  M->>M: success: journal to paid out. failed: back to available, retry next run
+  Note over M,P: worker, one attempt per withdrawal
+  M->>P: GET /{psa}/balances, then POST /v3/transfers (debit_subaccount = user PSA, reference wd-uuid, skip_beneficiary_creation)
+  P-->>M: transfer.completed webhook or 15-minute sweep, confirmed by GET /v3/transfers/{id}
+  M->>M: success: journal to paid out. failed (after the GET): back to available
 ```
 
 | Rule | Value |
@@ -325,15 +323,15 @@ sequenceDiagram
 | Who can request | Owner and finance roles only; step-up auth; a new bank account triggers a cooling-off hold (hours configurable) |
 | Limits | Daily and per-request limits in config tables, higher after KYC tier |
 | Concurrency | Row lock plus version; concurrent withdrawals cannot overdraw (plan acceptance test) |
-| Control | Only go-money holds the Paystack secret key; transfer OTP disabled for the API; any `otp` response stops the run |
-| Settlement | Escrow release is a ledger transition, then `locked24h`, then `available`, then a transfer. Direct shares settle to the seller's bank by Paystack T+1 and never enter this flow |
-| Fee | Paystack transfer fee by band: NGN 10 (up to 5,000), NGN 25 (5,001 to 50,000), NGN 50 (above 50,000) |
+| Control | Only go-money holds the Flutterwave secret key; NAT IPs whitelisted; `requires_approval` waits for a human, never auto-approved |
+| Settlement | Escrow release is a ledger transition, then `locked24h`, then `available`, then a withdrawal transfer from the seller's PSA |
+| Fee | Quoted per withdrawal with `GET /v3/transfers/fee` and shown before confirming |
 | Debt | Open seller debt is netted from payouts and turns direct mode off |
 | Audit | Every release, refund, payout and ledger adjustment written to the audit log |
 
 ## 7. Settlement timeline and escrow release
 
-See `marketplace.md` section 6 for the escrow state machine. Money rule: only go-money moves escrow; go-commerce requests transitions through events or an internal call and never writes ledger tables (read-only grants only). With E2, escrow funds sit in Zudomart's Paystack balance and the `escrow` rows decide when a transfer may be sent; with E1 they sit unsettled in the seller's manual-settlement subaccount.
+See `marketplace.md` section 6 for the escrow state machine. Money rule: only go-money moves escrow; go-commerce requests transitions through events or an internal call and never writes ledger tables (read-only grants only). Escrow funds stay in the buyer's PSA, locked by the ledger; the `escrow` rows decide when the release transfer may be sent.
 
 ## 8. Recommendations
 
@@ -343,12 +341,12 @@ See `marketplace.md` section 6 for the escrow state machine. Money rule: only go
 | 2 | No webhook verification or durable idempotency in new services | Redis idempotency unwired; no payments module | Replay or forged webhook credits money | Implement raw-body verification, `payment_event` unique key and Postgres idempotency records first, with tests | M | High | P0, first code in go-money |
 | 3 | IAP verification and store notifications do not exist | Contract-only in plan | Refund abuse and unverified mints | Build Apple and Google adapters with Notifications v2 and RTDN before enabling the coin store; fail closed when verification is unavailable | L | High | P0 for any mobile coin sale |
 | 4 | Payout economics undefined | Rate and minimum are config only | Creator payouts could exceed net revenue after store fees | Finance signs off coin-to-fiat rate and store-fee accounting before launch | S | High | P1, pricing launch gate |
-| 5 | Single provider (Paystack) | One provider, interface kept honest | Paystack outage stops checkout and payouts | Keep the provider interfaces free of Paystack-specific fields so another provider can be added later; outage mode hides the pay button and keeps browse and cart | M | Medium | P2, MVP optional, Near term |
-| 6 | Reconciliation | Bachs mirror recon in code (to be replaced) | The ledger can silently diverge from the Paystack balance, settlements and transfers | Daily recon of transactions, balance, settlements per subaccount, transfers, refunds and disputes; trial-balance check in CI e2e | M | Medium | P1, money integrity, MVP |
-| 8 | Control of funds and licensing | Owner rule: hold as little as possible. E2 escrow sits in Zudomart's Paystack balance | A regulator could treat Zudomart as holding buyer funds in escrow | Paystack's written approval of the escrow model, push for E1, and a Nigerian fintech lawyer's review before launch | S | High | P0, launch gate |
+| 5 | Single provider (Flutterwave) | One provider, capability interfaces | A Flutterwave outage stops checkout and payouts | Keep the capability interfaces free of provider-specific fields so another provider can be added later; outage mode hides the pay button and keeps browse and cart | M | Medium | P2, MVP optional, Near term |
+| 6 | Reconciliation | Daily Flutterwave reconciliation in code (cases, wallet freezes, alerts) | The ledger can silently diverge from PSA balances, the main balance and settlements | Keep the daily per-PSA, main and settlement recon plus the trial-balance check in CI e2e | M | Medium | P1, money integrity, MVP |
+| 8 | Control of funds and licensing | Owner rule: Zudomart holds no customer money. Escrow is locked in the buyer's own PSA | PSA fund ownership is undocumented; a regulator could still treat Zudomart as controlling buyer funds | Flutterwave's written answers (§8 of the spec) and a Nigerian fintech lawyer's review before launch | S | High | P0, launch gate |
 | 9 | Prepaid ad credit and unspent coins | Not modelled | Stored value held by Zudomart | Postpaid or threshold ads billing; lawyer review of coin terms | S | Medium | P1 |
 | 7 | Ledger at scale | Single Aurora | Hot ledger rows (platform account) serialize writes | MVP: split platform accounts per shard key (per day or per creator bucket); Scale stage: only consider partitioning ledger entries when write p95 exceeds a defined budget. No sharding trigger is met today | M | Low | P3, Scale stage |
 
-The money-module change checklist is `docs/integrations/flutterwaveMigration.md` Appendix C section 12.
+The money-module task list is `docs/integrations/flutterwaveMigration.md` §10.
 
 Store policy items are time-sensitive; schedule a pre-launch policy re-read as an explicit launch checklist item.

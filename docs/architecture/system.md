@@ -149,7 +149,7 @@ flowchart LR
   rt["Phoenix fan-out"]:::existing
   os[("OpenSearch")]:::future
   ch[("ClickHouse")]:::future
-  paystack["Paystack (checkout, subaccount splits, transfers)"]
+  flutterwave["Flutterwave (checkout, payout subaccounts, transfers)"]
   iap["Apple / Google IAP"]:::proposed
   livekit["LiveKit SFU, Ingress, Egress"]:::existing
   comms["SES email, SMS, FCM/APNs push"]:::proposed
@@ -160,11 +160,11 @@ flowchart LR
   svc -- "enqueue" --> jobs --> workers
   workers --> os & ch
   workers --> comms
-  paystack & iap -- "signed webhooks" --> svc
+  flutterwave & iap -- "webhooks" --> svc
   livekit -- "webhooks" --> svc
 ```
 
-Bachs and Anchor dropped; Paystack adopted (owner, 2026-10-03): Paystack is the only payment provider; its webhooks (`x-paystack-signature`, HMAC-SHA512) land on go-money (`docs/integrations/flutterwaveMigration.md` Appendix B).
+Flutterwave is the only payment provider (owner, 2026-10-11); its webhooks (`verif-hash`, re-verified by id) land on go-money (`docs/integrations/flutterwaveMigration.md`).
 
 LiveKit is EXISTING only as a local compose container (`infra/local/docker-compose.yml`); no token minting code exists.
 

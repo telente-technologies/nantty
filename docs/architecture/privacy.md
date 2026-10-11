@@ -71,11 +71,11 @@ flowchart LR
   EV --> C4{marketing consent?}
   C4 -- yes --> NF[Marketing email / push]
   C4 -- no --> TX[Transactional only]
-  PAY2[go-money] --> PSP[Paystack\nprocessor]
+  PAY2[go-money] --> PSP[Flutterwave\nprocessor]
   ID2[go-identity] --> EML[Email / SMS provider\nprocessor]
 ```
 
-Payments are moving from Paystack to Flutterwave (owner, 2026-10-10); the same data rules apply to Flutterwave, plus BVN checks for payout subaccounts ([flutterwaveMigration.md](../integrations/flutterwaveMigration.md)). Data sent to Paystack as processor: buyer account email (receipts, never asked at checkout), name, amount and order metadata (no item details beyond ids); sellers' and creators' bank account and legal name (subaccounts, transfer recipients, account resolve) and, if BVN validation is enabled, BVN with bank account. Card data is entered only on Paystack pages; the app keeps only the Paystack `authorization_code` in the device keystore. Retention and the processor agreement need legal review.
+Flutterwave is the only payment processor (owner, 2026-10-11; [flutterwaveMigration.md](../integrations/flutterwaveMigration.md)). Data sent to Flutterwave as processor: buyer account email (receipts, never asked at checkout), name, amount and order metadata (no item details beyond ids); for wallet users, the BVN-verified name, an alias email (`u+{userId}@wallets.zudomart.com`) and phone to create their payout subaccount; BVN through Flutterwave's consent flow; sellers' and creators' bank account and legal name (account resolve, transfers). Card data is entered only on Flutterwave's hosted checkout; the server keeps only the Flutterwave card token, encrypted. Retention and the processor agreement need legal review.
 
 
 Diagram 3, data subject requests.

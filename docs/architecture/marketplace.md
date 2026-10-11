@@ -27,13 +27,13 @@ flowchart TD
   F -- yes --> G[Server calculation<br/>prices, shipping, discounts, fees, taxes]
   F1 --> E
   G --> H[Checkout<br/>stock reserved TTL 15 min]
-  H --> I[Payment<br/>one Paystack transaction per checkout,<br/>direct groups split to seller subaccounts]
+  H --> I[Payment<br/>one Flutterwave checkout per cart,<br/>or the buyer's wallet]
   I --> J[Order + order groups paid]
-  J --> K[Escrow held: Zudomart Paystack balance E2<br/>or seller manual-settlement subaccount E1]
+  J --> K[Escrow locked in the buyer's<br/>Flutterwave payout subaccount]
   K --> L[Seller fulfils and ships]
   L --> M[Delivered]
   M --> N[Completed<br/>buyer confirm or auto after N days]
-  N --> O[Release<br/>24h lock, then Paystack transfer to the seller, daily run]
+  N --> O[Release<br/>buyer PSA to seller PSA, 24h lock, then withdrawable]
 ```
 
 All steps from G onward are server-authoritative. Everything in this diagram is PROPOSED in the new stack.
@@ -125,9 +125,9 @@ sequenceDiagram
   CM->>CM: policy: allow, hold, review, reject (deterministic)
   CM->>CM: tx: reserve stock, create checkout, order groups, snapshots
   CM->>M: InitPayment(groups, amount, key)
-  M-->>B: Paystack authorization_url (one per checkout)
-  B->>M: pays on Paystack, charge.success webhook arrives
-  M->>M: verify x-paystack-signature, re-fetch, mark paid, escrow or direct per group
+  M-->>B: Flutterwave hosted checkout link (one per checkout)
+  B->>M: pays on Flutterwave, charge.completed webhook arrives
+  M->>M: check verif-hash, re-verify by id, mark paid, escrow or direct per group
   M-->>CM: payment.succeeded via outbox
   CM->>CM: commit reservation, groups to paid, notify sellers
 ```
@@ -169,9 +169,9 @@ Parent `Order` status is derived: all groups terminal means closed; any `dispute
 
 ## 6. Escrow state machine
 
-> Bachs and Anchor dropped; Paystack adopted (owner, 2026-10-03).
+> Flutterwave is the only payment provider (owner, 2026-10-11).
 
-Provider flows, Paystack setup and open questions: `docs/integrations/flutterwaveMigration.md` Appendix C and `docs/integrations/flutterwaveMigration.md` Appendix B. A multi-seller cart is one Paystack payment: direct groups are split to seller subaccounts, escrow groups and commission stay with Zudomart's main account.
+Provider flows, setup and open questions: `docs/integrations/flutterwaveMigration.md` (§3 and Appendix B). A multi-seller cart is one payment; each escrow group is locked in the buyer's payout subaccount (PSA) and released PSA → PSA to its seller.
 
 Escrow is one row per order group, owned and mutated only by go-money.
 
@@ -199,9 +199,9 @@ stateDiagram-v2
 | --- | --- |
 | Release triggers | Buyer confirm-receipt, or auto-release 3 days after `delivered` (admin-configurable default; a dispute pauses the timer; auto-release job, reference `escrowAutoRelease.job.ts`) |
 | Amounts | Commission stays in Zudomart's main account (the split remainder); the seller gets the rest (split share for direct, transfer for escrow). Processing fee policy is a finance decision. Shipping fee follows the group to the seller. Computed in minor units, remainder to the platform |
-| Where the money is | Launch path E2: escrow funds sit in Zudomart's Paystack balance; release starts the 24h lock, then the daily run transfers to the seller's recipient. E1 (if Paystack confirms manual settlement per order): funds sit unsettled in the seller's escrow subaccount. Direct groups settle T+1 from the seller's subaccount and never pass through Zudomart |
+| Where the money is | Escrow stays in the buyer's own Flutterwave payout subaccount, locked by the ledger; release moves it buyer PSA → seller PSA (the escrow fee goes to Zudomart's main balance), then the 24h seller lock applies before withdrawal. Outside Nigeria (no PSA yet) sales use direct payment |
 | Seller visibility | Wallet shows `escrow`, locked, pending transfer, `available`, payout requested, settling to your bank (direct) and debt per currency |
-| Disputes | Opening a dispute freezes the escrow and pauses auto-release; admin resolves with refund, partial or release; every action audited. Refunds use the Paystack Refund API on Zudomart's balance; for a direct share already settled, or a chargeback after payout, the seller gets a debt that is netted from later payouts and turns direct mode off |
+| Disputes | Opening a dispute freezes the escrow and pauses auto-release; admin resolves with refund, partial or release; every action audited. Refunds before release unlock the money in the buyer's PSA (or go back to the card on request); for a direct share already settled, or a chargeback after payout, the seller gets a debt that is netted from later payouts and turns direct mode off |
 | Idempotency | Release, refund and split are journals with unique idempotency keys |
 
 ## 7. Where each app fits
@@ -212,7 +212,7 @@ stateDiagram-v2
 | Seller dashboard (`apps/seller`, `dashboard.`) | Catalog, inventory, shipping profiles, accept/pack/ship with tracking, returns, disputes, wallet and payouts, promotions. E-commerce management only | MOCK-ONLY, remove POS-era roles |
 | Admin (`apps/admin`) | Orders, disputes, refunds, ledger, payouts, escrow oversight | MOCK-ONLY |
 | go-commerce | Catalog, stock reservation, cart, shipping calc, orders | PROPOSED |
-| go-money | Paystack payments, escrow, seller balances, ledger, payouts | PROPOSED |
+| go-money | Flutterwave payments, escrow, seller balances, ledger, payouts | PROPOSED |
 | Gateway | Public edge only; idempotency and per-route limits not yet implemented | EXISTING proxy (inventory 2.2) |
 
 ## 8. Recommendations
