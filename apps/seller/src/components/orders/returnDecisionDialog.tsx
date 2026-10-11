@@ -57,7 +57,7 @@ export function ReturnDecisionDialog({ returnRequest, decision, onClose, onDecid
   }
 
   return (
-    <ModalDialog
+    <ModalDialog intent="refund"
       isOpen={returnRequest !== null}
       onClose={onClose}
       title={copy.title}

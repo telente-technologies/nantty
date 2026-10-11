@@ -52,7 +52,7 @@ function CreateApiKeyDialog({ onClose, onCreated }: { readonly onClose: () => vo
   }
 
   return (
-    <ModalDialog isOpen onClose={onClose} title="New API key" description="Keys act as your store. Give each tool its own key and only the scopes it needs." footer={<><Button onClick={onClose}>Cancel</Button><Button variant="primary" isBusy={isCreating} onClick={() => void createApiKey()}>Create key</Button></>}>
+    <ModalDialog intent="key" isOpen onClose={onClose} title="New API key" description="Keys act as your store. Give each tool its own key and only the scopes it needs." footer={<><Button onClick={onClose}>Cancel</Button><Button variant="primary" isBusy={isCreating} onClick={() => void createApiKey()}>Create key</Button></>}>
       <div className={styles.formStack}>
         <FormErrorSummary messages={errorMessages} />
         <TextField label="Name" value={name} maxLength={60} placeholder="Warehouse system" onChange={(event) => setName(event.target.value)} />
@@ -108,10 +108,10 @@ export function DeveloperApiKeysPanel() {
         ]}
       />
       {isCreating ? <CreateApiKeyDialog onClose={() => setIsCreating(false)} onCreated={(created) => { setIsCreating(false); setCreatedKey(created); apiKeysQuery.reload(); }} /> : null}
-      <ModalDialog isOpen={createdKey !== null} onClose={() => setCreatedKey(null)} title={`Key created: ${createdKey?.apiKey.name ?? ""}`} footer={<Button variant="primary" onClick={() => setCreatedKey(null)}>I have copied it</Button>}>
+      <ModalDialog intent="success" isOpen={createdKey !== null} onClose={() => setCreatedKey(null)} title={`Key created: ${createdKey?.apiKey.name ?? ""}`} footer={<Button variant="primary" onClick={() => setCreatedKey(null)}>I have copied it</Button>}>
         {createdKey ? <OneTimeSecretNotice label="API key" secret={createdKey.secret} /> : null}
       </ModalDialog>
-      <ModalDialog isOpen={keyPendingRevoke !== null} onClose={() => setKeyPendingRevoke(null)} width="small" title={`Revoke ${keyPendingRevoke?.name ?? "this key"}?`} footer={<><Button onClick={() => setKeyPendingRevoke(null)}>Keep it</Button><Button variant="danger" isBusy={isRevoking} onClick={() => void revokeApiKey()}>Revoke key</Button></>}>
+      <ModalDialog intent="key" isOpen={keyPendingRevoke !== null} onClose={() => setKeyPendingRevoke(null)} width="small" title={`Revoke ${keyPendingRevoke?.name ?? "this key"}?`} footer={<><Button onClick={() => setKeyPendingRevoke(null)}>Keep it</Button><Button variant="danger" isBusy={isRevoking} onClick={() => void revokeApiKey()}>Revoke key</Button></>}>
         Any tool using this key loses access straight away. This cannot be undone.
       </ModalDialog>
     </Panel>

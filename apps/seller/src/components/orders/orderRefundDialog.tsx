@@ -47,7 +47,7 @@ export function OrderRefundDialog({ order, isOpen, onClose, onRefunded }: { read
   }
 
   return (
-    <ModalDialog
+    <ModalDialog intent="refund"
       isOpen={isOpen}
       onClose={onClose}
       width="small"

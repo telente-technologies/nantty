@@ -98,7 +98,7 @@ export function DeveloperWebhooksPanel() {
         />
       </Panel>
       {editingWebhook ? <DeveloperWebhookDialog webhook={editingWebhook === "new" ? null : editingWebhook} onClose={() => setEditingWebhook(null)} onSaved={reloadWebhooksAndDeliveries} /> : null}
-      <ModalDialog
+      <ModalDialog intent="delete"
         isOpen={webhookPendingDelete !== null}
         onClose={() => setWebhookPendingDelete(null)}
         width="small"

@@ -55,7 +55,7 @@ export function DeveloperWebhookDialog({ webhook, onClose, onSaved }: { readonly
 
   if (signingSecret) {
     return (
-      <ModalDialog isOpen onClose={onClose} title="Webhook added" footer={<Button variant="primary" onClick={onClose}>I have copied it</Button>}>
+      <ModalDialog intent="success" isOpen onClose={onClose} title="Webhook added" footer={<Button variant="primary" onClick={onClose}>I have copied it</Button>}>
         <p className={styles.mutedText}>Use this secret to check the Zudomart-Signature header on every delivery.</p>
         <OneTimeSecretNotice label="signing secret" secret={signingSecret} />
       </ModalDialog>
@@ -63,7 +63,7 @@ export function DeveloperWebhookDialog({ webhook, onClose, onSaved }: { readonly
   }
 
   return (
-    <ModalDialog isOpen onClose={onClose} width="large" title={webhook ? "Edit webhook" : "Add webhook"} description="We send a signed POST request to this address when the events you pick happen. Failed deliveries are retried for 24 hours." footer={<><Button onClick={onClose}>Cancel</Button><Button variant="primary" isBusy={isSaving} onClick={() => void saveWebhookEndpoint()}>{webhook ? "Save webhook" : "Add webhook"}</Button></>}>
+    <ModalDialog intent="webhook" isOpen onClose={onClose} width="large" title={webhook ? "Edit webhook" : "Add webhook"} description="We send a signed POST request to this address when the events you pick happen. Failed deliveries are retried for 24 hours." footer={<><Button onClick={onClose}>Cancel</Button><Button variant="primary" isBusy={isSaving} onClick={() => void saveWebhookEndpoint()}>{webhook ? "Save webhook" : "Add webhook"}</Button></>}>
       <div className={styles.formStack}>
         <FormErrorSummary messages={errorMessages} />
         <TextField label="Endpoint URL" type="url" value={url} maxLength={240} placeholder="https://yourapp.ng/hooks/zudomart" onChange={(event) => setUrl(event.target.value)} />

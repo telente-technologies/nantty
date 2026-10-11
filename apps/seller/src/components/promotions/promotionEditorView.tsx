@@ -92,7 +92,7 @@ export function PromotionEditorView({ promotionId }: { readonly promotionId: str
         }
       />
       <PromotionEditorForm key={promotion?.id ?? "new"} promotion={promotion} currency={settings.currency} isSaving={isSaving} onSubmit={(input) => void savePromotion(input)} />
-      <ModalDialog
+      <ModalDialog intent="delete"
         isOpen={isDeleteDialogOpen}
         onClose={() => setIsDeleteDialogOpen(false)}
         title="Delete this promotion?"

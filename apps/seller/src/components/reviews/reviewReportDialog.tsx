@@ -43,7 +43,7 @@ export function ReviewReportDialog({ review, onClose, onReported }: { readonly r
   }
 
   return (
-    <ModalDialog
+    <ModalDialog intent="report"
       isOpen
       onClose={onClose}
       width="small"

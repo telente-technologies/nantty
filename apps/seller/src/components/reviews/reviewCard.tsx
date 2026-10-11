@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { useState } from "react";
 
+import { requestConfirmation } from "@zudomart/web-kit";
+
 import { ReviewReportDialog } from "@/components/reviews/reviewReportDialog";
 import { Button } from "@/components/ui/button";
 import { TextAreaField } from "@/components/ui/formFields";
@@ -51,7 +53,7 @@ export function ReviewCard({ review, onReviewChanged }: { readonly review: Revie
   }
 
   async function deleteReply() {
-    if (!window.confirm("Remove your public reply?")) return;
+    if (!(await requestConfirmation({ title: "Remove your public reply?", description: "Buyers will no longer see it.", confirmLabel: "Remove reply", tone: "danger", intent: "delete" }))) return;
     try {
       const updated = await sendSellerApiRequest<Review>(`/seller/reviews/${encodeURIComponent(review.id)}/reply`, { method: "DELETE" });
       onReviewChanged(updated);

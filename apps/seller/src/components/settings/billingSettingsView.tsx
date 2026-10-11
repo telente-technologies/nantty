@@ -91,7 +91,7 @@ export function BillingSettingsView() {
             items={[
               { label: details.cancelAtPeriodEnd ? "Ends on" : "Renews on", value: formatDateForDisplay(subscription?.currentPeriodEnd) },
               { label: "Payment method", value: details.paymentMethodSummary ?? "—" },
-              { label: "Paid through", value: details.provider === "paystack" ? "Paystack" : "—" },
+              { label: "Paid through", value: details.provider === "flutterwave" ? "Flutterwave" : details.provider ? "Card / bank transfer" : "—" },
               ...(offer?.accountEmail ? [{ label: "Receipts go to", value: offer.accountEmail }] : []),
             ]}
           />
@@ -130,7 +130,7 @@ export function BillingSettingsView() {
           ]}
         />
       </Panel>
-      <ModalDialog
+      <ModalDialog intent="subscribe"
         isOpen={pendingAction !== null}
         onClose={() => setPendingAction(null)}
         width="small"

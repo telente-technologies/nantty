@@ -6,6 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Callout } from "@/components/ui/feedback";
 import { SelectField, TextField } from "@/components/ui/formFields";
 import { useSellerQuery } from "@/hooks/useSellerQuery.hook";
+import { StepUpCancelledError, useStepUpPrompt } from "@/components/wallet/stepUpDialog";
+import { stepUpHeaders } from "@/services/stepUp.service";
 import { readErrorMessageForDisplay, sendSellerApiRequest } from "@/services/clientApi.service";
 import type { CursorPage } from "@/types/pagination.type";
 import type { PayoutOnboardingState } from "@/types/payoutOnboarding.type";
@@ -23,6 +25,7 @@ export function PayoutBankForm({ state, stepNumber, stepCount, onSaved }: { read
   const [isResolving, setIsResolving] = useState(false);
   const [isBusy, setIsBusy] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const { withStepUp, stepUpDialog } = useStepUpPrompt();
   const bank = banks.data?.data.find((candidate) => candidate.code === bankCode);
   const matches = doPayoutNamesMatch(resolvedName, state.legalName ?? "");
 
@@ -43,16 +46,18 @@ export function PayoutBankForm({ state, stepNumber, stepCount, onSaved }: { read
     setIsBusy(true);
     setErrorMessage(null);
     try {
-      await sendSellerApiRequest("/payments/payout-onboarding/me/bank", { method: "PUT", body: { bankCode, bankName: bank?.name ?? "", accountNumber, resolvedAccountName: resolvedName } });
+      await withStepUp((token) => sendSellerApiRequest("/payments/payout-onboarding/me/bank", { method: "PUT", body: { bankCode, bankName: bank?.name ?? "", accountNumber, resolvedAccountName: resolvedName }, headers: stepUpHeaders(token) }));
       onSaved();
     } catch (error) {
-      setErrorMessage(readErrorMessageForDisplay(error));
+      if (!(error instanceof StepUpCancelledError)) setErrorMessage(readErrorMessageForDisplay(error));
     } finally {
       setIsBusy(false);
     }
   }
 
   return (
+    <>
+    {stepUpDialog}
     <PayoutStepFrame stepNumber={stepNumber} stepCount={stepCount} title="Where to send your money" why="Payouts only go to a bank account in your own name. We check the account name with your bank so nothing is sent to the wrong person.">
       <div className={styles.grid}>
         <SelectField label="Bank" value={bankCode} onChange={(event) => setBankCode(event.target.value)} options={[{ value: "", label: "Choose your bank" }, ...(banks.data?.data ?? []).map((item) => ({ value: item.code, label: item.name }))]} />
@@ -69,5 +74,6 @@ export function PayoutBankForm({ state, stepNumber, stepCount, onSaved }: { read
       {errorMessage ? <Callout tone="error">{errorMessage}</Callout> : null}
       <div className={styles.actions}><Button variant="primary" isBusy={isBusy} disabled={!matches} onClick={() => void save()}>Save account</Button></div>
     </PayoutStepFrame>
+    </>
   );
 }
