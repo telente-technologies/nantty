@@ -23,8 +23,6 @@ var RecommendedArgon2idParameters = Argon2idParameters{MemoryKibibytes: 19 * 102
 
 var ErrMalformedPasswordHash = errors.New("malformed argon2id hash")
 
-const dummyPasswordForTimingEqualisation = "zudomart-timing-equaliser-1"
-
 type PasswordHasher struct {
 	parameters        Argon2idParameters
 	dummyPasswordHash string
@@ -32,7 +30,7 @@ type PasswordHasher struct {
 
 func NewPasswordHasher(parameters Argon2idParameters) *PasswordHasher {
 	hasher := &PasswordHasher{parameters: parameters}
-	hasher.dummyPasswordHash, _ = hasher.HashPasswordWithArgon2id(dummyPasswordForTimingEqualisation)
+	hasher.dummyPasswordHash, _ = hasher.HashPasswordWithArgon2id(randomDummyPassword())
 	return hasher
 }
 
@@ -78,4 +76,10 @@ func decodeArgon2idHash(encodedHash string) (Argon2idParameters, []byte, []byte,
 		return Argon2idParameters{}, nil, nil, ErrMalformedPasswordHash
 	}
 	return parameters, salt, key, nil
+}
+
+func randomDummyPassword() string {
+	random := make([]byte, 32)
+	_, _ = rand.Read(random)
+	return base64.RawStdEncoding.EncodeToString(random)
 }

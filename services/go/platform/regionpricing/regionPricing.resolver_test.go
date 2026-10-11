@@ -38,6 +38,7 @@ func TestRegionResolutionPrefersStorefrontThenProfileThenIpThenFallsBackToUsd(t 
 
 func TestReadSignalsFromRequestUsesTheConfiguredTrustedHeader(t *testing.T) {
 	request := httptest.NewRequest("GET", "/", nil)
+	request.RemoteAddr = "10.0.4.7:41000"
 	request.Header.Set("X-Client-Platform", "android")
 	request.Header.Set("X-Store-Storefront", "ZA")
 	request.Header.Set("CloudFront-Viewer-Country", "NG")
@@ -47,6 +48,10 @@ func TestReadSignalsFromRequestUsesTheConfiguredTrustedHeader(t *testing.T) {
 	}
 	if ReadSignalsFromRequest(request, "", "").TrustedHeaderCountry != "" {
 		t.Fatal("an unconfigured trusted header must be ignored")
+	}
+	request.RemoteAddr = "203.0.113.50:41000"
+	if ReadSignalsFromRequest(request, DefaultTrustedCountryKey, "").TrustedHeaderCountry != "" {
+		t.Fatal("a CDN country header sent straight from the internet must be ignored")
 	}
 }
 

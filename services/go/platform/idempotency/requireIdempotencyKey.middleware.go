@@ -2,12 +2,14 @@ package idempotency
 
 import (
 	"bytes"
+	"context"
 	"crypto/sha256"
 	"encoding/hex"
 	"io"
 	"log/slog"
 	"net/http"
 	"regexp"
+	"slices"
 	"time"
 
 	"zudomart/platform/httpserver"
@@ -22,11 +24,37 @@ const (
 	maximumHashedBodyBytes = httpserver.DefaultMaximumJsonBodyBytes
 )
 
+var retryableClientStatuses = []int{
+	http.StatusUnauthorized, http.StatusPaymentRequired, http.StatusForbidden, http.StatusRequestTimeout,
+	http.StatusConflict, http.StatusLocked, http.StatusTooEarly, http.StatusTooManyRequests,
+}
+
+var IdempotencyStoreUnavailable = httpserver.NewApiError(http.StatusServiceUnavailable, "IDEMPOTENCY_UNAVAILABLE", "This action is temporarily unavailable. Try again shortly.")
+
+type reservationStore interface {
+	ReserveKeyOrLoadEarlierOutcome(ctx context.Context, scopedKey, requestHash string, ttl time.Duration) (ReservationOutcome, *StoredResponse, string, error)
+	SaveCompletedResponse(ctx context.Context, scopedKey, requestHash, owner string, response StoredResponse, ttl time.Duration) error
+	ReleaseKeySoTheClientCanRetry(ctx context.Context, scopedKey, owner string) error
+}
+
 func IsValidIdempotencyKey(key string) bool {
 	return idempotencyKeyPattern.MatchString(key)
 }
 
 func RequireIdempotencyKeyAndReplayCompletedResponses(store *RedisStore, ttl time.Duration, logger *slog.Logger) func(http.Handler) http.Handler {
+	if store == nil {
+		return refuseWithoutStore
+	}
+	return requireIdempotencyKeyWithStore(store, ttl, logger)
+}
+
+func refuseWithoutStore(http.Handler) http.Handler {
+	return http.HandlerFunc(func(writer http.ResponseWriter, _ *http.Request) {
+		httpserver.WriteJsonResponse(writer, http.StatusServiceUnavailable, IdempotencyStoreUnavailable)
+	})
+}
+
+func requireIdempotencyKeyWithStore(store reservationStore, ttl time.Duration, logger *slog.Logger) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
 			key := request.Header.Get("Idempotency-Key")
@@ -43,7 +71,7 @@ func RequireIdempotencyKeyAndReplayCompletedResponses(store *RedisStore, ttl tim
 			principal, _ := jwtauth.PrincipalFromContext(request.Context())
 			scopedKey := hashParts(principal.UserId, request.Method, request.Pattern, key)
 			requestHash := hashParts(string(body))
-			outcome, stored, err := store.ReserveKeyOrLoadEarlierOutcome(request.Context(), scopedKey, requestHash, ttl)
+			outcome, stored, owner, err := store.ReserveKeyOrLoadEarlierOutcome(request.Context(), scopedKey, requestHash, ttl)
 			if err != nil {
 				httpserver.WriteErrorResponse(writer, request, logger, err)
 				return
@@ -62,34 +90,54 @@ func RequireIdempotencyKeyAndReplayCompletedResponses(store *RedisStore, ttl tim
 				_, _ = writer.Write(stored.Body)
 				return
 			}
-			recorder := &bufferingResponseWriter{ResponseWriter: writer, status: http.StatusOK}
-			next.ServeHTTP(recorder, request)
-			if recorder.status >= http.StatusInternalServerError {
-				_ = store.ReleaseKeySoTheClientCanRetry(request.Context(), scopedKey)
-				return
+			recorder := &bufferingResponseWriter{header: writer.Header(), status: http.StatusOK}
+			serveReleasingOnPanic(request.Context(), store, scopedKey, owner, next, recorder, request)
+			if recorder.status >= http.StatusInternalServerError || slices.Contains(retryableClientStatuses, recorder.status) {
+				if err := store.ReleaseKeySoTheClientCanRetry(context.WithoutCancel(request.Context()), scopedKey, owner); err != nil {
+					logger.WarnContext(request.Context(), "could not release idempotency key", slog.Any("error", err))
+				}
+			} else {
+				response := StoredResponse{Status: recorder.status, ContentType: writer.Header().Get("Content-Type"), Body: recorder.body.Bytes()}
+				if err := store.SaveCompletedResponse(context.WithoutCancel(request.Context()), scopedKey, requestHash, owner, response, ttl); err != nil {
+					logger.WarnContext(request.Context(), "could not store idempotent response", slog.Any("error", err))
+				}
 			}
-			response := StoredResponse{Status: recorder.status, ContentType: writer.Header().Get("Content-Type"), Body: recorder.body.Bytes()}
-			if err := store.SaveCompletedResponse(request.Context(), scopedKey, requestHash, response, ttl); err != nil {
-				logger.WarnContext(request.Context(), "could not store idempotent response", slog.Any("error", err))
-			}
+			writer.WriteHeader(recorder.status)
+			_, _ = writer.Write(recorder.body.Bytes())
 		})
 	}
 }
 
-type bufferingResponseWriter struct {
-	http.ResponseWriter
-	status int
-	body   bytes.Buffer
+func serveReleasingOnPanic(ctx context.Context, store reservationStore, scopedKey, owner string, next http.Handler, recorder *bufferingResponseWriter, request *http.Request) {
+	defer func() {
+		if recovered := recover(); recovered != nil {
+			_ = store.ReleaseKeySoTheClientCanRetry(context.WithoutCancel(ctx), scopedKey, owner)
+			panic(recovered)
+		}
+	}()
+	next.ServeHTTP(recorder, request)
 }
 
+type bufferingResponseWriter struct {
+	header      http.Header
+	status      int
+	wroteHeader bool
+	body        bytes.Buffer
+}
+
+func (recorder *bufferingResponseWriter) Header() http.Header { return recorder.header }
+
 func (recorder *bufferingResponseWriter) WriteHeader(status int) {
+	if recorder.wroteHeader {
+		return
+	}
+	recorder.wroteHeader = true
 	recorder.status = status
-	recorder.ResponseWriter.WriteHeader(status)
 }
 
 func (recorder *bufferingResponseWriter) Write(chunk []byte) (int, error) {
-	recorder.body.Write(chunk)
-	return recorder.ResponseWriter.Write(chunk)
+	recorder.wroteHeader = true
+	return recorder.body.Write(chunk)
 }
 
 func hashParts(parts ...string) string {
@@ -103,9 +151,12 @@ func hashParts(parts ...string) string {
 
 func ReplayWhenIdempotencyKeyPresent(store *RedisStore, ttl time.Duration, logger *slog.Logger) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
-		replaying := RequireIdempotencyKeyAndReplayCompletedResponses(store, ttl, logger)(next)
+		if store == nil {
+			return next
+		}
+		replaying := requireIdempotencyKeyWithStore(store, ttl, logger)(next)
 		return http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
-			if request.Header.Get("Idempotency-Key") == "" || store == nil {
+			if request.Header.Get("Idempotency-Key") == "" {
 				next.ServeHTTP(writer, request)
 				return
 			}

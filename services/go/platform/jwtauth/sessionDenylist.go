@@ -66,6 +66,7 @@ func DenylistSessions(ctx context.Context, sessionIds []string, ttl time.Duratio
 	}
 	writeCtx, cancel := context.WithTimeout(context.WithoutCancel(ctx), time.Second)
 	defer cancel()
+	forgetWidgetTokensForRevokedSessions(writeCtx, sessionIds)
 	if err := denylist.RevokeSessions(writeCtx, sessionIds, ttl); err != nil {
 		denylistWriteFailures.Add(1)
 		slog.ErrorContext(ctx, "session denylist write failed; sweeper will retry",

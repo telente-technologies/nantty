@@ -15,6 +15,7 @@ type Principal struct {
 	UserId    string
 	SessionId string
 	Roles     []string
+	Scope     string
 }
 
 type KeySetProvider func(ctx context.Context) (jwk.Set, error)
@@ -41,6 +42,8 @@ func (verifier *AccessTokenVerifier) activeDenylist() SessionDenylist {
 
 var ErrInvalidAccessToken = errors.New("invalid access token")
 
+const jwksColdFetchTimeout = 5 * time.Second
+
 func NewAccessTokenVerifierFromKeySetProvider(provider KeySetProvider, issuer, audience string) *AccessTokenVerifier {
 	return &AccessTokenVerifier{publicKeySet: provider, issuer: issuer, audience: audience}
 }
@@ -54,10 +57,12 @@ func NewAccessTokenVerifierFromRemoteJwks(ctx context.Context, jwksUrl, issuer, 
 		return nil, fmt.Errorf("register jwks url: %w", err)
 	}
 	provider := func(ctx context.Context) (jwk.Set, error) {
-		if !cache.Ready(ctx, jwksUrl) {
-			return cache.Refresh(ctx, jwksUrl)
+		if set, err := cache.Lookup(ctx, jwksUrl); err == nil {
+			return set, nil
 		}
-		return cache.Lookup(ctx, jwksUrl)
+		refreshCtx, cancel := context.WithTimeout(ctx, jwksColdFetchTimeout)
+		defer cancel()
+		return cache.Refresh(refreshCtx, jwksUrl)
 	}
 	return NewAccessTokenVerifierFromKeySetProvider(provider, issuer, audience), nil
 }
@@ -85,6 +90,9 @@ func (verifier *AccessTokenVerifier) VerifyAccessTokenAndExtractPrincipal(ctx co
 	var sessionId string
 	if err := token.Get("sid", &sessionId); err != nil || sessionId == "" {
 		return Principal{}, fmt.Errorf("%w: missing session", ErrInvalidAccessToken)
+	}
+	if token.Has("scope") {
+		return Principal{}, fmt.Errorf("%w: scoped tokens are not access tokens", ErrInvalidAccessToken)
 	}
 	if isSessionRevokedFailingOpen(ctx, verifier.activeDenylist(), sessionId) {
 		return Principal{}, fmt.Errorf("%w: session revoked", ErrInvalidAccessToken)

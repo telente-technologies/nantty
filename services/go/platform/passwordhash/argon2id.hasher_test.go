@@ -31,3 +31,14 @@ func TestArgon2idHashAndVerify(t *testing.T) {
 		})
 	}
 }
+
+func TestTheTimingDummyIsRandomPerProcessAndMatchesNoGuessablePassword(t *testing.T) {
+	first := NewPasswordHasher(RecommendedArgon2idParameters)
+	second := NewPasswordHasher(RecommendedArgon2idParameters)
+	if first.dummyPasswordHash == "" || first.dummyPasswordHash == second.dummyPasswordHash {
+		t.Fatal("each hasher needs its own random dummy hash")
+	}
+	if matches, _ := first.VerifyPasswordAgainstArgon2idHash("zudomart-timing-equaliser-1", first.dummyPasswordHash); matches {
+		t.Fatal("the old published dummy password must not match")
+	}
+}

@@ -3,6 +3,8 @@ package regionpricing
 import (
 	"net/http"
 	"strings"
+
+	"zudomart/platform/httpserver"
 )
 
 const (
@@ -95,8 +97,17 @@ func ReadSignalsFromRequest(request *http.Request, trustedCountryHeader, profile
 		ProfileCountry:   profileCountry,
 		ClientRegionHint: request.Header.Get(ClientRegionHeader),
 	}
-	if trustedCountryHeader != "" {
+	if trustedCountryHeader != "" && httpserver.IsFromTrustedProxy(request) {
 		signals.TrustedHeaderCountry = request.Header.Get(trustedCountryHeader)
 	}
 	return signals
+}
+
+var ErrCountryRequired = httpserver.NewApiError(http.StatusUnprocessableEntity, "COUNTRY_REQUIRED", "Choose your country before paying. We use it to charge you in the right currency.")
+
+func RequireChargingCountry(resolution Resolution) (Resolution, error) {
+	if resolution.CountryCode == "" || resolution.Source == SourceFallback {
+		return resolution, ErrCountryRequired
+	}
+	return resolution, nil
 }

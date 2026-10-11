@@ -41,6 +41,11 @@ func redactSensitiveAttribute(_ []string, attribute slog.Attr) slog.Attr {
 	if IsSensitiveAttributeKey(attribute.Key) {
 		return slog.String(attribute.Key, "[REDACTED]")
 	}
+	if attribute.Value.Kind() == slog.KindAny {
+		if redacted, changed := redactNestedValue(attribute.Value.Any()); changed {
+			return slog.Any(attribute.Key, redacted)
+		}
+	}
 	return attribute
 }
 
