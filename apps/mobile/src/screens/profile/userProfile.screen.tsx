@@ -5,7 +5,9 @@ import { creatorQueryKeys, useMySubscriptionsQuery } from "@/components/creator/
 import { ProfileHeaderBar } from "@/components/profile/profileHeaderBar";
 import { TransferCoinsSheet } from "@/components/coins/transferCoinsSheet";
 import { ProfileMoreSheet } from "@/components/profile/profileMoreSheet";
-import { useToggleFollowMutation, useUserPostsQuery, useUserProfileQuery } from "@/components/profile/profileQueries.hook";
+import { useFollowUserToggle } from "@/components/profile/confirmedFollowToggle.hook";
+import { PostNotificationLevelIcon, PostNotificationsSheet } from "@/components/profile/postNotificationsSheet";
+import { useFollowStatusQuery, useSetPostNotificationsMutation, useUserPostsQuery, useUserProfileQuery } from "@/components/profile/profileQueries.hook";
 import type { ProfileAction } from "@/components/profile/profileSummary";
 import { followButtonLabelForState, isFollowStateHighlighted, isProfileContentHiddenFromViewer, resolveFollowStateOfUser } from "@/components/profile/followState.util";
 import { SuspendedProfileState } from "@/components/profile/suspendedProfileState";
@@ -25,7 +27,10 @@ export function UserProfileScreen({ navigation, route }: MainScreenProps<"UserPr
   const viewingOwnProfile = userId === signedInUserId;
   const profileQuery = useUserProfileQuery(userId);
   const postsQuery = useUserPostsQuery(userId);
-  const toggleFollow = useToggleFollowMutation(userId);
+  const { toggleUser } = useFollowUserToggle();
+  const followStatus = useFollowStatusQuery(userId, !viewingOwnProfile && !!signedInUserId).data;
+  const setPostNotifications = useSetPostNotificationsMutation(userId);
+  const [isBellSheetOpen, setIsBellSheetOpen] = useState(false);
   const subscriptionPlans = useQuery({
     queryKey: creatorQueryKeys.plansOfCreator(userId),
     queryFn: () => creatorProgramService.listSubscriptionPlansOfCreator(userId),
@@ -36,8 +41,11 @@ export function UserProfileScreen({ navigation, route }: MainScreenProps<"UserPr
   const alreadySubscribed = (mySubscriptions.data ?? []).some((item) => item.creatorId === userId && item.status === "active");
   const [moreSheetVisible, setMoreSheetVisible] = useState(false);
   const [isTransferCoinsSheetOpen, setIsTransferCoinsSheetOpen] = useState(false);
-  const profile = profileQuery.data;
+  const fetchedProfile = profileQuery.data;
+  const profile = fetchedProfile && followStatus ? { ...fetchedProfile, followState: followStatus.state, isFollowing: followStatus.state === "accepted" } : fetchedProfile;
   const followState = profile ? resolveFollowStateOfUser(profile) : "none";
+  const postNotificationLevel = followStatus?.viewerPostNotifications ?? "off";
+  const showBell = !!signedInUserId && !viewingOwnProfile && followState === "accepted";
   const isContentHidden = profile ? isProfileContentHiddenFromViewer(profile) : false;
 
   useEffect(() => {
@@ -48,10 +56,18 @@ export function UserProfileScreen({ navigation, route }: MainScreenProps<"UserPr
     ? [
         {
           label: followButtonLabelForState(followState),
-          onPress: () => requireAuthThen(() => toggleFollow.mutate(followState === "accepted" || followState === "requested"), undefined, "follow people"),
+          onPress: () => requireAuthThen(() => toggleUser({ id: userId, username: profile.username, followState, isPrivate: profile.isPrivate }), undefined, "follow people"),
           highlighted: isFollowStateHighlighted(followState),
         },
         { label: "Message", onPress: () => requireAuthThen(() => navigation.navigate("Chat", { userId, name: profile.name }), undefined, "send messages") },
+        ...(showBell
+          ? [{
+              label: "Post notifications",
+              accessibilityLabel: `Post notifications for @${profile.username}: ${postNotificationLevel === "off" ? "off" : postNotificationLevel === "posts" ? "all posts" : "posts and lives"}`,
+              icon: <PostNotificationLevelIcon level={postNotificationLevel} color={postNotificationLevel === "off" ? colors.text : colors.primary} />,
+              onPress: () => setIsBellSheetOpen(true),
+            }]
+          : []),
         ...(profile.isSeller && profile.storeId ? [{ label: "View Shop", onPress: () => navigation.navigate("Store", { storeId: profile.storeId! }) }] : []),
       ]
     : [];
@@ -107,6 +123,15 @@ export function UserProfileScreen({ navigation, route }: MainScreenProps<"UserPr
           onClose={() => setMoreSheetVisible(false)}
           onBlocked={() => navigation.goBack()}
           onSendCoins={() => setIsTransferCoinsSheetOpen(true)}
+        />
+      ) : null}
+      {profile && showBell ? (
+        <PostNotificationsSheet
+          visible={isBellSheetOpen}
+          onClose={() => setIsBellSheetOpen(false)}
+          username={profile.username}
+          level={postNotificationLevel}
+          onSelect={(level) => setPostNotifications.mutate(level)}
         />
       ) : null}
       <TransferCoinsSheet

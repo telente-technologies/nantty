@@ -66,6 +66,7 @@ export function SettingsPrivacyDataScreen({ navigation }: MainScreenProps<"Setti
         <SettingsRow label="Privacy Policy" icon={<FileLock24Icon />} trailing="external" onPress={() => openTrustedWebPage(legalLinks.privacyPolicy, inAppBrowserColorsFromTheme(colors))} />
         <SettingsRow label="Cookie Policy" icon={<Cookie24Icon />} trailing="external" onPress={() => openTrustedWebPage(legalLinks.cookiePolicy, inAppBrowserColorsFromTheme(colors))} />
         <SettingsRow label="Terms of Service" icon={<Scales24Icon />} trailing="external" onPress={() => openTrustedWebPage(legalLinks.terms, inAppBrowserColorsFromTheme(colors))} />
+        <SettingsRow label="Data rights requests" icon={<FileLock24Icon />} trailing="external" onPress={() => openTrustedWebPage(legalLinks.dataRights, inAppBrowserColorsFromTheme(colors))} />
       </SettingsGroup>
 
       <SettingsCenteredAction label="Delete my account" icon={<Trash24Icon size={20} color={colors.error} />} onPress={() => setDeleteSheetVisible(true)} />

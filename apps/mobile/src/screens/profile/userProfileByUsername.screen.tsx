@@ -1,7 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
 import { useEffect } from "react";
-import { ActivityIndicator, StyleSheet, View } from "react-native";
+import { StyleSheet, View } from "react-native";
 
+import { BrandLoader } from "@/components/ui/brandLoader";
 import { ErrorState } from "@/components/ui/errorState";
 import { Header } from "@/components/ui/header";
 import { Screen } from "@/components/ui/screen";
@@ -25,7 +26,7 @@ export function UserProfileByUsernameScreen({ navigation, route }: MainScreenPro
         <ErrorState message="This account doesn't exist or has been renamed." onRetry={() => lookup.refetch()} />
       ) : (
         <View style={styles.center} accessibilityLabel="Opening profile">
-          <ActivityIndicator color={colors.primary} />
+          <BrandLoader size="lg" />
         </View>
       )}
     </Screen>

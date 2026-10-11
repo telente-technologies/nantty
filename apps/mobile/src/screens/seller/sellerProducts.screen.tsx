@@ -15,11 +15,15 @@ import { useTheme } from "@/theme";
 import type { MainScreenProps } from "@/navigation/navigation.types";
 import { sellerService } from "@/services/sellers/seller.service";
 import { spacing } from "@/constants/spacing.constant";
+import { useLocaleStore } from "@/store/locale.store";
+import { summariseProductForInventory } from "@/utils/sellerProductForm.util";
 
 export function SellerProductsScreen({ navigation }: MainScreenProps<"SellerProducts">) {
   const { colors } = useTheme();
-  const { data: products = [], isLoading, isError, refetch, isRefetching } = useQuery({ queryKey: sellerQueryKeys.products, queryFn: sellerService.listMyStoreProducts });
+  const viewerCurrency = useLocaleStore((state) => state.currency);
+  const { data: allProducts = [], isLoading, isError, refetch, isRefetching } = useQuery({ queryKey: sellerQueryKeys.products, queryFn: sellerService.listMyStoreProducts });
   const refreshControl = usePullToRefresh(refetch);
+  const products = allProducts.filter((product) => product.status !== "archived");
   return (
     <Screen>
       <Header title="Products" />
@@ -31,7 +35,7 @@ export function SellerProductsScreen({ navigation }: MainScreenProps<"SellerProd
         columnWrapperStyle={styles.column}
         contentContainerStyle={styles.list}
         ListHeaderComponent={<Button title="Add product" onPress={() => navigation.navigate("ProductForm")} style={styles.add} />}
-        renderItem={({ item }) => <InventoryCard product={item} onPress={() => navigation.navigate("ProductForm", { productId: item.id })} />}
+        renderItem={({ item }) => <InventoryCard product={summariseProductForInventory(item, viewerCurrency)} onPress={() => navigation.navigate("ProductForm", { productId: item.id })} />}
         ListEmptyComponent={
           isLoading ? (
             <GridSkeleton items={4} />

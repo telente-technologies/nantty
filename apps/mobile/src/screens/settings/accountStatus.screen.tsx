@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ActivityIndicator, StyleSheet, View } from "react-native";
+import { StyleSheet, View } from "react-native";
 
 import { AppealStrikeSheet } from "@/components/accountHealth/appealStrikeSheet";
 import { AccountStandingCard, NoticeItem, StrikeItem } from "@/components/accountHealth/accountHealthItems";
@@ -8,6 +8,7 @@ import { CounterNoticeSheet } from "@/components/accountHealth/counterNoticeShee
 import { SettingsGroup, SettingsRow } from "@/components/settings/settingsGroup";
 import { SettingsPage } from "@/components/settings/settingsPage";
 import { BookOpenText24Icon } from "@/components/icons";
+import { BrandLoader } from "@/components/ui/brandLoader";
 import { ErrorState } from "@/components/ui/errorState";
 import { Text } from "@/components/ui/text";
 import type { MainScreenProps } from "@/navigation/navigation.types";
@@ -24,7 +25,7 @@ export function AccountStatusScreen({ navigation }: MainScreenProps<"AccountStat
 
   return (
     <SettingsPage title="Account status" contentTopSpacing={24} gap={28}>
-      {isPending ? <ActivityIndicator color={colors.primary} /> : null}
+      {isPending ? <BrandLoader size="md" /> : null}
       {isError ? <ErrorState onRetry={() => refetch()} /> : null}
       {health ? (
         <>

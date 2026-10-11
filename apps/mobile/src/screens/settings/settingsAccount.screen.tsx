@@ -34,7 +34,7 @@ export function SettingsAccountScreen({ navigation }: MainScreenProps<"SettingsA
           await clearSessionAndSignOut();
         },
       },
-    ]);
+    ], { intent: "danger" });
 
   return (
     <SettingsPage title="Account">

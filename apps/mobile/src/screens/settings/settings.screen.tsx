@@ -21,6 +21,7 @@ import {
   ShieldCheck24Icon,
   ShieldStar24Icon,
   SlidersHorizontal24Icon,
+  SquaresFour24Icon,
   Tag24Icon,
   TrademarkRegistered24Icon,
   UserCircle24Icon,
@@ -56,7 +57,7 @@ export function SettingsScreen({ navigation }: MainScreenProps<"Settings">) {
     showAlertWithButtons("Log out?", "You'll need to log in again to use Zudomart.", [
       { text: "Cancel", style: "cancel" },
       { text: "Log out", style: "destructive", onPress: logOutAndClearSession },
-    ]);
+    ], { intent: "signOut" });
 
   return (
     <SettingsPage
@@ -105,6 +106,7 @@ export function SettingsScreen({ navigation }: MainScreenProps<"Settings">) {
 
       <SettingsGroup>
         <SettingsRow label="App Preference" icon={<SlidersHorizontal24Icon />} onPress={() => navigation.navigate("SettingsAppPreference")} />
+        <SettingsRow label="Widgets" icon={<SquaresFour24Icon />} onPress={() => navigation.navigate("SettingsWidgets")} />
         <SettingsRow label="Payment Methods" icon={<CreditCard24Icon />} onPress={() => navigation.navigate("SettingsPaymentMethods")} />
         <SettingsRow label="Shipping Address" icon={<MapPin24Icon />} onPress={() => navigation.navigate("ShippingAddresses")} />
       </SettingsGroup>
