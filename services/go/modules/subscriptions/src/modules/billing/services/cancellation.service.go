@@ -30,7 +30,7 @@ func (billing Billing) CancelSubscription(ctx context.Context, userId string, su
 			if err := billing.Container.Client(transaction).Subscription.UpdateOneID(row.ID).SetCancelAtPeriodEnd(true).SetPendingPlanCode("").SetPendingInterval("").Exec(ctx); err != nil {
 				return err
 			}
-			if row.Channel == subscription.ChannelWebPaystack && row.BillingReference != "" && row.ProviderPlanCode != "" {
+			if IsWebCheckoutChannel(row.Channel) && row.BillingReference != "" && row.ProviderPlanCode != "" {
 				if err := billing.emit(ctx, transaction, ProviderCancelRequestedEvent, row.ID.String(), map[string]any{"subscriptionId": row.ID.String()}); err != nil {
 					return err
 				}

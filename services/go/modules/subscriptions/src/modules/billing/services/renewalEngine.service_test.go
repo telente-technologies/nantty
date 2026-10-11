@@ -53,9 +53,9 @@ func TestOnlyCardSubscriptionsWithASavedAuthorizationRunOnTheEngine(t *testing.T
 		row  ent.Subscription
 		want bool
 	}{
-		{ent.Subscription{Channel: subscription.ChannelWebPaystack, BillingAuthorizationID: "auth"}, true},
-		{ent.Subscription{Channel: subscription.ChannelWebPaystack, BillingAuthorizationID: "auth", ProviderPlanCode: "PLN_legacy"}, false},
-		{ent.Subscription{Channel: subscription.ChannelWebPaystack}, false},
+		{ent.Subscription{Channel: subscription.ChannelWebCheckout, BillingAuthorizationID: "auth"}, true},
+		{ent.Subscription{Channel: subscription.ChannelWebCheckout, BillingAuthorizationID: "auth", ProviderPlanCode: "PLN_legacy"}, false},
+		{ent.Subscription{Channel: subscription.ChannelWebCheckout}, false},
 		{ent.Subscription{Channel: subscription.ChannelAppleIap, BillingAuthorizationID: "auth"}, false},
 	}
 	for index, testCase := range cases {

@@ -29,19 +29,19 @@ func TestVerificationRefundBranchesForPlansThatKeepRunning(t *testing.T) {
 	paid := func(plan string, channel subscription.Channel) ent.Subscription {
 		return ent.Subscription{PlanCode: plan, Channel: channel, BillingReference: "sub-1", AmountMinor: 500_000, Currency: "NGN", StoreOriginalTransactionID: "token"}
 	}
-	trial := paid("seller_pro", subscription.ChannelWebPaystack)
+	trial := paid("seller_pro", subscription.ChannelWebCheckout)
 	trial.WithTrial, trial.TrialEndsAt = true, &future
 	cases := []struct {
 		name string
 		row  ent.Subscription
 		want VerificationRefundPath
 	}{
-		{"seller plan paid on web refunds the share to the card", paid("seller_pro", subscription.ChannelWebPaystack), RefundPathCardShare},
-		{"premium paid on web refunds the share to the card", paid("premium", subscription.ChannelWebPaystack), RefundPathCardShare},
+		{"seller plan paid on web refunds the share to the card", paid("seller_pro", subscription.ChannelWebCheckout), RefundPathCardShare},
+		{"premium paid on web refunds the share to the card", paid("premium", subscription.ChannelWebCheckout), RefundPathCardShare},
 		{"Google Play tries a partial refund", paid("premium", subscription.ChannelGooglePlay), RefundPathGoogleShare},
 		{"App Store is flagged for a manual refund", paid("premium", subscription.ChannelAppleIap), RefundPathAppleManual},
 		{"running trial charged nothing so the plan just continues", trial, RefundPathNothingCharged},
-		{"standalone Gold still gets the full refund", paid("gold_only", subscription.ChannelWebPaystack), RefundPathCard},
+		{"standalone Gold still gets the full refund", paid("gold_only", subscription.ChannelWebCheckout), RefundPathCard},
 		{"standalone Blue on Google still gets the full revoke", paid("blue", subscription.ChannelGooglePlay), RefundPathGooglePlay},
 	}
 	for _, testCase := range cases {

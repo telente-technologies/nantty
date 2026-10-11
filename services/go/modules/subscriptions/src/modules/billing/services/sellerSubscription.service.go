@@ -85,7 +85,7 @@ func (billing Billing) detailsOf(ctx context.Context, row *ent.Subscription) (Se
 	if row.CardLabel != "" {
 		details.PaymentMethodSummary = &row.CardLabel
 	}
-	if row.Channel == subscription.ChannelWebPaystack {
+	if IsWebCheckoutChannel(row.Channel) {
 		provider := "paystack"
 		details.Provider = &provider
 	}
@@ -153,7 +153,7 @@ func (billing Billing) ResumeSellerSubscription(ctx context.Context, userId, pro
 	if row == nil || !row.CancelAtPeriodEnd {
 		return ErrNothingToResume
 	}
-	if row.Channel == subscription.ChannelWebPaystack && row.ProviderPlanCode != "" {
+	if IsWebCheckoutChannel(row.Channel) && row.ProviderPlanCode != "" {
 		return ErrResumeNeedsCheckout
 	}
 	return billing.Container.Client(billing.Container.Resources.Database).Subscription.UpdateOneID(row.ID).SetCancelAtPeriodEnd(false).Exec(ctx)

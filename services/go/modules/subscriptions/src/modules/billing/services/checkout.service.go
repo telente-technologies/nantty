@@ -106,7 +106,7 @@ func (billing Billing) StartCheckout(ctx context.Context, request CheckoutReques
 	var intentId uuid.UUID
 	err = databases.RunInMoneyTransaction(ctx, billing.Container.Resources.Database, func(ctx context.Context, transaction *sql.Tx) error {
 		create := billing.Container.Client(transaction).Subscription.Create().SetID(subscriptionId).SetProfileID(profile.ProfileId).SetProfileType(profile.ProfileType).
-			SetOwnerUserID(request.UserId).SetPlanCode(request.PlanCode).SetInterval(subscription.Interval(request.Interval)).SetChannel(subscription.ChannelWebPaystack).
+			SetOwnerUserID(request.UserId).SetPlanCode(request.PlanCode).SetInterval(subscription.Interval(request.Interval)).SetChannel(subscription.ChannelWebCheckout).
 			SetListAmountMinor(quote.ListAmountMinor).SetAmountMinor(quote.AmountMinor).SetCurrency(currency).SetDiscountKind(subscription.DiscountKind(quote.DiscountKind)).
 			SetDiscountBps(quote.DiscountBps).SetWithTrial(request.WithTrial).SetPeriodPriceMinor(firstCharge.SubtotalMinor + bundleDiscountOf(firstCharge)).SetCreatedAt(now)
 		if request.WithTrial {

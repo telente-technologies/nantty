@@ -19,13 +19,13 @@ import (
 const renewalLease = 15 * time.Minute
 
 func IsEngineManaged(row *ent.Subscription) bool {
-	return row.Channel == subscription.ChannelWebPaystack && row.BillingAuthorizationID != "" && row.ProviderPlanCode == ""
+	return IsWebCheckoutChannel(row.Channel) && row.BillingAuthorizationID != "" && row.ProviderPlanCode == ""
 }
 
 func (billing Billing) SweepDueSubscriptions(ctx context.Context, limit int) int {
 	now := billing.Container.Now().UTC()
 	client := billing.Container.Client(billing.Container.Resources.Database)
-	due, err := client.Subscription.Query().Where(subscription.NextChargeAtLTE(now), subscription.StatusIn(liveStatuses()...), subscription.ChannelEQ(subscription.ChannelWebPaystack)).
+	due, err := client.Subscription.Query().Where(subscription.NextChargeAtLTE(now), subscription.StatusIn(liveStatuses()...), subscription.ChannelIn(subscription.ChannelWebCheckout, subscription.ChannelWebCheckout)).
 		Limit(limit).IDs(ctx)
 	if err != nil {
 		return 0

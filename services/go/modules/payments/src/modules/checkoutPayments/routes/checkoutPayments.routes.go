@@ -17,4 +17,5 @@ func MountCheckoutPaymentsRoutes(mux *http.ServeMux, application *gateway.Applic
 		httpserver.WriteJsonResponse(writer, http.StatusOK, map[string]any{"channels": application.Container.Settings.Paystack.Channels})
 	})
 	mux.Handle("POST /api/v1/payments/orders/{orderId}/verify", requireUser(http.HandlerFunc(controller.VerifyOrderPayment)))
+	mux.Handle("GET /api/v1/payments/{reference}", requireUser(http.HandlerFunc(controller.GetPaymentStatus)))
 }
