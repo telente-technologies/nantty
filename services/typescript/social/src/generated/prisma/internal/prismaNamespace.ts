@@ -400,9 +400,6 @@ export const ModelName = {
   Conversation: 'Conversation',
   ConversationMember: 'ConversationMember',
   Message: 'Message',
-  MessageReaction: 'MessageReaction',
-  MessagePollOption: 'MessagePollOption',
-  MessagePollVote: 'MessagePollVote',
   ChatSettings: 'ChatSettings',
   SenderBehaviourMetric: 'SenderBehaviourMetric',
   ChatMediaExpiryRun: 'ChatMediaExpiryRun',
@@ -420,6 +417,7 @@ export const ModelName = {
   SoundSave: 'SoundSave',
   ContentPreference: 'ContentPreference',
   CommentRankSnapshot: 'CommentRankSnapshot',
+  FeedRankSnapshot: 'FeedRankSnapshot',
   PostNotificationMute: 'PostNotificationMute',
   DownloadSetting: 'DownloadSetting',
   Follow: 'Follow',
@@ -457,7 +455,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "conversation" | "conversationMember" | "message" | "messageReaction" | "messagePollOption" | "messagePollVote" | "chatSettings" | "senderBehaviourMetric" | "chatMediaExpiryRun" | "post" | "postMedia" | "postLike" | "postShare" | "comment" | "commentLike" | "feedFeedback" | "storyView" | "postViewer" | "postDailyStat" | "sound" | "soundSave" | "contentPreference" | "commentRankSnapshot" | "postNotificationMute" | "downloadSetting" | "follow" | "block" | "storeFollow" | "linkPreviewCache" | "chatDeviceKey" | "chatOneTimePreKey" | "chatKeyMailboxEntry" | "chatPreKeyClaim" | "outboxEvent" | "idempotencyRecord" | "reportIntake" | "saveCollection" | "savedItem" | "saveCounter" | "chatStreak" | "streakSenderDay" | "streakRestore" | "streakCelebration" | "postTag" | "taggingSetting"
+    modelProps: "conversation" | "conversationMember" | "message" | "chatSettings" | "senderBehaviourMetric" | "chatMediaExpiryRun" | "post" | "postMedia" | "postLike" | "postShare" | "comment" | "commentLike" | "feedFeedback" | "storyView" | "postViewer" | "postDailyStat" | "sound" | "soundSave" | "contentPreference" | "commentRankSnapshot" | "feedRankSnapshot" | "postNotificationMute" | "downloadSetting" | "follow" | "block" | "storeFollow" | "linkPreviewCache" | "chatDeviceKey" | "chatOneTimePreKey" | "chatKeyMailboxEntry" | "chatPreKeyClaim" | "outboxEvent" | "idempotencyRecord" | "reportIntake" | "saveCollection" | "savedItem" | "saveCounter" | "chatStreak" | "streakSenderDay" | "streakRestore" | "streakCelebration" | "postTag" | "taggingSetting"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -680,228 +678,6 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.MessageCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.MessageCountAggregateOutputType> | number
-        }
-      }
-    }
-    MessageReaction: {
-      payload: Prisma.$MessageReactionPayload<ExtArgs>
-      fields: Prisma.MessageReactionFieldRefs
-      operations: {
-        findUnique: {
-          args: Prisma.MessageReactionFindUniqueArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$MessageReactionPayload> | null
-        }
-        findUniqueOrThrow: {
-          args: Prisma.MessageReactionFindUniqueOrThrowArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$MessageReactionPayload>
-        }
-        findFirst: {
-          args: Prisma.MessageReactionFindFirstArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$MessageReactionPayload> | null
-        }
-        findFirstOrThrow: {
-          args: Prisma.MessageReactionFindFirstOrThrowArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$MessageReactionPayload>
-        }
-        findMany: {
-          args: Prisma.MessageReactionFindManyArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$MessageReactionPayload>[]
-        }
-        create: {
-          args: Prisma.MessageReactionCreateArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$MessageReactionPayload>
-        }
-        createMany: {
-          args: Prisma.MessageReactionCreateManyArgs<ExtArgs>
-          result: BatchPayload
-        }
-        createManyAndReturn: {
-          args: Prisma.MessageReactionCreateManyAndReturnArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$MessageReactionPayload>[]
-        }
-        delete: {
-          args: Prisma.MessageReactionDeleteArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$MessageReactionPayload>
-        }
-        update: {
-          args: Prisma.MessageReactionUpdateArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$MessageReactionPayload>
-        }
-        deleteMany: {
-          args: Prisma.MessageReactionDeleteManyArgs<ExtArgs>
-          result: BatchPayload
-        }
-        updateMany: {
-          args: Prisma.MessageReactionUpdateManyArgs<ExtArgs>
-          result: BatchPayload
-        }
-        updateManyAndReturn: {
-          args: Prisma.MessageReactionUpdateManyAndReturnArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$MessageReactionPayload>[]
-        }
-        upsert: {
-          args: Prisma.MessageReactionUpsertArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$MessageReactionPayload>
-        }
-        aggregate: {
-          args: Prisma.MessageReactionAggregateArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.AggregateMessageReaction>
-        }
-        groupBy: {
-          args: Prisma.MessageReactionGroupByArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.MessageReactionGroupByOutputType>[]
-        }
-        count: {
-          args: Prisma.MessageReactionCountArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.MessageReactionCountAggregateOutputType> | number
-        }
-      }
-    }
-    MessagePollOption: {
-      payload: Prisma.$MessagePollOptionPayload<ExtArgs>
-      fields: Prisma.MessagePollOptionFieldRefs
-      operations: {
-        findUnique: {
-          args: Prisma.MessagePollOptionFindUniqueArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$MessagePollOptionPayload> | null
-        }
-        findUniqueOrThrow: {
-          args: Prisma.MessagePollOptionFindUniqueOrThrowArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$MessagePollOptionPayload>
-        }
-        findFirst: {
-          args: Prisma.MessagePollOptionFindFirstArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$MessagePollOptionPayload> | null
-        }
-        findFirstOrThrow: {
-          args: Prisma.MessagePollOptionFindFirstOrThrowArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$MessagePollOptionPayload>
-        }
-        findMany: {
-          args: Prisma.MessagePollOptionFindManyArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$MessagePollOptionPayload>[]
-        }
-        create: {
-          args: Prisma.MessagePollOptionCreateArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$MessagePollOptionPayload>
-        }
-        createMany: {
-          args: Prisma.MessagePollOptionCreateManyArgs<ExtArgs>
-          result: BatchPayload
-        }
-        createManyAndReturn: {
-          args: Prisma.MessagePollOptionCreateManyAndReturnArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$MessagePollOptionPayload>[]
-        }
-        delete: {
-          args: Prisma.MessagePollOptionDeleteArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$MessagePollOptionPayload>
-        }
-        update: {
-          args: Prisma.MessagePollOptionUpdateArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$MessagePollOptionPayload>
-        }
-        deleteMany: {
-          args: Prisma.MessagePollOptionDeleteManyArgs<ExtArgs>
-          result: BatchPayload
-        }
-        updateMany: {
-          args: Prisma.MessagePollOptionUpdateManyArgs<ExtArgs>
-          result: BatchPayload
-        }
-        updateManyAndReturn: {
-          args: Prisma.MessagePollOptionUpdateManyAndReturnArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$MessagePollOptionPayload>[]
-        }
-        upsert: {
-          args: Prisma.MessagePollOptionUpsertArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$MessagePollOptionPayload>
-        }
-        aggregate: {
-          args: Prisma.MessagePollOptionAggregateArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.AggregateMessagePollOption>
-        }
-        groupBy: {
-          args: Prisma.MessagePollOptionGroupByArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.MessagePollOptionGroupByOutputType>[]
-        }
-        count: {
-          args: Prisma.MessagePollOptionCountArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.MessagePollOptionCountAggregateOutputType> | number
-        }
-      }
-    }
-    MessagePollVote: {
-      payload: Prisma.$MessagePollVotePayload<ExtArgs>
-      fields: Prisma.MessagePollVoteFieldRefs
-      operations: {
-        findUnique: {
-          args: Prisma.MessagePollVoteFindUniqueArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$MessagePollVotePayload> | null
-        }
-        findUniqueOrThrow: {
-          args: Prisma.MessagePollVoteFindUniqueOrThrowArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$MessagePollVotePayload>
-        }
-        findFirst: {
-          args: Prisma.MessagePollVoteFindFirstArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$MessagePollVotePayload> | null
-        }
-        findFirstOrThrow: {
-          args: Prisma.MessagePollVoteFindFirstOrThrowArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$MessagePollVotePayload>
-        }
-        findMany: {
-          args: Prisma.MessagePollVoteFindManyArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$MessagePollVotePayload>[]
-        }
-        create: {
-          args: Prisma.MessagePollVoteCreateArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$MessagePollVotePayload>
-        }
-        createMany: {
-          args: Prisma.MessagePollVoteCreateManyArgs<ExtArgs>
-          result: BatchPayload
-        }
-        createManyAndReturn: {
-          args: Prisma.MessagePollVoteCreateManyAndReturnArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$MessagePollVotePayload>[]
-        }
-        delete: {
-          args: Prisma.MessagePollVoteDeleteArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$MessagePollVotePayload>
-        }
-        update: {
-          args: Prisma.MessagePollVoteUpdateArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$MessagePollVotePayload>
-        }
-        deleteMany: {
-          args: Prisma.MessagePollVoteDeleteManyArgs<ExtArgs>
-          result: BatchPayload
-        }
-        updateMany: {
-          args: Prisma.MessagePollVoteUpdateManyArgs<ExtArgs>
-          result: BatchPayload
-        }
-        updateManyAndReturn: {
-          args: Prisma.MessagePollVoteUpdateManyAndReturnArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$MessagePollVotePayload>[]
-        }
-        upsert: {
-          args: Prisma.MessagePollVoteUpsertArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$MessagePollVotePayload>
-        }
-        aggregate: {
-          args: Prisma.MessagePollVoteAggregateArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.AggregateMessagePollVote>
-        }
-        groupBy: {
-          args: Prisma.MessagePollVoteGroupByArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.MessagePollVoteGroupByOutputType>[]
-        }
-        count: {
-          args: Prisma.MessagePollVoteCountArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.MessagePollVoteCountAggregateOutputType> | number
         }
       }
     }
@@ -2160,6 +1936,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.CommentRankSnapshotCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.CommentRankSnapshotCountAggregateOutputType> | number
+        }
+      }
+    }
+    FeedRankSnapshot: {
+      payload: Prisma.$FeedRankSnapshotPayload<ExtArgs>
+      fields: Prisma.FeedRankSnapshotFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.FeedRankSnapshotFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FeedRankSnapshotPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.FeedRankSnapshotFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FeedRankSnapshotPayload>
+        }
+        findFirst: {
+          args: Prisma.FeedRankSnapshotFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FeedRankSnapshotPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.FeedRankSnapshotFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FeedRankSnapshotPayload>
+        }
+        findMany: {
+          args: Prisma.FeedRankSnapshotFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FeedRankSnapshotPayload>[]
+        }
+        create: {
+          args: Prisma.FeedRankSnapshotCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FeedRankSnapshotPayload>
+        }
+        createMany: {
+          args: Prisma.FeedRankSnapshotCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.FeedRankSnapshotCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FeedRankSnapshotPayload>[]
+        }
+        delete: {
+          args: Prisma.FeedRankSnapshotDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FeedRankSnapshotPayload>
+        }
+        update: {
+          args: Prisma.FeedRankSnapshotUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FeedRankSnapshotPayload>
+        }
+        deleteMany: {
+          args: Prisma.FeedRankSnapshotDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.FeedRankSnapshotUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.FeedRankSnapshotUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FeedRankSnapshotPayload>[]
+        }
+        upsert: {
+          args: Prisma.FeedRankSnapshotUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FeedRankSnapshotPayload>
+        }
+        aggregate: {
+          args: Prisma.FeedRankSnapshotAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateFeedRankSnapshot>
+        }
+        groupBy: {
+          args: Prisma.FeedRankSnapshotGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.FeedRankSnapshotGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.FeedRankSnapshotCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.FeedRankSnapshotCountAggregateOutputType> | number
         }
       }
     }
@@ -3836,6 +3686,7 @@ export const ConversationScalarFieldEnum = {
   directKey: 'directKey',
   title: 'title',
   description: 'description',
+  encryptedAttributes: 'encryptedAttributes',
   photoMediaId: 'photoMediaId',
   createdById: 'createdById',
   storeId: 'storeId',
@@ -3885,51 +3736,16 @@ export const MessageScalarFieldEnum = {
   mediaStatus: 'mediaStatus',
   mediaDurationSeconds: 'mediaDurationSeconds',
   linkPreviewEnvelope: 'linkPreviewEnvelope',
-  sharedContent: 'sharedContent',
-  location: 'location',
-  document: 'document',
   mentions: 'mentions',
   expiresAt: 'expiresAt',
   mediaExpiresAt: 'mediaExpiresAt',
   mediaPurgedAt: 'mediaPurgedAt',
   hiddenAt: 'hiddenAt',
   createdAt: 'createdAt',
-  pollQuestion: 'pollQuestion',
-  pollAllowMultiple: 'pollAllowMultiple',
   senderLabel: 'senderLabel'
 } as const
 
 export type MessageScalarFieldEnum = (typeof MessageScalarFieldEnum)[keyof typeof MessageScalarFieldEnum]
-
-
-export const MessageReactionScalarFieldEnum = {
-  messageId: 'messageId',
-  userId: 'userId',
-  emoji: 'emoji',
-  createdAt: 'createdAt'
-} as const
-
-export type MessageReactionScalarFieldEnum = (typeof MessageReactionScalarFieldEnum)[keyof typeof MessageReactionScalarFieldEnum]
-
-
-export const MessagePollOptionScalarFieldEnum = {
-  id: 'id',
-  messageId: 'messageId',
-  text: 'text',
-  position: 'position'
-} as const
-
-export type MessagePollOptionScalarFieldEnum = (typeof MessagePollOptionScalarFieldEnum)[keyof typeof MessagePollOptionScalarFieldEnum]
-
-
-export const MessagePollVoteScalarFieldEnum = {
-  optionId: 'optionId',
-  messageId: 'messageId',
-  userId: 'userId',
-  createdAt: 'createdAt'
-} as const
-
-export type MessagePollVoteScalarFieldEnum = (typeof MessagePollVoteScalarFieldEnum)[keyof typeof MessagePollVoteScalarFieldEnum]
 
 
 export const ChatSettingsScalarFieldEnum = {
@@ -4001,6 +3817,7 @@ export const PostScalarFieldEnum = {
   advisorySensitiveLabels: 'advisorySensitiveLabels',
   sensitiveLabelsReviewed: 'sensitiveLabelsReviewed',
   moderationVisibility: 'moderationVisibility',
+  moderationVisibilityAt: 'moderationVisibilityAt',
   topics: 'topics',
   productIds: 'productIds',
   clipEdit: 'clipEdit',
@@ -4068,6 +3885,7 @@ export const CommentScalarFieldEnum = {
   depth: 'depth',
   path: 'path',
   moderationVisibility: 'moderationVisibility',
+  moderationVisibilityAt: 'moderationVisibilityAt',
   deletedAt: 'deletedAt',
   createdAt: 'createdAt',
   isPinned: 'isPinned',
@@ -4110,7 +3928,12 @@ export type StoryViewScalarFieldEnum = (typeof StoryViewScalarFieldEnum)[keyof t
 export const PostViewerScalarFieldEnum = {
   postId: 'postId',
   viewerKey: 'viewerKey',
-  createdAt: 'createdAt'
+  createdAt: 'createdAt',
+  lastViewedAt: 'lastViewedAt',
+  lastWatchedAt: 'lastWatchedAt',
+  lastLinkClickAt: 'lastLinkClickAt',
+  lastProfileClickAt: 'lastProfileClickAt',
+  followAttributedAt: 'followAttributedAt'
 } as const
 
 export type PostViewerScalarFieldEnum = (typeof PostViewerScalarFieldEnum)[keyof typeof PostViewerScalarFieldEnum]
@@ -4122,6 +3945,7 @@ export const PostDailyStatScalarFieldEnum = {
   impressions: 'impressions',
   videoViews: 'videoViews',
   watchTimeSeconds: 'watchTimeSeconds',
+  completedViews: 'completedViews',
   linkClicks: 'linkClicks',
   newFollows: 'newFollows'
 } as const
@@ -4176,6 +4000,18 @@ export const CommentRankSnapshotScalarFieldEnum = {
 export type CommentRankSnapshotScalarFieldEnum = (typeof CommentRankSnapshotScalarFieldEnum)[keyof typeof CommentRankSnapshotScalarFieldEnum]
 
 
+export const FeedRankSnapshotScalarFieldEnum = {
+  id: 'id',
+  viewerId: 'viewerId',
+  surface: 'surface',
+  itemIds: 'itemIds',
+  disclosures: 'disclosures',
+  createdAt: 'createdAt'
+} as const
+
+export type FeedRankSnapshotScalarFieldEnum = (typeof FeedRankSnapshotScalarFieldEnum)[keyof typeof FeedRankSnapshotScalarFieldEnum]
+
+
 export const PostNotificationMuteScalarFieldEnum = {
   userId: 'userId',
   postId: 'postId',
@@ -4200,7 +4036,8 @@ export const FollowScalarFieldEnum = {
   followeeId: 'followeeId',
   state: 'state',
   createdAt: 'createdAt',
-  respondedAt: 'respondedAt'
+  respondedAt: 'respondedAt',
+  postNotifications: 'postNotifications'
 } as const
 
 export type FollowScalarFieldEnum = (typeof FollowScalarFieldEnum)[keyof typeof FollowScalarFieldEnum]
@@ -4441,19 +4278,19 @@ export const SortOrder = {
 export type SortOrder = (typeof SortOrder)[keyof typeof SortOrder]
 
 
+export const JsonNullValueInput = {
+  JsonNull: JsonNull
+} as const
+
+export type JsonNullValueInput = (typeof JsonNullValueInput)[keyof typeof JsonNullValueInput]
+
+
 export const NullableJsonNullValueInput = {
   DbNull: DbNull,
   JsonNull: JsonNull
 } as const
 
 export type NullableJsonNullValueInput = (typeof NullableJsonNullValueInput)[keyof typeof NullableJsonNullValueInput]
-
-
-export const JsonNullValueInput = {
-  JsonNull: JsonNull
-} as const
-
-export type JsonNullValueInput = (typeof JsonNullValueInput)[keyof typeof JsonNullValueInput]
 
 
 export const QueryMode = {
@@ -4775,6 +4612,20 @@ export type ListEnumFollowStateFieldRefInput<$PrismaModel> = FieldRefInputType<$
 
 
 /**
+ * Reference to a field of type 'PostNotificationLevel'
+ */
+export type EnumPostNotificationLevelFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'PostNotificationLevel'>
+    
+
+
+/**
+ * Reference to a field of type 'PostNotificationLevel[]'
+ */
+export type ListEnumPostNotificationLevelFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'PostNotificationLevel[]'>
+    
+
+
+/**
  * Reference to a field of type 'SavedItemType'
  */
 export type EnumSavedItemTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'SavedItemType'>
@@ -4955,9 +4806,6 @@ export type GlobalOmitConfig = {
   conversation?: Prisma.ConversationOmit
   conversationMember?: Prisma.ConversationMemberOmit
   message?: Prisma.MessageOmit
-  messageReaction?: Prisma.MessageReactionOmit
-  messagePollOption?: Prisma.MessagePollOptionOmit
-  messagePollVote?: Prisma.MessagePollVoteOmit
   chatSettings?: Prisma.ChatSettingsOmit
   senderBehaviourMetric?: Prisma.SenderBehaviourMetricOmit
   chatMediaExpiryRun?: Prisma.ChatMediaExpiryRunOmit
@@ -4975,6 +4823,7 @@ export type GlobalOmitConfig = {
   soundSave?: Prisma.SoundSaveOmit
   contentPreference?: Prisma.ContentPreferenceOmit
   commentRankSnapshot?: Prisma.CommentRankSnapshotOmit
+  feedRankSnapshot?: Prisma.FeedRankSnapshotOmit
   postNotificationMute?: Prisma.PostNotificationMuteOmit
   downloadSetting?: Prisma.DownloadSettingOmit
   follow?: Prisma.FollowOmit

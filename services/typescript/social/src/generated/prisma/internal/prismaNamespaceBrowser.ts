@@ -54,9 +54,6 @@ export const ModelName = {
   Conversation: 'Conversation',
   ConversationMember: 'ConversationMember',
   Message: 'Message',
-  MessageReaction: 'MessageReaction',
-  MessagePollOption: 'MessagePollOption',
-  MessagePollVote: 'MessagePollVote',
   ChatSettings: 'ChatSettings',
   SenderBehaviourMetric: 'SenderBehaviourMetric',
   ChatMediaExpiryRun: 'ChatMediaExpiryRun',
@@ -74,6 +71,7 @@ export const ModelName = {
   SoundSave: 'SoundSave',
   ContentPreference: 'ContentPreference',
   CommentRankSnapshot: 'CommentRankSnapshot',
+  FeedRankSnapshot: 'FeedRankSnapshot',
   PostNotificationMute: 'PostNotificationMute',
   DownloadSetting: 'DownloadSetting',
   Follow: 'Follow',
@@ -120,6 +118,7 @@ export const ConversationScalarFieldEnum = {
   directKey: 'directKey',
   title: 'title',
   description: 'description',
+  encryptedAttributes: 'encryptedAttributes',
   photoMediaId: 'photoMediaId',
   createdById: 'createdById',
   storeId: 'storeId',
@@ -169,51 +168,16 @@ export const MessageScalarFieldEnum = {
   mediaStatus: 'mediaStatus',
   mediaDurationSeconds: 'mediaDurationSeconds',
   linkPreviewEnvelope: 'linkPreviewEnvelope',
-  sharedContent: 'sharedContent',
-  location: 'location',
-  document: 'document',
   mentions: 'mentions',
   expiresAt: 'expiresAt',
   mediaExpiresAt: 'mediaExpiresAt',
   mediaPurgedAt: 'mediaPurgedAt',
   hiddenAt: 'hiddenAt',
   createdAt: 'createdAt',
-  pollQuestion: 'pollQuestion',
-  pollAllowMultiple: 'pollAllowMultiple',
   senderLabel: 'senderLabel'
 } as const
 
 export type MessageScalarFieldEnum = (typeof MessageScalarFieldEnum)[keyof typeof MessageScalarFieldEnum]
-
-
-export const MessageReactionScalarFieldEnum = {
-  messageId: 'messageId',
-  userId: 'userId',
-  emoji: 'emoji',
-  createdAt: 'createdAt'
-} as const
-
-export type MessageReactionScalarFieldEnum = (typeof MessageReactionScalarFieldEnum)[keyof typeof MessageReactionScalarFieldEnum]
-
-
-export const MessagePollOptionScalarFieldEnum = {
-  id: 'id',
-  messageId: 'messageId',
-  text: 'text',
-  position: 'position'
-} as const
-
-export type MessagePollOptionScalarFieldEnum = (typeof MessagePollOptionScalarFieldEnum)[keyof typeof MessagePollOptionScalarFieldEnum]
-
-
-export const MessagePollVoteScalarFieldEnum = {
-  optionId: 'optionId',
-  messageId: 'messageId',
-  userId: 'userId',
-  createdAt: 'createdAt'
-} as const
-
-export type MessagePollVoteScalarFieldEnum = (typeof MessagePollVoteScalarFieldEnum)[keyof typeof MessagePollVoteScalarFieldEnum]
 
 
 export const ChatSettingsScalarFieldEnum = {
@@ -285,6 +249,7 @@ export const PostScalarFieldEnum = {
   advisorySensitiveLabels: 'advisorySensitiveLabels',
   sensitiveLabelsReviewed: 'sensitiveLabelsReviewed',
   moderationVisibility: 'moderationVisibility',
+  moderationVisibilityAt: 'moderationVisibilityAt',
   topics: 'topics',
   productIds: 'productIds',
   clipEdit: 'clipEdit',
@@ -352,6 +317,7 @@ export const CommentScalarFieldEnum = {
   depth: 'depth',
   path: 'path',
   moderationVisibility: 'moderationVisibility',
+  moderationVisibilityAt: 'moderationVisibilityAt',
   deletedAt: 'deletedAt',
   createdAt: 'createdAt',
   isPinned: 'isPinned',
@@ -394,7 +360,12 @@ export type StoryViewScalarFieldEnum = (typeof StoryViewScalarFieldEnum)[keyof t
 export const PostViewerScalarFieldEnum = {
   postId: 'postId',
   viewerKey: 'viewerKey',
-  createdAt: 'createdAt'
+  createdAt: 'createdAt',
+  lastViewedAt: 'lastViewedAt',
+  lastWatchedAt: 'lastWatchedAt',
+  lastLinkClickAt: 'lastLinkClickAt',
+  lastProfileClickAt: 'lastProfileClickAt',
+  followAttributedAt: 'followAttributedAt'
 } as const
 
 export type PostViewerScalarFieldEnum = (typeof PostViewerScalarFieldEnum)[keyof typeof PostViewerScalarFieldEnum]
@@ -406,6 +377,7 @@ export const PostDailyStatScalarFieldEnum = {
   impressions: 'impressions',
   videoViews: 'videoViews',
   watchTimeSeconds: 'watchTimeSeconds',
+  completedViews: 'completedViews',
   linkClicks: 'linkClicks',
   newFollows: 'newFollows'
 } as const
@@ -460,6 +432,18 @@ export const CommentRankSnapshotScalarFieldEnum = {
 export type CommentRankSnapshotScalarFieldEnum = (typeof CommentRankSnapshotScalarFieldEnum)[keyof typeof CommentRankSnapshotScalarFieldEnum]
 
 
+export const FeedRankSnapshotScalarFieldEnum = {
+  id: 'id',
+  viewerId: 'viewerId',
+  surface: 'surface',
+  itemIds: 'itemIds',
+  disclosures: 'disclosures',
+  createdAt: 'createdAt'
+} as const
+
+export type FeedRankSnapshotScalarFieldEnum = (typeof FeedRankSnapshotScalarFieldEnum)[keyof typeof FeedRankSnapshotScalarFieldEnum]
+
+
 export const PostNotificationMuteScalarFieldEnum = {
   userId: 'userId',
   postId: 'postId',
@@ -484,7 +468,8 @@ export const FollowScalarFieldEnum = {
   followeeId: 'followeeId',
   state: 'state',
   createdAt: 'createdAt',
-  respondedAt: 'respondedAt'
+  respondedAt: 'respondedAt',
+  postNotifications: 'postNotifications'
 } as const
 
 export type FollowScalarFieldEnum = (typeof FollowScalarFieldEnum)[keyof typeof FollowScalarFieldEnum]
@@ -725,19 +710,19 @@ export const SortOrder = {
 export type SortOrder = (typeof SortOrder)[keyof typeof SortOrder]
 
 
+export const JsonNullValueInput = {
+  JsonNull: JsonNull
+} as const
+
+export type JsonNullValueInput = (typeof JsonNullValueInput)[keyof typeof JsonNullValueInput]
+
+
 export const NullableJsonNullValueInput = {
   DbNull: DbNull,
   JsonNull: JsonNull
 } as const
 
 export type NullableJsonNullValueInput = (typeof NullableJsonNullValueInput)[keyof typeof NullableJsonNullValueInput]
-
-
-export const JsonNullValueInput = {
-  JsonNull: JsonNull
-} as const
-
-export type JsonNullValueInput = (typeof JsonNullValueInput)[keyof typeof JsonNullValueInput]
 
 
 export const QueryMode = {

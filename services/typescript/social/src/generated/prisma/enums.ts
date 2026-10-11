@@ -48,7 +48,8 @@ export const MessageKind = {
   location: 'location',
   liveLocation: 'liveLocation',
   document: 'document',
-  poll: 'poll'
+  poll: 'poll',
+  control: 'control'
 } as const
 
 export type MessageKind = (typeof MessageKind)[keyof typeof MessageKind]
@@ -153,6 +154,15 @@ export const FollowState = {
 } as const
 
 export type FollowState = (typeof FollowState)[keyof typeof FollowState]
+
+
+export const PostNotificationLevel = {
+  off: 'off',
+  posts: 'posts',
+  posts_and_lives: 'posts_and_lives'
+} as const
+
+export type PostNotificationLevel = (typeof PostNotificationLevel)[keyof typeof PostNotificationLevel]
 
 
 export const SavedItemType = {

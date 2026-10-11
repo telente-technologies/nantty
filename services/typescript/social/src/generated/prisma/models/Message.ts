@@ -54,8 +54,6 @@ export type MessageMinAggregateOutputType = {
   mediaPurgedAt: Date | null
   hiddenAt: Date | null
   createdAt: Date | null
-  pollQuestion: string | null
-  pollAllowMultiple: boolean | null
   senderLabel: string | null
 }
 
@@ -79,8 +77,6 @@ export type MessageMaxAggregateOutputType = {
   mediaPurgedAt: Date | null
   hiddenAt: Date | null
   createdAt: Date | null
-  pollQuestion: string | null
-  pollAllowMultiple: boolean | null
   senderLabel: string | null
 }
 
@@ -99,17 +95,12 @@ export type MessageCountAggregateOutputType = {
   mediaStatus: number
   mediaDurationSeconds: number
   linkPreviewEnvelope: number
-  sharedContent: number
-  location: number
-  document: number
   mentions: number
   expiresAt: number
   mediaExpiresAt: number
   mediaPurgedAt: number
   hiddenAt: number
   createdAt: number
-  pollQuestion: number
-  pollAllowMultiple: number
   senderLabel: number
   _all: number
 }
@@ -143,8 +134,6 @@ export type MessageMinAggregateInputType = {
   mediaPurgedAt?: true
   hiddenAt?: true
   createdAt?: true
-  pollQuestion?: true
-  pollAllowMultiple?: true
   senderLabel?: true
 }
 
@@ -168,8 +157,6 @@ export type MessageMaxAggregateInputType = {
   mediaPurgedAt?: true
   hiddenAt?: true
   createdAt?: true
-  pollQuestion?: true
-  pollAllowMultiple?: true
   senderLabel?: true
 }
 
@@ -188,17 +175,12 @@ export type MessageCountAggregateInputType = {
   mediaStatus?: true
   mediaDurationSeconds?: true
   linkPreviewEnvelope?: true
-  sharedContent?: true
-  location?: true
-  document?: true
   mentions?: true
   expiresAt?: true
   mediaExpiresAt?: true
   mediaPurgedAt?: true
   hiddenAt?: true
   createdAt?: true
-  pollQuestion?: true
-  pollAllowMultiple?: true
   senderLabel?: true
   _all?: true
 }
@@ -304,17 +286,12 @@ export type MessageGroupByOutputType = {
   mediaStatus: $Enums.MediaProcessingStatus | null
   mediaDurationSeconds: number | null
   linkPreviewEnvelope: string | null
-  sharedContent: runtime.JsonValue | null
-  location: runtime.JsonValue | null
-  document: runtime.JsonValue | null
   mentions: runtime.JsonValue
   expiresAt: Date | null
   mediaExpiresAt: Date | null
   mediaPurgedAt: Date | null
   hiddenAt: Date | null
   createdAt: Date
-  pollQuestion: string | null
-  pollAllowMultiple: boolean
   senderLabel: string | null
   _count: MessageCountAggregateOutputType | null
   _avg: MessageAvgAggregateOutputType | null
@@ -356,21 +333,14 @@ export type MessageWhereInput = {
   mediaStatus?: Prisma.EnumMediaProcessingStatusNullableFilter<"Message"> | $Enums.MediaProcessingStatus | null
   mediaDurationSeconds?: Prisma.IntNullableFilter<"Message"> | number | null
   linkPreviewEnvelope?: Prisma.StringNullableFilter<"Message"> | string | null
-  sharedContent?: Prisma.JsonNullableFilter<"Message">
-  location?: Prisma.JsonNullableFilter<"Message">
-  document?: Prisma.JsonNullableFilter<"Message">
   mentions?: Prisma.JsonFilter<"Message">
   expiresAt?: Prisma.DateTimeNullableFilter<"Message"> | Date | string | null
   mediaExpiresAt?: Prisma.DateTimeNullableFilter<"Message"> | Date | string | null
   mediaPurgedAt?: Prisma.DateTimeNullableFilter<"Message"> | Date | string | null
   hiddenAt?: Prisma.DateTimeNullableFilter<"Message"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"Message"> | Date | string
-  pollQuestion?: Prisma.StringNullableFilter<"Message"> | string | null
-  pollAllowMultiple?: Prisma.BoolFilter<"Message"> | boolean
   senderLabel?: Prisma.StringNullableFilter<"Message"> | string | null
   conversation?: Prisma.XOR<Prisma.ConversationScalarRelationFilter, Prisma.ConversationWhereInput>
-  reactions?: Prisma.MessageReactionListRelationFilter
-  pollOptions?: Prisma.MessagePollOptionListRelationFilter
 }
 
 export type MessageOrderByWithRelationInput = {
@@ -388,21 +358,14 @@ export type MessageOrderByWithRelationInput = {
   mediaStatus?: Prisma.SortOrderInput | Prisma.SortOrder
   mediaDurationSeconds?: Prisma.SortOrderInput | Prisma.SortOrder
   linkPreviewEnvelope?: Prisma.SortOrderInput | Prisma.SortOrder
-  sharedContent?: Prisma.SortOrderInput | Prisma.SortOrder
-  location?: Prisma.SortOrderInput | Prisma.SortOrder
-  document?: Prisma.SortOrderInput | Prisma.SortOrder
   mentions?: Prisma.SortOrder
   expiresAt?: Prisma.SortOrderInput | Prisma.SortOrder
   mediaExpiresAt?: Prisma.SortOrderInput | Prisma.SortOrder
   mediaPurgedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   hiddenAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
-  pollQuestion?: Prisma.SortOrderInput | Prisma.SortOrder
-  pollAllowMultiple?: Prisma.SortOrder
   senderLabel?: Prisma.SortOrderInput | Prisma.SortOrder
   conversation?: Prisma.ConversationOrderByWithRelationInput
-  reactions?: Prisma.MessageReactionOrderByRelationAggregateInput
-  pollOptions?: Prisma.MessagePollOptionOrderByRelationAggregateInput
 }
 
 export type MessageWhereUniqueInput = Prisma.AtLeast<{
@@ -424,21 +387,14 @@ export type MessageWhereUniqueInput = Prisma.AtLeast<{
   mediaStatus?: Prisma.EnumMediaProcessingStatusNullableFilter<"Message"> | $Enums.MediaProcessingStatus | null
   mediaDurationSeconds?: Prisma.IntNullableFilter<"Message"> | number | null
   linkPreviewEnvelope?: Prisma.StringNullableFilter<"Message"> | string | null
-  sharedContent?: Prisma.JsonNullableFilter<"Message">
-  location?: Prisma.JsonNullableFilter<"Message">
-  document?: Prisma.JsonNullableFilter<"Message">
   mentions?: Prisma.JsonFilter<"Message">
   expiresAt?: Prisma.DateTimeNullableFilter<"Message"> | Date | string | null
   mediaExpiresAt?: Prisma.DateTimeNullableFilter<"Message"> | Date | string | null
   mediaPurgedAt?: Prisma.DateTimeNullableFilter<"Message"> | Date | string | null
   hiddenAt?: Prisma.DateTimeNullableFilter<"Message"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"Message"> | Date | string
-  pollQuestion?: Prisma.StringNullableFilter<"Message"> | string | null
-  pollAllowMultiple?: Prisma.BoolFilter<"Message"> | boolean
   senderLabel?: Prisma.StringNullableFilter<"Message"> | string | null
   conversation?: Prisma.XOR<Prisma.ConversationScalarRelationFilter, Prisma.ConversationWhereInput>
-  reactions?: Prisma.MessageReactionListRelationFilter
-  pollOptions?: Prisma.MessagePollOptionListRelationFilter
 }, "id" | "conversationId_senderId_clientMessageId">
 
 export type MessageOrderByWithAggregationInput = {
@@ -456,17 +412,12 @@ export type MessageOrderByWithAggregationInput = {
   mediaStatus?: Prisma.SortOrderInput | Prisma.SortOrder
   mediaDurationSeconds?: Prisma.SortOrderInput | Prisma.SortOrder
   linkPreviewEnvelope?: Prisma.SortOrderInput | Prisma.SortOrder
-  sharedContent?: Prisma.SortOrderInput | Prisma.SortOrder
-  location?: Prisma.SortOrderInput | Prisma.SortOrder
-  document?: Prisma.SortOrderInput | Prisma.SortOrder
   mentions?: Prisma.SortOrder
   expiresAt?: Prisma.SortOrderInput | Prisma.SortOrder
   mediaExpiresAt?: Prisma.SortOrderInput | Prisma.SortOrder
   mediaPurgedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   hiddenAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
-  pollQuestion?: Prisma.SortOrderInput | Prisma.SortOrder
-  pollAllowMultiple?: Prisma.SortOrder
   senderLabel?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.MessageCountOrderByAggregateInput
   _avg?: Prisma.MessageAvgOrderByAggregateInput
@@ -493,17 +444,12 @@ export type MessageScalarWhereWithAggregatesInput = {
   mediaStatus?: Prisma.EnumMediaProcessingStatusNullableWithAggregatesFilter<"Message"> | $Enums.MediaProcessingStatus | null
   mediaDurationSeconds?: Prisma.IntNullableWithAggregatesFilter<"Message"> | number | null
   linkPreviewEnvelope?: Prisma.StringNullableWithAggregatesFilter<"Message"> | string | null
-  sharedContent?: Prisma.JsonNullableWithAggregatesFilter<"Message">
-  location?: Prisma.JsonNullableWithAggregatesFilter<"Message">
-  document?: Prisma.JsonNullableWithAggregatesFilter<"Message">
   mentions?: Prisma.JsonWithAggregatesFilter<"Message">
   expiresAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Message"> | Date | string | null
   mediaExpiresAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Message"> | Date | string | null
   mediaPurgedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Message"> | Date | string | null
   hiddenAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Message"> | Date | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Message"> | Date | string
-  pollQuestion?: Prisma.StringNullableWithAggregatesFilter<"Message"> | string | null
-  pollAllowMultiple?: Prisma.BoolWithAggregatesFilter<"Message"> | boolean
   senderLabel?: Prisma.StringNullableWithAggregatesFilter<"Message"> | string | null
 }
 
@@ -521,21 +467,14 @@ export type MessageCreateInput = {
   mediaStatus?: $Enums.MediaProcessingStatus | null
   mediaDurationSeconds?: number | null
   linkPreviewEnvelope?: string | null
-  sharedContent?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  location?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  document?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   mentions?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   expiresAt?: Date | string | null
   mediaExpiresAt?: Date | string | null
   mediaPurgedAt?: Date | string | null
   hiddenAt?: Date | string | null
   createdAt?: Date | string
-  pollQuestion?: string | null
-  pollAllowMultiple?: boolean
   senderLabel?: string | null
   conversation: Prisma.ConversationCreateNestedOneWithoutMessagesInput
-  reactions?: Prisma.MessageReactionCreateNestedManyWithoutMessageInput
-  pollOptions?: Prisma.MessagePollOptionCreateNestedManyWithoutMessageInput
 }
 
 export type MessageUncheckedCreateInput = {
@@ -553,20 +492,13 @@ export type MessageUncheckedCreateInput = {
   mediaStatus?: $Enums.MediaProcessingStatus | null
   mediaDurationSeconds?: number | null
   linkPreviewEnvelope?: string | null
-  sharedContent?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  location?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  document?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   mentions?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   expiresAt?: Date | string | null
   mediaExpiresAt?: Date | string | null
   mediaPurgedAt?: Date | string | null
   hiddenAt?: Date | string | null
   createdAt?: Date | string
-  pollQuestion?: string | null
-  pollAllowMultiple?: boolean
   senderLabel?: string | null
-  reactions?: Prisma.MessageReactionUncheckedCreateNestedManyWithoutMessageInput
-  pollOptions?: Prisma.MessagePollOptionUncheckedCreateNestedManyWithoutMessageInput
 }
 
 export type MessageUpdateInput = {
@@ -583,21 +515,14 @@ export type MessageUpdateInput = {
   mediaStatus?: Prisma.NullableEnumMediaProcessingStatusFieldUpdateOperationsInput | $Enums.MediaProcessingStatus | null
   mediaDurationSeconds?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   linkPreviewEnvelope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  sharedContent?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  location?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  document?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   mentions?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   expiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   mediaExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   mediaPurgedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   hiddenAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  pollQuestion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  pollAllowMultiple?: Prisma.BoolFieldUpdateOperationsInput | boolean
   senderLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   conversation?: Prisma.ConversationUpdateOneRequiredWithoutMessagesNestedInput
-  reactions?: Prisma.MessageReactionUpdateManyWithoutMessageNestedInput
-  pollOptions?: Prisma.MessagePollOptionUpdateManyWithoutMessageNestedInput
 }
 
 export type MessageUncheckedUpdateInput = {
@@ -615,20 +540,13 @@ export type MessageUncheckedUpdateInput = {
   mediaStatus?: Prisma.NullableEnumMediaProcessingStatusFieldUpdateOperationsInput | $Enums.MediaProcessingStatus | null
   mediaDurationSeconds?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   linkPreviewEnvelope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  sharedContent?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  location?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  document?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   mentions?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   expiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   mediaExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   mediaPurgedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   hiddenAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  pollQuestion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  pollAllowMultiple?: Prisma.BoolFieldUpdateOperationsInput | boolean
   senderLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  reactions?: Prisma.MessageReactionUncheckedUpdateManyWithoutMessageNestedInput
-  pollOptions?: Prisma.MessagePollOptionUncheckedUpdateManyWithoutMessageNestedInput
 }
 
 export type MessageCreateManyInput = {
@@ -646,17 +564,12 @@ export type MessageCreateManyInput = {
   mediaStatus?: $Enums.MediaProcessingStatus | null
   mediaDurationSeconds?: number | null
   linkPreviewEnvelope?: string | null
-  sharedContent?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  location?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  document?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   mentions?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   expiresAt?: Date | string | null
   mediaExpiresAt?: Date | string | null
   mediaPurgedAt?: Date | string | null
   hiddenAt?: Date | string | null
   createdAt?: Date | string
-  pollQuestion?: string | null
-  pollAllowMultiple?: boolean
   senderLabel?: string | null
 }
 
@@ -674,17 +587,12 @@ export type MessageUpdateManyMutationInput = {
   mediaStatus?: Prisma.NullableEnumMediaProcessingStatusFieldUpdateOperationsInput | $Enums.MediaProcessingStatus | null
   mediaDurationSeconds?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   linkPreviewEnvelope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  sharedContent?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  location?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  document?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   mentions?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   expiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   mediaExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   mediaPurgedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   hiddenAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  pollQuestion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  pollAllowMultiple?: Prisma.BoolFieldUpdateOperationsInput | boolean
   senderLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
@@ -703,17 +611,12 @@ export type MessageUncheckedUpdateManyInput = {
   mediaStatus?: Prisma.NullableEnumMediaProcessingStatusFieldUpdateOperationsInput | $Enums.MediaProcessingStatus | null
   mediaDurationSeconds?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   linkPreviewEnvelope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  sharedContent?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  location?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  document?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   mentions?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   expiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   mediaExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   mediaPurgedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   hiddenAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  pollQuestion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  pollAllowMultiple?: Prisma.BoolFieldUpdateOperationsInput | boolean
   senderLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
@@ -748,17 +651,12 @@ export type MessageCountOrderByAggregateInput = {
   mediaStatus?: Prisma.SortOrder
   mediaDurationSeconds?: Prisma.SortOrder
   linkPreviewEnvelope?: Prisma.SortOrder
-  sharedContent?: Prisma.SortOrder
-  location?: Prisma.SortOrder
-  document?: Prisma.SortOrder
   mentions?: Prisma.SortOrder
   expiresAt?: Prisma.SortOrder
   mediaExpiresAt?: Prisma.SortOrder
   mediaPurgedAt?: Prisma.SortOrder
   hiddenAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
-  pollQuestion?: Prisma.SortOrder
-  pollAllowMultiple?: Prisma.SortOrder
   senderLabel?: Prisma.SortOrder
 }
 
@@ -786,8 +684,6 @@ export type MessageMaxOrderByAggregateInput = {
   mediaPurgedAt?: Prisma.SortOrder
   hiddenAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
-  pollQuestion?: Prisma.SortOrder
-  pollAllowMultiple?: Prisma.SortOrder
   senderLabel?: Prisma.SortOrder
 }
 
@@ -811,18 +707,11 @@ export type MessageMinOrderByAggregateInput = {
   mediaPurgedAt?: Prisma.SortOrder
   hiddenAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
-  pollQuestion?: Prisma.SortOrder
-  pollAllowMultiple?: Prisma.SortOrder
   senderLabel?: Prisma.SortOrder
 }
 
 export type MessageSumOrderByAggregateInput = {
   mediaDurationSeconds?: Prisma.SortOrder
-}
-
-export type MessageScalarRelationFilter = {
-  is?: Prisma.MessageWhereInput
-  isNot?: Prisma.MessageWhereInput
 }
 
 export type MessageCreateNestedManyWithoutConversationInput = {
@@ -875,34 +764,6 @@ export type NullableEnumMediaProcessingStatusFieldUpdateOperationsInput = {
   set?: $Enums.MediaProcessingStatus | null
 }
 
-export type MessageCreateNestedOneWithoutReactionsInput = {
-  create?: Prisma.XOR<Prisma.MessageCreateWithoutReactionsInput, Prisma.MessageUncheckedCreateWithoutReactionsInput>
-  connectOrCreate?: Prisma.MessageCreateOrConnectWithoutReactionsInput
-  connect?: Prisma.MessageWhereUniqueInput
-}
-
-export type MessageUpdateOneRequiredWithoutReactionsNestedInput = {
-  create?: Prisma.XOR<Prisma.MessageCreateWithoutReactionsInput, Prisma.MessageUncheckedCreateWithoutReactionsInput>
-  connectOrCreate?: Prisma.MessageCreateOrConnectWithoutReactionsInput
-  upsert?: Prisma.MessageUpsertWithoutReactionsInput
-  connect?: Prisma.MessageWhereUniqueInput
-  update?: Prisma.XOR<Prisma.XOR<Prisma.MessageUpdateToOneWithWhereWithoutReactionsInput, Prisma.MessageUpdateWithoutReactionsInput>, Prisma.MessageUncheckedUpdateWithoutReactionsInput>
-}
-
-export type MessageCreateNestedOneWithoutPollOptionsInput = {
-  create?: Prisma.XOR<Prisma.MessageCreateWithoutPollOptionsInput, Prisma.MessageUncheckedCreateWithoutPollOptionsInput>
-  connectOrCreate?: Prisma.MessageCreateOrConnectWithoutPollOptionsInput
-  connect?: Prisma.MessageWhereUniqueInput
-}
-
-export type MessageUpdateOneRequiredWithoutPollOptionsNestedInput = {
-  create?: Prisma.XOR<Prisma.MessageCreateWithoutPollOptionsInput, Prisma.MessageUncheckedCreateWithoutPollOptionsInput>
-  connectOrCreate?: Prisma.MessageCreateOrConnectWithoutPollOptionsInput
-  upsert?: Prisma.MessageUpsertWithoutPollOptionsInput
-  connect?: Prisma.MessageWhereUniqueInput
-  update?: Prisma.XOR<Prisma.XOR<Prisma.MessageUpdateToOneWithWhereWithoutPollOptionsInput, Prisma.MessageUpdateWithoutPollOptionsInput>, Prisma.MessageUncheckedUpdateWithoutPollOptionsInput>
-}
-
 export type MessageCreateWithoutConversationInput = {
   id?: string
   senderId: string
@@ -917,20 +778,13 @@ export type MessageCreateWithoutConversationInput = {
   mediaStatus?: $Enums.MediaProcessingStatus | null
   mediaDurationSeconds?: number | null
   linkPreviewEnvelope?: string | null
-  sharedContent?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  location?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  document?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   mentions?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   expiresAt?: Date | string | null
   mediaExpiresAt?: Date | string | null
   mediaPurgedAt?: Date | string | null
   hiddenAt?: Date | string | null
   createdAt?: Date | string
-  pollQuestion?: string | null
-  pollAllowMultiple?: boolean
   senderLabel?: string | null
-  reactions?: Prisma.MessageReactionCreateNestedManyWithoutMessageInput
-  pollOptions?: Prisma.MessagePollOptionCreateNestedManyWithoutMessageInput
 }
 
 export type MessageUncheckedCreateWithoutConversationInput = {
@@ -947,20 +801,13 @@ export type MessageUncheckedCreateWithoutConversationInput = {
   mediaStatus?: $Enums.MediaProcessingStatus | null
   mediaDurationSeconds?: number | null
   linkPreviewEnvelope?: string | null
-  sharedContent?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  location?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  document?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   mentions?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   expiresAt?: Date | string | null
   mediaExpiresAt?: Date | string | null
   mediaPurgedAt?: Date | string | null
   hiddenAt?: Date | string | null
   createdAt?: Date | string
-  pollQuestion?: string | null
-  pollAllowMultiple?: boolean
   senderLabel?: string | null
-  reactions?: Prisma.MessageReactionUncheckedCreateNestedManyWithoutMessageInput
-  pollOptions?: Prisma.MessagePollOptionUncheckedCreateNestedManyWithoutMessageInput
 }
 
 export type MessageCreateOrConnectWithoutConversationInput = {
@@ -1007,290 +854,13 @@ export type MessageScalarWhereInput = {
   mediaStatus?: Prisma.EnumMediaProcessingStatusNullableFilter<"Message"> | $Enums.MediaProcessingStatus | null
   mediaDurationSeconds?: Prisma.IntNullableFilter<"Message"> | number | null
   linkPreviewEnvelope?: Prisma.StringNullableFilter<"Message"> | string | null
-  sharedContent?: Prisma.JsonNullableFilter<"Message">
-  location?: Prisma.JsonNullableFilter<"Message">
-  document?: Prisma.JsonNullableFilter<"Message">
   mentions?: Prisma.JsonFilter<"Message">
   expiresAt?: Prisma.DateTimeNullableFilter<"Message"> | Date | string | null
   mediaExpiresAt?: Prisma.DateTimeNullableFilter<"Message"> | Date | string | null
   mediaPurgedAt?: Prisma.DateTimeNullableFilter<"Message"> | Date | string | null
   hiddenAt?: Prisma.DateTimeNullableFilter<"Message"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"Message"> | Date | string
-  pollQuestion?: Prisma.StringNullableFilter<"Message"> | string | null
-  pollAllowMultiple?: Prisma.BoolFilter<"Message"> | boolean
   senderLabel?: Prisma.StringNullableFilter<"Message"> | string | null
-}
-
-export type MessageCreateWithoutReactionsInput = {
-  id?: string
-  senderId: string
-  kind: $Enums.MessageKind
-  clientMessageId?: string | null
-  ciphertext?: string | null
-  deviceId?: string | null
-  protocol?: string
-  mediaId?: string | null
-  mediaType?: string | null
-  mediaUrl?: string | null
-  mediaStatus?: $Enums.MediaProcessingStatus | null
-  mediaDurationSeconds?: number | null
-  linkPreviewEnvelope?: string | null
-  sharedContent?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  location?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  document?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  mentions?: Prisma.JsonNullValueInput | runtime.InputJsonValue
-  expiresAt?: Date | string | null
-  mediaExpiresAt?: Date | string | null
-  mediaPurgedAt?: Date | string | null
-  hiddenAt?: Date | string | null
-  createdAt?: Date | string
-  pollQuestion?: string | null
-  pollAllowMultiple?: boolean
-  senderLabel?: string | null
-  conversation: Prisma.ConversationCreateNestedOneWithoutMessagesInput
-  pollOptions?: Prisma.MessagePollOptionCreateNestedManyWithoutMessageInput
-}
-
-export type MessageUncheckedCreateWithoutReactionsInput = {
-  id?: string
-  conversationId: string
-  senderId: string
-  kind: $Enums.MessageKind
-  clientMessageId?: string | null
-  ciphertext?: string | null
-  deviceId?: string | null
-  protocol?: string
-  mediaId?: string | null
-  mediaType?: string | null
-  mediaUrl?: string | null
-  mediaStatus?: $Enums.MediaProcessingStatus | null
-  mediaDurationSeconds?: number | null
-  linkPreviewEnvelope?: string | null
-  sharedContent?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  location?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  document?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  mentions?: Prisma.JsonNullValueInput | runtime.InputJsonValue
-  expiresAt?: Date | string | null
-  mediaExpiresAt?: Date | string | null
-  mediaPurgedAt?: Date | string | null
-  hiddenAt?: Date | string | null
-  createdAt?: Date | string
-  pollQuestion?: string | null
-  pollAllowMultiple?: boolean
-  senderLabel?: string | null
-  pollOptions?: Prisma.MessagePollOptionUncheckedCreateNestedManyWithoutMessageInput
-}
-
-export type MessageCreateOrConnectWithoutReactionsInput = {
-  where: Prisma.MessageWhereUniqueInput
-  create: Prisma.XOR<Prisma.MessageCreateWithoutReactionsInput, Prisma.MessageUncheckedCreateWithoutReactionsInput>
-}
-
-export type MessageUpsertWithoutReactionsInput = {
-  update: Prisma.XOR<Prisma.MessageUpdateWithoutReactionsInput, Prisma.MessageUncheckedUpdateWithoutReactionsInput>
-  create: Prisma.XOR<Prisma.MessageCreateWithoutReactionsInput, Prisma.MessageUncheckedCreateWithoutReactionsInput>
-  where?: Prisma.MessageWhereInput
-}
-
-export type MessageUpdateToOneWithWhereWithoutReactionsInput = {
-  where?: Prisma.MessageWhereInput
-  data: Prisma.XOR<Prisma.MessageUpdateWithoutReactionsInput, Prisma.MessageUncheckedUpdateWithoutReactionsInput>
-}
-
-export type MessageUpdateWithoutReactionsInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
-  senderId?: Prisma.StringFieldUpdateOperationsInput | string
-  kind?: Prisma.EnumMessageKindFieldUpdateOperationsInput | $Enums.MessageKind
-  clientMessageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  ciphertext?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  deviceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  protocol?: Prisma.StringFieldUpdateOperationsInput | string
-  mediaId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  mediaType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  mediaUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  mediaStatus?: Prisma.NullableEnumMediaProcessingStatusFieldUpdateOperationsInput | $Enums.MediaProcessingStatus | null
-  mediaDurationSeconds?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  linkPreviewEnvelope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  sharedContent?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  location?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  document?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  mentions?: Prisma.JsonNullValueInput | runtime.InputJsonValue
-  expiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  mediaExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  mediaPurgedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  hiddenAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  pollQuestion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  pollAllowMultiple?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  senderLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  conversation?: Prisma.ConversationUpdateOneRequiredWithoutMessagesNestedInput
-  pollOptions?: Prisma.MessagePollOptionUpdateManyWithoutMessageNestedInput
-}
-
-export type MessageUncheckedUpdateWithoutReactionsInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
-  conversationId?: Prisma.StringFieldUpdateOperationsInput | string
-  senderId?: Prisma.StringFieldUpdateOperationsInput | string
-  kind?: Prisma.EnumMessageKindFieldUpdateOperationsInput | $Enums.MessageKind
-  clientMessageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  ciphertext?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  deviceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  protocol?: Prisma.StringFieldUpdateOperationsInput | string
-  mediaId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  mediaType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  mediaUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  mediaStatus?: Prisma.NullableEnumMediaProcessingStatusFieldUpdateOperationsInput | $Enums.MediaProcessingStatus | null
-  mediaDurationSeconds?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  linkPreviewEnvelope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  sharedContent?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  location?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  document?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  mentions?: Prisma.JsonNullValueInput | runtime.InputJsonValue
-  expiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  mediaExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  mediaPurgedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  hiddenAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  pollQuestion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  pollAllowMultiple?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  senderLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  pollOptions?: Prisma.MessagePollOptionUncheckedUpdateManyWithoutMessageNestedInput
-}
-
-export type MessageCreateWithoutPollOptionsInput = {
-  id?: string
-  senderId: string
-  kind: $Enums.MessageKind
-  clientMessageId?: string | null
-  ciphertext?: string | null
-  deviceId?: string | null
-  protocol?: string
-  mediaId?: string | null
-  mediaType?: string | null
-  mediaUrl?: string | null
-  mediaStatus?: $Enums.MediaProcessingStatus | null
-  mediaDurationSeconds?: number | null
-  linkPreviewEnvelope?: string | null
-  sharedContent?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  location?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  document?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  mentions?: Prisma.JsonNullValueInput | runtime.InputJsonValue
-  expiresAt?: Date | string | null
-  mediaExpiresAt?: Date | string | null
-  mediaPurgedAt?: Date | string | null
-  hiddenAt?: Date | string | null
-  createdAt?: Date | string
-  pollQuestion?: string | null
-  pollAllowMultiple?: boolean
-  senderLabel?: string | null
-  conversation: Prisma.ConversationCreateNestedOneWithoutMessagesInput
-  reactions?: Prisma.MessageReactionCreateNestedManyWithoutMessageInput
-}
-
-export type MessageUncheckedCreateWithoutPollOptionsInput = {
-  id?: string
-  conversationId: string
-  senderId: string
-  kind: $Enums.MessageKind
-  clientMessageId?: string | null
-  ciphertext?: string | null
-  deviceId?: string | null
-  protocol?: string
-  mediaId?: string | null
-  mediaType?: string | null
-  mediaUrl?: string | null
-  mediaStatus?: $Enums.MediaProcessingStatus | null
-  mediaDurationSeconds?: number | null
-  linkPreviewEnvelope?: string | null
-  sharedContent?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  location?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  document?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  mentions?: Prisma.JsonNullValueInput | runtime.InputJsonValue
-  expiresAt?: Date | string | null
-  mediaExpiresAt?: Date | string | null
-  mediaPurgedAt?: Date | string | null
-  hiddenAt?: Date | string | null
-  createdAt?: Date | string
-  pollQuestion?: string | null
-  pollAllowMultiple?: boolean
-  senderLabel?: string | null
-  reactions?: Prisma.MessageReactionUncheckedCreateNestedManyWithoutMessageInput
-}
-
-export type MessageCreateOrConnectWithoutPollOptionsInput = {
-  where: Prisma.MessageWhereUniqueInput
-  create: Prisma.XOR<Prisma.MessageCreateWithoutPollOptionsInput, Prisma.MessageUncheckedCreateWithoutPollOptionsInput>
-}
-
-export type MessageUpsertWithoutPollOptionsInput = {
-  update: Prisma.XOR<Prisma.MessageUpdateWithoutPollOptionsInput, Prisma.MessageUncheckedUpdateWithoutPollOptionsInput>
-  create: Prisma.XOR<Prisma.MessageCreateWithoutPollOptionsInput, Prisma.MessageUncheckedCreateWithoutPollOptionsInput>
-  where?: Prisma.MessageWhereInput
-}
-
-export type MessageUpdateToOneWithWhereWithoutPollOptionsInput = {
-  where?: Prisma.MessageWhereInput
-  data: Prisma.XOR<Prisma.MessageUpdateWithoutPollOptionsInput, Prisma.MessageUncheckedUpdateWithoutPollOptionsInput>
-}
-
-export type MessageUpdateWithoutPollOptionsInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
-  senderId?: Prisma.StringFieldUpdateOperationsInput | string
-  kind?: Prisma.EnumMessageKindFieldUpdateOperationsInput | $Enums.MessageKind
-  clientMessageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  ciphertext?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  deviceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  protocol?: Prisma.StringFieldUpdateOperationsInput | string
-  mediaId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  mediaType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  mediaUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  mediaStatus?: Prisma.NullableEnumMediaProcessingStatusFieldUpdateOperationsInput | $Enums.MediaProcessingStatus | null
-  mediaDurationSeconds?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  linkPreviewEnvelope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  sharedContent?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  location?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  document?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  mentions?: Prisma.JsonNullValueInput | runtime.InputJsonValue
-  expiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  mediaExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  mediaPurgedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  hiddenAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  pollQuestion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  pollAllowMultiple?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  senderLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  conversation?: Prisma.ConversationUpdateOneRequiredWithoutMessagesNestedInput
-  reactions?: Prisma.MessageReactionUpdateManyWithoutMessageNestedInput
-}
-
-export type MessageUncheckedUpdateWithoutPollOptionsInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
-  conversationId?: Prisma.StringFieldUpdateOperationsInput | string
-  senderId?: Prisma.StringFieldUpdateOperationsInput | string
-  kind?: Prisma.EnumMessageKindFieldUpdateOperationsInput | $Enums.MessageKind
-  clientMessageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  ciphertext?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  deviceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  protocol?: Prisma.StringFieldUpdateOperationsInput | string
-  mediaId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  mediaType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  mediaUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  mediaStatus?: Prisma.NullableEnumMediaProcessingStatusFieldUpdateOperationsInput | $Enums.MediaProcessingStatus | null
-  mediaDurationSeconds?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  linkPreviewEnvelope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  sharedContent?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  location?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  document?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  mentions?: Prisma.JsonNullValueInput | runtime.InputJsonValue
-  expiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  mediaExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  mediaPurgedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  hiddenAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  pollQuestion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  pollAllowMultiple?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  senderLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  reactions?: Prisma.MessageReactionUncheckedUpdateManyWithoutMessageNestedInput
 }
 
 export type MessageCreateManyConversationInput = {
@@ -1307,17 +877,12 @@ export type MessageCreateManyConversationInput = {
   mediaStatus?: $Enums.MediaProcessingStatus | null
   mediaDurationSeconds?: number | null
   linkPreviewEnvelope?: string | null
-  sharedContent?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  location?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  document?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   mentions?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   expiresAt?: Date | string | null
   mediaExpiresAt?: Date | string | null
   mediaPurgedAt?: Date | string | null
   hiddenAt?: Date | string | null
   createdAt?: Date | string
-  pollQuestion?: string | null
-  pollAllowMultiple?: boolean
   senderLabel?: string | null
 }
 
@@ -1335,20 +900,13 @@ export type MessageUpdateWithoutConversationInput = {
   mediaStatus?: Prisma.NullableEnumMediaProcessingStatusFieldUpdateOperationsInput | $Enums.MediaProcessingStatus | null
   mediaDurationSeconds?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   linkPreviewEnvelope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  sharedContent?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  location?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  document?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   mentions?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   expiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   mediaExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   mediaPurgedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   hiddenAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  pollQuestion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  pollAllowMultiple?: Prisma.BoolFieldUpdateOperationsInput | boolean
   senderLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  reactions?: Prisma.MessageReactionUpdateManyWithoutMessageNestedInput
-  pollOptions?: Prisma.MessagePollOptionUpdateManyWithoutMessageNestedInput
 }
 
 export type MessageUncheckedUpdateWithoutConversationInput = {
@@ -1365,20 +923,13 @@ export type MessageUncheckedUpdateWithoutConversationInput = {
   mediaStatus?: Prisma.NullableEnumMediaProcessingStatusFieldUpdateOperationsInput | $Enums.MediaProcessingStatus | null
   mediaDurationSeconds?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   linkPreviewEnvelope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  sharedContent?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  location?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  document?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   mentions?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   expiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   mediaExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   mediaPurgedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   hiddenAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  pollQuestion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  pollAllowMultiple?: Prisma.BoolFieldUpdateOperationsInput | boolean
   senderLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  reactions?: Prisma.MessageReactionUncheckedUpdateManyWithoutMessageNestedInput
-  pollOptions?: Prisma.MessagePollOptionUncheckedUpdateManyWithoutMessageNestedInput
 }
 
 export type MessageUncheckedUpdateManyWithoutConversationInput = {
@@ -1395,58 +946,15 @@ export type MessageUncheckedUpdateManyWithoutConversationInput = {
   mediaStatus?: Prisma.NullableEnumMediaProcessingStatusFieldUpdateOperationsInput | $Enums.MediaProcessingStatus | null
   mediaDurationSeconds?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   linkPreviewEnvelope?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  sharedContent?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  location?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  document?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   mentions?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   expiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   mediaExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   mediaPurgedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   hiddenAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  pollQuestion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  pollAllowMultiple?: Prisma.BoolFieldUpdateOperationsInput | boolean
   senderLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
-
-/**
- * Count Type MessageCountOutputType
- */
-
-export type MessageCountOutputType = {
-  reactions: number
-  pollOptions: number
-}
-
-export type MessageCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  reactions?: boolean | MessageCountOutputTypeCountReactionsArgs
-  pollOptions?: boolean | MessageCountOutputTypeCountPollOptionsArgs
-}
-
-/**
- * MessageCountOutputType without action
- */
-export type MessageCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  /**
-   * Select specific fields to fetch from the MessageCountOutputType
-   */
-  select?: Prisma.MessageCountOutputTypeSelect<ExtArgs> | null
-}
-
-/**
- * MessageCountOutputType without action
- */
-export type MessageCountOutputTypeCountReactionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  where?: Prisma.MessageReactionWhereInput
-}
-
-/**
- * MessageCountOutputType without action
- */
-export type MessageCountOutputTypeCountPollOptionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  where?: Prisma.MessagePollOptionWhereInput
-}
 
 
 export type MessageSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -1464,22 +972,14 @@ export type MessageSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   mediaStatus?: boolean
   mediaDurationSeconds?: boolean
   linkPreviewEnvelope?: boolean
-  sharedContent?: boolean
-  location?: boolean
-  document?: boolean
   mentions?: boolean
   expiresAt?: boolean
   mediaExpiresAt?: boolean
   mediaPurgedAt?: boolean
   hiddenAt?: boolean
   createdAt?: boolean
-  pollQuestion?: boolean
-  pollAllowMultiple?: boolean
   senderLabel?: boolean
   conversation?: boolean | Prisma.ConversationDefaultArgs<ExtArgs>
-  reactions?: boolean | Prisma.Message$reactionsArgs<ExtArgs>
-  pollOptions?: boolean | Prisma.Message$pollOptionsArgs<ExtArgs>
-  _count?: boolean | Prisma.MessageCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["message"]>
 
 export type MessageSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -1497,17 +997,12 @@ export type MessageSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exten
   mediaStatus?: boolean
   mediaDurationSeconds?: boolean
   linkPreviewEnvelope?: boolean
-  sharedContent?: boolean
-  location?: boolean
-  document?: boolean
   mentions?: boolean
   expiresAt?: boolean
   mediaExpiresAt?: boolean
   mediaPurgedAt?: boolean
   hiddenAt?: boolean
   createdAt?: boolean
-  pollQuestion?: boolean
-  pollAllowMultiple?: boolean
   senderLabel?: boolean
   conversation?: boolean | Prisma.ConversationDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["message"]>
@@ -1527,17 +1022,12 @@ export type MessageSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exten
   mediaStatus?: boolean
   mediaDurationSeconds?: boolean
   linkPreviewEnvelope?: boolean
-  sharedContent?: boolean
-  location?: boolean
-  document?: boolean
   mentions?: boolean
   expiresAt?: boolean
   mediaExpiresAt?: boolean
   mediaPurgedAt?: boolean
   hiddenAt?: boolean
   createdAt?: boolean
-  pollQuestion?: boolean
-  pollAllowMultiple?: boolean
   senderLabel?: boolean
   conversation?: boolean | Prisma.ConversationDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["message"]>
@@ -1557,26 +1047,18 @@ export type MessageSelectScalar = {
   mediaStatus?: boolean
   mediaDurationSeconds?: boolean
   linkPreviewEnvelope?: boolean
-  sharedContent?: boolean
-  location?: boolean
-  document?: boolean
   mentions?: boolean
   expiresAt?: boolean
   mediaExpiresAt?: boolean
   mediaPurgedAt?: boolean
   hiddenAt?: boolean
   createdAt?: boolean
-  pollQuestion?: boolean
-  pollAllowMultiple?: boolean
   senderLabel?: boolean
 }
 
-export type MessageOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "conversationId" | "senderId" | "kind" | "clientMessageId" | "ciphertext" | "deviceId" | "protocol" | "mediaId" | "mediaType" | "mediaUrl" | "mediaStatus" | "mediaDurationSeconds" | "linkPreviewEnvelope" | "sharedContent" | "location" | "document" | "mentions" | "expiresAt" | "mediaExpiresAt" | "mediaPurgedAt" | "hiddenAt" | "createdAt" | "pollQuestion" | "pollAllowMultiple" | "senderLabel", ExtArgs["result"]["message"]>
+export type MessageOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "conversationId" | "senderId" | "kind" | "clientMessageId" | "ciphertext" | "deviceId" | "protocol" | "mediaId" | "mediaType" | "mediaUrl" | "mediaStatus" | "mediaDurationSeconds" | "linkPreviewEnvelope" | "mentions" | "expiresAt" | "mediaExpiresAt" | "mediaPurgedAt" | "hiddenAt" | "createdAt" | "senderLabel", ExtArgs["result"]["message"]>
 export type MessageInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   conversation?: boolean | Prisma.ConversationDefaultArgs<ExtArgs>
-  reactions?: boolean | Prisma.Message$reactionsArgs<ExtArgs>
-  pollOptions?: boolean | Prisma.Message$pollOptionsArgs<ExtArgs>
-  _count?: boolean | Prisma.MessageCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type MessageIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   conversation?: boolean | Prisma.ConversationDefaultArgs<ExtArgs>
@@ -1589,8 +1071,6 @@ export type $MessagePayload<ExtArgs extends runtime.Types.Extensions.InternalArg
   name: "Message"
   objects: {
     conversation: Prisma.$ConversationPayload<ExtArgs>
-    reactions: Prisma.$MessageReactionPayload<ExtArgs>[]
-    pollOptions: Prisma.$MessagePollOptionPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1607,17 +1087,12 @@ export type $MessagePayload<ExtArgs extends runtime.Types.Extensions.InternalArg
     mediaStatus: $Enums.MediaProcessingStatus | null
     mediaDurationSeconds: number | null
     linkPreviewEnvelope: string | null
-    sharedContent: runtime.JsonValue | null
-    location: runtime.JsonValue | null
-    document: runtime.JsonValue | null
     mentions: runtime.JsonValue
     expiresAt: Date | null
     mediaExpiresAt: Date | null
     mediaPurgedAt: Date | null
     hiddenAt: Date | null
     createdAt: Date
-    pollQuestion: string | null
-    pollAllowMultiple: boolean
     senderLabel: string | null
   }, ExtArgs["result"]["message"]>
   composites: {}
@@ -2014,8 +1489,6 @@ readonly fields: MessageFieldRefs;
 export interface Prisma__MessageClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
   conversation<T extends Prisma.ConversationDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ConversationDefaultArgs<ExtArgs>>): Prisma.Prisma__ConversationClient<runtime.Types.Result.GetResult<Prisma.$ConversationPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
-  reactions<T extends Prisma.Message$reactionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Message$reactionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$MessageReactionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-  pollOptions<T extends Prisma.Message$pollOptionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Message$pollOptionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$MessagePollOptionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -2059,17 +1532,12 @@ export interface MessageFieldRefs {
   readonly mediaStatus: Prisma.FieldRef<"Message", 'MediaProcessingStatus'>
   readonly mediaDurationSeconds: Prisma.FieldRef<"Message", 'Int'>
   readonly linkPreviewEnvelope: Prisma.FieldRef<"Message", 'String'>
-  readonly sharedContent: Prisma.FieldRef<"Message", 'Json'>
-  readonly location: Prisma.FieldRef<"Message", 'Json'>
-  readonly document: Prisma.FieldRef<"Message", 'Json'>
   readonly mentions: Prisma.FieldRef<"Message", 'Json'>
   readonly expiresAt: Prisma.FieldRef<"Message", 'DateTime'>
   readonly mediaExpiresAt: Prisma.FieldRef<"Message", 'DateTime'>
   readonly mediaPurgedAt: Prisma.FieldRef<"Message", 'DateTime'>
   readonly hiddenAt: Prisma.FieldRef<"Message", 'DateTime'>
   readonly createdAt: Prisma.FieldRef<"Message", 'DateTime'>
-  readonly pollQuestion: Prisma.FieldRef<"Message", 'String'>
-  readonly pollAllowMultiple: Prisma.FieldRef<"Message", 'Boolean'>
   readonly senderLabel: Prisma.FieldRef<"Message", 'String'>
 }
     
@@ -2469,54 +1937,6 @@ export type MessageDeleteManyArgs<ExtArgs extends runtime.Types.Extensions.Inter
    * Limit how many Messages to delete.
    */
   limit?: number
-}
-
-/**
- * Message.reactions
- */
-export type Message$reactionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  /**
-   * Select specific fields to fetch from the MessageReaction
-   */
-  select?: Prisma.MessageReactionSelect<ExtArgs> | null
-  /**
-   * Omit specific fields from the MessageReaction
-   */
-  omit?: Prisma.MessageReactionOmit<ExtArgs> | null
-  /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.MessageReactionInclude<ExtArgs> | null
-  where?: Prisma.MessageReactionWhereInput
-  orderBy?: Prisma.MessageReactionOrderByWithRelationInput | Prisma.MessageReactionOrderByWithRelationInput[]
-  cursor?: Prisma.MessageReactionWhereUniqueInput
-  take?: number
-  skip?: number
-  distinct?: Prisma.MessageReactionScalarFieldEnum | Prisma.MessageReactionScalarFieldEnum[]
-}
-
-/**
- * Message.pollOptions
- */
-export type Message$pollOptionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  /**
-   * Select specific fields to fetch from the MessagePollOption
-   */
-  select?: Prisma.MessagePollOptionSelect<ExtArgs> | null
-  /**
-   * Omit specific fields from the MessagePollOption
-   */
-  omit?: Prisma.MessagePollOptionOmit<ExtArgs> | null
-  /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.MessagePollOptionInclude<ExtArgs> | null
-  where?: Prisma.MessagePollOptionWhereInput
-  orderBy?: Prisma.MessagePollOptionOrderByWithRelationInput | Prisma.MessagePollOptionOrderByWithRelationInput[]
-  cursor?: Prisma.MessagePollOptionWhereUniqueInput
-  take?: number
-  skip?: number
-  distinct?: Prisma.MessagePollOptionScalarFieldEnum | Prisma.MessagePollOptionScalarFieldEnum[]
 }
 
 /**

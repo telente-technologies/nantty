@@ -40,6 +40,7 @@ export type ConversationMinAggregateOutputType = {
   directKey: string | null
   title: string | null
   description: string | null
+  encryptedAttributes: string | null
   photoMediaId: string | null
   createdById: string | null
   storeId: string | null
@@ -58,6 +59,7 @@ export type ConversationMaxAggregateOutputType = {
   directKey: string | null
   title: string | null
   description: string | null
+  encryptedAttributes: string | null
   photoMediaId: string | null
   createdById: string | null
   storeId: string | null
@@ -76,6 +78,7 @@ export type ConversationCountAggregateOutputType = {
   directKey: number
   title: number
   description: number
+  encryptedAttributes: number
   photoMediaId: number
   createdById: number
   storeId: number
@@ -104,6 +107,7 @@ export type ConversationMinAggregateInputType = {
   directKey?: true
   title?: true
   description?: true
+  encryptedAttributes?: true
   photoMediaId?: true
   createdById?: true
   storeId?: true
@@ -122,6 +126,7 @@ export type ConversationMaxAggregateInputType = {
   directKey?: true
   title?: true
   description?: true
+  encryptedAttributes?: true
   photoMediaId?: true
   createdById?: true
   storeId?: true
@@ -140,6 +145,7 @@ export type ConversationCountAggregateInputType = {
   directKey?: true
   title?: true
   description?: true
+  encryptedAttributes?: true
   photoMediaId?: true
   createdById?: true
   storeId?: true
@@ -245,6 +251,7 @@ export type ConversationGroupByOutputType = {
   directKey: string | null
   title: string | null
   description: string | null
+  encryptedAttributes: string | null
   photoMediaId: string | null
   createdById: string
   storeId: string | null
@@ -286,6 +293,7 @@ export type ConversationWhereInput = {
   directKey?: Prisma.StringNullableFilter<"Conversation"> | string | null
   title?: Prisma.StringNullableFilter<"Conversation"> | string | null
   description?: Prisma.StringNullableFilter<"Conversation"> | string | null
+  encryptedAttributes?: Prisma.StringNullableFilter<"Conversation"> | string | null
   photoMediaId?: Prisma.UuidNullableFilter<"Conversation"> | string | null
   createdById?: Prisma.UuidFilter<"Conversation"> | string
   storeId?: Prisma.StringNullableFilter<"Conversation"> | string | null
@@ -307,6 +315,7 @@ export type ConversationOrderByWithRelationInput = {
   directKey?: Prisma.SortOrderInput | Prisma.SortOrder
   title?: Prisma.SortOrderInput | Prisma.SortOrder
   description?: Prisma.SortOrderInput | Prisma.SortOrder
+  encryptedAttributes?: Prisma.SortOrderInput | Prisma.SortOrder
   photoMediaId?: Prisma.SortOrderInput | Prisma.SortOrder
   createdById?: Prisma.SortOrder
   storeId?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -331,6 +340,7 @@ export type ConversationWhereUniqueInput = Prisma.AtLeast<{
   kind?: Prisma.EnumConversationKindFilter<"Conversation"> | $Enums.ConversationKind
   title?: Prisma.StringNullableFilter<"Conversation"> | string | null
   description?: Prisma.StringNullableFilter<"Conversation"> | string | null
+  encryptedAttributes?: Prisma.StringNullableFilter<"Conversation"> | string | null
   photoMediaId?: Prisma.UuidNullableFilter<"Conversation"> | string | null
   createdById?: Prisma.UuidFilter<"Conversation"> | string
   storeId?: Prisma.StringNullableFilter<"Conversation"> | string | null
@@ -352,6 +362,7 @@ export type ConversationOrderByWithAggregationInput = {
   directKey?: Prisma.SortOrderInput | Prisma.SortOrder
   title?: Prisma.SortOrderInput | Prisma.SortOrder
   description?: Prisma.SortOrderInput | Prisma.SortOrder
+  encryptedAttributes?: Prisma.SortOrderInput | Prisma.SortOrder
   photoMediaId?: Prisma.SortOrderInput | Prisma.SortOrder
   createdById?: Prisma.SortOrder
   storeId?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -378,6 +389,7 @@ export type ConversationScalarWhereWithAggregatesInput = {
   directKey?: Prisma.StringNullableWithAggregatesFilter<"Conversation"> | string | null
   title?: Prisma.StringNullableWithAggregatesFilter<"Conversation"> | string | null
   description?: Prisma.StringNullableWithAggregatesFilter<"Conversation"> | string | null
+  encryptedAttributes?: Prisma.StringNullableWithAggregatesFilter<"Conversation"> | string | null
   photoMediaId?: Prisma.UuidNullableWithAggregatesFilter<"Conversation"> | string | null
   createdById?: Prisma.UuidWithAggregatesFilter<"Conversation"> | string
   storeId?: Prisma.StringNullableWithAggregatesFilter<"Conversation"> | string | null
@@ -396,6 +408,7 @@ export type ConversationCreateInput = {
   directKey?: string | null
   title?: string | null
   description?: string | null
+  encryptedAttributes?: string | null
   photoMediaId?: string | null
   createdById: string
   storeId?: string | null
@@ -417,6 +430,7 @@ export type ConversationUncheckedCreateInput = {
   directKey?: string | null
   title?: string | null
   description?: string | null
+  encryptedAttributes?: string | null
   photoMediaId?: string | null
   createdById: string
   storeId?: string | null
@@ -438,6 +452,7 @@ export type ConversationUpdateInput = {
   directKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   title?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  encryptedAttributes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   photoMediaId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdById?: Prisma.StringFieldUpdateOperationsInput | string
   storeId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -459,6 +474,7 @@ export type ConversationUncheckedUpdateInput = {
   directKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   title?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  encryptedAttributes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   photoMediaId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdById?: Prisma.StringFieldUpdateOperationsInput | string
   storeId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -480,6 +496,7 @@ export type ConversationCreateManyInput = {
   directKey?: string | null
   title?: string | null
   description?: string | null
+  encryptedAttributes?: string | null
   photoMediaId?: string | null
   createdById: string
   storeId?: string | null
@@ -498,6 +515,7 @@ export type ConversationUpdateManyMutationInput = {
   directKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   title?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  encryptedAttributes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   photoMediaId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdById?: Prisma.StringFieldUpdateOperationsInput | string
   storeId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -516,6 +534,7 @@ export type ConversationUncheckedUpdateManyInput = {
   directKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   title?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  encryptedAttributes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   photoMediaId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdById?: Prisma.StringFieldUpdateOperationsInput | string
   storeId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -534,6 +553,7 @@ export type ConversationCountOrderByAggregateInput = {
   directKey?: Prisma.SortOrder
   title?: Prisma.SortOrder
   description?: Prisma.SortOrder
+  encryptedAttributes?: Prisma.SortOrder
   photoMediaId?: Prisma.SortOrder
   createdById?: Prisma.SortOrder
   storeId?: Prisma.SortOrder
@@ -556,6 +576,7 @@ export type ConversationMaxOrderByAggregateInput = {
   directKey?: Prisma.SortOrder
   title?: Prisma.SortOrder
   description?: Prisma.SortOrder
+  encryptedAttributes?: Prisma.SortOrder
   photoMediaId?: Prisma.SortOrder
   createdById?: Prisma.SortOrder
   storeId?: Prisma.SortOrder
@@ -574,6 +595,7 @@ export type ConversationMinOrderByAggregateInput = {
   directKey?: Prisma.SortOrder
   title?: Prisma.SortOrder
   description?: Prisma.SortOrder
+  encryptedAttributes?: Prisma.SortOrder
   photoMediaId?: Prisma.SortOrder
   createdById?: Prisma.SortOrder
   storeId?: Prisma.SortOrder
@@ -675,6 +697,7 @@ export type ConversationCreateWithoutMembersInput = {
   directKey?: string | null
   title?: string | null
   description?: string | null
+  encryptedAttributes?: string | null
   photoMediaId?: string | null
   createdById: string
   storeId?: string | null
@@ -695,6 +718,7 @@ export type ConversationUncheckedCreateWithoutMembersInput = {
   directKey?: string | null
   title?: string | null
   description?: string | null
+  encryptedAttributes?: string | null
   photoMediaId?: string | null
   createdById: string
   storeId?: string | null
@@ -731,6 +755,7 @@ export type ConversationUpdateWithoutMembersInput = {
   directKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   title?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  encryptedAttributes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   photoMediaId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdById?: Prisma.StringFieldUpdateOperationsInput | string
   storeId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -751,6 +776,7 @@ export type ConversationUncheckedUpdateWithoutMembersInput = {
   directKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   title?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  encryptedAttributes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   photoMediaId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdById?: Prisma.StringFieldUpdateOperationsInput | string
   storeId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -771,6 +797,7 @@ export type ConversationCreateWithoutMessagesInput = {
   directKey?: string | null
   title?: string | null
   description?: string | null
+  encryptedAttributes?: string | null
   photoMediaId?: string | null
   createdById: string
   storeId?: string | null
@@ -791,6 +818,7 @@ export type ConversationUncheckedCreateWithoutMessagesInput = {
   directKey?: string | null
   title?: string | null
   description?: string | null
+  encryptedAttributes?: string | null
   photoMediaId?: string | null
   createdById: string
   storeId?: string | null
@@ -827,6 +855,7 @@ export type ConversationUpdateWithoutMessagesInput = {
   directKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   title?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  encryptedAttributes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   photoMediaId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdById?: Prisma.StringFieldUpdateOperationsInput | string
   storeId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -847,6 +876,7 @@ export type ConversationUncheckedUpdateWithoutMessagesInput = {
   directKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   title?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  encryptedAttributes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   photoMediaId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdById?: Prisma.StringFieldUpdateOperationsInput | string
   storeId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -867,6 +897,7 @@ export type ConversationCreateWithoutStreakInput = {
   directKey?: string | null
   title?: string | null
   description?: string | null
+  encryptedAttributes?: string | null
   photoMediaId?: string | null
   createdById: string
   storeId?: string | null
@@ -887,6 +918,7 @@ export type ConversationUncheckedCreateWithoutStreakInput = {
   directKey?: string | null
   title?: string | null
   description?: string | null
+  encryptedAttributes?: string | null
   photoMediaId?: string | null
   createdById: string
   storeId?: string | null
@@ -923,6 +955,7 @@ export type ConversationUpdateWithoutStreakInput = {
   directKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   title?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  encryptedAttributes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   photoMediaId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdById?: Prisma.StringFieldUpdateOperationsInput | string
   storeId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -943,6 +976,7 @@ export type ConversationUncheckedUpdateWithoutStreakInput = {
   directKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   title?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  encryptedAttributes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   photoMediaId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdById?: Prisma.StringFieldUpdateOperationsInput | string
   storeId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1003,6 +1037,7 @@ export type ConversationSelect<ExtArgs extends runtime.Types.Extensions.Internal
   directKey?: boolean
   title?: boolean
   description?: boolean
+  encryptedAttributes?: boolean
   photoMediaId?: boolean
   createdById?: boolean
   storeId?: boolean
@@ -1025,6 +1060,7 @@ export type ConversationSelectCreateManyAndReturn<ExtArgs extends runtime.Types.
   directKey?: boolean
   title?: boolean
   description?: boolean
+  encryptedAttributes?: boolean
   photoMediaId?: boolean
   createdById?: boolean
   storeId?: boolean
@@ -1043,6 +1079,7 @@ export type ConversationSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.
   directKey?: boolean
   title?: boolean
   description?: boolean
+  encryptedAttributes?: boolean
   photoMediaId?: boolean
   createdById?: boolean
   storeId?: boolean
@@ -1061,6 +1098,7 @@ export type ConversationSelectScalar = {
   directKey?: boolean
   title?: boolean
   description?: boolean
+  encryptedAttributes?: boolean
   photoMediaId?: boolean
   createdById?: boolean
   storeId?: boolean
@@ -1073,7 +1111,7 @@ export type ConversationSelectScalar = {
   createdAt?: boolean
 }
 
-export type ConversationOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "kind" | "directKey" | "title" | "description" | "photoMediaId" | "createdById" | "storeId" | "orderId" | "orderNumber" | "disappearingMessagesSeconds" | "onlyAdminsCanMentionAll" | "lastMessageKind" | "lastMessageAt" | "createdAt", ExtArgs["result"]["conversation"]>
+export type ConversationOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "kind" | "directKey" | "title" | "description" | "encryptedAttributes" | "photoMediaId" | "createdById" | "storeId" | "orderId" | "orderNumber" | "disappearingMessagesSeconds" | "onlyAdminsCanMentionAll" | "lastMessageKind" | "lastMessageAt" | "createdAt", ExtArgs["result"]["conversation"]>
 export type ConversationInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   members?: boolean | Prisma.Conversation$membersArgs<ExtArgs>
   messages?: boolean | Prisma.Conversation$messagesArgs<ExtArgs>
@@ -1096,6 +1134,7 @@ export type $ConversationPayload<ExtArgs extends runtime.Types.Extensions.Intern
     directKey: string | null
     title: string | null
     description: string | null
+    encryptedAttributes: string | null
     photoMediaId: string | null
     createdById: string
     storeId: string | null
@@ -1537,6 +1576,7 @@ export interface ConversationFieldRefs {
   readonly directKey: Prisma.FieldRef<"Conversation", 'String'>
   readonly title: Prisma.FieldRef<"Conversation", 'String'>
   readonly description: Prisma.FieldRef<"Conversation", 'String'>
+  readonly encryptedAttributes: Prisma.FieldRef<"Conversation", 'String'>
   readonly photoMediaId: Prisma.FieldRef<"Conversation", 'String'>
   readonly createdById: Prisma.FieldRef<"Conversation", 'String'>
   readonly storeId: Prisma.FieldRef<"Conversation", 'String'>
