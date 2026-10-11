@@ -28,6 +28,7 @@ import { DeviceFrame } from "@/components/ui/deviceFrame";
 import { KeyboardProvider } from "@/components/ui/keyboardController";
 import { ErrorBoundary } from "@/components/ui/errorBoundary";
 import { CelebrationHost } from "@/components/celebrations/celebrationHost";
+import { useHydrateSignedInUser } from "@/components/profile/profileQueries.hook";
 import { RootNavigator } from "@/navigation/root.navigator";
 import { localeService } from "@/services/geo/locale.service";
 import { cancelAndRemoveUpload } from "@/services/media/mediaUploadQueue.service";
@@ -35,6 +36,7 @@ import { startAutomaticUploadResume } from "@/services/core/uploadBackgroundTask
 import { startHomeScreenWidgetSync, syncHomeScreenWidgetsNow } from "@/services/widgets/widgetSync.service";
 import { forgetDecryptedAttachmentsInMemory } from "@/services/chatCrypto/encryptedAttachments.service";
 import { startDecryptedMediaHygiene, wipeDecryptedFiles } from "@/services/chatCrypto/ephemeralDecryptedFiles.service";
+import { useActingProfileStore } from "@/store/actingProfile.store";
 import { useAuthStore } from "@/store/auth.store";
 import { addOfflineMutationReplayedListener, startOfflineConnectivityMonitoring, useOfflineStore } from "@/store/offline.store";
 import { useUploadQueueStore } from "@/store/uploadQueue.store";
@@ -94,6 +96,7 @@ export default function App() {
     forgetDecryptedAttachmentsInMemory();
     wipeDecryptedFiles();
     useOfflineStore.getState().clearQueuedMutations();
+    useActingProfileStore.getState().setActingProfile(null);
   }, [authStatus, queryClient]);
 
   useEffect(() => {
@@ -125,6 +128,7 @@ export default function App() {
           <PersistQueryClientProvider client={queryClient} persistOptions={reactQueryPersistOptions}>
             <StatusBarFollowingTheme />
             <KeepRealtimeMessagingConnectedWhileSignedIn />
+            <HydrateSignedInUser />
             <RootNavigator />
             <CelebrationHost />
             <OfflineIndicator />
@@ -135,6 +139,11 @@ export default function App() {
       </SafeAreaProvider>
     </ThemeProvider>
   );
+}
+
+function HydrateSignedInUser() {
+  useHydrateSignedInUser();
+  return null;
 }
 
 function StatusBarFollowingTheme() {
