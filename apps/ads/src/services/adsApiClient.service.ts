@@ -1,5 +1,6 @@
 import type { ApiErrorBody, ApiValidationIssue } from "@/types/api.type";
 import { adaptListEnvelope } from "@/utils/listEnvelope.util";
+import { describeLimitError } from "@/utils/limitErrors.util";
 
 let currentCsrfToken: string | null = null;
 
@@ -17,8 +18,9 @@ export class AdsApiRequestError extends Error {
     public readonly code: string,
     message: string,
     public readonly issues: readonly ApiValidationIssue[] = [],
+    public readonly details?: Readonly<Record<string, unknown>>,
   ) {
-    super(message);
+    super(describeLimitError(code, details) ?? message);
     this.name = "AdsApiRequestError";
   }
 }
@@ -92,7 +94,7 @@ export async function sendRequestToAdsManagerServer<Payload>(bffPath: string, op
     const errorBody = (await response.json().catch(() => null)) as ApiErrorBody | null;
     if (response.status === 401 && sessionEndedErrorCodes.has(errorBody?.code ?? "")) redirectToLoginAfterSessionEnded();
     if (response.status === 403 && errorBody?.code === verificationRequiredErrorCode) announceVerificationRequired(errorBody.message);
-    throw new AdsApiRequestError(response.status, errorBody?.code ?? `HTTP_${response.status}`, errorBody?.message ?? "Something went wrong. Try again.", errorBody?.issues ?? []);
+    throw new AdsApiRequestError(response.status, errorBody?.code ?? `HTTP_${response.status}`, errorBody?.message ?? "Something went wrong. Try again.", errorBody?.issues ?? [], errorBody?.details);
   }
   if (response.status === 204) return undefined as Payload;
   if (options.expect === "text") return (await response.text()) as Payload;
