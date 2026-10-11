@@ -40,19 +40,24 @@ const titles: Record<string, { readonly title: string; readonly intent: ModalInt
 
 export const paymentProblemCodes = Object.keys(titles);
 
+function isBuyerFacing(error: ApiError): boolean {
+  return error.details?.["audience"] === "buyer";
+}
+
 export function describePaymentProblem(error: unknown): PaymentProblemCopy | null {
   if (!(error instanceof ApiError) || !error.code || !titles[error.code]) return null;
+  if (error.code === "SELLER_DEBT_LIMIT" && isBuyerFacing(error)) return { title: "This seller can't take new orders", intent: "warning", message: error.message };
   const { title, intent } = titles[error.code]!;
   return { title, intent, message: error.message || fallbackMessages[error.code]! };
 }
 
-function actionsFor(code: string, handlers: PaymentProblemHandlers): ModalAction[] {
+function actionsFor(code: string, handlers: PaymentProblemHandlers, buyerFacing: boolean): ModalAction[] {
   const actions: ModalAction[] = [];
   if ((code === "VERIFICATION_REQUIRED" || code === "WALLET_NOT_READY" || code === "BVN_REQUIRED") && handlers.onVerify) {
     actions.push({ label: "Verify now", style: "primary", onPress: handlers.onVerify });
   }
   if (code === "WALLET_DAILY_LIMIT" && handlers.onPayByCard) actions.push({ label: "Pay by card instead", style: "primary", onPress: handlers.onPayByCard });
-  if (code === "SELLER_DEBT_LIMIT" && handlers.onAddMoney) actions.push({ label: "Add money", style: "primary", onPress: handlers.onAddMoney });
+  if (code === "SELLER_DEBT_LIMIT" && !buyerFacing && handlers.onAddMoney) actions.push({ label: "Add money", style: "primary", onPress: handlers.onAddMoney });
   if (code === "STEP_UP_REUSED" && handlers.onConfirmAgain) actions.push({ label: "Confirm again", style: "primary", onPress: handlers.onConfirmAgain });
   actions.push({ label: actions.length > 0 ? "Not now" : "OK", style: "secondary" });
   return actions;
@@ -61,6 +66,6 @@ function actionsFor(code: string, handlers: PaymentProblemHandlers): ModalAction
 export function presentPaymentProblem(error: unknown, handlers: PaymentProblemHandlers = {}): boolean {
   const copy = describePaymentProblem(error);
   if (!copy) return false;
-  showDialog({ title: copy.title, message: copy.message, intent: copy.intent, actions: actionsFor((error as ApiError).code!, handlers) });
+  showDialog({ title: copy.title, message: copy.message, intent: copy.intent, actions: actionsFor((error as ApiError).code!, handlers, isBuyerFacing(error as ApiError)) });
   return true;
 }

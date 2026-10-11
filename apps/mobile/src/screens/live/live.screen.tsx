@@ -25,6 +25,13 @@ import { LivePinProductsSheet } from "@/components/live/livePinProductsSheet";
 import { useLiveEngagementPoints } from "@/components/live/points/liveZudoPoints.hook";
 import { LiveReactionRail } from "@/components/live/liveReactionRail";
 import { useLiveSessionWithActions } from "@/components/live/liveSession.hook";
+import { useLiveHostConnection } from "@/components/live/liveHostConnection.hook";
+import { LiveHostStatusBanner } from "@/components/live/liveHostStatusBanner";
+import { pickLiveHostNotice } from "@/services/live/liveMediaPolicy.util";
+import { useLiveMedia } from "@/components/live/media/liveMedia.hook";
+import { LiveHostControls } from "@/components/live/media/liveHostControls";
+import { LiveViewerMediaControls } from "@/components/live/media/liveKitStage";
+import { ApiError } from "@/errors/api.error";
 import { ShareLiveSheet } from "@/components/live/shareLiveSheet";
 import { doesLiveStageShowVideo, LiveVideoStage } from "@/components/live/liveVideoStage";
 import { useLiveStageWithActions } from "@/components/live/guests/liveStage.hook";
@@ -74,6 +81,33 @@ export function LiveScreen({ navigation, route }: MainScreenProps<"Live">) {
   const creatorEntry = useCreatorEntry();
   const session = live.session.data;
   const liveSafety = useLiveSafety(liveId, session?.safety, isHost, hasJoined && session?.status === "live");
+  const refetchSessionRef = useRef(live.session.refetch);
+  refetchSessionRef.current = live.session.refetch;
+  const hasLeftForSummary = useRef(false);
+  const isEndingLive = useRef(false);
+  const openLiveSummary = () => {
+    if (hasLeftForSummary.current) return;
+    hasLeftForSummary.current = true;
+    navigation.replace("LiveEnded", { liveId });
+  };
+  const hostConnection = useLiveHostConnection(liveId, isHost && session?.status === "live", openLiveSummary);
+  const media = useLiveMedia({
+    liveId,
+    hostId: session?.host.id ?? null,
+    isLive: session?.status === "live",
+    hasJoined,
+    isPublisher: isHost || liveStage.stage?.myRole === "guest",
+    onRoomClosed: () => void refetchSessionRef.current(),
+  });
+  const hostNotice = isHost
+    ? pickLiveHostNotice({
+        isHeartbeatReconnecting: hostConnection === "reconnecting",
+        mediaMode: media.mode,
+        mediaStatus: media.connection.status,
+        quality: media.connection.quality,
+        wasPausedInBackground: media.host.wasPausedInBackground,
+      })
+    : null;
   const isHostBlockedFromGoingLive = isHost && !isCreatorStatusLoading && !canGoLive;
   const viewerCanSendGifts = !isHost && (session?.giftsEnabled ?? session?.hostIsCreator ?? false);
   const [likeBurstKey, setLikeBurstKey] = useState(0);
@@ -97,22 +131,33 @@ export function LiveScreen({ navigation, route }: MainScreenProps<"Live">) {
   }, [isHostBlockedFromGoingLive, navigation, creatorEntry.route]);
 
   useEffect(() => {
-    if (session?.status === "ended") navigation.replace("LiveEnded", { liveId });
-  }, [session?.status, navigation, liveId]);
+    if (session?.status === "ended") openLiveSummary();
+  });
 
   useEffect(() => {
     if (!hasJoined || isHost) return;
-    liveService.joinLiveSession(liveId).catch(() => showToast("Couldn't join this live. Try again.", { tone: "error" }));
+    liveService.joinLiveSession(liveId).catch((error: unknown) => {
+      if (error instanceof ApiError && (error.code === "LIVE_NOT_ACTIVE" || error.code === "LIVE_NOT_FOUND")) {
+        void refetchSessionRef.current();
+        return;
+      }
+      showToast("Couldn't join this live. Try again.", { tone: "error" });
+    });
     return () => {
       liveService.leaveLiveSession(liveId).catch(() => undefined);
     };
   }, [hasJoined, isHost, liveId]);
 
-  const endLiveAsHost = () =>
+  const endLiveAsHost = () => {
+    if (isEndingLive.current) return;
+    isEndingLive.current = true;
     liveService
       .endLiveSession(liveId)
-      .then(() => navigation.replace("LiveEnded", { liveId }))
-      .catch(() => undefined);
+      .then(openLiveSummary, () => showToast("Couldn't end your live. Check your connection and try again."))
+      .finally(() => {
+        isEndingLive.current = false;
+      });
+  };
 
   const openLiveOptions = () => {
     if (isHost) {
@@ -196,14 +241,14 @@ export function LiveScreen({ navigation, route }: MainScreenProps<"Live">) {
 
   const showsTitle = isHost || live.isFollowingHost;
   const isHostCameraAllowed = !!cameraPermission?.granted;
-  const isShownOverVideo = liveStage.isMultiGuestLayout || doesLiveStageShowVideo(session, isHost, isHostCameraAllowed);
+  const isShownOverVideo = liveStage.isMultiGuestLayout || doesLiveStageShowVideo(session, isHost, isHostCameraAllowed, media);
   const liveHasProducts = session.products.length > 0;
   const liveStoreId = session.storeId ?? null;
   const hostCanPinProductsToThisLive = isHost && liveStoreId !== null;
   return (
     <View style={[styles.root, { paddingTop: insets.top }]}>
       {liveStage.isMultiGuestLayout ? null : (
-        <LiveVideoStage session={session} isHost={isHost} isHostCameraAllowed={isHostCameraAllowed} isPlaybackAllowed={isScreenFocused} />
+        <LiveVideoStage session={session} isHost={isHost} isHostCameraAllowed={isHostCameraAllowed} isPlaybackAllowed={isScreenFocused} media={media} />
       )}
       {isHost || isSponsoredLive ? null : (
         <Pressable
@@ -214,6 +259,7 @@ export function LiveScreen({ navigation, route }: MainScreenProps<"Live">) {
         />
       )}
       {isHost || isSponsoredLive ? null : <LikeBurst burstKey={likeBurstKey} />}
+      {isHost ? null : <LiveViewerMediaControls media={media} topOffset={insets.top + 64} />}
       <LiveStageLayer
         liveId={liveId}
         session={session}
@@ -221,6 +267,7 @@ export function LiveScreen({ navigation, route }: MainScreenProps<"Live">) {
         canViewerSendGifts={viewerCanSendGifts}
         isCameraPermissionGranted={isHostCameraAllowed}
         isPlaybackAllowed={isScreenFocused}
+        media={media}
       />
       {!isHost && liveSafety.isPaused ? <LiveSafetyOverlay message={liveSafety.safety?.viewerMessage} /> : null}
       <LiveHeader
@@ -237,6 +284,12 @@ export function LiveScreen({ navigation, route }: MainScreenProps<"Live">) {
         }}
         onMore={openLiveOptions}
       />
+      {isHost ? (
+        <LiveHostStatusBanner notice={hostNotice} topOffset={insets.top + 56} />
+      ) : null}
+      {isHost && media.mode === "livekit" && !liveStage.isMultiGuestLayout ? (
+        <LiveHostControls media={media.host} quality={media.connection.quality} topOffset={insets.top + 110} />
+      ) : null}
       {isHost && liveSafety.safety ? (
         <LiveSafetyHostBanner safety={liveSafety.safety} hasAppealed={hasAppealedHold} onAppeal={() => setAppealLiveId(liveId)} />
       ) : null}

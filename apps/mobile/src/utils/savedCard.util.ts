@@ -3,9 +3,9 @@ import type { SavedCardDisplay, SavedCardOffer } from "@/types/commerce.type";
 import { authenticateWithBiometrics, areBiometricsAvailable } from "./chatPasscode.util";
 import { secureStorage } from "./secureStorage.util";
 
-const DISPLAY_KEY = "zudomart.paystack.savedCard.display";
+const DISPLAY_KEY = "zudomart.savedCard.display";
 const CARD_ID_KEY = "zudomart.savedCard.id";
-const LEGACY_CODE_KEY = "zudomart.paystack.savedCard.code";
+const LEGACY_CODE_KEY = "zudomart.savedCard.legacyCode";
 
 export async function readSavedCardDisplay(): Promise<SavedCardDisplay | null> {
   try {

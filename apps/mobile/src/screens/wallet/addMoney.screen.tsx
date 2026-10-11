@@ -14,6 +14,7 @@ import { useTheme } from "@/theme";
 import { formatMoneyForDisplay } from "@/utils/formatMoney.util";
 import { OUTSIDE_NIGERIA_NOTE, paymentPartnerLine } from "@/utils/paymentCopy.util";
 import { presentPaymentProblem } from "@/utils/paymentProblem.util";
+import { describeWalletDailyLimit } from "@/utils/walletLimits.util";
 
 export const ADD_MONEY_NOTES = [
   "Transfer from any Nigerian bank app. It usually arrives in a few minutes.",
@@ -66,7 +67,7 @@ export function AddMoneyScreen({ navigation }: MainScreenProps<"AddMoney">) {
               Available {formatMoneyForDisplay({ amountMinor: data.balances.availableMinor + data.balances.depositHoldMinor, currency: "NGN" })}
               {data.balances.depositHoldMinor > 0 ? ` (${formatMoneyForDisplay({ amountMinor: data.balances.depositHoldMinor, currency: "NGN" })} on deposit hold)` : ""}
             </Text>
-            {ADD_MONEY_NOTES.map((note) => (
+            {[...ADD_MONEY_NOTES.slice(0, -1), describeWalletDailyLimit(data.limits) ?? ADD_MONEY_NOTES[ADD_MONEY_NOTES.length - 1]].map((note) => (
               <Text key={note} size={13} lineHeight={18} color={colors.textMuted}>• {note}</Text>
             ))}
             <Text size={12} lineHeight={16} color={colors.textMuted}>{paymentPartnerLine(data.wallet.provider)}</Text>

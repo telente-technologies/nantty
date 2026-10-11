@@ -11,6 +11,9 @@ describe("payment problem dialogs", () => {
     expect(describePaymentProblem(new ApiError(422, "x", "PAYMENT_AMOUNT_OUT_OF_RANGE"))?.title).toBe("Amount not allowed");
     expect(describePaymentProblem(new ApiError(403, "Verify", "VERIFICATION_REQUIRED"))?.title).toBe("Verification needed");
     expect(describePaymentProblem(new ApiError(403, "Owe", "SELLER_DEBT_LIMIT"))?.title).toBe("Selling paused");
+    const buyerSide = describePaymentProblem(new ApiError(403, "x", "SELLER_DEBT_LIMIT", undefined, { audience: "buyer" }));
+    expect(buyerSide?.title).toBe("This seller can't take new orders");
+    expect(buyerSide?.message).toMatch(/This seller can't take new orders/);
     expect(describePaymentProblem(new ApiError(401, "Used", "STEP_UP_REUSED"))?.title).toBe("Confirm it's you again");
     expect(describePaymentProblem(new ApiError(409, "Not ready", "WALLET_NOT_READY"))?.title).toBe("Wallet not ready yet");
   });
@@ -20,10 +23,11 @@ describe("payment problem dialogs", () => {
     expect(describePaymentProblem(new Error("boom"))).toBeNull();
   });
 
-  it("never names Paystack and names Flutterwave only when it is the provider", () => {
+  it("names Flutterwave when it is the provider and stays neutral otherwise", () => {
     expect(paymentPartnerLine("flutterwave")).toMatch(/Flutterwave/);
-    expect(paymentPartnerLine("paystack")).not.toMatch(/paystack/i);
-    expect(paidThroughLabel("paystack")).toBe("Card / bank transfer");
+    expect(paymentPartnerLine(null)).toBe("Pay by card or bank transfer.");
+    expect(paidThroughLabel("flutterwave")).toBe("Flutterwave");
+    expect(paidThroughLabel(undefined)).toBe("Card / bank transfer");
     expect(checkoutEscrowNote(true)).toMatch(/your own wallet/);
     expect(checkoutEscrowNote(false)).toMatch(/no escrow/);
   });

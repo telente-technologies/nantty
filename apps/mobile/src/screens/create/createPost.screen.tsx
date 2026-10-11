@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { StyleSheet, View } from "react-native";
 
 import { CreateHeader } from "@/components/create/createHeader";
@@ -21,6 +21,9 @@ import { VideoReplyStage } from "@/components/clips/videoReply/videoReplyStage";
 import { DEFAULT_STICKER_LAYOUT } from "@/components/clips/videoReply/videoReply.util";
 import { LiveBadge } from "@/components/live/liveBadge";
 import { useLiveHostStore } from "@/components/live/liveHostStore.hook";
+import { LiveHostingGate } from "@/components/live/liveHostingGate";
+import { canPreviewLiveHostingWithMocks, decideLiveHostingGate, detectLiveHostingSupport, type LiveHostingGateKind } from "@/services/live/liveHostingSupport.service";
+import { ensureLiveCameraAndMicrophone, promptToEnableLiveMediaInSettings } from "@/services/live/liveMediaPermissions.service";
 import { Screen } from "@/components/ui/screen";
 import { RoleGateScreen } from "@/components/roleGate/roleGateScreen";
 import { useCreateMenuAccess } from "@/hooks/useCreateMenuAccess.hook";
@@ -35,7 +38,7 @@ import { useActingProfileStore } from "@/store/actingProfile.store";
 import { useComposerDraftsStore, type ComposerDraft } from "@/store/composerDrafts.store";
 import { useToastStore } from "@/store/toast.store";
 import type { CommentStickerLayout, CreateMode, ID, LiveCategory, LiveSource } from "@/types";
-import { readLiveErrorMessage } from "@/utils/liveStoreErrors.util";
+import { readLiveErrorMessage, readRunningLiveId } from "@/utils/liveStoreErrors.util";
 import { shiftMentionsAfterTrimmingStart } from "@/utils/mentions.util";
 
 const EMPTY_POST_DRAFT: PostComposerDraft = { text: "", mentions: [], audience: "everyone", kind: "photo", ...DEFAULT_POST_SETTINGS };
@@ -209,8 +212,36 @@ export function CreatePostScreen({ navigation, route }: MainScreenProps<"CreateP
       }
       navigation.replace("Live", { liveId: session.id, host: true });
     },
-    onError: (error) => showToast(readLiveErrorMessage(error, error instanceof Error && error.message ? error.message : "We couldn't start your live. Try again.")),
+    onError: (error) => {
+      const runningLiveId = readRunningLiveId(error);
+      if (runningLiveId) {
+        navigation.replace("Live", { liveId: runningLiveId, host: true });
+        return;
+      }
+      showToast(readLiveErrorMessage(error, error instanceof Error && error.message ? error.message : "We couldn't start your live. Try again."));
+    },
   });
+  const isStartingLive = useRef(false);
+  const [liveHostingGate, setLiveHostingGate] = useState<LiveHostingGateKind | null>(null);
+  const [hasAcceptedMockLivePreview, setHasAcceptedMockLivePreview] = useState(false);
+  const startGoingLive = async () => {
+    if (isStartingLive.current || goLive.isPending) return;
+    const gate = decideLiveHostingGate(detectLiveHostingSupport(), liveSource, hasAcceptedMockLivePreview);
+    if (gate) {
+      setLiveHostingGate(gate);
+      return;
+    }
+    isStartingLive.current = true;
+    try {
+      if (liveSource !== "external" && (await ensureLiveCameraAndMicrophone(liveSource === "camera")) === "denied") {
+        promptToEnableLiveMediaInSettings(liveSource === "camera");
+        return;
+      }
+      await goLive.mutateAsync().catch(() => undefined);
+    } finally {
+      isStartingLive.current = false;
+    }
+  };
   const openLiveRoom = (liveId: string) => navigation.replace("Live", { liveId, host: true });
 
   const switchCreateMode = (next: CreateMode) => {
@@ -334,12 +365,23 @@ export function CreatePostScreen({ navigation, route }: MainScreenProps<"CreateP
             credentials={liveCredentials}
             onOpenLiveRoom={openLiveRoom}
             starting={goLive.isPending || hostStore.isLoading}
-            onGoLive={() => goLive.mutate()}
+            onGoLive={() => void startGoingLive()}
             monetization={liveMonetization}
             onChangeMonetization={setLiveMonetization}
           />
         )}
       </View>
+      {mode === "live" && liveHostingGate ? (
+        <LiveHostingGate
+          support={liveHostingGate}
+          canPreviewWithMocks={canPreviewLiveHostingWithMocks()}
+          onPreviewWithMocks={() => {
+            setHasAcceptedMockLivePreview(true);
+            setLiveHostingGate(null);
+          }}
+          onClose={() => setLiveHostingGate(null)}
+        />
+      ) : null}
       <DraftsSheet onResume={resumeDraft} />
       <KeyboardSpacer />
     </Screen>

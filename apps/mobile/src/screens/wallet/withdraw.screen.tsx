@@ -21,8 +21,7 @@ import { spacing } from "@/constants/spacing.constant";
 import { typeScale } from "@/constants/typography.constant";
 import { StepUpCancelledError, useStepUpPrompt } from "@/components/wallet/stepUpSheet";
 import { presentPaymentProblem } from "@/utils/paymentProblem.util";
-
-const convertMajorUnitTextToMinorUnits = (value: string) => Math.round(Number.parseFloat(value || "0") * 100);
+import { parseMajorAmountToMinorUnits } from "@/utils/amountInput.util";
 
 export function WithdrawScreen({ navigation }: MainScreenProps<"Withdraw">) {
   const { colors } = useTheme();
@@ -39,7 +38,7 @@ export function WithdrawScreen({ navigation }: MainScreenProps<"Withdraw">) {
   const idempotencyKey = useRef(generateIdempotencyKey());
 
   const payoutAccountId = selectedAccountId ?? payoutAccounts[0]?.id ?? null;
-  const amountMinor = convertMajorUnitTextToMinorUnits(amountText);
+  const amountMinor = parseMajorAmountToMinorUnits(amountText) ?? 0;
   const available = wallet?.available;
   const feeMinor = fees && available && fees.fee.currency === available.currency ? fees.fee.amountMinor : 0;
   const exceedsBalance = !!available && amountMinor + feeMinor > available.amountMinor;

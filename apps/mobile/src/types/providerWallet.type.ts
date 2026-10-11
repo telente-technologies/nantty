@@ -1,6 +1,8 @@
+import type { WalletDailyLimits } from "@/utils/walletLimits.util";
+
 import type { Money } from "./money.type";
 
-export type PaymentsProvider = "paystack" | "flutterwave";
+export type PaymentsProvider = "flutterwave";
 
 export interface WalletFundingNumber {
   readonly accountNumber: string;
@@ -33,6 +35,7 @@ export interface ProviderWalletBalances {
 export interface MyProviderWallet {
   readonly wallet: ProviderWallet;
   readonly balances: ProviderWalletBalances;
+  readonly limits?: WalletDailyLimits;
 }
 
 export interface PaymentVerificationLevel {
