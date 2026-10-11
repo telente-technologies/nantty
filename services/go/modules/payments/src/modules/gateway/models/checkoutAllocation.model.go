@@ -3,6 +3,8 @@ package models
 import (
 	"encoding/json"
 	"errors"
+	"math/big"
+	"sort"
 )
 
 const CheckoutGroupsMetadataKey = "checkoutGroups"
@@ -39,23 +41,30 @@ func EstimatePaystackLocalFee(amountMinor int64) int64 {
 
 func AllocateProRata(totalMinor int64, weights []int64) []int64 {
 	parts := make([]int64, len(weights))
-	var sum int64
+	sum := new(big.Int)
 	for _, weight := range weights {
-		sum += max(weight, 0)
+		sum.Add(sum, big.NewInt(max(weight, 0)))
 	}
-	if sum == 0 || totalMinor <= 0 {
+	if sum.Sign() == 0 || totalMinor <= 0 {
 		return parts
 	}
-	var allocated int64
+	remainders := make([]*big.Int, len(weights))
+	allocated := int64(0)
 	for index, weight := range weights {
-		parts[index] = totalMinor * max(weight, 0) / sum
+		quotient, remainder := new(big.Int).QuoRem(new(big.Int).Mul(big.NewInt(totalMinor), big.NewInt(max(weight, 0))), sum, new(big.Int))
+		parts[index], remainders[index] = quotient.Int64(), remainder
 		allocated += parts[index]
 	}
-	for index := 0; allocated < totalMinor; index = (index + 1) % len(parts) {
-		if weights[index] > 0 {
-			parts[index]++
-			allocated++
+	order := make([]int, 0, len(weights))
+	for index, weight := range weights {
+		if weight > 0 {
+			order = append(order, index)
 		}
+	}
+	sort.SliceStable(order, func(left, right int) bool { return remainders[order[left]].Cmp(remainders[order[right]]) > 0 })
+	for position := 0; allocated < totalMinor; position = (position + 1) % len(order) {
+		parts[order[position]]++
+		allocated++
 	}
 	return parts
 }

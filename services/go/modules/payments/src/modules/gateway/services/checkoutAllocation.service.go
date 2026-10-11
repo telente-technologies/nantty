@@ -22,7 +22,9 @@ func (gateway *PaymentGateway) AllocateCheckoutPayables(ctx context.Context, exe
 			return nil, 0, "", fmt.Errorf("checkout %s mixes currencies", payable.CheckoutId)
 		}
 		group := models.CheckoutGroupAllocation{OrderId: payable.OrderId, PaymentMode: payable.PaymentMode, SellerUserId: payable.SellerUserId, AmountMinor: payable.AmountMinor}
-		if group.IsDirect() {
+		if group.IsDirect() && gateway.Container.UsesProviderWallets() {
+			group.Subaccount = "main"
+		} else if group.IsDirect() {
 			account, err := gateway.FindConnectedAccountForUser(ctx, executor, payable.SellerUserId)
 			if errors.Is(err, ErrConnectedAccountMissing) || (err == nil && !ConnectedAccountCanAcceptPayments(account)) {
 				return nil, 0, "", ErrSellerNotReadyForPayments

@@ -57,3 +57,17 @@ func TestProRataAllocationGivesRemaindersToTheFirstGroups(t *testing.T) {
 		t.Fatalf("parts %v", parts)
 	}
 }
+
+func TestProRataAllocationGivesTheRemainderToTheLargestFractionsAndNeverOverflows(t *testing.T) {
+	if parts := AllocateProRata(10, []int64{1, 1, 8}); parts[0] != 1 || parts[1] != 1 || parts[2] != 8 {
+		t.Fatalf("exact split: %v", parts)
+	}
+	if parts := AllocateProRata(100, []int64{10, 10, 79}); parts[0]+parts[1]+parts[2] != 100 || parts[2] != 80 {
+		t.Fatalf("the leftover unit goes to the largest fraction, not index 0: %v", parts)
+	}
+	huge := int64(1) << 62
+	parts := AllocateProRata(huge, []int64{huge, huge, huge})
+	if parts[0]+parts[1]+parts[2] != huge || parts[0] < 0 || parts[2] < 0 {
+		t.Fatalf("large totals and weights must not overflow: %v", parts)
+	}
+}

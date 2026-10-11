@@ -44,7 +44,11 @@ func (directory *BankDirectory) ListBanksForCountry(ctx context.Context, country
 	if found && directory.Now().Sub(cached.fetchedAt) < bankListCacheLifetime {
 		return cached.banks
 	}
-	banks, err := directory.Provider.ListBanks(ctx, countryCode)
+	identity, supported := directory.Provider.(interfaces.IdentityVerifier)
+	if !supported {
+		return withCountryCode(fallbackBanksByCountry[countryCode], countryCode)
+	}
+	banks, err := identity.ListBanks(ctx, countryCode)
 	if err != nil || len(banks) == 0 {
 		return withCountryCode(fallbackBanksByCountry[countryCode], countryCode)
 	}
@@ -52,6 +56,14 @@ func (directory *BankDirectory) ListBanksForCountry(ctx context.Context, country
 	directory.cache[countryCode] = cachedBankList{banks: banks, fetchedAt: directory.Now()}
 	directory.mutex.Unlock()
 	return banks
+}
+
+func (directory *BankDirectory) ResolveAccountName(ctx context.Context, bankCode, accountNumber string) (string, error) {
+	identity, supported := directory.Provider.(interfaces.IdentityVerifier)
+	if !supported {
+		return "", interfaces.ErrCapabilityNotSupported
+	}
+	return identity.ResolveBankAccountName(ctx, bankCode, accountNumber)
 }
 
 func withCountryCode(banks []interfaces.Bank, countryCode string) []interfaces.Bank {

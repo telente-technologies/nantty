@@ -37,6 +37,9 @@ func (gateway *PaymentGateway) RegisterCheckoutPayables(ctx context.Context, pay
 			return fmt.Errorf("every order in a checkout must share checkout, buyer and currency and have a positive amount")
 		}
 	}
+	if err := gateway.applyCheckoutRules(ctx, payables); err != nil {
+		return err
+	}
 	err := gateway.registerCheckoutPayablesOnce(ctx, payables)
 	if ent.IsConstraintError(err) {
 		err = gateway.registerCheckoutPayablesOnce(ctx, payables)
@@ -101,4 +104,23 @@ func (gateway *PaymentGateway) FindPayablesForCheckout(ctx context.Context, exec
 		converted[index] = ConvertOrderPayable(sibling)
 	}
 	return converted, nil
+}
+
+func (gateway *PaymentGateway) applyCheckoutRules(ctx context.Context, payables []models.OrderPayable) error {
+	checked := map[string]bool{}
+	for index, payable := range payables {
+		if err := gateway.RequireOrderAmountWithinLimit(ctx, payable.Currency, payable.AmountMinor); err != nil {
+			return err
+		}
+		if !checked[payable.SellerUserId] {
+			if err := gateway.RequireSellerMaySell(ctx, payable.SellerUserId); err != nil {
+				return err
+			}
+			checked[payable.SellerUserId] = true
+		}
+		if gateway.Container.UsesProviderWallets() && payable.Currency != walletCurrency {
+			payables[index].PaymentMode = "direct"
+		}
+	}
+	return nil
 }

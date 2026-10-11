@@ -1,6 +1,8 @@
 package controllers
 
 import (
+	"context"
+	"database/sql"
 	"net/http"
 	"strings"
 
@@ -87,8 +89,19 @@ func (controller ConnectedAccountsController) StartWebSubscriptionCheckout(write
 		controller.fail(writer, request, httpserver.NewApiError(http.StatusUnprocessableEntity, "RETURN_URL_NOT_ALLOWED", "This return address is not allowed."))
 		return
 	}
+	idempotencyKey, err := ledgerutils.ReadRequiredIdempotencyKey(request)
+	if err != nil {
+		controller.fail(writer, request, err)
+		return
+	}
 	platform := strings.ToLower(strings.TrimSpace(request.Header.Get("X-Client-Platform")))
-	checkout, err := controller.Application.Gateway.StartWebSubscriptionCheckout(request.Context(), principal.UserId, body.PlanCode, body.ReturnTo, platform)
+	container := controller.Application.Container
+	checkout, _, err := ledgerutils.RunIdempotentMoneyCommand(request.Context(), container.Resources.Database, container.Idempotency, ledgerutils.IdempotentCommand[services.WebSubscriptionCheckout]{
+		Scope: principal.UserId + ":subscription.checkout", Key: idempotencyKey, RequestHash: ledgerutils.HashRequestFingerprint(body.PlanCode, body.ReturnTo, platform),
+		Execute: func(ctx context.Context, _ *sql.Tx) (services.WebSubscriptionCheckout, error) {
+			return controller.Application.Gateway.StartWebSubscriptionCheckout(ctx, principal.UserId, body.PlanCode, body.ReturnTo, platform)
+		},
+	})
 	if err != nil {
 		controller.fail(writer, request, err)
 		return

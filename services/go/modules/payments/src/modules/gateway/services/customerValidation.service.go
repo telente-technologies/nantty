@@ -36,12 +36,8 @@ func (gateway *PaymentGateway) StartBankAccountValidation(ctx context.Context, u
 	if gateway.customerValidationMode() == models.CustomerValidationOff {
 		return "not_required", nil
 	}
-	provider, err := gateway.Container.DefaultProvider()
+	verifier, err := gateway.Container.DefaultIdentity()
 	if err != nil {
-		return "", err
-	}
-	verifier, supported := provider.(interfaces.PayoutIdentityVerifier)
-	if !supported {
 		return "", ErrBankValidationNotSupported
 	}
 	database := gateway.Container.Resources.Database

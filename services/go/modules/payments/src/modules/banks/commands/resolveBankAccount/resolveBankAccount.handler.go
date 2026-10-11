@@ -26,7 +26,7 @@ func (handler Handler) Execute(ctx context.Context, command Command) (string, er
 	if _, known := bankservices.IsBankKnownInCountry(banks, command.BankCode); !known {
 		return "", ErrUnknownBank
 	}
-	accountName, err := handler.Application.Banks.Provider.ResolveBankAccountName(ctx, command.BankCode, command.AccountNumber)
+	accountName, err := handler.Application.Banks.ResolveAccountName(ctx, command.BankCode, command.AccountNumber)
 	switch {
 	case errors.Is(err, interfaces.ErrBankAccountNotFound):
 		return "", ErrBankAccountNotFound

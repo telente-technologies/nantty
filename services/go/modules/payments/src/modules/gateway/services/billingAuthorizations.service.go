@@ -67,14 +67,17 @@ func (gateway *PaymentGateway) StoreBillingAuthorizationInTransaction(ctx contex
 	client := gateway.Container.Client(transaction)
 	existing, err := client.BillingAuthorization.Query().Where(billingauthorization.UserID(userId), billingauthorization.CardFingerprintHash(fingerprint)).ForUpdate().Only(ctx)
 	if err == nil {
-		return existing.ID.String(), existing.Update().SetSealedAuthorization(sealed).SetProviderCustomerID(customerId).ClearRevokedAt().
+		if existing.TokenEmail != "" && card.TokenEmail != "" && existing.TokenEmail != card.TokenEmail {
+			return existing.ID.String(), nil
+		}
+		return existing.ID.String(), existing.Update().SetSealedAuthorization(sealed).SetProviderCustomerID(customerId).ClearRevokedAt().SetTokenEmail(card.TokenEmail).
 			SetCardExpiryMonth(card.ExpiryMonth).SetCardExpiryYear(card.ExpiryYear).Exec(ctx)
 	}
 	if !ent.IsNotFound(err) {
 		return "", err
 	}
 	created, err := client.BillingAuthorization.Create().SetID(uuid.Must(uuid.NewV7())).SetUserID(userId).SetProvider(provider).SetProviderCustomerID(customerId).
-		SetSealedAuthorization(sealed).SetCardFingerprintHash(fingerprint).SetCardBrand(truncate(card.Brand, 30)).SetCardLast4(truncate(card.Last4, 4)).
+		SetSealedAuthorization(sealed).SetTokenEmail(card.TokenEmail).SetCardFingerprintHash(fingerprint).SetCardBrand(truncate(card.Brand, 30)).SetCardLast4(truncate(card.Last4, 4)).
 		SetCardExpiryMonth(card.ExpiryMonth).SetCardExpiryYear(card.ExpiryYear).SetCreatedAt(gateway.Container.Now()).Save(ctx)
 	if err != nil {
 		return "", err
@@ -115,7 +118,7 @@ func (gateway *PaymentGateway) ChargeBillingAuthorization(ctx context.Context, r
 	if err != nil {
 		return result, err
 	}
-	provider, err := gateway.Container.Provider(authorization.Provider)
+	provider, err := gateway.Container.SavedCards(authorization.Provider)
 	if err != nil {
 		return result, err
 	}
@@ -134,7 +137,7 @@ func (gateway *PaymentGateway) ChargeBillingAuthorization(ctx context.Context, r
 		return result, err
 	}
 	charged, err := provider.ChargeAuthorization(ctx, interfaces.AuthorizationChargeRequest{
-		CustomerEmail: contact.Email, AuthorizationCode: code, Reference: request.Reference, AmountMinor: request.AmountMinor, Currency: request.Currency, Metadata: request.Metadata,
+		CustomerEmail: pinnedTokenEmail(authorization, contact.Email), AuthorizationCode: code, Reference: request.Reference, AmountMinor: request.AmountMinor, Currency: request.Currency, Metadata: request.Metadata,
 	})
 	_ = client.BillingAuthorization.UpdateOneID(authorization.ID).SetLastUsedAt(gateway.Container.Now()).Exec(ctx)
 	if errors.Is(err, interfaces.ErrSavedCardNotForCustomer) {
@@ -189,4 +192,11 @@ func (gateway *PaymentGateway) openBillingAuthorization(ctx context.Context, use
 		return nil, "", ErrBillingAuthorizationMissing
 	}
 	return row, string(code), nil
+}
+
+func pinnedTokenEmail(authorization *ent.BillingAuthorization, accountEmail string) string {
+	if authorization.TokenEmail != "" {
+		return authorization.TokenEmail
+	}
+	return accountEmail
 }

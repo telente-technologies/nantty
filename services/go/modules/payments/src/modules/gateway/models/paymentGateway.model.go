@@ -44,6 +44,8 @@ type SettledPayment struct {
 	GroupAllocations       []SettledGroupAllocation
 	Authorization          *CardAuthorizationHandoff
 	BillingAuthorizationId string
+	PaidFromWallet         bool
+	WalletHoldMinor        int64
 }
 
 type CardAuthorizationHandoff struct {
@@ -54,6 +56,7 @@ type CardAuthorizationHandoff struct {
 	ExpiryMonth       int
 	ExpiryYear        int
 	Reusable          bool
+	TokenEmail        string
 }
 
 type PaymentPurposeHandler interface {
