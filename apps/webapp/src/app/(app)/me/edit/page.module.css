@@ -1,0 +1,100 @@
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  max-width: 560px;
+  margin-inline: auto;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.back {
+  display: grid;
+  place-items: center;
+  width: var(--control-md);
+  height: var(--control-md);
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--ink-strong);
+}
+
+.title {
+  font-size: var(--text-lg);
+}
+
+.banner {
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  aspect-ratio: 3 / 1;
+  border: 0;
+  border-radius: var(--radius-large);
+  background: var(--surface-sunken);
+}
+
+.bannerImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.cameraBadge {
+  position: absolute;
+  right: var(--space-2);
+  bottom: var(--space-2);
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--color-overlay);
+  color: var(--color-on-inverse);
+}
+
+.identity {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.avatarButton {
+  position: relative;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+}
+
+.avatarButton .cameraBadge {
+  right: -4px;
+  bottom: -4px;
+  width: 28px;
+  height: 28px;
+}
+
+.name {
+  margin: 0;
+  font-weight: 700;
+}
+
+.handle,
+.counts {
+  margin: 0;
+  color: var(--ink-muted);
+  font-size: var(--text-sm);
+}
+
+.counts strong {
+  color: var(--ink-strong);
+}
+
+.error {
+  margin: 0;
+  color: var(--color-danger-text);
+  font-size: var(--text-sm);
+}
