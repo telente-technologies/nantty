@@ -62,6 +62,8 @@ export const adminPermissionGroups = [
       { key: "payouts:approve", label: "Approve or hold withdrawals" },
       { key: "coins:review", label: "Review coin purchases and transfers" },
       { key: "ledger:read", label: "Explore the ledger" },
+      { key: "payments:webhooks", label: "Inspect and replay failed payment webhooks" },
+      { key: "payments:wallets", label: "Reject deposits, unfreeze wallets and run wallet reconciliation" },
     ],
   },
   {

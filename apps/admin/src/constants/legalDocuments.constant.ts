@@ -9,6 +9,8 @@ export const legalDocumentDefinitions: readonly { readonly key: LegalDocumentKey
   { key: "creator-terms", title: "Creator Program Terms", publicPath: "/creator-terms" },
   { key: "ads-policy", title: "Ads Policy", publicPath: "/ads-policy" },
   { key: "refund-escrow-policy", title: "Refund and Escrow Policy", publicPath: "/refund-escrow-policy" },
+  { key: "copyright-policy", title: "Copyright and IP Policy", publicPath: "/copyright-policy" },
+  { key: "data-rights", title: "Data Rights Requests", publicPath: "/data-rights" },
 ];
 
 export const documentsThatAlwaysNotifyUsers: readonly LegalDocumentKey[] = ["terms", "privacy"];
