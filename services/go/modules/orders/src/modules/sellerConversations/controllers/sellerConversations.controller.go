@@ -14,6 +14,7 @@ import (
 	"zudomart/modules/orders/src/integrations"
 	"zudomart/modules/orders/src/middlewares"
 	"zudomart/modules/orders/src/utils"
+	"zudomart/platform/httpserver"
 )
 
 type SellerConversationsController struct {
@@ -22,7 +23,27 @@ type SellerConversationsController struct {
 }
 
 type replyRequest struct {
-	Body string `json:"body"`
+	Body            *string         `json:"body"`
+	Text            *string         `json:"text"`
+	Location        json.RawMessage `json:"location"`
+	Poll            json.RawMessage `json:"poll"`
+	Document        json.RawMessage `json:"document"`
+	SharedContent   json.RawMessage `json:"sharedContent"`
+	Kind            string          `json:"kind"`
+	Encryption      json.RawMessage `json:"encryption"`
+	MediaId         string          `json:"mediaId"`
+	DurationSeconds *float64        `json:"durationSeconds"`
+	LinkPreview     *string         `json:"linkPreview"`
+}
+
+var errPlaintextNotAccepted = httpserver.NewApiError(http.StatusUnprocessableEntity, "PLAINTEXT_NOT_ACCEPTED", "Store chats are end-to-end encrypted. Update the seller dashboard to reply: messages must be encrypted on your device.")
+
+func hasRaw(value json.RawMessage) bool {
+	return len(value) > 0 && string(value) != "null"
+}
+
+func (candidate replyRequest) carriesPlaintext() bool {
+	return (candidate.Body != nil && *candidate.Body != "") || (candidate.Text != nil && *candidate.Text != "") || hasRaw(candidate.Location) || hasRaw(candidate.Poll) || hasRaw(candidate.Document) || hasRaw(candidate.SharedContent)
 }
 
 func (controller SellerConversationsController) relay(writer http.ResponseWriter, request *http.Request, method, suffix string, body []byte) {
@@ -61,7 +82,23 @@ func (controller SellerConversationsController) List(writer http.ResponseWriter,
 }
 
 func (controller SellerConversationsController) Get(writer http.ResponseWriter, request *http.Request) {
-	if suffix, ok := controller.conversationSuffix(writer, request, ""); ok {
+	values := url.Values{}
+	for _, name := range []string{"cursor", "after", "limit"} {
+		if value := request.URL.Query().Get(name); value != "" {
+			values.Set(name, value)
+		}
+	}
+	tail := ""
+	if len(values) > 0 {
+		tail = "?" + values.Encode()
+	}
+	if suffix, ok := controller.conversationSuffix(writer, request, tail); ok {
+		controller.relay(writer, request, http.MethodGet, suffix, nil)
+	}
+}
+
+func (controller SellerConversationsController) Recipients(writer http.ResponseWriter, request *http.Request) {
+	if suffix, ok := controller.conversationSuffix(writer, request, "/recipients"); ok {
 		controller.relay(writer, request, http.MethodGet, suffix, nil)
 	}
 }
@@ -78,8 +115,13 @@ func (controller SellerConversationsController) Reply(writer http.ResponseWriter
 		return
 	}
 	body, err := utils.DecodeAndValidate[replyRequest](writer, request, func(candidate replyRequest) error {
+		if candidate.carriesPlaintext() {
+			return errPlaintextNotAccepted
+		}
 		var issues utils.Issues
-		issues.CheckLength("body", candidate.Body, 1, 2000)
+		if !hasRaw(candidate.Encryption) {
+			issues.Add("encryption", "is required")
+		}
 		return issues.AsError()
 	})
 	if err != nil {
@@ -92,7 +134,23 @@ func (controller SellerConversationsController) Reply(writer http.ResponseWriter
 	if profiles, lookupError := controller.Container.Users.PersonalProfilesByAccount(request.Context(), []uuid.UUID{actorId}); lookupError == nil && profiles[actorId].Name != "" {
 		name = profiles[actorId].Name + " (" + store.StoreName + ")"
 	}
-	forwarded, _ := json.Marshal(map[string]string{"body": body.Body, "senderAccountId": actorId.String(), "senderName": truncate(name, 80)})
+	message := map[string]any{"encryption": body.Encryption, "senderAccountId": actorId.String(), "senderName": truncate(name, 80)}
+	if key := request.Header.Get("Idempotency-Key"); key != "" {
+		message["clientMessageId"] = truncate(key, 100)
+	}
+	if body.Kind != "" {
+		message["kind"] = body.Kind
+	}
+	if body.MediaId != "" {
+		message["mediaId"] = body.MediaId
+	}
+	if body.DurationSeconds != nil {
+		message["durationSeconds"] = *body.DurationSeconds
+	}
+	if body.LinkPreview != nil {
+		message["linkPreview"] = *body.LinkPreview
+	}
+	forwarded, _ := json.Marshal(message)
 	controller.relay(writer, request, http.MethodPost, suffix, forwarded)
 }
 

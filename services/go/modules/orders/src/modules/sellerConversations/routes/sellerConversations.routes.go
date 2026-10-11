@@ -15,6 +15,7 @@ func MountSellerConversationsRoutes(mux *http.ServeMux, deployed *container.Cont
 	mux.Handle("GET /api/v1/seller/conversations", inbox(controller.List))
 	mux.Handle("GET /api/v1/seller/conversations/{conversationId}", inbox(controller.Get))
 	mux.Handle("POST /api/v1/seller/conversations/{conversationId}/messages", middlewares.StoreMemberWithOptionalKey(deployed, "messages:manage")(controller.Reply))
+	mux.Handle("GET /api/v1/seller/conversations/{conversationId}/recipients", inbox(controller.Recipients))
 	mux.Handle("POST /api/v1/seller/conversations/{conversationId}/read", inbox(controller.Read))
 	mux.Handle("POST /api/v1/seller/orders/{orderId}/conversation", middlewares.StoreMember(deployed, "orders:manage", false)(controller.OpenForOrder))
 }

@@ -22,7 +22,7 @@ func asInsufficientStock(err error, target *commerceports.InsufficientStockError
 }
 
 func AbortCheckout(ctx context.Context, deployed *container.Container, checkoutId uuid.UUID, finalStatus, reason string) error {
-	released := []string{}
+	released := []uuid.UUID{}
 	err := deployed.RunInTransaction(ctx, func(tx *ent.Tx) error {
 		row, err := tx.Checkout.Query().Where(checkout.ID(checkoutId)).ForUpdate().Only(ctx)
 		if err != nil {
@@ -41,7 +41,7 @@ func AbortCheckout(ctx context.Context, deployed *container.Container, checkoutI
 				return err
 			}
 			if group.StockReserved {
-				released = append(released, group.ID.String())
+				released = append(released, group.ID)
 			}
 		}
 		if err := row.Update().SetStatus(finalStatus).Exec(ctx); err != nil {
@@ -52,14 +52,8 @@ func AbortCheckout(ctx context.Context, deployed *container.Container, checkoutI
 	if err != nil {
 		return err
 	}
-	stock, stockError := deployed.Stock()
-	if stockError != nil {
-		return nil
-	}
-	for _, reference := range released {
-		if err := stock.Release(context.WithoutCancel(ctx), reference); err != nil {
-			return err
-		}
+	for _, groupId := range released {
+		releaseReservedStockOrLeaveForSweep(ctx, deployed, groupId)
 	}
 	return nil
 }
@@ -70,6 +64,10 @@ func cancelPendingGroup(ctx context.Context, tx *ent.Tx, group *ent.OrderGroup, 
 	}}, now); err != nil {
 		return err
 	}
+	return restoreStoreCreditOfCancelledGroup(ctx, tx, group, now)
+}
+
+func restoreStoreCreditOfCancelledGroup(ctx context.Context, tx *ent.Tx, group *ent.OrderGroup, now time.Time) error {
 	if group.StoreCreditMinor == 0 {
 		return nil
 	}

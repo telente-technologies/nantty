@@ -19,6 +19,7 @@ import (
 	"zudomart/modules/orders/src/generated/ent/ordergroup"
 	"zudomart/modules/orders/src/generated/ent/predicate"
 	"zudomart/modules/orders/src/generated/ent/promotion"
+	"zudomart/modules/orders/src/generated/ent/promotionredemption"
 	"zudomart/platform/httpserver"
 	"zudomart/platform/usersdirectory"
 )
@@ -98,7 +99,7 @@ func persistOrderGroup(ctx context.Context, deployed *container.Container, tx *e
 	if err != nil {
 		return nil, err
 	}
-	if err := redeemPromotion(ctx, tx, group, planned); err != nil {
+	if err := RedeemPromotionInTransaction(ctx, tx, group, planned); err != nil {
 		return nil, err
 	}
 	if err := redeemCampaigns(ctx, tx, group, planned.Campaigns); err != nil {
@@ -174,7 +175,7 @@ func nonEmpty(values ...string) []string {
 	return kept
 }
 
-func redeemPromotion(ctx context.Context, tx *ent.Tx, group *ent.OrderGroup, planned PlannedGroup) error {
+func RedeemPromotionInTransaction(ctx context.Context, tx *ent.Tx, group *ent.OrderGroup, planned PlannedGroup) error {
 	if planned.Promotion == nil {
 		return nil
 	}
@@ -188,6 +189,15 @@ func redeemPromotion(ctx context.Context, tx *ent.Tx, group *ent.OrderGroup, pla
 	}
 	if updated == 0 {
 		return couponNotApplicable
+	}
+	if limit := planned.Promotion.UsageLimitPerCustomer; limit != nil {
+		used, err := tx.PromotionRedemption.Query().Where(promotionredemption.PromotionID(planned.Promotion.Id), promotionredemption.BuyerAccountID(group.BuyerAccountID)).Count(ctx)
+		if err != nil {
+			return err
+		}
+		if used >= *limit {
+			return couponNotApplicable
+		}
 	}
 	return tx.PromotionRedemption.Create().SetPromotionID(planned.Promotion.Id).SetOrderGroupID(group.ID).SetBuyerAccountID(group.BuyerAccountID).SetDiscountMinor(planned.DiscountMinor).Exec(ctx)
 }

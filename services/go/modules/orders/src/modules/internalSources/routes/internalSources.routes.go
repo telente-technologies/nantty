@@ -11,6 +11,8 @@ import (
 func MountInternalSourcesRoutes(mux *http.ServeMux, deployed *container.Container) {
 	controller := controllers.InternalSourcesController{Container: deployed}
 	mux.Handle("GET /api/v1/internal/audience-sources/stores/{storeId}/purchasers", middlewares.RequireInternalToken(deployed)(controller.ListStorePurchasers))
+	mux.Handle("GET /api/v1/internal/stores/{storeId}/inbox-team", middlewares.RequireInternalToken(deployed)(controller.ListInboxTeam))
+	mux.Handle("GET /api/v1/internal/share-cards/order/{orderId}", middlewares.RequireInternalToken(deployed)(controller.GetOrderShareCard))
 	mux.Handle("GET /internal/v1/buyers/{userId}/stores", middlewares.RequireInternalToken(deployed)(controller.ListBuyerStores))
 	mux.Handle("GET /api/v1/internal/buyers/{userId}/stores", middlewares.RequireInternalToken(deployed)(controller.ListBuyerStores))
 }

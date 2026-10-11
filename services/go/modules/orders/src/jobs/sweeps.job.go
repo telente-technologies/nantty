@@ -42,6 +42,9 @@ func RunSweepsUntilContextDone(ctx context.Context, deployed *container.Containe
 			if _, err := ExpireOpenCheckouts(ctx, deployed, 50); err != nil && ctx.Err() == nil {
 				deployed.Logger.WarnContext(ctx, "checkout expiry sweep failed", slog.Any("error", err))
 			}
+			if _, err := services.ReleaseStockOfClosedOrders(ctx, deployed, 50); err != nil && ctx.Err() == nil {
+				deployed.Logger.WarnContext(ctx, "stock release sweep failed", slog.Any("error", err))
+			}
 		case <-rollupTicker.C:
 			refreshSuccessRates(ctx, deployed)
 		case <-creditTicker.C:

@@ -1,7 +1,10 @@
 package services
 
 import (
+	"zudomart/platform/regionpricing"
+
 	"context"
+	"slices"
 
 	"github.com/google/uuid"
 
@@ -60,6 +63,10 @@ func BuildCheckoutPlan(ctx context.Context, deployed *container.Container, buyer
 	if !found {
 		return plan, ordererrors.AddressNotFound
 	}
+	buyerCountry := BuyerCountry(ctx, deployed, buyerId, &address)
+	if buyerCountry == "" {
+		return plan, regionpricing.ErrCountryRequired
+	}
 	plan.AddressRow, plan.Address = address, AddressSnapshotOf(address)
 	contents, err := LoadCartContents(ctx, deployed.Client, buyerId)
 	if err != nil {
@@ -68,7 +75,7 @@ func BuildCheckoutPlan(ctx context.Context, deployed *container.Container, buyer
 	if len(contents.Items) == 0 {
 		return plan, ordererrors.CartEmpty
 	}
-	lines, unavailable, err := PriceCartItems(ctx, deployed, contents.Items, address.CountryCode)
+	lines, unavailable, err := PriceCartItems(ctx, deployed, contents.Items, buyerCountry)
 	if err != nil {
 		return plan, err
 	}
@@ -130,7 +137,18 @@ func planGroups(ctx context.Context, deployed *container.Container, buyerId uuid
 	if len(plan.Groups) == 0 {
 		return *plan, ordererrors.NothingDeliverable
 	}
+	if !CheckoutCurrencySupported(deployed.Settings.CheckoutCurrencies, string(plan.Currency)) {
+		return *plan, ordererrors.CheckoutCurrencyNotSupported
+	}
 	return *plan, nil
+}
+
+func CheckoutCurrencySupported(allowed []string, currency string) bool {
+	parsed, err := money.ParseCurrencyCode(currency)
+	if err != nil || string(parsed) != currency {
+		return false
+	}
+	return len(allowed) == 0 || slices.Contains(allowed, currency)
 }
 
 func choosePromotion(ctx context.Context, deployed *container.Container, buyerId uuid.UUID, group SellerGroup, code string) (*PromotionRule, int64, error) {

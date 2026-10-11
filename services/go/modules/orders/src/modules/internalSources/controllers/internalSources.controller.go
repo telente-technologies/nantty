@@ -1,11 +1,15 @@
 package controllers
 
 import (
+	"context"
 	"net/http"
 	"strconv"
 	"time"
 
+	"github.com/google/uuid"
+
 	"zudomart/modules/orders/src/container"
+	getordersharecard "zudomart/modules/orders/src/modules/internalSources/queries/getOrderShareCard"
 	listbuyerstores "zudomart/modules/orders/src/modules/internalSources/queries/listBuyerStores"
 	liststorepurchasers "zudomart/modules/orders/src/modules/internalSources/queries/listStorePurchasers"
 	"zudomart/modules/orders/src/utils"
@@ -71,4 +75,54 @@ func (controller InternalSourcesController) ListBuyerStores(writer http.Response
 		return
 	}
 	httpserver.WriteJsonResponse(writer, http.StatusOK, page)
+}
+
+func (controller InternalSourcesController) ListInboxTeam(writer http.ResponseWriter, request *http.Request) {
+	responder := utils.Responder{Logger: controller.Container.Logger}
+	storeId, err := utils.PathIdentifier(request, "storeId")
+	if err != nil {
+		responder.Error(writer, request, err)
+		return
+	}
+	catalog, err := controller.Container.Catalog()
+	if err != nil {
+		responder.Error(writer, request, err)
+		return
+	}
+	accountIds, err := catalog.ListStoreTeamWithPermission(request.Context(), storeId, "messages:manage")
+	if err != nil {
+		responder.Error(writer, request, err)
+		return
+	}
+	httpserver.WriteJsonResponse(writer, http.StatusOK, map[string]any{"accountIds": accountIds})
+}
+
+func (controller InternalSourcesController) GetOrderShareCard(writer http.ResponseWriter, request *http.Request) {
+	responder := utils.Responder{Logger: controller.Container.Logger}
+	orderId, err := utils.PathIdentifier(request, "orderId")
+	if err != nil {
+		responder.Error(writer, request, err)
+		return
+	}
+	viewerId, err := uuid.Parse(request.URL.Query().Get("viewerId"))
+	if err != nil {
+		var collected utils.Issues
+		collected.Add("viewerId", "must be an account id")
+		responder.Error(writer, request, collected.AsError())
+		return
+	}
+	team := func(ctx context.Context, storeId uuid.UUID) ([]uuid.UUID, error) {
+		catalog, err := controller.Container.Catalog()
+		if err != nil {
+			return nil, err
+		}
+		return catalog.ListStoreTeamWithPermission(ctx, storeId, "orders:view")
+	}
+	card, err := (getordersharecard.Handler{Container: controller.Container, Team: team}).Execute(request.Context(), getordersharecard.Query{OrderId: orderId, ViewerId: viewerId})
+	if err != nil {
+		responder.Error(writer, request, err)
+		return
+	}
+	writer.Header().Set("Cache-Control", "no-store")
+	httpserver.WriteJsonResponse(writer, http.StatusOK, getordersharecard.Present(card))
 }
