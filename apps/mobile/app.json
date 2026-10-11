@@ -9,7 +9,12 @@
     "ios": {
       "supportsTablet": false,
       "bundleIdentifier": "com.zudomart.app",
-      "usesAppleSignIn": true
+      "usesAppleSignIn": true,
+      "entitlements": {
+        "com.apple.security.application-groups": [
+          "group.com.zudomart.app"
+        ]
+      }
     },
     "android": {
       "package": "com.zudomart.app",
@@ -83,7 +88,77 @@
         }
       ],
       "expo-dev-client",
-      "expo-iap"
+      "expo-iap",
+      [
+        "expo-notifications",
+        {
+          "enableBackgroundRemoteNotifications": true,
+          "color": "#3A2BFF"
+        }
+      ],
+      "@bacons/apple-targets",
+      [
+        "react-native-android-widget",
+        {
+          "widgets": [
+            {
+              "name": "ZudomartOrders",
+              "label": "Orders",
+              "description": "Track your active orders and delivery times.",
+              "minWidth": "110dp",
+              "minHeight": "110dp",
+              "targetCellWidth": 2,
+              "targetCellHeight": 2,
+              "resizeMode": "horizontal|vertical",
+              "updatePeriodMillis": 1800000
+            },
+            {
+              "name": "ZudomartSellerToday",
+              "label": "Sales today",
+              "description": "Today's sales, orders to ship and your balance.",
+              "minWidth": "110dp",
+              "minHeight": "110dp",
+              "targetCellWidth": 2,
+              "targetCellHeight": 2,
+              "resizeMode": "horizontal|vertical",
+              "updatePeriodMillis": 1800000
+            },
+            {
+              "name": "ZudomartLiveNow",
+              "label": "Live now",
+              "description": "Creators you follow who are live right now.",
+              "minWidth": "110dp",
+              "minHeight": "110dp",
+              "targetCellWidth": 2,
+              "targetCellHeight": 2,
+              "resizeMode": "horizontal|vertical",
+              "updatePeriodMillis": 1800000
+            },
+            {
+              "name": "ZudomartCreatorToday",
+              "label": "Creator stats",
+              "description": "Today's views, new followers and earnings.",
+              "minWidth": "110dp",
+              "minHeight": "110dp",
+              "targetCellWidth": 2,
+              "targetCellHeight": 2,
+              "resizeMode": "horizontal|vertical",
+              "updatePeriodMillis": 1800000
+            },
+            {
+              "name": "ZudomartStories",
+              "label": "Stories",
+              "description": "New stories from people you follow.",
+              "minWidth": "110dp",
+              "minHeight": "110dp",
+              "targetCellWidth": 4,
+              "targetCellHeight": 2,
+              "resizeMode": "horizontal|vertical",
+              "updatePeriodMillis": 1800000
+            }
+          ]
+        }
+      ]
     ],
     "owner": "oyinlola141"
   }

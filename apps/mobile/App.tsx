@@ -31,6 +31,9 @@ import { RootNavigator } from "@/navigation/root.navigator";
 import { localeService } from "@/services/geo/locale.service";
 import { cancelAndRemoveUpload } from "@/services/media/mediaUploadQueue.service";
 import { startAutomaticUploadResume } from "@/services/core/uploadBackgroundTask.service";
+import { startHomeScreenWidgetSync, syncHomeScreenWidgetsNow } from "@/services/widgets/widgetSync.service";
+import { forgetDecryptedAttachmentsInMemory } from "@/services/chatCrypto/encryptedAttachments.service";
+import { startDecryptedMediaHygiene, wipeDecryptedFiles } from "@/services/chatCrypto/ephemeralDecryptedFiles.service";
 import { useAuthStore } from "@/store/auth.store";
 import { addOfflineMutationReplayedListener, startOfflineConnectivityMonitoring, useOfflineStore } from "@/store/offline.store";
 import { useUploadQueueStore } from "@/store/uploadQueue.store";
@@ -57,6 +60,7 @@ export default function App() {
   const ready = (fontsLoaded || !!fontError) && authStatus !== "loading";
 
   useEffect(() => {
+    startDecryptedMediaHygiene();
     useAuthStore.getState().restoreSavedSession().catch(() => useAuthStore.setState({ status: "signedOut" }));
   }, []);
 
@@ -74,7 +78,10 @@ export default function App() {
   }, [queryClient]);
 
   useEffect(() => {
-    if (authStatus === "signedIn") startAutomaticUploadResume();
+    if (authStatus !== "signedIn") return;
+    startAutomaticUploadResume();
+    startHomeScreenWidgetSync();
+    syncHomeScreenWidgetsNow({ force: true }).catch(() => undefined);
   }, [authStatus]);
 
   useEffect(() => {
@@ -83,6 +90,8 @@ export default function App() {
     queryClient.clear();
     Promise.resolve(reactQueryAsyncStoragePersister.removeClient()).catch(() => undefined);
     deleteAllLocallySavedMessageHistory();
+    forgetDecryptedAttachmentsInMemory();
+    wipeDecryptedFiles();
     useOfflineStore.getState().clearQueuedMutations();
   }, [authStatus, queryClient]);
 
