@@ -10,7 +10,7 @@ import (
 	ledgermodels "zudomart/modules/ledger/src/modules/journal/models"
 )
 
-func TestCommerceRefundRequestRefundsTheOrderGroupOnceThroughPaystack(t *testing.T) {
+func TestCommerceRefundRequestRefundsTheOrderGroupOnceThroughTheProvider(t *testing.T) {
 	harness := startEscrowHarness(t)
 	buyer, orderId := uuid.NewString(), uuid.NewString()
 	harness.registerCheckout(buyer, map[string]int64{orderId: 300_000})
@@ -26,17 +26,17 @@ func TestCommerceRefundRequestRefundsTheOrderGroupOnceThroughPaystack(t *testing
 	}
 	first := harness.Call(http.MethodPost, "/api/v1/internal/order-groups/"+orderId+"/refunds", "", "", request, internal)
 	again := harness.Call(http.MethodPost, "/api/v1/internal/order-groups/"+orderId+"/refunds", "", "", request, internal)
-	if calls := harness.Paystack.Calls("POST /refund"); calls != 0 {
+	if calls := harness.Flutterwave.Calls("POST /transactions"); calls != 0 {
 		t.Fatalf("an escrow refund must not be sent before the outbox delivers it, sent %d", calls)
 	}
 	harness.relayQueuedRefunds()
 	harness.relayQueuedRefunds()
-	if first.Status != http.StatusOK || first.Body["status"] != "refunded" || again.Headers.Get("Idempotent-Replayed") != "true" || harness.Paystack.Calls("POST /refund") != 1 {
-		t.Fatalf("refund: %d %s / %v refunds %d", first.Status, first.Raw, again.Headers, harness.Paystack.Calls("POST /refund"))
+	if first.Status != http.StatusOK || first.Body["status"] != "refunded" || again.Headers.Get("Idempotent-Replayed") != "true" || harness.Flutterwave.Calls("POST /transactions") != 1 {
+		t.Fatalf("refund: %d %s / %v refunds %d", first.Status, first.Raw, again.Headers, harness.Flutterwave.Calls("POST /transactions"))
 	}
 	harness.deliverRefundProcessed(reference)
-	if harness.balance(ledgermodels.RefundsPayableAccount("paystack", "NGN")) != 0 || harness.balance(ledgermodels.RefundedProcessingFeesExpenseAccount("NGN")) != 4_500 {
-		t.Fatal("the refund must be paid from the main balance with the Paystack fee absorbed")
+	if harness.balance(ledgermodels.RefundsPayableAccount("flutterwave", "NGN")) != 0 || harness.balance(ledgermodels.PaymentProcessingFeeExpenseAccount("NGN")) != 4_200 {
+		t.Fatalf("the refund must be paid from the main balance with the provider fee absorbed: %v", harness.NonZeroBalances())
 	}
 	harness.AssertLedgerHealthy()
 }

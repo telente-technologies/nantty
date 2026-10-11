@@ -32,6 +32,9 @@ func StoreNewPasswordAndRevokeSessionsInTransaction(ctx context.Context, applica
 	if err != nil {
 		return err
 	}
+	if err := EnqueueSessionsEndedInTransaction(ctx, tx, existing.ID, "*", revoked, now); err != nil {
+		return err
+	}
 	return events.EnqueueOutboxEventInTransaction(ctx, tx, "account.passwordChanged", existing.ID.String(), now, events.PasswordChangedEventData{
 		AccountId: existing.ID.String(), SessionsRevoked: revoked, Method: method,
 	})

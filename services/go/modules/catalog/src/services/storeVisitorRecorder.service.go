@@ -13,25 +13,13 @@ import (
 
 var storeVisitEvents = map[string]bool{"product.viewed": true, "product.clicked": true, "seller.viewed": true, "product.addedToCart": true}
 
-func visitedStoreOf(ctx context.Context, tx *ent.Tx, data map[string]any) (uuid.UUID, bool) {
-	if raw, found := data["storeId"].(string); found {
-		if storeId, err := uuid.Parse(raw); err == nil {
-			return storeId, true
-		}
-	}
-	raw, found := data["productId"].(string)
+func visitedStoreOf(_ context.Context, _ *ent.Tx, data map[string]any) (uuid.UUID, bool) {
+	raw, found := data["storeId"].(string)
 	if !found {
 		return uuid.Nil, false
 	}
-	productId, err := uuid.Parse(raw)
-	if err != nil {
-		return uuid.Nil, false
-	}
-	parent, err := tx.Product.Get(ctx, productId)
-	if err != nil {
-		return uuid.Nil, false
-	}
-	return parent.StoreID, true
+	storeId, err := uuid.Parse(raw)
+	return storeId, err == nil
 }
 
 func RecordStoreVisitWhenPersonalized(ctx context.Context, tx *ent.Tx, event string, data map[string]any, occurredAt time.Time) error {

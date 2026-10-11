@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"strings"
 	"testing"
+	ledgermodels "zudomart/modules/ledger/src/modules/journal/models"
 
 	"github.com/google/uuid"
 )
@@ -24,7 +25,7 @@ func TestSecondDistinctPartialRefundIsRejectedAndMovesNoMoney(t *testing.T) {
 	harness := startEscrowHarness(t)
 	buyer, orderId := uuid.NewString(), uuid.NewString()
 	harness.registerCheckout(buyer, map[string]int64{orderId: 300_000})
-	reference := harness.payCheckoutThroughWebhook(buyer, orderId, 0)
+	reference := harness.payAndSettle(buyer, orderId)
 	internal := http.Header{"X-Internal-Token": {strings.Repeat("e", 32)}}
 	call := func(amount int64, reason string) int {
 		request := map[string]any{"orderGroupId": orderId, "storeId": "store-1", "buyerAccountId": buyer, "amountMinor": amount, "currency": "NGN", "reason": reason}
@@ -41,8 +42,8 @@ func TestSecondDistinctPartialRefundIsRejectedAndMovesNoMoney(t *testing.T) {
 	if status := call(100_000, "replay of the first amount"); status != http.StatusOK {
 		t.Fatalf("a replay of the same partial amount stays idempotent: %d", status)
 	}
-	if count, total := refundRowsForOrder(t, harness, reference); count != 1 || total != 100_000 {
-		t.Fatalf("money must move once: %d refunds totalling %d", count, total)
+	if count, _ := refundRowsForOrder(t, harness, reference); count != 0 || harness.balance(ledgermodels.WalletAvailableAccount(buyer, "NGN")) != 100_000 {
+		t.Fatalf("money must move once, inside the buyer's wallet: %d card refunds, balances %v", count, harness.NonZeroBalances())
 	}
 	harness.AssertLedgerHealthy()
 }

@@ -68,7 +68,7 @@ func TestDeliveredEventSetsTheReleaseTimerOnceEvenAcrossReplaysAndDisputes(t *te
 	}
 	var scheduled int
 	schema := harness.escrow.Application.Container.Settings.Money.DatabaseSchema
-	_ = harness.Database.QueryRow(`SELECT count(*) FROM "`+schema+`".outbox_events WHERE event_type = 'escrow.releaseScheduled'`).Scan(&scheduled)
+	_ = harness.Database.QueryRow(`SELECT count(*) FROM "` + schema + `".outbox_events WHERE event_type = 'escrow.releaseScheduled'`).Scan(&scheduled)
 	if scheduled != 1 {
 		t.Fatalf("the release schedule is announced once: %d", scheduled)
 	}

@@ -139,7 +139,7 @@ func drain(harness *creatorsHarness, creator string, amount int64) {
 	err := databases.RunInMoneyTransaction(context.Background(), harness.database, func(ctx context.Context, transaction *sql.Tx) error {
 		_, err := harness.ledger.PostBalancedJournalEntry(ctx, transaction, ledgermodels.JournalEntryRequest{Reference: "withdraw-" + creator, Kind: "test.withdraw", Lines: []ledgermodels.JournalLineRequest{
 			{Account: ledgermodels.CreatorEarningsPayableAccount(creator, "NGN"), Direction: ledgermodels.Debit, AmountMinor: amount},
-			{Account: ledgermodels.PlatformProviderBalanceAccount("paystack", "NGN"), Direction: ledgermodels.Credit, AmountMinor: amount},
+			{Account: ledgermodels.PlatformProviderBalanceAccount("flutterwave", "NGN"), Direction: ledgermodels.Credit, AmountMinor: amount},
 		}})
 		return err
 	})

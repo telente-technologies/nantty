@@ -26,7 +26,7 @@ func TestSellerSilentFor48HoursEscalatesTheDisputeOnceAndNotifiesBothSides(t *te
 	harness := startEscrowHarness(t)
 	silent, _ := openTestDispute(t, harness, "silent-dispute-1")
 	answered, answeredOrder := openTestDispute(t, harness, "answered-dispute-1")
-	seller := harness.Tokens.UserAccessToken("seller-" + answeredOrder[:4])
+	seller := harness.Tokens.UserAccessToken(sellerForOrder(answeredOrder))
 	if reply := harness.Call(http.MethodPost, "/api/v1/disputes/"+answered+"/messages", seller, "seller-answer-1", map[string]any{"text": "Tracking attached", "attachmentUrls": []string{}}); reply.Status != http.StatusCreated {
 		t.Fatalf("seller reply: %d %s", reply.Status, reply.Raw)
 	}
@@ -48,7 +48,7 @@ func TestSellerSilentFor48HoursEscalatesTheDisputeOnceAndNotifiesBothSides(t *te
 	}
 	var events int
 	schema := harness.escrow.Application.Container.Settings.Money.DatabaseSchema
-	_ = harness.Database.QueryRow(`SELECT count(*) FROM "`+schema+`".outbox_events WHERE event_type = 'dispute.sellerResponseOverdue'`).Scan(&events)
+	_ = harness.Database.QueryRow(`SELECT count(*) FROM "` + schema + `".outbox_events WHERE event_type = 'dispute.sellerResponseOverdue'`).Scan(&events)
 	if events != 1 {
 		t.Fatalf("one outbox event notifies buyer and seller, got %d", events)
 	}

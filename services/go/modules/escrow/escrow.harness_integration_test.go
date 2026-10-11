@@ -26,7 +26,7 @@ type escrowHarness struct {
 	onboarded map[string]string
 }
 
-func processingFeeFor(amountMinor int64) int64 { return amountMinor * 150 / 10_000 }
+func processingFeeFor(amountMinor int64) int64 { return amountMinor * 140 / 10_000 }
 
 func (harness *escrowHarness) ensureSellerOnboarded(orderId string) string {
 	harness.T.Helper()
@@ -66,13 +66,13 @@ func (harness *escrowHarness) relayQueuedRefunds() {
 func (harness *escrowHarness) deliverRefundProcessed(paymentReference string) {
 	harness.T.Helper()
 	harness.relayQueuedRefunds()
-	for _, refund := range harness.Paystack.Refunds {
-		if refund["transaction_reference"] == paymentReference {
-			harness.DeliverPaystackEvent("refund.processed", map[string]any{"id": refund["id"], "status": "processed", "transaction_reference": paymentReference, "amount": refund["amount"], "currency": "NGN"})
-			return
-		}
+	body, headers, found := harness.Flutterwave.RefundWebhookForCharge(paymentReference, "completed")
+	if !found {
+		harness.T.Fatalf("no refund for %s", paymentReference)
 	}
-	harness.T.Fatalf("no refund for %s", paymentReference)
+	if response := harness.DeliverWebhook(body, headers); response.Status != http.StatusOK {
+		harness.T.Fatalf("refund webhook: %d %s", response.Status, response.Raw)
+	}
 }
 
 func (harness *escrowHarness) paymentReferenceForOrder(orderId string) string {
@@ -97,7 +97,7 @@ func startEscrowHarness(t *testing.T) *escrowHarness {
 		t.Fatal(err)
 	}
 	money.MountModule(module)
-	money.Paystack.FundPlatformBalance("NGN", 10_000_000)
+	money.Flutterwave.FundMainBalance("NGN", 10_000_000)
 	harness := &escrowHarness{MoneyHarness: money, escrow: module, clock: time.Now(), onboarded: map[string]string{}}
 	module.Application.Container.Now = func() time.Time { return harness.clock }
 	module.Application.Container.Sellers.Now = func() time.Time { return harness.clock }
@@ -116,7 +116,7 @@ func (harness *escrowHarness) registerCheckoutWithMode(buyer string, orders map[
 	for orderId, amount := range orders {
 		payables = append(payables, paymentmodels.OrderPayable{
 			CheckoutId: checkoutId, OrderId: orderId, OrderReference: "ZM-" + orderId[:5], BuyerUserId: buyer, StoreId: "store-" + orderId[:4],
-			SellerUserId: "seller-" + orderId[:4], AmountMinor: amount, Currency: "NGN", ProductSummary: "Ankara dress", PaymentMode: mode, StoreVerified: storeVerified,
+			SellerUserId: sellerForOrder(orderId), AmountMinor: amount, Currency: "NGN", ProductSummary: "Ankara dress", PaymentMode: mode, StoreVerified: storeVerified,
 		})
 	}
 	if storeVerified {
@@ -140,7 +140,15 @@ func (harness *escrowHarness) payCheckoutThroughWebhook(buyer, orderId string, p
 	}
 	reference := initialized.Body["reference"].(string)
 	amount := int64(initialized.Body["payment"].(map[string]any)["amount"].(map[string]any)["amountMinor"].(float64))
+	harness.SetCountry(buyer, "NG")
 	harness.CompleteCheckoutThroughWebhook(reference, providerAmount, processingFeeFor(amount))
+	return reference
+}
+
+func (harness *escrowHarness) payAndSettle(buyer, orderId string) string {
+	harness.T.Helper()
+	reference := harness.payCheckoutThroughWebhook(buyer, orderId, 0)
+	harness.SettleCardPayments("NGN")
 	return reference
 }
 
@@ -184,4 +192,8 @@ func escrowIdForOrder(t *testing.T, harness *escrowHarness, orderId string) stri
 		t.Fatalf("escrow lookup: %d %s", view.Status, view.Raw)
 	}
 	return identifier
+}
+
+func sellerForOrder(orderId string) string {
+	return uuid.NewSHA1(uuid.NameSpaceOID, []byte("seller:"+orderId)).String()
 }

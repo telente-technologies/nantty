@@ -20,7 +20,6 @@ import (
 	commonv1 "zudomart/contracts/gen/go/zudomart/common/v1"
 	moneyv1 "zudomart/contracts/gen/go/zudomart/money/v1"
 	"zudomart/modules/ledger/src/loaders"
-	ledgermodels "zudomart/modules/ledger/src/modules/journal/models"
 )
 
 func startCheckoutMoneyClient(t *testing.T, harness *escrowHarness) moneyv1.CheckoutMoneyServiceClient {
@@ -42,7 +41,7 @@ func TestCommerceRegistersPayablesRecordsDeliveryAndConfirmsReceiptOverGrpc(t *t
 	client := startCheckoutMoneyClient(t, harness)
 	ctx := metadata.AppendToOutgoingContext(context.Background(), "authorization", "Bearer checkout-internal-token-0123456789abcd")
 	buyer, orderId, checkoutId := uuid.NewString(), uuid.NewString(), uuid.NewString()
-	order := &moneyv1.OrderPayable{OrderId: orderId, OrderReference: "ZM-77", StoreId: "store-1", SellerUserId: "seller-1", Amount: &commonv1.Money{AmountMinor: 400_000, Currency: "NGN"}, PaymentMode: moneyv1.OrderPaymentMode_ORDER_PAYMENT_MODE_DIRECT}
+	order := &moneyv1.OrderPayable{OrderId: orderId, OrderReference: "ZM-77", StoreId: "store-1", SellerUserId: sellerForOrder("grpc-order"), Amount: &commonv1.Money{AmountMinor: 400_000, Currency: "NGN"}, PaymentMode: moneyv1.OrderPaymentMode_ORDER_PAYMENT_MODE_DIRECT}
 	_, err := client.RegisterCheckoutPayables(ctx, &moneyv1.RegisterCheckoutPayablesRequest{CheckoutId: checkoutId, BuyerUserId: buyer, Orders: []*moneyv1.OrderPayable{order}})
 	if reason := errorInfoReason(err); status.Code(err) != codes.FailedPrecondition || reason != "DIRECT_PAYMENT_NOT_ALLOWED" {
 		t.Fatalf("direct payment for an unverified store: %v %s", err, reason)
@@ -54,7 +53,7 @@ func TestCommerceRegistersPayablesRecordsDeliveryAndConfirmsReceiptOverGrpc(t *t
 	if registered, err := client.RegisterCheckoutPayables(ctx, &moneyv1.RegisterCheckoutPayablesRequest{CheckoutId: checkoutId, BuyerUserId: buyer, Orders: []*moneyv1.OrderPayable{order}}); err != nil || registered.RegisteredOrderCount != 1 {
 		t.Fatalf("register: %v %v", registered, err)
 	}
-	harness.payCheckoutThroughWebhook(buyer, orderId, 0)
+	harness.payAndSettle(buyer, orderId)
 	delivered, err := client.RecordOrderFulfilment(ctx, &moneyv1.RecordOrderFulfilmentRequest{OrderId: orderId, Stage: moneyv1.FulfilmentStage_FULFILMENT_STAGE_DELIVERED, OccurredAt: timestamppb.New(harness.clock)})
 	if err != nil || delivered.Escrow.AutoReleaseAt == nil || !delivered.Escrow.AutoReleaseAt.AsTime().Equal(harness.clock.Add(72*time.Hour).UTC().Truncate(time.Microsecond)) {
 		t.Fatalf("delivered: %+v %v", delivered, err)
@@ -63,11 +62,12 @@ func TestCommerceRegistersPayablesRecordsDeliveryAndConfirmsReceiptOverGrpc(t *t
 		t.Fatalf("another buyer confirmed receipt: %v", err)
 	}
 	released, err := client.ConfirmOrderReceipt(ctx, &moneyv1.ConfirmOrderReceiptRequest{OrderId: orderId, BuyerUserId: buyer})
-	if err != nil || released.Escrow.Status != "released" || released.Escrow.SellerAmount.AmountMinor != 388_000 {
+	if err != nil || released.Escrow.Status != "released" || released.Escrow.SellerAmount.AmountMinor != 388_400 {
 		t.Fatalf("confirm receipt: %+v %v", released, err)
 	}
-	if harness.balance(ledgermodels.SellerPendingAccount("seller-1", "NGN")) != 388_000 {
-		t.Fatal("confirmed receipt did not lock the seller's share")
+	harness.RunMoneyWorkers()
+	if got := harness.Flutterwave.WalletBalance(harness.WalletRef(sellerForOrder("grpc-order")), "NGN"); got != 388_400 {
+		t.Fatalf("confirmed receipt must move the seller's share to the seller's wallet: %d", got)
 	}
 	if view := harness.Call(http.MethodGet, "/api/v1/orders/"+orderId+"/escrow", harness.Tokens.UserAccessToken(buyer), "", nil); view.Body["stage"] != "released_to_seller" {
 		t.Fatalf("stage after receipt = %v", view.Body["stage"])

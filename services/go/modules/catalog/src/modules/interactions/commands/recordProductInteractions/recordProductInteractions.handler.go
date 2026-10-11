@@ -20,6 +20,7 @@ func (handler Handler) Execute(ctx context.Context, command Command) (dtos.Inter
 	result := dtos.InteractionBatchResult{}
 	err := handler.Container.RunInTransaction(ctx, func(tx *ent.Tx) error {
 		result = dtos.InteractionBatchResult{}
+		seen := map[string]bool{}
 		for _, record := range command.Events {
 			occurredAt := record.OccurredAt
 			if occurredAt.IsZero() || occurredAt.After(now.Add(5*time.Minute)) || occurredAt.Before(now.Add(-24*time.Hour)) {
@@ -30,6 +31,15 @@ func (handler Handler) Execute(ctx context.Context, command Command) (dtos.Inter
 				result.Dropped++
 				continue
 			}
+			if err := services.ResolveInteractionStore(ctx, tx, data); err != nil {
+				return err
+			}
+			key := services.InteractionDedupeKey(record.Event, data)
+			if seen[key] {
+				result.Dropped++
+				continue
+			}
+			seen[key] = true
 			if err := events.EnqueueOutboxEventInTransaction(ctx, tx, record.Event, subjectOf(data), occurredAt, data); err != nil {
 				return err
 			}

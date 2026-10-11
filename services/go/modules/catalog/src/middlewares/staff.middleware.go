@@ -40,6 +40,10 @@ func StaffWithAnyPermission(deployed *container.Container, permissions []string,
 				return
 			}
 			staff := staffFromPrincipal(principal)
+			if failure := staffauth.RefuseDisallowedStaffNetwork(request, staff.Id); failure != nil {
+				httpserver.WriteJsonResponse(writer, failure.Status, failure)
+				return
+			}
 			if token := strings.TrimSpace(request.Header.Get(staffauth.StepUpHeader)); verifiers.StepUp != nil && token != "" {
 				stepUp, err := verifiers.StepUp.VerifyAccessTokenAndExtractPrincipal(request.Context(), token)
 				staff.SteppedUp = err == nil && stepUp.UserId == staff.Id && stepUp.SessionId == staff.SessionId

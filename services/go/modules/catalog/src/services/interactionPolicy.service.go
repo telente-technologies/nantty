@@ -40,7 +40,9 @@ func BuildInteractionEventData(input InteractionInput, actor InteractionActor, c
 	data := map[string]any{"occurredAt": input.OccurredAt.UTC().Format(time.RFC3339Nano)}
 	for _, key := range allowedPayloadKeys {
 		if value, present := input.Payload[key]; present {
-			data[key] = value
+			if cleaned, valid := sanitizeInteractionValue(key, value); valid {
+				data[key] = cleaned
+			}
 		}
 	}
 	personalized := !personalizationEvents[input.Event] || consent.Personalization
