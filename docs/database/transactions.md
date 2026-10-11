@@ -1,8 +1,10 @@
 # Transaction boundaries
 
+> **Provider change (owner, 2026-10-10):** the payment provider is moving from Paystack to Flutterwave; provider calls below change per [`flutterwaveMigration.md`](../integrations/flutterwaveMigration.md).
+
 As of 2026-10-03. The go-money code (payments, escrow, wallet, ledger) was being edited by another agent while this audit ran (Bachs connected-account mirror: `paymentCollectionPosting.service.go`, `providerMirrorReconciliation.service.go`, `escrowChargebacks.service.go`). Statements below describe the working tree at audit time; re-verify line numbers before acting. Paths are relative to `services/go/modules/`.
 
-> **Bachs and Anchor dropped; Paystack adopted (owner, 2026-10-03).** The audit below describes the code as it was (Bachs mirror). Target model (`docs/checkoutPaymentFlowPlan.md` §4): Zudomart holds as little as possible; direct shares are split to seller subaccounts and settle T+1 from Paystack; escrow sits in Zudomart's Paystack balance (E2) until release + 24h, then a Paystack transfer pays the seller; the ledger is the source of truth for what money means. Wherever this file says Bachs, read the Paystack equivalent given in brackets.
+> **Bachs and Anchor dropped; Paystack adopted (owner, 2026-10-03).** The audit below describes the code as it was (Bachs mirror). Target model (`docs/integrations/flutterwaveMigration.md` Appendix C §4): Zudomart holds as little as possible; direct shares are split to seller subaccounts and settle T+1 from Paystack; escrow sits in Zudomart's Paystack balance (E2) until release + 24h, then a Paystack transfer pays the seller; the ledger is the source of truth for what money means. Wherever this file says Bachs, read the Paystack equivalent given in brackets.
 
 ## 1. Shared machinery (EXISTING)
 
