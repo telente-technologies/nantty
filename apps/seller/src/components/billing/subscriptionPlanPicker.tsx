@@ -59,7 +59,7 @@ export function SubscriptionPlanPicker({ currentPlanId, currentPlan, offer }: { 
   }
 
   if (plansQuery.isLoading) return <LoadingBlock label="Loading plans" />;
-  if (!plansQuery.data) return <ErrorCallout message={plansQuery.errorMessage ?? "Plans could not be loaded."} onRetry={plansQuery.reload} />;
+  if (!plansQuery.data) return <ErrorCallout variant="section" error={plansQuery.error} message={plansQuery.errorMessage ?? "Plans could not be loaded."} onRetry={plansQuery.reload} />;
   const paidPlans = plansQuery.data.data.filter((plan) => plan.interval === billingInterval);
   const hasYearlyPlans = plansQuery.data.data.some((plan) => plan.interval === "year");
 

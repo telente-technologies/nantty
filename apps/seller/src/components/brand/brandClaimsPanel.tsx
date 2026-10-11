@@ -40,7 +40,7 @@ export function BrandClaimsPanel({ canWithdraw, onChanged }: { readonly canWithd
 
   return (
     <Panel title="Your claims" padded={false}>
-      {claims.errorMessage ? <div style={{ padding: 12 }}><ErrorCallout message={claims.errorMessage} onRetry={claims.reload} /></div> : null}
+      {claims.errorMessage ? <div style={{ padding: 12 }}><ErrorCallout error={claims.error} message={claims.errorMessage} onRetry={claims.reload} /></div> : null}
       <DataTable
         caption="Brand claims"
         rows={claims.items}

@@ -62,7 +62,7 @@ export function AffiliateCreatorsView() {
           Export CSV
         </Button>
       </FilterBar>
-      {creatorsQuery.errorMessage ? <ErrorCallout message={creatorsQuery.errorMessage} onRetry={creatorsQuery.reload} /> : null}
+      {creatorsQuery.errorMessage ? <ErrorCallout error={creatorsQuery.error} message={creatorsQuery.errorMessage} onRetry={creatorsQuery.reload} /> : null}
       <Panel padded={false}>
         <DataTable
           caption="Creators in your affiliate program"

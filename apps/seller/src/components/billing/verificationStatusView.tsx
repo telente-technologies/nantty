@@ -62,7 +62,7 @@ export function VerificationStatusView() {
         </ol>
       </Panel>
       <Panel title="Documents">
-        {verificationQuery.isLoading ? <LoadingBlock /> : verificationQuery.data ? <VerificationDocumentsList details={verificationQuery.data} /> : <ErrorCallout message={verificationQuery.errorMessage} onRetry={verificationQuery.reload} />}
+        {verificationQuery.isLoading ? <LoadingBlock /> : verificationQuery.data ? <VerificationDocumentsList details={verificationQuery.data} /> : <ErrorCallout error={verificationQuery.error} message={verificationQuery.errorMessage} onRetry={verificationQuery.reload} />}
       </Panel>
     </>
   );

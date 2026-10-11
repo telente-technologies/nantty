@@ -47,7 +47,7 @@ export function AffiliateLiveInvitationsView() {
         actions={<Button variant="primary" iconName="videoCamera24" onClick={() => setIsInviteDialogOpen(true)}>Invite a creator</Button>}
         padded={false}
       >
-        {invitationsQuery.errorMessage ? <ErrorCallout message={invitationsQuery.errorMessage} onRetry={invitationsQuery.reload} /> : null}
+        {invitationsQuery.errorMessage ? <ErrorCallout error={invitationsQuery.error} message={invitationsQuery.errorMessage} onRetry={invitationsQuery.reload} /> : null}
         <DataTable
           caption="Live selling invitations"
           rows={invitationsQuery.data?.data ?? null}

@@ -55,7 +55,7 @@ function ProtectedListingsPanel() {
             <SegmentedControl label="Risk" value={riskFilter} onValueChange={setRiskFilter} options={[{ value: "all", label: "All" }, { value: "high", label: "High risk" }, { value: "medium", label: "Medium" }, { value: "low", label: "Low" }]} />
           </FilterBar>
         </div>
-        {listings.errorMessage ? <div style={{ padding: 12 }}><ErrorCallout message={listings.errorMessage} onRetry={listings.reload} /></div> : null}
+        {listings.errorMessage ? <div style={{ padding: 12 }}><ErrorCallout error={listings.error} message={listings.errorMessage} onRetry={listings.reload} /></div> : null}
         <DataTable
           caption="Listings by other sellers tagging your brand"
           rows={listings.items}

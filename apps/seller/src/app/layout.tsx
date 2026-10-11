@@ -3,7 +3,7 @@ import { Inter, JetBrains_Mono } from "next/font/google";
 import { cookies } from "next/headers";
 import type { ReactNode } from "react";
 
-import { ConfirmDialogHost, OfflineBanner, ThemeInitScript, parseThemePreference, readHtmlThemeAttribute, themeCookieName, themeViewport } from "@zudomart/web-kit";
+import { ConfirmDialogHost, ConnectionStatus, ThemeInitScript, parseThemePreference, readHtmlThemeAttribute, themeCookieName, themeViewport } from "@zudomart/web-kit";
 
 import { ConsentBannerHost } from "@/components/privacy/consentBannerHost";
 import { SellerSessionProvider } from "@/components/session/sellerSessionProvider";
@@ -11,6 +11,8 @@ import { AppThemeProvider } from "@/components/theme/appThemeProvider";
 import { ToastProvider } from "@/components/ui/toastProvider";
 import { dashboardProductName, readPublicSiteUrl } from "@/config/siteMetadata.config";
 import { buildSellerSessionViewFromCookies, readCsrfTokenForCookies } from "@/server/sellerSessionView.service";
+
+import { SellerErrorExperienceProvider } from "@/components/errors/errorExperience.provider";
 
 import "./globals.css";
 
@@ -49,10 +51,12 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
         <a href="#main-content" className="skipToContentLink">
           Skip to content
         </a>
-        <OfflineBanner />
+        <ConnectionStatus />
         <SellerSessionProvider initialSessionView={sessionView} csrfToken={csrfToken}>
           <AppThemeProvider initialPreference={themePreference}>
-            <ToastProvider>{children}</ToastProvider>
+            <ToastProvider>
+              <SellerErrorExperienceProvider>{children}</SellerErrorExperienceProvider>
+            </ToastProvider>
             <ConfirmDialogHost />
             <ConsentBannerHost isSignedIn={sessionView !== null} />
           </AppThemeProvider>

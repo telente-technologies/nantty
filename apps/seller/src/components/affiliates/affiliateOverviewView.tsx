@@ -18,7 +18,7 @@ export function AffiliateOverviewView() {
   const overview = overviewQuery.data;
 
   if (overviewQuery.isLoading && !overview) return <LoadingBlock label="Loading your affiliate program" />;
-  if (!overview) return <ErrorCallout message={overviewQuery.errorMessage ?? "Could not load the affiliate program."} onRetry={overviewQuery.reload} />;
+  if (!overview) return <ErrorCallout variant="section" error={overviewQuery.error} message={overviewQuery.errorMessage ?? "Could not load the affiliate program."} onRetry={overviewQuery.reload} />;
 
   return (
     <>

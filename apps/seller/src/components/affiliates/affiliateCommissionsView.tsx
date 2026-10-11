@@ -32,7 +32,7 @@ export function AffiliateCommissionsView() {
         actions={<SearchInput label="Search products" value={searchText} onValueChange={setSearchText} />}
         padded={false}
       >
-        {commissionsQuery.errorMessage ? <ErrorCallout message={commissionsQuery.errorMessage} onRetry={commissionsQuery.reload} /> : null}
+        {commissionsQuery.errorMessage ? <ErrorCallout error={commissionsQuery.error} message={commissionsQuery.errorMessage} onRetry={commissionsQuery.reload} /> : null}
         <DataTable
           caption="Affiliate commission per product"
           rows={commissionsQuery.data?.data ?? null}

@@ -82,7 +82,7 @@ export function BrandWorkspace({ children }: { readonly children: ReactNode }) {
   }, [brand, myStores, sessionView?.user.id, can, brandQuery]);
 
   if (brandsQuery.isLoading) return <LoadingBlock label="Loading your brands" />;
-  if (brandsQuery.errorMessage) return <ErrorCallout message={brandsQuery.errorMessage} onRetry={brandsQuery.reload} />;
+  if (brandsQuery.errorMessage) return <ErrorCallout variant="section" error={brandsQuery.error} message={brandsQuery.errorMessage} onRetry={brandsQuery.reload} />;
   if (brands.length === 0) {
     return (
       <PageStack>
@@ -118,7 +118,7 @@ export function BrandWorkspace({ children }: { readonly children: ReactNode }) {
           { href: "/brand/protection", label: "Protection" },
         ]}
       />
-      {brandQuery.errorMessage ? <ErrorCallout message={brandQuery.errorMessage} onRetry={brandQuery.reload} /> : null}
+      {brandQuery.errorMessage ? <ErrorCallout error={brandQuery.error} message={brandQuery.errorMessage} onRetry={brandQuery.reload} /> : null}
       {contextValue ? <BrandWorkspaceContext.Provider value={contextValue}>{children}</BrandWorkspaceContext.Provider> : <LoadingBlock label="Loading brand" />}
     </PageStack>
   );
