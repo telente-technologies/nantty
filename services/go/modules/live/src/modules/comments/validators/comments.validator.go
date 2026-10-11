@@ -26,8 +26,11 @@ func ValidatePostCommentRequest(body dtos.PostCommentRequest) error {
 
 func ValidateRoomSettingsRequest(body dtos.RoomSettingsRequest) error {
 	var collected utils.Issues
-	if body.CommentsEnabled == nil && body.SlowModeSeconds == nil && body.BlockedWords == nil {
-		collected.Add("commentsEnabled", "send commentsEnabled, slowModeSeconds or blockedWords")
+	if body.CommentsEnabled == nil && body.SlowModeSeconds == nil && body.BlockedWords == nil && body.CommentAudience == nil {
+		collected.Add("commentsEnabled", "send commentsEnabled, slowModeSeconds, blockedWords or commentAudience")
+	}
+	if body.CommentAudience != nil && !utils.IsCommentAudience(*body.CommentAudience) {
+		collected.Add("commentAudience", "must be everyone, followers or subscribers")
 	}
 	if body.SlowModeSeconds != nil && (*body.SlowModeSeconds < 0 || *body.SlowModeSeconds > 300) {
 		collected.Add("slowModeSeconds", "must be between 0 and 300")

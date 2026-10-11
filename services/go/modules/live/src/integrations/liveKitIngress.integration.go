@@ -70,6 +70,40 @@ func (controller *LiveKitIngressController) GetIngress(ctx context.Context, ingr
 	return interfaces.IngressCredentials{IngressId: info.IngressId, Url: info.Url, StreamKey: info.StreamKey}, nil
 }
 
+var ingressStatusNames = map[livekit.IngressState_Status]string{
+	livekit.IngressState_ENDPOINT_INACTIVE: "inactive", livekit.IngressState_ENDPOINT_BUFFERING: "buffering", livekit.IngressState_ENDPOINT_PUBLISHING: "publishing",
+	livekit.IngressState_ENDPOINT_ERROR: "error", livekit.IngressState_ENDPOINT_COMPLETE: "complete",
+}
+
+func (controller *LiveKitIngressController) DescribeIngress(ctx context.Context, ingressId string) (interfaces.IngressStatus, error) {
+	authorised, err := controller.adminContext(ctx)
+	if err != nil {
+		return interfaces.IngressStatus{}, err
+	}
+	listed, err := controller.client.ListIngress(authorised, &livekit.ListIngressRequest{IngressId: ingressId})
+	if err != nil {
+		return interfaces.IngressStatus{}, errors.New("livekit list ingress failed: " + redactedTwirpCode(err))
+	}
+	if len(listed.Items) == 0 {
+		return interfaces.IngressStatus{}, ErrIngressMissing
+	}
+	state := listed.Items[0].State
+	if state == nil {
+		return interfaces.IngressStatus{Status: "inactive"}, nil
+	}
+	status := interfaces.IngressStatus{Status: ingressStatusNames[state.Status], Error: state.Error}
+	if status.Status == "" {
+		status.Status = "unknown"
+	}
+	if video := state.Video; video != nil {
+		status.VideoBitrateKbps, status.Width, status.Height, status.Framerate = int(video.AverageBitrate/1000), int(video.Width), int(video.Height), video.Framerate
+	}
+	if audio := state.Audio; audio != nil {
+		status.AudioBitrateKbps = int(audio.AverageBitrate / 1000)
+	}
+	return status, nil
+}
+
 func (controller *LiveKitIngressController) DeleteIngress(ctx context.Context, ingressId string) error {
 	authorised, err := controller.adminContext(ctx)
 	if err != nil {

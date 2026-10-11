@@ -16,6 +16,7 @@ import (
 	"zudomart/modules/live/src/generated/ent/guestslot"
 	"zudomart/modules/live/src/generated/ent/joinrequest"
 	"zudomart/modules/live/src/generated/ent/livecomment"
+	"zudomart/modules/live/src/generated/ent/livehostdefault"
 	"zudomart/modules/live/src/generated/ent/livehostrestriction"
 	"zudomart/modules/live/src/generated/ent/liveingress"
 	"zudomart/modules/live/src/generated/ent/liveleaderboardentry"
@@ -360,6 +361,22 @@ func init() {
 	livecommentDescID := livecommentMixinFields0[0].Descriptor()
 	// livecomment.DefaultID holds the default value on creation for the id field.
 	livecomment.DefaultID = livecommentDescID.Default.(func() uuid.UUID)
+	livehostdefaultFields := schema.LiveHostDefault{}.Fields()
+	_ = livehostdefaultFields
+	// livehostdefaultDescCommentsEnabled is the schema descriptor for comments_enabled field.
+	livehostdefaultDescCommentsEnabled := livehostdefaultFields[1].Descriptor()
+	// livehostdefault.DefaultCommentsEnabled holds the default value on creation for the comments_enabled field.
+	livehostdefault.DefaultCommentsEnabled = livehostdefaultDescCommentsEnabled.Default.(bool)
+	// livehostdefaultDescSlowModeSeconds is the schema descriptor for slow_mode_seconds field.
+	livehostdefaultDescSlowModeSeconds := livehostdefaultFields[3].Descriptor()
+	// livehostdefault.DefaultSlowModeSeconds holds the default value on creation for the slow_mode_seconds field.
+	livehostdefault.DefaultSlowModeSeconds = livehostdefaultDescSlowModeSeconds.Default.(int)
+	// livehostdefaultDescUpdatedAt is the schema descriptor for updated_at field.
+	livehostdefaultDescUpdatedAt := livehostdefaultFields[6].Descriptor()
+	// livehostdefault.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	livehostdefault.DefaultUpdatedAt = livehostdefaultDescUpdatedAt.Default.(func() time.Time)
+	// livehostdefault.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	livehostdefault.UpdateDefaultUpdatedAt = livehostdefaultDescUpdatedAt.UpdateDefault.(func() time.Time)
 	livehostrestrictionFields := schema.LiveHostRestriction{}.Fields()
 	_ = livehostrestrictionFields
 	// livehostrestrictionDescCanGoLive is the schema descriptor for can_go_live field.
@@ -697,7 +714,7 @@ func init() {
 	// livesession.DefaultModerationVisibility holds the default value on creation for the moderation_visibility field.
 	livesession.DefaultModerationVisibility = livesessionDescModerationVisibility.Default.(string)
 	// livesessionDescUpdatedAt is the schema descriptor for updated_at field.
-	livesessionDescUpdatedAt := livesessionFields[26].Descriptor()
+	livesessionDescUpdatedAt := livesessionFields[28].Descriptor()
 	// livesession.DefaultUpdatedAt holds the default value on creation for the updated_at field.
 	livesession.DefaultUpdatedAt = livesessionDescUpdatedAt.Default.(func() time.Time)
 	// livesession.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.

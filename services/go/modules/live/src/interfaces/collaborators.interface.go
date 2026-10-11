@@ -61,9 +61,20 @@ type IngressCredentials struct {
 	StreamKey string
 }
 
+type IngressStatus struct {
+	Status           string
+	Error            string
+	VideoBitrateKbps int
+	AudioBitrateKbps int
+	Width            int
+	Height           int
+	Framerate        float64
+}
+
 type IngressController interface {
 	CreateIngress(ctx context.Context, request IngressRequest) (IngressCredentials, error)
 	GetIngress(ctx context.Context, ingressId string) (IngressCredentials, error)
+	DescribeIngress(ctx context.Context, ingressId string) (IngressStatus, error)
 	DeleteIngress(ctx context.Context, ingressId string) error
 }
 
@@ -74,6 +85,7 @@ type RecordingController interface {
 
 type RecordingStorage interface {
 	PresignDownload(ctx context.Context, objectKey string, timeToLive time.Duration) (string, error)
+	DeleteObject(ctx context.Context, objectKey string) error
 }
 
 type MentionPrivacy string

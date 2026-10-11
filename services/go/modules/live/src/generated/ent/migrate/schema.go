@@ -364,6 +364,22 @@ var (
 			},
 		},
 	}
+	// LiveHostDefaultsColumns holds the columns for the "live_host_defaults" table.
+	LiveHostDefaultsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "comments_enabled", Type: field.TypeBool, Default: true},
+		{Name: "comment_audience", Type: field.TypeEnum, Enums: []string{"everyone", "followers", "subscribers"}, Default: "everyone"},
+		{Name: "slow_mode_seconds", Type: field.TypeInt, Default: 0},
+		{Name: "blocked_words", Type: field.TypeJSON, Nullable: true, SchemaType: map[string]string{"postgres": "jsonb"}},
+		{Name: "moderator_ids", Type: field.TypeJSON, Nullable: true, SchemaType: map[string]string{"postgres": "jsonb"}},
+		{Name: "updated_at", Type: field.TypeTime},
+	}
+	// LiveHostDefaultsTable holds the schema information for the "live_host_defaults" table.
+	LiveHostDefaultsTable = &schema.Table{
+		Name:       "live_host_defaults",
+		Columns:    LiveHostDefaultsColumns,
+		PrimaryKey: []*schema.Column{LiveHostDefaultsColumns[0]},
+	}
 	// LiveHostRestrictionsColumns holds the columns for the "live_host_restrictions" table.
 	LiveHostRestrictionsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeString, Size: 80},
@@ -547,6 +563,7 @@ var (
 		{Name: "blocked_words", Type: field.TypeJSON, Nullable: true, SchemaType: map[string]string{"postgres": "jsonb"}},
 		{Name: "pinned_comment_id", Type: field.TypeUUID, Nullable: true},
 		{Name: "record_enabled", Type: field.TypeBool, Default: false},
+		{Name: "comment_audience", Type: field.TypeEnum, Enums: []string{"everyone", "followers", "subscribers"}, Default: "everyone"},
 	}
 	// LiveRoomSettingsTable holds the schema information for the "live_room_settings" table.
 	LiveRoomSettingsTable = &schema.Table{
@@ -624,6 +641,8 @@ var (
 		{Name: "sponsorship_line", Type: field.TypeString, Nullable: true, Size: 200},
 		{Name: "moderation_visibility", Type: field.TypeString, Default: "visible"},
 		{Name: "moderation_visibility_at", Type: field.TypeTime, Nullable: true},
+		{Name: "scheduled_at", Type: field.TypeTime, Nullable: true},
+		{Name: "reminder_sent_at", Type: field.TypeTime, Nullable: true},
 		{Name: "updated_at", Type: field.TypeTime},
 	}
 	// LiveSessionsTable holds the schema information for the "live_sessions" table.
@@ -641,6 +660,11 @@ var (
 				Name:    "livesession_host_id_state",
 				Unique:  false,
 				Columns: []*schema.Column{LiveSessionsColumns[2], LiveSessionsColumns[6]},
+			},
+			{
+				Name:    "livesession_state_scheduled_at",
+				Unique:  false,
+				Columns: []*schema.Column{LiveSessionsColumns[6], LiveSessionsColumns[28]},
 			},
 		},
 	}
@@ -825,6 +849,7 @@ var (
 		GuestSlotsTable,
 		JoinRequestsTable,
 		LiveCommentsTable,
+		LiveHostDefaultsTable,
 		LiveHostRestrictionsTable,
 		LiveIngressesTable,
 		LiveLeaderboardEntriesTable,

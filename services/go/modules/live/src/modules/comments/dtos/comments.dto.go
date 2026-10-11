@@ -12,6 +12,7 @@ type RoomSettingsRequest struct {
 	CommentsEnabled *bool     `json:"commentsEnabled"`
 	SlowModeSeconds *int      `json:"slowModeSeconds"`
 	BlockedWords    *[]string `json:"blockedWords"`
+	CommentAudience *string   `json:"commentAudience"`
 }
 
 type RestrictionRequest struct {

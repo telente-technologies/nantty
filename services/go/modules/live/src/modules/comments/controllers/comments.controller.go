@@ -124,7 +124,7 @@ func (controller CommentsController) UpdateRoomSettings(writer http.ResponseWrit
 		if err != nil {
 			return err
 		}
-		input := types.RoomSettingsInput{CommentsEnabled: body.CommentsEnabled, SlowModeSeconds: body.SlowModeSeconds, BlockedWords: body.BlockedWords}
+		input := types.RoomSettingsInput{CommentsEnabled: body.CommentsEnabled, SlowModeSeconds: body.SlowModeSeconds, BlockedWords: body.BlockedWords, CommentAudience: body.CommentAudience}
 		view, err := (updateroomsettings.Handler{Container: controller.Container}).Execute(request.Context(), updateroomsettings.Command{Actor: actor, LiveId: liveId, Input: input})
 		if err == nil {
 			httpserver.WriteJsonResponse(writer, http.StatusOK, view)

@@ -47,9 +47,10 @@ func (controller SessionsController) CreateLiveSession(writer http.ResponseWrite
 		return
 	}
 	input := types.CreateLiveSessionInput{
-		Title: body.Title, Category: body.Category, Visibility: body.Visibility, StartNow: body.StartNow == nil || *body.StartNow,
+		Title: body.Title, Category: body.Category, Visibility: body.Visibility, StartNow: startNowFor(body),
 		CountryCode: utils.ClientRegion(request), Monetization: buildMonetization(body.LiveAdSettings, body.AcceptedLiveAdTermsVersion, body.SponsorshipLine),
 	}
+	input.ScheduledAt = scheduledAtFor(body)
 	if input.Visibility == "" {
 		input.Visibility = "public"
 	}

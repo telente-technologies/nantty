@@ -11,14 +11,37 @@ import (
 )
 
 type InMemoryIngressController struct {
-	mutex   sync.Mutex
-	counter int
-	Active  map[string]interfaces.IngressCredentials
-	Deleted []string
+	mutex    sync.Mutex
+	counter  int
+	Active   map[string]interfaces.IngressCredentials
+	Statuses map[string]interfaces.IngressStatus
+	Deleted  []string
+	Failure  error
 }
 
 func NewInMemoryIngressController() *InMemoryIngressController {
-	return &InMemoryIngressController{Active: map[string]interfaces.IngressCredentials{}}
+	return &InMemoryIngressController{Active: map[string]interfaces.IngressCredentials{}, Statuses: map[string]interfaces.IngressStatus{}}
+}
+
+func (controller *InMemoryIngressController) SetStatus(ingressId string, status interfaces.IngressStatus) {
+	controller.mutex.Lock()
+	defer controller.mutex.Unlock()
+	controller.Statuses[ingressId] = status
+}
+
+func (controller *InMemoryIngressController) DescribeIngress(_ context.Context, ingressId string) (interfaces.IngressStatus, error) {
+	controller.mutex.Lock()
+	defer controller.mutex.Unlock()
+	if controller.Failure != nil {
+		return interfaces.IngressStatus{}, controller.Failure
+	}
+	if _, known := controller.Active[ingressId]; !known {
+		return interfaces.IngressStatus{}, ErrIngressMissing
+	}
+	if status, known := controller.Statuses[ingressId]; known {
+		return status, nil
+	}
+	return interfaces.IngressStatus{Status: "inactive"}, nil
 }
 
 func (controller *InMemoryIngressController) CreateIngress(_ context.Context, request interfaces.IngressRequest) (interfaces.IngressCredentials, error) {
@@ -89,6 +112,8 @@ func (InMemoryRecordingStorage) PresignDownload(_ context.Context, objectKey str
 	return "https://recordings.test/" + objectKey + "?ttl=" + timeToLive.String(), nil
 }
 
+func (InMemoryRecordingStorage) DeleteObject(context.Context, string) error { return nil }
+
 type UnconfiguredRecording struct{}
 
 var ErrRecordingUnavailable = errors.New("recording is not configured")
@@ -102,3 +127,5 @@ func (UnconfiguredRecording) StopRecording(context.Context, string) error { retu
 func (UnconfiguredRecording) PresignDownload(context.Context, string, time.Duration) (string, error) {
 	return "", ErrRecordingUnavailable
 }
+
+func (UnconfiguredRecording) DeleteObject(context.Context, string) error { return nil }

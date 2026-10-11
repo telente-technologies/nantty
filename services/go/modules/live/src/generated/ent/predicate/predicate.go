@@ -39,6 +39,9 @@ type JoinRequest func(*sql.Selector)
 // LiveComment is the predicate function for livecomment builders.
 type LiveComment func(*sql.Selector)
 
+// LiveHostDefault is the predicate function for livehostdefault builders.
+type LiveHostDefault func(*sql.Selector)
+
 // LiveHostRestriction is the predicate function for livehostrestriction builders.
 type LiveHostRestriction func(*sql.Selector)
 

@@ -11,6 +11,7 @@ import (
 
 type S3RecordingStorage struct {
 	bucket    string
+	client    *s3.Client
 	presigner *s3.PresignClient
 }
 
@@ -25,7 +26,7 @@ func NewS3RecordingStorage(ctx context.Context, bucket, region, endpoint string)
 			options.UsePathStyle = true
 		}
 	})
-	return &S3RecordingStorage{bucket: bucket, presigner: s3.NewPresignClient(client)}, nil
+	return &S3RecordingStorage{bucket: bucket, client: client, presigner: s3.NewPresignClient(client)}, nil
 }
 
 func (storage *S3RecordingStorage) PresignDownload(ctx context.Context, objectKey string, timeToLive time.Duration) (string, error) {
@@ -34,4 +35,9 @@ func (storage *S3RecordingStorage) PresignDownload(ctx context.Context, objectKe
 		return "", err
 	}
 	return request.URL, nil
+}
+
+func (storage *S3RecordingStorage) DeleteObject(ctx context.Context, objectKey string) error {
+	_, err := storage.client.DeleteObject(ctx, &s3.DeleteObjectInput{Bucket: &storage.bucket, Key: &objectKey})
+	return err
 }

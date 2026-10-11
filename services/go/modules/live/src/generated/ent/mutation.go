@@ -19,6 +19,7 @@ import (
 	"zudomart/modules/live/src/generated/ent/guestslot"
 	"zudomart/modules/live/src/generated/ent/joinrequest"
 	"zudomart/modules/live/src/generated/ent/livecomment"
+	"zudomart/modules/live/src/generated/ent/livehostdefault"
 	"zudomart/modules/live/src/generated/ent/livehostrestriction"
 	"zudomart/modules/live/src/generated/ent/liveingress"
 	"zudomart/modules/live/src/generated/ent/liveleaderboardentry"
@@ -62,6 +63,7 @@ const (
 	TypeGuestSlot            = "GuestSlot"
 	TypeJoinRequest          = "JoinRequest"
 	TypeLiveComment          = "LiveComment"
+	TypeLiveHostDefault      = "LiveHostDefault"
 	TypeLiveHostRestriction  = "LiveHostRestriction"
 	TypeLiveIngress          = "LiveIngress"
 	TypeLiveLeaderboardEntry = "LiveLeaderboardEntry"
@@ -9662,6 +9664,719 @@ func (m *LiveCommentMutation) ResetEdge(name string) error {
 	return fmt.Errorf("unknown LiveComment edge %s", name)
 }
 
+// LiveHostDefaultMutation represents an operation that mutates the LiveHostDefault nodes in the graph.
+type LiveHostDefaultMutation struct {
+	config
+	op                   Op
+	typ                  string
+	id                   *uuid.UUID
+	comments_enabled     *bool
+	comment_audience     *livehostdefault.CommentAudience
+	slow_mode_seconds    *int
+	addslow_mode_seconds *int
+	blocked_words        *[]string
+	appendblocked_words  []string
+	moderator_ids        *[]string
+	appendmoderator_ids  []string
+	updated_at           *time.Time
+	clearedFields        map[string]struct{}
+	done                 bool
+	oldValue             func(context.Context) (*LiveHostDefault, error)
+	predicates           []predicate.LiveHostDefault
+}
+
+var _ ent.Mutation = (*LiveHostDefaultMutation)(nil)
+
+// livehostdefaultOption allows management of the mutation configuration using functional options.
+type livehostdefaultOption func(*LiveHostDefaultMutation)
+
+// newLiveHostDefaultMutation creates new mutation for the LiveHostDefault entity.
+func newLiveHostDefaultMutation(c config, op Op, opts ...livehostdefaultOption) *LiveHostDefaultMutation {
+	m := &LiveHostDefaultMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeLiveHostDefault,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withLiveHostDefaultID sets the ID field of the mutation.
+func withLiveHostDefaultID(id uuid.UUID) livehostdefaultOption {
+	return func(m *LiveHostDefaultMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *LiveHostDefault
+		)
+		m.oldValue = func(ctx context.Context) (*LiveHostDefault, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().LiveHostDefault.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withLiveHostDefault sets the old LiveHostDefault of the mutation.
+func withLiveHostDefault(node *LiveHostDefault) livehostdefaultOption {
+	return func(m *LiveHostDefaultMutation) {
+		m.oldValue = func(context.Context) (*LiveHostDefault, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m LiveHostDefaultMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m LiveHostDefaultMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of LiveHostDefault entities.
+func (m *LiveHostDefaultMutation) SetID(id uuid.UUID) {
+	m.id = &id
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *LiveHostDefaultMutation) ID() (id uuid.UUID, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *LiveHostDefaultMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []uuid.UUID{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().LiveHostDefault.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetCommentsEnabled sets the "comments_enabled" field.
+func (m *LiveHostDefaultMutation) SetCommentsEnabled(b bool) {
+	m.comments_enabled = &b
+}
+
+// CommentsEnabled returns the value of the "comments_enabled" field in the mutation.
+func (m *LiveHostDefaultMutation) CommentsEnabled() (r bool, exists bool) {
+	v := m.comments_enabled
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCommentsEnabled returns the old "comments_enabled" field's value of the LiveHostDefault entity.
+// If the LiveHostDefault object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *LiveHostDefaultMutation) OldCommentsEnabled(ctx context.Context) (v bool, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCommentsEnabled is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCommentsEnabled requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCommentsEnabled: %w", err)
+	}
+	return oldValue.CommentsEnabled, nil
+}
+
+// ResetCommentsEnabled resets all changes to the "comments_enabled" field.
+func (m *LiveHostDefaultMutation) ResetCommentsEnabled() {
+	m.comments_enabled = nil
+}
+
+// SetCommentAudience sets the "comment_audience" field.
+func (m *LiveHostDefaultMutation) SetCommentAudience(la livehostdefault.CommentAudience) {
+	m.comment_audience = &la
+}
+
+// CommentAudience returns the value of the "comment_audience" field in the mutation.
+func (m *LiveHostDefaultMutation) CommentAudience() (r livehostdefault.CommentAudience, exists bool) {
+	v := m.comment_audience
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCommentAudience returns the old "comment_audience" field's value of the LiveHostDefault entity.
+// If the LiveHostDefault object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *LiveHostDefaultMutation) OldCommentAudience(ctx context.Context) (v livehostdefault.CommentAudience, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCommentAudience is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCommentAudience requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCommentAudience: %w", err)
+	}
+	return oldValue.CommentAudience, nil
+}
+
+// ResetCommentAudience resets all changes to the "comment_audience" field.
+func (m *LiveHostDefaultMutation) ResetCommentAudience() {
+	m.comment_audience = nil
+}
+
+// SetSlowModeSeconds sets the "slow_mode_seconds" field.
+func (m *LiveHostDefaultMutation) SetSlowModeSeconds(i int) {
+	m.slow_mode_seconds = &i
+	m.addslow_mode_seconds = nil
+}
+
+// SlowModeSeconds returns the value of the "slow_mode_seconds" field in the mutation.
+func (m *LiveHostDefaultMutation) SlowModeSeconds() (r int, exists bool) {
+	v := m.slow_mode_seconds
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSlowModeSeconds returns the old "slow_mode_seconds" field's value of the LiveHostDefault entity.
+// If the LiveHostDefault object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *LiveHostDefaultMutation) OldSlowModeSeconds(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSlowModeSeconds is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSlowModeSeconds requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSlowModeSeconds: %w", err)
+	}
+	return oldValue.SlowModeSeconds, nil
+}
+
+// AddSlowModeSeconds adds i to the "slow_mode_seconds" field.
+func (m *LiveHostDefaultMutation) AddSlowModeSeconds(i int) {
+	if m.addslow_mode_seconds != nil {
+		*m.addslow_mode_seconds += i
+	} else {
+		m.addslow_mode_seconds = &i
+	}
+}
+
+// AddedSlowModeSeconds returns the value that was added to the "slow_mode_seconds" field in this mutation.
+func (m *LiveHostDefaultMutation) AddedSlowModeSeconds() (r int, exists bool) {
+	v := m.addslow_mode_seconds
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetSlowModeSeconds resets all changes to the "slow_mode_seconds" field.
+func (m *LiveHostDefaultMutation) ResetSlowModeSeconds() {
+	m.slow_mode_seconds = nil
+	m.addslow_mode_seconds = nil
+}
+
+// SetBlockedWords sets the "blocked_words" field.
+func (m *LiveHostDefaultMutation) SetBlockedWords(s []string) {
+	m.blocked_words = &s
+	m.appendblocked_words = nil
+}
+
+// BlockedWords returns the value of the "blocked_words" field in the mutation.
+func (m *LiveHostDefaultMutation) BlockedWords() (r []string, exists bool) {
+	v := m.blocked_words
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldBlockedWords returns the old "blocked_words" field's value of the LiveHostDefault entity.
+// If the LiveHostDefault object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *LiveHostDefaultMutation) OldBlockedWords(ctx context.Context) (v []string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldBlockedWords is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldBlockedWords requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldBlockedWords: %w", err)
+	}
+	return oldValue.BlockedWords, nil
+}
+
+// AppendBlockedWords adds s to the "blocked_words" field.
+func (m *LiveHostDefaultMutation) AppendBlockedWords(s []string) {
+	m.appendblocked_words = append(m.appendblocked_words, s...)
+}
+
+// AppendedBlockedWords returns the list of values that were appended to the "blocked_words" field in this mutation.
+func (m *LiveHostDefaultMutation) AppendedBlockedWords() ([]string, bool) {
+	if len(m.appendblocked_words) == 0 {
+		return nil, false
+	}
+	return m.appendblocked_words, true
+}
+
+// ClearBlockedWords clears the value of the "blocked_words" field.
+func (m *LiveHostDefaultMutation) ClearBlockedWords() {
+	m.blocked_words = nil
+	m.appendblocked_words = nil
+	m.clearedFields[livehostdefault.FieldBlockedWords] = struct{}{}
+}
+
+// BlockedWordsCleared returns if the "blocked_words" field was cleared in this mutation.
+func (m *LiveHostDefaultMutation) BlockedWordsCleared() bool {
+	_, ok := m.clearedFields[livehostdefault.FieldBlockedWords]
+	return ok
+}
+
+// ResetBlockedWords resets all changes to the "blocked_words" field.
+func (m *LiveHostDefaultMutation) ResetBlockedWords() {
+	m.blocked_words = nil
+	m.appendblocked_words = nil
+	delete(m.clearedFields, livehostdefault.FieldBlockedWords)
+}
+
+// SetModeratorIds sets the "moderator_ids" field.
+func (m *LiveHostDefaultMutation) SetModeratorIds(s []string) {
+	m.moderator_ids = &s
+	m.appendmoderator_ids = nil
+}
+
+// ModeratorIds returns the value of the "moderator_ids" field in the mutation.
+func (m *LiveHostDefaultMutation) ModeratorIds() (r []string, exists bool) {
+	v := m.moderator_ids
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldModeratorIds returns the old "moderator_ids" field's value of the LiveHostDefault entity.
+// If the LiveHostDefault object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *LiveHostDefaultMutation) OldModeratorIds(ctx context.Context) (v []string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldModeratorIds is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldModeratorIds requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldModeratorIds: %w", err)
+	}
+	return oldValue.ModeratorIds, nil
+}
+
+// AppendModeratorIds adds s to the "moderator_ids" field.
+func (m *LiveHostDefaultMutation) AppendModeratorIds(s []string) {
+	m.appendmoderator_ids = append(m.appendmoderator_ids, s...)
+}
+
+// AppendedModeratorIds returns the list of values that were appended to the "moderator_ids" field in this mutation.
+func (m *LiveHostDefaultMutation) AppendedModeratorIds() ([]string, bool) {
+	if len(m.appendmoderator_ids) == 0 {
+		return nil, false
+	}
+	return m.appendmoderator_ids, true
+}
+
+// ClearModeratorIds clears the value of the "moderator_ids" field.
+func (m *LiveHostDefaultMutation) ClearModeratorIds() {
+	m.moderator_ids = nil
+	m.appendmoderator_ids = nil
+	m.clearedFields[livehostdefault.FieldModeratorIds] = struct{}{}
+}
+
+// ModeratorIdsCleared returns if the "moderator_ids" field was cleared in this mutation.
+func (m *LiveHostDefaultMutation) ModeratorIdsCleared() bool {
+	_, ok := m.clearedFields[livehostdefault.FieldModeratorIds]
+	return ok
+}
+
+// ResetModeratorIds resets all changes to the "moderator_ids" field.
+func (m *LiveHostDefaultMutation) ResetModeratorIds() {
+	m.moderator_ids = nil
+	m.appendmoderator_ids = nil
+	delete(m.clearedFields, livehostdefault.FieldModeratorIds)
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (m *LiveHostDefaultMutation) SetUpdatedAt(t time.Time) {
+	m.updated_at = &t
+}
+
+// UpdatedAt returns the value of the "updated_at" field in the mutation.
+func (m *LiveHostDefaultMutation) UpdatedAt() (r time.Time, exists bool) {
+	v := m.updated_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUpdatedAt returns the old "updated_at" field's value of the LiveHostDefault entity.
+// If the LiveHostDefault object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *LiveHostDefaultMutation) OldUpdatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUpdatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUpdatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUpdatedAt: %w", err)
+	}
+	return oldValue.UpdatedAt, nil
+}
+
+// ResetUpdatedAt resets all changes to the "updated_at" field.
+func (m *LiveHostDefaultMutation) ResetUpdatedAt() {
+	m.updated_at = nil
+}
+
+// Where appends a list predicates to the LiveHostDefaultMutation builder.
+func (m *LiveHostDefaultMutation) Where(ps ...predicate.LiveHostDefault) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the LiveHostDefaultMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *LiveHostDefaultMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.LiveHostDefault, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *LiveHostDefaultMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *LiveHostDefaultMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (LiveHostDefault).
+func (m *LiveHostDefaultMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *LiveHostDefaultMutation) Fields() []string {
+	fields := make([]string, 0, 6)
+	if m.comments_enabled != nil {
+		fields = append(fields, livehostdefault.FieldCommentsEnabled)
+	}
+	if m.comment_audience != nil {
+		fields = append(fields, livehostdefault.FieldCommentAudience)
+	}
+	if m.slow_mode_seconds != nil {
+		fields = append(fields, livehostdefault.FieldSlowModeSeconds)
+	}
+	if m.blocked_words != nil {
+		fields = append(fields, livehostdefault.FieldBlockedWords)
+	}
+	if m.moderator_ids != nil {
+		fields = append(fields, livehostdefault.FieldModeratorIds)
+	}
+	if m.updated_at != nil {
+		fields = append(fields, livehostdefault.FieldUpdatedAt)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *LiveHostDefaultMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case livehostdefault.FieldCommentsEnabled:
+		return m.CommentsEnabled()
+	case livehostdefault.FieldCommentAudience:
+		return m.CommentAudience()
+	case livehostdefault.FieldSlowModeSeconds:
+		return m.SlowModeSeconds()
+	case livehostdefault.FieldBlockedWords:
+		return m.BlockedWords()
+	case livehostdefault.FieldModeratorIds:
+		return m.ModeratorIds()
+	case livehostdefault.FieldUpdatedAt:
+		return m.UpdatedAt()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *LiveHostDefaultMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case livehostdefault.FieldCommentsEnabled:
+		return m.OldCommentsEnabled(ctx)
+	case livehostdefault.FieldCommentAudience:
+		return m.OldCommentAudience(ctx)
+	case livehostdefault.FieldSlowModeSeconds:
+		return m.OldSlowModeSeconds(ctx)
+	case livehostdefault.FieldBlockedWords:
+		return m.OldBlockedWords(ctx)
+	case livehostdefault.FieldModeratorIds:
+		return m.OldModeratorIds(ctx)
+	case livehostdefault.FieldUpdatedAt:
+		return m.OldUpdatedAt(ctx)
+	}
+	return nil, fmt.Errorf("unknown LiveHostDefault field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *LiveHostDefaultMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case livehostdefault.FieldCommentsEnabled:
+		v, ok := value.(bool)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCommentsEnabled(v)
+		return nil
+	case livehostdefault.FieldCommentAudience:
+		v, ok := value.(livehostdefault.CommentAudience)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCommentAudience(v)
+		return nil
+	case livehostdefault.FieldSlowModeSeconds:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSlowModeSeconds(v)
+		return nil
+	case livehostdefault.FieldBlockedWords:
+		v, ok := value.([]string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetBlockedWords(v)
+		return nil
+	case livehostdefault.FieldModeratorIds:
+		v, ok := value.([]string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetModeratorIds(v)
+		return nil
+	case livehostdefault.FieldUpdatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUpdatedAt(v)
+		return nil
+	}
+	return fmt.Errorf("unknown LiveHostDefault field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *LiveHostDefaultMutation) AddedFields() []string {
+	var fields []string
+	if m.addslow_mode_seconds != nil {
+		fields = append(fields, livehostdefault.FieldSlowModeSeconds)
+	}
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *LiveHostDefaultMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case livehostdefault.FieldSlowModeSeconds:
+		return m.AddedSlowModeSeconds()
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *LiveHostDefaultMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	case livehostdefault.FieldSlowModeSeconds:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddSlowModeSeconds(v)
+		return nil
+	}
+	return fmt.Errorf("unknown LiveHostDefault numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *LiveHostDefaultMutation) ClearedFields() []string {
+	var fields []string
+	if m.FieldCleared(livehostdefault.FieldBlockedWords) {
+		fields = append(fields, livehostdefault.FieldBlockedWords)
+	}
+	if m.FieldCleared(livehostdefault.FieldModeratorIds) {
+		fields = append(fields, livehostdefault.FieldModeratorIds)
+	}
+	return fields
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *LiveHostDefaultMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *LiveHostDefaultMutation) ClearField(name string) error {
+	switch name {
+	case livehostdefault.FieldBlockedWords:
+		m.ClearBlockedWords()
+		return nil
+	case livehostdefault.FieldModeratorIds:
+		m.ClearModeratorIds()
+		return nil
+	}
+	return fmt.Errorf("unknown LiveHostDefault nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *LiveHostDefaultMutation) ResetField(name string) error {
+	switch name {
+	case livehostdefault.FieldCommentsEnabled:
+		m.ResetCommentsEnabled()
+		return nil
+	case livehostdefault.FieldCommentAudience:
+		m.ResetCommentAudience()
+		return nil
+	case livehostdefault.FieldSlowModeSeconds:
+		m.ResetSlowModeSeconds()
+		return nil
+	case livehostdefault.FieldBlockedWords:
+		m.ResetBlockedWords()
+		return nil
+	case livehostdefault.FieldModeratorIds:
+		m.ResetModeratorIds()
+		return nil
+	case livehostdefault.FieldUpdatedAt:
+		m.ResetUpdatedAt()
+		return nil
+	}
+	return fmt.Errorf("unknown LiveHostDefault field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *LiveHostDefaultMutation) AddedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *LiveHostDefaultMutation) AddedIDs(name string) []ent.Value {
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *LiveHostDefaultMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *LiveHostDefaultMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *LiveHostDefaultMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *LiveHostDefaultMutation) EdgeCleared(name string) bool {
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *LiveHostDefaultMutation) ClearEdge(name string) error {
+	return fmt.Errorf("unknown LiveHostDefault unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *LiveHostDefaultMutation) ResetEdge(name string) error {
+	return fmt.Errorf("unknown LiveHostDefault edge %s", name)
+}
+
 // LiveHostRestrictionMutation represents an operation that mutates the LiveHostRestriction nodes in the graph.
 type LiveHostRestrictionMutation struct {
 	config
@@ -14461,6 +15176,7 @@ type LiveRoomSettingMutation struct {
 	appendblocked_words  []string
 	pinned_comment_id    *uuid.UUID
 	record_enabled       *bool
+	comment_audience     *liveroomsetting.CommentAudience
 	clearedFields        map[string]struct{}
 	done                 bool
 	oldValue             func(context.Context) (*LiveRoomSetting, error)
@@ -14813,6 +15529,42 @@ func (m *LiveRoomSettingMutation) ResetRecordEnabled() {
 	m.record_enabled = nil
 }
 
+// SetCommentAudience sets the "comment_audience" field.
+func (m *LiveRoomSettingMutation) SetCommentAudience(la liveroomsetting.CommentAudience) {
+	m.comment_audience = &la
+}
+
+// CommentAudience returns the value of the "comment_audience" field in the mutation.
+func (m *LiveRoomSettingMutation) CommentAudience() (r liveroomsetting.CommentAudience, exists bool) {
+	v := m.comment_audience
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCommentAudience returns the old "comment_audience" field's value of the LiveRoomSetting entity.
+// If the LiveRoomSetting object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *LiveRoomSettingMutation) OldCommentAudience(ctx context.Context) (v liveroomsetting.CommentAudience, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCommentAudience is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCommentAudience requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCommentAudience: %w", err)
+	}
+	return oldValue.CommentAudience, nil
+}
+
+// ResetCommentAudience resets all changes to the "comment_audience" field.
+func (m *LiveRoomSettingMutation) ResetCommentAudience() {
+	m.comment_audience = nil
+}
+
 // Where appends a list predicates to the LiveRoomSettingMutation builder.
 func (m *LiveRoomSettingMutation) Where(ps ...predicate.LiveRoomSetting) {
 	m.predicates = append(m.predicates, ps...)
@@ -14847,7 +15599,7 @@ func (m *LiveRoomSettingMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *LiveRoomSettingMutation) Fields() []string {
-	fields := make([]string, 0, 5)
+	fields := make([]string, 0, 6)
 	if m.comments_enabled != nil {
 		fields = append(fields, liveroomsetting.FieldCommentsEnabled)
 	}
@@ -14862,6 +15614,9 @@ func (m *LiveRoomSettingMutation) Fields() []string {
 	}
 	if m.record_enabled != nil {
 		fields = append(fields, liveroomsetting.FieldRecordEnabled)
+	}
+	if m.comment_audience != nil {
+		fields = append(fields, liveroomsetting.FieldCommentAudience)
 	}
 	return fields
 }
@@ -14881,6 +15636,8 @@ func (m *LiveRoomSettingMutation) Field(name string) (ent.Value, bool) {
 		return m.PinnedCommentID()
 	case liveroomsetting.FieldRecordEnabled:
 		return m.RecordEnabled()
+	case liveroomsetting.FieldCommentAudience:
+		return m.CommentAudience()
 	}
 	return nil, false
 }
@@ -14900,6 +15657,8 @@ func (m *LiveRoomSettingMutation) OldField(ctx context.Context, name string) (en
 		return m.OldPinnedCommentID(ctx)
 	case liveroomsetting.FieldRecordEnabled:
 		return m.OldRecordEnabled(ctx)
+	case liveroomsetting.FieldCommentAudience:
+		return m.OldCommentAudience(ctx)
 	}
 	return nil, fmt.Errorf("unknown LiveRoomSetting field %s", name)
 }
@@ -14943,6 +15702,13 @@ func (m *LiveRoomSettingMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetRecordEnabled(v)
+		return nil
+	case liveroomsetting.FieldCommentAudience:
+		v, ok := value.(liveroomsetting.CommentAudience)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCommentAudience(v)
 		return nil
 	}
 	return fmt.Errorf("unknown LiveRoomSetting field %s", name)
@@ -15037,6 +15803,9 @@ func (m *LiveRoomSettingMutation) ResetField(name string) error {
 		return nil
 	case liveroomsetting.FieldRecordEnabled:
 		m.ResetRecordEnabled()
+		return nil
+	case liveroomsetting.FieldCommentAudience:
+		m.ResetCommentAudience()
 		return nil
 	}
 	return fmt.Errorf("unknown LiveRoomSetting field %s", name)
@@ -16457,6 +17226,8 @@ type LiveSessionMutation struct {
 	sponsorship_line               *string
 	moderation_visibility          *string
 	moderation_visibility_at       *time.Time
+	scheduled_at                   *time.Time
+	reminder_sent_at               *time.Time
 	updated_at                     *time.Time
 	clearedFields                  map[string]struct{}
 	done                           bool
@@ -17783,6 +18554,104 @@ func (m *LiveSessionMutation) ResetModerationVisibilityAt() {
 	delete(m.clearedFields, livesession.FieldModerationVisibilityAt)
 }
 
+// SetScheduledAt sets the "scheduled_at" field.
+func (m *LiveSessionMutation) SetScheduledAt(t time.Time) {
+	m.scheduled_at = &t
+}
+
+// ScheduledAt returns the value of the "scheduled_at" field in the mutation.
+func (m *LiveSessionMutation) ScheduledAt() (r time.Time, exists bool) {
+	v := m.scheduled_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldScheduledAt returns the old "scheduled_at" field's value of the LiveSession entity.
+// If the LiveSession object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *LiveSessionMutation) OldScheduledAt(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldScheduledAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldScheduledAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldScheduledAt: %w", err)
+	}
+	return oldValue.ScheduledAt, nil
+}
+
+// ClearScheduledAt clears the value of the "scheduled_at" field.
+func (m *LiveSessionMutation) ClearScheduledAt() {
+	m.scheduled_at = nil
+	m.clearedFields[livesession.FieldScheduledAt] = struct{}{}
+}
+
+// ScheduledAtCleared returns if the "scheduled_at" field was cleared in this mutation.
+func (m *LiveSessionMutation) ScheduledAtCleared() bool {
+	_, ok := m.clearedFields[livesession.FieldScheduledAt]
+	return ok
+}
+
+// ResetScheduledAt resets all changes to the "scheduled_at" field.
+func (m *LiveSessionMutation) ResetScheduledAt() {
+	m.scheduled_at = nil
+	delete(m.clearedFields, livesession.FieldScheduledAt)
+}
+
+// SetReminderSentAt sets the "reminder_sent_at" field.
+func (m *LiveSessionMutation) SetReminderSentAt(t time.Time) {
+	m.reminder_sent_at = &t
+}
+
+// ReminderSentAt returns the value of the "reminder_sent_at" field in the mutation.
+func (m *LiveSessionMutation) ReminderSentAt() (r time.Time, exists bool) {
+	v := m.reminder_sent_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldReminderSentAt returns the old "reminder_sent_at" field's value of the LiveSession entity.
+// If the LiveSession object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *LiveSessionMutation) OldReminderSentAt(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldReminderSentAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldReminderSentAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldReminderSentAt: %w", err)
+	}
+	return oldValue.ReminderSentAt, nil
+}
+
+// ClearReminderSentAt clears the value of the "reminder_sent_at" field.
+func (m *LiveSessionMutation) ClearReminderSentAt() {
+	m.reminder_sent_at = nil
+	m.clearedFields[livesession.FieldReminderSentAt] = struct{}{}
+}
+
+// ReminderSentAtCleared returns if the "reminder_sent_at" field was cleared in this mutation.
+func (m *LiveSessionMutation) ReminderSentAtCleared() bool {
+	_, ok := m.clearedFields[livesession.FieldReminderSentAt]
+	return ok
+}
+
+// ResetReminderSentAt resets all changes to the "reminder_sent_at" field.
+func (m *LiveSessionMutation) ResetReminderSentAt() {
+	m.reminder_sent_at = nil
+	delete(m.clearedFields, livesession.FieldReminderSentAt)
+}
+
 // SetUpdatedAt sets the "updated_at" field.
 func (m *LiveSessionMutation) SetUpdatedAt(t time.Time) {
 	m.updated_at = &t
@@ -17853,7 +18722,7 @@ func (m *LiveSessionMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *LiveSessionMutation) Fields() []string {
-	fields := make([]string, 0, 28)
+	fields := make([]string, 0, 30)
 	if m.created_at != nil {
 		fields = append(fields, livesession.FieldCreatedAt)
 	}
@@ -17935,6 +18804,12 @@ func (m *LiveSessionMutation) Fields() []string {
 	if m.moderation_visibility_at != nil {
 		fields = append(fields, livesession.FieldModerationVisibilityAt)
 	}
+	if m.scheduled_at != nil {
+		fields = append(fields, livesession.FieldScheduledAt)
+	}
+	if m.reminder_sent_at != nil {
+		fields = append(fields, livesession.FieldReminderSentAt)
+	}
 	if m.updated_at != nil {
 		fields = append(fields, livesession.FieldUpdatedAt)
 	}
@@ -18000,6 +18875,10 @@ func (m *LiveSessionMutation) Field(name string) (ent.Value, bool) {
 		return m.ModerationVisibility()
 	case livesession.FieldModerationVisibilityAt:
 		return m.ModerationVisibilityAt()
+	case livesession.FieldScheduledAt:
+		return m.ScheduledAt()
+	case livesession.FieldReminderSentAt:
+		return m.ReminderSentAt()
 	case livesession.FieldUpdatedAt:
 		return m.UpdatedAt()
 	}
@@ -18065,6 +18944,10 @@ func (m *LiveSessionMutation) OldField(ctx context.Context, name string) (ent.Va
 		return m.OldModerationVisibility(ctx)
 	case livesession.FieldModerationVisibilityAt:
 		return m.OldModerationVisibilityAt(ctx)
+	case livesession.FieldScheduledAt:
+		return m.OldScheduledAt(ctx)
+	case livesession.FieldReminderSentAt:
+		return m.OldReminderSentAt(ctx)
 	case livesession.FieldUpdatedAt:
 		return m.OldUpdatedAt(ctx)
 	}
@@ -18265,6 +19148,20 @@ func (m *LiveSessionMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetModerationVisibilityAt(v)
 		return nil
+	case livesession.FieldScheduledAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetScheduledAt(v)
+		return nil
+	case livesession.FieldReminderSentAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetReminderSentAt(v)
+		return nil
 	case livesession.FieldUpdatedAt:
 		v, ok := value.(time.Time)
 		if !ok {
@@ -18398,6 +19295,12 @@ func (m *LiveSessionMutation) ClearedFields() []string {
 	if m.FieldCleared(livesession.FieldModerationVisibilityAt) {
 		fields = append(fields, livesession.FieldModerationVisibilityAt)
 	}
+	if m.FieldCleared(livesession.FieldScheduledAt) {
+		fields = append(fields, livesession.FieldScheduledAt)
+	}
+	if m.FieldCleared(livesession.FieldReminderSentAt) {
+		fields = append(fields, livesession.FieldReminderSentAt)
+	}
 	return fields
 }
 
@@ -18444,6 +19347,12 @@ func (m *LiveSessionMutation) ClearField(name string) error {
 		return nil
 	case livesession.FieldModerationVisibilityAt:
 		m.ClearModerationVisibilityAt()
+		return nil
+	case livesession.FieldScheduledAt:
+		m.ClearScheduledAt()
+		return nil
+	case livesession.FieldReminderSentAt:
+		m.ClearReminderSentAt()
 		return nil
 	}
 	return fmt.Errorf("unknown LiveSession nullable field %s", name)
@@ -18533,6 +19442,12 @@ func (m *LiveSessionMutation) ResetField(name string) error {
 		return nil
 	case livesession.FieldModerationVisibilityAt:
 		m.ResetModerationVisibilityAt()
+		return nil
+	case livesession.FieldScheduledAt:
+		m.ResetScheduledAt()
+		return nil
+	case livesession.FieldReminderSentAt:
+		m.ResetReminderSentAt()
 		return nil
 	case livesession.FieldUpdatedAt:
 		m.ResetUpdatedAt()

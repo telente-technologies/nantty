@@ -1,5 +1,7 @@
 package dtos
 
+import "encoding/json"
+
 type LiveAdSettingsRequest struct {
 	AllowAds             bool     `json:"allowAds"`
 	Placements           []string `json:"placements"`
@@ -20,6 +22,13 @@ type CreateLiveRequest struct {
 	LiveAdSettings             *LiveAdSettingsRequest `json:"liveAdSettings"`
 	AcceptedLiveAdTermsVersion *string                `json:"acceptedLiveAdTermsVersion"`
 	SponsorshipLine            *string                `json:"sponsorshipLine"`
+	ScheduledAt                *string                `json:"scheduledAt"`
+}
+
+type UpdateLiveRequest struct {
+	Title       *string         `json:"title"`
+	Category    *string         `json:"category"`
+	ScheduledAt json.RawMessage `json:"scheduledAt"`
 }
 
 type MonetizationRequest struct {

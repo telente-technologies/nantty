@@ -36,6 +36,8 @@ type Tx struct {
 	JoinRequest *JoinRequestClient
 	// LiveComment is the client for interacting with the LiveComment builders.
 	LiveComment *LiveCommentClient
+	// LiveHostDefault is the client for interacting with the LiveHostDefault builders.
+	LiveHostDefault *LiveHostDefaultClient
 	// LiveHostRestriction is the client for interacting with the LiveHostRestriction builders.
 	LiveHostRestriction *LiveHostRestrictionClient
 	// LiveIngress is the client for interacting with the LiveIngress builders.
@@ -210,6 +212,7 @@ func (tx *Tx) init() {
 	tx.GuestSlot = NewGuestSlotClient(tx.config)
 	tx.JoinRequest = NewJoinRequestClient(tx.config)
 	tx.LiveComment = NewLiveCommentClient(tx.config)
+	tx.LiveHostDefault = NewLiveHostDefaultClient(tx.config)
 	tx.LiveHostRestriction = NewLiveHostRestrictionClient(tx.config)
 	tx.LiveIngress = NewLiveIngressClient(tx.config)
 	tx.LiveLeaderboardEntry = NewLiveLeaderboardEntryClient(tx.config)
