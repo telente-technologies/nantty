@@ -21,11 +21,17 @@ type SchemaConfig struct {
 	PayoutTransfer            string // PayoutTransfer table.
 	ProviderCustomer          string // ProviderCustomer table.
 	ProviderDispute           string // ProviderDispute table.
+	ProviderMovement          string // ProviderMovement table.
 	ProviderPayoutDestination string // ProviderPayoutDestination table.
+	ProviderWallet            string // ProviderWallet table.
+	ProviderWalletNumber      string // ProviderWalletNumber table.
+	ReconciliationCase        string // ReconciliationCase table.
+	ReconciliationRun         string // ReconciliationRun table.
 	SavedCardSetup            string // SavedCardSetup table.
 	SellerVerification        string // SellerVerification table.
 	StorePurchase             string // StorePurchase table.
 	VerificationLevelRecord   string // VerificationLevelRecord table.
+	WalletFunding             string // WalletFunding table.
 	WebhookEvent              string // WebhookEvent table.
 }
 

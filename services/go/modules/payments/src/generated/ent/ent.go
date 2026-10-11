@@ -22,11 +22,17 @@ import (
 	"zudomart/modules/payments/src/generated/ent/payouttransfer"
 	"zudomart/modules/payments/src/generated/ent/providercustomer"
 	"zudomart/modules/payments/src/generated/ent/providerdispute"
+	"zudomart/modules/payments/src/generated/ent/providermovement"
 	"zudomart/modules/payments/src/generated/ent/providerpayoutdestination"
+	"zudomart/modules/payments/src/generated/ent/providerwallet"
+	"zudomart/modules/payments/src/generated/ent/providerwalletnumber"
+	"zudomart/modules/payments/src/generated/ent/reconciliationcase"
+	"zudomart/modules/payments/src/generated/ent/reconciliationrun"
 	"zudomart/modules/payments/src/generated/ent/savedcardsetup"
 	"zudomart/modules/payments/src/generated/ent/sellerverification"
 	"zudomart/modules/payments/src/generated/ent/storepurchase"
 	"zudomart/modules/payments/src/generated/ent/verificationlevelrecord"
+	"zudomart/modules/payments/src/generated/ent/walletfunding"
 	"zudomart/modules/payments/src/generated/ent/webhookevent"
 
 	"entgo.io/ent"
@@ -106,11 +112,17 @@ func checkColumn(t, c string) error {
 			payouttransfer.Table:            payouttransfer.ValidColumn,
 			providercustomer.Table:          providercustomer.ValidColumn,
 			providerdispute.Table:           providerdispute.ValidColumn,
+			providermovement.Table:          providermovement.ValidColumn,
 			providerpayoutdestination.Table: providerpayoutdestination.ValidColumn,
+			providerwallet.Table:            providerwallet.ValidColumn,
+			providerwalletnumber.Table:      providerwalletnumber.ValidColumn,
+			reconciliationcase.Table:        reconciliationcase.ValidColumn,
+			reconciliationrun.Table:         reconciliationrun.ValidColumn,
 			savedcardsetup.Table:            savedcardsetup.ValidColumn,
 			sellerverification.Table:        sellerverification.ValidColumn,
 			storepurchase.Table:             storepurchase.ValidColumn,
 			verificationlevelrecord.Table:   verificationlevelrecord.ValidColumn,
+			walletfunding.Table:             walletfunding.ValidColumn,
 			webhookevent.Table:              webhookevent.ValidColumn,
 		})
 	})

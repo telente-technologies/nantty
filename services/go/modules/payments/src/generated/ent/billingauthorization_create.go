@@ -70,6 +70,20 @@ func (_c *BillingAuthorizationCreate) SetSealedAuthorization(v []byte) *BillingA
 	return _c
 }
 
+// SetTokenEmail sets the "token_email" field.
+func (_c *BillingAuthorizationCreate) SetTokenEmail(v string) *BillingAuthorizationCreate {
+	_c.mutation.SetTokenEmail(v)
+	return _c
+}
+
+// SetNillableTokenEmail sets the "token_email" field if the given value is not nil.
+func (_c *BillingAuthorizationCreate) SetNillableTokenEmail(v *string) *BillingAuthorizationCreate {
+	if v != nil {
+		_c.SetTokenEmail(*v)
+	}
+	return _c
+}
+
 // SetCardFingerprintHash sets the "card_fingerprint_hash" field.
 func (_c *BillingAuthorizationCreate) SetCardFingerprintHash(v string) *BillingAuthorizationCreate {
 	_c.mutation.SetCardFingerprintHash(v)
@@ -217,6 +231,10 @@ func (_c *BillingAuthorizationCreate) defaults() {
 		v := billingauthorization.DefaultProviderCustomerID
 		_c.mutation.SetProviderCustomerID(v)
 	}
+	if _, ok := _c.mutation.TokenEmail(); !ok {
+		v := billingauthorization.DefaultTokenEmail
+		_c.mutation.SetTokenEmail(v)
+	}
 	if _, ok := _c.mutation.CardBrand(); !ok {
 		v := billingauthorization.DefaultCardBrand
 		_c.mutation.SetCardBrand(v)
@@ -270,6 +288,14 @@ func (_c *BillingAuthorizationCreate) check() error {
 	}
 	if _, ok := _c.mutation.SealedAuthorization(); !ok {
 		return &ValidationError{Name: "sealed_authorization", err: errors.New(`ent: missing required field "BillingAuthorization.sealed_authorization"`)}
+	}
+	if _, ok := _c.mutation.TokenEmail(); !ok {
+		return &ValidationError{Name: "token_email", err: errors.New(`ent: missing required field "BillingAuthorization.token_email"`)}
+	}
+	if v, ok := _c.mutation.TokenEmail(); ok {
+		if err := billingauthorization.TokenEmailValidator(v); err != nil {
+			return &ValidationError{Name: "token_email", err: fmt.Errorf(`ent: validator failed for field "BillingAuthorization.token_email": %w`, err)}
+		}
 	}
 	if _, ok := _c.mutation.CardFingerprintHash(); !ok {
 		return &ValidationError{Name: "card_fingerprint_hash", err: errors.New(`ent: missing required field "BillingAuthorization.card_fingerprint_hash"`)}
@@ -357,6 +383,10 @@ func (_c *BillingAuthorizationCreate) createSpec() (*BillingAuthorization, *sqlg
 	if value, ok := _c.mutation.SealedAuthorization(); ok {
 		_spec.SetField(billingauthorization.FieldSealedAuthorization, field.TypeBytes, value)
 		_node.SealedAuthorization = value
+	}
+	if value, ok := _c.mutation.TokenEmail(); ok {
+		_spec.SetField(billingauthorization.FieldTokenEmail, field.TypeString, value)
+		_node.TokenEmail = value
 	}
 	if value, ok := _c.mutation.CardFingerprintHash(); ok {
 		_spec.SetField(billingauthorization.FieldCardFingerprintHash, field.TypeString, value)
@@ -459,6 +489,18 @@ func (u *BillingAuthorizationUpsert) SetSealedAuthorization(v []byte) *BillingAu
 // UpdateSealedAuthorization sets the "sealed_authorization" field to the value that was provided on create.
 func (u *BillingAuthorizationUpsert) UpdateSealedAuthorization() *BillingAuthorizationUpsert {
 	u.SetExcluded(billingauthorization.FieldSealedAuthorization)
+	return u
+}
+
+// SetTokenEmail sets the "token_email" field.
+func (u *BillingAuthorizationUpsert) SetTokenEmail(v string) *BillingAuthorizationUpsert {
+	u.Set(billingauthorization.FieldTokenEmail, v)
+	return u
+}
+
+// UpdateTokenEmail sets the "token_email" field to the value that was provided on create.
+func (u *BillingAuthorizationUpsert) UpdateTokenEmail() *BillingAuthorizationUpsert {
+	u.SetExcluded(billingauthorization.FieldTokenEmail)
 	return u
 }
 
@@ -643,6 +685,20 @@ func (u *BillingAuthorizationUpsertOne) SetSealedAuthorization(v []byte) *Billin
 func (u *BillingAuthorizationUpsertOne) UpdateSealedAuthorization() *BillingAuthorizationUpsertOne {
 	return u.Update(func(s *BillingAuthorizationUpsert) {
 		s.UpdateSealedAuthorization()
+	})
+}
+
+// SetTokenEmail sets the "token_email" field.
+func (u *BillingAuthorizationUpsertOne) SetTokenEmail(v string) *BillingAuthorizationUpsertOne {
+	return u.Update(func(s *BillingAuthorizationUpsert) {
+		s.SetTokenEmail(v)
+	})
+}
+
+// UpdateTokenEmail sets the "token_email" field to the value that was provided on create.
+func (u *BillingAuthorizationUpsertOne) UpdateTokenEmail() *BillingAuthorizationUpsertOne {
+	return u.Update(func(s *BillingAuthorizationUpsert) {
+		s.UpdateTokenEmail()
 	})
 }
 
@@ -1010,6 +1066,20 @@ func (u *BillingAuthorizationUpsertBulk) SetSealedAuthorization(v []byte) *Billi
 func (u *BillingAuthorizationUpsertBulk) UpdateSealedAuthorization() *BillingAuthorizationUpsertBulk {
 	return u.Update(func(s *BillingAuthorizationUpsert) {
 		s.UpdateSealedAuthorization()
+	})
+}
+
+// SetTokenEmail sets the "token_email" field.
+func (u *BillingAuthorizationUpsertBulk) SetTokenEmail(v string) *BillingAuthorizationUpsertBulk {
+	return u.Update(func(s *BillingAuthorizationUpsert) {
+		s.SetTokenEmail(v)
+	})
+}
+
+// UpdateTokenEmail sets the "token_email" field to the value that was provided on create.
+func (u *BillingAuthorizationUpsertBulk) UpdateTokenEmail() *BillingAuthorizationUpsertBulk {
+	return u.Update(func(s *BillingAuthorizationUpsert) {
+		s.UpdateTokenEmail()
 	})
 }
 

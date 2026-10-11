@@ -176,6 +176,18 @@ func (f ProviderDisputeFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Va
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.ProviderDisputeMutation", m)
 }
 
+// The ProviderMovementFunc type is an adapter to allow the use of ordinary
+// function as ProviderMovement mutator.
+type ProviderMovementFunc func(context.Context, *ent.ProviderMovementMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f ProviderMovementFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.ProviderMovementMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.ProviderMovementMutation", m)
+}
+
 // The ProviderPayoutDestinationFunc type is an adapter to allow the use of ordinary
 // function as ProviderPayoutDestination mutator.
 type ProviderPayoutDestinationFunc func(context.Context, *ent.ProviderPayoutDestinationMutation) (ent.Value, error)
@@ -186,6 +198,54 @@ func (f ProviderPayoutDestinationFunc) Mutate(ctx context.Context, m ent.Mutatio
 		return f(ctx, mv)
 	}
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.ProviderPayoutDestinationMutation", m)
+}
+
+// The ProviderWalletFunc type is an adapter to allow the use of ordinary
+// function as ProviderWallet mutator.
+type ProviderWalletFunc func(context.Context, *ent.ProviderWalletMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f ProviderWalletFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.ProviderWalletMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.ProviderWalletMutation", m)
+}
+
+// The ProviderWalletNumberFunc type is an adapter to allow the use of ordinary
+// function as ProviderWalletNumber mutator.
+type ProviderWalletNumberFunc func(context.Context, *ent.ProviderWalletNumberMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f ProviderWalletNumberFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.ProviderWalletNumberMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.ProviderWalletNumberMutation", m)
+}
+
+// The ReconciliationCaseFunc type is an adapter to allow the use of ordinary
+// function as ReconciliationCase mutator.
+type ReconciliationCaseFunc func(context.Context, *ent.ReconciliationCaseMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f ReconciliationCaseFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.ReconciliationCaseMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.ReconciliationCaseMutation", m)
+}
+
+// The ReconciliationRunFunc type is an adapter to allow the use of ordinary
+// function as ReconciliationRun mutator.
+type ReconciliationRunFunc func(context.Context, *ent.ReconciliationRunMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f ReconciliationRunFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.ReconciliationRunMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.ReconciliationRunMutation", m)
 }
 
 // The SavedCardSetupFunc type is an adapter to allow the use of ordinary
@@ -234,6 +294,18 @@ func (f VerificationLevelRecordFunc) Mutate(ctx context.Context, m ent.Mutation)
 		return f(ctx, mv)
 	}
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.VerificationLevelRecordMutation", m)
+}
+
+// The WalletFundingFunc type is an adapter to allow the use of ordinary
+// function as WalletFunding mutator.
+type WalletFundingFunc func(context.Context, *ent.WalletFundingMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f WalletFundingFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.WalletFundingMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.WalletFundingMutation", m)
 }
 
 // The WebhookEventFunc type is an adapter to allow the use of ordinary

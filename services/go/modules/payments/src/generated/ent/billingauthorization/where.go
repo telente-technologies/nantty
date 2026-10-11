@@ -80,6 +80,11 @@ func SealedAuthorization(v []byte) predicate.BillingAuthorization {
 	return predicate.BillingAuthorization(sql.FieldEQ(FieldSealedAuthorization, v))
 }
 
+// TokenEmail applies equality check predicate on the "token_email" field. It's identical to TokenEmailEQ.
+func TokenEmail(v string) predicate.BillingAuthorization {
+	return predicate.BillingAuthorization(sql.FieldEQ(FieldTokenEmail, v))
+}
+
 // CardFingerprintHash applies equality check predicate on the "card_fingerprint_hash" field. It's identical to CardFingerprintHashEQ.
 func CardFingerprintHash(v string) predicate.BillingAuthorization {
 	return predicate.BillingAuthorization(sql.FieldEQ(FieldCardFingerprintHash, v))
@@ -388,6 +393,71 @@ func SealedAuthorizationLT(v []byte) predicate.BillingAuthorization {
 // SealedAuthorizationLTE applies the LTE predicate on the "sealed_authorization" field.
 func SealedAuthorizationLTE(v []byte) predicate.BillingAuthorization {
 	return predicate.BillingAuthorization(sql.FieldLTE(FieldSealedAuthorization, v))
+}
+
+// TokenEmailEQ applies the EQ predicate on the "token_email" field.
+func TokenEmailEQ(v string) predicate.BillingAuthorization {
+	return predicate.BillingAuthorization(sql.FieldEQ(FieldTokenEmail, v))
+}
+
+// TokenEmailNEQ applies the NEQ predicate on the "token_email" field.
+func TokenEmailNEQ(v string) predicate.BillingAuthorization {
+	return predicate.BillingAuthorization(sql.FieldNEQ(FieldTokenEmail, v))
+}
+
+// TokenEmailIn applies the In predicate on the "token_email" field.
+func TokenEmailIn(vs ...string) predicate.BillingAuthorization {
+	return predicate.BillingAuthorization(sql.FieldIn(FieldTokenEmail, vs...))
+}
+
+// TokenEmailNotIn applies the NotIn predicate on the "token_email" field.
+func TokenEmailNotIn(vs ...string) predicate.BillingAuthorization {
+	return predicate.BillingAuthorization(sql.FieldNotIn(FieldTokenEmail, vs...))
+}
+
+// TokenEmailGT applies the GT predicate on the "token_email" field.
+func TokenEmailGT(v string) predicate.BillingAuthorization {
+	return predicate.BillingAuthorization(sql.FieldGT(FieldTokenEmail, v))
+}
+
+// TokenEmailGTE applies the GTE predicate on the "token_email" field.
+func TokenEmailGTE(v string) predicate.BillingAuthorization {
+	return predicate.BillingAuthorization(sql.FieldGTE(FieldTokenEmail, v))
+}
+
+// TokenEmailLT applies the LT predicate on the "token_email" field.
+func TokenEmailLT(v string) predicate.BillingAuthorization {
+	return predicate.BillingAuthorization(sql.FieldLT(FieldTokenEmail, v))
+}
+
+// TokenEmailLTE applies the LTE predicate on the "token_email" field.
+func TokenEmailLTE(v string) predicate.BillingAuthorization {
+	return predicate.BillingAuthorization(sql.FieldLTE(FieldTokenEmail, v))
+}
+
+// TokenEmailContains applies the Contains predicate on the "token_email" field.
+func TokenEmailContains(v string) predicate.BillingAuthorization {
+	return predicate.BillingAuthorization(sql.FieldContains(FieldTokenEmail, v))
+}
+
+// TokenEmailHasPrefix applies the HasPrefix predicate on the "token_email" field.
+func TokenEmailHasPrefix(v string) predicate.BillingAuthorization {
+	return predicate.BillingAuthorization(sql.FieldHasPrefix(FieldTokenEmail, v))
+}
+
+// TokenEmailHasSuffix applies the HasSuffix predicate on the "token_email" field.
+func TokenEmailHasSuffix(v string) predicate.BillingAuthorization {
+	return predicate.BillingAuthorization(sql.FieldHasSuffix(FieldTokenEmail, v))
+}
+
+// TokenEmailEqualFold applies the EqualFold predicate on the "token_email" field.
+func TokenEmailEqualFold(v string) predicate.BillingAuthorization {
+	return predicate.BillingAuthorization(sql.FieldEqualFold(FieldTokenEmail, v))
+}
+
+// TokenEmailContainsFold applies the ContainsFold predicate on the "token_email" field.
+func TokenEmailContainsFold(v string) predicate.BillingAuthorization {
+	return predicate.BillingAuthorization(sql.FieldContainsFold(FieldTokenEmail, v))
 }
 
 // CardFingerprintHashEQ applies the EQ predicate on the "card_fingerprint_hash" field.

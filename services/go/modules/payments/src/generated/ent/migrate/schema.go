@@ -17,6 +17,7 @@ var (
 		{Name: "provider", Type: field.TypeString, Size: 40},
 		{Name: "provider_customer_id", Type: field.TypeString, Size: 120, Default: ""},
 		{Name: "sealed_authorization", Type: field.TypeBytes},
+		{Name: "token_email", Type: field.TypeString, Size: 320, Default: ""},
 		{Name: "card_fingerprint_hash", Type: field.TypeString, Size: 64},
 		{Name: "card_brand", Type: field.TypeString, Size: 30, Default: ""},
 		{Name: "card_last4", Type: field.TypeString, Size: 4, Default: ""},
@@ -34,7 +35,7 @@ var (
 			{
 				Name:    "billingauthorization_user_id_card_fingerprint_hash",
 				Unique:  true,
-				Columns: []*schema.Column{BillingAuthorizationsColumns[2], BillingAuthorizationsColumns[6]},
+				Columns: []*schema.Column{BillingAuthorizationsColumns[2], BillingAuthorizationsColumns[7]},
 			},
 			{
 				Name:    "billingauthorization_user_id_created_at",
@@ -340,6 +341,10 @@ var (
 		{Name: "paid_at", Type: field.TypeTime, Nullable: true},
 		{Name: "failed_at", Type: field.TypeTime, Nullable: true},
 		{Name: "refunded_minor", Type: field.TypeInt64, Default: 0},
+		{Name: "refund_in_flight_minor", Type: field.TypeInt64, Default: 0},
+		{Name: "saved_card_charge_started_at", Type: field.TypeTime, Nullable: true},
+		{Name: "customer_email", Type: field.TypeString, Size: 320, Default: ""},
+		{Name: "provider_settled_at", Type: field.TypeTime, Nullable: true},
 		{Name: "version", Type: field.TypeInt64, Default: 0},
 		{Name: "metadata", Type: field.TypeBytes, SchemaType: map[string]string{"postgres": "jsonb"}},
 		{Name: "updated_at", Type: field.TypeTime},
@@ -379,6 +384,14 @@ var (
 				Name:    "paymentintent_provider_transaction_id",
 				Unique:  false,
 				Columns: []*schema.Column{PaymentIntentsColumns[15]},
+			},
+			{
+				Name:    "payment_intents_provider_charge_unique",
+				Unique:  true,
+				Columns: []*schema.Column{PaymentIntentsColumns[6], PaymentIntentsColumns[15]},
+				Annotation: &entsql.IndexAnnotation{
+					Where: "provider_transaction_id <> ''",
+				},
 			},
 		},
 	}
@@ -495,6 +508,8 @@ var (
 		{Name: "fee_minor", Type: field.TypeInt64, Default: 0},
 		{Name: "bank_code", Type: field.TypeString, Size: 20, Default: ""},
 		{Name: "destination_last4", Type: field.TypeString, Size: 4, Default: ""},
+		{Name: "source_wallet_ref", Type: field.TypeString, Size: 80, Default: ""},
+		{Name: "sealed_destination", Type: field.TypeBytes, Nullable: true},
 		{Name: "status", Type: field.TypeEnum, Enums: []string{"processing", "succeeded", "failed"}, Default: "processing"},
 		{Name: "provider_transfer_code", Type: field.TypeString, Size: 120, Default: ""},
 		{Name: "failure_reason", Type: field.TypeString, Size: 300, Default: ""},
@@ -520,17 +535,17 @@ var (
 			{
 				Name:    "payouttransfer_status_created_at",
 				Unique:  false,
-				Columns: []*schema.Column{PayoutTransfersColumns[16], PayoutTransfersColumns[1]},
+				Columns: []*schema.Column{PayoutTransfersColumns[18], PayoutTransfersColumns[1]},
 			},
 			{
 				Name:    "payouttransfer_provider_transfer_code",
 				Unique:  false,
-				Columns: []*schema.Column{PayoutTransfersColumns[17]},
+				Columns: []*schema.Column{PayoutTransfersColumns[19]},
 			},
 			{
 				Name:    "payouttransfer_connected_account_id_status",
 				Unique:  false,
-				Columns: []*schema.Column{PayoutTransfersColumns[9], PayoutTransfersColumns[16]},
+				Columns: []*schema.Column{PayoutTransfersColumns[9], PayoutTransfersColumns[18]},
 			},
 		},
 	}
@@ -594,6 +609,63 @@ var (
 			},
 		},
 	}
+	// ProviderMovementsColumns holds the columns for the "provider_movements" table.
+	ProviderMovementsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "reference", Type: field.TypeString, Size: 60},
+		{Name: "provider", Type: field.TypeString, Size: 40},
+		{Name: "kind", Type: field.TypeString, Size: 40},
+		{Name: "subject_id", Type: field.TypeString, Size: 120, Default: ""},
+		{Name: "user_id", Type: field.TypeString, Size: 80, Default: ""},
+		{Name: "from_wallet_ref", Type: field.TypeString, Size: 80, Default: ""},
+		{Name: "from_user_id", Type: field.TypeString, Size: 80, Default: ""},
+		{Name: "to_barter_id", Type: field.TypeString, Size: 80, Default: ""},
+		{Name: "to_wallet_ref", Type: field.TypeString, Size: 80, Default: ""},
+		{Name: "to_platform", Type: field.TypeBool, Default: false},
+		{Name: "to_user_id", Type: field.TypeString, Size: 80, Default: ""},
+		{Name: "amount_minor", Type: field.TypeInt64},
+		{Name: "currency", Type: field.TypeString, Size: 3},
+		{Name: "status", Type: field.TypeEnum, Enums: []string{"pending", "processing", "succeeded", "failed", "cancelled"}, Default: "pending"},
+		{Name: "provider_transfer_id", Type: field.TypeString, Size: 120, Default: ""},
+		{Name: "attempts", Type: field.TypeInt, Default: 0},
+		{Name: "failure_reason", Type: field.TypeString, Size: 300, Default: ""},
+		{Name: "blocked_on", Type: field.TypeString, Size: 120, Default: ""},
+		{Name: "not_before", Type: field.TypeTime, Nullable: true},
+		{Name: "sent_at", Type: field.TypeTime, Nullable: true},
+		{Name: "finished_at", Type: field.TypeTime, Nullable: true},
+		{Name: "metadata", Type: field.TypeBytes, SchemaType: map[string]string{"postgres": "jsonb"}},
+		{Name: "version", Type: field.TypeInt64, Default: 0},
+		{Name: "updated_at", Type: field.TypeTime},
+	}
+	// ProviderMovementsTable holds the schema information for the "provider_movements" table.
+	ProviderMovementsTable = &schema.Table{
+		Name:       "provider_movements",
+		Columns:    ProviderMovementsColumns,
+		PrimaryKey: []*schema.Column{ProviderMovementsColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "providermovement_reference",
+				Unique:  true,
+				Columns: []*schema.Column{ProviderMovementsColumns[2]},
+			},
+			{
+				Name:    "providermovement_status_created_at",
+				Unique:  false,
+				Columns: []*schema.Column{ProviderMovementsColumns[15], ProviderMovementsColumns[1]},
+			},
+			{
+				Name:    "providermovement_kind_subject_id",
+				Unique:  false,
+				Columns: []*schema.Column{ProviderMovementsColumns[4], ProviderMovementsColumns[5]},
+			},
+			{
+				Name:    "providermovement_from_wallet_ref_status",
+				Unique:  false,
+				Columns: []*schema.Column{ProviderMovementsColumns[7], ProviderMovementsColumns[15]},
+			},
+		},
+	}
 	// ProviderPayoutDestinationsColumns holds the columns for the "provider_payout_destinations" table.
 	ProviderPayoutDestinationsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID},
@@ -615,6 +687,141 @@ var (
 				Name:    "providerpayoutdestination_connected_account_id_account_fingerprint_currency",
 				Unique:  true,
 				Columns: []*schema.Column{ProviderPayoutDestinationsColumns[2], ProviderPayoutDestinationsColumns[3], ProviderPayoutDestinationsColumns[4]},
+			},
+		},
+	}
+	// ProviderWalletsColumns holds the columns for the "provider_wallets" table.
+	ProviderWalletsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "user_id", Type: field.TypeString, Size: 80},
+		{Name: "provider", Type: field.TypeString, Size: 40},
+		{Name: "currency", Type: field.TypeString, Size: 3},
+		{Name: "account_ref", Type: field.TypeString, Size: 80},
+		{Name: "barter_id", Type: field.TypeString, Size: 80},
+		{Name: "nuban", Type: field.TypeString, Size: 20, Default: ""},
+		{Name: "bank_code", Type: field.TypeString, Size: 20, Default: ""},
+		{Name: "bank_name", Type: field.TypeString, Size: 120, Default: ""},
+		{Name: "account_name", Type: field.TypeString, Size: 160, Default: ""},
+		{Name: "alias_email", Type: field.TypeString, Size: 200, Default: ""},
+		{Name: "status", Type: field.TypeEnum, Enums: []string{"active", "frozen", "closed", "deleted"}, Default: "active"},
+		{Name: "freeze_reason", Type: field.TypeString, Size: 300, Default: ""},
+		{Name: "frozen_at", Type: field.TypeTime, Nullable: true},
+		{Name: "first_funded_at", Type: field.TypeTime, Nullable: true},
+		{Name: "version", Type: field.TypeInt64, Default: 0},
+		{Name: "updated_at", Type: field.TypeTime},
+	}
+	// ProviderWalletsTable holds the schema information for the "provider_wallets" table.
+	ProviderWalletsTable = &schema.Table{
+		Name:       "provider_wallets",
+		Columns:    ProviderWalletsColumns,
+		PrimaryKey: []*schema.Column{ProviderWalletsColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "providerwallet_provider_user_id_currency",
+				Unique:  true,
+				Columns: []*schema.Column{ProviderWalletsColumns[3], ProviderWalletsColumns[2], ProviderWalletsColumns[4]},
+			},
+			{
+				Name:    "providerwallet_provider_account_ref",
+				Unique:  true,
+				Columns: []*schema.Column{ProviderWalletsColumns[3], ProviderWalletsColumns[5]},
+			},
+			{
+				Name:    "providerwallet_provider_barter_id",
+				Unique:  true,
+				Columns: []*schema.Column{ProviderWalletsColumns[3], ProviderWalletsColumns[6]},
+			},
+			{
+				Name:    "providerwallet_status",
+				Unique:  false,
+				Columns: []*schema.Column{ProviderWalletsColumns[12]},
+			},
+		},
+	}
+	// ProviderWalletNumbersColumns holds the columns for the "provider_wallet_numbers" table.
+	ProviderWalletNumbersColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "wallet_id", Type: field.TypeUUID},
+		{Name: "provider", Type: field.TypeString, Size: 40},
+		{Name: "account_number", Type: field.TypeString, Size: 20},
+		{Name: "bank_code", Type: field.TypeString, Size: 20, Default: ""},
+		{Name: "bank_name", Type: field.TypeString, Size: 120, Default: ""},
+	}
+	// ProviderWalletNumbersTable holds the schema information for the "provider_wallet_numbers" table.
+	ProviderWalletNumbersTable = &schema.Table{
+		Name:       "provider_wallet_numbers",
+		Columns:    ProviderWalletNumbersColumns,
+		PrimaryKey: []*schema.Column{ProviderWalletNumbersColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "providerwalletnumber_provider_account_number",
+				Unique:  true,
+				Columns: []*schema.Column{ProviderWalletNumbersColumns[3], ProviderWalletNumbersColumns[4]},
+			},
+			{
+				Name:    "providerwalletnumber_wallet_id",
+				Unique:  false,
+				Columns: []*schema.Column{ProviderWalletNumbersColumns[2]},
+			},
+		},
+	}
+	// ReconciliationCasesColumns holds the columns for the "reconciliation_cases" table.
+	ReconciliationCasesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "provider", Type: field.TypeString, Size: 40},
+		{Name: "kind", Type: field.TypeString, Size: 60},
+		{Name: "subject", Type: field.TypeString, Size: 160},
+		{Name: "dedupe_key", Type: field.TypeString, Size: 255},
+		{Name: "expected_minor", Type: field.TypeInt64, Default: 0},
+		{Name: "actual_minor", Type: field.TypeInt64, Default: 0},
+		{Name: "currency", Type: field.TypeString, Size: 3, Default: ""},
+		{Name: "detail", Type: field.TypeString, Size: 1000, Default: ""},
+		{Name: "status", Type: field.TypeEnum, Enums: []string{"open", "resolved"}, Default: "open"},
+		{Name: "resolved_at", Type: field.TypeTime, Nullable: true},
+	}
+	// ReconciliationCasesTable holds the schema information for the "reconciliation_cases" table.
+	ReconciliationCasesTable = &schema.Table{
+		Name:       "reconciliation_cases",
+		Columns:    ReconciliationCasesColumns,
+		PrimaryKey: []*schema.Column{ReconciliationCasesColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "reconciliationcase_dedupe_key",
+				Unique:  true,
+				Columns: []*schema.Column{ReconciliationCasesColumns[5]},
+			},
+			{
+				Name:    "reconciliationcase_status_created_at",
+				Unique:  false,
+				Columns: []*schema.Column{ReconciliationCasesColumns[10], ReconciliationCasesColumns[1]},
+			},
+		},
+	}
+	// ReconciliationRunsColumns holds the columns for the "reconciliation_runs" table.
+	ReconciliationRunsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "provider", Type: field.TypeString, Size: 40},
+		{Name: "kind", Type: field.TypeString, Size: 40},
+		{Name: "status", Type: field.TypeEnum, Enums: []string{"running", "clean", "drift", "failed"}, Default: "running"},
+		{Name: "wallets_checked", Type: field.TypeInt, Default: 0},
+		{Name: "issues_found", Type: field.TypeInt, Default: 0},
+		{Name: "summary", Type: field.TypeBytes, SchemaType: map[string]string{"postgres": "jsonb"}},
+		{Name: "finished_at", Type: field.TypeTime, Nullable: true},
+	}
+	// ReconciliationRunsTable holds the schema information for the "reconciliation_runs" table.
+	ReconciliationRunsTable = &schema.Table{
+		Name:       "reconciliation_runs",
+		Columns:    ReconciliationRunsColumns,
+		PrimaryKey: []*schema.Column{ReconciliationRunsColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "reconciliationrun_provider_kind_created_at",
+				Unique:  false,
+				Columns: []*schema.Column{ReconciliationRunsColumns[2], ReconciliationRunsColumns[3], ReconciliationRunsColumns[1]},
 			},
 		},
 	}
@@ -743,6 +950,53 @@ var (
 			},
 		},
 	}
+	// WalletFundingsColumns holds the columns for the "wallet_fundings" table.
+	WalletFundingsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "wallet_id", Type: field.TypeUUID},
+		{Name: "user_id", Type: field.TypeString, Size: 80},
+		{Name: "provider", Type: field.TypeString, Size: 40},
+		{Name: "provider_reference", Type: field.TypeString, Size: 120},
+		{Name: "source", Type: field.TypeEnum, Enums: []string{"deposit", "sale", "refund", "earnings"}, Default: "deposit"},
+		{Name: "account_number", Type: field.TypeString, Size: 20, Default: ""},
+		{Name: "gross_minor", Type: field.TypeInt64},
+		{Name: "provider_fee_minor", Type: field.TypeInt64, Default: 0},
+		{Name: "deposit_fee_minor", Type: field.TypeInt64, Default: 0},
+		{Name: "hinted_minor", Type: field.TypeInt64, Default: 0},
+		{Name: "currency", Type: field.TypeString, Size: 3},
+		{Name: "status", Type: field.TypeEnum, Enums: []string{"held", "available", "rejected", "reversed"}, Default: "held"},
+		{Name: "hold_release_at", Type: field.TypeTime},
+		{Name: "hold_released_at", Type: field.TypeTime, Nullable: true},
+		{Name: "sweep_reference", Type: field.TypeString, Size: 80, Default: ""},
+		{Name: "reversal_reference", Type: field.TypeString, Size: 120, Default: ""},
+		{Name: "reversed_at", Type: field.TypeTime, Nullable: true},
+		{Name: "debt_minor", Type: field.TypeInt64, Default: 0},
+		{Name: "version", Type: field.TypeInt64, Default: 0},
+	}
+	// WalletFundingsTable holds the schema information for the "wallet_fundings" table.
+	WalletFundingsTable = &schema.Table{
+		Name:       "wallet_fundings",
+		Columns:    WalletFundingsColumns,
+		PrimaryKey: []*schema.Column{WalletFundingsColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "walletfunding_provider_provider_reference",
+				Unique:  true,
+				Columns: []*schema.Column{WalletFundingsColumns[4], WalletFundingsColumns[5]},
+			},
+			{
+				Name:    "walletfunding_user_id_created_at",
+				Unique:  false,
+				Columns: []*schema.Column{WalletFundingsColumns[3], WalletFundingsColumns[1]},
+			},
+			{
+				Name:    "walletfunding_status_hold_release_at",
+				Unique:  false,
+				Columns: []*schema.Column{WalletFundingsColumns[13], WalletFundingsColumns[14]},
+			},
+		},
+	}
 	// WebhookEventsColumns holds the columns for the "webhook_events" table.
 	WebhookEventsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID},
@@ -756,6 +1010,10 @@ var (
 		{Name: "processed_at", Type: field.TypeTime, Nullable: true},
 		{Name: "attempt_count", Type: field.TypeInt, Default: 0},
 		{Name: "last_error", Type: field.TypeString, Size: 1000, Default: ""},
+		{Name: "next_attempt_at", Type: field.TypeTime, Nullable: true},
+		{Name: "locked_until", Type: field.TypeTime, Nullable: true},
+		{Name: "lease_token", Type: field.TypeString, Size: 64, Default: ""},
+		{Name: "dead_lettered_at", Type: field.TypeTime, Nullable: true},
 	}
 	// WebhookEventsTable holds the schema information for the "webhook_events" table.
 	WebhookEventsTable = &schema.Table{
@@ -772,6 +1030,14 @@ var (
 				Name:    "webhookevent_processed_at_created_at",
 				Unique:  false,
 				Columns: []*schema.Column{WebhookEventsColumns[8], WebhookEventsColumns[1]},
+			},
+			{
+				Name:    "webhookevent_due",
+				Unique:  false,
+				Columns: []*schema.Column{WebhookEventsColumns[11]},
+				Annotation: &entsql.IndexAnnotation{
+					Where: "processed_at IS NULL AND dead_lettered_at IS NULL",
+				},
 			},
 		},
 	}
@@ -791,11 +1057,17 @@ var (
 		PayoutTransfersTable,
 		ProviderCustomersTable,
 		ProviderDisputesTable,
+		ProviderMovementsTable,
 		ProviderPayoutDestinationsTable,
+		ProviderWalletsTable,
+		ProviderWalletNumbersTable,
+		ReconciliationCasesTable,
+		ReconciliationRunsTable,
 		SavedCardSetupsTable,
 		SellerVerificationsTable,
 		StorePurchasesTable,
 		VerificationLevelRecordsTable,
+		WalletFundingsTable,
 		WebhookEventsTable,
 	}
 )
@@ -810,6 +1082,7 @@ func init() {
 		"payment_intents_amount_positive":           "amount_minor > 0",
 		"payment_intents_platform_fee_in_range":     "platform_fee_minor >= 0 AND platform_fee_minor < amount_minor",
 		"payment_intents_provider_fee_not_negative": "provider_fee_minor >= 0",
+		"payment_intents_refund_capacity":           "refund_in_flight_minor >= 0 AND refunded_minor + refund_in_flight_minor <= amount_minor",
 		"payment_intents_refunds_within_amount":     "refunded_minor >= 0 AND refunded_minor <= amount_minor",
 	}
 	PaymentRefundsTable.Annotation = &entsql.Annotation{}
@@ -821,5 +1094,15 @@ func init() {
 	PayoutTransfersTable.Annotation.Checks = map[string]string{
 		"payout_transfers_amount_positive":  "amount_minor > 0",
 		"payout_transfers_fee_not_negative": "fee_minor >= 0",
+	}
+	ProviderMovementsTable.Annotation = &entsql.Annotation{}
+	ProviderMovementsTable.Annotation.Checks = map[string]string{
+		"provider_movements_amount_positive":      "amount_minor > 0",
+		"provider_movements_one_side_is_a_wallet": "from_wallet_ref <> '' OR to_user_id <> ''",
+	}
+	WalletFundingsTable.Annotation = &entsql.Annotation{}
+	WalletFundingsTable.Annotation.Checks = map[string]string{
+		"wallet_fundings_amounts_valid": "gross_minor > 0 AND provider_fee_minor >= 0 AND deposit_fee_minor >= 0 AND provider_fee_minor + deposit_fee_minor <= gross_minor",
+		"wallet_fundings_debt_valid":    "debt_minor >= 0",
 	}
 }

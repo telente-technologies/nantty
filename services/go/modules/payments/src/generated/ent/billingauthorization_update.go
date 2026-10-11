@@ -49,6 +49,20 @@ func (_u *BillingAuthorizationUpdate) SetSealedAuthorization(v []byte) *BillingA
 	return _u
 }
 
+// SetTokenEmail sets the "token_email" field.
+func (_u *BillingAuthorizationUpdate) SetTokenEmail(v string) *BillingAuthorizationUpdate {
+	_u.mutation.SetTokenEmail(v)
+	return _u
+}
+
+// SetNillableTokenEmail sets the "token_email" field if the given value is not nil.
+func (_u *BillingAuthorizationUpdate) SetNillableTokenEmail(v *string) *BillingAuthorizationUpdate {
+	if v != nil {
+		_u.SetTokenEmail(*v)
+	}
+	return _u
+}
+
 // SetCardBrand sets the "card_brand" field.
 func (_u *BillingAuthorizationUpdate) SetCardBrand(v string) *BillingAuthorizationUpdate {
 	_u.mutation.SetCardBrand(v)
@@ -198,6 +212,11 @@ func (_u *BillingAuthorizationUpdate) check() error {
 			return &ValidationError{Name: "provider_customer_id", err: fmt.Errorf(`ent: validator failed for field "BillingAuthorization.provider_customer_id": %w`, err)}
 		}
 	}
+	if v, ok := _u.mutation.TokenEmail(); ok {
+		if err := billingauthorization.TokenEmailValidator(v); err != nil {
+			return &ValidationError{Name: "token_email", err: fmt.Errorf(`ent: validator failed for field "BillingAuthorization.token_email": %w`, err)}
+		}
+	}
 	if v, ok := _u.mutation.CardBrand(); ok {
 		if err := billingauthorization.CardBrandValidator(v); err != nil {
 			return &ValidationError{Name: "card_brand", err: fmt.Errorf(`ent: validator failed for field "BillingAuthorization.card_brand": %w`, err)}
@@ -228,6 +247,9 @@ func (_u *BillingAuthorizationUpdate) sqlSave(ctx context.Context) (_node int, e
 	}
 	if value, ok := _u.mutation.SealedAuthorization(); ok {
 		_spec.SetField(billingauthorization.FieldSealedAuthorization, field.TypeBytes, value)
+	}
+	if value, ok := _u.mutation.TokenEmail(); ok {
+		_spec.SetField(billingauthorization.FieldTokenEmail, field.TypeString, value)
 	}
 	if value, ok := _u.mutation.CardBrand(); ok {
 		_spec.SetField(billingauthorization.FieldCardBrand, field.TypeString, value)
@@ -298,6 +320,20 @@ func (_u *BillingAuthorizationUpdateOne) SetNillableProviderCustomerID(v *string
 // SetSealedAuthorization sets the "sealed_authorization" field.
 func (_u *BillingAuthorizationUpdateOne) SetSealedAuthorization(v []byte) *BillingAuthorizationUpdateOne {
 	_u.mutation.SetSealedAuthorization(v)
+	return _u
+}
+
+// SetTokenEmail sets the "token_email" field.
+func (_u *BillingAuthorizationUpdateOne) SetTokenEmail(v string) *BillingAuthorizationUpdateOne {
+	_u.mutation.SetTokenEmail(v)
+	return _u
+}
+
+// SetNillableTokenEmail sets the "token_email" field if the given value is not nil.
+func (_u *BillingAuthorizationUpdateOne) SetNillableTokenEmail(v *string) *BillingAuthorizationUpdateOne {
+	if v != nil {
+		_u.SetTokenEmail(*v)
+	}
 	return _u
 }
 
@@ -463,6 +499,11 @@ func (_u *BillingAuthorizationUpdateOne) check() error {
 			return &ValidationError{Name: "provider_customer_id", err: fmt.Errorf(`ent: validator failed for field "BillingAuthorization.provider_customer_id": %w`, err)}
 		}
 	}
+	if v, ok := _u.mutation.TokenEmail(); ok {
+		if err := billingauthorization.TokenEmailValidator(v); err != nil {
+			return &ValidationError{Name: "token_email", err: fmt.Errorf(`ent: validator failed for field "BillingAuthorization.token_email": %w`, err)}
+		}
+	}
 	if v, ok := _u.mutation.CardBrand(); ok {
 		if err := billingauthorization.CardBrandValidator(v); err != nil {
 			return &ValidationError{Name: "card_brand", err: fmt.Errorf(`ent: validator failed for field "BillingAuthorization.card_brand": %w`, err)}
@@ -510,6 +551,9 @@ func (_u *BillingAuthorizationUpdateOne) sqlSave(ctx context.Context) (_node *Bi
 	}
 	if value, ok := _u.mutation.SealedAuthorization(); ok {
 		_spec.SetField(billingauthorization.FieldSealedAuthorization, field.TypeBytes, value)
+	}
+	if value, ok := _u.mutation.TokenEmail(); ok {
+		_spec.SetField(billingauthorization.FieldTokenEmail, field.TypeString, value)
 	}
 	if value, ok := _u.mutation.CardBrand(); ok {
 		_spec.SetField(billingauthorization.FieldCardBrand, field.TypeString, value)

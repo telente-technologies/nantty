@@ -28,6 +28,8 @@ type BillingAuthorization struct {
 	ProviderCustomerID string `json:"provider_customer_id,omitempty"`
 	// SealedAuthorization holds the value of the "sealed_authorization" field.
 	SealedAuthorization []byte `json:"-"`
+	// TokenEmail holds the value of the "token_email" field.
+	TokenEmail string `json:"token_email,omitempty"`
 	// CardFingerprintHash holds the value of the "card_fingerprint_hash" field.
 	CardFingerprintHash string `json:"card_fingerprint_hash,omitempty"`
 	// CardBrand holds the value of the "card_brand" field.
@@ -54,7 +56,7 @@ func (*BillingAuthorization) scanValues(columns []string) ([]any, error) {
 			values[i] = new([]byte)
 		case billingauthorization.FieldCardExpiryMonth, billingauthorization.FieldCardExpiryYear:
 			values[i] = new(sql.NullInt64)
-		case billingauthorization.FieldUserID, billingauthorization.FieldProvider, billingauthorization.FieldProviderCustomerID, billingauthorization.FieldCardFingerprintHash, billingauthorization.FieldCardBrand, billingauthorization.FieldCardLast4:
+		case billingauthorization.FieldUserID, billingauthorization.FieldProvider, billingauthorization.FieldProviderCustomerID, billingauthorization.FieldTokenEmail, billingauthorization.FieldCardFingerprintHash, billingauthorization.FieldCardBrand, billingauthorization.FieldCardLast4:
 			values[i] = new(sql.NullString)
 		case billingauthorization.FieldCreatedAt, billingauthorization.FieldRevokedAt, billingauthorization.FieldLastUsedAt:
 			values[i] = new(sql.NullTime)
@@ -110,6 +112,12 @@ func (_m *BillingAuthorization) assignValues(columns []string, values []any) err
 				return fmt.Errorf("unexpected type %T for field sealed_authorization", values[i])
 			} else if value != nil {
 				_m.SealedAuthorization = *value
+			}
+		case billingauthorization.FieldTokenEmail:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field token_email", values[i])
+			} else if value.Valid {
+				_m.TokenEmail = value.String
 			}
 		case billingauthorization.FieldCardFingerprintHash:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -204,6 +212,9 @@ func (_m *BillingAuthorization) String() string {
 	builder.WriteString(_m.ProviderCustomerID)
 	builder.WriteString(", ")
 	builder.WriteString("sealed_authorization=<sensitive>")
+	builder.WriteString(", ")
+	builder.WriteString("token_email=")
+	builder.WriteString(_m.TokenEmail)
 	builder.WriteString(", ")
 	builder.WriteString("card_fingerprint_hash=")
 	builder.WriteString(_m.CardFingerprintHash)

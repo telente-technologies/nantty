@@ -24,6 +24,8 @@ const (
 	FieldProviderCustomerID = "provider_customer_id"
 	// FieldSealedAuthorization holds the string denoting the sealed_authorization field in the database.
 	FieldSealedAuthorization = "sealed_authorization"
+	// FieldTokenEmail holds the string denoting the token_email field in the database.
+	FieldTokenEmail = "token_email"
 	// FieldCardFingerprintHash holds the string denoting the card_fingerprint_hash field in the database.
 	FieldCardFingerprintHash = "card_fingerprint_hash"
 	// FieldCardBrand holds the string denoting the card_brand field in the database.
@@ -50,6 +52,7 @@ var Columns = []string{
 	FieldProvider,
 	FieldProviderCustomerID,
 	FieldSealedAuthorization,
+	FieldTokenEmail,
 	FieldCardFingerprintHash,
 	FieldCardBrand,
 	FieldCardLast4,
@@ -80,6 +83,10 @@ var (
 	DefaultProviderCustomerID string
 	// ProviderCustomerIDValidator is a validator for the "provider_customer_id" field. It is called by the builders before save.
 	ProviderCustomerIDValidator func(string) error
+	// DefaultTokenEmail holds the default value on creation for the "token_email" field.
+	DefaultTokenEmail string
+	// TokenEmailValidator is a validator for the "token_email" field. It is called by the builders before save.
+	TokenEmailValidator func(string) error
 	// CardFingerprintHashValidator is a validator for the "card_fingerprint_hash" field. It is called by the builders before save.
 	CardFingerprintHashValidator func(string) error
 	// DefaultCardBrand holds the default value on creation for the "card_brand" field.
@@ -124,6 +131,11 @@ func ByProvider(opts ...sql.OrderTermOption) OrderOption {
 // ByProviderCustomerID orders the results by the provider_customer_id field.
 func ByProviderCustomerID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldProviderCustomerID, opts...).ToFunc()
+}
+
+// ByTokenEmail orders the results by the token_email field.
+func ByTokenEmail(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldTokenEmail, opts...).ToFunc()
 }
 
 // ByCardFingerprintHash orders the results by the card_fingerprint_hash field.

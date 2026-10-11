@@ -25,11 +25,17 @@ import (
 	"zudomart/modules/payments/src/generated/ent/payouttransfer"
 	"zudomart/modules/payments/src/generated/ent/providercustomer"
 	"zudomart/modules/payments/src/generated/ent/providerdispute"
+	"zudomart/modules/payments/src/generated/ent/providermovement"
 	"zudomart/modules/payments/src/generated/ent/providerpayoutdestination"
+	"zudomart/modules/payments/src/generated/ent/providerwallet"
+	"zudomart/modules/payments/src/generated/ent/providerwalletnumber"
+	"zudomart/modules/payments/src/generated/ent/reconciliationcase"
+	"zudomart/modules/payments/src/generated/ent/reconciliationrun"
 	"zudomart/modules/payments/src/generated/ent/savedcardsetup"
 	"zudomart/modules/payments/src/generated/ent/sellerverification"
 	"zudomart/modules/payments/src/generated/ent/storepurchase"
 	"zudomart/modules/payments/src/generated/ent/verificationlevelrecord"
+	"zudomart/modules/payments/src/generated/ent/walletfunding"
 	"zudomart/modules/payments/src/generated/ent/webhookevent"
 
 	"entgo.io/ent"
@@ -74,8 +80,18 @@ type Client struct {
 	ProviderCustomer *ProviderCustomerClient
 	// ProviderDispute is the client for interacting with the ProviderDispute builders.
 	ProviderDispute *ProviderDisputeClient
+	// ProviderMovement is the client for interacting with the ProviderMovement builders.
+	ProviderMovement *ProviderMovementClient
 	// ProviderPayoutDestination is the client for interacting with the ProviderPayoutDestination builders.
 	ProviderPayoutDestination *ProviderPayoutDestinationClient
+	// ProviderWallet is the client for interacting with the ProviderWallet builders.
+	ProviderWallet *ProviderWalletClient
+	// ProviderWalletNumber is the client for interacting with the ProviderWalletNumber builders.
+	ProviderWalletNumber *ProviderWalletNumberClient
+	// ReconciliationCase is the client for interacting with the ReconciliationCase builders.
+	ReconciliationCase *ReconciliationCaseClient
+	// ReconciliationRun is the client for interacting with the ReconciliationRun builders.
+	ReconciliationRun *ReconciliationRunClient
 	// SavedCardSetup is the client for interacting with the SavedCardSetup builders.
 	SavedCardSetup *SavedCardSetupClient
 	// SellerVerification is the client for interacting with the SellerVerification builders.
@@ -84,6 +100,8 @@ type Client struct {
 	StorePurchase *StorePurchaseClient
 	// VerificationLevelRecord is the client for interacting with the VerificationLevelRecord builders.
 	VerificationLevelRecord *VerificationLevelRecordClient
+	// WalletFunding is the client for interacting with the WalletFunding builders.
+	WalletFunding *WalletFundingClient
 	// WebhookEvent is the client for interacting with the WebhookEvent builders.
 	WebhookEvent *WebhookEventClient
 }
@@ -111,11 +129,17 @@ func (c *Client) init() {
 	c.PayoutTransfer = NewPayoutTransferClient(c.config)
 	c.ProviderCustomer = NewProviderCustomerClient(c.config)
 	c.ProviderDispute = NewProviderDisputeClient(c.config)
+	c.ProviderMovement = NewProviderMovementClient(c.config)
 	c.ProviderPayoutDestination = NewProviderPayoutDestinationClient(c.config)
+	c.ProviderWallet = NewProviderWalletClient(c.config)
+	c.ProviderWalletNumber = NewProviderWalletNumberClient(c.config)
+	c.ReconciliationCase = NewReconciliationCaseClient(c.config)
+	c.ReconciliationRun = NewReconciliationRunClient(c.config)
 	c.SavedCardSetup = NewSavedCardSetupClient(c.config)
 	c.SellerVerification = NewSellerVerificationClient(c.config)
 	c.StorePurchase = NewStorePurchaseClient(c.config)
 	c.VerificationLevelRecord = NewVerificationLevelRecordClient(c.config)
+	c.WalletFunding = NewWalletFundingClient(c.config)
 	c.WebhookEvent = NewWebhookEventClient(c.config)
 }
 
@@ -225,11 +249,17 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		PayoutTransfer:            NewPayoutTransferClient(cfg),
 		ProviderCustomer:          NewProviderCustomerClient(cfg),
 		ProviderDispute:           NewProviderDisputeClient(cfg),
+		ProviderMovement:          NewProviderMovementClient(cfg),
 		ProviderPayoutDestination: NewProviderPayoutDestinationClient(cfg),
+		ProviderWallet:            NewProviderWalletClient(cfg),
+		ProviderWalletNumber:      NewProviderWalletNumberClient(cfg),
+		ReconciliationCase:        NewReconciliationCaseClient(cfg),
+		ReconciliationRun:         NewReconciliationRunClient(cfg),
 		SavedCardSetup:            NewSavedCardSetupClient(cfg),
 		SellerVerification:        NewSellerVerificationClient(cfg),
 		StorePurchase:             NewStorePurchaseClient(cfg),
 		VerificationLevelRecord:   NewVerificationLevelRecordClient(cfg),
+		WalletFunding:             NewWalletFundingClient(cfg),
 		WebhookEvent:              NewWebhookEventClient(cfg),
 	}, nil
 }
@@ -264,11 +294,17 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		PayoutTransfer:            NewPayoutTransferClient(cfg),
 		ProviderCustomer:          NewProviderCustomerClient(cfg),
 		ProviderDispute:           NewProviderDisputeClient(cfg),
+		ProviderMovement:          NewProviderMovementClient(cfg),
 		ProviderPayoutDestination: NewProviderPayoutDestinationClient(cfg),
+		ProviderWallet:            NewProviderWalletClient(cfg),
+		ProviderWalletNumber:      NewProviderWalletNumberClient(cfg),
+		ReconciliationCase:        NewReconciliationCaseClient(cfg),
+		ReconciliationRun:         NewReconciliationRunClient(cfg),
 		SavedCardSetup:            NewSavedCardSetupClient(cfg),
 		SellerVerification:        NewSellerVerificationClient(cfg),
 		StorePurchase:             NewStorePurchaseClient(cfg),
 		VerificationLevelRecord:   NewVerificationLevelRecordClient(cfg),
+		WalletFunding:             NewWalletFundingClient(cfg),
 		WebhookEvent:              NewWebhookEventClient(cfg),
 	}, nil
 }
@@ -303,8 +339,10 @@ func (c *Client) Use(hooks ...Hook) {
 		c.ConnectedAccountJob, c.CustomerValidation, c.IdempotentRequest,
 		c.OrderPayable, c.OutboxEvent, c.PaymentIntent, c.PaymentRefund,
 		c.PayoutOnboarding, c.PayoutTransfer, c.ProviderCustomer, c.ProviderDispute,
-		c.ProviderPayoutDestination, c.SavedCardSetup, c.SellerVerification,
-		c.StorePurchase, c.VerificationLevelRecord, c.WebhookEvent,
+		c.ProviderMovement, c.ProviderPayoutDestination, c.ProviderWallet,
+		c.ProviderWalletNumber, c.ReconciliationCase, c.ReconciliationRun,
+		c.SavedCardSetup, c.SellerVerification, c.StorePurchase,
+		c.VerificationLevelRecord, c.WalletFunding, c.WebhookEvent,
 	} {
 		n.Use(hooks...)
 	}
@@ -318,8 +356,10 @@ func (c *Client) Intercept(interceptors ...Interceptor) {
 		c.ConnectedAccountJob, c.CustomerValidation, c.IdempotentRequest,
 		c.OrderPayable, c.OutboxEvent, c.PaymentIntent, c.PaymentRefund,
 		c.PayoutOnboarding, c.PayoutTransfer, c.ProviderCustomer, c.ProviderDispute,
-		c.ProviderPayoutDestination, c.SavedCardSetup, c.SellerVerification,
-		c.StorePurchase, c.VerificationLevelRecord, c.WebhookEvent,
+		c.ProviderMovement, c.ProviderPayoutDestination, c.ProviderWallet,
+		c.ProviderWalletNumber, c.ReconciliationCase, c.ReconciliationRun,
+		c.SavedCardSetup, c.SellerVerification, c.StorePurchase,
+		c.VerificationLevelRecord, c.WalletFunding, c.WebhookEvent,
 	} {
 		n.Intercept(interceptors...)
 	}
@@ -356,8 +396,18 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.ProviderCustomer.mutate(ctx, m)
 	case *ProviderDisputeMutation:
 		return c.ProviderDispute.mutate(ctx, m)
+	case *ProviderMovementMutation:
+		return c.ProviderMovement.mutate(ctx, m)
 	case *ProviderPayoutDestinationMutation:
 		return c.ProviderPayoutDestination.mutate(ctx, m)
+	case *ProviderWalletMutation:
+		return c.ProviderWallet.mutate(ctx, m)
+	case *ProviderWalletNumberMutation:
+		return c.ProviderWalletNumber.mutate(ctx, m)
+	case *ReconciliationCaseMutation:
+		return c.ReconciliationCase.mutate(ctx, m)
+	case *ReconciliationRunMutation:
+		return c.ReconciliationRun.mutate(ctx, m)
 	case *SavedCardSetupMutation:
 		return c.SavedCardSetup.mutate(ctx, m)
 	case *SellerVerificationMutation:
@@ -366,6 +416,8 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.StorePurchase.mutate(ctx, m)
 	case *VerificationLevelRecordMutation:
 		return c.VerificationLevelRecord.mutate(ctx, m)
+	case *WalletFundingMutation:
+		return c.WalletFunding.mutate(ctx, m)
 	case *WebhookEventMutation:
 		return c.WebhookEvent.mutate(ctx, m)
 	default:
@@ -2235,6 +2287,139 @@ func (c *ProviderDisputeClient) mutate(ctx context.Context, m *ProviderDisputeMu
 	}
 }
 
+// ProviderMovementClient is a client for the ProviderMovement schema.
+type ProviderMovementClient struct {
+	config
+}
+
+// NewProviderMovementClient returns a client for the ProviderMovement from the given config.
+func NewProviderMovementClient(c config) *ProviderMovementClient {
+	return &ProviderMovementClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `providermovement.Hooks(f(g(h())))`.
+func (c *ProviderMovementClient) Use(hooks ...Hook) {
+	c.hooks.ProviderMovement = append(c.hooks.ProviderMovement, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `providermovement.Intercept(f(g(h())))`.
+func (c *ProviderMovementClient) Intercept(interceptors ...Interceptor) {
+	c.inters.ProviderMovement = append(c.inters.ProviderMovement, interceptors...)
+}
+
+// Create returns a builder for creating a ProviderMovement entity.
+func (c *ProviderMovementClient) Create() *ProviderMovementCreate {
+	mutation := newProviderMovementMutation(c.config, OpCreate)
+	return &ProviderMovementCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of ProviderMovement entities.
+func (c *ProviderMovementClient) CreateBulk(builders ...*ProviderMovementCreate) *ProviderMovementCreateBulk {
+	return &ProviderMovementCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *ProviderMovementClient) MapCreateBulk(slice any, setFunc func(*ProviderMovementCreate, int)) *ProviderMovementCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &ProviderMovementCreateBulk{err: fmt.Errorf("calling to ProviderMovementClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*ProviderMovementCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &ProviderMovementCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for ProviderMovement.
+func (c *ProviderMovementClient) Update() *ProviderMovementUpdate {
+	mutation := newProviderMovementMutation(c.config, OpUpdate)
+	return &ProviderMovementUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *ProviderMovementClient) UpdateOne(_m *ProviderMovement) *ProviderMovementUpdateOne {
+	mutation := newProviderMovementMutation(c.config, OpUpdateOne, withProviderMovement(_m))
+	return &ProviderMovementUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *ProviderMovementClient) UpdateOneID(id uuid.UUID) *ProviderMovementUpdateOne {
+	mutation := newProviderMovementMutation(c.config, OpUpdateOne, withProviderMovementID(id))
+	return &ProviderMovementUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for ProviderMovement.
+func (c *ProviderMovementClient) Delete() *ProviderMovementDelete {
+	mutation := newProviderMovementMutation(c.config, OpDelete)
+	return &ProviderMovementDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *ProviderMovementClient) DeleteOne(_m *ProviderMovement) *ProviderMovementDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *ProviderMovementClient) DeleteOneID(id uuid.UUID) *ProviderMovementDeleteOne {
+	builder := c.Delete().Where(providermovement.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &ProviderMovementDeleteOne{builder}
+}
+
+// Query returns a query builder for ProviderMovement.
+func (c *ProviderMovementClient) Query() *ProviderMovementQuery {
+	return &ProviderMovementQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeProviderMovement},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a ProviderMovement entity by its id.
+func (c *ProviderMovementClient) Get(ctx context.Context, id uuid.UUID) (*ProviderMovement, error) {
+	return c.Query().Where(providermovement.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *ProviderMovementClient) GetX(ctx context.Context, id uuid.UUID) *ProviderMovement {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *ProviderMovementClient) Hooks() []Hook {
+	return c.hooks.ProviderMovement
+}
+
+// Interceptors returns the client interceptors.
+func (c *ProviderMovementClient) Interceptors() []Interceptor {
+	return c.inters.ProviderMovement
+}
+
+func (c *ProviderMovementClient) mutate(ctx context.Context, m *ProviderMovementMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&ProviderMovementCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&ProviderMovementUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&ProviderMovementUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&ProviderMovementDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown ProviderMovement mutation op: %q", m.Op())
+	}
+}
+
 // ProviderPayoutDestinationClient is a client for the ProviderPayoutDestination schema.
 type ProviderPayoutDestinationClient struct {
 	config
@@ -2365,6 +2550,538 @@ func (c *ProviderPayoutDestinationClient) mutate(ctx context.Context, m *Provide
 		return (&ProviderPayoutDestinationDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
 		return nil, fmt.Errorf("ent: unknown ProviderPayoutDestination mutation op: %q", m.Op())
+	}
+}
+
+// ProviderWalletClient is a client for the ProviderWallet schema.
+type ProviderWalletClient struct {
+	config
+}
+
+// NewProviderWalletClient returns a client for the ProviderWallet from the given config.
+func NewProviderWalletClient(c config) *ProviderWalletClient {
+	return &ProviderWalletClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `providerwallet.Hooks(f(g(h())))`.
+func (c *ProviderWalletClient) Use(hooks ...Hook) {
+	c.hooks.ProviderWallet = append(c.hooks.ProviderWallet, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `providerwallet.Intercept(f(g(h())))`.
+func (c *ProviderWalletClient) Intercept(interceptors ...Interceptor) {
+	c.inters.ProviderWallet = append(c.inters.ProviderWallet, interceptors...)
+}
+
+// Create returns a builder for creating a ProviderWallet entity.
+func (c *ProviderWalletClient) Create() *ProviderWalletCreate {
+	mutation := newProviderWalletMutation(c.config, OpCreate)
+	return &ProviderWalletCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of ProviderWallet entities.
+func (c *ProviderWalletClient) CreateBulk(builders ...*ProviderWalletCreate) *ProviderWalletCreateBulk {
+	return &ProviderWalletCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *ProviderWalletClient) MapCreateBulk(slice any, setFunc func(*ProviderWalletCreate, int)) *ProviderWalletCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &ProviderWalletCreateBulk{err: fmt.Errorf("calling to ProviderWalletClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*ProviderWalletCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &ProviderWalletCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for ProviderWallet.
+func (c *ProviderWalletClient) Update() *ProviderWalletUpdate {
+	mutation := newProviderWalletMutation(c.config, OpUpdate)
+	return &ProviderWalletUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *ProviderWalletClient) UpdateOne(_m *ProviderWallet) *ProviderWalletUpdateOne {
+	mutation := newProviderWalletMutation(c.config, OpUpdateOne, withProviderWallet(_m))
+	return &ProviderWalletUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *ProviderWalletClient) UpdateOneID(id uuid.UUID) *ProviderWalletUpdateOne {
+	mutation := newProviderWalletMutation(c.config, OpUpdateOne, withProviderWalletID(id))
+	return &ProviderWalletUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for ProviderWallet.
+func (c *ProviderWalletClient) Delete() *ProviderWalletDelete {
+	mutation := newProviderWalletMutation(c.config, OpDelete)
+	return &ProviderWalletDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *ProviderWalletClient) DeleteOne(_m *ProviderWallet) *ProviderWalletDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *ProviderWalletClient) DeleteOneID(id uuid.UUID) *ProviderWalletDeleteOne {
+	builder := c.Delete().Where(providerwallet.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &ProviderWalletDeleteOne{builder}
+}
+
+// Query returns a query builder for ProviderWallet.
+func (c *ProviderWalletClient) Query() *ProviderWalletQuery {
+	return &ProviderWalletQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeProviderWallet},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a ProviderWallet entity by its id.
+func (c *ProviderWalletClient) Get(ctx context.Context, id uuid.UUID) (*ProviderWallet, error) {
+	return c.Query().Where(providerwallet.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *ProviderWalletClient) GetX(ctx context.Context, id uuid.UUID) *ProviderWallet {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *ProviderWalletClient) Hooks() []Hook {
+	return c.hooks.ProviderWallet
+}
+
+// Interceptors returns the client interceptors.
+func (c *ProviderWalletClient) Interceptors() []Interceptor {
+	return c.inters.ProviderWallet
+}
+
+func (c *ProviderWalletClient) mutate(ctx context.Context, m *ProviderWalletMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&ProviderWalletCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&ProviderWalletUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&ProviderWalletUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&ProviderWalletDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown ProviderWallet mutation op: %q", m.Op())
+	}
+}
+
+// ProviderWalletNumberClient is a client for the ProviderWalletNumber schema.
+type ProviderWalletNumberClient struct {
+	config
+}
+
+// NewProviderWalletNumberClient returns a client for the ProviderWalletNumber from the given config.
+func NewProviderWalletNumberClient(c config) *ProviderWalletNumberClient {
+	return &ProviderWalletNumberClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `providerwalletnumber.Hooks(f(g(h())))`.
+func (c *ProviderWalletNumberClient) Use(hooks ...Hook) {
+	c.hooks.ProviderWalletNumber = append(c.hooks.ProviderWalletNumber, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `providerwalletnumber.Intercept(f(g(h())))`.
+func (c *ProviderWalletNumberClient) Intercept(interceptors ...Interceptor) {
+	c.inters.ProviderWalletNumber = append(c.inters.ProviderWalletNumber, interceptors...)
+}
+
+// Create returns a builder for creating a ProviderWalletNumber entity.
+func (c *ProviderWalletNumberClient) Create() *ProviderWalletNumberCreate {
+	mutation := newProviderWalletNumberMutation(c.config, OpCreate)
+	return &ProviderWalletNumberCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of ProviderWalletNumber entities.
+func (c *ProviderWalletNumberClient) CreateBulk(builders ...*ProviderWalletNumberCreate) *ProviderWalletNumberCreateBulk {
+	return &ProviderWalletNumberCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *ProviderWalletNumberClient) MapCreateBulk(slice any, setFunc func(*ProviderWalletNumberCreate, int)) *ProviderWalletNumberCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &ProviderWalletNumberCreateBulk{err: fmt.Errorf("calling to ProviderWalletNumberClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*ProviderWalletNumberCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &ProviderWalletNumberCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for ProviderWalletNumber.
+func (c *ProviderWalletNumberClient) Update() *ProviderWalletNumberUpdate {
+	mutation := newProviderWalletNumberMutation(c.config, OpUpdate)
+	return &ProviderWalletNumberUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *ProviderWalletNumberClient) UpdateOne(_m *ProviderWalletNumber) *ProviderWalletNumberUpdateOne {
+	mutation := newProviderWalletNumberMutation(c.config, OpUpdateOne, withProviderWalletNumber(_m))
+	return &ProviderWalletNumberUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *ProviderWalletNumberClient) UpdateOneID(id uuid.UUID) *ProviderWalletNumberUpdateOne {
+	mutation := newProviderWalletNumberMutation(c.config, OpUpdateOne, withProviderWalletNumberID(id))
+	return &ProviderWalletNumberUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for ProviderWalletNumber.
+func (c *ProviderWalletNumberClient) Delete() *ProviderWalletNumberDelete {
+	mutation := newProviderWalletNumberMutation(c.config, OpDelete)
+	return &ProviderWalletNumberDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *ProviderWalletNumberClient) DeleteOne(_m *ProviderWalletNumber) *ProviderWalletNumberDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *ProviderWalletNumberClient) DeleteOneID(id uuid.UUID) *ProviderWalletNumberDeleteOne {
+	builder := c.Delete().Where(providerwalletnumber.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &ProviderWalletNumberDeleteOne{builder}
+}
+
+// Query returns a query builder for ProviderWalletNumber.
+func (c *ProviderWalletNumberClient) Query() *ProviderWalletNumberQuery {
+	return &ProviderWalletNumberQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeProviderWalletNumber},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a ProviderWalletNumber entity by its id.
+func (c *ProviderWalletNumberClient) Get(ctx context.Context, id uuid.UUID) (*ProviderWalletNumber, error) {
+	return c.Query().Where(providerwalletnumber.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *ProviderWalletNumberClient) GetX(ctx context.Context, id uuid.UUID) *ProviderWalletNumber {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *ProviderWalletNumberClient) Hooks() []Hook {
+	return c.hooks.ProviderWalletNumber
+}
+
+// Interceptors returns the client interceptors.
+func (c *ProviderWalletNumberClient) Interceptors() []Interceptor {
+	return c.inters.ProviderWalletNumber
+}
+
+func (c *ProviderWalletNumberClient) mutate(ctx context.Context, m *ProviderWalletNumberMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&ProviderWalletNumberCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&ProviderWalletNumberUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&ProviderWalletNumberUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&ProviderWalletNumberDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown ProviderWalletNumber mutation op: %q", m.Op())
+	}
+}
+
+// ReconciliationCaseClient is a client for the ReconciliationCase schema.
+type ReconciliationCaseClient struct {
+	config
+}
+
+// NewReconciliationCaseClient returns a client for the ReconciliationCase from the given config.
+func NewReconciliationCaseClient(c config) *ReconciliationCaseClient {
+	return &ReconciliationCaseClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `reconciliationcase.Hooks(f(g(h())))`.
+func (c *ReconciliationCaseClient) Use(hooks ...Hook) {
+	c.hooks.ReconciliationCase = append(c.hooks.ReconciliationCase, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `reconciliationcase.Intercept(f(g(h())))`.
+func (c *ReconciliationCaseClient) Intercept(interceptors ...Interceptor) {
+	c.inters.ReconciliationCase = append(c.inters.ReconciliationCase, interceptors...)
+}
+
+// Create returns a builder for creating a ReconciliationCase entity.
+func (c *ReconciliationCaseClient) Create() *ReconciliationCaseCreate {
+	mutation := newReconciliationCaseMutation(c.config, OpCreate)
+	return &ReconciliationCaseCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of ReconciliationCase entities.
+func (c *ReconciliationCaseClient) CreateBulk(builders ...*ReconciliationCaseCreate) *ReconciliationCaseCreateBulk {
+	return &ReconciliationCaseCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *ReconciliationCaseClient) MapCreateBulk(slice any, setFunc func(*ReconciliationCaseCreate, int)) *ReconciliationCaseCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &ReconciliationCaseCreateBulk{err: fmt.Errorf("calling to ReconciliationCaseClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*ReconciliationCaseCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &ReconciliationCaseCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for ReconciliationCase.
+func (c *ReconciliationCaseClient) Update() *ReconciliationCaseUpdate {
+	mutation := newReconciliationCaseMutation(c.config, OpUpdate)
+	return &ReconciliationCaseUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *ReconciliationCaseClient) UpdateOne(_m *ReconciliationCase) *ReconciliationCaseUpdateOne {
+	mutation := newReconciliationCaseMutation(c.config, OpUpdateOne, withReconciliationCase(_m))
+	return &ReconciliationCaseUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *ReconciliationCaseClient) UpdateOneID(id uuid.UUID) *ReconciliationCaseUpdateOne {
+	mutation := newReconciliationCaseMutation(c.config, OpUpdateOne, withReconciliationCaseID(id))
+	return &ReconciliationCaseUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for ReconciliationCase.
+func (c *ReconciliationCaseClient) Delete() *ReconciliationCaseDelete {
+	mutation := newReconciliationCaseMutation(c.config, OpDelete)
+	return &ReconciliationCaseDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *ReconciliationCaseClient) DeleteOne(_m *ReconciliationCase) *ReconciliationCaseDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *ReconciliationCaseClient) DeleteOneID(id uuid.UUID) *ReconciliationCaseDeleteOne {
+	builder := c.Delete().Where(reconciliationcase.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &ReconciliationCaseDeleteOne{builder}
+}
+
+// Query returns a query builder for ReconciliationCase.
+func (c *ReconciliationCaseClient) Query() *ReconciliationCaseQuery {
+	return &ReconciliationCaseQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeReconciliationCase},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a ReconciliationCase entity by its id.
+func (c *ReconciliationCaseClient) Get(ctx context.Context, id uuid.UUID) (*ReconciliationCase, error) {
+	return c.Query().Where(reconciliationcase.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *ReconciliationCaseClient) GetX(ctx context.Context, id uuid.UUID) *ReconciliationCase {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *ReconciliationCaseClient) Hooks() []Hook {
+	return c.hooks.ReconciliationCase
+}
+
+// Interceptors returns the client interceptors.
+func (c *ReconciliationCaseClient) Interceptors() []Interceptor {
+	return c.inters.ReconciliationCase
+}
+
+func (c *ReconciliationCaseClient) mutate(ctx context.Context, m *ReconciliationCaseMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&ReconciliationCaseCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&ReconciliationCaseUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&ReconciliationCaseUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&ReconciliationCaseDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown ReconciliationCase mutation op: %q", m.Op())
+	}
+}
+
+// ReconciliationRunClient is a client for the ReconciliationRun schema.
+type ReconciliationRunClient struct {
+	config
+}
+
+// NewReconciliationRunClient returns a client for the ReconciliationRun from the given config.
+func NewReconciliationRunClient(c config) *ReconciliationRunClient {
+	return &ReconciliationRunClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `reconciliationrun.Hooks(f(g(h())))`.
+func (c *ReconciliationRunClient) Use(hooks ...Hook) {
+	c.hooks.ReconciliationRun = append(c.hooks.ReconciliationRun, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `reconciliationrun.Intercept(f(g(h())))`.
+func (c *ReconciliationRunClient) Intercept(interceptors ...Interceptor) {
+	c.inters.ReconciliationRun = append(c.inters.ReconciliationRun, interceptors...)
+}
+
+// Create returns a builder for creating a ReconciliationRun entity.
+func (c *ReconciliationRunClient) Create() *ReconciliationRunCreate {
+	mutation := newReconciliationRunMutation(c.config, OpCreate)
+	return &ReconciliationRunCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of ReconciliationRun entities.
+func (c *ReconciliationRunClient) CreateBulk(builders ...*ReconciliationRunCreate) *ReconciliationRunCreateBulk {
+	return &ReconciliationRunCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *ReconciliationRunClient) MapCreateBulk(slice any, setFunc func(*ReconciliationRunCreate, int)) *ReconciliationRunCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &ReconciliationRunCreateBulk{err: fmt.Errorf("calling to ReconciliationRunClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*ReconciliationRunCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &ReconciliationRunCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for ReconciliationRun.
+func (c *ReconciliationRunClient) Update() *ReconciliationRunUpdate {
+	mutation := newReconciliationRunMutation(c.config, OpUpdate)
+	return &ReconciliationRunUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *ReconciliationRunClient) UpdateOne(_m *ReconciliationRun) *ReconciliationRunUpdateOne {
+	mutation := newReconciliationRunMutation(c.config, OpUpdateOne, withReconciliationRun(_m))
+	return &ReconciliationRunUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *ReconciliationRunClient) UpdateOneID(id uuid.UUID) *ReconciliationRunUpdateOne {
+	mutation := newReconciliationRunMutation(c.config, OpUpdateOne, withReconciliationRunID(id))
+	return &ReconciliationRunUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for ReconciliationRun.
+func (c *ReconciliationRunClient) Delete() *ReconciliationRunDelete {
+	mutation := newReconciliationRunMutation(c.config, OpDelete)
+	return &ReconciliationRunDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *ReconciliationRunClient) DeleteOne(_m *ReconciliationRun) *ReconciliationRunDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *ReconciliationRunClient) DeleteOneID(id uuid.UUID) *ReconciliationRunDeleteOne {
+	builder := c.Delete().Where(reconciliationrun.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &ReconciliationRunDeleteOne{builder}
+}
+
+// Query returns a query builder for ReconciliationRun.
+func (c *ReconciliationRunClient) Query() *ReconciliationRunQuery {
+	return &ReconciliationRunQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeReconciliationRun},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a ReconciliationRun entity by its id.
+func (c *ReconciliationRunClient) Get(ctx context.Context, id uuid.UUID) (*ReconciliationRun, error) {
+	return c.Query().Where(reconciliationrun.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *ReconciliationRunClient) GetX(ctx context.Context, id uuid.UUID) *ReconciliationRun {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *ReconciliationRunClient) Hooks() []Hook {
+	return c.hooks.ReconciliationRun
+}
+
+// Interceptors returns the client interceptors.
+func (c *ReconciliationRunClient) Interceptors() []Interceptor {
+	return c.inters.ReconciliationRun
+}
+
+func (c *ReconciliationRunClient) mutate(ctx context.Context, m *ReconciliationRunMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&ReconciliationRunCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&ReconciliationRunUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&ReconciliationRunUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&ReconciliationRunDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown ReconciliationRun mutation op: %q", m.Op())
 	}
 }
 
@@ -2900,6 +3617,139 @@ func (c *VerificationLevelRecordClient) mutate(ctx context.Context, m *Verificat
 	}
 }
 
+// WalletFundingClient is a client for the WalletFunding schema.
+type WalletFundingClient struct {
+	config
+}
+
+// NewWalletFundingClient returns a client for the WalletFunding from the given config.
+func NewWalletFundingClient(c config) *WalletFundingClient {
+	return &WalletFundingClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `walletfunding.Hooks(f(g(h())))`.
+func (c *WalletFundingClient) Use(hooks ...Hook) {
+	c.hooks.WalletFunding = append(c.hooks.WalletFunding, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `walletfunding.Intercept(f(g(h())))`.
+func (c *WalletFundingClient) Intercept(interceptors ...Interceptor) {
+	c.inters.WalletFunding = append(c.inters.WalletFunding, interceptors...)
+}
+
+// Create returns a builder for creating a WalletFunding entity.
+func (c *WalletFundingClient) Create() *WalletFundingCreate {
+	mutation := newWalletFundingMutation(c.config, OpCreate)
+	return &WalletFundingCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of WalletFunding entities.
+func (c *WalletFundingClient) CreateBulk(builders ...*WalletFundingCreate) *WalletFundingCreateBulk {
+	return &WalletFundingCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *WalletFundingClient) MapCreateBulk(slice any, setFunc func(*WalletFundingCreate, int)) *WalletFundingCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &WalletFundingCreateBulk{err: fmt.Errorf("calling to WalletFundingClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*WalletFundingCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &WalletFundingCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for WalletFunding.
+func (c *WalletFundingClient) Update() *WalletFundingUpdate {
+	mutation := newWalletFundingMutation(c.config, OpUpdate)
+	return &WalletFundingUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *WalletFundingClient) UpdateOne(_m *WalletFunding) *WalletFundingUpdateOne {
+	mutation := newWalletFundingMutation(c.config, OpUpdateOne, withWalletFunding(_m))
+	return &WalletFundingUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *WalletFundingClient) UpdateOneID(id uuid.UUID) *WalletFundingUpdateOne {
+	mutation := newWalletFundingMutation(c.config, OpUpdateOne, withWalletFundingID(id))
+	return &WalletFundingUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for WalletFunding.
+func (c *WalletFundingClient) Delete() *WalletFundingDelete {
+	mutation := newWalletFundingMutation(c.config, OpDelete)
+	return &WalletFundingDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *WalletFundingClient) DeleteOne(_m *WalletFunding) *WalletFundingDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *WalletFundingClient) DeleteOneID(id uuid.UUID) *WalletFundingDeleteOne {
+	builder := c.Delete().Where(walletfunding.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &WalletFundingDeleteOne{builder}
+}
+
+// Query returns a query builder for WalletFunding.
+func (c *WalletFundingClient) Query() *WalletFundingQuery {
+	return &WalletFundingQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeWalletFunding},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a WalletFunding entity by its id.
+func (c *WalletFundingClient) Get(ctx context.Context, id uuid.UUID) (*WalletFunding, error) {
+	return c.Query().Where(walletfunding.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *WalletFundingClient) GetX(ctx context.Context, id uuid.UUID) *WalletFunding {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *WalletFundingClient) Hooks() []Hook {
+	return c.hooks.WalletFunding
+}
+
+// Interceptors returns the client interceptors.
+func (c *WalletFundingClient) Interceptors() []Interceptor {
+	return c.inters.WalletFunding
+}
+
+func (c *WalletFundingClient) mutate(ctx context.Context, m *WalletFundingMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&WalletFundingCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&WalletFundingUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&WalletFundingUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&WalletFundingDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown WalletFunding mutation op: %q", m.Op())
+	}
+}
+
 // WebhookEventClient is a client for the WebhookEvent schema.
 type WebhookEventClient struct {
 	config
@@ -3039,17 +3889,19 @@ type (
 		BillingAuthorization, BillingSubscription, ConnectedAccount,
 		ConnectedAccountJob, CustomerValidation, IdempotentRequest, OrderPayable,
 		OutboxEvent, PaymentIntent, PaymentRefund, PayoutOnboarding, PayoutTransfer,
-		ProviderCustomer, ProviderDispute, ProviderPayoutDestination, SavedCardSetup,
-		SellerVerification, StorePurchase, VerificationLevelRecord,
-		WebhookEvent []ent.Hook
+		ProviderCustomer, ProviderDispute, ProviderMovement, ProviderPayoutDestination,
+		ProviderWallet, ProviderWalletNumber, ReconciliationCase, ReconciliationRun,
+		SavedCardSetup, SellerVerification, StorePurchase, VerificationLevelRecord,
+		WalletFunding, WebhookEvent []ent.Hook
 	}
 	inters struct {
 		BillingAuthorization, BillingSubscription, ConnectedAccount,
 		ConnectedAccountJob, CustomerValidation, IdempotentRequest, OrderPayable,
 		OutboxEvent, PaymentIntent, PaymentRefund, PayoutOnboarding, PayoutTransfer,
-		ProviderCustomer, ProviderDispute, ProviderPayoutDestination, SavedCardSetup,
-		SellerVerification, StorePurchase, VerificationLevelRecord,
-		WebhookEvent []ent.Interceptor
+		ProviderCustomer, ProviderDispute, ProviderMovement, ProviderPayoutDestination,
+		ProviderWallet, ProviderWalletNumber, ReconciliationCase, ReconciliationRun,
+		SavedCardSetup, SellerVerification, StorePurchase, VerificationLevelRecord,
+		WalletFunding, WebhookEvent []ent.Interceptor
 	}
 )
 
