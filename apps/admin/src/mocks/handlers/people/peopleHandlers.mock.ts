@@ -5,6 +5,7 @@ import { registerPeopleAccountsAdminMockHandlers } from "./peopleAccountsAdmin.m
 import { registerPeopleBlackApplicationMockHandlers } from "./peopleBlackApplications.mock";
 import { registerPeopleBusinessDocumentMockHandlers } from "./peopleBusinessDocuments.mock";
 import { countIdentityCasesNeedingReview, registerPeopleIdentityCheckMockHandlers } from "./peopleIdentityChecks.mock";
+import { registerPeopleLinkedProfileMockHandlers } from "./peopleLinkedProfiles.mock";
 import { registerPeopleUserActionMockHandlers } from "./peopleUserActions.mock";
 import { registerPeopleUsernameMockHandlers } from "./peopleUsernames.mock";
 import { registerPeopleUserMockHandlers } from "./peopleUsers.mock";
@@ -15,6 +16,7 @@ export function registerPeopleMockHandlers(): void {
   registerPeopleUsernameMockHandlers();
   registerPeopleAccountsAdminMockHandlers();
   registerPeopleUserActionMockHandlers();
+  registerPeopleLinkedProfileMockHandlers();
   registerPeopleBusinessDocumentMockHandlers();
   registerPeopleBlackApplicationMockHandlers();
   registerPeopleVerificationMockHandlers();

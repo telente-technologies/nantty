@@ -25,6 +25,7 @@ const accountActionsInBody = new Set(["SUSPEND_USER", "BAN_USER", "REMOVE_GROUP"
 const isAccountActionInBody = (body: unknown) => typeof body === "object" && body !== null && accountActionsInBody.has(String((body as { action?: unknown }).action));
 
 const userReaders: AdminPermission[] = ["users:read", "support:tickets", "verification:review", "moderation:reports"];
+const linkedProfileReaders: AdminPermission[] = ["users:read", "support:tickets", "users:moderate"];
 const usernameReaders: AdminPermission[] = ["usernames:manage", "usernames:reassign", "reserved-usernames:manage"];
 const usernameHoldReaders: AdminPermission[] = ["usernames:reassign", "reserved-usernames:manage"];
 const verificationReaders: AdminPermission[] = ["verification:review", "verification:revoke"];
@@ -84,6 +85,9 @@ const peopleRoutes: ApiRouteDefinition[] = [
   write("POST", "/admin/users/:id/delete", ["users:delete"], sensitive),
   write("POST", "/admin/users/:id/username/{reassign|assign-held}", ["usernames:reassign"], sensitive),
   write("POST", "/admin/users/:id/username/{withhold|reclaim}", ["usernames:manage"], sensitive),
+  read("/admin/users/:id/linked-profiles", linkedProfileReaders),
+  write("POST", "/admin/users/:id/linked-profiles/{convert|resolve}", ["users:moderate"], sensitive),
+  read("/admin/linked-profiles/conflicts", linkedProfileReaders),
   read("/admin/usernames/withheld", usernameReaders),
   read("/admin/usernames/confusables", usernameReaders),
   read("/admin/usernames/held", usernameHoldReaders),
@@ -127,6 +131,7 @@ const verificationRoutes: ApiRouteDefinition[] = [
   read("/admin/brands/:id/documents/:documentId", ["brands:review"]),
   write("POST", "/admin/brands/:id/official-status/{approve|reject|request-info}", ["brands:review"], reasoned),
   write("POST", "/admin/brands/:id/official-status/revoke", ["brands:revoke"], sensitive),
+  write("POST", "/admin/brands/:id/reassign", ["brands:revoke"], sensitive),
 ];
 
 const trustRoutes: ApiRouteDefinition[] = [

@@ -69,6 +69,22 @@ export function registerBrandDirectoryMockHandlers(): void {
     });
   });
 
+  registerMockRoute("POST", "/admin/brands/:brandId/reassign", (request) => {
+    requireMockPermission(request, "brands:revoke");
+    requireMockStepUp(request);
+    const brand = findBrandRecordOrFail(request.params.brandId);
+    const body = readJsonObjectBody(request);
+    const reason = readRequiredReason(body);
+    const toAccountId = typeof body["toAccountId"] === "string" ? body["toAccountId"].trim() : "";
+    if (!toAccountId) throw new MockHttpError(400, "VALIDATION_FAILED", "Enter the receiving account ID.", [{ path: "toAccountId", message: "Required" }]);
+    const owner = brand.members.find((member) => member.role === "OWNER");
+    if (owner?.userId === toAccountId) throw new MockHttpError(409, "NO_CHANGE", "That account already owns the brand.");
+    const before = owner?.userId ?? null;
+    if (owner) owner.userId = toAccountId;
+    recordMockAuditEntry(request, { action: "brand.reassigned", area: "brands", target: { type: "brand", id: brand.id, label: brand.name }, reason, before: { ownerAccountId: before }, after: { ownerAccountId: toAccountId } });
+    return respondWithJson(200, { brandId: brand.id, ownerAccountId: toAccountId });
+  });
+
   for (const action of ["approve", "reject", "request-info", "revoke"] as const) {
     registerMockRoute("POST", `/admin/brands/:brandId/official-status/${action}`, (request) => applyOfficialDecision(request, action));
   }
