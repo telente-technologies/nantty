@@ -121,6 +121,16 @@ describe("feed interactions", () => {
     expect(store.events).toEqual([expect.objectContaining({ eventType: "post.viewed", data: expect.objectContaining({ actorId: viewerId, dwellMs: 4000, position: 2 }) })]);
   });
 
+  it("SOC-05: repeated dwell events in one cooldown window emit a single post.viewed", async () => {
+    const store = createStore(clip());
+    const batch = createRecordFeedInteractionBatchHandler(createRecordFeedInteractionHandler(store.context));
+    await batch({ viewerId, events: [{ postId: clipId, kind: "view" }, ...Array.from({ length: 49 }, () => ({ postId: clipId, kind: "dwell" as const, dwellMs: 20_000 }))] });
+    expect(store.events.filter((event) => event.eventType === "post.viewed")).toHaveLength(1);
+    store.advance(11 * 60_000);
+    await batch({ viewerId, events: [{ postId: clipId, kind: "dwell", dwellMs: 20_000 }, { postId: clipId, kind: "dwell", dwellMs: 20_000 }] });
+    expect(store.events.filter((event) => event.eventType === "post.viewed")).toHaveLength(2);
+  });
+
   it("attributes a follow once, and only when the viewer really follows the author", async () => {
     const unfollowed = createStore(clip());
     await createRecordFeedInteractionHandler(unfollowed.context)({ viewerId, postId: clipId, kind: "follow" });

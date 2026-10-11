@@ -11,21 +11,21 @@ import type { HandlerContext } from "../../src/types/handlerContext.type.js";
 
 interface FollowRow { id: string; followerId: string; followeeId: string; state: "requested" | "accepted" | "rejected"; postNotifications: "off" | "posts" | "posts_and_lives" }
 
-function fakeDatabase(follows: FollowRow[], blocks: Array<[string, string]> = []) {
+function fakeDatabase(follows: FollowRow[], blocks: Array<[string, string]> = [], livePosts: Array<{ id: string; authorId: string }> = []) {
   const findManyCalls: unknown[] = [];
   const db = {
     follow: {
       findUnique: async ({ where }: { where: { followerId_followeeId: { followerId: string; followeeId: string } } }) =>
         follows.find((row) => row.followerId === where.followerId_followeeId.followerId && row.followeeId === where.followerId_followeeId.followeeId) ?? null,
       update: async ({ where, data }: { where: { id: string }; data: Partial<FollowRow> }) => Object.assign(follows.find((row) => row.id === where.id)!, data),
-      findMany: async (args: { where: { followeeId: string; state: string; postNotifications: { in: string[] } }; take: number; cursor?: { id: string } }) => {
+      findMany: async (args: { where: { followeeId: string; state: string; postNotifications: { in: string[] }; id?: { gt: string } }; take: number }) => {
         findManyCalls.push(args);
         const matching = follows.filter((row) => row.followeeId === args.where.followeeId && row.state === args.where.state && args.where.postNotifications.in.includes(row.postNotifications)).sort((a, b) => a.id.localeCompare(b.id));
-        const start = args.cursor === undefined ? 0 : matching.findIndex((row) => row.id === args.cursor!.id) + 1;
-        return matching.slice(start, start + args.take);
+        return matching.filter((row) => args.where.id === undefined || row.id > args.where.id.gt).slice(0, args.take);
       },
       upsert: async (args: { update: Partial<FollowRow> }) => args,
     },
+    post: { count: async ({ where }: { where: { id: string; authorId: string } }) => livePosts.filter((post) => post.id === where.id && post.authorId === where.authorId).length },
     block: {
       count: async ({ where }: { where: { OR: Array<{ blockerId: string; blockedId: string }> } }) => blocks.filter(([blocker, blocked]) => where.OR.some((pair) => pair.blockerId === blocker && pair.blockedId === blocked)).length,
       findMany: async ({ where }: { where: { blockerId?: string | { in: string[] }; blockedId?: string | { in: string[] } } }) =>
@@ -109,5 +109,25 @@ describe("internal subscriber pages", () => {
     expect(seen).not.toContain("pending");
     const lives = await list({ authorId: "star", scope: "lives", cursor: undefined, limit: 500 });
     expect(lives.data.every((entry) => Number(entry.userId.slice(1)) % 2 === 1)).toBe(true);
+  });
+
+  it("keeps paging when the follower at the page boundary unfollows mid fan-out", async () => {
+    const follows: FollowRow[] = Array.from({ length: 5 }, (_, index) => ({ id: `f${index}`, followerId: `u${index}`, followeeId: "star", state: "accepted" as const, postNotifications: "posts" as const }));
+    const { context } = fakeDatabase(follows);
+    const list = createListPostNotificationSubscribersHandler(context);
+    const first = await list({ authorId: "star", scope: "posts", cursor: undefined, limit: 2 });
+    expect(first.nextCursor).toBe("f1");
+    follows.splice(1, 1);
+    const second = await list({ authorId: "star", scope: "posts", cursor: first.nextCursor!, limit: 2 });
+    expect(second.data.map((entry) => entry.userId)).toEqual(["u2", "u3"]);
+  });
+
+  it("returns an empty last page once the post being announced is deleted, removed or not the author's", async () => {
+    const follows: FollowRow[] = [{ id: "f1", followerId: "u1", followeeId: "star", state: "accepted", postNotifications: "posts" }];
+    const { context } = fakeDatabase(follows, [], [{ id: "p-live", authorId: "star" }, { id: "p-other", authorId: "someone" }]);
+    const list = createListPostNotificationSubscribersHandler(context);
+    expect((await list({ authorId: "star", scope: "posts", cursor: undefined, limit: 10, postId: "p-live" })).data).toEqual([{ userId: "u1" }]);
+    expect(await list({ authorId: "star", scope: "posts", cursor: undefined, limit: 10, postId: "p-gone" })).toEqual({ data: [], nextCursor: null });
+    expect(await list({ authorId: "star", scope: "posts", cursor: undefined, limit: 10, postId: "p-other" })).toEqual({ data: [], nextCursor: null });
   });
 });

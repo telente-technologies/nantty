@@ -46,7 +46,14 @@ function buildContext(state: FakeState, clipRanker: FeedRanker, consent = true):
     block: { findMany: async () => state.blocks },
     postDailyStat: { groupBy: async () => Object.entries(state.watchTotals).map(([postId, totals]) => ({ postId, _sum: totals })) },
     feedRankSnapshot: {
-      deleteMany: async () => ({ count: 0 }),
+      deleteMany: async ({ where }: { where: { id?: { in: string[] } } }) => {
+        for (const snapshotId of where.id?.in ?? []) state.snapshots.delete(snapshotId);
+        return { count: 0 };
+      },
+      findMany: async ({ where, skip }: { where: { viewerId: string; surface: string }; skip: number }) =>
+        [...state.snapshots.values()].filter((row) => row["viewerId"] === where.viewerId && row["surface"] === where.surface).sort((left, right) => String(right["id"]).localeCompare(String(left["id"]))).slice(skip),
+      findFirst: async ({ where }: { where: { viewerId: null; surface: string } }) =>
+        [...state.snapshots.values()].filter((row) => row["viewerId"] === null && row["surface"] === where.surface).sort((left, right) => String(right["id"]).localeCompare(String(left["id"])))[0] ?? null,
       create: async ({ data }: { data: Record<string, unknown> }) => {
         snapshotCounter += 1;
         const row = { ...data, id: `0192f0a0-0000-7000-9000-${snapshotCounter.toString().padStart(12, "0")}` };
@@ -118,6 +125,26 @@ describe("clips For You tab", () => {
     await expect(listClips({ viewerId: viewer, tab: "forYou", cursor: "not-a-cursor", limit: 1 })).rejects.toMatchObject({ code: "CURSOR_EXPIRED" });
     expect(decodeSnapshotCursor(encodeSnapshotCursor({ snapshotId: id(1), offset: 4 }))).toEqual({ snapshotId: id(1), offset: 4 });
     expect(decodeSnapshotCursor(Buffer.from(JSON.stringify({ s: "x", o: -1 })).toString("base64url"))).toBeNull();
+  });
+});
+
+describe("clips snapshot bounds", () => {
+  it("SOC-06: keeps only the newest snapshots per signed-in viewer", async () => {
+    const state: FakeState = { posts: [clip(1, "a1"), clip(2, "a2")], follows: [], blocks: [], snapshots: new Map(), watchTotals: {} };
+    const listClips = createListClipsHandler(buildContext(state, reverseRanker()));
+    const first = await listClips({ viewerId: viewer, tab: "forYou", cursor: undefined, limit: 1 });
+    for (let index = 0; index < 10; index += 1) await listClips({ viewerId: viewer, tab: "forYou", cursor: undefined, limit: 1 });
+    expect(state.snapshots.size).toBe(3);
+    await expect(listClips({ viewerId: viewer, tab: "forYou", cursor: first.nextCursor ?? undefined, limit: 1 })).rejects.toMatchObject({ code: "CURSOR_EXPIRED" });
+  });
+
+  it("SOC-06: guests share one fresh snapshot instead of writing one per request", async () => {
+    const calls: { candidates: readonly RankingCandidate[]; personalized: boolean }[] = [];
+    const state: FakeState = { posts: [clip(1, "a1"), clip(2, "a2")], follows: [], blocks: [], snapshots: new Map(), watchTotals: {} };
+    const listClips = createListClipsHandler(buildContext(state, reverseRanker(calls)));
+    for (let index = 0; index < 5; index += 1) await listClips({ viewerId: undefined, tab: "forYou", cursor: undefined, limit: 1 });
+    expect(state.snapshots.size).toBe(1);
+    expect(calls).toHaveLength(1);
   });
 });
 

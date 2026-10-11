@@ -87,6 +87,23 @@ describe("top-level comment ranking", () => {
     expect(decodeRankedCursor(Buffer.from(JSON.stringify({ s: "x", o: -1 })).toString("base64url"))).toBeNull();
   });
 
+  it("SOC-06: reuses a fresh snapshot for repeated first-page loads and expires old cursors", async () => {
+    const { store } = seed(15);
+    const handler = createListPostCommentsHandler(store.context);
+    const first = await handler({ viewerId: viewer, postId, cursor: undefined, limit: 5 });
+    for (let index = 0; index < 20; index += 1) await handler({ viewerId: viewer, postId, cursor: undefined, limit: 5 });
+    await handler({ viewerId: undefined, postId, cursor: undefined, limit: 5 });
+    await handler({ viewerId: undefined, postId, cursor: undefined, limit: 5 });
+    expect(store.snapshots).toHaveLength(2);
+    const reused = await handler({ viewerId: viewer, postId, cursor: undefined, limit: 20 });
+    expect(reused.nextCursor).toBeNull();
+    store.now = new Date(store.now.getTime() + 61_000);
+    await handler({ viewerId: viewer, postId, cursor: undefined, limit: 5 });
+    expect(store.snapshots).toHaveLength(3);
+    store.now = new Date(store.now.getTime() + 6 * 3_600_000);
+    await expect(handler({ viewerId: viewer, postId, cursor: first.nextCursor ?? undefined, limit: 5 })).rejects.toMatchObject({ code: "CURSOR_EXPIRED" });
+  });
+
   it("hides roots and chain replies from blocked and private accounts", async () => {
     const { store, roots } = seed(4);
     const blockedUser = userId(1);
