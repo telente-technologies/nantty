@@ -37,7 +37,7 @@ export function PostQuotesScreen({ navigation, route }: MainScreenProps<"PostQuo
       {quotes.isPending ? (
         <ListSkeleton />
       ) : quotes.isError ? (
-        <ErrorState message={quotes.error.message} onRetry={() => quotes.refetch()} />
+        <ErrorState error={quotes.error} onRetry={() => quotes.refetch()} />
       ) : (
         <FlatList
           data={posts}

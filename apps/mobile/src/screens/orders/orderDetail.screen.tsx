@@ -19,6 +19,7 @@ import { ordersService } from "@/services/commerce/orders.service";
 import { formatMoneyForDisplay } from "@/utils/formatMoney.util";
 import { ListSkeleton } from "@/components/ui/listSkeleton";
 import { ErrorState } from "@/components/ui/errorState";
+import { describeActionFailure } from "@/errors/errorExperience/describeError";
 
 export function OrderDetailScreen({ navigation, route }: MainScreenProps<"OrderDetail">) {
   const { colors } = useTheme();
@@ -34,7 +35,7 @@ export function OrderDetailScreen({ navigation, route }: MainScreenProps<"OrderD
       <Screen>
         <Header title="Order" />
         {order.isError ? (
-          <ErrorState message="Couldn't load this order." onRetry={() => order.refetch()} />
+          <ErrorState error={order.error} message="Couldn't load this order." onRetry={() => order.refetch()} />
         ) : (
           <ListSkeleton />
         )}
@@ -119,7 +120,7 @@ export function OrderDetailScreen({ navigation, route }: MainScreenProps<"OrderD
         message={isDirect ? "Only confirm if everything arrived as described." : `Only confirm if everything arrived as described. ${detail.store.name} will be paid right away and this can't be undone.`}
         confirmTitle="Yes, release payment"
         confirming={confirmReceipt.isPending}
-        errorMessage={confirmReceipt.isError ? confirmReceipt.error.message : null}
+        errorMessage={confirmReceipt.isError ? describeActionFailure(confirmReceipt.error) : null}
         onConfirm={() => confirmReceipt.mutate(undefined, { onSuccess: () => { setConfirmSheetVisible(false); order.refetch(); } })}
         onClose={() => setConfirmSheetVisible(false)}
       />

@@ -87,7 +87,7 @@ export function OrdersScreen({ navigation }: MainScreenProps<"Orders">) {
           orders.isLoading ? (
             <ListSkeleton />
           ) : orders.isError ? (
-            <ErrorState message="Couldn't load your orders." onRetry={() => orders.refetch()} />
+            <ErrorState error={orders.error} message="Couldn't load your orders." onRetry={() => orders.refetch()} />
           ) : (
             <Text align="center" color={colors.textSubtle} style={styles.state}>No orders here yet.</Text>
           )

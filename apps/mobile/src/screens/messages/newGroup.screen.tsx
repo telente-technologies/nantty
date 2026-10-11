@@ -18,6 +18,7 @@ import { groupsService } from "@/services/social/groups.service";
 import { enqueueLocalMediaForUpload, waitForUploadedMediaId } from "@/services/media/mediaUploadQueue.service";
 import type { LocalMediaFile } from "@/services/media/mediaPreparation.service";
 import type { UserSummary } from "@/types";
+import { describeActionFailure } from "@/errors/errorExperience/describeError";
 
 const MAXIMUM_GROUP_NAME_LENGTH = 60;
 
@@ -106,7 +107,7 @@ export function NewGroupScreen({ navigation, route }: MainScreenProps<"NewGroup"
         )}
         {createConversation.error ? (
           <Text size={13} lineHeight={16.9} color={colors.error}>
-            {createConversation.error.message}
+            {describeActionFailure(createConversation.error)}
           </Text>
         ) : null}
         <Button

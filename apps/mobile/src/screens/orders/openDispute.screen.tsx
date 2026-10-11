@@ -16,6 +16,7 @@ import type { MainScreenProps } from "@/navigation/navigation.types";
 import { generateIdempotencyKey } from "@/services/core/apiClient.service";
 import { disputesService } from "@/services/moderation/disputes.service";
 import type { DisputeReason } from "@/types/commerce.type";
+import { describeActionFailure } from "@/errors/errorExperience/describeError";
 
 const MINIMUM_DESCRIPTION_LENGTH = 20;
 const REASONS_THAT_NEED_PHOTOS = new Set<DisputeReason>(["damaged", "not_as_described", "wrong_item"]);
@@ -99,7 +100,7 @@ export function OpenDisputeScreen({ navigation, route }: MainScreenProps<"OpenDi
       <View style={styles.footer}>
         {submitDispute.isError ? (
           <Text size={12} lineHeight={14.4} color={colors.error} align="center" accessibilityRole="alert">
-            {submitDispute.error.message || "Couldn't open the dispute. Try again."}
+            {describeActionFailure(submitDispute.error) || "Couldn't open the dispute. Try again."}
           </Text>
         ) : null}
         <Button title="Submit dispute" disabled={!readyToSubmit} loading={submitDispute.isPending} onPress={() => submitDispute.mutate()} />

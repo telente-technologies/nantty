@@ -31,7 +31,7 @@ export function PostAnalyticsScreen({ route }: MainScreenProps<"PostAnalytics">)
       <Screen>
         <Header title="Post analytics" />
         {failure?.canRetry ? (
-          <ErrorState message={failure.title} detail={failure.detail} retrying={analytics.isRefetching} onRetry={() => analytics.refetch()} />
+          <ErrorState error={analytics.error} message={failure.title} detail={failure.detail} retrying={analytics.isRefetching} onRetry={() => analytics.refetch()} />
         ) : failure ? (
           <EmptyState title={failure.title} body={failure.detail} icon={<Analytics24Icon size={28} color={colors.textMuted} />} />
         ) : (

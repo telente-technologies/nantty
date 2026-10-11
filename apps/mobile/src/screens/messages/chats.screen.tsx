@@ -80,7 +80,7 @@ export function ChatsScreen() {
       ) : conversations.isLoading ? (
         <View style={styles.skeleton}>{folder === "chats" ? <ChatsSkeleton /> : <ListSkeleton avatarSize={56} />}</View>
       ) : conversations.isError && !conversations.data ? (
-        <ErrorState message="Couldn't load your messages." onRetry={() => conversations.refetch()} />
+        <ErrorState error={conversations.error} message="Couldn't load your messages." onRetry={() => conversations.refetch()} />
       ) : (
         <FlatList
           data={conversations.data ?? []}

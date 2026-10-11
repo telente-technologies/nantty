@@ -8,8 +8,8 @@ import { CommentThreadContext, TOP_LEVEL_PARENT_KEY, useCommentThreadController 
 import { ReplyingToCommentLink } from "@/components/clips/videoReply/commentStickerOverlay";
 import { PostCard } from "@/components/feed/postCard";
 import { ReshareSheet } from "@/components/feed/reshareSheet";
-import { ViewQuotesLink } from "@/components/feed/viewQuotesLink";
 import { toLocalThreadReply, usePostConversation } from "@/components/feed/thread/postThread.hook";
+import { CommentSectionFilterTabs, QuoteThreadItemRow } from "@/components/feed/thread/quoteThreadItem";
 import { SponsoredThreadItem } from "@/components/feed/thread/sponsoredThreadItem";
 import { ThreadComposer } from "@/components/feed/thread/threadComposer";
 import { ThreadEmptyState, ThreadErrorState, ThreadSkeleton, ThreadSortDropdown } from "@/components/feed/thread/threadListParts";
@@ -27,7 +27,7 @@ import { postsService } from "@/services/content/posts.service";
 import { useAuthStore } from "@/store/auth.store";
 import { makeThemedStyles, useTheme } from "@/theme";
 import type { Post } from "@/types";
-import type { ThreadRow, ThreadSort } from "@/types/postThread.type";
+import type { CommentSectionFilter, ThreadRow, ThreadSort } from "@/types/postThread.type";
 import { formatCompactCount } from "@/utils/formatDate.util";
 import { requireAuthThen } from "@/utils/requireAuth.util";
 import { webAppLinks } from "@/config/webAppLinks.config";
@@ -51,11 +51,12 @@ export function PostDetailScreen({ navigation, route }: MainScreenProps<"PostDet
   const isScreenFocused = useIsFocused();
   useScreenshotSharePrompt(post.data, isScreenFocused);
   const [sort, setSort] = useState<ThreadSort>("relevant");
+  const [filter, setFilter] = useState<CommentSectionFilter>("all");
   const [reshareTarget, setReshareTarget] = useState<Post | null>(null);
   const postAuthorId = post.data?.author.id;
   const commentThread = useCommentThreadController(postId, undefined, undefined, postAuthorId);
   const threadListRef = useRef<FlatList<ThreadRow>>(null);
-  const conversation = usePostConversation(postId, sort, () => threadListRef.current?.scrollToOffset({ offset: 0, animated: false }));
+  const conversation = usePostConversation(postId, sort, () => threadListRef.current?.scrollToOffset({ offset: 0, animated: false }), filter);
   const { offerSendInChat, sendInChatElement } = useShareToChat();
 
   const sharePostLink = async () => {
@@ -63,13 +64,13 @@ export function PostDetailScreen({ navigation, route }: MainScreenProps<"PostDet
     postsService.recordPostShare(postId).catch(() => undefined);
   };
 
-  const locallyPostedRows: ThreadRow[] = commentThread
+  const locallyPostedRows: ThreadRow[] = filter === "quotes" ? [] : commentThread
     .locallyPostedCommentsFor(TOP_LEVEL_PARENT_KEY)
     .map((comment) => ({ kind: "reply", key: comment.id, reply: toLocalThreadReply(comment, postAuthorId, false) }));
   const serverIds = new Set(conversation.rows.map((row) => row.key));
   const isPinnedRow = (row: ThreadRow) => row.kind === "reply" && commentThread.applyLocalOverridesToComment(row.reply).isPinned === true;
   const rows = [...locallyPostedRows.filter((row) => !serverIds.has(row.key)), ...conversation.rows]
-    .filter((row) => row.kind === "sponsored" || !commentThread.isCommentDeleted(row.reply.id))
+    .filter((row) => row.kind !== "reply" || !commentThread.isCommentDeleted(row.reply.id))
     .sort((a, b) => Number(isPinnedRow(b)) - Number(isPinnedRow(a)));
   const threadQuery = conversation.query;
 
@@ -107,12 +108,12 @@ export function PostDetailScreen({ navigation, route }: MainScreenProps<"PostDet
         ) : null}
       </Text>
       <View style={styles.threadHeader}>
-        <ThreadSortDropdown sort={sort} onChange={setSort} />
-        <ViewQuotesLink post={post.data} />
+        <CommentSectionFilterTabs filter={filter} onChange={setFilter} quoteCount={post.data.quotes} />
+        {filter === "all" ? <ThreadSortDropdown sort={sort} onChange={setSort} /> : null}
       </View>
     </View>
   ) : (
-    <ErrorState message="This post isn't available." onRetry={() => post.refetch()} />
+    <ErrorState error={post.error} message="This post isn't available." onRetry={() => post.refetch()} />
   );
 
   return (
@@ -144,6 +145,10 @@ export function PostDetailScreen({ navigation, route }: MainScreenProps<"PostDet
             renderItem={({ item }) =>
               item.kind === "sponsored" ? (
                 <SponsoredThreadItem ad={item.ad} postId={postId} />
+              ) : item.kind === "quote" ? (
+                <View style={[styles.conversation, styles.quote]}>
+                  <QuoteThreadItemRow item={item.quote} onOpen={(quotePostId) => navigation.push("PostDetail", { postId: quotePostId })} />
+                </View>
               ) : (
                 <View style={styles.conversation}>
                   <ThreadReplyBranch
@@ -161,6 +166,10 @@ export function PostDetailScreen({ navigation, route }: MainScreenProps<"PostDet
                 <ThreadSkeleton />
               ) : threadQuery.isError && !conversation.isRestartingFromTop ? (
                 <ThreadErrorState onRetry={() => threadQuery.refetch()} />
+              ) : filter === "quotes" ? (
+                <Text size={14} lineHeight={19} color={colors.textMuted} align="center" style={styles.emptyQuotes}>
+                  No quotes yet.
+                </Text>
               ) : (
                 <ThreadEmptyState isGuest={isGuest} />
               )
@@ -192,5 +201,7 @@ const useStyles = makeThemedStyles((colors) =>
     threadHeader: { paddingHorizontal: 16, flexDirection: "row", alignItems: "center", justifyContent: "space-between", borderBottomWidth: StyleSheet.hairlineWidth, borderColor: colors.divider },
     conversation: { paddingBottom: 8, borderBottomWidth: StyleSheet.hairlineWidth, borderColor: colors.divider },
     footer: { height: 24 },
+    quote: { paddingHorizontal: 16, paddingTop: 12 },
+    emptyQuotes: { paddingVertical: 32 },
   }),
 );

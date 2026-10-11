@@ -106,9 +106,9 @@ export function ProductDetailScreen({ navigation, route }: MainScreenProps<"Prod
         {header}
         {product.isError ? (
           product.error instanceof ApiError && product.error.code === "PRODUCT_NOT_AVAILABLE_IN_REGION" ? (
-            <ErrorState message="Not available in your region" />
+            <ErrorState kind="regionUnavailable" />
           ) : (
-            <ErrorState message="Couldn't load this product." onRetry={() => product.refetch()} />
+            <ErrorState error={product.error} message="Couldn't load this product." onRetry={() => product.refetch()} />
           )
         ) : (
           <ListSkeleton />

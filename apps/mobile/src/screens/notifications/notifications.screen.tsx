@@ -101,7 +101,7 @@ export function NotificationsScreen({ navigation }: MainScreenProps<"Notificatio
           notifications.isLoading ? (
             <ListSkeleton />
           ) : notifications.isError ? (
-            <ErrorState compact message="Couldn't load notifications." onRetry={() => notifications.refetch()} retrying={notifications.isRefetching} />
+            <ErrorState error={notifications.error} compact message="Couldn't load notifications." onRetry={() => notifications.refetch()} retrying={notifications.isRefetching} />
           ) : (
             <EmptyState
               compact

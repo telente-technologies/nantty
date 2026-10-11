@@ -74,7 +74,7 @@ export function ChatPasscodeScreen() {
           </>
         ) : null}
         {errorMessage ? <Text size={12} lineHeight={16} color={colors.error}>{errorMessage}</Text> : null}
-        <Button title={mode === "remove" ? "Remove passcode" : "Save passcode"} variant={mode === "remove" ? "danger" : "primary"} onPress={() => submit().catch(() => setErrorMessage("Something went wrong"))} />
+        <Button title={mode === "remove" ? "Remove passcode" : "Save passcode"} variant={mode === "remove" ? "danger" : "primary"} onPress={() => submit().catch(() => setErrorMessage("We couldn't save your passcode. Try again."))} />
         <Button title="Cancel" variant="outline" onPress={returnToOverview} />
       </SettingsPage>
     );

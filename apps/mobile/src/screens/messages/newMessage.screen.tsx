@@ -55,7 +55,7 @@ export function NewMessageScreen({ navigation }: MainScreenProps<"NewMessage">) 
           people.isPending ? (
             <ListSkeleton padding={0} />
           ) : people.isError ? (
-            <ErrorState compact message="Couldn't load people." onRetry={() => people.refetch()} retrying={people.isRefetching} />
+            <ErrorState error={people.error} compact message="Couldn't load people." onRetry={() => people.refetch()} retrying={people.isRefetching} />
           ) : (
             <EmptyState compact title={debounced ? `No one matches “${debounced}”` : "No one to message yet"} body={debounced ? "Check the spelling or try their username." : "Follow people to start a conversation."} />
           )

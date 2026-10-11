@@ -31,6 +31,7 @@ import type { Conversation, ConversationSettingsUpdate, UserSummary } from "@/ty
 import { LockSimple24Icon } from "@/components/icons";
 import { IconRow } from "@/components/ui/iconRow";
 import { spacing } from "@/constants/spacing.constant";
+import { describeActionFailure } from "@/errors/errorExperience/describeError";
 
 export function ConversationInfoScreen({ navigation, route }: MainScreenProps<"ConversationInfo">) {
   const { colors } = useTheme();
@@ -127,7 +128,7 @@ export function ConversationInfoScreen({ navigation, route }: MainScreenProps<"C
         </Text>
       </View>
       {conversation.isError && !conversation.data ? (
-        <ErrorState message="Couldn't load chat info." onRetry={() => conversation.refetch()} retrying={conversation.isRefetching} />
+        <ErrorState error={conversation.error} message="Couldn't load chat info." onRetry={() => conversation.refetch()} retrying={conversation.isRefetching} />
       ) : conversation.isPending ? (
         <ListSkeleton rows={5} />
       ) : (
@@ -149,7 +150,7 @@ export function ConversationInfoScreen({ navigation, route }: MainScreenProps<"C
           )}
           {changeGroupPhoto.error ? (
             <Text size={typeScale.sm} lineHeight={16.9} color={colors.error}>
-              {changeGroupPhoto.error.message}
+              {describeActionFailure(changeGroupPhoto.error)}
             </Text>
           ) : null}
           <View style={styles.nameRow}>

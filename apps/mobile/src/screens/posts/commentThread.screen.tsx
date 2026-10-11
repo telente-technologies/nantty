@@ -91,10 +91,10 @@ export function CommentThreadScreen({ navigation, route }: MainScreenProps<"Comm
           <ScrollView style={styles.flex} contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled" keyboardDismissMode={Platform.OS === "ios" ? "interactive" : "on-drag"}>
             {initialLoading ? <ThreadSkeleton rows={2} /> : null}
             {showCommentGone ? (
-              <ErrorState message="This reply is no longer available." detail="It may have been deleted." />
+              <ErrorState kind="contentGone" subject="comment" variant="section" />
             ) : null}
             {commentDenied && !initialLoading ? (
-              <ErrorState message="You can't view this reply." detail="You don't have permission to see it." />
+              <ErrorState kind="forbidden" variant="section" title="You can't view this reply" description="You don't have permission to see it." />
             ) : null}
             {commentFailed && !initialLoading ? (
               <ErrorState

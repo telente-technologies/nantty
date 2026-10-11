@@ -37,7 +37,7 @@ export function ChatSettingsScreen() {
         {settings.isLoading ? (
           <ListSkeleton rows={4} avatarSize={24} />
         ) : settings.isError || !settings.data ? (
-          <ErrorState message="Couldn't load chat settings." onRetry={() => settings.refetch()} />
+          <ErrorState error={settings.error} message="Couldn't load chat settings." onRetry={() => settings.refetch()} />
         ) : (
           <>
             <SettingsGroup>
