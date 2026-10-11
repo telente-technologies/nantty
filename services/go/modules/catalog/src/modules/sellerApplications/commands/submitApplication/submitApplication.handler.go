@@ -2,17 +2,20 @@ package submitapplication
 
 import (
 	"context"
+	"log/slog"
 	"regexp"
 	"strings"
 
 	"github.com/google/uuid"
 
 	"zudomart/modules/catalog/src/container"
+	"zudomart/modules/catalog/src/databases/schema"
 	catalogerrors "zudomart/modules/catalog/src/errors"
 	"zudomart/modules/catalog/src/events"
 	"zudomart/modules/catalog/src/generated/ent"
 	"zudomart/modules/catalog/src/generated/ent/category"
 	"zudomart/modules/catalog/src/generated/ent/sellerapplication"
+	"zudomart/modules/catalog/src/interfaces"
 	applicationservices "zudomart/modules/catalog/src/modules/sellerApplications/services"
 	"zudomart/modules/catalog/src/utils"
 	"zudomart/platform/secretbox"
@@ -37,6 +40,7 @@ func (handler Handler) Execute(ctx context.Context, command Command) (applicatio
 		return applicationservices.MyApplication{}, err
 	}
 	scope := "sellerApplications.submit:" + command.AccountId.String()
+	var claimed *uuid.UUID
 	applicationId, err := container.RunIdempotently(ctx, handler.Container, scope, command.IdempotencyKey, container.FingerprintOfRequest(request), func(tx *ent.Tx) (string, error) {
 		previous, err := tx.SellerApplication.Query().Where(sellerapplication.AccountID(command.AccountId), sellerapplication.StatusIn("pending", "approved")).First(ctx)
 		if err == nil && previous.Status == "approved" {
@@ -48,7 +52,12 @@ func (handler Handler) Execute(ctx context.Context, command Command) (applicatio
 		if !ent.IsNotFound(err) {
 			return "", err
 		}
-		created, err := handler.create(ctx, tx, command, chosen)
+		applicationId := schema.NewTimeOrderedUuid()
+		if err := handler.Container.LinkedProfiles.Claim(ctx, command.AccountId, interfaces.LinkedClaim{Kind: "store", ProfileId: applicationId}); err != nil {
+			return "", err
+		}
+		claimed = &applicationId
+		created, err := handler.create(ctx, tx, command, chosen, applicationId)
 		if err != nil {
 			return "", err
 		}
@@ -56,6 +65,11 @@ func (handler Handler) Execute(ctx context.Context, command Command) (applicatio
 			"applicationId": created.ID, "accountId": command.AccountId, "storeName": created.StoreName, "categoryId": created.CategoryID,
 		})
 	})
+	if err != nil && claimed != nil {
+		if releaseErr := handler.Container.LinkedProfiles.Release(ctx, command.AccountId, interfaces.LinkedClaim{Kind: "store", ProfileId: *claimed}); releaseErr != nil {
+			handler.Container.Logger.Error("release linked store claim", slog.Any("error", releaseErr))
+		}
+	}
 	if ent.IsConstraintError(err) {
 		return applicationservices.MyApplication{}, catalogerrors.ApplicationPending
 	}
@@ -69,7 +83,7 @@ func (handler Handler) Execute(ctx context.Context, command Command) (applicatio
 	return applicationservices.PresentMine(row), nil
 }
 
-func (handler Handler) create(ctx context.Context, tx *ent.Tx, command Command, chosen *ent.Category) (*ent.SellerApplication, error) {
+func (handler Handler) create(ctx context.Context, tx *ent.Tx, command Command, chosen *ent.Category, applicationId uuid.UUID) (*ent.SellerApplication, error) {
 	request, key := command.Request, handler.Container.Settings.DataEncryptionKey
 	seal := func(text string) ([]byte, error) { return secretbox.SealWithAesGcm(key, []byte(text)) }
 	phone, err := seal(phoneDigits.ReplaceAllString(request.Phone, ""))
@@ -85,7 +99,7 @@ func (handler Handler) create(ctx context.Context, tx *ent.Tx, command Command, 
 		return nil, err
 	}
 	number := request.IdentityDocument.DocumentNumber
-	return tx.SellerApplication.Create().SetAccountID(command.AccountId).SetStoreName(strings.TrimSpace(request.StoreName)).SetCategoryID(chosen.ID).
+	return tx.SellerApplication.Create().SetID(applicationId).SetAccountID(command.AccountId).SetStoreName(strings.TrimSpace(request.StoreName)).SetCategoryID(chosen.ID).
 		SetCategoryName(chosen.Name).SetDescription(strings.TrimSpace(request.Description)).SetPhoneSealed(phone).SetAddressLine(strings.TrimSpace(request.AddressLine)).
 		SetCity(strings.TrimSpace(request.City)).SetState(strings.TrimSpace(request.State)).SetIdentityDocumentType(request.IdentityDocument.DocumentType).
 		SetIdentityDocumentNumberSealed(document).SetIdentityDocumentLast4(number[len(number)-4:]).SetIdentityDocumentPhotoURL(request.IdentityDocument.DocumentPhotoUrl).

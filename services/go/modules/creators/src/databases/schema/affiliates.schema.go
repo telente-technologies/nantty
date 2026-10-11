@@ -100,7 +100,7 @@ func (AffiliateCommission) Fields() []ent.Field {
 		field.Int64("commission_bps").Immutable(),
 		field.Int64("commission_minor").Immutable(),
 		field.String("currency").NotEmpty().MaxLen(3).Immutable(),
-		field.Enum("status").Values("paid", "reversed").Default("paid"),
+		field.Enum("status").Values("pending", "processing", "paid", "reversed").Default("pending"),
 		field.Int64("reversed_minor").Default(0),
 		field.Time("ordered_at").Optional().Nillable().Immutable(),
 		field.Time("paid_at").Optional().Nillable(),
@@ -124,8 +124,9 @@ func (AffiliateCommissionReversal) Fields() []ent.Field {
 		field.String("commission_id").NotEmpty().MaxLen(80).Immutable(),
 		field.String("refund_key").NotEmpty().MaxLen(160).Immutable(),
 		field.Int64("amount_minor").Immutable(),
-		field.Int64("recovered_minor").Immutable(),
-		field.Int64("shortfall_minor").Immutable(),
+		field.Int64("recovered_minor"),
+		field.Int64("shortfall_minor"),
+		field.Bool("applied").Default(true),
 	}
 }
 

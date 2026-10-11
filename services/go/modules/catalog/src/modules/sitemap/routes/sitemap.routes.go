@@ -8,5 +8,13 @@ import (
 )
 
 func MountSitemapRoutes(mux *http.ServeMux, deployed *container.Container) {
-	mux.Handle("GET /api/v1/sitemap/{kind}", http.HandlerFunc(controllers.SitemapController{Container: deployed}.List))
+	list := controllers.SitemapController{Container: deployed}.List
+	forKind := func(kind string) http.Handler {
+		return http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
+			request.SetPathValue("kind", kind)
+			list(writer, request)
+		})
+	}
+	mux.Handle("GET /api/v1/sitemap/products", forKind("products"))
+	mux.Handle("GET /api/v1/sitemap/stores", forKind("stores"))
 }

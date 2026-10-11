@@ -2,15 +2,14 @@ package creators
 
 import (
 	"context"
-	"database/sql"
 	"net/http"
 	"testing"
 
 	"github.com/google/uuid"
 
+	"zudomart/modules/creators/src/generated/ent/affiliatecommission"
 	affiliateservices "zudomart/modules/creators/src/modules/affiliates/services"
 	"zudomart/modules/creators/src/repositories"
-	"zudomart/modules/ledger/src/databases"
 	ledgermodels "zudomart/modules/ledger/src/modules/journal/models"
 )
 
@@ -69,23 +68,26 @@ func TestAffiliateCommissionIsCreditedOncePerOrderAndProductOnRelease(t *testing
 			t.Fatal(err)
 		}
 	}
-	if payable := harness.balance(ledgermodels.CreatorEarningsPayableAccount(creator, "NGN")); payable != 144_000 {
-		t.Fatalf("8%% of each attributed line after the 10%% refund, once per order item: %d", payable)
+	if owed := harness.commissionOwed(creator); owed != 144_000 {
+		t.Fatalf("8%% of each attributed line after the 10%% refund, once per order item: %d", owed)
 	}
-	if payable := harness.balance(ledgermodels.CreatorEarningsPayableAccount(other, "NGN")); payable != 0 {
-		t.Fatalf("creators outside the store's program earn nothing: %d", payable)
+	if owed := harness.commissionOwed(other); owed != 0 {
+		t.Fatalf("creators outside the store's program earn nothing: %d", owed)
+	}
+	if payable := harness.balance(ledgermodels.CreatorEarningsPayableAccount(creator, "NGN")); payable != 0 {
+		t.Fatalf("commissions are paid from the seller's wallet, never booked as platform-owed earnings: %d", payable)
 	}
 	_, ledger := harness.call(http.MethodGet, "/api/v1/seller/affiliates/commission-ledger", sellerToken, "", nil)
-	if entries := ledger["data"].([]any); len(entries) != 2 || entries[0].(map[string]any)["creatorUsername"] != "ada" || entries[0].(map[string]any)["status"] != "paid" {
+	if entries := ledger["data"].([]any); len(entries) != 2 || entries[0].(map[string]any)["creatorUsername"] != "ada" || entries[0].(map[string]any)["status"] != "pending" {
 		t.Fatalf("ledger: %v", ledger)
 	}
 	_, overview := harness.call(http.MethodGet, "/api/v1/seller/affiliates/overview", sellerToken, "", nil)
-	if overview["activeCreatorsCount"] != float64(1) || overview["commissionsPaid"].(map[string]any)["amountMinor"] != float64(144_000) {
+	if overview["activeCreatorsCount"] != float64(1) || overview["commissionsOwed"].(map[string]any)["amountMinor"] != float64(144_000) || overview["commissionsPaid"].(map[string]any)["amountMinor"] != float64(0) {
 		t.Fatalf("overview: %v", overview)
 	}
 	_, mine := harness.call(http.MethodGet, "/api/v1/creators/affiliations", creatorToken, "", nil)
 	affiliation := mine["data"].([]any)[0].(map[string]any)
-	if affiliation["status"] != "active" || affiliation["salesCount"] != float64(2) || affiliation["earned"].(map[string]any)["amountMinor"] != float64(144_000) {
+	if affiliation["status"] != "active" || affiliation["salesCount"] != float64(2) || affiliation["earned"].(map[string]any)["amountMinor"] != float64(0) {
 		t.Fatalf("my affiliations: %v", affiliation)
 	}
 	if status, _ := harness.call(http.MethodPatch, "/api/v1/seller/affiliates/creators/"+creator, sellerToken, "", map[string]any{"status": "paused"}); status != http.StatusOK {
@@ -107,11 +109,9 @@ func TestAffiliateCommissionIsCreditedOncePerOrderAndProductOnRelease(t *testing
 	if _, err := harness.module.Affiliates.CreditCommissionsForRelease(context.Background(), lockedSale); err != nil {
 		t.Fatal(err)
 	}
-	payable := ledgermodels.CreatorEarningsPayableAccount(creator, "NGN")
-	if earned := harness.balance(payable); earned != 144_000+100_000 {
-		t.Fatalf("the rate locked at checkout wins over today's rate: %d", earned)
+	if owed := harness.commissionOwed(creator); owed != 144_000+100_000 {
+		t.Fatalf("the rate locked at checkout wins over today's rate: %d", owed)
 	}
-	drain(harness.creatorsHarness, creator, harness.balance(payable)-60_000)
 	refund := affiliateservices.EscrowRefunded{EscrowId: uuid.NewString(), OrderId: refundOrder, Amount: affiliateservices.Money{AmountMinor: 1_000_000, Currency: "NGN"}}
 	refund.Refunded = affiliateservices.Money{AmountMinor: 500_000, Currency: "NGN"}
 	for range 2 {
@@ -119,15 +119,15 @@ func TestAffiliateCommissionIsCreditedOncePerOrderAndProductOnRelease(t *testing
 			t.Fatal(err)
 		}
 	}
-	if left := harness.balance(payable); left != 10_000 {
-		t.Fatalf("half the commission comes back once per refund: %d", left)
+	if owed := harness.commissionOwed(creator); owed != 144_000+50_000 {
+		t.Fatalf("half of an unpaid commission is cancelled once per refund: %d", owed)
 	}
 	refund.Refunded.AmountMinor = 1_000_000
 	if _, err := harness.module.Affiliates.ReverseCommissionsForRefund(context.Background(), refund, "escrow.refunded"); err != nil {
 		t.Fatal(err)
 	}
-	if left, debt := harness.balance(payable), harness.balance(affiliateservices.CreatorEarningsDebtAccount(creator, "NGN")); left != 0 || debt != 40_000 {
-		t.Fatalf("a short balance becomes creator debt: payable %d debt %d", left, debt)
+	if owed := harness.commissionOwed(creator); owed != 144_000 {
+		t.Fatalf("a full refund cancels the rest of the unpaid commission with no debt: %d", owed)
 	}
 	if status, _ := harness.call(http.MethodGet, "/api/v1/seller/affiliates/settings", creatorToken, "", nil); status != http.StatusNotFound {
 		t.Fatalf("only store owners manage the program: %d", status)
@@ -135,15 +135,14 @@ func TestAffiliateCommissionIsCreditedOncePerOrderAndProductOnRelease(t *testing
 	assertHealthy(t, harness.creatorsHarness)
 }
 
-func drain(harness *creatorsHarness, creator string, amount int64) {
-	err := databases.RunInMoneyTransaction(context.Background(), harness.database, func(ctx context.Context, transaction *sql.Tx) error {
-		_, err := harness.ledger.PostBalancedJournalEntry(ctx, transaction, ledgermodels.JournalEntryRequest{Reference: "withdraw-" + creator, Kind: "test.withdraw", Lines: []ledgermodels.JournalLineRequest{
-			{Account: ledgermodels.CreatorEarningsPayableAccount(creator, "NGN"), Direction: ledgermodels.Debit, AmountMinor: amount},
-			{Account: ledgermodels.PlatformProviderBalanceAccount("flutterwave", "NGN"), Direction: ledgermodels.Credit, AmountMinor: amount},
-		}})
-		return err
-	})
+func (harness *httpHarness) commissionOwed(creator string) int64 {
+	rows, err := harness.module.Container.Client(harness.database).AffiliateCommission.Query().Where(affiliatecommission.CreatorID(creator)).All(context.Background())
 	if err != nil {
 		harness.t.Fatal(err)
 	}
+	var total int64
+	for _, row := range rows {
+		total += row.CommissionMinor - row.ReversedMinor
+	}
+	return total
 }

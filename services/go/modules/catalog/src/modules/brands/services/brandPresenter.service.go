@@ -31,6 +31,8 @@ type BrandSummary struct {
 	Verification    *Verification `json:"verification"`
 	Followers       int           `json:"followers"`
 	OfficialStoreId *string       `json:"officialStoreId"`
+	SellingEnabled  bool          `json:"sellingEnabled"`
+	ShowsMart       bool          `json:"showsMart"`
 }
 
 type BrandDetail struct {
@@ -42,6 +44,7 @@ type BrandDetail struct {
 	IsFollowing   bool                    `json:"isFollowing"`
 	OwnerUserId   *string                 `json:"ownerUserId"`
 	OfficialStore *types.StoreSummaryView `json:"officialStore"`
+	Storefront    *types.StoreSummaryView `json:"storefront"`
 }
 
 func OfficialStores(ctx context.Context, deployed *container.Container, brandIds []uuid.UUID) (map[uuid.UUID]*ent.Store, error) {
@@ -56,7 +59,7 @@ func OfficialStores(ctx context.Context, deployed *container.Container, brandIds
 }
 
 func Summarize(row *ent.Brand, official *ent.Store) BrandSummary {
-	summary := BrandSummary{Id: row.ID.String(), Name: row.Name, Handle: row.Slug, Slug: row.Slug, LogoUrl: row.LogoURL, Official: row.OfficialStatus == "OFFICIAL", Followers: row.FollowerCount}
+	summary := BrandSummary{Id: row.ID.String(), Name: row.Name, Handle: row.Slug, Slug: row.Slug, LogoUrl: row.LogoURL, Official: row.OfficialStatus == "OFFICIAL", Followers: row.FollowerCount, SellingEnabled: row.SellingEnabled, ShowsMart: row.SellingEnabled}
 	if summary.Official {
 		summary.Verification = &Verification{Status: "active", Type: "business", Color: "gold", Tier: "OFFICIAL", BadgeVisible: true}
 	}
@@ -99,6 +102,19 @@ func Detail(ctx context.Context, deployed *container.Container, row *ent.Brand, 
 			return detail, err
 		}
 		detail.OfficialStore = &summaries
+	}
+	if row.SellingEnabled {
+		storefront, err := deployed.Client.Store.Query().Where(store.BrandID(row.ID), store.Channel(enums.ChannelBrand), store.Status(enums.StoreActive)).First(ctx)
+		if err != nil && !ent.IsNotFound(err) {
+			return detail, err
+		}
+		if storefront != nil {
+			summary, err := loadStoreSummaries(ctx, deployed, storefront)
+			if err != nil {
+				return detail, err
+			}
+			detail.Storefront = &summary
+		}
 	}
 	if viewer != nil {
 		detail.IsFollowing, err = deployed.Client.CatalogFollow.Query().Where(catalogfollow.TargetKind("brand"), catalogfollow.TargetID(row.ID), catalogfollow.AccountID(*viewer)).Exist(ctx)

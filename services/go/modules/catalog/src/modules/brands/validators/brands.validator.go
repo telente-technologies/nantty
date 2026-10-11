@@ -46,3 +46,19 @@ func ValidateDecision(request dtos.OfficialDecisionRequest) error {
 	issues.CheckLength("reason", request.Reason, 5, 1000)
 	return issues.AsError()
 }
+
+func ValidateUpdateBrand(request dtos.UpdateBrandRequest) error {
+	issues := utils.Issues{}
+	if request.SellingEnabled == nil {
+		issues.Add("sellingEnabled", "is required")
+	}
+	return issues.AsError()
+}
+
+func ValidateCreateStorefront(request dtos.CreateStorefrontRequest) error {
+	issues := utils.Issues{}
+	if request.CountryCode != nil && len(*request.CountryCode) != 2 {
+		issues.Add("countryCode", "must be a two-letter country code")
+	}
+	return issues.AsError()
+}

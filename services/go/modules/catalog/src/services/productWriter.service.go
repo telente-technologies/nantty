@@ -43,6 +43,15 @@ func WriteProduct(ctx context.Context, deployed *container.Container, write Prod
 	if err := checkActiveProductCap(ctx, deployed, write); err != nil {
 		return uuid.Nil, err
 	}
+	if write.ProductId == nil {
+		owner, err := deployed.Client.Store.Get(ctx, write.Store.StoreId)
+		if err != nil {
+			return uuid.Nil, err
+		}
+		if err := AssertStoreAcceptsNewListings(ctx, deployed, owner); err != nil {
+			return uuid.Nil, err
+		}
+	}
 	var product *ent.Product
 	var provisioned []provisionedVariant
 	err = deployed.RunInTransaction(ctx, func(tx *ent.Tx) error {

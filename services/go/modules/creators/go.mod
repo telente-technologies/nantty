@@ -12,6 +12,7 @@ require (
 	google.golang.org/protobuf v1.36.12
 	zudomart/contracts v0.0.0-00010101000000-000000000000
 	zudomart/modules/ledger v0.0.0-00010101000000-000000000000
+	zudomart/modules/payments v0.0.0-00010101000000-000000000000
 	zudomart/platform v0.0.0
 )
 
@@ -92,5 +93,7 @@ require (
 replace zudomart/platform => ../../platform
 
 replace zudomart/modules/ledger => ../ledger
+
+replace zudomart/modules/payments => ../payments
 
 replace zudomart/contracts => ../../../contracts

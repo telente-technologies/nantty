@@ -30,7 +30,9 @@ type AffiliateCommissionReversal struct {
 	RecoveredMinor int64 `json:"recovered_minor,omitempty"`
 	// ShortfallMinor holds the value of the "shortfall_minor" field.
 	ShortfallMinor int64 `json:"shortfall_minor,omitempty"`
-	selectValues   sql.SelectValues
+	// Applied holds the value of the "applied" field.
+	Applied      bool `json:"applied,omitempty"`
+	selectValues sql.SelectValues
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -38,6 +40,8 @@ func (*AffiliateCommissionReversal) scanValues(columns []string) ([]any, error) 
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
+		case affiliatecommissionreversal.FieldApplied:
+			values[i] = new(sql.NullBool)
 		case affiliatecommissionreversal.FieldAmountMinor, affiliatecommissionreversal.FieldRecoveredMinor, affiliatecommissionreversal.FieldShortfallMinor:
 			values[i] = new(sql.NullInt64)
 		case affiliatecommissionreversal.FieldCommissionID, affiliatecommissionreversal.FieldRefundKey:
@@ -103,6 +107,12 @@ func (_m *AffiliateCommissionReversal) assignValues(columns []string, values []a
 			} else if value.Valid {
 				_m.ShortfallMinor = value.Int64
 			}
+		case affiliatecommissionreversal.FieldApplied:
+			if value, ok := values[i].(*sql.NullBool); !ok {
+				return fmt.Errorf("unexpected type %T for field applied", values[i])
+			} else if value.Valid {
+				_m.Applied = value.Bool
+			}
 		default:
 			_m.selectValues.Set(columns[i], values[i])
 		}
@@ -156,6 +166,9 @@ func (_m *AffiliateCommissionReversal) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("shortfall_minor=")
 	builder.WriteString(fmt.Sprintf("%v", _m.ShortfallMinor))
+	builder.WriteString(", ")
+	builder.WriteString("applied=")
+	builder.WriteString(fmt.Sprintf("%v", _m.Applied))
 	builder.WriteByte(')')
 	return builder.String()
 }

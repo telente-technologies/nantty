@@ -26,6 +26,8 @@ const (
 	FieldRecoveredMinor = "recovered_minor"
 	// FieldShortfallMinor holds the string denoting the shortfall_minor field in the database.
 	FieldShortfallMinor = "shortfall_minor"
+	// FieldApplied holds the string denoting the applied field in the database.
+	FieldApplied = "applied"
 	// Table holds the table name of the affiliatecommissionreversal in the database.
 	Table = "affiliate_commission_reversals"
 )
@@ -39,6 +41,7 @@ var Columns = []string{
 	FieldAmountMinor,
 	FieldRecoveredMinor,
 	FieldShortfallMinor,
+	FieldApplied,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -58,6 +61,8 @@ var (
 	CommissionIDValidator func(string) error
 	// RefundKeyValidator is a validator for the "refund_key" field. It is called by the builders before save.
 	RefundKeyValidator func(string) error
+	// DefaultApplied holds the default value on creation for the "applied" field.
+	DefaultApplied bool
 	// DefaultID holds the default value on creation for the "id" field.
 	DefaultID func() uuid.UUID
 )
@@ -98,4 +103,9 @@ func ByRecoveredMinor(opts ...sql.OrderTermOption) OrderOption {
 // ByShortfallMinor orders the results by the shortfall_minor field.
 func ByShortfallMinor(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldShortfallMinor, opts...).ToFunc()
+}
+
+// ByApplied orders the results by the applied field.
+func ByApplied(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldApplied, opts...).ToFunc()
 }

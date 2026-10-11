@@ -5,6 +5,8 @@ import (
 	"net/http"
 	"time"
 
+	paymentservices "zudomart/modules/payments/src/modules/gateway/services"
+
 	"google.golang.org/grpc"
 
 	moneyv1 "zudomart/contracts/gen/go/zudomart/money/v1"
@@ -45,6 +47,13 @@ func NewCreatorsModule(ctx context.Context, dependencies servicemodule.Dependenc
 	}
 	module, err := StartCreatorsModuleWithSettings(ctx, settings, dependencies, loaders.MoneyModuleOverrides{})
 	if err != nil {
+		return nil, err
+	}
+	payments, err := paymentservices.SharedPaymentGateway()
+	if err != nil {
+		return nil, err
+	}
+	if err := module.UsePayments(payments); err != nil {
 		return nil, err
 	}
 	loaders.RegisterMoneyGrpcService(module.RegisterGrpcServices)
@@ -129,7 +138,27 @@ func (module *Module) MountRoutes(mux *http.ServeMux) {
 	branddealroutes.MountBrandDealsRoutes(mux, branddealcontrollers.BrandDealsController{Deals: branddealservices.BrandDeals{Container: module.Container, Program: module.Program}})
 }
 
+func (module *Module) UsePayments(payments *paymentservices.PaymentGateway) error {
+	module.Container.Payments = payments
+	module.Affiliates.Container.Payments = payments
+	return module.Affiliates.RegisterMovementHandlers()
+}
+
 func (module *Module) RunBackgroundWorkersUntilContextDone(ctx context.Context) error {
+	if module.Container.Payments != nil {
+		go func() {
+			ticker := time.NewTicker(time.Minute)
+			defer ticker.Stop()
+			for {
+				select {
+				case <-ctx.Done():
+					return
+				case <-ticker.C:
+					module.Affiliates.SettlePendingCommissions(ctx, 100)
+				}
+			}
+		}()
+	}
 	return platformevents.RelayOutboxEventsUntilContextDone(ctx, platformevents.OutboxRelayOptions{
 		Store:     ledgerevents.OutboxRelayStore{Database: module.Container.Resources.Database, Table: module.Container.Outbox, Now: time.Now},
 		Publisher: module.Container.Resources.Publisher,

@@ -4,14 +4,19 @@ import (
 	"context"
 	"crypto/rand"
 	"encoding/hex"
+	"log/slog"
 	"strings"
 
 	"github.com/google/uuid"
 
 	"zudomart/modules/catalog/src/container"
+	"zudomart/modules/catalog/src/databases/schema"
+	"zudomart/modules/catalog/src/enums"
 	catalogerrors "zudomart/modules/catalog/src/errors"
 	"zudomart/modules/catalog/src/events"
 	"zudomart/modules/catalog/src/generated/ent"
+	"zudomart/modules/catalog/src/generated/ent/store"
+	"zudomart/modules/catalog/src/interfaces"
 	"zudomart/modules/catalog/src/modules/stores/dtos"
 	"zudomart/modules/catalog/src/services"
 	"zudomart/platform/commerceports"
@@ -49,10 +54,18 @@ func (handler Handler) Execute(ctx context.Context, command Command) (Result, er
 	if err != nil {
 		return Result{}, err
 	}
+	if err := handler.refuseSecondStore(ctx, command.AccountId); err != nil {
+		return Result{}, err
+	}
+	storeId := schema.NewTimeOrderedUuid()
+	claim := interfaces.LinkedClaim{Kind: "store", ProfileId: profile.ProfileId, StoreId: &storeId}
+	if err := handler.Container.LinkedProfiles.Claim(ctx, command.AccountId, claim); err != nil {
+		return Result{}, err
+	}
 	var created *ent.Store
 	err = handler.Container.RunInTransaction(ctx, func(tx *ent.Tx) error {
 		var createError error
-		created, createError = tx.Store.Create().SetOwnerAccountID(command.AccountId).SetBusinessProfileID(profile.ProfileId).SetName(strings.TrimSpace(request.Name)).
+		created, createError = tx.Store.Create().SetID(storeId).SetOwnerAccountID(command.AccountId).SetBusinessProfileID(profile.ProfileId).SetName(strings.TrimSpace(request.Name)).
 			SetSlug(slug).SetDescription(request.Description).SetCountryCode(country).SetCurrency(currency).Save(ctx)
 		if createError != nil {
 			return createError
@@ -64,6 +77,11 @@ func (handler Handler) Execute(ctx context.Context, command Command) (Result, er
 			"storeId": created.ID, "ownerAccountId": command.AccountId, "businessProfileId": profile.ProfileId, "currency": currency, "countryCode": country,
 		})
 	})
+	if err != nil {
+		if releaseErr := handler.Container.LinkedProfiles.Release(ctx, command.AccountId, claim); releaseErr != nil {
+			handler.Container.Logger.Error("release linked store claim", slog.Any("error", releaseErr))
+		}
+	}
 	if ent.IsConstraintError(err) {
 		return Result{}, catalogerrors.StoreAlreadyExists
 	}
@@ -101,6 +119,17 @@ func (handler Handler) chooseSlug(ctx context.Context, request dtos.CreateStoreR
 		candidate = base + "-" + hex.EncodeToString(suffix)
 	}
 	return "", catalogerrors.StoreSlugTaken
+}
+
+func (handler Handler) refuseSecondStore(ctx context.Context, accountId uuid.UUID) error {
+	owned, err := handler.Container.Client.Store.Query().Where(store.OwnerAccountID(accountId), store.Channel(enums.ChannelStore), store.StatusNEQ(enums.StoreClosed)).Exist(ctx)
+	if err != nil {
+		return err
+	}
+	if owned {
+		return catalogerrors.ProfileLimitStoreOrBusiness
+	}
+	return nil
 }
 
 func firstError(primary, fallback error) error {
