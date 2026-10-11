@@ -10,6 +10,7 @@ const reasonMessages: Record<string, string> = {
   idle: "You were signed out after 15 minutes without activity.",
   expired: "Your session ended. Sign in again to continue.",
   "signed-out": "You signed out.",
+  privileges: "Your admin access changed. Sign in again to use your new permissions.",
   "mfa-expired": "Your sign-in step expired. Enter your password again.",
 };
 

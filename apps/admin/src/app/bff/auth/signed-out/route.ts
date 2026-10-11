@@ -4,7 +4,7 @@ import { sendJsonToAdminBackend } from "@/server/adminApiTransport.service";
 import { clearEverySessionCookie, readApiTokensFromCookies } from "@/server/adminSession.service";
 import { readSafeRelativeRedirectPath } from "@/server/requestOriginGuard.service";
 
-const knownReasons = new Set(["idle", "expired", "signed-out"]);
+const knownReasons = new Set(["idle", "expired", "signed-out", "privileges"]);
 
 export async function GET(request: NextRequest) {
   const tokens = readApiTokensFromCookies(request.cookies);

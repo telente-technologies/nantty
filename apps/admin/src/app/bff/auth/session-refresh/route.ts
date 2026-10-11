@@ -1,6 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 
-import { revalidateAdminWithBackend } from "@/server/adminAuthentication.service";
+import { havePrivilegesChanged, revalidateAdminWithBackend } from "@/server/adminAuthentication.service";
 import { nowInEpochSeconds, readApiTokensFromCookies, readCachedSessionViewFromCookies, writeApiTokenCookies, writeCachedSessionViewCookie } from "@/server/adminSession.service";
 import { readSafeRelativeRedirectPath } from "@/server/requestOriginGuard.service";
 
@@ -8,9 +8,10 @@ export async function GET(request: NextRequest) {
   const nextPath = readSafeRelativeRedirectPath(request.nextUrl.searchParams.get("next"), "/");
   const view = readCachedSessionViewFromCookies(request.cookies);
   const revalidated = view ? await revalidateAdminWithBackend(readApiTokensFromCookies(request.cookies)) : null;
-  if (!view || !revalidated) {
+  const privilegesChanged = Boolean(view && revalidated && havePrivilegesChanged(view.admin, revalidated.admin));
+  if (!view || !revalidated || privilegesChanged) {
     const signedOutUrl = new URL("/bff/auth/signed-out", request.nextUrl.origin);
-    signedOutUrl.searchParams.set("reason", view ? "expired" : "idle");
+    signedOutUrl.searchParams.set("reason", privilegesChanged ? "privileges" : view ? "expired" : "idle");
     signedOutUrl.searchParams.set("next", nextPath);
     return NextResponse.redirect(signedOutUrl, 303);
   }

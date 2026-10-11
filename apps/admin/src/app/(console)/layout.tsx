@@ -2,6 +2,8 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import type { ReactNode } from "react";
 
+import { ConfirmDialogHost } from "@zudomart/web-kit";
+
 import { StepUpProvider } from "@/components/security/stepUpProvider";
 import { AdminSessionProvider } from "@/components/session/adminSessionProvider";
 import { ConsoleShell } from "@/components/shell/consoleShell";
@@ -17,6 +19,7 @@ export default async function ConsoleLayout({ children }: Readonly<{ children: R
       <ToastProvider>
         <StepUpProvider>
           <ConsoleShell>{children}</ConsoleShell>
+          <ConfirmDialogHost />
         </StepUpProvider>
       </ToastProvider>
     </AdminSessionProvider>
