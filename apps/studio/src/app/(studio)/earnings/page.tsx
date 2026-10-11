@@ -3,50 +3,47 @@
 import { useQuery } from "@tanstack/react-query";
 import { Suspense } from "react";
 
-import { AccountHealthSummary } from "@/components/accountHealth/accountHealthSummary";
+import { BrandDealsCard } from "@/components/earnings/brandDealsCard";
+import { EarningsHistoryCard, RevenueRulesCard, WithdrawalsCard } from "@/components/earnings/earningsHistoryCard";
 import { PayoutOnboardingPanel } from "@/components/payouts/payoutOnboardingPanel";
-import { usePayoutStateQuery } from "@/components/payouts/payoutStateQuery.hook";
 import { WalletVerificationBanner, ZudomartBalanceCard } from "@/components/payouts/zudomartBalanceCard";
 import { ErrorState, Skeleton } from "@/components/ui/feedback";
+import { Card, Muted, PageHeader, pageStyles } from "@/components/ui/studioPage";
+import { webappLinks } from "@/config/webappLinks.config";
 import { readErrorMessageForDisplay } from "@/services/clientApi.service";
 import { payoutOnboardingService } from "@/services/payoutOnboarding.service";
 import { walletService } from "@/services/wallet.service";
 import { formatMoneyForDisplay } from "@/utils/formatMoney.util";
 
-import styles from "./page.module.css";
-
 export default function EarningsPage() {
   const fees = useQuery({ queryKey: ["payout-fees"], queryFn: payoutOnboardingService.fetchPayoutFees });
-  const { data: state } = usePayoutStateQuery();
-  const wallet = useQuery({ queryKey: ["wallet", "me", state?.status ?? null], queryFn: walletService.fetchMine });
+  const wallet = useQuery({ queryKey: ["wallet", "me"], queryFn: walletService.fetchMine });
+  const canWithdraw = Boolean(wallet.data && wallet.data.available.amountMinor > 0 && wallet.data.verification?.withdrawalsUnlocked !== false);
   return (
-    <div className={styles.page}>
-      <header>
-        <h1 className={styles.title}>Earnings and payouts</h1>
-        <p className={styles.subtitle}>Gifts and subscriptions are recorded as you earn them. Set up payouts once to withdraw to your bank.</p>
-      </header>
+    <div className={pageStyles.page}>
+      <PageHeader
+        title="Earnings"
+        subtitle="One Zudomart wallet holds everything you earn. Verify your payout details once, then withdraw available money to your bank."
+        action={canWithdraw ? <a className={pageStyles.textLink} href={webappLinks.withdraw} target="_blank" rel="noopener noreferrer">Withdraw {formatMoneyForDisplay(wallet.data!.available)}</a> : null}
+      />
       <WalletVerificationBanner summary={wallet.data} payoutSetupHref="#payout-setup" />
-      {wallet.data?.verification === undefined && state && state.status !== "verified" && state.pendingWithdrawable && state.pendingWithdrawable.amountMinor > 0 ? (
-        <p className={styles.notice}>Verify your ID to withdraw {formatMoneyForDisplay(state.pendingWithdrawable)}. Everything else in Studio keeps working.</p>
-      ) : null}
       <ZudomartBalanceCard wallet={wallet} />
-      <AccountHealthSummary />
-      <div id="payout-setup">
-        <Suspense fallback={null}>
+      <Card title="Payout details" id="payout-setup">
+        <Suspense fallback={<Skeleton height={120} />}>
           <PayoutOnboardingPanel />
         </Suspense>
+        {fees.data ? (
+          <Muted>{`Withdrawal fee: ${formatMoneyForDisplay(fees.data.fee)} flat, added on top of the amount. ${fees.data.arrivalEstimate} ${fees.data.firstPayoutNote}`}</Muted>
+        ) : fees.isError ? (
+          <ErrorState title="Withdrawal fee didn't load" description={readErrorMessageForDisplay(fees.error)} onRetry={() => void fees.refetch()} />
+        ) : null}
+      </Card>
+      <div className={pageStyles.columns}>
+        <EarningsHistoryCard />
+        <WithdrawalsCard />
       </div>
-      {fees.data ? (
-        <section className={styles.card} aria-label="Payout fee">
-          <strong>Payout fee</strong>
-          <p className={styles.muted}>{formatMoneyForDisplay(fees.data.fee)} flat per withdrawal, added on top of the amount. {fees.data.arrivalEstimate}</p>
-          <p className={styles.muted}>{fees.data.firstPayoutNote}</p>
-        </section>
-      ) : fees.isError ? (
-        <ErrorState title="Payout fee didn't load" description={readErrorMessageForDisplay(fees.error)} onRetry={() => void fees.refetch()} />
-      ) : (
-        <Skeleton height={96} />
-      )}
+      <RevenueRulesCard />
+      <BrandDealsCard currency={wallet.data?.available.currency ?? "NGN"} />
     </div>
   );
 }

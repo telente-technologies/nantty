@@ -1,6 +1,0 @@
-.page { display: flex; flex-direction: column; gap: var(--space-6); max-width: 720px; }
-.title { font-size: var(--text-3xl); }
-.subtitle { margin-top: var(--space-2); font-size: var(--text-sm); color: var(--ink-muted); }
-.notice { margin: 0; padding: var(--space-3) var(--space-4); border-radius: var(--radius-medium); background: var(--surface-brand-tint); font-size: var(--text-sm); }
-.card { background: var(--surface-card); border: 1px solid var(--divider); border-radius: var(--radius-medium); padding: var(--space-4); display: flex; flex-direction: column; gap: var(--space-2); }
-.muted { margin: 0; font-size: var(--text-sm); color: var(--ink-muted); line-height: 1.5; }

@@ -9,12 +9,11 @@ import { SelectField, TextField } from "@/components/ui/field";
 import { EmptyState, ErrorState } from "@/components/ui/feedback";
 import { ListPageSkeleton } from "@/components/ui/pageSkeletons";
 import { PayoutSetupBanner } from "@/components/payouts/payoutSetupBanner";
-import { LiveEarningsPanel } from "@/components/live/liveEarningsPanel";
 import { LIVE_CATEGORY_LABELS, LIVE_CATEGORY_OPTIONS } from "@/constants/liveCategories.constant";
 import { useSession } from "@/components/providers/sessionProvider";
 import { readErrorMessageForDisplay } from "@/services/clientApi.service";
 import { livesService } from "@/services/lives.service";
-import type { LiveCategory, LiveEarnings, LiveSession, LiveState, StoreOption, User } from "@/types";
+import type { LiveCategory, LiveSession, LiveState, StoreOption, User } from "@/types";
 import { formatCountWithThousandsSuffix, formatTimeSincePosted } from "@/utils/formatDate.util";
 import { readLiveErrorMessage } from "@/utils/liveStoreErrors.util";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -22,23 +21,6 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import styles from "./page.module.css";
 
 const STATE_LABEL: Record<LiveState, string> = { idle: "Ready", connecting: "Connecting", live: "Live", ended: "Ended" };
-
-const sumEarningsAcrossLives = (lives: readonly LiveSession[]): LiveEarnings => {
-  const gifterCoins = new Map<string, { id: string; name: string; coins: number }>();
-  lives.forEach((live) =>
-    live.earnings.topGifters.forEach((gifter) => {
-      const known = gifterCoins.get(gifter.name);
-      gifterCoins.set(gifter.name, { ...gifter, coins: (known?.coins ?? 0) + gifter.coins });
-    }),
-  );
-  return {
-    coins: lives.reduce((total, live) => total + live.earnings.coins, 0),
-    giftCount: lives.reduce((total, live) => total + live.earnings.giftCount, 0),
-    newSubscribers: lives.reduce((total, live) => total + live.earnings.newSubscribers, 0),
-    topGifters: [...gifterCoins.values()].sort((a, b) => b.coins - a.coins).slice(0, 5),
-    battles: lives.flatMap((live) => live.earnings.battles),
-  };
-};
 
 const NO_STORE = "";
 
@@ -85,8 +67,8 @@ export default function LivesDashboardPage() {
     <div className={styles.page}>
       <header className={styles.header}>
         <div>
-          <h1 className={styles.title}>Lives</h1>
-          <p className={styles.subtitle}>Talk, play, perform or teach. Start a stream from here, in OBS, or from your phone.</p>
+          <h1 className={styles.title}>Live</h1>
+          <p className={styles.subtitle}>Create a live here, then stream it from OBS with the stream key in its control room, or from the Zudomart app.</p>
         </div>
       </header>
 
@@ -138,13 +120,7 @@ export default function LivesDashboardPage() {
         </Button>
       </form>
 
-      {lives.data && lives.data.length > 0 ? (
-        <LiveEarningsPanel
-          earnings={sumEarningsAcrossLives(lives.data)}
-          viewers={lives.data.reduce((total, live) => total + live.viewers, 0)}
-          peakViewers={Math.max(...lives.data.map((live) => live.peakViewers))}
-        />
-      ) : null}
+      {lives.data && lives.data.length > 0 ? <LiveHistoryTotals lives={lives.data} /> : null}
 
       {formError ? (
         <p className={styles.formError} role="alert">
@@ -160,7 +136,7 @@ export default function LivesDashboardPage() {
         ))}
       </ul>
 
-      {lives.data?.length === 0 ? <EmptyState title="No lives yet" description="Give your first live a title above and pick a category. You'll get a stream key for OBS, or go live from the Zudomart app." /> : null}
+      {lives.data?.length === 0 ? <EmptyState title="No lives yet" description="Type a title above, pick a category and press Create live. The control room gives you a stream key for OBS." /> : null}
     </div>
   );
 }
@@ -192,5 +168,25 @@ function LiveRow({ live }: { readonly live: LiveSession }) {
         </Link>
       </div>
     </li>
+  );
+}
+
+function LiveHistoryTotals({ lives }: { readonly lives: readonly LiveSession[] }) {
+  const ended = lives.filter((live) => live.state === "ended");
+  const totals = [
+    { label: "Lives streamed", value: formatCountWithThousandsSuffix(ended.length) },
+    { label: "Coins from lives", value: formatCountWithThousandsSuffix(lives.reduce((sum, live) => sum + live.earnings.coins, 0)) },
+    { label: "Gifts received", value: formatCountWithThousandsSuffix(lives.reduce((sum, live) => sum + live.earnings.giftCount, 0)) },
+    { label: "Best peak", value: formatCountWithThousandsSuffix(Math.max(0, ...lives.map((live) => live.peakViewers))) },
+  ];
+  return (
+    <ul className={styles.totals} aria-label="Live history totals">
+      {totals.map((total) => (
+        <li key={total.label} className={styles.total}>
+          <span className={styles.totalLabel}>{total.label}</span>
+          <strong className={styles.totalValue}>{total.value}</strong>
+        </li>
+      ))}
+    </ul>
   );
 }

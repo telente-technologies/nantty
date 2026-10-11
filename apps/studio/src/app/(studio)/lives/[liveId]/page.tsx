@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { use, useState } from "react";
 
+import { requestConfirmation } from "@zudomart/web-kit";
+
 import { Button } from "@/components/ui/button";
 import { ErrorState } from "@/components/ui/feedback";
 import { ControlRoomSkeleton } from "@/components/ui/pageSkeletons";
@@ -46,6 +48,19 @@ export default function ControlRoomPage({ params }: { readonly params: Promise<{
   const startLive = useMutation({ mutationFn: () => livesService.startLive(liveId), onSuccess: invalidate });
   const endLive = useMutation({ mutationFn: () => livesService.endLive(liveId), onSuccess: invalidate });
   const rotateKey = useMutation({ mutationFn: () => livesService.rotateStreamKey(liveId), onSuccess: (key) => queryClient.setQueryData(["live-stream-key", liveId], key) });
+
+  async function confirmEndLive() {
+    const confirmed = await requestConfirmation({ title: "End this live?", description: "Viewers are disconnected and the live can't be restarted. Gifts already received stay in your earnings.", confirmLabel: "End live", intent: "stop", tone: "danger" });
+    if (confirmed && !endLive.isPending) endLive.mutate();
+  }
+
+  async function confirmRotateKey() {
+    if (streamKey.data) {
+      const confirmed = await requestConfirmation({ title: "Rotate the stream key?", description: "The current key stops working at once. Paste the new key into OBS before you stream again.", confirmLabel: "Rotate key", intent: "key" });
+      if (!confirmed) return;
+    }
+    if (!rotateKey.isPending) rotateKey.mutate();
+  }
   const pinProduct = useMutation({
     mutationFn: (productId: string) => livesService.pinProduct(liveId, productId),
     onSuccess: invalidate,
@@ -99,7 +114,7 @@ export default function ControlRoomPage({ params }: { readonly params: Promise<{
         </div>
         <div className={styles.headerActions}>
           {isLive || session.state === "connecting" ? (
-            <Button variant="danger" busy={endLive.isPending} onClick={() => endLive.mutate()}>
+            <Button variant="danger" busy={endLive.isPending} onClick={() => void confirmEndLive()}>
               End live
             </Button>
           ) : session.state === "ended" ? null : (
@@ -124,7 +139,7 @@ export default function ControlRoomPage({ params }: { readonly params: Promise<{
       <section className={styles.card}>
         <div className={styles.cardHead}>
           <h2 className={styles.cardTitle}>Connect OBS or any encoder</h2>
-          <Button variant="secondary" size="sm" busy={rotateKey.isPending} onClick={() => rotateKey.mutate()}>
+          <Button variant="secondary" size="sm" busy={rotateKey.isPending} onClick={() => void confirmRotateKey()}>
             {streamKey.data ? "Rotate stream key" : "Create stream key"}
           </Button>
         </div>
@@ -144,7 +159,7 @@ export default function ControlRoomPage({ params }: { readonly params: Promise<{
         </div>
       </section>
 
-      <LiveEarningsPanel earnings={session.earnings} viewers={session.viewers} peakViewers={session.peakViewers} />
+      <LiveEarningsPanel earnings={session.earnings} viewers={session.viewers} peakViewers={session.peakViewers} ranking={session.hostRanking} />
 
       <StageGuestsPanel liveId={session.id} isActive={isLive} />
 
