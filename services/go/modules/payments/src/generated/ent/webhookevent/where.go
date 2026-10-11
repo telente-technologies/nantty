@@ -105,6 +105,26 @@ func LastError(v string) predicate.WebhookEvent {
 	return predicate.WebhookEvent(sql.FieldEQ(FieldLastError, v))
 }
 
+// NextAttemptAt applies equality check predicate on the "next_attempt_at" field. It's identical to NextAttemptAtEQ.
+func NextAttemptAt(v time.Time) predicate.WebhookEvent {
+	return predicate.WebhookEvent(sql.FieldEQ(FieldNextAttemptAt, v))
+}
+
+// LockedUntil applies equality check predicate on the "locked_until" field. It's identical to LockedUntilEQ.
+func LockedUntil(v time.Time) predicate.WebhookEvent {
+	return predicate.WebhookEvent(sql.FieldEQ(FieldLockedUntil, v))
+}
+
+// LeaseToken applies equality check predicate on the "lease_token" field. It's identical to LeaseTokenEQ.
+func LeaseToken(v string) predicate.WebhookEvent {
+	return predicate.WebhookEvent(sql.FieldEQ(FieldLeaseToken, v))
+}
+
+// DeadLetteredAt applies equality check predicate on the "dead_lettered_at" field. It's identical to DeadLetteredAtEQ.
+func DeadLetteredAt(v time.Time) predicate.WebhookEvent {
+	return predicate.WebhookEvent(sql.FieldEQ(FieldDeadLetteredAt, v))
+}
+
 // CreatedAtEQ applies the EQ predicate on the "created_at" field.
 func CreatedAtEQ(v time.Time) predicate.WebhookEvent {
 	return predicate.WebhookEvent(sql.FieldEQ(FieldCreatedAt, v))
@@ -673,6 +693,221 @@ func LastErrorEqualFold(v string) predicate.WebhookEvent {
 // LastErrorContainsFold applies the ContainsFold predicate on the "last_error" field.
 func LastErrorContainsFold(v string) predicate.WebhookEvent {
 	return predicate.WebhookEvent(sql.FieldContainsFold(FieldLastError, v))
+}
+
+// NextAttemptAtEQ applies the EQ predicate on the "next_attempt_at" field.
+func NextAttemptAtEQ(v time.Time) predicate.WebhookEvent {
+	return predicate.WebhookEvent(sql.FieldEQ(FieldNextAttemptAt, v))
+}
+
+// NextAttemptAtNEQ applies the NEQ predicate on the "next_attempt_at" field.
+func NextAttemptAtNEQ(v time.Time) predicate.WebhookEvent {
+	return predicate.WebhookEvent(sql.FieldNEQ(FieldNextAttemptAt, v))
+}
+
+// NextAttemptAtIn applies the In predicate on the "next_attempt_at" field.
+func NextAttemptAtIn(vs ...time.Time) predicate.WebhookEvent {
+	return predicate.WebhookEvent(sql.FieldIn(FieldNextAttemptAt, vs...))
+}
+
+// NextAttemptAtNotIn applies the NotIn predicate on the "next_attempt_at" field.
+func NextAttemptAtNotIn(vs ...time.Time) predicate.WebhookEvent {
+	return predicate.WebhookEvent(sql.FieldNotIn(FieldNextAttemptAt, vs...))
+}
+
+// NextAttemptAtGT applies the GT predicate on the "next_attempt_at" field.
+func NextAttemptAtGT(v time.Time) predicate.WebhookEvent {
+	return predicate.WebhookEvent(sql.FieldGT(FieldNextAttemptAt, v))
+}
+
+// NextAttemptAtGTE applies the GTE predicate on the "next_attempt_at" field.
+func NextAttemptAtGTE(v time.Time) predicate.WebhookEvent {
+	return predicate.WebhookEvent(sql.FieldGTE(FieldNextAttemptAt, v))
+}
+
+// NextAttemptAtLT applies the LT predicate on the "next_attempt_at" field.
+func NextAttemptAtLT(v time.Time) predicate.WebhookEvent {
+	return predicate.WebhookEvent(sql.FieldLT(FieldNextAttemptAt, v))
+}
+
+// NextAttemptAtLTE applies the LTE predicate on the "next_attempt_at" field.
+func NextAttemptAtLTE(v time.Time) predicate.WebhookEvent {
+	return predicate.WebhookEvent(sql.FieldLTE(FieldNextAttemptAt, v))
+}
+
+// NextAttemptAtIsNil applies the IsNil predicate on the "next_attempt_at" field.
+func NextAttemptAtIsNil() predicate.WebhookEvent {
+	return predicate.WebhookEvent(sql.FieldIsNull(FieldNextAttemptAt))
+}
+
+// NextAttemptAtNotNil applies the NotNil predicate on the "next_attempt_at" field.
+func NextAttemptAtNotNil() predicate.WebhookEvent {
+	return predicate.WebhookEvent(sql.FieldNotNull(FieldNextAttemptAt))
+}
+
+// LockedUntilEQ applies the EQ predicate on the "locked_until" field.
+func LockedUntilEQ(v time.Time) predicate.WebhookEvent {
+	return predicate.WebhookEvent(sql.FieldEQ(FieldLockedUntil, v))
+}
+
+// LockedUntilNEQ applies the NEQ predicate on the "locked_until" field.
+func LockedUntilNEQ(v time.Time) predicate.WebhookEvent {
+	return predicate.WebhookEvent(sql.FieldNEQ(FieldLockedUntil, v))
+}
+
+// LockedUntilIn applies the In predicate on the "locked_until" field.
+func LockedUntilIn(vs ...time.Time) predicate.WebhookEvent {
+	return predicate.WebhookEvent(sql.FieldIn(FieldLockedUntil, vs...))
+}
+
+// LockedUntilNotIn applies the NotIn predicate on the "locked_until" field.
+func LockedUntilNotIn(vs ...time.Time) predicate.WebhookEvent {
+	return predicate.WebhookEvent(sql.FieldNotIn(FieldLockedUntil, vs...))
+}
+
+// LockedUntilGT applies the GT predicate on the "locked_until" field.
+func LockedUntilGT(v time.Time) predicate.WebhookEvent {
+	return predicate.WebhookEvent(sql.FieldGT(FieldLockedUntil, v))
+}
+
+// LockedUntilGTE applies the GTE predicate on the "locked_until" field.
+func LockedUntilGTE(v time.Time) predicate.WebhookEvent {
+	return predicate.WebhookEvent(sql.FieldGTE(FieldLockedUntil, v))
+}
+
+// LockedUntilLT applies the LT predicate on the "locked_until" field.
+func LockedUntilLT(v time.Time) predicate.WebhookEvent {
+	return predicate.WebhookEvent(sql.FieldLT(FieldLockedUntil, v))
+}
+
+// LockedUntilLTE applies the LTE predicate on the "locked_until" field.
+func LockedUntilLTE(v time.Time) predicate.WebhookEvent {
+	return predicate.WebhookEvent(sql.FieldLTE(FieldLockedUntil, v))
+}
+
+// LockedUntilIsNil applies the IsNil predicate on the "locked_until" field.
+func LockedUntilIsNil() predicate.WebhookEvent {
+	return predicate.WebhookEvent(sql.FieldIsNull(FieldLockedUntil))
+}
+
+// LockedUntilNotNil applies the NotNil predicate on the "locked_until" field.
+func LockedUntilNotNil() predicate.WebhookEvent {
+	return predicate.WebhookEvent(sql.FieldNotNull(FieldLockedUntil))
+}
+
+// LeaseTokenEQ applies the EQ predicate on the "lease_token" field.
+func LeaseTokenEQ(v string) predicate.WebhookEvent {
+	return predicate.WebhookEvent(sql.FieldEQ(FieldLeaseToken, v))
+}
+
+// LeaseTokenNEQ applies the NEQ predicate on the "lease_token" field.
+func LeaseTokenNEQ(v string) predicate.WebhookEvent {
+	return predicate.WebhookEvent(sql.FieldNEQ(FieldLeaseToken, v))
+}
+
+// LeaseTokenIn applies the In predicate on the "lease_token" field.
+func LeaseTokenIn(vs ...string) predicate.WebhookEvent {
+	return predicate.WebhookEvent(sql.FieldIn(FieldLeaseToken, vs...))
+}
+
+// LeaseTokenNotIn applies the NotIn predicate on the "lease_token" field.
+func LeaseTokenNotIn(vs ...string) predicate.WebhookEvent {
+	return predicate.WebhookEvent(sql.FieldNotIn(FieldLeaseToken, vs...))
+}
+
+// LeaseTokenGT applies the GT predicate on the "lease_token" field.
+func LeaseTokenGT(v string) predicate.WebhookEvent {
+	return predicate.WebhookEvent(sql.FieldGT(FieldLeaseToken, v))
+}
+
+// LeaseTokenGTE applies the GTE predicate on the "lease_token" field.
+func LeaseTokenGTE(v string) predicate.WebhookEvent {
+	return predicate.WebhookEvent(sql.FieldGTE(FieldLeaseToken, v))
+}
+
+// LeaseTokenLT applies the LT predicate on the "lease_token" field.
+func LeaseTokenLT(v string) predicate.WebhookEvent {
+	return predicate.WebhookEvent(sql.FieldLT(FieldLeaseToken, v))
+}
+
+// LeaseTokenLTE applies the LTE predicate on the "lease_token" field.
+func LeaseTokenLTE(v string) predicate.WebhookEvent {
+	return predicate.WebhookEvent(sql.FieldLTE(FieldLeaseToken, v))
+}
+
+// LeaseTokenContains applies the Contains predicate on the "lease_token" field.
+func LeaseTokenContains(v string) predicate.WebhookEvent {
+	return predicate.WebhookEvent(sql.FieldContains(FieldLeaseToken, v))
+}
+
+// LeaseTokenHasPrefix applies the HasPrefix predicate on the "lease_token" field.
+func LeaseTokenHasPrefix(v string) predicate.WebhookEvent {
+	return predicate.WebhookEvent(sql.FieldHasPrefix(FieldLeaseToken, v))
+}
+
+// LeaseTokenHasSuffix applies the HasSuffix predicate on the "lease_token" field.
+func LeaseTokenHasSuffix(v string) predicate.WebhookEvent {
+	return predicate.WebhookEvent(sql.FieldHasSuffix(FieldLeaseToken, v))
+}
+
+// LeaseTokenEqualFold applies the EqualFold predicate on the "lease_token" field.
+func LeaseTokenEqualFold(v string) predicate.WebhookEvent {
+	return predicate.WebhookEvent(sql.FieldEqualFold(FieldLeaseToken, v))
+}
+
+// LeaseTokenContainsFold applies the ContainsFold predicate on the "lease_token" field.
+func LeaseTokenContainsFold(v string) predicate.WebhookEvent {
+	return predicate.WebhookEvent(sql.FieldContainsFold(FieldLeaseToken, v))
+}
+
+// DeadLetteredAtEQ applies the EQ predicate on the "dead_lettered_at" field.
+func DeadLetteredAtEQ(v time.Time) predicate.WebhookEvent {
+	return predicate.WebhookEvent(sql.FieldEQ(FieldDeadLetteredAt, v))
+}
+
+// DeadLetteredAtNEQ applies the NEQ predicate on the "dead_lettered_at" field.
+func DeadLetteredAtNEQ(v time.Time) predicate.WebhookEvent {
+	return predicate.WebhookEvent(sql.FieldNEQ(FieldDeadLetteredAt, v))
+}
+
+// DeadLetteredAtIn applies the In predicate on the "dead_lettered_at" field.
+func DeadLetteredAtIn(vs ...time.Time) predicate.WebhookEvent {
+	return predicate.WebhookEvent(sql.FieldIn(FieldDeadLetteredAt, vs...))
+}
+
+// DeadLetteredAtNotIn applies the NotIn predicate on the "dead_lettered_at" field.
+func DeadLetteredAtNotIn(vs ...time.Time) predicate.WebhookEvent {
+	return predicate.WebhookEvent(sql.FieldNotIn(FieldDeadLetteredAt, vs...))
+}
+
+// DeadLetteredAtGT applies the GT predicate on the "dead_lettered_at" field.
+func DeadLetteredAtGT(v time.Time) predicate.WebhookEvent {
+	return predicate.WebhookEvent(sql.FieldGT(FieldDeadLetteredAt, v))
+}
+
+// DeadLetteredAtGTE applies the GTE predicate on the "dead_lettered_at" field.
+func DeadLetteredAtGTE(v time.Time) predicate.WebhookEvent {
+	return predicate.WebhookEvent(sql.FieldGTE(FieldDeadLetteredAt, v))
+}
+
+// DeadLetteredAtLT applies the LT predicate on the "dead_lettered_at" field.
+func DeadLetteredAtLT(v time.Time) predicate.WebhookEvent {
+	return predicate.WebhookEvent(sql.FieldLT(FieldDeadLetteredAt, v))
+}
+
+// DeadLetteredAtLTE applies the LTE predicate on the "dead_lettered_at" field.
+func DeadLetteredAtLTE(v time.Time) predicate.WebhookEvent {
+	return predicate.WebhookEvent(sql.FieldLTE(FieldDeadLetteredAt, v))
+}
+
+// DeadLetteredAtIsNil applies the IsNil predicate on the "dead_lettered_at" field.
+func DeadLetteredAtIsNil() predicate.WebhookEvent {
+	return predicate.WebhookEvent(sql.FieldIsNull(FieldDeadLetteredAt))
+}
+
+// DeadLetteredAtNotNil applies the NotNil predicate on the "dead_lettered_at" field.
+func DeadLetteredAtNotNil() predicate.WebhookEvent {
+	return predicate.WebhookEvent(sql.FieldNotNull(FieldDeadLetteredAt))
 }
 
 // And groups predicates with the AND operator between them.

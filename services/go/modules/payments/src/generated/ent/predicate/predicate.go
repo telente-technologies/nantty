@@ -48,8 +48,23 @@ type ProviderCustomer func(*sql.Selector)
 // ProviderDispute is the predicate function for providerdispute builders.
 type ProviderDispute func(*sql.Selector)
 
+// ProviderMovement is the predicate function for providermovement builders.
+type ProviderMovement func(*sql.Selector)
+
 // ProviderPayoutDestination is the predicate function for providerpayoutdestination builders.
 type ProviderPayoutDestination func(*sql.Selector)
+
+// ProviderWallet is the predicate function for providerwallet builders.
+type ProviderWallet func(*sql.Selector)
+
+// ProviderWalletNumber is the predicate function for providerwalletnumber builders.
+type ProviderWalletNumber func(*sql.Selector)
+
+// ReconciliationCase is the predicate function for reconciliationcase builders.
+type ReconciliationCase func(*sql.Selector)
+
+// ReconciliationRun is the predicate function for reconciliationrun builders.
+type ReconciliationRun func(*sql.Selector)
 
 // SavedCardSetup is the predicate function for savedcardsetup builders.
 type SavedCardSetup func(*sql.Selector)
@@ -62,6 +77,9 @@ type StorePurchase func(*sql.Selector)
 
 // VerificationLevelRecord is the predicate function for verificationlevelrecord builders.
 type VerificationLevelRecord func(*sql.Selector)
+
+// WalletFunding is the predicate function for walletfunding builders.
+type WalletFunding func(*sql.Selector)
 
 // WebhookEvent is the predicate function for webhookevent builders.
 type WebhookEvent func(*sql.Selector)

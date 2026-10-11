@@ -219,6 +219,9 @@ func (_u *PayoutTransferUpdate) sqlSave(ctx context.Context) (_node int, err err
 	if value, ok := _u.mutation.AddedFeeMinor(); ok {
 		_spec.AddField(payouttransfer.FieldFeeMinor, field.TypeInt64, value)
 	}
+	if _u.mutation.SealedDestinationCleared() {
+		_spec.ClearField(payouttransfer.FieldSealedDestination, field.TypeBytes)
+	}
 	if value, ok := _u.mutation.Status(); ok {
 		_spec.SetField(payouttransfer.FieldStatus, field.TypeEnum, value)
 	}
@@ -478,6 +481,9 @@ func (_u *PayoutTransferUpdateOne) sqlSave(ctx context.Context) (_node *PayoutTr
 	}
 	if value, ok := _u.mutation.AddedFeeMinor(); ok {
 		_spec.AddField(payouttransfer.FieldFeeMinor, field.TypeInt64, value)
+	}
+	if _u.mutation.SealedDestinationCleared() {
+		_spec.ClearField(payouttransfer.FieldSealedDestination, field.TypeBytes)
 	}
 	if value, ok := _u.mutation.Status(); ok {
 		_spec.SetField(payouttransfer.FieldStatus, field.TypeEnum, value)

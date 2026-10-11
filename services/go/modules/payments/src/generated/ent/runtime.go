@@ -19,11 +19,17 @@ import (
 	"zudomart/modules/payments/src/generated/ent/payouttransfer"
 	"zudomart/modules/payments/src/generated/ent/providercustomer"
 	"zudomart/modules/payments/src/generated/ent/providerdispute"
+	"zudomart/modules/payments/src/generated/ent/providermovement"
 	"zudomart/modules/payments/src/generated/ent/providerpayoutdestination"
+	"zudomart/modules/payments/src/generated/ent/providerwallet"
+	"zudomart/modules/payments/src/generated/ent/providerwalletnumber"
+	"zudomart/modules/payments/src/generated/ent/reconciliationcase"
+	"zudomart/modules/payments/src/generated/ent/reconciliationrun"
 	"zudomart/modules/payments/src/generated/ent/savedcardsetup"
 	"zudomart/modules/payments/src/generated/ent/sellerverification"
 	"zudomart/modules/payments/src/generated/ent/storepurchase"
 	"zudomart/modules/payments/src/generated/ent/verificationlevelrecord"
+	"zudomart/modules/payments/src/generated/ent/walletfunding"
 	"zudomart/modules/payments/src/generated/ent/webhookevent"
 
 	"github.com/google/uuid"
@@ -84,8 +90,14 @@ func init() {
 	billingauthorization.DefaultProviderCustomerID = billingauthorizationDescProviderCustomerID.Default.(string)
 	// billingauthorization.ProviderCustomerIDValidator is a validator for the "provider_customer_id" field. It is called by the builders before save.
 	billingauthorization.ProviderCustomerIDValidator = billingauthorizationDescProviderCustomerID.Validators[0].(func(string) error)
+	// billingauthorizationDescTokenEmail is the schema descriptor for token_email field.
+	billingauthorizationDescTokenEmail := billingauthorizationFields[4].Descriptor()
+	// billingauthorization.DefaultTokenEmail holds the default value on creation for the token_email field.
+	billingauthorization.DefaultTokenEmail = billingauthorizationDescTokenEmail.Default.(string)
+	// billingauthorization.TokenEmailValidator is a validator for the "token_email" field. It is called by the builders before save.
+	billingauthorization.TokenEmailValidator = billingauthorizationDescTokenEmail.Validators[0].(func(string) error)
 	// billingauthorizationDescCardFingerprintHash is the schema descriptor for card_fingerprint_hash field.
-	billingauthorizationDescCardFingerprintHash := billingauthorizationFields[4].Descriptor()
+	billingauthorizationDescCardFingerprintHash := billingauthorizationFields[5].Descriptor()
 	// billingauthorization.CardFingerprintHashValidator is a validator for the "card_fingerprint_hash" field. It is called by the builders before save.
 	billingauthorization.CardFingerprintHashValidator = func() func(string) error {
 		validators := billingauthorizationDescCardFingerprintHash.Validators
@@ -103,23 +115,23 @@ func init() {
 		}
 	}()
 	// billingauthorizationDescCardBrand is the schema descriptor for card_brand field.
-	billingauthorizationDescCardBrand := billingauthorizationFields[5].Descriptor()
+	billingauthorizationDescCardBrand := billingauthorizationFields[6].Descriptor()
 	// billingauthorization.DefaultCardBrand holds the default value on creation for the card_brand field.
 	billingauthorization.DefaultCardBrand = billingauthorizationDescCardBrand.Default.(string)
 	// billingauthorization.CardBrandValidator is a validator for the "card_brand" field. It is called by the builders before save.
 	billingauthorization.CardBrandValidator = billingauthorizationDescCardBrand.Validators[0].(func(string) error)
 	// billingauthorizationDescCardLast4 is the schema descriptor for card_last4 field.
-	billingauthorizationDescCardLast4 := billingauthorizationFields[6].Descriptor()
+	billingauthorizationDescCardLast4 := billingauthorizationFields[7].Descriptor()
 	// billingauthorization.DefaultCardLast4 holds the default value on creation for the card_last4 field.
 	billingauthorization.DefaultCardLast4 = billingauthorizationDescCardLast4.Default.(string)
 	// billingauthorization.CardLast4Validator is a validator for the "card_last4" field. It is called by the builders before save.
 	billingauthorization.CardLast4Validator = billingauthorizationDescCardLast4.Validators[0].(func(string) error)
 	// billingauthorizationDescCardExpiryMonth is the schema descriptor for card_expiry_month field.
-	billingauthorizationDescCardExpiryMonth := billingauthorizationFields[7].Descriptor()
+	billingauthorizationDescCardExpiryMonth := billingauthorizationFields[8].Descriptor()
 	// billingauthorization.DefaultCardExpiryMonth holds the default value on creation for the card_expiry_month field.
 	billingauthorization.DefaultCardExpiryMonth = billingauthorizationDescCardExpiryMonth.Default.(int)
 	// billingauthorizationDescCardExpiryYear is the schema descriptor for card_expiry_year field.
-	billingauthorizationDescCardExpiryYear := billingauthorizationFields[8].Descriptor()
+	billingauthorizationDescCardExpiryYear := billingauthorizationFields[9].Descriptor()
 	// billingauthorization.DefaultCardExpiryYear holds the default value on creation for the card_expiry_year field.
 	billingauthorization.DefaultCardExpiryYear = billingauthorizationDescCardExpiryYear.Default.(int)
 	// billingauthorizationDescID is the schema descriptor for id field.
@@ -948,12 +960,22 @@ func init() {
 	paymentintentDescRefundedMinor := paymentintentFields[18].Descriptor()
 	// paymentintent.DefaultRefundedMinor holds the default value on creation for the refunded_minor field.
 	paymentintent.DefaultRefundedMinor = paymentintentDescRefundedMinor.Default.(int64)
+	// paymentintentDescRefundInFlightMinor is the schema descriptor for refund_in_flight_minor field.
+	paymentintentDescRefundInFlightMinor := paymentintentFields[19].Descriptor()
+	// paymentintent.DefaultRefundInFlightMinor holds the default value on creation for the refund_in_flight_minor field.
+	paymentintent.DefaultRefundInFlightMinor = paymentintentDescRefundInFlightMinor.Default.(int64)
+	// paymentintentDescCustomerEmail is the schema descriptor for customer_email field.
+	paymentintentDescCustomerEmail := paymentintentFields[21].Descriptor()
+	// paymentintent.DefaultCustomerEmail holds the default value on creation for the customer_email field.
+	paymentintent.DefaultCustomerEmail = paymentintentDescCustomerEmail.Default.(string)
+	// paymentintent.CustomerEmailValidator is a validator for the "customer_email" field. It is called by the builders before save.
+	paymentintent.CustomerEmailValidator = paymentintentDescCustomerEmail.Validators[0].(func(string) error)
 	// paymentintentDescVersion is the schema descriptor for version field.
-	paymentintentDescVersion := paymentintentFields[19].Descriptor()
+	paymentintentDescVersion := paymentintentFields[23].Descriptor()
 	// paymentintent.DefaultVersion holds the default value on creation for the version field.
 	paymentintent.DefaultVersion = paymentintentDescVersion.Default.(int64)
 	// paymentintentDescUpdatedAt is the schema descriptor for updated_at field.
-	paymentintentDescUpdatedAt := paymentintentFields[21].Descriptor()
+	paymentintentDescUpdatedAt := paymentintentFields[25].Descriptor()
 	// paymentintent.DefaultUpdatedAt holds the default value on creation for the updated_at field.
 	paymentintent.DefaultUpdatedAt = paymentintentDescUpdatedAt.Default.(func() time.Time)
 	// paymentintent.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
@@ -1347,20 +1369,26 @@ func init() {
 	payouttransfer.DefaultDestinationLast4 = payouttransferDescDestinationLast4.Default.(string)
 	// payouttransfer.DestinationLast4Validator is a validator for the "destination_last4" field. It is called by the builders before save.
 	payouttransfer.DestinationLast4Validator = payouttransferDescDestinationLast4.Validators[0].(func(string) error)
+	// payouttransferDescSourceWalletRef is the schema descriptor for source_wallet_ref field.
+	payouttransferDescSourceWalletRef := payouttransferFields[14].Descriptor()
+	// payouttransfer.DefaultSourceWalletRef holds the default value on creation for the source_wallet_ref field.
+	payouttransfer.DefaultSourceWalletRef = payouttransferDescSourceWalletRef.Default.(string)
+	// payouttransfer.SourceWalletRefValidator is a validator for the "source_wallet_ref" field. It is called by the builders before save.
+	payouttransfer.SourceWalletRefValidator = payouttransferDescSourceWalletRef.Validators[0].(func(string) error)
 	// payouttransferDescProviderTransferCode is the schema descriptor for provider_transfer_code field.
-	payouttransferDescProviderTransferCode := payouttransferFields[15].Descriptor()
+	payouttransferDescProviderTransferCode := payouttransferFields[17].Descriptor()
 	// payouttransfer.DefaultProviderTransferCode holds the default value on creation for the provider_transfer_code field.
 	payouttransfer.DefaultProviderTransferCode = payouttransferDescProviderTransferCode.Default.(string)
 	// payouttransfer.ProviderTransferCodeValidator is a validator for the "provider_transfer_code" field. It is called by the builders before save.
 	payouttransfer.ProviderTransferCodeValidator = payouttransferDescProviderTransferCode.Validators[0].(func(string) error)
 	// payouttransferDescFailureReason is the schema descriptor for failure_reason field.
-	payouttransferDescFailureReason := payouttransferFields[16].Descriptor()
+	payouttransferDescFailureReason := payouttransferFields[18].Descriptor()
 	// payouttransfer.DefaultFailureReason holds the default value on creation for the failure_reason field.
 	payouttransfer.DefaultFailureReason = payouttransferDescFailureReason.Default.(string)
 	// payouttransfer.FailureReasonValidator is a validator for the "failure_reason" field. It is called by the builders before save.
 	payouttransfer.FailureReasonValidator = payouttransferDescFailureReason.Validators[0].(func(string) error)
 	// payouttransferDescUpdatedAt is the schema descriptor for updated_at field.
-	payouttransferDescUpdatedAt := payouttransferFields[18].Descriptor()
+	payouttransferDescUpdatedAt := payouttransferFields[20].Descriptor()
 	// payouttransfer.DefaultUpdatedAt holds the default value on creation for the updated_at field.
 	payouttransfer.DefaultUpdatedAt = payouttransferDescUpdatedAt.Default.(func() time.Time)
 	// payouttransfer.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
@@ -1525,6 +1553,169 @@ func init() {
 	providerdisputeDescID := providerdisputeMixinFields0[0].Descriptor()
 	// providerdispute.DefaultID holds the default value on creation for the id field.
 	providerdispute.DefaultID = providerdisputeDescID.Default.(func() uuid.UUID)
+	providermovementMixin := schema.ProviderMovement{}.Mixin()
+	providermovementMixinFields0 := providermovementMixin[0].Fields()
+	_ = providermovementMixinFields0
+	providermovementFields := schema.ProviderMovement{}.Fields()
+	_ = providermovementFields
+	// providermovementDescCreatedAt is the schema descriptor for created_at field.
+	providermovementDescCreatedAt := providermovementMixinFields0[1].Descriptor()
+	// providermovement.DefaultCreatedAt holds the default value on creation for the created_at field.
+	providermovement.DefaultCreatedAt = providermovementDescCreatedAt.Default.(func() time.Time)
+	// providermovementDescReference is the schema descriptor for reference field.
+	providermovementDescReference := providermovementFields[0].Descriptor()
+	// providermovement.ReferenceValidator is a validator for the "reference" field. It is called by the builders before save.
+	providermovement.ReferenceValidator = func() func(string) error {
+		validators := providermovementDescReference.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(reference string) error {
+			for _, fn := range fns {
+				if err := fn(reference); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// providermovementDescProvider is the schema descriptor for provider field.
+	providermovementDescProvider := providermovementFields[1].Descriptor()
+	// providermovement.ProviderValidator is a validator for the "provider" field. It is called by the builders before save.
+	providermovement.ProviderValidator = func() func(string) error {
+		validators := providermovementDescProvider.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(provider string) error {
+			for _, fn := range fns {
+				if err := fn(provider); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// providermovementDescKind is the schema descriptor for kind field.
+	providermovementDescKind := providermovementFields[2].Descriptor()
+	// providermovement.KindValidator is a validator for the "kind" field. It is called by the builders before save.
+	providermovement.KindValidator = func() func(string) error {
+		validators := providermovementDescKind.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(kind string) error {
+			for _, fn := range fns {
+				if err := fn(kind); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// providermovementDescSubjectID is the schema descriptor for subject_id field.
+	providermovementDescSubjectID := providermovementFields[3].Descriptor()
+	// providermovement.DefaultSubjectID holds the default value on creation for the subject_id field.
+	providermovement.DefaultSubjectID = providermovementDescSubjectID.Default.(string)
+	// providermovement.SubjectIDValidator is a validator for the "subject_id" field. It is called by the builders before save.
+	providermovement.SubjectIDValidator = providermovementDescSubjectID.Validators[0].(func(string) error)
+	// providermovementDescUserID is the schema descriptor for user_id field.
+	providermovementDescUserID := providermovementFields[4].Descriptor()
+	// providermovement.DefaultUserID holds the default value on creation for the user_id field.
+	providermovement.DefaultUserID = providermovementDescUserID.Default.(string)
+	// providermovement.UserIDValidator is a validator for the "user_id" field. It is called by the builders before save.
+	providermovement.UserIDValidator = providermovementDescUserID.Validators[0].(func(string) error)
+	// providermovementDescFromWalletRef is the schema descriptor for from_wallet_ref field.
+	providermovementDescFromWalletRef := providermovementFields[5].Descriptor()
+	// providermovement.DefaultFromWalletRef holds the default value on creation for the from_wallet_ref field.
+	providermovement.DefaultFromWalletRef = providermovementDescFromWalletRef.Default.(string)
+	// providermovement.FromWalletRefValidator is a validator for the "from_wallet_ref" field. It is called by the builders before save.
+	providermovement.FromWalletRefValidator = providermovementDescFromWalletRef.Validators[0].(func(string) error)
+	// providermovementDescFromUserID is the schema descriptor for from_user_id field.
+	providermovementDescFromUserID := providermovementFields[6].Descriptor()
+	// providermovement.DefaultFromUserID holds the default value on creation for the from_user_id field.
+	providermovement.DefaultFromUserID = providermovementDescFromUserID.Default.(string)
+	// providermovement.FromUserIDValidator is a validator for the "from_user_id" field. It is called by the builders before save.
+	providermovement.FromUserIDValidator = providermovementDescFromUserID.Validators[0].(func(string) error)
+	// providermovementDescToBarterID is the schema descriptor for to_barter_id field.
+	providermovementDescToBarterID := providermovementFields[7].Descriptor()
+	// providermovement.DefaultToBarterID holds the default value on creation for the to_barter_id field.
+	providermovement.DefaultToBarterID = providermovementDescToBarterID.Default.(string)
+	// providermovement.ToBarterIDValidator is a validator for the "to_barter_id" field. It is called by the builders before save.
+	providermovement.ToBarterIDValidator = providermovementDescToBarterID.Validators[0].(func(string) error)
+	// providermovementDescToWalletRef is the schema descriptor for to_wallet_ref field.
+	providermovementDescToWalletRef := providermovementFields[8].Descriptor()
+	// providermovement.DefaultToWalletRef holds the default value on creation for the to_wallet_ref field.
+	providermovement.DefaultToWalletRef = providermovementDescToWalletRef.Default.(string)
+	// providermovement.ToWalletRefValidator is a validator for the "to_wallet_ref" field. It is called by the builders before save.
+	providermovement.ToWalletRefValidator = providermovementDescToWalletRef.Validators[0].(func(string) error)
+	// providermovementDescToPlatform is the schema descriptor for to_platform field.
+	providermovementDescToPlatform := providermovementFields[9].Descriptor()
+	// providermovement.DefaultToPlatform holds the default value on creation for the to_platform field.
+	providermovement.DefaultToPlatform = providermovementDescToPlatform.Default.(bool)
+	// providermovementDescToUserID is the schema descriptor for to_user_id field.
+	providermovementDescToUserID := providermovementFields[10].Descriptor()
+	// providermovement.DefaultToUserID holds the default value on creation for the to_user_id field.
+	providermovement.DefaultToUserID = providermovementDescToUserID.Default.(string)
+	// providermovement.ToUserIDValidator is a validator for the "to_user_id" field. It is called by the builders before save.
+	providermovement.ToUserIDValidator = providermovementDescToUserID.Validators[0].(func(string) error)
+	// providermovementDescCurrency is the schema descriptor for currency field.
+	providermovementDescCurrency := providermovementFields[12].Descriptor()
+	// providermovement.CurrencyValidator is a validator for the "currency" field. It is called by the builders before save.
+	providermovement.CurrencyValidator = func() func(string) error {
+		validators := providermovementDescCurrency.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(currency string) error {
+			for _, fn := range fns {
+				if err := fn(currency); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// providermovementDescProviderTransferID is the schema descriptor for provider_transfer_id field.
+	providermovementDescProviderTransferID := providermovementFields[14].Descriptor()
+	// providermovement.DefaultProviderTransferID holds the default value on creation for the provider_transfer_id field.
+	providermovement.DefaultProviderTransferID = providermovementDescProviderTransferID.Default.(string)
+	// providermovement.ProviderTransferIDValidator is a validator for the "provider_transfer_id" field. It is called by the builders before save.
+	providermovement.ProviderTransferIDValidator = providermovementDescProviderTransferID.Validators[0].(func(string) error)
+	// providermovementDescAttempts is the schema descriptor for attempts field.
+	providermovementDescAttempts := providermovementFields[15].Descriptor()
+	// providermovement.DefaultAttempts holds the default value on creation for the attempts field.
+	providermovement.DefaultAttempts = providermovementDescAttempts.Default.(int)
+	// providermovementDescFailureReason is the schema descriptor for failure_reason field.
+	providermovementDescFailureReason := providermovementFields[16].Descriptor()
+	// providermovement.DefaultFailureReason holds the default value on creation for the failure_reason field.
+	providermovement.DefaultFailureReason = providermovementDescFailureReason.Default.(string)
+	// providermovement.FailureReasonValidator is a validator for the "failure_reason" field. It is called by the builders before save.
+	providermovement.FailureReasonValidator = providermovementDescFailureReason.Validators[0].(func(string) error)
+	// providermovementDescBlockedOn is the schema descriptor for blocked_on field.
+	providermovementDescBlockedOn := providermovementFields[17].Descriptor()
+	// providermovement.DefaultBlockedOn holds the default value on creation for the blocked_on field.
+	providermovement.DefaultBlockedOn = providermovementDescBlockedOn.Default.(string)
+	// providermovement.BlockedOnValidator is a validator for the "blocked_on" field. It is called by the builders before save.
+	providermovement.BlockedOnValidator = providermovementDescBlockedOn.Validators[0].(func(string) error)
+	// providermovementDescVersion is the schema descriptor for version field.
+	providermovementDescVersion := providermovementFields[22].Descriptor()
+	// providermovement.DefaultVersion holds the default value on creation for the version field.
+	providermovement.DefaultVersion = providermovementDescVersion.Default.(int64)
+	// providermovementDescUpdatedAt is the schema descriptor for updated_at field.
+	providermovementDescUpdatedAt := providermovementFields[23].Descriptor()
+	// providermovement.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	providermovement.DefaultUpdatedAt = providermovementDescUpdatedAt.Default.(func() time.Time)
+	// providermovement.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	providermovement.UpdateDefaultUpdatedAt = providermovementDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// providermovementDescID is the schema descriptor for id field.
+	providermovementDescID := providermovementMixinFields0[0].Descriptor()
+	// providermovement.DefaultID holds the default value on creation for the id field.
+	providermovement.DefaultID = providermovementDescID.Default.(func() uuid.UUID)
 	providerpayoutdestinationMixin := schema.ProviderPayoutDestination{}.Mixin()
 	providerpayoutdestinationMixinFields0 := providerpayoutdestinationMixin[0].Fields()
 	_ = providerpayoutdestinationMixinFields0
@@ -1616,6 +1807,378 @@ func init() {
 	providerpayoutdestinationDescID := providerpayoutdestinationMixinFields0[0].Descriptor()
 	// providerpayoutdestination.DefaultID holds the default value on creation for the id field.
 	providerpayoutdestination.DefaultID = providerpayoutdestinationDescID.Default.(func() uuid.UUID)
+	providerwalletMixin := schema.ProviderWallet{}.Mixin()
+	providerwalletMixinFields0 := providerwalletMixin[0].Fields()
+	_ = providerwalletMixinFields0
+	providerwalletFields := schema.ProviderWallet{}.Fields()
+	_ = providerwalletFields
+	// providerwalletDescCreatedAt is the schema descriptor for created_at field.
+	providerwalletDescCreatedAt := providerwalletMixinFields0[1].Descriptor()
+	// providerwallet.DefaultCreatedAt holds the default value on creation for the created_at field.
+	providerwallet.DefaultCreatedAt = providerwalletDescCreatedAt.Default.(func() time.Time)
+	// providerwalletDescUserID is the schema descriptor for user_id field.
+	providerwalletDescUserID := providerwalletFields[0].Descriptor()
+	// providerwallet.UserIDValidator is a validator for the "user_id" field. It is called by the builders before save.
+	providerwallet.UserIDValidator = func() func(string) error {
+		validators := providerwalletDescUserID.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(user_id string) error {
+			for _, fn := range fns {
+				if err := fn(user_id); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// providerwalletDescProvider is the schema descriptor for provider field.
+	providerwalletDescProvider := providerwalletFields[1].Descriptor()
+	// providerwallet.ProviderValidator is a validator for the "provider" field. It is called by the builders before save.
+	providerwallet.ProviderValidator = func() func(string) error {
+		validators := providerwalletDescProvider.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(provider string) error {
+			for _, fn := range fns {
+				if err := fn(provider); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// providerwalletDescCurrency is the schema descriptor for currency field.
+	providerwalletDescCurrency := providerwalletFields[2].Descriptor()
+	// providerwallet.CurrencyValidator is a validator for the "currency" field. It is called by the builders before save.
+	providerwallet.CurrencyValidator = func() func(string) error {
+		validators := providerwalletDescCurrency.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(currency string) error {
+			for _, fn := range fns {
+				if err := fn(currency); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// providerwalletDescAccountRef is the schema descriptor for account_ref field.
+	providerwalletDescAccountRef := providerwalletFields[3].Descriptor()
+	// providerwallet.AccountRefValidator is a validator for the "account_ref" field. It is called by the builders before save.
+	providerwallet.AccountRefValidator = func() func(string) error {
+		validators := providerwalletDescAccountRef.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(account_ref string) error {
+			for _, fn := range fns {
+				if err := fn(account_ref); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// providerwalletDescBarterID is the schema descriptor for barter_id field.
+	providerwalletDescBarterID := providerwalletFields[4].Descriptor()
+	// providerwallet.BarterIDValidator is a validator for the "barter_id" field. It is called by the builders before save.
+	providerwallet.BarterIDValidator = func() func(string) error {
+		validators := providerwalletDescBarterID.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(barter_id string) error {
+			for _, fn := range fns {
+				if err := fn(barter_id); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// providerwalletDescNuban is the schema descriptor for nuban field.
+	providerwalletDescNuban := providerwalletFields[5].Descriptor()
+	// providerwallet.DefaultNuban holds the default value on creation for the nuban field.
+	providerwallet.DefaultNuban = providerwalletDescNuban.Default.(string)
+	// providerwallet.NubanValidator is a validator for the "nuban" field. It is called by the builders before save.
+	providerwallet.NubanValidator = providerwalletDescNuban.Validators[0].(func(string) error)
+	// providerwalletDescBankCode is the schema descriptor for bank_code field.
+	providerwalletDescBankCode := providerwalletFields[6].Descriptor()
+	// providerwallet.DefaultBankCode holds the default value on creation for the bank_code field.
+	providerwallet.DefaultBankCode = providerwalletDescBankCode.Default.(string)
+	// providerwallet.BankCodeValidator is a validator for the "bank_code" field. It is called by the builders before save.
+	providerwallet.BankCodeValidator = providerwalletDescBankCode.Validators[0].(func(string) error)
+	// providerwalletDescBankName is the schema descriptor for bank_name field.
+	providerwalletDescBankName := providerwalletFields[7].Descriptor()
+	// providerwallet.DefaultBankName holds the default value on creation for the bank_name field.
+	providerwallet.DefaultBankName = providerwalletDescBankName.Default.(string)
+	// providerwallet.BankNameValidator is a validator for the "bank_name" field. It is called by the builders before save.
+	providerwallet.BankNameValidator = providerwalletDescBankName.Validators[0].(func(string) error)
+	// providerwalletDescAccountName is the schema descriptor for account_name field.
+	providerwalletDescAccountName := providerwalletFields[8].Descriptor()
+	// providerwallet.DefaultAccountName holds the default value on creation for the account_name field.
+	providerwallet.DefaultAccountName = providerwalletDescAccountName.Default.(string)
+	// providerwallet.AccountNameValidator is a validator for the "account_name" field. It is called by the builders before save.
+	providerwallet.AccountNameValidator = providerwalletDescAccountName.Validators[0].(func(string) error)
+	// providerwalletDescAliasEmail is the schema descriptor for alias_email field.
+	providerwalletDescAliasEmail := providerwalletFields[9].Descriptor()
+	// providerwallet.DefaultAliasEmail holds the default value on creation for the alias_email field.
+	providerwallet.DefaultAliasEmail = providerwalletDescAliasEmail.Default.(string)
+	// providerwallet.AliasEmailValidator is a validator for the "alias_email" field. It is called by the builders before save.
+	providerwallet.AliasEmailValidator = providerwalletDescAliasEmail.Validators[0].(func(string) error)
+	// providerwalletDescFreezeReason is the schema descriptor for freeze_reason field.
+	providerwalletDescFreezeReason := providerwalletFields[11].Descriptor()
+	// providerwallet.DefaultFreezeReason holds the default value on creation for the freeze_reason field.
+	providerwallet.DefaultFreezeReason = providerwalletDescFreezeReason.Default.(string)
+	// providerwallet.FreezeReasonValidator is a validator for the "freeze_reason" field. It is called by the builders before save.
+	providerwallet.FreezeReasonValidator = providerwalletDescFreezeReason.Validators[0].(func(string) error)
+	// providerwalletDescVersion is the schema descriptor for version field.
+	providerwalletDescVersion := providerwalletFields[14].Descriptor()
+	// providerwallet.DefaultVersion holds the default value on creation for the version field.
+	providerwallet.DefaultVersion = providerwalletDescVersion.Default.(int64)
+	// providerwalletDescUpdatedAt is the schema descriptor for updated_at field.
+	providerwalletDescUpdatedAt := providerwalletFields[15].Descriptor()
+	// providerwallet.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	providerwallet.DefaultUpdatedAt = providerwalletDescUpdatedAt.Default.(func() time.Time)
+	// providerwallet.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	providerwallet.UpdateDefaultUpdatedAt = providerwalletDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// providerwalletDescID is the schema descriptor for id field.
+	providerwalletDescID := providerwalletMixinFields0[0].Descriptor()
+	// providerwallet.DefaultID holds the default value on creation for the id field.
+	providerwallet.DefaultID = providerwalletDescID.Default.(func() uuid.UUID)
+	providerwalletnumberMixin := schema.ProviderWalletNumber{}.Mixin()
+	providerwalletnumberMixinFields0 := providerwalletnumberMixin[0].Fields()
+	_ = providerwalletnumberMixinFields0
+	providerwalletnumberFields := schema.ProviderWalletNumber{}.Fields()
+	_ = providerwalletnumberFields
+	// providerwalletnumberDescCreatedAt is the schema descriptor for created_at field.
+	providerwalletnumberDescCreatedAt := providerwalletnumberMixinFields0[1].Descriptor()
+	// providerwalletnumber.DefaultCreatedAt holds the default value on creation for the created_at field.
+	providerwalletnumber.DefaultCreatedAt = providerwalletnumberDescCreatedAt.Default.(func() time.Time)
+	// providerwalletnumberDescProvider is the schema descriptor for provider field.
+	providerwalletnumberDescProvider := providerwalletnumberFields[1].Descriptor()
+	// providerwalletnumber.ProviderValidator is a validator for the "provider" field. It is called by the builders before save.
+	providerwalletnumber.ProviderValidator = func() func(string) error {
+		validators := providerwalletnumberDescProvider.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(provider string) error {
+			for _, fn := range fns {
+				if err := fn(provider); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// providerwalletnumberDescAccountNumber is the schema descriptor for account_number field.
+	providerwalletnumberDescAccountNumber := providerwalletnumberFields[2].Descriptor()
+	// providerwalletnumber.AccountNumberValidator is a validator for the "account_number" field. It is called by the builders before save.
+	providerwalletnumber.AccountNumberValidator = func() func(string) error {
+		validators := providerwalletnumberDescAccountNumber.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(account_number string) error {
+			for _, fn := range fns {
+				if err := fn(account_number); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// providerwalletnumberDescBankCode is the schema descriptor for bank_code field.
+	providerwalletnumberDescBankCode := providerwalletnumberFields[3].Descriptor()
+	// providerwalletnumber.DefaultBankCode holds the default value on creation for the bank_code field.
+	providerwalletnumber.DefaultBankCode = providerwalletnumberDescBankCode.Default.(string)
+	// providerwalletnumber.BankCodeValidator is a validator for the "bank_code" field. It is called by the builders before save.
+	providerwalletnumber.BankCodeValidator = providerwalletnumberDescBankCode.Validators[0].(func(string) error)
+	// providerwalletnumberDescBankName is the schema descriptor for bank_name field.
+	providerwalletnumberDescBankName := providerwalletnumberFields[4].Descriptor()
+	// providerwalletnumber.DefaultBankName holds the default value on creation for the bank_name field.
+	providerwalletnumber.DefaultBankName = providerwalletnumberDescBankName.Default.(string)
+	// providerwalletnumber.BankNameValidator is a validator for the "bank_name" field. It is called by the builders before save.
+	providerwalletnumber.BankNameValidator = providerwalletnumberDescBankName.Validators[0].(func(string) error)
+	// providerwalletnumberDescID is the schema descriptor for id field.
+	providerwalletnumberDescID := providerwalletnumberMixinFields0[0].Descriptor()
+	// providerwalletnumber.DefaultID holds the default value on creation for the id field.
+	providerwalletnumber.DefaultID = providerwalletnumberDescID.Default.(func() uuid.UUID)
+	reconciliationcaseMixin := schema.ReconciliationCase{}.Mixin()
+	reconciliationcaseMixinFields0 := reconciliationcaseMixin[0].Fields()
+	_ = reconciliationcaseMixinFields0
+	reconciliationcaseFields := schema.ReconciliationCase{}.Fields()
+	_ = reconciliationcaseFields
+	// reconciliationcaseDescCreatedAt is the schema descriptor for created_at field.
+	reconciliationcaseDescCreatedAt := reconciliationcaseMixinFields0[1].Descriptor()
+	// reconciliationcase.DefaultCreatedAt holds the default value on creation for the created_at field.
+	reconciliationcase.DefaultCreatedAt = reconciliationcaseDescCreatedAt.Default.(func() time.Time)
+	// reconciliationcaseDescProvider is the schema descriptor for provider field.
+	reconciliationcaseDescProvider := reconciliationcaseFields[0].Descriptor()
+	// reconciliationcase.ProviderValidator is a validator for the "provider" field. It is called by the builders before save.
+	reconciliationcase.ProviderValidator = func() func(string) error {
+		validators := reconciliationcaseDescProvider.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(provider string) error {
+			for _, fn := range fns {
+				if err := fn(provider); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// reconciliationcaseDescKind is the schema descriptor for kind field.
+	reconciliationcaseDescKind := reconciliationcaseFields[1].Descriptor()
+	// reconciliationcase.KindValidator is a validator for the "kind" field. It is called by the builders before save.
+	reconciliationcase.KindValidator = func() func(string) error {
+		validators := reconciliationcaseDescKind.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(kind string) error {
+			for _, fn := range fns {
+				if err := fn(kind); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// reconciliationcaseDescSubject is the schema descriptor for subject field.
+	reconciliationcaseDescSubject := reconciliationcaseFields[2].Descriptor()
+	// reconciliationcase.SubjectValidator is a validator for the "subject" field. It is called by the builders before save.
+	reconciliationcase.SubjectValidator = func() func(string) error {
+		validators := reconciliationcaseDescSubject.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(subject string) error {
+			for _, fn := range fns {
+				if err := fn(subject); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// reconciliationcaseDescDedupeKey is the schema descriptor for dedupe_key field.
+	reconciliationcaseDescDedupeKey := reconciliationcaseFields[3].Descriptor()
+	// reconciliationcase.DedupeKeyValidator is a validator for the "dedupe_key" field. It is called by the builders before save.
+	reconciliationcase.DedupeKeyValidator = func() func(string) error {
+		validators := reconciliationcaseDescDedupeKey.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(dedupe_key string) error {
+			for _, fn := range fns {
+				if err := fn(dedupe_key); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// reconciliationcaseDescExpectedMinor is the schema descriptor for expected_minor field.
+	reconciliationcaseDescExpectedMinor := reconciliationcaseFields[4].Descriptor()
+	// reconciliationcase.DefaultExpectedMinor holds the default value on creation for the expected_minor field.
+	reconciliationcase.DefaultExpectedMinor = reconciliationcaseDescExpectedMinor.Default.(int64)
+	// reconciliationcaseDescActualMinor is the schema descriptor for actual_minor field.
+	reconciliationcaseDescActualMinor := reconciliationcaseFields[5].Descriptor()
+	// reconciliationcase.DefaultActualMinor holds the default value on creation for the actual_minor field.
+	reconciliationcase.DefaultActualMinor = reconciliationcaseDescActualMinor.Default.(int64)
+	// reconciliationcaseDescCurrency is the schema descriptor for currency field.
+	reconciliationcaseDescCurrency := reconciliationcaseFields[6].Descriptor()
+	// reconciliationcase.DefaultCurrency holds the default value on creation for the currency field.
+	reconciliationcase.DefaultCurrency = reconciliationcaseDescCurrency.Default.(string)
+	// reconciliationcase.CurrencyValidator is a validator for the "currency" field. It is called by the builders before save.
+	reconciliationcase.CurrencyValidator = reconciliationcaseDescCurrency.Validators[0].(func(string) error)
+	// reconciliationcaseDescDetail is the schema descriptor for detail field.
+	reconciliationcaseDescDetail := reconciliationcaseFields[7].Descriptor()
+	// reconciliationcase.DefaultDetail holds the default value on creation for the detail field.
+	reconciliationcase.DefaultDetail = reconciliationcaseDescDetail.Default.(string)
+	// reconciliationcase.DetailValidator is a validator for the "detail" field. It is called by the builders before save.
+	reconciliationcase.DetailValidator = reconciliationcaseDescDetail.Validators[0].(func(string) error)
+	// reconciliationcaseDescID is the schema descriptor for id field.
+	reconciliationcaseDescID := reconciliationcaseMixinFields0[0].Descriptor()
+	// reconciliationcase.DefaultID holds the default value on creation for the id field.
+	reconciliationcase.DefaultID = reconciliationcaseDescID.Default.(func() uuid.UUID)
+	reconciliationrunMixin := schema.ReconciliationRun{}.Mixin()
+	reconciliationrunMixinFields0 := reconciliationrunMixin[0].Fields()
+	_ = reconciliationrunMixinFields0
+	reconciliationrunFields := schema.ReconciliationRun{}.Fields()
+	_ = reconciliationrunFields
+	// reconciliationrunDescCreatedAt is the schema descriptor for created_at field.
+	reconciliationrunDescCreatedAt := reconciliationrunMixinFields0[1].Descriptor()
+	// reconciliationrun.DefaultCreatedAt holds the default value on creation for the created_at field.
+	reconciliationrun.DefaultCreatedAt = reconciliationrunDescCreatedAt.Default.(func() time.Time)
+	// reconciliationrunDescProvider is the schema descriptor for provider field.
+	reconciliationrunDescProvider := reconciliationrunFields[0].Descriptor()
+	// reconciliationrun.ProviderValidator is a validator for the "provider" field. It is called by the builders before save.
+	reconciliationrun.ProviderValidator = func() func(string) error {
+		validators := reconciliationrunDescProvider.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(provider string) error {
+			for _, fn := range fns {
+				if err := fn(provider); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// reconciliationrunDescKind is the schema descriptor for kind field.
+	reconciliationrunDescKind := reconciliationrunFields[1].Descriptor()
+	// reconciliationrun.KindValidator is a validator for the "kind" field. It is called by the builders before save.
+	reconciliationrun.KindValidator = func() func(string) error {
+		validators := reconciliationrunDescKind.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(kind string) error {
+			for _, fn := range fns {
+				if err := fn(kind); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// reconciliationrunDescWalletsChecked is the schema descriptor for wallets_checked field.
+	reconciliationrunDescWalletsChecked := reconciliationrunFields[3].Descriptor()
+	// reconciliationrun.DefaultWalletsChecked holds the default value on creation for the wallets_checked field.
+	reconciliationrun.DefaultWalletsChecked = reconciliationrunDescWalletsChecked.Default.(int)
+	// reconciliationrunDescIssuesFound is the schema descriptor for issues_found field.
+	reconciliationrunDescIssuesFound := reconciliationrunFields[4].Descriptor()
+	// reconciliationrun.DefaultIssuesFound holds the default value on creation for the issues_found field.
+	reconciliationrun.DefaultIssuesFound = reconciliationrunDescIssuesFound.Default.(int)
+	// reconciliationrunDescID is the schema descriptor for id field.
+	reconciliationrunDescID := reconciliationrunMixinFields0[0].Descriptor()
+	// reconciliationrun.DefaultID holds the default value on creation for the id field.
+	reconciliationrun.DefaultID = reconciliationrunDescID.Default.(func() uuid.UUID)
 	savedcardsetupMixin := schema.SavedCardSetup{}.Mixin()
 	savedcardsetupMixinFields0 := savedcardsetupMixin[0].Fields()
 	_ = savedcardsetupMixinFields0
@@ -2000,6 +2563,129 @@ func init() {
 	verificationlevelrecordDescID := verificationlevelrecordMixinFields0[0].Descriptor()
 	// verificationlevelrecord.DefaultID holds the default value on creation for the id field.
 	verificationlevelrecord.DefaultID = verificationlevelrecordDescID.Default.(func() uuid.UUID)
+	walletfundingMixin := schema.WalletFunding{}.Mixin()
+	walletfundingMixinFields0 := walletfundingMixin[0].Fields()
+	_ = walletfundingMixinFields0
+	walletfundingFields := schema.WalletFunding{}.Fields()
+	_ = walletfundingFields
+	// walletfundingDescCreatedAt is the schema descriptor for created_at field.
+	walletfundingDescCreatedAt := walletfundingMixinFields0[1].Descriptor()
+	// walletfunding.DefaultCreatedAt holds the default value on creation for the created_at field.
+	walletfunding.DefaultCreatedAt = walletfundingDescCreatedAt.Default.(func() time.Time)
+	// walletfundingDescUserID is the schema descriptor for user_id field.
+	walletfundingDescUserID := walletfundingFields[1].Descriptor()
+	// walletfunding.UserIDValidator is a validator for the "user_id" field. It is called by the builders before save.
+	walletfunding.UserIDValidator = func() func(string) error {
+		validators := walletfundingDescUserID.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(user_id string) error {
+			for _, fn := range fns {
+				if err := fn(user_id); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// walletfundingDescProvider is the schema descriptor for provider field.
+	walletfundingDescProvider := walletfundingFields[2].Descriptor()
+	// walletfunding.ProviderValidator is a validator for the "provider" field. It is called by the builders before save.
+	walletfunding.ProviderValidator = func() func(string) error {
+		validators := walletfundingDescProvider.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(provider string) error {
+			for _, fn := range fns {
+				if err := fn(provider); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// walletfundingDescProviderReference is the schema descriptor for provider_reference field.
+	walletfundingDescProviderReference := walletfundingFields[3].Descriptor()
+	// walletfunding.ProviderReferenceValidator is a validator for the "provider_reference" field. It is called by the builders before save.
+	walletfunding.ProviderReferenceValidator = func() func(string) error {
+		validators := walletfundingDescProviderReference.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(provider_reference string) error {
+			for _, fn := range fns {
+				if err := fn(provider_reference); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// walletfundingDescAccountNumber is the schema descriptor for account_number field.
+	walletfundingDescAccountNumber := walletfundingFields[5].Descriptor()
+	// walletfunding.DefaultAccountNumber holds the default value on creation for the account_number field.
+	walletfunding.DefaultAccountNumber = walletfundingDescAccountNumber.Default.(string)
+	// walletfunding.AccountNumberValidator is a validator for the "account_number" field. It is called by the builders before save.
+	walletfunding.AccountNumberValidator = walletfundingDescAccountNumber.Validators[0].(func(string) error)
+	// walletfundingDescProviderFeeMinor is the schema descriptor for provider_fee_minor field.
+	walletfundingDescProviderFeeMinor := walletfundingFields[7].Descriptor()
+	// walletfunding.DefaultProviderFeeMinor holds the default value on creation for the provider_fee_minor field.
+	walletfunding.DefaultProviderFeeMinor = walletfundingDescProviderFeeMinor.Default.(int64)
+	// walletfundingDescDepositFeeMinor is the schema descriptor for deposit_fee_minor field.
+	walletfundingDescDepositFeeMinor := walletfundingFields[8].Descriptor()
+	// walletfunding.DefaultDepositFeeMinor holds the default value on creation for the deposit_fee_minor field.
+	walletfunding.DefaultDepositFeeMinor = walletfundingDescDepositFeeMinor.Default.(int64)
+	// walletfundingDescHintedMinor is the schema descriptor for hinted_minor field.
+	walletfundingDescHintedMinor := walletfundingFields[9].Descriptor()
+	// walletfunding.DefaultHintedMinor holds the default value on creation for the hinted_minor field.
+	walletfunding.DefaultHintedMinor = walletfundingDescHintedMinor.Default.(int64)
+	// walletfundingDescCurrency is the schema descriptor for currency field.
+	walletfundingDescCurrency := walletfundingFields[10].Descriptor()
+	// walletfunding.CurrencyValidator is a validator for the "currency" field. It is called by the builders before save.
+	walletfunding.CurrencyValidator = func() func(string) error {
+		validators := walletfundingDescCurrency.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(currency string) error {
+			for _, fn := range fns {
+				if err := fn(currency); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// walletfundingDescSweepReference is the schema descriptor for sweep_reference field.
+	walletfundingDescSweepReference := walletfundingFields[14].Descriptor()
+	// walletfunding.DefaultSweepReference holds the default value on creation for the sweep_reference field.
+	walletfunding.DefaultSweepReference = walletfundingDescSweepReference.Default.(string)
+	// walletfunding.SweepReferenceValidator is a validator for the "sweep_reference" field. It is called by the builders before save.
+	walletfunding.SweepReferenceValidator = walletfundingDescSweepReference.Validators[0].(func(string) error)
+	// walletfundingDescReversalReference is the schema descriptor for reversal_reference field.
+	walletfundingDescReversalReference := walletfundingFields[15].Descriptor()
+	// walletfunding.DefaultReversalReference holds the default value on creation for the reversal_reference field.
+	walletfunding.DefaultReversalReference = walletfundingDescReversalReference.Default.(string)
+	// walletfunding.ReversalReferenceValidator is a validator for the "reversal_reference" field. It is called by the builders before save.
+	walletfunding.ReversalReferenceValidator = walletfundingDescReversalReference.Validators[0].(func(string) error)
+	// walletfundingDescDebtMinor is the schema descriptor for debt_minor field.
+	walletfundingDescDebtMinor := walletfundingFields[17].Descriptor()
+	// walletfunding.DefaultDebtMinor holds the default value on creation for the debt_minor field.
+	walletfunding.DefaultDebtMinor = walletfundingDescDebtMinor.Default.(int64)
+	// walletfundingDescVersion is the schema descriptor for version field.
+	walletfundingDescVersion := walletfundingFields[18].Descriptor()
+	// walletfunding.DefaultVersion holds the default value on creation for the version field.
+	walletfunding.DefaultVersion = walletfundingDescVersion.Default.(int64)
+	// walletfundingDescID is the schema descriptor for id field.
+	walletfundingDescID := walletfundingMixinFields0[0].Descriptor()
+	// walletfunding.DefaultID holds the default value on creation for the id field.
+	walletfunding.DefaultID = walletfundingDescID.Default.(func() uuid.UUID)
 	webhookeventMixin := schema.WebhookEvent{}.Mixin()
 	webhookeventMixinFields0 := webhookeventMixin[0].Fields()
 	_ = webhookeventMixinFields0
@@ -2067,6 +2753,12 @@ func init() {
 	webhookevent.DefaultLastError = webhookeventDescLastError.Default.(string)
 	// webhookevent.LastErrorValidator is a validator for the "last_error" field. It is called by the builders before save.
 	webhookevent.LastErrorValidator = webhookeventDescLastError.Validators[0].(func(string) error)
+	// webhookeventDescLeaseToken is the schema descriptor for lease_token field.
+	webhookeventDescLeaseToken := webhookeventFields[11].Descriptor()
+	// webhookevent.DefaultLeaseToken holds the default value on creation for the lease_token field.
+	webhookevent.DefaultLeaseToken = webhookeventDescLeaseToken.Default.(string)
+	// webhookevent.LeaseTokenValidator is a validator for the "lease_token" field. It is called by the builders before save.
+	webhookevent.LeaseTokenValidator = webhookeventDescLeaseToken.Validators[0].(func(string) error)
 	// webhookeventDescID is the schema descriptor for id field.
 	webhookeventDescID := webhookeventMixinFields0[0].Descriptor()
 	// webhookevent.DefaultID holds the default value on creation for the id field.

@@ -34,6 +34,14 @@ const (
 	FieldAttemptCount = "attempt_count"
 	// FieldLastError holds the string denoting the last_error field in the database.
 	FieldLastError = "last_error"
+	// FieldNextAttemptAt holds the string denoting the next_attempt_at field in the database.
+	FieldNextAttemptAt = "next_attempt_at"
+	// FieldLockedUntil holds the string denoting the locked_until field in the database.
+	FieldLockedUntil = "locked_until"
+	// FieldLeaseToken holds the string denoting the lease_token field in the database.
+	FieldLeaseToken = "lease_token"
+	// FieldDeadLetteredAt holds the string denoting the dead_lettered_at field in the database.
+	FieldDeadLetteredAt = "dead_lettered_at"
 	// Table holds the table name of the webhookevent in the database.
 	Table = "webhook_events"
 )
@@ -51,6 +59,10 @@ var Columns = []string{
 	FieldProcessedAt,
 	FieldAttemptCount,
 	FieldLastError,
+	FieldNextAttemptAt,
+	FieldLockedUntil,
+	FieldLeaseToken,
+	FieldDeadLetteredAt,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -82,6 +94,10 @@ var (
 	DefaultLastError string
 	// LastErrorValidator is a validator for the "last_error" field. It is called by the builders before save.
 	LastErrorValidator func(string) error
+	// DefaultLeaseToken holds the default value on creation for the "lease_token" field.
+	DefaultLeaseToken string
+	// LeaseTokenValidator is a validator for the "lease_token" field. It is called by the builders before save.
+	LeaseTokenValidator func(string) error
 	// DefaultID holds the default value on creation for the "id" field.
 	DefaultID func() uuid.UUID
 )
@@ -137,4 +153,24 @@ func ByAttemptCount(opts ...sql.OrderTermOption) OrderOption {
 // ByLastError orders the results by the last_error field.
 func ByLastError(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldLastError, opts...).ToFunc()
+}
+
+// ByNextAttemptAt orders the results by the next_attempt_at field.
+func ByNextAttemptAt(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldNextAttemptAt, opts...).ToFunc()
+}
+
+// ByLockedUntil orders the results by the locked_until field.
+func ByLockedUntil(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldLockedUntil, opts...).ToFunc()
+}
+
+// ByLeaseToken orders the results by the lease_token field.
+func ByLeaseToken(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldLeaseToken, opts...).ToFunc()
+}
+
+// ByDeadLetteredAt orders the results by the dead_lettered_at field.
+func ByDeadLetteredAt(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldDeadLetteredAt, opts...).ToFunc()
 }

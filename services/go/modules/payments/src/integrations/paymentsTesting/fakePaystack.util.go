@@ -40,28 +40,29 @@ type FakeTransfer struct {
 }
 
 type FakePaystack struct {
-	Server               *httptest.Server
-	mutex                sync.Mutex
-	nextId               int64
-	Transactions         map[string]*FakeTransaction
-	Transfers            map[string]*FakeTransfer
-	Recipients           map[string]map[string]any
-	Subaccounts          map[string]map[string]any
-	Refunds              []map[string]any
-	Disputes             []map[string]any
-	Subscriptions        map[string]map[string]any
-	Customers            map[string]string
-	Identifications      map[string]map[string]any
-	PlatformBalance      map[string]int64
-	SubaccountBalances   map[string]int64
-	CallCounts           map[string]int
-	RecipientCreations   int
-	SubaccountCreations  int
-	FailNextRequests     int
-	RefundsNeedAttention bool
-	RefundDelay          time.Duration
-	LoseNextRefundReply  bool
-	LoseNextChargeReply  bool
+	Server                *httptest.Server
+	mutex                 sync.Mutex
+	nextId                int64
+	Transactions          map[string]*FakeTransaction
+	Transfers             map[string]*FakeTransfer
+	Recipients            map[string]map[string]any
+	Subaccounts           map[string]map[string]any
+	Refunds               []map[string]any
+	Disputes              []map[string]any
+	Subscriptions         map[string]map[string]any
+	Customers             map[string]string
+	Identifications       map[string]map[string]any
+	PlatformBalance       map[string]int64
+	SubaccountBalances    map[string]int64
+	CallCounts            map[string]int
+	RecipientCreations    int
+	SubaccountCreations   int
+	FailNextRequests      int
+	RefundsNeedAttention  bool
+	RefundDelay           time.Duration
+	LoseNextRefundReply   bool
+	LoseNextChargeReply   bool
+	LoseNextTransferReply bool
 }
 
 func StartFakePaystack(t *testing.T) *FakePaystack {

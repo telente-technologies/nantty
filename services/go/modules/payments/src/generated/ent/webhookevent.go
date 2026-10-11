@@ -37,8 +37,16 @@ type WebhookEvent struct {
 	// AttemptCount holds the value of the "attempt_count" field.
 	AttemptCount int `json:"attempt_count,omitempty"`
 	// LastError holds the value of the "last_error" field.
-	LastError    string `json:"last_error,omitempty"`
-	selectValues sql.SelectValues
+	LastError string `json:"last_error,omitempty"`
+	// NextAttemptAt holds the value of the "next_attempt_at" field.
+	NextAttemptAt *time.Time `json:"next_attempt_at,omitempty"`
+	// LockedUntil holds the value of the "locked_until" field.
+	LockedUntil *time.Time `json:"locked_until,omitempty"`
+	// LeaseToken holds the value of the "lease_token" field.
+	LeaseToken string `json:"lease_token,omitempty"`
+	// DeadLetteredAt holds the value of the "dead_lettered_at" field.
+	DeadLetteredAt *time.Time `json:"dead_lettered_at,omitempty"`
+	selectValues   sql.SelectValues
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -50,9 +58,9 @@ func (*WebhookEvent) scanValues(columns []string) ([]any, error) {
 			values[i] = new([]byte)
 		case webhookevent.FieldAttemptCount:
 			values[i] = new(sql.NullInt64)
-		case webhookevent.FieldProvider, webhookevent.FieldEventKey, webhookevent.FieldEventType, webhookevent.FieldReference, webhookevent.FieldPayloadSha256, webhookevent.FieldLastError:
+		case webhookevent.FieldProvider, webhookevent.FieldEventKey, webhookevent.FieldEventType, webhookevent.FieldReference, webhookevent.FieldPayloadSha256, webhookevent.FieldLastError, webhookevent.FieldLeaseToken:
 			values[i] = new(sql.NullString)
-		case webhookevent.FieldCreatedAt, webhookevent.FieldProcessedAt:
+		case webhookevent.FieldCreatedAt, webhookevent.FieldProcessedAt, webhookevent.FieldNextAttemptAt, webhookevent.FieldLockedUntil, webhookevent.FieldDeadLetteredAt:
 			values[i] = new(sql.NullTime)
 		case webhookevent.FieldID:
 			values[i] = new(uuid.UUID)
@@ -138,6 +146,33 @@ func (_m *WebhookEvent) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.LastError = value.String
 			}
+		case webhookevent.FieldNextAttemptAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field next_attempt_at", values[i])
+			} else if value.Valid {
+				_m.NextAttemptAt = new(time.Time)
+				*_m.NextAttemptAt = value.Time
+			}
+		case webhookevent.FieldLockedUntil:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field locked_until", values[i])
+			} else if value.Valid {
+				_m.LockedUntil = new(time.Time)
+				*_m.LockedUntil = value.Time
+			}
+		case webhookevent.FieldLeaseToken:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field lease_token", values[i])
+			} else if value.Valid {
+				_m.LeaseToken = value.String
+			}
+		case webhookevent.FieldDeadLetteredAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field dead_lettered_at", values[i])
+			} else if value.Valid {
+				_m.DeadLetteredAt = new(time.Time)
+				*_m.DeadLetteredAt = value.Time
+			}
 		default:
 			_m.selectValues.Set(columns[i], values[i])
 		}
@@ -207,6 +242,24 @@ func (_m *WebhookEvent) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("last_error=")
 	builder.WriteString(_m.LastError)
+	builder.WriteString(", ")
+	if v := _m.NextAttemptAt; v != nil {
+		builder.WriteString("next_attempt_at=")
+		builder.WriteString(v.Format(time.ANSIC))
+	}
+	builder.WriteString(", ")
+	if v := _m.LockedUntil; v != nil {
+		builder.WriteString("locked_until=")
+		builder.WriteString(v.Format(time.ANSIC))
+	}
+	builder.WriteString(", ")
+	builder.WriteString("lease_token=")
+	builder.WriteString(_m.LeaseToken)
+	builder.WriteString(", ")
+	if v := _m.DeadLetteredAt; v != nil {
+		builder.WriteString("dead_lettered_at=")
+		builder.WriteString(v.Format(time.ANSIC))
+	}
 	builder.WriteByte(')')
 	return builder.String()
 }

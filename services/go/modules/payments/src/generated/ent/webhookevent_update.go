@@ -84,6 +84,80 @@ func (_u *WebhookEventUpdate) SetNillableLastError(v *string) *WebhookEventUpdat
 	return _u
 }
 
+// SetNextAttemptAt sets the "next_attempt_at" field.
+func (_u *WebhookEventUpdate) SetNextAttemptAt(v time.Time) *WebhookEventUpdate {
+	_u.mutation.SetNextAttemptAt(v)
+	return _u
+}
+
+// SetNillableNextAttemptAt sets the "next_attempt_at" field if the given value is not nil.
+func (_u *WebhookEventUpdate) SetNillableNextAttemptAt(v *time.Time) *WebhookEventUpdate {
+	if v != nil {
+		_u.SetNextAttemptAt(*v)
+	}
+	return _u
+}
+
+// ClearNextAttemptAt clears the value of the "next_attempt_at" field.
+func (_u *WebhookEventUpdate) ClearNextAttemptAt() *WebhookEventUpdate {
+	_u.mutation.ClearNextAttemptAt()
+	return _u
+}
+
+// SetLockedUntil sets the "locked_until" field.
+func (_u *WebhookEventUpdate) SetLockedUntil(v time.Time) *WebhookEventUpdate {
+	_u.mutation.SetLockedUntil(v)
+	return _u
+}
+
+// SetNillableLockedUntil sets the "locked_until" field if the given value is not nil.
+func (_u *WebhookEventUpdate) SetNillableLockedUntil(v *time.Time) *WebhookEventUpdate {
+	if v != nil {
+		_u.SetLockedUntil(*v)
+	}
+	return _u
+}
+
+// ClearLockedUntil clears the value of the "locked_until" field.
+func (_u *WebhookEventUpdate) ClearLockedUntil() *WebhookEventUpdate {
+	_u.mutation.ClearLockedUntil()
+	return _u
+}
+
+// SetLeaseToken sets the "lease_token" field.
+func (_u *WebhookEventUpdate) SetLeaseToken(v string) *WebhookEventUpdate {
+	_u.mutation.SetLeaseToken(v)
+	return _u
+}
+
+// SetNillableLeaseToken sets the "lease_token" field if the given value is not nil.
+func (_u *WebhookEventUpdate) SetNillableLeaseToken(v *string) *WebhookEventUpdate {
+	if v != nil {
+		_u.SetLeaseToken(*v)
+	}
+	return _u
+}
+
+// SetDeadLetteredAt sets the "dead_lettered_at" field.
+func (_u *WebhookEventUpdate) SetDeadLetteredAt(v time.Time) *WebhookEventUpdate {
+	_u.mutation.SetDeadLetteredAt(v)
+	return _u
+}
+
+// SetNillableDeadLetteredAt sets the "dead_lettered_at" field if the given value is not nil.
+func (_u *WebhookEventUpdate) SetNillableDeadLetteredAt(v *time.Time) *WebhookEventUpdate {
+	if v != nil {
+		_u.SetDeadLetteredAt(*v)
+	}
+	return _u
+}
+
+// ClearDeadLetteredAt clears the value of the "dead_lettered_at" field.
+func (_u *WebhookEventUpdate) ClearDeadLetteredAt() *WebhookEventUpdate {
+	_u.mutation.ClearDeadLetteredAt()
+	return _u
+}
+
 // Mutation returns the WebhookEventMutation object of the builder.
 func (_u *WebhookEventUpdate) Mutation() *WebhookEventMutation {
 	return _u.mutation
@@ -123,6 +197,11 @@ func (_u *WebhookEventUpdate) check() error {
 			return &ValidationError{Name: "last_error", err: fmt.Errorf(`ent: validator failed for field "WebhookEvent.last_error": %w`, err)}
 		}
 	}
+	if v, ok := _u.mutation.LeaseToken(); ok {
+		if err := webhookevent.LeaseTokenValidator(v); err != nil {
+			return &ValidationError{Name: "lease_token", err: fmt.Errorf(`ent: validator failed for field "WebhookEvent.lease_token": %w`, err)}
+		}
+	}
 	return nil
 }
 
@@ -155,6 +234,27 @@ func (_u *WebhookEventUpdate) sqlSave(ctx context.Context) (_node int, err error
 	}
 	if value, ok := _u.mutation.LastError(); ok {
 		_spec.SetField(webhookevent.FieldLastError, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.NextAttemptAt(); ok {
+		_spec.SetField(webhookevent.FieldNextAttemptAt, field.TypeTime, value)
+	}
+	if _u.mutation.NextAttemptAtCleared() {
+		_spec.ClearField(webhookevent.FieldNextAttemptAt, field.TypeTime)
+	}
+	if value, ok := _u.mutation.LockedUntil(); ok {
+		_spec.SetField(webhookevent.FieldLockedUntil, field.TypeTime, value)
+	}
+	if _u.mutation.LockedUntilCleared() {
+		_spec.ClearField(webhookevent.FieldLockedUntil, field.TypeTime)
+	}
+	if value, ok := _u.mutation.LeaseToken(); ok {
+		_spec.SetField(webhookevent.FieldLeaseToken, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.DeadLetteredAt(); ok {
+		_spec.SetField(webhookevent.FieldDeadLetteredAt, field.TypeTime, value)
+	}
+	if _u.mutation.DeadLetteredAtCleared() {
+		_spec.ClearField(webhookevent.FieldDeadLetteredAt, field.TypeTime)
 	}
 	_spec.Node.Schema = _u.schemaConfig.WebhookEvent
 	ctx = internal.NewSchemaConfigContext(ctx, _u.schemaConfig)
@@ -233,6 +333,80 @@ func (_u *WebhookEventUpdateOne) SetNillableLastError(v *string) *WebhookEventUp
 	return _u
 }
 
+// SetNextAttemptAt sets the "next_attempt_at" field.
+func (_u *WebhookEventUpdateOne) SetNextAttemptAt(v time.Time) *WebhookEventUpdateOne {
+	_u.mutation.SetNextAttemptAt(v)
+	return _u
+}
+
+// SetNillableNextAttemptAt sets the "next_attempt_at" field if the given value is not nil.
+func (_u *WebhookEventUpdateOne) SetNillableNextAttemptAt(v *time.Time) *WebhookEventUpdateOne {
+	if v != nil {
+		_u.SetNextAttemptAt(*v)
+	}
+	return _u
+}
+
+// ClearNextAttemptAt clears the value of the "next_attempt_at" field.
+func (_u *WebhookEventUpdateOne) ClearNextAttemptAt() *WebhookEventUpdateOne {
+	_u.mutation.ClearNextAttemptAt()
+	return _u
+}
+
+// SetLockedUntil sets the "locked_until" field.
+func (_u *WebhookEventUpdateOne) SetLockedUntil(v time.Time) *WebhookEventUpdateOne {
+	_u.mutation.SetLockedUntil(v)
+	return _u
+}
+
+// SetNillableLockedUntil sets the "locked_until" field if the given value is not nil.
+func (_u *WebhookEventUpdateOne) SetNillableLockedUntil(v *time.Time) *WebhookEventUpdateOne {
+	if v != nil {
+		_u.SetLockedUntil(*v)
+	}
+	return _u
+}
+
+// ClearLockedUntil clears the value of the "locked_until" field.
+func (_u *WebhookEventUpdateOne) ClearLockedUntil() *WebhookEventUpdateOne {
+	_u.mutation.ClearLockedUntil()
+	return _u
+}
+
+// SetLeaseToken sets the "lease_token" field.
+func (_u *WebhookEventUpdateOne) SetLeaseToken(v string) *WebhookEventUpdateOne {
+	_u.mutation.SetLeaseToken(v)
+	return _u
+}
+
+// SetNillableLeaseToken sets the "lease_token" field if the given value is not nil.
+func (_u *WebhookEventUpdateOne) SetNillableLeaseToken(v *string) *WebhookEventUpdateOne {
+	if v != nil {
+		_u.SetLeaseToken(*v)
+	}
+	return _u
+}
+
+// SetDeadLetteredAt sets the "dead_lettered_at" field.
+func (_u *WebhookEventUpdateOne) SetDeadLetteredAt(v time.Time) *WebhookEventUpdateOne {
+	_u.mutation.SetDeadLetteredAt(v)
+	return _u
+}
+
+// SetNillableDeadLetteredAt sets the "dead_lettered_at" field if the given value is not nil.
+func (_u *WebhookEventUpdateOne) SetNillableDeadLetteredAt(v *time.Time) *WebhookEventUpdateOne {
+	if v != nil {
+		_u.SetDeadLetteredAt(*v)
+	}
+	return _u
+}
+
+// ClearDeadLetteredAt clears the value of the "dead_lettered_at" field.
+func (_u *WebhookEventUpdateOne) ClearDeadLetteredAt() *WebhookEventUpdateOne {
+	_u.mutation.ClearDeadLetteredAt()
+	return _u
+}
+
 // Mutation returns the WebhookEventMutation object of the builder.
 func (_u *WebhookEventUpdateOne) Mutation() *WebhookEventMutation {
 	return _u.mutation
@@ -285,6 +459,11 @@ func (_u *WebhookEventUpdateOne) check() error {
 			return &ValidationError{Name: "last_error", err: fmt.Errorf(`ent: validator failed for field "WebhookEvent.last_error": %w`, err)}
 		}
 	}
+	if v, ok := _u.mutation.LeaseToken(); ok {
+		if err := webhookevent.LeaseTokenValidator(v); err != nil {
+			return &ValidationError{Name: "lease_token", err: fmt.Errorf(`ent: validator failed for field "WebhookEvent.lease_token": %w`, err)}
+		}
+	}
 	return nil
 }
 
@@ -334,6 +513,27 @@ func (_u *WebhookEventUpdateOne) sqlSave(ctx context.Context) (_node *WebhookEve
 	}
 	if value, ok := _u.mutation.LastError(); ok {
 		_spec.SetField(webhookevent.FieldLastError, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.NextAttemptAt(); ok {
+		_spec.SetField(webhookevent.FieldNextAttemptAt, field.TypeTime, value)
+	}
+	if _u.mutation.NextAttemptAtCleared() {
+		_spec.ClearField(webhookevent.FieldNextAttemptAt, field.TypeTime)
+	}
+	if value, ok := _u.mutation.LockedUntil(); ok {
+		_spec.SetField(webhookevent.FieldLockedUntil, field.TypeTime, value)
+	}
+	if _u.mutation.LockedUntilCleared() {
+		_spec.ClearField(webhookevent.FieldLockedUntil, field.TypeTime)
+	}
+	if value, ok := _u.mutation.LeaseToken(); ok {
+		_spec.SetField(webhookevent.FieldLeaseToken, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.DeadLetteredAt(); ok {
+		_spec.SetField(webhookevent.FieldDeadLetteredAt, field.TypeTime, value)
+	}
+	if _u.mutation.DeadLetteredAtCleared() {
+		_spec.ClearField(webhookevent.FieldDeadLetteredAt, field.TypeTime)
 	}
 	_spec.Node.Schema = _u.schemaConfig.WebhookEvent
 	ctx = internal.NewSchemaConfigContext(ctx, _u.schemaConfig)

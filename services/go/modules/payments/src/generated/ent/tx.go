@@ -42,8 +42,18 @@ type Tx struct {
 	ProviderCustomer *ProviderCustomerClient
 	// ProviderDispute is the client for interacting with the ProviderDispute builders.
 	ProviderDispute *ProviderDisputeClient
+	// ProviderMovement is the client for interacting with the ProviderMovement builders.
+	ProviderMovement *ProviderMovementClient
 	// ProviderPayoutDestination is the client for interacting with the ProviderPayoutDestination builders.
 	ProviderPayoutDestination *ProviderPayoutDestinationClient
+	// ProviderWallet is the client for interacting with the ProviderWallet builders.
+	ProviderWallet *ProviderWalletClient
+	// ProviderWalletNumber is the client for interacting with the ProviderWalletNumber builders.
+	ProviderWalletNumber *ProviderWalletNumberClient
+	// ReconciliationCase is the client for interacting with the ReconciliationCase builders.
+	ReconciliationCase *ReconciliationCaseClient
+	// ReconciliationRun is the client for interacting with the ReconciliationRun builders.
+	ReconciliationRun *ReconciliationRunClient
 	// SavedCardSetup is the client for interacting with the SavedCardSetup builders.
 	SavedCardSetup *SavedCardSetupClient
 	// SellerVerification is the client for interacting with the SellerVerification builders.
@@ -52,6 +62,8 @@ type Tx struct {
 	StorePurchase *StorePurchaseClient
 	// VerificationLevelRecord is the client for interacting with the VerificationLevelRecord builders.
 	VerificationLevelRecord *VerificationLevelRecordClient
+	// WalletFunding is the client for interacting with the WalletFunding builders.
+	WalletFunding *WalletFundingClient
 	// WebhookEvent is the client for interacting with the WebhookEvent builders.
 	WebhookEvent *WebhookEventClient
 
@@ -199,11 +211,17 @@ func (tx *Tx) init() {
 	tx.PayoutTransfer = NewPayoutTransferClient(tx.config)
 	tx.ProviderCustomer = NewProviderCustomerClient(tx.config)
 	tx.ProviderDispute = NewProviderDisputeClient(tx.config)
+	tx.ProviderMovement = NewProviderMovementClient(tx.config)
 	tx.ProviderPayoutDestination = NewProviderPayoutDestinationClient(tx.config)
+	tx.ProviderWallet = NewProviderWalletClient(tx.config)
+	tx.ProviderWalletNumber = NewProviderWalletNumberClient(tx.config)
+	tx.ReconciliationCase = NewReconciliationCaseClient(tx.config)
+	tx.ReconciliationRun = NewReconciliationRunClient(tx.config)
 	tx.SavedCardSetup = NewSavedCardSetupClient(tx.config)
 	tx.SellerVerification = NewSellerVerificationClient(tx.config)
 	tx.StorePurchase = NewStorePurchaseClient(tx.config)
 	tx.VerificationLevelRecord = NewVerificationLevelRecordClient(tx.config)
+	tx.WalletFunding = NewWalletFundingClient(tx.config)
 	tx.WebhookEvent = NewWebhookEventClient(tx.config)
 }
 

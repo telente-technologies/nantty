@@ -116,6 +116,62 @@ func (_c *WebhookEventCreate) SetNillableLastError(v *string) *WebhookEventCreat
 	return _c
 }
 
+// SetNextAttemptAt sets the "next_attempt_at" field.
+func (_c *WebhookEventCreate) SetNextAttemptAt(v time.Time) *WebhookEventCreate {
+	_c.mutation.SetNextAttemptAt(v)
+	return _c
+}
+
+// SetNillableNextAttemptAt sets the "next_attempt_at" field if the given value is not nil.
+func (_c *WebhookEventCreate) SetNillableNextAttemptAt(v *time.Time) *WebhookEventCreate {
+	if v != nil {
+		_c.SetNextAttemptAt(*v)
+	}
+	return _c
+}
+
+// SetLockedUntil sets the "locked_until" field.
+func (_c *WebhookEventCreate) SetLockedUntil(v time.Time) *WebhookEventCreate {
+	_c.mutation.SetLockedUntil(v)
+	return _c
+}
+
+// SetNillableLockedUntil sets the "locked_until" field if the given value is not nil.
+func (_c *WebhookEventCreate) SetNillableLockedUntil(v *time.Time) *WebhookEventCreate {
+	if v != nil {
+		_c.SetLockedUntil(*v)
+	}
+	return _c
+}
+
+// SetLeaseToken sets the "lease_token" field.
+func (_c *WebhookEventCreate) SetLeaseToken(v string) *WebhookEventCreate {
+	_c.mutation.SetLeaseToken(v)
+	return _c
+}
+
+// SetNillableLeaseToken sets the "lease_token" field if the given value is not nil.
+func (_c *WebhookEventCreate) SetNillableLeaseToken(v *string) *WebhookEventCreate {
+	if v != nil {
+		_c.SetLeaseToken(*v)
+	}
+	return _c
+}
+
+// SetDeadLetteredAt sets the "dead_lettered_at" field.
+func (_c *WebhookEventCreate) SetDeadLetteredAt(v time.Time) *WebhookEventCreate {
+	_c.mutation.SetDeadLetteredAt(v)
+	return _c
+}
+
+// SetNillableDeadLetteredAt sets the "dead_lettered_at" field if the given value is not nil.
+func (_c *WebhookEventCreate) SetNillableDeadLetteredAt(v *time.Time) *WebhookEventCreate {
+	if v != nil {
+		_c.SetDeadLetteredAt(*v)
+	}
+	return _c
+}
+
 // SetID sets the "id" field.
 func (_c *WebhookEventCreate) SetID(v uuid.UUID) *WebhookEventCreate {
 	_c.mutation.SetID(v)
@@ -177,6 +233,10 @@ func (_c *WebhookEventCreate) defaults() {
 		v := webhookevent.DefaultLastError
 		_c.mutation.SetLastError(v)
 	}
+	if _, ok := _c.mutation.LeaseToken(); !ok {
+		v := webhookevent.DefaultLeaseToken
+		_c.mutation.SetLeaseToken(v)
+	}
 	if _, ok := _c.mutation.ID(); !ok {
 		v := webhookevent.DefaultID()
 		_c.mutation.SetID(v)
@@ -237,6 +297,14 @@ func (_c *WebhookEventCreate) check() error {
 	if v, ok := _c.mutation.LastError(); ok {
 		if err := webhookevent.LastErrorValidator(v); err != nil {
 			return &ValidationError{Name: "last_error", err: fmt.Errorf(`ent: validator failed for field "WebhookEvent.last_error": %w`, err)}
+		}
+	}
+	if _, ok := _c.mutation.LeaseToken(); !ok {
+		return &ValidationError{Name: "lease_token", err: errors.New(`ent: missing required field "WebhookEvent.lease_token"`)}
+	}
+	if v, ok := _c.mutation.LeaseToken(); ok {
+		if err := webhookevent.LeaseTokenValidator(v); err != nil {
+			return &ValidationError{Name: "lease_token", err: fmt.Errorf(`ent: validator failed for field "WebhookEvent.lease_token": %w`, err)}
 		}
 	}
 	return nil
@@ -315,6 +383,22 @@ func (_c *WebhookEventCreate) createSpec() (*WebhookEvent, *sqlgraph.CreateSpec)
 	if value, ok := _c.mutation.LastError(); ok {
 		_spec.SetField(webhookevent.FieldLastError, field.TypeString, value)
 		_node.LastError = value
+	}
+	if value, ok := _c.mutation.NextAttemptAt(); ok {
+		_spec.SetField(webhookevent.FieldNextAttemptAt, field.TypeTime, value)
+		_node.NextAttemptAt = &value
+	}
+	if value, ok := _c.mutation.LockedUntil(); ok {
+		_spec.SetField(webhookevent.FieldLockedUntil, field.TypeTime, value)
+		_node.LockedUntil = &value
+	}
+	if value, ok := _c.mutation.LeaseToken(); ok {
+		_spec.SetField(webhookevent.FieldLeaseToken, field.TypeString, value)
+		_node.LeaseToken = value
+	}
+	if value, ok := _c.mutation.DeadLetteredAt(); ok {
+		_spec.SetField(webhookevent.FieldDeadLetteredAt, field.TypeTime, value)
+		_node.DeadLetteredAt = &value
 	}
 	return _node, _spec
 }
@@ -413,6 +497,72 @@ func (u *WebhookEventUpsert) SetLastError(v string) *WebhookEventUpsert {
 // UpdateLastError sets the "last_error" field to the value that was provided on create.
 func (u *WebhookEventUpsert) UpdateLastError() *WebhookEventUpsert {
 	u.SetExcluded(webhookevent.FieldLastError)
+	return u
+}
+
+// SetNextAttemptAt sets the "next_attempt_at" field.
+func (u *WebhookEventUpsert) SetNextAttemptAt(v time.Time) *WebhookEventUpsert {
+	u.Set(webhookevent.FieldNextAttemptAt, v)
+	return u
+}
+
+// UpdateNextAttemptAt sets the "next_attempt_at" field to the value that was provided on create.
+func (u *WebhookEventUpsert) UpdateNextAttemptAt() *WebhookEventUpsert {
+	u.SetExcluded(webhookevent.FieldNextAttemptAt)
+	return u
+}
+
+// ClearNextAttemptAt clears the value of the "next_attempt_at" field.
+func (u *WebhookEventUpsert) ClearNextAttemptAt() *WebhookEventUpsert {
+	u.SetNull(webhookevent.FieldNextAttemptAt)
+	return u
+}
+
+// SetLockedUntil sets the "locked_until" field.
+func (u *WebhookEventUpsert) SetLockedUntil(v time.Time) *WebhookEventUpsert {
+	u.Set(webhookevent.FieldLockedUntil, v)
+	return u
+}
+
+// UpdateLockedUntil sets the "locked_until" field to the value that was provided on create.
+func (u *WebhookEventUpsert) UpdateLockedUntil() *WebhookEventUpsert {
+	u.SetExcluded(webhookevent.FieldLockedUntil)
+	return u
+}
+
+// ClearLockedUntil clears the value of the "locked_until" field.
+func (u *WebhookEventUpsert) ClearLockedUntil() *WebhookEventUpsert {
+	u.SetNull(webhookevent.FieldLockedUntil)
+	return u
+}
+
+// SetLeaseToken sets the "lease_token" field.
+func (u *WebhookEventUpsert) SetLeaseToken(v string) *WebhookEventUpsert {
+	u.Set(webhookevent.FieldLeaseToken, v)
+	return u
+}
+
+// UpdateLeaseToken sets the "lease_token" field to the value that was provided on create.
+func (u *WebhookEventUpsert) UpdateLeaseToken() *WebhookEventUpsert {
+	u.SetExcluded(webhookevent.FieldLeaseToken)
+	return u
+}
+
+// SetDeadLetteredAt sets the "dead_lettered_at" field.
+func (u *WebhookEventUpsert) SetDeadLetteredAt(v time.Time) *WebhookEventUpsert {
+	u.Set(webhookevent.FieldDeadLetteredAt, v)
+	return u
+}
+
+// UpdateDeadLetteredAt sets the "dead_lettered_at" field to the value that was provided on create.
+func (u *WebhookEventUpsert) UpdateDeadLetteredAt() *WebhookEventUpsert {
+	u.SetExcluded(webhookevent.FieldDeadLetteredAt)
+	return u
+}
+
+// ClearDeadLetteredAt clears the value of the "dead_lettered_at" field.
+func (u *WebhookEventUpsert) ClearDeadLetteredAt() *WebhookEventUpsert {
+	u.SetNull(webhookevent.FieldDeadLetteredAt)
 	return u
 }
 
@@ -538,6 +688,83 @@ func (u *WebhookEventUpsertOne) SetLastError(v string) *WebhookEventUpsertOne {
 func (u *WebhookEventUpsertOne) UpdateLastError() *WebhookEventUpsertOne {
 	return u.Update(func(s *WebhookEventUpsert) {
 		s.UpdateLastError()
+	})
+}
+
+// SetNextAttemptAt sets the "next_attempt_at" field.
+func (u *WebhookEventUpsertOne) SetNextAttemptAt(v time.Time) *WebhookEventUpsertOne {
+	return u.Update(func(s *WebhookEventUpsert) {
+		s.SetNextAttemptAt(v)
+	})
+}
+
+// UpdateNextAttemptAt sets the "next_attempt_at" field to the value that was provided on create.
+func (u *WebhookEventUpsertOne) UpdateNextAttemptAt() *WebhookEventUpsertOne {
+	return u.Update(func(s *WebhookEventUpsert) {
+		s.UpdateNextAttemptAt()
+	})
+}
+
+// ClearNextAttemptAt clears the value of the "next_attempt_at" field.
+func (u *WebhookEventUpsertOne) ClearNextAttemptAt() *WebhookEventUpsertOne {
+	return u.Update(func(s *WebhookEventUpsert) {
+		s.ClearNextAttemptAt()
+	})
+}
+
+// SetLockedUntil sets the "locked_until" field.
+func (u *WebhookEventUpsertOne) SetLockedUntil(v time.Time) *WebhookEventUpsertOne {
+	return u.Update(func(s *WebhookEventUpsert) {
+		s.SetLockedUntil(v)
+	})
+}
+
+// UpdateLockedUntil sets the "locked_until" field to the value that was provided on create.
+func (u *WebhookEventUpsertOne) UpdateLockedUntil() *WebhookEventUpsertOne {
+	return u.Update(func(s *WebhookEventUpsert) {
+		s.UpdateLockedUntil()
+	})
+}
+
+// ClearLockedUntil clears the value of the "locked_until" field.
+func (u *WebhookEventUpsertOne) ClearLockedUntil() *WebhookEventUpsertOne {
+	return u.Update(func(s *WebhookEventUpsert) {
+		s.ClearLockedUntil()
+	})
+}
+
+// SetLeaseToken sets the "lease_token" field.
+func (u *WebhookEventUpsertOne) SetLeaseToken(v string) *WebhookEventUpsertOne {
+	return u.Update(func(s *WebhookEventUpsert) {
+		s.SetLeaseToken(v)
+	})
+}
+
+// UpdateLeaseToken sets the "lease_token" field to the value that was provided on create.
+func (u *WebhookEventUpsertOne) UpdateLeaseToken() *WebhookEventUpsertOne {
+	return u.Update(func(s *WebhookEventUpsert) {
+		s.UpdateLeaseToken()
+	})
+}
+
+// SetDeadLetteredAt sets the "dead_lettered_at" field.
+func (u *WebhookEventUpsertOne) SetDeadLetteredAt(v time.Time) *WebhookEventUpsertOne {
+	return u.Update(func(s *WebhookEventUpsert) {
+		s.SetDeadLetteredAt(v)
+	})
+}
+
+// UpdateDeadLetteredAt sets the "dead_lettered_at" field to the value that was provided on create.
+func (u *WebhookEventUpsertOne) UpdateDeadLetteredAt() *WebhookEventUpsertOne {
+	return u.Update(func(s *WebhookEventUpsert) {
+		s.UpdateDeadLetteredAt()
+	})
+}
+
+// ClearDeadLetteredAt clears the value of the "dead_lettered_at" field.
+func (u *WebhookEventUpsertOne) ClearDeadLetteredAt() *WebhookEventUpsertOne {
+	return u.Update(func(s *WebhookEventUpsert) {
+		s.ClearDeadLetteredAt()
 	})
 }
 
@@ -830,6 +1057,83 @@ func (u *WebhookEventUpsertBulk) SetLastError(v string) *WebhookEventUpsertBulk 
 func (u *WebhookEventUpsertBulk) UpdateLastError() *WebhookEventUpsertBulk {
 	return u.Update(func(s *WebhookEventUpsert) {
 		s.UpdateLastError()
+	})
+}
+
+// SetNextAttemptAt sets the "next_attempt_at" field.
+func (u *WebhookEventUpsertBulk) SetNextAttemptAt(v time.Time) *WebhookEventUpsertBulk {
+	return u.Update(func(s *WebhookEventUpsert) {
+		s.SetNextAttemptAt(v)
+	})
+}
+
+// UpdateNextAttemptAt sets the "next_attempt_at" field to the value that was provided on create.
+func (u *WebhookEventUpsertBulk) UpdateNextAttemptAt() *WebhookEventUpsertBulk {
+	return u.Update(func(s *WebhookEventUpsert) {
+		s.UpdateNextAttemptAt()
+	})
+}
+
+// ClearNextAttemptAt clears the value of the "next_attempt_at" field.
+func (u *WebhookEventUpsertBulk) ClearNextAttemptAt() *WebhookEventUpsertBulk {
+	return u.Update(func(s *WebhookEventUpsert) {
+		s.ClearNextAttemptAt()
+	})
+}
+
+// SetLockedUntil sets the "locked_until" field.
+func (u *WebhookEventUpsertBulk) SetLockedUntil(v time.Time) *WebhookEventUpsertBulk {
+	return u.Update(func(s *WebhookEventUpsert) {
+		s.SetLockedUntil(v)
+	})
+}
+
+// UpdateLockedUntil sets the "locked_until" field to the value that was provided on create.
+func (u *WebhookEventUpsertBulk) UpdateLockedUntil() *WebhookEventUpsertBulk {
+	return u.Update(func(s *WebhookEventUpsert) {
+		s.UpdateLockedUntil()
+	})
+}
+
+// ClearLockedUntil clears the value of the "locked_until" field.
+func (u *WebhookEventUpsertBulk) ClearLockedUntil() *WebhookEventUpsertBulk {
+	return u.Update(func(s *WebhookEventUpsert) {
+		s.ClearLockedUntil()
+	})
+}
+
+// SetLeaseToken sets the "lease_token" field.
+func (u *WebhookEventUpsertBulk) SetLeaseToken(v string) *WebhookEventUpsertBulk {
+	return u.Update(func(s *WebhookEventUpsert) {
+		s.SetLeaseToken(v)
+	})
+}
+
+// UpdateLeaseToken sets the "lease_token" field to the value that was provided on create.
+func (u *WebhookEventUpsertBulk) UpdateLeaseToken() *WebhookEventUpsertBulk {
+	return u.Update(func(s *WebhookEventUpsert) {
+		s.UpdateLeaseToken()
+	})
+}
+
+// SetDeadLetteredAt sets the "dead_lettered_at" field.
+func (u *WebhookEventUpsertBulk) SetDeadLetteredAt(v time.Time) *WebhookEventUpsertBulk {
+	return u.Update(func(s *WebhookEventUpsert) {
+		s.SetDeadLetteredAt(v)
+	})
+}
+
+// UpdateDeadLetteredAt sets the "dead_lettered_at" field to the value that was provided on create.
+func (u *WebhookEventUpsertBulk) UpdateDeadLetteredAt() *WebhookEventUpsertBulk {
+	return u.Update(func(s *WebhookEventUpsert) {
+		s.UpdateDeadLetteredAt()
+	})
+}
+
+// ClearDeadLetteredAt clears the value of the "dead_lettered_at" field.
+func (u *WebhookEventUpsertBulk) ClearDeadLetteredAt() *WebhookEventUpsertBulk {
+	return u.Update(func(s *WebhookEventUpsert) {
+		s.ClearDeadLetteredAt()
 	})
 }
 
