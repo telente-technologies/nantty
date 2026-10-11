@@ -16,8 +16,6 @@ import (
 	"zudomart/modules/creators/src/generated/ent/creatoraffiliation"
 	programservices "zudomart/modules/creators/src/modules/creatorProgram/services"
 	"zudomart/modules/creators/src/repositories"
-	ledgermodels "zudomart/modules/ledger/src/modules/journal/models"
-	sellerbalances "zudomart/modules/ledger/src/modules/sellerBalances/services"
 )
 
 type AttributedItem struct {
@@ -151,16 +149,13 @@ func (affiliates Affiliates) creditOne(ctx context.Context, sale AffiliateSaleRe
 		now := affiliates.Container.Now().UTC()
 		commission, err := client.AffiliateCommission.Create().SetID(uuid.Must(uuid.NewV7())).SetOrderID(sale.OrderId).SetOrderNumber(sale.OrderNumber).SetOrderItemID(item.itemKey).SetProductID(item.productId).
 			SetStoreID(sale.StoreId).SetSellerUserID(sale.SellerUserId).SetCreatorID(creatorId).SetAttributionSource(item.source).SetAttributionID(item.sourceId).
-			SetSaleMinor(item.amountMinor).SetCommissionBps(bps).SetCommissionMinor(amount).SetCurrency(sale.Currency).SetNillableOrderedAt(sale.OrderedAt).SetPaidAt(now).SetCreatedAt(now).Save(ctx)
+			SetSaleMinor(item.amountMinor).SetCommissionBps(bps).SetCommissionMinor(amount).SetCurrency(sale.Currency).SetNillableOrderedAt(sale.OrderedAt).
+			SetStatus(affiliatecommission.StatusPending).SetCreatedAt(now).Save(ctx)
 		if err != nil {
 			return err
 		}
 		reference := "affiliate-commission:" + item.itemKey
-		if _, err := affiliates.Container.Sellers.TakeSellerFundsForRefundInTransaction(ctx, transaction, sellerbalances.SellerRefundDebit{
-			SellerUserId: sale.SellerUserId, Currency: sale.Currency, AmountMinor: amount, PreferredSourceReference: "order-credit:" + sale.OrderId, Reference: reference,
-			Description: "Affiliate commission for order " + sale.OrderNumber, CreditAccount: ledgermodels.CreatorEarningsPayableAccount(creatorId, sale.Currency),
-			Metadata: map[string]any{"orderId": sale.OrderId, "productId": item.productId, "creatorId": creatorId, "commissionBps": bps},
-		}); err != nil {
+		if _, err := affiliates.settleCommissionInTransaction(ctx, transaction, client, commission); err != nil {
 			return err
 		}
 		if _, err := programservices.RecordEarning(ctx, client, programservices.Earning{
@@ -197,7 +192,7 @@ func (affiliates Affiliates) CommissionLedger(ctx context.Context, store reposit
 	case "paid", "reversed":
 		query.Where(affiliatecommission.StatusEQ(affiliatecommission.Status(status)))
 	case "owed":
-		return []CommissionLedgerEntryView{}, "", nil
+		query.Where(affiliatecommission.StatusIn(affiliatecommission.StatusPending, affiliatecommission.StatusProcessing))
 	}
 	if before, err := uuid.Parse(cursor); err == nil {
 		query.Where(affiliatecommission.IDLT(before))

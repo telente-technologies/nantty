@@ -85,6 +85,11 @@ func ShortfallMinor(v int64) predicate.AffiliateCommissionReversal {
 	return predicate.AffiliateCommissionReversal(sql.FieldEQ(FieldShortfallMinor, v))
 }
 
+// Applied applies equality check predicate on the "applied" field. It's identical to AppliedEQ.
+func Applied(v bool) predicate.AffiliateCommissionReversal {
+	return predicate.AffiliateCommissionReversal(sql.FieldEQ(FieldApplied, v))
+}
+
 // CreatedAtEQ applies the EQ predicate on the "created_at" field.
 func CreatedAtEQ(v time.Time) predicate.AffiliateCommissionReversal {
 	return predicate.AffiliateCommissionReversal(sql.FieldEQ(FieldCreatedAt, v))
@@ -373,6 +378,16 @@ func ShortfallMinorLT(v int64) predicate.AffiliateCommissionReversal {
 // ShortfallMinorLTE applies the LTE predicate on the "shortfall_minor" field.
 func ShortfallMinorLTE(v int64) predicate.AffiliateCommissionReversal {
 	return predicate.AffiliateCommissionReversal(sql.FieldLTE(FieldShortfallMinor, v))
+}
+
+// AppliedEQ applies the EQ predicate on the "applied" field.
+func AppliedEQ(v bool) predicate.AffiliateCommissionReversal {
+	return predicate.AffiliateCommissionReversal(sql.FieldEQ(FieldApplied, v))
+}
+
+// AppliedNEQ applies the NEQ predicate on the "applied" field.
+func AppliedNEQ(v bool) predicate.AffiliateCommissionReversal {
+	return predicate.AffiliateCommissionReversal(sql.FieldNEQ(FieldApplied, v))
 }
 
 // And groups predicates with the AND operator between them.

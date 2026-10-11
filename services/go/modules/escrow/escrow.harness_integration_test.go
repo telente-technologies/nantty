@@ -100,7 +100,6 @@ func startEscrowHarness(t *testing.T) *escrowHarness {
 	money.Flutterwave.FundMainBalance("NGN", 10_000_000)
 	harness := &escrowHarness{MoneyHarness: money, escrow: module, clock: time.Now(), onboarded: map[string]string{}}
 	module.Application.Container.Now = func() time.Time { return harness.clock }
-	module.Application.Container.Sellers.Now = func() time.Time { return harness.clock }
 	return harness
 }
 

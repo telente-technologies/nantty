@@ -28,6 +28,62 @@ func (_u *AffiliateCommissionReversalUpdate) Where(ps ...predicate.AffiliateComm
 	return _u
 }
 
+// SetRecoveredMinor sets the "recovered_minor" field.
+func (_u *AffiliateCommissionReversalUpdate) SetRecoveredMinor(v int64) *AffiliateCommissionReversalUpdate {
+	_u.mutation.ResetRecoveredMinor()
+	_u.mutation.SetRecoveredMinor(v)
+	return _u
+}
+
+// SetNillableRecoveredMinor sets the "recovered_minor" field if the given value is not nil.
+func (_u *AffiliateCommissionReversalUpdate) SetNillableRecoveredMinor(v *int64) *AffiliateCommissionReversalUpdate {
+	if v != nil {
+		_u.SetRecoveredMinor(*v)
+	}
+	return _u
+}
+
+// AddRecoveredMinor adds value to the "recovered_minor" field.
+func (_u *AffiliateCommissionReversalUpdate) AddRecoveredMinor(v int64) *AffiliateCommissionReversalUpdate {
+	_u.mutation.AddRecoveredMinor(v)
+	return _u
+}
+
+// SetShortfallMinor sets the "shortfall_minor" field.
+func (_u *AffiliateCommissionReversalUpdate) SetShortfallMinor(v int64) *AffiliateCommissionReversalUpdate {
+	_u.mutation.ResetShortfallMinor()
+	_u.mutation.SetShortfallMinor(v)
+	return _u
+}
+
+// SetNillableShortfallMinor sets the "shortfall_minor" field if the given value is not nil.
+func (_u *AffiliateCommissionReversalUpdate) SetNillableShortfallMinor(v *int64) *AffiliateCommissionReversalUpdate {
+	if v != nil {
+		_u.SetShortfallMinor(*v)
+	}
+	return _u
+}
+
+// AddShortfallMinor adds value to the "shortfall_minor" field.
+func (_u *AffiliateCommissionReversalUpdate) AddShortfallMinor(v int64) *AffiliateCommissionReversalUpdate {
+	_u.mutation.AddShortfallMinor(v)
+	return _u
+}
+
+// SetApplied sets the "applied" field.
+func (_u *AffiliateCommissionReversalUpdate) SetApplied(v bool) *AffiliateCommissionReversalUpdate {
+	_u.mutation.SetApplied(v)
+	return _u
+}
+
+// SetNillableApplied sets the "applied" field if the given value is not nil.
+func (_u *AffiliateCommissionReversalUpdate) SetNillableApplied(v *bool) *AffiliateCommissionReversalUpdate {
+	if v != nil {
+		_u.SetApplied(*v)
+	}
+	return _u
+}
+
 // Mutation returns the AffiliateCommissionReversalMutation object of the builder.
 func (_u *AffiliateCommissionReversalUpdate) Mutation() *AffiliateCommissionReversalMutation {
 	return _u.mutation
@@ -69,6 +125,21 @@ func (_u *AffiliateCommissionReversalUpdate) sqlSave(ctx context.Context) (_node
 			}
 		}
 	}
+	if value, ok := _u.mutation.RecoveredMinor(); ok {
+		_spec.SetField(affiliatecommissionreversal.FieldRecoveredMinor, field.TypeInt64, value)
+	}
+	if value, ok := _u.mutation.AddedRecoveredMinor(); ok {
+		_spec.AddField(affiliatecommissionreversal.FieldRecoveredMinor, field.TypeInt64, value)
+	}
+	if value, ok := _u.mutation.ShortfallMinor(); ok {
+		_spec.SetField(affiliatecommissionreversal.FieldShortfallMinor, field.TypeInt64, value)
+	}
+	if value, ok := _u.mutation.AddedShortfallMinor(); ok {
+		_spec.AddField(affiliatecommissionreversal.FieldShortfallMinor, field.TypeInt64, value)
+	}
+	if value, ok := _u.mutation.Applied(); ok {
+		_spec.SetField(affiliatecommissionreversal.FieldApplied, field.TypeBool, value)
+	}
 	_spec.Node.Schema = _u.schemaConfig.AffiliateCommissionReversal
 	ctx = internal.NewSchemaConfigContext(ctx, _u.schemaConfig)
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
@@ -89,6 +160,62 @@ type AffiliateCommissionReversalUpdateOne struct {
 	fields   []string
 	hooks    []Hook
 	mutation *AffiliateCommissionReversalMutation
+}
+
+// SetRecoveredMinor sets the "recovered_minor" field.
+func (_u *AffiliateCommissionReversalUpdateOne) SetRecoveredMinor(v int64) *AffiliateCommissionReversalUpdateOne {
+	_u.mutation.ResetRecoveredMinor()
+	_u.mutation.SetRecoveredMinor(v)
+	return _u
+}
+
+// SetNillableRecoveredMinor sets the "recovered_minor" field if the given value is not nil.
+func (_u *AffiliateCommissionReversalUpdateOne) SetNillableRecoveredMinor(v *int64) *AffiliateCommissionReversalUpdateOne {
+	if v != nil {
+		_u.SetRecoveredMinor(*v)
+	}
+	return _u
+}
+
+// AddRecoveredMinor adds value to the "recovered_minor" field.
+func (_u *AffiliateCommissionReversalUpdateOne) AddRecoveredMinor(v int64) *AffiliateCommissionReversalUpdateOne {
+	_u.mutation.AddRecoveredMinor(v)
+	return _u
+}
+
+// SetShortfallMinor sets the "shortfall_minor" field.
+func (_u *AffiliateCommissionReversalUpdateOne) SetShortfallMinor(v int64) *AffiliateCommissionReversalUpdateOne {
+	_u.mutation.ResetShortfallMinor()
+	_u.mutation.SetShortfallMinor(v)
+	return _u
+}
+
+// SetNillableShortfallMinor sets the "shortfall_minor" field if the given value is not nil.
+func (_u *AffiliateCommissionReversalUpdateOne) SetNillableShortfallMinor(v *int64) *AffiliateCommissionReversalUpdateOne {
+	if v != nil {
+		_u.SetShortfallMinor(*v)
+	}
+	return _u
+}
+
+// AddShortfallMinor adds value to the "shortfall_minor" field.
+func (_u *AffiliateCommissionReversalUpdateOne) AddShortfallMinor(v int64) *AffiliateCommissionReversalUpdateOne {
+	_u.mutation.AddShortfallMinor(v)
+	return _u
+}
+
+// SetApplied sets the "applied" field.
+func (_u *AffiliateCommissionReversalUpdateOne) SetApplied(v bool) *AffiliateCommissionReversalUpdateOne {
+	_u.mutation.SetApplied(v)
+	return _u
+}
+
+// SetNillableApplied sets the "applied" field if the given value is not nil.
+func (_u *AffiliateCommissionReversalUpdateOne) SetNillableApplied(v *bool) *AffiliateCommissionReversalUpdateOne {
+	if v != nil {
+		_u.SetApplied(*v)
+	}
+	return _u
 }
 
 // Mutation returns the AffiliateCommissionReversalMutation object of the builder.
@@ -161,6 +288,21 @@ func (_u *AffiliateCommissionReversalUpdateOne) sqlSave(ctx context.Context) (_n
 				ps[i](selector)
 			}
 		}
+	}
+	if value, ok := _u.mutation.RecoveredMinor(); ok {
+		_spec.SetField(affiliatecommissionreversal.FieldRecoveredMinor, field.TypeInt64, value)
+	}
+	if value, ok := _u.mutation.AddedRecoveredMinor(); ok {
+		_spec.AddField(affiliatecommissionreversal.FieldRecoveredMinor, field.TypeInt64, value)
+	}
+	if value, ok := _u.mutation.ShortfallMinor(); ok {
+		_spec.SetField(affiliatecommissionreversal.FieldShortfallMinor, field.TypeInt64, value)
+	}
+	if value, ok := _u.mutation.AddedShortfallMinor(); ok {
+		_spec.AddField(affiliatecommissionreversal.FieldShortfallMinor, field.TypeInt64, value)
+	}
+	if value, ok := _u.mutation.Applied(); ok {
+		_spec.SetField(affiliatecommissionreversal.FieldApplied, field.TypeBool, value)
 	}
 	_spec.Node.Schema = _u.schemaConfig.AffiliateCommissionReversal
 	ctx = internal.NewSchemaConfigContext(ctx, _u.schemaConfig)

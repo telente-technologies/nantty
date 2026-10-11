@@ -12,7 +12,6 @@ import (
 	"zudomart/modules/creators/src/generated/ent/affiliatecommission"
 	"zudomart/modules/creators/src/generated/ent/affiliatecommissionreversal"
 	programservices "zudomart/modules/creators/src/modules/creatorProgram/services"
-	ledgermodels "zudomart/modules/ledger/src/modules/journal/models"
 )
 
 type EscrowRefunded struct {
@@ -21,10 +20,6 @@ type EscrowRefunded struct {
 	Status   string `json:"status"`
 	Amount   Money  `json:"amount"`
 	Refunded Money  `json:"refunded"`
-}
-
-func CreatorEarningsDebtAccount(userId, currency string) ledgermodels.AccountRef {
-	return ledgermodels.CreatorEarningsDebtAccount(userId, currency)
 }
 
 func ReversalTarget(commissionMinor, refundedMinor, orderMinor int64) int64 {
@@ -76,33 +71,25 @@ func (affiliates Affiliates) reverseOne(ctx context.Context, transaction *sql.Tx
 	if amount <= 0 {
 		return false, nil
 	}
-	payable := ledgermodels.CreatorEarningsPayableAccount(commission.CreatorID, commission.Currency)
-	balance, err := affiliates.Container.Ledger.ReadAccountBalance(ctx, transaction, payable)
-	if err != nil {
-		return false, err
-	}
-	recovered := min(max(balance, 0), amount)
-	lines := []ledgermodels.JournalLineRequest{{Account: ledgermodels.SellerAvailableAccount(commission.SellerUserID, commission.Currency), Direction: ledgermodels.Credit, AmountMinor: amount}}
-	if recovered > 0 {
-		lines = append(lines, ledgermodels.JournalLineRequest{Account: payable, Direction: ledgermodels.Debit, AmountMinor: recovered})
-	}
-	if shortfall := amount - recovered; shortfall > 0 {
-		lines = append(lines, ledgermodels.JournalLineRequest{Account: CreatorEarningsDebtAccount(commission.CreatorID, commission.Currency), Direction: ledgermodels.Debit, AmountMinor: shortfall})
-	}
 	reference := "affiliate-commission-reversal:" + commissionId + ":" + refundKey
-	if _, err := affiliates.Container.Ledger.PostBalancedJournalEntry(ctx, transaction, ledgermodels.JournalEntryRequest{
-		Reference: reference, Kind: "affiliateCommission.reversed", Description: "Affiliate commission returned after a refund", Lines: lines,
-		Metadata: map[string]any{"commissionId": commissionId, "orderId": commission.OrderID, "escrowId": refund.EscrowId, "shortfallMinor": amount - recovered},
-	}); err != nil {
-		return false, err
+	var recovered, shortfall int64
+	applied := true
+	switch commission.Status {
+	case affiliatecommission.StatusPending:
+	case affiliatecommission.StatusProcessing:
+		applied = false
+	default:
+		if recovered, shortfall, err = affiliates.clawBackInTransaction(ctx, transaction, commission, amount, refundKey); err != nil {
+			return false, err
+		}
 	}
 	now := affiliates.Container.Now().UTC()
 	if err := client.AffiliateCommissionReversal.Create().SetCommissionID(commissionId).SetRefundKey(refundKey).SetAmountMinor(amount).SetRecoveredMinor(recovered).
-		SetShortfallMinor(amount - recovered).SetCreatedAt(now).Exec(ctx); err != nil {
+		SetShortfallMinor(shortfall).SetApplied(applied).SetCreatedAt(now).Exec(ctx); err != nil {
 		return false, err
 	}
 	update := commission.Update().AddReversedMinor(amount)
-	if commission.ReversedMinor+amount >= commission.CommissionMinor {
+	if commission.ReversedMinor+amount >= commission.CommissionMinor && commission.Status != affiliatecommission.StatusProcessing {
 		update.SetStatus(affiliatecommission.StatusReversed)
 	}
 	if err := update.Exec(ctx); err != nil {
@@ -116,6 +103,6 @@ func (affiliates Affiliates) reverseOne(ctx context.Context, transaction *sql.Tx
 	}
 	return true, affiliates.Container.Outbox.EnqueueInTransaction(ctx, transaction, "affiliateCommission.reversed", commission.CreatorID, now, map[string]any{
 		"commissionId": commissionId, "creatorId": commission.CreatorID, "orderId": commission.OrderID, "amount": Money{amount, commission.Currency},
-		"recovered": Money{recovered, commission.Currency}, "shortfall": Money{amount - recovered, commission.Currency},
+		"recovered": Money{recovered, commission.Currency}, "shortfall": Money{shortfall, commission.Currency},
 	})
 }

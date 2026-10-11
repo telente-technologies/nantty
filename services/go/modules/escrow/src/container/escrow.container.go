@@ -11,7 +11,6 @@ import (
 	ledgerevents "zudomart/modules/ledger/src/events"
 	"zudomart/modules/ledger/src/loaders"
 	ledgerservices "zudomart/modules/ledger/src/modules/journal/services"
-	sellerbalances "zudomart/modules/ledger/src/modules/sellerBalances/services"
 	ledgerrepositories "zudomart/modules/ledger/src/repositories"
 	ledgerutils "zudomart/modules/ledger/src/utils"
 	paymentservices "zudomart/modules/payments/src/modules/gateway/services"
@@ -21,7 +20,6 @@ type Container struct {
 	Resources    loaders.MoneyModuleResources
 	Settings     configs.EscrowSettings
 	Ledger       *ledgerservices.Ledger
-	Sellers      sellerbalances.SellerBalances
 	Payments     *paymentservices.PaymentGateway
 	Outbox       ledgerevents.OutboxTable
 	Idempotency  ledgerutils.SqlIdempotencyRecordStore
@@ -35,7 +33,6 @@ func NewEscrowContainer(resources loaders.MoneyModuleResources, settings configs
 	return &Container{
 		Resources: resources, Settings: settings, Payments: payments,
 		Ledger:      ledgerservices.NewLedgerInSchema(settings.Money.LedgerSchema),
-		Sellers:     sellerbalances.NewSellerBalancesInSchema(settings.Money.LedgerSchema),
 		Outbox:      ledgerevents.OutboxTable{Schema: schema, Source: "zudomart.escrow"},
 		Idempotency: ledgerutils.SqlIdempotencyRecordStore{Schema: schema},
 		Parties:     ledgerrepositories.PartyDirectory{Database: resources.Database, AccountSchema: settings.Money.AccountSchema, CatalogSchema: settings.Money.CatalogSchema, Logger: resources.Logger},

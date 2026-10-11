@@ -68,6 +68,20 @@ func (_c *AffiliateCommissionReversalCreate) SetShortfallMinor(v int64) *Affilia
 	return _c
 }
 
+// SetApplied sets the "applied" field.
+func (_c *AffiliateCommissionReversalCreate) SetApplied(v bool) *AffiliateCommissionReversalCreate {
+	_c.mutation.SetApplied(v)
+	return _c
+}
+
+// SetNillableApplied sets the "applied" field if the given value is not nil.
+func (_c *AffiliateCommissionReversalCreate) SetNillableApplied(v *bool) *AffiliateCommissionReversalCreate {
+	if v != nil {
+		_c.SetApplied(*v)
+	}
+	return _c
+}
+
 // SetID sets the "id" field.
 func (_c *AffiliateCommissionReversalCreate) SetID(v uuid.UUID) *AffiliateCommissionReversalCreate {
 	_c.mutation.SetID(v)
@@ -121,6 +135,10 @@ func (_c *AffiliateCommissionReversalCreate) defaults() {
 		v := affiliatecommissionreversal.DefaultCreatedAt()
 		_c.mutation.SetCreatedAt(v)
 	}
+	if _, ok := _c.mutation.Applied(); !ok {
+		v := affiliatecommissionreversal.DefaultApplied
+		_c.mutation.SetApplied(v)
+	}
 	if _, ok := _c.mutation.ID(); !ok {
 		v := affiliatecommissionreversal.DefaultID()
 		_c.mutation.SetID(v)
@@ -156,6 +174,9 @@ func (_c *AffiliateCommissionReversalCreate) check() error {
 	}
 	if _, ok := _c.mutation.ShortfallMinor(); !ok {
 		return &ValidationError{Name: "shortfall_minor", err: errors.New(`ent: missing required field "AffiliateCommissionReversal.shortfall_minor"`)}
+	}
+	if _, ok := _c.mutation.Applied(); !ok {
+		return &ValidationError{Name: "applied", err: errors.New(`ent: missing required field "AffiliateCommissionReversal.applied"`)}
 	}
 	return nil
 }
@@ -218,6 +239,10 @@ func (_c *AffiliateCommissionReversalCreate) createSpec() (*AffiliateCommissionR
 		_spec.SetField(affiliatecommissionreversal.FieldShortfallMinor, field.TypeInt64, value)
 		_node.ShortfallMinor = value
 	}
+	if value, ok := _c.mutation.Applied(); ok {
+		_spec.SetField(affiliatecommissionreversal.FieldApplied, field.TypeBool, value)
+		_node.Applied = value
+	}
 	return _node, _spec
 }
 
@@ -270,6 +295,54 @@ type (
 	}
 )
 
+// SetRecoveredMinor sets the "recovered_minor" field.
+func (u *AffiliateCommissionReversalUpsert) SetRecoveredMinor(v int64) *AffiliateCommissionReversalUpsert {
+	u.Set(affiliatecommissionreversal.FieldRecoveredMinor, v)
+	return u
+}
+
+// UpdateRecoveredMinor sets the "recovered_minor" field to the value that was provided on create.
+func (u *AffiliateCommissionReversalUpsert) UpdateRecoveredMinor() *AffiliateCommissionReversalUpsert {
+	u.SetExcluded(affiliatecommissionreversal.FieldRecoveredMinor)
+	return u
+}
+
+// AddRecoveredMinor adds v to the "recovered_minor" field.
+func (u *AffiliateCommissionReversalUpsert) AddRecoveredMinor(v int64) *AffiliateCommissionReversalUpsert {
+	u.Add(affiliatecommissionreversal.FieldRecoveredMinor, v)
+	return u
+}
+
+// SetShortfallMinor sets the "shortfall_minor" field.
+func (u *AffiliateCommissionReversalUpsert) SetShortfallMinor(v int64) *AffiliateCommissionReversalUpsert {
+	u.Set(affiliatecommissionreversal.FieldShortfallMinor, v)
+	return u
+}
+
+// UpdateShortfallMinor sets the "shortfall_minor" field to the value that was provided on create.
+func (u *AffiliateCommissionReversalUpsert) UpdateShortfallMinor() *AffiliateCommissionReversalUpsert {
+	u.SetExcluded(affiliatecommissionreversal.FieldShortfallMinor)
+	return u
+}
+
+// AddShortfallMinor adds v to the "shortfall_minor" field.
+func (u *AffiliateCommissionReversalUpsert) AddShortfallMinor(v int64) *AffiliateCommissionReversalUpsert {
+	u.Add(affiliatecommissionreversal.FieldShortfallMinor, v)
+	return u
+}
+
+// SetApplied sets the "applied" field.
+func (u *AffiliateCommissionReversalUpsert) SetApplied(v bool) *AffiliateCommissionReversalUpsert {
+	u.Set(affiliatecommissionreversal.FieldApplied, v)
+	return u
+}
+
+// UpdateApplied sets the "applied" field to the value that was provided on create.
+func (u *AffiliateCommissionReversalUpsert) UpdateApplied() *AffiliateCommissionReversalUpsert {
+	u.SetExcluded(affiliatecommissionreversal.FieldApplied)
+	return u
+}
+
 // UpdateNewValues updates the mutable fields using the new values that were set on create except the ID field.
 // Using this option is equivalent to using:
 //
@@ -298,12 +371,6 @@ func (u *AffiliateCommissionReversalUpsertOne) UpdateNewValues() *AffiliateCommi
 		}
 		if _, exists := u.create.mutation.AmountMinor(); exists {
 			s.SetIgnore(affiliatecommissionreversal.FieldAmountMinor)
-		}
-		if _, exists := u.create.mutation.RecoveredMinor(); exists {
-			s.SetIgnore(affiliatecommissionreversal.FieldRecoveredMinor)
-		}
-		if _, exists := u.create.mutation.ShortfallMinor(); exists {
-			s.SetIgnore(affiliatecommissionreversal.FieldShortfallMinor)
 		}
 	}))
 	return u
@@ -334,6 +401,62 @@ func (u *AffiliateCommissionReversalUpsertOne) Update(set func(*AffiliateCommiss
 		set(&AffiliateCommissionReversalUpsert{UpdateSet: update})
 	}))
 	return u
+}
+
+// SetRecoveredMinor sets the "recovered_minor" field.
+func (u *AffiliateCommissionReversalUpsertOne) SetRecoveredMinor(v int64) *AffiliateCommissionReversalUpsertOne {
+	return u.Update(func(s *AffiliateCommissionReversalUpsert) {
+		s.SetRecoveredMinor(v)
+	})
+}
+
+// AddRecoveredMinor adds v to the "recovered_minor" field.
+func (u *AffiliateCommissionReversalUpsertOne) AddRecoveredMinor(v int64) *AffiliateCommissionReversalUpsertOne {
+	return u.Update(func(s *AffiliateCommissionReversalUpsert) {
+		s.AddRecoveredMinor(v)
+	})
+}
+
+// UpdateRecoveredMinor sets the "recovered_minor" field to the value that was provided on create.
+func (u *AffiliateCommissionReversalUpsertOne) UpdateRecoveredMinor() *AffiliateCommissionReversalUpsertOne {
+	return u.Update(func(s *AffiliateCommissionReversalUpsert) {
+		s.UpdateRecoveredMinor()
+	})
+}
+
+// SetShortfallMinor sets the "shortfall_minor" field.
+func (u *AffiliateCommissionReversalUpsertOne) SetShortfallMinor(v int64) *AffiliateCommissionReversalUpsertOne {
+	return u.Update(func(s *AffiliateCommissionReversalUpsert) {
+		s.SetShortfallMinor(v)
+	})
+}
+
+// AddShortfallMinor adds v to the "shortfall_minor" field.
+func (u *AffiliateCommissionReversalUpsertOne) AddShortfallMinor(v int64) *AffiliateCommissionReversalUpsertOne {
+	return u.Update(func(s *AffiliateCommissionReversalUpsert) {
+		s.AddShortfallMinor(v)
+	})
+}
+
+// UpdateShortfallMinor sets the "shortfall_minor" field to the value that was provided on create.
+func (u *AffiliateCommissionReversalUpsertOne) UpdateShortfallMinor() *AffiliateCommissionReversalUpsertOne {
+	return u.Update(func(s *AffiliateCommissionReversalUpsert) {
+		s.UpdateShortfallMinor()
+	})
+}
+
+// SetApplied sets the "applied" field.
+func (u *AffiliateCommissionReversalUpsertOne) SetApplied(v bool) *AffiliateCommissionReversalUpsertOne {
+	return u.Update(func(s *AffiliateCommissionReversalUpsert) {
+		s.SetApplied(v)
+	})
+}
+
+// UpdateApplied sets the "applied" field to the value that was provided on create.
+func (u *AffiliateCommissionReversalUpsertOne) UpdateApplied() *AffiliateCommissionReversalUpsertOne {
+	return u.Update(func(s *AffiliateCommissionReversalUpsert) {
+		s.UpdateApplied()
+	})
 }
 
 // Exec executes the query.
@@ -531,12 +654,6 @@ func (u *AffiliateCommissionReversalUpsertBulk) UpdateNewValues() *AffiliateComm
 			if _, exists := b.mutation.AmountMinor(); exists {
 				s.SetIgnore(affiliatecommissionreversal.FieldAmountMinor)
 			}
-			if _, exists := b.mutation.RecoveredMinor(); exists {
-				s.SetIgnore(affiliatecommissionreversal.FieldRecoveredMinor)
-			}
-			if _, exists := b.mutation.ShortfallMinor(); exists {
-				s.SetIgnore(affiliatecommissionreversal.FieldShortfallMinor)
-			}
 		}
 	}))
 	return u
@@ -567,6 +684,62 @@ func (u *AffiliateCommissionReversalUpsertBulk) Update(set func(*AffiliateCommis
 		set(&AffiliateCommissionReversalUpsert{UpdateSet: update})
 	}))
 	return u
+}
+
+// SetRecoveredMinor sets the "recovered_minor" field.
+func (u *AffiliateCommissionReversalUpsertBulk) SetRecoveredMinor(v int64) *AffiliateCommissionReversalUpsertBulk {
+	return u.Update(func(s *AffiliateCommissionReversalUpsert) {
+		s.SetRecoveredMinor(v)
+	})
+}
+
+// AddRecoveredMinor adds v to the "recovered_minor" field.
+func (u *AffiliateCommissionReversalUpsertBulk) AddRecoveredMinor(v int64) *AffiliateCommissionReversalUpsertBulk {
+	return u.Update(func(s *AffiliateCommissionReversalUpsert) {
+		s.AddRecoveredMinor(v)
+	})
+}
+
+// UpdateRecoveredMinor sets the "recovered_minor" field to the value that was provided on create.
+func (u *AffiliateCommissionReversalUpsertBulk) UpdateRecoveredMinor() *AffiliateCommissionReversalUpsertBulk {
+	return u.Update(func(s *AffiliateCommissionReversalUpsert) {
+		s.UpdateRecoveredMinor()
+	})
+}
+
+// SetShortfallMinor sets the "shortfall_minor" field.
+func (u *AffiliateCommissionReversalUpsertBulk) SetShortfallMinor(v int64) *AffiliateCommissionReversalUpsertBulk {
+	return u.Update(func(s *AffiliateCommissionReversalUpsert) {
+		s.SetShortfallMinor(v)
+	})
+}
+
+// AddShortfallMinor adds v to the "shortfall_minor" field.
+func (u *AffiliateCommissionReversalUpsertBulk) AddShortfallMinor(v int64) *AffiliateCommissionReversalUpsertBulk {
+	return u.Update(func(s *AffiliateCommissionReversalUpsert) {
+		s.AddShortfallMinor(v)
+	})
+}
+
+// UpdateShortfallMinor sets the "shortfall_minor" field to the value that was provided on create.
+func (u *AffiliateCommissionReversalUpsertBulk) UpdateShortfallMinor() *AffiliateCommissionReversalUpsertBulk {
+	return u.Update(func(s *AffiliateCommissionReversalUpsert) {
+		s.UpdateShortfallMinor()
+	})
+}
+
+// SetApplied sets the "applied" field.
+func (u *AffiliateCommissionReversalUpsertBulk) SetApplied(v bool) *AffiliateCommissionReversalUpsertBulk {
+	return u.Update(func(s *AffiliateCommissionReversalUpsert) {
+		s.SetApplied(v)
+	})
+}
+
+// UpdateApplied sets the "applied" field to the value that was provided on create.
+func (u *AffiliateCommissionReversalUpsertBulk) UpdateApplied() *AffiliateCommissionReversalUpsertBulk {
+	return u.Update(func(s *AffiliateCommissionReversalUpsert) {
+		s.UpdateApplied()
+	})
 }
 
 // Exec executes the query.

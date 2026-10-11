@@ -198,14 +198,16 @@ func (affiliates Affiliates) presentAffiliations(ctx context.Context, rows []*en
 		}
 		view.CommissionPercent = float64(EffectiveBps(defaultBps, override, affiliates.MaximumBps())) / 100
 		commissions, err := client.AffiliateCommission.Query().Where(affiliatecommission.CreatorID(row.CreatorID), affiliatecommission.StoreID(row.StoreID),
-			affiliatecommission.StatusEQ(affiliatecommission.StatusPaid)).All(ctx)
+			affiliatecommission.StatusNEQ(affiliatecommission.StatusReversed)).All(ctx)
 		if err != nil {
 			return nil, err
 		}
 		for _, commission := range commissions {
 			if row.ProductID == "" || commission.ProductID == row.ProductID {
 				view.SalesCount++
-				view.Earned = Money{view.Earned.AmountMinor + commission.CommissionMinor, commission.Currency}
+				if commission.Status == affiliatecommission.StatusPaid {
+					view.Earned = Money{view.Earned.AmountMinor + commission.CommissionMinor, commission.Currency}
+				}
 			}
 		}
 		if view.Earned.Currency == "" && view.Store != nil {

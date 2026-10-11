@@ -26,7 +26,7 @@ var (
 		{Name: "commission_bps", Type: field.TypeInt64},
 		{Name: "commission_minor", Type: field.TypeInt64},
 		{Name: "currency", Type: field.TypeString, Size: 3},
-		{Name: "status", Type: field.TypeEnum, Enums: []string{"paid", "reversed"}, Default: "paid"},
+		{Name: "status", Type: field.TypeEnum, Enums: []string{"pending", "processing", "paid", "reversed"}, Default: "pending"},
 		{Name: "reversed_minor", Type: field.TypeInt64, Default: 0},
 		{Name: "ordered_at", Type: field.TypeTime, Nullable: true},
 		{Name: "paid_at", Type: field.TypeTime, Nullable: true},
@@ -68,6 +68,7 @@ var (
 		{Name: "amount_minor", Type: field.TypeInt64},
 		{Name: "recovered_minor", Type: field.TypeInt64},
 		{Name: "shortfall_minor", Type: field.TypeInt64},
+		{Name: "applied", Type: field.TypeBool, Default: true},
 	}
 	// AffiliateCommissionReversalsTable holds the schema information for the "affiliate_commission_reversals" table.
 	AffiliateCommissionReversalsTable = &schema.Table{

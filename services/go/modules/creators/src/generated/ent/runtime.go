@@ -257,6 +257,10 @@ func init() {
 			return nil
 		}
 	}()
+	// affiliatecommissionreversalDescApplied is the schema descriptor for applied field.
+	affiliatecommissionreversalDescApplied := affiliatecommissionreversalFields[5].Descriptor()
+	// affiliatecommissionreversal.DefaultApplied holds the default value on creation for the applied field.
+	affiliatecommissionreversal.DefaultApplied = affiliatecommissionreversalDescApplied.Default.(bool)
 	// affiliatecommissionreversalDescID is the schema descriptor for id field.
 	affiliatecommissionreversalDescID := affiliatecommissionreversalMixinFields0[0].Descriptor()
 	// affiliatecommissionreversal.DefaultID holds the default value on creation for the id field.

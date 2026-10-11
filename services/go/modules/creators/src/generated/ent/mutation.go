@@ -1495,6 +1495,7 @@ type AffiliateCommissionReversalMutation struct {
 	addrecovered_minor *int64
 	shortfall_minor    *int64
 	addshortfall_minor *int64
+	applied            *bool
 	clearedFields      map[string]struct{}
 	done               bool
 	oldValue           func(context.Context) (*AffiliateCommissionReversal, error)
@@ -1881,6 +1882,42 @@ func (m *AffiliateCommissionReversalMutation) ResetShortfallMinor() {
 	m.addshortfall_minor = nil
 }
 
+// SetApplied sets the "applied" field.
+func (m *AffiliateCommissionReversalMutation) SetApplied(b bool) {
+	m.applied = &b
+}
+
+// Applied returns the value of the "applied" field in the mutation.
+func (m *AffiliateCommissionReversalMutation) Applied() (r bool, exists bool) {
+	v := m.applied
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldApplied returns the old "applied" field's value of the AffiliateCommissionReversal entity.
+// If the AffiliateCommissionReversal object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AffiliateCommissionReversalMutation) OldApplied(ctx context.Context) (v bool, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldApplied is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldApplied requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldApplied: %w", err)
+	}
+	return oldValue.Applied, nil
+}
+
+// ResetApplied resets all changes to the "applied" field.
+func (m *AffiliateCommissionReversalMutation) ResetApplied() {
+	m.applied = nil
+}
+
 // Where appends a list predicates to the AffiliateCommissionReversalMutation builder.
 func (m *AffiliateCommissionReversalMutation) Where(ps ...predicate.AffiliateCommissionReversal) {
 	m.predicates = append(m.predicates, ps...)
@@ -1915,7 +1952,7 @@ func (m *AffiliateCommissionReversalMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *AffiliateCommissionReversalMutation) Fields() []string {
-	fields := make([]string, 0, 6)
+	fields := make([]string, 0, 7)
 	if m.created_at != nil {
 		fields = append(fields, affiliatecommissionreversal.FieldCreatedAt)
 	}
@@ -1933,6 +1970,9 @@ func (m *AffiliateCommissionReversalMutation) Fields() []string {
 	}
 	if m.shortfall_minor != nil {
 		fields = append(fields, affiliatecommissionreversal.FieldShortfallMinor)
+	}
+	if m.applied != nil {
+		fields = append(fields, affiliatecommissionreversal.FieldApplied)
 	}
 	return fields
 }
@@ -1954,6 +1994,8 @@ func (m *AffiliateCommissionReversalMutation) Field(name string) (ent.Value, boo
 		return m.RecoveredMinor()
 	case affiliatecommissionreversal.FieldShortfallMinor:
 		return m.ShortfallMinor()
+	case affiliatecommissionreversal.FieldApplied:
+		return m.Applied()
 	}
 	return nil, false
 }
@@ -1975,6 +2017,8 @@ func (m *AffiliateCommissionReversalMutation) OldField(ctx context.Context, name
 		return m.OldRecoveredMinor(ctx)
 	case affiliatecommissionreversal.FieldShortfallMinor:
 		return m.OldShortfallMinor(ctx)
+	case affiliatecommissionreversal.FieldApplied:
+		return m.OldApplied(ctx)
 	}
 	return nil, fmt.Errorf("unknown AffiliateCommissionReversal field %s", name)
 }
@@ -2025,6 +2069,13 @@ func (m *AffiliateCommissionReversalMutation) SetField(name string, value ent.Va
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetShortfallMinor(v)
+		return nil
+	case affiliatecommissionreversal.FieldApplied:
+		v, ok := value.(bool)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetApplied(v)
 		return nil
 	}
 	return fmt.Errorf("unknown AffiliateCommissionReversal field %s", name)
@@ -2131,6 +2182,9 @@ func (m *AffiliateCommissionReversalMutation) ResetField(name string) error {
 		return nil
 	case affiliatecommissionreversal.FieldShortfallMinor:
 		m.ResetShortfallMinor()
+		return nil
+	case affiliatecommissionreversal.FieldApplied:
+		m.ResetApplied()
 		return nil
 	}
 	return fmt.Errorf("unknown AffiliateCommissionReversal field %s", name)

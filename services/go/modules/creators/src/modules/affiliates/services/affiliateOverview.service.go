@@ -38,6 +38,7 @@ func (affiliates Affiliates) Overview(ctx context.Context, store repositories.St
 	for _, creator := range creators {
 		view.CreatorDrivenSales.AmountMinor += creator.Sales.AmountMinor
 		view.CommissionsPaid.AmountMinor += creator.CommissionPaid.AmountMinor
+		view.CommissionsOwed.AmountMinor += creator.CommissionOwed.AmountMinor
 		if creator.Status == "active" {
 			view.ActiveCreatorsCount++
 		}

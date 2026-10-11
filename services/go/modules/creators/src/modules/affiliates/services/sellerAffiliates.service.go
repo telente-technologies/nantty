@@ -177,12 +177,17 @@ func (affiliates Affiliates) ListCreators(ctx context.Context, store repositorie
 	}
 	for _, commission := range commissions {
 		view := performance[commission.CreatorID]
-		if view == nil || commission.Status != affiliatecommission.StatusPaid {
+		if view == nil || commission.Status == affiliatecommission.StatusReversed {
 			continue
 		}
 		view.Orders++
 		view.Sales.AmountMinor += commission.SaleMinor
-		view.CommissionPaid.AmountMinor += commission.CommissionMinor
+		net := commission.CommissionMinor - commission.ReversedMinor
+		if commission.Status == affiliatecommission.StatusPaid {
+			view.CommissionPaid.AmountMinor += net
+		} else {
+			view.CommissionOwed.AmountMinor += net
+		}
 		if view.LastSaleAt == nil || commission.CreatedAt.After(*view.LastSaleAt) {
 			at := commission.CreatedAt
 			view.LastSaleAt = &at
