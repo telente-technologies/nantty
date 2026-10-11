@@ -88,7 +88,7 @@ type TrialBillingRequest struct {
 }
 
 func (gateway *PaymentGateway) StartTrialBillingSubscription(ctx context.Context, request TrialBillingRequest) (string, error) {
-	provider, err := gateway.Container.DefaultProvider()
+	provider, err := gateway.Container.DefaultSubscriptions()
 	if err != nil {
 		return "", err
 	}
@@ -99,7 +99,7 @@ func (gateway *PaymentGateway) StartTrialBillingSubscription(ctx context.Context
 	reference := "sub-" + strings.ReplaceAll(uuid.NewString(), "-", "")
 	trialEnds := request.TrialEndsAt.UTC()
 	return reference, databases.RunInMoneyTransaction(ctx, gateway.Container.Resources.Database, func(ctx context.Context, transaction *sql.Tx) error {
-		row, err := gateway.Container.Client(transaction).BillingSubscription.Create().SetOwnerUserID(request.OwnerUserId).SetPlanCode(request.PlanCode).SetProvider(provider.Name()).
+		row, err := gateway.Container.Client(transaction).BillingSubscription.Create().SetOwnerUserID(request.OwnerUserId).SetPlanCode(request.PlanCode).SetProvider(gateway.Container.Settings.DefaultProvider).
 			SetReference(reference).SetProviderProductID(request.ProviderPlanId).SetProviderSubscriptionID(subscription.SubscriptionCode).
 			SetProviderCustomerID(request.ProviderCustomerId).SetEmailToken(subscription.EmailToken).SetStatus("trialing").SetTrialEndsAt(trialEnds).
 			SetCurrentPeriodEndsAt(trialEnds).SetCreatedAt(gateway.Container.Now()).Save(ctx)

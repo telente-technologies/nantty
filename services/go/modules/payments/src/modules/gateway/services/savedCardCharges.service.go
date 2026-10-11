@@ -6,7 +6,10 @@ import (
 	"encoding/json"
 	"errors"
 
+	"github.com/google/uuid"
+
 	"zudomart/modules/ledger/src/databases"
+	ledgerutils "zudomart/modules/ledger/src/utils"
 	"zudomart/modules/payments/src/generated/ent"
 	"zudomart/modules/payments/src/generated/ent/paymentintent"
 	"zudomart/modules/payments/src/interfaces"
@@ -17,6 +20,11 @@ type SavedCardChargeRequest struct {
 	UserId                 string
 	PaymentIntentReference string
 	SavedCardId            string
+	IdempotencyKey         string
+}
+
+type savedCardChargeClaim struct {
+	Claimed bool `json:"claimed"`
 }
 
 type SavedCardChargeView struct {
@@ -42,7 +50,7 @@ func (gateway *PaymentGateway) ChargePaymentIntentWithSavedCard(ctx context.Cont
 	if err != nil {
 		return SavedCardChargeView{}, err
 	}
-	provider, err := gateway.Container.Provider(intent.Provider)
+	provider, err := gateway.Container.SavedCards(intent.Provider)
 	if err != nil {
 		return SavedCardChargeView{}, err
 	}
@@ -56,6 +64,18 @@ func (gateway *PaymentGateway) ChargePaymentIntentWithSavedCard(ctx context.Cont
 	if intent.AuthorizationURL != "" {
 		return gateway.reissueIntentForHostedCheckout(ctx, intent)
 	}
+	claim, replayed, err := ledgerutils.RunIdempotentMoneyCommand(ctx, gateway.Container.Resources.Database, gateway.Container.Idempotency, ledgerutils.IdempotentCommand[savedCardChargeClaim]{
+		Scope: request.UserId + ":savedCard.charge", Key: request.IdempotencyKey, RequestHash: ledgerutils.HashRequestFingerprint(request.PaymentIntentReference, request.SavedCardId),
+		Execute: func(ctx context.Context, transaction *sql.Tx) (savedCardChargeClaim, error) {
+			return gateway.claimSavedCardChargeInTransaction(ctx, transaction, intent.ID.String())
+		},
+	})
+	if err != nil {
+		return SavedCardChargeView{}, err
+	}
+	if replayed || !claim.Claimed {
+		return gateway.savedCardChargeStatus(ctx, intent.Reference)
+	}
 	metadata := map[string]string{}
 	_ = json.Unmarshal(intent.Metadata, &metadata)
 	delete(metadata, callbackUrlMetadataKey)
@@ -63,7 +83,7 @@ func (gateway *PaymentGateway) ChargePaymentIntentWithSavedCard(ctx context.Cont
 	delete(metadata, models.CheckoutGroupsMetadataKey)
 	result, err := provider.ChargeAuthorization(ctx, interfaces.AuthorizationChargeRequest{
 		SplitShares:   splitShares,
-		CustomerEmail: contact.Email, AuthorizationCode: authorizationCode, Reference: intent.Reference, AmountMinor: intent.AmountMinor,
+		CustomerEmail: pinnedTokenEmail(authorization, contact.Email), AuthorizationCode: authorizationCode, Reference: intent.Reference, AmountMinor: intent.AmountMinor,
 		Currency: intent.Currency, SettlementAccount: intent.ConnectedAccountID, SubaccountBearsFee: gateway.Container.Settings.Paystack.SubaccountBearsFee, Metadata: metadata,
 	})
 	if errors.Is(err, interfaces.ErrSavedCardNotForCustomer) {
@@ -85,6 +105,32 @@ func (gateway *PaymentGateway) ChargePaymentIntentWithSavedCard(ctx context.Cont
 		return SavedCardChargeView{}, err
 	}
 	return SavedCardChargeView{Status: settled.Status, PaymentIntent: settled}, nil
+}
+
+func (gateway *PaymentGateway) claimSavedCardChargeInTransaction(ctx context.Context, transaction *sql.Tx, intentId string) (savedCardChargeClaim, error) {
+	locked, err := gateway.Container.Client(transaction).PaymentIntent.Query().Where(paymentintent.ID(uuid.MustParse(intentId))).ForUpdate().Only(ctx)
+	if err != nil {
+		return savedCardChargeClaim{}, err
+	}
+	if locked.Status != paymentintent.StatusPending {
+		return savedCardChargeClaim{}, ErrAlreadyPaid
+	}
+	if locked.SavedCardChargeStartedAt != nil {
+		return savedCardChargeClaim{}, nil
+	}
+	return savedCardChargeClaim{Claimed: true}, locked.Update().SetSavedCardChargeStartedAt(gateway.Container.Now().UTC()).AddVersion(1).Exec(ctx)
+}
+
+func (gateway *PaymentGateway) savedCardChargeStatus(ctx context.Context, reference string) (SavedCardChargeView, error) {
+	settled, err := gateway.VerifyAndSettlePaymentIntentByReference(ctx, reference)
+	if err != nil {
+		return SavedCardChargeView{}, err
+	}
+	status := settled.Status
+	if status == string(paymentintent.StatusPending) {
+		status = "processing"
+	}
+	return SavedCardChargeView{Status: status, PaymentIntent: settled}, nil
 }
 
 func (gateway *PaymentGateway) reissueIntentForHostedCheckout(ctx context.Context, previous *ent.PaymentIntent) (SavedCardChargeView, error) {

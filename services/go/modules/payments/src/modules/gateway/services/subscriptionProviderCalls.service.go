@@ -7,7 +7,7 @@ import (
 )
 
 func (gateway *PaymentGateway) CreateRecurringPlanProduct(ctx context.Context, request interfaces.RecurringPlanRequest) (string, error) {
-	provider, err := gateway.Container.DefaultProvider()
+	provider, err := gateway.Container.DefaultSubscriptions()
 	if err != nil {
 		return "", err
 	}
@@ -16,7 +16,7 @@ func (gateway *PaymentGateway) CreateRecurringPlanProduct(ctx context.Context, r
 }
 
 func (gateway *PaymentGateway) CreateProviderSubscription(ctx context.Context, request interfaces.SubscriptionRequest) (interfaces.ProviderSubscription, error) {
-	provider, err := gateway.Container.DefaultProvider()
+	provider, err := gateway.Container.DefaultSubscriptions()
 	if err != nil {
 		return interfaces.ProviderSubscription{}, err
 	}
@@ -25,7 +25,7 @@ func (gateway *PaymentGateway) CreateProviderSubscription(ctx context.Context, r
 }
 
 func (gateway *PaymentGateway) DisableProviderSubscription(ctx context.Context, subscriptionCode, emailToken string) error {
-	provider, err := gateway.Container.DefaultProvider()
+	provider, err := gateway.Container.DefaultSubscriptions()
 	if err != nil {
 		return err
 	}

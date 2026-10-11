@@ -48,10 +48,42 @@ func (controller PayoutOnboardingController) StartBankValidation(writer http.Res
 		controller.fail(writer, request, err)
 		return
 	}
-	status, err := controller.Application.Gateway.StartBankAccountValidation(request.Context(), principal.UserId)
+	started, err := controller.Application.Gateway.StartPayoutIdentityValidation(request.Context(), principal.UserId, request.URL.Query().Get("returnTo"))
 	if err != nil {
 		controller.fail(writer, request, err)
 		return
 	}
-	httpserver.WriteJsonResponse(writer, http.StatusAccepted, map[string]string{"status": status})
+	writer.Header().Set("Cache-Control", "no-store")
+	httpserver.WriteJsonResponse(writer, http.StatusAccepted, started)
+}
+
+func (controller PayoutOnboardingController) GetBankValidation(writer http.ResponseWriter, request *http.Request) {
+	principal, err := ledgerutils.RequirePrincipal(request)
+	if err != nil {
+		controller.fail(writer, request, err)
+		return
+	}
+	state, err := controller.Application.Gateway.RefreshPayoutIdentityValidation(request.Context(), principal.UserId)
+	if err != nil {
+		controller.fail(writer, request, err)
+		return
+	}
+	writer.Header().Set("Cache-Control", "no-store")
+	httpserver.WriteJsonResponse(writer, http.StatusOK, state)
+}
+
+func (controller PayoutOnboardingController) GetSellingEligibilityInternal(writer http.ResponseWriter, request *http.Request) {
+	expected := controller.Application.Container.Settings.InternalApiToken
+	presented := request.Header.Get("x-internal-token")
+	if len(expected) < 32 || subtle.ConstantTimeCompare([]byte(presented), []byte(expected)) != 1 {
+		httpserver.WriteJsonResponse(writer, http.StatusUnauthorized, httpserver.ErrUnauthorized)
+		return
+	}
+	eligibility, err := controller.Application.Gateway.ReadSellingEligibility(request.Context(), request.PathValue("userId"))
+	if err != nil {
+		controller.fail(writer, request, err)
+		return
+	}
+	writer.Header().Set("Cache-Control", "no-store")
+	httpserver.WriteJsonResponse(writer, http.StatusOK, eligibility)
 }

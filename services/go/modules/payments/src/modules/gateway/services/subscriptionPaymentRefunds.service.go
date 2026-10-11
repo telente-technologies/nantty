@@ -43,14 +43,14 @@ func (gateway *PaymentGateway) RefundSubscriptionPayment(ctx context.Context, re
 		}
 		amount := request.AmountMinor
 		if request.Full {
-			amount = intent.AmountMinor - intent.RefundedMinor
+			amount = RefundableMinor(intent)
 		}
 		if earlier, err := gateway.Container.Client(transaction).PaymentRefund.Query().Where(paymentrefund.Reference(request.Reference)).Only(ctx); err == nil {
 			if !request.Full && earlier.AmountMinor != request.AmountMinor {
 				return ErrRefundAmountInvalid
 			}
 			amount = earlier.AmountMinor
-		} else if amount <= 0 || amount > intent.AmountMinor-intent.RefundedMinor {
+		} else if amount <= 0 || amount > RefundableMinor(intent) {
 			return ErrRefundExceedsPayment
 		}
 		if _, err := gateway.Container.Ledger.PostBalancedJournalEntry(ctx, transaction, ledgermodels.JournalEntryRequest{

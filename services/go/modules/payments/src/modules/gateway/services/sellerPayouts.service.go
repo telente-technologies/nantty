@@ -2,6 +2,7 @@ package services
 
 import (
 	"context"
+	"database/sql"
 	"errors"
 	"regexp"
 
@@ -15,13 +16,15 @@ import (
 
 var providerTransferReferencePattern = regexp.MustCompile(`^[a-z0-9_-]{16,100}$`)
 
+const PayoutTransferMissing = "missing"
+
 type PayoutTransferStatus struct {
 	Reference string
 	Status    string
 }
 
 func (gateway *PaymentGateway) QuotePayoutFee(currency string, amountMinor int64) (int64, error) {
-	provider, err := gateway.Container.DefaultProvider()
+	provider, err := gateway.Container.DefaultPayouts()
 	if err != nil {
 		return 0, err
 	}
@@ -32,8 +35,11 @@ func (gateway *PaymentGateway) QuotePayoutFee(currency string, amountMinor int64
 	return fee, err
 }
 
-func (gateway *PaymentGateway) ReadProviderAvailableBalanceForUser(ctx context.Context, _ string, currency string) (int64, error) {
-	provider, err := gateway.Container.DefaultProvider()
+func (gateway *PaymentGateway) ReadProviderAvailableBalanceForUser(ctx context.Context, userId string, currency string) (int64, error) {
+	if gateway.Container.UsesProviderWallets() {
+		return gateway.readUserWalletBalance(ctx, userId, currency)
+	}
+	provider, err := gateway.Container.DefaultPayouts()
 	if err != nil {
 		return 0, err
 	}
@@ -50,16 +56,32 @@ func (gateway *PaymentGateway) ReadProviderAvailableBalanceForUser(ctx context.C
 }
 
 func (gateway *PaymentGateway) InitiateSellerPayout(ctx context.Context, instruction models.SellerPayoutInstruction) (PayoutTransferStatus, error) {
-	database := gateway.Container.Resources.Database
+	var prepared PayoutTransferStatus
+	err := databases.RunInMoneyTransaction(ctx, gateway.Container.Resources.Database, func(ctx context.Context, transaction *sql.Tx) error {
+		var prepareErr error
+		prepared, prepareErr = gateway.PrepareSellerPayoutInTransaction(ctx, transaction, instruction)
+		return prepareErr
+	})
+	if err != nil {
+		return PayoutTransferStatus{}, err
+	}
+	return gateway.SendPreparedSellerPayout(ctx, prepared.Reference)
+}
+
+func (gateway *PaymentGateway) PrepareSellerPayoutInTransaction(ctx context.Context, transaction *sql.Tx, instruction models.SellerPayoutInstruction) (PayoutTransferStatus, error) {
 	if !providerTransferReferencePattern.MatchString(instruction.Reference) {
 		return PayoutTransferStatus{}, errors.New("a payout reference must be 16 to 100 lowercase letters, digits, - or _")
 	}
-	if existing, err := gateway.Container.Client(database).PayoutTransfer.Query().Where(payouttransfer.Reference(instruction.Reference)).Only(ctx); err == nil {
+	client := gateway.Container.Client(transaction)
+	if existing, err := client.PayoutTransfer.Query().Where(payouttransfer.Reference(instruction.Reference)).Only(ctx); err == nil {
 		return PayoutTransferStatus{Reference: existing.Reference, Status: string(existing.Status)}, nil
 	} else if !ent.IsNotFound(err) {
 		return PayoutTransferStatus{}, err
 	}
-	account, err := gateway.FindConnectedAccountForUser(ctx, database, instruction.BeneficiaryUserId)
+	if gateway.Container.UsesProviderWallets() {
+		return gateway.prepareWalletPayoutInTransaction(ctx, transaction, instruction)
+	}
+	account, err := gateway.FindConnectedAccountForUser(ctx, transaction, instruction.BeneficiaryUserId)
 	if err != nil {
 		return PayoutTransferStatus{}, err
 	}
@@ -69,11 +91,10 @@ func (gateway *PaymentGateway) InitiateSellerPayout(ctx context.Context, instruc
 	if !ConnectedAccountReadyForPayouts(account) {
 		return PayoutTransferStatus{}, ErrConnectedAccountMissing
 	}
-	provider, err := gateway.Container.Provider(account.Provider)
-	if err != nil {
+	if _, err := gateway.Container.Payouts(account.Provider); err != nil {
 		return PayoutTransferStatus{}, err
 	}
-	transfer, err := gateway.Container.Client(database).PayoutTransfer.Create().
+	transfer, err := client.PayoutTransfer.Create().
 		SetReference(instruction.Reference).SetPurpose(instruction.Purpose).SetSubjectID(instruction.SubjectId).SetProvider(account.Provider).
 		SetKind(payouttransfer.KindPayout).SetConnectedAccountID(account.RecipientCode).SetBeneficiaryUserID(instruction.BeneficiaryUserId).
 		SetProviderDestinationID(account.RecipientCode).SetAmountMinor(instruction.AmountMinor).SetFeeMinor(instruction.FeeMinor).SetCurrency(instruction.Currency).
@@ -81,14 +102,38 @@ func (gateway *PaymentGateway) InitiateSellerPayout(ctx context.Context, instruc
 	if err != nil {
 		return PayoutTransferStatus{}, err
 	}
+	return PayoutTransferStatus{Reference: transfer.Reference, Status: string(transfer.Status)}, nil
+}
+
+func (gateway *PaymentGateway) SendPreparedSellerPayout(ctx context.Context, reference string) (PayoutTransferStatus, error) {
+	transfer, err := gateway.Container.Client(gateway.Container.Resources.Database).PayoutTransfer.Query().Where(payouttransfer.Reference(reference)).Only(ctx)
+	if err != nil {
+		return PayoutTransferStatus{}, err
+	}
+	if transfer.Status != payouttransfer.StatusProcessing || transfer.ProviderTransferCode != "" {
+		return PayoutTransferStatus{Reference: reference, Status: string(transfer.Status)}, nil
+	}
+	provider, err := gateway.Container.Payouts(transfer.Provider)
+	if err != nil {
+		return PayoutTransferStatus{}, err
+	}
 	return gateway.sendPayoutToProvider(ctx, provider, transfer)
 }
 
-func (gateway *PaymentGateway) sendPayoutToProvider(ctx context.Context, provider interfaces.FullPaymentProvider, transfer *ent.PayoutTransfer) (PayoutTransferStatus, error) {
-	result, err := provider.CreateTransfer(ctx, interfaces.TransferRequest{
+func (gateway *PaymentGateway) sendPayoutToProvider(ctx context.Context, provider interfaces.PayoutProvider, transfer *ent.PayoutTransfer) (PayoutTransferStatus, error) {
+	request := interfaces.TransferRequest{
 		RecipientCode: transfer.ProviderDestinationID, AmountMinor: transfer.AmountMinor, Currency: transfer.Currency, Reference: transfer.Reference,
-		Reason: "Zudomart payout " + transfer.Purpose,
-	})
+		Reason: "Zudomart payout " + transfer.Purpose, SourceWalletRef: transfer.SourceWalletRef,
+	}
+	if transfer.SealedDestination != nil {
+		if refusal, err := gateway.completeWalletPayoutRequest(ctx, transfer, &request); err != nil || refusal != "" {
+			if refusal != "" {
+				return gateway.recordTransferOutcome(ctx, transfer.Reference, transferOutcome{Outcome: interfaces.OutcomeFailed, FailureReason: refusal})
+			}
+			return PayoutTransferStatus{}, err
+		}
+	}
+	result, err := provider.CreateTransfer(ctx, request)
 	switch {
 	case errors.Is(err, interfaces.ErrTransferNeedsOtp):
 		gateway.Container.Resources.Logger.ErrorContext(ctx, "paystack asked for a transfer OTP; disable transfer OTP on the dashboard", "reference", transfer.Reference)
@@ -98,10 +143,14 @@ func (gateway *PaymentGateway) sendPayoutToProvider(ctx context.Context, provide
 	case err != nil && !isDefinitiveProviderRejection(err):
 		return PayoutTransferStatus{Reference: transfer.Reference, Status: string(payouttransfer.StatusProcessing)}, nil
 	case err != nil:
-		if vResult, vErr := provider.VerifyTransfer(ctx, transfer.Reference); vErr == nil && (vResult.Outcome == interfaces.OutcomeSucceeded || vResult.Outcome == interfaces.OutcomePending) {
+		vResult, vErr := provider.VerifyTransfer(ctx, transfer.Reference)
+		switch {
+		case vErr == nil && vResult.Outcome != interfaces.OutcomeFailed:
 			return gateway.recordTransferOutcome(ctx, transfer.Reference, transferOutcome{ProviderCode: vResult.ProviderTransferId, Outcome: vResult.Outcome, FailureReason: vResult.FailureReason})
+		case vErr == nil || isDefinitiveProviderRejection(vErr):
+			return gateway.recordTransferOutcome(ctx, transfer.Reference, transferOutcome{Outcome: interfaces.OutcomeFailed, FailureReason: truncateReason(err.Error())})
 		}
-		return gateway.recordTransferOutcome(ctx, transfer.Reference, transferOutcome{Outcome: interfaces.OutcomeFailed, FailureReason: truncateReason(err.Error())})
+		return PayoutTransferStatus{Reference: transfer.Reference, Status: string(payouttransfer.StatusProcessing)}, nil
 	}
 	if result.Outcome == interfaces.OutcomeSucceeded {
 		result.Outcome = interfaces.OutcomePending
@@ -120,7 +169,7 @@ func isDefinitiveProviderRejection(err error) bool {
 func (gateway *PaymentGateway) HandleTransferNotification(ctx context.Context, notification interfaces.WebhookNotification) error {
 	transfer, err := gateway.Container.Client(gateway.Container.Resources.Database).PayoutTransfer.Query().Where(payouttransfer.Reference(notification.Reference)).Only(ctx)
 	if ent.IsNotFound(err) {
-		return nil
+		return gateway.ConfirmMovement(ctx, notification.Reference, "")
 	}
 	if err != nil {
 		return err
@@ -132,7 +181,7 @@ func (gateway *PaymentGateway) confirmTransferWithProvider(ctx context.Context, 
 	if transfer.Status != payouttransfer.StatusProcessing {
 		return nil
 	}
-	provider, err := gateway.Container.Provider(transfer.Provider)
+	provider, err := gateway.Container.Payouts(transfer.Provider)
 	if err != nil {
 		return err
 	}
@@ -151,14 +200,14 @@ func (gateway *PaymentGateway) confirmTransferWithProvider(ctx context.Context, 
 func (gateway *PaymentGateway) FinalizeTransferByReferenceWithProvider(ctx context.Context, reference string) (PayoutTransferStatus, error) {
 	transfer, err := gateway.Container.Client(gateway.Container.Resources.Database).PayoutTransfer.Query().Where(payouttransfer.Reference(reference)).Only(ctx)
 	if ent.IsNotFound(err) {
-		return PayoutTransferStatus{}, nil
+		return PayoutTransferStatus{Reference: reference, Status: PayoutTransferMissing}, nil
 	}
 	if err != nil {
 		return PayoutTransferStatus{}, err
 	}
 	if transfer.Status == payouttransfer.StatusProcessing {
 		if transfer.ProviderTransferCode == "" {
-			provider, err := gateway.Container.Provider(transfer.Provider)
+			provider, err := gateway.Container.Payouts(transfer.Provider)
 			if err != nil {
 				return PayoutTransferStatus{}, err
 			}

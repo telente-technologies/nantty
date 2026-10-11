@@ -64,13 +64,18 @@ func (controller SavedCardsController) ChargeSavedCard(writer http.ResponseWrite
 		controller.fail(writer, request, err)
 		return
 	}
+	idempotencyKey, err := ledgerutils.ReadRequiredIdempotencyKey(request)
+	if err != nil {
+		controller.fail(writer, request, err)
+		return
+	}
 	body, err := ledgerutils.DecodeAndValidateJsonBody(writer, request, validators.ValidateChargeSavedCardRequest)
 	if err != nil {
 		controller.fail(writer, request, err)
 		return
 	}
 	result, err := controller.Application.Gateway.ChargePaymentIntentWithSavedCard(request.Context(), services.SavedCardChargeRequest{
-		UserId: principal.UserId, PaymentIntentReference: body.PaymentReference, SavedCardId: body.SavedCardId,
+		UserId: principal.UserId, PaymentIntentReference: body.PaymentReference, SavedCardId: body.SavedCardId, IdempotencyKey: idempotencyKey,
 	})
 	if err != nil {
 		controller.fail(writer, request, err)

@@ -91,6 +91,9 @@ func (gateway *PaymentGateway) enforceUnverifiedSellerRulesInTransaction(ctx con
 	})
 	caps := gateway.Container.Resources.Platform.ReadUnverifiedSellerSalesCaps(ctx, gateway.Container.Settings.UnverifiedSellerSalesCaps)
 	for _, key := range keys {
+		if gateway.Container.UsesProviderWallets() && key.Currency != walletCurrency {
+			continue
+		}
 		verified, err := gateway.IsSellerVerified(ctx, transaction, key.SellerUserId)
 		if err != nil {
 			gateway.Container.Resources.Logger.WarnContext(ctx, "seller verification read failed; refusing the checkout", "sellerUserId", key.SellerUserId, "error", err)
