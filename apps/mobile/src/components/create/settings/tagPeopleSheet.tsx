@@ -88,10 +88,10 @@ export function TagPeopleSheet({ visible, tagged, onChange, onClose }: TagPeople
 }
 
 const useStyles = makeThemedStyles((colors) => StyleSheet.create({
-  body: { paddingHorizontal: 16, paddingBottom: 16, gap: 12, maxHeight: 560 },
+  body: { flexShrink: 1, paddingHorizontal: 16, paddingBottom: 16, gap: 12, maxHeight: 560 },
   chips: { gap: 8 },
   chip: { minHeight: 32, paddingHorizontal: 12, borderRadius: 16, backgroundColor: colors.chip, flexDirection: "row", alignItems: "center", gap: 6 },
-  list: { maxHeight: 320 },
+  list: { flexShrink: 1, maxHeight: 320 },
   message: { marginVertical: 24 },
   row: { minHeight: 56, flexDirection: "row", alignItems: "center", gap: 12, borderBottomWidth: 1, borderBottomColor: colors.divider },
   texts: { flex: 1, gap: 2 },

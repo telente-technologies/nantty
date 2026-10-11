@@ -23,7 +23,7 @@ export function BuyCoinsSheet({ visible, onClose }: { visible: boolean; onClose:
   const styles = useStyles();
   const { coinPackages, buyCoinPackage, lastOutcome, countryNeededFor, clearCountryNeeded } = useBuyCoinsWithInAppBrowser();
   return (
-    <BottomSheet visible={visible} onClose={onClose} title="Buy coins" floating>
+    <BottomSheet visible={visible} onClose={onClose} title="Buy coins" floating scrollable>
       <View style={styles.body}>
         <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
           <View style={{ width: 40, height: 40, borderRadius: 20, alignItems: "center", justifyContent: "center", backgroundColor: colors.chip }}>
@@ -86,7 +86,7 @@ export function BuyCoinsSheet({ visible, onClose }: { visible: boolean; onClose:
 }
 
 const useStyles = makeThemedStyles((colors) => StyleSheet.create({
-  body: { paddingHorizontal: 16, paddingBottom: 20, gap: 12 },
+  body: { paddingBottom: 4, gap: 12 },
   packageRow: {
     minHeight: 56,
     paddingHorizontal: 14,

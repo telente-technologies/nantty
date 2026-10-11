@@ -20,7 +20,7 @@ export function AppealStrikeSheet({ strike, onClose }: { readonly strike: Accoun
     appeal.reset();
   }, [strike?.id]);
   return (
-    <BottomSheet visible={!!strike} onClose={onClose} title={appeal.isSuccess ? "Appeal sent" : `Appeal this ${strike?.kind === "WARNING" ? "warning" : "strike"}`}>
+    <BottomSheet visible={!!strike} onClose={onClose} title={appeal.isSuccess ? "Appeal sent" : `Appeal this ${strike?.kind === "WARNING" ? "warning" : "strike"}`} scrollable>
       <View style={styles.body}>
         <View style={{ width: 40, height: 40, borderRadius: 20, alignItems: "center", justifyContent: "center", backgroundColor: colors.chip }}>
           {appeal.isSuccess ? <SealCheck20Icon size={22} color={colors.textMuted} /> : <ShieldCheck24Icon size={22} color={colors.textMuted} />}
@@ -42,4 +42,4 @@ export function AppealStrikeSheet({ strike, onClose }: { readonly strike: Accoun
   );
 }
 
-const styles = StyleSheet.create({ body: { paddingHorizontal: 16, paddingBottom: 16, gap: 12 } });
+const styles = StyleSheet.create({ body: { paddingBottom: 4, gap: 12 } });

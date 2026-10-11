@@ -22,6 +22,7 @@ export const CalendarDotsIcon: Icon = require("phosphor-react-native/src/icons/C
 export const CameraIcon: Icon = require("phosphor-react-native/src/icons/Camera").CameraIcon;
 export const CameraPlusIcon: Icon = require("phosphor-react-native/src/icons/CameraPlus").CameraPlusIcon;
 export const CaretDownIcon: Icon = require("phosphor-react-native/src/icons/CaretDown").CaretDownIcon;
+export const CaretLeftIcon: Icon = require("phosphor-react-native/src/icons/CaretLeft").CaretLeftIcon;
 export const CaretRightIcon: Icon = require("phosphor-react-native/src/icons/CaretRight").CaretRightIcon;
 export const CaretUpIcon: Icon = require("phosphor-react-native/src/icons/CaretUp").CaretUpIcon;
 export const ChartBarIcon: Icon = require("phosphor-react-native/src/icons/ChartBar").ChartBarIcon;

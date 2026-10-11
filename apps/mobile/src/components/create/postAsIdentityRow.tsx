@@ -8,17 +8,19 @@ import { ProfileSwitcherSheet } from "@/components/profile/profileSwitcher";
 import { makeThemedStyles, useTheme } from "@/theme";
 import { brandsService } from "@/services/sellers/brands.service";
 import { useActingProfileStore } from "@/store/actingProfile.store";
+import { useAuthStore } from "@/store/auth.store";
 import { useProfileSwitcherSheetStore } from "@/store/profileSwitcherSheet.store";
 
 const KIND_LABELS = { person: "Personal", business: "Business", brand: "Brand", store: "Store", government: "Government" } as const;
 
 function useComposerIdentity() {
   const { actingProfile, setActingProfile } = useActingProfileStore();
-  const current = useQuery({ queryKey: ["users", "me", "acting-profile"], queryFn: brandsService.fetchMyActingProfile });
+  const isSignedIn = useAuthStore((s) => s.status === "signedIn");
+  const current = useQuery({ queryKey: ["users", "me", "acting-profile"], queryFn: brandsService.fetchMyActingProfile, enabled: isSignedIn });
   useEffect(() => {
-    if (current.data && !actingProfile) setActingProfile(current.data);
-  }, [current.data, actingProfile, setActingProfile]);
-  return actingProfile ?? current.data ?? null;
+    if (isSignedIn && current.data && !actingProfile) setActingProfile(current.data);
+  }, [isSignedIn, current.data, actingProfile, setActingProfile]);
+  return isSignedIn ? (actingProfile ?? current.data ?? null) : null;
 }
 
 export function PostAsIdentityRow() {

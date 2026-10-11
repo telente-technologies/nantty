@@ -2,7 +2,6 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { act, renderHook, waitFor } from "@testing-library/react-native";
 import { createElement, type ReactNode } from "react";
 
-import { ApiError } from "@/errors/api.error";
 import type { Post } from "@/types";
 
 import { useQuotedPostPreview } from "../quotedPostPreview.hook";
@@ -13,7 +12,7 @@ const mockPost = (id: string) => ({ id, kind: "post", author: { id: "a1", name: 
 jest.mock("@/services/content/posts.service", () => ({
   postsService: {
     fetchPostById: async (id: string) => {
-      if (mockMissing.has(id)) throw new ApiError(404, "gone", "POST_NOT_FOUND");
+      if (mockMissing.has(id)) throw new (jest.requireActual("@/errors/api.error").ApiError)(404, "gone", "POST_NOT_FOUND");
       return mockPost(id);
     },
   },

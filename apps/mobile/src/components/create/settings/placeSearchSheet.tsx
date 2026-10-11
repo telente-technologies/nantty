@@ -72,8 +72,8 @@ export function PlaceSearchSheet({ visible, selected, onSelect, onClose }: Place
 }
 
 const useStyles = makeThemedStyles((colors) => StyleSheet.create({
-  body: { paddingHorizontal: 16, paddingBottom: 16, gap: 12, maxHeight: 520 },
-  list: { maxHeight: 340 },
+  body: { flexShrink: 1, paddingHorizontal: 16, paddingBottom: 16, gap: 12, maxHeight: 520 },
+  list: { flexShrink: 1, maxHeight: 340 },
   message: { marginVertical: 24 },
   remove: { paddingVertical: 6, flex: 1 },
   removeRow: { flexDirection: "row", alignItems: "center", gap: 8 },

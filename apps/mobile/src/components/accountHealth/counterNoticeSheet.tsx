@@ -26,7 +26,7 @@ export function CounterNoticeSheet({ notice, onClose }: { readonly notice: Copyr
   }, [notice?.claimId]);
   const canSubmit = statement.trim().length >= 20 && isValidContactEmailAddress(contactEmail) && hasDeclared;
   return (
-    <BottomSheet visible={!!notice} onClose={onClose} title={submit.isSuccess ? "Counter-notice sent" : "Send a counter-notice"}>
+    <BottomSheet visible={!!notice} onClose={onClose} title={submit.isSuccess ? "Counter-notice sent" : "Send a counter-notice"} scrollable>
       <View style={styles.body}>
         <View style={{ width: 40, height: 40, borderRadius: 20, alignItems: "center", justifyContent: "center", backgroundColor: colors.chip }}>
           {submit.isSuccess ? <SealCheck20Icon size={22} color={colors.textMuted} /> : <Scales24Icon size={22} color={colors.textMuted} />}
@@ -52,4 +52,4 @@ export function CounterNoticeSheet({ notice, onClose }: { readonly notice: Copyr
   );
 }
 
-const styles = StyleSheet.create({ body: { paddingHorizontal: 16, paddingBottom: 16, gap: 12 } });
+const styles = StyleSheet.create({ body: { paddingBottom: 4, gap: 12 } });

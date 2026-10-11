@@ -13,6 +13,7 @@ import {
   CameraIcon,
   CameraPlusIcon,
   CaretDownIcon,
+  CaretLeftIcon,
   CaretRightIcon,
   ChartBarHorizontalIcon,
   ChartBarIcon,
@@ -152,6 +153,8 @@ export const CameraBolt24Icon = phosphorIcon(CameraPlusIcon, { ink: "#5B5B5B" })
 export const Cancel20Icon = phosphorIcon(XIcon, { width: 20 });
 export const CaretDown24Icon = phosphorIcon(CaretDownIcon, { ink: "#3A2BFF" });
 export const CaretRight24Icon = phosphorIcon(CaretRightIcon);
+export const CaretLeft16Icon = phosphorIcon(CaretLeftIcon, { width: 16 });
+export const CaretRight16Icon = phosphorIcon(CaretRightIcon, { width: 16 });
 export const Chat37Icon = phosphorIcon(ChatsCircleIcon, { width: 37, height: 28 });
 export const Chat37AltIcon = phosphorIcon(ChatsCircleIcon, { width: 37, height: 24 });
 export const Chat37AltAltIcon = phosphorIcon(ChatCircleIcon, { width: 37, height: 24 });

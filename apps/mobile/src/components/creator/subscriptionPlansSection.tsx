@@ -84,7 +84,7 @@ export function SubscriptionPlansSection() {
           <Text size={12} lineHeight={16.8} color={colors.textSubtle}>{subscriber.planName}</Text>
         </View>
       ))}
-      <BottomSheet visible={formVisible} onClose={() => setFormVisible(false)} title="New subscription plan">
+      <BottomSheet visible={formVisible} onClose={() => setFormVisible(false)} title="New subscription plan" scrollable>
         <View style={styles.form}>
           <View style={{ width: 40, height: 40, borderRadius: 20, alignItems: "center", justifyContent: "center", backgroundColor: colors.chip }}>
             <Ticket24Icon size={22} color={colors.textMuted} />
@@ -120,6 +120,6 @@ const useStyles = makeThemedStyles((colors) => StyleSheet.create({
   plan: { gap: 4, paddingBottom: 10, borderBottomWidth: 1, borderBottomColor: colors.background },
   row: { flexDirection: "row", alignItems: "center", gap: 10 },
   tiers: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
-  form: { paddingHorizontal: 16, paddingBottom: 20, gap: 12 },
+  form: { paddingBottom: 4, gap: 12 },
   multiline: { height: 90, alignItems: "flex-start", paddingVertical: 10 },
 }));

@@ -37,7 +37,8 @@ export const ThreadComposer = forwardRef<TextInput, ThreadComposerProps>(functio
 ) {
   const { colors } = useTheme();
   const styles = useStyles();
-  const viewer = useAuthStore((state) => (state.status === "signedIn" ? state.user : null));
+  const isSignedIn = useAuthStore((state) => state.status === "signedIn");
+  const viewerAvatarUrl = useAuthStore((state) => state.user?.avatarUrl ?? null);
   const [text, setText] = useState("");
   const [mentions, setMentions] = useState<readonly MentionEntity[]>([]);
   const inputRef = useRef<TextInput>(null);
@@ -77,7 +78,7 @@ export const ThreadComposer = forwardRef<TextInput, ThreadComposerProps>(functio
     <>
       {mentionComposer.suggestions ? <MentionSuggestionList suggestions={mentionComposer.suggestions} /> : null}
       <View style={styles.root}>
-        {viewer && replyRestriction ? (
+        {isSignedIn && replyRestriction ? (
           <View style={styles.restricted} accessible accessibilityRole="text" accessibilityLabel={`Who can reply? ${replyRestriction.message}`}>
             <LockSimple24Icon size={18} color={colors.textMuted} />
             <View style={styles.flex}>
@@ -86,7 +87,7 @@ export const ThreadComposer = forwardRef<TextInput, ThreadComposerProps>(functio
             </View>
           </View>
         ) : null}
-        {viewer && replyingToUsername && !replyRestriction ? (
+        {isSignedIn && replyingToUsername && !replyRestriction ? (
           <View style={styles.replyingTo}>
             <Text size={13} lineHeight={17} color={colors.textMuted} numberOfLines={1} style={styles.flex}>
               Replying to{" "}
@@ -101,9 +102,9 @@ export const ThreadComposer = forwardRef<TextInput, ThreadComposerProps>(functio
             ) : null}
           </View>
         ) : null}
-        {viewer && replyRestriction ? null : viewer ? (
+        {isSignedIn && replyRestriction ? null : isSignedIn ? (
           <View style={styles.inputRow}>
-            <Avatar uri={viewer.avatarUrl} size={32} />
+            <Avatar uri={viewerAvatarUrl} size={32} />
             <TextInput
               ref={inputRef}
               {...mentionComposer.inputProps}
@@ -140,7 +141,7 @@ export const ThreadComposer = forwardRef<TextInput, ThreadComposerProps>(functio
             </Text>
           </Pressable>
         )}
-        {viewer && !replyRestriction && quote.preview ? (
+        {isSignedIn && !replyRestriction && quote.preview ? (
           <View style={styles.quotePreview}>
             <QuotedPostCard compact quoted={quote.preview.quoted} loading={quote.preview.status === "loading"} unavailable={quote.preview.status === "unavailable"} onRemove={quote.remove} />
           </View>
