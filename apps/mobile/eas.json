@@ -29,6 +29,18 @@
         "buildType": "apk"
       },
       "env": {
+        "EXPO_PUBLIC_USE_MOCKS": "false",
+        "EXPO_PUBLIC_SELLER_WEB_URL": "https://dashboard.zudomart.com",
+        "EXPO_PUBLIC_ADS_MANAGER_URL": "https://ads.zudomart.com"
+      }
+    },
+    "demo": {
+      "extends": "base",
+      "distribution": "internal",
+      "android": {
+        "buildType": "apk"
+      },
+      "env": {
         "EXPO_PUBLIC_USE_MOCKS": "true",
         "EXPO_PUBLIC_SELLER_WEB_URL": "https://dashboard.zudomart.com",
         "EXPO_PUBLIC_ADS_MANAGER_URL": "https://ads.zudomart.com"
