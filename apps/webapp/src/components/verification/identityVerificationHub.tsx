@@ -2,14 +2,16 @@
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useSearchParams } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { RetryButton } from "@/components/ui/controls";
 import { ErrorState } from "@/components/ui/feedback";
 import styles from "@/components/settings/settings.module.css";
 import { legalLinks } from "@/config/legalLinks.config";
-import { readErrorMessageForDisplay } from "@/services/clientApi.service";
+import { useCountryRequiredRetry } from "@/components/commerce/countryRequiredDialog";
+import { isCountryRequiredError } from "@/components/commerce/countryRequiredPicker";
+import { readErrorMessageForDisplay, WebappRequestError } from "@/services/clientApi.service";
 import { identityVerificationService } from "@/services/identityVerification.service";
 import { openSmileIdCapture } from "@/services/smileIdWebIntegration.service";
 import type { IdentityJourney } from "@/types/identityVerification.type";
@@ -31,19 +33,31 @@ function StatusBlock({ title, text, tone = "muted" }: { readonly title: string; 
   );
 }
 
+const APP_PAYMENT_RETURN_URL = "zudomart://payments/return";
+const readAppReturnUrl = (value: string | null) => (value === APP_PAYMENT_RETURN_URL ? value : null);
+
 export function IdentityVerificationHub() {
   const queryClient = useQueryClient();
   const searchParams = useSearchParams();
   const step = searchParams.get("step");
   const returningFromPayment = step === "paid" || searchParams.has("reference");
+  const appReturnUrl = readAppReturnUrl(searchParams.get("return"));
   const [billingInterval, setBillingInterval] = useState<"month" | "year">("month");
+  const { retry: countryRetry, dialog: countryDialog } = useCountryRequiredRetry();
   const journeyQuery = useQuery({ queryKey: journeyKey, queryFn: identityVerificationService.fetchVerificationJourney, refetchInterval: (query) => (isWaitingForResult(query.state.data) || (returningFromPayment && !query.state.data?.case) ? 4000 : false) });
   const refresh = () => queryClient.invalidateQueries({ queryKey: journeyKey });
   const request = useMutation({ mutationFn: identityVerificationService.requestVerification, onSuccess: refresh });
   const checkout = useMutation({
-    mutationFn: (journey: IdentityJourney) => identityVerificationService.startCheckmarkCheckout({ profileId: journey.profileId, planCode: journey.planCode, interval: billingInterval, returnTo: `${window.location.origin}/settings/verification` }),
+    mutationFn: (journey: IdentityJourney) => identityVerificationService.startCheckmarkCheckout({ profileId: journey.profileId, planCode: journey.planCode, interval: billingInterval, returnTo: `${window.location.origin}/settings/verification${appReturnUrl ? `?return=${encodeURIComponent(appReturnUrl)}` : ""}` }),
     onSuccess: (started) => window.location.assign(started.authorizationUrl),
+    onError: (error, journey) => {
+      countryRetry.handle(error instanceof WebappRequestError ? error.code : null, () => checkout.mutate(journey));
+    },
   });
+  const paidCase = journeyQuery.data?.case;
+  useEffect(() => {
+    if (appReturnUrl && returningFromPayment && paidCase) window.location.replace(`${appReturnUrl}?purpose=checkmark`);
+  }, [appReturnUrl, returningFromPayment, paidCase]);
   const capture = useMutation({
     mutationFn: async (input: { journey: IdentityJourney; documentCountry: string; documentType: string }) => {
       if (!input.journey.case) throw new Error("Pay for your checkmark first.");
@@ -87,7 +101,8 @@ export function IdentityVerificationHub() {
               <label className={styles.radioRow}><input type="radio" checked={billingInterval === "month"} onChange={() => setBillingInterval("month")} /><span>Monthly</span></label>
               <label className={styles.radioRow}><input type="radio" checked={billingInterval === "year"} onChange={() => setBillingInterval("year")} /><span>Yearly (save 20%)</span></label>
             </div>
-            {checkout.isError ? <p className={styles.errorText} role="alert">{readErrorMessageForDisplay(checkout.error)}</p> : null}
+            {checkout.isError && !isCountryRequiredError(checkout.error) ? <p className={styles.errorText} role="alert">{readErrorMessageForDisplay(checkout.error)}</p> : null}
+            {countryDialog}
             <div className={styles.buttonRow}><Button busy={checkout.isPending} onClick={() => checkout.mutate(journey)}>Buy now</Button></div>
           </>
         ) : eligibility?.state === "requested" ? (

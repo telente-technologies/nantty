@@ -20,6 +20,7 @@ interface ToastStore {
 }
 
 const toastVisibleMilliseconds = 3_600;
+const actionToastVisibleMilliseconds = 7_000;
 let nextToastId = 1;
 
 export const useToastStore = create<ToastStore>((set, get) => ({
@@ -27,7 +28,7 @@ export const useToastStore = create<ToastStore>((set, get) => ({
   showToast: (toast) => {
     const id = nextToastId++;
     set((state) => ({ toasts: [...state.toasts.slice(-2), { tone: "neutral", ...toast, id }] }));
-    setTimeout(() => get().dismissToast(id), toastVisibleMilliseconds);
+    setTimeout(() => get().dismissToast(id), toast.actionHref ? actionToastVisibleMilliseconds : toastVisibleMilliseconds);
   },
   dismissToast: (id) => set((state) => ({ toasts: state.toasts.filter((toast) => toast.id !== id) })),
 }));
