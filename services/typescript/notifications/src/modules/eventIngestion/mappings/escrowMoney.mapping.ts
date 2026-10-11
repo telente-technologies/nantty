@@ -91,6 +91,17 @@ export const disputeResolved: EventMapping = (event, data, context) =>
     }),
   }));
 
+export const disputeSellerResponseOverdue: EventMapping = (event, data) =>
+  disputeParties(event, data, (role) => ({
+    category: "escrow", variant: role,
+    inApp: {
+      category: "orders", title: "Dispute sent to Zudomart review",
+      body: role === "seller" ? "You didn't respond within 48 hours, so our team is now reviewing the dispute. You can still add your side." : "The seller didn't respond within 48 hours, so our team is now reviewing your dispute. Your money stays protected.",
+      data: { disputeId: data.text("disputeId"), orderId: data.text("orderId") },
+    },
+    push: { title: "Dispute under review", body: "The 48-hour response window ended. Zudomart support is reviewing the case.", data: { disputeId: data.text("disputeId") } },
+  }));
+
 export const paymentFailed: EventMapping = (event, data, context) => [
   intentFor(event, data.text("ownerUserId"), {
     category: "payments",

@@ -6,6 +6,10 @@ import { createPrismaClient, type PrismaClient } from "./databases/prisma.databa
 import { IdentityHttpDirectory } from "./integrations/identityDirectory.integration.js";
 import { ExpoPushSender, LoggingPushSender } from "./integrations/expoPush.integration.js";
 import { SocialHttpDigestSource } from "./integrations/digestSource.integration.js";
+import { SocialHttpPostNotificationSubscribers } from "./integrations/postNotificationSubscribers.integration.js";
+import type { PostNotificationSubscriberSource } from "./interfaces/postNotificationSubscribers.interface.js";
+import { postNotificationFanoutBatchSize, widgetRefreshFanoutBatchSize, widgetRefreshMaximumDirectRecipients } from "./constants/delivery.constant.js";
+import { RunPostNotificationFanoutHandler } from "./modules/postNotifications/commands/runPostNotificationFanout/runPostNotificationFanout.handler.js";
 import { LoggingEmailSender } from "./integrations/loggingEmail.integration.js";
 import { SesEmailSender } from "./integrations/sesEmail.integration.js";
 import { RabbitMqMessageBroker } from "./integrations/rabbitMqBroker.integration.js";
@@ -37,6 +41,7 @@ import { AudiencePlannerService } from "./modules/bulkCampaigns/services/audienc
 import { LegalAudienceService } from "./modules/bulkCampaigns/services/legalAudience.service.js";
 import { PreviewEmailTemplateHandler } from "./modules/emailTemplates/queries/previewEmailTemplate/previewEmailTemplate.handler.js";
 import { HandleDomainEventHandler } from "./modules/eventIngestion/commands/handleDomainEvent/handleDomainEvent.handler.js";
+import { SendWidgetRefreshHandler } from "./modules/widgetRefresh/commands/sendWidgetRefresh/sendWidgetRefresh.handler.js";
 import { ListNotificationPreferencesHandler } from "./modules/inbox/queries/listNotificationPreferences/listNotificationPreferences.handler.js";
 import { GetUnreadCountHandler } from "./modules/inbox/queries/getUnreadCount/getUnreadCount.handler.js";
 import { ListNotificationsHandler } from "./modules/inbox/queries/listNotifications/listNotifications.handler.js";
@@ -72,6 +77,7 @@ export interface ContainerOverrides {
   readonly staffAuthenticator?: StaffAuthenticator;
   readonly legalVersions?: LegalVersionSource | null;
   readonly pause?: (milliseconds: number) => Promise<void>;
+  readonly postNotificationSubscribers?: PostNotificationSubscriberSource | null;
 }
 
 export function createContainer(config: NotificationsConfig, logger: Logger, overrides: ContainerOverrides = {}) {
@@ -102,6 +108,14 @@ export function createContainer(config: NotificationsConfig, logger: Logger, ove
   const queueLegalNotice = new QueueLegalNoticeHandler({ drafts, campaigns, audience: legalAudience, jobQueue, jobsQueueUrl: config.queues.jobs, identity, batchSize, ratePerSecond, acceptUrl });
   const planner = new AudiencePlannerService(identity);
   const supportInbox = config.supportInbox === undefined ? undefined : new SupportInboxAlertService({ emailDelivery, ...config.supportInbox });
+  const subscriberSource = overrides.postNotificationSubscribers !== undefined ? overrides.postNotificationSubscribers
+    : config.digestSource === null ? null : new SocialHttpPostNotificationSubscribers(config.digestSource.baseUrl, config.digestSource.internalToken);
+  const runPostNotificationFanout = subscriberSource === null ? null : new RunPostNotificationFanoutHandler({
+    source: subscriberSource, dispatcher, jobQueue, jobsQueueUrl: config.queues.jobs, batchSize: postNotificationFanoutBatchSize, lookupAuthor: (accountId) => identity.getRecipient(accountId),
+  });
+  const sendWidgetRefresh = new SendWidgetRefreshHandler({
+    deliveries, deviceTokens, pushSender, jobQueue, jobsQueueUrl: config.queues.jobs, storyAudience: subscriberSource, batchSize: widgetRefreshFanoutBatchSize, maximumDirectRecipients: widgetRefreshMaximumDirectRecipients, logger,
+  });
   const policyPublished = new CreateDraftFromPublishedPolicyHandler(drafts, config.webBaseUrl, config.policyNotice.autoSend, queueLegalNotice);
 
   return {
@@ -131,7 +145,9 @@ export function createContainer(config: NotificationsConfig, logger: Logger, ove
     listLegalNotices: new ListLegalNoticesHandler(campaigns, drafts),
     queueLegalNotice,
     previewEmailTemplate: new PreviewEmailTemplateHandler(brand, config.webBaseUrl),
-    handleDomainEvent: new HandleDomainEventHandler(dispatcher, policyPublished, { webBaseUrl: config.webBaseUrl, sellerDashboardUrl: brand.sellerDashboardUrl, otpEnvelopeKeys: config.otpEnvelopeKeys }, logger, supportInbox),
+    handleDomainEvent: new HandleDomainEventHandler(dispatcher, policyPublished, { webBaseUrl: config.webBaseUrl, sellerDashboardUrl: brand.sellerDashboardUrl, otpEnvelopeKeys: config.otpEnvelopeKeys }, logger, supportInbox, runPostNotificationFanout ?? undefined, sendWidgetRefresh, notifications),
+    runPostNotificationFanout,
+    sendWidgetRefresh,
     processBulkBatch: new ProcessBulkBatchHandler({ campaigns, identity, emailDelivery, jobQueue, jobsQueueUrl: config.queues.jobs, pause: overrides.pause ?? ((milliseconds) => new Promise((resolve) => setTimeout(resolve, milliseconds))) }),
     deliverEmailIfStillUnread: new DeliverEmailIfStillUnreadHandler({ notifications, deliveries, identity, emailDelivery, jobQueue, jobsQueueUrl: config.queues.jobs }),
     runDigestBatch: config.digestSource === null ? null : new RunDigestBatchHandler({ source: new SocialHttpDigestSource(config.digestSource.baseUrl, config.digestSource.internalToken), identity, emailDelivery, jobQueue, jobsQueueUrl: config.queues.jobs, batchSize }),

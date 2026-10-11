@@ -33,6 +33,7 @@ export interface NotificationRepository {
   markRead(userId: string, notificationId: string, readAt: Date): Promise<boolean>;
   markAllRead(userId: string, readAt: Date): Promise<number>;
   countUnread(userId: string): Promise<number>;
+  deleteForContent(contentId: string): Promise<number>;
 }
 
 export interface DeliveryClaim {
