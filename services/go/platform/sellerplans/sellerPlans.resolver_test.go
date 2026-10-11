@@ -88,3 +88,28 @@ func TestFreePlanIsRecheckedSoonSoAnUpgradeShowsQuickly(t *testing.T) {
 		t.Fatalf("plan = %s, want business after the short free-plan cache", got)
 	}
 }
+
+func TestUnconfiguredDefaultResolverDoesNotGrantEveryPlan(t *testing.T) {
+	if Default.AllowAll {
+		t.Fatal("the package default must not allow every feature before it is configured")
+	}
+}
+
+func TestEntitlementFailuresAreCachedBrieflyDuringAnOutage(t *testing.T) {
+	var calls atomic.Int32
+	server := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, _ *http.Request) {
+		calls.Add(1)
+		writer.WriteHeader(http.StatusServiceUnavailable)
+	}))
+	defer server.Close()
+	resolver := &Resolver{BaseUrl: server.URL, Timeout: time.Second, CacheDuration: time.Minute, Now: time.Now}
+	owner := uuid.New()
+	for attempt := 0; attempt < 3; attempt++ {
+		if resolver.PlanOf(context.Background(), owner) != Free {
+			t.Fatal("a failed lookup must resolve to free")
+		}
+	}
+	if calls.Load() != 1 {
+		t.Fatalf("calls = %d, want the failure cached", calls.Load())
+	}
+}

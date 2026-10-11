@@ -77,7 +77,7 @@ const freePlanCacheDuration = 5 * time.Second
 
 var (
 	configureOnce sync.Once
-	Default       = &Resolver{Timeout: 2 * time.Second, CacheDuration: time.Minute, Now: time.Now, AllowAll: true}
+	Default       = &Resolver{Timeout: 2 * time.Second, CacheDuration: time.Minute, Now: time.Now, AllowAll: false}
 )
 
 func ConfigureFromEnvironment(reader *platformconfig.EnvironmentReader, production bool) {
@@ -100,7 +100,7 @@ func (resolver *Resolver) PlanOf(ctx context.Context, ownerAccountId uuid.UUID) 
 	resolver.mutex.Unlock()
 	plan, err := resolver.fetch(ctx, ownerAccountId)
 	if err != nil {
-		return Free
+		plan = Free
 	}
 	resolver.mutex.Lock()
 	if resolver.cache == nil {

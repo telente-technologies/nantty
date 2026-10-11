@@ -29,7 +29,7 @@ var webRouteTerms = []string{
 	"subscriptions", "user", "users", "verify-email", "watch", "welcome", "security-check", "cookies", "guidelines", "community-guidelines",
 	"creator-terms", "faq", "sitemap", "sitemaps", "robots", "favicon", "manifest", "_next", "static", "assets", "images", "icons", "fonts", "public",
 	"embed", "oembed", "share", "invite", "download", "app", "apps", "reels", "videos", "video", "rankings", "wallet", "studio", "boost", "boosts", "sounds", "stories", "verification",
-	"rss", "logout", "register", "auth", "oauth", "callback", "new", "create", "edit", "trending", "discover", "tags", "hashtag",
+	"rss", "logout", "register", "auth", "oauth", "callback", "new", "create", "edit", "trending", "discover", "tags", "hashtag", "dispute", "disputes",
 }
 
 var prefixTerms = []string{

@@ -1,12 +1,16 @@
 package staffauth
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
+	"io"
 	"log/slog"
 	"net/http"
+	"strings"
 	"sync/atomic"
 
+	"zudomart/platform/httpserver"
 	"zudomart/platform/identityports"
 )
 
@@ -43,6 +47,30 @@ func (writer *statusCapturingWriter) Write(chunk []byte) (int, error) {
 
 func (writer *statusCapturingWriter) Unwrap() http.ResponseWriter { return writer.ResponseWriter }
 
+const maximumAuditedBodyBytes = 64 * 1024
+
+func readReasonAndRestoreBody(request *http.Request) string {
+	if request.Body == nil || !strings.Contains(request.Header.Get("Content-Type"), "json") || request.ContentLength > maximumAuditedBodyBytes {
+		return ""
+	}
+	body, err := io.ReadAll(io.LimitReader(request.Body, maximumAuditedBodyBytes+1))
+	request.Body = io.NopCloser(io.MultiReader(bytes.NewReader(body), request.Body))
+	if err != nil || len(body) > maximumAuditedBodyBytes {
+		return ""
+	}
+	var payload struct {
+		Reason string `json:"reason"`
+	}
+	if json.Unmarshal(body, &payload) != nil {
+		return ""
+	}
+	reason := strings.TrimSpace(payload.Reason)
+	if len(reason) > 1000 {
+		reason = reason[:1000]
+	}
+	return reason
+}
+
 func isMutatingMethod(method string) bool {
 	return method == http.MethodPost || method == http.MethodPut || method == http.MethodPatch || method == http.MethodDelete
 }
@@ -53,6 +81,7 @@ func (guard Guard) serveAndAuditUnrecordedMutation(writer http.ResponseWriter, r
 		next.ServeHTTP(writer, request.WithContext(ctx))
 		return
 	}
+	reason := readReasonAndRestoreBody(request)
 	trace := &requestAuditTrace{}
 	ctx = context.WithValue(ctx, requestAuditTraceKey{}, trace)
 	captured := &statusCapturingWriter{ResponseWriter: writer}
@@ -64,15 +93,16 @@ func (guard Guard) serveAndAuditUnrecordedMutation(writer http.ResponseWriter, r
 	if status >= http.StatusBadRequest || trace.recorded.Load() > 0 {
 		return
 	}
+	route := request.Method + " " + request.URL.Path
 	recorder, err := guard.Registry.AuditRecorder()
 	if err != nil {
+		slog.Default().ErrorContext(ctx, "catch-all staff audit skipped: no audit recorder registered", "route", route, "error", err)
 		return
 	}
-	route := request.Method + " " + request.URL.Path
 	after, _ := json.Marshal(map[string]int{"status": status})
 	event := identityports.AuditEvent{
 		ActorId: staff.Id, ActorName: staff.Name, ActorRole: staff.Role, Action: "admin.request", SubjectType: "admin_route", SubjectId: route, SubjectLabel: route,
-		StepUpVerified: staff.SteppedUp, After: after, IpAddress: ClientAddress(request), UserAgent: request.UserAgent(), RequestId: request.Header.Get("X-Request-Id"),
+		StepUpVerified: staff.SteppedUp, After: after, Reason: reason, IpAddress: ClientAddress(request), UserAgent: request.UserAgent(), RequestId: httpserver.RequestIdFromContext(request.Context()),
 	}
 	if err := recorder.RecordAuditEvent(context.WithoutCancel(ctx), event); err != nil {
 		slog.Default().WarnContext(ctx, "catch-all staff audit failed", "route", route, "error", err)

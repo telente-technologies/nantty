@@ -3,6 +3,8 @@ package viewerregion
 import (
 	"context"
 	"net/http"
+
+	"zudomart/platform/httpserver"
 )
 
 const (
@@ -26,7 +28,7 @@ func CaptureSignals(trustedHeader string) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
 			signals := Signals{ClientRegionHint: NormalizeCountryCode(request.Header.Get(ClientRegionHeader))}
-			if trustedHeader != "" {
+			if trustedHeader != "" && httpserver.IsFromTrustedProxy(request) {
 				signals.TrustedHeaderCountry = NormalizeCountryCode(request.Header.Get(trustedHeader))
 			}
 			next.ServeHTTP(writer, request.WithContext(context.WithValue(request.Context(), signalsKey{}, signals)))

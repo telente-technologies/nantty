@@ -33,11 +33,17 @@ func TestCaptureSignalsReadsTheTrustedHeaderAndTheHint(t *testing.T) {
 		seen = SignalsFromContext(request.Context())
 	}))
 	request := httptest.NewRequest("GET", "/", nil)
+	request.RemoteAddr = "10.0.4.7:41000"
 	request.Header.Set("CloudFront-Viewer-Country", "de")
 	request.Header.Set(ClientRegionHeader, "za")
 	handler.ServeHTTP(httptest.NewRecorder(), request)
 	if seen.TrustedHeaderCountry != "DE" || seen.ClientRegionHint != "ZA" {
 		t.Fatalf("unexpected %+v", seen)
+	}
+	request.RemoteAddr = "203.0.113.50:41000"
+	handler.ServeHTTP(httptest.NewRecorder(), request)
+	if seen.TrustedHeaderCountry != "" {
+		t.Fatalf("a CDN country header from an untrusted peer must be ignored, got %+v", seen)
 	}
 	if (SignalsFromContext(context.Background()) != Signals{}) {
 		t.Fatal("empty context has no signals")

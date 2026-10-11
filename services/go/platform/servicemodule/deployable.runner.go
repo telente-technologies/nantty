@@ -10,8 +10,6 @@ import (
 	"strings"
 	"syscall"
 
-	"golang.org/x/sync/errgroup"
-
 	"zudomart/platform/config"
 	"zudomart/platform/events"
 	"zudomart/platform/health"
@@ -32,6 +30,7 @@ func RunDeployableWithModulesUntilTerminationSignal(deployableName string, facto
 		environment.ReportProblem("APP_ENV must be set to development, staging, or production")
 	}
 	if appEnv == "production" {
+		environment.RejectPlaceholderSecretsInProcessEnvironment()
 		if strings.TrimSpace(environment.ReadStringOrDefault("AUTH_SESSION_DENYLIST_URL", "")) == "" {
 			environment.ReportProblem("AUTH_SESSION_DENYLIST_URL is required in production")
 		}
@@ -65,24 +64,24 @@ func RunDeployableWithModulesUntilTerminationSignal(deployableName string, facto
 		httpserver.AssignRequestIdToEveryRequest,
 		telemetry.TraceEveryHttpRequest(deployableName),
 		httpserver.RecoverFromPanicsAsInternalErrors(logger),
+		httpserver.LimitEveryRequestBody(int64(environment.ReadIntegerOrDefault("HTTP_MAX_REQUEST_BODY_BYTES", int(httpserver.DefaultMaximumRequestBodyBytes)))),
 		httpserver.ApplySecurityHeaders,
 		httpserver.ApplyCors,
 		httpserver.RateLimitEveryRequest(isProduction),
 		viewerregion.CaptureSignals(environment.ReadStringOrDefault("TRUSTED_COUNTRY_HEADER", viewerregion.DefaultTrustedCountryName)),
 		httpserver.LogEveryRequestWithDuration(logger),
 	)
-	group, groupContext := errgroup.WithContext(ctx)
+	workers := make([]func(context.Context) error, 0, len(modules))
 	for _, module := range modules {
-		group.Go(func() error { return module.RunBackgroundWorkersUntilContextDone(groupContext) })
+		workers = append(workers, module.RunBackgroundWorkersUntilContextDone)
 	}
-	group.Go(func() error {
-		return httpserver.RunHttpServerUntilContextDone(groupContext, httpserver.ServerOptions{
-			Address: address, Handler: handler, Logger: logger,
-			OnShutdown: append(closersForModules(modules), events.CloseSharedRabbitConnections, shutDownTracing),
-		})
+	return runWorkersAndServerThenShutDown(ctx, orderedRun{
+		Workers: workers,
+		Serve: func(serveContext context.Context) error {
+			return httpserver.RunHttpServerUntilContextDone(serveContext, httpserver.ServerOptions{Address: address, Handler: handler, Logger: logger})
+		},
+		Hooks: append(closersForModules(modules), events.CloseSharedRabbitConnections, shutDownTracing),
 	})
-	_ = stop
-	return group.Wait()
 }
 
 func createModulesInOrder(ctx context.Context, dependencies Dependencies, factories []Factory) ([]Module, error) {
