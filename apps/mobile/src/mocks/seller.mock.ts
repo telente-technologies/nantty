@@ -1,5 +1,5 @@
 import { ApiError } from "@/errors/api.error";
-import type { SellerApplication, SellerApplicationInput, SellerDashboardPeriod, StoreProduct, StoreProductInput } from "@/types/account.type";
+import type { SellerApplication, SellerApplicationInput, SellerDashboardPeriod, StoreProduct } from "@/types/account.type";
 import type { SellerDashboard } from "@/types";
 
 import { bankNameForCode } from "./banks.mock";
@@ -40,23 +40,7 @@ const catalogStoreProducts = (): StoreProduct[] =>
       published: true,
     }));
 
-let sellerEditedProducts = new Map<string, StoreProduct>();
-let deletedProductIds = new Set<string>();
-
-const listStoreProducts = (): StoreProduct[] => {
-  const fromCatalog = catalogStoreProducts().map((product) => sellerEditedProducts.get(product.id) ?? product);
-  const createdBySeller = [...sellerEditedProducts.values()].filter((product) => product.id.startsWith("sp_new_"));
-  return [...createdBySeller, ...fromCatalog].filter((product) => !deletedProductIds.has(product.id));
-};
-
-const toStoreProduct = (id: string, input: StoreProductInput): StoreProduct => ({
-  ...input,
-  id,
-  imageUrl: input.imageUrls[0] ?? null,
-  published: true,
-  hasVariants: input.sizes.length > 0 || input.colors.length > 0 || (input.variants?.length ?? 0) > 0,
-  variantGroups: input.variants ?? [],
-});
+const listStoreProducts = (): StoreProduct[] => catalogStoreProducts();
 
 const isCountedAsSale = (record: MockOrderRecord) => record.status !== "pending" && record.status !== "cancelled";
 
@@ -123,21 +107,6 @@ export const sellerMocks: MockRoute[] = [
   createMockRoute("GET", "/api/v1/seller/stores/mine", () => {
     const storeId = signedInStoreId();
     return storeId ? [{ storeId, storeName: findDirectoryStoreById(storeId).name, role: "owner", isCurrent: true }] : [];
-  }),
-  createMockRoute("GET", "/api/v1/seller/products", () => listStoreProducts()),
-  createMockRoute("GET", "/api/v1/seller/products/:productId", ({ params }) => listStoreProducts().find((p) => p.id === params.productId)),
-  createMockRoute("POST", "/api/v1/seller/products", ({ body }) => {
-    const product = toStoreProduct(`sp_new_${Date.now()}`, body as StoreProductInput);
-    sellerEditedProducts = new Map([[product.id, product], ...sellerEditedProducts]);
-    return product;
-  }),
-  createMockRoute("PATCH", "/api/v1/seller/products/:productId", ({ params, body }) => {
-    const product = toStoreProduct(params.productId!, body as StoreProductInput);
-    sellerEditedProducts.set(product.id, product);
-    return product;
-  }),
-  createMockRoute("DELETE", "/api/v1/seller/products/:productId", ({ params }) => {
-    deletedProductIds = new Set([...deletedProductIds, params.productId!]);
   }),
   createMockRoute("GET", "/api/v1/seller/orders", () => listSignedInStoreOrderRecords().map(buildOrderFromRecord)),
   createMockRoute("GET", "/api/v1/seller/orders/:orderId", ({ params }) => buildOrderFromRecord(findStoreOrderRecordOrThrow(params.orderId!))),

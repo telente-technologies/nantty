@@ -60,7 +60,7 @@ const findUploadSessionOrThrow = (uploadId: string) => {
   return session;
 };
 
-const currentMediaAsset = (mediaId: string): MediaAsset | null => {
+export const currentMediaAsset = (mediaId: string): MediaAsset | null => {
   const stored = storedMediaById.get(mediaId);
   if (!stored) return null;
   return Date.now() >= stored.readyAt ? { ...stored.asset, status: "ready" } : stored.asset;

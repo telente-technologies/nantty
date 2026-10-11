@@ -22,6 +22,9 @@ export const placesMocks: MockRoute[] = [
     const text = (query.get("q") ?? "").trim().toLowerCase();
     if (text.length < 2) return { places: [] };
     const places = MOCK_PLACES.filter((place) => `${place.name} ${place.area ?? ""}`.toLowerCase().includes(text)).slice(0, 8);
-    return { places };
+    const typedName = (query.get("q") ?? "").replace(/\s+/g, " ").trim().slice(0, 120);
+    const alreadyListed = places.some((place) => place.name.toLowerCase() === typedName.toLowerCase());
+    const freeText: PostLocationTag = { placeId: `text:${typedName.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`, name: typedName, area: null };
+    return { places: alreadyListed ? places : [...places, freeText] };
   }),
 ];

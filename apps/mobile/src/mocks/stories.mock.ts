@@ -50,14 +50,16 @@ export const storiesMocks: MockRoute[] = [
     if (input.text !== undefined || !input.encryption?.ciphertext) throw new ApiError(400, "Story replies are end-to-end encrypted.", "VALIDATION_FAILED");
   }),
   createMockRoute("POST", "/api/v1/stories", ({ body }) => {
-    const input = body as { mediaId: string; media: Story["media"]; soundId?: string; look?: string };
+    const input = body as { mediaId: string; soundId?: string; look?: string };
+    const media = input.mediaId ? findMockPostMediaById(input.mediaId) : null;
+    if (!media) throw new ApiError(422, "Your story upload could not be found", "MEDIA_NOT_FOUND");
     const soundState = input.soundId ? findMutableSoundState(input.soundId) : undefined;
     if (input.soundId && !soundState) throw new ApiError(422, "That sound isn't available", "SOUND_NOT_FOUND");
     const look = input.look && ["warm", "cool", "rose", "aqua", "sunset"].includes(input.look) ? input.look : null;
     return {
       id: `st_${Date.now()}`,
       author: summariseUser(getSignedInMockUser()),
-      media: findMockPostMediaById(input.mediaId) ?? input.media,
+      media,
       createdAt: new Date().toISOString(),
       seen: true,
       sound: soundState ? { id: input.soundId!, title: soundState.title } : null,
