@@ -31,7 +31,7 @@ Production replicates to a disaster-recovery (DR) region.
 | **VPC** (subnets, IGW, NAT, route tables, endpoints) | Public, private and data subnets. NAT is a single gateway, or one per AZ in prod. S3 gateway endpoint plus interface endpoints. | In Terraform (`network`) |
 | **VPC Flow Logs** | Logs rejected traffic | In Terraform |
 | **Application Load Balancer** (public + internal) | Public: `/ws*` → realtime, `/*` → gateway. Internal: host-based routing to each service. | In Terraform (`edge`) |
-| **AWS WAF v2** | ALB (regional): managed rule sets, rate rules for auth and global traffic, Paystack source IPs only on `/webhooks/paystack`, `/internal` blocked. The admin IP allow-list can also be an IP set. CloudFront (us-east-1): IP reputation, anonymous IP (count mode until tuned), common, known bad inputs and SQLi rule groups, plus a per-IP rate limit (`cdn_rate_limit_per_five_minutes`, default 10,000). Both log to KMS-encrypted `aws-waf-logs-*` groups with `authorization`, `cookie` and `x-step-up-token` redacted (the CloudFront ACL logs only blocked and counted requests). | In Terraform (`edge`, `cloudfront-waf`) |
+| **AWS WAF v2** | ALB (regional): managed rule sets, rate rules for auth and global traffic, `verif-hash` header required and a rate limit on `/webhooks/flutterwave`, `/internal` blocked. The admin IP allow-list can also be an IP set. CloudFront (us-east-1): IP reputation, anonymous IP (count mode until tuned), common, known bad inputs and SQLi rule groups, plus a per-IP rate limit (`cdn_rate_limit_per_five_minutes`, default 10,000). Both log to KMS-encrypted `aws-waf-logs-*` groups with `authorization`, `cookie` and `x-step-up-token` redacted (the CloudFront ACL logs only blocked and counted requests). | In Terraform (`edge`, `cloudfront-waf`) |
 | **Route 53** | Public zone, private zone, alias records, API health check | In Terraform (`dns`) |
 | **ACM** | TLS certificates: regional for the ALB, plus us-east-1 for CloudFront | In Terraform (`dns`) |
 | **CloudFront** | Public media CDN with Origin Access Control and the CloudFront WAF web ACL. Signed URLs (key group + public key) for private media. OAC decrypts KMS-encrypted media through a key-policy grant scoped to the distribution ARN. | In Terraform (`storage`) |
@@ -42,7 +42,7 @@ Production replicates to a disaster-recovery (DR) region.
 | Service | Used for | Status |
 | --- | --- | --- |
 | **Aurora PostgreSQL** (+ **RDS Proxy**) | One cluster where each service owns its own schema. RDS Proxy gives writer and reader endpoints. | In Terraform (`aurora`) |
-| **ElastiCache for Valkey** | Rate limits, sessions and the session denylist, caches, and Python feature state. TLS and AUTH are on. | In Terraform (`valkey`) |
+| **ElastiCache for Valkey** | Shared cluster: rate limits, sessions and the session denylist, caches. A separate small cluster (`zudomart-<env>-intelligence`, `intelligence_valkey`) holds the Python feature state, replay nonces and dedup keys, so they can't evict the shared cluster's TTL'd security keys. Its security group admits only the intelligence task. TLS and AUTH are on for both, and the URLs are in Secrets Manager. | In Terraform (`valkey`, `platform/intelligence_cache.tf`) |
 | **Amazon MQ for RabbitMQ** | Domain events between services (outbox → broker → queues). Admin user plus one user per service. | In Terraform (`messaging`) |
 | **S3** | Public media, a private KYC bucket (Object Lock, KMS, TLS only), logs, live recordings, live-safety frames and evidence, user data exports, model artefacts, encrypted chat blobs. Cross-region replication to DR. CORS for browser uploads from the dashboards. | In Terraform (`storage`). **Check that the live-recording, live-safety, export and ads-creative buckets exist, and that the dashboard origins have CORS.** |
 | **Amazon OpenSearch Service** | Full-text and people search (`ts-search`). Postgres full-text is the MVP fallback. | **Needed, not in Terraform.** Local: OpenSearch 3 in compose. |
@@ -61,7 +61,7 @@ Production replicates to a disaster-recovery (DR) region.
 | Service | Used for | Status |
 | --- | --- | --- |
 | **KMS** | One rotated key per purpose: data, secrets, logs, kyc, ecr, backup, sns. A media key (plus a DR-region one) encrypts the media buckets, and a us-east-1 key encrypts the CloudFront WAF logs. The kyc and media keys only let the task roles that use those buckets call them through S3. The logs bucket stays SSE-S3, because S3 access logs and ALB access logs can't be delivered to an SSE-KMS bucket. | In Terraform (`kms`, `storage`, `cloudfront-waf`) |
-| **Secrets Manager** | Every service secret: DB URLs, Paystack keys, internal tokens, signing keys, LiveKit, Apple and Google keys, and more. Each service reads only its own secrets. | In Terraform |
+| **Secrets Manager** | Every service secret: DB URLs, Flutterwave keys, internal tokens, signing keys, LiveKit, Apple and Google keys, and more. Each service reads only its own secrets. | In Terraform |
 | **IAM** (+ **GitHub OIDC**) | One task role per service (least privilege), execution roles, a CI push role (main branch only) and a deploy role (per environment) | In Terraform (`github-oidc`) |
 | **AWS Backup** | Aurora backups, with a cross-region copy | In Terraform (`aurora`) |
 | **GuardDuty, Security Hub, CloudTrail, AWS Config** | Threat detection, audit trail, compliance posture | **Needed, not in Terraform.** Turn on per account; Organizations-level is best. |
@@ -80,7 +80,7 @@ Production replicates to a disaster-recovery (DR) region.
 
 | Service | Used for | Status |
 | --- | --- | --- |
-| **CloudWatch Logs, Metrics, Alarms, Dashboard** | JSON logs from every service. Alarms for ALB, ECS, Aurora, Valkey, MQ, SES and ledger imbalance. | In Terraform (`observability`) |
+| **CloudWatch Logs, Metrics, Alarms, Dashboard** | JSON logs from every service. Alarms for ALB, ECS, Aurora, Valkey, MQ, SES, ledger imbalance, and Go background-worker restarts (a log metric filter). The ADOT sidecar scrapes each Go deployable's loopback-only `/metrics` (RED per route, goroutines, denylist failure counters) and exports it as EMF to `Zudomart/<env>`; traces go to X-Ray. ALB target groups check `/readyz` (intelligence: `/health/ready`), and container checks use liveness. | In Terraform (`observability`, `ecs-service`) |
 | **AWS X-Ray** (or Amazon Managed Grafana / Tempo) via an OpenTelemetry collector sidecar | Distributed tracing (`OTEL_EXPORTER_OTLP_ENDPOINT`) | **Needed, not in Terraform.** Local: OTel collector + Jaeger. |
 | **AWS Budgets / Cost Anomaly Detection** | Cost alerts | Recommended |
 
@@ -103,8 +103,7 @@ Documented in `docs/architecture` with a trigger; none is built or in Terraform.
 
 | Provider | Used for | What you need | Docs |
 | --- | --- | --- | --- |
-| **Flutterwave** (target provider, owner decision 2026-10-10) | Per-user payout subaccounts (wallets), card and transfer checkout, escrow locks, payouts, BVN and bank verification, webhooks | Live and test keys, the webhook secret, payout subaccounts enabled on the account | `docs/integrations/flutterwaveMigration.md` |
-| **Paystack** (current code, being replaced by Flutterwave) | Card and bank-transfer checkout, saved cards, subscriptions and trials, transfers and payouts, bank account verification, webhooks, split payments. A USD account is needed for UK/EU/US buyers. | Live secret and public keys, the webhook URL, plan codes, transfer setup, plus a USD (domiciliary) account | `docs/integrations/flutterwaveMigration.md` Appendix B |
+| **Flutterwave** (the only payment provider, owner 2026-10-11) | Per-user payout subaccounts (wallets), card and transfer checkout, escrow locks, payouts, BVN and bank verification, webhooks | Live and test keys, the webhook secret, payout subaccounts enabled on the account | `docs/integrations/flutterwaveMigration.md` |
 | **Apple App Store** (in-app purchase) | Creator subscriptions (70 slot products); coins and Premium later | Paid Apps agreement, the products, an In-App Purchase API key (`.p8`), the Server Notifications V2 URL | `docs/integrations/appStoreProducts.md` |
 | **Google Play Billing** | The same products on Android | Play payments profile, the products, a service account with the Android Publisher API, Pub/Sub real-time notifications with authenticated push | `docs/integrations/appStoreProducts.md` |
 | **Google Cloud Pub/Sub** | Delivers Google Play's real-time developer notifications to our webhook | A topic with an authenticated push subscription | same |
@@ -164,7 +163,7 @@ Documented in `docs/architecture` with a trigger; none is built or in Terraform.
 | ClickHouse (`analytics` profile) | Analytics store |
 | LiveKit server | LiveKit Cloud |
 | OTel collector + Jaeger | X-Ray or another tracing backend |
-| Fake Paystack (`127.0.0.1:18999`, Go test server) | Paystack |
+| Fake Flutterwave (`127.0.0.1:18998`, Go test server) | Flutterwave |
 
 ## 4. Before the first production deploy
 
@@ -178,7 +177,7 @@ Documented in `docs/architecture` with a trigger; none is built or in Terraform.
    - the missing S3 buckets and CORS rules
 2. **Request SES production access,** then move DMARC from `p=none` to `quarantine` and then `reject` once the reports are clean.
 3. **Fill every Secrets Manager placeholder:**
-   - Paystack live keys
+   - Flutterwave live keys (`FLUTTERWAVE_SECRET_KEY`, `FLUTTERWAVE_WEBHOOK_HASH`, `FLUTTERWAVE_MERCHANT_ID`)
    - Smile ID, LiveKit
    - Apple: IAP key and root certificates, Sign in with Apple
    - Google: Play service account, OAuth client ids
@@ -189,4 +188,4 @@ Documented in `docs/architecture` with a trigger; none is built or in Terraform.
    - `PAYMENT_ADS_RETURN_ORIGINS` and the CORS origins.
    - `ADMIN_IP_ALLOWLIST`.
 5. **Finish the store setup:** create the IAP products and notification URLs in App Store Connect and the Play Console (see `appStoreProducts.md`).
-6. **Get Paystack ready for production:** go live with the business account, add the USD account, register the webhook URL, and allow-list Paystack's IPs in WAF (already in Terraform).
+6. **Get Flutterwave ready for production:** go live with the business account, enable payout subaccounts, BVN consent, tokenized charges and transfers via API, register `https://api.zudomart.com/webhooks/flutterwave` (v3 webhooks with the PSA funding hook), whitelist the NAT IPs (`terraform output nat_public_ips`), and get Flutterwave's written answers (`docs/integrations/flutterwaveMigration.md` §8).
