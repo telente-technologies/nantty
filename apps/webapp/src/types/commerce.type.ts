@@ -21,11 +21,27 @@ export interface SearchResults {
   readonly brands?: readonly import("./brand.type").BrandSummary[];
 }
 
+export interface ProductReviewReply {
+  readonly body: string;
+  readonly authorName: string;
+  readonly createdAt: ISODate;
+}
+
+export interface ReviewAuthor {
+  readonly id: ID;
+  readonly name: string;
+  readonly username: string;
+  readonly avatarUrl: string | null;
+}
+
 export interface ProductReview {
   readonly id: ID;
-  readonly author: UserSummary;
+  readonly author: ReviewAuthor;
   readonly rating: number;
   readonly text: string;
+  readonly title?: string | null;
+  readonly isVerifiedPurchase?: boolean;
+  readonly reply?: ProductReviewReply | null;
   readonly createdAt: ISODate;
 }
 
@@ -33,6 +49,21 @@ export interface ProductReviewSummary {
   readonly average: number;
   readonly count: number;
   readonly reviews: readonly ProductReview[];
+  readonly nextCursor?: string | null;
+}
+
+export type RatingStar = "1" | "2" | "3" | "4" | "5";
+
+export interface ProductRatingSummary {
+  readonly average: number;
+  readonly count: number;
+  readonly distribution: Readonly<Record<RatingStar, number>>;
+}
+
+export interface SubmitReviewInput {
+  readonly rating: number;
+  readonly text: string;
+  readonly title: string | null;
 }
 
 export interface StoreDetail extends StoreSummary {
@@ -49,15 +80,24 @@ export interface StoreDetail extends StoreSummary {
   readonly posts: readonly Post[];
 }
 
-export type PaymentProvider = "paystack";
+export type PaymentProvider = "paystack" | "flutterwave";
 
 export type PaymentChannel = "card" | "bank" | "bank_transfer" | "ussd";
+
+export interface PaymentIntentSummary {
+  readonly reference: string;
+  readonly provider: PaymentProvider | string;
+  readonly status: string;
+  readonly amount: Money;
+}
 
 export interface PaymentInitialization {
   readonly orderId: ID;
   readonly reference: string;
+  readonly checkoutUrl?: string | null;
   readonly authorizationUrl: string;
   readonly accessCode?: string;
+  readonly payment?: PaymentIntentSummary;
 }
 
 export interface CheckoutResult {

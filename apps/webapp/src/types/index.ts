@@ -16,3 +16,4 @@ export * from "./postAudience.type";
 export * from "./accountHealth.type";
 export * from "./taggedUser.type";
 export * from "./mediaDownload.type";
+export * from "./chatSafety.type";

@@ -1,4 +1,4 @@
-export type PolicyDocumentKey = "terms" | "privacy" | "cookies" | "community-guidelines" | "seller-terms" | "creator-terms" | "ads-policy" | "refund-escrow-policy";
+export type PolicyDocumentKey = "terms" | "privacy" | "cookies" | "community-guidelines" | "seller-terms" | "creator-terms" | "ads-policy" | "refund-escrow-policy" | "copyright-policy" | "data-rights";
 
 export interface PolicyVersionSummary {
   readonly policyVersionId: string;

@@ -1,6 +1,7 @@
-import type { ChatLinkPreview } from "@zudomart/chat-crypto";
+import type { AttachmentPointer, ChatControl, ChatLinkPreview, ChatLocation, ChatPoll, LiveLocationState, PollOptionTally } from "@zudomart/chat-crypto";
 
 import type { AdAppInstall, AdCard, AdClickLinks, AdCreativeType, AdDestination } from "./adCreative.type";
+import type { InboxFolder, SharedContentReference } from "./chatSafety.type";
 import type { Money } from "./money.type";
 
 export type ID = string;
@@ -29,6 +30,10 @@ export interface UserSummary {
   readonly verification?: Verification | null;
 }
 
+export type FollowState = "none" | "requested" | "accepted" | "rejected" | "blocked";
+
+export type PostNotificationLevel = "off" | "posts" | "posts_and_lives";
+
 export interface User extends UserSummary {
   readonly bio: string;
   readonly bannerUrl: string | null;
@@ -40,7 +45,11 @@ export interface User extends UserSummary {
   readonly posts: number;
   readonly joinedAt: ISODate;
   readonly isFollowing?: boolean;
+  readonly followState?: FollowState;
+  readonly viewerPostNotifications?: PostNotificationLevel;
   readonly isSeller?: boolean;
+  readonly isPremium?: boolean;
+  readonly isPrivate?: boolean;
   readonly storeId?: ID | null;
   readonly birthdayToday?: boolean;
   readonly anniversaryToday?: boolean;
@@ -169,8 +178,18 @@ export interface PostAnalyticsDaily {
   readonly impressions: number;
 }
 
+export interface PostVideoAnalytics {
+  readonly views: number;
+  readonly watchTimeSeconds: number;
+  readonly averageWatchSeconds?: number;
+  readonly completedViews?: number;
+  readonly completionRate?: number;
+}
+
 export interface PostAnalytics {
   readonly postId: ID;
+  readonly kind?: "post" | "clip" | "story";
+  readonly hasLink?: boolean;
   readonly author: UserSummary;
   readonly postedAt: ISODate;
   readonly impressions: number;
@@ -186,7 +205,7 @@ export interface PostAnalytics {
   readonly newFollows: number;
   readonly engagements: number;
   readonly engagementRate: number;
-  readonly video: { readonly views: number; readonly watchTimeSeconds: number } | null;
+  readonly video: PostVideoAnalytics | null;
   readonly audience: readonly { readonly label: string; readonly share: number }[];
   readonly daily: readonly PostAnalyticsDaily[];
 }
@@ -231,12 +250,19 @@ export interface Conversation {
   readonly isFriend: boolean;
   readonly kind?: "direct" | "group" | "channel" | "business";
   readonly title?: string | null;
+  readonly description?: string | null;
+  readonly encryptedAttributes?: string | null;
   readonly photoUrl?: string | null;
+  readonly photoMediaId?: ID | null;
   readonly memberCount?: number;
+  readonly onlyAdminsCanMentionAll?: boolean;
+  readonly mutedUntil?: string | null;
   readonly subscriberCount?: number;
   readonly myRole?: "owner" | "admin" | "member" | "subscriber";
   readonly disappearingMessagesSeconds?: number | null;
-  readonly store?: { readonly id: ID; readonly name: string } | null;
+  readonly store?: { readonly id: ID; readonly name: string; readonly avatarUrl?: string | null } | null;
+  readonly inboxFolder?: InboxFolder;
+  readonly spamReason?: string | null;
 }
 
 export interface MessageReactionSummary {
@@ -258,14 +284,25 @@ export interface Message {
   readonly senderId: ID;
   readonly text: string;
   readonly createdAt: ISODate;
-  readonly kind?: "text" | "voice" | "image" | "video" | "system" | "shared" | "location" | "liveLocation" | "document" | "poll";
+  readonly kind?: "text" | "voice" | "image" | "video" | "system" | "shared" | "location" | "liveLocation" | "document" | "poll" | "control";
   readonly sender?: UserSummary;
   readonly media?: MessageAttachedMedia | null;
   readonly reactions?: readonly MessageReactionSummary[];
   readonly expiresAt?: ISODate | null;
   readonly encryption?: MessageEncryptionEnvelope | null;
   readonly linkPreview?: ChatLinkPreview | null;
+  readonly sharedReference?: SharedContentReference | null;
+  readonly attachment?: AttachmentPointer | null;
+  readonly document?: { readonly url: string | null } | null;
+  readonly location?: ChatLocation | null;
+  readonly liveLocation?: LiveLocationState | null;
+  readonly poll?: ChatPoll | null;
+  readonly pollTally?: readonly PollOptionTally[];
+  readonly control?: ChatControl | null;
   readonly decryptionNotice?: string | null;
+  readonly clientMessageId?: string | null;
+  readonly deliveryState?: "pending" | "failed";
+  readonly pendingLabel?: string | null;
 }
 
 export interface MessageEncryptionEnvelope {

@@ -1,4 +1,4 @@
-import type { ID, ISODate, UserSummary } from "./models.type";
+import type { Comment, ID, ISODate } from "./models.type";
 import type { Money } from "./money.type";
 
 export type SaveTargetType = "post" | "video" | "clip" | "product" | "comment";
@@ -12,10 +12,10 @@ export interface SaveCollection {
 }
 
 export interface SavedItemPreview {
-  readonly title: string;
+  readonly title: string | null;
   readonly thumbnailUrl: string | null;
   readonly href: string;
-  readonly author: UserSummary | null;
+  readonly author: string | null;
   readonly price: Money | null;
   readonly durationSeconds: number | null;
 }
@@ -27,6 +27,8 @@ export interface SavedItem {
   readonly savedAt: ISODate;
   readonly collectionId: ID | null;
   readonly preview: SavedItemPreview;
+  readonly comment?: Comment;
+  readonly postId?: ID;
 }
 
 export interface SaveTargetRequest {

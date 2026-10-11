@@ -128,6 +128,14 @@ export interface CreatorSubscriptionPlanInput {
   readonly benefits: readonly string[];
 }
 
+export type CreatorBillingChannel = "web" | "ios" | "android";
+
+export interface CreatorSubscriptionPriceTier {
+  readonly tier: string;
+  readonly prices: Readonly<Record<CreatorBillingChannel, Money>>;
+  readonly default: boolean;
+}
+
 export interface CreatorSubscriber {
   readonly id: ID;
   readonly user: import("./models.type").UserSummary;
@@ -143,10 +151,17 @@ export interface CreatorSubscriptionCheckout {
   readonly authorizationUrl: string;
 }
 
+export type CreatorSubscriptionStatus = "pending" | "active" | "past_due" | "cancelled" | "expired" | "failed";
+
 export interface CreatorSubscriptionState {
   readonly subscriptionId: ID;
-  readonly creatorId?: ID;
-  readonly status: "pending" | "active" | "cancelled" | "failed";
+  readonly creatorId: ID;
   readonly planId: ID;
+  readonly status: CreatorSubscriptionStatus;
+  readonly price: Money;
+  readonly interval: "month" | "year";
+  readonly currentPeriodEnd: ISODate | null;
   readonly renewsAt: ISODate | null;
+  readonly billingChannel?: "web" | "apple_iap" | "google_play";
+  readonly storeProductId?: string | null;
 }

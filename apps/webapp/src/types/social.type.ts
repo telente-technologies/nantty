@@ -1,5 +1,7 @@
 import type { Comment, Conversation, ID, LiveSession, Media, Message, MessageReactionSummary, Post, UserSummary } from "./models.type";
 import type { LiveSafetyState } from "./liveSafety.type";
+import type { MentionEntity } from "./mentions.type";
+import type { ReplyPolicy, SensitiveLabel } from "./postAudience.type";
 
 export type ConversationFilter = "all" | "direct";
 export type ClipsFeedTab = "forYou" | "following";
@@ -60,11 +62,49 @@ export interface SuggestedLive {
   readonly coverUrl: string | null;
 }
 
+export type ClipTransition = "none" | "crossfade" | "slide";
+
+export interface ClipMediaInput {
+  readonly mediaId: ID;
+  readonly type: "image" | "video";
+  readonly trim?: { readonly startMs: number; readonly endMs: number };
+}
+
+export interface ClipSlideshowInput {
+  readonly durationsMs: readonly number[];
+  readonly transition: ClipTransition;
+}
+
+export interface PostLocationTag {
+  readonly placeId: string;
+  readonly name: string;
+  readonly area?: string | null;
+}
+
 export interface NewPostInput {
   readonly text: string;
   readonly mediaIds: readonly ID[];
   readonly audience: PostAudience;
+  readonly kind?: "post" | "clip";
+  readonly media?: readonly ClipMediaInput[];
+  readonly slideshow?: ClipSlideshowInput;
+  readonly look?: string;
+  readonly location?: PostLocationTag;
   readonly soundId?: ID;
+  readonly mentions?: readonly MentionEntity[];
+  readonly replyPolicy?: ReplyPolicy;
+  readonly visibility?: "public" | "subscribers";
+  readonly sensitiveLabels?: readonly SensitiveLabel[];
+  readonly isAiGenerated?: boolean;
+  readonly taggedUserIds?: readonly ID[];
+  readonly productIds?: readonly ID[];
+  readonly quotedPostId?: ID | null;
+}
+
+export interface TagCandidate {
+  readonly user: UserSummary;
+  readonly canTag: boolean;
+  readonly unavailableReason: string | null;
 }
 
 export type MediaUploadPurpose =
@@ -267,7 +307,7 @@ export interface GroupConversationDetails {
 }
 
 export interface NewGroupConversationInput {
-  readonly name: string;
+  readonly encryptedAttributes: string;
   readonly photoMediaId?: ID;
   readonly memberIds: readonly ID[];
 }
@@ -280,8 +320,10 @@ export interface NewChannelInput {
 
 export interface ConversationSettingsUpdate {
   readonly name?: string;
-  readonly photoMediaId?: ID;
+  readonly encryptedAttributes?: string;
+  readonly photoMediaId?: ID | null;
   readonly disappearingMessagesSeconds?: number | null;
+  readonly onlyAdminsCanMentionAll?: boolean;
 }
 
 export interface OutgoingVoiceNote {

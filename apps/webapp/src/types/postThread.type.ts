@@ -76,3 +76,11 @@ export interface ThreadAdDecision {
 export type ThreadRow =
   | { readonly kind: "reply"; readonly key: string; readonly reply: ThreadReply }
   | { readonly kind: "sponsored"; readonly key: string; readonly ad: ThreadDecidedAd };
+
+export interface CommentThreadPage {
+  readonly data: readonly ThreadReply[];
+  readonly nextCursor: string | null;
+  readonly focus: Comment;
+  readonly ancestors: readonly Comment[];
+  readonly maximumVisibleDepth: number;
+}

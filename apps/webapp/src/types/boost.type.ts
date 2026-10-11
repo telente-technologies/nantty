@@ -55,7 +55,7 @@ export interface BoostResults {
 export interface Boost {
   readonly id: ID;
   readonly postId: ID;
-  readonly status: "pending_payment" | "in_review" | "active" | "completed" | "rejected";
+  readonly status: "pending_payment" | "in_review" | "active" | "completed" | "rejected" | "cancelled";
   readonly goal: BoostGoal;
   readonly totalBudget: Money;
   readonly spent: Money;
