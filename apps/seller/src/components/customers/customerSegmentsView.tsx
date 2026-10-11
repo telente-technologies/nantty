@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { useState } from "react";
 
+import { requestConfirmation } from "@zudomart/web-kit";
+
 import { PlanGate } from "@/components/billing/planGate";
 import { CustomerSegmentEditorDialog } from "@/components/customers/customerSegmentEditorDialog";
 import { describeSegmentRuleInWords } from "@/components/customers/customerSegmentRuleEditor";
@@ -63,7 +65,7 @@ function CustomerSegmentsList() {
   const canEdit = can("customers:manage");
 
   async function deleteSegment(segment: CustomerSegment) {
-    if (!window.confirm(`Delete the segment “${segment.name}”? Customers are not affected.`)) return;
+    if (!(await requestConfirmation({ title: `Delete “${segment.name}”?`, description: "Customers in it are not affected.", confirmLabel: "Delete segment", tone: "danger", intent: "delete" }))) return;
     try {
       await sendSellerApiRequest(`/seller/customers/segments/${encodeURIComponent(segment.id)}`, { method: "DELETE" });
       showToast(`Deleted ${segment.name}.`);

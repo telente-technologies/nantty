@@ -54,7 +54,7 @@ export function DeliveryAreaFormDialog({ area, onClose, onSaved }: { readonly ar
   }
 
   return (
-    <ModalDialog
+    <ModalDialog intent="location"
       isOpen
       onClose={onClose}
       title={area ? `Edit ${area.name}` : "Add a delivery area"}

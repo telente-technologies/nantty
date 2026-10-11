@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 
+import { requestConfirmation } from "@zudomart/web-kit";
+
 import { DeliveryAreaFormDialog } from "@/components/delivery/deliveryAreaFormDialog";
 import { useSellerSession } from "@/components/session/sellerSessionProvider";
 import { Button } from "@/components/ui/button";
@@ -28,7 +30,7 @@ export function DeliveryAreasManager() {
   const areas = areasQuery.data?.data ?? [];
 
   async function removeDeliveryArea(area: DeliveryArea) {
-    if (!window.confirm(`Remove ${area.name}? Customers there will no longer see a delivery option.`)) return;
+    if (!(await requestConfirmation({ title: `Remove ${area.name}?`, description: "Customers there will no longer see a delivery option.", confirmLabel: "Remove area", tone: "danger", intent: "remove" }))) return;
     setRemovingAreaId(area.id);
     try {
       await sendSellerApiRequest(`/seller/delivery/areas/${encodeURIComponent(area.id)}`, { method: "DELETE" });

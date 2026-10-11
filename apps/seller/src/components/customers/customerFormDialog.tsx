@@ -45,7 +45,7 @@ export function CustomerFormDialog({ isOpen, customer, onClose, onSaved }: { rea
   }
 
   return (
-    <ModalDialog
+    <ModalDialog intent="addMember"
       isOpen={isOpen}
       onClose={onClose}
       title={customer ? `Edit ${customer.name}` : "Add a customer"}

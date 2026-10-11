@@ -3,6 +3,8 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
+import { requestConfirmation } from "@zudomart/web-kit";
+
 import { ProductAttributesSection } from "@/components/catalog/productAttributesSection";
 import { ProductBasicsSection } from "@/components/catalog/productBasicsSection";
 import { ProductBrandSection } from "@/components/catalog/productBrandSection";
@@ -24,6 +26,7 @@ import { useToast } from "@/components/ui/toastProvider";
 import { useSellerQuery } from "@/hooks/useSellerQuery.hook";
 import { useStoreContext } from "@/hooks/useStoreSettings.hook";
 import { readErrorMessageForDisplay, SellerApiRequestError, sendSellerApiRequest } from "@/services/clientApi.service";
+import { presentPaymentProblem } from "@/utils/paymentProblem.util";
 import type { Product } from "@/types/catalog.type";
 import { convertIssuesToFieldErrorMap, type ValidationIssue } from "@/utils/formValidation.util";
 import { validateProductUpsertRequest } from "@/utils/productValidation.util";
@@ -67,6 +70,7 @@ export function ProductEditorView({ productId }: { readonly productId: string | 
       updateDraft({ publishedOnline: updatedProduct.publishedOnline });
       showToast(publishedOnline ? "Published to the marketplace." : "Removed from the marketplace.");
     } catch (error) {
+      if (await presentPaymentProblem(error)) return;
       showToast(readErrorMessageForDisplay(error), "error");
     } finally {
       setIsPublishing(false);
@@ -109,6 +113,7 @@ export function ProductEditorView({ productId }: { readonly productId: string | 
       else setDraft(convertProductToDraft(savedProduct));
     } catch (error) {
       if (error instanceof SellerApiRequestError && error.issues && error.issues.length > 0) setIssues(error.issues);
+      if (await presentPaymentProblem(error)) return;
       showToast(readErrorMessageForDisplay(error), "error");
     } finally {
       saveInFlight.current = false;
@@ -117,7 +122,7 @@ export function ProductEditorView({ productId }: { readonly productId: string | 
   }
 
   async function archiveProduct() {
-    if (!productId || !window.confirm("Archive this product? It is removed from the marketplace, and you can restore it by setting it back to active.")) return;
+    if (!productId || !(await requestConfirmation({ title: "Archive this product?", description: "It is removed from the marketplace. You can restore it by setting it back to active.", confirmLabel: "Archive", intent: "archive" }))) return;
     try {
       await sendSellerApiRequest(`/seller/products/${encodeURIComponent(productId)}`, { method: "DELETE" });
       showToast("Product archived.");

@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 
+import { requestConfirmation } from "@zudomart/web-kit";
+
 import type { ShippingRuleWithZone } from "@/components/delivery/shipping/shippingRuleFormDialog";
 import { Button } from "@/components/ui/button";
 import { DataTable, type DataTableColumn } from "@/components/ui/dataTable";
@@ -37,8 +39,8 @@ export function ShippingRulesTable({ profile, canEdit, onEdit, onChanged }: { re
     }
   }
 
-  function removeRule({ rule, zone }: ShippingRuleWithZone) {
-    if (!window.confirm(`Remove ${zone.name}? Customers there will use the next most specific rule, or cannot check out.`)) return;
+  async function removeRule({ rule, zone }: ShippingRuleWithZone) {
+    if (!(await requestConfirmation({ title: `Remove ${zone.name}?`, description: "Customers there will use the next most specific rule, or can't check out.", confirmLabel: "Remove rule", tone: "danger", intent: "remove" }))) return;
     void runRuleRequest(rule.id, "DELETE", undefined, `Removed ${zone.name}.`);
   }
 

@@ -50,7 +50,7 @@ export function ShippingRuleFormDialog({ existing, currency, onClose, onSaved }:
   }
 
   return (
-    <ModalDialog
+    <ModalDialog intent="delivery"
       isOpen
       onClose={onClose}
       width="large"

@@ -44,7 +44,7 @@ export function DeliveryShipmentDialog({ shipment, onClose, onShipmentChanged }:
   }
 
   return (
-    <ModalDialog isOpen onClose={onClose} width="medium" title={`Delivery for ${shipment.orderNumber}`} description={`${shipment.buyerName} · ${shipment.city}, ${shipment.state}`} footer={<Button onClick={onClose}>Close</Button>}>
+    <ModalDialog intent="delivery" isOpen onClose={onClose} width="medium" title={`Delivery for ${shipment.orderNumber}`} description={`${shipment.buyerName} · ${shipment.city}, ${shipment.state}`} footer={<Button onClick={onClose}>Close</Button>}>
       <div className={styles.stack}>
         <KeyValueList
           items={[

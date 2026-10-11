@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { useState } from "react";
 
+import { requestConfirmation } from "@zudomart/web-kit";
+
 import { CategoryFormDialog } from "@/components/catalog/categoryFormDialog";
 import { ProductsSectionTabs } from "@/components/catalog/productsSectionTabs";
 import { Button } from "@/components/ui/button";
@@ -34,7 +36,7 @@ export function ProductCategoriesView() {
 
   async function deleteCategory(category: ProductCategory) {
     const productCount = category.productCount ?? 0;
-    if (!window.confirm(productCount > 0 ? `Delete ${category.name}? Its ${productCount} product(s) stay in your store with no category.` : `Delete ${category.name}?`)) return;
+    if (!(await requestConfirmation({ title: `Delete ${category.name}?`, description: productCount > 0 ? `Its ${productCount} product(s) stay in your store with no category.` : undefined, confirmLabel: "Delete category", tone: "danger", intent: "delete" }))) return;
     setDeletingCategoryId(category.id);
     try {
       await sendSellerApiRequest(`/seller/categories/${encodeURIComponent(category.id)}`, { method: "DELETE" });

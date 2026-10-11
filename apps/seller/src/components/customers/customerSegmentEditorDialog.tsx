@@ -44,7 +44,7 @@ export function CustomerSegmentEditorDialog({ segment, onClose, onSaved }: { rea
   }
 
   return (
-    <ModalDialog
+    <ModalDialog intent="audience"
       isOpen
       onClose={onClose}
       width="large"
