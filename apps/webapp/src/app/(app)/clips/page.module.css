@@ -116,7 +116,7 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-2);
-  padding: var(--space-8) var(--space-4) var(--space-3);
+  padding: var(--space-8) var(--space-4) calc(var(--space-3) + 14px);
   padding-right: 72px;
   background: linear-gradient(to top, var(--color-overlay), transparent);
   color: var(--color-on-brand);
@@ -243,6 +243,44 @@
   cursor: pointer;
 }
 
+.fullscreenButton {
+  position: absolute;
+  top: calc(var(--space-3) + 48px);
+  right: var(--space-3);
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border: 0;
+  border-radius: 50%;
+  background: var(--color-overlay);
+  color: var(--color-on-brand);
+  cursor: pointer;
+}
+
+.fullscreenButton:hover {
+  background: var(--color-brand);
+}
+
+.clipSeekBar {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+}
+
+.stageFullscreen {
+  aspect-ratio: auto;
+  width: 100vw;
+  height: 100vh;
+  border-radius: 0;
+  background: #000;
+}
+
+.stageFullscreen .video {
+  object-fit: contain;
+}
+
 .muteButton:hover {
   background: var(--color-brand);
   color: var(--color-on-brand);
@@ -286,11 +324,6 @@
 }
 
 .followPill:hover {
-  background: var(--color-on-brand);
-  color: var(--ink-strong);
-}
-
-.followPillActive {
   background: var(--color-on-brand);
   color: var(--ink-strong);
 }

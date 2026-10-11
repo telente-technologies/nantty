@@ -14,28 +14,25 @@ import { EmptyState, ErrorState, Skeleton } from "@/components/ui/feedback";
 import { RetryButton } from "@/components/ui/controls";
 import { MapPinIcon } from "@/components/ui/icons";
 import { cartsService } from "@/services/carts.service";
-import { createIdempotencyKey, readErrorMessageForDisplay, sendRequestToWebappServer } from "@/services/clientApi.service";
+import { createIdempotencyKey, readErrorMessageForDisplay, sendRequestToWebappServer, WebappRequestError } from "@/services/clientApi.service";
+import { CountryRequiredPicker, countryRequiredCode } from "@/components/commerce/countryRequiredPicker";
 import { ordersService } from "@/services/orders.service";
 import { emailVerificationService } from "@/services/webActions.service";
 import { useMutation, useQuery } from "@tanstack/react-query";
+import { CheckoutPaymentChoice, canPayFromWallet, type CheckoutPaymentSource } from "@/components/commerce/checkoutPaymentChoice";
+import { providerWalletQueryKeys, providerWalletService } from "@/services/providerWallet.service";
 import { formatMoneyForDisplay } from "@/utils/formatMoney.util";
 import { paymentsService } from "@/services/payments.service";
-import type { CheckoutResult, PaymentChannel, PaymentInitialization } from "@/types/commerce.type";
+import type { CheckoutResult } from "@/types/commerce.type";
 import type { PaymentMode } from "@/types";
 import { groupCartItemsByStore } from "@/utils/groupCartItemsByStore.util";
 import { isDirectPaymentStore, toPaymentModeChoices } from "@/utils/paymentMode.util";
-import { openPaystackCheckout } from "@/utils/paystackCheckout.util";
-import { forgetPendingValue, paymentReturnUrl, pendingSubscriptionStorageKey } from "@/utils/paymentReturn.util";
+import { openHostedCheckout } from "@/utils/hostedCheckout.util";
+import { forgetPendingValue, pendingSubscriptionStorageKey, rememberPendingOrderPayment } from "@/utils/paymentReturn.util";
+import { presentPaymentProblem } from "@/utils/paymentProblem.util";
 
 import styles from "./page.module.css";
 import { AppIcon } from "@/components/ui/appIcon";
-
-const channelLabels: Record<PaymentChannel, { readonly name: string; readonly note: string }> = {
-  card: { name: "Card", note: "Debit or credit card" },
-  bank: { name: "Bank account", note: "Pay directly from your bank account" },
-  bank_transfer: { name: "Bank transfer", note: "Pay from your bank app" },
-  ussd: { name: "USSD", note: "Pay with a code from your phone" },
-};
 
 export default function CheckoutPage() {
   const router = useRouter();
@@ -45,7 +42,11 @@ export default function CheckoutPage() {
 
   const [chosenAddressId, setChosenAddressId] = useState<string | null>(null);
   const channelsQuery = useQuery({ queryKey: ["payments", "channels"], queryFn: paymentsService.fetchPaymentChannels, retry: false });
+  const walletQuery = useQuery({ queryKey: providerWalletQueryKeys.wallet, queryFn: providerWalletService.fetchMyWallet, retry: false });
+  const verificationQuery = useQuery({ queryKey: providerWalletQueryKeys.verification, queryFn: providerWalletService.fetchMyVerificationLevel, retry: false });
+  const [paymentSource, setPaymentSource] = useState<CheckoutPaymentSource>("hosted");
   const [error, setError] = useState<string | null>(null);
+  const [isCountryNeeded, setCountryNeeded] = useState(false);
   const checkoutKey = useRef(createIdempotencyKey("checkout"));
   const placeOrderInFlight = useRef(false);
   const [paymentModes, setPaymentModes] = useState<Record<string, PaymentMode>>({});
@@ -61,6 +62,9 @@ export default function CheckoutPage() {
   const quote = quoteQuery.data ?? null;
   const hasShippableGroup = quote?.groups.some((group) => group.status === "calculated") ?? false;
 
+  const orderTotal = quote ? quote.total : (cartQuery.data?.total ?? null);
+  const walletChosen = paymentSource === "wallet" && canPayFromWallet(walletQuery.data, orderTotal);
+  const isNigeria = (verificationQuery.data?.country ?? "NG") === "NG";
   const placeOrder = useMutation({
     mutationFn: async () => {
       if (!addressId) throw new Error("Choose a shipping address first.");
@@ -74,23 +78,34 @@ export default function CheckoutPage() {
         body: { addressId, paymentModes: toPaymentModeChoices(directChoices) },
         idempotencyKey: checkoutKey.current,
       });
-      const payment = await sendRequestToWebappServer<PaymentInitialization>("/api/v1/payments/initialize", {
-        method: "POST",
-        body: { orderId: result.payableOrderId, provider: "paystack", returnTo: paymentReturnUrl() },
-        idempotencyKey: `${checkoutKey.current}-pay`,
-      });
-      return payment;
-    },
-    onSuccess: async (payment) => {
+      const payment = await paymentsService.initializeOrderPayment(result.payableOrderId, `${checkoutKey.current}-pay`);
       forgetPendingValue(pendingSubscriptionStorageKey);
-      sessionStorage.setItem(
-        "zd_pending_payment",
-        JSON.stringify({ orderId: payment.orderId, authorizationUrl: payment.authorizationUrl, reference: payment.reference }),
-      );
-      const outcome = await openPaystackCheckout(payment);
-      if (outcome !== "redirected") router.push(`/orders/${payment.orderId}`);
+      rememberPendingOrderPayment({ orderId: payment.orderId, reference: payment.reference, checkoutUrl: payment.checkoutUrl || payment.authorizationUrl });
+      if (walletChosen) await providerWalletService.payFromWallet(payment.reference, `${checkoutKey.current}-wallet`);
+      return { payment, paidFromWallet: walletChosen };
     },
-    onError: (caught) => setError(readErrorMessageForDisplay(caught)),
+    onSuccess: ({ payment, paidFromWallet }) => {
+      if (paidFromWallet) {
+        router.push("/pay/return");
+        return;
+      }
+      if (openHostedCheckout(payment) === "blocked") {
+        setError("We couldn't open the secure payment page. Your order is saved; open it from your orders to pay.");
+        router.push(`/orders/${encodeURIComponent(payment.orderId)}`);
+      }
+    },
+    onError: async (caught) => {
+      if (caught instanceof WebappRequestError && caught.code === countryRequiredCode) {
+        setError(null);
+        setCountryNeeded(true);
+        return;
+      }
+      if (await presentPaymentProblem(caught, (href) => router.push(href))) {
+        setError(null);
+        return;
+      }
+      setError(readErrorMessageForDisplay(caught));
+    },
   });
 
   if (cartQuery.isLoading || addressesQuery.isLoading) {
@@ -119,6 +134,15 @@ export default function CheckoutPage() {
         <p className={styles.error} role="alert">
           {error}
         </p>
+      ) : null}
+      {isCountryNeeded ? (
+        <CountryRequiredPicker
+          onSaved={() => {
+            setCountryNeeded(false);
+            checkoutKey.current = createIdempotencyKey("checkout");
+            placeOrder.mutate();
+          }}
+        />
       ) : null}
 
       <div className={styles.layout}>
@@ -168,19 +192,13 @@ export default function CheckoutPage() {
 
           <section className={styles.section}>
             <h2 className={styles.sectionTitle}>Payment method</h2>
-            <ul className={styles.optionList}>
-              {(channelsQuery.data?.channels ?? []).filter((channel) => channel in channelLabels).map((channel) => (
-                <li key={channel}>
-                  <div className={styles.optionRow}>
-                    <span className={styles.optionText}>
-                      <span className={styles.optionName}>{channelLabels[channel].name}</span>
-                      <span className={styles.optionMeta}>{channelLabels[channel].note}</span>
-                    </span>
-                  </div>
-                </li>
-              ))}
-            </ul>
-            <p className={styles.optionMeta}>You'll choose how to pay in the secure payment window. We never see your card details.</p>
+            <CheckoutPaymentChoice
+              channels={channelsQuery.data?.channels ?? []}
+              wallet={walletQuery.data}
+              total={orderTotal}
+              source={walletChosen ? "wallet" : "hosted"}
+              onChoose={setPaymentSource}
+            />
           </section>
 
           <section className={styles.section}>
@@ -228,15 +246,19 @@ export default function CheckoutPage() {
               Verify your email to continue. <Link href="/verify-email?next=/checkout">Verify email</Link>
             </p>
           ) : (
-            <Button size="lg" fullWidth busy={placeOrder.isPending} disabled={!addressId || quoteQuery.isFetching || !hasShippableGroup} onClick={() => {
+            <Button size="lg" fullWidth busy={placeOrder.isPending} disabled={!addressId || quoteQuery.isFetching || !hasShippableGroup || placeOrder.isSuccess} onClick={() => {
               if (placeOrderInFlight.current) return;
               placeOrderInFlight.current = true;
-              placeOrder.mutate(undefined, { onSettled: () => { placeOrderInFlight.current = false; } });
+              placeOrder.mutate(undefined, { onError: () => { placeOrderInFlight.current = false; } });
             }}>
-              {addressId ? "Pay now" : "Choose an address"}
+              {!addressId ? "Choose an address" : walletChosen ? "Pay from wallet" : "Pay securely"}
             </Button>
           )}
-          <p className={styles.terms}>Escrow orders are held until you confirm delivery. Direct orders pay the seller right away.</p>
+          <p className={styles.terms}>
+            {isNigeria
+              ? "Escrow orders stay locked in your own wallet, held by our licensed payment partner, until you confirm delivery. Direct orders pay the seller right away."
+              : "Outside Nigeria there's no escrow: you pay the seller directly, and our dispute process still applies. Zudomart doesn't hold your money."}
+          </p>
         </aside>
       </div>
     </div>

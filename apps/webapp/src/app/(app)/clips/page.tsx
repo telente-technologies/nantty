@@ -70,11 +70,11 @@ export default function ClipsPage() {
   }, []);
 
   function handleFeedKeys(event: KeyboardEvent<HTMLDivElement>) {
-    if (event.key === "ArrowDown" || event.key === "j" || event.key === "PageDown") {
+    if (event.key === "ArrowDown" || event.key === "PageDown") {
       event.preventDefault();
       scrollByOneClip(1);
     }
-    if (event.key === "ArrowUp" || event.key === "k" || event.key === "PageUp") {
+    if (event.key === "ArrowUp" || event.key === "PageUp") {
       event.preventDefault();
       scrollByOneClip(-1);
     }
@@ -125,7 +125,7 @@ export default function ClipsPage() {
         <SegmentedControl
           label="Clips feed"
           value={tab}
-          onChange={setTab}
+          onChange={(next: ClipsTab) => (next === "following" ? requireAuthThen(() => setTab("following"), "Sign in to see clips from people you follow.") : setTab(next))}
           options={[
             { value: "forYou", label: "For you" },
             { value: "following", label: "Following" },
@@ -158,7 +158,11 @@ export default function ClipsPage() {
       ) : clipsQuery.isError ? (
         <ErrorState description="We couldn't load clips." action={<RetryButton onRetry={() => clipsQuery.refetch()} />} />
       ) : clips.length === 0 ? (
-        <EmptyState title="No clips yet" description="Follow creators to see their clips here." action={<InlineLink href="/explore">Explore creators</InlineLink>} />
+        tab === "following" ? (
+          <EmptyState title="Nothing new from people you follow" description="Follow more creators to fill this feed." action={<InlineLink href="/explore">Explore creators</InlineLink>} />
+        ) : (
+          <EmptyState title="No clips yet" description="Check back soon for fresh clips." action={<RetryButton onRetry={() => clipsQuery.refetch()} />} />
+        )
       ) : (
         <div ref={feedRef} className={styles.feed} tabIndex={0} onKeyDown={handleFeedKeys} aria-label="Clips. Use the arrow keys to move between clips.">
           {clips.map((clip, index) => (

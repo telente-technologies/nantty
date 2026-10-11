@@ -3,12 +3,12 @@
 import { use } from "react";
 import Link from "next/link";
 
-import { useSession } from "@/components/providers/sessionProvider";
 import { RetryButton } from "@/components/ui/controls";
 import { ErrorState } from "@/components/ui/feedback";
 import { AnalyticsIcon, ArrowLeftIcon } from "@/components/ui/icons";
 import { postsService } from "@/services/posts.service";
 import { formatCountWithThousandsSuffix, formatTimeSincePosted } from "@/utils/formatDate.util";
+import { analyticsTitleFor, describeAnalyticsFailure, engagementRowsFor, isClipAnalytics, summaryMetricsFor, videoMetricsFor, type AnalyticsRow } from "@/utils/postAnalytics.util";
 import { useQuery } from "@tanstack/react-query";
 
 import styles from "./page.module.css";
@@ -18,50 +18,33 @@ const DAY_LABELS: readonly string[] = ["S", "M", "T", "W", "T", "F", "S"];
 
 export default function PostAnalyticsPage({ params }: { readonly params: Promise<{ readonly postId: string }> }) {
   const { postId } = use(params);
-  const { viewer } = useSession();
-  const analytics = useQuery({ queryKey: ["post-analytics", postId], queryFn: () => postsService.fetchPostAnalytics(postId), retry: false });
+  const analytics = useQuery({
+    queryKey: ["post-analytics", postId],
+    queryFn: () => postsService.fetchPostAnalytics(postId),
+    retry: (failureCount, error) => describeAnalyticsFailure(error).canRetry && failureCount < 2,
+  });
 
   if (analytics.isLoading) return <StatGridSkeleton label="Loading analytics" />;
   if (analytics.isError || !analytics.data) {
-    return (
-      <ErrorState
-        title="Analytics unavailable"
-        description={analytics.error instanceof Error ? analytics.error.message : "We couldn't load this post's numbers."}
-        action={<RetryButton onRetry={() => analytics.refetch()} />}
-      />
-    );
+    const failure = describeAnalyticsFailure(analytics.error);
+    return <ErrorState error={analytics.error} title={failure.title} description={failure.detail} action={failure.canRetry ? <RetryButton onRetry={() => analytics.refetch()} /> : undefined} />;
   }
 
   const data = analytics.data;
-  const isOwner = viewer?.id === data.author.id;
-  if (!isOwner) {
-    return <ErrorState title="Not available" description="Only the author of a post can see its analytics." action={<RetryButton onRetry={() => analytics.refetch()} />} />;
-  }
-
   const peak = Math.max(1, ...data.daily.map((entry) => entry.impressions));
-  const metrics = [
-    { label: "Impressions", value: data.impressions },
-    { label: "Unique viewers", value: data.uniqueViewers },
-    { label: "Profile visits", value: data.profileVisits },
-    { label: "Engagements", value: data.engagements },
-    { label: "Engagement rate", value: `${data.engagementRate}%` },
-    { label: "New follows", value: data.newFollows },
-    ...(data.video
-      ? [
-          { label: "Video views", value: data.video.views },
-          { label: "Watch time", value: `${Math.round(data.video.watchTimeSeconds / 60)} min` },
-        ]
-      : []),
-  ];
-  const engagementRows = [
-    { label: "Likes", value: data.likes },
-    { label: "Replies", value: data.comments },
-    { label: "Reposts", value: data.reposts },
-    { label: "Saves", value: data.saves },
-    { label: "Shares", value: data.shares },
-    { label: "Link clicks", value: data.linkClicks },
-    { label: "Profile clicks", value: data.profileClicks },
-  ];
+  const metrics = summaryMetricsFor(data);
+  const videoMetrics = videoMetricsFor(data);
+  const engagementRows = engagementRowsFor(data);
+  const renderMetricGrid = (rows: readonly AnalyticsRow[]) => (
+    <div className={styles.grid}>
+      {rows.map((metric) => (
+        <div className={styles.metric} key={metric.label}>
+          <span className={styles.metricValue}>{typeof metric.value === "number" ? formatCountWithThousandsSuffix(metric.value) : metric.value}</span>
+          <span className={styles.metricLabel}>{metric.label}</span>
+        </div>
+      ))}
+    </div>
+  );
 
   return (
     <div className={styles.page}>
@@ -69,7 +52,7 @@ export default function PostAnalyticsPage({ params }: { readonly params: Promise
         <Link href="/" className={styles.back} aria-label="Back to feed">
           <ArrowLeftIcon size={20} />
         </Link>
-        <h1 className={styles.title}>Post analytics</h1>
+        <h1 className={styles.title}>{analyticsTitleFor(data)}</h1>
       </header>
 
       <p className={styles.ownerNote}>
@@ -77,14 +60,14 @@ export default function PostAnalyticsPage({ params }: { readonly params: Promise
         Only you can see these numbers.
       </p>
 
-      <div className={styles.grid}>
-        {metrics.map((metric) => (
-          <div className={styles.metric} key={metric.label}>
-            <span className={styles.metricValue}>{typeof metric.value === "number" ? formatCountWithThousandsSuffix(metric.value) : metric.value}</span>
-            <span className={styles.metricLabel}>{metric.label}</span>
-          </div>
-        ))}
-      </div>
+      {renderMetricGrid(metrics)}
+
+      {videoMetrics.length > 0 ? (
+        <section className={styles.card} aria-labelledby="video-analytics-title">
+          <h2 className={styles.cardTitle} id="video-analytics-title">{isClipAnalytics(data) ? "Watching" : "Video"}</h2>
+          {renderMetricGrid(videoMetrics)}
+        </section>
+      ) : null}
 
       <section className={styles.card}>
         <h2 className={styles.cardTitle}>Impressions, last 7 days</h2>
@@ -106,7 +89,7 @@ export default function PostAnalyticsPage({ params }: { readonly params: Promise
           {engagementRows.map((row) => (
             <div className={styles.engagementRow} key={row.label}>
               <dt>{row.label}</dt>
-              <dd>{formatCountWithThousandsSuffix(row.value)}</dd>
+              <dd>{typeof row.value === "number" ? formatCountWithThousandsSuffix(row.value) : row.value}</dd>
             </div>
           ))}
           <div className={styles.engagementRow}>

@@ -5,6 +5,7 @@ import Link from "next/link";
 
 import { OfficialStoreBadges } from "@zudomart/web-kit";
 
+import { SubscriptionPlansSection } from "@/components/creator/subscriptionPlansSection";
 import { storeLinks } from "@/config/brandContact.config";
 import { RetryButton } from "@/components/ui/controls";
 import { ErrorState } from "@/components/ui/feedback";
@@ -137,6 +138,8 @@ export default function CreatorDashboardPage() {
           Open a post to see its full analytics — only you can see these numbers.
         </p>
       </section>
+
+      <SubscriptionPlansSection />
     </div>
   );
 }

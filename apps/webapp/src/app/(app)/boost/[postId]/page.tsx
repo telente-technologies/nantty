@@ -6,6 +6,7 @@ import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { RetryButton } from "@/components/ui/controls";
+import { useCountryRequiredRetry } from "@/components/commerce/countryRequiredDialog";
 import { ErrorState } from "@/components/ui/feedback";
 import { ListRowsSkeleton } from "@/components/ui/pageSkeletons";
 import { boostsService } from "@/services/boosts.service";
@@ -15,6 +16,7 @@ import type { BoostAudience, BoostGoal, BoostPaymentMethod, FreeBoostAllowance }
 import type { Money } from "@/types/money.type";
 import { boostErrorMessageForCode, boostTotalFor, fitsWithinMoney, pickFreeBoostSelection, readBoostPaymentMethods, readUsableFreeBoost } from "@/utils/boostPayment.util";
 import { formatMoneyForDisplay } from "@/utils/formatMoney.util";
+import { openHostedCheckout } from "@/utils/hostedCheckout.util";
 import { readVerificationLevel } from "@/utils/walletLines.util";
 
 import styles from "../page.module.css";
@@ -40,6 +42,7 @@ export default function PromotePostPage() {
   const [durationDays, setDurationDays] = useState<number | null>(null);
   const [chosenMethod, setChosenMethod] = useState<BoostPaymentMethod | null>(null);
   const [error, setError] = useState<{ readonly text: string; readonly code: string | null } | null>(null);
+  const { retry: countryRetry, dialog: countryDialog } = useCountryRequiredRetry();
 
   const budgets = options.data?.suggestedDailyBudgets ?? [];
   const dayOptions = options.data?.durationDayOptions ?? [];
@@ -65,13 +68,13 @@ export default function PromotePostPage() {
       if (paymentMethod === "balance") void queryClient.invalidateQueries({ queryKey: ["wallet"] });
       if (paymentMethod === "free") void queryClient.invalidateQueries({ queryKey: ["boosts", "options"] });
       if (paymentMethod === "card" && created.checkoutUrl) {
-        window.location.href = created.checkoutUrl;
-        return;
+        if (openHostedCheckout({ checkoutUrl: created.checkoutUrl, reference: created.boost.id }) === "redirected") return;
       }
       router.push(`/boost/status/${created.boost.id}`);
     },
     onError: (mutationError) => {
       const code = mutationError instanceof WebappRequestError ? mutationError.code : null;
+      if (countryRetry.handle(code, () => create.mutate())) return;
       setError({ text: boostErrorMessageForCode(code) ?? readErrorMessageForDisplay(mutationError), code });
       if (code === "FREE_BOOST_USED" || code === "FREE_BOOST_NOT_AVAILABLE") {
         setChosenMethod("card");
@@ -110,10 +113,11 @@ export default function PromotePostPage() {
       if (selection) setBudgetIndex(selection.budgetIndex);
     }
   };
-  const submitLabel = paymentMethod === "free" ? "Start free promotion" : paymentMethod === "balance" ? `Pay ${total ? formatMoneyForDisplay(total) : ""} from balance` : "Continue to Paystack";
+  const submitLabel = paymentMethod === "free" ? "Start free promotion" : paymentMethod === "balance" ? `Pay ${total ? formatMoneyForDisplay(total) : ""} from balance` : "Pay securely";
 
   return (
     <div className={styles.page}>
+      {countryDialog}
       <h1 className={styles.title}>Promote post</h1>
       <FreeBoostNotice freeBoost={freeBoost} premiumUsed={!freeBoost && !!options.data.freeBoost?.premium && options.data.freeBoost.remainingThisMonth === 0} resetsAt={options.data.freeBoost?.resetsAt ?? null} />
       <section className={styles.section} aria-label="Goal">
@@ -153,7 +157,7 @@ export default function PromotePostPage() {
         <h2 className={styles.sectionTitle}>Pay with</h2>
         <div className={styles.chips}>
           {freeBoost ? <button type="button" className={chipClass(paymentMethod === "free")} aria-pressed={paymentMethod === "free"} onClick={chooseFree}>Free boost</button> : null}
-          {methods.includes("card") ? <button type="button" className={chipClass(paymentMethod === "card")} aria-pressed={paymentMethod === "card"} onClick={() => choosePaid("card")}>Card or bank transfer (Paystack)</button> : null}
+          {methods.includes("card") ? <button type="button" className={chipClass(paymentMethod === "card")} aria-pressed={paymentMethod === "card"} onClick={() => choosePaid("card")}>Card or bank transfer</button> : null}
           {methods.includes("balance") ? (
             <button type="button" className={chipClass(paymentMethod === "balance")} aria-pressed={paymentMethod === "balance"} disabled={!verified || !balanceCovers} onClick={() => choosePaid("balance")}>Pay from my Zudomart balance</button>
           ) : null}

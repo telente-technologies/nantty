@@ -1,10 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { SaveToggleButton } from "@/components/saves/saveToggleButton";
 import {
+  EnterFullscreenIcon,
   EyeIcon,
   LikeActionIcon,
   LikeFilledActionIcon,
@@ -13,9 +14,11 @@ import {
   ShareActionIcon,
   SpeakerHighIcon,
   SpeakerMutedIcon,
+  TrashIcon,
 } from "@/components/ui/icons";
 import { requireAuthThen } from "@/components/auth/authPrompt.store";
 import { ContentActionsMenu } from "@/components/actions/contentActionsMenu";
+import { useDeleteOwnPost } from "@/components/feed/useDeleteOwnPost.hook";
 import { usePostNotificationMute } from "@/components/feed/postNotificationMute.hook";
 import { useSession } from "@/components/providers/sessionProvider";
 import { canOfferPostNotificationMute } from "@/utils/postNotificationMute.util";
@@ -29,6 +32,14 @@ import styles from "./page.module.css";
 import { IconLabel } from "@/components/ui/appIcon";
 import { findDownloadTargetForPost } from "@/utils/brandedDownload.util";
 import { describeCount } from "@/utils/countLabel.util";
+import { ViewsExplainerDialog } from "@/components/feed/viewsExplainerDialog";
+import { feedInteractionsService } from "@/services/feedInteractions.service";
+
+import { useClipWatchTracking } from "./clipWatchTracking.hook";
+import { useVideoControls } from "@/components/video/videoControls.hook";
+import { VideoFullscreenControls } from "@/components/video/videoFullscreenControls";
+import { useDocumentVideoShortcuts } from "@/components/video/videoPlayback.hook";
+import { VideoSeekBar } from "@/components/video/videoSeekBar";
 
 function canPlayInBrowser(url: string | null): url is string {
   return !!url && !url.endsWith(".m3u8");
@@ -70,6 +81,7 @@ export function ClipPlayerCard({
   onShareLink,
 }: ClipPlayerCardProps) {
   const videoRef = useRef<HTMLVideoElement | null>(null);
+  const stageRef = useRef<HTMLDivElement | null>(null);
   const { viewer } = useSession();
   const notificationMute = usePostNotificationMute(clip);
   const lastTapAt = useRef(0);
@@ -78,9 +90,20 @@ export function ClipPlayerCard({
   const [burstKey, setBurstKey] = useState(0);
   const [isTaggedOpen, setIsTaggedOpen] = useState(false);
   const [isCaptionExpanded, setIsCaptionExpanded] = useState(false);
+  const [isViewsInfoOpen, setIsViewsInfoOpen] = useState(false);
+  const isOwnClip = viewer?.id === clip.author.id;
+  const { confirmAndDelete } = useDeleteOwnPost();
+  const interactionTarget = useMemo(() => ({ postId: clip.id, authorId: clip.author.id }), [clip.id, clip.author.id]);
+  useClipWatchTracking(videoRef, interactionTarget, isActive, clip.durationSeconds ?? 0);
   const media = clip.media[0];
   const isLandscapeClip = !!media?.width && !!media.height && media.width > media.height;
   const playableUrl = canPlayInBrowser(media?.url ?? null) ? (media as { url: string }).url : null;
+  const canSeek = !clip.sponsored && !clip.promotedLive;
+  const togglePausedByViewer = useCallback(() => setIsPausedByViewer((paused) => !paused), []);
+  const controls = useVideoControls({ videoRef, containerRef: stageRef, sourceKey: playableUrl, fallbackDurationSeconds: clip.durationSeconds ?? 0, onTogglePlay: togglePausedByViewer, onToggleMute });
+  const { fullscreen } = controls;
+  const ignoreSeek = useCallback(() => undefined, []);
+  useDocumentVideoShortcuts(isActive && !!playableUrl, { onSeekBy: canSeek ? controls.seekBy : ignoreSeek, onTogglePlay: controls.togglePlay });
   const captionNeedsToggle = clip.text.length > 140;
   const visibleCaption = !captionNeedsToggle || isCaptionExpanded ? clip.text : `${clip.text.slice(0, 140).trimEnd()}…`;
 
@@ -123,7 +146,7 @@ export function ClipPlayerCard({
 
   return (
     <article className={styles.clip} data-clip-id={clip.id} aria-label={`Clip by ${clip.author.name}`}>
-      <div className={styles.stage}>
+      <div ref={stageRef} className={[styles.stage, fullscreen.isFullscreen ? styles.stageFullscreen : ""].join(" ")} onPointerMove={fullscreen.isFullscreen ? controls.wakeControls : undefined}>
         {playableUrl ? (
           <video
             ref={videoRef}
@@ -134,7 +157,7 @@ export function ClipPlayerCard({
             muted={isMuted}
             playsInline
             preload={isActive ? "auto" : "metadata"}
-            onClick={handleMediaTap}
+            onClick={fullscreen.isFullscreen ? controls.toggleControls : handleMediaTap}
           />
         ) : (
           <MediaImage src={media?.posterUrl ?? null} alt="" sizes="420px" />
@@ -144,7 +167,7 @@ export function ClipPlayerCard({
             <LikeFilledActionIcon size={72} />
           </span>
         ) : null}
-        {playableUrl && isPausedByViewer ? (
+        {playableUrl && isPausedByViewer && !fullscreen.isFullscreen && !controls.isScrubbing ? (
           <button
             type="button"
             className={styles.playToggle}
@@ -154,6 +177,8 @@ export function ClipPlayerCard({
             <PlayIcon size={34} />
           </button>
         ) : null}
+        {fullscreen.isFullscreen ? null : (
+        <>
         <button
           type="button"
           className={styles.muteButton}
@@ -164,23 +189,28 @@ export function ClipPlayerCard({
         >
           {isMuted ? <SpeakerMutedIcon size={18} /> : <SpeakerHighIcon size={18} />}
         </button>
+        {playableUrl ? (
+          <button type="button" className={styles.fullscreenButton} aria-label="Full screen" title="Full screen" onClick={fullscreen.enter}>
+            <EnterFullscreenIcon size={18} />
+          </button>
+        ) : null}
         <div className={styles.overlay}>
           <div className={styles.authorRow}>
-            <Link href={`/user/${clip.author.id}`} className={styles.clipAuthor}>
+            <Link href={`/user/${clip.author.id}`} className={styles.clipAuthor} onClick={() => feedInteractionsService.recordProfileClick(interactionTarget, "clips")}>
               <Avatar name={clip.author.name} src={clip.author.avatarUrl} size="sm" />
               <span className={styles.authorNames}>
                 <span className={styles.authorName}>{clip.author.name}</span>
                 <span className={styles.authorHandle}>@{clip.author.username}</span>
               </span>
             </Link>
-            <button
-              type="button"
-              className={[styles.followPill, engagement.isFollowing ? styles.followPillActive : ""].join(" ")}
-              aria-pressed={engagement.isFollowing}
-              onClick={onToggleFollow}
-            >
-              {engagement.isFollowing ? "Following" : "Follow"}
-            </button>
+            {!engagement.isFollowing && viewer?.id !== clip.author.id ? (
+              <button type="button" className={styles.followPill} onClick={() => {
+                feedInteractionsService.recordFollow(interactionTarget, "clips");
+                onToggleFollow();
+              }}>
+                Follow
+              </button>
+            ) : null}
           </div>
           <ClipTaggedPill post={clip} isOpen={isTaggedOpen} onOpenChange={setIsTaggedOpen} />
           <p className={[styles.clipCaption, isCaptionExpanded ? styles.clipCaptionExpanded : ""].join(" ")}>
@@ -202,6 +232,36 @@ export function ClipPlayerCard({
             </Link>
           ) : null}
         </div>
+        </>
+        )}
+        {playableUrl && !fullscreen.isFullscreen && !clip.promotedLive ? (
+          <VideoSeekBar
+            className={styles.clipSeekBar}
+            currentSeconds={controls.playback.currentSeconds}
+            durationSeconds={controls.playback.durationSeconds}
+            bufferedSeconds={controls.playback.bufferedSeconds}
+            canSeek={canSeek && isActive}
+            onScrubStart={controls.scrub.onScrubStart}
+            onScrubPreview={controls.scrub.onScrubPreview}
+            onScrubEnd={controls.scrub.onScrubEnd}
+            onSeekBy={controls.seekBy}
+          />
+        ) : null}
+        {playableUrl && fullscreen.isFullscreen ? (
+          <VideoFullscreenControls
+            playback={controls.playback}
+            isPaused={isPausedByViewer}
+            isVisible={controls.areControlsVisible}
+            canSeek={canSeek}
+            onTogglePlay={controls.togglePlay}
+            onSeekBy={controls.seekBy}
+            onScrubStart={controls.scrub.onScrubStart}
+            onScrubPreview={controls.scrub.onScrubPreview}
+            onScrubEnd={controls.scrub.onScrubEnd}
+            onToggleMute={controls.toggleMute}
+            onExit={fullscreen.exit}
+          />
+        ) : null}
       </div>
       <div className={styles.actionColumn} role="group" aria-label="Clip actions">
         <span className={styles.actionItem}>
@@ -249,10 +309,16 @@ export function ClipPlayerCard({
           <SaveToggleButton targetType="clip" targetId={clip.id} initiallySaved={clip.bookmarked} appearance="overlay" iconSize={24} />
           <span className={styles.actionCount}>{formatCompactCount(clip.saveCount ?? 0)}</span>
         </span>
-        <span className={styles.actionItem} aria-label={`Views, ${clip.views}`}>
-          <span className={styles.actionCircleStatic}>
-            <EyeIcon size={24} />
-          </span>
+        <span className={styles.actionItem}>
+          {isOwnClip ? (
+            <Link href={`/analytics/post/${clip.id}`} className={styles.actionCircle} aria-label={`View clip analytics, ${describeCount(clip.views, "view", "views")}`} title="Clip analytics">
+              <EyeIcon size={24} />
+            </Link>
+          ) : (
+            <button type="button" className={styles.actionCircle} aria-haspopup="dialog" aria-label={`Views, ${describeCount(clip.views, "view", "views")}. What are views`} title="Views" onClick={() => setIsViewsInfoOpen(true)}>
+              <EyeIcon size={24} />
+            </button>
+          )}
           <span className={styles.actionCount}>{formatCompactCount(clip.views)}</span>
         </span>
         <span className={styles.actionItem}>
@@ -265,9 +331,12 @@ export function ClipPlayerCard({
             triggerClassName={styles.actionCircle}
             downloadTarget={findDownloadTargetForPost(clip)}
             notificationMuteAction={canOfferPostNotificationMute(viewer !== null, clip) ? { isMuted: notificationMute.isMuted, onToggle: notificationMute.toggle } : undefined}
+            isOwnContent={isOwnClip}
+            extraDangerActions={isOwnClip ? [{ label: "Delete", icon: <TrashIcon size={18} aria-hidden="true" />, onSelect: () => void confirmAndDelete({ id: clip.id, kind: "clip" }) }] : undefined}
           />
         </span>
       </div>
+      <ViewsExplainerDialog isOpen={isViewsInfoOpen} onClose={() => setIsViewsInfoOpen(false)} />
     </article>
   );
 }

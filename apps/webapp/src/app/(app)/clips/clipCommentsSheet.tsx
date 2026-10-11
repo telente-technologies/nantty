@@ -1,13 +1,15 @@
 "use client";
 
 import { useInfiniteQuery } from "@tanstack/react-query";
-import { useEffect } from "react";
+import { useModalFocusTrap } from "@zudomart/web-kit";
+import { useRef } from "react";
 
 import { RetryButton } from "@/components/ui/controls";
 import { EmptyState, ErrorState, Skeleton } from "@/components/ui/feedback";
 import { CloseIcon } from "@/components/ui/icons";
 import { CommentComposer } from "@/components/feed/commentComposer";
 import { CommentThread } from "@/components/feed/commentThread";
+import { retryCommentsPageUnlessCursorExpired, useRestartCommentsOnExpiredCursor } from "@/components/feed/restartCommentsOnExpiredCursor.hook";
 import { postsService } from "@/services/posts.service";
 import { formatCountWithThousandsSuffix } from "@/utils/formatDate.util";
 
@@ -26,25 +28,23 @@ export function ClipCommentsSheet({ postId, postAuthorId, totalComments, onClose
     queryFn: ({ pageParam }) => postsService.fetchCommentsPage(postId as string, pageParam),
     initialPageParam: null as string | null,
     getNextPageParam: (lastPage) => lastPage.nextCursor,
+    retry: retryCommentsPageUnlessCursorExpired,
     enabled: postId !== null,
   });
+  const listRef = useRef<HTMLDivElement | null>(null);
+  const { isRestartingFromTop } = useRestartCommentsOnExpiredCursor(["comments", postId ?? "none"], commentsQuery.error, () => listRef.current?.scrollTo({ top: 0 }));
   const comments = (commentsQuery.data?.pages ?? []).flatMap((page) => page.data);
   const orderedComments = [...comments].sort((a, b) => Number(b.isPinned === true) - Number(a.isPinned === true));
 
-  useEffect(() => {
-    if (!postId) return;
-    const handleKey = (event: KeyboardEvent) => {
-      if (event.key === "Escape") onClose();
-    };
-    window.addEventListener("keydown", handleKey);
-    return () => window.removeEventListener("keydown", handleKey);
-  }, [postId, onClose]);
+  const sheetRef = useRef<HTMLElement | null>(null);
+  useModalFocusTrap(sheetRef, postId !== null, onClose);
 
   if (!postId) return null;
 
   return (
     <div className={styles.sheetScrim} onClick={onClose}>
       <section
+        ref={sheetRef}
         className={styles.sheet}
         role="dialog"
         aria-modal="true"
@@ -60,10 +60,10 @@ export function ClipCommentsSheet({ postId, postAuthorId, totalComments, onClose
             <CloseIcon size={18} />
           </button>
         </div>
-        <div className={styles.sheetList}>
+        <div ref={listRef} className={styles.sheetList}>
           {commentsQuery.isLoading ? (
             [0, 1, 2].map((index) => <Skeleton key={index} height={48} />)
-          ) : commentsQuery.isError ? (
+          ) : commentsQuery.isError && !isRestartingFromTop ? (
             <ErrorState description="We couldn't load comments." action={<RetryButton onRetry={() => commentsQuery.refetch()} />} />
           ) : comments.length === 0 ? (
             <EmptyState title="No comments yet" description="Start the conversation." />
