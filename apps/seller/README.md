@@ -35,7 +35,7 @@ With `SELLER_USE_MOCKS=true` (the default in development) every API call is answ
 
 - Session cookies are **host-only** (no `Domain` attribute), `HttpOnly`, `Secure`, `SameSite=Lax`, and use the `__Host-` prefix in production, so they are never shared with the marketing site or any other subdomain.
 - The API must allow CORS for the dashboard origin (`DASHBOARD_ORIGIN`) in `CORS_ORIGINS`. Today all calls go server-to-server through the dashboard's `/bff` routes, but the origin must be on the allow-list for any browser call and for the payment provider callback flow.
-- Register `${DASHBOARD_ORIGIN}/billing-checkout/callback` as the Paystack/Flutterwave callback URL for Pro and Business subscription payments.
+- Register `${DASHBOARD_ORIGIN}/billing-checkout/callback` as the Flutterwave callback URL for Pro and Business subscription payments.
 
 ## Security design
 
