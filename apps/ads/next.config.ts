@@ -1,7 +1,7 @@
 import type { NextConfig } from "next";
 
 const isDevelopmentBuild = process.env.NODE_ENV === "development";
-const hostedCheckoutOrigins = ["https://checkout.flutterwave.com", "https://checkout-testing.flutterwave.com", "https://checkout.paystack.com"];
+const hostedCheckoutOrigins = ["https://checkout.flutterwave.com", "https://checkout-testing.flutterwave.com"];
 
 function readOriginOrEmpty(configuredUrl: string | undefined): string {
   if (!configuredUrl) return "";
