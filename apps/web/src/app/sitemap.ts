@@ -15,6 +15,8 @@ const publicRoutes: ReadonlyArray<{ readonly path: string; readonly priority: nu
   { path: "/creator-terms", priority: 0.3, changeFrequency: "yearly" },
   { path: "/ads-policy", priority: 0.3, changeFrequency: "yearly" },
   { path: "/refund-escrow-policy", priority: 0.3, changeFrequency: "yearly" },
+  { path: "/copyright-policy", priority: 0.3, changeFrequency: "yearly" },
+  { path: "/data-rights", priority: 0.3, changeFrequency: "yearly" },
 ];
 
 export default function sitemap(): MetadataRoute.Sitemap {
