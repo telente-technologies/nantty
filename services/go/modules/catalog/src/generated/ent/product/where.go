@@ -165,6 +165,11 @@ func ModerationVisibility(v string) predicate.Product {
 	return predicate.Product(sql.FieldEQ(FieldModerationVisibility, v))
 }
 
+// ModerationVisibilityAt applies equality check predicate on the "moderation_visibility_at" field. It's identical to ModerationVisibilityAtEQ.
+func ModerationVisibilityAt(v time.Time) predicate.Product {
+	return predicate.Product(sql.FieldEQ(FieldModerationVisibilityAt, v))
+}
+
 // UpdatedAt applies equality check predicate on the "updated_at" field. It's identical to UpdatedAtEQ.
 func UpdatedAt(v time.Time) predicate.Product {
 	return predicate.Product(sql.FieldEQ(FieldUpdatedAt, v))
@@ -1233,6 +1238,56 @@ func ModerationVisibilityEqualFold(v string) predicate.Product {
 // ModerationVisibilityContainsFold applies the ContainsFold predicate on the "moderation_visibility" field.
 func ModerationVisibilityContainsFold(v string) predicate.Product {
 	return predicate.Product(sql.FieldContainsFold(FieldModerationVisibility, v))
+}
+
+// ModerationVisibilityAtEQ applies the EQ predicate on the "moderation_visibility_at" field.
+func ModerationVisibilityAtEQ(v time.Time) predicate.Product {
+	return predicate.Product(sql.FieldEQ(FieldModerationVisibilityAt, v))
+}
+
+// ModerationVisibilityAtNEQ applies the NEQ predicate on the "moderation_visibility_at" field.
+func ModerationVisibilityAtNEQ(v time.Time) predicate.Product {
+	return predicate.Product(sql.FieldNEQ(FieldModerationVisibilityAt, v))
+}
+
+// ModerationVisibilityAtIn applies the In predicate on the "moderation_visibility_at" field.
+func ModerationVisibilityAtIn(vs ...time.Time) predicate.Product {
+	return predicate.Product(sql.FieldIn(FieldModerationVisibilityAt, vs...))
+}
+
+// ModerationVisibilityAtNotIn applies the NotIn predicate on the "moderation_visibility_at" field.
+func ModerationVisibilityAtNotIn(vs ...time.Time) predicate.Product {
+	return predicate.Product(sql.FieldNotIn(FieldModerationVisibilityAt, vs...))
+}
+
+// ModerationVisibilityAtGT applies the GT predicate on the "moderation_visibility_at" field.
+func ModerationVisibilityAtGT(v time.Time) predicate.Product {
+	return predicate.Product(sql.FieldGT(FieldModerationVisibilityAt, v))
+}
+
+// ModerationVisibilityAtGTE applies the GTE predicate on the "moderation_visibility_at" field.
+func ModerationVisibilityAtGTE(v time.Time) predicate.Product {
+	return predicate.Product(sql.FieldGTE(FieldModerationVisibilityAt, v))
+}
+
+// ModerationVisibilityAtLT applies the LT predicate on the "moderation_visibility_at" field.
+func ModerationVisibilityAtLT(v time.Time) predicate.Product {
+	return predicate.Product(sql.FieldLT(FieldModerationVisibilityAt, v))
+}
+
+// ModerationVisibilityAtLTE applies the LTE predicate on the "moderation_visibility_at" field.
+func ModerationVisibilityAtLTE(v time.Time) predicate.Product {
+	return predicate.Product(sql.FieldLTE(FieldModerationVisibilityAt, v))
+}
+
+// ModerationVisibilityAtIsNil applies the IsNil predicate on the "moderation_visibility_at" field.
+func ModerationVisibilityAtIsNil() predicate.Product {
+	return predicate.Product(sql.FieldIsNull(FieldModerationVisibilityAt))
+}
+
+// ModerationVisibilityAtNotNil applies the NotNil predicate on the "moderation_visibility_at" field.
+func ModerationVisibilityAtNotNil() predicate.Product {
+	return predicate.Product(sql.FieldNotNull(FieldModerationVisibilityAt))
 }
 
 // UpdatedAtEQ applies the EQ predicate on the "updated_at" field.

@@ -440,6 +440,26 @@ func (_u *ProductUpdate) SetNillableModerationVisibility(v *string) *ProductUpda
 	return _u
 }
 
+// SetModerationVisibilityAt sets the "moderation_visibility_at" field.
+func (_u *ProductUpdate) SetModerationVisibilityAt(v time.Time) *ProductUpdate {
+	_u.mutation.SetModerationVisibilityAt(v)
+	return _u
+}
+
+// SetNillableModerationVisibilityAt sets the "moderation_visibility_at" field if the given value is not nil.
+func (_u *ProductUpdate) SetNillableModerationVisibilityAt(v *time.Time) *ProductUpdate {
+	if v != nil {
+		_u.SetModerationVisibilityAt(*v)
+	}
+	return _u
+}
+
+// ClearModerationVisibilityAt clears the value of the "moderation_visibility_at" field.
+func (_u *ProductUpdate) ClearModerationVisibilityAt() *ProductUpdate {
+	_u.mutation.ClearModerationVisibilityAt()
+	return _u
+}
+
 // SetUpdatedAt sets the "updated_at" field.
 func (_u *ProductUpdate) SetUpdatedAt(v time.Time) *ProductUpdate {
 	_u.mutation.SetUpdatedAt(v)
@@ -647,6 +667,12 @@ func (_u *ProductUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	}
 	if value, ok := _u.mutation.ModerationVisibility(); ok {
 		_spec.SetField(product.FieldModerationVisibility, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.ModerationVisibilityAt(); ok {
+		_spec.SetField(product.FieldModerationVisibilityAt, field.TypeTime, value)
+	}
+	if _u.mutation.ModerationVisibilityAtCleared() {
+		_spec.ClearField(product.FieldModerationVisibilityAt, field.TypeTime)
 	}
 	if value, ok := _u.mutation.UpdatedAt(); ok {
 		_spec.SetField(product.FieldUpdatedAt, field.TypeTime, value)
@@ -1080,6 +1106,26 @@ func (_u *ProductUpdateOne) SetNillableModerationVisibility(v *string) *ProductU
 	return _u
 }
 
+// SetModerationVisibilityAt sets the "moderation_visibility_at" field.
+func (_u *ProductUpdateOne) SetModerationVisibilityAt(v time.Time) *ProductUpdateOne {
+	_u.mutation.SetModerationVisibilityAt(v)
+	return _u
+}
+
+// SetNillableModerationVisibilityAt sets the "moderation_visibility_at" field if the given value is not nil.
+func (_u *ProductUpdateOne) SetNillableModerationVisibilityAt(v *time.Time) *ProductUpdateOne {
+	if v != nil {
+		_u.SetModerationVisibilityAt(*v)
+	}
+	return _u
+}
+
+// ClearModerationVisibilityAt clears the value of the "moderation_visibility_at" field.
+func (_u *ProductUpdateOne) ClearModerationVisibilityAt() *ProductUpdateOne {
+	_u.mutation.ClearModerationVisibilityAt()
+	return _u
+}
+
 // SetUpdatedAt sets the "updated_at" field.
 func (_u *ProductUpdateOne) SetUpdatedAt(v time.Time) *ProductUpdateOne {
 	_u.mutation.SetUpdatedAt(v)
@@ -1317,6 +1363,12 @@ func (_u *ProductUpdateOne) sqlSave(ctx context.Context) (_node *Product, err er
 	}
 	if value, ok := _u.mutation.ModerationVisibility(); ok {
 		_spec.SetField(product.FieldModerationVisibility, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.ModerationVisibilityAt(); ok {
+		_spec.SetField(product.FieldModerationVisibilityAt, field.TypeTime, value)
+	}
+	if _u.mutation.ModerationVisibilityAtCleared() {
+		_spec.ClearField(product.FieldModerationVisibilityAt, field.TypeTime)
 	}
 	if value, ok := _u.mutation.UpdatedAt(); ok {
 		_spec.SetField(product.FieldUpdatedAt, field.TypeTime, value)

@@ -7126,49 +7126,50 @@ func (m *OutboxEventMutation) ResetEdge(name string) error {
 // ProductMutation represents an operation that mutates the Product nodes in the graph.
 type ProductMutation struct {
 	config
-	op                    Op
-	typ                   string
-	id                    *uuid.UUID
-	created_at            *time.Time
-	store_id              *uuid.UUID
-	name                  *string
-	description           *string
-	category_id           *uuid.UUID
-	brand_id              *uuid.UUID
-	brand_relationship    *string
-	status                *string
-	visibility            *string
-	published_online      *bool
-	taxable               *bool
-	track_inventory       *bool
-	tags                  *[]string
-	appendtags            []string
-	options               *[]schema.ProductOption
-	appendoptions         []schema.ProductOption
-	attributes            *[]schema.ProductAttribute
-	appendattributes      []schema.ProductAttribute
-	videos                *[]schema.ProductVideo
-	appendvideos          []schema.ProductVideo
-	supplier_id           *uuid.UUID
-	currency              *string
-	min_price_minor       *int64
-	addmin_price_minor    *int64
-	publish_at            *time.Time
-	published_at          *time.Time
-	rating_sum            *int64
-	addrating_sum         *int64
-	rating_count          *int
-	addrating_count       *int
-	like_count            *int
-	addlike_count         *int
-	units_sold            *int
-	addunits_sold         *int
-	moderation_visibility *string
-	updated_at            *time.Time
-	clearedFields         map[string]struct{}
-	done                  bool
-	oldValue              func(context.Context) (*Product, error)
-	predicates            []predicate.Product
+	op                       Op
+	typ                      string
+	id                       *uuid.UUID
+	created_at               *time.Time
+	store_id                 *uuid.UUID
+	name                     *string
+	description              *string
+	category_id              *uuid.UUID
+	brand_id                 *uuid.UUID
+	brand_relationship       *string
+	status                   *string
+	visibility               *string
+	published_online         *bool
+	taxable                  *bool
+	track_inventory          *bool
+	tags                     *[]string
+	appendtags               []string
+	options                  *[]schema.ProductOption
+	appendoptions            []schema.ProductOption
+	attributes               *[]schema.ProductAttribute
+	appendattributes         []schema.ProductAttribute
+	videos                   *[]schema.ProductVideo
+	appendvideos             []schema.ProductVideo
+	supplier_id              *uuid.UUID
+	currency                 *string
+	min_price_minor          *int64
+	addmin_price_minor       *int64
+	publish_at               *time.Time
+	published_at             *time.Time
+	rating_sum               *int64
+	addrating_sum            *int64
+	rating_count             *int
+	addrating_count          *int
+	like_count               *int
+	addlike_count            *int
+	units_sold               *int
+	addunits_sold            *int
+	moderation_visibility    *string
+	moderation_visibility_at *time.Time
+	updated_at               *time.Time
+	clearedFields            map[string]struct{}
+	done                     bool
+	oldValue                 func(context.Context) (*Product, error)
+	predicates               []predicate.Product
 }
 
 var _ ent.Mutation = (*ProductMutation)(nil)
@@ -8505,6 +8506,55 @@ func (m *ProductMutation) ResetModerationVisibility() {
 	m.moderation_visibility = nil
 }
 
+// SetModerationVisibilityAt sets the "moderation_visibility_at" field.
+func (m *ProductMutation) SetModerationVisibilityAt(t time.Time) {
+	m.moderation_visibility_at = &t
+}
+
+// ModerationVisibilityAt returns the value of the "moderation_visibility_at" field in the mutation.
+func (m *ProductMutation) ModerationVisibilityAt() (r time.Time, exists bool) {
+	v := m.moderation_visibility_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldModerationVisibilityAt returns the old "moderation_visibility_at" field's value of the Product entity.
+// If the Product object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ProductMutation) OldModerationVisibilityAt(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldModerationVisibilityAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldModerationVisibilityAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldModerationVisibilityAt: %w", err)
+	}
+	return oldValue.ModerationVisibilityAt, nil
+}
+
+// ClearModerationVisibilityAt clears the value of the "moderation_visibility_at" field.
+func (m *ProductMutation) ClearModerationVisibilityAt() {
+	m.moderation_visibility_at = nil
+	m.clearedFields[product.FieldModerationVisibilityAt] = struct{}{}
+}
+
+// ModerationVisibilityAtCleared returns if the "moderation_visibility_at" field was cleared in this mutation.
+func (m *ProductMutation) ModerationVisibilityAtCleared() bool {
+	_, ok := m.clearedFields[product.FieldModerationVisibilityAt]
+	return ok
+}
+
+// ResetModerationVisibilityAt resets all changes to the "moderation_visibility_at" field.
+func (m *ProductMutation) ResetModerationVisibilityAt() {
+	m.moderation_visibility_at = nil
+	delete(m.clearedFields, product.FieldModerationVisibilityAt)
+}
+
 // SetUpdatedAt sets the "updated_at" field.
 func (m *ProductMutation) SetUpdatedAt(t time.Time) {
 	m.updated_at = &t
@@ -8575,7 +8625,7 @@ func (m *ProductMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *ProductMutation) Fields() []string {
-	fields := make([]string, 0, 27)
+	fields := make([]string, 0, 28)
 	if m.created_at != nil {
 		fields = append(fields, product.FieldCreatedAt)
 	}
@@ -8654,6 +8704,9 @@ func (m *ProductMutation) Fields() []string {
 	if m.moderation_visibility != nil {
 		fields = append(fields, product.FieldModerationVisibility)
 	}
+	if m.moderation_visibility_at != nil {
+		fields = append(fields, product.FieldModerationVisibilityAt)
+	}
 	if m.updated_at != nil {
 		fields = append(fields, product.FieldUpdatedAt)
 	}
@@ -8717,6 +8770,8 @@ func (m *ProductMutation) Field(name string) (ent.Value, bool) {
 		return m.UnitsSold()
 	case product.FieldModerationVisibility:
 		return m.ModerationVisibility()
+	case product.FieldModerationVisibilityAt:
+		return m.ModerationVisibilityAt()
 	case product.FieldUpdatedAt:
 		return m.UpdatedAt()
 	}
@@ -8780,6 +8835,8 @@ func (m *ProductMutation) OldField(ctx context.Context, name string) (ent.Value,
 		return m.OldUnitsSold(ctx)
 	case product.FieldModerationVisibility:
 		return m.OldModerationVisibility(ctx)
+	case product.FieldModerationVisibilityAt:
+		return m.OldModerationVisibilityAt(ctx)
 	case product.FieldUpdatedAt:
 		return m.OldUpdatedAt(ctx)
 	}
@@ -8973,6 +9030,13 @@ func (m *ProductMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetModerationVisibility(v)
 		return nil
+	case product.FieldModerationVisibilityAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetModerationVisibilityAt(v)
+		return nil
 	case product.FieldUpdatedAt:
 		v, ok := value.(time.Time)
 		if !ok {
@@ -9103,6 +9167,9 @@ func (m *ProductMutation) ClearedFields() []string {
 	if m.FieldCleared(product.FieldPublishedAt) {
 		fields = append(fields, product.FieldPublishedAt)
 	}
+	if m.FieldCleared(product.FieldModerationVisibilityAt) {
+		fields = append(fields, product.FieldModerationVisibilityAt)
+	}
 	return fields
 }
 
@@ -9146,6 +9213,9 @@ func (m *ProductMutation) ClearField(name string) error {
 		return nil
 	case product.FieldPublishedAt:
 		m.ClearPublishedAt()
+		return nil
+	case product.FieldModerationVisibilityAt:
+		m.ClearModerationVisibilityAt()
 		return nil
 	}
 	return fmt.Errorf("unknown Product nullable field %s", name)
@@ -9232,6 +9302,9 @@ func (m *ProductMutation) ResetField(name string) error {
 		return nil
 	case product.FieldModerationVisibility:
 		m.ResetModerationVisibility()
+		return nil
+	case product.FieldModerationVisibilityAt:
+		m.ResetModerationVisibilityAt()
 		return nil
 	case product.FieldUpdatedAt:
 		m.ResetUpdatedAt()
@@ -17081,6 +17154,7 @@ type StoreMutation struct {
 	rating_count                 *int
 	addrating_count              *int
 	moderation_visibility        *string
+	moderation_visibility_at     *time.Time
 	shipping_country_codes       *[]string
 	appendshipping_country_codes []string
 	locale                       *string
@@ -18032,6 +18106,55 @@ func (m *StoreMutation) ResetModerationVisibility() {
 	m.moderation_visibility = nil
 }
 
+// SetModerationVisibilityAt sets the "moderation_visibility_at" field.
+func (m *StoreMutation) SetModerationVisibilityAt(t time.Time) {
+	m.moderation_visibility_at = &t
+}
+
+// ModerationVisibilityAt returns the value of the "moderation_visibility_at" field in the mutation.
+func (m *StoreMutation) ModerationVisibilityAt() (r time.Time, exists bool) {
+	v := m.moderation_visibility_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldModerationVisibilityAt returns the old "moderation_visibility_at" field's value of the Store entity.
+// If the Store object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *StoreMutation) OldModerationVisibilityAt(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldModerationVisibilityAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldModerationVisibilityAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldModerationVisibilityAt: %w", err)
+	}
+	return oldValue.ModerationVisibilityAt, nil
+}
+
+// ClearModerationVisibilityAt clears the value of the "moderation_visibility_at" field.
+func (m *StoreMutation) ClearModerationVisibilityAt() {
+	m.moderation_visibility_at = nil
+	m.clearedFields[store.FieldModerationVisibilityAt] = struct{}{}
+}
+
+// ModerationVisibilityAtCleared returns if the "moderation_visibility_at" field was cleared in this mutation.
+func (m *StoreMutation) ModerationVisibilityAtCleared() bool {
+	_, ok := m.clearedFields[store.FieldModerationVisibilityAt]
+	return ok
+}
+
+// ResetModerationVisibilityAt resets all changes to the "moderation_visibility_at" field.
+func (m *StoreMutation) ResetModerationVisibilityAt() {
+	m.moderation_visibility_at = nil
+	delete(m.clearedFields, store.FieldModerationVisibilityAt)
+}
+
 // SetShippingCountryCodes sets the "shipping_country_codes" field.
 func (m *StoreMutation) SetShippingCountryCodes(s []string) {
 	m.shipping_country_codes = &s
@@ -18660,7 +18783,7 @@ func (m *StoreMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *StoreMutation) Fields() []string {
-	fields := make([]string, 0, 33)
+	fields := make([]string, 0, 34)
 	if m.created_at != nil {
 		fields = append(fields, store.FieldCreatedAt)
 	}
@@ -18720,6 +18843,9 @@ func (m *StoreMutation) Fields() []string {
 	}
 	if m.moderation_visibility != nil {
 		fields = append(fields, store.FieldModerationVisibility)
+	}
+	if m.moderation_visibility_at != nil {
+		fields = append(fields, store.FieldModerationVisibilityAt)
 	}
 	if m.shipping_country_codes != nil {
 		fields = append(fields, store.FieldShippingCountryCodes)
@@ -18808,6 +18934,8 @@ func (m *StoreMutation) Field(name string) (ent.Value, bool) {
 		return m.RatingCount()
 	case store.FieldModerationVisibility:
 		return m.ModerationVisibility()
+	case store.FieldModerationVisibilityAt:
+		return m.ModerationVisibilityAt()
 	case store.FieldShippingCountryCodes:
 		return m.ShippingCountryCodes()
 	case store.FieldLocale:
@@ -18883,6 +19011,8 @@ func (m *StoreMutation) OldField(ctx context.Context, name string) (ent.Value, e
 		return m.OldRatingCount(ctx)
 	case store.FieldModerationVisibility:
 		return m.OldModerationVisibility(ctx)
+	case store.FieldModerationVisibilityAt:
+		return m.OldModerationVisibilityAt(ctx)
 	case store.FieldShippingCountryCodes:
 		return m.OldShippingCountryCodes(ctx)
 	case store.FieldLocale:
@@ -19058,6 +19188,13 @@ func (m *StoreMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetModerationVisibility(v)
 		return nil
+	case store.FieldModerationVisibilityAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetModerationVisibilityAt(v)
+		return nil
 	case store.FieldShippingCountryCodes:
 		v, ok := value.([]string)
 		if !ok {
@@ -19221,6 +19358,9 @@ func (m *StoreMutation) ClearedFields() []string {
 	if m.FieldCleared(store.FieldBrandID) {
 		fields = append(fields, store.FieldBrandID)
 	}
+	if m.FieldCleared(store.FieldModerationVisibilityAt) {
+		fields = append(fields, store.FieldModerationVisibilityAt)
+	}
 	if m.FieldCleared(store.FieldShippingCountryCodes) {
 		fields = append(fields, store.FieldShippingCountryCodes)
 	}
@@ -19267,6 +19407,9 @@ func (m *StoreMutation) ClearField(name string) error {
 		return nil
 	case store.FieldBrandID:
 		m.ClearBrandID()
+		return nil
+	case store.FieldModerationVisibilityAt:
+		m.ClearModerationVisibilityAt()
 		return nil
 	case store.FieldShippingCountryCodes:
 		m.ClearShippingCountryCodes()
@@ -19353,6 +19496,9 @@ func (m *StoreMutation) ResetField(name string) error {
 		return nil
 	case store.FieldModerationVisibility:
 		m.ResetModerationVisibility()
+		return nil
+	case store.FieldModerationVisibilityAt:
+		m.ResetModerationVisibilityAt()
 		return nil
 	case store.FieldShippingCountryCodes:
 		m.ResetShippingCountryCodes()

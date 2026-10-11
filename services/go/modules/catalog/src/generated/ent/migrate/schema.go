@@ -309,6 +309,7 @@ var (
 		{Name: "like_count", Type: field.TypeInt, Default: 0},
 		{Name: "units_sold", Type: field.TypeInt, Default: 0},
 		{Name: "moderation_visibility", Type: field.TypeString, Default: "visible"},
+		{Name: "moderation_visibility_at", Type: field.TypeTime, Nullable: true},
 		{Name: "updated_at", Type: field.TypeTime},
 	}
 	// ProductsTable holds the schema information for the "products" table.
@@ -332,12 +333,12 @@ var (
 			{
 				Name:    "product_store_status_updated",
 				Unique:  false,
-				Columns: []*schema.Column{ProductsColumns[2], ProductsColumns[8], ProductsColumns[27], ProductsColumns[0]},
+				Columns: []*schema.Column{ProductsColumns[2], ProductsColumns[8], ProductsColumns[28], ProductsColumns[0]},
 				Annotation: &entsql.IndexAnnotation{
 					DescColumns: map[string]bool{
 						ProductsColumns[0].Name: true,
 
-						ProductsColumns[27].Name: true,
+						ProductsColumns[28].Name: true,
 					},
 				},
 			},
@@ -702,6 +703,7 @@ var (
 		{Name: "rating_sum", Type: field.TypeInt64, Default: 0},
 		{Name: "rating_count", Type: field.TypeInt, Default: 0},
 		{Name: "moderation_visibility", Type: field.TypeString, Default: "visible"},
+		{Name: "moderation_visibility_at", Type: field.TypeTime, Nullable: true},
 		{Name: "shipping_country_codes", Type: field.TypeJSON, Nullable: true},
 		{Name: "locale", Type: field.TypeString, Size: 12, Default: "en-NG"},
 		{Name: "contact_phone", Type: field.TypeString, Size: 20, Default: ""},

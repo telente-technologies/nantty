@@ -333,6 +333,20 @@ func (_c *ProductCreate) SetNillableModerationVisibility(v *string) *ProductCrea
 	return _c
 }
 
+// SetModerationVisibilityAt sets the "moderation_visibility_at" field.
+func (_c *ProductCreate) SetModerationVisibilityAt(v time.Time) *ProductCreate {
+	_c.mutation.SetModerationVisibilityAt(v)
+	return _c
+}
+
+// SetNillableModerationVisibilityAt sets the "moderation_visibility_at" field if the given value is not nil.
+func (_c *ProductCreate) SetNillableModerationVisibilityAt(v *time.Time) *ProductCreate {
+	if v != nil {
+		_c.SetModerationVisibilityAt(*v)
+	}
+	return _c
+}
+
 // SetUpdatedAt sets the "updated_at" field.
 func (_c *ProductCreate) SetUpdatedAt(v time.Time) *ProductCreate {
 	_c.mutation.SetUpdatedAt(v)
@@ -665,6 +679,10 @@ func (_c *ProductCreate) createSpec() (*Product, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.ModerationVisibility(); ok {
 		_spec.SetField(product.FieldModerationVisibility, field.TypeString, value)
 		_node.ModerationVisibility = value
+	}
+	if value, ok := _c.mutation.ModerationVisibilityAt(); ok {
+		_spec.SetField(product.FieldModerationVisibilityAt, field.TypeTime, value)
+		_node.ModerationVisibilityAt = &value
 	}
 	if value, ok := _c.mutation.UpdatedAt(); ok {
 		_spec.SetField(product.FieldUpdatedAt, field.TypeTime, value)
@@ -1085,6 +1103,24 @@ func (u *ProductUpsert) SetModerationVisibility(v string) *ProductUpsert {
 // UpdateModerationVisibility sets the "moderation_visibility" field to the value that was provided on create.
 func (u *ProductUpsert) UpdateModerationVisibility() *ProductUpsert {
 	u.SetExcluded(product.FieldModerationVisibility)
+	return u
+}
+
+// SetModerationVisibilityAt sets the "moderation_visibility_at" field.
+func (u *ProductUpsert) SetModerationVisibilityAt(v time.Time) *ProductUpsert {
+	u.Set(product.FieldModerationVisibilityAt, v)
+	return u
+}
+
+// UpdateModerationVisibilityAt sets the "moderation_visibility_at" field to the value that was provided on create.
+func (u *ProductUpsert) UpdateModerationVisibilityAt() *ProductUpsert {
+	u.SetExcluded(product.FieldModerationVisibilityAt)
+	return u
+}
+
+// ClearModerationVisibilityAt clears the value of the "moderation_visibility_at" field.
+func (u *ProductUpsert) ClearModerationVisibilityAt() *ProductUpsert {
+	u.SetNull(product.FieldModerationVisibilityAt)
 	return u
 }
 
@@ -1581,6 +1617,27 @@ func (u *ProductUpsertOne) SetModerationVisibility(v string) *ProductUpsertOne {
 func (u *ProductUpsertOne) UpdateModerationVisibility() *ProductUpsertOne {
 	return u.Update(func(s *ProductUpsert) {
 		s.UpdateModerationVisibility()
+	})
+}
+
+// SetModerationVisibilityAt sets the "moderation_visibility_at" field.
+func (u *ProductUpsertOne) SetModerationVisibilityAt(v time.Time) *ProductUpsertOne {
+	return u.Update(func(s *ProductUpsert) {
+		s.SetModerationVisibilityAt(v)
+	})
+}
+
+// UpdateModerationVisibilityAt sets the "moderation_visibility_at" field to the value that was provided on create.
+func (u *ProductUpsertOne) UpdateModerationVisibilityAt() *ProductUpsertOne {
+	return u.Update(func(s *ProductUpsert) {
+		s.UpdateModerationVisibilityAt()
+	})
+}
+
+// ClearModerationVisibilityAt clears the value of the "moderation_visibility_at" field.
+func (u *ProductUpsertOne) ClearModerationVisibilityAt() *ProductUpsertOne {
+	return u.Update(func(s *ProductUpsert) {
+		s.ClearModerationVisibilityAt()
 	})
 }
 
@@ -2246,6 +2303,27 @@ func (u *ProductUpsertBulk) SetModerationVisibility(v string) *ProductUpsertBulk
 func (u *ProductUpsertBulk) UpdateModerationVisibility() *ProductUpsertBulk {
 	return u.Update(func(s *ProductUpsert) {
 		s.UpdateModerationVisibility()
+	})
+}
+
+// SetModerationVisibilityAt sets the "moderation_visibility_at" field.
+func (u *ProductUpsertBulk) SetModerationVisibilityAt(v time.Time) *ProductUpsertBulk {
+	return u.Update(func(s *ProductUpsert) {
+		s.SetModerationVisibilityAt(v)
+	})
+}
+
+// UpdateModerationVisibilityAt sets the "moderation_visibility_at" field to the value that was provided on create.
+func (u *ProductUpsertBulk) UpdateModerationVisibilityAt() *ProductUpsertBulk {
+	return u.Update(func(s *ProductUpsert) {
+		s.UpdateModerationVisibilityAt()
+	})
+}
+
+// ClearModerationVisibilityAt clears the value of the "moderation_visibility_at" field.
+func (u *ProductUpsertBulk) ClearModerationVisibilityAt() *ProductUpsertBulk {
+	return u.Update(func(s *ProductUpsert) {
+		s.ClearModerationVisibilityAt()
 	})
 }
 

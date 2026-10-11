@@ -72,6 +72,8 @@ type Product struct {
 	UnitsSold int `json:"units_sold,omitempty"`
 	// ModerationVisibility holds the value of the "moderation_visibility" field.
 	ModerationVisibility string `json:"moderation_visibility,omitempty"`
+	// ModerationVisibilityAt holds the value of the "moderation_visibility_at" field.
+	ModerationVisibilityAt *time.Time `json:"moderation_visibility_at,omitempty"`
 	// UpdatedAt holds the value of the "updated_at" field.
 	UpdatedAt    time.Time `json:"updated_at,omitempty"`
 	selectValues sql.SelectValues
@@ -92,7 +94,7 @@ func (*Product) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullInt64)
 		case product.FieldName, product.FieldDescription, product.FieldBrandRelationship, product.FieldStatus, product.FieldVisibility, product.FieldCurrency, product.FieldModerationVisibility:
 			values[i] = new(sql.NullString)
-		case product.FieldCreatedAt, product.FieldPublishAt, product.FieldPublishedAt, product.FieldUpdatedAt:
+		case product.FieldCreatedAt, product.FieldPublishAt, product.FieldPublishedAt, product.FieldModerationVisibilityAt, product.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
 		case product.FieldID, product.FieldStoreID:
 			values[i] = new(uuid.UUID)
@@ -287,6 +289,13 @@ func (_m *Product) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.ModerationVisibility = value.String
 			}
+		case product.FieldModerationVisibilityAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field moderation_visibility_at", values[i])
+			} else if value.Valid {
+				_m.ModerationVisibilityAt = new(time.Time)
+				*_m.ModerationVisibilityAt = value.Time
+			}
 		case product.FieldUpdatedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field updated_at", values[i])
@@ -418,6 +427,11 @@ func (_m *Product) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("moderation_visibility=")
 	builder.WriteString(_m.ModerationVisibility)
+	builder.WriteString(", ")
+	if v := _m.ModerationVisibilityAt; v != nil {
+		builder.WriteString("moderation_visibility_at=")
+		builder.WriteString(v.Format(time.ANSIC))
+	}
 	builder.WriteString(", ")
 	builder.WriteString("updated_at=")
 	builder.WriteString(_m.UpdatedAt.Format(time.ANSIC))

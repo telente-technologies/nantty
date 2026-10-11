@@ -67,6 +67,7 @@ func (Product) Fields() []ent.Field {
 		field.Int("like_count").Default(0),
 		field.Int("units_sold").Default(0),
 		field.String("moderation_visibility").Default("visible"),
+		field.Time("moderation_visibility_at").Optional().Nillable(),
 		field.Time("updated_at").Default(time.Now).UpdateDefault(time.Now),
 	}
 }

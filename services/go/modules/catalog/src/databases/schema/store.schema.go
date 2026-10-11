@@ -38,6 +38,7 @@ func (Store) Fields() []ent.Field {
 		field.Int64("rating_sum").Default(0),
 		field.Int("rating_count").Default(0),
 		field.String("moderation_visibility").Default("visible"),
+		field.Time("moderation_visibility_at").Optional().Nillable(),
 		field.JSON("shipping_country_codes", []string{}).Optional(),
 		field.String("locale").Default("en-NG").MaxLen(12),
 		field.String("contact_phone").Default("").MaxLen(20),

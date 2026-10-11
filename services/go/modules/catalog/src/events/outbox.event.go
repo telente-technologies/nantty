@@ -54,13 +54,21 @@ func (store EntOutboxStore) PublishPendingOutboxEventsInTransaction(ctx context.
 		batch = append(batch, events.OutboxEvent{Id: row.ID.String(), EventType: row.EventType, Subject: row.Subject, Payload: row.Payload})
 		identifiers = append(identifiers, row.ID)
 	}
-	if err := publish(ctx, batch); err != nil {
-		return 0, rollbackAndJoin(tx, fmt.Errorf("publish outbox events: %w", err))
+	publishedIndexes, publishError := events.PublishIsolatingFailures(ctx, batch, publish)
+	if len(publishedIndexes) == 0 {
+		return 0, rollbackAndJoin(tx, fmt.Errorf("publish outbox events: %w", publishError))
 	}
-	if err := tx.OutboxEvent.Update().Where(outboxevent.IDIn(identifiers...)).SetPublishedAt(store.Now()).Exec(ctx); err != nil {
+	published := make([]uuid.UUID, 0, len(publishedIndexes))
+	for _, index := range publishedIndexes {
+		published = append(published, identifiers[index])
+	}
+	if err := tx.OutboxEvent.Update().Where(outboxevent.IDIn(published...)).SetPublishedAt(store.Now()).Exec(ctx); err != nil {
 		return 0, rollbackAndJoin(tx, err)
 	}
-	return len(pending), tx.Commit()
+	if err := tx.Commit(); err != nil {
+		return 0, err
+	}
+	return len(published), publishError
 }
 
 func rollbackAndJoin(tx *ent.Tx, err error) error {
