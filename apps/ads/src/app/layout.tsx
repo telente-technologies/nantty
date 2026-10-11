@@ -3,7 +3,7 @@ import { Inter } from "next/font/google";
 import { cookies } from "next/headers";
 import type { ReactNode } from "react";
 
-import { OfflineBanner, ThemeInitScript, parseThemePreference, readHtmlThemeAttribute, themeCookieName, themeViewport } from "@zudomart/web-kit";
+import { ConfirmDialogHost, OfflineBanner, ThemeInitScript, parseThemePreference, readHtmlThemeAttribute, themeCookieName, themeViewport } from "@zudomart/web-kit";
 
 import { ConsentBannerHost } from "@/components/privacy/consentBannerHost";
 import { AdsSessionProvider } from "@/components/session/adsSessionProvider";
@@ -52,6 +52,7 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
           <AppThemeProvider initialPreference={themePreference} isSignedIn={sessionView !== null}>
             <AdsVerificationProvider isSignedIn={sessionView !== null}>
               <ToastProvider>{children}</ToastProvider>
+              <ConfirmDialogHost />
             </AdsVerificationProvider>
             <ConsentBannerHost isSignedIn={sessionView !== null} />
           </AppThemeProvider>
