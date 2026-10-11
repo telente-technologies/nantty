@@ -19,4 +19,10 @@ describe("seller.debtLimits and payments.limits settings", () => {
     assert.throws(() => validatePaymentLimits({ baseMinor: { ...defaultPaymentLimits.baseMinor, walletDaily: { basic: 30_000_000, mid: 20_000_000, full: 500_000_000 } }, currencyOverridesMinor: {} }));
     assert.equal(validateSellerDebtLimits({ ...defaultSellerDebtLimits, currencyOverridesMinor: { GHS: { unverified: 4_000, payoutVerified: 20_000, identityVerified: 80_000 } } }).currencyOverridesMinor["GHS"]?.payoutVerified, 20_000);
   });
+
+  it("fill the ads step-up threshold for documents saved before it existed and keep it within the top-up maximum", () => {
+    const { adsStepUpAbove: _omitted, ...legacyBase } = defaultPaymentLimits.baseMinor;
+    assert.equal(validatePaymentLimits({ baseMinor: legacyBase, currencyOverridesMinor: {} }).baseMinor.adsStepUpAbove, 5_000_000);
+    assert.throws(() => validatePaymentLimits({ baseMinor: { ...defaultPaymentLimits.baseMinor, adsStepUpAbove: 2_000_000_000 }, currencyOverridesMinor: {} }));
+  });
 });

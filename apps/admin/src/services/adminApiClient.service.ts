@@ -1,3 +1,5 @@
+import { parseRetryAfterHeader, readRequestIdHeader } from "@zudomart/web-kit";
+
 import type { ApiErrorBody, ApiValidationIssue } from "@/types/api.type";
 import { resolveAdminErrorMessage } from "@/utils/adminErrorMessages.util";
 import { adaptListEnvelope } from "@/utils/listEnvelope.util";
@@ -19,6 +21,10 @@ export function registerStepUpPrompt(prompt: (() => Promise<boolean>) | null): v
   stepUpPrompt = prompt;
 }
 
+export function requestStepUpFromUser(): Promise<boolean> {
+  return stepUpPrompt ? stepUpPrompt() : Promise.resolve(false);
+}
+
 export function subscribeToAdminActivity(listener: () => void): () => void {
   activityListeners.add(listener);
   return () => activityListeners.delete(listener);
@@ -30,6 +36,9 @@ export class AdminApiRequestError extends Error {
     public readonly code: string,
     message: string,
     public readonly issues: readonly ApiValidationIssue[] = [],
+    public readonly details?: Readonly<Record<string, unknown>>,
+    public readonly requestId?: string,
+    public readonly retryAfterSeconds?: number,
   ) {
     super(message);
     this.name = "AdminApiRequestError";
@@ -101,7 +110,7 @@ export async function sendRequestToAdminConsoleServer<Payload>(bffPath: string, 
   if (!response.ok) {
     if (response.status === 401 && errorBody && sessionEndingCodes.has(errorBody.code)) redirectToSignedOutPage(errorBody.code);
     const code = errorBody?.code ?? `HTTP_${response.status}`;
-    throw new AdminApiRequestError(response.status, code, resolveAdminErrorMessage(code, errorBody?.message, response.status), errorBody?.issues ?? []);
+    throw new AdminApiRequestError(response.status, code, resolveAdminErrorMessage(code, errorBody?.message, response.status), errorBody?.issues ?? [], errorBody?.details, readRequestIdHeader(response.headers), parseRetryAfterHeader(response.headers.get("retry-after")));
   }
   if (response.status === 204) return undefined as Payload;
   if (options.expect === "text") return (await response.text()) as Payload;
@@ -116,7 +125,6 @@ export function sendAdminApiRequest<Payload>(apiPath: string, options: AdminApiR
 export function readErrorMessageForDisplay(error: unknown): string {
   if (typeof navigator !== "undefined" && navigator.onLine === false) return "You're offline. Check your connection and we'll retry when you're back.";
   if (error instanceof AdminApiRequestError) return error.message;
-  if (error instanceof Error && error.message) return `${error.message} (CLIENT_ERROR)`;
   return "The console hit an unexpected error. Nothing was sent. Reload the page and try again. (CLIENT_ERROR)";
 }
 

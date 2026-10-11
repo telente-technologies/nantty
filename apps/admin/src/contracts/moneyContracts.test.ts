@@ -63,10 +63,17 @@ const database = readMockDatabase();
 const admin = database.admins.find((candidate) => candidate.role === "SUPERADMIN");
 if (!admin) throw new Error("the demo data has no superadmin");
 const principal: MockPrincipal = { adminId: admin.id, name: admin.name, email: admin.email, role: admin.role, permissions: admin.permissions, sessionId: "ses_contract" };
-database.stepUpTokens.set("stepup_contract", { adminId: admin.id, sessionId: principal.sessionId, expiresAtEpochMs: Date.now() + 600_000 });
+let stepUpCounter = 0;
+// Money actions consume their step-up token, so each call confirms afresh, as the console does.
+function issueStepUpToken(): string {
+  stepUpCounter += 1;
+  const token = `stepup_contract_${stepUpCounter}`;
+  database.stepUpTokens.set(token, { adminId: admin!.id, sessionId: principal.sessionId, expiresAtEpochMs: Date.now() + 600_000 });
+  return token;
+}
 
 async function call(method: string, path: string, options: { readonly body?: unknown; readonly query?: string; readonly idempotencyKey?: string } = {}) {
-  const headers = new Headers({ "x-step-up-token": "stepup_contract" });
+  const headers = new Headers({ "x-step-up-token": issueStepUpToken() });
   if (options.idempotencyKey) headers.set("idempotency-key", options.idempotencyKey);
   const matched = findMockRouteForRequest(method, path);
   if (!matched) throw new Error(`no mock for ${method} ${path}`);

@@ -22,7 +22,7 @@ import styles from "./trustShared.module.css";
 const decisionOrder: readonly SuspensionCaseDecision[] = ["dismiss", "escalate", "approve"];
 
 export function SuspensionCasePanel({ caseId, onClose, onChanged }: { readonly caseId: string; readonly onClose: () => void; readonly onChanged: () => void }) {
-  const { data: suspensionCase, errorMessage, isLoading, reload, replaceData } = useAdminQuery((signal) => fetchSuspensionCaseDetail(caseId, signal), caseId);
+  const { data: suspensionCase, errorMessage, error: queryError, isLoading, reload, replaceData } = useAdminQuery((signal) => fetchSuspensionCaseDetail(caseId, signal), caseId);
   const [pendingDecision, setPendingDecision] = useState<SuspensionCaseDecision | null>(null);
   const { showToast } = useToast();
   const isOpen = suspensionCase?.status === "PENDING" || suspensionCase?.status === "ESCALATED";
@@ -45,7 +45,7 @@ export function SuspensionCasePanel({ caseId, onClose, onChanged }: { readonly c
         <Button key={decision} size="small" variant={decision === "approve" ? "quietDanger" : decision === "dismiss" ? "ghost" : "secondary"} iconName="shield24" onClick={() => setPendingDecision(decision)}>{suspensionDecisionLabels[decision]}</Button>
       )) : null}
     >
-      {errorMessage ? <ErrorBlock message={errorMessage} onRetry={reload} /> : null}
+      {errorMessage ? <ErrorBlock error={queryError} message={errorMessage} onRetry={reload} /> : null}
       {isLoading && !suspensionCase ? <LoadingBlock /> : null}
       {suspensionCase ? (
         <>

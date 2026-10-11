@@ -1,7 +1,10 @@
 import type { ReactNode } from "react";
 
-import { Button } from "./button";
+import { ErrorState, resolveCallerErrorCopy, type ErrorStateVariant } from "@zudomart/web-kit";
+
 import styles from "./feedback.module.css";
+import type { ZudoIconName } from "@/constants/zudoIconNames.constant";
+
 import { ZudoIcon } from "./zudoIcon";
 
 export function InlineError({ message }: { readonly message: string }) {
@@ -13,18 +16,9 @@ export function InlineError({ message }: { readonly message: string }) {
   );
 }
 
-export function ErrorBlock({ message, onRetry }: { readonly message: string; readonly onRetry?: () => void }) {
-  return (
-    <div className={styles.errorBlock} role="alert">
-      <ZudoIcon name="warning20" size={18} />
-      <p>{message}</p>
-      {onRetry ? (
-        <Button size="small" onClick={onRetry} iconName="refresh20">
-          Try again
-        </Button>
-      ) : null}
-    </div>
-  );
+export function ErrorBlock({ message, onRetry, error, title, variant = "inline" }: { readonly message?: string; readonly onRetry?: () => void; readonly error?: unknown; readonly title?: string; readonly variant?: ErrorStateVariant }) {
+  const copy = resolveCallerErrorCopy(error, message);
+  return <ErrorState variant={variant} error={error} kind={copy.kind} title={title} description={copy.description} onRetry={onRetry} />;
 }
 
 export function LoadingBlock({ label = "Loading…", lines = 4 }: { readonly label?: string; readonly lines?: number }) {
@@ -38,9 +32,12 @@ export function LoadingBlock({ label = "Loading…", lines = 4 }: { readonly lab
   );
 }
 
-export function EmptyState({ title, description, action }: { readonly title: string; readonly description?: ReactNode; readonly action?: ReactNode }) {
+export function EmptyState({ title, description, action, iconName = "squaresFour24" }: { readonly title: string; readonly description?: ReactNode; readonly action?: ReactNode; readonly iconName?: ZudoIconName }) {
   return (
     <div className={styles.emptyState}>
+      <span className={styles.emptyIcon} aria-hidden="true">
+        <ZudoIcon name={iconName} size={24} />
+      </span>
       <p className={styles.emptyTitle}>{title}</p>
       {description ? <p className={styles.emptyDescription}>{description}</p> : null}
       {action}

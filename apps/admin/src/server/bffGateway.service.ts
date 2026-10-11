@@ -26,7 +26,7 @@ import { sessionCookieNames } from "@/config/sessionCookies.config";
 
 const maximumForwardedBodyBytes = 2 * 1024 * 1024;
 const forwardedRequestHeaderNames = ["idempotency-key", "if-match"];
-const returnedResponseHeaderNames = ["content-type", "content-disposition", "idempotent-replayed", "retry-after", "etag"];
+const returnedResponseHeaderNames = ["content-type", "content-disposition", "idempotent-replayed", "retry-after", "etag", "x-request-id"];
 const allowedApiPathPattern = /^\/admin(\/[A-Za-z0-9._~:@%-]+)+$/;
 
 export function readBackendErrorCode(result: BackendResult): string | null {
@@ -121,7 +121,7 @@ export async function forwardBffRequestToAdminApi(request: NextRequest, pathSegm
     rotatedTokens = revalidated.rotatedTokens ?? rotatedTokens;
     view = { ...view, admin: revalidated.admin, verifiedAtEpochSeconds: nowInEpochSeconds() };
   }
-  if (!doesAdminSatisfyApiRequirement(view.admin, route.requirement)) return respondWithBffError(403, "FORBIDDEN", "Your admin permissions do not allow this.");
+  if (!doesAdminSatisfyApiRequirement(view.admin, route.requirement)) return respondWithBffError(403, "FORBIDDEN", "Your admin permissions do not allow this.", { details: { permission: route.requirement.kind === "anyOf" ? route.requirement.permissions[0] : "superadmin" } });
 
   const body = await readRequestBodyWithinLimit(request);
   if (body === "too_large") return respondWithBffError(413, "PAYLOAD_TOO_LARGE", "That request is too large.");

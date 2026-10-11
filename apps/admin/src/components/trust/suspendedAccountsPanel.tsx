@@ -38,7 +38,7 @@ export function SuspendedAccountsPanel({ appealsOnly }: { readonly appealsOnly: 
   const [cursor, setCursor] = useState<string | undefined>();
   const [action, setAction] = useState<AccountAction | null>(null);
   const filters = { appeal: appealsOnly ? "PENDING" : undefined, search: search || undefined, cursor };
-  const { data, errorMessage, isLoading, reload } = useAdminQuery((signal) => fetchSuspendedAccounts(filters, signal), JSON.stringify(filters));
+  const { data, errorMessage, error: queryError, isLoading, reload } = useAdminQuery((signal) => fetchSuspendedAccounts(filters, signal), JSON.stringify(filters));
   const { showToast } = useToast();
   const mutation = useAdminMutation(async (input: { action: AccountAction; reason: string }) => {
     const caseId = input.action.account.caseId;
@@ -82,7 +82,7 @@ export function SuspendedAccountsPanel({ appealsOnly }: { readonly appealsOnly: 
           <TextField label="Search" isLabelHidden type="search" placeholder="Search @username or name" value={search} onChange={(event) => { setSearch(event.target.value); setCursor(undefined); }} />
         </div>
       </Toolbar>
-      {errorMessage ? <ErrorBlock message={errorMessage} onRetry={reload} /> : null}
+      {errorMessage ? <ErrorBlock error={queryError} message={errorMessage} onRetry={reload} /> : null}
       <DataTable caption={appealsOnly ? "Appeal queue" : "Suspended accounts"} columns={columns} rows={data?.items ?? []} readRowKey={(account) => account.caseId} isLoading={isLoading} readRowTone={(account) => (account.daysUntilDeletion <= 14 ? "danger" : account.appeal?.status === "PENDING" ? "caution" : null)} emptyMessage={appealsOnly ? "No appeals waiting." : "No suspended accounts."} />
       <CursorPagination cursor={cursor} nextCursor={data?.nextCursor} onCursorChange={setCursor} />
       {action ? (

@@ -22,14 +22,19 @@ function readDebtLevels(rawLevels: unknown, path: string): DebtLevelAmounts {
   return read;
 }
 
-function readPaymentAmounts(rawAmounts: unknown, path: string): PaymentLimitAmounts {
+const defaultAdsStepUpAboveMinor = 5_000_000;
+
+function readPaymentAmounts(rawAmounts: unknown, path: string, isBase = false): PaymentLimitAmounts {
   const amounts = readObjectAtPath(rawAmounts, path);
-  onlyKeys(amounts, path, ["orderCheckout", "coinPurchase", "adsTopUp", "walletDaily"]);
+  onlyKeys(amounts, path, ["orderCheckout", "coinPurchase", "adsTopUp", "adsStepUpAbove", "walletDaily"]);
   const daily = readObjectAtPath(amounts["walletDaily"], `${path}.walletDaily`);
   onlyKeys(daily, `${path}.walletDaily`, ["basic", "mid", "full"]);
   const walletDaily = { basic: readLimit(daily, "basic", `${path}.walletDaily`), mid: readLimit(daily, "mid", `${path}.walletDaily`), full: readLimit(daily, "full", `${path}.walletDaily`) };
   if (walletDaily.basic > walletDaily.mid || walletDaily.mid > walletDaily.full) failValidation(`${path}.walletDaily`, "Basic must not exceed mid, and mid must not exceed full.");
-  return { orderCheckout: readLimit(amounts, "orderCheckout", path), coinPurchase: readLimit(amounts, "coinPurchase", path), adsTopUp: readLimit(amounts, "adsTopUp", path), walletDaily };
+  const adsTopUp = readLimit(amounts, "adsTopUp", path);
+  const stepUp = amounts["adsStepUpAbove"] === undefined || amounts["adsStepUpAbove"] === 0 ? (isBase ? defaultAdsStepUpAboveMinor : undefined) : readLimit(amounts, "adsStepUpAbove", path);
+  if (stepUp !== undefined && stepUp > adsTopUp) failValidation(`${path}.adsStepUpAbove`, "Must not exceed the ads top-up maximum.");
+  return { orderCheckout: readLimit(amounts, "orderCheckout", path), coinPurchase: readLimit(amounts, "coinPurchase", path), adsTopUp, ...(stepUp === undefined ? {} : { adsStepUpAbove: stepUp }), walletDaily };
 }
 
 function readOverrides<Value>(rawOverrides: unknown, path: string, readValue: (raw: unknown, path: string) => Value): Record<string, Value> {
@@ -59,8 +64,8 @@ export function validatePaymentLimits(rawContent: unknown): PaymentLimits {
   const content = readObjectAtPath(rawContent, "content");
   onlyKeys(content, "content", ["baseMinor", "currencyOverridesMinor"]);
   return {
-    baseMinor: readPaymentAmounts(content["baseMinor"], "content.baseMinor"),
-    currencyOverridesMinor: readOverrides(content["currencyOverridesMinor"], "content.currencyOverridesMinor", readPaymentAmounts),
+    baseMinor: readPaymentAmounts(content["baseMinor"], "content.baseMinor", true),
+    currencyOverridesMinor: readOverrides(content["currencyOverridesMinor"], "content.currencyOverridesMinor", (raw, path) => readPaymentAmounts(raw, path)),
   };
 }
 
@@ -70,6 +75,6 @@ export const defaultSellerDebtLimits: SellerDebtLimits = {
 };
 
 export const defaultPaymentLimits: PaymentLimits = {
-  baseMinor: { orderCheckout: 500_000_000, coinPurchase: 50_000_000, adsTopUp: 1_000_000_000, walletDaily: { basic: 5_000_000, mid: 20_000_000, full: 500_000_000 } },
+  baseMinor: { orderCheckout: 500_000_000, coinPurchase: 50_000_000, adsTopUp: 1_000_000_000, adsStepUpAbove: 5_000_000, walletDaily: { basic: 5_000_000, mid: 20_000_000, full: 500_000_000 } },
   currencyOverridesMinor: {},
 };

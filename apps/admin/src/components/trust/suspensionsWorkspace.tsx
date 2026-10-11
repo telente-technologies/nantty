@@ -44,7 +44,7 @@ function CaseQueue({ status }: { readonly status: "OPEN" | "DECIDED" }) {
   const [filters, setFilters] = useState<Omit<SuspensionQueueFilters, "status">>({});
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const queryFilters = { ...filters, status };
-  const { data, errorMessage, isLoading, reload } = useAdminQuery((signal) => fetchSuspensionCases(queryFilters, signal), JSON.stringify(queryFilters));
+  const { data, errorMessage, error: queryError, isLoading, reload } = useAdminQuery((signal) => fetchSuspensionCases(queryFilters, signal), JSON.stringify(queryFilters));
   return (
     <>
       <Toolbar>
@@ -53,7 +53,7 @@ function CaseQueue({ status }: { readonly status: "OPEN" | "DECIDED" }) {
           <SelectField label="Source" isLabelHidden options={suspensionSourceOptions} value={filters.source ?? ""} onChange={(event) => setFilters({ ...filters, source: event.target.value || undefined, cursor: undefined })} />
         </div>
       </Toolbar>
-      {errorMessage ? <ErrorBlock message={errorMessage} onRetry={reload} /> : null}
+      {errorMessage ? <ErrorBlock error={queryError} message={errorMessage} onRetry={reload} /> : null}
       <DataTable caption="Suspension cases" columns={columns} rows={data?.items ?? []} readRowKey={(item) => item.id} onRowOpen={(item) => setSelectedId(item.id)} selectedRowKey={selectedId} isLoading={isLoading} readRowTone={(item) => (item.status === "ESCALATED" ? "danger" : item.riskScore >= 80 ? "caution" : null)} emptyMessage={status === "OPEN" ? "No suspension cases waiting." : "Nothing decided yet."} />
       <CursorPagination cursor={filters.cursor} nextCursor={data?.nextCursor} onCursorChange={(cursor) => setFilters({ ...filters, cursor })} />
       {selectedId ? <SuspensionCasePanel key={selectedId} caseId={selectedId} onClose={() => setSelectedId(null)} onChanged={reload} /> : null}
