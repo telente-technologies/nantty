@@ -58,7 +58,7 @@ export function TransferCoinsSheet({ visible, recipient, onClose }: TransferCoin
   };
 
   return (
-    <BottomSheet visible={visible} onClose={closeAndReset} title={`Send coins to ${recipient?.name ?? ""}`} floating>
+    <BottomSheet visible={visible} onClose={closeAndReset} title={`Send coins to ${recipient?.name ?? ""}`} floating scrollable>
       <View style={styles.body}>
         <View style={{ width: 40, height: 40, borderRadius: 20, alignItems: "center", justifyContent: "center", backgroundColor: colors.chip }}>
           {transfer.isSuccess ? <SealCheck20Icon size={22} color={colors.textMuted} /> : <Wallet24Icon size={22} color={colors.textMuted} />}
@@ -113,6 +113,6 @@ export function TransferCoinsSheet({ visible, recipient, onClose }: TransferCoin
 }
 
 const useStyles = makeThemedStyles((colors) => StyleSheet.create({
-  body: { paddingHorizontal: 16, paddingBottom: 20, gap: 12 },
+  body: { paddingBottom: 4, gap: 12 },
   quote: { gap: 4, padding: 12, borderRadius: 8, backgroundColor: colors.background },
 }));

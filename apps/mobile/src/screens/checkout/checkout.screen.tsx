@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
-import { ScrollView, StyleSheet, View } from "react-native";
+import { StyleSheet, View } from "react-native";
 
 import { CartGrandTotalCard } from "@/components/cart/cartGrandTotalCard";
 import { CartSellerGroupCard } from "@/components/cart/cartSellerGroupCard";
@@ -9,6 +9,7 @@ import { PurchaseTermsText } from "@/components/cart/purchaseTermsText";
 import { formatAddressLocation } from "@/components/settings/addressRow";
 import { SelectableRow } from "@/components/cart/selectableRow";
 import { Button } from "@/components/ui/button";
+import { KeyboardAwareForm } from "@/components/ui/keyboardAwareForm";
 import { Header } from "@/components/ui/header";
 import { Screen } from "@/components/ui/screen";
 import { Text } from "@/components/ui/text";
@@ -141,7 +142,26 @@ export function CheckoutScreen({ navigation }: MainScreenProps<"Checkout">) {
   return (
     <Screen>
       <Header title="Checkout" paddingHorizontal={12} />
-      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+      <KeyboardAwareForm
+        contentContainerStyle={styles.content}
+        showsVerticalScrollIndicator={false}
+        footerStyle={styles.footer}
+        footer={
+          <>
+            {placeOrderAndStartPayment.isError && !countryNeeded && !isHandledProblem(placeOrderAndStartPayment.error) ? (
+              <Text size={typeScale.xs} lineHeight={14.4} color={colors.error} align="center" accessibilityRole="alert">
+                Couldn't place your order. Please try again.
+              </Text>
+            ) : null}
+            <Button
+              title={usingWallet ? "Pay from wallet" : "Pay securely"}
+              disabled={!addressId || !cart.data || cart.data.payableGroupCount === 0}
+              loading={placeOrderAndStartPayment.isPending}
+              onPress={startPayment}
+            />
+          </>
+        }
+      >
         {countryNeeded ? (
           <CountryRequiredPicker
             onSaved={() => {
@@ -218,20 +238,7 @@ export function CheckoutScreen({ navigation }: MainScreenProps<"Checkout">) {
           {checkoutEscrowNote(providerWallet.isNigeria)}
         </Text>
         <PurchaseTermsText />
-      </ScrollView>
-      <View style={styles.footer}>
-        {placeOrderAndStartPayment.isError && !countryNeeded && !isHandledProblem(placeOrderAndStartPayment.error) ? (
-          <Text size={typeScale.xs} lineHeight={14.4} color={colors.error} align="center" accessibilityRole="alert">
-            Couldn't place your order. Please try again.
-          </Text>
-        ) : null}
-        <Button
-          title={usingWallet ? "Pay from wallet" : "Pay securely"}
-          disabled={!addressId || !cart.data || cart.data.payableGroupCount === 0}
-          loading={placeOrderAndStartPayment.isPending}
-          onPress={startPayment}
-        />
-      </View>
+      </KeyboardAwareForm>
     </Screen>
   );
 }
@@ -239,5 +246,5 @@ export function CheckoutScreen({ navigation }: MainScreenProps<"Checkout">) {
 const styles = StyleSheet.create({
   content: { paddingHorizontal: spacing[3], paddingTop: spacing[2], paddingBottom: spacing[6], gap: spacing[6] },
   section: { gap: spacing[3] },
-  footer: { paddingHorizontal: spacing[4], paddingTop: spacing[2], paddingBottom: spacing[6], gap: spacing[2] },
+  footer: { paddingHorizontal: spacing[4], paddingTop: spacing[2], paddingBottom: spacing[3], gap: spacing[2] },
 });

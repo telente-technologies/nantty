@@ -139,7 +139,7 @@ function SoundOptionRow(props: { title: string; subtitle: string; isSelected: bo
 }
 
 const useStyles = makeThemedStyles((colors) => StyleSheet.create({
-  body: { paddingHorizontal: 16, paddingBottom: 16, gap: 12, maxHeight: 520 },
+  body: { flexShrink: 1, paddingHorizontal: 16, paddingBottom: 16, gap: 12, maxHeight: 520 },
   searchField: {
     height: 44,
     paddingHorizontal: 14,
@@ -161,7 +161,7 @@ const useStyles = makeThemedStyles((colors) => StyleSheet.create({
     color: colors.text,
   },
   tabs: { flexDirection: "row", gap: 16 },
-  list: { maxHeight: 320 },
+  list: { flexShrink: 1, maxHeight: 320 },
   loading: { marginVertical: 24 },
   optionRow: {
     minHeight: 52,

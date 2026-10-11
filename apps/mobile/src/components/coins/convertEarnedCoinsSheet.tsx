@@ -57,7 +57,7 @@ export function ConvertEarnedCoinsSheet({ visible, onClose }: ConvertEarnedCoins
   };
 
   return (
-    <BottomSheet visible={visible} onClose={closeAndReset} title="Convert earned coins" floating>
+    <BottomSheet visible={visible} onClose={closeAndReset} title="Convert earned coins" floating scrollable>
       <View style={styles.body}>
         <View style={{ width: 40, height: 40, borderRadius: 20, alignItems: "center", justifyContent: "center", backgroundColor: colors.chip }}>
           {convert.isSuccess ? <SealCheck20Icon size={22} color={colors.textMuted} /> : <Repeat24Icon size={22} color={colors.textMuted} />}
@@ -112,6 +112,6 @@ export function ConvertEarnedCoinsSheet({ visible, onClose }: ConvertEarnedCoins
 }
 
 const styles = StyleSheet.create({
-  body: { paddingHorizontal: 16, paddingBottom: 20, gap: 12 },
+  body: { paddingBottom: 4, gap: 12 },
   receipt: { gap: 8 },
 });

@@ -11,6 +11,7 @@ import { sellerQueryKeys } from "@/components/seller/sellerQueries.hook";
 import { SettingsCenteredAction } from "@/components/settings/settingsGroup";
 import { BrandLoader } from "@/components/ui/brandLoader";
 import { Button } from "@/components/ui/button";
+import { KeyboardAwareForm } from "@/components/ui/keyboardAwareForm";
 import { Header } from "@/components/ui/header";
 import { Screen } from "@/components/ui/screen";
 import { Text } from "@/components/ui/text";
@@ -109,7 +110,7 @@ function ProductFormEditor({ navigation, route }: MainScreenProps<"ProductForm">
   return (
     <Screen>
       <Header title={productId ? "Edit product" : "New product"} />
-      <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
+      <KeyboardAwareForm contentContainerStyle={styles.content}>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.images}>
           {images.map((image, index) => (
             <View key={image.mediaId} style={styles.image}>
@@ -141,7 +142,7 @@ function ProductFormEditor({ navigation, route }: MainScreenProps<"ProductForm">
         ) : null}
         <Button title={productId ? "Save changes" : "Publish product"} disabled={!canSave || uploading} loading={saveProduct.isPending} onPress={() => saveProduct.mutate()} />
         {productId ? <SettingsCenteredAction label="Delete product" onPress={confirmAndDeleteProduct} /> : null}
-      </ScrollView>
+      </KeyboardAwareForm>
     </Screen>
   );
 }

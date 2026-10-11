@@ -102,8 +102,8 @@ export function SendInChatSheet({ reference, onClose }: SendInChatSheetProps) {
 }
 
 const useStyles = makeThemedStyles((colors) => StyleSheet.create({
-  body: { gap: 12, paddingHorizontal: 20, paddingBottom: 16 },
-  list: { maxHeight: 300 },
+  body: { flexShrink: 1, gap: 12, paddingHorizontal: 20, paddingBottom: 16 },
+  list: { flexShrink: 1, maxHeight: 300 },
   row: { flexDirection: "row", alignItems: "center", gap: 12, paddingVertical: 8 },
   name: { flex: 1 },
   check: { width: 22, height: 22, borderRadius: 11, borderWidth: 1.5, borderColor: colors.divider, alignItems: "center", justifyContent: "center" },

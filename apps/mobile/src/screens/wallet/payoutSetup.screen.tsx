@@ -1,6 +1,6 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
-import { ActivityIndicator, ScrollView, StyleSheet } from "react-native";
+import { ActivityIndicator, StyleSheet } from "react-native";
 
 import { AccountSetupPanel } from "@/components/payoutOnboarding/accountSetupPanel";
 import { BankStep } from "@/components/payoutOnboarding/bankStep";
@@ -13,6 +13,7 @@ import { PayoutStatusPanel } from "@/components/payoutOnboarding/payoutStatusPan
 import { payoutQueryKeys, usePayoutOnboardingQuery } from "@/components/payoutOnboarding/payoutOnboardingQueries.hook";
 import { StepSyncList } from "@/components/payoutOnboarding/stepSyncList";
 import { Header } from "@/components/ui/header";
+import { KeyboardAwareForm } from "@/components/ui/keyboardAwareForm";
 import { Screen } from "@/components/ui/screen";
 import { Text } from "@/components/ui/text";
 import { useTheme } from "@/theme";
@@ -36,7 +37,7 @@ export function PayoutSetupScreen({ navigation, route }: MainScreenProps<"Payout
   return (
     <Screen>
       <Header title="Get paid" />
-      <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
+      <KeyboardAwareForm contentContainerStyle={styles.content}>
         {isError ? <Text color={colors.error}>{error.message}</Text> : null}
         {!state && !isError ? <ActivityIndicator color={colors.primary} style={styles.loading} /> : null}
         {needsBvnConsent ? <BvnConsentCard onVerify={() => setEditing(true)} /> : null}
@@ -58,7 +59,7 @@ export function PayoutSetupScreen({ navigation, route }: MainScreenProps<"Payout
             {state.currentStep === "document" ? <DocumentStep state={state} stepNumber={stepNumber} stepCount={stepCount} onChanged={refresh} /> : null}
           </>
         ) : null}
-      </ScrollView>
+      </KeyboardAwareForm>
     </Screen>
   );
 }

@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
-import { ScrollView, StyleSheet, View } from "react-native";
+import { StyleSheet, View } from "react-native";
 
 import { ApplicationIdentityStep } from "@/components/seller/applicationIdentityStep";
 import { ApplicationPayoutStep } from "@/components/seller/applicationPayoutStep";
@@ -9,6 +9,7 @@ import { ApplicationStepHeader } from "@/components/seller/applicationStepHeader
 import { ApplicationContactStep, ApplicationStoreStep } from "@/components/seller/applicationStoreAndContactSteps";
 import { sellerQueryKeys } from "@/components/seller/sellerQueries.hook";
 import { Button } from "@/components/ui/button";
+import { KeyboardAwareForm } from "@/components/ui/keyboardAwareForm";
 import { Header } from "@/components/ui/header";
 import { Screen } from "@/components/ui/screen";
 import { Text } from "@/components/ui/text";
@@ -85,30 +86,35 @@ export function SellerApplicationScreen({ navigation }: MainScreenProps<"SellerA
   return (
     <Screen>
       <Header title="Start selling" onBack={goBackOneStep} />
-      <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
+      <KeyboardAwareForm
+        contentContainerStyle={styles.content}
+        footerStyle={styles.footer}
+        footer={
+          <>
+            {submitApplication.isError ? (
+              <Text size={12} lineHeight={16} color={colors.error} align="center" accessibilityRole="alert">{describeActionFailure(submitApplication.error)}</Text>
+            ) : null}
+            <Button
+              title={isLastStep ? "Submit application" : "Continue"}
+              disabled={!step.isComplete(draft) || uploadingDocument || (isLastStep && !STEPS.every((s) => s.isComplete(draft)))}
+              loading={submitApplication.isPending}
+              onPress={() => (isLastStep ? submitApplication.mutate() : setStepIndex(stepIndex + 1))}
+            />
+          </>
+        }
+      >
         <ApplicationStepHeader stepNumber={stepIndex + 1} totalSteps={STEPS.length} title={step.title} subtitle={step.subtitle} />
         {stepIndex === 0 ? <ApplicationStoreStep draft={draft} onChange={updateDraft} /> : null}
         {stepIndex === 1 ? <ApplicationContactStep draft={draft} onChange={updateDraft} /> : null}
         {stepIndex === 2 ? <ApplicationIdentityStep draft={draft} onChange={updateDraft} onUploadingChange={setUploadingDocument} /> : null}
         {stepIndex === 3 ? <ApplicationPayoutStep draft={draft} onChange={updateDraft} /> : null}
         {stepIndex === 4 ? <ApplicationReviewStep draft={draft} onEditStep={setStepIndex} /> : null}
-      </ScrollView>
-      <View style={styles.footer}>
-        {submitApplication.isError ? (
-          <Text size={12} lineHeight={16} color={colors.error} align="center" accessibilityRole="alert">{describeActionFailure(submitApplication.error)}</Text>
-        ) : null}
-        <Button
-          title={isLastStep ? "Submit application" : "Continue"}
-          disabled={!step.isComplete(draft) || uploadingDocument || (isLastStep && !STEPS.every((s) => s.isComplete(draft)))}
-          loading={submitApplication.isPending}
-          onPress={() => (isLastStep ? submitApplication.mutate() : setStepIndex(stepIndex + 1))}
-        />
-      </View>
+      </KeyboardAwareForm>
     </Screen>
   );
 }
 
 const styles = StyleSheet.create({
   content: { paddingHorizontal: 16, paddingTop: 8, paddingBottom: 32, gap: 24 },
-  footer: { paddingHorizontal: 16, paddingTop: 8, paddingBottom: 24, gap: 8 },
+  footer: { paddingHorizontal: 16, paddingTop: 8, paddingBottom: 12, gap: 8 },
 });

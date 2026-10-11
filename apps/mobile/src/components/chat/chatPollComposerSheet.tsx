@@ -42,7 +42,7 @@ export function ChatPollComposerSheet({ visible, onClose, onSendPoll }: ChatPoll
   };
 
   return (
-    <BottomSheet visible={visible} onClose={onClose} title="Create poll">
+    <BottomSheet visible={visible} onClose={onClose} title="Create poll" scrollable>
       <View style={styles.body}>
         <TextField label="Question" value={question} onChangeText={setQuestion} maxLength={MAXIMUM_QUESTION_LENGTH} placeholder="Ask something" />
         {optionTexts.map((text, index) => (
@@ -73,7 +73,7 @@ export function ChatPollComposerSheet({ visible, onClose, onSendPoll }: ChatPoll
 }
 
 const useStyles = makeThemedStyles(() => StyleSheet.create({
-  body: { paddingHorizontal: 16, paddingBottom: 12, gap: 12 },
+  body: { paddingBottom: 12, gap: 12 },
   addOption: { flexDirection: "row", alignItems: "center", gap: 8 },
   switchRow: { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
 }));

@@ -62,7 +62,7 @@ export function TipSheet({ target, onClose }: { target: TipTarget | null; onClos
 
   return (
     <>
-      <BottomSheet visible={!!target && !isBuyCoinsOpen} onClose={closeAndReset} title={`Tip ${target?.creatorName ?? ""}`} floating>
+      <BottomSheet visible={!!target && !isBuyCoinsOpen} onClose={closeAndReset} title={`Tip ${target?.creatorName ?? ""}`} floating scrollable>
         <View style={styles.body}>
           <View style={{ width: 40, height: 40, borderRadius: 20, alignItems: "center", justifyContent: "center", backgroundColor: colors.chip }}>
             {sendTip.isSuccess ? <SealCheck20Icon size={22} color={colors.textMuted} /> : <Gift24Icon size={22} color={colors.textMuted} />}
@@ -121,7 +121,7 @@ export function TipSheet({ target, onClose }: { target: TipTarget | null; onClos
 }
 
 const useStyles = makeThemedStyles((colors) => StyleSheet.create({
-  body: { paddingHorizontal: 16, paddingBottom: 20, gap: 12 },
+  body: { paddingBottom: 4, gap: 12 },
   presets: { flexDirection: "row", gap: 8 },
   preset: {
     flex: 1,
