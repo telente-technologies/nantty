@@ -22,6 +22,12 @@ func sellerHeaders(storeId string) http.Header {
 		"X-Store-Country": {"NG"}, "X-Store-Timezone": {"Africa/Lagos"}, "X-Store-Name": {"Ada Fabrics"}}
 }
 
+func steppedUp(headers http.Header) http.Header {
+	copied := headers.Clone()
+	copied.Set("X-Step-Up-Token-Digest", strings.ReplaceAll(uuid.NewString()+uuid.NewString(), "-", ""))
+	return copied
+}
+
 func TestSellerWalletViewsPayoutAccountsAndPayoutsThroughTheInternalApi(t *testing.T) {
 	if testing.Short() {
 		t.Skip("integration test: needs Postgres")
@@ -34,7 +40,7 @@ func TestSellerWalletViewsPayoutAccountsAndPayoutsThroughTheInternalApi(t *testi
 		t.Fatalf("internal routes need the token: %d", denied.Status)
 	}
 	harness.post(ledgermodels.JournalEntryRequest{Reference: "seed-seller-" + seller, Kind: "escrow.released", Description: "Escrow released for ZM-1001", Lines: []ledgermodels.JournalLineRequest{
-		{Account: ledgermodels.PlatformProviderBalanceAccount("paystack", "NGN"), Direction: ledgermodels.Debit, AmountMinor: 500_000},
+		{Account: ledgermodels.PlatformProviderBalanceAccount("flutterwave", "NGN"), Direction: ledgermodels.Debit, AmountMinor: 500_000},
 		{Account: ledgermodels.SellerAvailableAccount(seller, "NGN"), Direction: ledgermodels.Credit, AmountMinor: 500_000},
 	}})
 	balances := harness.Call(http.MethodGet, prefix+"/wallet/balances", "", "", nil, headers)
@@ -54,32 +60,39 @@ func TestSellerWalletViewsPayoutAccountsAndPayoutsThroughTheInternalApi(t *testi
 		t.Fatalf("resolve: %d %s", resolved.Status, resolved.Raw)
 	}
 	resolution := map[string]any{"resolutionId": resolved.Body["resolutionId"]}
-	added := harness.Call(http.MethodPost, prefix+"/wallet/payout-accounts", "", "", resolution, headers)
+	if unconfirmed := harness.Call(http.MethodPost, prefix+"/wallet/payout-accounts", "", "", resolution, headers); unconfirmed.Status != http.StatusForbidden || unconfirmed.Body["code"] != "STEP_UP_REQUIRED" {
+		t.Fatalf("adding a payout account needs the relayed step-up: %d %s", unconfirmed.Status, unconfirmed.Raw)
+	}
+	confirmed := steppedUp(headers)
+	added := harness.Call(http.MethodPost, prefix+"/wallet/payout-accounts", "", "", resolution, confirmed)
 	if added.Status != http.StatusCreated || added.Body["isDefault"] != true {
 		t.Fatalf("add: %d %s", added.Status, added.Raw)
 	}
-	if reused := harness.Call(http.MethodPost, prefix+"/wallet/payout-accounts", "", "", resolution, headers); reused.Status != http.StatusUnprocessableEntity || reused.Body["code"] != "RESOLUTION_EXPIRED" {
+	if replayed := harness.Call(http.MethodPost, prefix+"/wallet/payout-accounts", "", "", resolution, confirmed); replayed.Status != http.StatusUnauthorized || replayed.Body["code"] != "STEP_UP_REUSED" {
+		t.Fatalf("a relayed step-up is single use: %d %s", replayed.Status, replayed.Raw)
+	}
+	if reused := harness.Call(http.MethodPost, prefix+"/wallet/payout-accounts", "", "", resolution, steppedUp(headers)); reused.Status != http.StatusUnprocessableEntity || reused.Body["code"] != "RESOLUTION_EXPIRED" {
 		t.Fatalf("a resolution is single use: %d %s", reused.Status, reused.Raw)
 	}
 	accountId := added.Body["id"].(string)
 	harness.OnboardConnectedAccount(seller, false)
-	harness.Paystack.FundPlatformBalance("NGN", 1_000_000)
-	if missingKey := harness.Call(http.MethodPost, prefix+"/wallet/payouts", "", "", map[string]any{"amountMinor": 100_000, "accountId": accountId}, headers); missingKey.Status != http.StatusBadRequest {
+	harness.SeedWalletAvailable(seller, 500_000)
+	if missingKey := harness.Call(http.MethodPost, prefix+"/wallet/payouts", "", "", map[string]any{"amountMinor": 100_000, "accountId": accountId}, steppedUp(headers)); missingKey.Status != http.StatusBadRequest {
 		t.Fatalf("payouts need an idempotency key: %d", missingKey.Status)
 	}
-	payout := harness.Call(http.MethodPost, prefix+"/wallet/payouts", "", "payout-key-0001", map[string]any{"amountMinor": 100_000, "accountId": accountId}, headers)
+	payout := harness.Call(http.MethodPost, prefix+"/wallet/payouts", "", "payout-key-0001", map[string]any{"amountMinor": 100_000, "accountId": accountId}, steppedUp(headers))
 	if payout.Status != http.StatusCreated || payout.Body["amount"].(map[string]any)["amountMinor"].(float64) != 100_000 || payout.Body["status"] != "processing" {
 		t.Fatalf("payout: %d %s", payout.Status, payout.Raw)
 	}
-	replay := harness.Call(http.MethodPost, prefix+"/wallet/payouts", "", "payout-key-0001", map[string]any{"amountMinor": 100_000, "accountId": accountId}, headers)
+	replay := harness.Call(http.MethodPost, prefix+"/wallet/payouts", "", "payout-key-0001", map[string]any{"amountMinor": 100_000, "accountId": accountId}, steppedUp(headers))
 	if replay.Body["id"] != payout.Body["id"] {
 		t.Fatalf("a replay must return the same payout: %s", replay.Raw)
 	}
 	fee := int64(payout.Body["fee"].(map[string]any)["amountMinor"].(float64))
-	if harness.balance(ledgermodels.SellerAvailableAccount(seller, "NGN")) != 500_000-100_000-fee {
+	if harness.balance(ledgermodels.WalletAvailableAccount(seller, "NGN")) != 500_000-100_000-fee {
 		t.Fatal("the fee is charged on top of the payout amount")
 	}
-	if tooMuch := harness.Call(http.MethodPost, prefix+"/wallet/payouts", "", "payout-key-0002", map[string]any{"amountMinor": 900_000, "accountId": accountId}, headers); tooMuch.Body["code"] != "INSUFFICIENT_AVAILABLE_BALANCE" {
+	if tooMuch := harness.Call(http.MethodPost, prefix+"/wallet/payouts", "", "payout-key-0002", map[string]any{"amountMinor": 900_000, "accountId": accountId}, steppedUp(headers)); tooMuch.Body["code"] != "INSUFFICIENT_AVAILABLE_BALANCE" {
 		t.Fatalf("overdraw: %d %s", tooMuch.Status, tooMuch.Raw)
 	}
 	if busy := harness.Call(http.MethodDelete, prefix+"/wallet/payout-accounts/"+accountId, "", "", nil, headers); busy.Body["code"] != "PAYOUT_IN_PROGRESS" {
@@ -113,7 +126,7 @@ func TestSellerFinanceGroupsReleasedEscrowIntoWeeklySettlements(t *testing.T) {
 	released := time.Now().Add(-10 * 24 * time.Hour)
 	for index, status := range []string{"released", "held", "refunded"} {
 		create := client.Escrow.Create().SetOrderID(uuid.NewString()).SetOrderReference("ZM-200" + string(rune('1'+index))).SetCheckoutID(uuid.NewString()).
-			SetPaymentIntentID(uuid.New()).SetPaymentReference("ref-" + uuid.NewString()[:8]).SetProvider("paystack").SetBuyerUserID(uuid.NewString()).
+			SetPaymentIntentID(uuid.New()).SetPaymentReference("ref-" + uuid.NewString()[:8]).SetProvider("flutterwave").SetBuyerUserID(uuid.NewString()).
 			SetStoreID(storeId).SetSellerUserID(seller).SetAmountMinor(100_000).SetCurrency("NGN").SetCommissionBps(150).SetCommissionMinor(1_500).
 			SetSellerAmountMinor(97_000).SetProcessingFeeMinor(1_500).SetStatus(escrowStatus(status))
 		switch status {

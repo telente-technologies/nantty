@@ -13,7 +13,7 @@ import (
 	sellerbalances "zudomart/modules/ledger/src/modules/sellerBalances/services"
 )
 
-func TestPrepaidAdBalanceIsFundedByPaystackAndDebitedBySpendAndBoosts(t *testing.T) {
+func TestPrepaidAdBalanceIsFundedByCardAndDebitedBySpendAndBoosts(t *testing.T) {
 	if testing.Short() {
 		t.Skip("integration test: needs Postgres")
 	}
@@ -82,7 +82,7 @@ func TestFlaggedSellersKeepTheReservePercentageLockedWhenCreditsMature(t *testin
 		t.Fatalf("flag: %d %s", flagged.Status, flagged.Raw)
 	}
 	harness.post(ledgermodels.JournalEntryRequest{Reference: "seed-release-" + seller, Kind: "test.release", Lines: []ledgermodels.JournalLineRequest{
-		{Account: ledgermodels.PlatformProviderBalanceAccount("paystack", "NGN"), Direction: ledgermodels.Debit, AmountMinor: 200_000},
+		{Account: ledgermodels.PlatformProviderBalanceAccount("flutterwave", "NGN"), Direction: ledgermodels.Debit, AmountMinor: 200_000},
 		{Account: ledgermodels.SellerPendingAccount(seller, "NGN"), Direction: ledgermodels.Credit, AmountMinor: 200_000},
 	}})
 	balances := sellerbalances.NewSellerBalancesInSchema(harness.LedgerSchema)

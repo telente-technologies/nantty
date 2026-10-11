@@ -25,7 +25,7 @@ func TestRestrictedCreatorEarningsStayPendingUntilMonetisationIsRestored(t *test
 	if converted := harness.Call(http.MethodPost, "/api/v1/creators/earnings/convert", token, "convert-held-1", map[string]any{"coins": 180, "currency": "NGN"}, http.Header{"CloudFront-Viewer-Country": {"NG"}}); converted.Status != http.StatusCreated {
 		t.Fatalf("convert: %d %s", converted.Status, converted.Raw)
 	}
-	harness.Paystack.FundPlatformBalance("NGN", 175_000)
+	harness.Flutterwave.FundMainBalance("NGN", 175_000)
 	holds := harness.wallet.Payouts.Holds
 	restrictedAt := time.Now().UTC()
 	if err := holds.ApplyAccountHealthChange(context.Background(), payoutservices.AccountHealthChange{AccountId: creator, Status: "RESTRICTED", Restrictions: []string{"MONETISATION", "GOING_LIVE"}, CanMonetise: false, OccurredAt: restrictedAt}); err != nil {

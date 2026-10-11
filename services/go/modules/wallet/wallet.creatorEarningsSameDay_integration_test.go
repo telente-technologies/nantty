@@ -35,8 +35,11 @@ func TestASecondCreatorEarningsRunOnTheSameDayMovesNewEarningsButNeverMovesTheSa
 	if report := creators.TransferCreatorEarningsToConnectedAccounts(ctx, "2026-10-11"); report.Transferred != 1 {
 		t.Fatalf("first run: %+v", report)
 	}
-	if again := creators.TransferCreatorEarningsToConnectedAccounts(ctx, "2026-10-11"); again.Transferred != 0 {
-		t.Fatalf("nothing new to move: %+v", again)
+	creators.TransferCreatorEarningsToConnectedAccounts(ctx, "2026-10-11")
+	harness.Flutterwave.FundMainBalance("NGN", 1_000_000)
+	harness.RunMoneyWorkers()
+	if moved := harness.Flutterwave.WalletBalance(harness.WalletRef(creator), "NGN"); moved != 180_000 {
+		t.Fatalf("a repeated run must not move the same balance twice: wallet holds %d", moved)
 	}
 	if services.CreatorEarningsMoveReference(creator, "NGN", 180_000) != services.CreatorEarningsMoveReference(creator, "NGN", 180_000) ||
 		services.CreatorEarningsMoveReference(creator, "NGN", 180_000) == services.CreatorEarningsMoveReference(creator, "NGN", 300_000) {
@@ -46,7 +49,8 @@ func TestASecondCreatorEarningsRunOnTheSameDayMovesNewEarningsButNeverMovesTheSa
 	if report := creators.TransferCreatorEarningsToConnectedAccounts(ctx, "2026-10-11"); report.Transferred != 1 || report.Failed != 0 {
 		t.Fatalf("a second run on the same day must move the new earnings: %+v", report)
 	}
-	if payable, available := harness.balance(ledgermodels.CreatorEarningsPayableAccount(creator, "NGN")), harness.balance(ledgermodels.SellerAvailableAccount(creator, "NGN")); payable != 0 || available != 300_000 {
+	harness.RunMoneyWorkers()
+	if payable, available := harness.balance(ledgermodels.CreatorEarningsPayableAccount(creator, "NGN")), harness.balance(ledgermodels.WalletAvailableAccount(creator, "NGN")); payable != 0 || available != 300_000 {
 		t.Fatalf("payable %d, available %d; want 0 and 300,000", payable, available)
 	}
 	harness.AssertLedgerHealthy()

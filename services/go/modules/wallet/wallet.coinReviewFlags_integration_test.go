@@ -94,7 +94,7 @@ func TestOnlyFlaggedCoinTransactionsEnterTheReviewQueueWithTheRulesThatFlaggedTh
 	harness.buyCoinsWithKey(chargedBack, "web-coins-1", "chargeback-buy-1")
 	paymentsSchema := harness.Payments.Application.Container.Settings.Money.DatabaseSchema
 	if _, err := harness.Database.Exec(`INSERT INTO `+pgx.Identifier{paymentsSchema, "provider_disputes"}.Sanitize()+` (id, created_at, provider, provider_dispute_id, payment_intent_id, updated_at)
-		SELECT $1, now(), 'paystack', 'dsp_test_1', id, now() FROM `+pgx.Identifier{paymentsSchema, "payment_intents"}.Sanitize()+` WHERE owner_user_id = $2 LIMIT 1`, uuid.Must(uuid.NewV7()), chargedBack); err != nil {
+		SELECT $1, now(), 'flutterwave', 'dsp_test_1', id, now() FROM `+pgx.Identifier{paymentsSchema, "payment_intents"}.Sanitize()+` WHERE owner_user_id = $2 LIMIT 1`, uuid.Must(uuid.NewV7()), chargedBack); err != nil {
 		t.Fatal(err)
 	}
 	harness.buyCoinsWithKey(chargedBack, "web-coins-1", "chargeback-buy-2")

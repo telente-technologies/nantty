@@ -3,26 +3,34 @@ package routes
 import (
 	"net/http"
 
+	"zudomart/modules/ledger/src/middlewares"
 	sellermoney "zudomart/modules/wallet/src/modules/sellerMoney"
 	"zudomart/modules/wallet/src/modules/sellerMoney/controllers"
+	"zudomart/modules/wallet/src/modules/sellerMoney/dtos"
 )
 
 func MountSellerMoneyRoutes(mux *http.ServeMux, application *sellermoney.Application) {
 	controller := controllers.SellerMoneyController{Application: application}
 	internal := controller.Internal
+	consumeStepUp := middlewares.RequireRelayedSingleUseStepUp(application.Payouts.Container.Resources.StaffVerifiers.SingleUse)
+	stepUp := func(next func(http.ResponseWriter, *http.Request, dtos.SellerContext)) func(http.ResponseWriter, *http.Request, dtos.SellerContext) {
+		return func(writer http.ResponseWriter, request *http.Request, seller dtos.SellerContext) {
+			consumeStepUp(func(writer http.ResponseWriter, request *http.Request) { next(writer, request, seller) })(writer, request)
+		}
+	}
 	mux.Handle("GET /api/v1/internal/sellers/{sellerId}/wallet/balances", internal(controller.Balances))
 	mux.Handle("GET /api/v1/internal/sellers/{sellerId}/wallet/transactions", internal(controller.Transactions))
 	mux.Handle("GET /api/v1/internal/sellers/{sellerId}/wallet/statements", internal(controller.StatementCsv))
 	mux.Handle("GET /api/v1/internal/sellers/{sellerId}/wallet/payout-settings", internal(controller.PayoutSettings))
 	mux.Handle("GET /api/v1/internal/sellers/{sellerId}/wallet/payouts", internal(controller.Payouts))
-	mux.Handle("POST /api/v1/internal/sellers/{sellerId}/wallet/payouts", internal(controller.RequestPayout))
+	mux.Handle("POST /api/v1/internal/sellers/{sellerId}/wallet/payouts", internal(stepUp(controller.RequestPayout)))
 	mux.Handle("GET /api/v1/internal/sellers/{sellerId}/wallet/payouts/schedule", internal(controller.PayoutSchedule))
 	mux.Handle("PUT /api/v1/internal/sellers/{sellerId}/wallet/payouts/schedule", internal(controller.SavePayoutSchedule))
 	mux.Handle("GET /api/v1/internal/sellers/{sellerId}/wallet/banks", internal(controller.Banks))
 	mux.Handle("GET /api/v1/internal/sellers/{sellerId}/wallet/payout-accounts", internal(controller.PayoutAccounts))
 	mux.Handle("POST /api/v1/internal/sellers/{sellerId}/wallet/payout-accounts/resolve", internal(controller.ResolvePayoutAccount))
-	mux.Handle("POST /api/v1/internal/sellers/{sellerId}/wallet/payout-accounts", internal(controller.AddPayoutAccount))
-	mux.Handle("PATCH /api/v1/internal/sellers/{sellerId}/wallet/payout-accounts/{accountId}", internal(controller.UpdatePayoutAccount))
+	mux.Handle("POST /api/v1/internal/sellers/{sellerId}/wallet/payout-accounts", internal(stepUp(controller.AddPayoutAccount)))
+	mux.Handle("PATCH /api/v1/internal/sellers/{sellerId}/wallet/payout-accounts/{accountId}", internal(stepUp(controller.UpdatePayoutAccount)))
 	mux.Handle("DELETE /api/v1/internal/sellers/{sellerId}/wallet/payout-accounts/{accountId}", internal(controller.RemovePayoutAccount))
 	mux.Handle("GET /api/v1/internal/sellers/{sellerId}/finance/summary", internal(controller.FinanceSummary))
 	mux.Handle("GET /api/v1/internal/sellers/{sellerId}/finance/escrow", internal(controller.Escrow))

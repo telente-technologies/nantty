@@ -128,7 +128,7 @@ func TestWebCoinPurchaseCreditsOnceAndAppClientsMustUseInAppPurchase(t *testing.
 		t.Fatalf("balance: %v", balance.Body)
 	}
 	if harness.balance(ledgermodels.CoinSalesRevenueAccount("NGN")) != 1_000_000 || harness.balance(ledgermodels.PaymentProcessingFeeExpenseAccount("NGN")) != 2_000 ||
-		harness.balance(ledgermodels.PlatformProviderBalanceAccount("paystack", "NGN")) != harness.Paystack.PlatformBalanceOf("NGN") {
+		harness.balance(ledgermodels.PlatformProviderBalanceAccount("flutterwave", "NGN")) != harness.Flutterwave.MainBalanceOf("NGN") {
 		t.Fatal("coin sale revenue, processing fee or platform balance not mirrored")
 	}
 	harness.AssertLedgerHealthy()

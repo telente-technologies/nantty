@@ -41,6 +41,7 @@ func TestCoinTransfersAreRefusedBetweenBlockedUsers(t *testing.T) {
 
 func TestStaffReviewAndReverseCoinTransactionsWithClawbackAndRefund(t *testing.T) {
 	harness := startWalletHarness(t, true)
+	harness.Flutterwave.RefundStatus = "pending"
 	buyer, recipient, other := uuid.NewString(), uuid.NewString(), uuid.NewString()
 	harness.buyCoinsOnTheWeb(buyer, "web-coins-1")
 	buyerToken := harness.Tokens.UserAccessToken(buyer)
@@ -99,11 +100,11 @@ func TestStaffReviewAndReverseCoinTransactionsWithClawbackAndRefund(t *testing.T
 	if purchaseReversal.Status != http.StatusOK || purchaseReversal.Body["transactionStatus"] != "refunded" || purchaseReversal.Body["clawbackShortfallCoins"].(float64) != 30 {
 		t.Fatalf("reverse purchase: %d %s", purchaseReversal.Status, purchaseReversal.Raw)
 	}
-	if harness.Paystack.Calls("POST /refund") != 1 || harness.balance(ledgermodels.UserSpendableCoinsAccount(buyer)) != 0 || harness.balance(ledgermodels.UserCoinDebtAccount(buyer)) != 30 {
-		t.Fatal("purchase reversal must refund through Paystack and claw back every coin")
+	if harness.Flutterwave.Calls("POST /transactions") != 1 || harness.balance(ledgermodels.UserSpendableCoinsAccount(buyer)) != 0 || harness.balance(ledgermodels.UserCoinDebtAccount(buyer)) != 30 {
+		t.Fatal("purchase reversal must refund through the provider and claw back every coin")
 	}
-	if harness.balance(ledgermodels.RefundsPayableAccount("paystack", "NGN")) != 100_000 {
-		t.Fatal("refund must stay payable until Paystack confirms it")
+	if harness.balance(ledgermodels.RefundsPayableAccount("flutterwave", "NGN")) != 100_000 {
+		t.Fatal("refund must stay payable until the provider confirms it")
 	}
 	harness.AssertLedgerHealthy()
 

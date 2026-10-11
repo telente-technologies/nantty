@@ -233,11 +233,20 @@ func (withdrawals Withdrawals) sumWithdrawalsNotYetSentToProvider(ctx context.Co
 	var sums []struct {
 		Sum *int64 `json:"sum"`
 	}
+	notYetSent := statusesToSubtractFromProviderBalance(withdrawals.Container.Settings.WithdrawalLimits.BlockWhileProcessing)
 	err := withdrawals.Container.Client(transaction).Withdrawal.Query().
-		Where(withdrawal.UserID(userId), withdrawal.Currency(currency), withdrawal.StatusIn(withdrawal.StatusPendingReview, withdrawal.StatusOnHold, withdrawal.StatusQueued)).
+		Where(withdrawal.UserID(userId), withdrawal.Currency(currency), withdrawal.StatusIn(notYetSent...)).
 		Aggregate(ent.Sum(withdrawal.FieldAmountMinor)).Scan(ctx, &sums)
 	if err != nil || len(sums) == 0 || sums[0].Sum == nil {
 		return 0, err
 	}
 	return *sums[0].Sum, nil
+}
+
+func statusesToSubtractFromProviderBalance(blockWhileProcessing bool) []withdrawal.Status {
+	statuses := []withdrawal.Status{withdrawal.StatusPendingReview, withdrawal.StatusOnHold, withdrawal.StatusQueued}
+	if !blockWhileProcessing {
+		statuses = append(statuses, withdrawal.StatusProcessing)
+	}
+	return statuses
 }

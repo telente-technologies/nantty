@@ -81,7 +81,7 @@ func (withdrawals Withdrawals) GetWithdrawalForStaff(ctx context.Context, withdr
 	if err != nil {
 		return dtos.StaffWithdrawalDetailDto{}, err
 	}
-	available, err := withdrawals.Container.Ledger.ReadAccountBalance(ctx, database, ledgermodels.SellerAvailableAccount(row.UserID, row.Currency))
+	available, err := withdrawals.Container.Ledger.ReadAccountBalance(ctx, database, ledgermodels.UserCashAccountsForProvider(row.Provider, row.UserID, row.Currency).Available)
 	if err != nil {
 		return dtos.StaffWithdrawalDetailDto{}, err
 	}

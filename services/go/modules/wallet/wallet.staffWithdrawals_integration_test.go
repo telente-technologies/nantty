@@ -14,12 +14,9 @@ import (
 
 func (harness *walletHarness) fundWithdrawableBalance(userId string, amountMinor int64) (string, string) {
 	harness.T.Helper()
-	harness.post(ledgermodels.JournalEntryRequest{Reference: "seed-available-" + userId, Kind: "test.seedAvailable", Lines: []ledgermodels.JournalLineRequest{
-		{Account: ledgermodels.CreatorCoinPayoutExpenseAccount("NGN"), Direction: ledgermodels.Debit, AmountMinor: amountMinor},
-		{Account: ledgermodels.SellerAvailableAccount(userId, "NGN"), Direction: ledgermodels.Credit, AmountMinor: amountMinor},
-	}})
 	harness.OnboardConnectedAccount(userId, false)
-	harness.Paystack.FundPlatformBalance("NGN", 100_000_000)
+	harness.SeedWalletAvailable(userId, amountMinor)
+	harness.Flutterwave.FundMainBalance("NGN", 100_000_000)
 	token := harness.Tokens.UserAccessToken(userId)
 	account := harness.Call(http.MethodPost, "/api/v1/wallets/me/payout-accounts", token, "", map[string]any{"bankCode": "058", "accountNumber": "0123454821"}, harness.stepUp(token))
 	if account.Status != http.StatusCreated {
@@ -53,7 +50,7 @@ func TestConcurrentWithdrawalsNeverOverdrawTheWallet(t *testing.T) {
 	if created.Load() != 3 || refused.Load() != 9 {
 		t.Fatalf("created=%d refused=%d", created.Load(), refused.Load())
 	}
-	if harness.balance(ledgermodels.SellerAvailableAccount(user, "NGN")) != 10_000 || harness.balance(ledgermodels.SellerReservedPayoutAccount(user, "NGN")) != 90_000 {
+	if harness.balance(ledgermodels.WalletAvailableAccount(user, "NGN")) != 10_000 || harness.balance(ledgermodels.WalletReservedPayoutAccount(user, "NGN")) != 90_000 {
 		t.Fatal("reserved and available do not add up to the funded balance")
 	}
 	harness.AssertLedgerHealthy()
@@ -90,7 +87,7 @@ func TestStaffSeeWithdrawalDetailsAndCanHoldThenApproveOrRejectWithFundsReturned
 	}
 	row := rows[0].(map[string]any)
 	destination := row["destination"].(map[string]any)
-	if row["userId"] != user || row["provider"] != "paystack" || destination["accountLast4"] != "4821" || destination["bankName"] == "" || destination["addedAt"] == nil {
+	if row["userId"] != user || row["provider"] != "flutterwave" || destination["accountLast4"] != "4821" || destination["bankName"] == "" || destination["addedAt"] == nil {
 		t.Fatalf("staff row: %v", row)
 	}
 	staff := harness.Tokens.StaffTokens(uuid.NewString(), "money.withdrawals.process")
@@ -122,9 +119,8 @@ func TestStaffSeeWithdrawalDetailsAndCanHoldThenApproveOrRejectWithFundsReturned
 		t.Fatalf("a rejected withdrawal was reversed twice: %d", again.Status)
 	}
 	harness.Call(http.MethodPost, "/api/v1/admin/payouts/run", staff.AccessToken, "", nil, stepUp())
-	failed := harness.Paystack.SetTransferStatus(first.Body["reference"].(string), "failed")
-	harness.DeliverPaystackEvent("transfer.failed", map[string]any{"reference": first.Body["reference"], "transfer_code": failed.Code, "status": "failed"})
-	if harness.balance(ledgermodels.SellerAvailableAccount(user, "NGN")) != 200_000 || harness.balance(ledgermodels.SellerReservedPayoutAccount(user, "NGN")) != 0 {
+	harness.FinishTransfer(first.Body["reference"].(string), false)
+	if harness.balance(ledgermodels.WalletAvailableAccount(user, "NGN")) != 200_000 || harness.balance(ledgermodels.WalletReservedPayoutAccount(user, "NGN")) != 0 {
 		t.Fatal("a failed transfer and a rejection did not return every kobo to available")
 	}
 	harness.AssertLedgerHealthy()

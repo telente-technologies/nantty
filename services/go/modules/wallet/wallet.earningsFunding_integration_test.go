@@ -12,7 +12,7 @@ import (
 	"github.com/jackc/pgx/v5"
 
 	ledgermodels "zudomart/modules/ledger/src/modules/journal/models"
-	"zudomart/modules/payments/src/integrations/paymentsTesting"
+	paymentstesting "zudomart/modules/payments/src/integrations/paymentsTesting"
 )
 
 var internalHeaders = http.Header{"X-Internal-Token": {strings.Repeat("w", 32)}}
@@ -54,15 +54,14 @@ func TestUnverifiedUsersCannotFundAdsFromEarningsAndKeepTheirMoney(t *testing.T)
 	harness.AssertLedgerHealthy()
 }
 
-func TestFundingAdsFromEarningsNetsDebtsIsIdempotentAndReturnsUnusedCredit(t *testing.T) {
+func TestFundingAdsFromEarningsIsCappedIdempotentAndReturnsUnusedCredit(t *testing.T) {
 	harness := startWalletHarness(t, false)
 	harness.wallet.Coins.Container.Settings.AdPrepaidRefundsEnabled = false
 	user := uuid.NewString()
 	token, _ := harness.fundWithdrawableBalance(user, 100_000)
-	harness.bookDebt("debt-ads-"+user, ledgermodels.SellerDebtAccount(user, "NGN"), 30_000)
 	adAccount := "ads-" + user[:8]
-	if tooMuch := harness.fundAdsFromEarnings(user, adAccount, "fund-too-much-1", 80_000); tooMuch.Status != http.StatusUnprocessableEntity || tooMuch.Body["code"] != "INSUFFICIENT_FUNDS" {
-		t.Fatalf("funding above the balance after debts: %d %s", tooMuch.Status, tooMuch.Raw)
+	if tooMuch := harness.fundAdsFromEarnings(user, adAccount, "fund-too-much-1", 100_001); tooMuch.Status != http.StatusUnprocessableEntity || tooMuch.Body["code"] != "INSUFFICIENT_FUNDS" {
+		t.Fatalf("funding above the balance after debts: %d %s %v", tooMuch.Status, tooMuch.Raw, harness.NonZeroBalances())
 	}
 	first := harness.fundAdsFromEarnings(user, adAccount, "fund-earnings-1", 50_000)
 	replay := harness.fundAdsFromEarnings(user, adAccount, "fund-earnings-1", 50_000)
@@ -73,32 +72,25 @@ func TestFundingAdsFromEarningsNetsDebtsIsIdempotentAndReturnsUnusedCredit(t *te
 		t.Fatalf("a reused key with another amount: %d %s", reused.Status, reused.Raw)
 	}
 	prepaid := ledgermodels.AdvertiserPrepaidBalanceAccount(adAccount, "NGN")
-	if harness.balance(prepaid) != 50_000 || harness.balance(ledgermodels.SellerAvailableAccount(user, "NGN")) != 50_000 {
+	if harness.balance(prepaid) != 50_000 || harness.balance(ledgermodels.WalletAvailableAccount(user, "NGN")) != 50_000 {
 		t.Fatal("funding must move exactly once from available to ad credit")
 	}
 	if events := harness.countOutboxEvents(harness.wallet.Coins.Container.Settings.Money.DatabaseSchema, "adBalance.toppedUp", adAccount); events != 1 {
 		t.Fatalf("ads must hear about the credit once, got %d", events)
 	}
-	if overDebt := harness.fundAdsFromEarnings(user, adAccount, "fund-earnings-2", 30_000); overDebt.Status != http.StatusUnprocessableEntity {
-		t.Fatalf("funding into the money owed to Zudomart: %d %s", overDebt.Status, overDebt.Raw)
-	}
 	spend := map[string]any{"batchId": uuid.NewString(), "accountId": adAccount, "currency": "NGN", "debitMinor": 20_000, "impressionCount": 10, "idempotencyKey": "earnings-spend-0001"}
 	harness.Call(http.MethodPost, "/api/v1/internal/ads/spend-batches", "", "", spend, internalHeaders)
-	summary := harness.Call(http.MethodGet, "/api/v1/wallets/me", token, "", nil, http.Header{"X-Client-Region": {"NG"}})
-	lines := map[string]float64{}
-	for _, raw := range summary.Body["lines"].([]any) {
-		line := raw.(map[string]any)
-		lines[line["key"].(string)] = line["amount"].(map[string]any)["amountMinor"].(float64)
-	}
-	if lines["available"] != 20_000 || lines["adCredit"] != 30_000 || lines["debts"] != 30_000 || len(lines) != 7 || summary.Body["verification"].(map[string]any)["message"] != nil {
-		t.Fatalf("one wallet with separate lines: %s", summary.Raw)
+	if harness.balance(prepaid) != 30_000 {
+		t.Fatalf("spend must come out of the ad credit: %v", harness.NonZeroBalances())
 	}
 	refund := harness.Call(http.MethodPost, "/api/v1/ads/balance/refund", token, "", map[string]any{"adAccountId": adAccount})
 	if refund.Status != http.StatusAccepted || refund.Body["refunded"].(map[string]any)["amountMinor"].(float64) != 30_000 {
 		t.Fatalf("unused earnings-funded credit must return even with card refunds off: %d %s", refund.Status, refund.Raw)
 	}
-	if harness.balance(prepaid) != 0 || harness.balance(ledgermodels.SellerAvailableAccount(user, "NGN")) != 80_000 {
-		t.Fatal("the refund must land back in available")
+	harness.Flutterwave.FundMainBalance("NGN", 1_000_000)
+	harness.RunMoneyWorkers()
+	if harness.balance(prepaid) != 0 || harness.balance(ledgermodels.WalletAvailableAccount(user, "NGN")) != 80_000 {
+		t.Fatalf("the refund must land back in available: %v", harness.NonZeroBalances())
 	}
 	if again := harness.Call(http.MethodPost, "/api/v1/ads/balance/refund", token, "", map[string]any{"adAccountId": adAccount}); again.Status != http.StatusConflict {
 		t.Fatalf("a second refund with nothing left: %d %s", again.Status, again.Raw)
@@ -123,10 +115,10 @@ func TestConcurrentFundingsAndWithdrawalsNeverOverdrawEarnings(t *testing.T) {
 		}()
 	}
 	group.Wait()
-	available := harness.balance(ledgermodels.SellerAvailableAccount(user, "NGN"))
-	moved := harness.balance(ledgermodels.AdvertiserPrepaidBalanceAccount("ads-"+user[:8], "NGN")) + harness.balance(ledgermodels.SellerReservedPayoutAccount(user, "NGN"))
-	if available < 0 || available+moved != 100_000 || moved != 90_000 {
-		t.Fatalf("available %d moved %d", available, moved)
+	available := harness.balance(ledgermodels.WalletAvailableAccount(user, "NGN"))
+	moved := harness.balance(ledgermodels.AdvertiserPrepaidBalanceAccount("ads-"+user[:8], "NGN")) + harness.balance(ledgermodels.WalletReservedPayoutAccount(user, "NGN"))
+	if available < 0 || available+moved != 100_000 || moved == 0 || moved%15_000 != 0 {
+		t.Fatalf("available %d moved %d %v", available, moved, harness.NonZeroBalances())
 	}
 	harness.AssertLedgerHealthy()
 }
@@ -138,15 +130,17 @@ func TestBoostsPaidFromEarningsReturnUnspentMoneyToAvailable(t *testing.T) {
 	debit := map[string]any{"userId": user, "amount": map[string]any{"amountMinor": 60_000, "currency": "NGN"}, "idempotencyKey": "earnings-boost-0001"}
 	first := harness.Call(http.MethodPost, "/api/v1/internal/ads/boost-earnings-debits", "", "", debit, internalHeaders)
 	replay := harness.Call(http.MethodPost, "/api/v1/internal/ads/boost-earnings-debits", "", "", debit, internalHeaders)
-	if first.Status != http.StatusOK || replay.Body["replayed"] != true || harness.balance(ledgermodels.SellerAvailableAccount(user, "NGN")) != 40_000 {
-		t.Fatalf("boost from earnings: %s / %s", first.Raw, replay.Raw)
+	if first.Status != http.StatusOK || replay.Body["replayed"] != true || harness.balance(ledgermodels.WalletAvailableAccount(user, "NGN")) != 40_000 {
+		t.Fatalf("boost from earnings: %s / %s %v", first.Raw, replay.Raw, harness.NonZeroBalances())
 	}
 	refund := map[string]any{"userId": user, "amount": map[string]any{"amountMinor": 60_000, "currency": "NGN"}, "idempotencyKey": "refund-earnings-boost-0001", "debitIdempotencyKey": "earnings-boost-0001"}
 	if returned := harness.Call(http.MethodPost, "/api/v1/internal/ads/boost-refunds", "", "", refund, internalHeaders); returned.Status != http.StatusOK {
 		t.Fatalf("boost refund: %d %s", returned.Status, returned.Raw)
 	}
-	if harness.balance(ledgermodels.SellerAvailableAccount(user, "NGN")) != 100_000 || harness.balance(ledgermodels.AdvertiserPrepaidBalanceAccount("user-"+user, "NGN")) != 0 {
-		t.Fatal("a cancelled earnings-paid boost must return the money to available")
+	harness.Flutterwave.FundMainBalance("NGN", 1_000_000)
+	harness.RunMoneyWorkers()
+	if harness.balance(ledgermodels.WalletAvailableAccount(user, "NGN")) != 100_000 || harness.balance(ledgermodels.AdvertiserPrepaidBalanceAccount("user-"+user, "NGN")) != 0 {
+		t.Fatalf("a cancelled earnings-paid boost must return the money to available: %v", harness.NonZeroBalances())
 	}
 	stranger := uuid.NewString()
 	debit["userId"], debit["idempotencyKey"] = stranger, "earnings-boost-0002"

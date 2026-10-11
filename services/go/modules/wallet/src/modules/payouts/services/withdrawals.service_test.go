@@ -2,7 +2,10 @@ package services
 
 import (
 	"math"
+	"slices"
 	"testing"
+
+	"zudomart/modules/wallet/src/generated/ent/withdrawal"
 )
 
 func TestWithdrawalFitsAvailableBalance(t *testing.T) {
@@ -28,5 +31,17 @@ func TestWithdrawalFitsAvailableBalance(t *testing.T) {
 				t.Fatalf("withdrawalFitsAvailableBalance(%d, %d, %d) = %t, want %t", testCase.available, testCase.reserved, testCase.amount, got, testCase.want)
 			}
 		})
+	}
+}
+
+func TestAProcessingWithdrawalIsSubtractedWhenNewWithdrawalsMayStartDuringIt(t *testing.T) {
+	if slices.Contains(statusesToSubtractFromProviderBalance(true), withdrawal.StatusProcessing) {
+		t.Fatal("with the processing block on, a processing withdrawal already refuses new ones")
+	}
+	allowed := statusesToSubtractFromProviderBalance(false)
+	for _, status := range []withdrawal.Status{withdrawal.StatusPendingReview, withdrawal.StatusOnHold, withdrawal.StatusQueued, withdrawal.StatusProcessing} {
+		if !slices.Contains(allowed, status) {
+			t.Fatalf("%s must be subtracted from the provider balance when the block is off", status)
+		}
 	}
 }

@@ -39,20 +39,20 @@ func TestAdsServiceStartsAndTracksAccountTopUpsThroughTheInternalApi(t *testing.
 		t.Fatalf("start: %d %s / %s", started.Status, started.Raw, replay.Raw)
 	}
 	reference := started.Body["reference"].(string)
-	if pending := harness.Call(http.MethodGet, path+"/"+reference, "", "", nil, internal); pending.Body["status"] != "pending" || pending.Body["provider"] != "paystack" {
+	if pending := harness.Call(http.MethodGet, path+"/"+reference, "", "", nil, internal); pending.Body["status"] != "pending" || pending.Body["provider"] != "flutterwave" {
 		t.Fatalf("pending status: %s", pending.Raw)
 	}
 	if other := harness.Call(http.MethodGet, "/api/v1/internal/ads/accounts/acct-other/top-ups/"+reference, "", "", nil, internal); other.Status != http.StatusNotFound {
 		t.Fatalf("top-up visible under another ad account: %d", other.Status)
 	}
-	harness.Paystack.CompleteCheckout(reference, 0, 7_500, "card")
+	harness.Flutterwave.CompleteCheckout(reference, 0, 7_500, "card")
 	done := harness.Call(http.MethodGet, path+"/"+reference, "", "", nil, internal)
 	if done.Body["status"] != "succeeded" || done.Body["completedAt"] == nil || harness.balance(ledgermodels.AdvertiserPrepaidBalanceAccount(adAccount, "NGN")) != 500_000 {
 		t.Fatalf("verified status: %s", done.Raw)
 	}
 	failing := harness.Call(http.MethodPost, path, "", "ads-top-up-0005", body, internal)
 	failingReference := failing.Body["reference"].(string)
-	harness.Paystack.Transactions[failingReference].Status = "failed"
+	harness.Flutterwave.FailCheckout(failingReference)
 	if failed := harness.Call(http.MethodGet, path+"/"+failingReference, "", "", nil, internal); failed.Body["status"] != "failed" {
 		t.Fatalf("failed charge status: %s", failed.Raw)
 	}
