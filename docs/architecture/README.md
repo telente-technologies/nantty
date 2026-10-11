@@ -41,4 +41,3 @@ Fixed owner decisions (not up for debate in these docs): one Aurora PostgreSQL +
 
 Related plans outside this folder: `docs/backendPlan.md` (backend contracts and wiring order), `docs/plans.md` (frontend mock contracts), `SECURITY.md` (baseline rules, written against the old monolith's paths).
 
-- [improvementReport.md](./improvementReport.md) — prioritised P0–P3 findings, current vs recommended architecture, migration plan and phases
