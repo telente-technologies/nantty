@@ -18,9 +18,6 @@ func (gateway *PaymentGateway) ReadSellingEligibility(ctx context.Context, selle
 	} else if over {
 		return sellingeligibility.Eligibility{VerifyUrl: verifyUrl, BlockedBy: sellingeligibility.BlockedByDebt, Reason: "Seller debt is above the limit."}, nil
 	}
-	if !gateway.Container.UsesProviderWallets() {
-		return sellingeligibility.Eligibility{CanSell: true, VerifyUrl: verifyUrl}, nil
-	}
 	view, err := gateway.ReadVerificationLevel(ctx, sellerUserId)
 	if err != nil {
 		return sellingeligibility.Eligibility{}, err

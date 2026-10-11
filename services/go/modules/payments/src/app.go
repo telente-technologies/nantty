@@ -126,11 +126,7 @@ func (module *Module) RunBackgroundWorkersUntilContextDone(ctx context.Context) 
 		}
 	})
 	runProviderWalletWorkers(ctx, gateway)
-	disputePollInterval := 24 * time.Hour
-	if container.UsesProviderWallets() {
-		disputePollInterval = time.Hour
-	}
-	go runEveryIntervalUntilContextDone(ctx, disputePollInterval, func(ctx context.Context) {
+	go runEveryIntervalUntilContextDone(ctx, time.Hour, func(ctx context.Context) {
 		if _, err := gateway.PollOpenProviderDisputes(ctx); err != nil && ctx.Err() == nil {
 			container.Resources.Logger.WarnContext(ctx, "provider dispute polling failed", "error", err)
 		}
@@ -143,9 +139,6 @@ func (module *Module) RunBackgroundWorkersUntilContextDone(ctx context.Context) 
 }
 
 func runProviderWalletWorkers(ctx context.Context, gateway *services.PaymentGateway) {
-	if !gateway.Container.UsesProviderWallets() {
-		return
-	}
 	wallets := gateway.Container.Settings.Wallets
 	go runEveryIntervalUntilContextDone(ctx, positiveOr(wallets.MovementWorkerInterval, 30*time.Second), func(ctx context.Context) {
 		gateway.ProcessDueMovements(ctx, 50)

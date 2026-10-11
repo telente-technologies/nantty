@@ -138,9 +138,6 @@ func (gateway *PaymentGateway) createProviderWallet(ctx context.Context, userId,
 }
 
 func (gateway *PaymentGateway) ProvisionMissingProviderWallets(ctx context.Context, limit int) int {
-	if !gateway.Container.UsesProviderWallets() {
-		return 0
-	}
 	database := gateway.Container.Resources.Database
 	records, err := gateway.Container.Client(database).VerificationLevelRecord.Query().Where(verificationlevelrecord.LevelGTE(models.VerificationLevelPayout)).
 		Order(ent.Desc(verificationlevelrecord.FieldUpdatedAt)).Limit(limit * 4).All(ctx)

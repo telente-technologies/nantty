@@ -36,23 +36,7 @@ func (gateway *PaymentGateway) QuotePayoutFee(currency string, amountMinor int64
 }
 
 func (gateway *PaymentGateway) ReadProviderAvailableBalanceForUser(ctx context.Context, userId string, currency string) (int64, error) {
-	if gateway.Container.UsesProviderWallets() {
-		return gateway.readUserWalletBalance(ctx, userId, currency)
-	}
-	provider, err := gateway.Container.DefaultPayouts()
-	if err != nil {
-		return 0, err
-	}
-	balances, err := provider.ReadPlatformBalances(ctx)
-	if err != nil {
-		return 0, convertProviderError(err)
-	}
-	for _, balance := range balances {
-		if balance.Currency == currency {
-			return balance.AvailableMinor, nil
-		}
-	}
-	return 0, nil
+	return gateway.readUserWalletBalance(ctx, userId, currency)
 }
 
 func (gateway *PaymentGateway) InitiateSellerPayout(ctx context.Context, instruction models.SellerPayoutInstruction) (PayoutTransferStatus, error) {
@@ -78,31 +62,7 @@ func (gateway *PaymentGateway) PrepareSellerPayoutInTransaction(ctx context.Cont
 	} else if !ent.IsNotFound(err) {
 		return PayoutTransferStatus{}, err
 	}
-	if gateway.Container.UsesProviderWallets() {
-		return gateway.prepareWalletPayoutInTransaction(ctx, transaction, instruction)
-	}
-	account, err := gateway.FindConnectedAccountForUser(ctx, transaction, instruction.BeneficiaryUserId)
-	if err != nil {
-		return PayoutTransferStatus{}, err
-	}
-	if account.PayoutsFrozen {
-		return PayoutTransferStatus{}, ErrPayoutsFrozen
-	}
-	if !ConnectedAccountReadyForPayouts(account) {
-		return PayoutTransferStatus{}, ErrConnectedAccountMissing
-	}
-	if _, err := gateway.Container.Payouts(account.Provider); err != nil {
-		return PayoutTransferStatus{}, err
-	}
-	transfer, err := client.PayoutTransfer.Create().
-		SetReference(instruction.Reference).SetPurpose(instruction.Purpose).SetSubjectID(instruction.SubjectId).SetProvider(account.Provider).
-		SetKind(payouttransfer.KindPayout).SetConnectedAccountID(account.RecipientCode).SetBeneficiaryUserID(instruction.BeneficiaryUserId).
-		SetProviderDestinationID(account.RecipientCode).SetAmountMinor(instruction.AmountMinor).SetFeeMinor(instruction.FeeMinor).SetCurrency(instruction.Currency).
-		SetBankCode(account.BankCode).SetDestinationLast4(account.AccountLast4).SetCreatedAt(gateway.Container.Now()).Save(ctx)
-	if err != nil {
-		return PayoutTransferStatus{}, err
-	}
-	return PayoutTransferStatus{Reference: transfer.Reference, Status: string(transfer.Status)}, nil
+	return gateway.prepareWalletPayoutInTransaction(ctx, transaction, instruction)
 }
 
 func (gateway *PaymentGateway) SendPreparedSellerPayout(ctx context.Context, reference string) (PayoutTransferStatus, error) {

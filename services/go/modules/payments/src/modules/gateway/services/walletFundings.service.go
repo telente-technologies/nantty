@@ -210,3 +210,17 @@ func (gateway *PaymentGateway) releaseWalletHoldInTransaction(ctx context.Contex
 	}
 	return funding.Update().SetStatus(walletfunding.StatusAvailable).SetHoldReleasedAt(gateway.Container.Now().UTC()).AddVersion(1).Exec(ctx)
 }
+
+func (gateway *PaymentGateway) NextWalletHoldReleaseAt(ctx context.Context, userId, currency string) (*time.Time, error) {
+	next, err := gateway.Container.Client(gateway.Container.Resources.Database).WalletFunding.Query().
+		Where(walletfunding.UserID(userId), walletfunding.Currency(currency), walletfunding.StatusEQ(walletfunding.StatusHeld)).
+		Order(ent.Asc(walletfunding.FieldHoldReleaseAt)).First(ctx)
+	if ent.IsNotFound(err) {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+	releaseAt := next.HoldReleaseAt
+	return &releaseAt, nil
+}

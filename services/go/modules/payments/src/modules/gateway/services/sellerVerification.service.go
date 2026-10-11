@@ -91,7 +91,7 @@ func (gateway *PaymentGateway) enforceUnverifiedSellerRulesInTransaction(ctx con
 	})
 	caps := gateway.Container.Resources.Platform.ReadUnverifiedSellerSalesCaps(ctx, gateway.Container.Settings.UnverifiedSellerSalesCaps)
 	for _, key := range keys {
-		if gateway.Container.UsesProviderWallets() && key.Currency != walletCurrency {
+		if key.Currency != walletCurrency {
 			continue
 		}
 		verified, err := gateway.IsSellerVerified(ctx, transaction, key.SellerUserId)

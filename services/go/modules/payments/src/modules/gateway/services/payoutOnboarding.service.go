@@ -89,13 +89,13 @@ func (gateway *PaymentGateway) ReadPayoutOnboardingState(ctx context.Context, us
 		}
 	}
 	balances, err := gateway.Container.Ledger.ReadAccountBalances(ctx, executor, []ledgermodels.AccountRef{
-		ledgermodels.CreatorEarningsPayableAccount(userId, "NGN"), ledgermodels.SellerAvailableAccount(userId, "NGN"),
+		ledgermodels.CreatorEarningsPayableAccount(userId, "NGN"), ledgermodels.WalletAvailableAccount(userId, "NGN"),
 	})
 	if err != nil {
 		return models.PayoutOnboardingState{}, err
 	}
 	state.EarningsPendingTransfer = models.MoneyView{AmountMinor: balances[ledgermodels.CreatorEarningsPayableAccount(userId, "NGN").Key()], Currency: "NGN"}
-	state.PendingWithdrawable = models.MoneyView{AmountMinor: max(balances[ledgermodels.SellerAvailableAccount(userId, "NGN").Key()], 0), Currency: "NGN"}
+	state.PendingWithdrawable = models.MoneyView{AmountMinor: max(balances[ledgermodels.WalletAvailableAccount(userId, "NGN").Key()], 0), Currency: "NGN"}
 	if validation, err := client.CustomerValidation.Query().Where(customervalidation.UserID(userId)).Only(ctx); err == nil {
 		state.BankValidation = &models.BankValidationView{Status: string(validation.Status), FailureReason: validation.FailureReason}
 	} else if !ent.IsNotFound(err) {
@@ -250,15 +250,8 @@ func (gateway *PaymentGateway) RetryPayoutOnboarding(ctx context.Context, userId
 }
 
 func (gateway *PaymentGateway) RequirePayoutAccountVerified(ctx context.Context, userId string) error {
-	if gateway.Container.UsesProviderWallets() {
-		_, err := gateway.FindActiveProviderWallet(ctx, gateway.Container.Resources.Database, userId)
-		return err
-	}
-	account, err := gateway.FindConnectedAccountForUser(ctx, gateway.Container.Resources.Database, userId)
-	if err != nil || !ConnectedAccountReadyForPayouts(account) || account.PayoutsFrozen {
-		return ErrPayoutAccountNotVerified
-	}
-	return nil
+	_, err := gateway.FindActiveProviderWallet(ctx, gateway.Container.Resources.Database, userId)
+	return err
 }
 
 type PayoutDestinationDetails struct {

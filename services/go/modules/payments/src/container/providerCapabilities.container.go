@@ -41,11 +41,6 @@ func (container *Container) DefaultWallets() (interfaces.WalletProvider, error) 
 	return container.Wallets(container.Settings.DefaultProvider)
 }
 
-func (container *Container) UsesProviderWallets() bool {
-	_, err := container.DefaultWallets()
-	return err == nil
-}
-
 func capabilityOf[Capability any](container *Container, name string) (Capability, error) {
 	var missing Capability
 	provider, err := container.Provider(name)

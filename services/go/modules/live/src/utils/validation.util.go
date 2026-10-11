@@ -1,6 +1,8 @@
 package utils
 
 import (
+	"slices"
+
 	"github.com/google/uuid"
 
 	"zudomart/platform/httpserver"
@@ -28,7 +30,12 @@ var (
 	RankingBoards    = []string{"streamer", "supporter", "creator", "engagement"}
 	RankingScopes    = []string{"global", "country", "category"}
 	RankingPeriods   = []string{"day", "week", "month", "all"}
+	CommentAudiences = []string{"everyone", "followers", "subscribers"}
 )
+
+func IsCommentAudience(value string) bool {
+	return slices.Contains(CommentAudiences, value)
+}
 
 func ParseIdentifiers(path string, values []string, collected *Issues) []uuid.UUID {
 	parsed := make([]uuid.UUID, 0, len(values))

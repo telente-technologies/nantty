@@ -148,7 +148,7 @@ func (gateway *PaymentGateway) decideBvnConsent(ctx context.Context, reference s
 	if err != nil || userId == "" {
 		return string(decided), err
 	}
-	if decided == customervalidation.StatusVerified && gateway.Container.UsesProviderWallets() {
+	if decided == customervalidation.StatusVerified {
 		if _, err := gateway.EnsureProviderWalletAtLevelOne(ctx, userId); err != nil && !errors.Is(err, ErrVerificationRequired) {
 			gateway.Container.Resources.Logger.WarnContext(ctx, "wallet provisioning after verification failed; the worker retries", "userId", userId, "error", err)
 		}

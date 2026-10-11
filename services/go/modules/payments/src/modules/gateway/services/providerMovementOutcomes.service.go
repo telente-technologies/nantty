@@ -94,9 +94,6 @@ func movementEventData(movement *ent.ProviderMovement) map[string]any {
 }
 
 func (gateway *PaymentGateway) ProcessDueMovements(ctx context.Context, limit int) int {
-	if !gateway.Container.UsesProviderWallets() {
-		return 0
-	}
 	gateway.unblockMovements(ctx, limit)
 	client := gateway.Container.Client(gateway.Container.Resources.Database)
 	now := gateway.Container.Now().UTC()

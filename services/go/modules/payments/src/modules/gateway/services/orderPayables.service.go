@@ -118,7 +118,7 @@ func (gateway *PaymentGateway) applyCheckoutRules(ctx context.Context, payables 
 			}
 			checked[payable.SellerUserId] = true
 		}
-		if gateway.Container.UsesProviderWallets() && payable.Currency != walletCurrency {
+		if payable.Currency != walletCurrency {
 			payables[index].PaymentMode = "direct"
 		}
 	}

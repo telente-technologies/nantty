@@ -25,7 +25,7 @@ const (
 var MovementReferencePrefixByKind = map[string]string{
 	MovementFeeSweep: "sweep-", MovementEscrowFundIn: "esc-in-", MovementEscrowRelease: "rel-", MovementEscrowCommission: "com-",
 	MovementClawback: "claw-", MovementClawbackTopUp: "clawtop-", MovementWalletPayment: "walpay-", MovementChargebackRecovery: "cbrec-",
-	MovementCreatorPayout: "crpay-", "directSale": "dsale-", "walletCredit": "wcred-",
+	MovementCreatorPayout: "crpay-", "directSale": "dsale-", "walletCredit": "wcred-", "affiliateCommission": "aff-", "affiliateClawback": "affclaw-",
 }
 
 func NewMovementReference(kind string) string {
