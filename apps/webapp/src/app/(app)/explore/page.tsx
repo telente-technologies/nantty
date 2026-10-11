@@ -83,7 +83,7 @@ function ExploreResults() {
           action={context.scope === "global" ? undefined : <Button variant="secondary" onClick={() => router.push(buildExploreSearchHref(query, globalSearchContext))}>Search everywhere</Button>}
         />
       ) : (
-        <SearchResultSections items={items} onOpenResult={() => recordSearch(query)} onSearchHashtag={(tag) => searchFor(`#${tag}`)} />
+        <SearchResultSections items={items} surface={query.trim().startsWith("#") ? "hashtag" : "search"} onOpenResult={() => recordSearch(query)} onSearchHashtag={(tag) => searchFor(`#${tag}`)} />
       )}
 
       {resultsQuery.hasNextPage ? (

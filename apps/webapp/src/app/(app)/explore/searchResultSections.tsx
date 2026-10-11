@@ -9,6 +9,8 @@ import { Avatar } from "@/components/ui/media";
 import type { ProductSummary } from "@/types";
 import type { SearchItem } from "@/types/search.type";
 import { buildPostPath, buildProfilePath, buildStorePath } from "@/utils/seoPaths.util";
+import { usePostImpressionRef } from "@/components/feed/interactions/feedInteractions.hook";
+import type { FeedInteractionSurface } from "@/utils/feedInteractionQueue.util";
 
 import styles from "./page.module.css";
 import { describeCount } from "@/utils/countLabel.util";
@@ -26,9 +28,17 @@ function Section({ title, children }: { readonly title: string; readonly childre
   );
 }
 
-function EntityRow({ href, name, meta, avatarUrl, onOpen }: { readonly href: string; readonly name: string; readonly meta: ReactNode; readonly avatarUrl: string | null; readonly onOpen: () => void }) {
+interface ImpressionTracking {
+  readonly postId: string;
+  readonly authorId: string;
+  readonly surface: FeedInteractionSurface;
+  readonly position: number;
+}
+
+function EntityRow({ href, name, meta, avatarUrl, onOpen, impression }: { readonly href: string; readonly name: string; readonly meta: ReactNode; readonly avatarUrl: string | null; readonly onOpen: () => void; readonly impression?: ImpressionTracking }) {
+  const impressionRef = usePostImpressionRef(impression ? { postId: impression.postId, authorId: impression.authorId } : null, impression?.surface ?? "search", impression?.position);
   return (
-    <li>
+    <li ref={impressionRef}>
       <Link href={href} className={styles.entityRow} onClick={onOpen}>
         <Avatar name={name} src={avatarUrl} size="md" />
         <span className={styles.entityText}>
@@ -40,7 +50,7 @@ function EntityRow({ href, name, meta, avatarUrl, onOpen }: { readonly href: str
   );
 }
 
-export function SearchResultSections({ items, onOpenResult, onSearchHashtag }: { readonly items: readonly SearchItem[]; readonly onOpenResult: () => void; readonly onSearchHashtag: (tag: string) => void }) {
+export function SearchResultSections({ items, onOpenResult, onSearchHashtag, surface = "search" }: { readonly items: readonly SearchItem[]; readonly onOpenResult: () => void; readonly onSearchHashtag: (tag: string) => void; readonly surface?: FeedInteractionSurface }) {
   const products: ProductSummary[] = pick(items, "product").map(({ type: _type, ...product }) => product);
   const posts = [...pick(items, "post"), ...pick(items, "clip")];
   const people = pick(items, "user");
@@ -91,8 +101,8 @@ export function SearchResultSections({ items, onOpenResult, onSearchHashtag }: {
       {posts.length ? (
         <Section title="Posts and clips">
           <ul className={styles.entityList}>
-            {posts.map((post) => (
-              <EntityRow key={post.id} href={post.type === "clip" ? `/clips?start=${encodeURIComponent(post.id)}` : buildPostPath(post.id)} name={post.caption || (post.type === "clip" ? "Clip" : "Post")}
+            {posts.map((post, index) => (
+              <EntityRow key={post.id} impression={{ postId: post.id, authorId: post.authorId, surface, position: index }} href={post.type === "clip" ? `/clips?start=${encodeURIComponent(post.id)}` : buildPostPath(post.id)} name={post.caption || (post.type === "clip" ? "Clip" : "Post")}
                 meta={`${post.type === "clip" ? "Clip" : "Post"} · ${describeCount(post.likes, "like", "likes")}`} avatarUrl={post.thumbnailUrl} onOpen={onOpenResult} />
             ))}
           </ul>

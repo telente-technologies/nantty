@@ -25,6 +25,7 @@ const savedTabs: readonly { readonly value: SavedItemFilter; readonly label: str
   { value: "video", label: "Videos" },
   { value: "clip", label: "Clips" },
   { value: "product", label: "Products" },
+  { value: "comment", label: "Replies" },
 ];
 
 const emptyCopyByFilter: Record<SavedItemFilter, { title: string; description: string; href: string; cta: string }> = {
@@ -33,6 +34,7 @@ const emptyCopyByFilter: Record<SavedItemFilter, { title: string; description: s
   video: { title: "No saved videos", description: "Save long videos and come back to finish them.", href: "/explore", cta: "Find videos" },
   clip: { title: "No saved clips", description: "Save clips you want to rewatch or shop from.", href: "/clips", cta: "Watch clips" },
   product: { title: "No saved products", description: "Save products to compare prices before you buy.", href: "/mart", cta: "Open Mart" },
+  comment: { title: "No saved replies", description: "Bookmark replies in a conversation to find them again.", href: "/", cta: "Go to feed" },
 };
 
 function SavedGridSkeleton() {

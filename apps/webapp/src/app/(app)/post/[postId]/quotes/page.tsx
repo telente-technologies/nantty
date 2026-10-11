@@ -39,7 +39,7 @@ export default function PostQuotesPage({ params }: { readonly params: Promise<{ 
       ) : quotes.length === 0 ? (
         <EmptyState title="No quotes to show" description="Quotes from private accounts or ones you can't see stay hidden." />
       ) : (
-        quotes.map((quote) => <PostCard key={quote.id} post={quote} />)
+        quotes.map((quote) => <PostCard key={quote.id} post={quote} surface="post_detail" />)
       )}
       <div ref={sentinelRef} />
       {quotesQuery.isFetchingNextPage ? <PostCardSkeleton /> : null}

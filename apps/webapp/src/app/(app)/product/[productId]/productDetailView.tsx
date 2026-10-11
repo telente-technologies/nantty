@@ -131,10 +131,11 @@ export function ProductDetailView({ productId, initialProduct }: { readonly prod
                   {product.brand.name}
                 </span>
               ) : null}
-              <span className={styles.rating}>
+              <Link href={`/product/${encodeURIComponent(productId)}/reviews`} className={styles.rating} aria-label={product.rating > 0 ? `Rated ${product.rating.toFixed(1)} out of 5. See reviews` : "No ratings yet. See reviews"}>
                 <StarIcon size={15} />
                 {product.rating > 0 ? product.rating.toFixed(1) : "New"}
-              </span>
+                <span>· Reviews</span>
+              </Link>
             </div>
 
             <h1 className={styles.title}>{product.title}</h1>
