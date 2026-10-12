@@ -147,3 +147,29 @@ describe("verification rejection when the plan keeps running", () => {
     expect(rendered.text).toContain("refunded the full amount");
   });
 });
+
+describe("refund emails say where the money lands", () => {
+  const sample = readEmailTemplate("refundIssued").sample;
+
+  it("tells a wallet refund that the money is already in the Zudomart wallet", async () => {
+    const rendered = await renderEmail("refundIssued", sample);
+    expect(rendered.subject).toContain("is in your Zudomart wallet");
+    expect(rendered.text).toContain("Back to: Your Zudomart wallet");
+    expect(rendered.text).toContain("Arrives: Now");
+    expect(rendered.text).not.toContain("original payment method");
+    expect(rendered.text).not.toContain("on your statement");
+  });
+
+  it("keeps the bank timing for a refund back to the card", async () => {
+    const rendered = await renderEmail("refundIssued", { ...sample, refundDestination: "paymentMethod", refundMethod: "The card you paid with" });
+    expect(rendered.subject).toContain("is on its way");
+    expect(rendered.text).toContain("Back to: The card you paid with");
+    expect(rendered.text).toContain("3–5 business days");
+  });
+
+  it("does not promise the original payment method when an order is cancelled", async () => {
+    const rendered = await renderEmail("orderCancelled", readEmailTemplate("orderCancelled").sample);
+    expect(rendered.text).toContain("Your Zudomart wallet, or your card if the payment hadn't settled yet");
+    expect(rendered.text).not.toContain("Original payment method");
+  });
+});
