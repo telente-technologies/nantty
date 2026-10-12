@@ -4,7 +4,7 @@ Every maintained document in the repo, one line each. Third-party files (`deps/`
 
 ## Start here
 
-- [../README.md](../README.md): what Zudomart is, the apps, the architecture diagrams, getting started.
+- [../README.md](../README.md): what Zudomart is, the repo map, quick start and common commands.
 - [runningLocally.md](runningLocally.md): switch the apps between mocks and the real backend, start the local stack, demo accounts, testing on a phone.
 - [plans.md](plans.md): the living work plan, with status markers and owner decisions.
 - [CHANGELOG.md](CHANGELOG.md): what changed, by date.
@@ -12,10 +12,10 @@ Every maintained document in the repo, one line each. Third-party files (`deps/`
 
 ## Architecture (`docs/architecture`)
 
-- [architecture/README.md](architecture/README.md): index, status labels and the fixed owner decisions.
-- [architecture/inventory.md](architecture/inventory.md): factual audit of what existed on 2026-10-03 (a snapshot).
-- [architecture/system.md](architecture/system.md): whole-system view, current against target.
-- [architecture/backend.md](architecture/backend.md): Go deployables, TS/Elixir/Python services, ownership matrix.
+- [architecture/system.md](architecture/system.md): the current system overview (services, data ownership, events, money flow, auth, realtime, deployment). Start here.
+- [architecture/README.md](architecture/README.md): index of the topic documents, which are current and which are dated, and the fixed decisions.
+- [architecture/inventory.md](architecture/inventory.md): historical audit of the repo on 2026-10-03.
+- [architecture/backend.md](architecture/backend.md): deployables, ownership matrix, API design audit (dated design notes).
 - [architecture/frontend.md](architecture/frontend.md): front-end apps, BFFs, mock switching.
 - [architecture/database.md](architecture/database.md): domain ERDs and schema ownership.
 - [architecture/events.md](architecture/events.md): outbox, event catalog, queues and background jobs.
@@ -34,7 +34,7 @@ Every maintained document in the repo, one line each. Third-party files (`deps/`
 - [architecture/devops.md](architecture/devops.md): CI/CD, environments, AWS layout.
 - [architecture/disaster-recovery.md](architecture/disaster-recovery.md): backup, restore, failover.
 - [architecture/widgetsApiContract.md](architecture/widgetsApiContract.md): home-screen and embeddable web widget API.
-- [architecture/microservicesPlan.json](architecture/microservicesPlan.json): service map (commands, queries, events per module).
+- [architecture/microservicesPlan.json](architecture/microservicesPlan.json): early proposed service map (historical).
 
 ## Database (`docs/database`)
 
