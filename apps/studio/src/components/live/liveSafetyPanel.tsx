@@ -9,10 +9,10 @@ import type { ID } from "@/types";
 
 import styles from "./liveSafety.module.css";
 
-export function LiveSafetyPanel({ liveId, isActive }: { readonly liveId: ID; readonly isActive: boolean }) {
+export function LiveSafetyPanel({ liveId, isActive, isRealtime = false }: { readonly liveId: ID; readonly isActive: boolean; readonly isRealtime?: boolean }) {
   const queryClient = useQueryClient();
   const [appealMessage, setAppealMessage] = useState("");
-  const safety = useQuery({ queryKey: ["live-safety", liveId], queryFn: () => liveSafetyService.fetchLiveSafety(liveId), enabled: isActive, refetchInterval: 5000 });
+  const safety = useQuery({ queryKey: ["live-safety", liveId], queryFn: () => liveSafetyService.fetchLiveSafety(liveId), enabled: isActive, refetchInterval: isRealtime ? 30_000 : 5000 });
   const appeal = useMutation({
     mutationFn: () => liveSafetyService.appealLiveSafetyHold(liveId, appealMessage.trim()),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["live-safety", liveId] }),

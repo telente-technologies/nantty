@@ -26,7 +26,7 @@ export const studioErrorExperience: ErrorExperienceConfig = {
     { label: "Content", href: "/content", icon: "playCircle" },
     { label: "Lives", href: "/lives", icon: "broadcast" },
     { label: "Earnings", href: "/earnings", icon: "wallet" },
-    { label: "Audience", href: "/audience", icon: "users" },
+    { label: "Analytics", href: "/analytics", icon: "users" },
   ],
   renderLink: renderNextLink,
 };

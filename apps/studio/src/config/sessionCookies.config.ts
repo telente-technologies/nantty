@@ -19,6 +19,9 @@ export const sessionCookieNames = {
   get viewer() {
     return prefixCookieNameForHost("zd_viewer");
   },
+  get realtimeTicket() {
+    return prefixCookieNameForHost("zd_rtt");
+  },
 };
 
 export const sessionLifetimesInSeconds = {

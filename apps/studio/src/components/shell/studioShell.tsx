@@ -7,6 +7,7 @@ import { useEffect, useState, type ComponentType, type ReactNode } from "react";
 import { ConnectionStatus, ZudomartWordmark } from "@zudomart/web-kit";
 
 import { AccountMenu } from "@/components/shell/accountMenu";
+import { NotificationsLink } from "@/components/shell/notificationsLink";
 import { CreatorProgramGate } from "@/components/shell/creatorProgramGate";
 import { useSession } from "@/components/providers/sessionProvider";
 import { webappLinks } from "@/config/webappLinks.config";
@@ -90,6 +91,7 @@ export function StudioShell({ children }: { readonly children: ReactNode }) {
             </nav>
           ) : <span className={styles.navSpacer} />}
           <div className={styles.sidebarFooter}>
+            {viewer ? <NotificationsLink /> : null}
             <a href={webappLinks.help} className={styles.navLink} target="_blank" rel="noopener noreferrer" title="Help Centre">
               <HelpIcon size={20} />
               <span className={styles.navLabel}>Help Centre</span>

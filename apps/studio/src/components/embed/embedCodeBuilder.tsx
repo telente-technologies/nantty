@@ -44,7 +44,7 @@ export function StudioEmbedCodeBuilder() {
   return (
     <div className={styles.page}>
       <header>
-        <h1 className={styles.title}>Embed on your site</h1>
+        <h2 className={styles.title}>Embed on your site</h2>
         <p className={styles.subtitle}>Add a Buy on Zudomart button for products you promote, or your store and products, to your own website or blog. Buying always opens Zudomart.</p>
       </header>
       <div className={styles.layout}>

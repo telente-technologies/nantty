@@ -53,10 +53,10 @@ function PinnedProductsCard({ liveId }: { readonly liveId: ID }) {
   );
 }
 
-function LiveChatCard({ liveId, ended }: { readonly liveId: ID; readonly ended: boolean }) {
+function LiveChatCard({ liveId, ended, isRealtime }: { readonly liveId: ID; readonly ended: boolean; readonly isRealtime: boolean }) {
   const queryClient = useQueryClient();
   const [draft, setDraft] = useState("");
-  const comments = useQuery({ queryKey: ["live-comments", liveId], queryFn: () => livesService.listComments(liveId), refetchInterval: ended ? false : 5000 });
+  const comments = useQuery({ queryKey: ["live-comments", liveId], queryFn: () => livesService.listComments(liveId), refetchInterval: ended ? false : isRealtime ? 30_000 : 5000 });
   const postComment = useMutation({
     mutationFn: () => livesService.postComment(liveId, draft.trim()),
     onSuccess: () => {
@@ -95,11 +95,11 @@ function LiveChatCard({ liveId, ended }: { readonly liveId: ID; readonly ended: 
   );
 }
 
-export function LiveControlColumns({ liveId, canPinProducts, ended }: { readonly liveId: ID; readonly canPinProducts: boolean; readonly ended: boolean }) {
+export function LiveControlColumns({ liveId, canPinProducts, ended, isRealtime = false }: { readonly liveId: ID; readonly canPinProducts: boolean; readonly ended: boolean; readonly isRealtime?: boolean }) {
   return (
     <div className={styles.columns}>
       {canPinProducts && !ended ? <PinnedProductsCard liveId={liveId} /> : null}
-      <LiveChatCard liveId={liveId} ended={ended} />
+      <LiveChatCard liveId={liveId} ended={ended} isRealtime={isRealtime} />
     </div>
   );
 }

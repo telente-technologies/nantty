@@ -2,6 +2,7 @@
 
 import { createContext, useContext, useEffect, useMemo, type ReactNode } from "react";
 
+import { useRealtimeBridge } from "@/components/realtime/useRealtimeBridge.hook";
 import { rememberCsrfTokenForRequests } from "@/services/clientApi.service";
 import { useAuthStore } from "@/store/auth.store";
 import type { User } from "@/types";
@@ -19,6 +20,7 @@ export function SessionProvider({ viewer, csrfToken, children }: SessionContextV
     return { viewer, csrfToken };
   }, [viewer, csrfToken]);
   const syncAuthStore = useAuthStore((state) => state.setViewerFromSession);
+  useRealtimeBridge(viewer?.id ?? null);
 
   useEffect(() => {
     rememberCsrfTokenForRequests(csrfToken);

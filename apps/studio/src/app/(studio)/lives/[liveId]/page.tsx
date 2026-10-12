@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { use, useCallback, useState } from "react";
+import { use, useCallback, useEffect, useRef, useState } from "react";
 
 import { requestConfirmation } from "@zudomart/web-kit";
 
@@ -11,6 +11,7 @@ import { EncoderSetupCard } from "@/components/golive/encoderSetupCard";
 import { LiveChatSettingsCard } from "@/components/golive/liveChatSettingsCard";
 import { LiveControlColumns } from "@/components/golive/liveControlColumns";
 import { StreamHealthPanel } from "@/components/golive/streamHealthPanel";
+import { useControlRoomRealtime } from "@/components/live/controlRoomRealtime.hook";
 import { LiveEarningsPanel } from "@/components/live/liveEarningsPanel";
 import { LiveSafetyPanel } from "@/components/live/liveSafetyPanel";
 import { StageGuestsPanel } from "@/components/live/stageGuestsPanel";
@@ -50,7 +51,8 @@ export default function ControlRoomPage({ params }: { readonly params: Promise<{
   const queryClient = useQueryClient();
   const [mode, setMode] = useState<BroadcastMode>(searchParams.get("mode") === "encoder" ? "encoder" : "browser");
   const [localStats, setLocalStats] = useState<PublisherStats | null>(null);
-  const live = useQuery({ queryKey: ["live", liveId], queryFn: () => livesService.fetchLiveById(liveId), refetchInterval: 5000 });
+  const isRealtimeRef = useRef(false);
+  const live = useQuery({ queryKey: ["live", liveId], queryFn: () => livesService.fetchLiveById(liveId), refetchInterval: () => (isRealtimeRef.current ? 30_000 : 5000) });
   const isOwner = Boolean(live.data && viewer && (live.data.hostId === null || live.data.hostId === viewer.id));
   const ended = live.data?.state === "ended";
   const health = useQuery({
@@ -60,6 +62,11 @@ export default function ControlRoomPage({ params }: { readonly params: Promise<{
     refetchInterval: 4000,
     retry: (count, error) => !isForbidden(error) && count < 2,
   });
+
+  const isRealtime = useControlRoomRealtime(liveId, isOwner && !ended);
+  useEffect(() => {
+    isRealtimeRef.current = isRealtime;
+  }, [isRealtime]);
 
   const invalidate = useCallback(() => {
     for (const key of [["live", liveId], ["stream-health", liveId], ["live-stream-key", liveId], ["lives"]]) void queryClient.invalidateQueries({ queryKey: key });
@@ -117,7 +124,7 @@ export default function ControlRoomPage({ params }: { readonly params: Promise<{
 
       {actionError ? <p className={styles.actionError} role="alert">{readLiveErrorMessage(actionError)}</p> : null}
 
-      <LiveSafetyPanel liveId={session.id} isActive={isLive || session.state === "connecting"} />
+      <LiveSafetyPanel liveId={session.id} isActive={isLive || session.state === "connecting"} isRealtime={isRealtime} />
 
       {!ended ? <StreamHealthPanel health={health.data} error={health.error} local={mode === "browser" ? localStats : null} onRetry={() => void health.refetch()} /> : null}
 
@@ -142,9 +149,9 @@ export default function ControlRoomPage({ params }: { readonly params: Promise<{
 
       <LiveEarningsPanel earnings={session.earnings} viewers={session.viewers} peakViewers={session.peakViewers} ranking={session.hostRanking} />
 
-      <StageGuestsPanel liveId={session.id} isActive={isLive} />
+      <StageGuestsPanel liveId={session.id} isActive={isLive} isRealtime={isRealtime} />
 
-      <LiveControlColumns liveId={session.id} canPinProducts={Boolean(session.storeId)} ended={ended} />
+      <LiveControlColumns liveId={session.id} canPinProducts={Boolean(session.storeId)} ended={ended} isRealtime={isRealtime} />
 
       {!ended ? <LiveChatSettingsCard liveId={session.id} /> : null}
     </div>

@@ -365,3 +365,27 @@
     padding-top: var(--space-5);
   }
 }
+
+.navIconWithBadge {
+  position: relative;
+  display: inline-flex;
+  flex: none;
+}
+
+.navBadge {
+  position: absolute;
+  top: -6px;
+  left: 12px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border: 2px solid var(--surface-card);
+  border-radius: var(--radius-pill);
+  background: var(--color-brand-solid);
+  color: var(--ink-inverse);
+  font-size: var(--text-2xs);
+  font-weight: 700;
+  line-height: 14px;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}

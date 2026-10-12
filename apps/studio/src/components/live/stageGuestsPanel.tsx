@@ -71,8 +71,8 @@ function GuestReportForm({ liveId, guest, onDone }: { readonly liveId: ID; reado
   );
 }
 
-export function StageGuestsPanel({ liveId, isActive }: { readonly liveId: ID; readonly isActive: boolean }) {
-  const guests = useQuery({ queryKey: ["live-stage-guests", liveId], queryFn: () => liveSafetyService.listStageGuests(liveId), enabled: isActive, refetchInterval: 10_000 });
+export function StageGuestsPanel({ liveId, isActive, isRealtime = false }: { readonly liveId: ID; readonly isActive: boolean; readonly isRealtime?: boolean }) {
+  const guests = useQuery({ queryKey: ["live-stage-guests", liveId], queryFn: () => liveSafetyService.listStageGuests(liveId), enabled: isActive, refetchInterval: isRealtime ? 60_000 : 10_000 });
   const [reportingSlotId, setReportingSlotId] = useState<string | null>(null);
   if (!isActive) return null;
   return (
