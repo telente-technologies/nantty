@@ -33,6 +33,7 @@ import { commentsMocks } from "./comments.mock";
 import { postThreadMocks } from "./postThread.mock";
 import { soundsMocks } from "./sounds.mock";
 import { creatorProgramMocks } from "./creatorProgram.mock";
+import { affiliatesMocks } from "./affiliates.mock";
 import { creatorsMocks } from "./creators.mock";
 import { creatorSubscriptionsMocks } from "./creatorSubscriptions.mock";
 import { disputesMocks } from "./disputes.mock";
@@ -116,6 +117,7 @@ const routes: MockRoute[] = [
   ...banksMocks,
   ...creatorSubscriptionsMocks,
   ...creatorProgramMocks,
+  ...affiliatesMocks,
   ...identityVerificationMocks,
   ...verificationMocks,
   ...boostsMocks,

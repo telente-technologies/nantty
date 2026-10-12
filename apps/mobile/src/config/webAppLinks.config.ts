@@ -34,6 +34,8 @@ export function readProductIdFromSlug(slugAndId: string): string {
 export const webAppLinks = {
   profile: (username: string) => `${webAppBaseUrl}/${encodeURIComponent(username.replace(/^@/, ""))}`,
   product: (product: { readonly id: string; readonly name?: string | null }) => `${webAppBaseUrl}/p/${slugifyForUrl(product.name ?? "product")}-${encodeURIComponent(product.id)}`,
+  affiliateProduct: (product: { readonly id: string; readonly name?: string | null }, linkId: string) =>
+    `${webAppBaseUrl}/p/${slugifyForUrl(product.name ?? "product")}-${encodeURIComponent(product.id)}?aff=${encodeURIComponent(linkId)}`,
   store: (storeId: string) => `${webAppBaseUrl}/store/${encodeURIComponent(storeId)}`,
   post: (postId: string) => `${webAppBaseUrl}/post/${encodeURIComponent(postId)}`,
   clip: (clipId: string) => `${webAppBaseUrl}/post/${encodeURIComponent(clipId)}`,
