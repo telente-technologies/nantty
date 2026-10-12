@@ -52,13 +52,13 @@ func startFlowHarness(t *testing.T) *flowHarness {
 	escrow.Application.Container.Now = func() time.Time { return harness.clock }
 	harness.escrow = escrow
 	walletSettings := walletconfigs.WalletSettings{
-		Money:                        moneytesting.MoneyModuleSettingsForTests("wallet", moneytesting.CreateEmptySchema(t, money.Database, "wallet"), money.LedgerSchema),
-		CoinTransferFeeBps:           2500, CoinCashValueMinorByCurrency: walletconfigs.ParseCurrencyAmounts("NGN:1000"),
+		Money:              moneytesting.MoneyModuleSettingsForTests("wallet", moneytesting.CreateEmptySchema(t, money.Database, "wallet"), money.LedgerSchema),
+		CoinTransferFeeBps: 2500, CoinCashValueMinorByCurrency: walletconfigs.ParseCurrencyAmounts("NGN:1000"),
 		MinimumPayoutMinorByCurrency: walletconfigs.ParseCurrencyAmounts("NGN:1000"), MinimumWithdrawalMinor: 100, DataEncryptionKey: bytes.Repeat([]byte{9}, 32),
 		DefaultCurrency: "NGN", WithdrawalLimits: walletconfigs.WithdrawalLimits{MaximumPerDay: 3, MinimumGap: 10 * time.Minute, NewAccountCooldown: 48 * time.Hour, BlockWhileProcessing: true},
 		PayoutRunInterval: time.Hour, CreatorTransferMinimum: walletconfigs.ParseCurrencyAmounts("NGN:10000"), InternalApiToken: strings.Repeat("w", 32),
 		CoinNetValueMinorByCurrency: walletconfigs.ParseCurrencyAmounts("NGN:1000"), CoinChannelFeeBps: walletconfigs.ParseChannelFees("web:200"),
-		UsersSchema:                 harness.usersSchema,
+		UsersSchema: harness.usersSchema,
 	}
 	wallet, err := walletsrc.StartWalletModuleWithSettings(context.Background(), walletSettings, money.Dependencies, money.Overrides(), harness.gateway)
 	if err != nil {
@@ -70,7 +70,9 @@ func startFlowHarness(t *testing.T) *flowHarness {
 	return harness
 }
 
-func (harness *flowHarness) advance(duration time.Duration) { harness.clock = harness.clock.Add(duration) }
+func (harness *flowHarness) advance(duration time.Duration) {
+	harness.clock = harness.clock.Add(duration)
+}
 
 func (harness *flowHarness) setCountry(userId, country string) {
 	harness.T.Helper()

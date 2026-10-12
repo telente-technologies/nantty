@@ -36,7 +36,10 @@ func TestWithdrawalRacedAgainstAPurchaseNeverSpendsTheSameMoneyTwice(t *testing.
 	results := make([]paymentstesting.HarnessResponse, 2)
 	group.Add(2)
 	go func() { defer group.Done(); results[0] = harness.payWithWallet(buyer, placed, "race-pay-0001") }()
-	go func() { defer group.Done(); results[1] = harness.withdraw(buyer, accountId, available, "race-wd-00001", true) }()
+	go func() {
+		defer group.Done()
+		results[1] = harness.withdraw(buyer, accountId, available, "race-wd-00001", true)
+	}()
 	group.Wait()
 	succeeded := 0
 	for _, result := range results {

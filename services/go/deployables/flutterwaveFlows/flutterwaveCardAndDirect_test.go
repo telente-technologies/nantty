@@ -3,10 +3,12 @@ package flutterwaveflows
 import (
 	"context"
 	"database/sql"
+	"encoding/json"
 	"errors"
 	"net/http"
 	"testing"
 
+	escrowoutbox "zudomart/modules/escrow/src/generated/ent/outboxevent"
 	"zudomart/modules/escrow/src/modules/escrows/services"
 	"zudomart/modules/ledger/src/databases"
 	ledgermodels "zudomart/modules/ledger/src/modules/journal/models"
@@ -19,6 +21,23 @@ func (harness *flowHarness) refundEscrow(placed order, reason string) error {
 		_, err := harness.escrow.Application.Escrows.RefundEscrowInTransaction(ctx, transaction, placed.orderId, reason, services.EscrowActor{Type: "staff", Id: "staff-1"})
 		return err
 	})
+}
+
+func (harness *flowHarness) refundDestinationAnnounced(placed order) string {
+	harness.T.Helper()
+	event, err := harness.escrowClient().OutboxEvent.Query().Where(escrowoutbox.EventType("escrow.refunded"), escrowoutbox.Subject(placed.orderId)).Only(context.Background())
+	if err != nil {
+		harness.T.Fatal(err)
+	}
+	var envelope struct {
+		Data struct {
+			RefundDestination string `json:"refundDestination"`
+		} `json:"data"`
+	}
+	if err := json.Unmarshal(event.Payload, &envelope); err != nil {
+		harness.T.Fatal(err)
+	}
+	return envelope.Data.RefundDestination
 }
 
 func TestCardBuyerRefundedBeforeSettlementGetsTheCardRefundAndAfterSettlementGetsTheWalletUnlocked(t *testing.T) {
@@ -38,6 +57,9 @@ func TestCardBuyerRefundedBeforeSettlementGetsTheCardRefundAndAfterSettlementGet
 	if len(harness.fake.Refunds) != 1 {
 		t.Fatalf("the refund goes back to the card through the outbox: %v", harness.fake.Refunds)
 	}
+	if destination := harness.refundDestinationAnnounced(early); destination != "paymentMethod" {
+		t.Fatalf("the buyer is told the refund goes back to the card, got %q", destination)
+	}
 	late := harness.registerOrder(buyer, seller, 150_000, "NGN", "escrow")
 	harness.initialize(buyer, &late)
 	harness.payByCard(late, 2_250)
@@ -56,6 +78,9 @@ func TestCardBuyerRefundedBeforeSettlementGetsTheCardRefundAndAfterSettlementGet
 	}
 	if available := harness.balance(ledgermodels.WalletAvailableAccount(buyer, "NGN")); available != 150_000 {
 		t.Fatalf("refund must unlock the order in the buyer's wallet, available %d", available)
+	}
+	if destination := harness.refundDestinationAnnounced(late); destination != "wallet" {
+		t.Fatalf("the buyer is told the refund is in their Zudomart wallet, got %q", destination)
 	}
 	harness.assertWalletMatchesProvider(buyer)
 	harness.AssertLedgerHealthy()
