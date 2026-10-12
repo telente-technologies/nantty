@@ -43,3 +43,7 @@ test("a quote deep link opens the normal composer with the quoted post attached"
   expect(route.name).toBe("CreatePost");
   expect(route.params).toMatchObject({ mode: "post", quotePostId: "post_42" });
 });
+
+test("an emailed offer link opens the web claim hand-off instead of a profile", () => {
+  expect(focusedRouteNames("offer/Xq3v0mZp9bT2nR8kL5wA7cD1eF4gH6jK0lM2nP4qR6s")).toEqual(["SubscriptionOffer"]);
+});

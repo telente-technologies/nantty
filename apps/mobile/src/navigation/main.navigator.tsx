@@ -80,6 +80,7 @@ import { MySubscriptionsScreen } from "@/screens/creator/mySubscriptions.screen"
 import { VerificationScreen } from "@/screens/verification/verification.screen";
 import { VerificationApplyScreen } from "@/screens/verification/verificationApply.screen";
 import { IdentityVerificationScreen } from "@/screens/verification/identityVerification.screen";
+import { SubscriptionOfferHandoffScreen } from "@/screens/subscriptions/subscriptionOfferHandoff.screen";
 import { PromotePostScreen } from "@/screens/boost/promotePost.screen";
 import { BoostStatusScreen } from "@/screens/boost/boostStatus.screen";
 import { SupportTicketsScreen } from "@/screens/support/supportTickets.screen";
@@ -196,6 +197,7 @@ export function MainNavigator() {
       <Stack.Screen name="Verification" component={VerificationScreen} />
       <Stack.Screen name="VerificationApply" component={VerificationApplyScreen} />
       <Stack.Screen name="IdentityVerification" component={IdentityVerificationScreen} />
+      <Stack.Screen name="SubscriptionOffer" component={SubscriptionOfferHandoffScreen} />
       <Stack.Screen name="PromotePost" component={PromotePostScreen} />
       <Stack.Screen name="BoostStatus" component={BoostStatusScreen} />
       <Stack.Screen name="SupportTickets" component={SupportTicketsScreen} />

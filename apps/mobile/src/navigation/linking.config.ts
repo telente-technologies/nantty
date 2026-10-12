@@ -33,6 +33,7 @@ export const deepLinking: LinkingOptions<RootStackParamList> = {
       Settings: "settings",
       AccountStatus: "settings/account-status",
       IdentityVerification: "settings/verification",
+      SubscriptionOffer: "offer/:token",
       CreatePost: { path: "create/:mode?" },
       ProductForm: "seller/products/new",
       CreatorProgram: "creator",

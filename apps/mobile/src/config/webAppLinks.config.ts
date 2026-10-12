@@ -38,4 +38,5 @@ export const webAppLinks = {
   post: (postId: string) => `${webAppBaseUrl}/post/${encodeURIComponent(postId)}`,
   clip: (clipId: string) => `${webAppBaseUrl}/post/${encodeURIComponent(clipId)}`,
   live: (liveId: string) => `${webAppBaseUrl}/live/${encodeURIComponent(liveId)}`,
+  subscriptionOffer: (token: string) => `${webAppBaseUrl}/offer/${encodeURIComponent(token)}`,
 };
