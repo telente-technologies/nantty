@@ -17,7 +17,7 @@ Sellers, for paid orders that aren't in dispute.
 2. Tap **Refund**, then pick **Full refund** or **Partial refund**.
 3. For a partial refund, enter the **Amount to refund**. The dialog shows how much can still be refunded.
 4. Write a **Reason shown to the buyer** (at least 5 characters).
-5. Confirm. "The money goes back to the buyer's original payment method."
+5. Confirm. "The money goes to the buyer's Zudomart wallet, or back to their card if the payment hasn't settled yet."
 
 ## When you can refund
 
