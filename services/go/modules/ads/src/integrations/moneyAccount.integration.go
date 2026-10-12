@@ -142,7 +142,10 @@ func (UnconfiguredMoneyAccountGateway) FundAdAccountFromEarnings(context.Context
 	return interfaces.EarningsFundingResult{}, adserrors.UpstreamUnavailable
 }
 
-type StaticEntitlementReader struct{ Premium map[string]bool }
+type StaticEntitlementReader struct {
+	Premium map[string]bool
+	AdLoad  map[string]int
+}
 
 func (reader StaticEntitlementReader) IsPremium(_ context.Context, userId string) (bool, error) {
 	return reader.Premium[userId], nil

@@ -1,4 +1,4 @@
-h1:GNxrQ6t6nIIwFhrjrRlyU80qg2z3NXoRmLIWLYJlNto=
+h1:71maCl5c23SP+0znLbgAr7JRpmgWvTcEXby3vnyH5Qo=
 20261003163309_create_ads_tables.up.sql h1:oVHSIrJdBZzzZHW3MeXKNySIV+azpV6aODc0qt7oADA=
 20261003163400_grant_read_access_to_other_services.up.sql h1:Y8rxKkfNJiQzRN2eu/BlbLrFuOEgJgl33HoVc6cqHtM=
 20261003180000_drop_ad_monetization_policies.up.sql h1:gZIC/QFft70dcuHaVvM7rM4+/5ckZ8SjJjdOMOjTLzQ=
@@ -8,3 +8,4 @@ h1:GNxrQ6t6nIIwFhrjrRlyU80qg2z3NXoRmLIWLYJlNto=
 20261005161332_add_tools_top_ups.up.sql h1:dTHJQqpy+9vjmE+FopplpxK6AgwxAVl6CDdPM3myAnA=
 20261010105609_add_free_boosts_and_boost_top_ups.up.sql h1:gKHVhhAC1EeFBxtmGf0+VeskXABEmUtuynRJAsB6paU=
 20261011120000_flutterwave_top_up_provider.up.sql h1:Qtg2u9721Y1ZdwLOPGsSg8Gayj/T2bEuJjq4P+EyJ2c=
+20261012120000_comment_thread_creator_share.up.sql h1:TKUSyb/HfEij/XgsnJ0DhhD9nSAgYjhZ8BtFiHZwLO4=

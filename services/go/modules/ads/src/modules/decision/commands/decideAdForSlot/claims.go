@@ -19,7 +19,7 @@ func (handler Handler) buildClaims(ctx context.Context, slot *slotContext, winne
 	if slot.command.Viewer.PersonalizedAds {
 		claims.AgeBand, claims.Gender = slot.command.Viewer.AgeBand, slot.command.Viewer.Gender
 	}
-	if slot.signal != nil && services.IsContentAdjacentSlot(slot.command.Slot.Kind) {
+	if handler.sharesRevenueWithCreator(ctx, slot) {
 		claims.CreatorUserId, claims.AiGenerated = slot.signal.CreatorUserId, slot.signal.AiGenerated
 		rows, err := handler.Container.Policies.MonetizationRows(ctx)
 		if err != nil {
@@ -28,4 +28,23 @@ func (handler Handler) buildClaims(ctx context.Context, slot *slotContext, winne
 		claims.CreatorShareBps, claims.MultiplierBps = services.ResolveCreatorShareWithDefault(rows, slot.signal.AiGenerated, slot.now, handler.Container.Policies.CreatorShareBps(ctx))
 	}
 	return claims
+}
+
+func (handler Handler) sharesRevenueWithCreator(ctx context.Context, slot *slotContext) bool {
+	if slot.signal == nil || slot.signal.CreatorUserId == "" || slot.signal.CreatorUserId == slot.command.UserId {
+		return false
+	}
+	if services.IsContentAdjacentSlot(slot.command.Slot.Kind) {
+		return true
+	}
+	if slot.command.Slot.Kind != services.SlotFeedCommentThread {
+		return false
+	}
+	members := services.CreatorProgramMembers{Client: handler.Container.Client, Now: handler.Container.Now}
+	paid, err := members.IsCreatorPaidForCommentThreadAds(ctx, slot.signal.CreatorUserId, slot.signal.MonetizationEligible)
+	if err != nil {
+		handler.Container.Logger.WarnContext(ctx, "creator program lookup failed; comment ad revenue stays with the platform", "error", err)
+		return false
+	}
+	return paid
 }

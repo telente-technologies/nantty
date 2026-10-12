@@ -65,6 +65,10 @@ func completeMoneyAccountCollaborators(deployed *container.Container, collaborat
 	if deployed.EarningsFunding == nil {
 		deployed.EarningsFunding = money
 	}
+	deployed.AdLoad = integrations.PremiumOnlyAdLoadReader{Entitlements: deployed.Entitlements}
+	if reader, ok := deployed.Entitlements.(interfaces.AdLoadReader); ok {
+		deployed.AdLoad = integrations.NewCachedAdLoadReader(reader, time.Minute, deployed.Now)
+	}
 	deployed.StepUps = collaborators.StepUps
 	if deployed.StepUps == nil {
 		deployed.StepUps = money

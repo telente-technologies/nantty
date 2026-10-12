@@ -47,6 +47,10 @@ type EntitlementReader interface {
 	IsPremium(ctx context.Context, userId string) (bool, error)
 }
 
+type AdLoadReader interface {
+	AdLoadPercent(ctx context.Context, userId string) (int, error)
+}
+
 type EarningsFundingResult struct {
 	FundingId   string
 	AmountMinor int64

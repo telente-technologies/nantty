@@ -18,9 +18,29 @@ func (handler Handler) checkViewerEligibility(ctx context.Context, slot *slotCon
 	if slot.command.UserId == "" {
 		return "no_viewer", nil
 	}
+	if reason := handler.checkPlanAdLoad(ctx, slot); reason != "" {
+		return reason, nil
+	}
 	enabled, err := handler.Container.Consent.PersonalizedAdsEnabled(ctx, slot.command.UserId)
 	viewer.PersonalizedAds = enabled
 	return "", err
+}
+
+func (handler Handler) checkPlanAdLoad(ctx context.Context, slot *slotContext) string {
+	percent := services.FullAdLoadPercent
+	if handler.Container.AdLoad != nil {
+		read, err := handler.Container.AdLoad.AdLoadPercent(ctx, slot.command.UserId)
+		if err != nil {
+			handler.Container.Logger.WarnContext(ctx, "plan ad load unavailable; using the full load", "error", err)
+		} else {
+			percent = read
+		}
+	}
+	request := slot.command.Slot
+	return services.AdLoadDeclineReason(percent, services.AdLoadRoll(services.AdLoadSlotKey{
+		UserId: slot.command.UserId, SessionId: slot.command.SessionId, SlotKind: request.Kind, ContentId: request.ContentId,
+		SlotIndex: request.SlotIndex, SlotsSinceLastAd: request.SlotsSinceLastAd, Neighbours: request.NeighbourContentIds, At: slot.now,
+	}))
 }
 
 func (handler Handler) checkContentEligibility(ctx context.Context, slot *slotContext) (string, error) {
@@ -36,6 +56,14 @@ func (handler Handler) checkContentEligibility(ctx context.Context, slot *slotCo
 		}
 	}
 	slot.signal = signal
+	if slotData.Kind == services.SlotFeedCommentThread && signal != nil {
+		switch {
+		case signal.Removed:
+			return "content_removed", nil
+		case !signal.BrandSafe || signal.Sensitive || signal.KidsContent:
+			return "content_not_brand_safe", nil
+		}
+	}
 	if services.IsContentAdjacentSlot(slotData.Kind) {
 		if signal == nil {
 			return "content_signals_missing", nil

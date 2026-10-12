@@ -21,6 +21,6 @@ func (reader EntContentSignalReader) FindContentSignal(ctx context.Context, cont
 	return types.ContentSignal{
 		ContentId: row.ContentID, CreatorUserId: row.CreatorUserID, ContentKind: row.ContentKind, DurationSeconds: row.DurationSeconds,
 		BrandSafe: row.BrandSafe, Sensitive: row.Sensitive, KidsContent: row.KidsContent, AiGenerated: row.AiGenerated,
-		MonetizationEligible: row.MonetizationEligible, OptedInPlacements: row.OptedInPlacements, Topics: row.Topics,
+		MonetizationEligible: row.MonetizationEligible, Removed: row.Removed, OptedInPlacements: row.OptedInPlacements, Topics: row.Topics,
 	}, true, nil
 }
