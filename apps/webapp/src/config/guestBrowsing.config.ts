@@ -39,5 +39,6 @@ export function isGuestBrowsablePage(pathname: string): boolean {
 
 export function isPublicApiRead(method: string, apiPath: string): boolean {
   if (method === "POST" && apiPath === "/api/v1/mentions/resolve") return true;
+  if (method === "POST" && /^\/api\/v1\/affiliate-links\/[A-Za-z0-9_-]{1,80}\/clicks$/.test(apiPath)) return true;
   return method === "GET" && publicApiReadPatterns.some((pattern) => pattern.test(apiPath));
 }

@@ -41,6 +41,7 @@ import { TaggedPeopleLine } from "@/components/taggedPeople/taggedPeopleLine";
 import type { FeedInteractionSurface } from "@/utils/feedInteractionQueue.util";
 import { feedInteractionsService } from "@/services/feedInteractions.service";
 import { PostSurfaceProvider, usePostImpressionRef, usePostSurface } from "./interactions/feedInteractions.hook";
+import { attributionSourceForPostKind, rememberSaleAttribution } from "@/utils/saleAttribution.util";
 
 export interface PostCardProps {
   readonly post: Post;
@@ -151,7 +152,7 @@ export function PostCard({ post, priority = false, swipeable = false, showPinned
             <TagIcon size={14} /> Tagged
           </span>
           {post.products.slice(0, 4).map((product) => (
-            <Link key={product.id} href={buildProductPath(product)} className={styles.productChip}>
+            <Link key={product.id} href={buildProductPath(product)} className={styles.productChip} onClick={() => rememberSaleAttribution(product.id, { source: attributionSourceForPostKind(post.kind), id: post.id })}>
               <span className={styles.productChipThumb}>
                 <MediaImage src={product.imageUrl} alt="" sizes="48px" />
               </span>
