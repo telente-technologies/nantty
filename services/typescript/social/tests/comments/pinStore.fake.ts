@@ -50,7 +50,7 @@ function table(rows: Row[], withMedia: boolean) {
 export function buildComment(overrides: Row & { id: string }): Row {
   return {
     postId, parentCommentId: null, rootCommentId: null, authorId: viewerId, text: "Nice post", mentions: [], likeCount: 0, replyCount: 0, depth: 0, path: "",
-    moderationVisibility: "visible", deletedAt: null, createdAt: new Date("2026-10-04T11:00:00Z"), isPinned: false, pinnedAt: null, ...overrides,
+    moderationVisibility: "visible", deletedAt: null, hiddenAt: null, hiddenByUserId: null, createdAt: new Date("2026-10-04T11:00:00Z"), isPinned: false, pinnedAt: null, ...overrides,
   };
 }
 

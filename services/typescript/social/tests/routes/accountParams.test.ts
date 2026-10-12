@@ -12,7 +12,7 @@ const ownerId = "01a12b3d-d5cc-7e11-bc61-000000000001";
 
 function postsRouter(listUserPosts: ReturnType<typeof vi.fn>) {
   const router = createRouter({});
-  const handlers = new Proxy({ listUserPosts, listUserStories: listUserPosts } as unknown as PostsHandlers, { get: (target, key) => (target as Record<string, unknown>)[key as string] ?? vi.fn() });
+  const handlers = new Proxy({ listUserPosts, listUserStories: listUserPosts } as unknown as PostsHandlers, { get: (target, key) => (target as unknown as Record<string, unknown>)[key as string] ?? vi.fn() });
   registerPostsRoutes(router, createPostsController(route, handlers));
   return router;
 }
