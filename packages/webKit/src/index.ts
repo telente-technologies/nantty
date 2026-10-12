@@ -42,3 +42,9 @@ export { listFocusableElements, nextTrappedFocus, trapTabKey } from "./dialog/di
 export { shouldDismissSheetDrag, useSheetDragToClose } from "./dialog/sheetDrag.hook";
 export { BrandLoader, brandLoaderSizes } from "./loader/brandLoader";
 export type { BrandLoaderProps, BrandLoaderSize } from "./loader/brandLoader";
+export { createRealtimeConnection, reconnectDelay } from "./realtime/realtimeConnection";
+export type { RealtimeConnection, RealtimeConnectionOptions, RealtimeSocketLike, RealtimeStatus, RealtimeTicket, TicketRequest, TicketResult } from "./realtime/realtimeConnection";
+export { createRealtimeHub, isWatchableTopic, readRealtimeEventIdentity } from "./realtime/realtimeHub";
+export type { RealtimeEvent, RealtimeHub, RealtimeHubOptions } from "./realtime/realtimeHub";
+export { createRealtimeTicketFetcher } from "./realtime/realtimeTicket";
+export { useRealtimeEvents, useRealtimeStatus, useRealtimeTopic } from "./realtime/realtimeHooks";

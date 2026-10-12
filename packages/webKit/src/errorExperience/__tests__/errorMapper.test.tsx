@@ -17,7 +17,7 @@ import { ErrorState } from "../errorState";
 import { RouteErrorScreen } from "../routeErrorScreen";
 
 const requiredCodes: Readonly<Record<string, ErrorKind>> = {
-  NETWORK_UNAVAILABLE: "offline", TIMEOUT: "timeout", SESSION_EXPIRED: "sessionExpired", UNAUTHENTICATED: "signedOut", FORBIDDEN: "forbidden", STEP_UP_REQUIRED: "stepUpRequired",
+  NETWORK_UNAVAILABLE: "offline", TIMEOUT: "timeout", SESSION_EXPIRED: "sessionExpired", UNAUTHENTICATED: "signedOut", INVALID_CREDENTIALS: "unknown", INVALID_PASSWORD: "unknown", FORBIDDEN: "forbidden", STEP_UP_REQUIRED: "stepUpRequired",
   VERIFICATION_REQUIRED: "verificationRequired", RATE_LIMITED: "rateLimited", MAINTENANCE: "maintenance", UPSTREAM_UNAVAILABLE: "maintenance", PAYMENT_AMOUNT_OUT_OF_RANGE: "paymentLimit",
   WALLET_DAILY_LIMIT: "paymentLimit", SELLER_DEBT_LIMIT: "sellerDebtLimit", COUNTRY_REQUIRED: "countryRequired", PRODUCT_NOT_AVAILABLE_IN_REGION: "regionUnavailable", ACCOUNT_SUSPENDED: "accountSuspended",
   RESTRICTED: "accountRestricted", APP_UPDATE_REQUIRED: "updateRequired", ACCOUNT_PRIVATE: "contentPrivate", BLOCKED: "contentBlocked", DECRYPTION_FAILED: "decryptionFailed", LIVE_ENDED: "liveUnavailable",

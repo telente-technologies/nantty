@@ -21,6 +21,7 @@ export const errorKindByCode: Readonly<Record<string, CodeRule>> = {
   UNAUTHENTICATED: ["signedOut"], UNAUTHORIZED: ["signedOut"],
   SESSION_EXPIRED: ["sessionExpired"], SESSION_IDLE_TIMEOUT: ["sessionExpired"], SESSION_PRIVILEGES_CHANGED: ["sessionExpired"], INVALID_REFRESH_TOKEN: ["sessionExpired"], REFRESH_TOKEN_REUSED: ["sessionExpired"],
   FORBIDDEN: ["forbidden"], PERMISSION_DENIED: ["forbidden"], SUPERADMIN_REQUIRED: ["forbidden"], IP_NOT_ALLOWED: ["forbidden"], CSRF_REJECTED: ["forbidden"],
+  INVALID_CREDENTIALS: ["unknown"], INVALID_PASSWORD: ["unknown"],
   STEP_UP_REQUIRED: ["stepUpRequired"], STEP_UP_PROOF_REQUIRED: ["stepUpRequired"], STEP_UP_FAILED: ["stepUpRequired"], STEP_UP_REUSED: ["stepUpRequired"],
   VERIFICATION_REQUIRED: ["verificationRequired"], SELLER_VERIFICATION_REQUIRED: ["verificationRequired"], BVN_REQUIRED: ["verificationRequired"],
   VERIFY_EMAIL_REQUIRED: ["emailNotVerified"], EMAIL_NOT_VERIFIED: ["emailNotVerified"], SOCIAL_EMAIL_NOT_VERIFIED: ["emailNotVerified"],
