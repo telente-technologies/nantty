@@ -29,7 +29,7 @@ type CartItemView struct {
 	Attribution   *SaleAttributionView `json:"attribution"`
 }
 
-var SaleAttributionSources = []string{"post", "clip", "live"}
+var SaleAttributionSources = []string{"post", "clip", "live", "link"}
 
 type SaleAttributionView struct {
 	Source string `json:"source"`

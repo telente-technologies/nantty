@@ -17,7 +17,7 @@ func ValidateAddCartItem(body dtos.AddCartItemRequest) error {
 	collected.CheckRange("quantity", body.Quantity, 1, 99)
 	if body.Attribution != nil {
 		if !slices.Contains(types.SaleAttributionSources, body.Attribution.Source) {
-			collected.Add("attribution.source", "must be post, clip or live")
+			collected.Add("attribution.source", "must be post, clip, live or link")
 		}
 		utils.ParseIdentifier("attribution.id", body.Attribution.Id, &collected)
 	}

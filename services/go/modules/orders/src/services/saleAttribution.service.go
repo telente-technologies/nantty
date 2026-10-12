@@ -12,15 +12,16 @@ import (
 )
 
 type AttributedSaleItem struct {
-	OrderItemId       uuid.UUID `json:"orderItemId"`
-	ProductId         uuid.UUID `json:"productId"`
-	VariantId         uuid.UUID `json:"variantId"`
-	Quantity          int       `json:"quantity"`
-	LineTotalMinor    int64     `json:"lineTotalMinor"`
-	Currency          string    `json:"currency"`
-	AttributionSource string    `json:"attributionSource"`
-	AttributionId     uuid.UUID `json:"attributionId"`
-	CommissionBps     *int64    `json:"commissionBasisPoints"`
+	OrderItemId       uuid.UUID  `json:"orderItemId"`
+	ProductId         uuid.UUID  `json:"productId"`
+	VariantId         uuid.UUID  `json:"variantId"`
+	Quantity          int        `json:"quantity"`
+	LineTotalMinor    int64      `json:"lineTotalMinor"`
+	Currency          string     `json:"currency"`
+	AttributionSource string     `json:"attributionSource"`
+	AttributionId     uuid.UUID  `json:"attributionId"`
+	AttributedAt      *time.Time `json:"attributedAt"`
+	CommissionBps     *int64     `json:"commissionBasisPoints"`
 }
 
 func AttributedSaleItemsOf(group *ent.OrderGroup, items []*ent.OrderItem) []AttributedSaleItem {
@@ -31,7 +32,7 @@ func AttributedSaleItemsOf(group *ent.OrderGroup, items []*ent.OrderItem) []Attr
 		}
 		attributed = append(attributed, AttributedSaleItem{OrderItemId: item.ID, ProductId: item.ProductID, VariantId: item.VariantID, Quantity: item.Quantity,
 			LineTotalMinor: item.LineTotalMinor, Currency: group.Currency, AttributionSource: *item.AttributionSource, AttributionId: *item.AttributionID,
-			CommissionBps: item.AffiliateCommissionBps})
+			AttributedAt: item.AttributedAt, CommissionBps: item.AffiliateCommissionBps})
 	}
 	return attributed
 }
@@ -50,7 +51,7 @@ func enqueueOrderCompleted(ctx context.Context, tx *ent.Tx, group *ent.OrderGrou
 		return err
 	}
 	return events.EnqueueOutboxEventInTransaction(ctx, tx, "orderGroup.completed", group.ID.String(), now, map[string]any{
-		"orderGroupId": group.ID, "storeId": group.StoreID, "sellerAccountId": group.SellerAccountID, "buyerAccountId": group.BuyerAccountID,
+		"orderGroupId": group.ID, "orderNumber": group.Reference, "orderedAt": group.CreatedAt.UTC().Format(time.RFC3339Nano), "storeId": group.StoreID, "sellerAccountId": group.SellerAccountID, "buyerAccountId": group.BuyerAccountID,
 		"subtotalMinor": group.SubtotalMinor, "totalMinor": group.TotalMinor, "refundedMinor": group.RefundedMinor, "currency": group.Currency,
 		"completedAt": now.UTC().Format(time.RFC3339Nano), "attributedItems": attributed,
 	})

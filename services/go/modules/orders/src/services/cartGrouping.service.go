@@ -2,6 +2,7 @@ package services
 
 import (
 	"errors"
+	"time"
 
 	"github.com/google/uuid"
 
@@ -15,6 +16,7 @@ type PricedCartLine struct {
 	Product           commerceports.ProductSnapshot
 	AttributionSource *string
 	AttributionId     *uuid.UUID
+	AttributedAt      *time.Time
 	CommissionBps     *int64
 }
 

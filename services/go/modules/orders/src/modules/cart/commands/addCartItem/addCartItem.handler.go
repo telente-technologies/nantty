@@ -3,6 +3,7 @@ package addcartitem
 import (
 	"context"
 	"strings"
+	"time"
 
 	"github.com/google/uuid"
 
@@ -53,13 +54,14 @@ func (handler Handler) Execute(ctx context.Context, command Command) (types.Cart
 		source, attributionId := attributionOf(command.Request.Attribution)
 		if existing != nil {
 			update := existing.Update().SetQuantity(quantity)
-			if existing.AttributionSource == nil && source != nil {
-				update.SetAttributionSource(*source).SetAttributionID(*attributionId)
+			sameAttribution := existing.AttributionSource != nil && source != nil && *existing.AttributionSource == *source && *existing.AttributionID == *attributionId
+			if source != nil && (existing.AttributionSource == nil || sameAttribution) {
+				update.SetAttributionSource(*source).SetAttributionID(*attributionId).SetAttributedAt(handler.Container.Now())
 			}
 			return update.Exec(ctx)
 		}
 		return tx.CartItem.Create().SetCartID(cartId).SetProductID(snapshot.ProductId).SetVariantID(snapshot.VariantId).SetStoreID(snapshot.StoreId).SetQuantity(quantity).
-			SetNillableAttributionSource(source).SetNillableAttributionID(attributionId).Exec(ctx)
+			SetNillableAttributionSource(source).SetNillableAttributionID(attributionId).SetNillableAttributedAt(attributedAtWhen(source, handler.Container.Now())).Exec(ctx)
 	})
 	if err != nil {
 		return types.CartView{}, err
@@ -73,6 +75,13 @@ func attributionOf(attribution *dtos.SaleAttribution) (*string, *uuid.UUID) {
 	}
 	identifier := uuid.MustParse(attribution.Id)
 	return &attribution.Source, &identifier
+}
+
+func attributedAtWhen(source *string, now time.Time) *time.Time {
+	if source == nil {
+		return nil
+	}
+	return &now
 }
 
 func ensureCart(ctx context.Context, tx *ent.Tx, accountId uuid.UUID) (uuid.UUID, error) {
