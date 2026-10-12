@@ -1,4 +1,4 @@
-import type { Comment, CommentWithReplies, NewCommentInput, Page } from "@/types";
+import type { Comment, CommentHiddenState, CommentWithReplies, MyPostComment, NewCommentInput, Page } from "@/types";
 import type { CommentSectionFilter, QuoteThreadItem } from "@/types/postThread.type";
 
 import { api } from "../core/apiClient.service";
@@ -14,4 +14,7 @@ export const postCommentsService = {
   deleteComment: (commentId: string) => api.delete<void>(`/api/v1/comments/${commentId}`),
   pinComment: (postId: string, commentId: string) => api.put<Comment>(`/api/v1/posts/${postId}/comments/${commentId}/pin`),
   unpinComment: (postId: string, commentId: string) => api.delete<void>(`/api/v1/posts/${postId}/comments/${commentId}/pin`),
+  hideComment: (postId: string, commentId: string) => api.put<CommentHiddenState>(`/api/v1/posts/${postId}/comments/${commentId}/hide`),
+  unhideComment: (postId: string, commentId: string) => api.delete<CommentHiddenState>(`/api/v1/posts/${postId}/comments/${commentId}/hide`),
+  fetchHiddenComments: (cursor?: string) => api.get<Page<MyPostComment>>("/api/v1/me/post-comments", { filter: "hidden", cursor }),
 };

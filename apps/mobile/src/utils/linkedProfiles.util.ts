@@ -6,6 +6,11 @@ export function profileShowsMart(acting: Pick<ActingProfile, "kind" | "showsMart
   return isSeller === true;
 }
 
+export function userProfileShowsMart(user: { isSeller?: boolean; profileKind?: string; showsMart?: boolean } | null | undefined): boolean {
+  if (!user || user.profileKind === "business") return false;
+  return user.showsMart ?? user.isSeller === true;
+}
+
 export function storeOrBusinessOf(linked: LinkedProfiles | undefined) {
   return linked?.items.find((item) => item.status === "active" && (item.kind === "store" || item.kind === "business")) ?? null;
 }

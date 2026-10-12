@@ -61,6 +61,8 @@ export interface User extends UserSummary {
   readonly isPrivate?: boolean;
   readonly followState?: FollowState;
   readonly isSeller?: boolean;
+  readonly profileKind?: "personal" | "store" | "business";
+  readonly showsMart?: boolean;
   readonly storeId?: ID | null;
   readonly birthdayToday?: boolean;
   readonly anniversaryToday?: boolean;
@@ -266,6 +268,21 @@ export interface Comment {
   readonly isPostAuthor?: boolean;
   readonly quotedPost?: QuotedPostSummary | null;
   readonly quotedPostUnavailable?: boolean;
+}
+
+export interface CommentHiddenState {
+  readonly commentId: ID;
+  readonly postId: ID;
+  readonly hidden: boolean;
+  readonly hiddenAt: ISODate | null;
+}
+
+export interface MyPostComment extends Comment {
+  readonly previewReplies: readonly Comment[];
+  readonly post: { readonly id: ID; readonly kind: string; readonly text: string; readonly thumbnailUrl: string | null };
+  readonly hidden: boolean;
+  readonly hiddenAt: ISODate | null;
+  readonly needsReply: boolean;
 }
 
 export interface CommentVideoReply {
