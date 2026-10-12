@@ -53,7 +53,11 @@ type AffiliateCommission struct {
 	// OrderedAt holds the value of the "ordered_at" field.
 	OrderedAt *time.Time `json:"ordered_at,omitempty"`
 	// PaidAt holds the value of the "paid_at" field.
-	PaidAt       *time.Time `json:"paid_at,omitempty"`
+	PaidAt *time.Time `json:"paid_at,omitempty"`
+	// TransferAttempts holds the value of the "transfer_attempts" field.
+	TransferAttempts int `json:"transfer_attempts,omitempty"`
+	// RetryAfter holds the value of the "retry_after" field.
+	RetryAfter   *time.Time `json:"retry_after,omitempty"`
 	selectValues sql.SelectValues
 }
 
@@ -62,11 +66,11 @@ func (*AffiliateCommission) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case affiliatecommission.FieldSaleMinor, affiliatecommission.FieldCommissionBps, affiliatecommission.FieldCommissionMinor, affiliatecommission.FieldReversedMinor:
+		case affiliatecommission.FieldSaleMinor, affiliatecommission.FieldCommissionBps, affiliatecommission.FieldCommissionMinor, affiliatecommission.FieldReversedMinor, affiliatecommission.FieldTransferAttempts:
 			values[i] = new(sql.NullInt64)
 		case affiliatecommission.FieldOrderID, affiliatecommission.FieldOrderNumber, affiliatecommission.FieldOrderItemID, affiliatecommission.FieldProductID, affiliatecommission.FieldStoreID, affiliatecommission.FieldSellerUserID, affiliatecommission.FieldCreatorID, affiliatecommission.FieldAttributionSource, affiliatecommission.FieldAttributionID, affiliatecommission.FieldCurrency, affiliatecommission.FieldStatus:
 			values[i] = new(sql.NullString)
-		case affiliatecommission.FieldCreatedAt, affiliatecommission.FieldOrderedAt, affiliatecommission.FieldPaidAt:
+		case affiliatecommission.FieldCreatedAt, affiliatecommission.FieldOrderedAt, affiliatecommission.FieldPaidAt, affiliatecommission.FieldRetryAfter:
 			values[i] = new(sql.NullTime)
 		case affiliatecommission.FieldID:
 			values[i] = new(uuid.UUID)
@@ -201,6 +205,19 @@ func (_m *AffiliateCommission) assignValues(columns []string, values []any) erro
 				_m.PaidAt = new(time.Time)
 				*_m.PaidAt = value.Time
 			}
+		case affiliatecommission.FieldTransferAttempts:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field transfer_attempts", values[i])
+			} else if value.Valid {
+				_m.TransferAttempts = int(value.Int64)
+			}
+		case affiliatecommission.FieldRetryAfter:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field retry_after", values[i])
+			} else if value.Valid {
+				_m.RetryAfter = new(time.Time)
+				*_m.RetryAfter = value.Time
+			}
 		default:
 			_m.selectValues.Set(columns[i], values[i])
 		}
@@ -292,6 +309,14 @@ func (_m *AffiliateCommission) String() string {
 	builder.WriteString(", ")
 	if v := _m.PaidAt; v != nil {
 		builder.WriteString("paid_at=")
+		builder.WriteString(v.Format(time.ANSIC))
+	}
+	builder.WriteString(", ")
+	builder.WriteString("transfer_attempts=")
+	builder.WriteString(fmt.Sprintf("%v", _m.TransferAttempts))
+	builder.WriteString(", ")
+	if v := _m.RetryAfter; v != nil {
+		builder.WriteString("retry_after=")
 		builder.WriteString(v.Format(time.ANSIC))
 	}
 	builder.WriteByte(')')

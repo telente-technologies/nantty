@@ -28,8 +28,9 @@ var (
 )
 
 type Affiliates struct {
-	Container *container.Container
-	Program   programservices.CreatorProgram
+	Container  *container.Container
+	Program    programservices.CreatorProgram
+	Settlement *CommissionSettlementCursor
 }
 
 type ProgramSettingsView struct {

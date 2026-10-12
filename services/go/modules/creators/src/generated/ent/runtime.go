@@ -208,6 +208,10 @@ func init() {
 	affiliatecommissionDescReversedMinor := affiliatecommissionFields[14].Descriptor()
 	// affiliatecommission.DefaultReversedMinor holds the default value on creation for the reversed_minor field.
 	affiliatecommission.DefaultReversedMinor = affiliatecommissionDescReversedMinor.Default.(int64)
+	// affiliatecommissionDescTransferAttempts is the schema descriptor for transfer_attempts field.
+	affiliatecommissionDescTransferAttempts := affiliatecommissionFields[17].Descriptor()
+	// affiliatecommission.DefaultTransferAttempts holds the default value on creation for the transfer_attempts field.
+	affiliatecommission.DefaultTransferAttempts = affiliatecommissionDescTransferAttempts.Default.(int)
 	// affiliatecommissionDescID is the schema descriptor for id field.
 	affiliatecommissionDescID := affiliatecommissionMixinFields0[0].Descriptor()
 	// affiliatecommission.DefaultID holds the default value on creation for the id field.

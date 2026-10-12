@@ -140,6 +140,16 @@ func PaidAt(v time.Time) predicate.AffiliateCommission {
 	return predicate.AffiliateCommission(sql.FieldEQ(FieldPaidAt, v))
 }
 
+// TransferAttempts applies equality check predicate on the "transfer_attempts" field. It's identical to TransferAttemptsEQ.
+func TransferAttempts(v int) predicate.AffiliateCommission {
+	return predicate.AffiliateCommission(sql.FieldEQ(FieldTransferAttempts, v))
+}
+
+// RetryAfter applies equality check predicate on the "retry_after" field. It's identical to RetryAfterEQ.
+func RetryAfter(v time.Time) predicate.AffiliateCommission {
+	return predicate.AffiliateCommission(sql.FieldEQ(FieldRetryAfter, v))
+}
+
 // CreatedAtEQ applies the EQ predicate on the "created_at" field.
 func CreatedAtEQ(v time.Time) predicate.AffiliateCommission {
 	return predicate.AffiliateCommission(sql.FieldEQ(FieldCreatedAt, v))
@@ -1108,6 +1118,96 @@ func PaidAtIsNil() predicate.AffiliateCommission {
 // PaidAtNotNil applies the NotNil predicate on the "paid_at" field.
 func PaidAtNotNil() predicate.AffiliateCommission {
 	return predicate.AffiliateCommission(sql.FieldNotNull(FieldPaidAt))
+}
+
+// TransferAttemptsEQ applies the EQ predicate on the "transfer_attempts" field.
+func TransferAttemptsEQ(v int) predicate.AffiliateCommission {
+	return predicate.AffiliateCommission(sql.FieldEQ(FieldTransferAttempts, v))
+}
+
+// TransferAttemptsNEQ applies the NEQ predicate on the "transfer_attempts" field.
+func TransferAttemptsNEQ(v int) predicate.AffiliateCommission {
+	return predicate.AffiliateCommission(sql.FieldNEQ(FieldTransferAttempts, v))
+}
+
+// TransferAttemptsIn applies the In predicate on the "transfer_attempts" field.
+func TransferAttemptsIn(vs ...int) predicate.AffiliateCommission {
+	return predicate.AffiliateCommission(sql.FieldIn(FieldTransferAttempts, vs...))
+}
+
+// TransferAttemptsNotIn applies the NotIn predicate on the "transfer_attempts" field.
+func TransferAttemptsNotIn(vs ...int) predicate.AffiliateCommission {
+	return predicate.AffiliateCommission(sql.FieldNotIn(FieldTransferAttempts, vs...))
+}
+
+// TransferAttemptsGT applies the GT predicate on the "transfer_attempts" field.
+func TransferAttemptsGT(v int) predicate.AffiliateCommission {
+	return predicate.AffiliateCommission(sql.FieldGT(FieldTransferAttempts, v))
+}
+
+// TransferAttemptsGTE applies the GTE predicate on the "transfer_attempts" field.
+func TransferAttemptsGTE(v int) predicate.AffiliateCommission {
+	return predicate.AffiliateCommission(sql.FieldGTE(FieldTransferAttempts, v))
+}
+
+// TransferAttemptsLT applies the LT predicate on the "transfer_attempts" field.
+func TransferAttemptsLT(v int) predicate.AffiliateCommission {
+	return predicate.AffiliateCommission(sql.FieldLT(FieldTransferAttempts, v))
+}
+
+// TransferAttemptsLTE applies the LTE predicate on the "transfer_attempts" field.
+func TransferAttemptsLTE(v int) predicate.AffiliateCommission {
+	return predicate.AffiliateCommission(sql.FieldLTE(FieldTransferAttempts, v))
+}
+
+// RetryAfterEQ applies the EQ predicate on the "retry_after" field.
+func RetryAfterEQ(v time.Time) predicate.AffiliateCommission {
+	return predicate.AffiliateCommission(sql.FieldEQ(FieldRetryAfter, v))
+}
+
+// RetryAfterNEQ applies the NEQ predicate on the "retry_after" field.
+func RetryAfterNEQ(v time.Time) predicate.AffiliateCommission {
+	return predicate.AffiliateCommission(sql.FieldNEQ(FieldRetryAfter, v))
+}
+
+// RetryAfterIn applies the In predicate on the "retry_after" field.
+func RetryAfterIn(vs ...time.Time) predicate.AffiliateCommission {
+	return predicate.AffiliateCommission(sql.FieldIn(FieldRetryAfter, vs...))
+}
+
+// RetryAfterNotIn applies the NotIn predicate on the "retry_after" field.
+func RetryAfterNotIn(vs ...time.Time) predicate.AffiliateCommission {
+	return predicate.AffiliateCommission(sql.FieldNotIn(FieldRetryAfter, vs...))
+}
+
+// RetryAfterGT applies the GT predicate on the "retry_after" field.
+func RetryAfterGT(v time.Time) predicate.AffiliateCommission {
+	return predicate.AffiliateCommission(sql.FieldGT(FieldRetryAfter, v))
+}
+
+// RetryAfterGTE applies the GTE predicate on the "retry_after" field.
+func RetryAfterGTE(v time.Time) predicate.AffiliateCommission {
+	return predicate.AffiliateCommission(sql.FieldGTE(FieldRetryAfter, v))
+}
+
+// RetryAfterLT applies the LT predicate on the "retry_after" field.
+func RetryAfterLT(v time.Time) predicate.AffiliateCommission {
+	return predicate.AffiliateCommission(sql.FieldLT(FieldRetryAfter, v))
+}
+
+// RetryAfterLTE applies the LTE predicate on the "retry_after" field.
+func RetryAfterLTE(v time.Time) predicate.AffiliateCommission {
+	return predicate.AffiliateCommission(sql.FieldLTE(FieldRetryAfter, v))
+}
+
+// RetryAfterIsNil applies the IsNil predicate on the "retry_after" field.
+func RetryAfterIsNil() predicate.AffiliateCommission {
+	return predicate.AffiliateCommission(sql.FieldIsNull(FieldRetryAfter))
+}
+
+// RetryAfterNotNil applies the NotNil predicate on the "retry_after" field.
+func RetryAfterNotNil() predicate.AffiliateCommission {
+	return predicate.AffiliateCommission(sql.FieldNotNull(FieldRetryAfter))
 }
 
 // And groups predicates with the AND operator between them.

@@ -121,7 +121,7 @@ func StartCreatorsModuleWithSettings(ctx context.Context, settings configs.Creat
 	}
 	return &Module{
 		Container: creatorsContainer, Program: program, LiveMoney: services.LiveMoney{Container: creatorsContainer, Program: program},
-		Money: moneyservices.CreatorMoney{Container: creatorsContainer, Program: program}, Affiliates: affiliateservices.Affiliates{Container: creatorsContainer, Program: program},
+		Money: moneyservices.CreatorMoney{Container: creatorsContainer, Program: program}, Affiliates: affiliateservices.Affiliates{Container: creatorsContainer, Program: program, Settlement: &affiliateservices.CommissionSettlementCursor{}},
 	}, nil
 }
 

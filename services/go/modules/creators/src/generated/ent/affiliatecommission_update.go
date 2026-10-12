@@ -84,6 +84,47 @@ func (_u *AffiliateCommissionUpdate) ClearPaidAt() *AffiliateCommissionUpdate {
 	return _u
 }
 
+// SetTransferAttempts sets the "transfer_attempts" field.
+func (_u *AffiliateCommissionUpdate) SetTransferAttempts(v int) *AffiliateCommissionUpdate {
+	_u.mutation.ResetTransferAttempts()
+	_u.mutation.SetTransferAttempts(v)
+	return _u
+}
+
+// SetNillableTransferAttempts sets the "transfer_attempts" field if the given value is not nil.
+func (_u *AffiliateCommissionUpdate) SetNillableTransferAttempts(v *int) *AffiliateCommissionUpdate {
+	if v != nil {
+		_u.SetTransferAttempts(*v)
+	}
+	return _u
+}
+
+// AddTransferAttempts adds value to the "transfer_attempts" field.
+func (_u *AffiliateCommissionUpdate) AddTransferAttempts(v int) *AffiliateCommissionUpdate {
+	_u.mutation.AddTransferAttempts(v)
+	return _u
+}
+
+// SetRetryAfter sets the "retry_after" field.
+func (_u *AffiliateCommissionUpdate) SetRetryAfter(v time.Time) *AffiliateCommissionUpdate {
+	_u.mutation.SetRetryAfter(v)
+	return _u
+}
+
+// SetNillableRetryAfter sets the "retry_after" field if the given value is not nil.
+func (_u *AffiliateCommissionUpdate) SetNillableRetryAfter(v *time.Time) *AffiliateCommissionUpdate {
+	if v != nil {
+		_u.SetRetryAfter(*v)
+	}
+	return _u
+}
+
+// ClearRetryAfter clears the value of the "retry_after" field.
+func (_u *AffiliateCommissionUpdate) ClearRetryAfter() *AffiliateCommissionUpdate {
+	_u.mutation.ClearRetryAfter()
+	return _u
+}
+
 // Mutation returns the AffiliateCommissionMutation object of the builder.
 func (_u *AffiliateCommissionUpdate) Mutation() *AffiliateCommissionMutation {
 	return _u.mutation
@@ -155,6 +196,18 @@ func (_u *AffiliateCommissionUpdate) sqlSave(ctx context.Context) (_node int, er
 	}
 	if _u.mutation.PaidAtCleared() {
 		_spec.ClearField(affiliatecommission.FieldPaidAt, field.TypeTime)
+	}
+	if value, ok := _u.mutation.TransferAttempts(); ok {
+		_spec.SetField(affiliatecommission.FieldTransferAttempts, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedTransferAttempts(); ok {
+		_spec.AddField(affiliatecommission.FieldTransferAttempts, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.RetryAfter(); ok {
+		_spec.SetField(affiliatecommission.FieldRetryAfter, field.TypeTime, value)
+	}
+	if _u.mutation.RetryAfterCleared() {
+		_spec.ClearField(affiliatecommission.FieldRetryAfter, field.TypeTime)
 	}
 	_spec.Node.Schema = _u.schemaConfig.AffiliateCommission
 	ctx = internal.NewSchemaConfigContext(ctx, _u.schemaConfig)
@@ -230,6 +283,47 @@ func (_u *AffiliateCommissionUpdateOne) SetNillablePaidAt(v *time.Time) *Affilia
 // ClearPaidAt clears the value of the "paid_at" field.
 func (_u *AffiliateCommissionUpdateOne) ClearPaidAt() *AffiliateCommissionUpdateOne {
 	_u.mutation.ClearPaidAt()
+	return _u
+}
+
+// SetTransferAttempts sets the "transfer_attempts" field.
+func (_u *AffiliateCommissionUpdateOne) SetTransferAttempts(v int) *AffiliateCommissionUpdateOne {
+	_u.mutation.ResetTransferAttempts()
+	_u.mutation.SetTransferAttempts(v)
+	return _u
+}
+
+// SetNillableTransferAttempts sets the "transfer_attempts" field if the given value is not nil.
+func (_u *AffiliateCommissionUpdateOne) SetNillableTransferAttempts(v *int) *AffiliateCommissionUpdateOne {
+	if v != nil {
+		_u.SetTransferAttempts(*v)
+	}
+	return _u
+}
+
+// AddTransferAttempts adds value to the "transfer_attempts" field.
+func (_u *AffiliateCommissionUpdateOne) AddTransferAttempts(v int) *AffiliateCommissionUpdateOne {
+	_u.mutation.AddTransferAttempts(v)
+	return _u
+}
+
+// SetRetryAfter sets the "retry_after" field.
+func (_u *AffiliateCommissionUpdateOne) SetRetryAfter(v time.Time) *AffiliateCommissionUpdateOne {
+	_u.mutation.SetRetryAfter(v)
+	return _u
+}
+
+// SetNillableRetryAfter sets the "retry_after" field if the given value is not nil.
+func (_u *AffiliateCommissionUpdateOne) SetNillableRetryAfter(v *time.Time) *AffiliateCommissionUpdateOne {
+	if v != nil {
+		_u.SetRetryAfter(*v)
+	}
+	return _u
+}
+
+// ClearRetryAfter clears the value of the "retry_after" field.
+func (_u *AffiliateCommissionUpdateOne) ClearRetryAfter() *AffiliateCommissionUpdateOne {
+	_u.mutation.ClearRetryAfter()
 	return _u
 }
 
@@ -334,6 +428,18 @@ func (_u *AffiliateCommissionUpdateOne) sqlSave(ctx context.Context) (_node *Aff
 	}
 	if _u.mutation.PaidAtCleared() {
 		_spec.ClearField(affiliatecommission.FieldPaidAt, field.TypeTime)
+	}
+	if value, ok := _u.mutation.TransferAttempts(); ok {
+		_spec.SetField(affiliatecommission.FieldTransferAttempts, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedTransferAttempts(); ok {
+		_spec.AddField(affiliatecommission.FieldTransferAttempts, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.RetryAfter(); ok {
+		_spec.SetField(affiliatecommission.FieldRetryAfter, field.TypeTime, value)
+	}
+	if _u.mutation.RetryAfterCleared() {
+		_spec.ClearField(affiliatecommission.FieldRetryAfter, field.TypeTime)
 	}
 	_spec.Node.Schema = _u.schemaConfig.AffiliateCommission
 	ctx = internal.NewSchemaConfigContext(ctx, _u.schemaConfig)

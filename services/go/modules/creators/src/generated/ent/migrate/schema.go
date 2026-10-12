@@ -30,6 +30,8 @@ var (
 		{Name: "reversed_minor", Type: field.TypeInt64, Default: 0},
 		{Name: "ordered_at", Type: field.TypeTime, Nullable: true},
 		{Name: "paid_at", Type: field.TypeTime, Nullable: true},
+		{Name: "transfer_attempts", Type: field.TypeInt, Default: 0},
+		{Name: "retry_after", Type: field.TypeTime, Nullable: true},
 	}
 	// AffiliateCommissionsTable holds the schema information for the "affiliate_commissions" table.
 	AffiliateCommissionsTable = &schema.Table{
@@ -56,6 +58,11 @@ var (
 				Name:    "affiliatecommission_creator_id_created_at",
 				Unique:  false,
 				Columns: []*schema.Column{AffiliateCommissionsColumns[8], AffiliateCommissionsColumns[1]},
+			},
+			{
+				Name:    "affiliatecommission_status_id",
+				Unique:  false,
+				Columns: []*schema.Column{AffiliateCommissionsColumns[15], AffiliateCommissionsColumns[0]},
 			},
 		},
 	}

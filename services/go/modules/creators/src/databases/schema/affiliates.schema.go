@@ -104,11 +104,13 @@ func (AffiliateCommission) Fields() []ent.Field {
 		field.Int64("reversed_minor").Default(0),
 		field.Time("ordered_at").Optional().Nillable().Immutable(),
 		field.Time("paid_at").Optional().Nillable(),
+		field.Int("transfer_attempts").Default(0),
+		field.Time("retry_after").Optional().Nillable(),
 	}
 }
 
 func (AffiliateCommission) Indexes() []ent.Index {
-	return []ent.Index{index.Fields("order_item_id").Unique(), index.Fields("order_id"), index.Fields("store_id", "created_at"), index.Fields("creator_id", "created_at")}
+	return []ent.Index{index.Fields("order_item_id").Unique(), index.Fields("order_id"), index.Fields("store_id", "created_at"), index.Fields("creator_id", "created_at"), index.Fields("status", "id")}
 }
 
 type AffiliateCommissionReversal struct {

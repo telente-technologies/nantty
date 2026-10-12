@@ -57,35 +57,38 @@ const (
 // AffiliateCommissionMutation represents an operation that mutates the AffiliateCommission nodes in the graph.
 type AffiliateCommissionMutation struct {
 	config
-	op                  Op
-	typ                 string
-	id                  *uuid.UUID
-	created_at          *time.Time
-	order_id            *string
-	order_number        *string
-	order_item_id       *string
-	product_id          *string
-	store_id            *string
-	seller_user_id      *string
-	creator_id          *string
-	attribution_source  *string
-	attribution_id      *string
-	sale_minor          *int64
-	addsale_minor       *int64
-	commission_bps      *int64
-	addcommission_bps   *int64
-	commission_minor    *int64
-	addcommission_minor *int64
-	currency            *string
-	status              *affiliatecommission.Status
-	reversed_minor      *int64
-	addreversed_minor   *int64
-	ordered_at          *time.Time
-	paid_at             *time.Time
-	clearedFields       map[string]struct{}
-	done                bool
-	oldValue            func(context.Context) (*AffiliateCommission, error)
-	predicates          []predicate.AffiliateCommission
+	op                   Op
+	typ                  string
+	id                   *uuid.UUID
+	created_at           *time.Time
+	order_id             *string
+	order_number         *string
+	order_item_id        *string
+	product_id           *string
+	store_id             *string
+	seller_user_id       *string
+	creator_id           *string
+	attribution_source   *string
+	attribution_id       *string
+	sale_minor           *int64
+	addsale_minor        *int64
+	commission_bps       *int64
+	addcommission_bps    *int64
+	commission_minor     *int64
+	addcommission_minor  *int64
+	currency             *string
+	status               *affiliatecommission.Status
+	reversed_minor       *int64
+	addreversed_minor    *int64
+	ordered_at           *time.Time
+	paid_at              *time.Time
+	transfer_attempts    *int
+	addtransfer_attempts *int
+	retry_after          *time.Time
+	clearedFields        map[string]struct{}
+	done                 bool
+	oldValue             func(context.Context) (*AffiliateCommission, error)
+	predicates           []predicate.AffiliateCommission
 }
 
 var _ ent.Mutation = (*AffiliateCommissionMutation)(nil)
@@ -946,6 +949,111 @@ func (m *AffiliateCommissionMutation) ResetPaidAt() {
 	delete(m.clearedFields, affiliatecommission.FieldPaidAt)
 }
 
+// SetTransferAttempts sets the "transfer_attempts" field.
+func (m *AffiliateCommissionMutation) SetTransferAttempts(i int) {
+	m.transfer_attempts = &i
+	m.addtransfer_attempts = nil
+}
+
+// TransferAttempts returns the value of the "transfer_attempts" field in the mutation.
+func (m *AffiliateCommissionMutation) TransferAttempts() (r int, exists bool) {
+	v := m.transfer_attempts
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldTransferAttempts returns the old "transfer_attempts" field's value of the AffiliateCommission entity.
+// If the AffiliateCommission object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AffiliateCommissionMutation) OldTransferAttempts(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldTransferAttempts is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldTransferAttempts requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldTransferAttempts: %w", err)
+	}
+	return oldValue.TransferAttempts, nil
+}
+
+// AddTransferAttempts adds i to the "transfer_attempts" field.
+func (m *AffiliateCommissionMutation) AddTransferAttempts(i int) {
+	if m.addtransfer_attempts != nil {
+		*m.addtransfer_attempts += i
+	} else {
+		m.addtransfer_attempts = &i
+	}
+}
+
+// AddedTransferAttempts returns the value that was added to the "transfer_attempts" field in this mutation.
+func (m *AffiliateCommissionMutation) AddedTransferAttempts() (r int, exists bool) {
+	v := m.addtransfer_attempts
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetTransferAttempts resets all changes to the "transfer_attempts" field.
+func (m *AffiliateCommissionMutation) ResetTransferAttempts() {
+	m.transfer_attempts = nil
+	m.addtransfer_attempts = nil
+}
+
+// SetRetryAfter sets the "retry_after" field.
+func (m *AffiliateCommissionMutation) SetRetryAfter(t time.Time) {
+	m.retry_after = &t
+}
+
+// RetryAfter returns the value of the "retry_after" field in the mutation.
+func (m *AffiliateCommissionMutation) RetryAfter() (r time.Time, exists bool) {
+	v := m.retry_after
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldRetryAfter returns the old "retry_after" field's value of the AffiliateCommission entity.
+// If the AffiliateCommission object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AffiliateCommissionMutation) OldRetryAfter(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldRetryAfter is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldRetryAfter requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldRetryAfter: %w", err)
+	}
+	return oldValue.RetryAfter, nil
+}
+
+// ClearRetryAfter clears the value of the "retry_after" field.
+func (m *AffiliateCommissionMutation) ClearRetryAfter() {
+	m.retry_after = nil
+	m.clearedFields[affiliatecommission.FieldRetryAfter] = struct{}{}
+}
+
+// RetryAfterCleared returns if the "retry_after" field was cleared in this mutation.
+func (m *AffiliateCommissionMutation) RetryAfterCleared() bool {
+	_, ok := m.clearedFields[affiliatecommission.FieldRetryAfter]
+	return ok
+}
+
+// ResetRetryAfter resets all changes to the "retry_after" field.
+func (m *AffiliateCommissionMutation) ResetRetryAfter() {
+	m.retry_after = nil
+	delete(m.clearedFields, affiliatecommission.FieldRetryAfter)
+}
+
 // Where appends a list predicates to the AffiliateCommissionMutation builder.
 func (m *AffiliateCommissionMutation) Where(ps ...predicate.AffiliateCommission) {
 	m.predicates = append(m.predicates, ps...)
@@ -980,7 +1088,7 @@ func (m *AffiliateCommissionMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *AffiliateCommissionMutation) Fields() []string {
-	fields := make([]string, 0, 18)
+	fields := make([]string, 0, 20)
 	if m.created_at != nil {
 		fields = append(fields, affiliatecommission.FieldCreatedAt)
 	}
@@ -1035,6 +1143,12 @@ func (m *AffiliateCommissionMutation) Fields() []string {
 	if m.paid_at != nil {
 		fields = append(fields, affiliatecommission.FieldPaidAt)
 	}
+	if m.transfer_attempts != nil {
+		fields = append(fields, affiliatecommission.FieldTransferAttempts)
+	}
+	if m.retry_after != nil {
+		fields = append(fields, affiliatecommission.FieldRetryAfter)
+	}
 	return fields
 }
 
@@ -1079,6 +1193,10 @@ func (m *AffiliateCommissionMutation) Field(name string) (ent.Value, bool) {
 		return m.OrderedAt()
 	case affiliatecommission.FieldPaidAt:
 		return m.PaidAt()
+	case affiliatecommission.FieldTransferAttempts:
+		return m.TransferAttempts()
+	case affiliatecommission.FieldRetryAfter:
+		return m.RetryAfter()
 	}
 	return nil, false
 }
@@ -1124,6 +1242,10 @@ func (m *AffiliateCommissionMutation) OldField(ctx context.Context, name string)
 		return m.OldOrderedAt(ctx)
 	case affiliatecommission.FieldPaidAt:
 		return m.OldPaidAt(ctx)
+	case affiliatecommission.FieldTransferAttempts:
+		return m.OldTransferAttempts(ctx)
+	case affiliatecommission.FieldRetryAfter:
+		return m.OldRetryAfter(ctx)
 	}
 	return nil, fmt.Errorf("unknown AffiliateCommission field %s", name)
 }
@@ -1259,6 +1381,20 @@ func (m *AffiliateCommissionMutation) SetField(name string, value ent.Value) err
 		}
 		m.SetPaidAt(v)
 		return nil
+	case affiliatecommission.FieldTransferAttempts:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetTransferAttempts(v)
+		return nil
+	case affiliatecommission.FieldRetryAfter:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetRetryAfter(v)
+		return nil
 	}
 	return fmt.Errorf("unknown AffiliateCommission field %s", name)
 }
@@ -1279,6 +1415,9 @@ func (m *AffiliateCommissionMutation) AddedFields() []string {
 	if m.addreversed_minor != nil {
 		fields = append(fields, affiliatecommission.FieldReversedMinor)
 	}
+	if m.addtransfer_attempts != nil {
+		fields = append(fields, affiliatecommission.FieldTransferAttempts)
+	}
 	return fields
 }
 
@@ -1295,6 +1434,8 @@ func (m *AffiliateCommissionMutation) AddedField(name string) (ent.Value, bool) 
 		return m.AddedCommissionMinor()
 	case affiliatecommission.FieldReversedMinor:
 		return m.AddedReversedMinor()
+	case affiliatecommission.FieldTransferAttempts:
+		return m.AddedTransferAttempts()
 	}
 	return nil, false
 }
@@ -1332,6 +1473,13 @@ func (m *AffiliateCommissionMutation) AddField(name string, value ent.Value) err
 		}
 		m.AddReversedMinor(v)
 		return nil
+	case affiliatecommission.FieldTransferAttempts:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddTransferAttempts(v)
+		return nil
 	}
 	return fmt.Errorf("unknown AffiliateCommission numeric field %s", name)
 }
@@ -1345,6 +1493,9 @@ func (m *AffiliateCommissionMutation) ClearedFields() []string {
 	}
 	if m.FieldCleared(affiliatecommission.FieldPaidAt) {
 		fields = append(fields, affiliatecommission.FieldPaidAt)
+	}
+	if m.FieldCleared(affiliatecommission.FieldRetryAfter) {
+		fields = append(fields, affiliatecommission.FieldRetryAfter)
 	}
 	return fields
 }
@@ -1365,6 +1516,9 @@ func (m *AffiliateCommissionMutation) ClearField(name string) error {
 		return nil
 	case affiliatecommission.FieldPaidAt:
 		m.ClearPaidAt()
+		return nil
+	case affiliatecommission.FieldRetryAfter:
+		m.ClearRetryAfter()
 		return nil
 	}
 	return fmt.Errorf("unknown AffiliateCommission nullable field %s", name)
@@ -1427,6 +1581,12 @@ func (m *AffiliateCommissionMutation) ResetField(name string) error {
 		return nil
 	case affiliatecommission.FieldPaidAt:
 		m.ResetPaidAt()
+		return nil
+	case affiliatecommission.FieldTransferAttempts:
+		m.ResetTransferAttempts()
+		return nil
+	case affiliatecommission.FieldRetryAfter:
+		m.ResetRetryAfter()
 		return nil
 	}
 	return fmt.Errorf("unknown AffiliateCommission field %s", name)

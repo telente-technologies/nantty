@@ -51,6 +51,10 @@ const (
 	FieldOrderedAt = "ordered_at"
 	// FieldPaidAt holds the string denoting the paid_at field in the database.
 	FieldPaidAt = "paid_at"
+	// FieldTransferAttempts holds the string denoting the transfer_attempts field in the database.
+	FieldTransferAttempts = "transfer_attempts"
+	// FieldRetryAfter holds the string denoting the retry_after field in the database.
+	FieldRetryAfter = "retry_after"
 	// Table holds the table name of the affiliatecommission in the database.
 	Table = "affiliate_commissions"
 )
@@ -76,6 +80,8 @@ var Columns = []string{
 	FieldReversedMinor,
 	FieldOrderedAt,
 	FieldPaidAt,
+	FieldTransferAttempts,
+	FieldRetryAfter,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -115,6 +121,8 @@ var (
 	CurrencyValidator func(string) error
 	// DefaultReversedMinor holds the default value on creation for the "reversed_minor" field.
 	DefaultReversedMinor int64
+	// DefaultTransferAttempts holds the default value on creation for the "transfer_attempts" field.
+	DefaultTransferAttempts int
 	// DefaultID holds the default value on creation for the "id" field.
 	DefaultID func() uuid.UUID
 )
@@ -243,4 +251,14 @@ func ByOrderedAt(opts ...sql.OrderTermOption) OrderOption {
 // ByPaidAt orders the results by the paid_at field.
 func ByPaidAt(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldPaidAt, opts...).ToFunc()
+}
+
+// ByTransferAttempts orders the results by the transfer_attempts field.
+func ByTransferAttempts(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldTransferAttempts, opts...).ToFunc()
+}
+
+// ByRetryAfter orders the results by the retry_after field.
+func ByRetryAfter(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldRetryAfter, opts...).ToFunc()
 }

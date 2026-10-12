@@ -180,6 +180,34 @@ func (_c *AffiliateCommissionCreate) SetNillablePaidAt(v *time.Time) *AffiliateC
 	return _c
 }
 
+// SetTransferAttempts sets the "transfer_attempts" field.
+func (_c *AffiliateCommissionCreate) SetTransferAttempts(v int) *AffiliateCommissionCreate {
+	_c.mutation.SetTransferAttempts(v)
+	return _c
+}
+
+// SetNillableTransferAttempts sets the "transfer_attempts" field if the given value is not nil.
+func (_c *AffiliateCommissionCreate) SetNillableTransferAttempts(v *int) *AffiliateCommissionCreate {
+	if v != nil {
+		_c.SetTransferAttempts(*v)
+	}
+	return _c
+}
+
+// SetRetryAfter sets the "retry_after" field.
+func (_c *AffiliateCommissionCreate) SetRetryAfter(v time.Time) *AffiliateCommissionCreate {
+	_c.mutation.SetRetryAfter(v)
+	return _c
+}
+
+// SetNillableRetryAfter sets the "retry_after" field if the given value is not nil.
+func (_c *AffiliateCommissionCreate) SetNillableRetryAfter(v *time.Time) *AffiliateCommissionCreate {
+	if v != nil {
+		_c.SetRetryAfter(*v)
+	}
+	return _c
+}
+
 // SetID sets the "id" field.
 func (_c *AffiliateCommissionCreate) SetID(v uuid.UUID) *AffiliateCommissionCreate {
 	_c.mutation.SetID(v)
@@ -244,6 +272,10 @@ func (_c *AffiliateCommissionCreate) defaults() {
 	if _, ok := _c.mutation.ReversedMinor(); !ok {
 		v := affiliatecommission.DefaultReversedMinor
 		_c.mutation.SetReversedMinor(v)
+	}
+	if _, ok := _c.mutation.TransferAttempts(); !ok {
+		v := affiliatecommission.DefaultTransferAttempts
+		_c.mutation.SetTransferAttempts(v)
 	}
 	if _, ok := _c.mutation.ID(); !ok {
 		v := affiliatecommission.DefaultID()
@@ -356,6 +388,9 @@ func (_c *AffiliateCommissionCreate) check() error {
 	if _, ok := _c.mutation.ReversedMinor(); !ok {
 		return &ValidationError{Name: "reversed_minor", err: errors.New(`ent: missing required field "AffiliateCommission.reversed_minor"`)}
 	}
+	if _, ok := _c.mutation.TransferAttempts(); !ok {
+		return &ValidationError{Name: "transfer_attempts", err: errors.New(`ent: missing required field "AffiliateCommission.transfer_attempts"`)}
+	}
 	return nil
 }
 
@@ -465,6 +500,14 @@ func (_c *AffiliateCommissionCreate) createSpec() (*AffiliateCommission, *sqlgra
 		_spec.SetField(affiliatecommission.FieldPaidAt, field.TypeTime, value)
 		_node.PaidAt = &value
 	}
+	if value, ok := _c.mutation.TransferAttempts(); ok {
+		_spec.SetField(affiliatecommission.FieldTransferAttempts, field.TypeInt, value)
+		_node.TransferAttempts = value
+	}
+	if value, ok := _c.mutation.RetryAfter(); ok {
+		_spec.SetField(affiliatecommission.FieldRetryAfter, field.TypeTime, value)
+		_node.RetryAfter = &value
+	}
 	return _node, _spec
 }
 
@@ -562,6 +605,42 @@ func (u *AffiliateCommissionUpsert) UpdatePaidAt() *AffiliateCommissionUpsert {
 // ClearPaidAt clears the value of the "paid_at" field.
 func (u *AffiliateCommissionUpsert) ClearPaidAt() *AffiliateCommissionUpsert {
 	u.SetNull(affiliatecommission.FieldPaidAt)
+	return u
+}
+
+// SetTransferAttempts sets the "transfer_attempts" field.
+func (u *AffiliateCommissionUpsert) SetTransferAttempts(v int) *AffiliateCommissionUpsert {
+	u.Set(affiliatecommission.FieldTransferAttempts, v)
+	return u
+}
+
+// UpdateTransferAttempts sets the "transfer_attempts" field to the value that was provided on create.
+func (u *AffiliateCommissionUpsert) UpdateTransferAttempts() *AffiliateCommissionUpsert {
+	u.SetExcluded(affiliatecommission.FieldTransferAttempts)
+	return u
+}
+
+// AddTransferAttempts adds v to the "transfer_attempts" field.
+func (u *AffiliateCommissionUpsert) AddTransferAttempts(v int) *AffiliateCommissionUpsert {
+	u.Add(affiliatecommission.FieldTransferAttempts, v)
+	return u
+}
+
+// SetRetryAfter sets the "retry_after" field.
+func (u *AffiliateCommissionUpsert) SetRetryAfter(v time.Time) *AffiliateCommissionUpsert {
+	u.Set(affiliatecommission.FieldRetryAfter, v)
+	return u
+}
+
+// UpdateRetryAfter sets the "retry_after" field to the value that was provided on create.
+func (u *AffiliateCommissionUpsert) UpdateRetryAfter() *AffiliateCommissionUpsert {
+	u.SetExcluded(affiliatecommission.FieldRetryAfter)
+	return u
+}
+
+// ClearRetryAfter clears the value of the "retry_after" field.
+func (u *AffiliateCommissionUpsert) ClearRetryAfter() *AffiliateCommissionUpsert {
+	u.SetNull(affiliatecommission.FieldRetryAfter)
 	return u
 }
 
@@ -711,6 +790,48 @@ func (u *AffiliateCommissionUpsertOne) UpdatePaidAt() *AffiliateCommissionUpsert
 func (u *AffiliateCommissionUpsertOne) ClearPaidAt() *AffiliateCommissionUpsertOne {
 	return u.Update(func(s *AffiliateCommissionUpsert) {
 		s.ClearPaidAt()
+	})
+}
+
+// SetTransferAttempts sets the "transfer_attempts" field.
+func (u *AffiliateCommissionUpsertOne) SetTransferAttempts(v int) *AffiliateCommissionUpsertOne {
+	return u.Update(func(s *AffiliateCommissionUpsert) {
+		s.SetTransferAttempts(v)
+	})
+}
+
+// AddTransferAttempts adds v to the "transfer_attempts" field.
+func (u *AffiliateCommissionUpsertOne) AddTransferAttempts(v int) *AffiliateCommissionUpsertOne {
+	return u.Update(func(s *AffiliateCommissionUpsert) {
+		s.AddTransferAttempts(v)
+	})
+}
+
+// UpdateTransferAttempts sets the "transfer_attempts" field to the value that was provided on create.
+func (u *AffiliateCommissionUpsertOne) UpdateTransferAttempts() *AffiliateCommissionUpsertOne {
+	return u.Update(func(s *AffiliateCommissionUpsert) {
+		s.UpdateTransferAttempts()
+	})
+}
+
+// SetRetryAfter sets the "retry_after" field.
+func (u *AffiliateCommissionUpsertOne) SetRetryAfter(v time.Time) *AffiliateCommissionUpsertOne {
+	return u.Update(func(s *AffiliateCommissionUpsert) {
+		s.SetRetryAfter(v)
+	})
+}
+
+// UpdateRetryAfter sets the "retry_after" field to the value that was provided on create.
+func (u *AffiliateCommissionUpsertOne) UpdateRetryAfter() *AffiliateCommissionUpsertOne {
+	return u.Update(func(s *AffiliateCommissionUpsert) {
+		s.UpdateRetryAfter()
+	})
+}
+
+// ClearRetryAfter clears the value of the "retry_after" field.
+func (u *AffiliateCommissionUpsertOne) ClearRetryAfter() *AffiliateCommissionUpsertOne {
+	return u.Update(func(s *AffiliateCommissionUpsert) {
+		s.ClearRetryAfter()
 	})
 }
 
@@ -1027,6 +1148,48 @@ func (u *AffiliateCommissionUpsertBulk) UpdatePaidAt() *AffiliateCommissionUpser
 func (u *AffiliateCommissionUpsertBulk) ClearPaidAt() *AffiliateCommissionUpsertBulk {
 	return u.Update(func(s *AffiliateCommissionUpsert) {
 		s.ClearPaidAt()
+	})
+}
+
+// SetTransferAttempts sets the "transfer_attempts" field.
+func (u *AffiliateCommissionUpsertBulk) SetTransferAttempts(v int) *AffiliateCommissionUpsertBulk {
+	return u.Update(func(s *AffiliateCommissionUpsert) {
+		s.SetTransferAttempts(v)
+	})
+}
+
+// AddTransferAttempts adds v to the "transfer_attempts" field.
+func (u *AffiliateCommissionUpsertBulk) AddTransferAttempts(v int) *AffiliateCommissionUpsertBulk {
+	return u.Update(func(s *AffiliateCommissionUpsert) {
+		s.AddTransferAttempts(v)
+	})
+}
+
+// UpdateTransferAttempts sets the "transfer_attempts" field to the value that was provided on create.
+func (u *AffiliateCommissionUpsertBulk) UpdateTransferAttempts() *AffiliateCommissionUpsertBulk {
+	return u.Update(func(s *AffiliateCommissionUpsert) {
+		s.UpdateTransferAttempts()
+	})
+}
+
+// SetRetryAfter sets the "retry_after" field.
+func (u *AffiliateCommissionUpsertBulk) SetRetryAfter(v time.Time) *AffiliateCommissionUpsertBulk {
+	return u.Update(func(s *AffiliateCommissionUpsert) {
+		s.SetRetryAfter(v)
+	})
+}
+
+// UpdateRetryAfter sets the "retry_after" field to the value that was provided on create.
+func (u *AffiliateCommissionUpsertBulk) UpdateRetryAfter() *AffiliateCommissionUpsertBulk {
+	return u.Update(func(s *AffiliateCommissionUpsert) {
+		s.UpdateRetryAfter()
+	})
+}
+
+// ClearRetryAfter clears the value of the "retry_after" field.
+func (u *AffiliateCommissionUpsertBulk) ClearRetryAfter() *AffiliateCommissionUpsertBulk {
+	return u.Update(func(s *AffiliateCommissionUpsert) {
+		s.ClearRetryAfter()
 	})
 }
 
