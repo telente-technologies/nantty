@@ -14,6 +14,7 @@ type StaticCreatorsDirectory struct {
 	Products     map[string]ProductSummary
 	Followers    map[string]int64
 	Applications map[string]string
+	Stock        map[string]int64
 }
 
 func (directory StaticCreatorsDirectory) FollowerCount(_ context.Context, accountId string) (int64, error) {

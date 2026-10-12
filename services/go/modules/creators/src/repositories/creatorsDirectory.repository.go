@@ -57,6 +57,8 @@ type CreatorsDirectory interface {
 	FindOwnedStore(ctx context.Context, ownerUserId, storeId string) (StoreSummary, bool, error)
 	FindProducts(ctx context.Context, productIds []string) (map[string]ProductSummary, error)
 	ListStoreProducts(ctx context.Context, storeId, search string, limit int) ([]ProductSummary, error)
+	ListPromotableProducts(ctx context.Context, filter PromotableProductFilter) ([]PromotableProduct, error)
+	FindPromotableProducts(ctx context.Context, productIds []string) (map[string]PromotableProduct, error)
 	FollowerCount(ctx context.Context, accountId string) (int64, error)
 	ApplicationStatus(ctx context.Context, accountId string) (string, error)
 }
@@ -67,6 +69,7 @@ type SqlCreatorsDirectory struct {
 	SocialSchema    string
 	LiveSchema      string
 	CatalogSchema   string
+	InventorySchema string
 	SocialUrl       string
 	SocialToken     string
 	HttpClient      *http.Client
