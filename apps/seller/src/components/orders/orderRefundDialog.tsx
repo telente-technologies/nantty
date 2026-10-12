@@ -52,7 +52,7 @@ export function OrderRefundDialog({ order, isOpen, onClose, onRefunded }: { read
       onClose={onClose}
       width="small"
       title={`Refund ${order.orderNumber}`}
-      description={`The money goes back to the buyer's original payment method. Up to ${formatMoney({ amountMinor: refundableMinor, currency: order.total.currency })} can still be refunded.`}
+      description={`The money goes to the buyer's Zudomart wallet, or back to their card if the payment hasn't settled yet. Up to ${formatMoney({ amountMinor: refundableMinor, currency: order.total.currency })} can still be refunded.`}
       footer={
         <>
           <Button onClick={onClose}>Not now</Button>

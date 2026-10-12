@@ -23,6 +23,9 @@ export const sessionCookieNames = {
   get selectedLocation() {
     return prefixCookieNameForHost("zd_location");
   },
+  get realtimeTicket() {
+    return prefixCookieNameForHost("zd_rtt");
+  },
 };
 
 export const sessionLifetimesInSeconds = {

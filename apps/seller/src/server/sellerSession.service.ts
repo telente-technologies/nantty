@@ -86,7 +86,7 @@ export function writeSelectedLocationCookie(response: NextResponse, locationId: 
 }
 
 export function clearEverySessionCookie(response: NextResponse): void {
-  for (const cookieName of [sessionCookieNames.accessToken, sessionCookieNames.refreshToken, sessionCookieNames.sessionId, sessionCookieNames.sellerAccess, sessionCookieNames.selectedStore]) {
+  for (const cookieName of [sessionCookieNames.accessToken, sessionCookieNames.refreshToken, sessionCookieNames.sessionId, sessionCookieNames.sellerAccess, sessionCookieNames.selectedStore, sessionCookieNames.realtimeTicket]) {
     response.cookies.set(cookieName, "", buildHardenedCookieOptions(0));
   }
 }
