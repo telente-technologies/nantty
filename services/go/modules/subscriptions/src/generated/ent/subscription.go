@@ -3,10 +3,12 @@
 package ent
 
 import (
+	"encoding/json"
 	"fmt"
 	"strings"
 	"time"
 	"zudomart/modules/subscriptions/src/generated/ent/subscription"
+	"zudomart/modules/subscriptions/src/models"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
@@ -104,6 +106,12 @@ type Subscription struct {
 	CardExpiryNoticedAt *time.Time `json:"card_expiry_noticed_at,omitempty"`
 	// EndedReason holds the value of the "ended_reason" field.
 	EndedReason string `json:"ended_reason,omitempty"`
+	// OfferClaimID holds the value of the "offer_claim_id" field.
+	OfferClaimID string `json:"offer_claim_id,omitempty"`
+	// OfferTerms holds the value of the "offer_terms" field.
+	OfferTerms models.OfferTerms `json:"offer_terms,omitempty"`
+	// OfferCyclesRemaining holds the value of the "offer_cycles_remaining" field.
+	OfferCyclesRemaining int `json:"offer_cycles_remaining,omitempty"`
 	// Version holds the value of the "version" field.
 	Version int64 `json:"version,omitempty"`
 	// UpdatedAt holds the value of the "updated_at" field.
@@ -116,11 +124,13 @@ func (*Subscription) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
+		case subscription.FieldOfferTerms:
+			values[i] = new([]byte)
 		case subscription.FieldWithTrial, subscription.FieldCancelAtPeriodEnd, subscription.FieldActivationPending, subscription.FieldCheckmarkIncluded:
 			values[i] = new(sql.NullBool)
-		case subscription.FieldListAmountMinor, subscription.FieldAmountMinor, subscription.FieldDiscountBps, subscription.FieldTrialDays, subscription.FieldDunningAttempts, subscription.FieldCreditMinor, subscription.FieldPeriodPriceMinor, subscription.FieldPriceNoticeAmountMinor, subscription.FieldCardExpiryMonth, subscription.FieldCardExpiryYear, subscription.FieldVersion:
+		case subscription.FieldListAmountMinor, subscription.FieldAmountMinor, subscription.FieldDiscountBps, subscription.FieldTrialDays, subscription.FieldDunningAttempts, subscription.FieldCreditMinor, subscription.FieldPeriodPriceMinor, subscription.FieldPriceNoticeAmountMinor, subscription.FieldCardExpiryMonth, subscription.FieldCardExpiryYear, subscription.FieldOfferCyclesRemaining, subscription.FieldVersion:
 			values[i] = new(sql.NullInt64)
-		case subscription.FieldProfileID, subscription.FieldProfileType, subscription.FieldOwnerUserID, subscription.FieldPlanCode, subscription.FieldInterval, subscription.FieldChannel, subscription.FieldStatus, subscription.FieldCurrency, subscription.FieldDiscountKind, subscription.FieldProviderPlanCode, subscription.FieldProviderCustomerID, subscription.FieldBillingReference, subscription.FieldStoreOriginalTransactionID, subscription.FieldCardLabel, subscription.FieldLastError, subscription.FieldBillingAuthorizationID, subscription.FieldPendingPlanCode, subscription.FieldPendingInterval, subscription.FieldEndedReason:
+		case subscription.FieldProfileID, subscription.FieldProfileType, subscription.FieldOwnerUserID, subscription.FieldPlanCode, subscription.FieldInterval, subscription.FieldChannel, subscription.FieldStatus, subscription.FieldCurrency, subscription.FieldDiscountKind, subscription.FieldProviderPlanCode, subscription.FieldProviderCustomerID, subscription.FieldBillingReference, subscription.FieldStoreOriginalTransactionID, subscription.FieldCardLabel, subscription.FieldLastError, subscription.FieldBillingAuthorizationID, subscription.FieldPendingPlanCode, subscription.FieldPendingInterval, subscription.FieldEndedReason, subscription.FieldOfferClaimID:
 			values[i] = new(sql.NullString)
 		case subscription.FieldCreatedAt, subscription.FieldTrialEndsAt, subscription.FieldCurrentPeriodEndsAt, subscription.FieldGraceEndsAt, subscription.FieldBundleLapsesAt, subscription.FieldBillingAnchorAt, subscription.FieldNextChargeAt, subscription.FieldDunningDueAt, subscription.FieldPriceEffectiveAt, subscription.FieldCardExpiryNoticedAt, subscription.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
@@ -414,6 +424,26 @@ func (_m *Subscription) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.EndedReason = value.String
 			}
+		case subscription.FieldOfferClaimID:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field offer_claim_id", values[i])
+			} else if value.Valid {
+				_m.OfferClaimID = value.String
+			}
+		case subscription.FieldOfferTerms:
+			if value, ok := values[i].(*[]byte); !ok {
+				return fmt.Errorf("unexpected type %T for field offer_terms", values[i])
+			} else if value != nil && len(*value) > 0 {
+				if err := json.Unmarshal(*value, &_m.OfferTerms); err != nil {
+					return fmt.Errorf("unmarshal field offer_terms: %w", err)
+				}
+			}
+		case subscription.FieldOfferCyclesRemaining:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field offer_cycles_remaining", values[i])
+			} else if value.Valid {
+				_m.OfferCyclesRemaining = int(value.Int64)
+			}
 		case subscription.FieldVersion:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field version", values[i])
@@ -608,6 +638,15 @@ func (_m *Subscription) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("ended_reason=")
 	builder.WriteString(_m.EndedReason)
+	builder.WriteString(", ")
+	builder.WriteString("offer_claim_id=")
+	builder.WriteString(_m.OfferClaimID)
+	builder.WriteString(", ")
+	builder.WriteString("offer_terms=")
+	builder.WriteString(fmt.Sprintf("%v", _m.OfferTerms))
+	builder.WriteString(", ")
+	builder.WriteString("offer_cycles_remaining=")
+	builder.WriteString(fmt.Sprintf("%v", _m.OfferCyclesRemaining))
 	builder.WriteString(", ")
 	builder.WriteString("version=")
 	builder.WriteString(fmt.Sprintf("%v", _m.Version))

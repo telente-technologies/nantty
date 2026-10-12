@@ -13,6 +13,9 @@ import (
 	"zudomart/modules/subscriptions/src/generated/ent/planprice"
 	"zudomart/modules/subscriptions/src/generated/ent/providerplan"
 	"zudomart/modules/subscriptions/src/generated/ent/subscription"
+	"zudomart/modules/subscriptions/src/generated/ent/subscriptionofferclaim"
+	"zudomart/modules/subscriptions/src/generated/ent/subscriptionofferlink"
+	"zudomart/modules/subscriptions/src/generated/ent/subscriptionoffersend"
 	"zudomart/modules/subscriptions/src/generated/ent/subscriptionperiod"
 	"zudomart/modules/subscriptions/src/generated/ent/subscriptionreminder"
 	"zudomart/modules/subscriptions/src/generated/ent/trialclaim"
@@ -877,12 +880,22 @@ func init() {
 	subscription.DefaultEndedReason = subscriptionDescEndedReason.Default.(string)
 	// subscription.EndedReasonValidator is a validator for the "ended_reason" field. It is called by the builders before save.
 	subscription.EndedReasonValidator = subscriptionDescEndedReason.Validators[0].(func(string) error)
+	// subscriptionDescOfferClaimID is the schema descriptor for offer_claim_id field.
+	subscriptionDescOfferClaimID := subscriptionFields[42].Descriptor()
+	// subscription.DefaultOfferClaimID holds the default value on creation for the offer_claim_id field.
+	subscription.DefaultOfferClaimID = subscriptionDescOfferClaimID.Default.(string)
+	// subscription.OfferClaimIDValidator is a validator for the "offer_claim_id" field. It is called by the builders before save.
+	subscription.OfferClaimIDValidator = subscriptionDescOfferClaimID.Validators[0].(func(string) error)
+	// subscriptionDescOfferCyclesRemaining is the schema descriptor for offer_cycles_remaining field.
+	subscriptionDescOfferCyclesRemaining := subscriptionFields[44].Descriptor()
+	// subscription.DefaultOfferCyclesRemaining holds the default value on creation for the offer_cycles_remaining field.
+	subscription.DefaultOfferCyclesRemaining = subscriptionDescOfferCyclesRemaining.Default.(int)
 	// subscriptionDescVersion is the schema descriptor for version field.
-	subscriptionDescVersion := subscriptionFields[42].Descriptor()
+	subscriptionDescVersion := subscriptionFields[45].Descriptor()
 	// subscription.DefaultVersion holds the default value on creation for the version field.
 	subscription.DefaultVersion = subscriptionDescVersion.Default.(int64)
 	// subscriptionDescUpdatedAt is the schema descriptor for updated_at field.
-	subscriptionDescUpdatedAt := subscriptionFields[43].Descriptor()
+	subscriptionDescUpdatedAt := subscriptionFields[46].Descriptor()
 	// subscription.DefaultUpdatedAt holds the default value on creation for the updated_at field.
 	subscription.DefaultUpdatedAt = subscriptionDescUpdatedAt.Default.(func() time.Time)
 	// subscription.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
@@ -891,6 +904,277 @@ func init() {
 	subscriptionDescID := subscriptionMixinFields0[0].Descriptor()
 	// subscription.DefaultID holds the default value on creation for the id field.
 	subscription.DefaultID = subscriptionDescID.Default.(func() uuid.UUID)
+	subscriptionofferclaimMixin := schema.SubscriptionOfferClaim{}.Mixin()
+	subscriptionofferclaimMixinFields0 := subscriptionofferclaimMixin[0].Fields()
+	_ = subscriptionofferclaimMixinFields0
+	subscriptionofferclaimFields := schema.SubscriptionOfferClaim{}.Fields()
+	_ = subscriptionofferclaimFields
+	// subscriptionofferclaimDescCreatedAt is the schema descriptor for created_at field.
+	subscriptionofferclaimDescCreatedAt := subscriptionofferclaimMixinFields0[1].Descriptor()
+	// subscriptionofferclaim.DefaultCreatedAt holds the default value on creation for the created_at field.
+	subscriptionofferclaim.DefaultCreatedAt = subscriptionofferclaimDescCreatedAt.Default.(func() time.Time)
+	// subscriptionofferclaimDescLinkID is the schema descriptor for link_id field.
+	subscriptionofferclaimDescLinkID := subscriptionofferclaimFields[0].Descriptor()
+	// subscriptionofferclaim.LinkIDValidator is a validator for the "link_id" field. It is called by the builders before save.
+	subscriptionofferclaim.LinkIDValidator = func() func(string) error {
+		validators := subscriptionofferclaimDescLinkID.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(link_id string) error {
+			for _, fn := range fns {
+				if err := fn(link_id); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// subscriptionofferclaimDescOwnerUserID is the schema descriptor for owner_user_id field.
+	subscriptionofferclaimDescOwnerUserID := subscriptionofferclaimFields[1].Descriptor()
+	// subscriptionofferclaim.OwnerUserIDValidator is a validator for the "owner_user_id" field. It is called by the builders before save.
+	subscriptionofferclaim.OwnerUserIDValidator = func() func(string) error {
+		validators := subscriptionofferclaimDescOwnerUserID.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(owner_user_id string) error {
+			for _, fn := range fns {
+				if err := fn(owner_user_id); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// subscriptionofferclaimDescProfileID is the schema descriptor for profile_id field.
+	subscriptionofferclaimDescProfileID := subscriptionofferclaimFields[2].Descriptor()
+	// subscriptionofferclaim.ProfileIDValidator is a validator for the "profile_id" field. It is called by the builders before save.
+	subscriptionofferclaim.ProfileIDValidator = func() func(string) error {
+		validators := subscriptionofferclaimDescProfileID.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(profile_id string) error {
+			for _, fn := range fns {
+				if err := fn(profile_id); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// subscriptionofferclaimDescSubscriptionID is the schema descriptor for subscription_id field.
+	subscriptionofferclaimDescSubscriptionID := subscriptionofferclaimFields[4].Descriptor()
+	// subscriptionofferclaim.DefaultSubscriptionID holds the default value on creation for the subscription_id field.
+	subscriptionofferclaim.DefaultSubscriptionID = subscriptionofferclaimDescSubscriptionID.Default.(string)
+	// subscriptionofferclaim.SubscriptionIDValidator is a validator for the "subscription_id" field. It is called by the builders before save.
+	subscriptionofferclaim.SubscriptionIDValidator = subscriptionofferclaimDescSubscriptionID.Validators[0].(func(string) error)
+	// subscriptionofferclaimDescUpdatedAt is the schema descriptor for updated_at field.
+	subscriptionofferclaimDescUpdatedAt := subscriptionofferclaimFields[8].Descriptor()
+	// subscriptionofferclaim.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	subscriptionofferclaim.DefaultUpdatedAt = subscriptionofferclaimDescUpdatedAt.Default.(func() time.Time)
+	// subscriptionofferclaim.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	subscriptionofferclaim.UpdateDefaultUpdatedAt = subscriptionofferclaimDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// subscriptionofferclaimDescID is the schema descriptor for id field.
+	subscriptionofferclaimDescID := subscriptionofferclaimMixinFields0[0].Descriptor()
+	// subscriptionofferclaim.DefaultID holds the default value on creation for the id field.
+	subscriptionofferclaim.DefaultID = subscriptionofferclaimDescID.Default.(func() uuid.UUID)
+	subscriptionofferlinkMixin := schema.SubscriptionOfferLink{}.Mixin()
+	subscriptionofferlinkMixinFields0 := subscriptionofferlinkMixin[0].Fields()
+	_ = subscriptionofferlinkMixinFields0
+	subscriptionofferlinkFields := schema.SubscriptionOfferLink{}.Fields()
+	_ = subscriptionofferlinkFields
+	// subscriptionofferlinkDescCreatedAt is the schema descriptor for created_at field.
+	subscriptionofferlinkDescCreatedAt := subscriptionofferlinkMixinFields0[1].Descriptor()
+	// subscriptionofferlink.DefaultCreatedAt holds the default value on creation for the created_at field.
+	subscriptionofferlink.DefaultCreatedAt = subscriptionofferlinkDescCreatedAt.Default.(func() time.Time)
+	// subscriptionofferlinkDescTokenHash is the schema descriptor for token_hash field.
+	subscriptionofferlinkDescTokenHash := subscriptionofferlinkFields[0].Descriptor()
+	// subscriptionofferlink.TokenHashValidator is a validator for the "token_hash" field. It is called by the builders before save.
+	subscriptionofferlink.TokenHashValidator = func() func(string) error {
+		validators := subscriptionofferlinkDescTokenHash.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(token_hash string) error {
+			for _, fn := range fns {
+				if err := fn(token_hash); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// subscriptionofferlinkDescTokenSalt is the schema descriptor for token_salt field.
+	subscriptionofferlinkDescTokenSalt := subscriptionofferlinkFields[1].Descriptor()
+	// subscriptionofferlink.TokenSaltValidator is a validator for the "token_salt" field. It is called by the builders before save.
+	subscriptionofferlink.TokenSaltValidator = func() func(string) error {
+		validators := subscriptionofferlinkDescTokenSalt.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(token_salt string) error {
+			for _, fn := range fns {
+				if err := fn(token_salt); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// subscriptionofferlinkDescLabel is the schema descriptor for label field.
+	subscriptionofferlinkDescLabel := subscriptionofferlinkFields[2].Descriptor()
+	// subscriptionofferlink.DefaultLabel holds the default value on creation for the label field.
+	subscriptionofferlink.DefaultLabel = subscriptionofferlinkDescLabel.Default.(string)
+	// subscriptionofferlink.LabelValidator is a validator for the "label" field. It is called by the builders before save.
+	subscriptionofferlink.LabelValidator = subscriptionofferlinkDescLabel.Validators[0].(func(string) error)
+	// subscriptionofferlinkDescPercentOff is the schema descriptor for percent_off field.
+	subscriptionofferlinkDescPercentOff := subscriptionofferlinkFields[5].Descriptor()
+	// subscriptionofferlink.DefaultPercentOff holds the default value on creation for the percent_off field.
+	subscriptionofferlink.DefaultPercentOff = subscriptionofferlinkDescPercentOff.Default.(int64)
+	// subscriptionofferlinkDescAmountOffMinor is the schema descriptor for amount_off_minor field.
+	subscriptionofferlinkDescAmountOffMinor := subscriptionofferlinkFields[6].Descriptor()
+	// subscriptionofferlink.DefaultAmountOffMinor holds the default value on creation for the amount_off_minor field.
+	subscriptionofferlink.DefaultAmountOffMinor = subscriptionofferlinkDescAmountOffMinor.Default.(int64)
+	// subscriptionofferlinkDescAmountOffCurrency is the schema descriptor for amount_off_currency field.
+	subscriptionofferlinkDescAmountOffCurrency := subscriptionofferlinkFields[7].Descriptor()
+	// subscriptionofferlink.DefaultAmountOffCurrency holds the default value on creation for the amount_off_currency field.
+	subscriptionofferlink.DefaultAmountOffCurrency = subscriptionofferlinkDescAmountOffCurrency.Default.(string)
+	// subscriptionofferlink.AmountOffCurrencyValidator is a validator for the "amount_off_currency" field. It is called by the builders before save.
+	subscriptionofferlink.AmountOffCurrencyValidator = subscriptionofferlinkDescAmountOffCurrency.Validators[0].(func(string) error)
+	// subscriptionofferlinkDescMaxClaims is the schema descriptor for max_claims field.
+	subscriptionofferlinkDescMaxClaims := subscriptionofferlinkFields[9].Descriptor()
+	// subscriptionofferlink.MaxClaimsValidator is a validator for the "max_claims" field. It is called by the builders before save.
+	subscriptionofferlink.MaxClaimsValidator = subscriptionofferlinkDescMaxClaims.Validators[0].(func(int) error)
+	// subscriptionofferlinkDescClaimedCount is the schema descriptor for claimed_count field.
+	subscriptionofferlinkDescClaimedCount := subscriptionofferlinkFields[10].Descriptor()
+	// subscriptionofferlink.DefaultClaimedCount holds the default value on creation for the claimed_count field.
+	subscriptionofferlink.DefaultClaimedCount = subscriptionofferlinkDescClaimedCount.Default.(int)
+	// subscriptionofferlink.ClaimedCountValidator is a validator for the "claimed_count" field. It is called by the builders before save.
+	subscriptionofferlink.ClaimedCountValidator = subscriptionofferlinkDescClaimedCount.Validators[0].(func(int) error)
+	// subscriptionofferlinkDescRedeemedCount is the schema descriptor for redeemed_count field.
+	subscriptionofferlinkDescRedeemedCount := subscriptionofferlinkFields[11].Descriptor()
+	// subscriptionofferlink.DefaultRedeemedCount holds the default value on creation for the redeemed_count field.
+	subscriptionofferlink.DefaultRedeemedCount = subscriptionofferlinkDescRedeemedCount.Default.(int)
+	// subscriptionofferlink.RedeemedCountValidator is a validator for the "redeemed_count" field. It is called by the builders before save.
+	subscriptionofferlink.RedeemedCountValidator = subscriptionofferlinkDescRedeemedCount.Validators[0].(func(int) error)
+	// subscriptionofferlinkDescDurationCycles is the schema descriptor for duration_cycles field.
+	subscriptionofferlinkDescDurationCycles := subscriptionofferlinkFields[12].Descriptor()
+	// subscriptionofferlink.DurationCyclesValidator is a validator for the "duration_cycles" field. It is called by the builders before save.
+	subscriptionofferlink.DurationCyclesValidator = subscriptionofferlinkDescDurationCycles.Validators[0].(func(int) error)
+	// subscriptionofferlinkDescRevokedByStaffID is the schema descriptor for revoked_by_staff_id field.
+	subscriptionofferlinkDescRevokedByStaffID := subscriptionofferlinkFields[15].Descriptor()
+	// subscriptionofferlink.DefaultRevokedByStaffID holds the default value on creation for the revoked_by_staff_id field.
+	subscriptionofferlink.DefaultRevokedByStaffID = subscriptionofferlinkDescRevokedByStaffID.Default.(string)
+	// subscriptionofferlink.RevokedByStaffIDValidator is a validator for the "revoked_by_staff_id" field. It is called by the builders before save.
+	subscriptionofferlink.RevokedByStaffIDValidator = subscriptionofferlinkDescRevokedByStaffID.Validators[0].(func(string) error)
+	// subscriptionofferlinkDescCreatedByStaffID is the schema descriptor for created_by_staff_id field.
+	subscriptionofferlinkDescCreatedByStaffID := subscriptionofferlinkFields[16].Descriptor()
+	// subscriptionofferlink.CreatedByStaffIDValidator is a validator for the "created_by_staff_id" field. It is called by the builders before save.
+	subscriptionofferlink.CreatedByStaffIDValidator = func() func(string) error {
+		validators := subscriptionofferlinkDescCreatedByStaffID.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(created_by_staff_id string) error {
+			for _, fn := range fns {
+				if err := fn(created_by_staff_id); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// subscriptionofferlinkDescUpdatedAt is the schema descriptor for updated_at field.
+	subscriptionofferlinkDescUpdatedAt := subscriptionofferlinkFields[17].Descriptor()
+	// subscriptionofferlink.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	subscriptionofferlink.DefaultUpdatedAt = subscriptionofferlinkDescUpdatedAt.Default.(func() time.Time)
+	// subscriptionofferlink.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	subscriptionofferlink.UpdateDefaultUpdatedAt = subscriptionofferlinkDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// subscriptionofferlinkDescID is the schema descriptor for id field.
+	subscriptionofferlinkDescID := subscriptionofferlinkMixinFields0[0].Descriptor()
+	// subscriptionofferlink.DefaultID holds the default value on creation for the id field.
+	subscriptionofferlink.DefaultID = subscriptionofferlinkDescID.Default.(func() uuid.UUID)
+	subscriptionoffersendMixin := schema.SubscriptionOfferSend{}.Mixin()
+	subscriptionoffersendMixinFields0 := subscriptionoffersendMixin[0].Fields()
+	_ = subscriptionoffersendMixinFields0
+	subscriptionoffersendFields := schema.SubscriptionOfferSend{}.Fields()
+	_ = subscriptionoffersendFields
+	// subscriptionoffersendDescCreatedAt is the schema descriptor for created_at field.
+	subscriptionoffersendDescCreatedAt := subscriptionoffersendMixinFields0[1].Descriptor()
+	// subscriptionoffersend.DefaultCreatedAt holds the default value on creation for the created_at field.
+	subscriptionoffersend.DefaultCreatedAt = subscriptionoffersendDescCreatedAt.Default.(func() time.Time)
+	// subscriptionoffersendDescLinkID is the schema descriptor for link_id field.
+	subscriptionoffersendDescLinkID := subscriptionoffersendFields[0].Descriptor()
+	// subscriptionoffersend.LinkIDValidator is a validator for the "link_id" field. It is called by the builders before save.
+	subscriptionoffersend.LinkIDValidator = func() func(string) error {
+		validators := subscriptionoffersendDescLinkID.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(link_id string) error {
+			for _, fn := range fns {
+				if err := fn(link_id); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// subscriptionoffersendDescRecipientEmail is the schema descriptor for recipient_email field.
+	subscriptionoffersendDescRecipientEmail := subscriptionoffersendFields[1].Descriptor()
+	// subscriptionoffersend.RecipientEmailValidator is a validator for the "recipient_email" field. It is called by the builders before save.
+	subscriptionoffersend.RecipientEmailValidator = func() func(string) error {
+		validators := subscriptionoffersendDescRecipientEmail.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(recipient_email string) error {
+			for _, fn := range fns {
+				if err := fn(recipient_email); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// subscriptionoffersendDescNote is the schema descriptor for note field.
+	subscriptionoffersendDescNote := subscriptionoffersendFields[2].Descriptor()
+	// subscriptionoffersend.DefaultNote holds the default value on creation for the note field.
+	subscriptionoffersend.DefaultNote = subscriptionoffersendDescNote.Default.(string)
+	// subscriptionoffersend.NoteValidator is a validator for the "note" field. It is called by the builders before save.
+	subscriptionoffersend.NoteValidator = subscriptionoffersendDescNote.Validators[0].(func(string) error)
+	// subscriptionoffersendDescSentByStaffID is the schema descriptor for sent_by_staff_id field.
+	subscriptionoffersendDescSentByStaffID := subscriptionoffersendFields[3].Descriptor()
+	// subscriptionoffersend.SentByStaffIDValidator is a validator for the "sent_by_staff_id" field. It is called by the builders before save.
+	subscriptionoffersend.SentByStaffIDValidator = func() func(string) error {
+		validators := subscriptionoffersendDescSentByStaffID.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(sent_by_staff_id string) error {
+			for _, fn := range fns {
+				if err := fn(sent_by_staff_id); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// subscriptionoffersendDescID is the schema descriptor for id field.
+	subscriptionoffersendDescID := subscriptionoffersendMixinFields0[0].Descriptor()
+	// subscriptionoffersend.DefaultID holds the default value on creation for the id field.
+	subscriptionoffersend.DefaultID = subscriptionoffersendDescID.Default.(func() uuid.UUID)
 	subscriptionperiodMixin := schema.SubscriptionPeriod{}.Mixin()
 	subscriptionperiodMixinFields0 := subscriptionperiodMixin[0].Fields()
 	_ = subscriptionperiodMixinFields0

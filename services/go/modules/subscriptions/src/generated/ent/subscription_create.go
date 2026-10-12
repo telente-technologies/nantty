@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"time"
 	"zudomart/modules/subscriptions/src/generated/ent/subscription"
+	"zudomart/modules/subscriptions/src/models"
 
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
@@ -554,6 +555,48 @@ func (_c *SubscriptionCreate) SetNillableEndedReason(v *string) *SubscriptionCre
 	return _c
 }
 
+// SetOfferClaimID sets the "offer_claim_id" field.
+func (_c *SubscriptionCreate) SetOfferClaimID(v string) *SubscriptionCreate {
+	_c.mutation.SetOfferClaimID(v)
+	return _c
+}
+
+// SetNillableOfferClaimID sets the "offer_claim_id" field if the given value is not nil.
+func (_c *SubscriptionCreate) SetNillableOfferClaimID(v *string) *SubscriptionCreate {
+	if v != nil {
+		_c.SetOfferClaimID(*v)
+	}
+	return _c
+}
+
+// SetOfferTerms sets the "offer_terms" field.
+func (_c *SubscriptionCreate) SetOfferTerms(v models.OfferTerms) *SubscriptionCreate {
+	_c.mutation.SetOfferTerms(v)
+	return _c
+}
+
+// SetNillableOfferTerms sets the "offer_terms" field if the given value is not nil.
+func (_c *SubscriptionCreate) SetNillableOfferTerms(v *models.OfferTerms) *SubscriptionCreate {
+	if v != nil {
+		_c.SetOfferTerms(*v)
+	}
+	return _c
+}
+
+// SetOfferCyclesRemaining sets the "offer_cycles_remaining" field.
+func (_c *SubscriptionCreate) SetOfferCyclesRemaining(v int) *SubscriptionCreate {
+	_c.mutation.SetOfferCyclesRemaining(v)
+	return _c
+}
+
+// SetNillableOfferCyclesRemaining sets the "offer_cycles_remaining" field if the given value is not nil.
+func (_c *SubscriptionCreate) SetNillableOfferCyclesRemaining(v *int) *SubscriptionCreate {
+	if v != nil {
+		_c.SetOfferCyclesRemaining(*v)
+	}
+	return _c
+}
+
 // SetVersion sets the "version" field.
 func (_c *SubscriptionCreate) SetVersion(v int64) *SubscriptionCreate {
 	_c.mutation.SetVersion(v)
@@ -730,6 +773,14 @@ func (_c *SubscriptionCreate) defaults() {
 	if _, ok := _c.mutation.EndedReason(); !ok {
 		v := subscription.DefaultEndedReason
 		_c.mutation.SetEndedReason(v)
+	}
+	if _, ok := _c.mutation.OfferClaimID(); !ok {
+		v := subscription.DefaultOfferClaimID
+		_c.mutation.SetOfferClaimID(v)
+	}
+	if _, ok := _c.mutation.OfferCyclesRemaining(); !ok {
+		v := subscription.DefaultOfferCyclesRemaining
+		_c.mutation.SetOfferCyclesRemaining(v)
 	}
 	if _, ok := _c.mutation.Version(); !ok {
 		v := subscription.DefaultVersion
@@ -943,6 +994,17 @@ func (_c *SubscriptionCreate) check() error {
 		if err := subscription.EndedReasonValidator(v); err != nil {
 			return &ValidationError{Name: "ended_reason", err: fmt.Errorf(`ent: validator failed for field "Subscription.ended_reason": %w`, err)}
 		}
+	}
+	if _, ok := _c.mutation.OfferClaimID(); !ok {
+		return &ValidationError{Name: "offer_claim_id", err: errors.New(`ent: missing required field "Subscription.offer_claim_id"`)}
+	}
+	if v, ok := _c.mutation.OfferClaimID(); ok {
+		if err := subscription.OfferClaimIDValidator(v); err != nil {
+			return &ValidationError{Name: "offer_claim_id", err: fmt.Errorf(`ent: validator failed for field "Subscription.offer_claim_id": %w`, err)}
+		}
+	}
+	if _, ok := _c.mutation.OfferCyclesRemaining(); !ok {
+		return &ValidationError{Name: "offer_cycles_remaining", err: errors.New(`ent: missing required field "Subscription.offer_cycles_remaining"`)}
 	}
 	if _, ok := _c.mutation.Version(); !ok {
 		return &ValidationError{Name: "version", err: errors.New(`ent: missing required field "Subscription.version"`)}
@@ -1158,6 +1220,18 @@ func (_c *SubscriptionCreate) createSpec() (*Subscription, *sqlgraph.CreateSpec)
 	if value, ok := _c.mutation.EndedReason(); ok {
 		_spec.SetField(subscription.FieldEndedReason, field.TypeString, value)
 		_node.EndedReason = value
+	}
+	if value, ok := _c.mutation.OfferClaimID(); ok {
+		_spec.SetField(subscription.FieldOfferClaimID, field.TypeString, value)
+		_node.OfferClaimID = value
+	}
+	if value, ok := _c.mutation.OfferTerms(); ok {
+		_spec.SetField(subscription.FieldOfferTerms, field.TypeJSON, value)
+		_node.OfferTerms = value
+	}
+	if value, ok := _c.mutation.OfferCyclesRemaining(); ok {
+		_spec.SetField(subscription.FieldOfferCyclesRemaining, field.TypeInt, value)
+		_node.OfferCyclesRemaining = value
 	}
 	if value, ok := _c.mutation.Version(); ok {
 		_spec.SetField(subscription.FieldVersion, field.TypeInt64, value)
@@ -1774,6 +1848,54 @@ func (u *SubscriptionUpsert) SetEndedReason(v string) *SubscriptionUpsert {
 // UpdateEndedReason sets the "ended_reason" field to the value that was provided on create.
 func (u *SubscriptionUpsert) UpdateEndedReason() *SubscriptionUpsert {
 	u.SetExcluded(subscription.FieldEndedReason)
+	return u
+}
+
+// SetOfferClaimID sets the "offer_claim_id" field.
+func (u *SubscriptionUpsert) SetOfferClaimID(v string) *SubscriptionUpsert {
+	u.Set(subscription.FieldOfferClaimID, v)
+	return u
+}
+
+// UpdateOfferClaimID sets the "offer_claim_id" field to the value that was provided on create.
+func (u *SubscriptionUpsert) UpdateOfferClaimID() *SubscriptionUpsert {
+	u.SetExcluded(subscription.FieldOfferClaimID)
+	return u
+}
+
+// SetOfferTerms sets the "offer_terms" field.
+func (u *SubscriptionUpsert) SetOfferTerms(v models.OfferTerms) *SubscriptionUpsert {
+	u.Set(subscription.FieldOfferTerms, v)
+	return u
+}
+
+// UpdateOfferTerms sets the "offer_terms" field to the value that was provided on create.
+func (u *SubscriptionUpsert) UpdateOfferTerms() *SubscriptionUpsert {
+	u.SetExcluded(subscription.FieldOfferTerms)
+	return u
+}
+
+// ClearOfferTerms clears the value of the "offer_terms" field.
+func (u *SubscriptionUpsert) ClearOfferTerms() *SubscriptionUpsert {
+	u.SetNull(subscription.FieldOfferTerms)
+	return u
+}
+
+// SetOfferCyclesRemaining sets the "offer_cycles_remaining" field.
+func (u *SubscriptionUpsert) SetOfferCyclesRemaining(v int) *SubscriptionUpsert {
+	u.Set(subscription.FieldOfferCyclesRemaining, v)
+	return u
+}
+
+// UpdateOfferCyclesRemaining sets the "offer_cycles_remaining" field to the value that was provided on create.
+func (u *SubscriptionUpsert) UpdateOfferCyclesRemaining() *SubscriptionUpsert {
+	u.SetExcluded(subscription.FieldOfferCyclesRemaining)
+	return u
+}
+
+// AddOfferCyclesRemaining adds v to the "offer_cycles_remaining" field.
+func (u *SubscriptionUpsert) AddOfferCyclesRemaining(v int) *SubscriptionUpsert {
+	u.Add(subscription.FieldOfferCyclesRemaining, v)
 	return u
 }
 
@@ -2521,6 +2643,62 @@ func (u *SubscriptionUpsertOne) SetEndedReason(v string) *SubscriptionUpsertOne 
 func (u *SubscriptionUpsertOne) UpdateEndedReason() *SubscriptionUpsertOne {
 	return u.Update(func(s *SubscriptionUpsert) {
 		s.UpdateEndedReason()
+	})
+}
+
+// SetOfferClaimID sets the "offer_claim_id" field.
+func (u *SubscriptionUpsertOne) SetOfferClaimID(v string) *SubscriptionUpsertOne {
+	return u.Update(func(s *SubscriptionUpsert) {
+		s.SetOfferClaimID(v)
+	})
+}
+
+// UpdateOfferClaimID sets the "offer_claim_id" field to the value that was provided on create.
+func (u *SubscriptionUpsertOne) UpdateOfferClaimID() *SubscriptionUpsertOne {
+	return u.Update(func(s *SubscriptionUpsert) {
+		s.UpdateOfferClaimID()
+	})
+}
+
+// SetOfferTerms sets the "offer_terms" field.
+func (u *SubscriptionUpsertOne) SetOfferTerms(v models.OfferTerms) *SubscriptionUpsertOne {
+	return u.Update(func(s *SubscriptionUpsert) {
+		s.SetOfferTerms(v)
+	})
+}
+
+// UpdateOfferTerms sets the "offer_terms" field to the value that was provided on create.
+func (u *SubscriptionUpsertOne) UpdateOfferTerms() *SubscriptionUpsertOne {
+	return u.Update(func(s *SubscriptionUpsert) {
+		s.UpdateOfferTerms()
+	})
+}
+
+// ClearOfferTerms clears the value of the "offer_terms" field.
+func (u *SubscriptionUpsertOne) ClearOfferTerms() *SubscriptionUpsertOne {
+	return u.Update(func(s *SubscriptionUpsert) {
+		s.ClearOfferTerms()
+	})
+}
+
+// SetOfferCyclesRemaining sets the "offer_cycles_remaining" field.
+func (u *SubscriptionUpsertOne) SetOfferCyclesRemaining(v int) *SubscriptionUpsertOne {
+	return u.Update(func(s *SubscriptionUpsert) {
+		s.SetOfferCyclesRemaining(v)
+	})
+}
+
+// AddOfferCyclesRemaining adds v to the "offer_cycles_remaining" field.
+func (u *SubscriptionUpsertOne) AddOfferCyclesRemaining(v int) *SubscriptionUpsertOne {
+	return u.Update(func(s *SubscriptionUpsert) {
+		s.AddOfferCyclesRemaining(v)
+	})
+}
+
+// UpdateOfferCyclesRemaining sets the "offer_cycles_remaining" field to the value that was provided on create.
+func (u *SubscriptionUpsertOne) UpdateOfferCyclesRemaining() *SubscriptionUpsertOne {
+	return u.Update(func(s *SubscriptionUpsert) {
+		s.UpdateOfferCyclesRemaining()
 	})
 }
 
@@ -3440,6 +3618,62 @@ func (u *SubscriptionUpsertBulk) SetEndedReason(v string) *SubscriptionUpsertBul
 func (u *SubscriptionUpsertBulk) UpdateEndedReason() *SubscriptionUpsertBulk {
 	return u.Update(func(s *SubscriptionUpsert) {
 		s.UpdateEndedReason()
+	})
+}
+
+// SetOfferClaimID sets the "offer_claim_id" field.
+func (u *SubscriptionUpsertBulk) SetOfferClaimID(v string) *SubscriptionUpsertBulk {
+	return u.Update(func(s *SubscriptionUpsert) {
+		s.SetOfferClaimID(v)
+	})
+}
+
+// UpdateOfferClaimID sets the "offer_claim_id" field to the value that was provided on create.
+func (u *SubscriptionUpsertBulk) UpdateOfferClaimID() *SubscriptionUpsertBulk {
+	return u.Update(func(s *SubscriptionUpsert) {
+		s.UpdateOfferClaimID()
+	})
+}
+
+// SetOfferTerms sets the "offer_terms" field.
+func (u *SubscriptionUpsertBulk) SetOfferTerms(v models.OfferTerms) *SubscriptionUpsertBulk {
+	return u.Update(func(s *SubscriptionUpsert) {
+		s.SetOfferTerms(v)
+	})
+}
+
+// UpdateOfferTerms sets the "offer_terms" field to the value that was provided on create.
+func (u *SubscriptionUpsertBulk) UpdateOfferTerms() *SubscriptionUpsertBulk {
+	return u.Update(func(s *SubscriptionUpsert) {
+		s.UpdateOfferTerms()
+	})
+}
+
+// ClearOfferTerms clears the value of the "offer_terms" field.
+func (u *SubscriptionUpsertBulk) ClearOfferTerms() *SubscriptionUpsertBulk {
+	return u.Update(func(s *SubscriptionUpsert) {
+		s.ClearOfferTerms()
+	})
+}
+
+// SetOfferCyclesRemaining sets the "offer_cycles_remaining" field.
+func (u *SubscriptionUpsertBulk) SetOfferCyclesRemaining(v int) *SubscriptionUpsertBulk {
+	return u.Update(func(s *SubscriptionUpsert) {
+		s.SetOfferCyclesRemaining(v)
+	})
+}
+
+// AddOfferCyclesRemaining adds v to the "offer_cycles_remaining" field.
+func (u *SubscriptionUpsertBulk) AddOfferCyclesRemaining(v int) *SubscriptionUpsertBulk {
+	return u.Update(func(s *SubscriptionUpsert) {
+		s.AddOfferCyclesRemaining(v)
+	})
+}
+
+// UpdateOfferCyclesRemaining sets the "offer_cycles_remaining" field to the value that was provided on create.
+func (u *SubscriptionUpsertBulk) UpdateOfferCyclesRemaining() *SubscriptionUpsertBulk {
+	return u.Update(func(s *SubscriptionUpsert) {
+		s.UpdateOfferCyclesRemaining()
 	})
 }
 

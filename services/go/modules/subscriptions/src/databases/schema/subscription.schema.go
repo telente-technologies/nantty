@@ -7,6 +7,8 @@ import (
 	"entgo.io/ent/dialect/entsql"
 	"entgo.io/ent/schema/field"
 	"entgo.io/ent/schema/index"
+
+	"zudomart/modules/subscriptions/src/models"
 )
 
 type Subscription struct {
@@ -29,7 +31,7 @@ func (Subscription) Fields() []ent.Field {
 		field.Int64("list_amount_minor"),
 		field.Int64("amount_minor"),
 		field.String("currency").NotEmpty().MaxLen(3),
-		field.Enum("discount_kind").Values("none", "yearly", "bundle").Default("none"),
+		field.Enum("discount_kind").Values("none", "yearly", "bundle", "offer").Default("none"),
 		field.Int64("discount_bps").Default(0),
 		field.Bool("with_trial").Default(false).Immutable(),
 		field.Int("trial_days").Default(0),
@@ -61,6 +63,9 @@ func (Subscription) Fields() []ent.Field {
 		field.Int("card_expiry_year").Default(0),
 		field.Time("card_expiry_noticed_at").Optional().Nillable(),
 		field.String("ended_reason").MaxLen(40).Default(""),
+		field.String("offer_claim_id").MaxLen(80).Default(""),
+		field.JSON("offer_terms", models.OfferTerms{}).Optional(),
+		field.Int("offer_cycles_remaining").Default(0),
 		field.Int64("version").Default(0),
 		field.Time("updated_at").Default(time.Now).UpdateDefault(time.Now),
 	}

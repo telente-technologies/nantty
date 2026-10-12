@@ -27,6 +27,8 @@ type SubscriptionsSettings struct {
 	BillingJobsQueue       string
 	CreatorsSchema         string
 	SocialSchema           string
+	PublicWebBaseUrl       string
+	OfferLinkKey           string
 }
 
 func ReadSubscriptionsSettingsFromEnvironment(reader *platformconfig.EnvironmentReader) SubscriptionsSettings {
@@ -45,6 +47,11 @@ func ReadSubscriptionsSettingsFromEnvironment(reader *platformconfig.Environment
 		BillingJobsQueue:       reader.ReadStringOrDefault("SUBSCRIPTION_BILLING_QUEUE", "jobs-subscription-billing"),
 		CreatorsSchema:         reader.ReadStringOrDefault("CREATORS_DATABASE_SCHEMA", "creators"),
 		SocialSchema:           reader.ReadStringOrDefault("SUBSCRIPTIONS_SOCIAL_SCHEMA", "social"),
+		PublicWebBaseUrl:       strings.TrimRight(reader.ReadStringOrDefault("PUBLIC_WEB_BASE_URL", "https://zudomart.com"), "/"),
+		OfferLinkKey:           reader.ReadStringOrDefault("SUBSCRIPTION_OFFER_LINK_KEY", ""),
+	}
+	if settings.OfferLinkKey == "" {
+		settings.OfferLinkKey = settings.FingerprintKey
 	}
 	if settings.Money.IsProduction() && settings.FingerprintKey == "" {
 		reader.ReadRequiredString("SAVED_CARD_FINGERPRINT_KEY")

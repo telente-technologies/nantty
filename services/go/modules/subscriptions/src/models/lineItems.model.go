@@ -5,6 +5,7 @@ const (
 	LineItemCheckmark       = "checkmark"
 	LineItemBundleDiscount  = "bundle_discount"
 	LineItemProrationCredit = "proration_credit"
+	LineItemOfferDiscount   = "offer_discount"
 
 	CheckmarkSplitFromPlan = "split"
 	CheckmarkIsWholePlan   = "whole"
@@ -25,6 +26,7 @@ type PeriodChargeInput struct {
 	CheckmarkSplit           string
 	BundleDiscountBps        int64
 	AvailableCreditMinor     int64
+	OfferDiscountMinor       int64
 }
 
 type PeriodCharge struct {
@@ -63,6 +65,10 @@ func ComputePeriodCharge(input PeriodChargeInput) PeriodCharge {
 		charge.LineItems = append(charge.LineItems, LineItem{Kind: LineItemBundleDiscount, Label: "Blue + Gold bundle", AmountMinor: -discount})
 		gross -= discount
 	}
+	if discount := min(max(input.OfferDiscountMinor, 0), gross); discount > 0 {
+		charge.LineItems = append(charge.LineItems, LineItem{Kind: LineItemOfferDiscount, Label: OfferLineLabel, AmountMinor: -discount})
+		gross -= discount
+	}
 	charge.SubtotalMinor = gross
 	charge.CreditAppliedMinor = min(max(input.AvailableCreditMinor, 0), gross)
 	if charge.CreditAppliedMinor > 0 {
@@ -71,4 +77,23 @@ func ComputePeriodCharge(input PeriodChargeInput) PeriodCharge {
 	charge.AmountDueMinor = gross - charge.CreditAppliedMinor
 	charge.RemainingCreditMinor = max(input.AvailableCreditMinor, 0) - charge.CreditAppliedMinor
 	return charge
+}
+
+func DiscountLinesTotalMinor(charge PeriodCharge) int64 {
+	total := int64(0)
+	for _, item := range charge.LineItems {
+		if item.Kind == LineItemBundleDiscount || item.Kind == LineItemOfferDiscount {
+			total -= item.AmountMinor
+		}
+	}
+	return total
+}
+
+func HasOfferDiscountLine(items []LineItem) bool {
+	for _, item := range items {
+		if item.Kind == LineItemOfferDiscount {
+			return true
+		}
+	}
+	return false
 }

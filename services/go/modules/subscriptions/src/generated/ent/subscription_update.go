@@ -10,6 +10,7 @@ import (
 	"zudomart/modules/subscriptions/src/generated/ent/internal"
 	"zudomart/modules/subscriptions/src/generated/ent/predicate"
 	"zudomart/modules/subscriptions/src/generated/ent/subscription"
+	"zudomart/modules/subscriptions/src/models"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -671,6 +672,61 @@ func (_u *SubscriptionUpdate) SetNillableEndedReason(v *string) *SubscriptionUpd
 	return _u
 }
 
+// SetOfferClaimID sets the "offer_claim_id" field.
+func (_u *SubscriptionUpdate) SetOfferClaimID(v string) *SubscriptionUpdate {
+	_u.mutation.SetOfferClaimID(v)
+	return _u
+}
+
+// SetNillableOfferClaimID sets the "offer_claim_id" field if the given value is not nil.
+func (_u *SubscriptionUpdate) SetNillableOfferClaimID(v *string) *SubscriptionUpdate {
+	if v != nil {
+		_u.SetOfferClaimID(*v)
+	}
+	return _u
+}
+
+// SetOfferTerms sets the "offer_terms" field.
+func (_u *SubscriptionUpdate) SetOfferTerms(v models.OfferTerms) *SubscriptionUpdate {
+	_u.mutation.SetOfferTerms(v)
+	return _u
+}
+
+// SetNillableOfferTerms sets the "offer_terms" field if the given value is not nil.
+func (_u *SubscriptionUpdate) SetNillableOfferTerms(v *models.OfferTerms) *SubscriptionUpdate {
+	if v != nil {
+		_u.SetOfferTerms(*v)
+	}
+	return _u
+}
+
+// ClearOfferTerms clears the value of the "offer_terms" field.
+func (_u *SubscriptionUpdate) ClearOfferTerms() *SubscriptionUpdate {
+	_u.mutation.ClearOfferTerms()
+	return _u
+}
+
+// SetOfferCyclesRemaining sets the "offer_cycles_remaining" field.
+func (_u *SubscriptionUpdate) SetOfferCyclesRemaining(v int) *SubscriptionUpdate {
+	_u.mutation.ResetOfferCyclesRemaining()
+	_u.mutation.SetOfferCyclesRemaining(v)
+	return _u
+}
+
+// SetNillableOfferCyclesRemaining sets the "offer_cycles_remaining" field if the given value is not nil.
+func (_u *SubscriptionUpdate) SetNillableOfferCyclesRemaining(v *int) *SubscriptionUpdate {
+	if v != nil {
+		_u.SetOfferCyclesRemaining(*v)
+	}
+	return _u
+}
+
+// AddOfferCyclesRemaining adds value to the "offer_cycles_remaining" field.
+func (_u *SubscriptionUpdate) AddOfferCyclesRemaining(v int) *SubscriptionUpdate {
+	_u.mutation.AddOfferCyclesRemaining(v)
+	return _u
+}
+
 // SetVersion sets the "version" field.
 func (_u *SubscriptionUpdate) SetVersion(v int64) *SubscriptionUpdate {
 	_u.mutation.ResetVersion()
@@ -814,6 +870,11 @@ func (_u *SubscriptionUpdate) check() error {
 	if v, ok := _u.mutation.EndedReason(); ok {
 		if err := subscription.EndedReasonValidator(v); err != nil {
 			return &ValidationError{Name: "ended_reason", err: fmt.Errorf(`ent: validator failed for field "Subscription.ended_reason": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.OfferClaimID(); ok {
+		if err := subscription.OfferClaimIDValidator(v); err != nil {
+			return &ValidationError{Name: "offer_claim_id", err: fmt.Errorf(`ent: validator failed for field "Subscription.offer_claim_id": %w`, err)}
 		}
 	}
 	return nil
@@ -998,6 +1059,21 @@ func (_u *SubscriptionUpdate) sqlSave(ctx context.Context) (_node int, err error
 	}
 	if value, ok := _u.mutation.EndedReason(); ok {
 		_spec.SetField(subscription.FieldEndedReason, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.OfferClaimID(); ok {
+		_spec.SetField(subscription.FieldOfferClaimID, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.OfferTerms(); ok {
+		_spec.SetField(subscription.FieldOfferTerms, field.TypeJSON, value)
+	}
+	if _u.mutation.OfferTermsCleared() {
+		_spec.ClearField(subscription.FieldOfferTerms, field.TypeJSON)
+	}
+	if value, ok := _u.mutation.OfferCyclesRemaining(); ok {
+		_spec.SetField(subscription.FieldOfferCyclesRemaining, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedOfferCyclesRemaining(); ok {
+		_spec.AddField(subscription.FieldOfferCyclesRemaining, field.TypeInt, value)
 	}
 	if value, ok := _u.mutation.Version(); ok {
 		_spec.SetField(subscription.FieldVersion, field.TypeInt64, value)
@@ -1672,6 +1748,61 @@ func (_u *SubscriptionUpdateOne) SetNillableEndedReason(v *string) *Subscription
 	return _u
 }
 
+// SetOfferClaimID sets the "offer_claim_id" field.
+func (_u *SubscriptionUpdateOne) SetOfferClaimID(v string) *SubscriptionUpdateOne {
+	_u.mutation.SetOfferClaimID(v)
+	return _u
+}
+
+// SetNillableOfferClaimID sets the "offer_claim_id" field if the given value is not nil.
+func (_u *SubscriptionUpdateOne) SetNillableOfferClaimID(v *string) *SubscriptionUpdateOne {
+	if v != nil {
+		_u.SetOfferClaimID(*v)
+	}
+	return _u
+}
+
+// SetOfferTerms sets the "offer_terms" field.
+func (_u *SubscriptionUpdateOne) SetOfferTerms(v models.OfferTerms) *SubscriptionUpdateOne {
+	_u.mutation.SetOfferTerms(v)
+	return _u
+}
+
+// SetNillableOfferTerms sets the "offer_terms" field if the given value is not nil.
+func (_u *SubscriptionUpdateOne) SetNillableOfferTerms(v *models.OfferTerms) *SubscriptionUpdateOne {
+	if v != nil {
+		_u.SetOfferTerms(*v)
+	}
+	return _u
+}
+
+// ClearOfferTerms clears the value of the "offer_terms" field.
+func (_u *SubscriptionUpdateOne) ClearOfferTerms() *SubscriptionUpdateOne {
+	_u.mutation.ClearOfferTerms()
+	return _u
+}
+
+// SetOfferCyclesRemaining sets the "offer_cycles_remaining" field.
+func (_u *SubscriptionUpdateOne) SetOfferCyclesRemaining(v int) *SubscriptionUpdateOne {
+	_u.mutation.ResetOfferCyclesRemaining()
+	_u.mutation.SetOfferCyclesRemaining(v)
+	return _u
+}
+
+// SetNillableOfferCyclesRemaining sets the "offer_cycles_remaining" field if the given value is not nil.
+func (_u *SubscriptionUpdateOne) SetNillableOfferCyclesRemaining(v *int) *SubscriptionUpdateOne {
+	if v != nil {
+		_u.SetOfferCyclesRemaining(*v)
+	}
+	return _u
+}
+
+// AddOfferCyclesRemaining adds value to the "offer_cycles_remaining" field.
+func (_u *SubscriptionUpdateOne) AddOfferCyclesRemaining(v int) *SubscriptionUpdateOne {
+	_u.mutation.AddOfferCyclesRemaining(v)
+	return _u
+}
+
 // SetVersion sets the "version" field.
 func (_u *SubscriptionUpdateOne) SetVersion(v int64) *SubscriptionUpdateOne {
 	_u.mutation.ResetVersion()
@@ -1828,6 +1959,11 @@ func (_u *SubscriptionUpdateOne) check() error {
 	if v, ok := _u.mutation.EndedReason(); ok {
 		if err := subscription.EndedReasonValidator(v); err != nil {
 			return &ValidationError{Name: "ended_reason", err: fmt.Errorf(`ent: validator failed for field "Subscription.ended_reason": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.OfferClaimID(); ok {
+		if err := subscription.OfferClaimIDValidator(v); err != nil {
+			return &ValidationError{Name: "offer_claim_id", err: fmt.Errorf(`ent: validator failed for field "Subscription.offer_claim_id": %w`, err)}
 		}
 	}
 	return nil
@@ -2029,6 +2165,21 @@ func (_u *SubscriptionUpdateOne) sqlSave(ctx context.Context) (_node *Subscripti
 	}
 	if value, ok := _u.mutation.EndedReason(); ok {
 		_spec.SetField(subscription.FieldEndedReason, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.OfferClaimID(); ok {
+		_spec.SetField(subscription.FieldOfferClaimID, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.OfferTerms(); ok {
+		_spec.SetField(subscription.FieldOfferTerms, field.TypeJSON, value)
+	}
+	if _u.mutation.OfferTermsCleared() {
+		_spec.ClearField(subscription.FieldOfferTerms, field.TypeJSON)
+	}
+	if value, ok := _u.mutation.OfferCyclesRemaining(); ok {
+		_spec.SetField(subscription.FieldOfferCyclesRemaining, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedOfferCyclesRemaining(); ok {
+		_spec.AddField(subscription.FieldOfferCyclesRemaining, field.TypeInt, value)
 	}
 	if value, ok := _u.mutation.Version(); ok {
 		_spec.SetField(subscription.FieldVersion, field.TypeInt64, value)

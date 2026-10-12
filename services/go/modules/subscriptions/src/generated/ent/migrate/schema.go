@@ -260,7 +260,7 @@ var (
 		{Name: "list_amount_minor", Type: field.TypeInt64},
 		{Name: "amount_minor", Type: field.TypeInt64},
 		{Name: "currency", Type: field.TypeString, Size: 3},
-		{Name: "discount_kind", Type: field.TypeEnum, Enums: []string{"none", "yearly", "bundle"}, Default: "none"},
+		{Name: "discount_kind", Type: field.TypeEnum, Enums: []string{"none", "yearly", "bundle", "offer"}, Default: "none"},
 		{Name: "discount_bps", Type: field.TypeInt64, Default: 0},
 		{Name: "with_trial", Type: field.TypeBool, Default: false},
 		{Name: "trial_days", Type: field.TypeInt, Default: 0},
@@ -292,6 +292,9 @@ var (
 		{Name: "card_expiry_year", Type: field.TypeInt, Default: 0},
 		{Name: "card_expiry_noticed_at", Type: field.TypeTime, Nullable: true},
 		{Name: "ended_reason", Type: field.TypeString, Size: 40, Default: ""},
+		{Name: "offer_claim_id", Type: field.TypeString, Size: 80, Default: ""},
+		{Name: "offer_terms", Type: field.TypeJSON, Nullable: true},
+		{Name: "offer_cycles_remaining", Type: field.TypeInt, Default: 0},
 		{Name: "version", Type: field.TypeInt64, Default: 0},
 		{Name: "updated_at", Type: field.TypeTime},
 	}
@@ -344,6 +347,109 @@ var (
 				Annotation: &entsql.IndexAnnotation{
 					Where: "activation_pending",
 				},
+			},
+		},
+	}
+	// SubscriptionOfferClaimsColumns holds the columns for the "subscription_offer_claims" table.
+	SubscriptionOfferClaimsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "link_id", Type: field.TypeString, Size: 80},
+		{Name: "owner_user_id", Type: field.TypeString, Size: 80},
+		{Name: "profile_id", Type: field.TypeString, Size: 80},
+		{Name: "status", Type: field.TypeEnum, Enums: []string{"reserved", "redeemed", "released"}, Default: "reserved"},
+		{Name: "subscription_id", Type: field.TypeString, Size: 80, Default: ""},
+		{Name: "reserved_until", Type: field.TypeTime},
+		{Name: "redeemed_at", Type: field.TypeTime, Nullable: true},
+		{Name: "released_at", Type: field.TypeTime, Nullable: true},
+		{Name: "updated_at", Type: field.TypeTime},
+	}
+	// SubscriptionOfferClaimsTable holds the schema information for the "subscription_offer_claims" table.
+	SubscriptionOfferClaimsTable = &schema.Table{
+		Name:       "subscription_offer_claims",
+		Columns:    SubscriptionOfferClaimsColumns,
+		PrimaryKey: []*schema.Column{SubscriptionOfferClaimsColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "subscription_offer_claims_one_per_account",
+				Unique:  true,
+				Columns: []*schema.Column{SubscriptionOfferClaimsColumns[2], SubscriptionOfferClaimsColumns[3]},
+				Annotation: &entsql.IndexAnnotation{
+					Where: "status IN ('reserved','redeemed')",
+				},
+			},
+			{
+				Name:    "subscriptionofferclaim_status_reserved_until",
+				Unique:  false,
+				Columns: []*schema.Column{SubscriptionOfferClaimsColumns[5], SubscriptionOfferClaimsColumns[7]},
+			},
+			{
+				Name:    "subscriptionofferclaim_link_id_created_at",
+				Unique:  false,
+				Columns: []*schema.Column{SubscriptionOfferClaimsColumns[2], SubscriptionOfferClaimsColumns[1]},
+			},
+		},
+	}
+	// SubscriptionOfferLinksColumns holds the columns for the "subscription_offer_links" table.
+	SubscriptionOfferLinksColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "token_hash", Type: field.TypeString, Size: 64},
+		{Name: "token_salt", Type: field.TypeString, Size: 64},
+		{Name: "label", Type: field.TypeString, Size: 120, Default: ""},
+		{Name: "plan_codes", Type: field.TypeJSON},
+		{Name: "discount_kind", Type: field.TypeEnum, Enums: []string{"percentage", "fixed_amount"}},
+		{Name: "percent_off", Type: field.TypeInt64, Default: 0},
+		{Name: "amount_off_minor", Type: field.TypeInt64, Default: 0},
+		{Name: "amount_off_currency", Type: field.TypeString, Size: 3, Default: ""},
+		{Name: "single_use", Type: field.TypeBool},
+		{Name: "max_claims", Type: field.TypeInt},
+		{Name: "claimed_count", Type: field.TypeInt, Default: 0},
+		{Name: "redeemed_count", Type: field.TypeInt, Default: 0},
+		{Name: "duration_cycles", Type: field.TypeInt},
+		{Name: "expires_at", Type: field.TypeTime, Nullable: true},
+		{Name: "revoked_at", Type: field.TypeTime, Nullable: true},
+		{Name: "revoked_by_staff_id", Type: field.TypeString, Size: 80, Default: ""},
+		{Name: "created_by_staff_id", Type: field.TypeString, Size: 80},
+		{Name: "updated_at", Type: field.TypeTime},
+	}
+	// SubscriptionOfferLinksTable holds the schema information for the "subscription_offer_links" table.
+	SubscriptionOfferLinksTable = &schema.Table{
+		Name:       "subscription_offer_links",
+		Columns:    SubscriptionOfferLinksColumns,
+		PrimaryKey: []*schema.Column{SubscriptionOfferLinksColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "subscriptionofferlink_token_hash",
+				Unique:  true,
+				Columns: []*schema.Column{SubscriptionOfferLinksColumns[2]},
+			},
+			{
+				Name:    "subscriptionofferlink_created_at",
+				Unique:  false,
+				Columns: []*schema.Column{SubscriptionOfferLinksColumns[1]},
+			},
+		},
+	}
+	// SubscriptionOfferSendsColumns holds the columns for the "subscription_offer_sends" table.
+	SubscriptionOfferSendsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "link_id", Type: field.TypeString, Size: 80},
+		{Name: "recipient_email", Type: field.TypeString, Size: 254},
+		{Name: "note", Type: field.TypeString, Size: 2000, Default: ""},
+		{Name: "sent_by_staff_id", Type: field.TypeString, Size: 80},
+	}
+	// SubscriptionOfferSendsTable holds the schema information for the "subscription_offer_sends" table.
+	SubscriptionOfferSendsTable = &schema.Table{
+		Name:       "subscription_offer_sends",
+		Columns:    SubscriptionOfferSendsColumns,
+		PrimaryKey: []*schema.Column{SubscriptionOfferSendsColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "subscriptionoffersend_link_id_created_at",
+				Unique:  false,
+				Columns: []*schema.Column{SubscriptionOfferSendsColumns[2], SubscriptionOfferSendsColumns[1]},
 			},
 		},
 	}
@@ -458,6 +564,9 @@ var (
 		PlanPricesTable,
 		ProviderPlansTable,
 		SubscriptionsTable,
+		SubscriptionOfferClaimsTable,
+		SubscriptionOfferLinksTable,
+		SubscriptionOfferSendsTable,
 		SubscriptionPeriodsTable,
 		SubscriptionRemindersTable,
 		TrialClaimsTable,

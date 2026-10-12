@@ -104,6 +104,42 @@ func (f SubscriptionFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.SubscriptionMutation", m)
 }
 
+// The SubscriptionOfferClaimFunc type is an adapter to allow the use of ordinary
+// function as SubscriptionOfferClaim mutator.
+type SubscriptionOfferClaimFunc func(context.Context, *ent.SubscriptionOfferClaimMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f SubscriptionOfferClaimFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.SubscriptionOfferClaimMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.SubscriptionOfferClaimMutation", m)
+}
+
+// The SubscriptionOfferLinkFunc type is an adapter to allow the use of ordinary
+// function as SubscriptionOfferLink mutator.
+type SubscriptionOfferLinkFunc func(context.Context, *ent.SubscriptionOfferLinkMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f SubscriptionOfferLinkFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.SubscriptionOfferLinkMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.SubscriptionOfferLinkMutation", m)
+}
+
+// The SubscriptionOfferSendFunc type is an adapter to allow the use of ordinary
+// function as SubscriptionOfferSend mutator.
+type SubscriptionOfferSendFunc func(context.Context, *ent.SubscriptionOfferSendMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f SubscriptionOfferSendFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.SubscriptionOfferSendMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.SubscriptionOfferSendMutation", m)
+}
+
 // The SubscriptionPeriodFunc type is an adapter to allow the use of ordinary
 // function as SubscriptionPeriod mutator.
 type SubscriptionPeriodFunc func(context.Context, *ent.SubscriptionPeriodMutation) (ent.Value, error)

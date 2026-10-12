@@ -101,6 +101,12 @@ const (
 	FieldCardExpiryNoticedAt = "card_expiry_noticed_at"
 	// FieldEndedReason holds the string denoting the ended_reason field in the database.
 	FieldEndedReason = "ended_reason"
+	// FieldOfferClaimID holds the string denoting the offer_claim_id field in the database.
+	FieldOfferClaimID = "offer_claim_id"
+	// FieldOfferTerms holds the string denoting the offer_terms field in the database.
+	FieldOfferTerms = "offer_terms"
+	// FieldOfferCyclesRemaining holds the string denoting the offer_cycles_remaining field in the database.
+	FieldOfferCyclesRemaining = "offer_cycles_remaining"
 	// FieldVersion holds the string denoting the version field in the database.
 	FieldVersion = "version"
 	// FieldUpdatedAt holds the string denoting the updated_at field in the database.
@@ -155,6 +161,9 @@ var Columns = []string{
 	FieldCardExpiryYear,
 	FieldCardExpiryNoticedAt,
 	FieldEndedReason,
+	FieldOfferClaimID,
+	FieldOfferTerms,
+	FieldOfferCyclesRemaining,
 	FieldVersion,
 	FieldUpdatedAt,
 }
@@ -246,6 +255,12 @@ var (
 	DefaultEndedReason string
 	// EndedReasonValidator is a validator for the "ended_reason" field. It is called by the builders before save.
 	EndedReasonValidator func(string) error
+	// DefaultOfferClaimID holds the default value on creation for the "offer_claim_id" field.
+	DefaultOfferClaimID string
+	// OfferClaimIDValidator is a validator for the "offer_claim_id" field. It is called by the builders before save.
+	OfferClaimIDValidator func(string) error
+	// DefaultOfferCyclesRemaining holds the default value on creation for the "offer_cycles_remaining" field.
+	DefaultOfferCyclesRemaining int
 	// DefaultVersion holds the default value on creation for the "version" field.
 	DefaultVersion int64
 	// DefaultUpdatedAt holds the default value on creation for the "updated_at" field.
@@ -349,6 +364,7 @@ const (
 	DiscountKindNone   DiscountKind = "none"
 	DiscountKindYearly DiscountKind = "yearly"
 	DiscountKindBundle DiscountKind = "bundle"
+	DiscountKindOffer  DiscountKind = "offer"
 )
 
 func (dk DiscountKind) String() string {
@@ -358,7 +374,7 @@ func (dk DiscountKind) String() string {
 // DiscountKindValidator is a validator for the "discount_kind" field enum values. It is called by the builders before save.
 func DiscountKindValidator(dk DiscountKind) error {
 	switch dk {
-	case DiscountKindNone, DiscountKindYearly, DiscountKindBundle:
+	case DiscountKindNone, DiscountKindYearly, DiscountKindBundle, DiscountKindOffer:
 		return nil
 	default:
 		return fmt.Errorf("subscription: invalid enum value for discount_kind field: %q", dk)
@@ -586,6 +602,16 @@ func ByCardExpiryNoticedAt(opts ...sql.OrderTermOption) OrderOption {
 // ByEndedReason orders the results by the ended_reason field.
 func ByEndedReason(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldEndedReason, opts...).ToFunc()
+}
+
+// ByOfferClaimID orders the results by the offer_claim_id field.
+func ByOfferClaimID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldOfferClaimID, opts...).ToFunc()
+}
+
+// ByOfferCyclesRemaining orders the results by the offer_cycles_remaining field.
+func ByOfferCyclesRemaining(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldOfferCyclesRemaining, opts...).ToFunc()
 }
 
 // ByVersion orders the results by the version field.

@@ -7,10 +7,11 @@ type PricingRules struct {
 }
 
 type PriceQuote struct {
-	ListAmountMinor int64  `json:"listAmountMinor"`
-	AmountMinor     int64  `json:"amountMinor"`
-	DiscountKind    string `json:"discountKind"`
-	DiscountBps     int64  `json:"discountBps"`
+	ListAmountMinor    int64  `json:"listAmountMinor"`
+	AmountMinor        int64  `json:"amountMinor"`
+	DiscountKind       string `json:"discountKind"`
+	DiscountBps        int64  `json:"discountBps"`
+	OfferDiscountMinor int64  `json:"offerDiscountMinor,omitempty"`
 }
 
 type PricingInput struct {

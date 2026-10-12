@@ -16,6 +16,9 @@ import (
 	"zudomart/modules/subscriptions/src/generated/ent/planprice"
 	"zudomart/modules/subscriptions/src/generated/ent/providerplan"
 	"zudomart/modules/subscriptions/src/generated/ent/subscription"
+	"zudomart/modules/subscriptions/src/generated/ent/subscriptionofferclaim"
+	"zudomart/modules/subscriptions/src/generated/ent/subscriptionofferlink"
+	"zudomart/modules/subscriptions/src/generated/ent/subscriptionoffersend"
 	"zudomart/modules/subscriptions/src/generated/ent/subscriptionperiod"
 	"zudomart/modules/subscriptions/src/generated/ent/subscriptionreminder"
 	"zudomart/modules/subscriptions/src/generated/ent/trialclaim"
@@ -91,6 +94,9 @@ func checkColumn(t, c string) error {
 			planprice.Table:                 planprice.ValidColumn,
 			providerplan.Table:              providerplan.ValidColumn,
 			subscription.Table:              subscription.ValidColumn,
+			subscriptionofferclaim.Table:    subscriptionofferclaim.ValidColumn,
+			subscriptionofferlink.Table:     subscriptionofferlink.ValidColumn,
+			subscriptionoffersend.Table:     subscriptionoffersend.ValidColumn,
 			subscriptionperiod.Table:        subscriptionperiod.ValidColumn,
 			subscriptionreminder.Table:      subscriptionreminder.ValidColumn,
 			trialclaim.Table:                trialclaim.ValidColumn,

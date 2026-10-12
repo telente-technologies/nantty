@@ -250,6 +250,16 @@ func EndedReason(v string) predicate.Subscription {
 	return predicate.Subscription(sql.FieldEQ(FieldEndedReason, v))
 }
 
+// OfferClaimID applies equality check predicate on the "offer_claim_id" field. It's identical to OfferClaimIDEQ.
+func OfferClaimID(v string) predicate.Subscription {
+	return predicate.Subscription(sql.FieldEQ(FieldOfferClaimID, v))
+}
+
+// OfferCyclesRemaining applies equality check predicate on the "offer_cycles_remaining" field. It's identical to OfferCyclesRemainingEQ.
+func OfferCyclesRemaining(v int) predicate.Subscription {
+	return predicate.Subscription(sql.FieldEQ(FieldOfferCyclesRemaining, v))
+}
+
 // Version applies equality check predicate on the "version" field. It's identical to VersionEQ.
 func Version(v int64) predicate.Subscription {
 	return predicate.Subscription(sql.FieldEQ(FieldVersion, v))
@@ -2243,6 +2253,121 @@ func EndedReasonEqualFold(v string) predicate.Subscription {
 // EndedReasonContainsFold applies the ContainsFold predicate on the "ended_reason" field.
 func EndedReasonContainsFold(v string) predicate.Subscription {
 	return predicate.Subscription(sql.FieldContainsFold(FieldEndedReason, v))
+}
+
+// OfferClaimIDEQ applies the EQ predicate on the "offer_claim_id" field.
+func OfferClaimIDEQ(v string) predicate.Subscription {
+	return predicate.Subscription(sql.FieldEQ(FieldOfferClaimID, v))
+}
+
+// OfferClaimIDNEQ applies the NEQ predicate on the "offer_claim_id" field.
+func OfferClaimIDNEQ(v string) predicate.Subscription {
+	return predicate.Subscription(sql.FieldNEQ(FieldOfferClaimID, v))
+}
+
+// OfferClaimIDIn applies the In predicate on the "offer_claim_id" field.
+func OfferClaimIDIn(vs ...string) predicate.Subscription {
+	return predicate.Subscription(sql.FieldIn(FieldOfferClaimID, vs...))
+}
+
+// OfferClaimIDNotIn applies the NotIn predicate on the "offer_claim_id" field.
+func OfferClaimIDNotIn(vs ...string) predicate.Subscription {
+	return predicate.Subscription(sql.FieldNotIn(FieldOfferClaimID, vs...))
+}
+
+// OfferClaimIDGT applies the GT predicate on the "offer_claim_id" field.
+func OfferClaimIDGT(v string) predicate.Subscription {
+	return predicate.Subscription(sql.FieldGT(FieldOfferClaimID, v))
+}
+
+// OfferClaimIDGTE applies the GTE predicate on the "offer_claim_id" field.
+func OfferClaimIDGTE(v string) predicate.Subscription {
+	return predicate.Subscription(sql.FieldGTE(FieldOfferClaimID, v))
+}
+
+// OfferClaimIDLT applies the LT predicate on the "offer_claim_id" field.
+func OfferClaimIDLT(v string) predicate.Subscription {
+	return predicate.Subscription(sql.FieldLT(FieldOfferClaimID, v))
+}
+
+// OfferClaimIDLTE applies the LTE predicate on the "offer_claim_id" field.
+func OfferClaimIDLTE(v string) predicate.Subscription {
+	return predicate.Subscription(sql.FieldLTE(FieldOfferClaimID, v))
+}
+
+// OfferClaimIDContains applies the Contains predicate on the "offer_claim_id" field.
+func OfferClaimIDContains(v string) predicate.Subscription {
+	return predicate.Subscription(sql.FieldContains(FieldOfferClaimID, v))
+}
+
+// OfferClaimIDHasPrefix applies the HasPrefix predicate on the "offer_claim_id" field.
+func OfferClaimIDHasPrefix(v string) predicate.Subscription {
+	return predicate.Subscription(sql.FieldHasPrefix(FieldOfferClaimID, v))
+}
+
+// OfferClaimIDHasSuffix applies the HasSuffix predicate on the "offer_claim_id" field.
+func OfferClaimIDHasSuffix(v string) predicate.Subscription {
+	return predicate.Subscription(sql.FieldHasSuffix(FieldOfferClaimID, v))
+}
+
+// OfferClaimIDEqualFold applies the EqualFold predicate on the "offer_claim_id" field.
+func OfferClaimIDEqualFold(v string) predicate.Subscription {
+	return predicate.Subscription(sql.FieldEqualFold(FieldOfferClaimID, v))
+}
+
+// OfferClaimIDContainsFold applies the ContainsFold predicate on the "offer_claim_id" field.
+func OfferClaimIDContainsFold(v string) predicate.Subscription {
+	return predicate.Subscription(sql.FieldContainsFold(FieldOfferClaimID, v))
+}
+
+// OfferTermsIsNil applies the IsNil predicate on the "offer_terms" field.
+func OfferTermsIsNil() predicate.Subscription {
+	return predicate.Subscription(sql.FieldIsNull(FieldOfferTerms))
+}
+
+// OfferTermsNotNil applies the NotNil predicate on the "offer_terms" field.
+func OfferTermsNotNil() predicate.Subscription {
+	return predicate.Subscription(sql.FieldNotNull(FieldOfferTerms))
+}
+
+// OfferCyclesRemainingEQ applies the EQ predicate on the "offer_cycles_remaining" field.
+func OfferCyclesRemainingEQ(v int) predicate.Subscription {
+	return predicate.Subscription(sql.FieldEQ(FieldOfferCyclesRemaining, v))
+}
+
+// OfferCyclesRemainingNEQ applies the NEQ predicate on the "offer_cycles_remaining" field.
+func OfferCyclesRemainingNEQ(v int) predicate.Subscription {
+	return predicate.Subscription(sql.FieldNEQ(FieldOfferCyclesRemaining, v))
+}
+
+// OfferCyclesRemainingIn applies the In predicate on the "offer_cycles_remaining" field.
+func OfferCyclesRemainingIn(vs ...int) predicate.Subscription {
+	return predicate.Subscription(sql.FieldIn(FieldOfferCyclesRemaining, vs...))
+}
+
+// OfferCyclesRemainingNotIn applies the NotIn predicate on the "offer_cycles_remaining" field.
+func OfferCyclesRemainingNotIn(vs ...int) predicate.Subscription {
+	return predicate.Subscription(sql.FieldNotIn(FieldOfferCyclesRemaining, vs...))
+}
+
+// OfferCyclesRemainingGT applies the GT predicate on the "offer_cycles_remaining" field.
+func OfferCyclesRemainingGT(v int) predicate.Subscription {
+	return predicate.Subscription(sql.FieldGT(FieldOfferCyclesRemaining, v))
+}
+
+// OfferCyclesRemainingGTE applies the GTE predicate on the "offer_cycles_remaining" field.
+func OfferCyclesRemainingGTE(v int) predicate.Subscription {
+	return predicate.Subscription(sql.FieldGTE(FieldOfferCyclesRemaining, v))
+}
+
+// OfferCyclesRemainingLT applies the LT predicate on the "offer_cycles_remaining" field.
+func OfferCyclesRemainingLT(v int) predicate.Subscription {
+	return predicate.Subscription(sql.FieldLT(FieldOfferCyclesRemaining, v))
+}
+
+// OfferCyclesRemainingLTE applies the LTE predicate on the "offer_cycles_remaining" field.
+func OfferCyclesRemainingLTE(v int) predicate.Subscription {
+	return predicate.Subscription(sql.FieldLTE(FieldOfferCyclesRemaining, v))
 }
 
 // VersionEQ applies the EQ predicate on the "version" field.

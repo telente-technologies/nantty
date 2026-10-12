@@ -17,6 +17,9 @@ import (
 	"zudomart/modules/subscriptions/src/generated/ent/predicate"
 	"zudomart/modules/subscriptions/src/generated/ent/providerplan"
 	"zudomart/modules/subscriptions/src/generated/ent/subscription"
+	"zudomart/modules/subscriptions/src/generated/ent/subscriptionofferclaim"
+	"zudomart/modules/subscriptions/src/generated/ent/subscriptionofferlink"
+	"zudomart/modules/subscriptions/src/generated/ent/subscriptionoffersend"
 	"zudomart/modules/subscriptions/src/generated/ent/subscriptionperiod"
 	"zudomart/modules/subscriptions/src/generated/ent/subscriptionreminder"
 	"zudomart/modules/subscriptions/src/generated/ent/trialclaim"
@@ -44,6 +47,9 @@ const (
 	TypePlanPrice                 = "PlanPrice"
 	TypeProviderPlan              = "ProviderPlan"
 	TypeSubscription              = "Subscription"
+	TypeSubscriptionOfferClaim    = "SubscriptionOfferClaim"
+	TypeSubscriptionOfferLink     = "SubscriptionOfferLink"
+	TypeSubscriptionOfferSend     = "SubscriptionOfferSend"
 	TypeSubscriptionPeriod        = "SubscriptionPeriod"
 	TypeSubscriptionReminder      = "SubscriptionReminder"
 	TypeTrialClaim                = "TrialClaim"
@@ -7279,6 +7285,10 @@ type SubscriptionMutation struct {
 	addcard_expiry_year           *int
 	card_expiry_noticed_at        *time.Time
 	ended_reason                  *string
+	offer_claim_id                *string
+	offer_terms                   *models.OfferTerms
+	offer_cycles_remaining        *int
+	addoffer_cycles_remaining     *int
 	version                       *int64
 	addversion                    *int64
 	updated_at                    *time.Time
@@ -9257,6 +9267,147 @@ func (m *SubscriptionMutation) ResetEndedReason() {
 	m.ended_reason = nil
 }
 
+// SetOfferClaimID sets the "offer_claim_id" field.
+func (m *SubscriptionMutation) SetOfferClaimID(s string) {
+	m.offer_claim_id = &s
+}
+
+// OfferClaimID returns the value of the "offer_claim_id" field in the mutation.
+func (m *SubscriptionMutation) OfferClaimID() (r string, exists bool) {
+	v := m.offer_claim_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldOfferClaimID returns the old "offer_claim_id" field's value of the Subscription entity.
+// If the Subscription object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SubscriptionMutation) OldOfferClaimID(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldOfferClaimID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldOfferClaimID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldOfferClaimID: %w", err)
+	}
+	return oldValue.OfferClaimID, nil
+}
+
+// ResetOfferClaimID resets all changes to the "offer_claim_id" field.
+func (m *SubscriptionMutation) ResetOfferClaimID() {
+	m.offer_claim_id = nil
+}
+
+// SetOfferTerms sets the "offer_terms" field.
+func (m *SubscriptionMutation) SetOfferTerms(mt models.OfferTerms) {
+	m.offer_terms = &mt
+}
+
+// OfferTerms returns the value of the "offer_terms" field in the mutation.
+func (m *SubscriptionMutation) OfferTerms() (r models.OfferTerms, exists bool) {
+	v := m.offer_terms
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldOfferTerms returns the old "offer_terms" field's value of the Subscription entity.
+// If the Subscription object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SubscriptionMutation) OldOfferTerms(ctx context.Context) (v models.OfferTerms, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldOfferTerms is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldOfferTerms requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldOfferTerms: %w", err)
+	}
+	return oldValue.OfferTerms, nil
+}
+
+// ClearOfferTerms clears the value of the "offer_terms" field.
+func (m *SubscriptionMutation) ClearOfferTerms() {
+	m.offer_terms = nil
+	m.clearedFields[subscription.FieldOfferTerms] = struct{}{}
+}
+
+// OfferTermsCleared returns if the "offer_terms" field was cleared in this mutation.
+func (m *SubscriptionMutation) OfferTermsCleared() bool {
+	_, ok := m.clearedFields[subscription.FieldOfferTerms]
+	return ok
+}
+
+// ResetOfferTerms resets all changes to the "offer_terms" field.
+func (m *SubscriptionMutation) ResetOfferTerms() {
+	m.offer_terms = nil
+	delete(m.clearedFields, subscription.FieldOfferTerms)
+}
+
+// SetOfferCyclesRemaining sets the "offer_cycles_remaining" field.
+func (m *SubscriptionMutation) SetOfferCyclesRemaining(i int) {
+	m.offer_cycles_remaining = &i
+	m.addoffer_cycles_remaining = nil
+}
+
+// OfferCyclesRemaining returns the value of the "offer_cycles_remaining" field in the mutation.
+func (m *SubscriptionMutation) OfferCyclesRemaining() (r int, exists bool) {
+	v := m.offer_cycles_remaining
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldOfferCyclesRemaining returns the old "offer_cycles_remaining" field's value of the Subscription entity.
+// If the Subscription object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SubscriptionMutation) OldOfferCyclesRemaining(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldOfferCyclesRemaining is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldOfferCyclesRemaining requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldOfferCyclesRemaining: %w", err)
+	}
+	return oldValue.OfferCyclesRemaining, nil
+}
+
+// AddOfferCyclesRemaining adds i to the "offer_cycles_remaining" field.
+func (m *SubscriptionMutation) AddOfferCyclesRemaining(i int) {
+	if m.addoffer_cycles_remaining != nil {
+		*m.addoffer_cycles_remaining += i
+	} else {
+		m.addoffer_cycles_remaining = &i
+	}
+}
+
+// AddedOfferCyclesRemaining returns the value that was added to the "offer_cycles_remaining" field in this mutation.
+func (m *SubscriptionMutation) AddedOfferCyclesRemaining() (r int, exists bool) {
+	v := m.addoffer_cycles_remaining
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetOfferCyclesRemaining resets all changes to the "offer_cycles_remaining" field.
+func (m *SubscriptionMutation) ResetOfferCyclesRemaining() {
+	m.offer_cycles_remaining = nil
+	m.addoffer_cycles_remaining = nil
+}
+
 // SetVersion sets the "version" field.
 func (m *SubscriptionMutation) SetVersion(i int64) {
 	m.version = &i
@@ -9383,7 +9534,7 @@ func (m *SubscriptionMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *SubscriptionMutation) Fields() []string {
-	fields := make([]string, 0, 45)
+	fields := make([]string, 0, 48)
 	if m.created_at != nil {
 		fields = append(fields, subscription.FieldCreatedAt)
 	}
@@ -9513,6 +9664,15 @@ func (m *SubscriptionMutation) Fields() []string {
 	if m.ended_reason != nil {
 		fields = append(fields, subscription.FieldEndedReason)
 	}
+	if m.offer_claim_id != nil {
+		fields = append(fields, subscription.FieldOfferClaimID)
+	}
+	if m.offer_terms != nil {
+		fields = append(fields, subscription.FieldOfferTerms)
+	}
+	if m.offer_cycles_remaining != nil {
+		fields = append(fields, subscription.FieldOfferCyclesRemaining)
+	}
 	if m.version != nil {
 		fields = append(fields, subscription.FieldVersion)
 	}
@@ -9613,6 +9773,12 @@ func (m *SubscriptionMutation) Field(name string) (ent.Value, bool) {
 		return m.CardExpiryNoticedAt()
 	case subscription.FieldEndedReason:
 		return m.EndedReason()
+	case subscription.FieldOfferClaimID:
+		return m.OfferClaimID()
+	case subscription.FieldOfferTerms:
+		return m.OfferTerms()
+	case subscription.FieldOfferCyclesRemaining:
+		return m.OfferCyclesRemaining()
 	case subscription.FieldVersion:
 		return m.Version()
 	case subscription.FieldUpdatedAt:
@@ -9712,6 +9878,12 @@ func (m *SubscriptionMutation) OldField(ctx context.Context, name string) (ent.V
 		return m.OldCardExpiryNoticedAt(ctx)
 	case subscription.FieldEndedReason:
 		return m.OldEndedReason(ctx)
+	case subscription.FieldOfferClaimID:
+		return m.OldOfferClaimID(ctx)
+	case subscription.FieldOfferTerms:
+		return m.OldOfferTerms(ctx)
+	case subscription.FieldOfferCyclesRemaining:
+		return m.OldOfferCyclesRemaining(ctx)
 	case subscription.FieldVersion:
 		return m.OldVersion(ctx)
 	case subscription.FieldUpdatedAt:
@@ -10026,6 +10198,27 @@ func (m *SubscriptionMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetEndedReason(v)
 		return nil
+	case subscription.FieldOfferClaimID:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetOfferClaimID(v)
+		return nil
+	case subscription.FieldOfferTerms:
+		v, ok := value.(models.OfferTerms)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetOfferTerms(v)
+		return nil
+	case subscription.FieldOfferCyclesRemaining:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetOfferCyclesRemaining(v)
+		return nil
 	case subscription.FieldVersion:
 		v, ok := value.(int64)
 		if !ok {
@@ -10078,6 +10271,9 @@ func (m *SubscriptionMutation) AddedFields() []string {
 	if m.addcard_expiry_year != nil {
 		fields = append(fields, subscription.FieldCardExpiryYear)
 	}
+	if m.addoffer_cycles_remaining != nil {
+		fields = append(fields, subscription.FieldOfferCyclesRemaining)
+	}
 	if m.addversion != nil {
 		fields = append(fields, subscription.FieldVersion)
 	}
@@ -10109,6 +10305,8 @@ func (m *SubscriptionMutation) AddedField(name string) (ent.Value, bool) {
 		return m.AddedCardExpiryMonth()
 	case subscription.FieldCardExpiryYear:
 		return m.AddedCardExpiryYear()
+	case subscription.FieldOfferCyclesRemaining:
+		return m.AddedOfferCyclesRemaining()
 	case subscription.FieldVersion:
 		return m.AddedVersion()
 	}
@@ -10190,6 +10388,13 @@ func (m *SubscriptionMutation) AddField(name string, value ent.Value) error {
 		}
 		m.AddCardExpiryYear(v)
 		return nil
+	case subscription.FieldOfferCyclesRemaining:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddOfferCyclesRemaining(v)
+		return nil
 	case subscription.FieldVersion:
 		v, ok := value.(int64)
 		if !ok {
@@ -10232,6 +10437,9 @@ func (m *SubscriptionMutation) ClearedFields() []string {
 	if m.FieldCleared(subscription.FieldCardExpiryNoticedAt) {
 		fields = append(fields, subscription.FieldCardExpiryNoticedAt)
 	}
+	if m.FieldCleared(subscription.FieldOfferTerms) {
+		fields = append(fields, subscription.FieldOfferTerms)
+	}
 	return fields
 }
 
@@ -10272,6 +10480,9 @@ func (m *SubscriptionMutation) ClearField(name string) error {
 		return nil
 	case subscription.FieldCardExpiryNoticedAt:
 		m.ClearCardExpiryNoticedAt()
+		return nil
+	case subscription.FieldOfferTerms:
+		m.ClearOfferTerms()
 		return nil
 	}
 	return fmt.Errorf("unknown Subscription nullable field %s", name)
@@ -10410,6 +10621,15 @@ func (m *SubscriptionMutation) ResetField(name string) error {
 	case subscription.FieldEndedReason:
 		m.ResetEndedReason()
 		return nil
+	case subscription.FieldOfferClaimID:
+		m.ResetOfferClaimID()
+		return nil
+	case subscription.FieldOfferTerms:
+		m.ResetOfferTerms()
+		return nil
+	case subscription.FieldOfferCyclesRemaining:
+		m.ResetOfferCyclesRemaining()
+		return nil
 	case subscription.FieldVersion:
 		m.ResetVersion()
 		return nil
@@ -10466,6 +10686,2975 @@ func (m *SubscriptionMutation) ClearEdge(name string) error {
 // It returns an error if the edge is not defined in the schema.
 func (m *SubscriptionMutation) ResetEdge(name string) error {
 	return fmt.Errorf("unknown Subscription edge %s", name)
+}
+
+// SubscriptionOfferClaimMutation represents an operation that mutates the SubscriptionOfferClaim nodes in the graph.
+type SubscriptionOfferClaimMutation struct {
+	config
+	op              Op
+	typ             string
+	id              *uuid.UUID
+	created_at      *time.Time
+	link_id         *string
+	owner_user_id   *string
+	profile_id      *string
+	status          *subscriptionofferclaim.Status
+	subscription_id *string
+	reserved_until  *time.Time
+	redeemed_at     *time.Time
+	released_at     *time.Time
+	updated_at      *time.Time
+	clearedFields   map[string]struct{}
+	done            bool
+	oldValue        func(context.Context) (*SubscriptionOfferClaim, error)
+	predicates      []predicate.SubscriptionOfferClaim
+}
+
+var _ ent.Mutation = (*SubscriptionOfferClaimMutation)(nil)
+
+// subscriptionofferclaimOption allows management of the mutation configuration using functional options.
+type subscriptionofferclaimOption func(*SubscriptionOfferClaimMutation)
+
+// newSubscriptionOfferClaimMutation creates new mutation for the SubscriptionOfferClaim entity.
+func newSubscriptionOfferClaimMutation(c config, op Op, opts ...subscriptionofferclaimOption) *SubscriptionOfferClaimMutation {
+	m := &SubscriptionOfferClaimMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeSubscriptionOfferClaim,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withSubscriptionOfferClaimID sets the ID field of the mutation.
+func withSubscriptionOfferClaimID(id uuid.UUID) subscriptionofferclaimOption {
+	return func(m *SubscriptionOfferClaimMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *SubscriptionOfferClaim
+		)
+		m.oldValue = func(ctx context.Context) (*SubscriptionOfferClaim, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().SubscriptionOfferClaim.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withSubscriptionOfferClaim sets the old SubscriptionOfferClaim of the mutation.
+func withSubscriptionOfferClaim(node *SubscriptionOfferClaim) subscriptionofferclaimOption {
+	return func(m *SubscriptionOfferClaimMutation) {
+		m.oldValue = func(context.Context) (*SubscriptionOfferClaim, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m SubscriptionOfferClaimMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m SubscriptionOfferClaimMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of SubscriptionOfferClaim entities.
+func (m *SubscriptionOfferClaimMutation) SetID(id uuid.UUID) {
+	m.id = &id
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *SubscriptionOfferClaimMutation) ID() (id uuid.UUID, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *SubscriptionOfferClaimMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []uuid.UUID{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().SubscriptionOfferClaim.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (m *SubscriptionOfferClaimMutation) SetCreatedAt(t time.Time) {
+	m.created_at = &t
+}
+
+// CreatedAt returns the value of the "created_at" field in the mutation.
+func (m *SubscriptionOfferClaimMutation) CreatedAt() (r time.Time, exists bool) {
+	v := m.created_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreatedAt returns the old "created_at" field's value of the SubscriptionOfferClaim entity.
+// If the SubscriptionOfferClaim object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SubscriptionOfferClaimMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
+	}
+	return oldValue.CreatedAt, nil
+}
+
+// ResetCreatedAt resets all changes to the "created_at" field.
+func (m *SubscriptionOfferClaimMutation) ResetCreatedAt() {
+	m.created_at = nil
+}
+
+// SetLinkID sets the "link_id" field.
+func (m *SubscriptionOfferClaimMutation) SetLinkID(s string) {
+	m.link_id = &s
+}
+
+// LinkID returns the value of the "link_id" field in the mutation.
+func (m *SubscriptionOfferClaimMutation) LinkID() (r string, exists bool) {
+	v := m.link_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldLinkID returns the old "link_id" field's value of the SubscriptionOfferClaim entity.
+// If the SubscriptionOfferClaim object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SubscriptionOfferClaimMutation) OldLinkID(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldLinkID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldLinkID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldLinkID: %w", err)
+	}
+	return oldValue.LinkID, nil
+}
+
+// ResetLinkID resets all changes to the "link_id" field.
+func (m *SubscriptionOfferClaimMutation) ResetLinkID() {
+	m.link_id = nil
+}
+
+// SetOwnerUserID sets the "owner_user_id" field.
+func (m *SubscriptionOfferClaimMutation) SetOwnerUserID(s string) {
+	m.owner_user_id = &s
+}
+
+// OwnerUserID returns the value of the "owner_user_id" field in the mutation.
+func (m *SubscriptionOfferClaimMutation) OwnerUserID() (r string, exists bool) {
+	v := m.owner_user_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldOwnerUserID returns the old "owner_user_id" field's value of the SubscriptionOfferClaim entity.
+// If the SubscriptionOfferClaim object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SubscriptionOfferClaimMutation) OldOwnerUserID(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldOwnerUserID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldOwnerUserID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldOwnerUserID: %w", err)
+	}
+	return oldValue.OwnerUserID, nil
+}
+
+// ResetOwnerUserID resets all changes to the "owner_user_id" field.
+func (m *SubscriptionOfferClaimMutation) ResetOwnerUserID() {
+	m.owner_user_id = nil
+}
+
+// SetProfileID sets the "profile_id" field.
+func (m *SubscriptionOfferClaimMutation) SetProfileID(s string) {
+	m.profile_id = &s
+}
+
+// ProfileID returns the value of the "profile_id" field in the mutation.
+func (m *SubscriptionOfferClaimMutation) ProfileID() (r string, exists bool) {
+	v := m.profile_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldProfileID returns the old "profile_id" field's value of the SubscriptionOfferClaim entity.
+// If the SubscriptionOfferClaim object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SubscriptionOfferClaimMutation) OldProfileID(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldProfileID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldProfileID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldProfileID: %w", err)
+	}
+	return oldValue.ProfileID, nil
+}
+
+// ResetProfileID resets all changes to the "profile_id" field.
+func (m *SubscriptionOfferClaimMutation) ResetProfileID() {
+	m.profile_id = nil
+}
+
+// SetStatus sets the "status" field.
+func (m *SubscriptionOfferClaimMutation) SetStatus(s subscriptionofferclaim.Status) {
+	m.status = &s
+}
+
+// Status returns the value of the "status" field in the mutation.
+func (m *SubscriptionOfferClaimMutation) Status() (r subscriptionofferclaim.Status, exists bool) {
+	v := m.status
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldStatus returns the old "status" field's value of the SubscriptionOfferClaim entity.
+// If the SubscriptionOfferClaim object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SubscriptionOfferClaimMutation) OldStatus(ctx context.Context) (v subscriptionofferclaim.Status, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldStatus is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldStatus requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldStatus: %w", err)
+	}
+	return oldValue.Status, nil
+}
+
+// ResetStatus resets all changes to the "status" field.
+func (m *SubscriptionOfferClaimMutation) ResetStatus() {
+	m.status = nil
+}
+
+// SetSubscriptionID sets the "subscription_id" field.
+func (m *SubscriptionOfferClaimMutation) SetSubscriptionID(s string) {
+	m.subscription_id = &s
+}
+
+// SubscriptionID returns the value of the "subscription_id" field in the mutation.
+func (m *SubscriptionOfferClaimMutation) SubscriptionID() (r string, exists bool) {
+	v := m.subscription_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSubscriptionID returns the old "subscription_id" field's value of the SubscriptionOfferClaim entity.
+// If the SubscriptionOfferClaim object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SubscriptionOfferClaimMutation) OldSubscriptionID(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSubscriptionID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSubscriptionID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSubscriptionID: %w", err)
+	}
+	return oldValue.SubscriptionID, nil
+}
+
+// ResetSubscriptionID resets all changes to the "subscription_id" field.
+func (m *SubscriptionOfferClaimMutation) ResetSubscriptionID() {
+	m.subscription_id = nil
+}
+
+// SetReservedUntil sets the "reserved_until" field.
+func (m *SubscriptionOfferClaimMutation) SetReservedUntil(t time.Time) {
+	m.reserved_until = &t
+}
+
+// ReservedUntil returns the value of the "reserved_until" field in the mutation.
+func (m *SubscriptionOfferClaimMutation) ReservedUntil() (r time.Time, exists bool) {
+	v := m.reserved_until
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldReservedUntil returns the old "reserved_until" field's value of the SubscriptionOfferClaim entity.
+// If the SubscriptionOfferClaim object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SubscriptionOfferClaimMutation) OldReservedUntil(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldReservedUntil is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldReservedUntil requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldReservedUntil: %w", err)
+	}
+	return oldValue.ReservedUntil, nil
+}
+
+// ResetReservedUntil resets all changes to the "reserved_until" field.
+func (m *SubscriptionOfferClaimMutation) ResetReservedUntil() {
+	m.reserved_until = nil
+}
+
+// SetRedeemedAt sets the "redeemed_at" field.
+func (m *SubscriptionOfferClaimMutation) SetRedeemedAt(t time.Time) {
+	m.redeemed_at = &t
+}
+
+// RedeemedAt returns the value of the "redeemed_at" field in the mutation.
+func (m *SubscriptionOfferClaimMutation) RedeemedAt() (r time.Time, exists bool) {
+	v := m.redeemed_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldRedeemedAt returns the old "redeemed_at" field's value of the SubscriptionOfferClaim entity.
+// If the SubscriptionOfferClaim object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SubscriptionOfferClaimMutation) OldRedeemedAt(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldRedeemedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldRedeemedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldRedeemedAt: %w", err)
+	}
+	return oldValue.RedeemedAt, nil
+}
+
+// ClearRedeemedAt clears the value of the "redeemed_at" field.
+func (m *SubscriptionOfferClaimMutation) ClearRedeemedAt() {
+	m.redeemed_at = nil
+	m.clearedFields[subscriptionofferclaim.FieldRedeemedAt] = struct{}{}
+}
+
+// RedeemedAtCleared returns if the "redeemed_at" field was cleared in this mutation.
+func (m *SubscriptionOfferClaimMutation) RedeemedAtCleared() bool {
+	_, ok := m.clearedFields[subscriptionofferclaim.FieldRedeemedAt]
+	return ok
+}
+
+// ResetRedeemedAt resets all changes to the "redeemed_at" field.
+func (m *SubscriptionOfferClaimMutation) ResetRedeemedAt() {
+	m.redeemed_at = nil
+	delete(m.clearedFields, subscriptionofferclaim.FieldRedeemedAt)
+}
+
+// SetReleasedAt sets the "released_at" field.
+func (m *SubscriptionOfferClaimMutation) SetReleasedAt(t time.Time) {
+	m.released_at = &t
+}
+
+// ReleasedAt returns the value of the "released_at" field in the mutation.
+func (m *SubscriptionOfferClaimMutation) ReleasedAt() (r time.Time, exists bool) {
+	v := m.released_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldReleasedAt returns the old "released_at" field's value of the SubscriptionOfferClaim entity.
+// If the SubscriptionOfferClaim object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SubscriptionOfferClaimMutation) OldReleasedAt(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldReleasedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldReleasedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldReleasedAt: %w", err)
+	}
+	return oldValue.ReleasedAt, nil
+}
+
+// ClearReleasedAt clears the value of the "released_at" field.
+func (m *SubscriptionOfferClaimMutation) ClearReleasedAt() {
+	m.released_at = nil
+	m.clearedFields[subscriptionofferclaim.FieldReleasedAt] = struct{}{}
+}
+
+// ReleasedAtCleared returns if the "released_at" field was cleared in this mutation.
+func (m *SubscriptionOfferClaimMutation) ReleasedAtCleared() bool {
+	_, ok := m.clearedFields[subscriptionofferclaim.FieldReleasedAt]
+	return ok
+}
+
+// ResetReleasedAt resets all changes to the "released_at" field.
+func (m *SubscriptionOfferClaimMutation) ResetReleasedAt() {
+	m.released_at = nil
+	delete(m.clearedFields, subscriptionofferclaim.FieldReleasedAt)
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (m *SubscriptionOfferClaimMutation) SetUpdatedAt(t time.Time) {
+	m.updated_at = &t
+}
+
+// UpdatedAt returns the value of the "updated_at" field in the mutation.
+func (m *SubscriptionOfferClaimMutation) UpdatedAt() (r time.Time, exists bool) {
+	v := m.updated_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUpdatedAt returns the old "updated_at" field's value of the SubscriptionOfferClaim entity.
+// If the SubscriptionOfferClaim object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SubscriptionOfferClaimMutation) OldUpdatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUpdatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUpdatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUpdatedAt: %w", err)
+	}
+	return oldValue.UpdatedAt, nil
+}
+
+// ResetUpdatedAt resets all changes to the "updated_at" field.
+func (m *SubscriptionOfferClaimMutation) ResetUpdatedAt() {
+	m.updated_at = nil
+}
+
+// Where appends a list predicates to the SubscriptionOfferClaimMutation builder.
+func (m *SubscriptionOfferClaimMutation) Where(ps ...predicate.SubscriptionOfferClaim) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the SubscriptionOfferClaimMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *SubscriptionOfferClaimMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.SubscriptionOfferClaim, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *SubscriptionOfferClaimMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *SubscriptionOfferClaimMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (SubscriptionOfferClaim).
+func (m *SubscriptionOfferClaimMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *SubscriptionOfferClaimMutation) Fields() []string {
+	fields := make([]string, 0, 10)
+	if m.created_at != nil {
+		fields = append(fields, subscriptionofferclaim.FieldCreatedAt)
+	}
+	if m.link_id != nil {
+		fields = append(fields, subscriptionofferclaim.FieldLinkID)
+	}
+	if m.owner_user_id != nil {
+		fields = append(fields, subscriptionofferclaim.FieldOwnerUserID)
+	}
+	if m.profile_id != nil {
+		fields = append(fields, subscriptionofferclaim.FieldProfileID)
+	}
+	if m.status != nil {
+		fields = append(fields, subscriptionofferclaim.FieldStatus)
+	}
+	if m.subscription_id != nil {
+		fields = append(fields, subscriptionofferclaim.FieldSubscriptionID)
+	}
+	if m.reserved_until != nil {
+		fields = append(fields, subscriptionofferclaim.FieldReservedUntil)
+	}
+	if m.redeemed_at != nil {
+		fields = append(fields, subscriptionofferclaim.FieldRedeemedAt)
+	}
+	if m.released_at != nil {
+		fields = append(fields, subscriptionofferclaim.FieldReleasedAt)
+	}
+	if m.updated_at != nil {
+		fields = append(fields, subscriptionofferclaim.FieldUpdatedAt)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *SubscriptionOfferClaimMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case subscriptionofferclaim.FieldCreatedAt:
+		return m.CreatedAt()
+	case subscriptionofferclaim.FieldLinkID:
+		return m.LinkID()
+	case subscriptionofferclaim.FieldOwnerUserID:
+		return m.OwnerUserID()
+	case subscriptionofferclaim.FieldProfileID:
+		return m.ProfileID()
+	case subscriptionofferclaim.FieldStatus:
+		return m.Status()
+	case subscriptionofferclaim.FieldSubscriptionID:
+		return m.SubscriptionID()
+	case subscriptionofferclaim.FieldReservedUntil:
+		return m.ReservedUntil()
+	case subscriptionofferclaim.FieldRedeemedAt:
+		return m.RedeemedAt()
+	case subscriptionofferclaim.FieldReleasedAt:
+		return m.ReleasedAt()
+	case subscriptionofferclaim.FieldUpdatedAt:
+		return m.UpdatedAt()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *SubscriptionOfferClaimMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case subscriptionofferclaim.FieldCreatedAt:
+		return m.OldCreatedAt(ctx)
+	case subscriptionofferclaim.FieldLinkID:
+		return m.OldLinkID(ctx)
+	case subscriptionofferclaim.FieldOwnerUserID:
+		return m.OldOwnerUserID(ctx)
+	case subscriptionofferclaim.FieldProfileID:
+		return m.OldProfileID(ctx)
+	case subscriptionofferclaim.FieldStatus:
+		return m.OldStatus(ctx)
+	case subscriptionofferclaim.FieldSubscriptionID:
+		return m.OldSubscriptionID(ctx)
+	case subscriptionofferclaim.FieldReservedUntil:
+		return m.OldReservedUntil(ctx)
+	case subscriptionofferclaim.FieldRedeemedAt:
+		return m.OldRedeemedAt(ctx)
+	case subscriptionofferclaim.FieldReleasedAt:
+		return m.OldReleasedAt(ctx)
+	case subscriptionofferclaim.FieldUpdatedAt:
+		return m.OldUpdatedAt(ctx)
+	}
+	return nil, fmt.Errorf("unknown SubscriptionOfferClaim field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *SubscriptionOfferClaimMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case subscriptionofferclaim.FieldCreatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatedAt(v)
+		return nil
+	case subscriptionofferclaim.FieldLinkID:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetLinkID(v)
+		return nil
+	case subscriptionofferclaim.FieldOwnerUserID:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetOwnerUserID(v)
+		return nil
+	case subscriptionofferclaim.FieldProfileID:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetProfileID(v)
+		return nil
+	case subscriptionofferclaim.FieldStatus:
+		v, ok := value.(subscriptionofferclaim.Status)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetStatus(v)
+		return nil
+	case subscriptionofferclaim.FieldSubscriptionID:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSubscriptionID(v)
+		return nil
+	case subscriptionofferclaim.FieldReservedUntil:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetReservedUntil(v)
+		return nil
+	case subscriptionofferclaim.FieldRedeemedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetRedeemedAt(v)
+		return nil
+	case subscriptionofferclaim.FieldReleasedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetReleasedAt(v)
+		return nil
+	case subscriptionofferclaim.FieldUpdatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUpdatedAt(v)
+		return nil
+	}
+	return fmt.Errorf("unknown SubscriptionOfferClaim field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *SubscriptionOfferClaimMutation) AddedFields() []string {
+	return nil
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *SubscriptionOfferClaimMutation) AddedField(name string) (ent.Value, bool) {
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *SubscriptionOfferClaimMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	}
+	return fmt.Errorf("unknown SubscriptionOfferClaim numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *SubscriptionOfferClaimMutation) ClearedFields() []string {
+	var fields []string
+	if m.FieldCleared(subscriptionofferclaim.FieldRedeemedAt) {
+		fields = append(fields, subscriptionofferclaim.FieldRedeemedAt)
+	}
+	if m.FieldCleared(subscriptionofferclaim.FieldReleasedAt) {
+		fields = append(fields, subscriptionofferclaim.FieldReleasedAt)
+	}
+	return fields
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *SubscriptionOfferClaimMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *SubscriptionOfferClaimMutation) ClearField(name string) error {
+	switch name {
+	case subscriptionofferclaim.FieldRedeemedAt:
+		m.ClearRedeemedAt()
+		return nil
+	case subscriptionofferclaim.FieldReleasedAt:
+		m.ClearReleasedAt()
+		return nil
+	}
+	return fmt.Errorf("unknown SubscriptionOfferClaim nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *SubscriptionOfferClaimMutation) ResetField(name string) error {
+	switch name {
+	case subscriptionofferclaim.FieldCreatedAt:
+		m.ResetCreatedAt()
+		return nil
+	case subscriptionofferclaim.FieldLinkID:
+		m.ResetLinkID()
+		return nil
+	case subscriptionofferclaim.FieldOwnerUserID:
+		m.ResetOwnerUserID()
+		return nil
+	case subscriptionofferclaim.FieldProfileID:
+		m.ResetProfileID()
+		return nil
+	case subscriptionofferclaim.FieldStatus:
+		m.ResetStatus()
+		return nil
+	case subscriptionofferclaim.FieldSubscriptionID:
+		m.ResetSubscriptionID()
+		return nil
+	case subscriptionofferclaim.FieldReservedUntil:
+		m.ResetReservedUntil()
+		return nil
+	case subscriptionofferclaim.FieldRedeemedAt:
+		m.ResetRedeemedAt()
+		return nil
+	case subscriptionofferclaim.FieldReleasedAt:
+		m.ResetReleasedAt()
+		return nil
+	case subscriptionofferclaim.FieldUpdatedAt:
+		m.ResetUpdatedAt()
+		return nil
+	}
+	return fmt.Errorf("unknown SubscriptionOfferClaim field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *SubscriptionOfferClaimMutation) AddedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *SubscriptionOfferClaimMutation) AddedIDs(name string) []ent.Value {
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *SubscriptionOfferClaimMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *SubscriptionOfferClaimMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *SubscriptionOfferClaimMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *SubscriptionOfferClaimMutation) EdgeCleared(name string) bool {
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *SubscriptionOfferClaimMutation) ClearEdge(name string) error {
+	return fmt.Errorf("unknown SubscriptionOfferClaim unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *SubscriptionOfferClaimMutation) ResetEdge(name string) error {
+	return fmt.Errorf("unknown SubscriptionOfferClaim edge %s", name)
+}
+
+// SubscriptionOfferLinkMutation represents an operation that mutates the SubscriptionOfferLink nodes in the graph.
+type SubscriptionOfferLinkMutation struct {
+	config
+	op                  Op
+	typ                 string
+	id                  *uuid.UUID
+	created_at          *time.Time
+	token_hash          *string
+	token_salt          *string
+	label               *string
+	plan_codes          *[]string
+	appendplan_codes    []string
+	discount_kind       *subscriptionofferlink.DiscountKind
+	percent_off         *int64
+	addpercent_off      *int64
+	amount_off_minor    *int64
+	addamount_off_minor *int64
+	amount_off_currency *string
+	single_use          *bool
+	max_claims          *int
+	addmax_claims       *int
+	claimed_count       *int
+	addclaimed_count    *int
+	redeemed_count      *int
+	addredeemed_count   *int
+	duration_cycles     *int
+	addduration_cycles  *int
+	expires_at          *time.Time
+	revoked_at          *time.Time
+	revoked_by_staff_id *string
+	created_by_staff_id *string
+	updated_at          *time.Time
+	clearedFields       map[string]struct{}
+	done                bool
+	oldValue            func(context.Context) (*SubscriptionOfferLink, error)
+	predicates          []predicate.SubscriptionOfferLink
+}
+
+var _ ent.Mutation = (*SubscriptionOfferLinkMutation)(nil)
+
+// subscriptionofferlinkOption allows management of the mutation configuration using functional options.
+type subscriptionofferlinkOption func(*SubscriptionOfferLinkMutation)
+
+// newSubscriptionOfferLinkMutation creates new mutation for the SubscriptionOfferLink entity.
+func newSubscriptionOfferLinkMutation(c config, op Op, opts ...subscriptionofferlinkOption) *SubscriptionOfferLinkMutation {
+	m := &SubscriptionOfferLinkMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeSubscriptionOfferLink,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withSubscriptionOfferLinkID sets the ID field of the mutation.
+func withSubscriptionOfferLinkID(id uuid.UUID) subscriptionofferlinkOption {
+	return func(m *SubscriptionOfferLinkMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *SubscriptionOfferLink
+		)
+		m.oldValue = func(ctx context.Context) (*SubscriptionOfferLink, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().SubscriptionOfferLink.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withSubscriptionOfferLink sets the old SubscriptionOfferLink of the mutation.
+func withSubscriptionOfferLink(node *SubscriptionOfferLink) subscriptionofferlinkOption {
+	return func(m *SubscriptionOfferLinkMutation) {
+		m.oldValue = func(context.Context) (*SubscriptionOfferLink, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m SubscriptionOfferLinkMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m SubscriptionOfferLinkMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of SubscriptionOfferLink entities.
+func (m *SubscriptionOfferLinkMutation) SetID(id uuid.UUID) {
+	m.id = &id
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *SubscriptionOfferLinkMutation) ID() (id uuid.UUID, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *SubscriptionOfferLinkMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []uuid.UUID{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().SubscriptionOfferLink.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (m *SubscriptionOfferLinkMutation) SetCreatedAt(t time.Time) {
+	m.created_at = &t
+}
+
+// CreatedAt returns the value of the "created_at" field in the mutation.
+func (m *SubscriptionOfferLinkMutation) CreatedAt() (r time.Time, exists bool) {
+	v := m.created_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreatedAt returns the old "created_at" field's value of the SubscriptionOfferLink entity.
+// If the SubscriptionOfferLink object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SubscriptionOfferLinkMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
+	}
+	return oldValue.CreatedAt, nil
+}
+
+// ResetCreatedAt resets all changes to the "created_at" field.
+func (m *SubscriptionOfferLinkMutation) ResetCreatedAt() {
+	m.created_at = nil
+}
+
+// SetTokenHash sets the "token_hash" field.
+func (m *SubscriptionOfferLinkMutation) SetTokenHash(s string) {
+	m.token_hash = &s
+}
+
+// TokenHash returns the value of the "token_hash" field in the mutation.
+func (m *SubscriptionOfferLinkMutation) TokenHash() (r string, exists bool) {
+	v := m.token_hash
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldTokenHash returns the old "token_hash" field's value of the SubscriptionOfferLink entity.
+// If the SubscriptionOfferLink object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SubscriptionOfferLinkMutation) OldTokenHash(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldTokenHash is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldTokenHash requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldTokenHash: %w", err)
+	}
+	return oldValue.TokenHash, nil
+}
+
+// ResetTokenHash resets all changes to the "token_hash" field.
+func (m *SubscriptionOfferLinkMutation) ResetTokenHash() {
+	m.token_hash = nil
+}
+
+// SetTokenSalt sets the "token_salt" field.
+func (m *SubscriptionOfferLinkMutation) SetTokenSalt(s string) {
+	m.token_salt = &s
+}
+
+// TokenSalt returns the value of the "token_salt" field in the mutation.
+func (m *SubscriptionOfferLinkMutation) TokenSalt() (r string, exists bool) {
+	v := m.token_salt
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldTokenSalt returns the old "token_salt" field's value of the SubscriptionOfferLink entity.
+// If the SubscriptionOfferLink object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SubscriptionOfferLinkMutation) OldTokenSalt(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldTokenSalt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldTokenSalt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldTokenSalt: %w", err)
+	}
+	return oldValue.TokenSalt, nil
+}
+
+// ResetTokenSalt resets all changes to the "token_salt" field.
+func (m *SubscriptionOfferLinkMutation) ResetTokenSalt() {
+	m.token_salt = nil
+}
+
+// SetLabel sets the "label" field.
+func (m *SubscriptionOfferLinkMutation) SetLabel(s string) {
+	m.label = &s
+}
+
+// Label returns the value of the "label" field in the mutation.
+func (m *SubscriptionOfferLinkMutation) Label() (r string, exists bool) {
+	v := m.label
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldLabel returns the old "label" field's value of the SubscriptionOfferLink entity.
+// If the SubscriptionOfferLink object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SubscriptionOfferLinkMutation) OldLabel(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldLabel is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldLabel requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldLabel: %w", err)
+	}
+	return oldValue.Label, nil
+}
+
+// ResetLabel resets all changes to the "label" field.
+func (m *SubscriptionOfferLinkMutation) ResetLabel() {
+	m.label = nil
+}
+
+// SetPlanCodes sets the "plan_codes" field.
+func (m *SubscriptionOfferLinkMutation) SetPlanCodes(s []string) {
+	m.plan_codes = &s
+	m.appendplan_codes = nil
+}
+
+// PlanCodes returns the value of the "plan_codes" field in the mutation.
+func (m *SubscriptionOfferLinkMutation) PlanCodes() (r []string, exists bool) {
+	v := m.plan_codes
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldPlanCodes returns the old "plan_codes" field's value of the SubscriptionOfferLink entity.
+// If the SubscriptionOfferLink object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SubscriptionOfferLinkMutation) OldPlanCodes(ctx context.Context) (v []string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldPlanCodes is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldPlanCodes requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldPlanCodes: %w", err)
+	}
+	return oldValue.PlanCodes, nil
+}
+
+// AppendPlanCodes adds s to the "plan_codes" field.
+func (m *SubscriptionOfferLinkMutation) AppendPlanCodes(s []string) {
+	m.appendplan_codes = append(m.appendplan_codes, s...)
+}
+
+// AppendedPlanCodes returns the list of values that were appended to the "plan_codes" field in this mutation.
+func (m *SubscriptionOfferLinkMutation) AppendedPlanCodes() ([]string, bool) {
+	if len(m.appendplan_codes) == 0 {
+		return nil, false
+	}
+	return m.appendplan_codes, true
+}
+
+// ResetPlanCodes resets all changes to the "plan_codes" field.
+func (m *SubscriptionOfferLinkMutation) ResetPlanCodes() {
+	m.plan_codes = nil
+	m.appendplan_codes = nil
+}
+
+// SetDiscountKind sets the "discount_kind" field.
+func (m *SubscriptionOfferLinkMutation) SetDiscountKind(sk subscriptionofferlink.DiscountKind) {
+	m.discount_kind = &sk
+}
+
+// DiscountKind returns the value of the "discount_kind" field in the mutation.
+func (m *SubscriptionOfferLinkMutation) DiscountKind() (r subscriptionofferlink.DiscountKind, exists bool) {
+	v := m.discount_kind
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDiscountKind returns the old "discount_kind" field's value of the SubscriptionOfferLink entity.
+// If the SubscriptionOfferLink object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SubscriptionOfferLinkMutation) OldDiscountKind(ctx context.Context) (v subscriptionofferlink.DiscountKind, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDiscountKind is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDiscountKind requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDiscountKind: %w", err)
+	}
+	return oldValue.DiscountKind, nil
+}
+
+// ResetDiscountKind resets all changes to the "discount_kind" field.
+func (m *SubscriptionOfferLinkMutation) ResetDiscountKind() {
+	m.discount_kind = nil
+}
+
+// SetPercentOff sets the "percent_off" field.
+func (m *SubscriptionOfferLinkMutation) SetPercentOff(i int64) {
+	m.percent_off = &i
+	m.addpercent_off = nil
+}
+
+// PercentOff returns the value of the "percent_off" field in the mutation.
+func (m *SubscriptionOfferLinkMutation) PercentOff() (r int64, exists bool) {
+	v := m.percent_off
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldPercentOff returns the old "percent_off" field's value of the SubscriptionOfferLink entity.
+// If the SubscriptionOfferLink object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SubscriptionOfferLinkMutation) OldPercentOff(ctx context.Context) (v int64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldPercentOff is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldPercentOff requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldPercentOff: %w", err)
+	}
+	return oldValue.PercentOff, nil
+}
+
+// AddPercentOff adds i to the "percent_off" field.
+func (m *SubscriptionOfferLinkMutation) AddPercentOff(i int64) {
+	if m.addpercent_off != nil {
+		*m.addpercent_off += i
+	} else {
+		m.addpercent_off = &i
+	}
+}
+
+// AddedPercentOff returns the value that was added to the "percent_off" field in this mutation.
+func (m *SubscriptionOfferLinkMutation) AddedPercentOff() (r int64, exists bool) {
+	v := m.addpercent_off
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetPercentOff resets all changes to the "percent_off" field.
+func (m *SubscriptionOfferLinkMutation) ResetPercentOff() {
+	m.percent_off = nil
+	m.addpercent_off = nil
+}
+
+// SetAmountOffMinor sets the "amount_off_minor" field.
+func (m *SubscriptionOfferLinkMutation) SetAmountOffMinor(i int64) {
+	m.amount_off_minor = &i
+	m.addamount_off_minor = nil
+}
+
+// AmountOffMinor returns the value of the "amount_off_minor" field in the mutation.
+func (m *SubscriptionOfferLinkMutation) AmountOffMinor() (r int64, exists bool) {
+	v := m.amount_off_minor
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldAmountOffMinor returns the old "amount_off_minor" field's value of the SubscriptionOfferLink entity.
+// If the SubscriptionOfferLink object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SubscriptionOfferLinkMutation) OldAmountOffMinor(ctx context.Context) (v int64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldAmountOffMinor is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldAmountOffMinor requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldAmountOffMinor: %w", err)
+	}
+	return oldValue.AmountOffMinor, nil
+}
+
+// AddAmountOffMinor adds i to the "amount_off_minor" field.
+func (m *SubscriptionOfferLinkMutation) AddAmountOffMinor(i int64) {
+	if m.addamount_off_minor != nil {
+		*m.addamount_off_minor += i
+	} else {
+		m.addamount_off_minor = &i
+	}
+}
+
+// AddedAmountOffMinor returns the value that was added to the "amount_off_minor" field in this mutation.
+func (m *SubscriptionOfferLinkMutation) AddedAmountOffMinor() (r int64, exists bool) {
+	v := m.addamount_off_minor
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetAmountOffMinor resets all changes to the "amount_off_minor" field.
+func (m *SubscriptionOfferLinkMutation) ResetAmountOffMinor() {
+	m.amount_off_minor = nil
+	m.addamount_off_minor = nil
+}
+
+// SetAmountOffCurrency sets the "amount_off_currency" field.
+func (m *SubscriptionOfferLinkMutation) SetAmountOffCurrency(s string) {
+	m.amount_off_currency = &s
+}
+
+// AmountOffCurrency returns the value of the "amount_off_currency" field in the mutation.
+func (m *SubscriptionOfferLinkMutation) AmountOffCurrency() (r string, exists bool) {
+	v := m.amount_off_currency
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldAmountOffCurrency returns the old "amount_off_currency" field's value of the SubscriptionOfferLink entity.
+// If the SubscriptionOfferLink object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SubscriptionOfferLinkMutation) OldAmountOffCurrency(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldAmountOffCurrency is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldAmountOffCurrency requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldAmountOffCurrency: %w", err)
+	}
+	return oldValue.AmountOffCurrency, nil
+}
+
+// ResetAmountOffCurrency resets all changes to the "amount_off_currency" field.
+func (m *SubscriptionOfferLinkMutation) ResetAmountOffCurrency() {
+	m.amount_off_currency = nil
+}
+
+// SetSingleUse sets the "single_use" field.
+func (m *SubscriptionOfferLinkMutation) SetSingleUse(b bool) {
+	m.single_use = &b
+}
+
+// SingleUse returns the value of the "single_use" field in the mutation.
+func (m *SubscriptionOfferLinkMutation) SingleUse() (r bool, exists bool) {
+	v := m.single_use
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSingleUse returns the old "single_use" field's value of the SubscriptionOfferLink entity.
+// If the SubscriptionOfferLink object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SubscriptionOfferLinkMutation) OldSingleUse(ctx context.Context) (v bool, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSingleUse is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSingleUse requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSingleUse: %w", err)
+	}
+	return oldValue.SingleUse, nil
+}
+
+// ResetSingleUse resets all changes to the "single_use" field.
+func (m *SubscriptionOfferLinkMutation) ResetSingleUse() {
+	m.single_use = nil
+}
+
+// SetMaxClaims sets the "max_claims" field.
+func (m *SubscriptionOfferLinkMutation) SetMaxClaims(i int) {
+	m.max_claims = &i
+	m.addmax_claims = nil
+}
+
+// MaxClaims returns the value of the "max_claims" field in the mutation.
+func (m *SubscriptionOfferLinkMutation) MaxClaims() (r int, exists bool) {
+	v := m.max_claims
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldMaxClaims returns the old "max_claims" field's value of the SubscriptionOfferLink entity.
+// If the SubscriptionOfferLink object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SubscriptionOfferLinkMutation) OldMaxClaims(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldMaxClaims is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldMaxClaims requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldMaxClaims: %w", err)
+	}
+	return oldValue.MaxClaims, nil
+}
+
+// AddMaxClaims adds i to the "max_claims" field.
+func (m *SubscriptionOfferLinkMutation) AddMaxClaims(i int) {
+	if m.addmax_claims != nil {
+		*m.addmax_claims += i
+	} else {
+		m.addmax_claims = &i
+	}
+}
+
+// AddedMaxClaims returns the value that was added to the "max_claims" field in this mutation.
+func (m *SubscriptionOfferLinkMutation) AddedMaxClaims() (r int, exists bool) {
+	v := m.addmax_claims
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetMaxClaims resets all changes to the "max_claims" field.
+func (m *SubscriptionOfferLinkMutation) ResetMaxClaims() {
+	m.max_claims = nil
+	m.addmax_claims = nil
+}
+
+// SetClaimedCount sets the "claimed_count" field.
+func (m *SubscriptionOfferLinkMutation) SetClaimedCount(i int) {
+	m.claimed_count = &i
+	m.addclaimed_count = nil
+}
+
+// ClaimedCount returns the value of the "claimed_count" field in the mutation.
+func (m *SubscriptionOfferLinkMutation) ClaimedCount() (r int, exists bool) {
+	v := m.claimed_count
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldClaimedCount returns the old "claimed_count" field's value of the SubscriptionOfferLink entity.
+// If the SubscriptionOfferLink object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SubscriptionOfferLinkMutation) OldClaimedCount(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldClaimedCount is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldClaimedCount requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldClaimedCount: %w", err)
+	}
+	return oldValue.ClaimedCount, nil
+}
+
+// AddClaimedCount adds i to the "claimed_count" field.
+func (m *SubscriptionOfferLinkMutation) AddClaimedCount(i int) {
+	if m.addclaimed_count != nil {
+		*m.addclaimed_count += i
+	} else {
+		m.addclaimed_count = &i
+	}
+}
+
+// AddedClaimedCount returns the value that was added to the "claimed_count" field in this mutation.
+func (m *SubscriptionOfferLinkMutation) AddedClaimedCount() (r int, exists bool) {
+	v := m.addclaimed_count
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetClaimedCount resets all changes to the "claimed_count" field.
+func (m *SubscriptionOfferLinkMutation) ResetClaimedCount() {
+	m.claimed_count = nil
+	m.addclaimed_count = nil
+}
+
+// SetRedeemedCount sets the "redeemed_count" field.
+func (m *SubscriptionOfferLinkMutation) SetRedeemedCount(i int) {
+	m.redeemed_count = &i
+	m.addredeemed_count = nil
+}
+
+// RedeemedCount returns the value of the "redeemed_count" field in the mutation.
+func (m *SubscriptionOfferLinkMutation) RedeemedCount() (r int, exists bool) {
+	v := m.redeemed_count
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldRedeemedCount returns the old "redeemed_count" field's value of the SubscriptionOfferLink entity.
+// If the SubscriptionOfferLink object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SubscriptionOfferLinkMutation) OldRedeemedCount(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldRedeemedCount is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldRedeemedCount requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldRedeemedCount: %w", err)
+	}
+	return oldValue.RedeemedCount, nil
+}
+
+// AddRedeemedCount adds i to the "redeemed_count" field.
+func (m *SubscriptionOfferLinkMutation) AddRedeemedCount(i int) {
+	if m.addredeemed_count != nil {
+		*m.addredeemed_count += i
+	} else {
+		m.addredeemed_count = &i
+	}
+}
+
+// AddedRedeemedCount returns the value that was added to the "redeemed_count" field in this mutation.
+func (m *SubscriptionOfferLinkMutation) AddedRedeemedCount() (r int, exists bool) {
+	v := m.addredeemed_count
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetRedeemedCount resets all changes to the "redeemed_count" field.
+func (m *SubscriptionOfferLinkMutation) ResetRedeemedCount() {
+	m.redeemed_count = nil
+	m.addredeemed_count = nil
+}
+
+// SetDurationCycles sets the "duration_cycles" field.
+func (m *SubscriptionOfferLinkMutation) SetDurationCycles(i int) {
+	m.duration_cycles = &i
+	m.addduration_cycles = nil
+}
+
+// DurationCycles returns the value of the "duration_cycles" field in the mutation.
+func (m *SubscriptionOfferLinkMutation) DurationCycles() (r int, exists bool) {
+	v := m.duration_cycles
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDurationCycles returns the old "duration_cycles" field's value of the SubscriptionOfferLink entity.
+// If the SubscriptionOfferLink object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SubscriptionOfferLinkMutation) OldDurationCycles(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDurationCycles is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDurationCycles requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDurationCycles: %w", err)
+	}
+	return oldValue.DurationCycles, nil
+}
+
+// AddDurationCycles adds i to the "duration_cycles" field.
+func (m *SubscriptionOfferLinkMutation) AddDurationCycles(i int) {
+	if m.addduration_cycles != nil {
+		*m.addduration_cycles += i
+	} else {
+		m.addduration_cycles = &i
+	}
+}
+
+// AddedDurationCycles returns the value that was added to the "duration_cycles" field in this mutation.
+func (m *SubscriptionOfferLinkMutation) AddedDurationCycles() (r int, exists bool) {
+	v := m.addduration_cycles
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetDurationCycles resets all changes to the "duration_cycles" field.
+func (m *SubscriptionOfferLinkMutation) ResetDurationCycles() {
+	m.duration_cycles = nil
+	m.addduration_cycles = nil
+}
+
+// SetExpiresAt sets the "expires_at" field.
+func (m *SubscriptionOfferLinkMutation) SetExpiresAt(t time.Time) {
+	m.expires_at = &t
+}
+
+// ExpiresAt returns the value of the "expires_at" field in the mutation.
+func (m *SubscriptionOfferLinkMutation) ExpiresAt() (r time.Time, exists bool) {
+	v := m.expires_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldExpiresAt returns the old "expires_at" field's value of the SubscriptionOfferLink entity.
+// If the SubscriptionOfferLink object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SubscriptionOfferLinkMutation) OldExpiresAt(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldExpiresAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldExpiresAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldExpiresAt: %w", err)
+	}
+	return oldValue.ExpiresAt, nil
+}
+
+// ClearExpiresAt clears the value of the "expires_at" field.
+func (m *SubscriptionOfferLinkMutation) ClearExpiresAt() {
+	m.expires_at = nil
+	m.clearedFields[subscriptionofferlink.FieldExpiresAt] = struct{}{}
+}
+
+// ExpiresAtCleared returns if the "expires_at" field was cleared in this mutation.
+func (m *SubscriptionOfferLinkMutation) ExpiresAtCleared() bool {
+	_, ok := m.clearedFields[subscriptionofferlink.FieldExpiresAt]
+	return ok
+}
+
+// ResetExpiresAt resets all changes to the "expires_at" field.
+func (m *SubscriptionOfferLinkMutation) ResetExpiresAt() {
+	m.expires_at = nil
+	delete(m.clearedFields, subscriptionofferlink.FieldExpiresAt)
+}
+
+// SetRevokedAt sets the "revoked_at" field.
+func (m *SubscriptionOfferLinkMutation) SetRevokedAt(t time.Time) {
+	m.revoked_at = &t
+}
+
+// RevokedAt returns the value of the "revoked_at" field in the mutation.
+func (m *SubscriptionOfferLinkMutation) RevokedAt() (r time.Time, exists bool) {
+	v := m.revoked_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldRevokedAt returns the old "revoked_at" field's value of the SubscriptionOfferLink entity.
+// If the SubscriptionOfferLink object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SubscriptionOfferLinkMutation) OldRevokedAt(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldRevokedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldRevokedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldRevokedAt: %w", err)
+	}
+	return oldValue.RevokedAt, nil
+}
+
+// ClearRevokedAt clears the value of the "revoked_at" field.
+func (m *SubscriptionOfferLinkMutation) ClearRevokedAt() {
+	m.revoked_at = nil
+	m.clearedFields[subscriptionofferlink.FieldRevokedAt] = struct{}{}
+}
+
+// RevokedAtCleared returns if the "revoked_at" field was cleared in this mutation.
+func (m *SubscriptionOfferLinkMutation) RevokedAtCleared() bool {
+	_, ok := m.clearedFields[subscriptionofferlink.FieldRevokedAt]
+	return ok
+}
+
+// ResetRevokedAt resets all changes to the "revoked_at" field.
+func (m *SubscriptionOfferLinkMutation) ResetRevokedAt() {
+	m.revoked_at = nil
+	delete(m.clearedFields, subscriptionofferlink.FieldRevokedAt)
+}
+
+// SetRevokedByStaffID sets the "revoked_by_staff_id" field.
+func (m *SubscriptionOfferLinkMutation) SetRevokedByStaffID(s string) {
+	m.revoked_by_staff_id = &s
+}
+
+// RevokedByStaffID returns the value of the "revoked_by_staff_id" field in the mutation.
+func (m *SubscriptionOfferLinkMutation) RevokedByStaffID() (r string, exists bool) {
+	v := m.revoked_by_staff_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldRevokedByStaffID returns the old "revoked_by_staff_id" field's value of the SubscriptionOfferLink entity.
+// If the SubscriptionOfferLink object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SubscriptionOfferLinkMutation) OldRevokedByStaffID(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldRevokedByStaffID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldRevokedByStaffID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldRevokedByStaffID: %w", err)
+	}
+	return oldValue.RevokedByStaffID, nil
+}
+
+// ResetRevokedByStaffID resets all changes to the "revoked_by_staff_id" field.
+func (m *SubscriptionOfferLinkMutation) ResetRevokedByStaffID() {
+	m.revoked_by_staff_id = nil
+}
+
+// SetCreatedByStaffID sets the "created_by_staff_id" field.
+func (m *SubscriptionOfferLinkMutation) SetCreatedByStaffID(s string) {
+	m.created_by_staff_id = &s
+}
+
+// CreatedByStaffID returns the value of the "created_by_staff_id" field in the mutation.
+func (m *SubscriptionOfferLinkMutation) CreatedByStaffID() (r string, exists bool) {
+	v := m.created_by_staff_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreatedByStaffID returns the old "created_by_staff_id" field's value of the SubscriptionOfferLink entity.
+// If the SubscriptionOfferLink object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SubscriptionOfferLinkMutation) OldCreatedByStaffID(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreatedByStaffID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreatedByStaffID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatedByStaffID: %w", err)
+	}
+	return oldValue.CreatedByStaffID, nil
+}
+
+// ResetCreatedByStaffID resets all changes to the "created_by_staff_id" field.
+func (m *SubscriptionOfferLinkMutation) ResetCreatedByStaffID() {
+	m.created_by_staff_id = nil
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (m *SubscriptionOfferLinkMutation) SetUpdatedAt(t time.Time) {
+	m.updated_at = &t
+}
+
+// UpdatedAt returns the value of the "updated_at" field in the mutation.
+func (m *SubscriptionOfferLinkMutation) UpdatedAt() (r time.Time, exists bool) {
+	v := m.updated_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUpdatedAt returns the old "updated_at" field's value of the SubscriptionOfferLink entity.
+// If the SubscriptionOfferLink object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SubscriptionOfferLinkMutation) OldUpdatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUpdatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUpdatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUpdatedAt: %w", err)
+	}
+	return oldValue.UpdatedAt, nil
+}
+
+// ResetUpdatedAt resets all changes to the "updated_at" field.
+func (m *SubscriptionOfferLinkMutation) ResetUpdatedAt() {
+	m.updated_at = nil
+}
+
+// Where appends a list predicates to the SubscriptionOfferLinkMutation builder.
+func (m *SubscriptionOfferLinkMutation) Where(ps ...predicate.SubscriptionOfferLink) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the SubscriptionOfferLinkMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *SubscriptionOfferLinkMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.SubscriptionOfferLink, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *SubscriptionOfferLinkMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *SubscriptionOfferLinkMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (SubscriptionOfferLink).
+func (m *SubscriptionOfferLinkMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *SubscriptionOfferLinkMutation) Fields() []string {
+	fields := make([]string, 0, 19)
+	if m.created_at != nil {
+		fields = append(fields, subscriptionofferlink.FieldCreatedAt)
+	}
+	if m.token_hash != nil {
+		fields = append(fields, subscriptionofferlink.FieldTokenHash)
+	}
+	if m.token_salt != nil {
+		fields = append(fields, subscriptionofferlink.FieldTokenSalt)
+	}
+	if m.label != nil {
+		fields = append(fields, subscriptionofferlink.FieldLabel)
+	}
+	if m.plan_codes != nil {
+		fields = append(fields, subscriptionofferlink.FieldPlanCodes)
+	}
+	if m.discount_kind != nil {
+		fields = append(fields, subscriptionofferlink.FieldDiscountKind)
+	}
+	if m.percent_off != nil {
+		fields = append(fields, subscriptionofferlink.FieldPercentOff)
+	}
+	if m.amount_off_minor != nil {
+		fields = append(fields, subscriptionofferlink.FieldAmountOffMinor)
+	}
+	if m.amount_off_currency != nil {
+		fields = append(fields, subscriptionofferlink.FieldAmountOffCurrency)
+	}
+	if m.single_use != nil {
+		fields = append(fields, subscriptionofferlink.FieldSingleUse)
+	}
+	if m.max_claims != nil {
+		fields = append(fields, subscriptionofferlink.FieldMaxClaims)
+	}
+	if m.claimed_count != nil {
+		fields = append(fields, subscriptionofferlink.FieldClaimedCount)
+	}
+	if m.redeemed_count != nil {
+		fields = append(fields, subscriptionofferlink.FieldRedeemedCount)
+	}
+	if m.duration_cycles != nil {
+		fields = append(fields, subscriptionofferlink.FieldDurationCycles)
+	}
+	if m.expires_at != nil {
+		fields = append(fields, subscriptionofferlink.FieldExpiresAt)
+	}
+	if m.revoked_at != nil {
+		fields = append(fields, subscriptionofferlink.FieldRevokedAt)
+	}
+	if m.revoked_by_staff_id != nil {
+		fields = append(fields, subscriptionofferlink.FieldRevokedByStaffID)
+	}
+	if m.created_by_staff_id != nil {
+		fields = append(fields, subscriptionofferlink.FieldCreatedByStaffID)
+	}
+	if m.updated_at != nil {
+		fields = append(fields, subscriptionofferlink.FieldUpdatedAt)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *SubscriptionOfferLinkMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case subscriptionofferlink.FieldCreatedAt:
+		return m.CreatedAt()
+	case subscriptionofferlink.FieldTokenHash:
+		return m.TokenHash()
+	case subscriptionofferlink.FieldTokenSalt:
+		return m.TokenSalt()
+	case subscriptionofferlink.FieldLabel:
+		return m.Label()
+	case subscriptionofferlink.FieldPlanCodes:
+		return m.PlanCodes()
+	case subscriptionofferlink.FieldDiscountKind:
+		return m.DiscountKind()
+	case subscriptionofferlink.FieldPercentOff:
+		return m.PercentOff()
+	case subscriptionofferlink.FieldAmountOffMinor:
+		return m.AmountOffMinor()
+	case subscriptionofferlink.FieldAmountOffCurrency:
+		return m.AmountOffCurrency()
+	case subscriptionofferlink.FieldSingleUse:
+		return m.SingleUse()
+	case subscriptionofferlink.FieldMaxClaims:
+		return m.MaxClaims()
+	case subscriptionofferlink.FieldClaimedCount:
+		return m.ClaimedCount()
+	case subscriptionofferlink.FieldRedeemedCount:
+		return m.RedeemedCount()
+	case subscriptionofferlink.FieldDurationCycles:
+		return m.DurationCycles()
+	case subscriptionofferlink.FieldExpiresAt:
+		return m.ExpiresAt()
+	case subscriptionofferlink.FieldRevokedAt:
+		return m.RevokedAt()
+	case subscriptionofferlink.FieldRevokedByStaffID:
+		return m.RevokedByStaffID()
+	case subscriptionofferlink.FieldCreatedByStaffID:
+		return m.CreatedByStaffID()
+	case subscriptionofferlink.FieldUpdatedAt:
+		return m.UpdatedAt()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *SubscriptionOfferLinkMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case subscriptionofferlink.FieldCreatedAt:
+		return m.OldCreatedAt(ctx)
+	case subscriptionofferlink.FieldTokenHash:
+		return m.OldTokenHash(ctx)
+	case subscriptionofferlink.FieldTokenSalt:
+		return m.OldTokenSalt(ctx)
+	case subscriptionofferlink.FieldLabel:
+		return m.OldLabel(ctx)
+	case subscriptionofferlink.FieldPlanCodes:
+		return m.OldPlanCodes(ctx)
+	case subscriptionofferlink.FieldDiscountKind:
+		return m.OldDiscountKind(ctx)
+	case subscriptionofferlink.FieldPercentOff:
+		return m.OldPercentOff(ctx)
+	case subscriptionofferlink.FieldAmountOffMinor:
+		return m.OldAmountOffMinor(ctx)
+	case subscriptionofferlink.FieldAmountOffCurrency:
+		return m.OldAmountOffCurrency(ctx)
+	case subscriptionofferlink.FieldSingleUse:
+		return m.OldSingleUse(ctx)
+	case subscriptionofferlink.FieldMaxClaims:
+		return m.OldMaxClaims(ctx)
+	case subscriptionofferlink.FieldClaimedCount:
+		return m.OldClaimedCount(ctx)
+	case subscriptionofferlink.FieldRedeemedCount:
+		return m.OldRedeemedCount(ctx)
+	case subscriptionofferlink.FieldDurationCycles:
+		return m.OldDurationCycles(ctx)
+	case subscriptionofferlink.FieldExpiresAt:
+		return m.OldExpiresAt(ctx)
+	case subscriptionofferlink.FieldRevokedAt:
+		return m.OldRevokedAt(ctx)
+	case subscriptionofferlink.FieldRevokedByStaffID:
+		return m.OldRevokedByStaffID(ctx)
+	case subscriptionofferlink.FieldCreatedByStaffID:
+		return m.OldCreatedByStaffID(ctx)
+	case subscriptionofferlink.FieldUpdatedAt:
+		return m.OldUpdatedAt(ctx)
+	}
+	return nil, fmt.Errorf("unknown SubscriptionOfferLink field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *SubscriptionOfferLinkMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case subscriptionofferlink.FieldCreatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatedAt(v)
+		return nil
+	case subscriptionofferlink.FieldTokenHash:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetTokenHash(v)
+		return nil
+	case subscriptionofferlink.FieldTokenSalt:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetTokenSalt(v)
+		return nil
+	case subscriptionofferlink.FieldLabel:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetLabel(v)
+		return nil
+	case subscriptionofferlink.FieldPlanCodes:
+		v, ok := value.([]string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetPlanCodes(v)
+		return nil
+	case subscriptionofferlink.FieldDiscountKind:
+		v, ok := value.(subscriptionofferlink.DiscountKind)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDiscountKind(v)
+		return nil
+	case subscriptionofferlink.FieldPercentOff:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetPercentOff(v)
+		return nil
+	case subscriptionofferlink.FieldAmountOffMinor:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetAmountOffMinor(v)
+		return nil
+	case subscriptionofferlink.FieldAmountOffCurrency:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetAmountOffCurrency(v)
+		return nil
+	case subscriptionofferlink.FieldSingleUse:
+		v, ok := value.(bool)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSingleUse(v)
+		return nil
+	case subscriptionofferlink.FieldMaxClaims:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetMaxClaims(v)
+		return nil
+	case subscriptionofferlink.FieldClaimedCount:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetClaimedCount(v)
+		return nil
+	case subscriptionofferlink.FieldRedeemedCount:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetRedeemedCount(v)
+		return nil
+	case subscriptionofferlink.FieldDurationCycles:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDurationCycles(v)
+		return nil
+	case subscriptionofferlink.FieldExpiresAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetExpiresAt(v)
+		return nil
+	case subscriptionofferlink.FieldRevokedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetRevokedAt(v)
+		return nil
+	case subscriptionofferlink.FieldRevokedByStaffID:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetRevokedByStaffID(v)
+		return nil
+	case subscriptionofferlink.FieldCreatedByStaffID:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatedByStaffID(v)
+		return nil
+	case subscriptionofferlink.FieldUpdatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUpdatedAt(v)
+		return nil
+	}
+	return fmt.Errorf("unknown SubscriptionOfferLink field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *SubscriptionOfferLinkMutation) AddedFields() []string {
+	var fields []string
+	if m.addpercent_off != nil {
+		fields = append(fields, subscriptionofferlink.FieldPercentOff)
+	}
+	if m.addamount_off_minor != nil {
+		fields = append(fields, subscriptionofferlink.FieldAmountOffMinor)
+	}
+	if m.addmax_claims != nil {
+		fields = append(fields, subscriptionofferlink.FieldMaxClaims)
+	}
+	if m.addclaimed_count != nil {
+		fields = append(fields, subscriptionofferlink.FieldClaimedCount)
+	}
+	if m.addredeemed_count != nil {
+		fields = append(fields, subscriptionofferlink.FieldRedeemedCount)
+	}
+	if m.addduration_cycles != nil {
+		fields = append(fields, subscriptionofferlink.FieldDurationCycles)
+	}
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *SubscriptionOfferLinkMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case subscriptionofferlink.FieldPercentOff:
+		return m.AddedPercentOff()
+	case subscriptionofferlink.FieldAmountOffMinor:
+		return m.AddedAmountOffMinor()
+	case subscriptionofferlink.FieldMaxClaims:
+		return m.AddedMaxClaims()
+	case subscriptionofferlink.FieldClaimedCount:
+		return m.AddedClaimedCount()
+	case subscriptionofferlink.FieldRedeemedCount:
+		return m.AddedRedeemedCount()
+	case subscriptionofferlink.FieldDurationCycles:
+		return m.AddedDurationCycles()
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *SubscriptionOfferLinkMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	case subscriptionofferlink.FieldPercentOff:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddPercentOff(v)
+		return nil
+	case subscriptionofferlink.FieldAmountOffMinor:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddAmountOffMinor(v)
+		return nil
+	case subscriptionofferlink.FieldMaxClaims:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddMaxClaims(v)
+		return nil
+	case subscriptionofferlink.FieldClaimedCount:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddClaimedCount(v)
+		return nil
+	case subscriptionofferlink.FieldRedeemedCount:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddRedeemedCount(v)
+		return nil
+	case subscriptionofferlink.FieldDurationCycles:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddDurationCycles(v)
+		return nil
+	}
+	return fmt.Errorf("unknown SubscriptionOfferLink numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *SubscriptionOfferLinkMutation) ClearedFields() []string {
+	var fields []string
+	if m.FieldCleared(subscriptionofferlink.FieldExpiresAt) {
+		fields = append(fields, subscriptionofferlink.FieldExpiresAt)
+	}
+	if m.FieldCleared(subscriptionofferlink.FieldRevokedAt) {
+		fields = append(fields, subscriptionofferlink.FieldRevokedAt)
+	}
+	return fields
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *SubscriptionOfferLinkMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *SubscriptionOfferLinkMutation) ClearField(name string) error {
+	switch name {
+	case subscriptionofferlink.FieldExpiresAt:
+		m.ClearExpiresAt()
+		return nil
+	case subscriptionofferlink.FieldRevokedAt:
+		m.ClearRevokedAt()
+		return nil
+	}
+	return fmt.Errorf("unknown SubscriptionOfferLink nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *SubscriptionOfferLinkMutation) ResetField(name string) error {
+	switch name {
+	case subscriptionofferlink.FieldCreatedAt:
+		m.ResetCreatedAt()
+		return nil
+	case subscriptionofferlink.FieldTokenHash:
+		m.ResetTokenHash()
+		return nil
+	case subscriptionofferlink.FieldTokenSalt:
+		m.ResetTokenSalt()
+		return nil
+	case subscriptionofferlink.FieldLabel:
+		m.ResetLabel()
+		return nil
+	case subscriptionofferlink.FieldPlanCodes:
+		m.ResetPlanCodes()
+		return nil
+	case subscriptionofferlink.FieldDiscountKind:
+		m.ResetDiscountKind()
+		return nil
+	case subscriptionofferlink.FieldPercentOff:
+		m.ResetPercentOff()
+		return nil
+	case subscriptionofferlink.FieldAmountOffMinor:
+		m.ResetAmountOffMinor()
+		return nil
+	case subscriptionofferlink.FieldAmountOffCurrency:
+		m.ResetAmountOffCurrency()
+		return nil
+	case subscriptionofferlink.FieldSingleUse:
+		m.ResetSingleUse()
+		return nil
+	case subscriptionofferlink.FieldMaxClaims:
+		m.ResetMaxClaims()
+		return nil
+	case subscriptionofferlink.FieldClaimedCount:
+		m.ResetClaimedCount()
+		return nil
+	case subscriptionofferlink.FieldRedeemedCount:
+		m.ResetRedeemedCount()
+		return nil
+	case subscriptionofferlink.FieldDurationCycles:
+		m.ResetDurationCycles()
+		return nil
+	case subscriptionofferlink.FieldExpiresAt:
+		m.ResetExpiresAt()
+		return nil
+	case subscriptionofferlink.FieldRevokedAt:
+		m.ResetRevokedAt()
+		return nil
+	case subscriptionofferlink.FieldRevokedByStaffID:
+		m.ResetRevokedByStaffID()
+		return nil
+	case subscriptionofferlink.FieldCreatedByStaffID:
+		m.ResetCreatedByStaffID()
+		return nil
+	case subscriptionofferlink.FieldUpdatedAt:
+		m.ResetUpdatedAt()
+		return nil
+	}
+	return fmt.Errorf("unknown SubscriptionOfferLink field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *SubscriptionOfferLinkMutation) AddedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *SubscriptionOfferLinkMutation) AddedIDs(name string) []ent.Value {
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *SubscriptionOfferLinkMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *SubscriptionOfferLinkMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *SubscriptionOfferLinkMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *SubscriptionOfferLinkMutation) EdgeCleared(name string) bool {
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *SubscriptionOfferLinkMutation) ClearEdge(name string) error {
+	return fmt.Errorf("unknown SubscriptionOfferLink unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *SubscriptionOfferLinkMutation) ResetEdge(name string) error {
+	return fmt.Errorf("unknown SubscriptionOfferLink edge %s", name)
+}
+
+// SubscriptionOfferSendMutation represents an operation that mutates the SubscriptionOfferSend nodes in the graph.
+type SubscriptionOfferSendMutation struct {
+	config
+	op               Op
+	typ              string
+	id               *uuid.UUID
+	created_at       *time.Time
+	link_id          *string
+	recipient_email  *string
+	note             *string
+	sent_by_staff_id *string
+	clearedFields    map[string]struct{}
+	done             bool
+	oldValue         func(context.Context) (*SubscriptionOfferSend, error)
+	predicates       []predicate.SubscriptionOfferSend
+}
+
+var _ ent.Mutation = (*SubscriptionOfferSendMutation)(nil)
+
+// subscriptionoffersendOption allows management of the mutation configuration using functional options.
+type subscriptionoffersendOption func(*SubscriptionOfferSendMutation)
+
+// newSubscriptionOfferSendMutation creates new mutation for the SubscriptionOfferSend entity.
+func newSubscriptionOfferSendMutation(c config, op Op, opts ...subscriptionoffersendOption) *SubscriptionOfferSendMutation {
+	m := &SubscriptionOfferSendMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeSubscriptionOfferSend,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withSubscriptionOfferSendID sets the ID field of the mutation.
+func withSubscriptionOfferSendID(id uuid.UUID) subscriptionoffersendOption {
+	return func(m *SubscriptionOfferSendMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *SubscriptionOfferSend
+		)
+		m.oldValue = func(ctx context.Context) (*SubscriptionOfferSend, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().SubscriptionOfferSend.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withSubscriptionOfferSend sets the old SubscriptionOfferSend of the mutation.
+func withSubscriptionOfferSend(node *SubscriptionOfferSend) subscriptionoffersendOption {
+	return func(m *SubscriptionOfferSendMutation) {
+		m.oldValue = func(context.Context) (*SubscriptionOfferSend, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m SubscriptionOfferSendMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m SubscriptionOfferSendMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of SubscriptionOfferSend entities.
+func (m *SubscriptionOfferSendMutation) SetID(id uuid.UUID) {
+	m.id = &id
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *SubscriptionOfferSendMutation) ID() (id uuid.UUID, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *SubscriptionOfferSendMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []uuid.UUID{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().SubscriptionOfferSend.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (m *SubscriptionOfferSendMutation) SetCreatedAt(t time.Time) {
+	m.created_at = &t
+}
+
+// CreatedAt returns the value of the "created_at" field in the mutation.
+func (m *SubscriptionOfferSendMutation) CreatedAt() (r time.Time, exists bool) {
+	v := m.created_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreatedAt returns the old "created_at" field's value of the SubscriptionOfferSend entity.
+// If the SubscriptionOfferSend object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SubscriptionOfferSendMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
+	}
+	return oldValue.CreatedAt, nil
+}
+
+// ResetCreatedAt resets all changes to the "created_at" field.
+func (m *SubscriptionOfferSendMutation) ResetCreatedAt() {
+	m.created_at = nil
+}
+
+// SetLinkID sets the "link_id" field.
+func (m *SubscriptionOfferSendMutation) SetLinkID(s string) {
+	m.link_id = &s
+}
+
+// LinkID returns the value of the "link_id" field in the mutation.
+func (m *SubscriptionOfferSendMutation) LinkID() (r string, exists bool) {
+	v := m.link_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldLinkID returns the old "link_id" field's value of the SubscriptionOfferSend entity.
+// If the SubscriptionOfferSend object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SubscriptionOfferSendMutation) OldLinkID(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldLinkID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldLinkID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldLinkID: %w", err)
+	}
+	return oldValue.LinkID, nil
+}
+
+// ResetLinkID resets all changes to the "link_id" field.
+func (m *SubscriptionOfferSendMutation) ResetLinkID() {
+	m.link_id = nil
+}
+
+// SetRecipientEmail sets the "recipient_email" field.
+func (m *SubscriptionOfferSendMutation) SetRecipientEmail(s string) {
+	m.recipient_email = &s
+}
+
+// RecipientEmail returns the value of the "recipient_email" field in the mutation.
+func (m *SubscriptionOfferSendMutation) RecipientEmail() (r string, exists bool) {
+	v := m.recipient_email
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldRecipientEmail returns the old "recipient_email" field's value of the SubscriptionOfferSend entity.
+// If the SubscriptionOfferSend object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SubscriptionOfferSendMutation) OldRecipientEmail(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldRecipientEmail is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldRecipientEmail requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldRecipientEmail: %w", err)
+	}
+	return oldValue.RecipientEmail, nil
+}
+
+// ResetRecipientEmail resets all changes to the "recipient_email" field.
+func (m *SubscriptionOfferSendMutation) ResetRecipientEmail() {
+	m.recipient_email = nil
+}
+
+// SetNote sets the "note" field.
+func (m *SubscriptionOfferSendMutation) SetNote(s string) {
+	m.note = &s
+}
+
+// Note returns the value of the "note" field in the mutation.
+func (m *SubscriptionOfferSendMutation) Note() (r string, exists bool) {
+	v := m.note
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldNote returns the old "note" field's value of the SubscriptionOfferSend entity.
+// If the SubscriptionOfferSend object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SubscriptionOfferSendMutation) OldNote(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldNote is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldNote requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldNote: %w", err)
+	}
+	return oldValue.Note, nil
+}
+
+// ResetNote resets all changes to the "note" field.
+func (m *SubscriptionOfferSendMutation) ResetNote() {
+	m.note = nil
+}
+
+// SetSentByStaffID sets the "sent_by_staff_id" field.
+func (m *SubscriptionOfferSendMutation) SetSentByStaffID(s string) {
+	m.sent_by_staff_id = &s
+}
+
+// SentByStaffID returns the value of the "sent_by_staff_id" field in the mutation.
+func (m *SubscriptionOfferSendMutation) SentByStaffID() (r string, exists bool) {
+	v := m.sent_by_staff_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSentByStaffID returns the old "sent_by_staff_id" field's value of the SubscriptionOfferSend entity.
+// If the SubscriptionOfferSend object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SubscriptionOfferSendMutation) OldSentByStaffID(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSentByStaffID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSentByStaffID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSentByStaffID: %w", err)
+	}
+	return oldValue.SentByStaffID, nil
+}
+
+// ResetSentByStaffID resets all changes to the "sent_by_staff_id" field.
+func (m *SubscriptionOfferSendMutation) ResetSentByStaffID() {
+	m.sent_by_staff_id = nil
+}
+
+// Where appends a list predicates to the SubscriptionOfferSendMutation builder.
+func (m *SubscriptionOfferSendMutation) Where(ps ...predicate.SubscriptionOfferSend) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the SubscriptionOfferSendMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *SubscriptionOfferSendMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.SubscriptionOfferSend, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *SubscriptionOfferSendMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *SubscriptionOfferSendMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (SubscriptionOfferSend).
+func (m *SubscriptionOfferSendMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *SubscriptionOfferSendMutation) Fields() []string {
+	fields := make([]string, 0, 5)
+	if m.created_at != nil {
+		fields = append(fields, subscriptionoffersend.FieldCreatedAt)
+	}
+	if m.link_id != nil {
+		fields = append(fields, subscriptionoffersend.FieldLinkID)
+	}
+	if m.recipient_email != nil {
+		fields = append(fields, subscriptionoffersend.FieldRecipientEmail)
+	}
+	if m.note != nil {
+		fields = append(fields, subscriptionoffersend.FieldNote)
+	}
+	if m.sent_by_staff_id != nil {
+		fields = append(fields, subscriptionoffersend.FieldSentByStaffID)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *SubscriptionOfferSendMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case subscriptionoffersend.FieldCreatedAt:
+		return m.CreatedAt()
+	case subscriptionoffersend.FieldLinkID:
+		return m.LinkID()
+	case subscriptionoffersend.FieldRecipientEmail:
+		return m.RecipientEmail()
+	case subscriptionoffersend.FieldNote:
+		return m.Note()
+	case subscriptionoffersend.FieldSentByStaffID:
+		return m.SentByStaffID()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *SubscriptionOfferSendMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case subscriptionoffersend.FieldCreatedAt:
+		return m.OldCreatedAt(ctx)
+	case subscriptionoffersend.FieldLinkID:
+		return m.OldLinkID(ctx)
+	case subscriptionoffersend.FieldRecipientEmail:
+		return m.OldRecipientEmail(ctx)
+	case subscriptionoffersend.FieldNote:
+		return m.OldNote(ctx)
+	case subscriptionoffersend.FieldSentByStaffID:
+		return m.OldSentByStaffID(ctx)
+	}
+	return nil, fmt.Errorf("unknown SubscriptionOfferSend field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *SubscriptionOfferSendMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case subscriptionoffersend.FieldCreatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatedAt(v)
+		return nil
+	case subscriptionoffersend.FieldLinkID:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetLinkID(v)
+		return nil
+	case subscriptionoffersend.FieldRecipientEmail:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetRecipientEmail(v)
+		return nil
+	case subscriptionoffersend.FieldNote:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetNote(v)
+		return nil
+	case subscriptionoffersend.FieldSentByStaffID:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSentByStaffID(v)
+		return nil
+	}
+	return fmt.Errorf("unknown SubscriptionOfferSend field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *SubscriptionOfferSendMutation) AddedFields() []string {
+	return nil
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *SubscriptionOfferSendMutation) AddedField(name string) (ent.Value, bool) {
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *SubscriptionOfferSendMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	}
+	return fmt.Errorf("unknown SubscriptionOfferSend numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *SubscriptionOfferSendMutation) ClearedFields() []string {
+	return nil
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *SubscriptionOfferSendMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *SubscriptionOfferSendMutation) ClearField(name string) error {
+	return fmt.Errorf("unknown SubscriptionOfferSend nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *SubscriptionOfferSendMutation) ResetField(name string) error {
+	switch name {
+	case subscriptionoffersend.FieldCreatedAt:
+		m.ResetCreatedAt()
+		return nil
+	case subscriptionoffersend.FieldLinkID:
+		m.ResetLinkID()
+		return nil
+	case subscriptionoffersend.FieldRecipientEmail:
+		m.ResetRecipientEmail()
+		return nil
+	case subscriptionoffersend.FieldNote:
+		m.ResetNote()
+		return nil
+	case subscriptionoffersend.FieldSentByStaffID:
+		m.ResetSentByStaffID()
+		return nil
+	}
+	return fmt.Errorf("unknown SubscriptionOfferSend field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *SubscriptionOfferSendMutation) AddedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *SubscriptionOfferSendMutation) AddedIDs(name string) []ent.Value {
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *SubscriptionOfferSendMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *SubscriptionOfferSendMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *SubscriptionOfferSendMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *SubscriptionOfferSendMutation) EdgeCleared(name string) bool {
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *SubscriptionOfferSendMutation) ClearEdge(name string) error {
+	return fmt.Errorf("unknown SubscriptionOfferSend unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *SubscriptionOfferSendMutation) ResetEdge(name string) error {
+	return fmt.Errorf("unknown SubscriptionOfferSend edge %s", name)
 }
 
 // SubscriptionPeriodMutation represents an operation that mutates the SubscriptionPeriod nodes in the graph.

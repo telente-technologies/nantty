@@ -19,6 +19,9 @@ import (
 	"zudomart/modules/subscriptions/src/generated/ent/planprice"
 	"zudomart/modules/subscriptions/src/generated/ent/providerplan"
 	"zudomart/modules/subscriptions/src/generated/ent/subscription"
+	"zudomart/modules/subscriptions/src/generated/ent/subscriptionofferclaim"
+	"zudomart/modules/subscriptions/src/generated/ent/subscriptionofferlink"
+	"zudomart/modules/subscriptions/src/generated/ent/subscriptionoffersend"
 	"zudomart/modules/subscriptions/src/generated/ent/subscriptionperiod"
 	"zudomart/modules/subscriptions/src/generated/ent/subscriptionreminder"
 	"zudomart/modules/subscriptions/src/generated/ent/trialclaim"
@@ -53,6 +56,12 @@ type Client struct {
 	ProviderPlan *ProviderPlanClient
 	// Subscription is the client for interacting with the Subscription builders.
 	Subscription *SubscriptionClient
+	// SubscriptionOfferClaim is the client for interacting with the SubscriptionOfferClaim builders.
+	SubscriptionOfferClaim *SubscriptionOfferClaimClient
+	// SubscriptionOfferLink is the client for interacting with the SubscriptionOfferLink builders.
+	SubscriptionOfferLink *SubscriptionOfferLinkClient
+	// SubscriptionOfferSend is the client for interacting with the SubscriptionOfferSend builders.
+	SubscriptionOfferSend *SubscriptionOfferSendClient
 	// SubscriptionPeriod is the client for interacting with the SubscriptionPeriod builders.
 	SubscriptionPeriod *SubscriptionPeriodClient
 	// SubscriptionReminder is the client for interacting with the SubscriptionReminder builders.
@@ -78,6 +87,9 @@ func (c *Client) init() {
 	c.PlanPrice = NewPlanPriceClient(c.config)
 	c.ProviderPlan = NewProviderPlanClient(c.config)
 	c.Subscription = NewSubscriptionClient(c.config)
+	c.SubscriptionOfferClaim = NewSubscriptionOfferClaimClient(c.config)
+	c.SubscriptionOfferLink = NewSubscriptionOfferLinkClient(c.config)
+	c.SubscriptionOfferSend = NewSubscriptionOfferSendClient(c.config)
 	c.SubscriptionPeriod = NewSubscriptionPeriodClient(c.config)
 	c.SubscriptionReminder = NewSubscriptionReminderClient(c.config)
 	c.TrialClaim = NewTrialClaimClient(c.config)
@@ -183,6 +195,9 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		PlanPrice:                 NewPlanPriceClient(cfg),
 		ProviderPlan:              NewProviderPlanClient(cfg),
 		Subscription:              NewSubscriptionClient(cfg),
+		SubscriptionOfferClaim:    NewSubscriptionOfferClaimClient(cfg),
+		SubscriptionOfferLink:     NewSubscriptionOfferLinkClient(cfg),
+		SubscriptionOfferSend:     NewSubscriptionOfferSendClient(cfg),
 		SubscriptionPeriod:        NewSubscriptionPeriodClient(cfg),
 		SubscriptionReminder:      NewSubscriptionReminderClient(cfg),
 		TrialClaim:                NewTrialClaimClient(cfg),
@@ -213,6 +228,9 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		PlanPrice:                 NewPlanPriceClient(cfg),
 		ProviderPlan:              NewProviderPlanClient(cfg),
 		Subscription:              NewSubscriptionClient(cfg),
+		SubscriptionOfferClaim:    NewSubscriptionOfferClaimClient(cfg),
+		SubscriptionOfferLink:     NewSubscriptionOfferLinkClient(cfg),
+		SubscriptionOfferSend:     NewSubscriptionOfferSendClient(cfg),
 		SubscriptionPeriod:        NewSubscriptionPeriodClient(cfg),
 		SubscriptionReminder:      NewSubscriptionReminderClient(cfg),
 		TrialClaim:                NewTrialClaimClient(cfg),
@@ -247,7 +265,9 @@ func (c *Client) Use(hooks ...Hook) {
 	for _, n := range []interface{ Use(...Hook) }{
 		c.CreatorSubscription, c.CreatorSubscriptionCharge, c.CreatorSubscriptionPlan,
 		c.IdempotentRequest, c.OutboxEvent, c.PlanPrice, c.ProviderPlan,
-		c.Subscription, c.SubscriptionPeriod, c.SubscriptionReminder, c.TrialClaim,
+		c.Subscription, c.SubscriptionOfferClaim, c.SubscriptionOfferLink,
+		c.SubscriptionOfferSend, c.SubscriptionPeriod, c.SubscriptionReminder,
+		c.TrialClaim,
 	} {
 		n.Use(hooks...)
 	}
@@ -259,7 +279,9 @@ func (c *Client) Intercept(interceptors ...Interceptor) {
 	for _, n := range []interface{ Intercept(...Interceptor) }{
 		c.CreatorSubscription, c.CreatorSubscriptionCharge, c.CreatorSubscriptionPlan,
 		c.IdempotentRequest, c.OutboxEvent, c.PlanPrice, c.ProviderPlan,
-		c.Subscription, c.SubscriptionPeriod, c.SubscriptionReminder, c.TrialClaim,
+		c.Subscription, c.SubscriptionOfferClaim, c.SubscriptionOfferLink,
+		c.SubscriptionOfferSend, c.SubscriptionPeriod, c.SubscriptionReminder,
+		c.TrialClaim,
 	} {
 		n.Intercept(interceptors...)
 	}
@@ -284,6 +306,12 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.ProviderPlan.mutate(ctx, m)
 	case *SubscriptionMutation:
 		return c.Subscription.mutate(ctx, m)
+	case *SubscriptionOfferClaimMutation:
+		return c.SubscriptionOfferClaim.mutate(ctx, m)
+	case *SubscriptionOfferLinkMutation:
+		return c.SubscriptionOfferLink.mutate(ctx, m)
+	case *SubscriptionOfferSendMutation:
+		return c.SubscriptionOfferSend.mutate(ctx, m)
 	case *SubscriptionPeriodMutation:
 		return c.SubscriptionPeriod.mutate(ctx, m)
 	case *SubscriptionReminderMutation:
@@ -1359,6 +1387,405 @@ func (c *SubscriptionClient) mutate(ctx context.Context, m *SubscriptionMutation
 	}
 }
 
+// SubscriptionOfferClaimClient is a client for the SubscriptionOfferClaim schema.
+type SubscriptionOfferClaimClient struct {
+	config
+}
+
+// NewSubscriptionOfferClaimClient returns a client for the SubscriptionOfferClaim from the given config.
+func NewSubscriptionOfferClaimClient(c config) *SubscriptionOfferClaimClient {
+	return &SubscriptionOfferClaimClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `subscriptionofferclaim.Hooks(f(g(h())))`.
+func (c *SubscriptionOfferClaimClient) Use(hooks ...Hook) {
+	c.hooks.SubscriptionOfferClaim = append(c.hooks.SubscriptionOfferClaim, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `subscriptionofferclaim.Intercept(f(g(h())))`.
+func (c *SubscriptionOfferClaimClient) Intercept(interceptors ...Interceptor) {
+	c.inters.SubscriptionOfferClaim = append(c.inters.SubscriptionOfferClaim, interceptors...)
+}
+
+// Create returns a builder for creating a SubscriptionOfferClaim entity.
+func (c *SubscriptionOfferClaimClient) Create() *SubscriptionOfferClaimCreate {
+	mutation := newSubscriptionOfferClaimMutation(c.config, OpCreate)
+	return &SubscriptionOfferClaimCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of SubscriptionOfferClaim entities.
+func (c *SubscriptionOfferClaimClient) CreateBulk(builders ...*SubscriptionOfferClaimCreate) *SubscriptionOfferClaimCreateBulk {
+	return &SubscriptionOfferClaimCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *SubscriptionOfferClaimClient) MapCreateBulk(slice any, setFunc func(*SubscriptionOfferClaimCreate, int)) *SubscriptionOfferClaimCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &SubscriptionOfferClaimCreateBulk{err: fmt.Errorf("calling to SubscriptionOfferClaimClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*SubscriptionOfferClaimCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &SubscriptionOfferClaimCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for SubscriptionOfferClaim.
+func (c *SubscriptionOfferClaimClient) Update() *SubscriptionOfferClaimUpdate {
+	mutation := newSubscriptionOfferClaimMutation(c.config, OpUpdate)
+	return &SubscriptionOfferClaimUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *SubscriptionOfferClaimClient) UpdateOne(_m *SubscriptionOfferClaim) *SubscriptionOfferClaimUpdateOne {
+	mutation := newSubscriptionOfferClaimMutation(c.config, OpUpdateOne, withSubscriptionOfferClaim(_m))
+	return &SubscriptionOfferClaimUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *SubscriptionOfferClaimClient) UpdateOneID(id uuid.UUID) *SubscriptionOfferClaimUpdateOne {
+	mutation := newSubscriptionOfferClaimMutation(c.config, OpUpdateOne, withSubscriptionOfferClaimID(id))
+	return &SubscriptionOfferClaimUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for SubscriptionOfferClaim.
+func (c *SubscriptionOfferClaimClient) Delete() *SubscriptionOfferClaimDelete {
+	mutation := newSubscriptionOfferClaimMutation(c.config, OpDelete)
+	return &SubscriptionOfferClaimDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *SubscriptionOfferClaimClient) DeleteOne(_m *SubscriptionOfferClaim) *SubscriptionOfferClaimDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *SubscriptionOfferClaimClient) DeleteOneID(id uuid.UUID) *SubscriptionOfferClaimDeleteOne {
+	builder := c.Delete().Where(subscriptionofferclaim.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &SubscriptionOfferClaimDeleteOne{builder}
+}
+
+// Query returns a query builder for SubscriptionOfferClaim.
+func (c *SubscriptionOfferClaimClient) Query() *SubscriptionOfferClaimQuery {
+	return &SubscriptionOfferClaimQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeSubscriptionOfferClaim},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a SubscriptionOfferClaim entity by its id.
+func (c *SubscriptionOfferClaimClient) Get(ctx context.Context, id uuid.UUID) (*SubscriptionOfferClaim, error) {
+	return c.Query().Where(subscriptionofferclaim.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *SubscriptionOfferClaimClient) GetX(ctx context.Context, id uuid.UUID) *SubscriptionOfferClaim {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *SubscriptionOfferClaimClient) Hooks() []Hook {
+	return c.hooks.SubscriptionOfferClaim
+}
+
+// Interceptors returns the client interceptors.
+func (c *SubscriptionOfferClaimClient) Interceptors() []Interceptor {
+	return c.inters.SubscriptionOfferClaim
+}
+
+func (c *SubscriptionOfferClaimClient) mutate(ctx context.Context, m *SubscriptionOfferClaimMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&SubscriptionOfferClaimCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&SubscriptionOfferClaimUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&SubscriptionOfferClaimUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&SubscriptionOfferClaimDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown SubscriptionOfferClaim mutation op: %q", m.Op())
+	}
+}
+
+// SubscriptionOfferLinkClient is a client for the SubscriptionOfferLink schema.
+type SubscriptionOfferLinkClient struct {
+	config
+}
+
+// NewSubscriptionOfferLinkClient returns a client for the SubscriptionOfferLink from the given config.
+func NewSubscriptionOfferLinkClient(c config) *SubscriptionOfferLinkClient {
+	return &SubscriptionOfferLinkClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `subscriptionofferlink.Hooks(f(g(h())))`.
+func (c *SubscriptionOfferLinkClient) Use(hooks ...Hook) {
+	c.hooks.SubscriptionOfferLink = append(c.hooks.SubscriptionOfferLink, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `subscriptionofferlink.Intercept(f(g(h())))`.
+func (c *SubscriptionOfferLinkClient) Intercept(interceptors ...Interceptor) {
+	c.inters.SubscriptionOfferLink = append(c.inters.SubscriptionOfferLink, interceptors...)
+}
+
+// Create returns a builder for creating a SubscriptionOfferLink entity.
+func (c *SubscriptionOfferLinkClient) Create() *SubscriptionOfferLinkCreate {
+	mutation := newSubscriptionOfferLinkMutation(c.config, OpCreate)
+	return &SubscriptionOfferLinkCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of SubscriptionOfferLink entities.
+func (c *SubscriptionOfferLinkClient) CreateBulk(builders ...*SubscriptionOfferLinkCreate) *SubscriptionOfferLinkCreateBulk {
+	return &SubscriptionOfferLinkCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *SubscriptionOfferLinkClient) MapCreateBulk(slice any, setFunc func(*SubscriptionOfferLinkCreate, int)) *SubscriptionOfferLinkCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &SubscriptionOfferLinkCreateBulk{err: fmt.Errorf("calling to SubscriptionOfferLinkClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*SubscriptionOfferLinkCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &SubscriptionOfferLinkCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for SubscriptionOfferLink.
+func (c *SubscriptionOfferLinkClient) Update() *SubscriptionOfferLinkUpdate {
+	mutation := newSubscriptionOfferLinkMutation(c.config, OpUpdate)
+	return &SubscriptionOfferLinkUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *SubscriptionOfferLinkClient) UpdateOne(_m *SubscriptionOfferLink) *SubscriptionOfferLinkUpdateOne {
+	mutation := newSubscriptionOfferLinkMutation(c.config, OpUpdateOne, withSubscriptionOfferLink(_m))
+	return &SubscriptionOfferLinkUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *SubscriptionOfferLinkClient) UpdateOneID(id uuid.UUID) *SubscriptionOfferLinkUpdateOne {
+	mutation := newSubscriptionOfferLinkMutation(c.config, OpUpdateOne, withSubscriptionOfferLinkID(id))
+	return &SubscriptionOfferLinkUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for SubscriptionOfferLink.
+func (c *SubscriptionOfferLinkClient) Delete() *SubscriptionOfferLinkDelete {
+	mutation := newSubscriptionOfferLinkMutation(c.config, OpDelete)
+	return &SubscriptionOfferLinkDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *SubscriptionOfferLinkClient) DeleteOne(_m *SubscriptionOfferLink) *SubscriptionOfferLinkDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *SubscriptionOfferLinkClient) DeleteOneID(id uuid.UUID) *SubscriptionOfferLinkDeleteOne {
+	builder := c.Delete().Where(subscriptionofferlink.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &SubscriptionOfferLinkDeleteOne{builder}
+}
+
+// Query returns a query builder for SubscriptionOfferLink.
+func (c *SubscriptionOfferLinkClient) Query() *SubscriptionOfferLinkQuery {
+	return &SubscriptionOfferLinkQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeSubscriptionOfferLink},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a SubscriptionOfferLink entity by its id.
+func (c *SubscriptionOfferLinkClient) Get(ctx context.Context, id uuid.UUID) (*SubscriptionOfferLink, error) {
+	return c.Query().Where(subscriptionofferlink.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *SubscriptionOfferLinkClient) GetX(ctx context.Context, id uuid.UUID) *SubscriptionOfferLink {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *SubscriptionOfferLinkClient) Hooks() []Hook {
+	return c.hooks.SubscriptionOfferLink
+}
+
+// Interceptors returns the client interceptors.
+func (c *SubscriptionOfferLinkClient) Interceptors() []Interceptor {
+	return c.inters.SubscriptionOfferLink
+}
+
+func (c *SubscriptionOfferLinkClient) mutate(ctx context.Context, m *SubscriptionOfferLinkMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&SubscriptionOfferLinkCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&SubscriptionOfferLinkUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&SubscriptionOfferLinkUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&SubscriptionOfferLinkDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown SubscriptionOfferLink mutation op: %q", m.Op())
+	}
+}
+
+// SubscriptionOfferSendClient is a client for the SubscriptionOfferSend schema.
+type SubscriptionOfferSendClient struct {
+	config
+}
+
+// NewSubscriptionOfferSendClient returns a client for the SubscriptionOfferSend from the given config.
+func NewSubscriptionOfferSendClient(c config) *SubscriptionOfferSendClient {
+	return &SubscriptionOfferSendClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `subscriptionoffersend.Hooks(f(g(h())))`.
+func (c *SubscriptionOfferSendClient) Use(hooks ...Hook) {
+	c.hooks.SubscriptionOfferSend = append(c.hooks.SubscriptionOfferSend, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `subscriptionoffersend.Intercept(f(g(h())))`.
+func (c *SubscriptionOfferSendClient) Intercept(interceptors ...Interceptor) {
+	c.inters.SubscriptionOfferSend = append(c.inters.SubscriptionOfferSend, interceptors...)
+}
+
+// Create returns a builder for creating a SubscriptionOfferSend entity.
+func (c *SubscriptionOfferSendClient) Create() *SubscriptionOfferSendCreate {
+	mutation := newSubscriptionOfferSendMutation(c.config, OpCreate)
+	return &SubscriptionOfferSendCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of SubscriptionOfferSend entities.
+func (c *SubscriptionOfferSendClient) CreateBulk(builders ...*SubscriptionOfferSendCreate) *SubscriptionOfferSendCreateBulk {
+	return &SubscriptionOfferSendCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *SubscriptionOfferSendClient) MapCreateBulk(slice any, setFunc func(*SubscriptionOfferSendCreate, int)) *SubscriptionOfferSendCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &SubscriptionOfferSendCreateBulk{err: fmt.Errorf("calling to SubscriptionOfferSendClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*SubscriptionOfferSendCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &SubscriptionOfferSendCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for SubscriptionOfferSend.
+func (c *SubscriptionOfferSendClient) Update() *SubscriptionOfferSendUpdate {
+	mutation := newSubscriptionOfferSendMutation(c.config, OpUpdate)
+	return &SubscriptionOfferSendUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *SubscriptionOfferSendClient) UpdateOne(_m *SubscriptionOfferSend) *SubscriptionOfferSendUpdateOne {
+	mutation := newSubscriptionOfferSendMutation(c.config, OpUpdateOne, withSubscriptionOfferSend(_m))
+	return &SubscriptionOfferSendUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *SubscriptionOfferSendClient) UpdateOneID(id uuid.UUID) *SubscriptionOfferSendUpdateOne {
+	mutation := newSubscriptionOfferSendMutation(c.config, OpUpdateOne, withSubscriptionOfferSendID(id))
+	return &SubscriptionOfferSendUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for SubscriptionOfferSend.
+func (c *SubscriptionOfferSendClient) Delete() *SubscriptionOfferSendDelete {
+	mutation := newSubscriptionOfferSendMutation(c.config, OpDelete)
+	return &SubscriptionOfferSendDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *SubscriptionOfferSendClient) DeleteOne(_m *SubscriptionOfferSend) *SubscriptionOfferSendDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *SubscriptionOfferSendClient) DeleteOneID(id uuid.UUID) *SubscriptionOfferSendDeleteOne {
+	builder := c.Delete().Where(subscriptionoffersend.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &SubscriptionOfferSendDeleteOne{builder}
+}
+
+// Query returns a query builder for SubscriptionOfferSend.
+func (c *SubscriptionOfferSendClient) Query() *SubscriptionOfferSendQuery {
+	return &SubscriptionOfferSendQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeSubscriptionOfferSend},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a SubscriptionOfferSend entity by its id.
+func (c *SubscriptionOfferSendClient) Get(ctx context.Context, id uuid.UUID) (*SubscriptionOfferSend, error) {
+	return c.Query().Where(subscriptionoffersend.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *SubscriptionOfferSendClient) GetX(ctx context.Context, id uuid.UUID) *SubscriptionOfferSend {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *SubscriptionOfferSendClient) Hooks() []Hook {
+	return c.hooks.SubscriptionOfferSend
+}
+
+// Interceptors returns the client interceptors.
+func (c *SubscriptionOfferSendClient) Interceptors() []Interceptor {
+	return c.inters.SubscriptionOfferSend
+}
+
+func (c *SubscriptionOfferSendClient) mutate(ctx context.Context, m *SubscriptionOfferSendMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&SubscriptionOfferSendCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&SubscriptionOfferSendUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&SubscriptionOfferSendUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&SubscriptionOfferSendDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown SubscriptionOfferSend mutation op: %q", m.Op())
+	}
+}
+
 // SubscriptionPeriodClient is a client for the SubscriptionPeriod schema.
 type SubscriptionPeriodClient struct {
 	config
@@ -1763,11 +2190,13 @@ type (
 	hooks struct {
 		CreatorSubscription, CreatorSubscriptionCharge, CreatorSubscriptionPlan,
 		IdempotentRequest, OutboxEvent, PlanPrice, ProviderPlan, Subscription,
+		SubscriptionOfferClaim, SubscriptionOfferLink, SubscriptionOfferSend,
 		SubscriptionPeriod, SubscriptionReminder, TrialClaim []ent.Hook
 	}
 	inters struct {
 		CreatorSubscription, CreatorSubscriptionCharge, CreatorSubscriptionPlan,
 		IdempotentRequest, OutboxEvent, PlanPrice, ProviderPlan, Subscription,
+		SubscriptionOfferClaim, SubscriptionOfferLink, SubscriptionOfferSend,
 		SubscriptionPeriod, SubscriptionReminder, TrialClaim []ent.Interceptor
 	}
 )
