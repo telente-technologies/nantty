@@ -1,5 +1,7 @@
 # Recommendations and personalization
 
+> **Dated design document.** The status labels below describe the repo when this was written; much that is marked PROPOSED or ABSENT has since been built. For the current system see [system.md](system.md); where the two disagree, the code wins. Where this document says SNS or SQS, read RabbitMQ: the event bus is RabbitMQ (Amazon MQ in AWS), and the SNS/SQS adapters are unused.
+
 As of 2026-10-04 (section 7 added: fair ranking, anti-manipulation, trends, Explore). Sources: `inventory.md` 2.6; `services/python/intelligence/apiContract.md` (sections 4, 6, 7); `docs/backendPlan.md` (consent, ranking). Labels: EXISTING, PROPOSED, OPTIONAL FUTURE.
 
 Principle: Python returns **scores and orderings**; Go/TS own candidate sets, eligibility, safety and the final decision. If Python is down, the request still succeeds with a deterministic ranking.

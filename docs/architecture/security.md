@@ -1,5 +1,7 @@
 # Security architecture
 
+> **Dated design document.** The status labels below describe the repo when this was written; much that is marked PROPOSED or ABSENT has since been built. For the current system see [system.md](system.md); where the two disagree, the code wins.
+
 As of 2026-10-03. Labels: **EXISTING** (cite path), **MOCK-ONLY**, **PROPOSED**, **OPTIONAL FUTURE**. Sources: `inventory.md` section 7, `SECURITY.md` (written against the the old monolith paths), `docs/backendPlan.md` 5.4-5.8.
 Privacy is in `privacy.md`; pipeline and network in `devops.md`; logging in `observability.md`.
 

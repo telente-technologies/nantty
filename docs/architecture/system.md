@@ -1,239 +1,276 @@
 # System architecture
 
-As of 2026-10-03. Facts come from [inventory.md](inventory.md) plus spot checks of the working tree. `services/**` is changing while this is written: `admin`, `currency`, `ledger`, `live` and `users` Go modules gained ent schemas and migrations during the audit window but still mount no routes. Treat module status as a snapshot.
+The whole system as the code stands on 2026-10-11. Every statement here was checked against the working tree; paths are given so you can check again. Topic documents in this folder go deeper, but several are dated design notes (see [README.md](README.md)); where they disagree with this file, this file and the code win.
 
-Labels: **EXISTING** (code in the repo, path cited) · **MOCK-ONLY** (frontend mock contract, no backend) · **PROPOSED** (plan only: `docs/backendPlan.md`, `microservicesPlan.json`, `infra/aws/README.md`) · **OPTIONAL FUTURE** (add only when the stated trigger fires).
+Principle: **design boundaries for scale, deploy minimal infrastructure first.** One Postgres with a schema per owning service, a transactional outbox into RabbitMQ, ECS Fargate rather than Kubernetes, no Kafka.
 
-## 1. Current architecture (what actually runs)
+## 1. System diagram
 
 ```mermaid
 flowchart LR
-  classDef existing fill:#d8f3dc,stroke:#2d6a4f,color:#081c15
-  classDef mock fill:#fff3bf,stroke:#e67700,color:#3d2c00
-  classDef ref fill:#e9ecef,stroke:#495057,color:#212529
+  subgraph Clients
+    MOB["Mobile app<br/>(Expo, widgets)"]
+    NEXT["webapp, studio, seller,<br/>ads, admin<br/>(Next.js + BFF)"]
+    WEB["apps/web<br/>marketing"]
+    OBS["OBS / browser<br/>(RTMP, WHIP)"]
+  end
 
-  mobile["apps/mobile<br/>useMocks=true"]:::mock
-  nextApps["webapp, studio, seller,<br/>ads, admin + BFF<br/>*_USE_MOCKS=true"]:::mock
-  web["apps/web marketing"]:::existing
-  gateway["TS gateway :8080<br/>3 auth prefixes only"]:::existing
-  identity["go-identity :8101<br/>auth module"]:::existing
-  otherGo["go-commerce, go-money,<br/>go-live, go-ads, go-trust<br/>routeless"]:::existing
-  realtime["Phoenix realtime /ws"]:::existing
-  intel["services/python/intelligence<br/>FastAPI, HMAC"]:::existing
-  pg[("Postgres 17 + PostGIS<br/>schema per service")]:::existing
-  valkey[("Valkey")]:::existing
-  bus["RabbitMQ topic exchange<br/>zudomart.events"]:::existing
-  qRealtime["quorum queue realtime-domain-events"]:::existing
-  legacy["the old monolith<br/>reference, never deployed"]:::ref
+  subgraph Edge
+    GW["gateway (TS)<br/>JWT check, rate limits,<br/>routing, signed identity"]
+  end
 
-  nextApps -. "auth only when mocks off" .-> gateway
-  mobile -. "auth only when mocks off" .-> gateway
-  gateway --> identity
-  identity --> pg
-  identity -- "outbox relay" --> bus
-  bus --> qRealtime --> realtime
-  mobile -. "wss /ws" .-> realtime
-  intel --> valkey
-  otherGo --> pg
+  subgraph Go["Go deployables"]
+    IDN["go-identity"]
+    COM["go-commerce"]
+    MON["go-money"]
+    LIV["go-live"]
+    ADS["go-ads"]
+    TRU["go-trust"]
+  end
+
+  subgraph TS["TypeScript services"]
+    SOC["social"]
+    NOT["notifications"]
+    SEA["search"]
+    MED["media"]
+    SUP["support"]
+  end
+
+  RT["realtime<br/>(Elixir, Phoenix /ws)"]
+  PY["intelligence<br/>(Python, scores only)"]
+
+  PG[("PostgreSQL + PostGIS<br/>schema per owner")]
+  MQ[["RabbitMQ<br/>zudomart.events / zudomart.jobs"]]
+  VK[("Valkey")]
+  S3[("S3 / SeaweedFS")]
+
+  FLW["Flutterwave"]
+  LK["LiveKit"]
+  EXT["SES, Expo push,<br/>Apple / Google IAP, Smile ID"]
+
+  MOB & NEXT --> GW
+  MOB & NEXT -- "wss /ws" --> RT
+  GW --> Go & TS
+  Go & TS --> PG
+  Go & TS -- "outbox relay" --> MQ
+  MQ --> Go & TS & RT & PY
+  Go & TS -- "HMAC HTTP" --> PY
+  COM & LIV & ADS -- gRPC --> MON
+  MED --> S3
+  MON <--> FLW
+  LIV <--> LK
+  OBS --> LK
+  MOB & NEXT -- "WebRTC media" --> LK
+  NOT & MON & IDN --> EXT
+  GW & IDN & LIV & PY --> VK
 ```
 
-| Fact | Evidence |
-| --- | --- |
-| Only auth is served end to end (8 routes) | `services/go/modules/auth/auth.routes.go`, `services/typescript/gateway/src/routes/upstream.routes.ts` |
-| Frontends default to in-process mocks; env examples point at `:3000` (legacy port), not the gateway `:8080` | `apps/*/.env.example`, `apps/mobile/src/config/api.config.ts` |
-| RabbitMQ adopted (owner, 2026-10-03): one topic exchange `zudomart.events`, 4 consumer queues, 7 job queues, each with 4 retry queues and a DLQ (5 attempts); one least-privilege user per service | `infra/local/rabbitmq/topology.json`, `definitions.json` |
-| Consumers: Phoenix (`realtime-domain-events`), notifications, intelligence, orders, goTrust advisory, goAds reports | `realtime/events/amqp.consumer.ex`, `platform/events/rabbitmq.consumer.go` |
-| Nothing is deployed to AWS | `infra/aws/README.md` ("Nothing here is applied") |
+Clients only ever call two hosts: the gateway (`/api/v1/*`, `/webhooks/*`) and realtime (`/ws`). Media goes to LiveKit directly with a short-lived token minted by go-live, and uploads go to object storage with URLs issued by the media service.
 
-## 2. Recommended architecture
+## 2. Clients
 
-Split into three diagrams, one concern each.
+| App | Path | Who it is for | Notes |
+| --- | --- | --- | --- |
+| Mobile | `apps/mobile` | Everyone | Expo SDK 57. LiveKit (`@livekit/react-native`) for going live and watching, which needs a dev or EAS build, not Expo Go. iOS WidgetKit widgets in `targets/widgets`, Android widgets in `src/widgets/android` |
+| Web app | `apps/webapp` | Buyers and viewers | Also serves the embeddable web widget (`/embed/*`, `/oembed`), see [widgetsApiContract.md](widgetsApiContract.md). LiveKit viewer (`livekit-client`) |
+| Studio | `apps/studio` | Creators | Lives, browser go-live over WHIP (`src/live/whipPublisher.ts`), OBS set-up, overlays, replays, comments, analytics |
+| Seller dashboard | `apps/seller` | Sellers and their staff | E-commerce back office: products, inventory, orders, returns, money, staff, marketing, reports. No in-store register |
+| Ads Manager | `apps/ads` | Advertisers | Campaigns, audiences, creatives, billing, reports |
+| Admin | `apps/admin` | Zudomart staff | Trust and safety, money, legal, support, settings |
+| Marketing site | `apps/web` | Public | Landing, sellers page, legal pages. No mocks |
 
-### 2.1 Edge and clients
+The five product Next apps use a BFF (`src/app/bff/[...path]/route.ts`): the browser talks only to its own origin, the session lives in `__Host-` httpOnly cookies, and mutations carry a CSRF token. Each app can run on in-process mocks (`src/mocks`) or against the gateway; see section 10.
+
+Shared packages: `@zudomart/chat-crypto` (E2EE), `@zudomart/contracts` and `@zudomart/shared-types` (API shapes), `@zudomart/design-tokens`, `@zudomart/web-kit`, `@zudomart/email-templates` (React Email), `@zudomart/eslint-config`.
+
+## 3. Services and what each owns
+
+Each Go deployable is a binary that mounts several modules (`services/go/deployables/<name>/server.go`). Modules never import each other; they talk through ports in `services/go/platform`, events or internal gRPC.
+
+| Service | Port (local) | Owns (Postgres schemas) | Responsibilities |
+| --- | --- | --- | --- |
+| gateway | 8080 | none | Routing (`src/routes/upstream.routes.ts`), access-token checks, Valkey rate limits, strict CORS, request size limits, human verification (Turnstile), admin IP allowlist, policy-acceptance gate, widget tokens, signed identity headers |
+| go-identity | 8101, gRPC 9101 | `auth`, `users`, `currency`, `admin` | Accounts, email-only sign-in, one-time codes, sessions, social sign-in, step-up, JWKS and signing keys, realtime and widget tokens; profiles and linked profiles, privacy, consents, data export and deletion, identity verification (Smile ID), creator program, checkmarks; exchange rates and locale; staff accounts, audit log, platform settings. gRPC `AccountDirectoryService` |
+| go-commerce | 8107 | `catalog`, `inventory`, `orders` (`analytics` module is a skeleton) | Stores, brands, products, reviews, seller applications; stock levels, locations, transfers; carts, checkout, shipping, orders, returns, disputes, promotions, store rewards, seller reports, order widgets |
+| go-money | 8103, gRPC 9103 | `payments`, `wallet`, `ledger`, `escrow`, `subscriptions`, `creators` | Flutterwave and IAP adapters, webhooks, reconciliation, payout onboarding, provider wallets; coins, payouts, ad balances; the double-entry ledger; escrow and disputes; subscriptions and billing; creator earnings, gifts money, affiliates, brand deals. gRPC `LiveMoneyService`, `CheckoutMoneyService`, `AdsMoneyService` |
+| go-live | 8102 | `live` | Live sessions, stage and guests, battles, gifts, comments, overlays, ZudoPoints, Studio, live widgets; LiveKit tokens, ingress (RTMP, WHIP), egress recordings for replays; LiveKit webhooks |
+| go-ads | 8110 | `ads` | Ad accounts, campaigns, audiences, creatives, review, the ad decision engine, tracking, reporting, billing, boosts |
+| go-trust | 8106 | `moderation` | Content and chat reports, copyright and IP claims, strikes, suspensions and appeals, live safety, account health, automation rules |
+| social | 8105 | `social` | Posts, comments, stories, clips, sounds, follows, blocks, mentions, saves, feeds and explore, conversations and encrypted messages, messaging keys, streaks, people search, social widgets |
+| notifications | 8104 | `notifications` | In-app inbox, email through SES, push (Expo), digests, bulk campaigns, suppression and unsubscribe, widget refresh pushes |
+| search | 8109 | `search` | Search index and queries on Postgres full-text (`tsvector`) and `pg_trgm`, fed by events; optional re-ranking by intelligence; recent searches |
+| media | 8108 | `media` | Uploads to a quarantine bucket, malware scan (ClamAV), processing (ffmpeg), public and private buckets, branded downloads |
+| support | 8111 | `support` | Help Centre content (`content/help`), tickets, automatic FAQ answers, account-erasure requests |
+| realtime | 4000 | none | WebSocket fan-out of domain events, presence, typing; see section 9 |
+| intelligence | 8090 | none (Valkey features, Parquet logs) | Feed, clip and search ranking, recommendations, trending, ads prediction, risk, bot, chat-spam and moderation scores, live-safety frame and audio checks (AWS Rekognition), experiments |
+
+Python returns scores; Go and TypeScript make the allow, hold, review or reject decision and fall back to deterministic logic when intelligence is slow or down. Callers today: search, social, support, go-ads, go-trust and go-identity (users). Intelligence never reads the product database.
+
+## 4. Data ownership
+
+- **One PostgreSQL database** (17 with PostGIS locally, Aurora PostgreSQL in AWS). Each owning service has its own schema and login role, created by `infra/local/postgres/create-databases.sh`. Only the owner writes its schema; other roles read through `zudomart_readers` grants where a read model needs it.
+- Grouped roles: `svc_money` is granted the payments, wallet, ledger, escrow, subscriptions, creators and rewards roles, so every balance change in go-money commits in one transaction. `svc_commerce` likewise covers catalog, inventory and orders, so an order and its stock reservation commit together.
+- **Go** persistence is ent with Atlas-generated migrations (`modules/<module>/src/migrations`), applied on service start locally and by a pre-deploy migrate task in AWS. **TypeScript** uses Prisma (`services/typescript/<service>/prisma`); `pnpm backend:lint` refuses raw SQL in TypeScript.
+- **Valkey:** rate limits, the session denylist, widget tokens, live counters and intelligence features. It holds nothing that cannot be rebuilt.
+- **Object storage:** SeaweedFS (S3 API) locally, S3 behind CloudFront in AWS.
+- Money is always integer minor units with a currency (`{ amountMinor, currency }`); the currency comes from the server, never from a client header.
+
+ERDs per domain: [database.md](database.md) and [../database/schema.md](../database/schema.md).
+
+## 5. Events and jobs
+
+```mermaid
+flowchart LR
+  CMD["Command handler"] -->|"one transaction"| TX[("business rows<br/>+ outbox row")]
+  TX --> RELAY["Outbox relay<br/>every 500 ms, batch 100"]
+  RELAY -->|"routing key = event name"| EX{{"zudomart.events<br/>(topic)"}}
+  EX --> Q["one quorum queue per consumer<br/>e.g. realtime-domain-events,<br/>notifications-domain-events"]
+  JOBS{{"zudomart.jobs"}} --> JQ["jobs-email, jobs-media, jobs-payouts,<br/>jobs-subscription-billing, jobs-search-indexing, ..."]
+  Q & JQ -.->|failure| RETRY["zudomart.retry<br/>30 s, 2 min, 10 min, 30 min"]
+  RETRY -.->|"after 5 attempts"| DLQ[("zudomart.dlx<br/>per-queue DLQ")]
+  EX -.->|no binding| UNR[("unrouted-events")]
+```
+
+- Every service that publishes writes the event row in the same transaction as the change (Go: `services/go/platform/events/outbox.relay.go`; the TS services have their own outbox tables). Delivery is at least once and consumers are idempotent on the event id.
+- Envelope: `{ id, type, source, subject, schemaVersion, occurredAt, data }`. Names are `<entity>.<pastTense>` (`order.created`, `escrow.released`). Each event has a JSON Schema in `services/contracts/events/schemas` and an entry in `services/contracts/events/asyncapi.yaml`.
+- The broker topology (which service publishes, which queues it consumes, the bindings) is `infra/local/rabbitmq/topology.json`; `pnpm backend:rabbitmq:definitions` generates `definitions.json` from it. Each service has its own least-privilege RabbitMQ user.
+- Bus selection is `EVENT_BUS` (`rabbitmq` by default, and in Terraform). The older SNS/SQS adapters are still in the code behind `EVENT_BUS=sqs`. The only SQS queue in the AWS plan is the SES bounce and complaint feedback queue, because SES cannot publish to RabbitMQ.
+
+Synchronous calls between services are kept few: internal gRPC to go-money and go-identity (`services/contracts/proto`), internal HTTP routes protected by per-service tokens, and HMAC-signed HTTP to intelligence.
+
+More detail: [events.md](events.md).
+
+## 6. Money flow
+
+Flutterwave is the only payment provider (`PAYMENTS_PROVIDER=flutterwave`); Apple and Google in-app purchase cover digital goods bought inside the mobile apps. **Zudomart never holds customer money.** Full design: [../integrations/flutterwaveMigration.md](../integrations/flutterwaveMigration.md).
 
 ```mermaid
 flowchart TB
-  classDef existing fill:#d8f3dc,stroke:#2d6a4f,color:#081c15
-  classDef proposed fill:#dbe4ff,stroke:#364fc7,color:#10194d
-
-  buyer(["Buyers / viewers"])
-  seller(["Sellers + staff"])
-  creator(["Creators"])
-  advertiser(["Advertisers"])
-  staff(["Zudomart staff"])
-
-  mobileApp["Mobile app<br/>bearer tokens in secure store"]:::existing
-  webapp["webapp BFF"]:::existing
-  studio["studio BFF"]:::existing
-  sellerApp["seller BFF"]:::existing
-  adsApp["ads BFF"]:::existing
-  adminApp["admin BFF<br/>MFA, step-up"]:::existing
-  marketing["apps/web"]:::existing
-
-  cf["CloudFront + AWS WAF<br/>TLS, bot rules, geo, rate rules"]:::proposed
-  alb["ALB<br/>path routing"]:::proposed
-  gw["TS gateway<br/>JWKS verify, Redis rate limits,<br/>idempotency fast path, CORS"]:::proposed
-  rt["Phoenix realtime<br/>/ws"]:::proposed
-  cdn["CloudFront media<br/>signed URLs"]:::proposed
-
-  buyer --> mobileApp & webapp
-  seller --> sellerApp & mobileApp
-  creator --> studio & mobileApp
-  advertiser --> adsApp
-  staff --> adminApp
-  mobileApp & webapp & studio & sellerApp & adsApp & adminApp & marketing --> cf
-  cf --> alb
-  alb -- "/api/v1/*" --> gw
-  alb -- "/ws (sticky not needed)" --> rt
-  cf --> cdn
+  subgraph NG["Nigeria: payout subaccounts (PSA)"]
+    PAY["Buyer pays: card, bank transfer, USSD,<br/>or their funded wallet"] --> BPSA["Buyer's own PSA<br/>escrow locked in our ledger"]
+    BPSA -->|"buyer confirms, or 72 h after delivery,<br/>no open dispute"| REL["Release: buyer PSA → seller PSA,<br/>escrow fee → Zudomart main"]
+    REL --> HOLD["Seller credit hold (24 h)"] --> WD["Withdrawal (step-up)<br/>transfer from seller PSA"] --> BANK["Seller's bank"]
+    BPSA -.->|"dispute pauses the timer"| DSP["Dispute"]
+    DSP -.->|"refund"| UNLOCK["Unlock in the buyer's PSA,<br/>or refund to the card"]
+  end
+  subgraph ROW["Outside Nigeria: no PSA, no escrow"]
+    CHK["Buyer pays by checkout"] --> DIRECT["Direct payment:<br/>seller's share paid out on settlement"]
+    VER["Seller must be identity-verified<br/>(Smile ID + payout account) to sell"] -.-> DIRECT
+  end
 ```
 
-| Edge component | Status | Notes |
-| --- | --- | --- |
-| BFFs with `__Host-` httpOnly cookies, CSRF HMAC, origin guards | EXISTING | `apps/webapp/src/server/*`, `apps/*/src/app/bff/[...path]/route.ts` |
-| Admin MFA / passkey / step-up BFF routes | EXISTING (UI + BFF), backend PROPOSED | `apps/admin/src/app/bff/auth/**`; no staff login route in Go yet |
-| CloudFront + WAF, ALB | PROPOSED | `infra/aws/README.md` modules `alb`, `media` |
-| Gateway Redis-backed rate limits, per-route login/OTP limits, idempotency fast path | PROPOSED | today: in-process 600/min per instance (`gateway.config.ts`) |
-| Browser socket tickets `POST /realtime/tickets` | PROPOSED | `backendPlan.md` 5.4; mobile sends access token in first frame (EXISTING) |
+- **Wallets.** In the countries listed in `WALLET_PSA_COUNTRIES` (default `NG`), each user's money is in their own Flutterwave payout subaccount. The ledger mirrors every PSA and reconciles it against Flutterwave daily.
+- **Escrow** is a lock on the buyer's own balance, recorded in the ledger (`escrow.CustodyBuyerWalletLock` in `modules/escrow`). A card payment settles to the main balance and is moved into the buyer's PSA before it is locked. On release the money moves buyer PSA to seller PSA; a refund before release just unlocks it.
+- **Outside Nigeria** sales use direct payment with no escrow and no stored balance, and `ReadSellingEligibility` (`modules/payments/src/modules/gateway/services/sellingEligibility.service.go`) refuses selling until the seller is verified. In Nigeria an unverified seller can sell through escrow only, up to an admin-set cap, and cannot withdraw until verified.
+- **Fees** (code defaults, admin-configurable): escrow fee `ESCROW_FEE_BPS=150` (1.5%), `ESCROW_FEE_BUSINESS_PLAN_BPS=100` on the Business plan, deducted from the seller at release. No commission on products and no buyer fee.
+- **Ledger.** go-money's double-entry ledger is the single financial truth: append-only, balanced per currency, idempotency keys stored in Postgres. Flutterwave balances are reconciliation evidence. Webhooks (`verif-hash`) are hints; every credit is re-verified with Flutterwave by id.
+- A refund after release that the seller's balance cannot cover becomes seller debt. Outstanding debt blocks withdrawals and ads spend, and debt above a per-level limit blocks selling.
 
-### 2.2 Services and data
+More detail: [payments.md](payments.md).
+
+## 7. Auth and the gateway
 
 ```mermaid
-flowchart LR
-  classDef existing fill:#d8f3dc,stroke:#2d6a4f,color:#081c15
-  classDef partial fill:#fff3bf,stroke:#e67700,color:#3d2c00
-  classDef proposed fill:#dbe4ff,stroke:#364fc7,color:#10194d
-
-  gw["TS gateway"]:::existing
-  idn["go-identity<br/>auth, users, currency, admin"]:::partial
-  com["go-commerce<br/>catalog, inventory, orders, analytics"]:::proposed
-  mon["go-money<br/>payments, wallet, ledger, escrow,<br/>subscriptions, creators"]:::partial
-  live["go-live<br/>sessions, guests, battles"]:::partial
-  ads["go-ads<br/>decision engine, attribution"]:::proposed
-  trust["go-trust<br/>moderation"]:::proposed
-  soc["ts-social<br/>posts, follows, feed"]:::proposed
-  io["ts-io<br/>media, notifications, search,<br/>support, integrations"]:::proposed
-  rt["Phoenix realtime<br/>chat persistence later"]:::existing
-  py["Python intelligence<br/>scores only"]:::existing
-
-  aurora[("Aurora PostgreSQL + PostGIS<br/>schema per owner, RDS Proxy")]:::proposed
-  redis[("ElastiCache Valkey<br/>cache, limits, combos, boards")]:::proposed
-  s3[("S3 media + exports")]:::proposed
-
-  gw --> idn & com & mon & live & ads & trust & soc & io
-  live -- "gRPC gift / settle" --> mon
-  com -- "gRPC escrow hold" --> mon
-  soc & com & ads & mon -- "HMAC HTTP" --> py
-  idn & com & mon & live & ads & trust & soc & io --> aurora
-  gw & live & ads & rt & py --> redis
-  io --> s3
+sequenceDiagram
+  participant C as Client (BFF or mobile)
+  participant G as gateway
+  participant I as go-identity
+  participant S as Go service
+  participant T as TS service
+  C->>G: Authorization: Bearer access token
+  G->>G: verify against go-identity JWKS, rate limit, CORS
+  alt Go upstream
+    G->>S: forward with bearer token
+    S->>I: JWKS (cached)
+    S->>S: verify the token itself
+  else TypeScript upstream
+    G->>T: x-zudomart-account-id, session, viewer headers<br/>+ x-zudomart-identity-signature (HMAC, 60 s)
+    T->>T: check the signature (GATEWAY_IDENTITY_SECRET)
+  end
 ```
 
-Yellow = module code partly present (ent schema/migrations), no routes yet. Only `auth` in go-identity serves traffic.
+- Sign-in is by email only (password or one-time code, or Google and Apple). go-identity issues short-lived EdDSA access tokens and rotating refresh tokens, and publishes its keys at `/.well-known/jwks.json`.
+- Go services verify the access token themselves (`services/go/platform/jwtauth`) and do not trust forwarded headers. TypeScript services accept identity only with a valid gateway HMAC signature (`src/middlewares/gatewayIdentity.middleware.ts`), with a previous secret allowed during rotation.
+- Separate token audiences for staff (password + TOTP, step-up for sensitive actions), realtime (`zudomart-realtime`, from `POST /api/v1/auth/realtime-token`) and widgets (`zudomart-widgets`, read-only, from `POST /api/v1/auth/widget-token`).
+- Provider webhooks enter through the gateway with the raw body untouched: `/webhooks/*` to go-money (Flutterwave), `/api/v1/webhooks/smile-id` to go-identity, `/api/v1/live/webhooks/*` to go-live (LiveKit).
+- Admin routes are limited by an IP allowlist in the gateway and in each service.
 
-### 2.3 Async and external
+## 8. Profiles
+
+A personal account can own at most one store **or** one business page (never both), plus one brand: valid sets are store, business, brand, store + brand and business + brand. go-identity enforces it in `modules/users/src/modules/linkedProfiles` (`ErrProfileLimitStoreOrBusiness`), and a store can be converted to a business page only after it is closed. A business page has no shop; a brand can turn selling on or off (catalog migration `add_brand_selling_and_store_channel`). Creators are personal accounts upgraded through the creator program, not separate profiles.
+
+## 9. Realtime, live and chat
+
+**Realtime** (`services/elixir/realtime`) is a raw JSON WebSocket at `/ws`, not Phoenix Channels. The client must send `{type: "auth", accessToken}` with a realtime token within 10 seconds, then subscribes to topics (at most 50 per socket):
+
+- `user:<accountId>`: own account only;
+- `conversation:<id>`: membership checked with the social service;
+- `live:<id>`, `battle:<id>`: access checked with go-live.
+
+It consumes `realtime-domain-events` from RabbitMQ (`lib/realtime/events/amqp.consumer.ex`), routes each event to its topic, throttles high-rate updates (viewer counts, scores, leaderboards), and tracks presence. It only fans out facts; it never moves money or decides a battle.
+
+**Live video** uses LiveKit (Cloud by default in Terraform, or self-hosted on ECS; a pinned container locally).
+
+- go-live creates rooms and mints short-lived participant tokens.
+- Hosts publish from the mobile app over WebRTC, from Studio in the browser over WHIP, or from OBS over RTMP or WHIP through a LiveKit ingress.
+- Viewers watch over WebRTC; there is no HLS fallback at present. Egress records replays to object storage.
+- Gifts are charged first: go-live calls `LiveMoneyService` on go-money, which debits coins and credits the creator in one ledger transaction; the `gift.sent` event then reaches viewers through realtime.
+
+**Chat is end-to-end encrypted.** `packages/chatCrypto` implements X3DH, the Double Ratchet and sender keys for groups, with per-device keys; mobile, webapp and seller use it. The social service stores public key bundles (`modules/messagingKeys`) and ciphertext only, and refuses plaintext message bodies (`assertNoPlaintext`, `ENCRYPTION_REQUIRED`). There is no plaintext fallback.
+
+More detail: [realtime.md](realtime.md), [liveSafety.md](liveSafety.md).
+
+## 10. Widgets
+
+- **Home-screen widgets** (iOS and Android): order tracking, seller sales today, live now, creator stats and stories. Each endpoint lives in the service that owns the data (`/api/v1/widgets/*` in `src/routes/widget.routes.ts`) and accepts the read-only widget token. Notifications sends silent pushes to refresh them.
+- **Embeddable web widget:** `apps/webapp` serves a loader script, store, product and buy-button embeds, and oEmbed. These pages are the only ones that may be framed.
+
+Contract: [widgetsApiContract.md](widgetsApiContract.md).
+
+## 11. Running locally: mocks or the real backend
+
+- `pnpm mode:mock` / `pnpm mode:backend` rewrite only the mode keys in each app's local env file (`scripts/localMode`), so every app either uses its in-process mocks or calls the gateway on `:8080`. `pnpm mode:status` shows where each app points.
+- `pnpm backend:up` (`scripts/localStack/backend.sh`) starts the core infra (Postgres, Valkey, RabbitMQ, LocalStack for SES, SeaweedFS), applies the Prisma migrations, builds and starts the Go binaries and TS services on 127.0.0.1, starts realtime if Elixir is installed, waits for health and seeds demo data. `pnpm backend:down` stops only what it started.
+- Locally, go-money talks to a fake Flutterwave server, and one-time codes are written to the go-identity log.
+- Production builds never contain mocks: `pnpm check:no-mocks` checks the Next builds and the mobile export.
+
+Details: [../runningLocally.md](../runningLocally.md).
+
+## 12. Deployment
+
+Terraform in `infra/aws` targets **ECS on Fargate**, one AWS account per environment. It is written and validated but has **never been applied**.
 
 ```mermaid
-flowchart LR
-  classDef existing fill:#d8f3dc,stroke:#2d6a4f,color:#081c15
-  classDef proposed fill:#dbe4ff,stroke:#364fc7,color:#10194d
-  classDef future fill:#f1f3f5,stroke:#868e96,color:#343a40,stroke-dasharray: 4 3
-
-  svc["Owning service tx<br/>business rows + outbox row"]:::existing
-  relay["Outbox relay<br/>500 ms, batch 100, SKIP LOCKED"]:::existing
-  bus["RabbitMQ zudomart.events<br/>(Amazon MQ cluster)"]:::existing
-  qRt["queue realtime"]:::existing
-  qOwn["quorum queue per consumer<br/>notifications, points, search,<br/>analytics, intelligence, webhooks"]:::proposed
-  jobs["zudomart.jobs queues<br/>retry tiers + DLQ"]:::existing
-  workers["Workers on ECS<br/>Go / TS / Python"]:::proposed
-  rt["Phoenix fan-out"]:::existing
-  os[("OpenSearch")]:::future
-  ch[("ClickHouse")]:::future
-  flutterwave["Flutterwave (checkout, payout subaccounts, transfers)"]
-  iap["Apple / Google IAP"]:::proposed
-  livekit["LiveKit SFU, Ingress, Egress"]:::existing
-  comms["SES email, SMS, FCM/APNs push"]:::proposed
-
-  svc --> relay --> bus
-  bus --> qRt --> rt
-  bus --> qOwn --> workers
-  svc -- "enqueue" --> jobs --> workers
-  workers --> os & ch
-  workers --> comms
-  flutterwave & iap -- "webhooks" --> svc
-  livekit -- "webhooks" --> svc
+flowchart TB
+  U(["Clients"]) --> CF["CloudFront + WAF"]
+  CF --> ALB["Public ALB"]
+  CF --> S3[("S3 media<br/>signed URLs")]
+  subgraph VPC["VPC, private subnets"]
+    ALB -- "/ws*" --> RT["realtime"]
+    ALB -- "/*" --> GW["gateway"]
+    GW --> IALB["Internal ALB<br/>host-based routing per service"]
+    IALB --> SVC["go-identity, go-commerce, go-money, go-live,<br/>go-ads, go-trust, social, notifications,<br/>media, search, support, intelligence"]
+    SVC --> AUR[("Aurora PostgreSQL + PostGIS<br/>RDS Proxy")]
+    SVC --> AMQ[["Amazon MQ for RabbitMQ"]]
+    SVC --> VAL[("ElastiCache Valkey")]
+  end
+  SVC --> LK["LiveKit Cloud<br/>or self-hosted"]
+  SVC --> SES["SES"]
+  SVC --> FLW["Flutterwave<br/>(fixed NAT IPs allowlisted)"]
 ```
 
-Flutterwave is the only payment provider (owner, 2026-10-11); its webhooks (`verif-hash`, re-verified by id) land on go-money (`docs/integrations/flutterwaveMigration.md`).
+- Fourteen Fargate services (`infra/aws/modules/platform/services.tf`), each with its own task role and secrets in Secrets Manager, encrypted with per-purpose KMS keys.
+- `.github/workflows/deploy.yml` deploys `main` to staging, then production behind a GitHub environment approval, running the migrate task first when it is configured. go-money uses CodeDeploy blue/green with a canary and automatic rollback on the ledger-imbalance and 5xx alarms; the other services use ECS rolling deploys with a circuit breaker.
+- The WAF blocks `/internal` paths and requires the `verif-hash` header on the Flutterwave webhook path.
 
-LiveKit is EXISTING only as a local compose container (`infra/local/docker-compose.yml`); no token minting code exists.
+Bootstrap steps and variables: [../../infra/aws/README.md](../../infra/aws/README.md). CI, environments and DR: [devops.md](devops.md), [disaster-recovery.md](disaster-recovery.md).
 
-## 3. Component status table
+## 13. Deliberately not built
 
-| Layer | Component | Status | Path / source |
-| --- | --- | --- | --- |
-| Clients | mobile, webapp, studio, seller, ads, admin, web | EXISTING UI, MOCK-ONLY data (except auth) | `apps/*` |
-| Edge | CloudFront, WAF, ALB | PROPOSED | `infra/aws/README.md` |
-| Gateway | Zudojs proxy, JWKS, CORS, 1 MiB body, 10 s upstream timeout | EXISTING | `services/typescript/gateway/src` |
-| Go | 6 deployables, platform libs | EXISTING (only auth routes) | `services/go/deployables/*`, `services/go/platform` |
-| TS services | social, feed, notifications, media, search, support, integrations, campaigns | PROPOSED (reference logic in the old monolith) | `microservicesPlan.json` `typescript` |
-| Realtime | Phoenix raw WebSocket, AMQP consumer, topic authorizer | EXISTING | `services/elixir/realtime` |
-| Intelligence | FastAPI scoring, 12 modules, AMQP domain event consumer + trust advisory producer | EXISTING, no callers | `services/python/intelligence` |
-| DB | Postgres 17 + PostGIS locally; 29 schemas and roles | EXISTING (local); Aurora PROPOSED | `infra/local/postgres/create-databases.sh` |
-| Cache | Valkey 9 locally | EXISTING (local); ElastiCache PROPOSED | compose |
-| Messaging | RabbitMQ 4 (RabbitMQ adopted, owner, 2026-10-03); Amazon MQ for RabbitMQ cluster in private subnets for AWS | EXISTING (local); Amazon MQ PROPOSED | `infra/local/rabbitmq/*` |
-| Media | SeaweedFS (S3 API) locally | EXISTING (local); S3 + CloudFront PROPOSED | compose |
-| Search / analytics | OpenSearch, ClickHouse compose profiles | OPTIONAL FUTURE | compose profiles `search`, `analytics` |
-| Observability | OTLP traces from Go, collector, Jaeger | EXISTING (local, opt-in) | `services/go/platform/telemetry`, `infra/local/otel` |
-| Payments, IAP, email/SMS/push | providers | PROPOSED (legacy reference in the old monolith) | the old monolith's `payments` module |
+These stay out until a stated trigger is reached; the triggers are in [devops.md](devops.md) and [events.md](events.md).
 
-## 4. Recommendations
-
-### 4.1 Wire one vertical slice through every layer before more modules
-
-| Field | Value |
-| --- | --- |
-| Problem | 6 deployables compile, 1 serves traffic; frontends never leave mocks |
-| Current | auth only; env examples target `:3000` |
-| Why it matters | Edge, gateway routing, event, and contract bugs stay hidden until late |
-| Recommendation | Fix env defaults to the gateway (`:8080`), add gateway routes per domain as modules land, start with live gifts (schema exists) end to end incl. go-money ledger |
-| Complexity | M |
-| Risk | Low |
-| Priority | **P1**: every other domain depends on the same gateway/route/event plumbing |
-
-### 4.2 Gateway trust boundary
-
-| Field | Value |
-| --- | --- |
-| Problem | go-identity trusts plain `x-zudomart-account-id` headers from the gateway |
-| Current | no signing; trust relies on network isolation (`upstreamProxy.service.ts`) |
-| Why it matters | Any task in the VPC that can reach a Go service can impersonate any user |
-| Recommendation | Go services verify the JWT themselves (`platform/jwtauth` already exists) and treat forwarded headers as hints; security groups allow only the gateway SG into Go services |
-| Complexity | S |
-| Risk | Low |
-| Priority | **P0**: required before any money or account-mutating route ships |
-
-### 4.3 Edge rate limiting is per instance
-
-| Field | Value |
-| --- | --- |
-| Problem | 600/min in-process limit multiplies with task count; no login/OTP limit (SECURITY.md requires one) |
-| Current | `RATE_LIMIT_MAX_PER_MINUTE` in gateway memory |
-| Why it matters | Credential stuffing and OTP pumping (SMS cost) |
-| Recommendation | WAF rate rule per IP at CloudFront + Redis token buckets in the gateway with the buckets from `backendPlan.md` 5.5 |
-| Complexity | S |
-| Risk | Low |
-| Priority | **P0** before public launch of OTP delivery (SMS cost exposure) |
-
-### 4.4 Performance and scale staging
-
-| Item | Stage |
-| --- | --- |
-| RDS Proxy in front of Aurora (many Fargate tasks x pool size) | MVP |
-| Redis-backed gateway limits and idempotency fast path | MVP |
-| CloudFront caching of `GET /gifts`, categories, mart home with ETag | MVP |
-| LL-HLS Egress for live rooms above a viewer threshold | Near term |
-| Aurora read replica for seller/admin analytics | Near term (trigger: analytics queries > 10% writer CPU) |
-| OpenSearch for search | Near term (trigger: Postgres trigram/FTS p95 > 300 ms or multilingual ranking needed) |
-| ClickHouse for analytics | Scale stage (trigger: > ~5k orders/day or event tables > 100M rows) |
-| MSK, EKS, service mesh | Not planned; triggers in [events.md](events.md) section 4 and [backend.md](backend.md) section 6 |
+- **Kafka or MSK:** the outbox and RabbitMQ cover today's load.
+- **OpenSearch:** search runs on Postgres. The OpenSearch container exists only in the full local compose profile and no code uses it.
+- **ClickHouse:** the same applies; no code uses it, and analytics run on Postgres.
+- **EKS or a service mesh.**
+- **Read replicas.**
