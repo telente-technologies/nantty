@@ -1,4 +1,5 @@
 const LIVE_POLL_INTERVAL_MS = 10_000;
+const LIVE_REALTIME_SAFETY_POLL_MS = 60_000;
 
 export type LiveRoomStatus = "live" | "upcoming" | "ended";
 
@@ -16,8 +17,9 @@ export function canPlayInBrowser(url: string | null | undefined): url is string 
   return typeof url === "string" && url.length > 0 && !/\.m3u8(\?|$)/i.test(url);
 }
 
-export function pollIntervalForLiveStatus(status: string | null | undefined): number | false {
-  return readLiveRoomStatus(status) === "ended" ? false : LIVE_POLL_INTERVAL_MS;
+export function pollIntervalForLiveStatus(status: string | null | undefined, isRealtime = false): number | false {
+  if (readLiveRoomStatus(status) === "ended") return false;
+  return isRealtime ? LIVE_REALTIME_SAFETY_POLL_MS : LIVE_POLL_INTERVAL_MS;
 }
 
 export function shouldShowLiveRoomError(hasData: boolean, isError: boolean): boolean {

@@ -1,5 +1,6 @@
 import type {
   Comment,
+  CommentHiddenState,
   CoinActivityEntry,
   CoinBalance,
   CoinPackage,
@@ -8,6 +9,7 @@ import type {
   LiveGift,
   LiveSessionDetails,
   MentionEntity,
+  MyPostComment,
   Page,
   SentLiveGiftReceipt,
 } from "@/types";
@@ -54,6 +56,12 @@ export const commentsService = {
     sendRequestToWebappServer<Comment>(`/api/v1/posts/${postId}/comments/${commentId}/pin`, { method: "PUT", idempotencyKey: createIdempotencyKey("pin") }),
   unpinComment: (postId: ID, commentId: ID) =>
     sendRequestToWebappServer<void>(`/api/v1/posts/${postId}/comments/${commentId}/pin`, { method: "DELETE", idempotencyKey: createIdempotencyKey("unpin") }),
+  hideComment: (postId: ID, commentId: ID) =>
+    sendRequestToWebappServer<CommentHiddenState>(`/api/v1/posts/${postId}/comments/${commentId}/hide`, { method: "PUT" }),
+  unhideComment: (postId: ID, commentId: ID) =>
+    sendRequestToWebappServer<CommentHiddenState>(`/api/v1/posts/${postId}/comments/${commentId}/hide`, { method: "DELETE" }),
+  listHiddenComments: (cursor: string | undefined) =>
+    sendRequestToWebappServer<Page<MyPostComment>>("/api/v1/me/post-comments", { query: { filter: "hidden", cursor } }),
 };
 
 export const reportsService = {

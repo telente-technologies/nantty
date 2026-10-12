@@ -58,7 +58,7 @@ export function writeCachedViewerCookie(response: NextResponse, sessionId: strin
 }
 
 export function clearEverySessionCookie(response: NextResponse): void {
-  for (const cookieName of [sessionCookieNames.accessToken, sessionCookieNames.refreshToken, sessionCookieNames.sessionId, sessionCookieNames.viewer]) {
+  for (const cookieName of [sessionCookieNames.accessToken, sessionCookieNames.refreshToken, sessionCookieNames.sessionId, sessionCookieNames.viewer, sessionCookieNames.realtimeTicket]) {
     response.cookies.set(cookieName, "", buildHardenedCookieOptions(0));
   }
 }
