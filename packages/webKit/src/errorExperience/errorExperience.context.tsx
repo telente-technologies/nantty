@@ -37,7 +37,7 @@ const defaultConfig: ErrorExperienceConfig = { homeHref: "/" };
 
 const ErrorExperienceContext = createContext<ErrorExperienceConfig>(defaultConfig);
 
-export function ErrorExperienceProvider({ value, children }: { readonly value: ErrorExperienceConfig; readonly children: ReactNode }) {
+export function ErrorExperienceProvider({ value, children }: { readonly value: ErrorExperienceConfig; readonly children?: ReactNode }) {
   return <ErrorExperienceContext.Provider value={value}>{children}</ErrorExperienceContext.Provider>;
 }
 

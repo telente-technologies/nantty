@@ -5,7 +5,7 @@ import { consentRules, defineEmailTemplate } from "./defineTemplate";
 const base = { category: "payments", kind: "transactional", audience: "Plan subscriber (web card billing)", consent: consentRules.always } as const;
 
 export interface BillingLineItem {
-  readonly kind: "plan_base" | "checkmark" | "bundle_discount" | "proration_credit";
+  readonly kind: "plan_base" | "checkmark" | "bundle_discount" | "offer_discount" | "proration_credit";
   readonly label: string;
   readonly amount: Money;
 }
