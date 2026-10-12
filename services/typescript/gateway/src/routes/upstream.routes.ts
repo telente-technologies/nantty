@@ -156,6 +156,8 @@ export const upstreamRoutes: readonly UpstreamRoute[] = [
   { pathPrefix: "/api/v1/pricing/", upstream: "money", authentication: "optional", methods: ["GET"] },
   { pathPrefix: "/api/v1/ads/r/", upstream: "ads", authentication: "optional", methods: ["GET"], redirectPassthrough: true },
   { pathPrefix: "/api/v1/ads/", upstream: "ads", authentication: "required" },
+  { pathPrefix: "/api/v1/subscription-offers/*", upstream: "money", authentication: "optional", methods: ["GET"], exactPathOnly: true },
+  { pathPrefix: "/api/v1/subscription-offers/*/claim", upstream: "money", authentication: "required", methods: ["POST"], exactPathOnly: true },
   { pathPrefix: "/api/v1/subscriptions", upstream: "money", authentication: "required" },
   { pathPrefix: "/api/v1/seller/subscription", upstream: "money", authentication: "required" },
   { pathPrefix: "/api/v1/returns", upstream: "commerce", authentication: "required" },
@@ -241,7 +243,7 @@ export const upstreamRoutes: readonly UpstreamRoute[] = [
   { pathPrefix: "/api/v1/admin/", upstream: "identity", authentication: "optional" },
 ];
 
-export const sensitiveGuestPathPrefixes: readonly string[] = ["/api/v1/feeds/", "/api/v1/explore", "/api/v1/search", "/api/v1/products", "/api/v1/stores", "/api/v1/clips"];
+export const sensitiveGuestPathPrefixes: readonly string[] = ["/api/v1/feeds/", "/api/v1/explore", "/api/v1/search", "/api/v1/products", "/api/v1/stores", "/api/v1/clips", "/api/v1/subscription-offers/"];
 
 export function isChatReportSubmission(method: string, path: string, body: Uint8Array | undefined): boolean {
   if (method.toUpperCase() !== "POST" || path !== "/api/v1/reports" || body === undefined) return false;

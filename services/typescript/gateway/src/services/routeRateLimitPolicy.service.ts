@@ -1,8 +1,8 @@
-export type RouteLimitName = "login" | "otp" | "reset" | "signup" | "report" | "upload" | "search" | "usernameCheck" | "postWrite" | "tagSearch" | "verification" | "mediaDownload" | "sellerPeopleSearch" | "sellerTeamWrite" | "sellerMoneyWrite" | "storeMessageSend" | "feedInteraction" | "linkPreview" | "widgetRead" | "widgetToken";
+export type RouteLimitName = "login" | "otp" | "reset" | "signup" | "report" | "upload" | "search" | "usernameCheck" | "postWrite" | "tagSearch" | "verification" | "mediaDownload" | "sellerPeopleSearch" | "sellerTeamWrite" | "sellerMoneyWrite" | "storeMessageSend" | "feedInteraction" | "linkPreview" | "widgetRead" | "widgetToken" | "offerRead" | "offerClaim";
 
-export const defaultRouteLimitsPerMinute: Readonly<Record<RouteLimitName, number>> = { login: 10, otp: 5, reset: 5, signup: 10, report: 20, upload: 30, search: 60, usernameCheck: 30, postWrite: 30, tagSearch: 60, verification: 10, mediaDownload: 40, sellerPeopleSearch: 30, sellerTeamWrite: 30, sellerMoneyWrite: 10, storeMessageSend: 60, feedInteraction: 60, linkPreview: 30, widgetRead: 30, widgetToken: 10 };
+export const defaultRouteLimitsPerMinute: Readonly<Record<RouteLimitName, number>> = { login: 10, otp: 5, reset: 5, signup: 10, report: 20, upload: 30, search: 60, usernameCheck: 30, postWrite: 30, tagSearch: 60, verification: 10, mediaDownload: 40, sellerPeopleSearch: 30, sellerTeamWrite: 30, sellerMoneyWrite: 10, storeMessageSend: 60, feedInteraction: 60, linkPreview: 30, widgetRead: 30, widgetToken: 10, offerRead: 30, offerClaim: 10 };
 
-const accountScopedLimits: readonly RouteLimitName[] = ["report", "upload", "search", "postWrite", "tagSearch", "verification", "mediaDownload", "sellerPeopleSearch", "sellerTeamWrite", "sellerMoneyWrite", "storeMessageSend", "feedInteraction", "linkPreview", "widgetRead", "widgetToken"];
+const accountScopedLimits: readonly RouteLimitName[] = ["report", "upload", "search", "postWrite", "tagSearch", "verification", "mediaDownload", "sellerPeopleSearch", "sellerTeamWrite", "sellerMoneyWrite", "storeMessageSend", "feedInteraction", "linkPreview", "widgetRead", "widgetToken", "offerClaim"];
 
 export function classifyRequestForRateLimit(method: string, path: string): RouteLimitName | undefined {
   const verb = method.toUpperCase();
@@ -27,6 +27,8 @@ export function classifyRequestForRateLimit(method: string, path: string): Route
   if ((verb === "GET" && lowered === "/api/v1/link-previews/resolve") || (verb === "POST" && /^\/api\/v1\/posts\/[^/]+\/link-preview$/.test(lowered))) return "linkPreview";
   if (verb === "GET" && lowered.startsWith("/api/v1/widgets/")) return "widgetRead";
   if (verb === "POST" && (lowered === "/api/v1/auth/widget-token" || lowered === "/api/v1/auth/realtime-token")) return "widgetToken";
+  if (verb === "GET" && /^\/api\/v1\/subscription-offers\/[^/]+$/.test(lowered)) return "offerRead";
+  if (verb === "POST" && /^\/api\/v1\/subscription-offers\/[^/]+\/claim$/.test(lowered)) return "offerClaim";
   return undefined;
 }
 
