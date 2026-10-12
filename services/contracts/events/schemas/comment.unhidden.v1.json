@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.zudomart.com/events/comment.unhidden.v1.json",
+  "title": "CommentUnhidden",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "commentId",
+    "postId",
+    "commentAuthorId",
+    "parentCommentId",
+    "actorId"
+  ],
+  "properties": {
+    "commentId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "postId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "commentAuthorId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "parentCommentId": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "uuid"
+    },
+    "actorId": {
+      "type": "string",
+      "format": "uuid"
+    }
+  }
+}

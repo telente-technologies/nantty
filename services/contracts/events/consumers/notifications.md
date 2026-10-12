@@ -23,7 +23,8 @@ Queue `notifications-domain-events` (RabbitMQ quorum queue bound to `zudomart.ev
 | policyVersion.published | goIdentity | R kind, version, effectiveAt, publishedBy; O versionId, documentKey, documentTitle, changeSummary, whatChanged[], isMaterialChange |
 | escrow.held | goMoney | R buyerUserId, orderId, escrowId; email also needs orderNumber, groups[], releaseRule |
 | escrow.released | goMoney | R sellerUserId, orderId, escrowId, amount, commission, releasedToSeller; email needs orderNumber; O paymentFee, availableAt, releasedBecause |
-| escrow.refunded, escrow.partiallyRefunded | goMoney | R buyerUserId, orderId, escrowId, refunded; email needs orderNumber; O refundMethod, reason, itemName |
+| escrow.refunded, escrow.partiallyRefunded | goMoney | R buyerUserId, orderId, escrowId, refunded; email needs orderNumber; O refundDestination (wallet, the default, or paymentMethod), reason, itemName |
+| escrow.refundScheduled | goMoney | R buyerUserId, sellerUserId, orderId, escrowId, pendingRefund; O orderNumber, reason. In-app only, to buyer and seller |
 | dispute.opened | goMoney | R buyerUserId, sellerUserId, disputeId, orderId; email needs caseNumber, orderNumber, amount, reason, respondBy; O openedBy |
 | disputeMessage.posted | goMoney | R buyerUserId, sellerUserId, disputeId, authorUserId; email needs caseNumber, orderNumber, amount, message; O authorName, stage, actionNeededBy |
 | dispute.sellerResponseOverdue | goMoney | R buyerUserId, sellerUserId, disputeId, orderId; in-app + push only (the dispute moved to staff review after the 48-hour seller window) |
@@ -37,6 +38,7 @@ Queue `notifications-domain-events` (RabbitMQ quorum queue bound to `zudomart.ev
 | gift.sent | goLive | R receiverUserId, liveId; O quantity, totalCoins, sender{id,name,username,avatarUrl} |
 | post.created | ts-social | R postId, authorId, kind, visibility; O isVideoReply, authorProfileId. Only public `post`/`clip` posts by the personal profile fan out (no stories, video replies, subscriber-only or business-profile posts): a `postNotifications.fanout` job pages `GET /api/v1/internal/post-notification-subscribers/:authorId?scope=posts` on social 200 at a time and sends in-app + push "@username posted a new clip" (social category, deep link `/clips/:id` or `/post/:id`) to followers whose bell is `posts` or `posts_and_lives`. Blocked pairs are filtered by social; each page passes `postId` so paging stops once the post is deleted or removed; a finished page job is not re-run on redelivery; the author is never notified |
 | live.started | goLive | R title, liveId, hostName, hostHandle, host{id,name,username,avatarUrl}, notifyUserIds[] (opted-in unblocked followers, at most 1000; notifyTruncated marks more), isShopping, viewerCount, visibility, notifyAudience, startedAt; O emailUserIds[], liveUrl, coverUrl (schema `live.started.v1.json`). Also queues a `postNotifications.fanout` job (scope `lives`) that alerts every follower whose bell is `posts_and_lives`, beyond the 1000 cap, with "@username is live: <title>" (deduped per event and recipient with notifyUserIds; skipped for subscriber-only lives) |
+| live.reminderDue | live reminder sweep (15 minutes before a scheduled live) | R liveId, title, scheduledAt, notifyUserIds[] (same audience rules as live.started, at most 1000); O hostName, host{id,name,username,avatarUrl}, hostHandle, notifyTruncated (schema `live.reminderDue.v1.json`). In-app and push only, category `live`: "<hostName> goes live in N minutes" with data {liveId, scheduledAt, url} |
 | review.created | goCommerce | R storeOwnerAccountId; O rating, storeName, reviewId. Seller category: in-app + push "New review" linking to the dashboard reviews page |
 | review.replied | goCommerce | R authorAccountId, storeId, reviewId; O storeName, productId, firstReply (false = an edit, nothing sent). In-app + push to the reviewer |
 | sellerApplication.reviewed | goCommerce | R accountId, applicationId, decision (`approved`\|`rejected`); O storeName, reason. Seller category: in-app + push |
@@ -58,10 +60,12 @@ otp.issued, signIn.newDeviceDetected, twoFactor.enabled (goIdentity); checkmark.
 | order.cancelled | goCommerce | R order base + reason; O cancelledBy, refund, refundMethod, restocked |
 | account.restricted / suspended / banned, appeal.decided, report.closed | goTrust | R accountId (reporterUserId for report.closed), caseId, reason, policy, policyUrl, appealUrl + restrictions[], until / appealBy, deletionAt; appeal: outcome, explanation; report: reportId, reportedWhat, outcome, reportedAt |
 | account.warned | goIdentity (via goTrust WARN_AUTHOR / WARN_USER) | R accountId, reason, policy, policyUrl, appealUrl; O caseId (report id), source. In-app + push only, no email template |
-| mention.created | social | R recipientUserId, actor{id,name}, excerpt, url; O surface, mentionedEveryone |
+| mention.created | social | R recipientUserId, actor{id,name}, excerpt, url; O surface, mentionedEveryone, commentId (stored for comment mentions) |
 | post.tagged | social | R recipientUserId, actor{id,name}, postId, kind (post or clip); O taggedUserId, authorId, url |
 | follow.created, followRequest.created, messageRequest.received, videoReply.created | social | R recipientUserId, actor{id,name}; O url |
-| comment.created | social | R recipientUserId, actor; O target, excerpt, url |
+| comment.created | social | R recipientUserId, actor; O target, excerpt, url, commentId (stored so the notification can be withdrawn) |
+| comment.hidden / comment.unhidden | social | R commentId. No notification: in-app notifications of that comment (comment.created and comment mentions, matched by stored commentId or a `?comment=<id>` link) get `hiddenAt` set or cleared, so they leave and rejoin the inbox and unread count. Push already sent is not recalled |
+| post.deleted | social | R postId. No notification: notifications pointing at the post are deleted |
 | post.reshared | social | R originalAuthorId, authorId, postId, originalPostId, isQuote, actor{id,name}; O surface (post or comment), commentId, url. Self-quotes are skipped. In-app + push |
 | any social event with `notificationsMuted: true` | social | Dropped without a notification: the recipient turned off notifications for that post (comment.created, mention.created, videoReply.created, post.tagged, post.reshared, post.liked, comment.liked, comment.pinned) |
 

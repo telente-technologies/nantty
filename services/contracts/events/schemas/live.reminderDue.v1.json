@@ -1,0 +1,84 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.zudomart.com/events/live.reminderDue.v1.json",
+  "title": "LiveReminderDue",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "liveId",
+    "hostId",
+    "title",
+    "scheduledAt",
+    "host",
+    "hostName",
+    "hostHandle",
+    "notifyUserIds",
+    "notifyTruncated"
+  ],
+  "properties": {
+    "liveId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "hostId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "title": {
+      "type": "string"
+    },
+    "scheduledAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "host": {
+      "type": "object",
+      "required": [
+        "id",
+        "name",
+        "username"
+      ],
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "username": {
+          "type": "string"
+        },
+        "avatarUrl": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "verified": {
+          "type": "boolean"
+        },
+        "isCreator": {
+          "type": "boolean"
+        }
+      }
+    },
+    "hostName": {
+      "type": "string"
+    },
+    "hostHandle": {
+      "type": "string"
+    },
+    "notifyUserIds": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "format": "uuid"
+      },
+      "maxItems": 1000,
+      "description": "followers alerted for the host's lives, resolved the same way as live.started"
+    },
+    "notifyTruncated": {
+      "type": "boolean"
+    }
+  }
+}

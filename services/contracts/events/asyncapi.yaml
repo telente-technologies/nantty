@@ -104,6 +104,10 @@ channels:
         $ref: '#/components/messages/postTagged'
       commentCreated:
         $ref: '#/components/messages/commentCreated'
+      commentHidden:
+        $ref: '#/components/messages/commentHidden'
+      commentUnhidden:
+        $ref: '#/components/messages/commentUnhidden'
       videoReplyCreated:
         $ref: '#/components/messages/videoReplyCreated'
       messageRequestReceived:
@@ -204,6 +208,12 @@ channels:
         $ref: '#/components/messages/liveStarted'
       liveEnded:
         $ref: '#/components/messages/liveEnded'
+      liveScheduled:
+        $ref: '#/components/messages/liveScheduled'
+      liveScheduleCancelled:
+        $ref: '#/components/messages/liveScheduleCancelled'
+      liveReminderDue:
+        $ref: '#/components/messages/liveReminderDue'
       liveTopSupporterSelected:
         $ref: '#/components/messages/liveTopSupporterSelected'
       liveViewerCountChanged:
@@ -330,6 +340,8 @@ channels:
         $ref: '#/components/messages/orderGroupDelivered'
       escrowReleaseScheduled:
         $ref: '#/components/messages/escrowReleaseScheduled'
+      escrowRefundScheduled:
+        $ref: '#/components/messages/escrowRefundScheduled'
       payoutAccountAdded:
         $ref: '#/components/messages/payoutAccountAdded'
       payoutAccountDefaultChanged:
@@ -615,6 +627,9 @@ operations:
     messages:
       - $ref: '#/channels/domainEvents/messages/liveStarted'
       - $ref: '#/channels/domainEvents/messages/liveEnded'
+      - $ref: '#/channels/domainEvents/messages/liveScheduled'
+      - $ref: '#/channels/domainEvents/messages/liveScheduleCancelled'
+      - $ref: '#/channels/domainEvents/messages/liveReminderDue'
       - $ref: '#/channels/domainEvents/messages/liveTopSupporterSelected'
       - $ref: '#/channels/domainEvents/messages/liveViewerCountChanged'
       - $ref: '#/channels/domainEvents/messages/liveCommentCreated'
@@ -677,6 +692,7 @@ operations:
       - $ref: '#/channels/domainEvents/messages/orderGroupShipped'
       - $ref: '#/channels/domainEvents/messages/orderGroupDelivered'
       - $ref: '#/channels/domainEvents/messages/escrowReleaseScheduled'
+      - $ref: '#/channels/domainEvents/messages/escrowRefundScheduled'
       - $ref: '#/channels/domainEvents/messages/payoutAccountAdded'
       - $ref: '#/channels/domainEvents/messages/payoutAccountDefaultChanged'
       - $ref: '#/channels/domainEvents/messages/payoutTransferSucceeded'
@@ -1189,6 +1205,27 @@ components:
         allOf:
           - $ref: './schemas/envelope.v1.json'
           - properties: { data: { $ref: './schemas/live.started.v1.json' } }
+    liveScheduled:
+      name: live.scheduled
+      headers: { type: object, properties: { eventType: { const: live.scheduled } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/live.scheduled.v1.json' } }
+    liveScheduleCancelled:
+      name: live.scheduleCancelled
+      headers: { type: object, properties: { eventType: { const: live.scheduleCancelled } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/live.scheduleCancelled.v1.json' } }
+    liveReminderDue:
+      name: live.reminderDue
+      headers: { type: object, properties: { eventType: { const: live.reminderDue } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/live.reminderDue.v1.json' } }
     liveEnded:
       name: live.ended
       headers: { type: object, properties: { eventType: { const: live.ended } } }
@@ -1574,6 +1611,13 @@ components:
         allOf:
           - $ref: './schemas/envelope.v1.json'
           - properties: { data: { $ref: './schemas/escrow.releaseScheduled.v1.json' } }
+    escrowRefundScheduled:
+      name: escrow.refundScheduled
+      headers: { type: object, properties: { eventType: { const: escrow.refundScheduled } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/escrow.refundScheduled.v1.json' } }
     payoutAccountAdded:
       name: payoutAccount.added
       headers: { type: object, properties: { eventType: { const: payoutAccount.added } } }
@@ -1931,6 +1975,20 @@ components:
         allOf:
           - $ref: './schemas/envelope.v1.json'
           - properties: { data: { $ref: './schemas/comment.created.v1.json' } }
+    commentHidden:
+      name: comment.hidden
+      headers: { type: object, properties: { eventType: { const: comment.hidden } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/comment.hidden.v1.json' } }
+    commentUnhidden:
+      name: comment.unhidden
+      headers: { type: object, properties: { eventType: { const: comment.unhidden } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/comment.unhidden.v1.json' } }
     videoReplyCreated:
       name: videoReply.created
       headers: { type: object, properties: { eventType: { const: videoReply.created } } }

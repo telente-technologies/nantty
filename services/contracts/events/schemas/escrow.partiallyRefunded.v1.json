@@ -127,6 +127,14 @@
           "pattern": "^[A-Z]{3}$"
         }
       }
+    },
+    "refundDestination": {
+      "type": "string",
+      "enum": [
+        "wallet",
+        "paymentMethod"
+      ],
+      "description": "wallet: unlocked in the buyer's own Zudomart (Flutterwave) wallet. paymentMethod: refunded through Flutterwave to the card or account the buyer paid with."
     }
   }
 }
