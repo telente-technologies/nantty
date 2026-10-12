@@ -350,6 +350,8 @@ channels:
         $ref: '#/components/messages/payoutTransferSucceeded'
       payoutTransferFailed:
         $ref: '#/components/messages/payoutTransferFailed'
+      subscriptionOfferSent:
+        $ref: '#/components/messages/subscriptionOfferSent'
       storePurchaseRefunded:
         $ref: '#/components/messages/storePurchaseRefunded'
       escrowHeld:
@@ -1646,6 +1648,13 @@ components:
         allOf:
           - $ref: './schemas/envelope.v1.json'
           - properties: { data: { $ref: './schemas/payoutTransfer.failed.v1.json' } }
+    subscriptionOfferSent:
+      name: subscriptionOffer.sent
+      headers: { type: object, properties: { eventType: { const: subscriptionOffer.sent } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/subscriptionOffer.sent.v1.json' } }
     storePurchaseRefunded:
       name: storePurchase.refunded
       headers: { type: object, properties: { eventType: { const: storePurchase.refunded } } }
