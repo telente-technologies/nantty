@@ -4,7 +4,9 @@ import { useState } from "react";
 import { VariantPickerSheet } from "@/components/product/variantPickerSheet";
 import { useCartActions } from "@/hooks/useCart.hook";
 import type { MainStackParamList } from "@/navigation/navigation.types";
+import { rememberSaleAttribution } from "@/store/saleAttribution.store";
 import type { ProductSummary } from "@/types";
+import type { SaleAttribution } from "@/utils/saleAttribution.util";
 import { requireAuthAfterClosingModal, requireAuthThen } from "@/utils/requireAuth.util";
 
 import { PostProductsSheet } from "./postProductsSheet";
@@ -12,9 +14,10 @@ import { PostProductsSheet } from "./postProductsSheet";
 export interface PostProductsFlowProps {
   readonly products: readonly ProductSummary[] | null;
   readonly onClose: () => void;
+  readonly attribution?: SaleAttribution | null;
 }
 
-export function PostProductsFlow({ products, onClose }: PostProductsFlowProps) {
+export function PostProductsFlow({ products, onClose, attribution = null }: PostProductsFlowProps) {
   const navigation = useNavigation<NavigationProp<MainStackParamList>>();
   const [variantPickerProductId, setVariantPickerProductId] = useState<string | null>(null);
   const { addProductToCart } = useCartActions();
@@ -23,7 +26,10 @@ export function PostProductsFlow({ products, onClose }: PostProductsFlowProps) {
     requireAuthAfterClosingModal(
       onClose,
       async () => {
-        for (const product of all) await addProductToCart.mutateAsync({ productId: product.id, quantity: 1 });
+        for (const product of all) {
+          rememberSaleAttribution(product.id, attribution);
+          await addProductToCart.mutateAsync({ productId: product.id, quantity: 1 });
+        }
         onClose();
         navigation.navigate("Cart");
       },
@@ -33,6 +39,7 @@ export function PostProductsFlow({ products, onClose }: PostProductsFlowProps) {
   const addSinglePostProductToCart = (product: ProductSummary) =>
     requireAuthThen(
       () => {
+        rememberSaleAttribution(product.id, attribution);
         if (product.hasVariants || (product.variantGroups?.length ?? 0) > 0) {
           setVariantPickerProductId(product.id);
           return;
@@ -49,6 +56,7 @@ export function PostProductsFlow({ products, onClose }: PostProductsFlowProps) {
         products={products}
         onClose={onClose}
         onPressProduct={(productId) => {
+          rememberSaleAttribution(productId, attribution);
           onClose();
           navigation.navigate("ProductDetail", { productId });
         }}

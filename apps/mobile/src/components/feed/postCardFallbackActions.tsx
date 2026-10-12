@@ -4,6 +4,7 @@ import { useShareToChat } from "@/components/chatSafety/shareToChat.hook";
 import { PostProductsFlow } from "@/components/home/postProductsFlow";
 import { usePostInteractions } from "@/hooks/usePostInteractions.hook";
 import type { Post, ProductSummary } from "@/types";
+import { attributionSourceForPostKind } from "@/utils/saleAttribution.util";
 
 import { ReshareSheet } from "./reshareSheet";
 
@@ -33,7 +34,7 @@ export function PostCardFallbackActions({ post, request }: PostCardFallbackActio
     <>
       {sendInChatElement}
       <ReshareSheet post={reshareTarget} onClose={() => setReshareTarget(null)} />
-      <PostProductsFlow products={products} onClose={() => setProducts(null)} />
+      <PostProductsFlow products={products} attribution={{ source: attributionSourceForPostKind(post.kind), id: post.id }} onClose={() => setProducts(null)} />
     </>
   );
 }

@@ -14,6 +14,8 @@ import { feedsService } from "@/services/feed/feeds.service";
 import type { Post, ProductSummary } from "@/types";
 import { requireAuthThen } from "@/utils/requireAuth.util";
 
+import { attributionSourceForPostKind, type SaleAttribution } from "@/utils/saleAttribution.util";
+
 import { PostProductsFlow } from "./postProductsFlow";
 import { SuggestedClipsRow } from "./suggestedClipsRow";
 import { TopicFilterRow } from "./topicFilterRow";
@@ -34,7 +36,7 @@ export function FeedTab() {
   const navigation = useNavigation();
   const [feedMode, setFeedMode] = useState<FeedMode>("for-you");
   const [selectedTopicId, setSelectedTopicId] = useState<string | null>(null);
-  const [productsInOpenPost, setProductsInOpenPost] = useState<readonly ProductSummary[] | null>(null);
+  const [openPostProducts, setOpenPostProducts] = useState<{ readonly products: readonly ProductSummary[]; readonly attribution: SaleAttribution } | null>(null);
   const [reshareTarget, setReshareTarget] = useState<Post | null>(null);
   const { togglePostLike, followPostAuthor, sharePost } = usePostInteractions();
   const { offerSendInChat, sendInChatElement } = useShareToChat();
@@ -115,7 +117,7 @@ export function FeedTab() {
               onPressOriginalPost={
                 item.post.resharedFrom ? () => navigation.navigate("PostDetail", { postId: item.post.resharedFrom!.id }) : undefined
               }
-              onPressViewProducts={() => setProductsInOpenPost(item.post.products)}
+              onPressViewProducts={() => setOpenPostProducts({ products: item.post.products, attribution: { source: attributionSourceForPostKind(item.post.kind), id: item.post.id } })}
               onPressAnalytics={() => navigation.navigate("PostAnalytics", { postId: item.post.id })}
             />
           )
@@ -134,7 +136,7 @@ export function FeedTab() {
         }
         ListFooterComponent={feed.isFetchingNextPage ? <BrandLoader size="sm" style={styles.footer} /> : null}
       />
-      <PostProductsFlow products={productsInOpenPost} onClose={() => setProductsInOpenPost(null)} />
+      <PostProductsFlow products={openPostProducts?.products ?? null} attribution={openPostProducts?.attribution ?? null} onClose={() => setOpenPostProducts(null)} />
       <ReshareSheet post={reshareTarget} onClose={() => setReshareTarget(null)} />
       {sendInChatElement}
     </View>
