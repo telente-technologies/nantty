@@ -36,10 +36,7 @@ Nothing is committed.
    Then run `eas build`.
 5. **LiveKit:** LiveKit Cloud, or local LiveKit with the ingress service (needed for browser go-live over WHIP; see `docs/runningLocally.md`).
 6. **Legal:** NDPC and ARCON registration.
-7. **Pitch deck:**
-   - the co-founder's photo;
-   - update the progress slide once the signed seller letters of intent come in.
-8. **Product decisions (optional):**
+7. **Product decisions (optional):**
    - Repost/Quote buttons on clips;
    - colour swatches for product options (needs a new backend field).
 
