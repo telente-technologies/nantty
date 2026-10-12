@@ -74,7 +74,19 @@ function CommentRow({ comment, postId, postAuthorId, isReply, connectBelow = fal
       showToast({ text: "Couldn't update the pin. Try again.", tone: "error" });
     },
   });
+  const hideMutation = useMutation({
+    mutationFn: () => commentsService.hideComment(postId, comment.id),
+    onSuccess: () => {
+      showToast({ text: "Comment hidden. Find it in Settings, Hidden comments." });
+      void queryClient.invalidateQueries({ queryKey: ["comments", postId] });
+      void queryClient.invalidateQueries({ queryKey: ["commentReplies"] });
+      void queryClient.invalidateQueries({ queryKey: ["post-thread", postId] });
+      void queryClient.invalidateQueries({ queryKey: ["hidden-comments"] });
+    },
+    onError: () => showToast({ text: "Couldn't hide the comment. Try again.", tone: "error" }),
+  });
   const isOwnComment = viewer?.id === comment.author.id;
+  const canHide = postAuthorId !== undefined && viewer?.id === postAuthorId && !isOwnComment;
   const isPostAuthor = comment.isPostAuthor ?? (postAuthorId !== undefined && comment.author.id === postAuthorId);
 
   return (
@@ -114,6 +126,11 @@ function CommentRow({ comment, postId, postAuthorId, isReply, connectBelow = fal
           {canPin ? (
             <button type="button" className={styles.commentAction} onClick={() => pinMutation.mutate()} disabled={pinMutation.isPending}>
               {optimisticPinned ? "Unpin" : "Pin"}
+            </button>
+          ) : null}
+          {canHide ? (
+            <button type="button" className={styles.commentAction} onClick={() => hideMutation.mutate()} disabled={hideMutation.isPending}>
+              Hide
             </button>
           ) : null}
           {isOwnComment ? (

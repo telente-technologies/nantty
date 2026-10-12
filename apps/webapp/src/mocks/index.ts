@@ -13,6 +13,7 @@ import { chatKeysMocks } from "./chatKeys.mock";
 import { groupsMocks } from "./groups.mock";
 import { clipsMocks } from "./clips.mock";
 import { coinsMocks } from "./coins.mock";
+import { commentHidingMocks } from "./commentHiding.mock";
 import { commentsMocks } from "./comments.mock";
 import { postThreadMocks } from "./postThread.mock";
 import { soundsMocks } from "./sounds.mock";
@@ -113,6 +114,7 @@ export const routes: MockRoute[] = [
   ...chatsMocks,
   ...clipsMocks,
   ...commentsMocks,
+  ...commentHidingMocks,
   ...postThreadMocks,
   ...soundsMocks,
   ...composerMocks,

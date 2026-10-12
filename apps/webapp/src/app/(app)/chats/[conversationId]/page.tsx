@@ -20,10 +20,13 @@ import { groupAttributesQueryKey, useConversationDisplay } from "@/components/me
 import { InboxRequestActions } from "@/components/messages/inboxRequestActions";
 import { useLiveLocationSharing } from "@/components/messages/liveLocationSharing.hook";
 import { useOptimisticSends } from "@/components/messages/optimisticSends.hook";
+import { useConversationTyping } from "@/components/messages/conversationTyping.hook";
 import { SecurityCodeChangedBanner } from "@/components/messages/secureChatNotices";
 import { readChatCryptoErrorMessage } from "@/services/chatCrypto/chatCrypto.service";
 import { readErrorMessageForDisplay } from "@/services/clientApi.service";
 import { messagesService } from "@/services/messages.service";
+import { webappRealtime } from "@/services/realtime/webappRealtime.service";
+import { useRealtimeTopic } from "@zudomart/web-kit/src/realtime/realtimeHooks";
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { ChatControl } from "@zudomart/chat-crypto";
 import { nextPollVote } from "@zudomart/chat-crypto";
@@ -41,6 +44,8 @@ export default function ConversationPage({ params }: { readonly params: Promise<
   const queryClient = useQueryClient();
   const [draft, setDraftState] = useState("");
   const draftRef = useRef("");
+  const isRealtime = useRealtimeTopic(webappRealtime, viewerId ? `conversation:${conversationId}` : null);
+  const typing = useConversationTyping(conversationId, viewerId, isRealtime);
   const setDraft = (value: string) => {
     draftRef.current = value;
     setDraftState(value);
@@ -63,7 +68,7 @@ export default function ConversationPage({ params }: { readonly params: Promise<
     enabled: Boolean(viewer?.id),
     initialPageParam: undefined as string | undefined,
     getNextPageParam: (lastPage) => lastPage.nextCursor ?? undefined,
-    refetchInterval: 5_000,
+    refetchInterval: isRealtime ? 30_000 : 5_000,
   });
 
   const readMutation = useMutation({
@@ -105,6 +110,7 @@ export default function ConversationPage({ params }: { readonly params: Promise<
     if (!text || !conversation || !viewer?.id) return;
     const sender = viewer.id;
     setDraft("");
+    typing.stopTyping();
     setRollbackError(null);
     optimistic.send({ kind: "text", text }, (key) => messagesService.sendChatMessage(conversation, sender, text, key));
     bottomRef.current?.scrollIntoView({ block: "end" });
@@ -146,7 +152,11 @@ export default function ConversationPage({ params }: { readonly params: Promise<
             <Avatar name={display.name} src={display.avatarSrc} size="sm" />
             <span className={styles.headerText}>
               <span className={styles.headerName}>{display.name}</span>
-              {display.subtitle ? <span className={styles.headerHandle}>{display.subtitle}</span> : null}
+              {typing.typingLabel ? (
+                <span className={styles.headerHandle} aria-live="polite">{typing.typingLabel}</span>
+              ) : display.subtitle ? (
+                <span className={styles.headerHandle}>{display.subtitle}</span>
+              ) : null}
             </span>
           </Link>
         ) : (
@@ -236,7 +246,11 @@ export default function ConversationPage({ params }: { readonly params: Promise<
             rows={1}
             placeholder="Write a message…"
             value={draft}
-            onChange={(event) => setDraft(event.target.value)}
+            onChange={(event) => {
+              setDraft(event.target.value);
+              typing.noteDraftChanged(event.target.value);
+            }}
+            onBlur={typing.stopTyping}
             onKeyDown={(event) => {
               if (event.key === "Enter" && !event.shiftKey) {
                 event.preventDefault();

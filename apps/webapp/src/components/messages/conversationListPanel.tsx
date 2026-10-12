@@ -13,6 +13,8 @@ import { Avatar } from "@/components/ui/media";
 import { EmptyState, ErrorState, Skeleton, Spinner } from "@/components/ui/feedback";
 import { InlineLink } from "@/components/ui/controls";
 import { messagesService } from "@/services/messages.service";
+import { webappRealtime } from "@/services/realtime/webappRealtime.service";
+import { useRealtimeStatus } from "@zudomart/web-kit/src/realtime/realtimeHooks";
 import { useQueries, useQuery } from "@tanstack/react-query";
 import { chatCryptoService } from "@/services/chatCrypto/chatCrypto.service";
 import { formatTimeSincePosted } from "@/utils/formatDate.util";
@@ -107,12 +109,13 @@ export function ConversationListPanel({ activeConversationId }: { readonly activ
   const [search, setSearch] = useState("");
   const [isNewMessageOpen, setIsNewMessageOpen] = useState(false);
   const [isNewGroupOpen, setIsNewGroupOpen] = useState(false);
+  const isRealtime = useRealtimeStatus(webappRealtime) === "live";
 
   const conversationsQuery = useQuery({
     queryKey: ["conversations", filter, folder],
     queryFn: () => (folder === "chats" ? messagesService.fetchConversationList(filter) : messagesService.fetchInboxFolder(folder)),
     retry: false,
-    refetchInterval: 15_000,
+    refetchInterval: isRealtime ? 60_000 : 15_000,
   });
 
   const searchResults = useQuery({

@@ -108,7 +108,7 @@ const seedThreads: readonly SeedComment[] = [
   { author: commenters.adaeze, text: "Where can I find the matching bag?", hoursAgo: 2, likes: 2 },
 ];
 
-const commentsByPostId = new Map<string, Comment[]>();
+export const commentsByPostId = new Map<string, Comment[]>();
 let nextCommentSequence = 1;
 
 const createStoredComment = (
@@ -158,7 +158,7 @@ export const findCommentAnywhere = (commentId: string): Comment | undefined => {
   return undefined;
 };
 
-const replaceStoredComment = (commentId: string, change: (comment: Comment) => Comment) => {
+export const replaceStoredComment = (commentId: string, change: (comment: Comment) => Comment) => {
   for (const [postId, comments] of commentsByPostId) {
     if (comments.some((c) => c.id === commentId))
       commentsByPostId.set(

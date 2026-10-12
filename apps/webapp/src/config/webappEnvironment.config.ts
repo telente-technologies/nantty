@@ -9,6 +9,11 @@ export function readWebappApiBaseUrl(): string {
   return configuredUrl.replace(/\/+$/, "");
 }
 
+export function readRealtimeSocketUrl(): string {
+  const configured = process.env.WEBAPP_REALTIME_URL?.trim() || `${readWebappApiBaseUrl()}/ws`;
+  return configured.replace(/^http(s?):\/\//i, (_, secure: string) => (secure ? "wss://" : "ws://"));
+}
+
 export function isMockBackendEnabled(): boolean {
   if (isProductionRuntime) return false;
   const configuredValue = process.env.WEBAPP_USE_MOCKS;

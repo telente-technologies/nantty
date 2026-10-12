@@ -39,6 +39,11 @@ export function readLiveKitOrigins(configured = readRuntimeEnv("WEBAPP_LIVEKIT_U
   }
 }
 
+export function readRealtimeConnectOrigin(configured = readRuntimeEnv("WEBAPP_REALTIME_URL"), apiUrl = readRuntimeEnv("WEBAPP_API_URL") ?? (isDevelopmentBuild ? "http://localhost:8080" : undefined)): string {
+  const socketUrl = configured ?? (apiUrl ? `${apiUrl.replace(/\/+$/, "")}/ws` : "");
+  return readOriginOrEmpty(socketUrl.replace(/^http(s?):\/\//i, (_, secure: string) => (secure ? "wss://" : "ws://")));
+}
+
 export function buildContentSecurityPolicyHeaderValue(options: { readonly isIdentityVerification?: boolean } = {}): string {
   const extraOrigins = options.isIdentityVerification ? smileIdOrigins : [];
   const directives: Record<string, string[]> = {
@@ -48,7 +53,7 @@ export function buildContentSecurityPolicyHeaderValue(options: { readonly isIden
     "style-src": ["'self'", "'unsafe-inline'"],
     "img-src": ["'self'", "data:", "blob:", "https:", ...(isDevelopmentBuild ? ["http:"] : [])],
     "font-src": ["'self'"],
-    "connect-src": ["'self'", ...readMediaUploadOrigins(), ...readLiveKitOrigins(), ...extraOrigins],
+    "connect-src": ["'self'", readRealtimeConnectOrigin(), ...readMediaUploadOrigins(), ...readLiveKitOrigins(), ...extraOrigins],
     "media-src": ["'self'", "https:", ...(isDevelopmentBuild ? ["http:"] : [])],
     "object-src": ["'none'"],
     "base-uri": ["'self'"],
@@ -58,6 +63,6 @@ export function buildContentSecurityPolicyHeaderValue(options: { readonly isIden
     "worker-src": ["'self'", "blob:", ...extraOrigins],
   };
   return Object.entries(directives)
-    .map(([directiveName, sources]) => `${directiveName} ${sources.join(" ")}`)
+    .map(([directiveName, sources]) => `${directiveName} ${sources.filter(Boolean).join(" ")}`)
     .join("; ");
 }

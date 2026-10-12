@@ -3,6 +3,7 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { createContext, useContext, useEffect, useMemo, useRef, type ReactNode } from "react";
 
+import { useRealtimeBridge } from "@/components/realtime/useRealtimeBridge.hook";
 import { chatCryptoService } from "@/services/chatCrypto/chatCrypto.service";
 import { rememberCsrfTokenForRequests } from "@/services/clientApi.service";
 import { useAuthStore } from "@/store/auth.store";
@@ -23,6 +24,7 @@ export function SessionProvider({ viewer, csrfToken, children }: SessionContextV
   const syncAuthStore = useAuthStore((state) => state.setViewerFromSession);
   const queryClient = useQueryClient();
   const previousViewerId = useRef(viewer?.id ?? null);
+  useRealtimeBridge(viewer?.id ?? null);
 
   useEffect(() => {
     const currentViewerId = viewer?.id ?? null;

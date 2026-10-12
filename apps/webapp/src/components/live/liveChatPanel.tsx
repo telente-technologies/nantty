@@ -14,11 +14,11 @@ import { liveService } from "@/services/webActions.service";
 
 import panelStyles from "./livePanels.module.css";
 
-export function LiveChatPanel({ liveId }: { readonly liveId: string }) {
+export function LiveChatPanel({ liveId, isRealtime = false }: { readonly liveId: string; readonly isRealtime?: boolean }) {
   const queryClient = useQueryClient();
   const [draft, setDraft] = useState("");
   const { viewer } = useSession();
-  const commentsQuery = useQuery({ queryKey: ["live", liveId, "comments"], queryFn: () => liveService.fetchLiveComments(liveId), refetchInterval: 5_000, retry: false, enabled: viewer !== null });
+  const commentsQuery = useQuery({ queryKey: ["live", liveId, "comments"], queryFn: () => liveService.fetchLiveComments(liveId), refetchInterval: isRealtime ? 30_000 : 5_000, retry: false, enabled: viewer !== null });
   const sendMutation = useMutation({
     mutationFn: (text: string) => liveService.postLiveComment(liveId, text),
     onSuccess: () => {

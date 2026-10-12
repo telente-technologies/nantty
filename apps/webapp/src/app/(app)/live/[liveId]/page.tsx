@@ -2,7 +2,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
-import { use, useEffect, useState } from "react";
+import { use, useEffect, useRef, useState } from "react";
 import { isLiveVideoSupported } from "@zudomart/web-kit";
 
 import { ContentActionsMenu } from "@/components/actions/contentActionsMenu";
@@ -12,6 +12,7 @@ import { LiveChatPanel } from "@/components/live/liveChatPanel";
 import { LiveGiftTray } from "@/components/live/liveGiftTray";
 import { LiveHostRankAvatar } from "@/components/live/liveHostRankAvatar";
 import { LiveReportDialog } from "@/components/live/liveReportDialog";
+import { useLiveRoomRealtime } from "@/components/live/liveRoomRealtime.hook";
 import { LiveVideoPlayer } from "@/components/live/liveVideoPlayer";
 import { LiveSafetyHostBanner, LiveSafetyOverlay } from "@/components/live/liveSafetyNotices";
 import styles from "@/components/live/liveRoom.module.css";
@@ -33,9 +34,14 @@ function FollowHostButton({ live }: { readonly live: LiveSessionDetails }) {
 
 export default function LiveRoomPage({ params }: { readonly params: Promise<{ readonly liveId: string }> }) {
   const { liveId } = use(params);
-  const liveQuery = useQuery({ queryKey: ["live", liveId], queryFn: () => liveService.fetchLiveSession(liveId), retry: false, refetchInterval: (query) => pollIntervalForLiveStatus(query.state.data?.status) });
-  const [isReportOpen, setIsReportOpen] = useState(false);
   const { viewer } = useSession();
+  const isRealtimeRef = useRef(false);
+  const liveQuery = useQuery({ queryKey: ["live", liveId], queryFn: () => liveService.fetchLiveSession(liveId), retry: false, refetchInterval: (query) => pollIntervalForLiveStatus(query.state.data?.status, isRealtimeRef.current) });
+  const isRealtime = useLiveRoomRealtime(liveId, viewer !== null && liveQuery.data !== undefined && readLiveRoomStatus(liveQuery.data.status) !== "ended");
+  useEffect(() => {
+    isRealtimeRef.current = isRealtime;
+  }, [isRealtime]);
+  const [isReportOpen, setIsReportOpen] = useState(false);
   const [canPlayLiveVideo, setCanPlayLiveVideo] = useState(true);
   useEffect(() => setCanPlayLiveVideo(isLiveVideoSupported()), []);
 
@@ -108,7 +114,7 @@ export default function LiveRoomPage({ params }: { readonly params: Promise<{ re
       </div>
       <aside className={styles.side}>
         {isLive && live.giftsEnabled !== false ? <LiveGiftTray liveId={live.id} hostName={live.host.name} /> : null}
-        <LiveChatPanel liveId={live.id} />
+        <LiveChatPanel liveId={live.id} isRealtime={isRealtime} />
       </aside>
       <LiveReportDialog key={isReportOpen ? "open" : "closed"} isOpen={isReportOpen} onClose={() => setIsReportOpen(false)} liveId={live.id} startedAt={live.startedAt} />
     </div>

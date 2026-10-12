@@ -2,7 +2,7 @@ import { c } from "./contractSchema.util";
 import type { EndpointContract } from "./endpointContract.type";
 
 const userSummary = c.object({ id: c.string(), name: c.string(), username: c.string(), avatarUrl: c.nullable(c.string()) });
-const user = c.object({ id: c.string(), name: c.string(), username: c.string(), avatarUrl: c.nullable(c.string()), bio: c.string() });
+const user = c.object({ id: c.string(), name: c.string(), username: c.string(), avatarUrl: c.nullable(c.string()), bio: c.string(), profileKind: c.string(), showsMart: c.boolean() }, ["profileKind", "showsMart"]);
 const reason = c.string(["taken", "reserved", "invalid", "recently_used", "withheld"]);
 const money = c.object({ amountMinor: c.number(), currency: c.string() });
 const walletLine = c.object({ key: c.string(), label: c.string(), description: c.string(), amount: money });
@@ -87,5 +87,14 @@ export const webappContracts: readonly EndpointContract[] = [
       video: c.nullable(c.object({ views: c.number(), watchTimeSeconds: c.number(), averageWatchSeconds: c.number(), completedViews: c.number(), completionRate: c.number() })),
       daily: c.array(c.object({ day: c.string(), impressions: c.number() })),
     }),
+  },
+  {
+    domain: "comments",
+    method: "GET",
+    path: "/api/v1/me/post-comments?filter=hidden",
+    schema: c.page(c.object({
+      id: c.string(), postId: c.string(), parentCommentId: c.nullable(c.string()), author: userSummary, text: c.string(), createdAt: c.string(), replyCount: c.number(),
+      post: c.object({ id: c.string(), kind: c.string(), text: c.string(), thumbnailUrl: c.nullable(c.string()) }), hidden: c.boolean(), hiddenAt: c.nullable(c.string()), needsReply: c.boolean(),
+    })),
   },
 ];

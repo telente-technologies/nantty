@@ -86,7 +86,19 @@ function ThreadReplyRow({ reply, postId, postAuthorId, hasParentAbove, hasChildB
       showToast({ text: "Couldn't update the pin. Try again.", tone: "error" });
     },
   });
+  const hideMutation = useMutation({
+    mutationFn: () => commentsService.hideComment(postId, reply.id),
+    onSuccess: () => {
+      showToast({ text: "Reply hidden. Find it in Settings, Hidden comments." });
+      void queryClient.invalidateQueries({ queryKey: ["post-thread", postId] });
+      void queryClient.invalidateQueries({ queryKey: ["post-thread-replies"] });
+      void queryClient.invalidateQueries({ queryKey: ["comments", postId] });
+      void queryClient.invalidateQueries({ queryKey: ["hidden-comments"] });
+    },
+    onError: () => showToast({ text: "Couldn't hide the reply. Try again.", tone: "error" }),
+  });
   const isOwnReply = viewer?.id === reply.author.id;
+  const canHide = postAuthorId !== undefined && viewer?.id === postAuthorId && !isOwnReply;
 
   async function copyReplyLinkToClipboard() {
     try {
@@ -178,6 +190,11 @@ function ThreadReplyRow({ reply, postId, postAuthorId, hasParentAbove, hasChildB
             {canPin ? (
               <button type="button" className={styles.textAction} onClick={() => pinMutation.mutate()} disabled={pinMutation.isPending}>
                 {optimisticPinned ? "Unpin" : "Pin"}
+              </button>
+            ) : null}
+            {canHide ? (
+              <button type="button" className={styles.textAction} onClick={() => hideMutation.mutate()} disabled={hideMutation.isPending}>
+                Hide
               </button>
             ) : null}
           </div>
