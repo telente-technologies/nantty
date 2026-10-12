@@ -30,9 +30,9 @@ Older narrative doc: `docs/architecture/database.md` (ERD proposals for planned 
 | --- | --- | --- |
 | Engine | PostgreSQL + PostGIS (Aurora PostgreSQL in prod, PLANNED) | `infra/local/docker-compose.yml`, `infra/local/postgres/create-databases.sh` |
 | Databases | `$POSTGRES_DB` (app), `zudomart_test`, `atlas_dev` (Atlas diff scratch) | `create-databases.sh` |
-| Schemas | 29, one per owning service: auth users catalog inventory orders payments wallet ledger escrow subscriptions ads creators rewards moderation live currency admin analytics social feed notifications media search support integrations campaigns realtime intelligence | `create-databases.sh` |
+| Schemas | 22, one per owning service: auth users catalog inventory orders payments wallet ledger escrow subscriptions ads creators moderation live currency admin social notifications media search support (rewards, analytics, feed, integrations, campaigns, realtime and intelligence were removed 2026-10-12: nothing used them) | `create-databases.sh` |
 | Roles | `svc_<service>` LOGIN owns schema `<service>`; all are members of `zudomart_readers` (NOLOGIN) | `create-databases.sh` |
-| Money role | `svc_money` is granted `svc_payments, svc_wallet, svc_ledger, svc_escrow, svc_subscriptions, svc_creators, svc_rewards` (one tx across money schemas) | `create-databases.sh` |
+| Money role | `svc_money` is granted `svc_payments, svc_wallet, svc_ledger, svc_escrow, svc_subscriptions, svc_creators` (one tx across money schemas) | `create-databases.sh` |
 | Cross-schema reads | Column-level `GRANT SELECT ... TO zudomart_readers` in each owner's `*_grant_*.up.sql` migration | `services/go/modules/*/src/migrations/*grant*.up.sql` |
 | `public` | `REVOKE CREATE ON SCHEMA public FROM PUBLIC` | `create-databases.sh` |
 | Search path | Per-module DSN gets `search_path=<schema>` | `services/go/platform/postgres/schema.scope.go` |
