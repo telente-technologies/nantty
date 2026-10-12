@@ -69,7 +69,7 @@ async function ensureStore(seller: Session): Promise<string> {
       values (gen_random_uuid(), now(), now(), '${seller.accountId}', 'approved', 'Ife Lifestyle Demo', gen_random_uuid(), '\\x00', '4 Allen Avenue', 'Ikeja', 'Lagos', 'nin', '\\x00', '0000', 'https://cdn.test/id.jpg', '058', '\\x00', '0000')`);
   }
   const handle = "ifelifestyledemo";
-  let profile = await callApi("POST", "/api/v1/users/me/business-profiles", { token: seller.accessToken, body: { displayName: "Ife Lifestyle (demo)", handle, description: "Demo store seeded for local development", businessType: "business", categories: [{ customName: "Fashion" }] } });
+  let profile = await callApi("POST", "/api/v1/users/me/business-profiles", { token: seller.accessToken, body: { displayName: "Ife Lifestyle (demo)", handle, description: "Demo store seeded for local development", businessType: "business", purpose: "store", categories: [{ customName: "Fashion" }] } });
   let businessProfileId: string | undefined = profile.body?.id ?? profile.body?.profile?.id;
   if (!okStatus(profile.status)) {
     profile = await callApi("GET", "/api/v1/users/me/business-profiles", { token: seller.accessToken });
