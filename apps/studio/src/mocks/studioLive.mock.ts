@@ -2,6 +2,8 @@ import { ApiError } from "@/errors/api.error";
 import type { LiveCategory } from "@/types";
 import type { CommentAudience, HostDefaults, LiveRecording, RoomSettings, StreamHealth } from "@/types/studioLive.type";
 
+import { isBlockedWordLengthValid } from "@/utils/blockedWords.util";
+
 import { findLiveOrThrow, patchLive, requireMockHost, validateMockSchedule } from "./lives.mock";
 import { createMockRoute, type MockRoute } from "./registry.mock";
 
@@ -31,7 +33,7 @@ let hostDefaults: HostDefaults = { commentsEnabled: true, commentAudience: "ever
 export const normaliseMockBlockedWords = (raw: unknown): string[] => {
   if (!Array.isArray(raw)) throw new ApiError(400, "blockedWords must be a list", "VALIDATION_FAILED");
   const cleaned = [...new Set(raw.map((word) => String(word).trim().toLowerCase()).filter(Boolean))];
-  if (cleaned.some((word) => [...word].length < 2 || [...word].length > 30)) throw new ApiError(422, "Blocked words must be 2-30 characters.", "BLOCKED_WORD_INVALID");
+  if (cleaned.some((word) => !isBlockedWordLengthValid(word))) throw new ApiError(422, "Blocked words must be 2-30 characters.", "BLOCKED_WORD_INVALID");
   if (cleaned.length > 100) throw new ApiError(422, "You can block at most 100 words.", "BLOCKED_WORDS_LIMIT");
   return cleaned;
 };
@@ -131,7 +133,8 @@ export const studioLiveMocks: MockRoute[] = [
     if (rawIds !== undefined && !Array.isArray(rawIds)) throw new ApiError(400, "moderatorIds must be a list", "VALIDATION_FAILED");
     const moderatorIds = rawIds === undefined ? undefined : [...new Set(rawIds.map(String))];
     if (moderatorIds?.includes("u_me")) throw new ApiError(422, "You're already in charge of your lives.", "MODERATOR_SELF");
-    if (moderatorIds && moderatorIds.length > 20) throw new ApiError(422, "You can add up to 20 moderators.", "VALIDATION_FAILED");
+    if (moderatorIds && moderatorIds.length > 20) throw new ApiError(422, "You can have at most 20 default moderators.", "MODERATOR_LIMIT");
+    if (moderatorIds?.some((moderatorId) => !MODERATOR_DIRECTORY.some((person) => person.id === moderatorId))) throw new ApiError(422, "That person could not be found.", "USER_NOT_FOUND");
     hostDefaults = {
       commentsEnabled: input.commentsEnabled ?? hostDefaults.commentsEnabled,
       commentAudience: input.commentAudience ?? hostDefaults.commentAudience,

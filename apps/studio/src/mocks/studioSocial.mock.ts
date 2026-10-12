@@ -1,5 +1,5 @@
 import { ApiError } from "@/errors/api.error";
-import type { NotificationCategory, NotificationPreference, PostComment, PostCommentThread } from "@/types/studioSocial.type";
+import type { CommentHiddenState, MyPostComment, MyPostCommentsFilter, MyPostSummary, NotificationCategory, NotificationPreference, PostComment } from "@/types/studioSocial.type";
 
 import { createMockRoute, type MockRoute } from "./registry.mock";
 
@@ -23,14 +23,52 @@ const commentsByPost = new Map<string, PostComment[]>([
   ]],
 ]);
 
-const topLevelWithReplies = (postId: string): (PostCommentThread)[] => {
-  const all = commentsByPost.get(postId) ?? [];
-  return all
-    .filter((entry) => entry.parentCommentId === null)
-    .map((entry) => {
-      const replies = all.filter((reply) => reply.parentCommentId === entry.id);
-      return { ...entry, type: "comment" as const, replyCount: replies.length, previewReplies: replies.slice(0, 3) };
-    });
+const postSummaries: Record<string, MyPostSummary> = {
+  post_clip_1: { id: "post_clip_1", kind: "clip", text: "Throwing a 2kg pot in under a minute", thumbnailUrl: null },
+  post_2: { id: "post_2", kind: "post", text: "New glaze colours drop on Sunday's live. Which one first?", thumbnailUrl: null },
+};
+const hiddenAtById = new Map<string, string>();
+const MY_POST_COMMENT_FILTERS = ["all", "needs_reply", "pinned", "hidden"] as const;
+
+const repliesTo = (entry: PostComment) => (commentsByPost.get(entry.postId) ?? []).filter((reply) => reply.parentCommentId === entry.id && !hiddenAtById.has(reply.id));
+
+const toMyPostComment = (entry: PostComment): MyPostComment => {
+  const hiddenAt = hiddenAtById.get(entry.id) ?? null;
+  const replies = hiddenAt ? [] : repliesTo(entry);
+  return {
+    ...entry, replyCount: replies.length, previewReplies: replies.slice(0, 3), post: postSummaries[entry.postId] ?? { id: entry.postId, kind: "post", text: "", thumbnailUrl: null },
+    hidden: hiddenAt !== null, hiddenAt, needsReply: !hiddenAt && entry.parentCommentId === null && !entry.isPostAuthor && !replies.some((reply) => reply.isPostAuthor),
+  };
+};
+
+const listMyPostComments = (query: URLSearchParams) => {
+  const filter = (query.get("filter") ?? "all") as MyPostCommentsFilter;
+  if (!MY_POST_COMMENT_FILTERS.includes(filter)) throw new ApiError(400, "filter is not supported", "VALIDATION_FAILED");
+  const postId = query.get("postId");
+  const search = query.get("q")?.toLowerCase();
+  const limit = Math.min(Math.max(Number(query.get("limit") ?? 20) || 20, 1), 50);
+  const matching = [...commentsByPost.values()].flat()
+    .map(toMyPostComment)
+    .filter((entry) => (filter === "hidden" ? entry.hidden : !entry.hidden && (filter === "pinned" ? entry.isPinned : entry.parentCommentId === null && (filter === "all" || entry.needsReply))))
+    .filter((entry) => (!postId || entry.postId === postId) && (!search || entry.text.toLowerCase().includes(search)))
+    .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+  const cursor = query.get("cursor");
+  const start = cursor ? matching.findIndex((entry) => entry.id === cursor) + 1 : 0;
+  const data = matching.slice(start, start + limit);
+  return { data, nextCursor: start + limit < matching.length ? (data.at(-1)?.id ?? null) : null };
+};
+
+const setHidden = (postId: string, commentId: string, hidden: boolean): CommentHiddenState => {
+  const { postId: actualPostId, found } = findComment(commentId);
+  if (actualPostId !== postId) throw new ApiError(404, "That comment isn't on this post.", "COMMENT_NOT_FOUND");
+  if (found.isPostAuthor) throw new ApiError(422, "You can't hide your own comment. Delete it instead.", "COMMENT_NOT_HIDEABLE");
+  if (hidden && !hiddenAtById.has(commentId)) {
+    hiddenAtById.set(commentId, new Date().toISOString());
+    commentsByPost.set(postId, (commentsByPost.get(postId) ?? []).map((entry) => (entry.id === commentId ? { ...entry, isPinned: false } : entry)));
+  }
+  if (!hidden) hiddenAtById.delete(commentId);
+  const hiddenAt = hiddenAtById.get(commentId) ?? null;
+  return { commentId, postId, hidden: hiddenAt !== null, hiddenAt };
 };
 
 const findComment = (commentId: string) => {
@@ -50,7 +88,7 @@ const notificationPreferences = new Map<NotificationCategory, NotificationPrefer
 let privacy = { whoCanMentionMe: "everyone", whoCanMessageMe: "followers" };
 
 export const studioSocialMocks: MockRoute[] = [
-  createMockRoute("GET", "/api/v1/posts/:postId/comments", ({ params }) => ({ data: topLevelWithReplies(params.postId!), nextCursor: null })),
+  createMockRoute("GET", "/api/v1/me/post-comments", ({ query }) => listMyPostComments(query)),
   createMockRoute("POST", "/api/v1/posts/:postId/comments", ({ params, body }) => {
     const payload = (body ?? {}) as { text?: unknown; parentCommentId?: unknown };
     const text = String(payload.text ?? "").trim();
@@ -76,6 +114,9 @@ export const studioSocialMocks: MockRoute[] = [
     commentsByPost.set(params.postId!, (commentsByPost.get(params.postId!) ?? []).map((entry) => (entry.id === params.commentId ? { ...entry, isPinned: false } : entry)));
     return undefined;
   }),
+  createMockRoute("PUT", "/api/v1/posts/:postId/comments/:commentId/hide", ({ params }) => setHidden(params.postId!, params.commentId!, true)),
+  createMockRoute("DELETE", "/api/v1/posts/:postId/comments/:commentId/hide", ({ params }) => setHidden(params.postId!, params.commentId!, false)),
+  createMockRoute("GET", "/api/v1/notifications/unread-count", () => ({ count: 3 })),
   createMockRoute("GET", "/api/v1/notifications/preferences", () => ({ data: [...notificationPreferences.values()], nextCursor: null })),
   createMockRoute("PATCH", "/api/v1/notifications/preferences", ({ body }) => {
     const payload = (body ?? {}) as { category?: unknown; push?: unknown; email?: unknown };

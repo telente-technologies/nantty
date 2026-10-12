@@ -66,6 +66,26 @@ const accountStatus = c.object({
   pendingTakedownCount: c.number(), strikeLifetimeDays: c.number(), warnings: c.array(strike), strikes: c.array(strike), notices: c.array(c.object({ claimId: c.string(), state: c.string(), deadlineAt: c.nullable(c.string()) })),
 });
 
+const ingressHealth = c.object({
+  protocol: c.string(["rtmp", "whip"]), status: c.string(["inactive", "buffering", "publishing", "error", "complete", "unknown"]), error: c.nullable(c.string()),
+  videoBitrateKbps: c.nullable(c.number()), audioBitrateKbps: c.nullable(c.number()), width: c.nullable(c.number()), height: c.nullable(c.number()), framerate: c.nullable(c.number()),
+});
+const streamHealth = c.object({ liveId: c.string(), state: liveState, viewers: c.number(), peakViewers: c.number(), startedAt: c.nullable(c.string()), ingress: c.nullable(ingressHealth), checkedAt: c.string() });
+const scheduledLive = c.object({ id: c.string(), title: c.string(), category: c.string(), state: liveState, startedAt: c.nullable(c.string()), endedAt: c.nullable(c.string()), storeId: c.nullable(c.string()), scheduledAt: c.nullable(c.string()) });
+const commentAudience = c.string(["everyone", "followers", "subscribers"]);
+const roomSettings = c.object({ liveId: c.string(), commentsEnabled: c.boolean(), commentAudience, slowModeSeconds: c.number(), blockedWords: c.array(c.string()), myRole: c.string() });
+const hostDefaults = c.object({ commentsEnabled: c.boolean(), commentAudience, slowModeSeconds: c.number(), blockedWords: c.array(c.string()), moderators: c.array(person), updatedAt: c.nullable(c.string()) });
+const recording = c.object({ id: c.string(), liveId: c.string(), state: c.string(["recording", "completed", "failed"]), durationSeconds: c.number(), sizeBytes: c.number(), createdAt: c.string(), completedAt: c.nullable(c.string()), playbackUrl: c.nullable(c.string()) });
+const postComment = c.object({ id: c.string(), postId: c.string(), parentCommentId: c.nullable(c.string()), author: person, text: c.string(), createdAt: c.string(), likes: c.number(), replyCount: c.number(), isPinned: c.boolean(), isPostAuthor: c.boolean() });
+const myPostComment = c.object({
+  id: c.string(), postId: c.string(), parentCommentId: c.nullable(c.string()), author: person, text: c.string(), createdAt: c.string(), likes: c.number(), replyCount: c.number(), isPinned: c.boolean(), isPostAuthor: c.boolean(),
+  previewReplies: c.array(postComment), post: c.object({ id: c.string(), kind: c.string(), text: c.string(), thumbnailUrl: c.nullable(c.string()) }), hidden: c.boolean(), hiddenAt: c.nullable(c.string()), needsReply: c.boolean(),
+});
+const commentHiddenState = c.object({ commentId: c.string(), postId: c.string(), hidden: c.boolean(), hiddenAt: c.nullable(c.string()) });
+const notificationPreference = c.object({ category: c.string(), push: c.boolean(), email: c.boolean(), locked: c.boolean() });
+const noContent = c.any();
+const inTwoHours = new Date(Date.now() + 2 * 3_600_000).toISOString();
+
 export const studioContracts: readonly EndpointContract[] = [
   { domain: "auth", method: "POST", path: "/api/v1/auth/login", body: { identifier: "creator@zudomart.com", password: "x" }, schema: session },
   { domain: "auth", method: "POST", path: "/api/v1/auth/google", body: { idToken: "a.b.c", nonce: "raw" }, schema: session },
@@ -104,4 +124,30 @@ export const studioContracts: readonly EndpointContract[] = [
   { domain: "social", method: "GET", path: "/api/v1/users/me/followers", schema: c.page(follower) },
   { domain: "live", method: "GET", path: "/api/v1/rankings?board=streamer&period=week", schema: c.page(ranking) },
   { domain: "trust", method: "GET", path: "/api/v1/account/status", schema: accountStatus },
+  { domain: "live", method: "GET", path: "/api/v1/lives/live_1/stream-health", schema: streamHealth },
+  { domain: "live", method: "POST", path: "/api/v1/lives", body: { title: "Scheduled live", category: "music", startNow: false, scheduledAt: inTwoHours }, schema: scheduledLive },
+  { domain: "live", method: "PATCH", path: "/api/v1/lives/live_4", body: { title: "Friday glaze reveal", scheduledAt: inTwoHours }, schema: scheduledLive },
+  { domain: "live", method: "POST", path: "/api/v1/lives/live_3/cancel", schema: noContent },
+  { domain: "live", method: "GET", path: "/api/v1/lives/live_2/recordings", schema: c.page(recording) },
+  { domain: "live", method: "DELETE", path: "/api/v1/lives/live_2/recordings/rec_2b", schema: noContent },
+  { domain: "live", method: "GET", path: "/api/v1/lives/live_1/room-settings", schema: roomSettings },
+  { domain: "live", method: "PUT", path: "/api/v1/lives/live_1/room-settings", body: { commentsEnabled: true, commentAudience: "followers", slowModeSeconds: 5, blockedWords: ["scam", "🍑"] }, schema: roomSettings },
+  { domain: "live", method: "GET", path: "/api/v1/live/host-defaults", schema: hostDefaults },
+  { domain: "live", method: "PUT", path: "/api/v1/live/host-defaults", body: { commentsEnabled: true, commentAudience: "everyone", slowModeSeconds: 0, blockedWords: ["🍑"], moderatorIds: ["f_1"] }, schema: hostDefaults },
+  { domain: "social", method: "GET", path: "/api/v1/me/post-comments?filter=all&limit=20", schema: c.page(myPostComment) },
+  { domain: "social", method: "GET", path: "/api/v1/me/post-comments?filter=needs_reply&postId=post_2", schema: c.page(myPostComment) },
+  { domain: "social", method: "POST", path: "/api/v1/posts/post_2/comments", body: { text: "Yes, we ship to Abuja.", parentCommentId: "cm_4" }, schema: postComment },
+  { domain: "social", method: "PUT", path: "/api/v1/posts/post_2/comments/cm_4/pin", schema: postComment },
+  { domain: "social", method: "DELETE", path: "/api/v1/posts/post_2/comments/cm_4/pin", schema: noContent },
+  { domain: "social", method: "PUT", path: "/api/v1/posts/post_2/comments/cm_4/hide", schema: commentHiddenState },
+  { domain: "social", method: "GET", path: "/api/v1/me/post-comments?filter=hidden", schema: c.page(myPostComment) },
+  { domain: "social", method: "DELETE", path: "/api/v1/posts/post_2/comments/cm_4/hide", schema: commentHiddenState },
+  { domain: "social", method: "DELETE", path: "/api/v1/comments/cm_1", schema: noContent },
+  { domain: "notifications", method: "GET", path: "/api/v1/notifications/unread-count", schema: c.object({ count: c.number() }) },
+  { domain: "notifications", method: "GET", path: "/api/v1/notifications/preferences", schema: c.page(notificationPreference) },
+  { domain: "notifications", method: "PATCH", path: "/api/v1/notifications/preferences", body: { category: "live", push: false }, schema: notificationPreference },
+  { domain: "users", method: "GET", path: "/api/v1/users/me/mention-privacy", schema: c.object({ whoCanMentionMe: c.string(["everyone", "following", "no_one"]) }) },
+  { domain: "users", method: "PUT", path: "/api/v1/users/me/mention-privacy", body: { whoCanMentionMe: "following" }, schema: c.object({ whoCanMentionMe: c.string(["everyone", "following", "no_one"]) }) },
+  { domain: "users", method: "GET", path: "/api/v1/users/me/message-privacy", schema: c.object({ whoCanMessageMe: c.string(["everyone", "following", "followers", "nobody"]) }) },
+  { domain: "users", method: "PUT", path: "/api/v1/users/me/message-privacy", body: { whoCanMessageMe: "followers" }, schema: c.object({ whoCanMessageMe: c.string(["everyone", "following", "followers", "nobody"]) }) },
 ];

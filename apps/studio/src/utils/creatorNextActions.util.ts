@@ -31,7 +31,7 @@ function healthActions(health: AccountHealthSummary | undefined): NextAction[] {
     }));
   const paused = [!health.canMonetise ? "earning" : null, !health.canGoLive ? "going live" : null].filter(Boolean);
   if (paused.length > 0) {
-    actions.push({ key: "restricted", tone: "urgent", href: "/account", label: "See strikes", title: `${paused.join(" and ")} is paused`, detail: `You have ${health.activeStrikeCount} active strikes. It lifts when strikes expire or an appeal succeeds.` });
+    actions.push({ key: "restricted", tone: "urgent", href: "/settings/account", label: "See strikes", title: `${paused.join(" and ")} is paused`, detail: `You have ${health.activeStrikeCount} active strikes. It lifts when strikes expire or an appeal succeeds.` });
   }
   return actions;
 }
@@ -53,7 +53,7 @@ export function buildCreatorNextActions(signals: CreatorSignals): NextAction[] {
   const actions: NextAction[] = [];
   const liveNow = signals.lives?.find((live) => live.state === "live" || live.state === "connecting");
   if (liveNow) actions.push({ key: "live-now", tone: "urgent", href: `/lives/${liveNow.id}`, label: "Open control room", title: `You're live: ${liveNow.title}`, detail: "Watch chat, gifts and guests from the control room." });
-  if (signals.status?.suspensionReason) actions.push({ key: "suspended", tone: "urgent", href: "/account", label: "See why", title: "Your Creator Program membership is suspended", detail: signals.status.suspensionReason });
+  if (signals.status?.suspensionReason) actions.push({ key: "suspended", tone: "urgent", href: "/settings/account", label: "See why", title: "Your Creator Program membership is suspended", detail: signals.status.suspensionReason });
   actions.push(...healthActions(signals.health), ...moneyActions(signals.wallet, signals.payout));
   if (signals.plans && !signals.plans.some((plan) => plan.active)) {
     actions.push({ key: "plan", href: "/subscribers", label: "Create a tier", title: "Offer a monthly subscription", detail: "Fans pay monthly for perks you choose. You set the price; app-store fees are shown before you publish." });

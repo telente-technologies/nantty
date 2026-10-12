@@ -9,6 +9,11 @@ export function readStudioApiBaseUrl(): string {
   return configuredUrl.replace(/\/+$/, "");
 }
 
+export function readRealtimeSocketUrl(): string {
+  const configured = process.env.STUDIO_REALTIME_URL?.trim() || `${readStudioApiBaseUrl()}/ws`;
+  return configured.replace(/^http(s?):\/\//i, (_, secure: string) => (secure ? "wss://" : "ws://"));
+}
+
 export function isMockBackendEnabled(): boolean {
   if (isProductionRuntime) return false;
   const configuredValue = process.env.STUDIO_USE_MOCKS;

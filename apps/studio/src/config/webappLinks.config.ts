@@ -6,6 +6,7 @@ export const webappLinks = {
   creatorProgram: `${webappOrigin}/creator/program`,
   creatorApply: `${webappOrigin}/creator/apply`,
   help: `${webappOrigin}/help`,
+  notifications: `${webappOrigin}/notifications`,
   manageProfiles: `${webappOrigin}/settings/profiles`,
   newPost: `${webappOrigin}/post/new`,
   newClip: `${webappOrigin}/create/clip`,

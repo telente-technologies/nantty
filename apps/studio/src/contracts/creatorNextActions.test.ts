@@ -9,7 +9,7 @@ const ngn = (amountMinor: number) => ({ amountMinor, currency: "NGN" });
 const health = (change: Partial<AccountHealthSummary> = {}): AccountHealthSummary => ({
   status: "GOOD_STANDING", restrictions: [], canMonetise: true, canGoLive: true, activeStrikeCount: 0, restrictionThreshold: 3, pendingTakedownCount: 0, strikeLifetimeDays: 90, warnings: [], notices: [], ...change,
 });
-const live = (state: LiveSession["state"]): LiveSession => ({ id: "live_9", title: "Now", category: "music", state, createdAt: "", startedAt: null, endedAt: null, viewers: 0, peakViewers: 0, hlsUrl: null, earnings: { coins: 0, giftCount: 0, topGifters: [] } });
+const live = (state: LiveSession["state"]): LiveSession => ({ id: "live_9", title: "Now", category: "music", state, createdAt: "", startedAt: null, endedAt: null, viewers: 0, peakViewers: 0, hlsUrl: null, scheduledAt: null, earnings: { coins: 0, giftCount: 0, topGifters: [] } });
 
 describe("creator next actions", () => {
   it("returns nothing while data is still loading", () => {
@@ -26,6 +26,7 @@ describe("creator next actions", () => {
     const [action] = buildCreatorNextActions({ health: health({ canMonetise: false, canGoLive: false, activeStrikeCount: 3 }) });
     assert.equal(action?.key, "restricted");
     assert.match(action?.title ?? "", /earning and going live/);
+    assert.equal(action?.href, "/settings/account");
   });
 
   it("asks to fix payouts before offering a withdrawal", () => {

@@ -14,7 +14,11 @@ const LIVE_STORE_ERROR_MESSAGES: Readonly<Record<string, string>> = {
   LIVE_ALREADY_RUNNING: "You're already live. End that live before starting another.",
   RECORDING_IN_PROGRESS: "This recording is still being saved. Try again once the live has ended.",
   MODERATOR_SELF: "You already control your own lives, so you can't add yourself as a moderator.",
-  BLOCKED_WORD_INVALID: "Blocked words must be 2-30 characters.",
+  BLOCKED_WORD_INVALID: "Blocked words must be 2-30 characters, or a single emoji.",
+  RECORDING_NOT_FOUND: "That recording was already deleted.",
+  RECORDING_UNAVAILABLE: "We couldn't delete the recording file just now. Try again in a moment.",
+  MODERATOR_LIMIT: "You can have up to 20 default moderators.",
+  USER_NOT_FOUND: "One of those moderators no longer has an account.",
   BLOCKED_WORDS_LIMIT: "You can block up to 100 words.",
   INGRESS_UNAVAILABLE: "The live server isn't responding right now. Try again in a moment.",
 };

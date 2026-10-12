@@ -13,6 +13,10 @@ export function rememberCsrfTokenForRequests(csrfToken: string | null): void {
   currentCsrfToken = csrfToken;
 }
 
+export function readCsrfTokenForRequests(): string | null {
+  return currentCsrfToken;
+}
+
 export class StudioRequestError extends Error {
   public constructor(
     public readonly status: number,

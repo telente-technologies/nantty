@@ -14,17 +14,29 @@ export interface PostComment {
   readonly isPostAuthor: boolean;
 }
 
-export interface PostCommentThread extends PostComment {
-  readonly type: "comment";
-  readonly previewReplies: readonly PostComment[];
-}
+export type MyPostCommentsFilter = "all" | "needs_reply" | "pinned" | "hidden";
 
-export interface PostQuoteItem {
-  readonly type: "quote";
+export interface MyPostSummary {
   readonly id: ID;
+  readonly kind: string;
+  readonly text: string;
+  readonly thumbnailUrl: string | null;
 }
 
-export type PostCommentsItem = PostCommentThread | PostQuoteItem;
+export interface MyPostComment extends PostComment {
+  readonly previewReplies: readonly PostComment[];
+  readonly post: MyPostSummary;
+  readonly hidden: boolean;
+  readonly hiddenAt: ISODate | null;
+  readonly needsReply: boolean;
+}
+
+export interface CommentHiddenState {
+  readonly commentId: ID;
+  readonly postId: ID;
+  readonly hidden: boolean;
+  readonly hiddenAt: ISODate | null;
+}
 
 export type NotificationCategory = "auth" | "orders" | "escrow" | "seller" | "payments" | "creator" | "checkmarks" | "social" | "milestones" | "live" | "trust" | "privacy" | "support" | "marketing";
 
