@@ -84,7 +84,7 @@ describe("Store or Business choice", () => {
 describe("blocked create flows", () => {
   it("shows the centred profile limit screen with Manage profiles for a deep link into a blocked flow", async () => {
     mockLinked = summary([item("store")]);
-    await render(createElement(ProfileLimitGate, { kind: "business", children: createElement(Text, null, "form") }));
+    await render(createElement(ProfileLimitGate, { kind: "business" }, createElement(Text, null, "form")));
     expect(screen.queryByText("form")).toBeNull();
     expect(screen.getByText("You can have one Store or one Business page")).toBeTruthy();
     expect(screen.getByRole("button", { name: "Manage profiles" })).toBeTruthy();
@@ -92,16 +92,16 @@ describe("blocked create flows", () => {
 
   it("lets the create flow through when the slot is free", async () => {
     mockLinked = summary([item("brand")]);
-    await render(createElement(ProfileLimitGate, { kind: "business", children: createElement(Text, null, "form") }));
+    await render(createElement(ProfileLimitGate, { kind: "business" }, createElement(Text, null, "form")));
     expect(screen.getByText("form")).toBeTruthy();
   });
 
   it("blocks a second brand and anything while profiles are on hold", async () => {
     mockLinked = summary([item("brand")]);
-    await render(createElement(ProfileLimitGate, { kind: "brand", children: createElement(Text, null, "form") }));
+    await render(createElement(ProfileLimitGate, { kind: "brand" }, createElement(Text, null, "form")));
     expect(screen.getByText("You already have a Brand")).toBeTruthy();
     mockLinked = summary([item("store"), item("business", "held")]);
-    await render(createElement(ProfileLimitGate, { kind: "brand", children: createElement(Text, null, "form") }));
+    await render(createElement(ProfileLimitGate, { kind: "brand" }, createElement(Text, null, "form")));
     expect(screen.getByText("Choose which profiles to keep")).toBeTruthy();
   });
 });

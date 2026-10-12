@@ -127,7 +127,7 @@ describe("fallback path", () => {
 
   test("KeyboardAwareForm falls back to a keyboard-avoiding scroll form and pads the footer by the bottom inset", async () => {
     await render(
-      createElement(KeyboardAwareForm, { footer: createElement(Text, null, "Save"), children: createElement(Text, null, "Field") }),
+      createElement(KeyboardAwareForm, { footer: createElement(Text, null, "Save") }, createElement(Text, null, "Field")),
     );
     expect(screen.getByTestId("keyboard-aware-form-fallback")).toBeTruthy();
     expect(innermostWithStyle("Save", "paddingBottom")?.paddingBottom).toBe(34);
@@ -135,7 +135,7 @@ describe("fallback path", () => {
 
   test("KeyboardAwareForm leaves the bottom inset alone when the screen already handles it", async () => {
     await render(
-      createElement(KeyboardAwareForm, { safeAreaHandledByParent: true, footer: createElement(Text, null, "Save"), children: createElement(Text, null, "Field") }),
+      createElement(KeyboardAwareForm, { safeAreaHandledByParent: true, footer: createElement(Text, null, "Save") }, createElement(Text, null, "Field")),
     );
     expect(innermostWithStyle("Save", "paddingBottom")?.paddingBottom).toBe(0);
   });
@@ -152,7 +152,7 @@ describe("sticky footer insets", () => {
   });
 
   test("renders its children above a spacer that holds the bottom inset at rest", async () => {
-    await render(createElement(KeyboardStickyFooter, { children: createElement(Text, null, "Send") }));
+    await render(createElement(KeyboardStickyFooter, null, createElement(Text, null, "Send")));
     expect(screen.getByText("Send")).toBeTruthy();
     const heights = hostNodes(screen.toJSON()).map((node) => flattenStyle(node.props.style).height);
     expect(heights).toContain(34);

@@ -1,4 +1,4 @@
-import { createElement, useState } from "react";
+import { createElement, useEffect, useState } from "react";
 import { AccessibilityInfo } from "react-native";
 import { fireEvent, render, screen } from "@testing-library/react-native";
 
@@ -13,7 +13,9 @@ let latestGroups: readonly OptionGroupDraft[] = [];
 
 function Harness({ impact }: { impact: string | null }) {
   const [groups, setGroups] = useState<readonly OptionGroupDraft[]>([]);
-  latestGroups = groups;
+  useEffect(() => {
+    latestGroups = groups;
+  }, [groups]);
   return createElement(ProductOptionsEditor, { groups, onGroupsChange: (update) => setGroups((current) => update(current)), describeRemovalImpact: () => impact });
 }
 

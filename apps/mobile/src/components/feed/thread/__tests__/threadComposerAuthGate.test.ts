@@ -30,7 +30,9 @@ const renderComposer = () =>
 
 const withQueryClient = () => {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
-  return ({ children }: { children: ReactNode }) => createElement(QueryClientProvider, { client }, children);
+  return function QueryClientWrapper({ children }: { children: ReactNode }) {
+    return createElement(QueryClientProvider, { client }, children);
+  };
 };
 
 beforeEach(() => {
