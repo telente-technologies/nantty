@@ -12,7 +12,7 @@ import { CreatorProgramGate } from "@/components/shell/creatorProgramGate";
 import { useSession } from "@/components/providers/sessionProvider";
 import { webappLinks } from "@/config/webappLinks.config";
 import {
-  AnalyticsIcon, CloseIcon, CommentsIcon, ContentIcon, HelpIcon, HomeIcon, LiveIcon, MenuIcon, SettingsIcon, SubscribersIcon, WalletIcon, type IconProps,
+  AnalyticsIcon, CloseIcon, CommentsIcon, ContentIcon, HelpIcon, HomeIcon, LiveIcon, MenuIcon, SettingsIcon, SubscribersIcon, TagIcon, WalletIcon, type IconProps,
 } from "@/components/ui/icons";
 
 import styles from "./studioShell.module.css";
@@ -31,6 +31,7 @@ export const studioSections: readonly SectionLink[] = [
   { href: "/analytics", label: "Analytics", icon: AnalyticsIcon, matches: ["/audience"] },
   { href: "/comments", label: "Comments", icon: CommentsIcon },
   { href: "/earnings", label: "Earnings", icon: WalletIcon },
+  { href: "/affiliates", label: "Affiliate", icon: TagIcon },
   { href: "/subscribers", label: "Subscribers", icon: SubscribersIcon },
   { href: "/settings", label: "Settings", icon: SettingsIcon, matches: ["/account", "/embed"] },
 ];

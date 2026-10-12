@@ -86,6 +86,26 @@ const notificationPreference = c.object({ category: c.string(), push: c.boolean(
 const noContent = c.any();
 const inTwoHours = new Date(Date.now() + 2 * 3_600_000).toISOString();
 
+const affiliateStore = c.object({ id: c.string(), name: c.string(), logoUrl: c.nullable(c.string()) });
+const affiliateAccess = c.string(["approved", "paused", "requested", "open", "approval_required", "closed"]);
+const programmeTerms = c.object({ defaultCommissionPercent: c.number(), attributionWindowDays: c.number(), approval: c.string(["automatic", "manual"]), autoApproveFollowersAbove: c.nullable(c.number()), commissionPaidWhen: c.string(["order_completed"]) });
+const affiliateLink = c.object({ id: c.string(), productId: c.string(), storeId: c.string(), path: c.string(), clicks: c.number(), createdAt: c.string() });
+const promotableProduct = c.object({
+  productId: c.string(), name: c.string(), imageUrl: c.nullable(c.string()), price: money, stock: c.nullable(c.number()), store: affiliateStore, commissionBasisPoints: c.number(), commissionPercent: c.number(),
+  estimatedCommission: money, access: affiliateAccess, link: c.nullable(affiliateLink), programme: programmeTerms,
+});
+const affiliatePromotion = c.object({
+  productId: c.string(), name: c.string(), imageUrl: c.nullable(c.string()), price: money, stock: c.nullable(c.number()), store: affiliateStore, commissionPercent: c.number(), access: affiliateAccess,
+  link: c.nullable(affiliateLink), clicks: c.number(), pendingOrders: c.number(), completedOrders: c.number(), reversedOrders: c.number(), conversionPercent: c.nullable(c.number()), sales: money, earned: money,
+  pendingEarnings: money, programme: c.nullable(programmeTerms),
+});
+const affiliateEarning = c.object({
+  id: c.string(), status: c.string(["pending", "earned", "reversed"]), payoutStatus: c.string(["awaiting_completion", "waiting_for_seller_funds", "transferring", "paid", "reversed", "not_paid"]), reason: c.string(),
+  orderNumber: c.string(), product: c.object({ id: c.string(), name: c.string() }), store: c.object({ id: c.string(), name: c.string() }), sale: money, commissionPercent: c.number(), commission: money, reversed: money,
+  source: c.object({ source: c.string(), id: c.string() }), orderedAt: c.nullable(c.string()), decidedAt: c.nullable(c.string()), createdAt: c.string(),
+});
+const affiliateEarningsPage = c.object({ summary: c.object({ pending: c.array(money), earned: c.array(money), paid: c.array(money), reversed: c.array(money) }), data: c.array(affiliateEarning), nextCursor: c.nullable(c.string()) });
+
 export const studioContracts: readonly EndpointContract[] = [
   { domain: "auth", method: "POST", path: "/api/v1/auth/login", body: { identifier: "creator@zudomart.com", password: "x" }, schema: session },
   { domain: "auth", method: "POST", path: "/api/v1/auth/google", body: { idToken: "a.b.c", nonce: "raw" }, schema: session },
@@ -115,6 +135,14 @@ export const studioContracts: readonly EndpointContract[] = [
   { domain: "creators", method: "GET", path: "/api/v1/creators/earnings", schema: c.page(earning) },
   { domain: "creators", method: "GET", path: "/api/v1/creators/eligibility", schema: eligibility },
   { domain: "creators", method: "GET", path: "/api/v1/creators/brand-deals", schema: c.page(brandDeal) },
+  { domain: "creators", method: "GET", path: "/api/v1/creators/me/affiliate-catalog?sort=commission&limit=24", schema: c.page(promotableProduct) },
+  { domain: "creators", method: "GET", path: "/api/v1/creators/me/affiliate-catalog?access=requestable&q=scarf", schema: c.page(promotableProduct) },
+  { domain: "creators", method: "GET", path: "/api/v1/creators/me/affiliate-promotions", schema: c.page(affiliatePromotion) },
+  { domain: "creators", method: "GET", path: "/api/v1/creators/me/affiliate-earnings?status=pending", schema: affiliateEarningsPage },
+  { domain: "creators", method: "GET", path: "/api/v1/creators/me/affiliate-earnings?status=earned", schema: affiliateEarningsPage },
+  { domain: "creators", method: "GET", path: "/api/v1/creators/me/affiliate-earnings?status=reversed", schema: affiliateEarningsPage },
+  { domain: "creators", method: "POST", path: "/api/v1/creators/me/affiliate-links", body: { productId: "prod_dress" }, schema: affiliateLink },
+  { domain: "creators", method: "POST", path: "/api/v1/creators/affiliations", body: { productId: "prod_scarf" }, schema: c.object({ id: c.string(), status: c.string(["active", "requested", "declined"]) }) },
   { domain: "creators", method: "POST", path: "/api/v1/creators/brand-deals", body: { brandName: "Acme", amountMinor: 100, currency: "NGN", startsAt: "2026-10-01T00:00:00Z", endsAt: null, disclosure: "Paid partnership with Acme", notes: "" }, schema: brandDeal },
   { domain: "subscriptions", method: "GET", path: "/api/v1/creators/me/subscription-plans", schema: c.page(plan) },
   { domain: "subscriptions", method: "GET", path: "/api/v1/creators/me/subscription-plans/price-tiers?currency=NGN&interval=month", schema: c.page(priceTier) },

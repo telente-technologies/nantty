@@ -11,5 +11,6 @@ export const webappLinks = {
   newPost: `${webappOrigin}/post/new`,
   newClip: `${webappOrigin}/create/clip`,
   profile: (username: string) => `${webappOrigin}/u/${encodeURIComponent(username)}`,
+  affiliateProductLink: (path: string) => `${webappOrigin}${path.startsWith("/") ? path : `/${path}`}`,
   post: (postId: string) => `${webappOrigin}/post/${encodeURIComponent(postId)}`,
 } as const;
