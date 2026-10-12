@@ -132,8 +132,17 @@ describe("social routes", () => {
     ["DELETE", "/api/v1/posts/p_1/pin"],
     ["PUT", "/api/v1/posts/p_1/comments/c_1/pin"],
     ["DELETE", "/api/v1/posts/p_1/comments/c_1/pin"],
+    ["PUT", "/api/v1/posts/p_1/comments/c_1/hide"],
+    ["DELETE", "/api/v1/posts/p_1/comments/c_1/hide"],
+    ["GET", "/api/v1/me/post-comments"],
   ])("%s %s pins through social and requires a token", (method, path) => {
     expect(resolveUpstreamRouteForRequest(method, path)).toMatchObject({ upstream: "social", authentication: "required" });
+  });
+
+  it("keeps the hide and comments-inbox routes exact", () => {
+    expect(resolveUpstreamRouteForRequest("GET", "/api/v1/posts/p_1/comments/c_1/hide")).toMatchObject({ upstream: "social", authentication: "optional" });
+    expect(resolveUpstreamRouteForRequest("PUT", "/api/v1/posts/p_1/comments/c_1/hide/extra")?.authentication).toBe("optional");
+    expect(resolveUpstreamRouteForRequest("POST", "/api/v1/me/post-comments")?.authentication).not.toBe("required");
   });
 
   it("does not let the pin routes swallow other post paths", () => {

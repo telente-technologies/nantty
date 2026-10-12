@@ -22,6 +22,7 @@ import { IdentityPolicyGateSource, type PolicyGateSource } from "./services/poli
 import { AccessTokenVerifier, ValkeySessionRevocationSource } from "./services/accessTokenVerifier.service.js";
 import { ValkeyWidgetTokenRevocationSource, WidgetTokenVerifier } from "./services/widgetTokenVerifier.service.js";
 import { buildSecurityServices, type SecurityServiceOverrides } from "./services/security/securityServices.service.js";
+import { createRealtimeProxyingServer } from "./services/realtimeSocketProxy.service.js";
 import { withRequestMetrics } from "./telemetry/requestMetrics.js";
 
 export interface GatewayServerOptions {
@@ -71,8 +72,9 @@ export function createGatewayServer(options: GatewayServerOptions) {
       createUpstreamDispatchHandler({ config: options.config, verifier, widgetVerifier, logger, rateLimitStore, security, staffNetworkGate, ...(policyGate === undefined ? {} : { policyGate }), ...(connection === undefined ? {} : { cacheProbe: () => connection.command(["PING"]) }) }),
     ],
   });
+  const realtimeServer = createRealtimeProxyingServer(options.config.realtimeUpstream, logger);
   return createHttpServer({
-    adapter: createNodeHttpAdapter({ host: options.config.host, port: options.config.port, maxBodySize: maximumRequestBodyBytes, trustProxy: options.config.trustedProxyHops ?? 0 }),
+    adapter: createNodeHttpAdapter({ host: options.config.host, port: options.config.port, maxBodySize: maximumRequestBodyBytes, trustProxy: options.config.trustedProxyHops ?? 0, ...(realtimeServer === undefined ? {} : { server: realtimeServer }) }),
     handler: withRequestMetrics((request: HttpRequestContext) => pipeline.execute(request, createResponseContext())),
   });
 }
