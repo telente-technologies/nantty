@@ -22,6 +22,7 @@ export const deepLinking: LinkingOptions<RootStackParamList> = {
       OrderDetail: "orders/:orderId",
       SellerDashboard: "seller/dashboard",
       CreatorDashboard: "creator/dashboard",
+      CreatorAffiliates: "creator/affiliates",
       Story: "stories/:userId",
       SettingsWidgets: "settings/widgets",
       ManageProfiles: "settings/profiles",

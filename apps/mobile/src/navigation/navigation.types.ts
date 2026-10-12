@@ -35,7 +35,7 @@ export type MainStackParamList = {
   Search: { scope?: SearchScopeKey | "all" | "messages"; scopeLabel?: string } | undefined;
   Notifications: undefined;
   Category: { categoryId: string; name: string; collection?: "sales_of_the_day" | "featured_brands" | "new_arrivals" };
-  ProductDetail: { productId: string };
+  ProductDetail: { productId: string; aff?: string };
   ProductReviews: { productId: string };
   WriteReview: { productId: string; productName?: string; imageUrl?: string | null };
   Store: { storeId: string };
@@ -103,6 +103,7 @@ export type MainStackParamList = {
   CreatorApplication: undefined;
   CreatorApplicationStatus: undefined;
   CreatorDashboard: undefined;
+  CreatorAffiliates: undefined;
   CreatorSubscribe: { creatorId: string };
   MySubscriptions: undefined;
   Verification: undefined;

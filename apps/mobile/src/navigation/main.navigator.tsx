@@ -74,6 +74,7 @@ import { SellerApplicationStatusScreen } from "@/screens/seller/sellerApplicatio
 import { CreatorProgramScreen } from "@/screens/creator/creatorProgram.screen";
 import { CreatorApplicationScreen } from "@/screens/creator/creatorApplication.screen";
 import { CreatorApplicationStatusScreen } from "@/screens/creator/creatorApplicationStatus.screen";
+import { CreatorAffiliatesScreen } from "@/screens/creator/creatorAffiliates.screen";
 import { CreatorDashboardScreen } from "@/screens/creator/creatorDashboard.screen";
 import { CreatorSubscribeScreen } from "@/screens/creator/creatorSubscribe.screen";
 import { MySubscriptionsScreen } from "@/screens/creator/mySubscriptions.screen";
@@ -192,6 +193,7 @@ export function MainNavigator() {
       <Stack.Screen name="CreatorApplication" component={CreatorApplicationScreen} />
       <Stack.Screen name="CreatorApplicationStatus" component={CreatorApplicationStatusScreen} />
       <Stack.Screen name="CreatorDashboard" component={CreatorDashboardScreen} />
+      <Stack.Screen name="CreatorAffiliates" component={CreatorAffiliatesScreen} />
       <Stack.Screen name="CreatorSubscribe" component={CreatorSubscribeScreen} />
       <Stack.Screen name="MySubscriptions" component={MySubscriptionsScreen} />
       <Stack.Screen name="Verification" component={VerificationScreen} />

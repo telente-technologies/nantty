@@ -47,3 +47,14 @@ test("a quote deep link opens the normal composer with the quoted post attached"
 test("an emailed offer link opens the web claim hand-off instead of a profile", () => {
   expect(focusedRouteNames("offer/Xq3v0mZp9bT2nR8kL5wA7cD1eF4gH6jK0lM2nP4qR6s")).toEqual(["SubscriptionOffer"]);
 });
+
+test("a creator's affiliate link opens the exact product and keeps the link id for attribution", () => {
+  const state = getStateFromPath("p/ankara-dress-0192f000-0000-7000-8000-000000000001?aff=0192f000-0000-7000-8000-0000000000aa", deepLinking.config) as { routes: { name: string; params?: Record<string, string> }[] };
+  const route = state.routes[state.routes.length - 1]!;
+  expect(route.name).toBe("ProductDetail");
+  expect(route.params).toEqual({ productId: "0192f000-0000-7000-8000-000000000001", aff: "0192f000-0000-7000-8000-0000000000aa" });
+});
+
+test("the creator affiliate workspace has its own link", () => {
+  expect(focusedRouteNames("creator/affiliates")).toEqual(["CreatorAffiliates"]);
+});
