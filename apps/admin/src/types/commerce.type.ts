@@ -2,7 +2,7 @@ import type { Money, PagedList, PartySummary } from "@/types/api.type";
 
 export type OrderStatus = "pending" | "new" | "processing" | "ready" | "shipped" | "delivered" | "completed" | "cancelled" | "returned" | "refunded" | "disputed";
 export type RefundSource = "manual" | "seller" | "return" | "cancellation" | "dispute" | "system";
-export type RefundStatus = "processing" | "completed" | "failed";
+export type RefundStatus = "processing" | "scheduled" | "completed" | "failed";
 
 export interface OrderParty {
   readonly id: string;

@@ -37,7 +37,7 @@ const orderSummaryFields = {
   id: c.string(), orderNumber: c.string(), invoiceNumber: c.string(), buyer: orderParty, seller: orderParty, storeId: c.string(), storeName: c.string(), status: c.string(), paymentStatus: c.string(),
   paymentMode: c.string(), escrowStatus: c.string(), deliveryStatus: c.string(), total: money, itemCount: c.number(), placedAt: c.string(),
 };
-const refund = c.object({ id: c.string(), orderId: c.string(), orderNumber: c.string(), storeId: c.string(), buyer: orderParty, amount: money, source: c.string(["manual", "seller", "return", "cancellation", "dispute", "system"]), status: c.string(["processing", "completed", "failed"]), reason: c.string(), createdAt: c.string(), completedAt: c.nullable(c.string()), createdByName: c.string() });
+const refund = c.object({ id: c.string(), orderId: c.string(), orderNumber: c.string(), storeId: c.string(), buyer: orderParty, amount: money, source: c.string(["manual", "seller", "return", "cancellation", "dispute", "system"]), status: c.string(["processing", "scheduled", "completed", "failed"]), reason: c.string(), createdAt: c.string(), completedAt: c.nullable(c.string()), createdByName: c.string() });
 const orderDetail = c.object({
   ...orderSummaryFields, items: c.array(c.object({ id: c.string(), productId: c.string(), productName: c.string(), variant: c.string(), imageUrl: c.nullable(c.string()), quantity: c.number(), unitPrice: money, lineTotal: money, attribution: c.nullable(c.any()) })),
   subtotal: money, discount: money, storeCredit: money, deliveryFee: money, refundedTotal: money, refundable: money, deliveryCity: c.string(), deliveryState: c.string(), courier: c.nullable(c.string()), trackingNumber: c.nullable(c.string()),

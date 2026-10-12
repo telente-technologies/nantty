@@ -39,7 +39,7 @@ export function registerPeopleLinkedProfileMockHandlers(): void {
 
   registerMockRoute("GET", "/admin/linked-profiles/conflicts", (request) => {
     requireMockPermission(request, ...readers);
-    return respondWithJson(200, { data: [...readStore().keys()].map(summaryOf).filter((summary) => summary.choiceRequired) });
+    return respondWithJson(200, { data: [...readStore().keys()].map(summaryOf).filter((summary) => summary.choiceRequired), nextCursor: null });
   });
 
   registerMockRoute("POST", "/admin/users/:userId/linked-profiles/convert", (request) => {

@@ -29,6 +29,5 @@ export function describeHttpStatus(status: number): string {
 }
 
 export function resolveAdminErrorMessage(code: string, backendMessage: string | undefined, status: number): string {
-  const message = backendMessage?.trim() || messagesByErrorCode[code] || describeHttpStatus(status);
-  return `${message} (${code})`;
+  return backendMessage?.trim() || messagesByErrorCode[code] || describeHttpStatus(status);
 }

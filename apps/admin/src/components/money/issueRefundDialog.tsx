@@ -36,7 +36,7 @@ export function IssueRefundDialog({ order, isOpen, onClose, onRefunded }: { read
     <ConfirmActionDialog
       isOpen={isOpen}
       title={`Refund order ${order.orderNumber}`}
-      description={`Money goes back to @${order.buyer.username} through the original payment method. Refundable now: ${formatMoneyForDisplay(order.refundable)}.`}
+      description={`Money goes to @${order.buyer.username}'s Zudomart wallet, or back to the card if the payment hasn't settled yet. Direct-payment orders are refunded to the card. Refundable now: ${formatMoneyForDisplay(order.refundable)}.`}
       consequences={mustRefundInFull ? ["Escrow was already released, so only a full refund is allowed. It is clawed back from the seller."] : ["The refund comes out of escrow before the seller is paid.", "A full refund closes the order and stops auto-release."]}
       confirmLabel={isAmountValid && amount ? `Refund ${formatMoneyForDisplay(amount)}` : "Issue refund"}
       tone="danger"

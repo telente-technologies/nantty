@@ -5,7 +5,7 @@ export function fetchLinkedProfiles(userId: string, signal?: AbortSignal): Promi
   return sendAdminApiRequest(`/admin/users/${encodeURIComponent(userId)}/linked-profiles`, { signal });
 }
 
-export function fetchLinkedProfileConflicts(signal?: AbortSignal): Promise<{ data: LinkedProfilesSummary[] }> {
+export function fetchLinkedProfileConflicts(signal?: AbortSignal): Promise<{ data: LinkedProfilesSummary[]; nextCursor: string | null }> {
   return sendAdminApiRequest("/admin/linked-profiles/conflicts", { signal });
 }
 
