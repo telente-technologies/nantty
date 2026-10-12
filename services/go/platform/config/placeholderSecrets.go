@@ -41,8 +41,20 @@ func IsPlaceholderSecretValue(value string) bool {
 	if strings.HasPrefix(trimmed, "local-only") || slices.Contains(knownExampleSecretValues, trimmed) {
 		return true
 	}
-	decoded, err := base64.StdEncoding.DecodeString(strings.TrimSpace(value))
-	return err == nil && strings.HasPrefix(strings.ToLower(string(decoded)), "local-only")
+	if isSandboxSecretValue(value) || isSandboxSecretValue(strings.TrimSpace(value)) {
+		return true
+	}
+	return decodesToLocalOnly(strings.TrimSpace(value))
+}
+
+func decodesToLocalOnly(value string) bool {
+	for _, encoding := range []*base64.Encoding{base64.StdEncoding, base64.RawStdEncoding, base64.URLEncoding, base64.RawURLEncoding} {
+		decoded, err := encoding.DecodeString(value)
+		if err == nil && strings.HasPrefix(strings.ToLower(string(decoded)), "local-only") {
+			return true
+		}
+	}
+	return false
 }
 
 func looksLikeSecretName(name string) bool {
