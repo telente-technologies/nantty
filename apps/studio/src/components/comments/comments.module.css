@@ -1,0 +1,154 @@
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: var(--space-3);
+}
+
+.toolbarField {
+  flex: 1 1 200px;
+  min-width: 0;
+}
+
+.summary {
+  margin: 0;
+  font-size: var(--text-sm);
+  color: var(--ink-muted);
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.item {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-4) var(--space-5);
+  border: 1px solid var(--divider);
+  border-radius: var(--radius-medium);
+  background: var(--surface-card);
+}
+
+.head {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  min-width: 0;
+}
+
+.headText {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: var(--space-1);
+  min-width: 0;
+}
+
+.author {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--text-sm);
+}
+
+.authorName {
+  font-weight: 700;
+  color: var(--ink-strong);
+}
+
+.meta {
+  font-size: var(--text-xs);
+  color: var(--ink-faint);
+}
+
+.text {
+  margin: 0;
+  font-size: var(--text-md);
+  color: var(--ink-strong);
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+}
+
+.postLink {
+  overflow: hidden;
+  font-size: var(--text-xs);
+  color: var(--ink-muted);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.postLink:hover {
+  color: var(--ink-strong);
+}
+
+.replies {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin: 0;
+  padding: var(--space-3) var(--space-4);
+  list-style: none;
+  border-radius: var(--radius-small);
+  background: var(--surface-sunken);
+}
+
+.reply {
+  font-size: var(--text-sm);
+  color: var(--ink-muted);
+}
+
+.reply strong {
+  color: var(--ink-strong);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.replyForm {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.replyFoot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.error {
+  margin: 0;
+  font-size: var(--text-sm);
+  color: var(--color-danger-text);
+}
+
+.partial {
+  margin: 0;
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--divider);
+  border-radius: var(--radius-small);
+  background: var(--surface-sunken);
+  font-size: var(--text-sm);
+  color: var(--ink-muted);
+}
+
+@media (max-width: 560px) {
+  .item {
+    padding: var(--space-4);
+  }
+
+  .replies {
+    padding: var(--space-2) var(--space-3);
+  }
+}
