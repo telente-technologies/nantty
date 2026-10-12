@@ -34,6 +34,8 @@ type CartItem struct {
 	AttributionSource *string `json:"attribution_source,omitempty"`
 	// AttributionID holds the value of the "attribution_id" field.
 	AttributionID *uuid.UUID `json:"attribution_id,omitempty"`
+	// AttributedAt holds the value of the "attributed_at" field.
+	AttributedAt *time.Time `json:"attributed_at,omitempty"`
 	// UpdatedAt holds the value of the "updated_at" field.
 	UpdatedAt    time.Time `json:"updated_at,omitempty"`
 	selectValues sql.SelectValues
@@ -50,7 +52,7 @@ func (*CartItem) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullInt64)
 		case cartitem.FieldAttributionSource:
 			values[i] = new(sql.NullString)
-		case cartitem.FieldCreatedAt, cartitem.FieldUpdatedAt:
+		case cartitem.FieldCreatedAt, cartitem.FieldAttributedAt, cartitem.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
 		case cartitem.FieldID, cartitem.FieldCartID, cartitem.FieldProductID, cartitem.FieldVariantID, cartitem.FieldStoreID:
 			values[i] = new(uuid.UUID)
@@ -125,6 +127,13 @@ func (_m *CartItem) assignValues(columns []string, values []any) error {
 				_m.AttributionID = new(uuid.UUID)
 				*_m.AttributionID = *value.S.(*uuid.UUID)
 			}
+		case cartitem.FieldAttributedAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field attributed_at", values[i])
+			} else if value.Valid {
+				_m.AttributedAt = new(time.Time)
+				*_m.AttributedAt = value.Time
+			}
 		case cartitem.FieldUpdatedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field updated_at", values[i])
@@ -193,6 +202,11 @@ func (_m *CartItem) String() string {
 	if v := _m.AttributionID; v != nil {
 		builder.WriteString("attribution_id=")
 		builder.WriteString(fmt.Sprintf("%v", *v))
+	}
+	builder.WriteString(", ")
+	if v := _m.AttributedAt; v != nil {
+		builder.WriteString("attributed_at=")
+		builder.WriteString(v.Format(time.ANSIC))
 	}
 	builder.WriteString(", ")
 	builder.WriteString("updated_at=")

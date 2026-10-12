@@ -90,6 +90,26 @@ func (_u *CartItemUpdate) ClearAttributionID() *CartItemUpdate {
 	return _u
 }
 
+// SetAttributedAt sets the "attributed_at" field.
+func (_u *CartItemUpdate) SetAttributedAt(v time.Time) *CartItemUpdate {
+	_u.mutation.SetAttributedAt(v)
+	return _u
+}
+
+// SetNillableAttributedAt sets the "attributed_at" field if the given value is not nil.
+func (_u *CartItemUpdate) SetNillableAttributedAt(v *time.Time) *CartItemUpdate {
+	if v != nil {
+		_u.SetAttributedAt(*v)
+	}
+	return _u
+}
+
+// ClearAttributedAt clears the value of the "attributed_at" field.
+func (_u *CartItemUpdate) ClearAttributedAt() *CartItemUpdate {
+	_u.mutation.ClearAttributedAt()
+	return _u
+}
+
 // SetUpdatedAt sets the "updated_at" field.
 func (_u *CartItemUpdate) SetUpdatedAt(v time.Time) *CartItemUpdate {
 	_u.mutation.SetUpdatedAt(v)
@@ -182,6 +202,12 @@ func (_u *CartItemUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if _u.mutation.AttributionIDCleared() {
 		_spec.ClearField(cartitem.FieldAttributionID, field.TypeUUID)
 	}
+	if value, ok := _u.mutation.AttributedAt(); ok {
+		_spec.SetField(cartitem.FieldAttributedAt, field.TypeTime, value)
+	}
+	if _u.mutation.AttributedAtCleared() {
+		_spec.ClearField(cartitem.FieldAttributedAt, field.TypeTime)
+	}
 	if value, ok := _u.mutation.UpdatedAt(); ok {
 		_spec.SetField(cartitem.FieldUpdatedAt, field.TypeTime, value)
 	}
@@ -263,6 +289,26 @@ func (_u *CartItemUpdateOne) SetNillableAttributionID(v *uuid.UUID) *CartItemUpd
 // ClearAttributionID clears the value of the "attribution_id" field.
 func (_u *CartItemUpdateOne) ClearAttributionID() *CartItemUpdateOne {
 	_u.mutation.ClearAttributionID()
+	return _u
+}
+
+// SetAttributedAt sets the "attributed_at" field.
+func (_u *CartItemUpdateOne) SetAttributedAt(v time.Time) *CartItemUpdateOne {
+	_u.mutation.SetAttributedAt(v)
+	return _u
+}
+
+// SetNillableAttributedAt sets the "attributed_at" field if the given value is not nil.
+func (_u *CartItemUpdateOne) SetNillableAttributedAt(v *time.Time) *CartItemUpdateOne {
+	if v != nil {
+		_u.SetAttributedAt(*v)
+	}
+	return _u
+}
+
+// ClearAttributedAt clears the value of the "attributed_at" field.
+func (_u *CartItemUpdateOne) ClearAttributedAt() *CartItemUpdateOne {
+	_u.mutation.ClearAttributedAt()
 	return _u
 }
 
@@ -387,6 +433,12 @@ func (_u *CartItemUpdateOne) sqlSave(ctx context.Context) (_node *CartItem, err 
 	}
 	if _u.mutation.AttributionIDCleared() {
 		_spec.ClearField(cartitem.FieldAttributionID, field.TypeUUID)
+	}
+	if value, ok := _u.mutation.AttributedAt(); ok {
+		_spec.SetField(cartitem.FieldAttributedAt, field.TypeTime, value)
+	}
+	if _u.mutation.AttributedAtCleared() {
+		_spec.ClearField(cartitem.FieldAttributedAt, field.TypeTime)
 	}
 	if value, ok := _u.mutation.UpdatedAt(); ok {
 		_spec.SetField(cartitem.FieldUpdatedAt, field.TypeTime, value)

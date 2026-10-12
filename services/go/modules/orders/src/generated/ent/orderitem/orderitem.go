@@ -56,6 +56,8 @@ const (
 	FieldAttributionSource = "attribution_source"
 	// FieldAttributionID holds the string denoting the attribution_id field in the database.
 	FieldAttributionID = "attribution_id"
+	// FieldAttributedAt holds the string denoting the attributed_at field in the database.
+	FieldAttributedAt = "attributed_at"
 	// FieldAffiliateCommissionBps holds the string denoting the affiliate_commission_bps field in the database.
 	FieldAffiliateCommissionBps = "affiliate_commission_bps"
 	// Table holds the table name of the orderitem in the database.
@@ -86,6 +88,7 @@ var Columns = []string{
 	FieldTaxable,
 	FieldAttributionSource,
 	FieldAttributionID,
+	FieldAttributedAt,
 	FieldAffiliateCommissionBps,
 }
 
@@ -249,6 +252,11 @@ func ByAttributionSource(opts ...sql.OrderTermOption) OrderOption {
 // ByAttributionID orders the results by the attribution_id field.
 func ByAttributionID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldAttributionID, opts...).ToFunc()
+}
+
+// ByAttributedAt orders the results by the attributed_at field.
+func ByAttributedAt(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldAttributedAt, opts...).ToFunc()
 }
 
 // ByAffiliateCommissionBps orders the results by the affiliate_commission_bps field.

@@ -100,7 +100,7 @@ func init() {
 	// cartitem.AttributionSourceValidator is a validator for the "attribution_source" field. It is called by the builders before save.
 	cartitem.AttributionSourceValidator = cartitemDescAttributionSource.Validators[0].(func(string) error)
 	// cartitemDescUpdatedAt is the schema descriptor for updated_at field.
-	cartitemDescUpdatedAt := cartitemFields[7].Descriptor()
+	cartitemDescUpdatedAt := cartitemFields[8].Descriptor()
 	// cartitem.DefaultUpdatedAt holds the default value on creation for the updated_at field.
 	cartitem.DefaultUpdatedAt = cartitemDescUpdatedAt.Default.(func() time.Time)
 	// cartitem.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.

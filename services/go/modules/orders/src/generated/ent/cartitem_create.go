@@ -96,6 +96,20 @@ func (_c *CartItemCreate) SetNillableAttributionID(v *uuid.UUID) *CartItemCreate
 	return _c
 }
 
+// SetAttributedAt sets the "attributed_at" field.
+func (_c *CartItemCreate) SetAttributedAt(v time.Time) *CartItemCreate {
+	_c.mutation.SetAttributedAt(v)
+	return _c
+}
+
+// SetNillableAttributedAt sets the "attributed_at" field if the given value is not nil.
+func (_c *CartItemCreate) SetNillableAttributedAt(v *time.Time) *CartItemCreate {
+	if v != nil {
+		_c.SetAttributedAt(*v)
+	}
+	return _c
+}
+
 // SetUpdatedAt sets the "updated_at" field.
 func (_c *CartItemCreate) SetUpdatedAt(v time.Time) *CartItemCreate {
 	_c.mutation.SetUpdatedAt(v)
@@ -274,6 +288,10 @@ func (_c *CartItemCreate) createSpec() (*CartItem, *sqlgraph.CreateSpec) {
 		_spec.SetField(cartitem.FieldAttributionID, field.TypeUUID, value)
 		_node.AttributionID = &value
 	}
+	if value, ok := _c.mutation.AttributedAt(); ok {
+		_spec.SetField(cartitem.FieldAttributedAt, field.TypeTime, value)
+		_node.AttributedAt = &value
+	}
 	if value, ok := _c.mutation.UpdatedAt(); ok {
 		_spec.SetField(cartitem.FieldUpdatedAt, field.TypeTime, value)
 		_node.UpdatedAt = value
@@ -381,6 +399,24 @@ func (u *CartItemUpsert) UpdateAttributionID() *CartItemUpsert {
 // ClearAttributionID clears the value of the "attribution_id" field.
 func (u *CartItemUpsert) ClearAttributionID() *CartItemUpsert {
 	u.SetNull(cartitem.FieldAttributionID)
+	return u
+}
+
+// SetAttributedAt sets the "attributed_at" field.
+func (u *CartItemUpsert) SetAttributedAt(v time.Time) *CartItemUpsert {
+	u.Set(cartitem.FieldAttributedAt, v)
+	return u
+}
+
+// UpdateAttributedAt sets the "attributed_at" field to the value that was provided on create.
+func (u *CartItemUpsert) UpdateAttributedAt() *CartItemUpsert {
+	u.SetExcluded(cartitem.FieldAttributedAt)
+	return u
+}
+
+// ClearAttributedAt clears the value of the "attributed_at" field.
+func (u *CartItemUpsert) ClearAttributedAt() *CartItemUpsert {
+	u.SetNull(cartitem.FieldAttributedAt)
 	return u
 }
 
@@ -519,6 +555,27 @@ func (u *CartItemUpsertOne) UpdateAttributionID() *CartItemUpsertOne {
 func (u *CartItemUpsertOne) ClearAttributionID() *CartItemUpsertOne {
 	return u.Update(func(s *CartItemUpsert) {
 		s.ClearAttributionID()
+	})
+}
+
+// SetAttributedAt sets the "attributed_at" field.
+func (u *CartItemUpsertOne) SetAttributedAt(v time.Time) *CartItemUpsertOne {
+	return u.Update(func(s *CartItemUpsert) {
+		s.SetAttributedAt(v)
+	})
+}
+
+// UpdateAttributedAt sets the "attributed_at" field to the value that was provided on create.
+func (u *CartItemUpsertOne) UpdateAttributedAt() *CartItemUpsertOne {
+	return u.Update(func(s *CartItemUpsert) {
+		s.UpdateAttributedAt()
+	})
+}
+
+// ClearAttributedAt clears the value of the "attributed_at" field.
+func (u *CartItemUpsertOne) ClearAttributedAt() *CartItemUpsertOne {
+	return u.Update(func(s *CartItemUpsert) {
+		s.ClearAttributedAt()
 	})
 }
 
@@ -826,6 +883,27 @@ func (u *CartItemUpsertBulk) UpdateAttributionID() *CartItemUpsertBulk {
 func (u *CartItemUpsertBulk) ClearAttributionID() *CartItemUpsertBulk {
 	return u.Update(func(s *CartItemUpsert) {
 		s.ClearAttributionID()
+	})
+}
+
+// SetAttributedAt sets the "attributed_at" field.
+func (u *CartItemUpsertBulk) SetAttributedAt(v time.Time) *CartItemUpsertBulk {
+	return u.Update(func(s *CartItemUpsert) {
+		s.SetAttributedAt(v)
+	})
+}
+
+// UpdateAttributedAt sets the "attributed_at" field to the value that was provided on create.
+func (u *CartItemUpsertBulk) UpdateAttributedAt() *CartItemUpsertBulk {
+	return u.Update(func(s *CartItemUpsert) {
+		s.UpdateAttributedAt()
+	})
+}
+
+// ClearAttributedAt clears the value of the "attributed_at" field.
+func (u *CartItemUpsertBulk) ClearAttributedAt() *CartItemUpsertBulk {
+	return u.Update(func(s *CartItemUpsert) {
+		s.ClearAttributedAt()
 	})
 }
 

@@ -60,6 +60,8 @@ type OrderItem struct {
 	AttributionSource *string `json:"attribution_source,omitempty"`
 	// AttributionID holds the value of the "attribution_id" field.
 	AttributionID *uuid.UUID `json:"attribution_id,omitempty"`
+	// AttributedAt holds the value of the "attributed_at" field.
+	AttributedAt *time.Time `json:"attributed_at,omitempty"`
 	// AffiliateCommissionBps holds the value of the "affiliate_commission_bps" field.
 	AffiliateCommissionBps *int64 `json:"affiliate_commission_bps,omitempty"`
 	selectValues           sql.SelectValues
@@ -78,7 +80,7 @@ func (*OrderItem) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullInt64)
 		case orderitem.FieldProductName, orderitem.FieldVariantTitle, orderitem.FieldSku, orderitem.FieldSize, orderitem.FieldColor, orderitem.FieldImageURL, orderitem.FieldCategoryName, orderitem.FieldAttributionSource:
 			values[i] = new(sql.NullString)
-		case orderitem.FieldCreatedAt:
+		case orderitem.FieldCreatedAt, orderitem.FieldAttributedAt:
 			values[i] = new(sql.NullTime)
 		case orderitem.FieldID, orderitem.FieldOrderGroupID, orderitem.FieldStoreID, orderitem.FieldProductID, orderitem.FieldVariantID:
 			values[i] = new(uuid.UUID)
@@ -234,6 +236,13 @@ func (_m *OrderItem) assignValues(columns []string, values []any) error {
 				_m.AttributionID = new(uuid.UUID)
 				*_m.AttributionID = *value.S.(*uuid.UUID)
 			}
+		case orderitem.FieldAttributedAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field attributed_at", values[i])
+			} else if value.Valid {
+				_m.AttributedAt = new(time.Time)
+				*_m.AttributedAt = value.Time
+			}
 		case orderitem.FieldAffiliateCommissionBps:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field affiliate_commission_bps", values[i])
@@ -348,6 +357,11 @@ func (_m *OrderItem) String() string {
 	if v := _m.AttributionID; v != nil {
 		builder.WriteString("attribution_id=")
 		builder.WriteString(fmt.Sprintf("%v", *v))
+	}
+	builder.WriteString(", ")
+	if v := _m.AttributedAt; v != nil {
+		builder.WriteString("attributed_at=")
+		builder.WriteString(v.Format(time.ANSIC))
 	}
 	builder.WriteString(", ")
 	if v := _m.AffiliateCommissionBps; v != nil {

@@ -160,6 +160,11 @@ func AttributionID(v uuid.UUID) predicate.OrderItem {
 	return predicate.OrderItem(sql.FieldEQ(FieldAttributionID, v))
 }
 
+// AttributedAt applies equality check predicate on the "attributed_at" field. It's identical to AttributedAtEQ.
+func AttributedAt(v time.Time) predicate.OrderItem {
+	return predicate.OrderItem(sql.FieldEQ(FieldAttributedAt, v))
+}
+
 // AffiliateCommissionBps applies equality check predicate on the "affiliate_commission_bps" field. It's identical to AffiliateCommissionBpsEQ.
 func AffiliateCommissionBps(v int64) predicate.OrderItem {
 	return predicate.OrderItem(sql.FieldEQ(FieldAffiliateCommissionBps, v))
@@ -1193,6 +1198,56 @@ func AttributionIDIsNil() predicate.OrderItem {
 // AttributionIDNotNil applies the NotNil predicate on the "attribution_id" field.
 func AttributionIDNotNil() predicate.OrderItem {
 	return predicate.OrderItem(sql.FieldNotNull(FieldAttributionID))
+}
+
+// AttributedAtEQ applies the EQ predicate on the "attributed_at" field.
+func AttributedAtEQ(v time.Time) predicate.OrderItem {
+	return predicate.OrderItem(sql.FieldEQ(FieldAttributedAt, v))
+}
+
+// AttributedAtNEQ applies the NEQ predicate on the "attributed_at" field.
+func AttributedAtNEQ(v time.Time) predicate.OrderItem {
+	return predicate.OrderItem(sql.FieldNEQ(FieldAttributedAt, v))
+}
+
+// AttributedAtIn applies the In predicate on the "attributed_at" field.
+func AttributedAtIn(vs ...time.Time) predicate.OrderItem {
+	return predicate.OrderItem(sql.FieldIn(FieldAttributedAt, vs...))
+}
+
+// AttributedAtNotIn applies the NotIn predicate on the "attributed_at" field.
+func AttributedAtNotIn(vs ...time.Time) predicate.OrderItem {
+	return predicate.OrderItem(sql.FieldNotIn(FieldAttributedAt, vs...))
+}
+
+// AttributedAtGT applies the GT predicate on the "attributed_at" field.
+func AttributedAtGT(v time.Time) predicate.OrderItem {
+	return predicate.OrderItem(sql.FieldGT(FieldAttributedAt, v))
+}
+
+// AttributedAtGTE applies the GTE predicate on the "attributed_at" field.
+func AttributedAtGTE(v time.Time) predicate.OrderItem {
+	return predicate.OrderItem(sql.FieldGTE(FieldAttributedAt, v))
+}
+
+// AttributedAtLT applies the LT predicate on the "attributed_at" field.
+func AttributedAtLT(v time.Time) predicate.OrderItem {
+	return predicate.OrderItem(sql.FieldLT(FieldAttributedAt, v))
+}
+
+// AttributedAtLTE applies the LTE predicate on the "attributed_at" field.
+func AttributedAtLTE(v time.Time) predicate.OrderItem {
+	return predicate.OrderItem(sql.FieldLTE(FieldAttributedAt, v))
+}
+
+// AttributedAtIsNil applies the IsNil predicate on the "attributed_at" field.
+func AttributedAtIsNil() predicate.OrderItem {
+	return predicate.OrderItem(sql.FieldIsNull(FieldAttributedAt))
+}
+
+// AttributedAtNotNil applies the NotNil predicate on the "attributed_at" field.
+func AttributedAtNotNil() predicate.OrderItem {
+	return predicate.OrderItem(sql.FieldNotNull(FieldAttributedAt))
 }
 
 // AffiliateCommissionBpsEQ applies the EQ predicate on the "affiliate_commission_bps" field.

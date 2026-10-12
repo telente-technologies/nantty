@@ -45,6 +45,7 @@ func (CartItem) Fields() []ent.Field {
 		field.Int("quantity").Positive(),
 		field.String("attribution_source").Optional().Nillable().MaxLen(10),
 		field.UUID("attribution_id", uuid.UUID{}).Optional().Nillable(),
+		field.Time("attributed_at").Optional().Nillable(),
 		field.Time("updated_at").Default(time.Now).UpdateDefault(time.Now),
 	}
 }

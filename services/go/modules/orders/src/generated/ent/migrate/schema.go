@@ -76,6 +76,7 @@ var (
 		{Name: "quantity", Type: field.TypeInt},
 		{Name: "attribution_source", Type: field.TypeString, Nullable: true, Size: 10},
 		{Name: "attribution_id", Type: field.TypeUUID, Nullable: true},
+		{Name: "attributed_at", Type: field.TypeTime, Nullable: true},
 		{Name: "updated_at", Type: field.TypeTime},
 	}
 	// CartItemsTable holds the schema information for the "cart_items" table.
@@ -468,6 +469,7 @@ var (
 		{Name: "taxable", Type: field.TypeBool, Default: true},
 		{Name: "attribution_source", Type: field.TypeString, Nullable: true, Size: 10},
 		{Name: "attribution_id", Type: field.TypeUUID, Nullable: true},
+		{Name: "attributed_at", Type: field.TypeTime, Nullable: true},
 		{Name: "affiliate_commission_bps", Type: field.TypeInt64, Nullable: true},
 	}
 	// OrderItemsTable holds the schema information for the "order_items" table.

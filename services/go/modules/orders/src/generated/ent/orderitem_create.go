@@ -254,6 +254,20 @@ func (_c *OrderItemCreate) SetNillableAttributionID(v *uuid.UUID) *OrderItemCrea
 	return _c
 }
 
+// SetAttributedAt sets the "attributed_at" field.
+func (_c *OrderItemCreate) SetAttributedAt(v time.Time) *OrderItemCreate {
+	_c.mutation.SetAttributedAt(v)
+	return _c
+}
+
+// SetNillableAttributedAt sets the "attributed_at" field if the given value is not nil.
+func (_c *OrderItemCreate) SetNillableAttributedAt(v *time.Time) *OrderItemCreate {
+	if v != nil {
+		_c.SetAttributedAt(*v)
+	}
+	return _c
+}
+
 // SetAffiliateCommissionBps sets the "affiliate_commission_bps" field.
 func (_c *OrderItemCreate) SetAffiliateCommissionBps(v int64) *OrderItemCreate {
 	_c.mutation.SetAffiliateCommissionBps(v)
@@ -570,6 +584,10 @@ func (_c *OrderItemCreate) createSpec() (*OrderItem, *sqlgraph.CreateSpec) {
 		_spec.SetField(orderitem.FieldAttributionID, field.TypeUUID, value)
 		_node.AttributionID = &value
 	}
+	if value, ok := _c.mutation.AttributedAt(); ok {
+		_spec.SetField(orderitem.FieldAttributedAt, field.TypeTime, value)
+		_node.AttributedAt = &value
+	}
 	if value, ok := _c.mutation.AffiliateCommissionBps(); ok {
 		_spec.SetField(orderitem.FieldAffiliateCommissionBps, field.TypeInt64, value)
 		_node.AffiliateCommissionBps = &value
@@ -705,6 +723,9 @@ func (u *OrderItemUpsertOne) UpdateNewValues() *OrderItemUpsertOne {
 		}
 		if _, exists := u.create.mutation.AttributionID(); exists {
 			s.SetIgnore(orderitem.FieldAttributionID)
+		}
+		if _, exists := u.create.mutation.AttributedAt(); exists {
+			s.SetIgnore(orderitem.FieldAttributedAt)
 		}
 		if _, exists := u.create.mutation.AffiliateCommissionBps(); exists {
 			s.SetIgnore(orderitem.FieldAffiliateCommissionBps)
@@ -985,6 +1006,9 @@ func (u *OrderItemUpsertBulk) UpdateNewValues() *OrderItemUpsertBulk {
 			}
 			if _, exists := b.mutation.AttributionID(); exists {
 				s.SetIgnore(orderitem.FieldAttributionID)
+			}
+			if _, exists := b.mutation.AttributedAt(); exists {
+				s.SetIgnore(orderitem.FieldAttributedAt)
 			}
 			if _, exists := b.mutation.AffiliateCommissionBps(); exists {
 				s.SetIgnore(orderitem.FieldAffiliateCommissionBps)

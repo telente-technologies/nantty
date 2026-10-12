@@ -95,6 +95,11 @@ func AttributionID(v uuid.UUID) predicate.CartItem {
 	return predicate.CartItem(sql.FieldEQ(FieldAttributionID, v))
 }
 
+// AttributedAt applies equality check predicate on the "attributed_at" field. It's identical to AttributedAtEQ.
+func AttributedAt(v time.Time) predicate.CartItem {
+	return predicate.CartItem(sql.FieldEQ(FieldAttributedAt, v))
+}
+
 // UpdatedAt applies equality check predicate on the "updated_at" field. It's identical to UpdatedAtEQ.
 func UpdatedAt(v time.Time) predicate.CartItem {
 	return predicate.CartItem(sql.FieldEQ(FieldUpdatedAt, v))
@@ -463,6 +468,56 @@ func AttributionIDIsNil() predicate.CartItem {
 // AttributionIDNotNil applies the NotNil predicate on the "attribution_id" field.
 func AttributionIDNotNil() predicate.CartItem {
 	return predicate.CartItem(sql.FieldNotNull(FieldAttributionID))
+}
+
+// AttributedAtEQ applies the EQ predicate on the "attributed_at" field.
+func AttributedAtEQ(v time.Time) predicate.CartItem {
+	return predicate.CartItem(sql.FieldEQ(FieldAttributedAt, v))
+}
+
+// AttributedAtNEQ applies the NEQ predicate on the "attributed_at" field.
+func AttributedAtNEQ(v time.Time) predicate.CartItem {
+	return predicate.CartItem(sql.FieldNEQ(FieldAttributedAt, v))
+}
+
+// AttributedAtIn applies the In predicate on the "attributed_at" field.
+func AttributedAtIn(vs ...time.Time) predicate.CartItem {
+	return predicate.CartItem(sql.FieldIn(FieldAttributedAt, vs...))
+}
+
+// AttributedAtNotIn applies the NotIn predicate on the "attributed_at" field.
+func AttributedAtNotIn(vs ...time.Time) predicate.CartItem {
+	return predicate.CartItem(sql.FieldNotIn(FieldAttributedAt, vs...))
+}
+
+// AttributedAtGT applies the GT predicate on the "attributed_at" field.
+func AttributedAtGT(v time.Time) predicate.CartItem {
+	return predicate.CartItem(sql.FieldGT(FieldAttributedAt, v))
+}
+
+// AttributedAtGTE applies the GTE predicate on the "attributed_at" field.
+func AttributedAtGTE(v time.Time) predicate.CartItem {
+	return predicate.CartItem(sql.FieldGTE(FieldAttributedAt, v))
+}
+
+// AttributedAtLT applies the LT predicate on the "attributed_at" field.
+func AttributedAtLT(v time.Time) predicate.CartItem {
+	return predicate.CartItem(sql.FieldLT(FieldAttributedAt, v))
+}
+
+// AttributedAtLTE applies the LTE predicate on the "attributed_at" field.
+func AttributedAtLTE(v time.Time) predicate.CartItem {
+	return predicate.CartItem(sql.FieldLTE(FieldAttributedAt, v))
+}
+
+// AttributedAtIsNil applies the IsNil predicate on the "attributed_at" field.
+func AttributedAtIsNil() predicate.CartItem {
+	return predicate.CartItem(sql.FieldIsNull(FieldAttributedAt))
+}
+
+// AttributedAtNotNil applies the NotNil predicate on the "attributed_at" field.
+func AttributedAtNotNil() predicate.CartItem {
+	return predicate.CartItem(sql.FieldNotNull(FieldAttributedAt))
 }
 
 // UpdatedAtEQ applies the EQ predicate on the "updated_at" field.

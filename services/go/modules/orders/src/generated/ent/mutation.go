@@ -1414,6 +1414,7 @@ type CartItemMutation struct {
 	addquantity        *int
 	attribution_source *string
 	attribution_id     *uuid.UUID
+	attributed_at      *time.Time
 	updated_at         *time.Time
 	clearedFields      map[string]struct{}
 	done               bool
@@ -1859,6 +1860,55 @@ func (m *CartItemMutation) ResetAttributionID() {
 	delete(m.clearedFields, cartitem.FieldAttributionID)
 }
 
+// SetAttributedAt sets the "attributed_at" field.
+func (m *CartItemMutation) SetAttributedAt(t time.Time) {
+	m.attributed_at = &t
+}
+
+// AttributedAt returns the value of the "attributed_at" field in the mutation.
+func (m *CartItemMutation) AttributedAt() (r time.Time, exists bool) {
+	v := m.attributed_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldAttributedAt returns the old "attributed_at" field's value of the CartItem entity.
+// If the CartItem object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CartItemMutation) OldAttributedAt(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldAttributedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldAttributedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldAttributedAt: %w", err)
+	}
+	return oldValue.AttributedAt, nil
+}
+
+// ClearAttributedAt clears the value of the "attributed_at" field.
+func (m *CartItemMutation) ClearAttributedAt() {
+	m.attributed_at = nil
+	m.clearedFields[cartitem.FieldAttributedAt] = struct{}{}
+}
+
+// AttributedAtCleared returns if the "attributed_at" field was cleared in this mutation.
+func (m *CartItemMutation) AttributedAtCleared() bool {
+	_, ok := m.clearedFields[cartitem.FieldAttributedAt]
+	return ok
+}
+
+// ResetAttributedAt resets all changes to the "attributed_at" field.
+func (m *CartItemMutation) ResetAttributedAt() {
+	m.attributed_at = nil
+	delete(m.clearedFields, cartitem.FieldAttributedAt)
+}
+
 // SetUpdatedAt sets the "updated_at" field.
 func (m *CartItemMutation) SetUpdatedAt(t time.Time) {
 	m.updated_at = &t
@@ -1929,7 +1979,7 @@ func (m *CartItemMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *CartItemMutation) Fields() []string {
-	fields := make([]string, 0, 9)
+	fields := make([]string, 0, 10)
 	if m.created_at != nil {
 		fields = append(fields, cartitem.FieldCreatedAt)
 	}
@@ -1953,6 +2003,9 @@ func (m *CartItemMutation) Fields() []string {
 	}
 	if m.attribution_id != nil {
 		fields = append(fields, cartitem.FieldAttributionID)
+	}
+	if m.attributed_at != nil {
+		fields = append(fields, cartitem.FieldAttributedAt)
 	}
 	if m.updated_at != nil {
 		fields = append(fields, cartitem.FieldUpdatedAt)
@@ -1981,6 +2034,8 @@ func (m *CartItemMutation) Field(name string) (ent.Value, bool) {
 		return m.AttributionSource()
 	case cartitem.FieldAttributionID:
 		return m.AttributionID()
+	case cartitem.FieldAttributedAt:
+		return m.AttributedAt()
 	case cartitem.FieldUpdatedAt:
 		return m.UpdatedAt()
 	}
@@ -2008,6 +2063,8 @@ func (m *CartItemMutation) OldField(ctx context.Context, name string) (ent.Value
 		return m.OldAttributionSource(ctx)
 	case cartitem.FieldAttributionID:
 		return m.OldAttributionID(ctx)
+	case cartitem.FieldAttributedAt:
+		return m.OldAttributedAt(ctx)
 	case cartitem.FieldUpdatedAt:
 		return m.OldUpdatedAt(ctx)
 	}
@@ -2075,6 +2132,13 @@ func (m *CartItemMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetAttributionID(v)
 		return nil
+	case cartitem.FieldAttributedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetAttributedAt(v)
+		return nil
 	case cartitem.FieldUpdatedAt:
 		v, ok := value.(time.Time)
 		if !ok {
@@ -2133,6 +2197,9 @@ func (m *CartItemMutation) ClearedFields() []string {
 	if m.FieldCleared(cartitem.FieldAttributionID) {
 		fields = append(fields, cartitem.FieldAttributionID)
 	}
+	if m.FieldCleared(cartitem.FieldAttributedAt) {
+		fields = append(fields, cartitem.FieldAttributedAt)
+	}
 	return fields
 }
 
@@ -2152,6 +2219,9 @@ func (m *CartItemMutation) ClearField(name string) error {
 		return nil
 	case cartitem.FieldAttributionID:
 		m.ClearAttributionID()
+		return nil
+	case cartitem.FieldAttributedAt:
+		m.ClearAttributedAt()
 		return nil
 	}
 	return fmt.Errorf("unknown CartItem nullable field %s", name)
@@ -2184,6 +2254,9 @@ func (m *CartItemMutation) ResetField(name string) error {
 		return nil
 	case cartitem.FieldAttributionID:
 		m.ResetAttributionID()
+		return nil
+	case cartitem.FieldAttributedAt:
+		m.ResetAttributedAt()
 		return nil
 	case cartitem.FieldUpdatedAt:
 		m.ResetUpdatedAt()
@@ -12043,6 +12116,7 @@ type OrderItemMutation struct {
 	taxable                     *bool
 	attribution_source          *string
 	attribution_id              *uuid.UUID
+	attributed_at               *time.Time
 	affiliate_commission_bps    *int64
 	addaffiliate_commission_bps *int64
 	clearedFields               map[string]struct{}
@@ -13057,6 +13131,55 @@ func (m *OrderItemMutation) ResetAttributionID() {
 	delete(m.clearedFields, orderitem.FieldAttributionID)
 }
 
+// SetAttributedAt sets the "attributed_at" field.
+func (m *OrderItemMutation) SetAttributedAt(t time.Time) {
+	m.attributed_at = &t
+}
+
+// AttributedAt returns the value of the "attributed_at" field in the mutation.
+func (m *OrderItemMutation) AttributedAt() (r time.Time, exists bool) {
+	v := m.attributed_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldAttributedAt returns the old "attributed_at" field's value of the OrderItem entity.
+// If the OrderItem object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *OrderItemMutation) OldAttributedAt(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldAttributedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldAttributedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldAttributedAt: %w", err)
+	}
+	return oldValue.AttributedAt, nil
+}
+
+// ClearAttributedAt clears the value of the "attributed_at" field.
+func (m *OrderItemMutation) ClearAttributedAt() {
+	m.attributed_at = nil
+	m.clearedFields[orderitem.FieldAttributedAt] = struct{}{}
+}
+
+// AttributedAtCleared returns if the "attributed_at" field was cleared in this mutation.
+func (m *OrderItemMutation) AttributedAtCleared() bool {
+	_, ok := m.clearedFields[orderitem.FieldAttributedAt]
+	return ok
+}
+
+// ResetAttributedAt resets all changes to the "attributed_at" field.
+func (m *OrderItemMutation) ResetAttributedAt() {
+	m.attributed_at = nil
+	delete(m.clearedFields, orderitem.FieldAttributedAt)
+}
+
 // SetAffiliateCommissionBps sets the "affiliate_commission_bps" field.
 func (m *OrderItemMutation) SetAffiliateCommissionBps(i int64) {
 	m.affiliate_commission_bps = &i
@@ -13161,7 +13284,7 @@ func (m *OrderItemMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *OrderItemMutation) Fields() []string {
-	fields := make([]string, 0, 22)
+	fields := make([]string, 0, 23)
 	if m.created_at != nil {
 		fields = append(fields, orderitem.FieldCreatedAt)
 	}
@@ -13225,6 +13348,9 @@ func (m *OrderItemMutation) Fields() []string {
 	if m.attribution_id != nil {
 		fields = append(fields, orderitem.FieldAttributionID)
 	}
+	if m.attributed_at != nil {
+		fields = append(fields, orderitem.FieldAttributedAt)
+	}
 	if m.affiliate_commission_bps != nil {
 		fields = append(fields, orderitem.FieldAffiliateCommissionBps)
 	}
@@ -13278,6 +13404,8 @@ func (m *OrderItemMutation) Field(name string) (ent.Value, bool) {
 		return m.AttributionSource()
 	case orderitem.FieldAttributionID:
 		return m.AttributionID()
+	case orderitem.FieldAttributedAt:
+		return m.AttributedAt()
 	case orderitem.FieldAffiliateCommissionBps:
 		return m.AffiliateCommissionBps()
 	}
@@ -13331,6 +13459,8 @@ func (m *OrderItemMutation) OldField(ctx context.Context, name string) (ent.Valu
 		return m.OldAttributionSource(ctx)
 	case orderitem.FieldAttributionID:
 		return m.OldAttributionID(ctx)
+	case orderitem.FieldAttributedAt:
+		return m.OldAttributedAt(ctx)
 	case orderitem.FieldAffiliateCommissionBps:
 		return m.OldAffiliateCommissionBps(ctx)
 	}
@@ -13489,6 +13619,13 @@ func (m *OrderItemMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetAttributionID(v)
 		return nil
+	case orderitem.FieldAttributedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetAttributedAt(v)
+		return nil
 	case orderitem.FieldAffiliateCommissionBps:
 		v, ok := value.(int64)
 		if !ok {
@@ -13604,6 +13741,9 @@ func (m *OrderItemMutation) ClearedFields() []string {
 	if m.FieldCleared(orderitem.FieldAttributionID) {
 		fields = append(fields, orderitem.FieldAttributionID)
 	}
+	if m.FieldCleared(orderitem.FieldAttributedAt) {
+		fields = append(fields, orderitem.FieldAttributedAt)
+	}
 	if m.FieldCleared(orderitem.FieldAffiliateCommissionBps) {
 		fields = append(fields, orderitem.FieldAffiliateCommissionBps)
 	}
@@ -13635,6 +13775,9 @@ func (m *OrderItemMutation) ClearField(name string) error {
 		return nil
 	case orderitem.FieldAttributionID:
 		m.ClearAttributionID()
+		return nil
+	case orderitem.FieldAttributedAt:
+		m.ClearAttributedAt()
 		return nil
 	case orderitem.FieldAffiliateCommissionBps:
 		m.ClearAffiliateCommissionBps()
@@ -13709,6 +13852,9 @@ func (m *OrderItemMutation) ResetField(name string) error {
 		return nil
 	case orderitem.FieldAttributionID:
 		m.ResetAttributionID()
+		return nil
+	case orderitem.FieldAttributedAt:
+		m.ResetAttributedAt()
 		return nil
 	case orderitem.FieldAffiliateCommissionBps:
 		m.ResetAffiliateCommissionBps()

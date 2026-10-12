@@ -83,6 +83,9 @@ func (_u *OrderItemUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if _u.mutation.AttributionIDCleared() {
 		_spec.ClearField(orderitem.FieldAttributionID, field.TypeUUID)
 	}
+	if _u.mutation.AttributedAtCleared() {
+		_spec.ClearField(orderitem.FieldAttributedAt, field.TypeTime)
+	}
 	if _u.mutation.AffiliateCommissionBpsCleared() {
 		_spec.ClearField(orderitem.FieldAffiliateCommissionBps, field.TypeInt64)
 	}
@@ -191,6 +194,9 @@ func (_u *OrderItemUpdateOne) sqlSave(ctx context.Context) (_node *OrderItem, er
 	}
 	if _u.mutation.AttributionIDCleared() {
 		_spec.ClearField(orderitem.FieldAttributionID, field.TypeUUID)
+	}
+	if _u.mutation.AttributedAtCleared() {
+		_spec.ClearField(orderitem.FieldAttributedAt, field.TypeTime)
 	}
 	if _u.mutation.AffiliateCommissionBpsCleared() {
 		_spec.ClearField(orderitem.FieldAffiliateCommissionBps, field.TypeInt64)
