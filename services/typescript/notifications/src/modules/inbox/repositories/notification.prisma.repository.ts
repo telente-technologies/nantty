@@ -60,6 +60,7 @@ export class NotificationPrismaRepository implements NotificationRepository {
     const rows = await this.prisma.notification.findMany({
       where: {
         userId,
+        hiddenAt: null,
         ...(filter === "mentions" ? { kind: "mention" } : {}),
         ...(position === null ? {} : { OR: [{ createdAt: { lt: position.createdAt } }, { createdAt: position.createdAt, id: { lt: position.id } }] }),
       },
@@ -79,15 +80,21 @@ export class NotificationPrismaRepository implements NotificationRepository {
   }
 
   public async markAllRead(userId: string, readAt: Date): Promise<number> {
-    return (await this.prisma.notification.updateMany({ where: { userId, readAt: null }, data: { readAt } })).count;
+    return (await this.prisma.notification.updateMany({ where: { userId, readAt: null, hiddenAt: null }, data: { readAt } })).count;
   }
 
   public countUnread(userId: string): Promise<number> {
-    return this.prisma.notification.count({ where: { userId, readAt: null } });
+    return this.prisma.notification.count({ where: { userId, readAt: null, hiddenAt: null } });
   }
 
   public async deleteForContent(contentId: string): Promise<number> {
     const references = contentReferenceKeys.map((key) => ({ data: { path: [key], equals: contentId } }));
     return (await this.prisma.notification.deleteMany({ where: { OR: references } })).count;
+  }
+
+  public async setHiddenForComment(commentId: string, hidden: boolean, at: Date): Promise<number> {
+    const byComment = [{ data: { path: ["commentId"], equals: commentId } }, { data: { path: ["url"], string_ends_with: `?comment=${commentId}` } }];
+    const where = { OR: byComment, hiddenAt: hidden ? null : { not: null } };
+    return (await this.prisma.notification.updateMany({ where, data: { hiddenAt: hidden ? at : null } })).count;
   }
 }

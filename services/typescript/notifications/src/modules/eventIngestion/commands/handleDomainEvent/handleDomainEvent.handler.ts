@@ -25,6 +25,7 @@ export interface WidgetRefreshPort {
 
 export interface RemovedContentPort {
   deleteForContent(contentId: string): Promise<number>;
+  setHiddenForComment(commentId: string, hidden: boolean, at: Date): Promise<number>;
 }
 
 const postNotificationEventTypes = new Set(["post.created", "live.started"]);
@@ -49,6 +50,7 @@ export class HandleDomainEventHandler {
     }
     await this.refreshWidgetsQuietly(event);
     if (event.type === "post.deleted") return this.forgetDeletedPost(event);
+    if (event.type === "comment.hidden" || event.type === "comment.unhidden") return this.applyCommentVisibility(event);
     if (event.data["notificationsMuted"] === true) return { handled: true, intents: 0, reason: "post_notifications_muted" };
     const fanoutStarted = postNotificationEventTypes.has(event.type) && this.postNotifications !== undefined ? await this.postNotifications.startFromEvent(event) : false;
     const mapping = eventMappings[event.type];
@@ -71,6 +73,14 @@ export class HandleDomainEventHandler {
     if (typeof postId !== "string" || postId === "" || this.removedContent === undefined) return { handled: false, intents: 0, reason: "unhandled_event_type" };
     await this.removedContent.deleteForContent(postId);
     return { handled: true, intents: 0, reason: "content_deleted" };
+  }
+
+  private async applyCommentVisibility(event: HandleDomainEventCommand["event"]): Promise<HandleDomainEventResult> {
+    const commentId = event.data["commentId"];
+    if (typeof commentId !== "string" || commentId === "" || this.removedContent === undefined) return { handled: false, intents: 0, reason: "unhandled_event_type" };
+    const hidden = event.type === "comment.hidden";
+    await this.removedContent.setHiddenForComment(commentId, hidden, new Date(event.occurredAt));
+    return { handled: true, intents: 0, reason: hidden ? "comment_hidden" : "comment_unhidden" };
   }
 
   private async refreshWidgetsQuietly(event: HandleDomainEventCommand["event"]): Promise<void> {

@@ -31,18 +31,46 @@ export const escrowReleased: EventMapping = (event, data) => {
   ];
 };
 
+const refundCopy = {
+  wallet: { method: "Your Zudomart wallet", inApp: "The money is back in your Zudomart wallet. You can spend it or withdraw it to your bank.", push: "It's back in your Zudomart wallet." },
+  paymentMethod: { method: "The card or account you paid with", inApp: "Your refund is on its way back to the card or account you paid with. Your bank may take 3–5 business days to show it.", push: "It's on its way back to the card or account you paid with." },
+} as const;
+
+const refundDestinationOf = (data: EventDataReader) => (data.text("refundDestination", "wallet") === "paymentMethod" ? "paymentMethod" : "wallet");
+
 function refundIntent(partial: boolean): EventMapping {
-  return (event, data) => [
+  return (event, data) => {
+    const destination = refundDestinationOf(data);
+    const copy = refundCopy[destination];
+    const title = partial ? "Partial refund issued" : "Refund issued";
+    return [
+      intentFor(event, data.text("buyerUserId"), {
+        category: "payments",
+        inApp: { category: "orders", title, body: copy.inApp, data: { orderId: data.text("orderId"), escrowId: data.text("escrowId") } },
+        push: { title, body: copy.push, data: { orderId: data.text("orderId") } },
+        email: (recipient) => plan("refundIssued", {
+          firstName: recipient.firstName, orderNumber: data.text("orderNumber"), refund: data.money("refunded"), refundDestination: destination, refundMethod: copy.method,
+          reference: data.text("escrowId"), reason: data.text("reason", partial ? "Partial refund" : "Order refunded"), itemName: data.text("itemName", "your order"),
+        }),
+      }),
+    ];
+  };
+}
+
+export const escrowRefundScheduled: EventMapping = (event, data) => {
+  const order = data.text("orderNumber", "your order");
+  const links = { orderId: data.text("orderId"), escrowId: data.text("escrowId") };
+  return [
     intentFor(event, data.text("buyerUserId"), {
       category: "payments",
-      inApp: { category: "orders", title: partial ? "Partial refund issued" : "Refund issued", body: "Your refund is on its way to your original payment method.", data: { orderId: data.text("orderId"), escrowId: data.text("escrowId") } },
-      email: (recipient) => plan("refundIssued", {
-        firstName: recipient.firstName, orderNumber: data.text("orderNumber"), refund: data.money("refunded"), refundMethod: data.text("refundMethod", "Original payment method"),
-        reference: data.text("escrowId"), reason: data.text("reason", partial ? "Partial refund" : "Order refunded"), itemName: data.text("itemName", "your order"),
-      }),
+      inApp: { category: "orders", title: "Refund scheduled", body: `Your refund for order ${order} is scheduled. It completes automatically once your card payment settles, usually within one business day.`, data: links },
+    }),
+    intentFor(event, data.text("sellerUserId"), {
+      category: "escrow",
+      inApp: { category: "orders", title: "Refund scheduled", body: `A refund on order ${order} runs once the buyer's card payment settles. The refunded amount won't be released to you.`, data: links },
     }),
   ];
-}
+};
 
 export const escrowRefunded = refundIntent(false);
 export const escrowPartiallyRefunded = refundIntent(true);

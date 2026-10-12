@@ -31,6 +31,7 @@ export const eventMappings: Readonly<Record<string, EventMapping>> = {
   "escrow.released": escrowMoney.escrowReleased,
   "escrow.refunded": escrowMoney.escrowRefunded,
   "escrow.partiallyRefunded": escrowMoney.escrowPartiallyRefunded,
+  "escrow.refundScheduled": escrowMoney.escrowRefundScheduled,
   "dispute.opened": escrowMoney.disputeOpened,
   "disputeMessage.posted": escrowMoney.disputeMessagePosted,
   "dispute.resolved": escrowMoney.disputeResolved,
@@ -76,6 +77,7 @@ export const eventMappings: Readonly<Record<string, EventMapping>> = {
   "adInvite.created": ads.adInviteCreated,
   "affiliateCommission.credited": creatorMoney.affiliateCommissionCredited,
   "live.started": social.liveStarted,
+  "live.reminderDue": social.liveReminderDue,
   "checkmark.suggested": verification.checkmarkSuggested,
   "checkmark.applicationSubmitted": verification.checkmarkApplicationSubmitted,
   "checkmark.approved": verification.checkmarkApproved,
@@ -119,4 +121,4 @@ export const eventMappings: Readonly<Record<string, EventMapping>> = {
   "ticket.resolved": support.ticketResolved,
 };
 
-export const domainEventTypesConsumed: readonly string[] = [...Object.keys(eventMappings), "policyVersion.published", "post.created"];
+export const domainEventTypesConsumed: readonly string[] = [...Object.keys(eventMappings), "policyVersion.published", "post.created", "comment.hidden", "comment.unhidden"];

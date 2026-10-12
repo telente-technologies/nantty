@@ -21,6 +21,7 @@ model Notification {
   actor      Json?
   data       Json      @default("{}")
   readAt     DateTime?
+  hiddenAt   DateTime?
   createdAt  DateTime  @default(now())
 
   @@index([userId, createdAt(sort: Desc), id])

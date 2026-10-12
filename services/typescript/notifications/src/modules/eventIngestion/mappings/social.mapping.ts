@@ -7,10 +7,11 @@ export const mentionCreated: EventMapping = (event, data) => {
   const surface = data.text("surface", "comment");
   const where = surface === "post" || surface === "clip" || surface === "group chat" ? surface : "comment";
   const actor = readActor(data);
+  const commentId = where === "comment" ? data.optionalText("commentId") : undefined;
   return [
     intentFor(event, data.text("recipientUserId"), {
       category: "social",
-      inApp: { category: "social", kind: "mention", title: actorNameOf(data), body: data.bool("mentionedEveryone") ? `mentioned everyone in a ${where}.` : `mentioned you in a ${where}.`, actor, data: { url: data.optionalText("url") ?? null } },
+      inApp: { category: "social", kind: "mention", title: actorNameOf(data), body: data.bool("mentionedEveryone") ? `mentioned everyone in a ${where}.` : `mentioned you in a ${where}.`, actor, data: { url: data.optionalText("url") ?? null, ...(commentId === undefined ? {} : { commentId }) } },
       push: { title: actorNameOf(data), body: `mentioned you in a ${where}.`, data: { url: data.optionalText("url") ?? null } },
       email: (recipient) => plan("mentionedYou", { firstName: recipient.firstName, actorName: actorNameOf(data), actorHandle: actor?.username ?? "", where, excerpt: data.text("excerpt"), url: data.text("url") }, 60),
     }),
@@ -47,7 +48,7 @@ export const followRequestCreated: EventMapping = (event, data) => [
 export const commentCreated: EventMapping = (event, data) => [
   intentFor(event, data.text("recipientUserId"), {
     category: "social",
-    inApp: { category: "social", title: actorNameOf(data), body: `commented on your ${data.text("target", "post")}.`, actor: readActor(data), data: { url: data.optionalText("url") ?? null } },
+    inApp: { category: "social", title: actorNameOf(data), body: `commented on your ${data.text("target", "post")}.`, actor: readActor(data), data: { url: data.optionalText("url") ?? null, commentId: data.optionalText("commentId") ?? null } },
     push: { title: actorNameOf(data), body: `commented: ${data.text("excerpt", "")}`.slice(0, 120) },
   }),
 ];
@@ -108,6 +109,28 @@ export const liveStarted: EventMapping = (event, data, context) => {
           liveUrl: data.text("liveUrl", `${context.webBaseUrl}/live/${data.text("liveId")}`), isShopping: data.bool("isShopping"),
         }),
       } : {}),
+    }),
+  );
+};
+
+const minutesUntil = (scheduledAt: string, occurredAt: string) => {
+  const minutes = Math.round((Date.parse(scheduledAt) - Date.parse(occurredAt)) / 60_000);
+  return Number.isFinite(minutes) ? Math.max(0, minutes) : null;
+};
+
+export const liveReminderDue: EventMapping = (event, data) => {
+  const hostName = data.text("hostName", "Someone you follow");
+  const title = data.text("title");
+  const liveId = data.text("liveId");
+  const scheduledAt = data.text("scheduledAt");
+  const minutes = minutesUntil(scheduledAt, event.occurredAt);
+  const when = minutes === null || minutes <= 1 ? "any minute now" : `in ${minutes} minutes`;
+  const payload = { liveId, scheduledAt, url: `/live/${liveId}` };
+  return data.textList("notifyUserIds").map((userId) =>
+    intentFor(event, userId, {
+      category: "live",
+      inApp: { category: "social", title: hostName, body: `goes live ${when}: ${title}`, actor: readActor(data, "host"), data: payload },
+      push: { title: `${hostName} goes live ${when}`, body: title, data: payload },
     }),
   );
 };

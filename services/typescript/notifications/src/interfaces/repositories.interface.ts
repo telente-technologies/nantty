@@ -34,6 +34,7 @@ export interface NotificationRepository {
   markAllRead(userId: string, readAt: Date): Promise<number>;
   countUnread(userId: string): Promise<number>;
   deleteForContent(contentId: string): Promise<number>;
+  setHiddenForComment(commentId: string, hidden: boolean, at: Date): Promise<number>;
 }
 
 export interface DeliveryClaim {

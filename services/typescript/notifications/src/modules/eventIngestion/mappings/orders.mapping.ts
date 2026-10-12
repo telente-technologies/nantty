@@ -20,6 +20,10 @@ function buyerOrderProps(data: EventDataReader, firstName: string, context: Mapp
   };
 }
 
+const optionalRefundMethod = (data: EventDataReader) => {
+  const refundMethod = data.optionalText("refundMethod");
+  return refundMethod === undefined ? {} : { refundMethod };
+};
 const sellerNameOf = (data: EventDataReader) => data.optionalText("sellerName") ?? readGroups(data)[0]?.group.sellerName ?? data.text("sellerName");
 
 export const orderPlaced: EventMapping = (event, data, context) => [
@@ -60,7 +64,7 @@ export const orderSellerRejected: EventMapping = (event, data, context) => [
   intentFor(event, data.text("buyerUserId"), {
     category: "orders",
     inApp: { category: "orders", title: "Seller declined your order", body: `${sellerNameOf(data)} could not fulfil order ${data.text("orderNumber")}. You will be refunded.`, data: { orderId: data.text("orderId") } },
-    email: (recipient) => plan("sellerRejected", { ...buyerOrderProps(data, recipient.firstName, context), sellerName: sellerNameOf(data), reason: data.text("reason"), refund: data.money("refund"), refundMethod: data.text("refundMethod", "Original payment method") }),
+    email: (recipient) => plan("sellerRejected", { ...buyerOrderProps(data, recipient.firstName, context), sellerName: sellerNameOf(data), reason: data.text("reason"), refund: data.money("refund"), ...optionalRefundMethod(data) }),
   }),
 ];
 
@@ -102,7 +106,7 @@ export const orderCancelled: EventMapping = (event, data, context) => {
     intentFor(event, data.text("buyerUserId"), {
       category: "orders",
       inApp: { category: "orders", title: "Order cancelled", body: `Order ${data.text("orderNumber")} was cancelled.`, data: { orderId: data.text("orderId") } },
-      email: (recipient) => plan("orderCancelled", { ...buyerOrderProps(data, recipient.firstName, context), cancelledBy: buyerCancelledBy(cancelledBy), reason: data.text("reason"), refund: data.optionalMoney("refund") ?? null, refundMethod: data.text("refundMethod", "Original payment method") }),
+      email: (recipient) => plan("orderCancelled", { ...buyerOrderProps(data, recipient.firstName, context), cancelledBy: buyerCancelledBy(cancelledBy), reason: data.text("reason"), refund: data.optionalMoney("refund") ?? null, ...optionalRefundMethod(data) }),
     }),
     ...readGroups(data).map(({ sellerUserId, group }) =>
       intentFor(event, sellerUserId, {

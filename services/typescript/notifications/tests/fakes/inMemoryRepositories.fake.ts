@@ -7,6 +7,7 @@ import type { DeliveryStatus, MailKind } from "../../src/types/notification.type
 
 export class InMemoryNotificationRepository implements NotificationRepository {
   public readonly rows: StoredNotification[] = [];
+  public readonly hiddenIds = new Set<string>();
   private readonly keys = new Map<string, StoredNotification>();
   private sequence = 0;
 
@@ -23,7 +24,7 @@ export class InMemoryNotificationRepository implements NotificationRepository {
   public async findByDedupeKey(dedupeKey: string) { return this.keys.get(dedupeKey) ?? null; }
 
   public async list(userId: string, filter: "all" | "mentions", limit: number, cursor: string | null) {
-    const mine = this.rows.filter((row) => row.userId === userId && (filter === "all" || row.kind === "mention")).sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+    const mine = this.rows.filter((row) => row.userId === userId && !this.hiddenIds.has(row.id) && (filter === "all" || row.kind === "mention")).sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
     const start = cursor === null ? 0 : mine.findIndex((row) => row.id === cursor) + 1;
     const rows = mine.slice(start, start + limit);
     return { rows, nextCursor: start + limit < mine.length ? (rows[rows.length - 1]?.id ?? null) : null };
@@ -40,12 +41,19 @@ export class InMemoryNotificationRepository implements NotificationRepository {
   public async markAllRead(userId: string, readAt: Date) {
     let count = 0;
     this.rows.forEach((row, index) => {
-      if (row.userId === userId && row.readAt === null) { this.replace(index, { ...row, readAt }); count += 1; }
+      if (row.userId === userId && row.readAt === null && !this.hiddenIds.has(row.id)) { this.replace(index, { ...row, readAt }); count += 1; }
     });
     return count;
   }
 
-  public async countUnread(userId: string) { return this.rows.filter((row) => row.userId === userId && row.readAt === null).length; }
+  public async countUnread(userId: string) { return this.rows.filter((row) => row.userId === userId && row.readAt === null && !this.hiddenIds.has(row.id)).length; }
+
+  public async setHiddenForComment(commentId: string, hidden: boolean) {
+    const matching = this.rows.filter((row) => row.data["commentId"] === commentId || (typeof row.data["url"] === "string" && row.data["url"].endsWith(`?comment=${commentId}`)));
+    const changed = matching.filter((row) => this.hiddenIds.has(row.id) !== hidden);
+    for (const row of changed) if (hidden) this.hiddenIds.add(row.id); else this.hiddenIds.delete(row.id);
+    return changed.length;
+  }
 
   public async deleteForContent(contentId: string) {
     const keep = this.rows.filter((row) => !["postId", "originalPostId", "replyClipId", "originalClipId"].some((key) => row.data[key] === contentId));
