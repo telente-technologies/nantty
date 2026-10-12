@@ -1,0 +1,6 @@
+-- create "pending_refunds" table
+CREATE TABLE "pending_refunds" ("id" uuid NOT NULL, "created_at" timestamptz NOT NULL, "order_id" character varying NOT NULL, "request_key" character varying NOT NULL, "amount_minor" bigint NOT NULL, "currency" character varying NOT NULL, "full" boolean NOT NULL, "reason" character varying NOT NULL DEFAULT '', "actor_type" character varying NOT NULL DEFAULT 'system', "actor_id" character varying NOT NULL DEFAULT '', "status" character varying NOT NULL DEFAULT 'scheduled', "attempts" bigint NOT NULL DEFAULT 0, "last_error" character varying NOT NULL DEFAULT '', "executed_at" timestamptz NULL, "updated_at" timestamptz NOT NULL, "escrow_id" uuid NOT NULL, PRIMARY KEY ("id"), CONSTRAINT "pending_refunds_escrows_pending_refunds" FOREIGN KEY ("escrow_id") REFERENCES "escrows" ("id") ON UPDATE NO ACTION ON DELETE NO ACTION, CONSTRAINT "pending_refunds_amount_positive" CHECK (amount_minor > 0));
+-- create index "pendingrefund_escrow_id_request_key" to table: "pending_refunds"
+CREATE UNIQUE INDEX "pendingrefund_escrow_id_request_key" ON "pending_refunds" ("escrow_id", "request_key");
+-- create index "pendingrefund_status_created_at" to table: "pending_refunds"
+CREATE INDEX "pendingrefund_status_created_at" ON "pending_refunds" ("status", "created_at");
