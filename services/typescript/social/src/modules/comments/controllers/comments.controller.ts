@@ -4,19 +4,23 @@ import { clampPageSize } from "../../../utils/cursor.util.js";
 import type { RouteFactory } from "../../../utils/route.util.js";
 import type { CreateCommentCommand } from "../commands/createComment/createComment.command.js";
 import type { DeleteCommentCommand } from "../commands/deleteComment/deleteComment.command.js";
+import type { HideCommentCommand } from "../commands/hideComment/hideComment.command.js";
 import type { LikeCommentCommand } from "../commands/likeComment/likeComment.command.js";
 import type { PinCommentCommand } from "../commands/pinComment/pinComment.command.js";
+import type { UnhideCommentCommand } from "../commands/unhideComment/unhideComment.command.js";
 import type { UnlikeCommentCommand } from "../commands/unlikeComment/unlikeComment.command.js";
 import type { UnpinCommentCommand } from "../commands/unpinComment/unpinComment.command.js";
-import type { CommentThreadPage, CommentView } from "../models/comment.model.js";
+import type { CommentHiddenState, CommentThreadPage, CommentView } from "../models/comment.model.js";
+import type { MyPostCommentItem } from "../models/myPostComments.model.js";
 import type { ConversationItem } from "../queries/getPostConversation/getPostConversation.handler.js";
 import type { PostCommentsItem } from "../queries/listPostComments/listPostComments.handler.js";
 import type { GetCommentThreadQuery } from "../queries/getCommentThread/getCommentThread.query.js";
 import type { GetPostConversationQuery } from "../queries/getPostConversation/getPostConversation.query.js";
 import type { GetCommentQuery } from "../queries/getComment/getComment.query.js";
 import type { ListCommentRepliesQuery } from "../queries/listCommentReplies/listCommentReplies.query.js";
+import type { ListMyPostCommentsQuery } from "../queries/listMyPostComments/listMyPostComments.query.js";
 import type { ListPostCommentsQuery } from "../queries/listPostComments/listPostComments.query.js";
-import { commentParamsSchema, commentsPageQuerySchema, conversationQuerySchema, newCommentBodySchema, postCommentParamsSchema, postCommentsParamsSchema, rankedCommentsQuerySchema } from "../validators/comments.validator.js";
+import { commentParamsSchema, commentsPageQuerySchema, conversationQuerySchema, myPostCommentsQuerySchema, newCommentBodySchema, postCommentParamsSchema, postCommentsParamsSchema, rankedCommentsQuerySchema } from "../validators/comments.validator.js";
 
 export interface CommentsHandlers {
   readonly createComment: Handler<CreateCommentCommand, CommentView>;
@@ -25,6 +29,9 @@ export interface CommentsHandlers {
   readonly unlikeComment: Handler<UnlikeCommentCommand, void>;
   readonly pinComment: Handler<PinCommentCommand, CommentView>;
   readonly unpinComment: Handler<UnpinCommentCommand, void>;
+  readonly hideComment: Handler<HideCommentCommand, CommentHiddenState>;
+  readonly unhideComment: Handler<UnhideCommentCommand, CommentHiddenState>;
+  readonly listMyPostComments: Handler<ListMyPostCommentsQuery, Page<MyPostCommentItem>>;
   readonly listPostComments: Handler<ListPostCommentsQuery, Page<PostCommentsItem>>;
   readonly listCommentReplies: Handler<ListCommentRepliesQuery, Page<CommentView>>;
   readonly getComment: Handler<GetCommentQuery, CommentView>;
@@ -50,5 +57,9 @@ export function createCommentsController(route: RouteFactory, handlers: Comments
     unlikeComment: route({ authentication: "required", params: commentParamsSchema }, ({ principal, params }) => handlers.unlikeComment({ actorId: principal.accountId, commentId: params.commentId })),
     pinComment: route({ authentication: "required", params: postCommentParamsSchema }, ({ principal, params }) => handlers.pinComment({ actorId: principal.accountId, postId: params.postId, commentId: params.commentId })),
     unpinComment: route({ authentication: "required", params: postCommentParamsSchema }, ({ principal, params }) => handlers.unpinComment({ actorId: principal.accountId, postId: params.postId, commentId: params.commentId })),
+    hideComment: route({ authentication: "required", params: postCommentParamsSchema }, ({ principal, params }) => handlers.hideComment({ actorId: principal.accountId, postId: params.postId, commentId: params.commentId })),
+    unhideComment: route({ authentication: "required", params: postCommentParamsSchema }, ({ principal, params }) => handlers.unhideComment({ actorId: principal.accountId, postId: params.postId, commentId: params.commentId })),
+    listMyPostComments: route({ authentication: "required", query: myPostCommentsQuerySchema }, ({ principal, query }) =>
+      handlers.listMyPostComments({ ownerId: principal.accountId, filter: query.filter ?? "all", postId: query.postId, search: query.q, cursor: query.cursor, limit: clampPageSize(query.limit, 20) })),
   };
 }

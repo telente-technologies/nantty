@@ -24,6 +24,8 @@ export const socialEventTypes = {
   commentLiked: "comment.liked",
   commentPinned: "comment.pinned",
   commentUnpinned: "comment.unpinned",
+  commentHidden: "comment.hidden",
+  commentUnhidden: "comment.unhidden",
   soundUpdated: "sound.updated",
   mentionCreated: "mention.created",
   videoReplyCreated: "videoReply.created",

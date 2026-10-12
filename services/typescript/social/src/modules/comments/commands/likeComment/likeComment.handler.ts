@@ -4,11 +4,12 @@ import { appendDomainEventsToOutbox } from "../../../../events/outbox.event.js";
 import type { Handler, HandlerContext } from "../../../../types/handlerContext.type.js";
 import { loadPostVisibleToViewer } from "../../../posts/services/postAccess.service.js";
 import { commentRepository } from "../../repositories/comment.repository.js";
+import { findCommentVisibleToViewer } from "../../services/commentVisibility.service.js";
 import type { LikeCommentCommand } from "./likeComment.command.js";
 
 export function createLikeCommentHandler(context: HandlerContext): Handler<LikeCommentCommand, void> {
   return async ({ actorId, commentId }) => {
-    const comment = await commentRepository.findById(context.database.client, commentId);
+    const comment = await findCommentVisibleToViewer(context.database.client, commentId, actorId);
     if (comment === null) throw notFound("COMMENT_NOT_FOUND", "Comment not found.");
     await loadPostVisibleToViewer(context, actorId, comment.postId);
     await context.database.transaction(async (transaction) => {

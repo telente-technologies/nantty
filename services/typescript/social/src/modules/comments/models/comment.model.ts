@@ -32,6 +32,13 @@ export interface CommentView {
   readonly quotedPostUnavailable: boolean;
 }
 
+export interface CommentHiddenState {
+  readonly commentId: string;
+  readonly postId: string;
+  readonly hidden: boolean;
+  readonly hiddenAt: string | null;
+}
+
 export interface CommentWithReplies extends CommentView {
   readonly previewReplies: readonly CommentView[];
 }

@@ -46,9 +46,9 @@ export function createGetPostConversationHandler(context: HandlerContext): Handl
       return { data, nextCursor: ranked.nextCursor };
     }
     const offset = normalizedSort === "latest" ? 0 : decodeOffsetCursor(cursor);
-    const rows = await commentThreadRepository.pageConversationRoots(db, postId, normalizedSort, limit, offset, normalizedSort === "latest" ? cursor : undefined);
+    const rows = await commentThreadRepository.pageConversationRoots(db, postId, viewerId, normalizedSort, limit, offset, normalizedSort === "latest" ? cursor : undefined);
     const page = buildPageFromOverfetchedRows(rows, limit);
-    const descendants = await commentThreadRepository.previewDescendants(db, page.data, inlinePreviewDepth);
+    const descendants = await commentThreadRepository.previewDescendants(db, viewerId, page.data, inlinePreviewDepth);
     const tree = assembleThreadTree(page.data, descendants, { baseDepth: 0, maximumRelativeDepth: inlinePreviewDepth, chooseChildren: preferAuthorReply(post.authorId) });
     const views = new Map((await buildCommentViews(context, viewerId, flattenThreadNodeSources(tree), post.authorId)).map((view) => [view.id, view]));
     const nextCursor = page.nextCursor === null ? null : normalizedSort === "latest" ? page.nextCursor : encodeOffsetCursor(offset + limit);

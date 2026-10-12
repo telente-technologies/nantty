@@ -3890,7 +3890,9 @@ export const CommentScalarFieldEnum = {
   createdAt: 'createdAt',
   isPinned: 'isPinned',
   pinnedAt: 'pinnedAt',
-  quotedPostId: 'quotedPostId'
+  quotedPostId: 'quotedPostId',
+  hiddenAt: 'hiddenAt',
+  hiddenByUserId: 'hiddenByUserId'
 } as const
 
 export type CommentScalarFieldEnum = (typeof CommentScalarFieldEnum)[keyof typeof CommentScalarFieldEnum]
