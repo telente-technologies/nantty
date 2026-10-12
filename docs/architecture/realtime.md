@@ -1,41 +1,40 @@
 # Realtime and livestream architecture
 
-As of 2026-10-03. Sources: `inventory.md` 2.5, 4, 5; `services/elixir/realtime/**`; `services/contracts/proto/**/live_money.proto`; `docs/backendPlan.md` 4.2, 5.6. Labels: EXISTING, MOCK-ONLY, PROPOSED, OPTIONAL FUTURE.
+Sections 1 and 2 were rewritten on 2026-10-11 from the code. Sections 3 to 7 are the design of 2026-10-03: their status labels are dated, and where they mention SNS or SQS, read RabbitMQ. The current overview is [system.md](system.md) section 9.
 
 ## 1. What exists
 
-| Item | Status | Evidence |
-| --- | --- | --- |
-| Raw JSON WebSocket at `/ws` (a `Phoenix.Socket.Transport`, **not Phoenix Channels**), 64 KB max frame, `check_origin` via `ALLOWED_ORIGINS`, `GET /healthz` | EXISTING | `lib/realtime_web/endpoint.ex`, `router.ex` |
-| Auth: first frame `{type:"auth",accessToken}` within 10 s else close; JWKS verification with key cache; auto-subscribes `user:<accountId>` | EXISTING | `client_socket.ex`, `auth/*` |
-| Client frames: `ping`, `auth`, `subscribe`, `unsubscribe`, `typing`; max 50 subscriptions per socket; server replies `pong`, `auth.ok`, `auth.failed`, `subscribed`, `unsubscribed`, `error{code}` | EXISTING | `client_socket.ex` |
-| Topic authorizer: `user:<id>` own only; `conversation:<id>` via membership checker that **defaults to deny all**; `live:<id>` and `battle:<id>` open to any authenticated user | EXISTING | `topics/topic_authorizer.ex` |
-| Presence tracked on `live:*` subscribe; no presence list API | EXISTING (partial) | `presence.ex` |
-| Domain event router (21 live/battle/gift/guest/stage/leaderboard types to `live:<liveId>`; `guest.invited`, `notification.created` to `user:*`; `message.created` to `conversation:*`) with throttles: goal progress 1 s, leaderboard 1 s, viewer count 2 s, battle score 500 ms | EXISTING | `events/domain_event_router.ex`, `events/throttle.ex` |
-| SQS consumer: long-poll `realtime-domain-events`, in-memory dedupe of 10 000 ids, delete after ack, hand-rolled SigV4 | EXISTING | `events/sqs_consumer.ex` |
-| Producers of those events (live, gifts, messages, notifications) | **ABSENT**: only 3 auth events have producers and schemas | inventory 4 |
-| Message send path, chat persistence, likes/comments fan-out, notification stream, reconnect resync, sequence numbers | ABSENT / PROPOSED | inventory 2.5 |
-| Mobile client: heartbeat 25 s, 60 s silence close, backoff 1-30 s with jitter, mock emitter in mocks mode | EXISTING (client), MOCK-ONLY data | `apps/mobile/src/services/realtime.service.ts` |
-| Web (webapp) realtime client | ABSENT | no `/ws` use in `apps/webapp` |
+| Item | Evidence |
+| --- | --- |
+| Raw JSON WebSocket at `/ws` (a `Phoenix.Socket.Transport`, not Phoenix Channels), 16 KB maximum frame, origin check against `ALLOWED_ORIGINS`, `GET /healthz`, per-account limits (by default 5 connections and 120 frames a minute) | `lib/realtimeWeb/realtime.endpoint.ex`, `origin.policy.ex`, `lib/realtime/connections/connection.limiter.ex` |
+| Auth: the first frame must be `{type: "auth", accessToken}` within 10 s, or the socket closes with 4401. The token is a realtime token (audience `zudomart-realtime`, from `POST /api/v1/auth/realtime-token`), checked against go-identity's JWKS with a key cache and a revocation list | `lib/realtimeWeb/clientSocket.socket.ex`, `lib/realtime/auth/*` |
+| Client frames: `ping`, `auth`, `subscribe`, `unsubscribe`, `typing`; at most 50 subscriptions per socket | `clientSocket.socket.ex` |
+| Topics: `user:<id>` for the account itself only; `conversation:<id>` after a membership check with the social service; `live:<id>` and `battle:<id>` after an access check with go-live | `lib/realtime/topics/topic.authorizer.ex`, `conversationMembership.client.ex`, `liveAccess.client.ex` |
+| Live presence: joins and leaves are batched and posted to go-live, which owns viewer counts | `lib/realtime/presence/livePresence.forwarder.ex`, `livePresence.client.ex` |
+| RabbitMQ consumer of `realtime-domain-events`, deduplicating the last 10 000 event ids, with retry and dead-letter handling from the broker topology | `lib/realtime/events/amqp.consumer.ex`, `infra/local/rabbitmq/topology.json` |
+| Event routing to topics with throttles for high-rate updates; account enforcement (suspension, ban or session revocation closes the affected sockets) | `lib/realtime/events/domainEvent.router.ex`, `conversationEvent.router.ex`, `accountEnforcement.router.ex`, `throttle.util.ex` |
+| Clients: the mobile app (`apps/mobile/src/services/realtime.service.ts`, with a mock emitter in mock mode) and the seller inbox (`apps/seller/src/services/realtime/`, through its BFF) | |
+| Live media: LiveKit rooms, tokens, RTMP and WHIP ingress, egress recordings, all driven by go-live | `services/go/modules/live/src/integrations/liveKit*.integration.go` |
 
 ## 2. Core flow
 
 ```mermaid
 flowchart LR
-  C["Client (mobile, studio, web)"] <-->|"WSS /ws JSON frames"| PH["Phoenix realtime"]
-  PH --- PS["PubSub + Presence (per node)"]
+  C["Client (mobile, seller inbox)"] <-->|"WSS /ws JSON frames"| PH["Phoenix realtime"]
+  PH --- PS["PubSub + presence"]
   subgraph Producers
     GL[go-live] --> OB1[(outbox)]
     GM[go-money] --> OB2[(outbox)]
-    SO["TS social / messages / notifications"] --> OB3[(outbox)]
+    SO["social, notifications"] --> OB3[(outbox)]
   end
-  OB1 & OB2 & OB3 --> RL["outbox relay"] --> SNS["SNS domain-events"]
-  SNS --> Q["SQS realtime-domain-events (+DLQ)"]
-  Q --> SC["SqsConsumer"] --> RT["DomainEventRouter + Throttle"] --> PS
+  OB1 & OB2 & OB3 --> RL["outbox relay"] --> EX{{"RabbitMQ zudomart.events"}}
+  EX --> Q["quorum queue realtime-domain-events<br/>(retry tiers + DLQ)"]
+  Q --> AC["AMQP consumer"] --> RT["domain event router + throttle"] --> PS
   PS --> PH
+  PH -. "presence changes" .-> GL
 ```
 
-Rule: Phoenix only **fans out facts** it consumed from SQS. It never debits, credits, scores money, or decides battle winners. Client-originated frames are limited to `typing`, `subscribe`, `ping` today.
+Rule: Phoenix only **fans out facts** it consumed from the bus. It never debits, credits, scores money or decides battle winners. Client-originated frames are limited to `auth`, `subscribe`, `unsubscribe`, `typing` and `ping`. Chat message bodies are end-to-end encrypted: realtime relays the ciphertext the social service stored and cannot read it.
 
 ## 3. Event catalogue by feature
 

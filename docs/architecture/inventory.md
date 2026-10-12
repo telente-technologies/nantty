@@ -1,5 +1,7 @@
 # Zudomart architecture inventory (phase 1)
 
+> **Historical snapshot.** This audit records the repo on 2026-10-03 and is no longer accurate (for example, the old monolith it refers to has been removed, and most services it lists as routeless now serve traffic). For the current system see [system.md](system.md).
+
 As of: 2026-10-03 10:07-10:20 UTC, git HEAD `295268bc` plus a dirty working tree. `services/**` is being edited by other agents
 right now (for example `services/go/modules/auth/internal/httpapi/*` and `services/go/modules/subscriptions/*` were modified or newly added
 during this audit), so treat every services/** row as a snapshot. Counts were taken with find/grep, not by running tests.

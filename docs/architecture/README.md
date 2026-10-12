@@ -1,43 +1,47 @@
 # Zudomart architecture docs
 
-As of 2026-10-03. Start with [inventory.md](inventory.md): it is the factual audit of what exists and the source every other document cites. Everything else describes the target, and labels each item by status.
+Start with [system.md](system.md): the current system, checked against the code on 2026-10-11 (services, data ownership, events, money flow, auth, realtime, deployment).
 
-## Status legend
+The topic documents below go deeper. Most were written as design notes on 2026-10-03, when little of the backend existed, so their **EXISTING / PROPOSED / ABSENT** labels are dated: many items marked PROPOSED have since been built. Each dated document says so at the top. Where one disagrees with `system.md` or the code, the code wins.
 
-| Label | Meaning | Rule |
-| --- | --- | --- |
-| **EXISTING** | Implemented code in this repo | Always cites a path. "WIP" means present in the working tree but uncommitted or without routes |
-| **MOCK-ONLY** | A frontend works against in-process mocks (`apps/*/src/mocks`); no real backend serves it | Mock shapes are contracts to converge on, not proof of behaviour |
-| **PROPOSED** | Only in `docs/backendPlan.md`, `microservicesPlan.json`, `infra/aws/README.md` or these docs | Not built. Never read as available |
-| **OPTIONAL FUTURE** | Deliberately deferred | Each comes with the trigger metric that would justify it |
+## Fixed decisions
 
-Fixed owner decisions (not up for debate in these docs): one Aurora PostgreSQL + PostGIS cluster with a schema per owner; outbox -> SNS/SQS, no Kafka on day one; ECS/Fargate, no Kubernetes or mesh; 6 Go deployables (ent + Atlas), TS gateway and social/IO services, Phoenix realtime, Python scores only; LiveKit; S3 + CloudFront; ledger owned by go-money is the single financial truth; sellers ship per order group; points are never money; consents versioned, no compliance claims. Code layout: [services/zudojsStructure.md](../../services/zudojsStructure.md).
+- One PostgreSQL database (Aurora + PostGIS in AWS) with a schema per owning service; only the owner writes it.
+- Transactional outbox into RabbitMQ (Amazon MQ in AWS). No Kafka. The SNS/SQS adapters remain in the code behind `EVENT_BUS=sqs` but are not used.
+- ECS on Fargate via Terraform; no Kubernetes or service mesh.
+- Six Go deployables (ent + Atlas), a TypeScript gateway and five TypeScript services (Prisma), Phoenix realtime, and Python intelligence that returns scores only.
+- Flutterwave is the only payment provider. Zudomart never holds customer money: in Nigeria each user's money is in their own payout subaccount and escrow is a lock on the buyer's balance; outside Nigeria payment is direct, with no escrow, and sellers must be identity-verified.
+- go-money's ledger is the single financial truth. Points are never money.
+- LiveKit for live video; chat is end-to-end encrypted with no plaintext fallback.
+- One store or one business page per personal account, plus one brand.
+- Consents are versioned; the docs make no compliance claims.
+- Code layout: [services/zudojsStructure.md](../../services/zudojsStructure.md).
 
 ## Index
 
-| Document | Summary |
-| --- | --- |
-| [inventory.md](inventory.md) | Factual audit: apps, services, data models, events, infra, security, tests, doc-vs-code gaps |
-| [system.md](system.md) | Whole-system view: current vs recommended architecture in edge, services/data, async/external diagrams |
-| [backend.md](backend.md) | Go deployables and modules, TS/Elixir/Python services, Zudojs code layout, ownership matrix, API design audit, sync/async classification |
-| [database.md](database.md) | Domain ERDs (identity, social, marketplace, payments, live, gifts/points, ads, shipping, privacy), schema ownership matrix, DB reliability |
-| [events.md](events.md) | Outbox flow, event catalog, financial event guarantees, queue technology comparison, background jobs |
-| [frontend.md](frontend.md) | Frontend apps, BFF pattern, data layer and mock switching |
-| [marketplace.md](marketplace.md) | Catalog, inventory, carts by seller, checkout, orders, shipping |
-| [payments.md](payments.md) | Payments, ledger, escrow, wallets, coins, payouts, reconciliation |
-| [realtime.md](realtime.md) | Phoenix realtime and the livestream stack (LiveKit, guests, battles, gifts fan-out) |
-| [liveSafety.md](liveSafety.md) | Live reports, frame sampling, Rekognition/Transcribe scoring, safety holds, Live incidents queue, CSAM hook (LEGAL REVIEW) |
-| [media.md](media.md) | Uploads, processing, storage and delivery |
-| [search.md](search.md) | Search now (Postgres) and later (OpenSearch) |
-| [recommendations.md](recommendations.md) | Ranking and personalization; Python scores, deterministic fallbacks |
-| [analytics.md](analytics.md) | Product and seller/creator analytics pipelines |
-| [fraud.md](fraud.md) | Fraud, trust and moderation |
-| [privacy.md](privacy.md) | Consent, data rights, retention (no compliance claims) |
-| [security.md](security.md) | Security controls mapped to services |
-| [observability.md](observability.md) | Traces, logs, metrics, SLOs, alerts |
-| [devops.md](devops.md) | CI/CD, environments, AWS layout |
-| [disaster-recovery.md](disaster-recovery.md) | Backup, restore, failover targets |
-| [microservicesPlan.json](microservicesPlan.json) | Proposed service map (commands, queries, events per module) |
+| Document | Summary | State |
+| --- | --- | --- |
+| [system.md](system.md) | Whole-system overview | Current (2026-10-11) |
+| [payments.md](payments.md) | Two economies, ledger, escrow, wallets, coins, payouts, reconciliation | Current (2026-10-11); flows in [flutterwaveMigration.md](../integrations/flutterwaveMigration.md) |
+| [widgetsApiContract.md](widgetsApiContract.md) | Home-screen widgets and the embeddable web widget API | Current |
+| [liveSafety.md](liveSafety.md) | Live reports, frame sampling, safety holds, Live incidents queue | Design (2026-10-04) |
+| [events.md](events.md) | Outbox, event catalogue, queue choice, background jobs | Dated (2026-10-03) |
+| [realtime.md](realtime.md) | Phoenix realtime and the livestream stack | Sections 1 and 2 current; the rest is the 2026-10-03 design |
+| [backend.md](backend.md) | Deployables, ownership matrix, API design audit, findings | Dated (2026-10-03) |
+| [database.md](database.md) | Domain ERDs, schema ownership matrix, DB reliability | Dated (2026-10-03) |
+| [frontend.md](frontend.md) | Front-end apps, BFF pattern, data layer | Dated (2026-10-03); mode switching is in [runningLocally.md](../runningLocally.md) |
+| [marketplace.md](marketplace.md) | Catalog, inventory, carts by seller, checkout, orders, shipping | Dated (2026-10-03) |
+| [media.md](media.md) | Uploads, processing, storage and delivery | Dated (2026-10-03) |
+| [search.md](search.md) | Postgres search now, OpenSearch only on a trigger | Dated (2026-10-03, with a 2026-10-04 MVP section) |
+| [recommendations.md](recommendations.md) | Ranking and personalisation; Python scores, deterministic fallbacks | Dated (2026-10-04) |
+| [analytics.md](analytics.md) | Product, seller and creator analytics | Dated (2026-10-03) |
+| [fraud.md](fraud.md) | Fraud, trust and moderation | Dated (2026-10-03) |
+| [privacy.md](privacy.md) | Consent, data rights, retention | Dated (2026-10-03) |
+| [security.md](security.md) | Security controls mapped to services | Dated (2026-10-03) |
+| [observability.md](observability.md) | Traces, logs, metrics, SLOs, alerts | Dated (2026-10-03) |
+| [devops.md](devops.md) | CI/CD, environments, AWS layout, scale triggers | Dated (2026-10-03); Terraform facts in [infra/aws/README.md](../../infra/aws/README.md) |
+| [disaster-recovery.md](disaster-recovery.md) | Backup, restore, failover targets | Proposed; nothing is applied |
+| [inventory.md](inventory.md) | Factual audit of the repo on 2026-10-03 | Historical snapshot, superseded by `system.md` |
+| [microservicesPlan.json](microservicesPlan.json) | Early proposed service map (commands, queries, events per module) | Historical; its Kafka, MSK and EKS parts were overruled |
 
-Related plans outside this folder: `docs/backendPlan.md` (backend contracts and wiring order), `docs/plans.md` (frontend mock contracts), `SECURITY.md` (baseline rules, written against the old monolith's paths).
-
+Related: [../runningLocally.md](../runningLocally.md) (local stack and mode switch), [../backendPlan.md](../backendPlan.md) (backend contracts and wiring order, 3 Oct draft, partly built), [../database/README.md](../database/README.md), [../../SECURITY.md](../../SECURITY.md).

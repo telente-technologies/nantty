@@ -1,5 +1,7 @@
 # Events and background jobs
 
+> **Dated design document.** The status labels below describe the repo when this was written; much that is marked PROPOSED or ABSENT has since been built. For the current system see [system.md](system.md); where the two disagree, the code wins.
+
 As of 2026-10-03. **RabbitMQ adopted (owner, 2026-10-03)**: the event bus and job queues moved from SNS/SQS (LocalStack locally) to RabbitMQ (Docker locally, Amazon MQ for RabbitMQ in production). Labels: **EXISTING** · **MOCK-ONLY** · **PROPOSED** · **OPTIONAL FUTURE**. Facts: [inventory.md](inventory.md) section 4.
 
 ## 1. What exists

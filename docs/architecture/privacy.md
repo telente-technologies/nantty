@@ -1,5 +1,7 @@
 # Privacy architecture
 
+> **Dated design document.** The status labels below describe the repo when this was written; much that is marked PROPOSED or ABSENT has since been built. For the current system see [system.md](system.md); where the two disagree, the code wins.
+
 As of 2026-10-03. Designed to **support** GDPR where it applies and Nigeria's NDPA 2023. This document does **not** claim compliance with either. Legal basis, retention periods, cross-border transfer mechanisms, DPIAs, DPO/registration duties, breach notification timelines and policy text **require review by qualified counsel before launch**. No retention periods are set here; legal sets them (`docs/backendPlan.md` 4.7).
 
 Labels: **EXISTING** / **MOCK-ONLY** / **PROPOSED** / **OPTIONAL FUTURE**.

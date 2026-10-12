@@ -8,18 +8,22 @@ Labels: **EXISTING** (in code), **MOCK-ONLY** (frontend mocks), **PROPOSED**, **
 
 ## 1. What exists today
 
+Updated 2026-10-11 from the code. Later sections still carry some PROPOSED labels from earlier drafts; where they disagree with this table, the table and the code win.
+
 | Item | State | Evidence |
 | --- | --- | --- |
-| Go payments / wallet / ledger / escrow / creators modules | EXISTING with ent schemas, migrations and integration tests (subscriptions is still a skeleton; the rewards module was deleted) | `services/go/modules/{payments,wallet,ledger,escrow,creators}` |
-| `go-money` deployable | EXISTING, compiles, routeless | `services/go/cmd/go-money` (inventory 2.4) |
-| `LiveMoneyService` gRPC contract (`ChargeGiftAndCreditCreator`, `SettleBattle`, `GetBattleGiftTotals`, `GetCoinBalance`) | EXISTING proto, **no server or client implementation** | `services/contracts/proto/zudomart/money/v1/live_money.proto` |
-| `Money` proto and Go money package (int64 minor units + currency) | EXISTING, tested | `services/contracts/proto/zudomart/common/v1/money.proto`, `services/go/platform/money` |
-| Idempotency middleware (Redis) | EXISTING, wired to no route | `services/go/platform/idempotency` |
-| Webhook verification | EXISTING: `POST /webhooks/flutterwave`, `verif-hash` compared in constant time, stored in the webhook inbox, used only as a trigger (every charge re-verified by id) | `services/go/modules/payments/src/integrations/flutterwaveWebhooks.integration.go` |
-| Legacy card gateways (replaced by the Flutterwave adapter), double-entry ledger, escrow auto-release job, coin IAP receipt endpoint | Ported to go-money (payments, ledger, escrow auto-release sweep, coin IAP receipts); the old monolith was removed on 2026-10-10 | `services/go/modules/{payments,ledger,escrow,wallet}` |
-| Risk scoring subjects `order, payout, account_event, coin_purchase, coin_transfer, gift` | EXISTING in Python, not called by any Go/TS caller | `services/python/intelligence/src/modules/risk/dtos/risk_scoring_dto.py` |
-| Wallet, escrow, coin, payout screens in mobile, seller, admin | MOCK-ONLY | `apps/mobile/src/screens/{wallet,escrow}`, `apps/seller` wallet pages, `apps/admin` commerce pages |
-| Everything below | PROPOSED | `docs/backendPlan.md` phases 5 and 6 |
+| go-money deployable with the payments, wallet, ledger, escrow, subscriptions and creators modules, routed by the gateway | EXISTING | `services/go/deployables/goMoney/server.go`, `services/typescript/gateway/src/routes/upstream.routes.ts` |
+| Flutterwave v3 adapter: Standard checkout, verify by id, refunds, disputes, PSAs (wallets), transfers, BVN consent, account resolve | EXISTING; the only provider | `services/go/modules/payments/src/integrations/flutterwave*.integration.go` |
+| Apple App Store and Google Play receipts and server notifications | EXISTING | `payments/src/integrations/appleAppStore*.go`, `googlePlay*.go` |
+| Webhooks: `POST /webhooks/flutterwave` through the gateway (raw body), `verif-hash` compared in constant time, stored in the webhook inbox, used only as a trigger | EXISTING | `payments/src/integrations/flutterwaveWebhooks.integration.go`, `webhookEvent.schema.go` |
+| gRPC `LiveMoneyService`, `CheckoutMoneyService`, `AdsMoneyService` served by go-money and called by go-live, go-commerce and go-ads | EXISTING | `services/contracts/proto/zudomart/money/v1/*.proto`, `wallet`, `creators`, `escrow` `src/app.go` |
+| Escrow locked in the buyer's own wallet (`CustodyBuyerWalletLock`), release, disputes, refunds, clawback and seller debt | EXISTING | `services/go/modules/escrow/src/modules/escrows/services/escrowWallet*.service.go` |
+| Selling eligibility: outside the PSA countries (`WALLET_PSA_COUNTRIES`, default `NG`) a seller must be payout-verified; debt over the limit blocks selling | EXISTING | `payments/src/modules/gateway/services/sellingEligibility.service.go` |
+| Idempotency: money requests stored in Postgres (`idempotentRequest.schema.go`); HTTP replay cache in Valkey | EXISTING | `payments/src/databases/schema`, `services/go/platform/idempotency` |
+| Daily reconciliation against Flutterwave balances, statements and settlements | EXISTING | `payments/src/modules/reconciliation` |
+| Wallet and balance screens in mobile, the seller dashboard and Studio | Read the wallet ledger in backend mode; mocks remain for mock mode | `apps/mobile/src/screens/{wallet,escrow}`, `apps/seller`, `apps/studio` |
+| Flutterwave flow tests against a fake Flutterwave server | EXISTING | `services/go/deployables/flutterwaveFlows/*_test.go` |
+| Production go-live | BLOCKED on live keys, the IP allowlist and Flutterwave's written answers | [flutterwaveMigration.md](../integrations/flutterwaveMigration.md) cutover status |
 
 ## 2. Two economies
 

@@ -1,5 +1,7 @@
 # Backend architecture
 
+> **Dated design document.** The status labels below describe the repo when this was written; much that is marked PROPOSED or ABSENT has since been built. For the current system see [system.md](system.md); where the two disagree, the code wins. Where this document says SNS or SQS, read RabbitMQ: the event bus is RabbitMQ (Amazon MQ in AWS), and the SNS/SQS adapters are unused.
+
 As of 2026-10-03. Labels: **EXISTING** · **MOCK-ONLY** · **PROPOSED** · **OPTIONAL FUTURE** (see [README.md](README.md)). Facts: [inventory.md](inventory.md). Service map source: [microservicesPlan.json](microservicesPlan.json), `docs/backendPlan.md`. Code layout rule: [services/zudojsStructure.md](../../services/zudojsStructure.md).
 
 ## 1. Service map and domain ownership
@@ -85,19 +87,21 @@ flowchart LR
 
 ### 1.3 Deployable inventory
 
+Updated 2026-10-11 to match the code. The `ts-social` / `ts-io` grouping above was not adopted: TypeScript runs as five separate services.
+
 | Deployable | Modules | Status | Scaling signal (ECS) | Key dependencies |
 | --- | --- | --- | --- | --- |
-| go-identity | auth, users, currency, admin | auth EXISTING (`services/go/deployables/go-identity`, renaming to `goIdentity`); others partial | CPU, p99 login latency | Aurora `auth/users/currency/admin`, Redis, SNS |
-| go-commerce | catalog, inventory, orders, analytics | PROPOSED (skeleton modules) | CPU, checkout p99 | Aurora `catalog/inventory/orders`, go-money gRPC |
-| go-money | payments, wallet, ledger, escrow, subscriptions, creators | ledger schema EXISTING (no routes); rest PROPOSED | CPU, DB lock wait | Aurora money schemas, Flutterwave (sole provider since 2026-10-11), IAP |
-| go-live | live | schema + migrations EXISTING; no routes | CPU, active rooms | Aurora `live`, LiveKit API, Redis, go-money gRPC |
-| go-ads | ads | PROPOSED | decision QPS, p99 < 50 ms | Redis pacing/caps, Python pCTR, go-money |
-| go-trust | moderation | PROPOSED | SQS queue depth | Python moderation scores |
-| ts-gateway | routing, auth, edge controls | EXISTING (`services/typescript/gateway`) | RPS | JWKS from go-identity |
-| ts-social | social, feed | PROPOSED (port from the old monolith's `posts,feeds,follows` modules) | RPS, feed p95 | Aurora `social/feed`, Redis timelines, Python |
-| ts-io | media, notifications, search, support, integrations, campaigns | PROPOSED | queue depth | S3, SES, SMS, FCM/APNs, OpenSearch later |
-| ex-realtime | sockets, presence, live fan-out, chat | EXISTING transport + SQS consumer (`services/elixir/realtime`); chat PROPOSED | socket count per task | SQS `realtime-domain-events`, Redis (PubSub across nodes PROPOSED) |
-| py-intelligence | 12 scoring modules | EXISTING (`services/python/intelligence`), no callers | RPS, CPU | Redis features, Parquet logs |
+| go-identity | auth, users, currency, admin | EXISTING, routed by the gateway (`services/go/deployables/goIdentity`) | CPU, p99 login latency | Postgres `auth/users/currency/admin`, Valkey, RabbitMQ, Smile ID |
+| go-commerce | catalog, inventory, orders, analytics (skeleton) | EXISTING, routed by the gateway | CPU, checkout p99 | Postgres `catalog/inventory/orders`, go-money gRPC |
+| go-money | payments, wallet, ledger, escrow, subscriptions, creators | EXISTING, routed by the gateway; gRPC on 9103 | CPU, DB lock wait | Postgres money schemas, Flutterwave (sole provider), Apple and Google IAP |
+| go-live | live | EXISTING, routed by the gateway | CPU, active rooms | Postgres `live`, LiveKit, Valkey, go-money gRPC |
+| go-ads | ads | EXISTING, routed by the gateway | decision QPS | Valkey, intelligence, go-money gRPC |
+| go-trust | moderation | EXISTING, routed by the gateway | queue depth | intelligence trust queues |
+| gateway | routing, auth, edge controls | EXISTING (`services/typescript/gateway`) | RPS | JWKS from go-identity, Valkey |
+| social | posts, comments, follows, feeds, chat, messaging keys, streaks | EXISTING (`services/typescript/social`) | RPS, feed p95 | Postgres `social`, intelligence |
+| notifications, search, media, support | one service each | EXISTING (`services/typescript/*`) | queue depth, RPS | SES, Expo push, S3, ClamAV, ffmpeg, Postgres FTS |
+| realtime | sockets, presence, live and chat fan-out | EXISTING, RabbitMQ consumer (`services/elixir/realtime`) | socket count per task | RabbitMQ `realtime-domain-events`, go-live and social for topic access |
+| intelligence | scoring modules | EXISTING (`services/python/intelligence`), called by search, social, support, go-ads, go-trust and go-identity | RPS, CPU | Valkey features, Parquet logs |
 
 ## 2. Code layout (target, all stacks)
 
@@ -218,7 +222,7 @@ tests/                                       (mirrors src/, files <name>.<kind>_
 
 ### F2. Forwarded identity headers are trusted
 
-See [system.md](system.md) 4.2. **P0.**
+Resolved: Go services now verify the access token themselves (`services/go/platform/jwtauth`), and TypeScript services accept forwarded identity only with the gateway's HMAC signature. See [system.md](system.md) section 7.
 
 ### F3. Idempotency is Redis-only and unmounted
 

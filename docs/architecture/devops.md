@@ -1,5 +1,7 @@
 # DevOps architecture
 
+> **Dated design document.** The status labels below describe the repo when this was written; much that is marked PROPOSED or ABSENT has since been built. For the current system see [system.md](system.md); where the two disagree, the code wins.
+
 As of 2026-10-03. Labels: **EXISTING** (cite path), **PROPOSED**, **OPTIONAL FUTURE**. Nothing in `infra/aws` is applied; everything AWS here is PROPOSED.
 
 ## 1. What exists today
