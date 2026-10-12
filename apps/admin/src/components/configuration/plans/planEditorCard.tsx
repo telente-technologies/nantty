@@ -14,8 +14,16 @@ interface PlanEditorCardProps {
   readonly onChange: (updater: (plan: VerificationPlan) => VerificationPlan) => void;
 }
 
+const adFreeTiers: Readonly<Record<string, readonly string[]>> = { BLUE: ["PREMIUM"], GOLD: ["BUSINESS", "PREMIUM"] };
+
+export function clampAdLoadPercent(raw: string): number {
+  const parsed = Number.parseInt(raw, 10);
+  return Number.isNaN(parsed) ? 0 : Math.min(100, Math.max(0, parsed));
+}
+
 export function PlanEditorCard({ plan, canWrite, onChange }: PlanEditorCardProps) {
   const isOfficial = plan.color === "BLACK";
+  const isAdFree = adFreeTiers[plan.color]?.includes(plan.tier) ?? false;
   return (
     <Card
       title={
@@ -40,6 +48,21 @@ export function PlanEditorCard({ plan, canWrite, onChange }: PlanEditorCardProps
             </NoticeBanner>
           ) : (
             <CheckboxField label="Available to buy" description="Turning this off hides the plan from checkout. Current subscribers keep it until renewal." checked={plan.isPurchasable} disabled={!canWrite} onChange={(event) => onChange((current) => ({ ...current, isPurchasable: event.target.checked }))} />
+          )}
+          {isAdFree ? (
+            <p className={styles.planNote}>No ads anywhere. Ad-free plans are locked at 0% ad load.</p>
+          ) : (
+            <TextField
+              label="Ad load"
+              hint="Percent of the ads a free account sees. 100 = same as free, 20 = one in five ad slots."
+              type="number"
+              inputMode="numeric"
+              min={0}
+              max={100}
+              value={plan.adLoadPercent ?? 100}
+              disabled={!canWrite}
+              onChange={(event) => onChange((current) => ({ ...current, adLoadPercent: clampAdLoadPercent(event.target.value) }))}
+            />
           )}
           {plan.tier === "ESSENTIAL" ? <p className={styles.planNote}>Essential never shows a badge, even when verified.</p> : null}
           <EditableTextList label="Perks" items={plan.perks} placeholder="e.g. Priority support" isDisabled={!canWrite} onChange={(perks) => onChange((current) => ({ ...current, perks }))} />

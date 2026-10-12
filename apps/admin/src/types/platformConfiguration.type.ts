@@ -34,10 +34,12 @@ export interface VerificationPlan {
   readonly isPurchasable: boolean;
   readonly perks: readonly string[];
   readonly dashboardEntitlements: readonly DashboardEntitlement[];
+  readonly adLoadPercent?: number;
 }
 
 export interface PlansConfiguration {
   readonly supportedCurrencies: readonly string[];
+  readonly freeAdLoadPercent?: number;
   readonly plans: readonly VerificationPlan[];
 }
 

@@ -83,6 +83,7 @@ export const navigationGroups: readonly NavigationGroup[] = [
     items: [
       { label: "Plans & perks", href: "/config/plans", icon: "viewProducts24", requirement: configReaders },
       { label: "Regional pricing", href: "/config/pricing", icon: "creditCard24", requirement: configReaders },
+      { label: "Subscription offers", href: "/config/offers", icon: "tag24", requirement: configReaders },
       { label: "Revenue rules", href: "/config/revenue", icon: "creditCard24", requirement: configReaders },
       { label: "Platform rules", href: "/config/rules", icon: "slidersHorizontal24", requirement: configReaders },
       { label: "Feed ranking", href: "/config/ranking", icon: "slidersHorizontal24", requirement: configReaders },
