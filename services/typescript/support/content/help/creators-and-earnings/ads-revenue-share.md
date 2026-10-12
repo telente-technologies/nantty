@@ -2,7 +2,7 @@
 title: Ads revenue share for creators
 summary: Approved creators get a share of the money advertisers pay for eligible ads shown on their content and lives, plus a share of the Premium pool.
 tags: ads revenue, revenue share, ad money, creator ads, premium pool, monetisation, paid for views
-related: creator-earnings, live-ads, ai-generated-label, creator-earnings-holds, why-you-see-an-ad, creators-faq
+related: creator-earnings, ads-in-comments, live-ads, ai-generated-label, creator-earnings-holds, why-you-see-an-ad, creators-faq
 ---
 
 Zudomart doesn't pay per view. Instead, when an advertiser pays for an ad shown next to your content, part of that money goes to you.
@@ -14,6 +14,7 @@ Approved [Creator Program](/help/creators-and-earnings/creator-program) members 
 ## How it works
 
 - **Ads on your content**: you get a share of what advertisers pay for eligible ads shown with your posts and clips. The default share is 40%. Your current rate is listed in Creator Studio under **How you earn**.
+- **Ads in your comment sections**: ads labelled **Promoted** can appear between replies under your posts. You get the same share. See [Ads in comment sections](/help/creators-and-earnings/ads-in-comments).
 - **Ads on your lives**: only if you turn them on in **Live monetization**. See [Ads on your live](/help/live/live-ads).
 - **Premium pool**: part of what Premium members pay goes into a monthly pool. It's shared among creators by how much time Premium members spend watching their content.
 

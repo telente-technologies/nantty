@@ -2,7 +2,7 @@
 title: Why you see an ad
 summary: Ads are chosen by an auction that weighs the advertiser's bid and how useful the ad is to you. You can turn off personalised ads and hide ads you don't like.
 tags: why am I seeing this ad, personalised ads, personalized ads, ad preferences, too many ads, hide ad, stop ads
-related: boosted-vs-sponsored, how-your-feed-works, privacy-settings, terms-privacy-and-cookies, ads-faq
+related: ads-by-plan, ads-in-comments, boosted-vs-sponsored, how-your-feed-works, privacy-settings, terms-privacy-and-cookies, ads-faq
 ---
 
 Ads help keep Zudomart free and pay creators. Here's how we decide which ones you see, and how to control them.
@@ -15,7 +15,7 @@ When there's a space for an ad, advertisers compete in an auction. The winner de
 - how useful the ad is likely to be to you
 - the audience the advertiser chose, for example country, state, age range or interests
 
-There are limits on how often one person sees the same ad.
+There are limits on how often one person sees the same ad. Checkmark plans see fewer ads, and Blue Premium and Gold Business see none. See [How many ads you see on each plan](/help/ads-and-boosts/ads-by-plan).
 
 ## What can be used
 
@@ -44,5 +44,5 @@ Ads can appear in your feed, between clips, in stories, in the Mart and search, 
 
 ## Good to know
 
-- Blue Premium members see fewer ads in their feed, but not zero. See [Premium](/help/payments-and-wallet/premium).
+- Blue Premium and Gold Business members see no ads. Other checkmark plans see fewer. See [How many ads you see on each plan](/help/ads-and-boosts/ads-by-plan).
 - Your privacy choices are explained in our Privacy Policy. See [Terms, privacy and cookies](/help/legal-and-data/terms-privacy-and-cookies).

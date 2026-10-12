@@ -33,7 +33,7 @@ Apple and Google charge a fee on in-app purchases, so in-app prices are higher. 
 
 - **Blue Essential**: priority account recovery, impersonation protection, edit posts within 1 hour. No badge.
 - **Blue Verified**: the blue badge on your profile and posts, priority ranking in comments, longer clips (up to 10 minutes).
-- **Blue Premium**: everything in Blue Verified, fewer ads in your feed, a monthly boost credit and priority support.
+- **Blue Premium**: everything in Blue Verified, no ads anywhere, a monthly boost credit and priority support.
 
 ## Good to know
 

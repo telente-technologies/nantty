@@ -23,7 +23,7 @@ Personal profiles, including creators. Business and brand profiles get Gold inst
 ## Which plan
 
 - **Blue Verified**: the blue badge, priority ranking in comments, longer clips up to 10 minutes.
-- **Blue Premium**: all of that plus fewer ads, a monthly boost credit and priority support.
+- **Blue Premium**: all of that plus no ads anywhere, a monthly boost credit and priority support.
 - **Blue Essential** protects your account but has no badge.
 
 See [Checkmark and plan prices by country](/help/checkmarks-and-verification/checkmark-prices).

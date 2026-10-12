@@ -1,6 +1,6 @@
 ---
 title: Premium
-summary: Blue Premium is the top Blue plan. It includes everything in Blue Verified plus fewer ads, a free boost each month, more streak restores and priority support.
+summary: Blue Premium is the top Blue plan. It includes everything in Blue Verified plus no ads anywhere, a free boost each month, more streak restores and priority support.
 tags: premium, blue premium, subscription, perks, cancel premium, premium price, free boost, trial
 related: checkmark-prices, checkmarks-explained, manage-subscriptions, streaks, boost-a-post, payment-methods
 ---
@@ -10,7 +10,7 @@ Blue Premium is the top Blue plan for personal profiles, including creators.
 ## Perks
 
 - Everything in Blue Verified: the blue badge on your profile and posts (after the identity check), priority ranking in comments and clips up to 10 minutes
-- Fewer ads in your feed
+- No ads anywhere. See [How many ads you see on each plan](/help/ads-and-boosts/ads-by-plan)
 - One free post boost each month. After that you pay for boosts as usual
 - 6 streak restores a month instead of 3
 - Priority support
