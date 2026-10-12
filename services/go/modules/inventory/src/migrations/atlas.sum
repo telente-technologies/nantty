@@ -1,3 +1,4 @@
-h1:DX2imcBd9ze7AyRlywanSGShLWkpo72TSjsbd96el08=
+h1:knOz3I8mnx/llpC0VMZZM4LaZQG8k25G5VHIw3JVtVc=
 20261003155503_create_inventory_tables.up.sql h1:EL8gAJpYyPOAxa6nE30nO1O7H335Er/7TcOFkxV3wJI=
 20261010180130_reservation_attempts.up.sql h1:3awomVhOQG0r+OjlN+LpNePZSZUuf6Z5WdmnAlK5XqE=
+20261012170000_grant_stock_levels_to_readers.up.sql h1:Rx7ic//vExbCVcWUUiL52gpCaeBdEEUljA16bOpkAE4=
