@@ -9,6 +9,7 @@ import (
 
 	paymentconstants "zudomart/modules/payments/src/constants"
 	paymentmodels "zudomart/modules/payments/src/modules/gateway/models"
+	"zudomart/modules/subscriptions/src/generated/ent/subscription"
 	"zudomart/modules/subscriptions/src/generated/ent/subscriptionperiod"
 	"zudomart/modules/subscriptions/src/models"
 )
@@ -29,13 +30,12 @@ type firstPeriodRequest struct {
 	PeriodPrice    int64
 }
 
-func bundleDiscountOf(charge models.PeriodCharge) int64 {
-	for _, item := range charge.LineItems {
-		if item.Kind == models.LineItemBundleDiscount {
-			return -item.AmountMinor
-		}
+func (billing Billing) settleFreeFirstPeriodInTransaction(ctx context.Context, transaction *sql.Tx, subscriptionId, periodId uuid.UUID) error {
+	row, err := billing.Container.Client(transaction).Subscription.Query().Where(subscription.ID(subscriptionId)).ForUpdate().Only(ctx)
+	if err != nil {
+		return err
 	}
-	return 0
+	return billing.settlePeriodInTransaction(ctx, transaction, row, periodId, "", "", nil)
 }
 
 func (billing Billing) createFirstPeriodInTransaction(ctx context.Context, transaction *sql.Tx, request firstPeriodRequest) (uuid.UUID, error) {
@@ -49,7 +49,7 @@ func (billing Billing) createFirstPeriodInTransaction(ctx context.Context, trans
 	}
 	periodPrice := request.PeriodPrice
 	if periodPrice == 0 {
-		periodPrice = request.Charge.SubtotalMinor + bundleDiscountOf(request.Charge) + request.Charge.CreditAppliedMinor
+		periodPrice = request.Charge.SubtotalMinor + models.DiscountLinesTotalMinor(request.Charge) + request.Charge.CreditAppliedMinor
 	}
 	key := models.RenewalIdempotencyKey(request.SubscriptionId.String(), request.StartsAt)
 	if kind == subscriptionperiod.KindUpgrade {

@@ -66,6 +66,9 @@ func (handler RenewalPayments) HandleFailedPayment(ctx context.Context, transact
 }
 
 func discountKindOf(period *ent.SubscriptionPeriod) subscription.DiscountKind {
+	if models.HasOfferDiscountLine(period.LineItems) {
+		return subscription.DiscountKindOffer
+	}
 	for _, item := range period.LineItems {
 		if item.Kind == models.LineItemBundleDiscount {
 			return subscription.DiscountKindBundle
@@ -127,6 +130,9 @@ func (billing Billing) settlePeriodInTransaction(ctx context.Context, transactio
 	}
 	if row.BillingAnchorAt == nil {
 		update.SetBillingAnchorAt(period.PeriodStartsAt)
+	}
+	if err := billing.consumeOfferCycleInTransaction(ctx, client, update, row, period); err != nil {
+		return err
 	}
 	if row, err = update.Save(ctx); err != nil {
 		return err

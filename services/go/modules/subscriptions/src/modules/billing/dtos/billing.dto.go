@@ -1,12 +1,13 @@
 package dtos
 
 type CheckoutRequestDto struct {
-	ProfileId string `json:"profileId"`
-	PlanCode  string `json:"planCode"`
-	PlanId    string `json:"planId"`
-	Interval  string `json:"interval"`
-	WithTrial bool   `json:"withTrial"`
-	ReturnTo  string `json:"returnTo"`
+	ProfileId    string `json:"profileId"`
+	PlanCode     string `json:"planCode"`
+	PlanId       string `json:"planId"`
+	Interval     string `json:"interval"`
+	WithTrial    bool   `json:"withTrial"`
+	ReturnTo     string `json:"returnTo"`
+	OfferClaimId string `json:"offerClaimId"`
 }
 
 type StoreReceiptRequestDto struct {

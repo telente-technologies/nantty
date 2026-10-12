@@ -35,6 +35,7 @@ type Entitlements struct {
 	Trial                 *TrialState                    `json:"trial"`
 	SubscribedToCreator   bool                           `json:"subscribedToCreator"`
 	DashboardEntitlements []loaders.DashboardEntitlement `json:"dashboardEntitlements"`
+	AdLoadPercent         int                            `json:"adLoadPercent"`
 }
 
 func (billing Billing) ReadEntitlements(ctx context.Context, userId string) (Entitlements, error) {
@@ -45,7 +46,9 @@ func (billing Billing) ReadEntitlements(ctx context.Context, userId string) (Ent
 	}
 	result := Entitlements{UserId: userId, SellerPlan: "free", Gold: []ProfileEntitlement{}, Black: []ProfileEntitlement{}}
 	rank := map[string]int{"free": 0, "pro": 1, "business": 2}
+	livePlanCodes := make([]string, 0, len(rows))
 	for _, row := range rows {
+		livePlanCodes = append(livePlanCodes, row.PlanCode)
 		definition := constants.Plans[row.PlanCode]
 		entitlement := ProfileEntitlement{ProfileId: row.ProfileID, Plan: row.PlanCode, Status: string(row.Status), ValidUntil: isoTime(row.CurrentPeriodEndsAt)}
 		switch row.PlanCode {
@@ -68,6 +71,7 @@ func (billing Billing) ReadEntitlements(ctx context.Context, userId string) (Ent
 			result.Trial = &TrialState{ProfileId: row.ProfileID, Plan: row.PlanCode, TrialEndsAt: isoTime(row.TrialEndsAt), IsCancelled: row.CancelAtPeriodEnd}
 		}
 	}
+	result.AdLoadPercent = loaders.ReadAdLoadTable(ctx, billing.Container.Resources.Platform).PercentFor(livePlanCodes)
 	result.DashboardEntitlements = []loaders.DashboardEntitlement{}
 	catalogue := loaders.ReadPlanCatalogue(ctx, billing.Container.Resources.Platform)
 	for code, definition := range constants.Plans {

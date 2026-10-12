@@ -40,4 +40,10 @@ func MountBillingRoutes(mux *http.ServeMux, controller controllers.BillingContro
 	mux.HandleFunc("GET /api/v1/internal/entitlements/{userId}", controller.InternalEntitlements)
 	mux.Handle("GET /api/v1/admin/subscriptions/price-table", requirePricingRead(http.HandlerFunc(controller.ListPriceTable)))
 	mux.Handle("PUT /api/v1/admin/subscriptions/price-table/{planCode}/{countryCode}", requirePricingWrite(http.HandlerFunc(controller.UpsertPrice)))
+	mux.Handle("GET /api/v1/admin/subscriptions/offer-links", requirePricingRead(http.HandlerFunc(controller.ListOfferLinks)))
+	mux.Handle("POST /api/v1/admin/subscriptions/offer-links", requirePricingWrite(http.HandlerFunc(controller.CreateOfferLink)))
+	mux.Handle("POST /api/v1/admin/subscriptions/offer-links/{linkId}/revoke", requirePricingWrite(http.HandlerFunc(controller.RevokeOfferLink)))
+	mux.Handle("POST /api/v1/admin/subscriptions/offer-links/{linkId}/sends", requirePricingWrite(http.HandlerFunc(controller.SendOfferLink)))
+	mux.HandleFunc("GET /api/v1/subscription-offers/{token}", controller.PreviewOffer)
+	mux.Handle("POST /api/v1/subscription-offers/{token}/claim", requireUser(http.HandlerFunc(controller.ClaimOffer)))
 }

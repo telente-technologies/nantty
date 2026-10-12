@@ -43,6 +43,9 @@ func (controller BillingController) StartCheckout(writer http.ResponseWriter, re
 		collector := &ledgerutils.IssueCollector{}
 		collector.RequireLength("profileId", body.ProfileId, 0, 80)
 		collector.RequireLength("returnTo", body.ReturnTo, 0, 300)
+		if body.OfferClaimId != "" {
+			collector.RequireUuid("offerClaimId", body.OfferClaimId)
+		}
 		return collector.Result()
 	})
 	if err != nil {
@@ -72,7 +75,7 @@ func (controller BillingController) StartCheckout(writer http.ResponseWriter, re
 	view, err := controller.Billing.StartCheckout(request.Context(), services.CheckoutRequest{
 		UserId: principal.UserId, ProfileId: body.ProfileId, PlanCode: planCode, Interval: interval, WithTrial: body.WithTrial, ReturnTo: body.ReturnTo,
 		ClientPlatform: strings.ToLower(request.Header.Get("X-Client-Platform")), DeviceId: request.Header.Get("X-Device-Id"),
-		ViewerCountry: controller.resolveChargingCountry(request, principal.UserId),
+		ViewerCountry: controller.resolveChargingCountry(request, principal.UserId), OfferClaimId: body.OfferClaimId,
 	})
 	if err != nil {
 		controller.fail(writer, request, err)

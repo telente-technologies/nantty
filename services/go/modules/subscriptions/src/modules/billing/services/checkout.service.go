@@ -37,18 +37,21 @@ type CheckoutRequest struct {
 	ClientPlatform string
 	DeviceId       string
 	ViewerCountry  string
+	OfferClaimId   string
 }
 
 type CheckoutView struct {
-	SubscriptionId   string            `json:"subscriptionId"`
-	AuthorizationUrl string            `json:"authorizationUrl"`
-	Reference        string            `json:"reference"`
-	Provider         string            `json:"provider"`
-	Price            map[string]any    `json:"price"`
-	Discount         models.PriceQuote `json:"discount"`
-	Trial            bool              `json:"trial"`
-	BillingNote      string            `json:"billingNote,omitempty"`
-	LineItems        []models.LineItem `json:"lineItems,omitempty"`
+	SubscriptionId   string                `json:"subscriptionId"`
+	AuthorizationUrl string                `json:"authorizationUrl"`
+	Reference        string                `json:"reference"`
+	Provider         string                `json:"provider"`
+	Price            map[string]any        `json:"price"`
+	Discount         models.PriceQuote     `json:"discount"`
+	Trial            bool                  `json:"trial"`
+	BillingNote      string                `json:"billingNote,omitempty"`
+	LineItems        []models.LineItem     `json:"lineItems,omitempty"`
+	Offer            *CheckoutOfferSummary `json:"offer,omitempty"`
+	Activated        bool                  `json:"activated,omitempty"`
 }
 
 type TrialNotAvailableError struct {
@@ -94,6 +97,10 @@ func (billing Billing) StartCheckout(ctx context.Context, request CheckoutReques
 		return CheckoutView{}, ErrWebCurrencyDisabled
 	}
 	currency := price.Currency
+	quote, offer, err := billing.quoteWithOfferClaim(ctx, client, request, quote, currency)
+	if err != nil {
+		return CheckoutView{}, err
+	}
 	trialRules, _ := billing.rules(ctx)
 	if request.WithTrial {
 		if reasons, err := billing.TrialIneligibility(ctx, client, request, definition.TrialAllowed); err != nil || len(reasons) > 0 {
@@ -105,10 +112,14 @@ func (billing Billing) StartCheckout(ctx context.Context, request CheckoutReques
 	firstCharge := FirstPeriodCharge(request.PlanCode, quote, billing.standaloneCheckmarkPriceMinor(ctx, definition.Checkmark, currency, "web", request.Interval))
 	var intentId uuid.UUID
 	err = databases.RunInMoneyTransaction(ctx, billing.Container.Resources.Database, func(ctx context.Context, transaction *sql.Tx) error {
+		if err := billing.bindOfferClaimToCheckoutInTransaction(ctx, transaction, offer, subscriptionId, profile.ProfileId); err != nil {
+			return err
+		}
 		create := billing.Container.Client(transaction).Subscription.Create().SetID(subscriptionId).SetProfileID(profile.ProfileId).SetProfileType(profile.ProfileType).
 			SetOwnerUserID(request.UserId).SetPlanCode(request.PlanCode).SetInterval(subscription.Interval(request.Interval)).SetChannel(subscription.ChannelWebCheckout).
 			SetListAmountMinor(quote.ListAmountMinor).SetAmountMinor(quote.AmountMinor).SetCurrency(currency).SetDiscountKind(subscription.DiscountKind(quote.DiscountKind)).
-			SetDiscountBps(quote.DiscountBps).SetWithTrial(request.WithTrial).SetPeriodPriceMinor(firstCharge.SubtotalMinor + bundleDiscountOf(firstCharge)).SetCreatedAt(now)
+			SetDiscountBps(quote.DiscountBps).SetWithTrial(request.WithTrial).SetPeriodPriceMinor(firstCharge.SubtotalMinor + models.DiscountLinesTotalMinor(firstCharge)).SetCreatedAt(now)
+		applyOfferToNewSubscription(create, offer)
 		if request.WithTrial {
 			create.SetStatus(subscription.StatusAwaitingCard).SetTrialDays(trialRules.TrialDays)
 		}
@@ -126,12 +137,16 @@ func (billing Billing) StartCheckout(ctx context.Context, request CheckoutReques
 			SubscriptionId: subscriptionId, PeriodId: periodId, OwnerUserId: request.UserId, PlanCode: request.PlanCode, Interval: request.Interval,
 			Currency: currency, Charge: firstCharge, StartsAt: now, ReturnTo: request.ReturnTo, ProfileId: profile.ProfileId,
 		})
-		return err
+		if err != nil || firstCharge.AmountDueMinor > 0 {
+			return err
+		}
+		return billing.settleFreeFirstPeriodInTransaction(ctx, transaction, subscriptionId, periodId)
 	})
 	if err != nil {
 		return CheckoutView{}, err
 	}
-	view := CheckoutView{SubscriptionId: subscriptionId.String(), Provider: "flutterwave", Price: money(quote.AmountMinor, currency), Discount: quote, Trial: request.WithTrial, BillingNote: webBillingNote(price)}
+	view := CheckoutView{SubscriptionId: subscriptionId.String(), Provider: "flutterwave", Price: money(quote.AmountMinor, currency), Discount: quote, Trial: request.WithTrial, BillingNote: webBillingNote(price),
+		Offer: checkoutOfferSummaryOf(offer, quote, currency)}
 	metadata := map[string]string{"subscriptionId": subscriptionId.String(), "profileId": profile.ProfileId}
 	if request.WithTrial {
 		verificationAmount, verificationCurrency := regionpricing.CardVerificationCharge(currency)
@@ -142,6 +157,10 @@ func (billing Billing) StartCheckout(ctx context.Context, request CheckoutReques
 			return CheckoutView{}, billing.failStartedSubscription(ctx, subscriptionId, err)
 		}
 		view.AuthorizationUrl, view.Reference = started.CheckoutUrl, started.Reference
+		return view, nil
+	}
+	if intentId == uuid.Nil {
+		view.Activated, view.LineItems = true, firstCharge.LineItems
 		return view, nil
 	}
 	opened, err := billing.Container.Payments.OpenProviderCheckoutForIntent(ctx, intentId)

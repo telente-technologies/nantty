@@ -107,13 +107,14 @@ func (billing Billing) PlanNextPeriod(ctx context.Context, client *ent.Client, r
 	if row.Currency != price.Currency {
 		credit = 0
 	}
-	plan.Charge = models.ComputePeriodCharge(models.PeriodChargeInput{
+	input := models.PeriodChargeInput{
 		PlanLabel: PlanLabel(planCode), CheckmarkLabel: checkmarkLabel(planCode), PeriodPriceMinor: plan.PeriodPriceMinor,
 		CheckmarkStandaloneMinor: billing.standaloneCheckmarkPriceMinor(ctx, CheckmarkOfPlan(planCode), price.Currency, "web", interval),
 		CheckmarkSplit:           CheckmarkSplitOf(planCode),
 		BundleDiscountBps:        bundleBps, AvailableCreditMinor: credit,
-	})
-	return plan, nil
+	}
+	plan.Charge = models.ComputePeriodCharge(input)
+	return billing.applyRemainingOfferCycle(row, plan, input, price.AmountFor("web", "month")), nil
 }
 
 func (billing Billing) bundleSeatAvailable(ctx context.Context, client *ent.Client, row *ent.Subscription) bool {
@@ -126,8 +127,10 @@ func (billing Billing) bundleSeatAvailable(ctx context.Context, client *ent.Clie
 }
 
 func FirstPeriodCharge(planCode string, quote models.PriceQuote, checkmarkStandaloneMinor int64) models.PeriodCharge {
-	periodPrice, bundleBps := quote.ListAmountMinor, int64(0)
+	periodPrice, bundleBps, offerMinor := quote.ListAmountMinor, int64(0), int64(0)
 	switch quote.DiscountKind {
+	case models.DiscountKindOffer:
+		offerMinor = quote.OfferDiscountMinor
 	case "yearly":
 		periodPrice = quote.AmountMinor
 	case "bundle":
@@ -135,6 +138,6 @@ func FirstPeriodCharge(planCode string, quote models.PriceQuote, checkmarkStanda
 	}
 	return models.ComputePeriodCharge(models.PeriodChargeInput{
 		PlanLabel: PlanLabel(planCode), CheckmarkLabel: checkmarkLabel(planCode), PeriodPriceMinor: periodPrice, CheckmarkStandaloneMinor: checkmarkStandaloneMinor,
-		CheckmarkSplit: CheckmarkSplitOf(planCode), BundleDiscountBps: bundleBps,
+		CheckmarkSplit: CheckmarkSplitOf(planCode), BundleDiscountBps: bundleBps, OfferDiscountMinor: offerMinor,
 	})
 }

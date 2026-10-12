@@ -56,15 +56,15 @@ func DefaultPlanCatalogue() map[string]PlanCatalogueEntry {
 		return converted
 	}
 	return map[string]PlanCatalogueEntry{
-		constants.PlanBlueEssential: {DisplayName: "Blue Essential", IsPurchasable: true, Perks: perks("Priority account recovery", "Impersonation protection", "Edit posts within 1 hour")},
-		constants.PlanBlue:          {DisplayName: "Blue Verified", IsPurchasable: true, Perks: perks("Blue badge on profile and posts", "Priority ranking in comments", "Longer clips (up to 10 minutes)")},
-		constants.PlanPremium:       {DisplayName: "Blue Premium", IsPurchasable: true, Perks: perks("Everything in Blue Verified", "Fewer ads in feed", "Monthly boost credit", "Priority support")},
-		constants.PlanGoldOnly:      {DisplayName: "Gold", IsPurchasable: true, Perks: perks("Gold business badge", "Verified store label on products")},
-		constants.PlanSellerPro: {DisplayName: "Gold Pro", IsPurchasable: true, Perks: perks("Gold business badge", "Zudomart Dashboard access", "Verified store label on products"),
+		constants.PlanBlueEssential: {DisplayName: "Blue Essential", IsPurchasable: true, Perks: perks("Priority account recovery", "Impersonation protection", "Edit posts within 1 hour", "Fewer ads")},
+		constants.PlanBlue:          {DisplayName: "Blue Verified", IsPurchasable: true, Perks: perks("Blue badge on profile and posts", "Priority ranking in comments", "Longer clips (up to 10 minutes)", "Fewer ads")},
+		constants.PlanPremium:       {DisplayName: "Blue Premium", IsPurchasable: true, Perks: perks("Everything in Blue Verified", "No ads anywhere", "Monthly boost credit", "Priority support")},
+		constants.PlanGoldOnly:      {DisplayName: "Gold", IsPurchasable: true, Perks: perks("Gold business badge", "Verified store label on products", "Fewer ads")},
+		constants.PlanSellerPro: {DisplayName: "Gold Pro", IsPurchasable: true, Perks: perks("Gold business badge", "Zudomart Dashboard access", "Verified store label on products", "Fewer ads"),
 			DashboardEntitlements: goldEntitlements(3, 1, 2_000)},
-		constants.PlanSellerBusiness: {DisplayName: "Gold Business", IsPurchasable: true, Perks: perks("Everything in Gold Pro", "Dedicated account manager", "Lower escrow fee"),
+		constants.PlanSellerBusiness: {DisplayName: "Gold Business", IsPurchasable: true, Perks: perks("Everything in Gold Pro", "Dedicated account manager", "Lower escrow fee", "No ads anywhere"),
 			DashboardEntitlements: goldEntitlements(15, 10, 20_000)},
-		constants.PlanBlack: {DisplayName: "Black Official", Perks: perks("Government and public institution badge")},
+		constants.PlanBlack: {DisplayName: "Black Official", Perks: perks("Government and public institution badge", "Very few ads")},
 	}
 }
 

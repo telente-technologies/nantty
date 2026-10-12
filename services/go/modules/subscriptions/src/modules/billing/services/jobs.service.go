@@ -20,6 +20,7 @@ type JobReport struct {
 	BundlesRepriced int `json:"bundlesRepriced"`
 	RenewalsQueued  int `json:"renewalsQueued"`
 	NoticesSent     int `json:"noticesSent"`
+	OffersReleased  int `json:"offersReleased"`
 }
 
 func (billing Billing) RunDueJobs(ctx context.Context) JobReport {
@@ -31,6 +32,7 @@ func (billing Billing) RunDueJobs(ctx context.Context) JobReport {
 	report.BundlesRepriced = billing.RepriceLapsedBundles(ctx, 50)
 	report.RenewalsQueued = billing.SweepDueSubscriptions(ctx, 200)
 	report.NoticesSent = billing.SendCardExpiryNotices(ctx, 100)
+	report.OffersReleased = billing.ReleaseExpiredOfferReservations(ctx, 100)
 	if billing.Container.Now().UTC().Minute() == 0 {
 		report.NoticesSent += billing.SendPriceChangeNotices(ctx, 500)
 	}
