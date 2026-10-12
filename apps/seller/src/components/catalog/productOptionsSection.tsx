@@ -42,7 +42,7 @@ export function ProductOptionsSection({ options, variants, fieldErrors, blockedM
   const suggestions = optionNameSuggestions.filter((name) => !options.some((option) => isSameOptionText(option.name, name) || (name === "Colour" && isSameOptionText(option.name, "Color"))));
   const combinations = countOptionCombinations(options);
 
-  const announce = (message: string) => setAnnouncement((current) => (current === message ? `${message} ` : message));
+  const announce = (message: string) => setAnnouncement((current) => (current === message ? `${message}\u00a0` : message));
   const updateOption = (key: string, patch: Partial<OptionDraft>) => onOptionsChange((current) => current.map((option) => (option.key === key ? { ...option, ...patch } : option)));
 
   function addOption(name: string) {

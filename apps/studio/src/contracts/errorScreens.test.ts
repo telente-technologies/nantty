@@ -24,7 +24,7 @@ before(async () => {
     NotFoundPage: (await import("@/app/not-found")).default,
     SectionNotFound: (await import("@/app/(studio)/not-found")).default,
     RootRouteError: (await import("@/app/error")).default,
-    withExperience: (child) => createElement(ErrorExperienceProvider, { value: studioErrorExperience, children: child }),
+    withExperience: (child) => createElement(ErrorExperienceProvider, { value: studioErrorExperience }, child),
   };
 });
 

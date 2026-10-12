@@ -72,7 +72,7 @@ export function RevenueRulesCard() {
           { key: "gift", label: "Gifts", detail: status.data?.giftSharePercent ? `Your tier: ${status.data.giftSharePercent}%` : undefined, value: `up to ${data.giftCreatorSharePercentUpTo}%` },
           { key: "tip", label: "Tips", value: `${data.tipCreatorSharePercent}%` },
           { key: "subscription", label: "Subscriptions", detail: data.subscriptionShareBasis === "net_of_store_fee" ? "After Apple or Google's fee on in-app purchases" : undefined, value: `${data.subscriptionCreatorSharePercent}%` },
-          { key: "ads", label: "Ad revenue on your content", value: `${data.adsRevenueCreatorSharePercent}%` },
+          { key: "ads", label: "Ad revenue on your content and comment sections", value: `${data.adsRevenueCreatorSharePercent}%` },
           { key: "affiliate", label: "Affiliate commission", detail: data.affiliateCommissionReleasedAfterEscrow ? "Paid after the buyer confirms delivery" : undefined, value: `up to ${data.affiliateCommissionMaximumPercent}%` },
           { key: "coin", label: "Value of 1 earned coin", value: formatMoneyForDisplay(data.coinCashValue) },
           { key: "minimum", label: "Minimum withdrawal", value: formatMoneyForDisplay(data.minimumPayout) },

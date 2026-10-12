@@ -1,5 +1,6 @@
 export const pendingSubscriptionStorageKey = "zd_pending_subscription";
 export const pendingOrderPaymentStorageKey = "zd_pending_payment";
+export const pendingOfferTokenStorageKey = "zd_pending_offer";
 
 export function paymentReturnUrl(): string {
   return `${window.location.origin}/pay/return`;

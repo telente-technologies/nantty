@@ -8,6 +8,7 @@ const guestBrowsablePagePatterns: readonly RegExp[] = [
   /^\/post\/[A-Za-z0-9_.~%-]+\/quotes$/,
   /^\/product\/[A-Za-z0-9_.~%-]+\/reviews$/,
   /^\/post\/[A-Za-z0-9_.~%-]+\/comment\/[A-Za-z0-9_.~%-]+$/,
+  /^\/offer\/[A-Za-z0-9_-]{8,64}$/,
   /^\/help(?:\/(?!tickets(?:\/|$))[a-z0-9-]+(?:\/[a-z0-9-]+)?)?$/,
 ];
 
@@ -29,6 +30,7 @@ const publicApiReadPatterns: readonly RegExp[] = [
   /^\/api\/v1\/users\/by-username\/[A-Za-z0-9_.~%-]+$/,
   /^\/api\/v1\/users\/(?!me\/)[A-Za-z0-9_.~%-]+\/posts$/,
   /^\/api\/v1\/legal\/policy-versions\/current$/,
+  /^\/api\/v1\/subscription-offers\/[A-Za-z0-9_-]{8,64}$/,
 ];
 
 export function isGuestBrowsablePage(pathname: string): boolean {

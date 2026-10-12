@@ -8,7 +8,7 @@ import { usePaymentPoll } from "@/components/actions/paymentPoll.hook";
 import { PaymentReturnStatus } from "@/components/actions/paymentReturnStatus";
 import { Spinner } from "@/components/ui/feedback";
 import { paymentsService } from "@/services/payments.service";
-import { forgetPendingOrderPayment, pendingSubscriptionStorageKey, readPendingOrderPayment, readPendingValue, type PendingOrderPayment } from "@/utils/paymentReturn.util";
+import { forgetPendingOrderPayment, forgetPendingValue, pendingOfferTokenStorageKey, pendingSubscriptionStorageKey, readPendingOrderPayment, readPendingValue, type PendingOrderPayment } from "@/utils/paymentReturn.util";
 
 function OrderPaymentReturn({ pending }: { readonly pending: PendingOrderPayment }) {
   const queryClient = useQueryClient();
@@ -41,6 +41,12 @@ export default function PaymentReturnPage() {
   const router = useRouter();
   const [pending, setPending] = useState<PendingOrderPayment | null | undefined>(undefined);
   useEffect(() => {
+    const offerToken = readPendingValue(pendingOfferTokenStorageKey);
+    if (offerToken) {
+      forgetPendingValue(pendingOfferTokenStorageKey);
+      router.replace(`/offer/${encodeURIComponent(offerToken)}?step=paid`);
+      return;
+    }
     const subscriptionId = readPendingValue(pendingSubscriptionStorageKey);
     if (subscriptionId) {
       router.replace(`/subscriptions/return?subscriptionId=${encodeURIComponent(subscriptionId)}`);

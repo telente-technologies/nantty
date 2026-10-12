@@ -65,7 +65,7 @@ export const landingQuestions = [
   },
   {
     question: "How much of a fan subscription do I keep?",
-    answer: "You keep 80% of each subscription after app store fees. Eligible content can also earn a share of ad revenue. Zudomart shares eligible revenue; it does not pay per view.",
+    answer: "You keep 80% of each subscription after app store fees. Eligible content, including ads in your comment sections, can also earn a share of ad revenue. Zudomart shares eligible revenue; it does not pay per view.",
   },
   {
     question: "What are ZudoPoints?",

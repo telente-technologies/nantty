@@ -56,6 +56,7 @@ import { usernameMocks } from "./username.mock";
 import { usersMocks } from "./users.mock";
 import { verificationMocks } from "./verification.mock";
 import { identityVerificationMocks } from "./identityVerification.mock";
+import { subscriptionOfferMocks } from "./subscriptionOffers.mock";
 import { storeRewardsMocks } from "./storeRewards.mock";
 import { providerWalletMocks } from "./providerWallet.mock";
 import { walletMocks } from "./wallet.mock";
@@ -102,6 +103,7 @@ export const routes: MockRoute[] = [
   ...creatorSubscriptionsMocks,
   ...creatorProgramMocks,
   ...identityVerificationMocks,
+  ...subscriptionOfferMocks,
   ...verificationMocks,
   ...boostsMocks,
   ...brandsMocks,
