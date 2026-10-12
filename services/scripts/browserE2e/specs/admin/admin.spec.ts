@@ -8,7 +8,7 @@ import { callApi, createSuperadmin, registerUser, uniqueSuffix } from "../../src
 import { expect, test } from "../../src/test.js";
 
 test.describe.configure({ mode: "serial" });
-test.use({ guardOptions: { allowConsoleErrors: [/status of 401 .*\/bff\/auth\/(login|mfa\/[a-z-]+|step-up[a-z/-]*)$/, /status of 403 .*\/bff\/admin\/usernames\/reserved$/], allowServerErrors: [] } });
+test.use({ guardOptions: { allowConsoleErrors: [/status of 401 .*\/bff\/auth\/(login|mfa\/[a-z-]+|step-up[a-z/-]*)$/, /status of 403 .*\/bff\/admin\/usernames\/reserved$/, /status of 403 .*\/bff\/admin\/users\/[^/]+\/suspend$/], allowServerErrors: [] } });
 
 let staff: PendingStaff;
 let totpSecret = "";
@@ -162,11 +162,13 @@ test("suspending a user (step-up when asked) signs them out everywhere", async (
   await confirm.getByLabel(/Reason/).fill("E2E suspension check");
   await confirm.getByRole("button", { name: "Suspend", exact: true }).click();
   const stepUp = page.getByRole("dialog", { name: "Confirm it's you" });
-  if (await stepUp.isVisible({ timeout: 3000 }).catch(() => false)) {
+  const suspended = page.getByText("User suspended");
+  await expect(stepUp.or(suspended).first()).toBeVisible();
+  if (await stepUp.isVisible()) {
     await stepUp.getByLabel("Authenticator code").fill(await freshTotp(totpSecret));
     await stepUp.getByRole("button", { name: "Confirm" }).click();
   }
-  await expect(page.getByText("User suspended")).toBeVisible();
+  await expect(suspended).toBeVisible();
   const profile = await callApi("GET", "/api/v1/users/me", { token: target.accessToken });
   expect(profile.status, "suspended user's token stops working").toBeGreaterThanOrEqual(400);
 });

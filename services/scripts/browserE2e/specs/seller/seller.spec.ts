@@ -1,7 +1,7 @@
 import type { Page } from "@playwright/test";
 
 import { seedStoreWithProduct, type SeededStore } from "../../src/data/commerce.data.js";
-import { acceptTeamRequest, placePaidOrder, upgradeToBusinessPlan } from "../../src/data/seller.data.js";
+import { acceptTeamRequest, addStoreManager, placePaidOrder, upgradeToBusinessPlan } from "../../src/data/seller.data.js";
 import { doubleClickSubmit, expireSession, malformedInputs, oversizedText } from "../../src/helpers/abuse.helper.js";
 import { expectRedirectedToLogin, logInWithZudomartAccount } from "../../src/helpers/appLogin.helper.js";
 import { expectReadableMessages } from "../../src/helpers/rendering.helper.js";
@@ -20,7 +20,9 @@ const logIn = (page: Page, user: UserActor = freeStore.seller, next?: string) =>
 
 test.beforeAll(async () => {
   freeStore = await seedStoreWithProduct("sellfree");
-  secondStore = await seedStoreWithProduct("sellsecond", 120_000, freeStore.seller);
+  secondStore = await seedStoreWithProduct("sellsecond", 120_000);
+  await upgradeToBusinessPlan(secondStore);
+  await addStoreManager(secondStore, freeStore.seller);
 });
 
 test("signed-out deep links, and a buyer without a store is sent to apply", async ({ page }) => {
@@ -33,7 +35,7 @@ test("signed-out deep links, and a buyer without a store is sent to apply", asyn
   await expect(page).toHaveURL(/\/access\/apply/);
 });
 
-test("switch between the seller's stores", async ({ page }) => {
+test("switch between the store the seller owns and one they manage", async ({ page }) => {
   await logIn(page);
   await page.goto("/dashboard");
   await page.locator('button[aria-haspopup="menu"]').filter({ hasText: /E2E/, visible: true }).first().click();
@@ -171,11 +173,14 @@ test("business documents upload refuses bad files and accepts a PDF", async ({ p
 
 test("staff roles: a sales staff member is blocked from finance and settings", async ({ page, browser }) => {
   await upgradeToBusinessPlan(freeStore);
-  await upgradeToBusinessPlan(secondStore);
   const member = await registerUser("staffer");
   await logIn(page);
-  await page.goto("/staff/invite");
-  await page.getByLabel("Find a Zudomart user").fill(`@${member.username}`);
+  const finder = page.getByLabel("Find a Zudomart user");
+  await expect(async () => {
+    await page.goto("/staff/invite");
+    await expect(finder, "the new plan unlocks the team form once the short plan cache expires").toBeVisible({ timeout: 3000 });
+  }).toPass({ timeout: 30_000 });
+  await finder.fill(`@${member.username}`);
   await page.getByRole("list", { name: "Matching Zudomart users" }).getByText(member.username).first().click();
   await page.getByLabel("Role").selectOption({ label: "Sales staff" });
   await page.getByRole("button", { name: "Send team request" }).click();

@@ -8,10 +8,11 @@ export async function upgradeToBusinessPlan(store: SeededStore): Promise<void> {
   const started = await callApi("POST", "/api/v1/seller/subscription/checkout", { token: store.seller.accessToken, headers: web, body: { profileId: store.businessProfileId, planId: "seller_business_monthly" } });
   if (started.status !== 201) throw new Error(`plan checkout: ${describeResponse(started)}`);
   await payCheckoutThroughProvider(started.body.reference);
-  await waitFor(async () => {
-    const current = await callApi("GET", "/api/v1/seller/subscription", { token: store.seller.accessToken, headers: { "X-Seller-Store": store.storeId } });
-    return /business/.test(JSON.stringify(current.body ?? {})) ? true : undefined;
+  const active = await waitFor(async () => {
+    const access = await callApi("GET", "/api/v1/seller/access", { token: store.seller.accessToken, headers: { "X-Seller-Store": store.storeId } });
+    return access.body?.subscription?.plan === "BUSINESS" ? true : undefined;
   }, 30_000, 1000);
+  if (active === undefined) throw new Error("the business plan never reached the seller access");
 }
 
 export async function acceptTeamRequest(member: UserActor): Promise<void> {
@@ -22,6 +23,18 @@ export async function acceptTeamRequest(member: UserActor): Promise<void> {
   if (pending === undefined) throw new Error("no team request arrived");
   const accepted = await callApi("POST", `/api/v1/stores/team-requests/${pending}/accept`, { token: member.accessToken, body: {} });
   if (accepted.status >= 300) throw new Error(`accept team request: ${describeResponse(accepted)}`);
+}
+
+export async function addStoreManager(store: SeededStore, member: UserActor): Promise<void> {
+  const headers = { "X-Seller-Store": store.storeId };
+  const locations = await callApi("GET", "/api/v1/seller/locations", { token: store.seller.accessToken, headers });
+  const body = { userId: member.accountId, role: "manager", locationIds: [locations.body?.data?.[0]?.id].filter(Boolean) };
+  const added = await waitFor(async () => {
+    const response = await callApi("POST", "/api/v1/seller/staff", { token: store.seller.accessToken, headers, body });
+    return response.status === 402 ? undefined : response;
+  }, 20_000, 2000);
+  if (added === undefined || added.status >= 300) throw new Error(`add staff: ${added === undefined ? "plan never unlocked the team feature" : describeResponse(added)}`);
+  await acceptTeamRequest(member);
 }
 
 export async function placePaidOrder(store: SeededStore): Promise<{ readonly buyer: UserActor; readonly orderId: string }> {

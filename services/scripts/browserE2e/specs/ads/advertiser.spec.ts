@@ -3,7 +3,7 @@ import { expectRedirectedToLogin, logInWithZudomartAccount } from "../../src/hel
 import { routeFlutterwaveToFake } from "../../src/helpers/flutterwave.helper.js";
 import { expectReadableMessages } from "../../src/helpers/rendering.helper.js";
 import { toggleDarkModeOnce } from "../../src/helpers/theme.helper.js";
-import { createSamplePng, registerUser, uniqueSuffix, type UserActor } from "../../src/smokeBridge.js";
+import { createSamplePng, registerUser, uniqueSuffix, verifyNigerianUserToLevelOne, type UserActor } from "../../src/smokeBridge.js";
 import { expect, test } from "../../src/test.js";
 
 test.describe.configure({ mode: "serial" });
@@ -14,6 +14,7 @@ let accountPath = "";
 
 test.beforeAll(async () => {
   advertiser = await registerUser("adv");
+  await verifyNigerianUserToLevelOne(advertiser);
 });
 
 test("signed-out deep links go to sign-in and come back", async ({ page }) => {

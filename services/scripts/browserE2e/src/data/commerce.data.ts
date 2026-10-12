@@ -18,7 +18,7 @@ export async function seedStoreWithProduct(label: string, priceMinor = 250_000, 
   const suffix = uniqueSuffix();
   const owner = seller ?? (await registerUser(label));
   const handle = `e2e${label}${suffix}`.slice(0, 30).toLowerCase();
-  const profile = await callApi("POST", "/api/v1/users/me/business-profiles", { token: owner.accessToken, body: { displayName: `E2E ${label} ${suffix}`, handle, description: "Browser e2e store", businessType: "business", categories: [{ customName: "Fashion" }] } });
+  const profile = await callApi("POST", "/api/v1/users/me/business-profiles", { token: owner.accessToken, body: { displayName: `E2E ${label} ${suffix}`, handle, description: "Browser e2e store", businessType: "business", purpose: "store", categories: [{ customName: "Fashion" }] } });
   must(profile.status === 201, "business profile", profile);
   const businessProfileId: string = profile.body.id ?? profile.body.profile?.id;
   const store = await callApi("POST", "/api/v1/stores", { token: owner.accessToken, body: { businessProfileId, name: `E2E ${label} ${suffix}`, description: "Browser e2e store", countryCode: "NG" } });

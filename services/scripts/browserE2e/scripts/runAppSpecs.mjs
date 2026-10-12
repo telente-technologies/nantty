@@ -42,7 +42,7 @@ function environmentFor(app) {
     case "studio":
       return { ...shared, STUDIO_ORIGIN: origin, STUDIO_API_URL: gateway, STUDIO_MEDIA_URL: mediaOrigin, STUDIO_USE_MOCKS: "false", STUDIO_REAL_API_PREFIXES: "", STUDIO_SESSION_SECRET: secret(), RTMP_INGEST_URL: "rtmp://localhost:1935/live", HLS_PLAYBACK_URL: "http://localhost:8888/hls" };
     case "seller":
-      return { ...shared, ...urls, DASHBOARD_ORIGIN: origin, SELLER_API_URL: gateway, SELLER_MEDIA_URL: mediaOrigin, SELLER_UPLOAD_ORIGINS: mediaOrigin, SELLER_USE_MOCKS: "false", SELLER_REAL_API_PREFIXES: "", SELLER_SESSION_SECRET: secret() };
+      return { ...shared, ...urls, DASHBOARD_ORIGIN: origin, SELLER_API_URL: gateway, SELLER_MEDIA_URL: mediaOrigin, SELLER_UPLOAD_ORIGINS: mediaOrigin, SELLER_USE_MOCKS: "false", SELLER_REAL_API_PREFIXES: "", SELLER_SESSION_SECRET: secret(), SELLER_REALTIME_URL: process.env.E2E_REALTIME_URL ?? "ws://127.0.0.1:4000/ws" };
     case "ads":
       return { ...shared, ADS_ORIGIN: origin, ADS_API_URL: gateway, ADS_MEDIA_URL: mediaOrigin, ADS_UPLOAD_URL: mediaOrigin, ADS_USE_MOCKS: "false", ADS_REAL_API_PREFIXES: "", ADS_SESSION_SECRET: secret(), ADS_CHECKOUT_HOSTS: "checkout.flutterwave.com,checkout-testing.flutterwave.com", NEXT_PUBLIC_ADS_CHECKOUT_HOSTS: "checkout.flutterwave.com,checkout-testing.flutterwave.com" };
     case "admin":

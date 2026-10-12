@@ -156,9 +156,12 @@ test("interact with someone else's post: like, reply, repost, share, report, fol
   await reply.fill(`${malformedInputs[0]} reply`);
   await page.getByRole("button", { name: "Reply", exact: true }).click();
   await expect(page.getByText("<script>alert(1)</script> reply").first(), "markup is shown as text").toBeVisible();
-  await page.getByRole("button", { name: /^Repost, \d+ reposts?/ }).first().click();
-  const repostMenu = page.getByRole("menuitem", { name: /^Repost$/ });
-  if (await repostMenu.isVisible().catch(() => false)) await repostMenu.click();
+  await page.getByRole("button", { name: /^Repost( or quote)?, \d+ reposts?/ }).first().click();
+  const repostSheet = page.getByRole("dialog", { name: "Repost" });
+  await repostSheet.getByRole("button", { name: /^Repost\b/ }).click();
+  await expect(page.getByRole("button", { name: /^Reposted, 1 repost/ }).first(), "the repost lands once").toBeVisible();
+  if (await repostSheet.isVisible()) await page.keyboard.press("Escape");
+  await expect(repostSheet).toBeHidden();
   await page.getByRole("button", { name: "Send in chat" }).first().click();
   await expect(page.getByRole("dialog", { name: "Send in chat" })).toBeVisible();
   await page.keyboard.press("Escape");
