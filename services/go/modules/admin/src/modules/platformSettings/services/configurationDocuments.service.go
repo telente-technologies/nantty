@@ -41,10 +41,12 @@ type VerificationPlan struct {
 	IsPurchasable         bool                   `json:"isPurchasable"`
 	Perks                 []string               `json:"perks"`
 	DashboardEntitlements []DashboardEntitlement `json:"dashboardEntitlements"`
+	AdLoadPercent         *int                   `json:"adLoadPercent,omitempty"`
 }
 
 type PlansConfiguration struct {
 	SupportedCurrencies []string           `json:"supportedCurrencies"`
+	FreeAdLoadPercent   *int               `json:"freeAdLoadPercent,omitempty"`
 	Plans               []VerificationPlan `json:"plans"`
 }
 
@@ -88,8 +90,10 @@ func init() {
 
 func defaultPlansConfiguration() PlansConfiguration {
 	plan := func(key, color, tier, name string, badge, purchasable bool, perks ...string) VerificationPlan {
-		return VerificationPlan{PlanKey: key, Color: color, Tier: tier, DisplayName: name, BadgeVisible: badge, IsPurchasable: purchasable, Perks: perks, DashboardEntitlements: []DashboardEntitlement{}}
+		adLoad := DefaultAdLoadPercentByPlanKey[key]
+		return VerificationPlan{PlanKey: key, Color: color, Tier: tier, DisplayName: name, BadgeVisible: badge, IsPurchasable: purchasable, Perks: perks, DashboardEntitlements: []DashboardEntitlement{}, AdLoadPercent: &adLoad}
 	}
+	freeAdLoad := fullAdLoadPercent
 	sellerPlan := func(plan VerificationPlan, staffSeats, storeLocations, catalogImport int) VerificationPlan {
 		plan.DashboardEntitlements = []DashboardEntitlement{
 			{Key: "staffSeats", Label: "Staff seats", Limit: &staffSeats},
@@ -99,14 +103,14 @@ func defaultPlansConfiguration() PlansConfiguration {
 		}
 		return plan
 	}
-	return PlansConfiguration{SupportedCurrencies: launchCurrencies, Plans: []VerificationPlan{
-		plan("BLUE_ESSENTIAL", "BLUE", "ESSENTIAL", "Blue Essential", false, true, "Priority account recovery", "Impersonation protection", "Edit posts within 1 hour"),
-		plan("BLUE_VERIFIED", "BLUE", "VERIFIED", "Blue Verified", true, true, "Blue badge on profile and posts", "Priority ranking in comments", "Longer clips (up to 10 minutes)"),
-		plan("BLUE_PREMIUM", "BLUE", "PREMIUM", "Blue Premium", true, true, "Everything in Blue Verified", "Fewer ads in feed", "Monthly boost credit", "Priority support"),
-		plan("GOLD_ONLY", "GOLD", "ONLY", "Gold", true, true, "Gold business badge", "Verified store label on products"),
-		sellerPlan(plan("GOLD_PRO", "GOLD", "PRO", "Gold Pro", true, true, "Gold business badge", "Zudomart Dashboard access", "Verified store label on products"), 3, 1, 2_000),
-		sellerPlan(plan("GOLD_BUSINESS", "GOLD", "BUSINESS", "Gold Business", true, true, "Everything in Gold Pro", "Dedicated account manager", "Lower escrow fee"), 15, 10, 20_000),
-		plan("BLACK_OFFICIAL", "BLACK", "OFFICIAL", "Black Official", true, false, "Government and public institution badge"),
+	return PlansConfiguration{SupportedCurrencies: launchCurrencies, FreeAdLoadPercent: &freeAdLoad, Plans: []VerificationPlan{
+		plan("BLUE_ESSENTIAL", "BLUE", "ESSENTIAL", "Blue Essential", false, true, "Priority account recovery", "Impersonation protection", "Edit posts within 1 hour", "Fewer ads"),
+		plan("BLUE_VERIFIED", "BLUE", "VERIFIED", "Blue Verified", true, true, "Blue badge on profile and posts", "Priority ranking in comments", "Longer clips (up to 10 minutes)", "Fewer ads"),
+		plan("BLUE_PREMIUM", "BLUE", "PREMIUM", "Blue Premium", true, true, "Everything in Blue Verified", "No ads anywhere", "Monthly boost credit", "Priority support"),
+		plan("GOLD_ONLY", "GOLD", "ONLY", "Gold", true, true, "Gold business badge", "Verified store label on products", "Fewer ads"),
+		sellerPlan(plan("GOLD_PRO", "GOLD", "PRO", "Gold Pro", true, true, "Gold business badge", "Zudomart Dashboard access", "Verified store label on products", "Fewer ads"), 3, 1, 2_000),
+		sellerPlan(plan("GOLD_BUSINESS", "GOLD", "BUSINESS", "Gold Business", true, true, "Everything in Gold Pro", "Dedicated account manager", "Lower escrow fee", "No ads anywhere"), 15, 10, 20_000),
+		plan("BLACK_OFFICIAL", "BLACK", "OFFICIAL", "Black Official", true, false, "Government and public institution badge", "Very few ads"),
 	}}
 }
 
@@ -156,6 +160,11 @@ func validatePlansConfiguration(raw json.RawMessage) (json.RawMessage, error) {
 	if err := firstFailure(requireCodes("supportedCurrencies", value.SupportedCurrencies, currencyCodePattern, 1), requireWithin("plans", len(value.Plans), 1, 30)); err != nil {
 		return nil, err
 	}
+	if value.FreeAdLoadPercent != nil {
+		if err := requireWithin("freeAdLoadPercent", *value.FreeAdLoadPercent, 0, fullAdLoadPercent); err != nil {
+			return nil, err
+		}
+	}
 	seen := map[string]bool{}
 	for _, plan := range value.Plans {
 		if !planKeyPattern.MatchString(plan.PlanKey) || seen[plan.PlanKey] || !slices.Contains(planTiersByColor[plan.Color], plan.Tier) {
@@ -163,6 +172,9 @@ func validatePlansConfiguration(raw json.RawMessage) (json.RawMessage, error) {
 		}
 		if plan.Color == "BLACK" && plan.IsPurchasable {
 			return nil, adminerrors.Unprocessable("Black Official is granted only through the official process and cannot be purchasable.")
+		}
+		if err := validatePlanAdLoad(plan); err != nil {
+			return nil, err
 		}
 		seen[plan.PlanKey] = true
 		if err := firstFailure(requireWithin(plan.PlanKey+".displayName", len(plan.DisplayName), 2, 60), requireWithin(plan.PlanKey+".perks", len(plan.Perks), 0, 20),
