@@ -43,6 +43,12 @@ const (
 	FieldCommissionMinor = "commission_minor"
 	// FieldCurrency holds the string denoting the currency field in the database.
 	FieldCurrency = "currency"
+	// FieldProductName holds the string denoting the product_name field in the database.
+	FieldProductName = "product_name"
+	// FieldStoreName holds the string denoting the store_name field in the database.
+	FieldStoreName = "store_name"
+	// FieldCreatorHandle holds the string denoting the creator_handle field in the database.
+	FieldCreatorHandle = "creator_handle"
 	// FieldStatus holds the string denoting the status field in the database.
 	FieldStatus = "status"
 	// FieldReversedMinor holds the string denoting the reversed_minor field in the database.
@@ -76,6 +82,9 @@ var Columns = []string{
 	FieldCommissionBps,
 	FieldCommissionMinor,
 	FieldCurrency,
+	FieldProductName,
+	FieldStoreName,
+	FieldCreatorHandle,
 	FieldStatus,
 	FieldReversedMinor,
 	FieldOrderedAt,
@@ -119,6 +128,18 @@ var (
 	AttributionIDValidator func(string) error
 	// CurrencyValidator is a validator for the "currency" field. It is called by the builders before save.
 	CurrencyValidator func(string) error
+	// DefaultProductName holds the default value on creation for the "product_name" field.
+	DefaultProductName string
+	// ProductNameValidator is a validator for the "product_name" field. It is called by the builders before save.
+	ProductNameValidator func(string) error
+	// DefaultStoreName holds the default value on creation for the "store_name" field.
+	DefaultStoreName string
+	// StoreNameValidator is a validator for the "store_name" field. It is called by the builders before save.
+	StoreNameValidator func(string) error
+	// DefaultCreatorHandle holds the default value on creation for the "creator_handle" field.
+	DefaultCreatorHandle string
+	// CreatorHandleValidator is a validator for the "creator_handle" field. It is called by the builders before save.
+	CreatorHandleValidator func(string) error
 	// DefaultReversedMinor holds the default value on creation for the "reversed_minor" field.
 	DefaultReversedMinor int64
 	// DefaultTransferAttempts holds the default value on creation for the "transfer_attempts" field.
@@ -231,6 +252,21 @@ func ByCommissionMinor(opts ...sql.OrderTermOption) OrderOption {
 // ByCurrency orders the results by the currency field.
 func ByCurrency(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldCurrency, opts...).ToFunc()
+}
+
+// ByProductName orders the results by the product_name field.
+func ByProductName(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldProductName, opts...).ToFunc()
+}
+
+// ByStoreName orders the results by the store_name field.
+func ByStoreName(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldStoreName, opts...).ToFunc()
+}
+
+// ByCreatorHandle orders the results by the creator_handle field.
+func ByCreatorHandle(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldCreatorHandle, opts...).ToFunc()
 }
 
 // ByStatus orders the results by the status field.

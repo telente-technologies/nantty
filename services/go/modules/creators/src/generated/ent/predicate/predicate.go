@@ -6,11 +6,17 @@ import (
 	"entgo.io/ent/dialect/sql"
 )
 
+// AffiliateAttributedSale is the predicate function for affiliateattributedsale builders.
+type AffiliateAttributedSale func(*sql.Selector)
+
 // AffiliateCommission is the predicate function for affiliatecommission builders.
 type AffiliateCommission func(*sql.Selector)
 
 // AffiliateCommissionReversal is the predicate function for affiliatecommissionreversal builders.
 type AffiliateCommissionReversal func(*sql.Selector)
+
+// AffiliateLink is the predicate function for affiliatelink builders.
+type AffiliateLink func(*sql.Selector)
 
 // AffiliateProductCommission is the predicate function for affiliateproductcommission builders.
 type AffiliateProductCommission func(*sql.Selector)

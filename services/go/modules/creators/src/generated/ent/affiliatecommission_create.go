@@ -124,6 +124,48 @@ func (_c *AffiliateCommissionCreate) SetCurrency(v string) *AffiliateCommissionC
 	return _c
 }
 
+// SetProductName sets the "product_name" field.
+func (_c *AffiliateCommissionCreate) SetProductName(v string) *AffiliateCommissionCreate {
+	_c.mutation.SetProductName(v)
+	return _c
+}
+
+// SetNillableProductName sets the "product_name" field if the given value is not nil.
+func (_c *AffiliateCommissionCreate) SetNillableProductName(v *string) *AffiliateCommissionCreate {
+	if v != nil {
+		_c.SetProductName(*v)
+	}
+	return _c
+}
+
+// SetStoreName sets the "store_name" field.
+func (_c *AffiliateCommissionCreate) SetStoreName(v string) *AffiliateCommissionCreate {
+	_c.mutation.SetStoreName(v)
+	return _c
+}
+
+// SetNillableStoreName sets the "store_name" field if the given value is not nil.
+func (_c *AffiliateCommissionCreate) SetNillableStoreName(v *string) *AffiliateCommissionCreate {
+	if v != nil {
+		_c.SetStoreName(*v)
+	}
+	return _c
+}
+
+// SetCreatorHandle sets the "creator_handle" field.
+func (_c *AffiliateCommissionCreate) SetCreatorHandle(v string) *AffiliateCommissionCreate {
+	_c.mutation.SetCreatorHandle(v)
+	return _c
+}
+
+// SetNillableCreatorHandle sets the "creator_handle" field if the given value is not nil.
+func (_c *AffiliateCommissionCreate) SetNillableCreatorHandle(v *string) *AffiliateCommissionCreate {
+	if v != nil {
+		_c.SetCreatorHandle(*v)
+	}
+	return _c
+}
+
 // SetStatus sets the "status" field.
 func (_c *AffiliateCommissionCreate) SetStatus(v affiliatecommission.Status) *AffiliateCommissionCreate {
 	_c.mutation.SetStatus(v)
@@ -265,6 +307,18 @@ func (_c *AffiliateCommissionCreate) defaults() {
 		v := affiliatecommission.DefaultOrderNumber
 		_c.mutation.SetOrderNumber(v)
 	}
+	if _, ok := _c.mutation.ProductName(); !ok {
+		v := affiliatecommission.DefaultProductName
+		_c.mutation.SetProductName(v)
+	}
+	if _, ok := _c.mutation.StoreName(); !ok {
+		v := affiliatecommission.DefaultStoreName
+		_c.mutation.SetStoreName(v)
+	}
+	if _, ok := _c.mutation.CreatorHandle(); !ok {
+		v := affiliatecommission.DefaultCreatorHandle
+		_c.mutation.SetCreatorHandle(v)
+	}
 	if _, ok := _c.mutation.Status(); !ok {
 		v := affiliatecommission.DefaultStatus
 		_c.mutation.SetStatus(v)
@@ -377,6 +431,30 @@ func (_c *AffiliateCommissionCreate) check() error {
 			return &ValidationError{Name: "currency", err: fmt.Errorf(`ent: validator failed for field "AffiliateCommission.currency": %w`, err)}
 		}
 	}
+	if _, ok := _c.mutation.ProductName(); !ok {
+		return &ValidationError{Name: "product_name", err: errors.New(`ent: missing required field "AffiliateCommission.product_name"`)}
+	}
+	if v, ok := _c.mutation.ProductName(); ok {
+		if err := affiliatecommission.ProductNameValidator(v); err != nil {
+			return &ValidationError{Name: "product_name", err: fmt.Errorf(`ent: validator failed for field "AffiliateCommission.product_name": %w`, err)}
+		}
+	}
+	if _, ok := _c.mutation.StoreName(); !ok {
+		return &ValidationError{Name: "store_name", err: errors.New(`ent: missing required field "AffiliateCommission.store_name"`)}
+	}
+	if v, ok := _c.mutation.StoreName(); ok {
+		if err := affiliatecommission.StoreNameValidator(v); err != nil {
+			return &ValidationError{Name: "store_name", err: fmt.Errorf(`ent: validator failed for field "AffiliateCommission.store_name": %w`, err)}
+		}
+	}
+	if _, ok := _c.mutation.CreatorHandle(); !ok {
+		return &ValidationError{Name: "creator_handle", err: errors.New(`ent: missing required field "AffiliateCommission.creator_handle"`)}
+	}
+	if v, ok := _c.mutation.CreatorHandle(); ok {
+		if err := affiliatecommission.CreatorHandleValidator(v); err != nil {
+			return &ValidationError{Name: "creator_handle", err: fmt.Errorf(`ent: validator failed for field "AffiliateCommission.creator_handle": %w`, err)}
+		}
+	}
 	if _, ok := _c.mutation.Status(); !ok {
 		return &ValidationError{Name: "status", err: errors.New(`ent: missing required field "AffiliateCommission.status"`)}
 	}
@@ -483,6 +561,18 @@ func (_c *AffiliateCommissionCreate) createSpec() (*AffiliateCommission, *sqlgra
 	if value, ok := _c.mutation.Currency(); ok {
 		_spec.SetField(affiliatecommission.FieldCurrency, field.TypeString, value)
 		_node.Currency = value
+	}
+	if value, ok := _c.mutation.ProductName(); ok {
+		_spec.SetField(affiliatecommission.FieldProductName, field.TypeString, value)
+		_node.ProductName = value
+	}
+	if value, ok := _c.mutation.StoreName(); ok {
+		_spec.SetField(affiliatecommission.FieldStoreName, field.TypeString, value)
+		_node.StoreName = value
+	}
+	if value, ok := _c.mutation.CreatorHandle(); ok {
+		_spec.SetField(affiliatecommission.FieldCreatorHandle, field.TypeString, value)
+		_node.CreatorHandle = value
 	}
 	if value, ok := _c.mutation.Status(); ok {
 		_spec.SetField(affiliatecommission.FieldStatus, field.TypeEnum, value)
@@ -702,6 +792,15 @@ func (u *AffiliateCommissionUpsertOne) UpdateNewValues() *AffiliateCommissionUps
 		}
 		if _, exists := u.create.mutation.Currency(); exists {
 			s.SetIgnore(affiliatecommission.FieldCurrency)
+		}
+		if _, exists := u.create.mutation.ProductName(); exists {
+			s.SetIgnore(affiliatecommission.FieldProductName)
+		}
+		if _, exists := u.create.mutation.StoreName(); exists {
+			s.SetIgnore(affiliatecommission.FieldStoreName)
+		}
+		if _, exists := u.create.mutation.CreatorHandle(); exists {
+			s.SetIgnore(affiliatecommission.FieldCreatorHandle)
 		}
 		if _, exists := u.create.mutation.OrderedAt(); exists {
 			s.SetIgnore(affiliatecommission.FieldOrderedAt)
@@ -1059,6 +1158,15 @@ func (u *AffiliateCommissionUpsertBulk) UpdateNewValues() *AffiliateCommissionUp
 			}
 			if _, exists := b.mutation.Currency(); exists {
 				s.SetIgnore(affiliatecommission.FieldCurrency)
+			}
+			if _, exists := b.mutation.ProductName(); exists {
+				s.SetIgnore(affiliatecommission.FieldProductName)
+			}
+			if _, exists := b.mutation.StoreName(); exists {
+				s.SetIgnore(affiliatecommission.FieldStoreName)
+			}
+			if _, exists := b.mutation.CreatorHandle(); exists {
+				s.SetIgnore(affiliatecommission.FieldCreatorHandle)
 			}
 			if _, exists := b.mutation.OrderedAt(); exists {
 				s.SetIgnore(affiliatecommission.FieldOrderedAt)

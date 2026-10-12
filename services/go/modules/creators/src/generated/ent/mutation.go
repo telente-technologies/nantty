@@ -8,8 +8,10 @@ import (
 	"fmt"
 	"sync"
 	"time"
+	"zudomart/modules/creators/src/generated/ent/affiliateattributedsale"
 	"zudomart/modules/creators/src/generated/ent/affiliatecommission"
 	"zudomart/modules/creators/src/generated/ent/affiliatecommissionreversal"
+	"zudomart/modules/creators/src/generated/ent/affiliatelink"
 	"zudomart/modules/creators/src/generated/ent/affiliateproductcommission"
 	"zudomart/modules/creators/src/generated/ent/affiliateprogramsetting"
 	"zudomart/modules/creators/src/generated/ent/battlesettlement"
@@ -38,8 +40,10 @@ const (
 	OpUpdateOne = ent.OpUpdateOne
 
 	// Node types.
+	TypeAffiliateAttributedSale     = "AffiliateAttributedSale"
 	TypeAffiliateCommission         = "AffiliateCommission"
 	TypeAffiliateCommissionReversal = "AffiliateCommissionReversal"
+	TypeAffiliateLink               = "AffiliateLink"
 	TypeAffiliateProductCommission  = "AffiliateProductCommission"
 	TypeAffiliateProgramSetting     = "AffiliateProgramSetting"
 	TypeBattleSettlement            = "BattleSettlement"
@@ -53,6 +57,1561 @@ const (
 	TypeOutboxEvent                 = "OutboxEvent"
 	TypeTipTransaction              = "TipTransaction"
 )
+
+// AffiliateAttributedSaleMutation represents an operation that mutates the AffiliateAttributedSale nodes in the graph.
+type AffiliateAttributedSaleMutation struct {
+	config
+	op                            Op
+	typ                           string
+	id                            *uuid.UUID
+	created_at                    *time.Time
+	order_id                      *string
+	order_number                  *string
+	order_item_id                 *string
+	product_id                    *string
+	product_name                  *string
+	store_id                      *string
+	store_name                    *string
+	seller_user_id                *string
+	creator_id                    *string
+	attribution_source            *string
+	attribution_id                *string
+	sale_minor                    *int64
+	addsale_minor                 *int64
+	commission_bps                *int64
+	addcommission_bps             *int64
+	estimated_commission_minor    *int64
+	addestimated_commission_minor *int64
+	currency                      *string
+	status                        *affiliateattributedsale.Status
+	void_reason                   *string
+	ordered_at                    *time.Time
+	decided_at                    *time.Time
+	updated_at                    *time.Time
+	clearedFields                 map[string]struct{}
+	done                          bool
+	oldValue                      func(context.Context) (*AffiliateAttributedSale, error)
+	predicates                    []predicate.AffiliateAttributedSale
+}
+
+var _ ent.Mutation = (*AffiliateAttributedSaleMutation)(nil)
+
+// affiliateattributedsaleOption allows management of the mutation configuration using functional options.
+type affiliateattributedsaleOption func(*AffiliateAttributedSaleMutation)
+
+// newAffiliateAttributedSaleMutation creates new mutation for the AffiliateAttributedSale entity.
+func newAffiliateAttributedSaleMutation(c config, op Op, opts ...affiliateattributedsaleOption) *AffiliateAttributedSaleMutation {
+	m := &AffiliateAttributedSaleMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeAffiliateAttributedSale,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withAffiliateAttributedSaleID sets the ID field of the mutation.
+func withAffiliateAttributedSaleID(id uuid.UUID) affiliateattributedsaleOption {
+	return func(m *AffiliateAttributedSaleMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *AffiliateAttributedSale
+		)
+		m.oldValue = func(ctx context.Context) (*AffiliateAttributedSale, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().AffiliateAttributedSale.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withAffiliateAttributedSale sets the old AffiliateAttributedSale of the mutation.
+func withAffiliateAttributedSale(node *AffiliateAttributedSale) affiliateattributedsaleOption {
+	return func(m *AffiliateAttributedSaleMutation) {
+		m.oldValue = func(context.Context) (*AffiliateAttributedSale, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m AffiliateAttributedSaleMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m AffiliateAttributedSaleMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of AffiliateAttributedSale entities.
+func (m *AffiliateAttributedSaleMutation) SetID(id uuid.UUID) {
+	m.id = &id
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *AffiliateAttributedSaleMutation) ID() (id uuid.UUID, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *AffiliateAttributedSaleMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []uuid.UUID{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().AffiliateAttributedSale.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (m *AffiliateAttributedSaleMutation) SetCreatedAt(t time.Time) {
+	m.created_at = &t
+}
+
+// CreatedAt returns the value of the "created_at" field in the mutation.
+func (m *AffiliateAttributedSaleMutation) CreatedAt() (r time.Time, exists bool) {
+	v := m.created_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreatedAt returns the old "created_at" field's value of the AffiliateAttributedSale entity.
+// If the AffiliateAttributedSale object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AffiliateAttributedSaleMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
+	}
+	return oldValue.CreatedAt, nil
+}
+
+// ResetCreatedAt resets all changes to the "created_at" field.
+func (m *AffiliateAttributedSaleMutation) ResetCreatedAt() {
+	m.created_at = nil
+}
+
+// SetOrderID sets the "order_id" field.
+func (m *AffiliateAttributedSaleMutation) SetOrderID(s string) {
+	m.order_id = &s
+}
+
+// OrderID returns the value of the "order_id" field in the mutation.
+func (m *AffiliateAttributedSaleMutation) OrderID() (r string, exists bool) {
+	v := m.order_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldOrderID returns the old "order_id" field's value of the AffiliateAttributedSale entity.
+// If the AffiliateAttributedSale object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AffiliateAttributedSaleMutation) OldOrderID(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldOrderID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldOrderID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldOrderID: %w", err)
+	}
+	return oldValue.OrderID, nil
+}
+
+// ResetOrderID resets all changes to the "order_id" field.
+func (m *AffiliateAttributedSaleMutation) ResetOrderID() {
+	m.order_id = nil
+}
+
+// SetOrderNumber sets the "order_number" field.
+func (m *AffiliateAttributedSaleMutation) SetOrderNumber(s string) {
+	m.order_number = &s
+}
+
+// OrderNumber returns the value of the "order_number" field in the mutation.
+func (m *AffiliateAttributedSaleMutation) OrderNumber() (r string, exists bool) {
+	v := m.order_number
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldOrderNumber returns the old "order_number" field's value of the AffiliateAttributedSale entity.
+// If the AffiliateAttributedSale object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AffiliateAttributedSaleMutation) OldOrderNumber(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldOrderNumber is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldOrderNumber requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldOrderNumber: %w", err)
+	}
+	return oldValue.OrderNumber, nil
+}
+
+// ResetOrderNumber resets all changes to the "order_number" field.
+func (m *AffiliateAttributedSaleMutation) ResetOrderNumber() {
+	m.order_number = nil
+}
+
+// SetOrderItemID sets the "order_item_id" field.
+func (m *AffiliateAttributedSaleMutation) SetOrderItemID(s string) {
+	m.order_item_id = &s
+}
+
+// OrderItemID returns the value of the "order_item_id" field in the mutation.
+func (m *AffiliateAttributedSaleMutation) OrderItemID() (r string, exists bool) {
+	v := m.order_item_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldOrderItemID returns the old "order_item_id" field's value of the AffiliateAttributedSale entity.
+// If the AffiliateAttributedSale object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AffiliateAttributedSaleMutation) OldOrderItemID(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldOrderItemID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldOrderItemID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldOrderItemID: %w", err)
+	}
+	return oldValue.OrderItemID, nil
+}
+
+// ResetOrderItemID resets all changes to the "order_item_id" field.
+func (m *AffiliateAttributedSaleMutation) ResetOrderItemID() {
+	m.order_item_id = nil
+}
+
+// SetProductID sets the "product_id" field.
+func (m *AffiliateAttributedSaleMutation) SetProductID(s string) {
+	m.product_id = &s
+}
+
+// ProductID returns the value of the "product_id" field in the mutation.
+func (m *AffiliateAttributedSaleMutation) ProductID() (r string, exists bool) {
+	v := m.product_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldProductID returns the old "product_id" field's value of the AffiliateAttributedSale entity.
+// If the AffiliateAttributedSale object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AffiliateAttributedSaleMutation) OldProductID(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldProductID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldProductID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldProductID: %w", err)
+	}
+	return oldValue.ProductID, nil
+}
+
+// ResetProductID resets all changes to the "product_id" field.
+func (m *AffiliateAttributedSaleMutation) ResetProductID() {
+	m.product_id = nil
+}
+
+// SetProductName sets the "product_name" field.
+func (m *AffiliateAttributedSaleMutation) SetProductName(s string) {
+	m.product_name = &s
+}
+
+// ProductName returns the value of the "product_name" field in the mutation.
+func (m *AffiliateAttributedSaleMutation) ProductName() (r string, exists bool) {
+	v := m.product_name
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldProductName returns the old "product_name" field's value of the AffiliateAttributedSale entity.
+// If the AffiliateAttributedSale object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AffiliateAttributedSaleMutation) OldProductName(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldProductName is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldProductName requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldProductName: %w", err)
+	}
+	return oldValue.ProductName, nil
+}
+
+// ResetProductName resets all changes to the "product_name" field.
+func (m *AffiliateAttributedSaleMutation) ResetProductName() {
+	m.product_name = nil
+}
+
+// SetStoreID sets the "store_id" field.
+func (m *AffiliateAttributedSaleMutation) SetStoreID(s string) {
+	m.store_id = &s
+}
+
+// StoreID returns the value of the "store_id" field in the mutation.
+func (m *AffiliateAttributedSaleMutation) StoreID() (r string, exists bool) {
+	v := m.store_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldStoreID returns the old "store_id" field's value of the AffiliateAttributedSale entity.
+// If the AffiliateAttributedSale object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AffiliateAttributedSaleMutation) OldStoreID(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldStoreID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldStoreID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldStoreID: %w", err)
+	}
+	return oldValue.StoreID, nil
+}
+
+// ResetStoreID resets all changes to the "store_id" field.
+func (m *AffiliateAttributedSaleMutation) ResetStoreID() {
+	m.store_id = nil
+}
+
+// SetStoreName sets the "store_name" field.
+func (m *AffiliateAttributedSaleMutation) SetStoreName(s string) {
+	m.store_name = &s
+}
+
+// StoreName returns the value of the "store_name" field in the mutation.
+func (m *AffiliateAttributedSaleMutation) StoreName() (r string, exists bool) {
+	v := m.store_name
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldStoreName returns the old "store_name" field's value of the AffiliateAttributedSale entity.
+// If the AffiliateAttributedSale object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AffiliateAttributedSaleMutation) OldStoreName(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldStoreName is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldStoreName requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldStoreName: %w", err)
+	}
+	return oldValue.StoreName, nil
+}
+
+// ResetStoreName resets all changes to the "store_name" field.
+func (m *AffiliateAttributedSaleMutation) ResetStoreName() {
+	m.store_name = nil
+}
+
+// SetSellerUserID sets the "seller_user_id" field.
+func (m *AffiliateAttributedSaleMutation) SetSellerUserID(s string) {
+	m.seller_user_id = &s
+}
+
+// SellerUserID returns the value of the "seller_user_id" field in the mutation.
+func (m *AffiliateAttributedSaleMutation) SellerUserID() (r string, exists bool) {
+	v := m.seller_user_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSellerUserID returns the old "seller_user_id" field's value of the AffiliateAttributedSale entity.
+// If the AffiliateAttributedSale object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AffiliateAttributedSaleMutation) OldSellerUserID(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSellerUserID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSellerUserID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSellerUserID: %w", err)
+	}
+	return oldValue.SellerUserID, nil
+}
+
+// ResetSellerUserID resets all changes to the "seller_user_id" field.
+func (m *AffiliateAttributedSaleMutation) ResetSellerUserID() {
+	m.seller_user_id = nil
+}
+
+// SetCreatorID sets the "creator_id" field.
+func (m *AffiliateAttributedSaleMutation) SetCreatorID(s string) {
+	m.creator_id = &s
+}
+
+// CreatorID returns the value of the "creator_id" field in the mutation.
+func (m *AffiliateAttributedSaleMutation) CreatorID() (r string, exists bool) {
+	v := m.creator_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreatorID returns the old "creator_id" field's value of the AffiliateAttributedSale entity.
+// If the AffiliateAttributedSale object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AffiliateAttributedSaleMutation) OldCreatorID(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreatorID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreatorID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatorID: %w", err)
+	}
+	return oldValue.CreatorID, nil
+}
+
+// ResetCreatorID resets all changes to the "creator_id" field.
+func (m *AffiliateAttributedSaleMutation) ResetCreatorID() {
+	m.creator_id = nil
+}
+
+// SetAttributionSource sets the "attribution_source" field.
+func (m *AffiliateAttributedSaleMutation) SetAttributionSource(s string) {
+	m.attribution_source = &s
+}
+
+// AttributionSource returns the value of the "attribution_source" field in the mutation.
+func (m *AffiliateAttributedSaleMutation) AttributionSource() (r string, exists bool) {
+	v := m.attribution_source
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldAttributionSource returns the old "attribution_source" field's value of the AffiliateAttributedSale entity.
+// If the AffiliateAttributedSale object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AffiliateAttributedSaleMutation) OldAttributionSource(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldAttributionSource is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldAttributionSource requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldAttributionSource: %w", err)
+	}
+	return oldValue.AttributionSource, nil
+}
+
+// ResetAttributionSource resets all changes to the "attribution_source" field.
+func (m *AffiliateAttributedSaleMutation) ResetAttributionSource() {
+	m.attribution_source = nil
+}
+
+// SetAttributionID sets the "attribution_id" field.
+func (m *AffiliateAttributedSaleMutation) SetAttributionID(s string) {
+	m.attribution_id = &s
+}
+
+// AttributionID returns the value of the "attribution_id" field in the mutation.
+func (m *AffiliateAttributedSaleMutation) AttributionID() (r string, exists bool) {
+	v := m.attribution_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldAttributionID returns the old "attribution_id" field's value of the AffiliateAttributedSale entity.
+// If the AffiliateAttributedSale object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AffiliateAttributedSaleMutation) OldAttributionID(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldAttributionID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldAttributionID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldAttributionID: %w", err)
+	}
+	return oldValue.AttributionID, nil
+}
+
+// ResetAttributionID resets all changes to the "attribution_id" field.
+func (m *AffiliateAttributedSaleMutation) ResetAttributionID() {
+	m.attribution_id = nil
+}
+
+// SetSaleMinor sets the "sale_minor" field.
+func (m *AffiliateAttributedSaleMutation) SetSaleMinor(i int64) {
+	m.sale_minor = &i
+	m.addsale_minor = nil
+}
+
+// SaleMinor returns the value of the "sale_minor" field in the mutation.
+func (m *AffiliateAttributedSaleMutation) SaleMinor() (r int64, exists bool) {
+	v := m.sale_minor
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSaleMinor returns the old "sale_minor" field's value of the AffiliateAttributedSale entity.
+// If the AffiliateAttributedSale object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AffiliateAttributedSaleMutation) OldSaleMinor(ctx context.Context) (v int64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSaleMinor is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSaleMinor requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSaleMinor: %w", err)
+	}
+	return oldValue.SaleMinor, nil
+}
+
+// AddSaleMinor adds i to the "sale_minor" field.
+func (m *AffiliateAttributedSaleMutation) AddSaleMinor(i int64) {
+	if m.addsale_minor != nil {
+		*m.addsale_minor += i
+	} else {
+		m.addsale_minor = &i
+	}
+}
+
+// AddedSaleMinor returns the value that was added to the "sale_minor" field in this mutation.
+func (m *AffiliateAttributedSaleMutation) AddedSaleMinor() (r int64, exists bool) {
+	v := m.addsale_minor
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetSaleMinor resets all changes to the "sale_minor" field.
+func (m *AffiliateAttributedSaleMutation) ResetSaleMinor() {
+	m.sale_minor = nil
+	m.addsale_minor = nil
+}
+
+// SetCommissionBps sets the "commission_bps" field.
+func (m *AffiliateAttributedSaleMutation) SetCommissionBps(i int64) {
+	m.commission_bps = &i
+	m.addcommission_bps = nil
+}
+
+// CommissionBps returns the value of the "commission_bps" field in the mutation.
+func (m *AffiliateAttributedSaleMutation) CommissionBps() (r int64, exists bool) {
+	v := m.commission_bps
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCommissionBps returns the old "commission_bps" field's value of the AffiliateAttributedSale entity.
+// If the AffiliateAttributedSale object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AffiliateAttributedSaleMutation) OldCommissionBps(ctx context.Context) (v int64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCommissionBps is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCommissionBps requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCommissionBps: %w", err)
+	}
+	return oldValue.CommissionBps, nil
+}
+
+// AddCommissionBps adds i to the "commission_bps" field.
+func (m *AffiliateAttributedSaleMutation) AddCommissionBps(i int64) {
+	if m.addcommission_bps != nil {
+		*m.addcommission_bps += i
+	} else {
+		m.addcommission_bps = &i
+	}
+}
+
+// AddedCommissionBps returns the value that was added to the "commission_bps" field in this mutation.
+func (m *AffiliateAttributedSaleMutation) AddedCommissionBps() (r int64, exists bool) {
+	v := m.addcommission_bps
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetCommissionBps resets all changes to the "commission_bps" field.
+func (m *AffiliateAttributedSaleMutation) ResetCommissionBps() {
+	m.commission_bps = nil
+	m.addcommission_bps = nil
+}
+
+// SetEstimatedCommissionMinor sets the "estimated_commission_minor" field.
+func (m *AffiliateAttributedSaleMutation) SetEstimatedCommissionMinor(i int64) {
+	m.estimated_commission_minor = &i
+	m.addestimated_commission_minor = nil
+}
+
+// EstimatedCommissionMinor returns the value of the "estimated_commission_minor" field in the mutation.
+func (m *AffiliateAttributedSaleMutation) EstimatedCommissionMinor() (r int64, exists bool) {
+	v := m.estimated_commission_minor
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldEstimatedCommissionMinor returns the old "estimated_commission_minor" field's value of the AffiliateAttributedSale entity.
+// If the AffiliateAttributedSale object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AffiliateAttributedSaleMutation) OldEstimatedCommissionMinor(ctx context.Context) (v int64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldEstimatedCommissionMinor is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldEstimatedCommissionMinor requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldEstimatedCommissionMinor: %w", err)
+	}
+	return oldValue.EstimatedCommissionMinor, nil
+}
+
+// AddEstimatedCommissionMinor adds i to the "estimated_commission_minor" field.
+func (m *AffiliateAttributedSaleMutation) AddEstimatedCommissionMinor(i int64) {
+	if m.addestimated_commission_minor != nil {
+		*m.addestimated_commission_minor += i
+	} else {
+		m.addestimated_commission_minor = &i
+	}
+}
+
+// AddedEstimatedCommissionMinor returns the value that was added to the "estimated_commission_minor" field in this mutation.
+func (m *AffiliateAttributedSaleMutation) AddedEstimatedCommissionMinor() (r int64, exists bool) {
+	v := m.addestimated_commission_minor
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetEstimatedCommissionMinor resets all changes to the "estimated_commission_minor" field.
+func (m *AffiliateAttributedSaleMutation) ResetEstimatedCommissionMinor() {
+	m.estimated_commission_minor = nil
+	m.addestimated_commission_minor = nil
+}
+
+// SetCurrency sets the "currency" field.
+func (m *AffiliateAttributedSaleMutation) SetCurrency(s string) {
+	m.currency = &s
+}
+
+// Currency returns the value of the "currency" field in the mutation.
+func (m *AffiliateAttributedSaleMutation) Currency() (r string, exists bool) {
+	v := m.currency
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCurrency returns the old "currency" field's value of the AffiliateAttributedSale entity.
+// If the AffiliateAttributedSale object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AffiliateAttributedSaleMutation) OldCurrency(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCurrency is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCurrency requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCurrency: %w", err)
+	}
+	return oldValue.Currency, nil
+}
+
+// ResetCurrency resets all changes to the "currency" field.
+func (m *AffiliateAttributedSaleMutation) ResetCurrency() {
+	m.currency = nil
+}
+
+// SetStatus sets the "status" field.
+func (m *AffiliateAttributedSaleMutation) SetStatus(a affiliateattributedsale.Status) {
+	m.status = &a
+}
+
+// Status returns the value of the "status" field in the mutation.
+func (m *AffiliateAttributedSaleMutation) Status() (r affiliateattributedsale.Status, exists bool) {
+	v := m.status
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldStatus returns the old "status" field's value of the AffiliateAttributedSale entity.
+// If the AffiliateAttributedSale object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AffiliateAttributedSaleMutation) OldStatus(ctx context.Context) (v affiliateattributedsale.Status, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldStatus is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldStatus requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldStatus: %w", err)
+	}
+	return oldValue.Status, nil
+}
+
+// ResetStatus resets all changes to the "status" field.
+func (m *AffiliateAttributedSaleMutation) ResetStatus() {
+	m.status = nil
+}
+
+// SetVoidReason sets the "void_reason" field.
+func (m *AffiliateAttributedSaleMutation) SetVoidReason(s string) {
+	m.void_reason = &s
+}
+
+// VoidReason returns the value of the "void_reason" field in the mutation.
+func (m *AffiliateAttributedSaleMutation) VoidReason() (r string, exists bool) {
+	v := m.void_reason
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldVoidReason returns the old "void_reason" field's value of the AffiliateAttributedSale entity.
+// If the AffiliateAttributedSale object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AffiliateAttributedSaleMutation) OldVoidReason(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldVoidReason is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldVoidReason requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldVoidReason: %w", err)
+	}
+	return oldValue.VoidReason, nil
+}
+
+// ResetVoidReason resets all changes to the "void_reason" field.
+func (m *AffiliateAttributedSaleMutation) ResetVoidReason() {
+	m.void_reason = nil
+}
+
+// SetOrderedAt sets the "ordered_at" field.
+func (m *AffiliateAttributedSaleMutation) SetOrderedAt(t time.Time) {
+	m.ordered_at = &t
+}
+
+// OrderedAt returns the value of the "ordered_at" field in the mutation.
+func (m *AffiliateAttributedSaleMutation) OrderedAt() (r time.Time, exists bool) {
+	v := m.ordered_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldOrderedAt returns the old "ordered_at" field's value of the AffiliateAttributedSale entity.
+// If the AffiliateAttributedSale object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AffiliateAttributedSaleMutation) OldOrderedAt(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldOrderedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldOrderedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldOrderedAt: %w", err)
+	}
+	return oldValue.OrderedAt, nil
+}
+
+// ClearOrderedAt clears the value of the "ordered_at" field.
+func (m *AffiliateAttributedSaleMutation) ClearOrderedAt() {
+	m.ordered_at = nil
+	m.clearedFields[affiliateattributedsale.FieldOrderedAt] = struct{}{}
+}
+
+// OrderedAtCleared returns if the "ordered_at" field was cleared in this mutation.
+func (m *AffiliateAttributedSaleMutation) OrderedAtCleared() bool {
+	_, ok := m.clearedFields[affiliateattributedsale.FieldOrderedAt]
+	return ok
+}
+
+// ResetOrderedAt resets all changes to the "ordered_at" field.
+func (m *AffiliateAttributedSaleMutation) ResetOrderedAt() {
+	m.ordered_at = nil
+	delete(m.clearedFields, affiliateattributedsale.FieldOrderedAt)
+}
+
+// SetDecidedAt sets the "decided_at" field.
+func (m *AffiliateAttributedSaleMutation) SetDecidedAt(t time.Time) {
+	m.decided_at = &t
+}
+
+// DecidedAt returns the value of the "decided_at" field in the mutation.
+func (m *AffiliateAttributedSaleMutation) DecidedAt() (r time.Time, exists bool) {
+	v := m.decided_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDecidedAt returns the old "decided_at" field's value of the AffiliateAttributedSale entity.
+// If the AffiliateAttributedSale object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AffiliateAttributedSaleMutation) OldDecidedAt(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDecidedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDecidedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDecidedAt: %w", err)
+	}
+	return oldValue.DecidedAt, nil
+}
+
+// ClearDecidedAt clears the value of the "decided_at" field.
+func (m *AffiliateAttributedSaleMutation) ClearDecidedAt() {
+	m.decided_at = nil
+	m.clearedFields[affiliateattributedsale.FieldDecidedAt] = struct{}{}
+}
+
+// DecidedAtCleared returns if the "decided_at" field was cleared in this mutation.
+func (m *AffiliateAttributedSaleMutation) DecidedAtCleared() bool {
+	_, ok := m.clearedFields[affiliateattributedsale.FieldDecidedAt]
+	return ok
+}
+
+// ResetDecidedAt resets all changes to the "decided_at" field.
+func (m *AffiliateAttributedSaleMutation) ResetDecidedAt() {
+	m.decided_at = nil
+	delete(m.clearedFields, affiliateattributedsale.FieldDecidedAt)
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (m *AffiliateAttributedSaleMutation) SetUpdatedAt(t time.Time) {
+	m.updated_at = &t
+}
+
+// UpdatedAt returns the value of the "updated_at" field in the mutation.
+func (m *AffiliateAttributedSaleMutation) UpdatedAt() (r time.Time, exists bool) {
+	v := m.updated_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUpdatedAt returns the old "updated_at" field's value of the AffiliateAttributedSale entity.
+// If the AffiliateAttributedSale object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AffiliateAttributedSaleMutation) OldUpdatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUpdatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUpdatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUpdatedAt: %w", err)
+	}
+	return oldValue.UpdatedAt, nil
+}
+
+// ResetUpdatedAt resets all changes to the "updated_at" field.
+func (m *AffiliateAttributedSaleMutation) ResetUpdatedAt() {
+	m.updated_at = nil
+}
+
+// Where appends a list predicates to the AffiliateAttributedSaleMutation builder.
+func (m *AffiliateAttributedSaleMutation) Where(ps ...predicate.AffiliateAttributedSale) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the AffiliateAttributedSaleMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *AffiliateAttributedSaleMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.AffiliateAttributedSale, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *AffiliateAttributedSaleMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *AffiliateAttributedSaleMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (AffiliateAttributedSale).
+func (m *AffiliateAttributedSaleMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *AffiliateAttributedSaleMutation) Fields() []string {
+	fields := make([]string, 0, 21)
+	if m.created_at != nil {
+		fields = append(fields, affiliateattributedsale.FieldCreatedAt)
+	}
+	if m.order_id != nil {
+		fields = append(fields, affiliateattributedsale.FieldOrderID)
+	}
+	if m.order_number != nil {
+		fields = append(fields, affiliateattributedsale.FieldOrderNumber)
+	}
+	if m.order_item_id != nil {
+		fields = append(fields, affiliateattributedsale.FieldOrderItemID)
+	}
+	if m.product_id != nil {
+		fields = append(fields, affiliateattributedsale.FieldProductID)
+	}
+	if m.product_name != nil {
+		fields = append(fields, affiliateattributedsale.FieldProductName)
+	}
+	if m.store_id != nil {
+		fields = append(fields, affiliateattributedsale.FieldStoreID)
+	}
+	if m.store_name != nil {
+		fields = append(fields, affiliateattributedsale.FieldStoreName)
+	}
+	if m.seller_user_id != nil {
+		fields = append(fields, affiliateattributedsale.FieldSellerUserID)
+	}
+	if m.creator_id != nil {
+		fields = append(fields, affiliateattributedsale.FieldCreatorID)
+	}
+	if m.attribution_source != nil {
+		fields = append(fields, affiliateattributedsale.FieldAttributionSource)
+	}
+	if m.attribution_id != nil {
+		fields = append(fields, affiliateattributedsale.FieldAttributionID)
+	}
+	if m.sale_minor != nil {
+		fields = append(fields, affiliateattributedsale.FieldSaleMinor)
+	}
+	if m.commission_bps != nil {
+		fields = append(fields, affiliateattributedsale.FieldCommissionBps)
+	}
+	if m.estimated_commission_minor != nil {
+		fields = append(fields, affiliateattributedsale.FieldEstimatedCommissionMinor)
+	}
+	if m.currency != nil {
+		fields = append(fields, affiliateattributedsale.FieldCurrency)
+	}
+	if m.status != nil {
+		fields = append(fields, affiliateattributedsale.FieldStatus)
+	}
+	if m.void_reason != nil {
+		fields = append(fields, affiliateattributedsale.FieldVoidReason)
+	}
+	if m.ordered_at != nil {
+		fields = append(fields, affiliateattributedsale.FieldOrderedAt)
+	}
+	if m.decided_at != nil {
+		fields = append(fields, affiliateattributedsale.FieldDecidedAt)
+	}
+	if m.updated_at != nil {
+		fields = append(fields, affiliateattributedsale.FieldUpdatedAt)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *AffiliateAttributedSaleMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case affiliateattributedsale.FieldCreatedAt:
+		return m.CreatedAt()
+	case affiliateattributedsale.FieldOrderID:
+		return m.OrderID()
+	case affiliateattributedsale.FieldOrderNumber:
+		return m.OrderNumber()
+	case affiliateattributedsale.FieldOrderItemID:
+		return m.OrderItemID()
+	case affiliateattributedsale.FieldProductID:
+		return m.ProductID()
+	case affiliateattributedsale.FieldProductName:
+		return m.ProductName()
+	case affiliateattributedsale.FieldStoreID:
+		return m.StoreID()
+	case affiliateattributedsale.FieldStoreName:
+		return m.StoreName()
+	case affiliateattributedsale.FieldSellerUserID:
+		return m.SellerUserID()
+	case affiliateattributedsale.FieldCreatorID:
+		return m.CreatorID()
+	case affiliateattributedsale.FieldAttributionSource:
+		return m.AttributionSource()
+	case affiliateattributedsale.FieldAttributionID:
+		return m.AttributionID()
+	case affiliateattributedsale.FieldSaleMinor:
+		return m.SaleMinor()
+	case affiliateattributedsale.FieldCommissionBps:
+		return m.CommissionBps()
+	case affiliateattributedsale.FieldEstimatedCommissionMinor:
+		return m.EstimatedCommissionMinor()
+	case affiliateattributedsale.FieldCurrency:
+		return m.Currency()
+	case affiliateattributedsale.FieldStatus:
+		return m.Status()
+	case affiliateattributedsale.FieldVoidReason:
+		return m.VoidReason()
+	case affiliateattributedsale.FieldOrderedAt:
+		return m.OrderedAt()
+	case affiliateattributedsale.FieldDecidedAt:
+		return m.DecidedAt()
+	case affiliateattributedsale.FieldUpdatedAt:
+		return m.UpdatedAt()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *AffiliateAttributedSaleMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case affiliateattributedsale.FieldCreatedAt:
+		return m.OldCreatedAt(ctx)
+	case affiliateattributedsale.FieldOrderID:
+		return m.OldOrderID(ctx)
+	case affiliateattributedsale.FieldOrderNumber:
+		return m.OldOrderNumber(ctx)
+	case affiliateattributedsale.FieldOrderItemID:
+		return m.OldOrderItemID(ctx)
+	case affiliateattributedsale.FieldProductID:
+		return m.OldProductID(ctx)
+	case affiliateattributedsale.FieldProductName:
+		return m.OldProductName(ctx)
+	case affiliateattributedsale.FieldStoreID:
+		return m.OldStoreID(ctx)
+	case affiliateattributedsale.FieldStoreName:
+		return m.OldStoreName(ctx)
+	case affiliateattributedsale.FieldSellerUserID:
+		return m.OldSellerUserID(ctx)
+	case affiliateattributedsale.FieldCreatorID:
+		return m.OldCreatorID(ctx)
+	case affiliateattributedsale.FieldAttributionSource:
+		return m.OldAttributionSource(ctx)
+	case affiliateattributedsale.FieldAttributionID:
+		return m.OldAttributionID(ctx)
+	case affiliateattributedsale.FieldSaleMinor:
+		return m.OldSaleMinor(ctx)
+	case affiliateattributedsale.FieldCommissionBps:
+		return m.OldCommissionBps(ctx)
+	case affiliateattributedsale.FieldEstimatedCommissionMinor:
+		return m.OldEstimatedCommissionMinor(ctx)
+	case affiliateattributedsale.FieldCurrency:
+		return m.OldCurrency(ctx)
+	case affiliateattributedsale.FieldStatus:
+		return m.OldStatus(ctx)
+	case affiliateattributedsale.FieldVoidReason:
+		return m.OldVoidReason(ctx)
+	case affiliateattributedsale.FieldOrderedAt:
+		return m.OldOrderedAt(ctx)
+	case affiliateattributedsale.FieldDecidedAt:
+		return m.OldDecidedAt(ctx)
+	case affiliateattributedsale.FieldUpdatedAt:
+		return m.OldUpdatedAt(ctx)
+	}
+	return nil, fmt.Errorf("unknown AffiliateAttributedSale field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *AffiliateAttributedSaleMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case affiliateattributedsale.FieldCreatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatedAt(v)
+		return nil
+	case affiliateattributedsale.FieldOrderID:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetOrderID(v)
+		return nil
+	case affiliateattributedsale.FieldOrderNumber:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetOrderNumber(v)
+		return nil
+	case affiliateattributedsale.FieldOrderItemID:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetOrderItemID(v)
+		return nil
+	case affiliateattributedsale.FieldProductID:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetProductID(v)
+		return nil
+	case affiliateattributedsale.FieldProductName:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetProductName(v)
+		return nil
+	case affiliateattributedsale.FieldStoreID:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetStoreID(v)
+		return nil
+	case affiliateattributedsale.FieldStoreName:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetStoreName(v)
+		return nil
+	case affiliateattributedsale.FieldSellerUserID:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSellerUserID(v)
+		return nil
+	case affiliateattributedsale.FieldCreatorID:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatorID(v)
+		return nil
+	case affiliateattributedsale.FieldAttributionSource:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetAttributionSource(v)
+		return nil
+	case affiliateattributedsale.FieldAttributionID:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetAttributionID(v)
+		return nil
+	case affiliateattributedsale.FieldSaleMinor:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSaleMinor(v)
+		return nil
+	case affiliateattributedsale.FieldCommissionBps:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCommissionBps(v)
+		return nil
+	case affiliateattributedsale.FieldEstimatedCommissionMinor:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetEstimatedCommissionMinor(v)
+		return nil
+	case affiliateattributedsale.FieldCurrency:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCurrency(v)
+		return nil
+	case affiliateattributedsale.FieldStatus:
+		v, ok := value.(affiliateattributedsale.Status)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetStatus(v)
+		return nil
+	case affiliateattributedsale.FieldVoidReason:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetVoidReason(v)
+		return nil
+	case affiliateattributedsale.FieldOrderedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetOrderedAt(v)
+		return nil
+	case affiliateattributedsale.FieldDecidedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDecidedAt(v)
+		return nil
+	case affiliateattributedsale.FieldUpdatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUpdatedAt(v)
+		return nil
+	}
+	return fmt.Errorf("unknown AffiliateAttributedSale field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *AffiliateAttributedSaleMutation) AddedFields() []string {
+	var fields []string
+	if m.addsale_minor != nil {
+		fields = append(fields, affiliateattributedsale.FieldSaleMinor)
+	}
+	if m.addcommission_bps != nil {
+		fields = append(fields, affiliateattributedsale.FieldCommissionBps)
+	}
+	if m.addestimated_commission_minor != nil {
+		fields = append(fields, affiliateattributedsale.FieldEstimatedCommissionMinor)
+	}
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *AffiliateAttributedSaleMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case affiliateattributedsale.FieldSaleMinor:
+		return m.AddedSaleMinor()
+	case affiliateattributedsale.FieldCommissionBps:
+		return m.AddedCommissionBps()
+	case affiliateattributedsale.FieldEstimatedCommissionMinor:
+		return m.AddedEstimatedCommissionMinor()
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *AffiliateAttributedSaleMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	case affiliateattributedsale.FieldSaleMinor:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddSaleMinor(v)
+		return nil
+	case affiliateattributedsale.FieldCommissionBps:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddCommissionBps(v)
+		return nil
+	case affiliateattributedsale.FieldEstimatedCommissionMinor:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddEstimatedCommissionMinor(v)
+		return nil
+	}
+	return fmt.Errorf("unknown AffiliateAttributedSale numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *AffiliateAttributedSaleMutation) ClearedFields() []string {
+	var fields []string
+	if m.FieldCleared(affiliateattributedsale.FieldOrderedAt) {
+		fields = append(fields, affiliateattributedsale.FieldOrderedAt)
+	}
+	if m.FieldCleared(affiliateattributedsale.FieldDecidedAt) {
+		fields = append(fields, affiliateattributedsale.FieldDecidedAt)
+	}
+	return fields
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *AffiliateAttributedSaleMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *AffiliateAttributedSaleMutation) ClearField(name string) error {
+	switch name {
+	case affiliateattributedsale.FieldOrderedAt:
+		m.ClearOrderedAt()
+		return nil
+	case affiliateattributedsale.FieldDecidedAt:
+		m.ClearDecidedAt()
+		return nil
+	}
+	return fmt.Errorf("unknown AffiliateAttributedSale nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *AffiliateAttributedSaleMutation) ResetField(name string) error {
+	switch name {
+	case affiliateattributedsale.FieldCreatedAt:
+		m.ResetCreatedAt()
+		return nil
+	case affiliateattributedsale.FieldOrderID:
+		m.ResetOrderID()
+		return nil
+	case affiliateattributedsale.FieldOrderNumber:
+		m.ResetOrderNumber()
+		return nil
+	case affiliateattributedsale.FieldOrderItemID:
+		m.ResetOrderItemID()
+		return nil
+	case affiliateattributedsale.FieldProductID:
+		m.ResetProductID()
+		return nil
+	case affiliateattributedsale.FieldProductName:
+		m.ResetProductName()
+		return nil
+	case affiliateattributedsale.FieldStoreID:
+		m.ResetStoreID()
+		return nil
+	case affiliateattributedsale.FieldStoreName:
+		m.ResetStoreName()
+		return nil
+	case affiliateattributedsale.FieldSellerUserID:
+		m.ResetSellerUserID()
+		return nil
+	case affiliateattributedsale.FieldCreatorID:
+		m.ResetCreatorID()
+		return nil
+	case affiliateattributedsale.FieldAttributionSource:
+		m.ResetAttributionSource()
+		return nil
+	case affiliateattributedsale.FieldAttributionID:
+		m.ResetAttributionID()
+		return nil
+	case affiliateattributedsale.FieldSaleMinor:
+		m.ResetSaleMinor()
+		return nil
+	case affiliateattributedsale.FieldCommissionBps:
+		m.ResetCommissionBps()
+		return nil
+	case affiliateattributedsale.FieldEstimatedCommissionMinor:
+		m.ResetEstimatedCommissionMinor()
+		return nil
+	case affiliateattributedsale.FieldCurrency:
+		m.ResetCurrency()
+		return nil
+	case affiliateattributedsale.FieldStatus:
+		m.ResetStatus()
+		return nil
+	case affiliateattributedsale.FieldVoidReason:
+		m.ResetVoidReason()
+		return nil
+	case affiliateattributedsale.FieldOrderedAt:
+		m.ResetOrderedAt()
+		return nil
+	case affiliateattributedsale.FieldDecidedAt:
+		m.ResetDecidedAt()
+		return nil
+	case affiliateattributedsale.FieldUpdatedAt:
+		m.ResetUpdatedAt()
+		return nil
+	}
+	return fmt.Errorf("unknown AffiliateAttributedSale field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *AffiliateAttributedSaleMutation) AddedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *AffiliateAttributedSaleMutation) AddedIDs(name string) []ent.Value {
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *AffiliateAttributedSaleMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *AffiliateAttributedSaleMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *AffiliateAttributedSaleMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *AffiliateAttributedSaleMutation) EdgeCleared(name string) bool {
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *AffiliateAttributedSaleMutation) ClearEdge(name string) error {
+	return fmt.Errorf("unknown AffiliateAttributedSale unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *AffiliateAttributedSaleMutation) ResetEdge(name string) error {
+	return fmt.Errorf("unknown AffiliateAttributedSale edge %s", name)
+}
 
 // AffiliateCommissionMutation represents an operation that mutates the AffiliateCommission nodes in the graph.
 type AffiliateCommissionMutation struct {
@@ -77,6 +1636,9 @@ type AffiliateCommissionMutation struct {
 	commission_minor     *int64
 	addcommission_minor  *int64
 	currency             *string
+	product_name         *string
+	store_name           *string
+	creator_handle       *string
 	status               *affiliatecommission.Status
 	reversed_minor       *int64
 	addreversed_minor    *int64
@@ -759,6 +2321,114 @@ func (m *AffiliateCommissionMutation) ResetCurrency() {
 	m.currency = nil
 }
 
+// SetProductName sets the "product_name" field.
+func (m *AffiliateCommissionMutation) SetProductName(s string) {
+	m.product_name = &s
+}
+
+// ProductName returns the value of the "product_name" field in the mutation.
+func (m *AffiliateCommissionMutation) ProductName() (r string, exists bool) {
+	v := m.product_name
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldProductName returns the old "product_name" field's value of the AffiliateCommission entity.
+// If the AffiliateCommission object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AffiliateCommissionMutation) OldProductName(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldProductName is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldProductName requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldProductName: %w", err)
+	}
+	return oldValue.ProductName, nil
+}
+
+// ResetProductName resets all changes to the "product_name" field.
+func (m *AffiliateCommissionMutation) ResetProductName() {
+	m.product_name = nil
+}
+
+// SetStoreName sets the "store_name" field.
+func (m *AffiliateCommissionMutation) SetStoreName(s string) {
+	m.store_name = &s
+}
+
+// StoreName returns the value of the "store_name" field in the mutation.
+func (m *AffiliateCommissionMutation) StoreName() (r string, exists bool) {
+	v := m.store_name
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldStoreName returns the old "store_name" field's value of the AffiliateCommission entity.
+// If the AffiliateCommission object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AffiliateCommissionMutation) OldStoreName(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldStoreName is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldStoreName requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldStoreName: %w", err)
+	}
+	return oldValue.StoreName, nil
+}
+
+// ResetStoreName resets all changes to the "store_name" field.
+func (m *AffiliateCommissionMutation) ResetStoreName() {
+	m.store_name = nil
+}
+
+// SetCreatorHandle sets the "creator_handle" field.
+func (m *AffiliateCommissionMutation) SetCreatorHandle(s string) {
+	m.creator_handle = &s
+}
+
+// CreatorHandle returns the value of the "creator_handle" field in the mutation.
+func (m *AffiliateCommissionMutation) CreatorHandle() (r string, exists bool) {
+	v := m.creator_handle
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreatorHandle returns the old "creator_handle" field's value of the AffiliateCommission entity.
+// If the AffiliateCommission object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AffiliateCommissionMutation) OldCreatorHandle(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreatorHandle is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreatorHandle requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatorHandle: %w", err)
+	}
+	return oldValue.CreatorHandle, nil
+}
+
+// ResetCreatorHandle resets all changes to the "creator_handle" field.
+func (m *AffiliateCommissionMutation) ResetCreatorHandle() {
+	m.creator_handle = nil
+}
+
 // SetStatus sets the "status" field.
 func (m *AffiliateCommissionMutation) SetStatus(a affiliatecommission.Status) {
 	m.status = &a
@@ -1088,7 +2758,7 @@ func (m *AffiliateCommissionMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *AffiliateCommissionMutation) Fields() []string {
-	fields := make([]string, 0, 20)
+	fields := make([]string, 0, 23)
 	if m.created_at != nil {
 		fields = append(fields, affiliatecommission.FieldCreatedAt)
 	}
@@ -1130,6 +2800,15 @@ func (m *AffiliateCommissionMutation) Fields() []string {
 	}
 	if m.currency != nil {
 		fields = append(fields, affiliatecommission.FieldCurrency)
+	}
+	if m.product_name != nil {
+		fields = append(fields, affiliatecommission.FieldProductName)
+	}
+	if m.store_name != nil {
+		fields = append(fields, affiliatecommission.FieldStoreName)
+	}
+	if m.creator_handle != nil {
+		fields = append(fields, affiliatecommission.FieldCreatorHandle)
 	}
 	if m.status != nil {
 		fields = append(fields, affiliatecommission.FieldStatus)
@@ -1185,6 +2864,12 @@ func (m *AffiliateCommissionMutation) Field(name string) (ent.Value, bool) {
 		return m.CommissionMinor()
 	case affiliatecommission.FieldCurrency:
 		return m.Currency()
+	case affiliatecommission.FieldProductName:
+		return m.ProductName()
+	case affiliatecommission.FieldStoreName:
+		return m.StoreName()
+	case affiliatecommission.FieldCreatorHandle:
+		return m.CreatorHandle()
 	case affiliatecommission.FieldStatus:
 		return m.Status()
 	case affiliatecommission.FieldReversedMinor:
@@ -1234,6 +2919,12 @@ func (m *AffiliateCommissionMutation) OldField(ctx context.Context, name string)
 		return m.OldCommissionMinor(ctx)
 	case affiliatecommission.FieldCurrency:
 		return m.OldCurrency(ctx)
+	case affiliatecommission.FieldProductName:
+		return m.OldProductName(ctx)
+	case affiliatecommission.FieldStoreName:
+		return m.OldStoreName(ctx)
+	case affiliatecommission.FieldCreatorHandle:
+		return m.OldCreatorHandle(ctx)
 	case affiliatecommission.FieldStatus:
 		return m.OldStatus(ctx)
 	case affiliatecommission.FieldReversedMinor:
@@ -1352,6 +3043,27 @@ func (m *AffiliateCommissionMutation) SetField(name string, value ent.Value) err
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetCurrency(v)
+		return nil
+	case affiliatecommission.FieldProductName:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetProductName(v)
+		return nil
+	case affiliatecommission.FieldStoreName:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetStoreName(v)
+		return nil
+	case affiliatecommission.FieldCreatorHandle:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatorHandle(v)
 		return nil
 	case affiliatecommission.FieldStatus:
 		v, ok := value.(affiliatecommission.Status)
@@ -1569,6 +3281,15 @@ func (m *AffiliateCommissionMutation) ResetField(name string) error {
 		return nil
 	case affiliatecommission.FieldCurrency:
 		m.ResetCurrency()
+		return nil
+	case affiliatecommission.FieldProductName:
+		m.ResetProductName()
+		return nil
+	case affiliatecommission.FieldStoreName:
+		m.ResetStoreName()
+		return nil
+	case affiliatecommission.FieldCreatorHandle:
+		m.ResetCreatorHandle()
 		return nil
 	case affiliatecommission.FieldStatus:
 		m.ResetStatus()
@@ -2396,6 +4117,666 @@ func (m *AffiliateCommissionReversalMutation) ClearEdge(name string) error {
 // It returns an error if the edge is not defined in the schema.
 func (m *AffiliateCommissionReversalMutation) ResetEdge(name string) error {
 	return fmt.Errorf("unknown AffiliateCommissionReversal edge %s", name)
+}
+
+// AffiliateLinkMutation represents an operation that mutates the AffiliateLink nodes in the graph.
+type AffiliateLinkMutation struct {
+	config
+	op              Op
+	typ             string
+	id              *uuid.UUID
+	created_at      *time.Time
+	creator_id      *string
+	store_id        *string
+	product_id      *string
+	clicks          *int64
+	addclicks       *int64
+	last_clicked_at *time.Time
+	clearedFields   map[string]struct{}
+	done            bool
+	oldValue        func(context.Context) (*AffiliateLink, error)
+	predicates      []predicate.AffiliateLink
+}
+
+var _ ent.Mutation = (*AffiliateLinkMutation)(nil)
+
+// affiliatelinkOption allows management of the mutation configuration using functional options.
+type affiliatelinkOption func(*AffiliateLinkMutation)
+
+// newAffiliateLinkMutation creates new mutation for the AffiliateLink entity.
+func newAffiliateLinkMutation(c config, op Op, opts ...affiliatelinkOption) *AffiliateLinkMutation {
+	m := &AffiliateLinkMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeAffiliateLink,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withAffiliateLinkID sets the ID field of the mutation.
+func withAffiliateLinkID(id uuid.UUID) affiliatelinkOption {
+	return func(m *AffiliateLinkMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *AffiliateLink
+		)
+		m.oldValue = func(ctx context.Context) (*AffiliateLink, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().AffiliateLink.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withAffiliateLink sets the old AffiliateLink of the mutation.
+func withAffiliateLink(node *AffiliateLink) affiliatelinkOption {
+	return func(m *AffiliateLinkMutation) {
+		m.oldValue = func(context.Context) (*AffiliateLink, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m AffiliateLinkMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m AffiliateLinkMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of AffiliateLink entities.
+func (m *AffiliateLinkMutation) SetID(id uuid.UUID) {
+	m.id = &id
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *AffiliateLinkMutation) ID() (id uuid.UUID, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *AffiliateLinkMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []uuid.UUID{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().AffiliateLink.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (m *AffiliateLinkMutation) SetCreatedAt(t time.Time) {
+	m.created_at = &t
+}
+
+// CreatedAt returns the value of the "created_at" field in the mutation.
+func (m *AffiliateLinkMutation) CreatedAt() (r time.Time, exists bool) {
+	v := m.created_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreatedAt returns the old "created_at" field's value of the AffiliateLink entity.
+// If the AffiliateLink object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AffiliateLinkMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
+	}
+	return oldValue.CreatedAt, nil
+}
+
+// ResetCreatedAt resets all changes to the "created_at" field.
+func (m *AffiliateLinkMutation) ResetCreatedAt() {
+	m.created_at = nil
+}
+
+// SetCreatorID sets the "creator_id" field.
+func (m *AffiliateLinkMutation) SetCreatorID(s string) {
+	m.creator_id = &s
+}
+
+// CreatorID returns the value of the "creator_id" field in the mutation.
+func (m *AffiliateLinkMutation) CreatorID() (r string, exists bool) {
+	v := m.creator_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreatorID returns the old "creator_id" field's value of the AffiliateLink entity.
+// If the AffiliateLink object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AffiliateLinkMutation) OldCreatorID(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreatorID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreatorID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatorID: %w", err)
+	}
+	return oldValue.CreatorID, nil
+}
+
+// ResetCreatorID resets all changes to the "creator_id" field.
+func (m *AffiliateLinkMutation) ResetCreatorID() {
+	m.creator_id = nil
+}
+
+// SetStoreID sets the "store_id" field.
+func (m *AffiliateLinkMutation) SetStoreID(s string) {
+	m.store_id = &s
+}
+
+// StoreID returns the value of the "store_id" field in the mutation.
+func (m *AffiliateLinkMutation) StoreID() (r string, exists bool) {
+	v := m.store_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldStoreID returns the old "store_id" field's value of the AffiliateLink entity.
+// If the AffiliateLink object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AffiliateLinkMutation) OldStoreID(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldStoreID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldStoreID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldStoreID: %w", err)
+	}
+	return oldValue.StoreID, nil
+}
+
+// ResetStoreID resets all changes to the "store_id" field.
+func (m *AffiliateLinkMutation) ResetStoreID() {
+	m.store_id = nil
+}
+
+// SetProductID sets the "product_id" field.
+func (m *AffiliateLinkMutation) SetProductID(s string) {
+	m.product_id = &s
+}
+
+// ProductID returns the value of the "product_id" field in the mutation.
+func (m *AffiliateLinkMutation) ProductID() (r string, exists bool) {
+	v := m.product_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldProductID returns the old "product_id" field's value of the AffiliateLink entity.
+// If the AffiliateLink object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AffiliateLinkMutation) OldProductID(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldProductID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldProductID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldProductID: %w", err)
+	}
+	return oldValue.ProductID, nil
+}
+
+// ResetProductID resets all changes to the "product_id" field.
+func (m *AffiliateLinkMutation) ResetProductID() {
+	m.product_id = nil
+}
+
+// SetClicks sets the "clicks" field.
+func (m *AffiliateLinkMutation) SetClicks(i int64) {
+	m.clicks = &i
+	m.addclicks = nil
+}
+
+// Clicks returns the value of the "clicks" field in the mutation.
+func (m *AffiliateLinkMutation) Clicks() (r int64, exists bool) {
+	v := m.clicks
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldClicks returns the old "clicks" field's value of the AffiliateLink entity.
+// If the AffiliateLink object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AffiliateLinkMutation) OldClicks(ctx context.Context) (v int64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldClicks is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldClicks requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldClicks: %w", err)
+	}
+	return oldValue.Clicks, nil
+}
+
+// AddClicks adds i to the "clicks" field.
+func (m *AffiliateLinkMutation) AddClicks(i int64) {
+	if m.addclicks != nil {
+		*m.addclicks += i
+	} else {
+		m.addclicks = &i
+	}
+}
+
+// AddedClicks returns the value that was added to the "clicks" field in this mutation.
+func (m *AffiliateLinkMutation) AddedClicks() (r int64, exists bool) {
+	v := m.addclicks
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetClicks resets all changes to the "clicks" field.
+func (m *AffiliateLinkMutation) ResetClicks() {
+	m.clicks = nil
+	m.addclicks = nil
+}
+
+// SetLastClickedAt sets the "last_clicked_at" field.
+func (m *AffiliateLinkMutation) SetLastClickedAt(t time.Time) {
+	m.last_clicked_at = &t
+}
+
+// LastClickedAt returns the value of the "last_clicked_at" field in the mutation.
+func (m *AffiliateLinkMutation) LastClickedAt() (r time.Time, exists bool) {
+	v := m.last_clicked_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldLastClickedAt returns the old "last_clicked_at" field's value of the AffiliateLink entity.
+// If the AffiliateLink object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AffiliateLinkMutation) OldLastClickedAt(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldLastClickedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldLastClickedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldLastClickedAt: %w", err)
+	}
+	return oldValue.LastClickedAt, nil
+}
+
+// ClearLastClickedAt clears the value of the "last_clicked_at" field.
+func (m *AffiliateLinkMutation) ClearLastClickedAt() {
+	m.last_clicked_at = nil
+	m.clearedFields[affiliatelink.FieldLastClickedAt] = struct{}{}
+}
+
+// LastClickedAtCleared returns if the "last_clicked_at" field was cleared in this mutation.
+func (m *AffiliateLinkMutation) LastClickedAtCleared() bool {
+	_, ok := m.clearedFields[affiliatelink.FieldLastClickedAt]
+	return ok
+}
+
+// ResetLastClickedAt resets all changes to the "last_clicked_at" field.
+func (m *AffiliateLinkMutation) ResetLastClickedAt() {
+	m.last_clicked_at = nil
+	delete(m.clearedFields, affiliatelink.FieldLastClickedAt)
+}
+
+// Where appends a list predicates to the AffiliateLinkMutation builder.
+func (m *AffiliateLinkMutation) Where(ps ...predicate.AffiliateLink) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the AffiliateLinkMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *AffiliateLinkMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.AffiliateLink, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *AffiliateLinkMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *AffiliateLinkMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (AffiliateLink).
+func (m *AffiliateLinkMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *AffiliateLinkMutation) Fields() []string {
+	fields := make([]string, 0, 6)
+	if m.created_at != nil {
+		fields = append(fields, affiliatelink.FieldCreatedAt)
+	}
+	if m.creator_id != nil {
+		fields = append(fields, affiliatelink.FieldCreatorID)
+	}
+	if m.store_id != nil {
+		fields = append(fields, affiliatelink.FieldStoreID)
+	}
+	if m.product_id != nil {
+		fields = append(fields, affiliatelink.FieldProductID)
+	}
+	if m.clicks != nil {
+		fields = append(fields, affiliatelink.FieldClicks)
+	}
+	if m.last_clicked_at != nil {
+		fields = append(fields, affiliatelink.FieldLastClickedAt)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *AffiliateLinkMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case affiliatelink.FieldCreatedAt:
+		return m.CreatedAt()
+	case affiliatelink.FieldCreatorID:
+		return m.CreatorID()
+	case affiliatelink.FieldStoreID:
+		return m.StoreID()
+	case affiliatelink.FieldProductID:
+		return m.ProductID()
+	case affiliatelink.FieldClicks:
+		return m.Clicks()
+	case affiliatelink.FieldLastClickedAt:
+		return m.LastClickedAt()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *AffiliateLinkMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case affiliatelink.FieldCreatedAt:
+		return m.OldCreatedAt(ctx)
+	case affiliatelink.FieldCreatorID:
+		return m.OldCreatorID(ctx)
+	case affiliatelink.FieldStoreID:
+		return m.OldStoreID(ctx)
+	case affiliatelink.FieldProductID:
+		return m.OldProductID(ctx)
+	case affiliatelink.FieldClicks:
+		return m.OldClicks(ctx)
+	case affiliatelink.FieldLastClickedAt:
+		return m.OldLastClickedAt(ctx)
+	}
+	return nil, fmt.Errorf("unknown AffiliateLink field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *AffiliateLinkMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case affiliatelink.FieldCreatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatedAt(v)
+		return nil
+	case affiliatelink.FieldCreatorID:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatorID(v)
+		return nil
+	case affiliatelink.FieldStoreID:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetStoreID(v)
+		return nil
+	case affiliatelink.FieldProductID:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetProductID(v)
+		return nil
+	case affiliatelink.FieldClicks:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetClicks(v)
+		return nil
+	case affiliatelink.FieldLastClickedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetLastClickedAt(v)
+		return nil
+	}
+	return fmt.Errorf("unknown AffiliateLink field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *AffiliateLinkMutation) AddedFields() []string {
+	var fields []string
+	if m.addclicks != nil {
+		fields = append(fields, affiliatelink.FieldClicks)
+	}
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *AffiliateLinkMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case affiliatelink.FieldClicks:
+		return m.AddedClicks()
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *AffiliateLinkMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	case affiliatelink.FieldClicks:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddClicks(v)
+		return nil
+	}
+	return fmt.Errorf("unknown AffiliateLink numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *AffiliateLinkMutation) ClearedFields() []string {
+	var fields []string
+	if m.FieldCleared(affiliatelink.FieldLastClickedAt) {
+		fields = append(fields, affiliatelink.FieldLastClickedAt)
+	}
+	return fields
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *AffiliateLinkMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *AffiliateLinkMutation) ClearField(name string) error {
+	switch name {
+	case affiliatelink.FieldLastClickedAt:
+		m.ClearLastClickedAt()
+		return nil
+	}
+	return fmt.Errorf("unknown AffiliateLink nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *AffiliateLinkMutation) ResetField(name string) error {
+	switch name {
+	case affiliatelink.FieldCreatedAt:
+		m.ResetCreatedAt()
+		return nil
+	case affiliatelink.FieldCreatorID:
+		m.ResetCreatorID()
+		return nil
+	case affiliatelink.FieldStoreID:
+		m.ResetStoreID()
+		return nil
+	case affiliatelink.FieldProductID:
+		m.ResetProductID()
+		return nil
+	case affiliatelink.FieldClicks:
+		m.ResetClicks()
+		return nil
+	case affiliatelink.FieldLastClickedAt:
+		m.ResetLastClickedAt()
+		return nil
+	}
+	return fmt.Errorf("unknown AffiliateLink field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *AffiliateLinkMutation) AddedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *AffiliateLinkMutation) AddedIDs(name string) []ent.Value {
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *AffiliateLinkMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *AffiliateLinkMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *AffiliateLinkMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *AffiliateLinkMutation) EdgeCleared(name string) bool {
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *AffiliateLinkMutation) ClearEdge(name string) error {
+	return fmt.Errorf("unknown AffiliateLink unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *AffiliateLinkMutation) ResetEdge(name string) error {
+	return fmt.Errorf("unknown AffiliateLink edge %s", name)
 }
 
 // AffiliateProductCommissionMutation represents an operation that mutates the AffiliateProductCommission nodes in the graph.

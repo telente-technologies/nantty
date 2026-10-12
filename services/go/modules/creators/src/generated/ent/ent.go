@@ -8,8 +8,10 @@ import (
 	"fmt"
 	"reflect"
 	"sync"
+	"zudomart/modules/creators/src/generated/ent/affiliateattributedsale"
 	"zudomart/modules/creators/src/generated/ent/affiliatecommission"
 	"zudomart/modules/creators/src/generated/ent/affiliatecommissionreversal"
+	"zudomart/modules/creators/src/generated/ent/affiliatelink"
 	"zudomart/modules/creators/src/generated/ent/affiliateproductcommission"
 	"zudomart/modules/creators/src/generated/ent/affiliateprogramsetting"
 	"zudomart/modules/creators/src/generated/ent/battlesettlement"
@@ -86,8 +88,10 @@ var (
 func checkColumn(t, c string) error {
 	initCheck.Do(func() {
 		columnCheck = sql.NewColumnCheck(map[string]func(string) bool{
+			affiliateattributedsale.Table:     affiliateattributedsale.ValidColumn,
 			affiliatecommission.Table:         affiliatecommission.ValidColumn,
 			affiliatecommissionreversal.Table: affiliatecommissionreversal.ValidColumn,
+			affiliatelink.Table:               affiliatelink.ValidColumn,
 			affiliateproductcommission.Table:  affiliateproductcommission.ValidColumn,
 			affiliateprogramsetting.Table:     affiliateprogramsetting.ValidColumn,
 			battlesettlement.Table:            battlesettlement.ValidColumn,

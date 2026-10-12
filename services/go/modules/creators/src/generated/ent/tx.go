@@ -14,10 +14,14 @@ import (
 // Tx is a transactional client that is created by calling Client.Tx().
 type Tx struct {
 	config
+	// AffiliateAttributedSale is the client for interacting with the AffiliateAttributedSale builders.
+	AffiliateAttributedSale *AffiliateAttributedSaleClient
 	// AffiliateCommission is the client for interacting with the AffiliateCommission builders.
 	AffiliateCommission *AffiliateCommissionClient
 	// AffiliateCommissionReversal is the client for interacting with the AffiliateCommissionReversal builders.
 	AffiliateCommissionReversal *AffiliateCommissionReversalClient
+	// AffiliateLink is the client for interacting with the AffiliateLink builders.
+	AffiliateLink *AffiliateLinkClient
 	// AffiliateProductCommission is the client for interacting with the AffiliateProductCommission builders.
 	AffiliateProductCommission *AffiliateProductCommissionClient
 	// AffiliateProgramSetting is the client for interacting with the AffiliateProgramSetting builders.
@@ -173,8 +177,10 @@ func (tx *Tx) Client() *Client {
 }
 
 func (tx *Tx) init() {
+	tx.AffiliateAttributedSale = NewAffiliateAttributedSaleClient(tx.config)
 	tx.AffiliateCommission = NewAffiliateCommissionClient(tx.config)
 	tx.AffiliateCommissionReversal = NewAffiliateCommissionReversalClient(tx.config)
+	tx.AffiliateLink = NewAffiliateLinkClient(tx.config)
 	tx.AffiliateProductCommission = NewAffiliateProductCommissionClient(tx.config)
 	tx.AffiliateProgramSetting = NewAffiliateProgramSettingClient(tx.config)
 	tx.BattleSettlement = NewBattleSettlementClient(tx.config)
@@ -196,7 +202,7 @@ func (tx *Tx) init() {
 // of them in order to commit or rollback the transaction.
 //
 // If a closed transaction is embedded in one of the generated entities, and the entity
-// applies a query, for example: AffiliateCommission.QueryXXX(), the query will be executed
+// applies a query, for example: AffiliateAttributedSale.QueryXXX(), the query will be executed
 // through the driver which created this transaction.
 //
 // Note that txDriver is not goroutine safe.

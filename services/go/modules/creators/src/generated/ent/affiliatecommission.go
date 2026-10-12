@@ -46,6 +46,12 @@ type AffiliateCommission struct {
 	CommissionMinor int64 `json:"commission_minor,omitempty"`
 	// Currency holds the value of the "currency" field.
 	Currency string `json:"currency,omitempty"`
+	// ProductName holds the value of the "product_name" field.
+	ProductName string `json:"product_name,omitempty"`
+	// StoreName holds the value of the "store_name" field.
+	StoreName string `json:"store_name,omitempty"`
+	// CreatorHandle holds the value of the "creator_handle" field.
+	CreatorHandle string `json:"creator_handle,omitempty"`
 	// Status holds the value of the "status" field.
 	Status affiliatecommission.Status `json:"status,omitempty"`
 	// ReversedMinor holds the value of the "reversed_minor" field.
@@ -68,7 +74,7 @@ func (*AffiliateCommission) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case affiliatecommission.FieldSaleMinor, affiliatecommission.FieldCommissionBps, affiliatecommission.FieldCommissionMinor, affiliatecommission.FieldReversedMinor, affiliatecommission.FieldTransferAttempts:
 			values[i] = new(sql.NullInt64)
-		case affiliatecommission.FieldOrderID, affiliatecommission.FieldOrderNumber, affiliatecommission.FieldOrderItemID, affiliatecommission.FieldProductID, affiliatecommission.FieldStoreID, affiliatecommission.FieldSellerUserID, affiliatecommission.FieldCreatorID, affiliatecommission.FieldAttributionSource, affiliatecommission.FieldAttributionID, affiliatecommission.FieldCurrency, affiliatecommission.FieldStatus:
+		case affiliatecommission.FieldOrderID, affiliatecommission.FieldOrderNumber, affiliatecommission.FieldOrderItemID, affiliatecommission.FieldProductID, affiliatecommission.FieldStoreID, affiliatecommission.FieldSellerUserID, affiliatecommission.FieldCreatorID, affiliatecommission.FieldAttributionSource, affiliatecommission.FieldAttributionID, affiliatecommission.FieldCurrency, affiliatecommission.FieldProductName, affiliatecommission.FieldStoreName, affiliatecommission.FieldCreatorHandle, affiliatecommission.FieldStatus:
 			values[i] = new(sql.NullString)
 		case affiliatecommission.FieldCreatedAt, affiliatecommission.FieldOrderedAt, affiliatecommission.FieldPaidAt, affiliatecommission.FieldRetryAfter:
 			values[i] = new(sql.NullTime)
@@ -178,6 +184,24 @@ func (_m *AffiliateCommission) assignValues(columns []string, values []any) erro
 				return fmt.Errorf("unexpected type %T for field currency", values[i])
 			} else if value.Valid {
 				_m.Currency = value.String
+			}
+		case affiliatecommission.FieldProductName:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field product_name", values[i])
+			} else if value.Valid {
+				_m.ProductName = value.String
+			}
+		case affiliatecommission.FieldStoreName:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field store_name", values[i])
+			} else if value.Valid {
+				_m.StoreName = value.String
+			}
+		case affiliatecommission.FieldCreatorHandle:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field creator_handle", values[i])
+			} else if value.Valid {
+				_m.CreatorHandle = value.String
 			}
 		case affiliatecommission.FieldStatus:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -295,6 +319,15 @@ func (_m *AffiliateCommission) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("currency=")
 	builder.WriteString(_m.Currency)
+	builder.WriteString(", ")
+	builder.WriteString("product_name=")
+	builder.WriteString(_m.ProductName)
+	builder.WriteString(", ")
+	builder.WriteString("store_name=")
+	builder.WriteString(_m.StoreName)
+	builder.WriteString(", ")
+	builder.WriteString("creator_handle=")
+	builder.WriteString(_m.CreatorHandle)
 	builder.WriteString(", ")
 	builder.WriteString("status=")
 	builder.WriteString(fmt.Sprintf("%v", _m.Status))

@@ -9,6 +9,54 @@ import (
 )
 
 var (
+	// AffiliateAttributedSalesColumns holds the columns for the "affiliate_attributed_sales" table.
+	AffiliateAttributedSalesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "order_id", Type: field.TypeString, Size: 80},
+		{Name: "order_number", Type: field.TypeString, Size: 80, Default: ""},
+		{Name: "order_item_id", Type: field.TypeString, Size: 120},
+		{Name: "product_id", Type: field.TypeString, Size: 80},
+		{Name: "product_name", Type: field.TypeString, Size: 200, Default: ""},
+		{Name: "store_id", Type: field.TypeString, Size: 80},
+		{Name: "store_name", Type: field.TypeString, Size: 200, Default: ""},
+		{Name: "seller_user_id", Type: field.TypeString, Size: 80},
+		{Name: "creator_id", Type: field.TypeString, Size: 80},
+		{Name: "attribution_source", Type: field.TypeString, Size: 10},
+		{Name: "attribution_id", Type: field.TypeString, Size: 80},
+		{Name: "sale_minor", Type: field.TypeInt64},
+		{Name: "commission_bps", Type: field.TypeInt64},
+		{Name: "estimated_commission_minor", Type: field.TypeInt64},
+		{Name: "currency", Type: field.TypeString, Size: 3},
+		{Name: "status", Type: field.TypeEnum, Enums: []string{"awaiting", "completed", "voided"}, Default: "awaiting"},
+		{Name: "void_reason", Type: field.TypeString, Size: 40, Default: ""},
+		{Name: "ordered_at", Type: field.TypeTime, Nullable: true},
+		{Name: "decided_at", Type: field.TypeTime, Nullable: true},
+		{Name: "updated_at", Type: field.TypeTime},
+	}
+	// AffiliateAttributedSalesTable holds the schema information for the "affiliate_attributed_sales" table.
+	AffiliateAttributedSalesTable = &schema.Table{
+		Name:       "affiliate_attributed_sales",
+		Columns:    AffiliateAttributedSalesColumns,
+		PrimaryKey: []*schema.Column{AffiliateAttributedSalesColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "affiliateattributedsale_order_item_id",
+				Unique:  true,
+				Columns: []*schema.Column{AffiliateAttributedSalesColumns[4]},
+			},
+			{
+				Name:    "affiliateattributedsale_order_id",
+				Unique:  false,
+				Columns: []*schema.Column{AffiliateAttributedSalesColumns[2]},
+			},
+			{
+				Name:    "affiliateattributedsale_creator_id_status_created_at",
+				Unique:  false,
+				Columns: []*schema.Column{AffiliateAttributedSalesColumns[10], AffiliateAttributedSalesColumns[17], AffiliateAttributedSalesColumns[1]},
+			},
+		},
+	}
 	// AffiliateCommissionsColumns holds the columns for the "affiliate_commissions" table.
 	AffiliateCommissionsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID},
@@ -26,6 +74,9 @@ var (
 		{Name: "commission_bps", Type: field.TypeInt64},
 		{Name: "commission_minor", Type: field.TypeInt64},
 		{Name: "currency", Type: field.TypeString, Size: 3},
+		{Name: "product_name", Type: field.TypeString, Size: 200, Default: ""},
+		{Name: "store_name", Type: field.TypeString, Size: 200, Default: ""},
+		{Name: "creator_handle", Type: field.TypeString, Size: 80, Default: ""},
 		{Name: "status", Type: field.TypeEnum, Enums: []string{"pending", "processing", "paid", "reversed"}, Default: "pending"},
 		{Name: "reversed_minor", Type: field.TypeInt64, Default: 0},
 		{Name: "ordered_at", Type: field.TypeTime, Nullable: true},
@@ -62,7 +113,7 @@ var (
 			{
 				Name:    "affiliatecommission_status_id",
 				Unique:  false,
-				Columns: []*schema.Column{AffiliateCommissionsColumns[15], AffiliateCommissionsColumns[0]},
+				Columns: []*schema.Column{AffiliateCommissionsColumns[18], AffiliateCommissionsColumns[0]},
 			},
 		},
 	}
@@ -87,6 +138,34 @@ var (
 				Name:    "affiliatecommissionreversal_commission_id_refund_key",
 				Unique:  true,
 				Columns: []*schema.Column{AffiliateCommissionReversalsColumns[2], AffiliateCommissionReversalsColumns[3]},
+			},
+		},
+	}
+	// AffiliateLinksColumns holds the columns for the "affiliate_links" table.
+	AffiliateLinksColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "creator_id", Type: field.TypeString, Size: 80},
+		{Name: "store_id", Type: field.TypeString, Size: 80},
+		{Name: "product_id", Type: field.TypeString, Size: 80},
+		{Name: "clicks", Type: field.TypeInt64, Default: 0},
+		{Name: "last_clicked_at", Type: field.TypeTime, Nullable: true},
+	}
+	// AffiliateLinksTable holds the schema information for the "affiliate_links" table.
+	AffiliateLinksTable = &schema.Table{
+		Name:       "affiliate_links",
+		Columns:    AffiliateLinksColumns,
+		PrimaryKey: []*schema.Column{AffiliateLinksColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "affiliatelink_creator_id_product_id",
+				Unique:  true,
+				Columns: []*schema.Column{AffiliateLinksColumns[2], AffiliateLinksColumns[4]},
+			},
+			{
+				Name:    "affiliatelink_creator_id_created_at",
+				Unique:  false,
+				Columns: []*schema.Column{AffiliateLinksColumns[2], AffiliateLinksColumns[1]},
 			},
 		},
 	}
@@ -439,8 +518,10 @@ var (
 	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
+		AffiliateAttributedSalesTable,
 		AffiliateCommissionsTable,
 		AffiliateCommissionReversalsTable,
+		AffiliateLinksTable,
 		AffiliateProductCommissionsTable,
 		AffiliateProgramSettingsTable,
 		BattleSettlementsTable,

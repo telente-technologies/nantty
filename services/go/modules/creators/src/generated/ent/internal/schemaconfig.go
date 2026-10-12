@@ -7,8 +7,10 @@ import "context"
 // SchemaConfig represents alternative schema names for all tables
 // that can be passed at runtime.
 type SchemaConfig struct {
+	AffiliateAttributedSale     string // AffiliateAttributedSale table.
 	AffiliateCommission         string // AffiliateCommission table.
 	AffiliateCommissionReversal string // AffiliateCommissionReversal table.
+	AffiliateLink               string // AffiliateLink table.
 	AffiliateProductCommission  string // AffiliateProductCommission table.
 	AffiliateProgramSetting     string // AffiliateProgramSetting table.
 	BattleSettlement            string // BattleSettlement table.

@@ -8,6 +8,18 @@ import (
 	"zudomart/modules/creators/src/generated/ent"
 )
 
+// The AffiliateAttributedSaleFunc type is an adapter to allow the use of ordinary
+// function as AffiliateAttributedSale mutator.
+type AffiliateAttributedSaleFunc func(context.Context, *ent.AffiliateAttributedSaleMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f AffiliateAttributedSaleFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.AffiliateAttributedSaleMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.AffiliateAttributedSaleMutation", m)
+}
+
 // The AffiliateCommissionFunc type is an adapter to allow the use of ordinary
 // function as AffiliateCommission mutator.
 type AffiliateCommissionFunc func(context.Context, *ent.AffiliateCommissionMutation) (ent.Value, error)
@@ -30,6 +42,18 @@ func (f AffiliateCommissionReversalFunc) Mutate(ctx context.Context, m ent.Mutat
 		return f(ctx, mv)
 	}
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.AffiliateCommissionReversalMutation", m)
+}
+
+// The AffiliateLinkFunc type is an adapter to allow the use of ordinary
+// function as AffiliateLink mutator.
+type AffiliateLinkFunc func(context.Context, *ent.AffiliateLinkMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f AffiliateLinkFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.AffiliateLinkMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.AffiliateLinkMutation", m)
 }
 
 // The AffiliateProductCommissionFunc type is an adapter to allow the use of ordinary

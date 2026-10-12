@@ -125,6 +125,21 @@ func Currency(v string) predicate.AffiliateCommission {
 	return predicate.AffiliateCommission(sql.FieldEQ(FieldCurrency, v))
 }
 
+// ProductName applies equality check predicate on the "product_name" field. It's identical to ProductNameEQ.
+func ProductName(v string) predicate.AffiliateCommission {
+	return predicate.AffiliateCommission(sql.FieldEQ(FieldProductName, v))
+}
+
+// StoreName applies equality check predicate on the "store_name" field. It's identical to StoreNameEQ.
+func StoreName(v string) predicate.AffiliateCommission {
+	return predicate.AffiliateCommission(sql.FieldEQ(FieldStoreName, v))
+}
+
+// CreatorHandle applies equality check predicate on the "creator_handle" field. It's identical to CreatorHandleEQ.
+func CreatorHandle(v string) predicate.AffiliateCommission {
+	return predicate.AffiliateCommission(sql.FieldEQ(FieldCreatorHandle, v))
+}
+
 // ReversedMinor applies equality check predicate on the "reversed_minor" field. It's identical to ReversedMinorEQ.
 func ReversedMinor(v int64) predicate.AffiliateCommission {
 	return predicate.AffiliateCommission(sql.FieldEQ(FieldReversedMinor, v))
@@ -958,6 +973,201 @@ func CurrencyEqualFold(v string) predicate.AffiliateCommission {
 // CurrencyContainsFold applies the ContainsFold predicate on the "currency" field.
 func CurrencyContainsFold(v string) predicate.AffiliateCommission {
 	return predicate.AffiliateCommission(sql.FieldContainsFold(FieldCurrency, v))
+}
+
+// ProductNameEQ applies the EQ predicate on the "product_name" field.
+func ProductNameEQ(v string) predicate.AffiliateCommission {
+	return predicate.AffiliateCommission(sql.FieldEQ(FieldProductName, v))
+}
+
+// ProductNameNEQ applies the NEQ predicate on the "product_name" field.
+func ProductNameNEQ(v string) predicate.AffiliateCommission {
+	return predicate.AffiliateCommission(sql.FieldNEQ(FieldProductName, v))
+}
+
+// ProductNameIn applies the In predicate on the "product_name" field.
+func ProductNameIn(vs ...string) predicate.AffiliateCommission {
+	return predicate.AffiliateCommission(sql.FieldIn(FieldProductName, vs...))
+}
+
+// ProductNameNotIn applies the NotIn predicate on the "product_name" field.
+func ProductNameNotIn(vs ...string) predicate.AffiliateCommission {
+	return predicate.AffiliateCommission(sql.FieldNotIn(FieldProductName, vs...))
+}
+
+// ProductNameGT applies the GT predicate on the "product_name" field.
+func ProductNameGT(v string) predicate.AffiliateCommission {
+	return predicate.AffiliateCommission(sql.FieldGT(FieldProductName, v))
+}
+
+// ProductNameGTE applies the GTE predicate on the "product_name" field.
+func ProductNameGTE(v string) predicate.AffiliateCommission {
+	return predicate.AffiliateCommission(sql.FieldGTE(FieldProductName, v))
+}
+
+// ProductNameLT applies the LT predicate on the "product_name" field.
+func ProductNameLT(v string) predicate.AffiliateCommission {
+	return predicate.AffiliateCommission(sql.FieldLT(FieldProductName, v))
+}
+
+// ProductNameLTE applies the LTE predicate on the "product_name" field.
+func ProductNameLTE(v string) predicate.AffiliateCommission {
+	return predicate.AffiliateCommission(sql.FieldLTE(FieldProductName, v))
+}
+
+// ProductNameContains applies the Contains predicate on the "product_name" field.
+func ProductNameContains(v string) predicate.AffiliateCommission {
+	return predicate.AffiliateCommission(sql.FieldContains(FieldProductName, v))
+}
+
+// ProductNameHasPrefix applies the HasPrefix predicate on the "product_name" field.
+func ProductNameHasPrefix(v string) predicate.AffiliateCommission {
+	return predicate.AffiliateCommission(sql.FieldHasPrefix(FieldProductName, v))
+}
+
+// ProductNameHasSuffix applies the HasSuffix predicate on the "product_name" field.
+func ProductNameHasSuffix(v string) predicate.AffiliateCommission {
+	return predicate.AffiliateCommission(sql.FieldHasSuffix(FieldProductName, v))
+}
+
+// ProductNameEqualFold applies the EqualFold predicate on the "product_name" field.
+func ProductNameEqualFold(v string) predicate.AffiliateCommission {
+	return predicate.AffiliateCommission(sql.FieldEqualFold(FieldProductName, v))
+}
+
+// ProductNameContainsFold applies the ContainsFold predicate on the "product_name" field.
+func ProductNameContainsFold(v string) predicate.AffiliateCommission {
+	return predicate.AffiliateCommission(sql.FieldContainsFold(FieldProductName, v))
+}
+
+// StoreNameEQ applies the EQ predicate on the "store_name" field.
+func StoreNameEQ(v string) predicate.AffiliateCommission {
+	return predicate.AffiliateCommission(sql.FieldEQ(FieldStoreName, v))
+}
+
+// StoreNameNEQ applies the NEQ predicate on the "store_name" field.
+func StoreNameNEQ(v string) predicate.AffiliateCommission {
+	return predicate.AffiliateCommission(sql.FieldNEQ(FieldStoreName, v))
+}
+
+// StoreNameIn applies the In predicate on the "store_name" field.
+func StoreNameIn(vs ...string) predicate.AffiliateCommission {
+	return predicate.AffiliateCommission(sql.FieldIn(FieldStoreName, vs...))
+}
+
+// StoreNameNotIn applies the NotIn predicate on the "store_name" field.
+func StoreNameNotIn(vs ...string) predicate.AffiliateCommission {
+	return predicate.AffiliateCommission(sql.FieldNotIn(FieldStoreName, vs...))
+}
+
+// StoreNameGT applies the GT predicate on the "store_name" field.
+func StoreNameGT(v string) predicate.AffiliateCommission {
+	return predicate.AffiliateCommission(sql.FieldGT(FieldStoreName, v))
+}
+
+// StoreNameGTE applies the GTE predicate on the "store_name" field.
+func StoreNameGTE(v string) predicate.AffiliateCommission {
+	return predicate.AffiliateCommission(sql.FieldGTE(FieldStoreName, v))
+}
+
+// StoreNameLT applies the LT predicate on the "store_name" field.
+func StoreNameLT(v string) predicate.AffiliateCommission {
+	return predicate.AffiliateCommission(sql.FieldLT(FieldStoreName, v))
+}
+
+// StoreNameLTE applies the LTE predicate on the "store_name" field.
+func StoreNameLTE(v string) predicate.AffiliateCommission {
+	return predicate.AffiliateCommission(sql.FieldLTE(FieldStoreName, v))
+}
+
+// StoreNameContains applies the Contains predicate on the "store_name" field.
+func StoreNameContains(v string) predicate.AffiliateCommission {
+	return predicate.AffiliateCommission(sql.FieldContains(FieldStoreName, v))
+}
+
+// StoreNameHasPrefix applies the HasPrefix predicate on the "store_name" field.
+func StoreNameHasPrefix(v string) predicate.AffiliateCommission {
+	return predicate.AffiliateCommission(sql.FieldHasPrefix(FieldStoreName, v))
+}
+
+// StoreNameHasSuffix applies the HasSuffix predicate on the "store_name" field.
+func StoreNameHasSuffix(v string) predicate.AffiliateCommission {
+	return predicate.AffiliateCommission(sql.FieldHasSuffix(FieldStoreName, v))
+}
+
+// StoreNameEqualFold applies the EqualFold predicate on the "store_name" field.
+func StoreNameEqualFold(v string) predicate.AffiliateCommission {
+	return predicate.AffiliateCommission(sql.FieldEqualFold(FieldStoreName, v))
+}
+
+// StoreNameContainsFold applies the ContainsFold predicate on the "store_name" field.
+func StoreNameContainsFold(v string) predicate.AffiliateCommission {
+	return predicate.AffiliateCommission(sql.FieldContainsFold(FieldStoreName, v))
+}
+
+// CreatorHandleEQ applies the EQ predicate on the "creator_handle" field.
+func CreatorHandleEQ(v string) predicate.AffiliateCommission {
+	return predicate.AffiliateCommission(sql.FieldEQ(FieldCreatorHandle, v))
+}
+
+// CreatorHandleNEQ applies the NEQ predicate on the "creator_handle" field.
+func CreatorHandleNEQ(v string) predicate.AffiliateCommission {
+	return predicate.AffiliateCommission(sql.FieldNEQ(FieldCreatorHandle, v))
+}
+
+// CreatorHandleIn applies the In predicate on the "creator_handle" field.
+func CreatorHandleIn(vs ...string) predicate.AffiliateCommission {
+	return predicate.AffiliateCommission(sql.FieldIn(FieldCreatorHandle, vs...))
+}
+
+// CreatorHandleNotIn applies the NotIn predicate on the "creator_handle" field.
+func CreatorHandleNotIn(vs ...string) predicate.AffiliateCommission {
+	return predicate.AffiliateCommission(sql.FieldNotIn(FieldCreatorHandle, vs...))
+}
+
+// CreatorHandleGT applies the GT predicate on the "creator_handle" field.
+func CreatorHandleGT(v string) predicate.AffiliateCommission {
+	return predicate.AffiliateCommission(sql.FieldGT(FieldCreatorHandle, v))
+}
+
+// CreatorHandleGTE applies the GTE predicate on the "creator_handle" field.
+func CreatorHandleGTE(v string) predicate.AffiliateCommission {
+	return predicate.AffiliateCommission(sql.FieldGTE(FieldCreatorHandle, v))
+}
+
+// CreatorHandleLT applies the LT predicate on the "creator_handle" field.
+func CreatorHandleLT(v string) predicate.AffiliateCommission {
+	return predicate.AffiliateCommission(sql.FieldLT(FieldCreatorHandle, v))
+}
+
+// CreatorHandleLTE applies the LTE predicate on the "creator_handle" field.
+func CreatorHandleLTE(v string) predicate.AffiliateCommission {
+	return predicate.AffiliateCommission(sql.FieldLTE(FieldCreatorHandle, v))
+}
+
+// CreatorHandleContains applies the Contains predicate on the "creator_handle" field.
+func CreatorHandleContains(v string) predicate.AffiliateCommission {
+	return predicate.AffiliateCommission(sql.FieldContains(FieldCreatorHandle, v))
+}
+
+// CreatorHandleHasPrefix applies the HasPrefix predicate on the "creator_handle" field.
+func CreatorHandleHasPrefix(v string) predicate.AffiliateCommission {
+	return predicate.AffiliateCommission(sql.FieldHasPrefix(FieldCreatorHandle, v))
+}
+
+// CreatorHandleHasSuffix applies the HasSuffix predicate on the "creator_handle" field.
+func CreatorHandleHasSuffix(v string) predicate.AffiliateCommission {
+	return predicate.AffiliateCommission(sql.FieldHasSuffix(FieldCreatorHandle, v))
+}
+
+// CreatorHandleEqualFold applies the EqualFold predicate on the "creator_handle" field.
+func CreatorHandleEqualFold(v string) predicate.AffiliateCommission {
+	return predicate.AffiliateCommission(sql.FieldEqualFold(FieldCreatorHandle, v))
+}
+
+// CreatorHandleContainsFold applies the ContainsFold predicate on the "creator_handle" field.
+func CreatorHandleContainsFold(v string) predicate.AffiliateCommission {
+	return predicate.AffiliateCommission(sql.FieldContainsFold(FieldCreatorHandle, v))
 }
 
 // StatusEQ applies the EQ predicate on the "status" field.
