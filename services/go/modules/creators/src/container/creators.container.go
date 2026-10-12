@@ -39,13 +39,13 @@ func NewCreatorsContainer(resources loaders.MoneyModuleResources, settings confi
 		Ledger: ledgerservices.NewLedgerInSchema(settings.Money.LedgerSchema),
 		Directory: repositories.SqlCreatorsDirectory{
 			Database: resources.Database, UsersSchema: orDefault(settings.UsersSchema, "users"), SocialSchema: orDefault(settings.SocialSchema, "social"),
-			LiveSchema: orDefault(settings.LiveSchema, "live"), CatalogSchema: orDefault(settings.CatalogSchema, "catalog"),
+			LiveSchema: orDefault(settings.LiveSchema, "live"), CatalogSchema: orDefault(settings.CatalogSchema, "catalog"), InventorySchema: orDefault(settings.InventorySchema, "inventory"),
 			SocialUrl: settings.SocialInternalUrl, SocialToken: settings.SocialInternalToken, TolerateMissing: !settings.Money.IsProduction(),
 		},
 		Outbox: ledgerevents.OutboxTable{Schema: schema, Source: "zudomart.creators"},
 		Now:    time.Now,
 		schemaConfig: ent.SchemaConfig{
-			AffiliateCommission: schema, AffiliateCommissionReversal: schema, AffiliateProductCommission: schema, AffiliateProgramSetting: schema, BattleSettlement: schema, CreatorAffiliation: schema, CreatorBrandDeal: schema, CreatorEarning: schema,
+			AffiliateAttributedSale: schema, AffiliateCommission: schema, AffiliateCommissionReversal: schema, AffiliateLink: schema, AffiliateProductCommission: schema, AffiliateProgramSetting: schema, BattleSettlement: schema, CreatorAffiliation: schema, CreatorBrandDeal: schema, CreatorEarning: schema,
 			CreatorProgramMember: schema, CreatorTier: schema, CreatorViolation: schema, GiftTransaction: schema, OutboxEvent: schema, TipTransaction: schema,
 		},
 	}

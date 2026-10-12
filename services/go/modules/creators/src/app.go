@@ -95,6 +95,25 @@ func NewCreatorsModule(ctx context.Context, dependencies servicemodule.Dependenc
 		_, err := module.Affiliates.CreditCommissionsForRelease(ctx, completed.Sale())
 		return err
 	})
+	loaders.RegisterMoneyDomainEventHandler("orderGroup.paid", func(ctx context.Context, envelope platformevents.EventEnvelope) error {
+		var paid affiliateservices.OrderGroupPaid
+		if err := loaders.DecodeEventData(envelope, &paid); err != nil {
+			return err
+		}
+		_, err := module.Affiliates.RecordAwaitingAttributedSales(ctx, paid.Sale())
+		return err
+	})
+	loaders.RegisterMoneyDomainEventHandler("orderGroup.statusChanged", func(ctx context.Context, envelope platformevents.EventEnvelope) error {
+		var changed affiliateservices.OrderGroupStatusChanged
+		if err := loaders.DecodeEventData(envelope, &changed); err != nil {
+			return err
+		}
+		if reason, voids := changed.VoidReason(); voids {
+			_, err := module.Affiliates.VoidAwaitingAttributedSales(ctx, changed.OrderGroupId, reason)
+			return err
+		}
+		return nil
+	})
 	for _, eventType := range []string{"escrow.refunded", "escrow.partiallyRefunded"} {
 		loaders.RegisterMoneyDomainEventHandler(eventType, func(ctx context.Context, envelope platformevents.EventEnvelope) error {
 			var refund affiliateservices.EscrowRefunded

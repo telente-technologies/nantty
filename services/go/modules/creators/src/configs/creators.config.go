@@ -27,6 +27,7 @@ type CreatorsSettings struct {
 	SocialSchema        string
 	LiveSchema          string
 	CatalogSchema       string
+	InventorySchema     string
 	SocialInternalUrl   string
 	SocialInternalToken string
 	AdminInternalUrl    string
@@ -52,6 +53,7 @@ func ReadCreatorsSettingsFromEnvironment(reader *platformconfig.EnvironmentReade
 		SocialSchema:        reader.ReadStringOrDefault("CREATORS_SOCIAL_SCHEMA", "social"),
 		LiveSchema:          reader.ReadStringOrDefault("CREATORS_LIVE_SCHEMA", "live"),
 		CatalogSchema:       reader.ReadStringOrDefault("CREATORS_CATALOG_SCHEMA", "catalog"),
+		InventorySchema:     reader.ReadStringOrDefault("CREATORS_INVENTORY_SCHEMA", "inventory"),
 		SocialInternalUrl:   reader.ReadStringOrDefault("SOCIAL_INTERNAL_URL", ""),
 		SocialInternalToken: reader.ReadStringOrDefault("SOCIAL_INTERNAL_API_TOKEN", ""),
 		AdminInternalUrl:    reader.ReadStringOrDefault("ADMIN_INTERNAL_URL", ""),
