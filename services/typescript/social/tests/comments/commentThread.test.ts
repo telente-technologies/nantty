@@ -44,9 +44,9 @@ describe("deep comment threads", () => {
     const calls: unknown[] = [];
     const db = { comment: { findMany: async (args: unknown) => (calls.push(args), []) } } as unknown as Db;
     const chain = buildChain(5);
-    await commentThreadRepository.descendantsWithinDepth(db, chain[2] as ThreadNodeSource, [chain[3] as ThreadNodeSource], 5);
+    await commentThreadRepository.descendantsWithinDepth(db, undefined, chain[2] as ThreadNodeSource, [chain[3] as ThreadNodeSource], 5);
     expect(calls).toHaveLength(1);
-    expect(calls[0]).toMatchObject({ where: { rootCommentId: "c00", depth: { lte: 5 }, OR: [{ path: { startsWith: "c00/c01/c02/c03" } }] }, orderBy: [{ depth: "asc" }, { id: "asc" }] });
+    expect(calls[0]).toMatchObject({ where: { rootCommentId: "c00", depth: { lte: 5 }, AND: [{ hiddenAt: null }], OR: [{ path: { startsWith: "c00/c01/c02/c03" } }] }, orderBy: [{ depth: "asc" }, { id: "asc" }] });
     await commentThreadRepository.allDescendantIds(db, chain[0] as ThreadNodeSource);
     expect(calls[1]).toMatchObject({ where: { rootCommentId: "c00", path: { startsWith: "c00" } } });
   });

@@ -28,7 +28,8 @@ export function matches(row: Row, rawWhere: Where = {}): boolean {
   return Object.entries(where).every(([key, condition]) => {
     if (key === "OR") return (condition as Where[]).some((part) => matches(row, part));
     if (key === "AND") return (condition as Where[]).every((part) => matches(row, part));
-    const value = row[key];
+    if (condition === undefined) return true;
+    const value = row[key] ?? null;
     if (condition !== null && typeof condition === "object" && !(condition instanceof Date)) {
       const ops = condition as Record<string, unknown>;
       if ("in" in ops && !(ops["in"] as unknown[]).includes(value)) return false;
@@ -38,6 +39,7 @@ export function matches(row: Row, rawWhere: Where = {}): boolean {
       if ("lte" in ops && !(value !== null && compare(value, ops["lte"]) <= 0)) return false;
       if ("gt" in ops && !(value !== null && compare(value, ops["gt"]) > 0)) return false;
       if ("startsWith" in ops && !String(value).startsWith(String(ops["startsWith"]))) return false;
+      if ("contains" in ops && !String(value).toLowerCase().includes(String(ops["contains"]).toLowerCase())) return false;
       return true;
     }
     return value === condition;
@@ -66,10 +68,10 @@ function applyUpdate(row: Row, data: Row): Row {
   return row;
 }
 
-export function memoryTable(rows: Row[], withMedia = false, defaults: () => Row = () => ({})) {
+export function memoryTable(rows: Row[], withMedia = false, defaults: () => Row = () => ({}), resolve: (where: Where | undefined) => Where | undefined = (where) => where) {
   const shape = (row: Row | undefined) => (row === undefined ? null : withMedia ? { media: [], ...row } : row);
   const findMany = async (args: { where?: Where; orderBy?: unknown; take?: number; distinct?: string[] } = {}) => {
-    let found = sortRows(rows.filter((row) => matches(row, args.where)), args.orderBy);
+    let found = sortRows(rows.filter((row) => matches(row, resolve(args.where))), args.orderBy);
     if (args.distinct !== undefined) {
       const seen = new Set<string>();
       found = found.filter((row) => { const key = args.distinct!.map((field) => String(row[field])).join("|"); return seen.has(key) ? false : (seen.add(key), true); });
@@ -99,6 +101,15 @@ export function memoryTable(rows: Row[], withMedia = false, defaults: () => Row 
   };
 }
 
+function resolveCommentRelations(store: { posts: Row[]; comments: Row[] }, where: Where | undefined): Where | undefined {
+  if (where === undefined || (!("post" in where) && !("replies" in where))) return where;
+  const { post, replies, ...rest } = where as Where & { post?: Where; replies?: { none: Where } };
+  const extra: Where[] = [];
+  if (post !== undefined) extra.push({ postId: { in: store.posts.filter((row) => matches(row, post)).map((row) => row["id"]) } });
+  if (replies !== undefined) extra.push({ id: { notIn: store.comments.filter((row) => matches(row, replies.none)).map((row) => row["parentCommentId"]) } });
+  return { ...rest, AND: [...((rest["AND"] as Where[] | undefined) ?? []), ...extra] };
+}
+
 export interface MemoryStore {
   readonly posts: Row[];
   readonly comments: Row[];
@@ -116,7 +127,7 @@ export function createMemoryStore(seed: { posts?: Row[]; comments?: Row[]; postD
   const store = { posts: seed.posts ?? [], comments: seed.comments ?? [], blocks: [] as Row[], follows: [] as Row[], snapshots: [] as Row[], postMutes: [] as Row[], events: [] as Row[], privateAccountIds: new Set<string>(), now: new Date("2026-10-10T12:00:00Z") } as MemoryStore;
   const tables: Row = {
     post: memoryTable(store.posts, true, seed.postDefaults),
-    comment: memoryTable(store.comments, false, seed.commentDefaults),
+    comment: memoryTable(store.comments, false, seed.commentDefaults, (where) => resolveCommentRelations(store, where)),
     block: memoryTable(store.blocks),
     follow: memoryTable(store.follows),
     commentRankSnapshot: memoryTable(store.snapshots),

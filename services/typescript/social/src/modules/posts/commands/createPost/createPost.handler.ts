@@ -1,4 +1,4 @@
-import { forbidden, notFound, unprocessable } from "../../../../errors/social.error.js";
+import { conflict, forbidden, notFound, unprocessable } from "../../../../errors/social.error.js";
 import { socialEventTypes } from "../../../../events/eventTypes.event.js";
 import { buildExcerpt, resolveEventActor } from "../../../../events/actor.event.js";
 import { appendDomainEventsToOutbox, type DomainEventInput } from "../../../../events/outbox.event.js";
@@ -57,6 +57,9 @@ export function createCreatePostHandler(context: HandlerContext): Handler<Create
     let authorProfileKind: string | null = null;
     if (command.asProfileId !== undefined) {
       const owned = await context.directory.findOwnedPostableProfile(command.authorId, command.asProfileId, "publish");
+      if (owned === null && (await context.directory.findOwnedPostableProfile(command.authorId, command.asProfileId)) !== null) {
+        throw conflict("PROFILE_ON_HOLD", "Choose which profiles to keep before using this one.");
+      }
       if (owned === null) throw forbidden("NOT_YOUR_PROFILE", "You can't post as that profile.");
       authorProfileId = owned.id;
       authorProfileKind = owned.kind;

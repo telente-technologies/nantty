@@ -46,7 +46,7 @@ export function createListAudienceEngagersHandler(context: HandlerContext): Hand
         _count: { _all: true }, _max: { createdAt: true }, orderBy: { userId: "asc" }, take: limit + 1,
       });
       const comments = await db.comment.groupBy({
-        by: ["authorId"], where: { authorId: { not: accountId, ...afterCursor }, createdAt: { gte: since }, deletedAt: null, post: postFilter },
+        by: ["authorId"], where: { authorId: { not: accountId, ...afterCursor }, createdAt: { gte: since }, deletedAt: null, hiddenAt: null, post: postFilter },
         _count: { _all: true }, _max: { createdAt: true }, orderBy: { authorId: "asc" }, take: limit + 1,
       });
       tallies.push(toTallies(likes, (index) => likes[index]?.userId ?? ""), toTallies(comments, (index) => comments[index]?.authorId ?? ""));

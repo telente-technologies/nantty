@@ -4,7 +4,7 @@ import { extractHashtags } from "../../../internalSources/services/hashtags.serv
 import { notFound, unprocessable } from "../../../../errors/social.error.js";
 import type { Handler, HandlerContext } from "../../../../types/handlerContext.type.js";
 import { loadPostVisibleToViewer } from "../../../posts/services/postAccess.service.js";
-import { commentRepository } from "../../../comments/repositories/comment.repository.js";
+import { findCommentVisibleToViewer } from "../../../comments/services/commentVisibility.service.js";
 import { saveCollectionRepository } from "../../repositories/saveCollection.repository.js";
 import { savedItemRepository } from "../../repositories/savedItem.repository.js";
 import type { SaveItemCommand } from "./saveItem.command.js";
@@ -16,7 +16,7 @@ export function createSaveItemHandler(context: HandlerContext): Handler<SaveItem
     const db = context.database.client;
     let post: Awaited<ReturnType<typeof loadPostVisibleToViewer>> | null = null;
     if (type === "comment") {
-      if ((await commentRepository.findById(db, targetId)) === null) throw unprocessable("INVALID_TARGET", "targetId must be a visible comment id.");
+      if ((await findCommentVisibleToViewer(db, targetId, userId)) === null) throw unprocessable("INVALID_TARGET", "targetId must be a visible comment id.");
     } else {
       post = type === "product" ? null : uuidPattern.test(targetId) ? await loadPostVisibleToViewer(context, userId, targetId) : null;
       if (type !== "product" && post === null) throw unprocessable("INVALID_TARGET", "targetId must be a post id.");

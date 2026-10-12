@@ -14,7 +14,7 @@ export async function buildCommentViews(context: HandlerContext, viewerId: strin
   const commentIds = rows.map((row) => row.id);
   const parentIds = [...new Set(rows.flatMap((row) => (row.parentCommentId === null ? [] : [row.parentCommentId])))];
   const [parents, liked, videoReplyRows, quotedPosts] = await Promise.all([
-    parentIds.length === 0 ? [] : commentRepository.findManyByIds(db, parentIds),
+    parentIds.length === 0 ? [] : commentRepository.findManyByIds(db, parentIds, viewerId),
     viewerId === undefined ? new Set<string>() : commentRepository.likedCommentIds(db, viewerId, commentIds),
     commentRepository.videoRepliesFor(db, commentIds),
     loadQuotedPostSummaries(context, viewerId, rows.map((row) => row.quotedPostId)),

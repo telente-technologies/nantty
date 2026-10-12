@@ -56,7 +56,7 @@ export async function buildSavedItemViews(context: HandlerContext, viewerId: str
   const visiblePosts = posts.filter((post) => visibleAuthors.has(post.authorId));
   const views = new Map((await buildPostViews(context, viewerId, visiblePosts)).map((view) => [view.id, view]));
   const commentIds = rows.filter((row) => row.type === "comment").map((row) => row.targetId);
-  const commentRows = commentIds.length === 0 ? [] : await commentRepository.findManyByIds(context.database.client, commentIds);
+  const commentRows = commentIds.length === 0 ? [] : await commentRepository.findManyByIds(context.database.client, commentIds, viewerId);
   const commentViews = new Map((await buildCommentViews(context, viewerId, commentRows)).map((view) => [view.id, view]));
   const productIds = rows.filter((row) => row.type === "product").map((row) => row.targetId);
   const products = productIds.length === 0 || context.products === undefined ? new Map() : await context.products.findProducts(productIds).catch(() => new Map());

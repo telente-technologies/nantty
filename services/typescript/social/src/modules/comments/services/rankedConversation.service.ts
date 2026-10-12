@@ -33,9 +33,9 @@ async function createRankedSnapshot(context: HandlerContext, viewerId: string | 
   const db = context.database.client;
   const now = context.clock.now();
   const reusable = await commentRankingRepository.findReusableSnapshot(db, post.id, viewerId, new Date(now.getTime() - rankSnapshotReuseMs));
-  if (reusable !== null) return { snapshot: reusable, hasTail: (await commentRankingRepository.countRootsUpTo(db, post.id, reusable.createdAt)) > commentKeysIn(reusable.commentIds).length };
+  if (reusable !== null) return { snapshot: reusable, hasTail: (await commentRankingRepository.countRootsUpTo(db, post.id, viewerId, reusable.createdAt)) > commentKeysIn(reusable.commentIds).length };
   const [candidates, authorRepliedRootIds, quotes] = await Promise.all([
-    commentRankingRepository.rankingCandidates(db, post.id, post.authorId),
+    commentRankingRepository.rankingCandidates(db, post.id, post.authorId, viewerId),
     commentRankingRepository.rootsWithAuthorReplies(db, post.id, post.authorId),
     rankableQuotesForViewer(context, viewerId, post),
   ]);
@@ -65,7 +65,7 @@ export async function loadRankedRootsPage(context: HandlerContext, viewerId: str
     const pageKeys = ids.slice(cursor.offset, cursor.offset + limit);
     const quoteIds = pageKeys.filter(isQuoteSnapshotKey).map(quoteIdFromSnapshotKey);
     const [rows, quotes] = await Promise.all([
-      commentRankingRepository.rootsByIds(db, commentKeysIn(pageKeys)).then((found) => keepVisibleAuthors(context, viewerId, found)),
+      commentRankingRepository.rootsByIds(db, commentKeysIn(pageKeys), viewerId).then((found) => keepVisibleAuthors(context, viewerId, found)),
       loadQuoteItemsByIds(context, viewerId, post, quoteIds),
     ]);
     const byId = new Map(rows.map((row) => [row.id, row]));
@@ -78,7 +78,7 @@ export async function loadRankedRootsPage(context: HandlerContext, viewerId: str
     return { roots: order.flatMap((entry) => (entry.type === "comment" ? (byId.get(entry.id) ?? []) : [])), quotes, order, nextCursor: more ? encodeRankedCursor({ ...cursor, offset: nextOffset }) : null };
   }
   if (!cursor.hasTail) return { roots: [], quotes: new Map(), order: [], nextCursor: null };
-  const tail = await commentRankingRepository.tailRoots(db, post.id, commentKeysIn(ids), snapshot.createdAt, cursor.tailAfterId, limit);
+  const tail = await commentRankingRepository.tailRoots(db, post.id, viewerId, commentKeysIn(ids), snapshot.createdAt, cursor.tailAfterId, limit);
   const pageRows = tail.slice(0, limit);
   const last = pageRows.at(-1);
   const roots = await keepVisibleAuthors(context, viewerId, pageRows);
@@ -91,7 +91,7 @@ export async function loadRankedRootsPage(context: HandlerContext, viewerId: str
 }
 
 export async function loadPreviewChains(context: HandlerContext, viewerId: string | undefined, postAuthorId: string, roots: readonly CommentRow[]): Promise<Map<string, CommentRow[]>> {
-  const descendants = await keepVisibleAuthors(context, viewerId, await commentRankingRepository.descendantsForRoots(context.database.client, roots.map((root) => root.id), maximumPreviewChainLength));
+  const descendants = await keepVisibleAuthors(context, viewerId, await commentRankingRepository.descendantsForRoots(context.database.client, roots.map((root) => root.id), viewerId, maximumPreviewChainLength));
   const byRoot = new Map<string, CommentRow[]>();
   for (const row of descendants) {
     if (row.rootCommentId === null) continue;
