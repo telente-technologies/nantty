@@ -58,6 +58,12 @@ func (publisher *RecordingPublisher) PublishedEventTypes() []string {
 	return types
 }
 
+func (publisher *RecordingPublisher) PublishedEvents() []OutboxEvent {
+	publisher.mutex.Lock()
+	defer publisher.mutex.Unlock()
+	return append([]OutboxEvent{}, publisher.Published...)
+}
+
 type DiscardingPublisher struct{}
 
 func (DiscardingPublisher) PublishDomainEvents(context.Context, []OutboxEvent) error { return nil }
