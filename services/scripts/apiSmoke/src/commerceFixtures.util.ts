@@ -29,13 +29,18 @@ export async function createStoreWithProduct(label: string, priceMinor: number, 
   const suffix = uniqueSuffix();
   const seller = await registerUser(label);
   approveSellerApplication(seller.accountId);
-  const profile = await callApi("POST", "/api/v1/users/me/business-profiles", { token: seller.accessToken, body: { displayName: `Smoke ${label} ${suffix}`, handle: `sm${label}${suffix}`.slice(0, 30), description: "Smoke store", businessType: "business", categories: [{ customName: "Fashion" }] } });
+  const profile = await callApi("POST", "/api/v1/users/me/business-profiles", { token: seller.accessToken, body: { displayName: `Smoke ${label} ${suffix}`, handle: `sm${label}${suffix}`.slice(0, 30), description: "Smoke store", businessType: "business", purpose: "store", categories: [{ customName: "Fashion" }] } });
   expect(profile.status, describeResponse(profile)).toBe(201);
   const businessProfileId: string = profile.body.id ?? profile.body.profile?.id;
   const store = await callApi("POST", "/api/v1/stores", { token: seller.accessToken, body: { businessProfileId, name: `Smoke ${label} ${suffix}`, description: "Smoke store", countryCode: "NG" } });
   expect(store.status, describeResponse(store)).toBe(201);
   const storeId: string = store.body.id ?? store.body.store?.id;
-  const headers = { "x-store-id": storeId };
+  return stockStoreWithProduct(seller, storeId, businessProfileId, label, priceMinor, openingQuantity);
+}
+
+export async function stockStoreWithProduct(seller: UserActor, storeId: string, businessProfileId: string, label: string, priceMinor: number, openingQuantity = 50): Promise<SmokeStore> {
+  const suffix = uniqueSuffix();
+  const headers = { "x-store-id": storeId, "x-seller-store": storeId };
   const rule = await callApi("POST", "/api/v1/seller/shipping/rules", { token: seller.accessToken, headers, body: { zoneName: "Nationwide", destinations: [{ level: "country", countryCode: "NG" }], type: "flat_fee", feeMinor: 150000, active: true } });
   expect([200, 201], describeResponse(rule)).toContain(rule.status);
   const locations = await callApi("GET", "/api/v1/seller/locations", { token: seller.accessToken, headers });
@@ -53,12 +58,12 @@ export async function createStoreWithProduct(label: string, priceMinor: number, 
 export async function changeVariantPrice(store: SmokeStore, priceMinor: number): Promise<void> {
   const [variant] = store.productBody["variants"] as Record<string, unknown>[];
   const body = { ...store.productBody, variants: [{ ...variant, id: store.variantId, priceMinor, openingStock: [] }] };
-  const changed = await callApi("PATCH", `/api/v1/seller/products/${store.productId}`, { token: store.seller.accessToken, headers: { "x-store-id": store.storeId }, body });
+  const changed = await callApi("PATCH", `/api/v1/seller/products/${store.productId}`, { token: store.seller.accessToken, headers: { "x-store-id": store.storeId, "x-seller-store": store.storeId }, body });
   expect(changed.status, describeResponse(changed)).toBe(200);
 }
 
 export async function adjustStock(store: SmokeStore, quantityDelta: number): Promise<void> {
-  const adjusted = await callApi("POST", "/api/v1/seller/inventory/adjustments", { token: store.seller.accessToken, headers: { "x-store-id": store.storeId }, body: { locationId: store.locationId, reason: quantityDelta < 0 ? "damaged" : "received", lines: [{ variantId: store.variantId, quantityDelta }] } });
+  const adjusted = await callApi("POST", "/api/v1/seller/inventory/adjustments", { token: store.seller.accessToken, headers: { "x-store-id": store.storeId, "x-seller-store": store.storeId }, body: { locationId: store.locationId, reason: quantityDelta < 0 ? "damaged" : "received", lines: [{ variantId: store.variantId, quantityDelta }] } });
   expect([200, 201], describeResponse(adjusted)).toContain(adjusted.status);
 }
 
@@ -91,7 +96,7 @@ export async function checkout(buyer: UserActor, addressId: string, paymentModes
 }
 
 export async function shipAndDeliver(store: SmokeStore, orderId: string): Promise<void> {
-  const headers = { "x-store-id": store.storeId };
+  const headers = { "x-store-id": store.storeId, "x-seller-store": store.storeId };
   const accepted = await waitFor(async () => {
     const response = await callApi("POST", `/api/v1/seller/orders/${orderId}/accept`, { token: store.seller.accessToken, headers, body: {} });
     return response.status === 409 ? undefined : response;

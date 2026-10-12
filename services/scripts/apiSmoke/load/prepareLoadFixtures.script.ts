@@ -15,7 +15,7 @@ async function expectOk(label: string, response: Awaited<ReturnType<typeof callA
 
 async function createStoreWithProduct(seller: UserActor) {
   const suffix = uniqueSuffix();
-  const profile = await expectOk("business profile", await callApi("POST", "/api/v1/users/me/business-profiles", { token: seller.accessToken, body: { displayName: `Load Store ${suffix}`, handle: `loadstore${suffix}`.slice(0, 30), description: "Load test", businessType: "business", categories: [{ customName: "Fashion" }] } }));
+  const profile = await expectOk("business profile", await callApi("POST", "/api/v1/users/me/business-profiles", { token: seller.accessToken, body: { displayName: `Load Store ${suffix}`, handle: `loadstore${suffix}`.slice(0, 30), description: "Load test", businessType: "business", purpose: "store", categories: [{ customName: "Fashion" }] } }));
   const store = await expectOk("store", await callApi("POST", "/api/v1/stores", { token: seller.accessToken, body: { businessProfileId: profile.id, name: `Load Store ${suffix}`, description: "Load test", countryCode: "NG" } }));
   const headers = { "x-store-id": store.id };
   await expectOk("shipping", await callApi("POST", "/api/v1/seller/shipping/rules", { token: seller.accessToken, headers, body: { zoneName: "Nationwide", destinations: [{ level: "country", countryCode: "NG" }], type: "flat_fee", feeMinor: 100000, active: true } }));

@@ -128,7 +128,7 @@ async function createGhanaStore(label: string): Promise<{ seller: UserActor; sto
   const seller = await registerUser(label);
   approveSellerApplication(seller.accountId);
   await callApi("PATCH", "/api/v1/users/me/preferences", { token: seller.accessToken, body: { countryCode: "GH" } });
-  const profile = await callApi("POST", "/api/v1/users/me/business-profiles", { token: seller.accessToken, body: { displayName: `Smoke ${label} ${suffix}`, handle: `sm${label}${suffix}`.slice(0, 30), description: "Smoke store", businessType: "business", categories: [{ customName: "Fashion" }] } });
+  const profile = await callApi("POST", "/api/v1/users/me/business-profiles", { token: seller.accessToken, body: { displayName: `Smoke ${label} ${suffix}`, handle: `sm${label}${suffix}`.slice(0, 30), description: "Smoke store", businessType: "business", purpose: "store", categories: [{ customName: "Fashion" }] } });
   expect(profile.status, describeResponse(profile)).toBe(201);
   const store = await callApi("POST", "/api/v1/stores", { token: seller.accessToken, body: { businessProfileId: profile.body.id ?? profile.body.profile?.id, name: `Smoke ${label} ${suffix}`, description: "Smoke store", countryCode: "GH" } });
   expect(store.status, describeResponse(store)).toBe(201);

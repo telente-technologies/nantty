@@ -26,7 +26,7 @@ describe("commerce journey: seller onboarding → product → cart → checkout 
   });
 
   it("creates a business profile and a store", async () => {
-    const profile = await callApi("POST", "/api/v1/users/me/business-profiles", { token: seller.accessToken, body: { displayName: `Smoke Store ${suffix}`, handle: `smokestore${suffix}`.slice(0, 30), description: "Smoke test store", businessType: "business", categories: [{ customName: "Fashion" }] } });
+    const profile = await callApi("POST", "/api/v1/users/me/business-profiles", { token: seller.accessToken, body: { displayName: `Smoke Store ${suffix}`, handle: `smokestore${suffix}`.slice(0, 30), description: "Smoke test store", businessType: "business", purpose: "store", categories: [{ customName: "Fashion" }] } });
     expect(profile.status, describeResponse(profile)).toBe(201);
     const businessProfileId = profile.body.id ?? profile.body.profile?.id;
     const store = await callApi("POST", "/api/v1/stores", { token: seller.accessToken, body: { businessProfileId, name: `Smoke Store ${suffix}`, description: "Smoke test store", countryCode: "NG" } });

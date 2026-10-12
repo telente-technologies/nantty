@@ -34,6 +34,10 @@ export async function fundWallet(nuban: string, amountMinor: number, reference: 
   await deliverOrThrow(await signFunding(nuban, amountMinor, reference));
 }
 
+export function signCardCompletion(reference: string, feeMinor = 0): Promise<SignedWebhook> {
+  return controlFake(`/__smoke/charges/${encodeURIComponent(reference)}/complete?fee=${feeMinor}&amount=0&card=good`);
+}
+
 export async function payCardCheckout(reference: string, feeMinor = 0, amountOverrideMinor = 0, card: "good" | "decline" = "good"): Promise<void> {
   await deliverOrThrow(await controlFake(`/__smoke/charges/${encodeURIComponent(reference)}/complete?fee=${feeMinor}&amount=${amountOverrideMinor}&card=${card}`));
 }

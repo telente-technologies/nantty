@@ -2,7 +2,7 @@ import { execFileSync } from "node:child_process";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 
-import { callApi, describeResponse, uniqueSuffix, waitFor } from "./apiClient.util.js";
+import { callApi, describeResponse, uniqueSuffix, waitFor, type ApiRequestOptions, type ApiResponse } from "./apiClient.util.js";
 import { generateTimeBasedCode } from "./oneTimePassword.util.js";
 
 const repositoryRoot = resolve(import.meta.dirname, "../../../..");
@@ -41,16 +41,25 @@ export async function readOneTimeCodeFromIdentityLog(email: string, purpose: str
   return code;
 }
 
+// goIdentity's per-IP auth limiter (burst 20, 10/s) is shared by every smoke actor on 127.0.0.1; fixture setup backs off instead of failing.
+async function callAuthApi(method: string, path: string, options: ApiRequestOptions): Promise<ApiResponse> {
+  for (let attempt = 1; ; attempt += 1) {
+    const response = await callApi(method, path, options);
+    if (response.status !== 429 || response.body?.code !== "RATE_LIMITED" || attempt === 6) return response;
+    await new Promise((done) => setTimeout(done, 400 * attempt));
+  }
+}
+
 export async function registerUser(prefix: string): Promise<UserActor> {
   const suffix = uniqueSuffix();
   const username = `${prefix}${suffix}`.toLowerCase().slice(0, 28);
   const email = `${username}@smoke.zudomart.test`;
-  const sent = await callApi("POST", "/api/v1/auth/otp/send", { body: { destination: email, purpose: "signup" } });
+  const sent = await callAuthApi("POST", "/api/v1/auth/otp/send", { body: { destination: email, purpose: "signup" } });
   if (sent.status !== 200) throw new Error(`otp send: ${describeResponse(sent)}`);
   const code = await readOneTimeCodeFromIdentityLog(email, "signup");
-  const verified = await callApi("POST", "/api/v1/auth/otp/verify", { body: { destination: email, code, purpose: "signup" } });
+  const verified = await callAuthApi("POST", "/api/v1/auth/otp/verify", { body: { destination: email, code, purpose: "signup" } });
   if (verified.status !== 200) throw new Error(`otp verify: ${describeResponse(verified)}`);
-  const registered = await callApi("POST", "/api/v1/auth/register", { body: { email, birthday: "1994-05-17", password: smokePassword, username, name: `Smoke ${prefix}`, otpToken: verified.body.otpToken } });
+  const registered = await callAuthApi("POST", "/api/v1/auth/register", { body: { email, birthday: "1994-05-17", password: smokePassword, username, name: `Smoke ${prefix}`, otpToken: verified.body.otpToken } });
   if (registered.status !== 201 && registered.status !== 200) throw new Error(`register: ${describeResponse(registered)}`);
   const profile = await callApi("GET", "/api/v1/users/me", { token: registered.body.accessToken });
   if (profile.status !== 200) throw new Error(`profile after signup: ${describeResponse(profile)}`);
@@ -60,7 +69,7 @@ export async function registerUser(prefix: string): Promise<UserActor> {
 }
 
 export async function logInUser(email: string): Promise<{ readonly accessToken: string; readonly refreshToken: string; readonly status: number }> {
-  const response = await callApi("POST", "/api/v1/auth/login", { body: { identifier: email, password: smokePassword } });
+  const response = await callAuthApi("POST", "/api/v1/auth/login", { body: { identifier: email, password: smokePassword } });
   return { accessToken: response.body?.accessToken, refreshToken: response.body?.refreshToken, status: response.status };
 }
 
@@ -108,7 +117,7 @@ export async function stepUpStaff(staff: StaffActor): Promise<string> {
 }
 
 export async function stepUpUser(user: UserActor): Promise<string> {
-  const response = await callApi("POST", "/api/v1/auth/step-up", { token: user.accessToken, body: { password: smokePassword } });
+  const response = await callAuthApi("POST", "/api/v1/auth/step-up", { token: user.accessToken, body: { password: smokePassword } });
   if (response.status !== 200) throw new Error(`user step-up: ${describeResponse(response)}`);
   return response.body.stepUpToken;
 }

@@ -31,6 +31,7 @@ interface ContractOutcome {
 
 const appsRoot = resolve(import.meta.dirname, "../../../../apps");
 const mockOnlyIds = /\/(live_\w+|post_\w+|user_\w+|scene_\w+)(\/|$)/;
+const persistedFixtureIds = ["post_2", "cm_1", "cm_4"];
 const socialSignIn = /\/auth\/(google|apple)$/;
 
 async function loadAppContracts(app: string, file: string, exportName: string): Promise<{ contracts: readonly FrontendContract[]; validate: Validator; c: Record<string, (...args: never[]) => unknown> }> {
@@ -71,11 +72,11 @@ function prepareBody(contract: FrontendContract, user: UserActor, password: stri
 async function runAppContracts(app: string, contracts: readonly FrontendContract[], validate: Validator, user: UserActor): Promise<ContractOutcome[]> {
   const outcomes: ContractOutcome[] = [];
   for (const contract of contracts) {
-    if (mockOnlyIds.test(contract.path)) {
+    if (mockOnlyIds.test(contract.path.replace(new RegExp(`\\b(${persistedFixtureIds.join("|")})\\b`, "g"), "real"))) {
       outcomes.push({ app, method: contract.method, path: contract.path, status: "skipped", problems: ["path uses a mock fixture id"] });
       continue;
     }
-    const response = await callApi(contract.method, preparePath(contract, user), { token: user.accessToken, headers: fixtures.storeId === "" ? {} : { "x-store-id": fixtures.storeId }, body: prepareBody(contract, user, "Sm0ke-Test-Pass!2026") });
+    const response = await callApi(contract.method, preparePath(contract, user), { token: user.accessToken, headers: fixtures.storeId === "" ? {} : { "x-store-id": fixtures.storeId, "x-seller-store": fixtures.storeId }, body: prepareBody(contract, user, "Sm0ke-Test-Pass!2026") });
     if (socialSignIn.test(contract.path) && response.status === 503) {
       outcomes.push({ app, method: contract.method, path: contract.path, status: response.status, problems: response.body?.code === "SOCIAL_SIGN_IN_NOT_CONFIGURED" ? [] : [`expected SOCIAL_SIGN_IN_NOT_CONFIGURED, got ${JSON.stringify(response.body)}`] });
       continue;
@@ -84,6 +85,19 @@ async function runAppContracts(app: string, contracts: readonly FrontendContract
     outcomes.push({ app, method: contract.method, path: contract.path, status: response.status, problems });
   }
   return outcomes;
+}
+
+async function postWithComments(author: UserActor, commenter: UserActor): Promise<{ postId: string; commentIds: string[] }> {
+  const post = await callApi("POST", "/api/v1/posts", { token: author.accessToken, body: { text: "Contract check post", audience: "everyone" } });
+  expect(post.status, JSON.stringify(post.body)).toBe(201);
+  const postId = String(post.body.id);
+  const commentIds: string[] = [];
+  for (const text of ["Do you ship to Abuja?", "Lovely colours"]) {
+    const comment = await callApi("POST", `/api/v1/posts/${postId}/comments`, { token: commenter.accessToken, body: { text } });
+    expect(comment.status, JSON.stringify(comment.body)).toBe(201);
+    commentIds.push(String(comment.body.id));
+  }
+  return { postId, commentIds };
 }
 
 describe("frontend contracts against the real gateway", () => {
@@ -96,9 +110,10 @@ describe("frontend contracts against the real gateway", () => {
     const store = await createStoreWithProduct("contract", 250_000);
     user = await withRelaxedCreatorThresholds(staff, () => approveExistingUserAsCreator(staff, store.seller));
     const other = await registerUser("contractpeer");
+    const commented = await postWithComments(user, other);
     fixtures = {
       storeId: store.storeId,
-      ids: { u_me: user.accountId, u_21: other.accountId, post_1: randomUUID(), post_missing: randomUUID(), store_1: store.storeId, prod_1: store.productId },
+      ids: { u_me: user.accountId, u_21: other.accountId, f_1: other.accountId, post_1: randomUUID(), post_missing: randomUUID(), store_1: store.storeId, prod_1: store.productId, post_2: commented.postId, cm_4: commented.commentIds[0]!, cm_1: commented.commentIds[1]! },
     };
   }, 300_000);
 
