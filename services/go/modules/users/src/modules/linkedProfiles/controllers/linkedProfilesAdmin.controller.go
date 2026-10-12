@@ -3,6 +3,8 @@ package controllers
 import (
 	"net/http"
 
+	"github.com/google/uuid"
+
 	usersErrors "zudomart/modules/users/src/errors"
 	chooselinkedprofiles "zudomart/modules/users/src/modules/linkedProfiles/commands/chooseLinkedProfiles"
 	convertlinkedprofile "zudomart/modules/users/src/modules/linkedProfiles/commands/convertLinkedProfile"
@@ -13,7 +15,19 @@ import (
 )
 
 func (controller LinkedProfilesController) AdminConflicts(writer http.ResponseWriter, request *http.Request) {
-	page, err := listruleconflicts.Handler{Container: controller.Container}.Execute(request.Context())
+	var after *uuid.UUID
+	var page listruleconflicts.Page
+	var err error
+	if raw := request.URL.Query().Get("cursor"); raw != "" {
+		parsed, parseErr := uuid.Parse(raw)
+		after, err = &parsed, parseErr
+		if err != nil {
+			err = usersErrors.ValidationFailedFor("cursor", "must be a cursor from a previous page")
+		}
+	}
+	if err == nil {
+		page, err = listruleconflicts.Handler{Container: controller.Container}.Execute(request.Context(), after)
+	}
 	controller.respond(writer, request, http.StatusOK, page, err)
 }
 

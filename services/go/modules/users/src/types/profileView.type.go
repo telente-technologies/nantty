@@ -23,6 +23,8 @@ type UserView struct {
 	CreatorStatus    string   `json:"creatorStatus"`
 	AccountStatus    string   `json:"accountStatus"`
 	IsSeller         bool     `json:"isSeller"`
+	ProfileKind      string   `json:"profileKind"`
+	ShowsMart        bool     `json:"showsMart"`
 	IsPrivate        bool     `json:"isPrivate"`
 	StoreId          *string  `json:"storeId"`
 	CountryCode      *string  `json:"countryCode"`

@@ -27,10 +27,11 @@ type Backfill struct {
 }
 
 type candidate struct {
-	kind      linkedprofile.Kind
-	profileId uuid.UUID
-	storeId   *uuid.UUID
-	createdAt time.Time
+	kind        linkedprofile.Kind
+	profileId   uuid.UUID
+	storeId     *uuid.UUID
+	createdAt   time.Time
+	application bool
 }
 
 func (backfill Backfill) Run(ctx context.Context) (BackfillReport, error) {
@@ -97,6 +98,15 @@ func (backfill Backfill) unregisteredCandidates(ctx context.Context) (map[uuid.U
 			byAccount[*brand.OwnerAccountId] = append(byAccount[*brand.OwnerAccountId], candidate{kind: linkedprofile.KindBrand, profileId: brand.Id, createdAt: brand.CreatedAt})
 		}
 	}
+	applications, err := backfill.Container.Catalog.FindPendingSellerApplications(ctx)
+	if err != nil {
+		return nil, err
+	}
+	for _, application := range applications {
+		if !registered[application.Id.String()] {
+			byAccount[application.OwnerAccountId] = append(byAccount[application.OwnerAccountId], candidate{kind: linkedprofile.KindStore, profileId: application.Id, createdAt: application.CreatedAt, application: true})
+		}
+	}
 	return byAccount, nil
 }
 
@@ -121,6 +131,9 @@ func (backfill Backfill) attachStores(ctx context.Context, accounts []uuid.UUID,
 
 func (backfill Backfill) registerAccount(ctx context.Context, accountId uuid.UUID, candidates []candidate) (int, int, error) {
 	sort.SliceStable(candidates, func(left, right int) bool {
+		if candidates[left].application != candidates[right].application {
+			return candidates[right].application
+		}
 		leftStore, rightStore := candidates[left].kind == linkedprofile.KindStore, candidates[right].kind == linkedprofile.KindStore
 		if leftStore != rightStore {
 			return leftStore

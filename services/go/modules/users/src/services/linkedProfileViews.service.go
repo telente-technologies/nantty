@@ -92,3 +92,14 @@ func ListOwnedActingProfiles(ctx context.Context, application *container.Contain
 	}
 	return views, nil
 }
+
+func ApplyPublicProfileKind(ctx context.Context, client *ent.Client, view *types.UserView, accountId uuid.UUID) error {
+	view.ProfileKind, view.ShowsMart = "personal", view.IsSeller
+	rows, err := client.LinkedProfile.Query().Where(linkedprofile.AccountID(accountId), linkedprofile.StatusEQ(linkedprofile.StatusActive), linkedprofile.KindIn(linkedprofile.KindStore, linkedprofile.KindBusiness)).All(ctx)
+	if err != nil || len(rows) == 0 {
+		return err
+	}
+	view.ProfileKind = string(rows[0].Kind)
+	view.ShowsMart = rows[0].Kind == linkedprofile.KindStore && rows[0].StoreID != nil
+	return nil
+}

@@ -120,40 +120,77 @@ func (gateway *PaymentGateway) ProcessDueMovements(ctx context.Context, limit in
 	return len(due)
 }
 
+const maximumUnblockPages = 20
+
 func (gateway *PaymentGateway) unblockMovements(ctx context.Context, limit int) {
 	client := gateway.Container.Client(gateway.Container.Resources.Database)
-	blocked, err := client.ProviderMovement.Query().Where(providermovement.StatusEQ(providermovement.StatusPending), providermovement.BlockedOnNEQ("")).
-		Order(ent.Asc(providermovement.FieldCreatedAt)).Limit(limit).All(ctx)
+	var last *ent.ProviderMovement
+	for page := 0; page < maximumUnblockPages; page++ {
+		query := client.ProviderMovement.Query().Where(providermovement.StatusEQ(providermovement.StatusPending), providermovement.BlockedOnNEQ(""))
+		if last != nil {
+			query = query.Where(providermovement.Or(providermovement.CreatedAtGT(last.CreatedAt), providermovement.And(providermovement.CreatedAtEQ(last.CreatedAt), providermovement.IDGT(last.ID))))
+		}
+		blocked, err := query.Order(ent.Asc(providermovement.FieldCreatedAt), ent.Asc(providermovement.FieldID)).Limit(limit).All(ctx)
+		if err != nil || len(blocked) == 0 {
+			return
+		}
+		settled := gateway.settledReferencesAmong(ctx, client, blocked)
+		for _, movement := range blocked {
+			gateway.unblockMovement(ctx, client, movement, settled)
+		}
+		if len(blocked) < limit {
+			return
+		}
+		last = blocked[len(blocked)-1]
+	}
+}
+
+func (gateway *PaymentGateway) settledReferencesAmong(ctx context.Context, client *ent.Client, blocked []*ent.ProviderMovement) map[string]bool {
+	references := []string{}
+	for _, movement := range blocked {
+		if kind, subject, _ := strings.Cut(movement.BlockedOn, ":"); kind == "settlement" {
+			references = append(references, subject)
+		}
+	}
+	settled := map[string]bool{}
+	if len(references) == 0 {
+		return settled
+	}
+	intents, err := client.PaymentIntent.Query().Where(paymentintent.ReferenceIn(references...), paymentintent.ProviderSettledAtNotNil()).Select(paymentintent.FieldReference).Strings(ctx)
 	if err != nil {
+		return settled
+	}
+	for _, reference := range intents {
+		settled[reference] = true
+	}
+	return settled
+}
+
+func (gateway *PaymentGateway) unblockMovement(ctx context.Context, client *ent.Client, movement *ent.ProviderMovement, settled map[string]bool) {
+	kind, subject, _ := strings.Cut(movement.BlockedOn, ":")
+	update := client.ProviderMovement.Update().Where(providermovement.ID(movement.ID), providermovement.Version(movement.Version)).AddVersion(1).SetBlockedOn("")
+	switch kind {
+	case "settlement":
+		if !settled[subject] {
+			return
+		}
+		if movement.ToUserID != "" && movement.ToWalletRef == "" {
+			update.SetBlockedOn("wallet:" + movement.ToUserID)
+		}
+	case "wallet":
+		wallet, err := gateway.FindProviderWallet(ctx, gateway.Container.Resources.Database, subject)
+		if errors.Is(err, ErrProviderWalletMissing) && movement.Kind == models.MovementEscrowFundIn {
+			wallet, err = gateway.EnsureProviderWalletForCardBuyer(ctx, subject)
+		}
+		if err != nil {
+			return
+		}
+		update.SetToBarterID(wallet.BarterID).SetToWalletRef(wallet.AccountRef)
+	default:
 		return
 	}
-	for _, movement := range blocked {
-		kind, subject, _ := strings.Cut(movement.BlockedOn, ":")
-		update := client.ProviderMovement.Update().Where(providermovement.ID(movement.ID), providermovement.Version(movement.Version)).AddVersion(1).SetBlockedOn("")
-		switch kind {
-		case "settlement":
-			settled, err := client.PaymentIntent.Query().Where(paymentintent.Reference(subject), paymentintent.ProviderSettledAtNotNil()).Exist(ctx)
-			if err != nil || !settled {
-				continue
-			}
-			if movement.ToUserID != "" && movement.ToWalletRef == "" {
-				update.SetBlockedOn("wallet:" + movement.ToUserID)
-			}
-		case "wallet":
-			wallet, err := gateway.FindProviderWallet(ctx, gateway.Container.Resources.Database, subject)
-			if errors.Is(err, ErrProviderWalletMissing) && movement.Kind == models.MovementEscrowFundIn {
-				wallet, err = gateway.EnsureProviderWalletForCardBuyer(ctx, subject)
-			}
-			if err != nil {
-				continue
-			}
-			update.SetToBarterID(wallet.BarterID).SetToWalletRef(wallet.AccountRef)
-		default:
-			continue
-		}
-		if err := update.Exec(ctx); err != nil {
-			gateway.Container.Resources.Logger.WarnContext(ctx, "could not unblock a provider movement", "reference", movement.Reference, "error", err)
-		}
+	if err := update.Exec(ctx); err != nil {
+		gateway.Container.Resources.Logger.WarnContext(ctx, "could not unblock a provider movement", "reference", movement.Reference, "error", err)
 	}
 }
 
@@ -176,6 +213,10 @@ func (gateway *PaymentGateway) FindMovementBySubject(ctx context.Context, execut
 		return nil, nil
 	}
 	return movement, err
+}
+
+func (gateway *PaymentGateway) CountMovementsBySubject(ctx context.Context, executor databases.ExecutorQuerier, kind, subjectId string) (int, error) {
+	return gateway.Container.Client(executor).ProviderMovement.Query().Where(providermovement.Kind(kind), providermovement.SubjectID(subjectId)).Count(ctx)
 }
 
 func (gateway *PaymentGateway) HasOpenMovement(ctx context.Context, executor databases.ExecutorQuerier, kind, userId string) (bool, error) {

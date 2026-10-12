@@ -43,9 +43,14 @@ func TestRuleBreakingAccountsAreGrandfatheredUntilTheOwnerChooses(t *testing.T) 
 	}
 
 	staffToken, _ := harness.staff("admin", "users:read")
-	conflicts := harness.expect("GET", "/api/v1/admin/linked-profiles/conflicts", staffToken, nil, http.StatusOK)["data"].([]any)
-	if len(conflicts) != 1 || conflicts[0].(map[string]any)["accountId"] != accountId {
-		t.Fatalf("the admin report lists the rule-breaking account: %v", conflicts)
+	conflictPage := harness.expect("GET", "/api/v1/admin/linked-profiles/conflicts", staffToken, nil, http.StatusOK)
+	conflicts := conflictPage["data"].([]any)
+	if len(conflicts) != 1 || conflicts[0].(map[string]any)["accountId"] != accountId || conflictPage["nextCursor"] != nil {
+		t.Fatalf("the admin report lists the rule-breaking account: %v", conflictPage)
+	}
+	harness.expect("GET", "/api/v1/admin/linked-profiles/conflicts?cursor=nope", staffToken, nil, http.StatusBadRequest)
+	if after := harness.expect("GET", "/api/v1/admin/linked-profiles/conflicts?cursor="+accountId, staffToken, nil, http.StatusOK)["data"].([]any); len(after) != 0 {
+		t.Fatalf("the next page starts after the cursor: %v", after)
 	}
 
 	choose := map[string]any{"keep": []string{second["id"].(string)}}

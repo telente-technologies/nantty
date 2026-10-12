@@ -26,6 +26,9 @@ func (handler Handler) Execute(ctx context.Context, query Query) (types.UserView
 		return types.UserView{}, err
 	}
 	view := types.BuildUserView(row, summary, true)
+	if err := services.ApplyPublicProfileKind(ctx, handler.Container.Client, &view, owner); err != nil {
+		return types.UserView{}, err
+	}
 	flags := celebrationservices.ComputePublicFlags(ctx, handler.Container, summary, true)
 	view.BirthdayToday, view.AnniversaryToday = flags.BirthdayToday, flags.AnniversaryToday
 	if handler.Container.OwnedStores != nil {

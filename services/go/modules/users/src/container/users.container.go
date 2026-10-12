@@ -34,6 +34,7 @@ type Container struct {
 type CatalogEntities interface {
 	FindBrands(ctx context.Context, ownerAccountId *uuid.UUID, brandIds []uuid.UUID) ([]integrations.CatalogBrand, error)
 	FindStoresOfAccounts(ctx context.Context, accountIds []uuid.UUID) ([]integrations.CatalogStore, error)
+	FindPendingSellerApplications(ctx context.Context) ([]integrations.CatalogPendingApplication, error)
 }
 
 type OwnedStoreLookup interface {

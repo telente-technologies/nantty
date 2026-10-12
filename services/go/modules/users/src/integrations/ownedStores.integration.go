@@ -110,3 +110,30 @@ func (stores CatalogOwnedStores) FindStoresOfAccounts(ctx context.Context, accou
 	}
 	return found, rows.Err()
 }
+
+type CatalogPendingApplication struct {
+	Id             uuid.UUID
+	OwnerAccountId uuid.UUID
+	CreatedAt      time.Time
+}
+
+func (stores CatalogOwnedStores) FindPendingSellerApplications(ctx context.Context) ([]CatalogPendingApplication, error) {
+	if !stores.tableExists(ctx, "seller_applications") {
+		return nil, nil
+	}
+	query := `SELECT id, account_id, created_at FROM ` + pgx.Identifier{stores.Schema, "seller_applications"}.Sanitize() + ` WHERE status = 'pending' ORDER BY created_at, id`
+	rows, err := stores.Database.QueryContext(ctx, query)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var found []CatalogPendingApplication
+	for rows.Next() {
+		var application CatalogPendingApplication
+		if err := rows.Scan(&application.Id, &application.OwnerAccountId, &application.CreatedAt); err != nil {
+			return nil, err
+		}
+		found = append(found, application)
+	}
+	return found, rows.Err()
+}

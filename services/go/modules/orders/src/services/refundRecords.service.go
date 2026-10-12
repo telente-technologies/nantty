@@ -2,7 +2,12 @@ package services
 
 import (
 	"context"
+	"fmt"
 	"time"
+
+	"github.com/google/uuid"
+
+	"zudomart/modules/orders/src/container"
 
 	"zudomart/modules/orders/src/events"
 	"zudomart/modules/orders/src/generated/ent"
@@ -17,6 +22,7 @@ const (
 	RefundSourceDispute      = "dispute"
 	RefundSourceSystem       = "system"
 	RefundProcessing         = "processing"
+	RefundScheduled          = "scheduled"
 	RefundCompleted          = "completed"
 )
 
@@ -50,7 +56,7 @@ func EnqueueRefundRequest(ctx context.Context, tx *ent.Tx, group *ent.OrderGroup
 }
 
 func settleRefundRecords(ctx context.Context, tx *ent.Tx, group *ent.OrderGroup, refundedMinor int64, disputeId string, now time.Time) error {
-	completedNow, err := tx.RefundRecord.Update().Where(refundrecord.OrderGroupID(group.ID), refundrecord.Status(RefundProcessing)).
+	completedNow, err := tx.RefundRecord.Update().Where(refundrecord.OrderGroupID(group.ID), refundrecord.StatusIn(RefundProcessing, RefundScheduled)).
 		SetStatus(RefundCompleted).SetCompletedAt(now).Save(ctx)
 	if err != nil || completedNow > 0 {
 		return err
@@ -65,6 +71,20 @@ func settleRefundRecords(ctx context.Context, tx *ent.Tx, group *ent.OrderGroup,
 	}
 	return tx.RefundRecord.Create().SetOrderGroupID(group.ID).SetStoreID(group.StoreID).SetBuyerAccountID(group.BuyerAccountID).SetOrderReference(group.Reference).
 		SetAmountMinor(amount).SetCurrency(group.Currency).SetSource(source).SetStatus(RefundCompleted).SetCompletedAt(now).Exec(ctx)
+}
+
+func RecordOrderRefundScheduled(ctx context.Context, deployed *container.Container, orderId uuid.UUID, amountMinor int64) error {
+	return deployed.RunInTransaction(ctx, func(tx *ent.Tx) error {
+		group, err := LockOrderGroup(ctx, tx, orderId)
+		if err != nil {
+			return err
+		}
+		if _, err := tx.RefundRecord.Update().Where(refundrecord.OrderGroupID(group.ID), refundrecord.Status(RefundProcessing)).SetStatus(RefundScheduled).Save(ctx); err != nil {
+			return err
+		}
+		summary := fmt.Sprintf("Refund of %d %s (minor units) scheduled; it completes automatically once the card payment settles", amountMinor, group.Currency)
+		return AppendTimelineEvent(ctx, tx, group.ID, "refundScheduled", summary, SystemActor)
+	})
 }
 
 func truncateText(text string, maximum int) string {

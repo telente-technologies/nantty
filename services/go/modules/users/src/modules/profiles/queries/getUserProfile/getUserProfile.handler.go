@@ -33,6 +33,9 @@ func ViewPublicProfileOfAccount(ctx context.Context, application *container.Cont
 		return types.UserView{}, err
 	}
 	view := types.BuildUserView(row, summary, false)
+	if err := services.ApplyPublicProfileKind(ctx, application.Client, &view, accountId); err != nil {
+		return types.UserView{}, err
+	}
 	flags := celebrationservices.ComputePublicFlags(ctx, application, summary, false)
 	view.BirthdayToday, view.AnniversaryToday = flags.BirthdayToday, flags.AnniversaryToday
 	return view, nil

@@ -11,7 +11,7 @@ import (
 )
 
 var (
-	ErrPayoutAccountCoolingDown = httpserver.NewApiError(http.StatusUnprocessableEntity, "PAYOUT_ACCOUNT_COOLING_DOWN", "New payout accounts can receive withdrawals 48 hours after they are added.")
+	ErrPayoutAccountCoolingDown = httpserver.NewApiError(http.StatusUnprocessableEntity, "PAYOUT_ACCOUNT_COOLING_DOWN", "New payout accounts cannot receive withdrawals yet.")
 	ErrWithdrawalInProgress     = httpserver.NewApiError(http.StatusConflict, "WITHDRAWAL_IN_PROGRESS", "Wait for your current withdrawal to finish first.")
 	ErrWithdrawalTooSoon        = httpserver.NewApiError(http.StatusTooManyRequests, "WITHDRAWAL_TOO_SOON", "Wait a few minutes before another withdrawal.")
 	ErrWithdrawalDailyCount     = httpserver.NewApiError(http.StatusTooManyRequests, "WITHDRAWAL_DAILY_LIMIT", "You have reached today's number of withdrawals.")
@@ -28,7 +28,7 @@ func (withdrawals Withdrawals) enforceWithdrawalLimits(ctx context.Context, tran
 	limits := withdrawals.Container.Settings.WithdrawalLimits
 	now := withdrawals.Container.Now().UTC()
 	if limits.NewAccountCooldown > 0 && account.CreatedAt.After(now.Add(-limits.NewAccountCooldown)) {
-		return ErrPayoutAccountCoolingDown
+		return PayoutAccountCoolingDown(limits.NewAccountCooldown, account.CreatedAt.Add(limits.NewAccountCooldown))
 	}
 	client := withdrawals.Container.Client(transaction)
 	if limits.BlockWhileProcessing {
