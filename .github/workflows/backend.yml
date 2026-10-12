@@ -60,6 +60,11 @@ jobs:
     if: needs.changes.outputs.go == 'true'
     runs-on: ubuntu-latest
     steps:
+      - name: Free runner disk space (the full Go workspace build, vet and test cache does not fit the default free space)
+        run: |
+          df -h /
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /usr/local/.ghcup /opt/hostedtoolcache/CodeQL
+          df -h /
       - uses: actions/checkout@v7.0.1
       - uses: actions/setup-go@v7
         with:
@@ -116,6 +121,11 @@ jobs:
       POSTGRES_USER: zudomart
       POSTGRES_DB: zudomart
     steps:
+      - name: Free runner disk space (the full Go workspace build, vet and test cache does not fit the default free space)
+        run: |
+          df -h /
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /usr/local/.ghcup /opt/hostedtoolcache/CodeQL
+          df -h /
       - uses: actions/checkout@v7.0.1
       - uses: actions/setup-go@v7
         with:
@@ -182,6 +192,7 @@ jobs:
           echo "$RUNNER_TEMP" >> "$GITHUB_PATH"
       - name: Lint every module migration directory against a clean dev database
         run: |
+          psql -d postgres -c "CREATE ROLE zudomart_readers NOLOGIN"
           status=0
           for dir in services/go/modules/*/src/migrations; do
             [ -f "$dir/atlas.sum" ] || continue
