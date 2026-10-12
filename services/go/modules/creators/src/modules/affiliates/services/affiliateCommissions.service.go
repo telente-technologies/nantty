@@ -3,9 +3,6 @@ package services
 import (
 	"context"
 	"database/sql"
-	"errors"
-	"strconv"
-	"strings"
 	"time"
 
 	"github.com/google/uuid"
@@ -13,154 +10,57 @@ import (
 	"zudomart/modules/creators/src/generated/ent"
 	"zudomart/modules/creators/src/generated/ent/affiliatecommission"
 	"zudomart/modules/creators/src/generated/ent/affiliateproductcommission"
-	"zudomart/modules/creators/src/generated/ent/creatoraffiliation"
 	programservices "zudomart/modules/creators/src/modules/creatorProgram/services"
 	"zudomart/modules/creators/src/repositories"
 )
 
-type AttributedItem struct {
-	OrderItemId       string `json:"orderItemId"`
-	ProductId         string `json:"productId"`
-	VariantId         string `json:"variantId"`
-	Quantity          int64  `json:"quantity"`
-	LineTotalMinor    int64  `json:"lineTotalMinor"`
-	Currency          string `json:"currency"`
-	AttributionSource string `json:"attributionSource"`
-	AttributionId     string `json:"attributionId"`
-	CommissionBps     *int64 `json:"commissionBasisPoints"`
-}
-
-type OrderGroupCompleted struct {
-	OrderGroupId    string           `json:"orderGroupId"`
-	OrderNumber     string           `json:"orderNumber"`
-	StoreId         string           `json:"storeId"`
-	SellerAccountId string           `json:"sellerAccountId"`
-	BuyerAccountId  string           `json:"buyerAccountId"`
-	SubtotalMinor   int64            `json:"subtotalMinor"`
-	TotalMinor      int64            `json:"totalMinor"`
-	RefundedMinor   int64            `json:"refundedMinor"`
-	Currency        string           `json:"currency"`
-	CompletedAt     *time.Time       `json:"completedAt"`
-	AttributedItems []AttributedItem `json:"attributedItems"`
-}
-
-type AffiliateSaleReleased struct {
-	OrderId      string
-	OrderNumber  string
-	StoreId      string
-	SellerUserId string
-	BuyerUserId  string
-	Currency     string
-	OrderedAt    *time.Time
-	Items        []AttributedItem
-}
-
-func (completed OrderGroupCompleted) Sale() AffiliateSaleReleased {
-	items := make([]AttributedItem, 0, len(completed.AttributedItems))
-	for _, item := range completed.AttributedItems {
-		if completed.RefundedMinor > 0 && completed.SubtotalMinor > 0 {
-			kept := max(completed.SubtotalMinor-completed.RefundedMinor, 0)
-			item.LineTotalMinor = item.LineTotalMinor/completed.SubtotalMinor*kept + item.LineTotalMinor%completed.SubtotalMinor*kept/completed.SubtotalMinor
-		}
-		items = append(items, item)
-	}
-	return AffiliateSaleReleased{
-		OrderId: completed.OrderGroupId, OrderNumber: completed.OrderNumber, StoreId: completed.StoreId, SellerUserId: completed.SellerAccountId,
-		BuyerUserId: completed.BuyerAccountId, Currency: completed.Currency, Items: items,
-	}
-}
-
-type attributedSale struct {
-	itemKey, productId, source, sourceId string
-	amountMinor                          int64
-	lockedBps                            *int64
-}
-
-func attributedSales(orderId, currency string, items []AttributedItem) []attributedSale {
-	sales := []attributedSale{}
-	for index, item := range items {
-		validSource := item.AttributionSource == "post" || item.AttributionSource == "clip" || item.AttributionSource == "live"
-		sameCurrency := item.Currency == "" || strings.EqualFold(item.Currency, currency)
-		if item.ProductId == "" || item.LineTotalMinor <= 0 || item.AttributionId == "" || !validSource || !sameCurrency {
-			continue
-		}
-		key := item.OrderItemId
-		if key == "" {
-			key = orderId + ":" + item.ProductId + ":" + strconv.Itoa(index)
-		}
-		sales = append(sales, attributedSale{itemKey: key, productId: item.ProductId, source: item.AttributionSource, sourceId: item.AttributionId, amountMinor: item.LineTotalMinor, lockedBps: item.CommissionBps})
-	}
-	return sales
-}
-
 func (affiliates Affiliates) CreditCommissionsForRelease(ctx context.Context, sale AffiliateSaleReleased) (int, error) {
-	sale.Currency = strings.ToUpper(sale.Currency)
-	if sale.OrderId == "" || sale.StoreId == "" || sale.SellerUserId == "" || len(sale.Currency) != 3 {
-		return 0, nil
-	}
 	credited := 0
-	for _, item := range attributedSales(sale.OrderId, sale.Currency, sale.Items) {
-		creatorId, err := affiliates.Container.Directory.ContentOwner(ctx, item.source, item.sourceId)
-		if errors.Is(err, repositories.ErrTargetNotFound) {
-			continue
-		}
-		if err != nil {
-			return credited, err
-		}
-		if creatorId == "" || creatorId == sale.BuyerUserId || creatorId == sale.SellerUserId {
-			continue
-		}
-		ok, err := affiliates.creditOne(ctx, sale, item, creatorId)
-		if err != nil {
-			return credited, err
-		}
+	err := affiliates.forEachAttributedCreator(ctx, &sale, func(item attributedSale, creatorId string, labels saleLabels) error {
+		ok, err := affiliates.creditOne(ctx, sale, item, creatorId, labels)
 		if ok {
 			credited++
 		}
-	}
-	return credited, nil
+		return err
+	})
+	return credited, err
 }
 
-func (affiliates Affiliates) creditOne(ctx context.Context, sale AffiliateSaleReleased, item attributedSale, creatorId string) (bool, error) {
+func (affiliates Affiliates) creditOne(ctx context.Context, sale AffiliateSaleReleased, item attributedSale, creatorId string, labels saleLabels) (bool, error) {
 	credited := false
 	err := affiliates.inTransaction(ctx, func(ctx context.Context, transaction *sql.Tx, client *ent.Client) error {
-		if _, err := transaction.ExecContext(ctx, "SELECT pg_advisory_xact_lock(hashtextextended($1, 0))", "affiliate-commission:"+item.itemKey); err != nil {
+		if err := lockAttributedItem(ctx, transaction, item); err != nil {
 			return err
 		}
 		if exists, err := client.AffiliateCommission.Query().Where(affiliatecommission.OrderItemID(item.itemKey)).Exist(ctx); err != nil || exists {
 			return err
 		}
-		if _, approved, err := affiliates.Program.ApprovedCreatorShare(ctx, transaction, creatorId); err != nil || !approved {
-			return err
-		}
-		affiliated, err := client.CreatorAffiliation.Query().Where(creatoraffiliation.CreatorID(creatorId), creatoraffiliation.StoreID(sale.StoreId),
-			creatoraffiliation.StatusEQ(creatoraffiliation.StatusActive), creatoraffiliation.ProductIDIn("", item.productId)).Exist(ctx)
-		if err != nil || !affiliated {
-			return err
-		}
-		bps, err := affiliates.rateFor(ctx, client, sale.StoreId, item)
+		bps, eligible, err := affiliates.eligibleRate(ctx, transaction, client, sale, item, creatorId)
 		if err != nil {
 			return err
 		}
 		amount := ShareOf(item.amountMinor, bps)
-		if amount <= 0 {
-			return nil
-		}
 		now := affiliates.Container.Now().UTC()
+		if !eligible || amount <= 0 {
+			return voidAttributedSale(ctx, client, item.itemKey, "ineligible", now)
+		}
 		commission, err := client.AffiliateCommission.Create().SetID(uuid.Must(uuid.NewV7())).SetOrderID(sale.OrderId).SetOrderNumber(sale.OrderNumber).SetOrderItemID(item.itemKey).SetProductID(item.productId).
 			SetStoreID(sale.StoreId).SetSellerUserID(sale.SellerUserId).SetCreatorID(creatorId).SetAttributionSource(item.source).SetAttributionID(item.sourceId).
 			SetSaleMinor(item.amountMinor).SetCommissionBps(bps).SetCommissionMinor(amount).SetCurrency(sale.Currency).SetNillableOrderedAt(sale.OrderedAt).
+			SetProductName(truncateLabel(labels.productName, 200)).SetStoreName(truncateLabel(labels.storeName, 200)).SetCreatorHandle(truncateLabel(labels.creatorHandle, 80)).
 			SetStatus(affiliatecommission.StatusPending).SetCreatedAt(now).Save(ctx)
 		if err != nil {
 			return err
 		}
-		reference := "affiliate-commission:" + item.itemKey
+		if err := completeAttributedSale(ctx, client, sale, item, creatorId, labels, bps, amount, now); err != nil {
+			return err
+		}
 		if _, err := affiliates.settleCommissionInTransaction(ctx, transaction, client, commission); err != nil {
 			return err
 		}
 		if _, err := programservices.RecordEarning(ctx, client, programservices.Earning{
-			CreatorId: creatorId, Kind: "affiliate", Reference: reference, SourceType: item.source, SourceId: item.sourceId, Description: "Affiliate commission",
-			GrossMinor: item.amountMinor, NetMinor: amount, Unit: sale.Currency, At: now,
+			CreatorId: creatorId, Kind: "affiliate", Reference: "affiliate-commission:" + item.itemKey, SourceType: item.source, SourceId: item.sourceId,
+			Description: CreatorCommissionCreditDescription(commission), GrossMinor: item.amountMinor, NetMinor: amount, Unit: sale.Currency, At: now,
 		}); err != nil {
 			return err
 		}

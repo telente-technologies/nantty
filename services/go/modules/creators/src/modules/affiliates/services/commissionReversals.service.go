@@ -97,7 +97,7 @@ func (affiliates Affiliates) reverseOne(ctx context.Context, transaction *sql.Tx
 	}
 	if _, err := programservices.RecordEarning(ctx, client, programservices.Earning{
 		CreatorId: commission.CreatorID, Kind: "affiliate", Reference: reference, SourceType: commission.AttributionSource, SourceId: commission.AttributionID,
-		Description: "Affiliate commission reversed after a refund", GrossMinor: -amount, NetMinor: -amount, Unit: commission.Currency, At: now,
+		Description: CreatorCommissionReversalDescription(commission), GrossMinor: -amount, NetMinor: -amount, Unit: commission.Currency, At: now,
 	}); err != nil {
 		return false, err
 	}

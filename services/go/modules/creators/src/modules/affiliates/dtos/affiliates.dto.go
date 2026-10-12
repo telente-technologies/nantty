@@ -27,3 +27,7 @@ type DecisionDto struct {
 type CreatorStatusDto struct {
 	Status string `json:"status"`
 }
+
+type AffiliateLinkRequestDto struct {
+	ProductId string `json:"productId"`
+}

@@ -101,7 +101,7 @@ func (affiliates Affiliates) settleCommissionInTransaction(ctx context.Context, 
 		journalReference, movementSuffix = fmt.Sprintf("%s:r%d", journalReference, attempts), fmt.Sprintf("-r%d", attempts)
 	}
 	if _, err := affiliates.Container.Ledger.PostBalancedJournalEntry(ctx, transaction, ledgermodels.JournalEntryRequest{
-		Reference: journalReference, Kind: "affiliateCommission.sent", Description: "Affiliate commission for order " + commission.OrderNumber,
+		Reference: journalReference, Kind: "affiliateCommission.sent", Description: SellerCommissionDebitDescription(commission),
 		Metadata: map[string]any{"commissionId": commission.ID.String(), "orderId": commission.OrderID, "creatorId": commission.CreatorID}, Lines: walletDebitLines(commission.SellerUserID, commission.Currency, take),
 	}); err != nil {
 		return false, err
@@ -130,7 +130,7 @@ func (affiliates Affiliates) clawBackInTransaction(ctx context.Context, transact
 	key := commission.ID.String() + ":" + refundKey
 	if recovered > 0 {
 		if _, err := affiliates.Container.Ledger.PostBalancedJournalEntry(ctx, transaction, ledgermodels.JournalEntryRequest{
-			Reference: "affiliate-commission-clawback:" + key, Kind: "affiliateCommission.clawedBack", Description: "Affiliate commission returned after a refund",
+			Reference: "affiliate-commission-clawback:" + key, Kind: "affiliateCommission.clawedBack", Description: CreatorCommissionReversalDescription(commission),
 			Metadata: map[string]any{"commissionId": commission.ID.String(), "orderId": commission.OrderID}, Lines: walletDebitLines(commission.CreatorID, commission.Currency, take),
 		}); err != nil {
 			return 0, 0, err
@@ -158,7 +158,7 @@ func (affiliates Affiliates) recordCreatorShortfall(ctx context.Context, transac
 	digest := sha256.Sum256([]byte(key))
 	subject := "aff-short:" + hex.EncodeToString(digest[:16])
 	if err := payments.CreditWalletFromPlatformInTransaction(ctx, transaction, commission.SellerUserID, commission.Currency, subject, subject, shortfall,
-		ledgermodels.WalletDebtAccount(commission.CreatorID, commission.Currency), "Affiliate commission the creator could not return yet"); err != nil {
+		ledgermodels.WalletDebtAccount(commission.CreatorID, commission.Currency), SellerCommissionShortfallDescription(commission)); err != nil {
 		return err
 	}
 	payments.RecordPaymentAlertMetric(ctx, "walletDebt", "userId", commission.CreatorID, "debtMinor", shortfall, "commissionId", commission.ID.String())
@@ -180,10 +180,10 @@ func (handler CommissionMovementHandler) commissionOf(ctx context.Context, clien
 	return client.AffiliateCommission.Query().Where(affiliatecommission.IDEQ(id)).ForUpdate().Only(ctx)
 }
 
-func (handler CommissionMovementHandler) post(ctx context.Context, transaction *sql.Tx, movement paymentmodels.FinishedMovement, outcome string, lines []ledgermodels.JournalLineRequest) error {
+func (handler CommissionMovementHandler) post(ctx context.Context, transaction *sql.Tx, movement paymentmodels.FinishedMovement, outcome, description string, lines []ledgermodels.JournalLineRequest) error {
 	_, err := handler.Affiliates.Container.Ledger.PostBalancedJournalEntry(ctx, transaction, ledgermodels.JournalEntryRequest{
 		Reference: "affiliate-movement-" + outcome + ":" + movement.Reference, Kind: "affiliateCommission.movement." + movement.Kind + "." + outcome,
-		Description: "Affiliate commission transfer " + outcome, Metadata: map[string]any{"commissionId": movement.SubjectId}, Lines: lines,
+		Description: description, Metadata: map[string]any{"commissionId": movement.SubjectId}, Lines: lines,
 	})
 	return err
 }
@@ -200,9 +200,9 @@ func (handler CommissionMovementHandler) HandleMovementSucceeded(ctx context.Con
 	}
 	currency := commission.Currency
 	if handler.Kind == MovementAffiliateClawback {
-		return handler.post(ctx, transaction, movement, "succeeded", moveBetween(ledgermodels.WalletOutgoingAccount(commission.CreatorID, currency), ledgermodels.WalletAvailableAccount(commission.SellerUserID, currency), movement.AmountMinor))
+		return handler.post(ctx, transaction, movement, "succeeded", SellerCommissionReversalCreditDescription(commission), moveBetween(ledgermodels.WalletOutgoingAccount(commission.CreatorID, currency), ledgermodels.WalletAvailableAccount(commission.SellerUserID, currency), movement.AmountMinor))
 	}
-	if err := handler.post(ctx, transaction, movement, "succeeded", moveBetween(ledgermodels.WalletOutgoingAccount(commission.SellerUserID, currency), ledgermodels.WalletAvailableAccount(commission.CreatorID, currency), movement.AmountMinor)); err != nil {
+	if err := handler.post(ctx, transaction, movement, "succeeded", CreatorCommissionCreditDescription(commission), moveBetween(ledgermodels.WalletOutgoingAccount(commission.SellerUserID, currency), ledgermodels.WalletAvailableAccount(commission.CreatorID, currency), movement.AmountMinor)); err != nil {
 		return err
 	}
 	if err := client.AffiliateCommission.UpdateOne(commission).SetStatus(affiliatecommission.StatusPaid).SetPaidAt(handler.Affiliates.Container.Now().UTC()).Exec(ctx); err != nil {
@@ -245,12 +245,12 @@ func (handler CommissionMovementHandler) HandleMovementFailed(ctx context.Contex
 	currency := commission.Currency
 	if handler.Kind == MovementAffiliateClawback {
 		creatorOutgoing := ledgermodels.WalletOutgoingAccount(commission.CreatorID, currency)
-		if err := handler.post(ctx, transaction, movement, "failed", moveBetween(creatorOutgoing, ledgermodels.WalletAvailableAccount(commission.CreatorID, currency), movement.AmountMinor)); err != nil {
+		if err := handler.post(ctx, transaction, movement, "failed", CreatorCommissionReversalFailedDescription(commission), moveBetween(creatorOutgoing, ledgermodels.WalletAvailableAccount(commission.CreatorID, currency), movement.AmountMinor)); err != nil {
 			return err
 		}
 		return handler.Affiliates.recordCreatorShortfall(ctx, transaction, commission, movement.AmountMinor, "failed:"+movement.Reference)
 	}
-	if err := handler.post(ctx, transaction, movement, "failed", moveBetween(ledgermodels.WalletOutgoingAccount(commission.SellerUserID, currency), ledgermodels.WalletAvailableAccount(commission.SellerUserID, currency), movement.AmountMinor)); err != nil {
+	if err := handler.post(ctx, transaction, movement, "failed", SellerCommissionTransferFailedDescription(commission), moveBetween(ledgermodels.WalletOutgoingAccount(commission.SellerUserID, currency), ledgermodels.WalletAvailableAccount(commission.SellerUserID, currency), movement.AmountMinor)); err != nil {
 		return err
 	}
 	return handler.Affiliates.recordFailedCommissionTransfer(ctx, transaction, client, commission, movement.FailureReason)
