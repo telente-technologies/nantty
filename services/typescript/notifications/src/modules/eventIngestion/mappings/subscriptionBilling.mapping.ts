@@ -1,8 +1,8 @@
 import type { EventDataReader } from "../../../utils/eventDataReader.util.js";
 import { intentFor, plan, type EventMapping, type MappingContext } from "./mappingHelpers.js";
 
-type LineItemKind = "plan_base" | "checkmark" | "bundle_discount" | "proration_credit";
-const lineItemKinds: readonly LineItemKind[] = ["plan_base", "checkmark", "bundle_discount", "proration_credit"];
+type LineItemKind = "plan_base" | "checkmark" | "bundle_discount" | "offer_discount" | "proration_credit";
+const lineItemKinds: readonly LineItemKind[] = ["plan_base", "checkmark", "bundle_discount", "offer_discount", "proration_credit"];
 
 function billingUrls(data: EventDataReader, context: MappingContext) {
   const manage = data.text("audience", "personal") === "business" ? `${context.sellerDashboardUrl}/settings/billing` : `${context.webBaseUrl}/settings/subscriptions`;

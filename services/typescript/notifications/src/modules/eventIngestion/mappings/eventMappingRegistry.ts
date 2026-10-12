@@ -10,6 +10,7 @@ import * as orders from "./orders.mapping.js";
 import * as social from "./social.mapping.js";
 import * as storeActivity from "./storeActivity.mapping.js";
 import * as subscriptionBilling from "./subscriptionBilling.mapping.js";
+import * as subscriptionOffers from "./subscriptionOffers.mapping.js";
 import * as support from "./support.mapping.js";
 import * as verification from "./verification.mapping.js";
 
@@ -109,6 +110,7 @@ export const eventMappings: Readonly<Record<string, EventMapping>> = {
   "subscription.downgraded": subscriptionBilling.subscriptionDowngraded,
   "subscriptionCard.expiring": subscriptionBilling.subscriptionCardExpiring,
   "subscriptionPrice.changeNotice": subscriptionBilling.subscriptionPriceChange,
+  "subscriptionOffer.sent": subscriptionOffers.subscriptionOfferSent,
   "copyrightClaim.warningIssued": copyright.copyrightWarningIssued,
   "copyrightClaim.audioMuteOrdered": copyright.copyrightAudioMuted,
   "copyrightClaim.contentTakenDown": copyright.copyrightContentTakenDown,
