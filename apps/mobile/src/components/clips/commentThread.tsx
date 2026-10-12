@@ -72,6 +72,8 @@ export function CommentThread({ comment, nestingDepth, previewReplies = [] }: Co
           onReply={() => thread.startReplyingToComment(comment)}
           onDelete={() => thread.deleteOwnComment(comment)}
           onTogglePin={() => thread.togglePinOnComment(commentWithLocalChanges)}
+          canHide={thread.canHideComment(commentWithLocalChanges)}
+          onHide={() => thread.hideComment(commentWithLocalChanges)}
           onReplyWithVideo={thread.canReplyWithVideoTo(comment) ? () => thread.startVideoReplyTo(comment) : undefined}
           isPickingForVideoReply={thread.isPickingVideoReplyComment}
           isHighlighted={thread.highlightedCommentId === comment.id}
@@ -122,6 +124,8 @@ function CommentChain({ comment, previewReplies, onShowMore }: { readonly commen
         onReply={() => thread.startReplyingToComment(node)}
         onDelete={() => thread.deleteOwnComment(node)}
         onTogglePin={() => thread.togglePinOnComment(withLocalChanges)}
+        canHide={thread.canHideComment(withLocalChanges)}
+        onHide={() => thread.hideComment(withLocalChanges)}
         onReplyWithVideo={thread.canReplyWithVideoTo(node) ? () => thread.startVideoReplyTo(node) : undefined}
         isPickingForVideoReply={thread.isPickingVideoReplyComment}
         isHighlighted={thread.highlightedCommentId === node.id}

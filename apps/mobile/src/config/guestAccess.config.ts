@@ -37,6 +37,7 @@ export const authOnlyRouteSignInPhrases: Readonly<Record<string, string>> = {
   SettingsSupport: "contact support",
   ChangePassword: "change your password",
   BlockedUsers: "manage blocked accounts",
+  HiddenComments: "manage hidden comments",
   SettingsUsername: "change your username",
   SettingsPrivacy: "manage your privacy",
   SettingsPrivacyData: "manage your data and consents",

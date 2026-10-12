@@ -2,7 +2,7 @@ import { c } from "./contractSchema.util";
 import type { EndpointContract } from "./endpointContract.type";
 
 const userSummary = c.object({ id: c.string(), name: c.string(), username: c.string(), avatarUrl: c.nullable(c.string()), verified: c.boolean() }, ["verified"]);
-const user = c.object({ id: c.string(), name: c.string(), username: c.string(), avatarUrl: c.nullable(c.string()), bannerUrl: c.nullable(c.string()), bio: c.string(), followers: c.number(), following: c.number(), posts: c.number() });
+const user = c.object({ id: c.string(), name: c.string(), username: c.string(), avatarUrl: c.nullable(c.string()), bannerUrl: c.nullable(c.string()), bio: c.string(), followers: c.number(), following: c.number(), posts: c.number(), profileKind: c.string(), showsMart: c.boolean() }, ["profileKind", "showsMart"]);
 const address = c.object({
   id: c.string(), fullName: c.string(), phone: c.string(), line1: c.string(), postalCode: c.string(), details: c.string(), isDefault: c.boolean(),
   countryId: c.string(), countryCode: c.string(), country: c.string(), stateId: c.nullable(c.string()), state: c.string(), lgaId: c.nullable(c.string()),

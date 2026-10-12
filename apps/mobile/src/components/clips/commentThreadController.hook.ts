@@ -187,6 +187,18 @@ export function useCommentThreadController(postId: string | null, closeContainin
     });
   };
 
+  const canHideComment = (comment: Comment) =>
+    !isPendingComment(comment) && !!postAuthorId && signedInUser?.id === postAuthorId && comment.author.id !== postAuthorId;
+
+  const hideComment = (comment: Comment) => {
+    if (!postId || !canHideComment(comment)) return;
+    setDeletedFlag(comment.id, true);
+    postCommentsService.hideComment(postId, comment.id).catch(() => {
+      setDeletedFlag(comment.id, false);
+      showAlertWithButtons("Could not hide comment", "Please try again.");
+    });
+  };
+
   const setReplyThreadVisibility = useCallback(
     (commentId: string, visibility: ReplyThreadVisibility) =>
       setThreadState((s) =>
@@ -226,6 +238,8 @@ export function useCommentThreadController(postId: string | null, closeContainin
     canDeleteComment,
     canPinComment,
     togglePinOnComment,
+    canHideComment,
+    hideComment,
     setReplyThreadVisibility,
     replyThreadVisibilityFor,
     startReplyingToComment,

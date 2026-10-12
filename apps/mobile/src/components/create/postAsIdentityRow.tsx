@@ -11,7 +11,8 @@ import { useActingProfileStore } from "@/store/actingProfile.store";
 import { useAuthStore } from "@/store/auth.store";
 import { useProfileSwitcherSheetStore } from "@/store/profileSwitcherSheet.store";
 
-const KIND_LABELS = { person: "Personal", business: "Business", brand: "Brand", store: "Store", government: "Government" } as const;
+const KIND_LABELS = { person: "Personal", business: "Business page", brand: "Brand", store: "Store", government: "Government" } as const;
+const KIND_DESTINATIONS = { person: "profile", business: "business page", brand: "brand page", store: "store", government: "page" } as const;
 
 function useComposerIdentity() {
   const { actingProfile, setActingProfile } = useActingProfileStore();
@@ -43,7 +44,7 @@ export function PostAsIdentityRow() {
             Posting as {identity.name}
           </Text>
           <Text size={12} lineHeight={16} color={colors.textMuted}>
-            @{identity.handle} · {KIND_LABELS[identity.kind]} — followers see this post in Feed and on your {identity.kind === "person" ? "profile" : "store or brand page"}
+            @{identity.handle} · {KIND_LABELS[identity.kind]} — followers see this post in Feed and on your {KIND_DESTINATIONS[identity.kind]}
           </Text>
         </View>
         <Text size={13} weight={600} lineHeight={16.9} color={colors.primary}>

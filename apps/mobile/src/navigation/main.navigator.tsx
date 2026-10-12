@@ -39,6 +39,7 @@ import { ChatNotificationSettingsScreen } from "@/screens/messages/chatNotificat
 import { ChatPasscodeScreen } from "@/screens/messages/chatPasscode.screen";
 import { ChatSettingsScreen } from "@/screens/messages/chatSettings.screen";
 import { BlockedUsersScreen } from "@/screens/settings/blockedUsers.screen";
+import { HiddenCommentsScreen } from "@/screens/settings/hiddenComments.screen";
 import { WalletScreen } from "@/screens/wallet/wallet.screen";
 import { StoreRewardsScreen } from "@/screens/wallet/storeRewards.screen";
 import { TransactionsScreen } from "@/screens/wallet/transactions.screen";
@@ -151,6 +152,7 @@ export function MainNavigator() {
       <Stack.Screen name="SettingsAbout" component={SettingsAboutScreen} />
       <Stack.Screen name="ChangePassword" component={ChangePasswordScreen} />
       <Stack.Screen name="BlockedUsers" component={BlockedUsersScreen} />
+      <Stack.Screen name="HiddenComments" component={HiddenCommentsScreen} />
       <Stack.Screen name="ChatSettings" component={ChatSettingsScreen} />
       <Stack.Screen name="ChatNotificationSettings" component={ChatNotificationSettingsScreen} />
       <Stack.Screen name="ChatPasscode" component={ChatPasscodeScreen} />

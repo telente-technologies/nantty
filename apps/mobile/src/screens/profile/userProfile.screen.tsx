@@ -18,6 +18,7 @@ import { useTheme } from "@/theme";
 import type { MainScreenProps } from "@/navigation/navigation.types";
 import { creatorProgramService } from "@/services/creators/creatorProgram.service";
 import { useAuthStore } from "@/store/auth.store";
+import { userProfileShowsMart } from "@/utils/linkedProfiles.util";
 import { requireAuthThen } from "@/utils/requireAuth.util";
 
 export function UserProfileScreen({ navigation, route }: MainScreenProps<"UserProfile">) {
@@ -47,6 +48,7 @@ export function UserProfileScreen({ navigation, route }: MainScreenProps<"UserPr
   const postNotificationLevel = followStatus?.viewerPostNotifications ?? "off";
   const showBell = !!signedInUserId && !viewingOwnProfile && followState === "accepted";
   const isContentHidden = profile ? isProfileContentHiddenFromViewer(profile) : false;
+  const showsMart = userProfileShowsMart(profile);
 
   useEffect(() => {
     if (viewingOwnProfile) navigation.replace("Tabs", { screen: "Me" });
@@ -68,7 +70,7 @@ export function UserProfileScreen({ navigation, route }: MainScreenProps<"UserPr
               onPress: () => setIsBellSheetOpen(true),
             }]
           : []),
-        ...(profile.isSeller && profile.storeId ? [{ label: "View Shop", onPress: () => navigation.navigate("Store", { storeId: profile.storeId! }) }] : []),
+        ...(showsMart && profile.storeId ? [{ label: "View Shop", onPress: () => navigation.navigate("Store", { storeId: profile.storeId! }) }] : []),
       ]
     : [];
 
@@ -99,7 +101,7 @@ export function UserProfileScreen({ navigation, route }: MainScreenProps<"UserPr
           "reposts",
           "clips",
           ...(profile?.isCreator || (subscriptionPlans.data?.length ?? 0) > 0 ? (["sounds"] as const) : []),
-          ...(profile?.isSeller ? (["store"] as const) : []),
+          ...(showsMart ? (["store"] as const) : []),
         ]}
         actions={actions}
         isLocked={isContentHidden}
@@ -113,7 +115,7 @@ export function UserProfileScreen({ navigation, route }: MainScreenProps<"UserPr
         onPressFollowers={() => navigation.navigate("Connections", { userId, tab: "followers" })}
         onPressFollowing={() => navigation.navigate("Connections", { userId, tab: "following" })}
         onPressPost={(post) => navigation.navigate("PostDetail", { postId: post.id })}
-        onOpenStoreTab={profile?.storeId ? () => navigation.navigate("Store", { storeId: profile.storeId! }) : undefined}
+        onOpenStoreTab={showsMart && profile?.storeId ? () => navigation.navigate("Store", { storeId: profile.storeId! }) : undefined}
       />
       )}
       {profile && profile.account?.status !== "suspended" ? (

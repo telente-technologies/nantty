@@ -70,6 +70,8 @@ export function ThreadReplyBranch({ reply, postAuthorId, hasParentAbove, showRep
         canDelete={thread.canDeleteComment(reply)}
         canPin={thread.canPinComment(reply)}
         onTogglePin={() => thread.togglePinOnComment(reply)}
+        canHide={thread.canHideComment(reply)}
+        onHide={() => thread.hideComment(reply)}
         onReply={() => thread.startReplyingToComment(reply)}
         onToggleLike={() => thread.toggleLikeOnComment(reply)}
         onRepost={() => onRepostReply?.(reply)}

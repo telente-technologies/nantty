@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Pressable, StyleSheet, View } from "react-native";
 
-import { Heart20Icon, HeartFill72Icon, PushPin24Icon, Trash24Icon, VideoCamera24Icon, Warning20Icon } from "@/components/icons";
+import { EyeSlash24Icon, Heart20Icon, HeartFill72Icon, PushPin24Icon, Trash24Icon, VideoCamera24Icon, Warning20Icon } from "@/components/icons";
 import { MentionText } from "@/components/mentions/mentionText";
 import { VideoReplyChip } from "./videoReply/videoReplyChip";
 import { CommentQuotedPost } from "@/components/feed/commentQuotedPost";
@@ -24,10 +24,12 @@ export interface CommentRowProps {
   readonly isPending?: boolean;
   readonly canDelete?: boolean;
   readonly canPin?: boolean;
+  readonly canHide?: boolean;
   readonly onToggleLike: () => void;
   readonly onReply: () => void;
   readonly onDelete?: () => void;
   readonly onTogglePin?: () => void;
+  readonly onHide?: () => void;
   readonly onReplyWithVideo?: () => void;
   readonly isPickingForVideoReply?: boolean;
   readonly isHighlighted?: boolean;
@@ -48,6 +50,8 @@ export function CommentRow({
   onDelete,
   canPin,
   onTogglePin,
+  canHide,
+  onHide,
   onReplyWithVideo,
   isPickingForVideoReply,
   isHighlighted,
@@ -60,8 +64,15 @@ export function CommentRow({
   const openUserProfile = useOpenUserProfile();
   const [isOptionsSheetOpen, setIsOptionsSheetOpen] = useState(false);
   const offerToReportComment = () => setIsOptionsSheetOpen(true);
+  const showsHide = !!canHide && !!onHide;
+  const hasOwnerOptions = !!canDelete || !!canPin || showsHide;
+  const askBeforeHiding = () =>
+    showAlertWithButtons("Hide comment?", "Only you and the person who wrote it will see it. Replies under it are hidden too. You can unhide it from Settings, Hidden comments.", [
+      { text: "Cancel", style: "cancel" },
+      { text: "Hide", onPress: () => onHide?.() },
+    ]);
   const openCommentOptions = () => {
-    if (!canDelete && !canPin) return;
+    if (!hasOwnerOptions) return;
     setIsOptionsSheetOpen(true);
   };
   const askBeforeDeleting = () =>
@@ -78,6 +89,7 @@ export function CommentRow({
         onPress: onTogglePin,
       }]
       : []),
+    ...(showsHide ? [{ label: "Hide comment", icon: <EyeSlash24Icon size={20} color={colors.text} />, onPress: askBeforeHiding }] : []),
     ...(canDelete && onDelete
       ? [{ label: "Delete comment", icon: <Trash24Icon size={20} />, destructive: true, onPress: askBeforeDeleting }]
       : [{ label: "Report comment", icon: <Warning20Icon />, destructive: true, onPress: () => requireAuthThen(() => setIsReportSheetOpen(true), undefined, "report") }]),
@@ -85,17 +97,19 @@ export function CommentRow({
   return (
     <Pressable
       onPress={isPickingForVideoReply && onReplyWithVideo ? onReplyWithVideo : undefined}
-      onLongPress={(canDelete || canPin) ? openCommentOptions : isPending ? undefined : offerToReportComment}
-      accessibilityHint={canDelete || canPin ? "Long press for comment options" : "Long press to report this comment"}
+      onLongPress={hasOwnerOptions ? openCommentOptions : isPending ? undefined : offerToReportComment}
+      accessibilityHint={hasOwnerOptions ? "Long press for comment options" : "Long press to report this comment"}
       accessibilityActions={[
         ...(canDelete || isPending ? [] : [{ name: "report", label: "Report comment" }]),
         ...(onReplyWithVideo ? [{ name: "replyWithVideo", label: "Reply with video" }] : []),
         ...(canPin && onTogglePin ? [{ name: "togglePin", label: comment.isPinned === true ? "Unpin comment" : "Pin comment" }] : []),
+        ...(showsHide ? [{ name: "hide", label: "Hide comment" }] : []),
       ]}
       onAccessibilityAction={(event) => {
         if (event.nativeEvent.actionName === "replyWithVideo") onReplyWithVideo?.();
         if (event.nativeEvent.actionName === "report") requireAuthThen(() => setIsReportSheetOpen(true), undefined, "report");
         if (event.nativeEvent.actionName === "togglePin") onTogglePin?.();
+        if (event.nativeEvent.actionName === "hide") askBeforeHiding();
       }}
       style={[styles.row, isPending && styles.pending, (isHighlighted || (isPickingForVideoReply && onReplyWithVideo)) && styles.pickable]}
     >

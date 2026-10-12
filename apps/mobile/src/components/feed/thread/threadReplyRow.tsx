@@ -2,7 +2,7 @@ import { Image } from "expo-image";
 import { useState } from "react";
 import { Pressable, StyleSheet, View } from "react-native";
 
-import { LikeActionIcon, BookmarkActionIcon, PushPin24Icon, ReplyActionIcon, RepostActionIcon, ShareActionIcon, Trash24Icon } from "@/components/icons";
+import { LikeActionIcon, BookmarkActionIcon, EyeSlash24Icon, PushPin24Icon, ReplyActionIcon, RepostActionIcon, ShareActionIcon, Trash24Icon } from "@/components/icons";
 import { MentionText } from "@/components/mentions/mentionText";
 import { VerificationBadge } from "@/components/profile/verificationBadge";
 import { ActionSheet, type ActionSheetOption } from "@/components/ui/actionSheet";
@@ -33,6 +33,8 @@ export interface ThreadReplyRowProps {
   readonly canDelete: boolean;
   readonly canPin?: boolean;
   readonly onTogglePin?: () => void;
+  readonly canHide?: boolean;
+  readonly onHide?: () => void;
   readonly onReply: () => void;
   readonly onToggleLike: () => void;
   readonly onRepost: () => void;
@@ -41,7 +43,7 @@ export interface ThreadReplyRowProps {
   readonly onDelete: () => void;
 }
 
-export function ThreadReplyRow({ reply, hasParentAbove, hasChildBelow, showReplyingTo, isPending, canDelete, canPin = false, onTogglePin, onReply, onToggleLike, onRepost, onShare, onOpenThread, onDelete }: ThreadReplyRowProps) {
+export function ThreadReplyRow({ reply, hasParentAbove, hasChildBelow, showReplyingTo, isPending, canDelete, canPin = false, onTogglePin, canHide = false, onHide, onReply, onToggleLike, onRepost, onShare, onOpenThread, onDelete }: ThreadReplyRowProps) {
   const { colors } = useTheme();
   const styles = useStyles();
   const openUserProfile = useOpenUserProfile();
@@ -59,8 +61,15 @@ export function ThreadReplyRow({ reply, hasParentAbove, hasChildBelow, showReply
     ], { intent: "delete" });
   const [isOptionsSheetOpen, setIsOptionsSheetOpen] = useState(false);
   const pinLabel = reply.isPinned === true ? "Unpin reply" : "Pin reply";
+  const showsHide = canHide && !!onHide;
+  const confirmHide = () =>
+    showAlertWithButtons("Hide reply?", "Only you and the person who wrote it will see it. Replies under it are hidden too. You can unhide it from Settings, Hidden comments.", [
+      { text: "Cancel", style: "cancel" },
+      { text: "Hide", onPress: () => onHide?.() },
+    ]);
   const replyOptions: ActionSheetOption[] = [
     ...(canPin && onTogglePin ? [{ label: pinLabel, icon: <PushPin24Icon size={20} color={colors.text} />, onPress: onTogglePin }] : []),
+    ...(showsHide ? [{ label: "Hide reply", icon: <EyeSlash24Icon size={20} color={colors.text} />, onPress: confirmHide }] : []),
     ...(canDelete ? [{ label: "Delete reply", icon: <Trash24Icon size={20} />, destructive: true, onPress: confirmDelete }] : []),
   ];
 
@@ -68,10 +77,11 @@ export function ThreadReplyRow({ reply, hasParentAbove, hasChildBelow, showReply
     <View
       style={[styles.row, isPending ? styles.pending : null]}
       accessible={false}
-      accessibilityActions={replyOptions.length > 0 ? [...(canPin && onTogglePin ? [{ name: "togglePin", label: pinLabel }] : []), ...(canDelete ? [{ name: "delete", label: "Delete reply" }] : [])] : undefined}
+      accessibilityActions={replyOptions.length > 0 ? [...(canPin && onTogglePin ? [{ name: "togglePin", label: pinLabel }] : []), ...(showsHide ? [{ name: "hide", label: "Hide reply" }] : []), ...(canDelete ? [{ name: "delete", label: "Delete reply" }] : [])] : undefined}
       onAccessibilityAction={(event) => {
         if (event.nativeEvent.actionName === "delete") confirmDelete();
         if (event.nativeEvent.actionName === "togglePin") onTogglePin?.();
+        if (event.nativeEvent.actionName === "hide") confirmHide();
       }}
     >
       <View style={styles.rail}>

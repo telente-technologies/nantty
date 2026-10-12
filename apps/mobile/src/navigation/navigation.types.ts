@@ -64,6 +64,7 @@ export type MainStackParamList = {
   SettingsAbout: undefined;
   ChangePassword: undefined;
   BlockedUsers: undefined;
+  HiddenComments: undefined;
   ChatSettings: undefined;
   ChatNotificationSettings: undefined;
   ChatPasscode: undefined;

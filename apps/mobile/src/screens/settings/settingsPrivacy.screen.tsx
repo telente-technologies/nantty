@@ -5,7 +5,7 @@ import { DownloadPrivacySection } from "@/components/settings/downloadPrivacySec
 import { MentionPrivacySection } from "@/components/settings/mentionPrivacySection";
 import { SettingsGroup, SettingsRow } from "@/components/settings/settingsGroup";
 import { SettingsPage } from "@/components/settings/settingsPage";
-import { Funnel24Icon } from "@/components/icons";
+import { EyeSlash24Icon, Funnel24Icon } from "@/components/icons";
 import { Chip } from "@/components/ui/chip";
 import { Text } from "@/components/ui/text";
 import { useTheme } from "@/theme";
@@ -38,6 +38,7 @@ export function SettingsPrivacyScreen({ navigation }: MainScreenProps<"SettingsP
       <DownloadPrivacySection />
       <SettingsGroup>
         <SettingsRow label="Content preferences" icon={<Funnel24Icon />} trailing="chevron" onPress={() => navigation.navigate("ContentPreferences")} />
+        <SettingsRow label="Hidden comments" icon={<EyeSlash24Icon />} trailing="chevron" onPress={() => navigation.navigate("HiddenComments")} />
       </SettingsGroup>
     </SettingsPage>
   );
