@@ -2,6 +2,7 @@ import { useIsFocused } from "@react-navigation/native";
 import { useCameraPermissions } from "expo-camera";
 import { useEffect, useRef, useState } from "react";
 import { Pressable, StyleSheet, View } from "react-native";
+import { rememberSaleAttribution } from "@/store/saleAttribution.store";
 import { useShareToChat } from "@/components/chatSafety/shareToChat.hook";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { BrandLoader } from "@/components/ui/brandLoader";
@@ -348,6 +349,7 @@ export function LiveScreen({ navigation, route }: MainScreenProps<"Live">) {
         onClose={() => setShowProducts(false)}
         onOpenProduct={(productId) => {
           setShowProducts(false);
+          rememberSaleAttribution(productId, { source: "live", id: liveId });
           navigation.navigate("ProductDetail", { productId });
         }}
       />

@@ -2,6 +2,9 @@ import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { ScrollView, Share, StyleSheet, View } from "react-native";
 
+import { affiliateLinksService } from "@/services/commerce/affiliateLinks.service";
+import { rememberSaleAttribution } from "@/store/saleAttribution.store";
+import { isAffiliateLinkId } from "@/utils/saleAttribution.util";
 import { useShareToChat } from "@/components/chatSafety/shareToChat.hook";
 import { Frame69424Icon } from "@/components/icons";
 import { AboutShopCard } from "@/components/product/aboutShopCard";
@@ -36,8 +39,17 @@ const QUANTITY_OPTIONS = Array.from({ length: 10 }, (_, i) => String(i + 1));
 export function ProductDetailScreen({ navigation, route }: MainScreenProps<"ProductDetail">) {
   const { colors } = useTheme();
   const styles = useStyles();
-  const { productId } = route.params;
+  const { productId, aff: affiliateLinkId } = route.params;
   const product = useQuery({ queryKey: ["products", "detail", productId], queryFn: () => productsService.fetchProductDetailById(productId) });
+  useEffect(() => {
+    if (!isAffiliateLinkId(affiliateLinkId)) return;
+    affiliateLinksService.recordClick(affiliateLinkId).then(
+      (click) => {
+        if (click.productId === productId) rememberSaleAttribution(productId, click.attribution, Date.parse(click.expiresAt));
+      },
+      () => undefined,
+    );
+  }, [affiliateLinkId, productId]);
   useEffect(() => {
     void trackProductInteraction("product.viewed", { productId });
   }, [productId]);
