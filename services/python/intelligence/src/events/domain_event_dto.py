@@ -66,6 +66,13 @@ class ConsentChangePayload(ContractModel):
 class CommentCreatedPayload(ItemTopicsMixin):
     post_id: OpaqueIdentifier
     author_id: OpaqueIdentifier | None = None
+    comment_id: OpaqueIdentifier | None = None
+
+
+class CommentVisibilityPayload(ContractModel):
+    comment_id: OpaqueIdentifier
+    post_id: OpaqueIdentifier
+    post_author_id: OpaqueIdentifier
 
 
 class EmptyPayload(ContractModel):
@@ -167,6 +174,16 @@ class CommentCreatedDomainEvent(DomainEnvelopeBase):
     payload: CommentCreatedPayload
 
 
+class CommentHiddenDomainEvent(DomainEnvelopeBase):
+    event_type: Literal["comment.hidden"]
+    payload: CommentVisibilityPayload
+
+
+class CommentUnhiddenDomainEvent(DomainEnvelopeBase):
+    event_type: Literal["comment.unhidden"]
+    payload: CommentVisibilityPayload
+
+
 class ContentSavedDomainEvent(DomainEnvelopeBase):
     event_type: Literal["content.saved"]
     payload: SavedPayload
@@ -202,6 +219,8 @@ type DomainEvent = Annotated[
     | PostLikedDomainEvent
     | PostSharedDomainEvent
     | CommentCreatedDomainEvent
+    | CommentHiddenDomainEvent
+    | CommentUnhiddenDomainEvent
     | ContentSavedDomainEvent
     | PostViewedDomainEvent
     | ClipWatchedDomainEvent,

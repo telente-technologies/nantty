@@ -11,6 +11,9 @@ from src.events.contract_envelope_normalizer import is_unattributed_purchase, un
 from src.events.domain_event_dto import (
     AccountDeletionExecutedDomainEvent,
     AccountDeletionRequestedDomainEvent,
+    CommentCreatedDomainEvent,
+    CommentHiddenDomainEvent,
+    CommentUnhiddenDomainEvent,
     ConsentGrantedDomainEvent,
     ConsentWithdrawnDomainEvent,
     DomainEvent,
@@ -20,6 +23,7 @@ from src.events.domain_event_dto import (
 )
 from src.modules.content_scoring.services.content_scoring_service import ContentScoringService
 from src.modules.domain_events.services.behaviour_feature_service import build_behaviour_operations
+from src.modules.domain_events.services.comment_signal_service import CommentSignalService
 from src.modules.domain_events.services.domain_event_translation_service import translate_to_intelligence_event
 from src.modules.domain_events.services.personal_data_purge_service import PersonalDataPurgeService
 from src.modules.events_ingestion.services.event_ingestion_service import EventIngestionService
@@ -64,6 +68,7 @@ class DomainEventConsumerService:
         self.event_ingestion_service = event_ingestion_service
         self.purge_service = purge_service
         self.content_scoring_service = content_scoring_service
+        self.comment_signals = CommentSignalService(feature_store, identifier_hasher)
 
     async def score_content_for_trust(self, event: DomainEvent) -> None:
         if self.content_scoring_service is None:
@@ -160,12 +165,17 @@ class DomainEventConsumerService:
         )
         if consent_rows[0].get(ACCOUNT_DELETED_FIELD):
             return DomainEventProcessingOutcome("skipped_deleted_account", event.event_id)
+        if isinstance(event, CommentHiddenDomainEvent | CommentUnhiddenDomainEvent):
+            await self.comment_signals.apply_visibility_change(event)
+            return DomainEventProcessingOutcome("processed", event.event_id)
         personalization_allowed = await self.feature_store.is_personalization_allowed(
             self.identifier_hasher.hash_user_id(event.actor_id)
         )
         intelligence_event = translate_to_intelligence_event(event, personalization_allowed, self.identifier_hasher)
         if intelligence_event is not None:
             await self.event_ingestion_service.ingest_event_batch([intelligence_event])
+            if isinstance(event, CommentCreatedDomainEvent):
+                await self.comment_signals.remember_contribution(event)
         operations = build_behaviour_operations(event, self.feature_store.keyspace)
         if operations:
             await self.feature_store.feature_backend.apply_write_operations(operations)

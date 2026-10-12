@@ -48,6 +48,7 @@ from src.repositories.online_feature_keyspace_repository import (
 from src.repositories.online_feature_repository import build_forward_decayed_increment_operations
 
 LONG_DWELL_MILLISECONDS = 8000
+COMMENTED_AFFINITY_WEIGHT = 2.0
 
 
 @dataclass(frozen=True, slots=True)
@@ -63,7 +64,7 @@ def calculate_affinity_signal_weight(event: IntelligenceEvent) -> float:
         case PostLikedEvent():
             return 1.0
         case CommentedEvent():
-            return 2.0
+            return COMMENTED_AFFINITY_WEIGHT
         case SharedEvent():
             return 3.0
         case SavedEvent():

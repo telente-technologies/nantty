@@ -59,7 +59,22 @@ def normalize_comment_created(data: dict[str, Any], flat: dict[str, Any]) -> dic
     if post_author is not None and data.get("commentId"):
         flat["eventId"] = f"comment.created:{data.get('commentId')}"
     flat["actorId"] = data.get("authorId")
-    flat["payload"] = {"postId": data.get("postId"), "authorId": post_author, **item_topics(data)}
+    flat["payload"] = {
+        "postId": data.get("postId"),
+        "authorId": post_author,
+        "commentId": data.get("commentId"),
+        **item_topics(data),
+    }
+    return flat
+
+
+def normalize_comment_visibility(data: dict[str, Any], flat: dict[str, Any]) -> dict[str, Any]:
+    flat["actorId"] = data.get("commentAuthorId")
+    flat["payload"] = {
+        "commentId": data.get("commentId"),
+        "postId": data.get("postId"),
+        "postAuthorId": data.get("actorId"),
+    }
     return flat
 
 
@@ -98,6 +113,8 @@ def normalize_social_engagement(event_type: Any, data: dict[str, Any], flat: dic
         }
     elif event_type == "comment.created":
         return normalize_comment_created(data, flat)
+    elif event_type in ("comment.hidden", "comment.unhidden"):
+        return normalize_comment_visibility(data, flat)
     elif event_type == "content.saved":
         flat["actorId"] = first_present(data, "actorId", "accountId", "userId")
         target_type = (

@@ -26,6 +26,8 @@ PERSONALIZATION_DOMAIN_EVENT_TYPES = frozenset(
         "post.liked",
         "post.shared",
         "comment.created",
+        "comment.hidden",
+        "comment.unhidden",
         "content.saved",
         "post.viewed",
         "clip.watched",
@@ -44,6 +46,7 @@ SAFETY_DOMAIN_EVENT_TYPES = frozenset(
 )
 UNHASHED_VALUE_FLOW_EVENT_TYPES = frozenset({"gift.sent"})
 HASHED_PAYLOAD_USER_FIELDS = ("authorId", "creatorId", "targetAuthorId", "hostCreatorId")
+DOMAIN_ONLY_PAYLOAD_FIELDS = {"comment_id"}
 
 
 def resolve_intelligence_event_type(event: DomainEvent) -> str | None:
@@ -94,7 +97,9 @@ def translate_to_intelligence_event(
         return None
     if not personalization_allowed and event.event_type != "gift.sent":
         return None
-    payload = event.payload.model_dump(by_alias=True, mode="json", exclude_none=True)
+    payload = event.payload.model_dump(
+        by_alias=True, mode="json", exclude_none=True, exclude=DOMAIN_ONLY_PAYLOAD_FIELDS
+    )
     keep_raw = event.event_type in UNHASHED_VALUE_FLOW_EVENT_TYPES
     envelope: dict[str, Any] = {
         "eventId": event.event_id,

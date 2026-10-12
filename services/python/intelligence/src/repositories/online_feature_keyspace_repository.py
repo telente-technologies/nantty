@@ -46,6 +46,9 @@ class OnlineFeatureKeyspace:
     def affinity_base_key(self, affinity_kind: str, user_id: str) -> str:
         return f"{self.prefix}:aff:{affinity_kind}:{user_id}"
 
+    def comment_signal_key(self, comment_id: str) -> str:
+        return f"{self.prefix}:commentsig:{comment_id}"
+
     def item_statistics_key(self, item_id: str) -> str:
         return f"{self.prefix}:item:{item_id}"
 
