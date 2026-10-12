@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useRef, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useRef, useState } from "react";
 
 import { requireAuthThen } from "@/components/auth/authPrompt.store";
 import { ProductCard } from "@/components/commerce/productCard";
@@ -14,11 +14,13 @@ import { Button } from "@/components/ui/button";
 import { ErrorState, Badge } from "@/components/ui/feedback";
 import { Avatar } from "@/components/ui/media";
 import { StarIcon, StoreIcon } from "@/components/ui/icons";
+import { affiliateLinksService } from "@/services/affiliateLinks.service";
 import { cartsService } from "@/services/carts.service";
 import { productsService } from "@/services/products.service";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { formatCountWithThousandsSuffix } from "@/utils/formatDate.util";
 import { formatProductPriceForDisplay } from "@/utils/formatMoney.util";
+import { readSaleAttribution, rememberSaleAttribution } from "@/utils/saleAttribution.util";
 import { buildProductPath, buildStorePath } from "@/utils/seoPaths.util";
 import type { BrandedProduct } from "@/types/brand.type";
 
@@ -30,6 +32,17 @@ import { IconLabel } from "@/components/ui/appIcon";
 export function ProductDetailView({ productId, initialProduct }: { readonly productId: string; readonly initialProduct: BrandedProduct | null }) {
   const router = useRouter();
   const queryClient = useQueryClient();
+  const affiliateLinkId = useSearchParams().get("aff");
+
+  useEffect(() => {
+    if (!affiliateLinkId || !/^[A-Za-z0-9_-]{1,80}$/.test(affiliateLinkId)) return;
+    affiliateLinksService.recordClick(affiliateLinkId).then(
+      (click) => {
+        if (click.productId === productId) rememberSaleAttribution(productId, click.attribution, Date.parse(click.expiresAt));
+      },
+      () => undefined,
+    );
+  }, [affiliateLinkId, productId]);
 
   const productQuery = useQuery({
     queryKey: ["products", "detail", productId],
@@ -47,7 +60,7 @@ export function ProductDetailView({ productId, initialProduct }: { readonly prod
 
   const addToCart = useMutation({
     mutationFn: () =>
-      cartsService.addProductToCart({ productId, quantity, size: selectedSize, color: selectedColor }),
+      cartsService.addProductToCart({ productId, quantity, size: selectedSize, color: selectedColor, attribution: readSaleAttribution(productId) }),
     onSuccess: async () => {
       setMessage("Added to cart.");
       await queryClient.invalidateQueries({ queryKey: ["shell", "cart"] });

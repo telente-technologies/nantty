@@ -40,6 +40,7 @@ import { useVideoControls } from "@/components/video/videoControls.hook";
 import { VideoFullscreenControls } from "@/components/video/videoFullscreenControls";
 import { useDocumentVideoShortcuts } from "@/components/video/videoPlayback.hook";
 import { VideoSeekBar } from "@/components/video/videoSeekBar";
+import { rememberSaleAttribution } from "@/utils/saleAttribution.util";
 
 function canPlayInBrowser(url: string | null): url is string {
   return !!url && !url.endsWith(".m3u8");
@@ -227,7 +228,7 @@ export function ClipPlayerCard({
             </IconLabel>
           </p>
           {clip.products[0] ? (
-            <Link href={`/product/${clip.products[0].id}`} className={styles.productChip}>
+            <Link href={`/product/${clip.products[0].id}`} className={styles.productChip} onClick={() => clip.products[0] && rememberSaleAttribution(clip.products[0].id, { source: "clip", id: clip.id })}>
               Shop: {clip.products[0].name}
             </Link>
           ) : null}

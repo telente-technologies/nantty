@@ -22,6 +22,7 @@ import { liveService } from "@/services/webActions.service";
 import { formatCountWithThousandsSuffix } from "@/utils/formatDate.util";
 import { liveRoomBadgeLabel, orderProductsWithPinnedFirst, pollIntervalForLiveStatus, readLiveRoomStatus, shouldShowLiveRoomError } from "@/utils/liveRoom.util";
 import type { LiveSessionDetails } from "@/types";
+import { rememberSaleAttribution } from "@/utils/saleAttribution.util";
 
 function FollowHostButton({ live }: { readonly live: LiveSessionDetails }) {
   const follow = useFollowUser({ userId: live.host.id, username: live.host.username, displayName: live.host.name, initialState: live.isFollowingHost ? "accepted" : "none" });
@@ -100,7 +101,7 @@ export default function LiveRoomPage({ params }: { readonly params: Promise<{ re
           <ul className={styles.productStrip} aria-label="Products in this live">
             {products.map((product) => (
               <li key={product.id}>
-                <Link href={`/product/${product.id}`} className={styles.productChip}>
+                <Link href={`/product/${product.id}`} className={styles.productChip} onClick={() => rememberSaleAttribution(product.id, { source: "live", id: live.id })}>
                   <span className={styles.productThumb}>
                     <MediaImage src={product.imageUrl} alt="" sizes="40px" />
                   </span>

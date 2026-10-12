@@ -6,10 +6,13 @@ import { formatMoneyForDisplay } from "@/utils/formatMoney.util";
 import { buildAbsoluteSiteUrl, buildProductPath, buildStorePath, readProductIdFromSlug } from "@/utils/seoPaths.util";
 import { buildBreadcrumbJsonLd, buildOrganizationJsonLd, buildProductJsonLd, convertMinorAmountToDecimalString, isProductInStock, serializeJsonLdForScriptTag } from "@/utils/structuredData.util";
 
+import { appendAffiliateParameter } from "@/utils/saleAttribution.util";
+
 import { ProductDetailView } from "../../product/[productId]/productDetailView";
 
 interface ProductPageProps {
   readonly params: Promise<{ readonly slugAndId: string }>;
+  readonly searchParams: Promise<{ readonly aff?: string | string[] }>;
 }
 
 async function loadProductForSlug(slugAndId: string) {
@@ -45,12 +48,13 @@ export async function generateMetadata({ params }: ProductPageProps): Promise<Me
   };
 }
 
-export default async function ProductPage({ params }: ProductPageProps) {
+export default async function ProductPage({ params, searchParams }: ProductPageProps) {
   const { slugAndId } = await params;
+  const { aff } = await searchParams;
   const product = await loadProductForSlug(slugAndId);
   if (!product) notFound();
   const canonicalPath = buildProductPath(product);
-  if (`/p/${slugAndId}` !== canonicalPath && `/p/${encodeURIComponent(decodeURIComponent(slugAndId))}` !== canonicalPath) permanentRedirect(canonicalPath);
+  if (`/p/${slugAndId}` !== canonicalPath && `/p/${encodeURIComponent(decodeURIComponent(slugAndId))}` !== canonicalPath) permanentRedirect(appendAffiliateParameter(canonicalPath, typeof aff === "string" ? aff : undefined));
   const structuredData = [
     buildProductJsonLd(product),
     buildBreadcrumbJsonLd([
