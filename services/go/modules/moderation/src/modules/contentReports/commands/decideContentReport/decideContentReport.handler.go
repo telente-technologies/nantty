@@ -16,9 +16,9 @@ import (
 	"zudomart/modules/moderation/src/generated/ent/contentreport"
 	"zudomart/modules/moderation/src/generated/ent/contentreportentry"
 	"zudomart/modules/moderation/src/integrations"
+	healthservices "zudomart/modules/moderation/src/modules/accountHealth/services"
 	reportevents "zudomart/modules/moderation/src/modules/contentReports/events"
 	"zudomart/modules/moderation/src/modules/contentReports/services"
-	healthservices "zudomart/modules/moderation/src/modules/accountHealth/services"
 	strikeservices "zudomart/modules/moderation/src/modules/strikes/services"
 	"zudomart/platform/httpserver"
 )

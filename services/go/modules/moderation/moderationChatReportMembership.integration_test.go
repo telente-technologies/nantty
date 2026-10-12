@@ -9,7 +9,9 @@ import (
 	"zudomart/platform/httpserver"
 )
 
-type refusingReportability struct{ requests []integrations.ChatReportabilityRequest }
+type refusingReportability struct {
+	requests []integrations.ChatReportabilityRequest
+}
 
 func (checker *refusingReportability) RequireReportable(_ context.Context, request integrations.ChatReportabilityRequest) error {
 	checker.requests = append(checker.requests, request)

@@ -30,8 +30,12 @@ type recordingFunding struct {
 	calls   int
 }
 
-func (funding *recordingFunding) ChargeUserWalletForBoost(context.Context, string, string, int64, string) error { return nil }
-func (funding *recordingFunding) ChargeEarningsForBoost(context.Context, string, string, int64, string) error   { return nil }
+func (funding *recordingFunding) ChargeUserWalletForBoost(context.Context, string, string, int64, string) error {
+	return nil
+}
+func (funding *recordingFunding) ChargeEarningsForBoost(context.Context, string, string, int64, string) error {
+	return nil
+}
 func (funding *recordingFunding) RefundBoostCharge(_ context.Context, _, _ string, amountMinor int64, key, debitKey string) error {
 	funding.mutex.Lock()
 	defer funding.mutex.Unlock()

@@ -23,9 +23,11 @@ func codeOf(err error) (int, string) {
 
 func TestChatReportabilityFailsClosedAndPassesSocialRefusalsThrough(t *testing.T) {
 	answers := map[string]func(http.ResponseWriter){
-		"member":   func(writer http.ResponseWriter) { writer.WriteHeader(http.StatusOK) },
-		"outsider": func(writer http.ResponseWriter) { httpserver.WriteJsonResponse(writer, http.StatusForbidden, httpserver.NewApiError(http.StatusForbidden, "NOT_A_MEMBER", "no")) },
-		"broken":   func(writer http.ResponseWriter) { writer.WriteHeader(http.StatusBadGateway) },
+		"member": func(writer http.ResponseWriter) { writer.WriteHeader(http.StatusOK) },
+		"outsider": func(writer http.ResponseWriter) {
+			httpserver.WriteJsonResponse(writer, http.StatusForbidden, httpserver.NewApiError(http.StatusForbidden, "NOT_A_MEMBER", "no"))
+		},
+		"broken": func(writer http.ResponseWriter) { writer.WriteHeader(http.StatusBadGateway) },
 	}
 	var token string
 	server := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
