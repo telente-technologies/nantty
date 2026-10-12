@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+	"time"
 
 	"github.com/google/uuid"
 
@@ -123,6 +124,9 @@ func TestSaleAttributionIsKeptFromCartToOrderAndCompletionEvents(t *testing.T) {
 	if line["quantity"].(float64) != 3 || line["attribution"].(map[string]any)["source"] != "clip" {
 		t.Fatalf("the first attribution is kept: %v", line)
 	}
+	if status, _ := buyer.call("POST", "/api/v1/cart/items", map[string]any{"productId": productId, "quantity": 1, "attribution": map[string]any{"source": "link", "id": uuid.NewString()}}); status != http.StatusOK {
+		t.Fatalf("an affiliate link is an attribution source: %d", status)
+	}
 	ctx := context.Background()
 	result, err := (services.CheckoutService{Container: harness.orders.Container}).Checkout(ctx, services.CheckoutRequest{BuyerId: harness.buyer, AddressId: harness.addressId, IdempotencyKey: "checkout-attribution-1"})
 	if err != nil {
@@ -143,9 +147,12 @@ func TestSaleAttributionIsKeptFromCartToOrderAndCompletionEvents(t *testing.T) {
 	for _, eventType := range []string{"orderGroup.paid", "orderGroup.completed"} {
 		row := harness.orders.Container.Client.OutboxEvent.Query().Where(outboxevent.EventType(eventType)).OnlyX(ctx)
 		var data struct {
+			OrderNumber     string                        `json:"orderNumber"`
+			OrderedAt       *time.Time                    `json:"orderedAt"`
 			AttributedItems []services.AttributedSaleItem `json:"attributedItems"`
 		}
-		if err := json.Unmarshal(eventPayload(t, row.Payload), &data); err != nil || len(data.AttributedItems) != 1 || data.AttributedItems[0].AttributionId.String() != clipId || data.AttributedItems[0].Quantity != 3 {
+		if err := json.Unmarshal(eventPayload(t, row.Payload), &data); err != nil || len(data.AttributedItems) != 1 || data.AttributedItems[0].AttributionId.String() != clipId || data.AttributedItems[0].Quantity != 4 ||
+			data.OrderNumber == "" || data.OrderedAt == nil || data.AttributedItems[0].AttributedAt == nil {
 			t.Fatalf("%s attributed items: %s %v", eventType, row.Payload, err)
 		}
 	}
