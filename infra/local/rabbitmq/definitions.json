@@ -3240,6 +3240,22 @@
       "arguments": {}
     },
     {
+      "source": "zudomart.events",
+      "vhost": "zudomart",
+      "destination": "money-domain-events",
+      "destination_type": "queue",
+      "routing_key": "orderGroup.paid",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.events",
+      "vhost": "zudomart",
+      "destination": "money-domain-events",
+      "destination_type": "queue",
+      "routing_key": "orderGroup.statusChanged",
+      "arguments": {}
+    },
+    {
       "source": "zudomart.dlx",
       "vhost": "zudomart",
       "destination": "ads-domain-events.dlq",
