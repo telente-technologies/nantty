@@ -27,8 +27,8 @@ infra/aws/
 
 ## What gets deployed
 
-Twelve Fargate services, all private, no public IPs: `gateway`, `go-identity`, `go-commerce`, `go-money`, `go-live`,
-`go-ads`, `go-trust`, `social`, `notifications`, `media`, `realtime`, `intelligence`. ECR repositories are
+Fourteen Fargate services, all private, no public IPs: `gateway`, `go-identity`, `go-commerce`, `go-money`, `go-live`,
+`go-ads`, `go-trust`, `social`, `notifications`, `media`, `search`, `support`, `realtime`, `intelligence`. ECR repositories are
 `zudomart/<service>` (immutable tags, scan on push, KMS, lifecycle, replicated to the DR region in prod) plus
 `zudomart/migrate` for the pre-deploy migration task.
 
