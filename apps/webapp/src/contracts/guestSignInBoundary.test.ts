@@ -17,6 +17,13 @@ describe("guest reads that need an account", () => {
     }
   });
 
+  it("let a guest who opens a creator's link record the click, but add nothing to a cart without signing in", () => {
+    assert.equal(isPublicApiRead("POST", "/api/v1/affiliate-links/0192a4f0-0000-7000-8000-000000000001/clicks"), true);
+    assert.equal(isPublicApiRead("POST", "/api/v1/affiliate-links/../clicks"), false);
+    assert.equal(isPublicApiRead("POST", "/api/v1/cart/items"), false);
+    assert.equal(isPublicApiRead("POST", "/api/v1/creators/me/affiliate-links"), false);
+  });
+
   it("recognise the sign-in errors the pages turn into a sign-in prompt", () => {
     assert.equal(isSignInRequiredError(new WebappRequestError(401, "UNAUTHENTICATED", "Sign in to continue.")), true);
     assert.equal(isSignInRequiredError(new WebappRequestError(401, "SESSION_EXPIRED", "Your session has ended.")), true);

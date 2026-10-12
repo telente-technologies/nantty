@@ -31,7 +31,10 @@ const linkedProfiles = c.object({
   choiceRequired: c.boolean(),
 });
 
+const affiliateLinkClick = c.object({ productId: c.string(), attribution: c.object({ source: c.string(["link"]), id: c.string() }), attributionWindowDays: c.number(), expiresAt: c.string() });
+
 export const webappContracts: readonly EndpointContract[] = [
+  { domain: "commerce", method: "POST", path: "/api/v1/affiliate-links/link_dress/clicks", schema: affiliateLinkClick },
   { domain: "auth", method: "POST", path: "/api/v1/auth/login", body: { identifier: "zudomart@test.com", password: "x" }, schema: c.object({ accessToken: c.string(), refreshToken: c.string(), user }) },
   { domain: "auth", method: "GET", path: "/api/v1/auth/username-available?username=admin", schema: c.object({ available: c.boolean(), reason }, []) },
   { domain: "users", method: "GET", path: "/api/v1/users/me", schema: user },

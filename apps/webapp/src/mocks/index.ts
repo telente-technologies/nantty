@@ -5,6 +5,7 @@ import { banksMocks } from "./banks.mock";
 import { boostsMocks } from "./boosts.mock";
 import { brandsMocks } from "./brands.mock";
 import { linkedProfilesMocks } from "./linkedProfiles.mock";
+import { affiliateLinkMocks } from "./affiliateLinks.mock";
 import { cartMocks } from "./cart.mock";
 import { geoMocks } from "./geo.mock";
 import { chatsMocks } from "./chats.mock";
@@ -96,6 +97,7 @@ export const routes: MockRoute[] = [
   ...searchMocks,
   ...martHighlightsMocks,
   ...cartMocks,
+  ...affiliateLinkMocks,
   ...geoMocks,
   ...ordersMocks,
   ...disputesMocks,
