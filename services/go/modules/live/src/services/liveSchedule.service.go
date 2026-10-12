@@ -87,22 +87,19 @@ func (service *LiveService) UpdateLiveDetails(ctx context.Context, actor types.A
 }
 
 func (service *LiveService) CancelLiveSession(ctx context.Context, actor types.Actor, liveId uuid.UUID) error {
-	var cancelled *ent.LiveSession
-	err := service.endLive(ctx, liveId, func(session *ent.LiveSession) (bool, error) {
+	return service.endLive(ctx, liveId, func(session *ent.LiveSession) (bool, error) {
 		if session.HostID != actor.UserId {
 			return false, liveerrors.NotLiveHost
 		}
 		if session.State != livesession.StateIdle {
 			return false, liveerrors.LiveNotEditable
 		}
-		cancelled = session
 		return true, nil
-	})
-	if err != nil || cancelled == nil || cancelled.ScheduledAt == nil {
-		return err
-	}
-	return service.RunInTransaction(ctx, func(tx *ent.Tx) error {
-		return events.EnqueueOutboxEventInTransaction(ctx, tx, events.LiveScheduleCancelled, liveId.String(), service.Now(), events.LiveScheduleCancelledEventData{LiveId: liveId.String(), HostId: cancelled.HostID.String()})
+	}, func(tx *ent.Tx, session *ent.LiveSession) error {
+		if session.ScheduledAt == nil {
+			return nil
+		}
+		return events.EnqueueOutboxEventInTransaction(ctx, tx, events.LiveScheduleCancelled, liveId.String(), service.Now(), events.LiveScheduleCancelledEventData{LiveId: liveId.String(), HostId: session.HostID.String()})
 	})
 }
 

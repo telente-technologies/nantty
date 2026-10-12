@@ -51,7 +51,11 @@ func (handler EscrowMovementHandler) HandleMovementSucceeded(ctx context.Context
 			ledgermodels.WalletEscrowLockedAccount(held.BuyerUserID, held.ID.String(), currency), movement.AmountMinor)); err != nil {
 			return err
 		}
-		return held.Update().SetWalletFundedAt(movement.FinishedAt).AddVersion(1).Exec(ctx)
+		if err := held.Update().SetWalletFundedAt(movement.FinishedAt).AddVersion(1).Exec(ctx); err != nil {
+			return err
+		}
+		_, err := handler.Service.ExecuteScheduledRefundsInTransaction(ctx, transaction, held.ID)
+		return err
 	case paymentmodels.MovementEscrowRelease:
 		if err := handler.post(ctx, transaction, held, movement, "succeeded", moveLines(buyerOutgoing, ledgermodels.WalletDepositHoldAccount(held.SellerUserID, currency), movement.AmountMinor)); err != nil {
 			return err

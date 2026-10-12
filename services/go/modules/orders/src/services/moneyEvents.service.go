@@ -22,6 +22,7 @@ type EscrowEventData struct {
 	BuyerUserId string     `json:"buyerUserId"`
 	DisputeId   string     `json:"disputeId"`
 	ReleaseAt   *time.Time `json:"autoReleaseAt"`
+	Pending     moneyData  `json:"pendingRefund"`
 }
 
 type moneyData struct {
@@ -68,6 +69,8 @@ func (handler MoneyEventHandler) apply(ctx context.Context, eventType string, or
 		return CompleteOrderGroup(ctx, handler.Container, orderId, SystemActor, "Escrow released to the seller")
 	case "escrow.refunded", "escrow.partiallyRefunded":
 		return RecordOrderRefund(ctx, handler.Container, orderId, data.Refunded.AmountMinor, data.DisputeId)
+	case "escrow.refundScheduled":
+		return RecordOrderRefundScheduled(ctx, handler.Container, orderId, data.Pending.AmountMinor)
 	case "escrow.releaseScheduled":
 		return RecordEscrowReleaseTime(ctx, handler.Container, orderId, data.ReleaseAt)
 	case "dispute.opened":

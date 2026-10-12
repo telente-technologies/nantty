@@ -28,6 +28,8 @@ type Tx struct {
 	IdempotentRequest *IdempotentRequestClient
 	// OutboxEvent is the client for interacting with the OutboxEvent builders.
 	OutboxEvent *OutboxEventClient
+	// PendingRefund is the client for interacting with the PendingRefund builders.
+	PendingRefund *PendingRefundClient
 
 	// lazily loaded.
 	client     *Client
@@ -166,6 +168,7 @@ func (tx *Tx) init() {
 	tx.EscrowEvent = NewEscrowEventClient(tx.config)
 	tx.IdempotentRequest = NewIdempotentRequestClient(tx.config)
 	tx.OutboxEvent = NewOutboxEventClient(tx.config)
+	tx.PendingRefund = NewPendingRefundClient(tx.config)
 }
 
 // txDriver wraps the given dialect.Tx with a nop dialect.Driver implementation.

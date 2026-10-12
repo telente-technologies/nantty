@@ -3,6 +3,7 @@ package refundordergroup
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"net/http"
 
 	"zudomart/modules/escrow/src/generated/ent/escrow"
@@ -25,8 +26,9 @@ type Handler struct {
 func (handler Handler) Execute(ctx context.Context, command Command) (dtos.EscrowDetailDto, bool, error) {
 	application := handler.Application
 	var settlement services.EscrowSettlementResult
+	key := ledgerutils.HashRequestFingerprint(command.OrderGroupId, command.Reason)[:64]
 	detail, replayed, err := ledgerutils.RunIdempotentMoneyCommand(ctx, application.Container.Resources.Database, application.Container.Idempotency, ledgerutils.IdempotentCommand[dtos.EscrowDetailDto]{
-		Scope: "commerce:orderGroup.refund", Key: ledgerutils.HashRequestFingerprint(command.OrderGroupId, command.Reason)[:64],
+		Scope: "commerce:orderGroup.refund", Key: key,
 		RequestHash: ledgerutils.HashRequestFingerprint(command.OrderGroupId, command.AmountMinor, command.Currency, command.Reason),
 		Execute: func(ctx context.Context, transaction *sql.Tx) (dtos.EscrowDetailDto, error) {
 			held, err := application.Escrows.LockEscrowForOrder(ctx, application.Container.Client(transaction), command.OrderGroupId)
@@ -45,10 +47,17 @@ func (handler Handler) Execute(ctx context.Context, command Command) (dtos.Escro
 			default:
 				settlement, err = application.Escrows.ResolveEscrowPartiallyInTransaction(ctx, transaction, command.OrderGroupId, command.AmountMinor, command.Reason, actor)
 			}
+			if errors.Is(err, services.ErrEscrowFundsNotSettled) {
+				settlement, err = application.Escrows.ScheduleRefundUntilFundsSettleInTransaction(ctx, transaction, command.OrderGroupId, services.PendingRefundRequest{
+					RequestKey: key, AmountMinor: command.AmountMinor, Reason: command.Reason, Actor: actor,
+				})
+			}
 			if err != nil {
 				return dtos.EscrowDetailDto{}, err
 			}
-			return services.ConvertEscrowToDetail(settlement.Escrow, application.Container.Policy(ctx).AutoReleasePeriod, nil, nil), nil
+			detail := services.ConvertEscrowToDetail(settlement.Escrow, application.Container.Policy(ctx).AutoReleasePeriod, nil, nil)
+			detail.RefundScheduled, err = application.Escrows.ScheduledRefundView(ctx, application.Container.Client(transaction), settlement.Escrow.ID)
+			return detail, err
 		},
 	})
 	return detail, replayed, err

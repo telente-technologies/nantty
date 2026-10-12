@@ -27,7 +27,7 @@ func (service *LiveService) EndLiveSession(ctx context.Context, actor types.Acto
 	})
 }
 
-func (service *LiveService) endLive(ctx context.Context, liveId uuid.UUID, shouldEnd func(*ent.LiveSession) (bool, error)) error {
+func (service *LiveService) endLive(ctx context.Context, liveId uuid.UUID, shouldEnd func(*ent.LiveSession) (bool, error), alsoInTransaction ...func(*ent.Tx, *ent.LiveSession) error) error {
 	var ended *ent.LiveSession
 	err := service.RunInTransaction(ctx, func(tx *ent.Tx) error {
 		session, err := service.lockLiveSession(ctx, tx, liveId)
@@ -50,7 +50,15 @@ func (service *LiveService) endLive(ctx context.Context, liveId uuid.UUID, shoul
 			return err
 		}
 		ended = session
-		return service.finishLiveAndStoreFinalBoard(ctx, tx, session, now)
+		if err := service.finishLiveAndStoreFinalBoard(ctx, tx, session, now); err != nil {
+			return err
+		}
+		for _, step := range alsoInTransaction {
+			if err := step(tx, session); err != nil {
+				return err
+			}
+		}
+		return nil
 	})
 	if err != nil || ended == nil {
 		return err

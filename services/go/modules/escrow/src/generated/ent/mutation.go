@@ -15,6 +15,7 @@ import (
 	"zudomart/modules/escrow/src/generated/ent/escrowevent"
 	"zudomart/modules/escrow/src/generated/ent/idempotentrequest"
 	"zudomart/modules/escrow/src/generated/ent/outboxevent"
+	"zudomart/modules/escrow/src/generated/ent/pendingrefund"
 	"zudomart/modules/escrow/src/generated/ent/predicate"
 
 	"entgo.io/ent"
@@ -38,6 +39,7 @@ const (
 	TypeEscrowEvent        = "EscrowEvent"
 	TypeIdempotentRequest  = "IdempotentRequest"
 	TypeOutboxEvent        = "OutboxEvent"
+	TypePendingRefund      = "PendingRefund"
 )
 
 // DisputeMutation represents an operation that mutates the Dispute nodes in the graph.
@@ -2448,6 +2450,9 @@ type EscrowMutation struct {
 	disputes                            map[uuid.UUID]struct{}
 	removeddisputes                     map[uuid.UUID]struct{}
 	cleareddisputes                     bool
+	pending_refunds                     map[uuid.UUID]struct{}
+	removedpending_refunds              map[uuid.UUID]struct{}
+	clearedpending_refunds              bool
 	done                                bool
 	oldValue                            func(context.Context) (*Escrow, error)
 	predicates                          []predicate.Escrow
@@ -4382,6 +4387,60 @@ func (m *EscrowMutation) ResetDisputes() {
 	m.removeddisputes = nil
 }
 
+// AddPendingRefundIDs adds the "pending_refunds" edge to the PendingRefund entity by ids.
+func (m *EscrowMutation) AddPendingRefundIDs(ids ...uuid.UUID) {
+	if m.pending_refunds == nil {
+		m.pending_refunds = make(map[uuid.UUID]struct{})
+	}
+	for i := range ids {
+		m.pending_refunds[ids[i]] = struct{}{}
+	}
+}
+
+// ClearPendingRefunds clears the "pending_refunds" edge to the PendingRefund entity.
+func (m *EscrowMutation) ClearPendingRefunds() {
+	m.clearedpending_refunds = true
+}
+
+// PendingRefundsCleared reports if the "pending_refunds" edge to the PendingRefund entity was cleared.
+func (m *EscrowMutation) PendingRefundsCleared() bool {
+	return m.clearedpending_refunds
+}
+
+// RemovePendingRefundIDs removes the "pending_refunds" edge to the PendingRefund entity by IDs.
+func (m *EscrowMutation) RemovePendingRefundIDs(ids ...uuid.UUID) {
+	if m.removedpending_refunds == nil {
+		m.removedpending_refunds = make(map[uuid.UUID]struct{})
+	}
+	for i := range ids {
+		delete(m.pending_refunds, ids[i])
+		m.removedpending_refunds[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedPendingRefunds returns the removed IDs of the "pending_refunds" edge to the PendingRefund entity.
+func (m *EscrowMutation) RemovedPendingRefundsIDs() (ids []uuid.UUID) {
+	for id := range m.removedpending_refunds {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// PendingRefundsIDs returns the "pending_refunds" edge IDs in the mutation.
+func (m *EscrowMutation) PendingRefundsIDs() (ids []uuid.UUID) {
+	for id := range m.pending_refunds {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetPendingRefunds resets all changes to the "pending_refunds" edge.
+func (m *EscrowMutation) ResetPendingRefunds() {
+	m.pending_refunds = nil
+	m.clearedpending_refunds = false
+	m.removedpending_refunds = nil
+}
+
 // Where appends a list predicates to the EscrowMutation builder.
 func (m *EscrowMutation) Where(ps ...predicate.Escrow) {
 	m.predicates = append(m.predicates, ps...)
@@ -5364,9 +5423,12 @@ func (m *EscrowMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *EscrowMutation) AddedEdges() []string {
-	edges := make([]string, 0, 1)
+	edges := make([]string, 0, 2)
 	if m.disputes != nil {
 		edges = append(edges, escrow.EdgeDisputes)
+	}
+	if m.pending_refunds != nil {
+		edges = append(edges, escrow.EdgePendingRefunds)
 	}
 	return edges
 }
@@ -5381,15 +5443,24 @@ func (m *EscrowMutation) AddedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case escrow.EdgePendingRefunds:
+		ids := make([]ent.Value, 0, len(m.pending_refunds))
+		for id := range m.pending_refunds {
+			ids = append(ids, id)
+		}
+		return ids
 	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *EscrowMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 1)
+	edges := make([]string, 0, 2)
 	if m.removeddisputes != nil {
 		edges = append(edges, escrow.EdgeDisputes)
+	}
+	if m.removedpending_refunds != nil {
+		edges = append(edges, escrow.EdgePendingRefunds)
 	}
 	return edges
 }
@@ -5404,15 +5475,24 @@ func (m *EscrowMutation) RemovedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case escrow.EdgePendingRefunds:
+		ids := make([]ent.Value, 0, len(m.removedpending_refunds))
+		for id := range m.removedpending_refunds {
+			ids = append(ids, id)
+		}
+		return ids
 	}
 	return nil
 }
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *EscrowMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 1)
+	edges := make([]string, 0, 2)
 	if m.cleareddisputes {
 		edges = append(edges, escrow.EdgeDisputes)
+	}
+	if m.clearedpending_refunds {
+		edges = append(edges, escrow.EdgePendingRefunds)
 	}
 	return edges
 }
@@ -5423,6 +5503,8 @@ func (m *EscrowMutation) EdgeCleared(name string) bool {
 	switch name {
 	case escrow.EdgeDisputes:
 		return m.cleareddisputes
+	case escrow.EdgePendingRefunds:
+		return m.clearedpending_refunds
 	}
 	return false
 }
@@ -5441,6 +5523,9 @@ func (m *EscrowMutation) ResetEdge(name string) error {
 	switch name {
 	case escrow.EdgeDisputes:
 		m.ResetDisputes()
+		return nil
+	case escrow.EdgePendingRefunds:
+		m.ResetPendingRefunds()
 		return nil
 	}
 	return fmt.Errorf("unknown Escrow edge %s", name)
@@ -7476,4 +7561,1237 @@ func (m *OutboxEventMutation) ClearEdge(name string) error {
 // It returns an error if the edge is not defined in the schema.
 func (m *OutboxEventMutation) ResetEdge(name string) error {
 	return fmt.Errorf("unknown OutboxEvent edge %s", name)
+}
+
+// PendingRefundMutation represents an operation that mutates the PendingRefund nodes in the graph.
+type PendingRefundMutation struct {
+	config
+	op              Op
+	typ             string
+	id              *uuid.UUID
+	created_at      *time.Time
+	order_id        *string
+	request_key     *string
+	amount_minor    *int64
+	addamount_minor *int64
+	currency        *string
+	full            *bool
+	reason          *string
+	actor_type      *string
+	actor_id        *string
+	status          *pendingrefund.Status
+	attempts        *int
+	addattempts     *int
+	last_error      *string
+	executed_at     *time.Time
+	updated_at      *time.Time
+	clearedFields   map[string]struct{}
+	escrow          *uuid.UUID
+	clearedescrow   bool
+	done            bool
+	oldValue        func(context.Context) (*PendingRefund, error)
+	predicates      []predicate.PendingRefund
+}
+
+var _ ent.Mutation = (*PendingRefundMutation)(nil)
+
+// pendingrefundOption allows management of the mutation configuration using functional options.
+type pendingrefundOption func(*PendingRefundMutation)
+
+// newPendingRefundMutation creates new mutation for the PendingRefund entity.
+func newPendingRefundMutation(c config, op Op, opts ...pendingrefundOption) *PendingRefundMutation {
+	m := &PendingRefundMutation{
+		config:        c,
+		op:            op,
+		typ:           TypePendingRefund,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withPendingRefundID sets the ID field of the mutation.
+func withPendingRefundID(id uuid.UUID) pendingrefundOption {
+	return func(m *PendingRefundMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *PendingRefund
+		)
+		m.oldValue = func(ctx context.Context) (*PendingRefund, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().PendingRefund.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withPendingRefund sets the old PendingRefund of the mutation.
+func withPendingRefund(node *PendingRefund) pendingrefundOption {
+	return func(m *PendingRefundMutation) {
+		m.oldValue = func(context.Context) (*PendingRefund, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m PendingRefundMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m PendingRefundMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of PendingRefund entities.
+func (m *PendingRefundMutation) SetID(id uuid.UUID) {
+	m.id = &id
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *PendingRefundMutation) ID() (id uuid.UUID, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *PendingRefundMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []uuid.UUID{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().PendingRefund.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (m *PendingRefundMutation) SetCreatedAt(t time.Time) {
+	m.created_at = &t
+}
+
+// CreatedAt returns the value of the "created_at" field in the mutation.
+func (m *PendingRefundMutation) CreatedAt() (r time.Time, exists bool) {
+	v := m.created_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreatedAt returns the old "created_at" field's value of the PendingRefund entity.
+// If the PendingRefund object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PendingRefundMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
+	}
+	return oldValue.CreatedAt, nil
+}
+
+// ResetCreatedAt resets all changes to the "created_at" field.
+func (m *PendingRefundMutation) ResetCreatedAt() {
+	m.created_at = nil
+}
+
+// SetEscrowID sets the "escrow_id" field.
+func (m *PendingRefundMutation) SetEscrowID(u uuid.UUID) {
+	m.escrow = &u
+}
+
+// EscrowID returns the value of the "escrow_id" field in the mutation.
+func (m *PendingRefundMutation) EscrowID() (r uuid.UUID, exists bool) {
+	v := m.escrow
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldEscrowID returns the old "escrow_id" field's value of the PendingRefund entity.
+// If the PendingRefund object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PendingRefundMutation) OldEscrowID(ctx context.Context) (v uuid.UUID, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldEscrowID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldEscrowID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldEscrowID: %w", err)
+	}
+	return oldValue.EscrowID, nil
+}
+
+// ResetEscrowID resets all changes to the "escrow_id" field.
+func (m *PendingRefundMutation) ResetEscrowID() {
+	m.escrow = nil
+}
+
+// SetOrderID sets the "order_id" field.
+func (m *PendingRefundMutation) SetOrderID(s string) {
+	m.order_id = &s
+}
+
+// OrderID returns the value of the "order_id" field in the mutation.
+func (m *PendingRefundMutation) OrderID() (r string, exists bool) {
+	v := m.order_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldOrderID returns the old "order_id" field's value of the PendingRefund entity.
+// If the PendingRefund object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PendingRefundMutation) OldOrderID(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldOrderID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldOrderID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldOrderID: %w", err)
+	}
+	return oldValue.OrderID, nil
+}
+
+// ResetOrderID resets all changes to the "order_id" field.
+func (m *PendingRefundMutation) ResetOrderID() {
+	m.order_id = nil
+}
+
+// SetRequestKey sets the "request_key" field.
+func (m *PendingRefundMutation) SetRequestKey(s string) {
+	m.request_key = &s
+}
+
+// RequestKey returns the value of the "request_key" field in the mutation.
+func (m *PendingRefundMutation) RequestKey() (r string, exists bool) {
+	v := m.request_key
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldRequestKey returns the old "request_key" field's value of the PendingRefund entity.
+// If the PendingRefund object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PendingRefundMutation) OldRequestKey(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldRequestKey is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldRequestKey requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldRequestKey: %w", err)
+	}
+	return oldValue.RequestKey, nil
+}
+
+// ResetRequestKey resets all changes to the "request_key" field.
+func (m *PendingRefundMutation) ResetRequestKey() {
+	m.request_key = nil
+}
+
+// SetAmountMinor sets the "amount_minor" field.
+func (m *PendingRefundMutation) SetAmountMinor(i int64) {
+	m.amount_minor = &i
+	m.addamount_minor = nil
+}
+
+// AmountMinor returns the value of the "amount_minor" field in the mutation.
+func (m *PendingRefundMutation) AmountMinor() (r int64, exists bool) {
+	v := m.amount_minor
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldAmountMinor returns the old "amount_minor" field's value of the PendingRefund entity.
+// If the PendingRefund object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PendingRefundMutation) OldAmountMinor(ctx context.Context) (v int64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldAmountMinor is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldAmountMinor requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldAmountMinor: %w", err)
+	}
+	return oldValue.AmountMinor, nil
+}
+
+// AddAmountMinor adds i to the "amount_minor" field.
+func (m *PendingRefundMutation) AddAmountMinor(i int64) {
+	if m.addamount_minor != nil {
+		*m.addamount_minor += i
+	} else {
+		m.addamount_minor = &i
+	}
+}
+
+// AddedAmountMinor returns the value that was added to the "amount_minor" field in this mutation.
+func (m *PendingRefundMutation) AddedAmountMinor() (r int64, exists bool) {
+	v := m.addamount_minor
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetAmountMinor resets all changes to the "amount_minor" field.
+func (m *PendingRefundMutation) ResetAmountMinor() {
+	m.amount_minor = nil
+	m.addamount_minor = nil
+}
+
+// SetCurrency sets the "currency" field.
+func (m *PendingRefundMutation) SetCurrency(s string) {
+	m.currency = &s
+}
+
+// Currency returns the value of the "currency" field in the mutation.
+func (m *PendingRefundMutation) Currency() (r string, exists bool) {
+	v := m.currency
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCurrency returns the old "currency" field's value of the PendingRefund entity.
+// If the PendingRefund object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PendingRefundMutation) OldCurrency(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCurrency is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCurrency requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCurrency: %w", err)
+	}
+	return oldValue.Currency, nil
+}
+
+// ResetCurrency resets all changes to the "currency" field.
+func (m *PendingRefundMutation) ResetCurrency() {
+	m.currency = nil
+}
+
+// SetFull sets the "full" field.
+func (m *PendingRefundMutation) SetFull(b bool) {
+	m.full = &b
+}
+
+// Full returns the value of the "full" field in the mutation.
+func (m *PendingRefundMutation) Full() (r bool, exists bool) {
+	v := m.full
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldFull returns the old "full" field's value of the PendingRefund entity.
+// If the PendingRefund object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PendingRefundMutation) OldFull(ctx context.Context) (v bool, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldFull is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldFull requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldFull: %w", err)
+	}
+	return oldValue.Full, nil
+}
+
+// ResetFull resets all changes to the "full" field.
+func (m *PendingRefundMutation) ResetFull() {
+	m.full = nil
+}
+
+// SetReason sets the "reason" field.
+func (m *PendingRefundMutation) SetReason(s string) {
+	m.reason = &s
+}
+
+// Reason returns the value of the "reason" field in the mutation.
+func (m *PendingRefundMutation) Reason() (r string, exists bool) {
+	v := m.reason
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldReason returns the old "reason" field's value of the PendingRefund entity.
+// If the PendingRefund object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PendingRefundMutation) OldReason(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldReason is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldReason requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldReason: %w", err)
+	}
+	return oldValue.Reason, nil
+}
+
+// ResetReason resets all changes to the "reason" field.
+func (m *PendingRefundMutation) ResetReason() {
+	m.reason = nil
+}
+
+// SetActorType sets the "actor_type" field.
+func (m *PendingRefundMutation) SetActorType(s string) {
+	m.actor_type = &s
+}
+
+// ActorType returns the value of the "actor_type" field in the mutation.
+func (m *PendingRefundMutation) ActorType() (r string, exists bool) {
+	v := m.actor_type
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldActorType returns the old "actor_type" field's value of the PendingRefund entity.
+// If the PendingRefund object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PendingRefundMutation) OldActorType(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldActorType is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldActorType requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldActorType: %w", err)
+	}
+	return oldValue.ActorType, nil
+}
+
+// ResetActorType resets all changes to the "actor_type" field.
+func (m *PendingRefundMutation) ResetActorType() {
+	m.actor_type = nil
+}
+
+// SetActorID sets the "actor_id" field.
+func (m *PendingRefundMutation) SetActorID(s string) {
+	m.actor_id = &s
+}
+
+// ActorID returns the value of the "actor_id" field in the mutation.
+func (m *PendingRefundMutation) ActorID() (r string, exists bool) {
+	v := m.actor_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldActorID returns the old "actor_id" field's value of the PendingRefund entity.
+// If the PendingRefund object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PendingRefundMutation) OldActorID(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldActorID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldActorID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldActorID: %w", err)
+	}
+	return oldValue.ActorID, nil
+}
+
+// ResetActorID resets all changes to the "actor_id" field.
+func (m *PendingRefundMutation) ResetActorID() {
+	m.actor_id = nil
+}
+
+// SetStatus sets the "status" field.
+func (m *PendingRefundMutation) SetStatus(pe pendingrefund.Status) {
+	m.status = &pe
+}
+
+// Status returns the value of the "status" field in the mutation.
+func (m *PendingRefundMutation) Status() (r pendingrefund.Status, exists bool) {
+	v := m.status
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldStatus returns the old "status" field's value of the PendingRefund entity.
+// If the PendingRefund object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PendingRefundMutation) OldStatus(ctx context.Context) (v pendingrefund.Status, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldStatus is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldStatus requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldStatus: %w", err)
+	}
+	return oldValue.Status, nil
+}
+
+// ResetStatus resets all changes to the "status" field.
+func (m *PendingRefundMutation) ResetStatus() {
+	m.status = nil
+}
+
+// SetAttempts sets the "attempts" field.
+func (m *PendingRefundMutation) SetAttempts(i int) {
+	m.attempts = &i
+	m.addattempts = nil
+}
+
+// Attempts returns the value of the "attempts" field in the mutation.
+func (m *PendingRefundMutation) Attempts() (r int, exists bool) {
+	v := m.attempts
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldAttempts returns the old "attempts" field's value of the PendingRefund entity.
+// If the PendingRefund object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PendingRefundMutation) OldAttempts(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldAttempts is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldAttempts requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldAttempts: %w", err)
+	}
+	return oldValue.Attempts, nil
+}
+
+// AddAttempts adds i to the "attempts" field.
+func (m *PendingRefundMutation) AddAttempts(i int) {
+	if m.addattempts != nil {
+		*m.addattempts += i
+	} else {
+		m.addattempts = &i
+	}
+}
+
+// AddedAttempts returns the value that was added to the "attempts" field in this mutation.
+func (m *PendingRefundMutation) AddedAttempts() (r int, exists bool) {
+	v := m.addattempts
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetAttempts resets all changes to the "attempts" field.
+func (m *PendingRefundMutation) ResetAttempts() {
+	m.attempts = nil
+	m.addattempts = nil
+}
+
+// SetLastError sets the "last_error" field.
+func (m *PendingRefundMutation) SetLastError(s string) {
+	m.last_error = &s
+}
+
+// LastError returns the value of the "last_error" field in the mutation.
+func (m *PendingRefundMutation) LastError() (r string, exists bool) {
+	v := m.last_error
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldLastError returns the old "last_error" field's value of the PendingRefund entity.
+// If the PendingRefund object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PendingRefundMutation) OldLastError(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldLastError is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldLastError requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldLastError: %w", err)
+	}
+	return oldValue.LastError, nil
+}
+
+// ResetLastError resets all changes to the "last_error" field.
+func (m *PendingRefundMutation) ResetLastError() {
+	m.last_error = nil
+}
+
+// SetExecutedAt sets the "executed_at" field.
+func (m *PendingRefundMutation) SetExecutedAt(t time.Time) {
+	m.executed_at = &t
+}
+
+// ExecutedAt returns the value of the "executed_at" field in the mutation.
+func (m *PendingRefundMutation) ExecutedAt() (r time.Time, exists bool) {
+	v := m.executed_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldExecutedAt returns the old "executed_at" field's value of the PendingRefund entity.
+// If the PendingRefund object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PendingRefundMutation) OldExecutedAt(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldExecutedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldExecutedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldExecutedAt: %w", err)
+	}
+	return oldValue.ExecutedAt, nil
+}
+
+// ClearExecutedAt clears the value of the "executed_at" field.
+func (m *PendingRefundMutation) ClearExecutedAt() {
+	m.executed_at = nil
+	m.clearedFields[pendingrefund.FieldExecutedAt] = struct{}{}
+}
+
+// ExecutedAtCleared returns if the "executed_at" field was cleared in this mutation.
+func (m *PendingRefundMutation) ExecutedAtCleared() bool {
+	_, ok := m.clearedFields[pendingrefund.FieldExecutedAt]
+	return ok
+}
+
+// ResetExecutedAt resets all changes to the "executed_at" field.
+func (m *PendingRefundMutation) ResetExecutedAt() {
+	m.executed_at = nil
+	delete(m.clearedFields, pendingrefund.FieldExecutedAt)
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (m *PendingRefundMutation) SetUpdatedAt(t time.Time) {
+	m.updated_at = &t
+}
+
+// UpdatedAt returns the value of the "updated_at" field in the mutation.
+func (m *PendingRefundMutation) UpdatedAt() (r time.Time, exists bool) {
+	v := m.updated_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUpdatedAt returns the old "updated_at" field's value of the PendingRefund entity.
+// If the PendingRefund object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PendingRefundMutation) OldUpdatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUpdatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUpdatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUpdatedAt: %w", err)
+	}
+	return oldValue.UpdatedAt, nil
+}
+
+// ResetUpdatedAt resets all changes to the "updated_at" field.
+func (m *PendingRefundMutation) ResetUpdatedAt() {
+	m.updated_at = nil
+}
+
+// ClearEscrow clears the "escrow" edge to the Escrow entity.
+func (m *PendingRefundMutation) ClearEscrow() {
+	m.clearedescrow = true
+	m.clearedFields[pendingrefund.FieldEscrowID] = struct{}{}
+}
+
+// EscrowCleared reports if the "escrow" edge to the Escrow entity was cleared.
+func (m *PendingRefundMutation) EscrowCleared() bool {
+	return m.clearedescrow
+}
+
+// EscrowIDs returns the "escrow" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// EscrowID instead. It exists only for internal usage by the builders.
+func (m *PendingRefundMutation) EscrowIDs() (ids []uuid.UUID) {
+	if id := m.escrow; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetEscrow resets all changes to the "escrow" edge.
+func (m *PendingRefundMutation) ResetEscrow() {
+	m.escrow = nil
+	m.clearedescrow = false
+}
+
+// Where appends a list predicates to the PendingRefundMutation builder.
+func (m *PendingRefundMutation) Where(ps ...predicate.PendingRefund) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the PendingRefundMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *PendingRefundMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.PendingRefund, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *PendingRefundMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *PendingRefundMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (PendingRefund).
+func (m *PendingRefundMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *PendingRefundMutation) Fields() []string {
+	fields := make([]string, 0, 15)
+	if m.created_at != nil {
+		fields = append(fields, pendingrefund.FieldCreatedAt)
+	}
+	if m.escrow != nil {
+		fields = append(fields, pendingrefund.FieldEscrowID)
+	}
+	if m.order_id != nil {
+		fields = append(fields, pendingrefund.FieldOrderID)
+	}
+	if m.request_key != nil {
+		fields = append(fields, pendingrefund.FieldRequestKey)
+	}
+	if m.amount_minor != nil {
+		fields = append(fields, pendingrefund.FieldAmountMinor)
+	}
+	if m.currency != nil {
+		fields = append(fields, pendingrefund.FieldCurrency)
+	}
+	if m.full != nil {
+		fields = append(fields, pendingrefund.FieldFull)
+	}
+	if m.reason != nil {
+		fields = append(fields, pendingrefund.FieldReason)
+	}
+	if m.actor_type != nil {
+		fields = append(fields, pendingrefund.FieldActorType)
+	}
+	if m.actor_id != nil {
+		fields = append(fields, pendingrefund.FieldActorID)
+	}
+	if m.status != nil {
+		fields = append(fields, pendingrefund.FieldStatus)
+	}
+	if m.attempts != nil {
+		fields = append(fields, pendingrefund.FieldAttempts)
+	}
+	if m.last_error != nil {
+		fields = append(fields, pendingrefund.FieldLastError)
+	}
+	if m.executed_at != nil {
+		fields = append(fields, pendingrefund.FieldExecutedAt)
+	}
+	if m.updated_at != nil {
+		fields = append(fields, pendingrefund.FieldUpdatedAt)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *PendingRefundMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case pendingrefund.FieldCreatedAt:
+		return m.CreatedAt()
+	case pendingrefund.FieldEscrowID:
+		return m.EscrowID()
+	case pendingrefund.FieldOrderID:
+		return m.OrderID()
+	case pendingrefund.FieldRequestKey:
+		return m.RequestKey()
+	case pendingrefund.FieldAmountMinor:
+		return m.AmountMinor()
+	case pendingrefund.FieldCurrency:
+		return m.Currency()
+	case pendingrefund.FieldFull:
+		return m.Full()
+	case pendingrefund.FieldReason:
+		return m.Reason()
+	case pendingrefund.FieldActorType:
+		return m.ActorType()
+	case pendingrefund.FieldActorID:
+		return m.ActorID()
+	case pendingrefund.FieldStatus:
+		return m.Status()
+	case pendingrefund.FieldAttempts:
+		return m.Attempts()
+	case pendingrefund.FieldLastError:
+		return m.LastError()
+	case pendingrefund.FieldExecutedAt:
+		return m.ExecutedAt()
+	case pendingrefund.FieldUpdatedAt:
+		return m.UpdatedAt()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *PendingRefundMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case pendingrefund.FieldCreatedAt:
+		return m.OldCreatedAt(ctx)
+	case pendingrefund.FieldEscrowID:
+		return m.OldEscrowID(ctx)
+	case pendingrefund.FieldOrderID:
+		return m.OldOrderID(ctx)
+	case pendingrefund.FieldRequestKey:
+		return m.OldRequestKey(ctx)
+	case pendingrefund.FieldAmountMinor:
+		return m.OldAmountMinor(ctx)
+	case pendingrefund.FieldCurrency:
+		return m.OldCurrency(ctx)
+	case pendingrefund.FieldFull:
+		return m.OldFull(ctx)
+	case pendingrefund.FieldReason:
+		return m.OldReason(ctx)
+	case pendingrefund.FieldActorType:
+		return m.OldActorType(ctx)
+	case pendingrefund.FieldActorID:
+		return m.OldActorID(ctx)
+	case pendingrefund.FieldStatus:
+		return m.OldStatus(ctx)
+	case pendingrefund.FieldAttempts:
+		return m.OldAttempts(ctx)
+	case pendingrefund.FieldLastError:
+		return m.OldLastError(ctx)
+	case pendingrefund.FieldExecutedAt:
+		return m.OldExecutedAt(ctx)
+	case pendingrefund.FieldUpdatedAt:
+		return m.OldUpdatedAt(ctx)
+	}
+	return nil, fmt.Errorf("unknown PendingRefund field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *PendingRefundMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case pendingrefund.FieldCreatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatedAt(v)
+		return nil
+	case pendingrefund.FieldEscrowID:
+		v, ok := value.(uuid.UUID)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetEscrowID(v)
+		return nil
+	case pendingrefund.FieldOrderID:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetOrderID(v)
+		return nil
+	case pendingrefund.FieldRequestKey:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetRequestKey(v)
+		return nil
+	case pendingrefund.FieldAmountMinor:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetAmountMinor(v)
+		return nil
+	case pendingrefund.FieldCurrency:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCurrency(v)
+		return nil
+	case pendingrefund.FieldFull:
+		v, ok := value.(bool)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetFull(v)
+		return nil
+	case pendingrefund.FieldReason:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetReason(v)
+		return nil
+	case pendingrefund.FieldActorType:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetActorType(v)
+		return nil
+	case pendingrefund.FieldActorID:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetActorID(v)
+		return nil
+	case pendingrefund.FieldStatus:
+		v, ok := value.(pendingrefund.Status)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetStatus(v)
+		return nil
+	case pendingrefund.FieldAttempts:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetAttempts(v)
+		return nil
+	case pendingrefund.FieldLastError:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetLastError(v)
+		return nil
+	case pendingrefund.FieldExecutedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetExecutedAt(v)
+		return nil
+	case pendingrefund.FieldUpdatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUpdatedAt(v)
+		return nil
+	}
+	return fmt.Errorf("unknown PendingRefund field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *PendingRefundMutation) AddedFields() []string {
+	var fields []string
+	if m.addamount_minor != nil {
+		fields = append(fields, pendingrefund.FieldAmountMinor)
+	}
+	if m.addattempts != nil {
+		fields = append(fields, pendingrefund.FieldAttempts)
+	}
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *PendingRefundMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case pendingrefund.FieldAmountMinor:
+		return m.AddedAmountMinor()
+	case pendingrefund.FieldAttempts:
+		return m.AddedAttempts()
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *PendingRefundMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	case pendingrefund.FieldAmountMinor:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddAmountMinor(v)
+		return nil
+	case pendingrefund.FieldAttempts:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddAttempts(v)
+		return nil
+	}
+	return fmt.Errorf("unknown PendingRefund numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *PendingRefundMutation) ClearedFields() []string {
+	var fields []string
+	if m.FieldCleared(pendingrefund.FieldExecutedAt) {
+		fields = append(fields, pendingrefund.FieldExecutedAt)
+	}
+	return fields
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *PendingRefundMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *PendingRefundMutation) ClearField(name string) error {
+	switch name {
+	case pendingrefund.FieldExecutedAt:
+		m.ClearExecutedAt()
+		return nil
+	}
+	return fmt.Errorf("unknown PendingRefund nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *PendingRefundMutation) ResetField(name string) error {
+	switch name {
+	case pendingrefund.FieldCreatedAt:
+		m.ResetCreatedAt()
+		return nil
+	case pendingrefund.FieldEscrowID:
+		m.ResetEscrowID()
+		return nil
+	case pendingrefund.FieldOrderID:
+		m.ResetOrderID()
+		return nil
+	case pendingrefund.FieldRequestKey:
+		m.ResetRequestKey()
+		return nil
+	case pendingrefund.FieldAmountMinor:
+		m.ResetAmountMinor()
+		return nil
+	case pendingrefund.FieldCurrency:
+		m.ResetCurrency()
+		return nil
+	case pendingrefund.FieldFull:
+		m.ResetFull()
+		return nil
+	case pendingrefund.FieldReason:
+		m.ResetReason()
+		return nil
+	case pendingrefund.FieldActorType:
+		m.ResetActorType()
+		return nil
+	case pendingrefund.FieldActorID:
+		m.ResetActorID()
+		return nil
+	case pendingrefund.FieldStatus:
+		m.ResetStatus()
+		return nil
+	case pendingrefund.FieldAttempts:
+		m.ResetAttempts()
+		return nil
+	case pendingrefund.FieldLastError:
+		m.ResetLastError()
+		return nil
+	case pendingrefund.FieldExecutedAt:
+		m.ResetExecutedAt()
+		return nil
+	case pendingrefund.FieldUpdatedAt:
+		m.ResetUpdatedAt()
+		return nil
+	}
+	return fmt.Errorf("unknown PendingRefund field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *PendingRefundMutation) AddedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.escrow != nil {
+		edges = append(edges, pendingrefund.EdgeEscrow)
+	}
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *PendingRefundMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case pendingrefund.EdgeEscrow:
+		if id := m.escrow; id != nil {
+			return []ent.Value{*id}
+		}
+	}
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *PendingRefundMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 1)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *PendingRefundMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *PendingRefundMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.clearedescrow {
+		edges = append(edges, pendingrefund.EdgeEscrow)
+	}
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *PendingRefundMutation) EdgeCleared(name string) bool {
+	switch name {
+	case pendingrefund.EdgeEscrow:
+		return m.clearedescrow
+	}
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *PendingRefundMutation) ClearEdge(name string) error {
+	switch name {
+	case pendingrefund.EdgeEscrow:
+		m.ClearEscrow()
+		return nil
+	}
+	return fmt.Errorf("unknown PendingRefund unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *PendingRefundMutation) ResetEdge(name string) error {
+	switch name {
+	case pendingrefund.EdgeEscrow:
+		m.ResetEscrow()
+		return nil
+	}
+	return fmt.Errorf("unknown PendingRefund edge %s", name)
 }

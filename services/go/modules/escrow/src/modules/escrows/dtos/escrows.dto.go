@@ -48,7 +48,15 @@ type EscrowDetailDto struct {
 	ReleasedAt         *time.Time               `json:"releasedAt"`
 	RefundedAt         *time.Time               `json:"refundedAt"`
 	DisputeId          *string                  `json:"disputeId"`
+	RefundScheduled    *ScheduledRefundDto      `json:"refundScheduled"`
 	Timeline           []EscrowTimelineEventDto `json:"timeline,omitempty"`
+}
+
+type ScheduledRefundDto struct {
+	Status      string    `json:"status"`
+	Amount      MoneyDto  `json:"amount"`
+	Reason      string    `json:"reason"`
+	ScheduledAt time.Time `json:"scheduledAt"`
 }
 
 type EscrowHoldDto struct {

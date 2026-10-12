@@ -17,7 +17,7 @@ var currencyPattern = regexp.MustCompile(`^[A-Z]{3}$`)
 var adminOrderStatuses = append([]string{enums.StatusPending}, enums.SellerStatuses...)
 
 var refundSources = []string{"manual", "seller", "return", "cancellation", "dispute", "system"}
-var refundStatuses = []string{"processing", "completed", "failed"}
+var refundStatuses = []string{"processing", "scheduled", "completed", "failed"}
 
 func ValidateOrderFilters(request *http.Request) error {
 	var collected utils.Issues

@@ -41,6 +41,13 @@ func (service EscrowService) ReleaseEscrowInTransaction(ctx context.Context, tra
 	if held.Status == escrow.StatusDisputed && trigger != "disputeResolved" {
 		return EscrowSettlementResult{}, models.ErrEscrowFrozenByDispute
 	}
+	pending, err := service.HasScheduledRefund(ctx, client, held.ID)
+	if err != nil {
+		return EscrowSettlementResult{}, err
+	}
+	if pending {
+		return EscrowSettlementResult{}, ErrRefundScheduled
+	}
 	if err := models.AssertEscrowTransitionAllowed(models.EscrowStatus(held.Status), models.EscrowReleased); err != nil {
 		return EscrowSettlementResult{}, err
 	}
@@ -146,10 +153,23 @@ func (service EscrowService) finishSettlement(ctx context.Context, transaction *
 	if err := service.recordEscrowEvent(ctx, client, settled.ID, eventType, actor.Type, actor.Id, map[string]any{"detail": detail}); err != nil {
 		return EscrowSettlementResult{}, err
 	}
-	if err := service.Container.Outbox.EnqueueInTransaction(ctx, transaction, "escrow."+eventType, settled.OrderID, service.Container.Now().UTC(), escrowEventData(settled)); err != nil {
+	data := escrowEventData(settled)
+	if eventType == "refunded" || eventType == "partiallyRefunded" {
+		data["refundDestination"] = refundDestination(refundId)
+	}
+	if err := service.Container.Outbox.EnqueueInTransaction(ctx, transaction, "escrow."+eventType, settled.OrderID, service.Container.Now().UTC(), data); err != nil {
 		return EscrowSettlementResult{}, err
 	}
 	return EscrowSettlementResult{Escrow: settled, RefundToSend: refundId}, nil
+}
+
+// refundDestination says where the buyer's money lands: a provider refund goes back to the card or account they paid with,
+// every other escrow refund unlocks the money in their own Zudomart (Flutterwave) wallet.
+func refundDestination(providerRefundId *uuid.UUID) string {
+	if providerRefundId != nil {
+		return "paymentMethod"
+	}
+	return "wallet"
 }
 
 func appendPositiveCredit(lines []ledgermodels.JournalLineRequest, account ledgermodels.AccountRef, amountMinor int64) []ledgermodels.JournalLineRequest {

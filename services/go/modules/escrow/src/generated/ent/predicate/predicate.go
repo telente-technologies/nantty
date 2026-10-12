@@ -26,3 +26,6 @@ type IdempotentRequest func(*sql.Selector)
 
 // OutboxEvent is the predicate function for outboxevent builders.
 type OutboxEvent func(*sql.Selector)
+
+// PendingRefund is the predicate function for pendingrefund builders.
+type PendingRefund func(*sql.Selector)

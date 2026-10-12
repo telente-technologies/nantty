@@ -10,6 +10,7 @@ import (
 
 	"zudomart/modules/escrow/src/generated/ent"
 	"zudomart/modules/escrow/src/generated/ent/escrow"
+	"zudomart/modules/escrow/src/generated/ent/pendingrefund"
 	"zudomart/modules/ledger/src/databases"
 )
 
@@ -82,7 +83,8 @@ func (service EscrowService) ReleaseEscrowsWhoseInspectionPeriodEnded(ctx contex
 			result = EscrowSettlementResult{}
 			due, err := service.Container.Client(transaction).Escrow.Query().
 				Where(escrow.StatusEQ(escrow.StatusHeld), escrow.AutoReleaseAtLTE(service.Container.Now().UTC()),
-					escrow.Or(escrow.CustodyNEQ(escrow.CustodyBuyerWalletLock), escrow.WalletFundedAtNotNil())).
+					escrow.Or(escrow.CustodyNEQ(escrow.CustodyBuyerWalletLock), escrow.WalletFundedAtNotNil()),
+					escrow.Not(escrow.HasPendingRefundsWith(pendingrefund.StatusEQ(pendingrefund.StatusScheduled)))).
 				Order(ent.Asc(escrow.FieldAutoReleaseAt)).ForUpdate(entsql.WithLockAction(entsql.SkipLocked)).First(ctx)
 			if ent.IsNotFound(err) {
 				return nil

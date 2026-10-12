@@ -12,6 +12,7 @@ import (
 	"zudomart/modules/escrow/src/generated/ent/escrowevent"
 	"zudomart/modules/escrow/src/generated/ent/idempotentrequest"
 	"zudomart/modules/escrow/src/generated/ent/outboxevent"
+	"zudomart/modules/escrow/src/generated/ent/pendingrefund"
 
 	"github.com/google/uuid"
 )
@@ -573,4 +574,105 @@ func init() {
 	outboxeventDescID := outboxeventMixinFields0[0].Descriptor()
 	// outboxevent.DefaultID holds the default value on creation for the id field.
 	outboxevent.DefaultID = outboxeventDescID.Default.(func() uuid.UUID)
+	pendingrefundMixin := schema.PendingRefund{}.Mixin()
+	pendingrefundMixinFields0 := pendingrefundMixin[0].Fields()
+	_ = pendingrefundMixinFields0
+	pendingrefundFields := schema.PendingRefund{}.Fields()
+	_ = pendingrefundFields
+	// pendingrefundDescCreatedAt is the schema descriptor for created_at field.
+	pendingrefundDescCreatedAt := pendingrefundMixinFields0[1].Descriptor()
+	// pendingrefund.DefaultCreatedAt holds the default value on creation for the created_at field.
+	pendingrefund.DefaultCreatedAt = pendingrefundDescCreatedAt.Default.(func() time.Time)
+	// pendingrefundDescOrderID is the schema descriptor for order_id field.
+	pendingrefundDescOrderID := pendingrefundFields[1].Descriptor()
+	// pendingrefund.OrderIDValidator is a validator for the "order_id" field. It is called by the builders before save.
+	pendingrefund.OrderIDValidator = func() func(string) error {
+		validators := pendingrefundDescOrderID.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(order_id string) error {
+			for _, fn := range fns {
+				if err := fn(order_id); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// pendingrefundDescRequestKey is the schema descriptor for request_key field.
+	pendingrefundDescRequestKey := pendingrefundFields[2].Descriptor()
+	// pendingrefund.RequestKeyValidator is a validator for the "request_key" field. It is called by the builders before save.
+	pendingrefund.RequestKeyValidator = func() func(string) error {
+		validators := pendingrefundDescRequestKey.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(request_key string) error {
+			for _, fn := range fns {
+				if err := fn(request_key); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// pendingrefundDescCurrency is the schema descriptor for currency field.
+	pendingrefundDescCurrency := pendingrefundFields[4].Descriptor()
+	// pendingrefund.CurrencyValidator is a validator for the "currency" field. It is called by the builders before save.
+	pendingrefund.CurrencyValidator = func() func(string) error {
+		validators := pendingrefundDescCurrency.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(currency string) error {
+			for _, fn := range fns {
+				if err := fn(currency); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// pendingrefundDescReason is the schema descriptor for reason field.
+	pendingrefundDescReason := pendingrefundFields[6].Descriptor()
+	// pendingrefund.DefaultReason holds the default value on creation for the reason field.
+	pendingrefund.DefaultReason = pendingrefundDescReason.Default.(string)
+	// pendingrefund.ReasonValidator is a validator for the "reason" field. It is called by the builders before save.
+	pendingrefund.ReasonValidator = pendingrefundDescReason.Validators[0].(func(string) error)
+	// pendingrefundDescActorType is the schema descriptor for actor_type field.
+	pendingrefundDescActorType := pendingrefundFields[7].Descriptor()
+	// pendingrefund.DefaultActorType holds the default value on creation for the actor_type field.
+	pendingrefund.DefaultActorType = pendingrefundDescActorType.Default.(string)
+	// pendingrefund.ActorTypeValidator is a validator for the "actor_type" field. It is called by the builders before save.
+	pendingrefund.ActorTypeValidator = pendingrefundDescActorType.Validators[0].(func(string) error)
+	// pendingrefundDescActorID is the schema descriptor for actor_id field.
+	pendingrefundDescActorID := pendingrefundFields[8].Descriptor()
+	// pendingrefund.DefaultActorID holds the default value on creation for the actor_id field.
+	pendingrefund.DefaultActorID = pendingrefundDescActorID.Default.(string)
+	// pendingrefund.ActorIDValidator is a validator for the "actor_id" field. It is called by the builders before save.
+	pendingrefund.ActorIDValidator = pendingrefundDescActorID.Validators[0].(func(string) error)
+	// pendingrefundDescAttempts is the schema descriptor for attempts field.
+	pendingrefundDescAttempts := pendingrefundFields[10].Descriptor()
+	// pendingrefund.DefaultAttempts holds the default value on creation for the attempts field.
+	pendingrefund.DefaultAttempts = pendingrefundDescAttempts.Default.(int)
+	// pendingrefundDescLastError is the schema descriptor for last_error field.
+	pendingrefundDescLastError := pendingrefundFields[11].Descriptor()
+	// pendingrefund.DefaultLastError holds the default value on creation for the last_error field.
+	pendingrefund.DefaultLastError = pendingrefundDescLastError.Default.(string)
+	// pendingrefund.LastErrorValidator is a validator for the "last_error" field. It is called by the builders before save.
+	pendingrefund.LastErrorValidator = pendingrefundDescLastError.Validators[0].(func(string) error)
+	// pendingrefundDescUpdatedAt is the schema descriptor for updated_at field.
+	pendingrefundDescUpdatedAt := pendingrefundFields[13].Descriptor()
+	// pendingrefund.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	pendingrefund.DefaultUpdatedAt = pendingrefundDescUpdatedAt.Default.(func() time.Time)
+	// pendingrefund.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	pendingrefund.UpdateDefaultUpdatedAt = pendingrefundDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// pendingrefundDescID is the schema descriptor for id field.
+	pendingrefundDescID := pendingrefundMixinFields0[0].Descriptor()
+	// pendingrefund.DefaultID holds the default value on creation for the id field.
+	pendingrefund.DefaultID = pendingrefundDescID.Default.(func() uuid.UUID)
 }
