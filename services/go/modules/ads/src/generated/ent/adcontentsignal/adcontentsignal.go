@@ -31,6 +31,8 @@ const (
 	FieldAiGenerated = "ai_generated"
 	// FieldMonetizationEligible holds the string denoting the monetization_eligible field in the database.
 	FieldMonetizationEligible = "monetization_eligible"
+	// FieldRemoved holds the string denoting the removed field in the database.
+	FieldRemoved = "removed"
 	// FieldOptedInPlacements holds the string denoting the opted_in_placements field in the database.
 	FieldOptedInPlacements = "opted_in_placements"
 	// FieldTopics holds the string denoting the topics field in the database.
@@ -53,6 +55,7 @@ var Columns = []string{
 	FieldKidsContent,
 	FieldAiGenerated,
 	FieldMonetizationEligible,
+	FieldRemoved,
 	FieldOptedInPlacements,
 	FieldTopics,
 	FieldUpdatedAt,
@@ -89,6 +92,8 @@ var (
 	DefaultAiGenerated bool
 	// DefaultMonetizationEligible holds the default value on creation for the "monetization_eligible" field.
 	DefaultMonetizationEligible bool
+	// DefaultRemoved holds the default value on creation for the "removed" field.
+	DefaultRemoved bool
 	// DefaultUpdatedAt holds the default value on creation for the "updated_at" field.
 	DefaultUpdatedAt func() time.Time
 	// UpdateDefaultUpdatedAt holds the default value on update for the "updated_at" field.
@@ -146,6 +151,11 @@ func ByAiGenerated(opts ...sql.OrderTermOption) OrderOption {
 // ByMonetizationEligible orders the results by the monetization_eligible field.
 func ByMonetizationEligible(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldMonetizationEligible, opts...).ToFunc()
+}
+
+// ByRemoved orders the results by the removed field.
+func ByRemoved(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldRemoved, opts...).ToFunc()
 }
 
 // ByUpdatedAt orders the results by the updated_at field.

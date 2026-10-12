@@ -54,6 +54,7 @@ type Container struct {
 	UserSummaries    interfaces.PlatformUserSummaries
 	Verification     interfaces.VerificationReader
 	Entitlements     interfaces.EntitlementReader
+	AdLoad           interfaces.AdLoadReader
 	EarningsFunding  interfaces.EarningsFunding
 	StepUps          interfaces.StepUpConsumer
 	Audit            staffaudit.Recorder

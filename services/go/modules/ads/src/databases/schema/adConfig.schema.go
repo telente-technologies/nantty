@@ -43,6 +43,7 @@ func (AdContentSignal) Fields() []ent.Field {
 		field.Bool("kids_content").Default(false),
 		field.Bool("ai_generated").Default(false),
 		field.Bool("monetization_eligible").Default(false),
+		field.Bool("removed").Default(false),
 		field.JSON("opted_in_placements", []string{}).SchemaType(map[string]string{dialect.Postgres: "jsonb"}),
 		field.JSON("topics", []string{}).SchemaType(map[string]string{dialect.Postgres: "jsonb"}),
 		field.Time("updated_at").Default(time.Now).UpdateDefault(time.Now),

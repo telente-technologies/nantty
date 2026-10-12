@@ -99,6 +99,11 @@ func MonetizationEligible(v bool) predicate.AdContentSignal {
 	return predicate.AdContentSignal(sql.FieldEQ(FieldMonetizationEligible, v))
 }
 
+// Removed applies equality check predicate on the "removed" field. It's identical to RemovedEQ.
+func Removed(v bool) predicate.AdContentSignal {
+	return predicate.AdContentSignal(sql.FieldEQ(FieldRemoved, v))
+}
+
 // UpdatedAt applies equality check predicate on the "updated_at" field. It's identical to UpdatedAtEQ.
 func UpdatedAt(v time.Time) predicate.AdContentSignal {
 	return predicate.AdContentSignal(sql.FieldEQ(FieldUpdatedAt, v))
@@ -387,6 +392,16 @@ func MonetizationEligibleEQ(v bool) predicate.AdContentSignal {
 // MonetizationEligibleNEQ applies the NEQ predicate on the "monetization_eligible" field.
 func MonetizationEligibleNEQ(v bool) predicate.AdContentSignal {
 	return predicate.AdContentSignal(sql.FieldNEQ(FieldMonetizationEligible, v))
+}
+
+// RemovedEQ applies the EQ predicate on the "removed" field.
+func RemovedEQ(v bool) predicate.AdContentSignal {
+	return predicate.AdContentSignal(sql.FieldEQ(FieldRemoved, v))
+}
+
+// RemovedNEQ applies the NEQ predicate on the "removed" field.
+func RemovedNEQ(v bool) predicate.AdContentSignal {
+	return predicate.AdContentSignal(sql.FieldNEQ(FieldRemoved, v))
 }
 
 // UpdatedAtEQ applies the EQ predicate on the "updated_at" field.

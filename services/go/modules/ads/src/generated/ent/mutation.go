@@ -23,6 +23,7 @@ import (
 	"zudomart/modules/ads/src/generated/ent/adconversionevent"
 	"zudomart/modules/ads/src/generated/ent/adcreatorearning"
 	"zudomart/modules/ads/src/generated/ent/adcreatormonetisationhold"
+	"zudomart/modules/ads/src/generated/ent/adcreatorprogrammember"
 	"zudomart/modules/ads/src/generated/ent/adcustomaudience"
 	"zudomart/modules/ads/src/generated/ent/adexperiment"
 	"zudomart/modules/ads/src/generated/ent/adfreeboostgrant"
@@ -70,6 +71,7 @@ const (
 	TypeAdConversionEvent         = "AdConversionEvent"
 	TypeAdCreatorEarning          = "AdCreatorEarning"
 	TypeAdCreatorMonetisationHold = "AdCreatorMonetisationHold"
+	TypeAdCreatorProgramMember    = "AdCreatorProgramMember"
 	TypeAdCustomAudience          = "AdCustomAudience"
 	TypeAdExperiment              = "AdExperiment"
 	TypeAdFreeBoostGrant          = "AdFreeBoostGrant"
@@ -10669,6 +10671,7 @@ type AdContentSignalMutation struct {
 	kids_content              *bool
 	ai_generated              *bool
 	monetization_eligible     *bool
+	removed                   *bool
 	opted_in_placements       *[]string
 	appendopted_in_placements []string
 	topics                    *[]string
@@ -11122,6 +11125,42 @@ func (m *AdContentSignalMutation) ResetMonetizationEligible() {
 	m.monetization_eligible = nil
 }
 
+// SetRemoved sets the "removed" field.
+func (m *AdContentSignalMutation) SetRemoved(b bool) {
+	m.removed = &b
+}
+
+// Removed returns the value of the "removed" field in the mutation.
+func (m *AdContentSignalMutation) Removed() (r bool, exists bool) {
+	v := m.removed
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldRemoved returns the old "removed" field's value of the AdContentSignal entity.
+// If the AdContentSignal object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AdContentSignalMutation) OldRemoved(ctx context.Context) (v bool, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldRemoved is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldRemoved requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldRemoved: %w", err)
+	}
+	return oldValue.Removed, nil
+}
+
+// ResetRemoved resets all changes to the "removed" field.
+func (m *AdContentSignalMutation) ResetRemoved() {
+	m.removed = nil
+}
+
 // SetOptedInPlacements sets the "opted_in_placements" field.
 func (m *AdContentSignalMutation) SetOptedInPlacements(s []string) {
 	m.opted_in_placements = &s
@@ -11294,7 +11333,7 @@ func (m *AdContentSignalMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *AdContentSignalMutation) Fields() []string {
-	fields := make([]string, 0, 12)
+	fields := make([]string, 0, 13)
 	if m.content_id != nil {
 		fields = append(fields, adcontentsignal.FieldContentID)
 	}
@@ -11321,6 +11360,9 @@ func (m *AdContentSignalMutation) Fields() []string {
 	}
 	if m.monetization_eligible != nil {
 		fields = append(fields, adcontentsignal.FieldMonetizationEligible)
+	}
+	if m.removed != nil {
+		fields = append(fields, adcontentsignal.FieldRemoved)
 	}
 	if m.opted_in_placements != nil {
 		fields = append(fields, adcontentsignal.FieldOptedInPlacements)
@@ -11357,6 +11399,8 @@ func (m *AdContentSignalMutation) Field(name string) (ent.Value, bool) {
 		return m.AiGenerated()
 	case adcontentsignal.FieldMonetizationEligible:
 		return m.MonetizationEligible()
+	case adcontentsignal.FieldRemoved:
+		return m.Removed()
 	case adcontentsignal.FieldOptedInPlacements:
 		return m.OptedInPlacements()
 	case adcontentsignal.FieldTopics:
@@ -11390,6 +11434,8 @@ func (m *AdContentSignalMutation) OldField(ctx context.Context, name string) (en
 		return m.OldAiGenerated(ctx)
 	case adcontentsignal.FieldMonetizationEligible:
 		return m.OldMonetizationEligible(ctx)
+	case adcontentsignal.FieldRemoved:
+		return m.OldRemoved(ctx)
 	case adcontentsignal.FieldOptedInPlacements:
 		return m.OldOptedInPlacements(ctx)
 	case adcontentsignal.FieldTopics:
@@ -11467,6 +11513,13 @@ func (m *AdContentSignalMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetMonetizationEligible(v)
+		return nil
+	case adcontentsignal.FieldRemoved:
+		v, ok := value.(bool)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetRemoved(v)
 		return nil
 	case adcontentsignal.FieldOptedInPlacements:
 		v, ok := value.([]string)
@@ -11579,6 +11632,9 @@ func (m *AdContentSignalMutation) ResetField(name string) error {
 		return nil
 	case adcontentsignal.FieldMonetizationEligible:
 		m.ResetMonetizationEligible()
+		return nil
+	case adcontentsignal.FieldRemoved:
+		m.ResetRemoved()
 		return nil
 	case adcontentsignal.FieldOptedInPlacements:
 		m.ResetOptedInPlacements()
@@ -14455,6 +14511,446 @@ func (m *AdCreatorMonetisationHoldMutation) ClearEdge(name string) error {
 // It returns an error if the edge is not defined in the schema.
 func (m *AdCreatorMonetisationHoldMutation) ResetEdge(name string) error {
 	return fmt.Errorf("unknown AdCreatorMonetisationHold edge %s", name)
+}
+
+// AdCreatorProgramMemberMutation represents an operation that mutates the AdCreatorProgramMember nodes in the graph.
+type AdCreatorProgramMemberMutation struct {
+	config
+	op                Op
+	typ               string
+	id                *string
+	approved          *bool
+	status_changed_at *time.Time
+	updated_at        *time.Time
+	clearedFields     map[string]struct{}
+	done              bool
+	oldValue          func(context.Context) (*AdCreatorProgramMember, error)
+	predicates        []predicate.AdCreatorProgramMember
+}
+
+var _ ent.Mutation = (*AdCreatorProgramMemberMutation)(nil)
+
+// adcreatorprogrammemberOption allows management of the mutation configuration using functional options.
+type adcreatorprogrammemberOption func(*AdCreatorProgramMemberMutation)
+
+// newAdCreatorProgramMemberMutation creates new mutation for the AdCreatorProgramMember entity.
+func newAdCreatorProgramMemberMutation(c config, op Op, opts ...adcreatorprogrammemberOption) *AdCreatorProgramMemberMutation {
+	m := &AdCreatorProgramMemberMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeAdCreatorProgramMember,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withAdCreatorProgramMemberID sets the ID field of the mutation.
+func withAdCreatorProgramMemberID(id string) adcreatorprogrammemberOption {
+	return func(m *AdCreatorProgramMemberMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *AdCreatorProgramMember
+		)
+		m.oldValue = func(ctx context.Context) (*AdCreatorProgramMember, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().AdCreatorProgramMember.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withAdCreatorProgramMember sets the old AdCreatorProgramMember of the mutation.
+func withAdCreatorProgramMember(node *AdCreatorProgramMember) adcreatorprogrammemberOption {
+	return func(m *AdCreatorProgramMemberMutation) {
+		m.oldValue = func(context.Context) (*AdCreatorProgramMember, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m AdCreatorProgramMemberMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m AdCreatorProgramMemberMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of AdCreatorProgramMember entities.
+func (m *AdCreatorProgramMemberMutation) SetID(id string) {
+	m.id = &id
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *AdCreatorProgramMemberMutation) ID() (id string, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *AdCreatorProgramMemberMutation) IDs(ctx context.Context) ([]string, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []string{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().AdCreatorProgramMember.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetApproved sets the "approved" field.
+func (m *AdCreatorProgramMemberMutation) SetApproved(b bool) {
+	m.approved = &b
+}
+
+// Approved returns the value of the "approved" field in the mutation.
+func (m *AdCreatorProgramMemberMutation) Approved() (r bool, exists bool) {
+	v := m.approved
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldApproved returns the old "approved" field's value of the AdCreatorProgramMember entity.
+// If the AdCreatorProgramMember object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AdCreatorProgramMemberMutation) OldApproved(ctx context.Context) (v bool, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldApproved is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldApproved requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldApproved: %w", err)
+	}
+	return oldValue.Approved, nil
+}
+
+// ResetApproved resets all changes to the "approved" field.
+func (m *AdCreatorProgramMemberMutation) ResetApproved() {
+	m.approved = nil
+}
+
+// SetStatusChangedAt sets the "status_changed_at" field.
+func (m *AdCreatorProgramMemberMutation) SetStatusChangedAt(t time.Time) {
+	m.status_changed_at = &t
+}
+
+// StatusChangedAt returns the value of the "status_changed_at" field in the mutation.
+func (m *AdCreatorProgramMemberMutation) StatusChangedAt() (r time.Time, exists bool) {
+	v := m.status_changed_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldStatusChangedAt returns the old "status_changed_at" field's value of the AdCreatorProgramMember entity.
+// If the AdCreatorProgramMember object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AdCreatorProgramMemberMutation) OldStatusChangedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldStatusChangedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldStatusChangedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldStatusChangedAt: %w", err)
+	}
+	return oldValue.StatusChangedAt, nil
+}
+
+// ResetStatusChangedAt resets all changes to the "status_changed_at" field.
+func (m *AdCreatorProgramMemberMutation) ResetStatusChangedAt() {
+	m.status_changed_at = nil
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (m *AdCreatorProgramMemberMutation) SetUpdatedAt(t time.Time) {
+	m.updated_at = &t
+}
+
+// UpdatedAt returns the value of the "updated_at" field in the mutation.
+func (m *AdCreatorProgramMemberMutation) UpdatedAt() (r time.Time, exists bool) {
+	v := m.updated_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUpdatedAt returns the old "updated_at" field's value of the AdCreatorProgramMember entity.
+// If the AdCreatorProgramMember object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AdCreatorProgramMemberMutation) OldUpdatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUpdatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUpdatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUpdatedAt: %w", err)
+	}
+	return oldValue.UpdatedAt, nil
+}
+
+// ResetUpdatedAt resets all changes to the "updated_at" field.
+func (m *AdCreatorProgramMemberMutation) ResetUpdatedAt() {
+	m.updated_at = nil
+}
+
+// Where appends a list predicates to the AdCreatorProgramMemberMutation builder.
+func (m *AdCreatorProgramMemberMutation) Where(ps ...predicate.AdCreatorProgramMember) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the AdCreatorProgramMemberMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *AdCreatorProgramMemberMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.AdCreatorProgramMember, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *AdCreatorProgramMemberMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *AdCreatorProgramMemberMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (AdCreatorProgramMember).
+func (m *AdCreatorProgramMemberMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *AdCreatorProgramMemberMutation) Fields() []string {
+	fields := make([]string, 0, 3)
+	if m.approved != nil {
+		fields = append(fields, adcreatorprogrammember.FieldApproved)
+	}
+	if m.status_changed_at != nil {
+		fields = append(fields, adcreatorprogrammember.FieldStatusChangedAt)
+	}
+	if m.updated_at != nil {
+		fields = append(fields, adcreatorprogrammember.FieldUpdatedAt)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *AdCreatorProgramMemberMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case adcreatorprogrammember.FieldApproved:
+		return m.Approved()
+	case adcreatorprogrammember.FieldStatusChangedAt:
+		return m.StatusChangedAt()
+	case adcreatorprogrammember.FieldUpdatedAt:
+		return m.UpdatedAt()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *AdCreatorProgramMemberMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case adcreatorprogrammember.FieldApproved:
+		return m.OldApproved(ctx)
+	case adcreatorprogrammember.FieldStatusChangedAt:
+		return m.OldStatusChangedAt(ctx)
+	case adcreatorprogrammember.FieldUpdatedAt:
+		return m.OldUpdatedAt(ctx)
+	}
+	return nil, fmt.Errorf("unknown AdCreatorProgramMember field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *AdCreatorProgramMemberMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case adcreatorprogrammember.FieldApproved:
+		v, ok := value.(bool)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetApproved(v)
+		return nil
+	case adcreatorprogrammember.FieldStatusChangedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetStatusChangedAt(v)
+		return nil
+	case adcreatorprogrammember.FieldUpdatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUpdatedAt(v)
+		return nil
+	}
+	return fmt.Errorf("unknown AdCreatorProgramMember field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *AdCreatorProgramMemberMutation) AddedFields() []string {
+	return nil
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *AdCreatorProgramMemberMutation) AddedField(name string) (ent.Value, bool) {
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *AdCreatorProgramMemberMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	}
+	return fmt.Errorf("unknown AdCreatorProgramMember numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *AdCreatorProgramMemberMutation) ClearedFields() []string {
+	return nil
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *AdCreatorProgramMemberMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *AdCreatorProgramMemberMutation) ClearField(name string) error {
+	return fmt.Errorf("unknown AdCreatorProgramMember nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *AdCreatorProgramMemberMutation) ResetField(name string) error {
+	switch name {
+	case adcreatorprogrammember.FieldApproved:
+		m.ResetApproved()
+		return nil
+	case adcreatorprogrammember.FieldStatusChangedAt:
+		m.ResetStatusChangedAt()
+		return nil
+	case adcreatorprogrammember.FieldUpdatedAt:
+		m.ResetUpdatedAt()
+		return nil
+	}
+	return fmt.Errorf("unknown AdCreatorProgramMember field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *AdCreatorProgramMemberMutation) AddedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *AdCreatorProgramMemberMutation) AddedIDs(name string) []ent.Value {
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *AdCreatorProgramMemberMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *AdCreatorProgramMemberMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *AdCreatorProgramMemberMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *AdCreatorProgramMemberMutation) EdgeCleared(name string) bool {
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *AdCreatorProgramMemberMutation) ClearEdge(name string) error {
+	return fmt.Errorf("unknown AdCreatorProgramMember unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *AdCreatorProgramMemberMutation) ResetEdge(name string) error {
+	return fmt.Errorf("unknown AdCreatorProgramMember edge %s", name)
 }
 
 // AdCustomAudienceMutation represents an operation that mutates the AdCustomAudience nodes in the graph.

@@ -36,6 +36,8 @@ type AdContentSignal struct {
 	AiGenerated bool `json:"ai_generated,omitempty"`
 	// MonetizationEligible holds the value of the "monetization_eligible" field.
 	MonetizationEligible bool `json:"monetization_eligible,omitempty"`
+	// Removed holds the value of the "removed" field.
+	Removed bool `json:"removed,omitempty"`
 	// OptedInPlacements holds the value of the "opted_in_placements" field.
 	OptedInPlacements []string `json:"opted_in_placements,omitempty"`
 	// Topics holds the value of the "topics" field.
@@ -52,7 +54,7 @@ func (*AdContentSignal) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case adcontentsignal.FieldOptedInPlacements, adcontentsignal.FieldTopics:
 			values[i] = new([]byte)
-		case adcontentsignal.FieldBrandSafe, adcontentsignal.FieldSensitive, adcontentsignal.FieldKidsContent, adcontentsignal.FieldAiGenerated, adcontentsignal.FieldMonetizationEligible:
+		case adcontentsignal.FieldBrandSafe, adcontentsignal.FieldSensitive, adcontentsignal.FieldKidsContent, adcontentsignal.FieldAiGenerated, adcontentsignal.FieldMonetizationEligible, adcontentsignal.FieldRemoved:
 			values[i] = new(sql.NullBool)
 		case adcontentsignal.FieldID, adcontentsignal.FieldDurationSeconds:
 			values[i] = new(sql.NullInt64)
@@ -134,6 +136,12 @@ func (_m *AdContentSignal) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field monetization_eligible", values[i])
 			} else if value.Valid {
 				_m.MonetizationEligible = value.Bool
+			}
+		case adcontentsignal.FieldRemoved:
+			if value, ok := values[i].(*sql.NullBool); !ok {
+				return fmt.Errorf("unexpected type %T for field removed", values[i])
+			} else if value.Valid {
+				_m.Removed = value.Bool
 			}
 		case adcontentsignal.FieldOptedInPlacements:
 			if value, ok := values[i].(*[]byte); !ok {
@@ -219,6 +227,9 @@ func (_m *AdContentSignal) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("monetization_eligible=")
 	builder.WriteString(fmt.Sprintf("%v", _m.MonetizationEligible))
+	builder.WriteString(", ")
+	builder.WriteString("removed=")
+	builder.WriteString(fmt.Sprintf("%v", _m.Removed))
 	builder.WriteString(", ")
 	builder.WriteString("opted_in_placements=")
 	builder.WriteString(fmt.Sprintf("%v", _m.OptedInPlacements))

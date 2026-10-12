@@ -188,6 +188,18 @@ func (f AdCreatorMonetisationHoldFunc) Mutate(ctx context.Context, m ent.Mutatio
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.AdCreatorMonetisationHoldMutation", m)
 }
 
+// The AdCreatorProgramMemberFunc type is an adapter to allow the use of ordinary
+// function as AdCreatorProgramMember mutator.
+type AdCreatorProgramMemberFunc func(context.Context, *ent.AdCreatorProgramMemberMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f AdCreatorProgramMemberFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.AdCreatorProgramMemberMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.AdCreatorProgramMemberMutation", m)
+}
+
 // The AdCustomAudienceFunc type is an adapter to allow the use of ordinary
 // function as AdCustomAudience mutator.
 type AdCustomAudienceFunc func(context.Context, *ent.AdCustomAudienceMutation) (ent.Value, error)

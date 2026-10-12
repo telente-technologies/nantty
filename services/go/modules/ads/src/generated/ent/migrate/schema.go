@@ -408,6 +408,7 @@ var (
 		{Name: "kids_content", Type: field.TypeBool, Default: false},
 		{Name: "ai_generated", Type: field.TypeBool, Default: false},
 		{Name: "monetization_eligible", Type: field.TypeBool, Default: false},
+		{Name: "removed", Type: field.TypeBool, Default: false},
 		{Name: "opted_in_placements", Type: field.TypeJSON, SchemaType: map[string]string{"postgres": "jsonb"}},
 		{Name: "topics", Type: field.TypeJSON, SchemaType: map[string]string{"postgres": "jsonb"}},
 		{Name: "updated_at", Type: field.TypeTime},
@@ -520,6 +521,19 @@ var (
 		Name:       "ad_creator_monetisation_holds",
 		Columns:    AdCreatorMonetisationHoldsColumns,
 		PrimaryKey: []*schema.Column{AdCreatorMonetisationHoldsColumns[0]},
+	}
+	// AdCreatorProgramMembersColumns holds the columns for the "ad_creator_program_members" table.
+	AdCreatorProgramMembersColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeString, Size: 80},
+		{Name: "approved", Type: field.TypeBool, Default: false},
+		{Name: "status_changed_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+	}
+	// AdCreatorProgramMembersTable holds the schema information for the "ad_creator_program_members" table.
+	AdCreatorProgramMembersTable = &schema.Table{
+		Name:       "ad_creator_program_members",
+		Columns:    AdCreatorProgramMembersColumns,
+		PrimaryKey: []*schema.Column{AdCreatorProgramMembersColumns[0]},
 	}
 	// AdCustomAudiencesColumns holds the columns for the "ad_custom_audiences" table.
 	AdCustomAudiencesColumns = []*schema.Column{
@@ -1082,6 +1096,7 @@ var (
 		AdConversionEventsTable,
 		AdCreatorEarningsTable,
 		AdCreatorMonetisationHoldsTable,
+		AdCreatorProgramMembersTable,
 		AdCustomAudiencesTable,
 		AdExperimentsTable,
 		AdFreeBoostGrantsTable,

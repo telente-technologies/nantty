@@ -47,6 +47,7 @@ type ContentSignal struct {
 	KidsContent          bool
 	AiGenerated          bool
 	MonetizationEligible bool
+	Removed              bool
 	OptedInPlacements    []string
 	Topics               []string
 }

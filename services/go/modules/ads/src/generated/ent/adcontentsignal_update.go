@@ -148,6 +148,20 @@ func (_u *AdContentSignalUpdate) SetNillableMonetizationEligible(v *bool) *AdCon
 	return _u
 }
 
+// SetRemoved sets the "removed" field.
+func (_u *AdContentSignalUpdate) SetRemoved(v bool) *AdContentSignalUpdate {
+	_u.mutation.SetRemoved(v)
+	return _u
+}
+
+// SetNillableRemoved sets the "removed" field if the given value is not nil.
+func (_u *AdContentSignalUpdate) SetNillableRemoved(v *bool) *AdContentSignalUpdate {
+	if v != nil {
+		_u.SetRemoved(*v)
+	}
+	return _u
+}
+
 // SetOptedInPlacements sets the "opted_in_placements" field.
 func (_u *AdContentSignalUpdate) SetOptedInPlacements(v []string) *AdContentSignalUpdate {
 	_u.mutation.SetOptedInPlacements(v)
@@ -272,6 +286,9 @@ func (_u *AdContentSignalUpdate) sqlSave(ctx context.Context) (_node int, err er
 	}
 	if value, ok := _u.mutation.MonetizationEligible(); ok {
 		_spec.SetField(adcontentsignal.FieldMonetizationEligible, field.TypeBool, value)
+	}
+	if value, ok := _u.mutation.Removed(); ok {
+		_spec.SetField(adcontentsignal.FieldRemoved, field.TypeBool, value)
 	}
 	if value, ok := _u.mutation.OptedInPlacements(); ok {
 		_spec.SetField(adcontentsignal.FieldOptedInPlacements, field.TypeJSON, value)
@@ -431,6 +448,20 @@ func (_u *AdContentSignalUpdateOne) SetNillableMonetizationEligible(v *bool) *Ad
 	return _u
 }
 
+// SetRemoved sets the "removed" field.
+func (_u *AdContentSignalUpdateOne) SetRemoved(v bool) *AdContentSignalUpdateOne {
+	_u.mutation.SetRemoved(v)
+	return _u
+}
+
+// SetNillableRemoved sets the "removed" field if the given value is not nil.
+func (_u *AdContentSignalUpdateOne) SetNillableRemoved(v *bool) *AdContentSignalUpdateOne {
+	if v != nil {
+		_u.SetRemoved(*v)
+	}
+	return _u
+}
+
 // SetOptedInPlacements sets the "opted_in_placements" field.
 func (_u *AdContentSignalUpdateOne) SetOptedInPlacements(v []string) *AdContentSignalUpdateOne {
 	_u.mutation.SetOptedInPlacements(v)
@@ -585,6 +616,9 @@ func (_u *AdContentSignalUpdateOne) sqlSave(ctx context.Context) (_node *AdConte
 	}
 	if value, ok := _u.mutation.MonetizationEligible(); ok {
 		_spec.SetField(adcontentsignal.FieldMonetizationEligible, field.TypeBool, value)
+	}
+	if value, ok := _u.mutation.Removed(); ok {
+		_spec.SetField(adcontentsignal.FieldRemoved, field.TypeBool, value)
 	}
 	if value, ok := _u.mutation.OptedInPlacements(); ok {
 		_spec.SetField(adcontentsignal.FieldOptedInPlacements, field.TypeJSON, value)

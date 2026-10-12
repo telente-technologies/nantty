@@ -26,6 +26,7 @@ import (
 	"zudomart/modules/ads/src/generated/ent/adconversionevent"
 	"zudomart/modules/ads/src/generated/ent/adcreatorearning"
 	"zudomart/modules/ads/src/generated/ent/adcreatormonetisationhold"
+	"zudomart/modules/ads/src/generated/ent/adcreatorprogrammember"
 	"zudomart/modules/ads/src/generated/ent/adcustomaudience"
 	"zudomart/modules/ads/src/generated/ent/adexperiment"
 	"zudomart/modules/ads/src/generated/ent/adfreeboostgrant"
@@ -85,6 +86,8 @@ type Client struct {
 	AdCreatorEarning *AdCreatorEarningClient
 	// AdCreatorMonetisationHold is the client for interacting with the AdCreatorMonetisationHold builders.
 	AdCreatorMonetisationHold *AdCreatorMonetisationHoldClient
+	// AdCreatorProgramMember is the client for interacting with the AdCreatorProgramMember builders.
+	AdCreatorProgramMember *AdCreatorProgramMemberClient
 	// AdCustomAudience is the client for interacting with the AdCustomAudience builders.
 	AdCustomAudience *AdCustomAudienceClient
 	// AdExperiment is the client for interacting with the AdExperiment builders.
@@ -141,6 +144,7 @@ func (c *Client) init() {
 	c.AdConversionEvent = NewAdConversionEventClient(c.config)
 	c.AdCreatorEarning = NewAdCreatorEarningClient(c.config)
 	c.AdCreatorMonetisationHold = NewAdCreatorMonetisationHoldClient(c.config)
+	c.AdCreatorProgramMember = NewAdCreatorProgramMemberClient(c.config)
 	c.AdCustomAudience = NewAdCustomAudienceClient(c.config)
 	c.AdExperiment = NewAdExperimentClient(c.config)
 	c.AdFreeBoostGrant = NewAdFreeBoostGrantClient(c.config)
@@ -263,6 +267,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		AdConversionEvent:         NewAdConversionEventClient(cfg),
 		AdCreatorEarning:          NewAdCreatorEarningClient(cfg),
 		AdCreatorMonetisationHold: NewAdCreatorMonetisationHoldClient(cfg),
+		AdCreatorProgramMember:    NewAdCreatorProgramMemberClient(cfg),
 		AdCustomAudience:          NewAdCustomAudienceClient(cfg),
 		AdExperiment:              NewAdExperimentClient(cfg),
 		AdFreeBoostGrant:          NewAdFreeBoostGrantClient(cfg),
@@ -312,6 +317,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		AdConversionEvent:         NewAdConversionEventClient(cfg),
 		AdCreatorEarning:          NewAdCreatorEarningClient(cfg),
 		AdCreatorMonetisationHold: NewAdCreatorMonetisationHoldClient(cfg),
+		AdCreatorProgramMember:    NewAdCreatorProgramMemberClient(cfg),
 		AdCustomAudience:          NewAdCustomAudienceClient(cfg),
 		AdExperiment:              NewAdExperimentClient(cfg),
 		AdFreeBoostGrant:          NewAdFreeBoostGrantClient(cfg),
@@ -359,10 +365,11 @@ func (c *Client) Use(hooks ...Hook) {
 		c.Ad, c.AdAccount, c.AdAccountInvite, c.AdAccountMember, c.AdActivityEntry,
 		c.AdAudienceMember, c.AdAutomatedRule, c.AdBoost, c.AdCampaign,
 		c.AdCardStatsDaily, c.AdContentSignal, c.AdConversion, c.AdConversionEvent,
-		c.AdCreatorEarning, c.AdCreatorMonetisationHold, c.AdCustomAudience,
-		c.AdExperiment, c.AdFreeBoostGrant, c.AdFrequencyPolicy, c.AdFundsTransaction,
-		c.AdGroup, c.AdImpression, c.AdMedia, c.AdPolicyCategory, c.AdPoolDaily,
-		c.AdScheduledReport, c.AdSpendBatch, c.AdStatsDaily, c.AdTopUp, c.OutboxEvent,
+		c.AdCreatorEarning, c.AdCreatorMonetisationHold, c.AdCreatorProgramMember,
+		c.AdCustomAudience, c.AdExperiment, c.AdFreeBoostGrant, c.AdFrequencyPolicy,
+		c.AdFundsTransaction, c.AdGroup, c.AdImpression, c.AdMedia, c.AdPolicyCategory,
+		c.AdPoolDaily, c.AdScheduledReport, c.AdSpendBatch, c.AdStatsDaily, c.AdTopUp,
+		c.OutboxEvent,
 	} {
 		n.Use(hooks...)
 	}
@@ -375,10 +382,11 @@ func (c *Client) Intercept(interceptors ...Interceptor) {
 		c.Ad, c.AdAccount, c.AdAccountInvite, c.AdAccountMember, c.AdActivityEntry,
 		c.AdAudienceMember, c.AdAutomatedRule, c.AdBoost, c.AdCampaign,
 		c.AdCardStatsDaily, c.AdContentSignal, c.AdConversion, c.AdConversionEvent,
-		c.AdCreatorEarning, c.AdCreatorMonetisationHold, c.AdCustomAudience,
-		c.AdExperiment, c.AdFreeBoostGrant, c.AdFrequencyPolicy, c.AdFundsTransaction,
-		c.AdGroup, c.AdImpression, c.AdMedia, c.AdPolicyCategory, c.AdPoolDaily,
-		c.AdScheduledReport, c.AdSpendBatch, c.AdStatsDaily, c.AdTopUp, c.OutboxEvent,
+		c.AdCreatorEarning, c.AdCreatorMonetisationHold, c.AdCreatorProgramMember,
+		c.AdCustomAudience, c.AdExperiment, c.AdFreeBoostGrant, c.AdFrequencyPolicy,
+		c.AdFundsTransaction, c.AdGroup, c.AdImpression, c.AdMedia, c.AdPolicyCategory,
+		c.AdPoolDaily, c.AdScheduledReport, c.AdSpendBatch, c.AdStatsDaily, c.AdTopUp,
+		c.OutboxEvent,
 	} {
 		n.Intercept(interceptors...)
 	}
@@ -417,6 +425,8 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.AdCreatorEarning.mutate(ctx, m)
 	case *AdCreatorMonetisationHoldMutation:
 		return c.AdCreatorMonetisationHold.mutate(ctx, m)
+	case *AdCreatorProgramMemberMutation:
+		return c.AdCreatorProgramMember.mutate(ctx, m)
 	case *AdCustomAudienceMutation:
 		return c.AdCustomAudience.mutate(ctx, m)
 	case *AdExperimentMutation:
@@ -2447,6 +2457,139 @@ func (c *AdCreatorMonetisationHoldClient) mutate(ctx context.Context, m *AdCreat
 	}
 }
 
+// AdCreatorProgramMemberClient is a client for the AdCreatorProgramMember schema.
+type AdCreatorProgramMemberClient struct {
+	config
+}
+
+// NewAdCreatorProgramMemberClient returns a client for the AdCreatorProgramMember from the given config.
+func NewAdCreatorProgramMemberClient(c config) *AdCreatorProgramMemberClient {
+	return &AdCreatorProgramMemberClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `adcreatorprogrammember.Hooks(f(g(h())))`.
+func (c *AdCreatorProgramMemberClient) Use(hooks ...Hook) {
+	c.hooks.AdCreatorProgramMember = append(c.hooks.AdCreatorProgramMember, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `adcreatorprogrammember.Intercept(f(g(h())))`.
+func (c *AdCreatorProgramMemberClient) Intercept(interceptors ...Interceptor) {
+	c.inters.AdCreatorProgramMember = append(c.inters.AdCreatorProgramMember, interceptors...)
+}
+
+// Create returns a builder for creating a AdCreatorProgramMember entity.
+func (c *AdCreatorProgramMemberClient) Create() *AdCreatorProgramMemberCreate {
+	mutation := newAdCreatorProgramMemberMutation(c.config, OpCreate)
+	return &AdCreatorProgramMemberCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of AdCreatorProgramMember entities.
+func (c *AdCreatorProgramMemberClient) CreateBulk(builders ...*AdCreatorProgramMemberCreate) *AdCreatorProgramMemberCreateBulk {
+	return &AdCreatorProgramMemberCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *AdCreatorProgramMemberClient) MapCreateBulk(slice any, setFunc func(*AdCreatorProgramMemberCreate, int)) *AdCreatorProgramMemberCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &AdCreatorProgramMemberCreateBulk{err: fmt.Errorf("calling to AdCreatorProgramMemberClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*AdCreatorProgramMemberCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &AdCreatorProgramMemberCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for AdCreatorProgramMember.
+func (c *AdCreatorProgramMemberClient) Update() *AdCreatorProgramMemberUpdate {
+	mutation := newAdCreatorProgramMemberMutation(c.config, OpUpdate)
+	return &AdCreatorProgramMemberUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *AdCreatorProgramMemberClient) UpdateOne(_m *AdCreatorProgramMember) *AdCreatorProgramMemberUpdateOne {
+	mutation := newAdCreatorProgramMemberMutation(c.config, OpUpdateOne, withAdCreatorProgramMember(_m))
+	return &AdCreatorProgramMemberUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *AdCreatorProgramMemberClient) UpdateOneID(id string) *AdCreatorProgramMemberUpdateOne {
+	mutation := newAdCreatorProgramMemberMutation(c.config, OpUpdateOne, withAdCreatorProgramMemberID(id))
+	return &AdCreatorProgramMemberUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for AdCreatorProgramMember.
+func (c *AdCreatorProgramMemberClient) Delete() *AdCreatorProgramMemberDelete {
+	mutation := newAdCreatorProgramMemberMutation(c.config, OpDelete)
+	return &AdCreatorProgramMemberDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *AdCreatorProgramMemberClient) DeleteOne(_m *AdCreatorProgramMember) *AdCreatorProgramMemberDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *AdCreatorProgramMemberClient) DeleteOneID(id string) *AdCreatorProgramMemberDeleteOne {
+	builder := c.Delete().Where(adcreatorprogrammember.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &AdCreatorProgramMemberDeleteOne{builder}
+}
+
+// Query returns a query builder for AdCreatorProgramMember.
+func (c *AdCreatorProgramMemberClient) Query() *AdCreatorProgramMemberQuery {
+	return &AdCreatorProgramMemberQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeAdCreatorProgramMember},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a AdCreatorProgramMember entity by its id.
+func (c *AdCreatorProgramMemberClient) Get(ctx context.Context, id string) (*AdCreatorProgramMember, error) {
+	return c.Query().Where(adcreatorprogrammember.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *AdCreatorProgramMemberClient) GetX(ctx context.Context, id string) *AdCreatorProgramMember {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *AdCreatorProgramMemberClient) Hooks() []Hook {
+	return c.hooks.AdCreatorProgramMember
+}
+
+// Interceptors returns the client interceptors.
+func (c *AdCreatorProgramMemberClient) Interceptors() []Interceptor {
+	return c.inters.AdCreatorProgramMember
+}
+
+func (c *AdCreatorProgramMemberClient) mutate(ctx context.Context, m *AdCreatorProgramMemberMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&AdCreatorProgramMemberCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&AdCreatorProgramMemberUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&AdCreatorProgramMemberUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&AdCreatorProgramMemberDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown AdCreatorProgramMember mutation op: %q", m.Op())
+	}
+}
+
 // AdCustomAudienceClient is a client for the AdCustomAudience schema.
 type AdCustomAudienceClient struct {
 	config
@@ -4448,19 +4591,19 @@ type (
 		Ad, AdAccount, AdAccountInvite, AdAccountMember, AdActivityEntry,
 		AdAudienceMember, AdAutomatedRule, AdBoost, AdCampaign, AdCardStatsDaily,
 		AdContentSignal, AdConversion, AdConversionEvent, AdCreatorEarning,
-		AdCreatorMonetisationHold, AdCustomAudience, AdExperiment, AdFreeBoostGrant,
-		AdFrequencyPolicy, AdFundsTransaction, AdGroup, AdImpression, AdMedia,
-		AdPolicyCategory, AdPoolDaily, AdScheduledReport, AdSpendBatch, AdStatsDaily,
-		AdTopUp, OutboxEvent []ent.Hook
+		AdCreatorMonetisationHold, AdCreatorProgramMember, AdCustomAudience,
+		AdExperiment, AdFreeBoostGrant, AdFrequencyPolicy, AdFundsTransaction, AdGroup,
+		AdImpression, AdMedia, AdPolicyCategory, AdPoolDaily, AdScheduledReport,
+		AdSpendBatch, AdStatsDaily, AdTopUp, OutboxEvent []ent.Hook
 	}
 	inters struct {
 		Ad, AdAccount, AdAccountInvite, AdAccountMember, AdActivityEntry,
 		AdAudienceMember, AdAutomatedRule, AdBoost, AdCampaign, AdCardStatsDaily,
 		AdContentSignal, AdConversion, AdConversionEvent, AdCreatorEarning,
-		AdCreatorMonetisationHold, AdCustomAudience, AdExperiment, AdFreeBoostGrant,
-		AdFrequencyPolicy, AdFundsTransaction, AdGroup, AdImpression, AdMedia,
-		AdPolicyCategory, AdPoolDaily, AdScheduledReport, AdSpendBatch, AdStatsDaily,
-		AdTopUp, OutboxEvent []ent.Interceptor
+		AdCreatorMonetisationHold, AdCreatorProgramMember, AdCustomAudience,
+		AdExperiment, AdFreeBoostGrant, AdFrequencyPolicy, AdFundsTransaction, AdGroup,
+		AdImpression, AdMedia, AdPolicyCategory, AdPoolDaily, AdScheduledReport,
+		AdSpendBatch, AdStatsDaily, AdTopUp, OutboxEvent []ent.Interceptor
 	}
 )
 

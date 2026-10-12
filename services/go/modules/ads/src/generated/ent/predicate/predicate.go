@@ -51,6 +51,9 @@ type AdCreatorEarning func(*sql.Selector)
 // AdCreatorMonetisationHold is the predicate function for adcreatormonetisationhold builders.
 type AdCreatorMonetisationHold func(*sql.Selector)
 
+// AdCreatorProgramMember is the predicate function for adcreatorprogrammember builders.
+type AdCreatorProgramMember func(*sql.Selector)
+
 // AdCustomAudience is the predicate function for adcustomaudience builders.
 type AdCustomAudience func(*sql.Selector)
 

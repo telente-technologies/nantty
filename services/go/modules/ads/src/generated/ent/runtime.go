@@ -19,6 +19,7 @@ import (
 	"zudomart/modules/ads/src/generated/ent/adconversionevent"
 	"zudomart/modules/ads/src/generated/ent/adcreatorearning"
 	"zudomart/modules/ads/src/generated/ent/adcreatormonetisationhold"
+	"zudomart/modules/ads/src/generated/ent/adcreatorprogrammember"
 	"zudomart/modules/ads/src/generated/ent/adcustomaudience"
 	"zudomart/modules/ads/src/generated/ent/adexperiment"
 	"zudomart/modules/ads/src/generated/ent/adfreeboostgrant"
@@ -532,8 +533,12 @@ func init() {
 	adcontentsignalDescMonetizationEligible := adcontentsignalFields[8].Descriptor()
 	// adcontentsignal.DefaultMonetizationEligible holds the default value on creation for the monetization_eligible field.
 	adcontentsignal.DefaultMonetizationEligible = adcontentsignalDescMonetizationEligible.Default.(bool)
+	// adcontentsignalDescRemoved is the schema descriptor for removed field.
+	adcontentsignalDescRemoved := adcontentsignalFields[9].Descriptor()
+	// adcontentsignal.DefaultRemoved holds the default value on creation for the removed field.
+	adcontentsignal.DefaultRemoved = adcontentsignalDescRemoved.Default.(bool)
 	// adcontentsignalDescUpdatedAt is the schema descriptor for updated_at field.
-	adcontentsignalDescUpdatedAt := adcontentsignalFields[11].Descriptor()
+	adcontentsignalDescUpdatedAt := adcontentsignalFields[12].Descriptor()
 	// adcontentsignal.DefaultUpdatedAt holds the default value on creation for the updated_at field.
 	adcontentsignal.DefaultUpdatedAt = adcontentsignalDescUpdatedAt.Default.(func() time.Time)
 	// adcontentsignal.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
@@ -728,6 +733,36 @@ func init() {
 	// adcreatormonetisationhold.IDValidator is a validator for the "id" field. It is called by the builders before save.
 	adcreatormonetisationhold.IDValidator = func() func(string) error {
 		validators := adcreatormonetisationholdDescID.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(id string) error {
+			for _, fn := range fns {
+				if err := fn(id); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	adcreatorprogrammemberFields := schema.AdCreatorProgramMember{}.Fields()
+	_ = adcreatorprogrammemberFields
+	// adcreatorprogrammemberDescApproved is the schema descriptor for approved field.
+	adcreatorprogrammemberDescApproved := adcreatorprogrammemberFields[1].Descriptor()
+	// adcreatorprogrammember.DefaultApproved holds the default value on creation for the approved field.
+	adcreatorprogrammember.DefaultApproved = adcreatorprogrammemberDescApproved.Default.(bool)
+	// adcreatorprogrammemberDescUpdatedAt is the schema descriptor for updated_at field.
+	adcreatorprogrammemberDescUpdatedAt := adcreatorprogrammemberFields[3].Descriptor()
+	// adcreatorprogrammember.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	adcreatorprogrammember.DefaultUpdatedAt = adcreatorprogrammemberDescUpdatedAt.Default.(func() time.Time)
+	// adcreatorprogrammember.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	adcreatorprogrammember.UpdateDefaultUpdatedAt = adcreatorprogrammemberDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// adcreatorprogrammemberDescID is the schema descriptor for id field.
+	adcreatorprogrammemberDescID := adcreatorprogrammemberFields[0].Descriptor()
+	// adcreatorprogrammember.IDValidator is a validator for the "id" field. It is called by the builders before save.
+	adcreatorprogrammember.IDValidator = func() func(string) error {
+		validators := adcreatorprogrammemberDescID.Validators
 		fns := [...]func(string) error{
 			validators[0].(func(string) error),
 			validators[1].(func(string) error),

@@ -132,6 +132,20 @@ func (_c *AdContentSignalCreate) SetNillableMonetizationEligible(v *bool) *AdCon
 	return _c
 }
 
+// SetRemoved sets the "removed" field.
+func (_c *AdContentSignalCreate) SetRemoved(v bool) *AdContentSignalCreate {
+	_c.mutation.SetRemoved(v)
+	return _c
+}
+
+// SetNillableRemoved sets the "removed" field if the given value is not nil.
+func (_c *AdContentSignalCreate) SetNillableRemoved(v *bool) *AdContentSignalCreate {
+	if v != nil {
+		_c.SetRemoved(*v)
+	}
+	return _c
+}
+
 // SetOptedInPlacements sets the "opted_in_placements" field.
 func (_c *AdContentSignalCreate) SetOptedInPlacements(v []string) *AdContentSignalCreate {
 	_c.mutation.SetOptedInPlacements(v)
@@ -221,6 +235,10 @@ func (_c *AdContentSignalCreate) defaults() {
 		v := adcontentsignal.DefaultMonetizationEligible
 		_c.mutation.SetMonetizationEligible(v)
 	}
+	if _, ok := _c.mutation.Removed(); !ok {
+		v := adcontentsignal.DefaultRemoved
+		_c.mutation.SetRemoved(v)
+	}
 	if _, ok := _c.mutation.UpdatedAt(); !ok {
 		v := adcontentsignal.DefaultUpdatedAt()
 		_c.mutation.SetUpdatedAt(v)
@@ -270,6 +288,9 @@ func (_c *AdContentSignalCreate) check() error {
 	}
 	if _, ok := _c.mutation.MonetizationEligible(); !ok {
 		return &ValidationError{Name: "monetization_eligible", err: errors.New(`ent: missing required field "AdContentSignal.monetization_eligible"`)}
+	}
+	if _, ok := _c.mutation.Removed(); !ok {
+		return &ValidationError{Name: "removed", err: errors.New(`ent: missing required field "AdContentSignal.removed"`)}
 	}
 	if _, ok := _c.mutation.OptedInPlacements(); !ok {
 		return &ValidationError{Name: "opted_in_placements", err: errors.New(`ent: missing required field "AdContentSignal.opted_in_placements"`)}
@@ -342,6 +363,10 @@ func (_c *AdContentSignalCreate) createSpec() (*AdContentSignal, *sqlgraph.Creat
 	if value, ok := _c.mutation.MonetizationEligible(); ok {
 		_spec.SetField(adcontentsignal.FieldMonetizationEligible, field.TypeBool, value)
 		_node.MonetizationEligible = value
+	}
+	if value, ok := _c.mutation.Removed(); ok {
+		_spec.SetField(adcontentsignal.FieldRemoved, field.TypeBool, value)
+		_node.Removed = value
 	}
 	if value, ok := _c.mutation.OptedInPlacements(); ok {
 		_spec.SetField(adcontentsignal.FieldOptedInPlacements, field.TypeJSON, value)
@@ -506,6 +531,18 @@ func (u *AdContentSignalUpsert) SetMonetizationEligible(v bool) *AdContentSignal
 // UpdateMonetizationEligible sets the "monetization_eligible" field to the value that was provided on create.
 func (u *AdContentSignalUpsert) UpdateMonetizationEligible() *AdContentSignalUpsert {
 	u.SetExcluded(adcontentsignal.FieldMonetizationEligible)
+	return u
+}
+
+// SetRemoved sets the "removed" field.
+func (u *AdContentSignalUpsert) SetRemoved(v bool) *AdContentSignalUpsert {
+	u.Set(adcontentsignal.FieldRemoved, v)
+	return u
+}
+
+// UpdateRemoved sets the "removed" field to the value that was provided on create.
+func (u *AdContentSignalUpsert) UpdateRemoved() *AdContentSignalUpsert {
+	u.SetExcluded(adcontentsignal.FieldRemoved)
 	return u
 }
 
@@ -706,6 +743,20 @@ func (u *AdContentSignalUpsertOne) SetMonetizationEligible(v bool) *AdContentSig
 func (u *AdContentSignalUpsertOne) UpdateMonetizationEligible() *AdContentSignalUpsertOne {
 	return u.Update(func(s *AdContentSignalUpsert) {
 		s.UpdateMonetizationEligible()
+	})
+}
+
+// SetRemoved sets the "removed" field.
+func (u *AdContentSignalUpsertOne) SetRemoved(v bool) *AdContentSignalUpsertOne {
+	return u.Update(func(s *AdContentSignalUpsert) {
+		s.SetRemoved(v)
+	})
+}
+
+// UpdateRemoved sets the "removed" field to the value that was provided on create.
+func (u *AdContentSignalUpsertOne) UpdateRemoved() *AdContentSignalUpsertOne {
+	return u.Update(func(s *AdContentSignalUpsert) {
+		s.UpdateRemoved()
 	})
 }
 
@@ -1078,6 +1129,20 @@ func (u *AdContentSignalUpsertBulk) SetMonetizationEligible(v bool) *AdContentSi
 func (u *AdContentSignalUpsertBulk) UpdateMonetizationEligible() *AdContentSignalUpsertBulk {
 	return u.Update(func(s *AdContentSignalUpsert) {
 		s.UpdateMonetizationEligible()
+	})
+}
+
+// SetRemoved sets the "removed" field.
+func (u *AdContentSignalUpsertBulk) SetRemoved(v bool) *AdContentSignalUpsertBulk {
+	return u.Update(func(s *AdContentSignalUpsert) {
+		s.SetRemoved(v)
+	})
+}
+
+// UpdateRemoved sets the "removed" field to the value that was provided on create.
+func (u *AdContentSignalUpsertBulk) UpdateRemoved() *AdContentSignalUpsertBulk {
+	return u.Update(func(s *AdContentSignalUpsert) {
+		s.UpdateRemoved()
 	})
 }
 
