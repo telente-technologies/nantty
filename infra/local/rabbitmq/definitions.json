@@ -3420,6 +3420,14 @@
       "vhost": "zudomart",
       "destination": "commerce-domain-events",
       "destination_type": "queue",
+      "routing_key": "escrow.refundScheduled",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.events",
+      "vhost": "zudomart",
+      "destination": "commerce-domain-events",
+      "destination_type": "queue",
       "routing_key": "directPayment.received",
       "arguments": {}
     },
@@ -3548,6 +3556,30 @@
       "vhost": "zudomart",
       "destination": "notifications-domain-events",
       "destination_type": "queue",
+      "routing_key": "comment.hidden",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.events",
+      "vhost": "zudomart",
+      "destination": "notifications-domain-events",
+      "destination_type": "queue",
+      "routing_key": "comment.unhidden",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.events",
+      "vhost": "zudomart",
+      "destination": "notifications-domain-events",
+      "destination_type": "queue",
+      "routing_key": "post.deleted",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.events",
+      "vhost": "zudomart",
+      "destination": "notifications-domain-events",
+      "destination_type": "queue",
       "routing_key": "creatorApplication.*",
       "arguments": {}
     },
@@ -3629,6 +3661,14 @@
       "destination": "notifications-domain-events",
       "destination_type": "queue",
       "routing_key": "live.started",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.events",
+      "vhost": "zudomart",
+      "destination": "notifications-domain-events",
+      "destination_type": "queue",
+      "routing_key": "live.reminderDue",
       "arguments": {}
     },
     {
@@ -4917,6 +4957,22 @@
       "destination": "intelligence-domain-events",
       "destination_type": "queue",
       "routing_key": "comment.created",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.events",
+      "vhost": "zudomart",
+      "destination": "intelligence-domain-events",
+      "destination_type": "queue",
+      "routing_key": "comment.hidden",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.events",
+      "vhost": "zudomart",
+      "destination": "intelligence-domain-events",
+      "destination_type": "queue",
+      "routing_key": "comment.unhidden",
       "arguments": {}
     },
     {
