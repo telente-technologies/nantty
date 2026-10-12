@@ -2286,6 +2286,35 @@ func HasDisputesWith(preds ...predicate.Dispute) predicate.Escrow {
 	})
 }
 
+// HasPendingRefunds applies the HasEdge predicate on the "pending_refunds" edge.
+func HasPendingRefunds() predicate.Escrow {
+	return predicate.Escrow(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, PendingRefundsTable, PendingRefundsColumn),
+		)
+		schemaConfig := internal.SchemaConfigFromContext(s.Context())
+		step.To.Schema = schemaConfig.PendingRefund
+		step.Edge.Schema = schemaConfig.PendingRefund
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasPendingRefundsWith applies the HasEdge predicate on the "pending_refunds" edge with a given conditions (other predicates).
+func HasPendingRefundsWith(preds ...predicate.PendingRefund) predicate.Escrow {
+	return predicate.Escrow(func(s *sql.Selector) {
+		step := newPendingRefundsStep()
+		schemaConfig := internal.SchemaConfigFromContext(s.Context())
+		step.To.Schema = schemaConfig.PendingRefund
+		step.Edge.Schema = schemaConfig.PendingRefund
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
 // And groups predicates with the AND operator between them.
 func And(predicates ...predicate.Escrow) predicate.Escrow {
 	return predicate.Escrow(sql.AndPredicates(predicates...))

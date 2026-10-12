@@ -74,7 +74,7 @@ func (Escrow) Fields() []ent.Field {
 }
 
 func (Escrow) Edges() []ent.Edge {
-	return []ent.Edge{edge.To("disputes", Dispute.Type)}
+	return []ent.Edge{edge.To("disputes", Dispute.Type), edge.To("pending_refunds", PendingRefund.Type)}
 }
 
 func (Escrow) Indexes() []ent.Index {

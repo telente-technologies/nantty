@@ -15,6 +15,7 @@ import (
 	"zudomart/modules/escrow/src/generated/ent/escrowevent"
 	"zudomart/modules/escrow/src/generated/ent/idempotentrequest"
 	"zudomart/modules/escrow/src/generated/ent/outboxevent"
+	"zudomart/modules/escrow/src/generated/ent/pendingrefund"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
@@ -86,6 +87,7 @@ func checkColumn(t, c string) error {
 			escrowevent.Table:        escrowevent.ValidColumn,
 			idempotentrequest.Table:  idempotentrequest.ValidColumn,
 			outboxevent.Table:        outboxevent.ValidColumn,
+			pendingrefund.Table:      pendingrefund.ValidColumn,
 		})
 	})
 	return columnCheck(t, c)

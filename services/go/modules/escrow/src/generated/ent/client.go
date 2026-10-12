@@ -18,6 +18,7 @@ import (
 	"zudomart/modules/escrow/src/generated/ent/escrowevent"
 	"zudomart/modules/escrow/src/generated/ent/idempotentrequest"
 	"zudomart/modules/escrow/src/generated/ent/outboxevent"
+	"zudomart/modules/escrow/src/generated/ent/pendingrefund"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect"
@@ -48,6 +49,8 @@ type Client struct {
 	IdempotentRequest *IdempotentRequestClient
 	// OutboxEvent is the client for interacting with the OutboxEvent builders.
 	OutboxEvent *OutboxEventClient
+	// PendingRefund is the client for interacting with the PendingRefund builders.
+	PendingRefund *PendingRefundClient
 }
 
 // NewClient creates a new client configured with the given options.
@@ -66,6 +69,7 @@ func (c *Client) init() {
 	c.EscrowEvent = NewEscrowEventClient(c.config)
 	c.IdempotentRequest = NewIdempotentRequestClient(c.config)
 	c.OutboxEvent = NewOutboxEventClient(c.config)
+	c.PendingRefund = NewPendingRefundClient(c.config)
 }
 
 type (
@@ -167,6 +171,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		EscrowEvent:        NewEscrowEventClient(cfg),
 		IdempotentRequest:  NewIdempotentRequestClient(cfg),
 		OutboxEvent:        NewOutboxEventClient(cfg),
+		PendingRefund:      NewPendingRefundClient(cfg),
 	}, nil
 }
 
@@ -193,6 +198,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		EscrowEvent:        NewEscrowEventClient(cfg),
 		IdempotentRequest:  NewIdempotentRequestClient(cfg),
 		OutboxEvent:        NewOutboxEventClient(cfg),
+		PendingRefund:      NewPendingRefundClient(cfg),
 	}, nil
 }
 
@@ -223,7 +229,7 @@ func (c *Client) Close() error {
 func (c *Client) Use(hooks ...Hook) {
 	for _, n := range []interface{ Use(...Hook) }{
 		c.Dispute, c.DisputeMessage, c.DisputeStatusEvent, c.Escrow, c.EscrowEvent,
-		c.IdempotentRequest, c.OutboxEvent,
+		c.IdempotentRequest, c.OutboxEvent, c.PendingRefund,
 	} {
 		n.Use(hooks...)
 	}
@@ -234,7 +240,7 @@ func (c *Client) Use(hooks ...Hook) {
 func (c *Client) Intercept(interceptors ...Interceptor) {
 	for _, n := range []interface{ Intercept(...Interceptor) }{
 		c.Dispute, c.DisputeMessage, c.DisputeStatusEvent, c.Escrow, c.EscrowEvent,
-		c.IdempotentRequest, c.OutboxEvent,
+		c.IdempotentRequest, c.OutboxEvent, c.PendingRefund,
 	} {
 		n.Intercept(interceptors...)
 	}
@@ -257,6 +263,8 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.IdempotentRequest.mutate(ctx, m)
 	case *OutboxEventMutation:
 		return c.OutboxEvent.mutate(ctx, m)
+	case *PendingRefundMutation:
+		return c.PendingRefund.mutate(ctx, m)
 	default:
 		return nil, fmt.Errorf("ent: unknown mutation type %T", m)
 	}
@@ -807,6 +815,25 @@ func (c *EscrowClient) QueryDisputes(_m *Escrow) *DisputeQuery {
 	return query
 }
 
+// QueryPendingRefunds queries the pending_refunds edge of a Escrow.
+func (c *EscrowClient) QueryPendingRefunds(_m *Escrow) *PendingRefundQuery {
+	query := (&PendingRefundClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(escrow.Table, escrow.FieldID, id),
+			sqlgraph.To(pendingrefund.Table, pendingrefund.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, escrow.PendingRefundsTable, escrow.PendingRefundsColumn),
+		)
+		schemaConfig := _m.schemaConfig
+		step.To.Schema = schemaConfig.PendingRefund
+		step.Edge.Schema = schemaConfig.PendingRefund
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // Hooks returns the client hooks.
 func (c *EscrowClient) Hooks() []Hook {
 	return c.hooks.Escrow
@@ -1231,15 +1258,167 @@ func (c *OutboxEventClient) mutate(ctx context.Context, m *OutboxEventMutation) 
 	}
 }
 
+// PendingRefundClient is a client for the PendingRefund schema.
+type PendingRefundClient struct {
+	config
+}
+
+// NewPendingRefundClient returns a client for the PendingRefund from the given config.
+func NewPendingRefundClient(c config) *PendingRefundClient {
+	return &PendingRefundClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `pendingrefund.Hooks(f(g(h())))`.
+func (c *PendingRefundClient) Use(hooks ...Hook) {
+	c.hooks.PendingRefund = append(c.hooks.PendingRefund, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `pendingrefund.Intercept(f(g(h())))`.
+func (c *PendingRefundClient) Intercept(interceptors ...Interceptor) {
+	c.inters.PendingRefund = append(c.inters.PendingRefund, interceptors...)
+}
+
+// Create returns a builder for creating a PendingRefund entity.
+func (c *PendingRefundClient) Create() *PendingRefundCreate {
+	mutation := newPendingRefundMutation(c.config, OpCreate)
+	return &PendingRefundCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of PendingRefund entities.
+func (c *PendingRefundClient) CreateBulk(builders ...*PendingRefundCreate) *PendingRefundCreateBulk {
+	return &PendingRefundCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *PendingRefundClient) MapCreateBulk(slice any, setFunc func(*PendingRefundCreate, int)) *PendingRefundCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &PendingRefundCreateBulk{err: fmt.Errorf("calling to PendingRefundClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*PendingRefundCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &PendingRefundCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for PendingRefund.
+func (c *PendingRefundClient) Update() *PendingRefundUpdate {
+	mutation := newPendingRefundMutation(c.config, OpUpdate)
+	return &PendingRefundUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *PendingRefundClient) UpdateOne(_m *PendingRefund) *PendingRefundUpdateOne {
+	mutation := newPendingRefundMutation(c.config, OpUpdateOne, withPendingRefund(_m))
+	return &PendingRefundUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *PendingRefundClient) UpdateOneID(id uuid.UUID) *PendingRefundUpdateOne {
+	mutation := newPendingRefundMutation(c.config, OpUpdateOne, withPendingRefundID(id))
+	return &PendingRefundUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for PendingRefund.
+func (c *PendingRefundClient) Delete() *PendingRefundDelete {
+	mutation := newPendingRefundMutation(c.config, OpDelete)
+	return &PendingRefundDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *PendingRefundClient) DeleteOne(_m *PendingRefund) *PendingRefundDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *PendingRefundClient) DeleteOneID(id uuid.UUID) *PendingRefundDeleteOne {
+	builder := c.Delete().Where(pendingrefund.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &PendingRefundDeleteOne{builder}
+}
+
+// Query returns a query builder for PendingRefund.
+func (c *PendingRefundClient) Query() *PendingRefundQuery {
+	return &PendingRefundQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypePendingRefund},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a PendingRefund entity by its id.
+func (c *PendingRefundClient) Get(ctx context.Context, id uuid.UUID) (*PendingRefund, error) {
+	return c.Query().Where(pendingrefund.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *PendingRefundClient) GetX(ctx context.Context, id uuid.UUID) *PendingRefund {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryEscrow queries the escrow edge of a PendingRefund.
+func (c *PendingRefundClient) QueryEscrow(_m *PendingRefund) *EscrowQuery {
+	query := (&EscrowClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(pendingrefund.Table, pendingrefund.FieldID, id),
+			sqlgraph.To(escrow.Table, escrow.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, pendingrefund.EscrowTable, pendingrefund.EscrowColumn),
+		)
+		schemaConfig := _m.schemaConfig
+		step.To.Schema = schemaConfig.Escrow
+		step.Edge.Schema = schemaConfig.PendingRefund
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *PendingRefundClient) Hooks() []Hook {
+	return c.hooks.PendingRefund
+}
+
+// Interceptors returns the client interceptors.
+func (c *PendingRefundClient) Interceptors() []Interceptor {
+	return c.inters.PendingRefund
+}
+
+func (c *PendingRefundClient) mutate(ctx context.Context, m *PendingRefundMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&PendingRefundCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&PendingRefundUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&PendingRefundUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&PendingRefundDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown PendingRefund mutation op: %q", m.Op())
+	}
+}
+
 // hooks and interceptors per client, for fast access.
 type (
 	hooks struct {
 		Dispute, DisputeMessage, DisputeStatusEvent, Escrow, EscrowEvent,
-		IdempotentRequest, OutboxEvent []ent.Hook
+		IdempotentRequest, OutboxEvent, PendingRefund []ent.Hook
 	}
 	inters struct {
 		Dispute, DisputeMessage, DisputeStatusEvent, Escrow, EscrowEvent,
-		IdempotentRequest, OutboxEvent []ent.Interceptor
+		IdempotentRequest, OutboxEvent, PendingRefund []ent.Interceptor
 	}
 )
 

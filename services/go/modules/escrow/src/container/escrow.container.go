@@ -39,7 +39,7 @@ func NewEscrowContainer(resources loaders.MoneyModuleResources, settings configs
 		Now:         time.Now,
 		schemaConfig: ent.SchemaConfig{
 			Dispute: schema, DisputeMessage: schema, DisputeStatusEvent: schema, Escrow: schema,
-			EscrowEvent: schema, IdempotentRequest: schema, OutboxEvent: schema,
+			EscrowEvent: schema, IdempotentRequest: schema, OutboxEvent: schema, PendingRefund: schema,
 		},
 	}
 }

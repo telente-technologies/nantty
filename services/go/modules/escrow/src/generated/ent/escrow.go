@@ -108,9 +108,11 @@ type Escrow struct {
 type EscrowEdges struct {
 	// Disputes holds the value of the disputes edge.
 	Disputes []*Dispute `json:"disputes,omitempty"`
+	// PendingRefunds holds the value of the pending_refunds edge.
+	PendingRefunds []*PendingRefund `json:"pending_refunds,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [1]bool
+	loadedTypes [2]bool
 }
 
 // DisputesOrErr returns the Disputes value or an error if the edge
@@ -120,6 +122,15 @@ func (e EscrowEdges) DisputesOrErr() ([]*Dispute, error) {
 		return e.Disputes, nil
 	}
 	return nil, &NotLoadedError{edge: "disputes"}
+}
+
+// PendingRefundsOrErr returns the PendingRefunds value or an error if the edge
+// was not loaded in eager-loading.
+func (e EscrowEdges) PendingRefundsOrErr() ([]*PendingRefund, error) {
+	if e.loadedTypes[1] {
+		return e.PendingRefunds, nil
+	}
+	return nil, &NotLoadedError{edge: "pending_refunds"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -422,6 +433,11 @@ func (_m *Escrow) Value(name string) (ent.Value, error) {
 // QueryDisputes queries the "disputes" edge of the Escrow entity.
 func (_m *Escrow) QueryDisputes() *DisputeQuery {
 	return NewEscrowClient(_m.config).QueryDisputes(_m)
+}
+
+// QueryPendingRefunds queries the "pending_refunds" edge of the Escrow entity.
+func (_m *Escrow) QueryPendingRefunds() *PendingRefundQuery {
+	return NewEscrowClient(_m.config).QueryPendingRefunds(_m)
 }
 
 // Update returns a builder for updating this Escrow.

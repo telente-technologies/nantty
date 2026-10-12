@@ -10,6 +10,7 @@ import (
 	"zudomart/modules/escrow/src/generated/ent/dispute"
 	"zudomart/modules/escrow/src/generated/ent/escrow"
 	"zudomart/modules/escrow/src/generated/ent/internal"
+	"zudomart/modules/escrow/src/generated/ent/pendingrefund"
 	"zudomart/modules/escrow/src/generated/ent/predicate"
 
 	"entgo.io/ent/dialect/sql"
@@ -427,6 +428,21 @@ func (_u *EscrowUpdate) AddDisputes(v ...*Dispute) *EscrowUpdate {
 	return _u.AddDisputeIDs(ids...)
 }
 
+// AddPendingRefundIDs adds the "pending_refunds" edge to the PendingRefund entity by IDs.
+func (_u *EscrowUpdate) AddPendingRefundIDs(ids ...uuid.UUID) *EscrowUpdate {
+	_u.mutation.AddPendingRefundIDs(ids...)
+	return _u
+}
+
+// AddPendingRefunds adds the "pending_refunds" edges to the PendingRefund entity.
+func (_u *EscrowUpdate) AddPendingRefunds(v ...*PendingRefund) *EscrowUpdate {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddPendingRefundIDs(ids...)
+}
+
 // Mutation returns the EscrowMutation object of the builder.
 func (_u *EscrowUpdate) Mutation() *EscrowMutation {
 	return _u.mutation
@@ -451,6 +467,27 @@ func (_u *EscrowUpdate) RemoveDisputes(v ...*Dispute) *EscrowUpdate {
 		ids[i] = v[i].ID
 	}
 	return _u.RemoveDisputeIDs(ids...)
+}
+
+// ClearPendingRefunds clears all "pending_refunds" edges to the PendingRefund entity.
+func (_u *EscrowUpdate) ClearPendingRefunds() *EscrowUpdate {
+	_u.mutation.ClearPendingRefunds()
+	return _u
+}
+
+// RemovePendingRefundIDs removes the "pending_refunds" edge to PendingRefund entities by IDs.
+func (_u *EscrowUpdate) RemovePendingRefundIDs(ids ...uuid.UUID) *EscrowUpdate {
+	_u.mutation.RemovePendingRefundIDs(ids...)
+	return _u
+}
+
+// RemovePendingRefunds removes "pending_refunds" edges to PendingRefund entities.
+func (_u *EscrowUpdate) RemovePendingRefunds(v ...*PendingRefund) *EscrowUpdate {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemovePendingRefundIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -687,6 +724,54 @@ func (_u *EscrowUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			},
 		}
 		edge.Schema = _u.schemaConfig.Dispute
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.PendingRefundsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   escrow.PendingRefundsTable,
+			Columns: []string{escrow.PendingRefundsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(pendingrefund.FieldID, field.TypeUUID),
+			},
+		}
+		edge.Schema = _u.schemaConfig.PendingRefund
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedPendingRefundsIDs(); len(nodes) > 0 && !_u.mutation.PendingRefundsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   escrow.PendingRefundsTable,
+			Columns: []string{escrow.PendingRefundsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(pendingrefund.FieldID, field.TypeUUID),
+			},
+		}
+		edge.Schema = _u.schemaConfig.PendingRefund
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.PendingRefundsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   escrow.PendingRefundsTable,
+			Columns: []string{escrow.PendingRefundsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(pendingrefund.FieldID, field.TypeUUID),
+			},
+		}
+		edge.Schema = _u.schemaConfig.PendingRefund
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
@@ -1110,6 +1195,21 @@ func (_u *EscrowUpdateOne) AddDisputes(v ...*Dispute) *EscrowUpdateOne {
 	return _u.AddDisputeIDs(ids...)
 }
 
+// AddPendingRefundIDs adds the "pending_refunds" edge to the PendingRefund entity by IDs.
+func (_u *EscrowUpdateOne) AddPendingRefundIDs(ids ...uuid.UUID) *EscrowUpdateOne {
+	_u.mutation.AddPendingRefundIDs(ids...)
+	return _u
+}
+
+// AddPendingRefunds adds the "pending_refunds" edges to the PendingRefund entity.
+func (_u *EscrowUpdateOne) AddPendingRefunds(v ...*PendingRefund) *EscrowUpdateOne {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddPendingRefundIDs(ids...)
+}
+
 // Mutation returns the EscrowMutation object of the builder.
 func (_u *EscrowUpdateOne) Mutation() *EscrowMutation {
 	return _u.mutation
@@ -1134,6 +1234,27 @@ func (_u *EscrowUpdateOne) RemoveDisputes(v ...*Dispute) *EscrowUpdateOne {
 		ids[i] = v[i].ID
 	}
 	return _u.RemoveDisputeIDs(ids...)
+}
+
+// ClearPendingRefunds clears all "pending_refunds" edges to the PendingRefund entity.
+func (_u *EscrowUpdateOne) ClearPendingRefunds() *EscrowUpdateOne {
+	_u.mutation.ClearPendingRefunds()
+	return _u
+}
+
+// RemovePendingRefundIDs removes the "pending_refunds" edge to PendingRefund entities by IDs.
+func (_u *EscrowUpdateOne) RemovePendingRefundIDs(ids ...uuid.UUID) *EscrowUpdateOne {
+	_u.mutation.RemovePendingRefundIDs(ids...)
+	return _u
+}
+
+// RemovePendingRefunds removes "pending_refunds" edges to PendingRefund entities.
+func (_u *EscrowUpdateOne) RemovePendingRefunds(v ...*PendingRefund) *EscrowUpdateOne {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemovePendingRefundIDs(ids...)
 }
 
 // Where appends a list predicates to the EscrowUpdate builder.
@@ -1400,6 +1521,54 @@ func (_u *EscrowUpdateOne) sqlSave(ctx context.Context) (_node *Escrow, err erro
 			},
 		}
 		edge.Schema = _u.schemaConfig.Dispute
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.PendingRefundsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   escrow.PendingRefundsTable,
+			Columns: []string{escrow.PendingRefundsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(pendingrefund.FieldID, field.TypeUUID),
+			},
+		}
+		edge.Schema = _u.schemaConfig.PendingRefund
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedPendingRefundsIDs(); len(nodes) > 0 && !_u.mutation.PendingRefundsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   escrow.PendingRefundsTable,
+			Columns: []string{escrow.PendingRefundsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(pendingrefund.FieldID, field.TypeUUID),
+			},
+		}
+		edge.Schema = _u.schemaConfig.PendingRefund
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.PendingRefundsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   escrow.PendingRefundsTable,
+			Columns: []string{escrow.PendingRefundsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(pendingrefund.FieldID, field.TypeUUID),
+			},
+		}
+		edge.Schema = _u.schemaConfig.PendingRefund
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}

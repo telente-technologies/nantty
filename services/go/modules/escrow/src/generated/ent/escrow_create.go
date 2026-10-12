@@ -9,6 +9,7 @@ import (
 	"time"
 	"zudomart/modules/escrow/src/generated/ent/dispute"
 	"zudomart/modules/escrow/src/generated/ent/escrow"
+	"zudomart/modules/escrow/src/generated/ent/pendingrefund"
 
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
@@ -500,6 +501,21 @@ func (_c *EscrowCreate) AddDisputes(v ...*Dispute) *EscrowCreate {
 		ids[i] = v[i].ID
 	}
 	return _c.AddDisputeIDs(ids...)
+}
+
+// AddPendingRefundIDs adds the "pending_refunds" edge to the PendingRefund entity by IDs.
+func (_c *EscrowCreate) AddPendingRefundIDs(ids ...uuid.UUID) *EscrowCreate {
+	_c.mutation.AddPendingRefundIDs(ids...)
+	return _c
+}
+
+// AddPendingRefunds adds the "pending_refunds" edges to the PendingRefund entity.
+func (_c *EscrowCreate) AddPendingRefunds(v ...*PendingRefund) *EscrowCreate {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _c.AddPendingRefundIDs(ids...)
 }
 
 // Mutation returns the EscrowMutation object of the builder.
@@ -998,6 +1014,23 @@ func (_c *EscrowCreate) createSpec() (*Escrow, *sqlgraph.CreateSpec) {
 			},
 		}
 		edge.Schema = _c.schemaConfig.Dispute
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.PendingRefundsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   escrow.PendingRefundsTable,
+			Columns: []string{escrow.PendingRefundsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(pendingrefund.FieldID, field.TypeUUID),
+			},
+		}
+		edge.Schema = _c.schemaConfig.PendingRefund
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}

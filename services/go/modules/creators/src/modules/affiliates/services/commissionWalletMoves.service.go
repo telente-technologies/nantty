@@ -6,6 +6,7 @@ import (
 	"database/sql"
 	"encoding/hex"
 	"errors"
+	"fmt"
 	"strings"
 
 	"github.com/google/uuid"
@@ -83,49 +84,35 @@ func (affiliates Affiliates) settleCommissionInTransaction(ctx context.Context, 
 	if payments == nil {
 		return false, nil
 	}
+	readiness, err := affiliates.commissionTransferAttempt(ctx, transaction, commission)
+	if err != nil {
+		return false, err
+	}
+	if !readiness.ready {
+		return false, rememberReadiness(ctx, client, commission, readiness)
+	}
 	take, err := affiliates.takeFromWallet(ctx, transaction, commission.SellerUserID, commission.Currency, owed)
 	if err != nil || take.total() < owed {
 		return false, err
 	}
+	attempts := readiness.attempts
+	journalReference, movementSuffix := "affiliate-commission-paid:"+commission.ID.String(), ""
+	if attempts > 0 {
+		journalReference, movementSuffix = fmt.Sprintf("%s:r%d", journalReference, attempts), fmt.Sprintf("-r%d", attempts)
+	}
 	if _, err := affiliates.Container.Ledger.PostBalancedJournalEntry(ctx, transaction, ledgermodels.JournalEntryRequest{
-		Reference: "affiliate-commission-paid:" + commission.ID.String(), Kind: "affiliateCommission.sent", Description: "Affiliate commission for order " + commission.OrderNumber,
+		Reference: journalReference, Kind: "affiliateCommission.sent", Description: "Affiliate commission for order " + commission.OrderNumber,
 		Metadata: map[string]any{"commissionId": commission.ID.String(), "orderId": commission.OrderID, "creatorId": commission.CreatorID}, Lines: walletDebitLines(commission.SellerUserID, commission.Currency, take),
 	}); err != nil {
 		return false, err
 	}
 	if _, err := payments.EnqueueMovementInTransaction(ctx, transaction, paymentmodels.MovementRequest{
-		Reference: movementReference("aff-", commission.ID, ""), Kind: MovementAffiliateCommission, SubjectId: commission.ID.String(), UserId: commission.CreatorID,
+		Reference: movementReference("aff-", commission.ID, movementSuffix), Kind: MovementAffiliateCommission, SubjectId: commission.ID.String(), UserId: commission.CreatorID,
 		FromUserId: commission.SellerUserID, ToUserId: commission.CreatorID, AmountMinor: owed, Currency: commission.Currency,
 	}); err != nil {
 		return false, err
 	}
-	return true, client.AffiliateCommission.UpdateOne(commission).SetStatus(affiliatecommission.StatusProcessing).Exec(ctx)
-}
-
-func (affiliates Affiliates) SettlePendingCommissions(ctx context.Context, limit int) int {
-	ids, err := affiliates.Container.Client(affiliates.Container.Resources.Database).AffiliateCommission.Query().
-		Where(affiliatecommission.StatusEQ(affiliatecommission.StatusPending)).Order(ent.Asc(affiliatecommission.FieldID)).Limit(limit).IDs(ctx)
-	if err != nil {
-		return 0
-	}
-	settled := 0
-	for _, id := range ids {
-		err := affiliates.inTransaction(ctx, func(ctx context.Context, transaction *sql.Tx, client *ent.Client) error {
-			commission, err := client.AffiliateCommission.Query().Where(affiliatecommission.IDEQ(id)).ForUpdate().Only(ctx)
-			if err != nil {
-				return err
-			}
-			done, err := affiliates.settleCommissionInTransaction(ctx, transaction, client, commission)
-			if done {
-				settled++
-			}
-			return err
-		})
-		if err != nil {
-			affiliates.Container.Resources.Logger.WarnContext(ctx, "affiliate commission settlement will be retried", "commissionId", id.String(), "error", err)
-		}
-	}
-	return settled
+	return true, client.AffiliateCommission.UpdateOne(commission).SetStatus(affiliatecommission.StatusProcessing).SetTransferAttempts(attempts + 1).ClearRetryAfter().Exec(ctx)
 }
 
 // clawBackInTransaction returns a reversed commission from the creator's wallet to the seller's.
@@ -266,7 +253,7 @@ func (handler CommissionMovementHandler) HandleMovementFailed(ctx context.Contex
 	if err := handler.post(ctx, transaction, movement, "failed", moveBetween(ledgermodels.WalletOutgoingAccount(commission.SellerUserID, currency), ledgermodels.WalletAvailableAccount(commission.SellerUserID, currency), movement.AmountMinor)); err != nil {
 		return err
 	}
-	return client.AffiliateCommission.UpdateOne(commission).SetStatus(affiliatecommission.StatusPending).Exec(ctx)
+	return handler.Affiliates.recordFailedCommissionTransfer(ctx, transaction, client, commission, movement.FailureReason)
 }
 
 func (affiliates Affiliates) RegisterMovementHandlers() error {

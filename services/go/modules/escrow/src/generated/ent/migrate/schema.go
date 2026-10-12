@@ -266,6 +266,51 @@ var (
 			},
 		},
 	}
+	// PendingRefundsColumns holds the columns for the "pending_refunds" table.
+	PendingRefundsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "order_id", Type: field.TypeString, Size: 80},
+		{Name: "request_key", Type: field.TypeString, Size: 128},
+		{Name: "amount_minor", Type: field.TypeInt64},
+		{Name: "currency", Type: field.TypeString, Size: 3},
+		{Name: "full", Type: field.TypeBool},
+		{Name: "reason", Type: field.TypeString, Size: 300, Default: ""},
+		{Name: "actor_type", Type: field.TypeString, Size: 20, Default: "system"},
+		{Name: "actor_id", Type: field.TypeString, Size: 80, Default: ""},
+		{Name: "status", Type: field.TypeEnum, Enums: []string{"scheduled", "executed", "superseded", "failed"}, Default: "scheduled"},
+		{Name: "attempts", Type: field.TypeInt, Default: 0},
+		{Name: "last_error", Type: field.TypeString, Size: 500, Default: ""},
+		{Name: "executed_at", Type: field.TypeTime, Nullable: true},
+		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "escrow_id", Type: field.TypeUUID},
+	}
+	// PendingRefundsTable holds the schema information for the "pending_refunds" table.
+	PendingRefundsTable = &schema.Table{
+		Name:       "pending_refunds",
+		Columns:    PendingRefundsColumns,
+		PrimaryKey: []*schema.Column{PendingRefundsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "pending_refunds_escrows_pending_refunds",
+				Columns:    []*schema.Column{PendingRefundsColumns[15]},
+				RefColumns: []*schema.Column{EscrowsColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "pendingrefund_escrow_id_request_key",
+				Unique:  true,
+				Columns: []*schema.Column{PendingRefundsColumns[15], PendingRefundsColumns[3]},
+			},
+			{
+				Name:    "pendingrefund_status_created_at",
+				Unique:  false,
+				Columns: []*schema.Column{PendingRefundsColumns[10], PendingRefundsColumns[1]},
+			},
+		},
+	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
 		DisputesTable,
@@ -275,6 +320,7 @@ var (
 		EscrowEventsTable,
 		IdempotentRequestsTable,
 		OutboxEventsTable,
+		PendingRefundsTable,
 	}
 )
 
@@ -286,5 +332,10 @@ func init() {
 		"escrows_commission_bps_in_range":      "commission_bps >= 0 AND commission_bps <= 10000",
 		"escrows_refund_within_amount":         "refunded_minor >= 0 AND refunded_minor <= amount_minor",
 		"escrows_split_and_fees_sum_to_amount": "commission_minor >= 0 AND seller_amount_minor >= 0 AND processing_fee_minor >= 0 AND commission_minor + seller_amount_minor + processing_fee_minor = amount_minor",
+	}
+	PendingRefundsTable.ForeignKeys[0].RefTable = EscrowsTable
+	PendingRefundsTable.Annotation = &entsql.Annotation{}
+	PendingRefundsTable.Annotation.Checks = map[string]string{
+		"pending_refunds_amount_positive": "amount_minor > 0",
 	}
 }

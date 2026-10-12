@@ -10,6 +10,7 @@ import (
 	"zudomart/modules/escrow/src/generated/ent/dispute"
 	"zudomart/modules/escrow/src/generated/ent/escrow"
 	"zudomart/modules/escrow/src/generated/ent/internal"
+	"zudomart/modules/escrow/src/generated/ent/pendingrefund"
 	"zudomart/modules/escrow/src/generated/ent/predicate"
 
 	"entgo.io/ent"
@@ -23,12 +24,13 @@ import (
 // EscrowQuery is the builder for querying Escrow entities.
 type EscrowQuery struct {
 	config
-	ctx          *QueryContext
-	order        []escrow.OrderOption
-	inters       []Interceptor
-	predicates   []predicate.Escrow
-	withDisputes *DisputeQuery
-	modifiers    []func(*sql.Selector)
+	ctx                *QueryContext
+	order              []escrow.OrderOption
+	inters             []Interceptor
+	predicates         []predicate.Escrow
+	withDisputes       *DisputeQuery
+	withPendingRefunds *PendingRefundQuery
+	modifiers          []func(*sql.Selector)
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -84,6 +86,31 @@ func (_q *EscrowQuery) QueryDisputes() *DisputeQuery {
 		schemaConfig := _q.schemaConfig
 		step.To.Schema = schemaConfig.Dispute
 		step.Edge.Schema = schemaConfig.Dispute
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryPendingRefunds chains the current query on the "pending_refunds" edge.
+func (_q *EscrowQuery) QueryPendingRefunds() *PendingRefundQuery {
+	query := (&PendingRefundClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(escrow.Table, escrow.FieldID, selector),
+			sqlgraph.To(pendingrefund.Table, pendingrefund.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, escrow.PendingRefundsTable, escrow.PendingRefundsColumn),
+		)
+		schemaConfig := _q.schemaConfig
+		step.To.Schema = schemaConfig.PendingRefund
+		step.Edge.Schema = schemaConfig.PendingRefund
 		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
 		return fromU, nil
 	}
@@ -277,12 +304,13 @@ func (_q *EscrowQuery) Clone() *EscrowQuery {
 		return nil
 	}
 	return &EscrowQuery{
-		config:       _q.config,
-		ctx:          _q.ctx.Clone(),
-		order:        append([]escrow.OrderOption{}, _q.order...),
-		inters:       append([]Interceptor{}, _q.inters...),
-		predicates:   append([]predicate.Escrow{}, _q.predicates...),
-		withDisputes: _q.withDisputes.Clone(),
+		config:             _q.config,
+		ctx:                _q.ctx.Clone(),
+		order:              append([]escrow.OrderOption{}, _q.order...),
+		inters:             append([]Interceptor{}, _q.inters...),
+		predicates:         append([]predicate.Escrow{}, _q.predicates...),
+		withDisputes:       _q.withDisputes.Clone(),
+		withPendingRefunds: _q.withPendingRefunds.Clone(),
 		// clone intermediate query.
 		sql:  _q.sql.Clone(),
 		path: _q.path,
@@ -297,6 +325,17 @@ func (_q *EscrowQuery) WithDisputes(opts ...func(*DisputeQuery)) *EscrowQuery {
 		opt(query)
 	}
 	_q.withDisputes = query
+	return _q
+}
+
+// WithPendingRefunds tells the query-builder to eager-load the nodes that are connected to
+// the "pending_refunds" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *EscrowQuery) WithPendingRefunds(opts ...func(*PendingRefundQuery)) *EscrowQuery {
+	query := (&PendingRefundClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withPendingRefunds = query
 	return _q
 }
 
@@ -378,8 +417,9 @@ func (_q *EscrowQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Escro
 	var (
 		nodes       = []*Escrow{}
 		_spec       = _q.querySpec()
-		loadedTypes = [1]bool{
+		loadedTypes = [2]bool{
 			_q.withDisputes != nil,
+			_q.withPendingRefunds != nil,
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
@@ -412,6 +452,13 @@ func (_q *EscrowQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Escro
 			return nil, err
 		}
 	}
+	if query := _q.withPendingRefunds; query != nil {
+		if err := _q.loadPendingRefunds(ctx, query, nodes,
+			func(n *Escrow) { n.Edges.PendingRefunds = []*PendingRefund{} },
+			func(n *Escrow, e *PendingRefund) { n.Edges.PendingRefunds = append(n.Edges.PendingRefunds, e) }); err != nil {
+			return nil, err
+		}
+	}
 	return nodes, nil
 }
 
@@ -430,6 +477,36 @@ func (_q *EscrowQuery) loadDisputes(ctx context.Context, query *DisputeQuery, no
 	}
 	query.Where(predicate.Dispute(func(s *sql.Selector) {
 		s.Where(sql.InValues(s.C(escrow.DisputesColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.EscrowID
+		node, ok := nodeids[fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "escrow_id" returned %v for node %v`, fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (_q *EscrowQuery) loadPendingRefunds(ctx context.Context, query *PendingRefundQuery, nodes []*Escrow, init func(*Escrow), assign func(*Escrow, *PendingRefund)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[uuid.UUID]*Escrow)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(pendingrefund.FieldEscrowID)
+	}
+	query.Where(predicate.PendingRefund(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(escrow.PendingRefundsColumn), fks...))
 	}))
 	neighbors, err := query.All(ctx)
 	if err != nil {

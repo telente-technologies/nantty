@@ -98,6 +98,8 @@ const (
 	FieldUpdatedAt = "updated_at"
 	// EdgeDisputes holds the string denoting the disputes edge name in mutations.
 	EdgeDisputes = "disputes"
+	// EdgePendingRefunds holds the string denoting the pending_refunds edge name in mutations.
+	EdgePendingRefunds = "pending_refunds"
 	// Table holds the table name of the escrow in the database.
 	Table = "escrows"
 	// DisputesTable is the table that holds the disputes relation/edge.
@@ -107,6 +109,13 @@ const (
 	DisputesInverseTable = "disputes"
 	// DisputesColumn is the table column denoting the disputes relation/edge.
 	DisputesColumn = "escrow_id"
+	// PendingRefundsTable is the table that holds the pending_refunds relation/edge.
+	PendingRefundsTable = "pending_refunds"
+	// PendingRefundsInverseTable is the table name for the PendingRefund entity.
+	// It exists in this package in order to avoid circular dependency with the "pendingrefund" package.
+	PendingRefundsInverseTable = "pending_refunds"
+	// PendingRefundsColumn is the table column denoting the pending_refunds relation/edge.
+	PendingRefundsColumn = "escrow_id"
 )
 
 // Columns holds all SQL columns for escrow fields.
@@ -530,10 +539,31 @@ func ByDisputes(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 		sqlgraph.OrderByNeighborTerms(s, newDisputesStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
+
+// ByPendingRefundsCount orders the results by pending_refunds count.
+func ByPendingRefundsCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newPendingRefundsStep(), opts...)
+	}
+}
+
+// ByPendingRefunds orders the results by pending_refunds terms.
+func ByPendingRefunds(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newPendingRefundsStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
 func newDisputesStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(DisputesInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.O2M, false, DisputesTable, DisputesColumn),
+	)
+}
+func newPendingRefundsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(PendingRefundsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, PendingRefundsTable, PendingRefundsColumn),
 	)
 }

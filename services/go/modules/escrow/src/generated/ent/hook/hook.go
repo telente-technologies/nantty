@@ -92,6 +92,18 @@ func (f OutboxEventFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value,
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.OutboxEventMutation", m)
 }
 
+// The PendingRefundFunc type is an adapter to allow the use of ordinary
+// function as PendingRefund mutator.
+type PendingRefundFunc func(context.Context, *ent.PendingRefundMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f PendingRefundFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.PendingRefundMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.PendingRefundMutation", m)
+}
+
 // Condition is a hook condition function.
 type Condition func(context.Context, ent.Mutation) bool
 

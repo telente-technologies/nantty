@@ -14,6 +14,7 @@ type SchemaConfig struct {
 	EscrowEvent        string // EscrowEvent table.
 	IdempotentRequest  string // IdempotentRequest table.
 	OutboxEvent        string // OutboxEvent table.
+	PendingRefund      string // PendingRefund table.
 }
 
 type schemaCtxKey struct{}

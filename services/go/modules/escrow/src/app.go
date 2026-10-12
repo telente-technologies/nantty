@@ -94,6 +94,7 @@ func (module *Module) RunBackgroundWorkersUntilContextDone(ctx context.Context) 
 	container := module.Application.Container
 	go module.Application.Escrows.RunAutoReleaseSweepUntilContextDone(ctx)
 	go runDirectPayoutsUntilContextDone(ctx, module.Application.Escrows)
+	go module.Application.Escrows.RunScheduledRefundSweepUntilContextDone(ctx, time.Minute)
 	go runDisputeDeadlinesUntilContextDone(ctx, module.Application)
 	return platformevents.RelayOutboxEventsUntilContextDone(ctx, platformevents.OutboxRelayOptions{
 		Store:     ledgerevents.OutboxRelayStore{Database: container.Resources.Database, Table: container.Outbox, Now: time.Now},
