@@ -26,7 +26,7 @@ type Handler struct {
 func (handler Handler) Execute(ctx context.Context, command Command) (dtos.EscrowDetailDto, bool, error) {
 	application := handler.Application
 	var settlement services.EscrowSettlementResult
-	key := ledgerutils.HashRequestFingerprint(command.OrderGroupId, command.Reason)[:64]
+	key := ledgerutils.HashRequestFingerprint(command.OrderGroupId, command.AmountMinor, command.Currency, command.Reason)
 	detail, replayed, err := ledgerutils.RunIdempotentMoneyCommand(ctx, application.Container.Resources.Database, application.Container.Idempotency, ledgerutils.IdempotentCommand[dtos.EscrowDetailDto]{
 		Scope: "commerce:orderGroup.refund", Key: key,
 		RequestHash: ledgerutils.HashRequestFingerprint(command.OrderGroupId, command.AmountMinor, command.Currency, command.Reason),

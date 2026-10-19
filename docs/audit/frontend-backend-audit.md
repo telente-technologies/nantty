@@ -201,7 +201,9 @@ Add regression test: seed 1×`succeeded` (old) + 1×`pending` (new) for same ord
 **Fix:** add private/follow/block gate to public-profile handler (404 for non-viewers, same as posts); call `DecideLiveAccess` in `GetLiveSession`/`GetLiveSafety` and 404 anon on restricted visibility; extend `privateResourceFamilies` + flag anon 404 bursts on `:id` templates.
 
 ---
-## ZM-005 [FILED] — Idempotency gaps + refund/send races (money)
+## ZM-005 [PART-FIXED 2026-10-19] — Idempotency gaps + refund/send races (money)
+
+**Status 2026-10-19:** `refundOrderGroup` now derives its idempotency key from order group + amount + currency + reason (`services/go/modules/escrow/src/modules/escrows/commands/refundOrderGroup/refundOrderGroup.handler.go`), so a second distinct partial refund is no longer misread as key reuse; same-amount retries still replay. The provider-session and confirm-receipt replay items below are unchanged.
 
 **Severity:** High (money — double-charge / double-refund / 500-on-retry)
 **Evidence (all `services/go/modules/`):**
@@ -325,7 +327,9 @@ Add regression test: seed 1×`succeeded` (old) + 1×`pending` (new) for same ord
 **Fix:** one-line log fix in `checkMobile`; `-race -count=1` for money packages; local-auth stub flag dev-only; PII scan on e2e reports.
 
 ---
-## ZM-014 [FILED] — Money round-2a: wallet/ledger atomicity + `available` display (logic/API)
+## ZM-014 [PART-FIXED 2026-10-19] — Money round-2a: wallet/ledger atomicity + `available` display (logic/API)
+
+**Status 2026-10-19:** mobile `addMoney` no longer labels held funds as available; it shows spendable `availableMinor` and the deposit hold separately (`apps/mobile/src/screens/wallet/addMoney.screen.tsx`). The atomicity notes below are unchanged.
 
 **Severity:** High (money)
 **Breakage/logic:**
@@ -336,9 +340,9 @@ Add regression test: seed 1×`succeeded` (old) + 1×`pending` (new) for same ord
 **API note:** every wallet/coin debit API must document that ledger post + state mutation are single-tx; add contract test asserting no post-commit ledger writes on new endpoints.
 
 ---
-## ZM-015 [PART-FIXED 2026-10-19] — Money round-2b: escrow lifecycle + chargeback double-post (logic/API)
+## ZM-015 [FIXED 2026-10-19] — Money round-2b: escrow lifecycle + chargeback double-post (logic/API)
 
-**Status 2026-10-19:** see `fix-changelog.md` "ZM-015 (Part B)", "Review corrections" and "Audit Batch 2". Corrections to this filing: stale-price hold is not realizable (totals immutable, payable conflict-guarded); the direct-sale lost entry also double-credited the provider balance (fixed). Batch 2 resolved the undelivered-deadline owner decision (staff review, never auto-release/refund) and made refunds after release return only the seller's portion (fees non-refundable, Terms updated). Open: partial chargeback on a released wallet escrow over-credits the receivable; release-rollback flag drift.
+**Status 2026-10-19:** see `fix-changelog.md` "ZM-015 (Part B)", "Review corrections", "Audit Batch 2" and the Batch 2 follow-up. Corrections to this filing: stale-price hold is not realizable (totals immutable, payable conflict-guarded); the direct-sale lost entry also double-credited the provider balance (fixed). Batch 2 resolved the undelivered-deadline owner decision (staff review, never auto-release/refund) and made refunds after release return only the seller's portion (fees non-refundable, Terms updated). The last two open items are now verified by tests: `TestAPartialChargebackOnAReleasedWalletEscrowRecoversOnlyTheDisputedShare` asserts the chargeback receivable is zero and only the seller's share of the disputed amount is taken, and `TestAFailedReleaseMovementIsAnnouncedAndRetriedNotLeftHeldForever` + `TestAFailedEscrowReleaseIsRecordedOnTheOrderAndTheRetryTimeShown` assert the escrow returns to `held` while the order records the retry time and `sellerPayoutRetrying` event.
 
 **Severity:** Critical (money — stuck funds, dust loss, double-pay)
 - Stale-price holds: payables snapshot `group.TotalMinor` at checkout (`checkout.service.go:182-189`); `findCheckoutPayables` checks buyer + cancelled only (`initializeOrderPayment.handler.go:76-107`); hold trusts `payable.AmountMinor` (`escrowHolding.service.go:44-47,70-71`). Post-checkout price/promo/credit edits leave stale payable → escrow holds stale price while `order_groups.total_minor` diverges; refund caps disagree (`sellerOrderRefund.service.go:34-35` order-total vs `refundOrderGroup.handler.go:38` escrow-amount). Fix: re-validate payable vs live order total at hold, or version payables.
@@ -351,9 +355,9 @@ Add regression test: seed 1×`succeeded` (old) + 1×`pending` (new) for same ord
 - Chargeback double-post (strongest): held/disputed escrow lost → escrow unlocks full `AmountMinor` to buyer (`escrowWalletChargebacks:50-58`) while payments withholds from provider balance, no cross-check of provider refund (`providerDisputes:62-69`, `chargebackLedger:40-67`, `escrowChargebacks:15-47`); already-refunded escrow no-ops leaving withholding unreversed → platform carries refund + open receivable (write-off only on no-handler path `:69-79`). **Direct-sale double-post: `escrowDirectRefunds.service.go:44-63` has no status guard** — posts `SellerDebt` + overwrites status even if `refundDirectSaleInTransaction (:18-42)` already refunded → duplicate seller-debt + buyer paid twice; clamp `:45-48` doesn't dedupe. Partial-then-chargeback: `walletChargebacks:48-49` nil-returns on `partiallyRefunded` → provider-taken funds never journaled. Fix: status-guarded idempotent chargeback posting + cross-module refunded-already check before every post.
 
 ---
-## ZM-016 [PART-FIXED 2026-10-19] — Money round-2c: payouts/settlement/KYC/bank-destination (logic/API)
+## ZM-016 [FIXED 2026-10-19] — Money round-2c: payouts/settlement/KYC/bank-destination (logic/API)
 
-**Status 2026-10-19:** see `fix-changelog.md` "ZM-016 (Part B)" and "Audit Batch 2". Corrections to this filing: same-currency seller debt was already checked in the withdrawal tx (gap was other currencies); bank validation defaults to `required`, not `optional`; settlement credit already unique at the ledger; card-verification double refund not reproducible. Batch 2 resolved the direct-payout owner decision (business verification now required) and the optional-mode Level 1 limit (name-matched-only bank capped at ₦100,000/day). Open: onboarding not single-tx, level snapshot outside tx.
+**Status 2026-10-19:** see `fix-changelog.md` "ZM-016 (Part B)", "Audit Batch 2" and the Batch 2 follow-up. Corrections to this filing: same-currency seller debt was already checked in the withdrawal tx (gap was other currencies); bank validation defaults to `required`, not `optional`; settlement credit already unique at the ledger; card-verification double refund not reproducible. Batch 2 resolved the direct-payout owner decision (business verification now required) and the optional-mode Level 1 limit (name-matched-only bank capped at ₦100,000/day). The last two open items are fixed: `SavePayoutOnboardingBank` locks the onboarding row, claims the settlement account and writes the `bank` step + recipient/subaccount jobs in one money transaction (only the provider bank-resolution call stays outside), and `requestWithdrawal` reads the verification level inside the withdrawal transaction via `ReadVerificationLevelInTransaction`, so the daily cap cannot use a stale level.
 
 **Severity:** Critical (money — payouts to unverified accounts, double-send, session-only refund redirect)
 - Resolve-then-claim split txn: `SavePayoutOnboardingBank` resolves bank (163) → claims settlement account in own tx (`payoutOnboarding.service.go:155-184` via `settlementAccountRegistry:35-52`) → saves onboarding step in second tx (174). TOCTOU bank-change/claim between txns; payout readers don't wait for `CreateRecipient`. `latestPayeeBankAccount` (`customerValidation.service.go:115-133`) reads latest `create_recipient` sealed payload with **no verification-status/`RecipientCode` check**; `PrepareDirectSellerPayoutInTransaction` (`walletPayouts.service.go:106-124`) pays it directly, called from `escrowDirectPayouts.service.go:56` (non-NGN direct sales) with no level/verified gate. Fix: single-tx resolve+claim+step or re-validate at payout; gate direct-payout path like wallet withdrawals.
@@ -366,7 +370,9 @@ Add regression test: seed 1×`succeeded` (old) + 1×`pending` (new) for same ord
 - Frontend: seller `removePayoutAccount` (`payoutAccountsView.tsx:47-59`) sends `DELETE payout-accounts/{id}` with NO step-up while `PATCH isDefault` does; backend `payouts.routes.go:24-28` matches (`DELETE :25` requireUser-only). Unattended-session attacker removes accounts forcing fallback to attacker-added account (`NewAccountCooldown` slows but doesn't stop). Fix: step-up on DELETE + confirm `addPayoutAccountDialog` wraps resolve+add.
 
 ---
-## ZM-017 [FILED] — Money round-2d: coins/subs/tips/gifts/affiliates/ads-balance (logic/API)
+## ZM-017 [PART-FIXED 2026-10-19] — Money round-2d: coins/subs/tips/gifts/affiliates/ads-balance (logic/API)
+
+**Status 2026-10-19:** affiliate release now reuses the `AffiliateAttributedSale.CommissionBps` persisted when the order was paid when the release event carries no checkout lock (`services/go/modules/creators/src/modules/affiliates/services/affiliateCommissions.service.go`), so a seller lowering the rate before escrow release cannot cut an already-attributed commission. The coin/subscription/gift/ads edges below are unchanged.
 
 **Severity:** High (money — non-unwound earnings, commission window, convert no-lock)
 - Coins happy path balanced, no mint-from-thin-air (`coinPurchases.service.go:94-114` amount/currency match + `FOR UPDATE` lock; negatives blocked by `AllowNegativeBalance:false` → `INSUFFICIENT_COINS`; shortfalls routed to explicit debt accounts not negative spendable). Edges: store redeem credits `pack.Coins + pack.BonusCoins` not receipt price (`coinStorePurchases:22-70`) — catalog bonus edit after ship changes old-IAP payout; conversion reads live `CoinCashValuesMinor` per request with snapshot stored (`coinBalances:65-96`) — mid-day config flip changes ratio with no quote/accept (client sends only `coins`); env-movable rate table (`wallet.config.go:40-47`, default `NGN:1000,…USD:1`) with no per-request pin; web-only `BonusCoins` seeding + USD-fallback silent currency switch (`coinCatalog:41-121`) where dialog renders price but NOT `billingNote` (`coinPurchaseDialog.tsx:79-89`) → charged in USD without visible note; store-channel blocked server-side ✓ (`FindActivePackage:141-147`).

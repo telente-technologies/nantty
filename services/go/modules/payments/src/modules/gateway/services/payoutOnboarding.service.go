@@ -153,27 +153,39 @@ func (gateway *PaymentGateway) SavePayoutOnboardingBusiness(ctx context.Context,
 }
 
 func (gateway *PaymentGateway) SavePayoutOnboardingBank(ctx context.Context, userId string, input OnboardingBankInput) error {
-	onboarding, err := gateway.Container.Client(gateway.Container.Resources.Database).PayoutOnboarding.Query().Where(payoutonboarding.UserID(userId)).Only(ctx)
-	if ent.IsNotFound(err) || (err == nil && onboarding.LegalName == "") {
-		return ErrOnboardingStepOrder
-	}
-	if err != nil {
-		return err
-	}
 	accountName, err := gateway.ResolveOnboardingBankAccount(ctx, input.BankCode, input.AccountNumber)
 	if err != nil {
 		return err
 	}
-	if !models.NamesMatchIgnoringOrderAndCase(accountName, onboarding.LegalName) {
-		return ErrOnboardingNameMismatch
-	}
 	bank := interfaces.PayeeBankAccount{UserId: userId, AccountName: accountName, BankCode: input.BankCode, AccountNumber: input.AccountNumber, Currency: "NGN"}
-	if err := gateway.ClaimSettlementAccount(ctx, userId, bank); err != nil {
-		return err
-	}
-	if err := gateway.saveOnboardingStep(ctx, userId, "bank", &bank, func(update *ent.PayoutOnboardingUpdateOne) {
-		update.SetBankCode(input.BankCode).SetBankName(input.BankName).SetAccountLast4(lastFour(input.AccountNumber)).SetResolvedAccountName(accountName)
-	}); err != nil {
+	err = databases.RunInMoneyTransaction(ctx, gateway.Container.Resources.Database, func(ctx context.Context, transaction *sql.Tx) error {
+		client := gateway.Container.Client(transaction)
+		onboarding, err := client.PayoutOnboarding.Query().Where(payoutonboarding.UserID(userId)).ForUpdate().Only(ctx)
+		if ent.IsNotFound(err) || (err == nil && onboarding.LegalName == "") {
+			return ErrOnboardingStepOrder
+		}
+		if err != nil {
+			return err
+		}
+		if !models.NamesMatchIgnoringOrderAndCase(accountName, onboarding.LegalName) {
+			return ErrOnboardingNameMismatch
+		}
+		account, err := gateway.FindConnectedAccountRowForUser(ctx, transaction, userId)
+		if err != nil {
+			return err
+		}
+		linked, err := gateway.claimSettlementAccountInTransaction(ctx, transaction, account, bank)
+		if err != nil {
+			return err
+		}
+		if linked {
+			return ErrBankAccountAlreadyLinked
+		}
+		return gateway.applyOnboardingStep(ctx, transaction, onboarding, "bank", &bank, func(update *ent.PayoutOnboardingUpdateOne) {
+			update.SetBankCode(input.BankCode).SetBankName(input.BankName).SetAccountLast4(lastFour(input.AccountNumber)).SetResolvedAccountName(accountName)
+		})
+	})
+	if err != nil {
 		return err
 	}
 	if _, err := gateway.StartBankAccountValidation(ctx, userId); err != nil {
@@ -209,31 +221,35 @@ func (gateway *PaymentGateway) saveOnboardingStep(ctx context.Context, userId, s
 		if err != nil {
 			return err
 		}
-		update := onboarding.Update()
-		apply(update)
-		if !slices.Contains(onboarding.CompletedSteps, step) {
-			update.SetCompletedSteps(append(append([]string{}, onboarding.CompletedSteps...), step))
-		}
-		if err := update.Exec(ctx); err != nil {
-			return err
-		}
-		account, err := gateway.FindConnectedAccountRowForUser(ctx, transaction, userId)
-		if err != nil || bank == nil {
-			return err
-		}
-		if account.RecipientCode != "" {
-			if err := account.Update().SetRecipientCode("").SetSettlementSubaccountCode("").SetEscrowSubaccountCode("").AddVersion(1).Exec(ctx); err != nil {
-				return err
-			}
-		}
-		if _, err := gateway.enqueueConnectedAccountStepInTransaction(ctx, transaction, userId, models.JobStepCreateRecipient, bank); err != nil {
-			return err
-		}
-		if slices.Contains(account.Roles, constants.ConnectedAccountRoleSeller) {
-			return gateway.enqueueSellerSubaccountJobsInTransaction(ctx, transaction, userId, *bank)
-		}
-		return nil
+		return gateway.applyOnboardingStep(ctx, transaction, onboarding, step, bank, apply)
 	})
+}
+
+func (gateway *PaymentGateway) applyOnboardingStep(ctx context.Context, transaction *sql.Tx, onboarding *ent.PayoutOnboarding, step string, bank *interfaces.PayeeBankAccount, apply func(*ent.PayoutOnboardingUpdateOne)) error {
+	update := onboarding.Update()
+	apply(update)
+	if !slices.Contains(onboarding.CompletedSteps, step) {
+		update.SetCompletedSteps(append(append([]string{}, onboarding.CompletedSteps...), step))
+	}
+	if err := update.Exec(ctx); err != nil {
+		return err
+	}
+	account, err := gateway.FindConnectedAccountRowForUser(ctx, transaction, onboarding.UserID)
+	if err != nil || bank == nil {
+		return err
+	}
+	if account.RecipientCode != "" {
+		if err := account.Update().SetRecipientCode("").SetSettlementSubaccountCode("").SetEscrowSubaccountCode("").AddVersion(1).Exec(ctx); err != nil {
+			return err
+		}
+	}
+	if _, err := gateway.enqueueConnectedAccountStepInTransaction(ctx, transaction, onboarding.UserID, models.JobStepCreateRecipient, bank); err != nil {
+		return err
+	}
+	if slices.Contains(account.Roles, constants.ConnectedAccountRoleSeller) {
+		return gateway.enqueueSellerSubaccountJobsInTransaction(ctx, transaction, onboarding.UserID, *bank)
+	}
+	return nil
 }
 
 func (gateway *PaymentGateway) RetryPayoutOnboarding(ctx context.Context, userId string) error {

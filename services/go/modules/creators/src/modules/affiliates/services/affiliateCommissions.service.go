@@ -8,6 +8,7 @@ import (
 	"github.com/google/uuid"
 
 	"zudomart/modules/creators/src/generated/ent"
+	"zudomart/modules/creators/src/generated/ent/affiliateattributedsale"
 	"zudomart/modules/creators/src/generated/ent/affiliatecommission"
 	"zudomart/modules/creators/src/generated/ent/affiliateproductcommission"
 	programservices "zudomart/modules/creators/src/modules/creatorProgram/services"
@@ -131,6 +132,16 @@ func (affiliates Affiliates) CommissionLedger(ctx context.Context, store reposit
 func (affiliates Affiliates) rateFor(ctx context.Context, client *ent.Client, storeId string, item attributedSale) (int64, error) {
 	if item.lockedBps != nil {
 		return min(max(*item.lockedBps, 0), affiliates.MaximumBps()), nil
+	}
+	// The awaiting-sale row is written when the order is paid, so its rate is the one the buyer saw at checkout.
+	// Prefer it over the current settings: a seller lowering their rate before escrow release must not cut an
+	// already-attributed commission.
+	awaiting, err := client.AffiliateAttributedSale.Query().Where(affiliateattributedsale.OrderItemID(item.itemKey)).Only(ctx)
+	if err == nil {
+		return min(max(awaiting.CommissionBps, 0), affiliates.MaximumBps()), nil
+	}
+	if !ent.IsNotFound(err) {
+		return 0, err
 	}
 	settings, err := affiliates.settingsRow(ctx, client, storeId)
 	if err != nil || settings == nil || !settings.Enabled {

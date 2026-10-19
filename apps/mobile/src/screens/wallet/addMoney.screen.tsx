@@ -64,8 +64,8 @@ export function AddMoneyScreen({ navigation }: MainScreenProps<"AddMoney">) {
             ) : null}
             <WalletAccountDetails wallet={data.wallet} />
             <Text size={13} lineHeight={18} color={colors.textMuted}>
-              Available {formatMoneyForDisplay({ amountMinor: data.balances.availableMinor + data.balances.depositHoldMinor, currency: "NGN" })}
-              {data.balances.depositHoldMinor > 0 ? ` (${formatMoneyForDisplay({ amountMinor: data.balances.depositHoldMinor, currency: "NGN" })} on deposit hold)` : ""}
+              Available {formatMoneyForDisplay({ amountMinor: data.balances.availableMinor, currency: "NGN" })}
+              {data.balances.depositHoldMinor > 0 ? ` • ${formatMoneyForDisplay({ amountMinor: data.balances.depositHoldMinor, currency: "NGN" })} on deposit hold` : ""}
             </Text>
             {[...ADD_MONEY_NOTES.slice(0, -1), describeWalletDailyLimit(data.limits) ?? ADD_MONEY_NOTES[ADD_MONEY_NOTES.length - 1]].map((note) => (
               <Text key={note} size={13} lineHeight={18} color={colors.textMuted}>• {note}</Text>

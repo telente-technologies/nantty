@@ -25,11 +25,6 @@ func (handler Handler) Execute(ctx context.Context, command Command) (dtos.Withd
 	if err := application.Container.Payments.RequireVerificationLevel(ctx, command.UserId, paymentmodels.VerificationLevelPayout); err != nil {
 		return dtos.WithdrawalDto{}, false, err
 	}
-	level, err := application.Container.Payments.ReadVerificationLevel(ctx, command.UserId)
-	if err != nil {
-		return dtos.WithdrawalDto{}, false, err
-	}
-	nameMatchedOnly := level.Method != nil && *level.Method == "payout_account"
 	providerAvailable, err := application.Container.Payments.ReadProviderAvailableBalanceForUser(ctx, command.UserId, command.Currency)
 	if err != nil {
 		return dtos.WithdrawalDto{}, false, err
@@ -38,6 +33,11 @@ func (handler Handler) Execute(ctx context.Context, command Command) (dtos.Withd
 		Scope: command.UserId + ":wallet.withdraw", Key: command.IdempotencyKey,
 		RequestHash: ledgerutils.HashRequestFingerprint(command.PayoutAccountId, command.AmountMinor, command.Currency),
 		Execute: func(ctx context.Context, transaction *sql.Tx) (dtos.WithdrawalDto, error) {
+			level, err := application.Container.Payments.ReadVerificationLevelInTransaction(ctx, transaction, command.UserId)
+			if err != nil {
+				return dtos.WithdrawalDto{}, err
+			}
+			nameMatchedOnly := level.Method != nil && *level.Method == "payout_account"
 			return application.Withdrawals.RequestWithdrawalInTransaction(ctx, transaction, command.UserId, command.PayoutAccountId, command.AmountMinor, command.Currency, providerAvailable, level.Level, nameMatchedOnly)
 		},
 	})

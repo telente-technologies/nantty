@@ -2,6 +2,42 @@
 
 Every code change made while fixing `docs/audit/frontend-backend-audit.md` is logged here with file, lines, audit ID, verification, and rollback notes. Investigations that concluded "no change needed" are logged too. Newest first.
 
+## 2026-10-19 — Batch 2 follow-up: single-tx onboarding, in-tx level, locked affiliate rate, refund keys, story viewer
+
+**Audit:** ZM-016 (remaining), ZM-017 (affiliate rate lock), ZM-005 (refund key), ZM-014 (`available` display); UI requests (story viewer/tray, feed→Mart, quote entry point)
+**Changes:**
+1. **Payout onboarding claim + step are one transaction** — `payments/src/modules/gateway/services/payoutOnboarding.service.go`.
+   - `SavePayoutOnboardingBank` still resolves the bank first (a provider call, so it must not hold a DB transaction), then in one `RunInMoneyTransaction` it locks the onboarding row, re-checks the legal name, claims the settlement account, and writes the `bank` step + `CreateRecipient`/seller-subaccount jobs.
+   - `saveOnboardingStep` and the bank path now share `applyOnboardingStep`, so identity/business keep their create-if-missing behaviour.
+   - Duplicate-account (`ErrBankAccountAlreadyLinked`), step-order and name-mismatch errors roll the claim and step back together.
+2. **Verification level is read inside the withdrawal transaction** — `payments/.../verificationLevels.service.go`, `wallet/.../commands/requestWithdrawal/requestWithdrawal.handler.go`.
+   - New `ReadVerificationLevelInTransaction(ctx, *sql.Tx, userId)` passes the transaction to both the ent queries and the raw identity lookup (`verificationLevelExecutor` now requires `QueryRowContext`).
+   - `requestWithdrawal` derives `level`/`nameMatchedOnly` for the daily cap inside the idempotent money command instead of snapshotting them before it.
+3. **Affiliate commission rate is locked at order time** — `creators/.../affiliates/services/affiliateCommissions.service.go`.
+   - When the release event has no checkout-locked bps, `rateFor` uses the `AffiliateAttributedSale.CommissionBps` persisted by `RecordAwaitingAttributedSales`; live settings are only the fallback when no awaiting row exists.
+   - A seller lowering the rate between order and escrow release no longer cuts an already-attributed commission.
+4. **Refund idempotency key includes amount/currency** — `escrow/.../commands/refundOrderGroup/refundOrderGroup.handler.go`.
+   - Key changed from `Hash(orderGroup, reason)[:64]` to `Hash(orderGroup, amountMinor, currency, reason)`. The `[:64]` was a no-op on a 64-char SHA-256 hex digest.
+   - Same-amount retries still replay; a distinct partial refund is no longer reported as key reuse (the state machine still rejects a second distinct partial refund).
+5. **Wallet `Available` no longer includes deposit hold** — `apps/mobile/src/screens/wallet/addMoney.screen.tsx`.
+   - Shows `availableMinor` as available and appends the held amount separately (`• ₦X on deposit hold`), so held funds are not presented as spendable.
+6. **Story viewer/tray** — `apps/mobile/src/screens/story/story.screen.tsx`, `components/story/storyAutoAdvance.hook.ts`, `components/chat/storyTray.tsx`, `navigation/navigation.types.ts`, `social/.../listStoryTray.handler.ts`, `social/.../post.repository.ts`.
+   - Close X at the far right; `startAtLast` jumps to the previous user's last story; no wrap at the first user; advancing past the last user closes the viewer; sponsored story pages are reachable (the `adPage` branch is checked before loading/error/empty); seen ring is always visible (primary = unseen, faint = seen); tray orders unseen-first then newest, and the `["story-tray"]` cache is updated after `markStoryAsSeen` so the ring changes without waiting for a refetch.
+7. **Feed→Mart drag and quote gating re-checked, no change needed.**
+   - Feed→Mart drag is already implemented in `apps/mobile/src/screens/home/home.screen.tsx` + `homeSectionSwipe.util.ts` (`d6e3c65f4`); `homeSectionSwipe.test.ts` and `horizontalScrollGestureGuard.test.ts` pass 13/13.
+   - `View quotes` already renders only when `quotes > 0` on mobile (`hasQuotesToShow`) and web (`ViewQuotesLink`).
+**Verified (real output):**
+- `go test ./modules/payments -run 'TestPayoutAccountCreation…|TestFailedPayoutAccountJobs…|TestADirectSalePayout…' -count=1` → `ok zudomart/modules/payments 2.300s`.
+- `go test ./modules/wallet -run 'TestWithdrawalAndNewPayout…|TestWithdrawalVelocity…|TestANameMatchedOnly…' -count=1` → `ok zudomart/modules/wallet 3.489s`.
+- `go test ./modules/escrow -run 'TestSecondDistinct…|TestAPartiallyRefunded…|TestAPartialChargeback…|TestAFailedRelease…' -count=1` → `ok zudomart/modules/escrow 2.821s`.
+- `go test ./modules/creators -run TestAffiliateCommission… -count=1` → `ok zudomart/modules/creators 0.424s`.
+- `go build ./modules/payments/... ./modules/wallet/... ./modules/escrow/... ./modules/creators/...` → clean.
+- Mobile: `tsc --noEmit` clean; social `typecheck` clean; mobile Jest `126 suites / 781 tests`; social Vitest `84 files / 544 tests`.
+**Rollback:**
+- Revert the Go hunks independently. The onboarding merge rolls back as one transaction; the in-tx level read is additive; the affiliate fallback is inert when no awaiting row exists; the refund key change only affects new requests.
+- Revert the mobile copy/story hunks independently; no schema or migration changes.
+**Remaining in Batch 2:** the two ZM-015 items are verified fixed by the tests above (chargeback receivable clears to zero; failed release returns the escrow to `held` while the order records the retry time/event). ZM-016's two open items are fixed here. ZM-005's provider-session open replay and confirm-receipt replay are still open; the refund retry race was re-checked and does not resend for lookup providers (attempt-count lookup) and parks unknown non-lookup providers in manual review.
+
 ## 2026-10-19 — Audit Batch 2: undelivered escrow review, fee-retaining refunds, direct-payout verification, name-matched cap, follow cooldown, locked live
 
 **Audit:** ZM-015 (undelivered deadline, refund-after-release), ZM-016 (direct-payout gate, optional-mode limit), social follow requests (ZM-010/ZM-012), live access (ZM-012)
@@ -45,9 +81,9 @@ Every code change made while fixing `docs/audit/frontend-backend-audit.md` is lo
 - Revert the Go/TS hunks independently. The follow migration is additive: drop `follows.endedBy`, then `DROP TYPE "FollowEndedBy"`; reverting the cooldown leaves existing `endedBy` values unused.
 - Revert the legal-copy changes with the same commit if the fee policy changes.
 - The name-matched cap is config-driven: `WALLET_WITHDRAWAL_NAME_MATCHED_DAILY_CAPS` can raise it without a code change.
-**Remaining in Batch 2:**
-- ZM-015: a partial chargeback on a released wallet escrow still over-credits the receivable; the release-movement-failure rollback (`released → held`) still drifts from the order service.
-- ZM-016: payout onboarding is still resolve → claim → step in separate transactions (mitigated at payout); the withdrawal verification level is still snapshotted outside the withdrawal transaction.
+**Remaining in Batch 2 (resolved in the follow-up entry above):**
+- ZM-015: both items are verified fixed — the released-escrow partial chargeback clears the receivable to zero and takes only the seller's disputed share; the failed release returns the escrow to `held` and the order records the retry time + `sellerPayoutRetrying` event.
+- ZM-016: both items are fixed in the follow-up — onboarding claim + step are one transaction (only the provider bank-resolution call stays outside), and the withdrawal verification level is read inside the withdrawal transaction.
 
 ## 2026-10-17 — ZM-016 (Part B): debt in the withdrawal tx, payout send claim, refund bank-destination guard, direct-payout gate, dead-lettered mismatches
 

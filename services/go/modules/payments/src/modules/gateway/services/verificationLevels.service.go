@@ -30,11 +30,20 @@ func (gateway *PaymentGateway) customerValidationMode() string {
 	return models.CustomerValidationOff
 }
 
+type verificationLevelExecutor interface {
+	databases.ExecutorQuerier
+	QueryRowContext(ctx context.Context, query string, args ...any) *sql.Row
+}
+
 func (gateway *PaymentGateway) ReadVerificationLevel(ctx context.Context, userId string) (models.VerificationLevelView, error) {
 	return gateway.readVerificationLevel(ctx, gateway.Container.Resources.Database, userId)
 }
 
-func (gateway *PaymentGateway) readVerificationLevel(ctx context.Context, executor databases.ExecutorQuerier, userId string) (models.VerificationLevelView, error) {
+func (gateway *PaymentGateway) ReadVerificationLevelInTransaction(ctx context.Context, transaction *sql.Tx, userId string) (models.VerificationLevelView, error) {
+	return gateway.readVerificationLevel(ctx, transaction, userId)
+}
+
+func (gateway *PaymentGateway) readVerificationLevel(ctx context.Context, executor verificationLevelExecutor, userId string) (models.VerificationLevelView, error) {
 	inputs := models.VerificationInputs{ValidationMode: gateway.customerValidationMode()}
 	account, err := gateway.FindConnectedAccountRowForUser(ctx, executor, userId)
 	if err != nil && !errors.Is(err, ErrConnectedAccountMissing) {
@@ -47,13 +56,13 @@ func (gateway *PaymentGateway) readVerificationLevel(ctx context.Context, execut
 		return models.VerificationLevelView{}, err
 	}
 	inputs.BankAccountValidated = validated
-	if inputs.Country, inputs.IdentityVerified, err = gateway.readIdentityFacts(ctx, userId); err != nil {
+	if inputs.Country, inputs.IdentityVerified, err = gateway.readIdentityFacts(ctx, executor, userId); err != nil {
 		return models.VerificationLevelView{}, err
 	}
 	return models.BuildVerificationLevel(inputs), nil
 }
 
-func (gateway *PaymentGateway) readIdentityFacts(ctx context.Context, userId string) (string, bool, error) {
+func (gateway *PaymentGateway) readIdentityFacts(ctx context.Context, executor verificationLevelExecutor, userId string) (string, bool, error) {
 	schema := gateway.Container.Settings.UsersSchema
 	if schema == "" || !ledgerutils.IsUuid(userId) {
 		return "", false, nil
@@ -64,7 +73,7 @@ func (gateway *PaymentGateway) readIdentityFacts(ctx context.Context, userId str
 			AND liveness_result = 'passed' AND face_match_result = 'passed')`
 	var country string
 	var verified bool
-	if err := gateway.Container.Resources.Database.QueryRowContext(ctx, query, userId).Scan(&country, &verified); err != nil {
+	if err := executor.QueryRowContext(ctx, query, userId).Scan(&country, &verified); err != nil {
 		return "", false, err
 	}
 	return country, verified, nil
