@@ -84,6 +84,7 @@ function checkMobileExport(directory) {
 }
 
 function checkMobile() {
+  const before = problems.length;
   const eas = JSON.parse(readFileSync(resolve(repositoryRoot, "apps/mobile/eas.json"), "utf8"));
   for (const [profile, settings] of Object.entries(eas.build ?? {})) {
     if (profile === "base" || profile === "demo") continue;
@@ -94,7 +95,7 @@ function checkMobile() {
   if (/extra\.useMocks \?\? true/.test(apiConfig)) problems.push("mobile: api.config.ts defaults to mocks when EXPO_PUBLIC_USE_MOCKS is unset; default to __DEV__");
   const appJson = JSON.parse(readFileSync(resolve(repositoryRoot, "apps/mobile/app.json"), "utf8"));
   if (appJson.expo?.extra?.useMocks === true) problems.push("mobile: app.json extra.useMocks is true, which turns mocks on in every build");
-  console.log("ok     mobile: EAS profiles checked (demo is the only mock profile)");
+  if (problems.length === before) console.log("ok     mobile: EAS profiles + api config + app.json checked (demo is the only mock profile)");
 }
 
 const targets = requested.length === 0 ? [...nextApps, "mobile"] : requested;
