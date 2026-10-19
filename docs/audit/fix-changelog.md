@@ -42,7 +42,7 @@ Every code change made while fixing `docs/audit/frontend-backend-audit.md` is lo
 **Rollback:**
 - Revert the Go hunks independently. The onboarding merge rolls back as one transaction; the in-tx level read is additive; the affiliate fallback is inert when no awaiting row exists; the refund key change only affects new requests.
 - Revert the mobile copy/story hunks independently; no schema or migration changes.
-**Remaining in Batch 2:** the two ZM-015 items are verified fixed by the tests above (chargeback receivable clears to zero; failed release returns the escrow to `held` while the order records the retry time/event). ZM-016's two open items are fixed here. ZM-005's provider-session open replay and confirm-receipt replay are still open; the refund retry race was re-checked and does not resend for lookup providers (attempt-count lookup) and parks unknown non-lookup providers in manual review.
+**Remaining in Batch 2:** the two ZM-015 items are verified fixed by the tests above (chargeback receivable clears to zero; failed release returns the escrow to `held` while the order records the retry time/event). ZM-016's two open items are fixed here. ZM-005's provider-session open replay is fixed by the per-intent lock + retryable 409; confirm-receipt replay was reviewed and needs no key because escrow release is already status-idempotent and returns the same escrow. The refund retry race was re-checked and does not resend for lookup providers (attempt-count lookup) and parks unknown non-lookup providers in manual review.
 
 ## 2026-10-19 — Audit Batch 2: undelivered escrow review, fee-retaining refunds, direct-payout verification, name-matched cap, follow cooldown, locked live
 
