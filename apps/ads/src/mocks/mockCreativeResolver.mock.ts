@@ -1,6 +1,16 @@
 import { readMockDatabase, type MockAdAccountRecord } from "@/mocks/mockDatabase.mock";
+import { listMockPromotableDestinations } from "@/mocks/mockPromotableDestinations.mock";
 import { demoIdentitiesByAccountId } from "@/mocks/seed/demoContent.mock";
-import type { Creative, CreativeInput, CreativeMedia } from "@/types/creative.type";
+import type { Creative, CreativeInput, CreativeMedia, PromotedDestinationIdentity } from "@/types/creative.type";
+
+function resolvePromotedDestination(input: CreativeInput, account: MockAdAccountRecord): PromotedDestinationIdentity | null {
+  const { destination } = input;
+  if (destination.type !== "profile" && destination.type !== "store") return null;
+  const match = listMockPromotableDestinations(account, destination.type).find((candidate) => candidate.id === destination.targetId);
+  if (!match) return null;
+  const { available: _available, eligible: _eligible, ineligibleReason: _ineligibleReason, ...identity } = match;
+  return identity;
+}
 
 export function resolveCreativeFromInput(input: CreativeInput, account: MockAdAccountRecord): Creative {
   const database = readMockDatabase();
@@ -35,5 +45,6 @@ export function resolveCreativeFromInput(input: CreativeInput, account: MockAdAc
     identity,
     product: source?.product ?? null,
     live: source?.live ?? null,
+    promoted: resolvePromotedDestination(input, account),
   };
 }

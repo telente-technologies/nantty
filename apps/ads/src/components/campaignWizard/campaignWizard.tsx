@@ -9,7 +9,7 @@ import { AudienceEstimatePanel } from "@/components/campaignWizard/audienceEstim
 import { AudiencePlacementStep } from "@/components/campaignWizard/audiencePlacementStep";
 import { BudgetScheduleStep } from "@/components/campaignWizard/budgetScheduleStep";
 import { CampaignSettingsStep } from "@/components/campaignWizard/campaignSettingsStep";
-import { createInitialWizardState, reduceCampaignWizardState } from "@/components/campaignWizard/campaignWizardState.store";
+import { createInitialWizardState, reduceCampaignWizardState, type CampaignWizardState } from "@/components/campaignWizard/campaignWizardState.store";
 import { campaignWizardSteps, findStepIndexForApiIssuePath } from "@/components/campaignWizard/campaignWizardSteps.constant";
 import { buildCampaignSubmissionFromWizard, readOwnDestinationTargets } from "@/components/campaignWizard/campaignWizardSubmission.util";
 import { findFirstStepWithErrors, validateWizardStep, type WizardFieldErrors } from "@/components/campaignWizard/campaignWizardValidation.util";
@@ -27,6 +27,8 @@ import { VerificationPrompt } from "@/components/verification/verificationPrompt
 import { supportedAccountCountries } from "@/constants/locale.constant";
 import { AdsApiRequestError, isVerificationRequiredError, readErrorMessageForDisplay } from "@/services/adsApiClient.service";
 import { campaignsApi } from "@/services/campaignsApi.service";
+import type { AudienceSpec } from "@/types/audience.type";
+import type { CampaignObjective } from "@/types/campaign.type";
 import { createClientIdempotencyKey } from "@/utils/formValidation.util";
 
 import styles from "./campaignWizard.module.css";
@@ -41,18 +43,23 @@ function convertApiIssuesToFieldErrors(error: AdsApiRequestError): WizardFieldEr
     else if (issue.path.includes("bidStrategy")) fieldErrors.bidAmount = issue.message;
     else if (issue.path === "campaign.name") fieldErrors.campaignName = issue.message;
     else if (issue.path.includes("schedule.endAt")) fieldErrors.endAt = issue.message;
-    else if (/^ads\.\d+\.creative\./.test(issue.path)) fieldErrors[issue.path.replace(".creative.", ".").replace(".mediaIds", ".media").replace(".destination.url", ".destinationUrl")] = issue.message;
+    else if (/^ads\.\d+\.creative\./.test(issue.path)) fieldErrors[issue.path.replace(".creative.", ".").replace(".mediaIds", ".media").replace(".destination.url", ".destinationUrl").replace(".destination.targetId", ".destinationTarget")] = issue.message;
     else fieldErrors[issue.path] = issue.message;
   }
   return fieldErrors;
 }
 
-export function CampaignWizard() {
+function createWizardStateWithPreselectedObjective(defaultAudience: AudienceSpec, preselectedObjective: CampaignObjective | null): CampaignWizardState {
+  const initialState = createInitialWizardState(defaultAudience);
+  return preselectedObjective ? reduceCampaignWizardState(initialState, { type: "choose_objective", objective: preselectedObjective }) : initialState;
+}
+
+export function CampaignWizard({ preselectedObjective = null }: { readonly preselectedObjective?: CampaignObjective | null }) {
   const router = useRouter();
   const { showToast } = useToast();
   const { accountId, account, currency, canPerform, buildAccountPagePath } = useAdAccount();
   const country = supportedAccountCountries.find((candidate) => candidate.code === account.countryCode);
-  const [state, dispatch] = useReducer(reduceCampaignWizardState, undefined, () => createInitialWizardState(createDefaultAudienceForCountry(account.countryCode, country?.name ?? account.countryCode)));
+  const [state, dispatch] = useReducer(reduceCampaignWizardState, undefined, () => createWizardStateWithPreselectedObjective(createDefaultAudienceForCountry(account.countryCode, country?.name ?? account.countryCode), preselectedObjective));
   const [errors, setErrors] = useState<WizardFieldErrors>({});
   const [submitErrorMessage, setSubmitErrorMessage] = useState<string | null>(null);
   const [verificationMessage, setVerificationMessage] = useState<string | null>(null);

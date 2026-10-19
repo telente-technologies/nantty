@@ -16,7 +16,7 @@ import type {
   DeliveryStatus,
   ReviewStatus,
 } from "@/types/campaign.type";
-import type { ContentSource, Creative, CreativeInput, CreativeSourceType } from "@/types/creative.type";
+import type { ContentSource, Creative, CreativeInput, CreativeSourceType, PromotableDestination, PromotableDestinationKind } from "@/types/creative.type";
 
 export interface CardReportRow {
   readonly cardIndex: number;
@@ -72,5 +72,7 @@ export const campaignsApi = {
     sendAdsApiRequest<Ad>(buildAccountApiPath(accountId, `/ads/${encodeURIComponent(adId)}/appeal`), { method: "POST", body: { message } }),
   listContentSources: (accountId: string, type: Exclude<CreativeSourceType, "upload">, search = "") =>
     sendAdsApiRequest<Page<ContentSource>>(buildAccountApiPath(accountId, "/content-sources"), { query: { type, search, limit: 24 } }),
+  listPromotableDestinations: (accountId: string, type: PromotableDestinationKind) =>
+    sendAdsApiRequest<Page<PromotableDestination>>(buildAccountApiPath(accountId, "/promotable-destinations"), { query: { type } }),
   previewCreative: (accountId: string, input: CreativeInput) => sendAdsApiRequest<Creative>(buildAccountApiPath(accountId, "/creatives/preview"), { method: "POST", body: input }),
 };

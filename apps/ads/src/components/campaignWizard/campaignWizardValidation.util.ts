@@ -10,6 +10,18 @@ import { parseTypedMajorAmountToMoney } from "@/utils/money.util";
 
 export type WizardFieldErrors = Record<string, string>;
 
+const missingPromotedDestinationMessages = {
+  profile: { nothingToPromote: "You have no profile you can promote from this ad account.", notChosen: "Choose the profile this ad opens." },
+  store: { nothingToPromote: "You have no store you can promote. Only stores you own, or help run as an owner or manager, can be promoted.", notChosen: "Choose the store this ad opens." },
+} as const;
+
+function describeMissingPromotedDestination(ad: WizardAdDraft): string | null {
+  if (ad.creativeType !== "single" || (ad.destinationType !== "profile" && ad.destinationType !== "store")) return null;
+  if (ad.promotedDestination?.kind === ad.destinationType && ad.promotedDestination.eligible) return null;
+  const messages = missingPromotedDestinationMessages[ad.destinationType];
+  return ad.kindsWithNothingToPromote.includes(ad.destinationType) ? messages.nothingToPromote : messages.notChosen;
+}
+
 function validateAdDraft(ad: WizardAdDraft, index: number, placements: readonly AdPlacement[], errors: WizardFieldErrors): void {
   const prefix = `ads.${index}`;
   const usesContentSource = ad.creativeType === "single" || ad.creativeType === "promoted_post";
@@ -28,6 +40,8 @@ function validateAdDraft(ad: WizardAdDraft, index: number, placements: readonly 
   if (ad.primaryText.trim().length > primaryTextMaximumLength) errors[`${prefix}.primaryText`] = `Keep the text under ${primaryTextMaximumLength} characters.`;
   if (ad.creativeType === "single" && ad.destinationType === "url" && !isSafeHttpsUrl(ad.destinationUrl.trim())) errors[`${prefix}.destinationUrl`] = "Enter a full https:// website address.";
   if (ad.creativeType === "single" && ad.sourceType === "upload" && (ad.destinationType === "post" || ad.destinationType === "product")) errors[`${prefix}.destinationType`] = "An uploaded photo or video has no post or product to open. Choose where the button takes people.";
+  const missingPromotedDestination = describeMissingPromotedDestination(ad);
+  if (missingPromotedDestination) errors[`${prefix}.destinationTarget`] = missingPromotedDestination;
   const hasCreative = ad.creativeType === "carousel" ? ad.cards.some((card) => card.media) : ad.sourceType === "upload" ? ad.uploadedMedia.length > 0 : Boolean(ad.selectedSource);
   const placementProblem = hasCreative ? describeWhyCreativeCannotRunAnywhere(buildCreativeShapeFromAdDraft(ad), placements) : null;
   if (placementProblem) errors[`${prefix}.placements`] = placementProblem;

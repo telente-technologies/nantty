@@ -70,6 +70,8 @@ export function checkCreativeFitForPlacement(shape: CreativeShape, placement: Ad
   let fit: Omit<PlacementFit, "placement">;
   if (shape.creativeType === "carousel" && placement !== "feed") {
     fit = { status: "blocked", message: "Carousels run in the feed and the comment thread only." };
+  } else if (shape.sourceType === "store") {
+    fit = placement === "feed" ? { status: "ready", message: "Store card with your logo, name and button, in the feed and comment threads." } : { status: "blocked", message: "Store ads run in the feed and the comment thread only for now." };
   } else if (shape.creativeType === "app_install" && (placement === "mart" || placement === "search" || placement === "live")) {
     fit = { status: "blocked", message: "App install ads run in the feed, Reels and stories, not in product grids or live." };
   } else if (placement === "mart" || placement === "search") {

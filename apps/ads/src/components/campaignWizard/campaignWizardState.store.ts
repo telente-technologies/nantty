@@ -1,7 +1,7 @@
 import { findObjectiveOption } from "@/constants/campaignOptions.constant";
 import type { AudienceSpec } from "@/types/audience.type";
 import type { AdPlacement, BidStrategyType, BudgetLevel, BudgetType, CampaignObjective, PlacementMode } from "@/types/campaign.type";
-import type { CallToAction, ContentSource, CreativeFormat, CreativeMedia, CreativeSourceType, CreativeType, CreativeUtm, DestinationType } from "@/types/creative.type";
+import type { CallToAction, ContentSource, CreativeFormat, CreativeMedia, CreativeSourceType, CreativeType, CreativeUtm, DestinationType, PromotableDestination, PromotableDestinationKind } from "@/types/creative.type";
 
 export interface WizardCardDraft {
   readonly key: string;
@@ -50,6 +50,8 @@ export interface WizardAdDraft {
   readonly callToAction: CallToAction;
   readonly destinationType: DestinationType;
   readonly destinationUrl: string;
+  readonly promotedDestination: PromotableDestination | null;
+  readonly kindsWithNothingToPromote: readonly PromotableDestinationKind[];
 }
 
 export interface CampaignWizardState {
@@ -109,8 +111,8 @@ export function createEmptyAdDraft(objective: CampaignObjective | null, index: n
     cards: [],
     app: emptyAppDraft,
     utm: {},
-    format: "feed_post",
-    sourceType: "post",
+    format: objective === "store_promotion" ? "store" : "feed_post",
+    sourceType: objective === "store_promotion" ? "store" : "post",
     selectedSource: null,
     uploadedMedia: [],
     headline: "",
@@ -118,6 +120,8 @@ export function createEmptyAdDraft(objective: CampaignObjective | null, index: n
     callToAction: objective ? findObjectiveOption(objective).defaultCallToAction : "learn_more",
     destinationType: objective === "messages" ? "messages" : objective === "followers" ? "profile" : objective === "store_promotion" ? "store" : "post",
     destinationUrl: "",
+    promotedDestination: null,
+    kindsWithNothingToPromote: [],
   };
 }
 

@@ -39,7 +39,7 @@ export function doesRoleHavePermission(role: AdAccountRole | null | undefined, p
 }
 
 const accountResourcePermissions: readonly { readonly pattern: RegExp; readonly read: AdsPermission; readonly write: AdsPermission }[] = [
-  { pattern: /^\/(campaigns|ad-sets|ads|creatives|content-sources|bulk-actions)(\/|$)/, read: "campaigns:view", write: "campaigns:manage" },
+  { pattern: /^\/(campaigns|ad-sets|ads|creatives|content-sources|promotable-destinations|bulk-actions)(\/|$)/, read: "campaigns:view", write: "campaigns:manage" },
   { pattern: /^\/audiences(\/|$)/, read: "campaigns:view", write: "audiences:manage" },
   { pattern: /^\/estimates(\/|$)/, read: "campaigns:view", write: "campaigns:view" },
   { pattern: /^\/reports\/scheduled(\/|$)/, read: "reports:view", write: "reports:view" },

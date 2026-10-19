@@ -1,18 +1,38 @@
 import { LiveCardPreview } from "@/components/creative/adPreviewMarketplaceAndLive";
 import { AppInstallRow, CarouselStrip, MediaWithTapHint } from "@/components/creative/adPreviewRichFormats";
-import { PreviewAvatar, PreviewMedia, SponsoredLabel, VerifiedSeal } from "@/components/creative/adPreviewParts";
+import { IdentityAvatar, IdentitySeal, PreviewAvatar, PreviewMedia, SponsoredLabel, VerifiedSeal } from "@/components/creative/adPreviewParts";
 import { ZudoIcon } from "@/components/ui/zudoIcon";
 import { callToActionLabels } from "@/constants/campaignOptions.constant";
-import type { Creative } from "@/types/creative.type";
+import type { Creative, PromotableDestinationKind, PromotedDestinationIdentity } from "@/types/creative.type";
 import { isLandscapeMedia } from "@/utils/adPlacementRules.util";
 
 import styles from "./adPreview.module.css";
 
+const promotedDestinationButtonLabels: Record<PromotableDestinationKind, string> = { profile: "View profile", store: "View store" };
+
 function CallToActionButton({ creative }: { readonly creative: Creative }) {
   return (
     <span className={styles.callToAction} role="presentation">
-      {callToActionLabels[creative.callToAction]}
+      {creative.promoted ? promotedDestinationButtonLabels[creative.promoted.kind] : callToActionLabels[creative.callToAction]}
     </span>
+  );
+}
+
+function PromotedDestinationCard({ promoted, showsSponsoredLabel = false }: { readonly promoted: PromotedDestinationIdentity; readonly showsSponsoredLabel?: boolean }) {
+  return (
+    <div className={styles.storeHeader}>
+      <IdentityAvatar name={promoted.name} avatarUrl={promoted.avatarUrl} size={40} />
+      <div>
+        <p className={styles.storeName}>
+          {promoted.name} {promoted.verified ? <IdentitySeal label="Verified" /> : null}
+        </p>
+        <p className={styles.storeHandle}>
+          @{promoted.handle}
+          {promoted.private ? " · Private account" : ""}
+          {showsSponsoredLabel ? <> · <SponsoredLabel /></> : null}
+        </p>
+      </div>
+    </div>
   );
 }
 
@@ -46,6 +66,11 @@ export function FeedCardPreview({ creative }: { readonly creative: Creative }) {
       )}
       {creative.type === "app_install" ? <AppInstallRow creative={creative} /> : null}
       {creative.type === "carousel" ? <p className={styles.carouselHint}>Swipe for {creative.cards?.length ?? 0} cards</p> : creative.media.length > 1 ? <p className={styles.carouselHint}>1 / {creative.media.length}</p> : null}
+      {creative.promoted ? (
+        <div className={styles.promotedDestination}>
+          <PromotedDestinationCard promoted={creative.promoted} />
+        </div>
+      ) : null}
       {creative.type === "app_install" || creative.type === "carousel" ? null : (
         <div className={styles.feedCallToAction}>
           <CallToActionButton creative={creative} />
@@ -122,17 +147,21 @@ export function ClipPreview({ creative, variant }: { readonly creative: Creative
 export function StoreCardPreview({ creative }: { readonly creative: Creative }) {
   return (
     <article className={styles.storeCard} aria-label="Store card preview">
-      <div className={styles.storeHeader}>
-        <PreviewAvatar creative={creative} size={40} />
-        <div>
-          <p className={styles.storeName}>
-            {creative.identity.name} <VerifiedSeal creative={creative} />
-          </p>
-          <p className={styles.storeHandle}>
-            @{creative.identity.handle} · <SponsoredLabel />
-          </p>
+      {creative.promoted ? (
+        <PromotedDestinationCard promoted={creative.promoted} showsSponsoredLabel />
+      ) : (
+        <div className={styles.storeHeader}>
+          <PreviewAvatar creative={creative} size={40} />
+          <div>
+            <p className={styles.storeName}>
+              {creative.identity.name} <VerifiedSeal creative={creative} />
+            </p>
+            <p className={styles.storeHandle}>
+              @{creative.identity.handle} · <SponsoredLabel />
+            </p>
+          </div>
         </div>
-      </div>
+      )}
       <div className={styles.storeStrip}>
         {creative.media.slice(0, 3).map((media) => (
           <PreviewMedia key={media.id} media={media} altText={creative.headline} className={styles.storeThumb} />

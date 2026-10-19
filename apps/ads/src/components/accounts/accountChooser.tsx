@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect } from "react";
 
 import { ButtonLink } from "@/components/ui/button";
 import { EmptyState, ErrorState, InlineNotice, LoadingBlock } from "@/components/ui/feedback";
@@ -11,15 +12,24 @@ import { ZudoIcon } from "@/components/ui/zudoIcon";
 import { roleLabels } from "@/config/rolePermissions.config";
 import { useAdsQuery } from "@/hooks/useAdsQuery.hook";
 import { accountsApi } from "@/services/accountsApi.service";
+import { buildAccountForwardPath, isSafeAccountForwardPath } from "@/utils/accountForwardPath.util";
 import { formatMoneyForDisplay } from "@/utils/money.util";
 
 import styles from "./accountChooser.module.css";
 
 export function AccountChooser() {
+  const router = useRouter();
   const searchParams = useSearchParams();
   const accountsQuery = useAdsQuery(() => accountsApi.listMyAdAccounts(), "accounts");
   const deniedAccountId = searchParams.get("denied");
+  const requestedForwardPath = searchParams.get("next");
+  const forwardPath = isSafeAccountForwardPath(requestedForwardPath) ? requestedForwardPath : null;
   const accounts = accountsQuery.data?.items ?? [];
+  const onlyAccountId = accounts.length === 1 ? accounts[0]?.id : undefined;
+
+  useEffect(() => {
+    if (forwardPath && onlyAccountId && !deniedAccountId) router.replace(buildAccountForwardPath(onlyAccountId, forwardPath));
+  }, [forwardPath, onlyAccountId, deniedAccountId, router]);
 
   return (
     <>
@@ -32,6 +42,7 @@ export function AccountChooser() {
           </ButtonLink>
         }
       />
+      {forwardPath && accounts.length > 1 ? <InlineNotice tone="info">Choose the ad account to continue with.</InlineNotice> : null}
       {deniedAccountId ? <InlineNotice tone="caution">You are not a member of that ad account. Ask one of its admins to invite you.</InlineNotice> : null}
       {accountsQuery.isLoading && !accountsQuery.data ? <LoadingBlock height={220} label="Loading ad accounts" /> : null}
       {accountsQuery.errorMessage ? <ErrorState error={accountsQuery.error} message={accountsQuery.errorMessage} onRetry={accountsQuery.reload} /> : null}
@@ -50,7 +61,7 @@ export function AccountChooser() {
       <ul className={styles.grid}>
         {accounts.map((account) => (
           <li key={account.id}>
-            <Link href={`/accounts/${account.id}/overview`} className={styles.card}>
+            <Link href={buildAccountForwardPath(account.id, forwardPath)} className={styles.card}>
               <div className={styles.cardTop}>
                 <span className={styles.initial} aria-hidden>
                   {account.name.slice(0, 1).toUpperCase()}

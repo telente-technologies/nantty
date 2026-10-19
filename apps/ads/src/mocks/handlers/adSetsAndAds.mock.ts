@@ -3,6 +3,7 @@ import { collectPlacementIssuesForAds, throwIfValidationIssues, validateAdSetInp
 import { resolveCreativeFromInput } from "@/mocks/mockCreativeResolver.mock";
 import { appendMockActivity, readMockDatabase, type MockAdRecord, type MockAdSetRecord } from "@/mocks/mockDatabase.mock";
 import { presentAd, presentAdSet } from "@/mocks/mockDeliveryPresenter.mock";
+import { listMockPromotableDestinations } from "@/mocks/mockPromotableDestinations.mock";
 import { MockHttpError, createMockId, paginateItems, readIsoNow, readJsonObjectBody, respondWithJson } from "@/mocks/mockResponses.mock";
 import { markAdAsSubmittedForReview } from "@/mocks/mockReviewQueue.mock";
 import { registerMockRoute, type MockRequest } from "@/mocks/mockRouter.mock";
@@ -156,6 +157,13 @@ export function registerAdSetAndAdMockHandlers(): void {
     const sources = readMockDatabase().contentSources.filter((source) => source.accountId === account.id && (!type || source.type === type) && (!search || `${source.title} ${source.text}`.toLowerCase().includes(search)));
     const page = paginateItems(sources, request, 24);
     return respondWithJson(200, { ...page, items: page.items.map(({ accountId: _accountId, ...source }) => source) });
+  });
+
+  registerMockRoute("GET", "/ads/accounts/:accountId/promotable-destinations", (request) => {
+    const { account } = requireAccountAccess(request, "campaigns:view");
+    const type = request.query.get("type");
+    if (type !== "profile" && type !== "store") throw new MockHttpError(400, "VALIDATION_FAILED", "Choose profile or store.", [{ path: "type", message: "Choose profile or store." }]);
+    return respondWithJson(200, { data: listMockPromotableDestinations(account, type) });
   });
 
   registerMockRoute("POST", "/ads/accounts/:accountId/creatives/preview", (request) => {

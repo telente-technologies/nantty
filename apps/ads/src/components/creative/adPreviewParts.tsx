@@ -3,19 +3,26 @@ import type { Creative, CreativeMedia } from "@/types/creative.type";
 
 import styles from "./adPreviewParts.module.css";
 
-export function PreviewAvatar({ creative, size = 32 }: { readonly creative: Creative; readonly size?: number }) {
-  const initial = creative.identity.name.slice(0, 1).toUpperCase();
-  if (creative.identity.avatarUrl) return <img className={styles.avatar} src={creative.identity.avatarUrl} alt="" width={size} height={size} style={{ width: size, height: size }} />;
+export function IdentityAvatar({ name, avatarUrl, size = 32 }: { readonly name: string; readonly avatarUrl: string | null; readonly size?: number }) {
+  if (avatarUrl) return <img className={styles.avatar} src={avatarUrl} alt="" width={size} height={size} style={{ width: size, height: size }} />;
   return (
     <span className={styles.avatarFallback} style={{ width: size, height: size }} aria-hidden>
-      {initial}
+      {name.slice(0, 1).toUpperCase()}
     </span>
   );
 }
 
+export function PreviewAvatar({ creative, size = 32 }: { readonly creative: Creative; readonly size?: number }) {
+  return <IdentityAvatar name={creative.identity.name} avatarUrl={creative.identity.avatarUrl} size={size} />;
+}
+
+export function IdentitySeal({ label }: { readonly label: string }) {
+  return <ZudoIcon name="sealCheck20" size={14} className={styles.seal} label={label} />;
+}
+
 export function VerifiedSeal({ creative }: { readonly creative: Creative }) {
   if (!creative.identity.verifiedBusiness) return null;
-  return <ZudoIcon name="sealCheck20" size={14} className={styles.seal} label="Verified business" />;
+  return <IdentitySeal label="Verified business" />;
 }
 
 function formatDurationAsMinutesAndSeconds(durationSeconds: number | null): string {

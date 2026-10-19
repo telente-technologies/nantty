@@ -24,6 +24,25 @@ export interface CreativeIdentity {
   readonly verifiedBusiness: boolean;
 }
 
+export type PromotableDestinationKind = Extract<DestinationType, "profile" | "store">;
+
+export interface PromotedDestinationIdentity {
+  readonly kind: PromotableDestinationKind;
+  readonly id: string;
+  readonly name: string;
+  readonly handle: string;
+  readonly avatarUrl: string | null;
+  readonly verified: boolean;
+  readonly checkmarkColor?: string;
+  readonly private: boolean;
+}
+
+export interface PromotableDestination extends PromotedDestinationIdentity {
+  readonly available: boolean;
+  readonly eligible: boolean;
+  readonly ineligibleReason: string | null;
+}
+
 export interface CreativeProduct {
   readonly productId: string;
   readonly title: string;
@@ -103,6 +122,7 @@ export interface Creative {
   readonly identity: CreativeIdentity;
   readonly product: CreativeProduct | null;
   readonly live?: CreativeLiveStream | null;
+  readonly promoted?: PromotedDestinationIdentity | null;
 }
 
 export interface CreativeInput {

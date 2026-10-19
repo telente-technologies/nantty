@@ -66,7 +66,7 @@ export function buildDemoCampaignRecords(): { campaigns: MockCampaignRecord[]; a
       callToAction: "shop_now",
       review: { status: "rejected", policyCode: "counterfeit", policyReason: "The ad describes products as \"first copy\", which presents them as replicas of a branded product. Remove the replica wording, or show only products you have the right to sell.", reviewedAt: shiftTimestampByDays(-1, 15), appeal: null },
     }),
-    buildDemoAd({ id: "ad_ife_store_draft", adSet: storeSet, name: "Store card — draft", source: source("str_ife"), format: "store", headline: "Visit Ife Lifestyle", callToAction: "visit_store" }),
+    buildDemoAd({ id: "ad_ife_store_draft", adSet: storeSet, name: "Store card — draft", source: source("st_ifelifestyle"), format: "store", headline: "Visit Ife Lifestyle", callToAction: "visit_store" }),
     buildDemoAd({ id: "ad_adaeze_lekki", adSet: adaezeSet, name: "Lekki market clip", source: source("clp_adaeze_lekki"), format: "clip", headline: "Thrift with me", callToAction: "watch_more" }),
     buildDemoAd({ id: "ad_kk_runner", adSet: kkSet, name: "Trail runner — product tile", source: source("prd_kk_runner"), format: "product", headline: "Trail Runner Sneakers", primaryText: "Grippy, cushioned and ready for Lagos traffic. Pay on delivery.", callToAction: "shop_now" }),
     buildDemoAd({ id: "ad_kk_street", adSet: kkSet, name: "Street sneakers — product tile", source: source("prd_kk_street"), format: "product", headline: "Street Sneakers", callToAction: "shop_now" }),

@@ -135,6 +135,21 @@
   overflow: hidden;
 }
 
+.destinationAvatar {
+  border-radius: 50%;
+}
+
+.destinationName {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.destinationSeal {
+  flex: none;
+  color: var(--color-brand);
+}
+
 .upload {
   display: flex;
   flex-direction: column;

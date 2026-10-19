@@ -6,6 +6,7 @@ import { CarouselCardEditor } from "@/components/campaignWizard/carouselCardEdit
 import { CreativeTypePicker } from "@/components/campaignWizard/creativeTypePicker";
 import { UtmBuilder } from "@/components/campaignWizard/destinationFields";
 import { PlacementFitList } from "@/components/campaignWizard/placementFitList";
+import { PromotedDestinationPicker } from "@/components/campaignWizard/promotedDestinationPicker";
 import { CreativeUploadField } from "@/components/campaignWizard/creativeUploadField";
 import { createEmptyCardDraft, type WizardAdDraft } from "@/components/campaignWizard/campaignWizardState.store";
 import { buildPreviewCreativeFromAdDraft } from "@/components/campaignWizard/campaignWizardSubmission.util";
@@ -15,7 +16,7 @@ import { CheckboxField, SelectField, TextAreaField, TextField } from "@/componen
 import { callToActionLabels, creativeFormatLabels, headlineMaximumLength, primaryTextMaximumLength } from "@/constants/campaignOptions.constant";
 import type { AdAccount } from "@/types/adAccount.type";
 import type { AdPlacement } from "@/types/campaign.type";
-import type { CallToAction, ContentSource, CreativeFormat, CreativeSourceType, CreativeType, DestinationType } from "@/types/creative.type";
+import type { CallToAction, ContentSource, CreativeFormat, CreativeSourceType, CreativeType, DestinationType, PromotableDestinationKind } from "@/types/creative.type";
 
 import styles from "./creativeEditor.module.css";
 
@@ -81,6 +82,12 @@ export function CreativeEditor({ accountId, account, ad, adIndex, placements, er
   const usesContentSource = ad.creativeType === "single" || ad.creativeType === "promoted_post";
   const visibleSourceTabs = ad.creativeType === "promoted_post" ? sourceTabs.filter((tab) => tab.value === "post" || tab.value === "clip") : sourceTabs;
   const showWebsiteFields = ad.creativeType === "single" && ad.destinationType === "url";
+  const promotedDestinationKind: PromotableDestinationKind | null = ad.creativeType === "single" && (ad.destinationType === "profile" || ad.destinationType === "store") ? ad.destinationType : null;
+
+  function rememberWhetherNothingToPromote(kind: PromotableDestinationKind, hasNothingToPromote: boolean) {
+    if (ad.kindsWithNothingToPromote.includes(kind) === hasNothingToPromote) return;
+    onAdChange({ kindsWithNothingToPromote: hasNothingToPromote ? [...ad.kindsWithNothingToPromote, kind] : ad.kindsWithNothingToPromote.filter((candidate) => candidate !== kind) });
+  }
 
   return (
     <div className={styles.editor}>
@@ -125,8 +132,19 @@ export function CreativeEditor({ accountId, account, ad, adIndex, placements, er
         <TextAreaField label="Primary text" value={ad.primaryText} onValueChange={(primaryText) => onAdChange({ primaryText })} maximumLength={primaryTextMaximumLength} error={errorFor("primaryText")} rows={4} />
         <div className={styles.twoColumns}>
           <SelectField label="Button" value={ad.callToAction} options={(Object.keys(callToActionLabels) as CallToAction[]).map((callToAction) => ({ value: callToAction, label: callToActionLabels[callToAction] }))} onValueChange={(callToAction) => onAdChange({ callToAction })} />
-          {ad.creativeType === "single" ? <SelectField label="Button opens" value={ad.destinationType} error={errorFor("destinationType")} options={singleDestinationTypes.map((destinationType) => ({ value: destinationType, label: destinationLabels[destinationType] }))} onValueChange={(destinationType) => onAdChange({ destinationType })} /> : null}
+          {ad.creativeType === "single" ? <SelectField label="Button opens" value={ad.destinationType} error={errorFor("destinationType") ?? (promotedDestinationKind ? undefined : errorFor("destinationTarget"))} options={singleDestinationTypes.map((destinationType) => ({ value: destinationType, label: destinationLabels[destinationType] }))} onValueChange={(destinationType) => onAdChange({ destinationType })} /> : null}
         </div>
+        {promotedDestinationKind ? (
+          <PromotedDestinationPicker
+            accountId={accountId}
+            kind={promotedDestinationKind}
+            chosenDestinationId={ad.promotedDestination?.kind === promotedDestinationKind ? ad.promotedDestination.id : null}
+            preferredDestinationId={promotedDestinationKind === "store" && ad.selectedSource?.type === "store" ? ad.selectedSource.id : null}
+            error={errorFor("destinationTarget")}
+            onDestinationChosen={(promotedDestination) => onAdChange({ promotedDestination })}
+            onNothingToPromoteChange={rememberWhetherNothingToPromote}
+          />
+        ) : null}
         {ad.creativeType === "single" ? <CheckboxField label="Open the link when someone taps the image or video" checked={ad.mediaClickable} onCheckedChange={(mediaClickable) => onAdChange({ mediaClickable })} description="The button always works. This also makes the media itself a link." /> : null}
         {showWebsiteFields ? <TextField label="Website address" type="url" placeholder="https://" value={ad.destinationUrl} onValueChange={(destinationUrl) => onAdChange({ destinationUrl })} error={errorFor("destinationUrl")} hint="Only secure https:// links are allowed." /> : null}
         {showWebsiteFields || ad.creativeType === "carousel" ? <UtmBuilder url={showWebsiteFields ? ad.destinationUrl : (ad.cards[0]?.destinationUrl ?? "")} utm={ad.utm} onUtmChange={(utm) => onAdChange({ utm })} /> : null}

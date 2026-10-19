@@ -97,7 +97,7 @@ export function buildDemoContentSources(): (ContentSource & { accountId: string 
       ["prd_ife_bag", "product", "Leather Top-Handle Bag", "Structured leather bag with a detachable strap.", [buildDemoImageMedia("topHandleBag")], 55, 0, 0, { productId: "prd_ife_bag", title: "Leather Top-Handle Bag", price: naira(68_000), compareAtPrice: null, rating: 4.6 }],
       ["prd_ife_serum", "product", "Glow Face Serum 30ml", "Vitamin C and niacinamide for an even glow.", [buildDemoImageMedia("faceSerum")], 30, 0, 0, { productId: "prd_ife_serum", title: "Glow Face Serum 30ml", price: naira(12_500), compareAtPrice: null, rating: 4.9 }],
       ["prd_ife_pearls", "product", "Pearl Strand Necklace", "Freshwater pearls on a silk thread.", [buildDemoImageMedia("pearlNecklace")], 25, 0, 0, { productId: "prd_ife_pearls", title: "Pearl Strand Necklace", price: naira(27_500), compareAtPrice: naira(31_000), rating: 4.7 }],
-      ["str_ife", "store", "Ife Lifestyle store", "Fashion, bags and beauty made in Nigeria. Delivery in 2–4 days nationwide.", [buildDemoImageMedia("topHandleBag"), buildDemoImageMedia("adireShirt"), buildDemoImageMedia("faceSerum")], 210, 0, 0, null],
+      ["st_ifelifestyle", "store", "Ife Lifestyle store", "Fashion, bags and beauty made in Nigeria. Delivery in 2–4 days nationwide.", [buildDemoImageMedia("topHandleBag"), buildDemoImageMedia("adireShirt"), buildDemoImageMedia("faceSerum")], 210, 0, 0, null],
     ]),
     buildDemoLiveSource("act_ifelifestyle", "liv_ife_now", "Live now: pearls & pendants restock", "Join us live — every piece shown up close, questions answered, pay on delivery in Lagos.", "pearlNecklace", "live", 1240),
     buildDemoLiveSource("act_ifelifestyle", "liv_ife_friday", "Friday live: new bag drop", "Seven new leather bags, live prices, first 20 orders get free delivery.", "topHandleBag", "scheduled", 0),
@@ -110,7 +110,7 @@ export function buildDemoContentSources(): (ContentSource & { accountId: string 
       ["prd_kk_runner", "product", "Trail Runner Sneakers", "Cushioned runners with a grippy outsole.", [buildDemoImageMedia("trailRunner")], 60, 0, 0, { productId: "prd_kk_runner", title: "Trail Runner Sneakers", price: naira(56_000), compareAtPrice: null, rating: 4.5 }],
       ["prd_kk_street", "product", "Street Sneakers", "Chunky everyday sneakers in a pastel colourway.", [buildDemoImageMedia("streetSneakers")], 45, 0, 0, { productId: "prd_kk_street", title: "Street Sneakers", price: naira(48_500), compareAtPrice: naira(55_000), rating: 4.4 }],
       ["clp_kk_unbox", "clip", "Unboxing the new drop", "New drop just landed in Aba. Unboxing every colourway.", [buildDemoClipMedia("streetSneakers", 27)], 5, 1200, 30_100, null],
-      ["str_kk", "store", "Kelechi Kicks store", "Sneakers from Aba and beyond. Pay on delivery in Lagos, Abuja and PH.", [buildDemoImageMedia("streetSneakers"), buildDemoImageMedia("trailRunner")], 95, 0, 0, null],
+      ["st_kelechikicks", "store", "Kelechi Kicks store", "Sneakers from Aba and beyond. Pay on delivery in Lagos, Abuja and PH.", [buildDemoImageMedia("streetSneakers"), buildDemoImageMedia("trailRunner")], 95, 0, 0, null],
     ]),
     ...convertSeedsToSources("act_kenteheritage", [
       ["prd_kente_pendant", "product", "Gold Pendant Necklace", "Gold-plated chain with a crescent pendant.", [buildDemoImageMedia("pendant")], 20, 0, 0, { productId: "prd_kente_pendant", title: "Gold Pendant Necklace", price: money(420, "GHS"), compareAtPrice: null, rating: 4.8 }],

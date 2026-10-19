@@ -1,5 +1,6 @@
 import { campaignNameMaximumLength, headlineMaximumLength, primaryTextMaximumLength } from "@/constants/campaignOptions.constant";
 import { readMockDatabase, type MockAdAccountRecord } from "@/mocks/mockDatabase.mock";
+import { canMockAccountPromoteDestination } from "@/mocks/mockPromotableDestinations.mock";
 import { MockHttpError } from "@/mocks/mockResponses.mock";
 import type { AudienceSpec, LocationTarget } from "@/types/audience.type";
 import type { AdInput, AdPlacement, AdSetInput, BidStrategy, Budget, CampaignInput, CampaignObjective, FrequencyCap, Schedule } from "@/types/campaign.type";
@@ -194,6 +195,8 @@ export function validateCreativeInput(value: unknown, path: string, accountId: s
   if (primaryText.length > primaryTextMaximumLength) issues.push({ path: `${path}.primaryText`, message: `Primary text can be at most ${primaryTextMaximumLength} characters.` });
   const callToAction = callsToAction.includes(input.callToAction as CallToAction) ? (input.callToAction as CallToAction) : "learn_more";
   if (type !== "carousel" && destination.type === "url" && (!destination.url || !isSafeHttpsUrl(destination.url))) issues.push({ path: `${path}.destination.url`, message: "Enter a full https:// website address." });
+  const account = database.accounts.find((candidate) => candidate.id === accountId);
+  if (type === "single" && account && (destination.type === "profile" || destination.type === "store") && !canMockAccountPromoteDestination(account, destination.type, destination.targetId)) issues.push({ path: `${path}.destination.targetId`, message: "You can only promote content you own or manage." });
   const normalised: CreativeInput = { type, mediaClickable: input.mediaClickable === true && type === "single", cards: type === "carousel" ? cards : [], app: type === "app_install" ? app : null, format, source: { type: sourceType, id: sourceId }, mediaIds, headline, primaryText, callToAction, destination };
   for (const [field, message] of Object.entries(validateCreativeTypeFields(normalised))) issues.push({ path: `${path}.${field}`, message });
   return normalised;

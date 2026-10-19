@@ -2,7 +2,7 @@ import type { CampaignWizardState, WizardAdDraft, WizardAppDraft, WizardCardDraf
 import type { AdAccount } from "@/types/adAccount.type";
 import type { AudienceEstimateRequest } from "@/types/audience.type";
 import type { AdPlacement, BidStrategy, Budget, CampaignDraftSubmission, Schedule } from "@/types/campaign.type";
-import type { Creative, CreativeApp, CreativeCard, CreativeCardInput, CreativeDestination, CreativeInput } from "@/types/creative.type";
+import type { Creative, CreativeApp, CreativeCard, CreativeCardInput, CreativeDestination, CreativeInput, PromotedDestinationIdentity } from "@/types/creative.type";
 import type { CreativeShape } from "@/utils/adPlacementRules.util";
 import { parseTypedMajorAmountToMoney } from "@/utils/money.util";
 
@@ -43,6 +43,7 @@ export interface OwnDestinationTargets {
 const noOwnTargets: OwnDestinationTargets = { profileId: null, storeId: null };
 
 function resolveDestinationTargetId(ad: WizardAdDraft, type: CreativeDestination["type"], own: OwnDestinationTargets): string | null {
+  if ((type === "profile" || type === "store") && ad.promotedDestination?.kind === type) return ad.promotedDestination.id;
   if (type === "profile") return own.profileId;
   if (type === "store") return own.storeId;
   if (type === "post") return ad.sourceType === "upload" || ad.sourceType === "product" ? null : (ad.selectedSource?.id ?? null);
@@ -98,6 +99,13 @@ export function readOwnDestinationTargets(account: AdAccount): OwnDestinationTar
   return { profileId: account.owner.id, storeId: account.business?.storeId ?? null };
 }
 
+function readPromotedIdentityForPreview(ad: WizardAdDraft): PromotedDestinationIdentity | null {
+  const chosen = ad.promotedDestination;
+  if (ad.creativeType !== "single" || !chosen || chosen.kind !== ad.destinationType) return null;
+  const { available: _available, eligible: _eligible, ineligibleReason: _ineligibleReason, ...identity } = chosen;
+  return identity;
+}
+
 export function buildPreviewCreativeFromAdDraft(ad: WizardAdDraft, account: AdAccount): Creative {
   const own = readOwnDestinationTargets(account);
   return {
@@ -120,6 +128,7 @@ export function buildPreviewCreativeFromAdDraft(ad: WizardAdDraft, account: AdAc
     },
     product: ad.sourceType === "upload" ? null : (ad.selectedSource?.product ?? null),
     live: ad.sourceType === "live" ? (ad.selectedSource?.live ?? null) : null,
+    promoted: readPromotedIdentityForPreview(ad),
   };
 }
 

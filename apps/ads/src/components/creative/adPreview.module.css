@@ -184,6 +184,10 @@
 
 
 
+.promotedDestination {
+  padding-top: var(--space-2);
+}
+
 .storeCard {
   padding: 14px 0;
   display: flex;
