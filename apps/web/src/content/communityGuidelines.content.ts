@@ -14,7 +14,7 @@ export const communityGuidelinesSections: readonly LegalDocumentSection[] = [
     heading: "Keep people safe",
     paragraphs: ["Not allowed:"],
     bullets: [
-      "Any content that sexualises, grooms or endangers children. We have zero tolerance, we remove it immediately, ban the account and report it to the authorities.",
+      "Any content that sexualises, grooms or endangers children. We have zero tolerance, we remove it immediately, ban the account and report it to the authorities. [Team to confirm the reporting bodies, for example the Nigeria Police Force, NAPTIP and the NCMEC CyberTipline, and build the reporting and hash-matching pipeline; neither exists in code yet.]",
       "Threats, incitement to violence, glorifying violent attacks, and content that supports terrorist or violent extremist groups, including those proscribed under the Terrorism (Prevention and Prohibition) Act 2022.",
       "Harassment, bullying, doxxing (sharing someone's private details), and sharing intimate images without consent. We remove non-consensual intimate images within 24 hours of being told.",
       "Hate speech that attacks people for ethnicity, tribe, religion, nationality, sex, gender, disability, illness or other protected traits.",
@@ -31,7 +31,7 @@ export const communityGuidelinesSections: readonly LegalDocumentSection[] = [
     bullets: [
       "Scams, phishing, advance-fee fraud and fake giveaways, including anything covered by the Advance Fee Fraud and Other Fraud Related Offences Act 2006.",
       "Impersonating a person, brand, store or government body, or using a username or profile that misleads people about who you are.",
-      "Fake reviews, buying or selling followers, likes or views, engagement pods and coordinated fake activity.",
+      "Fake reviews, buying or selling followers, likes or views, engagement pods and coordinated fake activity, including fake ad impressions or clicks and gifting rings that cycle coins between accounts.",
       "Misleading AI-generated or edited media that is not labelled, especially of real people or events.",
       "False information that could cause real harm, such as fake health cures, election misinformation, or false emergency alerts.",
       "Pyramid schemes, Ponzi schemes and 'double your money' offers.",
@@ -88,7 +88,9 @@ export const communityGuidelinesSections: readonly LegalDocumentSection[] = [
     id: "live",
     heading: "Live streams and gifts",
     paragraphs: [
-      "Everything in these guidelines applies to lives. Do not pressure viewers, especially young people, to send gifts, do not promise anything in return for gifts that you will not deliver, and do not use lives to sell prohibited items. Gift rankings and leaderboards appear only inside lives. Automated checks can blur or pause a live that shows severe harm until a moderator reviews it.",
+      "Everything in these guidelines applies to lives. Do not pressure viewers, especially young people, to send gifts, do not promise anything in return for gifts that you will not deliver, and do not use lives to sell prohibited items. Gift rankings and leaderboards appear only inside lives.",
+      "Do not trade coins or gifts for money, goods or services outside Zudomart, run bets, raffles or lotteries with them, or use them to move money. Coins and gifts involved can be removed.",
+      "Automated systems sample live video and audio (using Amazon Rekognition and Amazon Transcribe) to spot severe harm. They can blur, hide or pause a live and send it to a moderator, but they never ban an account on their own. The samples are deleted automatically after a day. [Team to confirm how evidence is kept when a moderator opens a case.]",
     ],
   },
   {
@@ -107,7 +109,7 @@ export const communityGuidelinesSections: readonly LegalDocumentSection[] = [
     bullets: [
       "1. Content action: the content is removed, age-restricted, covered with a warning or shown to fewer people. You are told why.",
       "2. Warning: a formal notice that you broke a rule. A warning given after a report also counts as a strike. A warning recorded on its own stays on your Account status page for 6 months and does not count towards a restriction.",
-      "3. Strike: active for 12 months, then it expires. Removing your content, warning you or suspending you after a report each adds one strike. Strikes add up across content, live, selling and copyright breaches. 3 active strikes pause earning money (gifts, ads revenue share, subscriptions) and going live until a strike expires or is removed on appeal. Copyright strikes also follow the legal ladder in our Copyright and IP Policy: a second copyright strike within 12 months suspends posting, going live, selling and earning for at least 30 days, and a third sends the account for review.",
+      "3. Strike: active for 12 months, then it expires. Removing your content, warning you or suspending you after a report each adds one strike. Strikes add up across content, live, selling and copyright breaches. 3 active strikes pause earning money (gifts, tips, ads revenue share, subscriptions, Premium pool) and going live until a strike expires or is removed on appeal. [Team to confirm: this pause is not automatic in the code yet.] Copyright strikes also follow the legal ladder in our Copyright and IP Policy: a second copyright strike within 12 months suspends posting, going live, selling and earning for at least 30 days, and a third sends the account for review.",
       "4. Feature restriction: for example no posting, live, selling, ads or earning for 1 to 30 days, or a lower sales limit.",
       "5. Temporary suspension: the account is hidden and cannot post, message, follow or sell for up to 30 days, and payouts may be held where the law allows while we investigate.",
       "6. Permanent ban: the account and its stores are closed and new accounts are not allowed. Money that belongs to you is not forfeited; it is paid out to your verified account, after any refunds you owe, unless the law requires us or our payment partner to hold it.",

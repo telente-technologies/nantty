@@ -17,7 +17,8 @@ export const refundEscrowPolicySections: readonly LegalDocumentSection[] = [
       "1. The money is locked in your own wallet. If you pay by card or bank transfer, it is moved into your wallet as soon as it settles and then locked.",
       "2. The seller ships and marks the order delivered.",
       "3. You confirm delivery, or escrow releases automatically 3 days after the order is marked delivered if you have not confirmed or opened a dispute.",
-      "4. The money moves to the seller's wallet, minus the seller's fees. Buyers never pay an escrow fee.",
+      "4. The money moves to the seller's wallet, minus the seller's fees (the escrow fee and the payment processing fee). Buyers never pay an escrow fee. Zudomart takes no commission on products.",
+      "If the order is still not marked delivered 30 days after you paid, our staff review it, contact you and the seller, and decide whether to release the payment or refund you. [Team to confirm: the code releases the payment to the seller automatically at 30 days today; it must be changed to staff review.]",
     ],
   },
   {
@@ -32,7 +33,8 @@ export const refundEscrowPolicySections: readonly LegalDocumentSection[] = [
     id: "refunds",
     heading: "How refunds are paid",
     paragraphs: [
-      "Before release, a refund simply unlocks the money in your wallet, where you can spend or withdraw it (deposit holds apply to withdrawals). You can also ask for a card refund back to your card.",
+      "Before release, a refund simply unlocks the full amount in your wallet, where you can spend or withdraw it (deposit holds apply to withdrawals). You can also ask for a card refund back to your card.",
+      "After release, if you are refunded after the money reached the seller (for example after a late dispute decision or a return of defective goods), we recover the seller's portion, which is what the seller received, and refund that to you. Zudomart's escrow fee and the payment processing fee are not refunded. Your rights against the seller for the full price under the FCCPA are not affected. [Team to confirm with counsel that this is fair under sections 120 to 122 and 127 of the FCCPA 2018. The code today refunds the buyer in full and returns the fees.]",
       "Card refunds can take up to 10 business days to appear, depending on your bank. For some bank transfer payments, we may ask you, in the app, for the account to refund. We never ask for this by email.",
       `If a refund has not arrived after 10 business days, contact support with the order attached, or ${emailAddresses.support}.`,
     ],
@@ -41,7 +43,7 @@ export const refundEscrowPolicySections: readonly LegalDocumentSection[] = [
     id: "direct-payment",
     heading: "Direct payment to verified stores (Nigeria)",
     paragraphs: [
-      "Some verified stores may offer direct payment. The seller is paid when the payment settles, and there is no escrow. You can still report the order, and our dispute process and your legal rights apply, but recovering money depends on the seller and our payment partner.",
+      "Some verified stores may offer direct payment. The seller is paid when the payment settles, and there is no escrow fee. The order completes automatically 3 days after it is marked delivered, unless you open a dispute or ask for a refund before then. You can still report the order, and our dispute process and your legal rights apply, but recovering money depends on the seller and our payment partner. If a refund is agreed, the seller repays it from their wallet.",
     ],
   },
   {
@@ -55,9 +57,16 @@ export const refundEscrowPolicySections: readonly LegalDocumentSection[] = [
   },
   {
     id: "digital",
-    heading: "Coins, subscriptions, checkmarks and boosts",
-    paragraphs: [
-      "Coins and gifts already sent are not refundable, except where the law requires or a purchase was unauthorised. Purchases in the iOS or Android app are refunded only through Apple or Google, under their rules. Subscriptions can be cancelled at any time and run until the end of the paid period. If checkmark verification is rejected, we refund the checkmark share of the current period as soon as possible. Boosts and ads that did not deliver are refunded to the source. If you are in the UK or EU, you agree that digital content starts at once and you lose the 14-day withdrawal right once it starts.",
+    heading: "Coins, gifts, subscriptions, checkmarks, boosts and ads",
+    paragraphs: ["Digital purchases follow these rules. If you are in the UK or EU, you agree that digital content starts at once and you lose the 14-day withdrawal right once it starts."],
+    bullets: [
+      "Coins: unused coins bought on the web can be refunded only where the law requires it or the purchase was unauthorised. Coins bought in the iOS or Android app are refunded only by Apple or Google, under their rules. When a coin purchase is refunded, those coins are removed from your balance; if you already spent them, the missing coins are recorded as owed.",
+      "Gifts, tips and coin transfers: final once sent and not refunded, except where the law requires it or the coins were used without your permission. Refunding the coins does not take back gifts already sent.",
+      "ZudoPoints: never money, so there is nothing to refund.",
+      "Subscriptions and Premium: cancel at any time and keep access until the end of the paid period. We do not refund part-used periods unless the law requires it.",
+      "Checkmarks: if verification is rejected, a checkmark-only plan is refunded in full, and for plans with other perks we refund the checkmark share of the current period.",
+      "Boosts and ads: spend that was not delivered is returned to your Zudomart Ads account. [Team to confirm whether undelivered spend paid from ad balance returns as ad balance or as ad credit; the code issues it as non-expiring ad credit.] Spend on ads removed for breaking the Ads Policy is not refunded unless the law requires it.",
+      "Ad balance: unspent ad balance can be withdrawn after a 24-hour hold, to your wallet and then to your verified payout account, with any fee shown first. Ad credit is never refunded in cash or withdrawn.",
     ],
   },
   {
@@ -69,11 +78,14 @@ export const refundEscrowPolicySections: readonly LegalDocumentSection[] = [
       rows: [
         ["Automatic escrow release", "3 days after the order is marked delivered"],
         ["Deadline to open a dispute", "Before escrow releases"],
+        ["Direct order completes", "3 days after the order is marked delivered, unless disputed"],
+        ["Order not delivered", "Staff review 30 days after payment"],
         ["Seller response to a dispute", "48 hours"],
         ["Seller funds locked after release", "24 hours"],
         ["Card refund arrival", "Up to 10 business days"],
         ["Deposit hold before withdrawal", "24 hours (72 hours for your first deposit)"],
         ["Creator subscription earnings hold", "7 days"],
+        ["Ad balance withdrawal hold", "24 hours after top-up"],
         ["Our decision on a disputed order", "[Team to confirm the target time for a decision after the seller's response.]"],
       ],
     },

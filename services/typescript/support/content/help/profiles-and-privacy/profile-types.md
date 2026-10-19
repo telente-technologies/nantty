@@ -21,7 +21,7 @@ Your Zudomart account is the login. Inside it you can run more than one public p
 3. Pick 1 to 5 categories.
 4. Tap **Create business profile**.
 
-You can have one Store or one Business page, never both, plus one Brand. See [Stores, business pages and brands](/help/business-and-brands/stores-business-pages-and-brands). See [Opening a store](/help/selling/start-selling).
+You can have one Store or one Business page, never both, plus one Brand. With Blue Premium you can have up to 5 business profiles, still with only one Store. See [Stores, business pages and brands](/help/business-and-brands/stores-business-pages-and-brands). See [Opening a store](/help/selling/start-selling).
 
 ## Switch profiles
 

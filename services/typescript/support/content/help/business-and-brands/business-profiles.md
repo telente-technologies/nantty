@@ -1,6 +1,6 @@
 ---
 title: Business profiles
-summary: Create a Business page for an organisation that doesn't sell. Each account can have one Store or one Business page, plus one Brand.
+summary: Create a Business page for an organisation that doesn't sell. Each account can have one Store or one Business page, plus one Brand, or up to 5 business profiles with Blue Premium.
 tags: business profile, business account, organisation, company page, ngo, create business, gold, my business
 related: stores-business-pages-and-brands, switch-profiles, brand-pages, profile-types, gold-checkmark, business-documents, start-selling
 ---

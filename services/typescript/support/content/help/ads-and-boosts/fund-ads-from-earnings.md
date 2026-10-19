@@ -20,13 +20,13 @@ Payout-verified users with money in **Available to withdraw**. Only the owner of
 
 The money moves into your ad account's balance straight away and is used for your campaigns.
 
-## Pay for a boost (web)
+## Pay for an ad (web)
 
-On the boost page at **app.zudomart.com**, under **Pay with**, choose **Pay from my Zudomart balance**. Your available balance must cover the whole boost. This option isn't offered in the phone apps.
+When you create an ad at **app.zudomart.com**, choose your earnings under **Pay with**. Your available balance must cover the whole ad. In the phone apps this option is shown but greyed out with "Pay from your earnings on zudomart.com"; you can still pay from your ad credit and balance or by card there.
 
 ## Good to know
 
-- **It's a one-way move.** Ad balance can't be withdrawn again. See [Ad credit and refunds](/help/ads-and-boosts/ad-credit-and-refunds).
+- **You can move it back.** Unspent ad balance can be withdrawn to your wallet once it has been settled for 24 hours, minus the payment provider fee shown before you confirm. Ad credit can't be withdrawn. See [Ad credit, ad balance and refunds](/help/ads-and-boosts/ad-credit-and-refunds).
 - **Same currency only.** If your Zudomart balance is in a different currency from your ad account, add funds by card instead.
 - Only money in **Available to withdraw** can be used. Money that's pending in escrow, locked, or still in Creator earnings can't.
 - Normal wallet safety rules still apply to the money you leave in your wallet. See [Your wallet explained](/help/payments-and-wallet/your-wallet-explained).

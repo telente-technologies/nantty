@@ -25,7 +25,7 @@ Your earnings stay in Creator earnings, safe and still yours, until:
 
 ## Affiliate commissions
 
-Affiliate commissions wait until the buyer's escrow is released, so a refunded order doesn't pay out.
+Affiliate commissions show as **Pending** until the order completes, for escrow and direct payments alike, so a refunded or cancelled order doesn't pay out. Once paid, a commission refunded later is taken back from your wallet, and the line in your history names the store and order.
 
 ## Refunds and chargebacks
 

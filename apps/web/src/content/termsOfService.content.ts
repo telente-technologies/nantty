@@ -2,6 +2,7 @@ import type { LegalDocumentSection } from "@/components/legal/legalDocument";
 import { emailAddresses } from "@/lib/siteConfig.config";
 
 import { generalLegalCreditParagraph, legalEntityPlaceholder } from "./legalPlaceholders.content";
+import { termsOfServiceMoneySections } from "./termsOfServiceMoney.content";
 
 export const termsOfServiceSections: readonly LegalDocumentSection[] = [
   {
@@ -19,7 +20,8 @@ export const termsOfServiceSections: readonly LegalDocumentSection[] = [
     heading: "Who can use Zudomart",
     paragraphs: [
       "You must be at least 13 years old to have an account, or older where your local law sets a higher age for using online services without a parent's consent. [Team to confirm the minimum age with counsel: 13 is the working proposal.]",
-      "If you are under 18, you need the permission of a parent or guardian, who accepts these terms for you and is responsible for your use. In Nigeria, the Nigeria Data Protection Act 2023 requires that consent for processing a child's data comes from a parent or guardian. Under-18 accounts never see nudity or dangerous content, are not shown personalised ads, and cannot sell, receive payouts, join the Creator Program or run ads. [Team to confirm whether under-18s may go live, buy coins or send gifts.]",
+      "We ask for your date of birth when you sign up. If you are under 18, you need the permission of a parent or guardian, who accepts these terms for you and is responsible for your use. In Nigeria, section 31 of the Nigeria Data Protection Act 2023 requires that consent for processing a child's data comes from a parent or guardian. [Team to confirm: Zudomart does not yet have a parental consent or age-assurance flow, so this requirement is not checked today. Build it before launch or change the minimum age with counsel.]",
+      "Under-18 accounts never see nudity or dangerous content, are not shown ads, and cannot sell, receive payouts, join the Creator Program or run ads. [Team to confirm whether under-18s may go live, buy coins or send gifts. Most large platforms require 18 or over to buy virtual currency or receive gifts, and we recommend the same.]",
       "You cannot use Zudomart if we have permanently banned you, or if the law or sanctions rules that apply to us prevent us from serving you.",
     ],
   },
@@ -27,9 +29,17 @@ export const termsOfServiceSections: readonly LegalDocumentSection[] = [
     id: "accounts",
     heading: "Your account and verification",
     paragraphs: [
-      "You sign in with your email address. Keep your email account and login secure, give accurate information, and tell us at once if you think someone else has used your account. You are responsible for what happens on your account unless it was used without your permission and you were not careless.",
+      "You sign in with your email address, or with Apple or Google linked to it; phone numbers are never used to log in. Keep your email account and login secure, give accurate information, and tell us at once if you think someone else has used your account. You are responsible for what happens on your account unless it was used without your permission and you were not careless.",
       "Accounts have verification levels. Level 0 means your email is confirmed. Level 1 (payout-verified) means your identity and a payout account in your own name are verified: in Nigeria with your BVN and bank account through our payment partner, and elsewhere through our identity partner Smile ID. Level 2 adds a Smile ID biometric check and is needed for a checkmark. Some features need a particular level, and we tell you before you start.",
       "Verification lowers risk but is not a promise about anyone. We may ask you to verify again, and we may limit features while a check is pending.",
+    ],
+  },
+  {
+    id: "guests-and-privacy",
+    heading: "Guests, public and private accounts",
+    paragraphs: [
+      "You can browse public posts, clips, lives, stores and products as a guest without an account. Guests cannot post, comment, chat, buy, send gifts or follow, and are not shown ads.",
+      "Accounts are public unless you make yours private. If your account is private, people must send a follow request and you choose who to accept; only approved followers see your posts, stories, followers and following. Your name, photo and bio can still be found in search, and what you post in chats, in comments on public posts or elsewhere can be seen by the people there.",
     ],
   },
   {
@@ -50,61 +60,15 @@ export const termsOfServiceSections: readonly LegalDocumentSection[] = [
       "We help in other ways: we verify sellers, show reviews and success rates, run escrow in Nigeria, review disputes and remove sellers who break the rules. Those steps reduce risk but do not make us the seller.",
     ],
   },
-  {
-    id: "payments",
-    heading: "Payments and wallets: Zudomart never holds your money",
-    paragraphs: [
-      "Payments, wallets and payouts are provided by our licensed payment partner, Flutterwave. You never pay into a Zudomart bank account.",
-      "In Nigeria, your wallet balance is held by our payment partner in a wallet in your own name. Zudomart does not hold, pool or lend it. We only instruct the partner to move money when you, or these terms, tell us to (for example, to pay a seller after delivery), and to collect our fees. The partner's own terms also apply to your wallet.",
-      "Money you add to your wallet can be spent on Zudomart straight away, but it can be withdrawn only after a short hold, normally 24 hours, or 72 hours for your first deposit. The hold protects you if someone uses a stolen bank account. Withdrawals go only to a verified account in your own name.",
-      "Prices, fees and the total are shown before you pay. If we suspect fraud, money laundering or a breach of these terms, we may pause payments on Zudomart and report to our payment partner and the authorities as the law requires. Your money is never forfeited to us: if your account is closed, money that is yours stays yours, subject to refunds you owe and any legal hold.",
-    ],
-  },
-  {
-    id: "buying",
-    heading: "Buying in Nigeria: escrow",
-    paragraphs: [
-      "In Nigeria, when you pay for an order, the money is locked in your own wallet as escrow. It moves to the seller only when you confirm delivery, or 3 days after the order is marked delivered if you have not confirmed or opened a dispute. If the order is refunded, the money is unlocked in your wallet.",
-      "Open a dispute before escrow releases if an order is late, missing, damaged, wrong or not as described. The full process and timelines are in the Refund and Escrow Policy.",
-      "Some verified stores may also offer direct payment. If you choose it, there is no escrow, and you rely on your rights against the seller and on our dispute process.",
-    ],
-  },
-  {
-    id: "outside-nigeria",
-    heading: "Buying and selling outside Nigeria",
-    paragraphs: [
-      "Outside Nigeria, escrow and buyer protection are not available. You pay the seller directly at checkout through our payment partner, and the seller is paid as soon as the payment settles. Zudomart does not hold, control or guarantee the money. You buy and sell at your own risk.",
-      "Every seller outside Nigeria must verify their identity and a payout account in their own name before they can list or sell anything. Verification lowers risk but is not a guarantee about a seller or their goods.",
-      "If something goes wrong, what Zudomart can do is limited to: reviewing your report; asking the seller to refund you; warning, restricting, suspending, freezing or banning the seller's account where the law and our partner allow; reporting the seller to our payment partner and, where appropriate, the authorities; and escalating your case to our payment partner so it can help you.",
-      "Zudomart cannot reverse a payment, force a refund or recover money already paid out. Recovery depends on our payment partner, your card issuer or bank, or your mobile money provider, for example through a chargeback. If they cannot help, there may be nothing more Zudomart can do.",
-      "This section does not take away rights that the law of your country gives you against the seller and that cannot be excluded by contract. See \"Your consumer rights\" below.",
-    ],
-  },
-  {
-    id: "selling",
-    heading: "Selling",
-    paragraphs: [
-      "Sellers must describe products accurately, ship on time, honour their returns policy and the law, and follow the prohibited items list in the Community Guidelines. The Seller Terms apply to everyone who sells.",
-      "In Nigeria, you can open a store and sell before you are verified, but only through escrow and up to a sales limit shown in your dashboard, and you cannot withdraw until you are verified. Your earnings stay yours while you wait. Outside Nigeria, you must be verified before you can sell.",
-    ],
-  },
-  {
-    id: "digital-purchases",
-    heading: "Coins, gifts, subscriptions, checkmarks and boosts",
-    paragraphs: [
-      "Coins are a licence to use a digital feature, not money. You cannot withdraw, transfer for cash or exchange coins, and they have no cash value except that gifts a creator earns can be converted to cash under the Creator Program Terms. ZudoPoints are never money and cannot be bought, sold or withdrawn.",
-      "In the iOS and Android apps, digital purchases (coins, Premium, checkmark plans bought in the app, creator subscriptions and in-app boosts) are sold through the Apple App Store or Google Play. Their price includes the store's fee, so it can be higher than on the web. Apple's or Google's terms and refund processes apply to those purchases, and a refund they give may reverse coins or benefits bought with it.",
-      "Subscriptions renew automatically until you cancel. You can cancel at any time and keep access until the end of the period you paid for. Plans always renew at the full price shown at renewal. If a checkmark verification is rejected, your plan keeps running and we refund the checkmark share of the current period.",
-      "A boost pays to show your own post to more people. Boosted posts are labelled Boosted. Ads bought in Zudomart Ads are labelled Sponsored. Premium members get 1 free boost each month.",
-    ],
-  },
+  ...termsOfServiceMoneySections,
   {
     id: "content",
     heading: "Your content and the licence you give us",
     paragraphs: [
       "You keep ownership of the posts, clips, stories, lives, comments, product listings and other content you create. You give Zudomart a worldwide, non-exclusive, royalty-free licence to host, store, copy, adapt (for example to resize or caption), display, distribute and promote your content in Zudomart and in marketing for Zudomart, for as long as it is on Zudomart and for a reasonable time after you delete it to clear backups and caches. The licence lets us run the service; it does not let us sell your content to others.",
       "Other users can view and share your public content inside Zudomart, and quote or embed it where the feature allows. You confirm that you have the rights needed for everything you post, including music, images and the people who appear in it.",
-      "If you label content as AI-generated, or we detect that it is, it shows an AI-generated label.",
+      "If you label content as AI-generated, or we detect that it is, it shows an AI-generated label. AI-generated content earns a lower share of ads revenue under the Creator Program Terms.",
+      "We do not use your chats to train any model, because we cannot read them. [Team to confirm whether Zudomart will train its own models on public content. If it will, say so here, in the Privacy Policy, and give an opt-out. Do not license user content to others for AI training without consent.]",
     ],
   },
   {
@@ -127,8 +91,8 @@ export const termsOfServiceSections: readonly LegalDocumentSection[] = [
     id: "chat",
     heading: "Chats are end-to-end encrypted",
     paragraphs: [
-      "Messages in Zudomart chats are end-to-end encrypted. Zudomart cannot read them. We still process information needed to deliver messages, such as who you message and when, and we use it to fight spam and abuse without reading content.",
-      "If you report a chat, your device sends the messages you choose to our safety team with your permission. Chat media is deleted automatically after 30 days. You are responsible for what you send. Chats with our support team are not end-to-end encrypted, so we can help you, and they are logged.",
+      "Messages, photos, videos and voice notes in Zudomart chats, including group chats, are end-to-end encrypted. Zudomart cannot read them. We still process information needed to deliver messages, such as who is in a chat, who sent each message and when, and we use it to fight spam and abuse without reading content. Locations and polls you share in a chat are not end-to-end encrypted, so we can see them.",
+      "If you report a chat, your device sends only the messages you select to our safety team, with your permission. Chat media is deleted from our servers automatically after 30 days. You are responsible for what you send. Chats with our support team are not end-to-end encrypted, so we can help you, and they are logged.",
     ],
   },
   {
@@ -143,8 +107,8 @@ export const termsOfServiceSections: readonly LegalDocumentSection[] = [
     id: "enforcement",
     heading: "When we act on content and accounts",
     paragraphs: [
-      "We may remove or limit content, restrict features, hold back payouts where the law allows, or suspend or close accounts that break these terms or the law, or that put others at risk. The Community Guidelines set out our enforcement steps. Automated systems can flag or temporarily limit, but a person reviews before any permanent ban.",
-      "We tell you what we did and why, unless the law or safety prevents it, and you can appeal from the app. If a suspension stands, your profile, posts, media and messages are deleted after 120 days, and order and payment records are anonymised and kept for the period the law requires.",
+      "We may remove or limit content, restrict features, pause monetisation, hold back payouts where the law allows, or suspend or close accounts that break these terms or the law, or that put others at risk. The Community Guidelines set out our enforcement steps and strikes. Automated systems, including those that scan lives for severe harm, can flag, hide or temporarily limit, but never ban an account permanently on their own: a person reviews first.",
+      "We tell you what we did, which rule it was under and why, unless the law or safety prevents it, and you can appeal from the app. A successful appeal removes the action and any strike. If a suspension stands, your profile, posts and media are deleted after 120 days, and order and payment records are anonymised and kept for the period the law requires. We report child sexual abuse material to the authorities.",
       "We remove unlawful content when a court, or a government agency authorised by law, orders us to, and we act on complaints as the Code of Practice for Interactive Computer Service Platforms issued by NITDA expects, including removing non-consensual intimate images within 24 hours of being told.",
     ],
   },
@@ -183,14 +147,14 @@ export const termsOfServiceSections: readonly LegalDocumentSection[] = [
     id: "ending",
     heading: "Closing your account",
     paragraphs: [
-      "You can delete your account at any time in Settings, Privacy & Data. You have 30 days to change your mind by logging in. Before you delete, withdraw available money and finish open orders and disputes. We may close accounts as set out in \"When we act on content and accounts\". Sections that by their nature should survive, such as the licence for content already shared, payment obligations, limits of liability and dispute resolution, continue after closure.",
+      "You can delete your account at any time in Settings, Privacy & Data. You have 30 days to change your mind by logging in; after that, your profile and content are deleted and your username is held for 120 days before anyone else can take it. Before you delete, withdraw available money and finish open orders and disputes. We may close accounts as set out in \"When we act on content and accounts\". Sections that by their nature should survive, such as the licence for content already shared, payment obligations, limits of liability and dispute resolution, continue after closure.",
     ],
   },
   {
     id: "changes",
     heading: "Changes to these terms",
     paragraphs: [
-      "We may update these terms when the product or the law changes. For a material change we tell you by email and in the app at least 30 days before it takes effect, and we may ask you to accept the new version before you continue. If you do not agree, you can close your account before the change applies. Earlier versions stay available on this page.",
+      "We may update these terms when the product or the law changes. For a material change we tell you by email and in the app at least 30 days before it takes effect, with a summary of what changed, and we may ask you to accept the new version before you continue. We never apply a change to earnings or purchases you already made. If you do not agree, you can close your account before the change applies. After launch, earlier versions stay available on this page.",
     ],
   },
   {

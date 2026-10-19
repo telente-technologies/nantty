@@ -6,7 +6,7 @@ export const adsPolicySections: readonly LegalDocumentSection[] = [
     id: "who-can-advertise",
     heading: "Who can advertise",
     paragraphs: [
-      "Zudomart Ads is open only to verified users: at least Level 1 (identity and a payout account in your own name verified), and business verification for some categories. Advertisers must be 18 or over. You can pay for ads from your card or from your earnings wallet.",
+      "Zudomart Ads is open only to verified users: at least Level 1 (identity and a payout account in your own name verified), and business verification for some categories. Advertisers must be 18 or over. You can pay for ads from your ad balance, your ad credit, your card or your earnings wallet.",
       "This policy applies to sponsored ads bought in Zudomart Ads, to boosts, and to paid partnerships between creators and brands.",
     ],
   },
@@ -15,9 +15,32 @@ export const adsPolicySections: readonly LegalDocumentSection[] = [
     heading: "Boosted, Sponsored and Paid partnership",
     paragraphs: ["Paid reach is always labelled, so people know what they are seeing:"],
     bullets: [
-      "Boosted: you paid to show your own post to more people. Premium members get 1 free boost a month.",
+      "Boosted: you paid to show your own post, profile or store to more people. Premium members get 1 free boost a month. Store and profile ads can also be bought in Zudomart Ads.",
       "Sponsored: an ad bought in Zudomart Ads, shown in feeds, between clips, before or after videos, and in lives only if the creator turned live ads on.",
-      "Paid partnership: a creator was paid or given something to post about a brand. The creator must turn on the label.",
+      "Promoted: an ad shown between replies in a comment section.",
+      "Paid partnership: a creator was paid or given something to post about a brand, or earns affiliate commission on it. The creator must turn on the label.",
+    ],
+  },
+  {
+    id: "ad-balance-and-credit",
+    heading: "Ad balance and ad credit",
+    paragraphs: ["Zudomart Ads keeps two kinds of funds apart:"],
+    bullets: [
+      "Ad balance is real money you top up to pay for ads. Unspent ad balance can be withdrawn after a 24-hour hold from the top-up, once you are payout-verified. It goes to your Zudomart wallet and from there to your verified payout account. Any fee is shown before you confirm. [Team to confirm the fee: the code charges a Zudomart fee of 1.5%, capped at ₦2,000, with a ₦1,000 minimum, not only the provider's fee.]",
+      "Ad credit is promotional value. It can be used only for ads and boosts in Zudomart, is never money, and can never be withdrawn, transferred or exchanged for cash. Credit Zudomart gives you, for example in a promotion or as goodwill, may expire on a date shown when we give it. Credit you earn in the app, such as cashback, never expires.",
+      "Cashback: selected advertisers, chosen by Zudomart, receive 10% of their delivered ad spend back as ad credit. We tell you if your account is selected, and we may change or end the offer with notice for future spend.",
+    ],
+  },
+  {
+    id: "ad-load",
+    heading: "How many ads people see",
+    paragraphs: ["The number of ads depends on the viewer's plan. Guests and under-18s are not shown ads. Today, compared with an account with no plan:"],
+    bullets: [
+      "No ads: Premium, the Business seller plan and the combined Gold and Premium plan.",
+      "About 20% of the usual ads: government accounts with a Black checkmark.",
+      "About half: a Gold checkmark on its own, and the Pro seller plan.",
+      "About 60%: Blue Verified. About 75%: Blue Essential.",
+      "If you have more than one plan, the lowest applies. [Team to confirm: the owner rule says Gold business accounts are ad-free, but a Gold checkmark on its own shows about half the ads today.]",
     ],
   },
   {
@@ -63,7 +86,9 @@ export const adsPolicySections: readonly LegalDocumentSection[] = [
     id: "targeting",
     heading: "Targeting and data",
     paragraphs: [
-      "Ads are chosen by a system separate from feed ranking, with frequency caps. Personalised ads are shown only to adults who allowed them. Under-18s see only non-personalised ads, and never ads for restricted categories. You may not target ads using sensitive data such as health, religion, ethnicity or sexuality, or upload personal data you are not allowed to use.",
+      "Ads are chosen by a system separate from feed ranking, with frequency caps. Personalised ads are shown only to adults who allowed them. Under-18s and guests are not shown ads. You may not target ads using sensitive data such as health, religion, ethnicity or sexuality.",
+      "If you upload a customer list, upload only people who agreed to hear from you. Emails and phone numbers are hashed and matched inside Zudomart; we never give you personal data about the people who see your ads, only aggregated results. Lookalike audiences are built inside Zudomart in the same way.",
+      "Advertisers are not charged for invalid traffic, such as fake or automated impressions and clicks. Creators who show your ads are paid a share of what you pay, as the Creator Program Terms explain.",
     ],
   },
   {

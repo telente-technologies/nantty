@@ -5,15 +5,17 @@ tags: ad results, boost results, ad report, impressions, reach, clicks, ctr, roa
 related: boost-a-post, ads-manager-campaigns, ad-credit-and-refunds, post-analytics, ads-faq
 ---
 
-Results show what you got for your money. Boosts have a simple results page; Ads Manager has full reports.
+Results show what you got for your money. Every ad in your [Ads hub](/help/ads-and-boosts/ads-in-the-app) has a results page; Ads Manager has full reports.
 
-## Boost results (app and web)
+## Ad results (app and web)
 
-Open your boost from its notification or the post, or go to **Boost results**. You'll see the status and:
+Open the ad from **Ads** in your profile menu, or from its notification. You'll see the status, spend against budget, cost per result, a daily chart and:
 
 - **Impressions**: how many times your post was shown
 - **People reached**: how many different people saw it
 - **Profile visits**: taps through to your profile
+- **Store visits** and **Product views**: taps through to your store or product, shown when you promote them. Profile, store and product visits count taps on the ad
+- **Followers gained**: not tracked, so it isn't shown
 - **Messages**: chats started from the boost
 
 Before you boost, **Estimated reach** and the estimated results (for example "About 300 to 900 views") are guesses based on similar boosts. Real results can be higher or lower.

@@ -1,0 +1,411 @@
+# ZudoMart — Frontend vs Services Audit Report
+
+**Scope:** `services/` (go, typescript, python, elixir, contracts) vs `apps/` (admin, webapp, seller, ads, studio, mobile, web) + `packages/shared-types, webKit`
+**Date:** 2026-10-16
+**Method:** static route inventory + gateway dispatch review + money-flow review + frontend transport review
+**Status:** IN PROGRESS — issues filed one at a time per owner request.
+
+## How unknown / unavailable endpoints are blocked before reaching servers
+
+Verified in `services/typescript/gateway/src/handlers/upstreamDispatch.handler.ts:67-73`:
+
+1. `isInternalOnlyPath(path)` → `404 NOT_FOUND` **without proxying**. Normalizes `%2F`, backslash, `..`, `internal;` tricks (`services/typescript/gateway/src/services/internalRouteGuard.service.ts:1-22`).
+2. `resolveUpstreamRouteForRequest(method, path)` → `undefined` → `404 NOT_FOUND` **without proxying**. So `GET /api/v1/nope`, wrong method, or `/internal/...` never hits go/python/ts/elixir upstreams.
+3. `doesAdminRequestNeedStaffToken(method, path)` (`services/typescript/gateway/src/services/adminStaffGate.service.ts:14-22`) → verifies **staff JWT** (`verifyStaffAccessToken`) before proxying any `/api/v1/admin/*` except 6 public login/MFA paths. This compensates for `authentication: "optional"` on admin routes in `services/typescript/gateway/src/routes/upstream.routes.ts:213-248`. Regular user Bearer tokens are rejected here with `401`.
+4. Probes are logged via `accessProbeClassifier.service.ts` (`adminRoute`, `forbidden`, `privateNotFound`, `tamperedToken`, `internalPath`) for rate-limit / strike counting.
+
+**Residual risk (tracked below, not yet filed):** `optional` auth on many `GET` routes (lives, users, products, search) relies entirely on downstream privacy checks; any missing `Require*` check = enumeration/IDOR. Each will be filed individually with file:line proof.
+
+## Issue index
+
+| ID | Severity | Area | Title | Status |
+|----|----------|------|-------|--------|
+| ZM-001 | **High (money)** | goMoney `verifyOrderPayment` vs all frontends' verify/status UI | Succeeded intent could fall off 10-window; no early-paid short-circuit; sibling-row buyer check | FIXED 2026-10-17 (window + early paid + own-row 10-16; provider verification capped at newest 3 pending + 5 integration tests 10-17) |
+| ZM-002 | **High (security + availability)** | Gateway admin auth + rate-limit vs `apps/admin` passkey login | Admin login brute-force window 12x + WebAuthn options 401 at edge | FIXED 2026-10-17 (all 7 pre-auth admin paths on login/otp buckets; bare admin OPTIONS answered 204 at edge; gateway 1690 tests pass) |
+| ZM-003 | **Medium (money-protection)** | Checkout `paymentModes` direct vs escrow vs all frontends | `direct` waives escrow/dispute window, no frontend warning | FILED below |
+| ZM-004 | **High (privacy)** | Users profile + Lives visibility vs anon `optional` GETs | Public profile + followers-only live metadata served to strangers | FILED below |
+| ZM-005 | **High (money)** | Idempotency + refund/send races (goMoney/ledger/escrow) | Concurrent double-submit 500s, replay outside guard, refund double-send | FILED below |
+| ZM-006 | **Medium (defense)** | Webhooks + BFF CSRF + realtime + internal S2S | Verifiers present; BFF GET+cookie zero-origin-check relies on safe-GET invariant | FILED below |
+| ZM-007 | **Low (availability)** | Env defaults + BFF allow-lists + error-code mapping | Localhost/mock defaults + seller wallet path; route-pattern suspicion CLEARED; unmapped codes non-issue (code-matched + server-passthrough) | PART-FIXED (investigated; seller path queued) |
+| ZM-008 | **Medium (money)** | Fee/rounding/clamp + currency + escrow terminal states | max/min clamps hide over-rebate, fee cap under-collects, partial-refund terminal | FILED below |
+| ZM-009 | **High (availability+privacy+ethics)** | Python intelligence | Silent ML outage, Redis-down outage, raw gift PII, no-appeal suspend | FILED below |
+| ZM-010 | **High (security+availability)** | TS social/media/search/notifications/support | Fail-open scans, SSRF residuals, anon oracles, shadow-moderation | FILED below |
+| ZM-011 | **High (availability+security)** | Elixir realtime + deploy wiring | Cluster never forms, ready-on-broker cascade, fanout/authz gaps | FILED below |
+| ZM-012 | **High (ethics+security+money)** | Go trust/ads/live/catalog/users/auth/admin/currency | Auto-hide, brigading, self-gift farm, soft-delete, OTP cycling | FILED below |
+| ZM-013 | **Medium (CI/local-parity)** | scripts + CI guards | Mock-guard log bug, go test w/o race, local realtime masks prod | PART-FIXED (log bug fixed; race/local-stub queued) |
+| ZM-014 | **High (money)** | Wallet/ledger + mobile wallet UI | Debt-account bypass review, `available` shown as top-up-able while held | FILED below |
+| ZM-015 | **Critical (money)** | Escrow hold→release→refund + chargebacks | Stale-price holds, dust misallocation, partial-terminal trap, stuck funds, direct double-post | PART-FIXED 2026-10-17 (dust rule, partial→refunded, deadline at hold, poison-row sweep, chargeback after refund/partial, direct double provider credit; stale-price hold not realizable. Open: partial chargeback on released wallet escrow, release-rollback flag drift, undelivered-deadline owner call) |
+| ZM-016 | **Critical (money)** | Payouts/settlement/KYC + bank-destination | Unverified bank payouts, debt-limit bypass, transfer double-send, step-up gaps | PART-FIXED 2026-10-17 (step-up DELETE on all apps + seller relay/internal; any-currency debt in withdrawal tx; payout send claim; bank-destination claim + name-match; direct-payout gate; mismatch dead-letter. Open: onboarding not single-tx, level snapshot outside tx, owner decisions) |
+| ZM-017 | **High (money)** | Coins/subs/tips/gifts/affiliates/ads-balance | Gift earnings never unwound on refund, affiliate rate window, coin convert no quote-lock | FILED below |
+| ZM-018 | **High (auth/API)** | Auth/users/admin/currency every route | Bare internal mutators, step-up gaps, username oracle, stale FX, audit holes | FILED below |
+| ZM-019 | **High (logic/API)** | Catalog/inventory/orders/live/ads/moderation every route | Stuck battles/orders, card-refund forfeit, open-redirect ads click, host-check delegation | PART-FIXED (suspension intake token; stuck-states/redirect/host queued) |
+| ZM-020 | **Medium (API)** | TS gateway/social/media/search/notify/support every route | Gateway shadow nesting, anon oracles, rate-limit holes, support/admin optional reliance | FILED below |
+
+---
+
+## ZM-001 [FIXED 2026-10-17] — Payment verify window + short-circuit + buyer-row
+
+**Severity:** High — money / order-fulfillment integrity
+**Files:**
+- `services/go/modules/payments/src/modules/checkoutPayments/commands/verifyOrderPayment/verifyOrderPayment.handler.go:24-55`
+- `services/go/modules/payments/src/modules/gateway/services/paymentSettlement.service.go:69-70`
+- Callers: `apps/mobile/src/services/orders.service.ts:16-17`, `apps/mobile/src/services/escrows.service.ts:8-9`, webapp/seller order status
+
+**Correction to original filing (honesty update):** deeper tracing showed `OrderPayable.OrderID` is unique (`orderPayables.service.go:55,87` — re-register with different amounts → `CHECKOUT_PAYABLES_CONFLICT`), so one order lives in exactly one checkout and every intent with subject `{orderId, checkoutId}` genuinely covers the order. ANY-succeeded ⇒ paid is therefore CORRECT semantics (a succeeded intent means the checkout total containing this order was captured). The realizable failures were the reverse direction and the edges, fixed below.
+
+**What was fixed:**
+1. `Limit(10)` → `Limit(50)`: a retry storm (>10 intents) could push the single succeeded intent off the window → false `pending` → buyer pays twice (duplicate-refund path eventually refunds, but double-charge UX + support load). Window widened past any realistic retry count.
+2. Early-paid short-circuit: any DB-`succeeded` intent returns `paid` immediately with ZERO provider `VerifyCharge` calls (previously every `pending` intent in the window triggered a provider verification per verify call — up to 10 external calls of cost/latency/amplification, and a succeeded row still paid that price).
+3. Buyer check on sibling row → own row: `payables[0]` is the oldest sibling by `createdAt`, not necessarily this order; the ownership check now selects the payable with `OrderId == command.OrderId` first (benign today — registration forces shared buyer per checkout — but wrong-row authz is never left standing).
+4. Mismatch path confirmed safe and kept: `VerifyAndSettle…` returns the failed view + `ErrPaymentAmountMismatch`, handler records `failed` (`paymentSettlement.service.go:129-158`).
+
+**Verified:** `gofmt` clean, `go build ./modules/payments/...` clean, `go vet` clean.
+**Frontend mitigation (kept as advice):** still cross-check `GET /api/v1/orders/{id}` before `confirm-receipt`; treat `verify → paid` as necessary, not sufficient, for ship-signal.
+
+**What the code does today:**
+
+```go
+// verifyOrderPayment.handler.go:31-49
+intents, err := ... PaymentIntent.Query().Where(
+    PurposeEQ(PurposeOrderCheckout),
+    SubjectIDIn(command.OrderId, payables[0].CheckoutId),
+    OwnerUserID(command.BuyerUserId),
+).Order(Desc(CreatedAt)).Limit(10).All(ctx)
+...
+statuses := ...
+for _, intent := range intents {
+    if intent.Status == Pending {
+        view, err := VerifyAndSettlePaymentIntentByReference(ctx, intent.Reference)
+        // mismatch is swallowed, view.Status (failed) is recorded — correct per paymentSettlement.service.go:69-70
+    }
+    statuses = append(statuses, status)
+}
+return Status{Status: SummarisePaymentStatuses(statuses)}, nil
+
+func SummarisePaymentStatuses(newestFirst []string) string {
+    for _, status := range newestFirst {
+        if status == "succeeded" { return "paid" }  // ANY of 10
+    }
+    if len>0 && newestFirst[0]=="failed" { return "failed" }
+    return "pending"
+}
+```
+
+**Why it breaks / attack & money impact:**
+
+1. Query spans **two subjects**: `SubjectIDIn(orderId, checkoutId)`. A retry checkout creates new intents under the same checkout but old failed/pending intents remain. If **any one of the last 10** ever succeeded (e.g. first attempt paid for checkout A, buyer then re-checkouts / splits orders, or partial checkout with `PaymentsRemainingInCheckout`), verify returns `paid` even when the **newest intent for this order is `pending` or `failed`**.
+2. Frontend verify screens treat `paid` as terminal → show success, release escrow (`confirm-receipt`), seller ships. Result: **false-paid fulfillment** or buyer confusion + support/refund load.
+3. Small-money amplifier: `Limit(10)` + `Desc(CreatedAt)` means the window is arbitrary; 11th intent falls off, and mixed-currency / partial-pay checkout groups (`AllocateCheckoutPayables`, `SettleCheckoutGroups`) are collapsed to a single string with no per-order amount check at verify time.
+4. The swallowed `ErrPaymentAmountMismatch` path is safe in isolation (intent is marked `failed` with `amountMismatch` reason, `paymentSettlement.service.go:129-158`), but `Summarise` then hides it if an older sibling succeeded — underpaid order looks `paid`.
+
+**How to reproduce:**
+
+1. Buyer checks out order O1 (checkout C1) → intent I1 `pending`.
+2. Buyer pays wrong amount → I1 → `failed (amountMismatch)`.
+3. Buyer retries same checkout → I2 `pending` (or pays different order in same checkout that succeeds → I3 `succeeded` for sibling order).
+4. `POST /api/v1/payments/orders/O1/verify` → queries I1+I2(+I3 via checkoutId) → `Summarise` sees one `succeeded` → returns `paid` for O1 although O1's own latest intent is `failed`/`pending`.
+
+**Expected behavior:**
+
+- Verify must be **per-order, newest-wins**: filter intents to those whose `orderIds` metadata / payable set actually covers `command.OrderId`, then return status of the **newest intent for that order** (or `paid` only if the newest covering intent is `succeeded` AND its settled amount ≥ order payable).
+- Alternatively return per-intent breakdown `{ reference, status, amountMinor }` so frontend cannot collapse to wrong terminal state.
+
+**Suggested fix (minimal):**
+
+```go
+// after fetching intents, partition by whether intent covers command.OrderId
+// (parse Metadata orderIds / CheckoutGroupsMetadataKey, or re-resolve via FindCheckoutPayablesForOrder)
+// then:
+latest := newest intent covering command.OrderId
+switch latest.Status { case succeeded: return "paid"; case failed: return "failed"; default: return "pending" }
+```
+
+Add regression test: seed 1×`succeeded` (old) + 1×`pending` (new) for same order → assert `pending`, not `paid`; plus mismatch variant → assert `failed`.
+
+**Frontend mitigation until fixed:** do not treat `verify → paid` as ship-signal alone; re-query `GET /api/v1/orders/{id}` (commerce source of truth) and require `order.paymentStatus == paid` + amount match before `confirm-receipt`.
+
+**Owner decision needed:** confirm intended semantics for multi-order checkout verify (per-order vs per-checkout `paid`), then I patch `verifyOrderPayment.handler.go` + add integration test.
+
+---
+## ZM-002 [FIXED 2026-10-17] — Gateway admin edge: no login rate-limit + passkey options blocked
+
+**Status 2026-10-17:** A + B fixed 10-16; remaining pre-auth paths bucketed and the Finding C OPTIONS item closed 10-17 (bare OPTIONS was proxied unauthenticated; now 204 at edge) — see `fix-changelog.md`.
+
+**Severity:** High (security + availability)
+**Files:**
+- `services/typescript/gateway/src/services/routeRateLimitPolicy.service.ts:7-32`
+- `services/typescript/gateway/src/configs/gateway.config.ts:65`
+- `services/typescript/gateway/src/services/anonymousMutationGuard.service.ts:5-22`
+- `services/typescript/gateway/src/services/adminStaffGate.service.ts:4-17`
+- `services/typescript/gateway/src/handlers/upstreamDispatch.handler.ts:79-85,109-114`
+- Frontend: `apps/admin/src/app/bff/auth/mfa/passkey-options/route.ts:12`
+
+**Finding A — `POST /api/v1/admin/auth/login` has no dedicated brute-force bucket.**
+- Consumer `POST /api/v1/auth/login` → `login: 10/min` per IP (`routeRateLimitPolicy.service.ts:10`).
+- Admin login has no branch in `classifyRequestForRateLimit` → falls through to generic guest bucket `120/min` per IP (`gateway.config.ts:65`).
+- Result: credential-stuffing / password-spray against staff accounts gets ~12x more attempts before the gateway blocks (blocks before upstream via `429 RATE_LIMITED`). Downstream Go has its own throttle, but the edge — the exact "block before server" layer requested — is weaker for the highest-privilege accounts.
+- Fix: add `if (verb === "POST" && lowered.startsWith("/api/v1/admin/auth/login")) return "login";` (same for `refresh`, `mfa/verify`) or a stricter `adminLogin: 5/min` bucket.
+
+**Finding B — legit passkey MFA login is 401-blocked at the gateway.**
+- `adminStaffGate.service.ts:4-12` lists `/api/v1/admin/auth/mfa/webauthn/options` as public (no staff token needed) — correct, it runs pre-auth with `mfaToken` in body.
+- `anonymousMutationGuard.service.ts:10` allowlist omits that path (covers `login|refresh|accept-invitation|mfa/verify|mfa/enroll/start|mfa/enroll/confirm` only).
+- Gateway order (`upstreamDispatch.handler.ts:85`): `principal === undefined && shouldRefuseAnonymousMutation(...)` → `401` **before proxying**.
+- `apps/admin/.../mfa/passkey-options/route.ts:12` calls `POST /admin/auth/mfa/webauthn/options` with `{ mfaToken }` and **no `Authorization` header** (pre-auth), so `shouldRefuseAnonymousMutation` returns true → passkey sign-in always `401` at edge, never reaches Go. TOTP path (`mfa/verify` is allowlisted) works, so bug hides as "passkey unavailable".
+- Fix (one line): add `mfa/webauthn/options` to `anonymousMutationAllowlist` regex, matching the staff-gate public set. Keep body-level `mfaToken` validation downstream.
+
+**Finding C (defense-in-depth note, not exploitable alone):** `shouldRefuseAnonymousMutation` line 22 exempts any `/api/v1/admin/*` request carrying *any* `Bearer xxx` value from the anonymous-mutation block, deferring to the staff gate. Invalid/consumer tokens still die at `authenticateStaffRequest` (`401`), and `OPTIONS` bypasses staff check by design for CORS preflight — confirm upstreams return empty `204` for `OPTIONS /api/v1/admin/*` with no side effects.
+
+**Reproduce B:** fresh admin login → MFA challenge → click passkey → BFF `POST /bff/auth/mfa/passkey-options` → gateway `401 UNAUTHENTICATED`, Go access log shows zero hits.
+
+**Owner decision needed:** confirm `5-10/min` admin-login bucket + allowlist patch, then I patch both gateway files + add unit tests for `classifyRequestForRateLimit` and `isAnonymousMutationAllowed`.
+
+---
+## ZM-003 [FILED] — Checkout totals are safe; `direct` payment mode silently waives buyer protection
+
+**Severity:** Medium (money-protection / UX-safety)
+**Files:**
+- `services/go/modules/orders/src/services/checkoutPlan.service.go:57-90,101-136` — totals server-computed
+- `services/go/modules/orders/src/services/paymentModes.service.go:10-27`
+- `services/go/modules/orders/src/services/storeCredit.service.go:89-91`
+- `services/go/modules/orders/src/services/promotionLoader.service.go:35-56`
+- `services/go/modules/orders/src/services/directOrderAutoCompletion.service.go:43`
+- Frontends: `apps/mobile/src/services/orders.service.ts:8-13`, webapp/seller checkout equivalents
+
+**Good news first (verified, no fix needed):** the client never sends prices. `POST /api/v1/orders/checkout` body is only `{ addressId, paymentModes[], promoCodes? }`. Subtotal comes from `PriceCartItems`, shipping from `CalculateShippingForOrderGroup`, discounts from server promos/campaigns, credit capped by `RedeemableCreditMinor = max(min(balance, subtotal-1), 0)` (forces ≥1 minor unit, blocks zero-value provider charges). Payment initialize re-derives amounts via `AllocateCheckoutPayables`. Price-tampering via proxy/curl is not possible.
+
+**The actual gap — `direct` mode escrow bypass:**
+- `ResolvePaymentModes` defaults every group to `escrow`; flips to `direct` on buyer request iff `mode == "direct"` **and** `store.Verified == true` (fresh catalog snapshot at checkout time — check itself is sound).
+- `direct` consequences (verified in orders module): different refund path (full-only vs escrow partial), `directOrderAutoCompletion` auto-marks delivered, escrow-release/dispute window skipped — seller paid faster, buyer loses `confirm-receipt`/`disputes` leverage.
+- No frontend in scope warns the buyer: mobile `checkoutCartIntoOrders` defaults `paymentModes = {}`, but any caller passing `{ storeId: "direct" }` (or a tampered BFF/proxy request) silently waives escrow. Webapp/seller checkout UIs show no "you are leaving escrow protection" interstitial.
+- Threat: verified-store account takeover or social engineering ("pay direct for 10% off") → buyer opts into `direct` → no dispute recourse. Not a server auth bug, but a **safety-critical UX gap** the audit must flag.
+
+**Secondary (availability, small):** `choosePromotion` (`checkoutPlan.service.go:165-170`): one invalid coupon code for one store aborts the **entire multi-store checkout** instead of failing only that store's promo. Buyer with 3 stores + 1 typo must restart. Suggest per-store `issues[]` + continue with automatics.
+
+**Suggested fix:**
+1. Frontend: explicit escrow/direct chooser with warning copy + `direct` requires type-to-confirm or checkbox; default stays `escrow`.
+2. Server (optional hardening): require explicit `directAccepted: true` flag + log `paymentMode: direct` to audit trail; consider per-store risk threshold (new/expensive orders force escrow).
+3. Promo: return per-store promo errors without aborting sibling stores.
+
+**Owner decision needed:** confirm direct-warning UX copy + whether to keep buyer-selectable `direct` at all, then I patch frontend checkout + promo error isolation.
+
+---
+## ZM-004 [FILED] — Anon `optional` GETs: public profile + followers-only live metadata exposed
+
+**Severity:** High (privacy)
+**Evidence:**
+- Gateway `services/typescript/gateway/src/routes/upstream.routes.ts:71-72,106,133-134` marks `users/*/posts`, `users/*`, `lives`, `lives/*` as `optional`.
+- GOOD (no fix): `posts/:id`, `conversations/*`, `orders/*`, `wallets/*`, `payments/*`, `seller/*`, `media/*` all enforce viewer/member/buyer ownership downstream (social `postAccess.service.ts:11-21`, `conversationAccess.service.ts:10-15`, orders `WHERE BuyerAccountID==BuyerId`, escrow `held.BuyerUserID != caller → NotFound`, `storeMember.middleware.go:32-46`, media `requireOwnedUploadSession`). Conversations IDOR masked as 404 — correct.
+- BAD 1 — user profiles enumerable anon: `services/go/modules/users/.../profiles/routes/profiles.routes.go:21-22` bare `HandleFunc` (vs authed `/me`), `controllers/profiles.controller.go:33-36` no viewer, `getUserProfile.handler.go:19-25` → public view with no private/follow/block check (`linkedProfileViews.service.go:96-105` kind-only). Any userId fetchable without login.
+- BAD 2 — followers/subscribers lives leak: `services/go/modules/live/.../sessions/routes/sessions.routes.go:14,17` `OptionallyAuthenticated` for `GET lives/{liveId}`; `sessions.controller.go:72-83` tolerates anon; `liveSessionPresenter.service.go:60-74` never calls `DecideLiveAccess/requireLiveAccess` (`liveAccess.service.go:56-84,127-139` exists but only on join paths). `visibility:followers|subscribers` (`sessions.validator.go:22-23`) metadata/safety/ranking returned to strangers; UUIDs enumerable.
+- Detection blind spots: `accessProbeClassifier.service.ts:34` enumerates numeric IDs to `:id` but short slugs <16 chars escape; `privateResourceFamilies:12-32` misses `lives/`, `products/`, `stores/`, `users/`, `posts/`, `feeds/`, `subscription-offers/`, `seller/conversations|wallet|finance`; `classifyCompletedRequest:70-74` only flags 403/404 **with** consumer principal — anon guest probing is invisible; admin anon hits unclassified.
+**Fix:** add private/follow/block gate to public-profile handler (404 for non-viewers, same as posts); call `DecideLiveAccess` in `GetLiveSession`/`GetLiveSafety` and 404 anon on restricted visibility; extend `privateResourceFamilies` + flag anon 404 bursts on `:id` templates.
+
+---
+## ZM-005 [FILED] — Idempotency gaps + refund/send races (money)
+
+**Severity:** High (money — double-charge / double-refund / 500-on-retry)
+**Evidence (all `services/go/modules/`):**
+- `ledger/src/utils/idempotentCommand.util.go:71-73` in-flight record → hard error, so concurrent double-submit gets 500 and retries blindly (mobile `mutationsInFlight` dedupes only per-device, not cross-device).
+- `payments/.../initializeOrderPayment.handler.go:31-34,65-73` idempotency covers intent creation only; `OpenProviderCheckoutForIntent` runs outside guard → replay can double-init provider sessions.
+- `payments/.../walletPayments.service.go:37-38` + `savedCardCharges.service.go:67-68` `RequestHash` omits amount/currency → same key + changed amount not detected as reuse.
+- `payments/.../billingRefundIntents.service.go:59-62,104-114` bespoke global `billingRefund` scope, hash omits charge/provider identity → cross-charge collisions.
+- `escrow/.../refundOrderGroup.handler.go:29-32` derived key `Hash(orderGroup,reason)[:64]`, global scope — same reason + different amount collides; 64-char truncation risk.
+- `escrow/.../confirmOrderReceipt.handler.go:18-32` no idempotency key at all — double-tap safety is only released-status short-circuit, no replayed response.
+- `escrow/.../disputes openDispute.handler.go:21` / `resolveDispute.handler.go:21` per-user scopes — same key across users does not dedupe → duplicate disputes.
+- `payments/.../paymentRefunds.service.go:157-170 vs 80-92` `RetryPendingRefunds` resets `processing→pending` by timestamp with no lease → races claim in `SendPendingRefundToProvider` → double provider send. `paymentRefunds.service.go:128-149` non-`RefundLookupProvider` providers land in `unknown` after send-failure → retry can duplicate provider-side refund.
+- GOOD: `paymentRefunds.service.go:29-56,72-74` reference-uniqueness + `ForUpdate` serializes concurrent refunds; escrow provider ref `"escrow-refund:"+held.ID:138` replays correctly.
+**Fix:** move provider-open inside idempotent Execute or keyed by intent id; include amount+currency+provider in every RequestHash; lease-token the refund retry claim; add idempotency key to confirm-receipt; scope dispute keys per-dispute not per-user.
+
+---
+## ZM-006 [FILED] — Webhooks verified; BFF GET+cookie relies on safe-GET invariant; realtime/internal gates sound
+
+**Severity:** Medium (defense-in-depth)
+**Evidence:**
+- GOOD: Flutterwave `integrations/flutterwaveWebhooks.integration.go:17-28` (`Verif-Hash` constant-time), Smile-ID `users/src/integrations/smileId.integration.go:50-56` + freshness/ownership (`applySmileResult.handler.go:41,51`), LiveKit `live/.../studio.controller.go:123-129`, store-notifications JWS (`webhooks.controller.go:47-59`). Gateway `rawBodyPassthrough:true` (`upstream.routes.ts:19,50,145`) forwards raw body + sig headers blindly by design — no missing-HMAC route; compromise of downstream verifier = unauthenticated ingest (already noted in `security/audit/reports/DEEPSCAN_REPORT.md:220`).
+- GOOD: mobile tokens in `expo-secure-store WHEN_UNLOCKED_THIS_DEVICE_ONLY` (`apps/mobile/src/utils/secureStorage.util.ts:6-24`), single-flight refresh (`core/apiClient.service.ts:40-56,105-110`), `auth:false` only on public auth endpoints; widget/realtime tokens require session (`widget.routes.ts:4-5`), misuse rejected (`upstreamDispatch.handler.ts:49-55`), Elixir `TopicAuthorizer` + deny-by-default `LiveAccessClient` + `SubscriptionGuard` recheck.
+- GOOD: `isInternalOnlyPath` normalize ×3-decode/backslash/`..`/`internal;` (`internalRouteGuard.service.ts:21-22`), no `/internal/*` upstream route, all Go internal routes wrap `RequireInternalToken`.
+- GAP: BFF catch-alls (`apps/webapp/src/app/bff/[...path]/route.ts:9-18`, studio/seller/ads/admin equivalents) forward **all GETs with session cookies and zero origin check**; only mutations require origin+CSRF (`gateway.service.ts:64-67`, `requestOriginGuard.service.ts:10-22`, `isSafeHttpMethod` GET/HEAD only). Safe **iff** no backend GET mutates — one state-changing GET (e.g. `/ads/r/` redirect counting, unsubscribe GET, download-variant POST-only ✓) or a future GET-with-side-effect becomes CSRF-able via `SameSite=lax` top-level navigation. Confirm studio/seller/ads/admin `[...path]` parity + add explicit GET-side-effect denylist test.
+**Fix:** keep invariant + add CI test asserting no `GET` route with write semantics behind BFF; consider `SameSite=Strict` for admin (already Strict) and private-mode `Cache-Control: no-store` on ticket routes.
+
+---
+## ZM-007 [FILED] — Env defaults, BFF allow-list holes, unmapped error codes
+
+**Severity:** Medium (availability — staging/prod breakage)
+**Evidence:**
+- Backend `.env.example` localhost/empty defaults that prod must override: `services/go/.env.example` empty `LIVEKIT_API_KEY:35`, `FLUTTERWAVE_*`, `*_INTERNAL_URL` (ads URLs empty :245,265 → nil-call behavior); gateway `UPSTREAM_REALTIME_URL=127.0.0.1:4000` + `TRUSTED_PROXY_HOPS=0` (behind 1-hop ALB → wrong client IPs → rate-limit/IP-allowlist wrong); python `INTELLIGENCE_REDIS_URL/S3/ID_HASH_SECRET` empty (verify no-redis degrade vs crash); elixir prod `fetch_env!` on `ALLOWED_ORIGINS/PHX_HOST/SECRET_KEY_BASE` (fail-fast ✓).
+- Frontend prod traps: every `apps/*/.env.example` `*_API_URL=http://localhost:8080`, `*_USE_MOCKS=true`, empty `*_REAL_API_PREFIXES` (webapp/ads/studio/seller/mobile) — flipping mocks without prefixes = silent mock serving; `*_REALTIME_URL` empty falls back to API_URL+/ws ✓ but `/ws` not in prefixes → `REALTIME_UNAVAILABLE`; `WEBAPP_LIVEKIT_URL=ws://localhost:7880`, `*_MEDIA_URL`/`*_UPLOAD_ORIGINS` empty → CSP/presigned-PUT blocked; `ADMIN_IP_ALLOWLIST` empty + `ADMIN_ENVIRONMENT=development`.
+- BFF holes: seller `GET /api/v1/wallets/me` (`walletOverviewView.tsx:84`, `sellerDomains.contract.ts:23`) not under `SELLER_REAL_API_PREFIXES` (`/seller/wallet`, `/seller/finance` only) → dead in partial-real mode; admin `compilePathPattern` (`apiAccess.config.ts:22-30`) suspect unclosed group `(?:a|b` for `{a|b}` routes (e.g. `apiRoutes.config.ts:67` disable|enable) → those actions 403/404 — needs unit test; studio/admin sampled routes otherwise match gateway surface.
+- Unmapped codes (generic "Something went wrong"): `VALIDATION_FAILED` (13 go hits + gateway), `USERNAME_TAKEN` (9 hits), `REALTIME_UNAVAILABLE`, gateway-only `ACCOUNT_SUSPENDED_SECURITY`, `CORS_ORIGIN_FORBIDDEN/REQUIRED`, `HUMAN_VERIFICATION_*`, `PAYLOAD_TOO_LARGE`, `POLICY_ACCEPTANCE_REQUIRED`, `WIDGET_TOKEN_SCOPE` — all fall through `errorMapper.ts:errorKindByCode`. Covered: `STEP_UP_REQUIRED`, `IDEMPOTENCY_KEY_REUSED`, `WALLET_DEBT_OUTSTANDING`, `INSUFFICIENT_FUNDS`, `UPSTREAM_UNAVAILABLE`, `SESSION_EXPIRED`, `IP_NOT_ALLOWED`. `INVALID_CREDENTIALS→unknown` deliberate anti-enumeration — keep.
+**Fix:** prod env checklist CI (fail if localhost/mock in staging/prod build); add `/api/v1/wallets/me` prefix or migrate seller to `/seller/wallet`; unit-test `compilePathPattern` `{a|b}`; add the 4 missing error-code mappings.
+
+---
+## ZM-008 [FILED] — Fee clamps, caps, currency deferral, escrow terminal states (small money)
+
+**Severity:** Medium (small money leaks, reconcile load)
+**Evidence:**
+- `payments/.../paymentSettlement.service.go:162` + `lateCharges.service.go:93` `max(fee,0)` hides negative provider fees (over-rebates inflate `AppliedCollectionAmount`); `checkoutAllocation.model.go:106-112` `max(actual-directFees,0)` zeroes escrow fee share when actual < estimated → direct groups overstated.
+- `checkoutAllocation.model.go:32-37` `EstimateLocalCheckoutFee` caps at 200000 minor → large checkouts under-collect fees (platform absorbs).
+- `escrow/.../escrowSettlement.service.go:114-115` `min(commissionKept)+max(net,0)` clamps negative seller share to zero instead of erroring (eats over-refund into proceeds); contrast `escrowWalletHolding.service.go:39` unclamped negative fails closed at journal validator — asymmetric strictness, pick one (fail-closed everywhere).
+- `paymentIntentCreation.service.go:41` + `checkoutAllocation.model.go:73-75` correctly reject ≤0 amounts; but `checkoutMoney.grpc.controller.go:36-48` accepts zero/negative payables, `orders/.../orderRefund.service.go:21-23,33` no-ops `refundedMinor <= RefundedMinor` as success (masks duplicates) + truncates over-refund via `min()` silently.
+- Currency: `checkoutPlan.service.go:87,111-112` rejects mixed currencies at plan; `checkoutMoney.grpc.controller.go:31-54` does NOT cross-check → fails later in escrow suspense (`escrowHolding.service.go:45-46,70-71` funds sit in `PaymentsAwaitingApplication`); mismatch `paymentSettlement.service.go:129-158` fails intent with no auto-refund (funds with provider till manual); `lateCharges.service.go:47-49` records any positive charge at face value without amount check then refunds.
+- Escrow: `escrowStateMachine.model.go:27-31` `partiallyRefunded` terminal (single-partial enforced); release blocked when disputed (`escrowSettlement.service.go:41,44-50` ✓); `disputeLifecycle.service.go:175-189` unlocked read before `ForUpdate` (minor TOCTOU); gRPC `ConfirmOrderReceipt:79-85` + `GetOrderEscrow:87-96` trust caller-supplied BuyerUserId / no ownership check — safe only if every internal caller is trusted; add service-auth + target check.
+**Fix:** error instead of clamp on negative nets/fees; lift or tier the fee cap; cross-check currency at `RegisterCheckoutPayables`; auto-refund or dead-letter queue for amount-mismatch funds; key escrow gRPC confirm by session principal.
+
+---
+## ZM-009 [FILED] — Python intelligence: silent ML outage, Redis-down full outage, raw gift PII, no-appeal auto-suspend
+
+**Severity:** High (availability + privacy + ethics)
+**Scope:** `services/python/intelligence` (no `scripts/` dir exists; deps in `pyproject.toml`/`uv.lock`)
+**Breakage:**
+- `src/configs/settings_config.py:103-152` fail-fast on missing `SHARED_SECRET/REDIS_URL/RABBITMQ_URL/MODEL_SIGNING_SECRET` — one missing env = full outage in staging/prod (by design; needs env checklist).
+- Silent heuristic-only mode: `src/container.py:188-202` + `model_registry_repository.py:93-156` + `lifespan_loader.py:35` boot with zero models; `Dockerfile:33` ships empty `/app/model_registry`. Rankings silently degrade (`risk_scoring_service.py:136`, `content_moderation_service.py:42,72` `degraded=True`); `model is None` does NOT escalate to `review` the way `model_failed` does (`content_moderation_service.py:60-61`) → borderline content auto-allowed.
+- `signed_request_middleware.py:112-119` Redis down → `503 replay_protection_unavailable` on every `/v1/*` (fail-closed but total outage; 0.5s timeout, no breaker). Chunked bodies skip early 413 (`:63-72,127-141`) → memory pressure at 2000rps/4000 burst.
+- Unbounded deps (`scikit-learn>=1.9.1`, `numpy>=2.5.3`, `python>=3.14`) can invalidate registry artifacts (`artifact_integrity_util.py:34-37`); rollback only after 3 rejections (`active_model_holder_service.py:49-65`).
+**Security:** HMAC sound (`request_signature_util.py:50-111`, dual-secret, 300s skew, nonce `SET NX EX`); pickle guarded by SHA256+HMAC (RCE only if signing secret leaks); non-root, no docs outside dev (`app.py:22-29`). Gaps: `ID_HASH_SECRET` empty falls back to `shared_secret` (`identifier_hashing_service.py:13-16`, allowed `settings_config.py:113-115`) → rotation re-pseudonymizes everyone; `gift.sent` keeps raw `actorId` + full payload in feature/parquet logs (`domain_event_translation_service.py:47,103-111`) even when `personalization_allowed=False` — financial-event PII hotspot; `country` unhashed.
+**Logic/ethics:** `BLOCK 0.85/REVIEW 0.5`, bot `PUBLISH 0.6/high 0.85` (`bot_scoring_service.py:62-67` shared-IP 0.15 + shared-device 0.3 + night-hours 0.3 stacks against NG carrier-NAT/night streamers); risk `MEDIUM 0.3/HIGH 0.7` with FX-outage→0.35 review, diaspora shipping-mismatch 0.15, unverified-ID 0.3; `suspension_suggestion_service.py:15,31` auto-suggests suspension at ≥0.8 with 24h dedup and **no appeal/expiry/retraction field** in any score response. Tiered reach (`ranking_boost_caps_constant.py:13-33` none 1.0 → black_official 1.15, cap 1.25) disclosed per-item but systemic pay-to-reach; `feed_fairness_service.py:70-80` wipes `author_is_verified` on discounted copy (verify intent); following-feed boosted ±90min so not chronological (`feed_scoring_service.py:30-33`); `same_country +0.5/+0.3` homophily shrinks cross-border discovery.
+**Fix:** seed/model-presence readiness gate; Redis breaker + degraded-replay policy; require `ID_HASH_SECRET`; hash gift actorIds; add appeal/recourse fields + human-approval for auto-suspend; document boost/fairness weights publicly.
+
+---
+## ZM-010 [FILED] — TypeScript social/media/search/notifications/support: fail-open scans, SSRF residuals, anon oracles, shadow-moderation
+
+**Severity:** High (security + availability)
+**Breakage:**
+- Media fail-open chain: no ClamAV → `verdict:skipped` published (`media/src/app.ts:59`, `clamAvTcpScanner.integration.ts:49`); `MODERATION_URL` unset → `{allow, degraded}` (`media.config.ts:103-110`, `moderationPolicy.service.ts:18-24`, default `MODERATION_FAIL_MODE=allow`); audio/docs never moderated (`mediaPipeline.service.ts:106` image|video only); missing ffmpeg → uploads stuck `processing` (`app.ts:89`). Staging without these = silent allow-all.
+- `presignPut` drops Content-Type binding (`s3ObjectStorage.integration.ts:89-92`) → MinIO/S3 diverge, mime-bypass; size enforced post-upload only.
+- Empty `internalToken` defaults (`social.config.ts:43-56`, `media.config.ts:64`) → all internal routes 401; prod-secret check (`productionSecrets.config.ts:1-8`) misses empty strings.
+- Fan-out storms: digests limit 500 + per-group queries (`listDigestPage.handler.ts:28-68`), widget `take:2000`, comments `Promise.all(parentIds.map)` uncapped + no viewer (`comment.repository.ts:33-38`), support `take:200` no cursor, search recent skip+delete race.
+**Security:**
+- `principal.middleware.ts:14-17` trusts `x-zudomart-account-id`; safe only behind gateway HMAC (`gatewayIdentity.middleware.ts:34-39`) + network isolation; direct exposure = anon downgrade.
+- Anon oracles/amplification: `recordImpression/recordProfileVisit/sharePost: optional` do DB read then no-op for anon but return success (`posts.controller.ts:63-64,96`); `mentions resolve: optional` 100 ids/req enumeration (`mentions.controller.ts:18`); `storeInbox reply/open` take actor ids from body on internal-token auth (impersonation by any internal-token holder).
+- SSRF guard strong (`safeHttpFetcher:121-134`, `ssrfGuard:83-122`, DNS pinning, caps) but digit-host regex misses `0x7f.0x0.0x0.0x1` variants; raw `fetch(baseUrl)` clients safe only because baseUrl is config.
+- Media: `inspectEncryptedBlob:65-72` skips sniff (trusts declared mime); ClamAV-missing = fail-open (above).
+- Unsubscribe HMAC unforgeable (`unsubscribeToken.service.ts:6-31`, ≥32ch secret) but **no expiry**, link in query string (logs/history), `describe` GET validity oracle, replay-forever victim-unsubscribe.
+- Cleared: search-recent scoping, support requester 404-on-other, staff JWT EdDSA — all correct.
+**Logic/ethics:** feed interaction farming (50-event batches, client-trusted watchMs, self-votes excluded but sock-puppets only flagged at ≥10 engagers/`excludedShare≥0.5`); audio/PDF moderation gap; anon share 200-while-no-op skews metrics; `restricted/hidden/removed` shadow-limits with appeal only in email copy (`identity.mapping.ts:94`), no in-product appeal; sponsored disclosure depends on client rendering `adType/impressionToken`; premium = pay-to-hide-ads (disclose); digest jobs skip personalization-consent check that feeds check; `services/scripts` test-only (fakeFlutterwave, k6) + e2e screenshots (scrub PII before commit).
+**Fix:** fail-closed scanners in staging/prod (block boot or quarantine when missing); bind presigned Content-Type; cap fan-outs (≤100) + cursor pagination; rate-limit + auth on mentions-resolve and impression endpoints; expiring single-use unsubscribe tokens (POST-only); in-product appeal for hidden/restricted; consent-check digests.
+
+---
+## ZM-011 [FILED] — Elixir realtime: cluster never forms, ready-gated on broker, fanout/authz gaps
+
+**Severity:** High (availability + security)
+**Breakage:**
+- Prod `fetch_env!` on `ALLOWED_ORIGINS/PHX_HOST/SECRET_KEY_BASE` (`config/runtime.exs:49-59`); infra provides them (`infra/aws/modules/platform/{deploy.tf:76,101,services.tf:66}`) but no message/defaults.
+- Audience mismatch risk: code default `REALTIME_TOKEN_AUDIENCE=zudomart-realtime` vs infra `AUTH_TOKEN_AUDIENCE=zudomart-api` (`deploy.tf:64-65`) → `accessToken.verifier.ex:52` rejects everything if minter uses `-api`.
+- `runtime.exs:56-58` prod IPv6 overwrite breaks IPv4-only tasks, drops `PORT` config.
+- Cluster `:ignore` when `DNS_CLUSTER_QUERY` nil (`realtime.application.ex:10`, `runtime.exs:50`) + no `RELEASE_COOKIE`/distribution config despite `services.tf:66` listing it → isolated PubSub/Presence per task; fanout, revocation broadcast, `membership_changed` node-local only.
+- AMQP consumer never declares queue/exchange (`amqpBroker.client.ex:31-34`, `amqp.consumer.ex:74-83`); missing/non-durable `realtime-domain-events` → infinite reconnect; `mandatory:true` retry + log-only `basic_return` = silently dropped retries.
+- `/metrics` 404 behind ALB (loopback-only + no `x-forwarded-for` in `health.controller.ex:6-18` vs `deploy.tf:196` scrape path; `container_health_check=null`); `/readyz` 503 on RabbitMQ down (`readiness.ex:6-8`) + ALB health on `ready` (`services.tf:64`) → broker blip evicts all tasks → cascade.
+- `origin.policy.ex:1-6` head-match only; missing-Origin (native/mobile) → `FunctionClauseError` transport crash; path/trailing-slash/query vs `ALLOWED_ORIGINS` join → browser 403.
+- No server heartbeat (only app `ping/pong` `clientSocket.socket.ex:115`); 60s endpoint timeout kills idle-healthy sockets; no `HEALTHCHECK`; `erl_crash.dump` in build context; local `backend.sh:59-63` omits internal tokens so all live/conversation auth fails locally, masking prod.
+**Security/logic:** `conversation_fanout` pushes full payload to `user:<id>` subscribers without delivery-time membership recheck (`clientSocket.socket.ex:88-92`; `fanout_account_ids` trusts bus event); 50-sub cap includes auto `user:` topic; subscribe-before-accounting PubSub churn; `MAX_CONNECTIONS_PER_USER` async-evict race, no per-IP cap; revocation TTL 30min no prod override, `issued_at<=revoked_at` no skew allowance vs verifier 30s skew, cross-node replication broken by `:ignore` cluster (banned session lives ≤30min); sync `:httpc` 2s inside socket handlers (slow-loris) + guard recheck thundering herd (no live-path cache); JWKS 5min refresh, stale kids never deleted; `{:all_sessions}` disconnect without revocation record (reconnect succeeds); `subscription.guard.ex:9-15` exempts own `user:` topic; social-outage → mass-revoke conversation subs; ex-member reads ≤60s; presence collide on shared `account_id` key; `battle:` topics authorized but never routed (dead cap waste); `livePresence.forwarder` unbounded map + `Task.start` per flush, counts drift; throttle drops intermediate states without sequence numbers; 10k FIFO dedupe re-broadcasts after eviction; retry header type-narrowing miscounts attempts → premature dead-letter with no DLX.
+**Fix:** wire RELEASE_COOKIE + DNS query in prod; decouple ALB health (live) from readiness (ready); audience contract test; declare AMQP topology at boot; origin-normalize + allow missing-Origin for native; server heartbeat; delivery-time membership check; revocation record on `all_sessions`; cache live-access; delete stale JWKS kids; DLX + typed headers.
+
+---
+## ZM-012 [FILED] — Go trust/ads/live/catalog/users/auth/admin/currency: auto-hide, brigading, self-gift farm, soft-delete-as-deletion, OTP cycling
+
+**Severity:** High (ethics + security + money)
+**Breakage:** currency `FindLatestRevisionForCurrency` orders by ID not `created_at` + no staleness check (`exchangeRate.repository.go:13`, `convertMoney.handler.go:20-27`) → silent stale-rate conversion; first-ever currency rate errors instead of seeding (`setExchangeRate.handler.go:49`); battle settle holds row locks across 10s ledger call, cap-20 no backoff (`settleBattle.service.go:16,27,44-71`); only-latest-OTP-checked (`verifyOneTimeCode.handler.go:31-33`) → concurrent-code flakiness; review-verifier-missing env blocks 100% of reviews (`submitReview.handler.go:62-84` fail-closed — set verifier in staging).
+**Security:** OTP 6-digit/5-attempts per code but resend (60s cooldown) mints new row resetting counter (`sendOneTimeCode.handler.go:43-48`) → send→guess cycling with no per-destination/hour cap beyond generic `rateLimitAuth`; reset = single-use opaque token ✓ but purpose/TTL binding needs value check; `username-available` oracle with taken/reserved/invalid + suggestions (`usernamePolicy.service.go:53-60`) harvestable behind rate-limit only; automation-hide publishes with `source="automation"` but no staff `Audit.Record` (vs `decideContentReport.handler.go:201-217` dual entries) → takedowns unaudited despite append-only `audit_events` table.
+**Logic:** strike `reference_key` dedup returns existing without new strike while caller refreshes standing as struck (`strikeRecorder.service.go:38-67` vs `decideContentReport.record:160-166`); empty ref → duplicate strikes; `RepeatInfringer=3` × copyright 3/2 thresholds triple-punish at 3 with no precedence; ads second-price-from-score (quality 0.5–2.0×) lets low-bid/high-pCTR outrank with no score logging (`auction.service.go:47-95`) → unauditable disputes; premium pool watch-seconds pro-rata, no anti-farm/cap/eligibility-in-allocator (`attribution.service.go:86-118`); `ConvertMinorUnitsWithFloor:60-73` truncates every conversion (platform-favoring skim, compounds multi-hop); retention `OutcomeDelegated` for orders/financial/messages/analytics/security_logs with no verification callback (`retentionApplier.service.go:29-43`) + `deleted_<8hex>` Profile retained not purged (`:108-110`) → "deleted" retains PII; review counts decrement without floor (`deleteReview.handler.go:30-34`); no self-like/velocity guard, like_count driftable.
+**Ethics:** free boost = premium-only (`freeBoosts.service.go:64`, `createBoost.handler.go:85-89`) + opaque auction inputs; **self-gifting farms both leaderboards** (`awardGiftPoints:52-64` sender+receiver points, `creditBattleScore:67-70` own coins to own battle score, no sender≠receiver check) + client-trusted `ComboId` (`sendGiftRecording.service.go:78-97`); auto-hide at classifier ≥0.85 without human review (`contentReportPolicy.service.go:75-93`); report-count priority (15→urgent, 5→high `:42-50`) + reopen-on-3-post-dismissal (`:102-104`) lets brigading override human dismiss; appeal SLA 48h display-only, no breach job (`appealRecorder.service.go:16,129`).
+**Fix:** per-destination OTP send caps; audit-record automation actions; strike precedence doc + empty-ref idempotency; log auction quality inputs; antifarm + caps on premium pool; sender≠receiver gift rule; human-review gate before hide + anti-brigading (unique-reporter weighting, dismiss stickiness); SLA breach job; true purge or honest "deactivated" copy; seed currency + staleness alert.
+
+---
+## ZM-013 [FILED] — Scripts/CI guards: mock-ship guard logs OK on failure, Go tests miss races, local realtime masks prod auth
+
+**Severity:** Medium (staging/prod breakage via CI/local-parity)
+**Files:**
+- `scripts/checkNoMocksInBuild.mjs:86-98` — `checkMobile()` pushes problems for bad EAS profiles / `extra.useMocks ?? true` / `app.json useMocks:true`, but line 97 unconditionally prints `ok mobile: EAS profiles checked` even when problems were just queued. Misleading CI log (exit code still 1, so gate holds — log-only bug). Also `seedMarkersFor` regex (`:41`) can false-positive on legit ids (`user_...`, `order_...`) — needs allowlist review per app or staging builds fail on innocent literals.
+- `services/scripts/test-go-workspace.sh:4-7` — `go build/vet/test -p 2` with default cache, no `-race`, no `-count=1`, no coverage gate. Data races + flaky-cache passes reach staging; money/escrow concurrency bugs (ZM-005/ZM-008 class) slip through. Fix: `go test -race -count=1 ./...` at least on `payments/ledger/escrow/orders` packages in CI.
+- `services/scripts/test-realtime-in-docker.sh:4-6` pins `elixir:1.19` matching `mix.exs ~> 1.19` ✓; `mix format --check-formatted` + `--warnings-as-errors` ✓. No gap.
+- `services/scripts/check-no-raw-sql-in-typescript.sh:5-8` — pattern covers `queryRaw/executeRaw(Unsafe)`, `` sql` ``, `.query("SELECT…` but misses `prisma.$transaction([...raw...])` passthrough and `$queryRaw` with template-var spacing variants; allowed-file `searchQueries.repository.ts` must be manually reviewed for `Prisma.sql` interpolation vs `Prisma.join`. Residual, low.
+- `services/scripts/check-backend-file-lengths.sh` — max 300 lines enforced, currently passing (verified this run). No gap; keep gate.
+- `scripts/localStack/backend.sh:59-63` (already in ZM-011): local realtime starts without `LIVE_INTERNAL_API_TOKEN`/`SOCIAL_INTERNAL_TOKEN` → all `live:`/`conversation:` subscribe tests fail locally by design (deny-closed), so local green ≠ prod behavior. Fix: local stub authorizers or documented `LIVE_AUTH_STUB=allow` for dev only, never in staging/prod.
+- `services/scripts/apiSmoke/*` (`fakeFlutterwave.util.ts`, `liveFixtures`, `commerceFixtures`, `routeInventory.util.ts`, k6 `load/`): test/seed only, no prod path. Hygiene: `browserE2e/reports/*` screenshots/logs must be scanned for real PII/creds before commit (add to `checkNoMocksInBuild` or pre-commit hook).
+**Fix:** one-line log fix in `checkMobile`; `-race -count=1` for money packages; local-auth stub flag dev-only; PII scan on e2e reports.
+
+---
+## ZM-014 [FILED] — Money round-2a: wallet/ledger atomicity + `available` display (logic/API)
+
+**Severity:** High (money)
+**Breakage/logic:**
+- Card-settle first read unlocked, re-read locked (`paymentSettlement.service.go:25-33,97-104`): concurrent verify-webhook + user-poll both call provider `VerifyCharge`, serialize on subject lock — safe but double provider calls per race; under provider timeout both enter `RunInMoneyTransaction` (`:55-59`).
+- Duplicate-settle writes second `succeeded` row with `failureReason=duplicatePaymentRefunded` + posts collection journals before refund (`:160-175,79-91`); `payment.succeeded` outbox skipped on duplicate path (`:202`) — order/escrow must rely on refund event, never assume `succeeded` fires.
+- Coin debits delegate atomicity to ledger (`coinPurchases.service.go:159`, `coinReviews:116-117`, `coinBalances:97`, `coinTransfers:92` — `ForUpdate` on purchase/transfer rows only, no version check); any new coin path that mutates state before ledger post must keep post in same `*sql.Tx`. Payment intents ARE version-guarded (`ForUpdate` + `Where(Version).AddVersion(1)` in settle/late-charge/wallet-pay) with unique index `payment_intents_one_settlement_per_subject` as backstop — pattern to copy everywhere.
+- Webapp wallet renders server lines verbatim, no client sum (`wallet/page.tsx:30,50,58-72`, `walletLines.util.ts:11-17`); held escrow separate section — correct. Contrast mobile `addMoney.screen.tsx:67` shows `available` as top-up-able while held (confirm display copy). Webapp mock `waiting = available + earningsPayable` (`wallet.mock.ts:68`) is test-only but must never be mistaken for server `WithdrawableMinor()` semantics. Seller-earnings dashboard (if outside webapp/mobile trees) must not sum `wallet:available + seller:available + InEscrow` — server keeps disjoint account families (`walletBalances.service.go`, `chartOfAccounts.model.go:126-156`).
+**API note:** every wallet/coin debit API must document that ledger post + state mutation are single-tx; add contract test asserting no post-commit ledger writes on new endpoints.
+
+---
+## ZM-015 [PART-FIXED 2026-10-17] — Money round-2b: escrow lifecycle + chargeback double-post (logic/API)
+
+**Status 2026-10-17:** see `fix-changelog.md` "ZM-015 (Part B)" and "Review corrections". Corrections to this filing: stale-price hold is not realizable (totals immutable, payable conflict-guarded); the direct-sale lost entry also double-credited the provider balance (fixed). Open: partial chargeback on a released wallet escrow over-credits the receivable; release-rollback flag drift.
+
+**Severity:** Critical (money — stuck funds, dust loss, double-pay)
+- Stale-price holds: payables snapshot `group.TotalMinor` at checkout (`checkout.service.go:182-189`); `findCheckoutPayables` checks buyer + cancelled only (`initializeOrderPayment.handler.go:76-107`); hold trusts `payable.AmountMinor` (`escrowHolding.service.go:44-47,70-71`). Post-checkout price/promo/credit edits leave stale payable → escrow holds stale price while `order_groups.total_minor` diverges; refund caps disagree (`sellerOrderRefund.service.go:34-35` order-total vs `refundOrderGroup.handler.go:38` escrow-amount). Fix: re-validate payable vs live order total at hold, or version payables.
+- Wrong-seller: NOT found — release consistently uses `held.SellerUserID` (wallet settlement/holding/clawback/reserves); `StoreID` display-only. Residual: payable snapshots `SellerAccountID` at checkout — post-checkout ownership transfer still pays original seller (policy callout, arguably correct).
+- Dust misallocation: `SplitAmountBetweenSellerAndPlatform` remainder to seller-first (`money.allocation.go:29-40`, `escrowStateMachine:68-77`), but `escrowSettlement.service.go:107,114-116` discards `SellerMinor`, recomputes `commissionKept=min(resolution.Commission, held.Commission)` on mixed bases → 1-minor-unit per partial refund lands in platform/commission, contradicting model. Fix: single dust rule, same-base commission.
+- Partial-terminal trap: no `partiallyRefunded` outgoing transitions (`escrowStateMachine:27-31`) — second partial, full refund, and release all rejected after one partial. Staff cannot finish partially-refunded escrows without DB action. Fix: allow `partiallyRefunded → {refunded, released}` with remaining-amount guard.
+- Confirm-vs-dispute race: correctly blocked (`ErrEscrowFrozenByDispute`, `escrowSettlement:41-43`; `SKIP LOCKED` sweep) — only misleading error-string TOCTOU in pre-read (`confirmOrderReceipt.handler:21-28`), no money movement.
+- Refund-after-release: routed to clawback not second release (`:73-76,123-130`); partial-after-release rejected. Residuals: clawback refunds buyer full `AmountMinor` while taking only `ReleasedToSellerMinor` from seller → shortfall becomes seller debt + platform absorbs fees (`escrowWalletClawback:37-75`); movement-failure rollback flips failed release back to `held`/clears `ReleasedAt` after buyer/seller saw "released" → order-service flags disagree.
+- Auto-release stuck funds: `AutoReleaseAt` set only on `delivered` (`escrowFulfilment:58-60,84-87`); never-delivered held rows (`AutoReleaseAt=NULL`) never match sweep (`:107`) → locked forever; `scheduledRefund`/disputed excluded by design. Plus head-of-line blocking: sweep `First`-by-due + return-on-error (`:110-122`) — one poison legacy-custody row (`ErrLegacyEscrowCustody` at `escrowSettlement:54-56`) stalls every later due row each tick. Fix: set `AutoReleaseAt` at hold (delivered extends it); skip-and-continue on poison rows with dead-letter counter.
+- Chargeback double-post (strongest): held/disputed escrow lost → escrow unlocks full `AmountMinor` to buyer (`escrowWalletChargebacks:50-58`) while payments withholds from provider balance, no cross-check of provider refund (`providerDisputes:62-69`, `chargebackLedger:40-67`, `escrowChargebacks:15-47`); already-refunded escrow no-ops leaving withholding unreversed → platform carries refund + open receivable (write-off only on no-handler path `:69-79`). **Direct-sale double-post: `escrowDirectRefunds.service.go:44-63` has no status guard** — posts `SellerDebt` + overwrites status even if `refundDirectSaleInTransaction (:18-42)` already refunded → duplicate seller-debt + buyer paid twice; clamp `:45-48` doesn't dedupe. Partial-then-chargeback: `walletChargebacks:48-49` nil-returns on `partiallyRefunded` → provider-taken funds never journaled. Fix: status-guarded idempotent chargeback posting + cross-module refunded-already check before every post.
+
+---
+## ZM-016 [PART-FIXED 2026-10-17] — Money round-2c: payouts/settlement/KYC/bank-destination (logic/API)
+
+**Status 2026-10-17:** see `fix-changelog.md` "ZM-016 (Part B)". Corrections to this filing: same-currency seller debt was already checked in the withdrawal tx (gap was other currencies); bank validation defaults to `required`, not `optional`; settlement credit already unique at the ledger; card-verification double refund not reproducible. Open: onboarding not single-tx, level snapshot outside tx, owner decisions.
+
+**Severity:** Critical (money — payouts to unverified accounts, double-send, session-only refund redirect)
+- Resolve-then-claim split txn: `SavePayoutOnboardingBank` resolves bank (163) → claims settlement account in own tx (`payoutOnboarding.service.go:155-184` via `settlementAccountRegistry:35-52`) → saves onboarding step in second tx (174). TOCTOU bank-change/claim between txns; payout readers don't wait for `CreateRecipient`. `latestPayeeBankAccount` (`customerValidation.service.go:115-133`) reads latest `create_recipient` sealed payload with **no verification-status/`RecipientCode` check**; `PrepareDirectSellerPayoutInTransaction` (`walletPayouts.service.go:106-124`) pays it directly, called from `escrowDirectPayouts.service.go:56` (non-NGN direct sales) with no level/verified gate. Fix: single-tx resolve+claim+step or re-validate at payout; gate direct-payout path like wallet withdrawals.
+- Debt-limit bypass: `sellerDebtOverLimit` only at checkout (`sellingEligibility.service.go:40-59` via `RequireSellerMaySell`, called `orderPayables.service.go:116`). Withdrawal gate (`requestWithdrawal.handler.go:17-31`) + in-txn `requireProviderWalletPayoutAllowed` (`providerWalletWithdrawals.service.go:19-35`) check verification + wallet-debt only — `SellerDebtAccount` (chargeback/refund debt) never consulted; level snapshot read outside txn (stale). Indebted seller can cash out. Fix: consult `ReadSellingEligibility`/seller-debt inside withdrawal tx.
+- Transfer double-send: `SendPreparedSellerPayout` (`sellerPayouts.service.go:68-81`) plain read + `Status!=processing` guard, no `FOR UPDATE`/CAS/claim before `provider.CreateTransfer (83-96)`; batch worker (`payoutRun:126-135`) + reconciler (`FinalizeProcessingWithdrawalsOlderThan:191-208`) can both pass guard → provider hit twice. `recordTransferOutcome` (`platformTransfers:19-30`) dedups only after provider call. Schema has no `sent/claimed` state (`payoutTransfer.schema.go:43` processing|succeeded|failed); unknown-error stays `processing` → retry re-sends on provider reference alone. Fix: version-guarded `processing→sent` claim before provider call (pattern exists in `providerMovements.service.go:90-97` — copy it).
+- Bank-destination refund hijack: `POST /api/v1/payments/refunds/{refundId}/bank-destination` (`savedCards.routes.go:17`) is `requireUser` only vs onboarding/withdrawals `requireStepUp`. `SubmitRefundBankDestination` (`refundBankPayouts.service.go:62-105`) checks `OwnerUserID==caller` only — no step-up, no name-match, no verified-account binding; `ResolveBankAccountName` proves existence not ownership. Status check + provider call outside tx; final `processing` flip ignores affected rows (`:101-104`) → concurrent submits both hit provider, last-writer wins. No step-up UI in any app (backend has none to trigger) — **stolen session alone redirects a refund**. Fix: step-up + name-match + verified-account binding + affected-row guard (copy `markRefundAwaitingBankDetails:50-54`).
+- Verification gating: NG `PayoutAccountReady` alone → Level 1 (`verificationLevel.model.go:47-56`, mode `optional` default) → withdraws up to 50,000,000 minor/day (`withdrawalLimits.config.go:19,53-65`) on name-matched-only bank; BVN gates only when mode=`required`. Confirm risk appetite. Direct-payout path bypasses gating entirely (above).
+- Card-verification edge: exactly-once claim holds (`paymentRefunds:80-95`, `FindRefundByReference` retry), but card-verification intent that is ALSO duplicate-paid gets two refund rows (`refundCardVerificationImmediately` + `refundDuplicatePaymentInTransaction`, `paymentSettlement:66-68,79-91`) and `attemptCardVerificationRefund:73-99` sends each pending one → double micro-refund; verify-webhook race widens window.
+- Webhook settlement: inbox dedup + transfer-confirm idempotent ✓; settlement credit relies on row lock only (no unique `settled:` constraint, `providerSettlements:51-77`); 7-day report reprocessing re-touches every line (noisy); `webhookProcessing:92-96` swallows not-found/mismatch as success-nil → amount-mismatch never dead-letters.
+- Frontend: seller `removePayoutAccount` (`payoutAccountsView.tsx:47-59`) sends `DELETE payout-accounts/{id}` with NO step-up while `PATCH isDefault` does; backend `payouts.routes.go:24-28` matches (`DELETE :25` requireUser-only). Unattended-session attacker removes accounts forcing fallback to attacker-added account (`NewAccountCooldown` slows but doesn't stop). Fix: step-up on DELETE + confirm `addPayoutAccountDialog` wraps resolve+add.
+
+---
+## ZM-017 [FILED] — Money round-2d: coins/subs/tips/gifts/affiliates/ads-balance (logic/API)
+
+**Severity:** High (money — non-unwound earnings, commission window, convert no-lock)
+- Coins happy path balanced, no mint-from-thin-air (`coinPurchases.service.go:94-114` amount/currency match + `FOR UPDATE` lock; negatives blocked by `AllowNegativeBalance:false` → `INSUFFICIENT_COINS`; shortfalls routed to explicit debt accounts not negative spendable). Edges: store redeem credits `pack.Coins + pack.BonusCoins` not receipt price (`coinStorePurchases:22-70`) — catalog bonus edit after ship changes old-IAP payout; conversion reads live `CoinCashValuesMinor` per request with snapshot stored (`coinBalances:65-96`) — mid-day config flip changes ratio with no quote/accept (client sends only `coins`); env-movable rate table (`wallet.config.go:40-47`, default `NGN:1000,…USD:1`) with no per-request pin; web-only `BonusCoins` seeding + USD-fallback silent currency switch (`coinCatalog:41-121`) where dialog renders price but NOT `billingNote` (`coinPurchaseDialog.tsx:79-89`) → charged in USD without visible note; store-channel blocked server-side ✓ (`FindActivePackage:141-147`).
+- Subs: renewal idempotency per period + `ConfirmPreviousBillingCharge` + `ForUpdate` + sweep lease-claim (web `renewalEngine:25-46,69-194`, creator `creatorRenewals:45-115`) — but attempt-counter read-modify-write non-atomic → two workers can mint two `RenewalChargeReference(key, attempt)`; provider reference-idempotency is the backstop (verify it). Cancel = no-refund/no-proration by policy (confirm intended); `Resume` after end forces NEW sub (double-charge history but single access — disclose no-refund re-subscribe); web-active blocks store-start and vice versa (`clearWayForNewSubscription`, `creatorCheckout:103-126`) except stale store-pending >30m hole (orphan pendings); `Cancel/Resume` reject non-web (`ErrManageInStore`) while `ListMine/HasSubscriberAccess` merge channels — UI must show channel labels or user double-pays thinking one cancel killed both.
+- Tips/gifts self-blocked both layers (live `sendGift:75-77` + money `giftCharging:72-73`; tips `:88-90`) — two-account wash unblocked (abuse-monitoring, not code). Charge-before-record ordering safe (money tx rolls back; live `ProcessedGift OnConflict DoNothing` self-heals; new-key retry double-charges by idempotency contract — document). **No gift/tip refund path exists: purchase-refunded coins do NOT unwind credited `CreatorEarnedCoins`, battle holdings, or `winnerTakesAll` payouts** (`giftCharging` no reversal; `creditBattleScore` add-only; settle from holdings `battleSettlement:122-198`). Confirm non-refundable-earnings policy or build cross-module clawback. Gift price server-resolved, qty 1-100 ✓; non-member receiver gifts silently credit HOST (`creatorProgram:62-76`) — disclose "settles to host"; tier `max(member,volume)` cap 7000bps with volume understated during battles + no service-layer range validation (`UpdateCreatorTierShare` relies on controller `0-7000`).
+- Affiliates: rate locked at checkout when `lockedBps` present (`affiliateSaleEvents:99-115` → `min(max(locked,0),Max)` before live settings) — but `RecordAwaitingAttributedSales` persists bps at order while `creditOne` re-derives `eligibleRate` at RELEASE (`affiliateCommissions:29-74`); content-attribution sources carry no bps → release-time CURRENT settings apply, so seller lowering commission between order and escrow-release steals commission on unlocked lines. Fix: always persist order-time bps, use it at release. `Exist→Create` under advisory xact-lock OK; reversals deduped `(commissionId, refundKey)`; self-buy/sell skipped silently (track drops in analytics); `ShareOf` rounding + `LineTotal<=0`/currency drops unreviewed.
+- Ads balance: NO credit-before-confirm (PENDING + intent, credit only in `HandleSucceededPayment` with match + lock, `adTopUps:33-154`) ✓. Refund-after-spend safe-ish: live-balance read + newest-first `min(remaining, unrefunded)` + `ad-balance:` advisory lock serializing spend-vs-refund + same-tx ledger/provider-request (`adSpend:21-134`); unknown-provider-failure rolls back both. Edges: reference `ad-refund-<id>-<refundedMinor-before>` unique only if strictly increasing (guard under lock); card-refunds-disabled policy still refunds earnings portions silently (`:86,94-100`) — surface per-source breakdown; earnings-funded returns to earnings not card (`earningsFunding:99-134`) — UI must distinguish.
+- Client display: coins/gifts/subs all display server price, POST ids only (no client-price tamper) — except quote-vs-send fee drift (`coinTransfers:65-69` re-splits at send; UI must refresh from receipt not `fetchCoinTransferQuote`) and `ALREADY_SUBSCRIBED` surfacing in dialogs (flagged for UI pass).
+
+---
+## ZM-018 [FILED] — Auth/users/admin/currency API sweep: bare internal mutators, step-up gaps, oracles
+
+**Severity:** High. Scope: every `routes/*.go` in `auth, users, admin, currency`. Pure logic/API audit (not frontend-vs-backend).
+**Breakage:** currency `exchangeRates.routes.go:19-20` convert bare + `First()` not-found unmapped + NO staleness TTL (`FindLatestRevisionForCurrency` order-by-ID) — empty table = every convert fails; first-ever currency errors instead of seeding (`setExchangeRate.handler.go:49`); locale routes trust spoofable `X-Client-Region` (`locale.routes.go:12-13`); `profiles.routes.go:20-21` bare by-username/userId duplicates guarded `:19` same-handler variant (auth bypass + router conflict); `usernames.routes.go:25` suggestion bare with no rate-limit import; smile-id webhook bare at route (`identityVerification.routes.go:23` — HMAC must live in handler, verify); sitemap `PageSize=1000` unbounded `page` = scrape vector; every `/internal/*` mutator bare (`platformSettings:24`, `staffAdmins:27-28`, `users/internal/*` enforcement/linkedProfiles/legal/checkmarks enforcement-actions/restrict/reinstate/warn/force-logout/audit-events/signals) — honest ONLY if gateway strips `/internal/*` externally; staff auth login/mfa/refresh routes bare with no route-level `RateLimitAuthEndpoints` (limiter must be global or brute-force open).
+**Security:** profiles/usernames/notification-directory/confusables oracles (taken/reserved/invalid + `takenByUserId/takenByUsername` to any `users.usernames.read`); step-up missing on restrict/reinstate/warn/force-logout (`accountEnforcement:28,30,37,38`), verification approve/reject/reinstate + business-docs + creator-approve (`checkmarks:31-33,44,48`, `businessDocuments:24-25`, `creatorProgram:23-24` — role/document grants without re-auth) while black-application approve/reject correctly requires it; `staffAdmins:26,32` + `staffAccount` empty-permission `RequireStaff("",…)` = any-stepped-up-staff incl. approve/superadmin/settings; `platformSettings` read-set includes `settings:edit`; `ChangeUsername`/deletion-request/address-delete without step-up (takeover persistence); pagination heavy-but-bounded (audit export 10000, held-usernames 500, sitemap 1000) — cap sitemap + add max-page.
+**Logic/ethics:** no FX TTL/`effectiveAt`/seed guarantee (30% large-change confirm + reason + audit good); delete honesty mixed (address hard-Delete honest; account-delete async-anonymize labeled `deleted` while 5 downstream categories `OutcomeDelegated` unverified; `deleted_<8hex>` Profile retained); audit missing must-confirm on usernames/retention/platform-settings/staff-admin/legal/policy/topics/business-docs/creator-approve + no user-action trail on deactivate/delete/username-change; PII separation good (`personal-data` + step-up + audit) but `ListUsers/GetUser` broad roles need view redaction; public profile/sitemap/topics bare = mass-scrape note.
+**Fix:** internal-token at every `/internal/*` route (close `suspensionCases.routes.go:15`-class bare intake); step-up on all privilege/document/role/session ops; non-empty permission strings; FX staleness reject + seed path; audit-record every listed mutation; redact confusables/PII views.
+
+---
+## ZM-019 [FILED] — Catalog/inventory/orders/live/ads/moderation API sweep: stuck states, forfeits, open redirect (logic/API)
+
+**Severity:** High. Scope: every route in `catalog, inventory, orders, live, ads, moderation`.
+**Breakage (stuck funds/orders/battles):** order `shipped/delivered` lack `cancelled` edge (`orderStateMachine:10-18` vs `orderCancellation:36`) — post-ship buyer has no cancel path; `shipped` row missing yet `ShipOrder` transitions unconditionally without `CanTransition` (`sellerOrderOperations:114-122`) + fulfils stock pre-tx; `confirmOrderReceipt delivered→completed` releases money then completes order — second-call failure leaves money-released/order-`delivered` (`confirmOrderReceipt.handler:27-36`); battle `countdown/active` no cancel, `ended` only `settlementCommitted` (`battleStateMachine:36-38`) — failed `SettleBattle` (10s ledger call inside DB tx, cap-20 no backoff) strands battles `ended` forever with no per-battle retry route (`battles.controller:88-89` host-end only); boost `cancelled` re-cancel 200-no-op + **card-paid unspent budget forfeited** (`boostCancellation:51-53,123-125` vs wallet/balance outbox refund) — card payers worse terms, undisclosed; return-after-decline re-request no cooldown + partial-restock marks full refund (`returns.service:45-49,115-141`); seller single-shot refund only (`sellerOrderRefund:24-48` — partial post-release dead-ends); CSV export truncates at 200; product/review lists need cap confirmation.
+**Security:** ads account routes bare `Authenticated` with path `accountId` only (cross-account by ID guess vs boosts `getBoost:18` user-scoped ✓); `ConfirmPayment` boostId+reference with no amount-match at route (`boosts.controller:110-123` internal-only — verify handler); `decide` any-authed with caller-supplied `Viewer/Slot/TrustedSignal` (`decision.routes:13-14` — must ignore untrusted signals); tracking events batch self-attributed 1-100 any-authed; **`GET /api/v1/ads/r/{token}` unauthenticated open redirect** (`tracking.routes`) — allowlist token target; live join/pins/monetization/media-token bare `authenticated`, host-check delegated to service (end checks host ✓, others must-confirm); battle view leaks pending stakes to any authed (`battles.controller:42-56`); receiver client-chosen with on-stage-only check (host↔guest collusion farms scores); brands `POST /brands` idempotent-only with possibly-empty `AccountIdFrom` (`brands.routes:68-71`); team accept/decline requestId-guessable (`storeTeam:22-26` — confirm invitee check); review DELETE author-check unconfirmed; reservation lines caller-supplied Store/Variant (confirm store-owns-variant); reports no self-report block; affiliate attribution unsigned (rate decided at release — seller changes rate post-click).
+**Logic:** checkout server-priced ✓ (re-price + reserve in tx; client sends ids only); coupon `candidates[len-1]` assumed coupon without type check + auto-best stacking with campaigns (combinability flag missing); promo per-candidate redemption N+1 + check-vs-increment race (overshoot without row lock); shipping-quote advisory-only must-confirm; like-toggle flapping/no self-like ban/count-drift; gift burst 1s-window no distributed lock (100-qty overspend) + share-action client-asserted farmable; auction unknown-`bidType` falls back to auto-bid instead of exclusion + reserve currency unnormalized.
+**Ethics:** verified-purchase gate exists but confirm it excludes cancelled/refunded; sellers blanket-reply bury negatives + `ReportReview` takedown requests need abuse counter; no self-referral (buyer==affiliate) check; battle/gift collusion → opaque `WinnerTakesAll` routing + public whale leaderboards (anonymize flag); auction losers/reserve/pCTR never exposed + `estimateBoost` no methodology + premium-pool no public audit; moderation `Act` single-permission no step-up (unilateral takedown) vs suspend/revoke stepped-up; automation executions read-only with no public remedy log.
+**Fix:** cancel edges + `CanTransition` on ship + atomic fulfil; idempotent per-battle settle/retry route; card unspent refund parity + disclosure; redirect allowlist; host-middleware at route; signed attribution; combinability flags + promo row locks; burst locks; auction transparency log.
+
+---
+## ZM-020 [FILED] — TS gateway/social/media/search/notify/support API sweep: shadow nesting, anon oracles, rate holes
+
+**Severity:** Medium. Scope: every `routes/*.routes.ts` + `modules/*/routes/*.routes.ts` in `gateway, social, media, search, notifications, support`.
+**Authz shadow nesting:** gateway `{ /api/v1/posts, optional }` (`upstream.routes.ts:79`) shadows nested POSTs — `POST posts/:postId/media/:mediaId/download` (optional at gateway; needs required + owner/download-setting downstream despite `mediaDownload` rate-limit existing); `POST posts/:postId/link-preview` falls under posts-optional (`linkPreviews.routes.ts:2`) while GET link-previews is required — refresh path must independently require auth + post-owner (controller resolve is required ✓, refresh must-confirm). `mentions resolve: optional` + anon-allowlisted POST = 100-id enumeration oracle, no captcha/rate entry. `sharePost/impression/profile-visit: optional` anon writes attribution then no-ops with success — spam-metric inflation + anon DoS amplification (DB read before early-return). Post analytics/story-viewers/audience/tags/sounds owner-check downstream-only (delete paths verify owner ✓, others must-confirm). `messagingKeys listDevices: required` takes `{userIds}` ignoring principal — any-authed device enumeration, no rate name. `storeInbox` internal wrapped ✓ + buyer paths required ✓, but `digests/:kind` uses manual `assertInternalToken` not wrapper (inconsistent). Media uploads all user+owner-scoped ✓, internal/download-variant internal ✓. Search-recent `requireViewerId` ✓. Support mine/staff split correct, BUT gateway marks `/api/v1/support/`, `/api/v1/admin/support/`, `/api/v1/admin/help/` ALL `optional` (`upstream.routes.ts:120,125-126`) — relies wholly on downstream staff JWT + `doesAdminRequestNeedStaffToken`; staging without JWKS/staff-audience = open. Notifications inbox required ✓; unsubscribe `optional` by design but token never expires (below).
+**SSRF/upload/token:** SafeFetcher + DNS pinning sound, `^https?://` validator ✓; residual: sound `audioUrl/coverUrl` free strings (fetch-time allowlist if ever fetched); upload mime/size server-checked + ClamAV hookup at route ✓ (fail-open is ZM-010); unsubscribe HMAC unforgeable but no `exp/iat`, query-string leakage, `describe` GET validity oracle, anon POST with no rate name.
+**Rate-limit holes:** covered only login/otp/reset/signup/usernameCheck/report/upload/search/tagSearch/postWrite(3 paths)/verification/mediaDownload/seller*/storeMessageSend(2 patterns)/feedInteraction/linkPreview/widget*/offer* — everything else global-IP-only: comments create/like, post like/repost/share/impressions, follows, saves, sounds, all conversation/group/member/admin/accept/block, message send/react/vote/share, key claim/deposit, `buyerSend` direct-conv (regex misses `POST /conversations/:id/messages`), inbox read-all/device-register, unsubscribe POST, ticket create/reply/rating, help votes, staff chat, admin bulk-send/notice/test-send (leaked staff token = bulk-send), mentions resolve.
+**Pagination/PII:** global clamps OK (20/100, search max) with outliers digests 500, postNotifications 500, storeInbox 200, key ids 500, ciphertext 70000, evidence 100×unknown-JSON; no unbounded take in scope. No PII logging in scope (counts/actions only).
+**Shadow-moderation:** author-hide/sensitivity/pin/allowReuse with counts/events but no appeal route in social scope — appeals live in trust/admin unlinked.
+**Staging notes:** `optional` forwards identity headers — non-identity upstreams must never trust `x-zudomart-account-id` without HMAC; `exactPathOnly` needs trailing-slash tests; `isInternalOnlyPath` blocks ANY future public path containing an `internal` segment.
+**Fix:** required+owner on download/link-preview-refresh/share; captcha/rate on resolve; scope listDevices to self-or-contact; staff-JWKS staging assertion test; per-route limits for the listed POSTs; expiring single-use unsubscribe (POST-only); link appeal flows; rename/allowlist any future `internal`-named public segment.
+
+---
+*End of current sweep — ZM-001…ZM-013 all in this file. Next step on request: patch in severity order (ZM-001 → ZM-005 → ZM-002B → ZM-011 cluster fix).*

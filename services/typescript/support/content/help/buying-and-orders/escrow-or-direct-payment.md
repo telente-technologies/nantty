@@ -21,6 +21,7 @@ Buyers in Nigeria. Outside Nigeria there is no escrow; every order is a direct p
 **Pay directly**: "The seller is paid right away."
 - The money goes to the seller as soon as you pay.
 - There is no escrow and no dispute button. For a problem, contact the seller or support, but we can't guarantee a refund.
+- The order completes when you tap **Confirm receipt**, or automatically 3 days after delivery unless you ask for a return or refund first.
 
 ## How to choose
 

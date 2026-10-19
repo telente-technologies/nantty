@@ -14,7 +14,7 @@ export const dataRightsRequestsSections: readonly LegalDocumentSection[] = [
     heading: "How to make a request",
     paragraphs: ["The fastest way is in the app, where we already know it is you:"],
     bullets: [
-      "Download your data: Settings, Privacy & Data, Download your data.",
+      "Download your data: Settings, Privacy & Data, Download your data. We tell you when the file is ready; it is deleted 72 hours later, and you can ask for a new one.",
       "Delete your account: Settings, Privacy & Data, Delete account. You have 30 days to change your mind by logging in.",
       "Correct your data: edit your profile, addresses and settings directly.",
       "Change consent: cookie settings on our websites, and Settings, Privacy & Data in the app.",

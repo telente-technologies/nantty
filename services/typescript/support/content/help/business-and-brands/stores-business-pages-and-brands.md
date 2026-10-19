@@ -1,13 +1,15 @@
 ---
 title: Stores, business pages and brands: what you can have
-summary: Each personal account can have one Store or one Business page, never both, plus one Brand. Brands can choose to sell or not.
-tags: store, business page, brand, profile limit, how many profiles, store or business, sell with brand, mart icon, choose which to keep
-related: business-profiles, brand-pages, switch-profiles, start-selling, profile-types
+summary: Each personal account can have one Store or one Business page, plus one Brand. With Blue Premium you can have up to 5 business profiles, but still only one Store.
+tags: store, business page, brand, profile limit, how many profiles, store or business, sell with brand, mart icon, choose which to keep, premium, 5 business profiles, premium needed
+related: business-profiles, brand-pages, switch-profiles, start-selling, profile-types, premium
 ---
 
-Your personal account can own at most two linked profiles: **one Store or one Business page** (never both), plus **one Brand**.
+Without Blue Premium, your personal account can own at most two linked profiles: **one Store or one Business page** (never both), plus **one Brand**.
 
-## What you can have
+With [Blue Premium](/help/payments-and-wallet/premium) you can own **up to 5 business profiles**. Still only one of them can be a Store. The others are Business pages or Brands that don't sell.
+
+## What you can have without Premium
 
 | You own | Allowed? |
 |---|---|
@@ -19,6 +21,19 @@ Your personal account can own at most two linked profiles: **one Store or one Bu
 | 1 Business page and 1 Brand | Yes |
 | A Store and a Business page | No, choose one |
 | 2 or more Stores, Business pages or Brands | No |
+
+## What you can have with Premium
+
+| You own | Allowed? |
+|---|---|
+| Up to 5 Business pages and Brands, in any mix | Yes |
+| 1 Store plus up to 4 Business pages and Brands | Yes |
+| 2 or more Stores | No, only one Store |
+| 6 or more business profiles | No |
+
+## If Premium ends
+
+Nothing is deleted. Profiles you already have keep working, including their posts, orders and payouts. You can't add new profiles until Premium is back, and the profiles beyond the standard limit show **Premium needed**. Renew Premium and the label goes away.
 
 ## Store or Business page
 
@@ -45,7 +60,7 @@ Brand selling follows the same money rules as stores: your Zudomart wallet, escr
 
 ## If your account has more than the rule allows
 
-Accounts created before this rule may have extra profiles. Nothing is deleted. The extras can't post or add listings until you choose which to keep:
+This section is about accounts without Premium. Accounts created before this rule may have extra profiles. Nothing is deleted. The extras can't post or add listings until you choose which to keep:
 
 1. Go to **Settings › Choose which profiles to keep**.
 2. Pick one Store or Business page, and one Brand.
@@ -56,6 +71,7 @@ Profiles you don't keep stay visible, and their open orders and payouts carry on
 ## If something goes wrong
 
 - **"You can have one Store or one Business page, not both."** You already have one of them. Manage it from your profiles.
-- **"You can have one Brand."** Your account already has a Brand.
+- **"You can have one Brand."** Your account already has a Brand. With Blue Premium you can add more, up to 5 business profiles in total.
+- **"Premium needed"** on a profile. Your Premium has ended and this profile is beyond the standard limit. It still works, but you can't add more profiles until you renew Premium.
 - **"Choose which profiles to keep before using this one."** Your account has extra profiles on hold. Choose which to keep first.
 - **"Turn on selling for this brand before adding listings."** Turn on **Sell products with this brand** in brand settings.

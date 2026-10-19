@@ -9,7 +9,7 @@ Confirming delivery tells us your order arrived safely. It releases the escrow p
 
 ## Who this is for
 
-Buyers who paid with escrow in Nigeria. Direct payments have already gone to the seller, so there is nothing to confirm.
+Buyers who paid with escrow in Nigeria. Direct payments have already gone to the seller, but you can still confirm receipt to complete the order. If you don't, a direct order completes automatically 3 days after delivery unless you ask for a return or refund.
 
 ## How to confirm delivery
 

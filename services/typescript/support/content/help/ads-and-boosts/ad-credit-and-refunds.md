@@ -1,43 +1,77 @@
 ---
 title: Ad credit, ad balance and refunds
-summary: Money in your ad account is prepaid for ads and boosts and can't be withdrawn. Rejected boosts are refunded to your ad balance.
-tags: ad credit, ad balance, refund boost, boost refund, withdraw ad credit, unused ad money, abeg refund
-related: fund-ads-from-earnings, pay-for-a-boost, ad-review-and-policies, your-wallet-explained, ads-faq
+summary: Your ad balance is real money you added and can be withdrawn to your wallet. Ad credit is promotional, can only be spent on ads and can never be withdrawn.
+tags: ad credit, ad balance, refund boost, boost refund, withdraw ad balance, withdraw ad credit, unused ad money, cashback, credit expiry, abeg refund
+related: fund-ads-from-earnings, pay-for-a-boost, ads-in-the-app, ad-review-and-policies, your-wallet-explained, ads-faq
 ---
 
-Your ad account holds money that can only be spent on Zudomart ads and boosts.
+Your ad account has two separate pots. The app and the web show them separately on the **Ad balance** page in your [Ads hub](/help/ads-and-boosts/ads-in-the-app).
 
-## Balance and credits
+## Ad balance (withdrawable)
 
-- **Balance**: money you added by card, bank transfer or from your Zudomart balance.
-- **Ad credit**: money Zudomart gives you, for example a free Premium boost, refunds, or monthly ad credit included with some plans. Credits are used before your balance.
+Real money you put in:
 
-Your wallet's **Ad credit** line describes it as "Prepaid credit for Zudomart ads and boosts. It cannot be withdrawn."
+- top-ups by card or bank transfer
+- money you moved from your earnings
+- card payments for a boost that weren't spent, for example after you stop a boost or it isn't approved
 
-In Ads Manager, the **Balance** card also estimates how many days your balance will last at your current daily budgets, and warns you with **Low balance**.
+You can spend it on ads, or withdraw what you haven't spent.
 
-## It can't be withdrawn
+## Ad credit (ads only)
 
-Ad balance and ad credit can't be moved back to your wallet or bank. Only add what you plan to spend.
+Promotional credit from Zudomart. It can only be spent on ads and boosts in the app or on the web, and it can **never** be withdrawn or turned into cash. It comes from:
+
+- **Issued by Zudomart**, for example a promotion. This credit may have an expiry date.
+- **Cashback**: some advertisers get a share of their ad spend back as credit.
+- **Free Premium boost**: the value of your free boost.
+- **Refunds** of ad spend that was paid with credit.
+
+Credit you earn in the app, such as cashback and refunds, never expires. Credit issued by Zudomart may expire; you see a line such as "₦5,000 expires on 30 Nov". Expired credit is removed automatically and shows as **Expired** in your history.
+
+## The order your money is spent
+
+1. Ad credit that expires soonest.
+2. Ad credit that doesn't expire.
+3. Your ad balance.
+4. Your card, for ads you paid by card.
+
+## Cashback
+
+If Zudomart has added you to cashback, you get a share of your ad spend back as ad credit, usually 10%. It's added when your spend is settled. You only earn cashback on spend paid with real money, never on spend paid with ad credit. If that spend is refunded, the cashback is taken back.
+
+## Withdraw your ad balance
+
+1. Open **Ads**, then **Ad balance**, and tap **Withdraw**.
+2. Enter an amount. You see the payment provider fee and what you'll receive before you confirm.
+3. Confirm it's you when asked.
+
+The money goes to your Zudomart wallet, and from there normal [wallet withdrawal](/help/payments-and-wallet/your-wallet-explained) rules apply.
+
+- You need payout verification.
+- Money from a top-up can be withdrawn once that top-up has been settled for 24 hours.
+- Money reserved for ads that are still running or in review can't be withdrawn. Stop or finish those ads first.
+- You can never withdraw ad credit, or more than your unspent ad balance.
 
 ## Refunds
 
-- **Rejected boost**: the full boost budget goes back to your ad balance, labelled "Boost not approved". You can use it for another boost or ad.
-- **Monthly plan credit**: unused credit doesn't roll over to the next month.
-- **Free Premium boost**: if rejected, the value returns as ad credit, but that month's free boost still counts as used.
-- **Charged twice or paid for a boost that never started?** [Contact support](/help/contact-support/contact-support) with your receipt.
+- **Rejected boost paid by card:** the budget stays in your ad balance, and you can withdraw it or use it to resubmit the ad.
+- **Stopped boost paid from your earnings:** what wasn't spent goes back to your Zudomart balance.
+- **Free Premium boost:** if it's rejected or stopped before it delivers, the credit is removed and you get that month's free boost back.
+- **Charged twice, or paid for a boost that never started?** [Contact support](/help/contact-support/contact-support) with your receipt.
 
-Refunds of money you added are handled by support case by case. Boost and ad spend that already delivered isn't refunded.
+Ad spend that already delivered isn't refunded, except when our systems find invalid traffic.
 
 ## Invalid clicks
 
 You're not charged for clicks and views our systems mark as invalid, such as bots or repeated fake clicks.
 
-## Receipts
+## History and receipts
 
-Ads Manager's billing history lists top-ups, refunds and card charges, and you can download a receipt for each.
+Your ad balance history shows each entry with its reason: **Top-up**, **Spent on ads**, **Issued by Zudomart**, **Cashback**, **Refund**, **Expired**, **Removed by Zudomart** or **Withdrawn to wallet**. Ads Manager's billing history also has receipts for top-ups, refunds and card charges.
 
 ## If something goes wrong
 
+- **"You can't withdraw more than your withdrawable ad balance."** Some of it is reserved for running ads, is credit, or comes from a top-up less than 24 hours old.
+- **"Verify payouts to withdraw your ad balance."** Finish payout verification.
+- **"Confirm it's you again."** Withdrawals always need a quick confirmation.
 - **"Add funds to your ad account to run this campaign."** Your balance and credit are used up.
-- **"This transaction has no receipt."** Only top-ups, refunds and card charges have receipts.

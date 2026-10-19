@@ -6,11 +6,11 @@ Parts are adapted from the CC0 templates by General Legal, PC (kept unchanged in
 
 ## 1. Public policies (website)
 
-All are rendered by `apps/web/src/components/legal/legalPolicyPage.tsx` from content in `apps/web/src/content/` and registered in `legalPolicies.content.ts` (current version **1.1 (draft)**, effective 2026-12-01; 1.0 and 0.9 are archived at `/legal-archive/<slug>/<version>`).
+All are rendered by `apps/web/src/components/legal/legalPolicyPage.tsx` from content in `apps/web/src/content/` and registered in `legalPolicies.content.ts`. Zudomart has not launched, so every document is **version 1.0 (draft)**, planned effective date 2026-12-01 (to be confirmed with counsel), with no version history. The `/legal-archive/<slug>/<version>` route stays in place and has no entries until a post-launch version replaces 1.0. The Terms are split across `termsOfService.content.ts` and `termsOfServiceMoney.content.ts`.
 
 | Page | Slug | Content file | Derived from General Legal |
 | --- | --- | --- | --- |
-| Terms of service | `/terms` | `termsOfService.content.ts` | Terms of Use |
+| Terms of service | `/terms` | `termsOfService.content.ts`, `termsOfServiceMoney.content.ts` | Terms of Use |
 | Privacy policy | `/privacy` | `privacyPolicy.content.ts`, `privacyPolicyProcessing.content.ts`, `privacyPolicyAnnexes.content.ts` | Privacy Policy (GDPR) and (US) |
 | Cookie policy | `/cookies` | `cookiePolicy.content.ts` | Cookie Notice |
 | Community guidelines | `/community-guidelines` | `communityGuidelines.content.ts` | no |
@@ -18,8 +18,10 @@ All are rendered by `apps/web/src/components/legal/legalPolicyPage.tsx` from con
 | Creator Program terms | `/creator-terms` | `creatorTerms.content.ts` | no |
 | Ads policy | `/ads-policy` | `adsPolicy.content.ts` | no |
 | Refund and escrow policy | `/refund-escrow-policy` | `refundEscrowPolicy.content.ts` | no |
-| Copyright and IP policy (new) | `/copyright-policy` | `copyrightPolicy.content.ts` | no |
-| Data rights requests (new) | `/data-rights` | `dataRightsRequests.content.ts` | no |
+| Copyright and IP policy | `/copyright-policy` | `copyrightPolicy.content.ts` | no |
+| Data rights requests | `/data-rights` | `dataRightsRequests.content.ts` | no |
+
+The drafts were benchmarked against TikTok, Meta, Twitch, X and Kick and checked against the code in October 2026: see [platformBenchmark-2026-10.md](platformBenchmark-2026-10.md), including the code vs policy mismatches the owner must resolve.
 
 Shared placeholders (entity name, credit line) live in `legalPlaceholders.content.ts`. Every remaining gap is marked `[Team to replace: ...]` or `[Team to confirm ...]`; search for `[Team to` to list them.
 
@@ -124,6 +126,7 @@ Status column is for the team to fill in.
 5. **No personalised ads for under-18s** is promised in the policies; check the ad decision engine enforces it.
 6. **Data-rights request log and 72-hour acknowledgment** are described in the Data rights page; the support service should track them.
 7. **Direct payment in Nigeria** is mentioned for verified stores (existing help content). Confirm it still exists in the Flutterwave design.
+8. **Code vs policy mismatches** found in the October 2026 benchmark (undelivered orders auto-release at 30 days, fees returned on post-payout refunds, no automatic strike pause, no CSAM reporting pipeline, web coin chargebacks not debited, ad balance withdrawal fee, Gold ad load, offer-link limit; Paystack resolved: Flutterwave only) are listed in `platformBenchmark-2026-10.md`.
 
 ## 5. Questions for a Nigerian lawyer
 
@@ -139,8 +142,9 @@ Status column is for the team to fill in.
 10. What are our VAT, withholding and reporting obligations as a marketplace under the Nigeria Tax Act 2025 and the Nigeria Tax Administration Act 2025, including e-invoicing and any duty to collect VAT on sellers' sales?
 11. Exact retention periods for order, payment and KYC records (CAMA 2020, NTAA 2025, MLPPA 2022), and does the 2-year Cybercrimes Act s.38 retention apply to us?
 12. Does our copyright process (48-hour uploader window, typed declaration instead of a "declaration on oath", 10 business days before restoring) meet ss.54–56 of the Copyright Act 2022?
-13. Are coins and gifts (non-withdrawable, creator-convertible) likely to be treated as e-money or a regulated product by the CBN or SEC?
+13. Are coins and gifts (non-withdrawable, creator-convertible) likely to be treated as e-money or a regulated product by the CBN or SEC? Same question for ad balance (withdrawable) versus ad credit (never withdrawable).
 14. Ghana, Kenya and South Africa: confirm registration duties at launch and whether "direct payment at your own risk" with seller verification is acceptable to consumer regulators there.
+15. Is it fair under FCCPA ss.120–122 and 127 to keep the escrow and processing fees when a buyer is refunded after the seller was paid, refunding only the seller's portion?
 
 ## 6. Sources
 

@@ -21,7 +21,9 @@ Eligible ads shown on your content, and on your lives if you allow live ads, ear
 
 ## Affiliate commissions
 
-Promote sellers' products and earn a commission on each confirmed sale. Commissions become available once the buyer's escrow is released.
+Promote sellers' products and earn a commission on each completed sale. In Creator Studio open **Affiliate** to find products open to affiliates, copy your link for each one and see clicks, sales and earnings. Tagging an approved product in a post, clip or live counts too.
+
+A commission is paid only when the order completes: the buyer confirms receipt, or 3 days pass after delivery with no dispute, return or refund request. Nothing is paid while the order is paid, shipped or delivered, and a sale refunded, cancelled or returned before completion pays nothing. Your own purchases never earn a commission.
 
 ## See your earnings
 

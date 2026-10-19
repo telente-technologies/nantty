@@ -35,7 +35,7 @@ Each reply has its own buttons to like, reply, repost, save and share. Press and
 
 ## Quick actions in the feed
 
-On a feed post with a single photo or no media, swipe right to like it and swipe left to open the comments. On posts with several photos, swiping moves between them instead. The buttons under each post always work.
+Use the buttons under each post to like it or open the comments, or double-tap a photo to like it. Swiping left and right on the feed switches between **Feed** and **Mart**; on posts with several photos, swiping moves between the photos instead.
 
 ## Quotes
 

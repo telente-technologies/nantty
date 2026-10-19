@@ -52,7 +52,7 @@ export const copyrightPolicySections: readonly LegalDocumentSection[] = [
       "When an account receives repeated notices, we send a warning that another valid notice will lead to suspension, and ask the account owner to confirm they received it.",
       "You can challenge the warning within 10 days with a signed counter-notice explaining the mistake or misidentification, or why the use was not infringing. If it cannot be resolved within 10 days, it is referred to the Nigerian Copyright Commission.",
       "After a further valid notice, with no challenge pending, the account is suspended for at least one month.",
-      "On top of that, every upheld claim about a video or listing adds a strike that lasts 12 months. Your first infringement gets a warning. A repeat infringement within 12 months suspends posting, going live, selling and earning for at least 30 days, as Section 55 of the Copyright Act 2022 requires. A third strike sends the account for review for permanent closure. Money already in your wallet stays yours.",
+      "On top of that, every upheld claim about a video or listing adds a strike that lasts 12 months. Your first infringement gets a warning. A repeat infringement within 12 months suspends posting, going live, selling and earning for at least 30 days, in line with the one-month suspension in section 56 of the Copyright Act 2022. A third strike sends the account for review for permanent closure. Money already in your wallet stays yours.",
     ],
   },
   {

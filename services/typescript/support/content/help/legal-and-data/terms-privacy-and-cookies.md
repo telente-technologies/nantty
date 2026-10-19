@@ -1,11 +1,11 @@
 ---
 title: Terms, privacy and cookie policies
-summary: Our policies are versioned drafts under Nigerian law. We tell you before important changes take effect and ask you to accept material ones.
+summary: Our policies are first-version drafts under Nigerian law, not yet in effect. We tell you before important changes take effect and ask you to accept material ones.
 tags: terms, privacy policy, cookies, legal, community guidelines, escrow policy, copyright policy, governing law
 related: your-data-rights, privacy-settings, download-your-data, delete-your-account
 ---
 
-Read our policies on the website. Each shows its version, the date it takes effect and earlier versions:
+Read our policies on the website. Each is version 1.0, a draft that isn't in effect yet, and shows the date it is planned to take effect. After launch, earlier versions stay available on each page:
 
 - **Terms of Service**: the main rules for using Zudomart
 - **Privacy Policy**: what data we collect, why, who we share it with and how long we keep it, with annexes for Ghana, Kenya, South Africa, the UK, the EU and the US
@@ -22,6 +22,9 @@ Read our policies on the website. Each shows its version, the date it takes effe
 - **Escrow is Nigeria only.** Outside Nigeria you pay sellers directly, at your own risk. We can act against the seller and escalate to our payment partner, but we can't reverse payments.
 - **Nigerian law applies.** Disputes go first to our support team, then mediation if you both agree, then arbitration seated in Lagos. Small claims courts and regulators such as the FCCPC and the Nigeria Data Protection Commission stay open to you, and consumers abroad keep their local rights.
 - **Your consumer rights are not affected.** Sellers must accept returns of goods that are defective or not as described.
+- **Coins aren't money.** Gifts and tips are final once sent. ZudoPoints can never be withdrawn, and ad credit is never cash.
+- **Sellers pay the fees.** There's no commission on products. Sellers pay the escrow fee and processing fee; buyers never pay a checkout or escrow fee.
+- **We never sell your personal data,** and we can't read your end-to-end encrypted chats.
 
 ## When policies change
 

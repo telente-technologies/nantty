@@ -23,7 +23,7 @@ export const sellerTermsSections: readonly LegalDocumentSection[] = [
     id: "stores-business-pages-and-brands",
     heading: "Stores, business pages and brands",
     paragraphs: [
-      "Each personal account can own one Store or one Business page, never both, plus one Brand. Business pages are for organisations that do not sell and cannot list products. If an account had more than this before the rule applied, nothing is deleted, but the extra profiles cannot post or add listings until the owner chooses which to keep or our team resolves it.",
+      "Each personal account can own one Store or one Business page, never both, plus one Brand. Premium members can own up to 5 business profiles, but never more than one Store. [Team to confirm how the 5 profiles may be split between business pages and brands.] Business pages are for organisations that do not sell and cannot list products. If an account had more than this before the rule applied, nothing is deleted, but the extra profiles cannot post or add listings until the owner chooses which to keep or our team resolves it.",
       "A Brand sells only when its owner turns on selling for it. A brand storefront is a sales channel of that Brand and does not count as your Store. Brand selling follows these Seller Terms in full, including the wallet, escrow in Nigeria, identity verification before selling outside Nigeria, and the seller debt limits. If you turn selling off, your brand products and storefront are hidden and you cannot add new listings, but you must still complete open orders, and their payouts continue as normal.",
     ],
   },
@@ -51,9 +51,10 @@ export const sellerTermsSections: readonly LegalDocumentSection[] = [
     paragraphs: [
       "Zudomart never holds your money. Your wallet is held by our licensed payment partner in your name.",
       "In Nigeria, escrow orders: the buyer's payment stays locked in the buyer's own wallet until the buyer confirms delivery, or 3 days after delivery if there is no dispute. It then moves to your wallet, minus fees, is locked for 24 hours, and then becomes available to withdraw. Payouts go to a verified bank account in your own name, in the daily payout run or when you request a withdrawal.",
-      "Verified stores in Nigeria may also offer direct payment where available. Direct payments reach you when the payment settles, with no escrow, and you remain responsible for refunds you owe.",
+      "Verified stores in Nigeria may also offer direct payment where available. Direct payments reach you when the payment settles, with no escrow, and you remain responsible for refunds you owe. A direct order completes automatically 3 days after you mark it delivered, unless the buyer opens a dispute or asks for a refund before then.",
+      "If an order is still not marked delivered 30 days after the buyer paid, our staff review it, contact you and the buyer, and decide whether to release the payment to you or refund the buyer. [Team to confirm: the escrow service releases the payment to the seller automatically at 30 days today; it must be changed to staff review.]",
       "Outside Nigeria, there is no escrow. You are paid directly when the buyer's payment settles, and you are fully responsible for refunds you owe the buyer. If you fail to pay a refund, we may restrict or close your store and report you to our payment partner and the authorities.",
-      "If a refund or chargeback happens after you were paid, we may move the amount back from your wallet up to your available balance. Any amount still owed is a debt you owe to the buyer or to us, as the case may be.",
+      "If a refund or chargeback happens after you were paid, we take back your portion of the order (what you received after fees) from your wallet, up to your available balance, and refund it to the buyer. Any amount still owed shows as owed to Zudomart and comes out of your next earnings, and you cannot withdraw until it is cleared. The escrow fee and processing fee are not refunded. [Team to confirm against the code, which today returns the fees to the buyer.]",
     ],
   },
   {
@@ -63,7 +64,7 @@ export const sellerTermsSections: readonly LegalDocumentSection[] = [
       "Zudomart takes no commission on what you sell. Fees are shown in your dashboard before they apply:",
     ],
     bullets: [
-      "Escrow fee: 1.5% of the seller order total including delivery, or 1% on the Business plan. No escrow fee is charged on any part that is refunded.",
+      "Escrow fee: 1.5% of the seller order total including delivery, or 1% on the Business plan. If an order is refunded before escrow releases, no escrow fee is charged on the refunded part. If it is refunded after you were paid, the fee is not returned. Direct orders have no escrow fee.",
       "Payment processing fee: our payment partner's actual fee for the buyer's payment, deducted from your payout on escrow and direct orders. Buyers never pay a checkout fee or escrow fee.",
       "Withdrawal fees, if our payment partner charges one, shown before you withdraw.",
       "Seller plans, sold on the web: Free (₦0), Pro (₦5,000 a month) and Business (₦15,000 a month), or local prices in other countries. Plans renew until you cancel, and you keep the plan until the end of the period you paid for.",
@@ -90,6 +91,14 @@ export const sellerTermsSections: readonly LegalDocumentSection[] = [
     heading: "Business details shown to buyers",
     paragraphs: [
       "Where the law requires, for example for business sellers who sell to the UK, EU or US, we collect and verify your business name, address, contact details and registration number, and show some of them to buyers.",
+    ],
+  },
+  {
+    id: "affiliates",
+    heading: "Affiliate programs",
+    paragraphs: [
+      "You can invite creators to promote your products for a commission you set, up to 50% of the item price. You fund the commission: it is taken from your proceeds for that order, never from the buyer and never paid by Zudomart.",
+      "A commission is owed only when the order completes, never while it is in escrow or before a direct order completes. The rate is locked at checkout. Attribution goes to the first creator link the buyer used, within your attribution window (30 days unless you change it). A creator never earns commission on their own purchase or on sales from a store they own. If the order is refunded, cancelled or returned before completion, no commission is paid; a partial refund reduces it in proportion; a refund after completion takes it back from the creator.",
     ],
   },
   {

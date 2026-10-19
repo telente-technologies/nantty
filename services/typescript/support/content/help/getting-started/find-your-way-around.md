@@ -9,7 +9,7 @@ The Zudomart app has five tabs along the bottom. Here's what each one does and w
 
 ## Home
 
-The top of **Home** has two sections: **Feed** and **Mart**. Tap them, or swipe left and right, to switch.
+The top of **Home** has two sections: **Feed** and **Mart**. Tap them, or swipe left and right, to switch. The page follows your finger, so you can peek and let go to stay where you are. This works the same on the app and on the web.
 
 - **Feed**: posts from people and stores. Use the menu at the top of the feed to choose **For you** or **Following**, and filter by topic.
 - **Mart**: shopping, with **Product categories**, **Sales of the Day**, **New Arrivals** and **Featured Brands**.

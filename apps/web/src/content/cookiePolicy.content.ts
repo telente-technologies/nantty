@@ -32,7 +32,7 @@ export const cookiePolicySections: readonly LegalDocumentSection[] = [
     heading: "Cookies and storage we use today",
     paragraphs: [
       "On live sites, sign-in cookies carry the __Host- prefix, which locks them to our domain and secure connections. They are HttpOnly, so scripts cannot read them.",
-      "[Team to replace: add each analytics, crash reporting and advertising cookie or SDK, with provider, purpose and lifetime, once those tools are chosen.]",
+      "We do not use any third-party analytics, crash reporting or advertising cookies or SDKs today, so the optional categories below only switch on our own first-party features. If we add a third-party tool, we will list it here, with provider, purpose and lifetime, before it runs.",
     ],
     table: {
       columns: ["Name", "Category", "Purpose", "Lifetime"],

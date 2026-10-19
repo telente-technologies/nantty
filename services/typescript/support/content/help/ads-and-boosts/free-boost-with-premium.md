@@ -13,10 +13,10 @@ Your free boost covers a boost up to the minimum daily boost budget in your coun
 
 ## How to use it
 
-1. Open your post, tap the menu and choose **Promote post**.
-2. Under **Pay with**, choose **Free boost available (1 this month)**. The app picks the biggest package your free boost covers.
-3. Pick your goal and audience.
-4. Tap **Use free boost** (on the web, **Start free promotion**).
+1. Open **Ads** from your profile menu and tap **Create ad**, or open your post's menu and choose **Promote post**.
+2. Pick what to promote, your goal and audience.
+3. Under **Pay with**, choose your free Premium boost and keep the budget within what it covers.
+4. Check the preview and tap **Submit for review**.
 
 Your boost goes through review like any other. Its results page says "Covered by your free Premium boost".
 
@@ -28,7 +28,8 @@ You get a new free boost on the 1st of each month (Lagos time, or your ad accoun
 
 - You get one free boost a month, however many posts you have.
 - If you choose a bigger budget, pay for the boost instead. See [Paying for a boost](/help/ads-and-boosts/pay-for-a-boost).
-- If your free boost isn't approved, its value goes back to your ad balance as ad credit, and that month's free boost is still counted as used.
+- Your free boost is ad credit: it can only be spent on that ad and can't be withdrawn.
+- If your free boost is rejected or stopped before it delivers, the credit is removed and you get that month's free boost back. Once it has started delivering, it counts as used.
 
 ## If something goes wrong
 
