@@ -122,11 +122,20 @@ func TestSaleAttributionIsKeptFromCartToOrderAndCompletionEvents(t *testing.T) {
 	_, view = buyer.call("POST", "/api/v1/cart/items", map[string]any{"productId": productId, "quantity": 1, "attribution": map[string]any{"source": "post", "id": uuid.NewString()}})
 	line := view["items"].([]any)[0].(map[string]any)
 	if line["quantity"].(float64) != 3 || line["attribution"].(map[string]any)["source"] != "clip" {
-		t.Fatalf("the first attribution is kept: %v", line)
+		t.Fatalf("the first attribution is kept and a second creator's post does not take the sale over: %v", line)
 	}
-	if status, _ := buyer.call("POST", "/api/v1/cart/items", map[string]any{"productId": productId, "quantity": 1, "attribution": map[string]any{"source": "link", "id": uuid.NewString()}}); status != http.StatusOK {
-		t.Fatalf("an affiliate link is an attribution source: %d", status)
+	firstTouch := harness.orders.Container.Client.CartItem.Query().OnlyX(context.Background()).AttributedAt
+	later := time.Now().Add(48 * time.Hour)
+	harness.orders.Container.Now = func() time.Time { return later }
+	buyer.call("POST", "/api/v1/cart/items", map[string]any{"productId": productId, "quantity": 1, "attribution": map[string]any{"source": "link", "id": uuid.NewString()}})
+	if item := harness.orders.Container.Client.CartItem.Query().OnlyX(context.Background()); item.AttributedAt == nil || !item.AttributedAt.Equal(*firstTouch) || *item.AttributionSource != "clip" {
+		t.Fatalf("another creator's link neither takes over nor extends the window: %+v", item)
 	}
+	buyer.call("POST", "/api/v1/cart/items", map[string]any{"productId": productId, "quantity": 1, "attribution": map[string]any{"source": "clip", "id": clipId}})
+	if item := harness.orders.Container.Client.CartItem.Query().OnlyX(context.Background()); item.AttributedAt == nil || !item.AttributedAt.After(*firstTouch) || item.AttributionID.String() != clipId {
+		t.Fatalf("the same creator's link clicked again refreshes the attribution window: %+v", item)
+	}
+	harness.orders.Container.Now = time.Now
 	ctx := context.Background()
 	result, err := (services.CheckoutService{Container: harness.orders.Container}).Checkout(ctx, services.CheckoutRequest{BuyerId: harness.buyer, AddressId: harness.addressId, IdempotencyKey: "checkout-attribution-1"})
 	if err != nil {
@@ -151,7 +160,7 @@ func TestSaleAttributionIsKeptFromCartToOrderAndCompletionEvents(t *testing.T) {
 			OrderedAt       *time.Time                    `json:"orderedAt"`
 			AttributedItems []services.AttributedSaleItem `json:"attributedItems"`
 		}
-		if err := json.Unmarshal(eventPayload(t, row.Payload), &data); err != nil || len(data.AttributedItems) != 1 || data.AttributedItems[0].AttributionId.String() != clipId || data.AttributedItems[0].Quantity != 4 ||
+		if err := json.Unmarshal(eventPayload(t, row.Payload), &data); err != nil || len(data.AttributedItems) != 1 || data.AttributedItems[0].AttributionId.String() != clipId || data.AttributedItems[0].Quantity != 5 ||
 			data.OrderNumber == "" || data.OrderedAt == nil || data.AttributedItems[0].AttributedAt == nil {
 			t.Fatalf("%s attributed items: %s %v", eventType, row.Payload, err)
 		}

@@ -52,7 +52,7 @@ func TestAffiliateSaleFromLinkToCompletionAndRefundMovesMoneyOnlyAtCompletion(t 
 	if err != nil {
 		t.Fatal(err)
 	}
-	click, err := affiliates.RecordAffiliateLinkClick(ctx, link.Id, scene.buyer)
+	click, err := affiliates.RecordAffiliateLinkClick(ctx, link.Id, affiliateservices.AffiliateLinkViewer{UserId: scene.buyer})
 	if err != nil || click.Attribution.Source != "link" || click.ProductId != scene.productId {
 		t.Fatalf("click: %+v %v", click, err)
 	}
