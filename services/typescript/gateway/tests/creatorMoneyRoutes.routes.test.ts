@@ -12,7 +12,7 @@ describe("creator money routes", () => {
       ["GET", "/api/v1/creators/me/affiliated-products"], ["GET", "/api/v1/creators/me/subscription-plans"], ["PATCH", "/api/v1/creators/me/subscription-plans/p1"],
       ["GET", "/api/v1/creators/me/subscribers"], [`POST`, `/api/v1/creators/${creatorId}/subscriptions`], ["GET", "/api/v1/creator-subscriptions"],
       ["POST", "/api/v1/creator-subscriptions/verify"], ["POST", "/api/v1/creator-subscriptions/s1/cancel"], ["GET", "/api/v1/subscriptions/s1"], ["POST", "/api/v1/tips"],
-      ["GET", "/api/v1/seller/affiliates/overview"], ["PUT", "/api/v1/seller/affiliates/product-commissions/p1"], ["GET", "/api/v1/verification/plans"],
+      ["GET", "/api/v1/seller/affiliates/overview"], ["PUT", "/api/v1/seller/affiliates/product-commissions/p1"], ["GET", "/api/v1/verification/plans"], ["GET", "/api/v1/verification/discounts"],
       ["POST", "/api/v1/verification/subscription/cancel"], [`POST`, `/api/v1/creators/${creatorId}/subscriptions/store`],
       ["POST", "/api/v1/creator-subscriptions/store-receipts"], ["GET", "/api/v1/creators/me/subscription-plans/price-tiers"],
       ["GET", "/api/v1/creators/brand-deals"], ["POST", "/api/v1/creators/brand-deals"], ["DELETE", "/api/v1/creators/brand-deals/d1"],

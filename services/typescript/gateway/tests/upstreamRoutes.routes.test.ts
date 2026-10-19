@@ -87,6 +87,8 @@ describe("admin escrow routes", () => {
   it.each([
     ["GET", "/api/v1/admin/orders/ord_1/escrow"],
     ["POST", "/api/v1/admin/orders/ord_1/escrow/refund"],
+    ["POST", "/api/v1/admin/orders/ord_1/escrow/release"],
+    ["GET", "/api/v1/admin/escrows/undelivered-review"],
   ])("%s %s goes to go-money with optional authentication", (method, path) => {
     const route = resolveUpstreamRouteForRequest(method, path);
     expect(route?.upstream).toBe("money");

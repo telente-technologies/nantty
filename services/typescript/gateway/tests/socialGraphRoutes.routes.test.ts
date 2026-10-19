@@ -20,6 +20,13 @@ describe("social graph routes", () => {
     expect(resolveUpstreamRouteForRequest("DELETE", `/api/v1/channels/${storeId}/subscribe`)).toMatchObject({ upstream: "social", authentication: "required" });
   });
 
+  it("serves the profile avatar story and live status to guests and members, without touching identity", () => {
+    expect(resolveUpstreamRouteForRequest("GET", `/api/v1/users/${storeId}/story-status`)).toMatchObject({ upstream: "social", authentication: "optional" });
+    expect(resolveUpstreamRouteForRequest("GET", `/api/v1/users/${storeId}/live`)).toMatchObject({ upstream: "live", authentication: "optional" });
+    expect(resolveUpstreamRouteForRequest("POST", `/api/v1/users/${storeId}/live`)?.upstream).toBe("identity");
+    expect(resolveUpstreamRouteForRequest("GET", `/api/v1/users/${storeId}/live/extra`)?.upstream).not.toBe("live");
+  });
+
   it("requires sign-in for per-post notification mutes", () => {
     for (const method of ["GET", "PUT", "DELETE"]) {
       expect(resolveUpstreamRouteForRequest(method, `/api/v1/posts/${storeId}/notifications-mute`)).toMatchObject({ upstream: "social", authentication: "required" });

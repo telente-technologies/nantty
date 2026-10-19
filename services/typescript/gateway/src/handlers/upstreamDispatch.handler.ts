@@ -21,6 +21,7 @@ import { humanVerificationPath, humanVerificationRequiredBody } from "../service
 import { handleHumanVerificationRequest } from "./humanVerification.handler.js";
 import { completedRequestSignal, internalPathSignal, observeProbeSignalInBackground, tamperedTokenSignal, type ObservedRequest } from "./securityObservation.handler.js";
 import { markRequestRoute } from "../telemetry/requestMetrics.js";
+import { isAdminPath } from "../services/security/accessProbeClassifier.service.js";
 
 export interface UpstreamDispatchOptions {
   readonly config: GatewayConfig;
@@ -68,6 +69,7 @@ export function createUpstreamDispatchHandler(options: UpstreamDispatchOptions):
       observeProbeSignalInBackground(security, options.logger, observed(undefined), internalPathSignal(request.path));
       return json(404, { message: "Not found.", code: "NOT_FOUND" });
     }
+    if (request.method.toUpperCase() === "OPTIONS" && isAdminPath(request.path)) return createResponseContext({ status: 204 });
     if (request.path === humanVerificationPath) return handleHumanVerificationRequest(request, security, options.verifier, rateLimitStore, options.logger);
     const route = resolveUpstreamRouteForRequest(request.method, request.path);
     if (route === undefined) return json(404, { message: "Not found.", code: "NOT_FOUND" });

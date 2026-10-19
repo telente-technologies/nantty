@@ -113,6 +113,17 @@ describe("H1 admin routes need a staff token at the gateway", () => {
     expect((await fetch(`${base}/api/v1/admin/auth/me`)).status).toBe(401);
   });
 
+  it("answers a bare admin OPTIONS at the edge without reaching any upstream", async () => {
+    const base = await startGateway({});
+    const forwardedBefore = forwardedPaths.length;
+    for (const path of ["/api/v1/admin/ledger/entries", "/api/v1/admin/withdrawals/w1/approve", "/api/v1/admin/support/tickets", "/api/v1/admin/auth/login"]) {
+      const response = await fetch(`${base}${path}`, { method: "OPTIONS" });
+      expect(response.status, path).toBe(204);
+      expect(await response.text(), path).toBe("");
+    }
+    expect(forwardedPaths.length).toBe(forwardedBefore);
+  });
+
   it("rejects tokens whose subject carries control characters", async () => {
     expect(await verifier.verifyAccessTokenWithJwks(await sign("zudomart-api", "account-1\nx-zudomart-viewer"))).toBeUndefined();
   });
