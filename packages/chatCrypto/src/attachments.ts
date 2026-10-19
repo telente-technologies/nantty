@@ -1,6 +1,7 @@
 import { bytesEqual, concatBytes, decodeBase64, encodeBase64 } from "./bytes.util";
 import { ChatCryptoError } from "./errors";
 import { type RandomSource, aeadKeyLength, aeadNonceLength, defaultRandomSource, openAead, sealAead, sha256Digest } from "./primitives";
+import { sanitizeVoiceNoteWaveform } from "./voiceNoteWaveform";
 
 export const encryptedAttachmentMimeType = "application/vnd.zudomart.encrypted";
 export const maximumThumbnailLength = 6_000;
@@ -16,6 +17,7 @@ export interface AttachmentPointer {
   readonly durationSeconds?: number | null;
   readonly pageCount?: number | null;
   readonly thumbnail?: string | null;
+  readonly waveform?: readonly number[] | null;
 }
 
 export type AttachmentDetails = Omit<AttachmentPointer, "key" | "digest" | "sizeBytes">;
@@ -28,10 +30,12 @@ export function encryptAttachment(plaintext: Uint8Array, details: AttachmentDeta
   const blob = concatBytes(nonce, sealAead(key, nonce, plaintext, attachmentAssociatedData));
   const digest = sha256Digest(blob);
   const thumbnail = details.thumbnail && details.thumbnail.length <= maximumThumbnailLength ? details.thumbnail : null;
+  const { waveform: requestedWaveform, ...otherDetails } = details;
+  const waveform = sanitizeVoiceNoteWaveform(requestedWaveform);
   return {
     blob,
     sha256Hex: [...digest].map((byte) => byte.toString(16).padStart(2, "0")).join(""),
-    pointer: { ...details, thumbnail, key: encodeBase64(key), digest: encodeBase64(digest), sizeBytes: plaintext.byteLength },
+    pointer: { ...otherDetails, ...(waveform ? { waveform } : {}), thumbnail, key: encodeBase64(key), digest: encodeBase64(digest), sizeBytes: plaintext.byteLength },
   };
 }
 
@@ -55,10 +59,12 @@ export function sanitizeAttachmentPointer(value: unknown): AttachmentPointer | n
   const candidate = value as Record<string, unknown>;
   if (!isString(candidate.key) || candidate.key.length !== 44 || !isString(candidate.digest) || candidate.digest.length !== 44) return null;
   if (typeof candidate.sizeBytes !== "number" || !Number.isInteger(candidate.sizeBytes) || candidate.sizeBytes < 0 || !isString(candidate.contentType)) return null;
+  const waveform = sanitizeVoiceNoteWaveform(candidate.waveform);
   return {
     key: candidate.key, digest: candidate.digest, sizeBytes: candidate.sizeBytes, contentType: candidate.contentType.slice(0, 120),
     fileName: isString(candidate.fileName) ? candidate.fileName.slice(0, 300) : null,
     width: optionalNumber(candidate.width), height: optionalNumber(candidate.height), durationSeconds: optionalNumber(candidate.durationSeconds), pageCount: optionalNumber(candidate.pageCount),
     thumbnail: isString(candidate.thumbnail) && candidate.thumbnail.length <= maximumThumbnailLength && /^[A-Za-z0-9+/=]*$/.test(candidate.thumbnail) ? candidate.thumbnail : null,
+    ...(waveform ? { waveform } : {}),
   };
 }
