@@ -76,6 +76,8 @@ type Escrow struct {
 	DeliveredAt *time.Time `json:"delivered_at,omitempty"`
 	// AutoReleaseAt holds the value of the "auto_release_at" field.
 	AutoReleaseAt *time.Time `json:"auto_release_at,omitempty"`
+	// UndeliveredReviewAt holds the value of the "undelivered_review_at" field.
+	UndeliveredReviewAt *time.Time `json:"undelivered_review_at,omitempty"`
 	// PausedReleaseRemainingSeconds holds the value of the "paused_release_remaining_seconds" field.
 	PausedReleaseRemainingSeconds *int64 `json:"paused_release_remaining_seconds,omitempty"`
 	// BuyerConfirmedAt holds the value of the "buyer_confirmed_at" field.
@@ -142,7 +144,7 @@ func (*Escrow) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullInt64)
 		case escrow.FieldOrderID, escrow.FieldOrderReference, escrow.FieldCheckoutID, escrow.FieldPaymentReference, escrow.FieldProvider, escrow.FieldBuyerUserID, escrow.FieldStoreID, escrow.FieldSellerUserID, escrow.FieldProductSummary, escrow.FieldPaymentMode, escrow.FieldCustody, escrow.FieldCurrency, escrow.FieldStatus, escrow.FieldCourierName, escrow.FieldTrackingNumber, escrow.FieldTrackingURL, escrow.FieldReleaseTrigger, escrow.FieldDirectPayoutReference:
 			values[i] = new(sql.NullString)
-		case escrow.FieldCreatedAt, escrow.FieldShippedAt, escrow.FieldEstimatedDeliveryAt, escrow.FieldDeliveredAt, escrow.FieldAutoReleaseAt, escrow.FieldBuyerConfirmedAt, escrow.FieldReleasedAt, escrow.FieldRefundedAt, escrow.FieldWalletFundedAt, escrow.FieldDirectPaidOutAt, escrow.FieldUpdatedAt:
+		case escrow.FieldCreatedAt, escrow.FieldShippedAt, escrow.FieldEstimatedDeliveryAt, escrow.FieldDeliveredAt, escrow.FieldAutoReleaseAt, escrow.FieldUndeliveredReviewAt, escrow.FieldBuyerConfirmedAt, escrow.FieldReleasedAt, escrow.FieldRefundedAt, escrow.FieldWalletFundedAt, escrow.FieldDirectPaidOutAt, escrow.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
 		case escrow.FieldID, escrow.FieldPaymentIntentID:
 			values[i] = new(uuid.UUID)
@@ -344,6 +346,13 @@ func (_m *Escrow) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.AutoReleaseAt = new(time.Time)
 				*_m.AutoReleaseAt = value.Time
+			}
+		case escrow.FieldUndeliveredReviewAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field undelivered_review_at", values[i])
+			} else if value.Valid {
+				_m.UndeliveredReviewAt = new(time.Time)
+				*_m.UndeliveredReviewAt = value.Time
 			}
 		case escrow.FieldPausedReleaseRemainingSeconds:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
@@ -555,6 +564,11 @@ func (_m *Escrow) String() string {
 	builder.WriteString(", ")
 	if v := _m.AutoReleaseAt; v != nil {
 		builder.WriteString("auto_release_at=")
+		builder.WriteString(v.Format(time.ANSIC))
+	}
+	builder.WriteString(", ")
+	if v := _m.UndeliveredReviewAt; v != nil {
+		builder.WriteString("undelivered_review_at=")
 		builder.WriteString(v.Format(time.ANSIC))
 	}
 	builder.WriteString(", ")

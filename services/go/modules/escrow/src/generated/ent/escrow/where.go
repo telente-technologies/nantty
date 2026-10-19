@@ -187,6 +187,11 @@ func AutoReleaseAt(v time.Time) predicate.Escrow {
 	return predicate.Escrow(sql.FieldEQ(FieldAutoReleaseAt, v))
 }
 
+// UndeliveredReviewAt applies equality check predicate on the "undelivered_review_at" field. It's identical to UndeliveredReviewAtEQ.
+func UndeliveredReviewAt(v time.Time) predicate.Escrow {
+	return predicate.Escrow(sql.FieldEQ(FieldUndeliveredReviewAt, v))
+}
+
 // PausedReleaseRemainingSeconds applies equality check predicate on the "paused_release_remaining_seconds" field. It's identical to PausedReleaseRemainingSecondsEQ.
 func PausedReleaseRemainingSeconds(v int64) predicate.Escrow {
 	return predicate.Escrow(sql.FieldEQ(FieldPausedReleaseRemainingSeconds, v))
@@ -1705,6 +1710,56 @@ func AutoReleaseAtIsNil() predicate.Escrow {
 // AutoReleaseAtNotNil applies the NotNil predicate on the "auto_release_at" field.
 func AutoReleaseAtNotNil() predicate.Escrow {
 	return predicate.Escrow(sql.FieldNotNull(FieldAutoReleaseAt))
+}
+
+// UndeliveredReviewAtEQ applies the EQ predicate on the "undelivered_review_at" field.
+func UndeliveredReviewAtEQ(v time.Time) predicate.Escrow {
+	return predicate.Escrow(sql.FieldEQ(FieldUndeliveredReviewAt, v))
+}
+
+// UndeliveredReviewAtNEQ applies the NEQ predicate on the "undelivered_review_at" field.
+func UndeliveredReviewAtNEQ(v time.Time) predicate.Escrow {
+	return predicate.Escrow(sql.FieldNEQ(FieldUndeliveredReviewAt, v))
+}
+
+// UndeliveredReviewAtIn applies the In predicate on the "undelivered_review_at" field.
+func UndeliveredReviewAtIn(vs ...time.Time) predicate.Escrow {
+	return predicate.Escrow(sql.FieldIn(FieldUndeliveredReviewAt, vs...))
+}
+
+// UndeliveredReviewAtNotIn applies the NotIn predicate on the "undelivered_review_at" field.
+func UndeliveredReviewAtNotIn(vs ...time.Time) predicate.Escrow {
+	return predicate.Escrow(sql.FieldNotIn(FieldUndeliveredReviewAt, vs...))
+}
+
+// UndeliveredReviewAtGT applies the GT predicate on the "undelivered_review_at" field.
+func UndeliveredReviewAtGT(v time.Time) predicate.Escrow {
+	return predicate.Escrow(sql.FieldGT(FieldUndeliveredReviewAt, v))
+}
+
+// UndeliveredReviewAtGTE applies the GTE predicate on the "undelivered_review_at" field.
+func UndeliveredReviewAtGTE(v time.Time) predicate.Escrow {
+	return predicate.Escrow(sql.FieldGTE(FieldUndeliveredReviewAt, v))
+}
+
+// UndeliveredReviewAtLT applies the LT predicate on the "undelivered_review_at" field.
+func UndeliveredReviewAtLT(v time.Time) predicate.Escrow {
+	return predicate.Escrow(sql.FieldLT(FieldUndeliveredReviewAt, v))
+}
+
+// UndeliveredReviewAtLTE applies the LTE predicate on the "undelivered_review_at" field.
+func UndeliveredReviewAtLTE(v time.Time) predicate.Escrow {
+	return predicate.Escrow(sql.FieldLTE(FieldUndeliveredReviewAt, v))
+}
+
+// UndeliveredReviewAtIsNil applies the IsNil predicate on the "undelivered_review_at" field.
+func UndeliveredReviewAtIsNil() predicate.Escrow {
+	return predicate.Escrow(sql.FieldIsNull(FieldUndeliveredReviewAt))
+}
+
+// UndeliveredReviewAtNotNil applies the NotNil predicate on the "undelivered_review_at" field.
+func UndeliveredReviewAtNotNil() predicate.Escrow {
+	return predicate.Escrow(sql.FieldNotNull(FieldUndeliveredReviewAt))
 }
 
 // PausedReleaseRemainingSecondsEQ applies the EQ predicate on the "paused_release_remaining_seconds" field.

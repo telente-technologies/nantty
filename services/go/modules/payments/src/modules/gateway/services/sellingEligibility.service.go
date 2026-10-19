@@ -2,6 +2,7 @@ package services
 
 import (
 	"context"
+	"database/sql"
 	"time"
 
 	"github.com/jackc/pgx/v5"
@@ -59,8 +60,19 @@ func (gateway *PaymentGateway) sellerDebtOverLimit(ctx context.Context, sellerUs
 }
 
 func (gateway *PaymentGateway) readSellerDebts(ctx context.Context, sellerUserId string) (map[string]int64, error) {
-	rows, err := gateway.Container.Resources.Database.QueryContext(ctx, `SELECT currency, COALESCE(SUM(balance_minor), 0) FROM `+pgx.Identifier{gateway.Container.Settings.Money.LedgerSchema, "ledger_accounts"}.Sanitize()+
-		` WHERE code IN ($1, $2) AND balance_minor > 0 GROUP BY currency`, ledgermodels.SellerDebtAccount(sellerUserId, "").Code, ledgermodels.WalletDebtAccount(sellerUserId, "").Code)
+	return gateway.readPositiveBalancesByCurrency(ctx, gateway.Container.Resources.Database, ledgermodels.SellerDebtAccount(sellerUserId, "").Code, ledgermodels.WalletDebtAccount(sellerUserId, "").Code)
+}
+
+func (gateway *PaymentGateway) ReadUserDebtsInAnyCurrencyInTransaction(ctx context.Context, transaction *sql.Tx, userId string) (map[string]int64, error) {
+	return gateway.readPositiveBalancesByCurrency(ctx, transaction, ledgermodels.SellerDebtAccount(userId, "").Code, ledgermodels.WalletDebtAccount(userId, "").Code,
+		ledgermodels.CreatorEarningsDebtAccount(userId, "").Code)
+}
+
+func (gateway *PaymentGateway) readPositiveBalancesByCurrency(ctx context.Context, executor interface {
+	QueryContext(ctx context.Context, query string, arguments ...any) (*sql.Rows, error)
+}, codes ...string) (map[string]int64, error) {
+	rows, err := executor.QueryContext(ctx, `SELECT currency, COALESCE(SUM(balance_minor), 0) FROM `+pgx.Identifier{gateway.Container.Settings.Money.LedgerSchema, "ledger_accounts"}.Sanitize()+
+		` WHERE code = ANY($1) AND balance_minor > 0 GROUP BY currency`, codes)
 	if err != nil {
 		return nil, err
 	}

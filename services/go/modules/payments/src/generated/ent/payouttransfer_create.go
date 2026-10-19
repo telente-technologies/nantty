@@ -262,6 +262,20 @@ func (_c *PayoutTransferCreate) SetNillableCompletedAt(v *time.Time) *PayoutTran
 	return _c
 }
 
+// SetSendClaimedAt sets the "send_claimed_at" field.
+func (_c *PayoutTransferCreate) SetSendClaimedAt(v time.Time) *PayoutTransferCreate {
+	_c.mutation.SetSendClaimedAt(v)
+	return _c
+}
+
+// SetNillableSendClaimedAt sets the "send_claimed_at" field if the given value is not nil.
+func (_c *PayoutTransferCreate) SetNillableSendClaimedAt(v *time.Time) *PayoutTransferCreate {
+	if v != nil {
+		_c.SetSendClaimedAt(*v)
+	}
+	return _c
+}
+
 // SetUpdatedAt sets the "updated_at" field.
 func (_c *PayoutTransferCreate) SetUpdatedAt(v time.Time) *PayoutTransferCreate {
 	_c.mutation.SetUpdatedAt(v)
@@ -650,6 +664,10 @@ func (_c *PayoutTransferCreate) createSpec() (*PayoutTransfer, *sqlgraph.CreateS
 		_spec.SetField(payouttransfer.FieldCompletedAt, field.TypeTime, value)
 		_node.CompletedAt = &value
 	}
+	if value, ok := _c.mutation.SendClaimedAt(); ok {
+		_spec.SetField(payouttransfer.FieldSendClaimedAt, field.TypeTime, value)
+		_node.SendClaimedAt = &value
+	}
 	if value, ok := _c.mutation.UpdatedAt(); ok {
 		_spec.SetField(payouttransfer.FieldUpdatedAt, field.TypeTime, value)
 		_node.UpdatedAt = value
@@ -787,6 +805,24 @@ func (u *PayoutTransferUpsert) UpdateCompletedAt() *PayoutTransferUpsert {
 // ClearCompletedAt clears the value of the "completed_at" field.
 func (u *PayoutTransferUpsert) ClearCompletedAt() *PayoutTransferUpsert {
 	u.SetNull(payouttransfer.FieldCompletedAt)
+	return u
+}
+
+// SetSendClaimedAt sets the "send_claimed_at" field.
+func (u *PayoutTransferUpsert) SetSendClaimedAt(v time.Time) *PayoutTransferUpsert {
+	u.Set(payouttransfer.FieldSendClaimedAt, v)
+	return u
+}
+
+// UpdateSendClaimedAt sets the "send_claimed_at" field to the value that was provided on create.
+func (u *PayoutTransferUpsert) UpdateSendClaimedAt() *PayoutTransferUpsert {
+	u.SetExcluded(payouttransfer.FieldSendClaimedAt)
+	return u
+}
+
+// ClearSendClaimedAt clears the value of the "send_claimed_at" field.
+func (u *PayoutTransferUpsert) ClearSendClaimedAt() *PayoutTransferUpsert {
+	u.SetNull(payouttransfer.FieldSendClaimedAt)
 	return u
 }
 
@@ -990,6 +1026,27 @@ func (u *PayoutTransferUpsertOne) UpdateCompletedAt() *PayoutTransferUpsertOne {
 func (u *PayoutTransferUpsertOne) ClearCompletedAt() *PayoutTransferUpsertOne {
 	return u.Update(func(s *PayoutTransferUpsert) {
 		s.ClearCompletedAt()
+	})
+}
+
+// SetSendClaimedAt sets the "send_claimed_at" field.
+func (u *PayoutTransferUpsertOne) SetSendClaimedAt(v time.Time) *PayoutTransferUpsertOne {
+	return u.Update(func(s *PayoutTransferUpsert) {
+		s.SetSendClaimedAt(v)
+	})
+}
+
+// UpdateSendClaimedAt sets the "send_claimed_at" field to the value that was provided on create.
+func (u *PayoutTransferUpsertOne) UpdateSendClaimedAt() *PayoutTransferUpsertOne {
+	return u.Update(func(s *PayoutTransferUpsert) {
+		s.UpdateSendClaimedAt()
+	})
+}
+
+// ClearSendClaimedAt clears the value of the "send_claimed_at" field.
+func (u *PayoutTransferUpsertOne) ClearSendClaimedAt() *PayoutTransferUpsertOne {
+	return u.Update(func(s *PayoutTransferUpsert) {
+		s.ClearSendClaimedAt()
 	})
 }
 
@@ -1362,6 +1419,27 @@ func (u *PayoutTransferUpsertBulk) UpdateCompletedAt() *PayoutTransferUpsertBulk
 func (u *PayoutTransferUpsertBulk) ClearCompletedAt() *PayoutTransferUpsertBulk {
 	return u.Update(func(s *PayoutTransferUpsert) {
 		s.ClearCompletedAt()
+	})
+}
+
+// SetSendClaimedAt sets the "send_claimed_at" field.
+func (u *PayoutTransferUpsertBulk) SetSendClaimedAt(v time.Time) *PayoutTransferUpsertBulk {
+	return u.Update(func(s *PayoutTransferUpsert) {
+		s.SetSendClaimedAt(v)
+	})
+}
+
+// UpdateSendClaimedAt sets the "send_claimed_at" field to the value that was provided on create.
+func (u *PayoutTransferUpsertBulk) UpdateSendClaimedAt() *PayoutTransferUpsertBulk {
+	return u.Update(func(s *PayoutTransferUpsert) {
+		s.UpdateSendClaimedAt()
+	})
+}
+
+// ClearSendClaimedAt clears the value of the "send_claimed_at" field.
+func (u *PayoutTransferUpsertBulk) ClearSendClaimedAt() *PayoutTransferUpsertBulk {
+	return u.Update(func(s *PayoutTransferUpsert) {
+		s.ClearSendClaimedAt()
 	})
 }
 

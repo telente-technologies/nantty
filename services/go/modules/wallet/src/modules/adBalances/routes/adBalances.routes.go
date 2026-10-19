@@ -20,4 +20,5 @@ func MountAdBalancesRoutes(mux *http.ServeMux, controller controllers.AdBalances
 	mux.HandleFunc("POST /api/v1/internal/ads/accounts/{adAccountId}/earnings-fundings", controller.FundFromEarnings)
 	mux.HandleFunc("POST /api/v1/internal/ads/boost-earnings-debits", controller.DebitEarningsForBoost)
 	mux.HandleFunc("POST /api/v1/internal/ads/step-up-consumptions", controller.ConsumeStepUp)
+	mux.HandleFunc("POST /api/v1/internal/ads/accounts/{adAccountId}/withdrawals", controller.WithdrawAdBalanceToWallet)
 }

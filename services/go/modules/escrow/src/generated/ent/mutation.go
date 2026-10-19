@@ -2432,6 +2432,7 @@ type EscrowMutation struct {
 	tracking_url                        *string
 	delivered_at                        *time.Time
 	auto_release_at                     *time.Time
+	undelivered_review_at               *time.Time
 	paused_release_remaining_seconds    *int64
 	addpaused_release_remaining_seconds *int64
 	buyer_confirmed_at                  *time.Time
@@ -3798,6 +3799,55 @@ func (m *EscrowMutation) ResetAutoReleaseAt() {
 	delete(m.clearedFields, escrow.FieldAutoReleaseAt)
 }
 
+// SetUndeliveredReviewAt sets the "undelivered_review_at" field.
+func (m *EscrowMutation) SetUndeliveredReviewAt(t time.Time) {
+	m.undelivered_review_at = &t
+}
+
+// UndeliveredReviewAt returns the value of the "undelivered_review_at" field in the mutation.
+func (m *EscrowMutation) UndeliveredReviewAt() (r time.Time, exists bool) {
+	v := m.undelivered_review_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUndeliveredReviewAt returns the old "undelivered_review_at" field's value of the Escrow entity.
+// If the Escrow object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *EscrowMutation) OldUndeliveredReviewAt(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUndeliveredReviewAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUndeliveredReviewAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUndeliveredReviewAt: %w", err)
+	}
+	return oldValue.UndeliveredReviewAt, nil
+}
+
+// ClearUndeliveredReviewAt clears the value of the "undelivered_review_at" field.
+func (m *EscrowMutation) ClearUndeliveredReviewAt() {
+	m.undelivered_review_at = nil
+	m.clearedFields[escrow.FieldUndeliveredReviewAt] = struct{}{}
+}
+
+// UndeliveredReviewAtCleared returns if the "undelivered_review_at" field was cleared in this mutation.
+func (m *EscrowMutation) UndeliveredReviewAtCleared() bool {
+	_, ok := m.clearedFields[escrow.FieldUndeliveredReviewAt]
+	return ok
+}
+
+// ResetUndeliveredReviewAt resets all changes to the "undelivered_review_at" field.
+func (m *EscrowMutation) ResetUndeliveredReviewAt() {
+	m.undelivered_review_at = nil
+	delete(m.clearedFields, escrow.FieldUndeliveredReviewAt)
+}
+
 // SetPausedReleaseRemainingSeconds sets the "paused_release_remaining_seconds" field.
 func (m *EscrowMutation) SetPausedReleaseRemainingSeconds(i int64) {
 	m.paused_release_remaining_seconds = &i
@@ -4475,7 +4525,7 @@ func (m *EscrowMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *EscrowMutation) Fields() []string {
-	fields := make([]string, 0, 40)
+	fields := make([]string, 0, 41)
 	if m.created_at != nil {
 		fields = append(fields, escrow.FieldCreatedAt)
 	}
@@ -4562,6 +4612,9 @@ func (m *EscrowMutation) Fields() []string {
 	}
 	if m.auto_release_at != nil {
 		fields = append(fields, escrow.FieldAutoReleaseAt)
+	}
+	if m.undelivered_review_at != nil {
+		fields = append(fields, escrow.FieldUndeliveredReviewAt)
 	}
 	if m.paused_release_remaining_seconds != nil {
 		fields = append(fields, escrow.FieldPausedReleaseRemainingSeconds)
@@ -4662,6 +4715,8 @@ func (m *EscrowMutation) Field(name string) (ent.Value, bool) {
 		return m.DeliveredAt()
 	case escrow.FieldAutoReleaseAt:
 		return m.AutoReleaseAt()
+	case escrow.FieldUndeliveredReviewAt:
+		return m.UndeliveredReviewAt()
 	case escrow.FieldPausedReleaseRemainingSeconds:
 		return m.PausedReleaseRemainingSeconds()
 	case escrow.FieldBuyerConfirmedAt:
@@ -4751,6 +4806,8 @@ func (m *EscrowMutation) OldField(ctx context.Context, name string) (ent.Value, 
 		return m.OldDeliveredAt(ctx)
 	case escrow.FieldAutoReleaseAt:
 		return m.OldAutoReleaseAt(ctx)
+	case escrow.FieldUndeliveredReviewAt:
+		return m.OldUndeliveredReviewAt(ctx)
 	case escrow.FieldPausedReleaseRemainingSeconds:
 		return m.OldPausedReleaseRemainingSeconds(ctx)
 	case escrow.FieldBuyerConfirmedAt:
@@ -4984,6 +5041,13 @@ func (m *EscrowMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetAutoReleaseAt(v)
+		return nil
+	case escrow.FieldUndeliveredReviewAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUndeliveredReviewAt(v)
 		return nil
 	case escrow.FieldPausedReleaseRemainingSeconds:
 		v, ok := value.(int64)
@@ -5227,6 +5291,9 @@ func (m *EscrowMutation) ClearedFields() []string {
 	if m.FieldCleared(escrow.FieldAutoReleaseAt) {
 		fields = append(fields, escrow.FieldAutoReleaseAt)
 	}
+	if m.FieldCleared(escrow.FieldUndeliveredReviewAt) {
+		fields = append(fields, escrow.FieldUndeliveredReviewAt)
+	}
 	if m.FieldCleared(escrow.FieldPausedReleaseRemainingSeconds) {
 		fields = append(fields, escrow.FieldPausedReleaseRemainingSeconds)
 	}
@@ -5270,6 +5337,9 @@ func (m *EscrowMutation) ClearField(name string) error {
 		return nil
 	case escrow.FieldAutoReleaseAt:
 		m.ClearAutoReleaseAt()
+		return nil
+	case escrow.FieldUndeliveredReviewAt:
+		m.ClearUndeliveredReviewAt()
 		return nil
 	case escrow.FieldPausedReleaseRemainingSeconds:
 		m.ClearPausedReleaseRemainingSeconds()
@@ -5383,6 +5453,9 @@ func (m *EscrowMutation) ResetField(name string) error {
 		return nil
 	case escrow.FieldAutoReleaseAt:
 		m.ResetAutoReleaseAt()
+		return nil
+	case escrow.FieldUndeliveredReviewAt:
+		m.ResetUndeliveredReviewAt()
 		return nil
 	case escrow.FieldPausedReleaseRemainingSeconds:
 		m.ResetPausedReleaseRemainingSeconds()

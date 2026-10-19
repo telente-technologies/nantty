@@ -33,21 +33,19 @@ func (service EscrowService) takeFromSellerWallet(ctx context.Context, transacti
 	return take, nil
 }
 
-func (service EscrowService) clawBackReleasedEscrowInTransaction(ctx context.Context, transaction *sql.Tx, held *ent.Escrow, reason string, actor EscrowActor) (*ent.Escrow, error) {
+// clawBackReleasedEscrowInTransaction refunds the buyer only the seller's portion: once the seller was paid, Zudomart keeps its escrow fee and the processing fee.
+func (service EscrowService) clawBackReleasedEscrowInTransaction(ctx context.Context, transaction *sql.Tx, held *ent.Escrow, reason string, finalStatus escrow.Status) (*ent.Escrow, error) {
 	take, err := service.takeFromSellerWallet(ctx, transaction, held.SellerUserID, held.Currency, held.ReleasedToSellerMinor)
 	if err != nil {
 		return nil, err
 	}
 	taken := take.fromHold + take.fromAvailable
 	inbound := ledgermodels.WalletInboundEscrowAccount(held.BuyerUserID, held.ID.String(), held.Currency)
-	platformReturn := held.AmountMinor - held.ReleasedToSellerMinor
 	lines := paymentservices.AppendPositiveLine(nil, ledgermodels.WalletDepositHoldAccount(held.SellerUserID, held.Currency), ledgermodels.Debit, take.fromHold)
 	lines = paymentservices.AppendPositiveLine(lines, ledgermodels.WalletAvailableAccount(held.SellerUserID, held.Currency), ledgermodels.Debit, take.fromAvailable)
 	lines = paymentservices.AppendPositiveLine(lines, ledgermodels.WalletOutgoingAccount(held.SellerUserID, held.Currency), ledgermodels.Credit, taken)
 	lines = paymentservices.AppendPositiveLine(lines, ledgermodels.WalletDebtAccount(held.SellerUserID, held.Currency), ledgermodels.Debit, take.shortfall)
-	lines = paymentservices.AppendPositiveLine(lines, ledgermodels.PlatformEscrowFeeRevenueAccount(held.Currency), ledgermodels.Debit, held.CommissionMinor)
-	lines = paymentservices.AppendPositiveLine(lines, ledgermodels.RefundedProcessingFeesExpenseAccount(held.Currency), ledgermodels.Debit, platformReturn-held.CommissionMinor)
-	lines = paymentservices.AppendPositiveLine(lines, inbound, ledgermodels.Credit, take.shortfall+platformReturn)
+	lines = paymentservices.AppendPositiveLine(lines, inbound, ledgermodels.Credit, take.shortfall)
 	if err := service.postEscrowLines(ctx, transaction, held, "escrow-clawback:"+held.ID.String(), "escrow.clawedBack", "Released order "+held.OrderReference+" clawed back for the buyer", lines); err != nil {
 		return nil, err
 	}
@@ -60,7 +58,7 @@ func (service EscrowService) clawBackReleasedEscrowInTransaction(ctx context.Con
 			return nil, err
 		}
 	}
-	if err := service.enqueueClawbackTopUp(ctx, transaction, held, take.shortfall+platformReturn, metadata); err != nil {
+	if err := service.enqueueClawbackTopUp(ctx, transaction, held, take.shortfall, metadata); err != nil {
 		return nil, err
 	}
 	if take.shortfall > 0 {
@@ -71,8 +69,8 @@ func (service EscrowService) clawBackReleasedEscrowInTransaction(ctx context.Con
 			return nil, err
 		}
 	}
-	return held.Update().Where(escrow.Version(held.Version)).AddVersion(1).SetStatus(escrow.StatusClawedBack).SetRefundedAt(service.Container.Now().UTC()).
-		SetRefundedMinor(held.AmountMinor).Save(ctx)
+	return held.Update().Where(escrow.Version(held.Version)).AddVersion(1).SetStatus(finalStatus).SetRefundedAt(service.Container.Now().UTC()).
+		SetRefundedMinor(held.RefundedMinor + held.ReleasedToSellerMinor).Save(ctx)
 }
 
 func (service EscrowService) enqueueClawbackTopUp(ctx context.Context, transaction *sql.Tx, held *ent.Escrow, amountMinor int64, metadata map[string]any) error {

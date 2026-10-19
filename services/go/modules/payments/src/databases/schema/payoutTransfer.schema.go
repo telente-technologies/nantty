@@ -44,6 +44,7 @@ func (PayoutTransfer) Fields() []ent.Field {
 		field.String("provider_transfer_code").MaxLen(120).Default(""),
 		field.String("failure_reason").MaxLen(300).Default(""),
 		field.Time("completed_at").Optional().Nillable(),
+		field.Time("send_claimed_at").Optional().Nillable(),
 		field.Time("updated_at").Default(time.Now).UpdateDefault(time.Now),
 	}
 }

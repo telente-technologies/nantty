@@ -18,25 +18,29 @@ func CompleteOrderGroup(ctx context.Context, deployed *container.Container, orde
 		if err != nil || group.Status == enums.StatusCompleted {
 			return err
 		}
-		now := deployed.Now()
-		if group.Status == enums.StatusShipped {
-			if group, err = TransitionOrderGroup(ctx, tx, group, Transition{To: enums.StatusDelivered, Summary: "Delivered", Actor: SystemActor, Customize: func(update *ent.OrderGroupUpdateOne) {
-				update.SetDeliveredAt(now)
-			}}, now); err != nil {
-				return err
-			}
-		}
-		completed, err := TransitionOrderGroup(ctx, tx, group, Transition{To: enums.StatusCompleted, Summary: summary, Actor: actor, Customize: func(update *ent.OrderGroupUpdateOne) {
-			update.SetCompletedAt(now)
-		}}, now)
-		if err != nil {
-			return err
-		}
-		if err := enqueueOrderCompleted(ctx, tx, completed, now); err != nil {
-			return err
-		}
-		return earnStoreCredit(ctx, tx, completed, now)
+		return completeLockedOrderGroup(ctx, tx, group, actor, summary, deployed.Now())
 	})
+}
+
+func completeLockedOrderGroup(ctx context.Context, tx *ent.Tx, group *ent.OrderGroup, actor OrderActor, summary string, now time.Time) error {
+	var err error
+	if group.Status == enums.StatusShipped {
+		if group, err = TransitionOrderGroup(ctx, tx, group, Transition{To: enums.StatusDelivered, Summary: "Delivered", Actor: SystemActor, Customize: func(update *ent.OrderGroupUpdateOne) {
+			update.SetDeliveredAt(now)
+		}}, now); err != nil {
+			return err
+		}
+	}
+	completed, err := TransitionOrderGroup(ctx, tx, group, Transition{To: enums.StatusCompleted, Summary: summary, Actor: actor, Customize: func(update *ent.OrderGroupUpdateOne) {
+		update.SetCompletedAt(now)
+	}}, now)
+	if err != nil {
+		return err
+	}
+	if err := enqueueOrderCompleted(ctx, tx, completed, now); err != nil {
+		return err
+	}
+	return earnStoreCredit(ctx, tx, completed, now)
 }
 
 func earnStoreCredit(ctx context.Context, tx *ent.Tx, group *ent.OrderGroup, now time.Time) error {

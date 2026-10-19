@@ -140,6 +140,7 @@ var (
 		{Name: "tracking_url", Type: field.TypeString, Size: 500, Default: ""},
 		{Name: "delivered_at", Type: field.TypeTime, Nullable: true},
 		{Name: "auto_release_at", Type: field.TypeTime, Nullable: true},
+		{Name: "undelivered_review_at", Type: field.TypeTime, Nullable: true},
 		{Name: "paused_release_remaining_seconds", Type: field.TypeInt64, Nullable: true},
 		{Name: "buyer_confirmed_at", Type: field.TypeTime, Nullable: true},
 		{Name: "released_at", Type: field.TypeTime, Nullable: true},
@@ -167,6 +168,11 @@ var (
 				Name:    "escrow_status_auto_release_at",
 				Unique:  false,
 				Columns: []*schema.Column{EscrowsColumns[22], EscrowsColumns[29]},
+			},
+			{
+				Name:    "escrow_status_undelivered_review_at",
+				Unique:  false,
+				Columns: []*schema.Column{EscrowsColumns[22], EscrowsColumns[30]},
 			},
 			{
 				Name:    "escrow_seller_user_id_status_id",

@@ -185,6 +185,26 @@ func PlatformAdRevenueAccount(currency string) AccountRef {
 	return platformAccount("revenue:ads", currency, AccountKindRevenue)
 }
 
+func AdvertiserAdCreditAccount(adAccountId, currency string) AccountRef {
+	return AccountRef{Code: "advertiser:" + adAccountId + ":adCredit", Currency: currency, Kind: AccountKindLiability, OwnerType: "advertiser", OwnerId: adAccountId}
+}
+
+func PlatformAdCreditIssuedExpenseAccount(currency string) AccountRef {
+	return platformAccount("expense:adCreditIssued", currency, AccountKindExpense)
+}
+
+func PlatformAdCashbackExpenseAccount(currency string) AccountRef {
+	return platformAccount("expense:adCashback", currency, AccountKindExpense)
+}
+
+func PlatformAdsPaidWithCreditRevenueAccount(currency string) AccountRef {
+	return platformAccount("revenue:adsPaidWithCredit", currency, AccountKindRevenue)
+}
+
+func PlatformAdBalanceWithdrawalFeeRevenueAccount(currency string) AccountRef {
+	return platformAccount("revenue:adBalanceWithdrawalFees", currency, AccountKindRevenue)
+}
+
 func PlatformFeesUnearnedAccount(currency string) AccountRef {
 	return platformAccount("liability:platformFeesUnearned", currency, AccountKindLiability)
 }

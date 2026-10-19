@@ -35,7 +35,7 @@ func (service EscrowService) ReleaseEscrowInTransaction(ctx context.Context, tra
 	if err != nil {
 		return EscrowSettlementResult{}, err
 	}
-	if held.Status == escrow.StatusReleased {
+	if held.Status == escrow.StatusReleased || held.Status == escrow.StatusPartiallyRefunded {
 		return EscrowSettlementResult{Escrow: held, AlreadySettled: true}, nil
 	}
 	if held.Status == escrow.StatusDisputed && trigger != "disputeResolved" {
@@ -111,7 +111,7 @@ func (service EscrowService) ResolveEscrowPartiallyInTransaction(ctx context.Con
 	if !IsWalletLocked(held) {
 		return EscrowSettlementResult{}, ErrLegacyEscrowCustody
 	}
-	commissionKept := min(resolution.CommissionMinor, held.CommissionMinor)
+	commissionKept := models.CommissionKeptOnRemainder(held.CommissionMinor, held.AmountMinor, held.AmountMinor-resolution.RefundMinor)
 	sellerKeeps := max(held.AmountMinor-resolution.RefundMinor-commissionKept-held.ProcessingFeeMinor, 0)
 	resolved, err := service.partiallyRefundBuyerWalletInTransaction(ctx, transaction, held, resolution.RefundMinor, sellerKeeps, commissionKept)
 	if err != nil {
@@ -121,12 +121,16 @@ func (service EscrowService) ResolveEscrowPartiallyInTransaction(ctx context.Con
 }
 
 func (service EscrowService) refundWalletLockedEscrow(ctx context.Context, transaction *sql.Tx, client *ent.Client, held *ent.Escrow, reason string, actor EscrowActor) (EscrowSettlementResult, error) {
-	if held.Status == escrow.StatusReleased {
-		clawed, err := service.clawBackReleasedEscrowInTransaction(ctx, transaction, held, reason, actor)
+	if held.Status == escrow.StatusReleased || held.Status == escrow.StatusPartiallyRefunded {
+		finalStatus := escrow.StatusClawedBack
+		if held.Status == escrow.StatusPartiallyRefunded {
+			finalStatus = escrow.StatusRefunded
+		}
+		clawed, err := service.clawBackReleasedEscrowInTransaction(ctx, transaction, held, reason, finalStatus)
 		if err != nil {
 			return EscrowSettlementResult{}, err
 		}
-		return service.finishSettlement(ctx, transaction, client, clawed, "clawedBack", reason, actor, nil)
+		return service.finishSettlement(ctx, transaction, client, clawed, string(finalStatus), reason, actor, nil)
 	}
 	refunded, toCard, err := service.refundIntoBuyerWalletInTransaction(ctx, transaction, held, reason, actor)
 	if err != nil {

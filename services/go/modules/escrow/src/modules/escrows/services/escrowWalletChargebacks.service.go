@@ -6,6 +6,7 @@ import (
 
 	"zudomart/modules/escrow/src/generated/ent"
 	"zudomart/modules/escrow/src/generated/ent/escrow"
+	"zudomart/modules/escrow/src/modules/escrows/models"
 	ledgermodels "zudomart/modules/ledger/src/modules/journal/models"
 	paymentmodels "zudomart/modules/payments/src/modules/gateway/models"
 	paymentservices "zudomart/modules/payments/src/modules/gateway/services"
@@ -23,18 +24,21 @@ func (service EscrowService) recoverLostChargebackFromWallets(ctx context.Contex
 	now := service.Container.Now().UTC()
 	switch {
 	case held.Status == escrow.StatusReleased:
-		take, err := service.takeFromSellerWallet(ctx, transaction, held.SellerUserID, currency, held.ReleasedToSellerMinor)
+		sellerPart := models.CommissionKeptOnRemainder(held.ReleasedToSellerMinor, held.AmountMinor, disputed)
+		commissionPart := models.CommissionKeptOnRemainder(held.CommissionMinor, held.AmountMinor, disputed)
+		feePart := disputed - sellerPart - commissionPart
+		take, err := service.takeFromSellerWallet(ctx, transaction, held.SellerUserID, currency, sellerPart)
 		if err != nil {
 			return err
 		}
-		taken, platformReturn := take.fromHold+take.fromAvailable, held.AmountMinor-held.ReleasedToSellerMinor
+		taken := take.fromHold + take.fromAvailable
 		lines := paymentservices.AppendPositiveLine(nil, ledgermodels.WalletDepositHoldAccount(held.SellerUserID, currency), ledgermodels.Debit, take.fromHold)
 		lines = paymentservices.AppendPositiveLine(lines, ledgermodels.WalletAvailableAccount(held.SellerUserID, currency), ledgermodels.Debit, take.fromAvailable)
 		lines = paymentservices.AppendPositiveLine(lines, ledgermodels.WalletOutgoingAccount(held.SellerUserID, currency), ledgermodels.Credit, taken)
 		lines = paymentservices.AppendPositiveLine(lines, ledgermodels.WalletDebtAccount(held.SellerUserID, currency), ledgermodels.Debit, take.shortfall)
-		lines = paymentservices.AppendPositiveLine(lines, ledgermodels.PlatformEscrowFeeRevenueAccount(currency), ledgermodels.Debit, held.CommissionMinor)
-		lines = paymentservices.AppendPositiveLine(lines, ledgermodels.RefundedProcessingFeesExpenseAccount(currency), ledgermodels.Debit, platformReturn-held.CommissionMinor)
-		lines = paymentservices.AppendPositiveLine(lines, receivable, ledgermodels.Credit, take.shortfall+platformReturn)
+		lines = paymentservices.AppendPositiveLine(lines, ledgermodels.PlatformEscrowFeeRevenueAccount(currency), ledgermodels.Debit, commissionPart)
+		lines = paymentservices.AppendPositiveLine(lines, ledgermodels.RefundedProcessingFeesExpenseAccount(currency), ledgermodels.Debit, feePart)
+		lines = paymentservices.AppendPositiveLine(lines, receivable, ledgermodels.Credit, take.shortfall+commissionPart+feePart)
 		if err := service.postEscrowLines(ctx, transaction, held, reference, "escrow.chargebackRecoveredFromSeller", "Chargeback lost on order "+held.OrderReference, lines); err != nil {
 			return err
 		}
@@ -44,7 +48,13 @@ func (service EscrowService) recoverLostChargebackFromWallets(ctx context.Contex
 		if take.shortfall > 0 {
 			service.Container.Payments.RecordPaymentAlertMetric(ctx, "walletDebt", "userId", held.SellerUserID, "debtMinor", take.shortfall, "escrowId", held.ID.String())
 		}
-		return held.Update().Where(escrow.Version(held.Version)).AddVersion(1).SetStatus(escrow.StatusClawedBack).SetRefundedAt(now).SetRefundedMinor(held.AmountMinor).Exec(ctx)
+		update := held.Update().Where(escrow.Version(held.Version)).AddVersion(1).SetStatus(escrow.StatusClawedBack).SetRefundedAt(now).SetRefundedMinor(disputed)
+		if disputed < held.AmountMinor {
+			update.SetStatus(escrow.StatusPartiallyRefunded).SetReleasedToSellerMinor(held.ReleasedToSellerMinor - sellerPart)
+		}
+		return update.Exec(ctx)
+	case held.Status == escrow.StatusRefunded, held.Status == escrow.StatusPartiallyRefunded, held.Status == escrow.StatusClawedBack:
+		return service.recoverLostChargebackAfterRefund(ctx, transaction, held, notice, disputed)
 	case held.Status != escrow.StatusHeld && held.Status != escrow.StatusDisputed:
 		return nil
 	case held.WalletFundedAt != nil:

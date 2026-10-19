@@ -84,6 +84,9 @@ func (gateway *PaymentGateway) finishClaimedWebhook(ctx context.Context, claim c
 	switch {
 	case processingError == nil:
 		update.SetProcessedAt(now).SetLastError("")
+	case errors.As(processingError, new(webhookNeedsFinanceReview)):
+		update.SetDeadLetteredAt(now).SetLastError(truncate(providerhttp.RedactSecrets(processingError.Error()), 1000))
+		gateway.RecordPaymentAlertMetric(ctx, "webhookDeadLettered", "provider", claim.provider, "eventKey", claim.eventKey, "reason", processingError.Error())
 	case claim.attempts >= MaximumWebhookAttempts:
 		update.SetDeadLetteredAt(now).SetLastError(truncate(providerhttp.RedactSecrets(processingError.Error()), 1000))
 		gateway.Container.Resources.Logger.ErrorContext(ctx, "webhook moved to the dead-letter state; replay it by hand once fixed", "provider", claim.provider, "eventKey", claim.eventKey, "attempts", claim.attempts)
@@ -120,6 +123,9 @@ func (gateway *PaymentGateway) processClaimedWebhook(ctx context.Context, claim 
 	}
 	if err := gateway.finishClaimedWebhook(context.WithoutCancel(ctx), claim, processingError); err != nil {
 		return errors.Join(processingError, err)
+	}
+	if errors.As(processingError, new(webhookNeedsFinanceReview)) {
+		return nil
 	}
 	return processingError
 }

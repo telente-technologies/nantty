@@ -57,6 +57,8 @@ const (
 	FieldFailureReason = "failure_reason"
 	// FieldCompletedAt holds the string denoting the completed_at field in the database.
 	FieldCompletedAt = "completed_at"
+	// FieldSendClaimedAt holds the string denoting the send_claimed_at field in the database.
+	FieldSendClaimedAt = "send_claimed_at"
 	// FieldUpdatedAt holds the string denoting the updated_at field in the database.
 	FieldUpdatedAt = "updated_at"
 	// Table holds the table name of the payouttransfer in the database.
@@ -87,6 +89,7 @@ var Columns = []string{
 	FieldProviderTransferCode,
 	FieldFailureReason,
 	FieldCompletedAt,
+	FieldSendClaimedAt,
 	FieldUpdatedAt,
 }
 
@@ -318,6 +321,11 @@ func ByFailureReason(opts ...sql.OrderTermOption) OrderOption {
 // ByCompletedAt orders the results by the completed_at field.
 func ByCompletedAt(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldCompletedAt, opts...).ToFunc()
+}
+
+// BySendClaimedAt orders the results by the send_claimed_at field.
+func BySendClaimedAt(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldSendClaimedAt, opts...).ToFunc()
 }
 
 // ByUpdatedAt orders the results by the updated_at field.

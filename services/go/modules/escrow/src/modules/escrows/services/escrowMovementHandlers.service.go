@@ -101,7 +101,7 @@ func (handler EscrowMovementHandler) HandleMovementFailed(ctx context.Context, t
 		if movement.MetadataString("stage") != "release" {
 			return nil
 		}
-		return held.Update().SetStatus(escrow.StatusHeld).ClearReleasedAt().SetReleaseTrigger("releaseFailed").SetReleasedToSellerMinor(0).AddVersion(1).Exec(ctx)
+		return handler.Service.retryFailedReleaseLater(ctx, transaction, held, movement.FailureReason)
 	case paymentmodels.MovementEscrowCommission:
 		return handler.post(ctx, transaction, held, movement, "failed", moveLines(ledgermodels.WalletOutgoingAccount(held.BuyerUserID, currency), locked, movement.AmountMinor))
 	case paymentmodels.MovementClawback:

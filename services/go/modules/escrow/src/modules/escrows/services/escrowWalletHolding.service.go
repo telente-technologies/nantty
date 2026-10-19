@@ -51,7 +51,8 @@ func (service EscrowService) holdFundsInProviderWallets(ctx context.Context, tra
 	if direct {
 		create.SetPaymentMode(escrow.PaymentModeDirect).SetStatus(escrow.StatusReleased).SetReleasedAt(now).SetReleaseTrigger("directPayment").SetReleasedToSellerMinor(sellerNet)
 	} else {
-		create.SetCustody(escrow.CustodyBuyerWalletLock).SetWalletHoldMinor(min(payment.WalletHoldMinor, payable.AmountMinor))
+		create.SetCustody(escrow.CustodyBuyerWalletLock).SetWalletHoldMinor(min(payment.WalletHoldMinor, payable.AmountMinor)).
+			SetAutoReleaseAt(now.Add(service.Container.Settings.UndeliveredReleaseWindow()))
 		if payment.PaidFromWallet {
 			create.SetWalletFundedAt(now)
 		}

@@ -14,6 +14,8 @@ import (
 	"zudomart/platform/httpserver"
 )
 
+const newestPendingIntentsVerifiedWithProvider = 3
+
 type Handler struct {
 	Application *gateway.Application
 }
@@ -25,19 +27,33 @@ func (handler Handler) Execute(ctx context.Context, command Command) (dtos.Order
 	if err != nil {
 		return dtos.OrderPaymentStatusDto{}, err
 	}
-	if payables[0].BuyerUserId != command.BuyerUserId {
+	buyerPayable := payables[0]
+	for _, payable := range payables {
+		if payable.OrderId == command.OrderId {
+			buyerPayable = payable
+			break
+		}
+	}
+	if buyerPayable.BuyerUserId != command.BuyerUserId {
 		return dtos.OrderPaymentStatusDto{}, httpserver.NewApiError(http.StatusNotFound, "ORDER_NOT_FOUND", "Order was not found.")
 	}
 	intents, err := application.Container.Client(database).PaymentIntent.Query().Where(
-		paymentintent.PurposeEQ(paymentintent.Purpose(constants.PurposeOrderCheckout)), paymentintent.SubjectIDIn(command.OrderId, payables[0].CheckoutId), paymentintent.OwnerUserID(command.BuyerUserId),
-	).Order(ent.Desc(paymentintent.FieldCreatedAt)).Limit(10).All(ctx)
+		paymentintent.PurposeEQ(paymentintent.Purpose(constants.PurposeOrderCheckout)), paymentintent.SubjectIDIn(command.OrderId, buyerPayable.CheckoutId), paymentintent.OwnerUserID(command.BuyerUserId),
+	).Order(ent.Desc(paymentintent.FieldCreatedAt)).Limit(50).All(ctx)
 	if err != nil {
 		return dtos.OrderPaymentStatusDto{}, err
 	}
+	for _, intent := range intents {
+		if intent.Status == paymentintent.StatusSucceeded {
+			return dtos.OrderPaymentStatusDto{Status: "paid"}, nil
+		}
+	}
 	statuses := make([]string, 0, len(intents))
+	providerChecksLeft := newestPendingIntentsVerifiedWithProvider
 	for _, intent := range intents {
 		status := string(intent.Status)
-		if intent.Status == paymentintent.StatusPending {
+		if intent.Status == paymentintent.StatusPending && providerChecksLeft > 0 {
+			providerChecksLeft--
 			view, err := application.Gateway.VerifyAndSettlePaymentIntentByReference(ctx, intent.Reference)
 			if err != nil && !errors.Is(err, services.ErrPaymentAmountMismatch) {
 				return dtos.OrderPaymentStatusDto{}, err

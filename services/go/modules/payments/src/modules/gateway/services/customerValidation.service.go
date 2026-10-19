@@ -13,6 +13,7 @@ import (
 	"zudomart/modules/payments/src/generated/ent/connectedaccountjob"
 	"zudomart/modules/payments/src/generated/ent/customervalidation"
 	"zudomart/modules/payments/src/generated/ent/payoutonboarding"
+	"zudomart/modules/payments/src/generated/ent/predicate"
 	"zudomart/modules/payments/src/interfaces"
 	"zudomart/modules/payments/src/modules/gateway/models"
 	"zudomart/platform/httpserver"
@@ -113,8 +114,16 @@ func (gateway *PaymentGateway) recordPendingValidation(ctx context.Context, user
 }
 
 func (gateway *PaymentGateway) latestPayeeBankAccount(ctx context.Context, userId string) (interfaces.PayeeBankAccount, error) {
+	return gateway.latestPayeeBankAccountWhere(ctx, userId)
+}
+
+func (gateway *PaymentGateway) latestConfirmedPayeeBankAccount(ctx context.Context, userId string) (interfaces.PayeeBankAccount, error) {
+	return gateway.latestPayeeBankAccountWhere(ctx, userId, connectedaccountjob.StatusEQ(connectedaccountjob.StatusSucceeded))
+}
+
+func (gateway *PaymentGateway) latestPayeeBankAccountWhere(ctx context.Context, userId string, extra ...predicate.ConnectedAccountJob) (interfaces.PayeeBankAccount, error) {
 	latest, err := gateway.Container.Client(gateway.Container.Resources.Database).ConnectedAccountJob.Query().
-		Where(connectedaccountjob.UserID(userId), connectedaccountjob.StepEQ(connectedaccountjob.StepCreateRecipient)).
+		Where(append([]predicate.ConnectedAccountJob{connectedaccountjob.UserID(userId), connectedaccountjob.StepEQ(connectedaccountjob.StepCreateRecipient)}, extra...)...).
 		Order(ent.Desc(connectedaccountjob.FieldVersion)).First(ctx)
 	if ent.IsNotFound(err) || (err == nil && latest.SealedPayload == nil) {
 		return interfaces.PayeeBankAccount{}, ErrBankAccountRequired

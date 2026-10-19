@@ -40,7 +40,7 @@ func (handler Handler) Execute(ctx context.Context, command Command) (dtos.Escro
 			}
 			actor := services.EscrowActor{Type: "commerce", Id: command.StoreId}
 			switch {
-			case command.AmountMinor == held.AmountMinor:
+			case command.AmountMinor == held.AmountMinor, held.Status == escrow.StatusPartiallyRefunded && command.AmountMinor == held.AmountMinor-held.RefundedMinor:
 				settlement, err = application.Escrows.RefundEscrowInTransaction(ctx, transaction, command.OrderGroupId, command.Reason, actor)
 			case held.Status == escrow.StatusReleased:
 				return dtos.EscrowDetailDto{}, ErrPartialRefundAfterRelease

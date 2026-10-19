@@ -1388,7 +1388,7 @@ func init() {
 	// payouttransfer.FailureReasonValidator is a validator for the "failure_reason" field. It is called by the builders before save.
 	payouttransfer.FailureReasonValidator = payouttransferDescFailureReason.Validators[0].(func(string) error)
 	// payouttransferDescUpdatedAt is the schema descriptor for updated_at field.
-	payouttransferDescUpdatedAt := payouttransferFields[20].Descriptor()
+	payouttransferDescUpdatedAt := payouttransferFields[21].Descriptor()
 	// payouttransfer.DefaultUpdatedAt holds the default value on creation for the updated_at field.
 	payouttransfer.DefaultUpdatedAt = payouttransferDescUpdatedAt.Default.(func() time.Time)
 	// payouttransfer.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.

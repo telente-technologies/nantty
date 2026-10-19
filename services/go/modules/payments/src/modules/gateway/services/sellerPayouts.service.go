@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"errors"
 	"regexp"
+	"time"
 
 	"zudomart/modules/ledger/src/databases"
 	"zudomart/modules/payments/src/generated/ent"
@@ -76,6 +77,23 @@ func (gateway *PaymentGateway) SendPreparedSellerPayout(ctx context.Context, ref
 	provider, err := gateway.Container.Payouts(transfer.Provider)
 	if err != nil {
 		return PayoutTransferStatus{}, err
+	}
+	return gateway.claimAndSendPayoutToProvider(ctx, provider, transfer)
+}
+
+const payoutSendClaimLifetime = 15 * time.Minute
+
+func (gateway *PaymentGateway) claimAndSendPayoutToProvider(ctx context.Context, provider interfaces.PayoutProvider, transfer *ent.PayoutTransfer) (PayoutTransferStatus, error) {
+	now := gateway.Container.Now().UTC()
+	claimed, err := gateway.Container.Client(gateway.Container.Resources.Database).PayoutTransfer.Update().
+		Where(payouttransfer.ID(transfer.ID), payouttransfer.StatusEQ(payouttransfer.StatusProcessing), payouttransfer.ProviderTransferCode(""),
+			payouttransfer.Or(payouttransfer.SendClaimedAtIsNil(), payouttransfer.SendClaimedAtLT(now.Add(-payoutSendClaimLifetime)))).
+		SetSendClaimedAt(now).Save(ctx)
+	if err != nil {
+		return PayoutTransferStatus{}, err
+	}
+	if claimed == 0 {
+		return gateway.readTransferStatus(ctx, gateway.Container.Resources.Database, transfer.Reference)
 	}
 	return gateway.sendPayoutToProvider(ctx, provider, transfer)
 }
@@ -175,7 +193,7 @@ func (gateway *PaymentGateway) FinalizeTransferByReferenceWithProvider(ctx conte
 				if !isDefinitiveProviderRejection(verifyErr) {
 					return PayoutTransferStatus{Reference: reference, Status: string(transfer.Status)}, nil
 				}
-				return gateway.sendPayoutToProvider(ctx, provider, transfer)
+				return gateway.claimAndSendPayoutToProvider(ctx, provider, transfer)
 			}
 		}
 		if err := gateway.confirmTransferWithProvider(ctx, transfer, ""); err != nil {

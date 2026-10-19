@@ -13,6 +13,7 @@ import (
 	"zudomart/modules/payments/src/generated/ent/paymentintent"
 	"zudomart/modules/payments/src/generated/ent/paymentrefund"
 	"zudomart/modules/payments/src/interfaces"
+	"zudomart/modules/payments/src/utils"
 	"zudomart/platform/httpserver"
 )
 
@@ -20,6 +21,8 @@ var (
 	ErrRefundNotFound            = httpserver.NewApiError(http.StatusNotFound, "REFUND_NOT_FOUND", "Refund was not found.")
 	ErrRefundNotAwaitingBank     = httpserver.NewApiError(http.StatusConflict, "REFUND_NOT_AWAITING_BANK_DETAILS", "This refund does not need bank details.")
 	ErrRefundBankAccountNotFound = httpserver.NewApiError(http.StatusUnprocessableEntity, "BANK_ACCOUNT_NOT_FOUND", "We could not find that bank account. Check the number and bank.")
+	ErrRefundBankNameMismatch    = httpserver.NewApiError(http.StatusUnprocessableEntity, "REFUND_BANK_NAME_MISMATCH", "Refunds can only go to a bank account in your own name.")
+	ErrRefundBankNameUnverified  = httpserver.NewApiError(http.StatusConflict, "REFUND_BANK_NAME_UNVERIFIED", "Verify your identity before we can send this refund to a bank account.")
 )
 
 type RefundBankDestination struct {
@@ -93,16 +96,38 @@ func (gateway *PaymentGateway) SubmitRefundBankDestination(ctx context.Context, 
 	if err != nil {
 		return RefundBankPayoutView{}, convertProviderError(err)
 	}
+	if err := gateway.requireRefundAccountInOwnersName(ctx, destination.UserId, accountName); err != nil {
+		return RefundBankPayoutView{}, err
+	}
+	claimed, err := client.PaymentRefund.Update().Where(paymentrefund.ID(refund.ID), paymentrefund.StatusEQ(paymentrefund.StatusAwaitingBankDetails)).
+		SetStatus(paymentrefund.StatusProcessing).SetFailureReason("").Save(ctx)
+	if err != nil {
+		return RefundBankPayoutView{}, err
+	}
+	if claimed == 0 {
+		return RefundBankPayoutView{}, ErrRefundNotAwaitingBank
+	}
 	if err := bankDetails.RetryRefundWithCustomerBankAccount(ctx, refund.ProviderRefundID, interfaces.PayeeBankAccount{
 		UserId: destination.UserId, AccountName: accountName, BankCode: destination.BankCode, AccountNumber: destination.AccountNumber, Currency: refund.Currency,
 	}); err != nil {
+		if revertErr := client.PaymentRefund.Update().Where(paymentrefund.ID(refund.ID), paymentrefund.StatusEQ(paymentrefund.StatusProcessing)).
+			SetStatus(paymentrefund.StatusAwaitingBankDetails).SetFailureReason(truncateReason(err.Error())).Exec(ctx); revertErr != nil {
+			return RefundBankPayoutView{}, errors.Join(convertProviderError(err), revertErr)
+		}
 		return RefundBankPayoutView{}, convertProviderError(err)
 	}
-	if err := client.PaymentRefund.Update().Where(paymentrefund.ID(refund.ID), paymentrefund.StatusEQ(paymentrefund.StatusAwaitingBankDetails)).
-		SetStatus(paymentrefund.StatusProcessing).SetFailureReason("").Exec(ctx); err != nil {
-		return RefundBankPayoutView{}, err
-	}
 	return RefundBankPayoutView{RefundId: refund.ID.String(), Status: string(paymentrefund.StatusProcessing), AccountName: accountName, Last4: lastFour(destination.AccountNumber)}, nil
+}
+
+func (gateway *PaymentGateway) requireRefundAccountInOwnersName(ctx context.Context, userId, accountName string) error {
+	wallet, err := gateway.FindActiveProviderWallet(ctx, gateway.Container.Resources.Database, userId)
+	if err != nil || wallet.AccountName == "" {
+		return ErrRefundBankNameUnverified
+	}
+	if !utils.NamesMatch(wallet.AccountName, accountName) {
+		return ErrRefundBankNameMismatch
+	}
+	return nil
 }
 
 func lastFour(value string) string {

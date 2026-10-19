@@ -210,6 +210,26 @@ func (_u *EscrowUpdate) ClearAutoReleaseAt() *EscrowUpdate {
 	return _u
 }
 
+// SetUndeliveredReviewAt sets the "undelivered_review_at" field.
+func (_u *EscrowUpdate) SetUndeliveredReviewAt(v time.Time) *EscrowUpdate {
+	_u.mutation.SetUndeliveredReviewAt(v)
+	return _u
+}
+
+// SetNillableUndeliveredReviewAt sets the "undelivered_review_at" field if the given value is not nil.
+func (_u *EscrowUpdate) SetNillableUndeliveredReviewAt(v *time.Time) *EscrowUpdate {
+	if v != nil {
+		_u.SetUndeliveredReviewAt(*v)
+	}
+	return _u
+}
+
+// ClearUndeliveredReviewAt clears the value of the "undelivered_review_at" field.
+func (_u *EscrowUpdate) ClearUndeliveredReviewAt() *EscrowUpdate {
+	_u.mutation.ClearUndeliveredReviewAt()
+	return _u
+}
+
 // SetPausedReleaseRemainingSeconds sets the "paused_release_remaining_seconds" field.
 func (_u *EscrowUpdate) SetPausedReleaseRemainingSeconds(v int64) *EscrowUpdate {
 	_u.mutation.ResetPausedReleaseRemainingSeconds()
@@ -621,6 +641,12 @@ func (_u *EscrowUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if _u.mutation.AutoReleaseAtCleared() {
 		_spec.ClearField(escrow.FieldAutoReleaseAt, field.TypeTime)
 	}
+	if value, ok := _u.mutation.UndeliveredReviewAt(); ok {
+		_spec.SetField(escrow.FieldUndeliveredReviewAt, field.TypeTime, value)
+	}
+	if _u.mutation.UndeliveredReviewAtCleared() {
+		_spec.ClearField(escrow.FieldUndeliveredReviewAt, field.TypeTime)
+	}
 	if value, ok := _u.mutation.PausedReleaseRemainingSeconds(); ok {
 		_spec.SetField(escrow.FieldPausedReleaseRemainingSeconds, field.TypeInt64, value)
 	}
@@ -974,6 +1000,26 @@ func (_u *EscrowUpdateOne) SetNillableAutoReleaseAt(v *time.Time) *EscrowUpdateO
 // ClearAutoReleaseAt clears the value of the "auto_release_at" field.
 func (_u *EscrowUpdateOne) ClearAutoReleaseAt() *EscrowUpdateOne {
 	_u.mutation.ClearAutoReleaseAt()
+	return _u
+}
+
+// SetUndeliveredReviewAt sets the "undelivered_review_at" field.
+func (_u *EscrowUpdateOne) SetUndeliveredReviewAt(v time.Time) *EscrowUpdateOne {
+	_u.mutation.SetUndeliveredReviewAt(v)
+	return _u
+}
+
+// SetNillableUndeliveredReviewAt sets the "undelivered_review_at" field if the given value is not nil.
+func (_u *EscrowUpdateOne) SetNillableUndeliveredReviewAt(v *time.Time) *EscrowUpdateOne {
+	if v != nil {
+		_u.SetUndeliveredReviewAt(*v)
+	}
+	return _u
+}
+
+// ClearUndeliveredReviewAt clears the value of the "undelivered_review_at" field.
+func (_u *EscrowUpdateOne) ClearUndeliveredReviewAt() *EscrowUpdateOne {
+	_u.mutation.ClearUndeliveredReviewAt()
 	return _u
 }
 
@@ -1417,6 +1463,12 @@ func (_u *EscrowUpdateOne) sqlSave(ctx context.Context) (_node *Escrow, err erro
 	}
 	if _u.mutation.AutoReleaseAtCleared() {
 		_spec.ClearField(escrow.FieldAutoReleaseAt, field.TypeTime)
+	}
+	if value, ok := _u.mutation.UndeliveredReviewAt(); ok {
+		_spec.SetField(escrow.FieldUndeliveredReviewAt, field.TypeTime, value)
+	}
+	if _u.mutation.UndeliveredReviewAtCleared() {
+		_spec.ClearField(escrow.FieldUndeliveredReviewAt, field.TypeTime)
 	}
 	if value, ok := _u.mutation.PausedReleaseRemainingSeconds(); ok {
 		_spec.SetField(escrow.FieldPausedReleaseRemainingSeconds, field.TypeInt64, value)

@@ -59,6 +59,7 @@ func (Escrow) Fields() []ent.Field {
 		field.String("tracking_url").MaxLen(500).Default(""),
 		field.Time("delivered_at").Optional().Nillable(),
 		field.Time("auto_release_at").Optional().Nillable(),
+		field.Time("undelivered_review_at").Optional().Nillable(),
 		field.Int64("paused_release_remaining_seconds").Optional().Nillable(),
 		field.Time("buyer_confirmed_at").Optional().Nillable(),
 		field.Time("released_at").Optional().Nillable(),
@@ -81,6 +82,7 @@ func (Escrow) Indexes() []ent.Index {
 	return []ent.Index{
 		index.Fields("order_id").Unique(),
 		index.Fields("status", "auto_release_at"),
+		index.Fields("status", "undelivered_review_at"),
 		index.Fields("seller_user_id", "status", "id").Annotations(entsql.DescColumns("id")),
 		index.Fields("payment_intent_id"),
 		index.Fields("buyer_user_id", "created_at"),

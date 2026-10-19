@@ -78,3 +78,29 @@ func TestOrderEventForAnUnknownOrderIsAcknowledged(t *testing.T) {
 	harness := startEscrowHarness(t)
 	harness.deliverOrderEvent("orderGroup.delivered", uuid.NewString(), time.Now())
 }
+
+func TestDeliveredDirectOrderGetsTheSameCompletionWindowAnnouncedOnce(t *testing.T) {
+	harness := startEscrowHarness(t)
+	buyer, orderId := uuid.NewString(), uuid.NewString()
+	harness.registerCheckoutWithMode(buyer, map[string]int64{orderId: 200_000}, "direct", true)
+	harness.payCheckoutThroughWebhook(buyer, orderId, 0)
+	deliveredAt := harness.clock.UTC().Truncate(time.Second)
+	for range 2 {
+		harness.deliverOrderEvent("orderGroup.delivered", orderId, deliveredAt)
+	}
+	completeAt, _, status := harness.escrowOf(orderId)
+	if completeAt == nil || !completeAt.Equal(deliveredAt.Add(72*time.Hour)) || status != "released" {
+		t.Fatalf("a direct order completes 3 days after delivery and its money stays with the seller: %v %s", completeAt, status)
+	}
+	var scheduled int
+	schema := harness.escrow.Application.Container.Settings.Money.DatabaseSchema
+	_ = harness.Database.QueryRow(`SELECT count(*) FROM "`+schema+`".outbox_events WHERE event_type = 'escrow.releaseScheduled' AND subject = $1`, orderId).Scan(&scheduled)
+	if scheduled != 1 {
+		t.Fatalf("the completion time is announced to the order service once: %d", scheduled)
+	}
+	harness.clock = harness.clock.Add(100 * time.Hour)
+	if released, err := harness.escrow.Application.Escrows.ReleaseEscrowsWhoseInspectionPeriodEnded(context.Background(), 10); err != nil || released != 0 {
+		t.Fatalf("the escrow sweep never releases a direct order twice: %d %v", released, err)
+	}
+	harness.AssertLedgerHealthy()
+}

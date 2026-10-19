@@ -3,10 +3,13 @@ package services
 import (
 	"context"
 	"database/sql"
+	"errors"
+	"fmt"
 	"log/slog"
 	"time"
 
 	entsql "entgo.io/ent/dialect/sql"
+	"github.com/google/uuid"
 
 	"zudomart/modules/escrow/src/generated/ent"
 	"zudomart/modules/escrow/src/generated/ent/escrow"
@@ -30,6 +33,9 @@ func (service EscrowService) RecordOrderFulfilmentInTransaction(ctx context.Cont
 	if err != nil {
 		return nil, err
 	}
+	if isDirectSale(held) && fulfilment.Stage == "delivered" {
+		return service.scheduleDirectOrderCompletionInTransaction(ctx, transaction, held, fulfilment.OccurredAt.UTC())
+	}
 	if held.Status != escrow.StatusHeld && held.Status != escrow.StatusDisputed {
 		return held, nil
 	}
@@ -52,8 +58,8 @@ func (service EscrowService) RecordOrderFulfilmentInTransaction(ctx context.Cont
 		if held.ShippedAt == nil {
 			update.SetShippedAt(occurredAt)
 		}
-		if held.Status == escrow.StatusHeld && held.AutoReleaseAt == nil {
-			update.SetAutoReleaseAt(occurredAt.Add(service.Container.Policy(ctx).AutoReleasePeriod))
+		if held.Status == escrow.StatusHeld {
+			update.SetAutoReleaseAt(occurredAt.Add(service.Container.Policy(ctx).AutoReleasePeriod)).ClearUndeliveredReviewAt()
 		}
 	default:
 		return nil, ErrInvalidFulfilmentStage
@@ -65,7 +71,7 @@ func (service EscrowService) RecordOrderFulfilmentInTransaction(ctx context.Cont
 	if err := service.recordEscrowEvent(ctx, client, held.ID, eventType, "system", "", map[string]any{"courierName": fulfilment.CourierName, "trackingNumber": fulfilment.TrackingNumber}); err != nil {
 		return nil, err
 	}
-	if updated.AutoReleaseAt != nil && held.AutoReleaseAt == nil {
+	if updated.AutoReleaseAt != nil && held.DeliveredAt == nil && updated.DeliveredAt != nil && held.Status == escrow.StatusHeld {
 		data := escrowEventData(updated)
 		data["autoReleaseAt"] = updated.AutoReleaseAt.UTC().Format(time.RFC3339)
 		if err := service.Container.Outbox.EnqueueInTransaction(ctx, transaction, "escrow.releaseScheduled", updated.OrderID, occurredAt, data); err != nil {
@@ -75,35 +81,73 @@ func (service EscrowService) RecordOrderFulfilmentInTransaction(ctx context.Cont
 	return updated, nil
 }
 
+// scheduleDirectOrderCompletionInTransaction gives a direct-payment order the same inspection window as an escrow:
+// the order service completes it automatically once the window passes unless the buyer confirms, disputes or asks for a refund first.
+func (service EscrowService) scheduleDirectOrderCompletionInTransaction(ctx context.Context, transaction *sql.Tx, held *ent.Escrow, occurredAt time.Time) (*ent.Escrow, error) {
+	if held.AutoReleaseAt != nil {
+		return held, nil
+	}
+	update := held.Update().AddVersion(1).SetAutoReleaseAt(occurredAt.Add(service.Container.Policy(ctx).AutoReleasePeriod))
+	if held.DeliveredAt == nil {
+		update.SetDeliveredAt(occurredAt)
+	}
+	updated, err := update.Save(ctx)
+	if err != nil {
+		return nil, err
+	}
+	data := escrowEventData(updated)
+	data["autoReleaseAt"] = updated.AutoReleaseAt.UTC().Format(time.RFC3339)
+	return updated, service.Container.Outbox.EnqueueInTransaction(ctx, transaction, "escrow.releaseScheduled", updated.OrderID, occurredAt, data)
+}
+
 func (service EscrowService) ReleaseEscrowsWhoseInspectionPeriodEnded(ctx context.Context, batchSize int) (int, error) {
 	released := 0
-	for released < batchSize {
+	var skipped []uuid.UUID
+	var failures []error
+	for attempt := 0; attempt < batchSize && released < batchSize; attempt++ {
+		var due *ent.Escrow
 		var result EscrowSettlementResult
+		reviewed := false
 		err := databases.RunInMoneyTransaction(ctx, service.Container.Resources.Database, func(ctx context.Context, transaction *sql.Tx) error {
-			result = EscrowSettlementResult{}
-			due, err := service.Container.Client(transaction).Escrow.Query().
-				Where(escrow.StatusEQ(escrow.StatusHeld), escrow.AutoReleaseAtLTE(service.Container.Now().UTC()),
+			due, result, reviewed = nil, EscrowSettlementResult{}, false
+			var err error
+			due, err = service.Container.Client(transaction).Escrow.Query().
+				Where(escrow.StatusEQ(escrow.StatusHeld), escrow.AutoReleaseAtLTE(service.Container.Now().UTC()), escrow.IDNotIn(skipped...),
 					escrow.Or(escrow.CustodyNEQ(escrow.CustodyBuyerWalletLock), escrow.WalletFundedAtNotNil()),
 					escrow.Not(escrow.HasPendingRefundsWith(pendingrefund.StatusEQ(pendingrefund.StatusScheduled)))).
 				Order(ent.Asc(escrow.FieldAutoReleaseAt)).ForUpdate(entsql.WithLockAction(entsql.SkipLocked)).First(ctx)
 			if ent.IsNotFound(err) {
+				due = nil
 				return nil
 			}
 			if err != nil {
 				return err
 			}
+			if due.DeliveredAt == nil && due.BuyerConfirmedAt == nil && due.ReleaseTrigger != ReleaseTriggerFailed {
+				reviewed = true
+				return service.moveUndeliveredEscrowToStaffReviewInTransaction(ctx, transaction, due)
+			}
 			result, err = service.ReleaseEscrowInTransaction(ctx, transaction, due.OrderID, "autoRelease", SystemActor)
 			return err
 		})
+		if err != nil && due == nil {
+			return released, errors.Join(append(failures, err)...)
+		}
 		if err != nil {
-			return released, err
+			skipped = append(skipped, due.ID)
+			failures = append(failures, fmt.Errorf("escrow %s: %w", due.ID, err))
+			service.Container.Payments.RecordPaymentAlertMetric(ctx, "escrowAutoReleaseDeadLetter", "escrowId", due.ID.String(), "orderId", due.OrderID, "error", err.Error())
+			continue
+		}
+		if reviewed {
+			continue
 		}
 		if result.Escrow == nil {
-			return released, nil
+			break
 		}
 		released++
 	}
-	return released, nil
+	return released, errors.Join(failures...)
 }
 
 func (service EscrowService) RunAutoReleaseSweepUntilContextDone(ctx context.Context) {

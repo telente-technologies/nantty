@@ -3,6 +3,8 @@ package services
 import (
 	"context"
 	"database/sql"
+	"fmt"
+	"time"
 
 	"zudomart/modules/escrow/src/generated/ent"
 	"zudomart/modules/escrow/src/generated/ent/escrow"
@@ -26,7 +28,11 @@ func (service EscrowService) releaseFromBuyerWalletInTransaction(ctx context.Con
 		return nil, err
 	}
 	locked := ledgermodels.WalletEscrowLockedAccount(held.BuyerUserID, held.ID.String(), held.Currency)
-	if err := service.postEscrowLines(ctx, transaction, held, "escrow-release:"+held.ID.String(), "escrow.releasing", "Order "+held.OrderReference+" released; moving to the seller",
+	reference := "escrow-release:" + held.ID.String()
+	if held.ReleaseTrigger == ReleaseTriggerFailed {
+		reference += fmt.Sprintf(":retry:%d", held.Version)
+	}
+	if err := service.postEscrowLines(ctx, transaction, held, reference, "escrow.releasing", "Order "+held.OrderReference+" released; moving to the seller",
 		moveLines(locked, ledgermodels.WalletOutgoingAccount(held.BuyerUserID, held.Currency), held.AmountMinor)); err != nil {
 		return nil, err
 	}
@@ -128,4 +134,24 @@ func (service EscrowService) partiallyRefundBuyerWalletInTransaction(ctx context
 		return nil, err
 	}
 	return resolved, service.enqueueSellerShareMovements(ctx, transaction, held, sellerKeeps, held.AmountMinor-refundMinor-sellerKeeps, "partialRefund")
+}
+
+const (
+	ReleaseTriggerFailed = "releaseFailed"
+	releaseRetryDelay    = time.Hour
+)
+
+// retryFailedReleaseLater puts a release whose wallet movement failed back to held with a new release time, so the sweep retries it,
+// and tells the order service, which already completed the order on escrow.released.
+func (service EscrowService) retryFailedReleaseLater(ctx context.Context, transaction *sql.Tx, held *ent.Escrow, failureReason string) error {
+	now := service.Container.Now().UTC()
+	updated, err := held.Update().SetStatus(escrow.StatusHeld).ClearReleasedAt().SetReleaseTrigger(ReleaseTriggerFailed).SetReleasedToSellerMinor(0).
+		SetAutoReleaseAt(now.Add(releaseRetryDelay)).AddVersion(1).Save(ctx)
+	if err != nil {
+		return err
+	}
+	service.Container.Payments.RecordPaymentAlertMetric(ctx, "escrowReleaseFailed", "escrowId", held.ID.String(), "orderId", held.OrderID, "reason", failureReason)
+	data := escrowEventData(updated)
+	data["autoReleaseAt"], data["reason"] = updated.AutoReleaseAt.Format(time.RFC3339), failureReason
+	return service.Container.Outbox.EnqueueInTransaction(ctx, transaction, "escrow.releaseFailed", updated.OrderID, now, data)
 }

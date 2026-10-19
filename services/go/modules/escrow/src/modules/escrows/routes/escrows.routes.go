@@ -20,4 +20,6 @@ func MountEscrowsRoutes(mux *http.ServeMux, application *escrows.Application) {
 	mux.Handle("GET /api/v1/admin/orders/{orderId}/escrow", requireStaffRead(http.HandlerFunc(controller.GetEscrowForOrder)))
 	mux.HandleFunc("POST /api/v1/internal/order-groups/{orderGroupId}/refunds", controller.RefundOrderGroupForCommerce)
 	mux.Handle("POST /api/v1/admin/orders/{orderId}/escrow/refund", requireStaffRefund(http.HandlerFunc(controller.RefundEscrowByStaff)))
+	mux.Handle("POST /api/v1/admin/orders/{orderId}/escrow/release", requireStaffRefund(http.HandlerFunc(controller.ReleaseEscrowByStaff)))
+	mux.Handle("GET /api/v1/admin/escrows/undelivered-review", requireStaffRead(http.HandlerFunc(controller.ListUndeliveredReview)))
 }

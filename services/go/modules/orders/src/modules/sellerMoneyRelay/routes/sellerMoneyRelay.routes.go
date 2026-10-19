@@ -42,7 +42,7 @@ func MountSellerMoneyRelayRoutes(mux *http.ServeMux, deployed *container.Contain
 	mux.Handle("POST /api/v1/seller/wallet/payout-accounts/resolve", withdrawer(controller.Relay("/wallet/payout-accounts/resolve", nil)))
 	mux.Handle("POST /api/v1/seller/wallet/payout-accounts", withdrawerWithKey(steppedUp(controller.Relay("/wallet/payout-accounts", audited("payout_account.added", "payout_account")))))
 	mux.Handle("PATCH /api/v1/seller/wallet/payout-accounts/{accountId}", withdrawer(steppedUp(controller.Relay("/wallet/payout-accounts/{accountId}", audited("payout_account.updated", "payout_account")))))
-	mux.Handle("DELETE /api/v1/seller/wallet/payout-accounts/{accountId}", withdrawer(controller.Relay("/wallet/payout-accounts/{accountId}", audited("payout_account.removed", "payout_account"))))
+	mux.Handle("DELETE /api/v1/seller/wallet/payout-accounts/{accountId}", withdrawer(steppedUp(controller.Relay("/wallet/payout-accounts/{accountId}", audited("payout_account.removed", "payout_account")))))
 	mux.Handle("GET /api/v1/seller/finance/summary", viewer(controller.Relay("/finance/summary", nil)))
 	mux.Handle("GET /api/v1/seller/finance/escrow", viewer(controller.Relay("/finance/escrow", nil)))
 	mux.Handle("GET /api/v1/seller/finance/settlements", viewer(controller.Relay("/finance/settlements", nil)))

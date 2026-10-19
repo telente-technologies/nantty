@@ -41,3 +41,20 @@ func TestAnOutstandingWalletDebtBlocksWithdrawalsAndMovesNoMoney(t *testing.T) {
 	}
 	harness.AssertLedgerHealthy()
 }
+
+func TestASellerDebtInAnotherCurrencyAlsoBlocksAWithdrawal(t *testing.T) {
+	harness := startWalletHarness(t, false)
+	user := uuid.NewString()
+	token, accountId := harness.fundWithdrawableBalance(user, 100_000)
+	harness.post(ledgermodels.JournalEntryRequest{Reference: "debt-seller-usd-" + user, Kind: "test.debt", Lines: []ledgermodels.JournalLineRequest{
+		{Account: ledgermodels.SellerDebtAccount(user, "USD"), Direction: ledgermodels.Debit, AmountMinor: 2_500},
+		{Account: ledgermodels.CreatorCoinPayoutExpenseAccount("USD"), Direction: ledgermodels.Credit, AmountMinor: 2_500},
+	}})
+	if response := harness.withdraw(token, "debt-usd-withdraw-01", accountId, 20_000); response.Status != http.StatusConflict || response.Body["code"] != "WALLET_DEBT_OUTSTANDING" {
+		t.Fatalf("a chargeback debt in USD must stop an NGN cash-out: %d %s", response.Status, response.Raw)
+	}
+	if harness.balance(ledgermodels.WalletReservedPayoutAccount(user, "NGN")) != 0 {
+		t.Fatalf("a refused withdrawal must move no money: %v", harness.NonZeroBalances())
+	}
+	harness.AssertLedgerHealthy()
+}

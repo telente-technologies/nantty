@@ -320,6 +320,20 @@ func (_c *EscrowCreate) SetNillableAutoReleaseAt(v *time.Time) *EscrowCreate {
 	return _c
 }
 
+// SetUndeliveredReviewAt sets the "undelivered_review_at" field.
+func (_c *EscrowCreate) SetUndeliveredReviewAt(v time.Time) *EscrowCreate {
+	_c.mutation.SetUndeliveredReviewAt(v)
+	return _c
+}
+
+// SetNillableUndeliveredReviewAt sets the "undelivered_review_at" field if the given value is not nil.
+func (_c *EscrowCreate) SetNillableUndeliveredReviewAt(v *time.Time) *EscrowCreate {
+	if v != nil {
+		_c.SetUndeliveredReviewAt(*v)
+	}
+	return _c
+}
+
 // SetPausedReleaseRemainingSeconds sets the "paused_release_remaining_seconds" field.
 func (_c *EscrowCreate) SetPausedReleaseRemainingSeconds(v int64) *EscrowCreate {
 	_c.mutation.SetPausedReleaseRemainingSeconds(v)
@@ -958,6 +972,10 @@ func (_c *EscrowCreate) createSpec() (*Escrow, *sqlgraph.CreateSpec) {
 		_spec.SetField(escrow.FieldAutoReleaseAt, field.TypeTime, value)
 		_node.AutoReleaseAt = &value
 	}
+	if value, ok := _c.mutation.UndeliveredReviewAt(); ok {
+		_spec.SetField(escrow.FieldUndeliveredReviewAt, field.TypeTime, value)
+		_node.UndeliveredReviewAt = &value
+	}
 	if value, ok := _c.mutation.PausedReleaseRemainingSeconds(); ok {
 		_spec.SetField(escrow.FieldPausedReleaseRemainingSeconds, field.TypeInt64, value)
 		_node.PausedReleaseRemainingSeconds = &value
@@ -1241,6 +1259,24 @@ func (u *EscrowUpsert) UpdateAutoReleaseAt() *EscrowUpsert {
 // ClearAutoReleaseAt clears the value of the "auto_release_at" field.
 func (u *EscrowUpsert) ClearAutoReleaseAt() *EscrowUpsert {
 	u.SetNull(escrow.FieldAutoReleaseAt)
+	return u
+}
+
+// SetUndeliveredReviewAt sets the "undelivered_review_at" field.
+func (u *EscrowUpsert) SetUndeliveredReviewAt(v time.Time) *EscrowUpsert {
+	u.Set(escrow.FieldUndeliveredReviewAt, v)
+	return u
+}
+
+// UpdateUndeliveredReviewAt sets the "undelivered_review_at" field to the value that was provided on create.
+func (u *EscrowUpsert) UpdateUndeliveredReviewAt() *EscrowUpsert {
+	u.SetExcluded(escrow.FieldUndeliveredReviewAt)
+	return u
+}
+
+// ClearUndeliveredReviewAt clears the value of the "undelivered_review_at" field.
+func (u *EscrowUpsert) ClearUndeliveredReviewAt() *EscrowUpsert {
+	u.SetNull(escrow.FieldUndeliveredReviewAt)
 	return u
 }
 
@@ -1714,6 +1750,27 @@ func (u *EscrowUpsertOne) UpdateAutoReleaseAt() *EscrowUpsertOne {
 func (u *EscrowUpsertOne) ClearAutoReleaseAt() *EscrowUpsertOne {
 	return u.Update(func(s *EscrowUpsert) {
 		s.ClearAutoReleaseAt()
+	})
+}
+
+// SetUndeliveredReviewAt sets the "undelivered_review_at" field.
+func (u *EscrowUpsertOne) SetUndeliveredReviewAt(v time.Time) *EscrowUpsertOne {
+	return u.Update(func(s *EscrowUpsert) {
+		s.SetUndeliveredReviewAt(v)
+	})
+}
+
+// UpdateUndeliveredReviewAt sets the "undelivered_review_at" field to the value that was provided on create.
+func (u *EscrowUpsertOne) UpdateUndeliveredReviewAt() *EscrowUpsertOne {
+	return u.Update(func(s *EscrowUpsert) {
+		s.UpdateUndeliveredReviewAt()
+	})
+}
+
+// ClearUndeliveredReviewAt clears the value of the "undelivered_review_at" field.
+func (u *EscrowUpsertOne) ClearUndeliveredReviewAt() *EscrowUpsertOne {
+	return u.Update(func(s *EscrowUpsert) {
+		s.ClearUndeliveredReviewAt()
 	})
 }
 
@@ -2385,6 +2442,27 @@ func (u *EscrowUpsertBulk) UpdateAutoReleaseAt() *EscrowUpsertBulk {
 func (u *EscrowUpsertBulk) ClearAutoReleaseAt() *EscrowUpsertBulk {
 	return u.Update(func(s *EscrowUpsert) {
 		s.ClearAutoReleaseAt()
+	})
+}
+
+// SetUndeliveredReviewAt sets the "undelivered_review_at" field.
+func (u *EscrowUpsertBulk) SetUndeliveredReviewAt(v time.Time) *EscrowUpsertBulk {
+	return u.Update(func(s *EscrowUpsert) {
+		s.SetUndeliveredReviewAt(v)
+	})
+}
+
+// UpdateUndeliveredReviewAt sets the "undelivered_review_at" field to the value that was provided on create.
+func (u *EscrowUpsertBulk) UpdateUndeliveredReviewAt() *EscrowUpsertBulk {
+	return u.Update(func(s *EscrowUpsert) {
+		s.UpdateUndeliveredReviewAt()
+	})
+}
+
+// ClearUndeliveredReviewAt clears the value of the "undelivered_review_at" field.
+func (u *EscrowUpsertBulk) ClearUndeliveredReviewAt() *EscrowUpsertBulk {
+	return u.Update(func(s *EscrowUpsert) {
+		s.ClearUndeliveredReviewAt()
 	})
 }
 

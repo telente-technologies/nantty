@@ -126,6 +126,26 @@ func (_u *PayoutTransferUpdate) ClearCompletedAt() *PayoutTransferUpdate {
 	return _u
 }
 
+// SetSendClaimedAt sets the "send_claimed_at" field.
+func (_u *PayoutTransferUpdate) SetSendClaimedAt(v time.Time) *PayoutTransferUpdate {
+	_u.mutation.SetSendClaimedAt(v)
+	return _u
+}
+
+// SetNillableSendClaimedAt sets the "send_claimed_at" field if the given value is not nil.
+func (_u *PayoutTransferUpdate) SetNillableSendClaimedAt(v *time.Time) *PayoutTransferUpdate {
+	if v != nil {
+		_u.SetSendClaimedAt(*v)
+	}
+	return _u
+}
+
+// ClearSendClaimedAt clears the value of the "send_claimed_at" field.
+func (_u *PayoutTransferUpdate) ClearSendClaimedAt() *PayoutTransferUpdate {
+	_u.mutation.ClearSendClaimedAt()
+	return _u
+}
+
 // SetUpdatedAt sets the "updated_at" field.
 func (_u *PayoutTransferUpdate) SetUpdatedAt(v time.Time) *PayoutTransferUpdate {
 	_u.mutation.SetUpdatedAt(v)
@@ -236,6 +256,12 @@ func (_u *PayoutTransferUpdate) sqlSave(ctx context.Context) (_node int, err err
 	}
 	if _u.mutation.CompletedAtCleared() {
 		_spec.ClearField(payouttransfer.FieldCompletedAt, field.TypeTime)
+	}
+	if value, ok := _u.mutation.SendClaimedAt(); ok {
+		_spec.SetField(payouttransfer.FieldSendClaimedAt, field.TypeTime, value)
+	}
+	if _u.mutation.SendClaimedAtCleared() {
+		_spec.ClearField(payouttransfer.FieldSendClaimedAt, field.TypeTime)
 	}
 	if value, ok := _u.mutation.UpdatedAt(); ok {
 		_spec.SetField(payouttransfer.FieldUpdatedAt, field.TypeTime, value)
@@ -356,6 +382,26 @@ func (_u *PayoutTransferUpdateOne) SetNillableCompletedAt(v *time.Time) *PayoutT
 // ClearCompletedAt clears the value of the "completed_at" field.
 func (_u *PayoutTransferUpdateOne) ClearCompletedAt() *PayoutTransferUpdateOne {
 	_u.mutation.ClearCompletedAt()
+	return _u
+}
+
+// SetSendClaimedAt sets the "send_claimed_at" field.
+func (_u *PayoutTransferUpdateOne) SetSendClaimedAt(v time.Time) *PayoutTransferUpdateOne {
+	_u.mutation.SetSendClaimedAt(v)
+	return _u
+}
+
+// SetNillableSendClaimedAt sets the "send_claimed_at" field if the given value is not nil.
+func (_u *PayoutTransferUpdateOne) SetNillableSendClaimedAt(v *time.Time) *PayoutTransferUpdateOne {
+	if v != nil {
+		_u.SetSendClaimedAt(*v)
+	}
+	return _u
+}
+
+// ClearSendClaimedAt clears the value of the "send_claimed_at" field.
+func (_u *PayoutTransferUpdateOne) ClearSendClaimedAt() *PayoutTransferUpdateOne {
+	_u.mutation.ClearSendClaimedAt()
 	return _u
 }
 
@@ -499,6 +545,12 @@ func (_u *PayoutTransferUpdateOne) sqlSave(ctx context.Context) (_node *PayoutTr
 	}
 	if _u.mutation.CompletedAtCleared() {
 		_spec.ClearField(payouttransfer.FieldCompletedAt, field.TypeTime)
+	}
+	if value, ok := _u.mutation.SendClaimedAt(); ok {
+		_spec.SetField(payouttransfer.FieldSendClaimedAt, field.TypeTime, value)
+	}
+	if _u.mutation.SendClaimedAtCleared() {
+		_spec.ClearField(payouttransfer.FieldSendClaimedAt, field.TypeTime)
 	}
 	if value, ok := _u.mutation.UpdatedAt(); ok {
 		_spec.SetField(payouttransfer.FieldUpdatedAt, field.TypeTime, value)

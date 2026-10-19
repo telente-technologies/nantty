@@ -24,6 +24,11 @@ func (withdrawals Withdrawals) requireProviderWalletPayoutAllowed(ctx context.Co
 	if balances.DebtsMinor() > 0 {
 		return ErrWalletDebtOutstanding
 	}
+	if owedElsewhere, err := withdrawals.Container.Payments.ReadUserDebtsInAnyCurrencyInTransaction(ctx, transaction, userId); err != nil {
+		return err
+	} else if len(owedElsewhere) > 0 {
+		return ErrWalletDebtOutstanding
+	}
 	wallet, err := withdrawals.Container.Payments.FindActiveProviderWallet(ctx, transaction, userId)
 	if err != nil {
 		return err

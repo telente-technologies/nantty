@@ -150,6 +150,11 @@ func CompletedAt(v time.Time) predicate.PayoutTransfer {
 	return predicate.PayoutTransfer(sql.FieldEQ(FieldCompletedAt, v))
 }
 
+// SendClaimedAt applies equality check predicate on the "send_claimed_at" field. It's identical to SendClaimedAtEQ.
+func SendClaimedAt(v time.Time) predicate.PayoutTransfer {
+	return predicate.PayoutTransfer(sql.FieldEQ(FieldSendClaimedAt, v))
+}
+
 // UpdatedAt applies equality check predicate on the "updated_at" field. It's identical to UpdatedAtEQ.
 func UpdatedAt(v time.Time) predicate.PayoutTransfer {
 	return predicate.PayoutTransfer(sql.FieldEQ(FieldUpdatedAt, v))
@@ -1323,6 +1328,56 @@ func CompletedAtIsNil() predicate.PayoutTransfer {
 // CompletedAtNotNil applies the NotNil predicate on the "completed_at" field.
 func CompletedAtNotNil() predicate.PayoutTransfer {
 	return predicate.PayoutTransfer(sql.FieldNotNull(FieldCompletedAt))
+}
+
+// SendClaimedAtEQ applies the EQ predicate on the "send_claimed_at" field.
+func SendClaimedAtEQ(v time.Time) predicate.PayoutTransfer {
+	return predicate.PayoutTransfer(sql.FieldEQ(FieldSendClaimedAt, v))
+}
+
+// SendClaimedAtNEQ applies the NEQ predicate on the "send_claimed_at" field.
+func SendClaimedAtNEQ(v time.Time) predicate.PayoutTransfer {
+	return predicate.PayoutTransfer(sql.FieldNEQ(FieldSendClaimedAt, v))
+}
+
+// SendClaimedAtIn applies the In predicate on the "send_claimed_at" field.
+func SendClaimedAtIn(vs ...time.Time) predicate.PayoutTransfer {
+	return predicate.PayoutTransfer(sql.FieldIn(FieldSendClaimedAt, vs...))
+}
+
+// SendClaimedAtNotIn applies the NotIn predicate on the "send_claimed_at" field.
+func SendClaimedAtNotIn(vs ...time.Time) predicate.PayoutTransfer {
+	return predicate.PayoutTransfer(sql.FieldNotIn(FieldSendClaimedAt, vs...))
+}
+
+// SendClaimedAtGT applies the GT predicate on the "send_claimed_at" field.
+func SendClaimedAtGT(v time.Time) predicate.PayoutTransfer {
+	return predicate.PayoutTransfer(sql.FieldGT(FieldSendClaimedAt, v))
+}
+
+// SendClaimedAtGTE applies the GTE predicate on the "send_claimed_at" field.
+func SendClaimedAtGTE(v time.Time) predicate.PayoutTransfer {
+	return predicate.PayoutTransfer(sql.FieldGTE(FieldSendClaimedAt, v))
+}
+
+// SendClaimedAtLT applies the LT predicate on the "send_claimed_at" field.
+func SendClaimedAtLT(v time.Time) predicate.PayoutTransfer {
+	return predicate.PayoutTransfer(sql.FieldLT(FieldSendClaimedAt, v))
+}
+
+// SendClaimedAtLTE applies the LTE predicate on the "send_claimed_at" field.
+func SendClaimedAtLTE(v time.Time) predicate.PayoutTransfer {
+	return predicate.PayoutTransfer(sql.FieldLTE(FieldSendClaimedAt, v))
+}
+
+// SendClaimedAtIsNil applies the IsNil predicate on the "send_claimed_at" field.
+func SendClaimedAtIsNil() predicate.PayoutTransfer {
+	return predicate.PayoutTransfer(sql.FieldIsNull(FieldSendClaimedAt))
+}
+
+// SendClaimedAtNotNil applies the NotNil predicate on the "send_claimed_at" field.
+func SendClaimedAtNotNil() predicate.PayoutTransfer {
+	return predicate.PayoutTransfer(sql.FieldNotNull(FieldSendClaimedAt))
 }
 
 // UpdatedAtEQ applies the EQ predicate on the "updated_at" field.

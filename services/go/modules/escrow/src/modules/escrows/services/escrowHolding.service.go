@@ -116,7 +116,28 @@ func escrowEventData(held *ent.Escrow) map[string]any {
 		"commission":       map[string]any{"amountMinor": held.CommissionMinor, "currency": held.Currency},
 		"refunded":         map[string]any{"amountMinor": held.RefundedMinor, "currency": held.Currency},
 		"releasedToSeller": map[string]any{"amountMinor": held.ReleasedToSellerMinor, "currency": held.Currency},
+		"refundBreakdown":  refundBreakdown(held),
 	}
+}
+
+// FeesKeptOnRefund is what Zudomart keeps when an order is refunded after the seller was paid: its escrow fee and the processing fee.
+func FeesKeptOnRefund(held *ent.Escrow) int64 {
+	if held.Status != escrow.StatusRefunded && held.Status != escrow.StatusClawedBack {
+		return 0
+	}
+	return max(held.AmountMinor-held.RefundedMinor, 0)
+}
+
+func refundBreakdown(held *ent.Escrow) map[string]any {
+	kept := FeesKeptOnRefund(held)
+	if kept == 0 {
+		return nil
+	}
+	processingFeeKept := min(held.ProcessingFeeMinor, kept)
+	amount := func(minor int64) map[string]any {
+		return map[string]any{"amountMinor": minor, "currency": held.Currency}
+	}
+	return map[string]any{"refundedToBuyer": amount(held.RefundedMinor), "escrowFeeKept": amount(kept - processingFeeKept), "processingFeeKept": amount(processingFeeKept)}
 }
 
 func escrowFeeBpsFor(feeMinor, amountMinor int64) int64 {

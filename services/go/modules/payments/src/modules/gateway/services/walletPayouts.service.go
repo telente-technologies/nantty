@@ -103,8 +103,18 @@ func (gateway *PaymentGateway) IsPaymentSettled(ctx context.Context, executor da
 	return gateway.Container.Client(executor).PaymentIntent.Query().Where(paymentintent.ID(intentId), paymentintent.ProviderSettledAtNotNil()).Exist(ctx)
 }
 
+var ErrDirectPayoutDebtOutstanding = errors.New("the seller owes money; the direct payout waits until the debt is cleared")
+
 func (gateway *PaymentGateway) PrepareDirectSellerPayoutInTransaction(ctx context.Context, transaction *sql.Tx, instruction models.SellerPayoutInstruction) (PayoutTransferStatus, error) {
-	bank, err := gateway.latestPayeeBankAccount(ctx, instruction.BeneficiaryUserId)
+	if err := gateway.RequireVerificationLevel(ctx, instruction.BeneficiaryUserId, models.VerificationLevelPayout); err != nil {
+		return PayoutTransferStatus{}, err
+	}
+	if owed, err := gateway.ReadUserDebtsInAnyCurrencyInTransaction(ctx, transaction, instruction.BeneficiaryUserId); err != nil {
+		return PayoutTransferStatus{}, err
+	} else if len(owed) > 0 {
+		return PayoutTransferStatus{}, ErrDirectPayoutDebtOutstanding
+	}
+	bank, err := gateway.latestConfirmedPayeeBankAccount(ctx, instruction.BeneficiaryUserId)
 	if err != nil {
 		return PayoutTransferStatus{}, err
 	}

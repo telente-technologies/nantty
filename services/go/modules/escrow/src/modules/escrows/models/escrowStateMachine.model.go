@@ -2,6 +2,7 @@ package models
 
 import (
 	"fmt"
+	"math/big"
 	"net/http"
 	"slices"
 
@@ -25,9 +26,10 @@ var ErrEscrowAlreadyPartiallyRefunded = httpserver.NewApiError(http.StatusConfli
 var ErrEscrowFrozenByDispute = httpserver.NewApiError(http.StatusConflict, "ESCROW_DISPUTED", "This order is under dispute; its funds stay frozen until the dispute is resolved.")
 
 var allowedEscrowTransitions = map[EscrowStatus][]EscrowStatus{
-	EscrowHeld:     {EscrowReleased, EscrowRefunded, EscrowDisputed, EscrowPartiallyRefunded},
-	EscrowDisputed: {EscrowReleased, EscrowRefunded, EscrowPartiallyRefunded, EscrowHeld},
-	EscrowReleased: {EscrowRefunded, EscrowClawedBack},
+	EscrowHeld:              {EscrowReleased, EscrowRefunded, EscrowDisputed, EscrowPartiallyRefunded},
+	EscrowDisputed:          {EscrowReleased, EscrowRefunded, EscrowPartiallyRefunded, EscrowHeld},
+	EscrowReleased:          {EscrowRefunded, EscrowClawedBack},
+	EscrowPartiallyRefunded: {EscrowRefunded},
 }
 
 func EscrowTransitionIsAllowed(from, to EscrowStatus) bool {
@@ -74,4 +76,13 @@ func SplitPartialResolution(amountMinor, refundMinor, commissionBps int64) (Part
 		return PartialResolution{}, err
 	}
 	return PartialResolution{RefundMinor: refundMinor, SellerMinor: split.SellerAmountMinor, CommissionMinor: split.CommissionMinor}, nil
+}
+
+func CommissionKeptOnRemainder(heldCommissionMinor, amountMinor, remainderMinor int64) int64 {
+	if amountMinor <= 0 || heldCommissionMinor <= 0 || remainderMinor <= 0 {
+		return 0
+	}
+	remainderMinor = min(remainderMinor, amountMinor)
+	kept := new(big.Int).Mul(big.NewInt(heldCommissionMinor), big.NewInt(remainderMinor))
+	return kept.Quo(kept, big.NewInt(amountMinor)).Int64()
 }

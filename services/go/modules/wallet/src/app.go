@@ -105,6 +105,20 @@ func StartWalletModuleWithSettings(ctx context.Context, settings configs.WalletS
 		_, err := adBalances.ApplySpendBatch(ctx, batch)
 		return err
 	})
+	loaders.RegisterMoneyDomainEventHandler("adCredit.changed", func(ctx context.Context, envelope platformevents.EventEnvelope) error {
+		var change adbalancedtos.AdCreditChangeDto
+		if err := loaders.DecodeEventData(envelope, &change); err != nil {
+			return err
+		}
+		return adBalances.ApplyAdCreditChange(ctx, change)
+	})
+	loaders.RegisterMoneyDomainEventHandler("adSpend.refunded", func(ctx context.Context, envelope platformevents.EventEnvelope) error {
+		var refund adbalancedtos.AdSpendRefundDto
+		if err := loaders.DecodeEventData(envelope, &refund); err != nil {
+			return err
+		}
+		return adBalances.ApplySpendRefund(ctx, refund)
+	})
 	return module, nil
 }
 

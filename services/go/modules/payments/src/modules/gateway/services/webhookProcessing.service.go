@@ -90,10 +90,25 @@ func (gateway *PaymentGateway) settleFromChargeNotification(ctx context.Context,
 		return nil
 	}
 	_, err := gateway.verifyAndSettlePaymentIntent(ctx, notification.Reference, notification.ProviderChargeId)
-	if errors.Is(err, ErrPaymentNotFound) || errors.Is(err, ErrPaymentAmountMismatch) {
+	if errors.Is(err, ErrPaymentAmountMismatch) {
+		return webhookNeedsFinanceReview{cause: err}
+	}
+	if errors.Is(err, ErrPaymentNotFound) {
 		return nil
 	}
 	return err
+}
+
+type webhookNeedsFinanceReview struct {
+	cause error
+}
+
+func (review webhookNeedsFinanceReview) Error() string {
+	return "needs finance review: " + review.cause.Error()
+}
+
+func (review webhookNeedsFinanceReview) Unwrap() error {
+	return review.cause
 }
 
 func hasOwnPaymentReferencePrefix(reference string) bool {

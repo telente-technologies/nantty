@@ -13,7 +13,7 @@ func TestEscrowTransitionsFollowTheAllowList(t *testing.T) {
 		{EscrowHeld, EscrowReleased, true}, {EscrowHeld, EscrowDisputed, true}, {EscrowHeld, EscrowRefunded, true},
 		{EscrowDisputed, EscrowReleased, true}, {EscrowDisputed, EscrowHeld, true}, {EscrowDisputed, EscrowPartiallyRefunded, true},
 		{EscrowReleased, EscrowRefunded, true}, {EscrowReleased, EscrowClawedBack, true}, {EscrowRefunded, EscrowReleased, false}, {EscrowReleased, EscrowDisputed, false},
-		{EscrowPartiallyRefunded, EscrowReleased, false}, {EscrowHeld, EscrowHeld, false},
+		{EscrowPartiallyRefunded, EscrowReleased, false}, {EscrowPartiallyRefunded, EscrowRefunded, true}, {EscrowPartiallyRefunded, EscrowPartiallyRefunded, false}, {EscrowHeld, EscrowHeld, false},
 	}
 	for _, testCase := range cases {
 		if got := EscrowTransitionIsAllowed(testCase.from, testCase.to); got != testCase.allowed {
@@ -54,5 +54,22 @@ func TestPartialResolutionSplitsTheReleasedRemainder(t *testing.T) {
 		if _, err := SplitPartialResolution(10_000, refund, 500); err == nil {
 			t.Errorf("refund %d accepted", refund)
 		}
+	}
+}
+
+func TestCommissionOnARemainderIsTheHeldCommissionProRataWithTheDustToTheSeller(t *testing.T) {
+	cases := []struct {
+		heldCommission, amount, remainder, kept int64
+	}{
+		{2_000, 1_000_000, 333_333, 666}, {150, 10_000, 7_500, 112}, {0, 10_000, 5_000, 0}, {150, 10_000, 10_000, 150}, {150, 10_000, 0, 0},
+		{math.MaxInt64 / 2, math.MaxInt64, math.MaxInt64 / 3, 1_537_228_672_809_129_300},
+	}
+	for _, testCase := range cases {
+		if kept := CommissionKeptOnRemainder(testCase.heldCommission, testCase.amount, testCase.remainder); kept != testCase.kept {
+			t.Errorf("%d of %d on a %d remainder: kept %d, want %d", testCase.heldCommission, testCase.amount, testCase.remainder, kept, testCase.kept)
+		}
+	}
+	if kept := CommissionKeptOnRemainder(150, 0, 100); kept != 0 {
+		t.Errorf("a zero amount keeps no commission: %d", kept)
 	}
 }

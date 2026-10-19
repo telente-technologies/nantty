@@ -54,6 +54,9 @@ func (balances AdBalances) ApplySpendBatch(ctx context.Context, batch dtos.Spend
 				return err
 			}
 		}
+		if err := balances.postCreditSpendInTransaction(ctx, transaction, batch); err != nil {
+			return err
+		}
 		eventType := "adBalance.debited"
 		if shortfall > 0 || balance-debited == 0 {
 			eventType = "adBalance.exhausted"

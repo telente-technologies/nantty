@@ -26,30 +26,32 @@ type EscrowTimelineEventDto struct {
 }
 
 type EscrowDetailDto struct {
-	EscrowId           string                   `json:"escrowId"`
-	OrderId            string                   `json:"orderId"`
-	OrderReference     string                   `json:"orderReference"`
-	Stage              string                   `json:"stage"`
-	Status             string                   `json:"status"`
-	HeldAmount         MoneyDto                 `json:"heldAmount"`
-	PlatformFee        MoneyDto                 `json:"platformFee"`
-	SellerPayoutAmount MoneyDto                 `json:"sellerPayoutAmount"`
-	RefundedAmount     MoneyDto                 `json:"refundedAmount"`
-	Buyer              PartySummaryDto          `json:"buyer"`
-	Store              PartySummaryDto          `json:"store"`
-	SellerUserId       string                   `json:"sellerUserId"`
-	PaidAt             *time.Time               `json:"paidAt"`
-	PreparingSince     *time.Time               `json:"preparingSince"`
-	Shipment           *ShipmentDetailsDto      `json:"shipment"`
-	DeliveredAt        *time.Time               `json:"deliveredAt"`
-	BuyerConfirmedAt   *time.Time               `json:"buyerConfirmedAt"`
-	AutoReleaseAt      *time.Time               `json:"autoReleaseAt"`
-	ExpectedReleaseAt  *time.Time               `json:"expectedReleaseAt"`
-	ReleasedAt         *time.Time               `json:"releasedAt"`
-	RefundedAt         *time.Time               `json:"refundedAt"`
-	DisputeId          *string                  `json:"disputeId"`
-	RefundScheduled    *ScheduledRefundDto      `json:"refundScheduled"`
-	Timeline           []EscrowTimelineEventDto `json:"timeline,omitempty"`
+	EscrowId            string                   `json:"escrowId"`
+	OrderId             string                   `json:"orderId"`
+	OrderReference      string                   `json:"orderReference"`
+	Stage               string                   `json:"stage"`
+	Status              string                   `json:"status"`
+	HeldAmount          MoneyDto                 `json:"heldAmount"`
+	PlatformFee         MoneyDto                 `json:"platformFee"`
+	SellerPayoutAmount  MoneyDto                 `json:"sellerPayoutAmount"`
+	RefundedAmount      MoneyDto                 `json:"refundedAmount"`
+	Buyer               PartySummaryDto          `json:"buyer"`
+	Store               PartySummaryDto          `json:"store"`
+	SellerUserId        string                   `json:"sellerUserId"`
+	PaidAt              *time.Time               `json:"paidAt"`
+	PreparingSince      *time.Time               `json:"preparingSince"`
+	Shipment            *ShipmentDetailsDto      `json:"shipment"`
+	DeliveredAt         *time.Time               `json:"deliveredAt"`
+	BuyerConfirmedAt    *time.Time               `json:"buyerConfirmedAt"`
+	AutoReleaseAt       *time.Time               `json:"autoReleaseAt"`
+	ExpectedReleaseAt   *time.Time               `json:"expectedReleaseAt"`
+	ReleasedAt          *time.Time               `json:"releasedAt"`
+	RefundedAt          *time.Time               `json:"refundedAt"`
+	DisputeId           *string                  `json:"disputeId"`
+	UndeliveredReviewAt *time.Time               `json:"undeliveredReviewAt"`
+	FeesKeptOnRefund    MoneyDto                 `json:"feesKeptOnRefund"`
+	RefundScheduled     *ScheduledRefundDto      `json:"refundScheduled"`
+	Timeline            []EscrowTimelineEventDto `json:"timeline,omitempty"`
 }
 
 type ScheduledRefundDto struct {
@@ -70,4 +72,19 @@ type EscrowHoldDto struct {
 
 type AdminRefundEscrowRequestDto struct {
 	Reason string `json:"reason"`
+}
+
+type UndeliveredReviewRowDto struct {
+	EscrowId       string     `json:"escrowId"`
+	OrderId        string     `json:"orderId"`
+	OrderReference string     `json:"orderReference"`
+	BuyerUserId    string     `json:"buyerUserId"`
+	SellerUserId   string     `json:"sellerUserId"`
+	StoreId        string     `json:"storeId"`
+	HeldAmount     MoneyDto   `json:"heldAmount"`
+	HeldSince      time.Time  `json:"heldSince"`
+	ReviewSince    time.Time  `json:"reviewSince"`
+	ShippedAt      *time.Time `json:"shippedAt"`
+	CourierName    string     `json:"courierName"`
+	TrackingNumber string     `json:"trackingNumber"`
 }

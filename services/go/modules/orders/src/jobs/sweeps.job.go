@@ -45,6 +45,9 @@ func RunSweepsUntilContextDone(ctx context.Context, deployed *container.Containe
 			if _, err := services.ReleaseStockOfClosedOrders(ctx, deployed, 50); err != nil && ctx.Err() == nil {
 				deployed.Logger.WarnContext(ctx, "stock release sweep failed", slog.Any("error", err))
 			}
+			if _, err := services.CompleteDirectOrdersPastTheirCompletionTime(ctx, deployed, 50); err != nil && ctx.Err() == nil {
+				deployed.Logger.WarnContext(ctx, "direct order auto-completion sweep failed", slog.Any("error", err))
+			}
 		case <-rollupTicker.C:
 			refreshSuccessRates(ctx, deployed)
 		case <-creditTicker.C:

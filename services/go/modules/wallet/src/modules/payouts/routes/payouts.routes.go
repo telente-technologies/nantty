@@ -22,7 +22,7 @@ func MountPayoutsRoutes(mux *http.ServeMux, application *payouts.Application) {
 	mux.Handle("GET /api/v1/wallets/me/transactions", requireUser(http.HandlerFunc(wallet.ListWalletTransactions)))
 	mux.Handle("GET /api/v1/wallets/me/payout-accounts", requireUser(http.HandlerFunc(wallet.ListPayoutAccounts)))
 	mux.Handle("POST /api/v1/wallets/me/payout-accounts", requireStepUp(http.HandlerFunc(wallet.AddPayoutAccount)))
-	mux.Handle("DELETE /api/v1/wallets/me/payout-accounts/{payoutAccountId}", requireUser(http.HandlerFunc(wallet.RemovePayoutAccount)))
+	mux.Handle("DELETE /api/v1/wallets/me/payout-accounts/{payoutAccountId}", requireStepUp(http.HandlerFunc(wallet.RemovePayoutAccount)))
 	mux.Handle("GET /api/v1/wallets/me/withdrawals/quote", requireUser(http.HandlerFunc(withdrawals.QuoteWithdrawal)))
 	mux.Handle("GET /api/v1/wallets/me/withdrawals", requireUser(http.HandlerFunc(withdrawals.ListMyWithdrawals)))
 	mux.Handle("POST /api/v1/wallets/me/withdrawals", requireStepUp(http.HandlerFunc(withdrawals.RequestWithdrawal)))

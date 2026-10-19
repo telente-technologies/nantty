@@ -15,6 +15,12 @@ import (
 )
 
 func RecordOrderRefund(ctx context.Context, deployed *container.Container, orderId uuid.UUID, refundedMinor int64, disputeId string) error {
+	return RecordSettledOrderRefund(ctx, deployed, orderId, refundedMinor, disputeId, false)
+}
+
+// RecordSettledOrderRefund marks the order refunded in full when escrow says nothing more is refundable,
+// even if the amount is below the total because Zudomart kept its fees on a refund after the seller was paid.
+func RecordSettledOrderRefund(ctx context.Context, deployed *container.Container, orderId uuid.UUID, refundedMinor int64, disputeId string, complete bool) error {
 	released := false
 	err := deployed.RunInTransaction(ctx, func(tx *ent.Tx) error {
 		group, err := LockOrderGroup(ctx, tx, orderId)
@@ -25,7 +31,7 @@ func RecordOrderRefund(ctx context.Context, deployed *container.Container, order
 		if err := settleRefundRecords(ctx, tx, group, refundedMinor, disputeId, now); err != nil {
 			return err
 		}
-		full := refundedMinor >= group.TotalMinor
+		full := complete || refundedMinor >= group.TotalMinor
 		paymentStatus := enums.PaymentPartiallyRefunded
 		if full {
 			paymentStatus = enums.PaymentRefunded
@@ -117,4 +123,19 @@ func RecordEscrowReleaseTime(ctx context.Context, deployed *container.Container,
 		return nil
 	}
 	return deployed.Client.OrderGroup.Update().Where(ordergroup.ID(orderId), ordergroup.EscrowReleaseAtIsNil()).SetEscrowReleaseAt(releaseAt.UTC()).Exec(ctx)
+}
+
+func RecordEscrowReleaseRetry(ctx context.Context, deployed *container.Container, orderId uuid.UUID, retryAt *time.Time) error {
+	return deployed.RunInTransaction(ctx, func(tx *ent.Tx) error {
+		group, err := LockOrderGroup(ctx, tx, orderId)
+		if err != nil {
+			return err
+		}
+		if retryAt != nil {
+			if err := tx.OrderGroup.UpdateOneID(group.ID).SetEscrowReleaseAt(retryAt.UTC()).AddVersion(1).Exec(ctx); err != nil {
+				return err
+			}
+		}
+		return AppendTimelineEvent(ctx, tx, group.ID, "sellerPayoutRetrying", "Paying the seller failed; Zudomart retries automatically", SystemActor)
+	})
 }

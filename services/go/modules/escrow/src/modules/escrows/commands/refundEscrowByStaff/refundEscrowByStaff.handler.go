@@ -22,9 +22,15 @@ func (handler Handler) Execute(ctx context.Context, command Command) (dtos.Escro
 		RequestHash: ledgerutils.HashRequestFingerprint(command.OrderId, command.Reason),
 		Execute: func(ctx context.Context, transaction *sql.Tx) (dtos.EscrowDetailDto, error) {
 			var err error
-			settlement, err = application.Escrows.RefundEscrowInTransaction(ctx, transaction, command.OrderId, command.Reason, services.EscrowActor{Type: "staff", Id: command.StaffId})
+			actor := services.EscrowActor{Type: "staff", Id: command.StaffId}
+			settlement, err = application.Escrows.RefundEscrowInTransaction(ctx, transaction, command.OrderId, command.Reason, actor)
 			if err != nil {
 				return dtos.EscrowDetailDto{}, err
+			}
+			if !settlement.AlreadySettled {
+				if err := application.Escrows.RecordStaffDecisionInTransaction(ctx, transaction, settlement.Escrow, "refund", command.Reason, actor); err != nil {
+					return dtos.EscrowDetailDto{}, err
+				}
 			}
 			return services.ConvertEscrowToDetail(settlement.Escrow, application.Container.Policy(ctx).AutoReleasePeriod, nil, nil), nil
 		},

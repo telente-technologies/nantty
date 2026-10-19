@@ -60,6 +60,8 @@ type PayoutTransfer struct {
 	FailureReason string `json:"failure_reason,omitempty"`
 	// CompletedAt holds the value of the "completed_at" field.
 	CompletedAt *time.Time `json:"completed_at,omitempty"`
+	// SendClaimedAt holds the value of the "send_claimed_at" field.
+	SendClaimedAt *time.Time `json:"send_claimed_at,omitempty"`
 	// UpdatedAt holds the value of the "updated_at" field.
 	UpdatedAt    time.Time `json:"updated_at,omitempty"`
 	selectValues sql.SelectValues
@@ -76,7 +78,7 @@ func (*PayoutTransfer) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullInt64)
 		case payouttransfer.FieldReference, payouttransfer.FieldPurpose, payouttransfer.FieldSubjectID, payouttransfer.FieldProvider, payouttransfer.FieldCurrency, payouttransfer.FieldKind, payouttransfer.FieldConnectedAccountID, payouttransfer.FieldBeneficiaryUserID, payouttransfer.FieldTransferGroup, payouttransfer.FieldProviderDestinationID, payouttransfer.FieldBankCode, payouttransfer.FieldDestinationLast4, payouttransfer.FieldSourceWalletRef, payouttransfer.FieldStatus, payouttransfer.FieldProviderTransferCode, payouttransfer.FieldFailureReason:
 			values[i] = new(sql.NullString)
-		case payouttransfer.FieldCreatedAt, payouttransfer.FieldCompletedAt, payouttransfer.FieldUpdatedAt:
+		case payouttransfer.FieldCreatedAt, payouttransfer.FieldCompletedAt, payouttransfer.FieldSendClaimedAt, payouttransfer.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
 		case payouttransfer.FieldID:
 			values[i] = new(uuid.UUID)
@@ -228,6 +230,13 @@ func (_m *PayoutTransfer) assignValues(columns []string, values []any) error {
 				_m.CompletedAt = new(time.Time)
 				*_m.CompletedAt = value.Time
 			}
+		case payouttransfer.FieldSendClaimedAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field send_claimed_at", values[i])
+			} else if value.Valid {
+				_m.SendClaimedAt = new(time.Time)
+				*_m.SendClaimedAt = value.Time
+			}
 		case payouttransfer.FieldUpdatedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field updated_at", values[i])
@@ -331,6 +340,11 @@ func (_m *PayoutTransfer) String() string {
 	builder.WriteString(", ")
 	if v := _m.CompletedAt; v != nil {
 		builder.WriteString("completed_at=")
+		builder.WriteString(v.Format(time.ANSIC))
+	}
+	builder.WriteString(", ")
+	if v := _m.SendClaimedAt; v != nil {
+		builder.WriteString("send_claimed_at=")
 		builder.WriteString(v.Format(time.ANSIC))
 	}
 	builder.WriteString(", ")

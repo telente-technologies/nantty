@@ -13777,6 +13777,7 @@ type PayoutTransferMutation struct {
 	provider_transfer_code  *string
 	failure_reason          *string
 	completed_at            *time.Time
+	send_claimed_at         *time.Time
 	updated_at              *time.Time
 	clearedFields           map[string]struct{}
 	done                    bool
@@ -14710,6 +14711,55 @@ func (m *PayoutTransferMutation) ResetCompletedAt() {
 	delete(m.clearedFields, payouttransfer.FieldCompletedAt)
 }
 
+// SetSendClaimedAt sets the "send_claimed_at" field.
+func (m *PayoutTransferMutation) SetSendClaimedAt(t time.Time) {
+	m.send_claimed_at = &t
+}
+
+// SendClaimedAt returns the value of the "send_claimed_at" field in the mutation.
+func (m *PayoutTransferMutation) SendClaimedAt() (r time.Time, exists bool) {
+	v := m.send_claimed_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSendClaimedAt returns the old "send_claimed_at" field's value of the PayoutTransfer entity.
+// If the PayoutTransfer object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PayoutTransferMutation) OldSendClaimedAt(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSendClaimedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSendClaimedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSendClaimedAt: %w", err)
+	}
+	return oldValue.SendClaimedAt, nil
+}
+
+// ClearSendClaimedAt clears the value of the "send_claimed_at" field.
+func (m *PayoutTransferMutation) ClearSendClaimedAt() {
+	m.send_claimed_at = nil
+	m.clearedFields[payouttransfer.FieldSendClaimedAt] = struct{}{}
+}
+
+// SendClaimedAtCleared returns if the "send_claimed_at" field was cleared in this mutation.
+func (m *PayoutTransferMutation) SendClaimedAtCleared() bool {
+	_, ok := m.clearedFields[payouttransfer.FieldSendClaimedAt]
+	return ok
+}
+
+// ResetSendClaimedAt resets all changes to the "send_claimed_at" field.
+func (m *PayoutTransferMutation) ResetSendClaimedAt() {
+	m.send_claimed_at = nil
+	delete(m.clearedFields, payouttransfer.FieldSendClaimedAt)
+}
+
 // SetUpdatedAt sets the "updated_at" field.
 func (m *PayoutTransferMutation) SetUpdatedAt(t time.Time) {
 	m.updated_at = &t
@@ -14780,7 +14830,7 @@ func (m *PayoutTransferMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *PayoutTransferMutation) Fields() []string {
-	fields := make([]string, 0, 22)
+	fields := make([]string, 0, 23)
 	if m.created_at != nil {
 		fields = append(fields, payouttransfer.FieldCreatedAt)
 	}
@@ -14844,6 +14894,9 @@ func (m *PayoutTransferMutation) Fields() []string {
 	if m.completed_at != nil {
 		fields = append(fields, payouttransfer.FieldCompletedAt)
 	}
+	if m.send_claimed_at != nil {
+		fields = append(fields, payouttransfer.FieldSendClaimedAt)
+	}
 	if m.updated_at != nil {
 		fields = append(fields, payouttransfer.FieldUpdatedAt)
 	}
@@ -14897,6 +14950,8 @@ func (m *PayoutTransferMutation) Field(name string) (ent.Value, bool) {
 		return m.FailureReason()
 	case payouttransfer.FieldCompletedAt:
 		return m.CompletedAt()
+	case payouttransfer.FieldSendClaimedAt:
+		return m.SendClaimedAt()
 	case payouttransfer.FieldUpdatedAt:
 		return m.UpdatedAt()
 	}
@@ -14950,6 +15005,8 @@ func (m *PayoutTransferMutation) OldField(ctx context.Context, name string) (ent
 		return m.OldFailureReason(ctx)
 	case payouttransfer.FieldCompletedAt:
 		return m.OldCompletedAt(ctx)
+	case payouttransfer.FieldSendClaimedAt:
+		return m.OldSendClaimedAt(ctx)
 	case payouttransfer.FieldUpdatedAt:
 		return m.OldUpdatedAt(ctx)
 	}
@@ -15108,6 +15165,13 @@ func (m *PayoutTransferMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetCompletedAt(v)
 		return nil
+	case payouttransfer.FieldSendClaimedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSendClaimedAt(v)
+		return nil
 	case payouttransfer.FieldUpdatedAt:
 		v, ok := value.(time.Time)
 		if !ok {
@@ -15178,6 +15242,9 @@ func (m *PayoutTransferMutation) ClearedFields() []string {
 	if m.FieldCleared(payouttransfer.FieldCompletedAt) {
 		fields = append(fields, payouttransfer.FieldCompletedAt)
 	}
+	if m.FieldCleared(payouttransfer.FieldSendClaimedAt) {
+		fields = append(fields, payouttransfer.FieldSendClaimedAt)
+	}
 	return fields
 }
 
@@ -15197,6 +15264,9 @@ func (m *PayoutTransferMutation) ClearField(name string) error {
 		return nil
 	case payouttransfer.FieldCompletedAt:
 		m.ClearCompletedAt()
+		return nil
+	case payouttransfer.FieldSendClaimedAt:
+		m.ClearSendClaimedAt()
 		return nil
 	}
 	return fmt.Errorf("unknown PayoutTransfer nullable field %s", name)
@@ -15268,6 +15338,9 @@ func (m *PayoutTransferMutation) ResetField(name string) error {
 		return nil
 	case payouttransfer.FieldCompletedAt:
 		m.ResetCompletedAt()
+		return nil
+	case payouttransfer.FieldSendClaimedAt:
+		m.ResetSendClaimedAt()
 		return nil
 	case payouttransfer.FieldUpdatedAt:
 		m.ResetUpdatedAt()

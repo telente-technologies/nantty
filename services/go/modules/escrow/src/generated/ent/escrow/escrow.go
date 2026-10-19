@@ -74,6 +74,8 @@ const (
 	FieldDeliveredAt = "delivered_at"
 	// FieldAutoReleaseAt holds the string denoting the auto_release_at field in the database.
 	FieldAutoReleaseAt = "auto_release_at"
+	// FieldUndeliveredReviewAt holds the string denoting the undelivered_review_at field in the database.
+	FieldUndeliveredReviewAt = "undelivered_review_at"
 	// FieldPausedReleaseRemainingSeconds holds the string denoting the paused_release_remaining_seconds field in the database.
 	FieldPausedReleaseRemainingSeconds = "paused_release_remaining_seconds"
 	// FieldBuyerConfirmedAt holds the string denoting the buyer_confirmed_at field in the database.
@@ -150,6 +152,7 @@ var Columns = []string{
 	FieldTrackingURL,
 	FieldDeliveredAt,
 	FieldAutoReleaseAt,
+	FieldUndeliveredReviewAt,
 	FieldPausedReleaseRemainingSeconds,
 	FieldBuyerConfirmedAt,
 	FieldReleasedAt,
@@ -469,6 +472,11 @@ func ByDeliveredAt(opts ...sql.OrderTermOption) OrderOption {
 // ByAutoReleaseAt orders the results by the auto_release_at field.
 func ByAutoReleaseAt(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldAutoReleaseAt, opts...).ToFunc()
+}
+
+// ByUndeliveredReviewAt orders the results by the undelivered_review_at field.
+func ByUndeliveredReviewAt(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldUndeliveredReviewAt, opts...).ToFunc()
 }
 
 // ByPausedReleaseRemainingSeconds orders the results by the paused_release_remaining_seconds field.

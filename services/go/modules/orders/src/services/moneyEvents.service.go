@@ -67,10 +67,12 @@ func (handler MoneyEventHandler) apply(ctx context.Context, eventType string, or
 		return RecordOrderPaid(ctx, handler.Container, orderId)
 	case "escrow.released":
 		return CompleteOrderGroup(ctx, handler.Container, orderId, SystemActor, "Escrow released to the seller")
-	case "escrow.refunded", "escrow.partiallyRefunded":
-		return RecordOrderRefund(ctx, handler.Container, orderId, data.Refunded.AmountMinor, data.DisputeId)
+	case "escrow.refunded", "escrow.partiallyRefunded", "escrow.clawedBack":
+		return RecordSettledOrderRefund(ctx, handler.Container, orderId, data.Refunded.AmountMinor, data.DisputeId, data.Status == "refunded" || data.Status == "clawedBack")
 	case "escrow.refundScheduled":
 		return RecordOrderRefundScheduled(ctx, handler.Container, orderId, data.Pending.AmountMinor)
+	case "escrow.releaseFailed":
+		return RecordEscrowReleaseRetry(ctx, handler.Container, orderId, data.ReleaseAt)
 	case "escrow.releaseScheduled":
 		return RecordEscrowReleaseTime(ctx, handler.Container, orderId, data.ReleaseAt)
 	case "dispute.opened":

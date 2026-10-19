@@ -522,6 +522,7 @@ var (
 		{Name: "provider_transfer_code", Type: field.TypeString, Size: 120, Default: ""},
 		{Name: "failure_reason", Type: field.TypeString, Size: 300, Default: ""},
 		{Name: "completed_at", Type: field.TypeTime, Nullable: true},
+		{Name: "send_claimed_at", Type: field.TypeTime, Nullable: true},
 		{Name: "updated_at", Type: field.TypeTime},
 	}
 	// PayoutTransfersTable holds the schema information for the "payout_transfers" table.

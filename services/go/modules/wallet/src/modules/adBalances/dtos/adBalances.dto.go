@@ -29,12 +29,49 @@ type AdBalanceDto struct {
 }
 
 type SpendBatchRequestDto struct {
-	BatchId         string `json:"batchId"`
-	AccountId       string `json:"accountId"`
-	Currency        string `json:"currency"`
-	DebitMinor      int64  `json:"debitMinor"`
-	ImpressionCount int64  `json:"impressionCount"`
-	IdempotencyKey  string `json:"idempotencyKey"`
+	BatchId          string `json:"batchId"`
+	AccountId        string `json:"accountId"`
+	Currency         string `json:"currency"`
+	DebitMinor       int64  `json:"debitMinor"`
+	CreditDebitMinor int64  `json:"creditDebitMinor"`
+	ImpressionCount  int64  `json:"impressionCount"`
+	IdempotencyKey   string `json:"idempotencyKey"`
+}
+
+type AdCreditChangeDto struct {
+	EntryId        string `json:"entryId"`
+	LotId          string `json:"lotId"`
+	AccountId      string `json:"accountId"`
+	UserId         string `json:"userId"`
+	Currency       string `json:"currency"`
+	AmountMinor    int64  `json:"amountMinor"`
+	Kind           string `json:"kind"`
+	Source         string `json:"source"`
+	IdempotencyKey string `json:"idempotencyKey"`
+}
+
+type AdSpendRefundDto struct {
+	BatchId        string `json:"batchId"`
+	AccountId      string `json:"accountId"`
+	Currency       string `json:"currency"`
+	BalanceMinor   int64  `json:"balanceMinor"`
+	CreditMinor    int64  `json:"creditMinor"`
+	IdempotencyKey string `json:"idempotencyKey"`
+}
+
+type AdBalanceWithdrawalRequestDto struct {
+	UserId         string `json:"userId"`
+	Currency       string `json:"currency"`
+	GrossMinor     int64  `json:"grossMinor"`
+	FeeMinor       int64  `json:"feeMinor"`
+	IdempotencyKey string `json:"idempotencyKey"`
+}
+
+type AdBalanceWithdrawalResultDto struct {
+	GrossMinor int64 `json:"grossMinor"`
+	FeeMinor   int64 `json:"feeMinor"`
+	NetMinor   int64 `json:"netMinor"`
+	Replayed   bool  `json:"replayed"`
 }
 
 type SpendBatchResultDto struct {

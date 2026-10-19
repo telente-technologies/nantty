@@ -408,27 +408,27 @@ func init() {
 	// escrow.TrackingURLValidator is a validator for the "tracking_url" field. It is called by the builders before save.
 	escrow.TrackingURLValidator = escrowDescTrackingURL.Validators[0].(func(string) error)
 	// escrowDescReleaseTrigger is the schema descriptor for release_trigger field.
-	escrowDescReleaseTrigger := escrowFields[32].Descriptor()
+	escrowDescReleaseTrigger := escrowFields[33].Descriptor()
 	// escrow.DefaultReleaseTrigger holds the default value on creation for the release_trigger field.
 	escrow.DefaultReleaseTrigger = escrowDescReleaseTrigger.Default.(string)
 	// escrow.ReleaseTriggerValidator is a validator for the "release_trigger" field. It is called by the builders before save.
 	escrow.ReleaseTriggerValidator = escrowDescReleaseTrigger.Validators[0].(func(string) error)
 	// escrowDescWalletHoldMinor is the schema descriptor for wallet_hold_minor field.
-	escrowDescWalletHoldMinor := escrowFields[34].Descriptor()
+	escrowDescWalletHoldMinor := escrowFields[35].Descriptor()
 	// escrow.DefaultWalletHoldMinor holds the default value on creation for the wallet_hold_minor field.
 	escrow.DefaultWalletHoldMinor = escrowDescWalletHoldMinor.Default.(int64)
 	// escrowDescDirectPayoutReference is the schema descriptor for direct_payout_reference field.
-	escrowDescDirectPayoutReference := escrowFields[35].Descriptor()
+	escrowDescDirectPayoutReference := escrowFields[36].Descriptor()
 	// escrow.DefaultDirectPayoutReference holds the default value on creation for the direct_payout_reference field.
 	escrow.DefaultDirectPayoutReference = escrowDescDirectPayoutReference.Default.(string)
 	// escrow.DirectPayoutReferenceValidator is a validator for the "direct_payout_reference" field. It is called by the builders before save.
 	escrow.DirectPayoutReferenceValidator = escrowDescDirectPayoutReference.Validators[0].(func(string) error)
 	// escrowDescVersion is the schema descriptor for version field.
-	escrowDescVersion := escrowFields[37].Descriptor()
+	escrowDescVersion := escrowFields[38].Descriptor()
 	// escrow.DefaultVersion holds the default value on creation for the version field.
 	escrow.DefaultVersion = escrowDescVersion.Default.(int64)
 	// escrowDescUpdatedAt is the schema descriptor for updated_at field.
-	escrowDescUpdatedAt := escrowFields[38].Descriptor()
+	escrowDescUpdatedAt := escrowFields[39].Descriptor()
 	// escrow.DefaultUpdatedAt holds the default value on creation for the updated_at field.
 	escrow.DefaultUpdatedAt = escrowDescUpdatedAt.Default.(func() time.Time)
 	// escrow.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.

@@ -31,7 +31,7 @@ func MountSellerMoneyRoutes(mux *http.ServeMux, application *sellermoney.Applica
 	mux.Handle("POST /api/v1/internal/sellers/{sellerId}/wallet/payout-accounts/resolve", internal(controller.ResolvePayoutAccount))
 	mux.Handle("POST /api/v1/internal/sellers/{sellerId}/wallet/payout-accounts", internal(stepUp(controller.AddPayoutAccount)))
 	mux.Handle("PATCH /api/v1/internal/sellers/{sellerId}/wallet/payout-accounts/{accountId}", internal(stepUp(controller.UpdatePayoutAccount)))
-	mux.Handle("DELETE /api/v1/internal/sellers/{sellerId}/wallet/payout-accounts/{accountId}", internal(controller.RemovePayoutAccount))
+	mux.Handle("DELETE /api/v1/internal/sellers/{sellerId}/wallet/payout-accounts/{accountId}", internal(stepUp(controller.RemovePayoutAccount)))
 	mux.Handle("GET /api/v1/internal/sellers/{sellerId}/finance/summary", internal(controller.FinanceSummary))
 	mux.Handle("GET /api/v1/internal/sellers/{sellerId}/finance/escrow", internal(controller.Escrow))
 	mux.Handle("GET /api/v1/internal/sellers/{sellerId}/finance/settlements", internal(controller.Settlements))

@@ -96,7 +96,7 @@ func TestSellerWalletViewsPayoutAccountsAndPayoutsThroughTheInternalApi(t *testi
 	if tooMuch := harness.Call(http.MethodPost, prefix+"/wallet/payouts", "", "payout-key-0002", map[string]any{"amountMinor": 900_000, "accountId": accountId}, steppedUp(headers)); tooMuch.Body["code"] != "INSUFFICIENT_AVAILABLE_BALANCE" {
 		t.Fatalf("overdraw: %d %s", tooMuch.Status, tooMuch.Raw)
 	}
-	if busy := harness.Call(http.MethodDelete, prefix+"/wallet/payout-accounts/"+accountId, "", "", nil, headers); busy.Body["code"] != "PAYOUT_IN_PROGRESS" {
+	if busy := harness.Call(http.MethodDelete, prefix+"/wallet/payout-accounts/"+accountId, "", "", nil, steppedUp(headers)); busy.Body["code"] != "PAYOUT_IN_PROGRESS" {
 		t.Fatalf("remove during payout: %d %s", busy.Status, busy.Raw)
 	}
 	schedule := harness.Call(http.MethodPut, prefix+"/wallet/payouts/schedule", "", "", map[string]any{"mode": "weekly", "weekday": 5, "dayOfMonth": 1, "keepMinimumBalanceMinor": 10_000, "accountId": accountId}, headers)
