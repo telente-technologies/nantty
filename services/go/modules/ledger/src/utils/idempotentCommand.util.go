@@ -6,7 +6,6 @@ import (
 	"database/sql"
 	"encoding/hex"
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"regexp"
 
@@ -19,6 +18,7 @@ var idempotencyKeyPattern = regexp.MustCompile(`^[A-Za-z0-9_-]{8,128}$`)
 var (
 	ErrIdempotencyKeyRequired = httpserver.NewApiError(http.StatusBadRequest, "IDEMPOTENCY_KEY_REQUIRED", "Send an Idempotency-Key header of 8-128 letters, digits, - or _.")
 	ErrIdempotencyKeyReused   = httpserver.NewApiError(http.StatusConflict, "IDEMPOTENCY_KEY_REUSED", "This Idempotency-Key was already used with a different request.")
+	ErrIdempotencyInProgress  = httpserver.NewApiError(http.StatusConflict, "IDEMPOTENCY_IN_PROGRESS", "This request is still being processed. Try again in a moment.")
 )
 
 func IsValidIdempotencyKey(key string) bool { return idempotencyKeyPattern.MatchString(key) }
@@ -69,7 +69,7 @@ func RunIdempotentMoneyCommand[Result any](ctx context.Context, database *sql.DB
 				return ErrIdempotencyKeyReused
 			}
 			if !existing.Completed {
-				return fmt.Errorf("idempotency record %s has no stored response", command.Key)
+				return ErrIdempotencyInProgress
 			}
 			replayed = true
 			return json.Unmarshal(existing.ResponseBody, &result)

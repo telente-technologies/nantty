@@ -203,7 +203,7 @@ Add regression test: seed 1×`succeeded` (old) + 1×`pending` (new) for same ord
 ---
 ## ZM-005 [PART-FIXED 2026-10-19] — Idempotency gaps + refund/send races (money)
 
-**Status 2026-10-19:** `refundOrderGroup` now derives its idempotency key from order group + amount + currency + reason (`services/go/modules/escrow/src/modules/escrows/commands/refundOrderGroup/refundOrderGroup.handler.go`), so a second distinct partial refund is no longer misread as key reuse; same-amount retries still replay. The provider-session and confirm-receipt replay items below are unchanged.
+**Status 2026-10-20:** `refundOrderGroup` now derives its idempotency key from order group + amount + currency + reason (`services/go/modules/escrow/src/modules/escrows/commands/refundOrderGroup/refundOrderGroup.handler.go`), so a second distinct partial refund is no longer misread as key reuse; same-amount retries still replay. `OpenProviderCheckoutForIntent` now serializes the check-and-open with a per-intent PostgreSQL advisory lock and returns a retryable `409 CHECKOUT_OPENING` instead of opening a second provider session (`payments/.../paymentIntentCreation.service.go`; test `TestAConcurrentCheckoutOpenReturnsRetryInsteadOfOpeningASecondProviderSession`). An incomplete idempotency record now returns `409 IDEMPOTENCY_IN_PROGRESS` instead of a 500. Confirm-receipt replay is unchanged: the escrow release is already status-idempotent and returns the same escrow.
 
 **Severity:** High (money — double-charge / double-refund / 500-on-retry)
 **Evidence (all `services/go/modules/`):**

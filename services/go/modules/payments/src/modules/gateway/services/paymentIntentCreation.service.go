@@ -99,6 +99,25 @@ func (gateway *PaymentGateway) CreatePendingPaymentIntentInTransaction(ctx conte
 const callbackUrlMetadataKey = "zudomartCallbackUrl"
 
 func (gateway *PaymentGateway) OpenProviderCheckoutForIntent(ctx context.Context, intentId uuid.UUID) (models.PaymentIntentView, error) {
+	// A replay can reach here while the first request is still waiting on the provider. Serialize the
+	// check-and-open so two requests cannot create two provider sessions for the same intent. The lock
+	// lives on a dedicated connection because the provider call outlives any single short transaction.
+	connection, err := gateway.Container.Resources.Database.Conn(ctx)
+	if err != nil {
+		return models.PaymentIntentView{}, err
+	}
+	defer connection.Close()
+	lockKey := "open-checkout:" + intentId.String()
+	var locked bool
+	if err := connection.QueryRowContext(ctx, "SELECT pg_try_advisory_lock(hashtextextended($1, 0))", lockKey).Scan(&locked); err != nil {
+		return models.PaymentIntentView{}, err
+	}
+	if !locked {
+		return models.PaymentIntentView{}, ErrCheckoutOpening
+	}
+	defer func() {
+		_, _ = connection.ExecContext(context.Background(), "SELECT pg_advisory_unlock(hashtextextended($1, 0))", lockKey)
+	}()
 	client := gateway.Container.Client(gateway.Container.Resources.Database)
 	intent, err := client.PaymentIntent.Get(ctx, intentId)
 	if ent.IsNotFound(err) {

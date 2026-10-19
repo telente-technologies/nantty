@@ -26,12 +26,18 @@ Every code change made while fixing `docs/audit/frontend-backend-audit.md` is lo
 7. **Feed→Mart drag and quote gating re-checked, no change needed.**
    - Feed→Mart drag is already implemented in `apps/mobile/src/screens/home/home.screen.tsx` + `homeSectionSwipe.util.ts` (`d6e3c65f4`); `homeSectionSwipe.test.ts` and `horizontalScrollGestureGuard.test.ts` pass 13/13.
    - `View quotes` already renders only when `quotes > 0` on mobile (`hasQuotesToShow`) and web (`ViewQuotesLink`).
+8. **Checkout open is serialized per intent** — `payments/.../paymentIntentCreation.service.go`, `paymentGateway.service.go`.
+   - `OpenProviderCheckoutForIntent` takes a session-level PostgreSQL advisory lock (`open-checkout:<intentId>`) on a dedicated connection before re-reading the intent. A concurrent caller gets a retryable `409 CHECKOUT_OPENING` instead of both calling the provider; the lock is released on that connection (and by connection close if the process dies).
+   - Test: `payments.checkoutOpenLock_integration_test.go` — `TestAConcurrentCheckoutOpenReturnsRetryInsteadOfOpeningASecondProviderSession` (blocked call makes 0 provider POSTs; after unlock exactly 1).
+9. **An incomplete idempotency record returns a retryable 409** — `ledger/src/utils/idempotentCommand.util.go`.
+   - `IDEMPOTENCY_IN_PROGRESS` replaces the generic 500 when a stored record has no response yet.
 **Verified (real output):**
 - `go test ./modules/payments -run 'TestPayoutAccountCreation…|TestFailedPayoutAccountJobs…|TestADirectSalePayout…' -count=1` → `ok zudomart/modules/payments 2.300s`.
 - `go test ./modules/wallet -run 'TestWithdrawalAndNewPayout…|TestWithdrawalVelocity…|TestANameMatchedOnly…' -count=1` → `ok zudomart/modules/wallet 3.489s`.
 - `go test ./modules/escrow -run 'TestSecondDistinct…|TestAPartiallyRefunded…|TestAPartialChargeback…|TestAFailedRelease…' -count=1` → `ok zudomart/modules/escrow 2.821s`.
 - `go test ./modules/creators -run TestAffiliateCommission… -count=1` → `ok zudomart/modules/creators 0.424s`.
-- `go build ./modules/payments/... ./modules/wallet/... ./modules/escrow/... ./modules/creators/...` → clean.
+- `go test ./modules/payments -run TestAConcurrentCheckoutOpen… -count=1` → `ok zudomart/modules/payments 0.460s`.
+- `go build ./modules/payments/... ./modules/wallet/... ./modules/escrow/... ./modules/creators/... ./modules/ledger/...` → clean.
 - Mobile: `tsc --noEmit` clean; social `typecheck` clean; mobile Jest `126 suites / 781 tests`; social Vitest `84 files / 544 tests`.
 **Rollback:**
 - Revert the Go hunks independently. The onboarding merge rolls back as one transaction; the in-tx level read is additive; the affiliate fallback is inert when no awaiting row exists; the refund key change only affects new requests.

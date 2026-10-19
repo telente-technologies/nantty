@@ -134,6 +134,7 @@ func SharedPaymentGateway() (*PaymentGateway, error) {
 
 var (
 	ErrPaymentNotFound             = httpserver.NewApiError(http.StatusNotFound, "PAYMENT_NOT_FOUND", "Payment was not found.")
+	ErrCheckoutOpening             = httpserver.NewApiError(http.StatusConflict, "CHECKOUT_OPENING", "The checkout link is being created. Try again in a moment.")
 	ErrPaymentAmountMismatch       = httpserver.NewApiError(http.StatusUnprocessableEntity, "PAYMENT_AMOUNT_MISMATCH", "The amount paid does not match this payment.")
 	ErrCurrencyNotSupported        = httpserver.NewApiError(http.StatusUnprocessableEntity, "CURRENCY_NOT_SUPPORTED", "Payments in this currency are not supported yet.")
 	ErrVerifyEmailRequired         = httpserver.NewApiError(http.StatusForbidden, "VERIFY_EMAIL_REQUIRED", "Verify your email to continue.")
