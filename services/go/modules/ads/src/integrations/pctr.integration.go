@@ -123,6 +123,7 @@ type PctrWithFallbackScorer struct {
 var (
 	mediaTypeByFormat   = map[string]string{"feed_post": "image", "clip": "video", "product": "product_tile", "store": "image", "story": "image", "live": "live_stream"}
 	aspectRatioByFormat = map[string]string{"clip": "9:16", "story": "9:16", "live": "9:16"}
+	contextualViewerId  = "contextual-viewer"
 	pythonAgeBracket    = regexp.MustCompile(`^(13-17|18-24|25-34|35-44|45-54|55-64|65\+)$`)
 )
 
@@ -151,11 +152,14 @@ func (scorer PctrWithFallbackScorer) ScorePredictedClickRatesInPpm(ctx context.C
 }
 
 func predictedCtrPayload(request types.PctrRequest) map[string]any {
-	viewer := map[string]any{"userId": request.Viewer.UserId}
+	viewer := map[string]any{"userId": contextualViewerId}
+	if request.Viewer.PersonalizedAds && request.Viewer.UserId != "" {
+		viewer["userId"] = request.Viewer.UserId
+	}
 	if request.Viewer.Country != "" {
 		viewer["country"] = request.Viewer.Country
 	}
-	if pythonAgeBracket.MatchString(request.Viewer.AgeBand) {
+	if request.Viewer.PersonalizedAds && pythonAgeBracket.MatchString(request.Viewer.AgeBand) {
 		viewer["ageBracket"] = request.Viewer.AgeBand
 	}
 	candidates := make([]map[string]any, 0, len(request.Candidates))

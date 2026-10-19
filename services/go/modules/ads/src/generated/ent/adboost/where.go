@@ -95,6 +95,11 @@ func TotalBudgetMinor(v int64) predicate.AdBoost {
 	return predicate.AdBoost(sql.FieldEQ(FieldTotalBudgetMinor, v))
 }
 
+// AddedBudgetMinor applies equality check predicate on the "added_budget_minor" field. It's identical to AddedBudgetMinorEQ.
+func AddedBudgetMinor(v int64) predicate.AdBoost {
+	return predicate.AdBoost(sql.FieldEQ(FieldAddedBudgetMinor, v))
+}
+
 // PaymentTopUpID applies equality check predicate on the "payment_top_up_id" field. It's identical to PaymentTopUpIDEQ.
 func PaymentTopUpID(v string) predicate.AdBoost {
 	return predicate.AdBoost(sql.FieldEQ(FieldPaymentTopUpID, v))
@@ -128,6 +133,11 @@ func AdGroupID(v uuid.UUID) predicate.AdBoost {
 // AdID applies equality check predicate on the "ad_id" field. It's identical to AdIDEQ.
 func AdID(v uuid.UUID) predicate.AdBoost {
 	return predicate.AdBoost(sql.FieldEQ(FieldAdID, v))
+}
+
+// ScheduledStartAt applies equality check predicate on the "scheduled_start_at" field. It's identical to ScheduledStartAtEQ.
+func ScheduledStartAt(v time.Time) predicate.AdBoost {
+	return predicate.AdBoost(sql.FieldEQ(FieldScheduledStartAt, v))
 }
 
 // StartsAt applies equality check predicate on the "starts_at" field. It's identical to StartsAtEQ.
@@ -295,6 +305,26 @@ func PostIDContainsFold(v string) predicate.AdBoost {
 	return predicate.AdBoost(sql.FieldContainsFold(FieldPostID, v))
 }
 
+// DestinationTypeEQ applies the EQ predicate on the "destination_type" field.
+func DestinationTypeEQ(v DestinationType) predicate.AdBoost {
+	return predicate.AdBoost(sql.FieldEQ(FieldDestinationType, v))
+}
+
+// DestinationTypeNEQ applies the NEQ predicate on the "destination_type" field.
+func DestinationTypeNEQ(v DestinationType) predicate.AdBoost {
+	return predicate.AdBoost(sql.FieldNEQ(FieldDestinationType, v))
+}
+
+// DestinationTypeIn applies the In predicate on the "destination_type" field.
+func DestinationTypeIn(vs ...DestinationType) predicate.AdBoost {
+	return predicate.AdBoost(sql.FieldIn(FieldDestinationType, vs...))
+}
+
+// DestinationTypeNotIn applies the NotIn predicate on the "destination_type" field.
+func DestinationTypeNotIn(vs ...DestinationType) predicate.AdBoost {
+	return predicate.AdBoost(sql.FieldNotIn(FieldDestinationType, vs...))
+}
+
 // GoalEQ applies the EQ predicate on the "goal" field.
 func GoalEQ(v Goal) predicate.AdBoost {
 	return predicate.AdBoost(sql.FieldEQ(FieldGoal, v))
@@ -440,6 +470,26 @@ func CurrencyContainsFold(v string) predicate.AdBoost {
 	return predicate.AdBoost(sql.FieldContainsFold(FieldCurrency, v))
 }
 
+// BudgetTypeEQ applies the EQ predicate on the "budget_type" field.
+func BudgetTypeEQ(v BudgetType) predicate.AdBoost {
+	return predicate.AdBoost(sql.FieldEQ(FieldBudgetType, v))
+}
+
+// BudgetTypeNEQ applies the NEQ predicate on the "budget_type" field.
+func BudgetTypeNEQ(v BudgetType) predicate.AdBoost {
+	return predicate.AdBoost(sql.FieldNEQ(FieldBudgetType, v))
+}
+
+// BudgetTypeIn applies the In predicate on the "budget_type" field.
+func BudgetTypeIn(vs ...BudgetType) predicate.AdBoost {
+	return predicate.AdBoost(sql.FieldIn(FieldBudgetType, vs...))
+}
+
+// BudgetTypeNotIn applies the NotIn predicate on the "budget_type" field.
+func BudgetTypeNotIn(vs ...BudgetType) predicate.AdBoost {
+	return predicate.AdBoost(sql.FieldNotIn(FieldBudgetType, vs...))
+}
+
 // DailyBudgetMinorEQ applies the EQ predicate on the "daily_budget_minor" field.
 func DailyBudgetMinorEQ(v int64) predicate.AdBoost {
 	return predicate.AdBoost(sql.FieldEQ(FieldDailyBudgetMinor, v))
@@ -558,6 +608,46 @@ func TotalBudgetMinorLT(v int64) predicate.AdBoost {
 // TotalBudgetMinorLTE applies the LTE predicate on the "total_budget_minor" field.
 func TotalBudgetMinorLTE(v int64) predicate.AdBoost {
 	return predicate.AdBoost(sql.FieldLTE(FieldTotalBudgetMinor, v))
+}
+
+// AddedBudgetMinorEQ applies the EQ predicate on the "added_budget_minor" field.
+func AddedBudgetMinorEQ(v int64) predicate.AdBoost {
+	return predicate.AdBoost(sql.FieldEQ(FieldAddedBudgetMinor, v))
+}
+
+// AddedBudgetMinorNEQ applies the NEQ predicate on the "added_budget_minor" field.
+func AddedBudgetMinorNEQ(v int64) predicate.AdBoost {
+	return predicate.AdBoost(sql.FieldNEQ(FieldAddedBudgetMinor, v))
+}
+
+// AddedBudgetMinorIn applies the In predicate on the "added_budget_minor" field.
+func AddedBudgetMinorIn(vs ...int64) predicate.AdBoost {
+	return predicate.AdBoost(sql.FieldIn(FieldAddedBudgetMinor, vs...))
+}
+
+// AddedBudgetMinorNotIn applies the NotIn predicate on the "added_budget_minor" field.
+func AddedBudgetMinorNotIn(vs ...int64) predicate.AdBoost {
+	return predicate.AdBoost(sql.FieldNotIn(FieldAddedBudgetMinor, vs...))
+}
+
+// AddedBudgetMinorGT applies the GT predicate on the "added_budget_minor" field.
+func AddedBudgetMinorGT(v int64) predicate.AdBoost {
+	return predicate.AdBoost(sql.FieldGT(FieldAddedBudgetMinor, v))
+}
+
+// AddedBudgetMinorGTE applies the GTE predicate on the "added_budget_minor" field.
+func AddedBudgetMinorGTE(v int64) predicate.AdBoost {
+	return predicate.AdBoost(sql.FieldGTE(FieldAddedBudgetMinor, v))
+}
+
+// AddedBudgetMinorLT applies the LT predicate on the "added_budget_minor" field.
+func AddedBudgetMinorLT(v int64) predicate.AdBoost {
+	return predicate.AdBoost(sql.FieldLT(FieldAddedBudgetMinor, v))
+}
+
+// AddedBudgetMinorLTE applies the LTE predicate on the "added_budget_minor" field.
+func AddedBudgetMinorLTE(v int64) predicate.AdBoost {
+	return predicate.AdBoost(sql.FieldLTE(FieldAddedBudgetMinor, v))
 }
 
 // PaymentMethodEQ applies the EQ predicate on the "payment_method" field.
@@ -933,6 +1023,56 @@ func AdIDLT(v uuid.UUID) predicate.AdBoost {
 // AdIDLTE applies the LTE predicate on the "ad_id" field.
 func AdIDLTE(v uuid.UUID) predicate.AdBoost {
 	return predicate.AdBoost(sql.FieldLTE(FieldAdID, v))
+}
+
+// ScheduledStartAtEQ applies the EQ predicate on the "scheduled_start_at" field.
+func ScheduledStartAtEQ(v time.Time) predicate.AdBoost {
+	return predicate.AdBoost(sql.FieldEQ(FieldScheduledStartAt, v))
+}
+
+// ScheduledStartAtNEQ applies the NEQ predicate on the "scheduled_start_at" field.
+func ScheduledStartAtNEQ(v time.Time) predicate.AdBoost {
+	return predicate.AdBoost(sql.FieldNEQ(FieldScheduledStartAt, v))
+}
+
+// ScheduledStartAtIn applies the In predicate on the "scheduled_start_at" field.
+func ScheduledStartAtIn(vs ...time.Time) predicate.AdBoost {
+	return predicate.AdBoost(sql.FieldIn(FieldScheduledStartAt, vs...))
+}
+
+// ScheduledStartAtNotIn applies the NotIn predicate on the "scheduled_start_at" field.
+func ScheduledStartAtNotIn(vs ...time.Time) predicate.AdBoost {
+	return predicate.AdBoost(sql.FieldNotIn(FieldScheduledStartAt, vs...))
+}
+
+// ScheduledStartAtGT applies the GT predicate on the "scheduled_start_at" field.
+func ScheduledStartAtGT(v time.Time) predicate.AdBoost {
+	return predicate.AdBoost(sql.FieldGT(FieldScheduledStartAt, v))
+}
+
+// ScheduledStartAtGTE applies the GTE predicate on the "scheduled_start_at" field.
+func ScheduledStartAtGTE(v time.Time) predicate.AdBoost {
+	return predicate.AdBoost(sql.FieldGTE(FieldScheduledStartAt, v))
+}
+
+// ScheduledStartAtLT applies the LT predicate on the "scheduled_start_at" field.
+func ScheduledStartAtLT(v time.Time) predicate.AdBoost {
+	return predicate.AdBoost(sql.FieldLT(FieldScheduledStartAt, v))
+}
+
+// ScheduledStartAtLTE applies the LTE predicate on the "scheduled_start_at" field.
+func ScheduledStartAtLTE(v time.Time) predicate.AdBoost {
+	return predicate.AdBoost(sql.FieldLTE(FieldScheduledStartAt, v))
+}
+
+// ScheduledStartAtIsNil applies the IsNil predicate on the "scheduled_start_at" field.
+func ScheduledStartAtIsNil() predicate.AdBoost {
+	return predicate.AdBoost(sql.FieldIsNull(FieldScheduledStartAt))
+}
+
+// ScheduledStartAtNotNil applies the NotNil predicate on the "scheduled_start_at" field.
+func ScheduledStartAtNotNil() predicate.AdBoost {
+	return predicate.AdBoost(sql.FieldNotNull(FieldScheduledStartAt))
 }
 
 // StartsAtEQ applies the EQ predicate on the "starts_at" field.

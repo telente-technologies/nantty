@@ -11,11 +11,19 @@ import (
 
 var DurationDayOptions = []int{1, 3, 7, 14}
 
+const (
+	MaximumDurationDays        = 30
+	MaximumChangedDurationDays = 90
+	MaximumScheduleDays        = 60
+	BudgetTypeDaily            = "daily"
+	BudgetTypeTotal            = "total"
+)
+
 var BoostInterests = []string{"Fashion", "Beauty", "Gadgets", "Food", "Home & Living", "Football", "Music", "Parenting", "Travel", "Tech"}
 
-var objectiveByGoal = map[string]string{"views": "awareness", "profile_visits": "traffic", "messages": "messages"}
+var objectiveByGoal = map[string]string{"views": "awareness", "profile_visits": "traffic", "messages": "messages", "store_visits": "traffic", "product_visits": "traffic"}
 
-var callToActionByGoal = map[string]string{"views": "watch_more", "profile_visits": "follow", "messages": "send_message"}
+var callToActionByGoal = map[string]string{"views": "watch_more", "profile_visits": "follow", "messages": "send_message", "store_visits": "visit_store", "product_visits": "shop_now"}
 
 func ObjectiveForGoal(goal string) string { return objectiveByGoal[goal] }
 
@@ -36,13 +44,35 @@ func SuggestedDailyBudgets(minimumMinor int64, currency string) []types.Money {
 	return suggestions
 }
 
-var objectiveForBoostGoal = map[string]string{"views": "views", "profile_visits": "profile_visits", "messages": "messages"}
+var objectiveForBoostGoal = map[string]string{"views": "views", "profile_visits": "profile_visits", "messages": "messages", "store_visits": "profile_visits", "product_visits": "profile_visits"}
 
 func EstimateRequestForBoost(request dtos.BoostEstimateRequest) regionpricing.EstimateRequest {
-	return regionpricing.EstimateRequest{
+	estimate := regionpricing.EstimateRequest{
 		Countries: BoostTargetCountries(request.Audience), BillingCurrency: request.DailyBudget.Currency, BudgetType: "daily",
 		BudgetMinor: request.DailyBudget.AmountMinor, Days: request.DurationDays, Objective: objectiveForBoostGoal[request.Goal],
 	}
+	if request.BudgetType == BudgetTypeTotal && request.TotalBudget != nil {
+		estimate.BudgetType, estimate.BudgetMinor = "lifetime", request.TotalBudget.AmountMinor
+	}
+	return estimate
+}
+
+func NormalizeBoostBudget(request dtos.BoostEstimateRequest) dtos.BoostEstimateRequest {
+	if request.BudgetType == "" {
+		request.BudgetType = BudgetTypeDaily
+	}
+	if request.BudgetType == BudgetTypeTotal && request.TotalBudget != nil && request.DurationDays > 0 {
+		total := *request.TotalBudget
+		request.DailyBudget = types.Money{AmountMinor: (total.AmountMinor + int64(request.DurationDays) - 1) / int64(request.DurationDays), Currency: total.Currency}
+	}
+	return request
+}
+
+func BoostTotalBudgetMinor(request dtos.BoostEstimateRequest) int64 {
+	if request.BudgetType == BudgetTypeTotal && request.TotalBudget != nil {
+		return request.TotalBudget.AmountMinor
+	}
+	return request.DailyBudget.AmountMinor * int64(max(request.DurationDays, 0))
 }
 
 func EstimateBoost(request dtos.BoostEstimateRequest, estimate regionpricing.CampaignEstimate) dtos.BoostEstimate {
@@ -53,6 +83,8 @@ func EstimateBoost(request dtos.BoostEstimateRequest, estimate regionpricing.Cam
 	labels := map[string]string{
 		"views":          fmt.Sprintf("About %d–%d views", estimate.VideoViews.Low, estimate.VideoViews.High),
 		"profile_visits": fmt.Sprintf("About %d–%d profile visits", estimate.Clicks.Low, estimate.Clicks.High),
+		"store_visits":   fmt.Sprintf("About %d–%d store visits", estimate.Clicks.Low, estimate.Clicks.High),
+		"product_visits": fmt.Sprintf("About %d–%d product views", estimate.Clicks.Low, estimate.Clicks.High),
 		"messages":       fmt.Sprintf("About %d–%d messages", max(estimate.Results.Low, 1), max(estimate.Results.High, 1)),
 	}
 	region := ""
@@ -77,12 +109,20 @@ func AudienceForBoost(audience dtos.BoostAudience, fallbackCountry string) types
 	if len(audience.States) > 0 {
 		spec.Locations = nil
 		for _, state := range audience.States {
-			spec.Locations = append(spec.Locations, types.LocationTarget{Type: "state", Code: state, Name: state, CountryCode: country})
+			spec.Locations = append(spec.Locations, StateTargetFor(country, state))
 		}
 	}
 	spec.AgeMin, spec.AgeMax = max(audience.AgeMin, 18), min(audience.AgeMax, 65)
+	if audience.Gender == "female" || audience.Gender == "male" {
+		spec.Gender = audience.Gender
+	}
 	for _, interest := range audience.Interests {
 		spec.TopicIds = append(spec.TopicIds, topicSlug(interest))
+	}
+	for _, topicId := range audience.TopicIds {
+		if !slices.Contains(spec.TopicIds, topicId) {
+			spec.TopicIds = append(spec.TopicIds, topicId)
+		}
 	}
 	return spec
 }
@@ -105,5 +145,5 @@ func topicSlug(interest string) string {
 }
 
 func IsSupportedGoal(goal string) bool {
-	return slices.Contains([]string{"views", "profile_visits", "messages"}, goal)
+	return slices.Contains([]string{"views", "profile_visits", "messages", "store_visits", "product_visits"}, goal)
 }

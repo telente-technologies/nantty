@@ -161,7 +161,7 @@ func TestBoostCancelledBeforeCardPaymentAndFinishedBoostsAreLeftAlone(t *testing
 		t.Fatalf("owner cannot cancel a finished boost: %d %v", status, refused)
 	}
 	stranger := h.newUser("stranger")
-	if status, _ := h.call("POST", "/api/v1/ads/boosts/"+doneId+"/cancel", &stranger, "cancel-stranger-01", map[string]any{}); status != http.StatusNotFound {
+	if status, _ := h.call("POST", "/api/v1/ads/boosts/"+doneId+"/cancel", &stranger, "cancel-stranger-01", map[string]any{}); status != http.StatusForbidden {
 		t.Fatalf("only the owner may cancel: %d", status)
 	}
 }

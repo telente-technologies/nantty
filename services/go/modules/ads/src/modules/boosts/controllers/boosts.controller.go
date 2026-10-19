@@ -11,6 +11,7 @@ import (
 	estimateboost "zudomart/modules/ads/src/modules/boosts/queries/estimateBoost"
 	getboost "zudomart/modules/ads/src/modules/boosts/queries/getBoost"
 	getboostoptions "zudomart/modules/ads/src/modules/boosts/queries/getBoostOptions"
+	"zudomart/modules/ads/src/modules/boosts/services"
 	"zudomart/modules/ads/src/utils"
 	"zudomart/platform/httpserver"
 	"zudomart/platform/regionpricing"
@@ -68,7 +69,7 @@ func (controller BoostsController) Create(writer http.ResponseWriter, request *h
 			return err
 		}
 		if method := body.PaymentMethod; method == "balance" || method == "wallet" {
-			total := body.DailyBudget.AmountMinor * int64(max(body.DurationDays, 0))
+			total := services.BoostTotalBudgetMinor(services.NormalizeBoostBudget(body.BoostEstimateRequest))
 			if err := middlewares.StepUpGate(controller.Container).RequireAbove(request, total, body.DailyBudget.Currency); err != nil {
 				return err
 			}

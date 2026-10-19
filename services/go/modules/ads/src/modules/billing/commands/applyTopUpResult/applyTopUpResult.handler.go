@@ -34,5 +34,8 @@ func (handler Handler) Execute(ctx context.Context, command Command) error {
 		SetStatus(adtopup.StatusSucceeded).SetCompletedAt(command.OccurredAt).SetFailureReason("").Exec(ctx); err != nil {
 		return err
 	}
-	return boostservices.StartBoostsPaidByTopUp(ctx, deployed, command.TopUpId)
+	if err := boostservices.StartBoostsPaidByTopUp(ctx, deployed, command.TopUpId); err != nil {
+		return err
+	}
+	return boostservices.ApplyBoostChangesPaidByTopUp(ctx, deployed.Client, deployed.RunInTransaction, command.TopUpId, deployed.Now())
 }

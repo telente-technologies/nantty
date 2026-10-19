@@ -55,10 +55,13 @@ func TestRejectingABoostNeverCreditsItsBudgetTwice(t *testing.T) {
 	money.premium[owner.id.String()] = true
 	free := h.expect("POST", "/api/v1/ads/boosts", &owner, "reject-free-boost1", boostBody("free", 100_000, 1), http.StatusCreated)
 	freeId := free["boost"].(map[string]any)["id"].(string)
-	freeBefore := balanceOf(freeId)
+	creditOf := func(boostId string) int64 {
+		return h.module.Container.Client.AdAccount.GetX(ctx, h.boostRow(boostId).AccountID).CreditMinor
+	}
+	freeBefore, balanceBefore := creditOf(freeId), balanceOf(freeId)
 	h.rejectBoostAd(&staff, h.boostRow(freeId).AdID.String(), http.StatusOK)
-	if after := balanceOf(freeId); freeBefore-after != 100_000 {
-		t.Fatalf("a rejected free boost withdraws its free credit: before %d after %d", freeBefore, after)
+	if after := creditOf(freeId); freeBefore-after != 100_000 || balanceOf(freeId) != balanceBefore {
+		t.Fatalf("a rejected free boost withdraws its free ad credit and never touches the real balance: credit before %d after %d", freeBefore, after)
 	}
 	if allowance := h.expect("GET", "/api/v1/ads/boosts/options", &owner, "", nil, http.StatusOK)["freeBoost"].(map[string]any); allowance["eligible"] != true {
 		t.Fatalf("an undelivered rejected free boost gives the allowance back: %v", allowance)

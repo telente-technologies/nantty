@@ -158,6 +158,20 @@ func (_c *AdCampaignCreate) SetCreatedByUserID(v uuid.UUID) *AdCampaignCreate {
 	return _c
 }
 
+// SetAdCategory sets the "ad_category" field.
+func (_c *AdCampaignCreate) SetAdCategory(v string) *AdCampaignCreate {
+	_c.mutation.SetAdCategory(v)
+	return _c
+}
+
+// SetNillableAdCategory sets the "ad_category" field if the given value is not nil.
+func (_c *AdCampaignCreate) SetNillableAdCategory(v *string) *AdCampaignCreate {
+	if v != nil {
+		_c.SetAdCategory(*v)
+	}
+	return _c
+}
+
 // SetUpdatedAt sets the "updated_at" field.
 func (_c *AdCampaignCreate) SetUpdatedAt(v time.Time) *AdCampaignCreate {
 	_c.mutation.SetUpdatedAt(v)
@@ -233,6 +247,10 @@ func (_c *AdCampaignCreate) defaults() {
 		v := adcampaign.DefaultStatus
 		_c.mutation.SetStatus(v)
 	}
+	if _, ok := _c.mutation.AdCategory(); !ok {
+		v := adcampaign.DefaultAdCategory
+		_c.mutation.SetAdCategory(v)
+	}
 	if _, ok := _c.mutation.UpdatedAt(); !ok {
 		v := adcampaign.DefaultUpdatedAt()
 		_c.mutation.SetUpdatedAt(v)
@@ -301,6 +319,14 @@ func (_c *AdCampaignCreate) check() error {
 	}
 	if _, ok := _c.mutation.CreatedByUserID(); !ok {
 		return &ValidationError{Name: "created_by_user_id", err: errors.New(`ent: missing required field "AdCampaign.created_by_user_id"`)}
+	}
+	if _, ok := _c.mutation.AdCategory(); !ok {
+		return &ValidationError{Name: "ad_category", err: errors.New(`ent: missing required field "AdCampaign.ad_category"`)}
+	}
+	if v, ok := _c.mutation.AdCategory(); ok {
+		if err := adcampaign.AdCategoryValidator(v); err != nil {
+			return &ValidationError{Name: "ad_category", err: fmt.Errorf(`ent: validator failed for field "AdCampaign.ad_category": %w`, err)}
+		}
 	}
 	if _, ok := _c.mutation.UpdatedAt(); !ok {
 		return &ValidationError{Name: "updated_at", err: errors.New(`ent: missing required field "AdCampaign.updated_at"`)}
@@ -392,6 +418,10 @@ func (_c *AdCampaignCreate) createSpec() (*AdCampaign, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.CreatedByUserID(); ok {
 		_spec.SetField(adcampaign.FieldCreatedByUserID, field.TypeUUID, value)
 		_node.CreatedByUserID = value
+	}
+	if value, ok := _c.mutation.AdCategory(); ok {
+		_spec.SetField(adcampaign.FieldAdCategory, field.TypeString, value)
+		_node.AdCategory = value
 	}
 	if value, ok := _c.mutation.UpdatedAt(); ok {
 		_spec.SetField(adcampaign.FieldUpdatedAt, field.TypeTime, value)
@@ -578,6 +608,18 @@ func (u *AdCampaignUpsert) UpdateEndAt() *AdCampaignUpsert {
 // ClearEndAt clears the value of the "end_at" field.
 func (u *AdCampaignUpsert) ClearEndAt() *AdCampaignUpsert {
 	u.SetNull(adcampaign.FieldEndAt)
+	return u
+}
+
+// SetAdCategory sets the "ad_category" field.
+func (u *AdCampaignUpsert) SetAdCategory(v string) *AdCampaignUpsert {
+	u.Set(adcampaign.FieldAdCategory, v)
+	return u
+}
+
+// UpdateAdCategory sets the "ad_category" field to the value that was provided on create.
+func (u *AdCampaignUpsert) UpdateAdCategory() *AdCampaignUpsert {
+	u.SetExcluded(adcampaign.FieldAdCategory)
 	return u
 }
 
@@ -807,6 +849,20 @@ func (u *AdCampaignUpsertOne) UpdateEndAt() *AdCampaignUpsertOne {
 func (u *AdCampaignUpsertOne) ClearEndAt() *AdCampaignUpsertOne {
 	return u.Update(func(s *AdCampaignUpsert) {
 		s.ClearEndAt()
+	})
+}
+
+// SetAdCategory sets the "ad_category" field.
+func (u *AdCampaignUpsertOne) SetAdCategory(v string) *AdCampaignUpsertOne {
+	return u.Update(func(s *AdCampaignUpsert) {
+		s.SetAdCategory(v)
+	})
+}
+
+// UpdateAdCategory sets the "ad_category" field to the value that was provided on create.
+func (u *AdCampaignUpsertOne) UpdateAdCategory() *AdCampaignUpsertOne {
+	return u.Update(func(s *AdCampaignUpsert) {
+		s.UpdateAdCategory()
 	})
 }
 
@@ -1205,6 +1261,20 @@ func (u *AdCampaignUpsertBulk) UpdateEndAt() *AdCampaignUpsertBulk {
 func (u *AdCampaignUpsertBulk) ClearEndAt() *AdCampaignUpsertBulk {
 	return u.Update(func(s *AdCampaignUpsert) {
 		s.ClearEndAt()
+	})
+}
+
+// SetAdCategory sets the "ad_category" field.
+func (u *AdCampaignUpsertBulk) SetAdCategory(v string) *AdCampaignUpsertBulk {
+	return u.Update(func(s *AdCampaignUpsert) {
+		s.SetAdCategory(v)
+	})
+}
+
+// UpdateAdCategory sets the "ad_category" field to the value that was provided on create.
+func (u *AdCampaignUpsertBulk) UpdateAdCategory() *AdCampaignUpsertBulk {
+	return u.Update(func(s *AdCampaignUpsert) {
+		s.UpdateAdCategory()
 	})
 }
 

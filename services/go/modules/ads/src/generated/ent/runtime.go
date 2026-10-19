@@ -11,15 +11,19 @@ import (
 	"zudomart/modules/ads/src/generated/ent/adaccountmember"
 	"zudomart/modules/ads/src/generated/ent/adactivityentry"
 	"zudomart/modules/ads/src/generated/ent/adautomatedrule"
+	"zudomart/modules/ads/src/generated/ent/adbalancewithdrawal"
 	"zudomart/modules/ads/src/generated/ent/adboost"
+	"zudomart/modules/ads/src/generated/ent/adboostchange"
 	"zudomart/modules/ads/src/generated/ent/adcampaign"
 	"zudomart/modules/ads/src/generated/ent/adcardstatsdaily"
+	"zudomart/modules/ads/src/generated/ent/adcashbacksetting"
 	"zudomart/modules/ads/src/generated/ent/adcontentsignal"
 	"zudomart/modules/ads/src/generated/ent/adconversion"
 	"zudomart/modules/ads/src/generated/ent/adconversionevent"
 	"zudomart/modules/ads/src/generated/ent/adcreatorearning"
 	"zudomart/modules/ads/src/generated/ent/adcreatormonetisationhold"
 	"zudomart/modules/ads/src/generated/ent/adcreatorprogrammember"
+	"zudomart/modules/ads/src/generated/ent/adcreditlot"
 	"zudomart/modules/ads/src/generated/ent/adcustomaudience"
 	"zudomart/modules/ads/src/generated/ent/adexperiment"
 	"zudomart/modules/ads/src/generated/ent/adfreeboostgrant"
@@ -109,8 +113,14 @@ func init() {
 	adDescAutoCheckFlags := adFields[18].Descriptor()
 	// ad.DefaultAutoCheckFlags holds the default value on creation for the auto_check_flags field.
 	ad.DefaultAutoCheckFlags = adDescAutoCheckFlags.Default.(func() []types.AutoCheckFlag)
+	// adDescAdCategory is the schema descriptor for ad_category field.
+	adDescAdCategory := adFields[19].Descriptor()
+	// ad.DefaultAdCategory holds the default value on creation for the ad_category field.
+	ad.DefaultAdCategory = adDescAdCategory.Default.(string)
+	// ad.AdCategoryValidator is a validator for the "ad_category" field. It is called by the builders before save.
+	ad.AdCategoryValidator = adDescAdCategory.Validators[0].(func(string) error)
 	// adDescUpdatedAt is the schema descriptor for updated_at field.
-	adDescUpdatedAt := adFields[19].Descriptor()
+	adDescUpdatedAt := adFields[20].Descriptor()
 	// ad.DefaultUpdatedAt holds the default value on creation for the updated_at field.
 	ad.DefaultUpdatedAt = adDescUpdatedAt.Default.(func() time.Time)
 	// ad.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
@@ -356,6 +366,53 @@ func init() {
 	adautomatedruleDescID := adautomatedruleMixinFields0[0].Descriptor()
 	// adautomatedrule.DefaultID holds the default value on creation for the id field.
 	adautomatedrule.DefaultID = adautomatedruleDescID.Default.(func() uuid.UUID)
+	adbalancewithdrawalMixin := schema.AdBalanceWithdrawal{}.Mixin()
+	adbalancewithdrawalMixinFields0 := adbalancewithdrawalMixin[0].Fields()
+	_ = adbalancewithdrawalMixinFields0
+	adbalancewithdrawalFields := schema.AdBalanceWithdrawal{}.Fields()
+	_ = adbalancewithdrawalFields
+	// adbalancewithdrawalDescCreatedAt is the schema descriptor for created_at field.
+	adbalancewithdrawalDescCreatedAt := adbalancewithdrawalMixinFields0[1].Descriptor()
+	// adbalancewithdrawal.DefaultCreatedAt holds the default value on creation for the created_at field.
+	adbalancewithdrawal.DefaultCreatedAt = adbalancewithdrawalDescCreatedAt.Default.(func() time.Time)
+	// adbalancewithdrawalDescIdempotencyKey is the schema descriptor for idempotency_key field.
+	adbalancewithdrawalDescIdempotencyKey := adbalancewithdrawalFields[2].Descriptor()
+	// adbalancewithdrawal.IdempotencyKeyValidator is a validator for the "idempotency_key" field. It is called by the builders before save.
+	adbalancewithdrawal.IdempotencyKeyValidator = adbalancewithdrawalDescIdempotencyKey.Validators[0].(func(string) error)
+	// adbalancewithdrawalDescCurrency is the schema descriptor for currency field.
+	adbalancewithdrawalDescCurrency := adbalancewithdrawalFields[3].Descriptor()
+	// adbalancewithdrawal.CurrencyValidator is a validator for the "currency" field. It is called by the builders before save.
+	adbalancewithdrawal.CurrencyValidator = func() func(string) error {
+		validators := adbalancewithdrawalDescCurrency.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(currency string) error {
+			for _, fn := range fns {
+				if err := fn(currency); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// adbalancewithdrawalDescFailureReason is the schema descriptor for failure_reason field.
+	adbalancewithdrawalDescFailureReason := adbalancewithdrawalFields[8].Descriptor()
+	// adbalancewithdrawal.DefaultFailureReason holds the default value on creation for the failure_reason field.
+	adbalancewithdrawal.DefaultFailureReason = adbalancewithdrawalDescFailureReason.Default.(string)
+	// adbalancewithdrawal.FailureReasonValidator is a validator for the "failure_reason" field. It is called by the builders before save.
+	adbalancewithdrawal.FailureReasonValidator = adbalancewithdrawalDescFailureReason.Validators[0].(func(string) error)
+	// adbalancewithdrawalDescUpdatedAt is the schema descriptor for updated_at field.
+	adbalancewithdrawalDescUpdatedAt := adbalancewithdrawalFields[10].Descriptor()
+	// adbalancewithdrawal.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	adbalancewithdrawal.DefaultUpdatedAt = adbalancewithdrawalDescUpdatedAt.Default.(func() time.Time)
+	// adbalancewithdrawal.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	adbalancewithdrawal.UpdateDefaultUpdatedAt = adbalancewithdrawalDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// adbalancewithdrawalDescID is the schema descriptor for id field.
+	adbalancewithdrawalDescID := adbalancewithdrawalMixinFields0[0].Descriptor()
+	// adbalancewithdrawal.DefaultID holds the default value on creation for the id field.
+	adbalancewithdrawal.DefaultID = adbalancewithdrawalDescID.Default.(func() uuid.UUID)
 	adboostMixin := schema.AdBoost{}.Mixin()
 	adboostMixinFields0 := adboostMixin[0].Fields()
 	_ = adboostMixinFields0
@@ -384,7 +441,7 @@ func init() {
 		}
 	}()
 	// adboostDescCurrency is the schema descriptor for currency field.
-	adboostDescCurrency := adboostFields[5].Descriptor()
+	adboostDescCurrency := adboostFields[6].Descriptor()
 	// adboost.CurrencyValidator is a validator for the "currency" field. It is called by the builders before save.
 	adboost.CurrencyValidator = func() func(string) error {
 		validators := adboostDescCurrency.Validators
@@ -401,28 +458,32 @@ func init() {
 			return nil
 		}
 	}()
+	// adboostDescAddedBudgetMinor is the schema descriptor for added_budget_minor field.
+	adboostDescAddedBudgetMinor := adboostFields[11].Descriptor()
+	// adboost.DefaultAddedBudgetMinor holds the default value on creation for the added_budget_minor field.
+	adboost.DefaultAddedBudgetMinor = adboostDescAddedBudgetMinor.Default.(int64)
 	// adboostDescPaymentTopUpID is the schema descriptor for payment_top_up_id field.
-	adboostDescPaymentTopUpID := adboostFields[10].Descriptor()
+	adboostDescPaymentTopUpID := adboostFields[13].Descriptor()
 	// adboost.DefaultPaymentTopUpID holds the default value on creation for the payment_top_up_id field.
 	adboost.DefaultPaymentTopUpID = adboostDescPaymentTopUpID.Default.(string)
 	// adboost.PaymentTopUpIDValidator is a validator for the "payment_top_up_id" field. It is called by the builders before save.
 	adboost.PaymentTopUpIDValidator = adboostDescPaymentTopUpID.Validators[0].(func(string) error)
 	// adboostDescIdempotencyKey is the schema descriptor for idempotency_key field.
-	adboostDescIdempotencyKey := adboostFields[11].Descriptor()
+	adboostDescIdempotencyKey := adboostFields[14].Descriptor()
 	// adboost.IdempotencyKeyValidator is a validator for the "idempotency_key" field. It is called by the builders before save.
 	adboost.IdempotencyKeyValidator = adboostDescIdempotencyKey.Validators[0].(func(string) error)
 	// adboostDescRequestHash is the schema descriptor for request_hash field.
-	adboostDescRequestHash := adboostFields[12].Descriptor()
+	adboostDescRequestHash := adboostFields[15].Descriptor()
 	// adboost.RequestHashValidator is a validator for the "request_hash" field. It is called by the builders before save.
 	adboost.RequestHashValidator = adboostDescRequestHash.Validators[0].(func(string) error)
 	// adboostDescRejectionReason is the schema descriptor for rejection_reason field.
-	adboostDescRejectionReason := adboostFields[19].Descriptor()
+	adboostDescRejectionReason := adboostFields[23].Descriptor()
 	// adboost.DefaultRejectionReason holds the default value on creation for the rejection_reason field.
 	adboost.DefaultRejectionReason = adboostDescRejectionReason.Default.(string)
 	// adboost.RejectionReasonValidator is a validator for the "rejection_reason" field. It is called by the builders before save.
 	adboost.RejectionReasonValidator = adboostDescRejectionReason.Validators[0].(func(string) error)
 	// adboostDescUpdatedAt is the schema descriptor for updated_at field.
-	adboostDescUpdatedAt := adboostFields[20].Descriptor()
+	adboostDescUpdatedAt := adboostFields[24].Descriptor()
 	// adboost.DefaultUpdatedAt holds the default value on creation for the updated_at field.
 	adboost.DefaultUpdatedAt = adboostDescUpdatedAt.Default.(func() time.Time)
 	// adboost.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
@@ -431,6 +492,51 @@ func init() {
 	adboostDescID := adboostMixinFields0[0].Descriptor()
 	// adboost.DefaultID holds the default value on creation for the id field.
 	adboost.DefaultID = adboostDescID.Default.(func() uuid.UUID)
+	adboostchangeMixin := schema.AdBoostChange{}.Mixin()
+	adboostchangeMixinFields0 := adboostchangeMixin[0].Fields()
+	_ = adboostchangeMixinFields0
+	adboostchangeFields := schema.AdBoostChange{}.Fields()
+	_ = adboostchangeFields
+	// adboostchangeDescCreatedAt is the schema descriptor for created_at field.
+	adboostchangeDescCreatedAt := adboostchangeMixinFields0[1].Descriptor()
+	// adboostchange.DefaultCreatedAt holds the default value on creation for the created_at field.
+	adboostchange.DefaultCreatedAt = adboostchangeDescCreatedAt.Default.(func() time.Time)
+	// adboostchangeDescIdempotencyKey is the schema descriptor for idempotency_key field.
+	adboostchangeDescIdempotencyKey := adboostchangeFields[2].Descriptor()
+	// adboostchange.IdempotencyKeyValidator is a validator for the "idempotency_key" field. It is called by the builders before save.
+	adboostchange.IdempotencyKeyValidator = adboostchangeDescIdempotencyKey.Validators[0].(func(string) error)
+	// adboostchangeDescRequestHash is the schema descriptor for request_hash field.
+	adboostchangeDescRequestHash := adboostchangeFields[3].Descriptor()
+	// adboostchange.RequestHashValidator is a validator for the "request_hash" field. It is called by the builders before save.
+	adboostchange.RequestHashValidator = adboostchangeDescRequestHash.Validators[0].(func(string) error)
+	// adboostchangeDescCurrency is the schema descriptor for currency field.
+	adboostchangeDescCurrency := adboostchangeFields[7].Descriptor()
+	// adboostchange.CurrencyValidator is a validator for the "currency" field. It is called by the builders before save.
+	adboostchange.CurrencyValidator = func() func(string) error {
+		validators := adboostchangeDescCurrency.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(currency string) error {
+			for _, fn := range fns {
+				if err := fn(currency); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// adboostchangeDescPaymentTopUpID is the schema descriptor for payment_top_up_id field.
+	adboostchangeDescPaymentTopUpID := adboostchangeFields[10].Descriptor()
+	// adboostchange.DefaultPaymentTopUpID holds the default value on creation for the payment_top_up_id field.
+	adboostchange.DefaultPaymentTopUpID = adboostchangeDescPaymentTopUpID.Default.(string)
+	// adboostchange.PaymentTopUpIDValidator is a validator for the "payment_top_up_id" field. It is called by the builders before save.
+	adboostchange.PaymentTopUpIDValidator = adboostchangeDescPaymentTopUpID.Validators[0].(func(string) error)
+	// adboostchangeDescID is the schema descriptor for id field.
+	adboostchangeDescID := adboostchangeMixinFields0[0].Descriptor()
+	// adboostchange.DefaultID holds the default value on creation for the id field.
+	adboostchange.DefaultID = adboostchangeDescID.Default.(func() uuid.UUID)
 	adcampaignMixin := schema.AdCampaign{}.Mixin()
 	adcampaignMixinFields0 := adcampaignMixin[0].Fields()
 	_ = adcampaignMixinFields0
@@ -458,8 +564,14 @@ func init() {
 			return nil
 		}
 	}()
+	// adcampaignDescAdCategory is the schema descriptor for ad_category field.
+	adcampaignDescAdCategory := adcampaignFields[12].Descriptor()
+	// adcampaign.DefaultAdCategory holds the default value on creation for the ad_category field.
+	adcampaign.DefaultAdCategory = adcampaignDescAdCategory.Default.(string)
+	// adcampaign.AdCategoryValidator is a validator for the "ad_category" field. It is called by the builders before save.
+	adcampaign.AdCategoryValidator = adcampaignDescAdCategory.Validators[0].(func(string) error)
 	// adcampaignDescUpdatedAt is the schema descriptor for updated_at field.
-	adcampaignDescUpdatedAt := adcampaignFields[12].Descriptor()
+	adcampaignDescUpdatedAt := adcampaignFields[13].Descriptor()
 	// adcampaign.DefaultUpdatedAt holds the default value on creation for the updated_at field.
 	adcampaign.DefaultUpdatedAt = adcampaignDescUpdatedAt.Default.(func() time.Time)
 	// adcampaign.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
@@ -493,6 +605,53 @@ func init() {
 	adcardstatsdailyDescID := adcardstatsdailyMixinFields0[0].Descriptor()
 	// adcardstatsdaily.DefaultID holds the default value on creation for the id field.
 	adcardstatsdaily.DefaultID = adcardstatsdailyDescID.Default.(func() uuid.UUID)
+	adcashbacksettingMixin := schema.AdCashbackSetting{}.Mixin()
+	adcashbacksettingMixinFields0 := adcashbacksettingMixin[0].Fields()
+	_ = adcashbacksettingMixinFields0
+	adcashbacksettingFields := schema.AdCashbackSetting{}.Fields()
+	_ = adcashbacksettingFields
+	// adcashbacksettingDescCreatedAt is the schema descriptor for created_at field.
+	adcashbacksettingDescCreatedAt := adcashbacksettingMixinFields0[1].Descriptor()
+	// adcashbacksetting.DefaultCreatedAt holds the default value on creation for the created_at field.
+	adcashbacksetting.DefaultCreatedAt = adcashbacksettingDescCreatedAt.Default.(func() time.Time)
+	// adcashbacksettingDescEnabled is the schema descriptor for enabled field.
+	adcashbacksettingDescEnabled := adcashbacksettingFields[1].Descriptor()
+	// adcashbacksetting.DefaultEnabled holds the default value on creation for the enabled field.
+	adcashbacksetting.DefaultEnabled = adcashbacksettingDescEnabled.Default.(bool)
+	// adcashbacksettingDescPercent is the schema descriptor for percent field.
+	adcashbacksettingDescPercent := adcashbacksettingFields[2].Descriptor()
+	// adcashbacksetting.DefaultPercent holds the default value on creation for the percent field.
+	adcashbacksetting.DefaultPercent = adcashbacksettingDescPercent.Default.(int)
+	// adcashbacksetting.PercentValidator is a validator for the "percent" field. It is called by the builders before save.
+	adcashbacksetting.PercentValidator = adcashbacksettingDescPercent.Validators[0].(func(int) error)
+	// adcashbacksettingDescReason is the schema descriptor for reason field.
+	adcashbacksettingDescReason := adcashbacksettingFields[3].Descriptor()
+	// adcashbacksetting.DefaultReason holds the default value on creation for the reason field.
+	adcashbacksetting.DefaultReason = adcashbacksettingDescReason.Default.(string)
+	// adcashbacksetting.ReasonValidator is a validator for the "reason" field. It is called by the builders before save.
+	adcashbacksetting.ReasonValidator = adcashbacksettingDescReason.Validators[0].(func(string) error)
+	// adcashbacksettingDescUpdatedByStaffID is the schema descriptor for updated_by_staff_id field.
+	adcashbacksettingDescUpdatedByStaffID := adcashbacksettingFields[4].Descriptor()
+	// adcashbacksetting.DefaultUpdatedByStaffID holds the default value on creation for the updated_by_staff_id field.
+	adcashbacksetting.DefaultUpdatedByStaffID = adcashbacksettingDescUpdatedByStaffID.Default.(string)
+	// adcashbacksetting.UpdatedByStaffIDValidator is a validator for the "updated_by_staff_id" field. It is called by the builders before save.
+	adcashbacksetting.UpdatedByStaffIDValidator = adcashbacksettingDescUpdatedByStaffID.Validators[0].(func(string) error)
+	// adcashbacksettingDescUpdatedByName is the schema descriptor for updated_by_name field.
+	adcashbacksettingDescUpdatedByName := adcashbacksettingFields[5].Descriptor()
+	// adcashbacksetting.DefaultUpdatedByName holds the default value on creation for the updated_by_name field.
+	adcashbacksetting.DefaultUpdatedByName = adcashbacksettingDescUpdatedByName.Default.(string)
+	// adcashbacksetting.UpdatedByNameValidator is a validator for the "updated_by_name" field. It is called by the builders before save.
+	adcashbacksetting.UpdatedByNameValidator = adcashbacksettingDescUpdatedByName.Validators[0].(func(string) error)
+	// adcashbacksettingDescUpdatedAt is the schema descriptor for updated_at field.
+	adcashbacksettingDescUpdatedAt := adcashbacksettingFields[6].Descriptor()
+	// adcashbacksetting.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	adcashbacksetting.DefaultUpdatedAt = adcashbacksettingDescUpdatedAt.Default.(func() time.Time)
+	// adcashbacksetting.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	adcashbacksetting.UpdateDefaultUpdatedAt = adcashbacksettingDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// adcashbacksettingDescID is the schema descriptor for id field.
+	adcashbacksettingDescID := adcashbacksettingMixinFields0[0].Descriptor()
+	// adcashbacksetting.DefaultID holds the default value on creation for the id field.
+	adcashbacksetting.DefaultID = adcashbacksettingDescID.Default.(func() uuid.UUID)
 	adcontentsignalFields := schema.AdContentSignal{}.Fields()
 	_ = adcontentsignalFields
 	// adcontentsignalDescContentID is the schema descriptor for content_id field.
@@ -776,6 +935,85 @@ func init() {
 			return nil
 		}
 	}()
+	adcreditlotMixin := schema.AdCreditLot{}.Mixin()
+	adcreditlotMixinFields0 := adcreditlotMixin[0].Fields()
+	_ = adcreditlotMixinFields0
+	adcreditlotFields := schema.AdCreditLot{}.Fields()
+	_ = adcreditlotFields
+	// adcreditlotDescCreatedAt is the schema descriptor for created_at field.
+	adcreditlotDescCreatedAt := adcreditlotMixinFields0[1].Descriptor()
+	// adcreditlot.DefaultCreatedAt holds the default value on creation for the created_at field.
+	adcreditlot.DefaultCreatedAt = adcreditlotDescCreatedAt.Default.(func() time.Time)
+	// adcreditlotDescCurrency is the schema descriptor for currency field.
+	adcreditlotDescCurrency := adcreditlotFields[2].Descriptor()
+	// adcreditlot.CurrencyValidator is a validator for the "currency" field. It is called by the builders before save.
+	adcreditlot.CurrencyValidator = func() func(string) error {
+		validators := adcreditlotDescCurrency.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(currency string) error {
+			for _, fn := range fns {
+				if err := fn(currency); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// adcreditlotDescReason is the schema descriptor for reason field.
+	adcreditlotDescReason := adcreditlotFields[8].Descriptor()
+	// adcreditlot.DefaultReason holds the default value on creation for the reason field.
+	adcreditlot.DefaultReason = adcreditlotDescReason.Default.(string)
+	// adcreditlot.ReasonValidator is a validator for the "reason" field. It is called by the builders before save.
+	adcreditlot.ReasonValidator = adcreditlotDescReason.Validators[0].(func(string) error)
+	// adcreditlotDescReference is the schema descriptor for reference field.
+	adcreditlotDescReference := adcreditlotFields[9].Descriptor()
+	// adcreditlot.ReferenceValidator is a validator for the "reference" field. It is called by the builders before save.
+	adcreditlot.ReferenceValidator = adcreditlotDescReference.Validators[0].(func(string) error)
+	// adcreditlotDescIssuedByStaffID is the schema descriptor for issued_by_staff_id field.
+	adcreditlotDescIssuedByStaffID := adcreditlotFields[10].Descriptor()
+	// adcreditlot.DefaultIssuedByStaffID holds the default value on creation for the issued_by_staff_id field.
+	adcreditlot.DefaultIssuedByStaffID = adcreditlotDescIssuedByStaffID.Default.(string)
+	// adcreditlot.IssuedByStaffIDValidator is a validator for the "issued_by_staff_id" field. It is called by the builders before save.
+	adcreditlot.IssuedByStaffIDValidator = adcreditlotDescIssuedByStaffID.Validators[0].(func(string) error)
+	// adcreditlotDescIssuedByName is the schema descriptor for issued_by_name field.
+	adcreditlotDescIssuedByName := adcreditlotFields[11].Descriptor()
+	// adcreditlot.DefaultIssuedByName holds the default value on creation for the issued_by_name field.
+	adcreditlot.DefaultIssuedByName = adcreditlotDescIssuedByName.Default.(string)
+	// adcreditlot.IssuedByNameValidator is a validator for the "issued_by_name" field. It is called by the builders before save.
+	adcreditlot.IssuedByNameValidator = adcreditlotDescIssuedByName.Validators[0].(func(string) error)
+	// adcreditlotDescExpiredMinor is the schema descriptor for expired_minor field.
+	adcreditlotDescExpiredMinor := adcreditlotFields[14].Descriptor()
+	// adcreditlot.DefaultExpiredMinor holds the default value on creation for the expired_minor field.
+	adcreditlot.DefaultExpiredMinor = adcreditlotDescExpiredMinor.Default.(int64)
+	// adcreditlotDescRevokedMinor is the schema descriptor for revoked_minor field.
+	adcreditlotDescRevokedMinor := adcreditlotFields[15].Descriptor()
+	// adcreditlot.DefaultRevokedMinor holds the default value on creation for the revoked_minor field.
+	adcreditlot.DefaultRevokedMinor = adcreditlotDescRevokedMinor.Default.(int64)
+	// adcreditlotDescRevokedByStaffID is the schema descriptor for revoked_by_staff_id field.
+	adcreditlotDescRevokedByStaffID := adcreditlotFields[17].Descriptor()
+	// adcreditlot.DefaultRevokedByStaffID holds the default value on creation for the revoked_by_staff_id field.
+	adcreditlot.DefaultRevokedByStaffID = adcreditlotDescRevokedByStaffID.Default.(string)
+	// adcreditlot.RevokedByStaffIDValidator is a validator for the "revoked_by_staff_id" field. It is called by the builders before save.
+	adcreditlot.RevokedByStaffIDValidator = adcreditlotDescRevokedByStaffID.Validators[0].(func(string) error)
+	// adcreditlotDescRevokeReason is the schema descriptor for revoke_reason field.
+	adcreditlotDescRevokeReason := adcreditlotFields[18].Descriptor()
+	// adcreditlot.DefaultRevokeReason holds the default value on creation for the revoke_reason field.
+	adcreditlot.DefaultRevokeReason = adcreditlotDescRevokeReason.Default.(string)
+	// adcreditlot.RevokeReasonValidator is a validator for the "revoke_reason" field. It is called by the builders before save.
+	adcreditlot.RevokeReasonValidator = adcreditlotDescRevokeReason.Validators[0].(func(string) error)
+	// adcreditlotDescUpdatedAt is the schema descriptor for updated_at field.
+	adcreditlotDescUpdatedAt := adcreditlotFields[19].Descriptor()
+	// adcreditlot.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	adcreditlot.DefaultUpdatedAt = adcreditlotDescUpdatedAt.Default.(func() time.Time)
+	// adcreditlot.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	adcreditlot.UpdateDefaultUpdatedAt = adcreditlotDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// adcreditlotDescID is the schema descriptor for id field.
+	adcreditlotDescID := adcreditlotMixinFields0[0].Descriptor()
+	// adcreditlot.DefaultID holds the default value on creation for the id field.
+	adcreditlot.DefaultID = adcreditlotDescID.Default.(func() uuid.UUID)
 	adcustomaudienceMixin := schema.AdCustomAudience{}.Mixin()
 	adcustomaudienceMixinFields0 := adcustomaudienceMixin[0].Fields()
 	_ = adcustomaudienceMixinFields0
@@ -1361,6 +1599,18 @@ func init() {
 			return nil
 		}
 	}()
+	// adspendbatchDescCreditUsedMinor is the schema descriptor for credit_used_minor field.
+	adspendbatchDescCreditUsedMinor := adspendbatchFields[7].Descriptor()
+	// adspendbatch.DefaultCreditUsedMinor holds the default value on creation for the credit_used_minor field.
+	adspendbatch.DefaultCreditUsedMinor = adspendbatchDescCreditUsedMinor.Default.(int64)
+	// adspendbatchDescCashbackMinor is the schema descriptor for cashback_minor field.
+	adspendbatchDescCashbackMinor := adspendbatchFields[8].Descriptor()
+	// adspendbatch.DefaultCashbackMinor holds the default value on creation for the cashback_minor field.
+	adspendbatch.DefaultCashbackMinor = adspendbatchDescCashbackMinor.Default.(int64)
+	// adspendbatchDescRefundedMinor is the schema descriptor for refunded_minor field.
+	adspendbatchDescRefundedMinor := adspendbatchFields[9].Descriptor()
+	// adspendbatch.DefaultRefundedMinor holds the default value on creation for the refunded_minor field.
+	adspendbatch.DefaultRefundedMinor = adspendbatchDescRefundedMinor.Default.(int64)
 	// adspendbatchDescID is the schema descriptor for id field.
 	adspendbatchDescID := adspendbatchMixinFields0[0].Descriptor()
 	// adspendbatch.DefaultID holds the default value on creation for the id field.

@@ -95,6 +95,21 @@ func PlatformShareMicros(v int64) predicate.AdSpendBatch {
 	return predicate.AdSpendBatch(sql.FieldEQ(FieldPlatformShareMicros, v))
 }
 
+// CreditUsedMinor applies equality check predicate on the "credit_used_minor" field. It's identical to CreditUsedMinorEQ.
+func CreditUsedMinor(v int64) predicate.AdSpendBatch {
+	return predicate.AdSpendBatch(sql.FieldEQ(FieldCreditUsedMinor, v))
+}
+
+// CashbackMinor applies equality check predicate on the "cashback_minor" field. It's identical to CashbackMinorEQ.
+func CashbackMinor(v int64) predicate.AdSpendBatch {
+	return predicate.AdSpendBatch(sql.FieldEQ(FieldCashbackMinor, v))
+}
+
+// RefundedMinor applies equality check predicate on the "refunded_minor" field. It's identical to RefundedMinorEQ.
+func RefundedMinor(v int64) predicate.AdSpendBatch {
+	return predicate.AdSpendBatch(sql.FieldEQ(FieldRefundedMinor, v))
+}
+
 // CreatedAtEQ applies the EQ predicate on the "created_at" field.
 func CreatedAtEQ(v time.Time) predicate.AdSpendBatch {
 	return predicate.AdSpendBatch(sql.FieldEQ(FieldCreatedAt, v))
@@ -438,6 +453,126 @@ func PlatformShareMicrosLT(v int64) predicate.AdSpendBatch {
 // PlatformShareMicrosLTE applies the LTE predicate on the "platform_share_micros" field.
 func PlatformShareMicrosLTE(v int64) predicate.AdSpendBatch {
 	return predicate.AdSpendBatch(sql.FieldLTE(FieldPlatformShareMicros, v))
+}
+
+// CreditUsedMinorEQ applies the EQ predicate on the "credit_used_minor" field.
+func CreditUsedMinorEQ(v int64) predicate.AdSpendBatch {
+	return predicate.AdSpendBatch(sql.FieldEQ(FieldCreditUsedMinor, v))
+}
+
+// CreditUsedMinorNEQ applies the NEQ predicate on the "credit_used_minor" field.
+func CreditUsedMinorNEQ(v int64) predicate.AdSpendBatch {
+	return predicate.AdSpendBatch(sql.FieldNEQ(FieldCreditUsedMinor, v))
+}
+
+// CreditUsedMinorIn applies the In predicate on the "credit_used_minor" field.
+func CreditUsedMinorIn(vs ...int64) predicate.AdSpendBatch {
+	return predicate.AdSpendBatch(sql.FieldIn(FieldCreditUsedMinor, vs...))
+}
+
+// CreditUsedMinorNotIn applies the NotIn predicate on the "credit_used_minor" field.
+func CreditUsedMinorNotIn(vs ...int64) predicate.AdSpendBatch {
+	return predicate.AdSpendBatch(sql.FieldNotIn(FieldCreditUsedMinor, vs...))
+}
+
+// CreditUsedMinorGT applies the GT predicate on the "credit_used_minor" field.
+func CreditUsedMinorGT(v int64) predicate.AdSpendBatch {
+	return predicate.AdSpendBatch(sql.FieldGT(FieldCreditUsedMinor, v))
+}
+
+// CreditUsedMinorGTE applies the GTE predicate on the "credit_used_minor" field.
+func CreditUsedMinorGTE(v int64) predicate.AdSpendBatch {
+	return predicate.AdSpendBatch(sql.FieldGTE(FieldCreditUsedMinor, v))
+}
+
+// CreditUsedMinorLT applies the LT predicate on the "credit_used_minor" field.
+func CreditUsedMinorLT(v int64) predicate.AdSpendBatch {
+	return predicate.AdSpendBatch(sql.FieldLT(FieldCreditUsedMinor, v))
+}
+
+// CreditUsedMinorLTE applies the LTE predicate on the "credit_used_minor" field.
+func CreditUsedMinorLTE(v int64) predicate.AdSpendBatch {
+	return predicate.AdSpendBatch(sql.FieldLTE(FieldCreditUsedMinor, v))
+}
+
+// CashbackMinorEQ applies the EQ predicate on the "cashback_minor" field.
+func CashbackMinorEQ(v int64) predicate.AdSpendBatch {
+	return predicate.AdSpendBatch(sql.FieldEQ(FieldCashbackMinor, v))
+}
+
+// CashbackMinorNEQ applies the NEQ predicate on the "cashback_minor" field.
+func CashbackMinorNEQ(v int64) predicate.AdSpendBatch {
+	return predicate.AdSpendBatch(sql.FieldNEQ(FieldCashbackMinor, v))
+}
+
+// CashbackMinorIn applies the In predicate on the "cashback_minor" field.
+func CashbackMinorIn(vs ...int64) predicate.AdSpendBatch {
+	return predicate.AdSpendBatch(sql.FieldIn(FieldCashbackMinor, vs...))
+}
+
+// CashbackMinorNotIn applies the NotIn predicate on the "cashback_minor" field.
+func CashbackMinorNotIn(vs ...int64) predicate.AdSpendBatch {
+	return predicate.AdSpendBatch(sql.FieldNotIn(FieldCashbackMinor, vs...))
+}
+
+// CashbackMinorGT applies the GT predicate on the "cashback_minor" field.
+func CashbackMinorGT(v int64) predicate.AdSpendBatch {
+	return predicate.AdSpendBatch(sql.FieldGT(FieldCashbackMinor, v))
+}
+
+// CashbackMinorGTE applies the GTE predicate on the "cashback_minor" field.
+func CashbackMinorGTE(v int64) predicate.AdSpendBatch {
+	return predicate.AdSpendBatch(sql.FieldGTE(FieldCashbackMinor, v))
+}
+
+// CashbackMinorLT applies the LT predicate on the "cashback_minor" field.
+func CashbackMinorLT(v int64) predicate.AdSpendBatch {
+	return predicate.AdSpendBatch(sql.FieldLT(FieldCashbackMinor, v))
+}
+
+// CashbackMinorLTE applies the LTE predicate on the "cashback_minor" field.
+func CashbackMinorLTE(v int64) predicate.AdSpendBatch {
+	return predicate.AdSpendBatch(sql.FieldLTE(FieldCashbackMinor, v))
+}
+
+// RefundedMinorEQ applies the EQ predicate on the "refunded_minor" field.
+func RefundedMinorEQ(v int64) predicate.AdSpendBatch {
+	return predicate.AdSpendBatch(sql.FieldEQ(FieldRefundedMinor, v))
+}
+
+// RefundedMinorNEQ applies the NEQ predicate on the "refunded_minor" field.
+func RefundedMinorNEQ(v int64) predicate.AdSpendBatch {
+	return predicate.AdSpendBatch(sql.FieldNEQ(FieldRefundedMinor, v))
+}
+
+// RefundedMinorIn applies the In predicate on the "refunded_minor" field.
+func RefundedMinorIn(vs ...int64) predicate.AdSpendBatch {
+	return predicate.AdSpendBatch(sql.FieldIn(FieldRefundedMinor, vs...))
+}
+
+// RefundedMinorNotIn applies the NotIn predicate on the "refunded_minor" field.
+func RefundedMinorNotIn(vs ...int64) predicate.AdSpendBatch {
+	return predicate.AdSpendBatch(sql.FieldNotIn(FieldRefundedMinor, vs...))
+}
+
+// RefundedMinorGT applies the GT predicate on the "refunded_minor" field.
+func RefundedMinorGT(v int64) predicate.AdSpendBatch {
+	return predicate.AdSpendBatch(sql.FieldGT(FieldRefundedMinor, v))
+}
+
+// RefundedMinorGTE applies the GTE predicate on the "refunded_minor" field.
+func RefundedMinorGTE(v int64) predicate.AdSpendBatch {
+	return predicate.AdSpendBatch(sql.FieldGTE(FieldRefundedMinor, v))
+}
+
+// RefundedMinorLT applies the LT predicate on the "refunded_minor" field.
+func RefundedMinorLT(v int64) predicate.AdSpendBatch {
+	return predicate.AdSpendBatch(sql.FieldLT(FieldRefundedMinor, v))
+}
+
+// RefundedMinorLTE applies the LTE predicate on the "refunded_minor" field.
+func RefundedMinorLTE(v int64) predicate.AdSpendBatch {
+	return predicate.AdSpendBatch(sql.FieldLTE(FieldRefundedMinor, v))
 }
 
 // And groups predicates with the AND operator between them.

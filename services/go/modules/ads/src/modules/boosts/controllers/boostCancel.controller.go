@@ -4,7 +4,6 @@ import (
 	"net/http"
 
 	adserrors "zudomart/modules/ads/src/errors"
-	"zudomart/modules/ads/src/generated/ent"
 	"zudomart/modules/ads/src/generated/ent/adboost"
 	getboost "zudomart/modules/ads/src/modules/boosts/queries/getBoost"
 	"zudomart/modules/ads/src/modules/boosts/services"
@@ -22,10 +21,7 @@ func (controller BoostsController) Cancel(writer http.ResponseWriter, request *h
 		if err != nil {
 			return err
 		}
-		owned, err := controller.Container.Client.AdBoost.Query().Where(adboost.ID(boostId), adboost.UserID(userId)).Only(request.Context())
-		if ent.IsNotFound(err) {
-			return adserrors.NotFound
-		}
+		owned, err := services.RequireBoostOwner(request.Context(), controller.Container.Client, boostId, userId)
 		if err != nil {
 			return err
 		}

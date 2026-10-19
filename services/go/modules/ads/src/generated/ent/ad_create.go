@@ -249,6 +249,20 @@ func (_c *AdCreate) SetAutoCheckFlags(v []types.AutoCheckFlag) *AdCreate {
 	return _c
 }
 
+// SetAdCategory sets the "ad_category" field.
+func (_c *AdCreate) SetAdCategory(v string) *AdCreate {
+	_c.mutation.SetAdCategory(v)
+	return _c
+}
+
+// SetNillableAdCategory sets the "ad_category" field if the given value is not nil.
+func (_c *AdCreate) SetNillableAdCategory(v *string) *AdCreate {
+	if v != nil {
+		_c.SetAdCategory(*v)
+	}
+	return _c
+}
+
 // SetUpdatedAt sets the "updated_at" field.
 func (_c *AdCreate) SetUpdatedAt(v time.Time) *AdCreate {
 	_c.mutation.SetUpdatedAt(v)
@@ -347,6 +361,10 @@ func (_c *AdCreate) defaults() {
 	if _, ok := _c.mutation.AutoCheckFlags(); !ok {
 		v := ad.DefaultAutoCheckFlags()
 		_c.mutation.SetAutoCheckFlags(v)
+	}
+	if _, ok := _c.mutation.AdCategory(); !ok {
+		v := ad.DefaultAdCategory
+		_c.mutation.SetAdCategory(v)
 	}
 	if _, ok := _c.mutation.UpdatedAt(); !ok {
 		v := ad.DefaultUpdatedAt()
@@ -454,6 +472,14 @@ func (_c *AdCreate) check() error {
 	}
 	if _, ok := _c.mutation.AutoCheckFlags(); !ok {
 		return &ValidationError{Name: "auto_check_flags", err: errors.New(`ent: missing required field "Ad.auto_check_flags"`)}
+	}
+	if _, ok := _c.mutation.AdCategory(); !ok {
+		return &ValidationError{Name: "ad_category", err: errors.New(`ent: missing required field "Ad.ad_category"`)}
+	}
+	if v, ok := _c.mutation.AdCategory(); ok {
+		if err := ad.AdCategoryValidator(v); err != nil {
+			return &ValidationError{Name: "ad_category", err: fmt.Errorf(`ent: validator failed for field "Ad.ad_category": %w`, err)}
+		}
 	}
 	if _, ok := _c.mutation.UpdatedAt(); !ok {
 		return &ValidationError{Name: "updated_at", err: errors.New(`ent: missing required field "Ad.updated_at"`)}
@@ -573,6 +599,10 @@ func (_c *AdCreate) createSpec() (*Ad, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.AutoCheckFlags(); ok {
 		_spec.SetField(ad.FieldAutoCheckFlags, field.TypeJSON, value)
 		_node.AutoCheckFlags = value
+	}
+	if value, ok := _c.mutation.AdCategory(); ok {
+		_spec.SetField(ad.FieldAdCategory, field.TypeString, value)
+		_node.AdCategory = value
 	}
 	if value, ok := _c.mutation.UpdatedAt(); ok {
 		_spec.SetField(ad.FieldUpdatedAt, field.TypeTime, value)
@@ -849,6 +879,18 @@ func (u *AdUpsert) SetAutoCheckFlags(v []types.AutoCheckFlag) *AdUpsert {
 // UpdateAutoCheckFlags sets the "auto_check_flags" field to the value that was provided on create.
 func (u *AdUpsert) UpdateAutoCheckFlags() *AdUpsert {
 	u.SetExcluded(ad.FieldAutoCheckFlags)
+	return u
+}
+
+// SetAdCategory sets the "ad_category" field.
+func (u *AdUpsert) SetAdCategory(v string) *AdUpsert {
+	u.Set(ad.FieldAdCategory, v)
+	return u
+}
+
+// UpdateAdCategory sets the "ad_category" field to the value that was provided on create.
+func (u *AdUpsert) UpdateAdCategory() *AdUpsert {
+	u.SetExcluded(ad.FieldAdCategory)
 	return u
 }
 
@@ -1180,6 +1222,20 @@ func (u *AdUpsertOne) SetAutoCheckFlags(v []types.AutoCheckFlag) *AdUpsertOne {
 func (u *AdUpsertOne) UpdateAutoCheckFlags() *AdUpsertOne {
 	return u.Update(func(s *AdUpsert) {
 		s.UpdateAutoCheckFlags()
+	})
+}
+
+// SetAdCategory sets the "ad_category" field.
+func (u *AdUpsertOne) SetAdCategory(v string) *AdUpsertOne {
+	return u.Update(func(s *AdUpsert) {
+		s.SetAdCategory(v)
+	})
+}
+
+// UpdateAdCategory sets the "ad_category" field to the value that was provided on create.
+func (u *AdUpsertOne) UpdateAdCategory() *AdUpsertOne {
+	return u.Update(func(s *AdUpsert) {
+		s.UpdateAdCategory()
 	})
 }
 
@@ -1680,6 +1736,20 @@ func (u *AdUpsertBulk) SetAutoCheckFlags(v []types.AutoCheckFlag) *AdUpsertBulk 
 func (u *AdUpsertBulk) UpdateAutoCheckFlags() *AdUpsertBulk {
 	return u.Update(func(s *AdUpsert) {
 		s.UpdateAutoCheckFlags()
+	})
+}
+
+// SetAdCategory sets the "ad_category" field.
+func (u *AdUpsertBulk) SetAdCategory(v string) *AdUpsertBulk {
+	return u.Update(func(s *AdUpsert) {
+		s.SetAdCategory(v)
+	})
+}
+
+// UpdateAdCategory sets the "ad_category" field to the value that was provided on create.
+func (u *AdUpsertBulk) UpdateAdCategory() *AdUpsertBulk {
+	return u.Update(func(s *AdUpsert) {
+		s.UpdateAdCategory()
 	})
 }
 

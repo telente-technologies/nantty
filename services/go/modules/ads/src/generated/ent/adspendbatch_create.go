@@ -80,6 +80,48 @@ func (_c *AdSpendBatchCreate) SetPlatformShareMicros(v int64) *AdSpendBatchCreat
 	return _c
 }
 
+// SetCreditUsedMinor sets the "credit_used_minor" field.
+func (_c *AdSpendBatchCreate) SetCreditUsedMinor(v int64) *AdSpendBatchCreate {
+	_c.mutation.SetCreditUsedMinor(v)
+	return _c
+}
+
+// SetNillableCreditUsedMinor sets the "credit_used_minor" field if the given value is not nil.
+func (_c *AdSpendBatchCreate) SetNillableCreditUsedMinor(v *int64) *AdSpendBatchCreate {
+	if v != nil {
+		_c.SetCreditUsedMinor(*v)
+	}
+	return _c
+}
+
+// SetCashbackMinor sets the "cashback_minor" field.
+func (_c *AdSpendBatchCreate) SetCashbackMinor(v int64) *AdSpendBatchCreate {
+	_c.mutation.SetCashbackMinor(v)
+	return _c
+}
+
+// SetNillableCashbackMinor sets the "cashback_minor" field if the given value is not nil.
+func (_c *AdSpendBatchCreate) SetNillableCashbackMinor(v *int64) *AdSpendBatchCreate {
+	if v != nil {
+		_c.SetCashbackMinor(*v)
+	}
+	return _c
+}
+
+// SetRefundedMinor sets the "refunded_minor" field.
+func (_c *AdSpendBatchCreate) SetRefundedMinor(v int64) *AdSpendBatchCreate {
+	_c.mutation.SetRefundedMinor(v)
+	return _c
+}
+
+// SetNillableRefundedMinor sets the "refunded_minor" field if the given value is not nil.
+func (_c *AdSpendBatchCreate) SetNillableRefundedMinor(v *int64) *AdSpendBatchCreate {
+	if v != nil {
+		_c.SetRefundedMinor(*v)
+	}
+	return _c
+}
+
 // SetID sets the "id" field.
 func (_c *AdSpendBatchCreate) SetID(v uuid.UUID) *AdSpendBatchCreate {
 	_c.mutation.SetID(v)
@@ -133,6 +175,18 @@ func (_c *AdSpendBatchCreate) defaults() {
 		v := adspendbatch.DefaultCreatedAt()
 		_c.mutation.SetCreatedAt(v)
 	}
+	if _, ok := _c.mutation.CreditUsedMinor(); !ok {
+		v := adspendbatch.DefaultCreditUsedMinor
+		_c.mutation.SetCreditUsedMinor(v)
+	}
+	if _, ok := _c.mutation.CashbackMinor(); !ok {
+		v := adspendbatch.DefaultCashbackMinor
+		_c.mutation.SetCashbackMinor(v)
+	}
+	if _, ok := _c.mutation.RefundedMinor(); !ok {
+		v := adspendbatch.DefaultRefundedMinor
+		_c.mutation.SetRefundedMinor(v)
+	}
 	if _, ok := _c.mutation.ID(); !ok {
 		v := adspendbatch.DefaultID()
 		_c.mutation.SetID(v)
@@ -169,6 +223,15 @@ func (_c *AdSpendBatchCreate) check() error {
 	}
 	if _, ok := _c.mutation.PlatformShareMicros(); !ok {
 		return &ValidationError{Name: "platform_share_micros", err: errors.New(`ent: missing required field "AdSpendBatch.platform_share_micros"`)}
+	}
+	if _, ok := _c.mutation.CreditUsedMinor(); !ok {
+		return &ValidationError{Name: "credit_used_minor", err: errors.New(`ent: missing required field "AdSpendBatch.credit_used_minor"`)}
+	}
+	if _, ok := _c.mutation.CashbackMinor(); !ok {
+		return &ValidationError{Name: "cashback_minor", err: errors.New(`ent: missing required field "AdSpendBatch.cashback_minor"`)}
+	}
+	if _, ok := _c.mutation.RefundedMinor(); !ok {
+		return &ValidationError{Name: "refunded_minor", err: errors.New(`ent: missing required field "AdSpendBatch.refunded_minor"`)}
 	}
 	return nil
 }
@@ -238,6 +301,18 @@ func (_c *AdSpendBatchCreate) createSpec() (*AdSpendBatch, *sqlgraph.CreateSpec)
 		_spec.SetField(adspendbatch.FieldPlatformShareMicros, field.TypeInt64, value)
 		_node.PlatformShareMicros = value
 	}
+	if value, ok := _c.mutation.CreditUsedMinor(); ok {
+		_spec.SetField(adspendbatch.FieldCreditUsedMinor, field.TypeInt64, value)
+		_node.CreditUsedMinor = value
+	}
+	if value, ok := _c.mutation.CashbackMinor(); ok {
+		_spec.SetField(adspendbatch.FieldCashbackMinor, field.TypeInt64, value)
+		_node.CashbackMinor = value
+	}
+	if value, ok := _c.mutation.RefundedMinor(); ok {
+		_spec.SetField(adspendbatch.FieldRefundedMinor, field.TypeInt64, value)
+		_node.RefundedMinor = value
+	}
 	return _node, _spec
 }
 
@@ -290,6 +365,24 @@ type (
 	}
 )
 
+// SetRefundedMinor sets the "refunded_minor" field.
+func (u *AdSpendBatchUpsert) SetRefundedMinor(v int64) *AdSpendBatchUpsert {
+	u.Set(adspendbatch.FieldRefundedMinor, v)
+	return u
+}
+
+// UpdateRefundedMinor sets the "refunded_minor" field to the value that was provided on create.
+func (u *AdSpendBatchUpsert) UpdateRefundedMinor() *AdSpendBatchUpsert {
+	u.SetExcluded(adspendbatch.FieldRefundedMinor)
+	return u
+}
+
+// AddRefundedMinor adds v to the "refunded_minor" field.
+func (u *AdSpendBatchUpsert) AddRefundedMinor(v int64) *AdSpendBatchUpsert {
+	u.Add(adspendbatch.FieldRefundedMinor, v)
+	return u
+}
+
 // UpdateNewValues updates the mutable fields using the new values that were set on create except the ID field.
 // Using this option is equivalent to using:
 //
@@ -331,6 +424,12 @@ func (u *AdSpendBatchUpsertOne) UpdateNewValues() *AdSpendBatchUpsertOne {
 		if _, exists := u.create.mutation.PlatformShareMicros(); exists {
 			s.SetIgnore(adspendbatch.FieldPlatformShareMicros)
 		}
+		if _, exists := u.create.mutation.CreditUsedMinor(); exists {
+			s.SetIgnore(adspendbatch.FieldCreditUsedMinor)
+		}
+		if _, exists := u.create.mutation.CashbackMinor(); exists {
+			s.SetIgnore(adspendbatch.FieldCashbackMinor)
+		}
 	}))
 	return u
 }
@@ -360,6 +459,27 @@ func (u *AdSpendBatchUpsertOne) Update(set func(*AdSpendBatchUpsert)) *AdSpendBa
 		set(&AdSpendBatchUpsert{UpdateSet: update})
 	}))
 	return u
+}
+
+// SetRefundedMinor sets the "refunded_minor" field.
+func (u *AdSpendBatchUpsertOne) SetRefundedMinor(v int64) *AdSpendBatchUpsertOne {
+	return u.Update(func(s *AdSpendBatchUpsert) {
+		s.SetRefundedMinor(v)
+	})
+}
+
+// AddRefundedMinor adds v to the "refunded_minor" field.
+func (u *AdSpendBatchUpsertOne) AddRefundedMinor(v int64) *AdSpendBatchUpsertOne {
+	return u.Update(func(s *AdSpendBatchUpsert) {
+		s.AddRefundedMinor(v)
+	})
+}
+
+// UpdateRefundedMinor sets the "refunded_minor" field to the value that was provided on create.
+func (u *AdSpendBatchUpsertOne) UpdateRefundedMinor() *AdSpendBatchUpsertOne {
+	return u.Update(func(s *AdSpendBatchUpsert) {
+		s.UpdateRefundedMinor()
+	})
 }
 
 // Exec executes the query.
@@ -569,6 +689,12 @@ func (u *AdSpendBatchUpsertBulk) UpdateNewValues() *AdSpendBatchUpsertBulk {
 			if _, exists := b.mutation.PlatformShareMicros(); exists {
 				s.SetIgnore(adspendbatch.FieldPlatformShareMicros)
 			}
+			if _, exists := b.mutation.CreditUsedMinor(); exists {
+				s.SetIgnore(adspendbatch.FieldCreditUsedMinor)
+			}
+			if _, exists := b.mutation.CashbackMinor(); exists {
+				s.SetIgnore(adspendbatch.FieldCashbackMinor)
+			}
 		}
 	}))
 	return u
@@ -599,6 +725,27 @@ func (u *AdSpendBatchUpsertBulk) Update(set func(*AdSpendBatchUpsert)) *AdSpendB
 		set(&AdSpendBatchUpsert{UpdateSet: update})
 	}))
 	return u
+}
+
+// SetRefundedMinor sets the "refunded_minor" field.
+func (u *AdSpendBatchUpsertBulk) SetRefundedMinor(v int64) *AdSpendBatchUpsertBulk {
+	return u.Update(func(s *AdSpendBatchUpsert) {
+		s.SetRefundedMinor(v)
+	})
+}
+
+// AddRefundedMinor adds v to the "refunded_minor" field.
+func (u *AdSpendBatchUpsertBulk) AddRefundedMinor(v int64) *AdSpendBatchUpsertBulk {
+	return u.Update(func(s *AdSpendBatchUpsert) {
+		s.AddRefundedMinor(v)
+	})
+}
+
+// UpdateRefundedMinor sets the "refunded_minor" field to the value that was provided on create.
+func (u *AdSpendBatchUpsertBulk) UpdateRefundedMinor() *AdSpendBatchUpsertBulk {
+	return u.Update(func(s *AdSpendBatchUpsert) {
+		s.UpdateRefundedMinor()
+	})
 }
 
 // Exec executes the query.

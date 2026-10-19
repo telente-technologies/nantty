@@ -7,7 +7,9 @@ import (
 	"zudomart/modules/ads/src/container"
 	adserrors "zudomart/modules/ads/src/errors"
 	"zudomart/modules/ads/src/generated/ent"
+	"zudomart/modules/ads/src/generated/ent/adcreditlot"
 	"zudomart/modules/ads/src/generated/ent/adfundstransaction"
+	adsservices "zudomart/modules/ads/src/services"
 	"zudomart/platform/httpserver"
 )
 
@@ -30,17 +32,18 @@ func (handler Handler) Execute(ctx context.Context, command Command) error {
 		return err
 	}
 	err = deployed.RunInTransaction(ctx, func(tx *ent.Tx) error {
-		update := tx.AdAccount.UpdateOneID(account.ID)
 		if request.Type == "credit_grant" {
 			expires := deployed.Now().AddDate(0, 1, 0)
 			if request.ExpiresAt != nil {
 				expires, _ = time.Parse(time.RFC3339, *request.ExpiresAt)
 			}
-			update.AddCreditMinor(request.AmountMinor).SetCreditExpiresAt(expires)
-		} else {
-			update.AddBalanceMinor(request.AmountMinor)
+			_, _, err := adsservices.IssueCreditLotInTransaction(ctx, tx, adsservices.CreditLotInput{
+				AccountId: account.ID, UserId: account.OwnerUserID, Currency: account.Currency, Source: adcreditlot.SourceAdminIssued, AmountMinor: request.AmountMinor,
+				ExpiresAt: &expires, Reason: request.Description, Reference: request.Reference, Description: request.Description,
+			}, deployed.Now())
+			return err
 		}
-		if err := update.Exec(ctx); err != nil {
+		if err := tx.AdAccount.UpdateOneID(account.ID).AddBalanceMinor(request.AmountMinor).Exec(ctx); err != nil {
 			return err
 		}
 		description := request.Description

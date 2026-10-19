@@ -18,6 +18,7 @@ import (
 	"zudomart/modules/ads/src/loaders"
 	"zudomart/modules/ads/src/migrations"
 	adaccounts "zudomart/modules/ads/src/modules/adAccounts"
+	adfunds "zudomart/modules/ads/src/modules/adFunds"
 	adpolicies "zudomart/modules/ads/src/modules/adPolicies"
 	adreview "zudomart/modules/ads/src/modules/adReview"
 	reviewservices "zudomart/modules/ads/src/modules/adReview/services"
@@ -101,6 +102,7 @@ func (module *Module) MountRoutes(mux *http.ServeMux) {
 	adreview.Mount(mux, deployed)
 	adpolicies.Mount(mux, deployed)
 	boosts.Mount(mux, deployed)
+	adfunds.Mount(mux, deployed)
 	billing.Mount(mux, deployed)
 	decision.Mount(mux, deployed)
 	tracking.Mount(mux, deployed)

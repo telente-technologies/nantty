@@ -3,6 +3,7 @@ package approvead
 import (
 	"context"
 
+	"zudomart/modules/ads/src/constants"
 	"zudomart/modules/ads/src/container"
 	adserrors "zudomart/modules/ads/src/errors"
 	"zudomart/modules/ads/src/generated/ent"
@@ -12,6 +13,7 @@ import (
 	"zudomart/modules/ads/src/modules/adReview/services"
 	campaignservices "zudomart/modules/ads/src/modules/campaigns/services"
 	adsservices "zudomart/modules/ads/src/services"
+	"zudomart/platform/httpserver"
 )
 
 type Handler struct{ Container *container.Container }
@@ -35,7 +37,15 @@ func (handler Handler) Execute(ctx context.Context, command Command) (dtos.AdFor
 	if err := adsservices.VerifyCreativeOwnership(ctx, deployed.Ownership, advertiser, review.Ad.Creative.Input, "creative"); err != nil {
 		return dtos.AdForReview{}, err
 	}
+	if command.AdCategory != "" && !constants.IsKnownAdCategory(command.AdCategory) {
+		return dtos.AdForReview{}, httpserver.NewValidationFailedError([]httpserver.ValidationIssue{{Path: "adCategory", Message: "Choose a known ad category."}})
+	}
 	err = deployed.RunInTransaction(ctx, func(tx *ent.Tx) error {
+		if command.AdCategory != "" {
+			if err := tx.Ad.UpdateOneID(review.Ad.ID).SetAdCategory(command.AdCategory).Exec(ctx); err != nil {
+				return err
+			}
+		}
 		return services.ApproveInTransaction(ctx, tx, review, command.Reviewer, command.Reason, deployed.Now())
 	})
 	if err != nil {

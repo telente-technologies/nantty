@@ -73,13 +73,20 @@ type Type string
 
 // Type values.
 const (
-	TypeTopUp       Type = "top_up"
-	TypeAdSpend     Type = "ad_spend"
-	TypeCreditGrant Type = "credit_grant"
-	TypeCreditSpend Type = "credit_spend"
-	TypeRefund      Type = "refund"
-	TypeCardCharge  Type = "card_charge"
-	TypeAdSpendDebt Type = "ad_spend_debt"
+	TypeTopUp              Type = "top_up"
+	TypeAdSpend            Type = "ad_spend"
+	TypeCreditGrant        Type = "credit_grant"
+	TypeCreditSpend        Type = "credit_spend"
+	TypeRefund             Type = "refund"
+	TypeCardCharge         Type = "card_charge"
+	TypeAdSpendDebt        Type = "ad_spend_debt"
+	TypeCreditExpired      Type = "credit_expired"
+	TypeCreditRevoked      Type = "credit_revoked"
+	TypeCashback           Type = "cashback"
+	TypeCashbackReversal   Type = "cashback_reversal"
+	TypeWithdrawal         Type = "withdrawal"
+	TypeWithdrawalReversal Type = "withdrawal_reversal"
+	TypeSpendRefund        Type = "spend_refund"
 )
 
 func (_type Type) String() string {
@@ -89,7 +96,7 @@ func (_type Type) String() string {
 // TypeValidator is a validator for the "type" field enum values. It is called by the builders before save.
 func TypeValidator(_type Type) error {
 	switch _type {
-	case TypeTopUp, TypeAdSpend, TypeCreditGrant, TypeCreditSpend, TypeRefund, TypeCardCharge, TypeAdSpendDebt:
+	case TypeTopUp, TypeAdSpend, TypeCreditGrant, TypeCreditSpend, TypeRefund, TypeCardCharge, TypeAdSpendDebt, TypeCreditExpired, TypeCreditRevoked, TypeCashback, TypeCashbackReversal, TypeWithdrawal, TypeWithdrawalReversal, TypeSpendRefund:
 		return nil
 	default:
 		return fmt.Errorf("adfundstransaction: invalid enum value for type field: %q", _type)

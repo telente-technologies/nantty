@@ -15,15 +15,19 @@ import (
 	"zudomart/modules/ads/src/generated/ent/adactivityentry"
 	"zudomart/modules/ads/src/generated/ent/adaudiencemember"
 	"zudomart/modules/ads/src/generated/ent/adautomatedrule"
+	"zudomart/modules/ads/src/generated/ent/adbalancewithdrawal"
 	"zudomart/modules/ads/src/generated/ent/adboost"
+	"zudomart/modules/ads/src/generated/ent/adboostchange"
 	"zudomart/modules/ads/src/generated/ent/adcampaign"
 	"zudomart/modules/ads/src/generated/ent/adcardstatsdaily"
+	"zudomart/modules/ads/src/generated/ent/adcashbacksetting"
 	"zudomart/modules/ads/src/generated/ent/adcontentsignal"
 	"zudomart/modules/ads/src/generated/ent/adconversion"
 	"zudomart/modules/ads/src/generated/ent/adconversionevent"
 	"zudomart/modules/ads/src/generated/ent/adcreatorearning"
 	"zudomart/modules/ads/src/generated/ent/adcreatormonetisationhold"
 	"zudomart/modules/ads/src/generated/ent/adcreatorprogrammember"
+	"zudomart/modules/ads/src/generated/ent/adcreditlot"
 	"zudomart/modules/ads/src/generated/ent/adcustomaudience"
 	"zudomart/modules/ads/src/generated/ent/adexperiment"
 	"zudomart/modules/ads/src/generated/ent/adfreeboostgrant"
@@ -110,15 +114,19 @@ func checkColumn(t, c string) error {
 			adactivityentry.Table:           adactivityentry.ValidColumn,
 			adaudiencemember.Table:          adaudiencemember.ValidColumn,
 			adautomatedrule.Table:           adautomatedrule.ValidColumn,
+			adbalancewithdrawal.Table:       adbalancewithdrawal.ValidColumn,
 			adboost.Table:                   adboost.ValidColumn,
+			adboostchange.Table:             adboostchange.ValidColumn,
 			adcampaign.Table:                adcampaign.ValidColumn,
 			adcardstatsdaily.Table:          adcardstatsdaily.ValidColumn,
+			adcashbacksetting.Table:         adcashbacksetting.ValidColumn,
 			adcontentsignal.Table:           adcontentsignal.ValidColumn,
 			adconversion.Table:              adconversion.ValidColumn,
 			adconversionevent.Table:         adconversionevent.ValidColumn,
 			adcreatorearning.Table:          adcreatorearning.ValidColumn,
 			adcreatormonetisationhold.Table: adcreatormonetisationhold.ValidColumn,
 			adcreatorprogrammember.Table:    adcreatorprogrammember.ValidColumn,
+			adcreditlot.Table:               adcreditlot.ValidColumn,
 			adcustomaudience.Table:          adcustomaudience.ValidColumn,
 			adexperiment.Table:              adexperiment.ValidColumn,
 			adfreeboostgrant.Table:          adfreeboostgrant.ValidColumn,

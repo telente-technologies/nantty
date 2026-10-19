@@ -21,6 +21,9 @@ func (handler Handler) Execute(ctx context.Context, query Query) ([]map[string]a
 	if !slices.Contains(sourceTypes, query.Type) {
 		return nil, "", httpserver.NewValidationFailedError([]httpserver.ValidationIssue{{Path: "type", Message: "Choose post, clip, product, live or store."}})
 	}
+	if query.Type == "store" {
+		return handler.listStores(ctx, query)
+	}
 	account, _, err := accountservices.LoadAccountForPermission(ctx, deployed, query.AccountId, query.UserId, adsservices.PermissionCampaignsView)
 	if err != nil {
 		return nil, "", err

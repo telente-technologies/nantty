@@ -32,6 +32,7 @@ func (AdCampaign) Fields() []ent.Field {
 		field.Time("start_at"),
 		field.Time("end_at").Optional().Nillable(),
 		field.UUID("created_by_user_id", uuid.UUID{}).Immutable(),
+		field.String("ad_category").MaxLen(40).Default("general"),
 		field.Time("updated_at").Default(time.Now).UpdateDefault(time.Now),
 	}
 }
@@ -96,6 +97,7 @@ func (Ad) Fields() []ent.Field {
 		field.String("format").MaxLen(20),
 		field.JSON("creative", types.StoredCreative{}).SchemaType(map[string]string{dialect.Postgres: "jsonb"}),
 		field.JSON("auto_check_flags", []types.AutoCheckFlag{}).SchemaType(map[string]string{dialect.Postgres: "jsonb"}).Default(func() []types.AutoCheckFlag { return []types.AutoCheckFlag{} }),
+		field.String("ad_category").MaxLen(40).Default(""),
 		field.Time("updated_at").Default(time.Now).UpdateDefault(time.Now),
 	}
 }

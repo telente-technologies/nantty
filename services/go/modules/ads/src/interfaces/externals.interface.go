@@ -12,6 +12,10 @@ type ConsentReader interface {
 	PersonalizedAdsEnabled(ctx context.Context, userId string) (bool, error)
 }
 
+type ViewerAgeReader interface {
+	IsAdultViewer(ctx context.Context, userId string) (bool, error)
+}
+
 type ProfileCountryReader interface {
 	ProfileCountry(ctx context.Context, userId string) string
 }

@@ -43,13 +43,22 @@ func FreeBoostPeriod(at time.Time, timezone string) (string, time.Time) {
 	return local.Format("2006-01"), start.AddDate(0, 1, 0).UTC()
 }
 
-func BoostTimezoneFor(ctx context.Context, client *ent.Client, userId uuid.UUID, currency string) (string, error) {
-	account, err := client.AdAccount.Query().Where(adaccount.OwnerUserID(userId), adaccount.CurrencyEQ(currency), adaccount.KindEQ(adaccount.KindPersonal), adaccount.StatusEQ(adaccount.StatusActive)).First(ctx)
+func FindPersonalBoostAccount(ctx context.Context, client *ent.Client, userId uuid.UUID, currency string) (*ent.AdAccount, error) {
+	account, err := client.AdAccount.Query().Where(adaccount.OwnerUserID(userId), adaccount.CurrencyEQ(currency), adaccount.KindEQ(adaccount.KindPersonal), adaccount.StatusEQ(adaccount.StatusActive)).
+		Order(adaccount.ByID()).First(ctx)
 	if ent.IsNotFound(err) {
-		return DefaultBoostTimezone, nil
+		return nil, nil
 	}
+	return account, err
+}
+
+func BoostTimezoneFor(ctx context.Context, client *ent.Client, userId uuid.UUID, currency string) (string, error) {
+	account, err := FindPersonalBoostAccount(ctx, client, userId, currency)
 	if err != nil {
 		return "", err
+	}
+	if account == nil {
+		return DefaultBoostTimezone, nil
 	}
 	return account.Timezone, nil
 }

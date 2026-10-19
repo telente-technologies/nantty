@@ -12,18 +12,31 @@ func (handler Handler) checkViewerEligibility(ctx context.Context, slot *slotCon
 	if viewer.PremiumAdFree {
 		return "premium_ad_free", nil
 	}
-	if viewer.AgeBand == "13-17" {
-		return "minor", nil
-	}
 	if slot.command.UserId == "" {
 		return "no_viewer", nil
 	}
 	if reason := handler.checkPlanAdLoad(ctx, slot); reason != "" {
 		return reason, nil
 	}
+	if !handler.viewerIsKnownAdult(ctx, slot) {
+		viewer.AgeRestricted, viewer.PersonalizedAds, viewer.AgeBand, viewer.Gender = true, false, "", ""
+		return "", nil
+	}
 	enabled, err := handler.Container.Consent.PersonalizedAdsEnabled(ctx, slot.command.UserId)
 	viewer.PersonalizedAds = enabled
 	return "", err
+}
+
+func (handler Handler) viewerIsKnownAdult(ctx context.Context, slot *slotContext) bool {
+	if slot.command.Viewer.AgeBand == "13-17" || handler.Container.ViewerAge == nil {
+		return false
+	}
+	adult, err := handler.Container.ViewerAge.IsAdultViewer(ctx, slot.command.UserId)
+	if err != nil {
+		handler.Container.Logger.WarnContext(ctx, "viewer age unavailable; serving contextual age-safe ads only", "error", err)
+		return false
+	}
+	return adult
 }
 
 func (handler Handler) checkPlanAdLoad(ctx context.Context, slot *slotContext) string {

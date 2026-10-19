@@ -1,6 +1,7 @@
 package updatecampaign
 
 import (
+	"zudomart/modules/ads/src/constants"
 	"context"
 
 	"zudomart/modules/ads/src/container"
@@ -42,6 +43,9 @@ func (handler Handler) Execute(ctx context.Context, command Command) (dtos.Campa
 	err = deployed.RunInTransaction(ctx, func(tx *ent.Tx) error {
 		update := tx.AdCampaign.UpdateOneID(campaign.ID).SetName(merged.Name).SetStartAt(parseTime(merged.Schedule.StartAt))
 		applyBudgetAndCap(update, merged)
+		if merged.AdCategory != "" {
+			update.SetAdCategory(merged.AdCategory)
+		}
 		if command.Patch.Status != nil {
 			update.SetStatus(adcampaign.Status(*command.Patch.Status))
 		}
@@ -77,6 +81,12 @@ func (handler Handler) mergeAndValidate(campaign *ent.AdCampaign, currency strin
 	}
 	if patch.Name != nil {
 		merged.Name = *patch.Name
+	}
+	if patch.AdCategory != nil {
+		if constants.IsAgeRestrictedAdCategory(campaign.AdCategory) && !constants.IsAgeRestrictedAdCategory(*patch.AdCategory) {
+			return merged, httpserver.NewValidationFailedError([]httpserver.ValidationIssue{{Path: "adCategory", Message: "An adults-only campaign cannot be moved to a general category. Create a new campaign instead."}})
+		}
+		merged.AdCategory = *patch.AdCategory
 	}
 	if patch.Budget != nil {
 		merged.Budget = patch.Budget

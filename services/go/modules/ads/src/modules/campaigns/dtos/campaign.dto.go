@@ -23,6 +23,7 @@ type Campaign struct {
 	Budget          *types.Budget   `json:"budget"`
 	SpendCap        *types.Money    `json:"spendCap"`
 	Schedule        types.Schedule  `json:"schedule"`
+	AdCategory      string          `json:"adCategory"`
 	AdSetCount      int             `json:"adSetCount"`
 	AdCount         int             `json:"adCount"`
 	RejectedAdCount int             `json:"rejectedAdCount"`
@@ -89,6 +90,7 @@ type CampaignInput struct {
 	Budget      *types.Budget  `json:"budget"`
 	SpendCap    *types.Money   `json:"spendCap"`
 	Schedule    types.Schedule `json:"schedule"`
+	AdCategory  string         `json:"adCategory"`
 }
 
 type AdSetInput struct {
@@ -129,6 +131,7 @@ type CampaignPatch struct {
 	Schedule    *types.Schedule             `json:"schedule"`
 	Status      *string                     `json:"status"`
 	Objective   *string                     `json:"objective"`
+	AdCategory  *string                     `json:"adCategory"`
 }
 
 type AdSetPatch struct {

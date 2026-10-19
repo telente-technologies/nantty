@@ -60,6 +60,8 @@ type Ad struct {
 	Creative types.StoredCreative `json:"creative,omitempty"`
 	// AutoCheckFlags holds the value of the "auto_check_flags" field.
 	AutoCheckFlags []types.AutoCheckFlag `json:"auto_check_flags,omitempty"`
+	// AdCategory holds the value of the "ad_category" field.
+	AdCategory string `json:"ad_category,omitempty"`
 	// UpdatedAt holds the value of the "updated_at" field.
 	UpdatedAt    time.Time `json:"updated_at,omitempty"`
 	selectValues sql.SelectValues
@@ -72,7 +74,7 @@ func (*Ad) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case ad.FieldCreative, ad.FieldAutoCheckFlags:
 			values[i] = new([]byte)
-		case ad.FieldName, ad.FieldStatus, ad.FieldReviewStatus, ad.FieldPolicyCode, ad.FieldPolicyReason, ad.FieldReviewedByName, ad.FieldAppealStatus, ad.FieldAppealMessage, ad.FieldAppealResolutionNote, ad.FieldFormat:
+		case ad.FieldName, ad.FieldStatus, ad.FieldReviewStatus, ad.FieldPolicyCode, ad.FieldPolicyReason, ad.FieldReviewedByName, ad.FieldAppealStatus, ad.FieldAppealMessage, ad.FieldAppealResolutionNote, ad.FieldFormat, ad.FieldAdCategory:
 			values[i] = new(sql.NullString)
 		case ad.FieldCreatedAt, ad.FieldSubmittedAt, ad.FieldReviewedAt, ad.FieldAppealSubmittedAt, ad.FieldAppealResolvedAt, ad.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
@@ -228,6 +230,12 @@ func (_m *Ad) assignValues(columns []string, values []any) error {
 					return fmt.Errorf("unmarshal field auto_check_flags: %w", err)
 				}
 			}
+		case ad.FieldAdCategory:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field ad_category", values[i])
+			} else if value.Valid {
+				_m.AdCategory = value.String
+			}
 		case ad.FieldUpdatedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field updated_at", values[i])
@@ -339,6 +347,9 @@ func (_m *Ad) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("auto_check_flags=")
 	builder.WriteString(fmt.Sprintf("%v", _m.AutoCheckFlags))
+	builder.WriteString(", ")
+	builder.WriteString("ad_category=")
+	builder.WriteString(_m.AdCategory)
 	builder.WriteString(", ")
 	builder.WriteString("updated_at=")
 	builder.WriteString(_m.UpdatedAt.Format(time.ANSIC))

@@ -15,6 +15,7 @@ type AdsSettings struct {
 	UsersSchema            string
 	AdminSchema            string
 	CurrencySchema         string
+	CatalogSchema          string
 	PlatformSettingsTtl    time.Duration
 	CreatorShareBps        int64
 	DomainEventsTopicArn   string
@@ -50,6 +51,9 @@ type AdsSettings struct {
 	BaselineCtrPpm         int64
 	AllowInMemoryFunding   bool
 	BoostMinimumDailyMinor map[string]int64
+	WithdrawalFeeBps       int64
+	WithdrawalFeeCapMinor  map[string]int64
+	WithdrawalMinimumMinor map[string]int64
 	PopulationByCountry    map[string]int64
 	AssetsBucket           string
 	S3Endpoint             string
@@ -84,6 +88,7 @@ func ReadAdsSettingsFromEnvironment(reader *platformconfig.EnvironmentReader) Ad
 		UsersSchema:            reader.ReadStringOrDefault("USERS_DATABASE_SCHEMA", "users"),
 		AdminSchema:            reader.ReadStringOrDefault("ADMIN_DATABASE_SCHEMA", "admin"),
 		CurrencySchema:         reader.ReadStringOrDefault("CURRENCY_DATABASE_SCHEMA", "currency"),
+		CatalogSchema:          reader.ReadStringOrDefault("CATALOG_DATABASE_SCHEMA", "catalog"),
 		PlatformSettingsTtl:    reader.ReadDurationOrDefault("ADS_PLATFORM_SETTINGS_TTL", 30*time.Second),
 		CreatorShareBps:        int64(reader.ReadIntegerOrDefault("ADS_CREATOR_SHARE_BPS", 4000)),
 		DomainEventsTopicArn:   reader.ReadStringOrDefault("DOMAIN_EVENTS_TOPIC_ARN", ""),
@@ -128,6 +133,9 @@ func ReadAdsSettingsFromEnvironment(reader *platformconfig.EnvironmentReader) Ad
 		ReportLinkLifetime:     reader.ReadDurationOrDefault("ADS_REPORT_LINK_TTL", 7*24*time.Hour),
 		ReportSweepInterval:    reader.ReadDurationOrDefault("ADS_REPORT_SWEEP_INTERVAL", time.Minute),
 		BoostMinimumDailyMinor: map[string]int64{"NGN": 100_000, "GHS": 1_000, "KES": 10_000, "ZAR": 2_000, "GBP": 100, "EUR": 100, "USD": 100},
+		WithdrawalFeeBps:       int64(reader.ReadIntegerOrDefault("ADS_BALANCE_WITHDRAWAL_FEE_BPS", 150)),
+		WithdrawalFeeCapMinor:  map[string]int64{"NGN": 200_000, "GHS": 3_000, "KES": 30_000, "ZAR": 5_000, "GBP": 200, "EUR": 200, "USD": 200},
+		WithdrawalMinimumMinor: map[string]int64{"NGN": 100_000, "GHS": 1_000, "KES": 10_000, "ZAR": 2_000, "GBP": 100, "EUR": 100, "USD": 100},
 	}
 	settings.AdTokenKeys = readAdTokenKeys(reader, settings.AdTokenActiveKeyId, settings.IsProduction())
 	settings.InternalSharedSecret = reader.ReadStringOrDefault("ADS_INTERNAL_SHARED_SECRET", "")

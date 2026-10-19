@@ -1,6 +1,10 @@
 package services
 
-import "slices"
+import (
+	"slices"
+
+	"zudomart/modules/ads/src/types"
+)
 
 var AllAdvertiserPlacements = []string{"feed", "clips", "mart", "search", "stories", "live"}
 
@@ -23,10 +27,12 @@ var placementBySlotKind = map[string]string{
 }
 
 var creativeFormatsBySlotKind = map[string][]string{
-	SlotFeedPost: {"feed_post", "live", "product"}, SlotPreRoll: {"feed_post", "clip"}, SlotPostRoll: {"feed_post", "clip"},
+	SlotFeedPost: {"feed_post", "live", "product", "store"}, SlotPreRoll: {"feed_post", "clip"}, SlotPostRoll: {"feed_post", "clip"},
 	SlotClipBetween: {"clip", "live"}, SlotMartTile: {"product"}, SlotSearchTile: {"product"}, SlotStory: {"story", "clip"}, SlotLiveBreak: {"live"},
-	SlotFeedCommentThread: {"feed_post", "product"},
+	SlotFeedCommentThread: {"feed_post", "product", "store"},
 }
+
+var entitySlotKinds = []string{SlotFeedPost, SlotFeedCommentThread}
 
 func PlacementForSlotKind(slotKind string) (string, bool) {
 	placement, found := placementBySlotKind[slotKind]
@@ -35,6 +41,16 @@ func PlacementForSlotKind(slotKind string) (string, bool) {
 
 func CreativeFitsSlotKind(creativeFormat, slotKind string) bool {
 	return slices.Contains(creativeFormatsBySlotKind[slotKind], creativeFormat)
+}
+
+func CreativeFitsSlot(creative types.Creative, slotKind string) bool {
+	if !CreativeFitsSlotKind(creative.Format, slotKind) {
+		return false
+	}
+	if isPromotableEntityKind(creative.Source.Type) {
+		return slices.Contains(entitySlotKinds, slotKind)
+	}
+	return true
 }
 
 func IsContentAdjacentSlot(slotKind string) bool {

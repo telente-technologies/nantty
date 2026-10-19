@@ -35,7 +35,7 @@ func internalTarget(destination types.CreativeDestination) (string, bool) {
 func CollectOwnershipRefs(input types.CreativeInput, path string) []OwnershipRef {
 	refs := []OwnershipRef{}
 	switch input.Source.Type {
-	case "post", "clip", "product", "store":
+	case "post", "clip", "product", "store", "profile":
 		if input.Source.Id != "" {
 			refs = append(refs, OwnershipRef{Path: path + ".source", Kind: input.Source.Type, TargetId: input.Source.Id})
 		}

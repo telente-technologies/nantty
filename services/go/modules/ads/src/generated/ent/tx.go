@@ -28,12 +28,18 @@ type Tx struct {
 	AdAudienceMember *AdAudienceMemberClient
 	// AdAutomatedRule is the client for interacting with the AdAutomatedRule builders.
 	AdAutomatedRule *AdAutomatedRuleClient
+	// AdBalanceWithdrawal is the client for interacting with the AdBalanceWithdrawal builders.
+	AdBalanceWithdrawal *AdBalanceWithdrawalClient
 	// AdBoost is the client for interacting with the AdBoost builders.
 	AdBoost *AdBoostClient
+	// AdBoostChange is the client for interacting with the AdBoostChange builders.
+	AdBoostChange *AdBoostChangeClient
 	// AdCampaign is the client for interacting with the AdCampaign builders.
 	AdCampaign *AdCampaignClient
 	// AdCardStatsDaily is the client for interacting with the AdCardStatsDaily builders.
 	AdCardStatsDaily *AdCardStatsDailyClient
+	// AdCashbackSetting is the client for interacting with the AdCashbackSetting builders.
+	AdCashbackSetting *AdCashbackSettingClient
 	// AdContentSignal is the client for interacting with the AdContentSignal builders.
 	AdContentSignal *AdContentSignalClient
 	// AdConversion is the client for interacting with the AdConversion builders.
@@ -46,6 +52,8 @@ type Tx struct {
 	AdCreatorMonetisationHold *AdCreatorMonetisationHoldClient
 	// AdCreatorProgramMember is the client for interacting with the AdCreatorProgramMember builders.
 	AdCreatorProgramMember *AdCreatorProgramMemberClient
+	// AdCreditLot is the client for interacting with the AdCreditLot builders.
+	AdCreditLot *AdCreditLotClient
 	// AdCustomAudience is the client for interacting with the AdCustomAudience builders.
 	AdCustomAudience *AdCustomAudienceClient
 	// AdExperiment is the client for interacting with the AdExperiment builders.
@@ -214,15 +222,19 @@ func (tx *Tx) init() {
 	tx.AdActivityEntry = NewAdActivityEntryClient(tx.config)
 	tx.AdAudienceMember = NewAdAudienceMemberClient(tx.config)
 	tx.AdAutomatedRule = NewAdAutomatedRuleClient(tx.config)
+	tx.AdBalanceWithdrawal = NewAdBalanceWithdrawalClient(tx.config)
 	tx.AdBoost = NewAdBoostClient(tx.config)
+	tx.AdBoostChange = NewAdBoostChangeClient(tx.config)
 	tx.AdCampaign = NewAdCampaignClient(tx.config)
 	tx.AdCardStatsDaily = NewAdCardStatsDailyClient(tx.config)
+	tx.AdCashbackSetting = NewAdCashbackSettingClient(tx.config)
 	tx.AdContentSignal = NewAdContentSignalClient(tx.config)
 	tx.AdConversion = NewAdConversionClient(tx.config)
 	tx.AdConversionEvent = NewAdConversionEventClient(tx.config)
 	tx.AdCreatorEarning = NewAdCreatorEarningClient(tx.config)
 	tx.AdCreatorMonetisationHold = NewAdCreatorMonetisationHoldClient(tx.config)
 	tx.AdCreatorProgramMember = NewAdCreatorProgramMemberClient(tx.config)
+	tx.AdCreditLot = NewAdCreditLotClient(tx.config)
 	tx.AdCustomAudience = NewAdCustomAudienceClient(tx.config)
 	tx.AdExperiment = NewAdExperimentClient(tx.config)
 	tx.AdFreeBoostGrant = NewAdFreeBoostGrantClient(tx.config)

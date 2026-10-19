@@ -53,7 +53,7 @@ func RejectInTransaction(ctx context.Context, tx *ent.Tx, review ReviewContext, 
 		if err := settleRejectedBoostBudget(ctx, tx, review); err != nil {
 			return err
 		}
-		if err := tx.AdBoost.Update().Where(adboost.CampaignID(review.Campaign.ID), adboost.StatusIn(adboost.StatusInReview, adboost.StatusActive)).SetStatus(adboost.StatusRejected).SetRejectionReason(reason).Exec(ctx); err != nil {
+		if err := tx.AdBoost.Update().Where(adboost.CampaignID(review.Campaign.ID), adboost.StatusIn(adboost.StatusInReview, adboost.StatusActive, adboost.StatusPaused)).SetStatus(adboost.StatusRejected).SetRejectionReason(reason).Exec(ctx); err != nil {
 			return err
 		}
 	}
@@ -65,19 +65,23 @@ func startBoostInTransaction(ctx context.Context, tx *ent.Tx, review ReviewConte
 	if err != nil {
 		return err
 	}
-	end := now.AddDate(0, 0, boost.DurationDays)
-	if err := tx.AdBoost.UpdateOneID(boost.ID).SetStatus(adboost.StatusActive).SetStartsAt(now).SetEndsAt(end).Exec(ctx); err != nil {
+	start := now
+	if boost.ScheduledStartAt != nil && boost.ScheduledStartAt.After(now) {
+		start = *boost.ScheduledStartAt
+	}
+	end := start.AddDate(0, 0, boost.DurationDays)
+	if err := tx.AdBoost.UpdateOneID(boost.ID).SetStatus(adboost.StatusActive).SetStartsAt(start).SetEndsAt(end).Exec(ctx); err != nil {
 		return err
 	}
-	if err := tx.AdCampaign.UpdateOneID(review.Campaign.ID).SetStartAt(now).SetEndAt(end).SetStatus(adcampaign.StatusActive).Exec(ctx); err != nil {
+	if err := tx.AdCampaign.UpdateOneID(review.Campaign.ID).SetStartAt(start).SetEndAt(end).SetStatus(adcampaign.StatusActive).Exec(ctx); err != nil {
 		return err
 	}
-	return tx.AdGroup.UpdateOneID(review.Group.ID).SetStartAt(now).SetEndAt(end).SetStatus(adgroup.StatusActive).Exec(ctx)
+	return tx.AdGroup.UpdateOneID(review.Group.ID).SetStartAt(start).SetEndAt(end).SetStatus(adgroup.StatusActive).Exec(ctx)
 }
 
 func settleRejectedBoostBudget(ctx context.Context, tx *ent.Tx, review ReviewContext) error {
 	boost, err := tx.AdBoost.Query().Where(adboost.CampaignID(review.Campaign.ID)).ForUpdate().Only(ctx)
-	if err != nil || (boost.Status != adboost.StatusInReview && boost.Status != adboost.StatusActive) {
+	if err != nil || (boost.Status != adboost.StatusInReview && boost.Status != adboost.StatusActive && boost.Status != adboost.StatusPaused) {
 		return err
 	}
 	return boostservices.ReleaseFreeBoostBudgetInTransaction(ctx, tx, boost)

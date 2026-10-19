@@ -27,6 +27,7 @@ type Collaborators struct {
 	Publisher    platformevents.DomainEventPublisher
 	Funding      interfaces.FundingGateway
 	Consent      interfaces.ConsentReader
+	ViewerAge    interfaces.ViewerAgeReader
 	Countries    interfaces.ProfileCountryReader
 	Stores       interfaces.StoreDirectory
 	Pctr         interfaces.PctrScorer
@@ -38,6 +39,7 @@ type Collaborators struct {
 	Identity     interfaces.IdentityMatcher
 	Content      interfaces.ContentSourceDirectory
 	Ownership    interfaces.DestinationOwnership
+	Promoted     interfaces.PromotedDestinationDirectory
 	Storage      interfaces.ObjectStorage
 	TopUps       interfaces.TopUpGateway
 	History      interfaces.AuditHistoryReader
@@ -50,6 +52,8 @@ type Collaborators struct {
 	Jobs         platformevents.JobQueue
 	Access       *jwtauth.AccessTokenVerifier
 	Staff        *jwtauth.AccessTokenVerifier
+	StaffStepUp  *jwtauth.AccessTokenVerifier
+	Withdrawals  interfaces.AdBalanceWithdrawalGateway
 	Now          func() time.Time
 }
 
@@ -71,6 +75,12 @@ func AssembleContainer(ctx context.Context, settings configs.AdsSettings, collab
 			return nil, nil, err
 		}
 	}
+	staffStepUpVerifier := collaborators.StaffStepUp
+	if staffStepUpVerifier == nil && collaborators.Staff == nil {
+		if staffStepUpVerifier, err = jwtauth.NewAccessTokenVerifierFromRemoteJwks(ctx, settings.StaffJwksUrl, settings.StaffTokenIssuer, staffauth.StepUpAudience); err != nil {
+			return nil, nil, err
+		}
+	}
 	counters, idempotencyStore, redisClosers := openRedisBackedStores(settings, collaborators, now, logger)
 	closers = append(closers, redisClosers...)
 	keys := make(map[string][]byte, len(settings.AdTokenKeys))
@@ -80,7 +90,7 @@ func AssembleContainer(ctx context.Context, settings configs.AdsSettings, collab
 	spend := services.SpendCounters{Store: counters}
 	platformSettings := integrations.NewPlatformSettingsSource(database, settings.AdminSchema, settings.PlatformSettingsTtl, logger)
 	deployed := &container.Container{
-		Client: client, Database: database, Settings: settings, Logger: logger, Now: now, AccessVerifier: accessVerifier, StaffVerifier: staffVerifier, IdempotencyStore: idempotencyStore,
+		Client: client, Database: database, Settings: settings, Logger: logger, Now: now, AccessVerifier: accessVerifier, StaffVerifier: staffVerifier, StaffStepUp: staffStepUpVerifier, IdempotencyStore: idempotencyStore,
 		Counters: counters, Frequency: services.FrequencyGuard{Store: counters}, Spend: spend,
 		Signer:     services.AdTokenSigner{ActiveKeyId: settings.AdTokenActiveKeyId, Keys: keys, TimeToLive: settings.AdTokenTimeToLive, Now: now},
 		Policies:   &services.PolicySource{Client: client, Now: now, Settings: platformSettings, ShareBps: settings.CreatorShareBps, Logger: logger},
@@ -128,6 +138,10 @@ func completeCollaborators(deployed *container.Container, collaborators Collabor
 	if deployed.Consent == nil {
 		deployed.Consent = integrations.UsersSchemaConsentReader{Database: database, Schema: settings.UsersSchema}
 	}
+	deployed.ViewerAge = collaborators.ViewerAge
+	if deployed.ViewerAge == nil {
+		deployed.ViewerAge = integrations.AuthSchemaViewerAgeReader{Database: database, Schema: "auth"}
+	}
 	deployed.Countries = collaborators.Countries
 	if deployed.Countries == nil {
 		deployed.Countries = integrations.UsersSchemaProfileCountryReader{Database: database, Schema: settings.UsersSchema}
@@ -155,6 +169,11 @@ func completeCollaborators(deployed *container.Container, collaborators Collabor
 	if deployed.Ownership == nil {
 		deployed.Ownership = selectDestinationOwnership(settings, deployed.Logger)
 	}
+	deployed.Promoted = collaborators.Promoted
+	if deployed.Promoted == nil {
+		deployed.Promoted = integrations.SchemaPromotedDestinations{Database: database, UsersSchema: settings.UsersSchema, CatalogSchema: settings.CatalogSchema, AuthSchema: "auth"}
+	}
+	deployed.Candidates.Destinations, deployed.Candidates.Logger = deployed.Promoted, deployed.Logger
 	deployed.Stores = collaborators.Stores
 	if deployed.Stores == nil {
 		deployed.Stores = integrations.NoStoreDirectory{}

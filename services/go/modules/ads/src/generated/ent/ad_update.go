@@ -282,6 +282,20 @@ func (_u *AdUpdate) AppendAutoCheckFlags(v []types.AutoCheckFlag) *AdUpdate {
 	return _u
 }
 
+// SetAdCategory sets the "ad_category" field.
+func (_u *AdUpdate) SetAdCategory(v string) *AdUpdate {
+	_u.mutation.SetAdCategory(v)
+	return _u
+}
+
+// SetNillableAdCategory sets the "ad_category" field if the given value is not nil.
+func (_u *AdUpdate) SetNillableAdCategory(v *string) *AdUpdate {
+	if v != nil {
+		_u.SetAdCategory(*v)
+	}
+	return _u
+}
+
 // SetUpdatedAt sets the "updated_at" field.
 func (_u *AdUpdate) SetUpdatedAt(v time.Time) *AdUpdate {
 	_u.mutation.SetUpdatedAt(v)
@@ -381,6 +395,11 @@ func (_u *AdUpdate) check() error {
 			return &ValidationError{Name: "format", err: fmt.Errorf(`ent: validator failed for field "Ad.format": %w`, err)}
 		}
 	}
+	if v, ok := _u.mutation.AdCategory(); ok {
+		if err := ad.AdCategoryValidator(v); err != nil {
+			return &ValidationError{Name: "ad_category", err: fmt.Errorf(`ent: validator failed for field "Ad.ad_category": %w`, err)}
+		}
+	}
 	return nil
 }
 
@@ -463,6 +482,9 @@ func (_u *AdUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		_spec.AddModifier(func(u *sql.UpdateBuilder) {
 			sqljson.Append(u, ad.FieldAutoCheckFlags, value)
 		})
+	}
+	if value, ok := _u.mutation.AdCategory(); ok {
+		_spec.SetField(ad.FieldAdCategory, field.TypeString, value)
 	}
 	if value, ok := _u.mutation.UpdatedAt(); ok {
 		_spec.SetField(ad.FieldUpdatedAt, field.TypeTime, value)
@@ -739,6 +761,20 @@ func (_u *AdUpdateOne) AppendAutoCheckFlags(v []types.AutoCheckFlag) *AdUpdateOn
 	return _u
 }
 
+// SetAdCategory sets the "ad_category" field.
+func (_u *AdUpdateOne) SetAdCategory(v string) *AdUpdateOne {
+	_u.mutation.SetAdCategory(v)
+	return _u
+}
+
+// SetNillableAdCategory sets the "ad_category" field if the given value is not nil.
+func (_u *AdUpdateOne) SetNillableAdCategory(v *string) *AdUpdateOne {
+	if v != nil {
+		_u.SetAdCategory(*v)
+	}
+	return _u
+}
+
 // SetUpdatedAt sets the "updated_at" field.
 func (_u *AdUpdateOne) SetUpdatedAt(v time.Time) *AdUpdateOne {
 	_u.mutation.SetUpdatedAt(v)
@@ -851,6 +887,11 @@ func (_u *AdUpdateOne) check() error {
 			return &ValidationError{Name: "format", err: fmt.Errorf(`ent: validator failed for field "Ad.format": %w`, err)}
 		}
 	}
+	if v, ok := _u.mutation.AdCategory(); ok {
+		if err := ad.AdCategoryValidator(v); err != nil {
+			return &ValidationError{Name: "ad_category", err: fmt.Errorf(`ent: validator failed for field "Ad.ad_category": %w`, err)}
+		}
+	}
 	return nil
 }
 
@@ -950,6 +991,9 @@ func (_u *AdUpdateOne) sqlSave(ctx context.Context) (_node *Ad, err error) {
 		_spec.AddModifier(func(u *sql.UpdateBuilder) {
 			sqljson.Append(u, ad.FieldAutoCheckFlags, value)
 		})
+	}
+	if value, ok := _u.mutation.AdCategory(); ok {
+		_spec.SetField(ad.FieldAdCategory, field.TypeString, value)
 	}
 	if value, ok := _u.mutation.UpdatedAt(); ok {
 		_spec.SetField(ad.FieldUpdatedAt, field.TypeTime, value)

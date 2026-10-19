@@ -23,6 +23,10 @@ var policyKeywordRules = []policyKeywordRule{
 	{"tobacco_vaping", "Tobacco and vaping", "HIGH", []string{"vape", "shisha", "e-cigarette"}},
 	{"adult_content", "Adult content", "CRITICAL", []string{"escort", "nude", "xxx"}},
 	{"gambling", "Gambling", "MEDIUM", []string{"betting", "casino", "jackpot"}},
+	{"alcohol", "Alcohol (adults only)", "MEDIUM", []string{"beer", "whisky", "whiskey", "vodka", "liquor", "gin ", "wine"}},
+	{"dating", "Dating (adults only)", "MEDIUM", []string{"dating", "hookup", "singles near"}},
+	{"weight_loss_cosmetic", "Weight loss or cosmetic procedure (adults only)", "MEDIUM", []string{"weight loss", "slimming", "fat burner", "liposuction", "bbl", "skin bleaching"}},
+	{"financial_speculation", "Financial speculation or crypto (adults only)", "MEDIUM", []string{"crypto", "bitcoin", "forex", "binary options", "trading signals"}},
 }
 
 var blockedDestinationDomains atomic.Pointer[[]string]

@@ -42,6 +42,90 @@ func (_u *AdBoostUpdate) SetNillableStatus(v *adboost.Status) *AdBoostUpdate {
 	return _u
 }
 
+// SetDailyBudgetMinor sets the "daily_budget_minor" field.
+func (_u *AdBoostUpdate) SetDailyBudgetMinor(v int64) *AdBoostUpdate {
+	_u.mutation.ResetDailyBudgetMinor()
+	_u.mutation.SetDailyBudgetMinor(v)
+	return _u
+}
+
+// SetNillableDailyBudgetMinor sets the "daily_budget_minor" field if the given value is not nil.
+func (_u *AdBoostUpdate) SetNillableDailyBudgetMinor(v *int64) *AdBoostUpdate {
+	if v != nil {
+		_u.SetDailyBudgetMinor(*v)
+	}
+	return _u
+}
+
+// AddDailyBudgetMinor adds value to the "daily_budget_minor" field.
+func (_u *AdBoostUpdate) AddDailyBudgetMinor(v int64) *AdBoostUpdate {
+	_u.mutation.AddDailyBudgetMinor(v)
+	return _u
+}
+
+// SetDurationDays sets the "duration_days" field.
+func (_u *AdBoostUpdate) SetDurationDays(v int) *AdBoostUpdate {
+	_u.mutation.ResetDurationDays()
+	_u.mutation.SetDurationDays(v)
+	return _u
+}
+
+// SetNillableDurationDays sets the "duration_days" field if the given value is not nil.
+func (_u *AdBoostUpdate) SetNillableDurationDays(v *int) *AdBoostUpdate {
+	if v != nil {
+		_u.SetDurationDays(*v)
+	}
+	return _u
+}
+
+// AddDurationDays adds value to the "duration_days" field.
+func (_u *AdBoostUpdate) AddDurationDays(v int) *AdBoostUpdate {
+	_u.mutation.AddDurationDays(v)
+	return _u
+}
+
+// SetTotalBudgetMinor sets the "total_budget_minor" field.
+func (_u *AdBoostUpdate) SetTotalBudgetMinor(v int64) *AdBoostUpdate {
+	_u.mutation.ResetTotalBudgetMinor()
+	_u.mutation.SetTotalBudgetMinor(v)
+	return _u
+}
+
+// SetNillableTotalBudgetMinor sets the "total_budget_minor" field if the given value is not nil.
+func (_u *AdBoostUpdate) SetNillableTotalBudgetMinor(v *int64) *AdBoostUpdate {
+	if v != nil {
+		_u.SetTotalBudgetMinor(*v)
+	}
+	return _u
+}
+
+// AddTotalBudgetMinor adds value to the "total_budget_minor" field.
+func (_u *AdBoostUpdate) AddTotalBudgetMinor(v int64) *AdBoostUpdate {
+	_u.mutation.AddTotalBudgetMinor(v)
+	return _u
+}
+
+// SetAddedBudgetMinor sets the "added_budget_minor" field.
+func (_u *AdBoostUpdate) SetAddedBudgetMinor(v int64) *AdBoostUpdate {
+	_u.mutation.ResetAddedBudgetMinor()
+	_u.mutation.SetAddedBudgetMinor(v)
+	return _u
+}
+
+// SetNillableAddedBudgetMinor sets the "added_budget_minor" field if the given value is not nil.
+func (_u *AdBoostUpdate) SetNillableAddedBudgetMinor(v *int64) *AdBoostUpdate {
+	if v != nil {
+		_u.SetAddedBudgetMinor(*v)
+	}
+	return _u
+}
+
+// AddAddedBudgetMinor adds value to the "added_budget_minor" field.
+func (_u *AdBoostUpdate) AddAddedBudgetMinor(v int64) *AdBoostUpdate {
+	_u.mutation.AddAddedBudgetMinor(v)
+	return _u
+}
+
 // SetPaymentTopUpID sets the "payment_top_up_id" field.
 func (_u *AdBoostUpdate) SetPaymentTopUpID(v string) *AdBoostUpdate {
 	_u.mutation.SetPaymentTopUpID(v)
@@ -53,6 +137,26 @@ func (_u *AdBoostUpdate) SetNillablePaymentTopUpID(v *string) *AdBoostUpdate {
 	if v != nil {
 		_u.SetPaymentTopUpID(*v)
 	}
+	return _u
+}
+
+// SetScheduledStartAt sets the "scheduled_start_at" field.
+func (_u *AdBoostUpdate) SetScheduledStartAt(v time.Time) *AdBoostUpdate {
+	_u.mutation.SetScheduledStartAt(v)
+	return _u
+}
+
+// SetNillableScheduledStartAt sets the "scheduled_start_at" field if the given value is not nil.
+func (_u *AdBoostUpdate) SetNillableScheduledStartAt(v *time.Time) *AdBoostUpdate {
+	if v != nil {
+		_u.SetScheduledStartAt(*v)
+	}
+	return _u
+}
+
+// ClearScheduledStartAt clears the value of the "scheduled_start_at" field.
+func (_u *AdBoostUpdate) ClearScheduledStartAt() *AdBoostUpdate {
+	_u.mutation.ClearScheduledStartAt()
 	return _u
 }
 
@@ -192,8 +296,38 @@ func (_u *AdBoostUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if value, ok := _u.mutation.Status(); ok {
 		_spec.SetField(adboost.FieldStatus, field.TypeEnum, value)
 	}
+	if value, ok := _u.mutation.DailyBudgetMinor(); ok {
+		_spec.SetField(adboost.FieldDailyBudgetMinor, field.TypeInt64, value)
+	}
+	if value, ok := _u.mutation.AddedDailyBudgetMinor(); ok {
+		_spec.AddField(adboost.FieldDailyBudgetMinor, field.TypeInt64, value)
+	}
+	if value, ok := _u.mutation.DurationDays(); ok {
+		_spec.SetField(adboost.FieldDurationDays, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedDurationDays(); ok {
+		_spec.AddField(adboost.FieldDurationDays, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.TotalBudgetMinor(); ok {
+		_spec.SetField(adboost.FieldTotalBudgetMinor, field.TypeInt64, value)
+	}
+	if value, ok := _u.mutation.AddedTotalBudgetMinor(); ok {
+		_spec.AddField(adboost.FieldTotalBudgetMinor, field.TypeInt64, value)
+	}
+	if value, ok := _u.mutation.AddedBudgetMinor(); ok {
+		_spec.SetField(adboost.FieldAddedBudgetMinor, field.TypeInt64, value)
+	}
+	if value, ok := _u.mutation.AddedAddedBudgetMinor(); ok {
+		_spec.AddField(adboost.FieldAddedBudgetMinor, field.TypeInt64, value)
+	}
 	if value, ok := _u.mutation.PaymentTopUpID(); ok {
 		_spec.SetField(adboost.FieldPaymentTopUpID, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.ScheduledStartAt(); ok {
+		_spec.SetField(adboost.FieldScheduledStartAt, field.TypeTime, value)
+	}
+	if _u.mutation.ScheduledStartAtCleared() {
+		_spec.ClearField(adboost.FieldScheduledStartAt, field.TypeTime)
 	}
 	if value, ok := _u.mutation.StartsAt(); ok {
 		_spec.SetField(adboost.FieldStartsAt, field.TypeTime, value)
@@ -247,6 +381,90 @@ func (_u *AdBoostUpdateOne) SetNillableStatus(v *adboost.Status) *AdBoostUpdateO
 	return _u
 }
 
+// SetDailyBudgetMinor sets the "daily_budget_minor" field.
+func (_u *AdBoostUpdateOne) SetDailyBudgetMinor(v int64) *AdBoostUpdateOne {
+	_u.mutation.ResetDailyBudgetMinor()
+	_u.mutation.SetDailyBudgetMinor(v)
+	return _u
+}
+
+// SetNillableDailyBudgetMinor sets the "daily_budget_minor" field if the given value is not nil.
+func (_u *AdBoostUpdateOne) SetNillableDailyBudgetMinor(v *int64) *AdBoostUpdateOne {
+	if v != nil {
+		_u.SetDailyBudgetMinor(*v)
+	}
+	return _u
+}
+
+// AddDailyBudgetMinor adds value to the "daily_budget_minor" field.
+func (_u *AdBoostUpdateOne) AddDailyBudgetMinor(v int64) *AdBoostUpdateOne {
+	_u.mutation.AddDailyBudgetMinor(v)
+	return _u
+}
+
+// SetDurationDays sets the "duration_days" field.
+func (_u *AdBoostUpdateOne) SetDurationDays(v int) *AdBoostUpdateOne {
+	_u.mutation.ResetDurationDays()
+	_u.mutation.SetDurationDays(v)
+	return _u
+}
+
+// SetNillableDurationDays sets the "duration_days" field if the given value is not nil.
+func (_u *AdBoostUpdateOne) SetNillableDurationDays(v *int) *AdBoostUpdateOne {
+	if v != nil {
+		_u.SetDurationDays(*v)
+	}
+	return _u
+}
+
+// AddDurationDays adds value to the "duration_days" field.
+func (_u *AdBoostUpdateOne) AddDurationDays(v int) *AdBoostUpdateOne {
+	_u.mutation.AddDurationDays(v)
+	return _u
+}
+
+// SetTotalBudgetMinor sets the "total_budget_minor" field.
+func (_u *AdBoostUpdateOne) SetTotalBudgetMinor(v int64) *AdBoostUpdateOne {
+	_u.mutation.ResetTotalBudgetMinor()
+	_u.mutation.SetTotalBudgetMinor(v)
+	return _u
+}
+
+// SetNillableTotalBudgetMinor sets the "total_budget_minor" field if the given value is not nil.
+func (_u *AdBoostUpdateOne) SetNillableTotalBudgetMinor(v *int64) *AdBoostUpdateOne {
+	if v != nil {
+		_u.SetTotalBudgetMinor(*v)
+	}
+	return _u
+}
+
+// AddTotalBudgetMinor adds value to the "total_budget_minor" field.
+func (_u *AdBoostUpdateOne) AddTotalBudgetMinor(v int64) *AdBoostUpdateOne {
+	_u.mutation.AddTotalBudgetMinor(v)
+	return _u
+}
+
+// SetAddedBudgetMinor sets the "added_budget_minor" field.
+func (_u *AdBoostUpdateOne) SetAddedBudgetMinor(v int64) *AdBoostUpdateOne {
+	_u.mutation.ResetAddedBudgetMinor()
+	_u.mutation.SetAddedBudgetMinor(v)
+	return _u
+}
+
+// SetNillableAddedBudgetMinor sets the "added_budget_minor" field if the given value is not nil.
+func (_u *AdBoostUpdateOne) SetNillableAddedBudgetMinor(v *int64) *AdBoostUpdateOne {
+	if v != nil {
+		_u.SetAddedBudgetMinor(*v)
+	}
+	return _u
+}
+
+// AddAddedBudgetMinor adds value to the "added_budget_minor" field.
+func (_u *AdBoostUpdateOne) AddAddedBudgetMinor(v int64) *AdBoostUpdateOne {
+	_u.mutation.AddAddedBudgetMinor(v)
+	return _u
+}
+
 // SetPaymentTopUpID sets the "payment_top_up_id" field.
 func (_u *AdBoostUpdateOne) SetPaymentTopUpID(v string) *AdBoostUpdateOne {
 	_u.mutation.SetPaymentTopUpID(v)
@@ -258,6 +476,26 @@ func (_u *AdBoostUpdateOne) SetNillablePaymentTopUpID(v *string) *AdBoostUpdateO
 	if v != nil {
 		_u.SetPaymentTopUpID(*v)
 	}
+	return _u
+}
+
+// SetScheduledStartAt sets the "scheduled_start_at" field.
+func (_u *AdBoostUpdateOne) SetScheduledStartAt(v time.Time) *AdBoostUpdateOne {
+	_u.mutation.SetScheduledStartAt(v)
+	return _u
+}
+
+// SetNillableScheduledStartAt sets the "scheduled_start_at" field if the given value is not nil.
+func (_u *AdBoostUpdateOne) SetNillableScheduledStartAt(v *time.Time) *AdBoostUpdateOne {
+	if v != nil {
+		_u.SetScheduledStartAt(*v)
+	}
+	return _u
+}
+
+// ClearScheduledStartAt clears the value of the "scheduled_start_at" field.
+func (_u *AdBoostUpdateOne) ClearScheduledStartAt() *AdBoostUpdateOne {
+	_u.mutation.ClearScheduledStartAt()
 	return _u
 }
 
@@ -427,8 +665,38 @@ func (_u *AdBoostUpdateOne) sqlSave(ctx context.Context) (_node *AdBoost, err er
 	if value, ok := _u.mutation.Status(); ok {
 		_spec.SetField(adboost.FieldStatus, field.TypeEnum, value)
 	}
+	if value, ok := _u.mutation.DailyBudgetMinor(); ok {
+		_spec.SetField(adboost.FieldDailyBudgetMinor, field.TypeInt64, value)
+	}
+	if value, ok := _u.mutation.AddedDailyBudgetMinor(); ok {
+		_spec.AddField(adboost.FieldDailyBudgetMinor, field.TypeInt64, value)
+	}
+	if value, ok := _u.mutation.DurationDays(); ok {
+		_spec.SetField(adboost.FieldDurationDays, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedDurationDays(); ok {
+		_spec.AddField(adboost.FieldDurationDays, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.TotalBudgetMinor(); ok {
+		_spec.SetField(adboost.FieldTotalBudgetMinor, field.TypeInt64, value)
+	}
+	if value, ok := _u.mutation.AddedTotalBudgetMinor(); ok {
+		_spec.AddField(adboost.FieldTotalBudgetMinor, field.TypeInt64, value)
+	}
+	if value, ok := _u.mutation.AddedBudgetMinor(); ok {
+		_spec.SetField(adboost.FieldAddedBudgetMinor, field.TypeInt64, value)
+	}
+	if value, ok := _u.mutation.AddedAddedBudgetMinor(); ok {
+		_spec.AddField(adboost.FieldAddedBudgetMinor, field.TypeInt64, value)
+	}
 	if value, ok := _u.mutation.PaymentTopUpID(); ok {
 		_spec.SetField(adboost.FieldPaymentTopUpID, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.ScheduledStartAt(); ok {
+		_spec.SetField(adboost.FieldScheduledStartAt, field.TypeTime, value)
+	}
+	if _u.mutation.ScheduledStartAtCleared() {
+		_spec.ClearField(adboost.FieldScheduledStartAt, field.TypeTime)
 	}
 	if value, ok := _u.mutation.StartsAt(); ok {
 		_spec.SetField(adboost.FieldStartsAt, field.TypeTime, value)

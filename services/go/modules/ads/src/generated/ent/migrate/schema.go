@@ -32,6 +32,7 @@ var (
 		{Name: "format", Type: field.TypeString, Size: 20},
 		{Name: "creative", Type: field.TypeJSON, SchemaType: map[string]string{"postgres": "jsonb"}},
 		{Name: "auto_check_flags", Type: field.TypeJSON, SchemaType: map[string]string{"postgres": "jsonb"}},
+		{Name: "ad_category", Type: field.TypeString, Size: 40, Default: ""},
 		{Name: "updated_at", Type: field.TypeTime},
 	}
 	// AdsTable holds the schema information for the "ads" table.
@@ -272,20 +273,62 @@ var (
 			},
 		},
 	}
+	// AdBalanceWithdrawalsColumns holds the columns for the "ad_balance_withdrawals" table.
+	AdBalanceWithdrawalsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "account_id", Type: field.TypeUUID},
+		{Name: "user_id", Type: field.TypeUUID},
+		{Name: "idempotency_key", Type: field.TypeString, Size: 128},
+		{Name: "currency", Type: field.TypeString, Size: 3},
+		{Name: "gross_minor", Type: field.TypeInt64},
+		{Name: "fee_minor", Type: field.TypeInt64},
+		{Name: "net_minor", Type: field.TypeInt64},
+		{Name: "status", Type: field.TypeEnum, Enums: []string{"pending", "completed", "failed"}, Default: "pending"},
+		{Name: "failure_reason", Type: field.TypeString, Size: 300, Default: ""},
+		{Name: "completed_at", Type: field.TypeTime, Nullable: true},
+		{Name: "updated_at", Type: field.TypeTime},
+	}
+	// AdBalanceWithdrawalsTable holds the schema information for the "ad_balance_withdrawals" table.
+	AdBalanceWithdrawalsTable = &schema.Table{
+		Name:       "ad_balance_withdrawals",
+		Columns:    AdBalanceWithdrawalsColumns,
+		PrimaryKey: []*schema.Column{AdBalanceWithdrawalsColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "adbalancewithdrawal_user_id_idempotency_key",
+				Unique:  true,
+				Columns: []*schema.Column{AdBalanceWithdrawalsColumns[3], AdBalanceWithdrawalsColumns[4]},
+			},
+			{
+				Name:    "adbalancewithdrawal_status_created_at",
+				Unique:  false,
+				Columns: []*schema.Column{AdBalanceWithdrawalsColumns[9], AdBalanceWithdrawalsColumns[1]},
+			},
+			{
+				Name:    "adbalancewithdrawal_account_id_created_at",
+				Unique:  false,
+				Columns: []*schema.Column{AdBalanceWithdrawalsColumns[2], AdBalanceWithdrawalsColumns[1]},
+			},
+		},
+	}
 	// AdBoostsColumns holds the columns for the "ad_boosts" table.
 	AdBoostsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID},
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "user_id", Type: field.TypeUUID},
 		{Name: "post_id", Type: field.TypeString, Size: 80},
-		{Name: "goal", Type: field.TypeEnum, Enums: []string{"views", "profile_visits", "messages"}},
-		{Name: "status", Type: field.TypeEnum, Enums: []string{"pending_payment", "in_review", "active", "completed", "rejected", "cancelled"}, Default: "pending_payment"},
+		{Name: "destination_type", Type: field.TypeEnum, Enums: []string{"post", "profile", "store", "product"}, Default: "post"},
+		{Name: "goal", Type: field.TypeEnum, Enums: []string{"views", "profile_visits", "messages", "store_visits", "product_visits"}},
+		{Name: "status", Type: field.TypeEnum, Enums: []string{"pending_payment", "in_review", "active", "paused", "completed", "rejected", "cancelled"}, Default: "pending_payment"},
 		{Name: "audience", Type: field.TypeBytes, SchemaType: map[string]string{"postgres": "jsonb"}},
 		{Name: "currency", Type: field.TypeString, Size: 3},
+		{Name: "budget_type", Type: field.TypeEnum, Enums: []string{"daily", "total"}, Default: "daily"},
 		{Name: "daily_budget_minor", Type: field.TypeInt64},
 		{Name: "duration_days", Type: field.TypeInt},
 		{Name: "total_budget_minor", Type: field.TypeInt64},
-		{Name: "payment_method", Type: field.TypeEnum, Enums: []string{"wallet", "card", "balance", "free"}},
+		{Name: "added_budget_minor", Type: field.TypeInt64, Default: 0},
+		{Name: "payment_method", Type: field.TypeEnum, Enums: []string{"wallet", "card", "balance", "free", "ad_balance"}},
 		{Name: "payment_top_up_id", Type: field.TypeString, Size: 80, Default: ""},
 		{Name: "idempotency_key", Type: field.TypeString, Size: 128},
 		{Name: "request_hash", Type: field.TypeString, Size: 64},
@@ -293,6 +336,7 @@ var (
 		{Name: "campaign_id", Type: field.TypeUUID},
 		{Name: "ad_group_id", Type: field.TypeUUID},
 		{Name: "ad_id", Type: field.TypeUUID},
+		{Name: "scheduled_start_at", Type: field.TypeTime, Nullable: true},
 		{Name: "starts_at", Type: field.TypeTime, Nullable: true},
 		{Name: "ends_at", Type: field.TypeTime, Nullable: true},
 		{Name: "rejection_reason", Type: field.TypeString, Size: 600, Default: ""},
@@ -307,7 +351,7 @@ var (
 			{
 				Name:    "adboost_user_id_idempotency_key",
 				Unique:  true,
-				Columns: []*schema.Column{AdBoostsColumns[2], AdBoostsColumns[13]},
+				Columns: []*schema.Column{AdBoostsColumns[2], AdBoostsColumns[16]},
 			},
 			{
 				Name:    "adboost_user_id_created_at",
@@ -317,17 +361,62 @@ var (
 			{
 				Name:    "adboost_campaign_id",
 				Unique:  false,
-				Columns: []*schema.Column{AdBoostsColumns[16]},
+				Columns: []*schema.Column{AdBoostsColumns[19]},
 			},
 			{
 				Name:    "adboost_status_ends_at",
 				Unique:  false,
-				Columns: []*schema.Column{AdBoostsColumns[5], AdBoostsColumns[20]},
+				Columns: []*schema.Column{AdBoostsColumns[6], AdBoostsColumns[24]},
 			},
 			{
 				Name:    "adboost_payment_top_up_id",
 				Unique:  false,
-				Columns: []*schema.Column{AdBoostsColumns[12]},
+				Columns: []*schema.Column{AdBoostsColumns[15]},
+			},
+			{
+				Name:    "adboost_destination_type_post_id",
+				Unique:  false,
+				Columns: []*schema.Column{AdBoostsColumns[4], AdBoostsColumns[3]},
+			},
+		},
+	}
+	// AdBoostChangesColumns holds the columns for the "ad_boost_changes" table.
+	AdBoostChangesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "boost_id", Type: field.TypeUUID},
+		{Name: "user_id", Type: field.TypeUUID},
+		{Name: "idempotency_key", Type: field.TypeString, Size: 128},
+		{Name: "request_hash", Type: field.TypeString, Size: 64},
+		{Name: "extra_days", Type: field.TypeInt},
+		{Name: "new_daily_budget_minor", Type: field.TypeInt64},
+		{Name: "additional_minor", Type: field.TypeInt64},
+		{Name: "currency", Type: field.TypeString, Size: 3},
+		{Name: "payment_method", Type: field.TypeEnum, Enums: []string{"card", "ad_balance"}},
+		{Name: "status", Type: field.TypeEnum, Enums: []string{"pending_payment", "applied", "unapplied"}, Default: "pending_payment"},
+		{Name: "payment_top_up_id", Type: field.TypeString, Size: 80, Default: ""},
+		{Name: "applied_at", Type: field.TypeTime, Nullable: true},
+	}
+	// AdBoostChangesTable holds the schema information for the "ad_boost_changes" table.
+	AdBoostChangesTable = &schema.Table{
+		Name:       "ad_boost_changes",
+		Columns:    AdBoostChangesColumns,
+		PrimaryKey: []*schema.Column{AdBoostChangesColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "adboostchange_user_id_idempotency_key",
+				Unique:  true,
+				Columns: []*schema.Column{AdBoostChangesColumns[3], AdBoostChangesColumns[4]},
+			},
+			{
+				Name:    "adboostchange_boost_id",
+				Unique:  false,
+				Columns: []*schema.Column{AdBoostChangesColumns[2]},
+			},
+			{
+				Name:    "adboostchange_payment_top_up_id",
+				Unique:  false,
+				Columns: []*schema.Column{AdBoostChangesColumns[12]},
 			},
 		},
 	}
@@ -347,6 +436,7 @@ var (
 		{Name: "start_at", Type: field.TypeTime},
 		{Name: "end_at", Type: field.TypeTime, Nullable: true},
 		{Name: "created_by_user_id", Type: field.TypeUUID},
+		{Name: "ad_category", Type: field.TypeString, Size: 40, Default: "general"},
 		{Name: "updated_at", Type: field.TypeTime},
 	}
 	// AdCampaignsTable holds the schema information for the "ad_campaigns" table.
@@ -393,6 +483,36 @@ var (
 				Name:    "adcardstatsdaily_ad_id_day",
 				Unique:  false,
 				Columns: []*schema.Column{AdCardStatsDailiesColumns[4], AdCardStatsDailiesColumns[2]},
+			},
+		},
+	}
+	// AdCashbackSettingsColumns holds the columns for the "ad_cashback_settings" table.
+	AdCashbackSettingsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "user_id", Type: field.TypeUUID},
+		{Name: "enabled", Type: field.TypeBool, Default: false},
+		{Name: "percent", Type: field.TypeInt, Default: 10},
+		{Name: "reason", Type: field.TypeString, Size: 500, Default: ""},
+		{Name: "updated_by_staff_id", Type: field.TypeString, Size: 80, Default: ""},
+		{Name: "updated_by_name", Type: field.TypeString, Size: 120, Default: ""},
+		{Name: "updated_at", Type: field.TypeTime},
+	}
+	// AdCashbackSettingsTable holds the schema information for the "ad_cashback_settings" table.
+	AdCashbackSettingsTable = &schema.Table{
+		Name:       "ad_cashback_settings",
+		Columns:    AdCashbackSettingsColumns,
+		PrimaryKey: []*schema.Column{AdCashbackSettingsColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "adcashbacksetting_user_id",
+				Unique:  true,
+				Columns: []*schema.Column{AdCashbackSettingsColumns[2]},
+			},
+			{
+				Name:    "adcashbacksetting_enabled_updated_at",
+				Unique:  false,
+				Columns: []*schema.Column{AdCashbackSettingsColumns[3], AdCashbackSettingsColumns[8]},
 			},
 		},
 	}
@@ -535,6 +655,64 @@ var (
 		Columns:    AdCreatorProgramMembersColumns,
 		PrimaryKey: []*schema.Column{AdCreatorProgramMembersColumns[0]},
 	}
+	// AdCreditLotsColumns holds the columns for the "ad_credit_lots" table.
+	AdCreditLotsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "account_id", Type: field.TypeUUID},
+		{Name: "user_id", Type: field.TypeUUID},
+		{Name: "currency", Type: field.TypeString, Size: 3},
+		{Name: "source", Type: field.TypeEnum, Enums: []string{"admin_issued", "cashback", "premium_free_boost", "boost_refund", "legacy"}},
+		{Name: "original_minor", Type: field.TypeInt64},
+		{Name: "remaining_minor", Type: field.TypeInt64},
+		{Name: "expires_at", Type: field.TypeTime, Nullable: true},
+		{Name: "status", Type: field.TypeEnum, Enums: []string{"active", "spent", "expired", "revoked"}, Default: "active"},
+		{Name: "reason", Type: field.TypeString, Size: 500, Default: ""},
+		{Name: "reference", Type: field.TypeString, Size: 128},
+		{Name: "issued_by_staff_id", Type: field.TypeString, Size: 80, Default: ""},
+		{Name: "issued_by_name", Type: field.TypeString, Size: 120, Default: ""},
+		{Name: "boost_id", Type: field.TypeUUID, Nullable: true},
+		{Name: "spend_batch_id", Type: field.TypeUUID, Nullable: true},
+		{Name: "expired_minor", Type: field.TypeInt64, Default: 0},
+		{Name: "revoked_minor", Type: field.TypeInt64, Default: 0},
+		{Name: "revoked_at", Type: field.TypeTime, Nullable: true},
+		{Name: "revoked_by_staff_id", Type: field.TypeString, Size: 80, Default: ""},
+		{Name: "revoke_reason", Type: field.TypeString, Size: 500, Default: ""},
+		{Name: "updated_at", Type: field.TypeTime},
+	}
+	// AdCreditLotsTable holds the schema information for the "ad_credit_lots" table.
+	AdCreditLotsTable = &schema.Table{
+		Name:       "ad_credit_lots",
+		Columns:    AdCreditLotsColumns,
+		PrimaryKey: []*schema.Column{AdCreditLotsColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "adcreditlot_reference",
+				Unique:  true,
+				Columns: []*schema.Column{AdCreditLotsColumns[11]},
+			},
+			{
+				Name:    "adcreditlot_account_id_status_expires_at",
+				Unique:  false,
+				Columns: []*schema.Column{AdCreditLotsColumns[2], AdCreditLotsColumns[9], AdCreditLotsColumns[8]},
+			},
+			{
+				Name:    "adcreditlot_status_expires_at",
+				Unique:  false,
+				Columns: []*schema.Column{AdCreditLotsColumns[9], AdCreditLotsColumns[8]},
+			},
+			{
+				Name:    "adcreditlot_user_id_created_at",
+				Unique:  false,
+				Columns: []*schema.Column{AdCreditLotsColumns[3], AdCreditLotsColumns[1]},
+			},
+			{
+				Name:    "adcreditlot_boost_id",
+				Unique:  false,
+				Columns: []*schema.Column{AdCreditLotsColumns[14]},
+			},
+		},
+	}
 	// AdCustomAudiencesColumns holds the columns for the "ad_custom_audiences" table.
 	AdCustomAudiencesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID},
@@ -669,7 +847,7 @@ var (
 		{Name: "id", Type: field.TypeUUID},
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "account_id", Type: field.TypeUUID},
-		{Name: "type", Type: field.TypeEnum, Enums: []string{"top_up", "ad_spend", "credit_grant", "credit_spend", "refund", "card_charge", "ad_spend_debt"}},
+		{Name: "type", Type: field.TypeEnum, Enums: []string{"top_up", "ad_spend", "credit_grant", "credit_spend", "refund", "card_charge", "ad_spend_debt", "credit_expired", "credit_revoked", "cashback", "cashback_reversal", "withdrawal", "withdrawal_reversal", "spend_refund"}},
 		{Name: "amount_minor", Type: field.TypeInt64},
 		{Name: "currency", Type: field.TypeString, Size: 3},
 		{Name: "description", Type: field.TypeString, Size: 200},
@@ -952,6 +1130,9 @@ var (
 		{Name: "debited_minor", Type: field.TypeInt64},
 		{Name: "creator_share_micros", Type: field.TypeInt64},
 		{Name: "platform_share_micros", Type: field.TypeInt64},
+		{Name: "credit_used_minor", Type: field.TypeInt64, Default: 0},
+		{Name: "cashback_minor", Type: field.TypeInt64, Default: 0},
+		{Name: "refunded_minor", Type: field.TypeInt64, Default: 0},
 	}
 	// AdSpendBatchesTable holds the schema information for the "ad_spend_batches" table.
 	AdSpendBatchesTable = &schema.Table{
@@ -1088,15 +1269,19 @@ var (
 		AdActivityEntriesTable,
 		AdAudienceMembersTable,
 		AdAutomatedRulesTable,
+		AdBalanceWithdrawalsTable,
 		AdBoostsTable,
+		AdBoostChangesTable,
 		AdCampaignsTable,
 		AdCardStatsDailiesTable,
+		AdCashbackSettingsTable,
 		AdContentSignalsTable,
 		AdConversionsTable,
 		AdConversionEventsTable,
 		AdCreatorEarningsTable,
 		AdCreatorMonetisationHoldsTable,
 		AdCreatorProgramMembersTable,
+		AdCreditLotsTable,
 		AdCustomAudiencesTable,
 		AdExperimentsTable,
 		AdFreeBoostGrantsTable,
@@ -1119,6 +1304,10 @@ func init() {
 	AdAccountsTable.Annotation = &entsql.Annotation{}
 	AdAccountsTable.Annotation.Checks = map[string]string{
 		"ad_accounts_non_negative_balance": "balance_minor >= 0 AND credit_minor >= 0 AND amount_spent_micros >= 0 AND spend_carry_micros >= 0",
+	}
+	AdCreditLotsTable.Annotation = &entsql.Annotation{}
+	AdCreditLotsTable.Annotation.Checks = map[string]string{
+		"ad_credit_lots_amounts": "remaining_minor >= 0 AND remaining_minor <= original_minor AND original_minor > 0",
 	}
 	AdImpressionsTable.Annotation = &entsql.Annotation{}
 	AdImpressionsTable.Annotation.Checks = map[string]string{

@@ -21,6 +21,8 @@ const (
 	FieldUserID = "user_id"
 	// FieldPostID holds the string denoting the post_id field in the database.
 	FieldPostID = "post_id"
+	// FieldDestinationType holds the string denoting the destination_type field in the database.
+	FieldDestinationType = "destination_type"
 	// FieldGoal holds the string denoting the goal field in the database.
 	FieldGoal = "goal"
 	// FieldStatus holds the string denoting the status field in the database.
@@ -29,12 +31,16 @@ const (
 	FieldAudience = "audience"
 	// FieldCurrency holds the string denoting the currency field in the database.
 	FieldCurrency = "currency"
+	// FieldBudgetType holds the string denoting the budget_type field in the database.
+	FieldBudgetType = "budget_type"
 	// FieldDailyBudgetMinor holds the string denoting the daily_budget_minor field in the database.
 	FieldDailyBudgetMinor = "daily_budget_minor"
 	// FieldDurationDays holds the string denoting the duration_days field in the database.
 	FieldDurationDays = "duration_days"
 	// FieldTotalBudgetMinor holds the string denoting the total_budget_minor field in the database.
 	FieldTotalBudgetMinor = "total_budget_minor"
+	// FieldAddedBudgetMinor holds the string denoting the added_budget_minor field in the database.
+	FieldAddedBudgetMinor = "added_budget_minor"
 	// FieldPaymentMethod holds the string denoting the payment_method field in the database.
 	FieldPaymentMethod = "payment_method"
 	// FieldPaymentTopUpID holds the string denoting the payment_top_up_id field in the database.
@@ -51,6 +57,8 @@ const (
 	FieldAdGroupID = "ad_group_id"
 	// FieldAdID holds the string denoting the ad_id field in the database.
 	FieldAdID = "ad_id"
+	// FieldScheduledStartAt holds the string denoting the scheduled_start_at field in the database.
+	FieldScheduledStartAt = "scheduled_start_at"
 	// FieldStartsAt holds the string denoting the starts_at field in the database.
 	FieldStartsAt = "starts_at"
 	// FieldEndsAt holds the string denoting the ends_at field in the database.
@@ -69,13 +77,16 @@ var Columns = []string{
 	FieldCreatedAt,
 	FieldUserID,
 	FieldPostID,
+	FieldDestinationType,
 	FieldGoal,
 	FieldStatus,
 	FieldAudience,
 	FieldCurrency,
+	FieldBudgetType,
 	FieldDailyBudgetMinor,
 	FieldDurationDays,
 	FieldTotalBudgetMinor,
+	FieldAddedBudgetMinor,
 	FieldPaymentMethod,
 	FieldPaymentTopUpID,
 	FieldIdempotencyKey,
@@ -84,6 +95,7 @@ var Columns = []string{
 	FieldCampaignID,
 	FieldAdGroupID,
 	FieldAdID,
+	FieldScheduledStartAt,
 	FieldStartsAt,
 	FieldEndsAt,
 	FieldRejectionReason,
@@ -107,6 +119,8 @@ var (
 	PostIDValidator func(string) error
 	// CurrencyValidator is a validator for the "currency" field. It is called by the builders before save.
 	CurrencyValidator func(string) error
+	// DefaultAddedBudgetMinor holds the default value on creation for the "added_budget_minor" field.
+	DefaultAddedBudgetMinor int64
 	// DefaultPaymentTopUpID holds the default value on creation for the "payment_top_up_id" field.
 	DefaultPaymentTopUpID string
 	// PaymentTopUpIDValidator is a validator for the "payment_top_up_id" field. It is called by the builders before save.
@@ -127,6 +141,34 @@ var (
 	DefaultID func() uuid.UUID
 )
 
+// DestinationType defines the type for the "destination_type" enum field.
+type DestinationType string
+
+// DestinationTypePost is the default value of the DestinationType enum.
+const DefaultDestinationType = DestinationTypePost
+
+// DestinationType values.
+const (
+	DestinationTypePost    DestinationType = "post"
+	DestinationTypeProfile DestinationType = "profile"
+	DestinationTypeStore   DestinationType = "store"
+	DestinationTypeProduct DestinationType = "product"
+)
+
+func (dt DestinationType) String() string {
+	return string(dt)
+}
+
+// DestinationTypeValidator is a validator for the "destination_type" field enum values. It is called by the builders before save.
+func DestinationTypeValidator(dt DestinationType) error {
+	switch dt {
+	case DestinationTypePost, DestinationTypeProfile, DestinationTypeStore, DestinationTypeProduct:
+		return nil
+	default:
+		return fmt.Errorf("adboost: invalid enum value for destination_type field: %q", dt)
+	}
+}
+
 // Goal defines the type for the "goal" enum field.
 type Goal string
 
@@ -135,6 +177,8 @@ const (
 	GoalViews         Goal = "views"
 	GoalProfileVisits Goal = "profile_visits"
 	GoalMessages      Goal = "messages"
+	GoalStoreVisits   Goal = "store_visits"
+	GoalProductVisits Goal = "product_visits"
 )
 
 func (_go Goal) String() string {
@@ -144,7 +188,7 @@ func (_go Goal) String() string {
 // GoalValidator is a validator for the "goal" field enum values. It is called by the builders before save.
 func GoalValidator(_go Goal) error {
 	switch _go {
-	case GoalViews, GoalProfileVisits, GoalMessages:
+	case GoalViews, GoalProfileVisits, GoalMessages, GoalStoreVisits, GoalProductVisits:
 		return nil
 	default:
 		return fmt.Errorf("adboost: invalid enum value for goal field: %q", _go)
@@ -162,6 +206,7 @@ const (
 	StatusPendingPayment Status = "pending_payment"
 	StatusInReview       Status = "in_review"
 	StatusActive         Status = "active"
+	StatusPaused         Status = "paused"
 	StatusCompleted      Status = "completed"
 	StatusRejected       Status = "rejected"
 	StatusCancelled      Status = "cancelled"
@@ -174,10 +219,36 @@ func (s Status) String() string {
 // StatusValidator is a validator for the "status" field enum values. It is called by the builders before save.
 func StatusValidator(s Status) error {
 	switch s {
-	case StatusPendingPayment, StatusInReview, StatusActive, StatusCompleted, StatusRejected, StatusCancelled:
+	case StatusPendingPayment, StatusInReview, StatusActive, StatusPaused, StatusCompleted, StatusRejected, StatusCancelled:
 		return nil
 	default:
 		return fmt.Errorf("adboost: invalid enum value for status field: %q", s)
+	}
+}
+
+// BudgetType defines the type for the "budget_type" enum field.
+type BudgetType string
+
+// BudgetTypeDaily is the default value of the BudgetType enum.
+const DefaultBudgetType = BudgetTypeDaily
+
+// BudgetType values.
+const (
+	BudgetTypeDaily BudgetType = "daily"
+	BudgetTypeTotal BudgetType = "total"
+)
+
+func (bt BudgetType) String() string {
+	return string(bt)
+}
+
+// BudgetTypeValidator is a validator for the "budget_type" field enum values. It is called by the builders before save.
+func BudgetTypeValidator(bt BudgetType) error {
+	switch bt {
+	case BudgetTypeDaily, BudgetTypeTotal:
+		return nil
+	default:
+		return fmt.Errorf("adboost: invalid enum value for budget_type field: %q", bt)
 	}
 }
 
@@ -186,10 +257,11 @@ type PaymentMethod string
 
 // PaymentMethod values.
 const (
-	PaymentMethodWallet  PaymentMethod = "wallet"
-	PaymentMethodCard    PaymentMethod = "card"
-	PaymentMethodBalance PaymentMethod = "balance"
-	PaymentMethodFree    PaymentMethod = "free"
+	PaymentMethodWallet    PaymentMethod = "wallet"
+	PaymentMethodCard      PaymentMethod = "card"
+	PaymentMethodBalance   PaymentMethod = "balance"
+	PaymentMethodFree      PaymentMethod = "free"
+	PaymentMethodAdBalance PaymentMethod = "ad_balance"
 )
 
 func (pm PaymentMethod) String() string {
@@ -199,7 +271,7 @@ func (pm PaymentMethod) String() string {
 // PaymentMethodValidator is a validator for the "payment_method" field enum values. It is called by the builders before save.
 func PaymentMethodValidator(pm PaymentMethod) error {
 	switch pm {
-	case PaymentMethodWallet, PaymentMethodCard, PaymentMethodBalance, PaymentMethodFree:
+	case PaymentMethodWallet, PaymentMethodCard, PaymentMethodBalance, PaymentMethodFree, PaymentMethodAdBalance:
 		return nil
 	default:
 		return fmt.Errorf("adboost: invalid enum value for payment_method field: %q", pm)
@@ -229,6 +301,11 @@ func ByPostID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldPostID, opts...).ToFunc()
 }
 
+// ByDestinationType orders the results by the destination_type field.
+func ByDestinationType(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldDestinationType, opts...).ToFunc()
+}
+
 // ByGoal orders the results by the goal field.
 func ByGoal(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldGoal, opts...).ToFunc()
@@ -244,6 +321,11 @@ func ByCurrency(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldCurrency, opts...).ToFunc()
 }
 
+// ByBudgetType orders the results by the budget_type field.
+func ByBudgetType(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldBudgetType, opts...).ToFunc()
+}
+
 // ByDailyBudgetMinor orders the results by the daily_budget_minor field.
 func ByDailyBudgetMinor(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldDailyBudgetMinor, opts...).ToFunc()
@@ -257,6 +339,11 @@ func ByDurationDays(opts ...sql.OrderTermOption) OrderOption {
 // ByTotalBudgetMinor orders the results by the total_budget_minor field.
 func ByTotalBudgetMinor(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldTotalBudgetMinor, opts...).ToFunc()
+}
+
+// ByAddedBudgetMinor orders the results by the added_budget_minor field.
+func ByAddedBudgetMinor(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldAddedBudgetMinor, opts...).ToFunc()
 }
 
 // ByPaymentMethod orders the results by the payment_method field.
@@ -297,6 +384,11 @@ func ByAdGroupID(opts ...sql.OrderTermOption) OrderOption {
 // ByAdID orders the results by the ad_id field.
 func ByAdID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldAdID, opts...).ToFunc()
+}
+
+// ByScheduledStartAt orders the results by the scheduled_start_at field.
+func ByScheduledStartAt(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldScheduledStartAt, opts...).ToFunc()
 }
 
 // ByStartsAt orders the results by the starts_at field.

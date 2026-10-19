@@ -33,6 +33,7 @@ import (
 	"zudomart/platform/jwtauth"
 	"zudomart/platform/postgres"
 	"zudomart/platform/servicemodule"
+	"zudomart/platform/staffauth"
 )
 
 const (
@@ -155,8 +156,9 @@ func startAdsAgainstFreshSchema(t *testing.T, options ...harnessOption) *harness
 	}
 	dependencies := servicemodule.Dependencies{Logger: slog.New(slog.NewTextHandler(logSink, nil)), Health: health.NewRegistryForService("ads-test")}
 	collaborators := src.Collaborators{
-		Publisher: h.publisher, Consent: integrations.StaticConsentReader{Enabled: true}, Countries: integrations.StaticProfileCountryReader{Country: "NG"}, Users: h.users, Now: h.clock.Now,
+		Publisher: h.publisher, Consent: integrations.StaticConsentReader{Enabled: true}, ViewerAge: integrations.StaticViewerAgeReader{Adult: true}, Countries: integrations.StaticProfileCountryReader{Country: "NG"}, Users: h.users, Now: h.clock.Now,
 		Access: jwtauth.NewAccessTokenVerifierFromKeySetProvider(provider, testIssuer, testAudience), Staff: jwtauth.NewAccessTokenVerifierFromKeySetProvider(provider, testIssuer, testAudience),
+		StaffStepUp: jwtauth.NewAccessTokenVerifierFromKeySetProvider(provider, testIssuer, staffauth.StepUpAudience),
 		Pctr: integrations.DeterministicPctrScorer{BaselinePpm: 15_000}, Fraud: integrations.NoFraudModel{},
 	}
 	for _, option := range options {

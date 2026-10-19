@@ -62,6 +62,8 @@ type AdForReview struct {
 	TotalBudget    *types.Money          `json:"totalBudget"`
 	Schedule       ReviewSchedule        `json:"schedule"`
 	AutoCheckFlags []types.AutoCheckFlag `json:"autoCheckFlags"`
+	AdCategory     string                `json:"adCategory"`
+	AgeRestricted  bool                  `json:"ageRestricted"`
 	Status         string                `json:"status"`
 	SubmittedAt    string                `json:"submittedAt"`
 	Decision       *ReviewDecision       `json:"decision"`
@@ -100,6 +102,7 @@ type PolicyCategory struct {
 type ApproveRequest struct {
 	Reason                string `json:"reason"`
 	OverrideCriticalFlags bool   `json:"overrideCriticalFlags"`
+	AdCategory            string `json:"adCategory"`
 }
 
 type RejectRequest struct {

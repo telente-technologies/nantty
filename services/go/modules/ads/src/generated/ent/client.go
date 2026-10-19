@@ -18,15 +18,19 @@ import (
 	"zudomart/modules/ads/src/generated/ent/adactivityentry"
 	"zudomart/modules/ads/src/generated/ent/adaudiencemember"
 	"zudomart/modules/ads/src/generated/ent/adautomatedrule"
+	"zudomart/modules/ads/src/generated/ent/adbalancewithdrawal"
 	"zudomart/modules/ads/src/generated/ent/adboost"
+	"zudomart/modules/ads/src/generated/ent/adboostchange"
 	"zudomart/modules/ads/src/generated/ent/adcampaign"
 	"zudomart/modules/ads/src/generated/ent/adcardstatsdaily"
+	"zudomart/modules/ads/src/generated/ent/adcashbacksetting"
 	"zudomart/modules/ads/src/generated/ent/adcontentsignal"
 	"zudomart/modules/ads/src/generated/ent/adconversion"
 	"zudomart/modules/ads/src/generated/ent/adconversionevent"
 	"zudomart/modules/ads/src/generated/ent/adcreatorearning"
 	"zudomart/modules/ads/src/generated/ent/adcreatormonetisationhold"
 	"zudomart/modules/ads/src/generated/ent/adcreatorprogrammember"
+	"zudomart/modules/ads/src/generated/ent/adcreditlot"
 	"zudomart/modules/ads/src/generated/ent/adcustomaudience"
 	"zudomart/modules/ads/src/generated/ent/adexperiment"
 	"zudomart/modules/ads/src/generated/ent/adfreeboostgrant"
@@ -70,12 +74,18 @@ type Client struct {
 	AdAudienceMember *AdAudienceMemberClient
 	// AdAutomatedRule is the client for interacting with the AdAutomatedRule builders.
 	AdAutomatedRule *AdAutomatedRuleClient
+	// AdBalanceWithdrawal is the client for interacting with the AdBalanceWithdrawal builders.
+	AdBalanceWithdrawal *AdBalanceWithdrawalClient
 	// AdBoost is the client for interacting with the AdBoost builders.
 	AdBoost *AdBoostClient
+	// AdBoostChange is the client for interacting with the AdBoostChange builders.
+	AdBoostChange *AdBoostChangeClient
 	// AdCampaign is the client for interacting with the AdCampaign builders.
 	AdCampaign *AdCampaignClient
 	// AdCardStatsDaily is the client for interacting with the AdCardStatsDaily builders.
 	AdCardStatsDaily *AdCardStatsDailyClient
+	// AdCashbackSetting is the client for interacting with the AdCashbackSetting builders.
+	AdCashbackSetting *AdCashbackSettingClient
 	// AdContentSignal is the client for interacting with the AdContentSignal builders.
 	AdContentSignal *AdContentSignalClient
 	// AdConversion is the client for interacting with the AdConversion builders.
@@ -88,6 +98,8 @@ type Client struct {
 	AdCreatorMonetisationHold *AdCreatorMonetisationHoldClient
 	// AdCreatorProgramMember is the client for interacting with the AdCreatorProgramMember builders.
 	AdCreatorProgramMember *AdCreatorProgramMemberClient
+	// AdCreditLot is the client for interacting with the AdCreditLot builders.
+	AdCreditLot *AdCreditLotClient
 	// AdCustomAudience is the client for interacting with the AdCustomAudience builders.
 	AdCustomAudience *AdCustomAudienceClient
 	// AdExperiment is the client for interacting with the AdExperiment builders.
@@ -136,15 +148,19 @@ func (c *Client) init() {
 	c.AdActivityEntry = NewAdActivityEntryClient(c.config)
 	c.AdAudienceMember = NewAdAudienceMemberClient(c.config)
 	c.AdAutomatedRule = NewAdAutomatedRuleClient(c.config)
+	c.AdBalanceWithdrawal = NewAdBalanceWithdrawalClient(c.config)
 	c.AdBoost = NewAdBoostClient(c.config)
+	c.AdBoostChange = NewAdBoostChangeClient(c.config)
 	c.AdCampaign = NewAdCampaignClient(c.config)
 	c.AdCardStatsDaily = NewAdCardStatsDailyClient(c.config)
+	c.AdCashbackSetting = NewAdCashbackSettingClient(c.config)
 	c.AdContentSignal = NewAdContentSignalClient(c.config)
 	c.AdConversion = NewAdConversionClient(c.config)
 	c.AdConversionEvent = NewAdConversionEventClient(c.config)
 	c.AdCreatorEarning = NewAdCreatorEarningClient(c.config)
 	c.AdCreatorMonetisationHold = NewAdCreatorMonetisationHoldClient(c.config)
 	c.AdCreatorProgramMember = NewAdCreatorProgramMemberClient(c.config)
+	c.AdCreditLot = NewAdCreditLotClient(c.config)
 	c.AdCustomAudience = NewAdCustomAudienceClient(c.config)
 	c.AdExperiment = NewAdExperimentClient(c.config)
 	c.AdFreeBoostGrant = NewAdFreeBoostGrantClient(c.config)
@@ -259,15 +275,19 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		AdActivityEntry:           NewAdActivityEntryClient(cfg),
 		AdAudienceMember:          NewAdAudienceMemberClient(cfg),
 		AdAutomatedRule:           NewAdAutomatedRuleClient(cfg),
+		AdBalanceWithdrawal:       NewAdBalanceWithdrawalClient(cfg),
 		AdBoost:                   NewAdBoostClient(cfg),
+		AdBoostChange:             NewAdBoostChangeClient(cfg),
 		AdCampaign:                NewAdCampaignClient(cfg),
 		AdCardStatsDaily:          NewAdCardStatsDailyClient(cfg),
+		AdCashbackSetting:         NewAdCashbackSettingClient(cfg),
 		AdContentSignal:           NewAdContentSignalClient(cfg),
 		AdConversion:              NewAdConversionClient(cfg),
 		AdConversionEvent:         NewAdConversionEventClient(cfg),
 		AdCreatorEarning:          NewAdCreatorEarningClient(cfg),
 		AdCreatorMonetisationHold: NewAdCreatorMonetisationHoldClient(cfg),
 		AdCreatorProgramMember:    NewAdCreatorProgramMemberClient(cfg),
+		AdCreditLot:               NewAdCreditLotClient(cfg),
 		AdCustomAudience:          NewAdCustomAudienceClient(cfg),
 		AdExperiment:              NewAdExperimentClient(cfg),
 		AdFreeBoostGrant:          NewAdFreeBoostGrantClient(cfg),
@@ -309,15 +329,19 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		AdActivityEntry:           NewAdActivityEntryClient(cfg),
 		AdAudienceMember:          NewAdAudienceMemberClient(cfg),
 		AdAutomatedRule:           NewAdAutomatedRuleClient(cfg),
+		AdBalanceWithdrawal:       NewAdBalanceWithdrawalClient(cfg),
 		AdBoost:                   NewAdBoostClient(cfg),
+		AdBoostChange:             NewAdBoostChangeClient(cfg),
 		AdCampaign:                NewAdCampaignClient(cfg),
 		AdCardStatsDaily:          NewAdCardStatsDailyClient(cfg),
+		AdCashbackSetting:         NewAdCashbackSettingClient(cfg),
 		AdContentSignal:           NewAdContentSignalClient(cfg),
 		AdConversion:              NewAdConversionClient(cfg),
 		AdConversionEvent:         NewAdConversionEventClient(cfg),
 		AdCreatorEarning:          NewAdCreatorEarningClient(cfg),
 		AdCreatorMonetisationHold: NewAdCreatorMonetisationHoldClient(cfg),
 		AdCreatorProgramMember:    NewAdCreatorProgramMemberClient(cfg),
+		AdCreditLot:               NewAdCreditLotClient(cfg),
 		AdCustomAudience:          NewAdCustomAudienceClient(cfg),
 		AdExperiment:              NewAdExperimentClient(cfg),
 		AdFreeBoostGrant:          NewAdFreeBoostGrantClient(cfg),
@@ -363,9 +387,10 @@ func (c *Client) Close() error {
 func (c *Client) Use(hooks ...Hook) {
 	for _, n := range []interface{ Use(...Hook) }{
 		c.Ad, c.AdAccount, c.AdAccountInvite, c.AdAccountMember, c.AdActivityEntry,
-		c.AdAudienceMember, c.AdAutomatedRule, c.AdBoost, c.AdCampaign,
-		c.AdCardStatsDaily, c.AdContentSignal, c.AdConversion, c.AdConversionEvent,
-		c.AdCreatorEarning, c.AdCreatorMonetisationHold, c.AdCreatorProgramMember,
+		c.AdAudienceMember, c.AdAutomatedRule, c.AdBalanceWithdrawal, c.AdBoost,
+		c.AdBoostChange, c.AdCampaign, c.AdCardStatsDaily, c.AdCashbackSetting,
+		c.AdContentSignal, c.AdConversion, c.AdConversionEvent, c.AdCreatorEarning,
+		c.AdCreatorMonetisationHold, c.AdCreatorProgramMember, c.AdCreditLot,
 		c.AdCustomAudience, c.AdExperiment, c.AdFreeBoostGrant, c.AdFrequencyPolicy,
 		c.AdFundsTransaction, c.AdGroup, c.AdImpression, c.AdMedia, c.AdPolicyCategory,
 		c.AdPoolDaily, c.AdScheduledReport, c.AdSpendBatch, c.AdStatsDaily, c.AdTopUp,
@@ -380,9 +405,10 @@ func (c *Client) Use(hooks ...Hook) {
 func (c *Client) Intercept(interceptors ...Interceptor) {
 	for _, n := range []interface{ Intercept(...Interceptor) }{
 		c.Ad, c.AdAccount, c.AdAccountInvite, c.AdAccountMember, c.AdActivityEntry,
-		c.AdAudienceMember, c.AdAutomatedRule, c.AdBoost, c.AdCampaign,
-		c.AdCardStatsDaily, c.AdContentSignal, c.AdConversion, c.AdConversionEvent,
-		c.AdCreatorEarning, c.AdCreatorMonetisationHold, c.AdCreatorProgramMember,
+		c.AdAudienceMember, c.AdAutomatedRule, c.AdBalanceWithdrawal, c.AdBoost,
+		c.AdBoostChange, c.AdCampaign, c.AdCardStatsDaily, c.AdCashbackSetting,
+		c.AdContentSignal, c.AdConversion, c.AdConversionEvent, c.AdCreatorEarning,
+		c.AdCreatorMonetisationHold, c.AdCreatorProgramMember, c.AdCreditLot,
 		c.AdCustomAudience, c.AdExperiment, c.AdFreeBoostGrant, c.AdFrequencyPolicy,
 		c.AdFundsTransaction, c.AdGroup, c.AdImpression, c.AdMedia, c.AdPolicyCategory,
 		c.AdPoolDaily, c.AdScheduledReport, c.AdSpendBatch, c.AdStatsDaily, c.AdTopUp,
@@ -409,12 +435,18 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.AdAudienceMember.mutate(ctx, m)
 	case *AdAutomatedRuleMutation:
 		return c.AdAutomatedRule.mutate(ctx, m)
+	case *AdBalanceWithdrawalMutation:
+		return c.AdBalanceWithdrawal.mutate(ctx, m)
 	case *AdBoostMutation:
 		return c.AdBoost.mutate(ctx, m)
+	case *AdBoostChangeMutation:
+		return c.AdBoostChange.mutate(ctx, m)
 	case *AdCampaignMutation:
 		return c.AdCampaign.mutate(ctx, m)
 	case *AdCardStatsDailyMutation:
 		return c.AdCardStatsDaily.mutate(ctx, m)
+	case *AdCashbackSettingMutation:
+		return c.AdCashbackSetting.mutate(ctx, m)
 	case *AdContentSignalMutation:
 		return c.AdContentSignal.mutate(ctx, m)
 	case *AdConversionMutation:
@@ -427,6 +459,8 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.AdCreatorMonetisationHold.mutate(ctx, m)
 	case *AdCreatorProgramMemberMutation:
 		return c.AdCreatorProgramMember.mutate(ctx, m)
+	case *AdCreditLotMutation:
+		return c.AdCreditLot.mutate(ctx, m)
 	case *AdCustomAudienceMutation:
 		return c.AdCustomAudience.mutate(ctx, m)
 	case *AdExperimentMutation:
@@ -1393,6 +1427,139 @@ func (c *AdAutomatedRuleClient) mutate(ctx context.Context, m *AdAutomatedRuleMu
 	}
 }
 
+// AdBalanceWithdrawalClient is a client for the AdBalanceWithdrawal schema.
+type AdBalanceWithdrawalClient struct {
+	config
+}
+
+// NewAdBalanceWithdrawalClient returns a client for the AdBalanceWithdrawal from the given config.
+func NewAdBalanceWithdrawalClient(c config) *AdBalanceWithdrawalClient {
+	return &AdBalanceWithdrawalClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `adbalancewithdrawal.Hooks(f(g(h())))`.
+func (c *AdBalanceWithdrawalClient) Use(hooks ...Hook) {
+	c.hooks.AdBalanceWithdrawal = append(c.hooks.AdBalanceWithdrawal, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `adbalancewithdrawal.Intercept(f(g(h())))`.
+func (c *AdBalanceWithdrawalClient) Intercept(interceptors ...Interceptor) {
+	c.inters.AdBalanceWithdrawal = append(c.inters.AdBalanceWithdrawal, interceptors...)
+}
+
+// Create returns a builder for creating a AdBalanceWithdrawal entity.
+func (c *AdBalanceWithdrawalClient) Create() *AdBalanceWithdrawalCreate {
+	mutation := newAdBalanceWithdrawalMutation(c.config, OpCreate)
+	return &AdBalanceWithdrawalCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of AdBalanceWithdrawal entities.
+func (c *AdBalanceWithdrawalClient) CreateBulk(builders ...*AdBalanceWithdrawalCreate) *AdBalanceWithdrawalCreateBulk {
+	return &AdBalanceWithdrawalCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *AdBalanceWithdrawalClient) MapCreateBulk(slice any, setFunc func(*AdBalanceWithdrawalCreate, int)) *AdBalanceWithdrawalCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &AdBalanceWithdrawalCreateBulk{err: fmt.Errorf("calling to AdBalanceWithdrawalClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*AdBalanceWithdrawalCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &AdBalanceWithdrawalCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for AdBalanceWithdrawal.
+func (c *AdBalanceWithdrawalClient) Update() *AdBalanceWithdrawalUpdate {
+	mutation := newAdBalanceWithdrawalMutation(c.config, OpUpdate)
+	return &AdBalanceWithdrawalUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *AdBalanceWithdrawalClient) UpdateOne(_m *AdBalanceWithdrawal) *AdBalanceWithdrawalUpdateOne {
+	mutation := newAdBalanceWithdrawalMutation(c.config, OpUpdateOne, withAdBalanceWithdrawal(_m))
+	return &AdBalanceWithdrawalUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *AdBalanceWithdrawalClient) UpdateOneID(id uuid.UUID) *AdBalanceWithdrawalUpdateOne {
+	mutation := newAdBalanceWithdrawalMutation(c.config, OpUpdateOne, withAdBalanceWithdrawalID(id))
+	return &AdBalanceWithdrawalUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for AdBalanceWithdrawal.
+func (c *AdBalanceWithdrawalClient) Delete() *AdBalanceWithdrawalDelete {
+	mutation := newAdBalanceWithdrawalMutation(c.config, OpDelete)
+	return &AdBalanceWithdrawalDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *AdBalanceWithdrawalClient) DeleteOne(_m *AdBalanceWithdrawal) *AdBalanceWithdrawalDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *AdBalanceWithdrawalClient) DeleteOneID(id uuid.UUID) *AdBalanceWithdrawalDeleteOne {
+	builder := c.Delete().Where(adbalancewithdrawal.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &AdBalanceWithdrawalDeleteOne{builder}
+}
+
+// Query returns a query builder for AdBalanceWithdrawal.
+func (c *AdBalanceWithdrawalClient) Query() *AdBalanceWithdrawalQuery {
+	return &AdBalanceWithdrawalQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeAdBalanceWithdrawal},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a AdBalanceWithdrawal entity by its id.
+func (c *AdBalanceWithdrawalClient) Get(ctx context.Context, id uuid.UUID) (*AdBalanceWithdrawal, error) {
+	return c.Query().Where(adbalancewithdrawal.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *AdBalanceWithdrawalClient) GetX(ctx context.Context, id uuid.UUID) *AdBalanceWithdrawal {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *AdBalanceWithdrawalClient) Hooks() []Hook {
+	return c.hooks.AdBalanceWithdrawal
+}
+
+// Interceptors returns the client interceptors.
+func (c *AdBalanceWithdrawalClient) Interceptors() []Interceptor {
+	return c.inters.AdBalanceWithdrawal
+}
+
+func (c *AdBalanceWithdrawalClient) mutate(ctx context.Context, m *AdBalanceWithdrawalMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&AdBalanceWithdrawalCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&AdBalanceWithdrawalUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&AdBalanceWithdrawalUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&AdBalanceWithdrawalDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown AdBalanceWithdrawal mutation op: %q", m.Op())
+	}
+}
+
 // AdBoostClient is a client for the AdBoost schema.
 type AdBoostClient struct {
 	config
@@ -1523,6 +1690,139 @@ func (c *AdBoostClient) mutate(ctx context.Context, m *AdBoostMutation) (Value, 
 		return (&AdBoostDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
 		return nil, fmt.Errorf("ent: unknown AdBoost mutation op: %q", m.Op())
+	}
+}
+
+// AdBoostChangeClient is a client for the AdBoostChange schema.
+type AdBoostChangeClient struct {
+	config
+}
+
+// NewAdBoostChangeClient returns a client for the AdBoostChange from the given config.
+func NewAdBoostChangeClient(c config) *AdBoostChangeClient {
+	return &AdBoostChangeClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `adboostchange.Hooks(f(g(h())))`.
+func (c *AdBoostChangeClient) Use(hooks ...Hook) {
+	c.hooks.AdBoostChange = append(c.hooks.AdBoostChange, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `adboostchange.Intercept(f(g(h())))`.
+func (c *AdBoostChangeClient) Intercept(interceptors ...Interceptor) {
+	c.inters.AdBoostChange = append(c.inters.AdBoostChange, interceptors...)
+}
+
+// Create returns a builder for creating a AdBoostChange entity.
+func (c *AdBoostChangeClient) Create() *AdBoostChangeCreate {
+	mutation := newAdBoostChangeMutation(c.config, OpCreate)
+	return &AdBoostChangeCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of AdBoostChange entities.
+func (c *AdBoostChangeClient) CreateBulk(builders ...*AdBoostChangeCreate) *AdBoostChangeCreateBulk {
+	return &AdBoostChangeCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *AdBoostChangeClient) MapCreateBulk(slice any, setFunc func(*AdBoostChangeCreate, int)) *AdBoostChangeCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &AdBoostChangeCreateBulk{err: fmt.Errorf("calling to AdBoostChangeClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*AdBoostChangeCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &AdBoostChangeCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for AdBoostChange.
+func (c *AdBoostChangeClient) Update() *AdBoostChangeUpdate {
+	mutation := newAdBoostChangeMutation(c.config, OpUpdate)
+	return &AdBoostChangeUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *AdBoostChangeClient) UpdateOne(_m *AdBoostChange) *AdBoostChangeUpdateOne {
+	mutation := newAdBoostChangeMutation(c.config, OpUpdateOne, withAdBoostChange(_m))
+	return &AdBoostChangeUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *AdBoostChangeClient) UpdateOneID(id uuid.UUID) *AdBoostChangeUpdateOne {
+	mutation := newAdBoostChangeMutation(c.config, OpUpdateOne, withAdBoostChangeID(id))
+	return &AdBoostChangeUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for AdBoostChange.
+func (c *AdBoostChangeClient) Delete() *AdBoostChangeDelete {
+	mutation := newAdBoostChangeMutation(c.config, OpDelete)
+	return &AdBoostChangeDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *AdBoostChangeClient) DeleteOne(_m *AdBoostChange) *AdBoostChangeDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *AdBoostChangeClient) DeleteOneID(id uuid.UUID) *AdBoostChangeDeleteOne {
+	builder := c.Delete().Where(adboostchange.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &AdBoostChangeDeleteOne{builder}
+}
+
+// Query returns a query builder for AdBoostChange.
+func (c *AdBoostChangeClient) Query() *AdBoostChangeQuery {
+	return &AdBoostChangeQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeAdBoostChange},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a AdBoostChange entity by its id.
+func (c *AdBoostChangeClient) Get(ctx context.Context, id uuid.UUID) (*AdBoostChange, error) {
+	return c.Query().Where(adboostchange.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *AdBoostChangeClient) GetX(ctx context.Context, id uuid.UUID) *AdBoostChange {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *AdBoostChangeClient) Hooks() []Hook {
+	return c.hooks.AdBoostChange
+}
+
+// Interceptors returns the client interceptors.
+func (c *AdBoostChangeClient) Interceptors() []Interceptor {
+	return c.inters.AdBoostChange
+}
+
+func (c *AdBoostChangeClient) mutate(ctx context.Context, m *AdBoostChangeMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&AdBoostChangeCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&AdBoostChangeUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&AdBoostChangeUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&AdBoostChangeDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown AdBoostChange mutation op: %q", m.Op())
 	}
 }
 
@@ -1789,6 +2089,139 @@ func (c *AdCardStatsDailyClient) mutate(ctx context.Context, m *AdCardStatsDaily
 		return (&AdCardStatsDailyDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
 		return nil, fmt.Errorf("ent: unknown AdCardStatsDaily mutation op: %q", m.Op())
+	}
+}
+
+// AdCashbackSettingClient is a client for the AdCashbackSetting schema.
+type AdCashbackSettingClient struct {
+	config
+}
+
+// NewAdCashbackSettingClient returns a client for the AdCashbackSetting from the given config.
+func NewAdCashbackSettingClient(c config) *AdCashbackSettingClient {
+	return &AdCashbackSettingClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `adcashbacksetting.Hooks(f(g(h())))`.
+func (c *AdCashbackSettingClient) Use(hooks ...Hook) {
+	c.hooks.AdCashbackSetting = append(c.hooks.AdCashbackSetting, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `adcashbacksetting.Intercept(f(g(h())))`.
+func (c *AdCashbackSettingClient) Intercept(interceptors ...Interceptor) {
+	c.inters.AdCashbackSetting = append(c.inters.AdCashbackSetting, interceptors...)
+}
+
+// Create returns a builder for creating a AdCashbackSetting entity.
+func (c *AdCashbackSettingClient) Create() *AdCashbackSettingCreate {
+	mutation := newAdCashbackSettingMutation(c.config, OpCreate)
+	return &AdCashbackSettingCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of AdCashbackSetting entities.
+func (c *AdCashbackSettingClient) CreateBulk(builders ...*AdCashbackSettingCreate) *AdCashbackSettingCreateBulk {
+	return &AdCashbackSettingCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *AdCashbackSettingClient) MapCreateBulk(slice any, setFunc func(*AdCashbackSettingCreate, int)) *AdCashbackSettingCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &AdCashbackSettingCreateBulk{err: fmt.Errorf("calling to AdCashbackSettingClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*AdCashbackSettingCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &AdCashbackSettingCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for AdCashbackSetting.
+func (c *AdCashbackSettingClient) Update() *AdCashbackSettingUpdate {
+	mutation := newAdCashbackSettingMutation(c.config, OpUpdate)
+	return &AdCashbackSettingUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *AdCashbackSettingClient) UpdateOne(_m *AdCashbackSetting) *AdCashbackSettingUpdateOne {
+	mutation := newAdCashbackSettingMutation(c.config, OpUpdateOne, withAdCashbackSetting(_m))
+	return &AdCashbackSettingUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *AdCashbackSettingClient) UpdateOneID(id uuid.UUID) *AdCashbackSettingUpdateOne {
+	mutation := newAdCashbackSettingMutation(c.config, OpUpdateOne, withAdCashbackSettingID(id))
+	return &AdCashbackSettingUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for AdCashbackSetting.
+func (c *AdCashbackSettingClient) Delete() *AdCashbackSettingDelete {
+	mutation := newAdCashbackSettingMutation(c.config, OpDelete)
+	return &AdCashbackSettingDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *AdCashbackSettingClient) DeleteOne(_m *AdCashbackSetting) *AdCashbackSettingDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *AdCashbackSettingClient) DeleteOneID(id uuid.UUID) *AdCashbackSettingDeleteOne {
+	builder := c.Delete().Where(adcashbacksetting.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &AdCashbackSettingDeleteOne{builder}
+}
+
+// Query returns a query builder for AdCashbackSetting.
+func (c *AdCashbackSettingClient) Query() *AdCashbackSettingQuery {
+	return &AdCashbackSettingQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeAdCashbackSetting},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a AdCashbackSetting entity by its id.
+func (c *AdCashbackSettingClient) Get(ctx context.Context, id uuid.UUID) (*AdCashbackSetting, error) {
+	return c.Query().Where(adcashbacksetting.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *AdCashbackSettingClient) GetX(ctx context.Context, id uuid.UUID) *AdCashbackSetting {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *AdCashbackSettingClient) Hooks() []Hook {
+	return c.hooks.AdCashbackSetting
+}
+
+// Interceptors returns the client interceptors.
+func (c *AdCashbackSettingClient) Interceptors() []Interceptor {
+	return c.inters.AdCashbackSetting
+}
+
+func (c *AdCashbackSettingClient) mutate(ctx context.Context, m *AdCashbackSettingMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&AdCashbackSettingCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&AdCashbackSettingUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&AdCashbackSettingUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&AdCashbackSettingDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown AdCashbackSetting mutation op: %q", m.Op())
 	}
 }
 
@@ -2587,6 +3020,139 @@ func (c *AdCreatorProgramMemberClient) mutate(ctx context.Context, m *AdCreatorP
 		return (&AdCreatorProgramMemberDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
 		return nil, fmt.Errorf("ent: unknown AdCreatorProgramMember mutation op: %q", m.Op())
+	}
+}
+
+// AdCreditLotClient is a client for the AdCreditLot schema.
+type AdCreditLotClient struct {
+	config
+}
+
+// NewAdCreditLotClient returns a client for the AdCreditLot from the given config.
+func NewAdCreditLotClient(c config) *AdCreditLotClient {
+	return &AdCreditLotClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `adcreditlot.Hooks(f(g(h())))`.
+func (c *AdCreditLotClient) Use(hooks ...Hook) {
+	c.hooks.AdCreditLot = append(c.hooks.AdCreditLot, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `adcreditlot.Intercept(f(g(h())))`.
+func (c *AdCreditLotClient) Intercept(interceptors ...Interceptor) {
+	c.inters.AdCreditLot = append(c.inters.AdCreditLot, interceptors...)
+}
+
+// Create returns a builder for creating a AdCreditLot entity.
+func (c *AdCreditLotClient) Create() *AdCreditLotCreate {
+	mutation := newAdCreditLotMutation(c.config, OpCreate)
+	return &AdCreditLotCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of AdCreditLot entities.
+func (c *AdCreditLotClient) CreateBulk(builders ...*AdCreditLotCreate) *AdCreditLotCreateBulk {
+	return &AdCreditLotCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *AdCreditLotClient) MapCreateBulk(slice any, setFunc func(*AdCreditLotCreate, int)) *AdCreditLotCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &AdCreditLotCreateBulk{err: fmt.Errorf("calling to AdCreditLotClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*AdCreditLotCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &AdCreditLotCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for AdCreditLot.
+func (c *AdCreditLotClient) Update() *AdCreditLotUpdate {
+	mutation := newAdCreditLotMutation(c.config, OpUpdate)
+	return &AdCreditLotUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *AdCreditLotClient) UpdateOne(_m *AdCreditLot) *AdCreditLotUpdateOne {
+	mutation := newAdCreditLotMutation(c.config, OpUpdateOne, withAdCreditLot(_m))
+	return &AdCreditLotUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *AdCreditLotClient) UpdateOneID(id uuid.UUID) *AdCreditLotUpdateOne {
+	mutation := newAdCreditLotMutation(c.config, OpUpdateOne, withAdCreditLotID(id))
+	return &AdCreditLotUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for AdCreditLot.
+func (c *AdCreditLotClient) Delete() *AdCreditLotDelete {
+	mutation := newAdCreditLotMutation(c.config, OpDelete)
+	return &AdCreditLotDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *AdCreditLotClient) DeleteOne(_m *AdCreditLot) *AdCreditLotDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *AdCreditLotClient) DeleteOneID(id uuid.UUID) *AdCreditLotDeleteOne {
+	builder := c.Delete().Where(adcreditlot.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &AdCreditLotDeleteOne{builder}
+}
+
+// Query returns a query builder for AdCreditLot.
+func (c *AdCreditLotClient) Query() *AdCreditLotQuery {
+	return &AdCreditLotQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeAdCreditLot},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a AdCreditLot entity by its id.
+func (c *AdCreditLotClient) Get(ctx context.Context, id uuid.UUID) (*AdCreditLot, error) {
+	return c.Query().Where(adcreditlot.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *AdCreditLotClient) GetX(ctx context.Context, id uuid.UUID) *AdCreditLot {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *AdCreditLotClient) Hooks() []Hook {
+	return c.hooks.AdCreditLot
+}
+
+// Interceptors returns the client interceptors.
+func (c *AdCreditLotClient) Interceptors() []Interceptor {
+	return c.inters.AdCreditLot
+}
+
+func (c *AdCreditLotClient) mutate(ctx context.Context, m *AdCreditLotMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&AdCreditLotCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&AdCreditLotUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&AdCreditLotUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&AdCreditLotDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown AdCreditLot mutation op: %q", m.Op())
 	}
 }
 
@@ -4589,21 +5155,23 @@ func (c *OutboxEventClient) mutate(ctx context.Context, m *OutboxEventMutation) 
 type (
 	hooks struct {
 		Ad, AdAccount, AdAccountInvite, AdAccountMember, AdActivityEntry,
-		AdAudienceMember, AdAutomatedRule, AdBoost, AdCampaign, AdCardStatsDaily,
-		AdContentSignal, AdConversion, AdConversionEvent, AdCreatorEarning,
-		AdCreatorMonetisationHold, AdCreatorProgramMember, AdCustomAudience,
-		AdExperiment, AdFreeBoostGrant, AdFrequencyPolicy, AdFundsTransaction, AdGroup,
-		AdImpression, AdMedia, AdPolicyCategory, AdPoolDaily, AdScheduledReport,
-		AdSpendBatch, AdStatsDaily, AdTopUp, OutboxEvent []ent.Hook
+		AdAudienceMember, AdAutomatedRule, AdBalanceWithdrawal, AdBoost, AdBoostChange,
+		AdCampaign, AdCardStatsDaily, AdCashbackSetting, AdContentSignal, AdConversion,
+		AdConversionEvent, AdCreatorEarning, AdCreatorMonetisationHold,
+		AdCreatorProgramMember, AdCreditLot, AdCustomAudience, AdExperiment,
+		AdFreeBoostGrant, AdFrequencyPolicy, AdFundsTransaction, AdGroup, AdImpression,
+		AdMedia, AdPolicyCategory, AdPoolDaily, AdScheduledReport, AdSpendBatch,
+		AdStatsDaily, AdTopUp, OutboxEvent []ent.Hook
 	}
 	inters struct {
 		Ad, AdAccount, AdAccountInvite, AdAccountMember, AdActivityEntry,
-		AdAudienceMember, AdAutomatedRule, AdBoost, AdCampaign, AdCardStatsDaily,
-		AdContentSignal, AdConversion, AdConversionEvent, AdCreatorEarning,
-		AdCreatorMonetisationHold, AdCreatorProgramMember, AdCustomAudience,
-		AdExperiment, AdFreeBoostGrant, AdFrequencyPolicy, AdFundsTransaction, AdGroup,
-		AdImpression, AdMedia, AdPolicyCategory, AdPoolDaily, AdScheduledReport,
-		AdSpendBatch, AdStatsDaily, AdTopUp, OutboxEvent []ent.Interceptor
+		AdAudienceMember, AdAutomatedRule, AdBalanceWithdrawal, AdBoost, AdBoostChange,
+		AdCampaign, AdCardStatsDaily, AdCashbackSetting, AdContentSignal, AdConversion,
+		AdConversionEvent, AdCreatorEarning, AdCreatorMonetisationHold,
+		AdCreatorProgramMember, AdCreditLot, AdCustomAudience, AdExperiment,
+		AdFreeBoostGrant, AdFrequencyPolicy, AdFundsTransaction, AdGroup, AdImpression,
+		AdMedia, AdPolicyCategory, AdPoolDaily, AdScheduledReport, AdSpendBatch,
+		AdStatsDaily, AdTopUp, OutboxEvent []ent.Interceptor
 	}
 )
 

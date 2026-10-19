@@ -28,6 +28,7 @@ type Container struct {
 	Now              func() time.Time
 	AccessVerifier   *jwtauth.AccessTokenVerifier
 	StaffVerifier    *jwtauth.AccessTokenVerifier
+	StaffStepUp      *jwtauth.AccessTokenVerifier
 	IdempotencyStore *idempotency.RedisStore
 	Counters         interfaces.CounterStore
 	Frequency        services.FrequencyGuard
@@ -37,6 +38,7 @@ type Container struct {
 	Pricing          *services.RegionalAdPricing
 	Candidates       *services.CandidateIndex
 	Consent          interfaces.ConsentReader
+	ViewerAge        interfaces.ViewerAgeReader
 	Countries        interfaces.ProfileCountryReader
 	Signals          interfaces.ContentSignalReader
 	Pctr             interfaces.PctrScorer
@@ -48,6 +50,7 @@ type Container struct {
 	Identity         interfaces.IdentityMatcher
 	ContentSources   interfaces.ContentSourceDirectory
 	Ownership        interfaces.DestinationOwnership
+	Promoted         interfaces.PromotedDestinationDirectory
 	Storage          interfaces.ObjectStorage
 	TopUps           interfaces.TopUpGateway
 	AuditHistory     interfaces.AuditHistoryReader
@@ -57,6 +60,7 @@ type Container struct {
 	AdLoad           interfaces.AdLoadReader
 	EarningsFunding  interfaces.EarningsFunding
 	StepUps          interfaces.StepUpConsumer
+	Withdrawals      interfaces.AdBalanceWithdrawalGateway
 	Audit            staffaudit.Recorder
 	Jobs             platformevents.JobQueue
 	QueueConsumer    QueueConsumer

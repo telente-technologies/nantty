@@ -21,6 +21,15 @@ func completeStaffAndMoneyCollaborators(deployed *container.Container, collabora
 		}
 	}
 	completeMoneyAccountCollaborators(deployed, collaborators, settings, client)
+	deployed.Withdrawals = collaborators.Withdrawals
+	if deployed.Withdrawals == nil {
+		deployed.Withdrawals = integrations.UnconfiguredAdBalanceWithdrawals{}
+		if settings.MoneyHttpUrl != "" {
+			deployed.Withdrawals = integrations.HttpAdBalanceWithdrawalGateway{BaseUrl: settings.MoneyHttpUrl, Token: settings.MoneyHttpToken, Http: client}
+		} else if settings.AllowInMemoryFunding && !settings.IsProduction() {
+			deployed.Withdrawals = integrations.NewInMemoryAdBalanceWithdrawals()
+		}
+	}
 	deployed.AuditHistory = collaborators.History
 	if deployed.AuditHistory == nil {
 		deployed.AuditHistory = integrations.HttpAuditHistory{BaseUrl: settings.AdminInternalUrl, Token: settings.AdminInternalToken, Http: client}

@@ -100,6 +100,18 @@ type Creative struct {
 	Identity       CreativeIdentity    `json:"identity"`
 	Product        map[string]any      `json:"product"`
 	Live           map[string]any      `json:"live,omitempty"`
+	Promoted       *CreativePromoted   `json:"promoted,omitempty"`
+}
+
+type CreativePromoted struct {
+	Kind           string  `json:"kind"`
+	Id             string  `json:"id"`
+	Name           string  `json:"name"`
+	Handle         string  `json:"handle"`
+	AvatarUrl      *string `json:"avatarUrl"`
+	Verified       bool    `json:"verified"`
+	CheckmarkColor string  `json:"checkmarkColor,omitempty"`
+	Private        bool    `json:"private"`
 }
 
 type StoredCreative struct {

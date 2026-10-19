@@ -32,9 +32,15 @@ func (handler Handler) Execute(ctx context.Context, query Query) (dtos.BoostOpti
 	if err != nil {
 		return dtos.BoostOptions{}, err
 	}
+	adBalance, err := services.ReadAdBalanceSummary(ctx, handler.Container, query.UserId, query.Currency)
+	if err != nil {
+		return dtos.BoostOptions{}, err
+	}
 	return dtos.BoostOptions{
 		MinimumDailyBudget: types.Money{AmountMinor: minimum, Currency: query.Currency}, SuggestedDailyBudgets: services.SuggestedDailyBudgets(minimum, query.Currency),
 		DurationDayOptions: services.DurationDayOptions, Interests: services.BoostInterests, Region: region.Code, Packages: packages,
 		PaymentMethods: services.PaymentMethodsFor(query.Platform, freeBoost.Premium), FreeBoost: freeBoost,
+		PaymentOptions: services.BuildCreatePaymentOptions(ctx, handler.Container, query.UserId, query.Platform, freeBoost, adBalance), AdBalance: adBalance,
+		MaximumDurationDays: services.MaximumDurationDays, MaximumScheduleDays: services.MaximumScheduleDays, GoalsByDestination: services.GoalsByDestination(),
 	}, nil
 }

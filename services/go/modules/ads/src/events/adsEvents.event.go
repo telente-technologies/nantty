@@ -16,6 +16,8 @@ const (
 	AdReportReady           = "adReport.ready"
 	AdInviteCreated         = "adInvite.created"
 	AdRuleTriggered         = "adRule.triggered"
+	AdCreditChanged         = "adCredit.changed"
+	AdSpendRefunded         = "adSpend.refunded"
 )
 
 type AdInviteCreatedEventData struct {
@@ -73,6 +75,7 @@ type AdSpendBatchedEventData struct {
 	AccountId           string `json:"accountId"`
 	Currency            string `json:"currency"`
 	DebitMinor          int64  `json:"debitMinor"`
+	CreditDebitMinor    int64  `json:"creditDebitMinor"`
 	SpendMicros         int64  `json:"spendMicros"`
 	CreatorShareMicros  int64  `json:"creatorShareMicros"`
 	PlatformShareMicros int64  `json:"platformShareMicros"`
@@ -104,6 +107,8 @@ type AdBoostCreatedEventData struct {
 	BoostId          string `json:"boostId"`
 	UserId           string `json:"userId"`
 	PostId           string `json:"postId"`
+	DestinationType  string `json:"destinationType"`
+	TargetId         string `json:"targetId"`
 	Goal             string `json:"goal"`
 	TotalBudgetMinor int64  `json:"totalBudgetMinor"`
 	Currency         string `json:"currency"`

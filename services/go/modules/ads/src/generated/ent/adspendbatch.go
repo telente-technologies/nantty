@@ -34,7 +34,13 @@ type AdSpendBatch struct {
 	CreatorShareMicros int64 `json:"creator_share_micros,omitempty"`
 	// PlatformShareMicros holds the value of the "platform_share_micros" field.
 	PlatformShareMicros int64 `json:"platform_share_micros,omitempty"`
-	selectValues        sql.SelectValues
+	// CreditUsedMinor holds the value of the "credit_used_minor" field.
+	CreditUsedMinor int64 `json:"credit_used_minor,omitempty"`
+	// CashbackMinor holds the value of the "cashback_minor" field.
+	CashbackMinor int64 `json:"cashback_minor,omitempty"`
+	// RefundedMinor holds the value of the "refunded_minor" field.
+	RefundedMinor int64 `json:"refunded_minor,omitempty"`
+	selectValues  sql.SelectValues
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -42,7 +48,7 @@ func (*AdSpendBatch) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case adspendbatch.FieldImpressionCount, adspendbatch.FieldSpendMicros, adspendbatch.FieldDebitedMinor, adspendbatch.FieldCreatorShareMicros, adspendbatch.FieldPlatformShareMicros:
+		case adspendbatch.FieldImpressionCount, adspendbatch.FieldSpendMicros, adspendbatch.FieldDebitedMinor, adspendbatch.FieldCreatorShareMicros, adspendbatch.FieldPlatformShareMicros, adspendbatch.FieldCreditUsedMinor, adspendbatch.FieldCashbackMinor, adspendbatch.FieldRefundedMinor:
 			values[i] = new(sql.NullInt64)
 		case adspendbatch.FieldCurrency:
 			values[i] = new(sql.NullString)
@@ -119,6 +125,24 @@ func (_m *AdSpendBatch) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.PlatformShareMicros = value.Int64
 			}
+		case adspendbatch.FieldCreditUsedMinor:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field credit_used_minor", values[i])
+			} else if value.Valid {
+				_m.CreditUsedMinor = value.Int64
+			}
+		case adspendbatch.FieldCashbackMinor:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field cashback_minor", values[i])
+			} else if value.Valid {
+				_m.CashbackMinor = value.Int64
+			}
+		case adspendbatch.FieldRefundedMinor:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field refunded_minor", values[i])
+			} else if value.Valid {
+				_m.RefundedMinor = value.Int64
+			}
 		default:
 			_m.selectValues.Set(columns[i], values[i])
 		}
@@ -178,6 +202,15 @@ func (_m *AdSpendBatch) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("platform_share_micros=")
 	builder.WriteString(fmt.Sprintf("%v", _m.PlatformShareMicros))
+	builder.WriteString(", ")
+	builder.WriteString("credit_used_minor=")
+	builder.WriteString(fmt.Sprintf("%v", _m.CreditUsedMinor))
+	builder.WriteString(", ")
+	builder.WriteString("cashback_minor=")
+	builder.WriteString(fmt.Sprintf("%v", _m.CashbackMinor))
+	builder.WriteString(", ")
+	builder.WriteString("refunded_minor=")
+	builder.WriteString(fmt.Sprintf("%v", _m.RefundedMinor))
 	builder.WriteByte(')')
 	return builder.String()
 }

@@ -178,6 +178,20 @@ func (_u *AdCampaignUpdate) ClearEndAt() *AdCampaignUpdate {
 	return _u
 }
 
+// SetAdCategory sets the "ad_category" field.
+func (_u *AdCampaignUpdate) SetAdCategory(v string) *AdCampaignUpdate {
+	_u.mutation.SetAdCategory(v)
+	return _u
+}
+
+// SetNillableAdCategory sets the "ad_category" field if the given value is not nil.
+func (_u *AdCampaignUpdate) SetNillableAdCategory(v *string) *AdCampaignUpdate {
+	if v != nil {
+		_u.SetAdCategory(*v)
+	}
+	return _u
+}
+
 // SetUpdatedAt sets the "updated_at" field.
 func (_u *AdCampaignUpdate) SetUpdatedAt(v time.Time) *AdCampaignUpdate {
 	_u.mutation.SetUpdatedAt(v)
@@ -247,6 +261,11 @@ func (_u *AdCampaignUpdate) check() error {
 			return &ValidationError{Name: "budget_type", err: fmt.Errorf(`ent: validator failed for field "AdCampaign.budget_type": %w`, err)}
 		}
 	}
+	if v, ok := _u.mutation.AdCategory(); ok {
+		if err := adcampaign.AdCategoryValidator(v); err != nil {
+			return &ValidationError{Name: "ad_category", err: fmt.Errorf(`ent: validator failed for field "AdCampaign.ad_category": %w`, err)}
+		}
+	}
 	return nil
 }
 
@@ -303,6 +322,9 @@ func (_u *AdCampaignUpdate) sqlSave(ctx context.Context) (_node int, err error) 
 	}
 	if _u.mutation.EndAtCleared() {
 		_spec.ClearField(adcampaign.FieldEndAt, field.TypeTime)
+	}
+	if value, ok := _u.mutation.AdCategory(); ok {
+		_spec.SetField(adcampaign.FieldAdCategory, field.TypeString, value)
 	}
 	if value, ok := _u.mutation.UpdatedAt(); ok {
 		_spec.SetField(adcampaign.FieldUpdatedAt, field.TypeTime, value)
@@ -477,6 +499,20 @@ func (_u *AdCampaignUpdateOne) ClearEndAt() *AdCampaignUpdateOne {
 	return _u
 }
 
+// SetAdCategory sets the "ad_category" field.
+func (_u *AdCampaignUpdateOne) SetAdCategory(v string) *AdCampaignUpdateOne {
+	_u.mutation.SetAdCategory(v)
+	return _u
+}
+
+// SetNillableAdCategory sets the "ad_category" field if the given value is not nil.
+func (_u *AdCampaignUpdateOne) SetNillableAdCategory(v *string) *AdCampaignUpdateOne {
+	if v != nil {
+		_u.SetAdCategory(*v)
+	}
+	return _u
+}
+
 // SetUpdatedAt sets the "updated_at" field.
 func (_u *AdCampaignUpdateOne) SetUpdatedAt(v time.Time) *AdCampaignUpdateOne {
 	_u.mutation.SetUpdatedAt(v)
@@ -559,6 +595,11 @@ func (_u *AdCampaignUpdateOne) check() error {
 			return &ValidationError{Name: "budget_type", err: fmt.Errorf(`ent: validator failed for field "AdCampaign.budget_type": %w`, err)}
 		}
 	}
+	if v, ok := _u.mutation.AdCategory(); ok {
+		if err := adcampaign.AdCategoryValidator(v); err != nil {
+			return &ValidationError{Name: "ad_category", err: fmt.Errorf(`ent: validator failed for field "AdCampaign.ad_category": %w`, err)}
+		}
+	}
 	return nil
 }
 
@@ -632,6 +673,9 @@ func (_u *AdCampaignUpdateOne) sqlSave(ctx context.Context) (_node *AdCampaign, 
 	}
 	if _u.mutation.EndAtCleared() {
 		_spec.ClearField(adcampaign.FieldEndAt, field.TypeTime)
+	}
+	if value, ok := _u.mutation.AdCategory(); ok {
+		_spec.SetField(adcampaign.FieldAdCategory, field.TypeString, value)
 	}
 	if value, ok := _u.mutation.UpdatedAt(); ok {
 		_spec.SetField(adcampaign.FieldUpdatedAt, field.TypeTime, value)

@@ -12,6 +12,8 @@ type BoostAudience struct {
 	Interests   []string `json:"interests,omitempty"`
 	AgeMin      int      `json:"ageMin,omitempty"`
 	AgeMax      int      `json:"ageMax,omitempty"`
+	Gender      string   `json:"gender,omitempty"`
+	TopicIds    []string `json:"topicIds,omitempty"`
 }
 
 type BoostOptions struct {
@@ -23,6 +25,26 @@ type BoostOptions struct {
 	Packages              []regionpricing.BoostPackage `json:"packages"`
 	PaymentMethods        []string                     `json:"paymentMethods"`
 	FreeBoost             FreeBoost                    `json:"freeBoost"`
+	PaymentOptions        []PaymentOption              `json:"paymentOptions"`
+	AdBalance             AdBalanceSummary             `json:"adBalance"`
+	MaximumDurationDays   int                          `json:"maximumDurationDays"`
+	MaximumScheduleDays   int                          `json:"maximumScheduleDays"`
+	GoalsByDestination    map[string][]string          `json:"goalsByDestination"`
+}
+
+type PaymentOption struct {
+	Method     string  `json:"method"`
+	Available  bool    `json:"available"`
+	ReasonCode *string `json:"reasonCode"`
+	Reason     *string `json:"reason"`
+}
+
+type AdBalanceSummary struct {
+	AccountId *string     `json:"accountId"`
+	Balance   types.Money `json:"balance"`
+	Credit    types.Money `json:"credit"`
+	Committed types.Money `json:"committed"`
+	Spendable types.Money `json:"spendable"`
 }
 
 type FreeBoost struct {
@@ -34,11 +56,16 @@ type FreeBoost struct {
 }
 
 type BoostEstimateRequest struct {
-	PostId       string        `json:"postId"`
-	Goal         string        `json:"goal"`
-	Audience     BoostAudience `json:"audience"`
-	DailyBudget  types.Money   `json:"dailyBudget"`
-	DurationDays int           `json:"durationDays"`
+	PostId          string        `json:"postId"`
+	DestinationType string        `json:"destinationType,omitempty"`
+	TargetId        string        `json:"targetId,omitempty"`
+	Goal            string        `json:"goal"`
+	Audience        BoostAudience `json:"audience"`
+	BudgetType      string        `json:"budgetType,omitempty"`
+	DailyBudget     types.Money   `json:"dailyBudget"`
+	TotalBudget     *types.Money  `json:"totalBudget,omitempty"`
+	DurationDays    int           `json:"durationDays"`
+	StartAt         *string       `json:"startAt,omitempty"`
 }
 
 type BoostEstimate struct {
@@ -61,22 +88,49 @@ type CreateBoostRequest struct {
 type BoostResults struct {
 	Impressions   int64 `json:"impressions"`
 	Reach         int64 `json:"reach"`
+	Clicks        int64 `json:"clicks"`
 	ProfileVisits int64 `json:"profileVisits"`
+	StoreVisits   int64 `json:"storeVisits"`
+	ProductVisits int64 `json:"productVisits"`
 	Messages      int64 `json:"messages"`
 }
 
+type BoostKeyResult struct {
+	Label string `json:"label"`
+	Value int64  `json:"value"`
+}
+
+type BoostActions struct {
+	Pause        bool `json:"pause"`
+	Resume       bool `json:"resume"`
+	Stop         bool `json:"stop"`
+	ChangeBudget bool `json:"changeBudget"`
+	Resubmit     bool `json:"resubmit"`
+}
+
 type Boost struct {
-	Id              string       `json:"id"`
-	PostId          string       `json:"postId"`
-	Status          string       `json:"status"`
-	Goal            string       `json:"goal"`
-	TotalBudget     types.Money  `json:"totalBudget"`
-	Spent           types.Money  `json:"spent"`
-	StartsAt        *string      `json:"startsAt"`
-	EndsAt          *string      `json:"endsAt"`
-	Results         BoostResults `json:"results"`
-	RejectionReason *string      `json:"rejectionReason"`
-	PaymentMethod   string       `json:"paymentMethod"`
+	Id               string         `json:"id"`
+	PostId           string         `json:"postId"`
+	DestinationType  string         `json:"destinationType"`
+	TargetId         string         `json:"targetId"`
+	Status           string         `json:"status"`
+	Goal             string         `json:"goal"`
+	BudgetType       string         `json:"budgetType"`
+	DailyBudget      types.Money    `json:"dailyBudget"`
+	DurationDays     int            `json:"durationDays"`
+	TotalBudget      types.Money    `json:"totalBudget"`
+	Spent            types.Money    `json:"spent"`
+	StartsAt         *string        `json:"startsAt"`
+	EndsAt           *string        `json:"endsAt"`
+	ScheduledStartAt *string        `json:"scheduledStartAt"`
+	CreatedAt        string         `json:"createdAt"`
+	Audience         BoostAudience  `json:"audience"`
+	Results          BoostResults   `json:"results"`
+	KeyResult        BoostKeyResult `json:"keyResult"`
+	CostPerResult    *types.Money   `json:"costPerResult"`
+	RejectionReason  *string        `json:"rejectionReason"`
+	PaymentMethod    string         `json:"paymentMethod"`
+	Actions          BoostActions   `json:"actions"`
 }
 
 type CreatedBoost struct {

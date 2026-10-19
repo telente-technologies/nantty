@@ -95,6 +95,11 @@ func CreatedByUserID(v uuid.UUID) predicate.AdCampaign {
 	return predicate.AdCampaign(sql.FieldEQ(FieldCreatedByUserID, v))
 }
 
+// AdCategory applies equality check predicate on the "ad_category" field. It's identical to AdCategoryEQ.
+func AdCategory(v string) predicate.AdCampaign {
+	return predicate.AdCampaign(sql.FieldEQ(FieldAdCategory, v))
+}
+
 // UpdatedAt applies equality check predicate on the "updated_at" field. It's identical to UpdatedAtEQ.
 func UpdatedAt(v time.Time) predicate.AdCampaign {
 	return predicate.AdCampaign(sql.FieldEQ(FieldUpdatedAt, v))
@@ -583,6 +588,71 @@ func CreatedByUserIDLT(v uuid.UUID) predicate.AdCampaign {
 // CreatedByUserIDLTE applies the LTE predicate on the "created_by_user_id" field.
 func CreatedByUserIDLTE(v uuid.UUID) predicate.AdCampaign {
 	return predicate.AdCampaign(sql.FieldLTE(FieldCreatedByUserID, v))
+}
+
+// AdCategoryEQ applies the EQ predicate on the "ad_category" field.
+func AdCategoryEQ(v string) predicate.AdCampaign {
+	return predicate.AdCampaign(sql.FieldEQ(FieldAdCategory, v))
+}
+
+// AdCategoryNEQ applies the NEQ predicate on the "ad_category" field.
+func AdCategoryNEQ(v string) predicate.AdCampaign {
+	return predicate.AdCampaign(sql.FieldNEQ(FieldAdCategory, v))
+}
+
+// AdCategoryIn applies the In predicate on the "ad_category" field.
+func AdCategoryIn(vs ...string) predicate.AdCampaign {
+	return predicate.AdCampaign(sql.FieldIn(FieldAdCategory, vs...))
+}
+
+// AdCategoryNotIn applies the NotIn predicate on the "ad_category" field.
+func AdCategoryNotIn(vs ...string) predicate.AdCampaign {
+	return predicate.AdCampaign(sql.FieldNotIn(FieldAdCategory, vs...))
+}
+
+// AdCategoryGT applies the GT predicate on the "ad_category" field.
+func AdCategoryGT(v string) predicate.AdCampaign {
+	return predicate.AdCampaign(sql.FieldGT(FieldAdCategory, v))
+}
+
+// AdCategoryGTE applies the GTE predicate on the "ad_category" field.
+func AdCategoryGTE(v string) predicate.AdCampaign {
+	return predicate.AdCampaign(sql.FieldGTE(FieldAdCategory, v))
+}
+
+// AdCategoryLT applies the LT predicate on the "ad_category" field.
+func AdCategoryLT(v string) predicate.AdCampaign {
+	return predicate.AdCampaign(sql.FieldLT(FieldAdCategory, v))
+}
+
+// AdCategoryLTE applies the LTE predicate on the "ad_category" field.
+func AdCategoryLTE(v string) predicate.AdCampaign {
+	return predicate.AdCampaign(sql.FieldLTE(FieldAdCategory, v))
+}
+
+// AdCategoryContains applies the Contains predicate on the "ad_category" field.
+func AdCategoryContains(v string) predicate.AdCampaign {
+	return predicate.AdCampaign(sql.FieldContains(FieldAdCategory, v))
+}
+
+// AdCategoryHasPrefix applies the HasPrefix predicate on the "ad_category" field.
+func AdCategoryHasPrefix(v string) predicate.AdCampaign {
+	return predicate.AdCampaign(sql.FieldHasPrefix(FieldAdCategory, v))
+}
+
+// AdCategoryHasSuffix applies the HasSuffix predicate on the "ad_category" field.
+func AdCategoryHasSuffix(v string) predicate.AdCampaign {
+	return predicate.AdCampaign(sql.FieldHasSuffix(FieldAdCategory, v))
+}
+
+// AdCategoryEqualFold applies the EqualFold predicate on the "ad_category" field.
+func AdCategoryEqualFold(v string) predicate.AdCampaign {
+	return predicate.AdCampaign(sql.FieldEqualFold(FieldAdCategory, v))
+}
+
+// AdCategoryContainsFold applies the ContainsFold predicate on the "ad_category" field.
+func AdCategoryContainsFold(v string) predicate.AdCampaign {
+	return predicate.AdCampaign(sql.FieldContainsFold(FieldAdCategory, v))
 }
 
 // UpdatedAtEQ applies the EQ predicate on the "updated_at" field.

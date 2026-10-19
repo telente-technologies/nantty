@@ -11,4 +11,5 @@ type Command struct {
 	Reviewer              services.Reviewer
 	Reason                string
 	OverrideCriticalFlags bool
+	AdCategory            string
 }

@@ -44,6 +44,8 @@ type AdCampaign struct {
 	EndAt *time.Time `json:"end_at,omitempty"`
 	// CreatedByUserID holds the value of the "created_by_user_id" field.
 	CreatedByUserID uuid.UUID `json:"created_by_user_id,omitempty"`
+	// AdCategory holds the value of the "ad_category" field.
+	AdCategory string `json:"ad_category,omitempty"`
 	// UpdatedAt holds the value of the "updated_at" field.
 	UpdatedAt    time.Time `json:"updated_at,omitempty"`
 	selectValues sql.SelectValues
@@ -56,7 +58,7 @@ func (*AdCampaign) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case adcampaign.FieldBudgetAmountMinor, adcampaign.FieldSpendCapMinor:
 			values[i] = new(sql.NullInt64)
-		case adcampaign.FieldName, adcampaign.FieldObjective, adcampaign.FieldKind, adcampaign.FieldStatus, adcampaign.FieldBudgetLevel, adcampaign.FieldBudgetType:
+		case adcampaign.FieldName, adcampaign.FieldObjective, adcampaign.FieldKind, adcampaign.FieldStatus, adcampaign.FieldBudgetLevel, adcampaign.FieldBudgetType, adcampaign.FieldAdCategory:
 			values[i] = new(sql.NullString)
 		case adcampaign.FieldCreatedAt, adcampaign.FieldStartAt, adcampaign.FieldEndAt, adcampaign.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
@@ -165,6 +167,12 @@ func (_m *AdCampaign) assignValues(columns []string, values []any) error {
 			} else if value != nil {
 				_m.CreatedByUserID = *value
 			}
+		case adcampaign.FieldAdCategory:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field ad_category", values[i])
+			} else if value.Valid {
+				_m.AdCategory = value.String
+			}
 		case adcampaign.FieldUpdatedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field updated_at", values[i])
@@ -253,6 +261,9 @@ func (_m *AdCampaign) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("created_by_user_id=")
 	builder.WriteString(fmt.Sprintf("%v", _m.CreatedByUserID))
+	builder.WriteString(", ")
+	builder.WriteString("ad_category=")
+	builder.WriteString(_m.AdCategory)
 	builder.WriteString(", ")
 	builder.WriteString("updated_at=")
 	builder.WriteString(_m.UpdatedAt.Format(time.ANSIC))

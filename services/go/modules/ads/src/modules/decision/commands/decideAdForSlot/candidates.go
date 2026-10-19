@@ -20,7 +20,10 @@ func (handler Handler) collectEligibleCandidates(ctx context.Context, slot *slot
 	}
 	var eligible []types.CandidateAd
 	for _, candidate := range snapshot {
-		if !slices.Contains(candidate.Placements, slot.placement) || !services.CreativeFitsSlotKind(candidate.Creative.Format, slot.command.Slot.Kind) {
+		if !slices.Contains(candidate.Placements, slot.placement) || !services.CreativeFitsSlot(candidate.Creative, slot.command.Slot.Kind) {
+			continue
+		}
+		if candidate.AgeRestricted && slot.command.Viewer.AgeRestricted {
 			continue
 		}
 		if !services.ViewerFallsInExperimentArm(candidate, slot.command.UserId) {

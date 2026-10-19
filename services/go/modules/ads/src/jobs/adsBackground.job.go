@@ -20,6 +20,7 @@ func RunBackgroundJobsUntilContextDone(ctx context.Context, deployed *container.
 		_, err := settlement.SettlePendingCharges(ctx)
 		return err
 	})
+	runAdFundsJobsUntilContextDone(ctx, deployed)
 	go runEvery(ctx, deployed.Settings.SettlementInterval, deployed, "lifecycle sweep", func(ctx context.Context) error { return AdvanceFinishedItemsToCompleted(ctx, deployed) })
 	go runEvery(ctx, time.Minute, deployed, "automated rules", func(ctx context.Context) error {
 		_, err := (evaluaterules.Handler{Container: deployed}).Execute(ctx)

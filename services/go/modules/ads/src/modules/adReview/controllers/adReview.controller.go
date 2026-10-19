@@ -107,7 +107,7 @@ func (controller AdReviewController) ApproveAd(writer http.ResponseWriter, reque
 		if err := services.RecordStaffAction(request, controller.Container, "ads.ad.approve", services.AdAuditSubject, adId.String(), body.Reason, nil, body); err != nil {
 			return err
 		}
-		result, err := (approvead.Handler{Container: controller.Container}).Execute(request.Context(), approvead.Command{AdId: adId, Reviewer: reviewer, Reason: body.Reason, OverrideCriticalFlags: body.OverrideCriticalFlags})
+		result, err := (approvead.Handler{Container: controller.Container}).Execute(request.Context(), approvead.Command{AdId: adId, Reviewer: reviewer, Reason: body.Reason, OverrideCriticalFlags: body.OverrideCriticalFlags, AdCategory: body.AdCategory})
 		if err != nil {
 			return err
 		}

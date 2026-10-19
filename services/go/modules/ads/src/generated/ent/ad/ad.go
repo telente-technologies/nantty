@@ -56,6 +56,8 @@ const (
 	FieldCreative = "creative"
 	// FieldAutoCheckFlags holds the string denoting the auto_check_flags field in the database.
 	FieldAutoCheckFlags = "auto_check_flags"
+	// FieldAdCategory holds the string denoting the ad_category field in the database.
+	FieldAdCategory = "ad_category"
 	// FieldUpdatedAt holds the string denoting the updated_at field in the database.
 	FieldUpdatedAt = "updated_at"
 	// Table holds the table name of the ad in the database.
@@ -85,6 +87,7 @@ var Columns = []string{
 	FieldFormat,
 	FieldCreative,
 	FieldAutoCheckFlags,
+	FieldAdCategory,
 	FieldUpdatedAt,
 }
 
@@ -127,6 +130,10 @@ var (
 	FormatValidator func(string) error
 	// DefaultAutoCheckFlags holds the default value on creation for the "auto_check_flags" field.
 	DefaultAutoCheckFlags func() []types.AutoCheckFlag
+	// DefaultAdCategory holds the default value on creation for the "ad_category" field.
+	DefaultAdCategory string
+	// AdCategoryValidator is a validator for the "ad_category" field. It is called by the builders before save.
+	AdCategoryValidator func(string) error
 	// DefaultUpdatedAt holds the default value on creation for the "updated_at" field.
 	DefaultUpdatedAt func() time.Time
 	// UpdateDefaultUpdatedAt holds the default value on update for the "updated_at" field.
@@ -313,6 +320,11 @@ func ByAppealResolutionNote(opts ...sql.OrderTermOption) OrderOption {
 // ByFormat orders the results by the format field.
 func ByFormat(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldFormat, opts...).ToFunc()
+}
+
+// ByAdCategory orders the results by the ad_category field.
+func ByAdCategory(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldAdCategory, opts...).ToFunc()
 }
 
 // ByUpdatedAt orders the results by the updated_at field.

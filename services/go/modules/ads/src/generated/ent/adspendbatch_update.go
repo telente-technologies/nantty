@@ -27,6 +27,27 @@ func (_u *AdSpendBatchUpdate) Where(ps ...predicate.AdSpendBatch) *AdSpendBatchU
 	return _u
 }
 
+// SetRefundedMinor sets the "refunded_minor" field.
+func (_u *AdSpendBatchUpdate) SetRefundedMinor(v int64) *AdSpendBatchUpdate {
+	_u.mutation.ResetRefundedMinor()
+	_u.mutation.SetRefundedMinor(v)
+	return _u
+}
+
+// SetNillableRefundedMinor sets the "refunded_minor" field if the given value is not nil.
+func (_u *AdSpendBatchUpdate) SetNillableRefundedMinor(v *int64) *AdSpendBatchUpdate {
+	if v != nil {
+		_u.SetRefundedMinor(*v)
+	}
+	return _u
+}
+
+// AddRefundedMinor adds value to the "refunded_minor" field.
+func (_u *AdSpendBatchUpdate) AddRefundedMinor(v int64) *AdSpendBatchUpdate {
+	_u.mutation.AddRefundedMinor(v)
+	return _u
+}
+
 // Mutation returns the AdSpendBatchMutation object of the builder.
 func (_u *AdSpendBatchUpdate) Mutation() *AdSpendBatchMutation {
 	return _u.mutation
@@ -68,6 +89,12 @@ func (_u *AdSpendBatchUpdate) sqlSave(ctx context.Context) (_node int, err error
 			}
 		}
 	}
+	if value, ok := _u.mutation.RefundedMinor(); ok {
+		_spec.SetField(adspendbatch.FieldRefundedMinor, field.TypeInt64, value)
+	}
+	if value, ok := _u.mutation.AddedRefundedMinor(); ok {
+		_spec.AddField(adspendbatch.FieldRefundedMinor, field.TypeInt64, value)
+	}
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{adspendbatch.Label}
@@ -86,6 +113,27 @@ type AdSpendBatchUpdateOne struct {
 	fields   []string
 	hooks    []Hook
 	mutation *AdSpendBatchMutation
+}
+
+// SetRefundedMinor sets the "refunded_minor" field.
+func (_u *AdSpendBatchUpdateOne) SetRefundedMinor(v int64) *AdSpendBatchUpdateOne {
+	_u.mutation.ResetRefundedMinor()
+	_u.mutation.SetRefundedMinor(v)
+	return _u
+}
+
+// SetNillableRefundedMinor sets the "refunded_minor" field if the given value is not nil.
+func (_u *AdSpendBatchUpdateOne) SetNillableRefundedMinor(v *int64) *AdSpendBatchUpdateOne {
+	if v != nil {
+		_u.SetRefundedMinor(*v)
+	}
+	return _u
+}
+
+// AddRefundedMinor adds value to the "refunded_minor" field.
+func (_u *AdSpendBatchUpdateOne) AddRefundedMinor(v int64) *AdSpendBatchUpdateOne {
+	_u.mutation.AddRefundedMinor(v)
+	return _u
 }
 
 // Mutation returns the AdSpendBatchMutation object of the builder.
@@ -158,6 +206,12 @@ func (_u *AdSpendBatchUpdateOne) sqlSave(ctx context.Context) (_node *AdSpendBat
 				ps[i](selector)
 			}
 		}
+	}
+	if value, ok := _u.mutation.RefundedMinor(); ok {
+		_spec.SetField(adspendbatch.FieldRefundedMinor, field.TypeInt64, value)
+	}
+	if value, ok := _u.mutation.AddedRefundedMinor(); ok {
+		_spec.AddField(adspendbatch.FieldRefundedMinor, field.TypeInt64, value)
 	}
 	_node = &AdSpendBatch{config: _u.config}
 	_spec.Assign = _node.assignValues

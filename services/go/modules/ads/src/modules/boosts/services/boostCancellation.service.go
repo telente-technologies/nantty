@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"time"
 
 	"github.com/google/uuid"
 
@@ -13,9 +14,11 @@ import (
 	"zudomart/modules/ads/src/generated/ent/ad"
 	"zudomart/modules/ads/src/generated/ent/adboost"
 	"zudomart/modules/ads/src/generated/ent/adcampaign"
+	"zudomart/modules/ads/src/generated/ent/adcreditlot"
 	"zudomart/modules/ads/src/generated/ent/adfreeboostgrant"
 	"zudomart/modules/ads/src/generated/ent/adgroup"
 	"zudomart/modules/ads/src/generated/ent/adimpression"
+	adsservices "zudomart/modules/ads/src/services"
 	"zudomart/modules/ads/src/types"
 	platformevents "zudomart/platform/events"
 )
@@ -25,7 +28,7 @@ const (
 	CancelReasonOwner       = "ownerCancelled"
 )
 
-var cancellableBoostStatuses = []adboost.Status{adboost.StatusPendingPayment, adboost.StatusInReview, adboost.StatusActive}
+var cancellableBoostStatuses = []adboost.Status{adboost.StatusPendingPayment, adboost.StatusInReview, adboost.StatusActive, adboost.StatusPaused}
 
 func CancelBoostsForPost(ctx context.Context, deployed *container.Container, postId, reason string) (int, error) {
 	ids, err := deployed.Client.AdBoost.Query().Where(adboost.PostID(postId), adboost.StatusIn(cancellableBoostStatuses...)).IDs(ctx)
@@ -120,7 +123,12 @@ func settleUnspentBudget(ctx context.Context, tx *ent.Tx, boost *ent.AdBoost, un
 		}
 		restored = removed > 0
 	}
-	if unspent <= 0 || boost.PaymentMethod == adboost.PaymentMethodCard {
+	if boost.PaymentMethod == adboost.PaymentMethodFree {
+		return 0, restored, removeFreeBoostCreditRemainder(ctx, tx, boost)
+	}
+	originallyFunded := boost.TotalBudgetMinor - boost.AddedBudgetMinor
+	unspent = min(unspent, max(originallyFunded, 0))
+	if unspent <= 0 || boost.PaymentMethod == adboost.PaymentMethodCard || boost.PaymentMethod == adboost.PaymentMethodAdBalance {
 		return 0, restored, nil
 	}
 	account, err := tx.AdAccount.Get(ctx, boost.AccountID)
@@ -134,18 +142,23 @@ func settleUnspentBudget(ctx context.Context, tx *ent.Tx, boost *ent.AdBoost, un
 	if err := tx.AdAccount.UpdateOneID(account.ID).AddBalanceMinor(-withdrawn).Exec(ctx); err != nil {
 		return 0, false, err
 	}
-	description := "Unspent boost budget returned"
-	if boost.PaymentMethod == adboost.PaymentMethodFree {
-		description = "Unspent free boost budget withdrawn"
-	}
 	if err := tx.AdFundsTransaction.Create().SetAccountID(account.ID).SetType("refund").SetAmountMinor(-withdrawn).SetCurrency(boost.Currency).
-		SetDescription(description).SetReference("boostCancel:" + boost.ID.String()).Exec(ctx); err != nil {
+		SetDescription("Unspent boost budget returned to your earnings").SetReference("boostCancel:" + boost.ID.String()).Exec(ctx); err != nil {
 		return 0, false, err
 	}
-	if boost.PaymentMethod == adboost.PaymentMethodFree {
-		return 0, restored, nil
-	}
 	return withdrawn, restored, nil
+}
+
+func removeFreeBoostCreditRemainder(ctx context.Context, tx *ent.Tx, boost *ent.AdBoost) error {
+	lot, err := tx.AdCreditLot.Query().Where(adcreditlot.BoostID(boost.ID), adcreditlot.SourceEQ(adcreditlot.SourcePremiumFreeBoost)).Only(ctx)
+	if ent.IsNotFound(err) {
+		return nil
+	}
+	if err != nil {
+		return err
+	}
+	_, _, err = adsservices.RemoveCreditLotRemainderInTransaction(ctx, tx, lot.ID, adsservices.CreditChangeRevoked, "", "Free boost stopped before its budget was used", time.Now())
+	return err
 }
 
 func HandleBoostCancelledEvent(ctx context.Context, deployed *container.Container, envelope platformevents.EventEnvelope) error {

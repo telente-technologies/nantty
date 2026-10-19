@@ -24,6 +24,8 @@ type AdBoost struct {
 	UserID uuid.UUID `json:"user_id,omitempty"`
 	// PostID holds the value of the "post_id" field.
 	PostID string `json:"post_id,omitempty"`
+	// DestinationType holds the value of the "destination_type" field.
+	DestinationType adboost.DestinationType `json:"destination_type,omitempty"`
 	// Goal holds the value of the "goal" field.
 	Goal adboost.Goal `json:"goal,omitempty"`
 	// Status holds the value of the "status" field.
@@ -32,12 +34,16 @@ type AdBoost struct {
 	Audience []byte `json:"audience,omitempty"`
 	// Currency holds the value of the "currency" field.
 	Currency string `json:"currency,omitempty"`
+	// BudgetType holds the value of the "budget_type" field.
+	BudgetType adboost.BudgetType `json:"budget_type,omitempty"`
 	// DailyBudgetMinor holds the value of the "daily_budget_minor" field.
 	DailyBudgetMinor int64 `json:"daily_budget_minor,omitempty"`
 	// DurationDays holds the value of the "duration_days" field.
 	DurationDays int `json:"duration_days,omitempty"`
 	// TotalBudgetMinor holds the value of the "total_budget_minor" field.
 	TotalBudgetMinor int64 `json:"total_budget_minor,omitempty"`
+	// AddedBudgetMinor holds the value of the "added_budget_minor" field.
+	AddedBudgetMinor int64 `json:"added_budget_minor,omitempty"`
 	// PaymentMethod holds the value of the "payment_method" field.
 	PaymentMethod adboost.PaymentMethod `json:"payment_method,omitempty"`
 	// PaymentTopUpID holds the value of the "payment_top_up_id" field.
@@ -54,6 +60,8 @@ type AdBoost struct {
 	AdGroupID uuid.UUID `json:"ad_group_id,omitempty"`
 	// AdID holds the value of the "ad_id" field.
 	AdID uuid.UUID `json:"ad_id,omitempty"`
+	// ScheduledStartAt holds the value of the "scheduled_start_at" field.
+	ScheduledStartAt *time.Time `json:"scheduled_start_at,omitempty"`
 	// StartsAt holds the value of the "starts_at" field.
 	StartsAt *time.Time `json:"starts_at,omitempty"`
 	// EndsAt holds the value of the "ends_at" field.
@@ -72,11 +80,11 @@ func (*AdBoost) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case adboost.FieldAudience:
 			values[i] = new([]byte)
-		case adboost.FieldDailyBudgetMinor, adboost.FieldDurationDays, adboost.FieldTotalBudgetMinor:
+		case adboost.FieldDailyBudgetMinor, adboost.FieldDurationDays, adboost.FieldTotalBudgetMinor, adboost.FieldAddedBudgetMinor:
 			values[i] = new(sql.NullInt64)
-		case adboost.FieldPostID, adboost.FieldGoal, adboost.FieldStatus, adboost.FieldCurrency, adboost.FieldPaymentMethod, adboost.FieldPaymentTopUpID, adboost.FieldIdempotencyKey, adboost.FieldRequestHash, adboost.FieldRejectionReason:
+		case adboost.FieldPostID, adboost.FieldDestinationType, adboost.FieldGoal, adboost.FieldStatus, adboost.FieldCurrency, adboost.FieldBudgetType, adboost.FieldPaymentMethod, adboost.FieldPaymentTopUpID, adboost.FieldIdempotencyKey, adboost.FieldRequestHash, adboost.FieldRejectionReason:
 			values[i] = new(sql.NullString)
-		case adboost.FieldCreatedAt, adboost.FieldStartsAt, adboost.FieldEndsAt, adboost.FieldUpdatedAt:
+		case adboost.FieldCreatedAt, adboost.FieldScheduledStartAt, adboost.FieldStartsAt, adboost.FieldEndsAt, adboost.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
 		case adboost.FieldID, adboost.FieldUserID, adboost.FieldAccountID, adboost.FieldCampaignID, adboost.FieldAdGroupID, adboost.FieldAdID:
 			values[i] = new(uuid.UUID)
@@ -119,6 +127,12 @@ func (_m *AdBoost) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.PostID = value.String
 			}
+		case adboost.FieldDestinationType:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field destination_type", values[i])
+			} else if value.Valid {
+				_m.DestinationType = adboost.DestinationType(value.String)
+			}
 		case adboost.FieldGoal:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field goal", values[i])
@@ -143,6 +157,12 @@ func (_m *AdBoost) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.Currency = value.String
 			}
+		case adboost.FieldBudgetType:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field budget_type", values[i])
+			} else if value.Valid {
+				_m.BudgetType = adboost.BudgetType(value.String)
+			}
 		case adboost.FieldDailyBudgetMinor:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field daily_budget_minor", values[i])
@@ -160,6 +180,12 @@ func (_m *AdBoost) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field total_budget_minor", values[i])
 			} else if value.Valid {
 				_m.TotalBudgetMinor = value.Int64
+			}
+		case adboost.FieldAddedBudgetMinor:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field added_budget_minor", values[i])
+			} else if value.Valid {
+				_m.AddedBudgetMinor = value.Int64
 			}
 		case adboost.FieldPaymentMethod:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -208,6 +234,13 @@ func (_m *AdBoost) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field ad_id", values[i])
 			} else if value != nil {
 				_m.AdID = *value
+			}
+		case adboost.FieldScheduledStartAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field scheduled_start_at", values[i])
+			} else if value.Valid {
+				_m.ScheduledStartAt = new(time.Time)
+				*_m.ScheduledStartAt = value.Time
 			}
 		case adboost.FieldStartsAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
@@ -280,6 +313,9 @@ func (_m *AdBoost) String() string {
 	builder.WriteString("post_id=")
 	builder.WriteString(_m.PostID)
 	builder.WriteString(", ")
+	builder.WriteString("destination_type=")
+	builder.WriteString(fmt.Sprintf("%v", _m.DestinationType))
+	builder.WriteString(", ")
 	builder.WriteString("goal=")
 	builder.WriteString(fmt.Sprintf("%v", _m.Goal))
 	builder.WriteString(", ")
@@ -292,6 +328,9 @@ func (_m *AdBoost) String() string {
 	builder.WriteString("currency=")
 	builder.WriteString(_m.Currency)
 	builder.WriteString(", ")
+	builder.WriteString("budget_type=")
+	builder.WriteString(fmt.Sprintf("%v", _m.BudgetType))
+	builder.WriteString(", ")
 	builder.WriteString("daily_budget_minor=")
 	builder.WriteString(fmt.Sprintf("%v", _m.DailyBudgetMinor))
 	builder.WriteString(", ")
@@ -300,6 +339,9 @@ func (_m *AdBoost) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("total_budget_minor=")
 	builder.WriteString(fmt.Sprintf("%v", _m.TotalBudgetMinor))
+	builder.WriteString(", ")
+	builder.WriteString("added_budget_minor=")
+	builder.WriteString(fmt.Sprintf("%v", _m.AddedBudgetMinor))
 	builder.WriteString(", ")
 	builder.WriteString("payment_method=")
 	builder.WriteString(fmt.Sprintf("%v", _m.PaymentMethod))
@@ -324,6 +366,11 @@ func (_m *AdBoost) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("ad_id=")
 	builder.WriteString(fmt.Sprintf("%v", _m.AdID))
+	builder.WriteString(", ")
+	if v := _m.ScheduledStartAt; v != nil {
+		builder.WriteString("scheduled_start_at=")
+		builder.WriteString(v.Format(time.ANSIC))
+	}
 	builder.WriteString(", ")
 	if v := _m.StartsAt; v != nil {
 		builder.WriteString("starts_at=")

@@ -28,6 +28,7 @@ type Viewer struct {
 	Gender            string
 	Topics            []string
 	PersonalizedAds   bool
+	AgeRestricted     bool
 	PremiumAdFree     bool
 	CustomAudienceIds []string
 }

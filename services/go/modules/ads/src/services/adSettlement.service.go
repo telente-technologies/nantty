@@ -90,14 +90,21 @@ func (settlement AdSettlement) settleAccountInTransaction(ctx context.Context, t
 		return err
 	}
 	debitMinor, carry := WholeMinorUnitsAndCarry(account.SpendCarryMicros + totals.spendMicros)
-	creditUsed := min(debitMinor, usableCreditMinor(account, now))
+	creditUsed, err := ConsumeCreditInSpendOrder(ctx, tx, accountId, min(debitMinor, max(account.CreditMinor, 0)), now)
+	if err != nil {
+		return err
+	}
 	balanceUsed := min(debitMinor-creditUsed, account.BalanceMinor)
+	cashbackMinor, err := CashbackForRealSpend(ctx, tx, account.OwnerUserID, balanceUsed)
+	if err != nil {
+		return err
+	}
 	shortfallMinor := debitMinor - creditUsed - balanceUsed
 	if shortfallMinor > 0 {
 		totals.scaleSharesToCollected(creditUsed+balanceUsed, debitMinor)
 	}
 	batch, err := tx.AdSpendBatch.Create().SetAccountID(accountId).SetCurrency(totals.currency).SetImpressionCount(len(totals.ids)).SetSpendMicros(totals.spendMicros).
-		SetDebitedMinor(creditUsed + balanceUsed).SetCreatorShareMicros(totals.creatorMicros).SetPlatformShareMicros(totals.platformMicros).Save(ctx)
+		SetDebitedMinor(creditUsed + balanceUsed).SetCreditUsedMinor(creditUsed).SetCashbackMinor(cashbackMinor).SetCreatorShareMicros(totals.creatorMicros).SetPlatformShareMicros(totals.platformMicros).Save(ctx)
 	if err != nil {
 		return err
 	}
@@ -110,6 +117,9 @@ func (settlement AdSettlement) settleAccountInTransaction(ctx context.Context, t
 	if err := recordSpendTransactions(ctx, tx, accountId, totals.currency, batch.ID, creditUsed, balanceUsed); err != nil {
 		return err
 	}
+	if err := issueCashbackInTransaction(ctx, tx, account, batch.ID, cashbackMinor, now); err != nil {
+		return err
+	}
 	if shortfallMinor > 0 {
 		if err := recordShortfallDebt(ctx, tx, accountId, totals.currency, batch.ID, shortfallMinor); err != nil {
 			return err
@@ -119,19 +129,12 @@ func (settlement AdSettlement) settleAccountInTransaction(ctx context.Context, t
 		return err
 	}
 	if err := events.EnqueueOutboxEventInTransaction(ctx, tx, events.AdSpendBatched, batch.ID.String(), now, events.AdSpendBatchedEventData{
-		BatchId: batch.ID.String(), AccountId: accountId.String(), Currency: totals.currency, DebitMinor: creditUsed + balanceUsed, SpendMicros: totals.spendMicros,
+		BatchId: batch.ID.String(), AccountId: accountId.String(), Currency: totals.currency, DebitMinor: balanceUsed, CreditDebitMinor: creditUsed, SpendMicros: totals.spendMicros,
 		CreatorShareMicros: totals.creatorMicros, PlatformShareMicros: totals.platformMicros, ImpressionCount: len(totals.ids), IdempotencyKey: "adSpend:" + batch.ID.String(),
 	}); err != nil {
 		return err
 	}
 	return settlement.postCreatorEarnings(ctx, tx, totals, batch.ID, now)
-}
-
-func usableCreditMinor(account *ent.AdAccount, now time.Time) int64 {
-	if account.CreditExpiresAt != nil && !account.CreditExpiresAt.After(now) {
-		return 0
-	}
-	return account.CreditMinor
 }
 
 func recordSpendTransactions(ctx context.Context, tx *ent.Tx, accountId uuid.UUID, currency string, batchId uuid.UUID, creditUsed, balanceUsed int64) error {

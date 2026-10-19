@@ -1,6 +1,9 @@
 package dtos
 
-import "zudomart/modules/ads/src/types"
+import (
+	"zudomart/modules/ads/src/interfaces"
+	"zudomart/modules/ads/src/types"
+)
 
 type ClientMetadata struct {
 	Width           int `json:"width"`
@@ -38,4 +41,10 @@ type MediaProcessedRequest struct {
 	Width           int    `json:"width"`
 	Height          int    `json:"height"`
 	DurationSeconds *int   `json:"durationSeconds"`
+}
+
+type PromotableDestination struct {
+	interfaces.PromotedDestination
+	Eligible         bool    `json:"eligible"`
+	IneligibleReason *string `json:"ineligibleReason"`
 }

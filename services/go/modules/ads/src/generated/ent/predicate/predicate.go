@@ -27,14 +27,23 @@ type AdAudienceMember func(*sql.Selector)
 // AdAutomatedRule is the predicate function for adautomatedrule builders.
 type AdAutomatedRule func(*sql.Selector)
 
+// AdBalanceWithdrawal is the predicate function for adbalancewithdrawal builders.
+type AdBalanceWithdrawal func(*sql.Selector)
+
 // AdBoost is the predicate function for adboost builders.
 type AdBoost func(*sql.Selector)
+
+// AdBoostChange is the predicate function for adboostchange builders.
+type AdBoostChange func(*sql.Selector)
 
 // AdCampaign is the predicate function for adcampaign builders.
 type AdCampaign func(*sql.Selector)
 
 // AdCardStatsDaily is the predicate function for adcardstatsdaily builders.
 type AdCardStatsDaily func(*sql.Selector)
+
+// AdCashbackSetting is the predicate function for adcashbacksetting builders.
+type AdCashbackSetting func(*sql.Selector)
 
 // AdContentSignal is the predicate function for adcontentsignal builders.
 type AdContentSignal func(*sql.Selector)
@@ -53,6 +62,9 @@ type AdCreatorMonetisationHold func(*sql.Selector)
 
 // AdCreatorProgramMember is the predicate function for adcreatorprogrammember builders.
 type AdCreatorProgramMember func(*sql.Selector)
+
+// AdCreditLot is the predicate function for adcreditlot builders.
+type AdCreditLot func(*sql.Selector)
 
 // AdCustomAudience is the predicate function for adcustomaudience builders.
 type AdCustomAudience func(*sql.Selector)

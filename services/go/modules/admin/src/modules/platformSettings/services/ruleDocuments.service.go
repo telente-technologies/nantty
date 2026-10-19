@@ -74,6 +74,7 @@ type CheckmarkPricingRules struct {
 	BundleDiscountPercent   int `json:"bundleDiscountPercent"`
 	BundleMaximumBusinesses int `json:"bundleMaximumBusinesses"`
 	BlackGraceDays          int `json:"blackGraceDays"`
+	MultiBusinessRules
 }
 
 func defaultCreatorThresholds() CreatorProgramThresholds {
@@ -103,7 +104,7 @@ func init() {
 			TrialLength: "DAYS_7", YearlyDiscountPercent: 20, MinimumAccountAgeDays: 7, RequiresVerifiedEmail: true, OnePerPerson: true, OnePerCard: true, OnePerDevice: true, MaximumRiskScore: 50,
 		}},
 		CheckmarkPricingKey: {Validate: validateCheckmarkPricing, WritePermission: "config:plans", DefaultValue: CheckmarkPricingRules{
-			BundleDiscountPercent: 15, BundleMaximumBusinesses: 3, BlackGraceDays: 14,
+			BundleDiscountPercent: 15, BundleMaximumBusinesses: 3, BlackGraceDays: 14, MultiBusinessRules: defaultMultiBusinessRules(),
 		}},
 	} {
 		PlatformSettingDefinitions[key] = definition
@@ -194,6 +195,7 @@ func validateCheckmarkPricing(raw json.RawMessage) (json.RawMessage, error) {
 		requireWithin("bundleDiscountPercent", value.BundleDiscountPercent, 0, 90),
 		requireWithin("bundleMaximumBusinesses", value.BundleMaximumBusinesses, 1, 100),
 		requireWithin("blackGraceDays", value.BlackGraceDays, 0, 90),
+		validateMultiBusinessRules(value.MultiBusinessRules),
 	} {
 		if check != nil {
 			return nil, check

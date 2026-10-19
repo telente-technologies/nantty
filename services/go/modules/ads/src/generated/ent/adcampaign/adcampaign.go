@@ -41,6 +41,8 @@ const (
 	FieldEndAt = "end_at"
 	// FieldCreatedByUserID holds the string denoting the created_by_user_id field in the database.
 	FieldCreatedByUserID = "created_by_user_id"
+	// FieldAdCategory holds the string denoting the ad_category field in the database.
+	FieldAdCategory = "ad_category"
 	// FieldUpdatedAt holds the string denoting the updated_at field in the database.
 	FieldUpdatedAt = "updated_at"
 	// Table holds the table name of the adcampaign in the database.
@@ -63,6 +65,7 @@ var Columns = []string{
 	FieldStartAt,
 	FieldEndAt,
 	FieldCreatedByUserID,
+	FieldAdCategory,
 	FieldUpdatedAt,
 }
 
@@ -81,6 +84,10 @@ var (
 	DefaultCreatedAt func() time.Time
 	// NameValidator is a validator for the "name" field. It is called by the builders before save.
 	NameValidator func(string) error
+	// DefaultAdCategory holds the default value on creation for the "ad_category" field.
+	DefaultAdCategory string
+	// AdCategoryValidator is a validator for the "ad_category" field. It is called by the builders before save.
+	AdCategoryValidator func(string) error
 	// DefaultUpdatedAt holds the default value on creation for the "updated_at" field.
 	DefaultUpdatedAt func() time.Time
 	// UpdateDefaultUpdatedAt holds the default value on update for the "updated_at" field.
@@ -290,6 +297,11 @@ func ByEndAt(opts ...sql.OrderTermOption) OrderOption {
 // ByCreatedByUserID orders the results by the created_by_user_id field.
 func ByCreatedByUserID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldCreatedByUserID, opts...).ToFunc()
+}
+
+// ByAdCategory orders the results by the ad_category field.
+func ByAdCategory(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldAdCategory, opts...).ToFunc()
 }
 
 // ByUpdatedAt orders the results by the updated_at field.

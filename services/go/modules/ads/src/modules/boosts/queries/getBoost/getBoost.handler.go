@@ -26,5 +26,5 @@ func (handler Handler) Execute(ctx context.Context, query Query) (dtos.Boost, er
 	if err != nil {
 		return dtos.Boost{}, err
 	}
-	return services.PresentBoost(ctx, handler.Container.Client, row, adsservices.DayKeyInTimezone(handler.Container.Now(), account.Timezone))
+	return services.PresentBoost(ctx, handler.Container.Client, row, adsservices.DayKeyInTimezone(handler.Container.Now(), account.Timezone), handler.Container.Now())
 }

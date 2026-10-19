@@ -50,6 +50,20 @@ func (_c *AdBoostCreate) SetPostID(v string) *AdBoostCreate {
 	return _c
 }
 
+// SetDestinationType sets the "destination_type" field.
+func (_c *AdBoostCreate) SetDestinationType(v adboost.DestinationType) *AdBoostCreate {
+	_c.mutation.SetDestinationType(v)
+	return _c
+}
+
+// SetNillableDestinationType sets the "destination_type" field if the given value is not nil.
+func (_c *AdBoostCreate) SetNillableDestinationType(v *adboost.DestinationType) *AdBoostCreate {
+	if v != nil {
+		_c.SetDestinationType(*v)
+	}
+	return _c
+}
+
 // SetGoal sets the "goal" field.
 func (_c *AdBoostCreate) SetGoal(v adboost.Goal) *AdBoostCreate {
 	_c.mutation.SetGoal(v)
@@ -82,6 +96,20 @@ func (_c *AdBoostCreate) SetCurrency(v string) *AdBoostCreate {
 	return _c
 }
 
+// SetBudgetType sets the "budget_type" field.
+func (_c *AdBoostCreate) SetBudgetType(v adboost.BudgetType) *AdBoostCreate {
+	_c.mutation.SetBudgetType(v)
+	return _c
+}
+
+// SetNillableBudgetType sets the "budget_type" field if the given value is not nil.
+func (_c *AdBoostCreate) SetNillableBudgetType(v *adboost.BudgetType) *AdBoostCreate {
+	if v != nil {
+		_c.SetBudgetType(*v)
+	}
+	return _c
+}
+
 // SetDailyBudgetMinor sets the "daily_budget_minor" field.
 func (_c *AdBoostCreate) SetDailyBudgetMinor(v int64) *AdBoostCreate {
 	_c.mutation.SetDailyBudgetMinor(v)
@@ -97,6 +125,20 @@ func (_c *AdBoostCreate) SetDurationDays(v int) *AdBoostCreate {
 // SetTotalBudgetMinor sets the "total_budget_minor" field.
 func (_c *AdBoostCreate) SetTotalBudgetMinor(v int64) *AdBoostCreate {
 	_c.mutation.SetTotalBudgetMinor(v)
+	return _c
+}
+
+// SetAddedBudgetMinor sets the "added_budget_minor" field.
+func (_c *AdBoostCreate) SetAddedBudgetMinor(v int64) *AdBoostCreate {
+	_c.mutation.SetAddedBudgetMinor(v)
+	return _c
+}
+
+// SetNillableAddedBudgetMinor sets the "added_budget_minor" field if the given value is not nil.
+func (_c *AdBoostCreate) SetNillableAddedBudgetMinor(v *int64) *AdBoostCreate {
+	if v != nil {
+		_c.SetAddedBudgetMinor(*v)
+	}
 	return _c
 }
 
@@ -153,6 +195,20 @@ func (_c *AdBoostCreate) SetAdGroupID(v uuid.UUID) *AdBoostCreate {
 // SetAdID sets the "ad_id" field.
 func (_c *AdBoostCreate) SetAdID(v uuid.UUID) *AdBoostCreate {
 	_c.mutation.SetAdID(v)
+	return _c
+}
+
+// SetScheduledStartAt sets the "scheduled_start_at" field.
+func (_c *AdBoostCreate) SetScheduledStartAt(v time.Time) *AdBoostCreate {
+	_c.mutation.SetScheduledStartAt(v)
+	return _c
+}
+
+// SetNillableScheduledStartAt sets the "scheduled_start_at" field if the given value is not nil.
+func (_c *AdBoostCreate) SetNillableScheduledStartAt(v *time.Time) *AdBoostCreate {
+	if v != nil {
+		_c.SetScheduledStartAt(*v)
+	}
 	return _c
 }
 
@@ -265,9 +321,21 @@ func (_c *AdBoostCreate) defaults() {
 		v := adboost.DefaultCreatedAt()
 		_c.mutation.SetCreatedAt(v)
 	}
+	if _, ok := _c.mutation.DestinationType(); !ok {
+		v := adboost.DefaultDestinationType
+		_c.mutation.SetDestinationType(v)
+	}
 	if _, ok := _c.mutation.Status(); !ok {
 		v := adboost.DefaultStatus
 		_c.mutation.SetStatus(v)
+	}
+	if _, ok := _c.mutation.BudgetType(); !ok {
+		v := adboost.DefaultBudgetType
+		_c.mutation.SetBudgetType(v)
+	}
+	if _, ok := _c.mutation.AddedBudgetMinor(); !ok {
+		v := adboost.DefaultAddedBudgetMinor
+		_c.mutation.SetAddedBudgetMinor(v)
 	}
 	if _, ok := _c.mutation.PaymentTopUpID(); !ok {
 		v := adboost.DefaultPaymentTopUpID
@@ -303,6 +371,14 @@ func (_c *AdBoostCreate) check() error {
 			return &ValidationError{Name: "post_id", err: fmt.Errorf(`ent: validator failed for field "AdBoost.post_id": %w`, err)}
 		}
 	}
+	if _, ok := _c.mutation.DestinationType(); !ok {
+		return &ValidationError{Name: "destination_type", err: errors.New(`ent: missing required field "AdBoost.destination_type"`)}
+	}
+	if v, ok := _c.mutation.DestinationType(); ok {
+		if err := adboost.DestinationTypeValidator(v); err != nil {
+			return &ValidationError{Name: "destination_type", err: fmt.Errorf(`ent: validator failed for field "AdBoost.destination_type": %w`, err)}
+		}
+	}
 	if _, ok := _c.mutation.Goal(); !ok {
 		return &ValidationError{Name: "goal", err: errors.New(`ent: missing required field "AdBoost.goal"`)}
 	}
@@ -330,6 +406,14 @@ func (_c *AdBoostCreate) check() error {
 			return &ValidationError{Name: "currency", err: fmt.Errorf(`ent: validator failed for field "AdBoost.currency": %w`, err)}
 		}
 	}
+	if _, ok := _c.mutation.BudgetType(); !ok {
+		return &ValidationError{Name: "budget_type", err: errors.New(`ent: missing required field "AdBoost.budget_type"`)}
+	}
+	if v, ok := _c.mutation.BudgetType(); ok {
+		if err := adboost.BudgetTypeValidator(v); err != nil {
+			return &ValidationError{Name: "budget_type", err: fmt.Errorf(`ent: validator failed for field "AdBoost.budget_type": %w`, err)}
+		}
+	}
 	if _, ok := _c.mutation.DailyBudgetMinor(); !ok {
 		return &ValidationError{Name: "daily_budget_minor", err: errors.New(`ent: missing required field "AdBoost.daily_budget_minor"`)}
 	}
@@ -338,6 +422,9 @@ func (_c *AdBoostCreate) check() error {
 	}
 	if _, ok := _c.mutation.TotalBudgetMinor(); !ok {
 		return &ValidationError{Name: "total_budget_minor", err: errors.New(`ent: missing required field "AdBoost.total_budget_minor"`)}
+	}
+	if _, ok := _c.mutation.AddedBudgetMinor(); !ok {
+		return &ValidationError{Name: "added_budget_minor", err: errors.New(`ent: missing required field "AdBoost.added_budget_minor"`)}
 	}
 	if _, ok := _c.mutation.PaymentMethod(); !ok {
 		return &ValidationError{Name: "payment_method", err: errors.New(`ent: missing required field "AdBoost.payment_method"`)}
@@ -442,6 +529,10 @@ func (_c *AdBoostCreate) createSpec() (*AdBoost, *sqlgraph.CreateSpec) {
 		_spec.SetField(adboost.FieldPostID, field.TypeString, value)
 		_node.PostID = value
 	}
+	if value, ok := _c.mutation.DestinationType(); ok {
+		_spec.SetField(adboost.FieldDestinationType, field.TypeEnum, value)
+		_node.DestinationType = value
+	}
 	if value, ok := _c.mutation.Goal(); ok {
 		_spec.SetField(adboost.FieldGoal, field.TypeEnum, value)
 		_node.Goal = value
@@ -458,6 +549,10 @@ func (_c *AdBoostCreate) createSpec() (*AdBoost, *sqlgraph.CreateSpec) {
 		_spec.SetField(adboost.FieldCurrency, field.TypeString, value)
 		_node.Currency = value
 	}
+	if value, ok := _c.mutation.BudgetType(); ok {
+		_spec.SetField(adboost.FieldBudgetType, field.TypeEnum, value)
+		_node.BudgetType = value
+	}
 	if value, ok := _c.mutation.DailyBudgetMinor(); ok {
 		_spec.SetField(adboost.FieldDailyBudgetMinor, field.TypeInt64, value)
 		_node.DailyBudgetMinor = value
@@ -469,6 +564,10 @@ func (_c *AdBoostCreate) createSpec() (*AdBoost, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.TotalBudgetMinor(); ok {
 		_spec.SetField(adboost.FieldTotalBudgetMinor, field.TypeInt64, value)
 		_node.TotalBudgetMinor = value
+	}
+	if value, ok := _c.mutation.AddedBudgetMinor(); ok {
+		_spec.SetField(adboost.FieldAddedBudgetMinor, field.TypeInt64, value)
+		_node.AddedBudgetMinor = value
 	}
 	if value, ok := _c.mutation.PaymentMethod(); ok {
 		_spec.SetField(adboost.FieldPaymentMethod, field.TypeEnum, value)
@@ -501,6 +600,10 @@ func (_c *AdBoostCreate) createSpec() (*AdBoost, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.AdID(); ok {
 		_spec.SetField(adboost.FieldAdID, field.TypeUUID, value)
 		_node.AdID = value
+	}
+	if value, ok := _c.mutation.ScheduledStartAt(); ok {
+		_spec.SetField(adboost.FieldScheduledStartAt, field.TypeTime, value)
+		_node.ScheduledStartAt = &value
 	}
 	if value, ok := _c.mutation.StartsAt(); ok {
 		_spec.SetField(adboost.FieldStartsAt, field.TypeTime, value)
@@ -582,6 +685,78 @@ func (u *AdBoostUpsert) UpdateStatus() *AdBoostUpsert {
 	return u
 }
 
+// SetDailyBudgetMinor sets the "daily_budget_minor" field.
+func (u *AdBoostUpsert) SetDailyBudgetMinor(v int64) *AdBoostUpsert {
+	u.Set(adboost.FieldDailyBudgetMinor, v)
+	return u
+}
+
+// UpdateDailyBudgetMinor sets the "daily_budget_minor" field to the value that was provided on create.
+func (u *AdBoostUpsert) UpdateDailyBudgetMinor() *AdBoostUpsert {
+	u.SetExcluded(adboost.FieldDailyBudgetMinor)
+	return u
+}
+
+// AddDailyBudgetMinor adds v to the "daily_budget_minor" field.
+func (u *AdBoostUpsert) AddDailyBudgetMinor(v int64) *AdBoostUpsert {
+	u.Add(adboost.FieldDailyBudgetMinor, v)
+	return u
+}
+
+// SetDurationDays sets the "duration_days" field.
+func (u *AdBoostUpsert) SetDurationDays(v int) *AdBoostUpsert {
+	u.Set(adboost.FieldDurationDays, v)
+	return u
+}
+
+// UpdateDurationDays sets the "duration_days" field to the value that was provided on create.
+func (u *AdBoostUpsert) UpdateDurationDays() *AdBoostUpsert {
+	u.SetExcluded(adboost.FieldDurationDays)
+	return u
+}
+
+// AddDurationDays adds v to the "duration_days" field.
+func (u *AdBoostUpsert) AddDurationDays(v int) *AdBoostUpsert {
+	u.Add(adboost.FieldDurationDays, v)
+	return u
+}
+
+// SetTotalBudgetMinor sets the "total_budget_minor" field.
+func (u *AdBoostUpsert) SetTotalBudgetMinor(v int64) *AdBoostUpsert {
+	u.Set(adboost.FieldTotalBudgetMinor, v)
+	return u
+}
+
+// UpdateTotalBudgetMinor sets the "total_budget_minor" field to the value that was provided on create.
+func (u *AdBoostUpsert) UpdateTotalBudgetMinor() *AdBoostUpsert {
+	u.SetExcluded(adboost.FieldTotalBudgetMinor)
+	return u
+}
+
+// AddTotalBudgetMinor adds v to the "total_budget_minor" field.
+func (u *AdBoostUpsert) AddTotalBudgetMinor(v int64) *AdBoostUpsert {
+	u.Add(adboost.FieldTotalBudgetMinor, v)
+	return u
+}
+
+// SetAddedBudgetMinor sets the "added_budget_minor" field.
+func (u *AdBoostUpsert) SetAddedBudgetMinor(v int64) *AdBoostUpsert {
+	u.Set(adboost.FieldAddedBudgetMinor, v)
+	return u
+}
+
+// UpdateAddedBudgetMinor sets the "added_budget_minor" field to the value that was provided on create.
+func (u *AdBoostUpsert) UpdateAddedBudgetMinor() *AdBoostUpsert {
+	u.SetExcluded(adboost.FieldAddedBudgetMinor)
+	return u
+}
+
+// AddAddedBudgetMinor adds v to the "added_budget_minor" field.
+func (u *AdBoostUpsert) AddAddedBudgetMinor(v int64) *AdBoostUpsert {
+	u.Add(adboost.FieldAddedBudgetMinor, v)
+	return u
+}
+
 // SetPaymentTopUpID sets the "payment_top_up_id" field.
 func (u *AdBoostUpsert) SetPaymentTopUpID(v string) *AdBoostUpsert {
 	u.Set(adboost.FieldPaymentTopUpID, v)
@@ -591,6 +766,24 @@ func (u *AdBoostUpsert) SetPaymentTopUpID(v string) *AdBoostUpsert {
 // UpdatePaymentTopUpID sets the "payment_top_up_id" field to the value that was provided on create.
 func (u *AdBoostUpsert) UpdatePaymentTopUpID() *AdBoostUpsert {
 	u.SetExcluded(adboost.FieldPaymentTopUpID)
+	return u
+}
+
+// SetScheduledStartAt sets the "scheduled_start_at" field.
+func (u *AdBoostUpsert) SetScheduledStartAt(v time.Time) *AdBoostUpsert {
+	u.Set(adboost.FieldScheduledStartAt, v)
+	return u
+}
+
+// UpdateScheduledStartAt sets the "scheduled_start_at" field to the value that was provided on create.
+func (u *AdBoostUpsert) UpdateScheduledStartAt() *AdBoostUpsert {
+	u.SetExcluded(adboost.FieldScheduledStartAt)
+	return u
+}
+
+// ClearScheduledStartAt clears the value of the "scheduled_start_at" field.
+func (u *AdBoostUpsert) ClearScheduledStartAt() *AdBoostUpsert {
+	u.SetNull(adboost.FieldScheduledStartAt)
 	return u
 }
 
@@ -680,6 +873,9 @@ func (u *AdBoostUpsertOne) UpdateNewValues() *AdBoostUpsertOne {
 		if _, exists := u.create.mutation.PostID(); exists {
 			s.SetIgnore(adboost.FieldPostID)
 		}
+		if _, exists := u.create.mutation.DestinationType(); exists {
+			s.SetIgnore(adboost.FieldDestinationType)
+		}
 		if _, exists := u.create.mutation.Goal(); exists {
 			s.SetIgnore(adboost.FieldGoal)
 		}
@@ -689,14 +885,8 @@ func (u *AdBoostUpsertOne) UpdateNewValues() *AdBoostUpsertOne {
 		if _, exists := u.create.mutation.Currency(); exists {
 			s.SetIgnore(adboost.FieldCurrency)
 		}
-		if _, exists := u.create.mutation.DailyBudgetMinor(); exists {
-			s.SetIgnore(adboost.FieldDailyBudgetMinor)
-		}
-		if _, exists := u.create.mutation.DurationDays(); exists {
-			s.SetIgnore(adboost.FieldDurationDays)
-		}
-		if _, exists := u.create.mutation.TotalBudgetMinor(); exists {
-			s.SetIgnore(adboost.FieldTotalBudgetMinor)
+		if _, exists := u.create.mutation.BudgetType(); exists {
+			s.SetIgnore(adboost.FieldBudgetType)
 		}
 		if _, exists := u.create.mutation.PaymentMethod(); exists {
 			s.SetIgnore(adboost.FieldPaymentMethod)
@@ -764,6 +954,90 @@ func (u *AdBoostUpsertOne) UpdateStatus() *AdBoostUpsertOne {
 	})
 }
 
+// SetDailyBudgetMinor sets the "daily_budget_minor" field.
+func (u *AdBoostUpsertOne) SetDailyBudgetMinor(v int64) *AdBoostUpsertOne {
+	return u.Update(func(s *AdBoostUpsert) {
+		s.SetDailyBudgetMinor(v)
+	})
+}
+
+// AddDailyBudgetMinor adds v to the "daily_budget_minor" field.
+func (u *AdBoostUpsertOne) AddDailyBudgetMinor(v int64) *AdBoostUpsertOne {
+	return u.Update(func(s *AdBoostUpsert) {
+		s.AddDailyBudgetMinor(v)
+	})
+}
+
+// UpdateDailyBudgetMinor sets the "daily_budget_minor" field to the value that was provided on create.
+func (u *AdBoostUpsertOne) UpdateDailyBudgetMinor() *AdBoostUpsertOne {
+	return u.Update(func(s *AdBoostUpsert) {
+		s.UpdateDailyBudgetMinor()
+	})
+}
+
+// SetDurationDays sets the "duration_days" field.
+func (u *AdBoostUpsertOne) SetDurationDays(v int) *AdBoostUpsertOne {
+	return u.Update(func(s *AdBoostUpsert) {
+		s.SetDurationDays(v)
+	})
+}
+
+// AddDurationDays adds v to the "duration_days" field.
+func (u *AdBoostUpsertOne) AddDurationDays(v int) *AdBoostUpsertOne {
+	return u.Update(func(s *AdBoostUpsert) {
+		s.AddDurationDays(v)
+	})
+}
+
+// UpdateDurationDays sets the "duration_days" field to the value that was provided on create.
+func (u *AdBoostUpsertOne) UpdateDurationDays() *AdBoostUpsertOne {
+	return u.Update(func(s *AdBoostUpsert) {
+		s.UpdateDurationDays()
+	})
+}
+
+// SetTotalBudgetMinor sets the "total_budget_minor" field.
+func (u *AdBoostUpsertOne) SetTotalBudgetMinor(v int64) *AdBoostUpsertOne {
+	return u.Update(func(s *AdBoostUpsert) {
+		s.SetTotalBudgetMinor(v)
+	})
+}
+
+// AddTotalBudgetMinor adds v to the "total_budget_minor" field.
+func (u *AdBoostUpsertOne) AddTotalBudgetMinor(v int64) *AdBoostUpsertOne {
+	return u.Update(func(s *AdBoostUpsert) {
+		s.AddTotalBudgetMinor(v)
+	})
+}
+
+// UpdateTotalBudgetMinor sets the "total_budget_minor" field to the value that was provided on create.
+func (u *AdBoostUpsertOne) UpdateTotalBudgetMinor() *AdBoostUpsertOne {
+	return u.Update(func(s *AdBoostUpsert) {
+		s.UpdateTotalBudgetMinor()
+	})
+}
+
+// SetAddedBudgetMinor sets the "added_budget_minor" field.
+func (u *AdBoostUpsertOne) SetAddedBudgetMinor(v int64) *AdBoostUpsertOne {
+	return u.Update(func(s *AdBoostUpsert) {
+		s.SetAddedBudgetMinor(v)
+	})
+}
+
+// AddAddedBudgetMinor adds v to the "added_budget_minor" field.
+func (u *AdBoostUpsertOne) AddAddedBudgetMinor(v int64) *AdBoostUpsertOne {
+	return u.Update(func(s *AdBoostUpsert) {
+		s.AddAddedBudgetMinor(v)
+	})
+}
+
+// UpdateAddedBudgetMinor sets the "added_budget_minor" field to the value that was provided on create.
+func (u *AdBoostUpsertOne) UpdateAddedBudgetMinor() *AdBoostUpsertOne {
+	return u.Update(func(s *AdBoostUpsert) {
+		s.UpdateAddedBudgetMinor()
+	})
+}
+
 // SetPaymentTopUpID sets the "payment_top_up_id" field.
 func (u *AdBoostUpsertOne) SetPaymentTopUpID(v string) *AdBoostUpsertOne {
 	return u.Update(func(s *AdBoostUpsert) {
@@ -775,6 +1049,27 @@ func (u *AdBoostUpsertOne) SetPaymentTopUpID(v string) *AdBoostUpsertOne {
 func (u *AdBoostUpsertOne) UpdatePaymentTopUpID() *AdBoostUpsertOne {
 	return u.Update(func(s *AdBoostUpsert) {
 		s.UpdatePaymentTopUpID()
+	})
+}
+
+// SetScheduledStartAt sets the "scheduled_start_at" field.
+func (u *AdBoostUpsertOne) SetScheduledStartAt(v time.Time) *AdBoostUpsertOne {
+	return u.Update(func(s *AdBoostUpsert) {
+		s.SetScheduledStartAt(v)
+	})
+}
+
+// UpdateScheduledStartAt sets the "scheduled_start_at" field to the value that was provided on create.
+func (u *AdBoostUpsertOne) UpdateScheduledStartAt() *AdBoostUpsertOne {
+	return u.Update(func(s *AdBoostUpsert) {
+		s.UpdateScheduledStartAt()
+	})
+}
+
+// ClearScheduledStartAt clears the value of the "scheduled_start_at" field.
+func (u *AdBoostUpsertOne) ClearScheduledStartAt() *AdBoostUpsertOne {
+	return u.Update(func(s *AdBoostUpsert) {
+		s.ClearScheduledStartAt()
 	})
 }
 
@@ -1040,6 +1335,9 @@ func (u *AdBoostUpsertBulk) UpdateNewValues() *AdBoostUpsertBulk {
 			if _, exists := b.mutation.PostID(); exists {
 				s.SetIgnore(adboost.FieldPostID)
 			}
+			if _, exists := b.mutation.DestinationType(); exists {
+				s.SetIgnore(adboost.FieldDestinationType)
+			}
 			if _, exists := b.mutation.Goal(); exists {
 				s.SetIgnore(adboost.FieldGoal)
 			}
@@ -1049,14 +1347,8 @@ func (u *AdBoostUpsertBulk) UpdateNewValues() *AdBoostUpsertBulk {
 			if _, exists := b.mutation.Currency(); exists {
 				s.SetIgnore(adboost.FieldCurrency)
 			}
-			if _, exists := b.mutation.DailyBudgetMinor(); exists {
-				s.SetIgnore(adboost.FieldDailyBudgetMinor)
-			}
-			if _, exists := b.mutation.DurationDays(); exists {
-				s.SetIgnore(adboost.FieldDurationDays)
-			}
-			if _, exists := b.mutation.TotalBudgetMinor(); exists {
-				s.SetIgnore(adboost.FieldTotalBudgetMinor)
+			if _, exists := b.mutation.BudgetType(); exists {
+				s.SetIgnore(adboost.FieldBudgetType)
 			}
 			if _, exists := b.mutation.PaymentMethod(); exists {
 				s.SetIgnore(adboost.FieldPaymentMethod)
@@ -1125,6 +1417,90 @@ func (u *AdBoostUpsertBulk) UpdateStatus() *AdBoostUpsertBulk {
 	})
 }
 
+// SetDailyBudgetMinor sets the "daily_budget_minor" field.
+func (u *AdBoostUpsertBulk) SetDailyBudgetMinor(v int64) *AdBoostUpsertBulk {
+	return u.Update(func(s *AdBoostUpsert) {
+		s.SetDailyBudgetMinor(v)
+	})
+}
+
+// AddDailyBudgetMinor adds v to the "daily_budget_minor" field.
+func (u *AdBoostUpsertBulk) AddDailyBudgetMinor(v int64) *AdBoostUpsertBulk {
+	return u.Update(func(s *AdBoostUpsert) {
+		s.AddDailyBudgetMinor(v)
+	})
+}
+
+// UpdateDailyBudgetMinor sets the "daily_budget_minor" field to the value that was provided on create.
+func (u *AdBoostUpsertBulk) UpdateDailyBudgetMinor() *AdBoostUpsertBulk {
+	return u.Update(func(s *AdBoostUpsert) {
+		s.UpdateDailyBudgetMinor()
+	})
+}
+
+// SetDurationDays sets the "duration_days" field.
+func (u *AdBoostUpsertBulk) SetDurationDays(v int) *AdBoostUpsertBulk {
+	return u.Update(func(s *AdBoostUpsert) {
+		s.SetDurationDays(v)
+	})
+}
+
+// AddDurationDays adds v to the "duration_days" field.
+func (u *AdBoostUpsertBulk) AddDurationDays(v int) *AdBoostUpsertBulk {
+	return u.Update(func(s *AdBoostUpsert) {
+		s.AddDurationDays(v)
+	})
+}
+
+// UpdateDurationDays sets the "duration_days" field to the value that was provided on create.
+func (u *AdBoostUpsertBulk) UpdateDurationDays() *AdBoostUpsertBulk {
+	return u.Update(func(s *AdBoostUpsert) {
+		s.UpdateDurationDays()
+	})
+}
+
+// SetTotalBudgetMinor sets the "total_budget_minor" field.
+func (u *AdBoostUpsertBulk) SetTotalBudgetMinor(v int64) *AdBoostUpsertBulk {
+	return u.Update(func(s *AdBoostUpsert) {
+		s.SetTotalBudgetMinor(v)
+	})
+}
+
+// AddTotalBudgetMinor adds v to the "total_budget_minor" field.
+func (u *AdBoostUpsertBulk) AddTotalBudgetMinor(v int64) *AdBoostUpsertBulk {
+	return u.Update(func(s *AdBoostUpsert) {
+		s.AddTotalBudgetMinor(v)
+	})
+}
+
+// UpdateTotalBudgetMinor sets the "total_budget_minor" field to the value that was provided on create.
+func (u *AdBoostUpsertBulk) UpdateTotalBudgetMinor() *AdBoostUpsertBulk {
+	return u.Update(func(s *AdBoostUpsert) {
+		s.UpdateTotalBudgetMinor()
+	})
+}
+
+// SetAddedBudgetMinor sets the "added_budget_minor" field.
+func (u *AdBoostUpsertBulk) SetAddedBudgetMinor(v int64) *AdBoostUpsertBulk {
+	return u.Update(func(s *AdBoostUpsert) {
+		s.SetAddedBudgetMinor(v)
+	})
+}
+
+// AddAddedBudgetMinor adds v to the "added_budget_minor" field.
+func (u *AdBoostUpsertBulk) AddAddedBudgetMinor(v int64) *AdBoostUpsertBulk {
+	return u.Update(func(s *AdBoostUpsert) {
+		s.AddAddedBudgetMinor(v)
+	})
+}
+
+// UpdateAddedBudgetMinor sets the "added_budget_minor" field to the value that was provided on create.
+func (u *AdBoostUpsertBulk) UpdateAddedBudgetMinor() *AdBoostUpsertBulk {
+	return u.Update(func(s *AdBoostUpsert) {
+		s.UpdateAddedBudgetMinor()
+	})
+}
+
 // SetPaymentTopUpID sets the "payment_top_up_id" field.
 func (u *AdBoostUpsertBulk) SetPaymentTopUpID(v string) *AdBoostUpsertBulk {
 	return u.Update(func(s *AdBoostUpsert) {
@@ -1136,6 +1512,27 @@ func (u *AdBoostUpsertBulk) SetPaymentTopUpID(v string) *AdBoostUpsertBulk {
 func (u *AdBoostUpsertBulk) UpdatePaymentTopUpID() *AdBoostUpsertBulk {
 	return u.Update(func(s *AdBoostUpsert) {
 		s.UpdatePaymentTopUpID()
+	})
+}
+
+// SetScheduledStartAt sets the "scheduled_start_at" field.
+func (u *AdBoostUpsertBulk) SetScheduledStartAt(v time.Time) *AdBoostUpsertBulk {
+	return u.Update(func(s *AdBoostUpsert) {
+		s.SetScheduledStartAt(v)
+	})
+}
+
+// UpdateScheduledStartAt sets the "scheduled_start_at" field to the value that was provided on create.
+func (u *AdBoostUpsertBulk) UpdateScheduledStartAt() *AdBoostUpsertBulk {
+	return u.Update(func(s *AdBoostUpsert) {
+		s.UpdateScheduledStartAt()
+	})
+}
+
+// ClearScheduledStartAt clears the value of the "scheduled_start_at" field.
+func (u *AdBoostUpsertBulk) ClearScheduledStartAt() *AdBoostUpsertBulk {
+	return u.Update(func(s *AdBoostUpsert) {
+		s.ClearScheduledStartAt()
 	})
 }
 

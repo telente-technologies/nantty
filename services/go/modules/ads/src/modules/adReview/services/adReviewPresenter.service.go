@@ -35,6 +35,7 @@ func PresentAdForReview(row *ent.Ad, account *ent.AdAccount, campaign *ent.AdCam
 		Creative:  dtos.ReviewCreative{Format: kind, ImageUrl: imageUrl, Headline: creative.Headline, PrimaryText: creative.PrimaryText, CallToAction: creative.CallToAction, LandingUrl: landingUrl(creative.Destination), Type: creative.Type, Cards: reviewCards(creative), App: creative.App},
 		Targeting: presentTargeting(group), DailyBudget: dailyBudgetOf(campaign, group, account.Currency), TotalBudget: totalBudgetOf(campaign, group, account.Currency),
 		Schedule: dtos.ReviewSchedule{StartsAt: group.StartAt.UTC().Format(time.RFC3339)}, AutoCheckFlags: row.AutoCheckFlags, Status: reviewStatusLabels[row.ReviewStatus],
+		AdCategory: adsservices.EffectiveAdCategory(row, campaign), AgeRestricted: adsservices.IsAgeRestrictedAd(row, campaign),
 	}
 	if presented.AutoCheckFlags == nil {
 		presented.AutoCheckFlags = []types.AutoCheckFlag{}

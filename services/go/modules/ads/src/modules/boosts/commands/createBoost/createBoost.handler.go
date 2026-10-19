@@ -21,18 +21,22 @@ type Handler struct{ Container *container.Container }
 
 func (handler Handler) Execute(ctx context.Context, command Command) (dtos.CreatedBoost, error) {
 	deployed := handler.Container
+	command.Request.BoostEstimateRequest = services.NormalizeBoostBudget(services.NormalizeBoostDestination(command.Request.BoostEstimateRequest))
 	if command.Request.DailyBudget.Currency != command.Country.Currency {
 		return dtos.CreatedBoost{}, adserrors.BoostCurrencyNotAllowed
 	}
 	floors := deployed.Pricing.FloorsForCountries(ctx, services.BoostTargetCountries(command.Request.Audience), command.Request.DailyBudget.Currency)
-	if err := validators.ValidateCreate(command.Request, floors.BoostMinimumDailyMinor); err != nil {
+	if err := validators.ValidateCreate(command.Request, floors.BoostMinimumDailyMinor, deployed.Now()); err != nil {
 		return dtos.CreatedBoost{}, err
 	}
 	hash := hashRequest(command.Request)
 	if existing, found, err := handler.findExisting(ctx, command, hash); found || err != nil {
 		return handler.present(ctx, command, existing, err)
 	}
-	total := command.Request.DailyBudget.AmountMinor * int64(command.Request.DurationDays)
+	if err := handler.requireOwnedDestination(ctx, command); err != nil {
+		return dtos.CreatedBoost{}, err
+	}
+	total := services.BoostTotalBudgetMinor(command.Request.BoostEstimateRequest)
 	method := command.Request.PaymentMethod
 	if err := handler.checkPaymentMethod(ctx, command, total, floors.BoostMinimumDailyMinor); err != nil {
 		return dtos.CreatedBoost{}, err
@@ -139,6 +143,6 @@ func (handler Handler) present(ctx context.Context, command Command, row *ent.Ad
 		}
 		created.CheckoutUrl = &checkoutUrl
 	}
-	created.Boost, err = services.PresentBoost(ctx, handler.Container.Client, row, adsservices.DayKeyInTimezone(handler.Container.Now(), account.Timezone))
+	created.Boost, err = services.PresentBoost(ctx, handler.Container.Client, row, adsservices.DayKeyInTimezone(handler.Container.Now(), account.Timezone), handler.Container.Now())
 	return created, err
 }

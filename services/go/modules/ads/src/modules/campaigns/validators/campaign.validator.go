@@ -6,6 +6,7 @@ import (
 	"strings"
 	"time"
 
+	"zudomart/modules/ads/src/constants"
 	audienceservices "zudomart/modules/ads/src/modules/audiences/services"
 	"zudomart/modules/ads/src/modules/campaigns/dtos"
 	"zudomart/modules/ads/src/services"
@@ -120,6 +121,13 @@ func ValidateCampaignInput(input dtos.CampaignInput, currency string, floors Pri
 	}
 	if input.SpendCap != nil {
 		validateMoney(*input.SpendCap, currency, path+".spendCap", issues)
+	}
+	ValidateAdCategory(input.AdCategory, issues, path+".adCategory")
+}
+
+func ValidateAdCategory(category string, issues *Issues, path string) {
+	if category != "" && !constants.IsKnownAdCategory(category) {
+		issues.Add(path, "Choose the ad category that fits what you advertise.")
 	}
 }
 

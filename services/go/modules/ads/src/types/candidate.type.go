@@ -35,6 +35,7 @@ type CandidateAd struct {
 	ExperimentId          string
 	ExperimentBucketFrom  int
 	ExperimentBucketTo    int
+	AgeRestricted         bool
 }
 
 type ContentSignal struct {

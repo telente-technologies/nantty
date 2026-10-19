@@ -33,6 +33,9 @@ func ApplyCampaignInput(create *ent.AdCampaignCreate, input dtos.CampaignInput) 
 	if input.SpendCap != nil {
 		create.SetSpendCapMinor(input.SpendCap.AmountMinor)
 	}
+	if input.AdCategory != "" {
+		create.SetAdCategory(input.AdCategory)
+	}
 	return create
 }
 
@@ -71,5 +74,5 @@ func AdSetInputFromRow(group *ent.AdGroup, currency string) dtos.AdSetInput {
 
 func CampaignInputFromRow(campaign *ent.AdCampaign, currency string) dtos.CampaignInput {
 	presented := PresentCampaign(campaign, currency, 0, 0, 0, dtos.DeliverySummary{})
-	return dtos.CampaignInput{Name: presented.Name, Objective: presented.Objective, BudgetLevel: presented.BudgetLevel, Budget: presented.Budget, SpendCap: presented.SpendCap, Schedule: presented.Schedule}
+	return dtos.CampaignInput{Name: presented.Name, Objective: presented.Objective, BudgetLevel: presented.BudgetLevel, Budget: presented.Budget, SpendCap: presented.SpendCap, Schedule: presented.Schedule, AdCategory: presented.AdCategory}
 }

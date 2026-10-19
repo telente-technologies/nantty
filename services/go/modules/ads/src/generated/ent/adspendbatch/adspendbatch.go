@@ -30,6 +30,12 @@ const (
 	FieldCreatorShareMicros = "creator_share_micros"
 	// FieldPlatformShareMicros holds the string denoting the platform_share_micros field in the database.
 	FieldPlatformShareMicros = "platform_share_micros"
+	// FieldCreditUsedMinor holds the string denoting the credit_used_minor field in the database.
+	FieldCreditUsedMinor = "credit_used_minor"
+	// FieldCashbackMinor holds the string denoting the cashback_minor field in the database.
+	FieldCashbackMinor = "cashback_minor"
+	// FieldRefundedMinor holds the string denoting the refunded_minor field in the database.
+	FieldRefundedMinor = "refunded_minor"
 	// Table holds the table name of the adspendbatch in the database.
 	Table = "ad_spend_batches"
 )
@@ -45,6 +51,9 @@ var Columns = []string{
 	FieldDebitedMinor,
 	FieldCreatorShareMicros,
 	FieldPlatformShareMicros,
+	FieldCreditUsedMinor,
+	FieldCashbackMinor,
+	FieldRefundedMinor,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -62,6 +71,12 @@ var (
 	DefaultCreatedAt func() time.Time
 	// CurrencyValidator is a validator for the "currency" field. It is called by the builders before save.
 	CurrencyValidator func(string) error
+	// DefaultCreditUsedMinor holds the default value on creation for the "credit_used_minor" field.
+	DefaultCreditUsedMinor int64
+	// DefaultCashbackMinor holds the default value on creation for the "cashback_minor" field.
+	DefaultCashbackMinor int64
+	// DefaultRefundedMinor holds the default value on creation for the "refunded_minor" field.
+	DefaultRefundedMinor int64
 	// DefaultID holds the default value on creation for the "id" field.
 	DefaultID func() uuid.UUID
 )
@@ -112,4 +127,19 @@ func ByCreatorShareMicros(opts ...sql.OrderTermOption) OrderOption {
 // ByPlatformShareMicros orders the results by the platform_share_micros field.
 func ByPlatformShareMicros(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldPlatformShareMicros, opts...).ToFunc()
+}
+
+// ByCreditUsedMinor orders the results by the credit_used_minor field.
+func ByCreditUsedMinor(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldCreditUsedMinor, opts...).ToFunc()
+}
+
+// ByCashbackMinor orders the results by the cashback_minor field.
+func ByCashbackMinor(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldCashbackMinor, opts...).ToFunc()
+}
+
+// ByRefundedMinor orders the results by the refunded_minor field.
+func ByRefundedMinor(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldRefundedMinor, opts...).ToFunc()
 }

@@ -13,6 +13,7 @@ import (
 	"zudomart/modules/ads/src/modules/creatives/dtos"
 	getmedia "zudomart/modules/ads/src/modules/creatives/queries/getMedia"
 	listcontentsources "zudomart/modules/ads/src/modules/creatives/queries/listContentSources"
+	listpromotabledestinations "zudomart/modules/ads/src/modules/creatives/queries/listPromotableDestinations"
 	"zudomart/modules/ads/src/utils"
 	"zudomart/platform/httpserver"
 )
@@ -49,6 +50,17 @@ func (controller CreativesController) ListContentSources(writer http.ResponseWri
 			return err
 		}
 		httpserver.WriteJsonResponse(writer, http.StatusOK, httpserver.NewCursorPage(items, next))
+		return nil
+	})
+}
+
+func (controller CreativesController) ListPromotableDestinations(writer http.ResponseWriter, request *http.Request) {
+	controller.run(writer, request, func(user, account uuid.UUID) error {
+		destinations, err := (listpromotabledestinations.Handler{Container: controller.Container}).Execute(request.Context(), listpromotabledestinations.Query{AccountId: account, UserId: user, Kind: request.URL.Query().Get("type")})
+		if err != nil {
+			return err
+		}
+		httpserver.WriteJsonResponse(writer, http.StatusOK, map[string]any{"data": destinations})
 		return nil
 	})
 }

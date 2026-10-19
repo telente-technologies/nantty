@@ -55,6 +55,15 @@ func (gate AdsStepUpGate) RequireAbove(request *http.Request, amountMinor int64,
 		return nil
 	}
 	required := adserrors.AdsStepUpRequired.WithDetails(map[string]any{"stepUpAbove": map[string]any{"amountMinor": threshold, "currency": strings.ToUpper(currency)}})
+	return gate.consume(request, required)
+}
+
+func (gate AdsStepUpGate) RequireAlways(request *http.Request) error {
+	return gate.consume(request, adserrors.AdsStepUpRequired)
+}
+
+func (gate AdsStepUpGate) consume(request *http.Request, required error) error {
+	ctx := request.Context()
 	principal, found := jwtauth.PrincipalFromContext(ctx)
 	token := strings.TrimSpace(request.Header.Get(jwtauth.UserStepUpHeader))
 	if !found || token == "" || gate.Verifier == nil || !jwtauth.VerifyUserStepUp(ctx, gate.Verifier, request, principal) {

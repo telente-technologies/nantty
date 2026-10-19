@@ -2,6 +2,7 @@ package services
 
 import (
 	"context"
+	"log/slog"
 	"sync"
 	"time"
 
@@ -13,19 +14,22 @@ import (
 	"zudomart/modules/ads/src/generated/ent/adcampaign"
 	"zudomart/modules/ads/src/generated/ent/adgroup"
 	"zudomart/modules/ads/src/generated/ent/adstatsdaily"
+	"zudomart/modules/ads/src/interfaces"
 	"zudomart/modules/ads/src/types"
 )
 
 const candidateLoadLimit = 5_000
 
 type CandidateIndex struct {
-	Client   *ent.Client
-	Spend    SpendCounters
-	Now      func() time.Time
-	Refresh  time.Duration
-	mutex    sync.RWMutex
-	snapshot []types.CandidateAd
-	loadedAt time.Time
+	Client       *ent.Client
+	Spend        SpendCounters
+	Now          func() time.Time
+	Refresh      time.Duration
+	Destinations interfaces.PromotedDestinationDirectory
+	Logger       *slog.Logger
+	mutex        sync.RWMutex
+	snapshot     []types.CandidateAd
+	loadedAt     time.Time
 }
 
 func (index *CandidateIndex) Snapshot(ctx context.Context) ([]types.CandidateAd, error) {
@@ -74,6 +78,7 @@ func (index *CandidateIndex) ReloadFromDatabase(ctx context.Context) error {
 		applyExperimentSlice(&candidate, experimentSlices)
 		candidates = append(candidates, candidate)
 	}
+	candidates = ApplyPromotedDestinations(ctx, index.Destinations, index.Logger, candidates)
 	index.seedSpendCounters(ctx, candidates)
 	index.mutex.Lock()
 	index.snapshot, index.loadedAt = candidates, now
@@ -165,7 +170,7 @@ func buildCandidate(row *ent.Ad, group *ent.AdGroup, campaign *ent.AdCampaign, a
 		BidType: string(group.BidType), StartAt: group.StartAt, EndAt: group.EndAt, Currency: account.Currency, Timezone: account.Timezone,
 		BalanceFundsMicros: account.BalanceMinor * types.MicrosPerMinorUnit, CreditFundsMicros: account.CreditMinor * types.MicrosPerMinorUnit, CreditExpiresAt: account.CreditExpiresAt,
 		MonthlySpendLimit: account.SpendLimitMinor, HistoricalImpressions: history.impressions, HistoricalClicks: history.clicks,
-		VideoDurationSeconds: videoDurationSeconds(row.Creative.Resolved),
+		VideoDurationSeconds: videoDurationSeconds(row.Creative.Resolved), AgeRestricted: IsAgeRestrictedAd(row, campaign),
 	}
 	if group.BidAmountMinor != nil {
 		candidate.BidMinor = *group.BidAmountMinor

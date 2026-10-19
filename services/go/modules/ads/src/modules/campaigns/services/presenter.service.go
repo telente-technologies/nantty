@@ -34,7 +34,7 @@ func PresentCampaign(campaign *ent.AdCampaign, currency string, adSetCount, adCo
 	presented := dtos.Campaign{
 		Id: campaign.ID.String(), AccountId: campaign.AccountID.String(), Name: campaign.Name, Objective: string(campaign.Objective), Status: string(campaign.Status), BudgetLevel: string(campaign.BudgetLevel),
 		Budget: budgetOf(budgetType, campaign.BudgetAmountMinor, currency), Schedule: types.Schedule{StartAt: formatTime(campaign.StartAt), EndAt: optionalTime(campaign.EndAt)},
-		AdSetCount: adSetCount, AdCount: adCount, RejectedAdCount: rejectedAdCount, Delivery: delivery, CreatedAt: formatTime(campaign.CreatedAt), UpdatedAt: formatTime(campaign.UpdatedAt),
+		AdCategory: campaign.AdCategory, AdSetCount: adSetCount, AdCount: adCount, RejectedAdCount: rejectedAdCount, Delivery: delivery, CreatedAt: formatTime(campaign.CreatedAt), UpdatedAt: formatTime(campaign.UpdatedAt),
 	}
 	if campaign.SpendCapMinor != nil {
 		presented.SpendCap = &types.Money{AmountMinor: *campaign.SpendCapMinor, Currency: currency}

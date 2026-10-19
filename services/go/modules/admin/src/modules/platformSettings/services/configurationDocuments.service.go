@@ -106,7 +106,8 @@ func defaultPlansConfiguration() PlansConfiguration {
 	return PlansConfiguration{SupportedCurrencies: launchCurrencies, FreeAdLoadPercent: &freeAdLoad, Plans: []VerificationPlan{
 		plan("BLUE_ESSENTIAL", "BLUE", "ESSENTIAL", "Blue Essential", false, true, "Priority account recovery", "Impersonation protection", "Edit posts within 1 hour", "Fewer ads"),
 		plan("BLUE_VERIFIED", "BLUE", "VERIFIED", "Blue Verified", true, true, "Blue badge on profile and posts", "Priority ranking in comments", "Longer clips (up to 10 minutes)", "Fewer ads"),
-		plan("BLUE_PREMIUM", "BLUE", "PREMIUM", "Blue Premium", true, true, "Everything in Blue Verified", "No ads anywhere", "Monthly boost credit", "Priority support"),
+		plan("BLUE_PREMIUM", "BLUE", "PREMIUM", "Blue Premium", true, true, "Everything in Blue Verified", "No ads anywhere", "Monthly boost credit", "Priority support",
+			"Up to 5 business profiles", "One Gold plan for all your businesses, up to 16% off"),
 		plan("GOLD_ONLY", "GOLD", "ONLY", "Gold", true, true, "Gold business badge", "Verified store label on products", "Fewer ads"),
 		sellerPlan(plan("GOLD_PRO", "GOLD", "PRO", "Gold Pro", true, true, "Gold business badge", "Zudomart Dashboard access", "Verified store label on products", "Fewer ads"), 3, 1, 2_000),
 		sellerPlan(plan("GOLD_BUSINESS", "GOLD", "BUSINESS", "Gold Business", true, true, "Everything in Gold Pro", "Dedicated account manager", "Lower escrow fee", "No ads anywhere"), 15, 10, 20_000),

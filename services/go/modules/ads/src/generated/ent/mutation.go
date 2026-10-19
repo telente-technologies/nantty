@@ -15,15 +15,19 @@ import (
 	"zudomart/modules/ads/src/generated/ent/adactivityentry"
 	"zudomart/modules/ads/src/generated/ent/adaudiencemember"
 	"zudomart/modules/ads/src/generated/ent/adautomatedrule"
+	"zudomart/modules/ads/src/generated/ent/adbalancewithdrawal"
 	"zudomart/modules/ads/src/generated/ent/adboost"
+	"zudomart/modules/ads/src/generated/ent/adboostchange"
 	"zudomart/modules/ads/src/generated/ent/adcampaign"
 	"zudomart/modules/ads/src/generated/ent/adcardstatsdaily"
+	"zudomart/modules/ads/src/generated/ent/adcashbacksetting"
 	"zudomart/modules/ads/src/generated/ent/adcontentsignal"
 	"zudomart/modules/ads/src/generated/ent/adconversion"
 	"zudomart/modules/ads/src/generated/ent/adconversionevent"
 	"zudomart/modules/ads/src/generated/ent/adcreatorearning"
 	"zudomart/modules/ads/src/generated/ent/adcreatormonetisationhold"
 	"zudomart/modules/ads/src/generated/ent/adcreatorprogrammember"
+	"zudomart/modules/ads/src/generated/ent/adcreditlot"
 	"zudomart/modules/ads/src/generated/ent/adcustomaudience"
 	"zudomart/modules/ads/src/generated/ent/adexperiment"
 	"zudomart/modules/ads/src/generated/ent/adfreeboostgrant"
@@ -63,15 +67,19 @@ const (
 	TypeAdActivityEntry           = "AdActivityEntry"
 	TypeAdAudienceMember          = "AdAudienceMember"
 	TypeAdAutomatedRule           = "AdAutomatedRule"
+	TypeAdBalanceWithdrawal       = "AdBalanceWithdrawal"
 	TypeAdBoost                   = "AdBoost"
+	TypeAdBoostChange             = "AdBoostChange"
 	TypeAdCampaign                = "AdCampaign"
 	TypeAdCardStatsDaily          = "AdCardStatsDaily"
+	TypeAdCashbackSetting         = "AdCashbackSetting"
 	TypeAdContentSignal           = "AdContentSignal"
 	TypeAdConversion              = "AdConversion"
 	TypeAdConversionEvent         = "AdConversionEvent"
 	TypeAdCreatorEarning          = "AdCreatorEarning"
 	TypeAdCreatorMonetisationHold = "AdCreatorMonetisationHold"
 	TypeAdCreatorProgramMember    = "AdCreatorProgramMember"
+	TypeAdCreditLot               = "AdCreditLot"
 	TypeAdCustomAudience          = "AdCustomAudience"
 	TypeAdExperiment              = "AdExperiment"
 	TypeAdFreeBoostGrant          = "AdFreeBoostGrant"
@@ -116,6 +124,7 @@ type AdMutation struct {
 	creative               *types.StoredCreative
 	auto_check_flags       *[]types.AutoCheckFlag
 	appendauto_check_flags []types.AutoCheckFlag
+	ad_category            *string
 	updated_at             *time.Time
 	clearedFields          map[string]struct{}
 	done                   bool
@@ -1027,6 +1036,42 @@ func (m *AdMutation) ResetAutoCheckFlags() {
 	m.appendauto_check_flags = nil
 }
 
+// SetAdCategory sets the "ad_category" field.
+func (m *AdMutation) SetAdCategory(s string) {
+	m.ad_category = &s
+}
+
+// AdCategory returns the value of the "ad_category" field in the mutation.
+func (m *AdMutation) AdCategory() (r string, exists bool) {
+	v := m.ad_category
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldAdCategory returns the old "ad_category" field's value of the Ad entity.
+// If the Ad object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AdMutation) OldAdCategory(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldAdCategory is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldAdCategory requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldAdCategory: %w", err)
+	}
+	return oldValue.AdCategory, nil
+}
+
+// ResetAdCategory resets all changes to the "ad_category" field.
+func (m *AdMutation) ResetAdCategory() {
+	m.ad_category = nil
+}
+
 // SetUpdatedAt sets the "updated_at" field.
 func (m *AdMutation) SetUpdatedAt(t time.Time) {
 	m.updated_at = &t
@@ -1097,7 +1142,7 @@ func (m *AdMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *AdMutation) Fields() []string {
-	fields := make([]string, 0, 21)
+	fields := make([]string, 0, 22)
 	if m.created_at != nil {
 		fields = append(fields, ad.FieldCreatedAt)
 	}
@@ -1158,6 +1203,9 @@ func (m *AdMutation) Fields() []string {
 	if m.auto_check_flags != nil {
 		fields = append(fields, ad.FieldAutoCheckFlags)
 	}
+	if m.ad_category != nil {
+		fields = append(fields, ad.FieldAdCategory)
+	}
 	if m.updated_at != nil {
 		fields = append(fields, ad.FieldUpdatedAt)
 	}
@@ -1209,6 +1257,8 @@ func (m *AdMutation) Field(name string) (ent.Value, bool) {
 		return m.Creative()
 	case ad.FieldAutoCheckFlags:
 		return m.AutoCheckFlags()
+	case ad.FieldAdCategory:
+		return m.AdCategory()
 	case ad.FieldUpdatedAt:
 		return m.UpdatedAt()
 	}
@@ -1260,6 +1310,8 @@ func (m *AdMutation) OldField(ctx context.Context, name string) (ent.Value, erro
 		return m.OldCreative(ctx)
 	case ad.FieldAutoCheckFlags:
 		return m.OldAutoCheckFlags(ctx)
+	case ad.FieldAdCategory:
+		return m.OldAdCategory(ctx)
 	case ad.FieldUpdatedAt:
 		return m.OldUpdatedAt(ctx)
 	}
@@ -1411,6 +1463,13 @@ func (m *AdMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetAutoCheckFlags(v)
 		return nil
+	case ad.FieldAdCategory:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetAdCategory(v)
+		return nil
 	case ad.FieldUpdatedAt:
 		v, ok := value.(time.Time)
 		if !ok {
@@ -1559,6 +1618,9 @@ func (m *AdMutation) ResetField(name string) error {
 		return nil
 	case ad.FieldAutoCheckFlags:
 		m.ResetAutoCheckFlags()
+		return nil
+	case ad.FieldAdCategory:
+		m.ResetAdCategory()
 		return nil
 	case ad.FieldUpdatedAt:
 		m.ResetUpdatedAt()
@@ -7104,6 +7166,1056 @@ func (m *AdAutomatedRuleMutation) ResetEdge(name string) error {
 	return fmt.Errorf("unknown AdAutomatedRule edge %s", name)
 }
 
+// AdBalanceWithdrawalMutation represents an operation that mutates the AdBalanceWithdrawal nodes in the graph.
+type AdBalanceWithdrawalMutation struct {
+	config
+	op              Op
+	typ             string
+	id              *uuid.UUID
+	created_at      *time.Time
+	account_id      *uuid.UUID
+	user_id         *uuid.UUID
+	idempotency_key *string
+	currency        *string
+	gross_minor     *int64
+	addgross_minor  *int64
+	fee_minor       *int64
+	addfee_minor    *int64
+	net_minor       *int64
+	addnet_minor    *int64
+	status          *adbalancewithdrawal.Status
+	failure_reason  *string
+	completed_at    *time.Time
+	updated_at      *time.Time
+	clearedFields   map[string]struct{}
+	done            bool
+	oldValue        func(context.Context) (*AdBalanceWithdrawal, error)
+	predicates      []predicate.AdBalanceWithdrawal
+}
+
+var _ ent.Mutation = (*AdBalanceWithdrawalMutation)(nil)
+
+// adbalancewithdrawalOption allows management of the mutation configuration using functional options.
+type adbalancewithdrawalOption func(*AdBalanceWithdrawalMutation)
+
+// newAdBalanceWithdrawalMutation creates new mutation for the AdBalanceWithdrawal entity.
+func newAdBalanceWithdrawalMutation(c config, op Op, opts ...adbalancewithdrawalOption) *AdBalanceWithdrawalMutation {
+	m := &AdBalanceWithdrawalMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeAdBalanceWithdrawal,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withAdBalanceWithdrawalID sets the ID field of the mutation.
+func withAdBalanceWithdrawalID(id uuid.UUID) adbalancewithdrawalOption {
+	return func(m *AdBalanceWithdrawalMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *AdBalanceWithdrawal
+		)
+		m.oldValue = func(ctx context.Context) (*AdBalanceWithdrawal, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().AdBalanceWithdrawal.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withAdBalanceWithdrawal sets the old AdBalanceWithdrawal of the mutation.
+func withAdBalanceWithdrawal(node *AdBalanceWithdrawal) adbalancewithdrawalOption {
+	return func(m *AdBalanceWithdrawalMutation) {
+		m.oldValue = func(context.Context) (*AdBalanceWithdrawal, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m AdBalanceWithdrawalMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m AdBalanceWithdrawalMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of AdBalanceWithdrawal entities.
+func (m *AdBalanceWithdrawalMutation) SetID(id uuid.UUID) {
+	m.id = &id
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *AdBalanceWithdrawalMutation) ID() (id uuid.UUID, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *AdBalanceWithdrawalMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []uuid.UUID{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().AdBalanceWithdrawal.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (m *AdBalanceWithdrawalMutation) SetCreatedAt(t time.Time) {
+	m.created_at = &t
+}
+
+// CreatedAt returns the value of the "created_at" field in the mutation.
+func (m *AdBalanceWithdrawalMutation) CreatedAt() (r time.Time, exists bool) {
+	v := m.created_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreatedAt returns the old "created_at" field's value of the AdBalanceWithdrawal entity.
+// If the AdBalanceWithdrawal object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AdBalanceWithdrawalMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
+	}
+	return oldValue.CreatedAt, nil
+}
+
+// ResetCreatedAt resets all changes to the "created_at" field.
+func (m *AdBalanceWithdrawalMutation) ResetCreatedAt() {
+	m.created_at = nil
+}
+
+// SetAccountID sets the "account_id" field.
+func (m *AdBalanceWithdrawalMutation) SetAccountID(u uuid.UUID) {
+	m.account_id = &u
+}
+
+// AccountID returns the value of the "account_id" field in the mutation.
+func (m *AdBalanceWithdrawalMutation) AccountID() (r uuid.UUID, exists bool) {
+	v := m.account_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldAccountID returns the old "account_id" field's value of the AdBalanceWithdrawal entity.
+// If the AdBalanceWithdrawal object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AdBalanceWithdrawalMutation) OldAccountID(ctx context.Context) (v uuid.UUID, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldAccountID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldAccountID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldAccountID: %w", err)
+	}
+	return oldValue.AccountID, nil
+}
+
+// ResetAccountID resets all changes to the "account_id" field.
+func (m *AdBalanceWithdrawalMutation) ResetAccountID() {
+	m.account_id = nil
+}
+
+// SetUserID sets the "user_id" field.
+func (m *AdBalanceWithdrawalMutation) SetUserID(u uuid.UUID) {
+	m.user_id = &u
+}
+
+// UserID returns the value of the "user_id" field in the mutation.
+func (m *AdBalanceWithdrawalMutation) UserID() (r uuid.UUID, exists bool) {
+	v := m.user_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUserID returns the old "user_id" field's value of the AdBalanceWithdrawal entity.
+// If the AdBalanceWithdrawal object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AdBalanceWithdrawalMutation) OldUserID(ctx context.Context) (v uuid.UUID, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUserID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUserID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUserID: %w", err)
+	}
+	return oldValue.UserID, nil
+}
+
+// ResetUserID resets all changes to the "user_id" field.
+func (m *AdBalanceWithdrawalMutation) ResetUserID() {
+	m.user_id = nil
+}
+
+// SetIdempotencyKey sets the "idempotency_key" field.
+func (m *AdBalanceWithdrawalMutation) SetIdempotencyKey(s string) {
+	m.idempotency_key = &s
+}
+
+// IdempotencyKey returns the value of the "idempotency_key" field in the mutation.
+func (m *AdBalanceWithdrawalMutation) IdempotencyKey() (r string, exists bool) {
+	v := m.idempotency_key
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldIdempotencyKey returns the old "idempotency_key" field's value of the AdBalanceWithdrawal entity.
+// If the AdBalanceWithdrawal object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AdBalanceWithdrawalMutation) OldIdempotencyKey(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldIdempotencyKey is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldIdempotencyKey requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldIdempotencyKey: %w", err)
+	}
+	return oldValue.IdempotencyKey, nil
+}
+
+// ResetIdempotencyKey resets all changes to the "idempotency_key" field.
+func (m *AdBalanceWithdrawalMutation) ResetIdempotencyKey() {
+	m.idempotency_key = nil
+}
+
+// SetCurrency sets the "currency" field.
+func (m *AdBalanceWithdrawalMutation) SetCurrency(s string) {
+	m.currency = &s
+}
+
+// Currency returns the value of the "currency" field in the mutation.
+func (m *AdBalanceWithdrawalMutation) Currency() (r string, exists bool) {
+	v := m.currency
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCurrency returns the old "currency" field's value of the AdBalanceWithdrawal entity.
+// If the AdBalanceWithdrawal object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AdBalanceWithdrawalMutation) OldCurrency(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCurrency is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCurrency requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCurrency: %w", err)
+	}
+	return oldValue.Currency, nil
+}
+
+// ResetCurrency resets all changes to the "currency" field.
+func (m *AdBalanceWithdrawalMutation) ResetCurrency() {
+	m.currency = nil
+}
+
+// SetGrossMinor sets the "gross_minor" field.
+func (m *AdBalanceWithdrawalMutation) SetGrossMinor(i int64) {
+	m.gross_minor = &i
+	m.addgross_minor = nil
+}
+
+// GrossMinor returns the value of the "gross_minor" field in the mutation.
+func (m *AdBalanceWithdrawalMutation) GrossMinor() (r int64, exists bool) {
+	v := m.gross_minor
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldGrossMinor returns the old "gross_minor" field's value of the AdBalanceWithdrawal entity.
+// If the AdBalanceWithdrawal object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AdBalanceWithdrawalMutation) OldGrossMinor(ctx context.Context) (v int64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldGrossMinor is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldGrossMinor requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldGrossMinor: %w", err)
+	}
+	return oldValue.GrossMinor, nil
+}
+
+// AddGrossMinor adds i to the "gross_minor" field.
+func (m *AdBalanceWithdrawalMutation) AddGrossMinor(i int64) {
+	if m.addgross_minor != nil {
+		*m.addgross_minor += i
+	} else {
+		m.addgross_minor = &i
+	}
+}
+
+// AddedGrossMinor returns the value that was added to the "gross_minor" field in this mutation.
+func (m *AdBalanceWithdrawalMutation) AddedGrossMinor() (r int64, exists bool) {
+	v := m.addgross_minor
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetGrossMinor resets all changes to the "gross_minor" field.
+func (m *AdBalanceWithdrawalMutation) ResetGrossMinor() {
+	m.gross_minor = nil
+	m.addgross_minor = nil
+}
+
+// SetFeeMinor sets the "fee_minor" field.
+func (m *AdBalanceWithdrawalMutation) SetFeeMinor(i int64) {
+	m.fee_minor = &i
+	m.addfee_minor = nil
+}
+
+// FeeMinor returns the value of the "fee_minor" field in the mutation.
+func (m *AdBalanceWithdrawalMutation) FeeMinor() (r int64, exists bool) {
+	v := m.fee_minor
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldFeeMinor returns the old "fee_minor" field's value of the AdBalanceWithdrawal entity.
+// If the AdBalanceWithdrawal object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AdBalanceWithdrawalMutation) OldFeeMinor(ctx context.Context) (v int64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldFeeMinor is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldFeeMinor requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldFeeMinor: %w", err)
+	}
+	return oldValue.FeeMinor, nil
+}
+
+// AddFeeMinor adds i to the "fee_minor" field.
+func (m *AdBalanceWithdrawalMutation) AddFeeMinor(i int64) {
+	if m.addfee_minor != nil {
+		*m.addfee_minor += i
+	} else {
+		m.addfee_minor = &i
+	}
+}
+
+// AddedFeeMinor returns the value that was added to the "fee_minor" field in this mutation.
+func (m *AdBalanceWithdrawalMutation) AddedFeeMinor() (r int64, exists bool) {
+	v := m.addfee_minor
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetFeeMinor resets all changes to the "fee_minor" field.
+func (m *AdBalanceWithdrawalMutation) ResetFeeMinor() {
+	m.fee_minor = nil
+	m.addfee_minor = nil
+}
+
+// SetNetMinor sets the "net_minor" field.
+func (m *AdBalanceWithdrawalMutation) SetNetMinor(i int64) {
+	m.net_minor = &i
+	m.addnet_minor = nil
+}
+
+// NetMinor returns the value of the "net_minor" field in the mutation.
+func (m *AdBalanceWithdrawalMutation) NetMinor() (r int64, exists bool) {
+	v := m.net_minor
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldNetMinor returns the old "net_minor" field's value of the AdBalanceWithdrawal entity.
+// If the AdBalanceWithdrawal object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AdBalanceWithdrawalMutation) OldNetMinor(ctx context.Context) (v int64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldNetMinor is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldNetMinor requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldNetMinor: %w", err)
+	}
+	return oldValue.NetMinor, nil
+}
+
+// AddNetMinor adds i to the "net_minor" field.
+func (m *AdBalanceWithdrawalMutation) AddNetMinor(i int64) {
+	if m.addnet_minor != nil {
+		*m.addnet_minor += i
+	} else {
+		m.addnet_minor = &i
+	}
+}
+
+// AddedNetMinor returns the value that was added to the "net_minor" field in this mutation.
+func (m *AdBalanceWithdrawalMutation) AddedNetMinor() (r int64, exists bool) {
+	v := m.addnet_minor
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetNetMinor resets all changes to the "net_minor" field.
+func (m *AdBalanceWithdrawalMutation) ResetNetMinor() {
+	m.net_minor = nil
+	m.addnet_minor = nil
+}
+
+// SetStatus sets the "status" field.
+func (m *AdBalanceWithdrawalMutation) SetStatus(a adbalancewithdrawal.Status) {
+	m.status = &a
+}
+
+// Status returns the value of the "status" field in the mutation.
+func (m *AdBalanceWithdrawalMutation) Status() (r adbalancewithdrawal.Status, exists bool) {
+	v := m.status
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldStatus returns the old "status" field's value of the AdBalanceWithdrawal entity.
+// If the AdBalanceWithdrawal object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AdBalanceWithdrawalMutation) OldStatus(ctx context.Context) (v adbalancewithdrawal.Status, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldStatus is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldStatus requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldStatus: %w", err)
+	}
+	return oldValue.Status, nil
+}
+
+// ResetStatus resets all changes to the "status" field.
+func (m *AdBalanceWithdrawalMutation) ResetStatus() {
+	m.status = nil
+}
+
+// SetFailureReason sets the "failure_reason" field.
+func (m *AdBalanceWithdrawalMutation) SetFailureReason(s string) {
+	m.failure_reason = &s
+}
+
+// FailureReason returns the value of the "failure_reason" field in the mutation.
+func (m *AdBalanceWithdrawalMutation) FailureReason() (r string, exists bool) {
+	v := m.failure_reason
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldFailureReason returns the old "failure_reason" field's value of the AdBalanceWithdrawal entity.
+// If the AdBalanceWithdrawal object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AdBalanceWithdrawalMutation) OldFailureReason(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldFailureReason is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldFailureReason requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldFailureReason: %w", err)
+	}
+	return oldValue.FailureReason, nil
+}
+
+// ResetFailureReason resets all changes to the "failure_reason" field.
+func (m *AdBalanceWithdrawalMutation) ResetFailureReason() {
+	m.failure_reason = nil
+}
+
+// SetCompletedAt sets the "completed_at" field.
+func (m *AdBalanceWithdrawalMutation) SetCompletedAt(t time.Time) {
+	m.completed_at = &t
+}
+
+// CompletedAt returns the value of the "completed_at" field in the mutation.
+func (m *AdBalanceWithdrawalMutation) CompletedAt() (r time.Time, exists bool) {
+	v := m.completed_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCompletedAt returns the old "completed_at" field's value of the AdBalanceWithdrawal entity.
+// If the AdBalanceWithdrawal object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AdBalanceWithdrawalMutation) OldCompletedAt(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCompletedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCompletedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCompletedAt: %w", err)
+	}
+	return oldValue.CompletedAt, nil
+}
+
+// ClearCompletedAt clears the value of the "completed_at" field.
+func (m *AdBalanceWithdrawalMutation) ClearCompletedAt() {
+	m.completed_at = nil
+	m.clearedFields[adbalancewithdrawal.FieldCompletedAt] = struct{}{}
+}
+
+// CompletedAtCleared returns if the "completed_at" field was cleared in this mutation.
+func (m *AdBalanceWithdrawalMutation) CompletedAtCleared() bool {
+	_, ok := m.clearedFields[adbalancewithdrawal.FieldCompletedAt]
+	return ok
+}
+
+// ResetCompletedAt resets all changes to the "completed_at" field.
+func (m *AdBalanceWithdrawalMutation) ResetCompletedAt() {
+	m.completed_at = nil
+	delete(m.clearedFields, adbalancewithdrawal.FieldCompletedAt)
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (m *AdBalanceWithdrawalMutation) SetUpdatedAt(t time.Time) {
+	m.updated_at = &t
+}
+
+// UpdatedAt returns the value of the "updated_at" field in the mutation.
+func (m *AdBalanceWithdrawalMutation) UpdatedAt() (r time.Time, exists bool) {
+	v := m.updated_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUpdatedAt returns the old "updated_at" field's value of the AdBalanceWithdrawal entity.
+// If the AdBalanceWithdrawal object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AdBalanceWithdrawalMutation) OldUpdatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUpdatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUpdatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUpdatedAt: %w", err)
+	}
+	return oldValue.UpdatedAt, nil
+}
+
+// ResetUpdatedAt resets all changes to the "updated_at" field.
+func (m *AdBalanceWithdrawalMutation) ResetUpdatedAt() {
+	m.updated_at = nil
+}
+
+// Where appends a list predicates to the AdBalanceWithdrawalMutation builder.
+func (m *AdBalanceWithdrawalMutation) Where(ps ...predicate.AdBalanceWithdrawal) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the AdBalanceWithdrawalMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *AdBalanceWithdrawalMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.AdBalanceWithdrawal, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *AdBalanceWithdrawalMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *AdBalanceWithdrawalMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (AdBalanceWithdrawal).
+func (m *AdBalanceWithdrawalMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *AdBalanceWithdrawalMutation) Fields() []string {
+	fields := make([]string, 0, 12)
+	if m.created_at != nil {
+		fields = append(fields, adbalancewithdrawal.FieldCreatedAt)
+	}
+	if m.account_id != nil {
+		fields = append(fields, adbalancewithdrawal.FieldAccountID)
+	}
+	if m.user_id != nil {
+		fields = append(fields, adbalancewithdrawal.FieldUserID)
+	}
+	if m.idempotency_key != nil {
+		fields = append(fields, adbalancewithdrawal.FieldIdempotencyKey)
+	}
+	if m.currency != nil {
+		fields = append(fields, adbalancewithdrawal.FieldCurrency)
+	}
+	if m.gross_minor != nil {
+		fields = append(fields, adbalancewithdrawal.FieldGrossMinor)
+	}
+	if m.fee_minor != nil {
+		fields = append(fields, adbalancewithdrawal.FieldFeeMinor)
+	}
+	if m.net_minor != nil {
+		fields = append(fields, adbalancewithdrawal.FieldNetMinor)
+	}
+	if m.status != nil {
+		fields = append(fields, adbalancewithdrawal.FieldStatus)
+	}
+	if m.failure_reason != nil {
+		fields = append(fields, adbalancewithdrawal.FieldFailureReason)
+	}
+	if m.completed_at != nil {
+		fields = append(fields, adbalancewithdrawal.FieldCompletedAt)
+	}
+	if m.updated_at != nil {
+		fields = append(fields, adbalancewithdrawal.FieldUpdatedAt)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *AdBalanceWithdrawalMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case adbalancewithdrawal.FieldCreatedAt:
+		return m.CreatedAt()
+	case adbalancewithdrawal.FieldAccountID:
+		return m.AccountID()
+	case adbalancewithdrawal.FieldUserID:
+		return m.UserID()
+	case adbalancewithdrawal.FieldIdempotencyKey:
+		return m.IdempotencyKey()
+	case adbalancewithdrawal.FieldCurrency:
+		return m.Currency()
+	case adbalancewithdrawal.FieldGrossMinor:
+		return m.GrossMinor()
+	case adbalancewithdrawal.FieldFeeMinor:
+		return m.FeeMinor()
+	case adbalancewithdrawal.FieldNetMinor:
+		return m.NetMinor()
+	case adbalancewithdrawal.FieldStatus:
+		return m.Status()
+	case adbalancewithdrawal.FieldFailureReason:
+		return m.FailureReason()
+	case adbalancewithdrawal.FieldCompletedAt:
+		return m.CompletedAt()
+	case adbalancewithdrawal.FieldUpdatedAt:
+		return m.UpdatedAt()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *AdBalanceWithdrawalMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case adbalancewithdrawal.FieldCreatedAt:
+		return m.OldCreatedAt(ctx)
+	case adbalancewithdrawal.FieldAccountID:
+		return m.OldAccountID(ctx)
+	case adbalancewithdrawal.FieldUserID:
+		return m.OldUserID(ctx)
+	case adbalancewithdrawal.FieldIdempotencyKey:
+		return m.OldIdempotencyKey(ctx)
+	case adbalancewithdrawal.FieldCurrency:
+		return m.OldCurrency(ctx)
+	case adbalancewithdrawal.FieldGrossMinor:
+		return m.OldGrossMinor(ctx)
+	case adbalancewithdrawal.FieldFeeMinor:
+		return m.OldFeeMinor(ctx)
+	case adbalancewithdrawal.FieldNetMinor:
+		return m.OldNetMinor(ctx)
+	case adbalancewithdrawal.FieldStatus:
+		return m.OldStatus(ctx)
+	case adbalancewithdrawal.FieldFailureReason:
+		return m.OldFailureReason(ctx)
+	case adbalancewithdrawal.FieldCompletedAt:
+		return m.OldCompletedAt(ctx)
+	case adbalancewithdrawal.FieldUpdatedAt:
+		return m.OldUpdatedAt(ctx)
+	}
+	return nil, fmt.Errorf("unknown AdBalanceWithdrawal field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *AdBalanceWithdrawalMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case adbalancewithdrawal.FieldCreatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatedAt(v)
+		return nil
+	case adbalancewithdrawal.FieldAccountID:
+		v, ok := value.(uuid.UUID)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetAccountID(v)
+		return nil
+	case adbalancewithdrawal.FieldUserID:
+		v, ok := value.(uuid.UUID)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUserID(v)
+		return nil
+	case adbalancewithdrawal.FieldIdempotencyKey:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetIdempotencyKey(v)
+		return nil
+	case adbalancewithdrawal.FieldCurrency:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCurrency(v)
+		return nil
+	case adbalancewithdrawal.FieldGrossMinor:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetGrossMinor(v)
+		return nil
+	case adbalancewithdrawal.FieldFeeMinor:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetFeeMinor(v)
+		return nil
+	case adbalancewithdrawal.FieldNetMinor:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetNetMinor(v)
+		return nil
+	case adbalancewithdrawal.FieldStatus:
+		v, ok := value.(adbalancewithdrawal.Status)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetStatus(v)
+		return nil
+	case adbalancewithdrawal.FieldFailureReason:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetFailureReason(v)
+		return nil
+	case adbalancewithdrawal.FieldCompletedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCompletedAt(v)
+		return nil
+	case adbalancewithdrawal.FieldUpdatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUpdatedAt(v)
+		return nil
+	}
+	return fmt.Errorf("unknown AdBalanceWithdrawal field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *AdBalanceWithdrawalMutation) AddedFields() []string {
+	var fields []string
+	if m.addgross_minor != nil {
+		fields = append(fields, adbalancewithdrawal.FieldGrossMinor)
+	}
+	if m.addfee_minor != nil {
+		fields = append(fields, adbalancewithdrawal.FieldFeeMinor)
+	}
+	if m.addnet_minor != nil {
+		fields = append(fields, adbalancewithdrawal.FieldNetMinor)
+	}
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *AdBalanceWithdrawalMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case adbalancewithdrawal.FieldGrossMinor:
+		return m.AddedGrossMinor()
+	case adbalancewithdrawal.FieldFeeMinor:
+		return m.AddedFeeMinor()
+	case adbalancewithdrawal.FieldNetMinor:
+		return m.AddedNetMinor()
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *AdBalanceWithdrawalMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	case adbalancewithdrawal.FieldGrossMinor:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddGrossMinor(v)
+		return nil
+	case adbalancewithdrawal.FieldFeeMinor:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddFeeMinor(v)
+		return nil
+	case adbalancewithdrawal.FieldNetMinor:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddNetMinor(v)
+		return nil
+	}
+	return fmt.Errorf("unknown AdBalanceWithdrawal numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *AdBalanceWithdrawalMutation) ClearedFields() []string {
+	var fields []string
+	if m.FieldCleared(adbalancewithdrawal.FieldCompletedAt) {
+		fields = append(fields, adbalancewithdrawal.FieldCompletedAt)
+	}
+	return fields
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *AdBalanceWithdrawalMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *AdBalanceWithdrawalMutation) ClearField(name string) error {
+	switch name {
+	case adbalancewithdrawal.FieldCompletedAt:
+		m.ClearCompletedAt()
+		return nil
+	}
+	return fmt.Errorf("unknown AdBalanceWithdrawal nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *AdBalanceWithdrawalMutation) ResetField(name string) error {
+	switch name {
+	case adbalancewithdrawal.FieldCreatedAt:
+		m.ResetCreatedAt()
+		return nil
+	case adbalancewithdrawal.FieldAccountID:
+		m.ResetAccountID()
+		return nil
+	case adbalancewithdrawal.FieldUserID:
+		m.ResetUserID()
+		return nil
+	case adbalancewithdrawal.FieldIdempotencyKey:
+		m.ResetIdempotencyKey()
+		return nil
+	case adbalancewithdrawal.FieldCurrency:
+		m.ResetCurrency()
+		return nil
+	case adbalancewithdrawal.FieldGrossMinor:
+		m.ResetGrossMinor()
+		return nil
+	case adbalancewithdrawal.FieldFeeMinor:
+		m.ResetFeeMinor()
+		return nil
+	case adbalancewithdrawal.FieldNetMinor:
+		m.ResetNetMinor()
+		return nil
+	case adbalancewithdrawal.FieldStatus:
+		m.ResetStatus()
+		return nil
+	case adbalancewithdrawal.FieldFailureReason:
+		m.ResetFailureReason()
+		return nil
+	case adbalancewithdrawal.FieldCompletedAt:
+		m.ResetCompletedAt()
+		return nil
+	case adbalancewithdrawal.FieldUpdatedAt:
+		m.ResetUpdatedAt()
+		return nil
+	}
+	return fmt.Errorf("unknown AdBalanceWithdrawal field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *AdBalanceWithdrawalMutation) AddedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *AdBalanceWithdrawalMutation) AddedIDs(name string) []ent.Value {
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *AdBalanceWithdrawalMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *AdBalanceWithdrawalMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *AdBalanceWithdrawalMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *AdBalanceWithdrawalMutation) EdgeCleared(name string) bool {
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *AdBalanceWithdrawalMutation) ClearEdge(name string) error {
+	return fmt.Errorf("unknown AdBalanceWithdrawal unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *AdBalanceWithdrawalMutation) ResetEdge(name string) error {
+	return fmt.Errorf("unknown AdBalanceWithdrawal edge %s", name)
+}
+
 // AdBoostMutation represents an operation that mutates the AdBoost nodes in the graph.
 type AdBoostMutation struct {
 	config
@@ -7113,16 +8225,20 @@ type AdBoostMutation struct {
 	created_at            *time.Time
 	user_id               *uuid.UUID
 	post_id               *string
+	destination_type      *adboost.DestinationType
 	goal                  *adboost.Goal
 	status                *adboost.Status
 	audience              *[]byte
 	currency              *string
+	budget_type           *adboost.BudgetType
 	daily_budget_minor    *int64
 	adddaily_budget_minor *int64
 	duration_days         *int
 	addduration_days      *int
 	total_budget_minor    *int64
 	addtotal_budget_minor *int64
+	added_budget_minor    *int64
+	addadded_budget_minor *int64
 	payment_method        *adboost.PaymentMethod
 	payment_top_up_id     *string
 	idempotency_key       *string
@@ -7131,6 +8247,7 @@ type AdBoostMutation struct {
 	campaign_id           *uuid.UUID
 	ad_group_id           *uuid.UUID
 	ad_id                 *uuid.UUID
+	scheduled_start_at    *time.Time
 	starts_at             *time.Time
 	ends_at               *time.Time
 	rejection_reason      *string
@@ -7353,6 +8470,42 @@ func (m *AdBoostMutation) ResetPostID() {
 	m.post_id = nil
 }
 
+// SetDestinationType sets the "destination_type" field.
+func (m *AdBoostMutation) SetDestinationType(at adboost.DestinationType) {
+	m.destination_type = &at
+}
+
+// DestinationType returns the value of the "destination_type" field in the mutation.
+func (m *AdBoostMutation) DestinationType() (r adboost.DestinationType, exists bool) {
+	v := m.destination_type
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDestinationType returns the old "destination_type" field's value of the AdBoost entity.
+// If the AdBoost object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AdBoostMutation) OldDestinationType(ctx context.Context) (v adboost.DestinationType, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDestinationType is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDestinationType requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDestinationType: %w", err)
+	}
+	return oldValue.DestinationType, nil
+}
+
+// ResetDestinationType resets all changes to the "destination_type" field.
+func (m *AdBoostMutation) ResetDestinationType() {
+	m.destination_type = nil
+}
+
 // SetGoal sets the "goal" field.
 func (m *AdBoostMutation) SetGoal(a adboost.Goal) {
 	m.goal = &a
@@ -7495,6 +8648,42 @@ func (m *AdBoostMutation) OldCurrency(ctx context.Context) (v string, err error)
 // ResetCurrency resets all changes to the "currency" field.
 func (m *AdBoostMutation) ResetCurrency() {
 	m.currency = nil
+}
+
+// SetBudgetType sets the "budget_type" field.
+func (m *AdBoostMutation) SetBudgetType(at adboost.BudgetType) {
+	m.budget_type = &at
+}
+
+// BudgetType returns the value of the "budget_type" field in the mutation.
+func (m *AdBoostMutation) BudgetType() (r adboost.BudgetType, exists bool) {
+	v := m.budget_type
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldBudgetType returns the old "budget_type" field's value of the AdBoost entity.
+// If the AdBoost object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AdBoostMutation) OldBudgetType(ctx context.Context) (v adboost.BudgetType, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldBudgetType is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldBudgetType requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldBudgetType: %w", err)
+	}
+	return oldValue.BudgetType, nil
+}
+
+// ResetBudgetType resets all changes to the "budget_type" field.
+func (m *AdBoostMutation) ResetBudgetType() {
+	m.budget_type = nil
 }
 
 // SetDailyBudgetMinor sets the "daily_budget_minor" field.
@@ -7663,6 +8852,62 @@ func (m *AdBoostMutation) AddedTotalBudgetMinor() (r int64, exists bool) {
 func (m *AdBoostMutation) ResetTotalBudgetMinor() {
 	m.total_budget_minor = nil
 	m.addtotal_budget_minor = nil
+}
+
+// SetAddedBudgetMinor sets the "added_budget_minor" field.
+func (m *AdBoostMutation) SetAddedBudgetMinor(i int64) {
+	m.added_budget_minor = &i
+	m.addadded_budget_minor = nil
+}
+
+// AddedBudgetMinor returns the value of the "added_budget_minor" field in the mutation.
+func (m *AdBoostMutation) AddedBudgetMinor() (r int64, exists bool) {
+	v := m.added_budget_minor
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldAddedBudgetMinor returns the old "added_budget_minor" field's value of the AdBoost entity.
+// If the AdBoost object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AdBoostMutation) OldAddedBudgetMinor(ctx context.Context) (v int64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldAddedBudgetMinor is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldAddedBudgetMinor requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldAddedBudgetMinor: %w", err)
+	}
+	return oldValue.AddedBudgetMinor, nil
+}
+
+// AddAddedBudgetMinor adds i to the "added_budget_minor" field.
+func (m *AdBoostMutation) AddAddedBudgetMinor(i int64) {
+	if m.addadded_budget_minor != nil {
+		*m.addadded_budget_minor += i
+	} else {
+		m.addadded_budget_minor = &i
+	}
+}
+
+// AddedAddedBudgetMinor returns the value that was added to the "added_budget_minor" field in this mutation.
+func (m *AdBoostMutation) AddedAddedBudgetMinor() (r int64, exists bool) {
+	v := m.addadded_budget_minor
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetAddedBudgetMinor resets all changes to the "added_budget_minor" field.
+func (m *AdBoostMutation) ResetAddedBudgetMinor() {
+	m.added_budget_minor = nil
+	m.addadded_budget_minor = nil
 }
 
 // SetPaymentMethod sets the "payment_method" field.
@@ -7953,6 +9198,55 @@ func (m *AdBoostMutation) ResetAdID() {
 	m.ad_id = nil
 }
 
+// SetScheduledStartAt sets the "scheduled_start_at" field.
+func (m *AdBoostMutation) SetScheduledStartAt(t time.Time) {
+	m.scheduled_start_at = &t
+}
+
+// ScheduledStartAt returns the value of the "scheduled_start_at" field in the mutation.
+func (m *AdBoostMutation) ScheduledStartAt() (r time.Time, exists bool) {
+	v := m.scheduled_start_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldScheduledStartAt returns the old "scheduled_start_at" field's value of the AdBoost entity.
+// If the AdBoost object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AdBoostMutation) OldScheduledStartAt(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldScheduledStartAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldScheduledStartAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldScheduledStartAt: %w", err)
+	}
+	return oldValue.ScheduledStartAt, nil
+}
+
+// ClearScheduledStartAt clears the value of the "scheduled_start_at" field.
+func (m *AdBoostMutation) ClearScheduledStartAt() {
+	m.scheduled_start_at = nil
+	m.clearedFields[adboost.FieldScheduledStartAt] = struct{}{}
+}
+
+// ScheduledStartAtCleared returns if the "scheduled_start_at" field was cleared in this mutation.
+func (m *AdBoostMutation) ScheduledStartAtCleared() bool {
+	_, ok := m.clearedFields[adboost.FieldScheduledStartAt]
+	return ok
+}
+
+// ResetScheduledStartAt resets all changes to the "scheduled_start_at" field.
+func (m *AdBoostMutation) ResetScheduledStartAt() {
+	m.scheduled_start_at = nil
+	delete(m.clearedFields, adboost.FieldScheduledStartAt)
+}
+
 // SetStartsAt sets the "starts_at" field.
 func (m *AdBoostMutation) SetStartsAt(t time.Time) {
 	m.starts_at = &t
@@ -8157,7 +9451,7 @@ func (m *AdBoostMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *AdBoostMutation) Fields() []string {
-	fields := make([]string, 0, 22)
+	fields := make([]string, 0, 26)
 	if m.created_at != nil {
 		fields = append(fields, adboost.FieldCreatedAt)
 	}
@@ -8166,6 +9460,9 @@ func (m *AdBoostMutation) Fields() []string {
 	}
 	if m.post_id != nil {
 		fields = append(fields, adboost.FieldPostID)
+	}
+	if m.destination_type != nil {
+		fields = append(fields, adboost.FieldDestinationType)
 	}
 	if m.goal != nil {
 		fields = append(fields, adboost.FieldGoal)
@@ -8179,6 +9476,9 @@ func (m *AdBoostMutation) Fields() []string {
 	if m.currency != nil {
 		fields = append(fields, adboost.FieldCurrency)
 	}
+	if m.budget_type != nil {
+		fields = append(fields, adboost.FieldBudgetType)
+	}
 	if m.daily_budget_minor != nil {
 		fields = append(fields, adboost.FieldDailyBudgetMinor)
 	}
@@ -8187,6 +9487,9 @@ func (m *AdBoostMutation) Fields() []string {
 	}
 	if m.total_budget_minor != nil {
 		fields = append(fields, adboost.FieldTotalBudgetMinor)
+	}
+	if m.added_budget_minor != nil {
+		fields = append(fields, adboost.FieldAddedBudgetMinor)
 	}
 	if m.payment_method != nil {
 		fields = append(fields, adboost.FieldPaymentMethod)
@@ -8211,6 +9514,9 @@ func (m *AdBoostMutation) Fields() []string {
 	}
 	if m.ad_id != nil {
 		fields = append(fields, adboost.FieldAdID)
+	}
+	if m.scheduled_start_at != nil {
+		fields = append(fields, adboost.FieldScheduledStartAt)
 	}
 	if m.starts_at != nil {
 		fields = append(fields, adboost.FieldStartsAt)
@@ -8238,6 +9544,8 @@ func (m *AdBoostMutation) Field(name string) (ent.Value, bool) {
 		return m.UserID()
 	case adboost.FieldPostID:
 		return m.PostID()
+	case adboost.FieldDestinationType:
+		return m.DestinationType()
 	case adboost.FieldGoal:
 		return m.Goal()
 	case adboost.FieldStatus:
@@ -8246,12 +9554,16 @@ func (m *AdBoostMutation) Field(name string) (ent.Value, bool) {
 		return m.Audience()
 	case adboost.FieldCurrency:
 		return m.Currency()
+	case adboost.FieldBudgetType:
+		return m.BudgetType()
 	case adboost.FieldDailyBudgetMinor:
 		return m.DailyBudgetMinor()
 	case adboost.FieldDurationDays:
 		return m.DurationDays()
 	case adboost.FieldTotalBudgetMinor:
 		return m.TotalBudgetMinor()
+	case adboost.FieldAddedBudgetMinor:
+		return m.AddedBudgetMinor()
 	case adboost.FieldPaymentMethod:
 		return m.PaymentMethod()
 	case adboost.FieldPaymentTopUpID:
@@ -8268,6 +9580,8 @@ func (m *AdBoostMutation) Field(name string) (ent.Value, bool) {
 		return m.AdGroupID()
 	case adboost.FieldAdID:
 		return m.AdID()
+	case adboost.FieldScheduledStartAt:
+		return m.ScheduledStartAt()
 	case adboost.FieldStartsAt:
 		return m.StartsAt()
 	case adboost.FieldEndsAt:
@@ -8291,6 +9605,8 @@ func (m *AdBoostMutation) OldField(ctx context.Context, name string) (ent.Value,
 		return m.OldUserID(ctx)
 	case adboost.FieldPostID:
 		return m.OldPostID(ctx)
+	case adboost.FieldDestinationType:
+		return m.OldDestinationType(ctx)
 	case adboost.FieldGoal:
 		return m.OldGoal(ctx)
 	case adboost.FieldStatus:
@@ -8299,12 +9615,16 @@ func (m *AdBoostMutation) OldField(ctx context.Context, name string) (ent.Value,
 		return m.OldAudience(ctx)
 	case adboost.FieldCurrency:
 		return m.OldCurrency(ctx)
+	case adboost.FieldBudgetType:
+		return m.OldBudgetType(ctx)
 	case adboost.FieldDailyBudgetMinor:
 		return m.OldDailyBudgetMinor(ctx)
 	case adboost.FieldDurationDays:
 		return m.OldDurationDays(ctx)
 	case adboost.FieldTotalBudgetMinor:
 		return m.OldTotalBudgetMinor(ctx)
+	case adboost.FieldAddedBudgetMinor:
+		return m.OldAddedBudgetMinor(ctx)
 	case adboost.FieldPaymentMethod:
 		return m.OldPaymentMethod(ctx)
 	case adboost.FieldPaymentTopUpID:
@@ -8321,6 +9641,8 @@ func (m *AdBoostMutation) OldField(ctx context.Context, name string) (ent.Value,
 		return m.OldAdGroupID(ctx)
 	case adboost.FieldAdID:
 		return m.OldAdID(ctx)
+	case adboost.FieldScheduledStartAt:
+		return m.OldScheduledStartAt(ctx)
 	case adboost.FieldStartsAt:
 		return m.OldStartsAt(ctx)
 	case adboost.FieldEndsAt:
@@ -8359,6 +9681,13 @@ func (m *AdBoostMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetPostID(v)
 		return nil
+	case adboost.FieldDestinationType:
+		v, ok := value.(adboost.DestinationType)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDestinationType(v)
+		return nil
 	case adboost.FieldGoal:
 		v, ok := value.(adboost.Goal)
 		if !ok {
@@ -8387,6 +9716,13 @@ func (m *AdBoostMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetCurrency(v)
 		return nil
+	case adboost.FieldBudgetType:
+		v, ok := value.(adboost.BudgetType)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetBudgetType(v)
+		return nil
 	case adboost.FieldDailyBudgetMinor:
 		v, ok := value.(int64)
 		if !ok {
@@ -8407,6 +9743,13 @@ func (m *AdBoostMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetTotalBudgetMinor(v)
+		return nil
+	case adboost.FieldAddedBudgetMinor:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetAddedBudgetMinor(v)
 		return nil
 	case adboost.FieldPaymentMethod:
 		v, ok := value.(adboost.PaymentMethod)
@@ -8464,6 +9807,13 @@ func (m *AdBoostMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetAdID(v)
 		return nil
+	case adboost.FieldScheduledStartAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetScheduledStartAt(v)
+		return nil
 	case adboost.FieldStartsAt:
 		v, ok := value.(time.Time)
 		if !ok {
@@ -8509,6 +9859,9 @@ func (m *AdBoostMutation) AddedFields() []string {
 	if m.addtotal_budget_minor != nil {
 		fields = append(fields, adboost.FieldTotalBudgetMinor)
 	}
+	if m.addadded_budget_minor != nil {
+		fields = append(fields, adboost.FieldAddedBudgetMinor)
+	}
 	return fields
 }
 
@@ -8523,6 +9876,8 @@ func (m *AdBoostMutation) AddedField(name string) (ent.Value, bool) {
 		return m.AddedDurationDays()
 	case adboost.FieldTotalBudgetMinor:
 		return m.AddedTotalBudgetMinor()
+	case adboost.FieldAddedBudgetMinor:
+		return m.AddedAddedBudgetMinor()
 	}
 	return nil, false
 }
@@ -8553,6 +9908,13 @@ func (m *AdBoostMutation) AddField(name string, value ent.Value) error {
 		}
 		m.AddTotalBudgetMinor(v)
 		return nil
+	case adboost.FieldAddedBudgetMinor:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddAddedBudgetMinor(v)
+		return nil
 	}
 	return fmt.Errorf("unknown AdBoost numeric field %s", name)
 }
@@ -8561,6 +9923,9 @@ func (m *AdBoostMutation) AddField(name string, value ent.Value) error {
 // mutation.
 func (m *AdBoostMutation) ClearedFields() []string {
 	var fields []string
+	if m.FieldCleared(adboost.FieldScheduledStartAt) {
+		fields = append(fields, adboost.FieldScheduledStartAt)
+	}
 	if m.FieldCleared(adboost.FieldStartsAt) {
 		fields = append(fields, adboost.FieldStartsAt)
 	}
@@ -8581,6 +9946,9 @@ func (m *AdBoostMutation) FieldCleared(name string) bool {
 // error if the field is not defined in the schema.
 func (m *AdBoostMutation) ClearField(name string) error {
 	switch name {
+	case adboost.FieldScheduledStartAt:
+		m.ClearScheduledStartAt()
+		return nil
 	case adboost.FieldStartsAt:
 		m.ClearStartsAt()
 		return nil
@@ -8604,6 +9972,9 @@ func (m *AdBoostMutation) ResetField(name string) error {
 	case adboost.FieldPostID:
 		m.ResetPostID()
 		return nil
+	case adboost.FieldDestinationType:
+		m.ResetDestinationType()
+		return nil
 	case adboost.FieldGoal:
 		m.ResetGoal()
 		return nil
@@ -8616,6 +9987,9 @@ func (m *AdBoostMutation) ResetField(name string) error {
 	case adboost.FieldCurrency:
 		m.ResetCurrency()
 		return nil
+	case adboost.FieldBudgetType:
+		m.ResetBudgetType()
+		return nil
 	case adboost.FieldDailyBudgetMinor:
 		m.ResetDailyBudgetMinor()
 		return nil
@@ -8624,6 +9998,9 @@ func (m *AdBoostMutation) ResetField(name string) error {
 		return nil
 	case adboost.FieldTotalBudgetMinor:
 		m.ResetTotalBudgetMinor()
+		return nil
+	case adboost.FieldAddedBudgetMinor:
+		m.ResetAddedBudgetMinor()
 		return nil
 	case adboost.FieldPaymentMethod:
 		m.ResetPaymentMethod()
@@ -8648,6 +10025,9 @@ func (m *AdBoostMutation) ResetField(name string) error {
 		return nil
 	case adboost.FieldAdID:
 		m.ResetAdID()
+		return nil
+	case adboost.FieldScheduledStartAt:
+		m.ResetScheduledStartAt()
 		return nil
 	case adboost.FieldStartsAt:
 		m.ResetStartsAt()
@@ -8713,6 +10093,1110 @@ func (m *AdBoostMutation) ResetEdge(name string) error {
 	return fmt.Errorf("unknown AdBoost edge %s", name)
 }
 
+// AdBoostChangeMutation represents an operation that mutates the AdBoostChange nodes in the graph.
+type AdBoostChangeMutation struct {
+	config
+	op                        Op
+	typ                       string
+	id                        *uuid.UUID
+	created_at                *time.Time
+	boost_id                  *uuid.UUID
+	user_id                   *uuid.UUID
+	idempotency_key           *string
+	request_hash              *string
+	extra_days                *int
+	addextra_days             *int
+	new_daily_budget_minor    *int64
+	addnew_daily_budget_minor *int64
+	additional_minor          *int64
+	addadditional_minor       *int64
+	currency                  *string
+	payment_method            *adboostchange.PaymentMethod
+	status                    *adboostchange.Status
+	payment_top_up_id         *string
+	applied_at                *time.Time
+	clearedFields             map[string]struct{}
+	done                      bool
+	oldValue                  func(context.Context) (*AdBoostChange, error)
+	predicates                []predicate.AdBoostChange
+}
+
+var _ ent.Mutation = (*AdBoostChangeMutation)(nil)
+
+// adboostchangeOption allows management of the mutation configuration using functional options.
+type adboostchangeOption func(*AdBoostChangeMutation)
+
+// newAdBoostChangeMutation creates new mutation for the AdBoostChange entity.
+func newAdBoostChangeMutation(c config, op Op, opts ...adboostchangeOption) *AdBoostChangeMutation {
+	m := &AdBoostChangeMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeAdBoostChange,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withAdBoostChangeID sets the ID field of the mutation.
+func withAdBoostChangeID(id uuid.UUID) adboostchangeOption {
+	return func(m *AdBoostChangeMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *AdBoostChange
+		)
+		m.oldValue = func(ctx context.Context) (*AdBoostChange, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().AdBoostChange.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withAdBoostChange sets the old AdBoostChange of the mutation.
+func withAdBoostChange(node *AdBoostChange) adboostchangeOption {
+	return func(m *AdBoostChangeMutation) {
+		m.oldValue = func(context.Context) (*AdBoostChange, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m AdBoostChangeMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m AdBoostChangeMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of AdBoostChange entities.
+func (m *AdBoostChangeMutation) SetID(id uuid.UUID) {
+	m.id = &id
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *AdBoostChangeMutation) ID() (id uuid.UUID, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *AdBoostChangeMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []uuid.UUID{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().AdBoostChange.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (m *AdBoostChangeMutation) SetCreatedAt(t time.Time) {
+	m.created_at = &t
+}
+
+// CreatedAt returns the value of the "created_at" field in the mutation.
+func (m *AdBoostChangeMutation) CreatedAt() (r time.Time, exists bool) {
+	v := m.created_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreatedAt returns the old "created_at" field's value of the AdBoostChange entity.
+// If the AdBoostChange object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AdBoostChangeMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
+	}
+	return oldValue.CreatedAt, nil
+}
+
+// ResetCreatedAt resets all changes to the "created_at" field.
+func (m *AdBoostChangeMutation) ResetCreatedAt() {
+	m.created_at = nil
+}
+
+// SetBoostID sets the "boost_id" field.
+func (m *AdBoostChangeMutation) SetBoostID(u uuid.UUID) {
+	m.boost_id = &u
+}
+
+// BoostID returns the value of the "boost_id" field in the mutation.
+func (m *AdBoostChangeMutation) BoostID() (r uuid.UUID, exists bool) {
+	v := m.boost_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldBoostID returns the old "boost_id" field's value of the AdBoostChange entity.
+// If the AdBoostChange object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AdBoostChangeMutation) OldBoostID(ctx context.Context) (v uuid.UUID, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldBoostID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldBoostID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldBoostID: %w", err)
+	}
+	return oldValue.BoostID, nil
+}
+
+// ResetBoostID resets all changes to the "boost_id" field.
+func (m *AdBoostChangeMutation) ResetBoostID() {
+	m.boost_id = nil
+}
+
+// SetUserID sets the "user_id" field.
+func (m *AdBoostChangeMutation) SetUserID(u uuid.UUID) {
+	m.user_id = &u
+}
+
+// UserID returns the value of the "user_id" field in the mutation.
+func (m *AdBoostChangeMutation) UserID() (r uuid.UUID, exists bool) {
+	v := m.user_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUserID returns the old "user_id" field's value of the AdBoostChange entity.
+// If the AdBoostChange object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AdBoostChangeMutation) OldUserID(ctx context.Context) (v uuid.UUID, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUserID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUserID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUserID: %w", err)
+	}
+	return oldValue.UserID, nil
+}
+
+// ResetUserID resets all changes to the "user_id" field.
+func (m *AdBoostChangeMutation) ResetUserID() {
+	m.user_id = nil
+}
+
+// SetIdempotencyKey sets the "idempotency_key" field.
+func (m *AdBoostChangeMutation) SetIdempotencyKey(s string) {
+	m.idempotency_key = &s
+}
+
+// IdempotencyKey returns the value of the "idempotency_key" field in the mutation.
+func (m *AdBoostChangeMutation) IdempotencyKey() (r string, exists bool) {
+	v := m.idempotency_key
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldIdempotencyKey returns the old "idempotency_key" field's value of the AdBoostChange entity.
+// If the AdBoostChange object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AdBoostChangeMutation) OldIdempotencyKey(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldIdempotencyKey is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldIdempotencyKey requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldIdempotencyKey: %w", err)
+	}
+	return oldValue.IdempotencyKey, nil
+}
+
+// ResetIdempotencyKey resets all changes to the "idempotency_key" field.
+func (m *AdBoostChangeMutation) ResetIdempotencyKey() {
+	m.idempotency_key = nil
+}
+
+// SetRequestHash sets the "request_hash" field.
+func (m *AdBoostChangeMutation) SetRequestHash(s string) {
+	m.request_hash = &s
+}
+
+// RequestHash returns the value of the "request_hash" field in the mutation.
+func (m *AdBoostChangeMutation) RequestHash() (r string, exists bool) {
+	v := m.request_hash
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldRequestHash returns the old "request_hash" field's value of the AdBoostChange entity.
+// If the AdBoostChange object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AdBoostChangeMutation) OldRequestHash(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldRequestHash is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldRequestHash requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldRequestHash: %w", err)
+	}
+	return oldValue.RequestHash, nil
+}
+
+// ResetRequestHash resets all changes to the "request_hash" field.
+func (m *AdBoostChangeMutation) ResetRequestHash() {
+	m.request_hash = nil
+}
+
+// SetExtraDays sets the "extra_days" field.
+func (m *AdBoostChangeMutation) SetExtraDays(i int) {
+	m.extra_days = &i
+	m.addextra_days = nil
+}
+
+// ExtraDays returns the value of the "extra_days" field in the mutation.
+func (m *AdBoostChangeMutation) ExtraDays() (r int, exists bool) {
+	v := m.extra_days
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldExtraDays returns the old "extra_days" field's value of the AdBoostChange entity.
+// If the AdBoostChange object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AdBoostChangeMutation) OldExtraDays(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldExtraDays is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldExtraDays requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldExtraDays: %w", err)
+	}
+	return oldValue.ExtraDays, nil
+}
+
+// AddExtraDays adds i to the "extra_days" field.
+func (m *AdBoostChangeMutation) AddExtraDays(i int) {
+	if m.addextra_days != nil {
+		*m.addextra_days += i
+	} else {
+		m.addextra_days = &i
+	}
+}
+
+// AddedExtraDays returns the value that was added to the "extra_days" field in this mutation.
+func (m *AdBoostChangeMutation) AddedExtraDays() (r int, exists bool) {
+	v := m.addextra_days
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetExtraDays resets all changes to the "extra_days" field.
+func (m *AdBoostChangeMutation) ResetExtraDays() {
+	m.extra_days = nil
+	m.addextra_days = nil
+}
+
+// SetNewDailyBudgetMinor sets the "new_daily_budget_minor" field.
+func (m *AdBoostChangeMutation) SetNewDailyBudgetMinor(i int64) {
+	m.new_daily_budget_minor = &i
+	m.addnew_daily_budget_minor = nil
+}
+
+// NewDailyBudgetMinor returns the value of the "new_daily_budget_minor" field in the mutation.
+func (m *AdBoostChangeMutation) NewDailyBudgetMinor() (r int64, exists bool) {
+	v := m.new_daily_budget_minor
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldNewDailyBudgetMinor returns the old "new_daily_budget_minor" field's value of the AdBoostChange entity.
+// If the AdBoostChange object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AdBoostChangeMutation) OldNewDailyBudgetMinor(ctx context.Context) (v int64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldNewDailyBudgetMinor is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldNewDailyBudgetMinor requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldNewDailyBudgetMinor: %w", err)
+	}
+	return oldValue.NewDailyBudgetMinor, nil
+}
+
+// AddNewDailyBudgetMinor adds i to the "new_daily_budget_minor" field.
+func (m *AdBoostChangeMutation) AddNewDailyBudgetMinor(i int64) {
+	if m.addnew_daily_budget_minor != nil {
+		*m.addnew_daily_budget_minor += i
+	} else {
+		m.addnew_daily_budget_minor = &i
+	}
+}
+
+// AddedNewDailyBudgetMinor returns the value that was added to the "new_daily_budget_minor" field in this mutation.
+func (m *AdBoostChangeMutation) AddedNewDailyBudgetMinor() (r int64, exists bool) {
+	v := m.addnew_daily_budget_minor
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetNewDailyBudgetMinor resets all changes to the "new_daily_budget_minor" field.
+func (m *AdBoostChangeMutation) ResetNewDailyBudgetMinor() {
+	m.new_daily_budget_minor = nil
+	m.addnew_daily_budget_minor = nil
+}
+
+// SetAdditionalMinor sets the "additional_minor" field.
+func (m *AdBoostChangeMutation) SetAdditionalMinor(i int64) {
+	m.additional_minor = &i
+	m.addadditional_minor = nil
+}
+
+// AdditionalMinor returns the value of the "additional_minor" field in the mutation.
+func (m *AdBoostChangeMutation) AdditionalMinor() (r int64, exists bool) {
+	v := m.additional_minor
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldAdditionalMinor returns the old "additional_minor" field's value of the AdBoostChange entity.
+// If the AdBoostChange object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AdBoostChangeMutation) OldAdditionalMinor(ctx context.Context) (v int64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldAdditionalMinor is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldAdditionalMinor requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldAdditionalMinor: %w", err)
+	}
+	return oldValue.AdditionalMinor, nil
+}
+
+// AddAdditionalMinor adds i to the "additional_minor" field.
+func (m *AdBoostChangeMutation) AddAdditionalMinor(i int64) {
+	if m.addadditional_minor != nil {
+		*m.addadditional_minor += i
+	} else {
+		m.addadditional_minor = &i
+	}
+}
+
+// AddedAdditionalMinor returns the value that was added to the "additional_minor" field in this mutation.
+func (m *AdBoostChangeMutation) AddedAdditionalMinor() (r int64, exists bool) {
+	v := m.addadditional_minor
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetAdditionalMinor resets all changes to the "additional_minor" field.
+func (m *AdBoostChangeMutation) ResetAdditionalMinor() {
+	m.additional_minor = nil
+	m.addadditional_minor = nil
+}
+
+// SetCurrency sets the "currency" field.
+func (m *AdBoostChangeMutation) SetCurrency(s string) {
+	m.currency = &s
+}
+
+// Currency returns the value of the "currency" field in the mutation.
+func (m *AdBoostChangeMutation) Currency() (r string, exists bool) {
+	v := m.currency
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCurrency returns the old "currency" field's value of the AdBoostChange entity.
+// If the AdBoostChange object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AdBoostChangeMutation) OldCurrency(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCurrency is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCurrency requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCurrency: %w", err)
+	}
+	return oldValue.Currency, nil
+}
+
+// ResetCurrency resets all changes to the "currency" field.
+func (m *AdBoostChangeMutation) ResetCurrency() {
+	m.currency = nil
+}
+
+// SetPaymentMethod sets the "payment_method" field.
+func (m *AdBoostChangeMutation) SetPaymentMethod(am adboostchange.PaymentMethod) {
+	m.payment_method = &am
+}
+
+// PaymentMethod returns the value of the "payment_method" field in the mutation.
+func (m *AdBoostChangeMutation) PaymentMethod() (r adboostchange.PaymentMethod, exists bool) {
+	v := m.payment_method
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldPaymentMethod returns the old "payment_method" field's value of the AdBoostChange entity.
+// If the AdBoostChange object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AdBoostChangeMutation) OldPaymentMethod(ctx context.Context) (v adboostchange.PaymentMethod, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldPaymentMethod is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldPaymentMethod requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldPaymentMethod: %w", err)
+	}
+	return oldValue.PaymentMethod, nil
+}
+
+// ResetPaymentMethod resets all changes to the "payment_method" field.
+func (m *AdBoostChangeMutation) ResetPaymentMethod() {
+	m.payment_method = nil
+}
+
+// SetStatus sets the "status" field.
+func (m *AdBoostChangeMutation) SetStatus(a adboostchange.Status) {
+	m.status = &a
+}
+
+// Status returns the value of the "status" field in the mutation.
+func (m *AdBoostChangeMutation) Status() (r adboostchange.Status, exists bool) {
+	v := m.status
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldStatus returns the old "status" field's value of the AdBoostChange entity.
+// If the AdBoostChange object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AdBoostChangeMutation) OldStatus(ctx context.Context) (v adboostchange.Status, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldStatus is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldStatus requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldStatus: %w", err)
+	}
+	return oldValue.Status, nil
+}
+
+// ResetStatus resets all changes to the "status" field.
+func (m *AdBoostChangeMutation) ResetStatus() {
+	m.status = nil
+}
+
+// SetPaymentTopUpID sets the "payment_top_up_id" field.
+func (m *AdBoostChangeMutation) SetPaymentTopUpID(s string) {
+	m.payment_top_up_id = &s
+}
+
+// PaymentTopUpID returns the value of the "payment_top_up_id" field in the mutation.
+func (m *AdBoostChangeMutation) PaymentTopUpID() (r string, exists bool) {
+	v := m.payment_top_up_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldPaymentTopUpID returns the old "payment_top_up_id" field's value of the AdBoostChange entity.
+// If the AdBoostChange object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AdBoostChangeMutation) OldPaymentTopUpID(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldPaymentTopUpID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldPaymentTopUpID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldPaymentTopUpID: %w", err)
+	}
+	return oldValue.PaymentTopUpID, nil
+}
+
+// ResetPaymentTopUpID resets all changes to the "payment_top_up_id" field.
+func (m *AdBoostChangeMutation) ResetPaymentTopUpID() {
+	m.payment_top_up_id = nil
+}
+
+// SetAppliedAt sets the "applied_at" field.
+func (m *AdBoostChangeMutation) SetAppliedAt(t time.Time) {
+	m.applied_at = &t
+}
+
+// AppliedAt returns the value of the "applied_at" field in the mutation.
+func (m *AdBoostChangeMutation) AppliedAt() (r time.Time, exists bool) {
+	v := m.applied_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldAppliedAt returns the old "applied_at" field's value of the AdBoostChange entity.
+// If the AdBoostChange object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AdBoostChangeMutation) OldAppliedAt(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldAppliedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldAppliedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldAppliedAt: %w", err)
+	}
+	return oldValue.AppliedAt, nil
+}
+
+// ClearAppliedAt clears the value of the "applied_at" field.
+func (m *AdBoostChangeMutation) ClearAppliedAt() {
+	m.applied_at = nil
+	m.clearedFields[adboostchange.FieldAppliedAt] = struct{}{}
+}
+
+// AppliedAtCleared returns if the "applied_at" field was cleared in this mutation.
+func (m *AdBoostChangeMutation) AppliedAtCleared() bool {
+	_, ok := m.clearedFields[adboostchange.FieldAppliedAt]
+	return ok
+}
+
+// ResetAppliedAt resets all changes to the "applied_at" field.
+func (m *AdBoostChangeMutation) ResetAppliedAt() {
+	m.applied_at = nil
+	delete(m.clearedFields, adboostchange.FieldAppliedAt)
+}
+
+// Where appends a list predicates to the AdBoostChangeMutation builder.
+func (m *AdBoostChangeMutation) Where(ps ...predicate.AdBoostChange) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the AdBoostChangeMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *AdBoostChangeMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.AdBoostChange, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *AdBoostChangeMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *AdBoostChangeMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (AdBoostChange).
+func (m *AdBoostChangeMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *AdBoostChangeMutation) Fields() []string {
+	fields := make([]string, 0, 13)
+	if m.created_at != nil {
+		fields = append(fields, adboostchange.FieldCreatedAt)
+	}
+	if m.boost_id != nil {
+		fields = append(fields, adboostchange.FieldBoostID)
+	}
+	if m.user_id != nil {
+		fields = append(fields, adboostchange.FieldUserID)
+	}
+	if m.idempotency_key != nil {
+		fields = append(fields, adboostchange.FieldIdempotencyKey)
+	}
+	if m.request_hash != nil {
+		fields = append(fields, adboostchange.FieldRequestHash)
+	}
+	if m.extra_days != nil {
+		fields = append(fields, adboostchange.FieldExtraDays)
+	}
+	if m.new_daily_budget_minor != nil {
+		fields = append(fields, adboostchange.FieldNewDailyBudgetMinor)
+	}
+	if m.additional_minor != nil {
+		fields = append(fields, adboostchange.FieldAdditionalMinor)
+	}
+	if m.currency != nil {
+		fields = append(fields, adboostchange.FieldCurrency)
+	}
+	if m.payment_method != nil {
+		fields = append(fields, adboostchange.FieldPaymentMethod)
+	}
+	if m.status != nil {
+		fields = append(fields, adboostchange.FieldStatus)
+	}
+	if m.payment_top_up_id != nil {
+		fields = append(fields, adboostchange.FieldPaymentTopUpID)
+	}
+	if m.applied_at != nil {
+		fields = append(fields, adboostchange.FieldAppliedAt)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *AdBoostChangeMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case adboostchange.FieldCreatedAt:
+		return m.CreatedAt()
+	case adboostchange.FieldBoostID:
+		return m.BoostID()
+	case adboostchange.FieldUserID:
+		return m.UserID()
+	case adboostchange.FieldIdempotencyKey:
+		return m.IdempotencyKey()
+	case adboostchange.FieldRequestHash:
+		return m.RequestHash()
+	case adboostchange.FieldExtraDays:
+		return m.ExtraDays()
+	case adboostchange.FieldNewDailyBudgetMinor:
+		return m.NewDailyBudgetMinor()
+	case adboostchange.FieldAdditionalMinor:
+		return m.AdditionalMinor()
+	case adboostchange.FieldCurrency:
+		return m.Currency()
+	case adboostchange.FieldPaymentMethod:
+		return m.PaymentMethod()
+	case adboostchange.FieldStatus:
+		return m.Status()
+	case adboostchange.FieldPaymentTopUpID:
+		return m.PaymentTopUpID()
+	case adboostchange.FieldAppliedAt:
+		return m.AppliedAt()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *AdBoostChangeMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case adboostchange.FieldCreatedAt:
+		return m.OldCreatedAt(ctx)
+	case adboostchange.FieldBoostID:
+		return m.OldBoostID(ctx)
+	case adboostchange.FieldUserID:
+		return m.OldUserID(ctx)
+	case adboostchange.FieldIdempotencyKey:
+		return m.OldIdempotencyKey(ctx)
+	case adboostchange.FieldRequestHash:
+		return m.OldRequestHash(ctx)
+	case adboostchange.FieldExtraDays:
+		return m.OldExtraDays(ctx)
+	case adboostchange.FieldNewDailyBudgetMinor:
+		return m.OldNewDailyBudgetMinor(ctx)
+	case adboostchange.FieldAdditionalMinor:
+		return m.OldAdditionalMinor(ctx)
+	case adboostchange.FieldCurrency:
+		return m.OldCurrency(ctx)
+	case adboostchange.FieldPaymentMethod:
+		return m.OldPaymentMethod(ctx)
+	case adboostchange.FieldStatus:
+		return m.OldStatus(ctx)
+	case adboostchange.FieldPaymentTopUpID:
+		return m.OldPaymentTopUpID(ctx)
+	case adboostchange.FieldAppliedAt:
+		return m.OldAppliedAt(ctx)
+	}
+	return nil, fmt.Errorf("unknown AdBoostChange field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *AdBoostChangeMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case adboostchange.FieldCreatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatedAt(v)
+		return nil
+	case adboostchange.FieldBoostID:
+		v, ok := value.(uuid.UUID)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetBoostID(v)
+		return nil
+	case adboostchange.FieldUserID:
+		v, ok := value.(uuid.UUID)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUserID(v)
+		return nil
+	case adboostchange.FieldIdempotencyKey:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetIdempotencyKey(v)
+		return nil
+	case adboostchange.FieldRequestHash:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetRequestHash(v)
+		return nil
+	case adboostchange.FieldExtraDays:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetExtraDays(v)
+		return nil
+	case adboostchange.FieldNewDailyBudgetMinor:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetNewDailyBudgetMinor(v)
+		return nil
+	case adboostchange.FieldAdditionalMinor:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetAdditionalMinor(v)
+		return nil
+	case adboostchange.FieldCurrency:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCurrency(v)
+		return nil
+	case adboostchange.FieldPaymentMethod:
+		v, ok := value.(adboostchange.PaymentMethod)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetPaymentMethod(v)
+		return nil
+	case adboostchange.FieldStatus:
+		v, ok := value.(adboostchange.Status)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetStatus(v)
+		return nil
+	case adboostchange.FieldPaymentTopUpID:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetPaymentTopUpID(v)
+		return nil
+	case adboostchange.FieldAppliedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetAppliedAt(v)
+		return nil
+	}
+	return fmt.Errorf("unknown AdBoostChange field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *AdBoostChangeMutation) AddedFields() []string {
+	var fields []string
+	if m.addextra_days != nil {
+		fields = append(fields, adboostchange.FieldExtraDays)
+	}
+	if m.addnew_daily_budget_minor != nil {
+		fields = append(fields, adboostchange.FieldNewDailyBudgetMinor)
+	}
+	if m.addadditional_minor != nil {
+		fields = append(fields, adboostchange.FieldAdditionalMinor)
+	}
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *AdBoostChangeMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case adboostchange.FieldExtraDays:
+		return m.AddedExtraDays()
+	case adboostchange.FieldNewDailyBudgetMinor:
+		return m.AddedNewDailyBudgetMinor()
+	case adboostchange.FieldAdditionalMinor:
+		return m.AddedAdditionalMinor()
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *AdBoostChangeMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	case adboostchange.FieldExtraDays:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddExtraDays(v)
+		return nil
+	case adboostchange.FieldNewDailyBudgetMinor:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddNewDailyBudgetMinor(v)
+		return nil
+	case adboostchange.FieldAdditionalMinor:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddAdditionalMinor(v)
+		return nil
+	}
+	return fmt.Errorf("unknown AdBoostChange numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *AdBoostChangeMutation) ClearedFields() []string {
+	var fields []string
+	if m.FieldCleared(adboostchange.FieldAppliedAt) {
+		fields = append(fields, adboostchange.FieldAppliedAt)
+	}
+	return fields
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *AdBoostChangeMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *AdBoostChangeMutation) ClearField(name string) error {
+	switch name {
+	case adboostchange.FieldAppliedAt:
+		m.ClearAppliedAt()
+		return nil
+	}
+	return fmt.Errorf("unknown AdBoostChange nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *AdBoostChangeMutation) ResetField(name string) error {
+	switch name {
+	case adboostchange.FieldCreatedAt:
+		m.ResetCreatedAt()
+		return nil
+	case adboostchange.FieldBoostID:
+		m.ResetBoostID()
+		return nil
+	case adboostchange.FieldUserID:
+		m.ResetUserID()
+		return nil
+	case adboostchange.FieldIdempotencyKey:
+		m.ResetIdempotencyKey()
+		return nil
+	case adboostchange.FieldRequestHash:
+		m.ResetRequestHash()
+		return nil
+	case adboostchange.FieldExtraDays:
+		m.ResetExtraDays()
+		return nil
+	case adboostchange.FieldNewDailyBudgetMinor:
+		m.ResetNewDailyBudgetMinor()
+		return nil
+	case adboostchange.FieldAdditionalMinor:
+		m.ResetAdditionalMinor()
+		return nil
+	case adboostchange.FieldCurrency:
+		m.ResetCurrency()
+		return nil
+	case adboostchange.FieldPaymentMethod:
+		m.ResetPaymentMethod()
+		return nil
+	case adboostchange.FieldStatus:
+		m.ResetStatus()
+		return nil
+	case adboostchange.FieldPaymentTopUpID:
+		m.ResetPaymentTopUpID()
+		return nil
+	case adboostchange.FieldAppliedAt:
+		m.ResetAppliedAt()
+		return nil
+	}
+	return fmt.Errorf("unknown AdBoostChange field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *AdBoostChangeMutation) AddedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *AdBoostChangeMutation) AddedIDs(name string) []ent.Value {
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *AdBoostChangeMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *AdBoostChangeMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *AdBoostChangeMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *AdBoostChangeMutation) EdgeCleared(name string) bool {
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *AdBoostChangeMutation) ClearEdge(name string) error {
+	return fmt.Errorf("unknown AdBoostChange unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *AdBoostChangeMutation) ResetEdge(name string) error {
+	return fmt.Errorf("unknown AdBoostChange edge %s", name)
+}
+
 // AdCampaignMutation represents an operation that mutates the AdCampaign nodes in the graph.
 type AdCampaignMutation struct {
 	config
@@ -8734,6 +11218,7 @@ type AdCampaignMutation struct {
 	start_at               *time.Time
 	end_at                 *time.Time
 	created_by_user_id     *uuid.UUID
+	ad_category            *string
 	updated_at             *time.Time
 	clearedFields          map[string]struct{}
 	done                   bool
@@ -9407,6 +11892,42 @@ func (m *AdCampaignMutation) ResetCreatedByUserID() {
 	m.created_by_user_id = nil
 }
 
+// SetAdCategory sets the "ad_category" field.
+func (m *AdCampaignMutation) SetAdCategory(s string) {
+	m.ad_category = &s
+}
+
+// AdCategory returns the value of the "ad_category" field in the mutation.
+func (m *AdCampaignMutation) AdCategory() (r string, exists bool) {
+	v := m.ad_category
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldAdCategory returns the old "ad_category" field's value of the AdCampaign entity.
+// If the AdCampaign object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AdCampaignMutation) OldAdCategory(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldAdCategory is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldAdCategory requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldAdCategory: %w", err)
+	}
+	return oldValue.AdCategory, nil
+}
+
+// ResetAdCategory resets all changes to the "ad_category" field.
+func (m *AdCampaignMutation) ResetAdCategory() {
+	m.ad_category = nil
+}
+
 // SetUpdatedAt sets the "updated_at" field.
 func (m *AdCampaignMutation) SetUpdatedAt(t time.Time) {
 	m.updated_at = &t
@@ -9477,7 +11998,7 @@ func (m *AdCampaignMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *AdCampaignMutation) Fields() []string {
-	fields := make([]string, 0, 14)
+	fields := make([]string, 0, 15)
 	if m.created_at != nil {
 		fields = append(fields, adcampaign.FieldCreatedAt)
 	}
@@ -9517,6 +12038,9 @@ func (m *AdCampaignMutation) Fields() []string {
 	if m.created_by_user_id != nil {
 		fields = append(fields, adcampaign.FieldCreatedByUserID)
 	}
+	if m.ad_category != nil {
+		fields = append(fields, adcampaign.FieldAdCategory)
+	}
 	if m.updated_at != nil {
 		fields = append(fields, adcampaign.FieldUpdatedAt)
 	}
@@ -9554,6 +12078,8 @@ func (m *AdCampaignMutation) Field(name string) (ent.Value, bool) {
 		return m.EndAt()
 	case adcampaign.FieldCreatedByUserID:
 		return m.CreatedByUserID()
+	case adcampaign.FieldAdCategory:
+		return m.AdCategory()
 	case adcampaign.FieldUpdatedAt:
 		return m.UpdatedAt()
 	}
@@ -9591,6 +12117,8 @@ func (m *AdCampaignMutation) OldField(ctx context.Context, name string) (ent.Val
 		return m.OldEndAt(ctx)
 	case adcampaign.FieldCreatedByUserID:
 		return m.OldCreatedByUserID(ctx)
+	case adcampaign.FieldAdCategory:
+		return m.OldAdCategory(ctx)
 	case adcampaign.FieldUpdatedAt:
 		return m.OldUpdatedAt(ctx)
 	}
@@ -9692,6 +12220,13 @@ func (m *AdCampaignMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetCreatedByUserID(v)
+		return nil
+	case adcampaign.FieldAdCategory:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetAdCategory(v)
 		return nil
 	case adcampaign.FieldUpdatedAt:
 		v, ok := value.(time.Time)
@@ -9841,6 +12376,9 @@ func (m *AdCampaignMutation) ResetField(name string) error {
 		return nil
 	case adcampaign.FieldCreatedByUserID:
 		m.ResetCreatedByUserID()
+		return nil
+	case adcampaign.FieldAdCategory:
+		m.ResetAdCategory()
 		return nil
 	case adcampaign.FieldUpdatedAt:
 		m.ResetUpdatedAt()
@@ -10653,6 +13191,752 @@ func (m *AdCardStatsDailyMutation) ClearEdge(name string) error {
 // It returns an error if the edge is not defined in the schema.
 func (m *AdCardStatsDailyMutation) ResetEdge(name string) error {
 	return fmt.Errorf("unknown AdCardStatsDaily edge %s", name)
+}
+
+// AdCashbackSettingMutation represents an operation that mutates the AdCashbackSetting nodes in the graph.
+type AdCashbackSettingMutation struct {
+	config
+	op                  Op
+	typ                 string
+	id                  *uuid.UUID
+	created_at          *time.Time
+	user_id             *uuid.UUID
+	enabled             *bool
+	percent             *int
+	addpercent          *int
+	reason              *string
+	updated_by_staff_id *string
+	updated_by_name     *string
+	updated_at          *time.Time
+	clearedFields       map[string]struct{}
+	done                bool
+	oldValue            func(context.Context) (*AdCashbackSetting, error)
+	predicates          []predicate.AdCashbackSetting
+}
+
+var _ ent.Mutation = (*AdCashbackSettingMutation)(nil)
+
+// adcashbacksettingOption allows management of the mutation configuration using functional options.
+type adcashbacksettingOption func(*AdCashbackSettingMutation)
+
+// newAdCashbackSettingMutation creates new mutation for the AdCashbackSetting entity.
+func newAdCashbackSettingMutation(c config, op Op, opts ...adcashbacksettingOption) *AdCashbackSettingMutation {
+	m := &AdCashbackSettingMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeAdCashbackSetting,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withAdCashbackSettingID sets the ID field of the mutation.
+func withAdCashbackSettingID(id uuid.UUID) adcashbacksettingOption {
+	return func(m *AdCashbackSettingMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *AdCashbackSetting
+		)
+		m.oldValue = func(ctx context.Context) (*AdCashbackSetting, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().AdCashbackSetting.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withAdCashbackSetting sets the old AdCashbackSetting of the mutation.
+func withAdCashbackSetting(node *AdCashbackSetting) adcashbacksettingOption {
+	return func(m *AdCashbackSettingMutation) {
+		m.oldValue = func(context.Context) (*AdCashbackSetting, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m AdCashbackSettingMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m AdCashbackSettingMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of AdCashbackSetting entities.
+func (m *AdCashbackSettingMutation) SetID(id uuid.UUID) {
+	m.id = &id
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *AdCashbackSettingMutation) ID() (id uuid.UUID, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *AdCashbackSettingMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []uuid.UUID{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().AdCashbackSetting.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (m *AdCashbackSettingMutation) SetCreatedAt(t time.Time) {
+	m.created_at = &t
+}
+
+// CreatedAt returns the value of the "created_at" field in the mutation.
+func (m *AdCashbackSettingMutation) CreatedAt() (r time.Time, exists bool) {
+	v := m.created_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreatedAt returns the old "created_at" field's value of the AdCashbackSetting entity.
+// If the AdCashbackSetting object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AdCashbackSettingMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
+	}
+	return oldValue.CreatedAt, nil
+}
+
+// ResetCreatedAt resets all changes to the "created_at" field.
+func (m *AdCashbackSettingMutation) ResetCreatedAt() {
+	m.created_at = nil
+}
+
+// SetUserID sets the "user_id" field.
+func (m *AdCashbackSettingMutation) SetUserID(u uuid.UUID) {
+	m.user_id = &u
+}
+
+// UserID returns the value of the "user_id" field in the mutation.
+func (m *AdCashbackSettingMutation) UserID() (r uuid.UUID, exists bool) {
+	v := m.user_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUserID returns the old "user_id" field's value of the AdCashbackSetting entity.
+// If the AdCashbackSetting object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AdCashbackSettingMutation) OldUserID(ctx context.Context) (v uuid.UUID, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUserID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUserID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUserID: %w", err)
+	}
+	return oldValue.UserID, nil
+}
+
+// ResetUserID resets all changes to the "user_id" field.
+func (m *AdCashbackSettingMutation) ResetUserID() {
+	m.user_id = nil
+}
+
+// SetEnabled sets the "enabled" field.
+func (m *AdCashbackSettingMutation) SetEnabled(b bool) {
+	m.enabled = &b
+}
+
+// Enabled returns the value of the "enabled" field in the mutation.
+func (m *AdCashbackSettingMutation) Enabled() (r bool, exists bool) {
+	v := m.enabled
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldEnabled returns the old "enabled" field's value of the AdCashbackSetting entity.
+// If the AdCashbackSetting object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AdCashbackSettingMutation) OldEnabled(ctx context.Context) (v bool, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldEnabled is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldEnabled requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldEnabled: %w", err)
+	}
+	return oldValue.Enabled, nil
+}
+
+// ResetEnabled resets all changes to the "enabled" field.
+func (m *AdCashbackSettingMutation) ResetEnabled() {
+	m.enabled = nil
+}
+
+// SetPercent sets the "percent" field.
+func (m *AdCashbackSettingMutation) SetPercent(i int) {
+	m.percent = &i
+	m.addpercent = nil
+}
+
+// Percent returns the value of the "percent" field in the mutation.
+func (m *AdCashbackSettingMutation) Percent() (r int, exists bool) {
+	v := m.percent
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldPercent returns the old "percent" field's value of the AdCashbackSetting entity.
+// If the AdCashbackSetting object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AdCashbackSettingMutation) OldPercent(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldPercent is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldPercent requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldPercent: %w", err)
+	}
+	return oldValue.Percent, nil
+}
+
+// AddPercent adds i to the "percent" field.
+func (m *AdCashbackSettingMutation) AddPercent(i int) {
+	if m.addpercent != nil {
+		*m.addpercent += i
+	} else {
+		m.addpercent = &i
+	}
+}
+
+// AddedPercent returns the value that was added to the "percent" field in this mutation.
+func (m *AdCashbackSettingMutation) AddedPercent() (r int, exists bool) {
+	v := m.addpercent
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetPercent resets all changes to the "percent" field.
+func (m *AdCashbackSettingMutation) ResetPercent() {
+	m.percent = nil
+	m.addpercent = nil
+}
+
+// SetReason sets the "reason" field.
+func (m *AdCashbackSettingMutation) SetReason(s string) {
+	m.reason = &s
+}
+
+// Reason returns the value of the "reason" field in the mutation.
+func (m *AdCashbackSettingMutation) Reason() (r string, exists bool) {
+	v := m.reason
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldReason returns the old "reason" field's value of the AdCashbackSetting entity.
+// If the AdCashbackSetting object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AdCashbackSettingMutation) OldReason(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldReason is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldReason requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldReason: %w", err)
+	}
+	return oldValue.Reason, nil
+}
+
+// ResetReason resets all changes to the "reason" field.
+func (m *AdCashbackSettingMutation) ResetReason() {
+	m.reason = nil
+}
+
+// SetUpdatedByStaffID sets the "updated_by_staff_id" field.
+func (m *AdCashbackSettingMutation) SetUpdatedByStaffID(s string) {
+	m.updated_by_staff_id = &s
+}
+
+// UpdatedByStaffID returns the value of the "updated_by_staff_id" field in the mutation.
+func (m *AdCashbackSettingMutation) UpdatedByStaffID() (r string, exists bool) {
+	v := m.updated_by_staff_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUpdatedByStaffID returns the old "updated_by_staff_id" field's value of the AdCashbackSetting entity.
+// If the AdCashbackSetting object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AdCashbackSettingMutation) OldUpdatedByStaffID(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUpdatedByStaffID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUpdatedByStaffID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUpdatedByStaffID: %w", err)
+	}
+	return oldValue.UpdatedByStaffID, nil
+}
+
+// ResetUpdatedByStaffID resets all changes to the "updated_by_staff_id" field.
+func (m *AdCashbackSettingMutation) ResetUpdatedByStaffID() {
+	m.updated_by_staff_id = nil
+}
+
+// SetUpdatedByName sets the "updated_by_name" field.
+func (m *AdCashbackSettingMutation) SetUpdatedByName(s string) {
+	m.updated_by_name = &s
+}
+
+// UpdatedByName returns the value of the "updated_by_name" field in the mutation.
+func (m *AdCashbackSettingMutation) UpdatedByName() (r string, exists bool) {
+	v := m.updated_by_name
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUpdatedByName returns the old "updated_by_name" field's value of the AdCashbackSetting entity.
+// If the AdCashbackSetting object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AdCashbackSettingMutation) OldUpdatedByName(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUpdatedByName is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUpdatedByName requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUpdatedByName: %w", err)
+	}
+	return oldValue.UpdatedByName, nil
+}
+
+// ResetUpdatedByName resets all changes to the "updated_by_name" field.
+func (m *AdCashbackSettingMutation) ResetUpdatedByName() {
+	m.updated_by_name = nil
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (m *AdCashbackSettingMutation) SetUpdatedAt(t time.Time) {
+	m.updated_at = &t
+}
+
+// UpdatedAt returns the value of the "updated_at" field in the mutation.
+func (m *AdCashbackSettingMutation) UpdatedAt() (r time.Time, exists bool) {
+	v := m.updated_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUpdatedAt returns the old "updated_at" field's value of the AdCashbackSetting entity.
+// If the AdCashbackSetting object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AdCashbackSettingMutation) OldUpdatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUpdatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUpdatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUpdatedAt: %w", err)
+	}
+	return oldValue.UpdatedAt, nil
+}
+
+// ResetUpdatedAt resets all changes to the "updated_at" field.
+func (m *AdCashbackSettingMutation) ResetUpdatedAt() {
+	m.updated_at = nil
+}
+
+// Where appends a list predicates to the AdCashbackSettingMutation builder.
+func (m *AdCashbackSettingMutation) Where(ps ...predicate.AdCashbackSetting) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the AdCashbackSettingMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *AdCashbackSettingMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.AdCashbackSetting, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *AdCashbackSettingMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *AdCashbackSettingMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (AdCashbackSetting).
+func (m *AdCashbackSettingMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *AdCashbackSettingMutation) Fields() []string {
+	fields := make([]string, 0, 8)
+	if m.created_at != nil {
+		fields = append(fields, adcashbacksetting.FieldCreatedAt)
+	}
+	if m.user_id != nil {
+		fields = append(fields, adcashbacksetting.FieldUserID)
+	}
+	if m.enabled != nil {
+		fields = append(fields, adcashbacksetting.FieldEnabled)
+	}
+	if m.percent != nil {
+		fields = append(fields, adcashbacksetting.FieldPercent)
+	}
+	if m.reason != nil {
+		fields = append(fields, adcashbacksetting.FieldReason)
+	}
+	if m.updated_by_staff_id != nil {
+		fields = append(fields, adcashbacksetting.FieldUpdatedByStaffID)
+	}
+	if m.updated_by_name != nil {
+		fields = append(fields, adcashbacksetting.FieldUpdatedByName)
+	}
+	if m.updated_at != nil {
+		fields = append(fields, adcashbacksetting.FieldUpdatedAt)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *AdCashbackSettingMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case adcashbacksetting.FieldCreatedAt:
+		return m.CreatedAt()
+	case adcashbacksetting.FieldUserID:
+		return m.UserID()
+	case adcashbacksetting.FieldEnabled:
+		return m.Enabled()
+	case adcashbacksetting.FieldPercent:
+		return m.Percent()
+	case adcashbacksetting.FieldReason:
+		return m.Reason()
+	case adcashbacksetting.FieldUpdatedByStaffID:
+		return m.UpdatedByStaffID()
+	case adcashbacksetting.FieldUpdatedByName:
+		return m.UpdatedByName()
+	case adcashbacksetting.FieldUpdatedAt:
+		return m.UpdatedAt()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *AdCashbackSettingMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case adcashbacksetting.FieldCreatedAt:
+		return m.OldCreatedAt(ctx)
+	case adcashbacksetting.FieldUserID:
+		return m.OldUserID(ctx)
+	case adcashbacksetting.FieldEnabled:
+		return m.OldEnabled(ctx)
+	case adcashbacksetting.FieldPercent:
+		return m.OldPercent(ctx)
+	case adcashbacksetting.FieldReason:
+		return m.OldReason(ctx)
+	case adcashbacksetting.FieldUpdatedByStaffID:
+		return m.OldUpdatedByStaffID(ctx)
+	case adcashbacksetting.FieldUpdatedByName:
+		return m.OldUpdatedByName(ctx)
+	case adcashbacksetting.FieldUpdatedAt:
+		return m.OldUpdatedAt(ctx)
+	}
+	return nil, fmt.Errorf("unknown AdCashbackSetting field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *AdCashbackSettingMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case adcashbacksetting.FieldCreatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatedAt(v)
+		return nil
+	case adcashbacksetting.FieldUserID:
+		v, ok := value.(uuid.UUID)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUserID(v)
+		return nil
+	case adcashbacksetting.FieldEnabled:
+		v, ok := value.(bool)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetEnabled(v)
+		return nil
+	case adcashbacksetting.FieldPercent:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetPercent(v)
+		return nil
+	case adcashbacksetting.FieldReason:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetReason(v)
+		return nil
+	case adcashbacksetting.FieldUpdatedByStaffID:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUpdatedByStaffID(v)
+		return nil
+	case adcashbacksetting.FieldUpdatedByName:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUpdatedByName(v)
+		return nil
+	case adcashbacksetting.FieldUpdatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUpdatedAt(v)
+		return nil
+	}
+	return fmt.Errorf("unknown AdCashbackSetting field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *AdCashbackSettingMutation) AddedFields() []string {
+	var fields []string
+	if m.addpercent != nil {
+		fields = append(fields, adcashbacksetting.FieldPercent)
+	}
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *AdCashbackSettingMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case adcashbacksetting.FieldPercent:
+		return m.AddedPercent()
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *AdCashbackSettingMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	case adcashbacksetting.FieldPercent:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddPercent(v)
+		return nil
+	}
+	return fmt.Errorf("unknown AdCashbackSetting numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *AdCashbackSettingMutation) ClearedFields() []string {
+	return nil
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *AdCashbackSettingMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *AdCashbackSettingMutation) ClearField(name string) error {
+	return fmt.Errorf("unknown AdCashbackSetting nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *AdCashbackSettingMutation) ResetField(name string) error {
+	switch name {
+	case adcashbacksetting.FieldCreatedAt:
+		m.ResetCreatedAt()
+		return nil
+	case adcashbacksetting.FieldUserID:
+		m.ResetUserID()
+		return nil
+	case adcashbacksetting.FieldEnabled:
+		m.ResetEnabled()
+		return nil
+	case adcashbacksetting.FieldPercent:
+		m.ResetPercent()
+		return nil
+	case adcashbacksetting.FieldReason:
+		m.ResetReason()
+		return nil
+	case adcashbacksetting.FieldUpdatedByStaffID:
+		m.ResetUpdatedByStaffID()
+		return nil
+	case adcashbacksetting.FieldUpdatedByName:
+		m.ResetUpdatedByName()
+		return nil
+	case adcashbacksetting.FieldUpdatedAt:
+		m.ResetUpdatedAt()
+		return nil
+	}
+	return fmt.Errorf("unknown AdCashbackSetting field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *AdCashbackSettingMutation) AddedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *AdCashbackSettingMutation) AddedIDs(name string) []ent.Value {
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *AdCashbackSettingMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *AdCashbackSettingMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *AdCashbackSettingMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *AdCashbackSettingMutation) EdgeCleared(name string) bool {
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *AdCashbackSettingMutation) ClearEdge(name string) error {
+	return fmt.Errorf("unknown AdCashbackSetting unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *AdCashbackSettingMutation) ResetEdge(name string) error {
+	return fmt.Errorf("unknown AdCashbackSetting edge %s", name)
 }
 
 // AdContentSignalMutation represents an operation that mutates the AdContentSignal nodes in the graph.
@@ -14951,6 +18235,1632 @@ func (m *AdCreatorProgramMemberMutation) ClearEdge(name string) error {
 // It returns an error if the edge is not defined in the schema.
 func (m *AdCreatorProgramMemberMutation) ResetEdge(name string) error {
 	return fmt.Errorf("unknown AdCreatorProgramMember edge %s", name)
+}
+
+// AdCreditLotMutation represents an operation that mutates the AdCreditLot nodes in the graph.
+type AdCreditLotMutation struct {
+	config
+	op                  Op
+	typ                 string
+	id                  *uuid.UUID
+	created_at          *time.Time
+	account_id          *uuid.UUID
+	user_id             *uuid.UUID
+	currency            *string
+	source              *adcreditlot.Source
+	original_minor      *int64
+	addoriginal_minor   *int64
+	remaining_minor     *int64
+	addremaining_minor  *int64
+	expires_at          *time.Time
+	status              *adcreditlot.Status
+	reason              *string
+	reference           *string
+	issued_by_staff_id  *string
+	issued_by_name      *string
+	boost_id            *uuid.UUID
+	spend_batch_id      *uuid.UUID
+	expired_minor       *int64
+	addexpired_minor    *int64
+	revoked_minor       *int64
+	addrevoked_minor    *int64
+	revoked_at          *time.Time
+	revoked_by_staff_id *string
+	revoke_reason       *string
+	updated_at          *time.Time
+	clearedFields       map[string]struct{}
+	done                bool
+	oldValue            func(context.Context) (*AdCreditLot, error)
+	predicates          []predicate.AdCreditLot
+}
+
+var _ ent.Mutation = (*AdCreditLotMutation)(nil)
+
+// adcreditlotOption allows management of the mutation configuration using functional options.
+type adcreditlotOption func(*AdCreditLotMutation)
+
+// newAdCreditLotMutation creates new mutation for the AdCreditLot entity.
+func newAdCreditLotMutation(c config, op Op, opts ...adcreditlotOption) *AdCreditLotMutation {
+	m := &AdCreditLotMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeAdCreditLot,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withAdCreditLotID sets the ID field of the mutation.
+func withAdCreditLotID(id uuid.UUID) adcreditlotOption {
+	return func(m *AdCreditLotMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *AdCreditLot
+		)
+		m.oldValue = func(ctx context.Context) (*AdCreditLot, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().AdCreditLot.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withAdCreditLot sets the old AdCreditLot of the mutation.
+func withAdCreditLot(node *AdCreditLot) adcreditlotOption {
+	return func(m *AdCreditLotMutation) {
+		m.oldValue = func(context.Context) (*AdCreditLot, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m AdCreditLotMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m AdCreditLotMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of AdCreditLot entities.
+func (m *AdCreditLotMutation) SetID(id uuid.UUID) {
+	m.id = &id
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *AdCreditLotMutation) ID() (id uuid.UUID, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *AdCreditLotMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []uuid.UUID{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().AdCreditLot.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (m *AdCreditLotMutation) SetCreatedAt(t time.Time) {
+	m.created_at = &t
+}
+
+// CreatedAt returns the value of the "created_at" field in the mutation.
+func (m *AdCreditLotMutation) CreatedAt() (r time.Time, exists bool) {
+	v := m.created_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreatedAt returns the old "created_at" field's value of the AdCreditLot entity.
+// If the AdCreditLot object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AdCreditLotMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
+	}
+	return oldValue.CreatedAt, nil
+}
+
+// ResetCreatedAt resets all changes to the "created_at" field.
+func (m *AdCreditLotMutation) ResetCreatedAt() {
+	m.created_at = nil
+}
+
+// SetAccountID sets the "account_id" field.
+func (m *AdCreditLotMutation) SetAccountID(u uuid.UUID) {
+	m.account_id = &u
+}
+
+// AccountID returns the value of the "account_id" field in the mutation.
+func (m *AdCreditLotMutation) AccountID() (r uuid.UUID, exists bool) {
+	v := m.account_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldAccountID returns the old "account_id" field's value of the AdCreditLot entity.
+// If the AdCreditLot object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AdCreditLotMutation) OldAccountID(ctx context.Context) (v uuid.UUID, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldAccountID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldAccountID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldAccountID: %w", err)
+	}
+	return oldValue.AccountID, nil
+}
+
+// ResetAccountID resets all changes to the "account_id" field.
+func (m *AdCreditLotMutation) ResetAccountID() {
+	m.account_id = nil
+}
+
+// SetUserID sets the "user_id" field.
+func (m *AdCreditLotMutation) SetUserID(u uuid.UUID) {
+	m.user_id = &u
+}
+
+// UserID returns the value of the "user_id" field in the mutation.
+func (m *AdCreditLotMutation) UserID() (r uuid.UUID, exists bool) {
+	v := m.user_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUserID returns the old "user_id" field's value of the AdCreditLot entity.
+// If the AdCreditLot object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AdCreditLotMutation) OldUserID(ctx context.Context) (v uuid.UUID, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUserID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUserID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUserID: %w", err)
+	}
+	return oldValue.UserID, nil
+}
+
+// ResetUserID resets all changes to the "user_id" field.
+func (m *AdCreditLotMutation) ResetUserID() {
+	m.user_id = nil
+}
+
+// SetCurrency sets the "currency" field.
+func (m *AdCreditLotMutation) SetCurrency(s string) {
+	m.currency = &s
+}
+
+// Currency returns the value of the "currency" field in the mutation.
+func (m *AdCreditLotMutation) Currency() (r string, exists bool) {
+	v := m.currency
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCurrency returns the old "currency" field's value of the AdCreditLot entity.
+// If the AdCreditLot object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AdCreditLotMutation) OldCurrency(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCurrency is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCurrency requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCurrency: %w", err)
+	}
+	return oldValue.Currency, nil
+}
+
+// ResetCurrency resets all changes to the "currency" field.
+func (m *AdCreditLotMutation) ResetCurrency() {
+	m.currency = nil
+}
+
+// SetSource sets the "source" field.
+func (m *AdCreditLotMutation) SetSource(a adcreditlot.Source) {
+	m.source = &a
+}
+
+// Source returns the value of the "source" field in the mutation.
+func (m *AdCreditLotMutation) Source() (r adcreditlot.Source, exists bool) {
+	v := m.source
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSource returns the old "source" field's value of the AdCreditLot entity.
+// If the AdCreditLot object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AdCreditLotMutation) OldSource(ctx context.Context) (v adcreditlot.Source, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSource is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSource requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSource: %w", err)
+	}
+	return oldValue.Source, nil
+}
+
+// ResetSource resets all changes to the "source" field.
+func (m *AdCreditLotMutation) ResetSource() {
+	m.source = nil
+}
+
+// SetOriginalMinor sets the "original_minor" field.
+func (m *AdCreditLotMutation) SetOriginalMinor(i int64) {
+	m.original_minor = &i
+	m.addoriginal_minor = nil
+}
+
+// OriginalMinor returns the value of the "original_minor" field in the mutation.
+func (m *AdCreditLotMutation) OriginalMinor() (r int64, exists bool) {
+	v := m.original_minor
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldOriginalMinor returns the old "original_minor" field's value of the AdCreditLot entity.
+// If the AdCreditLot object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AdCreditLotMutation) OldOriginalMinor(ctx context.Context) (v int64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldOriginalMinor is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldOriginalMinor requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldOriginalMinor: %w", err)
+	}
+	return oldValue.OriginalMinor, nil
+}
+
+// AddOriginalMinor adds i to the "original_minor" field.
+func (m *AdCreditLotMutation) AddOriginalMinor(i int64) {
+	if m.addoriginal_minor != nil {
+		*m.addoriginal_minor += i
+	} else {
+		m.addoriginal_minor = &i
+	}
+}
+
+// AddedOriginalMinor returns the value that was added to the "original_minor" field in this mutation.
+func (m *AdCreditLotMutation) AddedOriginalMinor() (r int64, exists bool) {
+	v := m.addoriginal_minor
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetOriginalMinor resets all changes to the "original_minor" field.
+func (m *AdCreditLotMutation) ResetOriginalMinor() {
+	m.original_minor = nil
+	m.addoriginal_minor = nil
+}
+
+// SetRemainingMinor sets the "remaining_minor" field.
+func (m *AdCreditLotMutation) SetRemainingMinor(i int64) {
+	m.remaining_minor = &i
+	m.addremaining_minor = nil
+}
+
+// RemainingMinor returns the value of the "remaining_minor" field in the mutation.
+func (m *AdCreditLotMutation) RemainingMinor() (r int64, exists bool) {
+	v := m.remaining_minor
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldRemainingMinor returns the old "remaining_minor" field's value of the AdCreditLot entity.
+// If the AdCreditLot object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AdCreditLotMutation) OldRemainingMinor(ctx context.Context) (v int64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldRemainingMinor is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldRemainingMinor requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldRemainingMinor: %w", err)
+	}
+	return oldValue.RemainingMinor, nil
+}
+
+// AddRemainingMinor adds i to the "remaining_minor" field.
+func (m *AdCreditLotMutation) AddRemainingMinor(i int64) {
+	if m.addremaining_minor != nil {
+		*m.addremaining_minor += i
+	} else {
+		m.addremaining_minor = &i
+	}
+}
+
+// AddedRemainingMinor returns the value that was added to the "remaining_minor" field in this mutation.
+func (m *AdCreditLotMutation) AddedRemainingMinor() (r int64, exists bool) {
+	v := m.addremaining_minor
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetRemainingMinor resets all changes to the "remaining_minor" field.
+func (m *AdCreditLotMutation) ResetRemainingMinor() {
+	m.remaining_minor = nil
+	m.addremaining_minor = nil
+}
+
+// SetExpiresAt sets the "expires_at" field.
+func (m *AdCreditLotMutation) SetExpiresAt(t time.Time) {
+	m.expires_at = &t
+}
+
+// ExpiresAt returns the value of the "expires_at" field in the mutation.
+func (m *AdCreditLotMutation) ExpiresAt() (r time.Time, exists bool) {
+	v := m.expires_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldExpiresAt returns the old "expires_at" field's value of the AdCreditLot entity.
+// If the AdCreditLot object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AdCreditLotMutation) OldExpiresAt(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldExpiresAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldExpiresAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldExpiresAt: %w", err)
+	}
+	return oldValue.ExpiresAt, nil
+}
+
+// ClearExpiresAt clears the value of the "expires_at" field.
+func (m *AdCreditLotMutation) ClearExpiresAt() {
+	m.expires_at = nil
+	m.clearedFields[adcreditlot.FieldExpiresAt] = struct{}{}
+}
+
+// ExpiresAtCleared returns if the "expires_at" field was cleared in this mutation.
+func (m *AdCreditLotMutation) ExpiresAtCleared() bool {
+	_, ok := m.clearedFields[adcreditlot.FieldExpiresAt]
+	return ok
+}
+
+// ResetExpiresAt resets all changes to the "expires_at" field.
+func (m *AdCreditLotMutation) ResetExpiresAt() {
+	m.expires_at = nil
+	delete(m.clearedFields, adcreditlot.FieldExpiresAt)
+}
+
+// SetStatus sets the "status" field.
+func (m *AdCreditLotMutation) SetStatus(a adcreditlot.Status) {
+	m.status = &a
+}
+
+// Status returns the value of the "status" field in the mutation.
+func (m *AdCreditLotMutation) Status() (r adcreditlot.Status, exists bool) {
+	v := m.status
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldStatus returns the old "status" field's value of the AdCreditLot entity.
+// If the AdCreditLot object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AdCreditLotMutation) OldStatus(ctx context.Context) (v adcreditlot.Status, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldStatus is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldStatus requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldStatus: %w", err)
+	}
+	return oldValue.Status, nil
+}
+
+// ResetStatus resets all changes to the "status" field.
+func (m *AdCreditLotMutation) ResetStatus() {
+	m.status = nil
+}
+
+// SetReason sets the "reason" field.
+func (m *AdCreditLotMutation) SetReason(s string) {
+	m.reason = &s
+}
+
+// Reason returns the value of the "reason" field in the mutation.
+func (m *AdCreditLotMutation) Reason() (r string, exists bool) {
+	v := m.reason
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldReason returns the old "reason" field's value of the AdCreditLot entity.
+// If the AdCreditLot object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AdCreditLotMutation) OldReason(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldReason is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldReason requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldReason: %w", err)
+	}
+	return oldValue.Reason, nil
+}
+
+// ResetReason resets all changes to the "reason" field.
+func (m *AdCreditLotMutation) ResetReason() {
+	m.reason = nil
+}
+
+// SetReference sets the "reference" field.
+func (m *AdCreditLotMutation) SetReference(s string) {
+	m.reference = &s
+}
+
+// Reference returns the value of the "reference" field in the mutation.
+func (m *AdCreditLotMutation) Reference() (r string, exists bool) {
+	v := m.reference
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldReference returns the old "reference" field's value of the AdCreditLot entity.
+// If the AdCreditLot object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AdCreditLotMutation) OldReference(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldReference is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldReference requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldReference: %w", err)
+	}
+	return oldValue.Reference, nil
+}
+
+// ResetReference resets all changes to the "reference" field.
+func (m *AdCreditLotMutation) ResetReference() {
+	m.reference = nil
+}
+
+// SetIssuedByStaffID sets the "issued_by_staff_id" field.
+func (m *AdCreditLotMutation) SetIssuedByStaffID(s string) {
+	m.issued_by_staff_id = &s
+}
+
+// IssuedByStaffID returns the value of the "issued_by_staff_id" field in the mutation.
+func (m *AdCreditLotMutation) IssuedByStaffID() (r string, exists bool) {
+	v := m.issued_by_staff_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldIssuedByStaffID returns the old "issued_by_staff_id" field's value of the AdCreditLot entity.
+// If the AdCreditLot object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AdCreditLotMutation) OldIssuedByStaffID(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldIssuedByStaffID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldIssuedByStaffID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldIssuedByStaffID: %w", err)
+	}
+	return oldValue.IssuedByStaffID, nil
+}
+
+// ResetIssuedByStaffID resets all changes to the "issued_by_staff_id" field.
+func (m *AdCreditLotMutation) ResetIssuedByStaffID() {
+	m.issued_by_staff_id = nil
+}
+
+// SetIssuedByName sets the "issued_by_name" field.
+func (m *AdCreditLotMutation) SetIssuedByName(s string) {
+	m.issued_by_name = &s
+}
+
+// IssuedByName returns the value of the "issued_by_name" field in the mutation.
+func (m *AdCreditLotMutation) IssuedByName() (r string, exists bool) {
+	v := m.issued_by_name
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldIssuedByName returns the old "issued_by_name" field's value of the AdCreditLot entity.
+// If the AdCreditLot object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AdCreditLotMutation) OldIssuedByName(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldIssuedByName is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldIssuedByName requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldIssuedByName: %w", err)
+	}
+	return oldValue.IssuedByName, nil
+}
+
+// ResetIssuedByName resets all changes to the "issued_by_name" field.
+func (m *AdCreditLotMutation) ResetIssuedByName() {
+	m.issued_by_name = nil
+}
+
+// SetBoostID sets the "boost_id" field.
+func (m *AdCreditLotMutation) SetBoostID(u uuid.UUID) {
+	m.boost_id = &u
+}
+
+// BoostID returns the value of the "boost_id" field in the mutation.
+func (m *AdCreditLotMutation) BoostID() (r uuid.UUID, exists bool) {
+	v := m.boost_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldBoostID returns the old "boost_id" field's value of the AdCreditLot entity.
+// If the AdCreditLot object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AdCreditLotMutation) OldBoostID(ctx context.Context) (v *uuid.UUID, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldBoostID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldBoostID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldBoostID: %w", err)
+	}
+	return oldValue.BoostID, nil
+}
+
+// ClearBoostID clears the value of the "boost_id" field.
+func (m *AdCreditLotMutation) ClearBoostID() {
+	m.boost_id = nil
+	m.clearedFields[adcreditlot.FieldBoostID] = struct{}{}
+}
+
+// BoostIDCleared returns if the "boost_id" field was cleared in this mutation.
+func (m *AdCreditLotMutation) BoostIDCleared() bool {
+	_, ok := m.clearedFields[adcreditlot.FieldBoostID]
+	return ok
+}
+
+// ResetBoostID resets all changes to the "boost_id" field.
+func (m *AdCreditLotMutation) ResetBoostID() {
+	m.boost_id = nil
+	delete(m.clearedFields, adcreditlot.FieldBoostID)
+}
+
+// SetSpendBatchID sets the "spend_batch_id" field.
+func (m *AdCreditLotMutation) SetSpendBatchID(u uuid.UUID) {
+	m.spend_batch_id = &u
+}
+
+// SpendBatchID returns the value of the "spend_batch_id" field in the mutation.
+func (m *AdCreditLotMutation) SpendBatchID() (r uuid.UUID, exists bool) {
+	v := m.spend_batch_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSpendBatchID returns the old "spend_batch_id" field's value of the AdCreditLot entity.
+// If the AdCreditLot object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AdCreditLotMutation) OldSpendBatchID(ctx context.Context) (v *uuid.UUID, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSpendBatchID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSpendBatchID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSpendBatchID: %w", err)
+	}
+	return oldValue.SpendBatchID, nil
+}
+
+// ClearSpendBatchID clears the value of the "spend_batch_id" field.
+func (m *AdCreditLotMutation) ClearSpendBatchID() {
+	m.spend_batch_id = nil
+	m.clearedFields[adcreditlot.FieldSpendBatchID] = struct{}{}
+}
+
+// SpendBatchIDCleared returns if the "spend_batch_id" field was cleared in this mutation.
+func (m *AdCreditLotMutation) SpendBatchIDCleared() bool {
+	_, ok := m.clearedFields[adcreditlot.FieldSpendBatchID]
+	return ok
+}
+
+// ResetSpendBatchID resets all changes to the "spend_batch_id" field.
+func (m *AdCreditLotMutation) ResetSpendBatchID() {
+	m.spend_batch_id = nil
+	delete(m.clearedFields, adcreditlot.FieldSpendBatchID)
+}
+
+// SetExpiredMinor sets the "expired_minor" field.
+func (m *AdCreditLotMutation) SetExpiredMinor(i int64) {
+	m.expired_minor = &i
+	m.addexpired_minor = nil
+}
+
+// ExpiredMinor returns the value of the "expired_minor" field in the mutation.
+func (m *AdCreditLotMutation) ExpiredMinor() (r int64, exists bool) {
+	v := m.expired_minor
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldExpiredMinor returns the old "expired_minor" field's value of the AdCreditLot entity.
+// If the AdCreditLot object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AdCreditLotMutation) OldExpiredMinor(ctx context.Context) (v int64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldExpiredMinor is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldExpiredMinor requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldExpiredMinor: %w", err)
+	}
+	return oldValue.ExpiredMinor, nil
+}
+
+// AddExpiredMinor adds i to the "expired_minor" field.
+func (m *AdCreditLotMutation) AddExpiredMinor(i int64) {
+	if m.addexpired_minor != nil {
+		*m.addexpired_minor += i
+	} else {
+		m.addexpired_minor = &i
+	}
+}
+
+// AddedExpiredMinor returns the value that was added to the "expired_minor" field in this mutation.
+func (m *AdCreditLotMutation) AddedExpiredMinor() (r int64, exists bool) {
+	v := m.addexpired_minor
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetExpiredMinor resets all changes to the "expired_minor" field.
+func (m *AdCreditLotMutation) ResetExpiredMinor() {
+	m.expired_minor = nil
+	m.addexpired_minor = nil
+}
+
+// SetRevokedMinor sets the "revoked_minor" field.
+func (m *AdCreditLotMutation) SetRevokedMinor(i int64) {
+	m.revoked_minor = &i
+	m.addrevoked_minor = nil
+}
+
+// RevokedMinor returns the value of the "revoked_minor" field in the mutation.
+func (m *AdCreditLotMutation) RevokedMinor() (r int64, exists bool) {
+	v := m.revoked_minor
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldRevokedMinor returns the old "revoked_minor" field's value of the AdCreditLot entity.
+// If the AdCreditLot object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AdCreditLotMutation) OldRevokedMinor(ctx context.Context) (v int64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldRevokedMinor is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldRevokedMinor requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldRevokedMinor: %w", err)
+	}
+	return oldValue.RevokedMinor, nil
+}
+
+// AddRevokedMinor adds i to the "revoked_minor" field.
+func (m *AdCreditLotMutation) AddRevokedMinor(i int64) {
+	if m.addrevoked_minor != nil {
+		*m.addrevoked_minor += i
+	} else {
+		m.addrevoked_minor = &i
+	}
+}
+
+// AddedRevokedMinor returns the value that was added to the "revoked_minor" field in this mutation.
+func (m *AdCreditLotMutation) AddedRevokedMinor() (r int64, exists bool) {
+	v := m.addrevoked_minor
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetRevokedMinor resets all changes to the "revoked_minor" field.
+func (m *AdCreditLotMutation) ResetRevokedMinor() {
+	m.revoked_minor = nil
+	m.addrevoked_minor = nil
+}
+
+// SetRevokedAt sets the "revoked_at" field.
+func (m *AdCreditLotMutation) SetRevokedAt(t time.Time) {
+	m.revoked_at = &t
+}
+
+// RevokedAt returns the value of the "revoked_at" field in the mutation.
+func (m *AdCreditLotMutation) RevokedAt() (r time.Time, exists bool) {
+	v := m.revoked_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldRevokedAt returns the old "revoked_at" field's value of the AdCreditLot entity.
+// If the AdCreditLot object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AdCreditLotMutation) OldRevokedAt(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldRevokedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldRevokedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldRevokedAt: %w", err)
+	}
+	return oldValue.RevokedAt, nil
+}
+
+// ClearRevokedAt clears the value of the "revoked_at" field.
+func (m *AdCreditLotMutation) ClearRevokedAt() {
+	m.revoked_at = nil
+	m.clearedFields[adcreditlot.FieldRevokedAt] = struct{}{}
+}
+
+// RevokedAtCleared returns if the "revoked_at" field was cleared in this mutation.
+func (m *AdCreditLotMutation) RevokedAtCleared() bool {
+	_, ok := m.clearedFields[adcreditlot.FieldRevokedAt]
+	return ok
+}
+
+// ResetRevokedAt resets all changes to the "revoked_at" field.
+func (m *AdCreditLotMutation) ResetRevokedAt() {
+	m.revoked_at = nil
+	delete(m.clearedFields, adcreditlot.FieldRevokedAt)
+}
+
+// SetRevokedByStaffID sets the "revoked_by_staff_id" field.
+func (m *AdCreditLotMutation) SetRevokedByStaffID(s string) {
+	m.revoked_by_staff_id = &s
+}
+
+// RevokedByStaffID returns the value of the "revoked_by_staff_id" field in the mutation.
+func (m *AdCreditLotMutation) RevokedByStaffID() (r string, exists bool) {
+	v := m.revoked_by_staff_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldRevokedByStaffID returns the old "revoked_by_staff_id" field's value of the AdCreditLot entity.
+// If the AdCreditLot object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AdCreditLotMutation) OldRevokedByStaffID(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldRevokedByStaffID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldRevokedByStaffID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldRevokedByStaffID: %w", err)
+	}
+	return oldValue.RevokedByStaffID, nil
+}
+
+// ResetRevokedByStaffID resets all changes to the "revoked_by_staff_id" field.
+func (m *AdCreditLotMutation) ResetRevokedByStaffID() {
+	m.revoked_by_staff_id = nil
+}
+
+// SetRevokeReason sets the "revoke_reason" field.
+func (m *AdCreditLotMutation) SetRevokeReason(s string) {
+	m.revoke_reason = &s
+}
+
+// RevokeReason returns the value of the "revoke_reason" field in the mutation.
+func (m *AdCreditLotMutation) RevokeReason() (r string, exists bool) {
+	v := m.revoke_reason
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldRevokeReason returns the old "revoke_reason" field's value of the AdCreditLot entity.
+// If the AdCreditLot object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AdCreditLotMutation) OldRevokeReason(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldRevokeReason is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldRevokeReason requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldRevokeReason: %w", err)
+	}
+	return oldValue.RevokeReason, nil
+}
+
+// ResetRevokeReason resets all changes to the "revoke_reason" field.
+func (m *AdCreditLotMutation) ResetRevokeReason() {
+	m.revoke_reason = nil
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (m *AdCreditLotMutation) SetUpdatedAt(t time.Time) {
+	m.updated_at = &t
+}
+
+// UpdatedAt returns the value of the "updated_at" field in the mutation.
+func (m *AdCreditLotMutation) UpdatedAt() (r time.Time, exists bool) {
+	v := m.updated_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUpdatedAt returns the old "updated_at" field's value of the AdCreditLot entity.
+// If the AdCreditLot object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AdCreditLotMutation) OldUpdatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUpdatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUpdatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUpdatedAt: %w", err)
+	}
+	return oldValue.UpdatedAt, nil
+}
+
+// ResetUpdatedAt resets all changes to the "updated_at" field.
+func (m *AdCreditLotMutation) ResetUpdatedAt() {
+	m.updated_at = nil
+}
+
+// Where appends a list predicates to the AdCreditLotMutation builder.
+func (m *AdCreditLotMutation) Where(ps ...predicate.AdCreditLot) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the AdCreditLotMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *AdCreditLotMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.AdCreditLot, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *AdCreditLotMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *AdCreditLotMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (AdCreditLot).
+func (m *AdCreditLotMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *AdCreditLotMutation) Fields() []string {
+	fields := make([]string, 0, 21)
+	if m.created_at != nil {
+		fields = append(fields, adcreditlot.FieldCreatedAt)
+	}
+	if m.account_id != nil {
+		fields = append(fields, adcreditlot.FieldAccountID)
+	}
+	if m.user_id != nil {
+		fields = append(fields, adcreditlot.FieldUserID)
+	}
+	if m.currency != nil {
+		fields = append(fields, adcreditlot.FieldCurrency)
+	}
+	if m.source != nil {
+		fields = append(fields, adcreditlot.FieldSource)
+	}
+	if m.original_minor != nil {
+		fields = append(fields, adcreditlot.FieldOriginalMinor)
+	}
+	if m.remaining_minor != nil {
+		fields = append(fields, adcreditlot.FieldRemainingMinor)
+	}
+	if m.expires_at != nil {
+		fields = append(fields, adcreditlot.FieldExpiresAt)
+	}
+	if m.status != nil {
+		fields = append(fields, adcreditlot.FieldStatus)
+	}
+	if m.reason != nil {
+		fields = append(fields, adcreditlot.FieldReason)
+	}
+	if m.reference != nil {
+		fields = append(fields, adcreditlot.FieldReference)
+	}
+	if m.issued_by_staff_id != nil {
+		fields = append(fields, adcreditlot.FieldIssuedByStaffID)
+	}
+	if m.issued_by_name != nil {
+		fields = append(fields, adcreditlot.FieldIssuedByName)
+	}
+	if m.boost_id != nil {
+		fields = append(fields, adcreditlot.FieldBoostID)
+	}
+	if m.spend_batch_id != nil {
+		fields = append(fields, adcreditlot.FieldSpendBatchID)
+	}
+	if m.expired_minor != nil {
+		fields = append(fields, adcreditlot.FieldExpiredMinor)
+	}
+	if m.revoked_minor != nil {
+		fields = append(fields, adcreditlot.FieldRevokedMinor)
+	}
+	if m.revoked_at != nil {
+		fields = append(fields, adcreditlot.FieldRevokedAt)
+	}
+	if m.revoked_by_staff_id != nil {
+		fields = append(fields, adcreditlot.FieldRevokedByStaffID)
+	}
+	if m.revoke_reason != nil {
+		fields = append(fields, adcreditlot.FieldRevokeReason)
+	}
+	if m.updated_at != nil {
+		fields = append(fields, adcreditlot.FieldUpdatedAt)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *AdCreditLotMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case adcreditlot.FieldCreatedAt:
+		return m.CreatedAt()
+	case adcreditlot.FieldAccountID:
+		return m.AccountID()
+	case adcreditlot.FieldUserID:
+		return m.UserID()
+	case adcreditlot.FieldCurrency:
+		return m.Currency()
+	case adcreditlot.FieldSource:
+		return m.Source()
+	case adcreditlot.FieldOriginalMinor:
+		return m.OriginalMinor()
+	case adcreditlot.FieldRemainingMinor:
+		return m.RemainingMinor()
+	case adcreditlot.FieldExpiresAt:
+		return m.ExpiresAt()
+	case adcreditlot.FieldStatus:
+		return m.Status()
+	case adcreditlot.FieldReason:
+		return m.Reason()
+	case adcreditlot.FieldReference:
+		return m.Reference()
+	case adcreditlot.FieldIssuedByStaffID:
+		return m.IssuedByStaffID()
+	case adcreditlot.FieldIssuedByName:
+		return m.IssuedByName()
+	case adcreditlot.FieldBoostID:
+		return m.BoostID()
+	case adcreditlot.FieldSpendBatchID:
+		return m.SpendBatchID()
+	case adcreditlot.FieldExpiredMinor:
+		return m.ExpiredMinor()
+	case adcreditlot.FieldRevokedMinor:
+		return m.RevokedMinor()
+	case adcreditlot.FieldRevokedAt:
+		return m.RevokedAt()
+	case adcreditlot.FieldRevokedByStaffID:
+		return m.RevokedByStaffID()
+	case adcreditlot.FieldRevokeReason:
+		return m.RevokeReason()
+	case adcreditlot.FieldUpdatedAt:
+		return m.UpdatedAt()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *AdCreditLotMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case adcreditlot.FieldCreatedAt:
+		return m.OldCreatedAt(ctx)
+	case adcreditlot.FieldAccountID:
+		return m.OldAccountID(ctx)
+	case adcreditlot.FieldUserID:
+		return m.OldUserID(ctx)
+	case adcreditlot.FieldCurrency:
+		return m.OldCurrency(ctx)
+	case adcreditlot.FieldSource:
+		return m.OldSource(ctx)
+	case adcreditlot.FieldOriginalMinor:
+		return m.OldOriginalMinor(ctx)
+	case adcreditlot.FieldRemainingMinor:
+		return m.OldRemainingMinor(ctx)
+	case adcreditlot.FieldExpiresAt:
+		return m.OldExpiresAt(ctx)
+	case adcreditlot.FieldStatus:
+		return m.OldStatus(ctx)
+	case adcreditlot.FieldReason:
+		return m.OldReason(ctx)
+	case adcreditlot.FieldReference:
+		return m.OldReference(ctx)
+	case adcreditlot.FieldIssuedByStaffID:
+		return m.OldIssuedByStaffID(ctx)
+	case adcreditlot.FieldIssuedByName:
+		return m.OldIssuedByName(ctx)
+	case adcreditlot.FieldBoostID:
+		return m.OldBoostID(ctx)
+	case adcreditlot.FieldSpendBatchID:
+		return m.OldSpendBatchID(ctx)
+	case adcreditlot.FieldExpiredMinor:
+		return m.OldExpiredMinor(ctx)
+	case adcreditlot.FieldRevokedMinor:
+		return m.OldRevokedMinor(ctx)
+	case adcreditlot.FieldRevokedAt:
+		return m.OldRevokedAt(ctx)
+	case adcreditlot.FieldRevokedByStaffID:
+		return m.OldRevokedByStaffID(ctx)
+	case adcreditlot.FieldRevokeReason:
+		return m.OldRevokeReason(ctx)
+	case adcreditlot.FieldUpdatedAt:
+		return m.OldUpdatedAt(ctx)
+	}
+	return nil, fmt.Errorf("unknown AdCreditLot field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *AdCreditLotMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case adcreditlot.FieldCreatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatedAt(v)
+		return nil
+	case adcreditlot.FieldAccountID:
+		v, ok := value.(uuid.UUID)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetAccountID(v)
+		return nil
+	case adcreditlot.FieldUserID:
+		v, ok := value.(uuid.UUID)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUserID(v)
+		return nil
+	case adcreditlot.FieldCurrency:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCurrency(v)
+		return nil
+	case adcreditlot.FieldSource:
+		v, ok := value.(adcreditlot.Source)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSource(v)
+		return nil
+	case adcreditlot.FieldOriginalMinor:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetOriginalMinor(v)
+		return nil
+	case adcreditlot.FieldRemainingMinor:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetRemainingMinor(v)
+		return nil
+	case adcreditlot.FieldExpiresAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetExpiresAt(v)
+		return nil
+	case adcreditlot.FieldStatus:
+		v, ok := value.(adcreditlot.Status)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetStatus(v)
+		return nil
+	case adcreditlot.FieldReason:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetReason(v)
+		return nil
+	case adcreditlot.FieldReference:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetReference(v)
+		return nil
+	case adcreditlot.FieldIssuedByStaffID:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetIssuedByStaffID(v)
+		return nil
+	case adcreditlot.FieldIssuedByName:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetIssuedByName(v)
+		return nil
+	case adcreditlot.FieldBoostID:
+		v, ok := value.(uuid.UUID)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetBoostID(v)
+		return nil
+	case adcreditlot.FieldSpendBatchID:
+		v, ok := value.(uuid.UUID)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSpendBatchID(v)
+		return nil
+	case adcreditlot.FieldExpiredMinor:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetExpiredMinor(v)
+		return nil
+	case adcreditlot.FieldRevokedMinor:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetRevokedMinor(v)
+		return nil
+	case adcreditlot.FieldRevokedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetRevokedAt(v)
+		return nil
+	case adcreditlot.FieldRevokedByStaffID:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetRevokedByStaffID(v)
+		return nil
+	case adcreditlot.FieldRevokeReason:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetRevokeReason(v)
+		return nil
+	case adcreditlot.FieldUpdatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUpdatedAt(v)
+		return nil
+	}
+	return fmt.Errorf("unknown AdCreditLot field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *AdCreditLotMutation) AddedFields() []string {
+	var fields []string
+	if m.addoriginal_minor != nil {
+		fields = append(fields, adcreditlot.FieldOriginalMinor)
+	}
+	if m.addremaining_minor != nil {
+		fields = append(fields, adcreditlot.FieldRemainingMinor)
+	}
+	if m.addexpired_minor != nil {
+		fields = append(fields, adcreditlot.FieldExpiredMinor)
+	}
+	if m.addrevoked_minor != nil {
+		fields = append(fields, adcreditlot.FieldRevokedMinor)
+	}
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *AdCreditLotMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case adcreditlot.FieldOriginalMinor:
+		return m.AddedOriginalMinor()
+	case adcreditlot.FieldRemainingMinor:
+		return m.AddedRemainingMinor()
+	case adcreditlot.FieldExpiredMinor:
+		return m.AddedExpiredMinor()
+	case adcreditlot.FieldRevokedMinor:
+		return m.AddedRevokedMinor()
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *AdCreditLotMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	case adcreditlot.FieldOriginalMinor:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddOriginalMinor(v)
+		return nil
+	case adcreditlot.FieldRemainingMinor:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddRemainingMinor(v)
+		return nil
+	case adcreditlot.FieldExpiredMinor:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddExpiredMinor(v)
+		return nil
+	case adcreditlot.FieldRevokedMinor:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddRevokedMinor(v)
+		return nil
+	}
+	return fmt.Errorf("unknown AdCreditLot numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *AdCreditLotMutation) ClearedFields() []string {
+	var fields []string
+	if m.FieldCleared(adcreditlot.FieldExpiresAt) {
+		fields = append(fields, adcreditlot.FieldExpiresAt)
+	}
+	if m.FieldCleared(adcreditlot.FieldBoostID) {
+		fields = append(fields, adcreditlot.FieldBoostID)
+	}
+	if m.FieldCleared(adcreditlot.FieldSpendBatchID) {
+		fields = append(fields, adcreditlot.FieldSpendBatchID)
+	}
+	if m.FieldCleared(adcreditlot.FieldRevokedAt) {
+		fields = append(fields, adcreditlot.FieldRevokedAt)
+	}
+	return fields
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *AdCreditLotMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *AdCreditLotMutation) ClearField(name string) error {
+	switch name {
+	case adcreditlot.FieldExpiresAt:
+		m.ClearExpiresAt()
+		return nil
+	case adcreditlot.FieldBoostID:
+		m.ClearBoostID()
+		return nil
+	case adcreditlot.FieldSpendBatchID:
+		m.ClearSpendBatchID()
+		return nil
+	case adcreditlot.FieldRevokedAt:
+		m.ClearRevokedAt()
+		return nil
+	}
+	return fmt.Errorf("unknown AdCreditLot nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *AdCreditLotMutation) ResetField(name string) error {
+	switch name {
+	case adcreditlot.FieldCreatedAt:
+		m.ResetCreatedAt()
+		return nil
+	case adcreditlot.FieldAccountID:
+		m.ResetAccountID()
+		return nil
+	case adcreditlot.FieldUserID:
+		m.ResetUserID()
+		return nil
+	case adcreditlot.FieldCurrency:
+		m.ResetCurrency()
+		return nil
+	case adcreditlot.FieldSource:
+		m.ResetSource()
+		return nil
+	case adcreditlot.FieldOriginalMinor:
+		m.ResetOriginalMinor()
+		return nil
+	case adcreditlot.FieldRemainingMinor:
+		m.ResetRemainingMinor()
+		return nil
+	case adcreditlot.FieldExpiresAt:
+		m.ResetExpiresAt()
+		return nil
+	case adcreditlot.FieldStatus:
+		m.ResetStatus()
+		return nil
+	case adcreditlot.FieldReason:
+		m.ResetReason()
+		return nil
+	case adcreditlot.FieldReference:
+		m.ResetReference()
+		return nil
+	case adcreditlot.FieldIssuedByStaffID:
+		m.ResetIssuedByStaffID()
+		return nil
+	case adcreditlot.FieldIssuedByName:
+		m.ResetIssuedByName()
+		return nil
+	case adcreditlot.FieldBoostID:
+		m.ResetBoostID()
+		return nil
+	case adcreditlot.FieldSpendBatchID:
+		m.ResetSpendBatchID()
+		return nil
+	case adcreditlot.FieldExpiredMinor:
+		m.ResetExpiredMinor()
+		return nil
+	case adcreditlot.FieldRevokedMinor:
+		m.ResetRevokedMinor()
+		return nil
+	case adcreditlot.FieldRevokedAt:
+		m.ResetRevokedAt()
+		return nil
+	case adcreditlot.FieldRevokedByStaffID:
+		m.ResetRevokedByStaffID()
+		return nil
+	case adcreditlot.FieldRevokeReason:
+		m.ResetRevokeReason()
+		return nil
+	case adcreditlot.FieldUpdatedAt:
+		m.ResetUpdatedAt()
+		return nil
+	}
+	return fmt.Errorf("unknown AdCreditLot field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *AdCreditLotMutation) AddedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *AdCreditLotMutation) AddedIDs(name string) []ent.Value {
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *AdCreditLotMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *AdCreditLotMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *AdCreditLotMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *AdCreditLotMutation) EdgeCleared(name string) bool {
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *AdCreditLotMutation) ClearEdge(name string) error {
+	return fmt.Errorf("unknown AdCreditLot unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *AdCreditLotMutation) ResetEdge(name string) error {
+	return fmt.Errorf("unknown AdCreditLot edge %s", name)
 }
 
 // AdCustomAudienceMutation represents an operation that mutates the AdCustomAudience nodes in the graph.
@@ -27369,6 +32279,12 @@ type AdSpendBatchMutation struct {
 	addcreator_share_micros  *int64
 	platform_share_micros    *int64
 	addplatform_share_micros *int64
+	credit_used_minor        *int64
+	addcredit_used_minor     *int64
+	cashback_minor           *int64
+	addcashback_minor        *int64
+	refunded_minor           *int64
+	addrefunded_minor        *int64
 	clearedFields            map[string]struct{}
 	done                     bool
 	oldValue                 func(context.Context) (*AdSpendBatch, error)
@@ -27867,6 +32783,174 @@ func (m *AdSpendBatchMutation) ResetPlatformShareMicros() {
 	m.addplatform_share_micros = nil
 }
 
+// SetCreditUsedMinor sets the "credit_used_minor" field.
+func (m *AdSpendBatchMutation) SetCreditUsedMinor(i int64) {
+	m.credit_used_minor = &i
+	m.addcredit_used_minor = nil
+}
+
+// CreditUsedMinor returns the value of the "credit_used_minor" field in the mutation.
+func (m *AdSpendBatchMutation) CreditUsedMinor() (r int64, exists bool) {
+	v := m.credit_used_minor
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreditUsedMinor returns the old "credit_used_minor" field's value of the AdSpendBatch entity.
+// If the AdSpendBatch object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AdSpendBatchMutation) OldCreditUsedMinor(ctx context.Context) (v int64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreditUsedMinor is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreditUsedMinor requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreditUsedMinor: %w", err)
+	}
+	return oldValue.CreditUsedMinor, nil
+}
+
+// AddCreditUsedMinor adds i to the "credit_used_minor" field.
+func (m *AdSpendBatchMutation) AddCreditUsedMinor(i int64) {
+	if m.addcredit_used_minor != nil {
+		*m.addcredit_used_minor += i
+	} else {
+		m.addcredit_used_minor = &i
+	}
+}
+
+// AddedCreditUsedMinor returns the value that was added to the "credit_used_minor" field in this mutation.
+func (m *AdSpendBatchMutation) AddedCreditUsedMinor() (r int64, exists bool) {
+	v := m.addcredit_used_minor
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetCreditUsedMinor resets all changes to the "credit_used_minor" field.
+func (m *AdSpendBatchMutation) ResetCreditUsedMinor() {
+	m.credit_used_minor = nil
+	m.addcredit_used_minor = nil
+}
+
+// SetCashbackMinor sets the "cashback_minor" field.
+func (m *AdSpendBatchMutation) SetCashbackMinor(i int64) {
+	m.cashback_minor = &i
+	m.addcashback_minor = nil
+}
+
+// CashbackMinor returns the value of the "cashback_minor" field in the mutation.
+func (m *AdSpendBatchMutation) CashbackMinor() (r int64, exists bool) {
+	v := m.cashback_minor
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCashbackMinor returns the old "cashback_minor" field's value of the AdSpendBatch entity.
+// If the AdSpendBatch object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AdSpendBatchMutation) OldCashbackMinor(ctx context.Context) (v int64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCashbackMinor is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCashbackMinor requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCashbackMinor: %w", err)
+	}
+	return oldValue.CashbackMinor, nil
+}
+
+// AddCashbackMinor adds i to the "cashback_minor" field.
+func (m *AdSpendBatchMutation) AddCashbackMinor(i int64) {
+	if m.addcashback_minor != nil {
+		*m.addcashback_minor += i
+	} else {
+		m.addcashback_minor = &i
+	}
+}
+
+// AddedCashbackMinor returns the value that was added to the "cashback_minor" field in this mutation.
+func (m *AdSpendBatchMutation) AddedCashbackMinor() (r int64, exists bool) {
+	v := m.addcashback_minor
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetCashbackMinor resets all changes to the "cashback_minor" field.
+func (m *AdSpendBatchMutation) ResetCashbackMinor() {
+	m.cashback_minor = nil
+	m.addcashback_minor = nil
+}
+
+// SetRefundedMinor sets the "refunded_minor" field.
+func (m *AdSpendBatchMutation) SetRefundedMinor(i int64) {
+	m.refunded_minor = &i
+	m.addrefunded_minor = nil
+}
+
+// RefundedMinor returns the value of the "refunded_minor" field in the mutation.
+func (m *AdSpendBatchMutation) RefundedMinor() (r int64, exists bool) {
+	v := m.refunded_minor
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldRefundedMinor returns the old "refunded_minor" field's value of the AdSpendBatch entity.
+// If the AdSpendBatch object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AdSpendBatchMutation) OldRefundedMinor(ctx context.Context) (v int64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldRefundedMinor is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldRefundedMinor requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldRefundedMinor: %w", err)
+	}
+	return oldValue.RefundedMinor, nil
+}
+
+// AddRefundedMinor adds i to the "refunded_minor" field.
+func (m *AdSpendBatchMutation) AddRefundedMinor(i int64) {
+	if m.addrefunded_minor != nil {
+		*m.addrefunded_minor += i
+	} else {
+		m.addrefunded_minor = &i
+	}
+}
+
+// AddedRefundedMinor returns the value that was added to the "refunded_minor" field in this mutation.
+func (m *AdSpendBatchMutation) AddedRefundedMinor() (r int64, exists bool) {
+	v := m.addrefunded_minor
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetRefundedMinor resets all changes to the "refunded_minor" field.
+func (m *AdSpendBatchMutation) ResetRefundedMinor() {
+	m.refunded_minor = nil
+	m.addrefunded_minor = nil
+}
+
 // Where appends a list predicates to the AdSpendBatchMutation builder.
 func (m *AdSpendBatchMutation) Where(ps ...predicate.AdSpendBatch) {
 	m.predicates = append(m.predicates, ps...)
@@ -27901,7 +32985,7 @@ func (m *AdSpendBatchMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *AdSpendBatchMutation) Fields() []string {
-	fields := make([]string, 0, 8)
+	fields := make([]string, 0, 11)
 	if m.created_at != nil {
 		fields = append(fields, adspendbatch.FieldCreatedAt)
 	}
@@ -27925,6 +33009,15 @@ func (m *AdSpendBatchMutation) Fields() []string {
 	}
 	if m.platform_share_micros != nil {
 		fields = append(fields, adspendbatch.FieldPlatformShareMicros)
+	}
+	if m.credit_used_minor != nil {
+		fields = append(fields, adspendbatch.FieldCreditUsedMinor)
+	}
+	if m.cashback_minor != nil {
+		fields = append(fields, adspendbatch.FieldCashbackMinor)
+	}
+	if m.refunded_minor != nil {
+		fields = append(fields, adspendbatch.FieldRefundedMinor)
 	}
 	return fields
 }
@@ -27950,6 +33043,12 @@ func (m *AdSpendBatchMutation) Field(name string) (ent.Value, bool) {
 		return m.CreatorShareMicros()
 	case adspendbatch.FieldPlatformShareMicros:
 		return m.PlatformShareMicros()
+	case adspendbatch.FieldCreditUsedMinor:
+		return m.CreditUsedMinor()
+	case adspendbatch.FieldCashbackMinor:
+		return m.CashbackMinor()
+	case adspendbatch.FieldRefundedMinor:
+		return m.RefundedMinor()
 	}
 	return nil, false
 }
@@ -27975,6 +33074,12 @@ func (m *AdSpendBatchMutation) OldField(ctx context.Context, name string) (ent.V
 		return m.OldCreatorShareMicros(ctx)
 	case adspendbatch.FieldPlatformShareMicros:
 		return m.OldPlatformShareMicros(ctx)
+	case adspendbatch.FieldCreditUsedMinor:
+		return m.OldCreditUsedMinor(ctx)
+	case adspendbatch.FieldCashbackMinor:
+		return m.OldCashbackMinor(ctx)
+	case adspendbatch.FieldRefundedMinor:
+		return m.OldRefundedMinor(ctx)
 	}
 	return nil, fmt.Errorf("unknown AdSpendBatch field %s", name)
 }
@@ -28040,6 +33145,27 @@ func (m *AdSpendBatchMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetPlatformShareMicros(v)
 		return nil
+	case adspendbatch.FieldCreditUsedMinor:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreditUsedMinor(v)
+		return nil
+	case adspendbatch.FieldCashbackMinor:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCashbackMinor(v)
+		return nil
+	case adspendbatch.FieldRefundedMinor:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetRefundedMinor(v)
+		return nil
 	}
 	return fmt.Errorf("unknown AdSpendBatch field %s", name)
 }
@@ -28063,6 +33189,15 @@ func (m *AdSpendBatchMutation) AddedFields() []string {
 	if m.addplatform_share_micros != nil {
 		fields = append(fields, adspendbatch.FieldPlatformShareMicros)
 	}
+	if m.addcredit_used_minor != nil {
+		fields = append(fields, adspendbatch.FieldCreditUsedMinor)
+	}
+	if m.addcashback_minor != nil {
+		fields = append(fields, adspendbatch.FieldCashbackMinor)
+	}
+	if m.addrefunded_minor != nil {
+		fields = append(fields, adspendbatch.FieldRefundedMinor)
+	}
 	return fields
 }
 
@@ -28081,6 +33216,12 @@ func (m *AdSpendBatchMutation) AddedField(name string) (ent.Value, bool) {
 		return m.AddedCreatorShareMicros()
 	case adspendbatch.FieldPlatformShareMicros:
 		return m.AddedPlatformShareMicros()
+	case adspendbatch.FieldCreditUsedMinor:
+		return m.AddedCreditUsedMinor()
+	case adspendbatch.FieldCashbackMinor:
+		return m.AddedCashbackMinor()
+	case adspendbatch.FieldRefundedMinor:
+		return m.AddedRefundedMinor()
 	}
 	return nil, false
 }
@@ -28124,6 +33265,27 @@ func (m *AdSpendBatchMutation) AddField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.AddPlatformShareMicros(v)
+		return nil
+	case adspendbatch.FieldCreditUsedMinor:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddCreditUsedMinor(v)
+		return nil
+	case adspendbatch.FieldCashbackMinor:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddCashbackMinor(v)
+		return nil
+	case adspendbatch.FieldRefundedMinor:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddRefundedMinor(v)
 		return nil
 	}
 	return fmt.Errorf("unknown AdSpendBatch numeric field %s", name)
@@ -28175,6 +33337,15 @@ func (m *AdSpendBatchMutation) ResetField(name string) error {
 		return nil
 	case adspendbatch.FieldPlatformShareMicros:
 		m.ResetPlatformShareMicros()
+		return nil
+	case adspendbatch.FieldCreditUsedMinor:
+		m.ResetCreditUsedMinor()
+		return nil
+	case adspendbatch.FieldCashbackMinor:
+		m.ResetCashbackMinor()
+		return nil
+	case adspendbatch.FieldRefundedMinor:
+		m.ResetRefundedMinor()
 		return nil
 	}
 	return fmt.Errorf("unknown AdSpendBatch field %s", name)
