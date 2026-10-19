@@ -1,11 +1,11 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Image } from "expo-image";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { PanResponder, Platform, Pressable, StyleSheet, View, useWindowDimensions } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { MessageComposerBar } from "@/components/chat/messageComposerBar";
-import { DotsThreeVertical24Icon, SpeakerHigh24Icon } from "@/components/icons";
+import { DotsThreeVertical24Icon, Cancel20Icon, SpeakerHigh24Icon } from "@/components/icons";
 import { ClipVideoPlayer } from "@/components/media/clipVideoPlayer";
 import { ClipLookOverlay, isClipLookId } from "@/components/create/clip/clipLook.constant";
 import { useStoryAutoAdvance } from "@/components/story/storyAutoAdvance.hook";
@@ -28,7 +28,7 @@ import { isStoryAdSlot, useStoryAdSessionStore } from "@/store/storyAdSession.st
 import { makeThemedStyles, useTheme } from "@/theme";
 import { requireAuthThen } from "@/utils/requireAuth.util";
 import { formatTimeSincePosted } from "@/utils/formatDate.util";
-import type { StoryDecidedAd } from "@/types/social.type";
+import type { StoryDecidedAd, StoryTrayItem } from "@/types/social.type";
 import { spacing } from "@/constants/spacing.constant";
 import { typeScale } from "@/constants/typography.constant";
 
@@ -40,6 +40,7 @@ function StoryViewer({ navigation, route }: MainScreenProps<"Story">) {
   const insets = useSafeAreaInsets();
   const { colors } = useTheme();
   const styles = useStyles();
+  const queryClient = useQueryClient();
   const [isOptionsOpen, setIsOptionsOpen] = useState(false);
   const openUserProfile = useOpenUserProfile();
   const { width } = useWindowDimensions();
@@ -54,14 +55,19 @@ function StoryViewer({ navigation, route }: MainScreenProps<"Story">) {
   const advanceToNextPersonsStories = useCallback(() => {
     const tray = storyTray.data ?? [];
     const currentPosition = tray.findIndex((item) => item.user.id === route.params.userId);
-    const ordered = currentPosition >= 0 ? [...tray.slice(currentPosition + 1), ...tray.slice(0, currentPosition)] : tray;
-    const next = ordered.find((item) => item.hasUnseen && item.user.id !== route.params.userId)
-      ?? ordered.find((item) => item.user.id !== route.params.userId);
-    if (next) navigation.replace("Story", { userId: next.user.id });
-    else {
-      useStoryAdSessionStore.getState().reset();
-      navigation.goBack();
+    const next = currentPosition >= 0 ? tray[currentPosition + 1] : tray[0];
+    if (next) {
+      navigation.replace("Story", { userId: next.user.id });
+      return;
     }
+    closeStoryViewer();
+  }, [closeStoryViewer, navigation, route.params.userId, storyTray.data]);
+  const goToPreviousPersonsStories = useCallback(() => {
+    const tray = storyTray.data ?? [];
+    const currentPosition = tray.findIndex((item) => item.user.id === route.params.userId);
+    if (currentPosition <= 0) return;
+    const previous = tray[currentPosition - 1];
+    if (previous) navigation.replace("Story", { userId: previous.user.id, startAtLast: true });
   }, [navigation, route.params.userId, storyTray.data]);
   const [videoStoryProgress, setVideoStoryProgress] = useState(0);
   const sessionOffsetRef = useRef(0);
@@ -95,11 +101,17 @@ function StoryViewer({ navigation, route }: MainScreenProps<"Story">) {
   const [isActiveStoryVideo, setIsActiveStoryVideo] = useState(isFirstStoryVideo);
   const [adPage, setAdPage] = useState<{ ad: StoryDecidedAd; slot: number } | null>(null);
   const shownAdSlots = useRef(new Set<number>());
-  const { activeIndex, progress, goToNextStory: advanceStoryIndex, goToPreviousStory: rewindStoryIndex } = useStoryAutoAdvance(
+  const { activeIndex, progress, goToNextStory: advanceStoryIndex, goToPreviousStory: rewindStoryIndex, goToLastStory } = useStoryAutoAdvance(
     list.length,
     isReplying || isOptionsOpen || isActiveStoryVideo || adPage !== null,
     advanceToNextPersonsStories,
   );
+  const startedAtLastRef = useRef(false);
+  useEffect(() => {
+    if (!route.params.startAtLast || startedAtLastRef.current || list.length === 0) return;
+    startedAtLastRef.current = true;
+    goToLastStory();
+  }, [goToLastStory, list.length, route.params.startAtLast]);
   const goToNextPage = useCallback(() => {
     if (adPage) {
       setAdPage(null);
@@ -121,8 +133,12 @@ function StoryViewer({ navigation, route }: MainScreenProps<"Story">) {
       setAdPage(null);
       return;
     }
-    rewindStoryIndex();
-  }, [adPage, rewindStoryIndex]);
+    if (activeIndex > 0) {
+      rewindStoryIndex();
+      return;
+    }
+    goToPreviousPersonsStories();
+  }, [activeIndex, adPage, goToPreviousPersonsStories, rewindStoryIndex]);
   const story = adPage ? undefined : list[Math.min(activeIndex, Math.max(0, list.length - 1))];
 
   const openAdDestination = useCallback((ad: StoryDecidedAd) => {
@@ -142,8 +158,16 @@ function StoryViewer({ navigation, route }: MainScreenProps<"Story">) {
   }, [story]);
 
   useEffect(() => {
-    if (story && !story.seen) storiesService.markStoryAsSeen(story.id).catch(() => undefined);
-  }, [story]);
+    if (!story || story.seen) return;
+    const authorId = story.author.id;
+    storiesService
+      .markStoryAsSeen(story.id)
+      .then(() => {
+        queryClient.setQueryData<readonly StoryTrayItem[]>(["story-tray"], (items) =>
+          items?.map((item) => (item.user.id === authorId ? { ...item, hasUnseen: false } : item)));
+      })
+      .catch(() => undefined);
+  }, [queryClient, story]);
 
   const dragDownToClose = PanResponder.create({
     onMoveShouldSetPanResponder: (_, g) => g.dy > 12 && Math.abs(g.dy) > Math.abs(g.dx),
@@ -165,7 +189,6 @@ function StoryViewer({ navigation, route }: MainScreenProps<"Story">) {
     null, "reply to stories");
   };
 
-  if (stories.isPending || stories.isError || list.length === 0) {
   if (adPage) {
     return (
       <View style={styles.root}>
@@ -174,7 +197,8 @@ function StoryViewer({ navigation, route }: MainScreenProps<"Story">) {
     );
   }
 
-  return (
+  if (stories.isPending || stories.isError || list.length === 0) {
+    return (
       <View style={[styles.root, styles.centered, { paddingTop: insets.top }]}>
         {stories.isPending ? (
           <BrandLoader size="md" accessibilityLabel="Loading stories" />
@@ -228,6 +252,9 @@ function StoryViewer({ navigation, route }: MainScreenProps<"Story">) {
           ) : null}
           <Pressable accessibilityRole="button" accessibilityLabel="Story options" onPress={() => setIsOptionsOpen(true)} style={styles.iconButton}>
             <DotsThreeVertical24Icon />
+          </Pressable>
+          <Pressable accessibilityRole="button" accessibilityLabel="Close stories" onPress={closeStoryViewer} style={styles.trailingIconButton}>
+            <Cancel20Icon />
           </Pressable>
         </View>
       </View>
@@ -302,7 +329,8 @@ function StoryViewer({ navigation, route }: MainScreenProps<"Story">) {
 const useStyles = makeThemedStyles((colors) => StyleSheet.create({
   root: { flex: 1, backgroundColor: colors.background },
   centered: { alignItems: "center", justifyContent: "center" },
-  iconButton: { width: 44, height: 44, alignItems: "center", justifyContent: "center", marginRight: -10 },
+  iconButton: { width: 44, height: 44, alignItems: "center", justifyContent: "center" },
+  trailingIconButton: { width: 44, height: 44, alignItems: "center", justifyContent: "center", marginRight: -10 },
   header: { marginTop: spacing[1], height: 44, paddingHorizontal: spacing[4], flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
   author: { flexDirection: "row", alignItems: "center", gap: spacing[2] },
   nameRow: { flexDirection: "row", alignItems: "center", gap: spacing[1] },

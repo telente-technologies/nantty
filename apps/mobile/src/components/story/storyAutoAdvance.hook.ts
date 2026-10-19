@@ -34,6 +34,10 @@ export function useStoryAutoAdvance(storyCount: number, paused: boolean, onFinis
     setActiveIndex(Math.max(0, activeIndex - 1));
     setProgress(0);
   };
+  const goToLastStory = () => {
+    setActiveIndex(Math.max(0, storyCount - 1));
+    setProgress(0);
+  };
 
-  return { activeIndex, progress, goToNextStory, goToPreviousStory };
+  return { activeIndex, progress, goToNextStory, goToPreviousStory, goToLastStory };
 }

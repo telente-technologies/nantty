@@ -22,15 +22,22 @@ export function createListStoryTrayHandler(context: HandlerContext): Handler<Lis
       postRepository.viewedStoryIds(db, viewerId, stories.map((story) => story.id)),
     ]);
     const unseenByAuthor = new Map<string, boolean>();
+    const latestStoryAtByAuthor = new Map<string, number>();
     for (const story of stories) {
       if (!visible.has(story.authorId)) continue;
       unseenByAuthor.set(story.authorId, (unseenByAuthor.get(story.authorId) ?? false) || (!seen.has(story.id) && story.authorId !== viewerId));
+      const createdAt = story.createdAt.getTime();
+      const latest = latestStoryAtByAuthor.get(story.authorId);
+      if (latest === undefined || createdAt > latest) latestStoryAtByAuthor.set(story.authorId, createdAt);
     }
     const summaries = await context.directory.findUserSummaries([...unseenByAuthor.keys()]);
     const items = [...unseenByAuthor].flatMap(([authorId, hasUnseen]) => {
       const user = summaries.get(authorId);
       return user === undefined ? [] : [{ user, hasUnseen }];
     });
-    return items.sort((left, right) => Number(right.hasUnseen) - Number(left.hasUnseen) || Number(right.user.id === viewerId) - Number(left.user.id === viewerId));
+    return items.sort((left, right) =>
+      Number(right.hasUnseen) - Number(left.hasUnseen)
+      || (latestStoryAtByAuthor.get(right.user.id) ?? 0) - (latestStoryAtByAuthor.get(left.user.id) ?? 0)
+      || Number(right.user.id === viewerId) - Number(left.user.id === viewerId));
   };
 }

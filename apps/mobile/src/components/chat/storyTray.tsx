@@ -61,7 +61,7 @@ export function StoryTray({ items, myAvatarUrl, onPressAddStory, onPressStory, o
             style={styles.item}
           >
             <View style={styles.bubble}>
-              <View style={[styles.ring, item.hasUnseen && styles.ringUnseen]} />
+              <View style={[styles.ring, item.hasUnseen ? styles.ringUnseen : styles.ringSeen]} />
               <View style={styles.badge}>
                 <Avatar uri={item.user.avatarUrl} size={32} />
               </View>
@@ -82,6 +82,7 @@ const useStyles = makeThemedStyles((colors) => StyleSheet.create({
   bubble: { width: 68, height: 60 },
   liveBubble: { width: 68, height: 60, alignItems: "center", justifyContent: "center" },
   ring: { width: 60, height: 60, borderRadius: 30, backgroundColor: colors.primaryTint },
-  ringUnseen: { borderWidth: 1, borderColor: colors.primary },
+  ringUnseen: { borderWidth: 2, borderColor: colors.primary },
+  ringSeen: { borderWidth: 2, borderColor: colors.textFaint, backgroundColor: colors.placeholder },
   badge: { position: "absolute", right: 0, bottom: 0 },
 }));

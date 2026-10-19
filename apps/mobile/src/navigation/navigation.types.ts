@@ -95,7 +95,7 @@ export type MainStackParamList = {
   Live: { liveId: string; host?: boolean };
   SuggestedVideos: { start?: string } | undefined;
   LiveEnded: { liveId: string };
-  Story: { userId: string };
+  Story: { userId: string; startAtLast?: boolean };
   StoryAnalytics: { storyId: string };
   EscrowStatus: { orderId: string };
   DisputeDetail: { disputeId: string };

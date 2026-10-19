@@ -92,7 +92,7 @@ export const postRepository = {
   recordShare: (db: Db, postId: string, userId: string, channel: string) => db.postShare.create({ data: { postId, userId, channel } }),
 
   storyAuthorsWithActiveStories: (db: Db, authorIds: readonly string[], now: Date) =>
-    db.post.findMany({ where: { authorId: { in: [...authorIds] }, kind: "story", ...shownToViewers, expiresAt: { gt: now } }, select: { id: true, authorId: true }, orderBy: { id: "desc" } }),
+    db.post.findMany({ where: { authorId: { in: [...authorIds] }, kind: "story", ...shownToViewers, expiresAt: { gt: now } }, select: { id: true, authorId: true, createdAt: true }, orderBy: { createdAt: "desc" } }),
 
   activeStoryIdsByAuthor: async (db: Db, authorId: string, audiences: readonly ("everyone" | "followers")[], now: Date): Promise<string[]> => {
     const rows = await db.post.findMany({ where: { authorId, kind: "story", ...shownToViewers, audience: { in: [...audiences] }, expiresAt: { gt: now } }, select: { id: true }, orderBy: { id: "asc" }, take: 100 });
