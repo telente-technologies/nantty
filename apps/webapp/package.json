@@ -19,8 +19,8 @@
     "@zudomart/web-kit": "workspace:*",
     "livekit-client": "2.22.4",
     "next": "^16.4.0",
-    "react": "^19.3.0",
-    "react-dom": "^19.3.0",
+    "react": "^19.2.9",
+    "react-dom": "^19.2.9",
     "zustand": "^5.0.15"
   },
   "devDependencies": {

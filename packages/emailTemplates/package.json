@@ -16,8 +16,8 @@
   "dependencies": {
     "@react-email/render": "^2.1.0",
     "@zudomart/design-tokens": "workspace:*",
-    "react": "^19.3.0",
-    "react-dom": "^19.3.0",
+    "react": "^19.2.9",
+    "react-dom": "^19.2.9",
     "react-email": "^6.11.1"
   },
   "devDependencies": {
