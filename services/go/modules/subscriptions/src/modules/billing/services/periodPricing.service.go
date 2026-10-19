@@ -75,6 +75,9 @@ func (billing Billing) PlanNextPeriod(ctx context.Context, client *ent.Client, r
 	if planOverride != "" {
 		planCode, interval = planOverride, firstNonEmpty(intervalOverride, interval)
 	}
+	if planCode == constants.PlanGoldCombined {
+		return billing.planCombinedGoldNextPeriod(ctx, client, row, interval)
+	}
 	profile, _, err := billing.Container.Identity.FindProfile(ctx, row.ProfileID)
 	if err != nil {
 		return NextPeriodPlan{}, err

@@ -17,7 +17,7 @@ import (
 
 var refundablePlans = map[string]bool{"blue": true, "gold_only": true}
 
-var checkmarkShareRefundPlans = map[string]bool{"seller_pro": true, "seller_business": true, "premium": true}
+var checkmarkShareRefundPlans = map[string]bool{"seller_pro": true, "seller_business": true, "premium": true, "gold_combined": true}
 
 const (
 	RefundScopeFull           = "full"
@@ -115,7 +115,7 @@ func RejectCaseInTransaction(ctx context.Context, tx *ent.Tx, now time.Time, row
 	}
 	if refund == verificationcase.RefundStatusRequested {
 		if err := usersevents.EnqueueOutboxEventInTransaction(ctx, tx, verificationevents.VerificationRefundRequestedType, row.SubscriptionID, now, verificationevents.RefundRequestedData{
-			CaseId: row.ID.String(), SubscriptionId: row.SubscriptionID, AccountId: row.AccountID.String(), Reason: reason, RefundScope: RefundScopeFor(row.PlanCode),
+			CaseId: row.ID.String(), SubscriptionId: row.SubscriptionID, AccountId: row.AccountID.String(), ProfileId: row.ProfileID.String(), Reason: reason, RefundScope: RefundScopeFor(row.PlanCode),
 		}); err != nil {
 			return nil, err
 		}

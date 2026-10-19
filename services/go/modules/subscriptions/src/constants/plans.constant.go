@@ -8,6 +8,7 @@ const (
 	PlanBlueEssential  = "blue_essential"
 	PlanBlue           = "blue"
 	PlanPremium        = "premium"
+	PlanGoldCombined   = "gold_combined"
 
 	ProfilePersonal   = "personal"
 	ProfileBusiness   = "business"
@@ -38,6 +39,7 @@ var Plans = map[string]PlanDefinition{
 	PlanBlack:          {Code: PlanBlack, ProfileTypes: []string{ProfileGovernment}, Checkmark: "black", GracePeriodEligible: true, Tier: "OFFICIAL"},
 	PlanBlueEssential:  {Code: PlanBlueEssential, ProfileTypes: []string{ProfilePersonal}, SelfServe: true, InAppAllowed: true, Tier: "ESSENTIAL"},
 	PlanBlue:           {Code: PlanBlue, ProfileTypes: []string{ProfilePersonal}, Checkmark: "blue", SelfServe: true, InAppAllowed: true, Tier: "VERIFIED"},
+	PlanGoldCombined:   {Code: PlanGoldCombined, ProfileTypes: []string{ProfilePersonal}, Checkmark: "gold", SelfServe: true, Tier: "GOLD_COMBINED"},
 	PlanPremium:        {Code: PlanPremium, ProfileTypes: []string{ProfilePersonal}, Checkmark: "blue", TrialAllowed: true, SelfServe: true, InAppAllowed: true, Tier: "PREMIUM"},
 }
 

@@ -68,7 +68,7 @@ func eligibleOfferPlansFor(link *ent.SubscriptionOfferLink, profileType string) 
 func (billing Billing) offerCurrencyFitsAnyPlan(ctx context.Context, client *ent.Client, link *ent.SubscriptionOfferLink, plans []string, country string) bool {
 	terms := offerTermsOf(link)
 	for _, code := range plans {
-		if price, err := billing.RegionalPriceFor(ctx, client, code, country, "web"); err == nil && terms.AppliesToCurrency(price.Currency) {
+		if price, err := billing.RegionalPriceFor(ctx, client, PriceBookPlanOf(code), country, "web"); err == nil && terms.AppliesToCurrency(price.Currency) {
 			return true
 		}
 	}

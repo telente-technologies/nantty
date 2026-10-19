@@ -13,6 +13,7 @@ import (
 	"zudomart/modules/subscriptions/src/generated/ent/planprice"
 	"zudomart/modules/subscriptions/src/generated/ent/providerplan"
 	"zudomart/modules/subscriptions/src/generated/ent/subscription"
+	"zudomart/modules/subscriptions/src/generated/ent/subscriptioncoveredprofile"
 	"zudomart/modules/subscriptions/src/generated/ent/subscriptionofferclaim"
 	"zudomart/modules/subscriptions/src/generated/ent/subscriptionofferlink"
 	"zudomart/modules/subscriptions/src/generated/ent/subscriptionoffersend"
@@ -904,6 +905,101 @@ func init() {
 	subscriptionDescID := subscriptionMixinFields0[0].Descriptor()
 	// subscription.DefaultID holds the default value on creation for the id field.
 	subscription.DefaultID = subscriptionDescID.Default.(func() uuid.UUID)
+	subscriptioncoveredprofileMixin := schema.SubscriptionCoveredProfile{}.Mixin()
+	subscriptioncoveredprofileMixinFields0 := subscriptioncoveredprofileMixin[0].Fields()
+	_ = subscriptioncoveredprofileMixinFields0
+	subscriptioncoveredprofileFields := schema.SubscriptionCoveredProfile{}.Fields()
+	_ = subscriptioncoveredprofileFields
+	// subscriptioncoveredprofileDescCreatedAt is the schema descriptor for created_at field.
+	subscriptioncoveredprofileDescCreatedAt := subscriptioncoveredprofileMixinFields0[1].Descriptor()
+	// subscriptioncoveredprofile.DefaultCreatedAt holds the default value on creation for the created_at field.
+	subscriptioncoveredprofile.DefaultCreatedAt = subscriptioncoveredprofileDescCreatedAt.Default.(func() time.Time)
+	// subscriptioncoveredprofileDescSubscriptionID is the schema descriptor for subscription_id field.
+	subscriptioncoveredprofileDescSubscriptionID := subscriptioncoveredprofileFields[0].Descriptor()
+	// subscriptioncoveredprofile.SubscriptionIDValidator is a validator for the "subscription_id" field. It is called by the builders before save.
+	subscriptioncoveredprofile.SubscriptionIDValidator = func() func(string) error {
+		validators := subscriptioncoveredprofileDescSubscriptionID.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(subscription_id string) error {
+			for _, fn := range fns {
+				if err := fn(subscription_id); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// subscriptioncoveredprofileDescOwnerUserID is the schema descriptor for owner_user_id field.
+	subscriptioncoveredprofileDescOwnerUserID := subscriptioncoveredprofileFields[1].Descriptor()
+	// subscriptioncoveredprofile.OwnerUserIDValidator is a validator for the "owner_user_id" field. It is called by the builders before save.
+	subscriptioncoveredprofile.OwnerUserIDValidator = func() func(string) error {
+		validators := subscriptioncoveredprofileDescOwnerUserID.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(owner_user_id string) error {
+			for _, fn := range fns {
+				if err := fn(owner_user_id); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// subscriptioncoveredprofileDescProfileID is the schema descriptor for profile_id field.
+	subscriptioncoveredprofileDescProfileID := subscriptioncoveredprofileFields[2].Descriptor()
+	// subscriptioncoveredprofile.ProfileIDValidator is a validator for the "profile_id" field. It is called by the builders before save.
+	subscriptioncoveredprofile.ProfileIDValidator = func() func(string) error {
+		validators := subscriptioncoveredprofileDescProfileID.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(profile_id string) error {
+			for _, fn := range fns {
+				if err := fn(profile_id); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// subscriptioncoveredprofileDescActivatesWithPeriodID is the schema descriptor for activates_with_period_id field.
+	subscriptioncoveredprofileDescActivatesWithPeriodID := subscriptioncoveredprofileFields[4].Descriptor()
+	// subscriptioncoveredprofile.DefaultActivatesWithPeriodID holds the default value on creation for the activates_with_period_id field.
+	subscriptioncoveredprofile.DefaultActivatesWithPeriodID = subscriptioncoveredprofileDescActivatesWithPeriodID.Default.(string)
+	// subscriptioncoveredprofile.ActivatesWithPeriodIDValidator is a validator for the "activates_with_period_id" field. It is called by the builders before save.
+	subscriptioncoveredprofile.ActivatesWithPeriodIDValidator = subscriptioncoveredprofileDescActivatesWithPeriodID.Validators[0].(func(string) error)
+	// subscriptioncoveredprofileDescShareMinor is the schema descriptor for share_minor field.
+	subscriptioncoveredprofileDescShareMinor := subscriptioncoveredprofileFields[5].Descriptor()
+	// subscriptioncoveredprofile.DefaultShareMinor holds the default value on creation for the share_minor field.
+	subscriptioncoveredprofile.DefaultShareMinor = subscriptioncoveredprofileDescShareMinor.Default.(int64)
+	// subscriptioncoveredprofileDescSharePaymentReference is the schema descriptor for share_payment_reference field.
+	subscriptioncoveredprofileDescSharePaymentReference := subscriptioncoveredprofileFields[6].Descriptor()
+	// subscriptioncoveredprofile.DefaultSharePaymentReference holds the default value on creation for the share_payment_reference field.
+	subscriptioncoveredprofile.DefaultSharePaymentReference = subscriptioncoveredprofileDescSharePaymentReference.Default.(string)
+	// subscriptioncoveredprofile.SharePaymentReferenceValidator is a validator for the "share_payment_reference" field. It is called by the builders before save.
+	subscriptioncoveredprofile.SharePaymentReferenceValidator = subscriptioncoveredprofileDescSharePaymentReference.Validators[0].(func(string) error)
+	// subscriptioncoveredprofileDescRefundState is the schema descriptor for refund_state field.
+	subscriptioncoveredprofileDescRefundState := subscriptioncoveredprofileFields[7].Descriptor()
+	// subscriptioncoveredprofile.DefaultRefundState holds the default value on creation for the refund_state field.
+	subscriptioncoveredprofile.DefaultRefundState = subscriptioncoveredprofileDescRefundState.Default.(string)
+	// subscriptioncoveredprofile.RefundStateValidator is a validator for the "refund_state" field. It is called by the builders before save.
+	subscriptioncoveredprofile.RefundStateValidator = subscriptioncoveredprofileDescRefundState.Validators[0].(func(string) error)
+	// subscriptioncoveredprofileDescUpdatedAt is the schema descriptor for updated_at field.
+	subscriptioncoveredprofileDescUpdatedAt := subscriptioncoveredprofileFields[10].Descriptor()
+	// subscriptioncoveredprofile.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	subscriptioncoveredprofile.DefaultUpdatedAt = subscriptioncoveredprofileDescUpdatedAt.Default.(func() time.Time)
+	// subscriptioncoveredprofile.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	subscriptioncoveredprofile.UpdateDefaultUpdatedAt = subscriptioncoveredprofileDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// subscriptioncoveredprofileDescID is the schema descriptor for id field.
+	subscriptioncoveredprofileDescID := subscriptioncoveredprofileMixinFields0[0].Descriptor()
+	// subscriptioncoveredprofile.DefaultID holds the default value on creation for the id field.
+	subscriptioncoveredprofile.DefaultID = subscriptioncoveredprofileDescID.Default.(func() uuid.UUID)
 	subscriptionofferclaimMixin := schema.SubscriptionOfferClaim{}.Mixin()
 	subscriptionofferclaimMixinFields0 := subscriptionofferclaimMixin[0].Fields()
 	_ = subscriptionofferclaimMixinFields0

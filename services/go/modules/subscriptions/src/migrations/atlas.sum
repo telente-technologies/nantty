@@ -1,4 +1,4 @@
-h1:SEdT54vHUjO/goVRR4ghfiHSBoDHDbC6AinbXdUrQ+w=
+h1:HNzOR/OqnlnfmIq+i/ZB78uP9VZxWDNQZCFSomHnwKc=
 20261003223349_create_subscriptions_tables.up.sql h1:cKdA5ZfcYWqAykeh1mOuBfzcn2c2ZTvDfn5j287gI9M=
 20261004120000_regional_plan_prices.up.sql h1:ep88tUJVdwo9ZTEO9/Fm91y0fXpC6ZUve1bWtZCoT1k=
 20261004175850_renewal_engine_and_periods.up.sql h1:a9H8LVHNutKrCoQNjLx1GrT7UXsxK1hYbCRAJDggFMo=
@@ -8,3 +8,4 @@ h1:SEdT54vHUjO/goVRR4ghfiHSBoDHDbC6AinbXdUrQ+w=
 20261005224548_creator_subscription_store_billing.up.sql h1:lnhVqgXMDVeX/6GdyoHw4kcbUIUNXe3qE9zCOYywKDU=
 20261011090000_neutral_web_checkout_channel.up.sql h1:T1cKLEBy3ViGMt6s/L33Cb1gvLktODK2LZVVtsKSzMo=
 20261012094210_subscription_offer_links.up.sql h1:OClkYQKEYw7efLpA2/wLXKsl05albW/3/aROtPtWA0o=
+20261017150000_combined_gold_covered_profiles.up.sql h1:7VYUa4LwmoSVT/FvzZ6zocLjJOTPNb3UweeEFiwxqVY=

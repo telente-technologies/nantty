@@ -17,6 +17,7 @@ import (
 	"zudomart/modules/subscriptions/src/generated/ent/predicate"
 	"zudomart/modules/subscriptions/src/generated/ent/providerplan"
 	"zudomart/modules/subscriptions/src/generated/ent/subscription"
+	"zudomart/modules/subscriptions/src/generated/ent/subscriptioncoveredprofile"
 	"zudomart/modules/subscriptions/src/generated/ent/subscriptionofferclaim"
 	"zudomart/modules/subscriptions/src/generated/ent/subscriptionofferlink"
 	"zudomart/modules/subscriptions/src/generated/ent/subscriptionoffersend"
@@ -39,20 +40,21 @@ const (
 	OpUpdateOne = ent.OpUpdateOne
 
 	// Node types.
-	TypeCreatorSubscription       = "CreatorSubscription"
-	TypeCreatorSubscriptionCharge = "CreatorSubscriptionCharge"
-	TypeCreatorSubscriptionPlan   = "CreatorSubscriptionPlan"
-	TypeIdempotentRequest         = "IdempotentRequest"
-	TypeOutboxEvent               = "OutboxEvent"
-	TypePlanPrice                 = "PlanPrice"
-	TypeProviderPlan              = "ProviderPlan"
-	TypeSubscription              = "Subscription"
-	TypeSubscriptionOfferClaim    = "SubscriptionOfferClaim"
-	TypeSubscriptionOfferLink     = "SubscriptionOfferLink"
-	TypeSubscriptionOfferSend     = "SubscriptionOfferSend"
-	TypeSubscriptionPeriod        = "SubscriptionPeriod"
-	TypeSubscriptionReminder      = "SubscriptionReminder"
-	TypeTrialClaim                = "TrialClaim"
+	TypeCreatorSubscription        = "CreatorSubscription"
+	TypeCreatorSubscriptionCharge  = "CreatorSubscriptionCharge"
+	TypeCreatorSubscriptionPlan    = "CreatorSubscriptionPlan"
+	TypeIdempotentRequest          = "IdempotentRequest"
+	TypeOutboxEvent                = "OutboxEvent"
+	TypePlanPrice                  = "PlanPrice"
+	TypeProviderPlan               = "ProviderPlan"
+	TypeSubscription               = "Subscription"
+	TypeSubscriptionCoveredProfile = "SubscriptionCoveredProfile"
+	TypeSubscriptionOfferClaim     = "SubscriptionOfferClaim"
+	TypeSubscriptionOfferLink      = "SubscriptionOfferLink"
+	TypeSubscriptionOfferSend      = "SubscriptionOfferSend"
+	TypeSubscriptionPeriod         = "SubscriptionPeriod"
+	TypeSubscriptionReminder       = "SubscriptionReminder"
+	TypeTrialClaim                 = "TrialClaim"
 )
 
 // CreatorSubscriptionMutation represents an operation that mutates the CreatorSubscription nodes in the graph.
@@ -10686,6 +10688,1009 @@ func (m *SubscriptionMutation) ClearEdge(name string) error {
 // It returns an error if the edge is not defined in the schema.
 func (m *SubscriptionMutation) ResetEdge(name string) error {
 	return fmt.Errorf("unknown Subscription edge %s", name)
+}
+
+// SubscriptionCoveredProfileMutation represents an operation that mutates the SubscriptionCoveredProfile nodes in the graph.
+type SubscriptionCoveredProfileMutation struct {
+	config
+	op                       Op
+	typ                      string
+	id                       *uuid.UUID
+	created_at               *time.Time
+	subscription_id          *string
+	owner_user_id            *string
+	profile_id               *string
+	status                   *subscriptioncoveredprofile.Status
+	activates_with_period_id *string
+	share_minor              *int64
+	addshare_minor           *int64
+	share_payment_reference  *string
+	refund_state             *string
+	activated_at             *time.Time
+	ended_at                 *time.Time
+	updated_at               *time.Time
+	clearedFields            map[string]struct{}
+	done                     bool
+	oldValue                 func(context.Context) (*SubscriptionCoveredProfile, error)
+	predicates               []predicate.SubscriptionCoveredProfile
+}
+
+var _ ent.Mutation = (*SubscriptionCoveredProfileMutation)(nil)
+
+// subscriptioncoveredprofileOption allows management of the mutation configuration using functional options.
+type subscriptioncoveredprofileOption func(*SubscriptionCoveredProfileMutation)
+
+// newSubscriptionCoveredProfileMutation creates new mutation for the SubscriptionCoveredProfile entity.
+func newSubscriptionCoveredProfileMutation(c config, op Op, opts ...subscriptioncoveredprofileOption) *SubscriptionCoveredProfileMutation {
+	m := &SubscriptionCoveredProfileMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeSubscriptionCoveredProfile,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withSubscriptionCoveredProfileID sets the ID field of the mutation.
+func withSubscriptionCoveredProfileID(id uuid.UUID) subscriptioncoveredprofileOption {
+	return func(m *SubscriptionCoveredProfileMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *SubscriptionCoveredProfile
+		)
+		m.oldValue = func(ctx context.Context) (*SubscriptionCoveredProfile, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().SubscriptionCoveredProfile.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withSubscriptionCoveredProfile sets the old SubscriptionCoveredProfile of the mutation.
+func withSubscriptionCoveredProfile(node *SubscriptionCoveredProfile) subscriptioncoveredprofileOption {
+	return func(m *SubscriptionCoveredProfileMutation) {
+		m.oldValue = func(context.Context) (*SubscriptionCoveredProfile, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m SubscriptionCoveredProfileMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m SubscriptionCoveredProfileMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of SubscriptionCoveredProfile entities.
+func (m *SubscriptionCoveredProfileMutation) SetID(id uuid.UUID) {
+	m.id = &id
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *SubscriptionCoveredProfileMutation) ID() (id uuid.UUID, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *SubscriptionCoveredProfileMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []uuid.UUID{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().SubscriptionCoveredProfile.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (m *SubscriptionCoveredProfileMutation) SetCreatedAt(t time.Time) {
+	m.created_at = &t
+}
+
+// CreatedAt returns the value of the "created_at" field in the mutation.
+func (m *SubscriptionCoveredProfileMutation) CreatedAt() (r time.Time, exists bool) {
+	v := m.created_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreatedAt returns the old "created_at" field's value of the SubscriptionCoveredProfile entity.
+// If the SubscriptionCoveredProfile object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SubscriptionCoveredProfileMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
+	}
+	return oldValue.CreatedAt, nil
+}
+
+// ResetCreatedAt resets all changes to the "created_at" field.
+func (m *SubscriptionCoveredProfileMutation) ResetCreatedAt() {
+	m.created_at = nil
+}
+
+// SetSubscriptionID sets the "subscription_id" field.
+func (m *SubscriptionCoveredProfileMutation) SetSubscriptionID(s string) {
+	m.subscription_id = &s
+}
+
+// SubscriptionID returns the value of the "subscription_id" field in the mutation.
+func (m *SubscriptionCoveredProfileMutation) SubscriptionID() (r string, exists bool) {
+	v := m.subscription_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSubscriptionID returns the old "subscription_id" field's value of the SubscriptionCoveredProfile entity.
+// If the SubscriptionCoveredProfile object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SubscriptionCoveredProfileMutation) OldSubscriptionID(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSubscriptionID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSubscriptionID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSubscriptionID: %w", err)
+	}
+	return oldValue.SubscriptionID, nil
+}
+
+// ResetSubscriptionID resets all changes to the "subscription_id" field.
+func (m *SubscriptionCoveredProfileMutation) ResetSubscriptionID() {
+	m.subscription_id = nil
+}
+
+// SetOwnerUserID sets the "owner_user_id" field.
+func (m *SubscriptionCoveredProfileMutation) SetOwnerUserID(s string) {
+	m.owner_user_id = &s
+}
+
+// OwnerUserID returns the value of the "owner_user_id" field in the mutation.
+func (m *SubscriptionCoveredProfileMutation) OwnerUserID() (r string, exists bool) {
+	v := m.owner_user_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldOwnerUserID returns the old "owner_user_id" field's value of the SubscriptionCoveredProfile entity.
+// If the SubscriptionCoveredProfile object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SubscriptionCoveredProfileMutation) OldOwnerUserID(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldOwnerUserID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldOwnerUserID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldOwnerUserID: %w", err)
+	}
+	return oldValue.OwnerUserID, nil
+}
+
+// ResetOwnerUserID resets all changes to the "owner_user_id" field.
+func (m *SubscriptionCoveredProfileMutation) ResetOwnerUserID() {
+	m.owner_user_id = nil
+}
+
+// SetProfileID sets the "profile_id" field.
+func (m *SubscriptionCoveredProfileMutation) SetProfileID(s string) {
+	m.profile_id = &s
+}
+
+// ProfileID returns the value of the "profile_id" field in the mutation.
+func (m *SubscriptionCoveredProfileMutation) ProfileID() (r string, exists bool) {
+	v := m.profile_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldProfileID returns the old "profile_id" field's value of the SubscriptionCoveredProfile entity.
+// If the SubscriptionCoveredProfile object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SubscriptionCoveredProfileMutation) OldProfileID(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldProfileID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldProfileID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldProfileID: %w", err)
+	}
+	return oldValue.ProfileID, nil
+}
+
+// ResetProfileID resets all changes to the "profile_id" field.
+func (m *SubscriptionCoveredProfileMutation) ResetProfileID() {
+	m.profile_id = nil
+}
+
+// SetStatus sets the "status" field.
+func (m *SubscriptionCoveredProfileMutation) SetStatus(s subscriptioncoveredprofile.Status) {
+	m.status = &s
+}
+
+// Status returns the value of the "status" field in the mutation.
+func (m *SubscriptionCoveredProfileMutation) Status() (r subscriptioncoveredprofile.Status, exists bool) {
+	v := m.status
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldStatus returns the old "status" field's value of the SubscriptionCoveredProfile entity.
+// If the SubscriptionCoveredProfile object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SubscriptionCoveredProfileMutation) OldStatus(ctx context.Context) (v subscriptioncoveredprofile.Status, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldStatus is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldStatus requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldStatus: %w", err)
+	}
+	return oldValue.Status, nil
+}
+
+// ResetStatus resets all changes to the "status" field.
+func (m *SubscriptionCoveredProfileMutation) ResetStatus() {
+	m.status = nil
+}
+
+// SetActivatesWithPeriodID sets the "activates_with_period_id" field.
+func (m *SubscriptionCoveredProfileMutation) SetActivatesWithPeriodID(s string) {
+	m.activates_with_period_id = &s
+}
+
+// ActivatesWithPeriodID returns the value of the "activates_with_period_id" field in the mutation.
+func (m *SubscriptionCoveredProfileMutation) ActivatesWithPeriodID() (r string, exists bool) {
+	v := m.activates_with_period_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldActivatesWithPeriodID returns the old "activates_with_period_id" field's value of the SubscriptionCoveredProfile entity.
+// If the SubscriptionCoveredProfile object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SubscriptionCoveredProfileMutation) OldActivatesWithPeriodID(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldActivatesWithPeriodID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldActivatesWithPeriodID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldActivatesWithPeriodID: %w", err)
+	}
+	return oldValue.ActivatesWithPeriodID, nil
+}
+
+// ResetActivatesWithPeriodID resets all changes to the "activates_with_period_id" field.
+func (m *SubscriptionCoveredProfileMutation) ResetActivatesWithPeriodID() {
+	m.activates_with_period_id = nil
+}
+
+// SetShareMinor sets the "share_minor" field.
+func (m *SubscriptionCoveredProfileMutation) SetShareMinor(i int64) {
+	m.share_minor = &i
+	m.addshare_minor = nil
+}
+
+// ShareMinor returns the value of the "share_minor" field in the mutation.
+func (m *SubscriptionCoveredProfileMutation) ShareMinor() (r int64, exists bool) {
+	v := m.share_minor
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldShareMinor returns the old "share_minor" field's value of the SubscriptionCoveredProfile entity.
+// If the SubscriptionCoveredProfile object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SubscriptionCoveredProfileMutation) OldShareMinor(ctx context.Context) (v int64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldShareMinor is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldShareMinor requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldShareMinor: %w", err)
+	}
+	return oldValue.ShareMinor, nil
+}
+
+// AddShareMinor adds i to the "share_minor" field.
+func (m *SubscriptionCoveredProfileMutation) AddShareMinor(i int64) {
+	if m.addshare_minor != nil {
+		*m.addshare_minor += i
+	} else {
+		m.addshare_minor = &i
+	}
+}
+
+// AddedShareMinor returns the value that was added to the "share_minor" field in this mutation.
+func (m *SubscriptionCoveredProfileMutation) AddedShareMinor() (r int64, exists bool) {
+	v := m.addshare_minor
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetShareMinor resets all changes to the "share_minor" field.
+func (m *SubscriptionCoveredProfileMutation) ResetShareMinor() {
+	m.share_minor = nil
+	m.addshare_minor = nil
+}
+
+// SetSharePaymentReference sets the "share_payment_reference" field.
+func (m *SubscriptionCoveredProfileMutation) SetSharePaymentReference(s string) {
+	m.share_payment_reference = &s
+}
+
+// SharePaymentReference returns the value of the "share_payment_reference" field in the mutation.
+func (m *SubscriptionCoveredProfileMutation) SharePaymentReference() (r string, exists bool) {
+	v := m.share_payment_reference
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSharePaymentReference returns the old "share_payment_reference" field's value of the SubscriptionCoveredProfile entity.
+// If the SubscriptionCoveredProfile object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SubscriptionCoveredProfileMutation) OldSharePaymentReference(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSharePaymentReference is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSharePaymentReference requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSharePaymentReference: %w", err)
+	}
+	return oldValue.SharePaymentReference, nil
+}
+
+// ResetSharePaymentReference resets all changes to the "share_payment_reference" field.
+func (m *SubscriptionCoveredProfileMutation) ResetSharePaymentReference() {
+	m.share_payment_reference = nil
+}
+
+// SetRefundState sets the "refund_state" field.
+func (m *SubscriptionCoveredProfileMutation) SetRefundState(s string) {
+	m.refund_state = &s
+}
+
+// RefundState returns the value of the "refund_state" field in the mutation.
+func (m *SubscriptionCoveredProfileMutation) RefundState() (r string, exists bool) {
+	v := m.refund_state
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldRefundState returns the old "refund_state" field's value of the SubscriptionCoveredProfile entity.
+// If the SubscriptionCoveredProfile object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SubscriptionCoveredProfileMutation) OldRefundState(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldRefundState is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldRefundState requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldRefundState: %w", err)
+	}
+	return oldValue.RefundState, nil
+}
+
+// ResetRefundState resets all changes to the "refund_state" field.
+func (m *SubscriptionCoveredProfileMutation) ResetRefundState() {
+	m.refund_state = nil
+}
+
+// SetActivatedAt sets the "activated_at" field.
+func (m *SubscriptionCoveredProfileMutation) SetActivatedAt(t time.Time) {
+	m.activated_at = &t
+}
+
+// ActivatedAt returns the value of the "activated_at" field in the mutation.
+func (m *SubscriptionCoveredProfileMutation) ActivatedAt() (r time.Time, exists bool) {
+	v := m.activated_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldActivatedAt returns the old "activated_at" field's value of the SubscriptionCoveredProfile entity.
+// If the SubscriptionCoveredProfile object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SubscriptionCoveredProfileMutation) OldActivatedAt(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldActivatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldActivatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldActivatedAt: %w", err)
+	}
+	return oldValue.ActivatedAt, nil
+}
+
+// ClearActivatedAt clears the value of the "activated_at" field.
+func (m *SubscriptionCoveredProfileMutation) ClearActivatedAt() {
+	m.activated_at = nil
+	m.clearedFields[subscriptioncoveredprofile.FieldActivatedAt] = struct{}{}
+}
+
+// ActivatedAtCleared returns if the "activated_at" field was cleared in this mutation.
+func (m *SubscriptionCoveredProfileMutation) ActivatedAtCleared() bool {
+	_, ok := m.clearedFields[subscriptioncoveredprofile.FieldActivatedAt]
+	return ok
+}
+
+// ResetActivatedAt resets all changes to the "activated_at" field.
+func (m *SubscriptionCoveredProfileMutation) ResetActivatedAt() {
+	m.activated_at = nil
+	delete(m.clearedFields, subscriptioncoveredprofile.FieldActivatedAt)
+}
+
+// SetEndedAt sets the "ended_at" field.
+func (m *SubscriptionCoveredProfileMutation) SetEndedAt(t time.Time) {
+	m.ended_at = &t
+}
+
+// EndedAt returns the value of the "ended_at" field in the mutation.
+func (m *SubscriptionCoveredProfileMutation) EndedAt() (r time.Time, exists bool) {
+	v := m.ended_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldEndedAt returns the old "ended_at" field's value of the SubscriptionCoveredProfile entity.
+// If the SubscriptionCoveredProfile object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SubscriptionCoveredProfileMutation) OldEndedAt(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldEndedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldEndedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldEndedAt: %w", err)
+	}
+	return oldValue.EndedAt, nil
+}
+
+// ClearEndedAt clears the value of the "ended_at" field.
+func (m *SubscriptionCoveredProfileMutation) ClearEndedAt() {
+	m.ended_at = nil
+	m.clearedFields[subscriptioncoveredprofile.FieldEndedAt] = struct{}{}
+}
+
+// EndedAtCleared returns if the "ended_at" field was cleared in this mutation.
+func (m *SubscriptionCoveredProfileMutation) EndedAtCleared() bool {
+	_, ok := m.clearedFields[subscriptioncoveredprofile.FieldEndedAt]
+	return ok
+}
+
+// ResetEndedAt resets all changes to the "ended_at" field.
+func (m *SubscriptionCoveredProfileMutation) ResetEndedAt() {
+	m.ended_at = nil
+	delete(m.clearedFields, subscriptioncoveredprofile.FieldEndedAt)
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (m *SubscriptionCoveredProfileMutation) SetUpdatedAt(t time.Time) {
+	m.updated_at = &t
+}
+
+// UpdatedAt returns the value of the "updated_at" field in the mutation.
+func (m *SubscriptionCoveredProfileMutation) UpdatedAt() (r time.Time, exists bool) {
+	v := m.updated_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUpdatedAt returns the old "updated_at" field's value of the SubscriptionCoveredProfile entity.
+// If the SubscriptionCoveredProfile object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SubscriptionCoveredProfileMutation) OldUpdatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUpdatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUpdatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUpdatedAt: %w", err)
+	}
+	return oldValue.UpdatedAt, nil
+}
+
+// ResetUpdatedAt resets all changes to the "updated_at" field.
+func (m *SubscriptionCoveredProfileMutation) ResetUpdatedAt() {
+	m.updated_at = nil
+}
+
+// Where appends a list predicates to the SubscriptionCoveredProfileMutation builder.
+func (m *SubscriptionCoveredProfileMutation) Where(ps ...predicate.SubscriptionCoveredProfile) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the SubscriptionCoveredProfileMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *SubscriptionCoveredProfileMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.SubscriptionCoveredProfile, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *SubscriptionCoveredProfileMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *SubscriptionCoveredProfileMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (SubscriptionCoveredProfile).
+func (m *SubscriptionCoveredProfileMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *SubscriptionCoveredProfileMutation) Fields() []string {
+	fields := make([]string, 0, 12)
+	if m.created_at != nil {
+		fields = append(fields, subscriptioncoveredprofile.FieldCreatedAt)
+	}
+	if m.subscription_id != nil {
+		fields = append(fields, subscriptioncoveredprofile.FieldSubscriptionID)
+	}
+	if m.owner_user_id != nil {
+		fields = append(fields, subscriptioncoveredprofile.FieldOwnerUserID)
+	}
+	if m.profile_id != nil {
+		fields = append(fields, subscriptioncoveredprofile.FieldProfileID)
+	}
+	if m.status != nil {
+		fields = append(fields, subscriptioncoveredprofile.FieldStatus)
+	}
+	if m.activates_with_period_id != nil {
+		fields = append(fields, subscriptioncoveredprofile.FieldActivatesWithPeriodID)
+	}
+	if m.share_minor != nil {
+		fields = append(fields, subscriptioncoveredprofile.FieldShareMinor)
+	}
+	if m.share_payment_reference != nil {
+		fields = append(fields, subscriptioncoveredprofile.FieldSharePaymentReference)
+	}
+	if m.refund_state != nil {
+		fields = append(fields, subscriptioncoveredprofile.FieldRefundState)
+	}
+	if m.activated_at != nil {
+		fields = append(fields, subscriptioncoveredprofile.FieldActivatedAt)
+	}
+	if m.ended_at != nil {
+		fields = append(fields, subscriptioncoveredprofile.FieldEndedAt)
+	}
+	if m.updated_at != nil {
+		fields = append(fields, subscriptioncoveredprofile.FieldUpdatedAt)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *SubscriptionCoveredProfileMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case subscriptioncoveredprofile.FieldCreatedAt:
+		return m.CreatedAt()
+	case subscriptioncoveredprofile.FieldSubscriptionID:
+		return m.SubscriptionID()
+	case subscriptioncoveredprofile.FieldOwnerUserID:
+		return m.OwnerUserID()
+	case subscriptioncoveredprofile.FieldProfileID:
+		return m.ProfileID()
+	case subscriptioncoveredprofile.FieldStatus:
+		return m.Status()
+	case subscriptioncoveredprofile.FieldActivatesWithPeriodID:
+		return m.ActivatesWithPeriodID()
+	case subscriptioncoveredprofile.FieldShareMinor:
+		return m.ShareMinor()
+	case subscriptioncoveredprofile.FieldSharePaymentReference:
+		return m.SharePaymentReference()
+	case subscriptioncoveredprofile.FieldRefundState:
+		return m.RefundState()
+	case subscriptioncoveredprofile.FieldActivatedAt:
+		return m.ActivatedAt()
+	case subscriptioncoveredprofile.FieldEndedAt:
+		return m.EndedAt()
+	case subscriptioncoveredprofile.FieldUpdatedAt:
+		return m.UpdatedAt()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *SubscriptionCoveredProfileMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case subscriptioncoveredprofile.FieldCreatedAt:
+		return m.OldCreatedAt(ctx)
+	case subscriptioncoveredprofile.FieldSubscriptionID:
+		return m.OldSubscriptionID(ctx)
+	case subscriptioncoveredprofile.FieldOwnerUserID:
+		return m.OldOwnerUserID(ctx)
+	case subscriptioncoveredprofile.FieldProfileID:
+		return m.OldProfileID(ctx)
+	case subscriptioncoveredprofile.FieldStatus:
+		return m.OldStatus(ctx)
+	case subscriptioncoveredprofile.FieldActivatesWithPeriodID:
+		return m.OldActivatesWithPeriodID(ctx)
+	case subscriptioncoveredprofile.FieldShareMinor:
+		return m.OldShareMinor(ctx)
+	case subscriptioncoveredprofile.FieldSharePaymentReference:
+		return m.OldSharePaymentReference(ctx)
+	case subscriptioncoveredprofile.FieldRefundState:
+		return m.OldRefundState(ctx)
+	case subscriptioncoveredprofile.FieldActivatedAt:
+		return m.OldActivatedAt(ctx)
+	case subscriptioncoveredprofile.FieldEndedAt:
+		return m.OldEndedAt(ctx)
+	case subscriptioncoveredprofile.FieldUpdatedAt:
+		return m.OldUpdatedAt(ctx)
+	}
+	return nil, fmt.Errorf("unknown SubscriptionCoveredProfile field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *SubscriptionCoveredProfileMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case subscriptioncoveredprofile.FieldCreatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatedAt(v)
+		return nil
+	case subscriptioncoveredprofile.FieldSubscriptionID:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSubscriptionID(v)
+		return nil
+	case subscriptioncoveredprofile.FieldOwnerUserID:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetOwnerUserID(v)
+		return nil
+	case subscriptioncoveredprofile.FieldProfileID:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetProfileID(v)
+		return nil
+	case subscriptioncoveredprofile.FieldStatus:
+		v, ok := value.(subscriptioncoveredprofile.Status)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetStatus(v)
+		return nil
+	case subscriptioncoveredprofile.FieldActivatesWithPeriodID:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetActivatesWithPeriodID(v)
+		return nil
+	case subscriptioncoveredprofile.FieldShareMinor:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetShareMinor(v)
+		return nil
+	case subscriptioncoveredprofile.FieldSharePaymentReference:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSharePaymentReference(v)
+		return nil
+	case subscriptioncoveredprofile.FieldRefundState:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetRefundState(v)
+		return nil
+	case subscriptioncoveredprofile.FieldActivatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetActivatedAt(v)
+		return nil
+	case subscriptioncoveredprofile.FieldEndedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetEndedAt(v)
+		return nil
+	case subscriptioncoveredprofile.FieldUpdatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUpdatedAt(v)
+		return nil
+	}
+	return fmt.Errorf("unknown SubscriptionCoveredProfile field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *SubscriptionCoveredProfileMutation) AddedFields() []string {
+	var fields []string
+	if m.addshare_minor != nil {
+		fields = append(fields, subscriptioncoveredprofile.FieldShareMinor)
+	}
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *SubscriptionCoveredProfileMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case subscriptioncoveredprofile.FieldShareMinor:
+		return m.AddedShareMinor()
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *SubscriptionCoveredProfileMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	case subscriptioncoveredprofile.FieldShareMinor:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddShareMinor(v)
+		return nil
+	}
+	return fmt.Errorf("unknown SubscriptionCoveredProfile numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *SubscriptionCoveredProfileMutation) ClearedFields() []string {
+	var fields []string
+	if m.FieldCleared(subscriptioncoveredprofile.FieldActivatedAt) {
+		fields = append(fields, subscriptioncoveredprofile.FieldActivatedAt)
+	}
+	if m.FieldCleared(subscriptioncoveredprofile.FieldEndedAt) {
+		fields = append(fields, subscriptioncoveredprofile.FieldEndedAt)
+	}
+	return fields
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *SubscriptionCoveredProfileMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *SubscriptionCoveredProfileMutation) ClearField(name string) error {
+	switch name {
+	case subscriptioncoveredprofile.FieldActivatedAt:
+		m.ClearActivatedAt()
+		return nil
+	case subscriptioncoveredprofile.FieldEndedAt:
+		m.ClearEndedAt()
+		return nil
+	}
+	return fmt.Errorf("unknown SubscriptionCoveredProfile nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *SubscriptionCoveredProfileMutation) ResetField(name string) error {
+	switch name {
+	case subscriptioncoveredprofile.FieldCreatedAt:
+		m.ResetCreatedAt()
+		return nil
+	case subscriptioncoveredprofile.FieldSubscriptionID:
+		m.ResetSubscriptionID()
+		return nil
+	case subscriptioncoveredprofile.FieldOwnerUserID:
+		m.ResetOwnerUserID()
+		return nil
+	case subscriptioncoveredprofile.FieldProfileID:
+		m.ResetProfileID()
+		return nil
+	case subscriptioncoveredprofile.FieldStatus:
+		m.ResetStatus()
+		return nil
+	case subscriptioncoveredprofile.FieldActivatesWithPeriodID:
+		m.ResetActivatesWithPeriodID()
+		return nil
+	case subscriptioncoveredprofile.FieldShareMinor:
+		m.ResetShareMinor()
+		return nil
+	case subscriptioncoveredprofile.FieldSharePaymentReference:
+		m.ResetSharePaymentReference()
+		return nil
+	case subscriptioncoveredprofile.FieldRefundState:
+		m.ResetRefundState()
+		return nil
+	case subscriptioncoveredprofile.FieldActivatedAt:
+		m.ResetActivatedAt()
+		return nil
+	case subscriptioncoveredprofile.FieldEndedAt:
+		m.ResetEndedAt()
+		return nil
+	case subscriptioncoveredprofile.FieldUpdatedAt:
+		m.ResetUpdatedAt()
+		return nil
+	}
+	return fmt.Errorf("unknown SubscriptionCoveredProfile field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *SubscriptionCoveredProfileMutation) AddedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *SubscriptionCoveredProfileMutation) AddedIDs(name string) []ent.Value {
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *SubscriptionCoveredProfileMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *SubscriptionCoveredProfileMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *SubscriptionCoveredProfileMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *SubscriptionCoveredProfileMutation) EdgeCleared(name string) bool {
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *SubscriptionCoveredProfileMutation) ClearEdge(name string) error {
+	return fmt.Errorf("unknown SubscriptionCoveredProfile unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *SubscriptionCoveredProfileMutation) ResetEdge(name string) error {
+	return fmt.Errorf("unknown SubscriptionCoveredProfile edge %s", name)
 }
 
 // SubscriptionOfferClaimMutation represents an operation that mutates the SubscriptionOfferClaim nodes in the graph.

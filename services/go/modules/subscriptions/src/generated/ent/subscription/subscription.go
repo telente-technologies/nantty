@@ -361,10 +361,11 @@ const DefaultDiscountKind = DiscountKindNone
 
 // DiscountKind values.
 const (
-	DiscountKindNone   DiscountKind = "none"
-	DiscountKindYearly DiscountKind = "yearly"
-	DiscountKindBundle DiscountKind = "bundle"
-	DiscountKindOffer  DiscountKind = "offer"
+	DiscountKindNone          DiscountKind = "none"
+	DiscountKindYearly        DiscountKind = "yearly"
+	DiscountKindBundle        DiscountKind = "bundle"
+	DiscountKindOffer         DiscountKind = "offer"
+	DiscountKindMultiBusiness DiscountKind = "multi_business"
 )
 
 func (dk DiscountKind) String() string {
@@ -374,7 +375,7 @@ func (dk DiscountKind) String() string {
 // DiscountKindValidator is a validator for the "discount_kind" field enum values. It is called by the builders before save.
 func DiscountKindValidator(dk DiscountKind) error {
 	switch dk {
-	case DiscountKindNone, DiscountKindYearly, DiscountKindBundle, DiscountKindOffer:
+	case DiscountKindNone, DiscountKindYearly, DiscountKindBundle, DiscountKindOffer, DiscountKindMultiBusiness:
 		return nil
 	default:
 		return fmt.Errorf("subscription: invalid enum value for discount_kind field: %q", dk)

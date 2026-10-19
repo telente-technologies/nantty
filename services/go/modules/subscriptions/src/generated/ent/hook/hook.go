@@ -104,6 +104,18 @@ func (f SubscriptionFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.SubscriptionMutation", m)
 }
 
+// The SubscriptionCoveredProfileFunc type is an adapter to allow the use of ordinary
+// function as SubscriptionCoveredProfile mutator.
+type SubscriptionCoveredProfileFunc func(context.Context, *ent.SubscriptionCoveredProfileMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f SubscriptionCoveredProfileFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.SubscriptionCoveredProfileMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.SubscriptionCoveredProfileMutation", m)
+}
+
 // The SubscriptionOfferClaimFunc type is an adapter to allow the use of ordinary
 // function as SubscriptionOfferClaim mutator.
 type SubscriptionOfferClaimFunc func(context.Context, *ent.SubscriptionOfferClaimMutation) (ent.Value, error)

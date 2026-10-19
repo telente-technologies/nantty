@@ -12,6 +12,7 @@ import (
 	"zudomart/modules/ledger/src/databases"
 	paymentconstants "zudomart/modules/payments/src/constants"
 	paymentservices "zudomart/modules/payments/src/modules/gateway/services"
+	"zudomart/modules/subscriptions/src/constants"
 	"zudomart/modules/subscriptions/src/generated/ent"
 	"zudomart/modules/subscriptions/src/generated/ent/subscription"
 )
@@ -35,6 +36,7 @@ type VerificationRefundRequest struct {
 	CaseId         string `json:"caseId"`
 	SubscriptionId string `json:"subscriptionId"`
 	AccountId      string `json:"accountId"`
+	ProfileId      string `json:"profileId"`
 	Reason         string `json:"reason"`
 }
 
@@ -63,6 +65,12 @@ func (billing Billing) HandleVerificationRefundRequested(ctx context.Context, re
 	subscriptionId, err := uuid.Parse(request.SubscriptionId)
 	if err != nil {
 		return nil
+	}
+	if combined, err := billing.Container.Client(billing.Container.Resources.Database).Subscription.Query().
+		Where(subscription.ID(subscriptionId), subscription.PlanCode(constants.PlanGoldCombined)).Only(ctx); err == nil {
+		return billing.handleCombinedGoldVerificationRefund(ctx, combined, request)
+	} else if !ent.IsNotFound(err) {
+		return err
 	}
 	var row *ent.Subscription
 	path := RefundPathAlreadyDone

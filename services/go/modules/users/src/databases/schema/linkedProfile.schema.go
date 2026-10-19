@@ -33,8 +33,7 @@ func (LinkedProfile) Fields() []ent.Field {
 func (LinkedProfile) Indexes() []ent.Index {
 	return []ent.Index{
 		index.Fields("kind", "profile_id").Unique(),
-		index.Fields("account_id", "kind").StorageKey("linked_profile_one_kind_per_account").Unique().Annotations(entsql.IndexWhere("status = 'active'")),
-		index.Fields("account_id").StorageKey("linked_profile_store_or_business").Unique().Annotations(entsql.IndexWhere("status = 'active' AND kind IN ('store', 'business')")),
+		index.Fields("account_id").StorageKey("linked_profile_one_store_per_account").Unique().Annotations(entsql.IndexWhere("status = 'active' AND (kind = 'store' OR store_id IS NOT NULL)")),
 		index.Fields("account_id", "status"),
 	}
 }

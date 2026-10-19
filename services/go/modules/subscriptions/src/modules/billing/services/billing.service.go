@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"net/http"
 	"slices"
+	"strings"
 	"time"
 
 	"github.com/google/uuid"
@@ -90,6 +91,13 @@ func (billing Billing) QuoteForOwnerOnChannel(ctx context.Context, executor *ent
 	if err != nil {
 		return models.PriceQuote{}, price, err
 	}
+	if hasBlue {
+		premium, err := billing.ownerHasLivePremium(ctx, executor, ownerUserId)
+		if err != nil {
+			return models.PriceQuote{}, price, err
+		}
+		hasBlue = !premium
+	}
 	bundled, err := executor.Subscription.Query().Where(subscription.OwnerUserID(ownerUserId), subscription.DiscountKindEQ(subscription.DiscountKindBundle), subscription.StatusIn(liveStatuses()...)).Count(ctx)
 	if err != nil {
 		return models.PriceQuote{}, price, err
@@ -105,6 +113,9 @@ func PlanAllowedForProfile(planCode, profileType string) bool {
 }
 
 func (billing Billing) emit(ctx context.Context, transaction *sql.Tx, eventType, subject string, data map[string]any) error {
+	if strings.HasPrefix(eventType, "entitlement.") && data["plan"] == constants.PlanGoldCombined {
+		return billing.emitCombinedGoldEntitlementsInTransaction(ctx, transaction, eventType, data)
+	}
 	return billing.Container.Outbox.EnqueueInTransaction(ctx, transaction, eventType, subject, billing.Container.Now().UTC(), data)
 }
 

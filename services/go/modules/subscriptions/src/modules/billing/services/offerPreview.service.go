@@ -84,7 +84,7 @@ func (billing Billing) PreviewOffer(ctx context.Context, request OfferPreviewReq
 		plan := OfferPlanPreview{PlanCode: code, PlanLabel: PlanLabel(code), AvailableForProfile: profileType == "" || PlanAllowedForProfile(code, profileType), Prices: []OfferIntervalPrice{}}
 		anyEligible = anyEligible || plan.AvailableForProfile
 		for _, interval := range []string{"month", "year"} {
-			quote, price, err := billing.QuoteForOwnerOnChannel(ctx, client, request.UserId, code, country, interval, "web")
+			quote, price, err := billing.quoteForOfferPreview(ctx, client, request.UserId, code, country, interval)
 			if err != nil || price.NotChargeableOnWeb {
 				continue
 			}

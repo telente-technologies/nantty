@@ -13,7 +13,7 @@ import (
 func TestRefundScopeFollowsWhatThePlanSells(t *testing.T) {
 	for plan, want := range map[string]string{
 		"blue": RefundScopeFull, "gold_only": RefundScopeFull,
-		"seller_pro": RefundScopeCheckmarkShare, "seller_business": RefundScopeCheckmarkShare, "premium": RefundScopeCheckmarkShare,
+		"seller_pro": RefundScopeCheckmarkShare, "seller_business": RefundScopeCheckmarkShare, "premium": RefundScopeCheckmarkShare, "gold_combined": RefundScopeCheckmarkShare,
 	} {
 		if got := RefundScopeFor(plan); got != want {
 			t.Errorf("%s: got %s, want %s", plan, got, want)

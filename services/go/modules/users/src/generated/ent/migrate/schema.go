@@ -732,19 +732,11 @@ var (
 				Columns: []*schema.Column{LinkedProfilesColumns[3], LinkedProfilesColumns[4]},
 			},
 			{
-				Name:    "linked_profile_one_kind_per_account",
-				Unique:  true,
-				Columns: []*schema.Column{LinkedProfilesColumns[2], LinkedProfilesColumns[3]},
-				Annotation: &entsql.IndexAnnotation{
-					Where: "status = 'active'",
-				},
-			},
-			{
-				Name:    "linked_profile_store_or_business",
+				Name:    "linked_profile_one_store_per_account",
 				Unique:  true,
 				Columns: []*schema.Column{LinkedProfilesColumns[2]},
 				Annotation: &entsql.IndexAnnotation{
-					Where: "status = 'active' AND kind IN ('store', 'business')",
+					Where: "status = 'active' AND (kind = 'store' OR store_id IS NOT NULL)",
 				},
 			},
 			{

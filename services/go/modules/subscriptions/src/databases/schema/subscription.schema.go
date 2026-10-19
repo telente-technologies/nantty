@@ -31,7 +31,7 @@ func (Subscription) Fields() []ent.Field {
 		field.Int64("list_amount_minor"),
 		field.Int64("amount_minor"),
 		field.String("currency").NotEmpty().MaxLen(3),
-		field.Enum("discount_kind").Values("none", "yearly", "bundle", "offer").Default("none"),
+		field.Enum("discount_kind").Values("none", "yearly", "bundle", "offer", "multi_business").Default("none"),
 		field.Int64("discount_bps").Default(0),
 		field.Bool("with_trial").Default(false).Immutable(),
 		field.Int("trial_days").Default(0),

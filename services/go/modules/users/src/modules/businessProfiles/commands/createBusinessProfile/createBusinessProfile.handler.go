@@ -154,5 +154,6 @@ func businessTypeOf(requested string) string {
 }
 
 func isLimitError(err error) bool {
-	return errors.Is(err, usersErrors.ErrProfileLimitStoreOrBusiness) || errors.Is(err, usersErrors.ErrProfileLimitOneBrand)
+	return errors.Is(err, usersErrors.ErrProfileLimitStoreOrBusiness) || errors.Is(err, usersErrors.ErrProfileLimitOneBrand) ||
+		errors.Is(err, usersErrors.ErrStoreLimitOne) || errors.Is(err, usersErrors.ErrBusinessProfileLimitPremium)
 }

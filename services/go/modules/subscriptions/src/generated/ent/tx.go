@@ -30,6 +30,8 @@ type Tx struct {
 	ProviderPlan *ProviderPlanClient
 	// Subscription is the client for interacting with the Subscription builders.
 	Subscription *SubscriptionClient
+	// SubscriptionCoveredProfile is the client for interacting with the SubscriptionCoveredProfile builders.
+	SubscriptionCoveredProfile *SubscriptionCoveredProfileClient
 	// SubscriptionOfferClaim is the client for interacting with the SubscriptionOfferClaim builders.
 	SubscriptionOfferClaim *SubscriptionOfferClaimClient
 	// SubscriptionOfferLink is the client for interacting with the SubscriptionOfferLink builders.
@@ -181,6 +183,7 @@ func (tx *Tx) init() {
 	tx.PlanPrice = NewPlanPriceClient(tx.config)
 	tx.ProviderPlan = NewProviderPlanClient(tx.config)
 	tx.Subscription = NewSubscriptionClient(tx.config)
+	tx.SubscriptionCoveredProfile = NewSubscriptionCoveredProfileClient(tx.config)
 	tx.SubscriptionOfferClaim = NewSubscriptionOfferClaimClient(tx.config)
 	tx.SubscriptionOfferLink = NewSubscriptionOfferLinkClient(tx.config)
 	tx.SubscriptionOfferSend = NewSubscriptionOfferSendClient(tx.config)

@@ -48,6 +48,9 @@ func (billing Billing) ChangePlan(ctx context.Context, userId string, subscripti
 		return PlanChangeView{}, err
 	}
 	definition, known := constants.Plans[planCode]
+	if row.PlanCode == constants.PlanGoldCombined || planCode == constants.PlanGoldCombined {
+		return PlanChangeView{}, ErrUseCombinedGoldCheckout
+	}
 	if !known || !definition.SelfServe || !PlanAllowedForProfile(planCode, row.ProfileType) {
 		return PlanChangeView{}, ErrProfileNotEligible
 	}

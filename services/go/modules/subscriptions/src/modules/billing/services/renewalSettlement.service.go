@@ -11,6 +11,7 @@ import (
 	ledgermodels "zudomart/modules/ledger/src/modules/journal/models"
 	paymentmodels "zudomart/modules/payments/src/modules/gateway/models"
 	paymentservices "zudomart/modules/payments/src/modules/gateway/services"
+	"zudomart/modules/subscriptions/src/constants"
 	"zudomart/modules/subscriptions/src/generated/ent"
 	"zudomart/modules/subscriptions/src/generated/ent/subscription"
 	"zudomart/modules/subscriptions/src/generated/ent/subscriptionperiod"
@@ -70,8 +71,11 @@ func discountKindOf(period *ent.SubscriptionPeriod) subscription.DiscountKind {
 		return subscription.DiscountKindOffer
 	}
 	for _, item := range period.LineItems {
-		if item.Kind == models.LineItemBundleDiscount {
+		switch item.Kind {
+		case models.LineItemBundleDiscount:
 			return subscription.DiscountKindBundle
+		case models.LineItemMultiBusinessDiscount:
+			return subscription.DiscountKindMultiBusiness
 		}
 	}
 	if period.Interval == "year" {
@@ -139,6 +143,11 @@ func (billing Billing) settlePeriodInTransaction(ctx context.Context, transactio
 	}
 	if row.Interval == subscription.IntervalYear && row.CurrentPeriodEndsAt != nil {
 		if err := billing.scheduleReminderInTransaction(ctx, client, row.ID.String(), "renewalUpcoming:"+row.CurrentPeriodEndsAt.Format("20060102"), 7, models.YearlyRenewalReminderAt(*row.CurrentPeriodEndsAt)); err != nil {
+			return err
+		}
+	}
+	if row.PlanCode == constants.PlanGoldCombined {
+		if err := billing.settleCombinedGoldCoverageInTransaction(ctx, transaction, row, period, paymentReference); err != nil {
 			return err
 		}
 	}

@@ -18,6 +18,8 @@ var (
 var (
 	ErrProfileLimitStoreOrBusiness = httpserver.NewApiError(http.StatusConflict, "PROFILE_LIMIT_STORE_OR_BUSINESS", "You can have one Store or one Business page, not both.")
 	ErrProfileLimitOneBrand        = httpserver.NewApiError(http.StatusConflict, "PROFILE_LIMIT_ONE_BRAND", "You can have one Brand.")
+	ErrStoreLimitOne               = httpserver.NewApiError(http.StatusConflict, "STORE_LIMIT_ONE", "You can own one store. Your other business profiles can be brands that don't sell.")
+	ErrBusinessProfileLimitPremium = httpserver.NewApiError(http.StatusConflict, "BUSINESS_PROFILE_LIMIT", "You can have up to 5 business profiles with Premium.")
 	ErrProfileOnHold               = httpserver.NewApiError(http.StatusConflict, "PROFILE_ON_HOLD", "Choose which profiles to keep before using this one.")
 )
 

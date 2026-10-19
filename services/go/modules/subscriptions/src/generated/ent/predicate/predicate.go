@@ -30,6 +30,9 @@ type ProviderPlan func(*sql.Selector)
 // Subscription is the predicate function for subscription builders.
 type Subscription func(*sql.Selector)
 
+// SubscriptionCoveredProfile is the predicate function for subscriptioncoveredprofile builders.
+type SubscriptionCoveredProfile func(*sql.Selector)
+
 // SubscriptionOfferClaim is the predicate function for subscriptionofferclaim builders.
 type SubscriptionOfferClaim func(*sql.Selector)
 

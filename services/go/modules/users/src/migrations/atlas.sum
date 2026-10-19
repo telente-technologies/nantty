@@ -1,4 +1,4 @@
-h1:hIvWuIF7fZR75zTNLdgUhSMO0N49CcGig9NDboqerQw=
+h1:5H+QDD6S1KiO0/qZxXUd/PZiTWa3lJp5+AqxOJ/CrCU=
 20261003101347_create_users_core_tables.up.sql h1:dNCI103B0TCx9zazGKCl3Ln/N+7bPYPmbcR+7djUkCU=
 20261003101400_grant_read_access_to_other_services.up.sql h1:ZvBT+vvQCm5NqTGPiEhOB1osuqSwgQFgMAX7+BBdFH8=
 20261003101713_add_privacy_geo_and_address_tables.up.sql h1:yqWZ0zBt6NwAbqkN3ptPBIu0qjIFptu66IDacpojKwU=
@@ -24,3 +24,4 @@ h1:hIvWuIF7fZR75zTNLdgUhSMO0N49CcGig9NDboqerQw=
 20261005175142_add_topic_admin_fields.up.sql h1:8LGOG+bsX9Y83xoPuksZX6ROLbHUs9HWPAM2K2kkl+w=
 20261010120000_grant_identity_verification_read_to_money.up.sql h1:7kxE6uNjT6SE8bSllZjH1z3xky+hjn82KNjs1nt6v/k=
 20261011145154_add_linked_profiles.up.sql h1:mDHi70PYtqt+UA2aXeiBiQCJwfNs+rovWk5HMiB0Jw0=
+20261017151000_premium_business_profile_limits.up.sql h1:oAPHErJfPasD7t4eGQaJt9EB3N3kepBf2xd6D/A1VCw=

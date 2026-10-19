@@ -260,7 +260,7 @@ var (
 		{Name: "list_amount_minor", Type: field.TypeInt64},
 		{Name: "amount_minor", Type: field.TypeInt64},
 		{Name: "currency", Type: field.TypeString, Size: 3},
-		{Name: "discount_kind", Type: field.TypeEnum, Enums: []string{"none", "yearly", "bundle", "offer"}, Default: "none"},
+		{Name: "discount_kind", Type: field.TypeEnum, Enums: []string{"none", "yearly", "bundle", "offer", "multi_business"}, Default: "none"},
 		{Name: "discount_bps", Type: field.TypeInt64, Default: 0},
 		{Name: "with_trial", Type: field.TypeBool, Default: false},
 		{Name: "trial_days", Type: field.TypeInt, Default: 0},
@@ -347,6 +347,43 @@ var (
 				Annotation: &entsql.IndexAnnotation{
 					Where: "activation_pending",
 				},
+			},
+		},
+	}
+	// SubscriptionCoveredProfilesColumns holds the columns for the "subscription_covered_profiles" table.
+	SubscriptionCoveredProfilesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "subscription_id", Type: field.TypeString, Size: 80},
+		{Name: "owner_user_id", Type: field.TypeString, Size: 80},
+		{Name: "profile_id", Type: field.TypeString, Size: 80},
+		{Name: "status", Type: field.TypeEnum, Enums: []string{"pending", "active", "removing", "removed", "rejected", "released"}, Default: "pending"},
+		{Name: "activates_with_period_id", Type: field.TypeString, Size: 80, Default: ""},
+		{Name: "share_minor", Type: field.TypeInt64, Default: 0},
+		{Name: "share_payment_reference", Type: field.TypeString, Size: 120, Default: ""},
+		{Name: "refund_state", Type: field.TypeString, Size: 40, Default: ""},
+		{Name: "activated_at", Type: field.TypeTime, Nullable: true},
+		{Name: "ended_at", Type: field.TypeTime, Nullable: true},
+		{Name: "updated_at", Type: field.TypeTime},
+	}
+	// SubscriptionCoveredProfilesTable holds the schema information for the "subscription_covered_profiles" table.
+	SubscriptionCoveredProfilesTable = &schema.Table{
+		Name:       "subscription_covered_profiles",
+		Columns:    SubscriptionCoveredProfilesColumns,
+		PrimaryKey: []*schema.Column{SubscriptionCoveredProfilesColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "subscription_covered_profiles_live_per_profile",
+				Unique:  true,
+				Columns: []*schema.Column{SubscriptionCoveredProfilesColumns[4]},
+				Annotation: &entsql.IndexAnnotation{
+					Where: "status IN ('pending','active','removing')",
+				},
+			},
+			{
+				Name:    "subscriptioncoveredprofile_subscription_id_status",
+				Unique:  false,
+				Columns: []*schema.Column{SubscriptionCoveredProfilesColumns[2], SubscriptionCoveredProfilesColumns[5]},
 			},
 		},
 	}
@@ -564,6 +601,7 @@ var (
 		PlanPricesTable,
 		ProviderPlansTable,
 		SubscriptionsTable,
+		SubscriptionCoveredProfilesTable,
 		SubscriptionOfferClaimsTable,
 		SubscriptionOfferLinksTable,
 		SubscriptionOfferSendsTable,

@@ -16,6 +16,7 @@ import (
 	"zudomart/modules/subscriptions/src/generated/ent/planprice"
 	"zudomart/modules/subscriptions/src/generated/ent/providerplan"
 	"zudomart/modules/subscriptions/src/generated/ent/subscription"
+	"zudomart/modules/subscriptions/src/generated/ent/subscriptioncoveredprofile"
 	"zudomart/modules/subscriptions/src/generated/ent/subscriptionofferclaim"
 	"zudomart/modules/subscriptions/src/generated/ent/subscriptionofferlink"
 	"zudomart/modules/subscriptions/src/generated/ent/subscriptionoffersend"
@@ -86,20 +87,21 @@ var (
 func checkColumn(t, c string) error {
 	initCheck.Do(func() {
 		columnCheck = sql.NewColumnCheck(map[string]func(string) bool{
-			creatorsubscription.Table:       creatorsubscription.ValidColumn,
-			creatorsubscriptioncharge.Table: creatorsubscriptioncharge.ValidColumn,
-			creatorsubscriptionplan.Table:   creatorsubscriptionplan.ValidColumn,
-			idempotentrequest.Table:         idempotentrequest.ValidColumn,
-			outboxevent.Table:               outboxevent.ValidColumn,
-			planprice.Table:                 planprice.ValidColumn,
-			providerplan.Table:              providerplan.ValidColumn,
-			subscription.Table:              subscription.ValidColumn,
-			subscriptionofferclaim.Table:    subscriptionofferclaim.ValidColumn,
-			subscriptionofferlink.Table:     subscriptionofferlink.ValidColumn,
-			subscriptionoffersend.Table:     subscriptionoffersend.ValidColumn,
-			subscriptionperiod.Table:        subscriptionperiod.ValidColumn,
-			subscriptionreminder.Table:      subscriptionreminder.ValidColumn,
-			trialclaim.Table:                trialclaim.ValidColumn,
+			creatorsubscription.Table:        creatorsubscription.ValidColumn,
+			creatorsubscriptioncharge.Table:  creatorsubscriptioncharge.ValidColumn,
+			creatorsubscriptionplan.Table:    creatorsubscriptionplan.ValidColumn,
+			idempotentrequest.Table:          idempotentrequest.ValidColumn,
+			outboxevent.Table:                outboxevent.ValidColumn,
+			planprice.Table:                  planprice.ValidColumn,
+			providerplan.Table:               providerplan.ValidColumn,
+			subscription.Table:               subscription.ValidColumn,
+			subscriptioncoveredprofile.Table: subscriptioncoveredprofile.ValidColumn,
+			subscriptionofferclaim.Table:     subscriptionofferclaim.ValidColumn,
+			subscriptionofferlink.Table:      subscriptionofferlink.ValidColumn,
+			subscriptionoffersend.Table:      subscriptionoffersend.ValidColumn,
+			subscriptionperiod.Table:         subscriptionperiod.ValidColumn,
+			subscriptionreminder.Table:       subscriptionreminder.ValidColumn,
+			trialclaim.Table:                 trialclaim.ValidColumn,
 		})
 	})
 	return columnCheck(t, c)

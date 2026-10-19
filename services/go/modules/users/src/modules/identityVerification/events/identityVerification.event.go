@@ -28,6 +28,7 @@ type RefundRequestedData struct {
 	CaseId         string `json:"caseId"`
 	SubscriptionId string `json:"subscriptionId"`
 	AccountId      string `json:"accountId"`
+	ProfileId      string `json:"profileId"`
 	Reason         string `json:"reason"`
 	RefundScope    string `json:"refundScope"`
 }

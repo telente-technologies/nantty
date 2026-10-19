@@ -2,6 +2,7 @@ package services
 
 import (
 	"context"
+	"time"
 
 	"github.com/google/uuid"
 
@@ -48,6 +49,13 @@ func ClaimLinkedProfile(ctx context.Context, tx *ent.Tx, claim LinkedClaim) (*en
 	active, err := tx.LinkedProfile.Query().Where(linkedprofile.AccountID(claim.AccountId), linkedprofile.StatusEQ(linkedprofile.StatusActive)).All(ctx)
 	if err != nil {
 		return nil, err
+	}
+	premium, err := AccountHasPremium(ctx, tx.Client(), claim.AccountId, time.Now())
+	if err != nil {
+		return nil, err
+	}
+	if premium {
+		return claimWithPremium(ctx, tx, active, claim)
 	}
 	for _, row := range active {
 		if claim.Kind == linkedprofile.KindBrand && row.Kind == linkedprofile.KindBrand {

@@ -68,6 +68,9 @@ func (billing Billing) StartCheckout(ctx context.Context, request CheckoutReques
 	if !known {
 		return CheckoutView{}, ErrPlanNotFound
 	}
+	if request.PlanCode == constants.PlanGoldCombined {
+		return CheckoutView{}, ErrUseCombinedGoldCheckout
+	}
 	if !definition.SelfServe || !loaders.ReadPlanCatalogue(ctx, billing.Container.Resources.Platform)[request.PlanCode].IsPurchasable {
 		return CheckoutView{}, ErrPlanNotSelfServe
 	}
@@ -112,6 +115,14 @@ func (billing Billing) StartCheckout(ctx context.Context, request CheckoutReques
 	firstCharge := FirstPeriodCharge(request.PlanCode, quote, billing.standaloneCheckmarkPriceMinor(ctx, definition.Checkmark, currency, "web", request.Interval))
 	var intentId uuid.UUID
 	err = databases.RunInMoneyTransaction(ctx, billing.Container.Resources.Database, func(ctx context.Context, transaction *sql.Tx) error {
+		if definition.Checkmark == "gold" {
+			if err := lockGoldProfilesInTransaction(ctx, transaction, []string{profile.ProfileId}); err != nil {
+				return err
+			}
+			if err := billing.refuseProfileCoveredByCombinedGoldInTransaction(ctx, billing.Container.Client(transaction), profile.ProfileId); err != nil {
+				return err
+			}
+		}
 		if err := billing.bindOfferClaimToCheckoutInTransaction(ctx, transaction, offer, subscriptionId, profile.ProfileId); err != nil {
 			return err
 		}

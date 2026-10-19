@@ -6,6 +6,7 @@ import (
 	"zudomart/modules/subscriptions/src/constants"
 	"zudomart/modules/subscriptions/src/generated/ent"
 	"zudomart/modules/subscriptions/src/generated/ent/subscription"
+	"zudomart/modules/subscriptions/src/generated/ent/subscriptioncoveredprofile"
 	"zudomart/modules/subscriptions/src/loaders"
 )
 
@@ -61,7 +62,18 @@ func (billing Billing) ReadEntitlements(ctx context.Context, userId string) (Ent
 		case constants.PlanBlack:
 			result.Black = append(result.Black, entitlement)
 		}
-		if definition.Checkmark == "gold" {
+		switch {
+		case row.PlanCode == constants.PlanGoldCombined:
+			covered, err := billing.Container.Client(billing.Container.Resources.Database).SubscriptionCoveredProfile.Query().
+				Where(subscriptioncoveredprofile.SubscriptionID(row.ID.String()), subscriptioncoveredprofile.StatusIn(grantedCoverageStatuses...)).All(ctx)
+			if err != nil {
+				return Entitlements{}, err
+			}
+			for _, profile := range covered {
+				entitlement.ProfileId = profile.ProfileID
+				result.Gold = append(result.Gold, entitlement)
+			}
+		case definition.Checkmark == "gold":
 			result.Gold = append(result.Gold, entitlement)
 		}
 		if definition.SellerPlan != "" && rank[definition.SellerPlan] > rank[result.SellerPlan] {

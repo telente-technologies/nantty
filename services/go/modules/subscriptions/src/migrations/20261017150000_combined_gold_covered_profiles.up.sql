@@ -1,0 +1,6 @@
+-- create "subscription_covered_profiles" table
+CREATE TABLE "subscription_covered_profiles" ("id" uuid NOT NULL, "created_at" timestamptz NOT NULL, "subscription_id" character varying NOT NULL, "owner_user_id" character varying NOT NULL, "profile_id" character varying NOT NULL, "status" character varying NOT NULL DEFAULT 'pending', "activates_with_period_id" character varying NOT NULL DEFAULT '', "share_minor" bigint NOT NULL DEFAULT 0, "share_payment_reference" character varying NOT NULL DEFAULT '', "refund_state" character varying NOT NULL DEFAULT '', "activated_at" timestamptz NULL, "ended_at" timestamptz NULL, "updated_at" timestamptz NOT NULL, PRIMARY KEY ("id"));
+-- create index "subscription_covered_profiles_live_per_profile" to table: "subscription_covered_profiles"
+CREATE UNIQUE INDEX "subscription_covered_profiles_live_per_profile" ON "subscription_covered_profiles" ("profile_id") WHERE ((status)::text = ANY ((ARRAY['pending'::character varying, 'active'::character varying, 'removing'::character varying])::text[]));
+-- create index "subscriptioncoveredprofile_subscription_id_status" to table: "subscription_covered_profiles"
+CREATE INDEX "subscriptioncoveredprofile_subscription_id_status" ON "subscription_covered_profiles" ("subscription_id", "status");
