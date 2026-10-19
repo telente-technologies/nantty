@@ -1,6 +1,7 @@
 export const socialEventTypes = {
   followCreated: "follow.created",
   followRequestCreated: "followRequest.created",
+  followRequestAccepted: "followRequest.accepted",
   followRejected: "follow.rejected",
   followRemoved: "follow.removed",
   userBlocked: "block.created",

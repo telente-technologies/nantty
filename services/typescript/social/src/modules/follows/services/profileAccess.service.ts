@@ -8,10 +8,12 @@ export async function assertViewerMaySeeConnections(context: HandlerContext, vie
   const db = context.database.client;
   const owner = (await context.directory.findUserSummaries([ownerId])).get(ownerId);
   if (owner === undefined) throw notFound("USER_NOT_FOUND", "User not found.");
-  const [privateOwners, viewerFollowState, ownerHasBlockedViewer] = await Promise.all([
+  const viewerIsOwner = viewerId === ownerId;
+  const [privateOwners, viewerFollowState, ownerHasBlockedViewer, viewerHasBlockedOwner] = await Promise.all([
     context.directory.findPrivateAccountIds([ownerId]),
-    viewerId === undefined ? undefined : followRepository.find(db, viewerId, ownerId),
-    viewerId === undefined ? false : blockRepository.exists(db, ownerId, viewerId),
+    viewerId === undefined || viewerIsOwner ? undefined : followRepository.find(db, viewerId, ownerId),
+    viewerId === undefined || viewerIsOwner ? false : blockRepository.exists(db, ownerId, viewerId),
+    viewerId === undefined || viewerIsOwner ? false : blockRepository.exists(db, viewerId, ownerId),
   ]);
   const visibility = decideProfileVisibility({
     viewerId,
@@ -19,6 +21,7 @@ export async function assertViewerMaySeeConnections(context: HandlerContext, vie
     ownerIsPrivate: privateOwners.has(ownerId),
     viewerIsAcceptedFollower: viewerFollowState?.state === "accepted",
     ownerHasBlockedViewer,
+    viewerHasBlockedOwner,
   });
   if (visibility === "hidden") throw notFound("USER_NOT_FOUND", "User not found.");
   if (visibility === "private") throw forbidden("ACCOUNT_PRIVATE", "This account is private");

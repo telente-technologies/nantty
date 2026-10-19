@@ -18,7 +18,7 @@ export function createExploreController(route: RouteFactory, context: HandlerCon
     headlines: route({ authentication: "optional", query: headlinesQuerySchema }, async ({ principal, query }) =>
       computeHeadlines(context, { country: await resolveViewerCountry(context, principal?.accountId, query.country), category: query.category ?? null, limit: query.limit ?? 6 })),
     whoToFollow: route({ authentication: "optional", query: whoToFollowQuerySchema }, async ({ principal, query }) => ({
-      data: await suggestAccountsToFollow(context, { viewerId: principal?.accountId, country: await resolveViewerCountry(context, principal?.accountId, query.country), limit: query.limit ?? 5 }),
+      data: await suggestAccountsToFollow(context, { viewerId: principal?.accountId, country: await resolveViewerCountry(context, principal?.accountId, query.country), limit: query.limit ?? 5, includePrivateAccounts: query.includePrivate === "true" }),
       nextCursor: null,
     })),
     postsForYou: route({ authentication: "optional", query: postsForYouQuerySchema }, async ({ principal, query }) => {

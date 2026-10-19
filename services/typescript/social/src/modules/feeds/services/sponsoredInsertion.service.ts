@@ -22,6 +22,7 @@ export function toSponsoredPlacement(ad: DecidedAd): SponsoredPlacementView {
     ...(ad.clickLinks === null ? {} : { clickLinks: ad.clickLinks }),
     ...(creative.cards === undefined ? {} : { cards: creative.cards }),
     ...(creative.app === undefined ? {} : { app: creative.app }),
+    ...(creative.promoted === undefined ? {} : { promoted: creative.promoted }),
   };
 }
 

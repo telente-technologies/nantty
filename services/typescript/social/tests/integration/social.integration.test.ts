@@ -46,4 +46,22 @@ describe.skipIf(!enabled)("social integration (needs Postgres with the social sc
     expect(pending).toBeGreaterThanOrEqual(2);
     await database.disconnect();
   });
+
+  it("keeps a double-tapped request and a double-tapped Confirm to one row and one event each", async () => {
+    const database = createSocialDatabase(process.env["DATABASE_URL"] as string);
+    const [follower, owner] = [randomUUID(), randomUUID()];
+    const summary = (id: string): UserSummary => ({ id, name: id, username: id.slice(0, 8), avatarUrl: null, verified: false, isCreator: false });
+    const context = { database, directory: directoryWithPrivateAccount([summary(follower), summary(owner)], owner), clock: systemClock, premium: noPremiumEntitlements, ranker: deterministicFeedRanker };
+    const follow = createFollowUserHandler(context);
+    const results = await Promise.all([follow({ followerId: follower, targetId: owner }), follow({ followerId: follower, targetId: owner }), follow({ followerId: follower, targetId: owner })]);
+    expect(results.map((result) => result.state)).toEqual(["requested", "requested", "requested"]);
+    const requestId = (await database.client.follow.findUniqueOrThrow({ where: { followerId_followeeId: { followerId: follower, followeeId: owner } } })).id;
+    const respond = createRespondToFollowRequestHandler(context);
+    await Promise.all([respond({ followeeId: owner, requestId, decision: "accept" }), respond({ followeeId: owner, requestId, decision: "accept" })]);
+    const events = await database.client.outboxEvent.findMany({ where: { subject: requestId }, select: { eventType: true } });
+    expect(events.map((event) => event.eventType).sort()).toEqual(["follow.created", "followRequest.accepted", "followRequest.created"]);
+    await database.client.follow.deleteMany({ where: { id: requestId } });
+    await database.client.outboxEvent.deleteMany({ where: { subject: requestId } });
+    await database.disconnect();
+  });
 });

@@ -5,6 +5,7 @@ import { createApplyContentVisibilityHandler } from "../modules/contentEvents/co
 import { createApplyCopyrightAudioRemedyHandler } from "../modules/contentEvents/commands/applyCopyrightAudioRemedy/applyCopyrightAudioRemedy.handler.js";
 import { createApplySensitiveLabelsHandler } from "../modules/contentEvents/commands/applySensitiveLabels/applySensitiveLabels.handler.js";
 import { createApplyProcessedMediaHandler } from "../modules/contentEvents/commands/applyProcessedMedia/applyProcessedMedia.handler.js";
+import { createAcceptPendingFollowRequestsHandler } from "../modules/follows/commands/acceptPendingFollowRequests/acceptPendingFollowRequests.handler.js";
 import { createBlockUserHandler } from "../modules/blocks/commands/blockUser/blockUser.handler.js";
 import { createRevokeStoreInboxAccessHandler } from "../modules/storeInbox/commands/revokeStoreInboxAccess/revokeStoreInboxAccess.handler.js";
 import { createContentEventRouter } from "../modules/contentEvents/services/contentEventRouter.service.js";
@@ -18,6 +19,7 @@ export function startContentEventConsumer(context: HandlerContext, factory: Mess
     applyCopyrightAudioRemedy: createApplyCopyrightAudioRemedyHandler(context),
     blockReportedUser: blockForChatReport(createBlockUserHandler(context)),
     revokeStoreInboxAccess: createRevokeStoreInboxAccessHandler(context),
+    acceptPendingFollowRequests: createAcceptPendingFollowRequestsHandler(context),
   });
   const consumer = factory.createConsumer("socialContentEvents", queue, route);
   consumer.start();

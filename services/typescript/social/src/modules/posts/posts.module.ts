@@ -21,6 +21,7 @@ import { createGetPostHandler } from "./queries/getPost/getPost.handler.js";
 import { createListStoryTrayHandler } from "./queries/listStoryTray/listStoryTray.handler.js";
 import { createListUserPostsHandler } from "./queries/listUserPosts/listUserPosts.handler.js";
 import { createListUserStoriesHandler } from "./queries/listUserStories/listUserStories.handler.js";
+import { createGetStoryRingStatusHandler } from "./queries/getStoryRingStatus/getStoryRingStatus.handler.js";
 import { createListStoryViewersHandler } from "./queries/listStoryViewers/listStoryViewers.handler.js";
 import { registerPostsRoutes } from "./routes/posts.routes.js";
 import { createUpdatePostSensitivityHandler } from "./commands/updatePostSensitivity/updatePostSensitivity.handler.js";
@@ -63,6 +64,7 @@ export function mountPostsModule(router: HttpRouter, route: RouteFactory, contex
     listUserPosts: createListUserPostsHandler(context),
     listStoryTray: createListStoryTrayHandler(context),
     listUserStories: createListUserStoriesHandler(context),
+    getStoryRingStatus: createGetStoryRingStatusHandler(context),
     listStoryViewers: createListStoryViewersHandler(context),
   }));
   registerPostAudienceRoutes(router, createPostAudienceController(route, {

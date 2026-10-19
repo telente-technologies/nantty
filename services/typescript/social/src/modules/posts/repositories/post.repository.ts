@@ -94,6 +94,11 @@ export const postRepository = {
   storyAuthorsWithActiveStories: (db: Db, authorIds: readonly string[], now: Date) =>
     db.post.findMany({ where: { authorId: { in: [...authorIds] }, kind: "story", ...shownToViewers, expiresAt: { gt: now } }, select: { id: true, authorId: true }, orderBy: { id: "desc" } }),
 
+  activeStoryIdsByAuthor: async (db: Db, authorId: string, audiences: readonly ("everyone" | "followers")[], now: Date): Promise<string[]> => {
+    const rows = await db.post.findMany({ where: { authorId, kind: "story", ...shownToViewers, audience: { in: [...audiences] }, expiresAt: { gt: now } }, select: { id: true }, orderBy: { id: "asc" }, take: 100 });
+    return rows.map((row) => row.id);
+  },
+
   markStoryViewed: (db: Db, storyId: string, viewerId: string) => db.storyView.createMany({ data: [{ storyId, viewerId }], skipDuplicates: true }),
 
   viewedStoryIds: async (db: Db, viewerId: string, storyIds: readonly string[]) => {

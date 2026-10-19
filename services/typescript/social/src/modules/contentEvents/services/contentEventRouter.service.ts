@@ -44,6 +44,7 @@ export interface ContentEventHandlers {
   readonly applyCopyrightAudioRemedy?: Handler<ApplyCopyrightAudioRemedyCommand, unknown>;
   readonly blockReportedUser?: Handler<{ readonly reporterId: string; readonly reportedUserId: string }, unknown>;
   readonly revokeStoreInboxAccess?: Handler<{ readonly storeId: string; readonly accountId: string; readonly occurredAt: Date }, unknown>;
+  readonly acceptPendingFollowRequests?: Handler<{ readonly accountId: string }, unknown>;
 }
 
 const storeTeamChangeEvents = new Set(["store.staff_removed", "store.staff_updated"]);
@@ -87,6 +88,12 @@ export function createContentEventRouter(handlers: ContentEventHandlers) {
       const accountId = optionalString(data["accountId"]);
       if (storeId === undefined || accountId === undefined) throw new PoisonEventError(`${envelope.type} has no store or account`);
       await handlers.revokeStoreInboxAccess?.({ storeId, accountId, occurredAt });
+      return;
+    }
+    if (envelope.type === "profile.visibilityChanged") {
+      const accountId = optionalString(data["accountId"]);
+      if (accountId === undefined || typeof data["isPrivate"] !== "boolean") throw new PoisonEventError("profile.visibilityChanged data is malformed");
+      if (data["isPrivate"] === false) await handlers.acceptPendingFollowRequests?.({ accountId });
       return;
     }
     if (envelope.type === "chatReport.received") {

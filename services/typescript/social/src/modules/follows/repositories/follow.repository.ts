@@ -6,12 +6,11 @@ export const followRepository = {
 
   findById: (db: Db, id: string) => db.follow.findUnique({ where: { id } }),
 
-  upsertState: (db: Db, followerId: string, followeeId: string, state: FollowState) =>
-    db.follow.upsert({
-      where: { followerId_followeeId: { followerId, followeeId } },
-      create: { followerId, followeeId, state, ...(state === "accepted" ? { respondedAt: new Date() } : {}) },
-      update: { state, createdAt: new Date(), respondedAt: state === "accepted" ? new Date() : null, postNotifications: "off" },
-    }),
+  claimFollowState: async (db: Db, existingId: string | undefined, followerId: string, followeeId: string, state: "requested" | "accepted", now: Date): Promise<boolean> => {
+    const respondedAt = state === "accepted" ? now : null;
+    if (existingId === undefined) return (await db.follow.createMany({ data: [{ followerId, followeeId, state, respondedAt }], skipDuplicates: true })).count === 1;
+    return (await db.follow.updateMany({ where: { id: existingId, state: "rejected" }, data: { state, createdAt: now, respondedAt, postNotifications: "off" } })).count === 1;
+  },
 
   setPostNotifications: (db: Db, id: string, level: PostNotificationLevel) => db.follow.update({ where: { id }, data: { postNotifications: level } }),
 
@@ -24,6 +23,12 @@ export const followRepository = {
     }),
 
   setState: (db: Db, id: string, state: FollowState, respondedAt: Date) => db.follow.update({ where: { id }, data: { state, respondedAt } }),
+
+  settlePendingRequest: async (db: Db, id: string, state: "accepted" | "rejected", respondedAt: Date) =>
+    (await db.follow.updateMany({ where: { id, state: "requested" }, data: { state, respondedAt } })).count === 1,
+
+  pagePendingRequestsOf: (db: Db, followeeId: string, limit: number) =>
+    db.follow.findMany({ where: { followeeId, state: "requested" }, orderBy: { id: "asc" }, take: limit, select: { id: true, followerId: true } }),
 
   delete: (db: Db, followerId: string, followeeId: string) => db.follow.deleteMany({ where: { followerId, followeeId } }),
 
@@ -42,6 +47,11 @@ export const followRepository = {
 
   allFollowedAccountIds: async (db: Db, followerId: string, limit = 5000) => {
     const rows = await db.follow.findMany({ where: { followerId, state: "accepted" }, select: { followeeId: true }, orderBy: { id: "desc" }, take: limit });
+    return rows.map((row) => row.followeeId);
+  },
+
+  allPendingFollowRequestAccountIds: async (db: Db, followerId: string, limit = 2000) => {
+    const rows = await db.follow.findMany({ where: { followerId, state: "requested" }, select: { followeeId: true }, orderBy: { id: "desc" }, take: limit });
     return rows.map((row) => row.followeeId);
   },
 

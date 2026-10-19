@@ -81,8 +81,10 @@ describe("set and read post notifications", () => {
 
   it("resets the level to off when a follow row is re-created, so a refollow starts at Off", async () => {
     const { context } = fakeDatabase([]);
-    const upsert = (await followRepository.upsertState(context.database.client, "fan", "star", "accepted")) as unknown as { update: { postNotifications: string } };
-    expect(upsert.update.postNotifications).toBe("off");
+    let reopened: { data: { postNotifications?: string } } | undefined;
+    (context.database.client as unknown as { follow: Record<string, unknown> }).follow["updateMany"] = async (args: { data: { postNotifications?: string } }) => { reopened = args; return { count: 1 }; };
+    expect(await followRepository.claimFollowState(context.database.client, "f-old", "fan", "star", "accepted", new Date())).toBe(true);
+    expect(reopened?.data.postNotifications).toBe("off");
   });
 });
 

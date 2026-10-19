@@ -6,13 +6,16 @@ import type { UnfollowUserCommand } from "./unfollowUser.command.js";
 
 export function createUnfollowUserHandler(context: HandlerContext): Handler<UnfollowUserCommand, void> {
   return async ({ followerId, targetId }) => {
-    const existing = await followRepository.find(context.database.client, followerId, targetId);
-    if (existing === null) return;
+    const db = context.database.client;
+    const existing = await followRepository.find(db, followerId, targetId);
+    if (existing === null || existing.state === "rejected") return;
+    if (existing.state === "requested") {
+      const withdrawn = await followRepository.settlePendingRequest(db, existing.id, "rejected", context.clock.now());
+      if (withdrawn || (await followRepository.find(db, followerId, targetId))?.state !== "accepted") return;
+    }
     await context.database.transaction(async (transaction) => {
       await followRepository.delete(transaction, followerId, targetId);
-      if (existing.state === "accepted") {
-        await appendDomainEventsToOutbox(transaction, [{ eventType: socialEventTypes.followRemoved, subject: existing.id, occurredAt: context.clock.now(), data: { followId: existing.id, followerId, followeeId: targetId } }]);
-      }
+      await appendDomainEventsToOutbox(transaction, [{ eventType: socialEventTypes.followRemoved, subject: existing.id, occurredAt: context.clock.now(), data: { followId: existing.id, followerId, followeeId: targetId } }]);
     });
   };
 }

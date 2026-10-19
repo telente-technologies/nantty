@@ -22,6 +22,8 @@ import type { StoryTrayItem } from "../queries/listStoryTray/listStoryTray.handl
 import type { ListStoryTrayQuery } from "../queries/listStoryTray/listStoryTray.query.js";
 import type { ListUserPostsQuery } from "../queries/listUserPosts/listUserPosts.query.js";
 import type { ListUserStoriesQuery } from "../queries/listUserStories/listUserStories.query.js";
+import type { GetStoryRingStatusQuery } from "../queries/getStoryRingStatus/getStoryRingStatus.query.js";
+import type { StoryRingStatus } from "../services/storyRingStatus.service.js";
 import { createPostBodySchema, postIdParamsSchema, publishStoryBodySchema, repostBodySchema, shareBodySchema, storyIdParamsSchema, storyViewersQuerySchema, userIdParamsSchema, userPostsQuerySchema } from "../validators/posts.validator.js";
 
 import type { RecordPostImpressionCommand } from "../commands/recordPostImpression/recordPostImpression.command.js";
@@ -49,6 +51,7 @@ export interface PostsHandlers {
   readonly listUserPosts: Handler<ListUserPostsQuery, Page<PostView>>;
   readonly listStoryTray: Handler<ListStoryTrayQuery, StoryTrayItem[]>;
   readonly listUserStories: Handler<ListUserStoriesQuery, StoryView[]>;
+  readonly getStoryRingStatus: Handler<GetStoryRingStatusQuery, StoryRingStatus>;
   readonly listStoryViewers: Handler<ListStoryViewersQuery, StoryViewersPage>;
 }
 
@@ -103,6 +106,8 @@ export function createPostsController(route: RouteFactory, handlers: PostsHandle
     listStoryTray: route({ authentication: "required" }, ({ principal }) => handlers.listStoryTray({ viewerId: principal.accountId })),
     listUserStories: route({ authentication: "optional", params: userIdParamsSchema }, ({ principal, params }) =>
       handlers.listUserStories({ viewerId: principal?.accountId, ownerId: resolveAccountParam(params.userId, principal?.accountId) })),
+    getStoryRingStatus: route({ authentication: "optional", params: userIdParamsSchema }, ({ principal, params }) =>
+      handlers.getStoryRingStatus({ viewerId: principal?.accountId, ownerId: resolveAccountParam(params.userId, principal?.accountId) })),
     listStoryViewers: route({ authentication: "required", params: storyIdParamsSchema, query: storyViewersQuerySchema }, ({ principal, params, query }) =>
       handlers.listStoryViewers({ viewerId: principal.accountId, storyId: params.storyId, cursor: query.cursor, limit: clampPageSize(query.limit, 50) })),
   };

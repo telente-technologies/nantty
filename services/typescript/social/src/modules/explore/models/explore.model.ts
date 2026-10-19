@@ -47,6 +47,7 @@ export interface FollowSuggestion {
   readonly reason: { readonly code: "mutuals" | "interests" | "popular_in_region" | "popular"; readonly label: string };
   readonly isOfficial: boolean;
   readonly checkmarkTier: AuthorRankingTier;
+  readonly isPrivate: boolean;
 }
 
 export interface ExploreCategory {

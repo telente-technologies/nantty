@@ -92,10 +92,17 @@ export function memoryTable(rows: Row[], withMedia = false, defaults: () => Row 
     },
     createMany: async ({ data, skipDuplicates }: { data: Row[]; skipDuplicates?: boolean }) => {
       const fresh = skipDuplicates === true ? data.filter((candidate) => !rows.some((row) => Object.entries(candidate).every(([key, value]) => row[key] === value))) : data;
-      rows.push(...fresh);
+      rows.push(...fresh.map((row) => ({ ...defaults(), id: randomUUID(), createdAt: new Date(), ...row })));
       return { count: fresh.length };
     },
     update: async ({ where, data }: { where: Where; data: Row }) => shape(applyUpdate(rows.find((row) => matches(row, where)) as Row, data)),
+    upsert: async ({ where, create, update }: { where: Where; create: Row; update: Row }) => {
+      const existing = rows.find((row) => matches(row, where));
+      if (existing !== undefined) return shape(applyUpdate(existing, update));
+      const row = { ...defaults(), id: randomUUID(), createdAt: new Date(), ...create };
+      rows.push(row);
+      return shape(row);
+    },
     updateMany: async ({ where, data }: { where: Where; data: Row }) => { const hits = rows.filter((row) => matches(row, where)); for (const row of hits) applyUpdate(row, data); return { count: hits.length }; },
     deleteMany: async ({ where }: { where?: Where } = {}) => { const before = rows.length; for (let index = rows.length - 1; index >= 0; index -= 1) if (matches(rows[index] as Row, where)) rows.splice(index, 1); return { count: before - rows.length }; },
   };

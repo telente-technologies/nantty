@@ -7,5 +7,5 @@ const categoryWithoutTabs = schema.enum(["news", "sports", "entertainment", "mus
 
 export const trendsQuerySchema = schema.object({ country, category: categoryWithoutTabs, limit: schema.coerce.number().int().min(1).max(30).optional() });
 export const headlinesQuerySchema = schema.object({ country, category: categoryWithoutTabs, limit: schema.coerce.number().int().min(1).max(12).optional() });
-export const whoToFollowQuerySchema = schema.object({ country, limit: schema.coerce.number().int().min(1).max(30).optional() });
+export const whoToFollowQuerySchema = schema.object({ country, limit: schema.coerce.number().int().min(1).max(30).optional(), includePrivate: schema.enum(["true", "false"]).optional() });
 export const postsForYouQuerySchema = schema.object({ country, category: schema.enum([...trendCategories]).optional(), cursor: schema.string().max(200).optional(), limit: schema.coerce.number().int().min(1).max(30).optional() });

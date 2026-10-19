@@ -22,4 +22,5 @@ export function registerPostsRoutes(router: HttpRouter, controller: ReturnType<t
   router.post("/api/v1/stories/:storyId/seen", controller.markStorySeen);
   router.get("/api/v1/stories/:storyId/viewers", controller.listStoryViewers);
   router.get("/api/v1/users/:userId/stories", controller.listUserStories);
+  router.get("/api/v1/users/:userId/story-status", controller.getStoryRingStatus);
 }

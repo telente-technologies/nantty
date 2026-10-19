@@ -1,3 +1,14 @@
+export interface PromotedEntityView {
+  readonly kind: "store" | "profile";
+  readonly id: string;
+  readonly name: string;
+  readonly handle: string;
+  readonly avatarUrl: string | null;
+  readonly verified: boolean;
+  readonly checkmarkColor?: string;
+  readonly private: boolean;
+}
+
 export interface SponsoredPlacementView {
   readonly campaignId: string;
   readonly label: "Sponsored" | "Promoted" | "Boosted";
@@ -11,6 +22,7 @@ export interface SponsoredPlacementView {
   readonly mediaClickable?: boolean;
   readonly cards?: readonly unknown[];
   readonly app?: unknown;
+  readonly promoted?: PromotedEntityView;
 }
 
 export interface DecidedAdCreative {
@@ -25,6 +37,7 @@ export interface DecidedAdCreative {
   readonly callToAction: string;
   readonly destination: { readonly type: string; readonly targetId: string | null; readonly url: string | null };
   readonly identity: { readonly name: string; readonly handle: string; readonly avatarUrl: string | null; readonly verifiedBusiness: boolean };
+  readonly promoted?: PromotedEntityView;
 }
 
 export interface DecidedAd {

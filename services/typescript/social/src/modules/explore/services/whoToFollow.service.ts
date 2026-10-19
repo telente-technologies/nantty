@@ -14,7 +14,7 @@ const reasonLabels: Readonly<Record<ReasonCode, string>> = {
 };
 const reasonWeights: Readonly<Record<ReasonCode, number>> = { mutuals: 3, interests: 2, popular_in_region: 1.5, popular: 1 };
 
-export async function suggestAccountsToFollow(context: HandlerContext, input: { readonly viewerId: string | undefined; readonly country: string | null; readonly limit: number }): Promise<FollowSuggestion[]> {
+export async function suggestAccountsToFollow(context: HandlerContext, input: { readonly viewerId: string | undefined; readonly country: string | null; readonly limit: number; readonly includePrivateAccounts?: boolean }): Promise<FollowSuggestion[]> {
   const db = context.database.client;
   const now = context.clock.now();
   const scores = new Map<string, { score: number; reason: ReasonCode }>();
@@ -28,6 +28,7 @@ export async function suggestAccountsToFollow(context: HandlerContext, input: { 
   const excluded = new Set<string>(followed);
   if (input.viewerId !== undefined) {
     excluded.add(input.viewerId);
+    for (const id of await followRepository.allPendingFollowRequestAccountIds(db, input.viewerId)) excluded.add(id);
     for (const id of await blockRepository.everyoneBlockedByOrBlocking(db, input.viewerId)) excluded.add(id);
     for (const row of await exploreRepository.followeesOfAccounts(db, followed.slice(0, 200), 4000)) add(row.followeeId, "mutuals");
     for (const authorId of await exploreRepository.recentlyLikedAuthors(db, input.viewerId, new Date(now.getTime() - 30 * 86_400_000), 300)) add(authorId, "interests", 0.5);
@@ -47,7 +48,7 @@ export async function suggestAccountsToFollow(context: HandlerContext, input: { 
     context.authorRanking?.findSuspendedAccountIds(candidateIds) ?? Promise.resolve(new Set<string>()),
   ]);
   const ordered = candidateIds
-    .filter((id) => !privateAccounts.has(id) && !suspended.has(id))
+    .filter((id) => !suspended.has(id) && (input.includePrivateAccounts === true || !privateAccounts.has(id)))
     .sort((left, right) => (scores.get(right)?.score ?? 0) - (scores.get(left)?.score ?? 0) || left.localeCompare(right))
     .slice(0, input.limit * 2);
   const summaries = await context.directory.findUserSummaries(ordered);
@@ -58,6 +59,6 @@ export async function suggestAccountsToFollow(context: HandlerContext, input: { 
     const entry = scores.get(accountId);
     if (user === undefined || entry === undefined) return [];
     const profile = profiles.get(accountId) ?? extraProfiles.get(accountId);
-    return [{ user, reason: { code: entry.reason, label: reasonLabels[entry.reason] }, isOfficial: profile?.isOfficial ?? false, checkmarkTier: profile?.tier ?? "none" }];
+    return [{ user, reason: { code: entry.reason, label: reasonLabels[entry.reason] }, isOfficial: profile?.isOfficial ?? false, checkmarkTier: profile?.tier ?? "none", isPrivate: privateAccounts.has(accountId) }];
   }).slice(0, input.limit);
 }

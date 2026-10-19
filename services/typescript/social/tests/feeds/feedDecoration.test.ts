@@ -56,6 +56,12 @@ describe("sponsored posts", () => {
     expect(view).toMatchObject({ id: "ad-ad1", text: "Buy", sponsored: { campaignId: "ad1" }, viewerCanReply: false });
     expect(view.media[0]?.url).toBe("https://cdn/a.jpg");
   });
+  it("carries the promoted store or profile card so apps can render it", () => {
+    const promoted = { kind: "store" as const, id: "store-1", name: "Ada Fabrics", handle: "adafabrics", avatarUrl: null, verified: true, checkmarkColor: "gold", private: false };
+    const storeAd: DecidedAd = { ...ad, label: "Boosted", creative: { ...ad.creative, source: { type: "store", id: "store-1" }, media: [], destination: { type: "store", targetId: "store-1", url: null }, promoted } };
+    expect(toSponsoredPlacement(storeAd)).toMatchObject({ label: "Boosted", destination: { type: "store", targetId: "store-1" }, promoted });
+    expect(toSponsoredPlacement(ad)).not.toHaveProperty("promoted");
+  });
   it("keeps boosted posts labelled Boosted, distinct from ads", () => {
     expect(toSponsoredPlacement({ ...ad, label: "Boosted" }).label).toBe("Boosted");
     expect(toSponsoredPlacement({ ...ad, label: "Ad" }).label).toBe("Sponsored");
