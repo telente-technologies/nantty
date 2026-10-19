@@ -154,6 +154,35 @@ describe("money endpoints match the Go handlers", () => {
   });
 });
 
+describe("undelivered orders under staff review", () => {
+  const reviewRow = c.object({
+    escrowId: c.string(), orderId: c.string(), orderReference: c.string(), buyerUserId: c.string(), sellerUserId: c.string(), storeId: c.string(), heldAmount: money,
+    heldSince: c.string(), reviewSince: c.string(), shippedAt: c.nullable(c.string()), courierName: c.string(), trackingNumber: c.string(),
+  });
+
+  it("lists the queue and lets staff release to the seller or refund the buyer with a reason", async () => {
+    const list = await call("GET", "/admin/escrows/undelivered-review");
+    assert.deepEqual(validateAgainstContract(c.page(reviewRow), list.body), []);
+    const [first, second] = list.body.data as { orderId: string }[];
+    if (!first || !second) throw new Error("expected two orders under review");
+    assert.equal((await call("POST", `/admin/orders/${first.orderId}/escrow/release`, { body: { reason: "" }, idempotencyKey: "review-0001" })).status, 400);
+    assert.equal((await call("POST", `/admin/orders/${first.orderId}/escrow/release`, { body: { reason: "Seller sent proof of delivery" } })).body.code, "IDEMPOTENCY_KEY_REQUIRED");
+    const released = await call("POST", `/admin/orders/${first.orderId}/escrow/release`, { body: { reason: "Seller sent proof of delivery" }, idempotencyKey: "review-0002" });
+    assert.equal(released.body.status, "released");
+    const refunded = await call("POST", `/admin/orders/${second.orderId}/escrow/refund`, { body: { reason: "Seller never shipped" }, idempotencyKey: "review-0003" });
+    assert.equal(refunded.body.status, "refunded");
+    const after = (await call("GET", "/admin/escrows/undelivered-review")).body.data as { orderId: string }[];
+    assert.ok(after.every((row) => row.orderId !== first.orderId && row.orderId !== second.orderId));
+    assert.equal((await call("POST", `/admin/orders/${first.orderId}/escrow/release`, { body: { reason: "Again" }, idempotencyKey: "review-0004" })).status, 409);
+  });
+
+  it("needs disputes:resolve and a single-use step-up", () => {
+    assert.deepEqual(findApiAccessRequirement("/admin/escrows/undelivered-review"), { kind: "anyOf", permissions: ["disputes:resolve"] });
+    assert.equal(doesApiCallRequireStepUp("POST", "/admin/orders/abc/escrow/release"), true);
+    assert.equal(doesApiCallRequireStepUp("POST", "/admin/orders/abc/escrow/refund"), true);
+  });
+});
+
 describe("BFF access rules for money paths", () => {
   it("guards the new paths and asks for step-up where the Go routes do", () => {
     assert.deepEqual(findApiAccessRequirement("/admin/withdrawals/abc"), { kind: "anyOf", permissions: ["payouts:approve"] });

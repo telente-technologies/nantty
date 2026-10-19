@@ -19,5 +19,15 @@ export function buildInitialTrialRules(): TrialRules {
 }
 
 export function buildInitialCheckmarkPricing(): CheckmarkPricingRules {
-  return { bundleDiscountPercent: 15, bundleMaximumBusinesses: 3, blackGraceDays: 14 };
+  return {
+    bundleDiscountPercent: 15,
+    bundleMaximumBusinesses: 3,
+    blackGraceDays: 14,
+    multiBusinessSingleProfilePercent: 5,
+    multiBusinessBasePercent: 10,
+    multiBusinessStepPercent: 2,
+    multiBusinessMaximumProfiles: 5,
+    multiBusinessYearlyExtraPercent: 5,
+    multiBusinessYearlyMode: "replace",
+  };
 }

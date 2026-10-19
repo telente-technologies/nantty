@@ -36,6 +36,7 @@ const configWriters: AdminPermission[] = ["config:plans", "config:revenue", "con
 const priceWriters: AdminPermission[] = ["config:plans", "config:revenue"];
 const priceReaders: AdminPermission[] = ["config:read", ...priceWriters];
 const adReaders: AdminPermission[] = ["ads:review", "advertisers:manage"];
+const adCreditReaders: AdminPermission[] = ["advertisers:manage", "ledger:read"];
 const chatReportReaders: AdminPermission[] = ["chat-reports:review", "chat-reports:legal"];
 const ticketWorkers: AdminPermission[] = ["support:tickets", "support:assign"];
 const helpReaders: AdminPermission[] = ["support:helpContent", "support:tickets", "support:assign"];
@@ -176,6 +177,11 @@ const trustRoutes: ApiRouteDefinition[] = [
   read("/admin/security/cases", ["security:cases"]),
   read("/admin/security/cases/:id", ["security:cases"]),
   write("POST", "/admin/security/cases/:id/decide", ["security:cases"], sensitive),
+  read("/admin/ads/credits", adCreditReaders),
+  write("POST", "/admin/ads/credits", ["advertisers:manage"], moneyAction),
+  write("POST", "/admin/ads/credits/:id/revoke", ["advertisers:manage"], moneyAction),
+  read("/admin/ads/cashback", adCreditReaders),
+  write("PUT", "/admin/ads/cashback/:id", ["advertisers:manage"], moneyAction),
   read("/admin/ads", adReaders),
   read("/admin/ads/:id", adReaders),
   write("POST", "/admin/ads/:id/approve", ["ads:review"]),
@@ -194,6 +200,8 @@ const moneyRoutes: ApiRouteDefinition[] = [
   read("/admin/disputes", ["disputes:resolve"]),
   read("/admin/disputes/:id", ["disputes:resolve"]),
   write("POST", "/admin/disputes/:id/resolve", ["disputes:resolve"], moneyAction),
+  read("/admin/escrows/undelivered-review", ["disputes:resolve"]),
+  write("POST", "/admin/orders/:id/escrow/{release|refund}", ["disputes:resolve"], moneyAction),
   read("/admin/refunds", ["refunds:issue"]),
   write("POST", "/admin/refunds", ["refunds:issue"], sensitive),
   read("/admin/withdrawals", ["payouts:approve"]),

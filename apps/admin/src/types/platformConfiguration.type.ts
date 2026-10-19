@@ -122,7 +122,15 @@ export interface CheckmarkPricingRules {
   readonly bundleDiscountPercent: number;
   readonly bundleMaximumBusinesses: number;
   readonly blackGraceDays: number;
+  readonly multiBusinessSingleProfilePercent?: number;
+  readonly multiBusinessBasePercent?: number;
+  readonly multiBusinessStepPercent?: number;
+  readonly multiBusinessMaximumProfiles?: number;
+  readonly multiBusinessYearlyExtraPercent?: number;
+  readonly multiBusinessYearlyMode?: MultiBusinessYearlyMode;
 }
+
+export type MultiBusinessYearlyMode = "replace" | "add";
 
 export interface ConfigurationDocumentContentByKey {
   readonly plans: PlansConfiguration;

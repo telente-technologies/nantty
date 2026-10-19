@@ -57,6 +57,7 @@ export const navigationGroups: readonly NavigationGroup[] = [
       { label: "Trademark claims", href: "/ip-claims", icon: "tag24", requirement: "ip-claims:review", goShortcutKey: "t" },
       { label: "Ads review", href: "/ads/review", icon: "play24", requirement: "ads:review" },
       { label: "Advertisers", href: "/ads/advertisers", icon: "arrowUpRight24", requirement: ["advertisers:manage", "ads:review"] },
+      { label: "Ad credit", href: "/ads/credit", icon: "creditCard24", requirement: ["advertisers:manage", "ledger:read"] },
     ],
   },
   {
@@ -64,6 +65,7 @@ export const navigationGroups: readonly NavigationGroup[] = [
     items: [
       { label: "Orders", href: "/commerce/orders", icon: "shoppingCart24", requirement: ["orders:read", "disputes:resolve", "refunds:issue", "support:tickets"] },
       { label: "Disputes", href: "/commerce/disputes", icon: "chatCircle24", requirement: "disputes:resolve", goShortcutKey: "d" },
+      { label: "Undelivered orders", href: "/commerce/undelivered", icon: "warning20", requirement: "disputes:resolve" },
       { label: "Refunds", href: "/commerce/refunds", icon: "arrowLeft24", requirement: "refunds:issue" },
       { label: "Withdrawals", href: "/commerce/payouts", icon: "creditCard24", requirement: "payouts:approve", goShortcutKey: "p" },
       { label: "Coins", href: "/commerce/coins", icon: "star16", requirement: "coins:review" },

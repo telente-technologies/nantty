@@ -1,7 +1,7 @@
 import { sendAdminApiRequest } from "@/services/adminApiClient.service";
 import type { Money, PagedList } from "@/types/api.type";
 import type { CoinTransactionDetail, CoinTransactionList } from "@/types/coins.type";
-import type { DisputeDetail, DisputeList, DisputeOutcome, OrderDetail, OrderSummary, RefundRecord } from "@/types/commerce.type";
+import type { DisputeDetail, DisputeList, DisputeOutcome, OrderDetail, OrderSummary, RefundRecord, StaffEscrowDecisionResult, UndeliveredReviewRow } from "@/types/commerce.type";
 import type { JournalEntryList, LedgerAccount } from "@/types/ledger.type";
 import type { StaffWithdrawalDetail, StaffWithdrawalList, WithdrawalDecision } from "@/types/withdrawals.type";
 
@@ -93,4 +93,12 @@ export const fetchPayoutDetail = fetchWithdrawalDetail;
 
 export function decidePayout(withdrawalId: string, decision: WithdrawalDecision, reason: string, idempotencyKey: string): Promise<StaffWithdrawalDetail> {
   return reviewWithdrawal(withdrawalId, { decision, reason, idempotencyKey });
+}
+
+export function fetchUndeliveredReview(cursor: string | undefined, signal?: AbortSignal): Promise<PagedList<UndeliveredReviewRow>> {
+  return sendAdminApiRequest("/admin/escrows/undelivered-review", { query: { cursor }, signal });
+}
+
+export function decideUndeliveredEscrow(orderId: string, decision: "release" | "refund", reason: string, idempotencyKey: string): Promise<StaffEscrowDecisionResult> {
+  return sendAdminApiRequest(`/admin/orders/${encodeURIComponent(orderId)}/escrow/${decision}`, { method: "POST", body: { reason }, idempotencyKey });
 }

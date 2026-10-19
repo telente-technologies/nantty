@@ -483,6 +483,17 @@ Staff view: `DisputeSummary & { description, evidenceUrls[], sellerResponse|null
 ### POST /api/v1/admin/disputes/{disputeId}/resolve
 `disputes:resolve`, step-up, `Idempotency-Key`. Body `{ outcome: "REFUND_FULL"|"REFUND_PARTIAL"|"RELEASE_TO_SELLER" (or refund|partial|release), reason (3–2000, alias of note), refundAmount?: Money }`. `refundAmount` is required for `REFUND_PARTIAL` (above zero, below the order total) and refused otherwise. Response: the staff view above.
 
+## Undelivered orders under review (escrow module)
+
+An escrow still not delivered 30 days after payment (`ESCROW_UNDELIVERED_RELEASE_PERIOD`) moves to this queue. It is never released or refunded automatically. A delivery recorded before staff act returns it to the normal 3-day release.
+
+### GET /api/v1/admin/escrows/undelivered-review
+`disputes:resolve`. Query: `cursor`, `limit`. Oldest first. Response `{ data: UndeliveredReviewRow[], nextCursor }`.
+`UndeliveredReviewRow = { escrowId, orderId, orderReference, buyerUserId, sellerUserId, storeId, heldAmount, heldSince, reviewSince, shippedAt|null, courierName, trackingNumber }`.
+
+### POST /api/v1/admin/orders/{orderId}/escrow/release · POST /api/v1/admin/orders/{orderId}/escrow/refund
+`disputes:resolve`, single-use step-up, `Idempotency-Key`. Body `{ reason (3–300) }`. Response: the escrow detail (`status` `released` / `refunded`). Release only works on an order in this queue (`409 ESCROW_NOT_UNDER_REVIEW` otherwise; `ESCROW_FROZEN_BY_DISPUTE` while disputed). Both write a `staffDecision` escrow event with the staff ID and reason.
+
 ## Withdrawals (wallet module)
 
 ### GET /api/v1/admin/withdrawals
@@ -940,7 +951,7 @@ Same versioned endpoints as the other documents (`GET /admin/config`, `PUT /admi
 | `checkmark-suggestions` | `blue { requiresIdVerified, minimumAccountAgeDays 90, minimumRealFollowers 1000, noViolationsInDays 90 }`, `gold { requiresBusinessVerification (CAC/KYB), requiresActiveStoreOrBrandPage, minimumCompletedOrders 20, minimumSuccessRatePercent 90 }` (20 orders AND 90% success). Black is never suggested. |
 | `creator-thresholds` | `autoApprove { minimumAccountAgeDays 30, requiresVerifiedEmail, minimumRealFollowers 1000, minimumOriginalPostsInLast60Days 10, noViolationsInDays 90, maximumFraudScore 30 }`, `manualReview { minimumRealFollowers 500, allowsPastViolation, allowsBorderlineOrAiHeavyContent, maximumRiskScore 60 }`. Below manual review is not eligible. |
 | `trial-rules` | `trialLength "DAYS_7"|"MONTH_1"`, `yearlyDiscountPercent 20` (admin-editable), `minimumAccountAgeDays 7`, `requiresVerifiedEmail`, `onePerPerson/Card/Device`, `maximumRiskScore 50`, `minimumCompletedOrders 0`. |
-| `checkmark-pricing` | `bundleDiscountPercent 15`, `bundleMaximumBusinesses 3`, `goldOnlyMonthlyPrice NGN 3,000`, `blackMonthlyPrice NGN 50,000`, `blackGraceDays 14`. The bundle never stacks with the yearly discount (the bigger wins) and never applies to Black. |
+| `checkmark-pricing` | `bundleDiscountPercent 15`, `bundleMaximumBusinesses 3`, `goldOnlyMonthlyPrice NGN 3,000`, `blackMonthlyPrice NGN 50,000`, `blackGraceDays 14`. The bundle never stacks with the yearly discount (the bigger wins) and never applies to Black. Optional "Gold for all your businesses" (Blue Premium combined Gold, plan `gold_combined`) fields, defaulted server-side when absent: `multiBusinessSingleProfilePercent 5` (0–90, 1 profile), `multiBusinessBasePercent 10` (0–90, 2 profiles), `multiBusinessStepPercent 2` (0–90, added per profile after the second), `multiBusinessMaximumProfiles 5` (1–5), `multiBusinessYearlyExtraPercent 5` (0–90), `multiBusinessYearlyMode "replace"|"add"` (default `replace`: the extra yearly % replaces the normal 20% yearly discount for this plan; `add` applies the normal yearly discount as well). Rejected with `400 VALIDATION_FAILED` when `multiBusinessBasePercent + multiBusinessStepPercent × (multiBusinessMaximumProfiles − 2) > 90`. |
 
 ## Support: live chat and email
 

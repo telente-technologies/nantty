@@ -169,3 +169,25 @@ export interface DisputeDetail extends DisputeSummary {
 export interface DisputeList extends PagedList<DisputeSummary> {
   readonly counts: Readonly<Partial<Record<DisputeStatus, number>>>;
 }
+
+export interface UndeliveredReviewRow {
+  readonly escrowId: string;
+  readonly orderId: string;
+  readonly orderReference: string;
+  readonly buyerUserId: string;
+  readonly sellerUserId: string;
+  readonly storeId: string;
+  readonly heldAmount: Money;
+  readonly heldSince: string;
+  readonly reviewSince: string;
+  readonly shippedAt: string | null;
+  readonly courierName: string;
+  readonly trackingNumber: string;
+}
+
+export interface StaffEscrowDecisionResult {
+  readonly escrowId: string;
+  readonly orderId: string;
+  readonly status: string;
+  readonly heldAmount: Money;
+}

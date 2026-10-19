@@ -67,5 +67,27 @@ export function validateCheckmarkPricing(rawContent: unknown): CheckmarkPricingR
     bundleDiscountPercent: readIntegerBetween(content, "bundleDiscountPercent", "content", 0, 50),
     bundleMaximumBusinesses: readIntegerBetween(content, "bundleMaximumBusinesses", "content", 1, 20),
     blackGraceDays: readIntegerBetween(content, "blackGraceDays", "content", 0, 90),
+    ...validateMultiBusinessGoldPricing(content),
+  };
+}
+
+function readOptionalIntegerBetween(content: Record<string, unknown>, key: string, fallback: number, minimum: number, maximum: number): number {
+  return content[key] === undefined ? fallback : readIntegerBetween(content, key, "content", minimum, maximum);
+}
+
+function validateMultiBusinessGoldPricing(content: Record<string, unknown>): Omit<Required<CheckmarkPricingRules>, "bundleDiscountPercent" | "bundleMaximumBusinesses" | "blackGraceDays"> {
+  const multiBusinessBasePercent = readOptionalIntegerBetween(content, "multiBusinessBasePercent", 10, 0, 90);
+  const multiBusinessStepPercent = readOptionalIntegerBetween(content, "multiBusinessStepPercent", 2, 0, 90);
+  const multiBusinessMaximumProfiles = readOptionalIntegerBetween(content, "multiBusinessMaximumProfiles", 5, 1, 5);
+  if (multiBusinessBasePercent + multiBusinessStepPercent * Math.max(0, multiBusinessMaximumProfiles - 2) > 90) {
+    failValidation("content.multiBusinessStepPercent", "The biggest multi-business discount (base + step for each profile after the second) can be at most 90%.");
+  }
+  return {
+    multiBusinessSingleProfilePercent: readOptionalIntegerBetween(content, "multiBusinessSingleProfilePercent", 5, 0, 90),
+    multiBusinessBasePercent,
+    multiBusinessStepPercent,
+    multiBusinessMaximumProfiles,
+    multiBusinessYearlyExtraPercent: readOptionalIntegerBetween(content, "multiBusinessYearlyExtraPercent", 5, 0, 90),
+    multiBusinessYearlyMode: content.multiBusinessYearlyMode === undefined ? "replace" : readEnumFromObject(content, "multiBusinessYearlyMode", "content", ["replace", "add"] as const),
   };
 }

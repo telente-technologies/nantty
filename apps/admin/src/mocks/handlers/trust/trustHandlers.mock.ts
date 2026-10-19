@@ -1,5 +1,6 @@
 import { registerMockQueueCounter } from "@/mocks/mockQueueCounters.mock";
 
+import { registerAdCreditMockHandlers } from "./adCredits.mock";
 import { registerAdsReviewMockHandlers } from "./adsReview.mock";
 import { registerAdvertiserAccountMockHandlers } from "./advertiserAccounts.mock";
 import { registerChatReportMockHandlers } from "./chatReports.mock";
@@ -63,6 +64,7 @@ export function registerTrustAndSafetyMockHandlers(): void {
   registerModerationAppealMockHandlers();
   registerCopyrightClaimMockHandlers();
   registerCopyrightRemedyMockHandlers();
+  registerAdCreditMockHandlers();
   registerAdsReviewMockHandlers();
   registerAdvertiserAccountMockHandlers();
   registerSuspensionMockHandlers();

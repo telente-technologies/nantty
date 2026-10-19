@@ -1,5 +1,5 @@
 import { CheckboxField, SelectField } from "@/components/ui/formFields";
-import type { CheckmarkPricingRules, CheckmarkSuggestionRules, CreatorProgramThresholds, TrialLength, TrialRules } from "@/types/platformConfiguration.type";
+import type { CheckmarkPricingRules, CheckmarkSuggestionRules, CreatorProgramThresholds, MultiBusinessYearlyMode, TrialLength, TrialRules } from "@/types/platformConfiguration.type";
 
 import { WholeNumberField } from "../shared/configurationFields";
 import styles from "./platformRules.module.css";
@@ -95,8 +95,18 @@ export function TrialRulesEditor({ rules, canWrite, onChange }: EditorProps<Tria
   );
 }
 
+const multiBusinessYearlyModeOptions = [{ value: "replace", label: "Replace the normal yearly discount" }, { value: "add", label: "Add to the normal yearly discount" }];
+
 export function CheckmarkPricingEditor({ rules, canWrite, onChange }: EditorProps<CheckmarkPricingRules>) {
   const disabled = !canWrite;
+  const set = <Key extends keyof CheckmarkPricingRules>(key: Key, value: CheckmarkPricingRules[Key]) => onChange((current) => ({ ...current, [key]: value }));
+  const singleProfilePercent = rules.multiBusinessSingleProfilePercent ?? 5;
+  const basePercent = rules.multiBusinessBasePercent ?? 10;
+  const stepPercent = rules.multiBusinessStepPercent ?? 2;
+  const maximumProfiles = rules.multiBusinessMaximumProfiles ?? 5;
+  const yearlyExtraPercent = rules.multiBusinessYearlyExtraPercent ?? 5;
+  const yearlyMode = rules.multiBusinessYearlyMode ?? "replace";
+  const largestDiscountPercent = maximumProfiles < 2 ? singleProfilePercent : basePercent + stepPercent * (maximumProfiles - 2);
   return (
     <div className={styles.editor}>
       <div className={styles.grid}>
@@ -104,6 +114,16 @@ export function CheckmarkPricingEditor({ rules, canWrite, onChange }: EditorProp
         <WholeNumberField label="Bundle cap (businesses per person)" value={rules.bundleMaximumBusinesses} minimum={1} maximum={20} isDisabled={disabled} onChange={(value) => onChange((current) => ({ ...current, bundleMaximumBusinesses: value }))} />
         <WholeNumberField label="Black grace period (days)" value={rules.blackGraceDays} maximum={90} isDisabled={disabled} onChange={(value) => onChange((current) => ({ ...current, blackGraceDays: value }))} />
       </div>
+      <h3 className={styles.sectionTitle}>Gold for all your businesses (Premium)</h3>
+      <div className={styles.grid}>
+        <WholeNumberField label="1 profile discount (%)" value={singleProfilePercent} maximum={90} isDisabled={disabled} onChange={(value) => set("multiBusinessSingleProfilePercent", value)} />
+        <WholeNumberField label="2 profiles discount (%)" hint="The base discount." value={basePercent} maximum={90} isDisabled={disabled} onChange={(value) => set("multiBusinessBasePercent", value)} />
+        <WholeNumberField label="Extra per profile after 2 (%)" value={stepPercent} maximum={90} isDisabled={disabled} onChange={(value) => set("multiBusinessStepPercent", value)} />
+        <WholeNumberField label="Most profiles on one plan" value={maximumProfiles} minimum={1} maximum={5} isDisabled={disabled} onChange={(value) => set("multiBusinessMaximumProfiles", value)} />
+        <WholeNumberField label="Extra yearly discount (%)" value={yearlyExtraPercent} maximum={90} isDisabled={disabled} onChange={(value) => set("multiBusinessYearlyExtraPercent", value)} />
+        <SelectField label="Yearly discount" value={yearlyMode} disabled={disabled} options={multiBusinessYearlyModeOptions} onChange={(event) => set("multiBusinessYearlyMode", event.target.value as MultiBusinessYearlyMode)} />
+      </div>
+      <p className={styles.summary}>One Gold plan covering up to {maximumProfiles} business or brand profiles, for Blue Premium only. The biggest discount is {largestDiscountPercent}% and must stay at or below 90%. Yearly plans get {yearlyExtraPercent}% more off, {yearlyMode === "replace" ? "instead of" : "on top of"} the normal yearly discount. It never stacks with offer links or the Blue + Gold bundle: the best single discount wins.</p>
       <p className={styles.summary}>The bundle never stacks with the yearly discount: the bigger one wins. It never applies to Black and lapses at the next renewal if Blue ends. Blue and Gold drop at period end. Black keeps its badge for {rules.blackGraceDays} days with reminders before it is removed. Prices for every plan and region are set in <a href="/config/pricing">Regional pricing</a>.</p>
     </div>
   );

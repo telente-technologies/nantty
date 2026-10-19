@@ -4,6 +4,7 @@ import { registerLedgerMockHandlers } from "@/mocks/handlers/money/ledger.mock";
 import { readMockMoneyStore } from "@/mocks/handlers/money/moneyStore.mock";
 import { registerOrderAndEscrowMockHandlers } from "@/mocks/handlers/money/ordersAndEscrow.mock";
 import { registerRefundMockHandlers } from "@/mocks/handlers/money/refunds.mock";
+import { registerUndeliveredReviewMockHandlers } from "@/mocks/handlers/money/undeliveredReview.mock";
 import { registerWithdrawalMockHandlers } from "@/mocks/handlers/money/withdrawals.mock";
 import { registerMockQueueCounter } from "@/mocks/mockQueueCounters.mock";
 
@@ -47,6 +48,7 @@ export function registerMoneyMockHandlers(): void {
   registerOrderAndEscrowMockHandlers();
   registerDisputeMockHandlers();
   registerRefundMockHandlers();
+  registerUndeliveredReviewMockHandlers();
   registerWithdrawalMockHandlers();
   registerCoinMockHandlers();
   registerLedgerMockHandlers();

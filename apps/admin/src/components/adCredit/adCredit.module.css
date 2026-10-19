@@ -1,0 +1,14 @@
+.muted { color: var(--ink-muted); font-size: var(--fs-12); }
+.stack { display: flex; flex-direction: column; gap: 2px; }
+.amount { font-variant-numeric: tabular-nums; font-weight: 600; white-space: nowrap; }
+.picker { display: flex; flex-direction: column; gap: var(--space-2); }
+.pickedUser { display: flex; align-items: center; gap: var(--space-3); flex-wrap: wrap; }
+.matchList { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; border: 1px solid var(--divider); border-radius: var(--radius-medium); overflow: hidden; }
+.matchButton { width: 100%; display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); padding: var(--space-2) var(--space-3); background: transparent; border: 0; border-bottom: 1px solid var(--divider); color: inherit; cursor: pointer; text-align: start; }
+.matchButton:hover, .matchButton:focus-visible { background: var(--surface-hover); }
+.matchList li:last-child .matchButton { border-bottom: 0; }
+.inlineRow { display: flex; align-items: flex-end; gap: var(--space-2); flex-wrap: wrap; }
+.formGrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: var(--space-3); }
+.filters { display: flex; flex-wrap: wrap; gap: var(--space-3); align-items: flex-end; }
+.rules { margin: 0; padding-inline-start: var(--space-5); display: flex; flex-direction: column; gap: var(--space-1); }
+.spacedTop { margin-top: var(--space-4); }
