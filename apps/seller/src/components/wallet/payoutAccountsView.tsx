@@ -47,12 +47,12 @@ export function PayoutAccountsView({ embedded = false }: { readonly embedded?: b
   async function removePayoutAccount(account: PayoutAccount) {
     setBusyAccountId(account.id);
     try {
-      await sendSellerApiRequest(`/seller/wallet/payout-accounts/${encodeURIComponent(account.id)}`, { method: "DELETE" });
+      await withStepUp((token) => sendSellerApiRequest(`/seller/wallet/payout-accounts/${encodeURIComponent(account.id)}`, { method: "DELETE", headers: stepUpHeaders(token) }));
       showToast("Payout account removed.");
       setAccountPendingRemoval(null);
       accountsQuery.reload();
     } catch (error) {
-      showToast(readErrorMessageForDisplay(error), "error");
+      if (!(error instanceof StepUpCancelledError)) showToast(readErrorMessageForDisplay(error), "error");
     } finally {
       setBusyAccountId(null);
     }

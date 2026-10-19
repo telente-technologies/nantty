@@ -150,6 +150,7 @@ const apiPermissionRules: ApiPermissionRule[] = [
   { method: "ANY", pathPattern: /^\/seller\/affiliates\//, permission: "affiliates:manage" },
   { method: "GET", pathPattern: /^\/seller\/stores\/mine$/, permission: "signed_in" },
   { method: "GET", pathPattern: /^\/account\/status$/, permission: "signed_in" },
+  { method: "GET", pathPattern: /^\/subscriptions\/gold-for-businesses$/, permission: "signed_in" },
   { method: "GET", pathPattern: /^\/seller\/brands(\/|$)/, permission: "settings:view" },
   { method: "WRITE", pathPattern: /^\/seller\/brands\//, permission: "settings:manage" },
   { method: "ANY", pathPattern: /^\/media\//, permission: "media:upload" },

@@ -22,13 +22,20 @@ import buttonStyles from "@/components/ui/button.module.css";
 
 import styles from "./ads.module.css";
 
+function buildAdsManagerAccountLink(adsManagerUrl: string, pathInsideAccount: string): string {
+  return `${adsManagerUrl}/accounts?next=${encodeURIComponent(pathInsideAccount)}`;
+}
+
 function AdsManagerLinks({ adsManagerUrl }: { readonly adsManagerUrl: string }) {
   return (
     <>
       <a href={adsManagerUrl} target="_blank" rel="noopener noreferrer" className={`${buttonStyles.button} ${buttonStyles.secondary} ${buttonStyles.medium}`}>
         <ZudoIcon name="arrowUpRight24" size={18} /> Open Ads Manager
       </a>
-      <a href={`${adsManagerUrl}/campaigns/new`} target="_blank" rel="noopener noreferrer" className={`${buttonStyles.button} ${buttonStyles.primary} ${buttonStyles.medium}`}>
+      <a href={buildAdsManagerAccountLink(adsManagerUrl, "campaigns/new?objective=store_promotion")} target="_blank" rel="noopener noreferrer" className={`${buttonStyles.button} ${buttonStyles.secondary} ${buttonStyles.medium}`}>
+        <ZudoIcon name="buildingStore20" size={18} /> Promote store
+      </a>
+      <a href={buildAdsManagerAccountLink(adsManagerUrl, "campaigns/new")} target="_blank" rel="noopener noreferrer" className={`${buttonStyles.button} ${buttonStyles.primary} ${buttonStyles.medium}`}>
         <ZudoIcon name="plus16" size={18} /> Create campaign
       </a>
     </>

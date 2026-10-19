@@ -100,6 +100,10 @@ function buildDemoWalletTransactions(orders: readonly OnlineOrder[], payouts: re
     if (order.escrowStatus === "released") {
       const releasedAt = new Date(new Date(order.deliveredAt ?? order.createdAt).getTime() + 2 * 86_400_000).toISOString();
       transactions.push({ id: recordId("r"), kind: "escrow_release", description: `Escrow released · ${order.orderNumber}`, amount: order.sellerPayout, direction: "credit", balanceBucket: "available", reference: order.orderNumber, createdAt: releasedAt });
+      if (index % 4 === 0) {
+        const commission = toStoreMoney(Math.round(order.sellerPayout.amountMinor / 10));
+        transactions.push({ id: recordId("a"), kind: "affiliate_commission", description: `Affiliate commission to @adaeze.styles, 10% on order #${order.orderNumber.replace(/^#/, "")}`, amount: commission, direction: "debit", balanceBucket: "available", reference: order.orderNumber, createdAt: releasedAt });
+      }
     }
     if (order.escrowStatus === "refunded") {
       transactions.push({ id: recordId("f"), kind: "refund", description: `Refunded to buyer · ${order.orderNumber}`, amount: order.sellerPayout, direction: "debit", balanceBucket: "escrow", reference: order.orderNumber, createdAt: new Date(new Date(order.createdAt).getTime() + 86_400_000).toISOString() });

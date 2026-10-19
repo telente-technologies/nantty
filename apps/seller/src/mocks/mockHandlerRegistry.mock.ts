@@ -7,6 +7,7 @@ import { registerCatalogOperationsMockHandlers } from "@/mocks/handlers/catalogO
 import { registerAccessAndAuthMockHandlers } from "@/mocks/handlers/accessAndAuth.mock";
 import { registerBillingOfferMockHandlers } from "@/mocks/handlers/billingOffer.mock";
 import { registerAccountHealthMockHandlers } from "@/mocks/handlers/accountHealth.mock";
+import { registerGoldForBusinessesMockHandlers } from "@/mocks/handlers/goldForBusinesses.mock";
 import { registerBusinessDocumentMockHandlers } from "@/mocks/handlers/businessDocuments.mock";
 import { registerPayoutOnboardingMockHandlers } from "@/mocks/handlers/payoutOnboarding.mock";
 import { registerProviderWalletMockHandlers } from "@/mocks/handlers/providerWallet.mock";
@@ -22,6 +23,7 @@ import { registerTeamAndSettingsMockHandlers } from "@/mocks/handlers/teamAndSet
 export function registerEveryMockHandler(): void {
   registerAccessAndAuthMockHandlers();
   registerBillingOfferMockHandlers();
+  registerGoldForBusinessesMockHandlers();
   registerBusinessDocumentMockHandlers();
   registerAccountHealthMockHandlers();
   registerPayoutOnboardingMockHandlers();

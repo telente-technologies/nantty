@@ -5,6 +5,7 @@ import { useState } from "react";
 import { TrialOfferNotice } from "@/components/billing/trialOfferNotice";
 import { TrialReminderCallout, TrialStatusPanel } from "@/components/billing/trialStatusPanel";
 import { SubscriptionPlanPicker } from "@/components/billing/subscriptionPlanPicker";
+import { GoldForBusinessesPanel } from "@/components/settings/goldForBusinessesPanel";
 import { planFeatureDescriptions, sellerPlanLabels, type PlanFeature } from "@/config/planFeatures.config";
 import { usePlanFeatures } from "@/hooks/usePlanFeatures.hook";
 import { describePlanEntitlements } from "@/utils/goldEntitlements.util";
@@ -113,6 +114,7 @@ export function BillingSettingsView() {
           ) : null}
         </div>
       </Panel>
+      <GoldForBusinessesPanel />
       <Panel title="Change plan" description="Switching opens our payment partner's page. You come straight back here after paying.">
         <SubscriptionPlanPicker currentPlanId={details.planId} currentPlan={plan} offer={offer} />
       </Panel>
