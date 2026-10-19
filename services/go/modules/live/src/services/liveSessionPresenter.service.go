@@ -65,12 +65,34 @@ func (service *LiveService) GetLiveSession(ctx context.Context, liveId uuid.UUID
 	if err != nil {
 		return types.LiveSessionView{}, err
 	}
+	decision, err := service.DecideLiveAccess(ctx, session, viewer)
+	if err != nil {
+		return types.LiveSessionView{}, err
+	}
+	if decision.Reason == "privateAccount" || decision.Reason == "blocked" {
+		return types.LiveSessionView{}, liveerrors.LiveNotAccessible
+	}
 	view, err := service.presentLiveSession(ctx, session)
-	if err == nil && session.State != "ended" {
+	if err != nil {
+		return view, err
+	}
+	view.Access = types.LiveAccessView{Allowed: decision.Allowed, Reason: decision.Reason}
+	if !decision.Allowed {
+		return lockedLiveView(view), nil
+	}
+	if session.State != "ended" {
 		view.Safety = service.LiveSafetyViewFor(ctx, session, viewer)
 		view.HostRanking = service.hostRankingFor(ctx, session)
 	}
-	return view, err
+	return view, nil
+}
+
+// lockedLiveView keeps only what a "Follow / Subscribe to watch" screen needs; no media, playback or commerce details.
+func lockedLiveView(view types.LiveSessionView) types.LiveSessionView {
+	view.PlaybackUrl, view.Media = nil, types.MediaConnection{}
+	view.StoreId, view.Products, view.PinnedProductId, view.LiveAdSettings, view.SponsorshipLine, view.TopSupporterUserId = nil, []any{}, nil, nil, nil, nil
+	view.AcceptedLiveAdTermsVersion, view.GiftsEnabled = nil, false
+	return view
 }
 
 func (service *LiveService) GetLiveSafety(ctx context.Context, liveId uuid.UUID, viewer uuid.UUID) (*types.LiveSafetyView, error) {
@@ -79,6 +101,9 @@ func (service *LiveService) GetLiveSafety(ctx context.Context, liveId uuid.UUID,
 		return nil, liveerrors.LiveNotFound
 	}
 	if err != nil {
+		return nil, err
+	}
+	if err := service.requireLiveAccess(ctx, session, viewer); err != nil {
 		return nil, err
 	}
 	return service.LiveSafetyViewFor(ctx, session, viewer), nil

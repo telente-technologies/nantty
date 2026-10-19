@@ -126,6 +126,48 @@ func (_c *LiveRecordingCreate) SetNillableCompletedAt(v *time.Time) *LiveRecordi
 	return _c
 }
 
+// SetRepostedAt sets the "reposted_at" field.
+func (_c *LiveRecordingCreate) SetRepostedAt(v time.Time) *LiveRecordingCreate {
+	_c.mutation.SetRepostedAt(v)
+	return _c
+}
+
+// SetNillableRepostedAt sets the "reposted_at" field if the given value is not nil.
+func (_c *LiveRecordingCreate) SetNillableRepostedAt(v *time.Time) *LiveRecordingCreate {
+	if v != nil {
+		_c.SetRepostedAt(*v)
+	}
+	return _c
+}
+
+// SetRepostedPostID sets the "reposted_post_id" field.
+func (_c *LiveRecordingCreate) SetRepostedPostID(v string) *LiveRecordingCreate {
+	_c.mutation.SetRepostedPostID(v)
+	return _c
+}
+
+// SetNillableRepostedPostID sets the "reposted_post_id" field if the given value is not nil.
+func (_c *LiveRecordingCreate) SetNillableRepostedPostID(v *string) *LiveRecordingCreate {
+	if v != nil {
+		_c.SetRepostedPostID(*v)
+	}
+	return _c
+}
+
+// SetLegalHold sets the "legal_hold" field.
+func (_c *LiveRecordingCreate) SetLegalHold(v bool) *LiveRecordingCreate {
+	_c.mutation.SetLegalHold(v)
+	return _c
+}
+
+// SetNillableLegalHold sets the "legal_hold" field if the given value is not nil.
+func (_c *LiveRecordingCreate) SetNillableLegalHold(v *bool) *LiveRecordingCreate {
+	if v != nil {
+		_c.SetLegalHold(*v)
+	}
+	return _c
+}
+
 // SetID sets the "id" field.
 func (_c *LiveRecordingCreate) SetID(v uuid.UUID) *LiveRecordingCreate {
 	_c.mutation.SetID(v)
@@ -191,6 +233,10 @@ func (_c *LiveRecordingCreate) defaults() {
 		v := liverecording.DefaultSizeBytes
 		_c.mutation.SetSizeBytes(v)
 	}
+	if _, ok := _c.mutation.LegalHold(); !ok {
+		v := liverecording.DefaultLegalHold
+		_c.mutation.SetLegalHold(v)
+	}
 	if _, ok := _c.mutation.ID(); !ok {
 		v := liverecording.DefaultID()
 		_c.mutation.SetID(v)
@@ -239,6 +285,14 @@ func (_c *LiveRecordingCreate) check() error {
 		if err := liverecording.FailureReasonValidator(v); err != nil {
 			return &ValidationError{Name: "failure_reason", err: fmt.Errorf(`ent: validator failed for field "LiveRecording.failure_reason": %w`, err)}
 		}
+	}
+	if v, ok := _c.mutation.RepostedPostID(); ok {
+		if err := liverecording.RepostedPostIDValidator(v); err != nil {
+			return &ValidationError{Name: "reposted_post_id", err: fmt.Errorf(`ent: validator failed for field "LiveRecording.reposted_post_id": %w`, err)}
+		}
+	}
+	if _, ok := _c.mutation.LegalHold(); !ok {
+		return &ValidationError{Name: "legal_hold", err: errors.New(`ent: missing required field "LiveRecording.legal_hold"`)}
 	}
 	return nil
 }
@@ -311,6 +365,18 @@ func (_c *LiveRecordingCreate) createSpec() (*LiveRecording, *sqlgraph.CreateSpe
 	if value, ok := _c.mutation.CompletedAt(); ok {
 		_spec.SetField(liverecording.FieldCompletedAt, field.TypeTime, value)
 		_node.CompletedAt = &value
+	}
+	if value, ok := _c.mutation.RepostedAt(); ok {
+		_spec.SetField(liverecording.FieldRepostedAt, field.TypeTime, value)
+		_node.RepostedAt = &value
+	}
+	if value, ok := _c.mutation.RepostedPostID(); ok {
+		_spec.SetField(liverecording.FieldRepostedPostID, field.TypeString, value)
+		_node.RepostedPostID = &value
+	}
+	if value, ok := _c.mutation.LegalHold(); ok {
+		_spec.SetField(liverecording.FieldLegalHold, field.TypeBool, value)
+		_node.LegalHold = value
 	}
 	return _node, _spec
 }
@@ -445,6 +511,54 @@ func (u *LiveRecordingUpsert) UpdateCompletedAt() *LiveRecordingUpsert {
 // ClearCompletedAt clears the value of the "completed_at" field.
 func (u *LiveRecordingUpsert) ClearCompletedAt() *LiveRecordingUpsert {
 	u.SetNull(liverecording.FieldCompletedAt)
+	return u
+}
+
+// SetRepostedAt sets the "reposted_at" field.
+func (u *LiveRecordingUpsert) SetRepostedAt(v time.Time) *LiveRecordingUpsert {
+	u.Set(liverecording.FieldRepostedAt, v)
+	return u
+}
+
+// UpdateRepostedAt sets the "reposted_at" field to the value that was provided on create.
+func (u *LiveRecordingUpsert) UpdateRepostedAt() *LiveRecordingUpsert {
+	u.SetExcluded(liverecording.FieldRepostedAt)
+	return u
+}
+
+// ClearRepostedAt clears the value of the "reposted_at" field.
+func (u *LiveRecordingUpsert) ClearRepostedAt() *LiveRecordingUpsert {
+	u.SetNull(liverecording.FieldRepostedAt)
+	return u
+}
+
+// SetRepostedPostID sets the "reposted_post_id" field.
+func (u *LiveRecordingUpsert) SetRepostedPostID(v string) *LiveRecordingUpsert {
+	u.Set(liverecording.FieldRepostedPostID, v)
+	return u
+}
+
+// UpdateRepostedPostID sets the "reposted_post_id" field to the value that was provided on create.
+func (u *LiveRecordingUpsert) UpdateRepostedPostID() *LiveRecordingUpsert {
+	u.SetExcluded(liverecording.FieldRepostedPostID)
+	return u
+}
+
+// ClearRepostedPostID clears the value of the "reposted_post_id" field.
+func (u *LiveRecordingUpsert) ClearRepostedPostID() *LiveRecordingUpsert {
+	u.SetNull(liverecording.FieldRepostedPostID)
+	return u
+}
+
+// SetLegalHold sets the "legal_hold" field.
+func (u *LiveRecordingUpsert) SetLegalHold(v bool) *LiveRecordingUpsert {
+	u.Set(liverecording.FieldLegalHold, v)
+	return u
+}
+
+// UpdateLegalHold sets the "legal_hold" field to the value that was provided on create.
+func (u *LiveRecordingUpsert) UpdateLegalHold() *LiveRecordingUpsert {
+	u.SetExcluded(liverecording.FieldLegalHold)
 	return u
 }
 
@@ -603,6 +717,62 @@ func (u *LiveRecordingUpsertOne) UpdateCompletedAt() *LiveRecordingUpsertOne {
 func (u *LiveRecordingUpsertOne) ClearCompletedAt() *LiveRecordingUpsertOne {
 	return u.Update(func(s *LiveRecordingUpsert) {
 		s.ClearCompletedAt()
+	})
+}
+
+// SetRepostedAt sets the "reposted_at" field.
+func (u *LiveRecordingUpsertOne) SetRepostedAt(v time.Time) *LiveRecordingUpsertOne {
+	return u.Update(func(s *LiveRecordingUpsert) {
+		s.SetRepostedAt(v)
+	})
+}
+
+// UpdateRepostedAt sets the "reposted_at" field to the value that was provided on create.
+func (u *LiveRecordingUpsertOne) UpdateRepostedAt() *LiveRecordingUpsertOne {
+	return u.Update(func(s *LiveRecordingUpsert) {
+		s.UpdateRepostedAt()
+	})
+}
+
+// ClearRepostedAt clears the value of the "reposted_at" field.
+func (u *LiveRecordingUpsertOne) ClearRepostedAt() *LiveRecordingUpsertOne {
+	return u.Update(func(s *LiveRecordingUpsert) {
+		s.ClearRepostedAt()
+	})
+}
+
+// SetRepostedPostID sets the "reposted_post_id" field.
+func (u *LiveRecordingUpsertOne) SetRepostedPostID(v string) *LiveRecordingUpsertOne {
+	return u.Update(func(s *LiveRecordingUpsert) {
+		s.SetRepostedPostID(v)
+	})
+}
+
+// UpdateRepostedPostID sets the "reposted_post_id" field to the value that was provided on create.
+func (u *LiveRecordingUpsertOne) UpdateRepostedPostID() *LiveRecordingUpsertOne {
+	return u.Update(func(s *LiveRecordingUpsert) {
+		s.UpdateRepostedPostID()
+	})
+}
+
+// ClearRepostedPostID clears the value of the "reposted_post_id" field.
+func (u *LiveRecordingUpsertOne) ClearRepostedPostID() *LiveRecordingUpsertOne {
+	return u.Update(func(s *LiveRecordingUpsert) {
+		s.ClearRepostedPostID()
+	})
+}
+
+// SetLegalHold sets the "legal_hold" field.
+func (u *LiveRecordingUpsertOne) SetLegalHold(v bool) *LiveRecordingUpsertOne {
+	return u.Update(func(s *LiveRecordingUpsert) {
+		s.SetLegalHold(v)
+	})
+}
+
+// UpdateLegalHold sets the "legal_hold" field to the value that was provided on create.
+func (u *LiveRecordingUpsertOne) UpdateLegalHold() *LiveRecordingUpsertOne {
+	return u.Update(func(s *LiveRecordingUpsert) {
+		s.UpdateLegalHold()
 	})
 }
 
@@ -928,6 +1098,62 @@ func (u *LiveRecordingUpsertBulk) UpdateCompletedAt() *LiveRecordingUpsertBulk {
 func (u *LiveRecordingUpsertBulk) ClearCompletedAt() *LiveRecordingUpsertBulk {
 	return u.Update(func(s *LiveRecordingUpsert) {
 		s.ClearCompletedAt()
+	})
+}
+
+// SetRepostedAt sets the "reposted_at" field.
+func (u *LiveRecordingUpsertBulk) SetRepostedAt(v time.Time) *LiveRecordingUpsertBulk {
+	return u.Update(func(s *LiveRecordingUpsert) {
+		s.SetRepostedAt(v)
+	})
+}
+
+// UpdateRepostedAt sets the "reposted_at" field to the value that was provided on create.
+func (u *LiveRecordingUpsertBulk) UpdateRepostedAt() *LiveRecordingUpsertBulk {
+	return u.Update(func(s *LiveRecordingUpsert) {
+		s.UpdateRepostedAt()
+	})
+}
+
+// ClearRepostedAt clears the value of the "reposted_at" field.
+func (u *LiveRecordingUpsertBulk) ClearRepostedAt() *LiveRecordingUpsertBulk {
+	return u.Update(func(s *LiveRecordingUpsert) {
+		s.ClearRepostedAt()
+	})
+}
+
+// SetRepostedPostID sets the "reposted_post_id" field.
+func (u *LiveRecordingUpsertBulk) SetRepostedPostID(v string) *LiveRecordingUpsertBulk {
+	return u.Update(func(s *LiveRecordingUpsert) {
+		s.SetRepostedPostID(v)
+	})
+}
+
+// UpdateRepostedPostID sets the "reposted_post_id" field to the value that was provided on create.
+func (u *LiveRecordingUpsertBulk) UpdateRepostedPostID() *LiveRecordingUpsertBulk {
+	return u.Update(func(s *LiveRecordingUpsert) {
+		s.UpdateRepostedPostID()
+	})
+}
+
+// ClearRepostedPostID clears the value of the "reposted_post_id" field.
+func (u *LiveRecordingUpsertBulk) ClearRepostedPostID() *LiveRecordingUpsertBulk {
+	return u.Update(func(s *LiveRecordingUpsert) {
+		s.ClearRepostedPostID()
+	})
+}
+
+// SetLegalHold sets the "legal_hold" field.
+func (u *LiveRecordingUpsertBulk) SetLegalHold(v bool) *LiveRecordingUpsertBulk {
+	return u.Update(func(s *LiveRecordingUpsert) {
+		s.SetLegalHold(v)
+	})
+}
+
+// UpdateLegalHold sets the "legal_hold" field to the value that was provided on create.
+func (u *LiveRecordingUpsertBulk) UpdateLegalHold() *LiveRecordingUpsertBulk {
+	return u.Update(func(s *LiveRecordingUpsert) {
+		s.UpdateLegalHold()
 	})
 }
 

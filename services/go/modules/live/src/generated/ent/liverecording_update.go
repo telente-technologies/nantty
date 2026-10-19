@@ -124,6 +124,60 @@ func (_u *LiveRecordingUpdate) ClearCompletedAt() *LiveRecordingUpdate {
 	return _u
 }
 
+// SetRepostedAt sets the "reposted_at" field.
+func (_u *LiveRecordingUpdate) SetRepostedAt(v time.Time) *LiveRecordingUpdate {
+	_u.mutation.SetRepostedAt(v)
+	return _u
+}
+
+// SetNillableRepostedAt sets the "reposted_at" field if the given value is not nil.
+func (_u *LiveRecordingUpdate) SetNillableRepostedAt(v *time.Time) *LiveRecordingUpdate {
+	if v != nil {
+		_u.SetRepostedAt(*v)
+	}
+	return _u
+}
+
+// ClearRepostedAt clears the value of the "reposted_at" field.
+func (_u *LiveRecordingUpdate) ClearRepostedAt() *LiveRecordingUpdate {
+	_u.mutation.ClearRepostedAt()
+	return _u
+}
+
+// SetRepostedPostID sets the "reposted_post_id" field.
+func (_u *LiveRecordingUpdate) SetRepostedPostID(v string) *LiveRecordingUpdate {
+	_u.mutation.SetRepostedPostID(v)
+	return _u
+}
+
+// SetNillableRepostedPostID sets the "reposted_post_id" field if the given value is not nil.
+func (_u *LiveRecordingUpdate) SetNillableRepostedPostID(v *string) *LiveRecordingUpdate {
+	if v != nil {
+		_u.SetRepostedPostID(*v)
+	}
+	return _u
+}
+
+// ClearRepostedPostID clears the value of the "reposted_post_id" field.
+func (_u *LiveRecordingUpdate) ClearRepostedPostID() *LiveRecordingUpdate {
+	_u.mutation.ClearRepostedPostID()
+	return _u
+}
+
+// SetLegalHold sets the "legal_hold" field.
+func (_u *LiveRecordingUpdate) SetLegalHold(v bool) *LiveRecordingUpdate {
+	_u.mutation.SetLegalHold(v)
+	return _u
+}
+
+// SetNillableLegalHold sets the "legal_hold" field if the given value is not nil.
+func (_u *LiveRecordingUpdate) SetNillableLegalHold(v *bool) *LiveRecordingUpdate {
+	if v != nil {
+		_u.SetLegalHold(*v)
+	}
+	return _u
+}
+
 // Mutation returns the LiveRecordingMutation object of the builder.
 func (_u *LiveRecordingUpdate) Mutation() *LiveRecordingMutation {
 	return _u.mutation
@@ -168,6 +222,11 @@ func (_u *LiveRecordingUpdate) check() error {
 			return &ValidationError{Name: "failure_reason", err: fmt.Errorf(`ent: validator failed for field "LiveRecording.failure_reason": %w`, err)}
 		}
 	}
+	if v, ok := _u.mutation.RepostedPostID(); ok {
+		if err := liverecording.RepostedPostIDValidator(v); err != nil {
+			return &ValidationError{Name: "reposted_post_id", err: fmt.Errorf(`ent: validator failed for field "LiveRecording.reposted_post_id": %w`, err)}
+		}
+	}
 	return nil
 }
 
@@ -209,6 +268,21 @@ func (_u *LiveRecordingUpdate) sqlSave(ctx context.Context) (_node int, err erro
 	}
 	if _u.mutation.CompletedAtCleared() {
 		_spec.ClearField(liverecording.FieldCompletedAt, field.TypeTime)
+	}
+	if value, ok := _u.mutation.RepostedAt(); ok {
+		_spec.SetField(liverecording.FieldRepostedAt, field.TypeTime, value)
+	}
+	if _u.mutation.RepostedAtCleared() {
+		_spec.ClearField(liverecording.FieldRepostedAt, field.TypeTime)
+	}
+	if value, ok := _u.mutation.RepostedPostID(); ok {
+		_spec.SetField(liverecording.FieldRepostedPostID, field.TypeString, value)
+	}
+	if _u.mutation.RepostedPostIDCleared() {
+		_spec.ClearField(liverecording.FieldRepostedPostID, field.TypeString)
+	}
+	if value, ok := _u.mutation.LegalHold(); ok {
+		_spec.SetField(liverecording.FieldLegalHold, field.TypeBool, value)
 	}
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
@@ -326,6 +400,60 @@ func (_u *LiveRecordingUpdateOne) ClearCompletedAt() *LiveRecordingUpdateOne {
 	return _u
 }
 
+// SetRepostedAt sets the "reposted_at" field.
+func (_u *LiveRecordingUpdateOne) SetRepostedAt(v time.Time) *LiveRecordingUpdateOne {
+	_u.mutation.SetRepostedAt(v)
+	return _u
+}
+
+// SetNillableRepostedAt sets the "reposted_at" field if the given value is not nil.
+func (_u *LiveRecordingUpdateOne) SetNillableRepostedAt(v *time.Time) *LiveRecordingUpdateOne {
+	if v != nil {
+		_u.SetRepostedAt(*v)
+	}
+	return _u
+}
+
+// ClearRepostedAt clears the value of the "reposted_at" field.
+func (_u *LiveRecordingUpdateOne) ClearRepostedAt() *LiveRecordingUpdateOne {
+	_u.mutation.ClearRepostedAt()
+	return _u
+}
+
+// SetRepostedPostID sets the "reposted_post_id" field.
+func (_u *LiveRecordingUpdateOne) SetRepostedPostID(v string) *LiveRecordingUpdateOne {
+	_u.mutation.SetRepostedPostID(v)
+	return _u
+}
+
+// SetNillableRepostedPostID sets the "reposted_post_id" field if the given value is not nil.
+func (_u *LiveRecordingUpdateOne) SetNillableRepostedPostID(v *string) *LiveRecordingUpdateOne {
+	if v != nil {
+		_u.SetRepostedPostID(*v)
+	}
+	return _u
+}
+
+// ClearRepostedPostID clears the value of the "reposted_post_id" field.
+func (_u *LiveRecordingUpdateOne) ClearRepostedPostID() *LiveRecordingUpdateOne {
+	_u.mutation.ClearRepostedPostID()
+	return _u
+}
+
+// SetLegalHold sets the "legal_hold" field.
+func (_u *LiveRecordingUpdateOne) SetLegalHold(v bool) *LiveRecordingUpdateOne {
+	_u.mutation.SetLegalHold(v)
+	return _u
+}
+
+// SetNillableLegalHold sets the "legal_hold" field if the given value is not nil.
+func (_u *LiveRecordingUpdateOne) SetNillableLegalHold(v *bool) *LiveRecordingUpdateOne {
+	if v != nil {
+		_u.SetLegalHold(*v)
+	}
+	return _u
+}
+
 // Mutation returns the LiveRecordingMutation object of the builder.
 func (_u *LiveRecordingUpdateOne) Mutation() *LiveRecordingMutation {
 	return _u.mutation
@@ -381,6 +509,11 @@ func (_u *LiveRecordingUpdateOne) check() error {
 	if v, ok := _u.mutation.FailureReason(); ok {
 		if err := liverecording.FailureReasonValidator(v); err != nil {
 			return &ValidationError{Name: "failure_reason", err: fmt.Errorf(`ent: validator failed for field "LiveRecording.failure_reason": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.RepostedPostID(); ok {
+		if err := liverecording.RepostedPostIDValidator(v); err != nil {
+			return &ValidationError{Name: "reposted_post_id", err: fmt.Errorf(`ent: validator failed for field "LiveRecording.reposted_post_id": %w`, err)}
 		}
 	}
 	return nil
@@ -441,6 +574,21 @@ func (_u *LiveRecordingUpdateOne) sqlSave(ctx context.Context) (_node *LiveRecor
 	}
 	if _u.mutation.CompletedAtCleared() {
 		_spec.ClearField(liverecording.FieldCompletedAt, field.TypeTime)
+	}
+	if value, ok := _u.mutation.RepostedAt(); ok {
+		_spec.SetField(liverecording.FieldRepostedAt, field.TypeTime, value)
+	}
+	if _u.mutation.RepostedAtCleared() {
+		_spec.ClearField(liverecording.FieldRepostedAt, field.TypeTime)
+	}
+	if value, ok := _u.mutation.RepostedPostID(); ok {
+		_spec.SetField(liverecording.FieldRepostedPostID, field.TypeString, value)
+	}
+	if _u.mutation.RepostedPostIDCleared() {
+		_spec.ClearField(liverecording.FieldRepostedPostID, field.TypeString)
+	}
+	if value, ok := _u.mutation.LegalHold(); ok {
+		_spec.SetField(liverecording.FieldLegalHold, field.TypeBool, value)
 	}
 	_node = &LiveRecording{config: _u.config}
 	_spec.Assign = _node.assignValues

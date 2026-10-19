@@ -12,7 +12,8 @@ func MountSuspensionCasesRoutes(mux *http.ServeMux, container *container.Contain
 	controller := controllers.SuspensionCasesController{Container: container}
 	read := middlewares.RequireStaffWithAnyPermission(container.StaffVerifiers, []string{"users:suspend", "users:moderate"}, false)
 	write := middlewares.RequireStaffWithAnyPermission(container.StaffVerifiers, []string{"users:suspend"}, true)
-	mux.HandleFunc("POST /api/v1/internal/suspension-cases", controller.Intake)
+	internal := middlewares.RequireInternalToken(container.Settings.IntakeToken)
+	mux.Handle("POST /api/v1/internal/suspension-cases", internal(http.HandlerFunc(controller.Intake)))
 	mux.Handle("GET /api/v1/admin/suspensions/cases", read(http.HandlerFunc(controller.List)))
 	mux.Handle("GET /api/v1/admin/suspensions/cases/{caseId}", read(http.HandlerFunc(controller.Detail)))
 	mux.Handle("POST /api/v1/admin/suspensions/cases/{caseId}/approve", write(controller.Approve()))

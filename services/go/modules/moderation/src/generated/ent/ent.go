@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"reflect"
 	"sync"
+	"zudomart/modules/moderation/src/generated/ent/accountmonetisationstate"
 	"zudomart/modules/moderation/src/generated/ent/appeal"
 	"zudomart/modules/moderation/src/generated/ent/automationeventoccurrence"
 	"zudomart/modules/moderation/src/generated/ent/automationexecution"
@@ -94,6 +95,7 @@ var (
 func checkColumn(t, c string) error {
 	initCheck.Do(func() {
 		columnCheck = sql.NewColumnCheck(map[string]func(string) bool{
+			accountmonetisationstate.Table:  accountmonetisationstate.ValidColumn,
 			appeal.Table:                    appeal.ValidColumn,
 			automationeventoccurrence.Table: automationeventoccurrence.ValidColumn,
 			automationexecution.Table:       automationexecution.ValidColumn,

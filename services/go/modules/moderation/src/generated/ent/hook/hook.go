@@ -8,6 +8,18 @@ import (
 	"zudomart/modules/moderation/src/generated/ent"
 )
 
+// The AccountMonetisationStateFunc type is an adapter to allow the use of ordinary
+// function as AccountMonetisationState mutator.
+type AccountMonetisationStateFunc func(context.Context, *ent.AccountMonetisationStateMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f AccountMonetisationStateFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.AccountMonetisationStateMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.AccountMonetisationStateMutation", m)
+}
+
 // The AppealFunc type is an adapter to allow the use of ordinary
 // function as Appeal mutator.
 type AppealFunc func(context.Context, *ent.AppealMutation) (ent.Value, error)

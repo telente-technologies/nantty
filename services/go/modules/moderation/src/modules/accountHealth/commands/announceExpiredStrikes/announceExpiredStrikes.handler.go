@@ -25,7 +25,7 @@ func (handler Handler) Execute(ctx context.Context) (int, error) {
 	if err != nil {
 		return 0, err
 	}
-	accounts := map[uuid.UUID]bool{}
+	expired := 0
 	for _, row := range due {
 		err := handler.Container.RunInTransaction(ctx, func(tx *ent.Tx) error {
 			if err := tx.Strike.UpdateOne(row).SetExpiryAnnouncedAt(now).Exec(ctx); err != nil {
@@ -35,19 +35,18 @@ func (handler Handler) Execute(ctx context.Context) (int, error) {
 			if err != nil {
 				return err
 			}
-			return events.EnqueueOutboxEventInTransaction(ctx, tx, strikeevents.StrikeExpiredType, row.ID.String(), now, strikeevents.StrikeExpiredData{
+			if err := events.EnqueueOutboxEventInTransaction(ctx, tx, strikeevents.StrikeExpiredType, row.ID.String(), now, strikeevents.StrikeExpiredData{
 				StrikeId: row.ID.String(), AccountId: row.AccountID.String(), Kind: string(row.Kind), Policy: row.Policy, Source: string(row.Source), ExpiredAt: row.ExpiresAt.UTC().Format(time.RFC3339), ActiveStrikeCount: counts[row.AccountID].ActiveStrikes,
-			})
+			}); err != nil {
+				return err
+			}
+			_, err = services.EnqueueHealthChangedInTransaction(ctx, tx, row.AccountID, now, "strike_expired")
+			return err
 		})
 		if err != nil {
-			return len(accounts), err
+			return expired, err
 		}
-		accounts[row.AccountID] = true
+		expired++
 	}
-	for account := range accounts {
-		if _, err := services.PublishHealthChanged(ctx, handler.Container, account, "strike_expired"); err != nil {
-			return len(due), err
-		}
-	}
-	return len(due), nil
+	return expired, nil
 }

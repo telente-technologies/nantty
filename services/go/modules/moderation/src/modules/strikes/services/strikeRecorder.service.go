@@ -2,6 +2,7 @@ package services
 
 import (
 	"context"
+	"strings"
 	"time"
 
 	"github.com/google/uuid"
@@ -33,6 +34,35 @@ type Counts struct {
 
 type Recorder struct {
 	Now func() time.Time
+}
+
+type StrikeChangeObserver func(ctx context.Context, tx *ent.Tx, accountId uuid.UUID, now time.Time, reason string) error
+
+var strikeChangeObserver StrikeChangeObserver
+
+func ObserveStrikeChangesInTransaction(observer StrikeChangeObserver) {
+	strikeChangeObserver = observer
+}
+
+func notifyStrikeChangeInTransaction(ctx context.Context, tx *ent.Tx, accountId uuid.UUID, now time.Time, reason string) error {
+	if strikeChangeObserver == nil {
+		return nil
+	}
+	return strikeChangeObserver(ctx, tx, accountId, now, reason)
+}
+
+func issuedChangeReason(params IssueParams) string {
+	if params.Kind == "strike" && params.Source == "copyright" {
+		return "copyright_strike_issued"
+	}
+	return params.Kind + "_issued"
+}
+
+func revokedChangeReason(reason string) string {
+	if strings.HasPrefix(reason, "Appeal overturned") {
+		return "appeal_overturned"
+	}
+	return "strike_revoked"
 }
 
 func ActiveCounts(ctx context.Context, client *ent.Client, now time.Time, accountIds []uuid.UUID) (map[uuid.UUID]Counts, error) {
@@ -84,9 +114,12 @@ func (recorder Recorder) Issue(ctx context.Context, tx *ent.Tx, params IssuePara
 	}
 	expiry := expires.UTC().Format(time.RFC3339)
 	active := counts[params.AccountId].ActiveStrikes
-	return created, true, events.EnqueueOutboxEventInTransaction(ctx, tx, strikeevents.StrikeIssuedType, created.ID.String(), now, strikeevents.StrikeIssuedData{
+	if err := events.EnqueueOutboxEventInTransaction(ctx, tx, strikeevents.StrikeIssuedType, created.ID.String(), now, strikeevents.StrikeIssuedData{
 		StrikeId: created.ID.String(), AccountId: params.AccountId.String(), Kind: params.Kind, Policy: params.Policy, Source: params.Source, ExpiresAt: &expiry, ActiveStrikeCount: active, IsRepeatInfringer: IsRepeatInfringer(active),
-	})
+	}); err != nil {
+		return nil, false, err
+	}
+	return created, true, notifyStrikeChangeInTransaction(ctx, tx, params.AccountId, now, issuedChangeReason(params))
 }
 
 func (recorder Recorder) Revoke(ctx context.Context, tx *ent.Tx, strikeId uuid.UUID, reason string) (*ent.Strike, error) {
@@ -109,7 +142,10 @@ func (recorder Recorder) Revoke(ctx context.Context, tx *ent.Tx, strikeId uuid.U
 	if err != nil {
 		return nil, err
 	}
-	return row, events.EnqueueOutboxEventInTransaction(ctx, tx, strikeevents.StrikeRevokedType, row.ID.String(), now, strikeevents.StrikeRevokedData{
+	if err := events.EnqueueOutboxEventInTransaction(ctx, tx, strikeevents.StrikeRevokedType, row.ID.String(), now, strikeevents.StrikeRevokedData{
 		StrikeId: row.ID.String(), AccountId: row.AccountID.String(), Reason: reason, ActiveStrikeCount: counts[row.AccountID].ActiveStrikes,
-	})
+	}); err != nil {
+		return nil, err
+	}
+	return row, notifyStrikeChangeInTransaction(ctx, tx, row.AccountID, now, revokedChangeReason(reason))
 }

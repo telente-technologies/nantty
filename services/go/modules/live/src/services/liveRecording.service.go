@@ -85,7 +85,8 @@ func (service *LiveService) stopActiveRecordings(ctx context.Context, liveId uui
 }
 
 func (service *LiveService) ListLiveRecordings(ctx context.Context, actor types.Actor, liveId uuid.UUID) ([]types.RecordingView, error) {
-	if _, err := service.requireHost(ctx, actor, liveId); err != nil {
+	session, err := service.requireHost(ctx, actor, liveId)
+	if err != nil {
 		return nil, err
 	}
 	rows, err := service.Client.LiveRecording.Query().Where(liverecording.LiveID(liveId)).Order(ent.Desc(liverecording.FieldID)).All(ctx)
@@ -97,6 +98,7 @@ func (service *LiveService) ListLiveRecordings(ctx context.Context, actor types.
 		view := types.RecordingView{
 			Id: row.ID.String(), LiveId: liveId.String(), State: string(row.State), DurationSeconds: row.DurationSeconds, SizeBytes: row.SizeBytes,
 			CreatedAt: formatTime(row.CreatedAt), CompletedAt: formatOptionalTime(row.CompletedAt),
+			RepostedAt: formatOptionalTime(row.RepostedAt), DeletesAt: liveRecordingDeletesAt(row, session),
 		}
 		if row.State == liverecording.StateCompleted {
 			url, err := service.RecordingStorage.PresignDownload(ctx, row.ObjectKey, service.Settings.RecordingDownloadTimeToLive)

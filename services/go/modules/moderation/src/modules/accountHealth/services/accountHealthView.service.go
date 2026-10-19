@@ -12,6 +12,7 @@ import (
 	"zudomart/modules/moderation/src/generated/ent/copyrightclaim"
 	"zudomart/modules/moderation/src/generated/ent/counternotice"
 	"zudomart/modules/moderation/src/generated/ent/strike"
+	strikeservices "zudomart/modules/moderation/src/modules/strikes/services"
 )
 
 type ContentReference struct {
@@ -56,19 +57,21 @@ type HelpLink struct {
 type AccountHealthView struct {
 	AccountId string `json:"accountId"`
 	Standing
-	ActiveStrikeCount         int                `json:"activeStrikeCount"`
-	CopyrightStrikesInWindow  int                `json:"copyrightStrikesInWindow"`
-	PendingTakedownCount      int                `json:"pendingTakedownCount"`
-	RestrictionThreshold      int                `json:"restrictionThreshold"`
-	SuspensionReviewThreshold int                `json:"suspensionReviewThreshold"`
-	StrikeWindowDays          int                `json:"strikeWindowDays"`
-	StrikeLifetimeDays        int                `json:"strikeLifetimeDays"`
-	TakedownDeadlineHours     int                `json:"takedownDeadlineHours"`
-	Warnings                  []HealthStrikeView `json:"warnings"`
-	Strikes                   []HealthStrikeView `json:"strikes"`
-	Notices                   []NoticeView       `json:"notices"`
-	HelpLinks                 []HelpLink         `json:"helpLinks"`
-	GeneratedAt               string             `json:"generatedAt"`
+	ActiveStrikeCount         int                       `json:"activeStrikeCount"`
+	StrikeThreshold           int                       `json:"strikeThreshold"`
+	CopyrightStrikesInWindow  int                       `json:"copyrightStrikesInWindow"`
+	PendingTakedownCount      int                       `json:"pendingTakedownCount"`
+	RestrictionThreshold      int                       `json:"restrictionThreshold"`
+	SuspensionReviewThreshold int                       `json:"suspensionReviewThreshold"`
+	StrikeWindowDays          int                       `json:"strikeWindowDays"`
+	StrikeLifetimeDays        int                       `json:"strikeLifetimeDays"`
+	TakedownDeadlineHours     int                       `json:"takedownDeadlineHours"`
+	Warnings                  []HealthStrikeView        `json:"warnings"`
+	Strikes                   []HealthStrikeView        `json:"strikes"`
+	Notices                   []NoticeView              `json:"notices"`
+	HelpLinks                 []HelpLink                `json:"helpLinks"`
+	GeneratedAt               string                    `json:"generatedAt"`
+	MonetisationOverride      *MonetisationOverrideView `json:"monetisationOverride,omitempty"`
 }
 
 var helpLinks = []HelpLink{
@@ -85,7 +88,7 @@ func formatOptional(moment *time.Time) *string {
 	return &formatted
 }
 
-func BuildAccountHealth(ctx context.Context, client *ent.Client, accountId uuid.UUID, now time.Time) (AccountHealthView, error) {
+func BuildAccountHealth(ctx context.Context, client *ent.Client, accountId uuid.UUID, now time.Time, includeStaffDetails bool) (AccountHealthView, error) {
 	snapshot, err := LoadStanding(ctx, client, accountId, now)
 	if err != nil {
 		return AccountHealthView{}, err
@@ -109,10 +112,13 @@ func BuildAccountHealth(ctx context.Context, client *ent.Client, accountId uuid.
 		noticeStatus[notice.ClaimID] = strings.ToUpper(string(notice.Status))
 	}
 	view := AccountHealthView{
-		AccountId: accountId.String(), Standing: snapshot.Standing, ActiveStrikeCount: snapshot.Input.ActiveStrikes, CopyrightStrikesInWindow: snapshot.Input.CopyrightStrikesInWindow,
+		AccountId: accountId.String(), Standing: snapshot.Standing, ActiveStrikeCount: snapshot.Input.ActiveStrikes, StrikeThreshold: strikeservices.RepeatInfringerThreshold, CopyrightStrikesInWindow: snapshot.Input.CopyrightStrikesInWindow,
 		PendingTakedownCount: snapshot.Input.PendingTakedowns, RestrictionThreshold: snapshot.Settings.RestrictionThreshold, SuspensionReviewThreshold: snapshot.Settings.SuspensionReviewThreshold,
 		StrikeWindowDays: snapshot.Settings.StrikeWindowDays, StrikeLifetimeDays: snapshot.Settings.StrikeLifetimeDays, TakedownDeadlineHours: snapshot.Settings.TakedownDeadlineHours,
 		Warnings: []HealthStrikeView{}, Strikes: []HealthStrikeView{}, Notices: []NoticeView{}, HelpLinks: helpLinks, GeneratedAt: now.UTC().Format(time.RFC3339),
+	}
+	if includeStaffDetails {
+		view.MonetisationOverride = DescribeMonetisationOverride(snapshot.Override)
 	}
 	for _, row := range snapshot.Strikes {
 		if !IsActiveAt(row, now) && row.AppealStatus != strike.AppealStatusPending {

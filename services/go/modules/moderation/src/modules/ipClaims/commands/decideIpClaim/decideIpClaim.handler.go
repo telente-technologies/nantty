@@ -14,7 +14,6 @@ import (
 	"zudomart/modules/moderation/src/generated/ent"
 	"zudomart/modules/moderation/src/generated/ent/ipclaim"
 	"zudomart/modules/moderation/src/integrations"
-	healthservices "zudomart/modules/moderation/src/modules/accountHealth/services"
 	contentservices "zudomart/modules/moderation/src/modules/contentReports/services"
 	ipevents "zudomart/modules/moderation/src/modules/ipClaims/events"
 	"zudomart/modules/moderation/src/modules/ipClaims/services"
@@ -108,8 +107,5 @@ func (handler Handler) record(ctx context.Context, command Command, claim *ent.I
 			Before: before, After: after, Reason: reason, IpAddress: command.IpAddress, RequestId: command.RequestId, StepUpVerified: command.Staff.SteppedUp,
 		})
 	})
-	if err == nil && strikeAdded {
-		healthservices.RefreshStandingAfterStrikeChange(ctx, handler.Container, claim.AccusedSellerID, "strike_issued")
-	}
 	return Result{StrikeAdded: strikeAdded}, err
 }

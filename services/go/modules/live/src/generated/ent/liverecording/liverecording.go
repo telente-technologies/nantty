@@ -33,6 +33,12 @@ const (
 	FieldFailureReason = "failure_reason"
 	// FieldCompletedAt holds the string denoting the completed_at field in the database.
 	FieldCompletedAt = "completed_at"
+	// FieldRepostedAt holds the string denoting the reposted_at field in the database.
+	FieldRepostedAt = "reposted_at"
+	// FieldRepostedPostID holds the string denoting the reposted_post_id field in the database.
+	FieldRepostedPostID = "reposted_post_id"
+	// FieldLegalHold holds the string denoting the legal_hold field in the database.
+	FieldLegalHold = "legal_hold"
 	// Table holds the table name of the liverecording in the database.
 	Table = "live_recordings"
 )
@@ -49,6 +55,9 @@ var Columns = []string{
 	FieldSizeBytes,
 	FieldFailureReason,
 	FieldCompletedAt,
+	FieldRepostedAt,
+	FieldRepostedPostID,
+	FieldLegalHold,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -74,6 +83,10 @@ var (
 	DefaultSizeBytes int64
 	// FailureReasonValidator is a validator for the "failure_reason" field. It is called by the builders before save.
 	FailureReasonValidator func(string) error
+	// RepostedPostIDValidator is a validator for the "reposted_post_id" field. It is called by the builders before save.
+	RepostedPostIDValidator func(string) error
+	// DefaultLegalHold holds the default value on creation for the "legal_hold" field.
+	DefaultLegalHold bool
 	// DefaultID holds the default value on creation for the "id" field.
 	DefaultID func() uuid.UUID
 )
@@ -156,4 +169,19 @@ func ByFailureReason(opts ...sql.OrderTermOption) OrderOption {
 // ByCompletedAt orders the results by the completed_at field.
 func ByCompletedAt(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldCompletedAt, opts...).ToFunc()
+}
+
+// ByRepostedAt orders the results by the reposted_at field.
+func ByRepostedAt(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldRepostedAt, opts...).ToFunc()
+}
+
+// ByRepostedPostID orders the results by the reposted_post_id field.
+func ByRepostedPostID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldRepostedPostID, opts...).ToFunc()
+}
+
+// ByLegalHold orders the results by the legal_hold field.
+func ByLegalHold(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldLegalHold, opts...).ToFunc()
 }

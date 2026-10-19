@@ -24,7 +24,7 @@ func (controller SocialSignInController) SignInWithGoogle(writer http.ResponseWr
 		httpserver.WriteErrorResponse(writer, request, controller.Container.Logger, err)
 		return
 	}
-	controller.finish(writer, request, signinwithsocialprovider.Command{Provider: identity.Google, Token: body.IdToken, Nonce: body.Nonce, Client: utils.ReadClientDetails(request)})
+	controller.finish(writer, request, signinwithsocialprovider.Command{Provider: identity.Google, Token: body.IdToken, Nonce: body.Nonce, Birthday: body.Birthday, Client: utils.ReadClientDetails(request)})
 }
 
 func (controller SocialSignInController) SignInWithApple(writer http.ResponseWriter, request *http.Request) {
@@ -37,7 +37,7 @@ func (controller SocialSignInController) SignInWithApple(writer http.ResponseWri
 	if body.FullName != nil {
 		fullName = strings.TrimSpace(utils.DerefOrEmpty(body.FullName.GivenName) + " " + utils.DerefOrEmpty(body.FullName.FamilyName))
 	}
-	controller.finish(writer, request, signinwithsocialprovider.Command{Provider: identity.Apple, Token: body.IdentityToken, Nonce: body.Nonce, FullName: fullName, Client: utils.ReadClientDetails(request)})
+	controller.finish(writer, request, signinwithsocialprovider.Command{Provider: identity.Apple, Token: body.IdentityToken, Nonce: body.Nonce, FullName: fullName, Birthday: body.Birthday, Client: utils.ReadClientDetails(request)})
 }
 
 func (controller SocialSignInController) finish(writer http.ResponseWriter, request *http.Request, command signinwithsocialprovider.Command) {

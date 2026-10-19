@@ -95,6 +95,21 @@ func CompletedAt(v time.Time) predicate.LiveRecording {
 	return predicate.LiveRecording(sql.FieldEQ(FieldCompletedAt, v))
 }
 
+// RepostedAt applies equality check predicate on the "reposted_at" field. It's identical to RepostedAtEQ.
+func RepostedAt(v time.Time) predicate.LiveRecording {
+	return predicate.LiveRecording(sql.FieldEQ(FieldRepostedAt, v))
+}
+
+// RepostedPostID applies equality check predicate on the "reposted_post_id" field. It's identical to RepostedPostIDEQ.
+func RepostedPostID(v string) predicate.LiveRecording {
+	return predicate.LiveRecording(sql.FieldEQ(FieldRepostedPostID, v))
+}
+
+// LegalHold applies equality check predicate on the "legal_hold" field. It's identical to LegalHoldEQ.
+func LegalHold(v bool) predicate.LiveRecording {
+	return predicate.LiveRecording(sql.FieldEQ(FieldLegalHold, v))
+}
+
 // CreatedAtEQ applies the EQ predicate on the "created_at" field.
 func CreatedAtEQ(v time.Time) predicate.LiveRecording {
 	return predicate.LiveRecording(sql.FieldEQ(FieldCreatedAt, v))
@@ -528,6 +543,141 @@ func CompletedAtIsNil() predicate.LiveRecording {
 // CompletedAtNotNil applies the NotNil predicate on the "completed_at" field.
 func CompletedAtNotNil() predicate.LiveRecording {
 	return predicate.LiveRecording(sql.FieldNotNull(FieldCompletedAt))
+}
+
+// RepostedAtEQ applies the EQ predicate on the "reposted_at" field.
+func RepostedAtEQ(v time.Time) predicate.LiveRecording {
+	return predicate.LiveRecording(sql.FieldEQ(FieldRepostedAt, v))
+}
+
+// RepostedAtNEQ applies the NEQ predicate on the "reposted_at" field.
+func RepostedAtNEQ(v time.Time) predicate.LiveRecording {
+	return predicate.LiveRecording(sql.FieldNEQ(FieldRepostedAt, v))
+}
+
+// RepostedAtIn applies the In predicate on the "reposted_at" field.
+func RepostedAtIn(vs ...time.Time) predicate.LiveRecording {
+	return predicate.LiveRecording(sql.FieldIn(FieldRepostedAt, vs...))
+}
+
+// RepostedAtNotIn applies the NotIn predicate on the "reposted_at" field.
+func RepostedAtNotIn(vs ...time.Time) predicate.LiveRecording {
+	return predicate.LiveRecording(sql.FieldNotIn(FieldRepostedAt, vs...))
+}
+
+// RepostedAtGT applies the GT predicate on the "reposted_at" field.
+func RepostedAtGT(v time.Time) predicate.LiveRecording {
+	return predicate.LiveRecording(sql.FieldGT(FieldRepostedAt, v))
+}
+
+// RepostedAtGTE applies the GTE predicate on the "reposted_at" field.
+func RepostedAtGTE(v time.Time) predicate.LiveRecording {
+	return predicate.LiveRecording(sql.FieldGTE(FieldRepostedAt, v))
+}
+
+// RepostedAtLT applies the LT predicate on the "reposted_at" field.
+func RepostedAtLT(v time.Time) predicate.LiveRecording {
+	return predicate.LiveRecording(sql.FieldLT(FieldRepostedAt, v))
+}
+
+// RepostedAtLTE applies the LTE predicate on the "reposted_at" field.
+func RepostedAtLTE(v time.Time) predicate.LiveRecording {
+	return predicate.LiveRecording(sql.FieldLTE(FieldRepostedAt, v))
+}
+
+// RepostedAtIsNil applies the IsNil predicate on the "reposted_at" field.
+func RepostedAtIsNil() predicate.LiveRecording {
+	return predicate.LiveRecording(sql.FieldIsNull(FieldRepostedAt))
+}
+
+// RepostedAtNotNil applies the NotNil predicate on the "reposted_at" field.
+func RepostedAtNotNil() predicate.LiveRecording {
+	return predicate.LiveRecording(sql.FieldNotNull(FieldRepostedAt))
+}
+
+// RepostedPostIDEQ applies the EQ predicate on the "reposted_post_id" field.
+func RepostedPostIDEQ(v string) predicate.LiveRecording {
+	return predicate.LiveRecording(sql.FieldEQ(FieldRepostedPostID, v))
+}
+
+// RepostedPostIDNEQ applies the NEQ predicate on the "reposted_post_id" field.
+func RepostedPostIDNEQ(v string) predicate.LiveRecording {
+	return predicate.LiveRecording(sql.FieldNEQ(FieldRepostedPostID, v))
+}
+
+// RepostedPostIDIn applies the In predicate on the "reposted_post_id" field.
+func RepostedPostIDIn(vs ...string) predicate.LiveRecording {
+	return predicate.LiveRecording(sql.FieldIn(FieldRepostedPostID, vs...))
+}
+
+// RepostedPostIDNotIn applies the NotIn predicate on the "reposted_post_id" field.
+func RepostedPostIDNotIn(vs ...string) predicate.LiveRecording {
+	return predicate.LiveRecording(sql.FieldNotIn(FieldRepostedPostID, vs...))
+}
+
+// RepostedPostIDGT applies the GT predicate on the "reposted_post_id" field.
+func RepostedPostIDGT(v string) predicate.LiveRecording {
+	return predicate.LiveRecording(sql.FieldGT(FieldRepostedPostID, v))
+}
+
+// RepostedPostIDGTE applies the GTE predicate on the "reposted_post_id" field.
+func RepostedPostIDGTE(v string) predicate.LiveRecording {
+	return predicate.LiveRecording(sql.FieldGTE(FieldRepostedPostID, v))
+}
+
+// RepostedPostIDLT applies the LT predicate on the "reposted_post_id" field.
+func RepostedPostIDLT(v string) predicate.LiveRecording {
+	return predicate.LiveRecording(sql.FieldLT(FieldRepostedPostID, v))
+}
+
+// RepostedPostIDLTE applies the LTE predicate on the "reposted_post_id" field.
+func RepostedPostIDLTE(v string) predicate.LiveRecording {
+	return predicate.LiveRecording(sql.FieldLTE(FieldRepostedPostID, v))
+}
+
+// RepostedPostIDContains applies the Contains predicate on the "reposted_post_id" field.
+func RepostedPostIDContains(v string) predicate.LiveRecording {
+	return predicate.LiveRecording(sql.FieldContains(FieldRepostedPostID, v))
+}
+
+// RepostedPostIDHasPrefix applies the HasPrefix predicate on the "reposted_post_id" field.
+func RepostedPostIDHasPrefix(v string) predicate.LiveRecording {
+	return predicate.LiveRecording(sql.FieldHasPrefix(FieldRepostedPostID, v))
+}
+
+// RepostedPostIDHasSuffix applies the HasSuffix predicate on the "reposted_post_id" field.
+func RepostedPostIDHasSuffix(v string) predicate.LiveRecording {
+	return predicate.LiveRecording(sql.FieldHasSuffix(FieldRepostedPostID, v))
+}
+
+// RepostedPostIDIsNil applies the IsNil predicate on the "reposted_post_id" field.
+func RepostedPostIDIsNil() predicate.LiveRecording {
+	return predicate.LiveRecording(sql.FieldIsNull(FieldRepostedPostID))
+}
+
+// RepostedPostIDNotNil applies the NotNil predicate on the "reposted_post_id" field.
+func RepostedPostIDNotNil() predicate.LiveRecording {
+	return predicate.LiveRecording(sql.FieldNotNull(FieldRepostedPostID))
+}
+
+// RepostedPostIDEqualFold applies the EqualFold predicate on the "reposted_post_id" field.
+func RepostedPostIDEqualFold(v string) predicate.LiveRecording {
+	return predicate.LiveRecording(sql.FieldEqualFold(FieldRepostedPostID, v))
+}
+
+// RepostedPostIDContainsFold applies the ContainsFold predicate on the "reposted_post_id" field.
+func RepostedPostIDContainsFold(v string) predicate.LiveRecording {
+	return predicate.LiveRecording(sql.FieldContainsFold(FieldRepostedPostID, v))
+}
+
+// LegalHoldEQ applies the EQ predicate on the "legal_hold" field.
+func LegalHoldEQ(v bool) predicate.LiveRecording {
+	return predicate.LiveRecording(sql.FieldEQ(FieldLegalHold, v))
+}
+
+// LegalHoldNEQ applies the NEQ predicate on the "legal_hold" field.
+func LegalHoldNEQ(v bool) predicate.LiveRecording {
+	return predicate.LiveRecording(sql.FieldNEQ(FieldLegalHold, v))
 }
 
 // And groups predicates with the AND operator between them.

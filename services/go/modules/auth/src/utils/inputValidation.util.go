@@ -42,18 +42,32 @@ func AssertPasswordMeetsPolicy(password string) error {
 	return nil
 }
 
-func ParseBirthdayAndAssertMinimumAge(raw string, now time.Time) (time.Time, error) {
+func ParseBirthday(raw string, now time.Time) (time.Time, error) {
 	birthday, err := time.Parse(time.DateOnly, raw)
 	if err != nil {
 		return time.Time{}, authErrors.Unprocessable("Enter your birthday as YYYY-MM-DD.")
 	}
 	now = now.UTC()
-	cutoff := time.Date(now.Year()-minimumAccountAgeInYears, now.Month(), now.Day(), 0, 0, 0, 0, time.UTC)
-	if birthday.After(cutoff) {
-		return time.Time{}, authErrors.Unprocessable("You must be at least 13 years old to use Zudomart.")
-	}
-	if birthday.Before(time.Date(now.Year()-120, 1, 1, 0, 0, 0, 0, time.UTC)) {
+	today := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, time.UTC)
+	if birthday.After(today) || birthday.Before(time.Date(now.Year()-120, 1, 1, 0, 0, 0, 0, time.UTC)) {
 		return time.Time{}, authErrors.Unprocessable("Enter a valid birthday.")
+	}
+	return birthday, nil
+}
+
+func IsBelowMinimumAccountAge(birthday time.Time, now time.Time) bool {
+	now = now.UTC()
+	cutoff := time.Date(now.Year()-minimumAccountAgeInYears, now.Month(), now.Day(), 0, 0, 0, 0, time.UTC)
+	return birthday.After(cutoff)
+}
+
+func ParseBirthdayAndAssertMinimumAge(raw string, now time.Time) (time.Time, error) {
+	birthday, err := ParseBirthday(raw, now)
+	if err != nil {
+		return time.Time{}, err
+	}
+	if IsBelowMinimumAccountAge(birthday, now) {
+		return time.Time{}, authErrors.ErrBelowMinimumAge
 	}
 	return birthday, nil
 }

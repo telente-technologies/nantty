@@ -16,7 +16,6 @@ import (
 	"zudomart/modules/moderation/src/generated/ent/contentreport"
 	"zudomart/modules/moderation/src/generated/ent/contentreportentry"
 	"zudomart/modules/moderation/src/integrations"
-	healthservices "zudomart/modules/moderation/src/modules/accountHealth/services"
 	reportevents "zudomart/modules/moderation/src/modules/contentReports/events"
 	"zudomart/modules/moderation/src/modules/contentReports/services"
 	strikeservices "zudomart/modules/moderation/src/modules/strikes/services"
@@ -176,9 +175,6 @@ func (handler Handler) record(ctx context.Context, command Command, report *ent.
 	})
 	if err != nil {
 		return err
-	}
-	if rule.addsStrike && report.AuthorID != nil {
-		healthservices.RefreshStandingAfterStrikeChange(ctx, handler.Container, *report.AuthorID, "strike_issued")
 	}
 	return nil
 }

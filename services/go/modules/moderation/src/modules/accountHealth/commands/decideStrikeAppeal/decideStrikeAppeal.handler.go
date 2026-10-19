@@ -14,7 +14,6 @@ import (
 	"zudomart/modules/moderation/src/generated/ent/appeal"
 	"zudomart/modules/moderation/src/generated/ent/strike"
 	"zudomart/modules/moderation/src/integrations"
-	"zudomart/modules/moderation/src/modules/accountHealth/services"
 	decideappeal "zudomart/modules/moderation/src/modules/appeals/commands/decideAppeal"
 	strikeservices "zudomart/modules/moderation/src/modules/strikes/services"
 	"zudomart/platform/httpserver"
@@ -33,6 +32,9 @@ func (handler Handler) Execute(ctx context.Context, command Command) error {
 	}
 	if command.Action != "uphold" && command.Action != "overturn" {
 		return httpserver.ErrNotFound
+	}
+	if command.Action == "overturn" && !command.Staff.SteppedUp {
+		return httpserver.NewApiError(http.StatusForbidden, "STEP_UP_REQUIRED", "Confirm your identity again to continue.")
 	}
 	identifier, err := uuid.Parse(command.StrikeId)
 	if err != nil {
@@ -75,14 +77,8 @@ func (handler Handler) Execute(ctx context.Context, command Command) error {
 		after, _ := json.Marshal(map[string]any{"appealStatus": outcome})
 		return handler.Container.Audit.Record(ctx, integrations.AuditRecord{
 			ActorId: command.Staff.Id, ActorName: command.Staff.Name, ActorRole: command.Staff.Role, Action: "strike.appeal_" + string(outcome), SubjectType: "user", SubjectId: row.AccountID.String(), SubjectLabel: row.Policy,
-			Before: before, After: after, Reason: reason, IpAddress: command.IpAddress, RequestId: command.RequestId,
+			Before: before, After: after, Reason: reason, IpAddress: command.IpAddress, RequestId: command.RequestId, StepUpVerified: command.Staff.SteppedUp,
 		})
 	})
-	if err != nil {
-		return err
-	}
-	if _, healthErr := services.PublishHealthChanged(ctx, handler.Container, row.AccountID, "strike_appeal_"+string(outcome)); healthErr != nil {
-		handler.Container.Logger.WarnContext(ctx, "account health event failed", "error", healthErr.Error())
-	}
-	return nil
+	return err
 }

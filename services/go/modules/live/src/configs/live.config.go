@@ -48,6 +48,7 @@ type LiveSettings struct {
 	RecordingAccessKey              string
 	RecordingSecret                 string
 	RecordingDownloadTimeToLive     time.Duration
+	RecordingRetentionInterval      time.Duration
 	LiveKitWebhookEnabled           bool
 	Safety                          LiveSafetySettings
 }
@@ -95,6 +96,7 @@ func ReadLiveSettingsFromEnvironment(reader *platformconfig.EnvironmentReader) L
 		RecordingAccessKey:              reader.ReadStringOrDefault("LIVE_RECORDING_S3_ACCESS_KEY", ""),
 		RecordingSecret:                 reader.ReadStringOrDefault("LIVE_RECORDING_S3_SECRET", ""),
 		RecordingDownloadTimeToLive:     reader.ReadDurationOrDefault("LIVE_RECORDING_DOWNLOAD_TTL", time.Hour),
+		RecordingRetentionInterval:      reader.ReadDurationOrDefault("LIVE_RECORDING_RETENTION_INTERVAL", time.Hour),
 		LiveKitWebhookEnabled:           reader.ReadStringOrDefault("LIVE_LIVEKIT_WEBHOOK_ENABLED", "true") == "true",
 	}
 	settings.Safety = readLiveSafetySettings(reader)

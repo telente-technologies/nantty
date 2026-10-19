@@ -12,6 +12,7 @@ import (
 	"zudomart/modules/auth/src/generated/ent/migrate"
 
 	"zudomart/modules/auth/src/generated/ent/account"
+	"zudomart/modules/auth/src/generated/ent/agegaterefusal"
 	"zudomart/modules/auth/src/generated/ent/onetimecode"
 	"zudomart/modules/auth/src/generated/ent/outboxevent"
 	"zudomart/modules/auth/src/generated/ent/refreshtoken"
@@ -36,6 +37,8 @@ type Client struct {
 	Schema *migrate.Schema
 	// Account is the client for interacting with the Account builders.
 	Account *AccountClient
+	// AgeGateRefusal is the client for interacting with the AgeGateRefusal builders.
+	AgeGateRefusal *AgeGateRefusalClient
 	// OneTimeCode is the client for interacting with the OneTimeCode builders.
 	OneTimeCode *OneTimeCodeClient
 	// OutboxEvent is the client for interacting with the OutboxEvent builders.
@@ -62,6 +65,7 @@ func NewClient(opts ...Option) *Client {
 func (c *Client) init() {
 	c.Schema = migrate.NewSchema(c.driver)
 	c.Account = NewAccountClient(c.config)
+	c.AgeGateRefusal = NewAgeGateRefusalClient(c.config)
 	c.OneTimeCode = NewOneTimeCodeClient(c.config)
 	c.OutboxEvent = NewOutboxEventClient(c.config)
 	c.RefreshToken = NewRefreshTokenClient(c.config)
@@ -162,6 +166,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		ctx:               ctx,
 		config:            cfg,
 		Account:           NewAccountClient(cfg),
+		AgeGateRefusal:    NewAgeGateRefusalClient(cfg),
 		OneTimeCode:       NewOneTimeCodeClient(cfg),
 		OutboxEvent:       NewOutboxEventClient(cfg),
 		RefreshToken:      NewRefreshTokenClient(cfg),
@@ -189,6 +194,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		ctx:               ctx,
 		config:            cfg,
 		Account:           NewAccountClient(cfg),
+		AgeGateRefusal:    NewAgeGateRefusalClient(cfg),
 		OneTimeCode:       NewOneTimeCodeClient(cfg),
 		OutboxEvent:       NewOutboxEventClient(cfg),
 		RefreshToken:      NewRefreshTokenClient(cfg),
@@ -225,8 +231,8 @@ func (c *Client) Close() error {
 // In order to add hooks to a specific client, call: `client.Node.Use(...)`.
 func (c *Client) Use(hooks ...Hook) {
 	for _, n := range []interface{ Use(...Hook) }{
-		c.Account, c.OneTimeCode, c.OutboxEvent, c.RefreshToken, c.RegistrationBlock,
-		c.Session, c.SigningKey, c.SocialIdentity,
+		c.Account, c.AgeGateRefusal, c.OneTimeCode, c.OutboxEvent, c.RefreshToken,
+		c.RegistrationBlock, c.Session, c.SigningKey, c.SocialIdentity,
 	} {
 		n.Use(hooks...)
 	}
@@ -236,8 +242,8 @@ func (c *Client) Use(hooks ...Hook) {
 // In order to add interceptors to a specific client, call: `client.Node.Intercept(...)`.
 func (c *Client) Intercept(interceptors ...Interceptor) {
 	for _, n := range []interface{ Intercept(...Interceptor) }{
-		c.Account, c.OneTimeCode, c.OutboxEvent, c.RefreshToken, c.RegistrationBlock,
-		c.Session, c.SigningKey, c.SocialIdentity,
+		c.Account, c.AgeGateRefusal, c.OneTimeCode, c.OutboxEvent, c.RefreshToken,
+		c.RegistrationBlock, c.Session, c.SigningKey, c.SocialIdentity,
 	} {
 		n.Intercept(interceptors...)
 	}
@@ -248,6 +254,8 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 	switch m := m.(type) {
 	case *AccountMutation:
 		return c.Account.mutate(ctx, m)
+	case *AgeGateRefusalMutation:
+		return c.AgeGateRefusal.mutate(ctx, m)
 	case *OneTimeCodeMutation:
 		return c.OneTimeCode.mutate(ctx, m)
 	case *OutboxEventMutation:
@@ -429,6 +437,139 @@ func (c *AccountClient) mutate(ctx context.Context, m *AccountMutation) (Value, 
 		return (&AccountDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
 		return nil, fmt.Errorf("ent: unknown Account mutation op: %q", m.Op())
+	}
+}
+
+// AgeGateRefusalClient is a client for the AgeGateRefusal schema.
+type AgeGateRefusalClient struct {
+	config
+}
+
+// NewAgeGateRefusalClient returns a client for the AgeGateRefusal from the given config.
+func NewAgeGateRefusalClient(c config) *AgeGateRefusalClient {
+	return &AgeGateRefusalClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `agegaterefusal.Hooks(f(g(h())))`.
+func (c *AgeGateRefusalClient) Use(hooks ...Hook) {
+	c.hooks.AgeGateRefusal = append(c.hooks.AgeGateRefusal, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `agegaterefusal.Intercept(f(g(h())))`.
+func (c *AgeGateRefusalClient) Intercept(interceptors ...Interceptor) {
+	c.inters.AgeGateRefusal = append(c.inters.AgeGateRefusal, interceptors...)
+}
+
+// Create returns a builder for creating a AgeGateRefusal entity.
+func (c *AgeGateRefusalClient) Create() *AgeGateRefusalCreate {
+	mutation := newAgeGateRefusalMutation(c.config, OpCreate)
+	return &AgeGateRefusalCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of AgeGateRefusal entities.
+func (c *AgeGateRefusalClient) CreateBulk(builders ...*AgeGateRefusalCreate) *AgeGateRefusalCreateBulk {
+	return &AgeGateRefusalCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *AgeGateRefusalClient) MapCreateBulk(slice any, setFunc func(*AgeGateRefusalCreate, int)) *AgeGateRefusalCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &AgeGateRefusalCreateBulk{err: fmt.Errorf("calling to AgeGateRefusalClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*AgeGateRefusalCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &AgeGateRefusalCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for AgeGateRefusal.
+func (c *AgeGateRefusalClient) Update() *AgeGateRefusalUpdate {
+	mutation := newAgeGateRefusalMutation(c.config, OpUpdate)
+	return &AgeGateRefusalUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *AgeGateRefusalClient) UpdateOne(_m *AgeGateRefusal) *AgeGateRefusalUpdateOne {
+	mutation := newAgeGateRefusalMutation(c.config, OpUpdateOne, withAgeGateRefusal(_m))
+	return &AgeGateRefusalUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *AgeGateRefusalClient) UpdateOneID(id uuid.UUID) *AgeGateRefusalUpdateOne {
+	mutation := newAgeGateRefusalMutation(c.config, OpUpdateOne, withAgeGateRefusalID(id))
+	return &AgeGateRefusalUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for AgeGateRefusal.
+func (c *AgeGateRefusalClient) Delete() *AgeGateRefusalDelete {
+	mutation := newAgeGateRefusalMutation(c.config, OpDelete)
+	return &AgeGateRefusalDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *AgeGateRefusalClient) DeleteOne(_m *AgeGateRefusal) *AgeGateRefusalDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *AgeGateRefusalClient) DeleteOneID(id uuid.UUID) *AgeGateRefusalDeleteOne {
+	builder := c.Delete().Where(agegaterefusal.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &AgeGateRefusalDeleteOne{builder}
+}
+
+// Query returns a query builder for AgeGateRefusal.
+func (c *AgeGateRefusalClient) Query() *AgeGateRefusalQuery {
+	return &AgeGateRefusalQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeAgeGateRefusal},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a AgeGateRefusal entity by its id.
+func (c *AgeGateRefusalClient) Get(ctx context.Context, id uuid.UUID) (*AgeGateRefusal, error) {
+	return c.Query().Where(agegaterefusal.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *AgeGateRefusalClient) GetX(ctx context.Context, id uuid.UUID) *AgeGateRefusal {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *AgeGateRefusalClient) Hooks() []Hook {
+	return c.hooks.AgeGateRefusal
+}
+
+// Interceptors returns the client interceptors.
+func (c *AgeGateRefusalClient) Interceptors() []Interceptor {
+	return c.inters.AgeGateRefusal
+}
+
+func (c *AgeGateRefusalClient) mutate(ctx context.Context, m *AgeGateRefusalMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&AgeGateRefusalCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&AgeGateRefusalUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&AgeGateRefusalUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&AgeGateRefusalDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown AgeGateRefusal mutation op: %q", m.Op())
 	}
 }
 
@@ -1430,12 +1571,12 @@ func (c *SocialIdentityClient) mutate(ctx context.Context, m *SocialIdentityMuta
 // hooks and interceptors per client, for fast access.
 type (
 	hooks struct {
-		Account, OneTimeCode, OutboxEvent, RefreshToken, RegistrationBlock, Session,
-		SigningKey, SocialIdentity []ent.Hook
+		Account, AgeGateRefusal, OneTimeCode, OutboxEvent, RefreshToken,
+		RegistrationBlock, Session, SigningKey, SocialIdentity []ent.Hook
 	}
 	inters struct {
-		Account, OneTimeCode, OutboxEvent, RefreshToken, RegistrationBlock, Session,
-		SigningKey, SocialIdentity []ent.Interceptor
+		Account, AgeGateRefusal, OneTimeCode, OutboxEvent, RefreshToken,
+		RegistrationBlock, Session, SigningKey, SocialIdentity []ent.Interceptor
 	}
 )
 

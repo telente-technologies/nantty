@@ -22,6 +22,9 @@ func (service *LiveService) ListSuggestedLives(ctx context.Context, viewer uuid.
 	if err != nil {
 		return nil, err
 	}
+	if rows, err = service.withoutLivesOfPrivateHostsHiddenFrom(ctx, viewer, rows); err != nil {
+		return nil, err
+	}
 	identifiers := make([]uuid.UUID, 0, len(rows))
 	for _, row := range rows {
 		identifiers = append(identifiers, row.HostID)

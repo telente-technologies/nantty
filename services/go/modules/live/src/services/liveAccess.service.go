@@ -69,6 +69,9 @@ func (service *LiveService) DecideLiveAccess(ctx context.Context, session *ent.L
 	if blocked[session.HostID] {
 		return deny("blocked")
 	}
+	if hidden, err := service.hostHiddenByPrivateAccount(ctx, session.HostID, userId); err != nil || hidden {
+		return orDenied(err, "privateAccount", role)
+	}
 	switch session.Visibility {
 	case livesession.VisibilityFollowers:
 		following, err := service.Relations.IsFollowing(ctx, userId, session.HostID)

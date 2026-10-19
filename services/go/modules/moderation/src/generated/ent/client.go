@@ -11,6 +11,7 @@ import (
 
 	"zudomart/modules/moderation/src/generated/ent/migrate"
 
+	"zudomart/modules/moderation/src/generated/ent/accountmonetisationstate"
 	"zudomart/modules/moderation/src/generated/ent/appeal"
 	"zudomart/modules/moderation/src/generated/ent/automationeventoccurrence"
 	"zudomart/modules/moderation/src/generated/ent/automationexecution"
@@ -47,6 +48,8 @@ type Client struct {
 	config
 	// Schema is the client for creating, migrating and dropping schema.
 	Schema *migrate.Schema
+	// AccountMonetisationState is the client for interacting with the AccountMonetisationState builders.
+	AccountMonetisationState *AccountMonetisationStateClient
 	// Appeal is the client for interacting with the Appeal builders.
 	Appeal *AppealClient
 	// AutomationEventOccurrence is the client for interacting with the AutomationEventOccurrence builders.
@@ -102,6 +105,7 @@ func NewClient(opts ...Option) *Client {
 
 func (c *Client) init() {
 	c.Schema = migrate.NewSchema(c.driver)
+	c.AccountMonetisationState = NewAccountMonetisationStateClient(c.config)
 	c.Appeal = NewAppealClient(c.config)
 	c.AutomationEventOccurrence = NewAutomationEventOccurrenceClient(c.config)
 	c.AutomationExecution = NewAutomationExecutionClient(c.config)
@@ -216,6 +220,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 	return &Tx{
 		ctx:                       ctx,
 		config:                    cfg,
+		AccountMonetisationState:  NewAccountMonetisationStateClient(cfg),
 		Appeal:                    NewAppealClient(cfg),
 		AutomationEventOccurrence: NewAutomationEventOccurrenceClient(cfg),
 		AutomationExecution:       NewAutomationExecutionClient(cfg),
@@ -257,6 +262,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 	return &Tx{
 		ctx:                       ctx,
 		config:                    cfg,
+		AccountMonetisationState:  NewAccountMonetisationStateClient(cfg),
 		Appeal:                    NewAppealClient(cfg),
 		AutomationEventOccurrence: NewAutomationEventOccurrenceClient(cfg),
 		AutomationExecution:       NewAutomationExecutionClient(cfg),
@@ -285,7 +291,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 // Debug returns a new debug-client. It's used to get verbose logging on specific operations.
 //
 //	client.Debug().
-//		Appeal.
+//		AccountMonetisationState.
 //		Query().
 //		Count(ctx)
 func (c *Client) Debug() *Client {
@@ -308,12 +314,13 @@ func (c *Client) Close() error {
 // In order to add hooks to a specific client, call: `client.Node.Use(...)`.
 func (c *Client) Use(hooks ...Hook) {
 	for _, n := range []interface{ Use(...Hook) }{
-		c.Appeal, c.AutomationEventOccurrence, c.AutomationExecution, c.AutomationRule,
-		c.AutomationRuleVersion, c.ChatReport, c.ContentReport, c.ContentReportEntry,
-		c.CopyrightClaim, c.CopyrightPolicySetting, c.CounterNotice,
-		c.EvidenceRetentionSetting, c.IpClaim, c.LegalReport, c.LiveSafetyIncident,
-		c.LiveSafetySignal, c.OutboxEvent, c.SecurityAccountState, c.SecurityCase,
-		c.SecurityEvent, c.Strike, c.SuspensionCase,
+		c.AccountMonetisationState, c.Appeal, c.AutomationEventOccurrence,
+		c.AutomationExecution, c.AutomationRule, c.AutomationRuleVersion, c.ChatReport,
+		c.ContentReport, c.ContentReportEntry, c.CopyrightClaim,
+		c.CopyrightPolicySetting, c.CounterNotice, c.EvidenceRetentionSetting,
+		c.IpClaim, c.LegalReport, c.LiveSafetyIncident, c.LiveSafetySignal,
+		c.OutboxEvent, c.SecurityAccountState, c.SecurityCase, c.SecurityEvent,
+		c.Strike, c.SuspensionCase,
 	} {
 		n.Use(hooks...)
 	}
@@ -323,12 +330,13 @@ func (c *Client) Use(hooks ...Hook) {
 // In order to add interceptors to a specific client, call: `client.Node.Intercept(...)`.
 func (c *Client) Intercept(interceptors ...Interceptor) {
 	for _, n := range []interface{ Intercept(...Interceptor) }{
-		c.Appeal, c.AutomationEventOccurrence, c.AutomationExecution, c.AutomationRule,
-		c.AutomationRuleVersion, c.ChatReport, c.ContentReport, c.ContentReportEntry,
-		c.CopyrightClaim, c.CopyrightPolicySetting, c.CounterNotice,
-		c.EvidenceRetentionSetting, c.IpClaim, c.LegalReport, c.LiveSafetyIncident,
-		c.LiveSafetySignal, c.OutboxEvent, c.SecurityAccountState, c.SecurityCase,
-		c.SecurityEvent, c.Strike, c.SuspensionCase,
+		c.AccountMonetisationState, c.Appeal, c.AutomationEventOccurrence,
+		c.AutomationExecution, c.AutomationRule, c.AutomationRuleVersion, c.ChatReport,
+		c.ContentReport, c.ContentReportEntry, c.CopyrightClaim,
+		c.CopyrightPolicySetting, c.CounterNotice, c.EvidenceRetentionSetting,
+		c.IpClaim, c.LegalReport, c.LiveSafetyIncident, c.LiveSafetySignal,
+		c.OutboxEvent, c.SecurityAccountState, c.SecurityCase, c.SecurityEvent,
+		c.Strike, c.SuspensionCase,
 	} {
 		n.Intercept(interceptors...)
 	}
@@ -337,6 +345,8 @@ func (c *Client) Intercept(interceptors ...Interceptor) {
 // Mutate implements the ent.Mutator interface.
 func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 	switch m := m.(type) {
+	case *AccountMonetisationStateMutation:
+		return c.AccountMonetisationState.mutate(ctx, m)
 	case *AppealMutation:
 		return c.Appeal.mutate(ctx, m)
 	case *AutomationEventOccurrenceMutation:
@@ -383,6 +393,139 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.SuspensionCase.mutate(ctx, m)
 	default:
 		return nil, fmt.Errorf("ent: unknown mutation type %T", m)
+	}
+}
+
+// AccountMonetisationStateClient is a client for the AccountMonetisationState schema.
+type AccountMonetisationStateClient struct {
+	config
+}
+
+// NewAccountMonetisationStateClient returns a client for the AccountMonetisationState from the given config.
+func NewAccountMonetisationStateClient(c config) *AccountMonetisationStateClient {
+	return &AccountMonetisationStateClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `accountmonetisationstate.Hooks(f(g(h())))`.
+func (c *AccountMonetisationStateClient) Use(hooks ...Hook) {
+	c.hooks.AccountMonetisationState = append(c.hooks.AccountMonetisationState, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `accountmonetisationstate.Intercept(f(g(h())))`.
+func (c *AccountMonetisationStateClient) Intercept(interceptors ...Interceptor) {
+	c.inters.AccountMonetisationState = append(c.inters.AccountMonetisationState, interceptors...)
+}
+
+// Create returns a builder for creating a AccountMonetisationState entity.
+func (c *AccountMonetisationStateClient) Create() *AccountMonetisationStateCreate {
+	mutation := newAccountMonetisationStateMutation(c.config, OpCreate)
+	return &AccountMonetisationStateCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of AccountMonetisationState entities.
+func (c *AccountMonetisationStateClient) CreateBulk(builders ...*AccountMonetisationStateCreate) *AccountMonetisationStateCreateBulk {
+	return &AccountMonetisationStateCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *AccountMonetisationStateClient) MapCreateBulk(slice any, setFunc func(*AccountMonetisationStateCreate, int)) *AccountMonetisationStateCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &AccountMonetisationStateCreateBulk{err: fmt.Errorf("calling to AccountMonetisationStateClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*AccountMonetisationStateCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &AccountMonetisationStateCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for AccountMonetisationState.
+func (c *AccountMonetisationStateClient) Update() *AccountMonetisationStateUpdate {
+	mutation := newAccountMonetisationStateMutation(c.config, OpUpdate)
+	return &AccountMonetisationStateUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *AccountMonetisationStateClient) UpdateOne(_m *AccountMonetisationState) *AccountMonetisationStateUpdateOne {
+	mutation := newAccountMonetisationStateMutation(c.config, OpUpdateOne, withAccountMonetisationState(_m))
+	return &AccountMonetisationStateUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *AccountMonetisationStateClient) UpdateOneID(id uuid.UUID) *AccountMonetisationStateUpdateOne {
+	mutation := newAccountMonetisationStateMutation(c.config, OpUpdateOne, withAccountMonetisationStateID(id))
+	return &AccountMonetisationStateUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for AccountMonetisationState.
+func (c *AccountMonetisationStateClient) Delete() *AccountMonetisationStateDelete {
+	mutation := newAccountMonetisationStateMutation(c.config, OpDelete)
+	return &AccountMonetisationStateDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *AccountMonetisationStateClient) DeleteOne(_m *AccountMonetisationState) *AccountMonetisationStateDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *AccountMonetisationStateClient) DeleteOneID(id uuid.UUID) *AccountMonetisationStateDeleteOne {
+	builder := c.Delete().Where(accountmonetisationstate.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &AccountMonetisationStateDeleteOne{builder}
+}
+
+// Query returns a query builder for AccountMonetisationState.
+func (c *AccountMonetisationStateClient) Query() *AccountMonetisationStateQuery {
+	return &AccountMonetisationStateQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeAccountMonetisationState},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a AccountMonetisationState entity by its id.
+func (c *AccountMonetisationStateClient) Get(ctx context.Context, id uuid.UUID) (*AccountMonetisationState, error) {
+	return c.Query().Where(accountmonetisationstate.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *AccountMonetisationStateClient) GetX(ctx context.Context, id uuid.UUID) *AccountMonetisationState {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *AccountMonetisationStateClient) Hooks() []Hook {
+	return c.hooks.AccountMonetisationState
+}
+
+// Interceptors returns the client interceptors.
+func (c *AccountMonetisationStateClient) Interceptors() []Interceptor {
+	return c.inters.AccountMonetisationState
+}
+
+func (c *AccountMonetisationStateClient) mutate(ctx context.Context, m *AccountMonetisationStateMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&AccountMonetisationStateCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&AccountMonetisationStateUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&AccountMonetisationStateUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&AccountMonetisationStateDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown AccountMonetisationState mutation op: %q", m.Op())
 	}
 }
 
@@ -3315,20 +3458,20 @@ func (c *SuspensionCaseClient) mutate(ctx context.Context, m *SuspensionCaseMuta
 // hooks and interceptors per client, for fast access.
 type (
 	hooks struct {
-		Appeal, AutomationEventOccurrence, AutomationExecution, AutomationRule,
-		AutomationRuleVersion, ChatReport, ContentReport, ContentReportEntry,
-		CopyrightClaim, CopyrightPolicySetting, CounterNotice,
-		EvidenceRetentionSetting, IpClaim, LegalReport, LiveSafetyIncident,
-		LiveSafetySignal, OutboxEvent, SecurityAccountState, SecurityCase,
-		SecurityEvent, Strike, SuspensionCase []ent.Hook
+		AccountMonetisationState, Appeal, AutomationEventOccurrence,
+		AutomationExecution, AutomationRule, AutomationRuleVersion, ChatReport,
+		ContentReport, ContentReportEntry, CopyrightClaim, CopyrightPolicySetting,
+		CounterNotice, EvidenceRetentionSetting, IpClaim, LegalReport,
+		LiveSafetyIncident, LiveSafetySignal, OutboxEvent, SecurityAccountState,
+		SecurityCase, SecurityEvent, Strike, SuspensionCase []ent.Hook
 	}
 	inters struct {
-		Appeal, AutomationEventOccurrence, AutomationExecution, AutomationRule,
-		AutomationRuleVersion, ChatReport, ContentReport, ContentReportEntry,
-		CopyrightClaim, CopyrightPolicySetting, CounterNotice,
-		EvidenceRetentionSetting, IpClaim, LegalReport, LiveSafetyIncident,
-		LiveSafetySignal, OutboxEvent, SecurityAccountState, SecurityCase,
-		SecurityEvent, Strike, SuspensionCase []ent.Interceptor
+		AccountMonetisationState, Appeal, AutomationEventOccurrence,
+		AutomationExecution, AutomationRule, AutomationRuleVersion, ChatReport,
+		ContentReport, ContentReportEntry, CopyrightClaim, CopyrightPolicySetting,
+		CounterNotice, EvidenceRetentionSetting, IpClaim, LegalReport,
+		LiveSafetyIncident, LiveSafetySignal, OutboxEvent, SecurityAccountState,
+		SecurityCase, SecurityEvent, Strike, SuspensionCase []ent.Interceptor
 	}
 )
 

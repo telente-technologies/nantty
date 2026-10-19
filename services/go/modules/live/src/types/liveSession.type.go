@@ -85,6 +85,12 @@ type LiveSessionView struct {
 	TopSupporterUserId         *string          `json:"topSupporterUserId"`
 	Safety                     *LiveSafetyView  `json:"safety"`
 	HostRanking                *HostRankingView `json:"hostRanking"`
+	Access                     LiveAccessView   `json:"access"`
+}
+
+type LiveAccessView struct {
+	Allowed bool   `json:"allowed"`
+	Reason  string `json:"reason"`
 }
 
 type HostRankingView struct {
@@ -113,4 +119,9 @@ type UpdateLiveDetailsInput struct {
 	Category       *string
 	ScheduledAt    *time.Time
 	ChangeSchedule bool
+}
+
+type HostLiveStatusView struct {
+	LiveStreamId *string `json:"liveStreamId"`
+	StartedAt    *string `json:"startedAt"`
 }

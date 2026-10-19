@@ -16,6 +16,8 @@ type Tx struct {
 	config
 	// Account is the client for interacting with the Account builders.
 	Account *AccountClient
+	// AgeGateRefusal is the client for interacting with the AgeGateRefusal builders.
+	AgeGateRefusal *AgeGateRefusalClient
 	// OneTimeCode is the client for interacting with the OneTimeCode builders.
 	OneTimeCode *OneTimeCodeClient
 	// OutboxEvent is the client for interacting with the OutboxEvent builders.
@@ -162,6 +164,7 @@ func (tx *Tx) Client() *Client {
 
 func (tx *Tx) init() {
 	tx.Account = NewAccountClient(tx.config)
+	tx.AgeGateRefusal = NewAgeGateRefusalClient(tx.config)
 	tx.OneTimeCode = NewOneTimeCodeClient(tx.config)
 	tx.OutboxEvent = NewOutboxEventClient(tx.config)
 	tx.RefreshToken = NewRefreshTokenClient(tx.config)

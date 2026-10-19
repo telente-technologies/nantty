@@ -53,11 +53,14 @@ func (LiveRecording) Fields() []ent.Field {
 		field.Int64("size_bytes").Default(0),
 		field.String("failure_reason").Optional().Nillable().MaxLen(200),
 		field.Time("completed_at").Optional().Nillable(),
+		field.Time("reposted_at").Optional().Nillable(),
+		field.String("reposted_post_id").Optional().Nillable().MaxLen(80),
+		field.Bool("legal_hold").Default(false),
 	}
 }
 
 func (LiveRecording) Indexes() []ent.Index {
-	return []ent.Index{index.Fields("live_id", "id"), index.Fields("egress_id").Unique()}
+	return []ent.Index{index.Fields("live_id", "id"), index.Fields("egress_id").Unique(), index.Fields("created_at").Annotations(entsql.IndexWhere("reposted_at IS NULL AND legal_hold = false"))}
 }
 
 type OverlayScene struct {

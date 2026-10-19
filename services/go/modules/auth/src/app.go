@@ -121,6 +121,7 @@ func (module *Module) RunBackgroundWorkersUntilContextDone(ctx context.Context) 
 	go func() { _ = module.container.Keys.RunRotationAndReloadLoopUntilContextDone(ctx, reportError) }()
 	go services.RunRevokedSessionSweeperUntilContextDone(ctx, module.container.Client, module.container.Now,
 		services.SessionDenylistTtl(module.container.Settings.LongestUserTokenTimeToLive()), module.container.Logger)
+	go services.RunAgeGateRefusalSweeperUntilContextDone(ctx, module.container.Client, module.container.Now, module.container.Logger)
 	go func() {
 		settings := module.container.Settings
 		directory := services.AccountDirectoryService{Container: module.container}

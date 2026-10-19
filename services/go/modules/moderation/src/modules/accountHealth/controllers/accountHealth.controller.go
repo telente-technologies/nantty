@@ -5,7 +5,9 @@ import (
 
 	"zudomart/modules/moderation/src/container"
 	appealstrike "zudomart/modules/moderation/src/modules/accountHealth/commands/appealStrike"
+	clearmonetisationoverride "zudomart/modules/moderation/src/modules/accountHealth/commands/clearMonetisationOverride"
 	decidestrikeappeal "zudomart/modules/moderation/src/modules/accountHealth/commands/decideStrikeAppeal"
+	setmonetisationoverride "zudomart/modules/moderation/src/modules/accountHealth/commands/setMonetisationOverride"
 	"zudomart/modules/moderation/src/modules/accountHealth/dtos"
 	getaccounthealth "zudomart/modules/moderation/src/modules/accountHealth/queries/getAccountHealth"
 	liststrikeappeals "zudomart/modules/moderation/src/modules/accountHealth/queries/listStrikeAppeals"
@@ -36,12 +38,12 @@ func clientIp(request *http.Request) string {
 
 func (controller AccountHealthController) Mine(writer http.ResponseWriter, request *http.Request) {
 	principal, _ := jwtauth.PrincipalFromContext(request.Context())
-	result, err := getaccounthealth.Handler{Container: controller.Container}.Execute(request.Context(), principal.UserId)
+	result, err := getaccounthealth.Handler{Container: controller.Container}.Execute(request.Context(), principal.UserId, false)
 	controller.respond(writer, request, http.StatusOK, result, err)
 }
 
 func (controller AccountHealthController) ForAccount(writer http.ResponseWriter, request *http.Request) {
-	result, err := getaccounthealth.Handler{Container: controller.Container}.Execute(request.Context(), request.PathValue("accountId"))
+	result, err := getaccounthealth.Handler{Container: controller.Container}.Execute(request.Context(), request.PathValue("accountId"), true)
 	controller.respond(writer, request, http.StatusOK, result, err)
 }
 
@@ -74,4 +76,30 @@ func (controller AccountHealthController) DecideAppeal(action string) http.Handl
 		})
 		controller.respond(writer, request, http.StatusOK, map[string]string{"status": action}, err)
 	}
+}
+
+func (controller AccountHealthController) SetMonetisationOverride(writer http.ResponseWriter, request *http.Request) {
+	var body dtos.MonetisationOverrideRequest
+	if err := httpserver.DecodeJsonBodyRejectingUnknownFields(writer, request, &body); err != nil {
+		controller.respond(writer, request, 0, nil, err)
+		return
+	}
+	staff, _ := staffauth.StaffFromContext(request.Context())
+	result, err := setmonetisationoverride.Handler{Container: controller.Container}.Execute(request.Context(), setmonetisationoverride.Command{
+		Staff: staff, IpAddress: clientIp(request), RequestId: httpserver.RequestIdFromContext(request.Context()), AccountId: request.PathValue("accountId"), Mode: body.Mode, Reason: body.Reason,
+	})
+	controller.respond(writer, request, http.StatusOK, result, err)
+}
+
+func (controller AccountHealthController) ClearMonetisationOverride(writer http.ResponseWriter, request *http.Request) {
+	var body dtos.ReasonRequest
+	if err := httpserver.DecodeJsonBodyRejectingUnknownFields(writer, request, &body); err != nil {
+		controller.respond(writer, request, 0, nil, err)
+		return
+	}
+	staff, _ := staffauth.StaffFromContext(request.Context())
+	result, err := clearmonetisationoverride.Handler{Container: controller.Container}.Execute(request.Context(), clearmonetisationoverride.Command{
+		Staff: staff, IpAddress: clientIp(request), RequestId: httpserver.RequestIdFromContext(request.Context()), AccountId: request.PathValue("accountId"), Reason: body.Reason,
+	})
+	controller.respond(writer, request, http.StatusOK, result, err)
 }

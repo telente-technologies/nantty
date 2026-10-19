@@ -14,6 +14,8 @@ import (
 // Tx is a transactional client that is created by calling Client.Tx().
 type Tx struct {
 	config
+	// AccountMonetisationState is the client for interacting with the AccountMonetisationState builders.
+	AccountMonetisationState *AccountMonetisationStateClient
 	// Appeal is the client for interacting with the Appeal builders.
 	Appeal *AppealClient
 	// AutomationEventOccurrence is the client for interacting with the AutomationEventOccurrence builders.
@@ -189,6 +191,7 @@ func (tx *Tx) Client() *Client {
 }
 
 func (tx *Tx) init() {
+	tx.AccountMonetisationState = NewAccountMonetisationStateClient(tx.config)
 	tx.Appeal = NewAppealClient(tx.config)
 	tx.AutomationEventOccurrence = NewAutomationEventOccurrenceClient(tx.config)
 	tx.AutomationExecution = NewAutomationExecutionClient(tx.config)
@@ -220,7 +223,7 @@ func (tx *Tx) init() {
 // of them in order to commit or rollback the transaction.
 //
 // If a closed transaction is embedded in one of the generated entities, and the entity
-// applies a query, for example: Appeal.QueryXXX(), the query will be executed
+// applies a query, for example: AccountMonetisationState.QueryXXX(), the query will be executed
 // through the driver which created this transaction.
 //
 // Note that txDriver is not goroutine safe.

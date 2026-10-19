@@ -35,7 +35,13 @@ type LiveRecording struct {
 	// FailureReason holds the value of the "failure_reason" field.
 	FailureReason *string `json:"failure_reason,omitempty"`
 	// CompletedAt holds the value of the "completed_at" field.
-	CompletedAt  *time.Time `json:"completed_at,omitempty"`
+	CompletedAt *time.Time `json:"completed_at,omitempty"`
+	// RepostedAt holds the value of the "reposted_at" field.
+	RepostedAt *time.Time `json:"reposted_at,omitempty"`
+	// RepostedPostID holds the value of the "reposted_post_id" field.
+	RepostedPostID *string `json:"reposted_post_id,omitempty"`
+	// LegalHold holds the value of the "legal_hold" field.
+	LegalHold    bool `json:"legal_hold,omitempty"`
 	selectValues sql.SelectValues
 }
 
@@ -44,11 +50,13 @@ func (*LiveRecording) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
+		case liverecording.FieldLegalHold:
+			values[i] = new(sql.NullBool)
 		case liverecording.FieldDurationSeconds, liverecording.FieldSizeBytes:
 			values[i] = new(sql.NullInt64)
-		case liverecording.FieldEgressID, liverecording.FieldState, liverecording.FieldObjectKey, liverecording.FieldFailureReason:
+		case liverecording.FieldEgressID, liverecording.FieldState, liverecording.FieldObjectKey, liverecording.FieldFailureReason, liverecording.FieldRepostedPostID:
 			values[i] = new(sql.NullString)
-		case liverecording.FieldCreatedAt, liverecording.FieldCompletedAt:
+		case liverecording.FieldCreatedAt, liverecording.FieldCompletedAt, liverecording.FieldRepostedAt:
 			values[i] = new(sql.NullTime)
 		case liverecording.FieldID, liverecording.FieldLiveID:
 			values[i] = new(uuid.UUID)
@@ -129,6 +137,26 @@ func (_m *LiveRecording) assignValues(columns []string, values []any) error {
 				_m.CompletedAt = new(time.Time)
 				*_m.CompletedAt = value.Time
 			}
+		case liverecording.FieldRepostedAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field reposted_at", values[i])
+			} else if value.Valid {
+				_m.RepostedAt = new(time.Time)
+				*_m.RepostedAt = value.Time
+			}
+		case liverecording.FieldRepostedPostID:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field reposted_post_id", values[i])
+			} else if value.Valid {
+				_m.RepostedPostID = new(string)
+				*_m.RepostedPostID = value.String
+			}
+		case liverecording.FieldLegalHold:
+			if value, ok := values[i].(*sql.NullBool); !ok {
+				return fmt.Errorf("unexpected type %T for field legal_hold", values[i])
+			} else if value.Valid {
+				_m.LegalHold = value.Bool
+			}
 		default:
 			_m.selectValues.Set(columns[i], values[i])
 		}
@@ -195,6 +223,19 @@ func (_m *LiveRecording) String() string {
 		builder.WriteString("completed_at=")
 		builder.WriteString(v.Format(time.ANSIC))
 	}
+	builder.WriteString(", ")
+	if v := _m.RepostedAt; v != nil {
+		builder.WriteString("reposted_at=")
+		builder.WriteString(v.Format(time.ANSIC))
+	}
+	builder.WriteString(", ")
+	if v := _m.RepostedPostID; v != nil {
+		builder.WriteString("reposted_post_id=")
+		builder.WriteString(*v)
+	}
+	builder.WriteString(", ")
+	builder.WriteString("legal_hold=")
+	builder.WriteString(fmt.Sprintf("%v", _m.LegalHold))
 	builder.WriteByte(')')
 	return builder.String()
 }

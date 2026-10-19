@@ -6,6 +6,7 @@ import (
 	"time"
 	"zudomart/modules/auth/src/databases/schema"
 	"zudomart/modules/auth/src/generated/ent/account"
+	"zudomart/modules/auth/src/generated/ent/agegaterefusal"
 	"zudomart/modules/auth/src/generated/ent/onetimecode"
 	"zudomart/modules/auth/src/generated/ent/outboxevent"
 	"zudomart/modules/auth/src/generated/ent/refreshtoken"
@@ -76,6 +77,37 @@ func init() {
 	accountDescID := accountMixinFields0[0].Descriptor()
 	// account.DefaultID holds the default value on creation for the id field.
 	account.DefaultID = accountDescID.Default.(func() uuid.UUID)
+	agegaterefusalMixin := schema.AgeGateRefusal{}.Mixin()
+	agegaterefusalMixinFields0 := agegaterefusalMixin[0].Fields()
+	_ = agegaterefusalMixinFields0
+	agegaterefusalFields := schema.AgeGateRefusal{}.Fields()
+	_ = agegaterefusalFields
+	// agegaterefusalDescCreatedAt is the schema descriptor for created_at field.
+	agegaterefusalDescCreatedAt := agegaterefusalMixinFields0[1].Descriptor()
+	// agegaterefusal.DefaultCreatedAt holds the default value on creation for the created_at field.
+	agegaterefusal.DefaultCreatedAt = agegaterefusalDescCreatedAt.Default.(func() time.Time)
+	// agegaterefusalDescValueHash is the schema descriptor for value_hash field.
+	agegaterefusalDescValueHash := agegaterefusalFields[1].Descriptor()
+	// agegaterefusal.ValueHashValidator is a validator for the "value_hash" field. It is called by the builders before save.
+	agegaterefusal.ValueHashValidator = func() func(string) error {
+		validators := agegaterefusalDescValueHash.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(value_hash string) error {
+			for _, fn := range fns {
+				if err := fn(value_hash); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// agegaterefusalDescID is the schema descriptor for id field.
+	agegaterefusalDescID := agegaterefusalMixinFields0[0].Descriptor()
+	// agegaterefusal.DefaultID holds the default value on creation for the id field.
+	agegaterefusal.DefaultID = agegaterefusalDescID.Default.(func() uuid.UUID)
 	onetimecodeMixin := schema.OneTimeCode{}.Mixin()
 	onetimecodeMixinFields0 := onetimecodeMixin[0].Fields()
 	_ = onetimecodeMixinFields0

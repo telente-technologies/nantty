@@ -104,6 +104,7 @@ type SocialRelations interface {
 	MentionPrivacyOf(ctx context.Context, userIds []uuid.UUID) (map[uuid.UUID]MentionPrivacy, error)
 	ListLiveAlertRecipients(ctx context.Context, hostId uuid.UUID, limit int) (recipients []uuid.UUID, truncated bool, err error)
 	FollowedAmong(ctx context.Context, followerId uuid.UUID, candidates []uuid.UUID) (map[uuid.UUID]bool, error)
+	PrivateAccountsAmong(ctx context.Context, userIds []uuid.UUID) (map[uuid.UUID]bool, error)
 }
 
 type SubscriberDirectory interface {

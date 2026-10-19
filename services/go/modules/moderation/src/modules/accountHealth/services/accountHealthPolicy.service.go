@@ -1,6 +1,7 @@
 package services
 
 import (
+	"slices"
 	"time"
 
 	"zudomart/modules/moderation/src/generated/ent"
@@ -15,7 +16,28 @@ const (
 	StatusRestricted   = "RESTRICTED"
 )
 
-var CopyrightRestrictions = []string{"MONETISATION", "GOING_LIVE"}
+const (
+	RestrictionMonetisation = "MONETISATION"
+	OverrideModeAllow       = "allow"
+	OverrideModePause       = "pause"
+)
+
+const (
+	PauseReasonActiveStrikes    = "ACTIVE_STRIKES"
+	PauseReasonCopyrightStrikes = "COPYRIGHT_STRIKES"
+	PauseReasonStaffOverride    = "STAFF_OVERRIDE"
+)
+
+var CopyrightRestrictions = []string{RestrictionMonetisation, "GOING_LIVE"}
+
+type MonetisationOverride struct {
+	Mode                        string
+	ActiveStrikeCountAtOverride int
+	Reason                      string
+	ActorId                     string
+	ActorName                   string
+	SetAt                       time.Time
+}
 
 type StandingInput struct {
 	CopyrightStrikesInWindow int
@@ -29,6 +51,7 @@ type Standing struct {
 	NeedsSuspensionReview bool     `json:"needsSuspensionReview"`
 	CanMonetise           bool     `json:"canMonetise"`
 	CanGoLive             bool     `json:"canGoLive"`
+	MonetisationPause     *string  `json:"monetisationPauseReason"`
 }
 
 func ComputeStanding(input StandingInput, settings copyrightservices.PolicySettings) Standing {
@@ -38,6 +61,42 @@ func ComputeStanding(input StandingInput, settings copyrightservices.PolicySetti
 	case restricted:
 		standing.Status, standing.Restrictions, standing.CanMonetise, standing.CanGoLive = StatusRestricted, append([]string{}, CopyrightRestrictions...), false, false
 	case input.ActiveStrikes > 0 || input.PendingTakedowns > 0:
+		standing.Status = StatusAtRisk
+	}
+	if !standing.CanMonetise {
+		standing.MonetisationPause = pauseReasonFor(input)
+	}
+	return standing
+}
+
+func pauseReasonFor(input StandingInput) *string {
+	reason := PauseReasonCopyrightStrikes
+	if strikeservices.IsRepeatInfringer(input.ActiveStrikes) {
+		reason = PauseReasonActiveStrikes
+	}
+	return &reason
+}
+
+func MonetisationOverrideStillApplies(override *MonetisationOverride, activeStrikes int) bool {
+	if override == nil {
+		return false
+	}
+	return override.Mode == OverrideModePause || (override.Mode == OverrideModeAllow && activeStrikes <= override.ActiveStrikeCountAtOverride)
+}
+
+func ApplyMonetisationOverride(standing Standing, override *MonetisationOverride, activeStrikes int) Standing {
+	if !MonetisationOverrideStillApplies(override, activeStrikes) {
+		return standing
+	}
+	restrictions := slices.DeleteFunc(append([]string{}, standing.Restrictions...), func(restriction string) bool { return restriction == RestrictionMonetisation })
+	if override.Mode == OverrideModePause {
+		reason := PauseReasonStaffOverride
+		standing.CanMonetise, standing.MonetisationPause, standing.Status = false, &reason, StatusRestricted
+		standing.Restrictions = append([]string{RestrictionMonetisation}, restrictions...)
+		return standing
+	}
+	standing.CanMonetise, standing.MonetisationPause, standing.Restrictions = true, nil, restrictions
+	if standing.Status == StatusRestricted && len(restrictions) == 0 {
 		standing.Status = StatusAtRisk
 	}
 	return standing

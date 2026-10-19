@@ -16,7 +16,6 @@ import (
 	"zudomart/modules/moderation/src/generated/ent/contentreport"
 	"zudomart/modules/moderation/src/generated/ent/strike"
 	"zudomart/modules/moderation/src/integrations"
-	healthservices "zudomart/modules/moderation/src/modules/accountHealth/services"
 	"zudomart/modules/moderation/src/modules/appeals/services"
 	reportservices "zudomart/modules/moderation/src/modules/contentReports/services"
 	strikeservices "zudomart/modules/moderation/src/modules/strikes/services"
@@ -103,15 +102,7 @@ func (handler Handler) Execute(ctx context.Context, command Command) error {
 		}
 		return handler.audit(ctx, command, locked, outcome, reason, applied)
 	})
-	if err != nil {
-		return err
-	}
-	if row.StrikeID != nil {
-		if _, healthErr := healthservices.PublishHealthChanged(ctx, handler.Container, row.AppellantID, "appeal_"+string(outcome)); healthErr != nil {
-			handler.Container.Logger.WarnContext(ctx, "account health event failed", "error", healthErr.Error())
-		}
-	}
-	return nil
+	return err
 }
 
 func (handler Handler) applyToStrike(ctx context.Context, tx *ent.Tx, row *ent.Appeal, outcome appeal.Status, reason string, now time.Time, applied *effects) error {

@@ -9,6 +9,7 @@ import (
 	"reflect"
 	"sync"
 	"zudomart/modules/auth/src/generated/ent/account"
+	"zudomart/modules/auth/src/generated/ent/agegaterefusal"
 	"zudomart/modules/auth/src/generated/ent/onetimecode"
 	"zudomart/modules/auth/src/generated/ent/outboxevent"
 	"zudomart/modules/auth/src/generated/ent/refreshtoken"
@@ -81,6 +82,7 @@ func checkColumn(t, c string) error {
 	initCheck.Do(func() {
 		columnCheck = sql.NewColumnCheck(map[string]func(string) bool{
 			account.Table:           account.ValidColumn,
+			agegaterefusal.Table:    agegaterefusal.ValidColumn,
 			onetimecode.Table:       onetimecode.ValidColumn,
 			outboxevent.Table:       outboxevent.ValidColumn,
 			refreshtoken.Table:      refreshtoken.ValidColumn,

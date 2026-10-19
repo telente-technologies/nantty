@@ -145,7 +145,11 @@ func TestGoogleSignInCreatesLinksAndRejectsBadTokens(t *testing.T) {
 	})
 	nonce := "0123456789abcdef0123456789abcdef"
 	token := provider.signToken(t, "google-subject-1", "Grace@Example.com", true, nonce)
-	created := harness.expect("POST", "/api/v1/auth/google", "", map[string]string{"idToken": token, "nonce": nonce}, http.StatusCreated)
+	missing := harness.expect("POST", "/api/v1/auth/google", "", map[string]string{"idToken": token, "nonce": nonce}, http.StatusUnprocessableEntity)
+	if missing["code"] != "BIRTHDAY_REQUIRED" {
+		t.Fatalf("a new social account needs a birthday first: %v", missing)
+	}
+	created := harness.expect("POST", "/api/v1/auth/google", "", map[string]string{"idToken": token, "nonce": nonce, "birthday": "1990-05-05"}, http.StatusCreated)
 	user := created["user"].(map[string]any)
 	if created["isNewUser"] != true || user["email"] != "grace@example.com" || user["emailVerified"] != true || user["hasPassword"] != false {
 		t.Fatalf("unexpected social registration %v", created)

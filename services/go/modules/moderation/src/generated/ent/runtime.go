@@ -5,6 +5,7 @@ package ent
 import (
 	"time"
 	"zudomart/modules/moderation/src/databases/schema"
+	"zudomart/modules/moderation/src/generated/ent/accountmonetisationstate"
 	"zudomart/modules/moderation/src/generated/ent/appeal"
 	"zudomart/modules/moderation/src/generated/ent/automationeventoccurrence"
 	"zudomart/modules/moderation/src/generated/ent/automationexecution"
@@ -35,6 +36,40 @@ import (
 // (default values, validators, hooks and policies) and stitches it
 // to their package variables.
 func init() {
+	accountmonetisationstateFields := schema.AccountMonetisationState{}.Fields()
+	_ = accountmonetisationstateFields
+	// accountmonetisationstateDescLastCanMonetise is the schema descriptor for last_can_monetise field.
+	accountmonetisationstateDescLastCanMonetise := accountmonetisationstateFields[1].Descriptor()
+	// accountmonetisationstate.DefaultLastCanMonetise holds the default value on creation for the last_can_monetise field.
+	accountmonetisationstate.DefaultLastCanMonetise = accountmonetisationstateDescLastCanMonetise.Default.(bool)
+	// accountmonetisationstateDescOverrideReason is the schema descriptor for override_reason field.
+	accountmonetisationstateDescOverrideReason := accountmonetisationstateFields[4].Descriptor()
+	// accountmonetisationstate.DefaultOverrideReason holds the default value on creation for the override_reason field.
+	accountmonetisationstate.DefaultOverrideReason = accountmonetisationstateDescOverrideReason.Default.(string)
+	// accountmonetisationstate.OverrideReasonValidator is a validator for the "override_reason" field. It is called by the builders before save.
+	accountmonetisationstate.OverrideReasonValidator = accountmonetisationstateDescOverrideReason.Validators[0].(func(string) error)
+	// accountmonetisationstateDescOverrideActorID is the schema descriptor for override_actor_id field.
+	accountmonetisationstateDescOverrideActorID := accountmonetisationstateFields[5].Descriptor()
+	// accountmonetisationstate.DefaultOverrideActorID holds the default value on creation for the override_actor_id field.
+	accountmonetisationstate.DefaultOverrideActorID = accountmonetisationstateDescOverrideActorID.Default.(string)
+	// accountmonetisationstate.OverrideActorIDValidator is a validator for the "override_actor_id" field. It is called by the builders before save.
+	accountmonetisationstate.OverrideActorIDValidator = accountmonetisationstateDescOverrideActorID.Validators[0].(func(string) error)
+	// accountmonetisationstateDescOverrideActorName is the schema descriptor for override_actor_name field.
+	accountmonetisationstateDescOverrideActorName := accountmonetisationstateFields[6].Descriptor()
+	// accountmonetisationstate.DefaultOverrideActorName holds the default value on creation for the override_actor_name field.
+	accountmonetisationstate.DefaultOverrideActorName = accountmonetisationstateDescOverrideActorName.Default.(string)
+	// accountmonetisationstate.OverrideActorNameValidator is a validator for the "override_actor_name" field. It is called by the builders before save.
+	accountmonetisationstate.OverrideActorNameValidator = accountmonetisationstateDescOverrideActorName.Validators[0].(func(string) error)
+	// accountmonetisationstateDescOverrideActiveStrikeCount is the schema descriptor for override_active_strike_count field.
+	accountmonetisationstateDescOverrideActiveStrikeCount := accountmonetisationstateFields[7].Descriptor()
+	// accountmonetisationstate.DefaultOverrideActiveStrikeCount holds the default value on creation for the override_active_strike_count field.
+	accountmonetisationstate.DefaultOverrideActiveStrikeCount = accountmonetisationstateDescOverrideActiveStrikeCount.Default.(int)
+	// accountmonetisationstate.OverrideActiveStrikeCountValidator is a validator for the "override_active_strike_count" field. It is called by the builders before save.
+	accountmonetisationstate.OverrideActiveStrikeCountValidator = accountmonetisationstateDescOverrideActiveStrikeCount.Validators[0].(func(int) error)
+	// accountmonetisationstateDescUpdatedAt is the schema descriptor for updated_at field.
+	accountmonetisationstateDescUpdatedAt := accountmonetisationstateFields[9].Descriptor()
+	// accountmonetisationstate.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	accountmonetisationstate.DefaultUpdatedAt = accountmonetisationstateDescUpdatedAt.Default.(func() time.Time)
 	appealMixin := schema.Appeal{}.Mixin()
 	appealMixinFields0 := appealMixin[0].Fields()
 	_ = appealMixinFields0

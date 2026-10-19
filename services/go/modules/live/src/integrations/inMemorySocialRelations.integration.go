@@ -11,17 +11,18 @@ import (
 )
 
 type InMemorySocialRelations struct {
-	mutex       sync.Mutex
-	blocks      map[[2]uuid.UUID]bool
-	follows     map[[2]uuid.UUID]bool
-	subscribers map[[2]uuid.UUID]bool
-	privacy     map[uuid.UUID]interfaces.MentionPrivacy
-	alertOptOut map[uuid.UUID]bool
+	mutex           sync.Mutex
+	blocks          map[[2]uuid.UUID]bool
+	follows         map[[2]uuid.UUID]bool
+	subscribers     map[[2]uuid.UUID]bool
+	privacy         map[uuid.UUID]interfaces.MentionPrivacy
+	alertOptOut     map[uuid.UUID]bool
+	privateAccounts map[uuid.UUID]bool
 }
 
 func NewInMemorySocialRelations() *InMemorySocialRelations {
 	return &InMemorySocialRelations{
-		blocks: map[[2]uuid.UUID]bool{}, follows: map[[2]uuid.UUID]bool{}, subscribers: map[[2]uuid.UUID]bool{}, privacy: map[uuid.UUID]interfaces.MentionPrivacy{}, alertOptOut: map[uuid.UUID]bool{},
+		blocks: map[[2]uuid.UUID]bool{}, follows: map[[2]uuid.UUID]bool{}, subscribers: map[[2]uuid.UUID]bool{}, privacy: map[uuid.UUID]interfaces.MentionPrivacy{}, alertOptOut: map[uuid.UUID]bool{}, privateAccounts: map[uuid.UUID]bool{},
 	}
 }
 
@@ -134,4 +135,26 @@ func (relations *InMemorySocialRelations) FollowedAmong(_ context.Context, follo
 		}
 	}
 	return followed, nil
+}
+
+func (relations *InMemorySocialRelations) MakeAccountPrivate(userId uuid.UUID, isPrivate bool) {
+	relations.mutex.Lock()
+	defer relations.mutex.Unlock()
+	if isPrivate {
+		relations.privateAccounts[userId] = true
+		return
+	}
+	delete(relations.privateAccounts, userId)
+}
+
+func (relations *InMemorySocialRelations) PrivateAccountsAmong(_ context.Context, userIds []uuid.UUID) (map[uuid.UUID]bool, error) {
+	relations.mutex.Lock()
+	defer relations.mutex.Unlock()
+	private := map[uuid.UUID]bool{}
+	for _, userId := range userIds {
+		if relations.privateAccounts[userId] {
+			private[userId] = true
+		}
+	}
+	return private, nil
 }

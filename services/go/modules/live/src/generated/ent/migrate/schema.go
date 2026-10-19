@@ -512,6 +512,9 @@ var (
 		{Name: "size_bytes", Type: field.TypeInt64, Default: 0},
 		{Name: "failure_reason", Type: field.TypeString, Nullable: true, Size: 200},
 		{Name: "completed_at", Type: field.TypeTime, Nullable: true},
+		{Name: "reposted_at", Type: field.TypeTime, Nullable: true},
+		{Name: "reposted_post_id", Type: field.TypeString, Nullable: true, Size: 80},
+		{Name: "legal_hold", Type: field.TypeBool, Default: false},
 	}
 	// LiveRecordingsTable holds the schema information for the "live_recordings" table.
 	LiveRecordingsTable = &schema.Table{
@@ -528,6 +531,14 @@ var (
 				Name:    "liverecording_egress_id",
 				Unique:  true,
 				Columns: []*schema.Column{LiveRecordingsColumns[3]},
+			},
+			{
+				Name:    "liverecording_created_at",
+				Unique:  false,
+				Columns: []*schema.Column{LiveRecordingsColumns[1]},
+				Annotation: &entsql.IndexAnnotation{
+					Where: "reposted_at IS NULL AND legal_hold = false",
+				},
 			},
 		},
 	}

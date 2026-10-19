@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"strings"
+	"time"
 
 	"zudomart/modules/auth/src/container"
 	authErrors "zudomart/modules/auth/src/errors"
@@ -16,6 +17,8 @@ import (
 	"zudomart/modules/auth/src/types"
 	"zudomart/modules/auth/src/utils"
 )
+
+var errRefusedUnderMinimumAge = errors.New("refused under minimum age")
 
 type Handler struct {
 	*container.Container
@@ -34,7 +37,7 @@ func (application Handler) Execute(ctx context.Context, command Command) (types.
 	var session services.StartedSession
 	isNewUser := false
 	err = application.RunInTransaction(ctx, func(tx *ent.Tx) error {
-		owner, isNewUser, err = application.findOrCreateAccountForSocialIdentityInTransaction(ctx, tx, verified, command.FullName, command.Client.DeviceId)
+		owner, isNewUser, err = application.findOrCreateAccountForSocialIdentityInTransaction(ctx, tx, verified, command)
 		if err != nil {
 			return err
 		}
@@ -55,6 +58,12 @@ func (application Handler) Execute(ctx context.Context, command Command) (types.
 		}
 		return events.EnqueueOutboxEventInTransaction(ctx, tx, eventType, owner.ID.String(), application.Now(), data)
 	})
+	if errors.Is(err, errRefusedUnderMinimumAge) {
+		if recordErr := services.RecordAgeGateRefusal(ctx, application.Client, application.Settings.OneTimeCodePepper, verified.Email, command.Client.DeviceId, application.Now()); recordErr != nil {
+			return types.AuthenticationResult{}, recordErr
+		}
+		return types.AuthenticationResult{}, authErrors.ErrBelowMinimumAge
+	}
 	if err != nil {
 		return types.AuthenticationResult{}, err
 	}
@@ -63,7 +72,7 @@ func (application Handler) Execute(ctx context.Context, command Command) (types.
 	return types.AuthenticationResult{Tokens: tokens, Account: owner, IsNewUser: isNewUser, DeletionCancelled: cancelled}, err
 }
 
-func (application Handler) findOrCreateAccountForSocialIdentityInTransaction(ctx context.Context, tx *ent.Tx, verified identity.VerifiedIdentity, fullName, deviceId string) (*ent.Account, bool, error) {
+func (application Handler) findOrCreateAccountForSocialIdentityInTransaction(ctx context.Context, tx *ent.Tx, verified identity.VerifiedIdentity, command Command) (*ent.Account, bool, error) {
 	linked, err := tx.SocialIdentity.Query().Where(socialidentity.ProviderEQ(socialidentity.Provider(verified.Provider)), socialidentity.Subject(verified.Subject)).Only(ctx)
 	if err == nil {
 		owner, err := tx.Account.Get(ctx, linked.AccountID)
@@ -81,10 +90,14 @@ func (application Handler) findOrCreateAccountForSocialIdentityInTransaction(ctx
 		return nil, false, err
 	}
 	if created {
-		if err := services.AssertSignupIsNotBlockedInTransaction(ctx, tx, application.Settings.OneTimeCodePepper, verified.Email, deviceId); err != nil {
+		if err := services.AssertSignupIsNotBlockedInTransaction(ctx, tx, application.Settings.OneTimeCodePepper, verified.Email, command.Client.DeviceId); err != nil {
 			return nil, false, err
 		}
-		if owner, err = application.createAccountForSocialIdentityInTransaction(ctx, tx, verified, fullName); err != nil {
+		birthday, err := application.parseNewSocialAccountBirthday(ctx, tx, verified.Email, command)
+		if err != nil {
+			return nil, false, err
+		}
+		if owner, err = application.createAccountForSocialIdentityInTransaction(ctx, tx, verified, command.FullName, birthday); err != nil {
 			return nil, false, err
 		}
 	}
@@ -92,7 +105,24 @@ func (application Handler) findOrCreateAccountForSocialIdentityInTransaction(ctx
 	return owner, created, services.MapUniqueViolationToConflict(err)
 }
 
-func (application Handler) createAccountForSocialIdentityInTransaction(ctx context.Context, tx *ent.Tx, verified identity.VerifiedIdentity, fullName string) (*ent.Account, error) {
+func (application Handler) parseNewSocialAccountBirthday(ctx context.Context, tx *ent.Tx, email string, command Command) (time.Time, error) {
+	if err := services.AssertNoRecentAgeGateRefusal(ctx, tx.Client(), application.Settings.OneTimeCodePepper, email, command.Client.DeviceId, application.Now()); err != nil {
+		return time.Time{}, err
+	}
+	if strings.TrimSpace(command.Birthday) == "" {
+		return time.Time{}, authErrors.ErrBirthdayRequired
+	}
+	birthday, err := utils.ParseBirthday(command.Birthday, application.Now())
+	if err != nil {
+		return time.Time{}, err
+	}
+	if utils.IsBelowMinimumAccountAge(birthday, application.Now()) {
+		return time.Time{}, errRefusedUnderMinimumAge
+	}
+	return birthday, nil
+}
+
+func (application Handler) createAccountForSocialIdentityInTransaction(ctx context.Context, tx *ent.Tx, verified identity.VerifiedIdentity, fullName string, birthday time.Time) (*ent.Account, error) {
 	name := strings.TrimSpace(fullName)
 	if name == "" {
 		name = verified.Name
@@ -102,7 +132,7 @@ func (application Handler) createAccountForSocialIdentityInTransaction(ctx conte
 		return nil, err
 	}
 	created, err := tx.Account.Create().
-		SetEmail(verified.Email).SetUsername(username).SetName(utils.TruncateToLength(name, 80)).SetEmailVerifiedAt(application.Now()).
+		SetEmail(verified.Email).SetUsername(username).SetName(utils.TruncateToLength(name, 80)).SetBirthday(birthday).SetEmailVerifiedAt(application.Now()).
 		Save(ctx)
 	return created, services.MapUniqueViolationToConflict(err)
 }

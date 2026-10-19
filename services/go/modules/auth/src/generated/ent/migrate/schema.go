@@ -41,6 +41,32 @@ var (
 			},
 		},
 	}
+	// AgeGateRefusalsColumns holds the columns for the "age_gate_refusals" table.
+	AgeGateRefusalsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "kind", Type: field.TypeEnum, Enums: []string{"email", "device"}},
+		{Name: "value_hash", Type: field.TypeString, Size: 64},
+		{Name: "expires_at", Type: field.TypeTime},
+	}
+	// AgeGateRefusalsTable holds the schema information for the "age_gate_refusals" table.
+	AgeGateRefusalsTable = &schema.Table{
+		Name:       "age_gate_refusals",
+		Columns:    AgeGateRefusalsColumns,
+		PrimaryKey: []*schema.Column{AgeGateRefusalsColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "agegaterefusal_kind_value_hash_expires_at",
+				Unique:  false,
+				Columns: []*schema.Column{AgeGateRefusalsColumns[2], AgeGateRefusalsColumns[3], AgeGateRefusalsColumns[4]},
+			},
+			{
+				Name:    "agegaterefusal_expires_at",
+				Unique:  false,
+				Columns: []*schema.Column{AgeGateRefusalsColumns[4]},
+			},
+		},
+	}
 	// OneTimeCodesColumns holds the columns for the "one_time_codes" table.
 	OneTimeCodesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID},
@@ -252,6 +278,7 @@ var (
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
 		AccountsTable,
+		AgeGateRefusalsTable,
 		OneTimeCodesTable,
 		OutboxEventsTable,
 		RefreshTokensTable,

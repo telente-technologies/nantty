@@ -6,6 +6,7 @@ import (
 	"github.com/google/uuid"
 
 	deleteliverecording "zudomart/modules/live/src/modules/studio/commands/deleteLiveRecording"
+	repostliverecording "zudomart/modules/live/src/modules/studio/commands/repostLiveRecording"
 	updatehostdefaults "zudomart/modules/live/src/modules/studio/commands/updateHostDefaults"
 	gethostdefaults "zudomart/modules/live/src/modules/studio/queries/getHostDefaults"
 	getstreamhealth "zudomart/modules/live/src/modules/studio/queries/getStreamHealth"
@@ -34,6 +35,21 @@ func (controller StudioController) DeleteRecording(writer http.ResponseWriter, r
 		command := deleteliverecording.Command{Actor: actor, LiveId: liveId, RecordingId: recordingId}
 		if err = (deleteliverecording.Handler{Container: controller.Container}).Execute(request.Context(), command); err == nil {
 			httpserver.WriteNoContentResponse(writer)
+		}
+		return err
+	})
+}
+
+func (controller StudioController) RepostRecording(writer http.ResponseWriter, request *http.Request) {
+	controller.responder().WithActorAndLive(writer, request, func(actor types.Actor, liveId uuid.UUID) error {
+		recordingId, err := utils.PathIdentifier(request, "recordingId")
+		if err != nil {
+			return err
+		}
+		command := repostliverecording.Command{Actor: actor, LiveId: liveId, RecordingId: recordingId}
+		view, err := (repostliverecording.Handler{Container: controller.Container}).Execute(request.Context(), command)
+		if err == nil {
+			writeSecretJson(writer, http.StatusOK, view)
 		}
 		return err
 	})

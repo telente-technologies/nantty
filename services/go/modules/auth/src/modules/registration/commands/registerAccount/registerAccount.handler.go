@@ -2,6 +2,7 @@ package registeraccount
 
 import (
 	"context"
+	"errors"
 	"strings"
 
 	"zudomart/modules/auth/src/container"
@@ -15,6 +16,8 @@ import (
 	"zudomart/modules/auth/src/utils"
 )
 
+var errRefusedUnderMinimumAge = errors.New("refused under minimum age")
+
 type Handler struct {
 	*container.Container
 }
@@ -27,7 +30,7 @@ func (application Handler) Execute(ctx context.Context, command Command) (types.
 	if err := utils.AssertPasswordMeetsPolicy(command.Password); err != nil {
 		return types.AuthenticationResult{}, err
 	}
-	birthday, err := utils.ParseBirthdayAndAssertMinimumAge(command.Birthday, application.Now())
+	birthday, err := utils.ParseBirthday(command.Birthday, application.Now())
 	if err != nil {
 		return types.AuthenticationResult{}, err
 	}
@@ -47,6 +50,12 @@ func (application Handler) Execute(ctx context.Context, command Command) (types.
 		}
 		if err := services.AssertSignupIsNotBlockedInTransaction(ctx, tx, application.Settings.OneTimeCodePepper, email, command.Client.DeviceId); err != nil {
 			return err
+		}
+		if err := services.AssertNoRecentAgeGateRefusal(ctx, tx.Client(), application.Settings.OneTimeCodePepper, email, command.Client.DeviceId, application.Now()); err != nil {
+			return err
+		}
+		if utils.IsBelowMinimumAccountAge(birthday, application.Now()) {
+			return errRefusedUnderMinimumAge
 		}
 		if taken, err := tx.Account.Query().Where(account.Email(email)).Exist(ctx); err != nil || taken {
 			return services.FirstError(err, authErrors.ErrEmailAlreadyInUse)
@@ -70,6 +79,12 @@ func (application Handler) Execute(ctx context.Context, command Command) (types.
 			AccountId: created.ID.String(), Username: created.Username, Name: created.Name, Email: email, Method: "password",
 		})
 	})
+	if errors.Is(err, errRefusedUnderMinimumAge) {
+		if recordErr := services.RecordAgeGateRefusal(ctx, application.Client, application.Settings.OneTimeCodePepper, email, command.Client.DeviceId, application.Now()); recordErr != nil {
+			return types.AuthenticationResult{}, recordErr
+		}
+		return types.AuthenticationResult{}, authErrors.ErrBelowMinimumAge
+	}
 	if err != nil {
 		return types.AuthenticationResult{}, services.AttachUsernameSuggestions(ctx, application.Client, application.Now(), err, command.Username, command.Name, email)
 	}

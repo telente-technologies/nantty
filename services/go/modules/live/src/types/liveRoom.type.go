@@ -107,6 +107,8 @@ type RecordingView struct {
 	CreatedAt       string  `json:"createdAt"`
 	CompletedAt     *string `json:"completedAt"`
 	PlaybackUrl     *string `json:"playbackUrl"`
+	RepostedAt      *string `json:"repostedAt"`
+	DeletesAt       *string `json:"deletesAt"`
 }
 
 type OverlayLayer struct {

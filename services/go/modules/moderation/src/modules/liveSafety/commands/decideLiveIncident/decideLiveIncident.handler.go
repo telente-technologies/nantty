@@ -14,7 +14,6 @@ import (
 	"zudomart/modules/moderation/src/generated/ent"
 	"zudomart/modules/moderation/src/generated/ent/livesafetyincident"
 	"zudomart/modules/moderation/src/integrations"
-	healthservices "zudomart/modules/moderation/src/modules/accountHealth/services"
 	"zudomart/modules/moderation/src/modules/liveSafety/services"
 	strikeservices "zudomart/modules/moderation/src/modules/strikes/services"
 	"zudomart/platform/httpserver"
@@ -112,9 +111,6 @@ func (handler Handler) record(ctx context.Context, command Command, incident *en
 	})
 	if err != nil {
 		return err
-	}
-	if command.Action != ActionKeepLive && incident.HostID != nil {
-		healthservices.RefreshStandingAfterStrikeChange(ctx, handler.Container, *incident.HostID, "strike_issued")
 	}
 	afterJson, _ := json.Marshal(map[string]any{"status": after.Status, "holdActive": after.HoldActive, "resolution": after.Resolution})
 	return handler.Container.Audit.Record(ctx, integrations.AuditRecord{

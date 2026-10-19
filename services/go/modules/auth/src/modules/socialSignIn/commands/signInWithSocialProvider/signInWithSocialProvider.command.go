@@ -10,5 +10,6 @@ type Command struct {
 	Token    string
 	Nonce    string
 	FullName string
+	Birthday string
 	Client   types.ClientDetails
 }

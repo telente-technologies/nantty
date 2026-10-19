@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"sync"
 	"time"
+	"zudomart/modules/moderation/src/generated/ent/accountmonetisationstate"
 	"zudomart/modules/moderation/src/generated/ent/appeal"
 	"zudomart/modules/moderation/src/generated/ent/automationeventoccurrence"
 	"zudomart/modules/moderation/src/generated/ent/automationexecution"
@@ -46,6 +47,7 @@ const (
 	OpUpdateOne = ent.OpUpdateOne
 
 	// Node types.
+	TypeAccountMonetisationState  = "AccountMonetisationState"
 	TypeAppeal                    = "Appeal"
 	TypeAutomationEventOccurrence = "AutomationEventOccurrence"
 	TypeAutomationExecution       = "AutomationExecution"
@@ -69,6 +71,866 @@ const (
 	TypeStrike                    = "Strike"
 	TypeSuspensionCase            = "SuspensionCase"
 )
+
+// AccountMonetisationStateMutation represents an operation that mutates the AccountMonetisationState nodes in the graph.
+type AccountMonetisationStateMutation struct {
+	config
+	op                              Op
+	typ                             string
+	id                              *uuid.UUID
+	last_can_monetise               *bool
+	last_published_at               *time.Time
+	override_mode                   *accountmonetisationstate.OverrideMode
+	override_reason                 *string
+	override_actor_id               *string
+	override_actor_name             *string
+	override_active_strike_count    *int
+	addoverride_active_strike_count *int
+	override_set_at                 *time.Time
+	updated_at                      *time.Time
+	clearedFields                   map[string]struct{}
+	done                            bool
+	oldValue                        func(context.Context) (*AccountMonetisationState, error)
+	predicates                      []predicate.AccountMonetisationState
+}
+
+var _ ent.Mutation = (*AccountMonetisationStateMutation)(nil)
+
+// accountmonetisationstateOption allows management of the mutation configuration using functional options.
+type accountmonetisationstateOption func(*AccountMonetisationStateMutation)
+
+// newAccountMonetisationStateMutation creates new mutation for the AccountMonetisationState entity.
+func newAccountMonetisationStateMutation(c config, op Op, opts ...accountmonetisationstateOption) *AccountMonetisationStateMutation {
+	m := &AccountMonetisationStateMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeAccountMonetisationState,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withAccountMonetisationStateID sets the ID field of the mutation.
+func withAccountMonetisationStateID(id uuid.UUID) accountmonetisationstateOption {
+	return func(m *AccountMonetisationStateMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *AccountMonetisationState
+		)
+		m.oldValue = func(ctx context.Context) (*AccountMonetisationState, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().AccountMonetisationState.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withAccountMonetisationState sets the old AccountMonetisationState of the mutation.
+func withAccountMonetisationState(node *AccountMonetisationState) accountmonetisationstateOption {
+	return func(m *AccountMonetisationStateMutation) {
+		m.oldValue = func(context.Context) (*AccountMonetisationState, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m AccountMonetisationStateMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m AccountMonetisationStateMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of AccountMonetisationState entities.
+func (m *AccountMonetisationStateMutation) SetID(id uuid.UUID) {
+	m.id = &id
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *AccountMonetisationStateMutation) ID() (id uuid.UUID, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *AccountMonetisationStateMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []uuid.UUID{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().AccountMonetisationState.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetLastCanMonetise sets the "last_can_monetise" field.
+func (m *AccountMonetisationStateMutation) SetLastCanMonetise(b bool) {
+	m.last_can_monetise = &b
+}
+
+// LastCanMonetise returns the value of the "last_can_monetise" field in the mutation.
+func (m *AccountMonetisationStateMutation) LastCanMonetise() (r bool, exists bool) {
+	v := m.last_can_monetise
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldLastCanMonetise returns the old "last_can_monetise" field's value of the AccountMonetisationState entity.
+// If the AccountMonetisationState object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AccountMonetisationStateMutation) OldLastCanMonetise(ctx context.Context) (v bool, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldLastCanMonetise is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldLastCanMonetise requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldLastCanMonetise: %w", err)
+	}
+	return oldValue.LastCanMonetise, nil
+}
+
+// ResetLastCanMonetise resets all changes to the "last_can_monetise" field.
+func (m *AccountMonetisationStateMutation) ResetLastCanMonetise() {
+	m.last_can_monetise = nil
+}
+
+// SetLastPublishedAt sets the "last_published_at" field.
+func (m *AccountMonetisationStateMutation) SetLastPublishedAt(t time.Time) {
+	m.last_published_at = &t
+}
+
+// LastPublishedAt returns the value of the "last_published_at" field in the mutation.
+func (m *AccountMonetisationStateMutation) LastPublishedAt() (r time.Time, exists bool) {
+	v := m.last_published_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldLastPublishedAt returns the old "last_published_at" field's value of the AccountMonetisationState entity.
+// If the AccountMonetisationState object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AccountMonetisationStateMutation) OldLastPublishedAt(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldLastPublishedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldLastPublishedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldLastPublishedAt: %w", err)
+	}
+	return oldValue.LastPublishedAt, nil
+}
+
+// ClearLastPublishedAt clears the value of the "last_published_at" field.
+func (m *AccountMonetisationStateMutation) ClearLastPublishedAt() {
+	m.last_published_at = nil
+	m.clearedFields[accountmonetisationstate.FieldLastPublishedAt] = struct{}{}
+}
+
+// LastPublishedAtCleared returns if the "last_published_at" field was cleared in this mutation.
+func (m *AccountMonetisationStateMutation) LastPublishedAtCleared() bool {
+	_, ok := m.clearedFields[accountmonetisationstate.FieldLastPublishedAt]
+	return ok
+}
+
+// ResetLastPublishedAt resets all changes to the "last_published_at" field.
+func (m *AccountMonetisationStateMutation) ResetLastPublishedAt() {
+	m.last_published_at = nil
+	delete(m.clearedFields, accountmonetisationstate.FieldLastPublishedAt)
+}
+
+// SetOverrideMode sets the "override_mode" field.
+func (m *AccountMonetisationStateMutation) SetOverrideMode(am accountmonetisationstate.OverrideMode) {
+	m.override_mode = &am
+}
+
+// OverrideMode returns the value of the "override_mode" field in the mutation.
+func (m *AccountMonetisationStateMutation) OverrideMode() (r accountmonetisationstate.OverrideMode, exists bool) {
+	v := m.override_mode
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldOverrideMode returns the old "override_mode" field's value of the AccountMonetisationState entity.
+// If the AccountMonetisationState object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AccountMonetisationStateMutation) OldOverrideMode(ctx context.Context) (v *accountmonetisationstate.OverrideMode, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldOverrideMode is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldOverrideMode requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldOverrideMode: %w", err)
+	}
+	return oldValue.OverrideMode, nil
+}
+
+// ClearOverrideMode clears the value of the "override_mode" field.
+func (m *AccountMonetisationStateMutation) ClearOverrideMode() {
+	m.override_mode = nil
+	m.clearedFields[accountmonetisationstate.FieldOverrideMode] = struct{}{}
+}
+
+// OverrideModeCleared returns if the "override_mode" field was cleared in this mutation.
+func (m *AccountMonetisationStateMutation) OverrideModeCleared() bool {
+	_, ok := m.clearedFields[accountmonetisationstate.FieldOverrideMode]
+	return ok
+}
+
+// ResetOverrideMode resets all changes to the "override_mode" field.
+func (m *AccountMonetisationStateMutation) ResetOverrideMode() {
+	m.override_mode = nil
+	delete(m.clearedFields, accountmonetisationstate.FieldOverrideMode)
+}
+
+// SetOverrideReason sets the "override_reason" field.
+func (m *AccountMonetisationStateMutation) SetOverrideReason(s string) {
+	m.override_reason = &s
+}
+
+// OverrideReason returns the value of the "override_reason" field in the mutation.
+func (m *AccountMonetisationStateMutation) OverrideReason() (r string, exists bool) {
+	v := m.override_reason
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldOverrideReason returns the old "override_reason" field's value of the AccountMonetisationState entity.
+// If the AccountMonetisationState object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AccountMonetisationStateMutation) OldOverrideReason(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldOverrideReason is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldOverrideReason requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldOverrideReason: %w", err)
+	}
+	return oldValue.OverrideReason, nil
+}
+
+// ResetOverrideReason resets all changes to the "override_reason" field.
+func (m *AccountMonetisationStateMutation) ResetOverrideReason() {
+	m.override_reason = nil
+}
+
+// SetOverrideActorID sets the "override_actor_id" field.
+func (m *AccountMonetisationStateMutation) SetOverrideActorID(s string) {
+	m.override_actor_id = &s
+}
+
+// OverrideActorID returns the value of the "override_actor_id" field in the mutation.
+func (m *AccountMonetisationStateMutation) OverrideActorID() (r string, exists bool) {
+	v := m.override_actor_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldOverrideActorID returns the old "override_actor_id" field's value of the AccountMonetisationState entity.
+// If the AccountMonetisationState object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AccountMonetisationStateMutation) OldOverrideActorID(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldOverrideActorID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldOverrideActorID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldOverrideActorID: %w", err)
+	}
+	return oldValue.OverrideActorID, nil
+}
+
+// ResetOverrideActorID resets all changes to the "override_actor_id" field.
+func (m *AccountMonetisationStateMutation) ResetOverrideActorID() {
+	m.override_actor_id = nil
+}
+
+// SetOverrideActorName sets the "override_actor_name" field.
+func (m *AccountMonetisationStateMutation) SetOverrideActorName(s string) {
+	m.override_actor_name = &s
+}
+
+// OverrideActorName returns the value of the "override_actor_name" field in the mutation.
+func (m *AccountMonetisationStateMutation) OverrideActorName() (r string, exists bool) {
+	v := m.override_actor_name
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldOverrideActorName returns the old "override_actor_name" field's value of the AccountMonetisationState entity.
+// If the AccountMonetisationState object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AccountMonetisationStateMutation) OldOverrideActorName(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldOverrideActorName is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldOverrideActorName requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldOverrideActorName: %w", err)
+	}
+	return oldValue.OverrideActorName, nil
+}
+
+// ResetOverrideActorName resets all changes to the "override_actor_name" field.
+func (m *AccountMonetisationStateMutation) ResetOverrideActorName() {
+	m.override_actor_name = nil
+}
+
+// SetOverrideActiveStrikeCount sets the "override_active_strike_count" field.
+func (m *AccountMonetisationStateMutation) SetOverrideActiveStrikeCount(i int) {
+	m.override_active_strike_count = &i
+	m.addoverride_active_strike_count = nil
+}
+
+// OverrideActiveStrikeCount returns the value of the "override_active_strike_count" field in the mutation.
+func (m *AccountMonetisationStateMutation) OverrideActiveStrikeCount() (r int, exists bool) {
+	v := m.override_active_strike_count
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldOverrideActiveStrikeCount returns the old "override_active_strike_count" field's value of the AccountMonetisationState entity.
+// If the AccountMonetisationState object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AccountMonetisationStateMutation) OldOverrideActiveStrikeCount(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldOverrideActiveStrikeCount is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldOverrideActiveStrikeCount requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldOverrideActiveStrikeCount: %w", err)
+	}
+	return oldValue.OverrideActiveStrikeCount, nil
+}
+
+// AddOverrideActiveStrikeCount adds i to the "override_active_strike_count" field.
+func (m *AccountMonetisationStateMutation) AddOverrideActiveStrikeCount(i int) {
+	if m.addoverride_active_strike_count != nil {
+		*m.addoverride_active_strike_count += i
+	} else {
+		m.addoverride_active_strike_count = &i
+	}
+}
+
+// AddedOverrideActiveStrikeCount returns the value that was added to the "override_active_strike_count" field in this mutation.
+func (m *AccountMonetisationStateMutation) AddedOverrideActiveStrikeCount() (r int, exists bool) {
+	v := m.addoverride_active_strike_count
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetOverrideActiveStrikeCount resets all changes to the "override_active_strike_count" field.
+func (m *AccountMonetisationStateMutation) ResetOverrideActiveStrikeCount() {
+	m.override_active_strike_count = nil
+	m.addoverride_active_strike_count = nil
+}
+
+// SetOverrideSetAt sets the "override_set_at" field.
+func (m *AccountMonetisationStateMutation) SetOverrideSetAt(t time.Time) {
+	m.override_set_at = &t
+}
+
+// OverrideSetAt returns the value of the "override_set_at" field in the mutation.
+func (m *AccountMonetisationStateMutation) OverrideSetAt() (r time.Time, exists bool) {
+	v := m.override_set_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldOverrideSetAt returns the old "override_set_at" field's value of the AccountMonetisationState entity.
+// If the AccountMonetisationState object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AccountMonetisationStateMutation) OldOverrideSetAt(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldOverrideSetAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldOverrideSetAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldOverrideSetAt: %w", err)
+	}
+	return oldValue.OverrideSetAt, nil
+}
+
+// ClearOverrideSetAt clears the value of the "override_set_at" field.
+func (m *AccountMonetisationStateMutation) ClearOverrideSetAt() {
+	m.override_set_at = nil
+	m.clearedFields[accountmonetisationstate.FieldOverrideSetAt] = struct{}{}
+}
+
+// OverrideSetAtCleared returns if the "override_set_at" field was cleared in this mutation.
+func (m *AccountMonetisationStateMutation) OverrideSetAtCleared() bool {
+	_, ok := m.clearedFields[accountmonetisationstate.FieldOverrideSetAt]
+	return ok
+}
+
+// ResetOverrideSetAt resets all changes to the "override_set_at" field.
+func (m *AccountMonetisationStateMutation) ResetOverrideSetAt() {
+	m.override_set_at = nil
+	delete(m.clearedFields, accountmonetisationstate.FieldOverrideSetAt)
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (m *AccountMonetisationStateMutation) SetUpdatedAt(t time.Time) {
+	m.updated_at = &t
+}
+
+// UpdatedAt returns the value of the "updated_at" field in the mutation.
+func (m *AccountMonetisationStateMutation) UpdatedAt() (r time.Time, exists bool) {
+	v := m.updated_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUpdatedAt returns the old "updated_at" field's value of the AccountMonetisationState entity.
+// If the AccountMonetisationState object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AccountMonetisationStateMutation) OldUpdatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUpdatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUpdatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUpdatedAt: %w", err)
+	}
+	return oldValue.UpdatedAt, nil
+}
+
+// ResetUpdatedAt resets all changes to the "updated_at" field.
+func (m *AccountMonetisationStateMutation) ResetUpdatedAt() {
+	m.updated_at = nil
+}
+
+// Where appends a list predicates to the AccountMonetisationStateMutation builder.
+func (m *AccountMonetisationStateMutation) Where(ps ...predicate.AccountMonetisationState) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the AccountMonetisationStateMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *AccountMonetisationStateMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.AccountMonetisationState, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *AccountMonetisationStateMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *AccountMonetisationStateMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (AccountMonetisationState).
+func (m *AccountMonetisationStateMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *AccountMonetisationStateMutation) Fields() []string {
+	fields := make([]string, 0, 9)
+	if m.last_can_monetise != nil {
+		fields = append(fields, accountmonetisationstate.FieldLastCanMonetise)
+	}
+	if m.last_published_at != nil {
+		fields = append(fields, accountmonetisationstate.FieldLastPublishedAt)
+	}
+	if m.override_mode != nil {
+		fields = append(fields, accountmonetisationstate.FieldOverrideMode)
+	}
+	if m.override_reason != nil {
+		fields = append(fields, accountmonetisationstate.FieldOverrideReason)
+	}
+	if m.override_actor_id != nil {
+		fields = append(fields, accountmonetisationstate.FieldOverrideActorID)
+	}
+	if m.override_actor_name != nil {
+		fields = append(fields, accountmonetisationstate.FieldOverrideActorName)
+	}
+	if m.override_active_strike_count != nil {
+		fields = append(fields, accountmonetisationstate.FieldOverrideActiveStrikeCount)
+	}
+	if m.override_set_at != nil {
+		fields = append(fields, accountmonetisationstate.FieldOverrideSetAt)
+	}
+	if m.updated_at != nil {
+		fields = append(fields, accountmonetisationstate.FieldUpdatedAt)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *AccountMonetisationStateMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case accountmonetisationstate.FieldLastCanMonetise:
+		return m.LastCanMonetise()
+	case accountmonetisationstate.FieldLastPublishedAt:
+		return m.LastPublishedAt()
+	case accountmonetisationstate.FieldOverrideMode:
+		return m.OverrideMode()
+	case accountmonetisationstate.FieldOverrideReason:
+		return m.OverrideReason()
+	case accountmonetisationstate.FieldOverrideActorID:
+		return m.OverrideActorID()
+	case accountmonetisationstate.FieldOverrideActorName:
+		return m.OverrideActorName()
+	case accountmonetisationstate.FieldOverrideActiveStrikeCount:
+		return m.OverrideActiveStrikeCount()
+	case accountmonetisationstate.FieldOverrideSetAt:
+		return m.OverrideSetAt()
+	case accountmonetisationstate.FieldUpdatedAt:
+		return m.UpdatedAt()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *AccountMonetisationStateMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case accountmonetisationstate.FieldLastCanMonetise:
+		return m.OldLastCanMonetise(ctx)
+	case accountmonetisationstate.FieldLastPublishedAt:
+		return m.OldLastPublishedAt(ctx)
+	case accountmonetisationstate.FieldOverrideMode:
+		return m.OldOverrideMode(ctx)
+	case accountmonetisationstate.FieldOverrideReason:
+		return m.OldOverrideReason(ctx)
+	case accountmonetisationstate.FieldOverrideActorID:
+		return m.OldOverrideActorID(ctx)
+	case accountmonetisationstate.FieldOverrideActorName:
+		return m.OldOverrideActorName(ctx)
+	case accountmonetisationstate.FieldOverrideActiveStrikeCount:
+		return m.OldOverrideActiveStrikeCount(ctx)
+	case accountmonetisationstate.FieldOverrideSetAt:
+		return m.OldOverrideSetAt(ctx)
+	case accountmonetisationstate.FieldUpdatedAt:
+		return m.OldUpdatedAt(ctx)
+	}
+	return nil, fmt.Errorf("unknown AccountMonetisationState field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *AccountMonetisationStateMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case accountmonetisationstate.FieldLastCanMonetise:
+		v, ok := value.(bool)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetLastCanMonetise(v)
+		return nil
+	case accountmonetisationstate.FieldLastPublishedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetLastPublishedAt(v)
+		return nil
+	case accountmonetisationstate.FieldOverrideMode:
+		v, ok := value.(accountmonetisationstate.OverrideMode)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetOverrideMode(v)
+		return nil
+	case accountmonetisationstate.FieldOverrideReason:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetOverrideReason(v)
+		return nil
+	case accountmonetisationstate.FieldOverrideActorID:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetOverrideActorID(v)
+		return nil
+	case accountmonetisationstate.FieldOverrideActorName:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetOverrideActorName(v)
+		return nil
+	case accountmonetisationstate.FieldOverrideActiveStrikeCount:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetOverrideActiveStrikeCount(v)
+		return nil
+	case accountmonetisationstate.FieldOverrideSetAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetOverrideSetAt(v)
+		return nil
+	case accountmonetisationstate.FieldUpdatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUpdatedAt(v)
+		return nil
+	}
+	return fmt.Errorf("unknown AccountMonetisationState field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *AccountMonetisationStateMutation) AddedFields() []string {
+	var fields []string
+	if m.addoverride_active_strike_count != nil {
+		fields = append(fields, accountmonetisationstate.FieldOverrideActiveStrikeCount)
+	}
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *AccountMonetisationStateMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case accountmonetisationstate.FieldOverrideActiveStrikeCount:
+		return m.AddedOverrideActiveStrikeCount()
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *AccountMonetisationStateMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	case accountmonetisationstate.FieldOverrideActiveStrikeCount:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddOverrideActiveStrikeCount(v)
+		return nil
+	}
+	return fmt.Errorf("unknown AccountMonetisationState numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *AccountMonetisationStateMutation) ClearedFields() []string {
+	var fields []string
+	if m.FieldCleared(accountmonetisationstate.FieldLastPublishedAt) {
+		fields = append(fields, accountmonetisationstate.FieldLastPublishedAt)
+	}
+	if m.FieldCleared(accountmonetisationstate.FieldOverrideMode) {
+		fields = append(fields, accountmonetisationstate.FieldOverrideMode)
+	}
+	if m.FieldCleared(accountmonetisationstate.FieldOverrideSetAt) {
+		fields = append(fields, accountmonetisationstate.FieldOverrideSetAt)
+	}
+	return fields
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *AccountMonetisationStateMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *AccountMonetisationStateMutation) ClearField(name string) error {
+	switch name {
+	case accountmonetisationstate.FieldLastPublishedAt:
+		m.ClearLastPublishedAt()
+		return nil
+	case accountmonetisationstate.FieldOverrideMode:
+		m.ClearOverrideMode()
+		return nil
+	case accountmonetisationstate.FieldOverrideSetAt:
+		m.ClearOverrideSetAt()
+		return nil
+	}
+	return fmt.Errorf("unknown AccountMonetisationState nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *AccountMonetisationStateMutation) ResetField(name string) error {
+	switch name {
+	case accountmonetisationstate.FieldLastCanMonetise:
+		m.ResetLastCanMonetise()
+		return nil
+	case accountmonetisationstate.FieldLastPublishedAt:
+		m.ResetLastPublishedAt()
+		return nil
+	case accountmonetisationstate.FieldOverrideMode:
+		m.ResetOverrideMode()
+		return nil
+	case accountmonetisationstate.FieldOverrideReason:
+		m.ResetOverrideReason()
+		return nil
+	case accountmonetisationstate.FieldOverrideActorID:
+		m.ResetOverrideActorID()
+		return nil
+	case accountmonetisationstate.FieldOverrideActorName:
+		m.ResetOverrideActorName()
+		return nil
+	case accountmonetisationstate.FieldOverrideActiveStrikeCount:
+		m.ResetOverrideActiveStrikeCount()
+		return nil
+	case accountmonetisationstate.FieldOverrideSetAt:
+		m.ResetOverrideSetAt()
+		return nil
+	case accountmonetisationstate.FieldUpdatedAt:
+		m.ResetUpdatedAt()
+		return nil
+	}
+	return fmt.Errorf("unknown AccountMonetisationState field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *AccountMonetisationStateMutation) AddedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *AccountMonetisationStateMutation) AddedIDs(name string) []ent.Value {
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *AccountMonetisationStateMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *AccountMonetisationStateMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *AccountMonetisationStateMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *AccountMonetisationStateMutation) EdgeCleared(name string) bool {
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *AccountMonetisationStateMutation) ClearEdge(name string) error {
+	return fmt.Errorf("unknown AccountMonetisationState unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *AccountMonetisationStateMutation) ResetEdge(name string) error {
+	return fmt.Errorf("unknown AccountMonetisationState edge %s", name)
+}
 
 // AppealMutation represents an operation that mutates the Appeal nodes in the graph.
 type AppealMutation struct {

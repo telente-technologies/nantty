@@ -14,16 +14,23 @@ import (
 	"zudomart/modules/moderation/src/generated/ent/strike"
 	"zudomart/modules/moderation/src/integrations"
 	copyrightservices "zudomart/modules/moderation/src/modules/copyrightClaims/services"
+	strikeservices "zudomart/modules/moderation/src/modules/strikes/services"
 	ingestsuspensioncase "zudomart/modules/moderation/src/modules/suspensionCases/commands/ingestSuspensionCase"
 )
 
 const AccountHealthChangedType = "accountHealth.changed"
+
+const ReasonOverrideCancelledByNewStrike = "monetisation_override_cancelled_by_new_strike"
 
 type AccountHealthChangedData struct {
 	AccountId                string   `json:"accountId"`
 	Status                   string   `json:"status"`
 	Restrictions             []string `json:"restrictions"`
 	CanMonetise              bool     `json:"canMonetise"`
+	PreviousCanMonetise      bool     `json:"previousCanMonetise"`
+	MonetisationChanged      bool     `json:"monetisationChanged"`
+	MonetisationPauseReason  *string  `json:"monetisationPauseReason"`
+	MonetisationOverride     *string  `json:"monetisationOverride"`
 	CanGoLive                bool     `json:"canGoLive"`
 	ActiveStrikeCount        int      `json:"activeStrikeCount"`
 	CopyrightStrikesInWindow int      `json:"copyrightStrikesInWindow"`
@@ -35,9 +42,25 @@ type StandingSnapshot struct {
 	Standing Standing
 	Strikes  []*ent.Strike
 	Settings copyrightservices.PolicySettings
+	Override *MonetisationOverride
+}
+
+func init() {
+	strikeservices.ObserveStrikeChangesInTransaction(func(ctx context.Context, tx *ent.Tx, accountId uuid.UUID, now time.Time, reason string) error {
+		_, err := EnqueueHealthChangedInTransaction(ctx, tx, accountId, now, reason)
+		return err
+	})
 }
 
 func LoadStanding(ctx context.Context, client *ent.Client, accountId uuid.UUID, now time.Time) (StandingSnapshot, error) {
+	override, err := ReadMonetisationOverride(ctx, client, accountId)
+	if err != nil {
+		return StandingSnapshot{}, err
+	}
+	return LoadStandingWithOverride(ctx, client, accountId, now, override)
+}
+
+func LoadStandingWithOverride(ctx context.Context, client *ent.Client, accountId uuid.UUID, now time.Time, override *MonetisationOverride) (StandingSnapshot, error) {
 	settings, err := copyrightservices.LoadPolicySettings(ctx, client)
 	if err != nil {
 		return StandingSnapshot{}, err
@@ -51,31 +74,54 @@ func LoadStanding(ctx context.Context, client *ent.Client, accountId uuid.UUID, 
 		return StandingSnapshot{}, err
 	}
 	input := StandingInput{CopyrightStrikesInWindow: CountCopyrightStrikesInWindow(rows, now, settings.StrikeWindowDays), ActiveStrikes: CountActiveStrikes(rows, now), PendingTakedowns: pending}
-	return StandingSnapshot{Input: input, Standing: ComputeStanding(input, settings), Strikes: rows, Settings: settings}, nil
+	if !MonetisationOverrideStillApplies(override, input.ActiveStrikes) {
+		override = nil
+	}
+	return StandingSnapshot{Input: input, Standing: ApplyMonetisationOverride(ComputeStanding(input, settings), override, input.ActiveStrikes), Strikes: rows, Settings: settings, Override: override}, nil
 }
 
-func PublishHealthChanged(ctx context.Context, c *container.Container, accountId uuid.UUID, reason string) (StandingSnapshot, error) {
-	now := c.Now()
-	snapshot, err := LoadStanding(ctx, c.Client, accountId, now)
+func EnqueueHealthChangedInTransaction(ctx context.Context, tx *ent.Tx, accountId uuid.UUID, now time.Time, reason string) (StandingSnapshot, error) {
+	state, err := LockMonetisationStateInTransaction(ctx, tx, accountId, now)
+	if err != nil {
+		return StandingSnapshot{}, err
+	}
+	stored := OverrideFromState(state)
+	snapshot, err := LoadStandingWithOverride(ctx, tx.Client(), accountId, now, stored)
 	if err != nil {
 		return snapshot, err
 	}
-	return snapshot, c.RunInTransaction(ctx, func(tx *ent.Tx) error {
-		return events.EnqueueOutboxEventInTransaction(ctx, tx, AccountHealthChangedType, accountId.String(), now, AccountHealthChangedData{
-			AccountId: accountId.String(), Status: snapshot.Standing.Status, Restrictions: snapshot.Standing.Restrictions, CanMonetise: snapshot.Standing.CanMonetise, CanGoLive: snapshot.Standing.CanGoLive,
-			ActiveStrikeCount: snapshot.Input.ActiveStrikes, CopyrightStrikesInWindow: snapshot.Input.CopyrightStrikesInWindow, Reason: reason,
-		})
+	if stored != nil && snapshot.Override == nil {
+		if err := ClearMonetisationOverrideInTransaction(ctx, tx, accountId, now); err != nil {
+			return snapshot, err
+		}
+		reason = ReasonOverrideCancelledByNewStrike
+	}
+	if err := tx.AccountMonetisationState.UpdateOneID(accountId).SetLastCanMonetise(snapshot.Standing.CanMonetise).SetLastPublishedAt(now).SetUpdatedAt(now).Exec(ctx); err != nil {
+		return snapshot, err
+	}
+	var overrideMode *string
+	if view := DescribeMonetisationOverride(snapshot.Override); view != nil {
+		overrideMode = &view.Mode
+	}
+	return snapshot, events.EnqueueOutboxEventInTransaction(ctx, tx, AccountHealthChangedType, accountId.String(), now, AccountHealthChangedData{
+		AccountId: accountId.String(), Status: snapshot.Standing.Status, Restrictions: snapshot.Standing.Restrictions, CanMonetise: snapshot.Standing.CanMonetise, PreviousCanMonetise: state.LastCanMonetise,
+		MonetisationChanged: state.LastCanMonetise != snapshot.Standing.CanMonetise, MonetisationPauseReason: snapshot.Standing.MonetisationPause, MonetisationOverride: overrideMode,
+		CanGoLive: snapshot.Standing.CanGoLive, ActiveStrikeCount: snapshot.Input.ActiveStrikes, CopyrightStrikesInWindow: snapshot.Input.CopyrightStrikesInWindow, Reason: reason,
 	})
 }
 
-func RefreshStandingAfterStrikeChange(ctx context.Context, c *container.Container, accountId uuid.UUID, reason string) {
-	if _, err := PublishHealthChanged(ctx, c, accountId, reason); err != nil {
-		c.Logger.WarnContext(ctx, "account health event failed", "error", err.Error())
-	}
+func PublishHealthChanged(ctx context.Context, c *container.Container, accountId uuid.UUID, reason string) (StandingSnapshot, error) {
+	var snapshot StandingSnapshot
+	err := c.RunInTransaction(ctx, func(tx *ent.Tx) error {
+		var enqueueErr error
+		snapshot, enqueueErr = EnqueueHealthChangedInTransaction(ctx, tx, accountId, c.Now(), reason)
+		return enqueueErr
+	})
+	return snapshot, err
 }
 
 func EnforceCopyrightStanding(ctx context.Context, c *container.Container, accountId uuid.UUID, triggeringStrikeId string) error {
-	snapshot, err := PublishHealthChanged(ctx, c, accountId, "copyright_strike_issued")
+	snapshot, err := LoadStanding(ctx, c.Client, accountId, c.Now())
 	if err != nil {
 		return err
 	}

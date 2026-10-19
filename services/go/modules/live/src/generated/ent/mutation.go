@@ -13609,6 +13609,9 @@ type LiveRecordingMutation struct {
 	addsize_bytes       *int64
 	failure_reason      *string
 	completed_at        *time.Time
+	reposted_at         *time.Time
+	reposted_post_id    *string
+	legal_hold          *bool
 	clearedFields       map[string]struct{}
 	done                bool
 	oldValue            func(context.Context) (*LiveRecording, error)
@@ -14109,6 +14112,140 @@ func (m *LiveRecordingMutation) ResetCompletedAt() {
 	delete(m.clearedFields, liverecording.FieldCompletedAt)
 }
 
+// SetRepostedAt sets the "reposted_at" field.
+func (m *LiveRecordingMutation) SetRepostedAt(t time.Time) {
+	m.reposted_at = &t
+}
+
+// RepostedAt returns the value of the "reposted_at" field in the mutation.
+func (m *LiveRecordingMutation) RepostedAt() (r time.Time, exists bool) {
+	v := m.reposted_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldRepostedAt returns the old "reposted_at" field's value of the LiveRecording entity.
+// If the LiveRecording object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *LiveRecordingMutation) OldRepostedAt(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldRepostedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldRepostedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldRepostedAt: %w", err)
+	}
+	return oldValue.RepostedAt, nil
+}
+
+// ClearRepostedAt clears the value of the "reposted_at" field.
+func (m *LiveRecordingMutation) ClearRepostedAt() {
+	m.reposted_at = nil
+	m.clearedFields[liverecording.FieldRepostedAt] = struct{}{}
+}
+
+// RepostedAtCleared returns if the "reposted_at" field was cleared in this mutation.
+func (m *LiveRecordingMutation) RepostedAtCleared() bool {
+	_, ok := m.clearedFields[liverecording.FieldRepostedAt]
+	return ok
+}
+
+// ResetRepostedAt resets all changes to the "reposted_at" field.
+func (m *LiveRecordingMutation) ResetRepostedAt() {
+	m.reposted_at = nil
+	delete(m.clearedFields, liverecording.FieldRepostedAt)
+}
+
+// SetRepostedPostID sets the "reposted_post_id" field.
+func (m *LiveRecordingMutation) SetRepostedPostID(s string) {
+	m.reposted_post_id = &s
+}
+
+// RepostedPostID returns the value of the "reposted_post_id" field in the mutation.
+func (m *LiveRecordingMutation) RepostedPostID() (r string, exists bool) {
+	v := m.reposted_post_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldRepostedPostID returns the old "reposted_post_id" field's value of the LiveRecording entity.
+// If the LiveRecording object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *LiveRecordingMutation) OldRepostedPostID(ctx context.Context) (v *string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldRepostedPostID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldRepostedPostID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldRepostedPostID: %w", err)
+	}
+	return oldValue.RepostedPostID, nil
+}
+
+// ClearRepostedPostID clears the value of the "reposted_post_id" field.
+func (m *LiveRecordingMutation) ClearRepostedPostID() {
+	m.reposted_post_id = nil
+	m.clearedFields[liverecording.FieldRepostedPostID] = struct{}{}
+}
+
+// RepostedPostIDCleared returns if the "reposted_post_id" field was cleared in this mutation.
+func (m *LiveRecordingMutation) RepostedPostIDCleared() bool {
+	_, ok := m.clearedFields[liverecording.FieldRepostedPostID]
+	return ok
+}
+
+// ResetRepostedPostID resets all changes to the "reposted_post_id" field.
+func (m *LiveRecordingMutation) ResetRepostedPostID() {
+	m.reposted_post_id = nil
+	delete(m.clearedFields, liverecording.FieldRepostedPostID)
+}
+
+// SetLegalHold sets the "legal_hold" field.
+func (m *LiveRecordingMutation) SetLegalHold(b bool) {
+	m.legal_hold = &b
+}
+
+// LegalHold returns the value of the "legal_hold" field in the mutation.
+func (m *LiveRecordingMutation) LegalHold() (r bool, exists bool) {
+	v := m.legal_hold
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldLegalHold returns the old "legal_hold" field's value of the LiveRecording entity.
+// If the LiveRecording object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *LiveRecordingMutation) OldLegalHold(ctx context.Context) (v bool, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldLegalHold is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldLegalHold requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldLegalHold: %w", err)
+	}
+	return oldValue.LegalHold, nil
+}
+
+// ResetLegalHold resets all changes to the "legal_hold" field.
+func (m *LiveRecordingMutation) ResetLegalHold() {
+	m.legal_hold = nil
+}
+
 // Where appends a list predicates to the LiveRecordingMutation builder.
 func (m *LiveRecordingMutation) Where(ps ...predicate.LiveRecording) {
 	m.predicates = append(m.predicates, ps...)
@@ -14143,7 +14280,7 @@ func (m *LiveRecordingMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *LiveRecordingMutation) Fields() []string {
-	fields := make([]string, 0, 9)
+	fields := make([]string, 0, 12)
 	if m.created_at != nil {
 		fields = append(fields, liverecording.FieldCreatedAt)
 	}
@@ -14171,6 +14308,15 @@ func (m *LiveRecordingMutation) Fields() []string {
 	if m.completed_at != nil {
 		fields = append(fields, liverecording.FieldCompletedAt)
 	}
+	if m.reposted_at != nil {
+		fields = append(fields, liverecording.FieldRepostedAt)
+	}
+	if m.reposted_post_id != nil {
+		fields = append(fields, liverecording.FieldRepostedPostID)
+	}
+	if m.legal_hold != nil {
+		fields = append(fields, liverecording.FieldLegalHold)
+	}
 	return fields
 }
 
@@ -14197,6 +14343,12 @@ func (m *LiveRecordingMutation) Field(name string) (ent.Value, bool) {
 		return m.FailureReason()
 	case liverecording.FieldCompletedAt:
 		return m.CompletedAt()
+	case liverecording.FieldRepostedAt:
+		return m.RepostedAt()
+	case liverecording.FieldRepostedPostID:
+		return m.RepostedPostID()
+	case liverecording.FieldLegalHold:
+		return m.LegalHold()
 	}
 	return nil, false
 }
@@ -14224,6 +14376,12 @@ func (m *LiveRecordingMutation) OldField(ctx context.Context, name string) (ent.
 		return m.OldFailureReason(ctx)
 	case liverecording.FieldCompletedAt:
 		return m.OldCompletedAt(ctx)
+	case liverecording.FieldRepostedAt:
+		return m.OldRepostedAt(ctx)
+	case liverecording.FieldRepostedPostID:
+		return m.OldRepostedPostID(ctx)
+	case liverecording.FieldLegalHold:
+		return m.OldLegalHold(ctx)
 	}
 	return nil, fmt.Errorf("unknown LiveRecording field %s", name)
 }
@@ -14296,6 +14454,27 @@ func (m *LiveRecordingMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetCompletedAt(v)
 		return nil
+	case liverecording.FieldRepostedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetRepostedAt(v)
+		return nil
+	case liverecording.FieldRepostedPostID:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetRepostedPostID(v)
+		return nil
+	case liverecording.FieldLegalHold:
+		v, ok := value.(bool)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetLegalHold(v)
+		return nil
 	}
 	return fmt.Errorf("unknown LiveRecording field %s", name)
 }
@@ -14359,6 +14538,12 @@ func (m *LiveRecordingMutation) ClearedFields() []string {
 	if m.FieldCleared(liverecording.FieldCompletedAt) {
 		fields = append(fields, liverecording.FieldCompletedAt)
 	}
+	if m.FieldCleared(liverecording.FieldRepostedAt) {
+		fields = append(fields, liverecording.FieldRepostedAt)
+	}
+	if m.FieldCleared(liverecording.FieldRepostedPostID) {
+		fields = append(fields, liverecording.FieldRepostedPostID)
+	}
 	return fields
 }
 
@@ -14378,6 +14563,12 @@ func (m *LiveRecordingMutation) ClearField(name string) error {
 		return nil
 	case liverecording.FieldCompletedAt:
 		m.ClearCompletedAt()
+		return nil
+	case liverecording.FieldRepostedAt:
+		m.ClearRepostedAt()
+		return nil
+	case liverecording.FieldRepostedPostID:
+		m.ClearRepostedPostID()
 		return nil
 	}
 	return fmt.Errorf("unknown LiveRecording nullable field %s", name)
@@ -14413,6 +14604,15 @@ func (m *LiveRecordingMutation) ResetField(name string) error {
 		return nil
 	case liverecording.FieldCompletedAt:
 		m.ResetCompletedAt()
+		return nil
+	case liverecording.FieldRepostedAt:
+		m.ResetRepostedAt()
+		return nil
+	case liverecording.FieldRepostedPostID:
+		m.ResetRepostedPostID()
+		return nil
+	case liverecording.FieldLegalHold:
+		m.ResetLegalHold()
 		return nil
 	}
 	return fmt.Errorf("unknown LiveRecording field %s", name)

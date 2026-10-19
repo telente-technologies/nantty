@@ -15,3 +15,9 @@ func ValidateRegisterRequest(request dtos.RegisterRequest) error {
 	collector.RequireLength("otpToken", request.OtpToken, utils.OpaqueTokenMinLength, utils.OpaqueTokenMaxLength)
 	return collector.Result()
 }
+
+func ValidateAddBirthdayRequest(request dtos.AddBirthdayRequest) error {
+	collector := &utils.IssueCollector{}
+	collector.RequireLength("birthday", request.Birthday, 10, 10)
+	return collector.Result()
+}

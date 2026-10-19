@@ -8,7 +8,6 @@ import (
 
 	"zudomart/modules/moderation/src/container"
 	"zudomart/modules/moderation/src/generated/ent"
-	healthservices "zudomart/modules/moderation/src/modules/accountHealth/services"
 	"zudomart/modules/moderation/src/modules/strikes/services"
 	"zudomart/platform/httpserver"
 )
@@ -26,14 +25,8 @@ func (handler Handler) Execute(ctx context.Context, strikeId, reason string) err
 	if len(reason) < 5 || len(reason) > 500 {
 		return httpserver.NewValidationFailedError([]httpserver.ValidationIssue{{Path: "reason", Message: "must be 5 to 500 characters"}})
 	}
-	var revoked *ent.Strike
-	err = handler.Container.RunInTransaction(ctx, func(tx *ent.Tx) error {
-		var revokeErr error
-		revoked, revokeErr = services.Recorder{Now: handler.Container.Now}.Revoke(ctx, tx, identifier, reason)
+	return handler.Container.RunInTransaction(ctx, func(tx *ent.Tx) error {
+		_, revokeErr := services.Recorder{Now: handler.Container.Now}.Revoke(ctx, tx, identifier, reason)
 		return revokeErr
 	})
-	if err == nil && revoked != nil {
-		healthservices.RefreshStandingAfterStrikeChange(ctx, handler.Container, revoked.AccountID, "strike_revoked")
-	}
-	return err
 }

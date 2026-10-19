@@ -528,6 +528,14 @@ func init() {
 	liverecordingDescFailureReason := liverecordingFields[6].Descriptor()
 	// liverecording.FailureReasonValidator is a validator for the "failure_reason" field. It is called by the builders before save.
 	liverecording.FailureReasonValidator = liverecordingDescFailureReason.Validators[0].(func(string) error)
+	// liverecordingDescRepostedPostID is the schema descriptor for reposted_post_id field.
+	liverecordingDescRepostedPostID := liverecordingFields[9].Descriptor()
+	// liverecording.RepostedPostIDValidator is a validator for the "reposted_post_id" field. It is called by the builders before save.
+	liverecording.RepostedPostIDValidator = liverecordingDescRepostedPostID.Validators[0].(func(string) error)
+	// liverecordingDescLegalHold is the schema descriptor for legal_hold field.
+	liverecordingDescLegalHold := liverecordingFields[10].Descriptor()
+	// liverecording.DefaultLegalHold holds the default value on creation for the legal_hold field.
+	liverecording.DefaultLegalHold = liverecordingDescLegalHold.Default.(bool)
 	// liverecordingDescID is the schema descriptor for id field.
 	liverecordingDescID := liverecordingMixinFields0[0].Descriptor()
 	// liverecording.DefaultID holds the default value on creation for the id field.

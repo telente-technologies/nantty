@@ -17,4 +17,6 @@ func MountInternalApiRoutes(mux *http.ServeMux, deployed *container.Container) {
 	mux.Handle("POST /api/v1/internal/live/{liveId}/presence", internal(controller.ApplyPresence))
 	mux.Handle("GET /api/v1/internal/accounts/{accountId}/activity-counts", internal(controller.GetAccountActivityCounts))
 	mux.Handle("GET /api/v1/internal/moderation/targets/{type}/{id}", internal(controller.GetModerationTarget))
+	mux.Handle("PUT /api/v1/internal/live/{liveId}/recordings/legal-hold", internal(controller.SetRecordingLegalHold))
+	mux.Handle("PUT /api/v1/internal/live/recordings/{recordingId}/repost", internal(controller.SetRecordingRepost))
 }

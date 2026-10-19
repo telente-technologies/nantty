@@ -42,3 +42,25 @@ func TestParseBirthdayAndAssertMinimumAge(t *testing.T) {
 		}
 	}
 }
+
+func TestBirthdayEdgeCasesAroundTheThirteenthBirthdayAndMidnight(t *testing.T) {
+	lateLagosEvening := time.Date(2026, 10, 3, 23, 30, 0, 0, time.FixedZone("WAT", 3600))
+	cases := map[string]bool{"2013-10-03": false, "2013-10-04": true, "2013-10-02": false, "2012-02-29": false}
+	for raw, below := range cases {
+		birthday, err := ParseBirthday(raw, lateLagosEvening)
+		if err != nil {
+			t.Fatalf("%q: %v", raw, err)
+		}
+		if IsBelowMinimumAccountAge(birthday, lateLagosEvening) != below {
+			t.Fatalf("%q below=%v", raw, !below)
+		}
+	}
+	for _, raw := range []string{"2026-10-04", "2027-01-01", "1899-12-31", "2013-13-01", ""} {
+		if _, err := ParseBirthday(raw, lateLagosEvening); err == nil {
+			t.Fatalf("%q must be rejected", raw)
+		}
+	}
+	if _, err := ParseBirthday("2026-10-03", lateLagosEvening); err != nil {
+		t.Fatalf("today in UTC is a valid date: %v", err)
+	}
+}

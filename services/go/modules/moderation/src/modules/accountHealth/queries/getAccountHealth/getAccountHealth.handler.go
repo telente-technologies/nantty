@@ -14,10 +14,10 @@ type Handler struct {
 	Container *container.Container
 }
 
-func (handler Handler) Execute(ctx context.Context, accountId string) (services.AccountHealthView, error) {
+func (handler Handler) Execute(ctx context.Context, accountId string, includeStaffDetails bool) (services.AccountHealthView, error) {
 	identifier, err := uuid.Parse(accountId)
 	if err != nil {
 		return services.AccountHealthView{}, httpserver.ErrNotFound
 	}
-	return services.BuildAccountHealth(ctx, handler.Container.Client, identifier, handler.Container.Now())
+	return services.BuildAccountHealth(ctx, handler.Container.Client, identifier, handler.Container.Now(), includeStaffDetails)
 }

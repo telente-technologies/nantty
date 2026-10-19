@@ -75,6 +75,9 @@ func (service *LiveService) DeleteLiveRecording(ctx context.Context, actor types
 	if row.State == liverecording.StateRecording {
 		return liveerrors.RecordingInProgress
 	}
+	if row.LegalHold {
+		return liveerrors.RecordingOnLegalHold
+	}
 	if err := service.RecordingStorage.DeleteObject(ctx, row.ObjectKey); err != nil {
 		service.Logger.Error("recording object could not be deleted", slog.String("recordingId", recordingId.String()), slog.Any("error", err))
 		return liveerrors.RecordingNotReady

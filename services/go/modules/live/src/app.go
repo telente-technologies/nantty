@@ -201,6 +201,7 @@ func (module *Module) RunBackgroundWorkersUntilContextDone(ctx context.Context) 
 	go func() { _ = jobs.RunDueTimerSweepsUntilContextDone(ctx, module.Container) }()
 	go jobs.ConsumeLiveEventsUntilContextDone(ctx, module.Container, module.bus)
 	go module.runLiveSafetySampler(ctx)
+	go jobs.RunLiveRecordingRetentionUntilContextDone(ctx, module.Container)
 	return platformevents.RelayOutboxEventsUntilContextDone(ctx, platformevents.OutboxRelayOptions{
 		Store:     events.EntOutboxStore{Client: module.Container.Client, Now: time.Now},
 		Publisher: module.publisher,

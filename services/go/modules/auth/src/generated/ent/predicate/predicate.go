@@ -9,6 +9,9 @@ import (
 // Account is the predicate function for account builders.
 type Account func(*sql.Selector)
 
+// AgeGateRefusal is the predicate function for agegaterefusal builders.
+type AgeGateRefusal func(*sql.Selector)
+
 // OneTimeCode is the predicate function for onetimecode builders.
 type OneTimeCode func(*sql.Selector)
 

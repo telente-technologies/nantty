@@ -6,6 +6,9 @@ import (
 	"entgo.io/ent/dialect/sql"
 )
 
+// AccountMonetisationState is the predicate function for accountmonetisationstate builders.
+type AccountMonetisationState func(*sql.Selector)
+
 // Appeal is the predicate function for appeal builders.
 type Appeal func(*sql.Selector)
 

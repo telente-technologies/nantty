@@ -20,6 +20,18 @@ func (f AccountFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, err
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.AccountMutation", m)
 }
 
+// The AgeGateRefusalFunc type is an adapter to allow the use of ordinary
+// function as AgeGateRefusal mutator.
+type AgeGateRefusalFunc func(context.Context, *ent.AgeGateRefusalMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f AgeGateRefusalFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.AgeGateRefusalMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.AgeGateRefusalMutation", m)
+}
+
 // The OneTimeCodeFunc type is an adapter to allow the use of ordinary
 // function as OneTimeCode mutator.
 type OneTimeCodeFunc func(context.Context, *ent.OneTimeCodeMutation) (ent.Value, error)

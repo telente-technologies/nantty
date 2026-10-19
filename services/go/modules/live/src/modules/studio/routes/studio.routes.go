@@ -18,6 +18,7 @@ func MountStudioRoutes(mux *http.ServeMux, deployed *container.Container) {
 	mux.Handle("GET /api/v1/lives/{liveId}/recordings", authenticated(controller.ListRecordings))
 	mux.Handle("PUT /api/v1/lives/{liveId}/recording", authenticated(controller.SetRecording))
 	mux.Handle("DELETE /api/v1/lives/{liveId}/recordings/{recordingId}", authenticated(controller.DeleteRecording))
+	mux.Handle("POST /api/v1/lives/{liveId}/recordings/{recordingId}/repost", authenticated(controller.RepostRecording))
 	mux.Handle("GET /api/v1/lives/{liveId}/stream-health", authenticated(controller.GetStreamHealth))
 	mux.Handle("GET /api/v1/live/host-defaults", authenticated(controller.GetHostDefaults))
 	mux.Handle("PUT /api/v1/live/host-defaults", authenticated(controller.UpdateHostDefaults))

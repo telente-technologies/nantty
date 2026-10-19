@@ -9,6 +9,25 @@ import (
 )
 
 var (
+	// AccountMonetisationStatesColumns holds the columns for the "account_monetisation_states" table.
+	AccountMonetisationStatesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "last_can_monetise", Type: field.TypeBool, Default: true},
+		{Name: "last_published_at", Type: field.TypeTime, Nullable: true},
+		{Name: "override_mode", Type: field.TypeEnum, Nullable: true, Enums: []string{"allow", "pause"}},
+		{Name: "override_reason", Type: field.TypeString, Size: 1000, Default: ""},
+		{Name: "override_actor_id", Type: field.TypeString, Size: 64, Default: ""},
+		{Name: "override_actor_name", Type: field.TypeString, Size: 120, Default: ""},
+		{Name: "override_active_strike_count", Type: field.TypeInt, Default: 0},
+		{Name: "override_set_at", Type: field.TypeTime, Nullable: true},
+		{Name: "updated_at", Type: field.TypeTime},
+	}
+	// AccountMonetisationStatesTable holds the schema information for the "account_monetisation_states" table.
+	AccountMonetisationStatesTable = &schema.Table{
+		Name:       "account_monetisation_states",
+		Columns:    AccountMonetisationStatesColumns,
+		PrimaryKey: []*schema.Column{AccountMonetisationStatesColumns[0]},
+	}
 	// AppealsColumns holds the columns for the "appeals" table.
 	AppealsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID},
@@ -880,6 +899,7 @@ var (
 	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
+		AccountMonetisationStatesTable,
 		AppealsTable,
 		AutomationEventOccurrencesTable,
 		AutomationExecutionsTable,

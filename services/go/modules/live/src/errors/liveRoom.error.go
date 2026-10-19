@@ -22,6 +22,7 @@ var (
 	CommentsSubscribersOnly = Api(http.StatusForbidden, "COMMENTS_SUBSCRIBERS_ONLY", "Only subscribers can comment on this live.")
 	RecordingNotFound       = Api(http.StatusNotFound, "RECORDING_NOT_FOUND", "That recording could not be found.")
 	RecordingInProgress     = Api(http.StatusConflict, "RECORDING_IN_PROGRESS", "This recording is still in progress.")
+	RecordingOnLegalHold    = Api(http.StatusConflict, "RECORDING_ON_HOLD", "This recording is kept for a safety review and can't be deleted yet.")
 	LiveNotEditable         = Api(http.StatusConflict, "LIVE_NOT_EDITABLE", "Only a live that hasn't started can be changed or cancelled.")
 	ModeratorSelf           = Unprocessable("MODERATOR_SELF", "You can't add yourself as a moderator.")
 )

@@ -15,6 +15,7 @@ import (
 	unpinproductfromlive "zudomart/modules/live/src/modules/sessions/commands/unpinProductFromLive"
 	updatelivemonetization "zudomart/modules/live/src/modules/sessions/commands/updateLiveMonetization"
 	"zudomart/modules/live/src/modules/sessions/dtos"
+	gethostlivestatus "zudomart/modules/live/src/modules/sessions/queries/getHostLiveStatus"
 	getlivesession "zudomart/modules/live/src/modules/sessions/queries/getLiveSession"
 	listliveproducts "zudomart/modules/live/src/modules/sessions/queries/listLiveProducts"
 	listsuggestedlives "zudomart/modules/live/src/modules/sessions/queries/listSuggestedLives"
@@ -75,6 +76,20 @@ func (controller SessionsController) GetLiveSession(writer http.ResponseWriter, 
 		var view types.LiveSessionView
 		actor, _ := utils.ActorFrom(request)
 		if view, err = (getlivesession.Handler{Container: controller.Container}).Execute(request.Context(), getlivesession.Query{LiveId: liveId, Viewer: actor.UserId}); err == nil {
+			httpserver.WriteJsonResponse(writer, http.StatusOK, view)
+			return
+		}
+	}
+	controller.responder().Error(writer, request, err)
+}
+
+func (controller SessionsController) GetHostLiveStatus(writer http.ResponseWriter, request *http.Request) {
+	hostId, err := utils.PathIdentifier(request, "userId")
+	if err == nil {
+		var view types.HostLiveStatusView
+		actor, _ := utils.ActorFrom(request)
+		if view, err = (gethostlivestatus.Handler{Container: controller.Container}).Execute(request.Context(), gethostlivestatus.Query{HostId: hostId, Viewer: actor.UserId}); err == nil {
+			writer.Header().Set("Cache-Control", "private, no-store")
 			httpserver.WriteJsonResponse(writer, http.StatusOK, view)
 			return
 		}

@@ -8,3 +8,7 @@ type RegisterRequest struct {
 	Name     string `json:"name"`
 	OtpToken string `json:"otpToken"`
 }
+
+type AddBirthdayRequest struct {
+	Birthday string `json:"birthday"`
+}
