@@ -33,7 +33,9 @@ import { QuotedPostCard } from "./quotedPostCard";
 import { quotedSummaryFromPost } from "@/utils/postLinks.util";
 import { AiGeneratedLabel } from "@/components/feed/aiGeneratedLabel";
 import { SponsoredCallToAction, SponsoredLabel } from "./sponsoredContent";
+import { isPromotedEntityAd } from "@/utils/promotedEntityAd.util";
 import { SponsoredMedia } from "./sponsoredMedia";
+import { PromotedEntityAdCard } from "./promotedEntityAdCard";
 import { LikeBurst } from "@/components/clips/likeBurst";
 import { saveTargetForPost } from "@/types";
 import { webAppLinks } from "@/config/webAppLinks.config";
@@ -74,6 +76,12 @@ export interface PostCardProps {
 }
 
 export function PostCard(props: PostCardProps) {
+  const { sponsored } = props.post;
+  if (isPromotedEntityAd(sponsored)) return <PromotedEntityAdCard sponsored={sponsored} placement={props.adPlacement ?? "feed"} itemId={props.post.id} media={props.post.media} primaryText={props.post.text} />;
+  return <OrganicPostCard {...props} />;
+}
+
+function OrganicPostCard(props: PostCardProps) {
   const { colors } = useTheme();
   const styles = useStyles();
   const { post } = props;

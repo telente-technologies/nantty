@@ -125,7 +125,7 @@ export type NotificationCategory = "orders" | "social" | "system";
 
 export interface CategorizedNotification extends AppNotification {
   readonly category: NotificationCategory;
-  readonly kind?: "mention" | "videoReply" | "postTag";
+  readonly kind?: "mention" | "videoReply" | "postTag" | "followRequest" | "followRequestAccepted";
   readonly url?: string | null;
   readonly data?: { readonly ticketId?: string; readonly screen?: string; readonly url?: string | null } | null;
 }
@@ -139,6 +139,7 @@ export type EscrowStage =
   | "buyer_confirmed"
   | "released_to_seller"
   | "disputed"
+  | "under_review"
   | "refunded";
 
 export interface ShipmentDetails {
@@ -169,6 +170,9 @@ export interface EscrowDetail {
   readonly releasedAt: ISODate | null;
   readonly refundedAt: ISODate | null;
   readonly disputeId: ID | null;
+  readonly undeliveredReviewAt?: ISODate | null;
+  readonly refundedAmount?: Money;
+  readonly feesKeptOnRefund?: Money;
 }
 
 export interface EscrowHold {

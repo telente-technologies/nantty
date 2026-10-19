@@ -9,6 +9,7 @@ import { buildPopoverMenuSurface } from "@/components/ui/modalChrome.constant";
 import { Text } from "@/components/ui/text";
 import { makeThemedStyles, useTheme } from "@/theme";
 import type { Topic } from "@/types";
+import { horizontalScrollGestureGuardProps } from "@/components/home/horizontalScrollGestureGuard.util";
 
 export type FeedMode = "for-you" | "following";
 
@@ -30,7 +31,7 @@ export function TopicFilterRow({ topics, selectedTopicId, feedMode, onSelectTopi
   };
   return (
     <View>
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.row} contentContainerStyle={styles.content}>
+      <ScrollView horizontal {...horizontalScrollGestureGuardProps} showsHorizontalScrollIndicator={false} style={styles.row} contentContainerStyle={styles.content}>
         <Chip
           kind="filter"
           label={feedMode === "following" ? "Following" : "For You"}

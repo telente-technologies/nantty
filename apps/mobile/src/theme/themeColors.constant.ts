@@ -21,8 +21,8 @@ export const lightThemeColors = {
 
 export type ThemeColors = { readonly [Key in keyof typeof lightThemeColors]: string };
 
-export const figmaDarkCanvas = "#0E0E10";
-export const figmaDarkSurface = "#2C2C2C";
+export const figmaDarkCanvas = "#15161A";
+export const figmaDarkSurface = "#1E2024";
 
 export const darkThemeColors: ThemeColors = {
   primary: semanticDark.brand,
@@ -46,24 +46,24 @@ export const darkThemeColors: ThemeColors = {
   white: colors.white,
   black: colors.black,
   background: figmaDarkCanvas,
-  surface: figmaDarkSurface,
-  elevated: "#3A3A3D",
-  sunken: "#1A1A1D",
+  surface: "#15161A",
+  elevated: figmaDarkSurface,
+  sunken: "#15161A",
 
-  text: colors.white,
-  textMuted: "#B3B3B3",
-  textSubtle: "#A6A6A6",
-  textFaint: "#A6A6A6",
+  text: "#E8E9EB",
+  textMuted: "#9A9DA3",
+  textSubtle: "#8A8D94",
+  textFaint: "#8A8D94",
 
-  placeholder: "#3A3A3D",
-  inputPlaceholderText: "#8E8E92",
-  divider: "#3D3D40",
-  chip: "#3A3A3D",
-  disabled: "#3A3A3D",
-  disabledText: "#7A7A7D",
-  avatar: "#48484B",
+  placeholder: figmaDarkSurface,
+  inputPlaceholderText: "#8A8D94",
+  divider: "#2C2E33",
+  chip: "#26282D",
+  disabled: "#26282D",
+  disabledText: "#6B6F77",
+  avatar: "#2C2E33",
   media: colors.media,
-  skeleton: "#38383B",
+  skeleton: figmaDarkSurface,
   overlay: semanticDark.overlay,
 };
 

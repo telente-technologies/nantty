@@ -9,7 +9,7 @@ const base: OwnProfileMenuInput = {
 const keys = (input: OwnProfileMenuInput) => buildOwnProfileMenuItems(input).map((item) => item.key);
 
 test("public non-seller sees the personal hubs with Settings last", () => {
-  expect(keys(base)).toEqual(["creator", "saved", "orders", "wallet", "verification", "settings"]);
+  expect(keys(base)).toEqual(["creator", "ads", "saved", "orders", "wallet", "verification", "settings"]);
 });
 
 test("seller dashboard only for sellers, first in the list", () => {
@@ -36,4 +36,11 @@ test("verification label reflects the badge", () => {
     buildOwnProfileMenuItems({ ...base, profile: { ...base.profile, verification: { badgeVisible } as never } }).find((item) => item.key === "verification")?.label;
   expect(label(false)).toBe("Get verified");
   expect(label(true)).toBe("Verification");
+});
+
+test("Ads opens the in-app Ads hub right after the creator entry, for everyone", () => {
+  const items = buildOwnProfileMenuItems({ ...base, profile: { ...base.profile, id: "user-1" } });
+  expect(items.map((item) => item.key).slice(0, 2)).toEqual(["creator", "ads"]);
+  expect(items[1]).toMatchObject({ label: "Ads", route: "AdsHub" });
+  expect(keys(base)).toContain("ads");
 });

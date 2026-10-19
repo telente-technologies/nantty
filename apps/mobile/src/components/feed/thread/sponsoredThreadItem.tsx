@@ -11,6 +11,7 @@ import { SponsoredCarousel } from "@/components/feed/sponsoredCarousel";
 import { adEventsService } from "@/services/ads/adEvents.service";
 import { openSponsoredTarget } from "@/services/ads/adClick.service";
 import { sponsoredPlacementFromDecidedAd } from "@/utils/adCreativeMapping.util";
+import { isPromotedEntityAd, promotedEntityCallToActionLabel } from "@/utils/promotedEntityAd.util";
 import { makeThemedStyles, useTheme } from "@/theme";
 import type { ThreadDecidedAd } from "@/types/postThread.type";
 
@@ -31,6 +32,9 @@ export function SponsoredThreadItem({ ad, postId }: { readonly ad: ThreadDecided
   const openMedia = () => openSponsoredTarget({ sponsored, placement: "feedCommentThread", itemId: postId, target: { kind: "cta" }, navigation });
   const isCarousel = sponsored.adType === "carousel" && (sponsored.cards?.length ?? 0) > 0;
   const isInstall = sponsored.adType === "app_install" && Boolean(sponsored.app);
+  const promotedEntity = isPromotedEntityAd(sponsored) ? sponsored.promoted : null;
+  const headline = promotedEntity ? promotedEntity.name : creative.headline;
+  const callToActionLabel = promotedEntity ? promotedEntityCallToActionLabel(promotedEntity.kind) : sponsored.ctaLabel;
 
   return (
     <View style={styles.row} accessibilityLabel={`Promoted by ${creative.identity.name}`}>
@@ -51,15 +55,15 @@ export function SponsoredThreadItem({ ad, postId }: { readonly ad: ThreadDecided
         {isCarousel ? <SponsoredCarousel sponsored={sponsored} placement="feedCommentThread" itemId={postId} /> : null}
         {isInstall ? <SponsoredAppInstallRow sponsored={sponsored} placement="feedCommentThread" itemId={postId} /> : null}
         {isCarousel || isInstall ? null : (
-          <Pressable accessibilityRole="link" accessibilityLabel={`${creative.headline}, ${sponsored.ctaLabel}`} onPress={openMedia} style={styles.card}>
+          <Pressable accessibilityRole="link" accessibilityLabel={`${headline}, ${callToActionLabel}`} onPress={openMedia} style={styles.card}>
             {image ? <Image source={{ uri: image.url }} style={[styles.media, { aspectRatio: image.width / Math.max(image.height, 1) }]} contentFit="cover" /> : null}
             <View style={styles.cardFooter}>
               <Text size={14} weight={500} lineHeight={18} numberOfLines={2} style={styles.headline}>
-                {creative.headline}
+                {headline}
               </Text>
               <View style={styles.cta}>
                 <Text size={13} weight={600} lineHeight={16} color={colors.onPrimary}>
-                  {sponsored.ctaLabel}
+                  {callToActionLabel}
                 </Text>
               </View>
             </View>

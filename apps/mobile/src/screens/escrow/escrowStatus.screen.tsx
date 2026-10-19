@@ -4,6 +4,7 @@ import { RefreshControl, ScrollView, StyleSheet, View } from "react-native";
 import { ConfirmActionSheet } from "@/components/escrow/confirmActionSheet";
 import { EscrowExplainerCard } from "@/components/escrow/escrowExplainerCard";
 import { useConfirmReceiptMutation, useEscrowForOrderQuery } from "@/components/escrow/escrowQueries.hook";
+import { STAGES_BUYER_CAN_CONFIRM, STAGES_BUYER_CAN_DISPUTE } from "@/components/escrow/escrowStage.util";
 import { EscrowSummaryCard } from "@/components/escrow/escrowSummaryCard";
 import { EscrowTimeline } from "@/components/escrow/escrowTimeline";
 import { Button } from "@/components/ui/button";
@@ -17,8 +18,6 @@ import { ListSkeleton } from "@/components/ui/listSkeleton";
 import { ErrorState } from "@/components/ui/errorState";
 import { describeActionFailure } from "@/errors/errorExperience/describeError";
 
-const STAGES_BUYER_CAN_CONFIRM = new Set(["shipped", "delivered"]);
-const STAGES_BUYER_CAN_DISPUTE = new Set(["seller_preparing", "paid_into_escrow", "shipped", "delivered"]);
 
 export function EscrowStatusScreen({ navigation, route }: MainScreenProps<"EscrowStatus">) {
   const { colors } = useTheme();

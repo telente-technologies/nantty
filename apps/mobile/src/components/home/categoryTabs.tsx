@@ -4,6 +4,7 @@ import { Pressable, ScrollView, StyleSheet } from "react-native";
 import { Text } from "@/components/ui/text";
 import { useTheme } from "@/theme";
 import type { Category } from "@/types";
+import { horizontalScrollGestureGuardProps } from "@/components/home/horizontalScrollGestureGuard.util";
 
 export interface CategoryTabsProps {
   readonly categories: readonly Category[];
@@ -32,7 +33,7 @@ export function CategoryTabs({ categories, selectedCategoryId, onSelectCategory,
       ref={scrollRef}
       onLayout={(event) => { rowWidth.current = event.nativeEvent.layout.width; }}
       accessibilityRole="tablist"
-      horizontal showsHorizontalScrollIndicator={false} style={{ flexGrow: 0, backgroundColor: background }} contentContainerStyle={styles.row}>
+      horizontal {...horizontalScrollGestureGuardProps} showsHorizontalScrollIndicator={false} style={{ flexGrow: 0, backgroundColor: background }} contentContainerStyle={styles.row}>
       {tabs.map((category) => {
         const selected = category.id === selectedCategoryId;
         const selectedBackground = tone === "primary" ? colors.primaryTint : colors.chip;

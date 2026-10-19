@@ -7,7 +7,7 @@ import { makeThemedStyles, useTheme, type ThemeColors } from "@/theme";
 import type { EscrowDetail } from "@/types/commerce.type";
 import { formatMoneyForDisplay } from "@/utils/formatMoney.util";
 
-import { formatFriendlyDate, formatFriendlyDateTime } from "./escrowStage.util";
+import { escrowPausedStepCopy, formatFriendlyDate, formatFriendlyDateTime } from "./escrowStage.util";
 
 type StepState = "done" | "current" | "upcoming" | "problem";
 
@@ -30,7 +30,7 @@ const lastCompletedStepIndex = (escrow: EscrowDetail): number => {
 
 function buildTimelineSteps(escrow: EscrowDetail, viewerRole: "buyer" | "seller"): TimelineStep[] {
   const completed = lastCompletedStepIndex(escrow);
-  const paused = escrow.stage === "disputed" || escrow.stage === "refunded";
+  const paused = escrow.stage === "disputed" || escrow.stage === "refunded" || escrow.stage === "under_review";
   const stateFor = (index: number): StepState => (index <= completed ? "done" : index === completed + 1 && !paused ? "current" : "upcoming");
   const storeName = escrow.store.name;
   const shipment = escrow.shipment;
@@ -84,12 +84,7 @@ function buildTimelineSteps(escrow: EscrowDetail, viewerRole: "buyer" | "seller"
     },
   ];
   if (!paused) return steps;
-  const problemStep: TimelineStep = {
-    key: "problem",
-    title: escrow.stage === "refunded" ? "Refunded to buyer" : "Dispute open — release paused",
-    detail: escrow.stage === "refunded" ? `${formatMoneyForDisplay(escrow.heldAmount)} returned to the buyer` : "Zudomart is holding the money until the dispute is resolved",
-    state: "problem",
-  };
+  const problemStep: TimelineStep = { key: "problem", ...escrowPausedStepCopy(escrow), state: "problem" };
   return [...steps.slice(0, completed + 1), problemStep, ...steps.slice(completed + 1)];
 }
 

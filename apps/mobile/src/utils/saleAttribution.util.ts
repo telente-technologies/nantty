@@ -18,6 +18,8 @@ export const isAffiliateLinkId = (value: unknown): value is string => typeof val
 export const attributionSourceForPostKind = (kind: string | null | undefined): SaleAttributionSource => (kind === "clip" ? "clip" : "post");
 
 export function keepLiveSaleAttributions(current: Readonly<Record<string, StoredSaleAttribution>>, productId: string, attribution: SaleAttribution, expiresAt: number, now: number): Record<string, StoredSaleAttribution> {
+  const existing = current[productId];
+  if (existing && existing.expiresAt > now && (existing.source !== attribution.source || existing.id !== attribution.id)) return { ...current };
   const kept = Object.entries(current).filter(([key, stored]) => key !== productId && stored.expiresAt > now).slice(-(maximumRememberedProducts - 1));
   if (!productId || !attribution.id || !attributionSources.includes(attribution.source) || expiresAt <= now) return Object.fromEntries(kept);
   return Object.fromEntries([...kept, [productId, { source: attribution.source, id: attribution.id, expiresAt }]]);

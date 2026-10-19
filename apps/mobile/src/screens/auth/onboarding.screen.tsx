@@ -1,6 +1,6 @@
 import { Image } from "expo-image";
 import { useEffect, useState } from "react";
-import { ScrollView, StyleSheet, View } from "react-native";
+import { Pressable, ScrollView, StyleSheet, View } from "react-native";
 
 import { LegalText } from "@/components/auth/legalText";
 import { Apple24Icon, Google24Icon, UserCircle24Icon } from "@/components/icons";
@@ -17,6 +17,7 @@ import { useGuestSessionStore } from "@/store/guestSession.store";
 
 const photo = require("../../../assets/images/onboardingMarketPhoto.jpg");
 const ROWS = [-43, -96, -43];
+const SIGN_IN_OPTION_ICON_GAP = 8;
 
 export function OnboardingScreen({ navigation, route }: AuthScreenProps<"Onboarding">) {
   const { colors } = useTheme();
@@ -53,6 +54,20 @@ export function OnboardingScreen({ navigation, route }: AuthScreenProps<"Onboard
 
   return (
     <Screen>
+      <View style={styles.topBar}>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={isDismissible ? "Not now" : "Skip"}
+          accessibilityHint={isDismissible ? "Closes sign in" : "Browse Zudomart without an account"}
+          hitSlop={8}
+          onPress={() => (isDismissible ? navigation.getParent()?.goBack() : startBrowsingAsGuest())}
+          style={({ pressed }) => [styles.skip, pressed && styles.skipPressed]}
+        >
+          <Text size={14} weight={500} lineHeight={16.8} color={colors.text}>
+            {isDismissible ? "Not now" : "Skip"}
+          </Text>
+        </Pressable>
+      </View>
       <ScrollView contentContainerStyle={styles.content} bounces={false}>
         <View style={styles.rows} accessible={false} importantForAccessibility="no-hide-descendants">
           {ROWS.map((offset, row) => (
@@ -79,6 +94,8 @@ export function OnboardingScreen({ navigation, route }: AuthScreenProps<"Onboard
               variant="outline"
               title="Continue with Apple"
               icon={<Apple24Icon />}
+              iconGap={SIGN_IN_OPTION_ICON_GAP}
+              style={styles.signInOption}
               loading={providerSigningIn === "apple"}
               onPress={() => handleSocialSignIn("apple")}
             />
@@ -87,19 +104,18 @@ export function OnboardingScreen({ navigation, route }: AuthScreenProps<"Onboard
             variant="outline"
             title="Continue with Google"
             icon={<Google24Icon />}
+            iconGap={SIGN_IN_OPTION_ICON_GAP}
+            style={styles.signInOption}
             loading={providerSigningIn === "google"}
             onPress={() => handleSocialSignIn("google")}
           />
           <Button
             variant="brand"
-            title="Email"
+            title="Use email"
             icon={<UserCircle24Icon />}
+            iconGap={SIGN_IN_OPTION_ICON_GAP}
+            style={[styles.signInOption, { borderColor: colors.primarySolid }]}
             onPress={() => (mode === "login" ? navigation.navigate("Login") : navigation.navigate("SignUpContact"))}
-          />
-          <Button
-            variant="subtle"
-            title={isDismissible ? "Not now" : "Browse first"}
-            onPress={() => (isDismissible ? navigation.getParent()?.goBack() : startBrowsingAsGuest())}
           />
           {notice ? (
             <Text size={12} lineHeight={14.4} color={colors.error} align="center">
@@ -132,8 +148,12 @@ export function OnboardingScreen({ navigation, route }: AuthScreenProps<"Onboard
 }
 
 const styles = StyleSheet.create({
+  topBar: { height: 44, paddingHorizontal: 16, flexDirection: "row", justifyContent: "flex-end", alignItems: "center" },
+  skip: { minHeight: 32, paddingHorizontal: 4, justifyContent: "center" },
+  skipPressed: { opacity: 0.6 },
   content: { paddingBottom: 24 },
-  rows: { marginTop: 118, gap: 16, overflow: "hidden" },
+  signInOption: { borderWidth: 1 },
+  rows: { marginTop: 74, gap: 16, overflow: "hidden" },
   row: { flexDirection: "row", gap: 8 },
   photo: { width: 100, height: 56, borderRadius: 4 },
   heading: { marginTop: 32, paddingHorizontal: 40, gap: 8, alignItems: "center" },

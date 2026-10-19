@@ -7,13 +7,12 @@ import type { FollowRequest } from "@/types/socialGraph.type";
 
 export interface FollowRequestRowProps {
   readonly request: FollowRequest;
-  readonly disabled: boolean;
-  readonly onApprove: () => void;
-  readonly onDecline: () => void;
+  readonly onConfirm: () => void;
+  readonly onDelete: () => void;
   readonly onPressUser: () => void;
 }
 
-export function FollowRequestRow({ request, disabled, onApprove, onDecline, onPressUser }: FollowRequestRowProps) {
+export function FollowRequestRow({ request, onConfirm, onDelete, onPressUser }: FollowRequestRowProps) {
   const { colors } = useTheme();
   const styles = useStyles();
   const { requester } = request;
@@ -26,11 +25,11 @@ export function FollowRequestRow({ request, disabled, onApprove, onDecline, onPr
           <Text size={13} lineHeight={16} color={colors.textSubtle} numberOfLines={1}>@{requester.username}</Text>
         </View>
       </Pressable>
-      <Pressable accessibilityRole="button" accessibilityLabel={`Approve ${requester.name}`} disabled={disabled} onPress={onApprove} style={[styles.button, styles.approve]}>
-        <Text size={13} weight={500} lineHeight={16.9} color={colors.white}>Approve</Text>
+      <Pressable accessibilityRole="button" accessibilityLabel={`Confirm ${requester.name}'s follow request`} onPress={onConfirm} style={[styles.button, styles.confirm]}>
+        <Text size={13} weight={500} lineHeight={16.9} color={colors.white}>Confirm</Text>
       </Pressable>
-      <Pressable accessibilityRole="button" accessibilityLabel={`Decline ${requester.name}`} disabled={disabled} onPress={onDecline} style={[styles.button, styles.decline]}>
-        <Text size={13} weight={500} lineHeight={16.9}>Decline</Text>
+      <Pressable accessibilityRole="button" accessibilityLabel={`Delete ${requester.name}'s follow request`} onPress={onDelete} style={[styles.button, styles.delete]}>
+        <Text size={13} weight={500} lineHeight={16.9}>Delete</Text>
       </Pressable>
     </View>
   );
@@ -41,6 +40,6 @@ const useStyles = makeThemedStyles((colors) => StyleSheet.create({
   identity: { flex: 1, flexDirection: "row", alignItems: "center", gap: 12 },
   names: { flex: 1, gap: 2 },
   button: { height: 30, paddingHorizontal: 10, borderRadius: 4, justifyContent: "center" },
-  approve: { backgroundColor: colors.primarySolid },
-  decline: { backgroundColor: colors.chip },
+  confirm: { backgroundColor: colors.primarySolid },
+  delete: { backgroundColor: colors.chip },
 }));

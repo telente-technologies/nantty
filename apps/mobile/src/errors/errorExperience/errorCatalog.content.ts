@@ -97,6 +97,8 @@ function describeProfileLimit(code: string | undefined): CatalogEntry {
   const shared = { icon: "storefront", tone: "neutral", motion: "float", primary: "manageProfiles", secondary: "back" } as const;
   if (code === "PROFILE_LIMIT_ONE_BRAND") return { ...shared, title: "You already have a Brand", description: "Each account can have one Brand, alongside one Store or one Business page. Manage your Brand from your profiles." };
   if (code === "PROFILE_ON_HOLD") return { ...shared, title: "Choose which profiles to keep", description: "Your account has more profiles than the rule allows. Choose which to keep, and you can post and list from them again." };
+  if (code === "STORE_LIMIT_ONE") return { ...shared, title: "You can own one store", description: "Each account can own one store. Your other business profiles can be Business pages or Brands that don't sell." };
+  if (code === "BUSINESS_PROFILE_LIMIT") return { ...shared, title: "You've reached 5 business profiles", description: "Blue Premium includes up to 5 business profiles, with one store among them. Manage your profiles to see them all." };
   if (code === "BRAND_SELLING_OFF") return { ...shared, title: "Selling is off for this brand", description: "Turn on Sell products with this brand in your brand settings before adding listings." };
   return { ...shared, title: "You can have one Store or one Business page", description: "Your account already has a Store or a Business page. You can keep one of them, plus one Brand." };
 }

@@ -1,3 +1,4 @@
+import { useNavigation, type NavigationProp } from "@react-navigation/native";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Image } from "expo-image";
 import { useState } from "react";
@@ -8,6 +9,7 @@ import { StatusPill } from "@/components/escrow/statusPill";
 import { BottomSheet } from "@/components/ui/bottomSheet";
 import { Button } from "@/components/ui/button";
 import { Text } from "@/components/ui/text";
+import type { MainStackParamList } from "@/navigation/navigation.types";
 import { makeThemedStyles, useTheme } from "@/theme";
 import { creatorProgramService } from "@/services/creators/creatorProgram.service";
 import { productsService } from "@/services/sellers/products.service";
@@ -21,6 +23,7 @@ export function AffiliationsSection() {
   const { colors } = useTheme();
   const styles = useStyles();
   const queryClient = useQueryClient();
+  const navigation = useNavigation<NavigationProp<MainStackParamList>>();
   const [pickerVisible, setPickerVisible] = useState(false);
   const affiliations = useQuery({ queryKey: creatorQueryKeys.affiliations, queryFn: creatorProgramService.listMyAffiliations });
   const candidates = useQuery({ queryKey: ["products", "featured"], queryFn: productsService.fetchFeaturedProducts, enabled: pickerVisible });
@@ -51,6 +54,7 @@ export function AffiliationsSection() {
           <StatusPill label={affiliation.status === "requested" ? "Requested" : affiliation.status === "active" ? "Active" : "Declined"} tone={AFFILIATION_TONE[affiliation.status]} />
         </View>
       ))}
+      <Button title="Open affiliate products, links and earnings" onPress={() => navigation.navigate("CreatorAffiliates")} />
       <Button variant="subtle" title="Find products to promote" onPress={() => setPickerVisible(true)} />
       <BottomSheet visible={pickerVisible} onClose={() => setPickerVisible(false)} title="Request affiliation">
         <ScrollView style={styles.sheetList} contentContainerStyle={styles.sheetContent}>

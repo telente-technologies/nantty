@@ -5,6 +5,7 @@ import { ScrollView, StyleSheet, View } from "react-native";
 import { ConfirmActionSheet } from "@/components/escrow/confirmActionSheet";
 import { formatFriendlyDate } from "@/components/escrow/escrowStage.util";
 import { StatusPill } from "@/components/escrow/statusPill";
+import { GoldForBusinessesCard } from "@/components/profile/goldForBusinessesCard";
 import { VerificationBadge } from "@/components/profile/verificationBadge";
 import { VerificationPlanCard } from "@/components/profile/verificationPlanCard";
 import { useMyVerificationQuery, useVerificationPlansQuery, verificationQueryKeys } from "@/components/profile/verificationQueries.hook";
@@ -99,6 +100,8 @@ export function VerificationScreen({ navigation }: MainScreenProps<"Verification
             <Button variant="subtle" title={MANAGE_ON_THE_WEB_LABEL} onPress={() => webHandoffService.openManageBilling(actingProfileId)} />
           </View>
         ) : null}
+
+        {type === "personal" || type === "business" ? <GoldForBusinessesCard /> : null}
 
         {type === "government" ? (
           <View style={styles.card}>

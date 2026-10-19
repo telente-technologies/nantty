@@ -24,6 +24,9 @@ export const LINKED_KIND_LABELS = { store: "Store", business: "Business page", b
 export function blockedCreateCode(linked: LinkedProfiles | undefined, kind: "store" | "business" | "brand"): string | null {
   if (!linked) return null;
   if (linked.choiceRequired) return "PROFILE_ON_HOLD";
-  if (kind === "brand") return linked.canCreate.brand ? null : "PROFILE_LIMIT_ONE_BRAND";
-  return linked.canCreate[kind] ? null : "PROFILE_LIMIT_STORE_OR_BUSINESS";
+  if (linked.canCreate[kind]) return null;
+  const allowance = linked.businessProfiles;
+  if (kind === "store" && allowance?.storeUsed && allowance.count < allowance.limit) return "STORE_LIMIT_ONE";
+  if (allowance?.premium) return "BUSINESS_PROFILE_LIMIT";
+  return kind === "brand" ? "PROFILE_LIMIT_ONE_BRAND" : "PROFILE_LIMIT_STORE_OR_BUSINESS";
 }

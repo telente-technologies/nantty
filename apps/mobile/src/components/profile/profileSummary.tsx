@@ -1,18 +1,17 @@
 import { MentionText } from "@/components/mentions/mentionText";
-import { useNavigation, type NavigationProp } from "@react-navigation/native";
 import { Image } from "expo-image";
 import type { ReactNode } from "react";
 import { Pressable, StyleSheet, View } from "react-native";
 
 import { CalendarDots16Icon } from "@/components/icons";
-import { LiveAvatarRing } from "@/components/live/liveAvatarRing";
-import { PreviewableImage, useImagePreview } from "@/components/ui/previewableImage";
+import { PreviewableImage } from "@/components/ui/previewableImage";
 import { Text } from "@/components/ui/text";
 import { makeThemedStyles, useTheme } from "@/theme";
-import type { MainStackParamList } from "@/navigation/navigation.types";
 import type { User } from "@/types";
 import { formatCountWithThousandsSuffix, formatJoinedDate } from "@/utils/formatDate.util";
 
+import { isProfileContentHiddenFromViewer } from "./followState.util";
+import { ProfileAvatar } from "./profileAvatar";
 import { VerificationBadge } from "./verificationBadge";
 
 export interface ProfileAction {
@@ -32,37 +31,6 @@ export interface ProfileSummaryProps {
   readonly onPressFollowing: () => void;
 }
 
-function ProfileAvatar({ profile, borderRadius }: { readonly profile: User; readonly borderRadius: number }) {
-  const styles = useStyles();
-  const navigation = useNavigation<NavigationProp<MainStackParamList>>();
-  const { openImagePreview, imagePreviewElement } = useImagePreview();
-  const avatarImage = profile.avatarUrl ? <Image source={{ uri: profile.avatarUrl }} style={StyleSheet.absoluteFill} contentFit="cover" /> : null;
-  if (!profile.live) {
-    return (
-      <PreviewableImage imageUrl={profile.avatarUrl} accessibilityLabel={`View ${profile.name}'s profile photo`}>
-        <View style={[styles.avatar, { borderRadius }]}>{avatarImage}</View>
-      </PreviewableImage>
-    );
-  }
-  const liveId = profile.live.liveId;
-  return (
-    <>
-      <Pressable
-        accessibilityRole="button"
-        accessibilityLabel={`${profile.name} is live, open livestream`}
-        accessibilityHint="Long press to view the profile photo"
-        onPress={() => navigation.navigate("Live", { liveId })}
-        onLongPress={() => openImagePreview([profile.avatarUrl])}
-      >
-        <LiveAvatarRing size={64} borderRadius={borderRadius}>
-          <View style={[styles.avatar, { borderRadius }]}>{avatarImage}</View>
-        </LiveAvatarRing>
-      </Pressable>
-      {imagePreviewElement}
-    </>
-  );
-}
-
 const formatJoinedMonthAndYear = (isoDate: string) => formatJoinedDate(isoDate).replace(/ (\d{4})$/, ", $1");
 
 export function ProfileSummary({ profile, variant, actions, identityAction, onPressFollowers, onPressFollowing }: ProfileSummaryProps) {
@@ -80,7 +48,7 @@ export function ProfileSummary({ profile, variant, actions, identityAction, onPr
       </View>
 
       <View style={styles.identity}>
-        <ProfileAvatar profile={profile} borderRadius={isOwn ? 32 : 8} />
+        <ProfileAvatar profile={profile} borderRadius={isOwn ? 32 : 8} isProfileHiddenFromViewer={!isOwn && (isProfileContentHiddenFromViewer(profile) || profile.followState === "blocked")} />
         <View style={styles.names}>
           <View style={styles.nameRow}>
             <Text size={16} weight={500} lineHeight={19.2} accessibilityRole="header" numberOfLines={1}>
@@ -176,7 +144,6 @@ const useStyles = makeThemedStyles((colors) => StyleSheet.create({
     justifyContent: "center",
     paddingHorizontal: 14,
   },
-  avatar: { width: 64, height: 64, backgroundColor: colors.placeholder, overflow: "hidden" },
   names: { flex: 1, gap: 4 },
   nameRow: { flexDirection: "row", alignItems: "center", gap: 4 },
   stats: { flexDirection: "row", alignItems: "center", gap: 8 },

@@ -14,7 +14,7 @@ describe("iOS widget colors", () => {
     for (const [name, value] of Object.entries(widgetColors.lightColors)) expect(value).toBe(lightColors[name as keyof typeof lightColors]);
     for (const [name, value] of Object.entries(widgetColors.darkColors)) {
       if (name === "canvas") expect(value).toBe(figmaDarkCanvas);
-      else if (name === "surface") expect(value).toBe("#2C2C2C");
+      else if (name === "surface") expect(value).toBe("#1E2024");
       else expect(value).toBe(darkColors[name as keyof typeof darkColors]);
     }
     expect(widgetColors.brandPalette.brand).toBe(lightColors.brand);

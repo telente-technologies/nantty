@@ -1,5 +1,5 @@
 import type { PostLocationTag } from "./clipCreate.type";
-import type { AdAppInstall, AdCard, AdClickLinks, AdCreativeType, AdDestination } from "./adCreative.type";
+import type { AdAppInstall, AdCard, AdClickLinks, AdCreativeType, AdDestination, AdPromotedEntity } from "./adCreative.type";
 import type { Money } from "./money.type";
 import type { Order } from "./cartOrder.type";
 import type { FollowState } from "./socialGraph.type";
@@ -152,6 +152,7 @@ export interface SponsoredPlacement {
   readonly mediaClickable?: boolean;
   readonly cards?: readonly AdCard[];
   readonly app?: AdAppInstall;
+  readonly promoted?: AdPromotedEntity;
 }
 
 export interface Post {

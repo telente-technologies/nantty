@@ -63,7 +63,7 @@ export function buildModalToneColors(colors: ThemeColors, scheme: ColorSchemeNam
     case "brand":
       return { tint: colors.primaryTint, ink: isDark ? colors.link : colors.primary };
     default:
-      return { tint: isDark ? "#3A3A3D" : "#F0F2FA", ink: colors.text };
+      return { tint: isDark ? "#26282D" : "#F0F2FA", ink: colors.text };
   }
 }
 

@@ -9,6 +9,7 @@ import {
   BuildingStore20Icon,
   GearSix24Icon,
   Package24Icon,
+  RocketLaunch24Icon,
   SealCheck20Icon,
   UserPlus24Icon,
   VideoCamera24Icon,
@@ -39,6 +40,7 @@ function MenuIcon({ name, color }: { name: OwnProfileMenuIcon; color: string }):
   switch (name) {
     case "seller": return <BuildingStore20Icon size={20} color={color} />;
     case "creator": return <VideoCamera24Icon size={20} color={color} />;
+    case "ads": return <RocketLaunch24Icon size={20} color={color} />;
     case "followRequests": return <UserPlus24Icon size={20} color={color} />;
     case "saved": return <BookmarkSimple24Icon size={20} color={color} />;
     case "orders": return <Package24Icon size={20} color={color} />;

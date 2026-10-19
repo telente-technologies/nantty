@@ -1,8 +1,8 @@
-import * as SecureStore from "expo-secure-store";
-import { Platform } from "react-native";
 import { create } from "zustand";
 
 import { storageKeys } from "@/constants/storageKeys.constant";
+import { readDevicePreference, writeDevicePreference } from "@/utils/devicePreferenceStorage.util";
+import { retryWhenAppComesToForeground } from "@/utils/secureStorage.util";
 
 export type ThemePreference = "light" | "dark" | "system";
 
@@ -10,22 +10,10 @@ export const DEFAULT_THEME_PREFERENCE: ThemePreference = "light";
 
 const isThemePreference = (value: unknown): value is ThemePreference => value === "light" || value === "dark" || value === "system";
 
-const readStoredThemePreferenceSynchronously = (): ThemePreference => {
-  try {
-    const stored = Platform.OS === "web" ? globalThis.localStorage?.getItem(storageKeys.themePreference) : SecureStore.getItem(storageKeys.themePreference);
-    return isThemePreference(stored) ? stored : DEFAULT_THEME_PREFERENCE;
-  } catch {
-    return DEFAULT_THEME_PREFERENCE;
-  }
-};
-
-const writeStoredThemePreference = (preference: ThemePreference) => {
-  try {
-    if (Platform.OS === "web") globalThis.localStorage?.setItem(storageKeys.themePreference, preference);
-    else SecureStore.setItem(storageKeys.themePreference, preference);
-  } catch {
-    return;
-  }
+const readStoredThemePreferenceSynchronously = (): ThemePreference | null => {
+  const stored = readDevicePreference(storageKeys.themePreference);
+  if (!stored.available) return null;
+  return isThemePreference(stored.value) ? stored.value : DEFAULT_THEME_PREFERENCE;
 };
 
 interface ThemePreferenceState {
@@ -33,10 +21,24 @@ interface ThemePreferenceState {
   readonly setPreference: (preference: ThemePreference) => void;
 }
 
+const preferenceReadAtLaunch = readStoredThemePreferenceSynchronously();
+let hasChosenPreferenceSinceLaunch = false;
+
 export const useThemePreferenceStore = create<ThemePreferenceState>()((set) => ({
-  preference: readStoredThemePreferenceSynchronously(),
+  preference: preferenceReadAtLaunch ?? DEFAULT_THEME_PREFERENCE,
   setPreference: (preference) => {
-    writeStoredThemePreference(preference);
+    hasChosenPreferenceSinceLaunch = true;
+    writeDevicePreference(storageKeys.themePreference, preference);
     set({ preference });
   },
 }));
+
+if (preferenceReadAtLaunch === null) {
+  retryWhenAppComesToForeground(() => {
+    if (hasChosenPreferenceSinceLaunch) return true;
+    const preference = readStoredThemePreferenceSynchronously();
+    if (preference === null) return false;
+    useThemePreferenceStore.setState({ preference });
+    return true;
+  });
+}

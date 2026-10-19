@@ -3,10 +3,12 @@ import { isAffiliateLinkId, keepLiveSaleAttributions, readLiveSaleAttribution } 
 describe("sale attribution memory", () => {
   const now = 1_000_000;
 
-  it("keeps the latest creator touch per product until it expires", () => {
+  it("keeps the first creator touch per product until it expires, and the same creator refreshes it", () => {
     let byProduct = keepLiveSaleAttributions({}, "p1", { source: "post", id: "post_1" }, now + 10, now);
     byProduct = keepLiveSaleAttributions(byProduct, "p1", { source: "link", id: "link_1" }, now + 10, now);
-    expect(readLiveSaleAttribution(byProduct, "p1", now)).toEqual({ source: "link", id: "link_1" });
+    expect(readLiveSaleAttribution(byProduct, "p1", now)).toEqual({ source: "post", id: "post_1" });
+    expect(readLiveSaleAttribution(keepLiveSaleAttributions(byProduct, "p1", { source: "post", id: "post_1" }, now + 50, now), "p1", now + 20)).toEqual({ source: "post", id: "post_1" });
+    expect(readLiveSaleAttribution(keepLiveSaleAttributions(byProduct, "p1", { source: "link", id: "link_1" }, now + 50, now + 11), "p1", now + 20)).toEqual({ source: "link", id: "link_1" });
     expect(readLiveSaleAttribution(byProduct, "p2", now)).toBeNull();
     expect(readLiveSaleAttribution(byProduct, "p1", now + 11)).toBeNull();
   });

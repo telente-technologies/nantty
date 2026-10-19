@@ -1,6 +1,7 @@
 import { ApiError } from "@/errors/api.error";
 import type { LinkedProfileItem, LinkedProfiles } from "@/types/brand.type";
 
+import { MOCK_PREMIUM_BUSINESS_PROFILE_LIMIT, mockBluePremiumState, mockBusinessProfileLimit } from "./bluePremiumMembership.mock";
 import { isBrandSelling, mockBrandRecords } from "./brandDirectory.mock";
 import { mockBusinessProfiles } from "./businessProfiles.mock";
 import { getSignedInMockUser } from "./fixtures.mock";
@@ -13,15 +14,16 @@ const keptProfileIds = new Set<string>();
 function rawItems(): LinkedProfileItem[] {
   const user = getSignedInMockUser();
   const store = user.storeId ? findDirectoryStoreById(user.storeId) : null;
-  const stores: LinkedProfileItem[] = store ? [{ kind: "store", profileId: store.id, storeId: store.id, status: "active", holdReason: null, name: store.name, handle: store.handle, showsMart: true }] : [];
-  const businesses: LinkedProfileItem[] = mockBusinessProfiles.map((profile) => ({ kind: "business", profileId: profile.id, storeId: null, status: "active", holdReason: null, name: profile.name, handle: profile.handle, showsMart: false }));
+  const stores: LinkedProfileItem[] = store ? [{ kind: "store", profileId: store.id, storeId: store.id, status: "active", holdReason: null, name: store.name, handle: store.handle, showsMart: true, ownsStore: true, premiumNeeded: false }] : [];
+  const businesses: LinkedProfileItem[] = mockBusinessProfiles.map((profile) => ({ kind: "business", profileId: profile.id, storeId: null, status: "active", holdReason: null, name: profile.name, handle: profile.handle, showsMart: false, ownsStore: false, premiumNeeded: false }));
   const brands: LinkedProfileItem[] = mockBrandRecords
     .filter((brand) => brand.ownerUserKey === user.id)
-    .map((brand) => ({ kind: "brand", profileId: brand.id, storeId: null, status: "active", holdReason: null, name: brand.name, handle: brand.handle, showsMart: isBrandSelling(brand) }));
+    .map((brand) => ({ kind: "brand", profileId: brand.id, storeId: null, status: "active", holdReason: null, name: brand.name, handle: brand.handle, showsMart: isBrandSelling(brand), ownsStore: false, premiumNeeded: false }));
   return [...stores, ...businesses, ...brands];
 }
 
 function withRuleApplied(items: readonly LinkedProfileItem[]): LinkedProfileItem[] {
+  const state = mockBluePremiumState();
   let slotTaken = false;
   let brandTaken = false;
   return items.map((item) => {
@@ -30,7 +32,8 @@ function withRuleApplied(items: readonly LinkedProfileItem[]): LinkedProfileItem
     const taken = isBrand ? brandTaken : slotTaken;
     if (isBrand) brandTaken = true;
     else slotTaken = true;
-    if (!taken || keptProfileIds.has(item.profileId)) return item;
+    if (state === "premium" || !taken || keptProfileIds.has(item.profileId)) return item;
+    if (state === "lapsed") return { ...item, premiumNeeded: true };
     return { ...item, status: "held", holdReason: "Your account has more profiles than the rule allows. Choose which to keep.", showsMart: false };
   });
 }
@@ -38,12 +41,20 @@ function withRuleApplied(items: readonly LinkedProfileItem[]): LinkedProfileItem
 export function buildMockLinkedProfiles(): LinkedProfiles {
   const items = withRuleApplied(rawItems());
   const active = items.filter((item) => item.status === "active");
+  const premium = mockBluePremiumState() === "premium";
+  const premiumNeeded = items.some((item) => item.premiumNeeded);
+  const storeUsed = active.some((item) => item.ownsStore);
   const hasSlot = active.some((item) => item.kind !== "brand");
+  const roomLeft = active.length < MOCK_PREMIUM_BUSINESS_PROFILE_LIMIT;
+  const canCreate = premium
+    ? { store: !storeUsed && roomLeft, business: roomLeft, brand: roomLeft }
+    : { store: !premiumNeeded && !hasSlot, business: !premiumNeeded && !hasSlot, brand: !premiumNeeded && !active.some((item) => item.kind === "brand") };
   return {
     accountId: getSignedInMockUser().id,
     items,
-    canCreate: { store: !hasSlot, business: !hasSlot, brand: !active.some((item) => item.kind === "brand") },
+    canCreate,
     choiceRequired: items.some((item) => item.status === "held"),
+    businessProfiles: { count: active.length, limit: mockBusinessProfileLimit(), premiumLimit: MOCK_PREMIUM_BUSINESS_PROFILE_LIMIT, premium, premiumNeeded, storeUsed },
   };
 }
 
@@ -53,6 +64,9 @@ export function isRetiredMockProfile(profileId: string): boolean {
 
 export function assertMockCanCreate(kind: "store" | "business" | "brand"): void {
   const linked = buildMockLinkedProfiles();
+  if (linked.canCreate[kind]) return;
+  if (kind === "store" && linked.businessProfiles.storeUsed) throw new ApiError(409, "You can own one store. Your other business profiles can be Business pages or Brands.", "STORE_LIMIT_ONE");
+  if (linked.businessProfiles.premium) throw new ApiError(409, "Blue Premium includes up to 5 business profiles.", "BUSINESS_PROFILE_LIMIT");
   if (kind === "brand" && !linked.canCreate.brand) throw new ApiError(409, "You can have one Brand.", "PROFILE_LIMIT_ONE_BRAND");
   if (kind !== "brand" && !linked.canCreate[kind]) throw new ApiError(409, "You can have one Store or one Business page, not both.", "PROFILE_LIMIT_STORE_OR_BUSINESS");
 }

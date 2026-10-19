@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { type ReactNode, useRef, useState } from "react";
 import { Pressable, ScrollView, StyleSheet, TextInput, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { scheduleOnRN } from "react-native-worklets";
@@ -32,7 +32,8 @@ export interface MessageComposerBarProps {
   readonly plusOnRight?: boolean;
   readonly onPressPlus?: () => void;
   readonly sending?: boolean;
-  readonly onPressMicrophone?: () => void;
+  readonly microphoneButton?: ReactNode;
+  readonly barOverlay?: ReactNode;
   readonly onTypingChange?: (isTyping: boolean) => void;
 }
 
@@ -43,7 +44,8 @@ export function MessageComposerBar({
   plusOnRight = false,
   onPressPlus,
   sending = false,
-  onPressMicrophone,
+  microphoneButton: providedMicrophoneButton,
+  barOverlay,
   onTypingChange,
 }: MessageComposerBarProps) {
   const { colors } = useTheme();
@@ -107,13 +109,8 @@ export function MessageComposerBar({
 
   const insertEmoji = (emoji: string) => mentionComposer.inputProps.onChangeText(text + emoji);
 
-  const microphoneButton = onPressMicrophone ? (
-    <Pressable accessibilityRole="button" accessibilityLabel="Record a voice note" hitSlop={10} onPress={onPressMicrophone}>
-      <Microphone24Icon />
-    </Pressable>
-  ) : (
-    <Microphone24Icon />
-  );
+  const microphoneButton = providedMicrophoneButton ?? <Microphone24Icon />;
+  const isBarCovered = barOverlay !== undefined && barOverlay !== null;
 
   const plusButton = (
     <Pressable accessibilityRole="button" accessibilityLabel="Add attachment" hitSlop={10} onPress={onPressPlus}>
@@ -130,6 +127,11 @@ export function MessageComposerBar({
         </View>
       ) : null}
       <View style={styles.bar}>
+        <View
+          style={styles.barContents}
+          accessibilityElementsHidden={isBarCovered}
+          importantForAccessibility={isBarCovered ? "no-hide-descendants" : "auto"}
+        >
         {!plusOnRight ? (focused ? microphoneButton : plusButton) : null}
         <View style={styles.field}>
           <TextInput
@@ -179,12 +181,14 @@ export function MessageComposerBar({
                   <Plus24Icon />
                 </Pressable>
               </ComposerSlot>
-            ) : onPressMicrophone && !plusOnRight ? (
+            ) : providedMicrophoneButton && !plusOnRight ? (
               <ComposerSlot slotKey="mic">{microphoneButton}</ComposerSlot>
             ) : null}
           </View>
         </View>
         {plusOnRight ? plusButton : null}
+        </View>
+        {barOverlay}
       </View>
       <KeyboardSpacer reservedHeight={emojiPanelReserve} style={styles.keyboardArea}>
         {showEmojiPanel ? (
@@ -218,10 +222,8 @@ const useStyles = makeThemedStyles((colors) => StyleSheet.create({
     borderTopWidth: 1,
     borderTopColor: colors.divider,
     backgroundColor: colors.surface,
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 12,
   },
+  barContents: { flex: 1, flexDirection: "row", alignItems: "center", gap: 12 },
   field: {
     flex: 1,
     height: 44,

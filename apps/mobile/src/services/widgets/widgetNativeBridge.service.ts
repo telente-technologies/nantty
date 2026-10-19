@@ -4,10 +4,9 @@ import * as SecureStore from "expo-secure-store";
 import { Platform } from "react-native";
 
 import { androidWidgetNames, iosWidgetTimelineKinds, widgetAppGroup, widgetKinds, type WidgetKind } from "@/config/widgets.config";
+import { type AndroidWidgetModules, loadAndroidWidgetModules } from "@/widgets/android/androidWidgetModules";
 
 type AppleExtensionStorageModule = typeof import("@bacons/apple-targets");
-type AndroidWidgetModule = typeof import("react-native-android-widget");
-type AndroidWidgetRenderer = typeof import("@/widgets/android/renderAndroidWidget");
 
 export const widgetKeychainService = "zudomart.widgets";
 
@@ -33,17 +32,9 @@ function loadAppleExtensionStorage(): AppleExtensionStorageModule | null {
   }
 }
 
-function loadAndroidWidgets(): { readonly widgets: AndroidWidgetModule; readonly renderer: AndroidWidgetRenderer } | null {
+function loadAndroidWidgets(): AndroidWidgetModules | null {
   if (Platform.OS !== "android" || !areHomeScreenWidgetsSupported()) return null;
-  try {
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const widgets = require("react-native-android-widget") as AndroidWidgetModule;
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const renderer = require("@/widgets/android/renderAndroidWidget") as AndroidWidgetRenderer;
-    return typeof widgets.requestWidgetUpdate === "function" ? { widgets, renderer } : null;
-  } catch {
-    return null;
-  }
+  return loadAndroidWidgetModules();
 }
 
 export async function writeWidgetSharedValue(key: string, value: string | null): Promise<void> {

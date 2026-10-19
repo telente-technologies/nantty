@@ -1,4 +1,5 @@
 import { Pressable, StyleSheet, View, useWindowDimensions } from "react-native";
+import Animated, { type SharedValue, useAnimatedStyle } from "react-native-reanimated";
 
 import { ZudomartLogoMark, ZudomartWordmark } from "@/components/brand/zudomartWordmark";
 import { Bell24Icon, MagnifyingGlass24Icon } from "@/components/icons";
@@ -14,21 +15,43 @@ const FULL_WORDMARK_MIN_WIDTH = 380;
 export interface HomeHeaderProps {
   readonly activeSection: HomeSection;
   readonly onChangeSection: (section: HomeSection) => void;
+  readonly pagerOffset?: SharedValue<number>;
+  readonly pageWidth?: number;
   readonly onPressSearch: () => void;
   readonly onPressNotifications: () => void;
 }
 
-export function HomeHeader({ activeSection, onChangeSection, onPressSearch, onPressNotifications }: HomeHeaderProps) {
+function SectionTabLabel({ label, sectionIndex, isActive, pagerOffset, pageWidth }: { readonly label: string; readonly sectionIndex: number; readonly isActive: boolean; readonly pagerOffset?: SharedValue<number>; readonly pageWidth?: number }) {
   const { colors } = useTheme();
   const styles = useStyles();
-  const { width } = useWindowDimensions();
-  const sectionTab = (section: HomeSection, label: string) => {
-    const active = activeSection === section;
-    return (
-      <Pressable accessibilityRole="tab" accessibilityState={{ selected: active }} onPress={() => onChangeSection(section)} hitSlop={8}>
-        <Text size={18} weight={active ? 600 : 500} lineHeight={21.6} letterSpacing={-0.36} color={active ? colors.primary : colors.textSubtle}>
+  const highlightStyle = useAnimatedStyle(() => {
+    if (!pagerOffset || !pageWidth) return { opacity: isActive ? 1 : 0 };
+    const position = -pagerOffset.value / pageWidth;
+    return { opacity: 1 - Math.min(1, Math.abs(position - sectionIndex)) };
+  });
+  const weight = isActive ? 600 : 500;
+  return (
+    <View>
+      <Text size={18} weight={weight} lineHeight={21.6} letterSpacing={-0.36} color={colors.textSubtle}>
+        {label}
+      </Text>
+      <Animated.View style={[styles.labelHighlight, highlightStyle]} pointerEvents="none">
+        <Text size={18} weight={weight} lineHeight={21.6} letterSpacing={-0.36} color={colors.primary}>
           {label}
         </Text>
+      </Animated.View>
+    </View>
+  );
+}
+
+export function HomeHeader({ activeSection, onChangeSection, pagerOffset, pageWidth, onPressSearch, onPressNotifications }: HomeHeaderProps) {
+  const styles = useStyles();
+  const { width } = useWindowDimensions();
+  const sectionTab = (section: HomeSection, label: string, sectionIndex: number) => {
+    const active = activeSection === section;
+    return (
+      <Pressable accessibilityRole="tab" accessibilityLabel={label} accessibilityState={{ selected: active }} onPress={() => onChangeSection(section)} hitSlop={8}>
+        <SectionTabLabel label={label} sectionIndex={sectionIndex} isActive={active} pagerOffset={pagerOffset} pageWidth={pageWidth} />
       </Pressable>
     );
   };
@@ -36,8 +59,8 @@ export function HomeHeader({ activeSection, onChangeSection, onPressSearch, onPr
   return (
     <View style={styles.bar}>
       <View style={styles.tabs} accessibilityRole="tablist">
-        {sectionTab("feed", "Feed")}
-        {sectionTab("mart", "Mart")}
+        {sectionTab("feed", "Feed", 0)}
+        {sectionTab("mart", "Mart", 1)}
       </View>
       <View style={styles.wordmark} pointerEvents="none">
         {width >= FULL_WORDMARK_MIN_WIDTH ? <ZudomartWordmark height={20} /> : <ZudomartLogoMark size={24} />}
@@ -67,6 +90,7 @@ const useStyles = makeThemedStyles((colors) => StyleSheet.create({
   lead: { flexDirection: "row", alignItems: "center", gap: 12, flexShrink: 1 },
   divider: { width: StyleSheet.hairlineWidth * 2, height: 16, borderRadius: 1, backgroundColor: colors.divider },
   tabs: { flexDirection: "row", alignItems: "center", gap: 8 },
+  labelHighlight: { position: "absolute", left: 0, top: 0 },
   wordmark: { position: "absolute", left: 0, right: 0, alignItems: "center", justifyContent: "center" },
   actions: { flexDirection: "row", alignItems: "center", gap: 16 },
 }));

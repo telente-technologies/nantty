@@ -44,12 +44,14 @@ export function PayoutAccountsScreen() {
     },
   });
   const removeAccount = useMutation({
-    mutationFn: walletsService.removePayoutAccount,
+    mutationFn: (accountId: string) => withStepUp((stepUpToken) => walletsService.removePayoutAccount(accountId, stepUpToken)),
     onSuccess: () => {
       showToast("Account removed");
       return refreshPayoutAccounts();
     },
-    onError: () => showToast("Couldn't remove the account. Try again."),
+    onError: (error) => {
+      if (!(error instanceof StepUpCancelledError)) showToast("Couldn't remove the account. Try again.");
+    },
   });
 
   const confirmAndRemovePayoutAccount = (accountId: string, label: string) =>

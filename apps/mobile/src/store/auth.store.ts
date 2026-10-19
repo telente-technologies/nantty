@@ -3,7 +3,8 @@ import { create } from "zustand";
 import { storageKeys } from "@/constants/storageKeys.constant";
 import type { User } from "@/types";
 import { showToast } from "@/store/toast.store";
-import { secureStorage } from "@/utils/secureStorage.util";
+import { moveSessionKeychainItemsToBackgroundReadableAccessOnce } from "@/utils/keychainAccessibilityMigration.util";
+import { retryWhenAppComesToForeground, secureStorage, SecureStorageUnavailableError } from "@/utils/secureStorage.util";
 
 interface Tokens {
   readonly accessToken: string;
@@ -23,6 +24,28 @@ interface AuthState {
 }
 
 const signOutHooks = new Set<() => Promise<void>>();
+const sessionTokenAccess = "backgroundReadableDeviceOnly";
+let restoringSavedSession: Promise<void> | null = null;
+let isWaitingForKeychainToUnlock = false;
+
+const restoreSessionOnceTheKeychainUnlocks = () => {
+  if (isWaitingForKeychainToUnlock) return;
+  isWaitingForKeychainToUnlock = true;
+  retryWhenAppComesToForeground(() => {
+    if (useAuthStore.getState().status !== "loading") return true;
+    useAuthStore.getState().restoreSavedSession().catch(() => useAuthStore.setState({ status: "signedOut" }));
+    return true;
+  });
+};
+
+async function readSavedSessionTokens(): Promise<readonly [string | null, string | null] | null> {
+  try {
+    return await Promise.all([secureStorage.get(storageKeys.accessToken), secureStorage.get(storageKeys.refreshToken)]);
+  } catch (error) {
+    if (error instanceof SecureStorageUnavailableError) return null;
+    throw error;
+  }
+}
 
 export const registerSignOutHook = (hook: () => Promise<void>) => {
   signOutHooks.add(hook);
@@ -34,25 +57,34 @@ export const useAuthStore = create<AuthState>((set) => ({
   user: null,
   accessToken: null,
   refreshToken: null,
-  restoreSavedSession: async () => {
-    const [accessToken, refreshToken] = await Promise.all([
-      secureStorage.get(storageKeys.accessToken),
-      secureStorage.get(storageKeys.refreshToken),
-    ]);
-    set({ accessToken, refreshToken, status: accessToken ? "signedIn" : "signedOut" });
+  restoreSavedSession: () => {
+    restoringSavedSession ??= (async () => {
+      const tokens = await readSavedSessionTokens();
+      if (tokens === null) {
+        isWaitingForKeychainToUnlock = false;
+        restoreSessionOnceTheKeychainUnlocks();
+        return;
+      }
+      const [accessToken, refreshToken] = tokens;
+      await moveSessionKeychainItemsToBackgroundReadableAccessOnce().catch(() => undefined);
+      set({ accessToken, refreshToken, status: accessToken ? "signedIn" : "signedOut" });
+    })().finally(() => {
+      restoringSavedSession = null;
+    });
+    return restoringSavedSession;
   },
   saveSignedInSession: async ({ accessToken, refreshToken, user, notice }) => {
     await Promise.all([
-      secureStorage.set(storageKeys.accessToken, accessToken),
-      secureStorage.set(storageKeys.refreshToken, refreshToken),
+      secureStorage.set(storageKeys.accessToken, accessToken, sessionTokenAccess),
+      secureStorage.set(storageKeys.refreshToken, refreshToken, sessionTokenAccess),
     ]);
     set({ accessToken, refreshToken, user, status: "signedIn" });
     if (notice) showToast(notice);
   },
   replaceSessionTokens: async ({ accessToken, refreshToken }) => {
     await Promise.all([
-      secureStorage.set(storageKeys.accessToken, accessToken),
-      secureStorage.set(storageKeys.refreshToken, refreshToken),
+      secureStorage.set(storageKeys.accessToken, accessToken, sessionTokenAccess),
+      secureStorage.set(storageKeys.refreshToken, refreshToken, sessionTokenAccess),
     ]);
     set({ accessToken, refreshToken });
   },

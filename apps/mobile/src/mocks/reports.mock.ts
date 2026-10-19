@@ -20,7 +20,7 @@ export const reportsMocks: MockRoute[] = [
   }),
   createMockRoute("POST", "/api/v1/feeds/feedback", ({ body }) => {
     const input = body as { postId: string; kind: string };
-    if (input.kind !== "hide" && input.kind !== "notInterested") throw new ApiError(422, "Unknown feedback type", "INVALID_FEEDBACK");
+    if (!["hide", "notInterested", "less", "more", "like"].includes(input.kind)) throw new ApiError(422, "Unknown feedback type", "INVALID_FEEDBACK");
     receivedMockFeedFeedback.push(input);
   }),
 ];

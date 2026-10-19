@@ -22,7 +22,7 @@ const hex = (value: string) => value as `#${string}`;
 export function widgetPaletteFor(scheme: "light" | "dark"): WidgetPalette {
   const tokens = scheme === "dark" ? darkColors : lightColors;
   return {
-    background: hex(scheme === "dark" ? "#0E0E10" : tokens.surface), surface: hex(scheme === "dark" ? "#2C2C2C" : tokens.sunken), text: hex(tokens.text), muted: hex(tokens.textMuted),
+    background: hex(scheme === "dark" ? "#15161A" : tokens.surface), surface: hex(scheme === "dark" ? "#1E2024" : tokens.sunken), text: hex(tokens.text), muted: hex(tokens.textMuted),
     brand: hex(tokens.brandSolid), onBrand: hex(tokens.onBrand), ring: hex(tokens.brandSolid), seenRing: hex(tokens.borderStrong), live: hex(tokens.danger),
   };
 }

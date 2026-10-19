@@ -1,37 +1,33 @@
-import { Platform } from "react-native";
-import * as SecureStore from "expo-secure-store";
 import { create } from "zustand";
 
-const storageKey = "zm.sensitiveConsentPostIds";
+import { readDevicePreference, writeDevicePreference } from "@/utils/devicePreferenceStorage.util";
+import { retryWhenAppComesToForeground } from "@/utils/secureStorage.util";
+
+export const sensitiveConsentStorageKey = "zm.sensitiveConsentPostIds";
 const maximumRememberedPosts = 300;
 
-const readRememberedPostIds = (): readonly string[] => {
+const readRememberedPostIds = (): readonly string[] | null => {
+  const stored = readDevicePreference(sensitiveConsentStorageKey);
+  if (!stored.available) return null;
   try {
-    const stored = Platform.OS === "web" ? globalThis.localStorage?.getItem(storageKey) : SecureStore.getItem(storageKey);
-    const parsed: unknown = stored ? JSON.parse(stored) : [];
+    const parsed: unknown = stored.value ? JSON.parse(stored.value) : [];
     return Array.isArray(parsed) ? parsed.filter((value): value is string => typeof value === "string") : [];
   } catch {
     return [];
   }
 };
 
-const writeRememberedPostIds = (postIds: readonly string[]) => {
-  try {
-    const serialised = JSON.stringify(postIds);
-    if (Platform.OS === "web") globalThis.localStorage?.setItem(storageKey, serialised);
-    else SecureStore.setItem(storageKey, serialised);
-  } catch {
-    return;
-  }
-};
+const writeRememberedPostIds = (postIds: readonly string[]) => writeDevicePreference(sensitiveConsentStorageKey, JSON.stringify(postIds));
 
 interface SensitiveConsentState {
   readonly consentedPostIds: readonly string[];
   readonly rememberConsentForPost: (postId: string) => void;
 }
 
+const postIdsReadAtLaunch = readRememberedPostIds();
+
 export const useSensitiveConsentStore = create<SensitiveConsentState>()((set) => ({
-  consentedPostIds: readRememberedPostIds(),
+  consentedPostIds: postIdsReadAtLaunch ?? [],
   rememberConsentForPost: (postId) =>
     set((state) => {
       if (state.consentedPostIds.includes(postId)) return state;
@@ -40,3 +36,15 @@ export const useSensitiveConsentStore = create<SensitiveConsentState>()((set) =>
       return { consentedPostIds };
     }),
 }));
+
+if (postIdsReadAtLaunch === null) {
+  retryWhenAppComesToForeground(() => {
+    const stored = readRememberedPostIds();
+    if (stored === null) return false;
+    const current = useSensitiveConsentStore.getState().consentedPostIds;
+    const consentedPostIds = [...new Set([...current, ...stored])].slice(0, maximumRememberedPosts);
+    if (current.length > 0) writeRememberedPostIds(consentedPostIds);
+    useSensitiveConsentStore.setState({ consentedPostIds });
+    return true;
+  });
+}

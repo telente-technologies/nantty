@@ -1,4 +1,4 @@
-import { Pressable, StyleSheet, View } from "react-native";
+import { Pressable, StyleSheet } from "react-native";
 
 import { inAppBrowserColorsFromTheme, openTrustedWebPage } from "@/components/links/openLink.util";
 import { ArrowUpRight24Icon } from "@/components/icons";
@@ -10,17 +10,21 @@ export function AdsManagerBanner() {
   const { colors } = useTheme();
   const styles = useStyles();
   return (
-    <Pressable accessibilityRole="link" accessibilityLabel="Open Zudomart Ads Manager" onPress={() => openTrustedWebPage(adsManagerConfig.adsManagerUrl, inAppBrowserColorsFromTheme(colors))} style={styles.banner}>
-      <View style={styles.flex}>
-        <Text size={14} weight={600} lineHeight={16.8}>Need full campaigns?</Text>
-        <Text size={12} lineHeight={16.8} color={colors.textMuted}>Open Zudomart Ads Manager for product catalogues, A/B tests and detailed reports.</Text>
-      </View>
-      <ArrowUpRight24Icon />
+    <Pressable
+      accessibilityRole="link"
+      accessibilityLabel="Need more? Open Ads Manager. Optional, for catalogues, A/B tests and detailed reports."
+      onPress={() => openTrustedWebPage(adsManagerConfig.adsManagerUrl, inAppBrowserColorsFromTheme(colors))}
+      style={styles.link}
+    >
+      <Text size={13} lineHeight={16.9} color={colors.textMuted} style={styles.flex}>
+        Need more? <Text size={13} weight={600} lineHeight={16.9} color={colors.primary}>Open Ads Manager</Text>
+      </Text>
+      <ArrowUpRight24Icon size={16} color={colors.textMuted} />
     </Pressable>
   );
 }
 
-const useStyles = makeThemedStyles((colors) => StyleSheet.create({
-  flex: { flex: 1, gap: 2 },
-  banner: { backgroundColor: colors.surface, borderRadius: 12, padding: 12, flexDirection: "row", alignItems: "center", gap: 12, borderWidth: 1, borderColor: colors.primaryTint },
+const useStyles = makeThemedStyles(() => StyleSheet.create({
+  flex: { flex: 1 },
+  link: { minHeight: 44, flexDirection: "row", alignItems: "center", gap: 8, paddingVertical: 8 },
 }));

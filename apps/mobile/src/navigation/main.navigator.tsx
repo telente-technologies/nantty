@@ -65,6 +65,7 @@ import { PostQuotesScreen } from "@/screens/posts/postQuotes.screen";
 import { CommentThreadScreen } from "@/screens/posts/commentThread.screen";
 import { ContentPreferencesScreen } from "@/screens/settings/contentPreferences.screen";
 import { LiveScreen } from "@/screens/live/live.screen";
+import { SuggestedVideosScreen } from "@/screens/clips/suggestedVideos.screen";
 import { LiveEndedScreen } from "@/screens/live/liveEnded.screen";
 import { StoryScreen } from "@/screens/story/story.screen";
 import { StoryAnalyticsScreen } from "@/screens/story/storyAnalytics.screen";
@@ -83,7 +84,11 @@ import { VerificationApplyScreen } from "@/screens/verification/verificationAppl
 import { IdentityVerificationScreen } from "@/screens/verification/identityVerification.screen";
 import { SubscriptionOfferHandoffScreen } from "@/screens/subscriptions/subscriptionOfferHandoff.screen";
 import { PromotePostScreen } from "@/screens/boost/promotePost.screen";
+import { PromoteDestinationScreen } from "@/screens/boost/promoteDestination.screen";
 import { BoostStatusScreen } from "@/screens/boost/boostStatus.screen";
+import { AdsHubScreen } from "@/screens/ads/adsHub.screen";
+import { CreateAdScreen } from "@/screens/ads/createAd.screen";
+import { AdBalanceScreen } from "@/screens/ads/adBalance.screen";
 import { SupportTicketsScreen } from "@/screens/support/supportTickets.screen";
 import { NewSupportTicketScreen } from "@/screens/support/newSupportTicket.screen";
 import { SupportTicketDetailScreen } from "@/screens/support/supportTicketDetail.screen";
@@ -183,6 +188,7 @@ export function MainNavigator() {
       <Stack.Screen name="CommentThread" component={CommentThreadScreen} />
       <Stack.Screen name="ContentPreferences" component={ContentPreferencesScreen} />
       <Stack.Screen name="Live" component={LiveScreen} options={dark} layout={keepOnDarkFirstPalette} />
+      <Stack.Screen name="SuggestedVideos" component={SuggestedVideosScreen} options={{ ...dark, animation: "slide_from_right", gestureEnabled: true }} layout={keepOnDarkFirstPalette} />
       <Stack.Screen name="LiveEnded" component={LiveEndedScreen} options={dark} layout={keepOnDarkFirstPalette} />
       <Stack.Screen name="Story" component={StoryScreen} options={dark} layout={keepOnDarkFirstPalette} />
       <Stack.Screen name="StoryAnalytics" component={StoryAnalyticsScreen} />
@@ -201,7 +207,11 @@ export function MainNavigator() {
       <Stack.Screen name="IdentityVerification" component={IdentityVerificationScreen} />
       <Stack.Screen name="SubscriptionOffer" component={SubscriptionOfferHandoffScreen} />
       <Stack.Screen name="PromotePost" component={PromotePostScreen} />
+      <Stack.Screen name="PromoteDestination" component={PromoteDestinationScreen} />
       <Stack.Screen name="BoostStatus" component={BoostStatusScreen} />
+      <Stack.Screen name="AdsHub" component={AdsHubScreen} />
+      <Stack.Screen name="CreateAd" component={CreateAdScreen} />
+      <Stack.Screen name="AdBalance" component={AdBalanceScreen} />
       <Stack.Screen name="SupportTickets" component={SupportTicketsScreen} />
       <Stack.Screen name="NewSupportTicket" component={NewSupportTicketScreen} />
       <Stack.Screen name="SupportTicketDetail" component={SupportTicketDetailScreen} />

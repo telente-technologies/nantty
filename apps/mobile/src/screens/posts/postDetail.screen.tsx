@@ -9,7 +9,7 @@ import { ReplyingToCommentLink } from "@/components/clips/videoReply/commentStic
 import { PostCard } from "@/components/feed/postCard";
 import { ReshareSheet } from "@/components/feed/reshareSheet";
 import { toLocalThreadReply, usePostConversation } from "@/components/feed/thread/postThread.hook";
-import { CommentSectionFilterTabs, QuoteThreadItemRow } from "@/components/feed/thread/quoteThreadItem";
+import { CommentSectionFilterTabs, hasQuotesToShow, QuoteThreadItemRow } from "@/components/feed/thread/quoteThreadItem";
 import { SponsoredThreadItem } from "@/components/feed/thread/sponsoredThreadItem";
 import { ThreadComposer } from "@/components/feed/thread/threadComposer";
 import { ThreadEmptyState, ThreadErrorState, ThreadSkeleton, ThreadSortDropdown } from "@/components/feed/thread/threadListParts";
@@ -51,7 +51,8 @@ export function PostDetailScreen({ navigation, route }: MainScreenProps<"PostDet
   const isScreenFocused = useIsFocused();
   useScreenshotSharePrompt(post.data, isScreenFocused);
   const [sort, setSort] = useState<ThreadSort>("relevant");
-  const [filter, setFilter] = useState<CommentSectionFilter>("all");
+  const [chosenFilter, setFilter] = useState<CommentSectionFilter>("all");
+  const filter: CommentSectionFilter = hasQuotesToShow(post.data?.quotes) ? chosenFilter : "all";
   const [reshareTarget, setReshareTarget] = useState<Post | null>(null);
   const postAuthorId = post.data?.author.id;
   const commentThread = useCommentThreadController(postId, undefined, undefined, postAuthorId);

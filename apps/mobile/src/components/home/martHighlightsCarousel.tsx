@@ -6,8 +6,10 @@ import { AccessibilityInfo, AppState, FlatList, Pressable, StyleSheet, View, typ
 import { Text } from "@/components/ui/text";
 import { useReducedMotionPreference } from "@/hooks/useReducedMotionPreference.hook";
 import { adEventsService } from "@/services/ads/adEvents.service";
+import { useIsHomeSectionOnScreen } from "@/components/home/homeSectionVisibility.context";
 import { makeThemedStyles, useTheme } from "@/theme";
 import type { MartHighlight } from "@/types/martHighlight.type";
+import { horizontalScrollGestureGuardProps } from "@/components/home/horizontalScrollGestureGuard.util";
 
 export const MART_CAROUSEL_AUTO_ADVANCE_MS = 5000;
 const HEIGHT = 140;
@@ -46,7 +48,8 @@ function useForegroundAndScreenReader() {
 export function MartHighlightsCarousel({ highlights, loading, visible, onPressHighlight, onLayout }: MartHighlightsCarouselProps) {
   const { colors } = useTheme();
   const styles = useStyles();
-  const focused = useIsFocused();
+  const isHomeSectionOnScreen = useIsHomeSectionOnScreen();
+  const focused = useIsFocused() && isHomeSectionOnScreen;
   const reduceMotion = useReducedMotionPreference();
   const { foreground, screenReader } = useForegroundAndScreenReader();
   const listRef = useRef<FlatList<MartHighlight>>(null);
@@ -134,6 +137,7 @@ export function MartHighlightsCarousel({ highlights, loading, visible, onPressHi
           keyExtractor={(highlight) => highlight.id}
           renderItem={renderSlide}
           horizontal
+          {...horizontalScrollGestureGuardProps}
           pagingEnabled
           decelerationRate="fast"
           disableIntervalMomentum
@@ -145,9 +149,18 @@ export function MartHighlightsCarousel({ highlights, loading, visible, onPressHi
           initialNumToRender={Math.min(count, 3)}
           showsHorizontalScrollIndicator={false}
           getItemLayout={(_, itemIndex) => ({ length: width, offset: width * itemIndex, index: itemIndex })}
-          onTouchStart={() => setDragging(true)}
-          onTouchEnd={() => setDragging(false)}
-          onTouchCancel={() => setDragging(false)}
+          onTouchStart={() => {
+            horizontalScrollGestureGuardProps.onTouchStart();
+            setDragging(true);
+          }}
+          onTouchEnd={() => {
+            horizontalScrollGestureGuardProps.onTouchEnd();
+            setDragging(false);
+          }}
+          onTouchCancel={() => {
+            horizontalScrollGestureGuardProps.onTouchCancel();
+            setDragging(false);
+          }}
           onScrollBeginDrag={() => setDragging(true)}
           onScrollEndDrag={() => setDragging(false)}
           onMomentumScrollEnd={settle}

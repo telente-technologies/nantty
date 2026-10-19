@@ -26,13 +26,14 @@ export function FollowRequestsScreen({ navigation }: MainScreenProps<"FollowRequ
         <FlatList
           data={requests.data.data}
           keyExtractor={(request) => request.id}
+          refreshing={requests.isRefetching}
+          onRefresh={() => requests.refetch()}
           contentContainerStyle={styles.list}
           renderItem={({ item }) => (
             <FollowRequestRow
               request={item}
-              disabled={settleRequest.isPending}
-              onApprove={() => settleRequest.mutate({ requestId: item.id, approve: true })}
-              onDecline={() => settleRequest.mutate({ requestId: item.id, approve: false })}
+              onConfirm={() => settleRequest.mutate({ requestId: item.id, approve: true, requesterName: item.requester.name })}
+              onDelete={() => settleRequest.mutate({ requestId: item.id, approve: false, requesterName: item.requester.name })}
               onPressUser={() => navigation.push("UserProfile", { userId: item.requester.id })}
             />
           )}

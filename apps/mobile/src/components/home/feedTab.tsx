@@ -15,9 +15,12 @@ import type { Post, ProductSummary } from "@/types";
 import { requireAuthThen } from "@/utils/requireAuth.util";
 
 import { attributionSourceForPostKind, type SaleAttribution } from "@/utils/saleAttribution.util";
+import { feedModuleRowKey } from "@/utils/feedModuleLayout.util";
 
 import { PostProductsFlow } from "./postProductsFlow";
-import { SuggestedClipsRow } from "./suggestedClipsRow";
+import { FeedModuleRow } from "./feedModuleRow";
+import { useFeedModules } from "./feedModules.hook";
+import { SuggestedClipsOptionsSheet } from "./suggestedClipsOptionsSheet";
 import { TopicFilterRow } from "./topicFilterRow";
 import { ListSkeleton } from "@/components/ui/listSkeleton";
 import { EmptyState } from "@/components/ui/emptyState";
@@ -25,10 +28,7 @@ import { ErrorState } from "@/components/ui/errorState";
 import { usePullToRefresh } from "@/components/ui/pullToRefresh.hook";
 import { spacing } from "@/constants/spacing.constant";
 
-type FeedRow = { type: "post"; post: Post } | { type: "suggestedClips" };
 type FeedMode = "for-you" | "following";
-
-const SUGGESTED_CLIPS_POSITION = 4;
 
 export function FeedTab() {
   const { colors } = useTheme();
@@ -42,7 +42,7 @@ export function FeedTab() {
   const { offerSendInChat, sendInChatElement } = useShareToChat();
 
   const topics = useQuery({ queryKey: ["topics", "mine"], queryFn: feedsService.fetchMyFollowedTopics });
-  const suggestedClips = useQuery({ queryKey: ["feed-suggested-clips"], queryFn: feedsService.fetchSuggestedClips });
+  const [railOptionsClipIds, setRailOptionsClipIds] = useState<readonly string[] | null>(null);
   const feed = useInfiniteQuery({
     queryKey: [...feedQueryKeyPrefix, feedMode, selectedTopicId],
     queryFn: ({ pageParam }) =>
@@ -54,21 +54,20 @@ export function FeedTab() {
   });
   const refreshControl = usePullToRefresh(feed.refetch);
 
-  const rows = useMemo<FeedRow[]>(() => {
+  const posts = useMemo<Post[]>(() => {
     const seenPostIds = new Set<string>();
-    const posts: FeedRow[] = [];
+    const unique: Post[] = [];
     for (const page of feed.data?.pages ?? []) {
       for (const post of page.data) {
         if (seenPostIds.has(post.id)) continue;
         seenPostIds.add(post.id);
-        posts.push({ type: "post", post });
+        unique.push(post);
       }
     }
-    if (posts.length > SUGGESTED_CLIPS_POSITION && (suggestedClips.data?.length ?? 0) > 0) {
-      posts.splice(SUGGESTED_CLIPS_POSITION, 0, { type: "suggestedClips" });
-    }
-    return posts;
-  }, [feed.data, suggestedClips.data]);
+    return unique;
+  }, [feed.data]);
+  const modules = useFeedModules(posts);
+  const rows = modules.rows;
 
   const selectTopic = (topicId: string | null) => {
     setFeedMode("for-you");
@@ -80,7 +79,7 @@ export function FeedTab() {
       <GuestFeedBanner />
       <FlatList
         data={rows}
-        keyExtractor={(row) => (row.type === "post" ? row.post.id : "suggested-clips")}
+        keyExtractor={(row) => (row.type === "post" ? row.post.id : feedModuleRowKey(row.slot))}
         ListHeaderComponent={
           <TopicFilterRow
             topics={topics.data ?? []}
@@ -99,14 +98,14 @@ export function FeedTab() {
         }
         stickyHeaderIndices={[0]}
         showsVerticalScrollIndicator={false}
-        renderItem={({ item, index }) =>
-          item.type === "suggestedClips" ? (
-            <SuggestedClipsRow clips={suggestedClips.data ?? []} onPressClip={(clipId) => navigation.navigate("Tabs", { screen: "Clips", params: { startId: clipId } })} />
+        renderItem={({ item }) =>
+          item.type === "module" ? (
+            <FeedModuleRow slot={item.slot} modules={modules} onPressRailMore={setRailOptionsClipIds} />
           ) : (
             <PostCard
               post={item.post}
               surface="feed"
-              position={index}
+              position={item.postIndex}
               onPressAuthor={() => navigation.navigate("UserProfile", { userId: item.post.author.id })}
               onToggleFollow={() => followPostAuthor(item.post)}
               onToggleLike={() => togglePostLike(item.post)}
@@ -138,6 +137,7 @@ export function FeedTab() {
       />
       <PostProductsFlow products={openPostProducts?.products ?? null} attribution={openPostProducts?.attribution ?? null} onClose={() => setOpenPostProducts(null)} />
       <ReshareSheet post={reshareTarget} onClose={() => setReshareTarget(null)} />
+      <SuggestedClipsOptionsSheet visible={railOptionsClipIds !== null} railClipIds={railOptionsClipIds ?? []} onClose={() => setRailOptionsClipIds(null)} />
       {sendInChatElement}
     </View>
   );

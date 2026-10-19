@@ -16,6 +16,7 @@ import { MediaLightbox } from "./mediaLightbox";
 import { AnimatedPageIndicator } from "./pageIndicator";
 import { ClipLookOverlay, isClipLookId } from "@/components/create/clip/clipLook.constant";
 import { VideoWatermark } from "@/components/media/videoWatermark";
+import { horizontalScrollGestureGuardProps } from "@/components/home/horizontalScrollGestureGuard.util";
 
 export interface MediaPagerProps {
   readonly media: readonly Media[];
@@ -85,6 +86,7 @@ export function MediaPager({ media, height: requestedHeight, isVisibleOnScreen =
       <FlatList
         data={pages}
         horizontal
+        {...horizontalScrollGestureGuardProps}
         pagingEnabled
         scrollEnabled={pages.length > 1}
         bounces={pages.length > 1}

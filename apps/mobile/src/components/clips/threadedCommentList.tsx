@@ -5,7 +5,7 @@ import { BrandLoader } from "@/components/ui/brandLoader";
 import { Text } from "@/components/ui/text";
 import { makeThemedStyles, useTheme } from "@/theme";
 import type { CommentWithReplies } from "@/types";
-import { CommentSectionFilterTabs, QuoteThreadItemRow } from "@/components/feed/thread/quoteThreadItem";
+import { CommentSectionFilterTabs, hasQuotesToShow, QuoteThreadItemRow } from "@/components/feed/thread/quoteThreadItem";
 import { isQuoteThreadItem, type CommentSectionFilter } from "@/types/postThread.type";
 
 import { CommentThread } from "./commentThread";
@@ -25,7 +25,8 @@ export function ThreadedCommentList({ listHeader, contentContainerStyle, comment
   const styles = useStyles();
   const thread = useCommentThreadContext();
   const listRef = useRef<FlatList<CommentSectionItem>>(null);
-  const [filter, setFilter] = useState<CommentSectionFilter>("all");
+  const [chosenFilter, setFilter] = useState<CommentSectionFilter>("all");
+  const filter: CommentSectionFilter = hasQuotesToShow(quoteCount) ? chosenFilter : "all";
   const { query, items, topLevelComments, loadNextPageOfTopLevelComments, isRestartingFromTop } = useTopLevelCommentsForPost(
     thread.postId,
     () => listRef.current?.scrollToOffset({ offset: 0, animated: false }),

@@ -74,6 +74,17 @@ export interface LinkedProfileItem {
   readonly name: string;
   readonly handle: string;
   readonly showsMart: boolean;
+  readonly ownsStore: boolean;
+  readonly premiumNeeded: boolean;
+}
+
+export interface BusinessProfileAllowance {
+  readonly count: number;
+  readonly limit: number;
+  readonly premiumLimit: number;
+  readonly premium: boolean;
+  readonly premiumNeeded: boolean;
+  readonly storeUsed: boolean;
 }
 
 export interface LinkedProfiles {
@@ -81,4 +92,5 @@ export interface LinkedProfiles {
   readonly items: readonly LinkedProfileItem[];
   readonly canCreate: { readonly store: boolean; readonly business: boolean; readonly brand: boolean };
   readonly choiceRequired: boolean;
+  readonly businessProfiles: BusinessProfileAllowance;
 }

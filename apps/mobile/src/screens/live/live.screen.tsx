@@ -12,6 +12,7 @@ import { Header } from "@/components/ui/header";
 
 import { DotsThreeVertical24Icon, MagnifyingGlass24Icon, PaperPlaneTilt24Icon, Warning20Icon } from "@/components/icons";
 import { JoinLiveCard } from "@/components/live/joinLiveCard";
+import { describeLiveAccessLock } from "@/utils/liveAccessLock.util";
 import { TipSheet } from "@/components/coins/tipSheet";
 import { LikeBurst } from "@/components/clips/likeBurst";
 import { LiveGiftOverlay } from "@/components/live/gifts/liveGiftOverlay";
@@ -221,7 +222,8 @@ export function LiveScreen({ navigation, route }: MainScreenProps<"Live">) {
     );
   }
 
-  if (!hasJoined) {
+  const accessLock = describeLiveAccessLock(session.access);
+  if (!hasJoined || accessLock) {
     return (
       <View style={[styles.root, { paddingTop: insets.top, paddingBottom: insets.bottom + 50 }]}>
         <View style={styles.joinTop}>
@@ -233,7 +235,14 @@ export function LiveScreen({ navigation, route }: MainScreenProps<"Live">) {
           </Pressable>
         </View>
         <View style={styles.flex} />
-        <JoinLiveCard session={session} showHost={session.isFollowingHost} onWatch={() => setHasJoined(true)} onDismiss={() => navigation.goBack()} />
+        <JoinLiveCard
+          session={session}
+          showHost={session.isFollowingHost || !!accessLock}
+          onWatch={() => setHasJoined(true)}
+          onDismiss={() => navigation.goBack()}
+          lock={accessLock}
+          onLockAction={() => (accessLock?.action === "follow" ? live.followHost() : navigation.navigate("UserProfile", { userId: session.host.id }))}
+        />
         <ShareLiveSheet liveId={liveId} visible={showShare} onClose={() => setShowShare(false)} />
         {viewerLiveOptionsSheet}
       </View>
@@ -362,7 +371,7 @@ const useStyles = makeThemedStyles((colors, scheme) => StyleSheet.create({
   root: { flex: 1, backgroundColor: colors.background },
   flex: { flex: 1 },
   joinTop: { height: 48, paddingHorizontal: 12, flexDirection: "row", justifyContent: "flex-end", alignItems: "center", gap: 8 },
-  topButton: { width: 36, height: 36, borderRadius: 18, alignItems: "center", justifyContent: "center", backgroundColor: scheme === "dark" ? "#2C2C2C" : "#F0F2FA" },
+  topButton: { width: 36, height: 36, borderRadius: 18, alignItems: "center", justifyContent: "center", backgroundColor: scheme === "dark" ? "#26282D" : "#F0F2FA" },
   commentBarArea: { backgroundColor: colors.background, borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: colors.divider },
   bottomRow: { paddingHorizontal: 12, paddingBottom: 8, flexDirection: "row", alignItems: "flex-end", justifyContent: "space-between", gap: 8 },
   loading: { flex: 1, alignItems: "center", justifyContent: "center" },

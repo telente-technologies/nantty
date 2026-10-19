@@ -5,10 +5,12 @@ import type { LocallyStoredMessage } from "@/cache/messageHistory.type";
 import { markPendingMessageAsFailedLocally, replacePendingMessageWithDeliveredMessageLocally } from "@/cache/messageSync.util";
 import { generateIdempotencyKey } from "@/services/core/apiClient.service";
 import { uploadEncryptedAttachment } from "@/services/chatCrypto/encryptedAttachments.service";
-import { type LocalMediaFile, validateLocalMediaBeforeUpload } from "@/services/media/mediaPreparation.service";
+import { validateLocalMediaBeforeUpload } from "@/services/media/mediaPreparation.service";
 import { messagesService } from "@/services/chat/messages.service";
 import type { Message } from "@/types";
 import { showAlertWithButtons } from "@/utils/crossPlatformAlert.util";
+
+import type { RecordedVoiceNote } from "./voiceNoteRecorder.hook";
 
 export function useOptimisticVoiceNoteSender(conversationId: string | undefined, myUserId: string) {
   const queryClient = useQueryClient();
@@ -20,7 +22,7 @@ export function useOptimisticVoiceNoteSender(conversationId: string | undefined,
   );
 
   return useCallback(
-    async (recordedVoiceNote: LocalMediaFile) => {
+    async ({ file: recordedVoiceNote, waveform }: RecordedVoiceNote) => {
       if (!conversationId) return;
       try {
         validateLocalMediaBeforeUpload(recordedVoiceNote, "voice");
@@ -37,14 +39,14 @@ export function useOptimisticVoiceNoteSender(conversationId: string | undefined,
         text: "",
         createdAt: new Date().toISOString(),
         kind: "voice",
-        media: { id: localId, type: "voice", url: recordedVoiceNote.uri, durationSeconds },
+        media: { id: localId, type: "voice", url: recordedVoiceNote.uri, durationSeconds, localWaveform: waveform },
         deliveryStatus: "pending",
       };
       updateCachedMessages((messages) => [...messages, pendingMessage]);
       const replacePendingMessage = (replacement: LocallyStoredMessage) =>
         updateCachedMessages((messages) => messages.map((message) => (message.id === pendingMessage.id ? replacement : message)));
       try {
-        const { mediaId, pointer } = await uploadEncryptedAttachment(recordedVoiceNote.uri, { contentType: recordedVoiceNote.mimeType ?? "audio/mp4", durationSeconds }, "voice");
+        const { mediaId, pointer } = await uploadEncryptedAttachment(recordedVoiceNote.uri, { contentType: recordedVoiceNote.mimeType ?? "audio/mp4", durationSeconds, waveform }, "voice");
         const delivered = await messagesService.sendVoiceNoteToConversation(
           conversationId,
           { kind: "voice", mediaId, durationSeconds, attachment: pointer },

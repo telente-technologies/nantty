@@ -1,4 +1,5 @@
-import type { DisputeReason, DisputeStatus, EscrowStage } from "@/types/commerce.type";
+import type { DisputeReason, DisputeStatus, EscrowDetail, EscrowStage } from "@/types/commerce.type";
+import { formatMoneyForDisplay } from "@/utils/formatMoney.util";
 
 import type { StatusTone } from "./statusPill";
 
@@ -11,6 +12,7 @@ export const ESCROW_STAGE_APPEARANCE: Record<EscrowStage, { label: string; tone:
   buyer_confirmed: { label: "Receipt confirmed", tone: "success" },
   released_to_seller: { label: "Released to seller", tone: "success" },
   disputed: { label: "In dispute", tone: "error" },
+  under_review: { label: "Under review", tone: "caution" },
   refunded: { label: "Refunded", tone: "neutral" },
 };
 
@@ -38,3 +40,26 @@ export const DISPUTE_REASON_OPTIONS: readonly { readonly id: DisputeReason; read
 ];
 
 export const disputeReasonLabel = (reason: DisputeReason) => DISPUTE_REASON_OPTIONS.find((option) => option.id === reason)?.label ?? "Other";
+
+export const STAGES_BUYER_CAN_CONFIRM = new Set<EscrowStage>(["shipped", "delivered", "under_review"]);
+export const STAGES_BUYER_CAN_DISPUTE = new Set<EscrowStage>(["seller_preparing", "paid_into_escrow", "shipped", "delivered", "under_review"]);
+
+export function describeEscrowRelease(escrow: EscrowDetail): string {
+  if (escrow.releasedAt) return `Released ${formatFriendlyDate(escrow.releasedAt)}`;
+  if (escrow.stage === "disputed") return "Release paused while the dispute is reviewed";
+  if (escrow.stage === "under_review") return "Under review by Zudomart staff. The seller isn't paid until it's settled";
+  if (escrow.expectedReleaseAt) return `Expected release: ${formatFriendlyDate(escrow.expectedReleaseAt)}`;
+  return "Release date appears once the order ships";
+}
+
+export function escrowPausedStepCopy(escrow: EscrowDetail): { readonly title: string; readonly detail: string } {
+  if (escrow.stage === "refunded") return { title: "Refunded to buyer", detail: describeRefundReturned(escrow) };
+  if (escrow.stage === "under_review") return { title: "Not delivered after 30 days — under review", detail: "Zudomart staff will contact the buyer and the seller. The money stays held until staff release it or refund it" };
+  return { title: "Dispute open — release paused", detail: "Zudomart is holding the money until the dispute is resolved" };
+}
+
+function describeRefundReturned(escrow: EscrowDetail): string {
+  const kept = escrow.feesKeptOnRefund;
+  if (!kept || kept.amountMinor <= 0) return `${formatMoneyForDisplay(escrow.refundedAmount ?? escrow.heldAmount)} returned to the buyer`;
+  return `${formatMoneyForDisplay(escrow.refundedAmount ?? escrow.heldAmount)} returned to the buyer. The seller had already been paid, so Zudomart kept its ${formatMoneyForDisplay(kept)} fees`;
+}

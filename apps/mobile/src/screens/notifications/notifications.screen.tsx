@@ -40,6 +40,11 @@ export function NotificationsScreen({ navigation }: MainScreenProps<"Notificatio
     if (!notification.read) markOneRead.mutate(notification.id);
     const url = notification.url ?? notification.data?.url;
     const reference = url ? readInternalReferenceFromUrl(url) : null;
+    if (notification.kind === "followRequest") return navigation.navigate("FollowRequests");
+    if (notification.kind === "followRequestAccepted" && notification.actor) {
+      void queryClient.invalidateQueries({ queryKey: ["users", notification.actor.id] });
+      return navigation.navigate("UserProfile", { userId: notification.actor.id });
+    }
     if (notification.data?.ticketId) navigation.navigate("SupportTicketDetail", { ticketId: notification.data.ticketId });
     else if (reference) {
       const route = buildInternalRoute(reference);

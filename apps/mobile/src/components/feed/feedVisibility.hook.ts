@@ -3,6 +3,7 @@ import type { ViewToken, ViewabilityConfigCallbackPairs } from "react-native";
 import { create } from "zustand";
 
 import { prefetchImagesToDiskCache } from "@/cache/cachedImage";
+import { useIsHomeSectionOnScreen } from "@/components/home/homeSectionVisibility.context";
 import { recordImpressionsForViewableSponsoredItems, sponsoredImpressionViewabilityConfig } from "@/services/ads/adEvents.service";
 import type { AdPlacement, ID, Media } from "@/types";
 
@@ -21,7 +22,9 @@ export const useVisibleFeedItemsStore = create<VisibleFeedItemsState>((set) => (
 }));
 
 export function useIsFeedItemVisibleForAutoplay(itemId: ID) {
-  return useVisibleFeedItemsStore((state) => !state.isListReportingVisibility || state.visibleItemIds.has(itemId));
+  const isSectionOnScreen = useIsHomeSectionOnScreen();
+  const isVisibleInList = useVisibleFeedItemsStore((state) => !state.isListReportingVisibility || state.visibleItemIds.has(itemId));
+  return isSectionOnScreen && isVisibleInList;
 }
 
 const MEDIA_AUTOPLAY_MINIMUM_VISIBLE_PERCENT = 60;

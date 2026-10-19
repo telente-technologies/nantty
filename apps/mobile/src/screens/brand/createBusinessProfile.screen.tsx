@@ -20,7 +20,8 @@ import { useActingProfileStore } from "@/store/actingProfile.store";
 import type { BusinessCategorySelection } from "@/types/socialGraph.type";
 import { describeActionFailure } from "@/errors/errorExperience/describeError";
 import { ProfileLimitGate } from "@/components/profile/profileLimitGate";
-import { linkedProfilesQueryKey } from "@/hooks/useLinkedProfiles.hook";
+import { linkedProfilesQueryKey, useLinkedProfiles } from "@/hooks/useLinkedProfiles.hook";
+import { describeBusinessProfileAllowance } from "@/utils/businessProfileAllowance.util";
 
 export function CreateBusinessProfileScreen({ navigation }: MainScreenProps<"CreateBusinessProfile">) {
   const { colors } = useTheme();
@@ -33,6 +34,7 @@ export function CreateBusinessProfileScreen({ navigation }: MainScreenProps<"Cre
   const [selections, setSelections] = useState<readonly BusinessCategorySelection[]>([]);
   const { isAvailable, message } = useUsernameAvailability(handle);
   const idempotencyKey = useRef(generateIdempotencyKey());
+  const allowance = useLinkedProfiles().data?.businessProfiles;
 
   const createBusinessProfile = useMutation({
     mutationFn: () =>
@@ -72,8 +74,11 @@ export function CreateBusinessProfileScreen({ navigation }: MainScreenProps<"Cre
             }
           >
             <Text size={13} lineHeight={17.5} color={colors.textMuted}>
-              For organisations that don't sell in Mart: NGOs, media, venues and more. You can have one Business page or one Store, not both.
+              {allowance?.premium
+                ? "For organisations that don't sell in Mart: NGOs, media, venues and more."
+                : "For organisations that don't sell in Mart: NGOs, media, venues and more. You can have one Business page or one Store, not both."}
             </Text>
+            {allowance ? <Text size={12} lineHeight={16} color={colors.textMuted}>{describeBusinessProfileAllowance(allowance)}</Text> : null}
             <TextField label="Business name" placeholder="e.g. Lagos Food Bank" value={displayName} onChangeText={setDisplayName} maxLength={50} />
             <TextField label="Handle" placeholder="e.g. lagosfoodbank" autoCapitalize="none" autoCorrect={false} value={handle} onChangeText={(value) => setHandle(value.replace(/\s/g, "").toLowerCase())} maxLength={20} />
             {message ? <Text size={12} lineHeight={16.8} color={isAvailable ? colors.success : colors.textMuted}>{message}</Text> : null}

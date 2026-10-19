@@ -128,6 +128,7 @@ import {
   LinkIcon,
   SignInIcon,
   StopCircleIcon,
+  StopIcon,
   WarningOctagonIcon,
   XCircleIcon,
   PaperclipIcon,
@@ -297,6 +298,7 @@ export const CurrencyNgn24Icon = phosphorIcon(CurrencyNgnIcon);
 export const Link24Icon = phosphorIcon(LinkIcon);
 export const SignIn24Icon = phosphorIcon(SignInIcon);
 export const StopCircle24Icon = phosphorIcon(StopCircleIcon);
+export const StopFill20Icon = phosphorIcon(StopIcon, { weight: "fill", width: 20 });
 export const WarningOctagon24Icon = phosphorIcon(WarningOctagonIcon);
 export const XCircle24Icon = phosphorIcon(XCircleIcon);
 export const SealCheck24Icon = phosphorIcon(SealCheckIcon);

@@ -52,7 +52,8 @@ export function SignUpContactScreen({ navigation }: AuthScreenProps<"SignUpConta
         autoCapitalize="none"
         accessibilityLabel="Email"
         invalid={!!errorMessage}
-      />      <RoundCheckbox
+      />
+      <RoundCheckbox
         checked={saveLoginInfo}
         onToggle={() => updateSignUpDraft({ saveLoginInfo: !saveLoginInfo })}
         label="Save login info on your device to log in automatically next time."

@@ -107,7 +107,7 @@ export function ChatBubble({
               onDiscardDocument={onDiscardDocument}
             />
           ) : isVoiceNote ? (
-            <VoiceNoteBubble media={message.media!} isMine={isMine} deliveryStatus={deliveryStatus} />
+            <VoiceNoteBubble media={message.media!} waveformPeaks={message.attachment?.waveform} isMine={isMine} deliveryStatus={deliveryStatus} />
           ) : isPhoto ? (
             <Image source={{ uri: message.media!.url! }} style={styles.photo} contentFit="cover" accessibilityLabel="Photo, tap to view full screen" />
           ) : isMediaExpired ? (

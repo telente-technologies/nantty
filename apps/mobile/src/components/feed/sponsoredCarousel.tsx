@@ -8,6 +8,7 @@ import { adEventsService } from "@/services/ads/adEvents.service";
 import { openSponsoredTarget } from "@/services/ads/adClick.service";
 import { makeThemedStyles, useTheme } from "@/theme";
 import type { AdCard, AdPlacement, ID, SponsoredPlacement } from "@/types";
+import { horizontalScrollGestureGuardProps } from "@/components/home/horizontalScrollGestureGuard.util";
 
 const CARD_WIDTH_RATIO = 0.72;
 const CARD_GAP = 8;
@@ -60,6 +61,7 @@ export function SponsoredCarousel({ sponsored, placement, itemId }: SponsoredCar
   return (
     <FlatList
       horizontal
+      {...horizontalScrollGestureGuardProps}
       data={cards}
       renderItem={renderCard}
       keyExtractor={(card, index) => `${index}:${card.headline}`}

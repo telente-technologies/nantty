@@ -49,7 +49,7 @@ export function OrderDetailScreen({ navigation, route }: MainScreenProps<"OrderD
   const isDirect = detail.paymentMode === "direct";
   const canDispute = !isDirect && (detail.status === "paid" || canConfirm) && !escrow.data?.disputeId;
   const releaseLine = isDirect
-    ? `Paid directly: ${detail.store.name} was paid right away. For a refund, contact the seller or support.`
+    ? `Paid directly: ${detail.store.name} was paid right away. For a refund, contact the seller or support.${detail.escrowReleaseAt && detail.status === "delivered" ? ` The order completes automatically ${formatFriendlyDate(detail.escrowReleaseAt)} unless you ask for a return or refund.` : ""}`
     : escrow.data?.releasedAt
     ? `Released to ${detail.store.name} on ${formatFriendlyDate(escrow.data.releasedAt)}`
     : escrow.data?.autoReleaseAt

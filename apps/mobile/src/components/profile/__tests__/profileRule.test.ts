@@ -40,11 +40,24 @@ jest.mock("react-native-reanimated", () => {
   return { __esModule: true, default: { View }, Easing: { inOut: () => undefined, sin: undefined }, cancelAnimation: () => undefined, useSharedValue: (value: number) => ({ value }), useAnimatedStyle: (factory: () => object) => factory(), withTiming: identity, withRepeat: identity, withDelay: (_: number, value: unknown) => value, withSequence: (...values: unknown[]) => values[0] };
 });
 
-const item = (kind: "store" | "business" | "brand", status: "active" | "held" = "active") => ({ kind, profileId: `${kind}-${status}`, storeId: kind === "store" ? "store-1" : null, status, holdReason: null, name: `My ${kind}`, handle: kind, showsMart: kind === "store" });
+const item = (kind: "store" | "business" | "brand", status: "active" | "held" = "active", premiumNeeded = false) => ({ kind, profileId: `${kind}-${status}`, storeId: kind === "store" ? "store-1" : null, status, holdReason: null, name: `My ${kind}`, handle: kind, showsMart: kind === "store", ownsStore: kind === "store", premiumNeeded });
 const summary = (items: LinkedProfiles["items"]): LinkedProfiles => {
   const active = items.filter((entry) => entry.status === "active");
   const slot = active.some((entry) => entry.kind !== "brand");
-  return { accountId: "me", items, canCreate: { store: !slot, business: !slot, brand: !active.some((entry) => entry.kind === "brand") }, choiceRequired: items.some((entry) => entry.status === "held") };
+  return {
+    accountId: "me", items, canCreate: { store: !slot, business: !slot, brand: !active.some((entry) => entry.kind === "brand") }, choiceRequired: items.some((entry) => entry.status === "held"),
+    businessProfiles: { count: active.length, limit: 2, premiumLimit: 5, premium: false, premiumNeeded: false, storeUsed: active.some((entry) => entry.ownsStore) },
+  };
+};
+const premiumSummary = (items: LinkedProfiles["items"], premium = true): LinkedProfiles => {
+  const count = items.filter((entry) => entry.status === "active").length;
+  const storeUsed = items.some((entry) => entry.ownsStore);
+  const premiumNeeded = items.some((entry) => entry.premiumNeeded);
+  const room = premium && count < 5;
+  return {
+    accountId: "me", items, canCreate: { store: room && !storeUsed, business: room, brand: room }, choiceRequired: false,
+    businessProfiles: { count, limit: premium ? 5 : 2, premiumLimit: 5, premium, premiumNeeded, storeUsed },
+  };
 };
 const withQueryClient = (element: ReturnType<typeof createElement>) => createElement(QueryClientProvider, { client: new QueryClient({ defaultOptions: { mutations: { retry: false } } }) }, element);
 const navigation = { navigate: jest.fn() };
@@ -103,6 +116,49 @@ describe("blocked create flows", () => {
     mockLinked = summary([item("store"), item("business", "held")]);
     await render(createElement(ProfileLimitGate, { kind: "brand" }, createElement(Text, null, "form")));
     expect(screen.getByText("Choose which profiles to keep")).toBeTruthy();
+  });
+});
+
+describe("Blue Premium business profiles", () => {
+  it("shows the Premium allowance, the Store badge and lets a Premium owner add a Business page next to the store", async () => {
+    mockLinked = premiumSummary([item("store"), { ...item("business"), profileId: "business-2" }, item("brand")]);
+    await renderManageProfiles();
+    expect(screen.getByText("3 of 5 business profiles (Premium)")).toBeTruthy();
+    expect(screen.getByText("Store")).toBeTruthy();
+    expect(screen.queryByText("Open a store")).toBeNull();
+    fireEvent.press(screen.getByText("Create a Business page"));
+    expect(navigation.navigate).toHaveBeenCalledWith("CreateBusinessProfile");
+  });
+
+  it("tells a Premium owner at 5 profiles they've reached the limit, without an upsell", async () => {
+    mockLinked = premiumSummary([item("store"), ...["a", "b", "c", "d"].map((suffix) => ({ ...item("business"), profileId: `business-${suffix}` }))]);
+    await renderManageProfiles();
+    expect(screen.getByText("5 of 5 business profiles (Premium)")).toBeTruthy();
+    expect(screen.getByText(/You've reached the 5 business profiles Blue Premium includes/)).toBeTruthy();
+    expect(screen.queryByText("Get Blue Premium for up to 5 business profiles")).toBeNull();
+  });
+
+  it("flags profiles over the standard limit after Premium lapses and keeps them listed", async () => {
+    mockLinked = premiumSummary([item("store"), item("brand"), { ...item("business", "active", true), profileId: "business-3" }], false);
+    await renderManageProfiles();
+    expect(screen.getByText("3 of 2 business profiles")).toBeTruthy();
+    expect(screen.getAllByText("Premium needed for more than 2 business profiles").length).toBeGreaterThan(0);
+    expect(screen.getByText("Premium needed")).toBeTruthy();
+    expect(screen.getByText("My business")).toBeTruthy();
+  });
+
+  it("upsells Blue Premium when a standard account is blocked from another business profile", async () => {
+    mockLinked = summary([item("store")]);
+    await render(createElement(ProfileLimitGate, { kind: "business" }, createElement(Text, null, "form")));
+    expect(screen.getByText("Get Blue Premium for up to 5 business profiles")).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Manage profiles" })).toBeTruthy();
+  });
+
+  it("explains the one-store rule without an upsell when a second store is blocked", async () => {
+    mockLinked = premiumSummary([item("store")]);
+    await render(createElement(ProfileLimitGate, { kind: "store" }, createElement(Text, null, "form")));
+    expect(screen.getByText("You can own one store")).toBeTruthy();
+    expect(screen.queryByText("Get Blue Premium for up to 5 business profiles")).toBeNull();
   });
 });
 

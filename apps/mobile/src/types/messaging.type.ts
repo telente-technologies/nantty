@@ -42,6 +42,7 @@ export interface MessageAttachedMedia {
   readonly type: "voice" | "image" | "video";
   readonly url: string | null;
   readonly durationSeconds?: number;
+  readonly localWaveform?: readonly number[] | null;
 }
 
 export interface SharedLocation {

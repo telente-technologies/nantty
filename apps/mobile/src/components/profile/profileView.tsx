@@ -8,6 +8,8 @@ import { Text } from "@/components/ui/text";
 import { useTheme } from "@/theme";
 import type { Post, User } from "@/types";
 
+import { lockedProfileCopyByLock, type LockedProfileCopy } from "./followState.util";
+import { LockedProfileNotice } from "./lockedProfileNotice";
 import { ProfileSoundsList } from "./profileSoundsList";
 import { ProfileSummary, type ProfileAction } from "./profileSummary";
 import { ProfileTabs, type ProfileTabKey } from "./profileTabs";
@@ -30,6 +32,7 @@ export interface ProfileViewProps {
   readonly onOpenStoreTab?: () => void;
   readonly headerAccessory?: ReactNode;
   readonly isLocked?: boolean;
+  readonly lockedCopy?: LockedProfileCopy;
   readonly onPressPostMore?: (post: Post) => void;
 }
 
@@ -87,14 +90,7 @@ export function ProfileView(props: ProfileViewProps) {
       )}
       ListEmptyComponent={
         props.isLocked ? (
-          <View style={styles.privateState} accessibilityRole="summary">
-            <Text size={typeScale.base} weight={600} lineHeight={20} align="center">
-              This account is private
-            </Text>
-            <Text size={typeScale.md} lineHeight={18} color={colors.textSubtle} align="center">
-              Follow this account to see their posts.
-            </Text>
-          </View>
+          <LockedProfileNotice copy={props.lockedCopy ?? lockedProfileCopyByLock.private} />
         ) : activeTab === "sounds" ? (
           <ProfileSoundsList profile={props.profile} />
         ) : props.loading ? (
@@ -115,5 +111,4 @@ const styles = StyleSheet.create({
   header: { gap: spacing[6] },
   content: { paddingBottom: spacing[8] },
   empty: { marginTop: 48 },
-  privateState: { marginTop: 48, paddingHorizontal: spacing[7], gap: 6 },
 });

@@ -3,6 +3,7 @@ import { useNavigation } from "@react-navigation/native";
 import { useEffect } from "react";
 import { Pressable, StyleSheet, View } from "react-native";
 
+import { StatusPill } from "@/components/escrow/statusPill";
 import { Check16Icon, Plus16Icon } from "@/components/icons";
 import { Avatar } from "@/components/ui/avatar";
 import { BottomSheet } from "@/components/ui/bottomSheet";
@@ -16,8 +17,10 @@ import { useAuthStore } from "@/store/auth.store";
 import { useProfileSwitcherSheetStore } from "@/store/profileSwitcherSheet.store";
 import { useLinkedProfiles } from "@/hooks/useLinkedProfiles.hook";
 
+import { describeBusinessProfileAllowance, describePremiumNeeded, linkedItemForProfile, linkedProfileBadges, PREMIUM_NEEDED_LABEL, shouldOfferBluePremium } from "@/utils/businessProfileAllowance.util";
 import { verificationForProfileKind } from "@/utils/verificationProfile.util";
 
+import { BluePremiumProfilesUpsell } from "./bluePremiumProfilesUpsell";
 import { VerificationBadge } from "./verificationBadge";
 
 const KIND_LABELS = { person: "Personal", business: "Business page", brand: "Brand", store: "Store", government: "Government" } as const;
@@ -58,6 +61,9 @@ export function ProfileSwitcherSheet() {
     },
   });
   if (!active) return null;
+  const allowanceText = describeBusinessProfileAllowance(linked.data?.businessProfiles);
+  const premiumNeededText = describePremiumNeeded(linked.data?.businessProfiles);
+  const addBusinessLabel = linked.data?.businessProfiles?.storeUsed ? "Add a Business page" : "Add a Store or Business page";
 
   return (
     <BottomSheet visible={isProfileSwitcherSheetVisible} onClose={closeProfileSwitcherSheet} title="Switch profile" subtitle="Posts, messages and store actions happen as the profile you choose." scrollable>
@@ -73,14 +79,17 @@ export function ProfileSwitcherSheet() {
                 <VerificationBadge verification={verificationForProfileKind(profile.verification, profile.kind)} size={14} />
               </View>
               <Text size={12} lineHeight={16} color={colors.textMuted}>@{profile.handle} · {KIND_LABELS[profile.kind]}{profile.onHold ? " · On hold" : ""}</Text>
+              <ProfileBadges labels={linkedProfileBadges(linkedItemForProfile(linked.data, profile.id))} />
             </View>
             <View style={[styles.radio, profile.id === active.id ? styles.radioOn : null]}>{profile.id === active.id ? <Check16Icon size={12} color={colors.onPrimary} /> : null}</View>
           </Pressable>
         ))}
-        {linked.data?.canCreate.store ? (
+        {allowanceText ? <Text size={12} lineHeight={16} color={colors.textMuted}>{allowanceText}</Text> : null}
+        {premiumNeededText ? <Text size={12} weight={500} lineHeight={16} color={colors.error}>{premiumNeededText}</Text> : null}
+        {linked.data?.canCreate.store || linked.data?.canCreate.business ? (
           <Pressable accessibilityRole="button" onPress={() => openScreen("ManageProfiles")} style={styles.row}>
             <View style={styles.plus}><Plus16Icon color={colors.primary} /></View>
-            <Text size={14} weight={500} lineHeight={16.8} color={colors.primary}>Add a Store or Business page</Text>
+            <Text size={14} weight={500} lineHeight={16.8} color={colors.primary}>{addBusinessLabel}</Text>
           </Pressable>
         ) : null}
         {linked.data?.canCreate.brand ? (
@@ -89,6 +98,7 @@ export function ProfileSwitcherSheet() {
             <Text size={14} weight={500} lineHeight={16.8} color={colors.primary}>Create a brand</Text>
           </Pressable>
         ) : null}
+        {shouldOfferBluePremium(linked.data) ? <BluePremiumProfilesUpsell note={premiumNeededText} onBeforeOpen={closeProfileSwitcherSheet} /> : null}
         <Pressable accessibilityRole="button" onPress={() => openScreen("ManageProfiles")} style={styles.row}>
           <Text size={14} weight={500} lineHeight={16.8} color={linked.data?.choiceRequired ? colors.error : colors.textMuted}>{linked.data?.choiceRequired ? "Choose which profiles to keep" : "Manage profiles"}</Text>
         </Pressable>
@@ -96,6 +106,17 @@ export function ProfileSwitcherSheet() {
     </BottomSheet>
   );
 }
+
+function ProfileBadges({ labels }: { readonly labels: readonly string[] }) {
+  if (labels.length === 0) return null;
+  return (
+    <View style={badgeStyles.row}>
+      {labels.map((label) => <StatusPill key={label} label={label} tone={label === PREMIUM_NEEDED_LABEL ? "caution" : "neutral"} />)}
+    </View>
+  );
+}
+
+const badgeStyles = StyleSheet.create({ row: { flexDirection: "row", gap: 6, marginTop: 2 } });
 
 const useStyles = makeThemedStyles((colors) => StyleSheet.create({
   list: { paddingTop: 4, gap: 8 },

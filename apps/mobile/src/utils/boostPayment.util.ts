@@ -15,7 +15,17 @@ const BOOST_ERROR_MESSAGES: Record<string, string> = {
   FREE_BOOST_NOT_AVAILABLE: "Free boosts come with Premium. You can still boost this post by card or bank transfer.",
   FREE_BOOST_USED: "You've already used this month's free boost. You can boost by card or bank transfer instead.",
   FREE_BOOST_TOO_LARGE: "This boost is bigger than your free boost covers. Pick a smaller package or pay by card.",
-  PAYMENT_METHOD_NOT_AVAILABLE_IN_APP: "That payment method isn't available in the app. Pay by card or bank transfer instead.",
+  PAYMENT_METHOD_NOT_AVAILABLE_IN_APP: "Paying from your earnings is available on zudomart.com. In the app, pay by card or bank transfer, or from your ad balance.",
+  INSUFFICIENT_AD_BALANCE: "Your ad balance doesn't cover this. Pay by card or bank transfer, or lower the budget.",
+  DESTINATION_NOT_OWNED: "You can only promote a post, product, profile or store you own or manage.",
+  DESTINATION_UNAVAILABLE: "This can't be promoted right now because it's suspended or no longer active.",
+  BOOST_STATUS_CHANGE_NOT_ALLOWED: "This ad can't be changed that way any more. Pull down to refresh.",
+  BOOST_ENDED: "This ad has reached its end date. Extend it to keep it running.",
+  BOOST_BUDGET_CHANGE_NOT_ALLOWED: "The budget of this ad can't be changed any more.",
+  BOOST_NOT_CANCELLABLE: "This ad has already finished.",
+  FORBIDDEN: "Only the person who created this ad can change it.",
+  WITHDRAWAL_ABOVE_AVAILABLE: "That is more than you can withdraw right now.",
+  TOP_UPS_UNAVAILABLE: "Top-ups are not available right now. Try again later.",
   VERIFICATION_REQUIRED: "Verify your payout details to use Zudomart Ads.",
   VERIFICATION_UNAVAILABLE: "We couldn't check your verification just now. Please try again in a moment.",
   IDEMPOTENCY_KEY_REUSED: "This boost was already sent. Please try again.",
@@ -78,4 +88,12 @@ export function boostErrorMessage(error: unknown): string {
     if (mapped) return mapped;
   }
   return error instanceof Error && error.message ? error.message : "Couldn't start your boost. Please try again.";
+}
+
+export function describeBoostPaymentMethodForDisplay(method: string | null | undefined): string | null {
+  if (method === "card") return "card or bank transfer";
+  if (method === "ad_balance") return "your ad credit & balance";
+  if (method === "balance" || method === "wallet") return "your Zudomart earnings";
+  if (method === "free") return "your free Premium boost";
+  return null;
 }

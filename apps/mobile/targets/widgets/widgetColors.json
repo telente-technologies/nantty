@@ -1,5 +1,5 @@
 {
   "brandPalette": { "brand": "#3A2BFF" },
   "lightColors": { "surface": "#FFFFFF", "sunken": "#F0F2FA", "text": "#0A0A14", "textMuted": "#5B5B6B", "brandSolid": "#3A2BFF", "borderStrong": "#CDD1E6", "danger": "#EF4444" },
-  "darkColors": { "canvas": "#0E0E10", "surface": "#2C2C2C", "text": "#F2F3F8", "textMuted": "#A9ADC2", "brandSolid": "#4E40FF", "borderStrong": "#353B57", "danger": "#F87171" }
+  "darkColors": { "canvas": "#15161A", "surface": "#1E2024", "text": "#E8E9EB", "textMuted": "#9A9DA3", "brandSolid": "#4E40FF", "borderStrong": "#3A3D43", "danger": "#F87171" }
 }

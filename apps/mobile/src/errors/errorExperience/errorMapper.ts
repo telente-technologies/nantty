@@ -46,7 +46,7 @@ export const errorKindByCode: Readonly<Record<string, CodeRule>> = {
   PAYMENT_PENDING: ["paymentPending"], PAYMENT_PROCESSING: ["paymentPending"],
   PAYMENT_AMOUNT_OUT_OF_RANGE: ["paymentLimit"], WALLET_DAILY_LIMIT: ["paymentLimit"], WITHDRAWAL_DAILY_LIMIT: ["paymentLimit"], WITHDRAWAL_DAILY_AMOUNT_LIMIT: ["paymentLimit"],
   SELLER_DEBT_LIMIT: ["sellerDebtLimit"], WALLET_DEBT_OUTSTANDING: ["sellerDebtLimit"],
-  PROFILE_LIMIT_STORE_OR_BUSINESS: ["profileLimit"], PROFILE_LIMIT_ONE_BRAND: ["profileLimit"], PROFILE_ON_HOLD: ["profileLimit"], BRAND_SELLING_OFF: ["profileLimit"],
+  PROFILE_LIMIT_STORE_OR_BUSINESS: ["profileLimit"], PROFILE_LIMIT_ONE_BRAND: ["profileLimit"], PROFILE_ON_HOLD: ["profileLimit"], BRAND_SELLING_OFF: ["profileLimit"], STORE_LIMIT_ONE: ["profileLimit"], BUSINESS_PROFILE_LIMIT: ["profileLimit"],
   COUNTRY_REQUIRED: ["countryRequired"],
   PLAN_FEATURE_REQUIRED: ["planFeatureRequired"], PLAN_UPGRADE_REQUIRED: ["planFeatureRequired"], CREATOR_PROGRAM_REQUIRED: ["planFeatureRequired"],
   PRODUCT_LIMIT_REACHED: ["quotaReached"], ADDRESS_LIMIT_REACHED: ["quotaReached"], LOCATION_LIMIT_REACHED: ["quotaReached"], SEAT_LIMIT_REACHED: ["quotaReached"], MEMBER_LIMIT_REACHED: ["quotaReached"], SEGMENT_LIMIT_REACHED: ["quotaReached"], RULE_LIMIT_REACHED: ["quotaReached"], SCENE_LIMIT_REACHED: ["quotaReached"], PIN_LIMIT_REACHED: ["quotaReached"], CATEGORY_LIMIT_REACHED: ["quotaReached"], API_KEY_LIMIT_REACHED: ["quotaReached"], AREA_LIMIT_REACHED: ["quotaReached"], QUOTA_EXCEEDED: ["quotaReached"],

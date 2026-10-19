@@ -11,6 +11,7 @@ import { Text } from "@/components/ui/text";
 import { useReducedMotionPreference } from "@/hooks/useReducedMotionPreference.hook";
 import { makeThemedStyles, useTheme } from "@/theme";
 import type { LiveSessionDetails } from "@/types";
+import type { LiveAccessLock } from "@/utils/liveAccessLock.util";
 
 import { LiveAvatarRing } from "./liveAvatarRing";
 import { LiveBadge } from "./liveBadge";
@@ -21,11 +22,15 @@ export interface JoinLiveCardProps {
   readonly showHost: boolean;
   readonly onWatch: () => void;
   readonly onDismiss?: () => void;
+  readonly lock?: LiveAccessLock | null;
+  readonly onLockAction?: () => void;
 }
 
 const formatViewerCount = (viewers: number) => Intl.NumberFormat("en", { notation: "compact" }).format(viewers);
 
-export function JoinLiveCard({ session, showHost, onWatch, onDismiss }: JoinLiveCardProps) {
+const lockActionLabels = { follow: "Follow", subscribe: "See subscription options" } as const;
+
+export function JoinLiveCard({ session, showHost, onWatch, onDismiss, lock, onLockAction }: JoinLiveCardProps) {
   const styles = useStyles();
   const { colors } = useTheme();
   const reduceMotion = useReducedMotionPreference();
@@ -79,10 +84,21 @@ export function JoinLiveCard({ session, showHost, onWatch, onDismiss }: JoinLive
             </Text>
           </View>
         ) : null}
+        {lock ? (
+          <View style={styles.lock} accessibilityRole="alert">
+            <Text size={17} weight={600} lineHeight={22}>
+              {lock.title}
+            </Text>
+            <Text size={14} lineHeight={20} color={colors.textMuted}>
+              {lock.body}
+            </Text>
+          </View>
+        ) : null}
         <ModalActionStack
           style={styles.actions}
           actions={[
-            { label: "Join live", style: "primary", onPress: onWatch },
+            ...(!lock ? [{ label: "Join live", style: "primary" as const, onPress: onWatch }] : []),
+            ...(lock?.action && onLockAction ? [{ label: lockActionLabels[lock.action], style: "primary" as const, onPress: onLockAction }] : []),
             ...(onDismiss ? [{ label: "Not now", style: "plain" as const, onPress: onDismiss }] : []),
           ]}
         />
@@ -106,5 +122,6 @@ const useStyles = makeThemedStyles((colors, scheme) => {
     shrink: { flexShrink: 1 },
     chip: { alignSelf: "flex-start", flexDirection: "row", alignItems: "center", gap: 6, paddingHorizontal: 10, paddingVertical: 4, borderRadius: 999, backgroundColor: palette.inset },
     actions: { marginTop: 6 },
+    lock: { gap: 4 },
   });
 });

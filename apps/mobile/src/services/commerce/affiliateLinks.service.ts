@@ -1,3 +1,4 @@
+import { useSaleAttributionStore } from "@/store/saleAttribution.store";
 import type { SaleAttribution } from "@/utils/saleAttribution.util";
 
 import { api } from "../core/apiClient.service";
@@ -10,5 +11,5 @@ export interface AffiliateLinkClick {
 }
 
 export const affiliateLinksService = {
-  recordClick: (linkId: string) => api.post<AffiliateLinkClick>(`/api/v1/affiliate-links/${encodeURIComponent(linkId)}/clicks`, {}),
+  recordClick: (linkId: string) => api.post<AffiliateLinkClick>(`/api/v1/affiliate-links/${encodeURIComponent(linkId)}/clicks`, { visitorId: useSaleAttributionStore.getState().ensureVisitorId() }),
 };

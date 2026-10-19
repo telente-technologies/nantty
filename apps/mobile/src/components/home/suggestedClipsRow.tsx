@@ -3,33 +3,35 @@ import { Pressable, ScrollView, StyleSheet, View } from "react-native";
 
 import { DotsThreeVertical24Icon } from "@/components/icons";
 import { Text } from "@/components/ui/text";
-import { makeThemedStyles } from "@/theme";
+import { makeThemedStyles, useTheme } from "@/theme";
 import type { SuggestedClip } from "@/types/commerce.type";
+import { horizontalScrollGestureGuardProps } from "@/components/home/horizontalScrollGestureGuard.util";
 
 export interface SuggestedClipsRowProps {
-  readonly clips: readonly SuggestedClip[];
+  readonly clips: readonly (SuggestedClip & { readonly authorName?: string })[];
   readonly onPressClip: (clipId: string) => void;
   readonly onPressMore?: () => void;
 }
 
 export function SuggestedClipsRow({ clips, onPressClip, onPressMore }: SuggestedClipsRowProps) {
   const styles = useStyles();
+  const { colors } = useTheme();
   return (
     <View style={styles.section}>
       <View style={styles.titleRow}>
         <Text size={14} weight={600} lineHeight={16.9} letterSpacing={0} accessibilityRole="header">
           Suggested Clips
         </Text>
-        <Pressable accessibilityRole="button" accessibilityLabel="More options" hitSlop={10} onPress={onPressMore}>
-          <DotsThreeVertical24Icon />
+        <Pressable accessibilityRole="button" accessibilityLabel="More options for suggested clips" hitSlop={10} onPress={onPressMore} disabled={!onPressMore}>
+          <DotsThreeVertical24Icon color={colors.text} />
         </Pressable>
       </View>
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.slider}>
+      <ScrollView horizontal {...horizontalScrollGestureGuardProps} showsHorizontalScrollIndicator={false} contentContainerStyle={styles.slider}>
         {clips.map((clip, index) => (
           <Pressable
             key={clip.id}
             accessibilityRole="button"
-            accessibilityLabel={`Suggested clip ${index + 1}`}
+            accessibilityLabel={clip.authorName ? `Play suggested clip by ${clip.authorName}` : `Play suggested clip ${index + 1}`}
             onPress={() => onPressClip(clip.id)}
             style={styles.clip}
           >

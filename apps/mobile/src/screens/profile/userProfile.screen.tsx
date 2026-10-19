@@ -9,7 +9,8 @@ import { useFollowUserToggle } from "@/components/profile/confirmedFollowToggle.
 import { PostNotificationLevelIcon, PostNotificationsSheet } from "@/components/profile/postNotificationsSheet";
 import { useFollowStatusQuery, useSetPostNotificationsMutation, useUserPostsQuery, useUserProfileQuery } from "@/components/profile/profileQueries.hook";
 import type { ProfileAction } from "@/components/profile/profileSummary";
-import { followButtonLabelForState, isFollowStateHighlighted, isProfileContentHiddenFromViewer, resolveFollowStateOfUser } from "@/components/profile/followState.util";
+import { followButtonLabelForState, isFollowStateHighlighted, lockedProfileCopyByLock, resolveFollowStateOfUser, resolveProfileLock } from "@/components/profile/followState.util";
+import { useUnblockFromProfile } from "@/components/profile/unblockFromProfile.hook";
 import { SuspendedProfileState } from "@/components/profile/suspendedProfileState";
 import { ProfileView } from "@/components/profile/profileView";
 import { ErrorState } from "@/components/ui/errorState";
@@ -27,9 +28,10 @@ export function UserProfileScreen({ navigation, route }: MainScreenProps<"UserPr
   const signedInUserId = useAuthStore((state) => state.user?.id);
   const viewingOwnProfile = userId === signedInUserId;
   const profileQuery = useUserProfileQuery(userId);
-  const postsQuery = useUserPostsQuery(userId);
   const { toggleUser } = useFollowUserToggle();
-  const followStatus = useFollowStatusQuery(userId, !viewingOwnProfile && !!signedInUserId).data;
+  const unblockFromProfile = useUnblockFromProfile();
+  const followStatusQuery = useFollowStatusQuery(userId, !viewingOwnProfile && !!signedInUserId);
+  const followStatus = followStatusQuery.data;
   const setPostNotifications = useSetPostNotificationsMutation(userId);
   const [isBellSheetOpen, setIsBellSheetOpen] = useState(false);
   const subscriptionPlans = useQuery({
@@ -47,7 +49,9 @@ export function UserProfileScreen({ navigation, route }: MainScreenProps<"UserPr
   const followState = profile ? resolveFollowStateOfUser(profile) : "none";
   const postNotificationLevel = followStatus?.viewerPostNotifications ?? "off";
   const showBell = !!signedInUserId && !viewingOwnProfile && followState === "accepted";
-  const isContentHidden = profile ? isProfileContentHiddenFromViewer(profile) : false;
+  const profileLock = profile ? resolveProfileLock(profile) : "open";
+  const isContentHidden = profileLock !== "open";
+  const postsQuery = useUserPostsQuery(profile && !isContentHidden ? userId : undefined);
   const showsMart = userProfileShowsMart(profile);
 
   useEffect(() => {
@@ -58,7 +62,7 @@ export function UserProfileScreen({ navigation, route }: MainScreenProps<"UserPr
     ? [
         {
           label: followButtonLabelForState(followState),
-          onPress: () => requireAuthThen(() => toggleUser({ id: userId, username: profile.username, followState, isPrivate: profile.isPrivate }), undefined, "follow people"),
+          onPress: () => requireAuthThen(() => (followState === "blocked" ? unblockFromProfile({ id: userId, username: profile.username }) : toggleUser({ id: userId, username: profile.username, followState, isPrivate: profile.isPrivate })), undefined, "follow people"),
           highlighted: isFollowStateHighlighted(followState),
         },
         { label: "Message", onPress: () => requireAuthThen(() => navigation.navigate("Chat", { userId, name: profile.name }), undefined, "send messages") },
@@ -105,15 +109,17 @@ export function UserProfileScreen({ navigation, route }: MainScreenProps<"UserPr
         ]}
         actions={actions}
         isLocked={isContentHidden}
+        lockedCopy={profileLock === "open" ? undefined : lockedProfileCopyByLock[profileLock]}
         identityAction={identityAction}
         loading={postsQuery.isLoading}
         refreshing={profileQuery.isRefetching || postsQuery.isRefetching}
         onRefresh={() => {
           profileQuery.refetch();
-          postsQuery.refetch();
+          if (signedInUserId) followStatusQuery.refetch();
+          if (!isContentHidden) postsQuery.refetch();
         }}
-        onPressFollowers={() => navigation.navigate("Connections", { userId, tab: "followers" })}
-        onPressFollowing={() => navigation.navigate("Connections", { userId, tab: "following" })}
+        onPressFollowers={() => (isContentHidden ? undefined : navigation.navigate("Connections", { userId, tab: "followers" }))}
+        onPressFollowing={() => (isContentHidden ? undefined : navigation.navigate("Connections", { userId, tab: "following" }))}
         onPressPost={(post) => navigation.navigate("PostDetail", { postId: post.id })}
         onOpenStoreTab={showsMart && profile?.storeId ? () => navigation.navigate("Store", { storeId: profile.storeId! }) : undefined}
       />

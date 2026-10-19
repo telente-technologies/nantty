@@ -1,29 +1,16 @@
-import * as SecureStore from "expo-secure-store";
-import { Platform } from "react-native";
-
 import { storageKeys } from "@/constants/storageKeys.constant";
+import { readDevicePreference, writeDevicePreference } from "@/utils/devicePreferenceStorage.util";
 
 const SEEN = "1";
 
 const accountKeyFor = (userId: string) => `${storageKeys.clipGestureTipsSeen}.${userId.replace(/[^A-Za-z0-9._-]/g, "_")}`;
 
 const readFlag = (key: string): boolean => {
-  try {
-    const stored = Platform.OS === "web" ? globalThis.localStorage?.getItem(key) : SecureStore.getItem(key);
-    return stored === SEEN;
-  } catch {
-    return false;
-  }
+  const stored = readDevicePreference(key);
+  return stored.available && stored.value === SEEN;
 };
 
-const writeFlag = (key: string) => {
-  try {
-    if (Platform.OS === "web") globalThis.localStorage?.setItem(key, SEEN);
-    else SecureStore.setItem(key, SEEN);
-  } catch {
-    return;
-  }
-};
+const writeFlag = (key: string) => writeDevicePreference(key, SEEN);
 
 export function shouldShowClipGestureTips(userId: string | null): boolean {
   if (!readFlag(storageKeys.clipGestureTipsSeen)) return true;

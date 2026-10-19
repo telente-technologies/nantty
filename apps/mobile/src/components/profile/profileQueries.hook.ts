@@ -9,6 +9,8 @@ import { showToast } from "@/store/toast.store";
 import type { ConnectionTab } from "@/types/account.type";
 import type { FollowStatus, PostNotificationLevel } from "@/types/socialGraph.type";
 
+import { followStatusPollIntervalMs } from "./followState.util";
+
 export const profileQueryKeys = {
   myProfile: ["users", "me"] as const,
   userProfile: (userId: string) => ["users", userId] as const,
@@ -66,7 +68,12 @@ export function useSaveProfileDetailsMutation() {
 }
 
 export function useFollowStatusQuery(userId: string, enabled: boolean) {
-  return useQuery({ queryKey: followQueryKeys.followStatus(userId), queryFn: () => followsService.fetchFollowStatus(userId), enabled });
+  return useQuery({
+    queryKey: followQueryKeys.followStatus(userId),
+    queryFn: () => followsService.fetchFollowStatus(userId),
+    enabled,
+    refetchInterval: (query) => followStatusPollIntervalMs(query.state.data?.state),
+  });
 }
 
 export function useSetPostNotificationsMutation(userId: string) {

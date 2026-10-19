@@ -93,6 +93,7 @@ export type MainStackParamList = {
   CommentThread: { commentId: string; postId: string };
   ContentPreferences: undefined;
   Live: { liveId: string; host?: boolean };
+  SuggestedVideos: { start?: string } | undefined;
   LiveEnded: { liveId: string };
   Story: { userId: string };
   StoryAnalytics: { storyId: string };
@@ -111,7 +112,11 @@ export type MainStackParamList = {
   IdentityVerification: { step?: "pay" } | undefined;
   SubscriptionOffer: { token: string };
   PromotePost: { postId: string };
+  PromoteDestination: { destinationType: "profile" | "store" | "product"; targetId: string };
   BoostStatus: { boostId: string };
+  AdsHub: undefined;
+  CreateAd: { destinationType?: "post" | "profile" | "store" | "product"; targetId?: string; fromBoostId?: string; mode?: "duplicate" | "resubmit" } | undefined;
+  AdBalance: undefined;
   SupportTickets: undefined;
   NewSupportTicket: { category?: SupportTicketCategory; linkedReference?: SupportLinkedReference } | undefined;
   HelpCenter: undefined;

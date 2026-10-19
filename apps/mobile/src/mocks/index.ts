@@ -19,6 +19,7 @@ import { boostsMocks } from "./boosts.mock";
 import { businessProfilesMocks } from "./businessProfiles.mock";
 import { brandsMocks } from "./brands.mock";
 import { linkedProfilesMocks } from "./linkedProfiles.mock";
+import { goldForBusinessesMocks } from "./goldForBusinesses.mock";
 import { cartMocks } from "./cart.mock";
 import { chatContentMocks } from "./chatContent.mock";
 import { chatInboxMocks } from "./chatInbox.mock";
@@ -69,6 +70,7 @@ import { legalMocks } from "./legal.mock";
 import { privacyMocks } from "./privacy.mock";
 import { settingsMocks } from "./settings.mock";
 import { storiesMocks } from "./stories.mock";
+import { profileAvatarPresenceMocks } from "./profileAvatarPresence.mock";
 import { supportMocks } from "./support.mock";
 import { usernameMocks } from "./username.mock";
 import { usersMocks } from "./users.mock";
@@ -124,6 +126,7 @@ const routes: MockRoute[] = [
   ...brandsMocks,
   ...businessProfilesMocks,
   ...linkedProfilesMocks,
+  ...goldForBusinessesMocks,
   ...supportMocks,
   ...groupsMocks,
   ...chatKeysMocks,
@@ -151,6 +154,7 @@ const routes: MockRoute[] = [
   ...liveGuestsMocks,
   ...liveBattleMocks,
   ...storiesMocks,
+  ...profileAvatarPresenceMocks,
   ...settingsMocks,
   ...geoMocks,
   ...privacyMocks,

@@ -1,70 +1,39 @@
 import type { BottomTabScreenProps } from "@react-navigation/bottom-tabs";
-import { useIsFocused, type CompositeScreenProps } from "@react-navigation/native";
+import type { CompositeScreenProps } from "@react-navigation/native";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { AppState, FlatList, Share, StyleSheet, View, type ViewToken, type ViewabilityConfigCallbackPairs } from "react-native";
-import { useShareToChat } from "@/components/chatSafety/shareToChat.hook";
-import { useSafeAreaFrame, useSafeAreaInsets } from "react-native-safe-area-context";
+import { useEffect, useMemo, useState } from "react";
+import { StyleSheet, View } from "react-native";
 
 import { ClipCommentsSheet } from "@/components/clips/clipCommentsSheet";
-import { ClipPage, type ClipEngagement } from "@/components/clips/clipPage";
+import { ClipPagerList } from "@/components/clips/clipPagerList";
+import { useClipPagerState } from "@/components/clips/clipPagerState.hook";
 import { ClipsFeedState } from "@/components/clips/clipsFeedState";
 import { ClipsHeader } from "@/components/clips/clipsHeader";
-import { bottomSafeAreaNotCoveredByTabBar } from "@/components/clips/clipPageLayout.util";
 import { rememberClipGestureTipsSeen, shouldShowClipGestureTips } from "@/components/clips/clipGestureTipsSeen.util";
 import { GestureTipsOverlay } from "@/components/clips/gestureTipsOverlay";
 import { colors } from "@/constants/colors.constant";
 import type { MainStackParamList, MainTabParamList } from "@/navigation/navigation.types";
-import { recordImpressionsForViewableSponsoredItems, sponsoredImpressionViewabilityConfig } from "@/services/ads/adEvents.service";
 import { clipsService } from "@/services/clips/clips.service";
-import { claimAudioFocusForVideoPlayback } from "@/services/clips/videoAudio.service";
-import { useOpenUserProfile } from "@/hooks/useOpenUserProfile.hook";
-import { usePostInteractions } from "@/hooks/usePostInteractions.hook";
 import { useAuthStore } from "@/store/auth.store";
 import { isCommentsCursorExpiredError } from "@/hooks/useRestartCommentsOnExpiredCursor.hook";
 import { requireAuthThen } from "@/utils/requireAuth.util";
-import { useVideoAudioStore } from "@/store/videoAudio.store";
-import type { Clip, ClipsFeedTab } from "@/types";
-
-import { prefetchUpcomingClipPosters } from "./clipsPrefetch.util";
-import { webAppLinks } from "@/config/webAppLinks.config";
+import type { ClipsFeedTab } from "@/types";
 
 type ClipsScreenProps = CompositeScreenProps<
   BottomTabScreenProps<MainTabParamList, "Clips">,
   NativeStackScreenProps<MainStackParamList>
 >;
 
-const NUMBER_OF_UPCOMING_CLIPS_TO_PRELOAD = 2;
-const ACTIVE_CLIP_MINIMUM_VISIBLE_PERCENT = 60;
-const PAGE_RESIZE_SETTLE_MS = 600;
-
 export function ClipsScreen({ navigation, route }: ClipsScreenProps) {
   const requestedStartClipId = route.params?.startId;
   const requestedCommentId = route.params?.commentId;
   const [highlightedCommentId, setHighlightedCommentId] = useState<string | null>(null);
-  const insets = useSafeAreaInsets();
-  const safeAreaFrame = useSafeAreaFrame();
-  const isScreenFocused = useIsFocused();
   const myAvatarUrl = useAuthStore((s) => s.user?.avatarUrl ?? null);
   const myUserId = useAuthStore((s) => s.user?.id ?? null);
-  const openUserProfile = useOpenUserProfile();
   const [tab, setTab] = useState<ClipsFeedTab>("forYou");
-  const [pageHeight, setPageHeight] = useState(0);
-  const [activeClipIndex, setActiveClipIndex] = useState(0);
   const queryClient = useQueryClient();
-  const activeClipIndexRef = useRef(0);
-  activeClipIndexRef.current = activeClipIndex;
-  const ignoreViewabilityUntilRef = useRef(0);
-  const previousPageHeightRef = useRef(0);
-  const [isAppInForeground, setIsAppInForeground] = useState(AppState.currentState === "active");
-  const isMuted = useVideoAudioStore((state) => state.isMuted);
-  const toggleMute = useVideoAudioStore((state) => state.toggleMute);
-  const [commentsForClipId, setCommentsForClipId] = useState<string | null>(null);
   const [showGestureTips, setShowGestureTips] = useState(() => shouldShowClipGestureTips(myUserId));
-  const clipsListRef = useRef<FlatList<Clip>>(null);
-  const uncoveredBottomInset = bottomSafeAreaNotCoveredByTabBar(insets.bottom, safeAreaFrame.height, pageHeight);
-  const [clipIndexToOpenListAt, setClipIndexToOpenListAt] = useState(0);
 
   const clipsFeed = useInfiniteQuery({
     queryKey: ["clips", tab],
@@ -73,12 +42,14 @@ export function ClipsScreen({ navigation, route }: ClipsScreenProps) {
     getNextPageParam: (lastPage) => lastPage.nextCursor ?? undefined,
   });
   const clips = useMemo(() => clipsFeed.data?.pages.flatMap((page) => page.data) ?? [], [clipsFeed.data]);
+  const pager = useClipPagerState(clips);
+  const { pageHeight, openListAtClip, setCommentsForClipId, commentsForClipId } = pager;
   const clipsCursorExpired = isCommentsCursorExpiredError(clipsFeed.error);
   useEffect(() => {
     if (!clipsCursorExpired) return;
-    setActiveClipIndex(0);
+    pager.setActiveClipIndex(0);
     void queryClient.resetQueries({ queryKey: ["clips", tab], exact: true });
-  }, [clipsCursorExpired, queryClient, tab]);
+  }, [clipsCursorExpired, queryClient, tab, pager.setActiveClipIndex]);
 
   useEffect(() => {
     if (!requestedStartClipId || pageHeight === 0 || !clipsFeed.isSuccess) return;
@@ -92,29 +63,18 @@ export function ClipsScreen({ navigation, route }: ClipsScreenProps) {
       if (!clipsFeed.hasNextPage) navigation.setParams({ startId: undefined });
       return;
     }
-    setActiveClipIndex(requestedClipIndex);
-    setClipIndexToOpenListAt(requestedClipIndex);
+    openListAtClip(requestedClipIndex);
     if (requestedCommentId) {
       setHighlightedCommentId(requestedCommentId);
       setCommentsForClipId(requestedStartClipId);
     }
     navigation.setParams({ startId: undefined, commentId: undefined });
-  }, [requestedStartClipId, requestedCommentId, pageHeight, clips, tab, clipsFeed, navigation]);
-
-  useEffect(() => {
-    const subscription = AppState.addEventListener("change", (state) => setIsAppInForeground(state === "active"));
-    return () => subscription.remove();
-  }, []);
-
-  useEffect(() => {
-    prefetchUpcomingClipPosters(clips, activeClipIndex, NUMBER_OF_UPCOMING_CLIPS_TO_PRELOAD + 2);
-  }, [clips, activeClipIndex]);
+  }, [requestedStartClipId, requestedCommentId, pageHeight, clips, tab, clipsFeed, navigation, openListAtClip, setCommentsForClipId]);
 
   const showFeedTabFromTop = (nextTab: ClipsFeedTab) => {
     setTab(nextTab);
-    setActiveClipIndex(0);
-    setClipIndexToOpenListAt(0);
-    clipsListRef.current?.scrollToOffset({ offset: 0, animated: false });
+    openListAtClip(0);
+    pager.clipsListRef.current?.scrollToOffset({ offset: 0, animated: false });
   };
   const switchFeedTabAndScrollToTop = (nextTab: ClipsFeedTab) => {
     if (nextTab === "following") requireAuthThen(() => showFeedTabFromTop("following"), undefined, "see clips from people you follow");
@@ -125,42 +85,6 @@ export function ClipsScreen({ navigation, route }: ClipsScreenProps) {
     if (!isSignedIn && tab === "following") setTab("forYou");
   }, [isSignedIn, tab]);
 
-  const updateActiveClipFromViewableItems = useCallback(({ viewableItems }: { viewableItems: ViewToken[] }) => {
-    if (Date.now() < ignoreViewabilityUntilRef.current) return;
-    const mostVisible = viewableItems.find((token) => token.isViewable && token.index !== null);
-    if (mostVisible?.index !== undefined && mostVisible.index !== null) setActiveClipIndex(mostVisible.index);
-  }, []);
-
-  const viewabilityConfigCallbackPairs = useRef<ViewabilityConfigCallbackPairs>([
-    { viewabilityConfig: { itemVisiblePercentThreshold: ACTIVE_CLIP_MINIMUM_VISIBLE_PERCENT }, onViewableItemsChanged: updateActiveClipFromViewableItems },
-    {
-      viewabilityConfig: sponsoredImpressionViewabilityConfig,
-      onViewableItemsChanged: ({ viewableItems }) => recordImpressionsForViewableSponsoredItems(viewableItems, "clips"),
-    },
-  ]).current;
-
-  const { togglePostLike, followPostAuthor } = usePostInteractions();
-
-  const engagementFor = (clip: Clip): ClipEngagement => ({ liked: clip.liked, likes: clip.likes, isFollowing: clip.isFollowingAuthor });
-
-  const toggleLikeOnClip = (clip: Clip) => togglePostLike(clip);
-
-  const likeClipWithDoubleTap = (clip: Clip) => {
-    if (clip.sponsored) return;
-    if (!clip.liked) toggleLikeOnClip(clip);
-  };
-
-  const toggleFollowOnClipAuthor = (clip: Clip) => {
-    if (!clip.isFollowingAuthor) followPostAuthor(clip);
-  };
-
-  const { offerSendInChat, sendInChatElement } = useShareToChat();
-
-  const shareClipLink = async (clip: Clip) => {
-    await Share.share({ message: webAppLinks.clip(clip.id) }).catch(() => undefined);
-    clipsService.recordClipShare(clip.id).catch(() => undefined);
-  };
-
   useEffect(() => {
     if (shouldShowClipGestureTips(myUserId)) setShowGestureTips(true);
   }, [myUserId]);
@@ -170,80 +94,16 @@ export function ClipsScreen({ navigation, route }: ClipsScreenProps) {
     setShowGestureTips(false);
   };
 
-  const keepActiveClipWhenPageHeightChanges = (nextHeight: number) => {
-    if (nextHeight === pageHeight) return;
-    ignoreViewabilityUntilRef.current = Date.now() + PAGE_RESIZE_SETTLE_MS;
-    setPageHeight(nextHeight);
-  };
-
-  useEffect(() => {
-    const previousHeight = previousPageHeightRef.current;
-    previousPageHeightRef.current = pageHeight;
-    if (pageHeight === 0 || previousHeight === 0) return;
-    const anchoredIndex = activeClipIndexRef.current;
-    const frame = requestAnimationFrame(() => clipsListRef.current?.scrollToOffset({ offset: anchoredIndex * pageHeight, animated: false }));
-    return () => cancelAnimationFrame(frame);
-  }, [pageHeight]);
-
-  const isPlaybackAllowed = isScreenFocused && isAppInForeground && commentsForClipId === null;
-
-  useEffect(() => {
-    if (!isPlaybackAllowed || isMuted) return;
-    claimAudioFocusForVideoPlayback();
-  }, [isPlaybackAllowed, isMuted]);
-
   return (
-    <View style={styles.root} onLayout={(e) => keepActiveClipWhenPageHeightChanges(e.nativeEvent.layout.height)}>
-      {sendInChatElement}
-      {pageHeight > 0 ? (
-        <FlatList
-          key={`clips-list-opened-at-${clipIndexToOpenListAt}`}
-          ref={clipsListRef}
-          initialScrollIndex={clipIndexToOpenListAt}
-          data={clips}
-          keyExtractor={(c) => c.id}
-          pagingEnabled
-          snapToInterval={pageHeight}
-          snapToAlignment="start"
-          decelerationRate="fast"
-          disableIntervalMomentum
-          showsVerticalScrollIndicator={false}
-          contentInsetAdjustmentBehavior="never"
-          automaticallyAdjustContentInsets={false}
-          getItemLayout={(_, index) => ({ length: pageHeight, offset: pageHeight * index, index })}
-          initialNumToRender={2}
-          maxToRenderPerBatch={2}
-          windowSize={3}
-          removeClippedSubviews
-          viewabilityConfigCallbackPairs={viewabilityConfigCallbackPairs}
-          onEndReachedThreshold={2}
-          onEndReached={() => {
-            if (clipsFeed.hasNextPage && !clipsFeed.isFetchingNextPage) clipsFeed.fetchNextPage().catch(() => undefined);
-          }}
-          extraData={{ activeClipIndex, isMuted, isPlaybackAllowed }}
-          renderItem={({ item, index }) => (
-            <ClipPage
-              clip={item}
-              height={pageHeight}
-              isActive={isPlaybackAllowed && index === activeClipIndex}
-              shouldMountVideoPlayer={index >= activeClipIndex - 1 && index <= activeClipIndex + NUMBER_OF_UPCOMING_CLIPS_TO_PRELOAD}
-              isMuted={isMuted}
-              topInset={insets.top}
-              bottomInset={uncoveredBottomInset}
-              engagement={engagementFor(item)}
-              myAvatarUrl={myAvatarUrl}
-              onToggleMute={toggleMute}
-              onToggleLike={() => toggleLikeOnClip(item)}
-              onLikeByDoubleTap={() => likeClipWithDoubleTap(item)}
-              onToggleFollow={() => toggleFollowOnClipAuthor(item)}
-              onOpenComments={() => setCommentsForClipId(item.id)}
-              onShare={() => offerSendInChat({ kind: "clip", id: item.id }, () => shareClipLink(item))}
-              onPressAuthor={() => openUserProfile(item.author.id)}
-              onOpenPromotedLive={(liveSessionId) => navigation.navigate("Live", { liveId: liveSessionId })}
-            />
-          )}
-        />
-      ) : null}
+    <View style={styles.root} onLayout={(e) => pager.keepActiveClipWhenPageHeightChanges(e.nativeEvent.layout.height)}>
+      <ClipPagerList
+        pager={pager}
+        clips={clips}
+        listKeyPrefix="clips-list"
+        onEndReached={() => {
+          if (clipsFeed.hasNextPage && !clipsFeed.isFetchingNextPage) clipsFeed.fetchNextPage().catch(() => undefined);
+        }}
+      />
       {clips.length === 0 ? (
         <ClipsFeedState
           tab={tab}
@@ -252,9 +112,10 @@ export function ClipsScreen({ navigation, route }: ClipsScreenProps) {
           isRefetching={clipsFeed.isRefetching}
           onRetry={() => clipsFeed.refetch()}
           onExploreForYou={() => switchFeedTabAndScrollToTop("forYou")}
+          onFollowedCreator={() => void queryClient.invalidateQueries({ queryKey: ["clips", "following"] })}
         />
       ) : null}
-      <View style={[styles.header, { paddingTop: insets.top }]} pointerEvents="box-none">
+      <View style={[styles.header, { paddingTop: pager.insets.top }]} pointerEvents="box-none">
         <ClipsHeader
           tab={tab}
           onChangeTab={switchFeedTabAndScrollToTop}

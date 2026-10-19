@@ -15,6 +15,7 @@ export interface ButtonProps {
   readonly disabled?: boolean;
   readonly loading?: boolean;
   readonly icon?: ReactNode;
+  readonly iconGap?: number;
   readonly height?: number;
   readonly style?: StyleProp<ViewStyle>;
   readonly accessibilityLabel?: string;
@@ -27,6 +28,7 @@ export function Button({
   disabled = false,
   loading = false,
   icon,
+  iconGap,
   height = 44,
   style,
   accessibilityLabel,
@@ -46,7 +48,7 @@ export function Button({
       {loading ? (
         <ActivityIndicator color={look.textColor} />
       ) : (
-        <View style={[styles.row, { gap: icon ? look.gap : 0 }]}>
+        <View style={[styles.row, { gap: icon ? iconGap ?? look.gap : 0 }]}>
           {icon}
           <Text size={look.size} weight={look.weight} lineHeight={look.lineHeight} color={look.textColor}>
             {title}

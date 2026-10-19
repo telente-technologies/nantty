@@ -1,4 +1,5 @@
-import { StyleSheet, View } from "react-native";
+import { ScrollView, StyleSheet, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { Flips34Icon } from "@/components/icons";
 import { BrandLoader } from "@/components/ui/brandLoader";
@@ -7,6 +8,9 @@ import { ErrorState } from "@/components/ui/errorState";
 import { ForcedColorSchemeScope, useTheme } from "@/theme";
 import type { ClipsFeedTab } from "@/types";
 
+import { CLIPS_HEADER_HEIGHT } from "./clipPageLayout.util";
+import { FollowingClipsSuggestions } from "./followingClipsSuggestions";
+
 export interface ClipsFeedStateProps {
   readonly tab: ClipsFeedTab;
   readonly isPending: boolean;
@@ -14,6 +18,7 @@ export interface ClipsFeedStateProps {
   readonly isRefetching: boolean;
   readonly onRetry: () => void;
   readonly onExploreForYou: () => void;
+  readonly onFollowedCreator?: () => void;
 }
 
 function ClipsFeedStateBody({ tab, isPending, isError, isRefetching, onRetry, onExploreForYou }: ClipsFeedStateProps) {
@@ -24,8 +29,8 @@ function ClipsFeedStateBody({ tab, isPending, isError, isRefetching, onRetry, on
   return (
     <EmptyState
       icon={<Flips34Icon size={28} color={colors.textMuted} />}
-      title={isForYou ? "No clips yet" : "Nothing new from people you follow"}
-      body={isForYou ? "Check back soon for fresh clips." : "Follow more creators to fill this feed."}
+      title={isForYou ? "No clips yet" : "Follow people to see their clips here"}
+      body={isForYou ? "Check back soon for fresh clips." : "When people you follow post clips, they'll show up here."}
       actionLabel={isForYou ? "Refresh" : "Watch For You"}
       onAction={isForYou ? onRetry : onExploreForYou}
     />
@@ -33,13 +38,26 @@ function ClipsFeedStateBody({ tab, isPending, isError, isRefetching, onRetry, on
 }
 
 export function ClipsFeedState(props: ClipsFeedStateProps) {
+  const insets = useSafeAreaInsets();
+  const showsFollowingSuggestions = props.tab === "following" && !props.isPending && !props.isError && props.onFollowedCreator !== undefined;
   return (
     <ForcedColorSchemeScope scheme="dark">
-      <View style={styles.root} pointerEvents="box-none">
-        <ClipsFeedStateBody {...props} />
-      </View>
+      {showsFollowingSuggestions ? (
+        <ScrollView style={styles.root} contentContainerStyle={[styles.scrollContent, { paddingTop: insets.top + CLIPS_HEADER_HEIGHT }]}>
+          <ClipsFeedStateBody {...props} />
+          <FollowingClipsSuggestions onFollowedCreator={props.onFollowedCreator!} />
+        </ScrollView>
+      ) : (
+        <View style={[styles.root, styles.centered]} pointerEvents="box-none">
+          <ClipsFeedStateBody {...props} />
+        </View>
+      )}
     </ForcedColorSchemeScope>
   );
 }
 
-const styles = StyleSheet.create({ root: { position: "absolute", top: 0, right: 0, bottom: 0, left: 0, alignItems: "center", justifyContent: "center" } });
+const styles = StyleSheet.create({
+  root: { position: "absolute", top: 0, right: 0, bottom: 0, left: 0 },
+  centered: { alignItems: "center", justifyContent: "center" },
+  scrollContent: { flexGrow: 1, justifyContent: "center", paddingBottom: 32 },
+});

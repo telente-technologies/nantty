@@ -1,7 +1,7 @@
 import type { CreatorEntryRoute } from "@/hooks/useCreatorStatus.hook";
 import type { User } from "@/types";
 
-export type OwnProfileMenuIcon = "seller" | "creator" | "followRequests" | "saved" | "orders" | "wallet" | "verification" | "settings";
+export type OwnProfileMenuIcon = "seller" | "creator" | "ads" | "followRequests" | "saved" | "orders" | "wallet" | "verification" | "settings";
 
 export type OwnProfileMenuRoute =
   | "SellerDashboard"
@@ -11,7 +11,8 @@ export type OwnProfileMenuRoute =
   | "Orders"
   | "Wallet"
   | "Verification"
-  | "Settings";
+  | "Settings"
+  | "AdsHub";
 
 export interface OwnProfileMenuItem {
   readonly key: OwnProfileMenuIcon;
@@ -22,7 +23,7 @@ export interface OwnProfileMenuItem {
 }
 
 export interface OwnProfileMenuInput {
-  readonly profile: Pick<User, "isSeller" | "isPrivate" | "verification">;
+  readonly profile: Pick<User, "isSeller" | "isPrivate" | "verification"> & Partial<Pick<User, "id">>;
   readonly creatorEntry: { readonly label: string; readonly route: CreatorEntryRoute; readonly isLoading: boolean };
   readonly pendingFollowRequests: number;
   readonly hasMoreFollowRequests?: boolean;
@@ -34,6 +35,7 @@ export function buildOwnProfileMenuItems({ profile, creatorEntry, pendingFollowR
   return [
     ...(profile.isSeller ? [{ key: "seller", label: "Seller dashboard", route: "SellerDashboard" } as const] : []),
     { key: "creator", label: creatorEntry.label, route: creatorEntry.route, disabled: creatorEntry.isLoading },
+    { key: "ads", label: "Ads", route: "AdsHub" },
     ...(showFollowRequests ? [{ key: "followRequests", label: "Follow requests", route: "FollowRequests", badge: followRequestsBadge } as const] : []),
     { key: "saved", label: "Saved", route: "Saved" },
     { key: "orders", label: "My orders", route: "Orders" },

@@ -10,6 +10,7 @@ import { ProductMasonry } from "@/components/home/productMasonry";
 import { Frame75132Icon, Frame75232Icon, Frame75332Icon } from "@/components/icons";
 import { StoreProfileHeader } from "@/components/store/storeProfileHeader";
 import { StoreTabs, type StoreTab } from "@/components/store/storeTabs";
+import { Button } from "@/components/ui/button";
 import { Screen } from "@/components/ui/screen";
 import { Text } from "@/components/ui/text";
 import { useTheme } from "@/theme";
@@ -22,6 +23,7 @@ import { ListSkeleton } from "@/components/ui/listSkeleton";
 import { ErrorState } from "@/components/ui/errorState";
 import { useAuthStore } from "@/store/auth.store";
 import { requireAuthThen } from "@/utils/requireAuth.util";
+import { canPromoteStore } from "@/utils/storePromotion.util";
 
 export function StoreScreen({ navigation, route }: MainScreenProps<"Store">) {
   const { colors } = useTheme();
@@ -31,6 +33,7 @@ export function StoreScreen({ navigation, route }: MainScreenProps<"Store">) {
   const [activeTab, setActiveTab] = useState<StoreTab>("products");
   const store = useQuery({ queryKey: ["stores", storeId], queryFn: () => storesService.fetchStoreById(storeId) });
   const products = useQuery({ queryKey: ["products", "store", storeId], queryFn: () => storesService.fetchStoreProducts(storeId) });
+  const myStores = useQuery({ queryKey: ["my-stores"], queryFn: storesService.fetchMyStores, enabled: Boolean(signedInUserId), retry: false, staleTime: 5 * 60_000 });
 
   useEffect(() => {
     void trackProductInteraction("seller.viewed", { storeId });
@@ -90,6 +93,9 @@ export function StoreScreen({ navigation, route }: MainScreenProps<"Store">) {
           }), undefined, "follow shops")}
           onMessage={() => requireAuthThen(() => navigation.navigate("Chat", { storeId, name: detail.name }), undefined, "message sellers")}
         />
+        {canPromoteStore({ storeId, storeOwnerUserId: detail.ownerUserId, signedInUserId, myStores: myStores.data }) ? (
+          <Button variant="subtle" title="Promote store" height={38} style={styles.promote} onPress={() => navigation.navigate("PromoteDestination", { destinationType: "store", targetId: storeId })} />
+        ) : null}
         <StoreTabs active={activeTab} onChange={setActiveTab} />
         <View style={styles.tabBody}>
           {activeTab === "products" ? (
@@ -110,4 +116,5 @@ const styles = StyleSheet.create({
   topActions: { flexDirection: "row", gap: 12 },
   content: { paddingTop: 8, paddingBottom: 24 },
   tabBody: { marginTop: 12 },
+  promote: { marginHorizontal: 16, marginTop: 12 },
 });

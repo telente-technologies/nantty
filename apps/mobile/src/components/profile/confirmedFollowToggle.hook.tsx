@@ -2,6 +2,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useCallback, useRef } from "react";
 
 import { setUserFollowStateEverywhere } from "@/cache/followCache.util";
+import { ApiError } from "@/errors/api.error";
 import { followsService } from "@/services/social/follows.service";
 import { showDialog } from "@/store/dialog.store";
 import { showToast } from "@/store/toast.store";
@@ -25,6 +26,11 @@ export function unfollowConfirmCopy(subjectLabel: string, state: FollowState | u
     : { title: `Unfollow ${subjectLabel}?`, message: "Their posts will no longer show up in your Following feed.", confirm: "Unfollow", keep: "Cancel" };
 }
 
+export function followToggleFailureMessage(error: unknown, attempted: FollowState, subjectLabel: string): string {
+  if (error instanceof ApiError && error.code === "FOLLOW_REQUEST_COOLDOWN") return `You can ask to follow ${subjectLabel} again in a little while.`;
+  return attempted === "none" ? `Couldn't unfollow ${subjectLabel}. Try again.` : `Couldn't follow ${subjectLabel}. Try again.`;
+}
+
 export function useConfirmedFollowToggle() {
   const busy = useRef(false);
 
@@ -35,9 +41,9 @@ export function useConfirmedFollowToggle() {
       const result = await action();
       const confirmed = (result as { state?: FollowState } | undefined)?.state;
       if (confirmed !== undefined && confirmed !== next) request.apply(confirmed);
-    } catch {
+    } catch (error) {
       request.apply(previous);
-      showToast(next === "none" ? `Couldn't unfollow ${request.subjectLabel}. Try again.` : `Couldn't follow ${request.subjectLabel}. Try again.`, { tone: "error" });
+      showToast(followToggleFailureMessage(error, next, request.subjectLabel), { tone: "error" });
     } finally {
       busy.current = false;
       request.onSettled?.();

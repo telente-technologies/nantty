@@ -32,6 +32,7 @@ export function sponsoredPlacementFromDecidedAd(ad: ThreadDecidedAd): SponsoredP
     destination: creative.destination,
     mediaClickable: creative.mediaClickable,
     app: creative.app ?? undefined,
+    promoted: creative.promoted,
     cards: creative.cards?.map((card) => ({
       media: { kind: card.media.kind, url: card.media.url, posterUrl: card.media.posterUrl, width: card.media.width, height: card.media.height },
       headline: card.headline,

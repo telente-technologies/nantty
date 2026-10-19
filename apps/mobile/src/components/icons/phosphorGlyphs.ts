@@ -141,6 +141,7 @@ export const CurrencyNgnIcon: Icon = require("phosphor-react-native/src/icons/Cu
 export const LinkIcon: Icon = require("phosphor-react-native/src/icons/Link").LinkIcon;
 export const SignInIcon: Icon = require("phosphor-react-native/src/icons/SignIn").SignInIcon;
 export const StopCircleIcon: Icon = require("phosphor-react-native/src/icons/StopCircle").StopCircleIcon;
+export const StopIcon: Icon = require("phosphor-react-native/src/icons/Stop").StopIcon;
 export const WarningOctagonIcon: Icon = require("phosphor-react-native/src/icons/WarningOctagon").WarningOctagonIcon;
 export const XCircleIcon: Icon = require("phosphor-react-native/src/icons/XCircle").XCircleIcon;
 export const PaperclipIcon: Icon = require("phosphor-react-native/src/icons/Paperclip").PaperclipIcon;

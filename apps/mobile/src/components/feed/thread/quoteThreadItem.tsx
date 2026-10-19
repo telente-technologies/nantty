@@ -26,8 +26,13 @@ export function QuoteThreadItemRow({ item, onOpen }: { readonly item: QuoteThrea
   );
 }
 
+export function hasQuotesToShow(quoteCount: number | undefined): boolean {
+  return (quoteCount ?? 0) > 0;
+}
+
 export function CommentSectionFilterTabs({ filter, onChange, quoteCount }: { readonly filter: CommentSectionFilter; readonly onChange: (filter: CommentSectionFilter) => void; readonly quoteCount?: number }) {
-  const quotesLabel = quoteCount && quoteCount > 0 ? `Quotes (${formatCountWithThousandsSuffix(quoteCount)})` : "Quotes";
+  if (!hasQuotesToShow(quoteCount)) return null;
+  const quotesLabel = `Quotes (${formatCountWithThousandsSuffix(quoteCount ?? 0)})`;
   return (
     <View style={styles.tabs} accessibilityRole="tablist">
       <Chip kind="filter" label="Replies" selected={filter === "all"} onPress={() => onChange("all")} />

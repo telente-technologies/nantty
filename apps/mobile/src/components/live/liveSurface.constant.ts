@@ -22,7 +22,7 @@ export function buildLiveForeground(isShownOverVideo: boolean, colors: ThemeColo
   return {
     ink: colors.text,
     inkMuted: colors.textMuted,
-    chip: isDark ? "#2C2C2C" : "#F0F2FA",
+    chip: isDark ? "#26282D" : "#F0F2FA",
     chipBorder: isDark ? "rgba(255, 255, 255, 0.10)" : "rgba(10, 10, 20, 0.06)",
     textShadow: undefined,
   };

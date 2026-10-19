@@ -37,6 +37,11 @@ const buildStoriesForUser = (userId: string): Story[] => {
   }));
 };
 
+export const storyRingStatusForMockUser = (userId: string) => {
+  const stories = buildStoriesForUser(userId);
+  return { hasActiveStory: stories.length > 0, hasUnseenStory: userId !== getSignedInMockUser().id && stories.some((story) => !story.seen) };
+};
+
 export const storiesMocks: MockRoute[] = [
   createMockRoute("GET", "/api/v1/stories/tray", () => tray()),
   createMockRoute("GET", "/api/v1/users/:userId/stories", ({ params }) => buildStoriesForUser(params.userId!)),

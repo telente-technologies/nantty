@@ -3,6 +3,8 @@ import { useState } from "react";
 import { Pressable, StyleSheet, View } from "react-native";
 
 import { Check16Icon } from "@/components/icons";
+import { BluePremiumProfilesUpsell } from "@/components/profile/bluePremiumProfilesUpsell";
+import { PremiumLinkedProfiles } from "@/components/profile/premiumLinkedProfiles";
 import { SettingsGroup, SettingsRow } from "@/components/settings/settingsGroup";
 import { SettingsPage } from "@/components/settings/settingsPage";
 import { useStepUpPrompt } from "@/components/wallet/stepUpSheet";
@@ -16,6 +18,7 @@ import type { MainScreenProps } from "@/navigation/navigation.types";
 import { brandsService } from "@/services/sellers/brands.service";
 import { makeThemedStyles, useTheme } from "@/theme";
 import type { LinkedProfileItem, LinkedProfiles } from "@/types/brand.type";
+import { describeBusinessProfileAllowance, shouldOfferBluePremium, usesPremiumProfileLayout } from "@/utils/businessProfileAllowance.util";
 import { showAlertWithButtons } from "@/utils/crossPlatformAlert.util";
 import { brandOf, LINKED_KIND_LABELS, storeOrBusinessOf } from "@/utils/linkedProfiles.util";
 
@@ -25,6 +28,20 @@ export function ManageProfilesScreen({ navigation }: MainScreenProps<"ManageProf
   if (linked.isPending) return <SettingsPage title="Your profiles"><ListSkeleton rows={4} padding={0} /></SettingsPage>;
   if (linked.isError) return <SettingsPage title="Your profiles"><ErrorState error={linked.error} onRetry={() => linked.refetch()} /></SettingsPage>;
   if (linked.data.choiceRequired) return <ChooseProfilesToKeep linked={linked.data} />;
+  if (usesPremiumProfileLayout(linked.data)) {
+    return (
+      <SettingsPage title="Your profiles" gap={24}>
+        <PremiumLinkedProfiles
+          linked={linked.data}
+          onOpenProfile={(item) => (item.storeId ? navigation.navigate("Store", { storeId: item.storeId }) : item.kind === "brand" ? navigation.navigate("BrandProfile", { brandId: item.profileId }) : undefined)}
+          onOpenStore={() => navigation.navigate("SellerApplication")}
+          onCreateBusiness={() => navigation.navigate("CreateBusinessProfile")}
+          onCreateBrand={() => navigation.navigate("CreateBrand")}
+        />
+      </SettingsPage>
+    );
+  }
+  const allowanceText = describeBusinessProfileAllowance(linked.data.businessProfiles);
   const storeOrBusiness = storeOrBusinessOf(linked.data);
   const brand = brandOf(linked.data);
   return (
@@ -32,6 +49,7 @@ export function ManageProfilesScreen({ navigation }: MainScreenProps<"ManageProf
       <Text size={13} lineHeight={18} color={colors.textMuted}>
         Your account can have one Store or one Business page, never both, plus one Brand.
       </Text>
+      {allowanceText ? <Text size={14} weight={500}>{allowanceText}</Text> : null}
       <View style={sectionStyles.section}>
         <Text size={14} weight={500}>Store or Business page</Text>
         {storeOrBusiness ? (
@@ -56,6 +74,7 @@ export function ManageProfilesScreen({ navigation }: MainScreenProps<"ManageProf
           )}
         </SettingsGroup>
       </View>
+      {shouldOfferBluePremium(linked.data) ? <BluePremiumProfilesUpsell /> : null}
     </SettingsPage>
   );
 }

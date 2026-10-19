@@ -5,20 +5,14 @@ import { makeThemedStyles, useTheme } from "@/theme";
 import type { EscrowDetail } from "@/types/commerce.type";
 import { formatMoneyForDisplay } from "@/utils/formatMoney.util";
 
-import { ESCROW_STAGE_APPEARANCE, formatFriendlyDate } from "./escrowStage.util";
+import { describeEscrowRelease, ESCROW_STAGE_APPEARANCE } from "./escrowStage.util";
 import { StatusPill } from "./statusPill";
 
 export function EscrowSummaryCard({ escrow, viewerRole }: { escrow: EscrowDetail; viewerRole: "buyer" | "seller" }) {
   const { colors } = useTheme();
   const styles = useStyles();
   const appearance = ESCROW_STAGE_APPEARANCE[escrow.stage];
-  const releaseLine = escrow.releasedAt
-    ? `Released ${formatFriendlyDate(escrow.releasedAt)}`
-    : escrow.stage === "disputed"
-      ? "Release paused while the dispute is reviewed"
-      : escrow.expectedReleaseAt
-        ? `Expected release: ${formatFriendlyDate(escrow.expectedReleaseAt)}`
-        : "Release date appears once the order ships";
+  const releaseLine = describeEscrowRelease(escrow);
   return (
     <View style={styles.card}>
       <View style={styles.row}>
