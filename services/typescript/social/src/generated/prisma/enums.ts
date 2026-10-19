@@ -156,6 +156,14 @@ export const FollowState = {
 export type FollowState = (typeof FollowState)[keyof typeof FollowState]
 
 
+export const FollowEndedBy = {
+  requester: 'requester',
+  owner: 'owner'
+} as const
+
+export type FollowEndedBy = (typeof FollowEndedBy)[keyof typeof FollowEndedBy]
+
+
 export const PostNotificationLevel = {
   off: 'off',
   posts: 'posts',

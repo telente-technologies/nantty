@@ -106,6 +106,9 @@ func (gateway *PaymentGateway) IsPaymentSettled(ctx context.Context, executor da
 var ErrDirectPayoutDebtOutstanding = errors.New("the seller owes money; the direct payout waits until the debt is cleared")
 
 func (gateway *PaymentGateway) PrepareDirectSellerPayoutInTransaction(ctx context.Context, transaction *sql.Tx, instruction models.SellerPayoutInstruction) (PayoutTransferStatus, error) {
+	if err := gateway.RequireSellerVerifiedForWithdrawal(ctx, instruction.BeneficiaryUserId); err != nil {
+		return PayoutTransferStatus{}, err
+	}
 	if err := gateway.RequireVerificationLevel(ctx, instruction.BeneficiaryUserId, models.VerificationLevelPayout); err != nil {
 		return PayoutTransferStatus{}, err
 	}

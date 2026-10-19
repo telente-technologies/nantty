@@ -9,7 +9,7 @@ export const followRepository = {
   claimFollowState: async (db: Db, existingId: string | undefined, followerId: string, followeeId: string, state: "requested" | "accepted", now: Date): Promise<boolean> => {
     const respondedAt = state === "accepted" ? now : null;
     if (existingId === undefined) return (await db.follow.createMany({ data: [{ followerId, followeeId, state, respondedAt }], skipDuplicates: true })).count === 1;
-    return (await db.follow.updateMany({ where: { id: existingId, state: "rejected" }, data: { state, createdAt: now, respondedAt, postNotifications: "off" } })).count === 1;
+    return (await db.follow.updateMany({ where: { id: existingId, state: "rejected" }, data: { state, createdAt: now, respondedAt, endedBy: null, postNotifications: "off" } })).count === 1;
   },
 
   setPostNotifications: (db: Db, id: string, level: PostNotificationLevel) => db.follow.update({ where: { id }, data: { postNotifications: level } }),
@@ -24,8 +24,8 @@ export const followRepository = {
 
   setState: (db: Db, id: string, state: FollowState, respondedAt: Date) => db.follow.update({ where: { id }, data: { state, respondedAt } }),
 
-  settlePendingRequest: async (db: Db, id: string, state: "accepted" | "rejected", respondedAt: Date) =>
-    (await db.follow.updateMany({ where: { id, state: "requested" }, data: { state, respondedAt } })).count === 1,
+  settlePendingRequest: async (db: Db, id: string, state: "accepted" | "rejected", respondedAt: Date, endedBy: "requester" | "owner" | null = null) =>
+    (await db.follow.updateMany({ where: { id, state: "requested" }, data: { state, respondedAt, endedBy } })).count === 1,
 
   pagePendingRequestsOf: (db: Db, followeeId: string, limit: number) =>
     db.follow.findMany({ where: { followeeId, state: "requested" }, orderBy: { id: "asc" }, take: limit, select: { id: true, followerId: true } }),

@@ -5,6 +5,8 @@ import (
 	"database/sql"
 	"net/http"
 
+	paymentmodels "zudomart/modules/payments/src/modules/gateway/models"
+	"zudomart/modules/wallet/src/configs"
 	"zudomart/modules/wallet/src/generated/ent"
 	"zudomart/modules/wallet/src/generated/ent/withdrawal"
 	"zudomart/platform/httpserver"
@@ -24,7 +26,7 @@ func (withdrawals Withdrawals) LockUserForWithdrawal(ctx context.Context, transa
 	return err
 }
 
-func (withdrawals Withdrawals) enforceWithdrawalLimits(ctx context.Context, transaction *sql.Tx, userId string, account *ent.PayoutAccount, amountMinor int64, currency string, level int) error {
+func (withdrawals Withdrawals) enforceWithdrawalLimits(ctx context.Context, transaction *sql.Tx, userId string, account *ent.PayoutAccount, amountMinor int64, currency string, level int, nameMatchedOnly bool) error {
 	limits := withdrawals.Container.Settings.WithdrawalLimits
 	now := withdrawals.Container.Now().UTC()
 	if limits.NewAccountCooldown > 0 && account.CreatedAt.After(now.Add(-limits.NewAccountCooldown)) {
@@ -56,7 +58,7 @@ func (withdrawals Withdrawals) enforceWithdrawalLimits(ctx context.Context, tran
 			usedToday += row.AmountMinor
 		}
 	}
-	cap, capped := limits.DailyCapFor(level, currency)
+	cap, capped := effectiveWithdrawalDailyCap(limits, level, currency, nameMatchedOnly)
 	if !capped {
 		return ErrWithdrawalNoDailyLimit
 	}
@@ -64,4 +66,15 @@ func (withdrawals Withdrawals) enforceWithdrawalLimits(ctx context.Context, tran
 		return ErrWithdrawalDailyAmount
 	}
 	return nil
+}
+
+func effectiveWithdrawalDailyCap(limits configs.WithdrawalLimits, level int, currency string, nameMatchedOnly bool) (int64, bool) {
+	cap, capped := limits.DailyCapFor(level, currency)
+	if !capped || !nameMatchedOnly || level != paymentmodels.VerificationLevelPayout {
+		return cap, capped
+	}
+	if reduced, ok := limits.NameMatchedOnlyDailyCapFor(currency); ok && reduced < cap {
+		return reduced, true
+	}
+	return cap, true
 }

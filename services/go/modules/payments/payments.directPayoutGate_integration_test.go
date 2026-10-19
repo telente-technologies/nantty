@@ -6,6 +6,7 @@ import (
 	"errors"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/google/uuid"
 
@@ -45,6 +46,9 @@ func TestADirectSalePayoutNeedsPayoutVerificationAConfirmedRecipientAndNoDebt(t 
 	}
 	verified := uuid.NewString()
 	harness.OnboardConnectedAccount(verified, true)
+	if err := gateway.RecordSellerVerification(context.Background(), verified, uuid.NewString(), time.Now()); err != nil {
+		t.Fatal(err)
+	}
 	if err := prepareDirectPayout(harness, verified); err != nil {
 		t.Fatalf("a verified seller with a confirmed recipient is paid: %v", err)
 	}

@@ -2,6 +2,53 @@
 
 Every code change made while fixing `docs/audit/frontend-backend-audit.md` is logged here with file, lines, audit ID, verification, and rollback notes. Investigations that concluded "no change needed" are logged too. Newest first.
 
+## 2026-10-19 — Audit Batch 2: undelivered escrow review, fee-retaining refunds, direct-payout verification, name-matched cap, follow cooldown, locked live
+
+**Audit:** ZM-015 (undelivered deadline, refund-after-release), ZM-016 (direct-payout gate, optional-mode limit), social follow requests (ZM-010/ZM-012), live access (ZM-012)
+**Changes:**
+1. **Undelivered escrow → staff review, never auto-release/refund** (owner decision 3 from ZM-015).
+   - `escrow/.../escrowUndeliveredReview.service.go:22-34`: at the deadline the sweep now calls `moveUndeliveredEscrowToStaffReviewInTransaction`, which sets `undeliveredReviewAt`, clears `autoReleaseAt`, records an `undeliveredReview` event, raises `escrowUndeliveredReview`, and publishes `escrow.underReview`.
+   - `escrowFulfilment.service.go:128`: due held+undelivered rows go to review instead of release.
+   - Staff actions: `GET /api/v1/admin/escrows/undelivered-review` lists the queue; `POST /api/v1/admin/orders/{orderId}/escrow/release` and `.../refund` require `money.disputes.resolve` + single-use step-up (`escrows.routes.go:16-17,24-26`). `ReleaseEscrowAfterStaffReviewInTransaction` refuses a hold that is not under review (`:36-45`); both actions write a `staffDecision` event.
+   - `BackfillUndeliveredReviewDeadlines` gives pre-existing held escrows a deadline, with `dryRun` support; not run automatically.
+   - Tests: `escrow.undeliveredAutoRelease_integration_test.go` — `TestAnUndeliveredEscrowGoesToStaffReviewAndIsNeverAutoReleasedOrAutoRefunded`, `TestTheBackfillGivesLegacyHeldEscrowsAReviewDeadlineOnceAndOnlyWhenApplied`.
+2. **Refund after the seller was paid keeps the platform fees** (owner decision 2).
+   - `escrowWalletClawback.service.go:37-38,73`: when a released escrow is refunded, the clawback takes only `ReleasedToSellerMinor` from the seller and credits that same amount to `RefundedMinor`; the commission and processing fee stay with the platform. Any seller shortfall still becomes wallet debt (`takeFromSellerWallet`).
+   - Terms now match the code: `apps/web/src/content/refundEscrowPolicy.content.ts`, `sellerTerms.content.ts`, `termsOfServiceMoney.content.ts` — removed the "code today refunds in full/returns the fees" caveats, state that the fee is non-refundable, and replace the 30-day caveats with "not released automatically while review is open".
+   - Test: `escrow.refundAfterPayoutKeepsFees_integration_test.go` — `TestARefundAfterTheSellerWasPaidReturnsOnlyTheSellersPortionAndKeepsZudomartsFees`.
+3. **Non-NGN direct-sale payouts require business verification** (owner decision 4).
+   - `payments/.../walletPayouts.service.go:109`: `PrepareDirectSellerPayoutInTransaction` now calls `RequireSellerVerifiedForWithdrawal` before the payout-level check. The helper returns nil when the user has no `OrderPayable` rows, so ordinary wallet users are unaffected.
+   - Fixtures updated: `payments.directPayoutGate_integration_test.go` records `RecordSellerVerification`; `flutterwaveCardAndDirect_test.go` marks the seller business-verified.
+   - Test: `TestADirectSalePayoutNeedsPayoutVerificationAConfirmedRecipientAndNoDebt`.
+4. **A name-matched-only Level 1 bank is capped at ₦100,000/day in optional mode** (owner decision 1).
+   - `wallet/src/configs/withdrawalLimits.config.go:17,23,37,61-75,91-97`: new `NameMatchedOnlyDailyCapMinor` (default `NGN:10000000` = ₦100,000), env `WALLET_WITHDRAWAL_NAME_MATCHED_DAILY_CAPS`, and `ParseCurrencyCaps`.
+   - `withdrawalLimits.service.go:71-80`: `effectiveWithdrawalDailyCap` applies the reduced cap only when the level is `VerificationLevelPayout` (1) and the bank is name-matched only; it takes the lower of the two caps and can never raise a cap.
+   - `requestWithdrawal.handler.go:32,41`: `nameMatchedOnly` is derived from the verification method `payout_account` (NG, bank not BVN-validated); `bank_account`/`smile_id` keep their normal cap.
+   - Tests: `withdrawalLimits.service_test.go` (unit, including the never-raise and default fallbacks) and `wallet.withdrawalSafety_integration_test.go` `TestANameMatchedOnlyLevelOneBankIsCappedAtOneHundredThousandNairaPerDay` (optional mode + deleted validation row → 20,000,000 minor refused, 9,000,000 allowed).
+5. **Follow-request cooldown split: 24h after a decline, 15 min after a self-cancel** (owner decision 5).
+   - `social/prisma/schema/graph.prisma`: `FollowEndedBy` (`requester`/`owner`) and nullable `Follow.endedBy`; migration `20261017120000_follow_ended_by`.
+   - `follow.repository.ts:27-28`: `settlePendingRequest` records who ended it; `claimFollowState` clears `endedBy` on a new request (`:12`).
+   - `followRules.service.ts:15-16,34`: decline → 24h, self-cancel → 15 min; unknown/legacy → 24h (fail closed). Handlers pass `existing?.endedBy`, `owner` on decline, and `requester` on unfollow-while-requested.
+   - Tests: `tests/follows` — 3 files, 73 tests.
+6. **Locked live view strips playback/media/commerce** (Part B).
+   - `liveSessionPresenter.service.go:68-95`: `GetLiveSession` evaluates `DecideLiveAccess`; when not allowed it returns `lockedLiveView`, which clears `PlaybackUrl`, `Media`, `StoreId`, products, pinned product, ad settings, sponsorship line, top supporter and gifts. Private/blocked viewers get 403 (`LIVE_NOT_ACCESSIBLE`).
+   - Test: `restrictedLiveAccess.integration_test.go` — `TestRestrictedLivesOfAPublicHostHandOutNoPlaybackToIneligibleViewers` (followers-only, subscribers-only, guest, blocked; media token + join refused).
+**Verified (real output):**
+- Escrow: `go test -count=1 ./ -run 'TestAnUndelivered…|TestTheBackfill…|TestARefundAfter…'` → `ok zudomart/modules/escrow 10.845s` (all 3 pass).
+- Live: `go test -count=1 ./ -run TestRestrictedLives…` → `ok zudomart/modules/live 0.694s`.
+- Wallet units: `go test -count=1 ./src/configs/... ./src/modules/payouts/services/... -run 'Withdrawal|NameMatched'` → `ok …/configs 0.031s`, `ok …/payouts/services 0.015s`.
+- Wallet integration: `go test -count=1 ./ -run TestANameMatchedOnly…` → `ok zudomart/modules/wallet 1.264s`.
+- Payments: `go test -count=1 ./ -run TestADirectSalePayout…` → `ok zudomart/modules/payments 1.030s`.
+- Social: `pnpm -s vitest run tests/follows` → `Test Files 3 passed (3)`, `Tests 73 passed (73)`; `pnpm -s typecheck` regenerates the Prisma clients and both `tsc` passes are clean.
+- `gofmt` clean on the changed Go files; wallet, payments and escrow build.
+**Rollback:**
+- Revert the Go/TS hunks independently. The follow migration is additive: drop `follows.endedBy`, then `DROP TYPE "FollowEndedBy"`; reverting the cooldown leaves existing `endedBy` values unused.
+- Revert the legal-copy changes with the same commit if the fee policy changes.
+- The name-matched cap is config-driven: `WALLET_WITHDRAWAL_NAME_MATCHED_DAILY_CAPS` can raise it without a code change.
+**Remaining in Batch 2:**
+- ZM-015: a partial chargeback on a released wallet escrow still over-credits the receivable; the release-movement-failure rollback (`released → held`) still drifts from the order service.
+- ZM-016: payout onboarding is still resolve → claim → step in separate transactions (mitigated at payout); the withdrawal verification level is still snapshotted outside the withdrawal transaction.
+
 ## 2026-10-17 — ZM-016 (Part B): debt in the withdrawal tx, payout send claim, refund bank-destination guard, direct-payout gate, dead-lettered mismatches
 
 **Audit:** ZM-016 (all bullets, in order)

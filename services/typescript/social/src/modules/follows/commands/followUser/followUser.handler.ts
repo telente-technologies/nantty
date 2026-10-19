@@ -22,7 +22,7 @@ export function createFollowUserHandler(context: HandlerContext): Handler<Follow
       blockRepository.exists(db, targetId, followerId),
     ]);
     const now = context.clock.now();
-    const decision = decideFollowOutcome({ followerHasBlockedTarget: hasBlocked, followerIsBlockedByTarget: isBlockedBy, targetIsPrivate: privateAccounts.has(targetId), existing: existing?.state, existingEndedAt: existing?.respondedAt, now });
+    const decision = decideFollowOutcome({ followerHasBlockedTarget: hasBlocked, followerIsBlockedByTarget: isBlockedBy, targetIsPrivate: privateAccounts.has(targetId), existing: existing?.state, existingEndedAt: existing?.respondedAt, existingEndedBy: existing?.endedBy, now });
     if (decision.outcome === "refused") throw forbidden("FOLLOW_NOT_ALLOWED", "You can't follow this account");
     if (decision.outcome === "coolingDown") throw tooManyRequests("FOLLOW_REQUEST_COOLDOWN", "You can ask to follow this account again in a little while.");
     if (decision.outcome === "unchanged") return { state: decision.state };

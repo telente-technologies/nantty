@@ -23,7 +23,7 @@ export function createRespondToFollowRequestHandler(context: HandlerContext): Ha
     const now = context.clock.now();
     const [requesterActor, ownerActor] = accepted ? await Promise.all([resolveEventActor(context.directory, request.followerId), resolveEventActor(context.directory, followeeId)]) : [undefined, undefined];
     await context.database.transaction(async (transaction) => {
-      if (!(await followRepository.settlePendingRequest(transaction, request.id, accepted ? "accepted" : "rejected", now))) return;
+      if (!(await followRepository.settlePendingRequest(transaction, request.id, accepted ? "accepted" : "rejected", now, accepted ? null : "owner"))) return;
       await appendDomainEventsToOutbox(transaction, requesterActor !== undefined && ownerActor !== undefined
         ? buildFollowRequestAcceptedEvents({ followId: request.id, followerId: request.followerId, followeeId, occurredAt: now, requesterActor, ownerActor, notifyRequester: true })
         : [{ eventType: socialEventTypes.followRejected, subject: request.id, occurredAt: now, data: { followId: request.id, followerId: request.followerId, followeeId } }]);

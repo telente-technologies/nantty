@@ -109,6 +109,38 @@ func TestWithdrawalVelocityDailyCapAndNewAccountCooldown(t *testing.T) {
 	harness.AssertLedgerHealthy()
 }
 
+func TestANameMatchedOnlyLevelOneBankIsCappedAtOneHundredThousandNairaPerDay(t *testing.T) {
+	harness := startWalletHarness(t, true, withLimits(configs.WithdrawalLimits{
+		MaximumPerDay:                10,
+		DailyCapMinor:                configs.ParseLevelCurrencyCaps("1:NGN:50000000,2:NGN:500000000"),
+		NameMatchedOnlyDailyCapMinor: configs.ParseCurrencyCaps("NGN:10000000"),
+	}))
+	user := uuid.NewString()
+	token, accountId := harness.fundWithdrawableBalance(user, 30_000_000)
+
+	// PAYOUT_BANK_VALIDATION=optional and no completed bank validation means the NG payout
+	// account is only name-matched: method "payout_account" at Level 1.
+	paymentsSchema := harness.Payments.Application.Container.Settings.Money.DatabaseSchema
+	if _, err := harness.Database.Exec(`DELETE FROM "`+paymentsSchema+`".customer_validations WHERE user_id = $1`, user); err != nil {
+		t.Fatal(err)
+	}
+	harness.Payments.Application.Container.Settings.CustomerValidationMode = "optional"
+	level, err := harness.Payments.Application.Gateway.ReadVerificationLevel(context.Background(), user)
+	if err != nil || level.Level != 1 || level.Method == nil || *level.Method != "payout_account" {
+		t.Fatalf("expected a name-matched-only Level 1 account, got %+v %v", level, err)
+	}
+
+	over := harness.withdraw(token, "name-matched-over", accountId, 20_000_000)
+	if over.Status != http.StatusUnprocessableEntity || over.Body["code"] != "WITHDRAWAL_DAILY_AMOUNT_LIMIT" {
+		t.Fatalf("200,000 NGN must exceed the 100,000 NGN name-matched-only cap: %d %s", over.Status, over.Raw)
+	}
+	under := harness.withdraw(token, "name-matched-under", accountId, 9_000_000)
+	if under.Status != http.StatusCreated {
+		t.Fatalf("90,000 NGN is under the name-matched-only cap: %d %s", under.Status, under.Raw)
+	}
+	harness.AssertLedgerHealthy()
+}
+
 func TestConcurrentWithdrawalsRespectTheMinimumGap(t *testing.T) {
 	harness := startWalletHarness(t, true, withLimits(configs.WithdrawalLimits{MaximumPerDay: 3, MinimumGap: 10 * time.Minute}))
 	user := uuid.NewString()

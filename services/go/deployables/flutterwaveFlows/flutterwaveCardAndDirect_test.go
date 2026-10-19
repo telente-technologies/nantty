@@ -90,6 +90,7 @@ func TestGhanaBuyerAndVerifiedGhanaSellerUseDirectModeAndTheSellerIsPaidAfterSet
 	harness := startFlowHarness(t)
 	buyer, seller := harness.newUser("GH"), harness.newUser("GH")
 	harness.markIdentityVerified(seller)
+	harness.markSellerBusinessVerified(seller)
 	harness.OnboardConnectedAccount(seller, true)
 	placed := harness.registerOrder(buyer, seller, 50_000, "GHS", "escrow")
 	harness.initialize(buyer, &placed)

@@ -647,6 +647,13 @@ export type EnumFollowStateFilter<$PrismaModel = never> = {
   not?: Prisma.NestedEnumFollowStateFilter<$PrismaModel> | $Enums.FollowState
 }
 
+export type EnumFollowEndedByNullableFilter<$PrismaModel = never> = {
+  equals?: $Enums.FollowEndedBy | Prisma.EnumFollowEndedByFieldRefInput<$PrismaModel> | null
+  in?: $Enums.FollowEndedBy[] | Prisma.ListEnumFollowEndedByFieldRefInput<$PrismaModel> | null
+  notIn?: $Enums.FollowEndedBy[] | Prisma.ListEnumFollowEndedByFieldRefInput<$PrismaModel> | null
+  not?: Prisma.NestedEnumFollowEndedByNullableFilter<$PrismaModel> | $Enums.FollowEndedBy | null
+}
+
 export type EnumPostNotificationLevelFilter<$PrismaModel = never> = {
   equals?: $Enums.PostNotificationLevel | Prisma.EnumPostNotificationLevelFieldRefInput<$PrismaModel>
   in?: $Enums.PostNotificationLevel[] | Prisma.ListEnumPostNotificationLevelFieldRefInput<$PrismaModel>
@@ -662,6 +669,16 @@ export type EnumFollowStateWithAggregatesFilter<$PrismaModel = never> = {
   _count?: Prisma.NestedIntFilter<$PrismaModel>
   _min?: Prisma.NestedEnumFollowStateFilter<$PrismaModel>
   _max?: Prisma.NestedEnumFollowStateFilter<$PrismaModel>
+}
+
+export type EnumFollowEndedByNullableWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.FollowEndedBy | Prisma.EnumFollowEndedByFieldRefInput<$PrismaModel> | null
+  in?: $Enums.FollowEndedBy[] | Prisma.ListEnumFollowEndedByFieldRefInput<$PrismaModel> | null
+  notIn?: $Enums.FollowEndedBy[] | Prisma.ListEnumFollowEndedByFieldRefInput<$PrismaModel> | null
+  not?: Prisma.NestedEnumFollowEndedByNullableWithAggregatesFilter<$PrismaModel> | $Enums.FollowEndedBy | null
+  _count?: Prisma.NestedIntNullableFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumFollowEndedByNullableFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumFollowEndedByNullableFilter<$PrismaModel>
 }
 
 export type EnumPostNotificationLevelWithAggregatesFilter<$PrismaModel = never> = {
@@ -1285,6 +1302,13 @@ export type NestedEnumFollowStateFilter<$PrismaModel = never> = {
   not?: Prisma.NestedEnumFollowStateFilter<$PrismaModel> | $Enums.FollowState
 }
 
+export type NestedEnumFollowEndedByNullableFilter<$PrismaModel = never> = {
+  equals?: $Enums.FollowEndedBy | Prisma.EnumFollowEndedByFieldRefInput<$PrismaModel> | null
+  in?: $Enums.FollowEndedBy[] | Prisma.ListEnumFollowEndedByFieldRefInput<$PrismaModel> | null
+  notIn?: $Enums.FollowEndedBy[] | Prisma.ListEnumFollowEndedByFieldRefInput<$PrismaModel> | null
+  not?: Prisma.NestedEnumFollowEndedByNullableFilter<$PrismaModel> | $Enums.FollowEndedBy | null
+}
+
 export type NestedEnumPostNotificationLevelFilter<$PrismaModel = never> = {
   equals?: $Enums.PostNotificationLevel | Prisma.EnumPostNotificationLevelFieldRefInput<$PrismaModel>
   in?: $Enums.PostNotificationLevel[] | Prisma.ListEnumPostNotificationLevelFieldRefInput<$PrismaModel>
@@ -1300,6 +1324,16 @@ export type NestedEnumFollowStateWithAggregatesFilter<$PrismaModel = never> = {
   _count?: Prisma.NestedIntFilter<$PrismaModel>
   _min?: Prisma.NestedEnumFollowStateFilter<$PrismaModel>
   _max?: Prisma.NestedEnumFollowStateFilter<$PrismaModel>
+}
+
+export type NestedEnumFollowEndedByNullableWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.FollowEndedBy | Prisma.EnumFollowEndedByFieldRefInput<$PrismaModel> | null
+  in?: $Enums.FollowEndedBy[] | Prisma.ListEnumFollowEndedByFieldRefInput<$PrismaModel> | null
+  notIn?: $Enums.FollowEndedBy[] | Prisma.ListEnumFollowEndedByFieldRefInput<$PrismaModel> | null
+  not?: Prisma.NestedEnumFollowEndedByNullableWithAggregatesFilter<$PrismaModel> | $Enums.FollowEndedBy | null
+  _count?: Prisma.NestedIntNullableFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumFollowEndedByNullableFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumFollowEndedByNullableFilter<$PrismaModel>
 }
 
 export type NestedEnumPostNotificationLevelWithAggregatesFilter<$PrismaModel = never> = {

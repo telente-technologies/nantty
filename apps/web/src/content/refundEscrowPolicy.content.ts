@@ -18,7 +18,7 @@ export const refundEscrowPolicySections: readonly LegalDocumentSection[] = [
       "2. The seller ships and marks the order delivered.",
       "3. You confirm delivery, or escrow releases automatically 3 days after the order is marked delivered if you have not confirmed or opened a dispute.",
       "4. The money moves to the seller's wallet, minus the seller's fees (the escrow fee and the payment processing fee). Buyers never pay an escrow fee. Zudomart takes no commission on products.",
-      "If the order is still not marked delivered 30 days after you paid, our staff review it, contact you and the seller, and decide whether to release the payment or refund you. [Team to confirm: the code releases the payment to the seller automatically at 30 days today; it must be changed to staff review.]",
+      "If the order is still not marked delivered 30 days after you paid, our staff review it, contact you and the seller, and decide whether to release the payment or refund you. The payment is not released automatically while that review is open.",
     ],
   },
   {
@@ -34,7 +34,7 @@ export const refundEscrowPolicySections: readonly LegalDocumentSection[] = [
     heading: "How refunds are paid",
     paragraphs: [
       "Before release, a refund simply unlocks the full amount in your wallet, where you can spend or withdraw it (deposit holds apply to withdrawals). You can also ask for a card refund back to your card.",
-      "After release, if you are refunded after the money reached the seller (for example after a late dispute decision or a return of defective goods), we recover the seller's portion, which is what the seller received, and refund that to you. Zudomart's escrow fee and the payment processing fee are not refunded. Your rights against the seller for the full price under the FCCPA are not affected. [Team to confirm with counsel that this is fair under sections 120 to 122 and 127 of the FCCPA 2018. The code today refunds the buyer in full and returns the fees.]",
+      "After release, if you are refunded after the money reached the seller (for example after a late dispute decision or a return of defective goods), we recover the seller's portion, which is what the seller received, and refund that to you. Zudomart's escrow fee and the payment processing fee are not refunded. Your rights against the seller for the full price under the FCCPA are not affected.",
       "Card refunds can take up to 10 business days to appear, depending on your bank. For some bank transfer payments, we may ask you, in the app, for the account to refund. We never ask for this by email.",
       `If a refund has not arrived after 10 business days, contact support with the order attached, or ${emailAddresses.support}.`,
     ],

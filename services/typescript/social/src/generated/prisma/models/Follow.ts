@@ -31,6 +31,7 @@ export type FollowMinAggregateOutputType = {
   state: $Enums.FollowState | null
   createdAt: Date | null
   respondedAt: Date | null
+  endedBy: $Enums.FollowEndedBy | null
   postNotifications: $Enums.PostNotificationLevel | null
 }
 
@@ -41,6 +42,7 @@ export type FollowMaxAggregateOutputType = {
   state: $Enums.FollowState | null
   createdAt: Date | null
   respondedAt: Date | null
+  endedBy: $Enums.FollowEndedBy | null
   postNotifications: $Enums.PostNotificationLevel | null
 }
 
@@ -51,6 +53,7 @@ export type FollowCountAggregateOutputType = {
   state: number
   createdAt: number
   respondedAt: number
+  endedBy: number
   postNotifications: number
   _all: number
 }
@@ -63,6 +66,7 @@ export type FollowMinAggregateInputType = {
   state?: true
   createdAt?: true
   respondedAt?: true
+  endedBy?: true
   postNotifications?: true
 }
 
@@ -73,6 +77,7 @@ export type FollowMaxAggregateInputType = {
   state?: true
   createdAt?: true
   respondedAt?: true
+  endedBy?: true
   postNotifications?: true
 }
 
@@ -83,6 +88,7 @@ export type FollowCountAggregateInputType = {
   state?: true
   createdAt?: true
   respondedAt?: true
+  endedBy?: true
   postNotifications?: true
   _all?: true
 }
@@ -166,6 +172,7 @@ export type FollowGroupByOutputType = {
   state: $Enums.FollowState
   createdAt: Date
   respondedAt: Date | null
+  endedBy: $Enums.FollowEndedBy | null
   postNotifications: $Enums.PostNotificationLevel
   _count: FollowCountAggregateOutputType | null
   _min: FollowMinAggregateOutputType | null
@@ -197,6 +204,7 @@ export type FollowWhereInput = {
   state?: Prisma.EnumFollowStateFilter<"Follow"> | $Enums.FollowState
   createdAt?: Prisma.DateTimeFilter<"Follow"> | Date | string
   respondedAt?: Prisma.DateTimeNullableFilter<"Follow"> | Date | string | null
+  endedBy?: Prisma.EnumFollowEndedByNullableFilter<"Follow"> | $Enums.FollowEndedBy | null
   postNotifications?: Prisma.EnumPostNotificationLevelFilter<"Follow"> | $Enums.PostNotificationLevel
 }
 
@@ -207,6 +215,7 @@ export type FollowOrderByWithRelationInput = {
   state?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   respondedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  endedBy?: Prisma.SortOrderInput | Prisma.SortOrder
   postNotifications?: Prisma.SortOrder
 }
 
@@ -221,6 +230,7 @@ export type FollowWhereUniqueInput = Prisma.AtLeast<{
   state?: Prisma.EnumFollowStateFilter<"Follow"> | $Enums.FollowState
   createdAt?: Prisma.DateTimeFilter<"Follow"> | Date | string
   respondedAt?: Prisma.DateTimeNullableFilter<"Follow"> | Date | string | null
+  endedBy?: Prisma.EnumFollowEndedByNullableFilter<"Follow"> | $Enums.FollowEndedBy | null
   postNotifications?: Prisma.EnumPostNotificationLevelFilter<"Follow"> | $Enums.PostNotificationLevel
 }, "id" | "followerId_followeeId">
 
@@ -231,6 +241,7 @@ export type FollowOrderByWithAggregationInput = {
   state?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   respondedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  endedBy?: Prisma.SortOrderInput | Prisma.SortOrder
   postNotifications?: Prisma.SortOrder
   _count?: Prisma.FollowCountOrderByAggregateInput
   _max?: Prisma.FollowMaxOrderByAggregateInput
@@ -247,6 +258,7 @@ export type FollowScalarWhereWithAggregatesInput = {
   state?: Prisma.EnumFollowStateWithAggregatesFilter<"Follow"> | $Enums.FollowState
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Follow"> | Date | string
   respondedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Follow"> | Date | string | null
+  endedBy?: Prisma.EnumFollowEndedByNullableWithAggregatesFilter<"Follow"> | $Enums.FollowEndedBy | null
   postNotifications?: Prisma.EnumPostNotificationLevelWithAggregatesFilter<"Follow"> | $Enums.PostNotificationLevel
 }
 
@@ -257,6 +269,7 @@ export type FollowCreateInput = {
   state: $Enums.FollowState
   createdAt?: Date | string
   respondedAt?: Date | string | null
+  endedBy?: $Enums.FollowEndedBy | null
   postNotifications?: $Enums.PostNotificationLevel
 }
 
@@ -267,6 +280,7 @@ export type FollowUncheckedCreateInput = {
   state: $Enums.FollowState
   createdAt?: Date | string
   respondedAt?: Date | string | null
+  endedBy?: $Enums.FollowEndedBy | null
   postNotifications?: $Enums.PostNotificationLevel
 }
 
@@ -277,6 +291,7 @@ export type FollowUpdateInput = {
   state?: Prisma.EnumFollowStateFieldUpdateOperationsInput | $Enums.FollowState
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   respondedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  endedBy?: Prisma.NullableEnumFollowEndedByFieldUpdateOperationsInput | $Enums.FollowEndedBy | null
   postNotifications?: Prisma.EnumPostNotificationLevelFieldUpdateOperationsInput | $Enums.PostNotificationLevel
 }
 
@@ -287,6 +302,7 @@ export type FollowUncheckedUpdateInput = {
   state?: Prisma.EnumFollowStateFieldUpdateOperationsInput | $Enums.FollowState
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   respondedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  endedBy?: Prisma.NullableEnumFollowEndedByFieldUpdateOperationsInput | $Enums.FollowEndedBy | null
   postNotifications?: Prisma.EnumPostNotificationLevelFieldUpdateOperationsInput | $Enums.PostNotificationLevel
 }
 
@@ -297,6 +313,7 @@ export type FollowCreateManyInput = {
   state: $Enums.FollowState
   createdAt?: Date | string
   respondedAt?: Date | string | null
+  endedBy?: $Enums.FollowEndedBy | null
   postNotifications?: $Enums.PostNotificationLevel
 }
 
@@ -307,6 +324,7 @@ export type FollowUpdateManyMutationInput = {
   state?: Prisma.EnumFollowStateFieldUpdateOperationsInput | $Enums.FollowState
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   respondedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  endedBy?: Prisma.NullableEnumFollowEndedByFieldUpdateOperationsInput | $Enums.FollowEndedBy | null
   postNotifications?: Prisma.EnumPostNotificationLevelFieldUpdateOperationsInput | $Enums.PostNotificationLevel
 }
 
@@ -317,6 +335,7 @@ export type FollowUncheckedUpdateManyInput = {
   state?: Prisma.EnumFollowStateFieldUpdateOperationsInput | $Enums.FollowState
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   respondedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  endedBy?: Prisma.NullableEnumFollowEndedByFieldUpdateOperationsInput | $Enums.FollowEndedBy | null
   postNotifications?: Prisma.EnumPostNotificationLevelFieldUpdateOperationsInput | $Enums.PostNotificationLevel
 }
 
@@ -332,6 +351,7 @@ export type FollowCountOrderByAggregateInput = {
   state?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   respondedAt?: Prisma.SortOrder
+  endedBy?: Prisma.SortOrder
   postNotifications?: Prisma.SortOrder
 }
 
@@ -342,6 +362,7 @@ export type FollowMaxOrderByAggregateInput = {
   state?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   respondedAt?: Prisma.SortOrder
+  endedBy?: Prisma.SortOrder
   postNotifications?: Prisma.SortOrder
 }
 
@@ -352,11 +373,16 @@ export type FollowMinOrderByAggregateInput = {
   state?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   respondedAt?: Prisma.SortOrder
+  endedBy?: Prisma.SortOrder
   postNotifications?: Prisma.SortOrder
 }
 
 export type EnumFollowStateFieldUpdateOperationsInput = {
   set?: $Enums.FollowState
+}
+
+export type NullableEnumFollowEndedByFieldUpdateOperationsInput = {
+  set?: $Enums.FollowEndedBy | null
 }
 
 export type EnumPostNotificationLevelFieldUpdateOperationsInput = {
@@ -372,6 +398,7 @@ export type FollowSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   state?: boolean
   createdAt?: boolean
   respondedAt?: boolean
+  endedBy?: boolean
   postNotifications?: boolean
 }, ExtArgs["result"]["follow"]>
 
@@ -382,6 +409,7 @@ export type FollowSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extens
   state?: boolean
   createdAt?: boolean
   respondedAt?: boolean
+  endedBy?: boolean
   postNotifications?: boolean
 }, ExtArgs["result"]["follow"]>
 
@@ -392,6 +420,7 @@ export type FollowSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extens
   state?: boolean
   createdAt?: boolean
   respondedAt?: boolean
+  endedBy?: boolean
   postNotifications?: boolean
 }, ExtArgs["result"]["follow"]>
 
@@ -402,10 +431,11 @@ export type FollowSelectScalar = {
   state?: boolean
   createdAt?: boolean
   respondedAt?: boolean
+  endedBy?: boolean
   postNotifications?: boolean
 }
 
-export type FollowOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "followerId" | "followeeId" | "state" | "createdAt" | "respondedAt" | "postNotifications", ExtArgs["result"]["follow"]>
+export type FollowOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "followerId" | "followeeId" | "state" | "createdAt" | "respondedAt" | "endedBy" | "postNotifications", ExtArgs["result"]["follow"]>
 
 export type $FollowPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "Follow"
@@ -417,6 +447,7 @@ export type $FollowPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs
     state: $Enums.FollowState
     createdAt: Date
     respondedAt: Date | null
+    endedBy: $Enums.FollowEndedBy | null
     postNotifications: $Enums.PostNotificationLevel
   }, ExtArgs["result"]["follow"]>
   composites: {}
@@ -847,6 +878,7 @@ export interface FollowFieldRefs {
   readonly state: Prisma.FieldRef<"Follow", 'FollowState'>
   readonly createdAt: Prisma.FieldRef<"Follow", 'DateTime'>
   readonly respondedAt: Prisma.FieldRef<"Follow", 'DateTime'>
+  readonly endedBy: Prisma.FieldRef<"Follow", 'FollowEndedBy'>
   readonly postNotifications: Prisma.FieldRef<"Follow", 'PostNotificationLevel'>
 }
     

@@ -10,7 +10,7 @@ export function createUnfollowUserHandler(context: HandlerContext): Handler<Unfo
     const existing = await followRepository.find(db, followerId, targetId);
     if (existing === null || existing.state === "rejected") return;
     if (existing.state === "requested") {
-      const withdrawn = await followRepository.settlePendingRequest(db, existing.id, "rejected", context.clock.now());
+      const withdrawn = await followRepository.settlePendingRequest(db, existing.id, "rejected", context.clock.now(), "requester");
       if (withdrawn || (await followRepository.find(db, followerId, targetId))?.state !== "accepted") return;
     }
     await context.database.transaction(async (transaction) => {

@@ -54,7 +54,7 @@ func (withdrawals Withdrawals) QuoteWithdrawal(ctx context.Context, userId strin
 	}, account, nil
 }
 
-func (withdrawals Withdrawals) RequestWithdrawalInTransaction(ctx context.Context, transaction *sql.Tx, userId string, accountId uuid.UUID, amountMinor int64, currency string, providerAvailableMinor int64, level int) (dtos.WithdrawalDto, error) {
+func (withdrawals Withdrawals) RequestWithdrawalInTransaction(ctx context.Context, transaction *sql.Tx, userId string, accountId uuid.UUID, amountMinor int64, currency string, providerAvailableMinor int64, level int, nameMatchedOnly bool) (dtos.WithdrawalDto, error) {
 	quote, account, err := withdrawals.QuoteWithdrawal(ctx, userId, accountId, amountMinor, currency)
 	if err != nil {
 		return dtos.WithdrawalDto{}, err
@@ -65,7 +65,7 @@ func (withdrawals Withdrawals) RequestWithdrawalInTransaction(ctx context.Contex
 	if err := withdrawals.LockUserCashForWithdrawal(ctx, transaction, userId, currency); err != nil {
 		return dtos.WithdrawalDto{}, err
 	}
-	if err := withdrawals.enforceWithdrawalLimits(ctx, transaction, userId, account, amountMinor, currency, level); err != nil {
+	if err := withdrawals.enforceWithdrawalLimits(ctx, transaction, userId, account, amountMinor, currency, level, nameMatchedOnly); err != nil {
 		return dtos.WithdrawalDto{}, err
 	}
 	alreadyReserved, err := withdrawals.sumWithdrawalsNotYetSentToProvider(ctx, transaction, userId, currency)

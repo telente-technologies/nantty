@@ -6,7 +6,7 @@ import { createRespondToFollowRequestHandler } from "../../src/modules/follows/c
 import { createUnfollowUserHandler } from "../../src/modules/follows/commands/unfollowUser/unfollowUser.handler.js";
 import { createGetFollowStatusHandler } from "../../src/modules/follows/queries/getFollowStatus/getFollowStatus.handler.js";
 import { createListFollowRequestsHandler } from "../../src/modules/follows/queries/listFollowRequests/listFollowRequests.handler.js";
-import { followRequestCooldownMs } from "../../src/modules/follows/services/followRules.service.js";
+import { followCancelCooldownMs, followDeclineCooldownMs } from "../../src/modules/follows/services/followRules.service.js";
 import { createContentEventRouter } from "../../src/modules/contentEvents/services/contentEventRouter.service.js";
 import { createMemoryStore, type Row } from "../comments/memoryDb.fake.js";
 
@@ -57,7 +57,7 @@ describe("following a private account", () => {
     expect(await world.pendingRequestId()).toBeUndefined();
     await expect(world.respond({ followeeId: ownerId, requestId, decision: "accept" })).rejects.toMatchObject({ status: 409 });
     await expect(world.follow({ followerId: requesterId, targetId: ownerId })).rejects.toMatchObject({ status: 429, code: "FOLLOW_REQUEST_COOLDOWN" });
-    world.advance(followRequestCooldownMs + 1000);
+    world.advance(followCancelCooldownMs + 1000);
     expect(await world.follow({ followerId: requesterId, targetId: ownerId })).toEqual({ state: "requested" });
     expect(world.eventsOfType("followRequest.created")).toHaveLength(2);
   });
@@ -97,7 +97,7 @@ describe("following a private account", () => {
     expect(world.eventsOfType("follow.rejected")).toHaveLength(1);
     expect(world.eventsOfType("followRequest.accepted")).toHaveLength(0);
     await expect(world.follow({ followerId: requesterId, targetId: ownerId })).rejects.toMatchObject({ status: 429 });
-    world.advance(followRequestCooldownMs - 60_000);
+    world.advance(followDeclineCooldownMs - 60_000);
     await expect(world.follow({ followerId: requesterId, targetId: ownerId })).rejects.toMatchObject({ status: 429 });
     world.advance(120_000);
     expect(await world.follow({ followerId: requesterId, targetId: ownerId })).toEqual({ state: "requested" });

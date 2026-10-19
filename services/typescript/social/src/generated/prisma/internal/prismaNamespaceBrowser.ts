@@ -472,6 +472,7 @@ export const FollowScalarFieldEnum = {
   state: 'state',
   createdAt: 'createdAt',
   respondedAt: 'respondedAt',
+  endedBy: 'endedBy',
   postNotifications: 'postNotifications'
 } as const
 

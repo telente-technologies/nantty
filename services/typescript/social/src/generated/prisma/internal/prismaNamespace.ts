@@ -4040,6 +4040,7 @@ export const FollowScalarFieldEnum = {
   state: 'state',
   createdAt: 'createdAt',
   respondedAt: 'respondedAt',
+  endedBy: 'endedBy',
   postNotifications: 'postNotifications'
 } as const
 
@@ -4612,6 +4613,20 @@ export type EnumFollowStateFieldRefInput<$PrismaModel> = FieldRefInputType<$Pris
  */
 export type ListEnumFollowStateFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'FollowState[]'>
     
+
+
+/**
+ * Reference to a field of type 'FollowEndedBy'
+ */
+export type EnumFollowEndedByFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'FollowEndedBy'>
+
+
+
+/**
+ * Reference to a field of type 'FollowEndedBy[]'
+ */
+export type ListEnumFollowEndedByFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'FollowEndedBy[]'>
+
 
 
 /**

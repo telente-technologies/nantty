@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { decideFollowOutcome, decideProfileVisibility, deriveViewerFollowState } from "../../src/modules/follows/services/followRules.service.js";
+import { decideFollowOutcome, decideProfileVisibility, deriveViewerFollowState, followCancelCooldownMs, followDeclineCooldownMs } from "../../src/modules/follows/services/followRules.service.js";
 
 const open = { followerIsBlockedByTarget: false, followerHasBlockedTarget: false, targetIsPrivate: false, existing: undefined } as const;
 
@@ -17,6 +17,14 @@ describe("decideFollowOutcome", () => {
   });
   it("lets a rejected follower ask again", () => {
     expect(decideFollowOutcome({ ...open, targetIsPrivate: true, existing: "rejected" })).toEqual({ outcome: "change", state: "requested" });
+  });
+  it("holds a declined requester for a day but a self-cancel for only fifteen minutes", () => {
+    const now = new Date("2026-10-17T12:00:00Z");
+    const rejected = { ...open, targetIsPrivate: true, existing: "rejected" } as const;
+    expect(decideFollowOutcome({ ...rejected, existingEndedBy: "requester", existingEndedAt: new Date(now.getTime() - followCancelCooldownMs + 1000), now })).toEqual({ outcome: "coolingDown", retryAfterSeconds: 1 });
+    expect(decideFollowOutcome({ ...rejected, existingEndedBy: "requester", existingEndedAt: new Date(now.getTime() - followCancelCooldownMs - 1000), now })).toEqual({ outcome: "change", state: "requested" });
+    expect(decideFollowOutcome({ ...rejected, existingEndedBy: "owner", existingEndedAt: new Date(now.getTime() - followCancelCooldownMs - 1000), now })).toMatchObject({ outcome: "coolingDown" });
+    expect(decideFollowOutcome({ ...rejected, existingEndedBy: "owner", existingEndedAt: new Date(now.getTime() - followDeclineCooldownMs - 1000), now })).toEqual({ outcome: "change", state: "requested" });
   });
   it("refuses when either side blocked", () => {
     expect(decideFollowOutcome({ ...open, followerHasBlockedTarget: true })).toEqual({ outcome: "refused" });

@@ -8,10 +8,12 @@ export interface FollowDecisionInput {
   readonly targetIsPrivate: boolean;
   readonly existing: StoredFollowState | undefined;
   readonly existingEndedAt?: Date | null;
+  readonly existingEndedBy?: "requester" | "owner" | null;
   readonly now?: Date;
 }
 
-export const followRequestCooldownMs = 15 * 60 * 1000;
+export const followCancelCooldownMs = 15 * 60 * 1000;
+export const followDeclineCooldownMs = 24 * 60 * 60 * 1000;
 
 export type FollowDecision =
   | { readonly outcome: "refused" }
@@ -29,7 +31,8 @@ export function decideFollowOutcome(input: FollowDecisionInput): FollowDecision 
 
 function remainingFollowRequestCooldownMs(input: FollowDecisionInput): number {
   if (input.existing !== "rejected" || input.existingEndedAt === undefined || input.existingEndedAt === null || input.now === undefined) return 0;
-  return Math.max(0, input.existingEndedAt.getTime() + followRequestCooldownMs - input.now.getTime());
+  const window = input.existingEndedBy === "requester" ? followCancelCooldownMs : followDeclineCooldownMs;
+  return Math.max(0, input.existingEndedAt.getTime() + window - input.now.getTime());
 }
 
 export type FollowRequestResponse = "accept" | "reject";
