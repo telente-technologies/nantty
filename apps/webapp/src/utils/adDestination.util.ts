@@ -33,7 +33,7 @@ const internalHref = (destination: AdDestination): string | null => {
     case "profile":
       return `/user/${targetId}`;
     case "store":
-      return `/mart?store=${targetId}`;
+      return `/store/${targetId}`;
     default:
       return null;
   }

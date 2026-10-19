@@ -112,6 +112,7 @@ export type NotificationCategory = "orders" | "social" | "system";
 
 export interface CategorizedNotification extends AppNotification {
   readonly category: NotificationCategory;
+  readonly kind?: string;
 }
 
 export type EscrowStage =
@@ -123,6 +124,7 @@ export type EscrowStage =
   | "buyer_confirmed"
   | "released_to_seller"
   | "disputed"
+  | "under_review"
   | "refunded";
 
 export interface ShipmentDetails {
@@ -153,6 +155,9 @@ export interface EscrowDetail {
   readonly releasedAt: ISODate | null;
   readonly refundedAt: ISODate | null;
   readonly disputeId: ID | null;
+  readonly undeliveredReviewAt?: ISODate | null;
+  readonly refundedAmount?: Money;
+  readonly feesKeptOnRefund?: Money;
 }
 
 export interface EscrowHold {
@@ -224,3 +229,10 @@ export interface ResolvedBankAccount {
 }
 
 export type ProductCollection = "sales_of_the_day" | "featured_brands" | "new_arrivals";
+
+export interface MyStoreSummary {
+  readonly storeId: string;
+  readonly storeName: string;
+  readonly role: string;
+  readonly isCurrent: boolean;
+}

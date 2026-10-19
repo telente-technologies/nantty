@@ -1,3 +1,5 @@
+import { describeProfileLimitError } from "./businessProfileAllowance.util";
+
 export const limitErrorCodes = ["SELLER_DEBT_LIMIT", "PAYMENT_AMOUNT_OUT_OF_RANGE", "WALLET_DAILY_LIMIT"] as const;
 
 type Details = Readonly<Record<string, unknown>> | null | undefined;
@@ -38,5 +40,5 @@ export function describeLimitError(code: string | null | undefined, details: Det
     if (minimum) return `The smallest payment here is ${minimum}.`;
     return "This amount can't be paid in one payment.";
   }
-  return null;
+  return describeProfileLimitError(code);
 }

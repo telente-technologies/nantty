@@ -39,7 +39,10 @@ function readAll(storage: AttributionStorage | null): Record<string, StoredSaleA
 export function rememberSaleAttribution(productId: string, attribution: SaleAttribution, expiresAt = Date.now() + defaultWindowMilliseconds, storage = browserStorage()): void {
   if (!storage || !productId || !attribution.id || !attributionSources.includes(attribution.source)) return;
   const now = Date.now();
-  const kept = Object.entries(readAll(storage)).filter(([key, stored]) => key !== productId && stored.expiresAt > now).slice(-(maximumRememberedProducts - 1));
+  const all = readAll(storage);
+  const current = all[productId];
+  if (current && current.expiresAt > now && (current.source !== attribution.source || current.id !== attribution.id)) return;
+  const kept = Object.entries(all).filter(([key, stored]) => key !== productId && stored.expiresAt > now).slice(-(maximumRememberedProducts - 1));
   try {
     storage.setItem(storageKey, JSON.stringify(Object.fromEntries([...kept, [productId, { source: attribution.source, id: attribution.id, expiresAt }]])));
   } catch {
@@ -57,4 +60,19 @@ export const attributionSourceForPostKind = (kind: string | null | undefined): S
 
 export function appendAffiliateParameter(path: string, affiliateLinkId: string | undefined): string {
   return affiliateLinkId && /^[A-Za-z0-9_-]{1,80}$/.test(affiliateLinkId) ? `${path}${path.includes("?") ? "&" : "?"}aff=${affiliateLinkId}` : path;
+}
+
+const visitorIdKey = "zudomart.visitorId";
+
+export function readOrCreateVisitorId(storage = browserStorage()): string | null {
+  try {
+    const existing = storage?.getItem(visitorIdKey);
+    if (existing && /^[A-Za-z0-9-]{8,80}$/.test(existing)) return existing;
+    if (!storage || typeof crypto === "undefined" || typeof crypto.randomUUID !== "function") return null;
+    const created = crypto.randomUUID();
+    storage.setItem(visitorIdKey, created);
+    return created;
+  } catch {
+    return null;
+  }
 }

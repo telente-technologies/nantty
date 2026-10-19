@@ -9,6 +9,7 @@ import { showToast } from "@/components/ui/toast";
 import { followsService } from "@/services/posts.service";
 import type { FollowState } from "@/types";
 import { createFollowToggleRunner, setFollowStateEverywhere, type FollowConfirmationCopy } from "@/utils/followToggle.util";
+import { followFailureMessage } from "@/utils/profileLock.util";
 
 export const confirmFollowChange = (copy: FollowConfirmationCopy) =>
   requestConfirmation({ ...copy, intent: "unfollow" });
@@ -19,9 +20,10 @@ interface UseFollowUserOptions {
   readonly displayName: string;
   readonly initialState: FollowState;
   readonly onStateChange?: (state: FollowState) => void;
+  readonly isPrivate?: boolean;
 }
 
-export function useFollowUser({ userId, username, displayName, initialState, onStateChange }: UseFollowUserOptions) {
+export function useFollowUser({ userId, username, displayName, initialState, onStateChange, isPrivate = false }: UseFollowUserOptions) {
   const queryClient = useQueryClient();
   const [state, setState] = useState<FollowState>(initialState);
   const [isPending, setIsPending] = useState(false);
@@ -45,8 +47,9 @@ export function useFollowUser({ userId, username, displayName, initialState, onS
       setFollowStateEverywhere(queryClient, userId, next);
       onStateChangeRef.current?.(next);
     },
-    onFailed: () => showToast({ text: "Couldn't update follow. Try again.", tone: "error" }),
-  }), [queryClient, userId]);
+    onFailed: (error) => showToast({ text: followFailureMessage(error), tone: "error" }),
+    optimisticFollowState: isPrivate ? "requested" : "accepted",
+  }), [queryClient, userId, isPrivate]);
 
   const toggle = () => requireAuthThen(() => {
     if (runner.isBusy()) return;

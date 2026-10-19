@@ -1,0 +1,32 @@
+.notice {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-8) var(--space-4);
+  text-align: center;
+  border-top: 1px solid var(--color-border);
+}
+
+.lockCircle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 64px;
+  height: 64px;
+  margin-bottom: var(--space-2);
+  border: 2px solid var(--ink-strong);
+  border-radius: 50%;
+  color: var(--ink-strong);
+}
+
+.title {
+  font-size: var(--text-lg);
+  font-weight: 700;
+  color: var(--ink-strong);
+}
+
+.message {
+  font-size: var(--text-sm);
+  color: var(--ink-muted);
+}

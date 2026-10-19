@@ -20,6 +20,7 @@ import styles from "./profileView.module.css";
 const menuIcons: Readonly<Record<OwnProfileMenuKey, ReactNode>> = {
   seller: <AppIcon name="buildingStore20" size={20} />,
   creator: <AppIcon name="videoCamera24" size={20} />,
+  ads: <AppIcon name="rocketLaunch16" size={20} />,
   followRequests: <AppIcon name="userPlus24" size={20} />,
   saved: <AppIcon name="bookmarkSimple24" size={20} />,
   orders: <AppIcon name="package24" size={20} />,
@@ -34,6 +35,7 @@ export function OwnProfileHeaderActions({ profile }: { readonly profile: User })
   const application = useQuery({ queryKey: ["creator", "application"], queryFn: () => creatorProgramService.fetchMyCreatorApplication(), retry: false });
   const followRequests = useQuery({ queryKey: ["followRequests", "me"], queryFn: () => followsService.listMyFollowRequests(), retry: false });
   const items = buildOwnProfileMenuItems({
+    userId: profile.id,
     isSeller: profile.isSeller === true,
     isPrivate: profile.isPrivate === true,
     verificationBadgeVisible: profile.verification?.badgeVisible === true,

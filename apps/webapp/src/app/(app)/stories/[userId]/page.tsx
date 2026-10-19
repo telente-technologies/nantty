@@ -31,10 +31,10 @@ export default function StoryViewerPage() {
     setIndex(0);
   }, [userId]);
   useEffect(() => {
-    if (current && !current.seen) {
+    if (current && !current.seen && viewer) {
       void storiesService.markStoryAsSeen(current.id).catch(() => undefined);
     }
-  }, [current]);
+  }, [current, viewer]);
   useEffect(() => {
     if (list.length <= 1) return;
     const timer = window.setTimeout(() => setIndex((value) => Math.min(value + 1, list.length - 1)), 8000);
@@ -43,7 +43,7 @@ export default function StoryViewerPage() {
   const viewers = useQuery({
     queryKey: ["stories", current?.id, "viewers"],
     queryFn: () => storiesService.fetchStoryViewers(current!.id),
-    enabled: !!current,
+    enabled: !!current && viewer?.id === current.author.id,
     retry: false,
   });
   if (stories.isLoading) return <ListRowsSkeleton label="Loading story" rows={3} />;

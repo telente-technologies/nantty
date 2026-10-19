@@ -8,11 +8,37 @@
   background: var(--surface-app);
 }
 
+.topBar {
+  display: flex;
+  justify-content: flex-end;
+  min-height: var(--control-md);
+  align-items: center;
+}
+
+.skip {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--control-sm);
+  padding-inline: var(--space-2);
+  border-radius: var(--radius-pill);
+  color: var(--ink-strong);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.skip:hover {
+  background: var(--color-surface-hover);
+}
+
+.skip:focus-visible {
+  outline: 2px solid var(--color-brand);
+  outline-offset: 2px;
+}
 
 .photoRows {
   display: grid;
   gap: var(--space-4);
-  margin-top: 64px;
+  margin-top: 22px;
   overflow: hidden;
 }
 
@@ -84,6 +110,6 @@
   }
 
   .photoRows {
-    margin-top: 48px;
+    margin-top: 8px;
   }
 }

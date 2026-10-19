@@ -1,6 +1,6 @@
 import type { CreatorProgramStatus } from "@/types";
 
-export type OwnProfileMenuKey = "seller" | "creator" | "followRequests" | "saved" | "orders" | "wallet" | "verification" | "settings";
+export type OwnProfileMenuKey = "seller" | "creator" | "ads" | "followRequests" | "saved" | "orders" | "wallet" | "verification" | "settings";
 
 export interface OwnProfileMenuItem {
   readonly key: OwnProfileMenuKey;
@@ -25,6 +25,7 @@ export function resolveCreatorEntry(creatorStatus: CreatorProgramStatus | undefi
 }
 
 export interface OwnProfileMenuInput {
+  readonly userId?: string;
   readonly isSeller: boolean;
   readonly isPrivate: boolean;
   readonly verificationBadgeVisible: boolean;
@@ -39,6 +40,7 @@ export function buildOwnProfileMenuItems({ isSeller, isPrivate, verificationBadg
   return [
     ...(isSeller ? [{ key: "seller", label: "Seller dashboard", href: "/seller" } as const] : []),
     { key: "creator", label: creatorEntry.label, href: creatorEntry.href, disabled: creatorEntry.isLoading },
+    { key: "ads", label: "Ads", href: "/ads" },
     ...(showFollowRequests ? [{ key: "followRequests", label: "Follow requests", href: "/me/follow-requests", badge: followRequestsBadge } as const] : []),
     { key: "saved", label: "Saved", href: "/saved" },
     { key: "orders", label: "My orders", href: "/orders" },

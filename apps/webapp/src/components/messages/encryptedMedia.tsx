@@ -3,6 +3,8 @@
 import { type AttachmentPointer, decryptAttachment } from "@zudomart/chat-crypto";
 import { useEffect, useState } from "react";
 
+import { VoiceNoteBubble } from "./voiceNoteBubble";
+
 const decryptedUrls = new Map<string, Promise<string>>();
 
 function decryptToObjectUrl(cacheKey: string, url: string, pointer: AttachmentPointer): Promise<string> {
@@ -37,11 +39,23 @@ export function useDecryptedMediaUrl(cacheKey: string, url: string | null | unde
   return state.url ? state : { url: pointer.thumbnail && !state.failed ? `data:image/jpeg;base64,${pointer.thumbnail}` : null, failed: state.failed };
 }
 
-export function EncryptedMedia({ cacheKey, type, url, pointer, className }: { readonly cacheKey: string; readonly type: "image" | "video" | "voice"; readonly url: string | null; readonly pointer: AttachmentPointer | null | undefined; readonly className?: string }) {
+interface EncryptedMediaProps {
+  readonly cacheKey: string;
+  readonly type: "image" | "video" | "voice";
+  readonly url: string | null;
+  readonly pointer: AttachmentPointer | null | undefined;
+  readonly className?: string;
+  readonly isMine?: boolean;
+  readonly durationSeconds?: number;
+}
+
+export function EncryptedMedia({ cacheKey, type, url, pointer, className, isMine = false, durationSeconds }: EncryptedMediaProps) {
   const resolved = useDecryptedMediaUrl(cacheKey, url, pointer);
   if (resolved.failed) return <p className={className}>This attachment couldn&apos;t be decrypted.</p>;
+  if (type === "voice") {
+    return <VoiceNoteBubble mediaId={cacheKey} source={resolved.url} durationSeconds={pointer?.durationSeconds ?? durationSeconds ?? 0} waveformPeaks={pointer?.waveform} isMine={isMine} />;
+  }
   if (!resolved.url) return null;
   if (type === "image") return <img src={resolved.url} alt="Photo" className={className} loading="lazy" />;
-  if (type === "voice") return <audio src={resolved.url} controls className={className} preload="metadata" />;
   return <video src={resolved.url} controls className={className} preload="metadata" />;
 }

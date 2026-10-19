@@ -45,12 +45,12 @@ export default function WalletPayoutsPage() {
     onError: showMutationError,
   });
   const removeAccount = useMutation({
-    mutationFn: (id: string) => walletsService.removePayoutAccount(id),
+    mutationFn: (id: string) => withStepUp((stepUpToken) => walletsService.removePayoutAccount(id, stepUpToken)),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ["wallet", "payout-accounts"] });
       showToast({ text: "Payout account removed" });
     },
-    onError: (mutationError) => setError(readErrorMessageForDisplay(mutationError)),
+    onError: showMutationError,
   });
   const withdrawalAccountId = selectedAccountId ?? accounts.data?.[0]?.id ?? null;
   const withdrawalAmountMinor = parseMajorAmountToMinorUnits(amountText) ?? 0;

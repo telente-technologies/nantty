@@ -15,7 +15,9 @@ import styles from "./commentsPanel.module.css";
 
 export function CommentsPanel({ postId, postAuthorId, totalComments, quoteCount }: { readonly postId: string; readonly postAuthorId?: string; readonly totalComments: number; readonly quoteCount?: number }) {
   const panelRef = useRef<HTMLElement | null>(null);
-  const [filter, setFilter] = useState<CommentSectionFilter>("all");
+  const [chosenFilter, setFilter] = useState<CommentSectionFilter>("all");
+  const hasQuotes = (quoteCount ?? 0) > 0;
+  const filter: CommentSectionFilter = hasQuotes ? chosenFilter : "all";
   const { query: commentsQuery, items: orderedComments, isRestartingFromTop } = useCommentSection(postId, filter, () => panelRef.current?.scrollIntoView({ block: "start" }));
   const listId = `comments-list-${postId}`;
 
@@ -25,7 +27,7 @@ export function CommentsPanel({ postId, postAuthorId, totalComments, quoteCount 
         Comments <span className={styles.count}>{formatCountWithThousandsSuffix(totalComments)}</span>
       </h2>
       <CommentComposer postId={postId} />
-      <UnderlineTabs options={commentSectionFilterOptions(quoteCount)} value={filter} onChange={setFilter} label="Show replies or quotes" panelId={listId} />
+      {hasQuotes ? <UnderlineTabs options={commentSectionFilterOptions(quoteCount)} value={filter} onChange={setFilter} label="Show replies or quotes" panelId={listId} /> : null}
       {commentsQuery.isLoading ? (
         <div className={styles.list}>
           {[0, 1, 2].map((index) => (

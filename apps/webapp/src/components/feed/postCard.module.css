@@ -196,3 +196,7 @@
 .viewQuotes:hover {
   text-decoration: underline;
 }
+
+.doubleTapArea {
+  touch-action: manipulation;
+}

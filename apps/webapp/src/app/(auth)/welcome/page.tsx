@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { ZudomartWordmark } from "@zudomart/web-kit";
 import { useEffect, useState } from "react";
 
@@ -48,6 +49,12 @@ export default function WelcomePage() {
         </div>
       ) : null}
 
+      <div className={styles.topBar}>
+        <Link href="/" className={styles.skip} title="Browse Zudomart without an account">
+          Skip
+        </Link>
+      </div>
+
       <div className={styles.photoRows} aria-hidden="true">
         {PHOTO_ROWS.map((row, rowIndex) => (
           <div key={row.key} className={styles.photoRow} style={{ marginLeft: row.offset }}>
@@ -82,7 +89,7 @@ export default function WelcomePage() {
             window.location.assign(mode === "login" ? "/login" : "/signup");
           }}
         >
-          {mode === "login" ? "Use email" : "Email"}
+          Use email
         </Button>
       </div>
 

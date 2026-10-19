@@ -16,6 +16,7 @@ import { ChatMessagesSkeleton } from "@/components/ui/pageSkeletons";
 import { useSession } from "@/components/providers/sessionProvider";
 import { ChatComposerTools } from "@/components/messages/chatComposerTools";
 import { ChatMessageBubble } from "@/components/messages/chatMessageBubble";
+import { VoiceNoteComposer } from "@/components/messages/voiceNoteComposer";
 import { groupAttributesQueryKey, useConversationDisplay } from "@/components/messages/conversationDisplay.hook";
 import { InboxRequestActions } from "@/components/messages/inboxRequestActions";
 import { useLiveLocationSharing } from "@/components/messages/liveLocationSharing.hook";
@@ -51,6 +52,7 @@ export default function ConversationPage({ params }: { readonly params: Promise<
     setDraftState(value);
   };
   const [reportTarget, setReportTarget] = useState<ChatReportTarget | null>(null);
+  const [isVoiceNoteActive, setIsVoiceNoteActive] = useState(false);
   const bottomRef = useRef<HTMLDivElement | null>(null);
   const listRef = useRef<HTMLDivElement | null>(null);
 
@@ -236,11 +238,13 @@ export default function ConversationPage({ params }: { readonly params: Promise<
       ) : null}
       {isInboxRequest || isChannelReader ? null : (
         <form className={styles.composer} onSubmit={handleSend}>
-          {conversation && viewer?.id ? <ChatComposerTools conversation={conversation} viewerId={viewer.id} sendOptimistically={optimistic.send} /> : null}
-          <label htmlFor="message-draft" className="visuallyHidden">
-            Message
-          </label>
-          <textarea
+          {conversation && viewer?.id && !isVoiceNoteActive ? <ChatComposerTools conversation={conversation} viewerId={viewer.id} sendOptimistically={optimistic.send} /> : null}
+          {isVoiceNoteActive ? null : (
+            <label htmlFor="message-draft" className="visuallyHidden">
+              Message
+            </label>
+          )}
+          {isVoiceNoteActive ? null : <textarea
             id="message-draft"
             className={styles.composerInput}
             rows={1}
@@ -257,10 +261,13 @@ export default function ConversationPage({ params }: { readonly params: Promise<
                 sendDraft();
               }
             }}
-          />
-          <button type="submit" className={styles.sendButton} disabled={!draft.trim()}>
-            Send
-          </button>
+          />}
+          {conversation && viewer?.id ? <VoiceNoteComposer conversation={conversation} viewerId={viewer.id} sendOptimistically={optimistic.send} onActiveChange={setIsVoiceNoteActive} /> : null}
+          {isVoiceNoteActive ? null : (
+            <button type="submit" className={styles.sendButton} disabled={!draft.trim()}>
+              Send
+            </button>
+          )}
         </form>
       )}
       <ChatReportDialog target={reportTarget} messages={messages.filter((message) => !message.deliveryState)} viewerId={viewerId} onClose={() => setReportTarget(null)} />

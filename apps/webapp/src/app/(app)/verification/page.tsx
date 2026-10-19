@@ -5,6 +5,7 @@ import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { ErrorState } from "@/components/ui/feedback";
+import { GoldForBusinessesCard } from "@/components/verification/goldForBusinessesCard";
 import { ListRowsSkeleton } from "@/components/ui/pageSkeletons";
 import { showToast } from "@/components/ui/toast";
 import { readErrorMessageForDisplay } from "@/services/clientApi.service";
@@ -102,6 +103,7 @@ export default function VerificationHubPage() {
         {error ? <p className={styles.error} role="alert">{error}</p> : null}
         <button type="submit" className={styles.primary} disabled={apply.isPending || !planId}>{apply.isPending ? "Starting…" : "Continue to checkout"}</button>
       </form>
+      <GoldForBusinessesCard />
       <div className={styles.links}>
         <Link className={styles.linkButton} href="/settings/verification">Identity verification hub</Link>
       </div>

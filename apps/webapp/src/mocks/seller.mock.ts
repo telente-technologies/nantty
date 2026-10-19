@@ -80,6 +80,10 @@ function validateSellerApplication(input: SellerApplicationInput) {
 export const sellerMocks: MockRoute[] = [
   createMockRoute("GET", "/api/v1/seller/dashboard", ({ query }) => buildSellerDashboard((query.get("period") as SellerDashboardPeriod) ?? "today")),
   createMockRoute("GET", "/api/v1/seller/applications/me", () => applicationsByUserId.get(getSignedInMockUser().id) ?? null),
+  createMockRoute("GET", "/api/v1/seller/stores/mine", () => {
+    const storeId = getSignedInMockUser().storeId;
+    return { data: storeId ? [{ storeId, storeName: "Your store", role: "owner", isCurrent: true }] : [], nextCursor: null };
+  }),
   createMockRoute("POST", "/api/v1/seller/applications", ({ body }) => {
     const existing = applicationsByUserId.get(getSignedInMockUser().id);
     if (existing?.status === "pending") return existing;

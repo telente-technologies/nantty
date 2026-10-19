@@ -1,4 +1,4 @@
-import type { SaleAttribution } from "@/utils/saleAttribution.util";
+import { readOrCreateVisitorId, type SaleAttribution } from "@/utils/saleAttribution.util";
 
 import { sendRequestToWebappServer } from "./clientApi.service";
 
@@ -10,5 +10,5 @@ export interface AffiliateLinkClick {
 }
 
 export const affiliateLinksService = {
-  recordClick: (linkId: string) => sendRequestToWebappServer<AffiliateLinkClick>(`/api/v1/affiliate-links/${encodeURIComponent(linkId)}/clicks`, { method: "POST" }),
+  recordClick: (linkId: string) => sendRequestToWebappServer<AffiliateLinkClick>(`/api/v1/affiliate-links/${encodeURIComponent(linkId)}/clicks`, { method: "POST", body: { visitorId: readOrCreateVisitorId() ?? undefined } }),
 };

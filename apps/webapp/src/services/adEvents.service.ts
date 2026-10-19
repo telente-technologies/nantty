@@ -4,8 +4,10 @@ import { sendRequestToWebappServer } from "./clientApi.service";
 
 const recordedThisSession = new Set<string>();
 
+export const AD_PREVIEW_CAMPAIGN_ID = "ad-preview";
+
 const sendAdEvent = (event: AdEvent) =>
-  sendRequestToWebappServer<void>("/api/v1/ads/events", { method: "POST", body: { events: [{ ...event, occurredAt: new Date().toISOString() }] } }).catch(() => undefined);
+  event.campaignId === AD_PREVIEW_CAMPAIGN_ID ? Promise.resolve(undefined) : sendRequestToWebappServer<void>("/api/v1/ads/events", { method: "POST", body: { events: [{ ...event, occurredAt: new Date().toISOString() }] } }).catch(() => undefined);
 
 export const adEventsService = {
   recordImpressionOncePerSession: (sponsored: SponsoredPlacement, placement: AdPlacement, itemId: ID) => {

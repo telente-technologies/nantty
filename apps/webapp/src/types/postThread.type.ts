@@ -1,4 +1,4 @@
-import type { AdAppInstall, AdClickLinks, AdCreativeType, AdDestination } from "./adCreative.type";
+import type { AdAppInstall, AdClickLinks, AdCreativeType, AdDestination, AdPromotedEntity } from "./adCreative.type";
 import type { Comment, ID, Media, QuotedPostSummary } from "./models.type";
 
 export type ThreadSort = "relevant" | "latest" | "likes";
@@ -63,13 +63,14 @@ export interface ThreadAdCreative {
   readonly mediaClickable?: boolean;
   readonly cards?: readonly ThreadAdCard[];
   readonly app?: AdAppInstall | null;
-  readonly format: "feed_post" | "product";
+  readonly format: "feed_post" | "product" | "store";
   readonly media: readonly ThreadAdCreativeMedia[];
   readonly headline: string;
   readonly primaryText: string;
   readonly callToAction: string;
   readonly destination: AdDestination;
   readonly identity: { readonly name: string; readonly handle: string; readonly avatarUrl: string | null; readonly verifiedBusiness: boolean };
+  readonly promoted?: AdPromotedEntity;
 }
 
 export interface ThreadDecidedAd {

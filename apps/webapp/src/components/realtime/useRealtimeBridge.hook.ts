@@ -5,6 +5,7 @@ import { useEffect } from "react";
 
 import { webappRealtime } from "@/services/realtime/webappRealtime.service";
 import type { CategorizedNotification } from "@/types/commerce.type";
+import { followRequestQueriesToRefresh } from "@/utils/followRequests.util";
 import { readChatEventEffect, readRealtimeNotification, upsertNotification } from "@/utils/realtimeCache.util";
 
 const coalesceMs = 400;
@@ -40,7 +41,7 @@ export function useRealtimeBridge(viewerId: string | null): void {
       const notification = readRealtimeNotification(event);
       if (notification) {
         queryClient.setQueryData<CategorizedNotification[]>(["shell", "notifications"], (current) => upsertNotification(current, notification));
-        refreshSoon([["shell", "notifications"]]);
+        refreshSoon([["shell", "notifications"], ...followRequestQueriesToRefresh(notification)]);
       }
     });
     webappRealtime.setEnabled(true);

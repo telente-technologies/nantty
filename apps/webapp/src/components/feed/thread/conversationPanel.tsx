@@ -53,7 +53,9 @@ const filterOptions = (quoteCount: number) => [
 
 export function ConversationPanel({ post }: { readonly post: Post }) {
   const [sort, setSort] = useState<ThreadSort>("relevant");
-  const [filter, setFilter] = useState<CommentSectionFilter>("all");
+  const [chosenFilter, setFilter] = useState<CommentSectionFilter>("all");
+  const hasQuotes = (post.quotes ?? 0) > 0;
+  const filter: CommentSectionFilter = hasQuotes ? chosenFilter : "all";
   const [replyTarget, setReplyTarget] = useState<ThreadReply | null>(null);
   const [focusedReply, setFocusedReply] = useState<ThreadReply | null>(null);
   const [localReplies, setLocalReplies] = useState<Readonly<Record<string, readonly ThreadReply[]>>>({});
@@ -91,7 +93,7 @@ export function ConversationPanel({ post }: { readonly post: Post }) {
         Replies
       </h2>
       {isOwnPost ? <ReplySettingsControl post={post} /> : null}
-      <UnderlineTabs options={filterOptions(post.quotes ?? 0)} value={filter} onChange={setFilter} label="Show replies or quotes" panelId={panelId} />
+      {hasQuotes ? <UnderlineTabs options={filterOptions(post.quotes ?? 0)} value={filter} onChange={setFilter} label="Show replies or quotes" panelId={panelId} /> : null}
       {filter === "all" ? <UnderlineTabs options={SORT_OPTIONS} value={sort} onChange={setSort} label="Sort replies" panelId={panelId} /> : null}
       {focusedReply ? (
         <div className={panelStyles.focusBar}>

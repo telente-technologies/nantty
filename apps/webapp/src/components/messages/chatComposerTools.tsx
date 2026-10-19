@@ -32,10 +32,8 @@ export function ChatComposerTools({ conversation, viewerId, sendOptimistically }
   const [dialog, setDialog] = useState<"poll" | "location" | null>(null);
   const mediaInput = useRef<HTMLInputElement | null>(null);
   const documentInput = useRef<HTMLInputElement | null>(null);
-  const recorder = useRef<MediaRecorder | null>(null);
-  const [recordingStartedAt, setRecordingStartedAt] = useState<number | null>(null);
 
-  function sendFile(file: File, forcedKind?: OutgoingAttachmentKind, durationSeconds?: number) {
+  function sendFile(file: File, forcedKind?: OutgoingAttachmentKind) {
     const kind = forcedKind ?? attachmentKindOf(file);
     setError(null);
     sendOptimistically({ kind, pendingLabel: "Encrypting…" }, async (key, report) => {
@@ -44,7 +42,7 @@ export function ChatComposerTools({ conversation, viewerId, sendOptimistically }
       const thumbnail = isImage ? await buildEncryptedThumbnail(file) : null;
       const uploaded = await uploadEncryptedAttachment(
         file,
-        { contentType: file.type || "application/octet-stream", fileName: kind === "document" ? file.name : null, ...size, thumbnail, durationSeconds: durationSeconds ?? null },
+        { contentType: file.type || "application/octet-stream", fileName: kind === "document" ? file.name : null, ...size, thumbnail, durationSeconds: null },
         kind === "voice" ? "voice" : "chat",
         (fraction) => report(`Uploading ${Math.round(fraction * 100)}%…`),
       );
@@ -52,45 +50,12 @@ export function ChatComposerTools({ conversation, viewerId, sendOptimistically }
     });
   }
 
-  async function toggleRecording() {
-    if (recorder.current) {
-      recorder.current.stop();
-      return;
-    }
-    setError(null);
-    if (typeof MediaRecorder === "undefined" || !navigator.mediaDevices?.getUserMedia) {
-      setError("Voice notes aren't supported in this browser. Attach an audio file instead.");
-      return;
-    }
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      const chunks: Blob[] = [];
-      const started = Date.now();
-      const media = new MediaRecorder(stream);
-      media.ondataavailable = (event) => chunks.push(event.data);
-      media.onstop = () => {
-        stream.getTracks().forEach((track) => track.stop());
-        recorder.current = null;
-        setRecordingStartedAt(null);
-        const type = media.mimeType || "audio/webm";
-        const seconds = Math.max(1, Math.round((Date.now() - started) / 1000));
-        sendFile(new File([new Blob(chunks, { type })], "voice-note", { type }), "voice", seconds);
-      };
-      recorder.current = media;
-      media.start();
-      setRecordingStartedAt(started);
-    } catch {
-      setError("Allow microphone access to record a voice note.");
-    }
-  }
-
-  const menuItems = ["Photo or video", "Document", "Voice note", "Location", "Poll"] as const;
+  const menuItems = ["Photo or video", "Document", "Location", "Poll"] as const;
 
   function selectMenuItem(item: (typeof menuItems)[number]) {
     setIsMenuOpen(false);
     if (item === "Photo or video") mediaInput.current?.click();
     else if (item === "Document") documentInput.current?.click();
-    else if (item === "Voice note") void toggleRecording();
     else setDialog(item === "Location" ? "location" : "poll");
   }
 
@@ -110,11 +75,6 @@ export function ChatComposerTools({ conversation, viewerId, sendOptimistically }
       ) : null}
       <input ref={mediaInput} type="file" accept="image/*,video/*" hidden onChange={(event) => { const file = event.target.files?.[0]; event.target.value = ""; if (file) sendFile(file); }} />
       <input ref={documentInput} type="file" hidden onChange={(event) => { const file = event.target.files?.[0]; event.target.value = ""; if (file) sendFile(file, "document"); }} />
-      {recordingStartedAt !== null ? (
-        <span className={styles.recording} role="status">
-          Recording… <Button size="sm" variant="secondary" onClick={() => recorder.current?.stop()}>Stop and send</Button>
-        </span>
-      ) : null}
       {error ? <p className={styles.error} role="alert">{error}</p> : null}
       <PollDialog isOpen={dialog === "poll"} onClose={() => setDialog(null)} onSubmit={async (draft) => {
         const poll = buildPollDefinition(draft);

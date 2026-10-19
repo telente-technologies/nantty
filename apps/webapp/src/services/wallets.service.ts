@@ -24,8 +24,8 @@ export const walletsService = {
   listMyPayoutAccounts: () => sendListRequestToWebappServer<PayoutAccount>("/api/v1/wallets/me/payout-accounts"),
   addPayoutAccount: (input: { readonly bankCode: string; readonly accountNumber: string }, stepUpToken: string) =>
     sendRequestToWebappServer<PayoutAccount>("/api/v1/wallets/me/payout-accounts", { method: "POST", body: input, stepUpToken }),
-  removePayoutAccount: (payoutAccountId: string) =>
-    sendRequestToWebappServer<void>(`/api/v1/wallets/me/payout-accounts/${encodeURIComponent(payoutAccountId)}`, { method: "DELETE" }),
+  removePayoutAccount: (payoutAccountId: string, stepUpToken: string) =>
+    sendRequestToWebappServer<void>(`/api/v1/wallets/me/payout-accounts/${encodeURIComponent(payoutAccountId)}`, { method: "DELETE", stepUpToken }),
   quoteWithdrawal: (payoutAccountId: string, amountMinor: number, currency: string) =>
     sendRequestToWebappServer<WithdrawalQuote>("/api/v1/wallets/me/withdrawals/quote", { query: { payoutAccountId, amountMinor, currency } }),
   listMyWithdrawals: () => sendListRequestToWebappServer<Withdrawal>("/api/v1/wallets/me/withdrawals"),

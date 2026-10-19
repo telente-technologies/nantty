@@ -38,6 +38,7 @@ export interface FollowSuggestion {
   readonly reason: { readonly code: string; readonly label: string };
   readonly isOfficial: boolean;
   readonly checkmarkTier: string;
+  readonly isPrivate?: boolean;
 }
 
 export interface RankingExplanation {

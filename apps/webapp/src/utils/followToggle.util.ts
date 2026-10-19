@@ -33,6 +33,7 @@ export interface FollowToggleDeps {
   readonly unfollow: () => Promise<unknown>;
   readonly apply: (state: FollowState) => void;
   readonly onFailed: (error: unknown) => void;
+  readonly optimisticFollowState?: "accepted" | "requested";
 }
 
 export interface FollowToggleRunner {
@@ -51,7 +52,7 @@ export function createFollowToggleRunner(deps: FollowToggleDeps): FollowToggleRu
         const action = followToggleActionFor(current);
         const copy = followConfirmationCopy(action, handle);
         if (copy !== null && !(await deps.confirm(copy))) return current;
-        const optimistic: FollowState = action === "follow" ? "accepted" : "none";
+        const optimistic: FollowState = action === "follow" ? deps.optimisticFollowState ?? "accepted" : "none";
         deps.apply(optimistic);
         try {
           if (action === "follow") {

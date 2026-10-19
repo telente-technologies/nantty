@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 
+import { useSession } from "@/components/providers/sessionProvider";
 import { InlineLink } from "@/components/ui/controls";
 import { EmptyState, ErrorState } from "@/components/ui/feedback";
 import { ListRowsSkeleton } from "@/components/ui/pageSkeletons";
@@ -22,6 +23,7 @@ const PERIODS: readonly { readonly key: SellerDashboardPeriod; readonly label: s
 
 export default function SellerDashboardPage() {
   const [period, setPeriod] = useState<SellerDashboardPeriod>("today");
+  const myStoreId = useSession().viewer?.storeId ?? null;
   const dashboard = useQuery({ queryKey: ["seller", "dashboard", period], queryFn: () => sellerService.fetchSellerDashboard(period) });
   const application = useQuery({ queryKey: ["seller", "application"], queryFn: () => sellerService.fetchMySellerApplication(), retry: false });
   if (dashboard.isLoading) return <ListRowsSkeleton label="Loading seller dashboard" rows={6} />;
@@ -52,6 +54,8 @@ export default function SellerDashboardPage() {
         <Link className={styles.linkButton} href="/seller/products">Products</Link>
         <Link className={styles.linkButton} href="/seller/orders">Orders</Link>
         <Link className={styles.linkButton} href="/seller/products/new">Add product</Link>
+        {myStoreId ? <Link className={styles.linkButton} href={`/ads/create?type=store&target=${encodeURIComponent(myStoreId)}`}>Promote store</Link> : null}
+        <Link className={styles.linkButton} href="/ads">Ads</Link>
         <Link className={styles.linkButton} href="/seller/apply">Seller application</Link>
         <Link className={styles.linkButton} href="/wallet/payouts">Payouts</Link>
       </nav>

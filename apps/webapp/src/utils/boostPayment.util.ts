@@ -1,7 +1,7 @@
 import type { BoostOptions, BoostPaymentMethod, FreeBoostAllowance } from "../types/boost.type";
 import type { Money } from "../types/money.type";
 
-const KNOWN_METHODS: readonly BoostPaymentMethod[] = ["card", "balance", "free"];
+const KNOWN_METHODS: readonly BoostPaymentMethod[] = ["card", "ad_balance", "balance", "free"];
 
 export function readBoostPaymentMethods(options: BoostOptions): readonly BoostPaymentMethod[] {
   const listed = Array.isArray(options.paymentMethods) ? options.paymentMethods.filter((method) => KNOWN_METHODS.includes(method)) : [];
@@ -42,6 +42,13 @@ const BOOST_ERROR_MESSAGES: Readonly<Record<string, string>> = {
   VERIFICATION_UNAVAILABLE: "We couldn't check your verification just now. Try again in a moment, or pay by card or bank transfer.",
   INSUFFICIENT_FUNDS: "Your available balance is less than this promotion costs. Pay by card or bank transfer instead.",
   PAYMENT_METHOD_NOT_AVAILABLE_IN_APP: "This way of paying isn't available here. Pay by card or bank transfer instead.",
+  INSUFFICIENT_AD_BALANCE: "Your ad balance is less than this costs. Top up your ad balance or pay by card.",
+  DESTINATION_NOT_OWNED: "You can only promote a post, product, profile or store you own or manage.",
+  DESTINATION_UNAVAILABLE: "This can't be promoted right now because it's suspended or no longer active.",
+  BOOST_STATUS_CHANGE_NOT_ALLOWED: "This ad can't do that in its current state. Refresh to see the latest status.",
+  BOOST_BUDGET_CHANGE_NOT_ALLOWED: "This ad's budget can't be changed now.",
+  BOOST_ENDED: "This ad's end date has passed. Extend it or duplicate it to run again.",
+  IDEMPOTENCY_KEY_REUSED: "This was already sent with different details. Please try again.",
 };
 
 export function boostErrorMessageForCode(code: string | null | undefined): string | null {
@@ -52,5 +59,6 @@ export function describeBoostPaymentMethod(method: string | null | undefined): s
   if (method === "card") return "card or bank transfer";
   if (method === "balance" || method === "wallet") return "your Zudomart balance";
   if (method === "free") return "your free Premium boost";
+  if (method === "ad_balance") return "your ad balance";
   return null;
 }

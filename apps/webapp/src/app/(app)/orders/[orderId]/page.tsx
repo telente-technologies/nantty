@@ -190,6 +190,7 @@ export default function OrderDetailPage({ params }: { readonly params: Promise<{
           <Link href={`/orders/${encodeURIComponent(order.id)}/escrow`} className={styles.escrowNote}>View payment protection</Link>
         )}
         {order.escrowReleaseAt && !isDirect ? <p className={styles.escrowNote}>Escrow releases to the seller on {new Date(order.escrowReleaseAt).toLocaleDateString()}.</p> : null}
+        {order.escrowReleaseAt && isDirect && order.status === "delivered" ? <p className={styles.escrowNote}>This order completes automatically on {new Date(order.escrowReleaseAt).toLocaleDateString()} unless you ask for a return or refund.</p> : null}
       </section>
 
       <section className={styles.panel}>

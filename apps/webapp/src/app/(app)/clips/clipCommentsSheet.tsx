@@ -25,7 +25,9 @@ interface ClipCommentsSheetProps {
 
 export function ClipCommentsSheet({ postId, postAuthorId, totalComments, quoteCount, onClose }: ClipCommentsSheetProps) {
   const listRef = useRef<HTMLDivElement | null>(null);
-  const [filter, setFilter] = useState<CommentSectionFilter>("all");
+  const [chosenFilter, setFilter] = useState<CommentSectionFilter>("all");
+  const hasQuotes = (quoteCount ?? 0) > 0;
+  const filter: CommentSectionFilter = hasQuotes ? chosenFilter : "all";
   const { query: commentsQuery, items: orderedComments, isRestartingFromTop } = useCommentSection(postId, filter, () => listRef.current?.scrollTo({ top: 0 }));
 
   const sheetRef = useRef<HTMLElement | null>(null);
@@ -52,7 +54,7 @@ export function ClipCommentsSheet({ postId, postAuthorId, totalComments, quoteCo
             <CloseIcon size={18} />
           </button>
         </div>
-        <UnderlineTabs options={commentSectionFilterOptions(quoteCount)} value={filter} onChange={setFilter} label="Show replies or quotes" panelId={`clip-comments-${postId}`} />
+        {hasQuotes ? <UnderlineTabs options={commentSectionFilterOptions(quoteCount)} value={filter} onChange={setFilter} label="Show replies or quotes" panelId={`clip-comments-${postId}`} /> : null}
         <div ref={listRef} className={styles.sheetList} id={`clip-comments-${postId}`} role="tabpanel">
           {commentsQuery.isLoading ? (
             [0, 1, 2].map((index) => <Skeleton key={index} height={48} />)

@@ -47,6 +47,9 @@ const KNOWN_LIVES_BY_ID: Readonly<Record<string, { hostId: DirectoryUserId; titl
   ...Object.fromEntries(SUGGESTED_LIVE_SEEDS.map(([hostId, title], index) => [`live_s${index}`, { hostId, title }])),
 };
 
+export const findMockLiveIdForHost = (hostId: string): string | null =>
+  Object.entries(KNOWN_LIVES_BY_ID).find(([, live]) => live.hostId === hostId)?.[0] ?? null;
+
 const findKnownLiveOrDefault = (liveId: string) => KNOWN_LIVES_BY_ID[liveId] ?? DEFAULT_LIVE;
 
 const MOCK_HOST_RANKINGS: Readonly<Record<string, LiveHostRanking>> = {

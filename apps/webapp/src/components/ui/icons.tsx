@@ -3,7 +3,7 @@ import {
   ExportIcon, FileTextIcon, FlagIcon as PhFlag, GearIcon, GiftIcon as PhGift, HeartIcon as PhHeart, LinkSimpleIcon as PhLinkSimple, MonitorIcon as PhMonitor, MoonIcon as PhMoon, PackageIcon as PhPackage,
   PaperPlaneTiltIcon, PauseIcon as PhPause, PhoneIcon as PhPhone, ProhibitIcon as PhProhibit, PushPinIcon as PhPushPin, QuotesIcon, RepeatIcon, ShieldCheckIcon, SignInIcon as PhSignIn, SignOutIcon, SpeakerHighIcon as PhSpeakerHigh, SpeakerXIcon as PhSpeakerX, SunIcon as PhSun, TrendUpIcon,
   UsersIcon, WalletIcon as PhWallet, WarningIcon, BellIcon as PhBell, BellRingingIcon, BellSlashIcon, UserMinusIcon,
-  ArrowClockwiseIcon, ArrowCounterClockwiseIcon, CornersInIcon, CornersOutIcon,
+  ArrowClockwiseIcon, ArrowCounterClockwiseIcon, CornersInIcon, CornersOutIcon, MicrophoneIcon as PhMicrophone, StopIcon as PhStop,
 } from "@phosphor-icons/react/dist/ssr";
 import type { Icon, IconProps as PhosphorIconProps, IconWeight } from "@phosphor-icons/react";
 
@@ -70,6 +70,8 @@ export const GridIcon = createFigmaIcon("squaresFour24");
 export const SendIcon = createFigmaIcon("paperPlaneTilt24");
 
 export const PauseIcon = createIcon(PhPause, "fill");
+export const MicrophoneIcon = createIcon(PhMicrophone, "bold");
+export const StopIcon = createIcon(PhStop, "fill");
 export const SunIcon = createIcon(PhSun);
 export const MoonIcon = createIcon(PhMoon);
 export const MonitorIcon = createIcon(PhMonitor);

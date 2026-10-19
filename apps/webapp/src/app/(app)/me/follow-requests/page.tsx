@@ -11,22 +11,35 @@ import { Avatar } from "@/components/ui/media";
 import { showToast } from "@/components/ui/toast";
 import { readErrorMessageForDisplay } from "@/services/clientApi.service";
 import { followsService } from "@/services/posts.service";
+import type { FollowRequest, Page } from "@/types";
+import { removeFollowRequestFromPage } from "@/utils/followRequests.util";
 import { buildProfilePath } from "@/utils/seoPaths.util";
 
 import styles from "../../user/[userId]/connections/page.module.css";
 
+const followRequestsKey = ["followRequests", "me"] as const;
+
 export default function FollowRequestsPage() {
   const router = useRouter();
   const queryClient = useQueryClient();
-  const requests = useQuery({ queryKey: ["followRequests", "me"], queryFn: () => followsService.listMyFollowRequests(), retry: false });
+  const requests = useQuery({ queryKey: followRequestsKey, queryFn: () => followsService.listMyFollowRequests(), retry: false });
   const settle = useMutation({
-    mutationFn: ({ requestId, approve }: { readonly requestId: string; readonly approve: boolean }) =>
+    mutationFn: ({ requestId, approve }: { readonly requestId: string; readonly approve: boolean; readonly requesterName: string }) =>
       approve ? followsService.acceptFollowRequest(requestId) : followsService.rejectFollowRequest(requestId),
-    onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: ["followRequests"] });
-      void queryClient.invalidateQueries({ queryKey: ["profile", "me"] });
+    onMutate: async ({ requestId }) => {
+      await queryClient.cancelQueries({ queryKey: followRequestsKey });
+      const previous = queryClient.getQueryData<Page<FollowRequest>>(followRequestsKey);
+      queryClient.setQueryData<Page<FollowRequest>>(followRequestsKey, (page) => removeFollowRequestFromPage(page, requestId));
+      return { previous };
     },
-    onError: (error) => showToast({ text: readErrorMessageForDisplay(error), tone: "error" }),
+    onError: (error, { approve, requesterName }, snapshot) => {
+      if (snapshot?.previous) queryClient.setQueryData(followRequestsKey, snapshot.previous);
+      showToast({ text: `Couldn't ${approve ? "confirm" : "delete"} ${requesterName}'s request. ${readErrorMessageForDisplay(error)}`, tone: "error" });
+    },
+    onSettled: (_result, _error, { approve }) => {
+      void queryClient.invalidateQueries({ queryKey: ["followRequests"] });
+      if (approve) void queryClient.invalidateQueries({ queryKey: ["profile", "me"] });
+    },
   });
 
   return (
@@ -53,8 +66,8 @@ export default function FollowRequestsPage() {
                 </span>
               </Link>
               <div className={styles.rowActions}>
-                <Button size="sm" aria-label={`Approve ${request.requester.name}`} disabled={settle.isPending} onClick={() => settle.mutate({ requestId: request.id, approve: true })}>Approve</Button>
-                <Button size="sm" variant="secondary" aria-label={`Decline ${request.requester.name}`} disabled={settle.isPending} onClick={() => settle.mutate({ requestId: request.id, approve: false })}>Decline</Button>
+                <Button size="sm" aria-label={`Confirm ${request.requester.name}'s follow request`} onClick={() => settle.mutate({ requestId: request.id, approve: true, requesterName: request.requester.name })}>Confirm</Button>
+                <Button size="sm" variant="secondary" aria-label={`Delete ${request.requester.name}'s follow request`} onClick={() => settle.mutate({ requestId: request.id, approve: false, requesterName: request.requester.name })}>Delete</Button>
               </div>
             </li>
           ))}

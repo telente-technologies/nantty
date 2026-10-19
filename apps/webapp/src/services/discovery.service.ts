@@ -6,6 +6,8 @@ import { sendRequestToWebappServer, sendListRequestToWebappServer } from "./clie
 export const discoveryService = {
   fetchSuggestedAccounts: async (): Promise<UserSummary[]> =>
     (await sendListRequestToWebappServer<FollowSuggestion>("/api/v1/explore/who-to-follow", { query: { limit: 4 } })).map((suggestion) => suggestion.user),
+  fetchFollowSuggestions: (limit: number) => sendListRequestToWebappServer<FollowSuggestion>("/api/v1/explore/who-to-follow", { query: { limit } }),
+  fetchPeopleYouMayKnow: (limit: number) => sendListRequestToWebappServer<FollowSuggestion>("/api/v1/explore/who-to-follow", { query: { limit, includePrivate: "true" } }),
   fetchTrendingTopics: async (): Promise<TrendingTopic[]> =>
     (await sendRequestToWebappServer<{ items: readonly TrendItem[] }>("/api/v1/explore/trends", { query: { limit: 5 } })).items.map((trend) => ({ tag: trend.label, postCount: trend.postCount, category: trend.categoryLabel })),
   fetchClipsPage: (tab: "forYou" | "following", cursor: string | null) =>

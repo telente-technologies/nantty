@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
-import { appendAffiliateParameter, readSaleAttribution, rememberSaleAttribution } from "./saleAttribution.util";
+import { appendAffiliateParameter, readOrCreateVisitorId, readSaleAttribution, rememberSaleAttribution } from "./saleAttribution.util";
 
 function memoryStorage() {
   const values = new Map<string, string>();
@@ -9,13 +9,22 @@ function memoryStorage() {
 }
 
 describe("sale attribution memory", () => {
-  it("remembers the latest creator touch per product until it expires", () => {
+  it("keeps the first creator touch per product until it expires, and the same creator refreshes it", () => {
     const storage = memoryStorage();
     rememberSaleAttribution("p1", { source: "post", id: "post_1" }, Date.now() + 1000, storage);
     rememberSaleAttribution("p1", { source: "link", id: "link_1" }, Date.now() + 1000, storage);
-    assert.deepEqual(readSaleAttribution("p1", storage), { source: "link", id: "link_1" });
+    assert.deepEqual(readSaleAttribution("p1", storage), { source: "post", id: "post_1" });
+    rememberSaleAttribution("p1", { source: "post", id: "post_1" }, Date.now() + 5000, storage);
+    assert.deepEqual(readSaleAttribution("p1", storage, Date.now() + 3000), { source: "post", id: "post_1" });
     assert.equal(readSaleAttribution("p2", storage), null);
-    assert.equal(readSaleAttribution("p1", storage, Date.now() + 2000), null);
+    assert.equal(readSaleAttribution("p1", storage, Date.now() + 6000), null);
+  });
+
+  it("keeps one random visitor id per browser for click counting", () => {
+    const storage = memoryStorage();
+    const first = readOrCreateVisitorId(storage);
+    assert.match(first ?? "", /^[0-9a-f-]{36}$/);
+    assert.equal(readOrCreateVisitorId(storage), first);
   });
 
   it("ignores unknown sources and corrupt storage", () => {

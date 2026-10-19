@@ -14,6 +14,7 @@ export const ESCROW_STAGE_APPEARANCE: Record<EscrowStage, { readonly label: stri
   buyer_confirmed: { label: "Receipt confirmed", tone: "success" },
   released_to_seller: { label: "Released to seller", tone: "success" },
   disputed: { label: "In dispute", tone: "error" },
+  under_review: { label: "Under review", tone: "warning" },
   refunded: { label: "Refunded", tone: "neutral" },
 };
 
@@ -38,8 +39,8 @@ export const MINIMUM_DISPUTE_DESCRIPTION_LENGTH = 20;
 export const MAXIMUM_DISPUTE_DESCRIPTION_LENGTH = 1000;
 export const MAXIMUM_DISPUTE_EVIDENCE_PHOTOS = 5;
 const REASONS_THAT_NEED_PHOTOS = new Set<DisputeReason>(["damaged", "not_as_described", "wrong_item"]);
-const STAGES_BUYER_CAN_CONFIRM = new Set<EscrowStage>(["shipped", "delivered"]);
-const STAGES_BUYER_CAN_DISPUTE = new Set<EscrowStage>(["seller_preparing", "paid_into_escrow", "shipped", "delivered"]);
+const STAGES_BUYER_CAN_CONFIRM = new Set<EscrowStage>(["shipped", "delivered", "under_review"]);
+const STAGES_BUYER_CAN_DISPUTE = new Set<EscrowStage>(["seller_preparing", "paid_into_escrow", "shipped", "delivered", "under_review"]);
 
 export const disputeReasonLabel = (reason: DisputeReason) => DISPUTE_REASON_OPTIONS.find((option) => option.id === reason)?.label ?? "Other";
 export const disputeReasonNeedsPhotos = (reason: DisputeReason | null) => reason !== null && REASONS_THAT_NEED_PHOTOS.has(reason);
@@ -65,6 +66,7 @@ export const formatFriendlyDateTime = (iso: string) => new Date(iso).toLocaleStr
 export function describeEscrowRelease(escrow: EscrowDetail): string {
   if (escrow.releasedAt) return `Released ${formatFriendlyDate(escrow.releasedAt)}`;
   if (escrow.stage === "disputed") return "Release paused while the dispute is reviewed";
+  if (escrow.stage === "under_review") return "Under review by Zudomart staff. The seller isn't paid until it's settled";
   if (escrow.expectedReleaseAt) return `Expected release: ${formatFriendlyDate(escrow.expectedReleaseAt)}`;
   return "Release date appears once the order ships";
 }
@@ -90,7 +92,7 @@ function lastCompletedStepIndex(escrow: EscrowDetail): number {
 
 export function buildEscrowTimelineSteps(escrow: EscrowDetail, viewerRole: EscrowViewerRole): EscrowTimelineStep[] {
   const completed = lastCompletedStepIndex(escrow);
-  const paused = escrow.stage === "disputed" || escrow.stage === "refunded";
+  const paused = escrow.stage === "disputed" || escrow.stage === "refunded" || escrow.stage === "under_review";
   const stateFor = (index: number): EscrowStepState => (index <= completed ? "done" : index === completed + 1 && !paused ? "current" : "upcoming");
   const storeName = escrow.store.name;
   const shipment = escrow.shipment;
@@ -136,11 +138,18 @@ export function buildEscrowTimelineSteps(escrow: EscrowDetail, viewerRole: Escro
     },
   ];
   if (!paused) return steps;
-  const problemStep: EscrowTimelineStep = {
-    key: "problem",
-    title: escrow.stage === "refunded" ? "Refunded to buyer" : "Dispute open — release paused",
-    detail: escrow.stage === "refunded" ? `${money(escrow.heldAmount)} returned to the buyer` : "Zudomart is holding the money until the dispute is resolved",
-    state: "problem",
-  };
+  const problemStep: EscrowTimelineStep = { key: "problem", ...pausedStepCopy(escrow), state: "problem" };
   return [...steps.slice(0, completed + 1), problemStep, ...steps.slice(completed + 1)];
+}
+
+function pausedStepCopy(escrow: EscrowDetail): { readonly title: string; readonly detail: string } {
+  if (escrow.stage === "refunded") return { title: "Refunded to buyer", detail: describeRefundReturned(escrow) };
+  if (escrow.stage === "under_review") return { title: "Not delivered after 30 days — under review", detail: "Zudomart staff will contact the buyer and the seller. The money stays held until staff release it or refund it" };
+  return { title: "Dispute open — release paused", detail: "Zudomart is holding the money until the dispute is resolved" };
+}
+
+function describeRefundReturned(escrow: EscrowDetail): string {
+  const kept = escrow.feesKeptOnRefund;
+  if (!kept || kept.amountMinor <= 0) return `${formatMoneyForDisplay(escrow.refundedAmount ?? escrow.heldAmount)} returned to the buyer`;
+  return `${formatMoneyForDisplay(escrow.refundedAmount ?? escrow.heldAmount)} returned to the buyer. The seller had already been paid, so Zudomart kept its ${formatMoneyForDisplay(kept)} fees`;
 }

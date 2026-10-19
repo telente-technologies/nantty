@@ -7,6 +7,7 @@ import { Avatar, MediaImage } from "@/components/ui/media";
 import { AdAction, SponsoredAppInstallRow, SponsoredCarousel } from "@/components/feed/sponsoredAd";
 import { adEventsService } from "@/services/adEvents.service";
 import { sponsoredPlacementFromDecidedAd } from "@/utils/adCreativeMapping.util";
+import { isPromotedEntityAd, promotedEntityCallToActionLabel } from "@/utils/promotedEntityAd.util";
 import type { ThreadDecidedAd } from "@/types/postThread.type";
 
 import styles from "./thread.module.css";
@@ -22,6 +23,9 @@ export function SponsoredThreadItem({ ad, postId }: { readonly ad: ThreadDecided
   const sponsored = useMemo(() => sponsoredPlacementFromDecidedAd(ad), [ad]);
   const isCarousel = sponsored.adType === "carousel" && (sponsored.cards?.length ?? 0) > 0;
   const isInstall = sponsored.adType === "app_install" && Boolean(sponsored.app);
+  const promotedEntity = isPromotedEntityAd(sponsored) ? sponsored.promoted : null;
+  const headline = promotedEntity ? promotedEntity.name : creative.headline;
+  const callToActionLabel = promotedEntity ? promotedEntityCallToActionLabel(promotedEntity.kind) : sponsored.ctaLabel;
 
   useEffect(() => {
     const element = rootRef.current;
@@ -67,15 +71,15 @@ export function SponsoredThreadItem({ ad, postId }: { readonly ad: ThreadDecided
         {isCarousel ? <SponsoredCarousel sponsored={sponsored} placement="feedCommentThread" itemId={postId} /> : null}
         {isInstall ? <SponsoredAppInstallRow sponsored={sponsored} placement="feedCommentThread" itemId={postId} /> : null}
         {isCarousel || isInstall ? null : (
-          <AdAction sponsored={sponsored} placement="feedCommentThread" itemId={postId} target={{ kind: "cta" }} className={adStyles.adCard} label={`${creative.headline}, ${sponsored.ctaLabel}`}>
+          <AdAction sponsored={sponsored} placement="feedCommentThread" itemId={postId} target={{ kind: "cta" }} className={adStyles.adCard} label={`${headline}, ${callToActionLabel}`}>
             {image ? (
               <span className={adStyles.adMedia} style={{ aspectRatio: `${image.width} / ${Math.max(image.height, 1)}` }}>
                 <MediaImage src={image.url} alt="" sizes="(max-width: 768px) 80vw, 520px" />
               </span>
             ) : null}
             <span className={adStyles.adFooter}>
-              <span className={adStyles.adHeadline}>{creative.headline}</span>
-              <span className={adStyles.adCta}>{sponsored.ctaLabel}</span>
+              <span className={adStyles.adHeadline}>{headline}</span>
+              <span className={adStyles.adCta}>{callToActionLabel}</span>
             </span>
           </AdAction>
         )}

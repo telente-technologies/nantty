@@ -4,20 +4,18 @@ import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
 import { useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useRef, useState, type KeyboardEvent } from "react";
 
-import { RetryButton, InlineLink } from "@/components/ui/controls";
+import { RetryButton } from "@/components/ui/controls";
 import { EmptyState, ErrorState, Skeleton, Spinner } from "@/components/ui/feedback";
 import { SegmentedControl } from "@/components/ui/controls";
 import { useInfiniteScrollSentinel } from "@/components/ui/useInfiniteScrollSentinel.hook";
 import { discoveryService } from "@/services/discovery.service";
-import { usePostLikeActions } from "@/components/feed/usePostLike.hook";
-import { setFollowingAuthorEverywhere } from "@/utils/postEngagementCache.util";
 import { requireAuthThen } from "@/components/auth/authPrompt.store";
 import { SpeakerHighIcon, SpeakerMutedIcon } from "@/components/ui/icons";
-import { showToast } from "@/components/ui/toast";
-import { buildAbsoluteSiteUrl } from "@/utils/seoPaths.util";
 import type { Clip } from "@/types";
 
-import { ClipPlayerCard, type ClipEngagement } from "./clipPlayerCard";
+import { ClipPlayerCard } from "./clipPlayerCard";
+import { useClipInteractions } from "./clipInteractions.hook";
+import { FollowingClipsEmptyState } from "./followingClipsEmptyState";
 import { ClipCommentsSheet } from "./clipCommentsSheet";
 import styles from "./page.module.css";
 import { AppIcon } from "@/components/ui/appIcon";
@@ -31,8 +29,7 @@ export default function ClipsPage() {
   const [activeClipId, setActiveClipId] = useState<string | null>(startClipId);
   const [isMuted, setIsMuted] = useState(true);
   const queryClient = useQueryClient();
-  const clipLikeActions = usePostLikeActions();
-  const [shareCountByClipId, setShareCountByClipId] = useState<Record<string, number>>({});
+  const { engagementFor, toggleLikeOnClip, likeClipWithDoubleTap, toggleFollowOnClipAuthor, shareClipLink, shareCountFor } = useClipInteractions();
   const [commentsForClip, setCommentsForClip] = useState<Clip | null>(null);
   const feedRef = useRef<HTMLDivElement | null>(null);
   const clipsQuery = useInfiniteQuery({
@@ -81,43 +78,6 @@ export default function ClipsPage() {
     if (event.key === "m") setIsMuted((muted) => !muted);
   }
 
-  function engagementFor(clip: Clip): ClipEngagement {
-    return { liked: clip.liked, likes: clip.likes, isFollowing: clip.isFollowingAuthor };
-  }
-
-  function toggleLikeOnClip(clip: Clip) {
-    clipLikeActions.toggleLike(clip, "Sign in to like clips.");
-  }
-
-  function likeClipWithDoubleTap(clip: Clip) {
-    if (!clip.liked) clipLikeActions.likeIfNotLiked(clip, "Sign in to like clips.");
-  }
-
-  function toggleFollowOnClipAuthor(clip: Clip) {
-    requireAuthThen(() => {
-      if (clip.isFollowingAuthor) return;
-      setFollowingAuthorEverywhere(queryClient, clip.author.id, true);
-      void discoveryService.followClipAuthor(clip.author.id).catch(() => setFollowingAuthorEverywhere(queryClient, clip.author.id, false));
-    }, "Sign in to follow creators.");
-  }
-
-  function shareClipLink(clip: Clip) {
-    const url = buildAbsoluteSiteUrl(`/clips?start=${clip.id}`);
-    const copyAndRecord = async () => {
-      try {
-        await navigator.clipboard.writeText(url);
-        showToast({ text: "Link copied" });
-      } catch {
-        showToast({ text: "Couldn't copy the link", tone: "error" });
-      }
-      setShareCountByClipId((all) => ({ ...all, [clip.id]: (all[clip.id] ?? clip.shares) + 1 }));
-      void discoveryService.recordClipShare(clip.id).catch(() =>
-        setShareCountByClipId((all) => ({ ...all, [clip.id]: all[clip.id] ?? clip.shares })),
-      );
-    };
-    void copyAndRecord();
-  }
-
   return (
     <div className={styles.page}>
       <div className={styles.toolbar}>
@@ -159,7 +119,7 @@ export default function ClipsPage() {
         <ErrorState description="We couldn't load clips." error={clipsQuery.error} onRetry={() => void clipsQuery.refetch()} />
       ) : clips.length === 0 ? (
         tab === "following" ? (
-          <EmptyState title="Nothing new from people you follow" description="Follow more creators to fill this feed." action={<InlineLink href="/explore">Explore creators</InlineLink>} />
+          <FollowingClipsEmptyState onFollowedCreator={() => void queryClient.invalidateQueries({ queryKey: ["clips", "following"] })} onWatchForYou={() => setTab("forYou")} />
         ) : (
           <EmptyState kind="clips" description="Check back soon for fresh clips." action={<RetryButton onRetry={() => void clipsQuery.refetch()} />} />
         )
@@ -172,7 +132,7 @@ export default function ClipsPage() {
               isActive={activeClipId ? activeClipId === clip.id : index === 0}
               isMuted={isMuted}
               engagement={engagementFor(clip)}
-              shareCount={shareCountByClipId[clip.id] ?? clip.shares}
+              shareCount={shareCountFor(clip)}
               onToggleMute={() => setIsMuted((muted) => !muted)}
               onToggleLike={() => toggleLikeOnClip(clip)}
               onLikeByDoubleTap={() => likeClipWithDoubleTap(clip)}

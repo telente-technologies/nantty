@@ -5,14 +5,14 @@ import { LinkedProfilesSection } from "@/components/settings/linkedProfilesSecti
 import styles from "@/components/settings/settings.module.css";
 import { IconLabel } from "@/components/ui/appIcon";
 
-export const metadata: Metadata = { title: "Store, Business page and Brand" };
+export const metadata: Metadata = { title: "Business profiles" };
 
 export default function LinkedProfilesPage() {
   return (
     <div className={styles.page}>
       <div>
         <Link href="/settings"><IconLabel name="arrowLeft24" size={16}>Settings</IconLabel></Link>
-        <h1 className={styles.title}>Store, Business page and Brand</h1>
+        <h1 className={styles.title}>Business profiles</h1>
       </div>
       <LinkedProfilesSection />
     </div>

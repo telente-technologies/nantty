@@ -9,6 +9,17 @@ export interface AdDestination {
   readonly url?: string | null;
 }
 
+export interface AdPromotedEntity {
+  readonly kind: "store" | "profile";
+  readonly id: ID;
+  readonly name: string;
+  readonly handle: string;
+  readonly avatarUrl: string | null;
+  readonly verified: boolean;
+  readonly checkmarkColor?: string;
+  readonly private: boolean;
+}
+
 export interface AdCardMedia {
   readonly kind: "image" | "video";
   readonly url: string;

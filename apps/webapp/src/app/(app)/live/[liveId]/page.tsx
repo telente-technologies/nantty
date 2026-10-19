@@ -8,6 +8,7 @@ import { isLiveVideoSupported } from "@zudomart/web-kit";
 import { ContentActionsMenu } from "@/components/actions/contentActionsMenu";
 import { useFollowUser } from "@/components/follow/useFollowUser.hook";
 import { useSession } from "@/components/providers/sessionProvider";
+import { LiveAccessLockOverlay } from "@/components/live/liveAccessLockOverlay";
 import { LiveChatPanel } from "@/components/live/liveChatPanel";
 import { LiveGiftTray } from "@/components/live/liveGiftTray";
 import { LiveHostRankAvatar } from "@/components/live/liveHostRankAvatar";
@@ -22,6 +23,7 @@ import { liveService } from "@/services/webActions.service";
 import { formatCountWithThousandsSuffix } from "@/utils/formatDate.util";
 import { liveRoomBadgeLabel, orderProductsWithPinnedFirst, pollIntervalForLiveStatus, readLiveRoomStatus, shouldShowLiveRoomError } from "@/utils/liveRoom.util";
 import type { LiveSessionDetails } from "@/types";
+import { describeLiveAccessLock } from "@/utils/liveAccessLock.util";
 import { rememberSaleAttribution } from "@/utils/saleAttribution.util";
 
 function FollowHostButton({ live }: { readonly live: LiveSessionDetails }) {
@@ -63,6 +65,29 @@ export default function LiveRoomPage({ params }: { readonly params: Promise<{ re
   const safety = isLive ? live.safety ?? null : null;
   const isPausedForSafety = safety?.state === "paused";
   const isHostView = !!safety?.hostReason || !!safety?.warningMessage;
+  const accessLock = describeLiveAccessLock(live.access);
+  if (accessLock) {
+    return (
+      <div className={styles.room}>
+        <div className={styles.main}>
+          <div className={styles.stage}>
+            <MediaImage src={live.coverUrl ?? null} alt="" sizes="(max-width: 1024px) 100vw, 720px" />
+            <span className={isLive ? styles.liveBadge : styles.endedBadge}>{liveRoomBadgeLabel(roomStatus)}</span>
+            <LiveAccessLockOverlay lock={accessLock} hostId={live.host.id} followButton={<FollowHostButton live={live} />} />
+          </div>
+          <div className={styles.hostBar}>
+            <div className={styles.host}>
+              <LiveHostRankAvatar hostName={live.host.name} avatarUrl={live.host.avatarUrl} ranking={null} />
+              <Link href={`/user/${live.host.id}`} className={styles.hostLink}>
+                <span className={styles.hostName}>{live.host.name}</span>
+                <span className={styles.liveTitle}>{live.title}</span>
+              </Link>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
   return (
     <div className={styles.room}>
       <div className={styles.main}>

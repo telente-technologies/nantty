@@ -58,3 +58,25 @@ export interface VerificationCheckout {
   readonly applicationId: ID;
   readonly checkoutUrl: string;
 }
+
+export interface VerificationOfferDiscount {
+  readonly linkId: ID;
+  readonly token: string;
+  readonly plans: readonly { readonly planCode: string; readonly planLabel: string }[];
+  readonly discount: { readonly kind: "percentage" | "fixed_amount"; readonly percentOff?: number; readonly amountOff?: Money };
+  readonly durationCycles: number;
+  readonly expiresAt: ISODate | null;
+  readonly sentAt: ISODate;
+}
+
+export interface VerificationDiscounts {
+  readonly offers: readonly VerificationOfferDiscount[];
+  readonly yearlyPercentOff: number;
+  readonly bundle: { readonly percentOff: number } | null;
+}
+
+export interface CheckmarkSuggestionSummary {
+  readonly color: "blue" | "gold";
+  readonly eligible: boolean;
+  readonly dismissed: boolean;
+}

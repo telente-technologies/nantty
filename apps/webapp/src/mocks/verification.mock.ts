@@ -15,6 +15,8 @@ const PLAN_SEEDS = [
     { title: "Everything in Verified", description: "Blue badge, priority support and protection." },
     { title: "Boost credits", description: "Monthly credits to promote your posts." },
     { title: "Longer lives and uploads", description: "Go live for longer and post longer clips." },
+    { title: "Up to 5 business profiles", description: "Run up to 5 business profiles, with one store." },
+    { title: "One Gold plan for all your businesses, up to 16% off", description: "Cover up to 5 businesses with one Gold plan." },
   ] },
   { id: "vp_gold_pro", color: "gold", tier: "PRO", usdCents: 1_999, perks: [
     { title: "Gold business badge", description: "Buyers see you're a verified business." },
@@ -51,9 +53,20 @@ const myState = () => {
   return verificationStateByUserId.get(userId)!;
 };
 
+const dismissedCheckmarkSuggestionColors = new Set<string>();
+
 export const verificationMocks: MockRoute[] = [
   createMockRoute("GET", "/api/v1/verification/plans", () => buildPlans()),
   createMockRoute("GET", "/api/v1/verification/me", () => myState()),
+  createMockRoute("GET", "/api/v1/verification/suggestions", () => [{ color: "blue", eligible: false, dismissed: dismissedCheckmarkSuggestionColors.has("blue"), headline: "You may qualify for a verified checkmark", detail: "Keep going.", rules: [] }]),
+  createMockRoute("POST", "/api/v1/verification/suggestions/:color/dismiss", ({ params }) => {
+    dismissedCheckmarkSuggestionColors.add(params.color ?? "");
+  }),
+  createMockRoute("GET", "/api/v1/verification/discounts", () => ({
+    offers: myState().current ? [] : [{ linkId: "offer_link_welcome", token: "mockWelcomeOfferToken0000000000000000000000", plans: [{ planCode: "blue", planLabel: "Blue Verified" }], discount: { kind: "percentage", percentOff: 40 }, durationCycles: 1, expiresAt: null, sentAt: "2026-10-10T09:00:00.000Z" }],
+    yearlyPercentOff: 20,
+    bundle: null,
+  })),
   createMockRoute("POST", "/api/v1/verification/applications", ({ body }) => {
     const input = body as VerificationApplicationInput;
     const plan = PLAN_SEEDS.find((seed) => seed.id === input.planId && seed.color === input.kind);

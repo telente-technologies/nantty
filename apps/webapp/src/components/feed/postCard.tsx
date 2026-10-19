@@ -21,8 +21,12 @@ import { postsService } from "@/services/posts.service";
 import { WebappRequestError } from "@/services/clientApi.service";
 import type { Post } from "@/types";
 
+import { isPromotedEntityAd } from "@/utils/promotedEntityAd.util";
+
+import { PromotedEntityAdCard } from "./promotedEntityAdCard";
 import styles from "./postCard.module.css";
 import swipeStyles from "./postSwipe.module.css";
+import { useDoubleTapToLike } from "./doubleTapToLike.hook";
 import { usePostSwipe } from "./postSwipe.hook";
 import { usePostLike } from "./usePostLike.hook";
 import { PostActions } from "./postActions";
@@ -52,12 +56,24 @@ export interface PostCardProps {
   readonly position?: number;
 }
 
-export function PostCard({ post, priority = false, swipeable = false, showPinnedBadge = false, surface: surfaceOverride, position }: PostCardProps) {
+export function PostCard(props: PostCardProps) {
+  const { sponsored } = props.post;
+  if (isPromotedEntityAd(sponsored)) return <PromotedEntityAdCard sponsored={sponsored} placement="feed" itemId={props.post.id} media={props.post.media} primaryText={props.post.text} />;
+  return <OrganicPostCard {...props} />;
+}
+
+function OrganicPostCard({ post, priority = false, swipeable = false, showPinnedBadge = false, surface: surfaceOverride, position }: PostCardProps) {
   const router = useRouter();
   const [likePopSignal, setLikePopSignal] = useState(0);
   const queryClient = useQueryClient();
   const { viewer } = useSession();
   const { toggleLike, likeIfNotLiked } = usePostLike(post);
+  const doubleTapToLike = useDoubleTapToLike(() =>
+    requireAuthThen(() => {
+      setLikePopSignal((signal) => signal + 1);
+      likeIfNotLiked();
+    }, "Sign in to like posts."),
+  );
   const isOwnPost = viewer?.id === post.author.id;
   const { confirmAndDelete } = useDeleteOwnPost();
   const contextSurface = usePostSurface();
@@ -138,7 +154,9 @@ export function PostCard({ post, priority = false, swipeable = false, showPinned
       <PostLinkCard post={post} />
       {post.sponsored?.adType === "carousel" ? null : (
         <SponsoredMediaLink post={post}>
-          <PostMedia media={post.media} priority={priority} watchHref={isLandscapeVideoPost(post) && !post.sponsored ? `/watch/${post.id}` : null} />
+          <div className={styles.doubleTapArea} {...doubleTapToLike}>
+            <PostMedia media={post.media} priority={priority} watchHref={isLandscapeVideoPost(post) && !post.sponsored ? `/watch/${post.id}` : null} />
+          </div>
         </SponsoredMediaLink>
       )}
       <SponsoredAdBody post={post} />

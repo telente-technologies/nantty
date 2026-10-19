@@ -27,7 +27,7 @@ export const embedResizeScript =
 
 const themeVariables: Readonly<Record<EmbedTheme, string>> = {
   light: "--bg:#ffffff;--surface:#f0f2fa;--text:#0a0a14;--muted:#5b5b6b;--border:#e4e6f2;--brand:#3a2bff;--on-brand:#ffffff;--brand-hover:#3024d2;--danger:#b91c1c",
-  dark: "--bg:#0b0d17;--surface:#141726;--text:#f2f3f8;--muted:#a9adc2;--border:#2a3048;--brand:#4e40ff;--on-brand:#ffffff;--brand-hover:#6155ff;--danger:#fca5a5",
+  dark: "--bg:#15161a;--surface:#15161a;--text:#e8e9eb;--muted:#9a9da3;--border:#2c2e33;--brand:#4e40ff;--on-brand:#ffffff;--brand-hover:#6155ff;--danger:#fca5a5",
 };
 
 const embedStyles = `*{box-sizing:border-box}html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font:14px/1.4 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}

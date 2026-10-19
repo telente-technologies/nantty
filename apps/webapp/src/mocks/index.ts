@@ -5,6 +5,7 @@ import { banksMocks } from "./banks.mock";
 import { boostsMocks } from "./boosts.mock";
 import { brandsMocks } from "./brands.mock";
 import { linkedProfilesMocks } from "./linkedProfiles.mock";
+import { goldForBusinessesMocks } from "./goldForBusinesses.mock";
 import { affiliateLinkMocks } from "./affiliateLinks.mock";
 import { cartMocks } from "./cart.mock";
 import { geoMocks } from "./geo.mock";
@@ -51,6 +52,7 @@ import { sellerCatalogMocks } from "./sellerCatalog.mock";
 import { sellerMocks } from "./seller.mock";
 import { settingsMocks } from "./settings.mock";
 import { storiesMocks } from "./stories.mock";
+import { profileAvatarPresenceMocks } from "./profileAvatarPresence.mock";
 import { helpCentreMocks } from "./helpCentre.mock";
 import { supportMocks } from "./support.mock";
 import { usernameMocks } from "./username.mock";
@@ -110,6 +112,7 @@ export const routes: MockRoute[] = [
   ...boostsMocks,
   ...brandsMocks,
   ...linkedProfilesMocks,
+  ...goldForBusinessesMocks,
   ...helpCentreMocks,
   ...supportMocks,
   ...chatE2eeMocks,
@@ -134,6 +137,7 @@ export const routes: MockRoute[] = [
   ...giftsMocks,
   ...liveMocks,
   ...storiesMocks,
+  ...profileAvatarPresenceMocks,
   ...settingsMocks,
   ...privacyMocks,
   ...celebrationsMocks,

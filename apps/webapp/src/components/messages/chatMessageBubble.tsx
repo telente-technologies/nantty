@@ -38,7 +38,7 @@ export function ChatMessageBubble({ message, mine, showSender, styles, reportBut
       {mine && !message.decryptionNotice && !isLocal ? <ReactionPicker message={message} onToggle={(emoji, reacted) => onReact(message, emoji, reacted)} /> : null}
       <div className={[styles.bubble, mine ? styles.bubbleMine : styles.bubbleTheirs].join(" ")}>
         {showSender && !mine && shownSender ? <span className={styles.senderName}>{shownSender}</span> : null}
-        {media ? <EncryptedMedia cacheKey={media.id} type={media.type} url={media.url} pointer={message.attachment} className={styles.bubbleImage} /> : null}
+        {media ? <EncryptedMedia cacheKey={media.id} type={media.type} url={media.url} pointer={message.attachment} className={styles.bubbleImage} isMine={mine} durationSeconds={media.durationSeconds} /> : null}
         {message.kind === "document" ? <DocumentCard message={message} /> : null}
         {message.poll ? <PollCard message={message} disabled={isBusy || isLocal} onVote={(optionId) => onVote(message, optionId)} /> : null}
         {message.location ? <LocationCard message={message} isMine={mine} onStop={() => onStopLocation(message)} /> : null}

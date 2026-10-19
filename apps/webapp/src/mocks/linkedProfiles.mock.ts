@@ -3,6 +3,7 @@ import type { LinkedProfileItem, LinkedProfiles } from "@/types/brand.type";
 
 import { mockBrandRecords } from "./brandDirectory.mock";
 import { getSignedInMockUser } from "./fixtures.mock";
+import { mockViewerHasBluePremium } from "./goldForBusinesses.mock";
 import { createMockRoute, type MockRoute } from "./registry.mock";
 import { findDirectoryStoreById } from "./storeDirectory.mock";
 
@@ -10,14 +11,21 @@ export function buildMockLinkedProfiles(): LinkedProfiles {
   const user = getSignedInMockUser();
   const store = user.storeId ? findDirectoryStoreById(user.storeId) : null;
   const items: LinkedProfileItem[] = [
-    ...(store ? [{ kind: "store", profileId: store.id, storeId: store.id, status: "active", holdReason: null, name: store.name, handle: store.handle, showsMart: true } as const] : []),
-    ...mockBrandRecords.filter((brand) => brand.ownerUserKey === user.id).map((brand) => ({ kind: "brand", profileId: brand.id, storeId: null, status: "active", holdReason: null, name: brand.name, handle: brand.handle, showsMart: brand.officialStoreId !== null } as const)),
+    ...(store ? [{ kind: "store", profileId: store.id, storeId: store.id, status: "active", holdReason: null, name: store.name, handle: store.handle, showsMart: true, ownsStore: true, premiumNeeded: false } as const] : []),
+    ...mockBrandRecords.filter((brand) => brand.ownerUserKey === user.id).map((brand) => ({ kind: "brand", profileId: brand.id, storeId: null, status: "active", holdReason: null, name: brand.name, handle: brand.handle, showsMart: brand.officialStoreId !== null, ownsStore: false, premiumNeeded: false } as const)),
   ];
+  const premium = mockViewerHasBluePremium();
+  const count = items.filter((item) => item.status === "active").length;
+  const limit = premium ? 5 : 2;
+  const hasRoom = count < limit;
   return {
     accountId: user.id,
     items,
-    canCreate: { store: store === null, business: store === null, brand: !items.some((item) => item.kind === "brand") },
+    canCreate: premium
+      ? { store: hasRoom && store === null, business: hasRoom, brand: hasRoom }
+      : { store: store === null, business: store === null, brand: !items.some((item) => item.kind === "brand") },
     choiceRequired: false,
+    businessProfiles: { count, limit, premiumLimit: 5, premium, premiumNeeded: false, storeUsed: store !== null },
   };
 }
 

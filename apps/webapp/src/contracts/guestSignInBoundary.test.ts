@@ -6,13 +6,13 @@ import { WebappRequestError, isSignInRequiredError } from "@/services/clientApi.
 
 describe("guest reads that need an account", () => {
   it("are not forwarded as anonymous reads, so the BFF answers with a sign-in error", () => {
-    for (const path of ["/api/v1/lives/suggested", "/api/v1/users/suggested", "/api/v1/gifts", "/api/v1/lives/live_1/comments", "/api/v1/users/0f8a1c2e"]) {
+    for (const path of ["/api/v1/lives/suggested", "/api/v1/users/suggested", "/api/v1/gifts", "/api/v1/lives/live_1/comments", "/api/v1/users/0f8a1c2e", "/api/v1/users/me/live", "/api/v1/users/me/stories", "/api/v1/users/0f8a1c2e/story-status/extra"]) {
       assert.equal(isPublicApiRead("GET", path), false, path);
     }
   });
 
   it("keep the public reads guests can see", () => {
-    for (const path of ["/api/v1/lives/live_1", "/api/v1/users/by-username/ada", "/api/v1/posts/p1/comments", "/api/v1/products/p1"]) {
+    for (const path of ["/api/v1/lives/live_1", "/api/v1/users/by-username/ada", "/api/v1/posts/p1/comments", "/api/v1/products/p1", "/api/v1/users/0f8a1c2e/live", "/api/v1/users/0f8a1c2e/stories", "/api/v1/users/0f8a1c2e/story-status"]) {
       assert.equal(isPublicApiRead("GET", path), true, path);
     }
   });

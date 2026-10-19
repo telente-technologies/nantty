@@ -1,7 +1,6 @@
 "use client";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import Link from "next/link";
 import { useState } from "react";
 
 import { useStepUpPrompt } from "@/components/wallet/stepUpDialog";
@@ -11,8 +10,9 @@ import { ErrorState, Skeleton } from "@/components/ui/feedback";
 import { readErrorMessageForDisplay } from "@/services/clientApi.service";
 import { linkedProfilesService } from "@/services/linkedProfiles.service";
 import type { LinkedProfileItem, LinkedProfiles } from "@/types/brand.type";
-import { activeBrand, activeStoreOrBusiness, LINKED_KIND_LABELS } from "@/utils/linkedProfiles.util";
+import { LINKED_KIND_LABELS } from "@/utils/linkedProfiles.util";
 
+import { BusinessProfilesOverview } from "./businessProfilesOverview";
 import styles from "./settings.module.css";
 
 const queryKey = ["users", "me", "linked-profiles"] as const;
@@ -22,33 +22,7 @@ export function LinkedProfilesSection() {
   if (linked.isPending) return <Skeleton height={160} />;
   if (linked.isError) return <ErrorState error={linked.error} onRetry={() => void linked.refetch()} />;
   if (linked.data.choiceRequired) return <ChooseWhichToKeep linked={linked.data} />;
-  const storeOrBusiness = activeStoreOrBusiness(linked.data);
-  const brand = activeBrand(linked.data);
-  return (
-    <>
-      <p className={styles.muted}>Your account can have one Store or one Business page, never both, plus one Brand.</p>
-      <section aria-labelledby="store-or-business-heading" className={styles.block}>
-        <h2 id="store-or-business-heading" className={styles.blockHeading}>Store or Business page</h2>
-        {storeOrBusiness ? (
-          <p className={styles.muted}>You already have a {LINKED_KIND_LABELS[storeOrBusiness.kind]}: {storeOrBusiness.name || "pending review"}.</p>
-        ) : (
-          <>
-            <p className={styles.muted}>A Store sells in Mart and shows the Mart icon. A Business page is for organisations that don&apos;t sell, so it has no Mart icon or products. Pick one.</p>
-            <div className={styles.buttonRow}>
-              <Link href="/seller/apply" className={styles.choiceChip}>Open a store</Link>
-            </div>
-            <p className={styles.muted}>Business pages are created in the Zudomart app.</p>
-          </>
-        )}
-      </section>
-      <section aria-labelledby="brand-heading" className={styles.block}>
-        <h2 id="brand-heading" className={styles.blockHeading}>Brand</h2>
-        <p className={styles.muted}>
-          {brand ? `You already have a Brand: ${brand.name}. Turn selling on or off in brand settings.` : "You don't have a Brand yet. Brands are created in the Zudomart app."}
-        </p>
-      </section>
-    </>
-  );
+  return <BusinessProfilesOverview linked={linked.data} />;
 }
 
 function ChooseWhichToKeep({ linked }: { readonly linked: LinkedProfiles }) {

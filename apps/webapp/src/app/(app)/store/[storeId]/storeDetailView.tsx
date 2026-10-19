@@ -1,6 +1,7 @@
 "use client";
 
 import { useMutation, useQuery } from "@tanstack/react-query";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import { ContentActionsMenu } from "@/components/actions/contentActionsMenu";
@@ -8,6 +9,7 @@ import { requireAuthThen } from "@/components/auth/authPrompt.store";
 import { confirmFollowChange } from "@/components/follow/useFollowUser.hook";
 import { ProductCard } from "@/components/commerce/productCard";
 import { MessageStoreButton } from "@/components/messages/messageStoreButton";
+import { useSession } from "@/components/providers/sessionProvider";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/feedback";
 import { StoreIcon } from "@/components/ui/icons";
@@ -18,6 +20,7 @@ import type { ProductSummary } from "@/types";
 import { formatCountWithThousandsSuffix } from "@/utils/formatDate.util";
 import { followConfirmationCopy } from "@/utils/followToggle.util";
 import { buildStorePath } from "@/utils/seoPaths.util";
+import { canPromoteStore, promoteHrefFor } from "@/utils/promotedEntityAd.util";
 
 import styles from "./storeDetailView.module.css";
 import { SearchScopeRegistrar } from "@/components/search/searchScopeRegistrar";
@@ -32,6 +35,10 @@ export function StoreDetailView({ initialStore, initialProducts }: StoreDetailVi
   const productsQuery = useQuery({ queryKey: ["store", initialStore.id, "products"], queryFn: () => storesService.fetchStoreProducts(initialStore.id), initialData: [...initialProducts], initialDataUpdatedAt: 0, retry: false });
   const store = storeQuery.data ?? initialStore;
   const products = productsQuery.data ?? initialProducts;
+  const router = useRouter();
+  const { viewer } = useSession();
+  const myStores = useQuery({ queryKey: ["my-stores"], queryFn: () => storesService.fetchMyStores(), enabled: Boolean(viewer), retry: false, staleTime: 5 * 60_000 });
+  const showsPromoteStore = canPromoteStore({ storeId: store.id, storeOwnerUserId: store.ownerUserId, signedInUserId: viewer?.id, myStores: myStores.data });
   const [isFollowing, setIsFollowing] = useState(store.isFollowing);
   const follow = useMutation({
     mutationFn: (followNow: boolean) => (followNow ? storesService.followStore(store.id) : storesService.unfollowStore(store.id)),
@@ -65,6 +72,7 @@ export function StoreDetailView({ initialStore, initialProducts }: StoreDetailVi
             {isFollowing ? "Following" : "Follow"}
           </Button>
           <MessageStoreButton storeId={store.id} storeName={store.name} />
+          {showsPromoteStore ? <Button size="sm" variant="secondary" onClick={() => router.push(promoteHrefFor({ type: "store", targetId: store.id }))}>Promote store</Button> : null}
           <ContentActionsMenu shareKind="store" reportTargetType="user" targetId={store.ownerUserId} canonicalPath={buildStorePath(store.id)} />
         </div>
       </header>

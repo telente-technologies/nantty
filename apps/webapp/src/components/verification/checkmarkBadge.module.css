@@ -1,0 +1,20 @@
+.checkmark {
+  display: inline-grid;
+  flex-shrink: 0;
+  place-items: center;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--color-brand-solid);
+  color: var(--color-on-brand);
+}
+
+.checkmark[data-color="gold"] {
+  background: var(--color-accent);
+  color: var(--color-on-accent);
+}
+
+.checkmark[data-color="black"] {
+  background: var(--ink-strong);
+  color: var(--surface-card);
+}

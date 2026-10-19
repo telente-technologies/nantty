@@ -1,0 +1,278 @@
+.module {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-3) 0;
+  border-block: 1px solid var(--divider);
+  background: var(--surface-card);
+}
+
+.header {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  padding: 0 var(--space-4);
+}
+
+.title {
+  margin: 0;
+  color: var(--ink-strong);
+  font-size: var(--text-sm);
+  font-weight: 600;
+}
+
+.iconButton {
+  display: inline-grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: transparent;
+  color: var(--ink-muted);
+}
+
+.iconButton:hover {
+  background: var(--surface-hover);
+  color: var(--ink-strong);
+}
+
+.textButton {
+  border: 0;
+  background: transparent;
+  color: var(--color-brand);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.slider {
+  display: flex;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0 var(--space-4);
+  overflow-x: auto;
+  list-style: none;
+  scroll-snap-type: x proximity;
+  scrollbar-width: none;
+}
+
+.slider::-webkit-scrollbar {
+  display: none;
+}
+
+.clipTile {
+  position: relative;
+  flex: 0 0 auto;
+  width: 140px;
+  aspect-ratio: 160 / 230;
+  overflow: hidden;
+  border: 0;
+  border-radius: var(--radius-medium);
+  background: var(--surface-sunken);
+  scroll-snap-align: start;
+  cursor: pointer;
+}
+
+.clipTileAuthor {
+  position: absolute;
+  inset: auto 0 0;
+  padding: var(--space-6) var(--space-2) var(--space-2);
+  background: linear-gradient(to top, rgb(0 0 0 / 60%), transparent);
+  color: var(--color-on-brand);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  text-align: left;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.clipTile:focus-visible,
+.iconButton:focus-visible,
+.textButton:focus-visible {
+  outline: 2px solid var(--color-brand);
+  outline-offset: 2px;
+}
+
+.menuPanel {
+  position: absolute;
+  top: calc(100% + var(--space-1));
+  right: var(--space-4);
+  z-index: var(--z-sheet);
+  display: flex;
+  flex-direction: column;
+  width: min(300px, calc(100vw - 32px));
+  padding: var(--space-2);
+  border: 1px solid var(--divider);
+  border-radius: var(--radius-large);
+  background: var(--color-elevated);
+  box-shadow: var(--shadow-float);
+}
+
+.menuItem {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  width: 100%;
+  padding: var(--space-2);
+  border: 0;
+  border-radius: var(--radius-small);
+  background: transparent;
+  color: var(--ink-strong);
+  text-align: left;
+}
+
+.menuItem:hover,
+.menuItem:focus-visible {
+  background: var(--color-surface-hover);
+  outline: none;
+}
+
+.menuItemText {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-weight: 600;
+}
+
+.menuItemDetail {
+  color: var(--ink-muted);
+  font-size: var(--text-xs);
+  font-weight: 400;
+}
+
+.reasons {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin: 0;
+  padding-left: var(--space-4);
+  color: var(--ink-muted);
+}
+
+.personCard {
+  position: relative;
+  display: flex;
+  flex: 0 0 auto;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+  width: 160px;
+  padding: var(--space-4) var(--space-3) var(--space-3);
+  border: 1px solid var(--divider);
+  border-radius: var(--radius-medium);
+  background: var(--color-elevated);
+  scroll-snap-align: start;
+}
+
+.personDismiss {
+  position: absolute;
+  top: var(--space-1);
+  right: var(--space-1);
+}
+
+.personLink {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-1);
+  width: 100%;
+  color: inherit;
+  text-decoration: none;
+}
+
+.nameRow {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  max-width: 100%;
+  font-weight: 600;
+}
+
+.name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.reason {
+  min-height: 2.6em;
+  margin: 0;
+  color: var(--ink-muted);
+  font-size: var(--text-xs);
+  text-align: center;
+}
+
+.verifiedCard {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin: var(--space-2) var(--space-4);
+  padding: var(--space-4);
+  border: 1px solid var(--divider);
+  border-radius: var(--radius-large);
+  background: var(--color-elevated);
+}
+
+.verifiedClose {
+  position: absolute;
+  top: var(--space-2);
+  right: var(--space-2);
+}
+
+.identity {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding-right: var(--space-8);
+}
+
+.identityText {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.muted {
+  margin: 0;
+  color: var(--ink-muted);
+  font-size: var(--text-sm);
+}
+
+.cardTitle {
+  margin: 0;
+  color: var(--ink-strong);
+  font-size: var(--text-md);
+  font-weight: 600;
+}
+
+.discount {
+  margin: 0;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-small);
+  background: var(--success-soft);
+  color: var(--color-success-text);
+  font-size: var(--text-sm);
+  font-weight: 600;
+}
+
+.actions {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.actions > :first-child {
+  flex: 1;
+}
+
+.neverAgain {
+  align-self: center;
+  border: 0;
+  background: transparent;
+  color: var(--ink-muted);
+  font-size: var(--text-xs);
+}

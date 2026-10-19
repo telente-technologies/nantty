@@ -37,7 +37,7 @@ export function buildSettingsLinkGroups(isSeller: boolean): readonly { readonly 
     },
     {
       title: "Profiles",
-      links: [{ href: "/settings/profiles", label: "Store, Business page and Brand", description: "One Store or one Business page, plus one Brand", icon: "buildingStore20" }],
+      links: [{ href: "/settings/profiles", label: "Business profiles", description: "Your store, Business pages and Brands", icon: "buildingStore20" }],
     },
     {
       title: "Support",

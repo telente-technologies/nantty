@@ -218,6 +218,7 @@ export interface SentLiveGiftReceipt {
 }
 
 export interface LiveSessionDetails {
+  readonly access?: { readonly allowed: boolean; readonly reason: string };
   readonly safety?: LiveSafetyState | null;
   readonly coverUrl?: string | null;
   readonly playbackUrl?: string | null;

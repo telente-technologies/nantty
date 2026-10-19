@@ -1,0 +1,82 @@
+.pager {
+  --pager-position: var(--pager-active-index);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.tabs {
+  display: flex;
+  gap: var(--space-4);
+  width: 100%;
+  max-width: var(--reading-width);
+  margin-inline: auto;
+}
+
+.tab {
+  position: relative;
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  cursor: pointer;
+}
+
+.tab:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 4px;
+  border-radius: 4px;
+}
+
+.tabLabel {
+  color: var(--color-text-subtle);
+}
+
+.tabLabelActive {
+  position: absolute;
+  inset: 0;
+  color: var(--color-brand);
+  opacity: calc(1 - min(1, max(var(--pager-position) - var(--tab-index), var(--tab-index) - var(--pager-position))));
+  transition: opacity 0.32s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.viewport {
+  overflow: hidden;
+  touch-action: pan-y;
+}
+
+.track {
+  display: flex;
+  transform: translate3d(var(--pager-drag-x, calc(var(--pager-active-index) * -100%)), 0, 0);
+  transition: transform 0.36s cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: transform;
+}
+
+.pager[data-dragging] .track,
+.pager[data-dragging] .tabLabelActive {
+  transition: none;
+}
+
+.panel {
+  flex: 0 0 100%;
+  min-width: 0;
+}
+
+.panel:not([data-active]) {
+  max-height: 100vh;
+  overflow: hidden;
+}
+
+.pager[data-dragging] .panel:not([data-active]) {
+  max-height: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .track,
+  .tabLabelActive {
+    transition: none;
+  }
+}

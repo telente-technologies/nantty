@@ -24,6 +24,7 @@ function harness(overrides: Partial<FollowToggleDeps> & { readonly answer?: bool
     unfollow: overrides.unfollow ?? (async () => { calls.push("unfollow"); }),
     apply: (state) => applied.push(state),
     onFailed: (error) => failures.push(error),
+    optimisticFollowState: overrides.optimisticFollowState,
   });
   return { runner, applied, asked, calls, failures };
 }
@@ -52,6 +53,16 @@ describe("follow toggle runner", () => {
     const { runner, applied } = harness({ follow: async () => ({ state: "requested" }) });
     assert.equal(await runner.run("none", "ada"), "requested");
     assert.deepEqual(applied, ["accepted", "requested"]);
+  });
+
+  it("shows Requested straight away for a private profile and rolls back when the follow fails", async () => {
+    const privateFollow = harness({ optimisticFollowState: "requested", follow: async () => ({ state: "requested" }) });
+    assert.equal(await privateFollow.runner.run("none", "ada"), "requested");
+    assert.deepEqual(privateFollow.applied, ["requested"]);
+    const failing = harness({ optimisticFollowState: "requested", follow: async () => { throw new Error("offline"); } });
+    assert.equal(await failing.runner.run("none", "ada"), "none");
+    assert.deepEqual(failing.applied, ["requested", "none"]);
+    assert.equal(failing.failures.length, 1);
   });
 
   it("does nothing when the confirm is cancelled", async () => {

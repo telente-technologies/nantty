@@ -5,8 +5,10 @@ import { useState } from "react";
 
 import { useSession } from "@/components/providers/sessionProvider";
 
+import { MartBrowser } from "@/components/commerce/martBrowser";
 import { FeedTopicFilterRow, type FeedMode } from "@/components/feed/feedTopicFilterRow";
-import { PostCard } from "@/components/feed/postCard";
+import { HomeSectionPager } from "@/components/home/homeSectionPager";
+import { FeedPostsWithModules } from "@/components/feedModules/feedPostsWithModules";
 import { PostFeedSkeleton } from "@/components/feed/postCardSkeleton";
 import { InlineLink } from "@/components/ui/controls";
 import { EmptyState, ErrorState, Spinner } from "@/components/ui/feedback";
@@ -53,9 +55,7 @@ function FeedSection({ feedMode, topicId, isGuest }: { readonly feedMode: FeedMo
 
   return (
     <div className={styles.feedList}>
-      {posts.map((post, index) => (
-        <PostCard key={post.id} post={post} priority={index < 2} swipeable surface="feed" position={index} />
-      ))}
+      <FeedPostsWithModules posts={posts} />
       <div ref={sentinelRef} />
       {feedQuery.isFetchingNextPage ? <Spinner label="Loading more posts" /> : null}
       {!feedQuery.hasNextPage ? <p className={styles.feedEnd}>You're all caught up.</p> : null}
@@ -68,9 +68,8 @@ export default function HomePage() {
   const [activeTopicId, setActiveTopicId] = useState<string | null>(null);
   const isGuest = useSession().viewer === null;
 
-  return (
+  const feed = (
     <div className={styles.page}>
-      <h1 className="visuallyHidden">Home feed</h1>
       {isGuest ? (
         <p className={styles.guestNote}>Popular on Zudomart right now. Sign in to get a feed picked for you.</p>
       ) : (
@@ -78,5 +77,12 @@ export default function HomePage() {
       )}
       <FeedSection feedMode={feedMode} topicId={activeTopicId} isGuest={isGuest} />
     </div>
+  );
+
+  return (
+    <>
+      <h1 className="visuallyHidden">Home</h1>
+      <HomeSectionPager feed={feed} mart={<MartBrowser />} />
+    </>
   );
 }

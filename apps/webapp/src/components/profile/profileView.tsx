@@ -8,9 +8,11 @@ import { useEffect, useState } from "react";
 import { ProfileCelebration } from "@/components/celebrations/profileCelebration";
 import { requireAuthThen } from "@/components/auth/authPrompt.store";
 import { ProfileContentTabs } from "./profileContentTabs";
+import { LockedProfileNotice } from "./lockedProfileNotice";
+import { ProfileAvatarButton } from "./profileAvatarButton";
 import { ProfileVisitorActions } from "./profileVisitorActions";
 import { Button } from "@/components/ui/button";
-import { Avatar, MediaImage } from "@/components/ui/media";
+import { MediaImage } from "@/components/ui/media";
 import { LogOutIcon } from "@/components/ui/icons";
 import { showToast } from "@/components/ui/toast";
 import { buildProfilePath } from "@/utils/seoPaths.util";
@@ -27,6 +29,8 @@ import { PostNotificationsBell } from "@/components/follow/postNotificationsBell
 import { useFollowUser } from "@/components/follow/useFollowUser.hook";
 import { useSession } from "@/components/providers/sessionProvider";
 import { shouldShowPostNotificationBell } from "@/utils/followToggle.util";
+import { followStatusPollIntervalMs, lockedProfileCopyByLock, resolveProfileLock } from "@/utils/profileLock.util";
+import { useUnblockFromProfile } from "./unblockFromProfile.hook";
 
 import styles from "./profileView.module.css";
 import { AppIcon } from "@/components/ui/appIcon";
@@ -62,19 +66,29 @@ export function ProfileView({ user, isSelf }: ProfileViewProps) {
   const router = useRouter();
   const queryClient = useQueryClient();
   const { viewer } = useSession();
-  const followStatus = useQuery({ queryKey: ["followStatus", user.id], queryFn: () => usersService.fetchFollowStatus(user.id), enabled: !isSelf && viewer !== null, retry: false });
+  const followStatus = useQuery({
+    queryKey: ["followStatus", user.id],
+    queryFn: () => usersService.fetchFollowStatus(user.id),
+    enabled: !isSelf && viewer !== null,
+    retry: false,
+    refetchInterval: (query) => followStatusPollIntervalMs(query.state.data?.state),
+  });
   const viewerPostNotifications = followStatus.data?.viewerPostNotifications ?? user.viewerPostNotifications ?? "off";
   const [postNotificationLevel, setPostNotificationLevel] = useState<PostNotificationLevel>(viewerPostNotifications);
   useEffect(() => setPostNotificationLevel(viewerPostNotifications), [viewerPostNotifications]);
   const follow = useFollowUser({
     userId: user.id, username: user.username, displayName: user.name,
     initialState: followStatus.data?.state ?? user.followState ?? (user.isFollowing ? "accepted" : "none"),
+    isPrivate: user.isPrivate === true,
     onStateChange: (state) => {
       if (state !== "accepted") setPostNotificationLevel("off");
       void queryClient.invalidateQueries({ queryKey: ["profile", user.id] });
       void queryClient.invalidateQueries({ queryKey: ["followStatus", user.id] });
     },
   });
+
+  const profileLock = resolveProfileLock({ isSelf, isPrivate: user.isPrivate, followState: follow.state });
+  const unblock = useUnblockFromProfile(user);
 
   const startChat = useMutation({
     mutationFn: () => messagesService.startConversationWithUser(user.id),
@@ -91,7 +105,7 @@ export function ProfileView({ user, isSelf }: ProfileViewProps) {
       {isSelf ? <OwnProfileHeaderActions profile={user} /> : null}
       <header className={styles.header}>
         <div className={styles.avatarWrap}>
-          <Avatar name={user.name} src={user.avatarUrl} size="xl" ring />
+          <ProfileAvatarButton user={user} isSelf={isSelf} followState={followStatus.data?.state} />
         </div>
 
         <div className={styles.identity}>
@@ -114,9 +128,13 @@ export function ProfileView({ user, isSelf }: ProfileViewProps) {
             </>
           ) : (
             <>
-              <Button size="sm" variant={follow.isActive ? "secondary" : "primary"} busy={follow.isPending} onClick={follow.toggle}>
-                {follow.label}
-              </Button>
+              {profileLock === "blocked" ? (
+                <Button size="sm" variant="secondary" busy={unblock.isPending} onClick={unblock.confirmAndUnblock}>Unblock</Button>
+              ) : (
+                <Button size="sm" variant={follow.isActive ? "secondary" : "primary"} busy={follow.isPending} onClick={follow.toggle}>
+                  {follow.label}
+                </Button>
+              )}
               <Button size="sm" variant="secondary" busy={startChat.isPending} onClick={() => requireAuthThen(() => startChat.mutate(), `Sign in to message ${user.name}.`)}>
                 Message
               </Button>
@@ -131,11 +149,11 @@ export function ProfileView({ user, isSelf }: ProfileViewProps) {
 
       <div className={styles.stats}>
         <Stat label="Posts" value={user.posts} />
-        <Stat label="Followers" value={followStatus.data?.followersCount ?? user.followers} href={`/user/${encodeURIComponent(user.id)}/connections?tab=followers`} />
-        <Stat label="Following" value={user.following} href={`/user/${encodeURIComponent(user.id)}/connections?tab=following`} />
+        <Stat label="Followers" value={followStatus.data?.followersCount ?? user.followers} href={profileLock === "open" ? `/user/${encodeURIComponent(user.id)}/connections?tab=followers` : undefined} />
+        <Stat label="Following" value={followStatus.data?.followingCount ?? user.following} href={profileLock === "open" ? `/user/${encodeURIComponent(user.id)}/connections?tab=following` : undefined} />
       </div>
 
-      <ProfileContentTabs user={user} isSelf={isSelf} />
+      {profileLock === "open" ? <ProfileContentTabs user={user} isSelf={isSelf} /> : <LockedProfileNotice copy={lockedProfileCopyByLock[profileLock]} />}
     </div>
   );
 }
