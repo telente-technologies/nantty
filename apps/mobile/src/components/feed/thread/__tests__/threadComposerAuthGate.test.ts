@@ -7,7 +7,19 @@ import { useHydrateSignedInUser } from "@/components/profile/profileQueries.hook
 import { useAuthStore } from "@/store/auth.store";
 import type { User } from "@/types";
 
-jest.mock("@/utils/secureStorage.util", () => ({ secureStorage: { get: jest.fn(async () => null), set: jest.fn(async () => undefined), remove: jest.fn(async () => undefined) } }));
+jest.mock("@/utils/secureStorage.util", () => {
+  class SecureStorageUnavailableError extends Error {}
+  return {
+    SecureStorageUnavailableError,
+    readSecureItemSynchronously: jest.fn(() => ({ available: true, value: null })),
+    writeSecureItemSynchronously: jest.fn(() => true),
+    retryWhenAppComesToForeground: jest.fn(),
+    moveSecureItemToAccess: jest.fn(async () => undefined),
+    secureStoreOptionsFor: jest.fn(() => ({})),
+    isKeychainLockedError: jest.fn(() => false),
+    secureStorage: { get: jest.fn(async () => null), set: jest.fn(async () => undefined), remove: jest.fn(async () => undefined) },
+  };
+});
 jest.mock("@/services/account/users.service", () => ({ usersService: { fetchMyProfile: jest.fn() } }));
 jest.mock("@/components/mentions/mentionComposer.hook", () => ({
   useMentionComposer: () => ({ inputProps: { onFocus: () => undefined }, suggestions: null, mentionCount: 0 }),

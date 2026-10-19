@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
-import { ActivityIndicator, ScrollView, StyleSheet, View } from "react-native";
+import { ActivityIndicator, StyleSheet, View } from "react-native";
 
 import { AdPreview } from "@/components/ads/adPreview";
 import { CreateAdAudienceEditor } from "@/components/ads/createAdAudienceEditor";
@@ -13,6 +13,7 @@ import { useCountryRequiredRetry } from "@/components/checkout/countryRequiredSh
 import { Button } from "@/components/ui/button";
 import { ErrorState } from "@/components/ui/errorState";
 import { Header } from "@/components/ui/header";
+import { KeyboardAwareForm } from "@/components/ui/keyboardAwareForm";
 import { ListSkeleton } from "@/components/ui/listSkeleton";
 import { Screen } from "@/components/ui/screen";
 import { Text } from "@/components/ui/text";
@@ -127,7 +128,7 @@ export function CreateAdScreen({ navigation, route }: MainScreenProps<"CreateAd"
     <Screen>
       <Header title={title} onBack={goBack} />
       {countrySheet}
-      <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
+      <KeyboardAwareForm contentContainerStyle={styles.content}>
         <Text size={12} lineHeight={16} color={colors.textMuted} accessibilityRole="header">Step {step + 1} of {STEP_TITLES.length} · {STEP_TITLES[step]}</Text>
         {params?.mode === "resubmit" && sourceBoost.data?.rejectionReason ? (
           <View style={styles.notice} accessibilityLiveRegion="polite">
@@ -187,7 +188,7 @@ export function CreateAdScreen({ navigation, route }: MainScreenProps<"CreateAd"
           </>
         ) : null}
         <AdsManagerBanner />
-      </ScrollView>
+      </KeyboardAwareForm>
       <View style={styles.footer}>
         {submit.isError ? <Text size={12} color={colors.error} align="center" accessibilityLiveRegion="assertive">{boostErrorMessage(submit.error)}</Text> : null}
         {step < 3 ? (

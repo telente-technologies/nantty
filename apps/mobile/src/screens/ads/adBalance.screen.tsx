@@ -1,12 +1,13 @@
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRef, useState } from "react";
-import { ActivityIndicator, ScrollView, StyleSheet, View } from "react-native";
+import { ActivityIndicator, StyleSheet, View } from "react-native";
 
 import { Button } from "@/components/ui/button";
 import { Chip } from "@/components/ui/chip";
 import { ErrorState } from "@/components/ui/errorState";
 import { Header } from "@/components/ui/header";
 import { TextField } from "@/components/ui/input";
+import { KeyboardAwareForm } from "@/components/ui/keyboardAwareForm";
 import { ListSkeleton } from "@/components/ui/listSkeleton";
 import { usePullToRefresh } from "@/components/ui/pullToRefresh.hook";
 import { Screen } from "@/components/ui/screen";
@@ -49,7 +50,7 @@ export function AdBalanceScreen({ navigation }: MainScreenProps<"AdBalance">) {
   return (
     <Screen>
       <Header title="Ad credit & balance" />
-      <ScrollView contentContainerStyle={styles.content} refreshControl={refreshControl} keyboardShouldPersistTaps="handled">
+      <KeyboardAwareForm contentContainerStyle={styles.content} refreshControl={refreshControl}>
         <View style={styles.pots}>
           <View style={styles.pot} accessible accessibilityLabel={`Ad balance, withdrawable: ${formatMoneyForDisplay(data.balance)}`}>
             <Text size={12} lineHeight={16} color={colors.textMuted}>Ad balance (withdrawable)</Text>
@@ -98,7 +99,7 @@ export function AdBalanceScreen({ navigation }: MainScreenProps<"AdBalance">) {
           ))}
           {history.hasNextPage ? <Button variant="subtle" title="Show more" loading={history.isFetchingNextPage} onPress={() => history.fetchNextPage()} /> : null}
         </View>
-      </ScrollView>
+      </KeyboardAwareForm>
     </Screen>
   );
 }
