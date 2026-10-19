@@ -115,6 +115,7 @@ async def test_a_flagged_frame_publishes_an_advisory_live_safety_score_for_go_tr
         "hashMatch",
         "hashMatchProvider",
         "hashMatchReference",
+        "childSafetySuspected",
         "advisoryOnly",
         "generatedAt",
     }

@@ -68,6 +68,15 @@ class IntelligenceSettings(BaseSettings):
     live_safety_transcribe_output_bucket: str = ""
     live_safety_transcribe_language_code: str = "en-US"
     live_safety_csam_hash_matching_enabled: bool = False
+    child_safety_hash_provider: Literal["disabled", "synthetic", "http"] = "disabled"
+    child_safety_hash_provider_name: str = ""
+    child_safety_hash_provider_endpoint: str = ""
+    child_safety_hash_provider_api_key: SecretStr = SecretStr("")
+    child_safety_hash_provider_timeout_seconds: float = Field(default=3.0, gt=0, le=30)
+    child_safety_synthetic_hashes: str = ""
+    child_safety_explicit_confidence: float = Field(default=0.90, ge=0.5, le=1.0)
+    child_safety_minor_age_ceiling: int = Field(default=18, ge=13, le=21)
+    media_scan_deadline_seconds: float = Field(default=4.5, gt=0, le=30)
     media_internal_url: str = ""
     media_internal_token: SecretStr = SecretStr("")
     media_internal_timeout_seconds: float = Field(default=10.0, gt=0, le=120)
@@ -158,6 +167,23 @@ class IntelligenceSettings(BaseSettings):
         if bool(self.media_internal_url) != bool(self.media_internal_token.get_secret_value()):
             raise ValueError(
                 "INTELLIGENCE_MEDIA_INTERNAL_URL and INTELLIGENCE_MEDIA_INTERNAL_TOKEN must be set together"
+            )
+        return self
+
+    @model_validator(mode="after")
+    def reject_misconfigured_child_safety_hash_matching(self) -> IntelligenceSettings:
+        if self.live_safety_csam_hash_matching_enabled and self.child_safety_hash_provider == "disabled":
+            raise ValueError("CSAM hash matching is enabled but INTELLIGENCE_CHILD_SAFETY_HASH_PROVIDER is disabled")
+        deployed = self.environment in {"staging", "production"}
+        if self.child_safety_hash_provider == "synthetic" and deployed:
+            raise ValueError("the synthetic child safety hash list is a test double and cannot run when deployed")
+        if self.child_safety_hash_provider == "http" and (
+            not self.child_safety_hash_provider_name
+            or len(self.child_safety_hash_provider_api_key.get_secret_value()) < 16
+            or not self.child_safety_hash_provider_endpoint.startswith("https://" if deployed else "http")
+        ):
+            raise ValueError(
+                "child safety hash matching is enabled but its provider name, endpoint or api key is missing"
             )
         return self
 

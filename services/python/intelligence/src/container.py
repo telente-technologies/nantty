@@ -45,6 +45,8 @@ from src.modules.events_ingestion.services.event_ingestion_service import EventI
 from src.modules.experiments.services.experiment_service import ExperimentService
 from src.modules.extended_risk.services.extended_risk_scoring_service import ExtendedRiskScoringService
 from src.modules.feed.services.feed_ranking_service import FeedRankingService
+from src.modules.child_safety.services.hash_match_provider_interface_service import build_hash_match_provider
+from src.modules.child_safety.services.media_child_safety_scan_service import MediaChildSafetyScanService
 from src.modules.live_safety.live_safety_module import build_live_safety_scoring_service
 from src.modules.live_safety.services.live_safety_scoring_service import LiveSafetyScoringService
 from src.modules.model_registry.repositories.model_registry_repository import ModelRegistry
@@ -108,6 +110,7 @@ class ApplicationContainer:
     ad_click_prediction_service: AdClickPredictionService
     social_proof_service: SocialProofService
     audio_fingerprint_index_service: AudioFingerprintIndexService
+    media_child_safety_scan_service: MediaChildSafetyScanService
     command_bus: CommandBus
     query_bus: QueryBus
     rabbitmq_channels: RabbitMqChannelProvider | None = None
@@ -212,6 +215,15 @@ def build_application_container(
     content_moderation_service = ContentModerationService(moderation_model_holder)
     image_moderation_model_holder = ImageModerationModelHolder()
     image_moderation_service = ImageModerationService(image_moderation_model_holder)
+    hash_provider = build_hash_match_provider(
+        settings.child_safety_hash_provider,
+        settings.environment,
+        settings.child_safety_hash_provider_name,
+        settings.child_safety_hash_provider_endpoint,
+        settings.child_safety_hash_provider_api_key.get_secret_value(),
+        settings.child_safety_hash_provider_timeout_seconds,
+        settings.child_safety_synthetic_hashes,
+    )
     content_scoring_service = ContentScoringService(
         content_moderation_service,
         image_moderation_service,
@@ -257,7 +269,17 @@ def build_application_container(
         image_moderation_service=image_moderation_service,
         content_scoring_service=content_scoring_service,
         live_safety_scoring_service=build_live_safety_scoring_service(
-            settings, rabbitmq_channels, image_moderation_model_holder, content_moderation_service
+            settings,
+            rabbitmq_channels,
+            image_moderation_model_holder,
+            content_moderation_service,
+            hash_provider=hash_provider,
+        ),
+        media_child_safety_scan_service=MediaChildSafetyScanService(
+            image_moderation_model_holder,
+            hash_provider,
+            settings.child_safety_explicit_confidence,
+            settings.child_safety_minor_age_ceiling,
         ),
         real_followers_estimation_service=RealFollowersEstimationService(),
         extended_risk_scoring_service=ExtendedRiskScoringService(suggestion_service),

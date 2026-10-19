@@ -63,5 +63,6 @@ class LiveSafetyScoreMessage(ContractModel):
     hash_match: bool = False
     hash_match_provider: str = ""
     hash_match_reference: str = ""
+    child_safety_suspected: bool = False
     advisory_only: Literal[True] = True
     generated_at: datetime

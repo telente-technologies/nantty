@@ -27,6 +27,7 @@ def signed_path_candidates(scope: Scope) -> list[str]:
 
 PROTECTED_PATH_PREFIX = "/v1/"
 EVENT_INGESTION_PATH = "/v1/events"
+LARGE_BODY_PATHS = frozenset({EVENT_INGESTION_PATH, "/v1/moderation/scan-media"})
 
 
 class RequestBodyTooLargeError(Exception):
@@ -62,7 +63,7 @@ class SignedRequestMiddleware:
             return
         body_limit = (
             self.maximum_event_batch_body_bytes
-            if scope["path"] == EVENT_INGESTION_PATH
+            if scope["path"] in LARGE_BODY_PATHS
             else self.maximum_request_body_bytes
         )
         raw_headers: list[tuple[bytes, bytes]] = list(scope.get("headers", []))

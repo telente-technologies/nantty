@@ -15,7 +15,12 @@ from src.modules.live_safety.repositories.live_safety_score_queue_repository imp
     LiveSafetyScorePublisher,
     NullLiveSafetyScorePublisher,
 )
-from src.modules.live_safety.services.csam_hash_match_interface_service import build_csam_hash_match_provider
+from src.modules.child_safety.services.hash_match_provider_interface_service import (
+    DisabledHashMatchProvider,
+    HashMatchProvider,
+    ObjectBytesReader,
+)
+from src.modules.live_safety.services.csam_hash_match_interface_service import build_live_frame_hash_matcher
 from src.modules.live_safety.services.live_safety_scoring_service import LiveSafetyScoringService
 from src.modules.live_safety.services.rekognition_image_moderation_model_service import (
     RekognitionImageModerationModel,
@@ -99,15 +104,33 @@ def build_live_safety_scoring_service(
     image_models: ImageModerationModelHolder,
     text_moderation: ContentModerationService,
     session_factory: AwsSessionFactory | None = None,
+    hash_provider: HashMatchProvider | None = None,
 ) -> LiveSafetyScoringService:
     session = register_rekognition_when_available(settings, image_models, session_factory)
     return LiveSafetyScoringService(
         image_models,
         TranscriptModerationScorer(text_moderation),
         build_segment_transcriber(settings, session),
-        build_csam_hash_match_provider(settings.live_safety_csam_hash_matching_enabled),
+        build_live_frame_hash_matcher(hash_provider or DisabledHashMatchProvider(), build_frame_object_reader(session)),
         build_live_safety_publisher(settings, channels),
+        settings.child_safety_explicit_confidence,
+        settings.child_safety_minor_age_ceiling,
     )
+
+
+MAXIMUM_FRAME_BYTES = 8 * 1024 * 1024
+
+
+def build_frame_object_reader(session: Any | None) -> ObjectBytesReader | None:
+    if session is None:
+        return None
+    client = session.client("s3", config=AWS_CLIENT_CONFIG)
+
+    def read_frame_bytes(bucket: str, key: str) -> bytes:
+        body: bytes = client.get_object(Bucket=bucket, Key=key)["Body"].read(MAXIMUM_FRAME_BYTES)
+        return body
+
+    return read_frame_bytes
 
 
 def start_live_safety_consumers(

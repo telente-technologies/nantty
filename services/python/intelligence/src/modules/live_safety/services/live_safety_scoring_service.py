@@ -7,6 +7,13 @@ from typing import Literal
 
 from pydantic import ValidationError
 
+from src.modules.child_safety.services.child_safety_signal_service import (
+    DEFAULT_EXPLICIT_CONFIDENCE,
+    has_high_confidence_explicit_label,
+    highest_explicit_sexual_confidence,
+    is_suspected_child_safety,
+)
+from src.modules.child_safety.services.hash_match_provider_interface_service import HashMatchUnavailableError
 from src.modules.content_scoring.dtos.content_score_dto import ImageModerationRequest
 from src.modules.content_scoring.services.image_moderation_interface_service import ImageModerationModelHolder
 from src.modules.live_safety.dtos.live_safety_dto import (
@@ -44,7 +51,11 @@ class LiveSafetyScoringService:
         transcriber: SegmentTranscriber,
         hash_matcher: CsamHashMatchProvider,
         publisher: LiveSafetyScorePublisher,
+        explicit_confidence: float = DEFAULT_EXPLICIT_CONFIDENCE,
+        minor_age_ceiling: int = 18,
     ) -> None:
+        self.explicit_confidence = explicit_confidence
+        self.minor_age_ceiling = minor_age_ceiling
         self.image_models = image_models
         self.transcript_scorer = transcript_scorer
         self.transcriber = transcriber
@@ -73,7 +84,12 @@ class LiveSafetyScoringService:
 
     async def score_frame(self, job: LiveFrameCapturedJob, now: datetime | None = None) -> JobOutcome:
         generated_at = now or datetime.now(UTC)
-        match = await asyncio.to_thread(self.hash_matcher.match_frame, job.bucket, job.frame_ref)
+        hash_check_unavailable = False
+        try:
+            match = await asyncio.to_thread(self.hash_matcher.match_frame, job.bucket, job.frame_ref)
+        except HashMatchUnavailableError:
+            live_safety_logger.error("live_frame_hash_check_unavailable")
+            match, hash_check_unavailable = None, True
         if match is not None:
             await self.publisher.publish_live_safety_score(
                 LiveSafetyScoreMessage(
@@ -96,9 +112,19 @@ class LiveSafetyScoringService:
             )
             return "scored"
         labels, model_version = await asyncio.to_thread(self.detect_frame_labels, job)
-        if labels is None:
+        if labels is None and not hash_check_unavailable:
             return "skipped"
+        labels = labels or []
         categories = map_labels_to_categories(labels)
+        suspected = await asyncio.to_thread(self.frame_suggests_child_safety, job, labels)
+        if suspected:
+            categories = [
+                LiveSafetyCategory(category="child_safety", confidence=highest_explicit_sexual_confidence(labels)),
+                *categories,
+            ]
+        suggested_action = "hold" if suspected else suggested_action_for_categories(categories)
+        if hash_check_unavailable and suggested_action == "allow":
+            suggested_action = "review"
         await self.publisher.publish_live_safety_score(
             LiveSafetyScoreMessage(
                 score_id=build_live_score_id("frame", job.frame_id, model_version),
@@ -110,12 +136,24 @@ class LiveSafetyScoringService:
                 labels=labels,
                 categories=categories,
                 confidence=categories[0].confidence if categories else 0.0,
-                suggested_action=suggested_action_for_categories(categories),
+                suggested_action=suggested_action,
                 model_version=model_version,
+                child_safety_suspected=suspected,
                 generated_at=generated_at,
             )
         )
         return "scored"
+
+    def frame_suggests_child_safety(self, job: LiveFrameCapturedJob, labels: list[DetectedModerationLabel]) -> bool:
+        detect_faces = getattr(self.image_models.active_model, "detect_face_ages_in_frame", None)
+        if not callable(detect_faces) or not has_high_confidence_explicit_label(labels, self.explicit_confidence):
+            return False
+        try:
+            faces = detect_faces(job.bucket, job.frame_ref)
+        except Exception:
+            live_safety_logger.error("live_frame_face_age_check_failed")
+            return False
+        return is_suspected_child_safety(labels, faces, self.explicit_confidence, self.minor_age_ceiling)
 
     def detect_frame_labels(self, job: LiveFrameCapturedJob) -> tuple[list[DetectedModerationLabel] | None, str]:
         model = self.image_models.active_model

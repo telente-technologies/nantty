@@ -1,0 +1,9 @@
+{
+  "ModerationLabels": [
+    {"Confidence": 98.12, "Name": "Explicit", "ParentName": "", "TaxonomyLevel": 1},
+    {"Confidence": 97.61, "Name": "Explicit Nudity", "ParentName": "Explicit", "TaxonomyLevel": 2},
+    {"Confidence": 96.4, "Name": "Exposed Female Nipple", "ParentName": "Explicit Nudity", "TaxonomyLevel": 3}
+  ],
+  "ModerationModelVersion": "7.0",
+  "ContentTypes": []
+}

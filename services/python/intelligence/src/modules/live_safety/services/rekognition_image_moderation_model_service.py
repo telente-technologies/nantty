@@ -13,6 +13,8 @@ REKOGNITION_MODEL_VERSION_PREFIX = "aws-rekognition-moderation"
 class RekognitionModerationClient(Protocol):
     def detect_moderation_labels(self, **kwargs: Any) -> dict[str, Any]: ...
 
+    def detect_faces(self, **kwargs: Any) -> dict[str, Any]: ...
+
 
 class FrameLabelDetector(Protocol):
     version: str
@@ -46,9 +48,19 @@ class RekognitionImageModerationModel:
         self.version = REKOGNITION_MODEL_VERSION_PREFIX
 
     def detect_frame_labels(self, bucket: str, key: str) -> list[DetectedModerationLabel]:
-        response = self.client.detect_moderation_labels(
-            Image={"S3Object": {"Bucket": bucket, "Name": key}}, MinConfidence=self.minimum_confidence_percent
-        )
+        return self.detect_labels_for_image({"S3Object": {"Bucket": bucket, "Name": key}})
+
+    def detect_labels_from_bytes(self, data: bytes) -> list[DetectedModerationLabel]:
+        return self.detect_labels_for_image({"Bytes": data})
+
+    def detect_face_ages_in_frame(self, bucket: str, key: str) -> dict[str, Any]:
+        return self.client.detect_faces(Image={"S3Object": {"Bucket": bucket, "Name": key}}, Attributes=["AGE_RANGE"])
+
+    def detect_face_ages_from_bytes(self, data: bytes) -> dict[str, Any]:
+        return self.client.detect_faces(Image={"Bytes": data}, Attributes=["AGE_RANGE"])
+
+    def detect_labels_for_image(self, image: dict[str, Any]) -> list[DetectedModerationLabel]:
+        response = self.client.detect_moderation_labels(Image=image, MinConfidence=self.minimum_confidence_percent)
         if model_version := response.get("ModerationModelVersion"):
             self.version = f"{REKOGNITION_MODEL_VERSION_PREFIX}-{model_version}"
         return [
