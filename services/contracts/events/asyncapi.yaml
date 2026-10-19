@@ -26,6 +26,8 @@ channels:
         $ref: '#/components/messages/followCreated'
       followRequestCreated:
         $ref: '#/components/messages/followRequestCreated'
+      followRequestAccepted:
+        $ref: '#/components/messages/followRequestAccepted'
       followRejected:
         $ref: '#/components/messages/followRejected'
       blockCreated:
@@ -262,6 +264,10 @@ channels:
         $ref: '#/components/messages/adBoostCreated'
       adBoostCancelled:
         $ref: '#/components/messages/adBoostCancelled'
+      adCreditChanged:
+        $ref: '#/components/messages/adCreditChanged'
+      adSpendRefunded:
+        $ref: '#/components/messages/adSpendRefunded'
       adMediaUploaded:
         $ref: '#/components/messages/adMediaUploaded'
       adReportReady:
@@ -740,6 +746,8 @@ operations:
       - $ref: '#/channels/domainEvents/messages/adPremiumPoolAllocated'
       - $ref: '#/channels/domainEvents/messages/adBoostCreated'
       - $ref: '#/channels/domainEvents/messages/adBoostCancelled'
+      - $ref: '#/channels/domainEvents/messages/adCreditChanged'
+      - $ref: '#/channels/domainEvents/messages/adSpendRefunded'
       - $ref: '#/channels/domainEvents/messages/adMediaUploaded'
       - $ref: '#/channels/domainEvents/messages/adReportReady'
 
@@ -1907,6 +1915,20 @@ components:
         allOf:
           - $ref: './schemas/envelope.v1.json'
           - properties: { data: { $ref: './schemas/adBoost.cancelled.v1.json' } }
+    adCreditChanged:
+      name: adCredit.changed
+      headers: { type: object, properties: { eventType: { const: adCredit.changed } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/adCredit.changed.v1.json' } }
+    adSpendRefunded:
+      name: adSpend.refunded
+      headers: { type: object, properties: { eventType: { const: adSpend.refunded } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/adSpend.refunded.v1.json' } }
     adMediaUploaded:
       name: adMedia.uploaded
       headers: { type: object, properties: { eventType: { const: adMedia.uploaded } } }
@@ -1935,6 +1957,13 @@ components:
         allOf:
           - $ref: './schemas/envelope.v1.json'
           - properties: { data: { $ref: './schemas/followRequest.created.v1.json' } }
+    followRequestAccepted:
+      name: followRequest.accepted
+      headers: { type: object, properties: { eventType: { const: followRequest.accepted } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/followRequest.accepted.v1.json' } }
     followRejected:
       name: follow.rejected
       headers: { type: object, properties: { eventType: { const: follow.rejected } } }

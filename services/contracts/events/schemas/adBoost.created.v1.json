@@ -25,11 +25,22 @@
     "postId": {
       "type": "string"
     },
+    "destinationType": {
+      "enum": [
+        "post",
+        "profile",
+        "store"
+      ]
+    },
+    "targetId": {
+      "type": "string"
+    },
     "goal": {
       "enum": [
         "views",
         "profile_visits",
-        "messages"
+        "messages",
+        "store_visits"
       ]
     },
     "totalBudgetMinor": {

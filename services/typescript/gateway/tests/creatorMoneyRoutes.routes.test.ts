@@ -16,6 +16,8 @@ describe("creator money routes", () => {
       ["POST", "/api/v1/verification/subscription/cancel"], [`POST`, `/api/v1/creators/${creatorId}/subscriptions/store`],
       ["POST", "/api/v1/creator-subscriptions/store-receipts"], ["GET", "/api/v1/creators/me/subscription-plans/price-tiers"],
       ["GET", "/api/v1/creators/brand-deals"], ["POST", "/api/v1/creators/brand-deals"], ["DELETE", "/api/v1/creators/brand-deals/d1"],
+      ["GET", "/api/v1/creators/me/affiliate-catalog"], ["GET", "/api/v1/creators/me/affiliate-promotions"], ["GET", "/api/v1/creators/me/affiliate-earnings"],
+      ["POST", "/api/v1/creators/me/affiliate-links"],
     ];
     for (const [method, path] of signedIn) {
       expect(resolveUpstreamRouteForRequest(method, path), `${method} ${path}`).toMatchObject({ upstream: "money", authentication: "required" });
@@ -26,6 +28,12 @@ describe("creator money routes", () => {
     for (const store of ["apple_iap", "google_play"]) {
       expect(resolveUpstreamRouteForRequest("POST", `/webhooks/store-notifications/${store}`)).toMatchObject({ upstream: "money", authentication: "optional", rawBodyPassthrough: true });
     }
+  });
+
+  it("lets anyone record an affiliate link click but never lists links anonymously", () => {
+    expect(resolveUpstreamRouteForRequest("POST", "/api/v1/affiliate-links/l1/clicks")).toMatchObject({ upstream: "money", authentication: "optional" });
+    expect(resolveUpstreamRouteForRequest("GET", "/api/v1/affiliate-links/l1/clicks")).toBeUndefined();
+    expect(resolveUpstreamRouteForRequest("DELETE", "/api/v1/creators/me/affiliate-links")).toBeUndefined();
   });
 
   it("keeps public plans anonymous and leaves identity and live routes alone", () => {

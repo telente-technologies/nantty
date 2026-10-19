@@ -62,7 +62,7 @@ otp.issued, signIn.newDeviceDetected, twoFactor.enabled (goIdentity); checkmark.
 | account.warned | goIdentity (via goTrust WARN_AUTHOR / WARN_USER) | R accountId, reason, policy, policyUrl, appealUrl; O caseId (report id), source. In-app + push only, no email template |
 | mention.created | social | R recipientUserId, actor{id,name}, excerpt, url; O surface, mentionedEveryone, commentId (stored for comment mentions) |
 | post.tagged | social | R recipientUserId, actor{id,name}, postId, kind (post or clip); O taggedUserId, authorId, url |
-| follow.created, followRequest.created, messageRequest.received, videoReply.created | social | R recipientUserId, actor{id,name}; O url |
+| follow.created, followRequest.created, followRequest.accepted, messageRequest.received, videoReply.created | social | R recipientUserId, actor{id,name}; O url. follow.created with viaRequest=true (an accepted request or a private→public switch) sends nothing; followRequest.accepted goes to the requester. follow.rejected has no mapping, so a decline never notifies |
 | comment.created | social | R recipientUserId, actor; O target, excerpt, url, commentId (stored so the notification can be withdrawn) |
 | comment.hidden / comment.unhidden | social | R commentId. No notification: in-app notifications of that comment (comment.created and comment mentions, matched by stored commentId or a `?comment=<id>` link) get `hiddenAt` set or cleared, so they leave and rejoin the inbox and unread count. Push already sent is not recalled |
 | post.deleted | social | R postId. No notification: notifications pointing at the post are deleted |

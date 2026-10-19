@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.zudomart.com/events/adSpend.refunded.v1.json",
+  "title": "AdSpendRefunded",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "batchId",
+    "accountId",
+    "currency",
+    "balanceMinor",
+    "creditMinor",
+    "reason",
+    "idempotencyKey"
+  ],
+  "properties": {
+    "batchId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "accountId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "currency": {
+      "type": "string"
+    },
+    "balanceMinor": {
+      "type": "integer"
+    },
+    "creditMinor": {
+      "type": "integer"
+    },
+    "reason": {
+      "type": "string"
+    },
+    "idempotencyKey": {
+      "type": "string"
+    }
+  }
+}

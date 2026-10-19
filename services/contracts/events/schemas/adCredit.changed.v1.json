@@ -1,0 +1,65 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.zudomart.com/events/adCredit.changed.v1.json",
+  "title": "AdCreditChanged",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "entryId",
+    "lotId",
+    "accountId",
+    "userId",
+    "currency",
+    "amountMinor",
+    "kind",
+    "source",
+    "idempotencyKey"
+  ],
+  "properties": {
+    "entryId": {
+      "type": "string"
+    },
+    "lotId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "accountId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "userId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "currency": {
+      "type": "string"
+    },
+    "amountMinor": {
+      "type": "integer",
+      "description": "Signed: positive when credit is added, negative when it expires, is revoked or cashback is reversed."
+    },
+    "kind": {
+      "type": "string",
+      "enum": [
+        "issued",
+        "cashback",
+        "expired",
+        "revoked",
+        "cashback_reversed"
+      ]
+    },
+    "source": {
+      "type": "string",
+      "enum": [
+        "admin_issued",
+        "cashback",
+        "premium_free_boost",
+        "boost_refund",
+        "legacy"
+      ]
+    },
+    "idempotencyKey": {
+      "type": "string"
+    }
+  }
+}

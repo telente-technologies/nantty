@@ -44,6 +44,10 @@
     },
     "idempotencyKey": {
       "type": "string"
+    },
+    "creditDebitMinor": {
+      "type": "integer",
+      "description": "Part of the spend paid with ad credit. debitMinor is the real ad balance part only."
     }
   }
 }
