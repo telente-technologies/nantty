@@ -23,14 +23,14 @@
 :global(:root[data-theme="dark"]) .banner {
   border-color: var(--color-border-strong);
   background: var(--color-surface);
-  box-shadow: 0 24px 60px -24px rgb(0 0 0 / 0.8);
+  box-shadow: 0 0 0 1px #2c2e33, 0 16px 40px -16px rgb(0 0 0 / 0.6);
 }
 
 @media (prefers-color-scheme: dark) {
   :global(:root:not([data-theme="light"])) .banner {
     border-color: var(--color-border-strong);
     background: var(--color-surface);
-    box-shadow: 0 24px 60px -24px rgb(0 0 0 / 0.8);
+    box-shadow: 0 0 0 1px #2c2e33, 0 16px 40px -16px rgb(0 0 0 / 0.6);
   }
 }
 

@@ -7,7 +7,7 @@ export const themeCookieMaxAgeSeconds = 60 * 60 * 24 * 365;
 export const themeChangedEventName = "zudomart:theme-changed";
 export const darkColorSchemeQuery = "(prefers-color-scheme: dark)";
 
-export const themeColorByResolvedTheme: Record<ResolvedTheme, string> = { light: "#f7f8fe", dark: "#0b0d17" };
+export const themeColorByResolvedTheme: Record<ResolvedTheme, string> = { light: "#f7f8fe", dark: "#15161a" };
 
 export const themeViewport: { colorScheme: "light dark"; themeColor: { media: string; color: string }[] } = {
   colorScheme: "light dark",

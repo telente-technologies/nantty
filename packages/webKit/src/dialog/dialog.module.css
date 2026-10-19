@@ -26,8 +26,8 @@
 :global(:root[data-theme="dark"]) .dialog {
   --dialog-surface: var(--color-surface);
   --dialog-border: var(--color-border-strong);
-  --dialog-scrim: rgb(0 0 0 / 0.68);
-  --dialog-shadow: 0 24px 60px -24px rgb(0 0 0 / 0.8);
+  --dialog-scrim: rgb(0 0 0 / 0.55);
+  --dialog-shadow: 0 0 0 1px #2c2e33, 0 16px 40px -16px rgb(0 0 0 / 0.6);
   --dialog-danger-solid: #c8333b;
   --dialog-danger-solid-hover: #d64550;
 }
@@ -36,8 +36,8 @@
   :global(:root:not([data-theme="light"])) .dialog {
     --dialog-surface: var(--color-surface);
     --dialog-border: var(--color-border-strong);
-    --dialog-scrim: rgb(0 0 0 / 0.68);
-    --dialog-shadow: 0 24px 60px -24px rgb(0 0 0 / 0.8);
+    --dialog-scrim: rgb(0 0 0 / 0.55);
+    --dialog-shadow: 0 0 0 1px #2c2e33, 0 16px 40px -16px rgb(0 0 0 / 0.6);
     --dialog-danger-solid: #c8333b;
     --dialog-danger-solid-hover: #d64550;
   }
