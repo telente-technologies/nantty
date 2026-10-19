@@ -15,6 +15,8 @@ import (
 	"zudomart/modules/creators/src/generated/ent/affiliatecommission"
 	"zudomart/modules/creators/src/generated/ent/affiliatecommissionreversal"
 	"zudomart/modules/creators/src/generated/ent/affiliatelink"
+	"zudomart/modules/creators/src/generated/ent/affiliatelinkvisit"
+	"zudomart/modules/creators/src/generated/ent/affiliateordervoid"
 	"zudomart/modules/creators/src/generated/ent/affiliateproductcommission"
 	"zudomart/modules/creators/src/generated/ent/affiliateprogramsetting"
 	"zudomart/modules/creators/src/generated/ent/battlesettlement"
@@ -50,6 +52,10 @@ type Client struct {
 	AffiliateCommissionReversal *AffiliateCommissionReversalClient
 	// AffiliateLink is the client for interacting with the AffiliateLink builders.
 	AffiliateLink *AffiliateLinkClient
+	// AffiliateLinkVisit is the client for interacting with the AffiliateLinkVisit builders.
+	AffiliateLinkVisit *AffiliateLinkVisitClient
+	// AffiliateOrderVoid is the client for interacting with the AffiliateOrderVoid builders.
+	AffiliateOrderVoid *AffiliateOrderVoidClient
 	// AffiliateProductCommission is the client for interacting with the AffiliateProductCommission builders.
 	AffiliateProductCommission *AffiliateProductCommissionClient
 	// AffiliateProgramSetting is the client for interacting with the AffiliateProgramSetting builders.
@@ -89,6 +95,8 @@ func (c *Client) init() {
 	c.AffiliateCommission = NewAffiliateCommissionClient(c.config)
 	c.AffiliateCommissionReversal = NewAffiliateCommissionReversalClient(c.config)
 	c.AffiliateLink = NewAffiliateLinkClient(c.config)
+	c.AffiliateLinkVisit = NewAffiliateLinkVisitClient(c.config)
+	c.AffiliateOrderVoid = NewAffiliateOrderVoidClient(c.config)
 	c.AffiliateProductCommission = NewAffiliateProductCommissionClient(c.config)
 	c.AffiliateProgramSetting = NewAffiliateProgramSettingClient(c.config)
 	c.BattleSettlement = NewBattleSettlementClient(c.config)
@@ -199,6 +207,8 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		AffiliateCommission:         NewAffiliateCommissionClient(cfg),
 		AffiliateCommissionReversal: NewAffiliateCommissionReversalClient(cfg),
 		AffiliateLink:               NewAffiliateLinkClient(cfg),
+		AffiliateLinkVisit:          NewAffiliateLinkVisitClient(cfg),
+		AffiliateOrderVoid:          NewAffiliateOrderVoidClient(cfg),
 		AffiliateProductCommission:  NewAffiliateProductCommissionClient(cfg),
 		AffiliateProgramSetting:     NewAffiliateProgramSettingClient(cfg),
 		BattleSettlement:            NewBattleSettlementClient(cfg),
@@ -234,6 +244,8 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		AffiliateCommission:         NewAffiliateCommissionClient(cfg),
 		AffiliateCommissionReversal: NewAffiliateCommissionReversalClient(cfg),
 		AffiliateLink:               NewAffiliateLinkClient(cfg),
+		AffiliateLinkVisit:          NewAffiliateLinkVisitClient(cfg),
+		AffiliateOrderVoid:          NewAffiliateOrderVoidClient(cfg),
 		AffiliateProductCommission:  NewAffiliateProductCommissionClient(cfg),
 		AffiliateProgramSetting:     NewAffiliateProgramSettingClient(cfg),
 		BattleSettlement:            NewBattleSettlementClient(cfg),
@@ -276,8 +288,9 @@ func (c *Client) Close() error {
 func (c *Client) Use(hooks ...Hook) {
 	for _, n := range []interface{ Use(...Hook) }{
 		c.AffiliateAttributedSale, c.AffiliateCommission, c.AffiliateCommissionReversal,
-		c.AffiliateLink, c.AffiliateProductCommission, c.AffiliateProgramSetting,
-		c.BattleSettlement, c.CreatorAffiliation, c.CreatorBrandDeal, c.CreatorEarning,
+		c.AffiliateLink, c.AffiliateLinkVisit, c.AffiliateOrderVoid,
+		c.AffiliateProductCommission, c.AffiliateProgramSetting, c.BattleSettlement,
+		c.CreatorAffiliation, c.CreatorBrandDeal, c.CreatorEarning,
 		c.CreatorProgramMember, c.CreatorTier, c.CreatorViolation, c.GiftTransaction,
 		c.OutboxEvent, c.TipTransaction,
 	} {
@@ -290,8 +303,9 @@ func (c *Client) Use(hooks ...Hook) {
 func (c *Client) Intercept(interceptors ...Interceptor) {
 	for _, n := range []interface{ Intercept(...Interceptor) }{
 		c.AffiliateAttributedSale, c.AffiliateCommission, c.AffiliateCommissionReversal,
-		c.AffiliateLink, c.AffiliateProductCommission, c.AffiliateProgramSetting,
-		c.BattleSettlement, c.CreatorAffiliation, c.CreatorBrandDeal, c.CreatorEarning,
+		c.AffiliateLink, c.AffiliateLinkVisit, c.AffiliateOrderVoid,
+		c.AffiliateProductCommission, c.AffiliateProgramSetting, c.BattleSettlement,
+		c.CreatorAffiliation, c.CreatorBrandDeal, c.CreatorEarning,
 		c.CreatorProgramMember, c.CreatorTier, c.CreatorViolation, c.GiftTransaction,
 		c.OutboxEvent, c.TipTransaction,
 	} {
@@ -310,6 +324,10 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.AffiliateCommissionReversal.mutate(ctx, m)
 	case *AffiliateLinkMutation:
 		return c.AffiliateLink.mutate(ctx, m)
+	case *AffiliateLinkVisitMutation:
+		return c.AffiliateLinkVisit.mutate(ctx, m)
+	case *AffiliateOrderVoidMutation:
+		return c.AffiliateOrderVoid.mutate(ctx, m)
 	case *AffiliateProductCommissionMutation:
 		return c.AffiliateProductCommission.mutate(ctx, m)
 	case *AffiliateProgramSettingMutation:
@@ -868,6 +886,272 @@ func (c *AffiliateLinkClient) mutate(ctx context.Context, m *AffiliateLinkMutati
 		return (&AffiliateLinkDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
 		return nil, fmt.Errorf("ent: unknown AffiliateLink mutation op: %q", m.Op())
+	}
+}
+
+// AffiliateLinkVisitClient is a client for the AffiliateLinkVisit schema.
+type AffiliateLinkVisitClient struct {
+	config
+}
+
+// NewAffiliateLinkVisitClient returns a client for the AffiliateLinkVisit from the given config.
+func NewAffiliateLinkVisitClient(c config) *AffiliateLinkVisitClient {
+	return &AffiliateLinkVisitClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `affiliatelinkvisit.Hooks(f(g(h())))`.
+func (c *AffiliateLinkVisitClient) Use(hooks ...Hook) {
+	c.hooks.AffiliateLinkVisit = append(c.hooks.AffiliateLinkVisit, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `affiliatelinkvisit.Intercept(f(g(h())))`.
+func (c *AffiliateLinkVisitClient) Intercept(interceptors ...Interceptor) {
+	c.inters.AffiliateLinkVisit = append(c.inters.AffiliateLinkVisit, interceptors...)
+}
+
+// Create returns a builder for creating a AffiliateLinkVisit entity.
+func (c *AffiliateLinkVisitClient) Create() *AffiliateLinkVisitCreate {
+	mutation := newAffiliateLinkVisitMutation(c.config, OpCreate)
+	return &AffiliateLinkVisitCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of AffiliateLinkVisit entities.
+func (c *AffiliateLinkVisitClient) CreateBulk(builders ...*AffiliateLinkVisitCreate) *AffiliateLinkVisitCreateBulk {
+	return &AffiliateLinkVisitCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *AffiliateLinkVisitClient) MapCreateBulk(slice any, setFunc func(*AffiliateLinkVisitCreate, int)) *AffiliateLinkVisitCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &AffiliateLinkVisitCreateBulk{err: fmt.Errorf("calling to AffiliateLinkVisitClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*AffiliateLinkVisitCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &AffiliateLinkVisitCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for AffiliateLinkVisit.
+func (c *AffiliateLinkVisitClient) Update() *AffiliateLinkVisitUpdate {
+	mutation := newAffiliateLinkVisitMutation(c.config, OpUpdate)
+	return &AffiliateLinkVisitUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *AffiliateLinkVisitClient) UpdateOne(_m *AffiliateLinkVisit) *AffiliateLinkVisitUpdateOne {
+	mutation := newAffiliateLinkVisitMutation(c.config, OpUpdateOne, withAffiliateLinkVisit(_m))
+	return &AffiliateLinkVisitUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *AffiliateLinkVisitClient) UpdateOneID(id uuid.UUID) *AffiliateLinkVisitUpdateOne {
+	mutation := newAffiliateLinkVisitMutation(c.config, OpUpdateOne, withAffiliateLinkVisitID(id))
+	return &AffiliateLinkVisitUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for AffiliateLinkVisit.
+func (c *AffiliateLinkVisitClient) Delete() *AffiliateLinkVisitDelete {
+	mutation := newAffiliateLinkVisitMutation(c.config, OpDelete)
+	return &AffiliateLinkVisitDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *AffiliateLinkVisitClient) DeleteOne(_m *AffiliateLinkVisit) *AffiliateLinkVisitDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *AffiliateLinkVisitClient) DeleteOneID(id uuid.UUID) *AffiliateLinkVisitDeleteOne {
+	builder := c.Delete().Where(affiliatelinkvisit.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &AffiliateLinkVisitDeleteOne{builder}
+}
+
+// Query returns a query builder for AffiliateLinkVisit.
+func (c *AffiliateLinkVisitClient) Query() *AffiliateLinkVisitQuery {
+	return &AffiliateLinkVisitQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeAffiliateLinkVisit},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a AffiliateLinkVisit entity by its id.
+func (c *AffiliateLinkVisitClient) Get(ctx context.Context, id uuid.UUID) (*AffiliateLinkVisit, error) {
+	return c.Query().Where(affiliatelinkvisit.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *AffiliateLinkVisitClient) GetX(ctx context.Context, id uuid.UUID) *AffiliateLinkVisit {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *AffiliateLinkVisitClient) Hooks() []Hook {
+	return c.hooks.AffiliateLinkVisit
+}
+
+// Interceptors returns the client interceptors.
+func (c *AffiliateLinkVisitClient) Interceptors() []Interceptor {
+	return c.inters.AffiliateLinkVisit
+}
+
+func (c *AffiliateLinkVisitClient) mutate(ctx context.Context, m *AffiliateLinkVisitMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&AffiliateLinkVisitCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&AffiliateLinkVisitUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&AffiliateLinkVisitUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&AffiliateLinkVisitDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown AffiliateLinkVisit mutation op: %q", m.Op())
+	}
+}
+
+// AffiliateOrderVoidClient is a client for the AffiliateOrderVoid schema.
+type AffiliateOrderVoidClient struct {
+	config
+}
+
+// NewAffiliateOrderVoidClient returns a client for the AffiliateOrderVoid from the given config.
+func NewAffiliateOrderVoidClient(c config) *AffiliateOrderVoidClient {
+	return &AffiliateOrderVoidClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `affiliateordervoid.Hooks(f(g(h())))`.
+func (c *AffiliateOrderVoidClient) Use(hooks ...Hook) {
+	c.hooks.AffiliateOrderVoid = append(c.hooks.AffiliateOrderVoid, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `affiliateordervoid.Intercept(f(g(h())))`.
+func (c *AffiliateOrderVoidClient) Intercept(interceptors ...Interceptor) {
+	c.inters.AffiliateOrderVoid = append(c.inters.AffiliateOrderVoid, interceptors...)
+}
+
+// Create returns a builder for creating a AffiliateOrderVoid entity.
+func (c *AffiliateOrderVoidClient) Create() *AffiliateOrderVoidCreate {
+	mutation := newAffiliateOrderVoidMutation(c.config, OpCreate)
+	return &AffiliateOrderVoidCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of AffiliateOrderVoid entities.
+func (c *AffiliateOrderVoidClient) CreateBulk(builders ...*AffiliateOrderVoidCreate) *AffiliateOrderVoidCreateBulk {
+	return &AffiliateOrderVoidCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *AffiliateOrderVoidClient) MapCreateBulk(slice any, setFunc func(*AffiliateOrderVoidCreate, int)) *AffiliateOrderVoidCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &AffiliateOrderVoidCreateBulk{err: fmt.Errorf("calling to AffiliateOrderVoidClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*AffiliateOrderVoidCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &AffiliateOrderVoidCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for AffiliateOrderVoid.
+func (c *AffiliateOrderVoidClient) Update() *AffiliateOrderVoidUpdate {
+	mutation := newAffiliateOrderVoidMutation(c.config, OpUpdate)
+	return &AffiliateOrderVoidUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *AffiliateOrderVoidClient) UpdateOne(_m *AffiliateOrderVoid) *AffiliateOrderVoidUpdateOne {
+	mutation := newAffiliateOrderVoidMutation(c.config, OpUpdateOne, withAffiliateOrderVoid(_m))
+	return &AffiliateOrderVoidUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *AffiliateOrderVoidClient) UpdateOneID(id string) *AffiliateOrderVoidUpdateOne {
+	mutation := newAffiliateOrderVoidMutation(c.config, OpUpdateOne, withAffiliateOrderVoidID(id))
+	return &AffiliateOrderVoidUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for AffiliateOrderVoid.
+func (c *AffiliateOrderVoidClient) Delete() *AffiliateOrderVoidDelete {
+	mutation := newAffiliateOrderVoidMutation(c.config, OpDelete)
+	return &AffiliateOrderVoidDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *AffiliateOrderVoidClient) DeleteOne(_m *AffiliateOrderVoid) *AffiliateOrderVoidDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *AffiliateOrderVoidClient) DeleteOneID(id string) *AffiliateOrderVoidDeleteOne {
+	builder := c.Delete().Where(affiliateordervoid.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &AffiliateOrderVoidDeleteOne{builder}
+}
+
+// Query returns a query builder for AffiliateOrderVoid.
+func (c *AffiliateOrderVoidClient) Query() *AffiliateOrderVoidQuery {
+	return &AffiliateOrderVoidQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeAffiliateOrderVoid},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a AffiliateOrderVoid entity by its id.
+func (c *AffiliateOrderVoidClient) Get(ctx context.Context, id string) (*AffiliateOrderVoid, error) {
+	return c.Query().Where(affiliateordervoid.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *AffiliateOrderVoidClient) GetX(ctx context.Context, id string) *AffiliateOrderVoid {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *AffiliateOrderVoidClient) Hooks() []Hook {
+	return c.hooks.AffiliateOrderVoid
+}
+
+// Interceptors returns the client interceptors.
+func (c *AffiliateOrderVoidClient) Interceptors() []Interceptor {
+	return c.inters.AffiliateOrderVoid
+}
+
+func (c *AffiliateOrderVoidClient) mutate(ctx context.Context, m *AffiliateOrderVoidMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&AffiliateOrderVoidCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&AffiliateOrderVoidUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&AffiliateOrderVoidUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&AffiliateOrderVoidDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown AffiliateOrderVoid mutation op: %q", m.Op())
 	}
 }
 
@@ -2471,17 +2755,19 @@ func (c *TipTransactionClient) mutate(ctx context.Context, m *TipTransactionMuta
 type (
 	hooks struct {
 		AffiliateAttributedSale, AffiliateCommission, AffiliateCommissionReversal,
-		AffiliateLink, AffiliateProductCommission, AffiliateProgramSetting,
-		BattleSettlement, CreatorAffiliation, CreatorBrandDeal, CreatorEarning,
-		CreatorProgramMember, CreatorTier, CreatorViolation, GiftTransaction,
-		OutboxEvent, TipTransaction []ent.Hook
+		AffiliateLink, AffiliateLinkVisit, AffiliateOrderVoid,
+		AffiliateProductCommission, AffiliateProgramSetting, BattleSettlement,
+		CreatorAffiliation, CreatorBrandDeal, CreatorEarning, CreatorProgramMember,
+		CreatorTier, CreatorViolation, GiftTransaction, OutboxEvent,
+		TipTransaction []ent.Hook
 	}
 	inters struct {
 		AffiliateAttributedSale, AffiliateCommission, AffiliateCommissionReversal,
-		AffiliateLink, AffiliateProductCommission, AffiliateProgramSetting,
-		BattleSettlement, CreatorAffiliation, CreatorBrandDeal, CreatorEarning,
-		CreatorProgramMember, CreatorTier, CreatorViolation, GiftTransaction,
-		OutboxEvent, TipTransaction []ent.Interceptor
+		AffiliateLink, AffiliateLinkVisit, AffiliateOrderVoid,
+		AffiliateProductCommission, AffiliateProgramSetting, BattleSettlement,
+		CreatorAffiliation, CreatorBrandDeal, CreatorEarning, CreatorProgramMember,
+		CreatorTier, CreatorViolation, GiftTransaction, OutboxEvent,
+		TipTransaction []ent.Interceptor
 	}
 )
 

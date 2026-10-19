@@ -65,6 +65,12 @@ func (handler Handler) Execute(ctx context.Context, command Command) (Result, er
 	var created *ent.Store
 	err = handler.Container.RunInTransaction(ctx, func(tx *ent.Tx) error {
 		var createError error
+		if _, createError = tx.ExecContext(ctx, "SELECT pg_advisory_xact_lock(hashtextextended($1, 13))", "store-owner:"+command.AccountId.String()); createError != nil {
+			return createError
+		}
+		if owned, lookupError := tx.Store.Query().Where(store.OwnerAccountID(command.AccountId), store.Channel(enums.ChannelStore), store.StatusNEQ(enums.StoreClosed)).Exist(ctx); lookupError != nil || owned {
+			return firstError(lookupError, catalogerrors.StoreLimitOne)
+		}
 		created, createError = tx.Store.Create().SetID(storeId).SetOwnerAccountID(command.AccountId).SetBusinessProfileID(profile.ProfileId).SetName(strings.TrimSpace(request.Name)).
 			SetSlug(slug).SetDescription(request.Description).SetCountryCode(country).SetCurrency(currency).Save(ctx)
 		if createError != nil {
@@ -127,7 +133,7 @@ func (handler Handler) refuseSecondStore(ctx context.Context, accountId uuid.UUI
 		return err
 	}
 	if owned {
-		return catalogerrors.ProfileLimitStoreOrBusiness
+		return catalogerrors.StoreLimitOne
 	}
 	return nil
 }

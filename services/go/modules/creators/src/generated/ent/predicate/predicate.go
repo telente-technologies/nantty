@@ -18,6 +18,12 @@ type AffiliateCommissionReversal func(*sql.Selector)
 // AffiliateLink is the predicate function for affiliatelink builders.
 type AffiliateLink func(*sql.Selector)
 
+// AffiliateLinkVisit is the predicate function for affiliatelinkvisit builders.
+type AffiliateLinkVisit func(*sql.Selector)
+
+// AffiliateOrderVoid is the predicate function for affiliateordervoid builders.
+type AffiliateOrderVoid func(*sql.Selector)
+
 // AffiliateProductCommission is the predicate function for affiliateproductcommission builders.
 type AffiliateProductCommission func(*sql.Selector)
 

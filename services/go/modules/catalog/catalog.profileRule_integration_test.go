@@ -28,7 +28,7 @@ func TestStoreCreationClaimsTheAccountSlotAndReleasesOnFailure(t *testing.T) {
 		t.Fatalf("the registry slot carries the new store id: %v", slot)
 	}
 	status, body := harness.call("POST", "/api/v1/stores", owner, map[string]any{"businessProfileId": directory.addBusiness(ownerId).String(), "name": "Second Shop"}, "Idempotency-Key", "store-slot-00000002")
-	if status != http.StatusConflict || body["code"] != "PROFILE_LIMIT_STORE_OR_BUSINESS" {
+	if status != http.StatusConflict || body["code"] != "STORE_LIMIT_ONE" {
 		t.Fatalf("a second store for the account is refused: %d %v", status, body)
 	}
 	businessId, business := harness.account("business-owner")

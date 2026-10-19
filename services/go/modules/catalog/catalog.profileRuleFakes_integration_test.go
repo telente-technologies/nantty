@@ -18,6 +18,7 @@ type fakeRegistry struct {
 	statuses map[uuid.UUID]string
 	released []interfaces.LinkedClaim
 	moved    []uuid.UUID
+	allowAll bool
 }
 
 func newFakeRegistry() *fakeRegistry {
@@ -27,6 +28,9 @@ func newFakeRegistry() *fakeRegistry {
 func (registry *fakeRegistry) Claim(_ context.Context, accountId uuid.UUID, claim interfaces.LinkedClaim) error {
 	registry.mutex.Lock()
 	defer registry.mutex.Unlock()
+	if registry.allowAll {
+		return nil
+	}
 	if claim.Kind == "brand" {
 		if existing, taken := registry.brands[accountId]; taken && existing != claim.ProfileId {
 			return catalogerrors.ProfileLimitOneBrand

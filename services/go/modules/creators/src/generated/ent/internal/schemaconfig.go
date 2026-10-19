@@ -11,6 +11,8 @@ type SchemaConfig struct {
 	AffiliateCommission         string // AffiliateCommission table.
 	AffiliateCommissionReversal string // AffiliateCommissionReversal table.
 	AffiliateLink               string // AffiliateLink table.
+	AffiliateLinkVisit          string // AffiliateLinkVisit table.
+	AffiliateOrderVoid          string // AffiliateOrderVoid table.
 	AffiliateProductCommission  string // AffiliateProductCommission table.
 	AffiliateProgramSetting     string // AffiliateProgramSetting table.
 	BattleSettlement            string // BattleSettlement table.

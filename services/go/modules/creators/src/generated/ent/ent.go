@@ -12,6 +12,8 @@ import (
 	"zudomart/modules/creators/src/generated/ent/affiliatecommission"
 	"zudomart/modules/creators/src/generated/ent/affiliatecommissionreversal"
 	"zudomart/modules/creators/src/generated/ent/affiliatelink"
+	"zudomart/modules/creators/src/generated/ent/affiliatelinkvisit"
+	"zudomart/modules/creators/src/generated/ent/affiliateordervoid"
 	"zudomart/modules/creators/src/generated/ent/affiliateproductcommission"
 	"zudomart/modules/creators/src/generated/ent/affiliateprogramsetting"
 	"zudomart/modules/creators/src/generated/ent/battlesettlement"
@@ -92,6 +94,8 @@ func checkColumn(t, c string) error {
 			affiliatecommission.Table:         affiliatecommission.ValidColumn,
 			affiliatecommissionreversal.Table: affiliatecommissionreversal.ValidColumn,
 			affiliatelink.Table:               affiliatelink.ValidColumn,
+			affiliatelinkvisit.Table:          affiliatelinkvisit.ValidColumn,
+			affiliateordervoid.Table:          affiliateordervoid.ValidColumn,
 			affiliateproductcommission.Table:  affiliateproductcommission.ValidColumn,
 			affiliateprogramsetting.Table:     affiliateprogramsetting.ValidColumn,
 			battlesettlement.Table:            battlesettlement.ValidColumn,

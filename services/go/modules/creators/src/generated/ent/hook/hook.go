@@ -56,6 +56,30 @@ func (f AffiliateLinkFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Valu
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.AffiliateLinkMutation", m)
 }
 
+// The AffiliateLinkVisitFunc type is an adapter to allow the use of ordinary
+// function as AffiliateLinkVisit mutator.
+type AffiliateLinkVisitFunc func(context.Context, *ent.AffiliateLinkVisitMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f AffiliateLinkVisitFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.AffiliateLinkVisitMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.AffiliateLinkVisitMutation", m)
+}
+
+// The AffiliateOrderVoidFunc type is an adapter to allow the use of ordinary
+// function as AffiliateOrderVoid mutator.
+type AffiliateOrderVoidFunc func(context.Context, *ent.AffiliateOrderVoidMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f AffiliateOrderVoidFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.AffiliateOrderVoidMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.AffiliateOrderVoidMutation", m)
+}
+
 // The AffiliateProductCommissionFunc type is an adapter to allow the use of ordinary
 // function as AffiliateProductCommission mutator.
 type AffiliateProductCommissionFunc func(context.Context, *ent.AffiliateProductCommissionMutation) (ent.Value, error)

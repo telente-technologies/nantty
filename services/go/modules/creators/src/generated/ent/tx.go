@@ -22,6 +22,10 @@ type Tx struct {
 	AffiliateCommissionReversal *AffiliateCommissionReversalClient
 	// AffiliateLink is the client for interacting with the AffiliateLink builders.
 	AffiliateLink *AffiliateLinkClient
+	// AffiliateLinkVisit is the client for interacting with the AffiliateLinkVisit builders.
+	AffiliateLinkVisit *AffiliateLinkVisitClient
+	// AffiliateOrderVoid is the client for interacting with the AffiliateOrderVoid builders.
+	AffiliateOrderVoid *AffiliateOrderVoidClient
 	// AffiliateProductCommission is the client for interacting with the AffiliateProductCommission builders.
 	AffiliateProductCommission *AffiliateProductCommissionClient
 	// AffiliateProgramSetting is the client for interacting with the AffiliateProgramSetting builders.
@@ -181,6 +185,8 @@ func (tx *Tx) init() {
 	tx.AffiliateCommission = NewAffiliateCommissionClient(tx.config)
 	tx.AffiliateCommissionReversal = NewAffiliateCommissionReversalClient(tx.config)
 	tx.AffiliateLink = NewAffiliateLinkClient(tx.config)
+	tx.AffiliateLinkVisit = NewAffiliateLinkVisitClient(tx.config)
+	tx.AffiliateOrderVoid = NewAffiliateOrderVoidClient(tx.config)
 	tx.AffiliateProductCommission = NewAffiliateProductCommissionClient(tx.config)
 	tx.AffiliateProgramSetting = NewAffiliateProgramSettingClient(tx.config)
 	tx.BattleSettlement = NewBattleSettlementClient(tx.config)

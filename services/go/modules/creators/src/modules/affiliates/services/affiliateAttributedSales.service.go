@@ -12,6 +12,7 @@ import (
 	"zudomart/modules/creators/src/generated/ent"
 	"zudomart/modules/creators/src/generated/ent/affiliateattributedsale"
 	"zudomart/modules/creators/src/generated/ent/affiliatecommission"
+	"zudomart/modules/creators/src/generated/ent/affiliateordervoid"
 	"zudomart/modules/creators/src/generated/ent/creatoraffiliation"
 	"zudomart/modules/creators/src/repositories"
 )
@@ -80,6 +81,11 @@ func (affiliates Affiliates) labelsFor(ctx context.Context, storeId, productId, 
 	return saleLabels{storeName: stores[storeId].Name, productName: products[productId].Name, creatorHandle: users[creatorId].Username}, err
 }
 
+func lockAffiliateOrder(ctx context.Context, transaction *sql.Tx, orderId string) error {
+	_, err := transaction.ExecContext(ctx, "SELECT pg_advisory_xact_lock(hashtextextended($1, 0))", "affiliate-order:"+orderId)
+	return err
+}
+
 func lockAttributedItem(ctx context.Context, transaction *sql.Tx, item attributedSale) error {
 	_, err := transaction.ExecContext(ctx, "SELECT pg_advisory_xact_lock(hashtextextended($1, 0))", "affiliate-commission:"+item.itemKey)
 	return err
@@ -111,7 +117,13 @@ func (affiliates Affiliates) RecordAwaitingAttributedSales(ctx context.Context, 
 	recorded := 0
 	err := affiliates.forEachAttributedCreator(ctx, &sale, func(item attributedSale, creatorId string, labels saleLabels) error {
 		return affiliates.inTransaction(ctx, func(ctx context.Context, transaction *sql.Tx, client *ent.Client) error {
+			if err := lockAffiliateOrder(ctx, transaction, sale.OrderId); err != nil {
+				return err
+			}
 			if err := lockAttributedItem(ctx, transaction, item); err != nil {
+				return err
+			}
+			if voided, err := client.AffiliateOrderVoid.Query().Where(affiliateordervoid.ID(sale.OrderId)).Exist(ctx); err != nil || voided {
 				return err
 			}
 			if seen, err := client.AffiliateAttributedSale.Query().Where(affiliateattributedsale.OrderItemID(item.itemKey)).Exist(ctx); err != nil || seen {
@@ -131,11 +143,24 @@ func (affiliates Affiliates) RecordAwaitingAttributedSales(ctx context.Context, 
 	return recorded, err
 }
 
+// VoidAwaitingAttributedSales also remembers the order as voided, so a paid event that is processed after the cancellation
+// or refund never leaves a pending sale behind.
 func (affiliates Affiliates) VoidAwaitingAttributedSales(ctx context.Context, orderId, reason string) (int, error) {
 	now := affiliates.Container.Now().UTC()
-	return affiliates.Container.Client(affiliates.Container.Resources.Database).AffiliateAttributedSale.Update().
-		Where(affiliateattributedsale.OrderID(orderId), affiliateattributedsale.StatusEQ(affiliateattributedsale.StatusAwaiting)).
-		SetStatus(affiliateattributedsale.StatusVoided).SetVoidReason(reason).SetDecidedAt(now).Save(ctx)
+	voided := 0
+	err := affiliates.inTransaction(ctx, func(ctx context.Context, transaction *sql.Tx, client *ent.Client) error {
+		if err := lockAffiliateOrder(ctx, transaction, orderId); err != nil {
+			return err
+		}
+		err := client.AffiliateOrderVoid.Create().SetID(orderId).SetReason(reason).SetCreatedAt(now).OnConflictColumns(affiliateordervoid.FieldID).DoNothing().Exec(ctx)
+		if err != nil && !errors.Is(err, sql.ErrNoRows) {
+			return err
+		}
+		voided, err = client.AffiliateAttributedSale.Update().Where(affiliateattributedsale.OrderID(orderId), affiliateattributedsale.StatusEQ(affiliateattributedsale.StatusAwaiting)).
+			SetStatus(affiliateattributedsale.StatusVoided).SetVoidReason(reason).SetDecidedAt(now).Save(ctx)
+		return err
+	})
+	return voided, err
 }
 
 func attributedSaleRow(client *ent.Client, sale AffiliateSaleReleased, item attributedSale, creatorId string, labels saleLabels, bps, amount int64, now time.Time) *ent.AffiliateAttributedSaleCreate {

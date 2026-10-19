@@ -65,6 +65,8 @@ var (
 
 var (
 	ProfileLimitStoreOrBusiness = Api(http.StatusConflict, "PROFILE_LIMIT_STORE_OR_BUSINESS", "You can have one Store or one Business page, not both.")
+	StoreLimitOne               = Api(http.StatusConflict, "STORE_LIMIT_ONE", "You can own one store. Your other business profiles can be brands that don't sell.")
+	BusinessProfileLimit        = Api(http.StatusConflict, "BUSINESS_PROFILE_LIMIT", "You can have up to 5 business profiles with Premium.")
 	ProfileLimitOneBrand        = Api(http.StatusConflict, "PROFILE_LIMIT_ONE_BRAND", "You can have one Brand.")
 	ProfileOnHold               = Api(http.StatusConflict, "PROFILE_ON_HOLD", "Choose which profiles to keep before adding listings here.")
 	BrandSellingOff             = Api(http.StatusConflict, "BRAND_SELLING_OFF", "Turn on selling for this brand before adding listings.")
@@ -78,6 +80,10 @@ func ProfileLimitFor(code string) error {
 		return ProfileLimitOneBrand
 	case ProfileOnHold.Code:
 		return ProfileOnHold
+	case StoreLimitOne.Code:
+		return StoreLimitOne
+	case BusinessProfileLimit.Code:
+		return BusinessProfileLimit
 	case "NO_CHANGE":
 		return NoChange
 	}

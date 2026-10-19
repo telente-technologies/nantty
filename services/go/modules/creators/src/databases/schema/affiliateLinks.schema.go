@@ -66,3 +66,35 @@ func (AffiliateAttributedSale) Fields() []ent.Field {
 func (AffiliateAttributedSale) Indexes() []ent.Index {
 	return []ent.Index{index.Fields("order_item_id").Unique(), index.Fields("order_id"), index.Fields("creator_id", "status", "created_at")}
 }
+
+type AffiliateLinkVisit struct {
+	ent.Schema
+}
+
+func (AffiliateLinkVisit) Mixin() []ent.Mixin {
+	return []ent.Mixin{TimeOrderedIdentifierMixin{}}
+}
+
+func (AffiliateLinkVisit) Fields() []ent.Field {
+	return []ent.Field{
+		field.String("link_id").NotEmpty().MaxLen(80).Immutable(),
+		field.String("viewer_key").NotEmpty().MaxLen(64).Immutable().Comment("sha256 of the signed-in user id or of the guest's device id, never a raw identifier"),
+		field.Time("last_counted_at"),
+	}
+}
+
+func (AffiliateLinkVisit) Indexes() []ent.Index {
+	return []ent.Index{index.Fields("link_id", "viewer_key").Unique()}
+}
+
+type AffiliateOrderVoid struct {
+	ent.Schema
+}
+
+func (AffiliateOrderVoid) Fields() []ent.Field {
+	return []ent.Field{
+		field.String("id").NotEmpty().MaxLen(80).Immutable().Comment("order group id"),
+		field.String("reason").MaxLen(40).Default(""),
+		field.Time("created_at").Default(time.Now).Immutable(),
+	}
+}

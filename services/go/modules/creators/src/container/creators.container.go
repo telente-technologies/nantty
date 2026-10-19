@@ -45,7 +45,7 @@ func NewCreatorsContainer(resources loaders.MoneyModuleResources, settings confi
 		Outbox: ledgerevents.OutboxTable{Schema: schema, Source: "zudomart.creators"},
 		Now:    time.Now,
 		schemaConfig: ent.SchemaConfig{
-			AffiliateAttributedSale: schema, AffiliateCommission: schema, AffiliateCommissionReversal: schema, AffiliateLink: schema, AffiliateProductCommission: schema, AffiliateProgramSetting: schema, BattleSettlement: schema, CreatorAffiliation: schema, CreatorBrandDeal: schema, CreatorEarning: schema,
+			AffiliateAttributedSale: schema, AffiliateCommission: schema, AffiliateCommissionReversal: schema, AffiliateLink: schema, AffiliateLinkVisit: schema, AffiliateOrderVoid: schema, AffiliateProductCommission: schema, AffiliateProgramSetting: schema, BattleSettlement: schema, CreatorAffiliation: schema, CreatorBrandDeal: schema, CreatorEarning: schema,
 			CreatorProgramMember: schema, CreatorTier: schema, CreatorViolation: schema, GiftTransaction: schema, OutboxEvent: schema, TipTransaction: schema,
 		},
 	}

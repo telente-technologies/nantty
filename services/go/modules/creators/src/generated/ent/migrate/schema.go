@@ -169,6 +169,39 @@ var (
 			},
 		},
 	}
+	// AffiliateLinkVisitsColumns holds the columns for the "affiliate_link_visits" table.
+	AffiliateLinkVisitsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "link_id", Type: field.TypeString, Size: 80},
+		{Name: "viewer_key", Type: field.TypeString, Size: 64},
+		{Name: "last_counted_at", Type: field.TypeTime},
+	}
+	// AffiliateLinkVisitsTable holds the schema information for the "affiliate_link_visits" table.
+	AffiliateLinkVisitsTable = &schema.Table{
+		Name:       "affiliate_link_visits",
+		Columns:    AffiliateLinkVisitsColumns,
+		PrimaryKey: []*schema.Column{AffiliateLinkVisitsColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "affiliatelinkvisit_link_id_viewer_key",
+				Unique:  true,
+				Columns: []*schema.Column{AffiliateLinkVisitsColumns[2], AffiliateLinkVisitsColumns[3]},
+			},
+		},
+	}
+	// AffiliateOrderVoidsColumns holds the columns for the "affiliate_order_voids" table.
+	AffiliateOrderVoidsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeString, Size: 80},
+		{Name: "reason", Type: field.TypeString, Size: 40, Default: ""},
+		{Name: "created_at", Type: field.TypeTime},
+	}
+	// AffiliateOrderVoidsTable holds the schema information for the "affiliate_order_voids" table.
+	AffiliateOrderVoidsTable = &schema.Table{
+		Name:       "affiliate_order_voids",
+		Columns:    AffiliateOrderVoidsColumns,
+		PrimaryKey: []*schema.Column{AffiliateOrderVoidsColumns[0]},
+	}
 	// AffiliateProductCommissionsColumns holds the columns for the "affiliate_product_commissions" table.
 	AffiliateProductCommissionsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID},
@@ -522,6 +555,8 @@ var (
 		AffiliateCommissionsTable,
 		AffiliateCommissionReversalsTable,
 		AffiliateLinksTable,
+		AffiliateLinkVisitsTable,
+		AffiliateOrderVoidsTable,
 		AffiliateProductCommissionsTable,
 		AffiliateProgramSettingsTable,
 		BattleSettlementsTable,

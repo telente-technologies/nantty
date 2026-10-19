@@ -94,31 +94,3 @@ func (affiliates Affiliates) CreateAffiliateLink(ctx context.Context, creatorId,
 	}
 	return presentLink(link), nil
 }
-
-func (affiliates Affiliates) RecordAffiliateLinkClick(ctx context.Context, linkId, viewerId string) (AffiliateLinkClickView, error) {
-	id, err := uuid.Parse(linkId)
-	if err != nil {
-		return AffiliateLinkClickView{}, ErrAffiliateLinkMissing
-	}
-	client := affiliates.Container.Client(affiliates.Container.Resources.Database)
-	link, err := client.AffiliateLink.Get(ctx, id)
-	if ent.IsNotFound(err) {
-		return AffiliateLinkClickView{}, ErrAffiliateLinkMissing
-	}
-	if err != nil {
-		return AffiliateLinkClickView{}, err
-	}
-	now := affiliates.Container.Now().UTC()
-	if viewerId != link.CreatorID {
-		if err := link.Update().AddClicks(1).SetLastClickedAt(now).Exec(ctx); err != nil {
-			return AffiliateLinkClickView{}, err
-		}
-	}
-	settings, err := affiliates.settingsRow(ctx, client, link.StoreID)
-	if err != nil {
-		return AffiliateLinkClickView{}, err
-	}
-	window := max(convertSettings(settings).CookieWindowDays, 1)
-	return AffiliateLinkClickView{ProductId: link.ProductID, Attribution: SaleAttributionView{Source: "link", Id: link.ID.String()}, AttributionWindowDays: window,
-		ExpiresAt: now.Add(time.Duration(window) * 24 * time.Hour)}, nil
-}

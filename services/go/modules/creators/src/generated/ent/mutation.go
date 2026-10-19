@@ -12,6 +12,8 @@ import (
 	"zudomart/modules/creators/src/generated/ent/affiliatecommission"
 	"zudomart/modules/creators/src/generated/ent/affiliatecommissionreversal"
 	"zudomart/modules/creators/src/generated/ent/affiliatelink"
+	"zudomart/modules/creators/src/generated/ent/affiliatelinkvisit"
+	"zudomart/modules/creators/src/generated/ent/affiliateordervoid"
 	"zudomart/modules/creators/src/generated/ent/affiliateproductcommission"
 	"zudomart/modules/creators/src/generated/ent/affiliateprogramsetting"
 	"zudomart/modules/creators/src/generated/ent/battlesettlement"
@@ -44,6 +46,8 @@ const (
 	TypeAffiliateCommission         = "AffiliateCommission"
 	TypeAffiliateCommissionReversal = "AffiliateCommissionReversal"
 	TypeAffiliateLink               = "AffiliateLink"
+	TypeAffiliateLinkVisit          = "AffiliateLinkVisit"
+	TypeAffiliateOrderVoid          = "AffiliateOrderVoid"
 	TypeAffiliateProductCommission  = "AffiliateProductCommission"
 	TypeAffiliateProgramSetting     = "AffiliateProgramSetting"
 	TypeBattleSettlement            = "BattleSettlement"
@@ -4777,6 +4781,886 @@ func (m *AffiliateLinkMutation) ClearEdge(name string) error {
 // It returns an error if the edge is not defined in the schema.
 func (m *AffiliateLinkMutation) ResetEdge(name string) error {
 	return fmt.Errorf("unknown AffiliateLink edge %s", name)
+}
+
+// AffiliateLinkVisitMutation represents an operation that mutates the AffiliateLinkVisit nodes in the graph.
+type AffiliateLinkVisitMutation struct {
+	config
+	op              Op
+	typ             string
+	id              *uuid.UUID
+	created_at      *time.Time
+	link_id         *string
+	viewer_key      *string
+	last_counted_at *time.Time
+	clearedFields   map[string]struct{}
+	done            bool
+	oldValue        func(context.Context) (*AffiliateLinkVisit, error)
+	predicates      []predicate.AffiliateLinkVisit
+}
+
+var _ ent.Mutation = (*AffiliateLinkVisitMutation)(nil)
+
+// affiliatelinkvisitOption allows management of the mutation configuration using functional options.
+type affiliatelinkvisitOption func(*AffiliateLinkVisitMutation)
+
+// newAffiliateLinkVisitMutation creates new mutation for the AffiliateLinkVisit entity.
+func newAffiliateLinkVisitMutation(c config, op Op, opts ...affiliatelinkvisitOption) *AffiliateLinkVisitMutation {
+	m := &AffiliateLinkVisitMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeAffiliateLinkVisit,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withAffiliateLinkVisitID sets the ID field of the mutation.
+func withAffiliateLinkVisitID(id uuid.UUID) affiliatelinkvisitOption {
+	return func(m *AffiliateLinkVisitMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *AffiliateLinkVisit
+		)
+		m.oldValue = func(ctx context.Context) (*AffiliateLinkVisit, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().AffiliateLinkVisit.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withAffiliateLinkVisit sets the old AffiliateLinkVisit of the mutation.
+func withAffiliateLinkVisit(node *AffiliateLinkVisit) affiliatelinkvisitOption {
+	return func(m *AffiliateLinkVisitMutation) {
+		m.oldValue = func(context.Context) (*AffiliateLinkVisit, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m AffiliateLinkVisitMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m AffiliateLinkVisitMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of AffiliateLinkVisit entities.
+func (m *AffiliateLinkVisitMutation) SetID(id uuid.UUID) {
+	m.id = &id
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *AffiliateLinkVisitMutation) ID() (id uuid.UUID, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *AffiliateLinkVisitMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []uuid.UUID{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().AffiliateLinkVisit.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (m *AffiliateLinkVisitMutation) SetCreatedAt(t time.Time) {
+	m.created_at = &t
+}
+
+// CreatedAt returns the value of the "created_at" field in the mutation.
+func (m *AffiliateLinkVisitMutation) CreatedAt() (r time.Time, exists bool) {
+	v := m.created_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreatedAt returns the old "created_at" field's value of the AffiliateLinkVisit entity.
+// If the AffiliateLinkVisit object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AffiliateLinkVisitMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
+	}
+	return oldValue.CreatedAt, nil
+}
+
+// ResetCreatedAt resets all changes to the "created_at" field.
+func (m *AffiliateLinkVisitMutation) ResetCreatedAt() {
+	m.created_at = nil
+}
+
+// SetLinkID sets the "link_id" field.
+func (m *AffiliateLinkVisitMutation) SetLinkID(s string) {
+	m.link_id = &s
+}
+
+// LinkID returns the value of the "link_id" field in the mutation.
+func (m *AffiliateLinkVisitMutation) LinkID() (r string, exists bool) {
+	v := m.link_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldLinkID returns the old "link_id" field's value of the AffiliateLinkVisit entity.
+// If the AffiliateLinkVisit object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AffiliateLinkVisitMutation) OldLinkID(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldLinkID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldLinkID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldLinkID: %w", err)
+	}
+	return oldValue.LinkID, nil
+}
+
+// ResetLinkID resets all changes to the "link_id" field.
+func (m *AffiliateLinkVisitMutation) ResetLinkID() {
+	m.link_id = nil
+}
+
+// SetViewerKey sets the "viewer_key" field.
+func (m *AffiliateLinkVisitMutation) SetViewerKey(s string) {
+	m.viewer_key = &s
+}
+
+// ViewerKey returns the value of the "viewer_key" field in the mutation.
+func (m *AffiliateLinkVisitMutation) ViewerKey() (r string, exists bool) {
+	v := m.viewer_key
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldViewerKey returns the old "viewer_key" field's value of the AffiliateLinkVisit entity.
+// If the AffiliateLinkVisit object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AffiliateLinkVisitMutation) OldViewerKey(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldViewerKey is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldViewerKey requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldViewerKey: %w", err)
+	}
+	return oldValue.ViewerKey, nil
+}
+
+// ResetViewerKey resets all changes to the "viewer_key" field.
+func (m *AffiliateLinkVisitMutation) ResetViewerKey() {
+	m.viewer_key = nil
+}
+
+// SetLastCountedAt sets the "last_counted_at" field.
+func (m *AffiliateLinkVisitMutation) SetLastCountedAt(t time.Time) {
+	m.last_counted_at = &t
+}
+
+// LastCountedAt returns the value of the "last_counted_at" field in the mutation.
+func (m *AffiliateLinkVisitMutation) LastCountedAt() (r time.Time, exists bool) {
+	v := m.last_counted_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldLastCountedAt returns the old "last_counted_at" field's value of the AffiliateLinkVisit entity.
+// If the AffiliateLinkVisit object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AffiliateLinkVisitMutation) OldLastCountedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldLastCountedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldLastCountedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldLastCountedAt: %w", err)
+	}
+	return oldValue.LastCountedAt, nil
+}
+
+// ResetLastCountedAt resets all changes to the "last_counted_at" field.
+func (m *AffiliateLinkVisitMutation) ResetLastCountedAt() {
+	m.last_counted_at = nil
+}
+
+// Where appends a list predicates to the AffiliateLinkVisitMutation builder.
+func (m *AffiliateLinkVisitMutation) Where(ps ...predicate.AffiliateLinkVisit) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the AffiliateLinkVisitMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *AffiliateLinkVisitMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.AffiliateLinkVisit, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *AffiliateLinkVisitMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *AffiliateLinkVisitMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (AffiliateLinkVisit).
+func (m *AffiliateLinkVisitMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *AffiliateLinkVisitMutation) Fields() []string {
+	fields := make([]string, 0, 4)
+	if m.created_at != nil {
+		fields = append(fields, affiliatelinkvisit.FieldCreatedAt)
+	}
+	if m.link_id != nil {
+		fields = append(fields, affiliatelinkvisit.FieldLinkID)
+	}
+	if m.viewer_key != nil {
+		fields = append(fields, affiliatelinkvisit.FieldViewerKey)
+	}
+	if m.last_counted_at != nil {
+		fields = append(fields, affiliatelinkvisit.FieldLastCountedAt)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *AffiliateLinkVisitMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case affiliatelinkvisit.FieldCreatedAt:
+		return m.CreatedAt()
+	case affiliatelinkvisit.FieldLinkID:
+		return m.LinkID()
+	case affiliatelinkvisit.FieldViewerKey:
+		return m.ViewerKey()
+	case affiliatelinkvisit.FieldLastCountedAt:
+		return m.LastCountedAt()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *AffiliateLinkVisitMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case affiliatelinkvisit.FieldCreatedAt:
+		return m.OldCreatedAt(ctx)
+	case affiliatelinkvisit.FieldLinkID:
+		return m.OldLinkID(ctx)
+	case affiliatelinkvisit.FieldViewerKey:
+		return m.OldViewerKey(ctx)
+	case affiliatelinkvisit.FieldLastCountedAt:
+		return m.OldLastCountedAt(ctx)
+	}
+	return nil, fmt.Errorf("unknown AffiliateLinkVisit field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *AffiliateLinkVisitMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case affiliatelinkvisit.FieldCreatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatedAt(v)
+		return nil
+	case affiliatelinkvisit.FieldLinkID:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetLinkID(v)
+		return nil
+	case affiliatelinkvisit.FieldViewerKey:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetViewerKey(v)
+		return nil
+	case affiliatelinkvisit.FieldLastCountedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetLastCountedAt(v)
+		return nil
+	}
+	return fmt.Errorf("unknown AffiliateLinkVisit field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *AffiliateLinkVisitMutation) AddedFields() []string {
+	return nil
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *AffiliateLinkVisitMutation) AddedField(name string) (ent.Value, bool) {
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *AffiliateLinkVisitMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	}
+	return fmt.Errorf("unknown AffiliateLinkVisit numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *AffiliateLinkVisitMutation) ClearedFields() []string {
+	return nil
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *AffiliateLinkVisitMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *AffiliateLinkVisitMutation) ClearField(name string) error {
+	return fmt.Errorf("unknown AffiliateLinkVisit nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *AffiliateLinkVisitMutation) ResetField(name string) error {
+	switch name {
+	case affiliatelinkvisit.FieldCreatedAt:
+		m.ResetCreatedAt()
+		return nil
+	case affiliatelinkvisit.FieldLinkID:
+		m.ResetLinkID()
+		return nil
+	case affiliatelinkvisit.FieldViewerKey:
+		m.ResetViewerKey()
+		return nil
+	case affiliatelinkvisit.FieldLastCountedAt:
+		m.ResetLastCountedAt()
+		return nil
+	}
+	return fmt.Errorf("unknown AffiliateLinkVisit field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *AffiliateLinkVisitMutation) AddedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *AffiliateLinkVisitMutation) AddedIDs(name string) []ent.Value {
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *AffiliateLinkVisitMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *AffiliateLinkVisitMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *AffiliateLinkVisitMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *AffiliateLinkVisitMutation) EdgeCleared(name string) bool {
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *AffiliateLinkVisitMutation) ClearEdge(name string) error {
+	return fmt.Errorf("unknown AffiliateLinkVisit unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *AffiliateLinkVisitMutation) ResetEdge(name string) error {
+	return fmt.Errorf("unknown AffiliateLinkVisit edge %s", name)
+}
+
+// AffiliateOrderVoidMutation represents an operation that mutates the AffiliateOrderVoid nodes in the graph.
+type AffiliateOrderVoidMutation struct {
+	config
+	op            Op
+	typ           string
+	id            *string
+	reason        *string
+	created_at    *time.Time
+	clearedFields map[string]struct{}
+	done          bool
+	oldValue      func(context.Context) (*AffiliateOrderVoid, error)
+	predicates    []predicate.AffiliateOrderVoid
+}
+
+var _ ent.Mutation = (*AffiliateOrderVoidMutation)(nil)
+
+// affiliateordervoidOption allows management of the mutation configuration using functional options.
+type affiliateordervoidOption func(*AffiliateOrderVoidMutation)
+
+// newAffiliateOrderVoidMutation creates new mutation for the AffiliateOrderVoid entity.
+func newAffiliateOrderVoidMutation(c config, op Op, opts ...affiliateordervoidOption) *AffiliateOrderVoidMutation {
+	m := &AffiliateOrderVoidMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeAffiliateOrderVoid,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withAffiliateOrderVoidID sets the ID field of the mutation.
+func withAffiliateOrderVoidID(id string) affiliateordervoidOption {
+	return func(m *AffiliateOrderVoidMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *AffiliateOrderVoid
+		)
+		m.oldValue = func(ctx context.Context) (*AffiliateOrderVoid, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().AffiliateOrderVoid.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withAffiliateOrderVoid sets the old AffiliateOrderVoid of the mutation.
+func withAffiliateOrderVoid(node *AffiliateOrderVoid) affiliateordervoidOption {
+	return func(m *AffiliateOrderVoidMutation) {
+		m.oldValue = func(context.Context) (*AffiliateOrderVoid, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m AffiliateOrderVoidMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m AffiliateOrderVoidMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of AffiliateOrderVoid entities.
+func (m *AffiliateOrderVoidMutation) SetID(id string) {
+	m.id = &id
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *AffiliateOrderVoidMutation) ID() (id string, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *AffiliateOrderVoidMutation) IDs(ctx context.Context) ([]string, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []string{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().AffiliateOrderVoid.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetReason sets the "reason" field.
+func (m *AffiliateOrderVoidMutation) SetReason(s string) {
+	m.reason = &s
+}
+
+// Reason returns the value of the "reason" field in the mutation.
+func (m *AffiliateOrderVoidMutation) Reason() (r string, exists bool) {
+	v := m.reason
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldReason returns the old "reason" field's value of the AffiliateOrderVoid entity.
+// If the AffiliateOrderVoid object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AffiliateOrderVoidMutation) OldReason(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldReason is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldReason requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldReason: %w", err)
+	}
+	return oldValue.Reason, nil
+}
+
+// ResetReason resets all changes to the "reason" field.
+func (m *AffiliateOrderVoidMutation) ResetReason() {
+	m.reason = nil
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (m *AffiliateOrderVoidMutation) SetCreatedAt(t time.Time) {
+	m.created_at = &t
+}
+
+// CreatedAt returns the value of the "created_at" field in the mutation.
+func (m *AffiliateOrderVoidMutation) CreatedAt() (r time.Time, exists bool) {
+	v := m.created_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreatedAt returns the old "created_at" field's value of the AffiliateOrderVoid entity.
+// If the AffiliateOrderVoid object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AffiliateOrderVoidMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
+	}
+	return oldValue.CreatedAt, nil
+}
+
+// ResetCreatedAt resets all changes to the "created_at" field.
+func (m *AffiliateOrderVoidMutation) ResetCreatedAt() {
+	m.created_at = nil
+}
+
+// Where appends a list predicates to the AffiliateOrderVoidMutation builder.
+func (m *AffiliateOrderVoidMutation) Where(ps ...predicate.AffiliateOrderVoid) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the AffiliateOrderVoidMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *AffiliateOrderVoidMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.AffiliateOrderVoid, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *AffiliateOrderVoidMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *AffiliateOrderVoidMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (AffiliateOrderVoid).
+func (m *AffiliateOrderVoidMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *AffiliateOrderVoidMutation) Fields() []string {
+	fields := make([]string, 0, 2)
+	if m.reason != nil {
+		fields = append(fields, affiliateordervoid.FieldReason)
+	}
+	if m.created_at != nil {
+		fields = append(fields, affiliateordervoid.FieldCreatedAt)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *AffiliateOrderVoidMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case affiliateordervoid.FieldReason:
+		return m.Reason()
+	case affiliateordervoid.FieldCreatedAt:
+		return m.CreatedAt()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *AffiliateOrderVoidMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case affiliateordervoid.FieldReason:
+		return m.OldReason(ctx)
+	case affiliateordervoid.FieldCreatedAt:
+		return m.OldCreatedAt(ctx)
+	}
+	return nil, fmt.Errorf("unknown AffiliateOrderVoid field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *AffiliateOrderVoidMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case affiliateordervoid.FieldReason:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetReason(v)
+		return nil
+	case affiliateordervoid.FieldCreatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatedAt(v)
+		return nil
+	}
+	return fmt.Errorf("unknown AffiliateOrderVoid field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *AffiliateOrderVoidMutation) AddedFields() []string {
+	return nil
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *AffiliateOrderVoidMutation) AddedField(name string) (ent.Value, bool) {
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *AffiliateOrderVoidMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	}
+	return fmt.Errorf("unknown AffiliateOrderVoid numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *AffiliateOrderVoidMutation) ClearedFields() []string {
+	return nil
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *AffiliateOrderVoidMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *AffiliateOrderVoidMutation) ClearField(name string) error {
+	return fmt.Errorf("unknown AffiliateOrderVoid nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *AffiliateOrderVoidMutation) ResetField(name string) error {
+	switch name {
+	case affiliateordervoid.FieldReason:
+		m.ResetReason()
+		return nil
+	case affiliateordervoid.FieldCreatedAt:
+		m.ResetCreatedAt()
+		return nil
+	}
+	return fmt.Errorf("unknown AffiliateOrderVoid field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *AffiliateOrderVoidMutation) AddedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *AffiliateOrderVoidMutation) AddedIDs(name string) []ent.Value {
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *AffiliateOrderVoidMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *AffiliateOrderVoidMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *AffiliateOrderVoidMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *AffiliateOrderVoidMutation) EdgeCleared(name string) bool {
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *AffiliateOrderVoidMutation) ClearEdge(name string) error {
+	return fmt.Errorf("unknown AffiliateOrderVoid unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *AffiliateOrderVoidMutation) ResetEdge(name string) error {
+	return fmt.Errorf("unknown AffiliateOrderVoid edge %s", name)
 }
 
 // AffiliateProductCommissionMutation represents an operation that mutates the AffiliateProductCommission nodes in the graph.

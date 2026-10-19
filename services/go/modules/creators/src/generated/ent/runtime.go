@@ -9,6 +9,8 @@ import (
 	"zudomart/modules/creators/src/generated/ent/affiliatecommission"
 	"zudomart/modules/creators/src/generated/ent/affiliatecommissionreversal"
 	"zudomart/modules/creators/src/generated/ent/affiliatelink"
+	"zudomart/modules/creators/src/generated/ent/affiliatelinkvisit"
+	"zudomart/modules/creators/src/generated/ent/affiliateordervoid"
 	"zudomart/modules/creators/src/generated/ent/affiliateproductcommission"
 	"zudomart/modules/creators/src/generated/ent/affiliateprogramsetting"
 	"zudomart/modules/creators/src/generated/ent/battlesettlement"
@@ -565,6 +567,85 @@ func init() {
 	affiliatelinkDescID := affiliatelinkMixinFields0[0].Descriptor()
 	// affiliatelink.DefaultID holds the default value on creation for the id field.
 	affiliatelink.DefaultID = affiliatelinkDescID.Default.(func() uuid.UUID)
+	affiliatelinkvisitMixin := schema.AffiliateLinkVisit{}.Mixin()
+	affiliatelinkvisitMixinFields0 := affiliatelinkvisitMixin[0].Fields()
+	_ = affiliatelinkvisitMixinFields0
+	affiliatelinkvisitFields := schema.AffiliateLinkVisit{}.Fields()
+	_ = affiliatelinkvisitFields
+	// affiliatelinkvisitDescCreatedAt is the schema descriptor for created_at field.
+	affiliatelinkvisitDescCreatedAt := affiliatelinkvisitMixinFields0[1].Descriptor()
+	// affiliatelinkvisit.DefaultCreatedAt holds the default value on creation for the created_at field.
+	affiliatelinkvisit.DefaultCreatedAt = affiliatelinkvisitDescCreatedAt.Default.(func() time.Time)
+	// affiliatelinkvisitDescLinkID is the schema descriptor for link_id field.
+	affiliatelinkvisitDescLinkID := affiliatelinkvisitFields[0].Descriptor()
+	// affiliatelinkvisit.LinkIDValidator is a validator for the "link_id" field. It is called by the builders before save.
+	affiliatelinkvisit.LinkIDValidator = func() func(string) error {
+		validators := affiliatelinkvisitDescLinkID.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(link_id string) error {
+			for _, fn := range fns {
+				if err := fn(link_id); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// affiliatelinkvisitDescViewerKey is the schema descriptor for viewer_key field.
+	affiliatelinkvisitDescViewerKey := affiliatelinkvisitFields[1].Descriptor()
+	// affiliatelinkvisit.ViewerKeyValidator is a validator for the "viewer_key" field. It is called by the builders before save.
+	affiliatelinkvisit.ViewerKeyValidator = func() func(string) error {
+		validators := affiliatelinkvisitDescViewerKey.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(viewer_key string) error {
+			for _, fn := range fns {
+				if err := fn(viewer_key); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// affiliatelinkvisitDescID is the schema descriptor for id field.
+	affiliatelinkvisitDescID := affiliatelinkvisitMixinFields0[0].Descriptor()
+	// affiliatelinkvisit.DefaultID holds the default value on creation for the id field.
+	affiliatelinkvisit.DefaultID = affiliatelinkvisitDescID.Default.(func() uuid.UUID)
+	affiliateordervoidFields := schema.AffiliateOrderVoid{}.Fields()
+	_ = affiliateordervoidFields
+	// affiliateordervoidDescReason is the schema descriptor for reason field.
+	affiliateordervoidDescReason := affiliateordervoidFields[1].Descriptor()
+	// affiliateordervoid.DefaultReason holds the default value on creation for the reason field.
+	affiliateordervoid.DefaultReason = affiliateordervoidDescReason.Default.(string)
+	// affiliateordervoid.ReasonValidator is a validator for the "reason" field. It is called by the builders before save.
+	affiliateordervoid.ReasonValidator = affiliateordervoidDescReason.Validators[0].(func(string) error)
+	// affiliateordervoidDescCreatedAt is the schema descriptor for created_at field.
+	affiliateordervoidDescCreatedAt := affiliateordervoidFields[2].Descriptor()
+	// affiliateordervoid.DefaultCreatedAt holds the default value on creation for the created_at field.
+	affiliateordervoid.DefaultCreatedAt = affiliateordervoidDescCreatedAt.Default.(func() time.Time)
+	// affiliateordervoidDescID is the schema descriptor for id field.
+	affiliateordervoidDescID := affiliateordervoidFields[0].Descriptor()
+	// affiliateordervoid.IDValidator is a validator for the "id" field. It is called by the builders before save.
+	affiliateordervoid.IDValidator = func() func(string) error {
+		validators := affiliateordervoidDescID.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(id string) error {
+			for _, fn := range fns {
+				if err := fn(id); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
 	affiliateproductcommissionMixin := schema.AffiliateProductCommission{}.Mixin()
 	affiliateproductcommissionMixinFields0 := affiliateproductcommissionMixin[0].Fields()
 	_ = affiliateproductcommissionMixinFields0

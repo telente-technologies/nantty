@@ -1,6 +1,10 @@
 package controllers
 
 import (
+	"crypto/sha256"
+	"encoding/hex"
+	"encoding/json"
+	"net"
 	"net/http"
 	"slices"
 	"strings"
@@ -93,7 +97,31 @@ func (controller AffiliatesController) CreateAffiliateLink(writer http.ResponseW
 }
 
 func (controller AffiliatesController) RecordAffiliateLinkClick(writer http.ResponseWriter, request *http.Request) {
-	viewerId := ledgerutils.ReadOptionalPrincipalUserId(request, controller.Affiliates.Container.Resources.AccessVerifier)
-	view, err := controller.Affiliates.RecordAffiliateLinkClick(request.Context(), request.PathValue("linkId"), viewerId)
+	viewer := services.AffiliateLinkViewer{UserId: ledgerutils.ReadOptionalPrincipalUserId(request, controller.Affiliates.Container.Resources.AccessVerifier)}
+	if viewer.UserId == "" {
+		viewer.GuestKey = guestKeyOf(request)
+	}
+	view, err := controller.Affiliates.RecordAffiliateLinkClick(request.Context(), request.PathValue("linkId"), viewer)
 	controller.respond(writer, request, http.StatusOK, view, err)
+}
+
+// guestKeyOf prefers the visitor id the web and mobile apps keep on the device; older clients fall back to a digest of the
+// forwarded address and user agent, so no raw address is ever stored.
+func guestKeyOf(request *http.Request) string {
+	var body dtos.AffiliateLinkClickDto
+	if request.ContentLength != 0 {
+		_ = json.NewDecoder(http.MaxBytesReader(nil, request.Body, 1024)).Decode(&body)
+	}
+	if visitor := strings.TrimSpace(body.VisitorId); len(visitor) >= 8 && len(visitor) <= 80 {
+		return "visitor:" + visitor
+	}
+	address := strings.TrimSpace(strings.Split(request.Header.Get("X-Forwarded-For"), ",")[0])
+	if address == "" {
+		address = request.RemoteAddr
+		if host, _, err := net.SplitHostPort(address); err == nil {
+			address = host
+		}
+	}
+	digest := sha256.Sum256([]byte(address + "|" + request.UserAgent()))
+	return "network:" + hex.EncodeToString(digest[:])
 }

@@ -31,3 +31,7 @@ type CreatorStatusDto struct {
 type AffiliateLinkRequestDto struct {
 	ProductId string `json:"productId"`
 }
+
+type AffiliateLinkClickDto struct {
+	VisitorId string `json:"visitorId"`
+}
