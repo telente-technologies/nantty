@@ -1,3 +1,5 @@
+import { formatMoney } from "@zudomart/email-templates";
+
 import type { EventDataReader } from "../../../utils/eventDataReader.util.js";
 import { readGroups } from "./orders.mapping.js";
 import { intentFor, plan, type EventMapping } from "./mappingHelpers.js";
@@ -38,10 +40,18 @@ const refundCopy = {
 
 const refundDestinationOf = (data: EventDataReader) => (data.text("refundDestination", "wallet") === "paymentMethod" ? "paymentMethod" : "wallet");
 
+function feesKeptCopy(data: EventDataReader, destination: keyof typeof refundCopy): string | undefined {
+  const breakdown = data.optionalObject("refundBreakdown");
+  if (!breakdown) return undefined;
+  const money = (key: string) => formatMoney(breakdown.money(key), "en-NG");
+  const landed = destination === "wallet" ? "is back in your Zudomart wallet" : "is on its way back to the card or account you paid with";
+  return `${money("refundedToBuyer")} ${landed}. The seller had already been paid, so Zudomart's escrow fee (${money("escrowFeeKept")}) and payment processing fee (${money("processingFeeKept")}) aren't refunded.`;
+}
+
 function refundIntent(partial: boolean): EventMapping {
   return (event, data) => {
     const destination = refundDestinationOf(data);
-    const copy = refundCopy[destination];
+    const copy = { ...refundCopy[destination], inApp: feesKeptCopy(data, destination) ?? refundCopy[destination].inApp };
     const title = partial ? "Partial refund issued" : "Refund issued";
     return [
       intentFor(event, data.text("buyerUserId"), {
@@ -72,8 +82,27 @@ export const escrowRefundScheduled: EventMapping = (event, data) => {
   ];
 };
 
+export const escrowUnderReview: EventMapping = (event, data) => {
+  const order = data.text("orderNumber", "your order");
+  const links = { orderId: data.text("orderId"), escrowId: data.text("escrowId") };
+  const push = { title: "Order under review", body: `Order ${order} hasn't been marked delivered, so Zudomart staff are reviewing it.`, data: { orderId: data.text("orderId") } };
+  return [
+    intentFor(event, data.text("buyerUserId"), {
+      category: "payments",
+      inApp: { category: "orders", title: "Order under review", body: `Order ${order} still isn't marked delivered after 30 days. Zudomart staff will contact you and the seller. Your payment stays safe and won't go to the seller until this is settled.`, data: links },
+      push,
+    }),
+    intentFor(event, data.text("sellerUserId"), {
+      category: "escrow",
+      inApp: { category: "orders", title: "Order under review", body: `Order ${order} still isn't marked delivered after 30 days. Zudomart staff will contact you and the buyer. Mark it delivered or send proof of delivery to have the payment released.`, data: links },
+      push,
+    }),
+  ];
+};
+
 export const escrowRefunded = refundIntent(false);
 export const escrowPartiallyRefunded = refundIntent(true);
+export const escrowClawedBack = refundIntent(false);
 
 function disputeParties(event: Parameters<EventMapping>[0], data: EventDataReader, build: (role: "buyer" | "seller", userId: string) => Parameters<typeof intentFor>[2]) {
   return [intentFor(event, data.text("buyerUserId"), build("buyer", data.text("buyerUserId"))), intentFor(event, data.text("sellerUserId"), build("seller", data.text("sellerUserId")))];

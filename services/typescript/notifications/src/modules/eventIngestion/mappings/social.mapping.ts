@@ -29,7 +29,7 @@ export const postTagged: EventMapping = (event, data) => {
   ];
 };
 
-export const followCreated: EventMapping = (event, data) => [
+export const followCreated: EventMapping = (event, data) => data.bool("viaRequest") ? [] : [
   intentFor(event, data.text("recipientUserId"), {
     category: "social",
     inApp: { category: "social", title: actorNameOf(data), body: "started following you.", actor: readActor(data) },
@@ -40,8 +40,16 @@ export const followCreated: EventMapping = (event, data) => [
 export const followRequestCreated: EventMapping = (event, data) => [
   intentFor(event, data.text("recipientUserId"), {
     category: "social",
-    inApp: { category: "social", title: actorNameOf(data), body: "requested to follow you.", actor: readActor(data) },
-    push: { title: actorNameOf(data), body: "requested to follow you." },
+    inApp: { category: "social", kind: "followRequest", title: actorNameOf(data), body: "requested to follow you.", actor: readActor(data), data: { url: "/me/follow-requests" } },
+    push: { title: actorNameOf(data), body: "requested to follow you.", data: { url: "/me/follow-requests" } },
+  }),
+];
+
+export const followRequestAccepted: EventMapping = (event, data) => [
+  intentFor(event, data.text("recipientUserId"), {
+    category: "social",
+    inApp: { category: "social", kind: "followRequestAccepted", title: actorNameOf(data), body: "accepted your follow request.", actor: readActor(data), data: { url: data.optionalText("url") ?? null } },
+    push: { title: actorNameOf(data), body: "accepted your follow request.", data: { url: data.optionalText("url") ?? null } },
   }),
 ];
 
