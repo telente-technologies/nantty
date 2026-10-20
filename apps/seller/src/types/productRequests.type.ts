@@ -19,6 +19,10 @@ export interface ProductVariantUpsertRequest {
   readonly lowStockThreshold: number;
   readonly reorderPoint?: number;
   readonly reorderQuantity?: number;
+  readonly weightGrams?: number | null;
+  readonly lengthMm?: number | null;
+  readonly widthMm?: number | null;
+  readonly heightMm?: number | null;
   readonly openingStock: { readonly locationId: string; readonly quantity: number }[];
 }
 
@@ -40,6 +44,15 @@ export interface ProductUpsertRequest {
   readonly attributes?: ProductAttribute[];
   readonly videos?: { readonly url: string; readonly title: string }[];
   readonly supplierId?: string | null;
+  readonly weightGrams?: number | null;
+  readonly lengthMm?: number | null;
+  readonly widthMm?: number | null;
+  readonly heightMm?: number | null;
+  readonly packageCategory?: string;
+  readonly packageCount?: number;
+  readonly fragile?: boolean;
+  readonly contentsDescription?: string;
+  readonly declaredValueMinor?: number | null;
 }
 
 export type ProductBulkAction = "publish" | "unpublish" | "archive" | "set_category" | "set_visibility" | "change_price_percent";

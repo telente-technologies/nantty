@@ -7207,6 +7207,21 @@ type ProductMutation struct {
 	currency                 *string
 	min_price_minor          *int64
 	addmin_price_minor       *int64
+	weight_grams             *int
+	addweight_grams          *int
+	length_mm                *int
+	addlength_mm             *int
+	width_mm                 *int
+	addwidth_mm              *int
+	height_mm                *int
+	addheight_mm             *int
+	package_category         *string
+	package_count            *int
+	addpackage_count         *int
+	fragile                  *bool
+	contents_description     *string
+	declared_value_minor     *int64
+	adddeclared_value_minor  *int64
 	publish_at               *time.Time
 	published_at             *time.Time
 	rating_sum               *int64
@@ -8202,6 +8217,520 @@ func (m *ProductMutation) ResetMinPriceMinor() {
 	m.addmin_price_minor = nil
 }
 
+// SetWeightGrams sets the "weight_grams" field.
+func (m *ProductMutation) SetWeightGrams(i int) {
+	m.weight_grams = &i
+	m.addweight_grams = nil
+}
+
+// WeightGrams returns the value of the "weight_grams" field in the mutation.
+func (m *ProductMutation) WeightGrams() (r int, exists bool) {
+	v := m.weight_grams
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldWeightGrams returns the old "weight_grams" field's value of the Product entity.
+// If the Product object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ProductMutation) OldWeightGrams(ctx context.Context) (v *int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldWeightGrams is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldWeightGrams requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldWeightGrams: %w", err)
+	}
+	return oldValue.WeightGrams, nil
+}
+
+// AddWeightGrams adds i to the "weight_grams" field.
+func (m *ProductMutation) AddWeightGrams(i int) {
+	if m.addweight_grams != nil {
+		*m.addweight_grams += i
+	} else {
+		m.addweight_grams = &i
+	}
+}
+
+// AddedWeightGrams returns the value that was added to the "weight_grams" field in this mutation.
+func (m *ProductMutation) AddedWeightGrams() (r int, exists bool) {
+	v := m.addweight_grams
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearWeightGrams clears the value of the "weight_grams" field.
+func (m *ProductMutation) ClearWeightGrams() {
+	m.weight_grams = nil
+	m.addweight_grams = nil
+	m.clearedFields[product.FieldWeightGrams] = struct{}{}
+}
+
+// WeightGramsCleared returns if the "weight_grams" field was cleared in this mutation.
+func (m *ProductMutation) WeightGramsCleared() bool {
+	_, ok := m.clearedFields[product.FieldWeightGrams]
+	return ok
+}
+
+// ResetWeightGrams resets all changes to the "weight_grams" field.
+func (m *ProductMutation) ResetWeightGrams() {
+	m.weight_grams = nil
+	m.addweight_grams = nil
+	delete(m.clearedFields, product.FieldWeightGrams)
+}
+
+// SetLengthMm sets the "length_mm" field.
+func (m *ProductMutation) SetLengthMm(i int) {
+	m.length_mm = &i
+	m.addlength_mm = nil
+}
+
+// LengthMm returns the value of the "length_mm" field in the mutation.
+func (m *ProductMutation) LengthMm() (r int, exists bool) {
+	v := m.length_mm
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldLengthMm returns the old "length_mm" field's value of the Product entity.
+// If the Product object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ProductMutation) OldLengthMm(ctx context.Context) (v *int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldLengthMm is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldLengthMm requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldLengthMm: %w", err)
+	}
+	return oldValue.LengthMm, nil
+}
+
+// AddLengthMm adds i to the "length_mm" field.
+func (m *ProductMutation) AddLengthMm(i int) {
+	if m.addlength_mm != nil {
+		*m.addlength_mm += i
+	} else {
+		m.addlength_mm = &i
+	}
+}
+
+// AddedLengthMm returns the value that was added to the "length_mm" field in this mutation.
+func (m *ProductMutation) AddedLengthMm() (r int, exists bool) {
+	v := m.addlength_mm
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearLengthMm clears the value of the "length_mm" field.
+func (m *ProductMutation) ClearLengthMm() {
+	m.length_mm = nil
+	m.addlength_mm = nil
+	m.clearedFields[product.FieldLengthMm] = struct{}{}
+}
+
+// LengthMmCleared returns if the "length_mm" field was cleared in this mutation.
+func (m *ProductMutation) LengthMmCleared() bool {
+	_, ok := m.clearedFields[product.FieldLengthMm]
+	return ok
+}
+
+// ResetLengthMm resets all changes to the "length_mm" field.
+func (m *ProductMutation) ResetLengthMm() {
+	m.length_mm = nil
+	m.addlength_mm = nil
+	delete(m.clearedFields, product.FieldLengthMm)
+}
+
+// SetWidthMm sets the "width_mm" field.
+func (m *ProductMutation) SetWidthMm(i int) {
+	m.width_mm = &i
+	m.addwidth_mm = nil
+}
+
+// WidthMm returns the value of the "width_mm" field in the mutation.
+func (m *ProductMutation) WidthMm() (r int, exists bool) {
+	v := m.width_mm
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldWidthMm returns the old "width_mm" field's value of the Product entity.
+// If the Product object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ProductMutation) OldWidthMm(ctx context.Context) (v *int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldWidthMm is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldWidthMm requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldWidthMm: %w", err)
+	}
+	return oldValue.WidthMm, nil
+}
+
+// AddWidthMm adds i to the "width_mm" field.
+func (m *ProductMutation) AddWidthMm(i int) {
+	if m.addwidth_mm != nil {
+		*m.addwidth_mm += i
+	} else {
+		m.addwidth_mm = &i
+	}
+}
+
+// AddedWidthMm returns the value that was added to the "width_mm" field in this mutation.
+func (m *ProductMutation) AddedWidthMm() (r int, exists bool) {
+	v := m.addwidth_mm
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearWidthMm clears the value of the "width_mm" field.
+func (m *ProductMutation) ClearWidthMm() {
+	m.width_mm = nil
+	m.addwidth_mm = nil
+	m.clearedFields[product.FieldWidthMm] = struct{}{}
+}
+
+// WidthMmCleared returns if the "width_mm" field was cleared in this mutation.
+func (m *ProductMutation) WidthMmCleared() bool {
+	_, ok := m.clearedFields[product.FieldWidthMm]
+	return ok
+}
+
+// ResetWidthMm resets all changes to the "width_mm" field.
+func (m *ProductMutation) ResetWidthMm() {
+	m.width_mm = nil
+	m.addwidth_mm = nil
+	delete(m.clearedFields, product.FieldWidthMm)
+}
+
+// SetHeightMm sets the "height_mm" field.
+func (m *ProductMutation) SetHeightMm(i int) {
+	m.height_mm = &i
+	m.addheight_mm = nil
+}
+
+// HeightMm returns the value of the "height_mm" field in the mutation.
+func (m *ProductMutation) HeightMm() (r int, exists bool) {
+	v := m.height_mm
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldHeightMm returns the old "height_mm" field's value of the Product entity.
+// If the Product object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ProductMutation) OldHeightMm(ctx context.Context) (v *int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldHeightMm is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldHeightMm requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldHeightMm: %w", err)
+	}
+	return oldValue.HeightMm, nil
+}
+
+// AddHeightMm adds i to the "height_mm" field.
+func (m *ProductMutation) AddHeightMm(i int) {
+	if m.addheight_mm != nil {
+		*m.addheight_mm += i
+	} else {
+		m.addheight_mm = &i
+	}
+}
+
+// AddedHeightMm returns the value that was added to the "height_mm" field in this mutation.
+func (m *ProductMutation) AddedHeightMm() (r int, exists bool) {
+	v := m.addheight_mm
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearHeightMm clears the value of the "height_mm" field.
+func (m *ProductMutation) ClearHeightMm() {
+	m.height_mm = nil
+	m.addheight_mm = nil
+	m.clearedFields[product.FieldHeightMm] = struct{}{}
+}
+
+// HeightMmCleared returns if the "height_mm" field was cleared in this mutation.
+func (m *ProductMutation) HeightMmCleared() bool {
+	_, ok := m.clearedFields[product.FieldHeightMm]
+	return ok
+}
+
+// ResetHeightMm resets all changes to the "height_mm" field.
+func (m *ProductMutation) ResetHeightMm() {
+	m.height_mm = nil
+	m.addheight_mm = nil
+	delete(m.clearedFields, product.FieldHeightMm)
+}
+
+// SetPackageCategory sets the "package_category" field.
+func (m *ProductMutation) SetPackageCategory(s string) {
+	m.package_category = &s
+}
+
+// PackageCategory returns the value of the "package_category" field in the mutation.
+func (m *ProductMutation) PackageCategory() (r string, exists bool) {
+	v := m.package_category
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldPackageCategory returns the old "package_category" field's value of the Product entity.
+// If the Product object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ProductMutation) OldPackageCategory(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldPackageCategory is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldPackageCategory requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldPackageCategory: %w", err)
+	}
+	return oldValue.PackageCategory, nil
+}
+
+// ResetPackageCategory resets all changes to the "package_category" field.
+func (m *ProductMutation) ResetPackageCategory() {
+	m.package_category = nil
+}
+
+// SetPackageCount sets the "package_count" field.
+func (m *ProductMutation) SetPackageCount(i int) {
+	m.package_count = &i
+	m.addpackage_count = nil
+}
+
+// PackageCount returns the value of the "package_count" field in the mutation.
+func (m *ProductMutation) PackageCount() (r int, exists bool) {
+	v := m.package_count
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldPackageCount returns the old "package_count" field's value of the Product entity.
+// If the Product object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ProductMutation) OldPackageCount(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldPackageCount is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldPackageCount requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldPackageCount: %w", err)
+	}
+	return oldValue.PackageCount, nil
+}
+
+// AddPackageCount adds i to the "package_count" field.
+func (m *ProductMutation) AddPackageCount(i int) {
+	if m.addpackage_count != nil {
+		*m.addpackage_count += i
+	} else {
+		m.addpackage_count = &i
+	}
+}
+
+// AddedPackageCount returns the value that was added to the "package_count" field in this mutation.
+func (m *ProductMutation) AddedPackageCount() (r int, exists bool) {
+	v := m.addpackage_count
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetPackageCount resets all changes to the "package_count" field.
+func (m *ProductMutation) ResetPackageCount() {
+	m.package_count = nil
+	m.addpackage_count = nil
+}
+
+// SetFragile sets the "fragile" field.
+func (m *ProductMutation) SetFragile(b bool) {
+	m.fragile = &b
+}
+
+// Fragile returns the value of the "fragile" field in the mutation.
+func (m *ProductMutation) Fragile() (r bool, exists bool) {
+	v := m.fragile
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldFragile returns the old "fragile" field's value of the Product entity.
+// If the Product object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ProductMutation) OldFragile(ctx context.Context) (v bool, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldFragile is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldFragile requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldFragile: %w", err)
+	}
+	return oldValue.Fragile, nil
+}
+
+// ResetFragile resets all changes to the "fragile" field.
+func (m *ProductMutation) ResetFragile() {
+	m.fragile = nil
+}
+
+// SetContentsDescription sets the "contents_description" field.
+func (m *ProductMutation) SetContentsDescription(s string) {
+	m.contents_description = &s
+}
+
+// ContentsDescription returns the value of the "contents_description" field in the mutation.
+func (m *ProductMutation) ContentsDescription() (r string, exists bool) {
+	v := m.contents_description
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldContentsDescription returns the old "contents_description" field's value of the Product entity.
+// If the Product object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ProductMutation) OldContentsDescription(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldContentsDescription is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldContentsDescription requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldContentsDescription: %w", err)
+	}
+	return oldValue.ContentsDescription, nil
+}
+
+// ResetContentsDescription resets all changes to the "contents_description" field.
+func (m *ProductMutation) ResetContentsDescription() {
+	m.contents_description = nil
+}
+
+// SetDeclaredValueMinor sets the "declared_value_minor" field.
+func (m *ProductMutation) SetDeclaredValueMinor(i int64) {
+	m.declared_value_minor = &i
+	m.adddeclared_value_minor = nil
+}
+
+// DeclaredValueMinor returns the value of the "declared_value_minor" field in the mutation.
+func (m *ProductMutation) DeclaredValueMinor() (r int64, exists bool) {
+	v := m.declared_value_minor
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDeclaredValueMinor returns the old "declared_value_minor" field's value of the Product entity.
+// If the Product object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ProductMutation) OldDeclaredValueMinor(ctx context.Context) (v *int64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDeclaredValueMinor is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDeclaredValueMinor requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDeclaredValueMinor: %w", err)
+	}
+	return oldValue.DeclaredValueMinor, nil
+}
+
+// AddDeclaredValueMinor adds i to the "declared_value_minor" field.
+func (m *ProductMutation) AddDeclaredValueMinor(i int64) {
+	if m.adddeclared_value_minor != nil {
+		*m.adddeclared_value_minor += i
+	} else {
+		m.adddeclared_value_minor = &i
+	}
+}
+
+// AddedDeclaredValueMinor returns the value that was added to the "declared_value_minor" field in this mutation.
+func (m *ProductMutation) AddedDeclaredValueMinor() (r int64, exists bool) {
+	v := m.adddeclared_value_minor
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearDeclaredValueMinor clears the value of the "declared_value_minor" field.
+func (m *ProductMutation) ClearDeclaredValueMinor() {
+	m.declared_value_minor = nil
+	m.adddeclared_value_minor = nil
+	m.clearedFields[product.FieldDeclaredValueMinor] = struct{}{}
+}
+
+// DeclaredValueMinorCleared returns if the "declared_value_minor" field was cleared in this mutation.
+func (m *ProductMutation) DeclaredValueMinorCleared() bool {
+	_, ok := m.clearedFields[product.FieldDeclaredValueMinor]
+	return ok
+}
+
+// ResetDeclaredValueMinor resets all changes to the "declared_value_minor" field.
+func (m *ProductMutation) ResetDeclaredValueMinor() {
+	m.declared_value_minor = nil
+	m.adddeclared_value_minor = nil
+	delete(m.clearedFields, product.FieldDeclaredValueMinor)
+}
+
 // SetPublishAt sets the "publish_at" field.
 func (m *ProductMutation) SetPublishAt(t time.Time) {
 	m.publish_at = &t
@@ -8679,7 +9208,7 @@ func (m *ProductMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *ProductMutation) Fields() []string {
-	fields := make([]string, 0, 28)
+	fields := make([]string, 0, 37)
 	if m.created_at != nil {
 		fields = append(fields, product.FieldCreatedAt)
 	}
@@ -8736,6 +9265,33 @@ func (m *ProductMutation) Fields() []string {
 	}
 	if m.min_price_minor != nil {
 		fields = append(fields, product.FieldMinPriceMinor)
+	}
+	if m.weight_grams != nil {
+		fields = append(fields, product.FieldWeightGrams)
+	}
+	if m.length_mm != nil {
+		fields = append(fields, product.FieldLengthMm)
+	}
+	if m.width_mm != nil {
+		fields = append(fields, product.FieldWidthMm)
+	}
+	if m.height_mm != nil {
+		fields = append(fields, product.FieldHeightMm)
+	}
+	if m.package_category != nil {
+		fields = append(fields, product.FieldPackageCategory)
+	}
+	if m.package_count != nil {
+		fields = append(fields, product.FieldPackageCount)
+	}
+	if m.fragile != nil {
+		fields = append(fields, product.FieldFragile)
+	}
+	if m.contents_description != nil {
+		fields = append(fields, product.FieldContentsDescription)
+	}
+	if m.declared_value_minor != nil {
+		fields = append(fields, product.FieldDeclaredValueMinor)
 	}
 	if m.publish_at != nil {
 		fields = append(fields, product.FieldPublishAt)
@@ -8810,6 +9366,24 @@ func (m *ProductMutation) Field(name string) (ent.Value, bool) {
 		return m.Currency()
 	case product.FieldMinPriceMinor:
 		return m.MinPriceMinor()
+	case product.FieldWeightGrams:
+		return m.WeightGrams()
+	case product.FieldLengthMm:
+		return m.LengthMm()
+	case product.FieldWidthMm:
+		return m.WidthMm()
+	case product.FieldHeightMm:
+		return m.HeightMm()
+	case product.FieldPackageCategory:
+		return m.PackageCategory()
+	case product.FieldPackageCount:
+		return m.PackageCount()
+	case product.FieldFragile:
+		return m.Fragile()
+	case product.FieldContentsDescription:
+		return m.ContentsDescription()
+	case product.FieldDeclaredValueMinor:
+		return m.DeclaredValueMinor()
 	case product.FieldPublishAt:
 		return m.PublishAt()
 	case product.FieldPublishedAt:
@@ -8875,6 +9449,24 @@ func (m *ProductMutation) OldField(ctx context.Context, name string) (ent.Value,
 		return m.OldCurrency(ctx)
 	case product.FieldMinPriceMinor:
 		return m.OldMinPriceMinor(ctx)
+	case product.FieldWeightGrams:
+		return m.OldWeightGrams(ctx)
+	case product.FieldLengthMm:
+		return m.OldLengthMm(ctx)
+	case product.FieldWidthMm:
+		return m.OldWidthMm(ctx)
+	case product.FieldHeightMm:
+		return m.OldHeightMm(ctx)
+	case product.FieldPackageCategory:
+		return m.OldPackageCategory(ctx)
+	case product.FieldPackageCount:
+		return m.OldPackageCount(ctx)
+	case product.FieldFragile:
+		return m.OldFragile(ctx)
+	case product.FieldContentsDescription:
+		return m.OldContentsDescription(ctx)
+	case product.FieldDeclaredValueMinor:
+		return m.OldDeclaredValueMinor(ctx)
 	case product.FieldPublishAt:
 		return m.OldPublishAt(ctx)
 	case product.FieldPublishedAt:
@@ -9035,6 +9627,69 @@ func (m *ProductMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetMinPriceMinor(v)
 		return nil
+	case product.FieldWeightGrams:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetWeightGrams(v)
+		return nil
+	case product.FieldLengthMm:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetLengthMm(v)
+		return nil
+	case product.FieldWidthMm:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetWidthMm(v)
+		return nil
+	case product.FieldHeightMm:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetHeightMm(v)
+		return nil
+	case product.FieldPackageCategory:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetPackageCategory(v)
+		return nil
+	case product.FieldPackageCount:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetPackageCount(v)
+		return nil
+	case product.FieldFragile:
+		v, ok := value.(bool)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetFragile(v)
+		return nil
+	case product.FieldContentsDescription:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetContentsDescription(v)
+		return nil
+	case product.FieldDeclaredValueMinor:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDeclaredValueMinor(v)
+		return nil
 	case product.FieldPublishAt:
 		v, ok := value.(time.Time)
 		if !ok {
@@ -9109,6 +9764,24 @@ func (m *ProductMutation) AddedFields() []string {
 	if m.addmin_price_minor != nil {
 		fields = append(fields, product.FieldMinPriceMinor)
 	}
+	if m.addweight_grams != nil {
+		fields = append(fields, product.FieldWeightGrams)
+	}
+	if m.addlength_mm != nil {
+		fields = append(fields, product.FieldLengthMm)
+	}
+	if m.addwidth_mm != nil {
+		fields = append(fields, product.FieldWidthMm)
+	}
+	if m.addheight_mm != nil {
+		fields = append(fields, product.FieldHeightMm)
+	}
+	if m.addpackage_count != nil {
+		fields = append(fields, product.FieldPackageCount)
+	}
+	if m.adddeclared_value_minor != nil {
+		fields = append(fields, product.FieldDeclaredValueMinor)
+	}
 	if m.addrating_sum != nil {
 		fields = append(fields, product.FieldRatingSum)
 	}
@@ -9131,6 +9804,18 @@ func (m *ProductMutation) AddedField(name string) (ent.Value, bool) {
 	switch name {
 	case product.FieldMinPriceMinor:
 		return m.AddedMinPriceMinor()
+	case product.FieldWeightGrams:
+		return m.AddedWeightGrams()
+	case product.FieldLengthMm:
+		return m.AddedLengthMm()
+	case product.FieldWidthMm:
+		return m.AddedWidthMm()
+	case product.FieldHeightMm:
+		return m.AddedHeightMm()
+	case product.FieldPackageCount:
+		return m.AddedPackageCount()
+	case product.FieldDeclaredValueMinor:
+		return m.AddedDeclaredValueMinor()
 	case product.FieldRatingSum:
 		return m.AddedRatingSum()
 	case product.FieldRatingCount:
@@ -9154,6 +9839,48 @@ func (m *ProductMutation) AddField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.AddMinPriceMinor(v)
+		return nil
+	case product.FieldWeightGrams:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddWeightGrams(v)
+		return nil
+	case product.FieldLengthMm:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddLengthMm(v)
+		return nil
+	case product.FieldWidthMm:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddWidthMm(v)
+		return nil
+	case product.FieldHeightMm:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddHeightMm(v)
+		return nil
+	case product.FieldPackageCount:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddPackageCount(v)
+		return nil
+	case product.FieldDeclaredValueMinor:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddDeclaredValueMinor(v)
 		return nil
 	case product.FieldRatingSum:
 		v, ok := value.(int64)
@@ -9215,6 +9942,21 @@ func (m *ProductMutation) ClearedFields() []string {
 	if m.FieldCleared(product.FieldSupplierID) {
 		fields = append(fields, product.FieldSupplierID)
 	}
+	if m.FieldCleared(product.FieldWeightGrams) {
+		fields = append(fields, product.FieldWeightGrams)
+	}
+	if m.FieldCleared(product.FieldLengthMm) {
+		fields = append(fields, product.FieldLengthMm)
+	}
+	if m.FieldCleared(product.FieldWidthMm) {
+		fields = append(fields, product.FieldWidthMm)
+	}
+	if m.FieldCleared(product.FieldHeightMm) {
+		fields = append(fields, product.FieldHeightMm)
+	}
+	if m.FieldCleared(product.FieldDeclaredValueMinor) {
+		fields = append(fields, product.FieldDeclaredValueMinor)
+	}
 	if m.FieldCleared(product.FieldPublishAt) {
 		fields = append(fields, product.FieldPublishAt)
 	}
@@ -9261,6 +10003,21 @@ func (m *ProductMutation) ClearField(name string) error {
 		return nil
 	case product.FieldSupplierID:
 		m.ClearSupplierID()
+		return nil
+	case product.FieldWeightGrams:
+		m.ClearWeightGrams()
+		return nil
+	case product.FieldLengthMm:
+		m.ClearLengthMm()
+		return nil
+	case product.FieldWidthMm:
+		m.ClearWidthMm()
+		return nil
+	case product.FieldHeightMm:
+		m.ClearHeightMm()
+		return nil
+	case product.FieldDeclaredValueMinor:
+		m.ClearDeclaredValueMinor()
 		return nil
 	case product.FieldPublishAt:
 		m.ClearPublishAt()
@@ -9335,6 +10092,33 @@ func (m *ProductMutation) ResetField(name string) error {
 		return nil
 	case product.FieldMinPriceMinor:
 		m.ResetMinPriceMinor()
+		return nil
+	case product.FieldWeightGrams:
+		m.ResetWeightGrams()
+		return nil
+	case product.FieldLengthMm:
+		m.ResetLengthMm()
+		return nil
+	case product.FieldWidthMm:
+		m.ResetWidthMm()
+		return nil
+	case product.FieldHeightMm:
+		m.ResetHeightMm()
+		return nil
+	case product.FieldPackageCategory:
+		m.ResetPackageCategory()
+		return nil
+	case product.FieldPackageCount:
+		m.ResetPackageCount()
+		return nil
+	case product.FieldFragile:
+		m.ResetFragile()
+		return nil
+	case product.FieldContentsDescription:
+		m.ResetContentsDescription()
+		return nil
+	case product.FieldDeclaredValueMinor:
+		m.ResetDeclaredValueMinor()
 		return nil
 	case product.FieldPublishAt:
 		m.ResetPublishAt()
@@ -12270,6 +13054,14 @@ type ProductVariantMutation struct {
 	addreorder_quantity       *int
 	position                  *int
 	addposition               *int
+	weight_grams              *int
+	addweight_grams           *int
+	length_mm                 *int
+	addlength_mm              *int
+	width_mm                  *int
+	addwidth_mm               *int
+	height_mm                 *int
+	addheight_mm              *int
 	updated_at                *time.Time
 	clearedFields             map[string]struct{}
 	done                      bool
@@ -13252,6 +14044,286 @@ func (m *ProductVariantMutation) ResetPosition() {
 	m.addposition = nil
 }
 
+// SetWeightGrams sets the "weight_grams" field.
+func (m *ProductVariantMutation) SetWeightGrams(i int) {
+	m.weight_grams = &i
+	m.addweight_grams = nil
+}
+
+// WeightGrams returns the value of the "weight_grams" field in the mutation.
+func (m *ProductVariantMutation) WeightGrams() (r int, exists bool) {
+	v := m.weight_grams
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldWeightGrams returns the old "weight_grams" field's value of the ProductVariant entity.
+// If the ProductVariant object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ProductVariantMutation) OldWeightGrams(ctx context.Context) (v *int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldWeightGrams is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldWeightGrams requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldWeightGrams: %w", err)
+	}
+	return oldValue.WeightGrams, nil
+}
+
+// AddWeightGrams adds i to the "weight_grams" field.
+func (m *ProductVariantMutation) AddWeightGrams(i int) {
+	if m.addweight_grams != nil {
+		*m.addweight_grams += i
+	} else {
+		m.addweight_grams = &i
+	}
+}
+
+// AddedWeightGrams returns the value that was added to the "weight_grams" field in this mutation.
+func (m *ProductVariantMutation) AddedWeightGrams() (r int, exists bool) {
+	v := m.addweight_grams
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearWeightGrams clears the value of the "weight_grams" field.
+func (m *ProductVariantMutation) ClearWeightGrams() {
+	m.weight_grams = nil
+	m.addweight_grams = nil
+	m.clearedFields[productvariant.FieldWeightGrams] = struct{}{}
+}
+
+// WeightGramsCleared returns if the "weight_grams" field was cleared in this mutation.
+func (m *ProductVariantMutation) WeightGramsCleared() bool {
+	_, ok := m.clearedFields[productvariant.FieldWeightGrams]
+	return ok
+}
+
+// ResetWeightGrams resets all changes to the "weight_grams" field.
+func (m *ProductVariantMutation) ResetWeightGrams() {
+	m.weight_grams = nil
+	m.addweight_grams = nil
+	delete(m.clearedFields, productvariant.FieldWeightGrams)
+}
+
+// SetLengthMm sets the "length_mm" field.
+func (m *ProductVariantMutation) SetLengthMm(i int) {
+	m.length_mm = &i
+	m.addlength_mm = nil
+}
+
+// LengthMm returns the value of the "length_mm" field in the mutation.
+func (m *ProductVariantMutation) LengthMm() (r int, exists bool) {
+	v := m.length_mm
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldLengthMm returns the old "length_mm" field's value of the ProductVariant entity.
+// If the ProductVariant object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ProductVariantMutation) OldLengthMm(ctx context.Context) (v *int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldLengthMm is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldLengthMm requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldLengthMm: %w", err)
+	}
+	return oldValue.LengthMm, nil
+}
+
+// AddLengthMm adds i to the "length_mm" field.
+func (m *ProductVariantMutation) AddLengthMm(i int) {
+	if m.addlength_mm != nil {
+		*m.addlength_mm += i
+	} else {
+		m.addlength_mm = &i
+	}
+}
+
+// AddedLengthMm returns the value that was added to the "length_mm" field in this mutation.
+func (m *ProductVariantMutation) AddedLengthMm() (r int, exists bool) {
+	v := m.addlength_mm
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearLengthMm clears the value of the "length_mm" field.
+func (m *ProductVariantMutation) ClearLengthMm() {
+	m.length_mm = nil
+	m.addlength_mm = nil
+	m.clearedFields[productvariant.FieldLengthMm] = struct{}{}
+}
+
+// LengthMmCleared returns if the "length_mm" field was cleared in this mutation.
+func (m *ProductVariantMutation) LengthMmCleared() bool {
+	_, ok := m.clearedFields[productvariant.FieldLengthMm]
+	return ok
+}
+
+// ResetLengthMm resets all changes to the "length_mm" field.
+func (m *ProductVariantMutation) ResetLengthMm() {
+	m.length_mm = nil
+	m.addlength_mm = nil
+	delete(m.clearedFields, productvariant.FieldLengthMm)
+}
+
+// SetWidthMm sets the "width_mm" field.
+func (m *ProductVariantMutation) SetWidthMm(i int) {
+	m.width_mm = &i
+	m.addwidth_mm = nil
+}
+
+// WidthMm returns the value of the "width_mm" field in the mutation.
+func (m *ProductVariantMutation) WidthMm() (r int, exists bool) {
+	v := m.width_mm
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldWidthMm returns the old "width_mm" field's value of the ProductVariant entity.
+// If the ProductVariant object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ProductVariantMutation) OldWidthMm(ctx context.Context) (v *int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldWidthMm is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldWidthMm requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldWidthMm: %w", err)
+	}
+	return oldValue.WidthMm, nil
+}
+
+// AddWidthMm adds i to the "width_mm" field.
+func (m *ProductVariantMutation) AddWidthMm(i int) {
+	if m.addwidth_mm != nil {
+		*m.addwidth_mm += i
+	} else {
+		m.addwidth_mm = &i
+	}
+}
+
+// AddedWidthMm returns the value that was added to the "width_mm" field in this mutation.
+func (m *ProductVariantMutation) AddedWidthMm() (r int, exists bool) {
+	v := m.addwidth_mm
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearWidthMm clears the value of the "width_mm" field.
+func (m *ProductVariantMutation) ClearWidthMm() {
+	m.width_mm = nil
+	m.addwidth_mm = nil
+	m.clearedFields[productvariant.FieldWidthMm] = struct{}{}
+}
+
+// WidthMmCleared returns if the "width_mm" field was cleared in this mutation.
+func (m *ProductVariantMutation) WidthMmCleared() bool {
+	_, ok := m.clearedFields[productvariant.FieldWidthMm]
+	return ok
+}
+
+// ResetWidthMm resets all changes to the "width_mm" field.
+func (m *ProductVariantMutation) ResetWidthMm() {
+	m.width_mm = nil
+	m.addwidth_mm = nil
+	delete(m.clearedFields, productvariant.FieldWidthMm)
+}
+
+// SetHeightMm sets the "height_mm" field.
+func (m *ProductVariantMutation) SetHeightMm(i int) {
+	m.height_mm = &i
+	m.addheight_mm = nil
+}
+
+// HeightMm returns the value of the "height_mm" field in the mutation.
+func (m *ProductVariantMutation) HeightMm() (r int, exists bool) {
+	v := m.height_mm
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldHeightMm returns the old "height_mm" field's value of the ProductVariant entity.
+// If the ProductVariant object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ProductVariantMutation) OldHeightMm(ctx context.Context) (v *int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldHeightMm is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldHeightMm requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldHeightMm: %w", err)
+	}
+	return oldValue.HeightMm, nil
+}
+
+// AddHeightMm adds i to the "height_mm" field.
+func (m *ProductVariantMutation) AddHeightMm(i int) {
+	if m.addheight_mm != nil {
+		*m.addheight_mm += i
+	} else {
+		m.addheight_mm = &i
+	}
+}
+
+// AddedHeightMm returns the value that was added to the "height_mm" field in this mutation.
+func (m *ProductVariantMutation) AddedHeightMm() (r int, exists bool) {
+	v := m.addheight_mm
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearHeightMm clears the value of the "height_mm" field.
+func (m *ProductVariantMutation) ClearHeightMm() {
+	m.height_mm = nil
+	m.addheight_mm = nil
+	m.clearedFields[productvariant.FieldHeightMm] = struct{}{}
+}
+
+// HeightMmCleared returns if the "height_mm" field was cleared in this mutation.
+func (m *ProductVariantMutation) HeightMmCleared() bool {
+	_, ok := m.clearedFields[productvariant.FieldHeightMm]
+	return ok
+}
+
+// ResetHeightMm resets all changes to the "height_mm" field.
+func (m *ProductVariantMutation) ResetHeightMm() {
+	m.height_mm = nil
+	m.addheight_mm = nil
+	delete(m.clearedFields, productvariant.FieldHeightMm)
+}
+
 // SetUpdatedAt sets the "updated_at" field.
 func (m *ProductVariantMutation) SetUpdatedAt(t time.Time) {
 	m.updated_at = &t
@@ -13322,7 +14394,7 @@ func (m *ProductVariantMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *ProductVariantMutation) Fields() []string {
-	fields := make([]string, 0, 19)
+	fields := make([]string, 0, 23)
 	if m.created_at != nil {
 		fields = append(fields, productvariant.FieldCreatedAt)
 	}
@@ -13377,6 +14449,18 @@ func (m *ProductVariantMutation) Fields() []string {
 	if m.position != nil {
 		fields = append(fields, productvariant.FieldPosition)
 	}
+	if m.weight_grams != nil {
+		fields = append(fields, productvariant.FieldWeightGrams)
+	}
+	if m.length_mm != nil {
+		fields = append(fields, productvariant.FieldLengthMm)
+	}
+	if m.width_mm != nil {
+		fields = append(fields, productvariant.FieldWidthMm)
+	}
+	if m.height_mm != nil {
+		fields = append(fields, productvariant.FieldHeightMm)
+	}
 	if m.updated_at != nil {
 		fields = append(fields, productvariant.FieldUpdatedAt)
 	}
@@ -13424,6 +14508,14 @@ func (m *ProductVariantMutation) Field(name string) (ent.Value, bool) {
 		return m.ReorderQuantity()
 	case productvariant.FieldPosition:
 		return m.Position()
+	case productvariant.FieldWeightGrams:
+		return m.WeightGrams()
+	case productvariant.FieldLengthMm:
+		return m.LengthMm()
+	case productvariant.FieldWidthMm:
+		return m.WidthMm()
+	case productvariant.FieldHeightMm:
+		return m.HeightMm()
 	case productvariant.FieldUpdatedAt:
 		return m.UpdatedAt()
 	}
@@ -13471,6 +14563,14 @@ func (m *ProductVariantMutation) OldField(ctx context.Context, name string) (ent
 		return m.OldReorderQuantity(ctx)
 	case productvariant.FieldPosition:
 		return m.OldPosition(ctx)
+	case productvariant.FieldWeightGrams:
+		return m.OldWeightGrams(ctx)
+	case productvariant.FieldLengthMm:
+		return m.OldLengthMm(ctx)
+	case productvariant.FieldWidthMm:
+		return m.OldWidthMm(ctx)
+	case productvariant.FieldHeightMm:
+		return m.OldHeightMm(ctx)
 	case productvariant.FieldUpdatedAt:
 		return m.OldUpdatedAt(ctx)
 	}
@@ -13608,6 +14708,34 @@ func (m *ProductVariantMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetPosition(v)
 		return nil
+	case productvariant.FieldWeightGrams:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetWeightGrams(v)
+		return nil
+	case productvariant.FieldLengthMm:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetLengthMm(v)
+		return nil
+	case productvariant.FieldWidthMm:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetWidthMm(v)
+		return nil
+	case productvariant.FieldHeightMm:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetHeightMm(v)
+		return nil
 	case productvariant.FieldUpdatedAt:
 		v, ok := value.(time.Time)
 		if !ok {
@@ -13644,6 +14772,18 @@ func (m *ProductVariantMutation) AddedFields() []string {
 	if m.addposition != nil {
 		fields = append(fields, productvariant.FieldPosition)
 	}
+	if m.addweight_grams != nil {
+		fields = append(fields, productvariant.FieldWeightGrams)
+	}
+	if m.addlength_mm != nil {
+		fields = append(fields, productvariant.FieldLengthMm)
+	}
+	if m.addwidth_mm != nil {
+		fields = append(fields, productvariant.FieldWidthMm)
+	}
+	if m.addheight_mm != nil {
+		fields = append(fields, productvariant.FieldHeightMm)
+	}
 	return fields
 }
 
@@ -13666,6 +14806,14 @@ func (m *ProductVariantMutation) AddedField(name string) (ent.Value, bool) {
 		return m.AddedReorderQuantity()
 	case productvariant.FieldPosition:
 		return m.AddedPosition()
+	case productvariant.FieldWeightGrams:
+		return m.AddedWeightGrams()
+	case productvariant.FieldLengthMm:
+		return m.AddedLengthMm()
+	case productvariant.FieldWidthMm:
+		return m.AddedWidthMm()
+	case productvariant.FieldHeightMm:
+		return m.AddedHeightMm()
 	}
 	return nil, false
 }
@@ -13724,6 +14872,34 @@ func (m *ProductVariantMutation) AddField(name string, value ent.Value) error {
 		}
 		m.AddPosition(v)
 		return nil
+	case productvariant.FieldWeightGrams:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddWeightGrams(v)
+		return nil
+	case productvariant.FieldLengthMm:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddLengthMm(v)
+		return nil
+	case productvariant.FieldWidthMm:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddWidthMm(v)
+		return nil
+	case productvariant.FieldHeightMm:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddHeightMm(v)
+		return nil
 	}
 	return fmt.Errorf("unknown ProductVariant numeric field %s", name)
 }
@@ -13746,6 +14922,18 @@ func (m *ProductVariantMutation) ClearedFields() []string {
 	}
 	if m.FieldCleared(productvariant.FieldRegionalPrices) {
 		fields = append(fields, productvariant.FieldRegionalPrices)
+	}
+	if m.FieldCleared(productvariant.FieldWeightGrams) {
+		fields = append(fields, productvariant.FieldWeightGrams)
+	}
+	if m.FieldCleared(productvariant.FieldLengthMm) {
+		fields = append(fields, productvariant.FieldLengthMm)
+	}
+	if m.FieldCleared(productvariant.FieldWidthMm) {
+		fields = append(fields, productvariant.FieldWidthMm)
+	}
+	if m.FieldCleared(productvariant.FieldHeightMm) {
+		fields = append(fields, productvariant.FieldHeightMm)
 	}
 	return fields
 }
@@ -13775,6 +14963,18 @@ func (m *ProductVariantMutation) ClearField(name string) error {
 		return nil
 	case productvariant.FieldRegionalPrices:
 		m.ClearRegionalPrices()
+		return nil
+	case productvariant.FieldWeightGrams:
+		m.ClearWeightGrams()
+		return nil
+	case productvariant.FieldLengthMm:
+		m.ClearLengthMm()
+		return nil
+	case productvariant.FieldWidthMm:
+		m.ClearWidthMm()
+		return nil
+	case productvariant.FieldHeightMm:
+		m.ClearHeightMm()
 		return nil
 	}
 	return fmt.Errorf("unknown ProductVariant nullable field %s", name)
@@ -13837,6 +15037,18 @@ func (m *ProductVariantMutation) ResetField(name string) error {
 		return nil
 	case productvariant.FieldPosition:
 		m.ResetPosition()
+		return nil
+	case productvariant.FieldWeightGrams:
+		m.ResetWeightGrams()
+		return nil
+	case productvariant.FieldLengthMm:
+		m.ResetLengthMm()
+		return nil
+	case productvariant.FieldWidthMm:
+		m.ResetWidthMm()
+		return nil
+	case productvariant.FieldHeightMm:
+		m.ResetHeightMm()
 		return nil
 	case productvariant.FieldUpdatedAt:
 		m.ResetUpdatedAt()

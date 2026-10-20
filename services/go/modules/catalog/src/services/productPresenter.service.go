@@ -88,6 +88,9 @@ func assembleSellerViews(products []*ent.Product, variants []*ent.ProductVariant
 			PublishedOnline: product.PublishedOnline, Images: []types.SellerImageView{}, Options: []types.OptionView{}, Variants: []types.SellerVariantView{},
 			Taxable: product.Taxable, TrackInventory: product.TrackInventory, Tags: nonNilStrings(product.Tags), Visibility: product.Visibility,
 			PublishAt: product.PublishAt, Attributes: []types.AttributeView{}, Videos: []types.VideoView{}, SupplierId: idString(product.SupplierID),
+			WeightGrams: product.WeightGrams, LengthMm: product.LengthMm, WidthMm: product.WidthMm, HeightMm: product.HeightMm,
+			PackageCategory: product.PackageCategory, PackageCount: product.PackageCount, Fragile: product.Fragile,
+			ContentsDescription: product.ContentsDescription, DeclaredValueMinor: product.DeclaredValueMinor,
 			CreatedAt: product.CreatedAt, UpdatedAt: product.UpdatedAt,
 		}
 		if product.CategoryID != nil {
@@ -128,7 +131,9 @@ func sellerVariantView(variant *ent.ProductVariant, currency money.CurrencyCode,
 	view := types.SellerVariantView{
 		Id: variant.ID.String(), ProductId: variant.ProductID.String(), Title: variant.Title, OptionValues: variant.OptionValues, Sku: variant.Sku,
 		Barcode: variant.Barcode, Price: money.Money{AmountMinor: variant.PriceMinor, Currency: currency}, LowStockThreshold: variant.LowStockThreshold,
-		ReorderPoint: variant.ReorderPoint, ReorderQuantity: variant.ReorderQuantity, Stock: []types.SellerStockView{}, RegionalPrices: []types.SellerRegionalPriceView{},
+		ReorderPoint: variant.ReorderPoint, ReorderQuantity: variant.ReorderQuantity, WeightGrams: variant.WeightGrams,
+		LengthMm: variant.LengthMm, WidthMm: variant.WidthMm, HeightMm: variant.HeightMm,
+		Stock: []types.SellerStockView{}, RegionalPrices: []types.SellerRegionalPriceView{},
 	}
 	for _, price := range variant.RegionalPrices {
 		view.RegionalPrices = append(view.RegionalPrices, types.SellerRegionalPriceView{Currency: price.Currency, PriceMinor: price.PriceMinor, CompareAtPriceMinor: price.CompareAtPriceMinor})

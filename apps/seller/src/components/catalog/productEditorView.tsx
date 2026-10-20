@@ -15,6 +15,7 @@ import { ProductOptionsSection } from "@/components/catalog/productOptionsSectio
 import { describeProductPublicationState } from "@/components/catalog/productPresentation.util";
 import { ProductRegionalPricesSection } from "@/components/catalog/productRegionalPricesSection";
 import { ProductPublishingSection } from "@/components/catalog/productPublishingSection";
+import { ProductShippingSection } from "@/components/catalog/productShippingSection";
 import { ProductSupplierSection } from "@/components/catalog/productSupplierSection";
 import { ProductVariantsTable } from "@/components/catalog/productVariantsTable";
 import { ProductVideosSection } from "@/components/catalog/productVideosSection";
@@ -154,6 +155,7 @@ export function ProductEditorView({ productId }: { readonly productId: string | 
       <div className={styles.layout}>
         <div className={styles.mainColumn}>
           <ProductBasicsSection draft={draft} fieldErrors={fieldErrors} onDraftChange={updateDraft} />
+          <ProductShippingSection draft={draft} fieldErrors={fieldErrors} currency={settings.currency} onDraftChange={updateDraft} />
           <ProductOptionsSection options={draft.options} variants={draft.variants} fieldErrors={fieldErrors} blockedMessage={stockBlockedMessage} onOptionsChange={updateOptions} />
           <ProductVariantsTable variants={draft.variants} options={draft.options} fieldErrors={fieldErrors} isNewProduct={isNewProduct} onVariantChange={updateVariant} />
           <ProductRegionalPricesSection variants={draft.variants} options={draft.options} fieldErrors={fieldErrors} onVariantChange={updateVariant} />

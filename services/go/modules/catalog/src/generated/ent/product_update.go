@@ -302,6 +302,204 @@ func (_u *ProductUpdate) AddMinPriceMinor(v int64) *ProductUpdate {
 	return _u
 }
 
+// SetWeightGrams sets the "weight_grams" field.
+func (_u *ProductUpdate) SetWeightGrams(v int) *ProductUpdate {
+	_u.mutation.ResetWeightGrams()
+	_u.mutation.SetWeightGrams(v)
+	return _u
+}
+
+// SetNillableWeightGrams sets the "weight_grams" field if the given value is not nil.
+func (_u *ProductUpdate) SetNillableWeightGrams(v *int) *ProductUpdate {
+	if v != nil {
+		_u.SetWeightGrams(*v)
+	}
+	return _u
+}
+
+// AddWeightGrams adds value to the "weight_grams" field.
+func (_u *ProductUpdate) AddWeightGrams(v int) *ProductUpdate {
+	_u.mutation.AddWeightGrams(v)
+	return _u
+}
+
+// ClearWeightGrams clears the value of the "weight_grams" field.
+func (_u *ProductUpdate) ClearWeightGrams() *ProductUpdate {
+	_u.mutation.ClearWeightGrams()
+	return _u
+}
+
+// SetLengthMm sets the "length_mm" field.
+func (_u *ProductUpdate) SetLengthMm(v int) *ProductUpdate {
+	_u.mutation.ResetLengthMm()
+	_u.mutation.SetLengthMm(v)
+	return _u
+}
+
+// SetNillableLengthMm sets the "length_mm" field if the given value is not nil.
+func (_u *ProductUpdate) SetNillableLengthMm(v *int) *ProductUpdate {
+	if v != nil {
+		_u.SetLengthMm(*v)
+	}
+	return _u
+}
+
+// AddLengthMm adds value to the "length_mm" field.
+func (_u *ProductUpdate) AddLengthMm(v int) *ProductUpdate {
+	_u.mutation.AddLengthMm(v)
+	return _u
+}
+
+// ClearLengthMm clears the value of the "length_mm" field.
+func (_u *ProductUpdate) ClearLengthMm() *ProductUpdate {
+	_u.mutation.ClearLengthMm()
+	return _u
+}
+
+// SetWidthMm sets the "width_mm" field.
+func (_u *ProductUpdate) SetWidthMm(v int) *ProductUpdate {
+	_u.mutation.ResetWidthMm()
+	_u.mutation.SetWidthMm(v)
+	return _u
+}
+
+// SetNillableWidthMm sets the "width_mm" field if the given value is not nil.
+func (_u *ProductUpdate) SetNillableWidthMm(v *int) *ProductUpdate {
+	if v != nil {
+		_u.SetWidthMm(*v)
+	}
+	return _u
+}
+
+// AddWidthMm adds value to the "width_mm" field.
+func (_u *ProductUpdate) AddWidthMm(v int) *ProductUpdate {
+	_u.mutation.AddWidthMm(v)
+	return _u
+}
+
+// ClearWidthMm clears the value of the "width_mm" field.
+func (_u *ProductUpdate) ClearWidthMm() *ProductUpdate {
+	_u.mutation.ClearWidthMm()
+	return _u
+}
+
+// SetHeightMm sets the "height_mm" field.
+func (_u *ProductUpdate) SetHeightMm(v int) *ProductUpdate {
+	_u.mutation.ResetHeightMm()
+	_u.mutation.SetHeightMm(v)
+	return _u
+}
+
+// SetNillableHeightMm sets the "height_mm" field if the given value is not nil.
+func (_u *ProductUpdate) SetNillableHeightMm(v *int) *ProductUpdate {
+	if v != nil {
+		_u.SetHeightMm(*v)
+	}
+	return _u
+}
+
+// AddHeightMm adds value to the "height_mm" field.
+func (_u *ProductUpdate) AddHeightMm(v int) *ProductUpdate {
+	_u.mutation.AddHeightMm(v)
+	return _u
+}
+
+// ClearHeightMm clears the value of the "height_mm" field.
+func (_u *ProductUpdate) ClearHeightMm() *ProductUpdate {
+	_u.mutation.ClearHeightMm()
+	return _u
+}
+
+// SetPackageCategory sets the "package_category" field.
+func (_u *ProductUpdate) SetPackageCategory(v string) *ProductUpdate {
+	_u.mutation.SetPackageCategory(v)
+	return _u
+}
+
+// SetNillablePackageCategory sets the "package_category" field if the given value is not nil.
+func (_u *ProductUpdate) SetNillablePackageCategory(v *string) *ProductUpdate {
+	if v != nil {
+		_u.SetPackageCategory(*v)
+	}
+	return _u
+}
+
+// SetPackageCount sets the "package_count" field.
+func (_u *ProductUpdate) SetPackageCount(v int) *ProductUpdate {
+	_u.mutation.ResetPackageCount()
+	_u.mutation.SetPackageCount(v)
+	return _u
+}
+
+// SetNillablePackageCount sets the "package_count" field if the given value is not nil.
+func (_u *ProductUpdate) SetNillablePackageCount(v *int) *ProductUpdate {
+	if v != nil {
+		_u.SetPackageCount(*v)
+	}
+	return _u
+}
+
+// AddPackageCount adds value to the "package_count" field.
+func (_u *ProductUpdate) AddPackageCount(v int) *ProductUpdate {
+	_u.mutation.AddPackageCount(v)
+	return _u
+}
+
+// SetFragile sets the "fragile" field.
+func (_u *ProductUpdate) SetFragile(v bool) *ProductUpdate {
+	_u.mutation.SetFragile(v)
+	return _u
+}
+
+// SetNillableFragile sets the "fragile" field if the given value is not nil.
+func (_u *ProductUpdate) SetNillableFragile(v *bool) *ProductUpdate {
+	if v != nil {
+		_u.SetFragile(*v)
+	}
+	return _u
+}
+
+// SetContentsDescription sets the "contents_description" field.
+func (_u *ProductUpdate) SetContentsDescription(v string) *ProductUpdate {
+	_u.mutation.SetContentsDescription(v)
+	return _u
+}
+
+// SetNillableContentsDescription sets the "contents_description" field if the given value is not nil.
+func (_u *ProductUpdate) SetNillableContentsDescription(v *string) *ProductUpdate {
+	if v != nil {
+		_u.SetContentsDescription(*v)
+	}
+	return _u
+}
+
+// SetDeclaredValueMinor sets the "declared_value_minor" field.
+func (_u *ProductUpdate) SetDeclaredValueMinor(v int64) *ProductUpdate {
+	_u.mutation.ResetDeclaredValueMinor()
+	_u.mutation.SetDeclaredValueMinor(v)
+	return _u
+}
+
+// SetNillableDeclaredValueMinor sets the "declared_value_minor" field if the given value is not nil.
+func (_u *ProductUpdate) SetNillableDeclaredValueMinor(v *int64) *ProductUpdate {
+	if v != nil {
+		_u.SetDeclaredValueMinor(*v)
+	}
+	return _u
+}
+
+// AddDeclaredValueMinor adds value to the "declared_value_minor" field.
+func (_u *ProductUpdate) AddDeclaredValueMinor(v int64) *ProductUpdate {
+	_u.mutation.AddDeclaredValueMinor(v)
+	return _u
+}
+
+// ClearDeclaredValueMinor clears the value of the "declared_value_minor" field.
+func (_u *ProductUpdate) ClearDeclaredValueMinor() *ProductUpdate {
+	_u.mutation.ClearDeclaredValueMinor()
+	return _u
+}
+
 // SetPublishAt sets the "publish_at" field.
 func (_u *ProductUpdate) SetPublishAt(v time.Time) *ProductUpdate {
 	_u.mutation.SetPublishAt(v)
@@ -519,6 +717,46 @@ func (_u *ProductUpdate) check() error {
 			return &ValidationError{Name: "description", err: fmt.Errorf(`ent: validator failed for field "Product.description": %w`, err)}
 		}
 	}
+	if v, ok := _u.mutation.WeightGrams(); ok {
+		if err := product.WeightGramsValidator(v); err != nil {
+			return &ValidationError{Name: "weight_grams", err: fmt.Errorf(`ent: validator failed for field "Product.weight_grams": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.LengthMm(); ok {
+		if err := product.LengthMmValidator(v); err != nil {
+			return &ValidationError{Name: "length_mm", err: fmt.Errorf(`ent: validator failed for field "Product.length_mm": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.WidthMm(); ok {
+		if err := product.WidthMmValidator(v); err != nil {
+			return &ValidationError{Name: "width_mm", err: fmt.Errorf(`ent: validator failed for field "Product.width_mm": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.HeightMm(); ok {
+		if err := product.HeightMmValidator(v); err != nil {
+			return &ValidationError{Name: "height_mm", err: fmt.Errorf(`ent: validator failed for field "Product.height_mm": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.PackageCategory(); ok {
+		if err := product.PackageCategoryValidator(v); err != nil {
+			return &ValidationError{Name: "package_category", err: fmt.Errorf(`ent: validator failed for field "Product.package_category": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.PackageCount(); ok {
+		if err := product.PackageCountValidator(v); err != nil {
+			return &ValidationError{Name: "package_count", err: fmt.Errorf(`ent: validator failed for field "Product.package_count": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.ContentsDescription(); ok {
+		if err := product.ContentsDescriptionValidator(v); err != nil {
+			return &ValidationError{Name: "contents_description", err: fmt.Errorf(`ent: validator failed for field "Product.contents_description": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.DeclaredValueMinor(); ok {
+		if err := product.DeclaredValueMinorValidator(v); err != nil {
+			return &ValidationError{Name: "declared_value_minor", err: fmt.Errorf(`ent: validator failed for field "Product.declared_value_minor": %w`, err)}
+		}
+	}
 	return nil
 }
 
@@ -628,6 +866,66 @@ func (_u *ProductUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	}
 	if value, ok := _u.mutation.AddedMinPriceMinor(); ok {
 		_spec.AddField(product.FieldMinPriceMinor, field.TypeInt64, value)
+	}
+	if value, ok := _u.mutation.WeightGrams(); ok {
+		_spec.SetField(product.FieldWeightGrams, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedWeightGrams(); ok {
+		_spec.AddField(product.FieldWeightGrams, field.TypeInt, value)
+	}
+	if _u.mutation.WeightGramsCleared() {
+		_spec.ClearField(product.FieldWeightGrams, field.TypeInt)
+	}
+	if value, ok := _u.mutation.LengthMm(); ok {
+		_spec.SetField(product.FieldLengthMm, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedLengthMm(); ok {
+		_spec.AddField(product.FieldLengthMm, field.TypeInt, value)
+	}
+	if _u.mutation.LengthMmCleared() {
+		_spec.ClearField(product.FieldLengthMm, field.TypeInt)
+	}
+	if value, ok := _u.mutation.WidthMm(); ok {
+		_spec.SetField(product.FieldWidthMm, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedWidthMm(); ok {
+		_spec.AddField(product.FieldWidthMm, field.TypeInt, value)
+	}
+	if _u.mutation.WidthMmCleared() {
+		_spec.ClearField(product.FieldWidthMm, field.TypeInt)
+	}
+	if value, ok := _u.mutation.HeightMm(); ok {
+		_spec.SetField(product.FieldHeightMm, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedHeightMm(); ok {
+		_spec.AddField(product.FieldHeightMm, field.TypeInt, value)
+	}
+	if _u.mutation.HeightMmCleared() {
+		_spec.ClearField(product.FieldHeightMm, field.TypeInt)
+	}
+	if value, ok := _u.mutation.PackageCategory(); ok {
+		_spec.SetField(product.FieldPackageCategory, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.PackageCount(); ok {
+		_spec.SetField(product.FieldPackageCount, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedPackageCount(); ok {
+		_spec.AddField(product.FieldPackageCount, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.Fragile(); ok {
+		_spec.SetField(product.FieldFragile, field.TypeBool, value)
+	}
+	if value, ok := _u.mutation.ContentsDescription(); ok {
+		_spec.SetField(product.FieldContentsDescription, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.DeclaredValueMinor(); ok {
+		_spec.SetField(product.FieldDeclaredValueMinor, field.TypeInt64, value)
+	}
+	if value, ok := _u.mutation.AddedDeclaredValueMinor(); ok {
+		_spec.AddField(product.FieldDeclaredValueMinor, field.TypeInt64, value)
+	}
+	if _u.mutation.DeclaredValueMinorCleared() {
+		_spec.ClearField(product.FieldDeclaredValueMinor, field.TypeInt64)
 	}
 	if value, ok := _u.mutation.PublishAt(); ok {
 		_spec.SetField(product.FieldPublishAt, field.TypeTime, value)
@@ -968,6 +1266,204 @@ func (_u *ProductUpdateOne) AddMinPriceMinor(v int64) *ProductUpdateOne {
 	return _u
 }
 
+// SetWeightGrams sets the "weight_grams" field.
+func (_u *ProductUpdateOne) SetWeightGrams(v int) *ProductUpdateOne {
+	_u.mutation.ResetWeightGrams()
+	_u.mutation.SetWeightGrams(v)
+	return _u
+}
+
+// SetNillableWeightGrams sets the "weight_grams" field if the given value is not nil.
+func (_u *ProductUpdateOne) SetNillableWeightGrams(v *int) *ProductUpdateOne {
+	if v != nil {
+		_u.SetWeightGrams(*v)
+	}
+	return _u
+}
+
+// AddWeightGrams adds value to the "weight_grams" field.
+func (_u *ProductUpdateOne) AddWeightGrams(v int) *ProductUpdateOne {
+	_u.mutation.AddWeightGrams(v)
+	return _u
+}
+
+// ClearWeightGrams clears the value of the "weight_grams" field.
+func (_u *ProductUpdateOne) ClearWeightGrams() *ProductUpdateOne {
+	_u.mutation.ClearWeightGrams()
+	return _u
+}
+
+// SetLengthMm sets the "length_mm" field.
+func (_u *ProductUpdateOne) SetLengthMm(v int) *ProductUpdateOne {
+	_u.mutation.ResetLengthMm()
+	_u.mutation.SetLengthMm(v)
+	return _u
+}
+
+// SetNillableLengthMm sets the "length_mm" field if the given value is not nil.
+func (_u *ProductUpdateOne) SetNillableLengthMm(v *int) *ProductUpdateOne {
+	if v != nil {
+		_u.SetLengthMm(*v)
+	}
+	return _u
+}
+
+// AddLengthMm adds value to the "length_mm" field.
+func (_u *ProductUpdateOne) AddLengthMm(v int) *ProductUpdateOne {
+	_u.mutation.AddLengthMm(v)
+	return _u
+}
+
+// ClearLengthMm clears the value of the "length_mm" field.
+func (_u *ProductUpdateOne) ClearLengthMm() *ProductUpdateOne {
+	_u.mutation.ClearLengthMm()
+	return _u
+}
+
+// SetWidthMm sets the "width_mm" field.
+func (_u *ProductUpdateOne) SetWidthMm(v int) *ProductUpdateOne {
+	_u.mutation.ResetWidthMm()
+	_u.mutation.SetWidthMm(v)
+	return _u
+}
+
+// SetNillableWidthMm sets the "width_mm" field if the given value is not nil.
+func (_u *ProductUpdateOne) SetNillableWidthMm(v *int) *ProductUpdateOne {
+	if v != nil {
+		_u.SetWidthMm(*v)
+	}
+	return _u
+}
+
+// AddWidthMm adds value to the "width_mm" field.
+func (_u *ProductUpdateOne) AddWidthMm(v int) *ProductUpdateOne {
+	_u.mutation.AddWidthMm(v)
+	return _u
+}
+
+// ClearWidthMm clears the value of the "width_mm" field.
+func (_u *ProductUpdateOne) ClearWidthMm() *ProductUpdateOne {
+	_u.mutation.ClearWidthMm()
+	return _u
+}
+
+// SetHeightMm sets the "height_mm" field.
+func (_u *ProductUpdateOne) SetHeightMm(v int) *ProductUpdateOne {
+	_u.mutation.ResetHeightMm()
+	_u.mutation.SetHeightMm(v)
+	return _u
+}
+
+// SetNillableHeightMm sets the "height_mm" field if the given value is not nil.
+func (_u *ProductUpdateOne) SetNillableHeightMm(v *int) *ProductUpdateOne {
+	if v != nil {
+		_u.SetHeightMm(*v)
+	}
+	return _u
+}
+
+// AddHeightMm adds value to the "height_mm" field.
+func (_u *ProductUpdateOne) AddHeightMm(v int) *ProductUpdateOne {
+	_u.mutation.AddHeightMm(v)
+	return _u
+}
+
+// ClearHeightMm clears the value of the "height_mm" field.
+func (_u *ProductUpdateOne) ClearHeightMm() *ProductUpdateOne {
+	_u.mutation.ClearHeightMm()
+	return _u
+}
+
+// SetPackageCategory sets the "package_category" field.
+func (_u *ProductUpdateOne) SetPackageCategory(v string) *ProductUpdateOne {
+	_u.mutation.SetPackageCategory(v)
+	return _u
+}
+
+// SetNillablePackageCategory sets the "package_category" field if the given value is not nil.
+func (_u *ProductUpdateOne) SetNillablePackageCategory(v *string) *ProductUpdateOne {
+	if v != nil {
+		_u.SetPackageCategory(*v)
+	}
+	return _u
+}
+
+// SetPackageCount sets the "package_count" field.
+func (_u *ProductUpdateOne) SetPackageCount(v int) *ProductUpdateOne {
+	_u.mutation.ResetPackageCount()
+	_u.mutation.SetPackageCount(v)
+	return _u
+}
+
+// SetNillablePackageCount sets the "package_count" field if the given value is not nil.
+func (_u *ProductUpdateOne) SetNillablePackageCount(v *int) *ProductUpdateOne {
+	if v != nil {
+		_u.SetPackageCount(*v)
+	}
+	return _u
+}
+
+// AddPackageCount adds value to the "package_count" field.
+func (_u *ProductUpdateOne) AddPackageCount(v int) *ProductUpdateOne {
+	_u.mutation.AddPackageCount(v)
+	return _u
+}
+
+// SetFragile sets the "fragile" field.
+func (_u *ProductUpdateOne) SetFragile(v bool) *ProductUpdateOne {
+	_u.mutation.SetFragile(v)
+	return _u
+}
+
+// SetNillableFragile sets the "fragile" field if the given value is not nil.
+func (_u *ProductUpdateOne) SetNillableFragile(v *bool) *ProductUpdateOne {
+	if v != nil {
+		_u.SetFragile(*v)
+	}
+	return _u
+}
+
+// SetContentsDescription sets the "contents_description" field.
+func (_u *ProductUpdateOne) SetContentsDescription(v string) *ProductUpdateOne {
+	_u.mutation.SetContentsDescription(v)
+	return _u
+}
+
+// SetNillableContentsDescription sets the "contents_description" field if the given value is not nil.
+func (_u *ProductUpdateOne) SetNillableContentsDescription(v *string) *ProductUpdateOne {
+	if v != nil {
+		_u.SetContentsDescription(*v)
+	}
+	return _u
+}
+
+// SetDeclaredValueMinor sets the "declared_value_minor" field.
+func (_u *ProductUpdateOne) SetDeclaredValueMinor(v int64) *ProductUpdateOne {
+	_u.mutation.ResetDeclaredValueMinor()
+	_u.mutation.SetDeclaredValueMinor(v)
+	return _u
+}
+
+// SetNillableDeclaredValueMinor sets the "declared_value_minor" field if the given value is not nil.
+func (_u *ProductUpdateOne) SetNillableDeclaredValueMinor(v *int64) *ProductUpdateOne {
+	if v != nil {
+		_u.SetDeclaredValueMinor(*v)
+	}
+	return _u
+}
+
+// AddDeclaredValueMinor adds value to the "declared_value_minor" field.
+func (_u *ProductUpdateOne) AddDeclaredValueMinor(v int64) *ProductUpdateOne {
+	_u.mutation.AddDeclaredValueMinor(v)
+	return _u
+}
+
+// ClearDeclaredValueMinor clears the value of the "declared_value_minor" field.
+func (_u *ProductUpdateOne) ClearDeclaredValueMinor() *ProductUpdateOne {
+	_u.mutation.ClearDeclaredValueMinor()
+	return _u
+}
+
 // SetPublishAt sets the "publish_at" field.
 func (_u *ProductUpdateOne) SetPublishAt(v time.Time) *ProductUpdateOne {
 	_u.mutation.SetPublishAt(v)
@@ -1198,6 +1694,46 @@ func (_u *ProductUpdateOne) check() error {
 			return &ValidationError{Name: "description", err: fmt.Errorf(`ent: validator failed for field "Product.description": %w`, err)}
 		}
 	}
+	if v, ok := _u.mutation.WeightGrams(); ok {
+		if err := product.WeightGramsValidator(v); err != nil {
+			return &ValidationError{Name: "weight_grams", err: fmt.Errorf(`ent: validator failed for field "Product.weight_grams": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.LengthMm(); ok {
+		if err := product.LengthMmValidator(v); err != nil {
+			return &ValidationError{Name: "length_mm", err: fmt.Errorf(`ent: validator failed for field "Product.length_mm": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.WidthMm(); ok {
+		if err := product.WidthMmValidator(v); err != nil {
+			return &ValidationError{Name: "width_mm", err: fmt.Errorf(`ent: validator failed for field "Product.width_mm": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.HeightMm(); ok {
+		if err := product.HeightMmValidator(v); err != nil {
+			return &ValidationError{Name: "height_mm", err: fmt.Errorf(`ent: validator failed for field "Product.height_mm": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.PackageCategory(); ok {
+		if err := product.PackageCategoryValidator(v); err != nil {
+			return &ValidationError{Name: "package_category", err: fmt.Errorf(`ent: validator failed for field "Product.package_category": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.PackageCount(); ok {
+		if err := product.PackageCountValidator(v); err != nil {
+			return &ValidationError{Name: "package_count", err: fmt.Errorf(`ent: validator failed for field "Product.package_count": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.ContentsDescription(); ok {
+		if err := product.ContentsDescriptionValidator(v); err != nil {
+			return &ValidationError{Name: "contents_description", err: fmt.Errorf(`ent: validator failed for field "Product.contents_description": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.DeclaredValueMinor(); ok {
+		if err := product.DeclaredValueMinorValidator(v); err != nil {
+			return &ValidationError{Name: "declared_value_minor", err: fmt.Errorf(`ent: validator failed for field "Product.declared_value_minor": %w`, err)}
+		}
+	}
 	return nil
 }
 
@@ -1324,6 +1860,66 @@ func (_u *ProductUpdateOne) sqlSave(ctx context.Context) (_node *Product, err er
 	}
 	if value, ok := _u.mutation.AddedMinPriceMinor(); ok {
 		_spec.AddField(product.FieldMinPriceMinor, field.TypeInt64, value)
+	}
+	if value, ok := _u.mutation.WeightGrams(); ok {
+		_spec.SetField(product.FieldWeightGrams, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedWeightGrams(); ok {
+		_spec.AddField(product.FieldWeightGrams, field.TypeInt, value)
+	}
+	if _u.mutation.WeightGramsCleared() {
+		_spec.ClearField(product.FieldWeightGrams, field.TypeInt)
+	}
+	if value, ok := _u.mutation.LengthMm(); ok {
+		_spec.SetField(product.FieldLengthMm, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedLengthMm(); ok {
+		_spec.AddField(product.FieldLengthMm, field.TypeInt, value)
+	}
+	if _u.mutation.LengthMmCleared() {
+		_spec.ClearField(product.FieldLengthMm, field.TypeInt)
+	}
+	if value, ok := _u.mutation.WidthMm(); ok {
+		_spec.SetField(product.FieldWidthMm, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedWidthMm(); ok {
+		_spec.AddField(product.FieldWidthMm, field.TypeInt, value)
+	}
+	if _u.mutation.WidthMmCleared() {
+		_spec.ClearField(product.FieldWidthMm, field.TypeInt)
+	}
+	if value, ok := _u.mutation.HeightMm(); ok {
+		_spec.SetField(product.FieldHeightMm, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedHeightMm(); ok {
+		_spec.AddField(product.FieldHeightMm, field.TypeInt, value)
+	}
+	if _u.mutation.HeightMmCleared() {
+		_spec.ClearField(product.FieldHeightMm, field.TypeInt)
+	}
+	if value, ok := _u.mutation.PackageCategory(); ok {
+		_spec.SetField(product.FieldPackageCategory, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.PackageCount(); ok {
+		_spec.SetField(product.FieldPackageCount, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedPackageCount(); ok {
+		_spec.AddField(product.FieldPackageCount, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.Fragile(); ok {
+		_spec.SetField(product.FieldFragile, field.TypeBool, value)
+	}
+	if value, ok := _u.mutation.ContentsDescription(); ok {
+		_spec.SetField(product.FieldContentsDescription, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.DeclaredValueMinor(); ok {
+		_spec.SetField(product.FieldDeclaredValueMinor, field.TypeInt64, value)
+	}
+	if value, ok := _u.mutation.AddedDeclaredValueMinor(); ok {
+		_spec.AddField(product.FieldDeclaredValueMinor, field.TypeInt64, value)
+	}
+	if _u.mutation.DeclaredValueMinorCleared() {
+		_spec.ClearField(product.FieldDeclaredValueMinor, field.TypeInt64)
 	}
 	if value, ok := _u.mutation.PublishAt(); ok {
 		_spec.SetField(product.FieldPublishAt, field.TypeTime, value)

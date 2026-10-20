@@ -62,6 +62,15 @@ export interface ProductDraft {
   readonly attributes: AttributeDraft[];
   readonly videos: VideoDraft[];
   readonly supplierId: string;
+  readonly weightGramsText: string;
+  readonly lengthMmText: string;
+  readonly widthMmText: string;
+  readonly heightMmText: string;
+  readonly packageCategory: string;
+  readonly packageCountText: string;
+  readonly fragile: boolean;
+  readonly contentsDescription: string;
+  readonly declaredValueText: string;
 }
 
 function convertIsoToLocalDateTimeInputText(isoDate: string | null): string {
@@ -102,11 +111,14 @@ export function createEmptyProductDraft(): ProductDraft {
     name: "", description: "", categoryId: "", status: "active", taxable: true, trackInventory: true, publishedOnline: false, tagsText: "",
     options: [], variants: [createEmptyVariantDraft({}, undefined)], images: [], brandId: "", brandRelationship: "",
     visibility: "public", publishAtLocalText: "", attributes: [], videos: [], supplierId: "",
+    weightGramsText: "", lengthMmText: "", widthMmText: "", heightMmText: "", packageCategory: "general", packageCountText: "1",
+    fragile: false, contentsDescription: "", declaredValueText: "",
   };
 }
 
 export function convertProductToDraft(product: Product): ProductDraft {
-  const toText = (amountMinor: number | undefined, currency: CurrencyCode | undefined) => (amountMinor === undefined || !currency ? "" : convertMinorUnitsToMajorInputText(amountMinor, currency));
+  const toText = (amountMinor: number | null | undefined, currency: CurrencyCode | undefined) => (amountMinor === undefined || amountMinor === null || !currency ? "" : convertMinorUnitsToMajorInputText(amountMinor, currency));
+  const currency = product.variants[0]?.price.currency;
   return {
     name: product.name, description: product.description, categoryId: product.categoryId ?? "", status: product.status, taxable: product.taxable,
     trackInventory: product.trackInventory, publishedOnline: product.publishedOnline, tagsText: product.tags.join(", "),
@@ -119,6 +131,15 @@ export function convertProductToDraft(product: Product): ProductDraft {
     attributes: product.attributes.map((attribute) => ({ key: createDraftKey(), name: attribute.name, value: attribute.value })),
     videos: product.videos.map((video) => ({ key: video.id, url: video.url, title: video.title })),
     supplierId: product.supplierId ?? "",
+    weightGramsText: product.weightGrams === null || product.weightGrams === undefined ? "" : String(product.weightGrams),
+    lengthMmText: product.lengthMm === null || product.lengthMm === undefined ? "" : String(product.lengthMm),
+    widthMmText: product.widthMm === null || product.widthMm === undefined ? "" : String(product.widthMm),
+    heightMmText: product.heightMm === null || product.heightMm === undefined ? "" : String(product.heightMm),
+    packageCategory: product.packageCategory ?? "general",
+    packageCountText: String(product.packageCount ?? 1),
+    fragile: product.fragile ?? false,
+    contentsDescription: product.contentsDescription ?? "",
+    declaredValueText: toText(product.declaredValueMinor ?? undefined, currency),
     variants: product.variants.map((variant) => ({
       key: variant.id, id: variant.id, optionValues: variant.optionValues, sku: variant.sku, barcode: variant.barcode ?? "",
       priceText: toText(variant.price.amountMinor, variant.price.currency),
@@ -191,6 +212,12 @@ function parseOptionalMoney(text: string, currency: CurrencyCode, label: string,
   return amountMinor;
 }
 
+function parseOptionalWholeNumber(text: string): number | null {
+  if (text.trim() === "") return null;
+  const value = Number(text);
+  return Number.isSafeInteger(value) ? value : -1;
+}
+
 function parseRegionalPrices(variant: VariantDraft, storeCurrency: CurrencyCode, index: number, issues: ValidationIssue[]): RegionalPriceRequest[] {
   const prices: RegionalPriceRequest[] = [];
   for (const [marketCurrency, text] of Object.entries(variant.regionalPriceTextByCurrency)) {
@@ -204,6 +231,12 @@ function parseRegionalPrices(variant: VariantDraft, storeCurrency: CurrencyCode,
 
 export function convertDraftToUpsertRequest(draft: ProductDraft, currency: CurrencyCode, isNewProduct: boolean): { request: ProductUpsertRequest; parseIssues: ValidationIssue[] } {
   const parseIssues: ValidationIssue[] = [];
+  const weightGrams = parseOptionalWholeNumber(draft.weightGramsText);
+  const lengthMm = parseOptionalWholeNumber(draft.lengthMmText);
+  const widthMm = parseOptionalWholeNumber(draft.widthMmText);
+  const heightMm = parseOptionalWholeNumber(draft.heightMmText);
+  const packageCount = draft.packageCountText.trim() === "" ? 1 : parseOptionalWholeNumber(draft.packageCountText) ?? -1;
+  const declaredValueMinor = parseOptionalMoney(draft.declaredValueText, currency, "Declared value", "declaredValueMinor", parseIssues);
   const variants: ProductVariantUpsertRequest[] = draft.variants.map((variant, index) => {
     const label = `Variant ${index + 1}`;
     const priceMinor = parseOptionalMoney(variant.priceText, currency, `${label} price`, `variants.${index}.priceMinor`, parseIssues);
@@ -246,6 +279,15 @@ export function convertDraftToUpsertRequest(draft: ProductDraft, currency: Curre
       attributes: draft.attributes.filter((attribute) => attribute.name.trim() || attribute.value.trim()).map((attribute) => ({ name: attribute.name.trim(), value: attribute.value.trim() })),
       videos: draft.videos.filter((video) => video.url.trim()).map((video) => ({ url: video.url.trim(), title: video.title.trim() })),
       supplierId: draft.supplierId || null,
+      weightGrams,
+      lengthMm,
+      widthMm,
+      heightMm,
+      packageCategory: draft.packageCategory.trim() || "general",
+      packageCount,
+      fragile: draft.fragile,
+      contentsDescription: draft.contentsDescription.trim(),
+      declaredValueMinor,
     },
   };
 }

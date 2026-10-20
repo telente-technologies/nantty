@@ -309,6 +309,114 @@ func (_u *ProductVariantUpdate) AddPosition(v int) *ProductVariantUpdate {
 	return _u
 }
 
+// SetWeightGrams sets the "weight_grams" field.
+func (_u *ProductVariantUpdate) SetWeightGrams(v int) *ProductVariantUpdate {
+	_u.mutation.ResetWeightGrams()
+	_u.mutation.SetWeightGrams(v)
+	return _u
+}
+
+// SetNillableWeightGrams sets the "weight_grams" field if the given value is not nil.
+func (_u *ProductVariantUpdate) SetNillableWeightGrams(v *int) *ProductVariantUpdate {
+	if v != nil {
+		_u.SetWeightGrams(*v)
+	}
+	return _u
+}
+
+// AddWeightGrams adds value to the "weight_grams" field.
+func (_u *ProductVariantUpdate) AddWeightGrams(v int) *ProductVariantUpdate {
+	_u.mutation.AddWeightGrams(v)
+	return _u
+}
+
+// ClearWeightGrams clears the value of the "weight_grams" field.
+func (_u *ProductVariantUpdate) ClearWeightGrams() *ProductVariantUpdate {
+	_u.mutation.ClearWeightGrams()
+	return _u
+}
+
+// SetLengthMm sets the "length_mm" field.
+func (_u *ProductVariantUpdate) SetLengthMm(v int) *ProductVariantUpdate {
+	_u.mutation.ResetLengthMm()
+	_u.mutation.SetLengthMm(v)
+	return _u
+}
+
+// SetNillableLengthMm sets the "length_mm" field if the given value is not nil.
+func (_u *ProductVariantUpdate) SetNillableLengthMm(v *int) *ProductVariantUpdate {
+	if v != nil {
+		_u.SetLengthMm(*v)
+	}
+	return _u
+}
+
+// AddLengthMm adds value to the "length_mm" field.
+func (_u *ProductVariantUpdate) AddLengthMm(v int) *ProductVariantUpdate {
+	_u.mutation.AddLengthMm(v)
+	return _u
+}
+
+// ClearLengthMm clears the value of the "length_mm" field.
+func (_u *ProductVariantUpdate) ClearLengthMm() *ProductVariantUpdate {
+	_u.mutation.ClearLengthMm()
+	return _u
+}
+
+// SetWidthMm sets the "width_mm" field.
+func (_u *ProductVariantUpdate) SetWidthMm(v int) *ProductVariantUpdate {
+	_u.mutation.ResetWidthMm()
+	_u.mutation.SetWidthMm(v)
+	return _u
+}
+
+// SetNillableWidthMm sets the "width_mm" field if the given value is not nil.
+func (_u *ProductVariantUpdate) SetNillableWidthMm(v *int) *ProductVariantUpdate {
+	if v != nil {
+		_u.SetWidthMm(*v)
+	}
+	return _u
+}
+
+// AddWidthMm adds value to the "width_mm" field.
+func (_u *ProductVariantUpdate) AddWidthMm(v int) *ProductVariantUpdate {
+	_u.mutation.AddWidthMm(v)
+	return _u
+}
+
+// ClearWidthMm clears the value of the "width_mm" field.
+func (_u *ProductVariantUpdate) ClearWidthMm() *ProductVariantUpdate {
+	_u.mutation.ClearWidthMm()
+	return _u
+}
+
+// SetHeightMm sets the "height_mm" field.
+func (_u *ProductVariantUpdate) SetHeightMm(v int) *ProductVariantUpdate {
+	_u.mutation.ResetHeightMm()
+	_u.mutation.SetHeightMm(v)
+	return _u
+}
+
+// SetNillableHeightMm sets the "height_mm" field if the given value is not nil.
+func (_u *ProductVariantUpdate) SetNillableHeightMm(v *int) *ProductVariantUpdate {
+	if v != nil {
+		_u.SetHeightMm(*v)
+	}
+	return _u
+}
+
+// AddHeightMm adds value to the "height_mm" field.
+func (_u *ProductVariantUpdate) AddHeightMm(v int) *ProductVariantUpdate {
+	_u.mutation.AddHeightMm(v)
+	return _u
+}
+
+// ClearHeightMm clears the value of the "height_mm" field.
+func (_u *ProductVariantUpdate) ClearHeightMm() *ProductVariantUpdate {
+	_u.mutation.ClearHeightMm()
+	return _u
+}
+
 // SetUpdatedAt sets the "updated_at" field.
 func (_u *ProductVariantUpdate) SetUpdatedAt(v time.Time) *ProductVariantUpdate {
 	_u.mutation.SetUpdatedAt(v)
@@ -386,6 +494,26 @@ func (_u *ProductVariantUpdate) check() error {
 	if v, ok := _u.mutation.Barcode(); ok {
 		if err := productvariant.BarcodeValidator(v); err != nil {
 			return &ValidationError{Name: "barcode", err: fmt.Errorf(`ent: validator failed for field "ProductVariant.barcode": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.WeightGrams(); ok {
+		if err := productvariant.WeightGramsValidator(v); err != nil {
+			return &ValidationError{Name: "weight_grams", err: fmt.Errorf(`ent: validator failed for field "ProductVariant.weight_grams": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.LengthMm(); ok {
+		if err := productvariant.LengthMmValidator(v); err != nil {
+			return &ValidationError{Name: "length_mm", err: fmt.Errorf(`ent: validator failed for field "ProductVariant.length_mm": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.WidthMm(); ok {
+		if err := productvariant.WidthMmValidator(v); err != nil {
+			return &ValidationError{Name: "width_mm", err: fmt.Errorf(`ent: validator failed for field "ProductVariant.width_mm": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.HeightMm(); ok {
+		if err := productvariant.HeightMmValidator(v); err != nil {
+			return &ValidationError{Name: "height_mm", err: fmt.Errorf(`ent: validator failed for field "ProductVariant.height_mm": %w`, err)}
 		}
 	}
 	return nil
@@ -488,6 +616,42 @@ func (_u *ProductVariantUpdate) sqlSave(ctx context.Context) (_node int, err err
 	}
 	if value, ok := _u.mutation.AddedPosition(); ok {
 		_spec.AddField(productvariant.FieldPosition, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.WeightGrams(); ok {
+		_spec.SetField(productvariant.FieldWeightGrams, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedWeightGrams(); ok {
+		_spec.AddField(productvariant.FieldWeightGrams, field.TypeInt, value)
+	}
+	if _u.mutation.WeightGramsCleared() {
+		_spec.ClearField(productvariant.FieldWeightGrams, field.TypeInt)
+	}
+	if value, ok := _u.mutation.LengthMm(); ok {
+		_spec.SetField(productvariant.FieldLengthMm, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedLengthMm(); ok {
+		_spec.AddField(productvariant.FieldLengthMm, field.TypeInt, value)
+	}
+	if _u.mutation.LengthMmCleared() {
+		_spec.ClearField(productvariant.FieldLengthMm, field.TypeInt)
+	}
+	if value, ok := _u.mutation.WidthMm(); ok {
+		_spec.SetField(productvariant.FieldWidthMm, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedWidthMm(); ok {
+		_spec.AddField(productvariant.FieldWidthMm, field.TypeInt, value)
+	}
+	if _u.mutation.WidthMmCleared() {
+		_spec.ClearField(productvariant.FieldWidthMm, field.TypeInt)
+	}
+	if value, ok := _u.mutation.HeightMm(); ok {
+		_spec.SetField(productvariant.FieldHeightMm, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedHeightMm(); ok {
+		_spec.AddField(productvariant.FieldHeightMm, field.TypeInt, value)
+	}
+	if _u.mutation.HeightMmCleared() {
+		_spec.ClearField(productvariant.FieldHeightMm, field.TypeInt)
 	}
 	if value, ok := _u.mutation.UpdatedAt(); ok {
 		_spec.SetField(productvariant.FieldUpdatedAt, field.TypeTime, value)
@@ -791,6 +955,114 @@ func (_u *ProductVariantUpdateOne) AddPosition(v int) *ProductVariantUpdateOne {
 	return _u
 }
 
+// SetWeightGrams sets the "weight_grams" field.
+func (_u *ProductVariantUpdateOne) SetWeightGrams(v int) *ProductVariantUpdateOne {
+	_u.mutation.ResetWeightGrams()
+	_u.mutation.SetWeightGrams(v)
+	return _u
+}
+
+// SetNillableWeightGrams sets the "weight_grams" field if the given value is not nil.
+func (_u *ProductVariantUpdateOne) SetNillableWeightGrams(v *int) *ProductVariantUpdateOne {
+	if v != nil {
+		_u.SetWeightGrams(*v)
+	}
+	return _u
+}
+
+// AddWeightGrams adds value to the "weight_grams" field.
+func (_u *ProductVariantUpdateOne) AddWeightGrams(v int) *ProductVariantUpdateOne {
+	_u.mutation.AddWeightGrams(v)
+	return _u
+}
+
+// ClearWeightGrams clears the value of the "weight_grams" field.
+func (_u *ProductVariantUpdateOne) ClearWeightGrams() *ProductVariantUpdateOne {
+	_u.mutation.ClearWeightGrams()
+	return _u
+}
+
+// SetLengthMm sets the "length_mm" field.
+func (_u *ProductVariantUpdateOne) SetLengthMm(v int) *ProductVariantUpdateOne {
+	_u.mutation.ResetLengthMm()
+	_u.mutation.SetLengthMm(v)
+	return _u
+}
+
+// SetNillableLengthMm sets the "length_mm" field if the given value is not nil.
+func (_u *ProductVariantUpdateOne) SetNillableLengthMm(v *int) *ProductVariantUpdateOne {
+	if v != nil {
+		_u.SetLengthMm(*v)
+	}
+	return _u
+}
+
+// AddLengthMm adds value to the "length_mm" field.
+func (_u *ProductVariantUpdateOne) AddLengthMm(v int) *ProductVariantUpdateOne {
+	_u.mutation.AddLengthMm(v)
+	return _u
+}
+
+// ClearLengthMm clears the value of the "length_mm" field.
+func (_u *ProductVariantUpdateOne) ClearLengthMm() *ProductVariantUpdateOne {
+	_u.mutation.ClearLengthMm()
+	return _u
+}
+
+// SetWidthMm sets the "width_mm" field.
+func (_u *ProductVariantUpdateOne) SetWidthMm(v int) *ProductVariantUpdateOne {
+	_u.mutation.ResetWidthMm()
+	_u.mutation.SetWidthMm(v)
+	return _u
+}
+
+// SetNillableWidthMm sets the "width_mm" field if the given value is not nil.
+func (_u *ProductVariantUpdateOne) SetNillableWidthMm(v *int) *ProductVariantUpdateOne {
+	if v != nil {
+		_u.SetWidthMm(*v)
+	}
+	return _u
+}
+
+// AddWidthMm adds value to the "width_mm" field.
+func (_u *ProductVariantUpdateOne) AddWidthMm(v int) *ProductVariantUpdateOne {
+	_u.mutation.AddWidthMm(v)
+	return _u
+}
+
+// ClearWidthMm clears the value of the "width_mm" field.
+func (_u *ProductVariantUpdateOne) ClearWidthMm() *ProductVariantUpdateOne {
+	_u.mutation.ClearWidthMm()
+	return _u
+}
+
+// SetHeightMm sets the "height_mm" field.
+func (_u *ProductVariantUpdateOne) SetHeightMm(v int) *ProductVariantUpdateOne {
+	_u.mutation.ResetHeightMm()
+	_u.mutation.SetHeightMm(v)
+	return _u
+}
+
+// SetNillableHeightMm sets the "height_mm" field if the given value is not nil.
+func (_u *ProductVariantUpdateOne) SetNillableHeightMm(v *int) *ProductVariantUpdateOne {
+	if v != nil {
+		_u.SetHeightMm(*v)
+	}
+	return _u
+}
+
+// AddHeightMm adds value to the "height_mm" field.
+func (_u *ProductVariantUpdateOne) AddHeightMm(v int) *ProductVariantUpdateOne {
+	_u.mutation.AddHeightMm(v)
+	return _u
+}
+
+// ClearHeightMm clears the value of the "height_mm" field.
+func (_u *ProductVariantUpdateOne) ClearHeightMm() *ProductVariantUpdateOne {
+	_u.mutation.ClearHeightMm()
+	return _u
+}
+
 // SetUpdatedAt sets the "updated_at" field.
 func (_u *ProductVariantUpdateOne) SetUpdatedAt(v time.Time) *ProductVariantUpdateOne {
 	_u.mutation.SetUpdatedAt(v)
@@ -881,6 +1153,26 @@ func (_u *ProductVariantUpdateOne) check() error {
 	if v, ok := _u.mutation.Barcode(); ok {
 		if err := productvariant.BarcodeValidator(v); err != nil {
 			return &ValidationError{Name: "barcode", err: fmt.Errorf(`ent: validator failed for field "ProductVariant.barcode": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.WeightGrams(); ok {
+		if err := productvariant.WeightGramsValidator(v); err != nil {
+			return &ValidationError{Name: "weight_grams", err: fmt.Errorf(`ent: validator failed for field "ProductVariant.weight_grams": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.LengthMm(); ok {
+		if err := productvariant.LengthMmValidator(v); err != nil {
+			return &ValidationError{Name: "length_mm", err: fmt.Errorf(`ent: validator failed for field "ProductVariant.length_mm": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.WidthMm(); ok {
+		if err := productvariant.WidthMmValidator(v); err != nil {
+			return &ValidationError{Name: "width_mm", err: fmt.Errorf(`ent: validator failed for field "ProductVariant.width_mm": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.HeightMm(); ok {
+		if err := productvariant.HeightMmValidator(v); err != nil {
+			return &ValidationError{Name: "height_mm", err: fmt.Errorf(`ent: validator failed for field "ProductVariant.height_mm": %w`, err)}
 		}
 	}
 	return nil
@@ -1000,6 +1292,42 @@ func (_u *ProductVariantUpdateOne) sqlSave(ctx context.Context) (_node *ProductV
 	}
 	if value, ok := _u.mutation.AddedPosition(); ok {
 		_spec.AddField(productvariant.FieldPosition, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.WeightGrams(); ok {
+		_spec.SetField(productvariant.FieldWeightGrams, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedWeightGrams(); ok {
+		_spec.AddField(productvariant.FieldWeightGrams, field.TypeInt, value)
+	}
+	if _u.mutation.WeightGramsCleared() {
+		_spec.ClearField(productvariant.FieldWeightGrams, field.TypeInt)
+	}
+	if value, ok := _u.mutation.LengthMm(); ok {
+		_spec.SetField(productvariant.FieldLengthMm, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedLengthMm(); ok {
+		_spec.AddField(productvariant.FieldLengthMm, field.TypeInt, value)
+	}
+	if _u.mutation.LengthMmCleared() {
+		_spec.ClearField(productvariant.FieldLengthMm, field.TypeInt)
+	}
+	if value, ok := _u.mutation.WidthMm(); ok {
+		_spec.SetField(productvariant.FieldWidthMm, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedWidthMm(); ok {
+		_spec.AddField(productvariant.FieldWidthMm, field.TypeInt, value)
+	}
+	if _u.mutation.WidthMmCleared() {
+		_spec.ClearField(productvariant.FieldWidthMm, field.TypeInt)
+	}
+	if value, ok := _u.mutation.HeightMm(); ok {
+		_spec.SetField(productvariant.FieldHeightMm, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedHeightMm(); ok {
+		_spec.AddField(productvariant.FieldHeightMm, field.TypeInt, value)
+	}
+	if _u.mutation.HeightMmCleared() {
+		_spec.ClearField(productvariant.FieldHeightMm, field.TypeInt)
 	}
 	if value, ok := _u.mutation.UpdatedAt(); ok {
 		_spec.SetField(productvariant.FieldUpdatedAt, field.TypeTime, value)

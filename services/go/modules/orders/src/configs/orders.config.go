@@ -1,6 +1,7 @@
 package configs
 
 import (
+	"strings"
 	"time"
 
 	platformconfig "zudomart/platform/config"
@@ -29,6 +30,7 @@ type OrdersSettings struct {
 	ReportExportSweepPeriod time.Duration
 	EventsQueueName         string
 	ShippingRuleLimit       int
+	LogisticsEnabled        bool
 	AutoCompleteGrace       time.Duration
 	InternalApiToken        string
 	MoneyInternalUrl        string
@@ -67,6 +69,7 @@ func ReadOrdersSettingsFromEnvironment(reader *platformconfig.EnvironmentReader)
 		ReportExportSweepPeriod: reader.ReadDurationOrDefault("ORDERS_REPORT_EXPORT_SWEEP_INTERVAL", 5*time.Second),
 		EventsQueueName:         reader.ReadStringOrDefault("ORDERS_EVENTS_QUEUE", ""),
 		ShippingRuleLimit:       50,
+		LogisticsEnabled:        strings.EqualFold(reader.ReadStringOrDefault("LOGISTICS_ENABLED", "false"), "true"),
 		InternalApiToken:        reader.ReadStringOrDefault("CATALOG_INTERNAL_API_TOKEN", ""),
 		MoneyInternalUrl:        reader.ReadStringOrDefault("ORDERS_MONEY_INTERNAL_URL", ""),
 		MoneyInternalToken:      reader.ReadStringOrDefault("MONEY_INTERNAL_API_TOKEN", ""),

@@ -70,8 +70,52 @@ func ValidateProductUpsertAt(body dtos.ProductUpsertRequest, now time.Time) erro
 	if body.SupplierId != nil {
 		utils.ParseIdentifier("supplierId", *body.SupplierId, &collected)
 	}
+	validateParcelFields("", body.WeightGrams, body.LengthMm, body.WidthMm, body.HeightMm, body.DeclaredValueMinor, body.PackageCount, &collected)
+	if body.PackageCategory != nil {
+		collected.CheckLength("packageCategory", *body.PackageCategory, 1, 40)
+	}
+	if body.ContentsDescription != nil && len(*body.ContentsDescription) > 300 {
+		collected.Add("contentsDescription", "must be at most 300 characters")
+	}
 	validateVariants(body.Variants, optionNames, &collected)
 	return collected.AsError()
+}
+
+func validateParcelFields(path string, weight, length, width, height *int, declaredValue *int64, packageCount *int, collected *utils.Issues) {
+	if weight != nil {
+		collected.CheckRange(parcelPath(path, "weightGrams"), *weight, 1, 1_000_000)
+	}
+	if length != nil {
+		collected.CheckRange(parcelPath(path, "lengthMm"), *length, 1, 10_000)
+	}
+	if width != nil {
+		collected.CheckRange(parcelPath(path, "widthMm"), *width, 1, 10_000)
+	}
+	if height != nil {
+		collected.CheckRange(parcelPath(path, "heightMm"), *height, 1, 10_000)
+	}
+	providedDimensions := 0
+	for _, dimension := range []*int{length, width, height} {
+		if dimension != nil {
+			providedDimensions++
+		}
+	}
+	if providedDimensions != 0 && providedDimensions != 3 {
+		collected.Add(parcelPath(path, "lengthMm"), "length, width and height must be provided together")
+	}
+	if declaredValue != nil && (*declaredValue < 0 || *declaredValue > 1_000_000_000_000) {
+		collected.Add(parcelPath(path, "declaredValueMinor"), "must be between 0 and 1000000000000")
+	}
+	if packageCount != nil {
+		collected.CheckRange(parcelPath(path, "packageCount"), *packageCount, 1, 1000)
+	}
+}
+
+func parcelPath(prefix, field string) string {
+	if prefix == "" {
+		return field
+	}
+	return prefix + "." + field
 }
 
 func validateOptions(options []dtos.OptionRequest, collected *utils.Issues) []string {
@@ -162,6 +206,7 @@ func validateVariants(variants []dtos.VariantRequest, optionNames []string, coll
 		skus[strings.ToLower(variant.Sku)] = true
 		validateBarcode(path, variant, barcodes, collected)
 		validateMoneyAndStock(path, variant, collected)
+		validateParcelFields(path, variant.WeightGrams, variant.LengthMm, variant.WidthMm, variant.HeightMm, nil, nil, collected)
 	}
 }
 

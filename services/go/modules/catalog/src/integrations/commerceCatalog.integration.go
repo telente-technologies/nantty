@@ -188,11 +188,26 @@ func (catalog CommerceCatalog) ResolveProductsForCheckoutInCountry(ctx context.C
 	for _, variant := range variants {
 		parent, owner := products[variant.ProductID], stores[variant.StoreID]
 		currency := money.CurrencyCode(parent.Currency)
+		weightGrams, lengthMm, widthMm, heightMm := parent.WeightGrams, parent.LengthMm, parent.WidthMm, parent.HeightMm
+		if variant.WeightGrams != nil {
+			weightGrams = variant.WeightGrams
+		}
+		if variant.LengthMm != nil {
+			lengthMm = variant.LengthMm
+		}
+		if variant.WidthMm != nil {
+			widthMm = variant.WidthMm
+		}
+		if variant.HeightMm != nil {
+			heightMm = variant.HeightMm
+		}
 		snapshot := commerceports.ProductSnapshot{
 			ProductId: parent.ID, VariantId: variant.ID, StoreId: variant.StoreID, SellerAccountId: owner.OwnerAccountId, ProductTitle: parent.Name,
 			VariantTitle: variant.Title, Sku: variant.Sku, Size: variant.Size, Color: variant.Color, OptionValues: variant.OptionValues, ImageUrl: images[parent.ID],
 			UnitPrice: money.Money{AmountMinor: variant.PriceMinor, Currency: currency}, Taxable: parent.Taxable, TrackInventory: parent.TrackInventory,
 			CategoryId: parent.CategoryID, CategoryName: categoryNames[parent.ID], Purchasable: parent.Status == enums.ProductActive && parent.PublishedOnline && owner.Active && enums.IsShownToBuyers(parent.ModerationVisibility),
+			WeightGrams: weightGrams, LengthMm: lengthMm, WidthMm: widthMm, HeightMm: heightMm, PackageCategory: parent.PackageCategory,
+			PackageCount: parent.PackageCount, Fragile: parent.Fragile, ContentsDescription: parent.ContentsDescription, DeclaredValueMinor: parent.DeclaredValueMinor,
 		}
 		if variant.CostPriceMinor != nil {
 			snapshot.CostPrice = &money.Money{AmountMinor: *variant.CostPriceMinor, Currency: currency}

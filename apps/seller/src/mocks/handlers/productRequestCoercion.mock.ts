@@ -10,6 +10,11 @@ function readNullableInteger(value: unknown): number | null {
   return value === null || value === undefined || value === "" ? null : (value as number);
 }
 
+function readOptionalNullableInteger(value: unknown): number | null | undefined {
+  if (value === undefined) return undefined;
+  return value === null || value === "" ? null : (value as number);
+}
+
 export function coerceProductUpsertRequest(body: Record<string, unknown>): ProductUpsertRequest {
   const options = Array.isArray(body.options) ? body.options : [];
   const variants = Array.isArray(body.variants) ? body.variants : [];
@@ -45,6 +50,10 @@ export function coerceProductUpsertRequest(body: Record<string, unknown>): Produ
         lowStockThreshold: record.lowStockThreshold as number,
         reorderPoint: typeof record.reorderPoint === "number" ? record.reorderPoint : undefined,
         reorderQuantity: typeof record.reorderQuantity === "number" ? record.reorderQuantity : undefined,
+        weightGrams: readOptionalNullableInteger(record.weightGrams),
+        lengthMm: readOptionalNullableInteger(record.lengthMm),
+        widthMm: readOptionalNullableInteger(record.widthMm),
+        heightMm: readOptionalNullableInteger(record.heightMm),
         openingStock: (Array.isArray(record.openingStock) ? record.openingStock : []).map((entry) => {
           const stockRecord = (typeof entry === "object" && entry !== null ? entry : {}) as Record<string, unknown>;
           return { locationId: String(stockRecord.locationId ?? ""), quantity: stockRecord.quantity as number };
@@ -62,6 +71,15 @@ export function coerceProductUpsertRequest(body: Record<string, unknown>): Produ
       return { url: typeof record.url === "string" ? record.url : "", title: typeof record.title === "string" ? record.title : "" };
     }) : undefined,
     supplierId: body.supplierId === undefined ? undefined : typeof body.supplierId === "string" && body.supplierId !== "" ? body.supplierId : null,
+    weightGrams: readOptionalNullableInteger(body.weightGrams),
+    lengthMm: readOptionalNullableInteger(body.lengthMm),
+    widthMm: readOptionalNullableInteger(body.widthMm),
+    heightMm: readOptionalNullableInteger(body.heightMm),
+    packageCategory: typeof body.packageCategory === "string" ? body.packageCategory : undefined,
+    packageCount: typeof body.packageCount === "number" ? body.packageCount : undefined,
+    fragile: typeof body.fragile === "boolean" ? body.fragile : undefined,
+    contentsDescription: typeof body.contentsDescription === "string" ? body.contentsDescription : undefined,
+    declaredValueMinor: readOptionalNullableInteger(body.declaredValueMinor),
   };
 }
 

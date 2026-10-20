@@ -20,6 +20,7 @@ import (
 	"zudomart/modules/orders/src/integrations"
 	"zudomart/modules/orders/src/interfaces"
 	"zudomart/modules/orders/src/jobs"
+	"zudomart/modules/orders/src/logistics"
 	"zudomart/modules/orders/src/migrations"
 	adminorders "zudomart/modules/orders/src/modules/adminOrders"
 	"zudomart/modules/orders/src/modules/cart"
@@ -121,6 +122,7 @@ func StartOrdersModuleWithSettings(ctx context.Context, settings configs.OrdersS
 		Client: ent.NewClient(ent.Driver(entsql.OpenDB(dialect.Postgres, database))), Database: database,
 		Users: usersdirectory.Reader{Database: database, Schema: "users"}, Settings: settings, Logger: logger, Now: time.Now,
 		AccessVerifier: collaborators.Verifier, IdempotencyStore: module.openIdempotencyStore(settings, logger), Staff: collaborators.Staff, Audit: collaborators.Audit,
+		Logistics: logistics.NewRegistry(settings.LogisticsEnabled),
 	}
 	if err := module.attachMoney(settings, collaborators, logger); err != nil {
 		_ = database.Close()

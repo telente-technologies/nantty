@@ -30,6 +30,10 @@ type VariantRequest struct {
 	LowStockThreshold   int                    `json:"lowStockThreshold"`
 	ReorderPoint        *int                   `json:"reorderPoint"`
 	ReorderQuantity     *int                   `json:"reorderQuantity"`
+	WeightGrams         *int                   `json:"weightGrams"`
+	LengthMm            *int                   `json:"lengthMm"`
+	WidthMm             *int                   `json:"widthMm"`
+	HeightMm            *int                   `json:"heightMm"`
 	OpeningStock        []OpeningStockRequest  `json:"openingStock"`
 }
 
@@ -66,6 +70,16 @@ type ProductUpsertRequest struct {
 	Attributes      *[]AttributeRequest `json:"attributes"`
 	Videos          *[]VideoRequest     `json:"videos"`
 	SupplierId      *string             `json:"supplierId"`
+
+	WeightGrams         *int    `json:"weightGrams"`
+	LengthMm            *int    `json:"lengthMm"`
+	WidthMm             *int    `json:"widthMm"`
+	HeightMm            *int    `json:"heightMm"`
+	PackageCategory     *string `json:"packageCategory"`
+	PackageCount        *int    `json:"packageCount"`
+	Fragile             *bool   `json:"fragile"`
+	ContentsDescription *string `json:"contentsDescription"`
+	DeclaredValueMinor  *int64  `json:"declaredValueMinor"`
 }
 
 type BulkActionRequest struct {

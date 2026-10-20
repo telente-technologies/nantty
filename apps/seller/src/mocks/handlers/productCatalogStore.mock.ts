@@ -112,6 +112,10 @@ export function buildMockProductFromRequest(request: ProductUpsertRequest, exist
       lowStockThreshold: variantRequest.lowStockThreshold,
       reorderPoint: variantRequest.reorderPoint ?? existingVariant?.reorderPoint ?? variantRequest.lowStockThreshold,
       reorderQuantity: variantRequest.reorderQuantity ?? existingVariant?.reorderQuantity ?? Math.max(10, variantRequest.lowStockThreshold * 4),
+      weightGrams: variantRequest.weightGrams === undefined || variantRequest.weightGrams === null ? (existingVariant?.weightGrams ?? null) : variantRequest.weightGrams,
+      lengthMm: variantRequest.lengthMm === undefined || variantRequest.lengthMm === null ? (existingVariant?.lengthMm ?? null) : variantRequest.lengthMm,
+      widthMm: variantRequest.widthMm === undefined || variantRequest.widthMm === null ? (existingVariant?.widthMm ?? null) : variantRequest.widthMm,
+      heightMm: variantRequest.heightMm === undefined || variantRequest.heightMm === null ? (existingVariant?.heightMm ?? null) : variantRequest.heightMm,
       stock,
     };
   });
@@ -141,6 +145,15 @@ export function buildMockProductFromRequest(request: ProductUpsertRequest, exist
     attributes: (request.attributes ?? existingProduct?.attributes ?? []).map((attribute) => ({ name: attribute.name.trim(), value: attribute.value.trim() })),
     videos: request.videos === undefined ? existingProduct?.videos ?? [] : request.videos.map((video, index) => ({ id: existingProduct?.videos.find((candidate) => candidate.url === video.url)?.id ?? createMockIdentifier(`vid${index}`), url: video.url, title: video.title.trim() })),
     supplierId: request.supplierId === undefined ? existingProduct?.supplierId ?? null : request.supplierId,
+    weightGrams: request.weightGrams === undefined || request.weightGrams === null ? (existingProduct?.weightGrams ?? null) : request.weightGrams,
+    lengthMm: request.lengthMm === undefined || request.lengthMm === null ? (existingProduct?.lengthMm ?? null) : request.lengthMm,
+    widthMm: request.widthMm === undefined || request.widthMm === null ? (existingProduct?.widthMm ?? null) : request.widthMm,
+    heightMm: request.heightMm === undefined || request.heightMm === null ? (existingProduct?.heightMm ?? null) : request.heightMm,
+    packageCategory: request.packageCategory ?? existingProduct?.packageCategory ?? "general",
+    packageCount: request.packageCount ?? existingProduct?.packageCount ?? 1,
+    fragile: request.fragile ?? existingProduct?.fragile ?? false,
+    contentsDescription: request.contentsDescription ?? existingProduct?.contentsDescription ?? "",
+    declaredValueMinor: request.declaredValueMinor === undefined || request.declaredValueMinor === null ? (existingProduct?.declaredValueMinor ?? null) : request.declaredValueMinor,
     createdAt: existingProduct?.createdAt ?? now,
     updatedAt: now,
   };

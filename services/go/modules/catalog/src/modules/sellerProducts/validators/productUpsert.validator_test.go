@@ -23,6 +23,26 @@ func TestValidProductPasses(t *testing.T) {
 	}
 }
 
+func TestValidProductParcelFieldsPass(t *testing.T) {
+	request := validRequest()
+	request.WeightGrams = intPointer(500)
+	request.LengthMm = intPointer(300)
+	request.WidthMm = intPointer(200)
+	request.HeightMm = intPointer(100)
+	request.PackageCategory = stringPointer("apparel")
+	request.PackageCount = intPointer(1)
+	request.Fragile = boolPointer(true)
+	request.ContentsDescription = stringPointer("one folded shirt")
+	request.DeclaredValueMinor = int64Pointer(500_000)
+	request.Variants[0].WeightGrams = intPointer(250)
+	request.Variants[0].LengthMm = intPointer(300)
+	request.Variants[0].WidthMm = intPointer(200)
+	request.Variants[0].HeightMm = intPointer(50)
+	if err := ValidateProductUpsertAt(request, time.Now()); err != nil {
+		t.Fatalf("expected valid parcel fields, got %v", err)
+	}
+}
+
 func TestProductValidationRejectsBrokenVariants(t *testing.T) {
 	cases := map[string]func(*dtos.ProductUpsertRequest){
 		"duplicate sku case-insensitive": func(request *dtos.ProductUpsertRequest) { request.Variants[1].Sku = "shirt-s" },
@@ -40,6 +60,19 @@ func TestProductValidationRejectsBrokenVariants(t *testing.T) {
 		"no variants":         func(request *dtos.ProductUpsertRequest) { request.Variants = nil },
 		"http video": func(request *dtos.ProductUpsertRequest) {
 			request.Videos = &[]dtos.VideoRequest{{Url: "http://x.test/v"}}
+		},
+		"partial dimensions": func(request *dtos.ProductUpsertRequest) {
+			request.WeightGrams = intPointer(500)
+			request.LengthMm = intPointer(300)
+		},
+		"zero weight": func(request *dtos.ProductUpsertRequest) {
+			request.WeightGrams = intPointer(0)
+		},
+		"zero package count": func(request *dtos.ProductUpsertRequest) {
+			request.PackageCount = intPointer(0)
+		},
+		"invalid variant dimension": func(request *dtos.ProductUpsertRequest) {
+			request.Variants[0].LengthMm = intPointer(0)
 		},
 	}
 	for name, mutate := range cases {
@@ -61,3 +94,11 @@ func TestEan13CheckDigit(t *testing.T) {
 		t.Fatal("wrong check digit accepted")
 	}
 }
+
+func intPointer(value int) *int { return &value }
+
+func int64Pointer(value int64) *int64 { return &value }
+
+func stringPointer(value string) *string { return &value }
+
+func boolPointer(value bool) *bool { return &value }

@@ -28,6 +28,14 @@ type Tx struct {
 	CustomerSegment *CustomerSegmentClient
 	// DeliveryArea is the client for interacting with the DeliveryArea builders.
 	DeliveryArea *DeliveryAreaClient
+	// DeliveryAttempt is the client for interacting with the DeliveryAttempt builders.
+	DeliveryAttempt *DeliveryAttemptClient
+	// DeliveryClaim is the client for interacting with the DeliveryClaim builders.
+	DeliveryClaim *DeliveryClaimClient
+	// DeliveryPolicy is the client for interacting with the DeliveryPolicy builders.
+	DeliveryPolicy *DeliveryPolicyClient
+	// DeliveryQuote is the client for interacting with the DeliveryQuote builders.
+	DeliveryQuote *DeliveryQuoteClient
 	// FlashSale is the client for interacting with the FlashSale builders.
 	FlashSale *FlashSaleClient
 	// FlashSaleItem is the client for interacting with the FlashSaleItem builders.
@@ -46,6 +54,8 @@ type Tx struct {
 	OrderNote *OrderNoteClient
 	// OutboxEvent is the client for interacting with the OutboxEvent builders.
 	OutboxEvent *OutboxEventClient
+	// Parcel is the client for interacting with the Parcel builders.
+	Parcel *ParcelClient
 	// ProcessedEvent is the client for interacting with the ProcessedEvent builders.
 	ProcessedEvent *ProcessedEventClient
 	// ProductBundle is the client for interacting with the ProductBundle builders.
@@ -62,6 +72,14 @@ type Tx struct {
 	ReportExportJob *ReportExportJobClient
 	// ReturnRequest is the client for interacting with the ReturnRequest builders.
 	ReturnRequest *ReturnRequestClient
+	// Shipment is the client for interacting with the Shipment builders.
+	Shipment *ShipmentClient
+	// ShipmentCharge is the client for interacting with the ShipmentCharge builders.
+	ShipmentCharge *ShipmentChargeClient
+	// ShipmentEvent is the client for interacting with the ShipmentEvent builders.
+	ShipmentEvent *ShipmentEventClient
+	// ShipmentInsurance is the client for interacting with the ShipmentInsurance builders.
+	ShipmentInsurance *ShipmentInsuranceClient
 	// ShippingCalculation is the client for interacting with the ShippingCalculation builders.
 	ShippingCalculation *ShippingCalculationClient
 	// ShippingDestination is the client for interacting with the ShippingDestination builders.
@@ -218,6 +236,10 @@ func (tx *Tx) init() {
 	tx.CustomerNote = NewCustomerNoteClient(tx.config)
 	tx.CustomerSegment = NewCustomerSegmentClient(tx.config)
 	tx.DeliveryArea = NewDeliveryAreaClient(tx.config)
+	tx.DeliveryAttempt = NewDeliveryAttemptClient(tx.config)
+	tx.DeliveryClaim = NewDeliveryClaimClient(tx.config)
+	tx.DeliveryPolicy = NewDeliveryPolicyClient(tx.config)
+	tx.DeliveryQuote = NewDeliveryQuoteClient(tx.config)
 	tx.FlashSale = NewFlashSaleClient(tx.config)
 	tx.FlashSaleItem = NewFlashSaleItemClient(tx.config)
 	tx.IdempotentRequest = NewIdempotentRequestClient(tx.config)
@@ -227,6 +249,7 @@ func (tx *Tx) init() {
 	tx.OrderItem = NewOrderItemClient(tx.config)
 	tx.OrderNote = NewOrderNoteClient(tx.config)
 	tx.OutboxEvent = NewOutboxEventClient(tx.config)
+	tx.Parcel = NewParcelClient(tx.config)
 	tx.ProcessedEvent = NewProcessedEventClient(tx.config)
 	tx.ProductBundle = NewProductBundleClient(tx.config)
 	tx.ProductBundleItem = NewProductBundleItemClient(tx.config)
@@ -235,6 +258,10 @@ func (tx *Tx) init() {
 	tx.RefundRecord = NewRefundRecordClient(tx.config)
 	tx.ReportExportJob = NewReportExportJobClient(tx.config)
 	tx.ReturnRequest = NewReturnRequestClient(tx.config)
+	tx.Shipment = NewShipmentClient(tx.config)
+	tx.ShipmentCharge = NewShipmentChargeClient(tx.config)
+	tx.ShipmentEvent = NewShipmentEventClient(tx.config)
+	tx.ShipmentInsurance = NewShipmentInsuranceClient(tx.config)
 	tx.ShippingCalculation = NewShippingCalculationClient(tx.config)
 	tx.ShippingDestination = NewShippingDestinationClient(tx.config)
 	tx.ShippingProfile = NewShippingProfileClient(tx.config)

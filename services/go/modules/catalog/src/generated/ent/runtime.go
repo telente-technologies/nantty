@@ -619,28 +619,70 @@ func init() {
 	productDescMinPriceMinor := productFields[17].Descriptor()
 	// product.DefaultMinPriceMinor holds the default value on creation for the min_price_minor field.
 	product.DefaultMinPriceMinor = productDescMinPriceMinor.Default.(int64)
+	// productDescWeightGrams is the schema descriptor for weight_grams field.
+	productDescWeightGrams := productFields[18].Descriptor()
+	// product.WeightGramsValidator is a validator for the "weight_grams" field. It is called by the builders before save.
+	product.WeightGramsValidator = productDescWeightGrams.Validators[0].(func(int) error)
+	// productDescLengthMm is the schema descriptor for length_mm field.
+	productDescLengthMm := productFields[19].Descriptor()
+	// product.LengthMmValidator is a validator for the "length_mm" field. It is called by the builders before save.
+	product.LengthMmValidator = productDescLengthMm.Validators[0].(func(int) error)
+	// productDescWidthMm is the schema descriptor for width_mm field.
+	productDescWidthMm := productFields[20].Descriptor()
+	// product.WidthMmValidator is a validator for the "width_mm" field. It is called by the builders before save.
+	product.WidthMmValidator = productDescWidthMm.Validators[0].(func(int) error)
+	// productDescHeightMm is the schema descriptor for height_mm field.
+	productDescHeightMm := productFields[21].Descriptor()
+	// product.HeightMmValidator is a validator for the "height_mm" field. It is called by the builders before save.
+	product.HeightMmValidator = productDescHeightMm.Validators[0].(func(int) error)
+	// productDescPackageCategory is the schema descriptor for package_category field.
+	productDescPackageCategory := productFields[22].Descriptor()
+	// product.DefaultPackageCategory holds the default value on creation for the package_category field.
+	product.DefaultPackageCategory = productDescPackageCategory.Default.(string)
+	// product.PackageCategoryValidator is a validator for the "package_category" field. It is called by the builders before save.
+	product.PackageCategoryValidator = productDescPackageCategory.Validators[0].(func(string) error)
+	// productDescPackageCount is the schema descriptor for package_count field.
+	productDescPackageCount := productFields[23].Descriptor()
+	// product.DefaultPackageCount holds the default value on creation for the package_count field.
+	product.DefaultPackageCount = productDescPackageCount.Default.(int)
+	// product.PackageCountValidator is a validator for the "package_count" field. It is called by the builders before save.
+	product.PackageCountValidator = productDescPackageCount.Validators[0].(func(int) error)
+	// productDescFragile is the schema descriptor for fragile field.
+	productDescFragile := productFields[24].Descriptor()
+	// product.DefaultFragile holds the default value on creation for the fragile field.
+	product.DefaultFragile = productDescFragile.Default.(bool)
+	// productDescContentsDescription is the schema descriptor for contents_description field.
+	productDescContentsDescription := productFields[25].Descriptor()
+	// product.DefaultContentsDescription holds the default value on creation for the contents_description field.
+	product.DefaultContentsDescription = productDescContentsDescription.Default.(string)
+	// product.ContentsDescriptionValidator is a validator for the "contents_description" field. It is called by the builders before save.
+	product.ContentsDescriptionValidator = productDescContentsDescription.Validators[0].(func(string) error)
+	// productDescDeclaredValueMinor is the schema descriptor for declared_value_minor field.
+	productDescDeclaredValueMinor := productFields[26].Descriptor()
+	// product.DeclaredValueMinorValidator is a validator for the "declared_value_minor" field. It is called by the builders before save.
+	product.DeclaredValueMinorValidator = productDescDeclaredValueMinor.Validators[0].(func(int64) error)
 	// productDescRatingSum is the schema descriptor for rating_sum field.
-	productDescRatingSum := productFields[20].Descriptor()
+	productDescRatingSum := productFields[29].Descriptor()
 	// product.DefaultRatingSum holds the default value on creation for the rating_sum field.
 	product.DefaultRatingSum = productDescRatingSum.Default.(int64)
 	// productDescRatingCount is the schema descriptor for rating_count field.
-	productDescRatingCount := productFields[21].Descriptor()
+	productDescRatingCount := productFields[30].Descriptor()
 	// product.DefaultRatingCount holds the default value on creation for the rating_count field.
 	product.DefaultRatingCount = productDescRatingCount.Default.(int)
 	// productDescLikeCount is the schema descriptor for like_count field.
-	productDescLikeCount := productFields[22].Descriptor()
+	productDescLikeCount := productFields[31].Descriptor()
 	// product.DefaultLikeCount holds the default value on creation for the like_count field.
 	product.DefaultLikeCount = productDescLikeCount.Default.(int)
 	// productDescUnitsSold is the schema descriptor for units_sold field.
-	productDescUnitsSold := productFields[23].Descriptor()
+	productDescUnitsSold := productFields[32].Descriptor()
 	// product.DefaultUnitsSold holds the default value on creation for the units_sold field.
 	product.DefaultUnitsSold = productDescUnitsSold.Default.(int)
 	// productDescModerationVisibility is the schema descriptor for moderation_visibility field.
-	productDescModerationVisibility := productFields[24].Descriptor()
+	productDescModerationVisibility := productFields[33].Descriptor()
 	// product.DefaultModerationVisibility holds the default value on creation for the moderation_visibility field.
 	product.DefaultModerationVisibility = productDescModerationVisibility.Default.(string)
 	// productDescUpdatedAt is the schema descriptor for updated_at field.
-	productDescUpdatedAt := productFields[26].Descriptor()
+	productDescUpdatedAt := productFields[35].Descriptor()
 	// product.DefaultUpdatedAt holds the default value on creation for the updated_at field.
 	product.DefaultUpdatedAt = productDescUpdatedAt.Default.(func() time.Time)
 	// product.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
@@ -916,8 +958,24 @@ func init() {
 	productvariantDescPosition := productvariantFields[16].Descriptor()
 	// productvariant.DefaultPosition holds the default value on creation for the position field.
 	productvariant.DefaultPosition = productvariantDescPosition.Default.(int)
+	// productvariantDescWeightGrams is the schema descriptor for weight_grams field.
+	productvariantDescWeightGrams := productvariantFields[17].Descriptor()
+	// productvariant.WeightGramsValidator is a validator for the "weight_grams" field. It is called by the builders before save.
+	productvariant.WeightGramsValidator = productvariantDescWeightGrams.Validators[0].(func(int) error)
+	// productvariantDescLengthMm is the schema descriptor for length_mm field.
+	productvariantDescLengthMm := productvariantFields[18].Descriptor()
+	// productvariant.LengthMmValidator is a validator for the "length_mm" field. It is called by the builders before save.
+	productvariant.LengthMmValidator = productvariantDescLengthMm.Validators[0].(func(int) error)
+	// productvariantDescWidthMm is the schema descriptor for width_mm field.
+	productvariantDescWidthMm := productvariantFields[19].Descriptor()
+	// productvariant.WidthMmValidator is a validator for the "width_mm" field. It is called by the builders before save.
+	productvariant.WidthMmValidator = productvariantDescWidthMm.Validators[0].(func(int) error)
+	// productvariantDescHeightMm is the schema descriptor for height_mm field.
+	productvariantDescHeightMm := productvariantFields[20].Descriptor()
+	// productvariant.HeightMmValidator is a validator for the "height_mm" field. It is called by the builders before save.
+	productvariant.HeightMmValidator = productvariantDescHeightMm.Validators[0].(func(int) error)
 	// productvariantDescUpdatedAt is the schema descriptor for updated_at field.
-	productvariantDescUpdatedAt := productvariantFields[17].Descriptor()
+	productvariantDescUpdatedAt := productvariantFields[21].Descriptor()
 	// productvariant.DefaultUpdatedAt holds the default value on creation for the updated_at field.
 	productvariant.DefaultUpdatedAt = productvariantDescUpdatedAt.Default.(func() time.Time)
 	// productvariant.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.

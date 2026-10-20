@@ -1,4 +1,4 @@
-h1:9qXZDJd6O+Ovn4m5Q5WUHifCQbX1TQRAR9Mwzh90AWs=
+h1:nD4QIRmJwm+x3wj1U/ww5kETAjO+ByQImHeXZa85V+o=
 20261003160510_create_catalog_tables.up.sql h1:YLf+g7jHJk5YGohV4arjmbgMRA88qVyu7j7FRc3WnGk=
 20261003170100_grant_read_access_to_other_services.up.sql h1:E3fMyEwmkWBcCvWKWt91abTBjCqVzPwpMBdzBm5sAbk=
 20261003235854_add_moderation_visibility_featured_products_and_store_visitors.up.sql h1:MHIR1J4HxEtbGMk2fuQVvduNpsAeaE0BmQYwIDY6oKs=
@@ -10,3 +10,4 @@ h1:9qXZDJd6O+Ovn4m5Q5WUHifCQbX1TQRAR9Mwzh90AWs=
 20261010180155_add_moderation_visibility_at.up.sql h1:8A5wn2rs1M9oDyrbiKxzz051+EW4KKKrvKwpjzrH/3w=
 20261011145157_add_brand_selling_and_store_channel.up.sql h1:TkvW5U5MUjFWR7gdZzmmxlUWqC7XHSh9Y+McanxO/KY=
 20261012170000_grant_product_media_to_readers.up.sql h1:pRcHGR1RQ5TYFIlIxrGo9QVwfaJTccraZi2nY0lxiu4=
+20261020133610_add_product_parcel_fields.up.sql h1:HwzffoXAK+SMUZ/550qDzzua0onLNpho9Kcj+LNr4C8=

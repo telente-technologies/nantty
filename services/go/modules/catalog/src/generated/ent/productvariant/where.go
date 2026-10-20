@@ -135,6 +135,26 @@ func Position(v int) predicate.ProductVariant {
 	return predicate.ProductVariant(sql.FieldEQ(FieldPosition, v))
 }
 
+// WeightGrams applies equality check predicate on the "weight_grams" field. It's identical to WeightGramsEQ.
+func WeightGrams(v int) predicate.ProductVariant {
+	return predicate.ProductVariant(sql.FieldEQ(FieldWeightGrams, v))
+}
+
+// LengthMm applies equality check predicate on the "length_mm" field. It's identical to LengthMmEQ.
+func LengthMm(v int) predicate.ProductVariant {
+	return predicate.ProductVariant(sql.FieldEQ(FieldLengthMm, v))
+}
+
+// WidthMm applies equality check predicate on the "width_mm" field. It's identical to WidthMmEQ.
+func WidthMm(v int) predicate.ProductVariant {
+	return predicate.ProductVariant(sql.FieldEQ(FieldWidthMm, v))
+}
+
+// HeightMm applies equality check predicate on the "height_mm" field. It's identical to HeightMmEQ.
+func HeightMm(v int) predicate.ProductVariant {
+	return predicate.ProductVariant(sql.FieldEQ(FieldHeightMm, v))
+}
+
 // UpdatedAt applies equality check predicate on the "updated_at" field. It's identical to UpdatedAtEQ.
 func UpdatedAt(v time.Time) predicate.ProductVariant {
 	return predicate.ProductVariant(sql.FieldEQ(FieldUpdatedAt, v))
@@ -978,6 +998,206 @@ func PositionLT(v int) predicate.ProductVariant {
 // PositionLTE applies the LTE predicate on the "position" field.
 func PositionLTE(v int) predicate.ProductVariant {
 	return predicate.ProductVariant(sql.FieldLTE(FieldPosition, v))
+}
+
+// WeightGramsEQ applies the EQ predicate on the "weight_grams" field.
+func WeightGramsEQ(v int) predicate.ProductVariant {
+	return predicate.ProductVariant(sql.FieldEQ(FieldWeightGrams, v))
+}
+
+// WeightGramsNEQ applies the NEQ predicate on the "weight_grams" field.
+func WeightGramsNEQ(v int) predicate.ProductVariant {
+	return predicate.ProductVariant(sql.FieldNEQ(FieldWeightGrams, v))
+}
+
+// WeightGramsIn applies the In predicate on the "weight_grams" field.
+func WeightGramsIn(vs ...int) predicate.ProductVariant {
+	return predicate.ProductVariant(sql.FieldIn(FieldWeightGrams, vs...))
+}
+
+// WeightGramsNotIn applies the NotIn predicate on the "weight_grams" field.
+func WeightGramsNotIn(vs ...int) predicate.ProductVariant {
+	return predicate.ProductVariant(sql.FieldNotIn(FieldWeightGrams, vs...))
+}
+
+// WeightGramsGT applies the GT predicate on the "weight_grams" field.
+func WeightGramsGT(v int) predicate.ProductVariant {
+	return predicate.ProductVariant(sql.FieldGT(FieldWeightGrams, v))
+}
+
+// WeightGramsGTE applies the GTE predicate on the "weight_grams" field.
+func WeightGramsGTE(v int) predicate.ProductVariant {
+	return predicate.ProductVariant(sql.FieldGTE(FieldWeightGrams, v))
+}
+
+// WeightGramsLT applies the LT predicate on the "weight_grams" field.
+func WeightGramsLT(v int) predicate.ProductVariant {
+	return predicate.ProductVariant(sql.FieldLT(FieldWeightGrams, v))
+}
+
+// WeightGramsLTE applies the LTE predicate on the "weight_grams" field.
+func WeightGramsLTE(v int) predicate.ProductVariant {
+	return predicate.ProductVariant(sql.FieldLTE(FieldWeightGrams, v))
+}
+
+// WeightGramsIsNil applies the IsNil predicate on the "weight_grams" field.
+func WeightGramsIsNil() predicate.ProductVariant {
+	return predicate.ProductVariant(sql.FieldIsNull(FieldWeightGrams))
+}
+
+// WeightGramsNotNil applies the NotNil predicate on the "weight_grams" field.
+func WeightGramsNotNil() predicate.ProductVariant {
+	return predicate.ProductVariant(sql.FieldNotNull(FieldWeightGrams))
+}
+
+// LengthMmEQ applies the EQ predicate on the "length_mm" field.
+func LengthMmEQ(v int) predicate.ProductVariant {
+	return predicate.ProductVariant(sql.FieldEQ(FieldLengthMm, v))
+}
+
+// LengthMmNEQ applies the NEQ predicate on the "length_mm" field.
+func LengthMmNEQ(v int) predicate.ProductVariant {
+	return predicate.ProductVariant(sql.FieldNEQ(FieldLengthMm, v))
+}
+
+// LengthMmIn applies the In predicate on the "length_mm" field.
+func LengthMmIn(vs ...int) predicate.ProductVariant {
+	return predicate.ProductVariant(sql.FieldIn(FieldLengthMm, vs...))
+}
+
+// LengthMmNotIn applies the NotIn predicate on the "length_mm" field.
+func LengthMmNotIn(vs ...int) predicate.ProductVariant {
+	return predicate.ProductVariant(sql.FieldNotIn(FieldLengthMm, vs...))
+}
+
+// LengthMmGT applies the GT predicate on the "length_mm" field.
+func LengthMmGT(v int) predicate.ProductVariant {
+	return predicate.ProductVariant(sql.FieldGT(FieldLengthMm, v))
+}
+
+// LengthMmGTE applies the GTE predicate on the "length_mm" field.
+func LengthMmGTE(v int) predicate.ProductVariant {
+	return predicate.ProductVariant(sql.FieldGTE(FieldLengthMm, v))
+}
+
+// LengthMmLT applies the LT predicate on the "length_mm" field.
+func LengthMmLT(v int) predicate.ProductVariant {
+	return predicate.ProductVariant(sql.FieldLT(FieldLengthMm, v))
+}
+
+// LengthMmLTE applies the LTE predicate on the "length_mm" field.
+func LengthMmLTE(v int) predicate.ProductVariant {
+	return predicate.ProductVariant(sql.FieldLTE(FieldLengthMm, v))
+}
+
+// LengthMmIsNil applies the IsNil predicate on the "length_mm" field.
+func LengthMmIsNil() predicate.ProductVariant {
+	return predicate.ProductVariant(sql.FieldIsNull(FieldLengthMm))
+}
+
+// LengthMmNotNil applies the NotNil predicate on the "length_mm" field.
+func LengthMmNotNil() predicate.ProductVariant {
+	return predicate.ProductVariant(sql.FieldNotNull(FieldLengthMm))
+}
+
+// WidthMmEQ applies the EQ predicate on the "width_mm" field.
+func WidthMmEQ(v int) predicate.ProductVariant {
+	return predicate.ProductVariant(sql.FieldEQ(FieldWidthMm, v))
+}
+
+// WidthMmNEQ applies the NEQ predicate on the "width_mm" field.
+func WidthMmNEQ(v int) predicate.ProductVariant {
+	return predicate.ProductVariant(sql.FieldNEQ(FieldWidthMm, v))
+}
+
+// WidthMmIn applies the In predicate on the "width_mm" field.
+func WidthMmIn(vs ...int) predicate.ProductVariant {
+	return predicate.ProductVariant(sql.FieldIn(FieldWidthMm, vs...))
+}
+
+// WidthMmNotIn applies the NotIn predicate on the "width_mm" field.
+func WidthMmNotIn(vs ...int) predicate.ProductVariant {
+	return predicate.ProductVariant(sql.FieldNotIn(FieldWidthMm, vs...))
+}
+
+// WidthMmGT applies the GT predicate on the "width_mm" field.
+func WidthMmGT(v int) predicate.ProductVariant {
+	return predicate.ProductVariant(sql.FieldGT(FieldWidthMm, v))
+}
+
+// WidthMmGTE applies the GTE predicate on the "width_mm" field.
+func WidthMmGTE(v int) predicate.ProductVariant {
+	return predicate.ProductVariant(sql.FieldGTE(FieldWidthMm, v))
+}
+
+// WidthMmLT applies the LT predicate on the "width_mm" field.
+func WidthMmLT(v int) predicate.ProductVariant {
+	return predicate.ProductVariant(sql.FieldLT(FieldWidthMm, v))
+}
+
+// WidthMmLTE applies the LTE predicate on the "width_mm" field.
+func WidthMmLTE(v int) predicate.ProductVariant {
+	return predicate.ProductVariant(sql.FieldLTE(FieldWidthMm, v))
+}
+
+// WidthMmIsNil applies the IsNil predicate on the "width_mm" field.
+func WidthMmIsNil() predicate.ProductVariant {
+	return predicate.ProductVariant(sql.FieldIsNull(FieldWidthMm))
+}
+
+// WidthMmNotNil applies the NotNil predicate on the "width_mm" field.
+func WidthMmNotNil() predicate.ProductVariant {
+	return predicate.ProductVariant(sql.FieldNotNull(FieldWidthMm))
+}
+
+// HeightMmEQ applies the EQ predicate on the "height_mm" field.
+func HeightMmEQ(v int) predicate.ProductVariant {
+	return predicate.ProductVariant(sql.FieldEQ(FieldHeightMm, v))
+}
+
+// HeightMmNEQ applies the NEQ predicate on the "height_mm" field.
+func HeightMmNEQ(v int) predicate.ProductVariant {
+	return predicate.ProductVariant(sql.FieldNEQ(FieldHeightMm, v))
+}
+
+// HeightMmIn applies the In predicate on the "height_mm" field.
+func HeightMmIn(vs ...int) predicate.ProductVariant {
+	return predicate.ProductVariant(sql.FieldIn(FieldHeightMm, vs...))
+}
+
+// HeightMmNotIn applies the NotIn predicate on the "height_mm" field.
+func HeightMmNotIn(vs ...int) predicate.ProductVariant {
+	return predicate.ProductVariant(sql.FieldNotIn(FieldHeightMm, vs...))
+}
+
+// HeightMmGT applies the GT predicate on the "height_mm" field.
+func HeightMmGT(v int) predicate.ProductVariant {
+	return predicate.ProductVariant(sql.FieldGT(FieldHeightMm, v))
+}
+
+// HeightMmGTE applies the GTE predicate on the "height_mm" field.
+func HeightMmGTE(v int) predicate.ProductVariant {
+	return predicate.ProductVariant(sql.FieldGTE(FieldHeightMm, v))
+}
+
+// HeightMmLT applies the LT predicate on the "height_mm" field.
+func HeightMmLT(v int) predicate.ProductVariant {
+	return predicate.ProductVariant(sql.FieldLT(FieldHeightMm, v))
+}
+
+// HeightMmLTE applies the LTE predicate on the "height_mm" field.
+func HeightMmLTE(v int) predicate.ProductVariant {
+	return predicate.ProductVariant(sql.FieldLTE(FieldHeightMm, v))
+}
+
+// HeightMmIsNil applies the IsNil predicate on the "height_mm" field.
+func HeightMmIsNil() predicate.ProductVariant {
+	return predicate.ProductVariant(sql.FieldIsNull(FieldHeightMm))
+}
+
+// HeightMmNotNil applies the NotNil predicate on the "height_mm" field.
+func HeightMmNotNil() predicate.ProductVariant {
+	return predicate.ProductVariant(sql.FieldNotNull(FieldHeightMm))
 }
 
 // UpdatedAtEQ applies the EQ predicate on the "updated_at" field.

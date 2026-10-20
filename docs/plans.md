@@ -2240,9 +2240,10 @@ Owner request, 2026-10-04.
 Owner direction, 2026-10-20: provider delivery is a **V2** feature, not launch. Seller-managed delivery remains the current flow. The full design is in [architecture/logisticsV2.md](./architecture/logisticsV2.md).
 
 - **V1 (now):** sellers set their own delivery price and update delivery status; no third-party courier API.
+- **Foundation (2026-10-20):** product/variant weight, dimensions, package category/count, fragile, contents and declared value are stored, collected in the seller product form and exposed through the seller API; checkout product snapshots carry them. Hidden orders tables for policy, quotes, shipments, parcels, attempts, events, charges, insurance and claims exist behind `LOGISTICS_ENABLED=false`. Adapter interface is in place; no provider adapter, delivery route or buyer delivery UI is live.
 - **V2.0:** logistics orchestrator, delivery ledger split, live quotes, buyer selection, seller-ready booking gate, Chowdeck Relay adapter, tracking, cancellation and redelivery.
 - **V2.1+:** second provider, coverage sync, insurance partnerships, rural partners.
-- **Before V2 code:** fix the shipping/commission ledger split, add address coordinates, product weight/dimensions, store pickup addresses and provider contracts.
+- **Before V2 code:** fix the shipping/commission ledger split, capture address coordinates, add store pickup coordinates and provider contracts.
 - **Chowdeck blockers:** production base URL, Relay webhook contract, coverage/serviceability list, weight/dimension rules, insurance terms and prepaid-wallet/float treatment.
 
 No provider integration is to be built until the V2 design is approved and the seller-managed flow remains unchanged behind the disabled feature flag.

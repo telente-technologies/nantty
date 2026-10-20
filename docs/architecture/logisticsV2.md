@@ -1,10 +1,12 @@
 # Logistics v2 — provider delivery, Chowdeck first
 
 > **Status: V2 plan, not launch.** Seller-managed delivery remains the current
-> production flow. Nothing in this document is implemented yet. The first
-> provider adapter is Chowdeck Relay; the engine must stay provider-agnostic so
-> ShipBubble, GIG/Fez, Sendbox or rural partners can be added later without
-> rewriting checkout or settlement.
+> production flow. Product parcel metadata and the provider-neutral logistics
+> foundation are implemented but hidden: `LOGISTICS_ENABLED` defaults to false,
+> and there are no delivery routes, checkout options or provider adapters yet.
+> The first provider adapter is Chowdeck Relay; the engine must stay
+> provider-agnostic so ShipBubble, GIG/Fez, Sendbox or rural partners can be
+> added later without rewriting checkout or settlement.
 
 Status date: 2026-10-20.
 
@@ -49,10 +51,16 @@ Two principles govern every provider:
 Before the checkout selector can be built:
 
 - Buyer and store addresses need `latitude` and `longitude`, plus a normalized
-  state/LGA and landmark/alternate phone where available.
+  state/LGA and landmark/alternate phone where available. `AddressSnapshot` now
+  carries optional coordinates; capturing them and adding explicit store
+  pickup coordinates are still needed.
 - Products need actual weight, dimensions (length, width, height), package
-  category, declared value and a fragile flag.
+  category, declared value and a fragile flag. **Done** for product/variant
+  storage, seller create/update/duplicate, the seller product form and the
+  checkout product snapshot.
 - Stores need a pickup address, contact name, phone, email and pickup hours.
+  The existing store contact address/phone/email and opening hours can seed
+  this; explicit pickup coordinates are still needed.
 - Delivery money must be separated from merchandise money in the payable and
   escrow calculations. Today `sellerNet` is calculated from
   `payable.AmountMinor - commission - payment.ProviderFeeMinor`, and
@@ -61,6 +69,21 @@ Before the checkout selector can be built:
   provider fee is added.
 - Provider contracts, sandbox credentials and webhook secrets must be in the
   server environment, never in a client app.
+
+### Foundation status (2026-10-20)
+
+- Product and variant parcel columns: weight, length, width, height, package
+  category, package count, fragile, contents description and declared value.
+  Variant weight/dimensions override the product values.
+- Seller create, replace and duplicate paths persist the fields; the seller
+  product form collects them; the seller product view returns them; the
+  checkout `ProductSnapshot` carries them.
+- Hidden `orders` tables: delivery policy, quote, shipment, parcel, delivery
+  attempt, shipment event, shipment charge, shipment insurance and delivery
+  claim.
+- Provider-neutral `logistics.Provider` interface and disabled registry.
+  `LOGISTICS_ENABLED` defaults to `false`; nothing mounts a route or changes
+  checkout.
 
 ## 3. Checkout and booking flow
 
@@ -208,7 +231,8 @@ the order total.
 
 ## 6. Parcel weight and dimensions
 
-Each seller should provide, when creating a shipping-ready order:
+Products carry the default parcel data; a variant may override weight and
+dimensions. Each seller should confirm, when creating a shipping-ready order:
 
 - actual weight in kilograms;
 - length, width and height in centimetres;

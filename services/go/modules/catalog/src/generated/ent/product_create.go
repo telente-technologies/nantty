@@ -235,6 +235,132 @@ func (_c *ProductCreate) SetNillableMinPriceMinor(v *int64) *ProductCreate {
 	return _c
 }
 
+// SetWeightGrams sets the "weight_grams" field.
+func (_c *ProductCreate) SetWeightGrams(v int) *ProductCreate {
+	_c.mutation.SetWeightGrams(v)
+	return _c
+}
+
+// SetNillableWeightGrams sets the "weight_grams" field if the given value is not nil.
+func (_c *ProductCreate) SetNillableWeightGrams(v *int) *ProductCreate {
+	if v != nil {
+		_c.SetWeightGrams(*v)
+	}
+	return _c
+}
+
+// SetLengthMm sets the "length_mm" field.
+func (_c *ProductCreate) SetLengthMm(v int) *ProductCreate {
+	_c.mutation.SetLengthMm(v)
+	return _c
+}
+
+// SetNillableLengthMm sets the "length_mm" field if the given value is not nil.
+func (_c *ProductCreate) SetNillableLengthMm(v *int) *ProductCreate {
+	if v != nil {
+		_c.SetLengthMm(*v)
+	}
+	return _c
+}
+
+// SetWidthMm sets the "width_mm" field.
+func (_c *ProductCreate) SetWidthMm(v int) *ProductCreate {
+	_c.mutation.SetWidthMm(v)
+	return _c
+}
+
+// SetNillableWidthMm sets the "width_mm" field if the given value is not nil.
+func (_c *ProductCreate) SetNillableWidthMm(v *int) *ProductCreate {
+	if v != nil {
+		_c.SetWidthMm(*v)
+	}
+	return _c
+}
+
+// SetHeightMm sets the "height_mm" field.
+func (_c *ProductCreate) SetHeightMm(v int) *ProductCreate {
+	_c.mutation.SetHeightMm(v)
+	return _c
+}
+
+// SetNillableHeightMm sets the "height_mm" field if the given value is not nil.
+func (_c *ProductCreate) SetNillableHeightMm(v *int) *ProductCreate {
+	if v != nil {
+		_c.SetHeightMm(*v)
+	}
+	return _c
+}
+
+// SetPackageCategory sets the "package_category" field.
+func (_c *ProductCreate) SetPackageCategory(v string) *ProductCreate {
+	_c.mutation.SetPackageCategory(v)
+	return _c
+}
+
+// SetNillablePackageCategory sets the "package_category" field if the given value is not nil.
+func (_c *ProductCreate) SetNillablePackageCategory(v *string) *ProductCreate {
+	if v != nil {
+		_c.SetPackageCategory(*v)
+	}
+	return _c
+}
+
+// SetPackageCount sets the "package_count" field.
+func (_c *ProductCreate) SetPackageCount(v int) *ProductCreate {
+	_c.mutation.SetPackageCount(v)
+	return _c
+}
+
+// SetNillablePackageCount sets the "package_count" field if the given value is not nil.
+func (_c *ProductCreate) SetNillablePackageCount(v *int) *ProductCreate {
+	if v != nil {
+		_c.SetPackageCount(*v)
+	}
+	return _c
+}
+
+// SetFragile sets the "fragile" field.
+func (_c *ProductCreate) SetFragile(v bool) *ProductCreate {
+	_c.mutation.SetFragile(v)
+	return _c
+}
+
+// SetNillableFragile sets the "fragile" field if the given value is not nil.
+func (_c *ProductCreate) SetNillableFragile(v *bool) *ProductCreate {
+	if v != nil {
+		_c.SetFragile(*v)
+	}
+	return _c
+}
+
+// SetContentsDescription sets the "contents_description" field.
+func (_c *ProductCreate) SetContentsDescription(v string) *ProductCreate {
+	_c.mutation.SetContentsDescription(v)
+	return _c
+}
+
+// SetNillableContentsDescription sets the "contents_description" field if the given value is not nil.
+func (_c *ProductCreate) SetNillableContentsDescription(v *string) *ProductCreate {
+	if v != nil {
+		_c.SetContentsDescription(*v)
+	}
+	return _c
+}
+
+// SetDeclaredValueMinor sets the "declared_value_minor" field.
+func (_c *ProductCreate) SetDeclaredValueMinor(v int64) *ProductCreate {
+	_c.mutation.SetDeclaredValueMinor(v)
+	return _c
+}
+
+// SetNillableDeclaredValueMinor sets the "declared_value_minor" field if the given value is not nil.
+func (_c *ProductCreate) SetNillableDeclaredValueMinor(v *int64) *ProductCreate {
+	if v != nil {
+		_c.SetDeclaredValueMinor(*v)
+	}
+	return _c
+}
+
 // SetPublishAt sets the "publish_at" field.
 func (_c *ProductCreate) SetPublishAt(v time.Time) *ProductCreate {
 	_c.mutation.SetPublishAt(v)
@@ -442,6 +568,22 @@ func (_c *ProductCreate) defaults() {
 		v := product.DefaultMinPriceMinor
 		_c.mutation.SetMinPriceMinor(v)
 	}
+	if _, ok := _c.mutation.PackageCategory(); !ok {
+		v := product.DefaultPackageCategory
+		_c.mutation.SetPackageCategory(v)
+	}
+	if _, ok := _c.mutation.PackageCount(); !ok {
+		v := product.DefaultPackageCount
+		_c.mutation.SetPackageCount(v)
+	}
+	if _, ok := _c.mutation.Fragile(); !ok {
+		v := product.DefaultFragile
+		_c.mutation.SetFragile(v)
+	}
+	if _, ok := _c.mutation.ContentsDescription(); !ok {
+		v := product.DefaultContentsDescription
+		_c.mutation.SetContentsDescription(v)
+	}
 	if _, ok := _c.mutation.RatingSum(); !ok {
 		v := product.DefaultRatingSum
 		_c.mutation.SetRatingSum(v)
@@ -521,6 +663,58 @@ func (_c *ProductCreate) check() error {
 	}
 	if _, ok := _c.mutation.MinPriceMinor(); !ok {
 		return &ValidationError{Name: "min_price_minor", err: errors.New(`ent: missing required field "Product.min_price_minor"`)}
+	}
+	if v, ok := _c.mutation.WeightGrams(); ok {
+		if err := product.WeightGramsValidator(v); err != nil {
+			return &ValidationError{Name: "weight_grams", err: fmt.Errorf(`ent: validator failed for field "Product.weight_grams": %w`, err)}
+		}
+	}
+	if v, ok := _c.mutation.LengthMm(); ok {
+		if err := product.LengthMmValidator(v); err != nil {
+			return &ValidationError{Name: "length_mm", err: fmt.Errorf(`ent: validator failed for field "Product.length_mm": %w`, err)}
+		}
+	}
+	if v, ok := _c.mutation.WidthMm(); ok {
+		if err := product.WidthMmValidator(v); err != nil {
+			return &ValidationError{Name: "width_mm", err: fmt.Errorf(`ent: validator failed for field "Product.width_mm": %w`, err)}
+		}
+	}
+	if v, ok := _c.mutation.HeightMm(); ok {
+		if err := product.HeightMmValidator(v); err != nil {
+			return &ValidationError{Name: "height_mm", err: fmt.Errorf(`ent: validator failed for field "Product.height_mm": %w`, err)}
+		}
+	}
+	if _, ok := _c.mutation.PackageCategory(); !ok {
+		return &ValidationError{Name: "package_category", err: errors.New(`ent: missing required field "Product.package_category"`)}
+	}
+	if v, ok := _c.mutation.PackageCategory(); ok {
+		if err := product.PackageCategoryValidator(v); err != nil {
+			return &ValidationError{Name: "package_category", err: fmt.Errorf(`ent: validator failed for field "Product.package_category": %w`, err)}
+		}
+	}
+	if _, ok := _c.mutation.PackageCount(); !ok {
+		return &ValidationError{Name: "package_count", err: errors.New(`ent: missing required field "Product.package_count"`)}
+	}
+	if v, ok := _c.mutation.PackageCount(); ok {
+		if err := product.PackageCountValidator(v); err != nil {
+			return &ValidationError{Name: "package_count", err: fmt.Errorf(`ent: validator failed for field "Product.package_count": %w`, err)}
+		}
+	}
+	if _, ok := _c.mutation.Fragile(); !ok {
+		return &ValidationError{Name: "fragile", err: errors.New(`ent: missing required field "Product.fragile"`)}
+	}
+	if _, ok := _c.mutation.ContentsDescription(); !ok {
+		return &ValidationError{Name: "contents_description", err: errors.New(`ent: missing required field "Product.contents_description"`)}
+	}
+	if v, ok := _c.mutation.ContentsDescription(); ok {
+		if err := product.ContentsDescriptionValidator(v); err != nil {
+			return &ValidationError{Name: "contents_description", err: fmt.Errorf(`ent: validator failed for field "Product.contents_description": %w`, err)}
+		}
+	}
+	if v, ok := _c.mutation.DeclaredValueMinor(); ok {
+		if err := product.DeclaredValueMinorValidator(v); err != nil {
+			return &ValidationError{Name: "declared_value_minor", err: fmt.Errorf(`ent: validator failed for field "Product.declared_value_minor": %w`, err)}
+		}
 	}
 	if _, ok := _c.mutation.RatingSum(); !ok {
 		return &ValidationError{Name: "rating_sum", err: errors.New(`ent: missing required field "Product.rating_sum"`)}
@@ -651,6 +845,42 @@ func (_c *ProductCreate) createSpec() (*Product, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.MinPriceMinor(); ok {
 		_spec.SetField(product.FieldMinPriceMinor, field.TypeInt64, value)
 		_node.MinPriceMinor = value
+	}
+	if value, ok := _c.mutation.WeightGrams(); ok {
+		_spec.SetField(product.FieldWeightGrams, field.TypeInt, value)
+		_node.WeightGrams = &value
+	}
+	if value, ok := _c.mutation.LengthMm(); ok {
+		_spec.SetField(product.FieldLengthMm, field.TypeInt, value)
+		_node.LengthMm = &value
+	}
+	if value, ok := _c.mutation.WidthMm(); ok {
+		_spec.SetField(product.FieldWidthMm, field.TypeInt, value)
+		_node.WidthMm = &value
+	}
+	if value, ok := _c.mutation.HeightMm(); ok {
+		_spec.SetField(product.FieldHeightMm, field.TypeInt, value)
+		_node.HeightMm = &value
+	}
+	if value, ok := _c.mutation.PackageCategory(); ok {
+		_spec.SetField(product.FieldPackageCategory, field.TypeString, value)
+		_node.PackageCategory = value
+	}
+	if value, ok := _c.mutation.PackageCount(); ok {
+		_spec.SetField(product.FieldPackageCount, field.TypeInt, value)
+		_node.PackageCount = value
+	}
+	if value, ok := _c.mutation.Fragile(); ok {
+		_spec.SetField(product.FieldFragile, field.TypeBool, value)
+		_node.Fragile = value
+	}
+	if value, ok := _c.mutation.ContentsDescription(); ok {
+		_spec.SetField(product.FieldContentsDescription, field.TypeString, value)
+		_node.ContentsDescription = value
+	}
+	if value, ok := _c.mutation.DeclaredValueMinor(); ok {
+		_spec.SetField(product.FieldDeclaredValueMinor, field.TypeInt64, value)
+		_node.DeclaredValueMinor = &value
 	}
 	if value, ok := _c.mutation.PublishAt(); ok {
 		_spec.SetField(product.FieldPublishAt, field.TypeTime, value)
@@ -983,6 +1213,180 @@ func (u *ProductUpsert) UpdateMinPriceMinor() *ProductUpsert {
 // AddMinPriceMinor adds v to the "min_price_minor" field.
 func (u *ProductUpsert) AddMinPriceMinor(v int64) *ProductUpsert {
 	u.Add(product.FieldMinPriceMinor, v)
+	return u
+}
+
+// SetWeightGrams sets the "weight_grams" field.
+func (u *ProductUpsert) SetWeightGrams(v int) *ProductUpsert {
+	u.Set(product.FieldWeightGrams, v)
+	return u
+}
+
+// UpdateWeightGrams sets the "weight_grams" field to the value that was provided on create.
+func (u *ProductUpsert) UpdateWeightGrams() *ProductUpsert {
+	u.SetExcluded(product.FieldWeightGrams)
+	return u
+}
+
+// AddWeightGrams adds v to the "weight_grams" field.
+func (u *ProductUpsert) AddWeightGrams(v int) *ProductUpsert {
+	u.Add(product.FieldWeightGrams, v)
+	return u
+}
+
+// ClearWeightGrams clears the value of the "weight_grams" field.
+func (u *ProductUpsert) ClearWeightGrams() *ProductUpsert {
+	u.SetNull(product.FieldWeightGrams)
+	return u
+}
+
+// SetLengthMm sets the "length_mm" field.
+func (u *ProductUpsert) SetLengthMm(v int) *ProductUpsert {
+	u.Set(product.FieldLengthMm, v)
+	return u
+}
+
+// UpdateLengthMm sets the "length_mm" field to the value that was provided on create.
+func (u *ProductUpsert) UpdateLengthMm() *ProductUpsert {
+	u.SetExcluded(product.FieldLengthMm)
+	return u
+}
+
+// AddLengthMm adds v to the "length_mm" field.
+func (u *ProductUpsert) AddLengthMm(v int) *ProductUpsert {
+	u.Add(product.FieldLengthMm, v)
+	return u
+}
+
+// ClearLengthMm clears the value of the "length_mm" field.
+func (u *ProductUpsert) ClearLengthMm() *ProductUpsert {
+	u.SetNull(product.FieldLengthMm)
+	return u
+}
+
+// SetWidthMm sets the "width_mm" field.
+func (u *ProductUpsert) SetWidthMm(v int) *ProductUpsert {
+	u.Set(product.FieldWidthMm, v)
+	return u
+}
+
+// UpdateWidthMm sets the "width_mm" field to the value that was provided on create.
+func (u *ProductUpsert) UpdateWidthMm() *ProductUpsert {
+	u.SetExcluded(product.FieldWidthMm)
+	return u
+}
+
+// AddWidthMm adds v to the "width_mm" field.
+func (u *ProductUpsert) AddWidthMm(v int) *ProductUpsert {
+	u.Add(product.FieldWidthMm, v)
+	return u
+}
+
+// ClearWidthMm clears the value of the "width_mm" field.
+func (u *ProductUpsert) ClearWidthMm() *ProductUpsert {
+	u.SetNull(product.FieldWidthMm)
+	return u
+}
+
+// SetHeightMm sets the "height_mm" field.
+func (u *ProductUpsert) SetHeightMm(v int) *ProductUpsert {
+	u.Set(product.FieldHeightMm, v)
+	return u
+}
+
+// UpdateHeightMm sets the "height_mm" field to the value that was provided on create.
+func (u *ProductUpsert) UpdateHeightMm() *ProductUpsert {
+	u.SetExcluded(product.FieldHeightMm)
+	return u
+}
+
+// AddHeightMm adds v to the "height_mm" field.
+func (u *ProductUpsert) AddHeightMm(v int) *ProductUpsert {
+	u.Add(product.FieldHeightMm, v)
+	return u
+}
+
+// ClearHeightMm clears the value of the "height_mm" field.
+func (u *ProductUpsert) ClearHeightMm() *ProductUpsert {
+	u.SetNull(product.FieldHeightMm)
+	return u
+}
+
+// SetPackageCategory sets the "package_category" field.
+func (u *ProductUpsert) SetPackageCategory(v string) *ProductUpsert {
+	u.Set(product.FieldPackageCategory, v)
+	return u
+}
+
+// UpdatePackageCategory sets the "package_category" field to the value that was provided on create.
+func (u *ProductUpsert) UpdatePackageCategory() *ProductUpsert {
+	u.SetExcluded(product.FieldPackageCategory)
+	return u
+}
+
+// SetPackageCount sets the "package_count" field.
+func (u *ProductUpsert) SetPackageCount(v int) *ProductUpsert {
+	u.Set(product.FieldPackageCount, v)
+	return u
+}
+
+// UpdatePackageCount sets the "package_count" field to the value that was provided on create.
+func (u *ProductUpsert) UpdatePackageCount() *ProductUpsert {
+	u.SetExcluded(product.FieldPackageCount)
+	return u
+}
+
+// AddPackageCount adds v to the "package_count" field.
+func (u *ProductUpsert) AddPackageCount(v int) *ProductUpsert {
+	u.Add(product.FieldPackageCount, v)
+	return u
+}
+
+// SetFragile sets the "fragile" field.
+func (u *ProductUpsert) SetFragile(v bool) *ProductUpsert {
+	u.Set(product.FieldFragile, v)
+	return u
+}
+
+// UpdateFragile sets the "fragile" field to the value that was provided on create.
+func (u *ProductUpsert) UpdateFragile() *ProductUpsert {
+	u.SetExcluded(product.FieldFragile)
+	return u
+}
+
+// SetContentsDescription sets the "contents_description" field.
+func (u *ProductUpsert) SetContentsDescription(v string) *ProductUpsert {
+	u.Set(product.FieldContentsDescription, v)
+	return u
+}
+
+// UpdateContentsDescription sets the "contents_description" field to the value that was provided on create.
+func (u *ProductUpsert) UpdateContentsDescription() *ProductUpsert {
+	u.SetExcluded(product.FieldContentsDescription)
+	return u
+}
+
+// SetDeclaredValueMinor sets the "declared_value_minor" field.
+func (u *ProductUpsert) SetDeclaredValueMinor(v int64) *ProductUpsert {
+	u.Set(product.FieldDeclaredValueMinor, v)
+	return u
+}
+
+// UpdateDeclaredValueMinor sets the "declared_value_minor" field to the value that was provided on create.
+func (u *ProductUpsert) UpdateDeclaredValueMinor() *ProductUpsert {
+	u.SetExcluded(product.FieldDeclaredValueMinor)
+	return u
+}
+
+// AddDeclaredValueMinor adds v to the "declared_value_minor" field.
+func (u *ProductUpsert) AddDeclaredValueMinor(v int64) *ProductUpsert {
+	u.Add(product.FieldDeclaredValueMinor, v)
+	return u
+}
+
+// ClearDeclaredValueMinor clears the value of the "declared_value_minor" field.
+func (u *ProductUpsert) ClearDeclaredValueMinor() *ProductUpsert {
+	u.SetNull(product.FieldDeclaredValueMinor)
 	return u
 }
 
@@ -1477,6 +1881,209 @@ func (u *ProductUpsertOne) AddMinPriceMinor(v int64) *ProductUpsertOne {
 func (u *ProductUpsertOne) UpdateMinPriceMinor() *ProductUpsertOne {
 	return u.Update(func(s *ProductUpsert) {
 		s.UpdateMinPriceMinor()
+	})
+}
+
+// SetWeightGrams sets the "weight_grams" field.
+func (u *ProductUpsertOne) SetWeightGrams(v int) *ProductUpsertOne {
+	return u.Update(func(s *ProductUpsert) {
+		s.SetWeightGrams(v)
+	})
+}
+
+// AddWeightGrams adds v to the "weight_grams" field.
+func (u *ProductUpsertOne) AddWeightGrams(v int) *ProductUpsertOne {
+	return u.Update(func(s *ProductUpsert) {
+		s.AddWeightGrams(v)
+	})
+}
+
+// UpdateWeightGrams sets the "weight_grams" field to the value that was provided on create.
+func (u *ProductUpsertOne) UpdateWeightGrams() *ProductUpsertOne {
+	return u.Update(func(s *ProductUpsert) {
+		s.UpdateWeightGrams()
+	})
+}
+
+// ClearWeightGrams clears the value of the "weight_grams" field.
+func (u *ProductUpsertOne) ClearWeightGrams() *ProductUpsertOne {
+	return u.Update(func(s *ProductUpsert) {
+		s.ClearWeightGrams()
+	})
+}
+
+// SetLengthMm sets the "length_mm" field.
+func (u *ProductUpsertOne) SetLengthMm(v int) *ProductUpsertOne {
+	return u.Update(func(s *ProductUpsert) {
+		s.SetLengthMm(v)
+	})
+}
+
+// AddLengthMm adds v to the "length_mm" field.
+func (u *ProductUpsertOne) AddLengthMm(v int) *ProductUpsertOne {
+	return u.Update(func(s *ProductUpsert) {
+		s.AddLengthMm(v)
+	})
+}
+
+// UpdateLengthMm sets the "length_mm" field to the value that was provided on create.
+func (u *ProductUpsertOne) UpdateLengthMm() *ProductUpsertOne {
+	return u.Update(func(s *ProductUpsert) {
+		s.UpdateLengthMm()
+	})
+}
+
+// ClearLengthMm clears the value of the "length_mm" field.
+func (u *ProductUpsertOne) ClearLengthMm() *ProductUpsertOne {
+	return u.Update(func(s *ProductUpsert) {
+		s.ClearLengthMm()
+	})
+}
+
+// SetWidthMm sets the "width_mm" field.
+func (u *ProductUpsertOne) SetWidthMm(v int) *ProductUpsertOne {
+	return u.Update(func(s *ProductUpsert) {
+		s.SetWidthMm(v)
+	})
+}
+
+// AddWidthMm adds v to the "width_mm" field.
+func (u *ProductUpsertOne) AddWidthMm(v int) *ProductUpsertOne {
+	return u.Update(func(s *ProductUpsert) {
+		s.AddWidthMm(v)
+	})
+}
+
+// UpdateWidthMm sets the "width_mm" field to the value that was provided on create.
+func (u *ProductUpsertOne) UpdateWidthMm() *ProductUpsertOne {
+	return u.Update(func(s *ProductUpsert) {
+		s.UpdateWidthMm()
+	})
+}
+
+// ClearWidthMm clears the value of the "width_mm" field.
+func (u *ProductUpsertOne) ClearWidthMm() *ProductUpsertOne {
+	return u.Update(func(s *ProductUpsert) {
+		s.ClearWidthMm()
+	})
+}
+
+// SetHeightMm sets the "height_mm" field.
+func (u *ProductUpsertOne) SetHeightMm(v int) *ProductUpsertOne {
+	return u.Update(func(s *ProductUpsert) {
+		s.SetHeightMm(v)
+	})
+}
+
+// AddHeightMm adds v to the "height_mm" field.
+func (u *ProductUpsertOne) AddHeightMm(v int) *ProductUpsertOne {
+	return u.Update(func(s *ProductUpsert) {
+		s.AddHeightMm(v)
+	})
+}
+
+// UpdateHeightMm sets the "height_mm" field to the value that was provided on create.
+func (u *ProductUpsertOne) UpdateHeightMm() *ProductUpsertOne {
+	return u.Update(func(s *ProductUpsert) {
+		s.UpdateHeightMm()
+	})
+}
+
+// ClearHeightMm clears the value of the "height_mm" field.
+func (u *ProductUpsertOne) ClearHeightMm() *ProductUpsertOne {
+	return u.Update(func(s *ProductUpsert) {
+		s.ClearHeightMm()
+	})
+}
+
+// SetPackageCategory sets the "package_category" field.
+func (u *ProductUpsertOne) SetPackageCategory(v string) *ProductUpsertOne {
+	return u.Update(func(s *ProductUpsert) {
+		s.SetPackageCategory(v)
+	})
+}
+
+// UpdatePackageCategory sets the "package_category" field to the value that was provided on create.
+func (u *ProductUpsertOne) UpdatePackageCategory() *ProductUpsertOne {
+	return u.Update(func(s *ProductUpsert) {
+		s.UpdatePackageCategory()
+	})
+}
+
+// SetPackageCount sets the "package_count" field.
+func (u *ProductUpsertOne) SetPackageCount(v int) *ProductUpsertOne {
+	return u.Update(func(s *ProductUpsert) {
+		s.SetPackageCount(v)
+	})
+}
+
+// AddPackageCount adds v to the "package_count" field.
+func (u *ProductUpsertOne) AddPackageCount(v int) *ProductUpsertOne {
+	return u.Update(func(s *ProductUpsert) {
+		s.AddPackageCount(v)
+	})
+}
+
+// UpdatePackageCount sets the "package_count" field to the value that was provided on create.
+func (u *ProductUpsertOne) UpdatePackageCount() *ProductUpsertOne {
+	return u.Update(func(s *ProductUpsert) {
+		s.UpdatePackageCount()
+	})
+}
+
+// SetFragile sets the "fragile" field.
+func (u *ProductUpsertOne) SetFragile(v bool) *ProductUpsertOne {
+	return u.Update(func(s *ProductUpsert) {
+		s.SetFragile(v)
+	})
+}
+
+// UpdateFragile sets the "fragile" field to the value that was provided on create.
+func (u *ProductUpsertOne) UpdateFragile() *ProductUpsertOne {
+	return u.Update(func(s *ProductUpsert) {
+		s.UpdateFragile()
+	})
+}
+
+// SetContentsDescription sets the "contents_description" field.
+func (u *ProductUpsertOne) SetContentsDescription(v string) *ProductUpsertOne {
+	return u.Update(func(s *ProductUpsert) {
+		s.SetContentsDescription(v)
+	})
+}
+
+// UpdateContentsDescription sets the "contents_description" field to the value that was provided on create.
+func (u *ProductUpsertOne) UpdateContentsDescription() *ProductUpsertOne {
+	return u.Update(func(s *ProductUpsert) {
+		s.UpdateContentsDescription()
+	})
+}
+
+// SetDeclaredValueMinor sets the "declared_value_minor" field.
+func (u *ProductUpsertOne) SetDeclaredValueMinor(v int64) *ProductUpsertOne {
+	return u.Update(func(s *ProductUpsert) {
+		s.SetDeclaredValueMinor(v)
+	})
+}
+
+// AddDeclaredValueMinor adds v to the "declared_value_minor" field.
+func (u *ProductUpsertOne) AddDeclaredValueMinor(v int64) *ProductUpsertOne {
+	return u.Update(func(s *ProductUpsert) {
+		s.AddDeclaredValueMinor(v)
+	})
+}
+
+// UpdateDeclaredValueMinor sets the "declared_value_minor" field to the value that was provided on create.
+func (u *ProductUpsertOne) UpdateDeclaredValueMinor() *ProductUpsertOne {
+	return u.Update(func(s *ProductUpsert) {
+		s.UpdateDeclaredValueMinor()
+	})
+}
+
+// ClearDeclaredValueMinor clears the value of the "declared_value_minor" field.
+func (u *ProductUpsertOne) ClearDeclaredValueMinor() *ProductUpsertOne {
+	return u.Update(func(s *ProductUpsert) {
+		s.ClearDeclaredValueMinor()
 	})
 }
 
@@ -2163,6 +2770,209 @@ func (u *ProductUpsertBulk) AddMinPriceMinor(v int64) *ProductUpsertBulk {
 func (u *ProductUpsertBulk) UpdateMinPriceMinor() *ProductUpsertBulk {
 	return u.Update(func(s *ProductUpsert) {
 		s.UpdateMinPriceMinor()
+	})
+}
+
+// SetWeightGrams sets the "weight_grams" field.
+func (u *ProductUpsertBulk) SetWeightGrams(v int) *ProductUpsertBulk {
+	return u.Update(func(s *ProductUpsert) {
+		s.SetWeightGrams(v)
+	})
+}
+
+// AddWeightGrams adds v to the "weight_grams" field.
+func (u *ProductUpsertBulk) AddWeightGrams(v int) *ProductUpsertBulk {
+	return u.Update(func(s *ProductUpsert) {
+		s.AddWeightGrams(v)
+	})
+}
+
+// UpdateWeightGrams sets the "weight_grams" field to the value that was provided on create.
+func (u *ProductUpsertBulk) UpdateWeightGrams() *ProductUpsertBulk {
+	return u.Update(func(s *ProductUpsert) {
+		s.UpdateWeightGrams()
+	})
+}
+
+// ClearWeightGrams clears the value of the "weight_grams" field.
+func (u *ProductUpsertBulk) ClearWeightGrams() *ProductUpsertBulk {
+	return u.Update(func(s *ProductUpsert) {
+		s.ClearWeightGrams()
+	})
+}
+
+// SetLengthMm sets the "length_mm" field.
+func (u *ProductUpsertBulk) SetLengthMm(v int) *ProductUpsertBulk {
+	return u.Update(func(s *ProductUpsert) {
+		s.SetLengthMm(v)
+	})
+}
+
+// AddLengthMm adds v to the "length_mm" field.
+func (u *ProductUpsertBulk) AddLengthMm(v int) *ProductUpsertBulk {
+	return u.Update(func(s *ProductUpsert) {
+		s.AddLengthMm(v)
+	})
+}
+
+// UpdateLengthMm sets the "length_mm" field to the value that was provided on create.
+func (u *ProductUpsertBulk) UpdateLengthMm() *ProductUpsertBulk {
+	return u.Update(func(s *ProductUpsert) {
+		s.UpdateLengthMm()
+	})
+}
+
+// ClearLengthMm clears the value of the "length_mm" field.
+func (u *ProductUpsertBulk) ClearLengthMm() *ProductUpsertBulk {
+	return u.Update(func(s *ProductUpsert) {
+		s.ClearLengthMm()
+	})
+}
+
+// SetWidthMm sets the "width_mm" field.
+func (u *ProductUpsertBulk) SetWidthMm(v int) *ProductUpsertBulk {
+	return u.Update(func(s *ProductUpsert) {
+		s.SetWidthMm(v)
+	})
+}
+
+// AddWidthMm adds v to the "width_mm" field.
+func (u *ProductUpsertBulk) AddWidthMm(v int) *ProductUpsertBulk {
+	return u.Update(func(s *ProductUpsert) {
+		s.AddWidthMm(v)
+	})
+}
+
+// UpdateWidthMm sets the "width_mm" field to the value that was provided on create.
+func (u *ProductUpsertBulk) UpdateWidthMm() *ProductUpsertBulk {
+	return u.Update(func(s *ProductUpsert) {
+		s.UpdateWidthMm()
+	})
+}
+
+// ClearWidthMm clears the value of the "width_mm" field.
+func (u *ProductUpsertBulk) ClearWidthMm() *ProductUpsertBulk {
+	return u.Update(func(s *ProductUpsert) {
+		s.ClearWidthMm()
+	})
+}
+
+// SetHeightMm sets the "height_mm" field.
+func (u *ProductUpsertBulk) SetHeightMm(v int) *ProductUpsertBulk {
+	return u.Update(func(s *ProductUpsert) {
+		s.SetHeightMm(v)
+	})
+}
+
+// AddHeightMm adds v to the "height_mm" field.
+func (u *ProductUpsertBulk) AddHeightMm(v int) *ProductUpsertBulk {
+	return u.Update(func(s *ProductUpsert) {
+		s.AddHeightMm(v)
+	})
+}
+
+// UpdateHeightMm sets the "height_mm" field to the value that was provided on create.
+func (u *ProductUpsertBulk) UpdateHeightMm() *ProductUpsertBulk {
+	return u.Update(func(s *ProductUpsert) {
+		s.UpdateHeightMm()
+	})
+}
+
+// ClearHeightMm clears the value of the "height_mm" field.
+func (u *ProductUpsertBulk) ClearHeightMm() *ProductUpsertBulk {
+	return u.Update(func(s *ProductUpsert) {
+		s.ClearHeightMm()
+	})
+}
+
+// SetPackageCategory sets the "package_category" field.
+func (u *ProductUpsertBulk) SetPackageCategory(v string) *ProductUpsertBulk {
+	return u.Update(func(s *ProductUpsert) {
+		s.SetPackageCategory(v)
+	})
+}
+
+// UpdatePackageCategory sets the "package_category" field to the value that was provided on create.
+func (u *ProductUpsertBulk) UpdatePackageCategory() *ProductUpsertBulk {
+	return u.Update(func(s *ProductUpsert) {
+		s.UpdatePackageCategory()
+	})
+}
+
+// SetPackageCount sets the "package_count" field.
+func (u *ProductUpsertBulk) SetPackageCount(v int) *ProductUpsertBulk {
+	return u.Update(func(s *ProductUpsert) {
+		s.SetPackageCount(v)
+	})
+}
+
+// AddPackageCount adds v to the "package_count" field.
+func (u *ProductUpsertBulk) AddPackageCount(v int) *ProductUpsertBulk {
+	return u.Update(func(s *ProductUpsert) {
+		s.AddPackageCount(v)
+	})
+}
+
+// UpdatePackageCount sets the "package_count" field to the value that was provided on create.
+func (u *ProductUpsertBulk) UpdatePackageCount() *ProductUpsertBulk {
+	return u.Update(func(s *ProductUpsert) {
+		s.UpdatePackageCount()
+	})
+}
+
+// SetFragile sets the "fragile" field.
+func (u *ProductUpsertBulk) SetFragile(v bool) *ProductUpsertBulk {
+	return u.Update(func(s *ProductUpsert) {
+		s.SetFragile(v)
+	})
+}
+
+// UpdateFragile sets the "fragile" field to the value that was provided on create.
+func (u *ProductUpsertBulk) UpdateFragile() *ProductUpsertBulk {
+	return u.Update(func(s *ProductUpsert) {
+		s.UpdateFragile()
+	})
+}
+
+// SetContentsDescription sets the "contents_description" field.
+func (u *ProductUpsertBulk) SetContentsDescription(v string) *ProductUpsertBulk {
+	return u.Update(func(s *ProductUpsert) {
+		s.SetContentsDescription(v)
+	})
+}
+
+// UpdateContentsDescription sets the "contents_description" field to the value that was provided on create.
+func (u *ProductUpsertBulk) UpdateContentsDescription() *ProductUpsertBulk {
+	return u.Update(func(s *ProductUpsert) {
+		s.UpdateContentsDescription()
+	})
+}
+
+// SetDeclaredValueMinor sets the "declared_value_minor" field.
+func (u *ProductUpsertBulk) SetDeclaredValueMinor(v int64) *ProductUpsertBulk {
+	return u.Update(func(s *ProductUpsert) {
+		s.SetDeclaredValueMinor(v)
+	})
+}
+
+// AddDeclaredValueMinor adds v to the "declared_value_minor" field.
+func (u *ProductUpsertBulk) AddDeclaredValueMinor(v int64) *ProductUpsertBulk {
+	return u.Update(func(s *ProductUpsert) {
+		s.AddDeclaredValueMinor(v)
+	})
+}
+
+// UpdateDeclaredValueMinor sets the "declared_value_minor" field to the value that was provided on create.
+func (u *ProductUpsertBulk) UpdateDeclaredValueMinor() *ProductUpsertBulk {
+	return u.Update(func(s *ProductUpsert) {
+		s.UpdateDeclaredValueMinor()
+	})
+}
+
+// ClearDeclaredValueMinor clears the value of the "declared_value_minor" field.
+func (u *ProductUpsertBulk) ClearDeclaredValueMinor() *ProductUpsertBulk {
+	return u.Update(func(s *ProductUpsert) {
+		s.ClearDeclaredValueMinor()
 	})
 }
 

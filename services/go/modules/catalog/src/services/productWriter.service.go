@@ -177,6 +177,7 @@ func upsertProductRow(ctx context.Context, deployed *container.Container, tx *en
 			SetStatus(status).SetVisibility(visibility).SetPublishedOnline(online).SetTaxable(request.Taxable).SetTrackInventory(request.TrackInventory).
 			SetTags(normalizeTags(request.Tags)).SetOptions(options).SetAttributes(toSchemaAttributes(request.Attributes)).
 			SetVideos(toSchemaVideos(request.Videos)).SetCurrency(string(write.Store.Currency)).SetNillablePublishAt(request.PublishAt)
+		applyParcelFieldsToCreate(create, request)
 		applyReferences(create, request)
 		if online {
 			create.SetPublishedAt(now)
@@ -206,6 +207,7 @@ func upsertProductRow(ctx context.Context, deployed *container.Container, tx *en
 	if request.Videos != nil {
 		update.SetVideos(toSchemaVideos(request.Videos))
 	}
+	applyParcelFieldsToUpdate(update, request)
 	applyReferencesToUpdate(update, request)
 	if online && current.PublishedAt == nil {
 		update.SetPublishedAt(now)

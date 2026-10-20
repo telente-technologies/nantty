@@ -56,6 +56,14 @@ type ProductVariant struct {
 	ReorderQuantity int `json:"reorder_quantity,omitempty"`
 	// Position holds the value of the "position" field.
 	Position int `json:"position,omitempty"`
+	// WeightGrams holds the value of the "weight_grams" field.
+	WeightGrams *int `json:"weight_grams,omitempty"`
+	// LengthMm holds the value of the "length_mm" field.
+	LengthMm *int `json:"length_mm,omitempty"`
+	// WidthMm holds the value of the "width_mm" field.
+	WidthMm *int `json:"width_mm,omitempty"`
+	// HeightMm holds the value of the "height_mm" field.
+	HeightMm *int `json:"height_mm,omitempty"`
 	// UpdatedAt holds the value of the "updated_at" field.
 	UpdatedAt    time.Time `json:"updated_at,omitempty"`
 	selectValues sql.SelectValues
@@ -68,7 +76,7 @@ func (*ProductVariant) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case productvariant.FieldOptionValues, productvariant.FieldRegionalPrices:
 			values[i] = new([]byte)
-		case productvariant.FieldPriceMinor, productvariant.FieldCompareAtPriceMinor, productvariant.FieldCostPriceMinor, productvariant.FieldLowStockThreshold, productvariant.FieldReorderPoint, productvariant.FieldReorderQuantity, productvariant.FieldPosition:
+		case productvariant.FieldPriceMinor, productvariant.FieldCompareAtPriceMinor, productvariant.FieldCostPriceMinor, productvariant.FieldLowStockThreshold, productvariant.FieldReorderPoint, productvariant.FieldReorderQuantity, productvariant.FieldPosition, productvariant.FieldWeightGrams, productvariant.FieldLengthMm, productvariant.FieldWidthMm, productvariant.FieldHeightMm:
 			values[i] = new(sql.NullInt64)
 		case productvariant.FieldTitle, productvariant.FieldSize, productvariant.FieldColor, productvariant.FieldSku, productvariant.FieldSkuKey, productvariant.FieldBarcode:
 			values[i] = new(sql.NullString)
@@ -212,6 +220,34 @@ func (_m *ProductVariant) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.Position = int(value.Int64)
 			}
+		case productvariant.FieldWeightGrams:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field weight_grams", values[i])
+			} else if value.Valid {
+				_m.WeightGrams = new(int)
+				*_m.WeightGrams = int(value.Int64)
+			}
+		case productvariant.FieldLengthMm:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field length_mm", values[i])
+			} else if value.Valid {
+				_m.LengthMm = new(int)
+				*_m.LengthMm = int(value.Int64)
+			}
+		case productvariant.FieldWidthMm:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field width_mm", values[i])
+			} else if value.Valid {
+				_m.WidthMm = new(int)
+				*_m.WidthMm = int(value.Int64)
+			}
+		case productvariant.FieldHeightMm:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field height_mm", values[i])
+			} else if value.Valid {
+				_m.HeightMm = new(int)
+				*_m.HeightMm = int(value.Int64)
+			}
 		case productvariant.FieldUpdatedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field updated_at", values[i])
@@ -313,6 +349,26 @@ func (_m *ProductVariant) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("position=")
 	builder.WriteString(fmt.Sprintf("%v", _m.Position))
+	builder.WriteString(", ")
+	if v := _m.WeightGrams; v != nil {
+		builder.WriteString("weight_grams=")
+		builder.WriteString(fmt.Sprintf("%v", *v))
+	}
+	builder.WriteString(", ")
+	if v := _m.LengthMm; v != nil {
+		builder.WriteString("length_mm=")
+		builder.WriteString(fmt.Sprintf("%v", *v))
+	}
+	builder.WriteString(", ")
+	if v := _m.WidthMm; v != nil {
+		builder.WriteString("width_mm=")
+		builder.WriteString(fmt.Sprintf("%v", *v))
+	}
+	builder.WriteString(", ")
+	if v := _m.HeightMm; v != nil {
+		builder.WriteString("height_mm=")
+		builder.WriteString(fmt.Sprintf("%v", *v))
+	}
 	builder.WriteString(", ")
 	builder.WriteString("updated_at=")
 	builder.WriteString(_m.UpdatedAt.Format(time.ANSIC))

@@ -207,6 +207,142 @@ var (
 			},
 		},
 	}
+	// DeliveryAttemptsColumns holds the columns for the "delivery_attempts" table.
+	DeliveryAttemptsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "shipment_id", Type: field.TypeUUID},
+		{Name: "attempt_number", Type: field.TypeInt},
+		{Name: "status", Type: field.TypeString, Size: 20, Default: "failed"},
+		{Name: "failure_reason", Type: field.TypeString, Size: 60, Default: ""},
+		{Name: "responsible_party", Type: field.TypeString, Size: 20, Default: "unassigned"},
+		{Name: "evidence", Type: field.TypeString, Size: 1000, Default: ""},
+		{Name: "attempted_at", Type: field.TypeTime},
+		{Name: "metadata", Type: field.TypeJSON, Nullable: true},
+	}
+	// DeliveryAttemptsTable holds the schema information for the "delivery_attempts" table.
+	DeliveryAttemptsTable = &schema.Table{
+		Name:       "delivery_attempts",
+		Columns:    DeliveryAttemptsColumns,
+		PrimaryKey: []*schema.Column{DeliveryAttemptsColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "deliveryattempt_shipment_id_attempt_number",
+				Unique:  true,
+				Columns: []*schema.Column{DeliveryAttemptsColumns[2], DeliveryAttemptsColumns[3]},
+			},
+		},
+	}
+	// DeliveryClaimsColumns holds the columns for the "delivery_claims" table.
+	DeliveryClaimsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "shipment_id", Type: field.TypeUUID},
+		{Name: "kind", Type: field.TypeString, Size: 20, Default: "loss"},
+		{Name: "status", Type: field.TypeString, Size: 20, Default: "open"},
+		{Name: "amount_minor", Type: field.TypeInt64},
+		{Name: "currency", Type: field.TypeString, Size: 3},
+		{Name: "responsible_party", Type: field.TypeString, Size: 20, Default: "unassigned"},
+		{Name: "description", Type: field.TypeString, Size: 1000, Default: ""},
+		{Name: "evidence", Type: field.TypeJSON, Nullable: true},
+		{Name: "resolution", Type: field.TypeString, Size: 1000, Default: ""},
+		{Name: "opened_at", Type: field.TypeTime},
+		{Name: "resolved_at", Type: field.TypeTime, Nullable: true},
+		{Name: "metadata", Type: field.TypeJSON, Nullable: true},
+	}
+	// DeliveryClaimsTable holds the schema information for the "delivery_claims" table.
+	DeliveryClaimsTable = &schema.Table{
+		Name:       "delivery_claims",
+		Columns:    DeliveryClaimsColumns,
+		PrimaryKey: []*schema.Column{DeliveryClaimsColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "deliveryclaim_shipment_id_id",
+				Unique:  false,
+				Columns: []*schema.Column{DeliveryClaimsColumns[2], DeliveryClaimsColumns[0]},
+			},
+			{
+				Name:    "deliveryclaim_status_opened_at",
+				Unique:  false,
+				Columns: []*schema.Column{DeliveryClaimsColumns[4], DeliveryClaimsColumns[11]},
+			},
+		},
+	}
+	// DeliveryPoliciesColumns holds the columns for the "delivery_policies" table.
+	DeliveryPoliciesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "store_id", Type: field.TypeUUID},
+		{Name: "active", Type: field.TypeBool, Default: true},
+		{Name: "funding_party", Type: field.TypeString, Size: 20, Default: "seller"},
+		{Name: "free_shipping_threshold_minor", Type: field.TypeInt64, Nullable: true},
+		{Name: "seller_subsidy_cap_minor", Type: field.TypeInt64, Nullable: true},
+		{Name: "eligible_category_ids", Type: field.TypeJSON, Nullable: true},
+		{Name: "updated_at", Type: field.TypeTime},
+	}
+	// DeliveryPoliciesTable holds the schema information for the "delivery_policies" table.
+	DeliveryPoliciesTable = &schema.Table{
+		Name:       "delivery_policies",
+		Columns:    DeliveryPoliciesColumns,
+		PrimaryKey: []*schema.Column{DeliveryPoliciesColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "deliverypolicy_store_id",
+				Unique:  true,
+				Columns: []*schema.Column{DeliveryPoliciesColumns[2]},
+			},
+		},
+	}
+	// DeliveryQuotesColumns holds the columns for the "delivery_quotes" table.
+	DeliveryQuotesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "store_id", Type: field.TypeUUID},
+		{Name: "checkout_id", Type: field.TypeUUID, Nullable: true},
+		{Name: "order_group_id", Type: field.TypeUUID, Nullable: true},
+		{Name: "provider", Type: field.TypeString, Size: 40},
+		{Name: "provider_quote_id", Type: field.TypeString, Nullable: true, Size: 120},
+		{Name: "service_type", Type: field.TypeString, Size: 40, Default: "door_to_door"},
+		{Name: "status", Type: field.TypeString, Size: 20, Default: "quoted"},
+		{Name: "amount_minor", Type: field.TypeInt64},
+		{Name: "currency", Type: field.TypeString, Size: 3},
+		{Name: "route", Type: field.TypeJSON},
+		{Name: "expires_at", Type: field.TypeTime},
+		{Name: "conditions", Type: field.TypeJSON, Nullable: true},
+		{Name: "metadata", Type: field.TypeJSON, Nullable: true},
+		{Name: "updated_at", Type: field.TypeTime},
+	}
+	// DeliveryQuotesTable holds the schema information for the "delivery_quotes" table.
+	DeliveryQuotesTable = &schema.Table{
+		Name:       "delivery_quotes",
+		Columns:    DeliveryQuotesColumns,
+		PrimaryKey: []*schema.Column{DeliveryQuotesColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "deliveryquote_store_id_status_expires_at",
+				Unique:  false,
+				Columns: []*schema.Column{DeliveryQuotesColumns[2], DeliveryQuotesColumns[8], DeliveryQuotesColumns[12]},
+			},
+			{
+				Name:    "deliveryquote_checkout_id",
+				Unique:  false,
+				Columns: []*schema.Column{DeliveryQuotesColumns[3]},
+			},
+			{
+				Name:    "deliveryquote_order_group_id",
+				Unique:  false,
+				Columns: []*schema.Column{DeliveryQuotesColumns[4]},
+			},
+			{
+				Name:    "deliveryquote_provider_quote_unique",
+				Unique:  true,
+				Columns: []*schema.Column{DeliveryQuotesColumns[5], DeliveryQuotesColumns[6]},
+				Annotation: &entsql.IndexAnnotation{
+					Where: "provider_quote_id IS NOT NULL",
+				},
+			},
+		},
+	}
 	// FlashSalesColumns holds the columns for the "flash_sales" table.
 	FlashSalesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID},
@@ -539,6 +675,37 @@ var (
 			},
 		},
 	}
+	// ParcelsColumns holds the columns for the "parcels" table.
+	ParcelsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "shipment_id", Type: field.TypeUUID},
+		{Name: "weight_grams", Type: field.TypeInt},
+		{Name: "length_mm", Type: field.TypeInt},
+		{Name: "width_mm", Type: field.TypeInt},
+		{Name: "height_mm", Type: field.TypeInt},
+		{Name: "package_category", Type: field.TypeString, Size: 40, Default: "general"},
+		{Name: "package_count", Type: field.TypeInt, Default: 1},
+		{Name: "fragile", Type: field.TypeBool, Default: false},
+		{Name: "contents_description", Type: field.TypeString, Size: 300, Default: ""},
+		{Name: "declared_value_minor", Type: field.TypeInt64},
+		{Name: "currency", Type: field.TypeString, Size: 3},
+		{Name: "metadata", Type: field.TypeJSON, Nullable: true},
+		{Name: "updated_at", Type: field.TypeTime},
+	}
+	// ParcelsTable holds the schema information for the "parcels" table.
+	ParcelsTable = &schema.Table{
+		Name:       "parcels",
+		Columns:    ParcelsColumns,
+		PrimaryKey: []*schema.Column{ParcelsColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "parcel_shipment_id",
+				Unique:  true,
+				Columns: []*schema.Column{ParcelsColumns[2]},
+			},
+		},
+	}
 	// ProcessedEventsColumns holds the columns for the "processed_events" table.
 	ProcessedEventsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID},
@@ -833,6 +1000,163 @@ var (
 			},
 		},
 	}
+	// ShipmentsColumns holds the columns for the "shipments" table.
+	ShipmentsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "order_group_id", Type: field.TypeUUID},
+		{Name: "store_id", Type: field.TypeUUID},
+		{Name: "provider", Type: field.TypeString, Size: 40},
+		{Name: "provider_reference", Type: field.TypeString, Nullable: true, Size: 120},
+		{Name: "quote_id", Type: field.TypeUUID, Nullable: true},
+		{Name: "status", Type: field.TypeString, Size: 30, Default: "pending"},
+		{Name: "previous_status", Type: field.TypeString, Size: 30, Default: ""},
+		{Name: "service_type", Type: field.TypeString, Size: 40, Default: "door_to_door"},
+		{Name: "pickup_address", Type: field.TypeJSON},
+		{Name: "destination_address", Type: field.TypeJSON},
+		{Name: "tracking_number", Type: field.TypeString, Nullable: true, Size: 80},
+		{Name: "tracking_url", Type: field.TypeString, Nullable: true, Size: 300},
+		{Name: "delivery_pin_hash", Type: field.TypeString, Nullable: true, Size: 128},
+		{Name: "booked_at", Type: field.TypeTime, Nullable: true},
+		{Name: "ready_for_pickup_at", Type: field.TypeTime, Nullable: true},
+		{Name: "picked_up_at", Type: field.TypeTime, Nullable: true},
+		{Name: "delivered_at", Type: field.TypeTime, Nullable: true},
+		{Name: "cancelled_at", Type: field.TypeTime, Nullable: true},
+		{Name: "estimated_delivery_at", Type: field.TypeTime, Nullable: true},
+		{Name: "cancellation_reason", Type: field.TypeString, Nullable: true, Size: 300},
+		{Name: "metadata", Type: field.TypeJSON, Nullable: true},
+		{Name: "updated_at", Type: field.TypeTime},
+	}
+	// ShipmentsTable holds the schema information for the "shipments" table.
+	ShipmentsTable = &schema.Table{
+		Name:       "shipments",
+		Columns:    ShipmentsColumns,
+		PrimaryKey: []*schema.Column{ShipmentsColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "shipment_order_group_id",
+				Unique:  true,
+				Columns: []*schema.Column{ShipmentsColumns[2]},
+			},
+			{
+				Name:    "shipment_store_status_newest",
+				Unique:  false,
+				Columns: []*schema.Column{ShipmentsColumns[3], ShipmentsColumns[7], ShipmentsColumns[0]},
+				Annotation: &entsql.IndexAnnotation{
+					DescColumns: map[string]bool{
+						ShipmentsColumns[0].Name: true,
+					},
+				},
+			},
+			{
+				Name:    "shipment_status_updated_at",
+				Unique:  false,
+				Columns: []*schema.Column{ShipmentsColumns[7], ShipmentsColumns[23]},
+			},
+			{
+				Name:    "shipment_provider_reference_unique",
+				Unique:  true,
+				Columns: []*schema.Column{ShipmentsColumns[4], ShipmentsColumns[5]},
+				Annotation: &entsql.IndexAnnotation{
+					Where: "provider_reference IS NOT NULL",
+				},
+			},
+		},
+	}
+	// ShipmentChargesColumns holds the columns for the "shipment_charges" table.
+	ShipmentChargesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "shipment_id", Type: field.TypeUUID},
+		{Name: "kind", Type: field.TypeString, Size: 30},
+		{Name: "funding_party", Type: field.TypeString, Size: 20, Default: "unassigned"},
+		{Name: "amount_minor", Type: field.TypeInt64},
+		{Name: "currency", Type: field.TypeString, Size: 3},
+		{Name: "reference", Type: field.TypeString, Nullable: true, Size: 120},
+		{Name: "metadata", Type: field.TypeJSON, Nullable: true},
+	}
+	// ShipmentChargesTable holds the schema information for the "shipment_charges" table.
+	ShipmentChargesTable = &schema.Table{
+		Name:       "shipment_charges",
+		Columns:    ShipmentChargesColumns,
+		PrimaryKey: []*schema.Column{ShipmentChargesColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "shipmentcharge_shipment_id_kind",
+				Unique:  false,
+				Columns: []*schema.Column{ShipmentChargesColumns[2], ShipmentChargesColumns[3]},
+			},
+		},
+	}
+	// ShipmentEventsColumns holds the columns for the "shipment_events" table.
+	ShipmentEventsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "shipment_id", Type: field.TypeUUID},
+		{Name: "provider", Type: field.TypeString, Size: 40},
+		{Name: "provider_event_id", Type: field.TypeString, Nullable: true, Size: 120},
+		{Name: "kind", Type: field.TypeString, Size: 40},
+		{Name: "status", Type: field.TypeString, Size: 30},
+		{Name: "source", Type: field.TypeString, Size: 20, Default: "webhook"},
+		{Name: "payload", Type: field.TypeJSON, Nullable: true},
+		{Name: "occurred_at", Type: field.TypeTime},
+		{Name: "received_at", Type: field.TypeTime},
+	}
+	// ShipmentEventsTable holds the schema information for the "shipment_events" table.
+	ShipmentEventsTable = &schema.Table{
+		Name:       "shipment_events",
+		Columns:    ShipmentEventsColumns,
+		PrimaryKey: []*schema.Column{ShipmentEventsColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "shipmentevent_shipment_id_occurred_at",
+				Unique:  false,
+				Columns: []*schema.Column{ShipmentEventsColumns[2], ShipmentEventsColumns[9]},
+			},
+			{
+				Name:    "shipevent_provider_event_unique",
+				Unique:  true,
+				Columns: []*schema.Column{ShipmentEventsColumns[3], ShipmentEventsColumns[4]},
+				Annotation: &entsql.IndexAnnotation{
+					Where: "provider_event_id IS NOT NULL",
+				},
+			},
+		},
+	}
+	// ShipmentInsurancesColumns holds the columns for the "shipment_insurances" table.
+	ShipmentInsurancesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "shipment_id", Type: field.TypeUUID},
+		{Name: "provider", Type: field.TypeString, Size: 40},
+		{Name: "insurer", Type: field.TypeString, Size: 80, Default: ""},
+		{Name: "policy_reference", Type: field.TypeString, Nullable: true, Size: 120},
+		{Name: "coverage_amount_minor", Type: field.TypeInt64},
+		{Name: "premium_minor", Type: field.TypeInt64},
+		{Name: "currency", Type: field.TypeString, Size: 3},
+		{Name: "status", Type: field.TypeString, Size: 20, Default: "pending"},
+		{Name: "exclusions", Type: field.TypeJSON, Nullable: true},
+		{Name: "metadata", Type: field.TypeJSON, Nullable: true},
+		{Name: "updated_at", Type: field.TypeTime},
+	}
+	// ShipmentInsurancesTable holds the schema information for the "shipment_insurances" table.
+	ShipmentInsurancesTable = &schema.Table{
+		Name:       "shipment_insurances",
+		Columns:    ShipmentInsurancesColumns,
+		PrimaryKey: []*schema.Column{ShipmentInsurancesColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "shipmentinsurance_shipment_id",
+				Unique:  true,
+				Columns: []*schema.Column{ShipmentInsurancesColumns[2]},
+			},
+			{
+				Name:    "shipmentinsurance_status_updated_at",
+				Unique:  false,
+				Columns: []*schema.Column{ShipmentInsurancesColumns[9], ShipmentInsurancesColumns[12]},
+			},
+		},
+	}
 	// ShippingCalculationsColumns holds the columns for the "shipping_calculations" table.
 	ShippingCalculationsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID},
@@ -1105,6 +1429,10 @@ var (
 		CustomerNotesTable,
 		CustomerSegmentsTable,
 		DeliveryAreasTable,
+		DeliveryAttemptsTable,
+		DeliveryClaimsTable,
+		DeliveryPoliciesTable,
+		DeliveryQuotesTable,
 		FlashSalesTable,
 		FlashSaleItemsTable,
 		IdempotentRequestsTable,
@@ -1114,6 +1442,7 @@ var (
 		OrderItemsTable,
 		OrderNotesTable,
 		OutboxEventsTable,
+		ParcelsTable,
 		ProcessedEventsTable,
 		ProductBundlesTable,
 		ProductBundleItemsTable,
@@ -1122,6 +1451,10 @@ var (
 		RefundRecordsTable,
 		ReportExportJobsTable,
 		ReturnRequestsTable,
+		ShipmentsTable,
+		ShipmentChargesTable,
+		ShipmentEventsTable,
+		ShipmentInsurancesTable,
 		ShippingCalculationsTable,
 		ShippingDestinationsTable,
 		ShippingProfilesTable,

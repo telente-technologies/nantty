@@ -92,6 +92,54 @@ func (f DeliveryAreaFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.DeliveryAreaMutation", m)
 }
 
+// The DeliveryAttemptFunc type is an adapter to allow the use of ordinary
+// function as DeliveryAttempt mutator.
+type DeliveryAttemptFunc func(context.Context, *ent.DeliveryAttemptMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f DeliveryAttemptFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.DeliveryAttemptMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.DeliveryAttemptMutation", m)
+}
+
+// The DeliveryClaimFunc type is an adapter to allow the use of ordinary
+// function as DeliveryClaim mutator.
+type DeliveryClaimFunc func(context.Context, *ent.DeliveryClaimMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f DeliveryClaimFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.DeliveryClaimMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.DeliveryClaimMutation", m)
+}
+
+// The DeliveryPolicyFunc type is an adapter to allow the use of ordinary
+// function as DeliveryPolicy mutator.
+type DeliveryPolicyFunc func(context.Context, *ent.DeliveryPolicyMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f DeliveryPolicyFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.DeliveryPolicyMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.DeliveryPolicyMutation", m)
+}
+
+// The DeliveryQuoteFunc type is an adapter to allow the use of ordinary
+// function as DeliveryQuote mutator.
+type DeliveryQuoteFunc func(context.Context, *ent.DeliveryQuoteMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f DeliveryQuoteFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.DeliveryQuoteMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.DeliveryQuoteMutation", m)
+}
+
 // The FlashSaleFunc type is an adapter to allow the use of ordinary
 // function as FlashSale mutator.
 type FlashSaleFunc func(context.Context, *ent.FlashSaleMutation) (ent.Value, error)
@@ -200,6 +248,18 @@ func (f OutboxEventFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value,
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.OutboxEventMutation", m)
 }
 
+// The ParcelFunc type is an adapter to allow the use of ordinary
+// function as Parcel mutator.
+type ParcelFunc func(context.Context, *ent.ParcelMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f ParcelFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.ParcelMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.ParcelMutation", m)
+}
+
 // The ProcessedEventFunc type is an adapter to allow the use of ordinary
 // function as ProcessedEvent mutator.
 type ProcessedEventFunc func(context.Context, *ent.ProcessedEventMutation) (ent.Value, error)
@@ -294,6 +354,54 @@ func (f ReturnRequestFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Valu
 		return f(ctx, mv)
 	}
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.ReturnRequestMutation", m)
+}
+
+// The ShipmentFunc type is an adapter to allow the use of ordinary
+// function as Shipment mutator.
+type ShipmentFunc func(context.Context, *ent.ShipmentMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f ShipmentFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.ShipmentMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.ShipmentMutation", m)
+}
+
+// The ShipmentChargeFunc type is an adapter to allow the use of ordinary
+// function as ShipmentCharge mutator.
+type ShipmentChargeFunc func(context.Context, *ent.ShipmentChargeMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f ShipmentChargeFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.ShipmentChargeMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.ShipmentChargeMutation", m)
+}
+
+// The ShipmentEventFunc type is an adapter to allow the use of ordinary
+// function as ShipmentEvent mutator.
+type ShipmentEventFunc func(context.Context, *ent.ShipmentEventMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f ShipmentEventFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.ShipmentEventMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.ShipmentEventMutation", m)
+}
+
+// The ShipmentInsuranceFunc type is an adapter to allow the use of ordinary
+// function as ShipmentInsurance mutator.
+type ShipmentInsuranceFunc func(context.Context, *ent.ShipmentInsuranceMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f ShipmentInsuranceFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.ShipmentInsuranceMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.ShipmentInsuranceMutation", m)
 }
 
 // The ShippingCalculationFunc type is an adapter to allow the use of ordinary

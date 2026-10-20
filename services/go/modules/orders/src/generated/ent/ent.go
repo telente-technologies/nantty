@@ -15,6 +15,10 @@ import (
 	"zudomart/modules/orders/src/generated/ent/customernote"
 	"zudomart/modules/orders/src/generated/ent/customersegment"
 	"zudomart/modules/orders/src/generated/ent/deliveryarea"
+	"zudomart/modules/orders/src/generated/ent/deliveryattempt"
+	"zudomart/modules/orders/src/generated/ent/deliveryclaim"
+	"zudomart/modules/orders/src/generated/ent/deliverypolicy"
+	"zudomart/modules/orders/src/generated/ent/deliveryquote"
 	"zudomart/modules/orders/src/generated/ent/flashsale"
 	"zudomart/modules/orders/src/generated/ent/flashsaleitem"
 	"zudomart/modules/orders/src/generated/ent/idempotentrequest"
@@ -24,6 +28,7 @@ import (
 	"zudomart/modules/orders/src/generated/ent/orderitem"
 	"zudomart/modules/orders/src/generated/ent/ordernote"
 	"zudomart/modules/orders/src/generated/ent/outboxevent"
+	"zudomart/modules/orders/src/generated/ent/parcel"
 	"zudomart/modules/orders/src/generated/ent/processedevent"
 	"zudomart/modules/orders/src/generated/ent/productbundle"
 	"zudomart/modules/orders/src/generated/ent/productbundleitem"
@@ -32,6 +37,10 @@ import (
 	"zudomart/modules/orders/src/generated/ent/refundrecord"
 	"zudomart/modules/orders/src/generated/ent/reportexportjob"
 	"zudomart/modules/orders/src/generated/ent/returnrequest"
+	"zudomart/modules/orders/src/generated/ent/shipment"
+	"zudomart/modules/orders/src/generated/ent/shipmentcharge"
+	"zudomart/modules/orders/src/generated/ent/shipmentevent"
+	"zudomart/modules/orders/src/generated/ent/shipmentinsurance"
 	"zudomart/modules/orders/src/generated/ent/shippingcalculation"
 	"zudomart/modules/orders/src/generated/ent/shippingdestination"
 	"zudomart/modules/orders/src/generated/ent/shippingprofile"
@@ -112,6 +121,10 @@ func checkColumn(t, c string) error {
 			customernote.Table:         customernote.ValidColumn,
 			customersegment.Table:      customersegment.ValidColumn,
 			deliveryarea.Table:         deliveryarea.ValidColumn,
+			deliveryattempt.Table:      deliveryattempt.ValidColumn,
+			deliveryclaim.Table:        deliveryclaim.ValidColumn,
+			deliverypolicy.Table:       deliverypolicy.ValidColumn,
+			deliveryquote.Table:        deliveryquote.ValidColumn,
 			flashsale.Table:            flashsale.ValidColumn,
 			flashsaleitem.Table:        flashsaleitem.ValidColumn,
 			idempotentrequest.Table:    idempotentrequest.ValidColumn,
@@ -121,6 +134,7 @@ func checkColumn(t, c string) error {
 			orderitem.Table:            orderitem.ValidColumn,
 			ordernote.Table:            ordernote.ValidColumn,
 			outboxevent.Table:          outboxevent.ValidColumn,
+			parcel.Table:               parcel.ValidColumn,
 			processedevent.Table:       processedevent.ValidColumn,
 			productbundle.Table:        productbundle.ValidColumn,
 			productbundleitem.Table:    productbundleitem.ValidColumn,
@@ -129,6 +143,10 @@ func checkColumn(t, c string) error {
 			refundrecord.Table:         refundrecord.ValidColumn,
 			reportexportjob.Table:      reportexportjob.ValidColumn,
 			returnrequest.Table:        returnrequest.ValidColumn,
+			shipment.Table:             shipment.ValidColumn,
+			shipmentcharge.Table:       shipmentcharge.ValidColumn,
+			shipmentevent.Table:        shipmentevent.ValidColumn,
+			shipmentinsurance.Table:    shipmentinsurance.ValidColumn,
 			shippingcalculation.Table:  shippingcalculation.ValidColumn,
 			shippingdestination.Table:  shippingdestination.ValidColumn,
 			shippingprofile.Table:      shippingprofile.ValidColumn,

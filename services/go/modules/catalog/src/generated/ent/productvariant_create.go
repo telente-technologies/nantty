@@ -213,6 +213,62 @@ func (_c *ProductVariantCreate) SetNillablePosition(v *int) *ProductVariantCreat
 	return _c
 }
 
+// SetWeightGrams sets the "weight_grams" field.
+func (_c *ProductVariantCreate) SetWeightGrams(v int) *ProductVariantCreate {
+	_c.mutation.SetWeightGrams(v)
+	return _c
+}
+
+// SetNillableWeightGrams sets the "weight_grams" field if the given value is not nil.
+func (_c *ProductVariantCreate) SetNillableWeightGrams(v *int) *ProductVariantCreate {
+	if v != nil {
+		_c.SetWeightGrams(*v)
+	}
+	return _c
+}
+
+// SetLengthMm sets the "length_mm" field.
+func (_c *ProductVariantCreate) SetLengthMm(v int) *ProductVariantCreate {
+	_c.mutation.SetLengthMm(v)
+	return _c
+}
+
+// SetNillableLengthMm sets the "length_mm" field if the given value is not nil.
+func (_c *ProductVariantCreate) SetNillableLengthMm(v *int) *ProductVariantCreate {
+	if v != nil {
+		_c.SetLengthMm(*v)
+	}
+	return _c
+}
+
+// SetWidthMm sets the "width_mm" field.
+func (_c *ProductVariantCreate) SetWidthMm(v int) *ProductVariantCreate {
+	_c.mutation.SetWidthMm(v)
+	return _c
+}
+
+// SetNillableWidthMm sets the "width_mm" field if the given value is not nil.
+func (_c *ProductVariantCreate) SetNillableWidthMm(v *int) *ProductVariantCreate {
+	if v != nil {
+		_c.SetWidthMm(*v)
+	}
+	return _c
+}
+
+// SetHeightMm sets the "height_mm" field.
+func (_c *ProductVariantCreate) SetHeightMm(v int) *ProductVariantCreate {
+	_c.mutation.SetHeightMm(v)
+	return _c
+}
+
+// SetNillableHeightMm sets the "height_mm" field if the given value is not nil.
+func (_c *ProductVariantCreate) SetNillableHeightMm(v *int) *ProductVariantCreate {
+	if v != nil {
+		_c.SetHeightMm(*v)
+	}
+	return _c
+}
+
 // SetUpdatedAt sets the "updated_at" field.
 func (_c *ProductVariantCreate) SetUpdatedAt(v time.Time) *ProductVariantCreate {
 	_c.mutation.SetUpdatedAt(v)
@@ -385,6 +441,26 @@ func (_c *ProductVariantCreate) check() error {
 	if _, ok := _c.mutation.Position(); !ok {
 		return &ValidationError{Name: "position", err: errors.New(`ent: missing required field "ProductVariant.position"`)}
 	}
+	if v, ok := _c.mutation.WeightGrams(); ok {
+		if err := productvariant.WeightGramsValidator(v); err != nil {
+			return &ValidationError{Name: "weight_grams", err: fmt.Errorf(`ent: validator failed for field "ProductVariant.weight_grams": %w`, err)}
+		}
+	}
+	if v, ok := _c.mutation.LengthMm(); ok {
+		if err := productvariant.LengthMmValidator(v); err != nil {
+			return &ValidationError{Name: "length_mm", err: fmt.Errorf(`ent: validator failed for field "ProductVariant.length_mm": %w`, err)}
+		}
+	}
+	if v, ok := _c.mutation.WidthMm(); ok {
+		if err := productvariant.WidthMmValidator(v); err != nil {
+			return &ValidationError{Name: "width_mm", err: fmt.Errorf(`ent: validator failed for field "ProductVariant.width_mm": %w`, err)}
+		}
+	}
+	if v, ok := _c.mutation.HeightMm(); ok {
+		if err := productvariant.HeightMmValidator(v); err != nil {
+			return &ValidationError{Name: "height_mm", err: fmt.Errorf(`ent: validator failed for field "ProductVariant.height_mm": %w`, err)}
+		}
+	}
 	if _, ok := _c.mutation.UpdatedAt(); !ok {
 		return &ValidationError{Name: "updated_at", err: errors.New(`ent: missing required field "ProductVariant.updated_at"`)}
 	}
@@ -495,6 +571,22 @@ func (_c *ProductVariantCreate) createSpec() (*ProductVariant, *sqlgraph.CreateS
 	if value, ok := _c.mutation.Position(); ok {
 		_spec.SetField(productvariant.FieldPosition, field.TypeInt, value)
 		_node.Position = value
+	}
+	if value, ok := _c.mutation.WeightGrams(); ok {
+		_spec.SetField(productvariant.FieldWeightGrams, field.TypeInt, value)
+		_node.WeightGrams = &value
+	}
+	if value, ok := _c.mutation.LengthMm(); ok {
+		_spec.SetField(productvariant.FieldLengthMm, field.TypeInt, value)
+		_node.LengthMm = &value
+	}
+	if value, ok := _c.mutation.WidthMm(); ok {
+		_spec.SetField(productvariant.FieldWidthMm, field.TypeInt, value)
+		_node.WidthMm = &value
+	}
+	if value, ok := _c.mutation.HeightMm(); ok {
+		_spec.SetField(productvariant.FieldHeightMm, field.TypeInt, value)
+		_node.HeightMm = &value
 	}
 	if value, ok := _c.mutation.UpdatedAt(); ok {
 		_spec.SetField(productvariant.FieldUpdatedAt, field.TypeTime, value)
@@ -801,6 +893,102 @@ func (u *ProductVariantUpsert) UpdatePosition() *ProductVariantUpsert {
 // AddPosition adds v to the "position" field.
 func (u *ProductVariantUpsert) AddPosition(v int) *ProductVariantUpsert {
 	u.Add(productvariant.FieldPosition, v)
+	return u
+}
+
+// SetWeightGrams sets the "weight_grams" field.
+func (u *ProductVariantUpsert) SetWeightGrams(v int) *ProductVariantUpsert {
+	u.Set(productvariant.FieldWeightGrams, v)
+	return u
+}
+
+// UpdateWeightGrams sets the "weight_grams" field to the value that was provided on create.
+func (u *ProductVariantUpsert) UpdateWeightGrams() *ProductVariantUpsert {
+	u.SetExcluded(productvariant.FieldWeightGrams)
+	return u
+}
+
+// AddWeightGrams adds v to the "weight_grams" field.
+func (u *ProductVariantUpsert) AddWeightGrams(v int) *ProductVariantUpsert {
+	u.Add(productvariant.FieldWeightGrams, v)
+	return u
+}
+
+// ClearWeightGrams clears the value of the "weight_grams" field.
+func (u *ProductVariantUpsert) ClearWeightGrams() *ProductVariantUpsert {
+	u.SetNull(productvariant.FieldWeightGrams)
+	return u
+}
+
+// SetLengthMm sets the "length_mm" field.
+func (u *ProductVariantUpsert) SetLengthMm(v int) *ProductVariantUpsert {
+	u.Set(productvariant.FieldLengthMm, v)
+	return u
+}
+
+// UpdateLengthMm sets the "length_mm" field to the value that was provided on create.
+func (u *ProductVariantUpsert) UpdateLengthMm() *ProductVariantUpsert {
+	u.SetExcluded(productvariant.FieldLengthMm)
+	return u
+}
+
+// AddLengthMm adds v to the "length_mm" field.
+func (u *ProductVariantUpsert) AddLengthMm(v int) *ProductVariantUpsert {
+	u.Add(productvariant.FieldLengthMm, v)
+	return u
+}
+
+// ClearLengthMm clears the value of the "length_mm" field.
+func (u *ProductVariantUpsert) ClearLengthMm() *ProductVariantUpsert {
+	u.SetNull(productvariant.FieldLengthMm)
+	return u
+}
+
+// SetWidthMm sets the "width_mm" field.
+func (u *ProductVariantUpsert) SetWidthMm(v int) *ProductVariantUpsert {
+	u.Set(productvariant.FieldWidthMm, v)
+	return u
+}
+
+// UpdateWidthMm sets the "width_mm" field to the value that was provided on create.
+func (u *ProductVariantUpsert) UpdateWidthMm() *ProductVariantUpsert {
+	u.SetExcluded(productvariant.FieldWidthMm)
+	return u
+}
+
+// AddWidthMm adds v to the "width_mm" field.
+func (u *ProductVariantUpsert) AddWidthMm(v int) *ProductVariantUpsert {
+	u.Add(productvariant.FieldWidthMm, v)
+	return u
+}
+
+// ClearWidthMm clears the value of the "width_mm" field.
+func (u *ProductVariantUpsert) ClearWidthMm() *ProductVariantUpsert {
+	u.SetNull(productvariant.FieldWidthMm)
+	return u
+}
+
+// SetHeightMm sets the "height_mm" field.
+func (u *ProductVariantUpsert) SetHeightMm(v int) *ProductVariantUpsert {
+	u.Set(productvariant.FieldHeightMm, v)
+	return u
+}
+
+// UpdateHeightMm sets the "height_mm" field to the value that was provided on create.
+func (u *ProductVariantUpsert) UpdateHeightMm() *ProductVariantUpsert {
+	u.SetExcluded(productvariant.FieldHeightMm)
+	return u
+}
+
+// AddHeightMm adds v to the "height_mm" field.
+func (u *ProductVariantUpsert) AddHeightMm(v int) *ProductVariantUpsert {
+	u.Add(productvariant.FieldHeightMm, v)
+	return u
+}
+
+// ClearHeightMm clears the value of the "height_mm" field.
+func (u *ProductVariantUpsert) ClearHeightMm() *ProductVariantUpsert {
+	u.SetNull(productvariant.FieldHeightMm)
 	return u
 }
 
@@ -1164,6 +1352,118 @@ func (u *ProductVariantUpsertOne) AddPosition(v int) *ProductVariantUpsertOne {
 func (u *ProductVariantUpsertOne) UpdatePosition() *ProductVariantUpsertOne {
 	return u.Update(func(s *ProductVariantUpsert) {
 		s.UpdatePosition()
+	})
+}
+
+// SetWeightGrams sets the "weight_grams" field.
+func (u *ProductVariantUpsertOne) SetWeightGrams(v int) *ProductVariantUpsertOne {
+	return u.Update(func(s *ProductVariantUpsert) {
+		s.SetWeightGrams(v)
+	})
+}
+
+// AddWeightGrams adds v to the "weight_grams" field.
+func (u *ProductVariantUpsertOne) AddWeightGrams(v int) *ProductVariantUpsertOne {
+	return u.Update(func(s *ProductVariantUpsert) {
+		s.AddWeightGrams(v)
+	})
+}
+
+// UpdateWeightGrams sets the "weight_grams" field to the value that was provided on create.
+func (u *ProductVariantUpsertOne) UpdateWeightGrams() *ProductVariantUpsertOne {
+	return u.Update(func(s *ProductVariantUpsert) {
+		s.UpdateWeightGrams()
+	})
+}
+
+// ClearWeightGrams clears the value of the "weight_grams" field.
+func (u *ProductVariantUpsertOne) ClearWeightGrams() *ProductVariantUpsertOne {
+	return u.Update(func(s *ProductVariantUpsert) {
+		s.ClearWeightGrams()
+	})
+}
+
+// SetLengthMm sets the "length_mm" field.
+func (u *ProductVariantUpsertOne) SetLengthMm(v int) *ProductVariantUpsertOne {
+	return u.Update(func(s *ProductVariantUpsert) {
+		s.SetLengthMm(v)
+	})
+}
+
+// AddLengthMm adds v to the "length_mm" field.
+func (u *ProductVariantUpsertOne) AddLengthMm(v int) *ProductVariantUpsertOne {
+	return u.Update(func(s *ProductVariantUpsert) {
+		s.AddLengthMm(v)
+	})
+}
+
+// UpdateLengthMm sets the "length_mm" field to the value that was provided on create.
+func (u *ProductVariantUpsertOne) UpdateLengthMm() *ProductVariantUpsertOne {
+	return u.Update(func(s *ProductVariantUpsert) {
+		s.UpdateLengthMm()
+	})
+}
+
+// ClearLengthMm clears the value of the "length_mm" field.
+func (u *ProductVariantUpsertOne) ClearLengthMm() *ProductVariantUpsertOne {
+	return u.Update(func(s *ProductVariantUpsert) {
+		s.ClearLengthMm()
+	})
+}
+
+// SetWidthMm sets the "width_mm" field.
+func (u *ProductVariantUpsertOne) SetWidthMm(v int) *ProductVariantUpsertOne {
+	return u.Update(func(s *ProductVariantUpsert) {
+		s.SetWidthMm(v)
+	})
+}
+
+// AddWidthMm adds v to the "width_mm" field.
+func (u *ProductVariantUpsertOne) AddWidthMm(v int) *ProductVariantUpsertOne {
+	return u.Update(func(s *ProductVariantUpsert) {
+		s.AddWidthMm(v)
+	})
+}
+
+// UpdateWidthMm sets the "width_mm" field to the value that was provided on create.
+func (u *ProductVariantUpsertOne) UpdateWidthMm() *ProductVariantUpsertOne {
+	return u.Update(func(s *ProductVariantUpsert) {
+		s.UpdateWidthMm()
+	})
+}
+
+// ClearWidthMm clears the value of the "width_mm" field.
+func (u *ProductVariantUpsertOne) ClearWidthMm() *ProductVariantUpsertOne {
+	return u.Update(func(s *ProductVariantUpsert) {
+		s.ClearWidthMm()
+	})
+}
+
+// SetHeightMm sets the "height_mm" field.
+func (u *ProductVariantUpsertOne) SetHeightMm(v int) *ProductVariantUpsertOne {
+	return u.Update(func(s *ProductVariantUpsert) {
+		s.SetHeightMm(v)
+	})
+}
+
+// AddHeightMm adds v to the "height_mm" field.
+func (u *ProductVariantUpsertOne) AddHeightMm(v int) *ProductVariantUpsertOne {
+	return u.Update(func(s *ProductVariantUpsert) {
+		s.AddHeightMm(v)
+	})
+}
+
+// UpdateHeightMm sets the "height_mm" field to the value that was provided on create.
+func (u *ProductVariantUpsertOne) UpdateHeightMm() *ProductVariantUpsertOne {
+	return u.Update(func(s *ProductVariantUpsert) {
+		s.UpdateHeightMm()
+	})
+}
+
+// ClearHeightMm clears the value of the "height_mm" field.
+func (u *ProductVariantUpsertOne) ClearHeightMm() *ProductVariantUpsertOne {
+	return u.Update(func(s *ProductVariantUpsert) {
+		s.ClearHeightMm()
 	})
 }
 
@@ -1696,6 +1996,118 @@ func (u *ProductVariantUpsertBulk) AddPosition(v int) *ProductVariantUpsertBulk 
 func (u *ProductVariantUpsertBulk) UpdatePosition() *ProductVariantUpsertBulk {
 	return u.Update(func(s *ProductVariantUpsert) {
 		s.UpdatePosition()
+	})
+}
+
+// SetWeightGrams sets the "weight_grams" field.
+func (u *ProductVariantUpsertBulk) SetWeightGrams(v int) *ProductVariantUpsertBulk {
+	return u.Update(func(s *ProductVariantUpsert) {
+		s.SetWeightGrams(v)
+	})
+}
+
+// AddWeightGrams adds v to the "weight_grams" field.
+func (u *ProductVariantUpsertBulk) AddWeightGrams(v int) *ProductVariantUpsertBulk {
+	return u.Update(func(s *ProductVariantUpsert) {
+		s.AddWeightGrams(v)
+	})
+}
+
+// UpdateWeightGrams sets the "weight_grams" field to the value that was provided on create.
+func (u *ProductVariantUpsertBulk) UpdateWeightGrams() *ProductVariantUpsertBulk {
+	return u.Update(func(s *ProductVariantUpsert) {
+		s.UpdateWeightGrams()
+	})
+}
+
+// ClearWeightGrams clears the value of the "weight_grams" field.
+func (u *ProductVariantUpsertBulk) ClearWeightGrams() *ProductVariantUpsertBulk {
+	return u.Update(func(s *ProductVariantUpsert) {
+		s.ClearWeightGrams()
+	})
+}
+
+// SetLengthMm sets the "length_mm" field.
+func (u *ProductVariantUpsertBulk) SetLengthMm(v int) *ProductVariantUpsertBulk {
+	return u.Update(func(s *ProductVariantUpsert) {
+		s.SetLengthMm(v)
+	})
+}
+
+// AddLengthMm adds v to the "length_mm" field.
+func (u *ProductVariantUpsertBulk) AddLengthMm(v int) *ProductVariantUpsertBulk {
+	return u.Update(func(s *ProductVariantUpsert) {
+		s.AddLengthMm(v)
+	})
+}
+
+// UpdateLengthMm sets the "length_mm" field to the value that was provided on create.
+func (u *ProductVariantUpsertBulk) UpdateLengthMm() *ProductVariantUpsertBulk {
+	return u.Update(func(s *ProductVariantUpsert) {
+		s.UpdateLengthMm()
+	})
+}
+
+// ClearLengthMm clears the value of the "length_mm" field.
+func (u *ProductVariantUpsertBulk) ClearLengthMm() *ProductVariantUpsertBulk {
+	return u.Update(func(s *ProductVariantUpsert) {
+		s.ClearLengthMm()
+	})
+}
+
+// SetWidthMm sets the "width_mm" field.
+func (u *ProductVariantUpsertBulk) SetWidthMm(v int) *ProductVariantUpsertBulk {
+	return u.Update(func(s *ProductVariantUpsert) {
+		s.SetWidthMm(v)
+	})
+}
+
+// AddWidthMm adds v to the "width_mm" field.
+func (u *ProductVariantUpsertBulk) AddWidthMm(v int) *ProductVariantUpsertBulk {
+	return u.Update(func(s *ProductVariantUpsert) {
+		s.AddWidthMm(v)
+	})
+}
+
+// UpdateWidthMm sets the "width_mm" field to the value that was provided on create.
+func (u *ProductVariantUpsertBulk) UpdateWidthMm() *ProductVariantUpsertBulk {
+	return u.Update(func(s *ProductVariantUpsert) {
+		s.UpdateWidthMm()
+	})
+}
+
+// ClearWidthMm clears the value of the "width_mm" field.
+func (u *ProductVariantUpsertBulk) ClearWidthMm() *ProductVariantUpsertBulk {
+	return u.Update(func(s *ProductVariantUpsert) {
+		s.ClearWidthMm()
+	})
+}
+
+// SetHeightMm sets the "height_mm" field.
+func (u *ProductVariantUpsertBulk) SetHeightMm(v int) *ProductVariantUpsertBulk {
+	return u.Update(func(s *ProductVariantUpsert) {
+		s.SetHeightMm(v)
+	})
+}
+
+// AddHeightMm adds v to the "height_mm" field.
+func (u *ProductVariantUpsertBulk) AddHeightMm(v int) *ProductVariantUpsertBulk {
+	return u.Update(func(s *ProductVariantUpsert) {
+		s.AddHeightMm(v)
+	})
+}
+
+// UpdateHeightMm sets the "height_mm" field to the value that was provided on create.
+func (u *ProductVariantUpsertBulk) UpdateHeightMm() *ProductVariantUpsertBulk {
+	return u.Update(func(s *ProductVariantUpsert) {
+		s.UpdateHeightMm()
+	})
+}
+
+// ClearHeightMm clears the value of the "height_mm" field.
+func (u *ProductVariantUpsertBulk) ClearHeightMm() *ProductVariantUpsertBulk {
+	return u.Update(func(s *ProductVariantUpsert) {
+		s.ClearHeightMm()
 	})
 }
 

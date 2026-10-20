@@ -58,6 +58,24 @@ type Product struct {
 	Currency string `json:"currency,omitempty"`
 	// MinPriceMinor holds the value of the "min_price_minor" field.
 	MinPriceMinor int64 `json:"min_price_minor,omitempty"`
+	// WeightGrams holds the value of the "weight_grams" field.
+	WeightGrams *int `json:"weight_grams,omitempty"`
+	// LengthMm holds the value of the "length_mm" field.
+	LengthMm *int `json:"length_mm,omitempty"`
+	// WidthMm holds the value of the "width_mm" field.
+	WidthMm *int `json:"width_mm,omitempty"`
+	// HeightMm holds the value of the "height_mm" field.
+	HeightMm *int `json:"height_mm,omitempty"`
+	// PackageCategory holds the value of the "package_category" field.
+	PackageCategory string `json:"package_category,omitempty"`
+	// PackageCount holds the value of the "package_count" field.
+	PackageCount int `json:"package_count,omitempty"`
+	// Fragile holds the value of the "fragile" field.
+	Fragile bool `json:"fragile,omitempty"`
+	// ContentsDescription holds the value of the "contents_description" field.
+	ContentsDescription string `json:"contents_description,omitempty"`
+	// DeclaredValueMinor holds the value of the "declared_value_minor" field.
+	DeclaredValueMinor *int64 `json:"declared_value_minor,omitempty"`
 	// PublishAt holds the value of the "publish_at" field.
 	PublishAt *time.Time `json:"publish_at,omitempty"`
 	// PublishedAt holds the value of the "published_at" field.
@@ -88,11 +106,11 @@ func (*Product) scanValues(columns []string) ([]any, error) {
 			values[i] = &sql.NullScanner{S: new(uuid.UUID)}
 		case product.FieldTags, product.FieldOptions, product.FieldAttributes, product.FieldVideos:
 			values[i] = new([]byte)
-		case product.FieldPublishedOnline, product.FieldTaxable, product.FieldTrackInventory:
+		case product.FieldPublishedOnline, product.FieldTaxable, product.FieldTrackInventory, product.FieldFragile:
 			values[i] = new(sql.NullBool)
-		case product.FieldMinPriceMinor, product.FieldRatingSum, product.FieldRatingCount, product.FieldLikeCount, product.FieldUnitsSold:
+		case product.FieldMinPriceMinor, product.FieldWeightGrams, product.FieldLengthMm, product.FieldWidthMm, product.FieldHeightMm, product.FieldPackageCount, product.FieldDeclaredValueMinor, product.FieldRatingSum, product.FieldRatingCount, product.FieldLikeCount, product.FieldUnitsSold:
 			values[i] = new(sql.NullInt64)
-		case product.FieldName, product.FieldDescription, product.FieldBrandRelationship, product.FieldStatus, product.FieldVisibility, product.FieldCurrency, product.FieldModerationVisibility:
+		case product.FieldName, product.FieldDescription, product.FieldBrandRelationship, product.FieldStatus, product.FieldVisibility, product.FieldCurrency, product.FieldPackageCategory, product.FieldContentsDescription, product.FieldModerationVisibility:
 			values[i] = new(sql.NullString)
 		case product.FieldCreatedAt, product.FieldPublishAt, product.FieldPublishedAt, product.FieldModerationVisibilityAt, product.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
@@ -244,6 +262,65 @@ func (_m *Product) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field min_price_minor", values[i])
 			} else if value.Valid {
 				_m.MinPriceMinor = value.Int64
+			}
+		case product.FieldWeightGrams:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field weight_grams", values[i])
+			} else if value.Valid {
+				_m.WeightGrams = new(int)
+				*_m.WeightGrams = int(value.Int64)
+			}
+		case product.FieldLengthMm:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field length_mm", values[i])
+			} else if value.Valid {
+				_m.LengthMm = new(int)
+				*_m.LengthMm = int(value.Int64)
+			}
+		case product.FieldWidthMm:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field width_mm", values[i])
+			} else if value.Valid {
+				_m.WidthMm = new(int)
+				*_m.WidthMm = int(value.Int64)
+			}
+		case product.FieldHeightMm:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field height_mm", values[i])
+			} else if value.Valid {
+				_m.HeightMm = new(int)
+				*_m.HeightMm = int(value.Int64)
+			}
+		case product.FieldPackageCategory:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field package_category", values[i])
+			} else if value.Valid {
+				_m.PackageCategory = value.String
+			}
+		case product.FieldPackageCount:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field package_count", values[i])
+			} else if value.Valid {
+				_m.PackageCount = int(value.Int64)
+			}
+		case product.FieldFragile:
+			if value, ok := values[i].(*sql.NullBool); !ok {
+				return fmt.Errorf("unexpected type %T for field fragile", values[i])
+			} else if value.Valid {
+				_m.Fragile = value.Bool
+			}
+		case product.FieldContentsDescription:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field contents_description", values[i])
+			} else if value.Valid {
+				_m.ContentsDescription = value.String
+			}
+		case product.FieldDeclaredValueMinor:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field declared_value_minor", values[i])
+			} else if value.Valid {
+				_m.DeclaredValueMinor = new(int64)
+				*_m.DeclaredValueMinor = value.Int64
 			}
 		case product.FieldPublishAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
@@ -402,6 +479,43 @@ func (_m *Product) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("min_price_minor=")
 	builder.WriteString(fmt.Sprintf("%v", _m.MinPriceMinor))
+	builder.WriteString(", ")
+	if v := _m.WeightGrams; v != nil {
+		builder.WriteString("weight_grams=")
+		builder.WriteString(fmt.Sprintf("%v", *v))
+	}
+	builder.WriteString(", ")
+	if v := _m.LengthMm; v != nil {
+		builder.WriteString("length_mm=")
+		builder.WriteString(fmt.Sprintf("%v", *v))
+	}
+	builder.WriteString(", ")
+	if v := _m.WidthMm; v != nil {
+		builder.WriteString("width_mm=")
+		builder.WriteString(fmt.Sprintf("%v", *v))
+	}
+	builder.WriteString(", ")
+	if v := _m.HeightMm; v != nil {
+		builder.WriteString("height_mm=")
+		builder.WriteString(fmt.Sprintf("%v", *v))
+	}
+	builder.WriteString(", ")
+	builder.WriteString("package_category=")
+	builder.WriteString(_m.PackageCategory)
+	builder.WriteString(", ")
+	builder.WriteString("package_count=")
+	builder.WriteString(fmt.Sprintf("%v", _m.PackageCount))
+	builder.WriteString(", ")
+	builder.WriteString("fragile=")
+	builder.WriteString(fmt.Sprintf("%v", _m.Fragile))
+	builder.WriteString(", ")
+	builder.WriteString("contents_description=")
+	builder.WriteString(_m.ContentsDescription)
+	builder.WriteString(", ")
+	if v := _m.DeclaredValueMinor; v != nil {
+		builder.WriteString("declared_value_minor=")
+		builder.WriteString(fmt.Sprintf("%v", *v))
+	}
 	builder.WriteString(", ")
 	if v := _m.PublishAt; v != nil {
 		builder.WriteString("publish_at=")

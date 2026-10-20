@@ -11,19 +11,21 @@ import (
 )
 
 type AddressSnapshot struct {
-	RecipientName string  `json:"recipientName"`
-	Phone         string  `json:"phone"`
-	Line1         string  `json:"line1"`
-	Line2         string  `json:"line2"`
-	PostalCode    string  `json:"postalCode"`
-	Details       string  `json:"details"`
-	CountryCode   string  `json:"countryCode"`
-	RegionId      *string `json:"regionId"`
-	AdminAreaId   *string `json:"adminAreaId"`
-	CityId        *string `json:"cityId"`
-	RegionName    string  `json:"regionName"`
-	AdminAreaName string  `json:"adminAreaName"`
-	CityName      string  `json:"cityName"`
+	RecipientName string   `json:"recipientName"`
+	Phone         string   `json:"phone"`
+	Line1         string   `json:"line1"`
+	Line2         string   `json:"line2"`
+	PostalCode    string   `json:"postalCode"`
+	Details       string   `json:"details"`
+	CountryCode   string   `json:"countryCode"`
+	RegionId      *string  `json:"regionId"`
+	AdminAreaId   *string  `json:"adminAreaId"`
+	CityId        *string  `json:"cityId"`
+	RegionName    string   `json:"regionName"`
+	AdminAreaName string   `json:"adminAreaName"`
+	CityName      string   `json:"cityName"`
+	Latitude      *float64 `json:"latitude,omitempty"`
+	Longitude     *float64 `json:"longitude,omitempty"`
 }
 
 type Checkout struct {

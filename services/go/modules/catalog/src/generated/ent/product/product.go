@@ -52,6 +52,24 @@ const (
 	FieldCurrency = "currency"
 	// FieldMinPriceMinor holds the string denoting the min_price_minor field in the database.
 	FieldMinPriceMinor = "min_price_minor"
+	// FieldWeightGrams holds the string denoting the weight_grams field in the database.
+	FieldWeightGrams = "weight_grams"
+	// FieldLengthMm holds the string denoting the length_mm field in the database.
+	FieldLengthMm = "length_mm"
+	// FieldWidthMm holds the string denoting the width_mm field in the database.
+	FieldWidthMm = "width_mm"
+	// FieldHeightMm holds the string denoting the height_mm field in the database.
+	FieldHeightMm = "height_mm"
+	// FieldPackageCategory holds the string denoting the package_category field in the database.
+	FieldPackageCategory = "package_category"
+	// FieldPackageCount holds the string denoting the package_count field in the database.
+	FieldPackageCount = "package_count"
+	// FieldFragile holds the string denoting the fragile field in the database.
+	FieldFragile = "fragile"
+	// FieldContentsDescription holds the string denoting the contents_description field in the database.
+	FieldContentsDescription = "contents_description"
+	// FieldDeclaredValueMinor holds the string denoting the declared_value_minor field in the database.
+	FieldDeclaredValueMinor = "declared_value_minor"
 	// FieldPublishAt holds the string denoting the publish_at field in the database.
 	FieldPublishAt = "publish_at"
 	// FieldPublishedAt holds the string denoting the published_at field in the database.
@@ -96,6 +114,15 @@ var Columns = []string{
 	FieldSupplierID,
 	FieldCurrency,
 	FieldMinPriceMinor,
+	FieldWeightGrams,
+	FieldLengthMm,
+	FieldWidthMm,
+	FieldHeightMm,
+	FieldPackageCategory,
+	FieldPackageCount,
+	FieldFragile,
+	FieldContentsDescription,
+	FieldDeclaredValueMinor,
 	FieldPublishAt,
 	FieldPublishedAt,
 	FieldRatingSum,
@@ -140,6 +167,30 @@ var (
 	CurrencyValidator func(string) error
 	// DefaultMinPriceMinor holds the default value on creation for the "min_price_minor" field.
 	DefaultMinPriceMinor int64
+	// WeightGramsValidator is a validator for the "weight_grams" field. It is called by the builders before save.
+	WeightGramsValidator func(int) error
+	// LengthMmValidator is a validator for the "length_mm" field. It is called by the builders before save.
+	LengthMmValidator func(int) error
+	// WidthMmValidator is a validator for the "width_mm" field. It is called by the builders before save.
+	WidthMmValidator func(int) error
+	// HeightMmValidator is a validator for the "height_mm" field. It is called by the builders before save.
+	HeightMmValidator func(int) error
+	// DefaultPackageCategory holds the default value on creation for the "package_category" field.
+	DefaultPackageCategory string
+	// PackageCategoryValidator is a validator for the "package_category" field. It is called by the builders before save.
+	PackageCategoryValidator func(string) error
+	// DefaultPackageCount holds the default value on creation for the "package_count" field.
+	DefaultPackageCount int
+	// PackageCountValidator is a validator for the "package_count" field. It is called by the builders before save.
+	PackageCountValidator func(int) error
+	// DefaultFragile holds the default value on creation for the "fragile" field.
+	DefaultFragile bool
+	// DefaultContentsDescription holds the default value on creation for the "contents_description" field.
+	DefaultContentsDescription string
+	// ContentsDescriptionValidator is a validator for the "contents_description" field. It is called by the builders before save.
+	ContentsDescriptionValidator func(string) error
+	// DeclaredValueMinorValidator is a validator for the "declared_value_minor" field. It is called by the builders before save.
+	DeclaredValueMinorValidator func(int64) error
 	// DefaultRatingSum holds the default value on creation for the "rating_sum" field.
 	DefaultRatingSum int64
 	// DefaultRatingCount holds the default value on creation for the "rating_count" field.
@@ -239,6 +290,51 @@ func ByCurrency(opts ...sql.OrderTermOption) OrderOption {
 // ByMinPriceMinor orders the results by the min_price_minor field.
 func ByMinPriceMinor(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldMinPriceMinor, opts...).ToFunc()
+}
+
+// ByWeightGrams orders the results by the weight_grams field.
+func ByWeightGrams(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldWeightGrams, opts...).ToFunc()
+}
+
+// ByLengthMm orders the results by the length_mm field.
+func ByLengthMm(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldLengthMm, opts...).ToFunc()
+}
+
+// ByWidthMm orders the results by the width_mm field.
+func ByWidthMm(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldWidthMm, opts...).ToFunc()
+}
+
+// ByHeightMm orders the results by the height_mm field.
+func ByHeightMm(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldHeightMm, opts...).ToFunc()
+}
+
+// ByPackageCategory orders the results by the package_category field.
+func ByPackageCategory(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldPackageCategory, opts...).ToFunc()
+}
+
+// ByPackageCount orders the results by the package_count field.
+func ByPackageCount(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldPackageCount, opts...).ToFunc()
+}
+
+// ByFragile orders the results by the fragile field.
+func ByFragile(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldFragile, opts...).ToFunc()
+}
+
+// ByContentsDescription orders the results by the contents_description field.
+func ByContentsDescription(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldContentsDescription, opts...).ToFunc()
+}
+
+// ByDeclaredValueMinor orders the results by the declared_value_minor field.
+func ByDeclaredValueMinor(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldDeclaredValueMinor, opts...).ToFunc()
 }
 
 // ByPublishAt orders the results by the publish_at field.

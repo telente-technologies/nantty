@@ -23,9 +23,13 @@ func (handler Handler) Execute(ctx context.Context, command Command) (types.Sell
 	if err != nil {
 		return types.SellerProductView{}, err
 	}
+	packageCategory, packageCount, fragile, contents := source.PackageCategory, source.PackageCount, source.Fragile, source.ContentsDescription
 	request := dtos.ProductUpsertRequest{
 		Name: source.Name + " (copy)", Description: source.Description, CategoryId: source.CategoryId, Status: enums.ProductDraft, Taxable: source.Taxable,
 		TrackInventory: source.TrackInventory, Tags: source.Tags, SupplierId: source.SupplierId, Visibility: &source.Visibility,
+		WeightGrams: source.WeightGrams, LengthMm: source.LengthMm, WidthMm: source.WidthMm, HeightMm: source.HeightMm,
+		PackageCategory: &packageCategory, PackageCount: &packageCount, Fragile: &fragile, ContentsDescription: &contents,
+		DeclaredValueMinor: source.DeclaredValueMinor,
 	}
 	for _, option := range source.Options {
 		request.Options = append(request.Options, dtos.OptionRequest{Name: option.Name, Values: option.Values})
@@ -52,6 +56,7 @@ func (handler Handler) Execute(ctx context.Context, command Command) (types.Sell
 		line := dtos.VariantRequest{
 			OptionValues: variant.OptionValues, Sku: sku, PriceMinor: variant.Price.AmountMinor, LowStockThreshold: variant.LowStockThreshold,
 			ReorderPoint: &variant.ReorderPoint, ReorderQuantity: &variant.ReorderQuantity,
+			WeightGrams: variant.WeightGrams, LengthMm: variant.LengthMm, WidthMm: variant.WidthMm, HeightMm: variant.HeightMm,
 		}
 		for _, price := range variant.RegionalPrices {
 			line.RegionalPrices = append(line.RegionalPrices, dtos.RegionalPriceRequest{Currency: price.Currency, PriceMinor: price.PriceMinor, CompareAtPriceMinor: price.CompareAtPriceMinor})

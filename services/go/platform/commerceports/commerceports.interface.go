@@ -43,6 +43,16 @@ type ProductSnapshot struct {
 	CategoryId      *uuid.UUID
 	CategoryName    string
 	Purchasable     bool
+
+	WeightGrams         *int
+	LengthMm            *int
+	WidthMm             *int
+	HeightMm            *int
+	PackageCategory     string
+	PackageCount        int
+	Fragile             bool
+	ContentsDescription string
+	DeclaredValueMinor  *int64
 }
 
 type VariantDescription struct {

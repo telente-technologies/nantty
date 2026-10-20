@@ -62,6 +62,74 @@ func toSchemaVideos(videos *[]dtos.VideoRequest) []schema.ProductVideo {
 	return result
 }
 
+func applyParcelFieldsToCreate(create *ent.ProductCreate, request dtos.ProductUpsertRequest) {
+	create.SetNillableWeightGrams(request.WeightGrams).SetNillableLengthMm(request.LengthMm).
+		SetNillableWidthMm(request.WidthMm).SetNillableHeightMm(request.HeightMm).
+		SetNillableDeclaredValueMinor(request.DeclaredValueMinor)
+	if request.PackageCategory != nil {
+		create.SetPackageCategory(strings.TrimSpace(*request.PackageCategory))
+	}
+	if request.PackageCount != nil {
+		create.SetPackageCount(*request.PackageCount)
+	}
+	if request.Fragile != nil {
+		create.SetFragile(*request.Fragile)
+	}
+	if request.ContentsDescription != nil {
+		create.SetContentsDescription(*request.ContentsDescription)
+	}
+}
+
+func applyParcelFieldsToUpdate(update *ent.ProductUpdateOne, request dtos.ProductUpsertRequest) {
+	if request.WeightGrams != nil {
+		update.SetWeightGrams(*request.WeightGrams)
+	}
+	if request.LengthMm != nil {
+		update.SetLengthMm(*request.LengthMm)
+	}
+	if request.WidthMm != nil {
+		update.SetWidthMm(*request.WidthMm)
+	}
+	if request.HeightMm != nil {
+		update.SetHeightMm(*request.HeightMm)
+	}
+	if request.PackageCategory != nil {
+		update.SetPackageCategory(strings.TrimSpace(*request.PackageCategory))
+	}
+	if request.PackageCount != nil {
+		update.SetPackageCount(*request.PackageCount)
+	}
+	if request.Fragile != nil {
+		update.SetFragile(*request.Fragile)
+	}
+	if request.ContentsDescription != nil {
+		update.SetContentsDescription(*request.ContentsDescription)
+	}
+	if request.DeclaredValueMinor != nil {
+		update.SetDeclaredValueMinor(*request.DeclaredValueMinor)
+	}
+}
+
+func applyVariantParcelFieldsToCreate(create *ent.ProductVariantCreate, request dtos.VariantRequest) {
+	create.SetNillableWeightGrams(request.WeightGrams).SetNillableLengthMm(request.LengthMm).
+		SetNillableWidthMm(request.WidthMm).SetNillableHeightMm(request.HeightMm)
+}
+
+func applyVariantParcelFieldsToUpdate(update *ent.ProductVariantUpdateOne, request dtos.VariantRequest) {
+	if request.WeightGrams != nil {
+		update.SetWeightGrams(*request.WeightGrams)
+	}
+	if request.LengthMm != nil {
+		update.SetLengthMm(*request.LengthMm)
+	}
+	if request.WidthMm != nil {
+		update.SetWidthMm(*request.WidthMm)
+	}
+	if request.HeightMm != nil {
+		update.SetHeightMm(*request.HeightMm)
+	}
+}
+
 func applyReferences(create *ent.ProductCreate, request dtos.ProductUpsertRequest) {
 	if request.CategoryId != nil {
 		create.SetCategoryID(uuid.MustParse(*request.CategoryId))
@@ -140,14 +208,17 @@ func upsertVariant(ctx context.Context, tx *ent.Tx, write ProductWrite, product 
 		if request.Barcode == nil {
 			update.ClearBarcode()
 		}
+		applyVariantParcelFieldsToUpdate(update, request)
 		saved, err := update.Save(ctx)
 		return provisionedVariant{Variant: saved}, err
 	}
-	saved, err := tx.ProductVariant.Create().SetProductID(product.ID).SetStoreID(write.Store.StoreId).SetTitle(title).SetOptionValues(request.OptionValues).
+	create := tx.ProductVariant.Create().SetProductID(product.ID).SetStoreID(write.Store.StoreId).SetTitle(title).SetOptionValues(request.OptionValues).
 		SetSize(size).SetColor(color).SetSku(request.Sku).SetSkuKey(strings.ToLower(request.Sku)).SetPriceMinor(request.PriceMinor).
 		SetNillableCompareAtPriceMinor(request.CompareAtPriceMinor).SetNillableCostPriceMinor(request.CostPriceMinor).SetNillableBarcode(request.Barcode).
 		SetLowStockThreshold(request.LowStockThreshold).SetReorderPoint(reorderPoint).SetReorderQuantity(reorderQuantity).SetPosition(position).
-		SetRegionalPrices(regionalPricesOf(request, product.Currency)).Save(ctx)
+		SetRegionalPrices(regionalPricesOf(request, product.Currency))
+	applyVariantParcelFieldsToCreate(create, request)
+	saved, err := create.Save(ctx)
 	if err != nil {
 		return provisionedVariant{}, err
 	}

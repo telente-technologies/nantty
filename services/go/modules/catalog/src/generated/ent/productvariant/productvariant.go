@@ -50,6 +50,14 @@ const (
 	FieldReorderQuantity = "reorder_quantity"
 	// FieldPosition holds the string denoting the position field in the database.
 	FieldPosition = "position"
+	// FieldWeightGrams holds the string denoting the weight_grams field in the database.
+	FieldWeightGrams = "weight_grams"
+	// FieldLengthMm holds the string denoting the length_mm field in the database.
+	FieldLengthMm = "length_mm"
+	// FieldWidthMm holds the string denoting the width_mm field in the database.
+	FieldWidthMm = "width_mm"
+	// FieldHeightMm holds the string denoting the height_mm field in the database.
+	FieldHeightMm = "height_mm"
 	// FieldUpdatedAt holds the string denoting the updated_at field in the database.
 	FieldUpdatedAt = "updated_at"
 	// Table holds the table name of the productvariant in the database.
@@ -77,6 +85,10 @@ var Columns = []string{
 	FieldReorderPoint,
 	FieldReorderQuantity,
 	FieldPosition,
+	FieldWeightGrams,
+	FieldLengthMm,
+	FieldWidthMm,
+	FieldHeightMm,
 	FieldUpdatedAt,
 }
 
@@ -117,6 +129,14 @@ var (
 	DefaultReorderQuantity int
 	// DefaultPosition holds the default value on creation for the "position" field.
 	DefaultPosition int
+	// WeightGramsValidator is a validator for the "weight_grams" field. It is called by the builders before save.
+	WeightGramsValidator func(int) error
+	// LengthMmValidator is a validator for the "length_mm" field. It is called by the builders before save.
+	LengthMmValidator func(int) error
+	// WidthMmValidator is a validator for the "width_mm" field. It is called by the builders before save.
+	WidthMmValidator func(int) error
+	// HeightMmValidator is a validator for the "height_mm" field. It is called by the builders before save.
+	HeightMmValidator func(int) error
 	// DefaultUpdatedAt holds the default value on creation for the "updated_at" field.
 	DefaultUpdatedAt func() time.Time
 	// UpdateDefaultUpdatedAt holds the default value on update for the "updated_at" field.
@@ -211,6 +231,26 @@ func ByReorderQuantity(opts ...sql.OrderTermOption) OrderOption {
 // ByPosition orders the results by the position field.
 func ByPosition(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldPosition, opts...).ToFunc()
+}
+
+// ByWeightGrams orders the results by the weight_grams field.
+func ByWeightGrams(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldWeightGrams, opts...).ToFunc()
+}
+
+// ByLengthMm orders the results by the length_mm field.
+func ByLengthMm(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldLengthMm, opts...).ToFunc()
+}
+
+// ByWidthMm orders the results by the width_mm field.
+func ByWidthMm(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldWidthMm, opts...).ToFunc()
+}
+
+// ByHeightMm orders the results by the height_mm field.
+func ByHeightMm(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldHeightMm, opts...).ToFunc()
 }
 
 // ByUpdatedAt orders the results by the updated_at field.

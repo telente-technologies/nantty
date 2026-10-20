@@ -5,6 +5,20 @@ All notable changes to Zudomart are documented here. Format follows
 
 ## [Unreleased] — 2026-10-20
 
+### Backend — product parcels and logistics foundation
+
+- Products now store actual weight, length/width/height, package category,
+  package count, fragile flag, contents description and declared value;
+  variants can override weight and dimensions. Seller create/replace/duplicate,
+  the seller product form ("Shipping and packaging") and the seller product
+  view persist and return the fields, and the checkout `ProductSnapshot`
+  carries them.
+- Added hidden `orders` tables for delivery policy, quote, shipment, parcel,
+  delivery attempt, shipment event, shipment charge, shipment insurance and
+  delivery claim, plus a provider-neutral `logistics.Provider` interface and
+  registry. `LOGISTICS_ENABLED` defaults to `false`; no provider delivery
+  route, checkout option, provider adapter or buyer/seller delivery UI is live.
+
 ### Docs — logistics v2
 
 - Added [architecture/logisticsV2.md](architecture/logisticsV2.md): the planned

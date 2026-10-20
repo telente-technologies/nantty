@@ -133,6 +133,10 @@ type SellerVariantView struct {
 	LowStockThreshold int                       `json:"lowStockThreshold"`
 	ReorderPoint      int                       `json:"reorderPoint"`
 	ReorderQuantity   int                       `json:"reorderQuantity"`
+	WeightGrams       *int                      `json:"weightGrams"`
+	LengthMm          *int                      `json:"lengthMm"`
+	WidthMm           *int                      `json:"widthMm"`
+	HeightMm          *int                      `json:"heightMm"`
 	Stock             []SellerStockView         `json:"stock"`
 }
 
@@ -142,27 +146,36 @@ type SellerImageView struct {
 }
 
 type SellerProductView struct {
-	Id              string              `json:"id"`
-	Name            string              `json:"name"`
-	Description     string              `json:"description"`
-	CategoryId      *string             `json:"categoryId"`
-	CategoryName    *string             `json:"categoryName"`
-	Status          string              `json:"status"`
-	PublishedOnline bool                `json:"publishedOnline"`
-	Images          []SellerImageView   `json:"images"`
-	Options         []OptionView        `json:"options"`
-	Variants        []SellerVariantView `json:"variants"`
-	Taxable         bool                `json:"taxable"`
-	TrackInventory  bool                `json:"trackInventory"`
-	Tags            []string            `json:"tags"`
-	Brand           *BrandTagView       `json:"brand"`
-	Visibility      string              `json:"visibility"`
-	PublishAt       *time.Time          `json:"publishAt"`
-	Attributes      []AttributeView     `json:"attributes"`
-	Videos          []VideoView         `json:"videos"`
-	SupplierId      *string             `json:"supplierId"`
-	CreatedAt       time.Time           `json:"createdAt"`
-	UpdatedAt       time.Time           `json:"updatedAt"`
+	Id                  string              `json:"id"`
+	Name                string              `json:"name"`
+	Description         string              `json:"description"`
+	CategoryId          *string             `json:"categoryId"`
+	CategoryName        *string             `json:"categoryName"`
+	Status              string              `json:"status"`
+	PublishedOnline     bool                `json:"publishedOnline"`
+	Images              []SellerImageView   `json:"images"`
+	Options             []OptionView        `json:"options"`
+	Variants            []SellerVariantView `json:"variants"`
+	Taxable             bool                `json:"taxable"`
+	TrackInventory      bool                `json:"trackInventory"`
+	Tags                []string            `json:"tags"`
+	Brand               *BrandTagView       `json:"brand"`
+	Visibility          string              `json:"visibility"`
+	PublishAt           *time.Time          `json:"publishAt"`
+	Attributes          []AttributeView     `json:"attributes"`
+	Videos              []VideoView         `json:"videos"`
+	SupplierId          *string             `json:"supplierId"`
+	WeightGrams         *int                `json:"weightGrams"`
+	LengthMm            *int                `json:"lengthMm"`
+	WidthMm             *int                `json:"widthMm"`
+	HeightMm            *int                `json:"heightMm"`
+	PackageCategory     string              `json:"packageCategory"`
+	PackageCount        int                 `json:"packageCount"`
+	Fragile             bool                `json:"fragile"`
+	ContentsDescription string              `json:"contentsDescription"`
+	DeclaredValueMinor  *int64              `json:"declaredValueMinor"`
+	CreatedAt           time.Time           `json:"createdAt"`
+	UpdatedAt           time.Time           `json:"updatedAt"`
 }
 
 type OptionView struct {

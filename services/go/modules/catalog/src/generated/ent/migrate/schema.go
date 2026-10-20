@@ -303,6 +303,15 @@ var (
 		{Name: "supplier_id", Type: field.TypeUUID, Nullable: true},
 		{Name: "currency", Type: field.TypeString, Size: 3},
 		{Name: "min_price_minor", Type: field.TypeInt64, Default: 0},
+		{Name: "weight_grams", Type: field.TypeInt, Nullable: true},
+		{Name: "length_mm", Type: field.TypeInt, Nullable: true},
+		{Name: "width_mm", Type: field.TypeInt, Nullable: true},
+		{Name: "height_mm", Type: field.TypeInt, Nullable: true},
+		{Name: "package_category", Type: field.TypeString, Size: 40, Default: "general"},
+		{Name: "package_count", Type: field.TypeInt, Default: 1},
+		{Name: "fragile", Type: field.TypeBool, Default: false},
+		{Name: "contents_description", Type: field.TypeString, Size: 300, Default: ""},
+		{Name: "declared_value_minor", Type: field.TypeInt64, Nullable: true},
 		{Name: "publish_at", Type: field.TypeTime, Nullable: true},
 		{Name: "published_at", Type: field.TypeTime, Nullable: true},
 		{Name: "rating_sum", Type: field.TypeInt64, Default: 0},
@@ -322,36 +331,36 @@ var (
 			{
 				Name:    "product_store_status_published",
 				Unique:  false,
-				Columns: []*schema.Column{ProductsColumns[2], ProductsColumns[8], ProductsColumns[21], ProductsColumns[0]},
+				Columns: []*schema.Column{ProductsColumns[2], ProductsColumns[8], ProductsColumns[30], ProductsColumns[0]},
 				Annotation: &entsql.IndexAnnotation{
 					DescColumns: map[string]bool{
 						ProductsColumns[0].Name: true,
 
-						ProductsColumns[21].Name: true,
+						ProductsColumns[30].Name: true,
 					},
 				},
 			},
 			{
 				Name:    "product_store_status_updated",
 				Unique:  false,
-				Columns: []*schema.Column{ProductsColumns[2], ProductsColumns[8], ProductsColumns[28], ProductsColumns[0]},
+				Columns: []*schema.Column{ProductsColumns[2], ProductsColumns[8], ProductsColumns[37], ProductsColumns[0]},
 				Annotation: &entsql.IndexAnnotation{
 					DescColumns: map[string]bool{
 						ProductsColumns[0].Name: true,
 
-						ProductsColumns[28].Name: true,
+						ProductsColumns[37].Name: true,
 					},
 				},
 			},
 			{
 				Name:    "product_category_listed",
 				Unique:  false,
-				Columns: []*schema.Column{ProductsColumns[5], ProductsColumns[21], ProductsColumns[0]},
+				Columns: []*schema.Column{ProductsColumns[5], ProductsColumns[30], ProductsColumns[0]},
 				Annotation: &entsql.IndexAnnotation{
 					DescColumns: map[string]bool{
 						ProductsColumns[0].Name: true,
 
-						ProductsColumns[21].Name: true,
+						ProductsColumns[30].Name: true,
 					},
 					Where: "status = 'active' AND visibility = 'public' AND published_online",
 				},
@@ -359,12 +368,12 @@ var (
 			{
 				Name:    "product_mart_listed",
 				Unique:  false,
-				Columns: []*schema.Column{ProductsColumns[21], ProductsColumns[0]},
+				Columns: []*schema.Column{ProductsColumns[30], ProductsColumns[0]},
 				Annotation: &entsql.IndexAnnotation{
 					DescColumns: map[string]bool{
 						ProductsColumns[0].Name: true,
 
-						ProductsColumns[21].Name: true,
+						ProductsColumns[30].Name: true,
 					},
 					Where: "status = 'active' AND visibility = 'public' AND published_online",
 				},
@@ -372,7 +381,7 @@ var (
 			{
 				Name:    "product_scheduled_due",
 				Unique:  false,
-				Columns: []*schema.Column{ProductsColumns[20]},
+				Columns: []*schema.Column{ProductsColumns[29]},
 				Annotation: &entsql.IndexAnnotation{
 					Where: "status = 'draft' AND publish_at IS NOT NULL",
 				},
@@ -531,6 +540,10 @@ var (
 		{Name: "reorder_point", Type: field.TypeInt, Default: 5},
 		{Name: "reorder_quantity", Type: field.TypeInt, Default: 10},
 		{Name: "position", Type: field.TypeInt, Default: 0},
+		{Name: "weight_grams", Type: field.TypeInt, Nullable: true},
+		{Name: "length_mm", Type: field.TypeInt, Nullable: true},
+		{Name: "width_mm", Type: field.TypeInt, Nullable: true},
+		{Name: "height_mm", Type: field.TypeInt, Nullable: true},
 		{Name: "updated_at", Type: field.TypeTime},
 	}
 	// ProductVariantsTable holds the schema information for the "product_variants" table.

@@ -27,6 +27,18 @@ type CustomerSegment func(*sql.Selector)
 // DeliveryArea is the predicate function for deliveryarea builders.
 type DeliveryArea func(*sql.Selector)
 
+// DeliveryAttempt is the predicate function for deliveryattempt builders.
+type DeliveryAttempt func(*sql.Selector)
+
+// DeliveryClaim is the predicate function for deliveryclaim builders.
+type DeliveryClaim func(*sql.Selector)
+
+// DeliveryPolicy is the predicate function for deliverypolicy builders.
+type DeliveryPolicy func(*sql.Selector)
+
+// DeliveryQuote is the predicate function for deliveryquote builders.
+type DeliveryQuote func(*sql.Selector)
+
 // FlashSale is the predicate function for flashsale builders.
 type FlashSale func(*sql.Selector)
 
@@ -54,6 +66,9 @@ type OrderNote func(*sql.Selector)
 // OutboxEvent is the predicate function for outboxevent builders.
 type OutboxEvent func(*sql.Selector)
 
+// Parcel is the predicate function for parcel builders.
+type Parcel func(*sql.Selector)
+
 // ProcessedEvent is the predicate function for processedevent builders.
 type ProcessedEvent func(*sql.Selector)
 
@@ -77,6 +92,18 @@ type ReportExportJob func(*sql.Selector)
 
 // ReturnRequest is the predicate function for returnrequest builders.
 type ReturnRequest func(*sql.Selector)
+
+// Shipment is the predicate function for shipment builders.
+type Shipment func(*sql.Selector)
+
+// ShipmentCharge is the predicate function for shipmentcharge builders.
+type ShipmentCharge func(*sql.Selector)
+
+// ShipmentEvent is the predicate function for shipmentevent builders.
+type ShipmentEvent func(*sql.Selector)
+
+// ShipmentInsurance is the predicate function for shipmentinsurance builders.
+type ShipmentInsurance func(*sql.Selector)
 
 // ShippingCalculation is the predicate function for shippingcalculation builders.
 type ShippingCalculation func(*sql.Selector)

@@ -11,6 +11,10 @@ export const maximumVariantsPerProduct = 100;
 export const productVisibilities: readonly ProductVisibility[] = ["public", "store_only", "link_only"];
 export const maximumProductAttributes = 20;
 export const maximumProductVideos = 3;
+export const maximumParcelWeightGrams = 1_000_000;
+export const maximumParcelDimensionMm = 10_000;
+export const maximumPackageCount = 1_000;
+export const maximumContentsDescriptionLength = 300;
 
 export function isHttpsVideoUrl(candidate: string): boolean {
   try {
@@ -72,6 +76,48 @@ function isWholeMinorAmount(value: unknown, allowNull: boolean): boolean {
   return typeof value === "number" && Number.isSafeInteger(value) && value >= 0 && value <= maximumMoneyMinor;
 }
 
+function isOptionalWholeNumberInRange(value: unknown, minimum: number, maximum: number): boolean {
+  return value === undefined || value === null || (typeof value === "number" && Number.isSafeInteger(value) && value >= minimum && value <= maximum);
+}
+
+interface ParcelMeasurementFields {
+  readonly weightGrams?: number | null;
+  readonly lengthMm?: number | null;
+  readonly widthMm?: number | null;
+  readonly heightMm?: number | null;
+}
+
+function validateParcelMeasurements(fields: ParcelMeasurementFields, path: string, label: string, addIssue: (path: string, message: string) => void): void {
+  if (!isOptionalWholeNumberInRange(fields.weightGrams, 1, maximumParcelWeightGrams)) addIssue(`${path}weightGrams`, `${label}: weight must be a whole number of grams from 1 to 1,000,000.`);
+  const dimensions = [
+    { value: fields.lengthMm, path: `${path}lengthMm`, name: "Length" },
+    { value: fields.widthMm, path: `${path}widthMm`, name: "Width" },
+    { value: fields.heightMm, path: `${path}heightMm`, name: "Height" },
+  ];
+  const suppliedDimensions = dimensions.filter((dimension) => dimension.value !== undefined && dimension.value !== null).length;
+  if (suppliedDimensions > 0 && suppliedDimensions < dimensions.length) addIssue(`${path}lengthMm`, `${label}: provide length, width and height together.`);
+  for (const dimension of dimensions) {
+    if (!isOptionalWholeNumberInRange(dimension.value, 1, maximumParcelDimensionMm)) addIssue(dimension.path, `${label}: ${dimension.name.toLowerCase()} must be a whole number of millimetres from 1 to 10,000.`);
+  }
+}
+
+function validateProductParcelFields(request: ProductUpsertRequest, addIssue: (path: string, message: string) => void): void {
+  validateParcelMeasurements(request, "", "Product", addIssue);
+  if (request.packageCategory !== undefined && (typeof request.packageCategory !== "string" || request.packageCategory.trim().length < 1 || request.packageCategory.length > 40)) {
+    addIssue("packageCategory", "Package type needs 1 to 40 characters.");
+  }
+  if (request.packageCount !== undefined && !isOptionalWholeNumberInRange(request.packageCount, 1, maximumPackageCount)) {
+    addIssue("packageCount", "Packages must be a whole number from 1 to 1,000.");
+  }
+  if (request.fragile !== undefined && typeof request.fragile !== "boolean") addIssue("fragile", "Fragile must be on or off.");
+  if (request.contentsDescription !== undefined && (typeof request.contentsDescription !== "string" || request.contentsDescription.length > maximumContentsDescriptionLength)) {
+    addIssue("contentsDescription", `Package contents must be ${maximumContentsDescriptionLength} characters or fewer.`);
+  }
+  if (request.declaredValueMinor !== undefined && !isWholeMinorAmount(request.declaredValueMinor, true)) {
+    addIssue("declaredValueMinor", "Declared value must be zero or more.");
+  }
+}
+
 export function isBarcodeFormatAcceptable(barcode: string): boolean {
   if (!/^\d{8,14}$/.test(barcode)) return false;
   return barcode.length !== 13 || isValidEan13(barcode);
@@ -95,6 +141,7 @@ export function validateProductUpsertRequest(request: ProductUpsertRequest, cont
   if (!Array.isArray(request.tags) || request.tags.length > 20 || request.tags.some((tag) => typeof tag !== "string" || tag.trim().length === 0 || tag.length > 30)) addIssue("tags", "Use up to 20 tags of 30 characters or fewer.");
   if (!Array.isArray(request.imageMediaIds) || request.imageMediaIds.length > 10) addIssue("imageMediaIds", "A product can have up to 10 images.");
   validateProductMerchandisingFields(request, context, addIssue);
+  validateProductParcelFields(request, addIssue);
 
   const options = Array.isArray(request.options) ? request.options : [];
   if (options.length > 3) addIssue("options", "Use up to 3 options, such as Size and Colour.");
@@ -138,6 +185,7 @@ export function validateProductUpsertRequest(request: ProductUpsertRequest, cont
       const reorderValue = variant[reorderField];
       if (reorderValue !== undefined && (!Number.isSafeInteger(reorderValue) || reorderValue < 0 || reorderValue > 1_000_000)) addIssue(`${path}.${reorderField}`, `${label}: reorder numbers must be whole numbers from 0 to 1,000,000.`);
     }
+    validateParcelMeasurements(variant, `${path}.`, label, addIssue);
     const optionValues = variant.optionValues ?? {};
     const hasEveryOptionValue = options.every((option, optionIndex) => option.values.includes(optionValues[optionNames[optionIndex] ?? ""] ?? ""));
     if (!hasEveryOptionValue || Object.keys(optionValues).length !== options.length) addIssue(`${path}.optionValues`, `${label}: pick one value for each option.`);

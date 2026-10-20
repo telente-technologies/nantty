@@ -45,6 +45,10 @@ export interface ProductVariant {
   readonly lowStockThreshold: number;
   readonly reorderPoint: number;
   readonly reorderQuantity: number;
+  readonly weightGrams?: number | null;
+  readonly lengthMm?: number | null;
+  readonly widthMm?: number | null;
+  readonly heightMm?: number | null;
   readonly stock: StockLevel[];
 }
 
@@ -68,6 +72,15 @@ export interface Product {
   readonly attributes: ProductAttribute[];
   readonly videos: ProductVideo[];
   readonly supplierId: string | null;
+  readonly weightGrams?: number | null;
+  readonly lengthMm?: number | null;
+  readonly widthMm?: number | null;
+  readonly heightMm?: number | null;
+  readonly packageCategory?: string;
+  readonly packageCount?: number;
+  readonly fragile?: boolean;
+  readonly contentsDescription?: string;
+  readonly declaredValueMinor?: number | null;
   readonly createdAt: string;
   readonly updatedAt: string;
 }

@@ -8,6 +8,7 @@ import (
 	"zudomart/modules/orders/src/configs"
 	"zudomart/modules/orders/src/generated/ent"
 	"zudomart/modules/orders/src/interfaces"
+	"zudomart/modules/orders/src/logistics"
 	"zudomart/platform/commerceports"
 	"zudomart/platform/idempotency"
 	"zudomart/platform/jwtauth"
@@ -27,6 +28,7 @@ type Container struct {
 	Money            interfaces.CheckoutMoney
 	Staff            StaffVerifiers
 	Audit            staffaudit.Recorder
+	Logistics        *logistics.Registry
 }
 
 type StaffVerifiers struct {

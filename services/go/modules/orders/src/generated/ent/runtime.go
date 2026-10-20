@@ -12,6 +12,10 @@ import (
 	"zudomart/modules/orders/src/generated/ent/customernote"
 	"zudomart/modules/orders/src/generated/ent/customersegment"
 	"zudomart/modules/orders/src/generated/ent/deliveryarea"
+	"zudomart/modules/orders/src/generated/ent/deliveryattempt"
+	"zudomart/modules/orders/src/generated/ent/deliveryclaim"
+	"zudomart/modules/orders/src/generated/ent/deliverypolicy"
+	"zudomart/modules/orders/src/generated/ent/deliveryquote"
 	"zudomart/modules/orders/src/generated/ent/flashsale"
 	"zudomart/modules/orders/src/generated/ent/flashsaleitem"
 	"zudomart/modules/orders/src/generated/ent/idempotentrequest"
@@ -21,6 +25,7 @@ import (
 	"zudomart/modules/orders/src/generated/ent/orderitem"
 	"zudomart/modules/orders/src/generated/ent/ordernote"
 	"zudomart/modules/orders/src/generated/ent/outboxevent"
+	"zudomart/modules/orders/src/generated/ent/parcel"
 	"zudomart/modules/orders/src/generated/ent/processedevent"
 	"zudomart/modules/orders/src/generated/ent/productbundle"
 	"zudomart/modules/orders/src/generated/ent/productbundleitem"
@@ -29,6 +34,10 @@ import (
 	"zudomart/modules/orders/src/generated/ent/refundrecord"
 	"zudomart/modules/orders/src/generated/ent/reportexportjob"
 	"zudomart/modules/orders/src/generated/ent/returnrequest"
+	"zudomart/modules/orders/src/generated/ent/shipment"
+	"zudomart/modules/orders/src/generated/ent/shipmentcharge"
+	"zudomart/modules/orders/src/generated/ent/shipmentevent"
+	"zudomart/modules/orders/src/generated/ent/shipmentinsurance"
 	"zudomart/modules/orders/src/generated/ent/shippingcalculation"
 	"zudomart/modules/orders/src/generated/ent/shippingdestination"
 	"zudomart/modules/orders/src/generated/ent/shippingprofile"
@@ -359,6 +368,228 @@ func init() {
 	deliveryareaDescID := deliveryareaMixinFields0[0].Descriptor()
 	// deliveryarea.DefaultID holds the default value on creation for the id field.
 	deliveryarea.DefaultID = deliveryareaDescID.Default.(func() uuid.UUID)
+	deliveryattemptMixin := schema.DeliveryAttempt{}.Mixin()
+	deliveryattemptMixinFields0 := deliveryattemptMixin[0].Fields()
+	_ = deliveryattemptMixinFields0
+	deliveryattemptFields := schema.DeliveryAttempt{}.Fields()
+	_ = deliveryattemptFields
+	// deliveryattemptDescCreatedAt is the schema descriptor for created_at field.
+	deliveryattemptDescCreatedAt := deliveryattemptMixinFields0[1].Descriptor()
+	// deliveryattempt.DefaultCreatedAt holds the default value on creation for the created_at field.
+	deliveryattempt.DefaultCreatedAt = deliveryattemptDescCreatedAt.Default.(func() time.Time)
+	// deliveryattemptDescAttemptNumber is the schema descriptor for attempt_number field.
+	deliveryattemptDescAttemptNumber := deliveryattemptFields[1].Descriptor()
+	// deliveryattempt.AttemptNumberValidator is a validator for the "attempt_number" field. It is called by the builders before save.
+	deliveryattempt.AttemptNumberValidator = deliveryattemptDescAttemptNumber.Validators[0].(func(int) error)
+	// deliveryattemptDescStatus is the schema descriptor for status field.
+	deliveryattemptDescStatus := deliveryattemptFields[2].Descriptor()
+	// deliveryattempt.DefaultStatus holds the default value on creation for the status field.
+	deliveryattempt.DefaultStatus = deliveryattemptDescStatus.Default.(string)
+	// deliveryattempt.StatusValidator is a validator for the "status" field. It is called by the builders before save.
+	deliveryattempt.StatusValidator = deliveryattemptDescStatus.Validators[0].(func(string) error)
+	// deliveryattemptDescFailureReason is the schema descriptor for failure_reason field.
+	deliveryattemptDescFailureReason := deliveryattemptFields[3].Descriptor()
+	// deliveryattempt.DefaultFailureReason holds the default value on creation for the failure_reason field.
+	deliveryattempt.DefaultFailureReason = deliveryattemptDescFailureReason.Default.(string)
+	// deliveryattempt.FailureReasonValidator is a validator for the "failure_reason" field. It is called by the builders before save.
+	deliveryattempt.FailureReasonValidator = deliveryattemptDescFailureReason.Validators[0].(func(string) error)
+	// deliveryattemptDescResponsibleParty is the schema descriptor for responsible_party field.
+	deliveryattemptDescResponsibleParty := deliveryattemptFields[4].Descriptor()
+	// deliveryattempt.DefaultResponsibleParty holds the default value on creation for the responsible_party field.
+	deliveryattempt.DefaultResponsibleParty = deliveryattemptDescResponsibleParty.Default.(string)
+	// deliveryattempt.ResponsiblePartyValidator is a validator for the "responsible_party" field. It is called by the builders before save.
+	deliveryattempt.ResponsiblePartyValidator = deliveryattemptDescResponsibleParty.Validators[0].(func(string) error)
+	// deliveryattemptDescEvidence is the schema descriptor for evidence field.
+	deliveryattemptDescEvidence := deliveryattemptFields[5].Descriptor()
+	// deliveryattempt.DefaultEvidence holds the default value on creation for the evidence field.
+	deliveryattempt.DefaultEvidence = deliveryattemptDescEvidence.Default.(string)
+	// deliveryattempt.EvidenceValidator is a validator for the "evidence" field. It is called by the builders before save.
+	deliveryattempt.EvidenceValidator = deliveryattemptDescEvidence.Validators[0].(func(string) error)
+	// deliveryattemptDescID is the schema descriptor for id field.
+	deliveryattemptDescID := deliveryattemptMixinFields0[0].Descriptor()
+	// deliveryattempt.DefaultID holds the default value on creation for the id field.
+	deliveryattempt.DefaultID = deliveryattemptDescID.Default.(func() uuid.UUID)
+	deliveryclaimMixin := schema.DeliveryClaim{}.Mixin()
+	deliveryclaimMixinFields0 := deliveryclaimMixin[0].Fields()
+	_ = deliveryclaimMixinFields0
+	deliveryclaimFields := schema.DeliveryClaim{}.Fields()
+	_ = deliveryclaimFields
+	// deliveryclaimDescCreatedAt is the schema descriptor for created_at field.
+	deliveryclaimDescCreatedAt := deliveryclaimMixinFields0[1].Descriptor()
+	// deliveryclaim.DefaultCreatedAt holds the default value on creation for the created_at field.
+	deliveryclaim.DefaultCreatedAt = deliveryclaimDescCreatedAt.Default.(func() time.Time)
+	// deliveryclaimDescKind is the schema descriptor for kind field.
+	deliveryclaimDescKind := deliveryclaimFields[1].Descriptor()
+	// deliveryclaim.DefaultKind holds the default value on creation for the kind field.
+	deliveryclaim.DefaultKind = deliveryclaimDescKind.Default.(string)
+	// deliveryclaim.KindValidator is a validator for the "kind" field. It is called by the builders before save.
+	deliveryclaim.KindValidator = deliveryclaimDescKind.Validators[0].(func(string) error)
+	// deliveryclaimDescStatus is the schema descriptor for status field.
+	deliveryclaimDescStatus := deliveryclaimFields[2].Descriptor()
+	// deliveryclaim.DefaultStatus holds the default value on creation for the status field.
+	deliveryclaim.DefaultStatus = deliveryclaimDescStatus.Default.(string)
+	// deliveryclaim.StatusValidator is a validator for the "status" field. It is called by the builders before save.
+	deliveryclaim.StatusValidator = deliveryclaimDescStatus.Validators[0].(func(string) error)
+	// deliveryclaimDescAmountMinor is the schema descriptor for amount_minor field.
+	deliveryclaimDescAmountMinor := deliveryclaimFields[3].Descriptor()
+	// deliveryclaim.AmountMinorValidator is a validator for the "amount_minor" field. It is called by the builders before save.
+	deliveryclaim.AmountMinorValidator = deliveryclaimDescAmountMinor.Validators[0].(func(int64) error)
+	// deliveryclaimDescCurrency is the schema descriptor for currency field.
+	deliveryclaimDescCurrency := deliveryclaimFields[4].Descriptor()
+	// deliveryclaim.CurrencyValidator is a validator for the "currency" field. It is called by the builders before save.
+	deliveryclaim.CurrencyValidator = func() func(string) error {
+		validators := deliveryclaimDescCurrency.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(currency string) error {
+			for _, fn := range fns {
+				if err := fn(currency); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// deliveryclaimDescResponsibleParty is the schema descriptor for responsible_party field.
+	deliveryclaimDescResponsibleParty := deliveryclaimFields[5].Descriptor()
+	// deliveryclaim.DefaultResponsibleParty holds the default value on creation for the responsible_party field.
+	deliveryclaim.DefaultResponsibleParty = deliveryclaimDescResponsibleParty.Default.(string)
+	// deliveryclaim.ResponsiblePartyValidator is a validator for the "responsible_party" field. It is called by the builders before save.
+	deliveryclaim.ResponsiblePartyValidator = deliveryclaimDescResponsibleParty.Validators[0].(func(string) error)
+	// deliveryclaimDescDescription is the schema descriptor for description field.
+	deliveryclaimDescDescription := deliveryclaimFields[6].Descriptor()
+	// deliveryclaim.DefaultDescription holds the default value on creation for the description field.
+	deliveryclaim.DefaultDescription = deliveryclaimDescDescription.Default.(string)
+	// deliveryclaim.DescriptionValidator is a validator for the "description" field. It is called by the builders before save.
+	deliveryclaim.DescriptionValidator = deliveryclaimDescDescription.Validators[0].(func(string) error)
+	// deliveryclaimDescResolution is the schema descriptor for resolution field.
+	deliveryclaimDescResolution := deliveryclaimFields[8].Descriptor()
+	// deliveryclaim.DefaultResolution holds the default value on creation for the resolution field.
+	deliveryclaim.DefaultResolution = deliveryclaimDescResolution.Default.(string)
+	// deliveryclaim.ResolutionValidator is a validator for the "resolution" field. It is called by the builders before save.
+	deliveryclaim.ResolutionValidator = deliveryclaimDescResolution.Validators[0].(func(string) error)
+	// deliveryclaimDescOpenedAt is the schema descriptor for opened_at field.
+	deliveryclaimDescOpenedAt := deliveryclaimFields[9].Descriptor()
+	// deliveryclaim.DefaultOpenedAt holds the default value on creation for the opened_at field.
+	deliveryclaim.DefaultOpenedAt = deliveryclaimDescOpenedAt.Default.(func() time.Time)
+	// deliveryclaimDescID is the schema descriptor for id field.
+	deliveryclaimDescID := deliveryclaimMixinFields0[0].Descriptor()
+	// deliveryclaim.DefaultID holds the default value on creation for the id field.
+	deliveryclaim.DefaultID = deliveryclaimDescID.Default.(func() uuid.UUID)
+	deliverypolicyMixin := schema.DeliveryPolicy{}.Mixin()
+	deliverypolicyMixinFields0 := deliverypolicyMixin[0].Fields()
+	_ = deliverypolicyMixinFields0
+	deliverypolicyFields := schema.DeliveryPolicy{}.Fields()
+	_ = deliverypolicyFields
+	// deliverypolicyDescCreatedAt is the schema descriptor for created_at field.
+	deliverypolicyDescCreatedAt := deliverypolicyMixinFields0[1].Descriptor()
+	// deliverypolicy.DefaultCreatedAt holds the default value on creation for the created_at field.
+	deliverypolicy.DefaultCreatedAt = deliverypolicyDescCreatedAt.Default.(func() time.Time)
+	// deliverypolicyDescActive is the schema descriptor for active field.
+	deliverypolicyDescActive := deliverypolicyFields[1].Descriptor()
+	// deliverypolicy.DefaultActive holds the default value on creation for the active field.
+	deliverypolicy.DefaultActive = deliverypolicyDescActive.Default.(bool)
+	// deliverypolicyDescFundingParty is the schema descriptor for funding_party field.
+	deliverypolicyDescFundingParty := deliverypolicyFields[2].Descriptor()
+	// deliverypolicy.DefaultFundingParty holds the default value on creation for the funding_party field.
+	deliverypolicy.DefaultFundingParty = deliverypolicyDescFundingParty.Default.(string)
+	// deliverypolicy.FundingPartyValidator is a validator for the "funding_party" field. It is called by the builders before save.
+	deliverypolicy.FundingPartyValidator = deliverypolicyDescFundingParty.Validators[0].(func(string) error)
+	// deliverypolicyDescFreeShippingThresholdMinor is the schema descriptor for free_shipping_threshold_minor field.
+	deliverypolicyDescFreeShippingThresholdMinor := deliverypolicyFields[3].Descriptor()
+	// deliverypolicy.FreeShippingThresholdMinorValidator is a validator for the "free_shipping_threshold_minor" field. It is called by the builders before save.
+	deliverypolicy.FreeShippingThresholdMinorValidator = deliverypolicyDescFreeShippingThresholdMinor.Validators[0].(func(int64) error)
+	// deliverypolicyDescSellerSubsidyCapMinor is the schema descriptor for seller_subsidy_cap_minor field.
+	deliverypolicyDescSellerSubsidyCapMinor := deliverypolicyFields[4].Descriptor()
+	// deliverypolicy.SellerSubsidyCapMinorValidator is a validator for the "seller_subsidy_cap_minor" field. It is called by the builders before save.
+	deliverypolicy.SellerSubsidyCapMinorValidator = deliverypolicyDescSellerSubsidyCapMinor.Validators[0].(func(int64) error)
+	// deliverypolicyDescUpdatedAt is the schema descriptor for updated_at field.
+	deliverypolicyDescUpdatedAt := deliverypolicyFields[6].Descriptor()
+	// deliverypolicy.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	deliverypolicy.DefaultUpdatedAt = deliverypolicyDescUpdatedAt.Default.(func() time.Time)
+	// deliverypolicy.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	deliverypolicy.UpdateDefaultUpdatedAt = deliverypolicyDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// deliverypolicyDescID is the schema descriptor for id field.
+	deliverypolicyDescID := deliverypolicyMixinFields0[0].Descriptor()
+	// deliverypolicy.DefaultID holds the default value on creation for the id field.
+	deliverypolicy.DefaultID = deliverypolicyDescID.Default.(func() uuid.UUID)
+	deliveryquoteMixin := schema.DeliveryQuote{}.Mixin()
+	deliveryquoteMixinFields0 := deliveryquoteMixin[0].Fields()
+	_ = deliveryquoteMixinFields0
+	deliveryquoteFields := schema.DeliveryQuote{}.Fields()
+	_ = deliveryquoteFields
+	// deliveryquoteDescCreatedAt is the schema descriptor for created_at field.
+	deliveryquoteDescCreatedAt := deliveryquoteMixinFields0[1].Descriptor()
+	// deliveryquote.DefaultCreatedAt holds the default value on creation for the created_at field.
+	deliveryquote.DefaultCreatedAt = deliveryquoteDescCreatedAt.Default.(func() time.Time)
+	// deliveryquoteDescProvider is the schema descriptor for provider field.
+	deliveryquoteDescProvider := deliveryquoteFields[3].Descriptor()
+	// deliveryquote.ProviderValidator is a validator for the "provider" field. It is called by the builders before save.
+	deliveryquote.ProviderValidator = func() func(string) error {
+		validators := deliveryquoteDescProvider.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(provider string) error {
+			for _, fn := range fns {
+				if err := fn(provider); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// deliveryquoteDescProviderQuoteID is the schema descriptor for provider_quote_id field.
+	deliveryquoteDescProviderQuoteID := deliveryquoteFields[4].Descriptor()
+	// deliveryquote.ProviderQuoteIDValidator is a validator for the "provider_quote_id" field. It is called by the builders before save.
+	deliveryquote.ProviderQuoteIDValidator = deliveryquoteDescProviderQuoteID.Validators[0].(func(string) error)
+	// deliveryquoteDescServiceType is the schema descriptor for service_type field.
+	deliveryquoteDescServiceType := deliveryquoteFields[5].Descriptor()
+	// deliveryquote.DefaultServiceType holds the default value on creation for the service_type field.
+	deliveryquote.DefaultServiceType = deliveryquoteDescServiceType.Default.(string)
+	// deliveryquote.ServiceTypeValidator is a validator for the "service_type" field. It is called by the builders before save.
+	deliveryquote.ServiceTypeValidator = deliveryquoteDescServiceType.Validators[0].(func(string) error)
+	// deliveryquoteDescStatus is the schema descriptor for status field.
+	deliveryquoteDescStatus := deliveryquoteFields[6].Descriptor()
+	// deliveryquote.DefaultStatus holds the default value on creation for the status field.
+	deliveryquote.DefaultStatus = deliveryquoteDescStatus.Default.(string)
+	// deliveryquote.StatusValidator is a validator for the "status" field. It is called by the builders before save.
+	deliveryquote.StatusValidator = deliveryquoteDescStatus.Validators[0].(func(string) error)
+	// deliveryquoteDescAmountMinor is the schema descriptor for amount_minor field.
+	deliveryquoteDescAmountMinor := deliveryquoteFields[7].Descriptor()
+	// deliveryquote.AmountMinorValidator is a validator for the "amount_minor" field. It is called by the builders before save.
+	deliveryquote.AmountMinorValidator = deliveryquoteDescAmountMinor.Validators[0].(func(int64) error)
+	// deliveryquoteDescCurrency is the schema descriptor for currency field.
+	deliveryquoteDescCurrency := deliveryquoteFields[8].Descriptor()
+	// deliveryquote.CurrencyValidator is a validator for the "currency" field. It is called by the builders before save.
+	deliveryquote.CurrencyValidator = func() func(string) error {
+		validators := deliveryquoteDescCurrency.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(currency string) error {
+			for _, fn := range fns {
+				if err := fn(currency); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// deliveryquoteDescUpdatedAt is the schema descriptor for updated_at field.
+	deliveryquoteDescUpdatedAt := deliveryquoteFields[13].Descriptor()
+	// deliveryquote.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	deliveryquote.DefaultUpdatedAt = deliveryquoteDescUpdatedAt.Default.(func() time.Time)
+	// deliveryquote.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	deliveryquote.UpdateDefaultUpdatedAt = deliveryquoteDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// deliveryquoteDescID is the schema descriptor for id field.
+	deliveryquoteDescID := deliveryquoteMixinFields0[0].Descriptor()
+	// deliveryquote.DefaultID holds the default value on creation for the id field.
+	deliveryquote.DefaultID = deliveryquoteDescID.Default.(func() uuid.UUID)
 	flashsaleMixin := schema.FlashSale{}.Mixin()
 	flashsaleMixinFields0 := flashsaleMixin[0].Fields()
 	_ = flashsaleMixinFields0
@@ -847,6 +1078,85 @@ func init() {
 	outboxeventDescID := outboxeventMixinFields0[0].Descriptor()
 	// outboxevent.DefaultID holds the default value on creation for the id field.
 	outboxevent.DefaultID = outboxeventDescID.Default.(func() uuid.UUID)
+	parcelMixin := schema.Parcel{}.Mixin()
+	parcelMixinFields0 := parcelMixin[0].Fields()
+	_ = parcelMixinFields0
+	parcelFields := schema.Parcel{}.Fields()
+	_ = parcelFields
+	// parcelDescCreatedAt is the schema descriptor for created_at field.
+	parcelDescCreatedAt := parcelMixinFields0[1].Descriptor()
+	// parcel.DefaultCreatedAt holds the default value on creation for the created_at field.
+	parcel.DefaultCreatedAt = parcelDescCreatedAt.Default.(func() time.Time)
+	// parcelDescWeightGrams is the schema descriptor for weight_grams field.
+	parcelDescWeightGrams := parcelFields[1].Descriptor()
+	// parcel.WeightGramsValidator is a validator for the "weight_grams" field. It is called by the builders before save.
+	parcel.WeightGramsValidator = parcelDescWeightGrams.Validators[0].(func(int) error)
+	// parcelDescLengthMm is the schema descriptor for length_mm field.
+	parcelDescLengthMm := parcelFields[2].Descriptor()
+	// parcel.LengthMmValidator is a validator for the "length_mm" field. It is called by the builders before save.
+	parcel.LengthMmValidator = parcelDescLengthMm.Validators[0].(func(int) error)
+	// parcelDescWidthMm is the schema descriptor for width_mm field.
+	parcelDescWidthMm := parcelFields[3].Descriptor()
+	// parcel.WidthMmValidator is a validator for the "width_mm" field. It is called by the builders before save.
+	parcel.WidthMmValidator = parcelDescWidthMm.Validators[0].(func(int) error)
+	// parcelDescHeightMm is the schema descriptor for height_mm field.
+	parcelDescHeightMm := parcelFields[4].Descriptor()
+	// parcel.HeightMmValidator is a validator for the "height_mm" field. It is called by the builders before save.
+	parcel.HeightMmValidator = parcelDescHeightMm.Validators[0].(func(int) error)
+	// parcelDescPackageCategory is the schema descriptor for package_category field.
+	parcelDescPackageCategory := parcelFields[5].Descriptor()
+	// parcel.DefaultPackageCategory holds the default value on creation for the package_category field.
+	parcel.DefaultPackageCategory = parcelDescPackageCategory.Default.(string)
+	// parcel.PackageCategoryValidator is a validator for the "package_category" field. It is called by the builders before save.
+	parcel.PackageCategoryValidator = parcelDescPackageCategory.Validators[0].(func(string) error)
+	// parcelDescPackageCount is the schema descriptor for package_count field.
+	parcelDescPackageCount := parcelFields[6].Descriptor()
+	// parcel.DefaultPackageCount holds the default value on creation for the package_count field.
+	parcel.DefaultPackageCount = parcelDescPackageCount.Default.(int)
+	// parcel.PackageCountValidator is a validator for the "package_count" field. It is called by the builders before save.
+	parcel.PackageCountValidator = parcelDescPackageCount.Validators[0].(func(int) error)
+	// parcelDescFragile is the schema descriptor for fragile field.
+	parcelDescFragile := parcelFields[7].Descriptor()
+	// parcel.DefaultFragile holds the default value on creation for the fragile field.
+	parcel.DefaultFragile = parcelDescFragile.Default.(bool)
+	// parcelDescContentsDescription is the schema descriptor for contents_description field.
+	parcelDescContentsDescription := parcelFields[8].Descriptor()
+	// parcel.DefaultContentsDescription holds the default value on creation for the contents_description field.
+	parcel.DefaultContentsDescription = parcelDescContentsDescription.Default.(string)
+	// parcel.ContentsDescriptionValidator is a validator for the "contents_description" field. It is called by the builders before save.
+	parcel.ContentsDescriptionValidator = parcelDescContentsDescription.Validators[0].(func(string) error)
+	// parcelDescDeclaredValueMinor is the schema descriptor for declared_value_minor field.
+	parcelDescDeclaredValueMinor := parcelFields[9].Descriptor()
+	// parcel.DeclaredValueMinorValidator is a validator for the "declared_value_minor" field. It is called by the builders before save.
+	parcel.DeclaredValueMinorValidator = parcelDescDeclaredValueMinor.Validators[0].(func(int64) error)
+	// parcelDescCurrency is the schema descriptor for currency field.
+	parcelDescCurrency := parcelFields[10].Descriptor()
+	// parcel.CurrencyValidator is a validator for the "currency" field. It is called by the builders before save.
+	parcel.CurrencyValidator = func() func(string) error {
+		validators := parcelDescCurrency.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(currency string) error {
+			for _, fn := range fns {
+				if err := fn(currency); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// parcelDescUpdatedAt is the schema descriptor for updated_at field.
+	parcelDescUpdatedAt := parcelFields[12].Descriptor()
+	// parcel.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	parcel.DefaultUpdatedAt = parcelDescUpdatedAt.Default.(func() time.Time)
+	// parcel.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	parcel.UpdateDefaultUpdatedAt = parcelDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// parcelDescID is the schema descriptor for id field.
+	parcelDescID := parcelMixinFields0[0].Descriptor()
+	// parcel.DefaultID holds the default value on creation for the id field.
+	parcel.DefaultID = parcelDescID.Default.(func() uuid.UUID)
 	processedeventMixin := schema.ProcessedEvent{}.Mixin()
 	processedeventMixinFields0 := processedeventMixin[0].Fields()
 	_ = processedeventMixinFields0
@@ -1243,6 +1553,230 @@ func init() {
 	returnrequestDescID := returnrequestMixinFields0[0].Descriptor()
 	// returnrequest.DefaultID holds the default value on creation for the id field.
 	returnrequest.DefaultID = returnrequestDescID.Default.(func() uuid.UUID)
+	shipmentMixin := schema.Shipment{}.Mixin()
+	shipmentMixinFields0 := shipmentMixin[0].Fields()
+	_ = shipmentMixinFields0
+	shipmentFields := schema.Shipment{}.Fields()
+	_ = shipmentFields
+	// shipmentDescCreatedAt is the schema descriptor for created_at field.
+	shipmentDescCreatedAt := shipmentMixinFields0[1].Descriptor()
+	// shipment.DefaultCreatedAt holds the default value on creation for the created_at field.
+	shipment.DefaultCreatedAt = shipmentDescCreatedAt.Default.(func() time.Time)
+	// shipmentDescProvider is the schema descriptor for provider field.
+	shipmentDescProvider := shipmentFields[2].Descriptor()
+	// shipment.ProviderValidator is a validator for the "provider" field. It is called by the builders before save.
+	shipment.ProviderValidator = func() func(string) error {
+		validators := shipmentDescProvider.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(provider string) error {
+			for _, fn := range fns {
+				if err := fn(provider); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// shipmentDescProviderReference is the schema descriptor for provider_reference field.
+	shipmentDescProviderReference := shipmentFields[3].Descriptor()
+	// shipment.ProviderReferenceValidator is a validator for the "provider_reference" field. It is called by the builders before save.
+	shipment.ProviderReferenceValidator = shipmentDescProviderReference.Validators[0].(func(string) error)
+	// shipmentDescStatus is the schema descriptor for status field.
+	shipmentDescStatus := shipmentFields[5].Descriptor()
+	// shipment.DefaultStatus holds the default value on creation for the status field.
+	shipment.DefaultStatus = shipmentDescStatus.Default.(string)
+	// shipment.StatusValidator is a validator for the "status" field. It is called by the builders before save.
+	shipment.StatusValidator = shipmentDescStatus.Validators[0].(func(string) error)
+	// shipmentDescPreviousStatus is the schema descriptor for previous_status field.
+	shipmentDescPreviousStatus := shipmentFields[6].Descriptor()
+	// shipment.DefaultPreviousStatus holds the default value on creation for the previous_status field.
+	shipment.DefaultPreviousStatus = shipmentDescPreviousStatus.Default.(string)
+	// shipment.PreviousStatusValidator is a validator for the "previous_status" field. It is called by the builders before save.
+	shipment.PreviousStatusValidator = shipmentDescPreviousStatus.Validators[0].(func(string) error)
+	// shipmentDescServiceType is the schema descriptor for service_type field.
+	shipmentDescServiceType := shipmentFields[7].Descriptor()
+	// shipment.DefaultServiceType holds the default value on creation for the service_type field.
+	shipment.DefaultServiceType = shipmentDescServiceType.Default.(string)
+	// shipment.ServiceTypeValidator is a validator for the "service_type" field. It is called by the builders before save.
+	shipment.ServiceTypeValidator = shipmentDescServiceType.Validators[0].(func(string) error)
+	// shipmentDescTrackingNumber is the schema descriptor for tracking_number field.
+	shipmentDescTrackingNumber := shipmentFields[10].Descriptor()
+	// shipment.TrackingNumberValidator is a validator for the "tracking_number" field. It is called by the builders before save.
+	shipment.TrackingNumberValidator = shipmentDescTrackingNumber.Validators[0].(func(string) error)
+	// shipmentDescTrackingURL is the schema descriptor for tracking_url field.
+	shipmentDescTrackingURL := shipmentFields[11].Descriptor()
+	// shipment.TrackingURLValidator is a validator for the "tracking_url" field. It is called by the builders before save.
+	shipment.TrackingURLValidator = shipmentDescTrackingURL.Validators[0].(func(string) error)
+	// shipmentDescDeliveryPinHash is the schema descriptor for delivery_pin_hash field.
+	shipmentDescDeliveryPinHash := shipmentFields[12].Descriptor()
+	// shipment.DeliveryPinHashValidator is a validator for the "delivery_pin_hash" field. It is called by the builders before save.
+	shipment.DeliveryPinHashValidator = shipmentDescDeliveryPinHash.Validators[0].(func(string) error)
+	// shipmentDescCancellationReason is the schema descriptor for cancellation_reason field.
+	shipmentDescCancellationReason := shipmentFields[19].Descriptor()
+	// shipment.CancellationReasonValidator is a validator for the "cancellation_reason" field. It is called by the builders before save.
+	shipment.CancellationReasonValidator = shipmentDescCancellationReason.Validators[0].(func(string) error)
+	// shipmentDescUpdatedAt is the schema descriptor for updated_at field.
+	shipmentDescUpdatedAt := shipmentFields[21].Descriptor()
+	// shipment.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	shipment.DefaultUpdatedAt = shipmentDescUpdatedAt.Default.(func() time.Time)
+	// shipment.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	shipment.UpdateDefaultUpdatedAt = shipmentDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// shipmentDescID is the schema descriptor for id field.
+	shipmentDescID := shipmentMixinFields0[0].Descriptor()
+	// shipment.DefaultID holds the default value on creation for the id field.
+	shipment.DefaultID = shipmentDescID.Default.(func() uuid.UUID)
+	shipmentchargeMixin := schema.ShipmentCharge{}.Mixin()
+	shipmentchargeMixinFields0 := shipmentchargeMixin[0].Fields()
+	_ = shipmentchargeMixinFields0
+	shipmentchargeFields := schema.ShipmentCharge{}.Fields()
+	_ = shipmentchargeFields
+	// shipmentchargeDescCreatedAt is the schema descriptor for created_at field.
+	shipmentchargeDescCreatedAt := shipmentchargeMixinFields0[1].Descriptor()
+	// shipmentcharge.DefaultCreatedAt holds the default value on creation for the created_at field.
+	shipmentcharge.DefaultCreatedAt = shipmentchargeDescCreatedAt.Default.(func() time.Time)
+	// shipmentchargeDescKind is the schema descriptor for kind field.
+	shipmentchargeDescKind := shipmentchargeFields[1].Descriptor()
+	// shipmentcharge.KindValidator is a validator for the "kind" field. It is called by the builders before save.
+	shipmentcharge.KindValidator = shipmentchargeDescKind.Validators[0].(func(string) error)
+	// shipmentchargeDescFundingParty is the schema descriptor for funding_party field.
+	shipmentchargeDescFundingParty := shipmentchargeFields[2].Descriptor()
+	// shipmentcharge.DefaultFundingParty holds the default value on creation for the funding_party field.
+	shipmentcharge.DefaultFundingParty = shipmentchargeDescFundingParty.Default.(string)
+	// shipmentcharge.FundingPartyValidator is a validator for the "funding_party" field. It is called by the builders before save.
+	shipmentcharge.FundingPartyValidator = shipmentchargeDescFundingParty.Validators[0].(func(string) error)
+	// shipmentchargeDescCurrency is the schema descriptor for currency field.
+	shipmentchargeDescCurrency := shipmentchargeFields[4].Descriptor()
+	// shipmentcharge.CurrencyValidator is a validator for the "currency" field. It is called by the builders before save.
+	shipmentcharge.CurrencyValidator = func() func(string) error {
+		validators := shipmentchargeDescCurrency.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(currency string) error {
+			for _, fn := range fns {
+				if err := fn(currency); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// shipmentchargeDescReference is the schema descriptor for reference field.
+	shipmentchargeDescReference := shipmentchargeFields[5].Descriptor()
+	// shipmentcharge.ReferenceValidator is a validator for the "reference" field. It is called by the builders before save.
+	shipmentcharge.ReferenceValidator = shipmentchargeDescReference.Validators[0].(func(string) error)
+	// shipmentchargeDescID is the schema descriptor for id field.
+	shipmentchargeDescID := shipmentchargeMixinFields0[0].Descriptor()
+	// shipmentcharge.DefaultID holds the default value on creation for the id field.
+	shipmentcharge.DefaultID = shipmentchargeDescID.Default.(func() uuid.UUID)
+	shipmenteventMixin := schema.ShipmentEvent{}.Mixin()
+	shipmenteventMixinFields0 := shipmenteventMixin[0].Fields()
+	_ = shipmenteventMixinFields0
+	shipmenteventFields := schema.ShipmentEvent{}.Fields()
+	_ = shipmenteventFields
+	// shipmenteventDescCreatedAt is the schema descriptor for created_at field.
+	shipmenteventDescCreatedAt := shipmenteventMixinFields0[1].Descriptor()
+	// shipmentevent.DefaultCreatedAt holds the default value on creation for the created_at field.
+	shipmentevent.DefaultCreatedAt = shipmenteventDescCreatedAt.Default.(func() time.Time)
+	// shipmenteventDescProvider is the schema descriptor for provider field.
+	shipmenteventDescProvider := shipmenteventFields[1].Descriptor()
+	// shipmentevent.ProviderValidator is a validator for the "provider" field. It is called by the builders before save.
+	shipmentevent.ProviderValidator = shipmenteventDescProvider.Validators[0].(func(string) error)
+	// shipmenteventDescProviderEventID is the schema descriptor for provider_event_id field.
+	shipmenteventDescProviderEventID := shipmenteventFields[2].Descriptor()
+	// shipmentevent.ProviderEventIDValidator is a validator for the "provider_event_id" field. It is called by the builders before save.
+	shipmentevent.ProviderEventIDValidator = shipmenteventDescProviderEventID.Validators[0].(func(string) error)
+	// shipmenteventDescKind is the schema descriptor for kind field.
+	shipmenteventDescKind := shipmenteventFields[3].Descriptor()
+	// shipmentevent.KindValidator is a validator for the "kind" field. It is called by the builders before save.
+	shipmentevent.KindValidator = shipmenteventDescKind.Validators[0].(func(string) error)
+	// shipmenteventDescStatus is the schema descriptor for status field.
+	shipmenteventDescStatus := shipmenteventFields[4].Descriptor()
+	// shipmentevent.StatusValidator is a validator for the "status" field. It is called by the builders before save.
+	shipmentevent.StatusValidator = shipmenteventDescStatus.Validators[0].(func(string) error)
+	// shipmenteventDescSource is the schema descriptor for source field.
+	shipmenteventDescSource := shipmenteventFields[5].Descriptor()
+	// shipmentevent.DefaultSource holds the default value on creation for the source field.
+	shipmentevent.DefaultSource = shipmenteventDescSource.Default.(string)
+	// shipmentevent.SourceValidator is a validator for the "source" field. It is called by the builders before save.
+	shipmentevent.SourceValidator = shipmenteventDescSource.Validators[0].(func(string) error)
+	// shipmenteventDescReceivedAt is the schema descriptor for received_at field.
+	shipmenteventDescReceivedAt := shipmenteventFields[8].Descriptor()
+	// shipmentevent.DefaultReceivedAt holds the default value on creation for the received_at field.
+	shipmentevent.DefaultReceivedAt = shipmenteventDescReceivedAt.Default.(func() time.Time)
+	// shipmenteventDescID is the schema descriptor for id field.
+	shipmenteventDescID := shipmenteventMixinFields0[0].Descriptor()
+	// shipmentevent.DefaultID holds the default value on creation for the id field.
+	shipmentevent.DefaultID = shipmenteventDescID.Default.(func() uuid.UUID)
+	shipmentinsuranceMixin := schema.ShipmentInsurance{}.Mixin()
+	shipmentinsuranceMixinFields0 := shipmentinsuranceMixin[0].Fields()
+	_ = shipmentinsuranceMixinFields0
+	shipmentinsuranceFields := schema.ShipmentInsurance{}.Fields()
+	_ = shipmentinsuranceFields
+	// shipmentinsuranceDescCreatedAt is the schema descriptor for created_at field.
+	shipmentinsuranceDescCreatedAt := shipmentinsuranceMixinFields0[1].Descriptor()
+	// shipmentinsurance.DefaultCreatedAt holds the default value on creation for the created_at field.
+	shipmentinsurance.DefaultCreatedAt = shipmentinsuranceDescCreatedAt.Default.(func() time.Time)
+	// shipmentinsuranceDescProvider is the schema descriptor for provider field.
+	shipmentinsuranceDescProvider := shipmentinsuranceFields[1].Descriptor()
+	// shipmentinsurance.ProviderValidator is a validator for the "provider" field. It is called by the builders before save.
+	shipmentinsurance.ProviderValidator = shipmentinsuranceDescProvider.Validators[0].(func(string) error)
+	// shipmentinsuranceDescInsurer is the schema descriptor for insurer field.
+	shipmentinsuranceDescInsurer := shipmentinsuranceFields[2].Descriptor()
+	// shipmentinsurance.DefaultInsurer holds the default value on creation for the insurer field.
+	shipmentinsurance.DefaultInsurer = shipmentinsuranceDescInsurer.Default.(string)
+	// shipmentinsurance.InsurerValidator is a validator for the "insurer" field. It is called by the builders before save.
+	shipmentinsurance.InsurerValidator = shipmentinsuranceDescInsurer.Validators[0].(func(string) error)
+	// shipmentinsuranceDescPolicyReference is the schema descriptor for policy_reference field.
+	shipmentinsuranceDescPolicyReference := shipmentinsuranceFields[3].Descriptor()
+	// shipmentinsurance.PolicyReferenceValidator is a validator for the "policy_reference" field. It is called by the builders before save.
+	shipmentinsurance.PolicyReferenceValidator = shipmentinsuranceDescPolicyReference.Validators[0].(func(string) error)
+	// shipmentinsuranceDescCoverageAmountMinor is the schema descriptor for coverage_amount_minor field.
+	shipmentinsuranceDescCoverageAmountMinor := shipmentinsuranceFields[4].Descriptor()
+	// shipmentinsurance.CoverageAmountMinorValidator is a validator for the "coverage_amount_minor" field. It is called by the builders before save.
+	shipmentinsurance.CoverageAmountMinorValidator = shipmentinsuranceDescCoverageAmountMinor.Validators[0].(func(int64) error)
+	// shipmentinsuranceDescPremiumMinor is the schema descriptor for premium_minor field.
+	shipmentinsuranceDescPremiumMinor := shipmentinsuranceFields[5].Descriptor()
+	// shipmentinsurance.PremiumMinorValidator is a validator for the "premium_minor" field. It is called by the builders before save.
+	shipmentinsurance.PremiumMinorValidator = shipmentinsuranceDescPremiumMinor.Validators[0].(func(int64) error)
+	// shipmentinsuranceDescCurrency is the schema descriptor for currency field.
+	shipmentinsuranceDescCurrency := shipmentinsuranceFields[6].Descriptor()
+	// shipmentinsurance.CurrencyValidator is a validator for the "currency" field. It is called by the builders before save.
+	shipmentinsurance.CurrencyValidator = func() func(string) error {
+		validators := shipmentinsuranceDescCurrency.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(currency string) error {
+			for _, fn := range fns {
+				if err := fn(currency); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// shipmentinsuranceDescStatus is the schema descriptor for status field.
+	shipmentinsuranceDescStatus := shipmentinsuranceFields[7].Descriptor()
+	// shipmentinsurance.DefaultStatus holds the default value on creation for the status field.
+	shipmentinsurance.DefaultStatus = shipmentinsuranceDescStatus.Default.(string)
+	// shipmentinsurance.StatusValidator is a validator for the "status" field. It is called by the builders before save.
+	shipmentinsurance.StatusValidator = shipmentinsuranceDescStatus.Validators[0].(func(string) error)
+	// shipmentinsuranceDescUpdatedAt is the schema descriptor for updated_at field.
+	shipmentinsuranceDescUpdatedAt := shipmentinsuranceFields[10].Descriptor()
+	// shipmentinsurance.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	shipmentinsurance.DefaultUpdatedAt = shipmentinsuranceDescUpdatedAt.Default.(func() time.Time)
+	// shipmentinsurance.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	shipmentinsurance.UpdateDefaultUpdatedAt = shipmentinsuranceDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// shipmentinsuranceDescID is the schema descriptor for id field.
+	shipmentinsuranceDescID := shipmentinsuranceMixinFields0[0].Descriptor()
+	// shipmentinsurance.DefaultID holds the default value on creation for the id field.
+	shipmentinsurance.DefaultID = shipmentinsuranceDescID.Default.(func() uuid.UUID)
 	shippingcalculationMixin := schema.ShippingCalculation{}.Mixin()
 	shippingcalculationMixinFields0 := shippingcalculationMixin[0].Fields()
 	_ = shippingcalculationMixinFields0
