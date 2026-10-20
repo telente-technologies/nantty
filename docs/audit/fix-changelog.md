@@ -2,6 +2,20 @@
 
 Every code change made while fixing `docs/audit/frontend-backend-audit.md` is logged here with file, lines, audit ID, verification, and rollback notes. Investigations that concluded "no change needed" are logged too. Newest first.
 
+## 2026-10-20 — CI fixes: Ruff formatter and TypeScript raw-SQL gate
+
+**Audit:** Backend conventions and Python jobs on `68106d533`
+**Changes:**
+1. **Ruff formatter** — `services/python/intelligence/src/modules/child_safety/services/media_child_safety_scan_service.py`.
+   - `ruff format --check .` collapsed the wrapped `is_suspected_child_safety(...)` call back to its 120-character form. The file now passes both `ruff check` and `ruff format --check`.
+2. **TypeScript raw-SQL gate** — `services/typescript/social/tests/explore/whoToFollow.test.ts`.
+   - The test double declared unused `$queryRaw` and `$queryRawUnsafe` stubs. `check-no-raw-sql-in-typescript.sh` flags those names even in tests, and the test never exercises raw SQL, so the stubs were removed. `suggestAccountsToFollow` does not reference them.
+**Verified:**
+- `uv run ruff format --check .` → 591 files formatted; `uv run ruff check .` → clean; `uv run mypy src` → 506 files clean; `uv run pytest -q` → pass.
+- `bash services/scripts/check-no-raw-sql-in-typescript.sh` → clean.
+- `pnpm exec vitest run tests/explore/whoToFollow.test.ts` → 2 passed.
+**Rollback:** re-add the two mock methods and revert the formatter-only hunk; no runtime behavior changes.
+
 ## 2026-10-20 — CI fixes: Python conventions, ruff, and mypy
 
 **Audit:** Backend conventions gate after the first CI repair push

@@ -23,8 +23,6 @@ function buildContext(follows: readonly FollowRow[], blocks: readonly { blockerI
     block: { findMany: async () => blocks },
     like: { findMany: async () => [] },
     postLike: { findMany: async () => [] },
-    $queryRaw: async () => [],
-    $queryRawUnsafe: async () => [],
   };
   return {
     database: { client },

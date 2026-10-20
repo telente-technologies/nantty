@@ -127,9 +127,7 @@ class MediaChildSafetyScanService:
                     frame_labels, self.explicit_confidence
                 ):
                     faces = detect_faces(frame)
-                    if is_suspected_child_safety(
-                        frame_labels, faces, self.explicit_confidence, self.minor_age_ceiling
-                    ):
+                    if is_suspected_child_safety(frame_labels, faces, self.explicit_confidence, self.minor_age_ceiling):
                         return frame_labels, True, model.version
         except Exception:
             child_safety_logger.error("media_scan_label_detection_failed")
