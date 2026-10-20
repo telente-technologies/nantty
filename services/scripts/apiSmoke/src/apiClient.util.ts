@@ -53,7 +53,7 @@ export async function callApi<T = any>(method: string, path: string, options: Ap
   const started = performance.now();
   const response = await send(`${options.baseUrl ?? gatewayUrl}${path}`, method, headers, body);
   const text = response.text;
-  let parsed: unknown = text;
+  let parsed: unknown;
   try {
     parsed = text === "" ? null : JSON.parse(text);
   } catch {

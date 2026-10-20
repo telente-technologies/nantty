@@ -6,7 +6,7 @@ const fractionDigitsCache = new Map<string, number>();
 export function readMinorUnitDigitsForCurrency(currency: string): number {
   const cached = fractionDigitsCache.get(currency);
   if (cached !== undefined) return cached;
-  let digits = 2;
+  let digits: number;
   try {
     digits = new Intl.NumberFormat("en", { style: "currency", currency }).resolvedOptions().maximumFractionDigits ?? 2;
   } catch {

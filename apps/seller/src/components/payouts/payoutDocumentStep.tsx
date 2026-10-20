@@ -52,7 +52,9 @@ export function PayoutDocumentStep({ state, stepNumber, stepCount, onChanged }: 
     }
   }
 
-  if (state.accountStatus === "failed") return <Callout tone="caution" title="We couldn't reach our payment partner">We'll keep trying automatically. Your details are saved.</Callout>;
+  if (state.accountStatus === "failed") {
+    return <Callout tone="caution" title="We couldn't reach our payment partner">We'll keep trying automatically. Your details are saved.</Callout>;
+  }
   if (state.accountStatus !== "documentsRequired") {
     return (
       <div className={styles.center} role="status">
@@ -61,7 +63,13 @@ export function PayoutDocumentStep({ state, stepNumber, stepCount, onChanged }: 
       </div>
     );
   }
-  if (isChecking) return <div className={styles.center} role="status"><strong>Checking your documents…</strong></div>;
+  if (isChecking) {
+    return (
+      <div className={styles.center} role="status">
+        <strong>Checking your documents…</strong>
+      </div>
+    );
+  }
 
   const isUnfinished = state.documentStatus === "link_issued" && !isUnavailable;
   return (

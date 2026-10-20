@@ -63,7 +63,7 @@ export function useBrandedMediaDownload() {
         signal: controller.signal,
       });
       setActiveDownload({ mediaType: target.mediaType, progress: 1 });
-      let outcome: "savedToLibrary" | "sharedInstead" = "savedToLibrary";
+      let outcome: "savedToLibrary" | "sharedInstead";
       try {
         outcome = await saveOrShareReadyFile(ready.url, ready.fileName, target.mediaType);
       } catch {

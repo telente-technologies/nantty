@@ -43,8 +43,20 @@ export function PayoutOnboardingPanel() {
   }, [verification, refresh]);
 
   const state = query.data;
-  if (verification === "mock" || verification === "returned") return <p className={`${styles.notice} ${styles.noticeSuccess}`}>Thanks, we've got your documents. You can close this window and go back to Studio.</p>;
-  if (!state) return query.isError ? <ErrorState title="Payout setup didn't load" error={query.error} onRetry={() => void query.refetch()} /> : <Skeleton height={180} />;
+  if (verification === "mock" || verification === "returned") {
+    return (
+      <p className={`${styles.notice} ${styles.noticeSuccess}`}>
+        Thanks, we've got your documents. You can close this window and go back to Studio.
+      </p>
+    );
+  }
+  if (!state) {
+    return query.isError ? (
+      <ErrorState title="Payout setup didn't load" error={query.error} onRetry={() => void query.refetch()} />
+    ) : (
+      <Skeleton height={180} />
+    );
+  }
 
   const showStatus = state.status === "pending_review" || state.status === "verified" || (state.status === "action_needed" && !isEditing);
   if (showStatus) {

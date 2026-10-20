@@ -2,6 +2,21 @@
 
 Every code change made while fixing `docs/audit/frontend-backend-audit.md` is logged here with file, lines, audit ID, verification, and rollback notes. Investigations that concluded "no change needed" are logged too. Newest first.
 
+## 2026-10-20 — CodeQL cleanup: stream error propagation, ASI braces, dead initialisers
+
+**Audit:** CodeQL findings (gateway realtime proxy, payout panels, branded download hook, API smoke client, money formatters)
+**Changes:**
+1. **Realtime socket proxy uses `pipeline`** — `services/typescript/gateway/src/services/realtimeSocketProxy.service.ts`.
+   - Both directions now use `node:stream`'s `pipeline` instead of bare `pipe`, so a source error is forwarded to the destination and logged; the shared `forget()` still destroys both sockets and removes them from the open set.
+2. **Explicit blocks for single-line JSX returns** — `apps/studio/src/components/payouts/payoutOnboardingPanel.tsx`, `apps/seller/src/components/payouts/payoutDocumentStep.tsx`.
+   - The verification/error/checking returns now use braces, removing the ASI warnings around JSX returns.
+3. **Removed dead initialisers** — `apps/webapp/src/components/actions/brandedMediaDownload.hook.ts` (`outcome`), `services/scripts/apiSmoke/src/apiClient.util.ts` (`parsed`), `apps/ads/src/utils/money.util.ts` and `apps/admin/src/utils/formatting.util.ts` (`digits`).
+   - Every path already assigns before use; the declarations are now `let name: Type;`, so nothing is silently overwritten.
+**Verified:**
+- `pnpm --filter @zudomart/gateway --filter @zudomart/studio --filter @zudomart/seller --filter @zudomart/webapp --filter @zudomart/ads --filter @zudomart/admin --filter @zudomart/api-smoke exec tsc --noEmit` → clean.
+- `pnpm ... lint` → 0 errors (70 pre-existing webapp warnings).
+**Rollback:** revert the hunks independently; no runtime contract, schema, or migration changes.
+
 ## 2026-10-19 — Batch 2 follow-up: single-tx onboarding, in-tx level, locked affiliate rate, refund keys, story viewer
 
 **Audit:** ZM-016 (remaining), ZM-017 (affiliate rate lock), ZM-005 (refund key), ZM-014 (`available` display); UI requests (story viewer/tray, feed→Mart, quote entry point)

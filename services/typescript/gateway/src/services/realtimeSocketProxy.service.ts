@@ -1,5 +1,5 @@
 import { createServer, request as httpRequest, type IncomingHttpHeaders, type IncomingMessage, type Server } from "node:http";
-import type { Duplex } from "node:stream";
+import { pipeline, type Duplex } from "node:stream";
 
 import type { Logger } from "@zudojs/logger";
 
@@ -47,12 +47,20 @@ export function attachRealtimeSocketProxy(server: Server, upstreamUrl: string, l
         client.destroy();
         upstreamSocket.destroy();
       };
-      client.on("close", forget).on("error", forget);
-      upstreamSocket.on("close", forget).on("error", forget);
+      client.on("close", forget);
+      upstreamSocket.on("close", forget);
       client.write(switchingProtocolsHead(response));
       if (upstreamHead.length > 0) client.write(upstreamHead);
       if (head.length > 0) upstreamSocket.write(head);
-      upstreamSocket.pipe(client).pipe(upstreamSocket);
+      // pipeline (not bare pipe) forwards source errors to the destination and runs the callback on failure.
+      pipeline(upstreamSocket, client, (error) => {
+        if (error) logger.warn("realtime socket proxy upstream stream failed", { error: error.message });
+        forget();
+      });
+      pipeline(client, upstreamSocket, (error) => {
+        if (error) logger.warn("realtime socket proxy client stream failed", { error: error.message });
+        forget();
+      });
     });
     outgoing.on("response", (response) => {
       response.resume();
