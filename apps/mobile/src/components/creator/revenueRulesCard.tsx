@@ -1,12 +1,11 @@
 import { StyleSheet, View } from "react-native";
 
 import { Text } from "@/components/ui/text";
-import { makeThemedStyles, useTheme } from "@/theme";
+import { makeThemedStyles } from "@/theme";
 import type { CreatorRevenueRules } from "@/types/creator.type";
 import { BulletLine } from "@/components/ui/bulletLine";
 
 export function RevenueRulesCard({ rules }: { rules: CreatorRevenueRules }) {
-  const { colors } = useTheme();
   const styles = useStyles();
   const lines = [
     `Gifts from lives: you keep up to ${rules.giftCreatorSharePercentUpTo}%.`,

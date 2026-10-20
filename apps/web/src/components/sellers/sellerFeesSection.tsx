@@ -1,4 +1,4 @@
-import { contactEmailDisplayText, contactMailtoHref, siteConfig } from "@/lib/siteConfig.config";
+import { contactEmailDisplayText, contactMailtoHref } from "@/lib/siteConfig.config";
 
 import { FigmaIconTintedWithCurrentColor } from "../ui/figmaIcon";
 import styles from "./sellerFeesSection.module.css";

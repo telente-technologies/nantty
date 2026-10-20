@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-import { contactEmailDisplayText, contactMailtoHref, siteConfig } from "@/lib/siteConfig.config";
+import { contactEmailDisplayText, contactMailtoHref } from "@/lib/siteConfig.config";
 
 import { FigmaIconTintedWithCurrentColor } from "../ui/figmaIcon";
 import styles from "./frequentlyAskedQuestions.module.css";

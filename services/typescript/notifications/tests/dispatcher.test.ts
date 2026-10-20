@@ -1,7 +1,6 @@
 import { testOtpKey } from "./fixtures/eventFixtures.fixture.js";
 import { beforeEach, describe, expect, it } from "vitest";
 
-import { eventMappings } from "../src/modules/eventIngestion/mappings/eventMappingRegistry.js";
 import { HandleDomainEventHandler } from "../src/modules/eventIngestion/commands/handleDomainEvent/handleDomainEvent.handler.js";
 import { eventFixtures } from "./fixtures/eventFixtures.fixture.js";
 import { createTestHarness, makeEvent, silentLogger, type TestHarness } from "./fakes/testHarness.fake.js";

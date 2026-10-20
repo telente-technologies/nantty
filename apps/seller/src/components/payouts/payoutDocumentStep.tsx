@@ -53,7 +53,11 @@ export function PayoutDocumentStep({ state, stepNumber, stepCount, onChanged }: 
   }
 
   if (state.accountStatus === "failed") {
-    return <Callout tone="caution" title="We couldn't reach our payment partner">We'll keep trying automatically. Your details are saved.</Callout>;
+    return (
+      <Callout tone="caution" title="We couldn't reach our payment partner">
+        We'll keep trying automatically. Your details are saved.
+      </Callout>
+    );
   }
   if (state.accountStatus !== "documentsRequired") {
     return (

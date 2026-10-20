@@ -4,7 +4,7 @@ import { Pressable, StyleSheet } from "react-native";
 import { CoinAmountWithIcon } from "@/components/coins/coinAmount";
 import { Text } from "@/components/ui/text";
 import type { LiveGift } from "@/types";
-import { makeThemedStyles, useTheme } from "@/theme";
+import { makeThemedStyles } from "@/theme";
 
 import { LiveGiftArtwork } from "./liveGiftArtwork";
 
