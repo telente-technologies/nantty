@@ -10,7 +10,8 @@ from src.modules.content_scoring.dtos.content_score_dto import ContentScoreMessa
 class ContentScorePublisher(Protocol):
     delivers: bool
 
-    async def publish_content_score(self, message: ContentScoreMessage) -> None: ...
+    async def publish_content_score(self, message: ContentScoreMessage) -> None:
+        pass
 
 
 class NullContentScorePublisher:

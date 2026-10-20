@@ -18,11 +18,14 @@ MAXIMUM_FAILURE_BACKOFF_SECONDS = 30.0
 
 
 class SqsClientProtocol(Protocol):
-    def receive_message(self, **kwargs: Any) -> dict[str, Any]: ...
+    def receive_message(self, **kwargs: Any) -> dict[str, Any]:
+        pass
 
-    def delete_message(self, **kwargs: Any) -> dict[str, Any]: ...
+    def delete_message(self, **kwargs: Any) -> dict[str, Any]:
+        pass
 
-    def send_message(self, **kwargs: Any) -> dict[str, Any]: ...
+    def send_message(self, **kwargs: Any) -> dict[str, Any]:
+        pass
 
 
 def build_sqs_client(settings: IntelligenceSettings) -> SqsClientProtocol:

@@ -9,6 +9,8 @@ if TYPE_CHECKING:
 class IntelligenceModule(Protocol):
     module_id: str
 
-    def register_handlers(self, container: ApplicationContainer) -> None: ...
+    def register_handlers(self, container: ApplicationContainer) -> None:
+        pass
 
-    def build_router(self, container: ApplicationContainer) -> APIRouter: ...
+    def build_router(self, container: ApplicationContainer) -> APIRouter:
+        pass

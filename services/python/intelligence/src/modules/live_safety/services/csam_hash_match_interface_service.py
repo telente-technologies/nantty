@@ -11,7 +11,8 @@ from src.modules.live_safety.dtos.live_safety_dto import CsamHashMatch
 class CsamHashMatchProvider(Protocol):
     name: str
 
-    def match_frame(self, bucket: str, key: str) -> CsamHashMatch | None: ...
+    def match_frame(self, bucket: str, key: str) -> CsamHashMatch | None:
+        pass
 
 
 class DisabledCsamHashMatchProvider:

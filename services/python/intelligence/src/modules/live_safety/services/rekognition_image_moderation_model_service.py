@@ -11,15 +11,18 @@ REKOGNITION_MODEL_VERSION_PREFIX = "aws-rekognition-moderation"
 
 
 class RekognitionModerationClient(Protocol):
-    def detect_moderation_labels(self, **kwargs: Any) -> dict[str, Any]: ...
+    def detect_moderation_labels(self, **kwargs: Any) -> dict[str, Any]:
+        pass
 
-    def detect_faces(self, **kwargs: Any) -> dict[str, Any]: ...
+    def detect_faces(self, **kwargs: Any) -> dict[str, Any]:
+        pass
 
 
 class FrameLabelDetector(Protocol):
     version: str
 
-    def detect_frame_labels(self, bucket: str, key: str) -> list[DetectedModerationLabel]: ...
+    def detect_frame_labels(self, bucket: str, key: str) -> list[DetectedModerationLabel]:
+        pass
 
 
 def parse_s3_image_url(image_url: str | None) -> tuple[str, str] | None:

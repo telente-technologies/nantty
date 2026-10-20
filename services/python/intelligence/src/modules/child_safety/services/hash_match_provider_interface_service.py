@@ -21,9 +21,11 @@ class HashMatchProvider(Protocol):
     name: str
     enabled: bool
 
-    def match_image(self, data: bytes) -> HashMatch | None: ...
+    def match_image(self, data: bytes) -> HashMatch | None:
+        pass
 
-    def match_known_digest(self, sha256_hex: str) -> HashMatch | None: ...
+    def match_known_digest(self, sha256_hex: str) -> HashMatch | None:
+        pass
 
 
 class DisabledHashMatchProvider:

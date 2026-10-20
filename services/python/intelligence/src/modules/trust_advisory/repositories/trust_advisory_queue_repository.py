@@ -12,7 +12,8 @@ from src.modules.trust_advisory.dtos.suspension_suggestion_dto import Suspension
 class TrustAdvisoryPublisher(Protocol):
     delivers: bool
 
-    async def publish_suspension_suggestion(self, suggestion: SuspensionSuggestion) -> None: ...
+    async def publish_suspension_suggestion(self, suggestion: SuspensionSuggestion) -> None:
+        pass
 
 
 class NullTrustAdvisoryPublisher:

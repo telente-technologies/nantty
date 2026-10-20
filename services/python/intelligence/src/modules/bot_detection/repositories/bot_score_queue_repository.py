@@ -14,7 +14,8 @@ BOT_SCORE_MESSAGE_TYPE = "security.botScoreComputed"
 class BotScorePublisher(Protocol):
     delivers: bool
 
-    async def publish_bot_score(self, advisory: BotScoreAdvisory) -> None: ...
+    async def publish_bot_score(self, advisory: BotScoreAdvisory) -> None:
+        pass
 
 
 class NullBotScorePublisher:

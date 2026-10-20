@@ -10,7 +10,8 @@ from src.modules.live_safety.dtos.live_safety_dto import LiveSafetyScoreMessage
 class LiveSafetyScorePublisher(Protocol):
     delivers: bool
 
-    async def publish_live_safety_score(self, message: LiveSafetyScoreMessage) -> None: ...
+    async def publish_live_safety_score(self, message: LiveSafetyScoreMessage) -> None:
+        pass
 
 
 class NullLiveSafetyScorePublisher:

@@ -11,6 +11,8 @@ class ChromaprintFingerprint:
 
 class AudioFingerprintSource(Protocol):
     @property
-    def source_name(self) -> str: ...
+    def source_name(self) -> str:
+        pass
 
-    async def fetch_chromaprint(self, media_id: str) -> ChromaprintFingerprint | None: ...
+    async def fetch_chromaprint(self, media_id: str) -> ChromaprintFingerprint | None:
+        pass

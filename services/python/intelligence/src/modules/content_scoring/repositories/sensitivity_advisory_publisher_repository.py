@@ -10,7 +10,8 @@ from src.modules.content_scoring.dtos.sensitivity_advisory_dto import Sensitivit
 class SensitivityAdvisoryPublisher(Protocol):
     delivers: bool
 
-    async def publish_sensitivity_advisory(self, event: SensitivityAdvisedEvent) -> None: ...
+    async def publish_sensitivity_advisory(self, event: SensitivityAdvisedEvent) -> None:
+        pass
 
 
 class NullSensitivityAdvisoryPublisher:

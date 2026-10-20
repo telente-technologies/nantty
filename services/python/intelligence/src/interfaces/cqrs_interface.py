@@ -14,11 +14,13 @@ class CommandHandler[CommandType: Command, ResultType](ABC):
     command_type: ClassVar[str]
 
     @abstractmethod
-    async def execute(self, command: CommandType) -> ResultType: ...
+    async def execute(self, command: CommandType) -> ResultType:
+        pass
 
 
 class QueryHandler[QueryType: Query, ResultType](ABC):
     query_type: ClassVar[str]
 
     @abstractmethod
-    async def execute(self, query: QueryType) -> ResultType: ...
+    async def execute(self, query: QueryType) -> ResultType:
+        pass

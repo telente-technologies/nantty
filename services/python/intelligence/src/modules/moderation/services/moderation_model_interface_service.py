@@ -6,7 +6,8 @@ from src.modules.moderation.dtos.content_moderation_dto import ModerationCategor
 class ModerationModel(Protocol):
     version: str
 
-    def classify(self, text: str, content_type: ModerationContentType) -> dict[ModerationCategory, float]: ...
+    def classify(self, text: str, content_type: ModerationContentType) -> dict[ModerationCategory, float]:
+        pass
 
 
 class ModerationModelHolder:

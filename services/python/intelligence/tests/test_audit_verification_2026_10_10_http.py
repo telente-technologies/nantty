@@ -96,7 +96,7 @@ async def test_previously_unbounded_endpoints_now_have_a_deadline() -> None:
     ]
     for call in calls:
         with pytest.raises(HTTPException) as raised:
-            await call
+            await asyncio.gather(call)
         assert raised.value.status_code == 503
 
 

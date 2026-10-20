@@ -2,6 +2,21 @@
 
 Every code change made while fixing `docs/audit/frontend-backend-audit.md` is logged here with file, lines, audit ID, verification, and rollback notes. Investigations that concluded "no change needed" are logged too. Newest first.
 
+## 2026-10-20 — CodeQL cleanup round 3: no-effect protocol stubs and bare awaits
+
+**Audit:** CodeQL "Statement has no effect" (37 findings)
+**Changes:**
+1. **Protocol and ABC stubs** — 16 files under `services/python/intelligence/src`.
+   - Replaced ellipsis (`...`) bodies with `pass` in `Protocol` methods, `@abstractmethod` methods, and the property stub. CodeQL flags a bare `...` expression as effect-free; `pass` is the explicit no-op form and keeps the stubs type-checkable.
+   - Files: `interfaces/{audio_fingerprint_source,cqrs,feature_backend,intelligence_module}_interface.py`; `modules/{bot_detection,content_scoring,domain_events,live_safety,trust_advisory}/repositories/*queue_repository.py` and `*publisher*_repository.py`; `modules/{child_safety,content_scoring,live_safety,moderation}/services/*_interface_service.py` and `*_model_service.py`; `modules/live_safety/services/{csam_hash_match_interface,rekognition_image_moderation_model,transcribe_batch_transcription}_service.py`.
+2. **Two bare `await` expressions** — `src/loaders/lifespan_loader.py`, `tests/test_audit_verification_2026_10_10_http.py`.
+   - CodeQL treats `await some_expression` as an effect-free statement. Wrapping the awaited task/coroutine in `asyncio.gather(...)` preserves cancellation and exception propagation while making the expression a call with an observable result.
+**Verified:**
+- `uv run ruff format --check .` → 591 files formatted; `uv run ruff check .` → clean.
+- `uv run mypy src` → 506 files clean; `uv run pytest -q` → pass.
+- No `...` function bodies remain under `src` or `tests`.
+**Rollback:** replace `pass` with `...` and the two `asyncio.gather(...)` wrappers with bare awaits. No runtime behavior changes.
+
 ## 2026-10-20 — CI fixes: Ruff formatter and TypeScript raw-SQL gate
 
 **Audit:** Backend conventions and Python jobs on `68106d533`

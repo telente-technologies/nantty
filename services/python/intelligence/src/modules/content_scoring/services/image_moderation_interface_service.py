@@ -17,7 +17,8 @@ IMAGE_REVIEW_SCORE_THRESHOLD = 0.5
 class ImageModerationModel(Protocol):
     version: str
 
-    def classify_image(self, request: ImageModerationRequest) -> dict[str, float]: ...
+    def classify_image(self, request: ImageModerationRequest) -> dict[str, float]:
+        pass
 
 
 class NoSignalImageModerationModel:

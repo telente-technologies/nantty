@@ -9,17 +9,21 @@ SAFE_JOB_NAME = re.compile(r"[^0-9A-Za-z._-]")
 
 
 class TranscribeClient(Protocol):
-    def start_transcription_job(self, **kwargs: Any) -> dict[str, Any]: ...
+    def start_transcription_job(self, **kwargs: Any) -> dict[str, Any]:
+        pass
 
-    def get_transcription_job(self, **kwargs: Any) -> dict[str, Any]: ...
+    def get_transcription_job(self, **kwargs: Any) -> dict[str, Any]:
+        pass
 
 
 class ObjectReader(Protocol):
-    def get_object(self, **kwargs: Any) -> dict[str, Any]: ...
+    def get_object(self, **kwargs: Any) -> dict[str, Any]:
+        pass
 
 
 class SegmentTranscriber(Protocol):
-    async def transcribe_segment(self, segment_id: str, bucket: str, key: str) -> str: ...
+    async def transcribe_segment(self, segment_id: str, bucket: str, key: str) -> str:
+        pass
 
 
 class DisabledSegmentTranscriber:
