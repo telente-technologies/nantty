@@ -9,8 +9,8 @@ import (
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 
-	confirmorderreceipt "zudomart/modules/orders/src/modules/orders/commands/confirmOrderReceipt"
 	"zudomart/modules/orders/src/generated/ent/outboxevent"
+	confirmorderreceipt "zudomart/modules/orders/src/modules/orders/commands/confirmOrderReceipt"
 	"zudomart/modules/orders/src/services"
 )
 

@@ -68,8 +68,14 @@ func TestConcurrentPaidAndCancelEventsNeverLeaveAPendingSale(t *testing.T) {
 		orderId := uuid.NewString()
 		paid := scene.paid(orderId, scene.buyer, scene.item(orderId+":1", scene.productId, "link", scene.linkId, time.Now()))
 		done := make(chan error, 2)
-		go func() { _, err := scene.module.Affiliates.RecordAwaitingAttributedSales(context.Background(), paid.Sale()); done <- err }()
-		go func() { _, err := scene.module.Affiliates.VoidAwaitingAttributedSales(context.Background(), orderId, "cancelled"); done <- err }()
+		go func() {
+			_, err := scene.module.Affiliates.RecordAwaitingAttributedSales(context.Background(), paid.Sale())
+			done <- err
+		}()
+		go func() {
+			_, err := scene.module.Affiliates.VoidAwaitingAttributedSales(context.Background(), orderId, "cancelled")
+			done <- err
+		}()
 		for range 2 {
 			if err := <-done; err != nil {
 				t.Fatal(err)

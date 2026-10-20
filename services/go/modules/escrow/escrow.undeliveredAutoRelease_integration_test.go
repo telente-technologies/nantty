@@ -72,7 +72,7 @@ func TestAnUndeliveredEscrowGoesToStaffReviewAndIsNeverAutoReleasedOrAutoRefunde
 		}
 	}
 	var underReview int
-	_ = harness.Database.QueryRow(`SELECT count(*) FROM "`+harness.escrow.Application.Container.Settings.Money.DatabaseSchema+`".outbox_events WHERE event_type = 'escrow.underReview'`).Scan(&underReview)
+	_ = harness.Database.QueryRow(`SELECT count(*) FROM "` + harness.escrow.Application.Container.Settings.Money.DatabaseSchema + `".outbox_events WHERE event_type = 'escrow.underReview'`).Scan(&underReview)
 	if underReview != 3 {
 		t.Fatal("buyer and seller are told the order is under review")
 	}

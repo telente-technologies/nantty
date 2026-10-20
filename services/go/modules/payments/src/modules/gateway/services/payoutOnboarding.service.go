@@ -158,6 +158,7 @@ func (gateway *PaymentGateway) SavePayoutOnboardingBank(ctx context.Context, use
 		return err
 	}
 	bank := interfaces.PayeeBankAccount{UserId: userId, AccountName: accountName, BankCode: input.BankCode, AccountNumber: input.AccountNumber, Currency: "NGN"}
+	linked := false
 	err = databases.RunInMoneyTransaction(ctx, gateway.Container.Resources.Database, func(ctx context.Context, transaction *sql.Tx) error {
 		client := gateway.Container.Client(transaction)
 		onboarding, err := client.PayoutOnboarding.Query().Where(payoutonboarding.UserID(userId)).ForUpdate().Only(ctx)
@@ -174,12 +175,13 @@ func (gateway *PaymentGateway) SavePayoutOnboardingBank(ctx context.Context, use
 		if err != nil {
 			return err
 		}
-		linked, err := gateway.claimSettlementAccountInTransaction(ctx, transaction, account, bank)
-		if err != nil {
-			return err
+		var claimErr error
+		linked, claimErr = gateway.claimSettlementAccountInTransaction(ctx, transaction, account, bank)
+		if claimErr != nil {
+			return claimErr
 		}
 		if linked {
-			return ErrBankAccountAlreadyLinked
+			return nil
 		}
 		return gateway.applyOnboardingStep(ctx, transaction, onboarding, "bank", &bank, func(update *ent.PayoutOnboardingUpdateOne) {
 			update.SetBankCode(input.BankCode).SetBankName(input.BankName).SetAccountLast4(lastFour(input.AccountNumber)).SetResolvedAccountName(accountName)
@@ -187,6 +189,9 @@ func (gateway *PaymentGateway) SavePayoutOnboardingBank(ctx context.Context, use
 	})
 	if err != nil {
 		return err
+	}
+	if linked {
+		return ErrBankAccountAlreadyLinked
 	}
 	if _, err := gateway.StartBankAccountValidation(ctx, userId); err != nil {
 		gateway.Container.Resources.Logger.WarnContext(ctx, "bank account validation did not start", "userId", userId, "error", err)

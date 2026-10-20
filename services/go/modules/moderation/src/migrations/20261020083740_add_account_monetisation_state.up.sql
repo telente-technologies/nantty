@@ -1,0 +1,2 @@
+-- create "account_monetisation_states" table
+CREATE TABLE "account_monetisation_states" ("id" uuid NOT NULL, "last_can_monetise" boolean NOT NULL DEFAULT true, "last_published_at" timestamptz NULL, "override_mode" character varying NULL, "override_reason" character varying NOT NULL DEFAULT '', "override_actor_id" character varying NOT NULL DEFAULT '', "override_actor_name" character varying NOT NULL DEFAULT '', "override_active_strike_count" bigint NOT NULL DEFAULT 0, "override_set_at" timestamptz NULL, "updated_at" timestamptz NOT NULL, PRIMARY KEY ("id"));

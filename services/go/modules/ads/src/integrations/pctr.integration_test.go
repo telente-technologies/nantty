@@ -13,7 +13,7 @@ import (
 
 func request() types.PctrRequest {
 	return types.PctrRequest{
-		Viewer: types.Viewer{UserId: "viewer-1", Country: "NG", AgeBand: "25-34"}, Placement: "feed", SlotKind: "feedPost",
+		Viewer: types.Viewer{UserId: "viewer-1", Country: "NG", AgeBand: "25-34", PersonalizedAds: true}, Placement: "feed", SlotKind: "feedPost",
 		Candidates: []types.PctrCandidate{{AdId: "ad-1", CampaignId: "c-1", AccountId: "a-1", Format: "clip", BidType: "cpc", BidMinor: 500, DailyBudgetMinor: 100_000, Currency: "NGN", Placements: []string{"clips"}, HistoricalImpressions: 2000, HistoricalClicks: 100}},
 	}
 }
