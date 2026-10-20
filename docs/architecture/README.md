@@ -31,6 +31,7 @@ The topic documents below go deeper. Most were written as design notes on 2026-1
 | [database.md](database.md) | Domain ERDs, schema ownership matrix, DB reliability | Dated (2026-10-03) |
 | [frontend.md](frontend.md) | Front-end apps, BFF pattern, data layer | Dated (2026-10-03); mode switching is in [runningLocally.md](../runningLocally.md) |
 | [marketplace.md](marketplace.md) | Catalog, inventory, carts by seller, checkout, orders, shipping | Dated (2026-10-03) |
+| [logisticsV2.md](logisticsV2.md) | V2 logistics: provider quotes, Chowdeck Relay first, delivery cost allocation, insurance, redelivery | Planned (2026-10-20); seller delivery remains current |
 | [media.md](media.md) | Uploads, processing, storage and delivery | Dated (2026-10-03) |
 | [search.md](search.md) | Postgres search now, OpenSearch only on a trigger | Dated (2026-10-03, with a 2026-10-04 MVP section) |
 | [recommendations.md](recommendations.md) | Ranking and personalisation; Python scores, deterministic fallbacks | Dated (2026-10-04) |

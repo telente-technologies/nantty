@@ -57,7 +57,7 @@ There is **no ZudoMart logistics network in the MVP**. Sellers ship; the platfor
 | Buyer messages | The messages above come from the server as codes plus text; clients localize by code |
 | Addresses and geo | Owned by go-identity; go-commerce reads through read-only grants or API. Mobile address lacks `countryCode`, `postalCode`, normalized region ids (backendPlan mismatch 8) |
 | Currency | All amounts `{amountMinor, currency}` in store currency; order stores a locked exchange rate when buyer currency differs |
-| Later (OPTIONAL FUTURE) | Carrier integrations (DHL, UPS, local couriers) behind `ShippingMethod`; ZudoMart logistics only with a stated volume trigger |
+| Later (OPTIONAL FUTURE) | Carrier integrations (DHL, UPS, local couriers) behind `ShippingMethod`; ZudoMart logistics only with a stated volume trigger. See [logisticsV2.md](logisticsV2.md) for the planned provider-delivery design (Chowdeck Relay first). |
 
 ### 3.1 Data model (PROPOSED)
 

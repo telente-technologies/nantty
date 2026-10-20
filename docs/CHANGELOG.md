@@ -3,6 +3,19 @@
 All notable changes to Zudomart are documented here. Format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [Unreleased] — 2026-10-20
+
+### Docs — logistics v2
+
+- Added [architecture/logisticsV2.md](architecture/logisticsV2.md): the planned
+  V2 provider-delivery design, with Chowdeck Relay as the first adapter. It
+  records the seller-managed V1 flow, live quotes, route filtering, checkout
+  booking gates, delivery cost allocation, free-delivery and subsidy rules,
+  parcel weight/dimensions, insurance, failed delivery/redelivery and the
+  provider wallet float. No provider integration is implemented.
+- Linked the plan from the architecture and documentation indexes and from the
+  marketplace shipping notes.
+
 ## [Unreleased] — 2026-10-11
 
 ### Payments — Flutterwave only
