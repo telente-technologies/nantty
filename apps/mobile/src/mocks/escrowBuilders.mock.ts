@@ -63,6 +63,8 @@ export function buildOrderFromRecord(record: MockOrderRecord): Order {
     store: summariseStore(findDirectoryStoreById(record.storeId)),
     createdAt: record.placedAt,
     escrowReleaseAt: expectedReleaseAtForRecord(record),
+    shipment: record.shipment,
+    delivery: record.delivery,
   };
 }
 

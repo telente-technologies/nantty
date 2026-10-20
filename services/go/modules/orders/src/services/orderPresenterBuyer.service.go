@@ -1,6 +1,8 @@
 package services
 
 import (
+	"time"
+
 	"zudomart/modules/orders/src/generated/ent"
 	"zudomart/modules/orders/src/types"
 	"zudomart/platform/commerceports"
@@ -33,5 +35,16 @@ func buyerOrderView(group *ent.OrderGroup, items []*ent.OrderItem, store commerc
 	if group.ShippedAt != nil && group.CourierName != nil && group.TrackingNumber != nil {
 		view.Shipment = &types.ShipmentView{CourierName: *group.CourierName, TrackingNumber: *group.TrackingNumber, TrackingUrl: group.TrackingURL, ShippedAt: *group.ShippedAt, EstimatedDeliveryAt: group.EstimatedDeliveryAt}
 	}
+	view.Delivery = buyerDeliveryView(group.DeliveryStatus, group.RiderName, group.RiderPhone, group.EstimatedDeliveryAt, group.DeliveryAttempts, group.LastAttemptNote)
 	return view
+}
+
+func buyerDeliveryView(status string, riderName, riderPhone *string, estimatedDeliveryAt *time.Time, attempts int, lastAttemptNote *string) *types.DeliveryView {
+	if status == "pending" && riderName == nil && riderPhone == nil && estimatedDeliveryAt == nil && attempts == 0 && lastAttemptNote == nil {
+		return nil
+	}
+	return &types.DeliveryView{
+		Status: status, RiderName: riderName, RiderPhone: riderPhone, EstimatedDeliveryAt: estimatedDeliveryAt,
+		Attempts: attempts, LastAttemptNote: lastAttemptNote,
+	}
 }

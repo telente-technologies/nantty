@@ -123,6 +123,14 @@ export const sellerMocks: MockRoute[] = [
     const { courier, trackingNumber } = body as { courier?: string; trackingNumber?: string };
     if (!courier?.trim() || !trackingNumber?.trim()) throw new ApiError(422, "Add the courier and tracking number");
     record.shipment = buildShipment(courier.trim(), trackingNumber.trim().toUpperCase(), new Date().toISOString());
+    record.delivery = {
+      status: "in_transit",
+      riderName: record.delivery?.riderName ?? null,
+      riderPhone: record.delivery?.riderPhone ?? null,
+      estimatedDeliveryAt: record.shipment.estimatedDeliveryAt,
+      attempts: record.delivery?.attempts ?? 0,
+      lastAttemptNote: record.delivery?.lastAttemptNote ?? null,
+    };
     record.status = "shipped";
     return buildOrderFromRecord(record);
   }),

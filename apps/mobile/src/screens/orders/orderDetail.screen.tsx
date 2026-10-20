@@ -8,6 +8,7 @@ import { ESCROW_STAGE_APPEARANCE, formatFriendlyDate } from "@/components/escrow
 import { StatusPill } from "@/components/escrow/statusPill";
 import { CaretRight24Icon, Shield24Icon } from "@/components/icons";
 import { CartItemSummary } from "@/components/order/cartItemSummary";
+import { DELIVERY_STATUS_APPEARANCE } from "@/components/order/deliveryStatus.util";
 import { RatePurchaseCard } from "@/components/reviews/ratePurchaseCard";
 import { Button } from "@/components/ui/button";
 import { Header } from "@/components/ui/header";
@@ -81,6 +82,47 @@ export function OrderDetailScreen({ navigation, route }: MainScreenProps<"OrderD
           <CaretRight24Icon />
         </Pressable>
 
+        {detail.delivery ? (
+          <View style={styles.card}>
+            <View style={styles.row}>
+              <Text size={14} weight={600} lineHeight={16.8}>Delivery</Text>
+              <StatusPill label={DELIVERY_STATUS_APPEARANCE[detail.delivery.status].label} tone={DELIVERY_STATUS_APPEARANCE[detail.delivery.status].tone} />
+            </View>
+            {detail.shipment?.courierName ? (
+              <View style={styles.row}>
+                <Text size={12} lineHeight={16.8} color={colors.textMuted}>Courier</Text>
+                <Text size={12} lineHeight={16.8} style={styles.deliveryValue}>{detail.shipment.courierName}</Text>
+              </View>
+            ) : null}
+            {detail.shipment?.trackingNumber ? (
+              <View style={styles.row}>
+                <Text size={12} lineHeight={16.8} color={colors.textMuted}>Tracking</Text>
+                <Text size={12} lineHeight={16.8} style={styles.deliveryValue}>{detail.shipment.trackingNumber}</Text>
+              </View>
+            ) : null}
+            {detail.delivery.riderName || detail.delivery.riderPhone ? (
+              <View style={styles.row}>
+                <Text size={12} lineHeight={16.8} color={colors.textMuted}>Rider</Text>
+                <Text size={12} lineHeight={16.8} style={styles.deliveryValue}>{[detail.delivery.riderName, detail.delivery.riderPhone].filter(Boolean).join(" · ")}</Text>
+              </View>
+            ) : null}
+            {detail.delivery.estimatedDeliveryAt ? (
+              <View style={styles.row}>
+                <Text size={12} lineHeight={16.8} color={colors.textMuted}>Estimated delivery</Text>
+                <Text size={12} lineHeight={16.8} style={styles.deliveryValue}>{formatFriendlyDate(detail.delivery.estimatedDeliveryAt)}</Text>
+              </View>
+            ) : null}
+            {detail.delivery.attempts > 0 ? (
+              <View style={styles.row}>
+                <Text size={12} lineHeight={16.8} color={colors.textMuted}>Delivery attempts</Text>
+                <Text size={12} lineHeight={16.8} style={styles.deliveryValue}>{detail.delivery.attempts}</Text>
+              </View>
+            ) : null}
+            {detail.delivery.lastAttemptNote ? <Text size={12} lineHeight={16.8} color={colors.textMuted}>Last attempt: {detail.delivery.lastAttemptNote}</Text> : null}
+            {detail.delivery.status === "failed" ? <Text size={12} lineHeight={16.8} color={colors.textMuted}>The seller will try again. Contact them if your address or phone number has changed.</Text> : null}
+          </View>
+        ) : null}
+
         <View style={styles.card}>
           <Pressable accessibilityRole="button" onPress={() => navigation.navigate("Store", { storeId: detail.store.id })} style={styles.row}>
             <Text size={14} weight={600} lineHeight={16.8}>{detail.store.name}</Text>
@@ -134,6 +176,7 @@ const useStyles = makeThemedStyles((colors) => StyleSheet.create({
   escrowCard: { backgroundColor: colors.surface, borderRadius: 12, padding: 12, flexDirection: "row", alignItems: "center", gap: 12 },
   card: { backgroundColor: colors.surface, borderRadius: 12, padding: 16, gap: 12 },
   row: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 8 },
+  deliveryValue: { flexShrink: 1, textAlign: "right" },
   divider: { height: 1, backgroundColor: colors.background },
   footer: { paddingHorizontal: 16, paddingTop: 8, paddingBottom: 24, gap: 12 },
   footerRow: { flexDirection: "row", gap: 12 },

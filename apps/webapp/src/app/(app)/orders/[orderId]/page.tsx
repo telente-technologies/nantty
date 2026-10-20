@@ -18,7 +18,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { formatTimeSincePosted } from "@/utils/formatDate.util";
 import { formatMoneyForDisplay } from "@/utils/formatMoney.util";
 import { isOrderReviewable } from "@/utils/productReviews.util";
-import type { OrderStatus } from "@/types";
+import type { DeliveryStatus, OrderStatus } from "@/types";
 
 import styles from "./page.module.css";
 import { DetailSkeleton } from "@/components/ui/pageSkeletons";
@@ -31,6 +31,17 @@ const statusTone: Record<OrderStatus, "neutral" | "brand" | "success" | "warning
   completed: "success",
   cancelled: "error",
   disputed: "error",
+};
+
+const deliveryStatusPresentation: Record<DeliveryStatus, { readonly label: string; readonly tone: "neutral" | "brand" | "success" | "warning" | "error" }> = {
+  pending: { label: "Pending", tone: "neutral" },
+  preparing: { label: "Preparing", tone: "brand" },
+  ready_for_pickup: { label: "Ready to ship", tone: "brand" },
+  in_transit: { label: "On the way", tone: "brand" },
+  delivered: { label: "Delivered", tone: "success" },
+  failed: { label: "Delivery attempt failed", tone: "error" },
+  cancelled: { label: "Cancelled", tone: "neutral" },
+  returned: { label: "Returned", tone: "warning" },
 };
 
 const buyerCancellableStatuses = new Set(["pending", "new"]);
@@ -192,6 +203,52 @@ export default function OrderDetailPage({ params }: { readonly params: Promise<{
         {order.escrowReleaseAt && !isDirect ? <p className={styles.escrowNote}>Escrow releases to the seller on {new Date(order.escrowReleaseAt).toLocaleDateString()}.</p> : null}
         {order.escrowReleaseAt && isDirect && order.status === "delivered" ? <p className={styles.escrowNote}>This order completes automatically on {new Date(order.escrowReleaseAt).toLocaleDateString()} unless you ask for a return or refund.</p> : null}
       </section>
+
+      {order.delivery ? (
+        <section className={styles.panel} aria-labelledby="delivery-title">
+          <div className={styles.deliveryHeader}>
+            <h2 className={styles.panelTitle} id="delivery-title">Delivery</h2>
+            <Badge tone={deliveryStatusPresentation[order.delivery.status].tone}>{deliveryStatusPresentation[order.delivery.status].label}</Badge>
+          </div>
+          <dl className={styles.deliveryFacts}>
+            {order.shipment?.courierName ? (
+              <div className={styles.deliveryFact}>
+                <dt>Courier</dt>
+                <dd>{order.shipment.courierName}</dd>
+              </div>
+            ) : null}
+            {order.shipment?.trackingNumber ? (
+              <div className={styles.deliveryFact}>
+                <dt>Tracking</dt>
+                <dd>{order.shipment.trackingUrl ? <a href={order.shipment.trackingUrl} target="_blank" rel="noopener noreferrer">{order.shipment.trackingNumber}</a> : order.shipment.trackingNumber}</dd>
+              </div>
+            ) : null}
+            {order.delivery.riderName || order.delivery.riderPhone ? (
+              <div className={styles.deliveryFact}>
+                <dt>Rider</dt>
+                <dd>
+                  {order.delivery.riderName ?? "Assigned"}
+                  {order.delivery.riderPhone ? <> · <a href={`tel:${order.delivery.riderPhone}`}>{order.delivery.riderPhone}</a></> : null}
+                </dd>
+              </div>
+            ) : null}
+            {order.delivery.estimatedDeliveryAt ? (
+              <div className={styles.deliveryFact}>
+                <dt>Estimated delivery</dt>
+                <dd>{new Date(order.delivery.estimatedDeliveryAt).toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short" })}</dd>
+              </div>
+            ) : null}
+            {order.delivery.attempts > 0 ? (
+              <div className={styles.deliveryFact}>
+                <dt>Delivery attempts</dt>
+                <dd>{order.delivery.attempts}</dd>
+              </div>
+            ) : null}
+          </dl>
+          {order.delivery.lastAttemptNote ? <p className={styles.deliveryNote}>Last attempt: {order.delivery.lastAttemptNote}</p> : null}
+          {order.delivery.status === "failed" ? <p className={styles.deliveryNote}>The seller will try again. Contact them if your address or phone number has changed.</p> : null}
+        </section>
+      ) : null}
 
       <section className={styles.panel}>
         <h2 className={styles.panelTitle}>Items</h2>

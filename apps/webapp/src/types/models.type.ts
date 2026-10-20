@@ -376,7 +376,7 @@ export interface AuthSession {
   readonly notice?: string | null;
 }
 
-export type { CartItem, Cart, OrderStatus, PaymentMode, Order, Address, WalletSummary, WalletLine, WalletVerification, WalletTransaction, PayoutAccount, SellerDashboard } from "./orders.type";
+export type { CartItem, Cart, OrderStatus, DeliveryStatus, DeliveryDetails, PaymentMode, Order, Address, WalletSummary, WalletLine, WalletVerification, WalletTransaction, PayoutAccount, SellerDashboard } from "./orders.type";
 
 export interface StoreCreditBalance {
   readonly storeId: ID;

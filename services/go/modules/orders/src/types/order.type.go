@@ -44,6 +44,7 @@ type OrderView struct {
 	CreatedAt        time.Time        `json:"createdAt"`
 	EscrowReleaseAt  *time.Time       `json:"escrowReleaseAt"`
 	Shipment         *ShipmentView    `json:"shipment"`
+	Delivery         *DeliveryView    `json:"delivery"`
 	DeliveredAt      *time.Time       `json:"deliveredAt"`
 }
 
@@ -53,6 +54,15 @@ type ShipmentView struct {
 	TrackingUrl         *string    `json:"trackingUrl"`
 	ShippedAt           time.Time  `json:"shippedAt"`
 	EstimatedDeliveryAt *time.Time `json:"estimatedDeliveryAt"`
+}
+
+type DeliveryView struct {
+	Status              string     `json:"status"`
+	RiderName           *string    `json:"riderName"`
+	RiderPhone          *string    `json:"riderPhone"`
+	EstimatedDeliveryAt *time.Time `json:"estimatedDeliveryAt"`
+	Attempts            int        `json:"attempts"`
+	LastAttemptNote     *string    `json:"lastAttemptNote"`
 }
 
 type CheckoutResultView struct {

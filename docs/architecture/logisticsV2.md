@@ -82,8 +82,12 @@ Before the checkout selector can be built:
   attempt, shipment event, shipment charge, shipment insurance and delivery
   claim.
 - Provider-neutral `logistics.Provider` interface and disabled registry.
-  `LOGISTICS_ENABLED` defaults to `false`; nothing mounts a route or changes
-  checkout.
+  `LOGISTICS_ENABLED` defaults to `false`; nothing mounts a provider route or
+  changes checkout.
+- Buyer order detail on web and mobile shows the seller-managed delivery
+  status, rider name and phone, ETA, attempt count and last-attempt note, plus
+  courier/tracking once shipped. This is the V1 seller-managed flow; no
+  provider delivery UI is live.
 
 ## 3. Checkout and booking flow
 

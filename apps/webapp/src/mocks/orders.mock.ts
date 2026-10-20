@@ -41,6 +41,7 @@ const createOrderRecordsFromCart = (): MockOrderRecord[] => {
       placedAt: now,
       paidAt: null,
       shipment: null,
+      delivery: null,
       deliveredAt: null,
       buyerConfirmedAt: null,
       releasedAt: null,
@@ -59,6 +60,7 @@ const markCheckoutGroupAsPaid = (orderId: string) => {
     .forEach((candidate) => {
       candidate.status = "paid";
       candidate.paidAt = paidAt;
+      candidate.delivery = { status: "preparing", riderName: null, riderPhone: null, estimatedDeliveryAt: null, attempts: 0, lastAttemptNote: null };
       candidate.lines.forEach((orderLine) => reduceCatalogStock(`pr_${orderLine.productKey}`, orderLine.quantity));
     });
 };
@@ -92,6 +94,9 @@ export const ordersMocks: MockRoute[] = [
     record.buyerConfirmedAt = now;
     record.releasedAt = now;
     record.status = "completed";
+    record.delivery = record.delivery
+      ? { ...record.delivery, status: "delivered" }
+      : { status: "delivered", riderName: null, riderPhone: null, estimatedDeliveryAt: null, attempts: 0, lastAttemptNote: null };
     return buildOrderFromRecord(record);
   }),
   createMockRoute("POST", "/api/v1/payments/initialize", ({ body }) => {

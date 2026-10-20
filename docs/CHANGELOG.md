@@ -17,7 +17,17 @@ All notable changes to Zudomart are documented here. Format follows
   delivery attempt, shipment event, shipment charge, shipment insurance and
   delivery claim, plus a provider-neutral `logistics.Provider` interface and
   registry. `LOGISTICS_ENABLED` defaults to `false`; no provider delivery
-  route, checkout option, provider adapter or buyer/seller delivery UI is live.
+  route, checkout option, provider adapter or provider delivery UI is live.
+
+### Buyer — seller delivery updates
+
+- Buyer order detail on web and mobile now shows the seller-managed delivery
+  status, rider name and phone, estimated delivery, attempt count and last
+  failed-attempt note, plus courier and tracking when shipped. The fields are
+  read from the same order record the seller updates, so a seller's changes
+  appear after the buyer refreshes or reopens the order. Product parcel
+  metadata remains seller/internal. Provider delivery stays hidden while
+  `LOGISTICS_ENABLED=false`.
 
 ### Docs — logistics v2
 

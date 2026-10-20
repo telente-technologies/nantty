@@ -1,4 +1,4 @@
-import type { Order, OrderStatus } from "@/types";
+import type { DeliveryDetails, DeliveryStatus, Order, OrderStatus } from "@/types";
 import type { ShipmentDetails } from "@/types/commerce.type";
 
 import { SHIPPING_FEE_PER_STORE_IN_USD_CENTS } from "./commerceFixtures.mock";
@@ -27,6 +27,7 @@ export interface MockOrderRecord {
   placedAt: string;
   paidAt: string | null;
   shipment: ShipmentDetails | null;
+  delivery: DeliveryDetails | null;
   deliveredAt: string | null;
   buyerConfirmedAt: string | null;
   releasedAt: string | null;
@@ -38,6 +39,10 @@ interface RecordTimeline {
   readonly placedHoursAgo: number;
   readonly shippedHoursAgo?: number;
   readonly courier?: readonly [courierName: string, trackingNumber: string];
+  readonly rider?: readonly [riderName: string, riderPhone: string];
+  readonly deliveryStatus?: DeliveryStatus;
+  readonly attempts?: number;
+  readonly lastAttemptNote?: string;
   readonly deliveredHoursAgo?: number;
   readonly confirmedHoursAgo?: number;
   readonly releasedHoursAgo?: number;
@@ -46,6 +51,23 @@ interface RecordTimeline {
 }
 
 const hoursAgoOrNull = (hours: number | undefined) => (hours === undefined ? null : isoDateHoursAgo(hours));
+
+const deliveryStatusForOrderStatus = (status: OrderStatus): DeliveryStatus => {
+  switch (status) {
+    case "pending":
+      return "pending";
+    case "paid":
+      return "preparing";
+    case "shipped":
+      return "in_transit";
+    case "delivered":
+    case "completed":
+    case "disputed":
+      return "delivered";
+    case "cancelled":
+      return "cancelled";
+  }
+};
 
 export const buildShipment = (courierName: string, trackingNumber: string, shippedAt: string): ShipmentDetails => ({
   courierName,
@@ -62,26 +84,41 @@ const defineRecord = (
   status: OrderStatus,
   lines: readonly MockOrderLine[],
   timeline: RecordTimeline,
-): MockOrderRecord => ({
-  id,
-  reference: `ZM-${id.replace(/\D/g, "").padStart(5, "4")}`,
-  storeId,
-  buyerUserId,
-  lines,
-  checkoutGroupId: null,
-  status,
-  placedAt: isoDateHoursAgo(timeline.placedHoursAgo),
-  paidAt: status === "pending" ? null : isoDateHoursAgo(timeline.placedHoursAgo - 0.1),
-  shipment:
+): MockOrderRecord => {
+  const shipment =
     timeline.shippedHoursAgo !== undefined && timeline.courier
       ? buildShipment(timeline.courier[0], timeline.courier[1], isoDateHoursAgo(timeline.shippedHoursAgo))
-      : null,
-  deliveredAt: hoursAgoOrNull(timeline.deliveredHoursAgo),
-  buyerConfirmedAt: hoursAgoOrNull(timeline.confirmedHoursAgo),
-  releasedAt: hoursAgoOrNull(timeline.releasedHoursAgo),
-  refundedAt: hoursAgoOrNull(timeline.refundedHoursAgo),
-  disputeId: timeline.disputeId ?? null,
-});
+      : null;
+  const deliveryStatus = timeline.deliveryStatus ?? deliveryStatusForOrderStatus(status);
+  return {
+    id,
+    reference: `ZM-${id.replace(/\D/g, "").padStart(5, "4")}`,
+    storeId,
+    buyerUserId,
+    lines,
+    checkoutGroupId: null,
+    status,
+    placedAt: isoDateHoursAgo(timeline.placedHoursAgo),
+    paidAt: status === "pending" ? null : isoDateHoursAgo(timeline.placedHoursAgo - 0.1),
+    shipment,
+    delivery:
+      deliveryStatus === "pending"
+        ? null
+        : {
+            status: deliveryStatus,
+            riderName: timeline.rider?.[0] ?? null,
+            riderPhone: timeline.rider?.[1] ?? null,
+            estimatedDeliveryAt: shipment?.estimatedDeliveryAt ?? null,
+            attempts: timeline.attempts ?? 0,
+            lastAttemptNote: timeline.lastAttemptNote ?? null,
+          },
+    deliveredAt: hoursAgoOrNull(timeline.deliveredHoursAgo),
+    buyerConfirmedAt: hoursAgoOrNull(timeline.confirmedHoursAgo),
+    releasedAt: hoursAgoOrNull(timeline.releasedHoursAgo),
+    refundedAt: hoursAgoOrNull(timeline.refundedHoursAgo),
+    disputeId: timeline.disputeId ?? null,
+  };
+};
 
 const line = (productKey: CatalogProductKey, quantity: number, variant: string | null): MockOrderLine => ({ productKey, quantity, variant });
 const GIG: readonly [string, string] = ["GIG Logistics", "GIG-7730941182"];
@@ -90,7 +127,8 @@ export const mockOrderRecords: MockOrderRecord[] = [
   defineRecord("o_4108", "s_ada", SIGNED_IN_BUYER, "pending", [line("f4", 1, "Gold")], { placedHoursAgo: 1 }),
   defineRecord("o_4107", "s_food", SIGNED_IN_BUYER, "paid", [line("fd1", 2, "5kg"), line("fd2", 3, "200g")], { placedHoursAgo: 5 }),
   defineRecord("o_4106", "s_glow", SIGNED_IN_BUYER, "shipped", [line("b3", 2, "30ml"), line("b1", 1, "250ml • Vanilla")], {
-    placedHoursAgo: 40, shippedHoursAgo: 20, courier: GIG,
+    placedHoursAgo: 40, shippedHoursAgo: 20, courier: GIG, rider: ["Tunde A.", "+234 803 555 0142"],
+    deliveryStatus: "failed", attempts: 1, lastAttemptNote: "Customer did not answer the phone. Retrying tomorrow morning.",
   }),
   defineRecord("o_4105", "s_tunde", SIGNED_IN_BUYER, "delivered", [line("g6", 1, "Black")], {
     placedHoursAgo: 96, shippedHoursAgo: 80, courier: ["Kwik Delivery", "KWK-55812"], deliveredHoursAgo: 30,
@@ -108,7 +146,7 @@ export const mockOrderRecords: MockOrderRecord[] = [
   defineRecord("o_5208", "s_home", "u_10", "paid", [line("h2", 1, "3 litres")], { placedHoursAgo: 3 }),
   defineRecord("o_5207", "s_home", "u_7", "paid", [line("h3", 2, "Speckled cream")], { placedHoursAgo: 9 }),
   defineRecord("o_5206", "s_home", "u_8", "shipped", [line("h4", 3, "Lemongrass & ginger")], {
-    placedHoursAgo: 50, shippedHoursAgo: 30, courier: ["GIG Logistics", "GIG-7730955210"],
+    placedHoursAgo: 50, shippedHoursAgo: 30, courier: ["GIG Logistics", "GIG-7730955210"], rider: ["Ibrahim B.", "+234 806 222 0199"],
   }),
   defineRecord("o_5205", "s_home", "u_11", "delivered", [line("h6", 1, null)], {
     placedHoursAgo: 120, shippedHoursAgo: 100, courier: ["Sendbox", "SBX-00417782"], deliveredHoursAgo: 22,

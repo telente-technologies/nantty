@@ -25,6 +25,25 @@ export type PaymentMode = "escrow" | "direct";
 
 export type OrderStatus = "pending" | "paid" | "shipped" | "delivered" | "completed" | "cancelled" | "disputed";
 
+export type DeliveryStatus = "pending" | "preparing" | "ready_for_pickup" | "in_transit" | "delivered" | "failed" | "cancelled" | "returned";
+
+export interface DeliveryDetails {
+  readonly status: DeliveryStatus;
+  readonly riderName: string | null;
+  readonly riderPhone: string | null;
+  readonly estimatedDeliveryAt: ISODate | null;
+  readonly attempts: number;
+  readonly lastAttemptNote: string | null;
+}
+
+export interface OrderShipment {
+  readonly courierName: string;
+  readonly trackingNumber: string;
+  readonly trackingUrl: string | null;
+  readonly shippedAt: ISODate;
+  readonly estimatedDeliveryAt: ISODate | null;
+}
+
 export interface Order {
   readonly id: ID;
   readonly reference: string;
@@ -36,6 +55,8 @@ export interface Order {
   readonly createdAt: ISODate;
   readonly escrowReleaseAt: ISODate | null;
   readonly paymentMode?: PaymentMode;
+  readonly shipment?: OrderShipment | null;
+  readonly delivery?: DeliveryDetails | null;
 }
 
 export interface Address {
