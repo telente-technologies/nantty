@@ -61,51 +61,53 @@ def build_contributions_for_social_item(
 
 
 def list_trending_contributions_for_event(event: IntelligenceEvent) -> list[TrendingContribution]:
+    contributions: list[TrendingContribution]
     match event:
         case PostViewedEvent() if event.payload.dwell_ms >= 8000:
             payload = event.payload
-            return build_contributions_for_social_item(
+            contributions = build_contributions_for_social_item(
                 event, "post", payload.post_id, payload.topics, payload.hashtags, 0.3
             )
         case PostLikedEvent():
             payload_liked = event.payload
-            return build_contributions_for_social_item(
+            contributions = build_contributions_for_social_item(
                 event, "post", payload_liked.post_id, payload_liked.topics, payload_liked.hashtags, 1.0
             )
         case CommentedEvent():
             payload_commented = event.payload
-            return build_contributions_for_social_item(
+            contributions = build_contributions_for_social_item(
                 event, "post", payload_commented.post_id, payload_commented.topics, payload_commented.hashtags, 2.0
             )
         case SharedEvent():
             payload_shared = event.payload
-            return build_contributions_for_social_item(
+            contributions = build_contributions_for_social_item(
                 event, "post", payload_shared.post_id, payload_shared.topics, payload_shared.hashtags, 3.0
             )
         case ClipWatchedEvent() if event.payload.watch_fraction >= 0.9:
             payload_clip = event.payload
-            return build_contributions_for_social_item(
+            contributions = build_contributions_for_social_item(
                 event, "clip", payload_clip.clip_id, payload_clip.topics, payload_clip.hashtags, 1.0
             )
         case ProductViewedEvent():
-            return [
+            contributions = [
                 TrendingContribution(
                     "product", event.payload.product_id, event.actor_id, event.country, 0.3, event.occurred_at
                 )
             ]
         case AddedToCartEvent():
-            return [
+            contributions = [
                 TrendingContribution(
                     "product", event.payload.product_id, event.actor_id, event.country, 1.5, event.occurred_at
                 )
             ]
         case PurchasedEvent():
-            return [
+            contributions = [
                 TrendingContribution("product", item.product_id, event.actor_id, event.country, 4.0, event.occurred_at)
                 for item in event.payload.items
             ]
         case _:
-            return []
+            contributions = []
+    return contributions
 
 
 def build_trending_actor_claim_key(contribution: TrendingContribution, keyspace: OnlineFeatureKeyspace) -> str:

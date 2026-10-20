@@ -58,101 +58,107 @@ class EventFeatureUpdatePlan:
 
 
 def calculate_affinity_signal_weight(event: IntelligenceEvent) -> float:
+    weight: float
     match event:
         case PostViewedEvent():
-            return min(event.payload.dwell_ms / 20_000.0, 1.0) * 0.5
+            weight = min(event.payload.dwell_ms / 20_000.0, 1.0) * 0.5
         case PostLikedEvent():
-            return 1.0
+            weight = 1.0
         case CommentedEvent():
-            return COMMENTED_AFFINITY_WEIGHT
+            weight = COMMENTED_AFFINITY_WEIGHT
         case SharedEvent():
-            return 3.0
+            weight = 3.0
         case SavedEvent():
-            return 2.5
+            weight = 2.5
         case FollowedEvent():
-            return 4.0
+            weight = 4.0
         case ClipWatchedEvent():
-            return event.payload.watch_fraction + 0.5 * min(event.payload.loop_count, 4)
+            weight = event.payload.watch_fraction + 0.5 * min(event.payload.loop_count, 4)
         case ProductViewedEvent():
-            return 0.5
+            weight = 0.5
         case AddedToCartEvent():
-            return 2.0
+            weight = 2.0
         case PurchasedEvent():
-            return 5.0
+            weight = 5.0
         case HiddenEvent():
-            return -3.0
+            weight = -3.0
         case ReportedEvent():
-            return -5.0
+            weight = -5.0
         case _:
-            return 0.0
+            weight = 0.0
+    return weight
 
 
 def find_affinity_targets(event: IntelligenceEvent) -> tuple[list[str], list[str]]:
+    targets: tuple[list[str], list[str]]
     match event:
         case PostViewedEvent() | PostLikedEvent() | CommentedEvent() | SharedEvent():
-            return [event.payload.author_id], [*event.payload.topics, *event.payload.hashtags]
+            targets = [event.payload.author_id], [*event.payload.topics, *event.payload.hashtags]
         case ClipWatchedEvent():
-            return [event.payload.creator_id], [*event.payload.topics, *event.payload.hashtags]
+            targets = [event.payload.creator_id], [*event.payload.topics, *event.payload.hashtags]
         case SavedEvent():
             authors = [event.payload.author_id] if event.payload.author_id else []
-            return authors, [*event.payload.topics, *event.payload.hashtags]
+            targets = authors, [*event.payload.topics, *event.payload.hashtags]
         case ProductViewedEvent():
-            return [event.payload.store_id], list(event.payload.topics)
+            targets = [event.payload.store_id], list(event.payload.topics)
         case AddedToCartEvent() | PurchasedEvent():
-            return [event.payload.store_id], []
+            targets = [event.payload.store_id], []
         case FollowedEvent():
-            return [event.payload.target_account_id], []
+            targets = [event.payload.target_account_id], []
         case HiddenEvent():
             authors = [event.payload.target_author_id] if event.payload.target_author_id else []
-            return authors, list(event.payload.topics)
+            targets = authors, list(event.payload.topics)
         case ReportedEvent():
             authors = [event.payload.target_author_id] if event.payload.target_author_id else []
-            return authors, []
+            targets = authors, []
         case _:
-            return [], []
+            targets = [], []
+    return targets
 
 
 def build_item_statistics_increments(event: IntelligenceEvent) -> list[tuple[str, str, float]]:
+    result: list[tuple[str, str, float]]
     match event:
         case PostViewedEvent():
             long_dwell = 1.0 if event.payload.dwell_ms >= LONG_DWELL_MILLISECONDS else 0.0
-            return [
+            result = [
                 (event.payload.post_id, "views", 1.0),
                 (event.payload.post_id, "dwell_ms_sum", float(event.payload.dwell_ms)),
                 (event.payload.post_id, "long_dwells", long_dwell),
             ]
         case PostLikedEvent():
-            return [(event.payload.post_id, "likes", 1.0)]
+            result = [(event.payload.post_id, "likes", 1.0)]
         case CommentedEvent():
-            return [(event.payload.post_id, "comments", 1.0)]
+            result = [(event.payload.post_id, "comments", 1.0)]
         case SharedEvent():
-            return [(event.payload.post_id, "shares", 1.0)]
+            result = [(event.payload.post_id, "shares", 1.0)]
         case SavedEvent():
-            return [(event.payload.target_id, "saves", 1.0)]
+            result = [(event.payload.target_id, "saves", 1.0)]
         case ClipWatchedEvent():
             completed = 1.0 if event.payload.watch_fraction >= 0.9 else 0.0
             rewatched = 1.0 if event.payload.loop_count >= 1 else 0.0
-            return [
+            result = [
                 (event.payload.clip_id, "watches", 1.0),
                 (event.payload.clip_id, "watch_fraction_sum", event.payload.watch_fraction),
                 (event.payload.clip_id, "completions", completed),
                 (event.payload.clip_id, "rewatches", rewatched),
             ]
         case ProductViewedEvent():
-            increments = [(event.payload.product_id, "product_views", 1.0)]
+            product_increments = [(event.payload.product_id, "product_views", 1.0)]
             if event.payload.source_post_id:
-                increments.append((event.payload.source_post_id, "product_clicks", 1.0))
-            return increments
+                product_increments.append((event.payload.source_post_id, "product_clicks", 1.0))
+            result = product_increments
         case AddedToCartEvent():
-            return [(event.payload.product_id, "carts", 1.0)]
+            result = [(event.payload.product_id, "carts", 1.0)]
         case PurchasedEvent():
-            return [(item.product_id, "purchases", float(item.quantity)) for item in event.payload.items]
+            result = [(item.product_id, "purchases", float(item.quantity)) for item in event.payload.items]
         case ReportedEvent():
-            return [(event.payload.target_id, "reports", 1.0)]
+            result = [(event.payload.target_id, "reports", 1.0)]
         case HiddenEvent():
-            return [(event.payload.target_id, "hides", 1.0)]
+            result = [(event.payload.target_id, "hides", 1.0)]
         case _:
-            return []
+            result = []
+    return result
 
 
 def build_advertising_operations(

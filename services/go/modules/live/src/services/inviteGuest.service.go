@@ -66,7 +66,7 @@ func (service *LiveService) CancelGuestInvitation(ctx context.Context, actor typ
 		if err != nil {
 			return err
 		}
-		if slot, err = service.applySlotEvent(ctx, tx, slot, HostCancelsInvitation); err != nil {
+		if _, err = service.applySlotEvent(ctx, tx, slot, HostCancelsInvitation); err != nil {
 			return err
 		}
 		return service.emitStageUpdated(ctx, tx, liveId)

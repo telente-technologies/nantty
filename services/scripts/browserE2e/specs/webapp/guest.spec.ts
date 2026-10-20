@@ -16,7 +16,6 @@ const signInDialog = (page: Page) => page.getByRole("dialog", { name: /sign in t
 
 async function expectGateThenReturn(page: Page, path: string, trigger: (page: Page) => Locator, afterSignIn: (page: Page) => Promise<void>): Promise<void> {
   await page.goto(path);
-  const before = new URL(page.url()).pathname;
   await trigger(page).first().click();
   await expect(signInDialog(page)).toBeVisible();
   await logInThroughAuthPrompt(page, world.visitor.email, smokePassword);

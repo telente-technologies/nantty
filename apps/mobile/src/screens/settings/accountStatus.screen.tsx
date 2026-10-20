@@ -18,7 +18,6 @@ import type { AccountStrike, CopyrightNotice } from "@/types";
 const HELP_TOPIC_SLUG = "copyright-and-account-status";
 
 export function AccountStatusScreen({ navigation }: MainScreenProps<"AccountStatus">) {
-  const { colors } = useTheme();
   const { data: health, isPending, isError, error, refetch } = useMyAccountHealth();
   const [appealTarget, setAppealTarget] = useState<AccountStrike | null>(null);
   const [counterNoticeTarget, setCounterNoticeTarget] = useState<CopyrightNotice | null>(null);

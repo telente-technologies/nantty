@@ -1,6 +1,6 @@
 import { beforeAll, describe, expect, it } from "vitest";
 
-import { createSuperadmin, stepUpStaff, stepUpStaffForMoneyAction, stepUpUser, type StaffActor, type UserActor } from "../src/actors.util.js";
+import { createSuperadmin, stepUpStaffForMoneyAction, stepUpUser, type StaffActor, type UserActor } from "../src/actors.util.js";
 import { callApi, describeResponse, waitFor } from "../src/apiClient.util.js";
 import { addToCart, checkout, createBuyerWithAddress, createStoreWithProduct, onboardPayoutAccount, psql, shipAndDeliver, type SmokeStore } from "../src/commerceFixtures.util.js";
 import { payCheckoutThroughProvider, readProviderState, readWallet, settleCardPaymentsFor, settleTransferThroughProvider, isOpenProviderTransfer } from "../src/fakeFlutterwave.util.js";

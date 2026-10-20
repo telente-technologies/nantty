@@ -34,7 +34,7 @@ func (service *LiveService) RespondToStageInvitation(ctx context.Context, actor 
 			return liveerrors.InvitationNoLongerOpen
 		}
 		if !accept {
-			if slot, err = service.applySlotEvent(ctx, tx, slot, GuestDeclines); err != nil {
+			if _, err = service.applySlotEvent(ctx, tx, slot, GuestDeclines); err != nil {
 				return err
 			}
 			return service.emitStageUpdated(ctx, tx, liveId)

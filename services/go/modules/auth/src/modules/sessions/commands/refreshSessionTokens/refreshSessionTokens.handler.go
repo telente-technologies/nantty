@@ -14,6 +14,8 @@ import (
 	"zudomart/modules/auth/src/services"
 	"zudomart/modules/auth/src/types"
 	"zudomart/modules/auth/src/utils"
+
+	"github.com/google/uuid"
 )
 
 type Handler struct {
@@ -58,7 +60,7 @@ func (application Handler) Execute(ctx context.Context, command Command) (types.
 			return err
 		}
 		nextExpiry := earliestOf(now.Add(application.Settings.RefreshTokenTimeToLive), currentSession.CreatedAt.Add(application.Settings.SessionMaximumLifetime))
-		var nextTokenId = presented.ID
+		var nextTokenId uuid.UUID
 		if nextRefreshToken, nextTokenId, err = services.CreateRefreshTokenInTransaction(ctx, application.Container, tx, currentSession.ID, nextExpiry); err != nil {
 			return err
 		}

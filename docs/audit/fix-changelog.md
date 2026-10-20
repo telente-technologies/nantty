@@ -2,6 +2,29 @@
 
 Every code change made while fixing `docs/audit/frontend-backend-audit.md` is logged here with file, lines, audit ID, verification, and rollback notes. Investigations that concluded "no change needed" are logged too. Newest first.
 
+## 2026-10-20 — CodeQL cleanup round 2: unused values, match returns, generated imports
+
+**Audit:** CodeQL findings (Go unused assignments, Python mixed returns, mobile/web unused imports, generated Prisma imports)
+**Changes:**
+1. **Go: stop assigning values that are never read** —
+   - `moderation/.../automationStore.repository.go`: `suppressed` is declared once and set from a scoped `matched, err := cooldown.Exist(ctx)` instead of a predeclared `err`.
+   - `live/.../respondToInvitation.service.go`, `live/.../inviteGuest.service.go`: discard the unused slot result (`_, err = ...`); the slot is only needed as input to the event.
+   - `auth/.../refreshSessionTokens.handler.go`: `nextTokenId` is declared as `uuid.UUID` without an unused `presented.ID` default; it is always assigned by `CreateRefreshTokenInTransaction` before use.
+2. **Python: one explicit return per match function** — `event_feature_update_service.py`, `domain_event_translation_service.py`, `trending_contribution_service.py`, `behaviour_feature_service.py`.
+   - `calculate_affinity_signal_weight`, `find_affinity_targets`, `build_item_statistics_increments`, `resolve_intelligence_event_type`, `list_trending_contributions_for_event`, and `build_behaviour_operations` now assign to a typed local in every `case` (including `case _`) and return it once. This removes the implicit-return paths CodeQL reported without adding unreachable code (mypy runs with `warn_unreachable`).
+3. **Unused imports/variables removed** — mobile (`storeDetail`, `feedTab`, `martTab`, `commentThread`, `deleteAccountSheet`, `accountStatus`, `userProfileByUsername`, `story.screen`, `sellerApplication`, `createBusinessProfile`, `sponsoredStoryPage`), admin (`ipClaimsQueueWorkspace`), notifications test, api-smoke tests, browser-e2e guest spec.
+   - The `useTheme()` calls that only destructured an unused `colors` were removed; components that still use `colors` keep the hook.
+4. **Generated Prisma imports are stripped after generation** — `scripts/stripGeneratedPrismaImports.mjs`, `services/typescript/social/package.json`, `services/typescript/search/package.json`, and the generated `client.ts`/`commonInputTypes.ts` files.
+   - The new script removes `import * as process from 'node:process'` and `import * as $Enums from "./enums.js"` only when the file's code does not reference them (comments and `export * as $Enums` re-exports do not count).
+   - `social` and `search` now run it after `prisma generate` in `build`, `typecheck`, `test`, and `db:generate`, so regeneration cannot silently reintroduce the two CodeQL alerts. `$Enums` remains re-exported from `client.ts`.
+**Verified:**
+- `go build ./modules/moderation/... ./modules/live/... ./modules/auth/...` → clean; changed files `gofmt`-clean.
+- Intelligence: `ruff check` clean on all four files; `mypy` strict clean; `pytest tests/modules/events_ingestion tests/modules/domain_events tests/modules/trending` → 51 passed.
+- `pnpm --filter @zudomart/mobile --filter @zudomart/admin --filter @zudomart/notifications --filter @zudomart/api-smoke --filter @zudomart/browser-e2e --filter @zudomart/social --filter @zudomart/search exec tsc --noEmit` → clean.
+- Lint across the same packages → 0 errors (notifications 2 warnings, admin 52, mobile 371 pre-existing warnings).
+- Notifications Vitest → 32 files passed, 1 skipped; 298 tests passed, 4 skipped.
+**Rollback:** revert the hunks independently; no schema, migration, or runtime-contract changes.
+
 ## 2026-10-20 — CodeQL cleanup: stream error propagation, ASI braces, dead initialisers
 
 **Audit:** CodeQL findings (gateway realtime proxy, payout panels, branded download hook, API smoke client, money formatters)

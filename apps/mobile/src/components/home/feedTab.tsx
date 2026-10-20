@@ -8,7 +8,7 @@ import { useShareToChat } from "@/components/chatSafety/shareToChat.hook";
 import { PostCard } from "@/components/feed/postCard";
 import { ReshareSheet } from "@/components/feed/reshareSheet";
 import { BrandLoader } from "@/components/ui/brandLoader";
-import { makeThemedStyles, useTheme } from "@/theme";
+import { makeThemedStyles } from "@/theme";
 import { feedQueryKeyPrefix, usePostInteractions } from "@/hooks/usePostInteractions.hook";
 import { feedsService } from "@/services/feed/feeds.service";
 import type { Post, ProductSummary } from "@/types";
@@ -31,7 +31,6 @@ import { spacing } from "@/constants/spacing.constant";
 type FeedMode = "for-you" | "following";
 
 export function FeedTab() {
-  const { colors } = useTheme();
   const styles = useStyles();
   const navigation = useNavigation();
   const [feedMode, setFeedMode] = useState<FeedMode>("for-you");

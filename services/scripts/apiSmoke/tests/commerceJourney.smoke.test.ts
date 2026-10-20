@@ -1,6 +1,6 @@
 import { beforeAll, describe, expect, it } from "vitest";
 
-import { registerUser, stepUpUser, type UserActor } from "../src/actors.util.js";
+import { registerUser, type UserActor } from "../src/actors.util.js";
 import { callApi, describeResponse, uniqueSuffix, waitFor } from "../src/apiClient.util.js";
 import { onboardPayoutAccount } from "../src/commerceFixtures.util.js";
 import { payCheckoutThroughProvider, readProviderState, readWallet, settleCardPaymentsFor, settleTransferThroughProvider, isOpenProviderTransfer } from "../src/fakeFlutterwave.util.js";

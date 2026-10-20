@@ -8,10 +8,8 @@ import { Header } from "@/components/ui/header";
 import { Screen } from "@/components/ui/screen";
 import type { MainScreenProps } from "@/navigation/navigation.types";
 import { usersService } from "@/services/account/users.service";
-import { useTheme } from "@/theme";
 
 export function UserProfileByUsernameScreen({ navigation, route }: MainScreenProps<"UserProfileByUsername">) {
-  const { colors } = useTheme();
   const username = route.params.username.replace(/^@/, "");
   const lookup = useQuery({ queryKey: ["user-by-username", username.toLowerCase()], queryFn: () => usersService.fetchUserIdByUsername(username), retry: false });
 

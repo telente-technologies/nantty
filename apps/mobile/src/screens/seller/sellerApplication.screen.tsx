@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
-import { StyleSheet, View } from "react-native";
+import { StyleSheet } from "react-native";
 
 import { ApplicationIdentityStep } from "@/components/seller/applicationIdentityStep";
 import { ApplicationPayoutStep } from "@/components/seller/applicationPayoutStep";

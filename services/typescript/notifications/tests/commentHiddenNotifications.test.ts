@@ -37,7 +37,7 @@ describe("comment hiding withdraws and restores in-app notifications", () => {
   });
 
   it("matches notifications stored before commentId was recorded, by their link", async () => {
-    const { harness, handler } = setup();
+    const { harness } = setup();
     await harness.notifications.insertIfAbsent({ userId: "author", dedupeKey: "legacy", category: "social", kind: null, templateKey: null, title: "Ada", body: "commented on your post.", actor, data: { url: "/post/p1?comment=c9" } });
     expect(await harness.notifications.setHiddenForComment("c9", true)).toBe(1);
     expect(await harness.notifications.countUnread("author")).toBe(0);

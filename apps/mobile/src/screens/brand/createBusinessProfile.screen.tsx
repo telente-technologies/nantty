@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRef, useState } from "react";
-import { StyleSheet, View } from "react-native";
+import { StyleSheet } from "react-native";
 
 import { BusinessCategoryPicker } from "@/components/profile/businessCategoryPicker";
 import { useUsernameAvailability } from "@/components/settings/usernameAvailability.hook";

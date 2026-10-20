@@ -64,6 +64,7 @@ def add_distinct(
 def build_behaviour_operations(event: DomainEvent, keyspace: OnlineFeatureKeyspace) -> list[FeatureWriteOperation]:
     day = format_utc_day_bucket(event.occurred_at)
     actor = event.actor_id
+    result: list[FeatureWriteOperation]
     match event:
         case MessageSentDomainEvent():
             payload = event.payload
@@ -74,29 +75,30 @@ def build_behaviour_operations(event: DomainEvent, keyspace: OnlineFeatureKeyspa
                 operations += increment_counter(keyspace, actor, day, "reported_links")
             operations += add_distinct(keyspace, "recipients", actor, day, payload.recipient_id)
             operations += add_distinct(keyspace, "devices", actor, day, payload.device_id)
-            return operations + add_distinct(keyspace, "ips", actor, day, payload.ip_hash)
+            result = operations + add_distinct(keyspace, "ips", actor, day, payload.ip_hash)
         case LoggedInDomainEvent():
-            return [
+            result = [
                 *increment_counter(keyspace, actor, day, "logins"),
                 *add_distinct(keyspace, "devices", actor, day, event.payload.device_id),
                 *add_distinct(keyspace, "ips", actor, day, event.payload.ip_hash),
             ]
         case PostCreatedDomainEvent():
-            return increment_counter(keyspace, actor, day, "posts_created")
+            result = increment_counter(keyspace, actor, day, "posts_created")
         case FollowCreatedDomainEvent():
-            return increment_counter(keyspace, actor, day, "follows_made")
+            result = increment_counter(keyspace, actor, day, "follows_made")
         case ReportCreatedDomainEvent() if event.payload.target_author_id:
-            return increment_counter(keyspace, event.payload.target_author_id, day, "reports_received")
+            result = increment_counter(keyspace, event.payload.target_author_id, day, "reports_received")
         case BlockCreatedDomainEvent():
-            return increment_counter(keyspace, event.payload.blocked_account_id, day, "blocks_received")
+            result = increment_counter(keyspace, event.payload.blocked_account_id, day, "blocks_received")
         case AccountRegisteredDomainEvent():
             profile_key = keyspace.account_profile_key(actor)
-            return [
+            result = [
                 HashFieldAssign(profile_key, PROFILE_CREATED_AT_FIELD, event.occurred_at.timestamp()),
                 KeyExpiry(profile_key, ACCOUNT_PROFILE_TTL_SECONDS),
             ]
         case _:
-            return []
+            result = []
+    return result
 
 
 def list_recent_day_buckets(now: datetime, day_count: int) -> list[str]:

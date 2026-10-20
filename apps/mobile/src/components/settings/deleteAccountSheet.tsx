@@ -18,7 +18,6 @@ const ANONYMIZED = ["Reviews and chat messages you sent stay visible without you
 const RETAINED = ["Orders, payments, payouts and escrow records may be kept for as long as the law requires for tax, fraud and dispute purposes"];
 
 function Section({ title, lines, icon }: { title: string; lines: string[]; icon: ReactNode }) {
-  const { colors } = useTheme();
   return (
     <View style={styles.section}>
       <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>

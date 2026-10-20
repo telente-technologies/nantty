@@ -5,7 +5,7 @@ import { callApi, describeResponse, uniqueSuffix, waitFor } from "../src/apiClie
 import { addToCart, approveSellerApplication, checkout, createBuyerWithAddress, createStoreWithProduct, psql, shipAndDeliver, type SmokeStore } from "../src/commerceFixtures.util.js";
 import { uploadSampleImage } from "../src/mediaUpload.util.js";
 import {
-  deliverFlutterwaveWebhook, finishTransfer, fundWallet, payCardCheckout, readFakeFlutterwaveState, readWallet, settle, signFunding,
+  deliverFlutterwaveWebhook, finishTransfer, payCardCheckout, readFakeFlutterwaveState, readWallet, settle, signFunding,
   userStepUp, verifyNigerianUserToLevelOne,
 } from "../src/fakeFlutterwave.util.js";
 import { verifySellerBusiness } from "../src/sellerVerification.util.js";

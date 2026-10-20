@@ -6,7 +6,6 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Avatar } from "@/components/ui/avatar";
 import { Text } from "@/components/ui/text";
 import { ClipVideoPlayer } from "@/components/media/clipVideoPlayer";
-import { openTrustedWebPage } from "@/components/links/openLink.util";
 import { useTheme } from "@/theme";
 import type { StoryDecidedAd } from "@/types/social.type";
 import { storyAdsService } from "@/services/clips/storyAds.service";

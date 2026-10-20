@@ -25,7 +25,6 @@ const describeHiddenReplyCount = (hiddenReplyCount: number, alreadyShowingSomeRe
 };
 
 export function CommentThread({ comment, nestingDepth, previewReplies = [] }: CommentThreadProps) {
-  const { colors } = useTheme();
   const styles = useStyles();
   const thread = useCommentThreadContext();
   const visibility = thread.replyThreadVisibilityFor(comment.id);

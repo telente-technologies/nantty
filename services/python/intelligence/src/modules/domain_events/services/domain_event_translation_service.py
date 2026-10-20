@@ -50,33 +50,35 @@ DOMAIN_ONLY_PAYLOAD_FIELDS = {"comment_id"}
 
 
 def resolve_intelligence_event_type(event: DomainEvent) -> str | None:
+    event_type: str | None
     match event:
         case ProductViewedDomainEvent():
-            return "product_viewed"
+            event_type = "product_viewed"
         case ProductPurchasedDomainEvent():
-            return "purchased"
+            event_type = "purchased"
         case FollowCreatedDomainEvent():
-            return "followed"
+            event_type = "followed"
         case AdImpressionRecordedDomainEvent():
-            return "ad_impression"
+            event_type = "ad_impression"
         case GiftSentDomainEvent():
-            return "gift_sent"
+            event_type = "gift_sent"
         case ReportCreatedDomainEvent():
-            return "reported"
+            event_type = "reported"
         case PostLikedDomainEvent():
-            return "post_liked"
+            event_type = "post_liked"
         case PostSharedDomainEvent():
-            return "shared"
+            event_type = "shared"
         case CommentCreatedDomainEvent() if event.payload.author_id is not None:
-            return "commented"
+            event_type = "commented"
         case ContentSavedDomainEvent():
-            return "saved"
+            event_type = "saved"
         case PostViewedDomainEvent():
-            return "post_viewed"
+            event_type = "post_viewed"
         case ClipWatchedDomainEvent():
-            return "clip_watched"
+            event_type = "clip_watched"
         case _:
-            return None
+            event_type = None
+    return event_type
 
 
 def pseudonymize_payload(payload: dict[str, Any], hasher: OpaqueIdentifierHasher) -> dict[str, Any]:

@@ -4,7 +4,7 @@ import { useRef, useState } from "react";
 import { ScrollView, StyleSheet, View, type NativeScrollEvent } from "react-native";
 
 import { BrandLoader } from "@/components/ui/brandLoader";
-import { makeThemedStyles, useTheme } from "@/theme";
+import { makeThemedStyles } from "@/theme";
 import { adEventsService } from "@/services/ads/adEvents.service";
 import { productsService } from "@/services/sellers/products.service";
 import type { MartHighlight } from "@/types/martHighlight.type";
@@ -32,7 +32,6 @@ const isNearBottom = ({ layoutMeasurement, contentOffset, contentSize }: NativeS
   layoutMeasurement.height + contentOffset.y >= contentSize.height - 600;
 
 export function MartTab() {
-  const { colors } = useTheme();
   const styles = useStyles();
   const navigation = useNavigation();
   const scrollRef = useRef<ScrollView>(null);

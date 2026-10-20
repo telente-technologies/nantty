@@ -12,7 +12,6 @@ import { StoreProfileHeader } from "@/components/store/storeProfileHeader";
 import { StoreTabs, type StoreTab } from "@/components/store/storeTabs";
 import { Button } from "@/components/ui/button";
 import { Screen } from "@/components/ui/screen";
-import { Text } from "@/components/ui/text";
 import { useTheme } from "@/theme";
 import type { MainScreenProps } from "@/navigation/navigation.types";
 import { trackProductInteraction } from "@/services/sellers/productInteractions.service";

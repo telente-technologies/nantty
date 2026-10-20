@@ -76,11 +76,13 @@ func (store EntStore) Reserve(ctx context.Context, record services.ExecutionReco
 		if limits.CooldownSince != nil {
 			cooldown = cooldown.Where(automationexecution.StartedAtGT(*limits.CooldownSince))
 		}
-		suppressed, err := false, error(nil)
+		suppressed := false
 		if limits.OncePerSubject || limits.CooldownSince != nil {
-			if suppressed, err = cooldown.Exist(ctx); err != nil {
+			matched, err := cooldown.Exist(ctx)
+			if err != nil {
 				return err
 			}
+			suppressed = matched
 		}
 		if suppressed {
 			gate = "suppressed"

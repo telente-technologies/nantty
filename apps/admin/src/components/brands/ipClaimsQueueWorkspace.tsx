@@ -13,7 +13,7 @@ import { SegmentedTabs } from "@/components/ui/tabs";
 import { useAdminQuery } from "@/hooks/useAdminQuery.hook";
 import { fetchIpClaims } from "@/services/brandsApi.service";
 
-import { ipClaimColumns, isIpClaimPastSla } from "./ipClaimColumns";
+import { ipClaimColumns } from "./ipClaimColumns";
 
 type ClaimStatusFilter = "OPEN" | "NEEDS_INFO" | "UPHELD" | "REJECTED" | "ALL";
 
