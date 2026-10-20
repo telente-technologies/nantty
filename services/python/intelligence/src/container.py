@@ -18,6 +18,8 @@ from src.modules.bot_detection.repositories.bot_score_queue_repository import (
 )
 from src.modules.bot_detection.services.bot_scoring_service import BotScoringService
 from src.modules.chat_spam.services.chat_spam_scoring_service import ChatSpamScoringService
+from src.modules.child_safety.services.hash_match_provider_interface_service import build_hash_match_provider
+from src.modules.child_safety.services.media_child_safety_scan_service import MediaChildSafetyScanService
 from src.modules.clips.services.clip_ranking_service import ClipRankingService
 from src.modules.content_scoring.repositories.content_score_queue_repository import (
     AmqpContentScorePublisher,
@@ -45,8 +47,6 @@ from src.modules.events_ingestion.services.event_ingestion_service import EventI
 from src.modules.experiments.services.experiment_service import ExperimentService
 from src.modules.extended_risk.services.extended_risk_scoring_service import ExtendedRiskScoringService
 from src.modules.feed.services.feed_ranking_service import FeedRankingService
-from src.modules.child_safety.services.hash_match_provider_interface_service import build_hash_match_provider
-from src.modules.child_safety.services.media_child_safety_scan_service import MediaChildSafetyScanService
 from src.modules.live_safety.live_safety_module import build_live_safety_scoring_service
 from src.modules.live_safety.services.live_safety_scoring_service import LiveSafetyScoringService
 from src.modules.model_registry.repositories.model_registry_repository import ModelRegistry

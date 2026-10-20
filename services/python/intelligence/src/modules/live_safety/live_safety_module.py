@@ -8,17 +8,17 @@ import boto3
 from src.configs.settings_config import IntelligenceSettings
 from src.integrations.aws_client_config import AWS_CLIENT_CONFIG
 from src.integrations.rabbitmq_channel_integration import RabbitMqChannelProvider
+from src.modules.child_safety.services.hash_match_provider_interface_service import (
+    DisabledHashMatchProvider,
+    HashMatchProvider,
+    ObjectBytesReader,
+)
 from src.modules.content_scoring.services.image_moderation_interface_service import ImageModerationModelHolder
 from src.modules.live_safety.repositories.amqp_live_safety_job_queue_repository import AmqpLiveSafetyJobQueueConsumer
 from src.modules.live_safety.repositories.live_safety_score_queue_repository import (
     AmqpLiveSafetyScorePublisher,
     LiveSafetyScorePublisher,
     NullLiveSafetyScorePublisher,
-)
-from src.modules.child_safety.services.hash_match_provider_interface_service import (
-    DisabledHashMatchProvider,
-    HashMatchProvider,
-    ObjectBytesReader,
 )
 from src.modules.live_safety.services.csam_hash_match_interface_service import build_live_frame_hash_matcher
 from src.modules.live_safety.services.live_safety_scoring_service import LiveSafetyScoringService

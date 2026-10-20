@@ -68,9 +68,12 @@ class MediaChildSafetyScanService:
         labels, suspected, model_version = self.detect_labels_and_minor_faces(frames)
         if suspected:
             child_safety_logger.warning("media_scan_blocked", extra={"signal": "suspected_minor_explicit"})
-            return self.blocked_response(request, generated_at, "suspected_minor_explicit", hash_check, None, model_version)
+            return self.blocked_response(
+                request, generated_at, "suspected_minor_explicit", hash_check, None, model_version
+            )
         categories = [
-            ContentScoreCategory(category=item.category, score=item.confidence) for item in map_labels_to_categories(labels or [])
+            ContentScoreCategory(category=item.category, score=item.confidence)
+            for item in map_labels_to_categories(labels or [])
         ]
         top = categories[0] if categories else None
         score = top.score if top else 0.0
@@ -89,7 +92,9 @@ class MediaChildSafetyScanService:
             generated_at=generated_at,
         )
 
-    def check_known_hashes(self, original_sha256: str | None, frames: list[bytes]) -> tuple[HashCheckOutcome, HashMatch | None]:
+    def check_known_hashes(
+        self, original_sha256: str | None, frames: list[bytes]
+    ) -> tuple[HashCheckOutcome, HashMatch | None]:
         if not self.hash_provider.enabled:
             return "disabled", None
         try:
@@ -105,7 +110,9 @@ class MediaChildSafetyScanService:
             return "unavailable", None
         return ("matched", match) if match is not None else ("clear", None)
 
-    def detect_labels_and_minor_faces(self, frames: list[bytes]) -> tuple[list[DetectedModerationLabel] | None, bool, str]:
+    def detect_labels_and_minor_faces(
+        self, frames: list[bytes]
+    ) -> tuple[list[DetectedModerationLabel] | None, bool, str]:
         model: Any = self.image_models.active_model
         detect_labels = getattr(model, "detect_labels_from_bytes", None)
         detect_faces = getattr(model, "detect_face_ages_from_bytes", None)
@@ -116,9 +123,13 @@ class MediaChildSafetyScanService:
             for frame in frames:
                 frame_labels = detect_labels(frame)
                 labels.extend(frame_labels)
-                if callable(detect_faces) and has_high_confidence_explicit_label(frame_labels, self.explicit_confidence):
+                if callable(detect_faces) and has_high_confidence_explicit_label(
+                    frame_labels, self.explicit_confidence
+                ):
                     faces = detect_faces(frame)
-                    if is_suspected_child_safety(frame_labels, faces, self.explicit_confidence, self.minor_age_ceiling):
+                    if is_suspected_child_safety(
+                        frame_labels, faces, self.explicit_confidence, self.minor_age_ceiling
+                    ):
                         return frame_labels, True, model.version
         except Exception:
             child_safety_logger.error("media_scan_label_detection_failed")

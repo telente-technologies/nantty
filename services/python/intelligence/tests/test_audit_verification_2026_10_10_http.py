@@ -212,6 +212,9 @@ def test_rekognition_refuses_images_outside_the_media_bucket() -> None:
         def detect_moderation_labels(self, **_arguments: object) -> dict[str, object]:
             return {"ModerationLabels": []}
 
+        def detect_faces(self, **_arguments: object) -> dict[str, object]:
+            return {"FaceDetails": []}
+
     model = RekognitionImageModerationModel(Client(), 50.0, frozenset({"zudo-media"}))
     assert model.classify_image(ImageModerationRequest(media_id="m", image_url="s3://zudo-media/a.jpg")) == {}
     with pytest.raises(ImageSourceNotAllowedError):

@@ -2,6 +2,23 @@
 
 Every code change made while fixing `docs/audit/frontend-backend-audit.md` is logged here with file, lines, audit ID, verification, and rollback notes. Investigations that concluded "no change needed" are logged too. Newest first.
 
+## 2026-10-20 — CI fixes: Python conventions, ruff, and mypy
+
+**Audit:** Backend conventions gate after the first CI repair push
+**Changes:**
+1. **Split the oversized child-safety hash test** — `tests/modules/child_safety/test_child_safety_hash_matching.py` (285 lines) and new `test_child_safety_hash_matching_api.py` (65 lines).
+   - The original file was 331 lines and failed `check-backend-file-lengths.sh` (300-line cap). The unit tests stay in the original file; the signed HTTP endpoint fixture and contract test moved to the new file.
+2. **Ruff long lines and import order** — `src/container.py`, `src/modules/child_safety/services/{child_safety_signal_service,hash_match_provider_interface_service,media_child_safety_scan_service}.py`, `src/modules/live_safety/live_safety_module.py`, and the split test files.
+   - Wrapped the 120+ character expressions and applied `ruff check --fix --select I001`; `uv run ruff check .` is clean.
+3. **Mypy protocol stubs** — `tests/modules/live_safety/test_live_safety_label_mapping.py`, `tests/test_audit_verification_2026_10_10_http.py`.
+   - `RekognitionModerationClient` now requires `detect_faces`; the two label-only test doubles implement it with an empty `FaceDetails` response. `uv run mypy` is clean across 589 files.
+**Verified:**
+- `bash services/scripts/check-backend-file-lengths.sh` → all backend files at most 300 lines.
+- `uv run ruff check .` → clean; `uv run mypy` → success; `uv run pytest -q` → pass.
+- `gofmt -l $(go list -m -f '{{.Dir}}')` → empty; prior Go fixes remain in `5d7de4561`.
+- Security, CodeQL Code Quality, and Deploy succeeded on `5d7de4561`; the Backend run only failed the conventions gate, which this change addresses.
+**Rollback:** recombine the split test and revert the ruff/mypy-only edits; no runtime behavior changes.
+
 ## 2026-10-20 — CI fixes: Bandit advisory, gofmt, moderation migration, duplicate-bank advisory
 
 **Audit:** GitHub Actions failures after the Batch 2 and CodeQL pushes

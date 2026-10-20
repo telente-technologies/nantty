@@ -28,7 +28,10 @@ def highest_explicit_sexual_confidence(labels: Iterable[DetectedModerationLabel]
         (
             label.confidence
             for label in labels
-            if label.name.lower() in EXPLICIT_SEXUAL_LABEL_NAMES or label.parent_name.lower() in EXPLICIT_SEXUAL_LABEL_NAMES
+            if (
+                label.name.lower() in EXPLICIT_SEXUAL_LABEL_NAMES
+                or label.parent_name.lower() in EXPLICIT_SEXUAL_LABEL_NAMES
+            )
         ),
         default=0.0,
     )

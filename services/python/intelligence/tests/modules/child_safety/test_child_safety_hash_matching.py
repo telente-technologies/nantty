@@ -3,18 +3,14 @@ import hashlib
 import json
 import logging
 import os
-from collections.abc import AsyncIterator
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
-import httpx
 import pytest
 from pydantic import ValidationError
 
-from src.app import create_application
 from src.configs.settings_config import IntelligenceSettings
-from src.databases.in_memory_feature_database import InMemoryFeatureBackend
 from src.modules.child_safety.dtos.child_safety_dto import MediaScanRequest
 from src.modules.child_safety.services.child_safety_signal_service import is_suspected_child_safety
 from src.modules.child_safety.services.hash_match_provider_interface_service import (
@@ -34,7 +30,7 @@ from src.modules.live_safety.services.transcribe_batch_transcription_service imp
 from src.modules.live_safety.services.transcript_moderation_scorer_service import TranscriptModerationScorer
 from src.modules.moderation.services.content_moderation_service import ContentModerationService
 from src.modules.moderation.services.moderation_model_interface_service import ModerationModelHolder
-from tests.conftest import TEST_SHARED_SECRET, SignedIntelligenceClient
+from tests.conftest import TEST_SHARED_SECRET
 
 FIXTURES = Path(__file__).parent / "fixtures"
 NOW = datetime(2026, 10, 17, 9, 0, tzinfo=UTC)
@@ -130,7 +126,11 @@ def test_hash_matching_fails_closed_at_startup_when_enabled_but_misconfigured_in
     with pytest.raises(ValidationError, match="test double"):
         IntelligenceSettings(environment="production", child_safety_hash_provider="synthetic", **DEPLOYED_SECRETS)
     with pytest.raises(ValidationError, match="CSAM hash matching is enabled"):
-        IntelligenceSettings(environment="test", shared_secret=TEST_SHARED_SECRET, live_safety_csam_hash_matching_enabled=True)
+        IntelligenceSettings(
+            environment="test",
+            shared_secret=TEST_SHARED_SECRET,
+            live_safety_csam_hash_matching_enabled=True,
+        )
     with pytest.raises(HashMatchProviderMisconfiguredError):
         build_hash_match_provider("http", "production", "safer", "https://hashes.example", "short")
     with pytest.raises(HashMatchProviderMisconfiguredError):
@@ -256,7 +256,8 @@ async def test_live_frames_hash_match_through_the_generic_adapter_without_loggin
 ) -> None:
     flagged = os.urandom(300)
     matcher = build_live_frame_hash_matcher(
-        SyntheticSha256HashMatchProvider(frozenset({hashlib.sha256(flagged).hexdigest()})), lambda _bucket, _key: flagged
+        SyntheticSha256HashMatchProvider(frozenset({hashlib.sha256(flagged).hexdigest()})),
+        lambda _bucket, _key: flagged,
     )
     service, publisher = live_scoring(ExplodingRekognitionClient(), matcher)
     with caplog.at_level(logging.DEBUG):
@@ -282,50 +283,3 @@ async def test_live_frames_still_get_reviewed_when_the_hash_check_is_down() -> N
     service, publisher = live_scoring(client, unreadable)
     assert await service.process_job_body(frame_body(), NOW) == "scored"
     assert publisher.messages[0].suggested_action in {"review", "hold"}
-
-
-@pytest.fixture
-async def synthetic_client(tmp_path: Path) -> AsyncIterator[tuple[SignedIntelligenceClient, bytes]]:
-    flagged = os.urandom(400)
-    settings = IntelligenceSettings(
-        environment="test",
-        shared_secret=TEST_SHARED_SECRET,
-        event_storage_uri=str(tmp_path / "data"),
-        model_registry_path=tmp_path / "registry",
-        redis_url="",
-        child_safety_hash_provider="synthetic",
-        child_safety_synthetic_hashes=hashlib.sha256(flagged).hexdigest(),
-    )
-    application = create_application(settings, InMemoryFeatureBackend(), start_background_tasks=False)
-    async with httpx.AsyncClient(transport=httpx.ASGITransport(app=application), base_url="http://intel") as http:
-        yield SignedIntelligenceClient(http), flagged
-
-
-async def test_scan_media_endpoint_reports_a_block_in_the_media_contract(
-    synthetic_client: tuple[SignedIntelligenceClient, bytes],
-) -> None:
-    client, flagged = synthetic_client
-    payload = {
-        "mediaId": "0192f3a0-0000-7000-8000-00000000c5a1",
-        "ownerId": "0192f3a0-0000-7000-8000-00000000c5a2",
-        "purpose": "post",
-        "kind": "image",
-        "originalSha256": hashlib.sha256(flagged).hexdigest(),
-        "frames": [{"mimeType": "image/jpeg", "dataBase64": base64.b64encode(os.urandom(64)).decode()}],
-    }
-    response = await client.post("/v1/moderation/scan-media", payload)
-    assert response.status_code == 200
-    body = response.json()
-    assert body["childSafety"] == {
-        "blocked": True,
-        "signal": "hash_match",
-        "hashCheck": "matched",
-        "provider": "synthetic-sha256",
-        "matchReference": body["childSafety"]["matchReference"],
-    }
-    assert body["suggestedAction"] == "block"
-    clean = await client.post("/v1/moderation/scan-media", {**payload, "originalSha256": hashlib.sha256(os.urandom(9)).hexdigest()})
-    assert clean.json()["childSafety"]["blocked"] is False
-    assert clean.json()["childSafety"]["hashCheck"] == "clear"
-    malformed = await client.post("/v1/moderation/scan-media", {**payload, "frames": [{"dataBase64": "!!!not-base64!!!"}]})
-    assert malformed.status_code == 422

@@ -115,7 +115,9 @@ def build_hash_match_provider(
         return DisabledHashMatchProvider()
     if provider == "synthetic":
         if deployed:
-            raise HashMatchProviderMisconfiguredError("the synthetic hash list is a test double and cannot run when deployed")
+            raise HashMatchProviderMisconfiguredError(
+                "the synthetic hash list is a test double and cannot run when deployed"
+            )
         return SyntheticSha256HashMatchProvider(parse_synthetic_hashes(synthetic_hashes))
     if provider == "http":
         if not name or not endpoint or len(api_key) < 16 or (deployed and not endpoint.startswith("https://")):
@@ -126,7 +128,12 @@ def build_hash_match_provider(
     raise HashMatchProviderMisconfiguredError("unknown hash match provider")
 
 
-def match_stored_object(provider: HashMatchProvider, read_object: ObjectBytesReader | None, bucket: str, key: str) -> HashMatch | None:
+def match_stored_object(
+    provider: HashMatchProvider,
+    read_object: ObjectBytesReader | None,
+    bucket: str,
+    key: str,
+) -> HashMatch | None:
     if not provider.enabled:
         return None
     if read_object is None:

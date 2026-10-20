@@ -27,6 +27,9 @@ class RecordedRekognitionClient:
         self.calls.append(kwargs)
         return self.response
 
+    def detect_faces(self, **_kwargs: Any) -> dict[str, Any]:
+        return {"FaceDetails": []}
+
 
 def categories_for(fixture: str) -> list[LiveSafetyCategory]:
     model = RekognitionImageModerationModel(RecordedRekognitionClient(fixture))
