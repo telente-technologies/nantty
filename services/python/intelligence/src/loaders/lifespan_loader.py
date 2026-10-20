@@ -95,7 +95,7 @@ def build_application_lifespan(
             for background_job in background_jobs:
                 background_job.cancel()
                 with contextlib.suppress(asyncio.CancelledError):
-                    await asyncio.gather(background_job)
+                    _ = await asyncio.gather(background_job)
             with contextlib.suppress(Exception):
                 await container.feature_log_sink.flush_buffered_rows()
             with contextlib.suppress(Exception):

@@ -10,7 +10,7 @@ Every code change made while fixing `docs/audit/frontend-backend-audit.md` is lo
    - Replaced ellipsis (`...`) bodies with `pass` in `Protocol` methods, `@abstractmethod` methods, and the property stub. CodeQL flags a bare `...` expression as effect-free; `pass` is the explicit no-op form and keeps the stubs type-checkable.
    - Files: `interfaces/{audio_fingerprint_source,cqrs,feature_backend,intelligence_module}_interface.py`; `modules/{bot_detection,content_scoring,domain_events,live_safety,trust_advisory}/repositories/*queue_repository.py` and `*publisher*_repository.py`; `modules/{child_safety,content_scoring,live_safety,moderation}/services/*_interface_service.py` and `*_model_service.py`; `modules/live_safety/services/{csam_hash_match_interface,rekognition_image_moderation_model,transcribe_batch_transcription}_service.py`.
 2. **Two bare `await` expressions** — `src/loaders/lifespan_loader.py`, `tests/test_audit_verification_2026_10_10_http.py`.
-   - CodeQL treats `await some_expression` as an effect-free statement. Wrapping the awaited task/coroutine in `asyncio.gather(...)` preserves cancellation and exception propagation while making the expression a call with an observable result.
+   - CodeQL treats a bare `await` expression as effect-free. Wrapping the awaited task/coroutine in `asyncio.gather(...)` and assigning the result to `_` preserves cancellation and exception propagation while making the statement an assignment with an observable result. The assignment is required: a bare `await asyncio.gather(...)` would still be an expression statement.
 **Verified:**
 - `uv run ruff format --check .` → 591 files formatted; `uv run ruff check .` → clean.
 - `uv run mypy src` → 506 files clean; `uv run pytest -q` → pass.
