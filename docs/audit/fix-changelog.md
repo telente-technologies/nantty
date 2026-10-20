@@ -2,6 +2,22 @@
 
 Every code change made while fixing `docs/audit/frontend-backend-audit.md` is logged here with file, lines, audit ID, verification, and rollback notes. Investigations that concluded "no change needed" are logged too. Newest first.
 
+## 2026-10-20 — Repo hygiene: stop tracking generated Prisma clients
+
+**Context:** Social, search, and media tracked their generated Prisma clients even though `.gitignore` already listed `services/typescript/*/src/generated/`. Git ignore rules only affect untracked files, and these clients predated the rule (`f43978b71` for social, `187e619e6` for search). The checked-in copies were never used by CI or Docker: every `build`/`typecheck`/`test` script runs `prisma generate`, and the Dockerfiles regenerate before compiling.
+**Changes:**
+1. Committed the `services/typescript/*/src/generated/` ignore rule at the repository root.
+2. Removed 94 tracked generated files from the index with `git rm -r --cached`:
+   - social: 65 files (`prisma` + `identity` clients)
+   - search: 15 files
+   - media: 14 files
+3. Kept the build scripts and `scripts/stripGeneratedPrismaImports.mjs` unchanged; locally generated output is still cleaned before type checking.
+**Verified:**
+- Deleted the three generated directories, then ran `pnpm --filter @zudomart/social typecheck`, `pnpm --filter @zudomart/search typecheck`, and `pnpm --filter @zudomart/media typecheck`; all regenerate the clients and pass.
+- `git ls-files 'services/typescript/*/src/generated/**'` → 0.
+- `git status` shows only the ignore rule and the staged deletions; regenerated working-tree clients are ignored.
+**Rollback:** restore the paths from the previous commit if generated code must be vendored again; not recommended.
+
 ## 2026-10-20 — CodeQL cleanup round 3: no-effect protocol stubs and bare awaits
 
 **Audit:** CodeQL "Statement has no effect" (37 findings)

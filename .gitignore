@@ -36,3 +36,5 @@ services/python/intelligence/**/__pycache__/
 /services/go/deployables/goLive/goLive
 /services/go/deployables/goMoney/goMoney
 /services/go/deployables/goTrust/goTrust
+
+services/typescript/*/src/generated/
