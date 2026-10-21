@@ -4,10 +4,10 @@ Python service that owns every algorithmic part of Zudomart: feed and clip ranki
 recommendations, ads (targeting, auction, pacing, ad load), trending, search re-ranking, fraud/risk
 scoring, experiments, and the offline training pipeline.
 
-**The TypeScript API owns the product, Python owns intelligence, events connect them.** Python never
-reads the product database: the API sends candidates and features, Python returns scores and orderings,
-and the API forwards events that Python stores as Parquet and turns into online features in Redis.
-The API falls back to deterministic logic whenever this service is slow or down.
+**The Go and TypeScript services own the product, Python owns intelligence, events connect them.** Python never
+reads the product database: the calling service sends candidates and features, Python returns scores and orderings,
+and the service forwards events that Python stores as Parquet and turns into online features in Redis.
+The caller falls back to deterministic logic whenever this service is slow or down.
 
 The endpoint and event contract is in [apiContract.md](apiContract.md).
 

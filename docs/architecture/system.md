@@ -1,6 +1,6 @@
 # System architecture
 
-The whole system as the code stands on 2026-10-11. Every statement here was checked against the working tree; paths are given so you can check again. Topic documents in this folder go deeper, but several are dated design notes (see [README.md](README.md)); where they disagree with this file, this file and the code win.
+The whole system as the code stands on 2026-10-11, with seller-managed delivery and parcel metadata refreshed on 2026-10-21. Paths are given so you can check again. Topic documents in this folder go deeper, but several are dated design notes (see [README.md](README.md)); where they disagree with this file, this file and the code win.
 
 Principle: **design boundaries for scale, deploy minimal infrastructure first.** One Postgres with a schema per owning service, a transactional outbox into RabbitMQ, ECS Fargate rather than Kubernetes, no Kafka.
 
@@ -91,7 +91,7 @@ Each Go deployable is a binary that mounts several modules (`services/go/deploya
 | --- | --- | --- | --- |
 | gateway | 8080 | none | Routing (`src/routes/upstream.routes.ts`), access-token checks, Valkey rate limits, strict CORS, request size limits, human verification (Turnstile), admin IP allowlist, policy-acceptance gate, widget tokens, signed identity headers |
 | go-identity | 8101, gRPC 9101 | `auth`, `users`, `currency`, `admin` | Accounts, email-only sign-in, one-time codes, sessions, social sign-in, step-up, JWKS and signing keys, realtime and widget tokens; profiles and linked profiles, privacy, consents, data export and deletion, identity verification (Smile ID), creator program, checkmarks; exchange rates and locale; staff accounts, audit log, platform settings. gRPC `AccountDirectoryService` |
-| go-commerce | 8107 | `catalog`, `inventory`, `orders` (`analytics` module is a skeleton) | Stores, brands, products, reviews, seller applications; stock levels, locations, transfers; carts, checkout, shipping, orders, returns, disputes, promotions, store rewards, seller reports, order widgets |
+| go-commerce | 8107 | `catalog`, `inventory`, `orders` (`analytics` module is a skeleton) | Stores, brands, products, reviews, seller applications; stock levels, locations, transfers; carts, checkout, seller-managed delivery (rider, ETA, attempts), shipping, product parcel metadata, orders, returns, disputes, promotions, store rewards, seller reports, order widgets |
 | go-money | 8103, gRPC 9103 | `payments`, `wallet`, `ledger`, `escrow`, `subscriptions`, `creators` | Flutterwave and IAP adapters, webhooks, reconciliation, payout onboarding, provider wallets; coins, payouts, ad balances; the double-entry ledger; escrow and disputes; subscriptions and billing; creator earnings, gifts money, affiliates, brand deals. gRPC `LiveMoneyService`, `CheckoutMoneyService`, `AdsMoneyService` |
 | go-live | 8102 | `live` | Live sessions, stage and guests, battles, gifts, comments, overlays, ZudoPoints, Studio, live widgets; LiveKit tokens, ingress (RTMP, WHIP), egress recordings for replays; LiveKit webhooks |
 | go-ads | 8110 | `ads` | Ad accounts, campaigns, audiences, creatives, review, the ad decision engine, tracking, reporting, billing, boosts |
@@ -108,8 +108,8 @@ Python returns scores; Go and TypeScript make the allow, hold, review or reject 
 
 ## 4. Data ownership
 
-- **One PostgreSQL database** (17 with PostGIS locally, Aurora PostgreSQL in AWS). Each owning service has its own schema and login role, created by `infra/local/postgres/create-databases.sh`. Only the owner writes its schema; other roles read through `zudomart_readers` grants where a read model needs it.
-- Grouped roles: `svc_money` is granted the payments, wallet, ledger, escrow, subscriptions, creators and rewards roles, so every balance change in go-money commits in one transaction. `svc_commerce` likewise covers catalog, inventory and orders, so an order and its stock reservation commit together.
+- **One PostgreSQL database** (21 schemas, with PostGIS locally; Aurora PostgreSQL in AWS). Each owning service has its own schema and login role, created by `infra/local/postgres/create-databases.sh`. Only the owner writes its schema; other roles read through `zudomart_readers` grants where a read model needs it.
+- Grouped roles: `svc_money` is granted the payments, wallet, ledger, escrow, subscriptions and creators roles, so every balance change in go-money commits in one transaction. (The old `rewards` module is gone; ZudoPoints live in `live`.) `svc_commerce` likewise covers catalog, inventory and orders, so an order and its stock reservation commit together.
 - **Go** persistence is ent with Atlas-generated migrations (`modules/<module>/src/migrations`), applied on service start locally and by a pre-deploy migrate task in AWS. **TypeScript** uses Prisma (`services/typescript/<service>/prisma`); `pnpm backend:lint` refuses raw SQL in TypeScript.
 - **Valkey:** rate limits, the session denylist, widget tokens, live counters and intelligence features. It holds nothing that cannot be rebuilt.
 - **Object storage:** SeaweedFS (S3 API) locally, S3 behind CloudFront in AWS.

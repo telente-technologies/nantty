@@ -2,7 +2,7 @@
 
 2026-10-11: the previous provider was removed; Flutterwave is the sole provider.
 
-Every finding in the five reports below was checked against the current code. Each report now ends with a `## Verification (2026-10-10)` table (ID, severity, status, evidence, fix/test). Nothing is committed.
+Every finding in the five reports below was checked against the current code. Each report now ends with a `## Verification (2026-10-10)` table (ID, severity, status, evidence, fix/test). The fixes are committed; see the git history and [docs/audit/fix-changelog.md](../../../docs/audit/fix-changelog.md).
 
 Status meanings:
 - **Fixed (before):** already fixed in the code before this pass, by the owner, by the earlier remediation batches, or by Flutterwave stage 1.

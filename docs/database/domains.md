@@ -1,5 +1,7 @@
 # Domain map and table ownership
 
+> **Historical snapshot (2026-10-03).** The status column is stale: social graph, chat, marketplace, products, inventory, orders, cart, reviews, media, notifications, ads and moderation have shipped since. Use [system.md](../architecture/system.md) for current ownership and the per-module migrations for current tables.
+
 > **Creator = personal account upgrade (owner, 2026-10-03).** A creator account is the user's personal account turned into a creator account, not a separate profile. Profile types are Personal, Business/Brand and Government; `creatorStatus` (`none|pending|approved|rejected`) lives on the Personal profile and is set to `approved` when the Creator Program application is approved. It unlocks Creator Studio, going live, monetisation and earnings. Blue applies to the Personal profile whether or not it is creator-enabled.
 
 As of 2026-10-03. Labels: **EXISTING** (path cited) · **PARTIAL** (some tables exist, plan not met) · **PLANNED** (owner plan / `docs/architecture/*`, no Go tables) · **FUTURE** (after a trigger). Paths are relative to `services/go/modules/` unless noted. Scale is described with size classes, not user numbers (section 3).

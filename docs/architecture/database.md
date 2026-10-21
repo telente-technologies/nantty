@@ -10,9 +10,9 @@ Fixed decisions: one Aurora PostgreSQL + PostGIS cluster, one schema per owning 
 
 | Fact | Status | Evidence |
 | --- | --- | --- |
-| 29 schemas + roles, `zudomart_readers`, `REVOKE CREATE ON SCHEMA public` | EXISTING (local) | `infra/local/postgres/create-databases.sh` |
-| `auth` schema: account, session, refresh_token, one_time_code, signing_key, social_identity, outbox_event | EXISTING, serving | `services/go/modules/auth/internal/ent/schema` |
-| `users`, `admin`, `currency`, `ledger`, `live` ent schemas + Atlas migrations | EXISTING (uncommitted WIP, no routes) | `services/go/modules/<m>/internal/{ent/schema,migrations}` |
+| 21 schemas + roles, `zudomart_readers`, `REVOKE CREATE ON SCHEMA public` | EXISTING (local) | `infra/local/postgres/create-databases.sh` |
+| `auth` schema: account, session, refresh_token, one_time_code, signing_key, social_identity, outbox_event | EXISTING, serving | `services/go/modules/auth/src/databases/schema` |
+| `users`, `admin`, `currency`, `ledger`, `live` ent schemas + Atlas migrations | EXISTING (serving) | `services/go/modules/<m>/src/{databases/schema,migrations}` |
 | Everything else | PROPOSED; the old monolith's Prisma schema (124 models) is the reference spec | |
 
 ERD conventions: PK, FK, UK markers; quoted text lists key indexes or constraints. Cross-schema FKs are **logical only** (no DB constraint across owners); they are drawn but labelled `ref`. Every table also has `created_at`; omitted.
@@ -425,7 +425,7 @@ erDiagram
   }
 ```
 
-Status: LEDGER_ACCOUNT, JOURNAL_ENTRY, JOURNAL_LINE, RECONCILIATION_RUN/BREAK EXISTING WIP (`services/go/modules/ledger/internal/ent/schema`); the rest PROPOSED (`payments`, `wallet`, `escrow` schemas; reference the old monolith `Payment`, `WebhookEvent`, `Escrow`, `LedgerAccount`, `LedgerEntry`, `PayoutAccount`, `Withdrawal`). Balances change only by journal lines in the same tx, with `SELECT ... FOR UPDATE` on the affected ledger accounts in a fixed order (by id) to avoid deadlocks, plus `version` check. Detailed money flows: [payments.md](payments.md).
+Status: LEDGER_ACCOUNT, JOURNAL_ENTRY, JOURNAL_LINE, RECONCILIATION_RUN/BREAK EXISTING WIP (`services/go/modules/ledger/src/databases/schema`); the rest PROPOSED (`payments`, `wallet`, `escrow` schemas; reference the old monolith `Payment`, `WebhookEvent`, `Escrow`, `LedgerAccount`, `LedgerEntry`, `PayoutAccount`, `Withdrawal`). Balances change only by journal lines in the same tx, with `SELECT ... FOR UPDATE` on the affected ledger accounts in a fixed order (by id) to avoid deadlocks, plus `version` check. Detailed money flows: [payments.md](payments.md).
 
 ## 6. Livestream
 
@@ -488,7 +488,7 @@ erDiagram
   }
 ```
 
-Status: all but BATTLE_SETTLEMENT EXISTING WIP (`services/go/modules/live/internal/ent/schema/*`, migration `create_live_tables`); BATTLE_SETTLEMENT PROPOSED (belongs in go-money, keyed `battle-settle:{battleId}`). `state_deadline_at` / `ends_at` indexes support the Postgres due-time poller so timers survive restarts.
+Status: all but BATTLE_SETTLEMENT EXISTING WIP (`services/go/modules/live/src/databases/schema/*`, migration `create_live_tables`); BATTLE_SETTLEMENT PROPOSED (belongs in go-money, keyed `battle-settle:{battleId}`). `state_deadline_at` / `ends_at` indexes support the Postgres due-time poller so timers survive restarts.
 
 ## 7. Gifts and ZudoPoints
 

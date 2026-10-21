@@ -6,7 +6,7 @@ Living plan for the work in flight. Status markers:
 - **[NEXT]** — approved, ready to build
 - **[LATER]** — agreed direction, not scheduled
 
-Update this file whenever a plan item changes shape. The record of what actually changed, file by file, lives in [CHANGELOG.md](./CHANGELOG.md).
+Update this file whenever a plan item changes shape. The record of what actually changed, file by file, lives in [CHANGELOG.md](./CHANGELOG.md). Paths in older mobile entries are relative to `apps/mobile/`; a few name files in the removed monolith and are kept as history.
 
 ---
 

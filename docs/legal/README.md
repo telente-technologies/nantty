@@ -126,7 +126,7 @@ Status column is for the team to fill in.
 5. **No personalised ads for under-18s** is promised in the policies; check the ad decision engine enforces it.
 6. **Data-rights request log and 72-hour acknowledgment** are described in the Data rights page; the support service should track them.
 7. **Direct payment in Nigeria** is mentioned for verified stores (existing help content). Confirm it still exists in the Flutterwave design.
-8. **Code vs policy mismatches** found in the October 2026 benchmark (undelivered orders auto-release at 30 days, fees returned on post-payout refunds, no automatic strike pause, no CSAM reporting pipeline, web coin chargebacks not debited, ad balance withdrawal fee, Gold ad load, offer-link limit; Paystack resolved: Flutterwave only) are listed in `platformBenchmark-2026-10.md`.
+8. **Code vs policy mismatches** found in the October 2026 benchmark are listed in `platformBenchmark-2026-10.md`. Two were resolved in code on 2026-10-19: undelivered escrows now move to staff review at payment + 30 days instead of auto-releasing, and post-payout refunds recover only the seller's portion while keeping Zudomart's fees. The remaining mismatches include no automatic strike pause, no CSAM reporting pipeline, web coin chargebacks not debited, the ad balance withdrawal fee and destination, Gold ad load, and the offer-link limit. Paystack is resolved: Flutterwave only.
 
 ## 5. Questions for a Nigerian lawyer
 

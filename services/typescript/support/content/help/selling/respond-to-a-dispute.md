@@ -39,7 +39,7 @@ You can't choose the outcome yourself while a dispute is open, but you can offer
 
 ## Good to know
 
-- Escrow fees aren't charged on any part that's refunded.
+- Escrow fees aren't charged when money is refunded before release. After release, only the seller portion is recovered; Zudomart's escrow and processing fees stay with Zudomart.
 - Good evidence wins disputes: packing photos, courier receipts and tracking numbers.
 
 ## If something goes wrong

@@ -1,6 +1,6 @@
 # Zudomart documentation index
 
-Every maintained document in the repo, one line each. Third-party files (`deps/`, `node_modules/`), generated test reports and the agent files (`AGENTS.md`, `CLAUDE.md`) are not listed. Last cleaned up 2026-10-11 (see [CHANGELOG.md](CHANGELOG.md)).
+Every maintained document in the repo, one line each. Third-party files (`deps/`, `node_modules/`), generated test reports and the agent files (`AGENTS.md`, `CLAUDE.md`) are not listed. Last cleaned up 2026-10-21 (see [CHANGELOG.md](CHANGELOG.md)).
 
 ## Start here
 
@@ -9,6 +9,9 @@ Every maintained document in the repo, one line each. Third-party files (`deps/`
 - [plans.md](plans.md): the living work plan, with status markers and owner decisions.
 - [CHANGELOG.md](CHANGELOG.md): what changed, by date.
 - [../SECURITY.md](../SECURITY.md): baseline security rules for every module.
+- [ownerActions.md](ownerActions.md): the owner-action checklist still open after the handoff.
+- [audit/frontend-backend-audit.md](audit/frontend-backend-audit.md): the living front-end/back-end audit (in progress).
+- [audit/fix-changelog.md](audit/fix-changelog.md): every code change made while fixing that audit, newest first.
 
 ## Architecture (`docs/architecture`)
 
@@ -39,9 +42,9 @@ Every maintained document in the repo, one line each. Third-party files (`deps/`
 
 ## Database (`docs/database`)
 
-- [database/README.md](database/README.md): index and labels.
-- [database/domains.md](database/domains.md): domain map and table ownership by schema.
-- [database/schema.md](database/schema.md): ERDs per domain.
+- [database/README.md](database/README.md): index and labels (historical snapshot, 2026-10-03).
+- [database/domains.md](database/domains.md): domain map and table ownership by schema (historical snapshot, 2026-10-03).
+- [database/schema.md](database/schema.md): ERDs per domain (historical snapshot, 2026-10-03).
 - [database/indexes.md](database/indexes.md): index plan and validation follow-ups.
 - [database/query-patterns.md](database/query-patterns.md): hot queries and caches.
 - [database/transactions.md](database/transactions.md): transaction boundaries and idempotency keys.
@@ -68,8 +71,9 @@ Every maintained document in the repo, one line each. Third-party files (`deps/`
 - [../apps/ads/apiContract.md](../apps/ads/apiContract.md): Ads Manager API contract.
 - [../apps/admin/apiContract.md](../apps/admin/apiContract.md): admin console API contract.
 - [integrations/frontendWiring.md](integrations/frontendWiring.md): switching each app from mocks to the real gateway.
-- [verification/apiContractCheck.md](verification/apiContractCheck.md): every front-end call checked against the backend routes.
+- [verification/apiContractCheck.md](verification/apiContractCheck.md): front-end calls checked against backend routes (2026-10-05 snapshot; some mock-only rows are stale).
 - [darkModePlan.md](darkModePlan.md): design tokens, theme API and per-app dark mode status.
+- [finance-admin-profile-plan.md](finance-admin-profile-plan.md): finance/admin profile plan.
 
 ## Payments, pricing and billing
 
@@ -111,6 +115,8 @@ Every maintained document in the repo, one line each. Third-party files (`deps/`
 - [design/brandWordmark.md](design/brandWordmark.md): brand marks and how to use them.
 - [design/studioLandingReferences.md](design/studioLandingReferences.md): Studio landing references and decisions.
 - [legal/README.md](legal/README.md): legal pack and contract templates (drafts for counsel).
+- `legal/templates/*.md`: advisor, contractor, DPA, employment, MSA and NDA templates (drafts for counsel).
+- [legal/platformBenchmark-2026-10.md](legal/platformBenchmark-2026-10.md): code-vs-policy benchmark against comparable platforms (rechecked 2026-10-21).
 - `apps/*/public/storeBadges/NOTICE.md`, `packages/emailTemplates/assets/storeBadges/NOTICE.md`: App Store and Google Play badge licence notices.
 
 ## Product content (not docs)

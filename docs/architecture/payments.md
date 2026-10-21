@@ -37,7 +37,7 @@ Rule: **the product being sold decides the rail, not the app it is sold from.**
 | Holding | Escrow per order group, locked in our ledger inside the buyer's own PSA until release; release moves buyer PSA → seller PSA. Card money settles to main and is moved into the buyer's PSA. Outside NG (no PSA): direct payment, no escrow | Spendable coins (bought) and earned coins (creator side) |
 | Payee | Seller's PSA, then a withdrawal transfer to their bank (`debit_subaccount`). Commission goes PSA → Zudomart's main balance | Creator share of gifts, paid main → creator PSA, then withdrawn |
 | Owner | go-money (payments, escrow, seller balances, payouts) + go-commerce (orders) | go-money (coins, gifts, subscriptions, creators) |
-| Refund | Before release: unlock in the buyer's PSA (or refund to the card on request). After release: clawback seller PSA → buyer PSA, rest as seller debt | Store refund notification: claw back coins or flag account |
+| Refund | Before release: unlock in the buyer's PSA (or refund to the card on request). After release: refund only the amount released to the seller; Zudomart keeps the escrow and processing fees and any shortfall becomes seller debt | Store refund notification: claw back coins or flag account |
 
 ### 2.1 App-store rules (owner-relevant, verify before launch)
 
@@ -173,10 +173,10 @@ sequenceDiagram
 
 | Concern | Control |
 | --- | --- |
-| Idempotency key | Required on every money-moving POST, scoped to actor, stored with the request hash; same key + different body returns `IDEMPOTENCY_KEY_REUSED`. Reuse `services/go/platform/idempotency` (EXISTING, unwired) but persist the durable record in Postgres, Redis is only the fast path |
+| Idempotency key | Required on every money-moving POST, scoped to actor, stored with the request hash; same key + different body returns `IDEMPOTENCY_KEY_REUSED`. `services/go/platform/idempotency` is EXISTING and wired in orders, catalog, inventory, ads and live; payments keeps its durable `idempotentRequest` record in Postgres, with Valkey only as the replay cache |
 | Webhook verification | `verif-hash` compared in constant time before parsing; reject on mismatch with 401; always re-fetch by id; status, `tx_ref`, amount, currency and customer email must match the pending row, and the charge id must be unused; no ordering guarantee, so transitions are conditional |
 | Duplicate protection | Unique `(provider, provider_event_id)` and `(provider, provider_ref)`; state transition is a conditional update (`WHERE status = 'pending'`), so replays are no-ops |
-| Reconciliation | Scheduled job (`jobs-payouts` queue, EXISTING locally) compares the ledger with Flutterwave daily: every PSA balance and statement, `GET /v3/balances`, `GET /v3/settlements`, pending transfers, refunds and chargebacks; opens reconciliation cases and freezes affected wallets on mismatch; admin ledger page shows breaks (`apps/admin` commerce/ledger, MOCK-ONLY) |
+| Reconciliation | Scheduled job (`jobs-payouts` queue, EXISTING locally) compares the ledger with Flutterwave daily: every PSA balance and statement, `GET /v3/balances`, `GET /v3/settlements`, pending transfers, refunds and chargebacks; opens reconciliation cases and freezes affected wallets on mismatch; admin ledger page shows breaks (`apps/admin` commerce/ledger, wired through the admin BFF to the ledger API; mocks are only the local default) |
 | Late or missed webhook | A sweeper verifies `pending` payments older than N minutes by API poll |
 | Failed payment | No successful charge before the session timeout; reservation released at TTL; no ledger entry; retry opens a new checkout with a new reference |
 | Amount tampering | Amount comes from the server-computed checkout, never the client; provider amount compared before marking paid |
@@ -197,7 +197,7 @@ sequenceDiagram
   else buyer asks for a card refund
     M->>P: buyer PSA → main, then POST /v3/transactions/{id}/refund
   else after release
-    M->>P: clawback seller PSA → buyer PSA, rest booked as seller debt
+    M->>P: refund the seller-released portion; Zudomart keeps its fees; any shortfall is booked as seller debt
   end
   Note over P,M: chargeback (hourly poll + webhook)
   P->>M: chargeback initiated
@@ -337,13 +337,13 @@ sequenceDiagram
 
 See `marketplace.md` section 6 for the escrow state machine. Money rule: only go-money moves escrow; go-commerce requests transitions through events or an internal call and never writes ledger tables (read-only grants only). Escrow funds stay in the buyer's PSA, locked by the ledger; the `escrow` rows decide when the release transfer may be sent.
 
-## 8. Recommendations
+## 8. Recommendations (checked 2026-10-21; resolved rows are kept for history)
 
 | # | Problem | Current | Why it matters | Recommendation | Complexity | Risk | Priority |
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | 1 | App-store rule not reflected in the model | `CoinPack` in the monolith has per-currency price, no channel | Selling coins via an external web checkout inside the iOS or Android app risks rejection or removal, and store fees make a single price lose money | Add `channel` to `CoinPack` and a separate IAP product catalogue before building the mobile coin store; remove any in-app web-checkout coin path | M | High if skipped | P0, blocks store approval and margin |
-| 2 | No webhook verification or durable idempotency in new services | Redis idempotency unwired; no payments module | Replay or forged webhook credits money | Implement raw-body verification, `payment_event` unique key and Postgres idempotency records first, with tests | M | High | P0, first code in go-money |
-| 3 | IAP verification and store notifications do not exist | Contract-only in plan | Refund abuse and unverified mints | Build Apple and Google adapters with Notifications v2 and RTDN before enabling the coin store; fail closed when verification is unavailable | L | High | P0 for any mobile coin sale |
+| 2 | Webhook verification and durable idempotency | **Done.** go-money verifies raw-body signatures, stores `payment_event` uniquely and keeps Postgres idempotency records; integration tests cover replay and amount mismatch | Replay or forged webhook credits money | Keep the fail-closed tests green; no new build needed | M | High | Done (2026-10) |
+| 3 | IAP verification and store notifications | **Done.** Apple App Store, signed-data and Google Play adapters (including subscription revoke/RTDN) exist in go-money | Refund abuse and unverified mints | Keep store credentials current and test sandbox notifications before each release | L | High | Done (2026-10) |
 | 4 | Payout economics undefined | Rate and minimum are config only | Creator payouts could exceed net revenue after store fees | Finance signs off coin-to-fiat rate and store-fee accounting before launch | S | High | P1, pricing launch gate |
 | 5 | Single provider (Flutterwave) | One provider, capability interfaces | A Flutterwave outage stops checkout and payouts | Keep the capability interfaces free of provider-specific fields so another provider can be added later; outage mode hides the pay button and keeps browse and cart | M | Medium | P2, MVP optional, Near term |
 | 6 | Reconciliation | Daily Flutterwave reconciliation in code (cases, wallet freezes, alerts) | The ledger can silently diverge from PSA balances, the main balance and settlements | Keep the daily per-PSA, main and settlement recon plus the trial-balance check in CI e2e | M | Medium | P1, money integrity, MVP |

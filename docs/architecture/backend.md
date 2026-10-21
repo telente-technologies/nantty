@@ -212,7 +212,7 @@ tests/                                       (mirrors src/, files <name>.<kind>_
 
 | Field | Value |
 | --- | --- |
-| Problem | `gift_transaction`, `gift_goal`, `points_entry`, `points_rule` are ent entities in `services/go/modules/live/internal/ent/schema` |
+| Problem | `gift_transaction`, `gift_goal`, `points_entry`, `points_rule` are ent entities in `services/go/modules/live/src/databases/schema` |
 | Current | `gift_transaction` carries `ledger_transaction_id`, coin amounts and `sender_coin_balance_after`; ledger lives in `modules/ledger` (go-money). Plan says gifts belong to go-money (`backendPlan.md` 4.1) and points stay in go-live (never money) |
 | Why it matters | go-live cannot debit coins and write the gift row in one transaction with the ledger (different deployable, schema and DB role). Either money is posted without the gift row or vice versa, or a saga is needed on the hottest money path |
 | Recommendation | Move `gift_transaction` and `gift_goal` to go-money (`creators` schema), posted in the same tx as the ledger; go-live exposes `assertRecipientOnStage` and receives `gift.sent`. Points stay in go-live and never touch the money ledger. Keep `battle` scores in go-live derived from `gift.sent` events, with final settlement recomputed from go-money rows. Same-tx writes across go-money schemas (`ledger`, `creators`, `wallet`, `escrow`) need one go-money connection role with write grants on each of them; per-module `svc_<module>` roles in `create-databases.sh` do not allow that today |
@@ -240,8 +240,8 @@ Resolved: Go services now verify the access token themselves (`services/go/platf
 
 | Field | Value |
 | --- | --- |
-| Problem | `live_money.proto` exists, no server/client; no interceptors for deadline, auth, tracing |
-| Recommendation | `services/go/platform/grpcserver` + client factory with 300 ms default deadline, retry only on `UNAVAILABLE` for idempotent calls, service JWT, OTel |
+| Problem | `live_money.proto` still has no server/client; the auth-account-directory and ledger-money gRPC links exist, but there is no shared interceptor set for deadline, auth or tracing |
+| Recommendation | `services/go/modules/auth/src/integrations/accountDirectoryGrpcServer.integration.go` and `services/go/modules/ledger/src/loaders/moneyGrpc.loader.go`, plus a client factory with 300 ms default deadline, retry only on `UNAVAILABLE` for idempotent calls, service JWT, OTel |
 | Complexity | S |
 | Risk | Low |
 | Priority | **P1**: blocks gifts and checkout |

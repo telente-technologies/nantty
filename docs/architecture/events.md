@@ -8,8 +8,8 @@ As of 2026-10-03. **RabbitMQ adopted (owner, 2026-10-03)**: the event bus and jo
 
 | Piece | Status | Evidence |
 | --- | --- | --- |
-| Outbox table per module schema `(id, event_type, subject, payload jsonb, published_at)`, index `(published_at, created_at)` | EXISTING in `auth` (serving) and `users`, `admin`, `currency`, `ledger`, `live` (WIP) | `services/go/modules/*/internal/ent/schema/outbox_event.schema.go` |
-| Outbox write in the same tx as the business change | EXISTING (auth) | `modules/auth/internal/application/outbox.events.go` |
+| Outbox table per module schema `(id, event_type, subject, payload jsonb, published_at)`, index `(published_at, created_at)` | EXISTING in `auth` (serving) and `users`, `admin`, `currency`, `ledger`, `live` (WIP) | `services/go/modules/*/src/databases/schema/outbox_event.schema.go` |
+| Outbox write in the same tx as the business change | EXISTING (auth) | `modules/auth/src/events/outbox.event.go` |
 | Relay: poll 500 ms, batch 100, `FOR UPDATE SKIP LOCKED`, mark published after publish | EXISTING | `platform/events/outbox.relay.go`, `EntOutboxStore` in each module |
 | RabbitMQ publisher: confirm channel, `mandatory`, persistent, routing key = `eventType`, `message_id` = envelope id, `type` = event type, `traceparent` + `x-zudomart-subject` headers; batch fails on any nack/return so outbox rows stay unpublished | EXISTING | `platform/events/rabbitmq.publisher.go`, social `rabbitMqDomainEventPublisher.integration.ts` |
 | Bus selection `EVENT_BUS=rabbitmq` (default) or `sqs` (old SNS/SQS adapters kept for rollback), `RABBITMQ_URL` per service user | EXISTING | `platform/events/messageBus.factory.go` |

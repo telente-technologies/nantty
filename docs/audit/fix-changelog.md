@@ -270,7 +270,7 @@ Every code change made while fixing `docs/audit/frontend-backend-audit.md` is lo
 **Owner decisions (safest default implemented; not guessed):**
 1. NG Level 1 with `PAYOUT_BANK_VALIDATION=optional`: the cap stays ₦500 000/day (`withdrawalLimits.config.go:19`) on a name-matched-only bank. Default is `required`.
 2. Clawback shortfall: today it becomes seller wallet debt and the platform absorbs the returned processing fee. Should the seller bear the fee?
-3. Undelivered escrow deadline (ZM-015): it is 30 days and **releases to the seller**, as the audit asked. The alternatives are auto-refund to the buyer, or staff review.
+3. Undelivered escrow deadline (ZM-015): it is 30 days and **releases to the seller**, as the audit asked. The alternatives are auto-refund to the buyer, or staff review. **Superseded later on 2026-10-17:** the implemented path now moves the escrow to staff review; it is never auto-released or auto-refunded.
 4. Direct payouts: should the business-verification gate that withdrawals use also apply to non-NGN direct-sale payouts? It is not applied, because it blocked verified Ghana sellers.
 5. Refund to a bank account for buyers without a KYC wallet name: today it is refused (`REFUND_BANK_NAME_UNVERIFIED`). The provider capability is unimplemented anyway.
 

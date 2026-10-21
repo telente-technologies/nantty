@@ -17,7 +17,7 @@ Labels: **EXISTING** / **MOCK-ONLY** / **PROPOSED** / **OPTIONAL FUTURE**.
 | Consent banner | ABSENT | none |
 | Log redaction | PROPOSED; the old monolith's log redactor | `SECURITY.md` |
 | Python receives opaque IDs only | EXISTING contract | `services/python/intelligence/apiContract.md` |
-| Auth events carry no password material | EXISTING | `services/go/modules/auth/internal/application/outbox.events.go` |
+| Auth events carry no password material | EXISTING | `services/go/modules/auth/src/events/outbox.event.go` |
 | OTP delivery | `log` only, so no real email/SMS processor yet | `one_time_code.delivery.go` |
 
 ## 2. Personal-data flow

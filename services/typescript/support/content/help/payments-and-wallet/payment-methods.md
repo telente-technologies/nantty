@@ -1,6 +1,6 @@
 ---
 title: Payment methods and saved cards
-summary: Pay at checkout by card, bank transfer or USSD in a secure payment window. You can save a card on your phone, unlocked with your fingerprint or face. Zudomart never stores your card number.
+summary: Pay at checkout by card, bank transfer or USSD in a secure payment window, or use your Zudomart wallet balance when it covers the order. You can save a card on your phone, unlocked with your fingerprint or face.
 tags: payment, payment method, card, bank transfer, ussd, saved card, remove card, checkout, pay, debit card
 related: cart-and-checkout, saved-cards, payment-failed, pay-from-your-wallet, transactions-and-receipts, payment-scams
 ---
@@ -9,6 +9,7 @@ related: cart-and-checkout, saved-cards, payment-failed, pay-from-your-wallet, t
 
 At **Checkout**, under **Payment method**, choose:
 
+- **Pay from wallet** (Nigeria only): shown when your wallet is active and its spendable balance covers the full order total. See [Paying from your wallet](/help/payments-and-wallet/pay-from-your-wallet).
 - **Secure payment window**: pay by card, bank transfer or USSD. The list under it shows the methods available for your country. The window opens inside the app, and you finish paying there.
 - **Your saved card** (if you saved one on this phone): shown as the card brand and last 4 digits.
 

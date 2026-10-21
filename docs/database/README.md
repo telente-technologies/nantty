@@ -1,5 +1,7 @@
 # Database architecture index
 
+> **Historical snapshot (2026-10-03).** The counts and status labels below are stale; several modules marked PLANNED or 0-table have since shipped. Use [system.md](../architecture/system.md) for the current ownership map and the per-module `src/migrations` directories for current tables. The workflow and grep recipes are still useful.
+
 As of 2026-10-03. Static audit of the working tree (no EXPLAIN run: the compose Postgres was not running. EXPLAIN validation is a follow-up in [indexes.md](indexes.md#7-validation-follow-ups)).
 
 Labels: **EXISTING** (in code or migrations, path cited) · **PLANNED** (in an owner plan or `docs/architecture/*`, no Go code yet) · **FUTURE** (only after a measurable trigger fires).
@@ -30,7 +32,7 @@ Older narrative doc: `docs/architecture/database.md` (ERD proposals for planned 
 | --- | --- | --- |
 | Engine | PostgreSQL + PostGIS (Aurora PostgreSQL in prod, PLANNED) | `infra/local/docker-compose.yml`, `infra/local/postgres/create-databases.sh` |
 | Databases | `$POSTGRES_DB` (app), `zudomart_test`, `atlas_dev` (Atlas diff scratch) | `create-databases.sh` |
-| Schemas | 22, one per owning service: auth users catalog inventory orders payments wallet ledger escrow subscriptions ads creators moderation live currency admin social notifications media search support (rewards, analytics, feed, integrations, campaigns, realtime and intelligence were removed 2026-10-12: nothing used them) | `create-databases.sh` |
+| Schemas | 21, one per owning service: auth users catalog inventory orders payments wallet ledger escrow subscriptions ads creators moderation live currency admin social notifications media search support (rewards, analytics, feed, integrations, campaigns, realtime and intelligence were removed 2026-10-12: nothing used them) | `create-databases.sh` |
 | Roles | `svc_<service>` LOGIN owns schema `<service>`; all are members of `zudomart_readers` (NOLOGIN) | `create-databases.sh` |
 | Money role | `svc_money` is granted `svc_payments, svc_wallet, svc_ledger, svc_escrow, svc_subscriptions, svc_creators` (one tx across money schemas) | `create-databases.sh` |
 | Cross-schema reads | Column-level `GRANT SELECT ... TO zudomart_readers` in each owner's `*_grant_*.up.sql` migration | `services/go/modules/*/src/migrations/*grant*.up.sql` |
@@ -63,15 +65,15 @@ Every Go module with a database uses the same layout. `<m>` = `services/go/modul
 | admin | goIdentity | `admin` | EXISTING | 8 | `admin/src/modules/{auditLog,platformSettings,staffAuth,staffAdmins}`; `cmd/bootstrapSuperadmin` |
 | currency | goIdentity | `currency` | EXISTING | 2 | `currency/src/modules/exchangeRates` (`seedDefaultRates` command) |
 | ledger | goMoney (library for all money modules) | `ledger` | EXISTING | 7 | `ledger/src/databases/moneyTransaction.database.go` (`RunInMoneyTransaction`), `sharedTransactionDriver.database.go`, `modules/journal/services/ledgerPosting.service.go`, `sellerBalances/services`, `jobs/ledgerIntegrity.job.go`, `utils/idempotent*.util.go` |
-| payments | goMoney | `payments` | EXISTING (+4 tables and ~30 columns in ent not yet migrated; escrow also lacks `processing_fee_minor`; see [schema.md](schema.md#11-gaps-between-ent-schemas-migrations-and-plans)) | 8 migrated, 12 in ent | `payments/src/modules/gateway/services/*` (webhooks, settlement, refunds, payouts, connected accounts) |
+| payments | goMoney | `payments` | EXISTING | 15 migrations (see [schema.md](schema.md#11-gaps-between-ent-schemas-migrations-and-plans)) | `payments/src/modules/gateway/services/*` (webhooks, settlement, refunds, payouts, connected accounts) |
 | escrow | goMoney | `escrow` | EXISTING | 7 | `escrow/src/modules/escrows/services/escrow{Holding,Settlement,Fulfilment}.service.go`, `disputes/services` |
 | wallet | goMoney | `wallet` | EXISTING | 9 | `wallet/src/modules/coins/services`, `payouts/services/{withdrawals,payoutRun,walletOverview}.service.go` |
 | creators | goMoney (gRPC from goLive) | `creators` | EXISTING | 5 | `creators/src/modules/liveMoney/services/{giftCharging,battleSettlement}.service.go` |
 | live | goLive | `live` | EXISTING | 18 | `live/src/services/*.service.go`, `jobs/advanceDueTimers.job.go`; Valkey idempotency in `live/src/app.go` |
-| catalog, inventory, orders, analytics | goCommerce | `catalog`, `inventory`, `orders`, `analytics` | PLANNED (module stubs only: `*.module.go`) | 0 | none |
-| subscriptions, rewards | goMoney | `subscriptions`, `rewards` | PLANNED (stubs) | 0 | ZudoPoints currently live in `live.points_entries` |
-| ads | goAds | `ads` | PLANNED (stub) | 0 | none |
-| moderation | goTrust | `moderation` | PLANNED (stub) | 0 | none |
+| catalog, inventory, orders | goCommerce | `catalog`, `inventory`, `orders` | EXISTING | see migrations | `goCommerce` mounts all three; `analytics` remains a stub |
+| subscriptions | goMoney | `subscriptions` | EXISTING | see migrations | Billing, plans and creator subscriptions; rewards is removed and ZudoPoints live in `live` |
+| ads | goAds | `ads` | EXISTING | see migrations | Campaigns, audiences, billing, tracking and reporting |
+| moderation | goTrust | `moderation` | EXISTING | see migrations | Reports, copyright, strikes, suspensions and appeals |
 
 gRPC contracts touching money data: `services/contracts/proto/zudomart/money/v1/{checkout_money,live_money}.proto`, `auth/v1/account_directory.proto`.
 

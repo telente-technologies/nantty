@@ -65,9 +65,9 @@ flowchart LR
 | Prefetching | none found | none found | Gap, see recommendations |
 | Cursor pagination | `useInfiniteQuery` + IntersectionObserver on `/` and `productCollectionBrowser` | `useInfiniteQuery` in 7 files, FlatList/FlashList in 27 | Envelope `{data,nextCursor}`; **mobile unwraps `payload.data ?? payload` and drops `nextCursor`** (`apiClient.service.ts:65`) |
 | Optimistic updates | `onMutate` in `feed/postCard.tsx` (like), `settings/consentChoicesSection.tsx` | `onMutate` for follow (product, brand, store), `hooks/useProductLike.hook.ts`; offline mutation queue (`cache/offlineMutationExecutor.util.ts`) | EXISTING |
-| Idempotency | n/a | `Idempotency-Key` header sent from `apiClient.service.ts` | server side not wired (platform middleware exists, unused by routes) |
+| Idempotency | n/a | `Idempotency-Key` header sent from `apiClient.service.ts` | server side wired on the money and creation routes that require it (`services/go/platform/idempotency`); coverage varies by route |
 | Error / loading / empty | `@zudomart/web-kit` `Skeleton`, `EmptyState`, `ErrorState`; Next `error.tsx`/`loading.tsx`: webapp 2/1, studio 2/1, ads 2/2, admin 2/1, seller 1/0, web 1/0 | `components/ui/{errorState,skeleton,listSkeleton}` | seller has no `loading.tsx` |
-| Realtime | none in webapp | `/ws` client, heartbeat 25 s, 60 s missed-heartbeat close, backoff 1-30 s with jitter, mock emitter when mocks on (`services/realtime.service.ts`) | see `realtime.md` |
+| Realtime | none in webapp | `/ws` client, heartbeat 25 s, 60 s missed-heartbeat close, backoff 1-30 s with jitter, mock emitter when mocks on (`apps/mobile/src/services/core/realtime.service.ts`) | see `realtime.md` |
 | Media upload | via BFF `/bff/*` | chunked upload queue (`PUT /media/uploads/:id/chunks/:i`, `X-Chunk-Sha256`), `uploadQueue` store | see `media.md` |
 | Reduced motion | n/a | `hooks/useReducedMotionPreference.hook.ts` | EXISTING |
 | Tokens | httpOnly cookies | `utils/secureStorage.util.ts` | EXISTING |

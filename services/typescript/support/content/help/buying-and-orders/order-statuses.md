@@ -15,7 +15,7 @@ All buyers.
 
 - **Awaiting payment**: you started checkout but the payment hasn't arrived yet.
 - **Preparing**: you've paid and the seller is getting your order ready. Escrow orders also show **Paid into escrow**.
-- **On the way**: the seller has shipped it. Courier and tracking appear on the order.
+- **On the way**: the seller has shipped it. The courier or rider, tracking (if any) and expected delivery date appear on the order. If an attempt fails, the Delivery panel shows the attempt and the seller can retry.
 - **Delivered**: the seller marked it delivered. Check it and confirm, or open a dispute. You have 3 days.
 - **Completed**: you confirmed delivery, or 3 days passed after delivery with no dispute, return or refund request. For escrow orders, this is when the money is released to the seller.
 - **Disputed**: you opened a dispute. Release is paused.

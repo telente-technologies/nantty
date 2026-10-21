@@ -2,6 +2,8 @@
 
 Queue `notifications-domain-events` (RabbitMQ quorum queue bound to `zudomart.events`, envelope.v1; bindings in `infra/local/rabbitmq/topology.json`). Handlers key on the exact `type`. R = required, O = optional (email skipped or default used when absent). Producers marked "published" use the schema in `../schemas`; "unpublished" lists the fields read until the owning agent publishes.
 
+> **Order events are not wired yet (checked 2026-10-21).** goCommerce publishes `orderGroup.created`, `orderGroup.paid`, `orderGroup.statusChanged`, `orderGroup.shipped` and `orderGroup.delivered` with an order-group id and a slim payload, plus `order.created` / `order.cancelled` for the checkout shell. `notifications-domain-events` is bound to `order.*` only, and there are no `orderGroup.*` entries in `eventMappingRegistry.ts`. Treat the `order.*` rows below as the intended contract, not current behaviour; order emails and push are not delivered until the producer and consumer names and fields are reconciled.
+
 ## Published schemas (fields read)
 | Type | Producer | Fields |
 | --- | --- | --- |

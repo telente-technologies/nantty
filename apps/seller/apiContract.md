@@ -617,6 +617,8 @@ PUT body `{ items: [{ productId, placement }] }` replaces the whole ordered list
 
 ## Ads summary (read-only view of Ads Manager)
 
+> **Contract-only (2026-10-21).** There is no `GET /seller/ads/summary` route in go-ads; the seller app serves this section from mocks. Keep `/seller/ads` out of the real API prefix list until the route is mounted.
+
 Campaigns are created and edited in Ads Manager (`NEXT_PUBLIC_ADS_MANAGER_URL`, `https://ads.zudomart.com`); creating ads is not gated. The dashboard only reads results. Types in `apps/seller/src/types/ads.type.ts`.
 
 ### GET /api/v1/seller/ads/summary
@@ -648,7 +650,7 @@ Permission: reviews:manage. Body `{ reason: "spam"|"offensive"|"fake"|"not_about
 
 ## Dashboard, reports, wallet and payouts
 
-Types: `apps/seller/src/types/dashboard.type.ts`, `report.type.ts`, `wallet.type.ts`, `walletExtra.type.ts`, `finance.type.ts`; report kinds and groups in `apps/seller/src/constants/reportCatalog.constant.ts`. All Money is in the store currency. Dates in query strings are `YYYY-MM-DD` store-local dates (store `timezone`), inclusive. Online orders are the marketplace orders placed in the Zudomart app; there are no in-store sales, so reports have no channel filter. Fee model used by the demo backend (the API is the source of truth): marketplace commission 3.5% + payment processing 1.5% of the order's item subtotal, deducted before escrow is released; shipping is not part of the seller's revenue; the withdrawal fee is the payment provider's fee.
+Types: `apps/seller/src/types/dashboard.type.ts`, `report.type.ts`, `wallet.type.ts`, `walletExtra.type.ts`, `finance.type.ts`; report kinds and groups in `apps/seller/src/constants/reportCatalog.constant.ts`. All Money is in the store currency. Dates in query strings are `YYYY-MM-DD` store-local dates (store `timezone`), inclusive. Online orders are the marketplace orders placed in the Zudomart app; there are no in-store sales, so reports have no channel filter. Fee model (code and [pricing.md](../../docs/pricing.md) are the source of truth): 0% commission on products; a 1.5% escrow fee on the seller-group total including shipping (1% on the Business plan); plus Flutterwave's payment-processing fee. The escrow and processing fees are deducted before release. Shipping is not the seller's revenue; the withdrawal fee is the payment provider's fee.
 
 ### GET /api/v1/seller/dashboard
 Permission: dashboard:view (every role). Plan: free.
@@ -970,6 +972,8 @@ Revokes every session of the account except the caller's. Response 200 `{ endedC
 
 ## Developers: API keys and webhooks
 
+> **Contract-only (2026-10-21).** No `/seller/developers/*` routes are mounted; the seller app serves this section from mocks. Keep `/seller/developers` out of the real API prefix list until the routes exist.
+
 Permission: developer:manage (owner only). Plan: pro (`api_webhooks`) — every endpoint returns 402 PLAN_FEATURE_REQUIRED below Pro.
 
 ### GET /api/v1/seller/developers/api-keys
@@ -1006,6 +1010,8 @@ Query: webhookId? Response 200: CursorPage<WebhookDelivery> `{ id, webhookId, ev
 ---
 
 ## Integrations
+
+> **Contract-only (2026-10-21).** No `/seller/integrations/*` routes are mounted; the seller app serves this section from mocks. Keep `/seller/integrations` out of the real API prefix list until the routes exist.
 
 Permission: GET settings:view; connect/disconnect/sync settings:manage.
 
@@ -1127,6 +1133,8 @@ Response 200 (target): `CursorPage<MyStoreEntry>` — every store the user belon
 Backend today: returns the same `SellerAccess` as `GET /seller/access` for the store in `X-Seller-Store` (or the default store). The dashboard reads either shape (`readMyStoreEntries`), so the switcher lists only the current store until the backend returns the list. The store switch BFF checks membership by calling it with the requested store in `X-Seller-Store`.
 
 ### GET /api/v1/seller/brands
+
+> **Contract-only (2026-10-21).** The seller-brand routes below are not mounted. go-commerce has public `/brands` routes, but they are not this seller-scoped API. The seller app serves this section from mocks.
 Permission: settings:view. Response 200: `CursorPage<BrandSummary>` — brands the user is an active member of, with `myRole`, `registrationStatus`, `officialStoreStatus`, `storeCount`.
 
 ### GET /api/v1/seller/brands/directory

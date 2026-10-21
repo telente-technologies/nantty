@@ -1,5 +1,7 @@
 # Zudomart TypeScript Backend — Deep Scan Report
 
+> **Historical scan (2026-10-08).** The `apps/api` monolith named below was removed on 2026-10-10; its paths no longer exist. The ported Go services and the 2026-10-10 verification table at the end are the current evidence.
+
 > Generated: 2026-10-08
 > Scope: `apps/api`, `services/typescript/gateway`, `services/typescript/social`
 > Severity: CRITICAL / HIGH / MEDIUM / LOW

@@ -1,13 +1,14 @@
 # Zudomart backend services
 
 The backend is polyglot and lives here (the old `apps/api` monolith was removed on 2026-10-10 after everything still in
-use was ported into these services). The service map and the platform rules are
-in [`docs/architecture/microservicesPlan.json`](../docs/architecture/microservicesPlan.json) (`platform` section first),
-and the contract inventory is in [`docs/backendPlan.md`](../docs/backendPlan.md).
+use was ported into these services). The current service map is
+[`docs/architecture/system.md`](../docs/architecture/system.md); the early proposed map is
+[`docs/architecture/microservicesPlan.json`](../docs/architecture/microservicesPlan.json) (`platform` section first,
+historical). The contract inventory is in [`docs/backendPlan.md`](../docs/backendPlan.md).
 
 ## Run locally
 
-Requirements: Docker, Go 1.26, Node 24 + pnpm 11. Elixir runs in the `elixir:1.19` image, so it does not need a local install.
+Requirements: Docker, Go 1.26, Node 24 + pnpm 11. Elixir 1.19 is needed locally to run realtime as part of `backend:up`; the `elixir:1.19` image is only used by `pnpm backend:test:realtime`.
 
 ```bash
 pnpm backend:up                # everything below in one go on 127.0.0.1, plus migrations and demo seed (docs/runningLocally.md)
@@ -15,9 +16,14 @@ pnpm backend:infra:up          # infra only: Postgres+PostGIS, Valkey, RabbitMQ,
 pnpm backend:dev:identity      # go-identity on :8101 (account directory gRPC :9101) (auth module), reads services/go/.env.example
 pnpm backend:dev:social       # ts-social on :8105 (needs go-identity data for profiles), reads services/typescript/social/.env.example
 pnpm backend:dev:media        # ts-media on :8108 (S3 multipart uploads to SeaweedFS, sharp, ffmpeg if installed), reads services/typescript/media/.env.example
-pnpm backend:dev:gateway       # gateway on :8080, verifies JWTs via JWKS and proxies /api/v1/auth/* to go-identity
-pnpm backend:dev:trust         # go-trust (chat reports, advisory suspension cases) on :8106
-pnpm backend:dev:money         # go-money on :8103 (HTTP) and :9103 (internal gRPC); Flutterwave test keys are empty by default (`PAYMENTS_PROVIDER=flutterwave`)
+pnpm backend:dev:live         # go-live on :8102 (feed, live, gifts, coins)
+pnpm backend:dev:commerce     # go-commerce on :8107 (catalog, inventory, orders)
+pnpm backend:dev:gateway      # gateway on :8080; verifies JWTs via JWKS, applies CORS/rate limits and routes /api/v1/* and /webhooks/* to 11 upstreams
+pnpm backend:dev:trust        # go-trust (chat reports, advisory suspension cases) on :8106
+pnpm backend:dev:money        # go-money on :8103 (HTTP) and :9103 (internal gRPC); Flutterwave test keys are empty by default (`PAYMENTS_PROVIDER=flutterwave`)
+pnpm backend:dev:ads          # go-ads on :8110
+pnpm backend:dev:search       # ts-search on :8109
+pnpm backend:dev:support      # ts-support on :8111
 pnpm backend:dev:notifications # ts.notifications on :8104; consumes RabbitMQ, sends email through SES (LocalStack), needs `prisma migrate deploy` once
 ```
 
@@ -31,11 +37,17 @@ OpenSearch and ClickHouse. Traces: http://localhost:16686.
 | --- | --- |
 | 8080 | gateway (TS) |
 | 8101 | goIdentity |
+| 8102 | go-live |
 | 8103 / 9103 | go-money HTTP / internal gRPC |
-| 8106 | go-trust (moderation) |
-| 8105 | ts-social |
-| 8108 | ts-media |
 | 8104 | ts.notifications |
+| 8105 | ts-social |
+| 8106 | go-trust (moderation) |
+| 8107 | go-commerce |
+| 8108 | ts-media |
+| 8109 | ts-search |
+| 8110 | go-ads |
+| 8111 | ts-support |
+| 8090 | Python intelligence |
 | 4000 | realtime (Phoenix, `/ws`) |
 | 15432 | Postgres (`zudomart`, `zudomart_test`, `atlas_dev`) |
 | 16379 | Valkey |
@@ -48,7 +60,7 @@ OpenSearch and ClickHouse. Traces: http://localhost:16686.
 | 4317/4318 | OTel collector |
 
 Tests: `pnpm backend:test:go` (unit + integration against the compose Postgres; integration tests skip when it is down),
-`pnpm backend:test:gateway`, `pnpm backend:test:notifications`, `pnpm backend:test:realtime`, and `pnpm backend:lint` (300-line limit, no raw SQL in TS).
+`pnpm backend:test:gateway`, `pnpm backend:test:notifications`, `pnpm backend:test:realtime`, `pnpm backend:test:social`, `pnpm backend:test:support`, and `pnpm backend:lint` (300-line limit, no raw SQL in TS).
 
 ## Layout
 
@@ -58,10 +70,13 @@ services/
   go/
     go.work
     platform/          shared Go libraries (below)
-    modules/<service>/ one Go module per JSON service: auth, users, currency, admin (go-identity) are built, the rest are skeletons
+    modules/<service>/ one Go module per domain. All 17 are implemented except `analytics`, which is still a stub.
     deployables/       6 binaries (goIdentity, goLive, goMoney, goCommerce, goAds, goTrust, each `server.go` + Dockerfile); build context is `services`: `docker build -f go/deployables/goMoney/Dockerfile .`
   typescript/social/   Zudojs + Prisma (`social` schema): follows, blocks, posts, comments, saves, mentions, feeds, chat metadata, streaks, report intake
   typescript/gateway/  Zudojs (@zudojs/http) edge: CORS, rate limit, JWKS verification, upstream routing
+  typescript/media/    Zudojs + Prisma (`media` schema): upload sessions, S3/SeaweedFS multipart, image/video derivatives, signed CDN URLs
+  typescript/search/   Zudojs + Prisma (`search` schema): search documents, read models, OpenSearch indexing
+  typescript/support/  Zudojs + Prisma (`support` schema): Help Centre, support conversations, auto-FAQ and moderation intake
   typescript/notifications/ Zudojs + Prisma (schema `notifications`): domain-event consumer, in-app inbox, SES email, push adapter, admin email and legal notices
   elixir/realtime/     Phoenix: raw JSON WebSocket at /ws, PubSub topics, Presence, JWKS auth, domain event router
   python/              Python services (intelligence)

@@ -1,6 +1,6 @@
 ---
 title: Adding money to your wallet
-summary: In Nigeria, a payout-verified wallet is held in your name by our licensed payment partner. The app doesn't have an Add money button yet, so for now you pay at checkout. Here's how deposits work and what to do today.
+summary: In Nigeria, a payout-verified wallet is held in your name by our licensed payment partner. Open your wallet account number, then transfer money in from any Nigerian bank app.
 tags: add money, deposit, fund wallet, top up, transfer to wallet, account number, deposit fee, deposit hold, money not showing, i don pay
 related: deposit-holds, your-wallet-explained, pay-from-your-wallet, who-holds-your-money, payment-methods, verification-levels
 ---
@@ -11,20 +11,21 @@ Your Zudomart wallet holds money in your own name with our licensed payment part
 
 Nigeria only. Wallets that hold money exist only in Nigeria. In other countries you pay at checkout each time, and nothing is stored. See [Payments outside Nigeria](/help/payments-and-wallet/payments-outside-nigeria).
 
-## What the app shows today
+## Add money
 
-The **Wallet** screen has no **Add money** button, and it doesn't show a wallet account number yet. You can't top up your wallet from the app or the web right now.
+1. At **app.zudomart.com**, open **Wallet**, then **Add money**. In the app, open **Wallet** and choose **Add money**.
+2. If you haven't opened your wallet yet, finish payout verification first. See [Verification levels](/help/checkmarks-and-verification/verification-levels).
+3. Tap **Get my account number**. Your wallet account is created in your verified name.
+4. The screen shows the **Bank**, **Account number** and **Account name**. Some wallets also show another funding number under **Also works**.
+5. Transfer from any Nigerian bank app to that account number. It usually arrives within a few minutes.
 
-Until that arrives:
+You can copy the account number or share the details from the same screen. The account number is only ever shown inside the Zudomart app or on **app.zudomart.com**. If anyone sends you an account number and says it's your "Zudomart wallet", don't pay into it. See [Payment scams](/help/wallet-security/payment-scams).
 
-- Pay for orders, coins and plans at checkout by card, bank transfer or USSD. See [Payment methods and saved cards](/help/payments-and-wallet/payment-methods).
-- Sales, creator earnings and refunds on escrow orders still arrive in your wallet on their own.
+If your wallet is on hold while we check it, deposits still arrive. Contact support if the hold lasts.
 
-If anyone sends you an account number and says it's your "Zudomart wallet", don't pay into it. A wallet account number will only ever be shown inside the Zudomart app or on **app.zudomart.com**. See [Payment scams](/help/wallet-security/payment-scams).
+## How deposits work
 
-## How deposits will work
-
-These rules already apply to the wallet:
+These rules apply to the wallet:
 
 - **You need payout verification (level 1)**: your BVN consent and a bank account in your own name. Your wallet is opened in your verified name. See [Verification levels](/help/checkmarks-and-verification/verification-levels).
 - **Only confirmed money counts.** A deposit is added only after we've checked it with our payment partner. A screenshot or bank alert is never proof.

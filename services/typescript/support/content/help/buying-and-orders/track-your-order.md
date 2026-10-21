@@ -1,6 +1,6 @@
 ---
 title: Tracking your orders
-summary: See every order's status, courier and tracking number in Orders, and get a notification at each step.
+summary: See every order's status, courier or rider, tracking number and delivery updates in Orders, and get a notification at each step.
 tags: orders, tracking, status, where is my order, how far my order, delivery, courier, tracking number
 related: order-statuses, confirm-delivery, disputes-and-refunds, get-help-with-an-order, cancel-an-order
 ---
@@ -16,9 +16,9 @@ All buyers, in the app and on the web.
 1. Open your profile menu and tap **My orders**.
 2. Use the filters to narrow the list: **All**, **To ship**, **On the way**, **To confirm**, **Completed**, **Disputes**, **Cancelled**.
 3. Tap an order to see its timeline: **Paid into escrow**, **Seller preparing**, **Shipped**, **Delivered**, then **Buyer confirms or auto-release** and **Released to seller**.
-4. When the seller ships, the **Shipped** step shows the courier, tracking number and date. Tap **Track parcel** to follow it on the courier's site.
+4. When the seller ships, the **Shipped** step shows the courier or rider, tracking number (if there is one) and date. Tap **Track parcel** to follow it on the courier's site.
 
-If the seller added an estimate, you'll see "Expected by" with a date.
+If the seller added rider contact details or an estimate, the order's **Delivery** panel shows the rider's name and phone, the estimated delivery date, the number of attempts and the note from the last failed attempt. Open the order again or pull to refresh to see the latest update.
 
 ## Notifications you'll get
 
@@ -32,7 +32,7 @@ If the seller added an estimate, you'll see "Expected by" with a date.
 
 - Statuses are explained in [Order statuses](/help/buying-and-orders/order-statuses).
 - Orders paid directly show "Paid to seller" instead of "Paid into escrow".
-- The web app (app.zudomart.com) shows your orders and timeline at **Your orders**; tracking links are in the mobile app.
+- The web app (app.zudomart.com) shows the same tracking link, rider details, estimated delivery and failed-attempt information at **Your orders**. The app and the web update when the page is opened or refreshed.
 
 ## If something goes wrong
 

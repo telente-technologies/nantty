@@ -11,7 +11,7 @@ As of 2026-10-03. Labels: **EXISTING** (cite path), **PROPOSED**, **OPTIONAL FUT
 | Go OTLP/gRPC trace export, opt-in by `OTEL_EXPORTER_OTLP_ENDPOINT`; per-request tracing middleware | EXISTING | `services/go/platform/telemetry` |
 | Go request id middleware, panic recovery, request logging (slog) | EXISTING | `services/go/platform/httpserver`, `platform/logging` |
 | Gateway forwards `x-request-id`, `x-forwarded-for`, `x-real-ip`; no tracing | EXISTING | `services/typescript/gateway/src` |
-| Phoenix `telemetry.ex` metrics definitions only; no exporter | EXISTING | `services/elixir/realtime/lib/realtime_web/telemetry.ex` |
+| Phoenix `telemetry.ex` metrics definitions only; no exporter | EXISTING | `services/elixir/realtime/lib/realtimeWeb/realtime.telemetry.ex` |
 | Local OTel collector + Jaeger UI :16686 | EXISTING | `infra/local/otel/collector.yaml`, `infra/local/docker-compose.yml` |
 | Python: no tracing; HMAC headers only | EXISTING | `services/python/intelligence` |
 | Metrics backend, log shipping, dashboards, alerts, SLOs | ABSENT | `inventory.md` s6 |

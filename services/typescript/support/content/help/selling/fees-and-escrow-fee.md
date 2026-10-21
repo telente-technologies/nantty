@@ -30,7 +30,7 @@ A ₦20,000 escrow order on the Free or Pro plan: the escrow fee is ₦300. On B
 ## Good to know
 
 - Buyers never pay a checkout fee or an escrow fee.
-- No escrow fee is charged on any part of an order that is refunded.
+- No escrow fee is charged when an order is refunded before release. If you have already been paid, a refund recovers only your seller portion; Zudomart's escrow and processing fees are not refunded.
 - Plan charges and ads you pay from your wallet show in the same breakdown, but they are not order fees.
 
 See [Seller plans](/help/selling/seller-plans) for what Business includes and [Seller payouts](/help/selling/seller-payouts) for when money becomes yours to withdraw.

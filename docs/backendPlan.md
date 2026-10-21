@@ -308,7 +308,7 @@ Internal only, HMAC signed (`x-zudo-timestamp/nonce/signature`), and called by s
 16. **Ad-account invites by email** vs the existing-users-only rule (open question).
 17. **Idempotency-Key length.** Ads ≤256 vs 8–128.
 18. **Studio social sign-in.** No mock route (`apps/studio/src/mocks/auth.mock.ts`).
-19. **Live create body.** Studio `createLive(title)` is missing `category` (`apps/studio/src/app/(studio)/lives/page.tsx`).
+19. **Live create body.** Studio `createLive(title)` is missing `category` (`apps/studio/src/app/(studio)/lives/(hub)/page.tsx`).
 
 ---
 
@@ -368,7 +368,7 @@ Differences from `apps/admin/apiContract.md` and the mobile mocks (the BFF must 
 2. Staff ids, role ids and case ids are UUIDs (templates have stable UUIDs plus `isTemplate`), not `tpl_*`.
 3. Step-up header is `X-Step-Up-Token` (the console sends `X-Admin-Step-Up`); the BFF or gateway must map it.
 4. `GET /admin/admins` and the writes need `staff:manage` (not only superadmin); config writes take `value` or `content` and return `{key, value, content, version, ...}` (no `versions` / `restore` endpoints).
-5. Staff auth login still answers `{status, challengeToken}` (pre-existing), not `{mfaToken, enrollmentRequired}`; passkeys, `/admin/account/*`, warn, force-logout and PII reveal are not built.
+5. Staff auth login still answers `{status, challengeToken}` (pre-existing), not `{mfaToken, enrollmentRequired}`. Passkeys and `/admin/account/*` now exist; warn, force-logout and PII reveal are not built.
 6. `UserDetail`: wallet is empty, strikes empty, `followerCount` is the Python real-follower signal, currency and phoneMasked are null; `status` filter on `GET /admin/users` is not implemented; checkmark document previews and `checks[]` on `/admin/verifications` are empty; `grantsDashboardAccess` is always false.
 7. Admin-created BUSINESS / BRAND / GOVERNMENT accounts are single-profile accounts typed by `profileType`.
 8. ~~`GET /reports/me` lists chat reports only~~ **Done (§2.19):** `GET /reports/me` merges chat and content reports (`kind: chat|content`), newest first. `POST /verification/applications` returns `checkoutUrl: null` (billing is go-money).
@@ -383,7 +383,7 @@ Done (unit tests, plus integration tests that skip without Postgres): everything
 - **inventory**: locations, levels, summary, movements, adjustments, transfers, suppliers, reorder levels; reservations with expiry (reserve, confirm, fulfil, release, restock) behind the in-process `commerceports` ports.
 - **orders**: seller-grouped cart with shipping quotes, one-transaction checkout (orders + order groups + stock reservation) then `RegisterCheckoutPayables`, order group state machine with timeline and seller notes, buyer orders, cancel and confirm-receipt, seller orders/fulfilment/delivery, shipping profiles/zones/destinations/rules (geo ids from go-identity) recomputed at order creation with an immutable snapshot, seller-funded store credit (earn on completion, reverse on refund, redeem at checkout, liability summary), promotions (coupon, automatic, scheduled sale) applied at checkout, returns, customers read model, report JSON/CSV and export jobs. Money events (`escrow.held`, `escrow.released`, `escrow.refunded`, `dispute.opened|closed`, `directPayment.received`) arrive on the `commerce-domain-events` queue (`ORDERS_EVENTS_QUEUE`).
 - **Plan gating**: Pro/Business features answer `402 PLAN_FEATURE_REQUIRED {requiredPlan}` using go-money `GET /api/v1/internal/entitlements/{ownerAccountId}` (expects `{ "sellerPlan": "free|pro|business" }`, header `x-internal-token`; fails closed to Free). Active product and location caps return 409.
-- **Not built yet**: customer segments, CSV product import, media upload sessions, ClickHouse analytics module. (Seller disputes, flash sales, bundles and featured products: **done in the 4 Oct integration pass, §2.19**.)
+- **Not built yet**: media upload sessions and the ClickHouse analytics module. Customer segments and CSV product import are now built. (Seller disputes, flash sales, bundles and featured products: **done in the 4 Oct integration pass, §2.19**.)
 - **Needs go-money**: a refund RPC or consumer for `orderGroup.refundRequested` (payload documented in `services/contracts/events/schemas/orderGroup.refundRequested.v1.json`).
 
 ### 2.16 Consolidation notes (go-live, go-money, gateway)
@@ -399,7 +399,7 @@ Built in `services/go/modules/{catalog,inventory,orders}` (ent + Atlas, schemas 
 
 - **Done (**✅ built, go-commerce**):** GET /mart/home, /products (+featured, :id), like/bookmark, /categories, /brands, /stores/:id[/products|/reviews], reviews (GET/POST, rating-summary, store reviews), POST /analytics/product-interactions (consent-gated outbox), cart (GET/DELETE, items CRUD, shipping-quote), POST /orders/checkout, GET /orders[/:id], cancel, confirm-receipt, GET /store-rewards/me, internal GET /internal/share-cards/{product|store}/{id}.
 - **Seller:** access, store create/update, categories, products (CRUD, publish, bulk, duplicate, barcodes, usage, export), inventory (levels, summary, locations, movements, reorder, adjustments, transfers), suppliers, locations, orders (accept/reject/status/fulfilment/cancel/notes/shipping-snapshot), delivery (summary, shipments, attempts), shipping profile/rules/preview, customers (list, summary, detail, purchases, notes, export), reviews, store rewards (summary, settings), reports (6 kinds, CSV, export jobs).
-- **Differences from the mocks:** lists are `{data,nextCursor}` (featured too); `Order` adds `fulfilmentStatus` and `checkoutId`, buyer `status` collapses new/processing/ready to `paid` and refunded/returned to `cancelled`; checkout returns `orderGroups` and `orders`; ids replace size/color on cart add (size+color still accepted); levels sort supports id/onHand/reserved only; adjustments never allow negative on hand; inventory emits `order_released` movements; reorder-levels returns the three fields, not the variant; plan gating (402) is not enforced here; product import, returns/disputes seller endpoints, promotions, segments, manual customers, delivery areas, tax and finance reports are not built.
+- **Differences from the mocks:** lists are `{data,nextCursor}` (featured too); `Order` adds `fulfilmentStatus` and `checkoutId`, buyer `status` collapses new/processing/ready to `paid` and refunded/returned to `cancelled`; checkout returns `orderGroups` and `orders`; ids replace size/color on cart add (size+color still accepted); levels sort supports id/onHand/reserved only; adjustments never allow negative on hand; inventory emits `order_released` movements; reorder-levels returns the three fields, not the variant; plan gating (402) is not enforced here. Product import, seller returns, promotions, segments, manual customers, shipping profiles/zones/rules and finance/tax report endpoints now exist.
 - **Gap for go-money:** seller reject/cancel of a paid order records `orderGroup.refundRequested` (outbox) because `CheckoutMoneyService` has no refund RPC. go-money must consume it (or add a RefundOrderEscrow RPC).
 - **Events:** consumes `escrow.held`, `directPayment.received`, `escrow.released`, `escrow.refunded`, `escrow.partiallyRefunded`, `dispute.opened`, `dispute.closed` from RabbitMQ queue `commerce-domain-events` (`ORDERS_EVENTS_QUEUE`). Publishes the new `product.*`, `store.*`, `review.*`, `order.*`, `orderGroup.*`, `storeCredit.*`, `stock.*`, `reservation.*`, `transfer.*` events (schemas in `contracts/events`).
 
@@ -447,7 +447,7 @@ Today each app has one global switch (`EXPO_PUBLIC_USE_MOCKS`, `WEBAPP_USE_MOCKS
 
 - **Infra:** ECS/Fargate cluster, one Aurora PostgreSQL + PostGIS cluster (schema per owner, read-only grants), ElastiCache Redis, Amazon MQ for RabbitMQ (cluster, private subnets; quorum queues with retry queues and DLQs), S3 + CloudFront, Secrets Manager/KMS, SES, ECR, GitHub Actions deploys, OpenTelemetry collector.
 - **Services:** `ts.gateway` with a route table, JWKS verification, rate limiting, idempotency store (Redis + Postgres), request id, and region/currency headers. A shared transactional outbox + `DomainEventPublisher`/`JobQueue` interface per language (RabbitMQ adapters now, SNS/SQS kept behind `EVENT_BUS=sqs` for rollback). Event naming: `<domain>.<entity>.<event>.v1`.
-- **Acceptance:** `GET /health` through the gateway, an end-to-end trace visible across gateway → stub service, and a CI pipeline that enforces the 300-line limit (`scripts/checkFileLength`) and a no-raw-SQL lint.
+- **Acceptance:** `GET /health` through the gateway, an end-to-end trace visible across gateway → stub service, and a CI pipeline that enforces the 300-line limit (`services/scripts/check-backend-file-lengths.sh`) and a no-raw-SQL lint.
 
 ### Phase 1 — Auth and session
 

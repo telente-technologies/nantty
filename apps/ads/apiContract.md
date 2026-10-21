@@ -35,7 +35,7 @@ The browser never calls the API directly. It calls the Ads Manager BFF (`/bff/..
 | POST | /auth/refresh | `{ refreshToken }` | `{ accessToken, refreshToken, expiresIn }` (rotates; old token revoked) | 401 INVALID_REFRESH_TOKEN |
 | POST | /auth/logout | `{ refreshToken }` + `Authorization: Bearer` (the gateway requires it; the BFF refreshes once on 401) | 204 | 401 |
 | GET | /users/me | — | `{ id, name, username, email, avatarUrl }` | 401 |
-| GET | /topics | — | `Topic[]` — **mock-only** | — |
+| GET | /topics | — | `Topic[]` (go-users, public) | — |
 | PATCH | /users/me/preferences | `{ theme: "system" \| "light" \| "dark" }` (go-users; also takes `countryCode`) | 204 | 400 |
 | PUT | /users/me/consents | `{ policyVersion, consents: Record<string, boolean> }` (go-users) | consent state | 409 STALE_POLICY_VERSION |
 
@@ -148,8 +148,8 @@ Delivery (`POST /api/v1/ads/decide` in the social apps, not the Ads Manager): `D
 
 | Method | Path | Permission | Request | Response | Errors |
 |---|---|---|---|---|---|
-| GET | /ads/locations | signed in | `?search=&countryCode=` | `{ items: LocationTarget[] }` (≤25; countries, states/regions, cities; Nigeria-first ordering) — **mock-only** | — |
-| GET | /ads/behaviours | signed in | — | `{ items: Behaviour[] }` — **mock-only** | — |
+| GET | /ads/locations | signed in | `?search=&countryCode=` | `{ items: LocationTarget[] }` (≤25; countries, states/regions, cities; Nigeria-first ordering) | — |
+| GET | /ads/behaviours | signed in | — | `{ items: Behaviour[] }` | — |
 | GET | /ads/accounts/:accountId/audiences | campaigns:view | `?type=` | `Page<CustomAudience>` | 404 |
 | POST | /ads/accounts/:accountId/audiences | audiences:manage | `CreateCustomAudienceRequest` | 201 `CustomAudience` (`building`, becomes `ready`/`too_small`) | 400 (store audience without linked store, lookalike of lookalike, similarity not 1–10) |
 | POST | /ads/accounts/:accountId/audiences/customer-lists | audiences:manage | `CustomerListUploadRequest` + `Idempotency-Key` | 201 `CustomAudience` | 400 unless every row is a 64-char lowercase SHA-256 hex; 1–50,000 rows per request |
@@ -164,22 +164,22 @@ Customer lists: the browser normalizes (emails trimmed + lowercased; phones to E
 | Method | Path | Permission | Request | Response | Errors |
 |---|---|---|---|---|---|
 | GET | /ads/accounts/:accountId/billing | billing:view | — | `BillingOverview` | 404 |
-| POST | /ads/accounts/:accountId/billing/top-ups **(mock-only)** | billing:manage | `{ amount: Money, provider: "flutterwave", returnPath }` + **Idempotency-Key** (the Go handler accepts `"flutterwave"` or an empty provider and records the one actually used) | 201 `TopUpCheckout` `{ topUpId, reference, provider: "flutterwave", checkoutUrl?, authorizationUrl, accessCode? }` — the app redirects to `checkoutUrl ?? authorizationUrl` (hosted checkout, host allowlisted, no inline script); the provider returns to `https://ads.<domain><returnPath>?status=…&tx_ref=<ref>&transaction_id=…` (Flutterwave). The redirect is display-only: the return page ignores `status` and polls `GET …/top-ups/:reference` every 3 s for up to 2 min, pausing offline | 400 (amount outside min/max, wrong currency), 400 IDEMPOTENCY_KEY_REQUIRED |
-| GET | /ads/accounts/:accountId/billing/top-ups/:reference **(mock-only)** | billing:view | — | `TopUp` — verify with the provider server-side (and via webhook); credit the balance exactly once | 404 |
+| POST | /ads/accounts/:accountId/billing/top-ups | billing:manage | `{ amount: Money, provider: "flutterwave", returnPath }` + **Idempotency-Key** (the Go handler accepts `"flutterwave"` or an empty provider and records the one actually used) | 201 `TopUpCheckout` `{ topUpId, reference, provider: "flutterwave", checkoutUrl?, authorizationUrl, accessCode? }` — the app redirects to `checkoutUrl ?? authorizationUrl` (hosted checkout, host allowlisted, no inline script); the provider returns to `https://ads.<domain><returnPath>?status=…&tx_ref=<ref>&transaction_id=…` (Flutterwave). The redirect is display-only: the return page ignores `status` and polls `GET …/top-ups/:reference` every 3 s for up to 2 min, pausing offline | 400 (amount outside min/max, wrong currency), 400 IDEMPOTENCY_KEY_REQUIRED |
+| GET | /ads/accounts/:accountId/billing/top-ups/:reference | billing:view | — | `TopUp` — verify with the provider server-side (and via webhook); credit the balance exactly once | 404 |
 | POST | /ads/accounts/:accountId/billing/fund-from-earnings | billing:manage (and the account owner) | `{ amount: Money }` + **Idempotency-Key** | 201 `EarningsFunding` `{ fundingId, amount, status: "succeeded" }` — moves the caller's "Available to withdraw" (GET /wallets/me) into this ad account's prepaid balance. UI label "Pay from my Zudomart balance", next to the card top-up; a new key per attempt, reused only to retry the same amount after a network/5xx failure | 403 VERIFICATION_REQUIRED, 403 FORBIDDEN (not the owner), 409 IDEMPOTENCY_KEY_REUSED, 422 INSUFFICIENT_FUNDS ("Amount is more than your available balance.") |
 | GET | /ads/verification | signed in | — | `AdsVerification` `{ level, verified, nextStep, message, verifyUrl }` — when `verified` is false the app shows a "Verify to advertise" prompt linking to `verifyUrl` (only http/https URLs are followed) | 503 VERIFICATION_UNAVAILABLE |
 | GET | /wallets/me (go-money) | signed in, GET only | — | `ZudomartWalletSummary` (apps/ads/src/types/zudomartWallet.type.ts). The billing page renders `lines` in order with the backend `label` and `description`, coins (currency `"COIN"`) as "N coins", never summed | 401 |
 | GET | /ads/accounts/:accountId/billing/transactions | billing:view | `?cursor=&limit=` | `Page<BillingTransaction>` (signed amounts) | 404 |
-| GET | /ads/accounts/:accountId/billing/transactions/:transactionId/receipt **(mock-only)** | billing:view | — | PDF (`Content-Disposition: attachment`) | 404 NO_RECEIPT |
-| GET | /ads/accounts/:accountId/billing/invoices **(mock-only)** | billing:view | `?cursor=&limit=` | `Page<Invoice>` monthly, with VAT | 404 |
-| GET | /ads/accounts/:accountId/billing/invoices/:invoiceId/download **(mock-only)** | billing:view | — | PDF attachment | 404 |
+| GET | /ads/accounts/:accountId/billing/transactions/:transactionId/receipt | billing:view | — | PDF (`Content-Disposition: attachment`) | 404 NO_RECEIPT |
+| GET | /ads/accounts/:accountId/billing/invoices | billing:view | `?cursor=&limit=` | `Page<Invoice>` monthly, with VAT | 404 |
+| GET | /ads/accounts/:accountId/billing/invoices/:invoiceId/download | billing:view | — | PDF attachment | 404 |
 | PUT | /ads/accounts/:accountId/billing/spend-limit | billing:manage | `{ amount: Money \| null }` (monthly account spending limit; null removes) | `BillingOverview` | 400 |
 | PUT | /ads/accounts/:accountId/billing/funding-mode | billing:manage | `{ fundingMode }` | `BillingOverview` | 400 (card modes need a card; go-ads accepts only `prepaid` for now) |
 | POST | /ads/accounts/:accountId/billing/payment-methods **(mock-only)** | billing:manage | `{ provider, returnPath }` + **Idempotency-Key** | 201 `TopUpCheckout` (card authorization on the hosted checkout page; returns with `?cardReference=`) | 400 |
 | POST | /ads/accounts/:accountId/billing/payment-methods/:paymentMethodId/default **(mock-only)** | billing:manage | — | `BillingOverview` | 404 |
 | DELETE | /ads/accounts/:accountId/billing/payment-methods/:paymentMethodId **(mock-only)** | billing:manage | — | 204 | 409 CARD_REQUIRED |
 
-go-money already serves `POST /ads/balance/top-ups` (`{ adAccountId, amount, returnTo }` + Idempotency-Key → `{ id, adAccountId, reference, status, amount, checkoutUrl }`, NGN only, ₦1,000–₦10,000,000), but go-ads does not credit the ad account from it and has no status lookup, so the app keeps the account-scoped top-up rows above (mock-only).
+go-ads starts a top-up through go-money (`POST /ads/balance/top-ups`), stores the reference, and `GET …/billing/top-ups/:reference` refreshes it from go-money and credits the ad balance exactly once when the provider reports success. The app polls that status endpoint after the hosted checkout redirect. Payment-method management remains mock-only.
 
 Spend order: ad credits (Gold Premium monthly grant, expires at month end) → prepaid balance → default card (when `fundingMode` allows). Delivery pauses at zero available funds or when the monthly spend limit or a campaign `spendCap` is reached. Card data never touches Zudomart servers (tokenized by the provider). The mock adapter returns plain-text receipts and invoices; the real API returns PDFs. The ads service bills on actual second-price clearing; creator revenue share for ads served on creator content is computed server-side and is not exposed to advertisers.
 
@@ -198,7 +198,7 @@ Metric definitions: CTR = clicks/impressions; CPC = spend/clicks; CPM = spend/im
 
 ## Tools
 
-Every row in this section is **mock-only**.
+Every row in this section is backed by a go-ads route (added 2026-10-21). The Ads Manager can keep using its mock adapter until its real API prefixes are switched on.
 
 | Method | Path | Permission | Request | Response | Errors |
 |---|---|---|---|---|---|

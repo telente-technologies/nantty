@@ -49,7 +49,7 @@ Root `package.json`: pnpm 11 workspace over `apps/*`, `packages/*`, `services/ty
 | Admin extras | MFA enrollment, passkey (WebAuthn) options, step-up, keep-alive BFF routes | `apps/admin/src/app/bff/auth/{mfa,step-up,keep-alive}/**` |
 | Tests | No frontend test files exist. Only `apps/mobile` has a `test` script (`jest`) and `apps/mobile/tests/` holds `.gitkeep` only. The other Next apps only define `typecheck` (web has none). `pnpm test` therefore runs nothing for the UI | `apps/*/package.json`, `find` of `*.test.*` (48 files, all under the old monolith) |
 | Error/empty/loading kit | Web: `@zudomart/web-kit` has `skeleton`, `emptyState`, `errorState`; mobile has own `ui/{errorState,skeleton,listSkeleton}`; webapp `components/ui/feedback.tsx`; admin/ads `ui/feedback.module.css`. Next `error.tsx`/`loading.tsx`: webapp 2/1, studio 2/1, ads 2/2, admin 2/1, seller 1/0, web 1/0 | `packages/webKit/src/*`, `apps/mobile/src/components/ui/*`, find of `error.tsx`, `loading.tsx` |
-| Realtime client | Mobile opens `wss://<apiBase>/ws`, sends `{type:"auth",accessToken}`, heartbeat 25 s, backoff 1-30 s, with a mock emitter in mocks mode | `apps/mobile/src/services/realtime.service.ts`; matches `services/elixir/realtime/lib/realtime_web/client_socket.ex` |
+| Realtime client | Mobile opens `wss://<apiBase>/ws`, sends `{type:"auth",accessToken}`, heartbeat 25 s, backoff 1-30 s, with a mock emitter in mocks mode | `apps/mobile/src/services/core/realtime.service.ts`; matches `services/elixir/realtime/lib/realtimeWeb/clientSocket.socket.ex` |
 
 ### 1.2 Per-app inventory
 
@@ -122,9 +122,9 @@ Auth module detail:
 | Social identities | `social_identities` table and `AUTH_GOOGLE_*`/`AUTH_APPLE_*` config exist; no social login route in `auth.routes.go` at snapshot time |
 | Staff auth | `AUTH_STAFF_ACCESS_TOKEN_TTL` config and `platform/staffauth` exist; no staff/admin login route |
 | Absent in module | password reset route, `/api/v1/auth/sessions` list/revoke, devices, MFA, passkeys, per-endpoint rate limit |
-| ent schemas | `account`, `session`, `refresh_token`, `one_time_code`, `signing_key`, `social_identity`, `outbox_event` (`internal/ent/schema/*.schema.go`) |
+| ent schemas | `account`, `session`, `refresh_token`, `one_time_code`, `signing_key`, `social_identity`, `outbox_event` (`src/databases/schema/*.schema.go`) |
 | Migrations | Atlas, embedded: `20261003094035_create_auth_tables`, `20261003094100_grant_read_access_to_other_services`, `20261003100736_add_social_identities` (+ down files, `atlas.sum`); applied automatically at start by `postgres.ApplyPendingMigrationsFromEmbeddedDirectory` |
-| Events emitted | `account.registered`, `account.loggedIn`, `session.refreshTokenReuseDetected` via outbox (`internal/application/outbox.events.go`) |
+| Events emitted | `account.registered`, `account.loggedIn`, `session.refreshTokenReuseDetected` via outbox (`src/events/outbox.event.go`) |
 | Tests | `auth.module_integration_test.go` (2 tests: full register-login-refresh-reuse-logout flow, OTP lockout after 5 attempts; need compose Postgres), `credentials_test.go`, `signing_key.selection_test.go`, `input.validation_test.go` |
 | Env | `AUTH_DATABASE_URL`, `AUTH_DATABASE_SCHEMA=auth`, `AUTH_TOKEN_ISSUER/AUDIENCE`, `AUTH_SIGNING_KEY_ENCRYPTION_KEY`, `AUTH_ONE_TIME_CODE_PEPPER`, `DOMAIN_EVENTS_TOPIC_ARN` (`services/go/.env.example`) |
 
@@ -157,7 +157,7 @@ Dockerfile: multi-stage `golang:1.26-alpine` to `distroless/static-debian13:nonr
 | Item | Finding | Evidence |
 | --- | --- | --- |
 | Deps | phoenix 1.8, bandit, jose, telemetry, dns_cluster; no ecto, no phoenix_pubsub-redis | `mix.exs` |
-| Transport | Raw JSON WebSocket at `/ws` (a `Phoenix.Socket.Transport`, **not Phoenix Channels**), 64 KB max frame, `check_origin` via `OriginPolicy` (`ALLOWED_ORIGINS`, required in prod), `GET /healthz` | `lib/realtime_web/endpoint.ex`, `router.ex` |
+| Transport | Raw JSON WebSocket at `/ws` (a `Phoenix.Socket.Transport`, **not Phoenix Channels**), 64 KB max frame, `check_origin` via `OriginPolicy` (`ALLOWED_ORIGINS`, required in prod), `GET /healthz` | `lib/realtimeWeb/endpoint.ex`, `router.ex` |
 | Socket auth | First frame `{type:"auth",accessToken}` within 10 s else close; JWKS verification with key cache; auto-subscribes `user:<accountId>` | `client_socket.ex`, `auth/{access_token_verifier,jwks_key_cache}.ex` |
 | Client frames | `ping`, `auth`, `subscribe`, `unsubscribe`, `typing`; max 50 subscriptions per socket | `client_socket.ex` |
 | Topics | `user:<id>` (own only), `conversation:<id>` (membership checker defaults to **deny all**), `live:<id>` and `battle:<id>` (any authenticated user) | `topics/topic_authorizer.ex` |
@@ -194,7 +194,7 @@ Dockerfile: multi-stage `golang:1.26-alpine` to `distroless/static-debian13:nonr
 
 ## 3. Data model inventory
 
-Legend: A = the old monolith Prisma model (124 total, reference), G = Go ent entity (EXISTING, `services/go/modules/*/internal/ent/schema`), P = PROPOSED only (microservicesPlan.json / backendPlan.md).
+Legend: A = the old monolith Prisma model (124 total, reference), G = Go ent entity (EXISTING, `services/go/modules/*/src/databases/schema`), P = PROPOSED only (microservicesPlan.json / backendPlan.md).
 
 | Domain | Prisma (A) | ent (G) | Status in services |
 | --- | --- | --- | --- |
@@ -246,14 +246,14 @@ DB layout: one Postgres, per-service schema and `svc_<service>` login role for 2
 
 | Item | Status | Evidence |
 | --- | --- | --- |
-| Outbox table | EXISTING in `auth` and `live` ent schemas (`id, event_type, subject, payload jsonb, published_at`); auth writes events in the same transaction as the business change | `modules/auth/internal/application/outbox.events.go`, `modules/*/internal/migrations/*create*` |
+| Outbox table | EXISTING in `auth` and `live` ent schemas (`id, event_type, subject, payload jsonb, published_at`); auth writes events in the same transaction as the business change | `modules/auth/src/events/outbox.event.go`, `modules/*/internal/migrations/*create*` |
 | Relay | EXISTING: polling relay (500 ms, batch 100) `platform/events/outbox.relay.go`, run from the auth module's background worker, publishes via `DomainEventPublisher` | `modules/auth/auth.module.go` |
 | Publisher | EXISTING SNS publisher `platform/events/sns.publisher.go`; dev fallback `DiscardingPublisher` marks events published without sending; production requires `DOMAIN_EVENTS_TOPIC_ARN` | `auth.module.go` `createDomainEventPublisher` |
 | Failure handling in relay | no attempt counter or dead-letter column on the outbox row; a failed batch is logged and retried on the next tick forever | `outbox.relay.go` |
 | Envelope | `platform/events/event.envelope.go` builds `{id,type,source,subject,version,occurredAt,data}`; JSON Schema `services/contracts/events/schemas/envelope.v1.json` | |
 | Event schemas | 3 domain events only: `account.registered`, `account.loggedIn`, `session.refreshTokenReuseDetected` (+envelope) | `services/contracts/events/schemas/*`, `asyncapi.yaml` (AsyncAPI 3.0, one channel `zudomart-domain-events`, 1 operation `publishAuthEvents`) |
 | Events consumed but undefined | Elixir router handles `gift.sent`, `goal.*`, `leaderboard.updated`, `live.*`, `guest.*`, `stage.updated`, `battle.*`, `message.created`, `notification.created`; none has a JSON Schema or a producer | `domain_event_router.ex` vs `contracts/events/schemas` |
-| Local topology | SNS `zudomart-domain-events`; consumer queues `users-`, `notifications-`, `realtime-`, `intelligence-domain-events` subscribed with RawMessageDelivery; job queues `jobs-email`, `jobs-media`, `jobs-reports`, `jobs-payouts`, `jobs-search-indexing`; each with a `-dlq`, `maxReceiveCount=5`, visibility timeout 60 s | `infra/local/localstack/create-topics-and-queues.sh` |
+| Local topology | SNS `zudomart-domain-events`; consumer queues `users-`, `notifications-`, `realtime-`, `intelligence-domain-events` subscribed with RawMessageDelivery; job queues `jobs-email`, `jobs-media`, `jobs-reports`, `jobs-payouts`, `jobs-search-indexing`; each with a `-dlq`, `maxReceiveCount=5`, visibility timeout 60 s | `scripts/localStack (queue/topic bootstrap)` |
 | Filter policies | AsyncAPI says consumers subscribe "with a filter policy on eventType"; the local script subscribes **without** filter policy (`RawMessageDelivery=true` only), and raw delivery drops the `eventType` message attribute envelope that a filter would need | script vs `asyncapi.yaml` description |
 | Consumers (real) | Only Elixir `SqsConsumer` (queue `realtime-domain-events`). No Go SQS consumer in use (`SqsQueues.ConsumeQueueUntilContextDone` exists in `platform/events/sqs.queue.go`, with no caller). Intelligence has no consumer | grep |
 | Job queues | `SqsQueues.EnqueueJob` exists in platform; nothing enqueues or consumes jobs; the old monolith used an in-process scheduler | `sqs.queue.go`, the old monolith's scheduler |

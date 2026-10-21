@@ -32,7 +32,7 @@ Sellers, for paid orders that aren't in dispute.
 
 ## Good to know
 
-- No escrow fee is charged on any part that's refunded.
+- No escrow fee is charged when you refund before release. After release, only your seller portion is recovered; Zudomart's escrow and processing fees are not refunded.
 - Refunding after release takes the money back from your earnings. If you've already withdrawn it, it shows as **Owed to Zudomart**: "Refunds or chargebacks taken from your next earnings." See [Owed to Zudomart](/help/payments-and-wallet/owed-to-zudomart).
 - Store credit the buyer earned on the order is taken back.
 - For direct-payment orders, buyers rely on you for refunds.

@@ -13,7 +13,7 @@ Sections 1 and 2 were rewritten on 2026-10-11 from the code. Sections 3 to 7 are
 | Live presence: joins and leaves are batched and posted to go-live, which owns viewer counts | `lib/realtime/presence/livePresence.forwarder.ex`, `livePresence.client.ex` |
 | RabbitMQ consumer of `realtime-domain-events`, deduplicating the last 10 000 event ids, with retry and dead-letter handling from the broker topology | `lib/realtime/events/amqp.consumer.ex`, `infra/local/rabbitmq/topology.json` |
 | Event routing to topics with throttles for high-rate updates; account enforcement (suspension, ban or session revocation closes the affected sockets) | `lib/realtime/events/domainEvent.router.ex`, `conversationEvent.router.ex`, `accountEnforcement.router.ex`, `throttle.util.ex` |
-| Clients: the mobile app (`apps/mobile/src/services/realtime.service.ts`, with a mock emitter in mock mode) and the seller inbox (`apps/seller/src/services/realtime/`, through its BFF) | |
+| Clients: the mobile app (`apps/mobile/src/services/core/realtime.service.ts`, with a mock emitter in mock mode) and the seller inbox (`apps/seller/src/services/realtime/`, through its BFF) | |
 | Live media: LiveKit rooms, tokens, RTMP and WHIP ingress, egress recordings, all driven by go-live | `services/go/modules/live/src/integrations/liveKit*.integration.go` |
 
 ## 2. Core flow

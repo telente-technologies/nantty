@@ -1,6 +1,6 @@
 # Frontend wiring: switching from mocks to the real backend
 
-As of 2026-10-05 (contract check: [apiContractCheck.md](../verification/apiContractCheck.md)). Mocks stay the default in every app. Nothing changes until a prefix variable is set. Gateway: `http://localhost:8080` (`pnpm backend:dev:gateway`, see `services/README.md`).
+As of 2026-10-05, refreshed 2026-10-21 for routes that have since landed (contract check: [apiContractCheck.md](../verification/apiContractCheck.md)). Mocks stay the default in every app. Nothing changes until a prefix variable is set. Gateway: `http://localhost:8080` (`pnpm backend:dev:gateway`, see `services/README.md`).
 
 ## How the switch works
 
@@ -59,7 +59,7 @@ Apps: mobile, webapp, studio, seller, ads. Backend: go-identity behind the gatew
 - [ ] Username policy, availability reasons, change errors.
 - [ ] Profiles list and acting profile (mobile); business profile creation with `categories`.
 - [ ] Addresses: list is an envelope, response has `countryCode`, geo ids, `display`. Mobile sends `countryId` (id or code) with state/LGA/city ids. Webapp address form has no geo pickers yet: do not switch addresses for the webapp until it does.
-- [ ] Countries and currency in settings. Theme is not stored server-side yet: `PATCH /users/me/preferences {theme}` is rejected (only `countryCode`), so keep theme local until go-identity has the field.
+- [ ] Countries and currency in settings. Theme is stored server-side: `PATCH /users/me/preferences` accepts `theme` (`system|light|dark`); `GET /users/me` returns it. The seller app already sends it.
 - [ ] Privacy: consents `GET/PUT /users/me/consents` (web cookie banner uses the PUT when signed in), export `GET/POST /users/me/data-exports`, deletion `POST /users/me/deletion-request {confirm, reason}`.
 - [ ] Webapp guests: `/lives/suggested`, `/users/suggested`, `/gifts`, `/lives/:id/comments`, `/users/:id` need auth at the gateway, so guests get 401 once these are switched.
 - Still mocked under these prefixes: `/users/me/settings`, `/topics`, `/users/me/topics`, `/users/me/blocked`, follows, verification, brands. Keep their paths out of the list until built (prefix `/api/v1/users` covers them, so expect 404s there until ts-social and settings land).
@@ -103,7 +103,7 @@ Payout onboarding screens are owned by another workstream; coordinate before swi
 - [x] Seller domains backed 2026-10-05: settings, storefront, staff and audit log, wallet and payouts, finance, dashboard, analytics, delivery areas, customers (create/update, segments), marketing overview and product options. `apps/seller/.env.example` now lists them in `SELLER_REAL_API_PREFIXES` (mocks stay the default switch).
 - [x] Payout onboarding: the dashboard calls `/payments/payout-onboarding/me/*` and `/payments/payout-fees`; the BFF forwards them (owner only, `wallet:withdraw`).
 - [x] Store rewards save through `PUT /seller/marketing/rewards/settings` (the settings PATCH no longer carries `storeRewards`).
-- [ ] Still mocked (57 calls): affiliates, brands workspace, conversations (incl. `POST /seller/orders/:id/conversation`, which sits under the `/seller/orders` prefix), developers, integrations, security sessions, subscription details/verify/trial verify and cancel, verification, preferences, consents, ads summary, product import (under `/seller/products`). Business documents still need the two-step upload. Leave `/seller/subscription` off the prefix list until `GET /seller/subscription` exists.
+- [ ] Still mocked: brands workspace, developers (API keys and webhooks), integrations and ads summary. Affiliates, conversations, security sessions, subscription details/verify/trial verify and cancel, verification, preferences, consents and product import now have Go routes and are in `SELLER_REAL_API_PREFIXES`. Business documents still need the two-step upload.
 - [ ] App side: the Zudomart app must show team requests (`GET /stores/team-requests`, accept/decline) so invited staff can join.
 
 ### 8. Ads (`/api/v1/ads`)
@@ -112,13 +112,13 @@ Apps: ads (and the mobile ad events path).
 
 - [ ] Memberships, accounts, campaigns, reports, billing lists go through `adaptListEnvelope`.
 - [ ] `Idempotency-Key` length (ads allows 256, server 8 to 128): keep keys under 128. Required on account, campaign, duplicate, ad set, ad, customer list and boost creation (all sent now).
-- [ ] Invites: go-ads invites by `username`, the UI by email. Do not switch `/ads/accounts/*/invites` until one side changes.
-- [ ] Billing top-ups, invoices, payment methods, conversion events, experiments, rules, locations and behaviours have no backend yet.
+- [x] Invites: go-ads accepts `{email, role}` or `{username, role}`; an email-shaped username is looked up as an email. The UI can invite by email without a backend change.
+- [ ] Payment methods and `POST /creatives/preview` are still mock-only. Billing top-ups, top-up status, invoices, receipts, conversion events, experiments, rules, locations and behaviours now have go-ads routes.
 
 ### 9. Admin (`/api/v1/admin`)
 
-- [ ] Staff login with TOTP and step-up; step-up prompts still work. The BFF now speaks the backend shape (`challengeToken`, `/mfa/enroll/start|confirm`, `staff`); passkeys and recovery codes are not in the backend.
-- [ ] Not built in the backend: metrics overview, own account sessions/passkeys, appeals, orders, refunds, payouts detail, coins review, ledger accounts/entries, catalog admin, brands, reserved usernames (backend path is `/admin/usernames/reserved`).
+- [ ] Staff login with TOTP and step-up; step-up prompts still work. The BFF now speaks the backend shape (`challengeToken`, `/mfa/enroll/start|confirm`, `staff`). Passkeys, recovery codes and own-account sessions are mounted under `/admin/account/*`.
+- [ ] Metrics overview, appeals, orders, refunds, payouts, coins, ledger, catalog admin, brands and reserved usernames now have admin routes. Remaining gaps include automation, withheld-usernames/confusables preview, email-template preview, payout detail/decide and coin review actions; verify route-by-route before switching each area.
 - [ ] Tables use `{data,page,pageSize,total}`; cursor lists (audit log) show without page numbers.
 
 ## Contract tests

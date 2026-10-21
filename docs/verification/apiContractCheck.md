@@ -1,5 +1,7 @@
 # API contract check: frontends against the real backend
 
+> **Historical snapshot (2026-10-05).** The counts, mock-only rows and "no backend" notes are stale. Several seller, ads, admin and delivery routes have shipped since; use [frontendWiring.md](../integrations/frontendWiring.md) and the current route tables before switching a prefix. The method and the fixed-mismatch history are still useful.
+
 As of 2026-10-05. Method: every API call in the six apps was extracted from source (service files, BFF routes, components; the `*_REAL_API_PREFIXES` switches send every call through the same client), normalised (`:p` = path parameter) and matched against the routes actually registered by the Go services, the TS services and the gateway route table (`services/typescript/gateway/src/routes/upstream.routes.ts`). Then: auth via the gateway table, request body keys against the Go DTO the controller decodes (Go decoders reject unknown fields, so an extra key is a 400), the list envelope, money shape, the error codes the UI branches on, and required `Idempotency-Key` headers. Seller, ads and admin calls were also checked against their `apiContract.md`.
 
 Statuses: **matches** (path, method and gateway route agree), **fixed** (was wrong, fixed in this pass), **mismatch** (both sides exist but disagree; open), **mock-only** (no backend route). Extraction is static, so a few calls built from helpers are matched by hand; the live run below confirms the main paths.
@@ -15,7 +17,7 @@ Statuses: **matches** (path, method and gateway route agree), **fixed** (was wro
 | ads | 81 | 54 | 4 | 0 | 23 |
 | admin | 191 | 134 | 5 | 2 | 50 |
 
-Counts updated 2026-10-05 after the theme, ads-invite and guest-read fixes.
+Counts are the 2026-10-05 snapshot; they are not current.
 
 ## Live run against the real gateway
 
@@ -56,7 +58,7 @@ Afterwards the host services were stopped and `docker compose stop` was run. The
 
 - ~~**Ads invites**~~ fixed 2026-10-05: go-ads accepts `{email, role}` or `{username, role}` (a `username` that is an email address is looked up by email). Misses say "No Zudomart user has that email. Ask them to sign up first, then invite them." The response carries the invitee's `username`, never their email; the pending-invites table shows `@username`.
 - ~~**Theme preference**~~ fixed 2026-10-05: `profiles.theme` (`system` default, `light`, `dark`; migration `users/20261005022135_add_profile_theme`). `PATCH /users/me/preferences` takes `countryCode` and/or `theme`; `GET /users/me` returns `theme`.
-- ~~**Webapp guest reads**~~ fixed 2026-10-05: `/lives/suggested`, `/users/suggested`, `/gifts`, `/lives/:id/comments` and `/users/:id` are no longer forwarded as anonymous reads. Guests see a sign-in prompt (`SignInRequiredState`) on the live list, live chat and gift tray instead of an error; the who-to-follow rail is hidden for guests; any page that passes its query error to `ErrorState` shows the prompt on a 401. Still open: `/videos`, `/trending`, `/topics`, `/mart/highlights` and `/creators/:id/subscription-plans` have no backend at all.
+- ~~**Webapp guest reads**~~ fixed 2026-10-05: `/lives/suggested`, `/users/suggested`, `/gifts`, `/lives/:id/comments` and `/users/:id` are no longer forwarded as anonymous reads. Guests see a sign-in prompt (`SignInRequiredState`) on the live list, live chat and gift tray instead of an error; the who-to-follow rail is hidden for guests; any page that passes its query error to `ErrorState` shows the prompt on a 401. Still open: `/videos` and `/trending` have no backend. `/topics`, `/mart/highlights` and `/creators/:id/subscription-plans` now have Go routes.
 - **Seller dashboard**:
   - Business documents need the two-step upload: `/{kind}/upload-intents`, then `PUT /{kind}`.
   - ~~Customers have no create or update~~ fixed 2026-10-05 (store customer profiles in go-commerce).
@@ -65,10 +67,9 @@ Afterwards the host services were stopped and `docker compose stop` was run. The
 - **Admin**:
   - Reserved usernames are `/admin/reserved-usernames` in the UI and contract, but `/admin/usernames/reserved` in the backend, with different bodies.
   - The backend has no withheld-usernames list and no confusables preview.
-  - There is no payout detail or decide; the backend has `/admin/withdrawals/{id}/review` instead.
-  - There is no coin transaction review or reverse.
-  - There are no ledger accounts or entries; the backend has `/admin/ledger/statement` and `/integrity`.
-  - Passkeys, recovery codes and admin sessions have no backend. Their BFF routes return the backend's 400 or 404.
+  - There is no `/admin/payouts/{id}/decide`; the backend has `GET /admin/withdrawals/{id}` and `POST /admin/withdrawals/{id}/review` instead.
+  - Coin review and reverse exist at `/admin/coins/transactions/{id}/mark-reviewed` and `/reverse`; use those paths.
+  - Ledger accounts, journal entries and reversals exist at `/admin/ledger/accounts`, `/journal-entries` and `/journal-entries/{id}/reversal`.
 - **Studio**: pinning a live product (`POST /lives/:id/products`) and `/live-products` have no backend. There is no `GET /overlay-scenes` list; scenes exist per live.
 - **Lists in the ads and admin contracts**: the contracts say `{items}`, but the backend sends `{data, nextCursor}`. `adaptListEnvelope` converts at the client boundary, so this works, but the contract text is out of date.
 
@@ -117,9 +118,9 @@ Grouped by area (the per-app tables have the full list):
 - **Social and discovery**: topics (`/topics`, `/users/me/topics`), `/users/me/settings`, marketing preferences, channels, `/videos`, `/trending`, `/mart/highlights`, `/places/search`, store follow, brand detail, products, follow and create, `GET /battles/:id`, `/tips`, `/sitemap/*`.
 - **Creator program**: dashboard, affiliations, earnings, revenue rules, subscription plans and subscriptions (`/creators/me/subscription-plans`, `/creator-subscriptions/*`), affiliated products, `/creators/me`.
 - **Verification**: `/verification/plans`, `/verification/subscription/cancel`, and the payout-onboarding `document-link/complete` mock helper.
-- **Seller dashboard** (57 calls left after the 2026-10-05 pass, see below): affiliates, brands workspace, conversations (and `orders/:id/conversation`), developers (API keys, webhooks), integrations, security sessions, `GET /seller/subscription` + `verify` + trial `verify`/`cancel`, `GET /seller/verification`, `users/me/preferences`, consents, ads summary, product import.
-- **Ads Manager**: billing top-ups, invoices, receipts, payment methods, creative preview, conversion events, experiments, automated rules, `/ads/locations`, `/ads/behaviours`.
-- **Admin console**: metrics overview, own account (sessions, passkeys, recovery codes), appeals, orders list and detail, refunds, payouts, coins, ledger, catalog (categories, topics, features), brands, advertiser detail, automation, email template preview, reserved usernames, confusables.
+- **Seller dashboard**: still mocked are brands workspace, developers (API keys, webhooks), integrations and ads summary. Affiliates, conversations, security sessions, subscription details/verify/trial, verification, preferences and product import now have Go routes; `/seller/consents` still has no backend.
+- **Ads Manager**: still mock-only are payment methods and `POST /creatives/preview`. Billing top-ups, top-up status, invoices, receipts, conversion events, experiments, automated rules, `/ads/locations` and `/ads/behaviours` now have go-ads routes.
+- **Admin console**: metrics overview, own account (sessions, passkeys, recovery codes), appeals, orders, refunds, payouts, coins, ledger, catalog admin, brands and reserved usernames now have admin routes. Remaining gaps include automation, email-template preview, withheld-usernames/confusables preview and the `/admin/payouts/{id}/decide` path (use `/admin/withdrawals/{id}/review`).
 
 ## mobile
 
@@ -722,20 +723,20 @@ Grouped by area (the per-app tables have the full list):
 | `POST /api/v1/seller/customers` | fixed | Backed 2026-10-05 (seller domains pass). |
 | `PATCH /api/v1/seller/customers/:p` | fixed | Backed 2026-10-05 (seller domains pass). |
 | `GET /api/v1/seller/ads/summary` | mock-only | No backend route (documented in apiContract.md). |
-| `GET /api/v1/seller/affiliates/commission-ledger` | mock-only | No backend route (documented in apiContract.md). |
+| `GET /api/v1/seller/affiliates/commission-ledger` | fixed | Backed by a Go route since 2026-10-21. |
 | `GET /api/v1/seller/affiliates/creator-directory` | mock-only | No backend route (documented in apiContract.md). |
-| `GET /api/v1/seller/affiliates/creators` | mock-only | No backend route (documented in apiContract.md). |
-| `DELETE /api/v1/seller/affiliates/creators/:p` | mock-only | No backend route (documented in apiContract.md). |
+| `GET /api/v1/seller/affiliates/creators` | fixed | Backed by a Go route since 2026-10-21. |
+| `DELETE /api/v1/seller/affiliates/creators/:p` | fixed | Backed by a Go route since 2026-10-21. |
 | `GET /api/v1/seller/affiliates/live-invitations` | mock-only | No backend route (documented in apiContract.md). |
 | `POST /api/v1/seller/affiliates/live-invitations` | mock-only | No backend route (documented in apiContract.md). |
 | `POST /api/v1/seller/affiliates/live-invitations/:p/cancel` | mock-only | No backend route (documented in apiContract.md). |
-| `GET /api/v1/seller/affiliates/overview` | mock-only | No backend route (documented in apiContract.md). |
-| `GET /api/v1/seller/affiliates/product-commissions` | mock-only | No backend route (documented in apiContract.md). |
-| `PUT /api/v1/seller/affiliates/product-commissions/:p` | mock-only | No backend route (documented in apiContract.md). |
-| `GET /api/v1/seller/affiliates/requests` | mock-only | No backend route (documented in apiContract.md). |
-| `POST /api/v1/seller/affiliates/requests/:p/:p` | mock-only | No backend route (documented in apiContract.md). |
-| `GET /api/v1/seller/affiliates/settings` | mock-only | No backend route (documented in apiContract.md). |
-| `PATCH /api/v1/seller/affiliates/settings` | mock-only | No backend route (documented in apiContract.md). |
+| `GET /api/v1/seller/affiliates/overview` | fixed | Backed by a Go route since 2026-10-21. |
+| `GET /api/v1/seller/affiliates/product-commissions` | fixed | Backed by a Go route since 2026-10-21. |
+| `PUT /api/v1/seller/affiliates/product-commissions/:p` | fixed | Backed by a Go route since 2026-10-21. |
+| `GET /api/v1/seller/affiliates/requests` | fixed | Backed by a Go route since 2026-10-21. |
+| `POST /api/v1/seller/affiliates/requests/:p/:p` | fixed | Backed by a Go route since 2026-10-21. |
+| `GET /api/v1/seller/affiliates/settings` | fixed | Backed by a Go route since 2026-10-21. |
+| `PATCH /api/v1/seller/affiliates/settings` | fixed | Backed by a Go route since 2026-10-21. |
 | `GET /api/v1/seller/analytics/breakdowns` | fixed | Backed 2026-10-05 (seller domains pass). |
 | `GET /api/v1/seller/analytics/overview` | fixed | Backed 2026-10-05 (seller domains pass). |
 | `GET /api/v1/seller/audit-log` | fixed | Backed 2026-10-05 (seller domains pass). |
@@ -755,10 +756,10 @@ Grouped by area (the per-app tables have the full list):
 | `DELETE /api/v1/seller/brands/:p/stores/:p` | mock-only | No backend route (documented in apiContract.md). |
 | `GET /api/v1/seller/brands/directory` | mock-only | No backend route (documented in apiContract.md). |
 | `POST /api/v1/seller/consents` | mock-only | No backend route. |
-| `GET /api/v1/seller/conversations` | mock-only | No backend route (documented in apiContract.md). |
-| `GET /api/v1/seller/conversations/:p` | mock-only | No backend route (documented in apiContract.md). |
-| `POST /api/v1/seller/conversations/:p/messages` | mock-only | No backend route (documented in apiContract.md). |
-| `POST /api/v1/seller/conversations/:p/read` | mock-only | No backend route (documented in apiContract.md). |
+| `GET /api/v1/seller/conversations` | fixed | Backed by a Go route since 2026-10-21. |
+| `GET /api/v1/seller/conversations/:p` | fixed | Backed by a Go route since 2026-10-21. |
+| `POST /api/v1/seller/conversations/:p/messages` | fixed | Backed by a Go route since 2026-10-21. |
+| `POST /api/v1/seller/conversations/:p/read` | fixed | Backed by a Go route since 2026-10-21. |
 | `GET /api/v1/seller/customers/segments` | fixed | Backed 2026-10-05 (seller domains pass). |
 | `POST /api/v1/seller/customers/segments` | fixed | Backed 2026-10-05 (seller domains pass). |
 | `DELETE /api/v1/seller/customers/segments/:p` | fixed | Backed 2026-10-05 (seller domains pass). |
@@ -798,10 +799,10 @@ Grouped by area (the per-app tables have the full list):
 | `PUT /api/v1/seller/payout-onboarding/identity` | fixed | Dashboard now calls `/payments/payout-onboarding/me/*` and `/payments/payout-fees` (go-money); BFF forwards them, owner only. `document-link/complete` stays a mock helper. |
 | `POST /api/v1/seller/payout-onboarding/resolve` | fixed | Dashboard now calls `/payments/payout-onboarding/me/*` and `/payments/payout-fees` (go-money); BFF forwards them, owner only. `document-link/complete` stays a mock helper. |
 | `POST /api/v1/seller/payout-onboarding/retry` | fixed | Dashboard now calls `/payments/payout-onboarding/me/*` and `/payments/payout-fees` (go-money); BFF forwards them, owner only. `document-link/complete` stays a mock helper. |
-| `POST /api/v1/seller/products/import` | mock-only | No backend route (documented in apiContract.md). |
-| `GET /api/v1/seller/security` | mock-only | No backend route (documented in apiContract.md). |
-| `DELETE /api/v1/seller/security/sessions/:p` | mock-only | No backend route (documented in apiContract.md). |
-| `POST /api/v1/seller/security/sessions/sign-out-others` | mock-only | No backend route (documented in apiContract.md). |
+| `POST /api/v1/seller/products/import` | fixed | Backed by a Go route since 2026-10-21. |
+| `GET /api/v1/seller/security` | fixed | Backed by a Go route since 2026-10-21. |
+| `DELETE /api/v1/seller/security/sessions/:p` | fixed | Backed by a Go route since 2026-10-21. |
+| `POST /api/v1/seller/security/sessions/sign-out-others` | fixed | Backed by a Go route since 2026-10-21. |
 | `GET /api/v1/seller/settings` | fixed | Backed 2026-10-05 (seller domains pass). |
 | `PATCH /api/v1/seller/settings` | fixed | Backed 2026-10-05 (seller domains pass). |
 | `GET /api/v1/seller/staff` | fixed | Backed 2026-10-05 (seller domains pass). |
@@ -811,12 +812,12 @@ Grouped by area (the per-app tables have the full list):
 | `GET /api/v1/seller/staff/candidates` | fixed | Backed 2026-10-05 (seller domains pass). |
 | `GET /api/v1/seller/storefront` | fixed | Backed 2026-10-05 (seller domains pass). |
 | `PATCH /api/v1/seller/storefront` | fixed | Backed 2026-10-05 (seller domains pass). |
-| `GET /api/v1/seller/subscription` | mock-only | No backend route (documented in apiContract.md). |
-| `POST /api/v1/seller/subscription/trial/cancel` | mock-only | No backend route (documented in apiContract.md). |
-| `POST /api/v1/seller/subscription/trial/verify` | mock-only | No backend route (documented in apiContract.md). |
-| `POST /api/v1/seller/subscription/verify` | mock-only | No backend route (documented in apiContract.md). |
-| `PATCH /api/v1/seller/users/me/preferences` | mock-only | No backend route. |
-| `GET /api/v1/seller/verification` | mock-only | No backend route (documented in apiContract.md). |
+| `GET /api/v1/seller/subscription` | fixed | Backed by a Go route since 2026-10-21. |
+| `POST /api/v1/seller/subscription/trial/cancel` | fixed | Backed by a Go route since 2026-10-21. |
+| `POST /api/v1/seller/subscription/trial/verify` | fixed | Backed by a Go route since 2026-10-21. |
+| `POST /api/v1/seller/subscription/verify` | fixed | Backed by a Go route since 2026-10-21. |
+| `PATCH /api/v1/seller/users/me/preferences` | fixed | The app calls `/api/v1/users/me/preferences` (go-users, backed); the seller-scoped path is a BFF alias, not a separate gateway route. |
+| `GET /api/v1/seller/verification` | fixed | Backed by a Go route since 2026-10-21. |
 | `GET /api/v1/seller/wallet/balances` | fixed | Backed 2026-10-05 (seller domains pass). |
 | `GET /api/v1/seller/wallet/banks` | fixed | Backed 2026-10-05 (seller domains pass). |
 | `GET /api/v1/seller/wallet/payout-accounts` | fixed | Backed 2026-10-05 (seller domains pass). |
@@ -935,28 +936,28 @@ Grouped by area (the per-app tables have the full list):
 | `POST /api/v1/ads/accounts/:p/ads` | fixed | Fixed: sends Idempotency-Key (backend requires it). |
 | `POST /api/v1/ads/accounts/:p/campaigns/:p/duplicate` | fixed | Fixed: sends Idempotency-Key (backend requires it). |
 | `POST /api/v1/ads/accounts/:p/invites` | fixed | Fixed 2026-10-05: backend accepts `{email, role}` or `{username, role}`; response has `username`. |
-| `GET /api/v1/ads/accounts/:p/billing/invoices` | mock-only | No backend route (documented in apiContract.md). |
-| `GET /api/v1/ads/accounts/:p/billing/invoices/:p/download` | mock-only | No backend route (documented in apiContract.md). |
+| `GET /api/v1/ads/accounts/:p/billing/invoices` | fixed | Backed by a go-ads route since 2026-10-21. |
+| `GET /api/v1/ads/accounts/:p/billing/invoices/:p/download` | fixed | Backed by a go-ads route since 2026-10-21. |
 | `POST /api/v1/ads/accounts/:p/billing/payment-methods` | mock-only | No backend route (documented in apiContract.md). |
 | `DELETE /api/v1/ads/accounts/:p/billing/payment-methods/:p` | mock-only | No backend route (documented in apiContract.md). |
 | `POST /api/v1/ads/accounts/:p/billing/payment-methods/:p/default` | mock-only | No backend route (documented in apiContract.md). |
-| `POST /api/v1/ads/accounts/:p/billing/top-ups` | mock-only | No backend route (documented in apiContract.md). |
-| `GET /api/v1/ads/accounts/:p/billing/top-ups/:p` | mock-only | No backend route (documented in apiContract.md). |
-| `GET /api/v1/ads/accounts/:p/billing/transactions/:p/receipt` | mock-only | No backend route (documented in apiContract.md). |
-| `GET /api/v1/ads/accounts/:p/conversion-events` | mock-only | No backend route (documented in apiContract.md). |
-| `POST /api/v1/ads/accounts/:p/conversion-events` | mock-only | No backend route (documented in apiContract.md). |
-| `PATCH /api/v1/ads/accounts/:p/conversion-events/:p` | mock-only | No backend route (documented in apiContract.md). |
+| `POST /api/v1/ads/accounts/:p/billing/top-ups` | fixed | Backed by a go-ads route since 2026-10-21. |
+| `GET /api/v1/ads/accounts/:p/billing/top-ups/:p` | fixed | Backed by a go-ads route since 2026-10-21. |
+| `GET /api/v1/ads/accounts/:p/billing/transactions/:p/receipt` | fixed | Backed by a go-ads route since 2026-10-21. |
+| `GET /api/v1/ads/accounts/:p/conversion-events` | fixed | Backed by a go-ads route since 2026-10-21. |
+| `POST /api/v1/ads/accounts/:p/conversion-events` | fixed | Backed by a go-ads route since 2026-10-21. |
+| `PATCH /api/v1/ads/accounts/:p/conversion-events/:p` | fixed | Backed by a go-ads route since 2026-10-21. |
 | `POST /api/v1/ads/accounts/:p/creatives/preview` | mock-only | No backend route (documented in apiContract.md). |
-| `GET /api/v1/ads/accounts/:p/experiments` | mock-only | No backend route (documented in apiContract.md). |
-| `POST /api/v1/ads/accounts/:p/experiments` | mock-only | No backend route (documented in apiContract.md). |
-| `POST /api/v1/ads/accounts/:p/experiments/:p/stop` | mock-only | No backend route (documented in apiContract.md). |
-| `GET /api/v1/ads/accounts/:p/rules` | mock-only | No backend route (documented in apiContract.md). |
-| `POST /api/v1/ads/accounts/:p/rules` | mock-only | No backend route (documented in apiContract.md). |
-| `DELETE /api/v1/ads/accounts/:p/rules/:p` | mock-only | No backend route (documented in apiContract.md). |
-| `PATCH /api/v1/ads/accounts/:p/rules/:p` | mock-only | No backend route (documented in apiContract.md). |
-| `GET /api/v1/ads/behaviours` | mock-only | No backend route (documented in apiContract.md). |
+| `GET /api/v1/ads/accounts/:p/experiments` | fixed | Backed by a go-ads route since 2026-10-21. |
+| `POST /api/v1/ads/accounts/:p/experiments` | fixed | Backed by a go-ads route since 2026-10-21. |
+| `POST /api/v1/ads/accounts/:p/experiments/:p/stop` | fixed | Backed by a go-ads route since 2026-10-21. |
+| `GET /api/v1/ads/accounts/:p/rules` | fixed | Backed by a go-ads route since 2026-10-21. |
+| `POST /api/v1/ads/accounts/:p/rules` | fixed | Backed by a go-ads route since 2026-10-21. |
+| `DELETE /api/v1/ads/accounts/:p/rules/:p` | fixed | Backed by a go-ads route since 2026-10-21. |
+| `PATCH /api/v1/ads/accounts/:p/rules/:p` | fixed | Backed by a go-ads route since 2026-10-21. |
+| `GET /api/v1/ads/behaviours` | fixed | Backed by a go-ads route since 2026-10-21. |
 | `POST /api/v1/ads/consents` | mock-only | No backend route. |
-| `GET /api/v1/ads/locations` | mock-only | No backend route (documented in apiContract.md). |
+| `GET /api/v1/ads/locations` | fixed | Backed by a go-ads route since 2026-10-21. |
 | `PATCH /api/v1/ads/users/me/preferences` | mock-only | No backend route. |
 | `GET /api/v1/ads/accounts` | matches |  |
 | `POST /api/v1/ads/accounts` | matches |  |
@@ -1224,7 +1225,7 @@ Grouped by area (the per-app tables have the full list):
 - **go:ledger** (3): `GET /api/v1/admin/ledger/integrity`, `GET /api/v1/admin/ledger/statement`, `POST /api/v1/admin/ledger/journal-entries/{entryId}/reversal`
 - **go:live** (43): `DELETE /api/v1/admin/gifts/{giftId}`, `DELETE /api/v1/lives/{liveId}/comments/{commentId}`, `DELETE /api/v1/lives/{liveId}/gift-goals/{goalId}`, `DELETE /api/v1/lives/{liveId}/guests/invitations/{slotId}`, `DELETE /api/v1/lives/{liveId}/moderators/{userId}`, `DELETE /api/v1/lives/{liveId}/overlay-scenes/{sceneId}/publish`, `DELETE /api/v1/lives/{liveId}/overlay-scenes/{sceneId}`, `DELETE /api/v1/lives/{liveId}/pinned-comment`, `DELETE /api/v1/lives/{liveId}/stream-key`, `DELETE /api/v1/lives/{liveId}/viewers/{userId}/ban`, `DELETE /api/v1/lives/{liveId}/viewers/{userId}/mute`, `GET /api/v1/admin/gifts`, `GET /api/v1/lives/{liveId}/moderators`, `GET /api/v1/lives/{liveId}/overlay-scenes/{sceneId}`, `GET /api/v1/lives/{liveId}/overlay-scenes`, `GET /api/v1/lives/{liveId}/recordings`, `GET /api/v1/lives/{liveId}/room-settings`, `GET /api/v1/lives/{liveId}/stream-key`, `GET /api/v1/lives/{liveId}/viewers`, `PATCH /api/v1/admin/gifts/{giftId}`, `POST /api/v1/admin/gifts`, `POST /api/v1/battles/{battleId}/{action}`, `POST /api/v1/live/webhooks/livekit`, `POST /api/v1/lives/{liveId}/battles`, `POST /api/v1/lives/{liveId}/guests/invitations/{slotId}/{response}`, `POST /api/v1/lives/{liveId}/guests/invitations`, `POST /api/v1/lives/{liveId}/guests/me/connection`, `POST /api/v1/lives/{liveId}/guests/me/leave`, `POST /api/v1/lives/{liveId}/guests/requests/{requestId}/{decision}`, `POST /api/v1/lives/{liveId}/guests/requests`, `POST /api/v1/lives/{liveId}/guests/{userId}/mute`, `POST /api/v1/lives/{liveId}/guests/{userId}/remove`, `POST /api/v1/lives/{liveId}/media-token`, `POST /api/v1/lives/{liveId}/overlay-scenes/{sceneId}/publish`, `POST /api/v1/lives/{liveId}/overlay-scenes`, `PUT /api/v1/lives/{liveId}/comments/{commentId}/pin`, `PUT /api/v1/lives/{liveId}/moderators/{userId}`, `PUT /api/v1/lives/{liveId}/monetization`, `PUT /api/v1/lives/{liveId}/overlay-scenes/{sceneId}`, `PUT /api/v1/lives/{liveId}/recording`, `PUT /api/v1/lives/{liveId}/room-settings`, `PUT /api/v1/lives/{liveId}/viewers/{userId}/ban`, `PUT /api/v1/lives/{liveId}/viewers/{userId}/mute`
 - **go:moderation** (13): `GET /api/v1/admin/strike-appeals`, `POST /api/v1/admin/copyright-claims/{claimId}/counter-notices/{noticeId}/court-action`, `POST /api/v1/admin/copyright-claims/{claimId}/counter-notices/{noticeId}/reject`, `POST /api/v1/admin/copyright-claims/{claimId}/reject`, `POST /api/v1/admin/copyright-claims/{claimId}/request-info`, `POST /api/v1/admin/copyright-claims/{claimId}/uphold`, `POST /api/v1/admin/ip-claims/{claimId}/reject`, `POST /api/v1/admin/ip-claims/{claimId}/request-info`, `POST /api/v1/admin/strike-appeals/{strikeId}/overturn`, `POST /api/v1/admin/suspensions/cases/{caseId}/dismiss`, `POST /api/v1/admin/suspensions/cases/{caseId}/escalate`, `POST /api/v1/ip-claims/{claimId}/response`, `POST /api/v1/security/client-signals`
-- **go:orders** (22): `DELETE /api/v1/cart`, `DELETE /api/v1/seller/shipping/rules/{ruleId}`, `GET /api/v1/returns`, `GET /api/v1/seller/marketing/rewards/settings`, `GET /api/v1/seller/reports/exports/{exportId}`, `GET /api/v1/seller/reports/exports`, `GET /api/v1/seller/shipping/preview`, `GET /api/v1/seller/shipping/profiles`, `PATCH /api/v1/seller/delivery/shipments/{orderId}`, `PATCH /api/v1/seller/shipping/rules/{ruleId}`, `POST /api/v1/orders/{orderId}/cancel`, `POST /api/v1/orders/{orderId}/returns`, `POST /api/v1/seller/delivery/shipments/{orderId}/attempts`, `POST /api/v1/seller/orders/{orderId}/cancel`, `POST /api/v1/seller/orders/{orderId}/reject`, `POST /api/v1/seller/orders/{orderId}/status`, `POST /api/v1/seller/promotions/validate-code`, `POST /api/v1/seller/reports/exports`, `POST /api/v1/seller/returns/{returnId}/decline`, `POST /api/v1/seller/returns/{returnId}/receive`, `POST /api/v1/seller/shipping/rules`, `PUT /api/v1/seller/marketing/rewards/settings`
+- **go:orders** (remaining): `DELETE /api/v1/cart`, `GET /api/v1/returns`, `GET /api/v1/seller/reports/exports/{exportId}`, `GET /api/v1/seller/reports/exports`, `GET /api/v1/seller/shipping/preview`, `GET /api/v1/seller/shipping/profiles`, `POST /api/v1/orders/{orderId}/cancel`, `POST /api/v1/orders/{orderId}/returns`, `POST /api/v1/seller/orders/{orderId}/cancel`, `POST /api/v1/seller/orders/{orderId}/reject`, `POST /api/v1/seller/orders/{orderId}/status`, `POST /api/v1/seller/promotions/validate-code`, `POST /api/v1/seller/reports/exports`, `POST /api/v1/seller/returns/{returnId}/decline`, `POST /api/v1/seller/returns/{returnId}/receive`,
 - **go:payments** (17): `GET /api/v1/admin/payments/payout-accounts/stuck`, `GET /api/v1/payments/connected-accounts/me`, `POST /api/v1/admin/payments/disputes/{providerDisputeId}/evidence`, `POST /api/v1/admin/payments/payout-accounts/jobs/{jobId}/retry`, `POST /api/v1/admin/payments/payout-accounts/{userId}/verification-prompt`, `POST /api/v1/admin/payments/reconciliations`, `POST /api/v1/payments/connected-accounts/me/onboarding-link`, `POST /api/v1/payments/connected-accounts/me`, `POST /api/v1/payments/payout-onboarding/me/document-link`, `POST /api/v1/payments/refunds/{refundId}/bank-destination`, `POST /api/v1/payments/saved-cards/setups/{reference}/complete`, `POST /api/v1/payments/saved-cards/setups`, `POST /api/v1/payments/store-notifications/{store}`, `POST /api/v1/payments/subscriptions/checkout`, `POST /api/v1/payments/webhooks/{provider}`, `POST /webhooks/store-notifications/{store}`, `POST /webhooks/{provider}`
 - **go:subscriptions** (11): `GET /api/v1/pricing/creator-subscription-bands`, `GET /api/v1/pricing/plans`, `GET /api/v1/pricing/region`, `GET /api/v1/subscriptions/me`, `GET /api/v1/subscriptions/offer`, `GET /api/v1/subscriptions/{subscriptionId}/periods`, `GET /api/v1/subscriptions/{subscriptionId}/upcoming-charge`, `POST /api/v1/subscriptions/store-receipts`, `POST /api/v1/subscriptions/{subscriptionId}/cancel`, `POST /api/v1/subscriptions/{subscriptionId}/change-plan`, `POST /api/v1/subscriptions/{subscriptionId}/pay-now`
 - **go:users** (58): `DELETE /api/v1/admin/usernames/reserved/{ruleId}`, `DELETE /api/v1/admin/usernames/withheld/{username}`, `GET /api/v1/admin/legal/versions/{versionId}/acceptance`, `GET /api/v1/admin/retention-policies`, `GET /api/v1/admin/usernames/reserved`, `GET /api/v1/consents`, `GET /api/v1/geo/regions/{regionId}/cities`, `GET /api/v1/policies/current`, `GET /api/v1/users/me/addresses/{addressId}`, `GET /api/v1/users/me/data-exports/{exportId}`, `GET /api/v1/users/me/deletion-request`, `GET /api/v1/users/me/message-privacy`, `GET /api/v1/users/me/privacy-settings`, `GET /api/v1/users/me/terms-acceptances`, `GET /api/v1/users/username/{username}`, `PATCH /api/v1/users/me/business-profiles/{profileId}`, `PATCH /api/v1/users/me/privacy-settings`, `POST /api/v1/admin/applications/creators/{applicationId}/reject`, `POST /api/v1/admin/black-applications/{blackId}/approve`, `POST /api/v1/admin/black-applications/{blackId}/checklist`, `POST /api/v1/admin/black-applications/{blackId}/reject`, `POST /api/v1/admin/black-applications/{blackId}/reverification-reminder`, `POST /api/v1/admin/black-applications/{blackId}/revoke`, `POST /api/v1/admin/business-documents/{submissionId}/documents/{documentId}/reject`, `POST /api/v1/admin/legal/documents/{key}/rollback`, `POST /api/v1/admin/legal/documents/{key}/versions`, `POST /api/v1/admin/legal/versions/{versionId}/publish`, `POST /api/v1/admin/legal/versions/{versionId}/return`, `POST /api/v1/admin/legal/versions/{versionId}/submit`, `POST /api/v1/admin/policy-versions`, `POST /api/v1/admin/usernames/reserved`, `POST /api/v1/admin/usernames/withheld`, `POST /api/v1/admin/users/{userId}/ban`, `POST /api/v1/admin/users/{userId}/delete`, `POST /api/v1/admin/users/{userId}/reinstate`, `POST /api/v1/admin/users/{userId}/restrict`, `POST /api/v1/admin/users/{userId}/suspend`, `POST /api/v1/admin/users/{userId}/unban`, `POST /api/v1/admin/users/{userId}/username/assign-held`, `POST /api/v1/admin/users/{userId}/username/reassign`, `POST /api/v1/admin/verification-cases/{caseId}/reject`, `POST /api/v1/admin/verifications/{verificationId}/approve`, `POST /api/v1/admin/verifications/{verificationId}/reinstate`, `POST /api/v1/admin/verifications/{verificationId}/reject`, `POST /api/v1/admin/verifications/{verificationId}/revoke`, `POST /api/v1/admin/verifications/{verificationId}/suspend`, `POST /api/v1/seller/business-documents/{kind}/upload-intents`, `POST /api/v1/users/me/consents/merge`, `POST /api/v1/users/me/creator-application`, `POST /api/v1/users/me/deletion-request/cancel`, `POST /api/v1/users/me/suspension/appeal`, `POST /api/v1/users/me/terms-acceptances`, `POST /api/v1/verification/black-applications`, `POST /api/v1/webhooks/smile-id`, `PUT /api/v1/admin/legal/versions/{versionId}`, `PUT /api/v1/admin/retention-policies/{category}`, `PUT /api/v1/consents`, `PUT /api/v1/users/me/message-privacy`

@@ -1,6 +1,6 @@
 # Zudomart architecture docs
 
-Start with [system.md](system.md): the current system, checked against the code on 2026-10-11 (services, data ownership, events, money flow, auth, realtime, deployment).
+Start with [system.md](system.md): the current system, checked against the code on 2026-10-11 and refreshed for seller-managed delivery on 2026-10-21 (services, data ownership, events, money flow, auth, realtime, deployment).
 
 The topic documents below go deeper. Most were written as design notes on 2026-10-03, when little of the backend existed, so their **EXISTING / PROPOSED / ABSENT** labels are dated: many items marked PROPOSED have since been built. Each dated document says so at the top. Where one disagrees with `system.md` or the code, the code wins.
 
@@ -21,7 +21,7 @@ The topic documents below go deeper. Most were written as design notes on 2026-1
 
 | Document | Summary | State |
 | --- | --- | --- |
-| [system.md](system.md) | Whole-system overview | Current (2026-10-11) |
+| [system.md](system.md) | Whole-system overview | Current (2026-10-11; refreshed 2026-10-21) |
 | [payments.md](payments.md) | Two economies, ledger, escrow, wallets, coins, payouts, reconciliation | Current (2026-10-11); flows in [flutterwaveMigration.md](../integrations/flutterwaveMigration.md) |
 | [widgetsApiContract.md](widgetsApiContract.md) | Home-screen widgets and the embeddable web widget API | Current |
 | [liveSafety.md](liveSafety.md) | Live reports, frame sampling, safety holds, Live incidents queue | Design (2026-10-04) |

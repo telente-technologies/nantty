@@ -25,7 +25,7 @@ Items are grouped by store. Each store shows **Subtotal**, **Discounts**, **Ship
 1. Choose a delivery address, or add one. See [Saved addresses](/help/buying-and-orders/saved-addresses).
 2. Under **How to pay each seller**, pick for each verified store: **Escrow protection (recommended)** ("Money is held until you confirm delivery.") or **Pay directly** ("The seller is paid right away."). Stores that aren't verified show **Protected by Zudomart Escrow**, which is the only option.
 3. Tap **Place order and pay** (on the web, **Pay now**).
-4. Follow the on-screen checkout from our payment partner: **Card**, **Bank transfer** or **USSD**. You can save a card on your device for next time.
+4. Pay with **Pay from wallet** when your balance covers the order, or follow the on-screen checkout from our payment partner: **Card**, **Bank transfer** or **USSD**. You can save a card on your device for next time.
 
 ## Good to know
 

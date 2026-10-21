@@ -82,7 +82,7 @@ At any point the customer can tap **Pay now** (`POST /api/v1/subscriptions/{id}/
 | Day 7 (fails) | Retries on day 8 and day 10. Features stay on for at most **3 days** after the trial ends. If day 10 fails, the seller moves to Free (no 7-day grace for trials) |
 
 - **Cancelling during the trial means no charge, ever.** Features stay until the trial end, then the plan ends.
-- **One trial per person.** We block a second trial by account, device, phone number and card (a keyed fingerprint of the card details Flutterwave returns, so the same card on another account is caught).
+- **One trial per person.** We block a second trial by account, device, email and card (a keyed fingerprint of the card details Flutterwave returns, so the same card on another account is caught). There is no phone-number claim.
 
 ## 6. Price changes
 

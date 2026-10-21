@@ -2,7 +2,7 @@
 
 > **Dated design document.** The status labels below describe the repo when this was written; much that is marked PROPOSED or ABSENT has since been built. For the current system see [system.md](system.md); where the two disagree, the code wins.
 
-As of 2026-10-03. Labels: **EXISTING** (cite path), **MOCK-ONLY**, **PROPOSED**, **OPTIONAL FUTURE**. Sources: `inventory.md` section 7, `SECURITY.md` (written against the the old monolith paths), `docs/backendPlan.md` 5.4-5.8.
+As of 2026-10-03. Labels: **EXISTING** (cite path), **MOCK-ONLY**, **PROPOSED**, **OPTIONAL FUTURE**. Sources: `inventory.md` section 7, `SECURITY.md` (current baseline), `docs/backendPlan.md` 5.4-5.8.
 Privacy is in `privacy.md`; pipeline and network in `devops.md`; logging in `observability.md`.
 
 ## 1. Trust zones and request path
@@ -70,10 +70,10 @@ sequenceDiagram
 
 | Control | Detail | Status | Evidence |
 | --- | --- | --- | --- |
-| Password hashing | argon2id | EXISTING | `services/go/modules/auth/internal/credentials/argon2id.hasher.go` |
+| Password hashing | argon2id | EXISTING | `services/go/platform/passwordhash/argon2id.hasher.go` |
 | Access token | EdDSA JWT, 15 min default, staff TTL 10 min config | EXISTING | `internal/signingkeys/access_token.issuer.go`, `internal/config/auth.config.go` |
 | Signing keys | Private keys encrypted in DB (`AUTH_SIGNING_KEY_ENCRYPTION_KEY`), rotation every 30 days, JWKS at `GET /.well-known/jwks.json`, old keys stay published until tokens expire | EXISTING | `internal/signingkeys/signing_key.service.go` |
-| Verifiers | Go `platform/jwtauth`, gateway `jose`, realtime `jose` with key cache | EXISTING | `platform/jwtauth`, `services/typescript/gateway/src`, `services/elixir/realtime/lib/realtime_web/auth` |
+| Verifiers | Go `platform/jwtauth`, gateway `jose`, realtime `jose` with key cache | EXISTING | `platform/jwtauth`, `services/typescript/gateway/src`, `services/elixir/realtime/lib/realtimeWeb` |
 | Refresh rotation | Stored as hash, rotated on use, reuse revokes session and emits `session.refreshTokenReuseDetected` | EXISTING, tested | `refresh_session_tokens.command.go`, `auth.module_integration_test.go` |
 | OTP | 5 min, 5 attempts, 1 min resend cooldown, peppered hash. Delivery `log` only; production refuses `log` delivery | EXISTING, no real provider | `one_time_code.delivery.go` |
 | Password reset / change | `POST /auth/password/reset`, `POST /auth/password/change` | EXISTING (added during audit window) | `internal/httpapi/auth.routes.go` |

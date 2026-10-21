@@ -4,7 +4,7 @@ This is the authoritative contract between the callers (ts-social, ts-search, ts
 go-users, go-moderation) and the Python intelligence service (`services/python/intelligence`). The Pydantic DTOs in `src/modules/*/dtos/*.py`, `src/dtos/` and `src/events/` are the source
 of truth; this document mirrors them.
 
-Rule: **the TS API owns the product, Python owns intelligence, events connect them.** Python never
+Rule: **the Go and TypeScript services own the product, Python owns intelligence, events connect them.** Python never
 reads the product database. Every answer from Python is advisory: the API re-validates every id it
 gets back and falls back to deterministic logic whenever Python is slow, down or degraded.
 

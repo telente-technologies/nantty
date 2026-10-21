@@ -5,7 +5,7 @@ What is left after the handoff was completed on 12 October 2026. Engineering wor
 - browser e2e: seller 11/11, ads 6/6, admin 8/8, web 7/7, webapp 37 passed;
 - all app type checks and builds pass.
 
-Nothing is committed.
+The handoff work has since been committed; this page is kept as the owner-action checklist. Rechecked 2026-10-21.
 
 ## Waiting on the owner
 

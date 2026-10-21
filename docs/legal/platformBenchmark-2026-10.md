@@ -1,6 +1,6 @@
 # Platform benchmark: TikTok, Meta, Twitch, X and Kick (October 2026)
 
-**Draft, not legal advice.** This is a working comparison prepared on 2026-10-17 to improve Zudomart's legal drafts (all version 1.0, draft, `isReviewedByLegal: false`). Nothing here has been reviewed by a lawyer. Every summary of another platform is written in our own words from their public pages; none of their wording is reused. Their documents change often, so re-check a page before relying on it.
+**Draft, not legal advice.** This is a working comparison prepared on 2026-10-17 and rechecked against the code on 2026-10-21 to improve Zudomart's legal drafts (all version 1.0, draft, `isReviewedByLegal: false`). Nothing here has been reviewed by a lawyer. Every summary of another platform is written in our own words from their public pages; none of their wording is reused. Their documents change often, so re-check a page before relying on it.
 
 ## 1. Scope and method
 
@@ -72,8 +72,8 @@ Gaps in the research: TikTok's LIVE Subscription, Creator Rewards and official a
 | Fan subscriptions | 18+, perks only (no split published) | Meta takes up to 30%; store fees from Meta's share | Dashboard split (50/50 default) | X sets the split; 60-day payout | Flat price, 95% to creator | Creator keeps 80% of net after store fee; app price grossed up; 7-day hold; refunds reversed | None | Text, done |
 | Affiliates | Seller sets commission; reversible after refunds | n/a | n/a | n/a | n/a | Seller-funded; only on completed orders; rate locked at checkout; first click; 30-day default window; no self-purchase; pro-rated partial refunds; clawback after completion | Rate falls back to "decided at release" if the rate service is down | Both: text done; code caveat |
 | Marketplace role and fees | Marketplace, not seller; commission plus fees | Seller is seller of record; selling fee per country | n/a | n/a | n/a | Not the seller; no commission; escrow fee 1.5% (1% Business) plus processing, paid by seller | None | None |
-| Escrow and release | Funds held as seller's agent for a 14-day window | Funds held while a dispute is open | n/a | n/a | n/a | Release on confirmation or 3 days after delivery; direct orders auto-complete after 3 days unless disputed; undelivered after 30 days goes to staff review | Code auto-releases to the seller at 30 days | Both: text done (flagged); code change needed |
-| Refunds after payout | Commission can be clawed back | Chargeback fee and fixed response window | n/a | n/a | n/a | Seller's portion recovered and refunded; Zudomart fees kept | Code returns fees to the buyer; FCCPA risk | Both: owner to decide; counsel review |
+| Escrow and release | Funds held as seller's agent for a 14-day window | Funds held while a dispute is open | n/a | n/a | n/a | Release on confirmation or 3 days after delivery; direct orders auto-complete after 3 days unless disputed; undelivered after 30 days goes to staff review | Code moves undelivered escrows to staff review at payment + 30 days; it does not release or refund automatically | Both: text and code done (2026-10-19); staff workflow to finish |
+| Refunds after payout | Commission can be clawed back | Chargeback fee and fixed response window | n/a | n/a | n/a | Seller's portion recovered and refunded; Zudomart fees kept | Code recovers only the seller's portion and keeps the escrow and processing fees; FCCPA risk remains | Code done (2026-10-19); counsel review remains |
 | Disputes | Arbitration in Singapore for Nigerians | Consumers sue at home | Informal step, then California courts | Texas courts | London ICC arbitration | Talk first (30 days), optional mediation, Lagos arbitration; small claims and regulators stay open | Zudomart is more accessible | Text: counsel to pick rules |
 | Ads and boosts | Coins can pay for Promote | Ad Standards, prohibited and restricted lists, review mostly automated | Only Twitch may sell ads | Ads policy log | Platform ads only | Boosted, Sponsored, Promoted and Paid partnership labels; ARCON; review before running; store and profile ads | None | Text, done |
 | Ad balance and ad credit | n/a | Promotional credit terms are separate | n/a | n/a | n/a | Ad balance withdrawable after 24 hours; ad credit never withdrawable; Zudomart credit may expire, earned credit never; 10% cashback for selected advertisers | Fee and destination differ from the owner rule; undelivered spend returns as credit | Both: owner to decide |
@@ -143,12 +143,12 @@ These are the places where copying a foreign platform's approach would mean some
 
 ## 6. Code vs policy mismatches
 
-The owner must decide for each one whether to change the code or the text. The 1.0 draft states the owner rule and flags the mismatch with `[Team to confirm ...]`.
+The owner must decide for each open one whether to change the code or the text; rows marked **Resolved** now match the code. The 1.0 draft states the owner rule and flags any remaining mismatch with `[Team to confirm ...]`.
 
 | # | Rule | What the policy says | What the code does | Where |
 | --- | --- | --- | --- | --- |
-| 1 | Undelivered orders | Staff review 30 days after payment | Escrow auto-release sweep releases the payment to the seller at payment + 30 days, with no staff step | `services/go/modules/escrow/src/configs/escrow.config.go` (`UndeliveredReleasePeriod`), `escrowWalletHolding.service.go`, `escrowFulfilment.service.go` |
-| 2 | Refund after seller was paid | Only the seller's portion refunded; Zudomart fees kept | Buyer is refunded in full; Zudomart reverses its escrow-fee revenue and processing fee; on direct orders the platform absorbs the processing fee | `escrowWalletClawback.service.go`, `escrowDirectRefunds.service.go`; Help `selling/seller-refunds.md`, `selling/fees-and-escrow-fee.md` say no fee on refunded parts |
+| 1 | Undelivered orders | Staff review 30 days after payment | **Resolved.** The sweep moves an undelivered escrow to staff review at payment + 30 days: it clears `auto_release_at`, sets `undelivered_review_at`, emits `escrow.underReview`, and leaves the money held until a staff release or refund decision | `escrowUndeliveredReview.service.go`, `escrowFulfilment.service.go`; policy text in `apps/web/src/content/refundEscrowPolicy.content.ts` |
+| 2 | Refund after seller was paid | Only the seller's portion refunded; Zudomart fees kept | **Resolved.** The clawback recovers only `ReleasedToSellerMinor` from the seller; escrow and processing fees stay with Zudomart, and a shortfall becomes seller debt. Help articles still need the before/after-release distinction | `escrowWalletClawback.service.go`, `escrowSettlement.service.go`; `escrow.refundAfterPayoutKeepsFees_integration_test.go` |
 | 3 | Coin purchase refunded or charged back | Store refunds remove coins or record coin debt; gifts stay with the creator | Store refunds: as stated. Web card chargebacks on coin purchases: no handler, booked as a platform loss, buyer keeps the coins. No code collects coin debt | `wallet/.../coinStorePurchases.service.go`, `escrow/.../providerDisputes.service.go`, `chargebackLedger.service.go` |
 | 4 | Invalid gifts | Creator earnings from invalid gifts not payable | No tool to reverse earned coins from a specific gift; the `reversed` gift status is never set | `creators/src/databases/schema/liveMoney.schema.go` |
 | 5 | Strikes pause monetisation | 3 active strikes pause earning and going live | No automatic pause; Creator Program suspension is set by staff only | `creators/.../creatorStanding.service.go`; Help `ads-revenue-share.md`, `ads-in-comments.md` |
@@ -157,7 +157,7 @@ The owner must decide for each one whether to change the code or the text. The 1
 | 8 | Gold Business ad load | Ad-free | Gold checkmark alone shows 50%; only the Business seller plan and combined Gold+Premium are 0% | `subscriptions/src/loaders/adLoad.loader.go` |
 | 9 | Discount offer links | One per account | One claim per link per account; claims on different links allowed (best single discount still wins) | `billing/services/offerClaims.service.go` |
 | 10 | Combined Gold discount | Shown at checkout | Bundle default 15%; admin copy says "up to 16%" | `subscriptionRules.loader.go`, `configurationDocuments.service.go` |
-| 11 | Payments | Paystack and Flutterwave | Only Flutterwave, Apple and Google are integrated | `services/go/modules/payments/src/integrations` |
+| 11 | Payments | Flutterwave only | Matches: Flutterwave, Apple and Google are the only integrated payment paths | `services/go/modules/payments/src/integrations` |
 | 12 | CSAM | Reported to the authorities | Hash matching is an empty, disabled interface; no reporting integration | `services/python/intelligence/.../csam_hash_match_interface_service.py` |
 | 13 | Parental consent | Under-18s need a parent's consent | No consent or age-assurance flow; Help `safety-and-reporting/child-safety.md` implies one exists | `services/go/modules/auth/src/utils/inputValidation.util.go` |
 | 14 | Coin prices | Help: about ₦1,200 in the app on both platforms | Defaults give about ₦1,031 web, ₦1,429 iOS, ₦1,177 Android per 100 coins | `wallet/src/configs/wallet.config.go`; Help `buy-coins.md`, `app-store-purchases.md` |
@@ -168,8 +168,8 @@ The owner must decide for each one whether to change the code or the text. The 1
 ## 7. Platform improvements (product changes for the owner to decide)
 
 1. Parental consent and age assurance for 13–17s, or raise the minimum age (NDPA s.31). Also decide 18+ for buying coins, gifting and going live.
-2. Change the 30-day undelivered auto-release into a staff review queue that contacts both parties.
-3. Decide the post-payout refund rule (keep fees or refund in full) after counsel review, then make code, Seller Terms, Refund Policy and Help agree.
+2. **Done in code (2026-10-19).** Undelivered escrows now move to staff review at payment + 30 days instead of auto-releasing. Finish the staff queue and the notice that contacts both parties.
+3. **Done in code (2026-10-19).** Post-payout refunds recover only the seller's portion and keep Zudomart's fees. Counsel still needs to confirm the FCCPA position, and the Help articles must distinguish refunds before release from refunds after release.
 4. Handle web card chargebacks on coin purchases (debit coins, record coin debt) and decide whether coin debt is collected.
 5. A tool to hold or reverse creator earnings from a specific invalid gift.
 6. Automatic monetisation pause at the strike threshold, with notice and appeal.

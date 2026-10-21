@@ -5,9 +5,9 @@ These files are the official, unaltered store badges. Do not recolour, crop, str
 | File | Source | Notes |
 | --- | --- | --- |
 | `app-store-badge-black.svg` | Apple, App Store marketing resources: https://developer.apple.com/assets/elements/badges/download-on-the-app-store.svg (also at https://tools.applemarketingtools.com) | Black "Download on the App Store" badge, US/UK English, RGB, Apple artwork `Download_on_the_App_Store_Badge_US-UK_RGB_blk_092917`. |
-| `app-store-badge-black@2x.png` | Rasterised 1:1 from the SVG above at 2x (240 × 80) for email clients that cannot show SVG. | No other change. |
 | `google-play-badge.png` | Google Play badge generator: https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png | Official "Get it on Google Play" badge, English, 646 × 250 including Google's built-in clear space. Google distributes the vector badge through the Partner Marketing Hub (sign-in); swap in that SVG when downloaded, unchanged. |
-| `google-play-badge@2x.png` | The PNG above, scaled down proportionally to 310 × 120 for email. | No other change. |
+
+The email-sized `@2x` PNGs are not kept in this folder. They live with the email templates: [`packages/emailTemplates/assets/storeBadges`](../../../../packages/emailTemplates/assets/storeBadges/NOTICE.md).
 
 ## Rules we follow
 

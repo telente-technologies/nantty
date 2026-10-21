@@ -15,7 +15,7 @@
 
 It also covers four rows still open in the 2026-10-10 verification tables.
 
-Items the earlier reports already fixed are not repeated. Nothing is committed. The previous payment provider was removed on 2026-10-11; no finding here exists only in the previous payment provider code, except the leftover MONEY-008/010 remainders noted below.
+Items the earlier reports already fixed are not repeated. This is the scan-time snapshot; subsequent fixes are in git. The previous payment provider was removed on 2026-10-11; no finding here exists only in the previous payment provider code, except the leftover MONEY-008/010 remainders noted below.
 
 ## Summary
 
