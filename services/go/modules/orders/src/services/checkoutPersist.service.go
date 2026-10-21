@@ -131,7 +131,8 @@ func persistOrderGroup(ctx context.Context, deployed *container.Container, tx *e
 		return nil, err
 	}
 	return group, events.EnqueueOutboxEventInTransaction(ctx, tx, "orderGroup.created", group.ID.String(), now, map[string]any{
-		"orderGroupId": group.ID, "checkoutId": checkout.ID, "storeId": group.StoreID, "buyerAccountId": group.BuyerAccountID, "totalMinor": group.TotalMinor, "currency": group.Currency,
+		"orderGroupId": group.ID, "checkoutId": checkout.ID, "storeId": group.StoreID, "sellerAccountId": group.SellerAccountID,
+		"buyerAccountId": group.BuyerAccountID, "orderNumber": group.Reference, "totalMinor": group.TotalMinor, "currency": group.Currency,
 	})
 }
 

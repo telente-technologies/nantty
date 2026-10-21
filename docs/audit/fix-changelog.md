@@ -2,6 +2,46 @@
 
 Every code change made while fixing `docs/audit/frontend-backend-audit.md` is logged here with file, lines, audit ID, verification, and rollback notes. Investigations that concluded "no change needed" are logged too. Newest first.
 
+## 2026-10-21 — ZM-021: wire order-group lifecycle events into notifications
+
+**Audit:** ZM-021 (order lifecycle events absent from the notifications path)
+**Changes:**
+1. `services/go/modules/orders/src/services/checkoutPersist.service.go` — `orderGroup.created` now includes `orderNumber` and `sellerAccountId`.
+2. `services/go/modules/orders/src/services/orderTransition.service.go` — `orderGroup.shipped` / `.delivered` now include `orderNumber`, `storeId`, `buyerAccountId` and `sellerAccountId` alongside courier/tracking.
+3. `services/typescript/notifications/src/modules/eventIngestion/mappings/orders.mapping.ts` — added mappings for `orderGroup.created`, `.paid`, `.statusChanged`, `.shipped`, `.delivered` and `.completed`. Buyer receives placed/paid/preparing/ready/shipped/delivered/completed/cancelled; seller receives paid/cancelled. `statusChanged` ignores shipped/delivered/completed so they are not duplicated. The legacy `order.cancelled` mapping now returns no intents for the checkout-shell payload (no buyer/groups), avoiding a warning on every abandoned checkout.
+4. `services/typescript/notifications/src/modules/eventIngestion/mappings/eventMappingRegistry.ts` — registered the six mappings.
+5. `infra/local/rabbitmq/topology.json` + regenerated `definitions.json` — bound the six routing keys to `notifications-domain-events`.
+6. `services/contracts/events/schemas/orderGroup.{created,paid,shipped,delivered}.v1.json` updated to match emitted payloads; added `orderGroup.completed.v1.json`; AsyncAPI message list updated.
+7. `services/typescript/notifications/tests/orderGroupMapping.test.ts` + `tests/fixtures/eventFixtures.fixture.ts` — new coverage for buyer/seller fan-out, cancellation, tracking links and status-change duplicate suppression.
+**Verified:** `pnpm --filter @zudomart/notifications test` → 33 files, 309 passed; `typecheck` clean. `go test ./modules/orders/...` → pass; `gofmt` clean. `node infra/local/rabbitmq/generateDefinitions.mjs` → 421 bindings.
+**Rollback:** remove the six mappings and queue bindings, and revert the producer fields. In-app/push order updates stop until a replacement consumer exists.
+**Remaining:** email templates are still not sent for order-group events (payloads lack line items/payment URL/recipient names). Production topology must be deployed with the same routing keys.
+
+## 2026-10-21 — ZM-010: media moderation and malware scanning fail closed
+
+**Audit:** ZM-010 (fail-open media scans)
+**Changes:**
+1. `services/typescript/media/src/configs/media.config.ts` — `MODERATION_FAIL_MODE` now defaults to `hold`; values other than `allow`/`hold` fail config validation; added `allowUnscannedUploads` from `MEDIA_ALLOW_UNSCANNED` (default `false`).
+2. `services/typescript/media/src/modules/assets/services/moderationPolicy.service.ts` — an absent classifier or empty frame set now follows `failMode` instead of always returning `allow`.
+3. `services/typescript/media/src/modules/assets/services/mediaPipeline.service.ts` — a `skipped` malware scan rejects the asset with `MALWARE_SCAN_UNAVAILABLE` and records `scanResult=skipped` unless unscanned uploads are explicitly allowed.
+4. `services/typescript/media/src/app.ts` — warns at startup when unscanned uploads are enabled.
+5. `services/typescript/media/.env.example` — documents the local-only `MEDIA_ALLOW_UNSCANNED=true` override.
+6. `services/typescript/media/tests/pipeline/mediaPipeline.test.ts` and `tests/integrations/scanAndModeration.test.ts` — default harness now provides a healthy classifier; added absent-classifier hold, skipped-scan rejection and explicit allowance tests; the old fail-open assertion now opts into `failMode=allow` explicitly.
+**Verified:** `pnpm --filter @zudomart/media test` → 21 files, 126 passed; `typecheck` clean.
+**Rollback:** restore the previous `allow` default and remove the skipped-scan guard. Do not roll back without an equivalent fail-closed control.
+**Remaining:** audio/PDF moderation, presigned `Content-Type` binding, internal-token defaults, fan-out caps, expiring unsubscribe tokens and in-product appeal links remain in ZM-010.
+
+## 2026-10-21 — ZM-003: explicit direct-payment risk warning
+
+**Audit:** ZM-003 (`direct` mode silently waives buyer protection)
+**Changes:**
+1. `apps/mobile/src/components/cart/paymentModeChooser.tsx` — selecting `direct` now shows caution-coloured copy: the buyer loses escrow protection, refunds/disputes depend on the seller, and Zudomart cannot hold or reverse the payment.
+2. `apps/webapp/src/components/commerce/paymentModeChooser.tsx` + `paymentModeChooser.module.css` — the same warning renders in a `role="note"` callout when `direct` is chosen.
+**Verified:** webapp `tsc --noEmit` clean. Mobile has no typecheck script; lint/tests are the available gates.
+**Rollback:** remove the two warning blocks and CSS class. The default remains `escrow`; this is copy only, no payment behaviour changed.
+**Remaining:** type-to-confirm/checkbox on `direct`, and per-store promo issues instead of failing the whole checkout.
+
+
 ## 2026-10-20 — Repo hygiene: stop tracking generated Prisma clients
 
 **Context:** Social, search, and media tracked their generated Prisma clients even though `.gitignore` already listed `services/typescript/*/src/generated/`. Git ignore rules only affect untracked files, and these clients predated the rule (`f43978b71` for social, `187e619e6` for search). The checked-in copies were never used by CI or Docker: every `build`/`typecheck`/`test` script runs `prisma generate`, and the Dockerfiles regenerate before compiling.

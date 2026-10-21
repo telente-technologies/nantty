@@ -6,15 +6,27 @@
   "additionalProperties": false,
   "required": [
     "orderGroupId",
+    "orderNumber",
+    "orderedAt",
     "checkoutId",
     "storeId",
+    "sellerAccountId",
     "buyerAccountId",
+    "subtotalMinor",
     "totalMinor",
-    "currency"
+    "currency",
+    "attributedItems"
   ],
   "properties": {
     "orderGroupId": {
       "type": "string"
+    },
+    "orderNumber": {
+      "type": "string"
+    },
+    "orderedAt": {
+      "type": "string",
+      "format": "date-time"
     },
     "checkoutId": {
       "type": "string"
@@ -22,14 +34,83 @@
     "storeId": {
       "type": "string"
     },
+    "sellerAccountId": {
+      "type": "string"
+    },
     "buyerAccountId": {
       "type": "string"
+    },
+    "subtotalMinor": {
+      "type": "integer"
     },
     "totalMinor": {
       "type": "integer"
     },
     "currency": {
       "type": "string"
+    },
+    "attributedItems": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/attributedItem"
+      }
+    }
+  },
+  "$defs": {
+    "attributedItem": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "orderItemId",
+        "productId",
+        "variantId",
+        "quantity",
+        "lineTotalMinor",
+        "currency",
+        "attributionSource",
+        "attributionId",
+        "attributedAt",
+        "commissionBasisPoints"
+      ],
+      "properties": {
+        "orderItemId": {
+          "type": "string"
+        },
+        "productId": {
+          "type": "string"
+        },
+        "variantId": {
+          "type": "string"
+        },
+        "quantity": {
+          "type": "integer"
+        },
+        "lineTotalMinor": {
+          "type": "integer"
+        },
+        "currency": {
+          "type": "string"
+        },
+        "attributionSource": {
+          "type": "string"
+        },
+        "attributionId": {
+          "type": "string"
+        },
+        "attributedAt": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time"
+        },
+        "commissionBasisPoints": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        }
+      }
     }
   }
 }

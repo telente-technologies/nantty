@@ -22,14 +22,14 @@ Verified in `services/typescript/gateway/src/handlers/upstreamDispatch.handler.t
 |----|----------|------|-------|--------|
 | ZM-001 | **High (money)** | goMoney `verifyOrderPayment` vs all frontends' verify/status UI | Succeeded intent could fall off 10-window; no early-paid short-circuit; sibling-row buyer check | FIXED 2026-10-17 (window + early paid + own-row 10-16; provider verification capped at newest 3 pending + 5 integration tests 10-17) |
 | ZM-002 | **High (security + availability)** | Gateway admin auth + rate-limit vs `apps/admin` passkey login | Admin login brute-force window 12x + WebAuthn options 401 at edge | FIXED 2026-10-17 (all 7 pre-auth admin paths on login/otp buckets; bare admin OPTIONS answered 204 at edge; gateway 1690 tests pass) |
-| ZM-003 | **Medium (money-protection)** | Checkout `paymentModes` direct vs escrow vs all frontends | `direct` waives escrow/dispute window, no frontend warning | FILED below |
+| ZM-003 | **Medium (money-protection)** | Checkout `paymentModes` direct vs escrow vs all frontends | `direct` waives escrow/dispute window, no frontend warning | PART-FIXED 2026-10-21 (explicit warning on mobile + web; type-to-confirm and promo issues queued) |
 | ZM-004 | **High (privacy)** | Users profile + Lives visibility vs anon `optional` GETs | Public profile + followers-only live metadata served to strangers | FILED below |
 | ZM-005 | **High (money)** | Idempotency + refund/send races (goMoney/ledger/escrow) | Concurrent double-submit 500s, replay outside guard, refund double-send | FILED below |
 | ZM-006 | **Medium (defense)** | Webhooks + BFF CSRF + realtime + internal S2S | Verifiers present; BFF GET+cookie zero-origin-check relies on safe-GET invariant | FILED below |
 | ZM-007 | **Low (availability)** | Env defaults + BFF allow-lists + error-code mapping | Localhost/mock defaults + seller wallet path; route-pattern suspicion CLEARED; unmapped codes non-issue (code-matched + server-passthrough) | PART-FIXED (investigated; seller path queued) |
 | ZM-008 | **Medium (money)** | Fee/rounding/clamp + currency + escrow terminal states | max/min clamps hide over-rebate, fee cap under-collects, partial-refund terminal | FILED below |
 | ZM-009 | **High (availability+privacy+ethics)** | Python intelligence | Silent ML outage, Redis-down outage, raw gift PII, no-appeal suspend | FILED below |
-| ZM-010 | **High (security+availability)** | TS social/media/search/notifications/support | Fail-open scans, SSRF residuals, anon oracles, shadow-moderation | FILED below |
+| ZM-010 | **High (security+availability)** | TS social/media/search/notifications/support | Fail-open scans, SSRF residuals, anon oracles, shadow-moderation | PART-FIXED 2026-10-21 (media moderation/scan fail-closed; audio/PDF moderation, presign binding and fan-out caps queued) |
 | ZM-011 | **High (availability+security)** | Elixir realtime + deploy wiring | Cluster never forms, ready-on-broker cascade, fanout/authz gaps | FILED below |
 | ZM-012 | **High (ethics+security+money)** | Go trust/ads/live/catalog/users/auth/admin/currency | Auto-hide, brigading, self-gift farm, soft-delete, OTP cycling | FILED below |
 | ZM-013 | **Medium (CI/local-parity)** | scripts + CI guards | Mock-guard log bug, go test w/o race, local realtime masks prod | PART-FIXED (log bug fixed; race/local-stub queued) |
@@ -40,6 +40,7 @@ Verified in `services/typescript/gateway/src/handlers/upstreamDispatch.handler.t
 | ZM-018 | **High (auth/API)** | Auth/users/admin/currency every route | Bare internal mutators, step-up gaps, username oracle, stale FX, audit holes | FILED below |
 | ZM-019 | **High (logic/API)** | Catalog/inventory/orders/live/ads/moderation every route | Stuck battles/orders, card-refund forfeit, open-redirect ads click, host-check delegation | PART-FIXED (suspension intake token; stuck-states/redirect/host queued) |
 | ZM-020 | **Medium (API)** | TS gateway/social/media/search/notify/support every route | Gateway shadow nesting, anon oracles, rate-limit holes, support/admin optional reliance | FILED below |
+| ZM-021 | **High (notifications)** | goCommerce `orderGroup.*` vs ts notifications | Lifecycle events published but never mapped or bound; buyers/sellers missed paid/shipped/delivered | FIXED 2026-10-21 (six mappings + queue bindings + payload fields; email templates queued) |
 
 ---
 
@@ -160,7 +161,9 @@ Add regression test: seed 1×`succeeded` (old) + 1×`pending` (new) for same ord
 **Owner decision needed:** confirm `5-10/min` admin-login bucket + allowlist patch, then I patch both gateway files + add unit tests for `classifyRequestForRateLimit` and `isAnonymousMutationAllowed`.
 
 ---
-## ZM-003 [FILED] — Checkout totals are safe; `direct` payment mode silently waives buyer protection
+## ZM-003 [PART-FIXED 2026-10-21] — Checkout totals are safe; `direct` payment mode silently waives buyer protection
+
+**Status 2026-10-21:** the mobile and web payment-mode choosers now show an explicit warning when `direct` is selected: the buyer loses escrow protection, refunds and disputes depend on the seller, and Zudomart cannot hold or reverse the payment. The default remains `escrow`; `direct` still requires a verified store. The stronger controls suggested below (type-to-confirm or a checkbox, and the per-store promo `issues[]`) remain queued.
 
 **Severity:** Medium (money-protection / UX-safety)
 **Files:**
@@ -268,7 +271,9 @@ Add regression test: seed 1×`succeeded` (old) + 1×`pending` (new) for same ord
 **Fix:** seed/model-presence readiness gate; Redis breaker + degraded-replay policy; require `ID_HASH_SECRET`; hash gift actorIds; add appeal/recourse fields + human-approval for auto-suspend; document boost/fairness weights publicly.
 
 ---
-## ZM-010 [FILED] — TypeScript social/media/search/notifications/support: fail-open scans, SSRF residuals, anon oracles, shadow-moderation
+## ZM-010 [PART-FIXED 2026-10-21] — TypeScript social/media/search/notifications/support: fail-open scans, SSRF residuals, anon oracles, shadow-moderation
+
+**Status 2026-10-21:** media scanning now fails closed. `MODERATION_FAIL_MODE` defaults to `hold`, invalid values fail config validation, and an absent classifier or empty frame set follows the configured mode instead of always allowing. A malware scan that returns `skipped` rejects the upload with `MALWARE_SCAN_UNAVAILABLE` unless `MEDIA_ALLOW_UNSCANNED=true` is set explicitly (the local `.env.example` sets it for development; production must not). Tests cover the absent-classifier hold, the skipped-scan rejection and the explicit local allowance. Audio/PDF moderation, presigned `Content-Type` binding, internal-token defaults, fan-out caps, expiring unsubscribe tokens and in-product appeal links remain open.
 
 **Severity:** High (security + availability)
 **Breakage:**
@@ -414,4 +419,17 @@ Add regression test: seed 1×`succeeded` (old) + 1×`pending` (new) for same ord
 **Fix:** required+owner on download/link-preview-refresh/share; captcha/rate on resolve; scope listDevices to self-or-contact; staff-JWKS staging assertion test; per-route limits for the listed POSTs; expiring single-use unsubscribe (POST-only); link appeal flows; rename/allowlist any future `internal`-named public segment.
 
 ---
-*End of current sweep — ZM-001…ZM-013 all in this file. Next step on request: patch in severity order (ZM-001 → ZM-005 → ZM-002B → ZM-011 cluster fix).*
+## ZM-021 [FIXED 2026-10-21] — Order lifecycle events never reached notifications
+
+**Severity:** High (buyers and sellers missed paid/shipped/delivered updates)
+**Breakage:** goCommerce publishes `orderGroup.created`, `.paid`, `.statusChanged`, `.shipped`, `.delivered` and `.completed`, but the notifications service only mapped legacy `order.*`, and the local RabbitMQ notifications queue was not bound to the `orderGroup.*` routing keys. Nothing consumed those events in the notifications path, so in-app notifications and push were silently absent for every order-group lifecycle change.
+**Changes:**
+- Added notification mappings for all six `orderGroup.*` events. Buyers get order placed, payment confirmed, preparing, ready, shipped, delivered, completed and cancelled; sellers get paid and cancelled. Paid/shipped/delivered/ready/cancelled also push.
+- `statusChanged` handles only `processing`, `ready` and `cancelled`; `shipped`, `delivered` and `completed` stay on their dedicated events to avoid duplicate notifications. The legacy checkout-shell `order.cancelled` event is ignored because it carries no buyer or groups.
+- Enriched the producer payloads: `orderGroup.created` now carries `orderNumber` and `sellerAccountId`; `shipped`/`delivered` carry `orderNumber`, store, buyer and seller IDs plus courier/tracking. Updated the v1 JSON Schemas, added `orderGroup.completed.v1.json`, and updated AsyncAPI.
+- Added the six routing keys to `notifications-domain-events` in the local RabbitMQ topology and regenerated `definitions.json`.
+**Verified:** notifications `pnpm test` (33 files, 309 passed) and `typecheck` clean; orders `go test ./modules/orders/...` clean; new `orderGroupMapping.test.ts` covers buyer/seller fan-out, cancellation, tracking, shell-cancel suppression and duplicate suppression.
+**Remaining:** email templates for order-group events are not sent because the payloads still lack line items, payment URL and recipient names; in-app and push are now wired. Durable production topology must be deployed with the same routing keys.
+
+---
+*End of current sweep — ZM-001…ZM-021 all in this file. Next step on request: patch in severity order (ZM-018/ZM-019/ZM-020 API sweeps and remaining ZM-010/ZM-015/ZM-016/ZM-017 edges).*

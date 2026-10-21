@@ -82,7 +82,8 @@ func enqueueFulfilmentEvent(ctx context.Context, tx *ent.Tx, group *ent.OrderGro
 	if !fulfilment {
 		return nil
 	}
-	data := map[string]any{"orderGroupId": group.ID.String(), "occurredAt": now.UTC(), "courierName": derefOrEmpty(group.CourierName),
-		"trackingNumber": derefOrEmpty(group.TrackingNumber), "trackingUrl": derefOrEmpty(group.TrackingURL)}
+	data := map[string]any{"orderGroupId": group.ID.String(), "occurredAt": now.UTC(), "orderNumber": group.Reference,
+		"storeId": group.StoreID, "buyerAccountId": group.BuyerAccountID, "sellerAccountId": group.SellerAccountID,
+		"courierName": derefOrEmpty(group.CourierName), "trackingNumber": derefOrEmpty(group.TrackingNumber), "trackingUrl": derefOrEmpty(group.TrackingURL)}
 	return events.EnqueueOutboxEventInTransaction(ctx, tx, eventType, group.ID.String(), now, data)
 }

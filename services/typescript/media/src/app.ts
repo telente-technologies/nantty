@@ -87,6 +87,7 @@ export function createMediaApp(config: MediaConfig, logger: Logger = createLogge
       if (config.storage.createBuckets) await storage.ensureBuckets();
       if (config.ffmpeg.mode === "required" && !(await context.transcoder.isAvailable())) throw new Error("FFMPEG_MODE=required but ffmpeg is not available");
       if (config.ffmpeg.mode !== "disabled" && !(await context.transcoder.isAvailable())) logger.warn("ffmpeg is not available: video and audio uploads will stay in processing until it is installed");
+      if (config.allowUnscannedUploads) logger.warn("MEDIA_ALLOW_UNSCANNED is enabled: uploads will be published without a malware scan");
       await server.start();
       if (config.jobsEnabled) {
         const publisher = createDomainEventPublisher(config, logger);

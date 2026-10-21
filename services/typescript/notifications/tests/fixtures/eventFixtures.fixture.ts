@@ -16,6 +16,7 @@ const groups = [{
 }];
 
 const order = { orderId: "o1", orderNumber: "ZM-48213", buyerUserId: "buyer1", groups, sellerName: "Glow by Zainab" };
+const orderGroup = { orderGroupId: "og1", orderNumber: "ZM-48213", checkoutId: "c1", storeId: "s1", buyerAccountId: "buyer1", sellerAccountId: "seller1", subtotalMinor: 1700000, totalMinor: 1850000, refundedMinor: 0, currency: "NGN" };
 const dispute = { disputeId: "dsp1", caseNumber: "DSP-10294", orderId: "o1", orderNumber: "ZM-48213", escrowId: "e1", buyerUserId: "buyer1", sellerUserId: "seller1", amount: money(1850000), reason: "Item damaged" };
 const escrow = { escrowId: "e1", orderId: "o1", orderNumber: "ZM-48213", checkoutId: "c1", storeId: "s1", buyerUserId: "buyer1", sellerUserId: "seller1", status: "released", amount: money(1850000), commission: money(92500), refunded: money(1850000), releasedToSeller: money(1757500) };
 const actor = { id: "actor1", name: "Adaeze Okafor", username: "adaeze" };
@@ -35,6 +36,12 @@ const ticket = { ticketId: "7b9e2f3a-1111-4222-8333-123456789abc", reference: "S
 const copyrightRemedy = { claimId: "0192f0a1-7c3e-7000-8000-00000000c1a1", targetType: "clip", targetId: "clip-1", infringerId: "u1", workTitle: "Lagos Nights", reason: "Proof of ownership matches.", canSubmitCounterNotice: true };
 export const eventFixtures: Readonly<Record<string, EventFixture>> = {
   "order.placed": { data: { ...order, payBy: "2026-10-05T10:00:00.000Z", paymentUrl: "https://zudomart.com/pay/o1" }, templates: ["orderPlaced"], inAppRecipients: ["buyer1"] },
+  "orderGroup.created": { data: orderGroup, templates: [], inAppRecipients: ["buyer1"] },
+  "orderGroup.paid": { data: orderGroup, templates: [], inAppRecipients: ["buyer1", "seller1"] },
+  "orderGroup.shipped": { data: { ...orderGroup, occurredAt: "2026-10-06T10:00:00.000Z", courierName: "GIG", trackingNumber: "GIG123", trackingUrl: "https://track.example/GIG123" }, templates: [], inAppRecipients: ["buyer1"] },
+  "orderGroup.delivered": { data: { ...orderGroup, occurredAt: "2026-10-08T10:00:00.000Z" }, templates: [], inAppRecipients: ["buyer1"] },
+  "orderGroup.completed": { data: { ...orderGroup, orderedAt: "2026-10-03T10:00:00.000Z", completedAt: "2026-10-11T10:00:00.000Z", attributedItems: [] }, templates: [], inAppRecipients: ["buyer1"] },
+  "orderGroup.statusChanged": { data: { ...orderGroup, reference: orderGroup.orderNumber, from: "new", to: "processing", actorKind: "seller" }, templates: [], inAppRecipients: ["buyer1"] },
   "order.paid": { data: { ...order, buyerName: "Bisola", paymentMethod: "Card", paidAt: "2026-10-03T10:00:00.000Z", acceptBy: "2026-10-04T10:00:00.000Z", paymentMode: "escrow" }, templates: ["paymentConfirmed", "sellerNewOrder"], inAppRecipients: ["buyer1", "seller1"] },
   "order.sellerAccepted": { data: { ...order, shipBy: "2026-10-06T10:00:00.000Z" }, templates: ["sellerAccepted"], inAppRecipients: ["buyer1"] },
   "order.sellerRejected": { data: { ...order, reason: "Out of stock", refund: money(1850000) }, templates: ["sellerRejected"], inAppRecipients: ["buyer1"] },

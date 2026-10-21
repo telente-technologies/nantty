@@ -101,6 +101,7 @@ export async function runMediaPipeline(context: HandlerContext, mediaId: string,
     const inspected = await inspectOriginal(asset, inputPath);
     const scan = await context.scanner.scanFile(inputPath);
     if (scan.verdict === "infected") return await rejectAsset(context, asset, "MALWARE_DETECTED", scan.signature);
+    if (scan.verdict === "skipped" && !context.config.allowUnscannedUploads) return await rejectAsset(context, asset, "MALWARE_SCAN_UNAVAILABLE", "skipped");
     const processed = await produceDerivatives(context, inspected.kind, inputPath, workDirectory, purpose, inspected.maximumDurationSeconds);
     let outcome = { decision: "allow" as "allow" | "hold" | "reject", score: null as number | null, category: null as string | null };
     if (policy.moderate && !options.moderationApproved && (inspected.kind === "image" || inspected.kind === "video")) {

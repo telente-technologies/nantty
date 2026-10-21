@@ -3,6 +3,38 @@
 All notable changes to Zudomart are documented here. Format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [Unreleased] — 2026-10-21
+
+### Security — media uploads fail closed
+
+- `MODERATION_FAIL_MODE` now defaults to `hold`; invalid values fail config
+  validation, and a missing classifier or an empty frame set follows the
+  configured mode instead of silently allowing the upload.
+- Uploads whose malware scan is `skipped` are rejected with
+  `MALWARE_SCAN_UNAVAILABLE` unless `MEDIA_ALLOW_UNSCANNED=true` is set. The
+  local `.env.example` enables that override for development only; production
+  must leave it off. The service logs a warning when unscanned uploads are on.
+
+### Notifications — order lifecycle updates
+
+- Buyers and sellers now receive in-app and push notifications for
+  `orderGroup.*` events: order placed, payment confirmed, preparing, ready,
+  shipped, delivered, completed and cancelled. Sellers receive paid and
+  cancelled. Dedicated shipped/delivered/completed events are not duplicated
+  by status changes.
+- Order-group event payloads now carry the order number and buyer/seller IDs;
+  shipped and delivered also carry courier and tracking. The v1 schemas,
+  AsyncAPI document and local RabbitMQ bindings were updated.
+- Order-group email templates remain unsent because the payloads do not yet
+  include line items, payment URLs or recipient names.
+
+### Buyer — direct-payment warning
+
+- The mobile and web checkout payment-mode choosers now warn that choosing
+  `direct` removes escrow protection: refunds and disputes depend on the
+  seller, and Zudomart cannot hold or reverse the payment. Escrow remains the
+  default.
+
 ## [Unreleased] — 2026-10-20
 
 ### Backend — product parcels and logistics foundation

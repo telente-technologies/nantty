@@ -2247,3 +2247,10 @@ Owner direction, 2026-10-20: provider delivery is a **V2** feature, not launch. 
 - **Chowdeck blockers:** production base URL, Relay webhook contract, coverage/serviceability list, weight/dimension rules, insurance terms and prepaid-wallet/float treatment.
 
 No provider integration is to be built until the V2 design is approved and the seller-managed flow remains unchanged behind the disabled feature flag.
+
+## 60. Order notifications and fail-closed media (2026-10-21) **[DONE]**
+
+- **Order lifecycle notifications:** `orderGroup.created`, `.paid`, `.statusChanged`, `.shipped`, `.delivered` and `.completed` now map to in-app and push notifications. Buyers get placed/paid/preparing/ready/shipped/delivered/completed/cancelled; sellers get paid/cancelled. Shipped/delivered/completed are not duplicated by `statusChanged`. Producer payloads carry the order number and buyer/seller IDs; shipped/delivered also carry courier/tracking. Email templates remain queued because line items and payment URLs are not in the payload.
+- **Media safety:** moderation defaults to `hold` on classifier failure; invalid fail modes fail startup; a skipped ClamAV scan rejects the upload unless `MEDIA_ALLOW_UNSCANNED=true` is explicitly set for local development.
+- **Direct-payment warning:** both checkout choosers now state that direct payment removes escrow protection and that Zudomart cannot reverse it. Escrow remains the default.
+- **Still open:** audio/PDF moderation, presigned Content-Type binding, stronger direct-payment confirmation, per-store promo issues, and the ZM-018/019/020 API sweeps.

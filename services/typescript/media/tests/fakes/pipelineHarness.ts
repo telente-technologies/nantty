@@ -53,7 +53,7 @@ export function createHarness(options: { scanner?: MalwareScanner; moderation?: 
     urls: { publicUrl: (key) => `https://cdn.test/${key}`, privateUrl: async (bucket, key, expires) => `https://private.test/${bucket}/${key}?e=${expires}` },
     jobs: { enqueueJob: async (queue, job) => { enqueued.push({ queue, job: job as never }); } },
     scanner: options.scanner ?? { scanFile: async () => ({ verdict: "clean" }) },
-    moderation: options.moderation,
+    moderation: options.moderation ?? { classify: async () => ({ score: 0, topCategory: null }) },
     images: options.images ?? createSharpImageProcessor(),
     transcoder: options.transcoder ?? unavailableTranscoder,
     branding: options.branding ?? unavailableBranding,

@@ -16,11 +16,12 @@ export function decideModerationFromScore(score: number, thresholds: { readonly 
 }
 
 export async function evaluateModeration(client: ModerationClient | undefined, config: MediaConfig["moderation"], request: ModerationRequest): Promise<ModerationOutcome> {
-  if (client === undefined || request.frames.length === 0) return { decision: "allow", score: null, category: null, degraded: client === undefined };
+  const unavailable = (): ModerationOutcome => ({ decision: config.failMode === "hold" ? "hold" : "allow", score: null, category: null, degraded: true });
+  if (client === undefined || request.frames.length === 0) return unavailable();
   try {
     const result = await client.classify(request);
     return { decision: decideModerationFromScore(result.score, config), score: result.score, category: result.topCategory, degraded: false };
   } catch {
-    return { decision: config.failMode === "hold" ? "hold" : "allow", score: null, category: null, degraded: true };
+    return unavailable();
   }
 }

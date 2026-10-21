@@ -46,6 +46,11 @@ export function PaymentModeChooser({ groups, modes, onChange }: PaymentModeChoos
                     <span className={styles.meta}>{option.note}</span>
                   </button>
                 ))}
+                {chosen === "direct" ? (
+                  <p className={styles.warning} role="note">
+                    You lose escrow protection. Refunds and disputes depend on the seller, and Zudomart cannot hold or reverse this payment.
+                  </p>
+                ) : null}
               </div>
             ) : (
               <p className={styles.meta}>Protected by Zudomart Escrow</p>

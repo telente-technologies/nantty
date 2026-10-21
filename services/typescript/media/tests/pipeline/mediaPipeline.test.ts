@@ -106,6 +106,21 @@ describe("rejections", () => {
     expect(harness.storage.keysIn(harness.context.config.storage.publicBucket)).toHaveLength(0);
   });
 
+  it("rejects unscanned uploads when no malware scanner is configured", async () => {
+    const harness = createHarness({ scanner: { scanFile: async () => ({ verdict: "skipped" }) } });
+    const id = harness.seedUpload({ purpose: "post", mimeType: "image/jpeg", bytes: await smallJpeg() });
+    await runMediaPipeline(harness.context, id, { attempt: firstAttempt, moderationApproved: false });
+    expect(harness.db.assets.get(id)).toMatchObject({ status: "rejected", rejectionReason: "MALWARE_SCAN_UNAVAILABLE", scanResult: "skipped" });
+    expect(harness.storage.keysIn(harness.context.config.storage.publicBucket)).toHaveLength(0);
+  });
+
+  it("can explicitly allow unscanned uploads for local development", async () => {
+    const harness = createHarness({ scanner: { scanFile: async () => ({ verdict: "skipped" }) }, config: { allowUnscannedUploads: true } });
+    const id = harness.seedUpload({ purpose: "post", mimeType: "image/jpeg", bytes: await smallJpeg() });
+    await runMediaPipeline(harness.context, id, { attempt: firstAttempt, moderationApproved: false });
+    expect(harness.db.assets.get(id)).toMatchObject({ status: "ready", scanResult: "skipped" });
+  });
+
   it("fails closed when the scanner itself errors until the final attempt", async () => {
     const harness = createHarness({ scanner: { scanFile: async () => { throw new Error("clamd down"); } } });
     const id = harness.seedUpload({ purpose: "post", mimeType: "image/jpeg", bytes: await smallJpeg() });
@@ -147,11 +162,11 @@ describe("moderation gate", () => {
   });
 
   it("degrades according to the configured fail mode when the classifier is down", async () => {
-    const open = withScore(new Error("python down"));
+    const base = createHarness().context.config.moderation;
+    const open = createHarness({ moderation: { classify: async () => { throw new Error("python down"); } }, config: { moderation: { ...base, failMode: "allow" } } });
     const openId = open.seedUpload({ purpose: "post", mimeType: "image/jpeg", bytes: await smallJpeg() });
     await runMediaPipeline(open.context, openId, { attempt: firstAttempt, moderationApproved: false });
     expect(open.db.assets.get(openId)?.["status"]).toBe("ready");
-    const base = open.context.config.moderation;
     const closed = createHarness({ moderation: { classify: async () => { throw new Error("down"); } }, config: { moderation: { ...base, failMode: "hold" } } });
     const closedId = closed.seedUpload({ purpose: "post", mimeType: "image/jpeg", bytes: await smallJpeg() });
     await runMediaPipeline(closed.context, closedId, { attempt: firstAttempt, moderationApproved: false });

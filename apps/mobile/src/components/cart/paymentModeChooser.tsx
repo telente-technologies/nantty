@@ -30,6 +30,11 @@ export function PaymentModeChooser({ group, mode, onChange }: PaymentModeChooser
           <SelectableRow selected={mode === "direct"} onPress={() => onChange("direct")} accessibilityLabel={`Pay ${group.storeName} directly`}>
             <Text size={14} weight={500} lineHeight={16.8}>Pay directly</Text>
             <Text size={13} lineHeight={16.9} color={colors.textMuted}>The seller is paid right away.</Text>
+            {mode === "direct" ? (
+              <Text size={12} lineHeight={15.6} color={colors.cautionStrongText}>
+                You lose escrow protection. Refunds and disputes depend on the seller, and Zudomart cannot hold or reverse this payment.
+              </Text>
+            ) : null}
           </SelectableRow>
         </>
       ) : (

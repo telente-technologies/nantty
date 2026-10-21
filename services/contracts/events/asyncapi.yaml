@@ -476,6 +476,8 @@ channels:
         $ref: '#/components/messages/orderGroupPaid'
       orderGroupStatusChanged:
         $ref: '#/components/messages/orderGroupStatusChanged'
+      orderGroupCompleted:
+        $ref: '#/components/messages/orderGroupCompleted'
       orderGroupRefundRequested:
         $ref: '#/components/messages/orderGroupRefundRequested'
       returnDecided:
@@ -782,6 +784,7 @@ operations:
       - $ref: '#/channels/domainEvents/messages/orderGroupCreated'
       - $ref: '#/channels/domainEvents/messages/orderGroupPaid'
       - $ref: '#/channels/domainEvents/messages/orderGroupStatusChanged'
+      - $ref: '#/channels/domainEvents/messages/orderGroupCompleted'
       - $ref: '#/channels/domainEvents/messages/orderGroupRefundRequested'
       - $ref: '#/channels/domainEvents/messages/returnDecided'
       - $ref: '#/channels/domainEvents/messages/returnRequested'
@@ -2365,6 +2368,13 @@ components:
         allOf:
           - $ref: './schemas/envelope.v1.json'
           - properties: { data: { $ref: './schemas/orderGroup.statusChanged.v1.json' } }
+    orderGroupCompleted:
+      name: orderGroup.completed
+      headers: { type: object, properties: { eventType: { const: orderGroup.completed } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/orderGroup.completed.v1.json' } }
     orderGroupRefundRequested:
       name: orderGroup.refundRequested
       headers: { type: object, properties: { eventType: { const: orderGroup.refundRequested } } }

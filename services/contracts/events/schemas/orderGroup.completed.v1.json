@@ -1,0 +1,64 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.zudomart.com/events/orderGroup.completed.v1.json",
+  "title": "OrderGroupCompleted",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "orderGroupId",
+    "orderNumber",
+    "orderedAt",
+    "storeId",
+    "sellerAccountId",
+    "buyerAccountId",
+    "subtotalMinor",
+    "totalMinor",
+    "refundedMinor",
+    "currency",
+    "completedAt",
+    "attributedItems"
+  ],
+  "properties": {
+    "orderGroupId": {
+      "type": "string"
+    },
+    "orderNumber": {
+      "type": "string"
+    },
+    "orderedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "storeId": {
+      "type": "string"
+    },
+    "sellerAccountId": {
+      "type": "string"
+    },
+    "buyerAccountId": {
+      "type": "string"
+    },
+    "subtotalMinor": {
+      "type": "integer"
+    },
+    "totalMinor": {
+      "type": "integer"
+    },
+    "refundedMinor": {
+      "type": "integer"
+    },
+    "currency": {
+      "type": "string"
+    },
+    "completedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "attributedItems": {
+      "type": "array",
+      "items": {
+        "$ref": "./orderGroup.paid.v1.json#/$defs/attributedItem"
+      }
+    }
+  }
+}

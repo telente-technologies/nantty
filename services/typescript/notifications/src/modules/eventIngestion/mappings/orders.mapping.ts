@@ -1,5 +1,7 @@
 import type { SellerItemGroup } from "@zudomart/email-templates";
 
+import type { DomainEventEnvelope } from "../../../types/domainEvent.type.js";
+import type { NotificationIntent } from "../../../types/notification.type.js";
 import type { EventDataReader } from "../../../utils/eventDataReader.util.js";
 import { intentFor, orderUrl, plan, readActor, type EventMapping, type MappingContext } from "./mappingHelpers.js";
 
@@ -101,6 +103,9 @@ const sellerCancelledBy = (cancelledBy: string) => (cancelledBy === "buyer" || c
 const buyerCancelledBy = (cancelledBy: string) => (cancelledBy === "buyer" || cancelledBy === "you" ? "you" : cancelledBy === "seller" ? "seller" : "zudomart");
 
 export const orderCancelled: EventMapping = (event, data, context) => {
+  // Checkout aborts publish a shell `order.cancelled` with only checkoutId/reason/status.
+  // It has no buyer or groups, so there is no notification to send.
+  if (data.optionalText("buyerUserId") === undefined) return [];
   const cancelledBy = data.text("cancelledBy", "zudomart");
   return [
     intentFor(event, data.text("buyerUserId"), {
@@ -117,4 +122,59 @@ export const orderCancelled: EventMapping = (event, data, context) => {
       }),
     ),
   ];
+};
+
+const orderGroupNumber = (data: EventDataReader): string => data.optionalText("orderNumber") ?? data.optionalText("reference") ?? data.text("orderGroupId");
+
+function orderGroupIntent(event: DomainEventEnvelope, recipientUserId: string, title: string, body: string, data: EventDataReader, options: { readonly variant?: string; readonly push?: boolean; readonly extra?: Readonly<Record<string, unknown>> } = {}): NotificationIntent {
+  const orderId = data.text("orderGroupId");
+  const payload = { orderId, ...options.extra };
+  return intentFor(event, recipientUserId, {
+    category: "orders",
+    ...(options.variant === undefined ? {} : { variant: options.variant }),
+    inApp: { category: "orders", title, body, data: payload },
+    ...(options.push === true ? { push: { title, body, data: payload } } : {}),
+  });
+}
+
+export const orderGroupCreated: EventMapping = (event, data) => [
+  orderGroupIntent(event, data.text("buyerAccountId"), "Order placed", `Order ${orderGroupNumber(data)} is waiting for payment.`, data),
+];
+
+export const orderGroupPaid: EventMapping = (event, data) => [
+  orderGroupIntent(event, data.text("buyerAccountId"), "Payment confirmed", `Payment for order ${orderGroupNumber(data)} is confirmed. We'll tell you when the seller accepts it.`, data, { variant: "buyer", push: true }),
+  orderGroupIntent(event, data.text("sellerAccountId"), "New order", `Order ${orderGroupNumber(data)} is paid and waiting for you to accept it.`, data, { variant: "seller", push: true }),
+];
+
+export const orderGroupShipped: EventMapping = (event, data) => {
+  const courier = data.optionalText("courierName");
+  const trackingUrl = data.optionalText("trackingUrl");
+  return [
+    orderGroupIntent(event, data.text("buyerAccountId"), "Your order is on its way", `Order ${orderGroupNumber(data)} has shipped${courier === undefined ? "" : ` with ${courier}`}.`, data, {
+      push: true,
+      ...(trackingUrl === undefined ? {} : { extra: { trackingUrl } }),
+    }),
+  ];
+};
+
+export const orderGroupDelivered: EventMapping = (event, data) => [
+  orderGroupIntent(event, data.text("buyerAccountId"), "Delivered — please confirm", `Confirm order ${orderGroupNumber(data)} so the seller gets paid.`, data, { push: true }),
+];
+
+export const orderGroupCompleted: EventMapping = (event, data) => [
+  orderGroupIntent(event, data.text("buyerAccountId"), "Order completed", `Order ${orderGroupNumber(data)} is complete. Leave a review?`, data),
+];
+
+export const orderGroupStatusChanged: EventMapping = (event, data) => {
+  const to = data.text("to");
+  const orderNumber = orderGroupNumber(data);
+  if (to === "processing") return [orderGroupIntent(event, data.text("buyerAccountId"), "Seller is preparing your order", `Order ${orderNumber} is being prepared.`, data)];
+  if (to === "ready") return [orderGroupIntent(event, data.text("buyerAccountId"), "Your order is ready", `Order ${orderNumber} is ready for delivery.`, data, { push: true })];
+  if (to === "cancelled") {
+    return [
+      orderGroupIntent(event, data.text("buyerAccountId"), "Order cancelled", `Order ${orderNumber} was cancelled.`, data, { variant: "buyer", push: true }),
+      orderGroupIntent(event, data.text("sellerAccountId"), "Order cancelled", `Order ${orderNumber} was cancelled.`, data, { variant: "seller", push: true }),
+    ];
+  }
+  return [];
 };

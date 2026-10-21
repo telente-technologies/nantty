@@ -36,6 +36,7 @@ export interface MediaConfig {
   readonly clamAv: { readonly host: string; readonly port: number } | undefined;
   readonly heifConvertPath: string;
   readonly allowProxiedChunks: boolean;
+  readonly allowUnscannedUploads: boolean;
   readonly ffmpeg: { readonly mode: "auto" | "required" | "disabled"; readonly ffmpegPath: string; readonly ffprobePath: string; readonly fpcalcPath: string; readonly timeoutMs: number; readonly maximumHeight: number };
   readonly moderation: { readonly baseUrl: string | undefined; readonly token: string; readonly failMode: "allow" | "hold"; readonly holdThreshold: number; readonly rejectThreshold: number; readonly timeoutMs: number };
 }
@@ -56,6 +57,8 @@ export function loadMediaConfigFromEnvironment(): MediaConfig {
   if (databaseUrl === "") problems.push("DATABASE_URL is required");
   const clamAvHost = readOptional("CLAMAV_HOST");
   const ffmpegMode = readOrDefault("FFMPEG_MODE", "auto");
+  const heifConvertPath = readOrDefault("HEIF_CONVERT_PATH", "heif-convert");
+  const moderationFailMode = readOrDefault("MODERATION_FAIL_MODE", "hold");
   const config: MediaConfig = {
     gatewayIdentitySecrets: readGatewayIdentitySecretsFromEnvironment(problems),
     host: readOrDefault("HOST", "0.0.0.0"),
@@ -90,8 +93,9 @@ export function loadMediaConfigFromEnvironment(): MediaConfig {
       signedUrlLifetimeSeconds: Number(readOrDefault("CDN_SIGNED_URL_LIFETIME_SECONDS", "3600")),
     },
     clamAv: clamAvHost === undefined ? undefined : { host: clamAvHost, port: Number(readOrDefault("CLAMAV_PORT", "3310")) },
-    heifConvertPath: readOrDefault("HEIF_CONVERT_PATH", "heif-convert"),
+    heifConvertPath,
     allowProxiedChunks: readOrDefault("ALLOW_PROXIED_CHUNKS", "false") === "true",
+    allowUnscannedUploads: readOrDefault("MEDIA_ALLOW_UNSCANNED", "false") === "true",
     ffmpeg: {
       mode: ffmpegMode === "required" || ffmpegMode === "disabled" ? ffmpegMode : "auto",
       ffmpegPath: readOrDefault("FFMPEG_PATH", "ffmpeg"),
@@ -103,13 +107,14 @@ export function loadMediaConfigFromEnvironment(): MediaConfig {
     moderation: {
       baseUrl: readOptional("MODERATION_URL"),
       token: readOrDefault("MODERATION_TOKEN", ""),
-      failMode: readOrDefault("MODERATION_FAIL_MODE", "allow") === "hold" ? "hold" : "allow",
+      failMode: moderationFailMode === "hold" ? "hold" : "allow",
       holdThreshold: Number(readOrDefault("MODERATION_HOLD_THRESHOLD", "0.5")),
       rejectThreshold: Number(readOrDefault("MODERATION_REJECT_THRESHOLD", "0.97")),
       timeoutMs: Number(readOrDefault("MODERATION_TIMEOUT_MS", "5000")),
     },
   };
   if (!Number.isInteger(config.port) || config.port <= 0) problems.push("PORT must be a positive integer");
+  if (moderationFailMode !== "allow" && moderationFailMode !== "hold") problems.push("MODERATION_FAIL_MODE must be allow or hold");
   if ((config.cdn.keyPairId === undefined) !== (config.cdn.privateKeyPem === undefined)) problems.push("CDN_SIGNING_KEY_PAIR_ID and CDN_SIGNING_PRIVATE_KEY must be set together");
   if (config.chunkSizeBytes < 5 * 1024 * 1024) problems.push("UPLOAD_CHUNK_SIZE_BYTES must be at least 5 MiB");
   if (problems.length > 0) throw new Error(`Invalid media configuration: ${problems.join("; ")}`);

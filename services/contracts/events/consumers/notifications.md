@@ -2,7 +2,17 @@
 
 Queue `notifications-domain-events` (RabbitMQ quorum queue bound to `zudomart.events`, envelope.v1; bindings in `infra/local/rabbitmq/topology.json`). Handlers key on the exact `type`. R = required, O = optional (email skipped or default used when absent). Producers marked "published" use the schema in `../schemas`; "unpublished" lists the fields read until the owning agent publishes.
 
-> **Order events are not wired yet (checked 2026-10-21).** goCommerce publishes `orderGroup.created`, `orderGroup.paid`, `orderGroup.statusChanged`, `orderGroup.shipped` and `orderGroup.delivered` with an order-group id and a slim payload, plus `order.created` / `order.cancelled` for the checkout shell. `notifications-domain-events` is bound to `order.*` only, and there are no `orderGroup.*` entries in `eventMappingRegistry.ts`. Treat the `order.*` rows below as the intended contract, not current behaviour; order emails and push are not delivered until the producer and consumer names and fields are reconciled.
+> **Order-group events are wired (2026-10-21).** goCommerce publishes `orderGroup.created`, `orderGroup.paid`, `orderGroup.statusChanged`, `orderGroup.shipped`, `orderGroup.delivered` and `orderGroup.completed`. `notifications-domain-events` is bound to all six, and `eventMappingRegistry.ts` maps them to in-app and push. Order-group email is still not sent because the payloads do not carry line items, payment URLs or recipient names. The legacy `order.*` mappings remain for the checkout shell; only `order.cancelled` currently has a producer, and its checkout-shell payload (checkoutId/reason/status only) is intentionally ignored.
+
+## Order-group lifecycle (published)
+| Type | Producer | Fields |
+| --- | --- | --- |
+| orderGroup.created | goCommerce | R orderGroupId, checkoutId, storeId, buyerAccountId, sellerAccountId, orderNumber, totalMinor, currency. In-app to buyer |
+| orderGroup.paid | goCommerce | R orderGroupId, orderNumber, orderedAt, checkoutId, storeId, sellerAccountId, buyerAccountId, subtotalMinor, totalMinor, currency, attributedItems. In-app + push to buyer and seller |
+| orderGroup.statusChanged | goCommerce | R orderGroupId, reference, from, to, actorKind, buyerAccountId, sellerAccountId. `processing` and `ready` notify the buyer; `cancelled` notifies buyer and seller. `shipped`, `delivered` and `completed` are ignored here so the dedicated events are not duplicated |
+| orderGroup.shipped | goCommerce | R orderGroupId, occurredAt; O orderNumber, storeId, buyerAccountId, sellerAccountId, courierName, trackingNumber, trackingUrl. In-app + push to buyer |
+| orderGroup.delivered | goCommerce | R orderGroupId, occurredAt; O orderNumber, storeId, buyerAccountId, sellerAccountId, courierName, trackingNumber, trackingUrl. In-app + push to buyer |
+| orderGroup.completed | goCommerce | R orderGroupId, orderNumber, orderedAt, storeId, sellerAccountId, buyerAccountId, subtotalMinor, totalMinor, refundedMinor, currency, completedAt, attributedItems. In-app to buyer |
 
 ## Published schemas (fields read)
 | Type | Producer | Fields |

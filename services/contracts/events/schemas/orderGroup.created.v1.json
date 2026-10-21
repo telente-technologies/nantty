@@ -9,6 +9,8 @@
     "checkoutId",
     "storeId",
     "buyerAccountId",
+    "sellerAccountId",
+    "orderNumber",
     "totalMinor",
     "currency"
   ],
@@ -23,6 +25,12 @@
       "type": "string"
     },
     "buyerAccountId": {
+      "type": "string"
+    },
+    "sellerAccountId": {
+      "type": "string"
+    },
+    "orderNumber": {
       "type": "string"
     },
     "totalMinor": {

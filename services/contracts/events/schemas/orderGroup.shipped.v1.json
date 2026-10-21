@@ -16,6 +16,18 @@
       "type": "string",
       "format": "date-time"
     },
+    "orderNumber": {
+      "type": "string"
+    },
+    "storeId": {
+      "type": "string"
+    },
+    "buyerAccountId": {
+      "type": "string"
+    },
+    "sellerAccountId": {
+      "type": "string"
+    },
     "courierName": {
       "type": "string"
     },
