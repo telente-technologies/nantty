@@ -5,6 +5,7 @@ import (
 
 	"zudomart/modules/users/src/container"
 	"zudomart/modules/users/src/modules/accountEnforcement/controllers"
+	"zudomart/platform/httpserver"
 	"zudomart/platform/identityports"
 	"zudomart/platform/jwtauth"
 	"zudomart/platform/staffauth"
@@ -16,6 +17,7 @@ var usernameReadPermissions = []string{"users.usernames.read", "usernames:reassi
 
 func MountAccountEnforcementRoutes(mux *http.ServeMux, container *container.Container) {
 	controller := controllers.AccountEnforcementController{Container: container}
+	internalToken := httpserver.RequireInternalToken(container.Settings.Privacy.InternalApiToken)
 	guard := staffauth.Guard{Registry: identityports.Default}
 	one := func(permission string, stepUp bool, handler http.HandlerFunc) http.Handler {
 		return guard.RequireStaff(permission, stepUp)(handler)
@@ -48,7 +50,7 @@ func MountAccountEnforcementRoutes(mux *http.ServeMux, container *container.Cont
 	requireAccessTokenAllowingSuspended := jwtauth.RequireVerifiedAccessTokenAllowingSuspended(container.AccessVerifier)
 	mux.Handle("GET /api/v1/users/me/suspension", requireAccessTokenAllowingSuspended(http.HandlerFunc(controller.MySuspension)))
 	mux.Handle("POST /api/v1/users/me/suspension/appeal", requireAccessTokenAllowingSuspended(http.HandlerFunc(controller.SubmitAppeal)))
-	mux.HandleFunc("POST /api/v1/internal/enforcement/actions", controller.InternalAction)
-	mux.HandleFunc("POST /api/v1/internal/users/summaries", controller.InternalSummaries)
-	mux.HandleFunc("POST /api/v1/internal/suspensions/{caseId}/appeal/decide", controller.InternalDecideAppeal)
+	mux.Handle("POST /api/v1/internal/enforcement/actions", internalToken(http.HandlerFunc(controller.InternalAction)))
+	mux.Handle("POST /api/v1/internal/users/summaries", internalToken(http.HandlerFunc(controller.InternalSummaries)))
+	mux.Handle("POST /api/v1/internal/suspensions/{caseId}/appeal/decide", internalToken(http.HandlerFunc(controller.InternalDecideAppeal)))
 }

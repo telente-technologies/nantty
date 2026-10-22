@@ -5,10 +5,12 @@ import (
 
 	"zudomart/modules/creators/src/modules/affiliates/controllers"
 	"zudomart/modules/ledger/src/middlewares"
+	"zudomart/platform/httpserver"
 )
 
 func MountAffiliatesRoutes(mux *http.ServeMux, controller controllers.AffiliatesController) {
 	requireUser := middlewares.RequireUserAccessToken(controller.Affiliates.Container.Resources.AccessVerifier)
+	internalToken := httpserver.RequireInternalToken(controller.Affiliates.Container.Settings.InternalApiToken)
 	user := func(handler http.HandlerFunc) http.Handler { return requireUser(handler) }
 	mux.Handle("GET /api/v1/creators/affiliations", user(controller.MyAffiliations))
 	mux.Handle("POST /api/v1/creators/affiliations", user(controller.RequestAffiliation))
@@ -30,5 +32,5 @@ func MountAffiliatesRoutes(mux *http.ServeMux, controller controllers.Affiliates
 	mux.Handle("PATCH /api/v1/seller/affiliates/creators/{creatorId}", user(controller.SetCreatorStatus))
 	mux.Handle("DELETE /api/v1/seller/affiliates/creators/{creatorId}", user(controller.SetCreatorStatus))
 	mux.Handle("GET /api/v1/seller/affiliates/commission-ledger", user(controller.CommissionLedger))
-	mux.HandleFunc("GET /api/v1/internal/affiliates/commission-rates", controller.CommissionRates)
+	mux.Handle("GET /api/v1/internal/affiliates/commission-rates", internalToken(http.HandlerFunc(controller.CommissionRates)))
 }

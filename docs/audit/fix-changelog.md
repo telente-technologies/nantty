@@ -2,6 +2,19 @@
 
 Every code change made while fixing `docs/audit/frontend-backend-audit.md` is logged here with file, lines, audit ID, verification, and rollback notes. Investigations that concluded "no change needed" are logged too. Newest first.
 
+## 2026-10-22 — ZM-018: route-level internal-token guard on every internal mutator
+
+**Audit:** ZM-018 (bare `/internal/*` mutators)
+**Changes:**
+1. `services/go/platform/httpserver/internalToken.middleware.go` — added a shared guard that accepts `X-Internal-Token` or a Bearer token and fails closed when the configured token is empty. Covered by `internalToken.middleware_test.go`.
+2. `services/go/modules/users/src/modules/{accountEnforcement,checkmarks,creatorProgram,legal,linkedProfiles,notificationDirectory}/routes` — every `/api/v1/internal/*` route is now wrapped at the route level, in addition to the existing controller checks.
+3. `services/go/modules/wallet/src/modules/adBalances/routes/adBalances.routes.go` — internal ad balance, top-up, boost, step-up and withdrawal routes are route-guarded.
+4. `services/go/modules/admin/src/modules/auditLog/routes/auditLog.routes.go`, `services/go/modules/escrow/src/modules/escrows/routes/escrows.routes.go` and `services/go/modules/creators/src/modules/affiliates/routes/affiliates.routes.go` — internal audit, refund and commission-rate routes are route-guarded.
+5. Tests: new middleware tests plus the existing integration suites, which already exercise these routes with and without valid internal tokens.
+**Verified:** `go test ./platform/httpserver ./modules/users ./modules/wallet ./modules/admin ./modules/creators ./modules/escrow` passes; `gofmt` clean.
+**Rollback:** remove the middleware and the route wrappers together. The controller-level token checks remain, so reverting only the wrappers does not make the routes unauthenticated.
+**Remaining:** FX staleness/seed, username oracles, audit-record coverage, and the rest of ZM-018/ZM-020.
+
 ## 2026-10-22 — ZM-003/ZM-020: direct-payment acceptance, author-only link previews, anon write no-ops, expiring unsubscribe tokens
 
 **Audit:** ZM-003 (direct-payment protection), ZM-020 (gateway/social/notifications hardening)

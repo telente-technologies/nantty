@@ -6,6 +6,7 @@ import (
 	"zudomart/modules/users/src/container"
 	transitionblackapplication "zudomart/modules/users/src/modules/checkmarks/commands/transitionBlackApplication"
 	"zudomart/modules/users/src/modules/checkmarks/controllers"
+	"zudomart/platform/httpserver"
 	"zudomart/platform/identityports"
 	"zudomart/platform/jwtauth"
 	"zudomart/platform/staffauth"
@@ -13,6 +14,7 @@ import (
 
 func MountCheckmarksRoutes(mux *http.ServeMux, container *container.Container) {
 	controller := controllers.CheckmarksController{Container: container}
+	internalToken := httpserver.RequireInternalToken(container.Settings.Privacy.InternalApiToken)
 	requireAccessToken := jwtauth.RequireVerifiedAccessToken(container.AccessVerifier)
 	guard := staffauth.Guard{Registry: identityports.Default}
 	review := guard.RequireStaffWithAnyPermission([]string{"verification:review", "verification:revoke"}, false)
@@ -46,5 +48,5 @@ func MountCheckmarksRoutes(mux *http.ServeMux, container *container.Container) {
 	mux.Handle("POST /api/v1/admin/black-applications/{blackId}/reject", reviewStepUp(controller.BlackTransitionHandler(transitionblackapplication.ActionReject)))
 	mux.Handle("POST /api/v1/admin/black-applications/{blackId}/revoke", revokeStepUp(controller.BlackTransitionHandler(transitionblackapplication.ActionRevoke)))
 	mux.Handle("POST /api/v1/admin/black-applications/{blackId}/reverification-reminder", guard.RequireStaff("verification:review", false)(controller.BlackTransitionHandler(transitionblackapplication.ActionReminder)))
-	mux.HandleFunc("POST /api/v1/internal/checkmarks/{profileId}/billing-events", controller.BillingEvent)
+	mux.Handle("POST /api/v1/internal/checkmarks/{profileId}/billing-events", internalToken(http.HandlerFunc(controller.BillingEvent)))
 }

@@ -2272,4 +2272,10 @@ No provider integration is to be built until the V2 design is approved and the s
 - **Anonymous counters:** anonymous share, impression and profile-visit requests now return before loading the post, so they can no longer be used for unauthenticated read amplification while reporting success.
 - **Unsubscribe links:** tokens now carry issued-at/expiry claims and default to 90 days (`UNSUBSCRIBE_TOKEN_TTL_DAYS`, 1–365). Expired, future-issued, tampered or legacy claim-less tokens are rejected. Repeat clicks remain idempotent rather than burning the link.
 - **Staff audience:** gateway startup rejects `AUTH_TOKEN_AUDIENCE=zudomart-admin`, preventing a config mistake from making ordinary user tokens satisfy the staff audience.
-- **Still open:** per-store promo `issues[]`, single-use replay tracking for unsubscribe, audio/PDF moderation, in-product appeal links, staff-JWKS staging assertion and the remaining ZM-018/ZM-020 items.
+- **Still open:** per-store promo `issues[]`, single-use replay tracking for unsubscribe, audio/PDF moderation, in-product appeal links and the remaining ZM-018/ZM-020 items.
+
+## 63. Internal route guards (2026-10-22) **[DONE]**
+
+- **Shared guard:** `platform/httpserver.RequireInternalToken` accepts `X-Internal-Token` or a Bearer token, uses a constant-time comparison and fails closed when the configured token is empty.
+- **Coverage:** every `/api/v1/internal/*` mutator in users, wallet, admin, escrow and creators is now guarded at the route level. The existing controller-level checks remain as defence in depth.
+- **Still open:** FX staleness/seed, username oracles, audit-record coverage and the rest of ZM-018/ZM-020.

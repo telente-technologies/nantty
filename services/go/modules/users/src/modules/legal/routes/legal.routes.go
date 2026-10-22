@@ -5,6 +5,7 @@ import (
 
 	"zudomart/modules/users/src/container"
 	"zudomart/modules/users/src/modules/legal/controllers"
+	"zudomart/platform/httpserver"
 	"zudomart/platform/identityports"
 	"zudomart/platform/jwtauth"
 	"zudomart/platform/staffauth"
@@ -18,6 +19,7 @@ const (
 
 func MountLegalRoutes(mux *http.ServeMux, container *container.Container) {
 	controller := controllers.LegalController{Container: container}
+	internalToken := httpserver.RequireInternalToken(container.Settings.Privacy.InternalApiToken)
 	guard := staffauth.Guard{Registry: identityports.Default}
 	allowed := func(stepUp bool, permissions ...string) func(http.Handler) http.Handler {
 		return guard.RequireStaffWithAnyPermission(permissions, stepUp)
@@ -34,6 +36,6 @@ func MountLegalRoutes(mux *http.ServeMux, container *container.Container) {
 	mux.Handle("GET /api/v1/admin/legal/versions/{versionId}/acceptance", allowed(false, view)(http.HandlerFunc(controller.GetAcceptance)))
 	mux.HandleFunc("GET /api/v1/legal/policy-versions/current", controller.CurrentPolicyVersions)
 	mux.Handle("GET /api/v1/users/me/policy-acceptances", jwtauth.RequireVerifiedAccessToken(container.AccessVerifier)(http.HandlerFunc(controller.MyAcceptances)))
-	mux.HandleFunc("GET /api/v1/internal/accounts/{accountId}/policy-gate", controller.PolicyGate)
-	mux.HandleFunc("PUT /api/v1/internal/legal/notices/{noticeId}/progress", controller.RecordNoticeProgress)
+	mux.Handle("GET /api/v1/internal/accounts/{accountId}/policy-gate", internalToken(http.HandlerFunc(controller.PolicyGate)))
+	mux.Handle("PUT /api/v1/internal/legal/notices/{noticeId}/progress", internalToken(http.HandlerFunc(controller.RecordNoticeProgress)))
 }

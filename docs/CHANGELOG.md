@@ -41,6 +41,9 @@ All notable changes to Zudomart are documented here. Format follows
 - The gateway now refuses to start if `AUTH_TOKEN_AUDIENCE` is set to the staff
   audience, so a misconfiguration cannot make user access tokens satisfy staff
   checks.
+- Every internal service mutation now has a route-level token check in addition
+  to its existing controller check. The shared guard fails closed when the
+  configured token is missing.
 
 ## [Unreleased] — 2026-10-21
 

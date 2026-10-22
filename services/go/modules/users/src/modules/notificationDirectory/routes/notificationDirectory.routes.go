@@ -5,14 +5,16 @@ import (
 
 	"zudomart/modules/users/src/container"
 	"zudomart/modules/users/src/modules/notificationDirectory/controllers"
+	"zudomart/platform/httpserver"
 )
 
 func MountNotificationDirectoryRoutes(mux *http.ServeMux, container *container.Container) {
 	controller := controllers.NotificationDirectoryController{Container: container}
-	mux.HandleFunc("GET /api/v1/internal/users/{accountId}/notification-recipient", controller.Recipient)
-	mux.HandleFunc("GET /api/v1/internal/users/by-username/{username}/notification-recipient", controller.RecipientByUsername)
-	mux.HandleFunc("GET /api/v1/internal/notification-audience/segments", controller.Segments)
-	mux.HandleFunc("GET /api/v1/internal/notification-audience/{segmentId}", controller.AudiencePage)
-	mux.HandleFunc("GET /api/v1/internal/notification-audience/{segmentId}/count", controller.AudienceCount)
-	mux.HandleFunc("POST /api/v1/internal/users/{accountId}/marketing-unsubscribe", controller.MarketingUnsubscribe)
+	internalToken := httpserver.RequireInternalToken(container.Settings.Privacy.InternalApiToken)
+	mux.Handle("GET /api/v1/internal/users/{accountId}/notification-recipient", internalToken(http.HandlerFunc(controller.Recipient)))
+	mux.Handle("GET /api/v1/internal/users/by-username/{username}/notification-recipient", internalToken(http.HandlerFunc(controller.RecipientByUsername)))
+	mux.Handle("GET /api/v1/internal/notification-audience/segments", internalToken(http.HandlerFunc(controller.Segments)))
+	mux.Handle("GET /api/v1/internal/notification-audience/{segmentId}", internalToken(http.HandlerFunc(controller.AudiencePage)))
+	mux.Handle("GET /api/v1/internal/notification-audience/{segmentId}/count", internalToken(http.HandlerFunc(controller.AudienceCount)))
+	mux.Handle("POST /api/v1/internal/users/{accountId}/marketing-unsubscribe", internalToken(http.HandlerFunc(controller.MarketingUnsubscribe)))
 }

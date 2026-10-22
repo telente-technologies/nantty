@@ -5,6 +5,7 @@ import (
 
 	"zudomart/modules/users/src/container"
 	"zudomart/modules/users/src/modules/creatorProgram/controllers"
+	"zudomart/platform/httpserver"
 	"zudomart/platform/identityports"
 	"zudomart/platform/jwtauth"
 	"zudomart/platform/staffauth"
@@ -12,6 +13,7 @@ import (
 
 func MountCreatorProgramRoutes(mux *http.ServeMux, container *container.Container) {
 	controller := controllers.CreatorProgramController{Container: container}
+	internalToken := httpserver.RequireInternalToken(container.Settings.Privacy.InternalApiToken)
 	requireAccessToken := jwtauth.RequireVerifiedAccessToken(container.AccessVerifier)
 	guard := staffauth.Guard{Registry: identityports.Default}
 	review := guard.RequireStaff("applications:creators", false)
@@ -23,5 +25,5 @@ func MountCreatorProgramRoutes(mux *http.ServeMux, container *container.Containe
 	mux.Handle("GET /api/v1/admin/applications/creators/{applicationId}", review(http.HandlerFunc(controller.Detail)))
 	mux.Handle("POST /api/v1/admin/applications/creators/{applicationId}/approve", reviewStepUp(http.HandlerFunc(controller.Approve)))
 	mux.Handle("POST /api/v1/admin/applications/creators/{applicationId}/reject", reviewStepUp(http.HandlerFunc(controller.Reject)))
-	mux.HandleFunc("PUT /api/v1/internal/profiles/{profileId}/signals", controller.PutSignals)
+	mux.Handle("PUT /api/v1/internal/profiles/{profileId}/signals", internalToken(http.HandlerFunc(controller.PutSignals)))
 }
