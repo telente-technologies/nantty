@@ -44,6 +44,9 @@ All notable changes to Zudomart are documented here. Format follows
 - Every internal service mutation now has a route-level token check in addition
   to its existing controller check. The shared guard fails closed when the
   configured token is missing.
+- A missing exchange rate now returns a clear `EXCHANGE_RATE_UNAVAILABLE` error
+  instead of a 500, and the first admin write for a currency seeds its default
+  rate before applying the change.
 
 ## [Unreleased] — 2026-10-21
 

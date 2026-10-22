@@ -2,6 +2,18 @@
 
 Every code change made while fixing `docs/audit/frontend-backend-audit.md` is logged here with file, lines, audit ID, verification, and rollback notes. Investigations that concluded "no change needed" are logged too. Newest first.
 
+## 2026-10-22 — ZM-012/ZM-018: exchange-rate seed path and missing-rate handling
+
+**Audit:** ZM-012 and ZM-018 (currency seed path, unordered latest revision, unmapped not-found)
+**Changes:**
+1. `services/go/modules/currency/src/modules/exchangeRates/repositories/exchangeRate.repository.go` — latest revisions are ordered by `created_at` then ID, so the newest rate wins even if identifiers are not monotonic. A missing currency rate now returns `EXCHANGE_RATE_UNAVAILABLE` (503) instead of leaking a `First()` error as a 500.
+2. `services/go/modules/currency/src/modules/exchangeRates/commands/setExchangeRate/setExchangeRate.handler.go` — the first admin write for a supported currency now seeds that currency's default revision inside the same transaction, then applies the change and the large-change check against the default. It no longer fails with a not-found error.
+3. `services/go/modules/currency/src/errors/currency.error.go` — added the missing-rate API error.
+4. `services/go/modules/currency/currency.integration_test.go` — deletes NGN's revisions, asserts conversion returns 503, then asserts an admin write re-seeds and succeeds.
+**Verified:** `go test ./modules/currency/...` passes; `gofmt` clean.
+**Rollback:** revert the repository ordering/error mapping and the seed-on-write branch together. The startup seed still covers normal boots, but a missing revision would return to a 500 and a first admin write would fail again.
+**Remaining:** staleness TTL/alerting for rates that have not been refreshed.
+
 ## 2026-10-22 — ZM-018: route-level internal-token guard on every internal mutator
 
 **Audit:** ZM-018 (bare `/internal/*` mutators)

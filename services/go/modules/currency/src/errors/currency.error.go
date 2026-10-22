@@ -11,3 +11,5 @@ func Unprocessable(code, message string) *httpserver.ApiError {
 }
 
 var UnsupportedCurrency = Unprocessable("UNSUPPORTED_CURRENCY", "That currency is not supported.")
+
+var RateUnavailable = httpserver.NewApiError(http.StatusServiceUnavailable, "EXCHANGE_RATE_UNAVAILABLE", "An exchange rate is not available right now. Try again later.")

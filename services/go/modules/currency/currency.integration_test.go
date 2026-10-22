@@ -42,12 +42,14 @@ func (recorder *recordingAudit) RecordAuditEvent(ctx context.Context, event iden
 }
 
 type currencyHarness struct {
-	t         *testing.T
-	server    *httptest.Server
-	tokens    *identitytest.FakeTokenService
-	publisher *events.RecordingPublisher
-	audit     *recordingAudit
-	countries countryLookupByAccount
+	t             *testing.T
+	server        *httptest.Server
+	tokens        *identitytest.FakeTokenService
+	publisher     *events.RecordingPublisher
+	audit         *recordingAudit
+	countries     countryLookupByAccount
+	administrator *sql.DB
+	schema        string
 }
 
 func startCurrencyModuleAgainstFreshSchema(t *testing.T) *currencyHarness {
@@ -66,7 +68,7 @@ func startCurrencyModuleAgainstFreshSchema(t *testing.T) *currencyHarness {
 		t.Fatal(err)
 	}
 	t.Cleanup(func() { dropSchemaAndClose(administrator, schema) })
-	harness := &currencyHarness{t: t, tokens: identitytest.NewFakeTokenService(t), publisher: &events.RecordingPublisher{}, audit: &recordingAudit{}, countries: countryLookupByAccount{}}
+	harness := &currencyHarness{t: t, tokens: identitytest.NewFakeTokenService(t), publisher: &events.RecordingPublisher{}, audit: &recordingAudit{}, countries: countryLookupByAccount{}, administrator: administrator, schema: schema}
 	identityports.Default.RegisterStaffTokenService(harness.tokens)
 	identityports.Default.RegisterStaffSessionChecker(identitytest.ActiveStaffSessionChecker{})
 	identityports.Default.RegisterStaffNetworkPolicy(identitytest.PermissiveStaffNetworkPolicy{})
@@ -163,6 +165,26 @@ func TestPublicCurrencyListCountriesAndConversion(t *testing.T) {
 	harness.expect("GET", "/api/v1/currency/convert?amountMinor=100&from=USD&to=JPY", nil, nil, http.StatusUnprocessableEntity)
 	harness.expect("GET", "/api/v1/currency/convert?amountMinor=-5&from=USD&to=NGN", nil, nil, http.StatusUnprocessableEntity)
 	harness.expect("GET", "/api/v1/currency/convert?amountMinor=abc&from=USD&to=NGN", nil, nil, http.StatusBadRequest)
+}
+
+func TestMissingRateIsSeedableAndConversionFailsClosed(t *testing.T) {
+	harness := startCurrencyModuleAgainstFreshSchema(t)
+	if _, err := harness.administrator.Exec(fmt.Sprintf("DELETE FROM %s WHERE currency = 'NGN'", pgx.Identifier{harness.schema, "exchange_rate_revisions"}.Sanitize())); err != nil {
+		t.Fatal(err)
+	}
+	missing := harness.expect("GET", "/api/v1/currency/convert?amountMinor=100&from=USD&to=NGN", nil, nil, http.StatusServiceUnavailable)
+	if missing["code"] != "EXCHANGE_RATE_UNAVAILABLE" {
+		t.Fatalf("unexpected missing-rate response %v", missing)
+	}
+	writer, stepUp, _ := harness.tokens.SignStaffTokensForTest(t, "admin", []string{"currency.rates.write"})
+	created := harness.expect("PUT", "/api/v1/admin/exchange-rates/NGN", staffHeaders(writer, stepUp), map[string]any{"rate": "1600", "reason": "market moved"}, http.StatusOK)
+	if created["usdRateE8"] != float64(160_000_000_000) {
+		t.Fatalf("unexpected first write %v", created)
+	}
+	converted := harness.expect("GET", "/api/v1/currency/convert?amountMinor=100&from=USD&to=NGN", nil, nil, http.StatusOK)
+	if converted["amountMinor"] != float64(160000) {
+		t.Fatalf("unexpected conversion after seeding %v", converted)
+	}
 }
 
 func TestLocaleLayersProfileThenCdnHeaderThenClientHint(t *testing.T) {

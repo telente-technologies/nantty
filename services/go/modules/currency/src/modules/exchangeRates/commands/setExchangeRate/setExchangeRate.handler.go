@@ -30,7 +30,8 @@ type Handler struct {
 func (handler Handler) Execute(ctx context.Context, command Command) (Result, error) {
 	code := strings.ToUpper(strings.TrimSpace(command.Currency))
 	reason := strings.TrimSpace(command.Reason)
-	if _, supported := constants.FindSupportedCurrency(code); !supported {
+	supportedCurrency, supported := constants.FindSupportedCurrency(code)
+	if !supported {
 		return Result{}, currencyerrors.UnsupportedCurrency
 	}
 	if code == constants.FixedBaseCurrency {
@@ -46,7 +47,12 @@ func (handler Handler) Execute(ctx context.Context, command Command) (Result, er
 	var created, previous *ent.ExchangeRateRevision
 	err = handler.Container.RunInTransaction(ctx, func(tx *ent.Tx) error {
 		var err error
-		if previous, err = tx.ExchangeRateRevision.Query().Where(exchangeraterevision.Currency(code)).Order(ent.Desc(exchangeraterevision.FieldID)).ForUpdate().First(ctx); err != nil {
+		if previous, err = tx.ExchangeRateRevision.Query().Where(exchangeraterevision.Currency(code)).Order(ent.Desc(exchangeraterevision.FieldCreatedAt), ent.Desc(exchangeraterevision.FieldID)).ForUpdate().First(ctx); ent.IsNotFound(err) {
+			previous, err = tx.ExchangeRateRevision.Create().
+				SetCurrency(code).SetUsdRateE8(supportedCurrency.DefaultE8).SetSource(exchangeraterevision.SourceSeed).SetReason("initial default rate").
+				Save(ctx)
+		}
+		if err != nil {
 			return err
 		}
 		if services.ExceedsChangeLimit(previous.UsdRateE8, proposed, largeChangeLimitPercent) && !command.ConfirmLargeChange {

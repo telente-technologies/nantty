@@ -10,7 +10,7 @@ import (
 )
 
 func FindLatestRevisionForCurrency(ctx context.Context, client *ent.Client, code string) (*ent.ExchangeRateRevision, error) {
-	return client.ExchangeRateRevision.Query().Where(exchangeraterevision.Currency(code)).Order(ent.Desc(exchangeraterevision.FieldID)).First(ctx)
+	return client.ExchangeRateRevision.Query().Where(exchangeraterevision.Currency(code)).Order(ent.Desc(exchangeraterevision.FieldCreatedAt), ent.Desc(exchangeraterevision.FieldID)).First(ctx)
 }
 
 func FindCurrentUsdRateE8(ctx context.Context, client *ent.Client, code string) (int64, error) {
@@ -18,6 +18,9 @@ func FindCurrentUsdRateE8(ctx context.Context, client *ent.Client, code string) 
 		return 0, currencyerrors.UnsupportedCurrency
 	}
 	latest, err := FindLatestRevisionForCurrency(ctx, client, code)
+	if ent.IsNotFound(err) {
+		return 0, currencyerrors.RateUnavailable
+	}
 	if err != nil {
 		return 0, err
 	}

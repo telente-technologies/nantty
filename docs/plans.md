@@ -2278,4 +2278,11 @@ No provider integration is to be built until the V2 design is approved and the s
 
 - **Shared guard:** `platform/httpserver.RequireInternalToken` accepts `X-Internal-Token` or a Bearer token, uses a constant-time comparison and fails closed when the configured token is empty.
 - **Coverage:** every `/api/v1/internal/*` mutator in users, wallet, admin, escrow and creators is now guarded at the route level. The existing controller-level checks remain as defence in depth.
-- **Still open:** FX staleness/seed, username oracles, audit-record coverage and the rest of ZM-018/ZM-020.
+- **Still open:** FX staleness alerting, username oracles, audit-record coverage and the rest of ZM-018/ZM-020.
+
+## 64. Currency rate seed path and missing-rate handling (2026-10-22) **[DONE]**
+
+- **Latest revision:** rates are ordered by `created_at` then ID instead of ID alone.
+- **Missing rate:** conversion now returns `EXCHANGE_RATE_UNAVAILABLE` (503) instead of surfacing a not-found error as a 500.
+- **First admin write:** if a supported currency has no revision, the transaction seeds its default rate before applying the admin change and the large-change check.
+- **Still open:** alerting/TTL for rates that have not been refreshed.
