@@ -50,10 +50,20 @@ func JudgeUsername(ctx context.Context, client *ent.Client, raw string, requeste
 	return username, UsernameAvailability{Available: true}, nil
 }
 
-func CheckUsernameAvailability(ctx context.Context, application *container.Container, raw, name string) (UsernameAvailability, error) {
+func CheckUsernameAvailability(ctx context.Context, application *container.Container, raw, name string, authenticated bool) (UsernameAvailability, error) {
 	username, verdict, err := JudgeUsername(ctx, application.Client, raw, uuid.Nil)
-	if err != nil || (verdict.Reason != string(usernames.ReasonTaken) && verdict.Reason != string(usernames.ReasonRecentlyUsed)) {
+	if err != nil {
 		return verdict, err
+	}
+	if !authenticated {
+		verdict.Suggestions = nil
+		if verdict.Reason != "" && verdict.Reason != string(usernames.ReasonInvalid) {
+			verdict.Reason = "unavailable"
+		}
+		return verdict, nil
+	}
+	if verdict.Reason != string(usernames.ReasonTaken) && verdict.Reason != string(usernames.ReasonRecentlyUsed) {
+		return verdict, nil
 	}
 	verdict.Suggestions, err = SuggestUsernames(ctx, application.Client, application.Now(), username, name)
 	return verdict, err

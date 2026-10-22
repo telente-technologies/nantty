@@ -12,5 +12,5 @@ type Handler struct {
 }
 
 func (handler Handler) Execute(ctx context.Context, query Query) (services.UsernameAvailability, error) {
-	return services.CheckUsernameAvailability(ctx, handler.Container, query.Username, query.Name)
+	return services.CheckUsernameAvailability(ctx, handler.Container, query.Username, query.Name, query.Authenticated)
 }

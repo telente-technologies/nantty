@@ -3,7 +3,7 @@ import type { EndpointContract } from "./endpointContract.type";
 
 const userSummary = c.object({ id: c.string(), name: c.string(), username: c.string(), avatarUrl: c.nullable(c.string()) });
 const user = c.object({ id: c.string(), name: c.string(), username: c.string(), avatarUrl: c.nullable(c.string()), bio: c.string(), profileKind: c.string(), showsMart: c.boolean() }, ["profileKind", "showsMart"]);
-const reason = c.string(["taken", "reserved", "invalid", "recently_used", "withheld"]);
+const reason = c.string(["taken", "reserved", "invalid", "recently_used", "withheld", "unavailable"]);
 const money = c.object({ amountMinor: c.number(), currency: c.string() });
 const walletLine = c.object({ key: c.string(), label: c.string(), description: c.string(), amount: money });
 const walletSummary = c.object({

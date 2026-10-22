@@ -8,6 +8,7 @@ export const USERNAME_UNAVAILABLE_MESSAGES: Record<string, string> = {
   invalid: "Use 3–20 letters, numbers, underscores or full stops.",
   recently_used: "That username was used recently and isn't available yet.",
   withheld: "That username has been withheld under our policies.",
+  unavailable: "That username isn't available. Try another one.",
 };
 
 export const DEFAULT_USERNAME_HINT = "3–20 characters. Letters, numbers, underscores and full stops only.";

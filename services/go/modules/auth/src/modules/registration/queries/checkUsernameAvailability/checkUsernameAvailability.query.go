@@ -1,6 +1,7 @@
 package checkusernameavailability
 
 type Query struct {
-	Username string
-	Name     string
+	Username      string
+	Name          string
+	Authenticated bool
 }

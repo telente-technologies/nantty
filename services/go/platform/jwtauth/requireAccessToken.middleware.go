@@ -32,6 +32,24 @@ func RequireVerifiedAccessToken(verifier *AccessTokenVerifier) func(http.Handler
 	return RequireVerifiedAccessTokenWithSuspendedPolicy(verifier, false)
 }
 
+func OptionalVerifiedAccessToken(verifier *AccessTokenVerifier) func(http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
+			rawToken := ExtractBearerTokenFromAuthorizationHeader(request)
+			if rawToken == "" {
+				next.ServeHTTP(writer, request)
+				return
+			}
+			principal, err := verifier.VerifyAccessTokenAndExtractPrincipal(request.Context(), rawToken)
+			if err != nil {
+				next.ServeHTTP(writer, request)
+				return
+			}
+			next.ServeHTTP(writer, request.WithContext(ContextWithPrincipal(request.Context(), principal)))
+		})
+	}
+}
+
 func RequireVerifiedAccessTokenAllowingSuspended(verifier *AccessTokenVerifier) func(http.Handler) http.Handler {
 	return RequireVerifiedAccessTokenWithSuspendedPolicy(verifier, true)
 }

@@ -124,7 +124,7 @@ export interface CountryOption {
   readonly currencyName: string;
 }
 
-export type UsernameUnavailableReason = "taken" | "reserved" | "invalid" | "recently_used" | "withheld";
+export type UsernameUnavailableReason = "taken" | "reserved" | "invalid" | "recently_used" | "withheld" | "unavailable";
 
 export interface UsernameAvailability {
   readonly available: boolean;

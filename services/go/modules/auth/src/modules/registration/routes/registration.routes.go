@@ -14,5 +14,5 @@ func MountRegistrationRoutes(mux *http.ServeMux, container *container.Container)
 	rateLimitAuth := httpserver.RateLimitAuthEndpoints()
 	mux.Handle("POST /api/v1/auth/register", rateLimitAuth(http.HandlerFunc(controller.RegisterAccount)))
 	mux.Handle("PUT /api/v1/auth/account/birthday", rateLimitAuth(jwtauth.RequireVerifiedAccessToken(container.AccessVerifier)(http.HandlerFunc(controller.AddAccountBirthday))))
-	mux.Handle("GET /api/v1/auth/username-available", rateLimitAuth(http.HandlerFunc(controller.CheckUsernameAvailability)))
+	mux.Handle("GET /api/v1/auth/username-available", rateLimitAuth(jwtauth.OptionalVerifiedAccessToken(container.AccessVerifier)(http.HandlerFunc(controller.CheckUsernameAvailability))))
 }

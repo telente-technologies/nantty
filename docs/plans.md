@@ -2325,3 +2325,10 @@ No provider integration is to be built until the V2 design is approved and the s
 - **Failure mode:** without both values there is no staff authenticator, so staff ticket and chat routes cannot be exposed by accident.
 - **Tests:** `supportConfig.test.ts` covers the missing-JWKS, missing-issuer and valid staging cases.
 - **Still open:** mentions-resolve captcha and the remaining ZM-020 route-limit edges.
+
+## 71. Signed-out username checks are generic (2026-10-22) **[DONE]**
+
+- **Public response:** an anonymous caller gets `available: false` with reason `unavailable` and no suggestions; `invalid` is still returned so the field can explain format rules.
+- **Signed-in response:** a verified access token still receives `taken`/`recently_used` and up to three suggestions for the settings screen.
+- **Rate limits:** the availability and suggestion endpoints share the `usernameCheck` policy, which is account-scoped for signed-in callers.
+- **Still open:** profile/confusables enumeration and the remaining ZM-018 edges.

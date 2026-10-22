@@ -204,7 +204,7 @@ func sha256Hex(value string) string {
 
 func TestUsernameAvailabilityExplainsWhyAndRegistrationEnforcesIt(t *testing.T) {
 	harness := startAuthModuleAgainstFreshSchema(t)
-	cases := map[string]string{"g00gle": "reserved", "official.admin": "reserved", "ab": "invalid", "_._": "invalid", "fresh.name": ""}
+	cases := map[string]string{"g00gle": "unavailable", "official.admin": "unavailable", "ab": "invalid", "_._": "invalid", "fresh.name": ""}
 	for username, wantReason := range cases {
 		result := harness.expect("GET", "/api/v1/auth/username-available?username="+username, "", nil, http.StatusOK)
 		reason, _ := result["reason"].(string)

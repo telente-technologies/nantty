@@ -33,20 +33,25 @@ func assertValidSuggestions(t *testing.T, body map[string]any, taken string) {
 
 func TestTakenUsernameReturnsSuggestionsFromAvailabilityAndRegister(t *testing.T) {
 	harness := startAuthModuleAgainstFreshSchema(t)
-	harness.registerWithUsername("first@example.com", "sunny.day", http.StatusCreated)
+	registered := harness.registerWithUsername("first@example.com", "sunny.day", http.StatusCreated)
+	accessToken := registered["accessToken"].(string)
 
 	query := "/api/v1/auth/username-available?name=" + url.QueryEscape("Sunny Day") + "&username="
-	taken := harness.expect("GET", query+"sunny.day", "", nil, http.StatusOK)
+	anonymous := harness.expect("GET", query+"sunny.day", "", nil, http.StatusOK)
+	if anonymous["available"] != false || anonymous["reason"] != "unavailable" || anonymous["suggestions"] != nil {
+		t.Fatalf("anonymous availability must not reveal why or suggest names: %v", anonymous)
+	}
+	taken := harness.expect("GET", query+"sunny.day", accessToken, nil, http.StatusOK)
 	if taken["available"] != false || taken["reason"] != "taken" {
 		t.Fatalf("expected taken, got %v", taken)
 	}
 	assertValidSuggestions(t, taken, "sunny.day")
 
-	free := harness.expect("GET", query+"sunny.free", "", nil, http.StatusOK)
+	free := harness.expect("GET", query+"sunny.free", accessToken, nil, http.StatusOK)
 	if free["available"] != true || free["suggestions"] != nil {
 		t.Fatalf("free username must not carry suggestions: %v", free)
 	}
-	if invalid := harness.expect("GET", query+"a", "", nil, http.StatusOK); invalid["suggestions"] != nil {
+	if invalid := harness.expect("GET", query+"a", accessToken, nil, http.StatusOK); invalid["suggestions"] != nil {
 		t.Fatalf("invalid username must not carry suggestions: %v", invalid)
 	}
 

@@ -73,6 +73,7 @@ const accountScopedLimits: readonly RouteLimitName[] = [
   "search",
   "postWrite",
   "tagSearch",
+  "usernameCheck",
   "verification",
   "mediaDownload",
   "sellerPeopleSearch",
@@ -107,7 +108,7 @@ export function classifyRequestForRateLimit(method: string, path: string): Route
   if (verb === "POST" && preAuthAdminCodeSteps.has(lowered)) return "otp";
   if (verb === "POST" && (lowered.startsWith("/api/v1/auth/password/reset") || lowered.startsWith("/api/v1/auth/password/forgot"))) return "reset";
   if (verb === "POST" && (lowered.startsWith("/api/v1/auth/register") || lowered.startsWith("/api/v1/auth/signup"))) return "signup";
-  if (verb === "GET" && lowered.startsWith("/api/v1/auth/username-available")) return "usernameCheck";
+  if (verb === "GET" && (lowered.startsWith("/api/v1/auth/username-available") || lowered.startsWith("/api/v1/auth/username-suggestion"))) return "usernameCheck";
   if (verb === "POST" && lowered === "/api/v1/reports") return "report";
   if ((verb === "POST" || verb === "PUT") && (lowered.includes("/uploads") || lowered.includes("/upload-intents"))) return "upload";
   if (verb === "GET" && lowered.startsWith("/api/v1/search")) return "search";

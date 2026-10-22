@@ -56,6 +56,9 @@ All notable changes to Zudomart are documented here. Format follows
   no-op, so repeat clicks no longer call the identity service again.
 - The support service now refuses to start in staging or production without a
   staff JWKS and issuer, so staff-only routes cannot run unverified.
+- Signed-out username checks now return a generic “not available” answer with
+  no suggestions. Signed-in users still get the specific reason and suggestions,
+  and the suggestion endpoint now shares the username-check rate limit.
 - The currency service now warns when an exchange rate has not been refreshed
   for 45 days. Conversions keep working while the warning is raised.
 - Username changes, account deactivation and deletion requests now leave an

@@ -38,8 +38,9 @@ func (controller RegistrationController) RegisterAccount(writer http.ResponseWri
 
 func (controller RegistrationController) CheckUsernameAvailability(writer http.ResponseWriter, request *http.Request) {
 	query := request.URL.Query()
+	_, authenticated := jwtauth.PrincipalFromContext(request.Context())
 	result, err := checkusernameavailability.Handler{Container: controller.Container}.Execute(request.Context(), checkusernameavailability.Query{
-		Username: utils.TruncateToLength(query.Get("username"), 64), Name: utils.TruncateToLength(query.Get("name"), 80),
+		Username: utils.TruncateToLength(query.Get("username"), 64), Name: utils.TruncateToLength(query.Get("name"), 80), Authenticated: authenticated,
 	})
 	if err != nil {
 		httpserver.WriteErrorResponse(writer, request, controller.Container.Logger, err)

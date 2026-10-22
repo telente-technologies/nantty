@@ -105,6 +105,7 @@ describe("per-route rate limits", () => {
     expect(classifyRequestForRateLimit("POST", "/api/v1/auth/password/reset")).toBe("reset");
     expect(classifyRequestForRateLimit("POST", "/api/v1/auth/register")).toBe("signup");
     expect(classifyRequestForRateLimit("GET", "/api/v1/auth/username-available?username=ada")).toBe("usernameCheck");
+    expect(classifyRequestForRateLimit("GET", "/api/v1/auth/username-suggestion?seed=ada")).toBe("usernameCheck");
     expect(classifyRequestForRateLimit("GET", "/api/v1/tags/candidates?q=a")).toBe("tagSearch");
     expect(classifyRequestForRateLimit("POST", "/api/v1/posts/p1/media/m1/download")).toBe("mediaDownload");
     expect(classifyRequestForRateLimit("POST", "/api/v1/posts")).toBe("postWrite");

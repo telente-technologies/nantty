@@ -2,6 +2,21 @@
 
 Every code change made while fixing `docs/audit/frontend-backend-audit.md` is logged here with file, lines, audit ID, verification, and rollback notes. Investigations that concluded "no change needed" are logged too. Newest first.
 
+## 2026-10-22 — ZM-018: signed-out username checks are generic
+
+**Audit:** ZM-018 (username availability returned `taken`/`reserved` plus suggestions to anonymous callers)
+**Changes:**
+1. `jwtauth.OptionalVerifiedAccessToken` attaches a principal when a valid bearer token is present and otherwise leaves the request anonymous.
+2. `CheckUsernameAvailability` returns `unavailable` without suggestions to anonymous callers; authenticated callers keep the specific reason and suggestions.
+3. `GET /api/v1/auth/username-suggestion` now uses the same auth rate limiter, and the gateway classifies it as `usernameCheck` with account-scoped limits for signed-in users.
+4. Go integration tests cover the anonymous and authenticated paths; the webapp type, message map and contract schema accept the generic reason.
+
+**Verified:** `go test ./modules/auth -run 'TestTakenUsernameReturnsSuggestionsFromAvailabilityAndRegister|TestUsernameAvailabilityExplainsWhyAndRegistrationEnforcesIt'`, `go test ./platform/jwtauth`, `go test ./modules/users -run TestChangeUsernameEnforcesRulesCooldownAndQuarantine`, `pnpm test` in the gateway, and `pnpm typecheck` plus `pnpm test:contracts` in the webapp pass.
+
+**Rollback:** remove the optional middleware from the route and restore the detailed anonymous response. Registration conflicts still return suggestions.
+
+**Remaining:** profile/confusables enumeration and the remaining ZM-018 edges.
+
 ## 2026-10-22 — ZM-020: staff JWKS required in staging
 
 **Audit:** ZM-020 (support staff routes relied on downstream auth while staging could boot without a staff JWKS)
