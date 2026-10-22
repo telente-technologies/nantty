@@ -69,6 +69,20 @@ func (_c *OrderGroupCreate) SetSellerAccountID(v uuid.UUID) *OrderGroupCreate {
 	return _c
 }
 
+// SetSellerName sets the "seller_name" field.
+func (_c *OrderGroupCreate) SetSellerName(v string) *OrderGroupCreate {
+	_c.mutation.SetSellerName(v)
+	return _c
+}
+
+// SetNillableSellerName sets the "seller_name" field if the given value is not nil.
+func (_c *OrderGroupCreate) SetNillableSellerName(v *string) *OrderGroupCreate {
+	if v != nil {
+		_c.SetSellerName(*v)
+	}
+	return _c
+}
+
 // SetBuyerAccountID sets the "buyer_account_id" field.
 func (_c *OrderGroupCreate) SetBuyerAccountID(v uuid.UUID) *OrderGroupCreate {
 	_c.mutation.SetBuyerAccountID(v)
@@ -606,6 +620,10 @@ func (_c *OrderGroupCreate) defaults() {
 		v := ordergroup.DefaultCreatedAt()
 		_c.mutation.SetCreatedAt(v)
 	}
+	if _, ok := _c.mutation.SellerName(); !ok {
+		v := ordergroup.DefaultSellerName
+		_c.mutation.SetSellerName(v)
+	}
 	if _, ok := _c.mutation.BuyerName(); !ok {
 		v := ordergroup.DefaultBuyerName
 		_c.mutation.SetBuyerName(v)
@@ -705,6 +723,14 @@ func (_c *OrderGroupCreate) check() error {
 	}
 	if _, ok := _c.mutation.SellerAccountID(); !ok {
 		return &ValidationError{Name: "seller_account_id", err: errors.New(`ent: missing required field "OrderGroup.seller_account_id"`)}
+	}
+	if _, ok := _c.mutation.SellerName(); !ok {
+		return &ValidationError{Name: "seller_name", err: errors.New(`ent: missing required field "OrderGroup.seller_name"`)}
+	}
+	if v, ok := _c.mutation.SellerName(); ok {
+		if err := ordergroup.SellerNameValidator(v); err != nil {
+			return &ValidationError{Name: "seller_name", err: fmt.Errorf(`ent: validator failed for field "OrderGroup.seller_name": %w`, err)}
+		}
 	}
 	if _, ok := _c.mutation.BuyerAccountID(); !ok {
 		return &ValidationError{Name: "buyer_account_id", err: errors.New(`ent: missing required field "OrderGroup.buyer_account_id"`)}
@@ -896,6 +922,10 @@ func (_c *OrderGroupCreate) createSpec() (*OrderGroup, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.SellerAccountID(); ok {
 		_spec.SetField(ordergroup.FieldSellerAccountID, field.TypeUUID, value)
 		_node.SellerAccountID = value
+	}
+	if value, ok := _c.mutation.SellerName(); ok {
+		_spec.SetField(ordergroup.FieldSellerName, field.TypeString, value)
+		_node.SellerName = value
 	}
 	if value, ok := _c.mutation.BuyerAccountID(); ok {
 		_spec.SetField(ordergroup.FieldBuyerAccountID, field.TypeUUID, value)
@@ -1555,6 +1585,9 @@ func (u *OrderGroupUpsertOne) UpdateNewValues() *OrderGroupUpsertOne {
 		}
 		if _, exists := u.create.mutation.SellerAccountID(); exists {
 			s.SetIgnore(ordergroup.FieldSellerAccountID)
+		}
+		if _, exists := u.create.mutation.SellerName(); exists {
+			s.SetIgnore(ordergroup.FieldSellerName)
 		}
 		if _, exists := u.create.mutation.BuyerAccountID(); exists {
 			s.SetIgnore(ordergroup.FieldBuyerAccountID)
@@ -2313,6 +2346,9 @@ func (u *OrderGroupUpsertBulk) UpdateNewValues() *OrderGroupUpsertBulk {
 			}
 			if _, exists := b.mutation.SellerAccountID(); exists {
 				s.SetIgnore(ordergroup.FieldSellerAccountID)
+			}
+			if _, exists := b.mutation.SellerName(); exists {
+				s.SetIgnore(ordergroup.FieldSellerName)
 			}
 			if _, exists := b.mutation.BuyerAccountID(); exists {
 				s.SetIgnore(ordergroup.FieldBuyerAccountID)

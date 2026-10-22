@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.zudomart.com/events/orderGroup.item.v1.json",
+  "title": "OrderGroupItem",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "name",
+    "quantity",
+    "unitPrice",
+    "imageUrl"
+  ],
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "variant": {
+      "type": "string"
+    },
+    "quantity": {
+      "type": "integer"
+    },
+    "unitPrice": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "amountMinor",
+        "currency"
+      ],
+      "properties": {
+        "amountMinor": {
+          "type": "integer"
+        },
+        "currency": {
+          "type": "string"
+        }
+      }
+    },
+    "imageUrl": {
+      "type": "string"
+    }
+  }
+}

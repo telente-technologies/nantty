@@ -59,6 +59,36 @@
       "items": {
         "$ref": "./orderGroup.paid.v1.json#/$defs/attributedItem"
       }
+    },
+    "sellerName": {
+      "type": "string"
+    },
+    "buyerName": {
+      "type": "string"
+    },
+    "paymentMode": {
+      "type": "string"
+    },
+    "discountMinor": {
+      "type": "integer"
+    },
+    "storeCreditMinor": {
+      "type": "integer"
+    },
+    "shippingMinor": {
+      "type": "integer"
+    },
+    "shippingMethod": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string"
+    },
+    "items": {
+      "type": "array",
+      "items": {
+        "$ref": "./orderGroup.item.v1.json"
+      }
     }
   }
 }

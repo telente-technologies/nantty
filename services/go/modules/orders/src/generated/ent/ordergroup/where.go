@@ -85,6 +85,11 @@ func SellerAccountID(v uuid.UUID) predicate.OrderGroup {
 	return predicate.OrderGroup(sql.FieldEQ(FieldSellerAccountID, v))
 }
 
+// SellerName applies equality check predicate on the "seller_name" field. It's identical to SellerNameEQ.
+func SellerName(v string) predicate.OrderGroup {
+	return predicate.OrderGroup(sql.FieldEQ(FieldSellerName, v))
+}
+
 // BuyerAccountID applies equality check predicate on the "buyer_account_id" field. It's identical to BuyerAccountIDEQ.
 func BuyerAccountID(v uuid.UUID) predicate.OrderGroup {
 	return predicate.OrderGroup(sql.FieldEQ(FieldBuyerAccountID, v))
@@ -558,6 +563,71 @@ func SellerAccountIDLT(v uuid.UUID) predicate.OrderGroup {
 // SellerAccountIDLTE applies the LTE predicate on the "seller_account_id" field.
 func SellerAccountIDLTE(v uuid.UUID) predicate.OrderGroup {
 	return predicate.OrderGroup(sql.FieldLTE(FieldSellerAccountID, v))
+}
+
+// SellerNameEQ applies the EQ predicate on the "seller_name" field.
+func SellerNameEQ(v string) predicate.OrderGroup {
+	return predicate.OrderGroup(sql.FieldEQ(FieldSellerName, v))
+}
+
+// SellerNameNEQ applies the NEQ predicate on the "seller_name" field.
+func SellerNameNEQ(v string) predicate.OrderGroup {
+	return predicate.OrderGroup(sql.FieldNEQ(FieldSellerName, v))
+}
+
+// SellerNameIn applies the In predicate on the "seller_name" field.
+func SellerNameIn(vs ...string) predicate.OrderGroup {
+	return predicate.OrderGroup(sql.FieldIn(FieldSellerName, vs...))
+}
+
+// SellerNameNotIn applies the NotIn predicate on the "seller_name" field.
+func SellerNameNotIn(vs ...string) predicate.OrderGroup {
+	return predicate.OrderGroup(sql.FieldNotIn(FieldSellerName, vs...))
+}
+
+// SellerNameGT applies the GT predicate on the "seller_name" field.
+func SellerNameGT(v string) predicate.OrderGroup {
+	return predicate.OrderGroup(sql.FieldGT(FieldSellerName, v))
+}
+
+// SellerNameGTE applies the GTE predicate on the "seller_name" field.
+func SellerNameGTE(v string) predicate.OrderGroup {
+	return predicate.OrderGroup(sql.FieldGTE(FieldSellerName, v))
+}
+
+// SellerNameLT applies the LT predicate on the "seller_name" field.
+func SellerNameLT(v string) predicate.OrderGroup {
+	return predicate.OrderGroup(sql.FieldLT(FieldSellerName, v))
+}
+
+// SellerNameLTE applies the LTE predicate on the "seller_name" field.
+func SellerNameLTE(v string) predicate.OrderGroup {
+	return predicate.OrderGroup(sql.FieldLTE(FieldSellerName, v))
+}
+
+// SellerNameContains applies the Contains predicate on the "seller_name" field.
+func SellerNameContains(v string) predicate.OrderGroup {
+	return predicate.OrderGroup(sql.FieldContains(FieldSellerName, v))
+}
+
+// SellerNameHasPrefix applies the HasPrefix predicate on the "seller_name" field.
+func SellerNameHasPrefix(v string) predicate.OrderGroup {
+	return predicate.OrderGroup(sql.FieldHasPrefix(FieldSellerName, v))
+}
+
+// SellerNameHasSuffix applies the HasSuffix predicate on the "seller_name" field.
+func SellerNameHasSuffix(v string) predicate.OrderGroup {
+	return predicate.OrderGroup(sql.FieldHasSuffix(FieldSellerName, v))
+}
+
+// SellerNameEqualFold applies the EqualFold predicate on the "seller_name" field.
+func SellerNameEqualFold(v string) predicate.OrderGroup {
+	return predicate.OrderGroup(sql.FieldEqualFold(FieldSellerName, v))
+}
+
+// SellerNameContainsFold applies the ContainsFold predicate on the "seller_name" field.
+func SellerNameContainsFold(v string) predicate.OrderGroup {
+	return predicate.OrderGroup(sql.FieldContainsFold(FieldSellerName, v))
 }
 
 // BuyerAccountIDEQ applies the EQ predicate on the "buyer_account_id" field.

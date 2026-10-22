@@ -12,6 +12,7 @@ import (
 
 	"zudomart/modules/orders/src"
 	"zudomart/modules/orders/src/databases/schema"
+	"zudomart/modules/orders/src/generated/ent"
 	"zudomart/modules/orders/src/generated/ent/outboxevent"
 	"zudomart/modules/orders/src/interfaces"
 	"zudomart/modules/orders/src/services"
@@ -137,5 +138,43 @@ func TestPaidOrderWithoutStockIsCancelledAndRefundedExactlyOnce(t *testing.T) {
 	}
 	if countOutbox(t, module, "orderGroup.paid", orderId.String()) != 0 {
 		t.Fatal("an order without stock is never announced as paid")
+	}
+}
+
+func TestOrderGroupEventDataCarriesEmailRenderableSnapshot(t *testing.T) {
+	module := startAgainstFreshSchema(t)
+	ctx := context.Background()
+	group, err := module.Container.Client.OrderGroup.Create().
+		SetCheckoutID(uuid.New()).SetReference("ZM-EM-" + uuid.NewString()[:6]).SetInvoiceNumber("INV-" + uuid.NewString()[:8]).SetStoreID(uuid.New()).
+		SetSellerAccountID(uuid.New()).SetSellerName("Glow by Zainab").SetBuyerAccountID(uuid.New()).SetBuyerName("Amaka O.").
+		SetCurrency("NGN").SetSubtotalMinor(170_000).SetShippingMinor(15_000).SetTotalMinor(185_000).SetStatus("new").SetPaymentStatus("paid").
+		SetPaymentMode("escrow").SetAddress(schema.AddressSnapshot{RecipientName: "Amaka", Phone: "+2348000000000", Line1: "1 Marina", CountryCode: "NG"}).Save(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := module.Container.Client.OrderItem.Create().SetOrderGroupID(group.ID).SetStoreID(group.StoreID).SetProductID(uuid.New()).SetVariantID(uuid.New()).
+		SetProductName("Vitamin C Glow Serum").SetVariantTitle("30ml").SetImageURL("https://cdn.zudomart.com/p/serum.jpg").SetUnitPriceMinor(85_000).SetQuantity(2).SetLineTotalMinor(170_000).
+		Save(ctx); err != nil {
+		t.Fatal(err)
+	}
+	err = module.Container.RunInTransaction(ctx, func(tx *ent.Tx) error {
+		payload, err := services.OrderGroupEventData(ctx, tx, group, map[string]any{"payBy": time.Now().UTC().Format(time.RFC3339Nano)})
+		if err != nil {
+			return err
+		}
+		if payload["sellerName"] != "Glow by Zainab" || payload["buyerName"] != "Amaka O." || payload["orderNumber"] != group.Reference {
+			t.Fatalf("unexpected group snapshot: %#v", payload)
+		}
+		items, ok := payload["items"].([]map[string]any)
+		if !ok || len(items) != 1 || items[0]["name"] != "Vitamin C Glow Serum" || items[0]["variant"] != "30ml" {
+			t.Fatalf("unexpected item snapshot: %#v", payload["items"])
+		}
+		if payload["payBy"] == "" {
+			t.Fatal("the payment deadline must be in the payload")
+		}
+		return nil
+	})
+	if err != nil {
+		t.Fatal(err)
 	}
 }

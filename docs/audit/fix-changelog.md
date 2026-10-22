@@ -2,6 +2,37 @@
 
 Every code change made while fixing `docs/audit/frontend-backend-audit.md` is logged here with file, lines, audit ID, verification, and rollback notes. Investigations that concluded "no change needed" are logged too. Newest first.
 
+## 2026-10-22 — ZM-013: race detector for the workspace integration suite
+
+**Audit:** ZM-013 (the integration script ran Go tests without `-race` or `-count=1`)
+**Changes:** `services/scripts/test-go-workspace.sh` now runs `go test -p 2 -race -count=1`. The unit workflow already runs `go test -short -race`.
+**Verified:** script reviewed; the full integration suite cannot run locally without Valkey and RabbitMQ.
+**Rollback:** remove `-race -count=1` from the script.
+**Remaining:** dev-only local-auth stub, e2e-report PII scan and the raw-SQL pattern residual.
+
+## 2026-10-22 — ZM-021: send buyer and seller order-group emails
+
+**Audit:** ZM-021 (order-group in-app and push worked, but email was skipped because payloads had no line items, names or payment URL)
+**Changes:**
+1. `order_groups` now snapshots `seller_name` at checkout; migration `20261022045705_add_order_group_seller_name` adds the column.
+2. `OrderGroupEventData` enriches `orderGroup.created`, `.paid`, `.shipped`, `.delivered` and `.completed` with seller/buyer names, line items, shipping, payment mode and lifecycle timestamps. `orderGroup.created` also carries `payBy`; paid carries `paidAt`; shipped carries `shippedAt`/`estimatedDeliveryAt`; delivered carries `deliveredAt`/`confirmBy`.
+3. Notifications mappings now emit `orderPlaced`, `paymentConfirmed`, `sellerNewOrder`, `orderShipped`, `orderDelivered` and `orderCompleted` emails. Emails are skipped for old events without line items, so a pre-deploy backlog cannot produce empty order emails.
+4. The shipped template tolerates missing courier, tracking and ETA values; the delivered template defaults the confirmation deadline to three days after delivery; the seller new-order template no longer promises an auto-cancel deadline the service does not enforce.
+5. JSON Schemas, the notifications consumer contract and the AsyncAPI references document the new fields. A shared `orderGroup.item.v1.json` schema defines line items.
+
+**Verified:** notifications `pnpm test` (314 passed, 4 skipped) and `typecheck` clean; email templates `pnpm test` (245 passed) and `typecheck` clean; orders `go test ./... -count=1` clean; `TestMigrationsApplyAndModuleStarts` and the new `TestOrderGroupEventDataCarriesEmailRenderableSnapshot` pass.
+
+**Rollback:** revert the migration, payload enrichment and notification mappings; in-app and push keep working with the earlier payloads.
+
+**Remaining:** order-group cancellation emails still need a reliable refund amount and stock-restock state in the status-change event.
+
+## 2026-10-22 — ZM-012: self-gift audit entry was stale (no code change)
+
+**Audit:** ZM-012 (self-gifting reportedly farmed support points, stream points and battle score)
+**Investigation:** `resolveGiftTarget` rejects a sender whose account is the live host, and the money service independently returns `ErrCannotGiftSelf` from `ChargeGiftAndCreditCreator` before any ledger post. The existing integration test `TestLiveGiftFlow` covers the self-gift rejection. Client-supplied `ComboId` cannot inflate quantity because the server checks the charged quantity, combo window, gift and receiver.
+**Change:** audit evidence corrected; combo display-only note added. No production code changed in this entry.
+**Remaining:** brigading weighting and the remaining ZM-012 edges.
+
 ## 2026-10-22 — ZM-012: cap one-time-code sends per destination
 
 **Audit:** ZM-012 (resend cycling minted a new code row, resetting the five-attempt counter)

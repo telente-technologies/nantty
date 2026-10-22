@@ -26,6 +26,8 @@ const (
 	FieldStoreID = "store_id"
 	// FieldSellerAccountID holds the string denoting the seller_account_id field in the database.
 	FieldSellerAccountID = "seller_account_id"
+	// FieldSellerName holds the string denoting the seller_name field in the database.
+	FieldSellerName = "seller_name"
 	// FieldBuyerAccountID holds the string denoting the buyer_account_id field in the database.
 	FieldBuyerAccountID = "buyer_account_id"
 	// FieldBuyerName holds the string denoting the buyer_name field in the database.
@@ -115,6 +117,7 @@ var Columns = []string{
 	FieldInvoiceNumber,
 	FieldStoreID,
 	FieldSellerAccountID,
+	FieldSellerName,
 	FieldBuyerAccountID,
 	FieldBuyerName,
 	FieldBuyerUsername,
@@ -172,6 +175,10 @@ var (
 	ReferenceValidator func(string) error
 	// InvoiceNumberValidator is a validator for the "invoice_number" field. It is called by the builders before save.
 	InvoiceNumberValidator func(string) error
+	// DefaultSellerName holds the default value on creation for the "seller_name" field.
+	DefaultSellerName string
+	// SellerNameValidator is a validator for the "seller_name" field. It is called by the builders before save.
+	SellerNameValidator func(string) error
 	// DefaultBuyerName holds the default value on creation for the "buyer_name" field.
 	DefaultBuyerName string
 	// BuyerNameValidator is a validator for the "buyer_name" field. It is called by the builders before save.
@@ -272,6 +279,11 @@ func ByStoreID(opts ...sql.OrderTermOption) OrderOption {
 // BySellerAccountID orders the results by the seller_account_id field.
 func BySellerAccountID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldSellerAccountID, opts...).ToFunc()
+}
+
+// BySellerName orders the results by the seller_name field.
+func BySellerName(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldSellerName, opts...).ToFunc()
 }
 
 // ByBuyerAccountID orders the results by the buyer_account_id field.

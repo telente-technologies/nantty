@@ -32,6 +32,8 @@ type OrderGroup struct {
 	StoreID uuid.UUID `json:"store_id,omitempty"`
 	// SellerAccountID holds the value of the "seller_account_id" field.
 	SellerAccountID uuid.UUID `json:"seller_account_id,omitempty"`
+	// SellerName holds the value of the "seller_name" field.
+	SellerName string `json:"seller_name,omitempty"`
 	// BuyerAccountID holds the value of the "buyer_account_id" field.
 	BuyerAccountID uuid.UUID `json:"buyer_account_id,omitempty"`
 	// BuyerName holds the value of the "buyer_name" field.
@@ -124,7 +126,7 @@ func (*OrderGroup) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullBool)
 		case ordergroup.FieldSubtotalMinor, ordergroup.FieldDiscountMinor, ordergroup.FieldStoreCreditMinor, ordergroup.FieldShippingMinor, ordergroup.FieldTotalMinor, ordergroup.FieldRefundedMinor, ordergroup.FieldDeliveryAttempts, ordergroup.FieldVersion:
 			values[i] = new(sql.NullInt64)
-		case ordergroup.FieldReference, ordergroup.FieldInvoiceNumber, ordergroup.FieldBuyerName, ordergroup.FieldBuyerUsername, ordergroup.FieldStatus, ordergroup.FieldPreviousStatus, ordergroup.FieldPaymentStatus, ordergroup.FieldPaymentMode, ordergroup.FieldDeliveryStatus, ordergroup.FieldCurrency, ordergroup.FieldPromotionIssueCode, ordergroup.FieldPromotionIssueMessage, ordergroup.FieldCourierName, ordergroup.FieldTrackingNumber, ordergroup.FieldTrackingURL, ordergroup.FieldRiderName, ordergroup.FieldRiderPhone, ordergroup.FieldLastAttemptNote, ordergroup.FieldCancelReason:
+		case ordergroup.FieldReference, ordergroup.FieldInvoiceNumber, ordergroup.FieldSellerName, ordergroup.FieldBuyerName, ordergroup.FieldBuyerUsername, ordergroup.FieldStatus, ordergroup.FieldPreviousStatus, ordergroup.FieldPaymentStatus, ordergroup.FieldPaymentMode, ordergroup.FieldDeliveryStatus, ordergroup.FieldCurrency, ordergroup.FieldPromotionIssueCode, ordergroup.FieldPromotionIssueMessage, ordergroup.FieldCourierName, ordergroup.FieldTrackingNumber, ordergroup.FieldTrackingURL, ordergroup.FieldRiderName, ordergroup.FieldRiderPhone, ordergroup.FieldLastAttemptNote, ordergroup.FieldCancelReason:
 			values[i] = new(sql.NullString)
 		case ordergroup.FieldCreatedAt, ordergroup.FieldEstimatedDeliveryAt, ordergroup.FieldPaidAt, ordergroup.FieldShippedAt, ordergroup.FieldDeliveredAt, ordergroup.FieldCompletedAt, ordergroup.FieldEscrowReleaseAt, ordergroup.FieldRefundRequestedAt, ordergroup.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
@@ -186,6 +188,12 @@ func (_m *OrderGroup) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field seller_account_id", values[i])
 			} else if value != nil {
 				_m.SellerAccountID = *value
+			}
+		case ordergroup.FieldSellerName:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field seller_name", values[i])
+			} else if value.Valid {
+				_m.SellerName = value.String
 			}
 		case ordergroup.FieldBuyerAccountID:
 			if value, ok := values[i].(*uuid.UUID); !ok {
@@ -486,6 +494,9 @@ func (_m *OrderGroup) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("seller_account_id=")
 	builder.WriteString(fmt.Sprintf("%v", _m.SellerAccountID))
+	builder.WriteString(", ")
+	builder.WriteString("seller_name=")
+	builder.WriteString(_m.SellerName)
 	builder.WriteString(", ")
 	builder.WriteString("buyer_account_id=")
 	builder.WriteString(fmt.Sprintf("%v", _m.BuyerAccountID))

@@ -2250,7 +2250,7 @@ No provider integration is to be built until the V2 design is approved and the s
 
 ## 60. Order notifications and fail-closed media (2026-10-21) **[DONE]**
 
-- **Order lifecycle notifications:** `orderGroup.created`, `.paid`, `.statusChanged`, `.shipped`, `.delivered` and `.completed` now map to in-app and push notifications. Buyers get placed/paid/preparing/ready/shipped/delivered/completed/cancelled; sellers get paid/cancelled. Shipped/delivered/completed are not duplicated by `statusChanged`. Producer payloads carry the order number and buyer/seller IDs; shipped/delivered also carry courier/tracking. Email templates remain queued because line items and payment URLs are not in the payload.
+- **Order lifecycle notifications:** `orderGroup.created`, `.paid`, `.statusChanged`, `.shipped`, `.delivered` and `.completed` now map to in-app and push notifications. Buyers get placed/paid/preparing/ready/shipped/delivered/completed/cancelled; sellers get paid/cancelled. Shipped/delivered/completed are not duplicated by `statusChanged`. Producer payloads carry the order number and buyer/seller IDs; shipped/delivered also carry courier/tracking. Email was queued at the time and is now sent; see plan 75.
 - **Media safety:** moderation defaults to `hold` on classifier failure; invalid fail modes fail startup; a skipped ClamAV scan rejects the upload unless `MEDIA_ALLOW_UNSCANNED=true` is explicitly set for local development.
 - **Direct-payment warning:** both checkout choosers now state that direct payment removes escrow protection and that Zudomart cannot reverse it. Escrow remains the default.
 - **Still open:** audio/PDF moderation, presigned Content-Type binding, stronger direct-payment confirmation, per-store promo issues, and the ZM-018/019/020 API sweeps.
@@ -2339,6 +2339,14 @@ No provider integration is to be built until the V2 design is approved and the s
 - **Budget:** real code rows count across signup, reset, login and email verification; verified-token rows do not.
 - **Behaviour:** over-budget sends keep the active code and silently skip delivery, so the response does not reveal which destinations exist.
 - **Still open:** brigading weighting, self-gift farming, soft-delete purge and the rest of ZM-012.
+
+## 75. Order-group buyer and seller emails (2026-10-22) **[DONE]**
+
+- **Snapshot:** `order_groups.seller_name` is captured from the checkout store snapshot; old rows default to an empty name.
+- **Payloads:** group events carry names, line items, shipping, payment mode and lifecycle timestamps, so email props no longer need a second lookup.
+- **Emails:** buyers get order placed, payment confirmed, shipped, delivered and completed; sellers get new-order. Emails are skipped for old events with no line items.
+- **Templates:** shipped and delivered handle absent tracking/ETA; the seller template no longer promises an auto-cancel deadline.
+- **Still open:** cancellation emails need a reliable refund amount and restock state in the status-change event.
 
 ## 73. Fan-out caps and public-read route limits (2026-10-22) **[DONE]**
 

@@ -1,4 +1,4 @@
-h1:SbPPoZxuCPip43LE5hjcb2zjtItfkRDMpVqBEnVCXEM=
+h1:nruz6Aonk7uoYkWS89ynAlER5WOfNfXdsrS1wL2xy2U=
 20261003211222_create_orders_tables.up.sql h1:pbNSwzL+emKRIA9gQLC8R/1FSMpALZClaanNypduIwU=
 20261004000534_add_flash_sales_bundles_and_campaign_redemptions.up.sql h1:mscFQZjSqfCGceopLlIIuaLuPTV6OYBO21jEAzof1DI=
 20261004120000_add_order_group_payment_mode.up.sql h1:zXTflJWM/H9qyLYr6nJkqOuNDeTglUoeyCgecsScL8Q=
@@ -11,3 +11,4 @@ h1:SbPPoZxuCPip43LE5hjcb2zjtItfkRDMpVqBEnVCXEM=
 20261012164443_add_affiliate_attribution_time.up.sql h1:9FLQVxApTcMB628/MZ9jhIl+PJpBDtnIIJYNKN/M4WE=
 20261020133625_add_logistics_foundation.up.sql h1:6uku4YW9iCYLJ0kd8At4K2vdEmBxaxCGPJr3MEqg/jo=
 20261022041528_add_promotion_issue.up.sql h1:GvUCYKtI4XKSjwcMzjGeDjuqoFtTfy9GXC2m74147EM=
+20261022045705_add_order_group_seller_name.up.sql h1:eK6sze2rdm9nID1tF5cMVY6zpsA2i97aGkmKcNHoaRY=

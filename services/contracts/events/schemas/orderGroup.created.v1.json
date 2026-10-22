@@ -38,6 +38,46 @@
     },
     "currency": {
       "type": "string"
+    },
+    "sellerName": {
+      "type": "string"
+    },
+    "buyerName": {
+      "type": "string"
+    },
+    "paymentMode": {
+      "type": "string"
+    },
+    "subtotalMinor": {
+      "type": "integer"
+    },
+    "discountMinor": {
+      "type": "integer"
+    },
+    "storeCreditMinor": {
+      "type": "integer"
+    },
+    "shippingMinor": {
+      "type": "integer"
+    },
+    "refundedMinor": {
+      "type": "integer"
+    },
+    "shippingMethod": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string"
+    },
+    "items": {
+      "type": "array",
+      "items": {
+        "$ref": "./orderGroup.item.v1.json"
+      }
+    },
+    "payBy": {
+      "type": "string",
+      "format": "date-time"
     }
   }
 }

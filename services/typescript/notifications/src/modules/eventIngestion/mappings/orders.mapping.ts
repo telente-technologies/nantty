@@ -1,7 +1,7 @@
 import type { SellerItemGroup } from "@zudomart/email-templates";
 
 import type { DomainEventEnvelope } from "../../../types/domainEvent.type.js";
-import type { NotificationIntent } from "../../../types/notification.type.js";
+import type { NotificationIntent, Recipient } from "../../../types/notification.type.js";
 import type { EventDataReader } from "../../../utils/eventDataReader.util.js";
 import { intentFor, orderUrl, plan, readActor, type EventMapping, type MappingContext } from "./mappingHelpers.js";
 
@@ -126,6 +126,32 @@ export const orderCancelled: EventMapping = (event, data, context) => {
 
 const orderGroupNumber = (data: EventDataReader): string => data.optionalText("orderNumber") ?? data.optionalText("reference") ?? data.text("orderGroupId");
 
+const orderGroupImage = (item: EventDataReader): string => item.optionalText("imageUrl") ?? "https://placehold.co/112x112/e8e4dc/55504a/png?text=Zudomart";
+
+function readOrderGroup(data: EventDataReader): SellerItemGroup | undefined {
+  const rawItems = data.rawValues.items;
+  if (!Array.isArray(rawItems) || rawItems.length === 0) return undefined;
+  const items = data.objectList("items").map((item) => {
+    const variant = item.optionalText("variant");
+    return {
+      name: item.text("name"), ...(variant === undefined ? {} : { variant }), quantity: item.integer("quantity"),
+      unitPrice: item.money("unitPrice"), imageUrl: orderGroupImage(item),
+    };
+  });
+  return {
+    sellerName: data.optionalText("sellerName") ?? "your seller",
+    items,
+    shipping: { amountMinor: data.integer("shippingMinor"), currency: data.text("currency") },
+    ...(data.optionalText("shippingMethod") === undefined ? {} : { shippingMethod: data.optionalText("shippingMethod") }),
+    ...(data.optionalText("status") === undefined ? {} : { status: data.optionalText("status") }),
+  };
+}
+
+function orderGroupEmailProps(data: EventDataReader, context: MappingContext, firstName: string, group: SellerItemGroup) {
+  const orderId = data.text("orderGroupId");
+  return { firstName, orderNumber: orderGroupNumber(data), orderUrl: orderUrl(context, orderId), groups: [group] };
+}
+
 function orderGroupIntent(event: DomainEventEnvelope, recipientUserId: string, title: string, body: string, data: EventDataReader, options: { readonly variant?: string; readonly push?: boolean; readonly extra?: Readonly<Record<string, unknown>> } = {}): NotificationIntent {
   const orderId = data.text("orderGroupId");
   const payload = { orderId, ...options.extra };
@@ -137,33 +163,90 @@ function orderGroupIntent(event: DomainEventEnvelope, recipientUserId: string, t
   });
 }
 
-export const orderGroupCreated: EventMapping = (event, data) => [
-  orderGroupIntent(event, data.text("buyerAccountId"), "Order placed", `Order ${orderGroupNumber(data)} is waiting for payment.`, data),
-];
-
-export const orderGroupPaid: EventMapping = (event, data) => [
-  orderGroupIntent(event, data.text("buyerAccountId"), "Payment confirmed", `Payment for order ${orderGroupNumber(data)} is confirmed. We'll tell you when the seller accepts it.`, data, { variant: "buyer", push: true }),
-  orderGroupIntent(event, data.text("sellerAccountId"), "New order", `Order ${orderGroupNumber(data)} is paid and waiting for you to accept it.`, data, { variant: "seller", push: true }),
-];
-
-export const orderGroupShipped: EventMapping = (event, data) => {
-  const courier = data.optionalText("courierName");
-  const trackingUrl = data.optionalText("trackingUrl");
+export const orderGroupCreated: EventMapping = (event, data, context) => {
+  const group = readOrderGroup(data);
   return [
-    orderGroupIntent(event, data.text("buyerAccountId"), "Your order is on its way", `Order ${orderGroupNumber(data)} has shipped${courier === undefined ? "" : ` with ${courier}`}.`, data, {
-      push: true,
-      ...(trackingUrl === undefined ? {} : { extra: { trackingUrl } }),
+    intentFor(event, data.text("buyerAccountId"), {
+      category: "orders",
+      inApp: { category: "orders", title: "Order placed", body: `Order ${orderGroupNumber(data)} is waiting for payment.`, data: { orderId: data.text("orderGroupId") } },
+      ...(group === undefined ? {} : { email: (recipient: Recipient) => plan("orderPlaced", { ...orderGroupEmailProps(data, context, recipient.firstName, group), payBy: data.text("payBy", event.occurredAt), paymentUrl: orderUrl(context, data.text("orderGroupId")) }) }),
     }),
   ];
 };
 
-export const orderGroupDelivered: EventMapping = (event, data) => [
-  orderGroupIntent(event, data.text("buyerAccountId"), "Delivered — please confirm", `Confirm order ${orderGroupNumber(data)} so the seller gets paid.`, data, { push: true }),
-];
+export const orderGroupPaid: EventMapping = (event, data, context) => {
+  const group = readOrderGroup(data);
+  return [
+    intentFor(event, data.text("buyerAccountId"), {
+      category: "orders",
+      variant: "buyer",
+      inApp: { category: "orders", title: "Payment confirmed", body: `Payment for order ${orderGroupNumber(data)} is confirmed. We'll tell you when the seller accepts it.`, data: { orderId: data.text("orderGroupId") } },
+      push: { title: "Payment confirmed", body: `Order ${orderGroupNumber(data)} is paid.`, data: { orderId: data.text("orderGroupId") } },
+      ...(group === undefined ? {} : { email: (recipient: Recipient) => plan("paymentConfirmed", { ...orderGroupEmailProps(data, context, recipient.firstName, group), paymentMethod: data.text("paymentMethod", "your payment method"), paidAt: data.text("paidAt", event.occurredAt) }) }),
+    }),
+    intentFor(event, data.text("sellerAccountId"), {
+      category: "seller",
+      variant: "seller",
+      inApp: { category: "orders", title: "New order", body: `Order ${orderGroupNumber(data)} is paid and waiting for you to accept it.`, data: { orderId: data.text("orderGroupId") } },
+      push: { title: "New order", body: `Order ${orderGroupNumber(data)} is ready to accept.`, data: { orderId: data.text("orderGroupId") } },
+      ...(group === undefined ? {} : { email: (recipient: Recipient) => plan("sellerNewOrder", {
+        firstName: recipient.firstName, orderNumber: orderGroupNumber(data), buyerName: data.optionalText("buyerName") ?? "A buyer", group,
+        paymentMode: data.text("paymentMode", "escrow") === "direct" ? "direct" : "escrow",
+      }) }),
+    }),
+  ];
+};
 
-export const orderGroupCompleted: EventMapping = (event, data) => [
-  orderGroupIntent(event, data.text("buyerAccountId"), "Order completed", `Order ${orderGroupNumber(data)} is complete. Leave a review?`, data),
-];
+export const orderGroupShipped: EventMapping = (event, data, context) => {
+  const group = readOrderGroup(data);
+  const courier = data.optionalText("courierName");
+  const trackingUrl = data.optionalText("trackingUrl");
+  const estimatedDelivery = data.optionalText("estimatedDeliveryAt");
+  const shippedBody = `Order ${orderGroupNumber(data)} has shipped${courier === undefined ? "" : ` with ${courier}`}.`;
+  return [
+    intentFor(event, data.text("buyerAccountId"), {
+      category: "orders",
+      inApp: { category: "orders", title: "Your order is on its way", body: shippedBody, data: { orderId: data.text("orderGroupId"), ...(trackingUrl === undefined ? {} : { trackingUrl }) } },
+      push: { title: "Your order is on its way", body: shippedBody, data: { orderId: data.text("orderGroupId") } },
+      ...(group === undefined ? {} : { email: (recipient: Recipient) => plan("orderShipped", {
+        ...orderGroupEmailProps(data, context, recipient.firstName, group), sellerName: group.sellerName, carrier: courier, trackingNumber: data.optionalText("trackingNumber"),
+        trackingUrl, estimatedDelivery,
+      }) }),
+    }),
+  ];
+};
+
+export const orderGroupDelivered: EventMapping = (event, data, context) => {
+  const group = readOrderGroup(data);
+  const deliveredAt = data.text("deliveredAt", event.occurredAt);
+  const confirmBy = data.optionalText("confirmBy") ?? new Date(Date.parse(deliveredAt) + 3 * 24 * 60 * 60 * 1000).toISOString();
+  return [
+    intentFor(event, data.text("buyerAccountId"), {
+      category: "orders",
+      inApp: { category: "orders", title: "Delivered — please confirm", body: `Confirm order ${orderGroupNumber(data)} so the seller gets paid.`, data: { orderId: data.text("orderGroupId") } },
+      push: { title: "Delivered — please confirm", body: `Confirm order ${orderGroupNumber(data)}.`, data: { orderId: data.text("orderGroupId") } },
+      ...(group === undefined ? {} : { email: (recipient: Recipient) => plan("orderDelivered", {
+        ...orderGroupEmailProps(data, context, recipient.firstName, group), sellerName: group.sellerName,
+        deliveredAt, confirmBy,
+        confirmUrl: `${orderUrl(context, data.text("orderGroupId"))}/confirm`, disputeUrl: `${orderUrl(context, data.text("orderGroupId"))}/dispute`,
+      }) }),
+    }),
+  ];
+};
+
+export const orderGroupCompleted: EventMapping = (event, data, context) => {
+  const group = readOrderGroup(data);
+  return [
+    intentFor(event, data.text("buyerAccountId"), {
+      category: "orders",
+      inApp: { category: "orders", title: "Order completed", body: `Order ${orderGroupNumber(data)} is complete. Leave a review?`, data: { orderId: data.text("orderGroupId") } },
+      ...(group === undefined ? {} : { email: (recipient: Recipient) => plan("orderCompleted", {
+        ...orderGroupEmailProps(data, context, recipient.firstName, group), sellerName: group.sellerName,
+        reviewUrl: `${orderUrl(context, data.text("orderGroupId"))}/review`,
+      }) }),
+    }),
+  ];
+};
 
 export const orderGroupStatusChanged: EventMapping = (event, data) => {
   const to = data.text("to");

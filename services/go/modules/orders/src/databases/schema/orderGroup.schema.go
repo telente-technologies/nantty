@@ -25,6 +25,7 @@ func (OrderGroup) Fields() []ent.Field {
 		field.String("invoice_number").NotEmpty().MaxLen(24).Immutable(),
 		field.UUID("store_id", uuid.UUID{}).Immutable(),
 		field.UUID("seller_account_id", uuid.UUID{}).Immutable(),
+		field.String("seller_name").Default("").MaxLen(120).Immutable(),
 		field.UUID("buyer_account_id", uuid.UUID{}).Immutable(),
 		field.String("buyer_name").Default("").MaxLen(80),
 		field.String("buyer_username").Default("").MaxLen(40),

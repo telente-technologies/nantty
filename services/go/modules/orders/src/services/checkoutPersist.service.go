@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/google/uuid"
 
@@ -93,7 +94,7 @@ func persistOrderGroup(ctx context.Context, deployed *container.Container, tx *e
 		return nil, err
 	}
 	group, err := tx.OrderGroup.Create().SetID(planned.GroupId).SetCheckoutID(checkout.ID).SetReference(NewOrderReference()).SetInvoiceNumber(invoice).SetStoreID(planned.Group.StoreId).
-		SetSellerAccountID(planned.Store.OwnerAccountId).SetBuyerAccountID(request.BuyerId).SetBuyerName(buyer.Name).SetBuyerUsername(buyer.Handle).
+		SetSellerAccountID(planned.Store.OwnerAccountId).SetSellerName(planned.Store.Name).SetBuyerAccountID(request.BuyerId).SetBuyerName(buyer.Name).SetBuyerUsername(buyer.Handle).
 		SetCurrency(string(plan.Currency)).SetSubtotalMinor(planned.Group.SubtotalMinor).SetDiscountMinor(planned.DiscountMinor).SetNillablePromotionID(promotionIdOf(planned)).SetStoreCreditMinor(planned.CreditMinor).SetShippingMinor(planned.Shipping.FeeMinor).
 		SetPromotionIssueCode(promotionIssueCodeOf(planned)).SetPromotionIssueMessage(promotionIssueMessageOf(planned)).
 		SetTotalMinor(planned.TotalMinor).SetAddress(plan.Address).SetPaymentMode(planned.PaymentMode).SetStockReserved(stockReserved).Save(ctx)
@@ -131,10 +132,13 @@ func persistOrderGroup(ctx context.Context, deployed *container.Container, tx *e
 	if err := AppendTimelineEvent(ctx, tx, group.ID, "placed", "Order placed, waiting for payment", buyerActor); err != nil {
 		return nil, err
 	}
-	return group, events.EnqueueOutboxEventInTransaction(ctx, tx, "orderGroup.created", group.ID.String(), now, map[string]any{
-		"orderGroupId": group.ID, "checkoutId": checkout.ID, "storeId": group.StoreID, "sellerAccountId": group.SellerAccountID,
-		"buyerAccountId": group.BuyerAccountID, "orderNumber": group.Reference, "totalMinor": group.TotalMinor, "currency": group.Currency,
+	payload, err := OrderGroupEventData(ctx, tx, group, map[string]any{
+		"payBy": checkout.ExpiresAt.UTC().Format(time.RFC3339Nano),
 	})
+	if err != nil {
+		return nil, err
+	}
+	return group, events.EnqueueOutboxEventInTransaction(ctx, tx, "orderGroup.created", group.ID.String(), now, payload)
 }
 
 func createOrderItem(ctx context.Context, tx *ent.Tx, group *ent.OrderGroup, line PricedCartLine) error {

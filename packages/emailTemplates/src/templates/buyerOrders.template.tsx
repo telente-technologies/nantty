@@ -28,15 +28,15 @@ export const orderPlaced = defineEmailTemplate<OrderProps & { readonly payBy: st
   sample: { ...sampleOrder, payBy: "2026-10-03T20:00:00.000Z", paymentUrl: "https://zudomart.com/checkout/pay/ZM-48213" },
 });
 
-export const paymentConfirmed = defineEmailTemplate<OrderProps & { readonly paymentMethod: string; readonly paidAt: string }>({
+export const paymentConfirmed = defineEmailTemplate<OrderProps & { readonly paymentMethod?: string; readonly paidAt: string }>({
   ...base, key: "paymentConfirmed", name: "Payment confirmed", trigger: "payments.charge.succeeded",
   subject: (p) => `Payment received for order ${p.orderNumber}`,
   preheader: (p, c) => `${c.money(orderTotal(p.groups))} is safe in escrow. ${sellerCount(p.groups)} can start packing.`,
   reference: ref,
   blocks: (p, c) => [
     { type: "hero", eyebrow: "Payment confirmed", title: "Paid and protected", tone: "success" },
-    { type: "track", steps: buyerTrackSteps, current: 2, caption: "Sellers have 48 hours to accept and ship. We'll email you at each step." },
-    { type: "paragraph", text: [`Hi ${p.firstName}, we received `, { strong: c.money(orderTotal(p.groups)) }, ` by ${p.paymentMethod} on ${c.dateTime(p.paidAt)}. It's held in escrow and only released once you confirm your order arrived.`] },
+    { type: "track", steps: buyerTrackSteps, current: 2, caption: "We'll email you at each step." },
+    { type: "paragraph", text: [`Hi ${p.firstName}, we received `, { strong: c.money(orderTotal(p.groups)) }, p.paymentMethod === undefined ? ` on ${c.dateTime(p.paidAt)}. ` : ` by ${p.paymentMethod} on ${c.dateTime(p.paidAt)}. `, `It's held in escrow and only released once you confirm your order arrived.`] },
     { type: "orderGroups", groups: p.groups },
     orderTotalsBlock(p.groups, { totalLabel: "Paid" }),
     { type: "button", label: "Track your order", href: p.orderUrl },
@@ -75,16 +75,20 @@ export const sellerRejected = defineEmailTemplate<OrderProps & { readonly seller
   sample: { ...sampleOrder, sellerName: firstGroup.sellerName, reason: "The indigo two-piece in size M sold out at our shop before we could update stock. Sorry!", refund: ngn(69000) },
 });
 
-export const orderShipped = defineEmailTemplate<OrderProps & { readonly sellerName: string; readonly carrier: string; readonly trackingNumber: string; readonly trackingUrl: string; readonly estimatedDelivery: string }>({
+export const orderShipped = defineEmailTemplate<OrderProps & { readonly sellerName: string; readonly carrier?: string; readonly trackingNumber?: string; readonly trackingUrl?: string; readonly estimatedDelivery?: string }>({
   ...base, key: "orderShipped", name: "Order shipped", trigger: "commerce.shipment.dispatched", consent: consentRules.transactionalOptOut,
   subject: (p) => `On its way: your order from ${p.sellerName}`,
-  preheader: (p, c) => `${p.carrier} · arriving by ${c.date(p.estimatedDelivery)}.`,
+  preheader: (p, c) => [p.carrier, p.estimatedDelivery === undefined ? undefined : `arriving by ${c.date(p.estimatedDelivery)}`].filter((part): part is string => part !== undefined).join(" · ") || "Your order is on its way.",
   reference: ref,
   blocks: (p, c) => [
-    { type: "hero", eyebrow: "Shipped", title: `Arriving by ${c.date(p.estimatedDelivery)}` },
+    { type: "hero", eyebrow: "Shipped", title: p.estimatedDelivery === undefined ? "Your order is on its way" : `Arriving by ${c.date(p.estimatedDelivery)}` },
     { type: "track", steps: buyerTrackSteps, current: 3 },
-    { type: "details", title: "Tracking", rows: [{ label: "Carrier", value: p.carrier }, { label: "Tracking number", value: p.trackingNumber, mono: true }, { label: "Estimated delivery", value: c.date(p.estimatedDelivery) }] },
-    { type: "button", label: "Track package", href: p.trackingUrl },
+    { type: "details", title: "Tracking", rows: [
+      ...(p.carrier === undefined ? [] : [{ label: "Carrier", value: p.carrier }]),
+      ...(p.trackingNumber === undefined ? [] : [{ label: "Tracking number", value: p.trackingNumber, mono: true }]),
+      ...(p.estimatedDelivery === undefined ? [] : [{ label: "Estimated delivery", value: c.date(p.estimatedDelivery) }]),
+    ] },
+    ...(p.trackingUrl === undefined ? [] : [{ type: "button" as const, label: "Track package", href: p.trackingUrl }]),
     { type: "orderGroups", groups: p.groups.filter((group) => group.sellerName === p.sellerName) },
     { type: "paragraph", muted: true, text: "Check your items when they arrive. You'll have 3 days to confirm or report a problem before payment is released." },
   ],

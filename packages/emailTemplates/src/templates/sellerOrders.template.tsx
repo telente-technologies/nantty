@@ -16,14 +16,16 @@ interface PayoutProps {
 
 const samplePayout: PayoutProps = { firstName: "Tobi", payoutId: "PO-2026-10-03-0192", amount: ngn(248300), bankAccount: "GTBank •••• 0412" };
 
-export const sellerNewOrder = defineEmailTemplate<{ readonly firstName: string; readonly orderNumber: string; readonly buyerName: string; readonly group: SellerItemGroup; readonly acceptBy: string; readonly paymentMode: "escrow" | "direct" }>({
+export const sellerNewOrder = defineEmailTemplate<{ readonly firstName: string; readonly orderNumber: string; readonly buyerName: string; readonly group: SellerItemGroup; readonly acceptBy?: string; readonly paymentMode: "escrow" | "direct" }>({
   ...base, key: "sellerNewOrder", name: "New order", trigger: "commerce.order.paid (per seller group)",
   subject: (p, c) => `New order ${p.orderNumber} — ${c.money(orderTotal([p.group]))}`,
-  preheader: (p, c) => `Accept by ${c.dateTime(p.acceptBy)} or it will be cancelled automatically.`,
+  preheader: (p, c) => p.acceptBy === undefined ? "Open your dashboard to accept and prepare it." : `Accept by ${c.dateTime(p.acceptBy)} or it will be cancelled automatically.`,
   reference: (p) => `ORDER ${p.orderNumber}`,
   blocks: (p, c) => [
     { type: "hero", eyebrow: "New order", title: `${p.buyerName} just bought from you`, tone: "success" },
-    { type: "paragraph", text: [`Payment is confirmed${p.paymentMode === "escrow" ? " and held in escrow" : ""}. Accept the order by `, { strong: c.dateTime(p.acceptBy) }, " and ship it within your stated handling time."] },
+    { type: "paragraph", text: p.acceptBy === undefined
+      ? `Payment is confirmed${p.paymentMode === "escrow" ? " and held in escrow" : ""}. Accept the order in your dashboard and ship it within your stated handling time.`
+      : ["Payment is confirmed", p.paymentMode === "escrow" ? " and held in escrow" : "", ". Accept the order by ", { strong: c.dateTime(p.acceptBy) }, " and ship it within your stated handling time."] },
     { type: "orderGroups", groups: [p.group] },
     { type: "button", label: "Accept and prepare order", href: dash(c.brand.sellerDashboardUrl, `/orders/${p.orderNumber}`) },
     { type: "paragraph", muted: true, text: p.paymentMode === "escrow" ? "Escrow releases 3 days after delivery unless the buyer reports a problem. Then funds lock for 24 hours before you can withdraw." : "This buyer chose direct payment. Funds lock for 24 hours before you can withdraw." },

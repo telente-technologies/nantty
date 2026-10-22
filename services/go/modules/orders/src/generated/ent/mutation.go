@@ -13007,6 +13007,7 @@ type OrderGroupMutation struct {
 	invoice_number          *string
 	store_id                *uuid.UUID
 	seller_account_id       *uuid.UUID
+	seller_name             *string
 	buyer_account_id        *uuid.UUID
 	buyer_name              *string
 	buyer_username          *string
@@ -13377,6 +13378,42 @@ func (m *OrderGroupMutation) OldSellerAccountID(ctx context.Context) (v uuid.UUI
 // ResetSellerAccountID resets all changes to the "seller_account_id" field.
 func (m *OrderGroupMutation) ResetSellerAccountID() {
 	m.seller_account_id = nil
+}
+
+// SetSellerName sets the "seller_name" field.
+func (m *OrderGroupMutation) SetSellerName(s string) {
+	m.seller_name = &s
+}
+
+// SellerName returns the value of the "seller_name" field in the mutation.
+func (m *OrderGroupMutation) SellerName() (r string, exists bool) {
+	v := m.seller_name
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSellerName returns the old "seller_name" field's value of the OrderGroup entity.
+// If the OrderGroup object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *OrderGroupMutation) OldSellerName(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSellerName is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSellerName requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSellerName: %w", err)
+	}
+	return oldValue.SellerName, nil
+}
+
+// ResetSellerName resets all changes to the "seller_name" field.
+func (m *OrderGroupMutation) ResetSellerName() {
+	m.seller_name = nil
 }
 
 // SetBuyerAccountID sets the "buyer_account_id" field.
@@ -15149,7 +15186,7 @@ func (m *OrderGroupMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *OrderGroupMutation) Fields() []string {
-	fields := make([]string, 0, 44)
+	fields := make([]string, 0, 45)
 	if m.created_at != nil {
 		fields = append(fields, ordergroup.FieldCreatedAt)
 	}
@@ -15167,6 +15204,9 @@ func (m *OrderGroupMutation) Fields() []string {
 	}
 	if m.seller_account_id != nil {
 		fields = append(fields, ordergroup.FieldSellerAccountID)
+	}
+	if m.seller_name != nil {
+		fields = append(fields, ordergroup.FieldSellerName)
 	}
 	if m.buyer_account_id != nil {
 		fields = append(fields, ordergroup.FieldBuyerAccountID)
@@ -15302,6 +15342,8 @@ func (m *OrderGroupMutation) Field(name string) (ent.Value, bool) {
 		return m.StoreID()
 	case ordergroup.FieldSellerAccountID:
 		return m.SellerAccountID()
+	case ordergroup.FieldSellerName:
+		return m.SellerName()
 	case ordergroup.FieldBuyerAccountID:
 		return m.BuyerAccountID()
 	case ordergroup.FieldBuyerName:
@@ -15399,6 +15441,8 @@ func (m *OrderGroupMutation) OldField(ctx context.Context, name string) (ent.Val
 		return m.OldStoreID(ctx)
 	case ordergroup.FieldSellerAccountID:
 		return m.OldSellerAccountID(ctx)
+	case ordergroup.FieldSellerName:
+		return m.OldSellerName(ctx)
 	case ordergroup.FieldBuyerAccountID:
 		return m.OldBuyerAccountID(ctx)
 	case ordergroup.FieldBuyerName:
@@ -15525,6 +15569,13 @@ func (m *OrderGroupMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetSellerAccountID(v)
+		return nil
+	case ordergroup.FieldSellerName:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSellerName(v)
 		return nil
 	case ordergroup.FieldBuyerAccountID:
 		v, ok := value.(uuid.UUID)
@@ -16056,6 +16107,9 @@ func (m *OrderGroupMutation) ResetField(name string) error {
 		return nil
 	case ordergroup.FieldSellerAccountID:
 		m.ResetSellerAccountID()
+		return nil
+	case ordergroup.FieldSellerName:
+		m.ResetSellerName()
 		return nil
 	case ordergroup.FieldBuyerAccountID:
 		m.ResetBuyerAccountID()

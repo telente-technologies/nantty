@@ -94,8 +94,11 @@ All notable changes to Zudomart are documented here. Format follows
 - Order-group event payloads now carry the order number and buyer/seller IDs;
   shipped and delivered also carry courier and tracking. The v1 schemas,
   AsyncAPI document and local RabbitMQ bindings were updated.
-- Order-group email templates remain unsent because the payloads do not yet
-  include line items, payment URLs or recipient names.
+- Order-group emails now follow the in-app and push notifications. Buyers get
+  order placed, payment confirmed, shipped, delivered and completed emails, and
+  sellers get a new-order email when payment is confirmed. Payloads carry the
+  seller and buyer names, line items, shipping, payment mode and lifecycle
+  timestamps; the order group snapshot also stores the seller name.
 
 ### Buyer — direct-payment warning
 

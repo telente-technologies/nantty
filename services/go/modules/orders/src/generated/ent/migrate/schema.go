@@ -473,6 +473,7 @@ var (
 		{Name: "invoice_number", Type: field.TypeString, Size: 24},
 		{Name: "store_id", Type: field.TypeUUID},
 		{Name: "seller_account_id", Type: field.TypeUUID},
+		{Name: "seller_name", Type: field.TypeString, Size: 120, Default: ""},
 		{Name: "buyer_account_id", Type: field.TypeUUID},
 		{Name: "buyer_name", Type: field.TypeString, Size: 80, Default: ""},
 		{Name: "buyer_username", Type: field.TypeString, Size: 40, Default: ""},
@@ -531,7 +532,7 @@ var (
 			{
 				Name:    "ordergroup_buyer_newest",
 				Unique:  false,
-				Columns: []*schema.Column{OrderGroupsColumns[7], OrderGroupsColumns[0]},
+				Columns: []*schema.Column{OrderGroupsColumns[8], OrderGroupsColumns[0]},
 				Annotation: &entsql.IndexAnnotation{
 					DescColumns: map[string]bool{
 						OrderGroupsColumns[0].Name: true,
@@ -541,7 +542,7 @@ var (
 			{
 				Name:    "ordergroup_buyer_status_newest",
 				Unique:  false,
-				Columns: []*schema.Column{OrderGroupsColumns[7], OrderGroupsColumns[10], OrderGroupsColumns[0]},
+				Columns: []*schema.Column{OrderGroupsColumns[8], OrderGroupsColumns[11], OrderGroupsColumns[0]},
 				Annotation: &entsql.IndexAnnotation{
 					DescColumns: map[string]bool{
 						OrderGroupsColumns[0].Name: true,
@@ -551,7 +552,7 @@ var (
 			{
 				Name:    "ordergroup_store_status_newest",
 				Unique:  false,
-				Columns: []*schema.Column{OrderGroupsColumns[5], OrderGroupsColumns[10], OrderGroupsColumns[0]},
+				Columns: []*schema.Column{OrderGroupsColumns[5], OrderGroupsColumns[11], OrderGroupsColumns[0]},
 				Annotation: &entsql.IndexAnnotation{
 					DescColumns: map[string]bool{
 						OrderGroupsColumns[0].Name: true,
@@ -561,7 +562,7 @@ var (
 			{
 				Name:    "ordergroup_store_id_buyer_account_id",
 				Unique:  false,
-				Columns: []*schema.Column{OrderGroupsColumns[5], OrderGroupsColumns[7]},
+				Columns: []*schema.Column{OrderGroupsColumns[5], OrderGroupsColumns[8]},
 			},
 			{
 				Name:    "ordergroup_checkout_id",
@@ -576,7 +577,7 @@ var (
 			{
 				Name:    "ordergroup_delivered_release",
 				Unique:  false,
-				Columns: []*schema.Column{OrderGroupsColumns[40]},
+				Columns: []*schema.Column{OrderGroupsColumns[41]},
 				Annotation: &entsql.IndexAnnotation{
 					Where: "status = 'delivered'",
 				},

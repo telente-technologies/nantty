@@ -130,10 +130,13 @@ func markGroupPaid(ctx context.Context, deployed *container.Container, tx *ent.T
 	if err != nil {
 		return err
 	}
-	if err := events.EnqueueOutboxEventInTransaction(ctx, tx, "orderGroup.paid", group.ID.String(), now, map[string]any{
-		"orderGroupId": group.ID, "orderNumber": group.Reference, "orderedAt": group.CreatedAt.UTC().Format(time.RFC3339Nano), "checkoutId": group.CheckoutID, "storeId": group.StoreID,
-		"sellerAccountId": group.SellerAccountID, "buyerAccountId": group.BuyerAccountID, "subtotalMinor": group.SubtotalMinor, "totalMinor": group.TotalMinor, "currency": group.Currency, "attributedItems": attributed,
-	}); err != nil {
+	payload, err := OrderGroupEventData(ctx, tx, paid, map[string]any{
+		"orderedAt": group.CreatedAt.UTC().Format(time.RFC3339Nano), "paidAt": now.UTC().Format(time.RFC3339Nano), "attributedItems": attributed,
+	})
+	if err != nil {
+		return err
+	}
+	if err := events.EnqueueOutboxEventInTransaction(ctx, tx, "orderGroup.paid", group.ID.String(), now, payload); err != nil {
 		return err
 	}
 	return enqueuePurchaseInteractions(ctx, deployed, tx, paid, now)

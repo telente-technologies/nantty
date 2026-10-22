@@ -82,8 +82,31 @@ func enqueueFulfilmentEvent(ctx context.Context, tx *ent.Tx, group *ent.OrderGro
 	if !fulfilment {
 		return nil
 	}
-	data := map[string]any{"orderGroupId": group.ID.String(), "occurredAt": now.UTC(), "orderNumber": group.Reference,
-		"storeId": group.StoreID, "buyerAccountId": group.BuyerAccountID, "sellerAccountId": group.SellerAccountID,
-		"courierName": derefOrEmpty(group.CourierName), "trackingNumber": derefOrEmpty(group.TrackingNumber), "trackingUrl": derefOrEmpty(group.TrackingURL)}
+	extra := map[string]any{"occurredAt": now.UTC().Format(time.RFC3339Nano), "courierName": derefOrEmpty(group.CourierName),
+		"trackingNumber": derefOrEmpty(group.TrackingNumber), "trackingUrl": derefOrEmpty(group.TrackingURL)}
+	if status == enums.StatusShipped {
+		shippedAt := now
+		if group.ShippedAt != nil {
+			shippedAt = *group.ShippedAt
+		}
+		extra["shippedAt"] = shippedAt.UTC().Format(time.RFC3339Nano)
+		if group.EstimatedDeliveryAt != nil {
+			extra["estimatedDeliveryAt"] = group.EstimatedDeliveryAt.UTC().Format(time.RFC3339Nano)
+		}
+	}
+	if status == enums.StatusDelivered {
+		deliveredAt := now
+		if group.DeliveredAt != nil {
+			deliveredAt = *group.DeliveredAt
+		}
+		extra["deliveredAt"] = deliveredAt.UTC().Format(time.RFC3339Nano)
+		if group.EscrowReleaseAt != nil {
+			extra["confirmBy"] = group.EscrowReleaseAt.UTC().Format(time.RFC3339Nano)
+		}
+	}
+	data, err := OrderGroupEventData(ctx, tx, group, extra)
+	if err != nil {
+		return err
+	}
 	return events.EnqueueOutboxEventInTransaction(ctx, tx, eventType, group.ID.String(), now, data)
 }

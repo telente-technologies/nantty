@@ -50,9 +50,11 @@ func enqueueOrderCompleted(ctx context.Context, tx *ent.Tx, group *ent.OrderGrou
 	if err != nil {
 		return err
 	}
-	return events.EnqueueOutboxEventInTransaction(ctx, tx, "orderGroup.completed", group.ID.String(), now, map[string]any{
-		"orderGroupId": group.ID, "orderNumber": group.Reference, "orderedAt": group.CreatedAt.UTC().Format(time.RFC3339Nano), "storeId": group.StoreID, "sellerAccountId": group.SellerAccountID, "buyerAccountId": group.BuyerAccountID,
-		"subtotalMinor": group.SubtotalMinor, "totalMinor": group.TotalMinor, "refundedMinor": group.RefundedMinor, "currency": group.Currency,
-		"completedAt": now.UTC().Format(time.RFC3339Nano), "attributedItems": attributed,
+	payload, err := OrderGroupEventData(ctx, tx, group, map[string]any{
+		"orderedAt": group.CreatedAt.UTC().Format(time.RFC3339Nano), "completedAt": now.UTC().Format(time.RFC3339Nano), "attributedItems": attributed,
 	})
+	if err != nil {
+		return err
+	}
+	return events.EnqueueOutboxEventInTransaction(ctx, tx, "orderGroup.completed", group.ID.String(), now, payload)
 }
