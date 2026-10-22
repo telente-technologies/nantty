@@ -5,7 +5,7 @@ import { NotificationDispatcherService } from "../../src/modules/delivery/servic
 import { UnsubscribeTokenService } from "../../src/modules/unsubscribe/services/unsubscribeToken.service.js";
 import type { DomainEventEnvelope } from "../../src/types/domainEvent.type.js";
 import {
-  InMemoryCampaignRepository, InMemoryDeliveryRepository, InMemoryDeviceTokenRepository, InMemoryNoticeDraftRepository, InMemoryNotificationRepository, InMemoryPreferenceRepository, InMemorySuppressionRepository,
+  InMemoryCampaignRepository, InMemoryDeliveryRepository, InMemoryDeviceTokenRepository, InMemoryNoticeDraftRepository, InMemoryNotificationRepository, InMemoryPreferenceRepository, InMemorySuppressionRepository, InMemoryUnsubscribeReceiptRepository,
 } from "./inMemoryRepositories.fake.js";
 import { FakeIdentityDirectory, RecordingEmailSender, RecordingJobQueue, RecordingPushSender } from "./inMemoryServices.fake.js";
 
@@ -19,6 +19,7 @@ export function createTestHarness() {
   const suppressions = new InMemorySuppressionRepository();
   const campaigns = new InMemoryCampaignRepository();
   const drafts = new InMemoryNoticeDraftRepository();
+  const unsubscribeReceipts = new InMemoryUnsubscribeReceiptRepository();
   const identity = new FakeIdentityDirectory();
   const sender = new RecordingEmailSender();
   const pushSender = new RecordingPushSender();
@@ -29,7 +30,7 @@ export function createTestHarness() {
   deliveries.now = now;
   const emailDelivery = new EmailDeliveryService({ sender, deliveries, suppressions, preferences, unsubscribeTokens, marketingMaxPerWeek: 2, now });
   const dispatcher = new NotificationDispatcherService({ notifications, deliveries, preferences, deviceTokens, identity, emailDelivery, pushSender, jobQueue, jobsQueueUrl: "jobs-queue", now });
-  return { notifications, deliveries, preferences, deviceTokens, suppressions, campaigns, drafts, identity, sender, pushSender, jobQueue, unsubscribeTokens, clock, now, emailDelivery, dispatcher };
+  return { notifications, deliveries, preferences, deviceTokens, suppressions, campaigns, drafts, unsubscribeReceipts, identity, sender, pushSender, jobQueue, unsubscribeTokens, clock, now, emailDelivery, dispatcher };
 }
 
 export type TestHarness = ReturnType<typeof createTestHarness>;

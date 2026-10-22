@@ -21,6 +21,9 @@ func TestChangeUsernameEnforcesRulesCooldownAndQuarantine(t *testing.T) {
 	if changed["username"] != "ada_byron" {
 		t.Fatalf("unexpected change %v", changed)
 	}
+	if !harness.audit.has("user.username_changed") {
+		t.Fatalf("a username change is audited: %v", harness.audit.actions)
+	}
 	if account, _, _ := harness.accounts.FindAccountSummary(nil, mustParseUuid(changed["id"].(string))); account.Username != "ada_byron" {
 		t.Fatalf("account directory was not renamed: %v", account.Username)
 	}
@@ -93,8 +96,11 @@ func TestStaffCanReserveAndWithholdUsernamesWithAudit(t *testing.T) {
 			domainActions = append(domainActions, action)
 		}
 	}
-	if len(domainActions) != 4 {
-		t.Fatalf("expected 4 audit events, got %v", harness.audit.actions)
+	if len(domainActions) != 5 {
+		t.Fatalf("expected 5 audit events, got %v", harness.audit.actions)
+	}
+	if !harness.audit.has("user.username_changed") {
+		t.Fatalf("the user's own rename is audited: %v", harness.audit.actions)
 	}
 }
 

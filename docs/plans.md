@@ -2305,3 +2305,16 @@ No provider integration is to be built until the V2 design is approved and the s
 - **Signal:** `StaleRateCurrencies` reports missing or older-than-45-days rates, and an hourly worker logs a warning per affected currency.
 - **Safety:** the check never rejects a conversion, so alerting cannot take payments down.
 - **Still open:** username oracles, the remaining audit-coverage gaps and the rest of ZM-018/ZM-020.
+
+## 68. User-action audit trail (2026-10-22) **[DONE]**
+
+- **Audited actions:** username changes, account deactivation, deletion requests and deletion cancellations now write user-actor audit entries.
+- **Failure handling:** a failed audit call is logged and does not roll back the user's action.
+- **Still open:** username oracles and the remaining audit-coverage gaps in ZM-018/ZM-020.
+
+## 69. Single-use unsubscribe replay tracking (2026-10-22) **[DONE]**
+
+- **Receipt:** a successful unsubscribe records the SHA-256 hash of the signed token in `unsubscribe_receipts`.
+- **Replay:** a second POST with the same link returns the same `{ unsubscribed: true }` response without calling the identity service again.
+- **Failure:** if withdrawing consent fails, the receipt is released so a retry can still unsubscribe the account.
+- **Still open:** the staff-JWKS staging assertion and the remaining ZM-020 edges.

@@ -20,7 +20,7 @@ import type { EmailSender } from "./interfaces/emailSender.interface.js";
 import type { IdentityDirectory } from "./interfaces/identityDirectory.interface.js";
 import type { JobQueue, MessageBroker, QueueReader } from "./interfaces/jobQueue.interface.js";
 import type { PushSender } from "./interfaces/pushSender.interface.js";
-import type { DeliveryRepository, DeviceTokenRepository, NotificationRepository, PreferenceRepository, SuppressionRepository } from "./interfaces/repositories.interface.js";
+import type { DeliveryRepository, DeviceTokenRepository, NotificationRepository, PreferenceRepository, SuppressionRepository, UnsubscribeReceiptRepository } from "./interfaces/repositories.interface.js";
 import { StaffAuthenticator } from "./middlewares/staffAuth.middleware.js";
 import { DeliverEmailIfStillUnreadHandler } from "./modules/delivery/commands/deliverEmailIfStillUnread/deliverEmailIfStillUnread.handler.js";
 import { RunDigestBatchHandler } from "./modules/digests/commands/runDigestBatch/runDigestBatch.handler.js";
@@ -64,6 +64,7 @@ import { NoticeDraftPrismaRepository } from "./modules/noticeDrafts/repositories
 import { RecordSesFeedbackHandler } from "./modules/suppression/commands/recordSesFeedback/recordSesFeedback.handler.js";
 import { SuppressionPrismaRepository } from "./modules/suppression/repositories/suppression.prisma.repository.js";
 import { UnsubscribeFromMarketingHandler } from "./modules/unsubscribe/commands/unsubscribeFromMarketing/unsubscribeFromMarketing.handler.js";
+import { UnsubscribeReceiptPrismaRepository } from "./modules/unsubscribe/repositories/unsubscribeReceipt.prisma.repository.js";
 import { UnsubscribeTokenService } from "./modules/unsubscribe/services/unsubscribeToken.service.js";
 
 export interface ContainerOverrides {
@@ -98,6 +99,7 @@ export function createContainer(config: NotificationsConfig, logger: Logger, ove
   const suppressions: SuppressionRepository = new SuppressionPrismaRepository(prisma);
   const campaigns: CampaignRepository = new CampaignPrismaRepository(prisma);
   const drafts: NoticeDraftRepository = new NoticeDraftPrismaRepository(prisma);
+  const unsubscribeReceipts: UnsubscribeReceiptRepository = new UnsubscribeReceiptPrismaRepository(prisma);
 
   const unsubscribeTokens = new UnsubscribeTokenService(config.unsubscribeSigningSecret, config.publicApiBaseUrl, config.unsubscribeTokenTtlSeconds);
   const emailDelivery = new EmailDeliveryService({ sender: emailSender, deliveries, suppressions, preferences, unsubscribeTokens, marketingMaxPerWeek: config.marketingMaxPerWeek, brand });
@@ -124,7 +126,7 @@ export function createContainer(config: NotificationsConfig, logger: Logger, ove
     sesFeedbackReader,
     staffAuthenticator: overrides.staffAuthenticator ?? new StaffAuthenticator({ jwksUrl: config.auth.jwksUrl, issuer: config.auth.staffIssuer }),
     unsubscribeTokens,
-    unsubscribeFromMarketing: new UnsubscribeFromMarketingHandler(unsubscribeTokens, identity),
+    unsubscribeFromMarketing: new UnsubscribeFromMarketingHandler(unsubscribeTokens, identity, unsubscribeReceipts),
     listNotifications: new ListNotificationsHandler(notifications, config.webBaseUrl),
     getUnreadCount: new GetUnreadCountHandler(notifications),
     markNotificationRead: new MarkNotificationReadHandler(notifications),

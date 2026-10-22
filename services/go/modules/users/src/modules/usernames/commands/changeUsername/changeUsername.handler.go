@@ -17,6 +17,7 @@ import (
 	usernameservices "zudomart/modules/users/src/modules/usernames/services"
 	"zudomart/modules/users/src/services"
 	"zudomart/modules/users/src/types"
+	"zudomart/modules/users/src/useraudit"
 	"zudomart/platform/httpserver"
 	"zudomart/platform/identityports"
 )
@@ -69,6 +70,12 @@ func (handler Handler) Execute(ctx context.Context, command Command) (types.User
 		return types.UserView{}, err
 	}
 	summary.Username = username
+	if auditErr := useraudit.RecordUserAuditEntry(ctx, useraudit.UserAuditEntry{
+		AccountId: owner.String(), AccountName: username, Action: "user.username_changed", SubjectType: "user", SubjectId: owner.String(), SubjectLabel: username,
+		Reason: "user_change", Before: map[string]string{"username": row.Handle}, After: map[string]string{"username": username},
+	}); auditErr != nil {
+		handler.Container.Logger.WarnContext(ctx, "username change audit failed", "accountId", owner.String(), "error", auditErr.Error())
+	}
 	return types.BuildUserView(updated, summary, true), err
 }
 

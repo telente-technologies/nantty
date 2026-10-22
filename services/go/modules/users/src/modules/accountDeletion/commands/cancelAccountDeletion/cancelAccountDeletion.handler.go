@@ -10,6 +10,7 @@ import (
 	"zudomart/modules/users/src/generated/ent/deletionrequest"
 	deletionevents "zudomart/modules/users/src/modules/accountDeletion/events"
 	"zudomart/modules/users/src/modules/accountDeletion/services"
+	"zudomart/modules/users/src/useraudit"
 )
 
 type Handler struct {
@@ -34,5 +35,14 @@ func (handler Handler) Execute(ctx context.Context, command Command) (*ent.Delet
 			AccountId: command.AccountId.String(), CancelledAt: now.UTC().Format(time.RFC3339),
 		})
 	})
-	return cancelled, err
+	if err != nil || cancelled == nil {
+		return cancelled, err
+	}
+	if auditErr := useraudit.RecordUserAuditEntry(ctx, useraudit.UserAuditEntry{
+		AccountId: command.AccountId.String(), Action: "user.deletion_cancelled", SubjectType: "deletion_request", SubjectId: cancelled.ID.String(), Reason: "user_cancelled",
+		Before: map[string]string{"status": "pending"}, After: map[string]string{"status": string(cancelled.Status)},
+	}); auditErr != nil {
+		handler.Container.Logger.WarnContext(ctx, "deletion cancellation audit failed", "accountId", command.AccountId.String(), "error", auditErr.Error())
+	}
+	return cancelled, nil
 }

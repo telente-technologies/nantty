@@ -52,8 +52,12 @@ All notable changes to Zudomart are documented here. Format follows
   inboxes, and the URL in the email copy now points at pages that exist.
 - Automated content hides now write an audit entry against the content report,
   so a takedown taken by an automation rule is visible in the audit log.
+- A reused unsubscribe link is now recognised and treated as an idempotent
+  no-op, so repeat clicks no longer call the identity service again.
 - The currency service now warns when an exchange rate has not been refreshed
   for 45 days. Conversions keep working while the warning is raised.
+- Username changes, account deactivation and deletion requests now leave an
+  audit trail so support and trust teams can see who did what and when.
 
 ## [Unreleased] — 2026-10-21
 

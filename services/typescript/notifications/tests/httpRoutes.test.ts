@@ -31,7 +31,7 @@ beforeEach(async () => {
     getUnreadCount: new GetUnreadCountHandler(harness.notifications),
     markNotificationRead: new MarkNotificationReadHandler(harness.notifications),
     unsubscribeTokens: harness.unsubscribeTokens,
-    unsubscribeFromMarketing: new UnsubscribeFromMarketingHandler(harness.unsubscribeTokens, harness.identity),
+    unsubscribeFromMarketing: new UnsubscribeFromMarketingHandler(harness.unsubscribeTokens, harness.identity, harness.unsubscribeReceipts),
   } as unknown as Container;
   handle = createRequestHandler(createRoutes(container), silentLogger);
   await harness.notifications.insertIfAbsent({ userId: "u1", dedupeKey: "k1", category: "orders", kind: null, templateKey: null, title: "Order shipped", body: "b", actor: null, data: {} });

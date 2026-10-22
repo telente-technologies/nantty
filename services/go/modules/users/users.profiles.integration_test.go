@@ -64,5 +64,8 @@ func TestDeactivatedAccountsCannotBeViewed(t *testing.T) {
 	targetId, _ := harness.newAccount("other.user", "Other User")
 	harness.expect("GET", "/api/v1/users/"+targetId, adaToken, nil, http.StatusOK)
 	harness.expect("POST", "/api/v1/users/me/deactivate", adaToken, nil, http.StatusNoContent)
+	if !harness.audit.has("user.deactivated") {
+		t.Fatalf("deactivation is audited: %v", harness.audit.actions)
+	}
 	harness.expect("GET", "/api/v1/users/me", adaToken, nil, http.StatusUnauthorized)
 }

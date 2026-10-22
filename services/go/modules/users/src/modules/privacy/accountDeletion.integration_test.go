@@ -65,6 +65,10 @@ func TestAccountDeletionRequestGracePeriodCancelAndRetainByDefault(t *testing.T)
 	if countOf(types, "account.deletionRequested") != 2 || countOf(types, "account.deletionCancelled") != 1 || countOf(types, "account.deletionExecuted") != 1 {
 		t.Fatalf("unexpected events %v", types)
 	}
+	actions := harness.audit.actions()
+	if countOf(actions, "user.deletion_requested") != 2 || countOf(actions, "user.deletion_cancelled") != 1 {
+		t.Fatalf("deletion requests and cancellations are audited: %v", actions)
+	}
 }
 
 func TestAccountDeletionAppliesConfiguredRetentionToUsersOwnedData(t *testing.T) {

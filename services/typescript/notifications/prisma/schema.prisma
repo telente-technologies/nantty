@@ -83,6 +83,15 @@ model EmailSuppression {
   @@map("email_suppressions")
 }
 
+model UnsubscribeReceipt {
+  tokenHash String   @id
+  accountId String
+  usedAt    DateTime @default(now())
+
+  @@index([accountId])
+  @@map("unsubscribe_receipts")
+}
+
 model BulkCampaign {
   id                       String    @id @default(uuid())
   kind                     String

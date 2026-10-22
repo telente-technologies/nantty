@@ -33,11 +33,20 @@ describe("one-click unsubscribe tokens", () => {
   });
 
   it("withdraws marketing consent in goIdentity", async () => {
-    const handler = new UnsubscribeFromMarketingHandler(harness.unsubscribeTokens, harness.identity);
+    const handler = new UnsubscribeFromMarketingHandler(harness.unsubscribeTokens, harness.identity, harness.unsubscribeReceipts);
     await expect(handler.execute({ token: harness.unsubscribeTokens.sign("u1") })).resolves.toEqual({ unsubscribed: true });
     expect(harness.identity.withdrawn).toEqual(["u1"]);
     await expect(handler.execute({ token: "nope" })).rejects.toMatchObject({ code: "VALIDATION_FAILED" });
     expect(harness.identity.withdrawn).toEqual(["u1"]);
+  });
+
+  it("treats a reused unsubscribe link as an idempotent no-op", async () => {
+    const handler = new UnsubscribeFromMarketingHandler(harness.unsubscribeTokens, harness.identity, harness.unsubscribeReceipts);
+    const token = harness.unsubscribeTokens.sign("u1");
+    await handler.execute({ token });
+    await handler.execute({ token });
+    expect(harness.identity.withdrawn).toEqual(["u1"]);
+    expect(harness.unsubscribeReceipts.rows.size).toBe(1);
   });
 
   it("builds a public one-click URL", () => {

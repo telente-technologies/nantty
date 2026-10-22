@@ -12,6 +12,7 @@ import (
 	deletionevents "zudomart/modules/users/src/modules/accountDeletion/events"
 	"zudomart/modules/users/src/modules/accountDeletion/services"
 	retentionservices "zudomart/modules/users/src/modules/retention/services"
+	"zudomart/modules/users/src/useraudit"
 )
 
 type Handler struct {
@@ -46,5 +47,14 @@ func (handler Handler) Execute(ctx context.Context, command Command) (*ent.Delet
 			AccountId: command.AccountId.String(), RequestedAt: now.UTC().Format(time.RFC3339), ScheduledFor: scheduledFor.UTC().Format(time.RFC3339), RetentionPolicy: snapshot,
 		})
 	})
-	return created, err
+	if err != nil || created == nil {
+		return created, err
+	}
+	if auditErr := useraudit.RecordUserAuditEntry(ctx, useraudit.UserAuditEntry{
+		AccountId: command.AccountId.String(), Action: "user.deletion_requested", SubjectType: "deletion_request", SubjectId: created.ID.String(), Reason: command.Reason,
+		After: map[string]string{"status": string(created.Status), "scheduledFor": created.ScheduledFor.UTC().Format(time.RFC3339)},
+	}); auditErr != nil {
+		handler.Container.Logger.WarnContext(ctx, "deletion request audit failed", "accountId", command.AccountId.String(), "error", auditErr.Error())
+	}
+	return created, nil
 }

@@ -1,6 +1,6 @@
 import type { CampaignRepository, NoticeDraftRepository } from "../../src/interfaces/campaignRepository.interface.js";
 import type {
-  DeliveryClaim, DeliveryRepository, DeviceTokenRepository, NewNotification, NotificationRepository, PreferenceRepository, PreferenceRow, StoredNotification, SuppressionReason, SuppressionRepository,
+  DeliveryClaim, DeliveryRepository, DeviceTokenRepository, NewNotification, NotificationRepository, PreferenceRepository, PreferenceRow, StoredNotification, SuppressionReason, SuppressionRepository, UnsubscribeReceiptRepository,
 } from "../../src/interfaces/repositories.interface.js";
 import type { BatchProgress, Campaign, CampaignKind, NewCampaign, NoticeDraft } from "../../src/types/campaign.type.js";
 import type { DeliveryStatus, MailKind } from "../../src/types/notification.type.js";
@@ -133,6 +133,16 @@ export class InMemorySuppressionRepository implements SuppressionRepository {
     for (const reason of this.rows.values()) counts[reason] += 1;
     return counts;
   }
+}
+
+export class InMemoryUnsubscribeReceiptRepository implements UnsubscribeReceiptRepository {
+  public readonly rows = new Set<string>();
+  public async claim(tokenHash: string, _accountId: string) {
+    if (this.rows.has(tokenHash)) return false;
+    this.rows.add(tokenHash);
+    return true;
+  }
+  public async release(tokenHash: string) { this.rows.delete(tokenHash); }
 }
 
 export class InMemoryCampaignRepository implements CampaignRepository {

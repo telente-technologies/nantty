@@ -74,3 +74,8 @@ export interface SuppressionRepository {
   upsert(email: string, reason: SuppressionReason, source: string): Promise<void>;
   countByReason(): Promise<Readonly<Record<SuppressionReason, number>>>;
 }
+
+export interface UnsubscribeReceiptRepository {
+  claim(tokenHash: string, accountId: string): Promise<boolean>;
+  release(tokenHash: string): Promise<void>;
+}

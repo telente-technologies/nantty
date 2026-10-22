@@ -2,7 +2,23 @@
 
 Every code change made while fixing `docs/audit/frontend-backend-audit.md` is logged here with file, lines, audit ID, verification, and rollback notes. Investigations that concluded "no change needed" are logged too. Newest first.
 
-## 2026-10-22 — ZM-018: stale exchange-rate alerting
+## 2026-10-22 — ZM-020: single-use unsubscribe replay tracking
+
+**Audit:** ZM-020 (unsubscribe link replay)
+**Changes:**
+1. `prisma/schema.prisma` and `20261022090000_unsubscribe_receipts` add `unsubscribe_receipts`, keyed by the SHA-256 token hash.
+2. `UnsubscribeReceiptRepository` claims a token before withdrawing consent and releases it if the identity call fails.
+3. `UnsubscribeFromMarketingHandler` returns the same idempotent response on a replay without calling `withdrawMarketingConsent` again.
+4. `httpRoutes.test.ts` and `unsubscribeAndFeedback.test.ts` cover the unchanged route contract and the replay no-op.
+
+**Verified:** `pnpm test`, `pnpm typecheck` and `pnpm lint` in `services/typescript/notifications` pass; lint reports two pre-existing unused-argument warnings.
+
+**Rollback:** drop the table, remove the repository and receipt argument, and delete the migration.
+
+**Remaining:** the staff-JWKS staging assertion.
+
+## 2026-10-22 — ZM-018: user-action audit trail\n\n**Audit:** ZM-018 (no user-action trail on username change, deactivation or deletion requests)\n**Changes:**\n1. `services/go/modules/users/src/useraudit/userAudit.service.go` — a small user-actor audit helper that records through the registered `identityports.AuditRecorder` with `ActorRole: \"user\"`.\n2. `changeUsername.handler.go` — records `user.username_changed` with before/after handles. A failed audit is logged and does not roll back a successful rename.\n3. `deactivateAccount.handler.go` — records `user.deactivated` after the directory deactivates and revokes sessions.\n4. `requestAccountDeletion.handler.go` and `cancelAccountDeletion.handler.go` — record `user.deletion_requested` and `user.deletion_cancelled` against the deletion request.\n5. Tests assert the audit entries in the username, profile and privacy integration suites.\n**Verified:** `go test ./modules/users -run 'TestChangeUsernameEnforcesRulesCooldownAndQuarantine|TestDeactivatedAccountsCannotBeViewed'` and `go test ./modules/users/src/modules/privacy -run TestAccountDeletionRequestGracePeriodCancelAndRetainByDefault` pass.\n**Rollback:** remove the audit calls and the helper. The underlying user actions are unchanged.\n**Remaining:** username-worker oracles and the remaining ZM-018 audit gaps.\n\n## 2026-10-22 — ZM-018: stale exchange-rate alerting"})
+
 
 **Audit:** ZM-018 (no FX TTL or freshness signal)
 **Changes:**
