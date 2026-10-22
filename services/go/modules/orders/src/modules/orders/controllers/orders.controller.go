@@ -47,7 +47,7 @@ func (controller OrdersController) Checkout(writer http.ResponseWriter, request 
 		paymentModes[uuid.MustParse(choice.StoreId)] = choice.Mode
 	}
 	result, err := (checkoutcart.Handler{Container: controller.Container}).Execute(request.Context(), checkoutcart.Command{Request: services.CheckoutRequest{
-		BuyerId: middlewares.AccountIdFrom(request.Context()), AddressId: uuid.MustParse(body.AddressId), IdempotencyKey: request.Header.Get("Idempotency-Key"), UseStoreCredit: useCredit, PromoCodes: promoCodes, PaymentModes: paymentModes,
+		BuyerId: middlewares.AccountIdFrom(request.Context()), AddressId: uuid.MustParse(body.AddressId), IdempotencyKey: request.Header.Get("Idempotency-Key"), UseStoreCredit: useCredit, PromoCodes: promoCodes, PaymentModes: paymentModes, DirectPaymentAccepted: body.DirectPaymentAccepted,
 	}})
 	controller.respond(writer, request, http.StatusCreated, result, err)
 }

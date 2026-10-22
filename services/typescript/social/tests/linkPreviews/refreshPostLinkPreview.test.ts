@@ -15,11 +15,17 @@ function setup(overrides: Row = {}) {
   return { store, attached, refresh: createRefreshPostLinkPreviewHandler(context) };
 }
 
-describe("SOC-01 refresh post link preview respects post visibility", () => {
-  it("returns the preview to a viewer who can see the post", async () => {
+describe("SOC-01 refresh post link preview is author-only", () => {
+  it("returns the preview to the post author", async () => {
     const { refresh, attached } = setup();
-    expect(await refresh({ actorId: viewerId, postId })).toMatchObject({ title: "Secret plan" });
+    expect(await refresh({ actorId: authorId, postId })).toMatchObject({ title: "Secret plan" });
     expect(attached).toEqual([postId]);
+  });
+
+  it("refuses another viewer even when the post is public", async () => {
+    const { refresh, attached } = setup({ linkPreview: preview });
+    await expect(refresh({ actorId: viewerId, postId })).rejects.toMatchObject({ status: 403, code: "NOT_POST_OWNER" });
+    expect(attached).toEqual([]);
   });
 
   it("refuses a followers-only post to a non-follower without fetching or leaking the cached preview", async () => {

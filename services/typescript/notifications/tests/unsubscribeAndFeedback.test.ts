@@ -20,6 +20,13 @@ describe("one-click unsubscribe tokens", () => {
     expect(harness.unsubscribeTokens.verify(`${token}.extra`)).toBeNull();
   });
 
+  it("rejects expired and not-yet-valid tokens", () => {
+    const day = 24 * 60 * 60 * 1000;
+    expect(harness.unsubscribeTokens.verify(harness.unsubscribeTokens.sign("u1", new Date(Date.now() - 91 * day)))).toBeNull();
+    expect(harness.unsubscribeTokens.verify(harness.unsubscribeTokens.sign("u1", new Date(Date.now() - 89 * day)))).toBe("u1");
+    expect(harness.unsubscribeTokens.verify(harness.unsubscribeTokens.sign("u1", new Date(Date.now() + 5 * 60 * 1000)))).toBeNull();
+  });
+
   it("a token signed with another secret is rejected", () => {
     const other = new (harness.unsubscribeTokens.constructor as new (secret: string, base: string) => typeof harness.unsubscribeTokens)("a-different-signing-secret-0123456789abcdef", "https://api.zudomart.test");
     expect(harness.unsubscribeTokens.verify(other.sign("u1"))).toBeNull();

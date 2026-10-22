@@ -2,6 +2,21 @@
 
 Every code change made while fixing `docs/audit/frontend-backend-audit.md` is logged here with file, lines, audit ID, verification, and rollback notes. Investigations that concluded "no change needed" are logged too. Newest first.
 
+## 2026-10-22 — ZM-003/ZM-020: direct-payment acceptance, author-only link previews, anon write no-ops, expiring unsubscribe tokens
+
+**Audit:** ZM-003 (direct-payment protection), ZM-020 (gateway/social/notifications hardening)
+**Changes:**
+1. `services/go/modules/orders/src/modules/orders/dtos/orders.dto.go`, `validators/orders.validator.go`, `controllers/orders.controller.go`, `services/checkout.service.go` and `services/paymentModes.service.go` — added `directPaymentAccepted` to checkout. The validator requires it when any store requests `direct`, and `ResolvePaymentModes` rejects direct without it even for internal callers that bypass the validator. The flag is part of the idempotency fingerprint.
+2. `apps/webapp/src/app/(app)/checkout/page.tsx`, `apps/webapp/src/services/orders.service.ts`, both mobile orders services and the API-smoke checkout fixture — clients send `directPaymentAccepted: true` only when a store is set to `direct`.
+3. `services/typescript/social/src/modules/linkPreviews/commands/refreshPostLinkPreview/refreshPostLinkPreview.handler.ts` — link-preview refresh now requires the caller to be the post author after the normal visibility check; other viewers receive `NOT_POST_OWNER`.
+4. `services/typescript/social/src/modules/posts/commands/{sharePost,recordPostImpression,recordProfileVisitFromPost}/*.handler.ts` — anonymous requests return before loading the post, so they cannot be used to force database work while returning success. Share event payloads now use the narrowed actor id.
+5. `services/typescript/notifications/src/modules/unsubscribe/services/unsubscribeToken.service.ts` and `configs/notifications.config.ts` — unsubscribe tokens now include `iat`/`exp`, reject future-issued and expired tokens, and default to 90 days. `UNSUBSCRIBE_TOKEN_TTL_DAYS` accepts 1–365 days; `.env.example` documents it. Repeat unsubscribe POSTs remain idempotent by design.
+6. `services/typescript/gateway/src/configs/gateway.config.ts` — startup now rejects `AUTH_TOKEN_AUDIENCE=zudomart-admin`, so a deployment cannot make user access tokens satisfy the gateway's staff audience. Covered in `deepScanHardening.test.ts`.
+7. Tests: Go checkout validator and payment-mode tests; social link-preview and anonymous-counter tests; notifications expiry test; gateway audience config test.
+**Verified:** `go test ./modules/orders/validators ./services -run 'ValidateCheckout|ResolvePaymentModes'` passes. Social 86 files / 549 pass, 4 files skipped; notifications 33 files / 310 pass, 1 file skipped; gateway 35 files / 1705 pass. Webapp, mobile, notifications and gateway `tsc --noEmit` clean. Social/notifications/webapp/gateway lint 0 errors (pre-existing warnings only).
+**Rollback:** revert the checkout DTO/validator/service/client flag together, otherwise every direct checkout will fail validation. Revert the link-preview owner check and anon early returns independently; reverting the token service invalidates all outstanding unsubscribe links and restores non-expiring tokens.
+**Remaining:** per-store promo `issues[]`, audio/PDF moderation, single-use unsubscribe replay tracking, in-product appeal links, staff-JWKS staging assertion, and the rest of ZM-018/ZM-020.
+
 ## 2026-10-22 — ZM-003/ZM-010/ZM-018/ZM-020: checkout confirmation, upload binding, admin step-up, route limits
 
 **Audit:** ZM-003 (direct-payment protection), ZM-010 (media fail-closed), ZM-018 (admin step-up), ZM-020 (gateway/API hardening)

@@ -159,7 +159,7 @@ describe("money journeys: multi-seller checkout, escrow timers, fees, payout, re
   it("pays a verified store directly: rejects direct for unverified stores, pays the seller at once, then refunds through the seller", { timeout: 120_000 }, async () => {
     const direct = await createStoreWithProduct("sellerd", itemPriceMinor);
     await addToCart(buyer, direct, 1);
-    const refusedDirect = await callApi("POST", "/api/v1/orders/checkout", { token: buyer.accessToken, body: { addressId, paymentModes: [{ storeId: direct.storeId, paymentMode: "direct" }] } });
+    const refusedDirect = await callApi("POST", "/api/v1/orders/checkout", { token: buyer.accessToken, body: { addressId, paymentModes: [{ storeId: direct.storeId, paymentMode: "direct" }], directPaymentAccepted: true } });
     expect(refusedDirect.status, describeResponse(refusedDirect)).toBe(422);
     expect(refusedDirect.body?.error?.code ?? refusedDirect.body?.code).toBe("DIRECT_PAYMENT_NOT_ALLOWED");
     psql(`update catalog.stores set verified = true where id = '${direct.storeId}'`);

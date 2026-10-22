@@ -22,16 +22,17 @@ import (
 )
 
 type CheckoutRequest struct {
-	BuyerId        uuid.UUID
-	AddressId      uuid.UUID
-	IdempotencyKey string
-	UseStoreCredit bool
-	PromoCodes     map[uuid.UUID]string
-	PaymentModes   map[uuid.UUID]string
+	BuyerId               uuid.UUID
+	AddressId             uuid.UUID
+	IdempotencyKey        string
+	UseStoreCredit        bool
+	PromoCodes            map[uuid.UUID]string
+	PaymentModes          map[uuid.UUID]string
+	DirectPaymentAccepted bool
 }
 
 func (request CheckoutRequest) Fingerprint() string {
-	return container.FingerprintOfRequest(request.AddressId, request.UseStoreCredit, request.PromoCodes, request.PaymentModes)
+	return container.FingerprintOfRequest(request.AddressId, request.UseStoreCredit, request.PromoCodes, request.PaymentModes, request.DirectPaymentAccepted)
 }
 
 type CheckoutService struct {
@@ -50,7 +51,7 @@ func (service CheckoutService) Checkout(ctx context.Context, request CheckoutReq
 	}
 	plan, err := BuildCheckoutPlan(ctx, service.Container, request.BuyerId, request.AddressId, request.UseStoreCredit, request.PromoCodes)
 	if err == nil {
-		err = ResolvePaymentModes(&plan, request.PaymentModes)
+		err = ResolvePaymentModes(&plan, request.PaymentModes, request.DirectPaymentAccepted)
 	}
 	if err == nil {
 		LockAffiliateCommissionRates(ctx, service.Container, &plan)

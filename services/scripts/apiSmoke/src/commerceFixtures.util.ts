@@ -88,7 +88,7 @@ export async function addToCart(buyer: UserActor, store: SmokeStore, quantity: n
 
 export async function checkout(buyer: UserActor, addressId: string, paymentModes: Record<string, "escrow" | "direct"> = {}): Promise<{ checkoutId: string; orderIds: string[]; body: any }> {
   const choices = Object.entries(paymentModes).map(([storeId, paymentMode]) => ({ storeId, paymentMode }));
-  const response = await callApi("POST", "/api/v1/orders/checkout", { token: buyer.accessToken, body: { addressId, paymentModes: choices } });
+  const response = await callApi("POST", "/api/v1/orders/checkout", { token: buyer.accessToken, body: { addressId, paymentModes: choices, directPaymentAccepted: Object.values(paymentModes).includes("direct") } });
   expect([200, 201], describeResponse(response)).toContain(response.status);
   const body = response.body;
   const orderIds: string[] = (body.orders ?? body.orderGroups ?? []).map((order: { id?: string; orderId?: string }) => order.id ?? order.orderId);

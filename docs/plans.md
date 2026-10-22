@@ -2263,4 +2263,13 @@ No provider integration is to be built until the V2 design is approved and the s
 - **Rate limits:** added account-scoped buckets for mentions resolve, comments, post engagement/saves, messages, conversation/channel writes, chat keys, support writes, admin email and unsubscribe.
 - **Device directory:** `chat/keys/devices/query` is scoped to the requester and existing conversation peers, closing arbitrary device enumeration. Mobile story replies start or resume the direct conversation before encrypting so first-time recipients still work.
 - **Admin step-up:** user enforcement, verification review, business-document review and creator decisions now require recent re-auth; staff settings and superadmin approvals now require the superadmin role rather than an empty permission check.
-- **Still open:** provider logistics remains deferred; audio/PDF moderation, expiring unsubscribe tokens, in-product appeals, staff-JWKS assertion and the remaining ZM-018/ZM-020 items are unchanged.
+- **Still open:** provider logistics remains deferred; audio/PDF moderation, single-use unsubscribe replay tracking, in-product appeals, staff-JWKS assertion and the remaining ZM-018/ZM-020 items are unchanged.
+
+## 62. Direct-payment acceptance, author-only previews and expiring unsubscribe links (2026-10-22) **[DONE]**
+
+- **Direct payment:** `POST /api/v1/orders/checkout` now accepts `directPaymentAccepted`. Request validation requires it when any store selects `direct`, and the service layer enforces the same rule. Both checkouts send it only when the buyer has actually chosen direct for a store. The flag is part of the checkout idempotency fingerprint, and the persisted order group continues to record `paymentMode: direct`.
+- **Link previews:** refreshing a post's cached link preview is now author-only. Any other viewer who can see the post still gets a `403 NOT_POST_OWNER`, and no fetch or cache write occurs.
+- **Anonymous counters:** anonymous share, impression and profile-visit requests now return before loading the post, so they can no longer be used for unauthenticated read amplification while reporting success.
+- **Unsubscribe links:** tokens now carry issued-at/expiry claims and default to 90 days (`UNSUBSCRIBE_TOKEN_TTL_DAYS`, 1–365). Expired, future-issued, tampered or legacy claim-less tokens are rejected. Repeat clicks remain idempotent rather than burning the link.
+- **Staff audience:** gateway startup rejects `AUTH_TOKEN_AUDIENCE=zudomart-admin`, preventing a config mistake from making ordinary user tokens satisfy the staff audience.
+- **Still open:** per-store promo `issues[]`, single-use replay tracking for unsubscribe, audio/PDF moderation, in-product appeal links, staff-JWKS staging assertion and the remaining ZM-018/ZM-020 items.

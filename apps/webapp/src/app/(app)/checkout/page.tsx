@@ -75,7 +75,7 @@ export default function CheckoutPage() {
       );
       const result = await sendRequestToWebappServer<CheckoutResult>("/api/v1/orders/checkout", {
         method: "POST",
-        body: { addressId, paymentModes: toPaymentModeChoices(directChoices) },
+        body: { addressId, paymentModes: toPaymentModeChoices(directChoices), directPaymentAccepted: Object.values(directChoices).includes("direct") },
         idempotencyKey: checkoutKey.current,
       });
       const payment = await paymentsService.initializeOrderPayment(result.payableOrderId, `${checkoutKey.current}-pay`);

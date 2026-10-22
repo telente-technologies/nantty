@@ -1,4 +1,5 @@
 import { defaultRouteLimitsPerMinute, type RouteLimitName } from "../services/routeRateLimitPolicy.service.js";
+import { staffAccessTokenAudience } from "../services/accessTokenVerifier.service.js";
 import { isValidAllowListEntry } from "../middlewares/adminNetwork.middleware.js";
 import { loadSecurityConfigFromEnvironment, type SecurityConfig } from "./security.config.js";
 import { collectProductionHardeningProblems } from "./productionHardening.config.js";
@@ -84,6 +85,7 @@ export function loadGatewayConfigFromEnvironment(): GatewayConfig {
     upstreams: { identity: readRequiredEnvironmentVariable("UPSTREAM_IDENTITY_URL", problems), live: readEnvironmentVariableOrDefault("UPSTREAM_LIVE_URL", "http://localhost:8102"), money: readEnvironmentVariableOrDefault("UPSTREAM_MONEY_URL", "http://localhost:8103"), notifications: readEnvironmentVariableOrDefault("UPSTREAM_NOTIFICATIONS_URL", "http://localhost:8104"), social: readEnvironmentVariableOrDefault("UPSTREAM_SOCIAL_URL", "http://localhost:8105"), trust: readEnvironmentVariableOrDefault("UPSTREAM_TRUST_URL", "http://localhost:8106"), commerce: readEnvironmentVariableOrDefault("UPSTREAM_COMMERCE_URL", "http://localhost:8107"), media: readEnvironmentVariableOrDefault("UPSTREAM_MEDIA_URL", "http://localhost:8108"), search: readEnvironmentVariableOrDefault("UPSTREAM_SEARCH_URL", "http://localhost:8109"), ads: readEnvironmentVariableOrDefault("UPSTREAM_ADS_URL", "http://localhost:8110"), support: readEnvironmentVariableOrDefault("UPSTREAM_SUPPORT_URL", "http://localhost:8111") },
   };
   if (config.corsOrigins.includes("*")) problems.push("CORS_ORIGINS must list exact origins, not *");
+  if (config.accessToken.audience === staffAccessTokenAudience) problems.push("AUTH_TOKEN_AUDIENCE must not equal the staff audience");
   if (process.env["NODE_ENV"] === "production" && config.valkeyUrl === null) problems.push("VALKEY_URL is required in production");
   if (!Number.isInteger(config.port) || config.port <= 0) problems.push("PORT must be a positive integer");
   if ((config.identitySigningSecret ?? "").length > 0 && (config.identitySigningSecret ?? "").length < 32) problems.push("GATEWAY_IDENTITY_SECRET must be at least 32 characters");

@@ -75,6 +75,11 @@ describe("C1 proxy trust", () => {
     expect(loadGatewayConfigFromEnvironment().trustedProxyHops).toBe(0);
   });
 
+  it("refuses to reuse the staff audience for user access tokens", () => {
+    Object.assign(process.env, required, { AUTH_TOKEN_AUDIENCE: "zudomart-admin" });
+    expect(() => loadGatewayConfigFromEnvironment()).toThrow(/AUTH_TOKEN_AUDIENCE must not equal the staff audience/);
+  });
+
   it("refuses to start in production without an explicit hop count", () => {
     const adminToken = { ADMIN_INTERNAL_API_TOKEN: "a".repeat(40) };
     expect(collectProductionHardeningProblems({ NODE_ENV: "production", ...adminToken })).toEqual([expect.stringMatching(/TRUSTED_PROXY_HOPS/)]);

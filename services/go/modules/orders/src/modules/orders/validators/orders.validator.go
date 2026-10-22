@@ -15,11 +15,18 @@ func ValidateCheckout(body dtos.CheckoutRequest) error {
 		collected.CheckLength("promoCodes.code", promo.Code, 3, 24)
 	}
 	collected.CheckRange("paymentModes", len(body.PaymentModes), 0, 20)
+	directRequested := false
 	for _, choice := range body.PaymentModes {
 		utils.ParseIdentifier("paymentModes.storeId", choice.StoreId, &collected)
 		if choice.Mode != enums.PaymentModeEscrow && choice.Mode != enums.PaymentModeDirect {
 			collected.Add("paymentModes.paymentMode", "must be escrow or direct")
 		}
+		if choice.Mode == enums.PaymentModeDirect {
+			directRequested = true
+		}
+	}
+	if directRequested && !body.DirectPaymentAccepted {
+		collected.Add("directPaymentAccepted", "must be true when paying a seller directly")
 	}
 	return collected.AsError()
 }

@@ -7,12 +7,12 @@ import type { SharePostCommand } from "./sharePost.command.js";
 
 export function createSharePostHandler(context: HandlerContext): Handler<SharePostCommand, void> {
   return async ({ actorId, postId, channel }) => {
-    const post = await loadPostVisibleToViewer(context, actorId, postId);
     if (actorId === undefined) return;
+    const post = await loadPostVisibleToViewer(context, actorId, postId);
     await context.database.transaction(async (transaction) => {
       await postRepository.recordShare(transaction, postId, actorId, channel);
       await postRepository.incrementCounter(transaction, postId, "shareCount", 1);
-      await appendDomainEventsToOutbox(transaction, [{ eventType: socialEventTypes.postShared, subject: postId, occurredAt: context.clock.now(), data: { postId, authorId: post.authorId, postAuthorId: post.authorId, actorId: actorId ?? null, topics: post.topics, sharedBy: actorId, channel } }]);
+      await appendDomainEventsToOutbox(transaction, [{ eventType: socialEventTypes.postShared, subject: postId, occurredAt: context.clock.now(), data: { postId, authorId: post.authorId, postAuthorId: post.authorId, actorId, topics: post.topics, sharedBy: actorId, channel } }]);
     });
   };
 }

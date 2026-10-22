@@ -7,7 +7,7 @@ import (
 	ordererrors "zudomart/modules/orders/src/errors"
 )
 
-func ResolvePaymentModes(plan *CheckoutPlan, requested map[uuid.UUID]string) error {
+func ResolvePaymentModes(plan *CheckoutPlan, requested map[uuid.UUID]string, acceptedDirect bool) error {
 	for index := range plan.Groups {
 		group := &plan.Groups[index]
 		group.PaymentMode = enums.PaymentModeEscrow
@@ -15,7 +15,7 @@ func ResolvePaymentModes(plan *CheckoutPlan, requested map[uuid.UUID]string) err
 		if !chosen || mode == enums.PaymentModeEscrow {
 			continue
 		}
-		if mode != enums.PaymentModeDirect {
+		if mode != enums.PaymentModeDirect || !acceptedDirect {
 			return ordererrors.DirectPaymentNotAllowed
 		}
 		if !group.Store.Verified {

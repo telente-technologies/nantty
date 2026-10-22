@@ -27,6 +27,20 @@ All notable changes to Zudomart are documented here. Format follows
   creator decisions now require recent re-authentication. Staff settings and
   superadmin approvals now require the superadmin role rather than an empty
   permission check.
+- Direct payment now also requires `directPaymentAccepted: true` in the
+  checkout request. The server rejects `direct` without it even when request
+  validation is bypassed, and both clients send it only after the buyer chooses
+  direct for a store.
+- Link-preview refresh is author-only, and anonymous share, impression and
+  profile-visit writes now return without loading the post, closing
+  unauthenticated read amplification.
+- Emailed unsubscribe links now expire after 90 days by default
+  (`UNSUBSCRIBE_TOKEN_TTL_DAYS`, 1–365). Tampered, expired, future-issued and
+  legacy links without expiry claims are rejected; repeat clicks remain
+  idempotent.
+- The gateway now refuses to start if `AUTH_TOKEN_AUDIENCE` is set to the staff
+  audience, so a misconfiguration cannot make user access tokens satisfy staff
+  checks.
 
 ## [Unreleased] — 2026-10-21
 

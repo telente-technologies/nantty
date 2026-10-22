@@ -6,8 +6,9 @@ import type { RecordPostImpressionCommand } from "./recordPostImpression.command
 
 export function createRecordPostImpressionHandler(context: HandlerContext): Handler<RecordPostImpressionCommand, void> {
   return async ({ viewerId, postId }) => {
+    if (viewerId === undefined) return;
     const post = await loadPostVisibleToViewer(context, viewerId, postId);
-    if (viewerId === undefined || viewerId === post.authorId) return;
+    if (viewerId === post.authorId) return;
     const now = context.clock.now();
     const day = now.toISOString().slice(0, 10);
     await context.database.transaction(async (transaction) => {

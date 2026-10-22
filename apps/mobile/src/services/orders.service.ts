@@ -8,7 +8,7 @@ export const ordersService = {
   checkoutCartIntoOrders: (addressId: string, idempotencyKey: string, paymentModes: Readonly<Record<string, PaymentMode>> = {}) =>
     api.post<CheckoutResult>(
       "/api/v1/orders/checkout",
-      { addressId, paymentModes: Object.entries(paymentModes).map(([storeId, paymentMode]) => ({ storeId, paymentMode })) },
+      { addressId, paymentModes: Object.entries(paymentModes).map(([storeId, paymentMode]) => ({ storeId, paymentMode })), directPaymentAccepted: Object.values(paymentModes).includes("direct") },
       { idempotencyKey },
     ),
   fetchMyOrders: (status: OrderStatus | null) => api.getList<Order>("/api/v1/orders", { status: status ?? undefined }),

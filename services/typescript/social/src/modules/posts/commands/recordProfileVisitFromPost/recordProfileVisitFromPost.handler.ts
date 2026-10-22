@@ -5,8 +5,9 @@ import type { RecordProfileVisitFromPostCommand } from "./recordProfileVisitFrom
 
 export function createRecordProfileVisitFromPostHandler(context: HandlerContext): Handler<RecordProfileVisitFromPostCommand, void> {
   return async ({ viewerId, postId }) => {
+    if (viewerId === undefined) return;
     const post = await loadPostVisibleToViewer(context, viewerId, postId);
-    if (viewerId === undefined || viewerId === post.authorId) return;
+    if (viewerId === post.authorId) return;
     const now = context.clock.now();
     await context.database.transaction(async (transaction) => {
       if (await claimViewerCooldown(transaction, postId, viewerId, "lastProfileClickAt", now)) await transaction.post.update({ where: { id: postId }, data: { profileVisitCount: { increment: 1 } } });

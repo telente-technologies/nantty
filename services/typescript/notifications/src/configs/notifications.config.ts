@@ -15,6 +15,7 @@ export interface NotificationsConfig {
   readonly identity: { readonly baseUrl: string; readonly internalToken: string };
   readonly auth: { readonly jwksUrl: string; readonly issuer: string; readonly staffIssuer: string; readonly audience: string };
   readonly unsubscribeSigningSecret: string;
+  readonly unsubscribeTokenTtlSeconds: number;
   readonly publicApiBaseUrl: string;
   readonly webBaseUrl: string;
   readonly supportInbox?: { readonly recipients: readonly string[]; readonly adminBaseUrl: string };
@@ -66,6 +67,7 @@ export function loadNotificationsConfigFromEnvironment(): NotificationsConfig {
     identity: { baseUrl: readRequired("IDENTITY_INTERNAL_URL", problems), internalToken: readRequired("IDENTITY_INTERNAL_TOKEN", problems) },
     auth: { jwksUrl: readRequired("AUTH_JWKS_URL", problems), issuer: authIssuer, staffIssuer: readOrDefault("STAFF_TOKEN_ISSUER", authIssuer), audience: readOrDefault("AUTH_TOKEN_AUDIENCE", "zudomart-api") },
     unsubscribeSigningSecret: readRequired("UNSUBSCRIBE_SIGNING_SECRET", problems),
+    unsubscribeTokenTtlSeconds: Number(readOrDefault("UNSUBSCRIBE_TOKEN_TTL_DAYS", "90")) * 24 * 60 * 60,
     publicApiBaseUrl: readRequired("PUBLIC_API_BASE_URL", problems),
     otpEnvelopeKeys: { [readOrDefault("AUTH_OTP_EVENT_KEY_ID", "otp-1")]: Buffer.from(readOrDefault("AUTH_OTP_EVENT_KEY", ""), "base64") },
     webBaseUrl: readOrDefault("ZUDOMART_WEB_BASE_URL", "https://zudomart.com"),
@@ -83,6 +85,7 @@ export function loadNotificationsConfigFromEnvironment(): NotificationsConfig {
   if (config.emailProvider === "log" && process.env["NODE_ENV"] === "production") problems.push("EMAIL_PROVIDER=log is for local development only");
   if (!Number.isInteger(config.port) || config.port <= 0) problems.push("PORT must be a positive integer");
   if (config.unsubscribeSigningSecret.length > 0 && config.unsubscribeSigningSecret.length < 32) problems.push("UNSUBSCRIBE_SIGNING_SECRET must be at least 32 characters");
+  if (!Number.isInteger(config.unsubscribeTokenTtlSeconds) || config.unsubscribeTokenTtlSeconds < 24 * 60 * 60 || config.unsubscribeTokenTtlSeconds > 365 * 24 * 60 * 60) problems.push("UNSUBSCRIBE_TOKEN_TTL_DAYS must be a whole number between 1 and 365");
   if (!(config.policyNotice.batchSize > 0) || !(config.policyNotice.ratePerSecond > 0)) problems.push("POLICY_NOTICE_BATCH_SIZE and POLICY_NOTICE_RATE_PER_SECOND must be positive");
   if (!(config.rabbitMq.prefetch > 0)) problems.push("RABBITMQ_PREFETCH must be positive");
   if (problems.length > 0) throw new Error(`Invalid notifications configuration: ${problems.join("; ")}`);

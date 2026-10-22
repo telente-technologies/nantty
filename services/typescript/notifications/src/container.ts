@@ -99,7 +99,7 @@ export function createContainer(config: NotificationsConfig, logger: Logger, ove
   const campaigns: CampaignRepository = new CampaignPrismaRepository(prisma);
   const drafts: NoticeDraftRepository = new NoticeDraftPrismaRepository(prisma);
 
-  const unsubscribeTokens = new UnsubscribeTokenService(config.unsubscribeSigningSecret, config.publicApiBaseUrl);
+  const unsubscribeTokens = new UnsubscribeTokenService(config.unsubscribeSigningSecret, config.publicApiBaseUrl, config.unsubscribeTokenTtlSeconds);
   const emailDelivery = new EmailDeliveryService({ sender: emailSender, deliveries, suppressions, preferences, unsubscribeTokens, marketingMaxPerWeek: config.marketingMaxPerWeek, brand });
   const dispatcher = new NotificationDispatcherService({ notifications, deliveries, preferences, deviceTokens, identity, emailDelivery, pushSender, jobQueue, jobsQueueUrl: config.queues.jobs });
 
