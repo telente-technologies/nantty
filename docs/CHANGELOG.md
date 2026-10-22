@@ -50,6 +50,8 @@ All notable changes to Zudomart are documented here. Format follows
 - Enforcement, suspension, ban and checkmark notifications now link to the
   account-status and verification pages. The links work in the web and mobile
   inboxes, and the URL in the email copy now points at pages that exist.
+- Automated content hides now write an audit entry against the content report,
+  so a takedown taken by an automation rule is visible in the audit log.
 
 ## [Unreleased] — 2026-10-21
 

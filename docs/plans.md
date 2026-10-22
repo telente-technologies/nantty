@@ -2293,3 +2293,9 @@ No provider integration is to be built until the V2 design is approved and the s
 - **In-app data:** restricted, warned, suspended, banned and appeal-decided notifications carry `{ url, screen: "AccountStatus" }`; revoked checkmarks carry `{ url, screen: "Verification" }`.
 - **Clients:** web notifications navigate to the stored `url` on click, and mobile opens `AccountStatus` or `IdentityVerification` natively from the stored screen.
 - **Still open:** per-store promo `issues[]`, single-use replay tracking for unsubscribe, audio/PDF moderation and the rest of ZM-010/ZM-020.
+
+## 66. Audit record for automation content hides (2026-10-22) **[DONE]**
+
+- **Audit entry:** an applied automation hide now records `report.automation_hide` against the content report with the automation as a `system` actor.
+- **Failure handling:** an audit failure is logged and does not reopen the content.
+- **Still open:** stale-rate alerting, username oracles, the remaining audit-coverage gaps and the rest of ZM-018/ZM-020.

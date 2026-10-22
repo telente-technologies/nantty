@@ -2,6 +2,16 @@
 
 Every code change made while fixing `docs/audit/frontend-backend-audit.md` is logged here with file, lines, audit ID, verification, and rollback notes. Investigations that concluded "no change needed" are logged too. Newest first.
 
+## 2026-10-22 — ZM-018: audit record for automation content hides
+
+**Audit:** ZM-018 (automation-hide publishes with `source="automation"` but writes no staff audit record)
+**Changes:**
+1. `services/go/modules/moderation/src/modules/automationRules/services/automationActions.service.go` — after a hide action is applied, the runner records `report.automation_hide` against the content report with the automation as a `system` actor. If the audit call fails, moderation continues and the failure is logged rather than leaving the content visible.
+2. `services/go/modules/moderation/moderationAutomation.integration_test.go` — asserts the audit entry is written when the second scam report hides the product.
+**Verified:** `go test ./modules/moderation -run TestAutomationRulesHideReportedContentAndLogEveryRun -count=1` passes; `gofmt` clean.
+**Rollback:** remove the audit block and the test assertion. The hide still happens without an audit entry, which is the previous behaviour.
+**Remaining:** the other audit-coverage gaps in ZM-018 (username, retention, platform settings, legal/policy and business-document changes).
+
 ## 2026-10-22 — ZM-010/ZM-020: in-product appeal links
 
 **Audit:** ZM-010 and ZM-020 (shadow moderation had appeal only in email copy; the appeal URLs pointed at routes that do not exist)

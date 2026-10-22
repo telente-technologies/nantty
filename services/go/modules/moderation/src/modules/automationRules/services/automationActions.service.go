@@ -11,6 +11,7 @@ import (
 	"zudomart/modules/moderation/src/container"
 	"zudomart/modules/moderation/src/generated/ent"
 	"zudomart/modules/moderation/src/generated/ent/contentreport"
+	"zudomart/modules/moderation/src/integrations"
 	reportservices "zudomart/modules/moderation/src/modules/contentReports/services"
 )
 
@@ -91,6 +92,14 @@ func (runner ContentActionRunner) Run(ctx context.Context, rule Rule, action Act
 	applied, err := runner.escalate(ctx, result.ReportId, PriorityFor(priority), hide, reason)
 	if err != nil {
 		return "", err
+	}
+	if hide && applied {
+		if err := runner.Container.Audit.Record(ctx, integrations.AuditRecord{
+			ActorId: "automation", ActorName: "Automation", ActorRole: "system", Action: "report.automation_hide", SubjectType: "content_report", SubjectId: result.ReportId,
+			SubjectLabel: input.TargetType, Reason: reason, RequestId: idempotencyKey,
+		}); err != nil {
+			runner.Container.Logger.WarnContext(ctx, "automation hide audit failed", "error", err.Error(), "reportId", result.ReportId)
+		}
 	}
 	switch {
 	case hide && applied:

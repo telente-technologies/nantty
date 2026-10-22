@@ -118,6 +118,9 @@ func TestAutomationRulesHideReportedContentAndLogEveryRun(t *testing.T) {
 	if !harness.waitForPublished("content.visibilityChanged") {
 		t.Fatal("the owning service hides the product")
 	}
+	if !harness.audit.has("report.automation_hide") {
+		t.Fatal("the automation hide is recorded in the audit log")
+	}
 	flagged := harness.expect("GET", "/api/v1/admin/reports?targetType=user&source=automation", viewer, nil, http.StatusOK)["data"].([]any)
 	if len(flagged) != 1 || flagged[0].(map[string]any)["target"].(map[string]any)["id"] != sender {
 		t.Fatalf("the sender is flagged for review: %v", flagged)
