@@ -16,8 +16,14 @@ export const checkmarkApproved = checkmarkMapping("Your checkmark was approved",
   (data, firstName) => plan("checkmarkApproved", { ...markProps(data, firstName), renewsAt: data.text("renewsAt") }));
 export const checkmarkRejected = checkmarkMapping("Your checkmark was not approved", "Open the email for the reasons and when you can reapply.",
   (data, firstName) => plan("checkmarkRejected", { ...markProps(data, firstName), reasons: data.textList("reasons"), reapplyFrom: data.text("reapplyFrom") }));
-export const checkmarkRevoked = checkmarkMapping("Your checkmark was removed", "Open the email for the reason and how to appeal.",
-  (data, firstName) => plan("checkmarkRevoked", { ...markProps(data, firstName), reason: data.text("reason"), appealUrl: data.text("appealUrl") }));
+export const checkmarkRevoked: EventMapping = (event, data, context) => [
+  intentFor(event, data.text("accountId"), {
+    category: "checkmarks",
+    inApp: { category: "system", title: "Your checkmark was removed", body: "Review the reason and appeal options in verification settings.", data: { url: `${context.webBaseUrl}/settings/verification`, screen: "Verification" } },
+    push: { title: "Your checkmark was removed", body: "Review the reason and appeal options in verification settings." },
+    email: (recipient) => plan("checkmarkRevoked", { ...markProps(data, recipient.firstName), reason: data.text("reason"), appealUrl: data.text("appealUrl") }),
+  }),
+];
 export const checkmarkRenewalFailed = checkmarkMapping("Checkmark renewal payment failed", "Update your payment method before the grace period ends.",
   (data, firstName) => plan("checkmarkRenewalDue", { ...markProps(data, firstName), price: data.money("price"), failedAt: data.text("failedAt"), graceEndsAt: data.text("graceEndsAt") }));
 

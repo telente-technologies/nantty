@@ -8,7 +8,7 @@ import (
 	"zudomart/modules/users/src/generated/ent"
 )
 
-const checkmarkAppealUrl = "https://zudomart.com/settings/verification/appeal"
+const checkmarkAppealUrl = "https://zudomart.com/settings/verification"
 
 type CheckmarkNotice struct {
 	AccountId        string   `json:"accountId"`

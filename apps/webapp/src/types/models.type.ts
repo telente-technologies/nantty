@@ -362,6 +362,7 @@ export interface AppNotification {
   readonly createdAt: ISODate;
   readonly read: boolean;
   readonly actor: UserSummary | null;
+  readonly url?: string | null;
 }
 
 export interface Page<T> {

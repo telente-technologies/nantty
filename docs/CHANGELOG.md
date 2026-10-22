@@ -47,6 +47,9 @@ All notable changes to Zudomart are documented here. Format follows
 - A missing exchange rate now returns a clear `EXCHANGE_RATE_UNAVAILABLE` error
   instead of a 500, and the first admin write for a currency seeds its default
   rate before applying the change.
+- Enforcement, suspension, ban and checkmark notifications now link to the
+  account-status and verification pages. The links work in the web and mobile
+  inboxes, and the URL in the email copy now points at pages that exist.
 
 ## [Unreleased] — 2026-10-21
 

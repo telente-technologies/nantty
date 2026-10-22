@@ -10,7 +10,7 @@ const (
 	UsernameReassignedType        = "username.reassigned"
 	AccountWarnedType             = "account.warned"
 	CommunityGuidelinesUrl        = "https://zudomart.com/community-guidelines"
-	AppealUrl                     = "https://zudomart.com/settings/account/appeal"
+	AppealUrl                     = "https://zudomart.com/settings/account-status"
 )
 
 type AccountRestrictedData struct {

@@ -2,6 +2,21 @@
 
 Every code change made while fixing `docs/audit/frontend-backend-audit.md` is logged here with file, lines, audit ID, verification, and rollback notes. Investigations that concluded "no change needed" are logged too. Newest first.
 
+## 2026-10-22 — ZM-010/ZM-020: in-product appeal links
+
+**Audit:** ZM-010 and ZM-020 (shadow moderation had appeal only in email copy; the appeal URLs pointed at routes that do not exist)
+**Changes:**
+1. `services/go/modules/users/src/modules/accountEnforcement/events/accountEnforcement.event.go` — `AppealUrl` now points at `https://zudomart.com/settings/account-status`, the page that renders the appeal flow, instead of the non-existent `/settings/account/appeal`.
+2. `services/go/modules/users/src/modules/checkmarks/services/checkmarkNotices.service.go` — the checkmark appeal URL now points at `https://zudomart.com/settings/verification` instead of the non-existent `/settings/verification/appeal`.
+3. `services/typescript/notifications/src/modules/eventIngestion/mappings/identity.mapping.ts` — restricted, warned, suspended, banned and appeal-decided in-app notifications now carry `{ url, screen: "AccountStatus" }`, so the inbox can link straight to the appeal page.
+4. `services/typescript/notifications/src/modules/eventIngestion/mappings/verification.mapping.ts` — a revoked checkmark now links to `{ url, screen: "Verification" }`.
+5. `apps/webapp/src/app/(app)/notifications/page.tsx`, `apps/webapp/src/types/models.type.ts` — web notifications expose `url` and navigate to it on click.
+6. `apps/mobile/src/screens/notifications/notifications.screen.tsx` — `AccountStatus` and `Verification` screens open natively instead of falling through to the browser.
+7. `services/typescript/notifications/tests/accountStatusLinks.test.ts` — covers the five trust mappings, the `toInAppPath` normalisation and the revoked-checkmark link.
+**Verified:** `pnpm --filter @zudomart/notifications test` (313 passed, 4 skipped), notifications typecheck and lint, webapp typecheck and lint, mobile `tsc`, and `go build ./modules/users/...`.
+**Rollback:** revert the constants, the mapping `data` blocks, the web `url` navigation and the mobile screen branches together. Notifications still render without a link.
+**Remaining:** audio/PDF moderation, fan-out caps, single-use unsubscribe replay tracking and the rest of ZM-010/ZM-020.
+
 ## 2026-10-22 — ZM-012/ZM-018: exchange-rate seed path and missing-rate handling
 
 **Audit:** ZM-012 and ZM-018 (currency seed path, unordered latest revision, unmapped not-found)

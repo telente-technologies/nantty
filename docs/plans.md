@@ -2263,7 +2263,7 @@ No provider integration is to be built until the V2 design is approved and the s
 - **Rate limits:** added account-scoped buckets for mentions resolve, comments, post engagement/saves, messages, conversation/channel writes, chat keys, support writes, admin email and unsubscribe.
 - **Device directory:** `chat/keys/devices/query` is scoped to the requester and existing conversation peers, closing arbitrary device enumeration. Mobile story replies start or resume the direct conversation before encrypting so first-time recipients still work.
 - **Admin step-up:** user enforcement, verification review, business-document review and creator decisions now require recent re-auth; staff settings and superadmin approvals now require the superadmin role rather than an empty permission check.
-- **Still open:** provider logistics remains deferred; audio/PDF moderation, single-use unsubscribe replay tracking, in-product appeals, staff-JWKS assertion and the remaining ZM-018/ZM-020 items are unchanged.
+- **Still open:** provider logistics remains deferred; audio/PDF moderation, single-use unsubscribe replay tracking, staff-JWKS assertion and the remaining ZM-018/ZM-020 items are unchanged.
 
 ## 62. Direct-payment acceptance, author-only previews and expiring unsubscribe links (2026-10-22) **[DONE]**
 
@@ -2272,7 +2272,7 @@ No provider integration is to be built until the V2 design is approved and the s
 - **Anonymous counters:** anonymous share, impression and profile-visit requests now return before loading the post, so they can no longer be used for unauthenticated read amplification while reporting success.
 - **Unsubscribe links:** tokens now carry issued-at/expiry claims and default to 90 days (`UNSUBSCRIBE_TOKEN_TTL_DAYS`, 1–365). Expired, future-issued, tampered or legacy claim-less tokens are rejected. Repeat clicks remain idempotent rather than burning the link.
 - **Staff audience:** gateway startup rejects `AUTH_TOKEN_AUDIENCE=zudomart-admin`, preventing a config mistake from making ordinary user tokens satisfy the staff audience.
-- **Still open:** per-store promo `issues[]`, single-use replay tracking for unsubscribe, audio/PDF moderation, in-product appeal links and the remaining ZM-018/ZM-020 items.
+- **Still open:** per-store promo `issues[]`, single-use replay tracking for unsubscribe, audio/PDF moderation and the remaining ZM-018/ZM-020 items.
 
 ## 63. Internal route guards (2026-10-22) **[DONE]**
 
@@ -2286,3 +2286,10 @@ No provider integration is to be built until the V2 design is approved and the s
 - **Missing rate:** conversion now returns `EXCHANGE_RATE_UNAVAILABLE` (503) instead of surfacing a not-found error as a 500.
 - **First admin write:** if a supported currency has no revision, the transaction seeds its default rate before applying the admin change and the large-change check.
 - **Still open:** alerting/TTL for rates that have not been refreshed.
+
+## 65. In-product appeal links (2026-10-22) **[DONE]**
+
+- **Backend URLs:** enforcement appeal URLs now point at `/settings/account-status` and checkmark appeal URLs at `/settings/verification`, both of which exist.
+- **In-app data:** restricted, warned, suspended, banned and appeal-decided notifications carry `{ url, screen: "AccountStatus" }`; revoked checkmarks carry `{ url, screen: "Verification" }`.
+- **Clients:** web notifications navigate to the stored `url` on click, and mobile opens `AccountStatus` or `IdentityVerification` natively from the stored screen.
+- **Still open:** per-store promo `issues[]`, single-use replay tracking for unsubscribe, audio/PDF moderation and the rest of ZM-010/ZM-020.

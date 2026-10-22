@@ -1,7 +1,7 @@
 import { createDecipheriv } from "node:crypto";
 
 import type { EventDataReader } from "../../../utils/eventDataReader.util.js";
-import { formatBytes, intentFor, plan, type EventMapping } from "./mappingHelpers.js";
+import { formatBytes, intentFor, plan, type EventMapping, type MappingContext } from "./mappingHelpers.js";
 
 const deviceDetails = (data: EventDataReader, occurredAt: string) => ({
   device: data.text("device", "Unknown device"), location: data.text("location", "Unknown location"), ipAddress: data.text("ipAddress", "Unknown"), occurredAt: data.text("occurredAt", occurredAt),
@@ -88,43 +88,48 @@ const actionProps = (data: EventDataReader, firstName: string) => ({
   firstName, caseId: data.text("caseId"), reason: data.text("reason"), policy: data.text("policy"), policyUrl: data.text("policyUrl"), appealUrl: data.text("appealUrl"),
 });
 
-export const accountRestricted: EventMapping = (event, data) => [
+const accountStatusLink = (context: MappingContext) => ({
+  url: `${context.webBaseUrl}/settings/account-status`,
+  screen: "AccountStatus",
+});
+
+export const accountRestricted: EventMapping = (event, data, context) => [
   intentFor(event, data.text("accountId"), {
     category: "trust",
-    inApp: { category: "system", title: "Your account has been restricted", body: data.text("reason", "Some features are limited. Open the email for details and how to appeal.") },
+    inApp: { category: "system", title: "Your account has been restricted", body: data.text("reason", "Some features are limited. Open the email for details and how to appeal."), data: accountStatusLink(context) },
     push: { title: "Account restricted", body: "Open the app for details." },
     email: (recipient) => plan("accountRestricted", { ...actionProps(data, recipient.firstName), restrictions: data.textList("restrictions"), until: data.text("until") }),
   }),
 ];
 
-export const accountWarned: EventMapping = (event, data) => [
+export const accountWarned: EventMapping = (event, data, context) => [
   intentFor(event, data.text("accountId"), {
     category: "trust",
-    inApp: { category: "system", title: "You received a warning", body: data.text("reason", "Something you shared went against our Community Guidelines.") },
+    inApp: { category: "system", title: "You received a warning", body: data.text("reason", "Something you shared went against our Community Guidelines."), data: accountStatusLink(context) },
     push: { title: "Community Guidelines warning", body: "Open the app to see what happened." },
   }),
 ];
 
-export const accountSuspended: EventMapping = (event, data) => [
+export const accountSuspended: EventMapping = (event, data, context) => [
   intentFor(event, data.text("accountId"), {
     category: "trust",
-    inApp: { category: "system", title: "Your account has been suspended", body: data.text("reason", "Open the email for details and how to appeal.") },
+    inApp: { category: "system", title: "Your account has been suspended", body: data.text("reason", "Open the email for details and how to appeal."), data: accountStatusLink(context) },
     email: (recipient) => plan("accountSuspended", { ...actionProps(data, recipient.firstName), appealBy: data.text("appealBy"), deletionAt: data.text("deletionAt") }),
   }),
 ];
 
-export const accountBanned: EventMapping = (event, data) => [
+export const accountBanned: EventMapping = (event, data, context) => [
   intentFor(event, data.text("accountId"), {
     category: "trust",
-    inApp: { category: "system", title: "Your account has been banned", body: data.text("reason", "Open the email for details and how to appeal.") },
+    inApp: { category: "system", title: "Your account has been banned", body: data.text("reason", "Open the email for details and how to appeal."), data: accountStatusLink(context) },
     email: (recipient) => plan("accountBanned", actionProps(data, recipient.firstName)),
   }),
 ];
 
-export const appealDecided: EventMapping = (event, data) => [
+export const appealDecided: EventMapping = (event, data, context) => [
   intentFor(event, data.text("accountId"), {
     category: "trust",
-    inApp: { category: "system", title: "Your appeal has been decided", body: data.text("explanation") },
+    inApp: { category: "system", title: "Your appeal has been decided", body: data.text("explanation"), data: accountStatusLink(context) },
     email: (recipient) => plan("appealDecision", { firstName: recipient.firstName, caseId: data.text("caseId"), outcome: data.text("outcome") === "overturned" ? "overturned" : "upheld", explanation: data.text("explanation") }),
   }),
 ];

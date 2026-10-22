@@ -2,6 +2,7 @@
 
 import { MentionText } from "@/components/mentions/mentionText";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useRouter } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
 import { EmptyState, ErrorState, Skeleton } from "@/components/ui/feedback";
@@ -25,6 +26,7 @@ function NotificationListSkeleton() {
 
 export default function NotificationsPage() {
   const queryClient = useQueryClient();
+  const router = useRouter();
   const notificationsQuery = useQuery({ queryKey: ["shell", "notifications"], queryFn: () => notificationsService.fetchMyNotifications(), retry: false });
 
   const markAllAsReadMutation = useMutation({
@@ -64,7 +66,10 @@ export default function NotificationsPage() {
               <button
                 type="button"
                 className={[styles.item, notification.read ? "" : styles.itemUnread].filter(Boolean).join(" ")}
-                onClick={() => (notification.read ? undefined : markOneAsReadMutation.mutate(notification.id))}
+                onClick={() => {
+                  if (!notification.read) markOneAsReadMutation.mutate(notification.id);
+                  if (notification.url?.startsWith("/")) router.push(notification.url);
+                }}
               >
                 <span className={styles.itemTitle}>{notification.title}</span>
                 <span className={styles.itemBody}><MentionText text={notification.body} /></span>

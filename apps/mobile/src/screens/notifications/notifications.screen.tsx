@@ -45,7 +45,9 @@ export function NotificationsScreen({ navigation }: MainScreenProps<"Notificatio
       void queryClient.invalidateQueries({ queryKey: ["users", notification.actor.id] });
       return navigation.navigate("UserProfile", { userId: notification.actor.id });
     }
-    if (notification.data?.ticketId) navigation.navigate("SupportTicketDetail", { ticketId: notification.data.ticketId });
+    if (notification.data?.screen === "AccountStatus") navigation.navigate("AccountStatus");
+    else if (notification.data?.screen === "Verification") navigation.navigate("IdentityVerification");
+    else if (notification.data?.ticketId) navigation.navigate("SupportTicketDetail", { ticketId: notification.data.ticketId });
     else if (reference) {
       const route = buildInternalRoute(reference);
       navigation.navigate(route.name, route.params as never);
