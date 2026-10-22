@@ -2,6 +2,17 @@
 
 Every code change made while fixing `docs/audit/frontend-backend-audit.md` is logged here with file, lines, audit ID, verification, and rollback notes. Investigations that concluded "no change needed" are logged too. Newest first.
 
+## 2026-10-22 — ZM-018: stale exchange-rate alerting
+
+**Audit:** ZM-018 (no FX TTL or freshness signal)
+**Changes:**
+1. `services/go/modules/currency/src/modules/exchangeRates/exchangeRates.module.go` — added `StaleRateCurrencies` and a background hourly `RunRateFreshnessCheckUntilContextDone` that warns when a supported currency's latest revision is older than 45 days or missing. The check logs and does not reject conversions, so a stale rate is visible without becoming a self-inflicted outage.
+2. `services/go/modules/currency/src/app.go` — starts the freshness worker alongside the outbox relay and exposes the container for tests.
+3. `services/go/modules/currency/currency.integration_test.go` — ages NGN's revision and asserts only NGN is reported stale.
+**Verified:** `go test ./modules/currency/... -count=1` passes; `gofmt` clean.
+**Rollback:** remove the worker start and the `StaleRateCurrencies`/`RunRateFreshnessCheckUntilContextDone` functions. No request path depends on them.
+**Remaining:** the other ZM-018 audit and username-oracle gaps.
+
 ## 2026-10-22 — ZM-018: audit record for automation content hides
 
 **Audit:** ZM-018 (automation-hide publishes with `source="automation"` but writes no staff audit record)

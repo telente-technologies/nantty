@@ -2285,7 +2285,7 @@ No provider integration is to be built until the V2 design is approved and the s
 - **Latest revision:** rates are ordered by `created_at` then ID instead of ID alone.
 - **Missing rate:** conversion now returns `EXCHANGE_RATE_UNAVAILABLE` (503) instead of surfacing a not-found error as a 500.
 - **First admin write:** if a supported currency has no revision, the transaction seeds its default rate before applying the admin change and the large-change check.
-- **Still open:** alerting/TTL for rates that have not been refreshed.
+- **Freshness alert:** an hourly background check warns when a supported currency's latest rate is older than 45 days or missing.
 
 ## 65. In-product appeal links (2026-10-22) **[DONE]**
 
@@ -2298,4 +2298,10 @@ No provider integration is to be built until the V2 design is approved and the s
 
 - **Audit entry:** an applied automation hide now records `report.automation_hide` against the content report with the automation as a `system` actor.
 - **Failure handling:** an audit failure is logged and does not reopen the content.
-- **Still open:** stale-rate alerting, username oracles, the remaining audit-coverage gaps and the rest of ZM-018/ZM-020.
+- **Still open:** username oracles, the remaining audit-coverage gaps and the rest of ZM-018/ZM-020.
+
+## 67. Stale exchange-rate alerting (2026-10-22) **[DONE]**
+
+- **Signal:** `StaleRateCurrencies` reports missing or older-than-45-days rates, and an hourly worker logs a warning per affected currency.
+- **Safety:** the check never rejects a conversion, so alerting cannot take payments down.
+- **Still open:** username oracles, the remaining audit-coverage gaps and the rest of ZM-018/ZM-020.

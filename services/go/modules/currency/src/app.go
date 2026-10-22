@@ -72,7 +72,10 @@ func (module *Module) MountRoutes(mux *http.ServeMux) {
 	exchangerates.Mount(mux, module.container)
 }
 
+func (module *Module) Container() *container.Container { return module.container }
+
 func (module *Module) RunBackgroundWorkersUntilContextDone(ctx context.Context) error {
+	go exchangerates.RunRateFreshnessCheckUntilContextDone(ctx, module.container)
 	return platformevents.RelayOutboxEventsUntilContextDone(ctx, platformevents.OutboxRelayOptions{
 		Store:     events.EntOutboxStore{Client: module.container.Client, Now: time.Now},
 		Publisher: module.publisher,

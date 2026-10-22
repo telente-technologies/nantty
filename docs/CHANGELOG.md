@@ -52,6 +52,8 @@ All notable changes to Zudomart are documented here. Format follows
   inboxes, and the URL in the email copy now points at pages that exist.
 - Automated content hides now write an audit entry against the content report,
   so a takedown taken by an automation rule is visible in the audit log.
+- The currency service now warns when an exchange rate has not been refreshed
+  for 45 days. Conversions keep working while the warning is raised.
 
 ## [Unreleased] — 2026-10-21
 

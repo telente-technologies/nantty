@@ -11,6 +11,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"os"
+	"slices"
 	"testing"
 	"time"
 
@@ -18,6 +19,7 @@ import (
 	"github.com/jackc/pgx/v5"
 
 	"zudomart/modules/currency/src/configs"
+	exchangerates "zudomart/modules/currency/src/modules/exchangeRates"
 	"zudomart/platform/events"
 	"zudomart/platform/health"
 	"zudomart/platform/identityports"
@@ -50,6 +52,7 @@ type currencyHarness struct {
 	countries     countryLookupByAccount
 	administrator *sql.DB
 	schema        string
+	module        *Module
 }
 
 func startCurrencyModuleAgainstFreshSchema(t *testing.T) *currencyHarness {
@@ -92,6 +95,7 @@ func startCurrencyModuleAgainstFreshSchema(t *testing.T) *currencyHarness {
 	mux := http.NewServeMux()
 	module.MountRoutes(mux)
 	harness.server = httptest.NewServer(mux)
+	harness.module = module
 	t.Cleanup(func() { harness.server.Close(); stopWorkers(); _ = module.Close(ctx) })
 	return harness
 }
@@ -184,6 +188,17 @@ func TestMissingRateIsSeedableAndConversionFailsClosed(t *testing.T) {
 	converted := harness.expect("GET", "/api/v1/currency/convert?amountMinor=100&from=USD&to=NGN", nil, nil, http.StatusOK)
 	if converted["amountMinor"] != float64(160000) {
 		t.Fatalf("unexpected conversion after seeding %v", converted)
+	}
+}
+
+func TestStaleRateCurrenciesFlagsOldRates(t *testing.T) {
+	harness := startCurrencyModuleAgainstFreshSchema(t)
+	if _, err := harness.administrator.Exec(fmt.Sprintf("UPDATE %s SET created_at = now() - interval '60 days' WHERE currency = 'NGN'", pgx.Identifier{harness.schema, "exchange_rate_revisions"}.Sanitize())); err != nil {
+		t.Fatal(err)
+	}
+	stale := exchangerates.StaleRateCurrencies(context.Background(), harness.module.Container(), exchangerates.DefaultRateStaleAfter)
+	if len(stale) != 1 || !slices.Contains(stale, "NGN") {
+		t.Fatalf("stale rates = %v, want only NGN", stale)
 	}
 }
 
