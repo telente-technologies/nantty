@@ -2,6 +2,23 @@
 
 Every code change made while fixing `docs/audit/frontend-backend-audit.md` is logged here with file, lines, audit ID, verification, and rollback notes. Investigations that concluded "no change needed" are logged too. Newest first.
 
+## 2026-10-22 — ZM-003/ZM-010/ZM-018/ZM-020: checkout confirmation, upload binding, admin step-up, route limits
+
+**Audit:** ZM-003 (direct-payment protection), ZM-010 (media fail-closed), ZM-018 (admin step-up), ZM-020 (gateway/API hardening)
+**Changes:**
+1. `apps/mobile/src/components/cart/paymentModeChooser.tsx` and `apps/webapp/src/components/commerce/paymentModeChooser.tsx` + CSS — choosing `direct` now requires typing `DIRECT` before the payment mode changes. The escrow warning remains visible while confirming, so the choice stays explicit and the default remains `escrow`.
+2. `services/typescript/media/src/integrations/s3ObjectStorage.integration.ts` — presigned PUTs now sign and return `Content-Type` in addition to `Content-Length`; the fake storage and upload-session tests were updated.
+3. `services/typescript/media/src/configs/media.config.ts` — production rejects an empty, placeholder or under-32-character `MEDIA_INTERNAL_TOKEN`; new config tests cover rejection and acceptance.
+4. `services/typescript/gateway/src/routes/upstream.routes.ts` — exact auth overrides make `POST /api/v1/posts/:postId/media/:mediaId/download` and `POST /api/v1/posts/:postId/link-preview` require authentication instead of inheriting the optional posts rule.
+5. `services/typescript/gateway/src/services/routeRateLimitPolicy.service.ts` — added account-scoped limits for mentions resolve, comment writes, post engagement/saves, direct messages, conversation/channel writes, chat key operations, support writes, admin email sends and unsubscribe. Classification tests cover the new families.
+6. `services/typescript/social/.../listDevices.handler.ts` + conversation repository — `POST /api/v1/chat/keys/devices/query` now returns devices only for the requester and accounts that already share a conversation, preventing arbitrary device-directory enumeration. Mobile story replies create/resume the direct conversation before encrypting, so the scoped directory still works for a first-time recipient.
+7. `services/go/platform/staffauth/staffGuard.middleware.go` — added `RequireSuperadmin`; staff settings and superadmin approval routes now use it instead of `RequireStaff("", true)`.
+8. `services/go/modules/users/...` — step-up now guards admin warn, force-logout, restrict, reinstate, verification approve/reject/reinstate, business-document approve/reject and creator-application approve/reject. Go integration tests and the admin RBAC test were updated.
+9. `apps/admin/src/config/apiRoutes.config.ts` — the corresponding BFF routes are marked `sensitive`.
+**Verified:** gateway 35 files / 1704 tests pass; media 24 files / 129 pass, 1 skipped; social suite passes; `go test ./modules/users ./modules/admin ./platform/staffauth` passes; webapp, admin and mobile `tsc --noEmit` clean; gateway/media/social/admin/webapp/mobile lint 0 errors (warnings pre-existing).
+**Rollback:** revert the two chooser components, the presign/config checks, gateway overrides/limit names, device-directory scoping, and the Go guard changes together. Reverting only the gateway overrides reopens anonymous download/link-preview calls; reverting only the presence checks reopens admin actions without re-auth.
+**Remaining:** server-side direct-payment acceptance flag, per-store promo `issues[]`, audio/PDF moderation, expiring single-use unsubscribe tokens, in-product appeal links, staff-JWKS staging assertion, link-preview owner check, optional anon share/impression writes, and the rest of ZM-018/ZM-020.
+
 ## 2026-10-21 — ZM-021: wire order-group lifecycle events into notifications
 
 **Audit:** ZM-021 (order lifecycle events absent from the notifications path)

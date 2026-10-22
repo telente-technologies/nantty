@@ -2254,3 +2254,13 @@ No provider integration is to be built until the V2 design is approved and the s
 - **Media safety:** moderation defaults to `hold` on classifier failure; invalid fail modes fail startup; a skipped ClamAV scan rejects the upload unless `MEDIA_ALLOW_UNSCANNED=true` is explicitly set for local development.
 - **Direct-payment warning:** both checkout choosers now state that direct payment removes escrow protection and that Zudomart cannot reverse it. Escrow remains the default.
 - **Still open:** audio/PDF moderation, presigned Content-Type binding, stronger direct-payment confirmation, per-store promo issues, and the ZM-018/019/020 API sweeps.
+
+## 61. Checkout confirmation, upload binding, admin step-up and route limits (2026-10-22) **[DONE]**
+
+- **Direct payment:** mobile and web checkouts now require the buyer to type `DIRECT` before switching a store from escrow to direct payment. The escrow-loss warning stays visible while confirming; `escrow` remains the default. Server-side acceptance flag and per-store promo issues are still queued.
+- **Media uploads:** presigned PUTs bind both `Content-Type` and `Content-Length`, so an upload intent cannot be reused with a different declared type. Production media config rejects an empty, placeholder or short `MEDIA_INTERNAL_TOKEN`.
+- **Gateway auth:** media download and link-preview refresh now require authentication at the gateway instead of inheriting the optional posts rule.
+- **Rate limits:** added account-scoped buckets for mentions resolve, comments, post engagement/saves, messages, conversation/channel writes, chat keys, support writes, admin email and unsubscribe.
+- **Device directory:** `chat/keys/devices/query` is scoped to the requester and existing conversation peers, closing arbitrary device enumeration. Mobile story replies start or resume the direct conversation before encrypting so first-time recipients still work.
+- **Admin step-up:** user enforcement, verification review, business-document review and creator decisions now require recent re-auth; staff settings and superadmin approvals now require the superadmin role rather than an empty permission check.
+- **Still open:** provider logistics remains deferred; audio/PDF moderation, expiring unsubscribe tokens, in-product appeals, staff-JWKS assertion and the remaining ZM-018/ZM-020 items are unchanged.

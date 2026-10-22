@@ -61,7 +61,7 @@ func TestBusinessDocumentsUploadReviewAndGoldEligibility(t *testing.T) {
 		harness.expect("PUT", "/api/v1/seller/business-documents/"+kind, token, map[string]any{"fileUrl": intent["uploadUrl"]}, http.StatusOK)
 	}
 
-	reviewer, _ := harness.staff("admin", "verification:review", "verification:documents", "users:read")
+	reviewer, reviewerStepUp := harness.staff("admin", "verification:review", "verification:documents", "users:read")
 	noAccess, _ := harness.staff("admin", "verification:review")
 	queue := harness.expect("GET", "/api/v1/admin/business-documents", reviewer, nil, http.StatusOK)["data"].([]any)
 	if len(queue) != 1 || queue[0].(map[string]any)["overallStatus"] != "PENDING" || len(queue[0].(map[string]any)["documents"].([]any)) != 3 {
@@ -79,7 +79,7 @@ func TestBusinessDocumentsUploadReviewAndGoldEligibility(t *testing.T) {
 	if !harness.audit.has("business_document.viewed") {
 		t.Fatal("opening a document must be audited")
 	}
-	rejected := harness.expect("POST", "/api/v1/admin/business-documents/"+submissionId+"/documents/"+first+"/reject", reviewer, map[string]string{"reason": "The certificate is blurry"}, http.StatusOK)
+	rejected := harness.expect("POST", "/api/v1/admin/business-documents/"+submissionId+"/documents/"+first+"/reject", reviewer, map[string]string{"reason": "The certificate is blurry"}, http.StatusOK, reviewerStepUp...)
 	if rejected["overallStatus"] != "REJECTED" {
 		t.Fatalf("unexpected %v", rejected)
 	}
@@ -87,7 +87,7 @@ func TestBusinessDocumentsUploadReviewAndGoldEligibility(t *testing.T) {
 	if mine[0].(map[string]any)["status"] != "rejected" || mine[0].(map[string]any)["rejectionReason"] != "The certificate is blurry" {
 		t.Fatalf("the seller sees the rejection reason: %v", mine)
 	}
-	harness.expect("POST", "/api/v1/admin/business-documents/"+submissionId+"/documents/"+first+"/approve", reviewer, map[string]string{"reason": "looks fine to me"}, http.StatusConflict)
+	harness.expect("POST", "/api/v1/admin/business-documents/"+submissionId+"/documents/"+first+"/approve", reviewer, map[string]string{"reason": "looks fine to me"}, http.StatusConflict, reviewerStepUp...)
 
 	intent := harness.expect("POST", "/api/v1/seller/business-documents/cac_certificate/upload-intents", token, map[string]any{"fileName": "cac2.pdf", "contentType": "application/pdf", "sizeBytes": 2048}, http.StatusCreated)
 	storage.markUploaded(intent["objectKey"].(string))
@@ -95,7 +95,7 @@ func TestBusinessDocumentsUploadReviewAndGoldEligibility(t *testing.T) {
 	queue = harness.expect("GET", "/api/v1/admin/business-documents", reviewer, nil, http.StatusOK)["data"].([]any)
 	var last map[string]any
 	for _, document := range queue[0].(map[string]any)["documents"].([]any) {
-		last = harness.expect("POST", "/api/v1/admin/business-documents/"+submissionId+"/documents/"+document.(map[string]any)["id"].(string)+"/approve", reviewer, map[string]string{"reason": "document is valid"}, http.StatusOK)
+		last = harness.expect("POST", "/api/v1/admin/business-documents/"+submissionId+"/documents/"+document.(map[string]any)["id"].(string)+"/approve", reviewer, map[string]string{"reason": "document is valid"}, http.StatusOK, reviewerStepUp...)
 	}
 	if last["overallStatus"] != "APPROVED" || last["goldCheckmark"] != "WAITING_FOR_PLAN" {
 		t.Fatalf("on the free plan Gold waits for a paid plan: %v", last)
@@ -110,11 +110,11 @@ func TestBusinessDocumentsUploadReviewAndGoldEligibility(t *testing.T) {
 		t.Fatal("rejecting a document before the first approval is not a revocation")
 	}
 	approvedDocument := after[0].(map[string]any)["documents"].([]any)[0].(map[string]any)["id"].(string)
-	revoked := harness.expect("POST", "/api/v1/admin/business-documents/"+submissionId+"/documents/"+approvedDocument+"/reject", reviewer, map[string]string{"reason": "The CAC registration was struck off"}, http.StatusOK)
+	revoked := harness.expect("POST", "/api/v1/admin/business-documents/"+submissionId+"/documents/"+approvedDocument+"/reject", reviewer, map[string]string{"reason": "The CAC registration was struck off"}, http.StatusOK, reviewerStepUp...)
 	if revoked["overallStatus"] != "REJECTED" {
 		t.Fatalf("revoking an approved document leaves the business unverified: %v", revoked)
 	}
-	harness.expect("POST", "/api/v1/admin/business-documents/"+submissionId+"/documents/"+approvedDocument+"/reject", reviewer, map[string]string{"reason": "The CAC registration was struck off"}, http.StatusConflict)
+	harness.expect("POST", "/api/v1/admin/business-documents/"+submissionId+"/documents/"+approvedDocument+"/reject", reviewer, map[string]string{"reason": "The CAC registration was struck off"}, http.StatusConflict, reviewerStepUp...)
 	harness.waitForPublishedEvents("businessVerification.revoked")
 }
 

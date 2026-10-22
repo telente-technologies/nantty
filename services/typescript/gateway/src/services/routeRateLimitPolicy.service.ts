@@ -1,8 +1,99 @@
-export type RouteLimitName = "login" | "otp" | "reset" | "signup" | "report" | "upload" | "search" | "usernameCheck" | "postWrite" | "tagSearch" | "verification" | "mediaDownload" | "sellerPeopleSearch" | "sellerTeamWrite" | "sellerMoneyWrite" | "storeMessageSend" | "feedInteraction" | "linkPreview" | "widgetRead" | "widgetToken" | "offerRead" | "offerClaim" | "followWrite";
+export type RouteLimitName =
+  | "login"
+  | "otp"
+  | "reset"
+  | "signup"
+  | "report"
+  | "upload"
+  | "search"
+  | "usernameCheck"
+  | "postWrite"
+  | "tagSearch"
+  | "verification"
+  | "mediaDownload"
+  | "sellerPeopleSearch"
+  | "sellerTeamWrite"
+  | "sellerMoneyWrite"
+  | "storeMessageSend"
+  | "feedInteraction"
+  | "linkPreview"
+  | "widgetRead"
+  | "widgetToken"
+  | "offerRead"
+  | "offerClaim"
+  | "followWrite"
+  | "mentionsResolve"
+  | "commentWrite"
+  | "postEngagement"
+  | "messageWrite"
+  | "conversationWrite"
+  | "messagingKeys"
+  | "supportWrite"
+  | "adminEmail"
+  | "unsubscribe";
 
-export const defaultRouteLimitsPerMinute: Readonly<Record<RouteLimitName, number>> = { login: 10, otp: 5, reset: 5, signup: 10, report: 20, upload: 30, search: 60, usernameCheck: 30, postWrite: 30, tagSearch: 60, verification: 10, mediaDownload: 40, sellerPeopleSearch: 30, sellerTeamWrite: 30, sellerMoneyWrite: 10, storeMessageSend: 60, feedInteraction: 60, linkPreview: 30, widgetRead: 30, widgetToken: 10, offerRead: 30, offerClaim: 10, followWrite: 30 };
+export const defaultRouteLimitsPerMinute: Readonly<Record<RouteLimitName, number>> = {
+  login: 10,
+  otp: 5,
+  reset: 5,
+  signup: 10,
+  report: 20,
+  upload: 30,
+  search: 60,
+  usernameCheck: 30,
+  postWrite: 30,
+  tagSearch: 60,
+  verification: 10,
+  mediaDownload: 40,
+  sellerPeopleSearch: 30,
+  sellerTeamWrite: 30,
+  sellerMoneyWrite: 10,
+  storeMessageSend: 60,
+  feedInteraction: 60,
+  linkPreview: 30,
+  widgetRead: 30,
+  widgetToken: 10,
+  offerRead: 30,
+  offerClaim: 10,
+  followWrite: 30,
+  mentionsResolve: 20,
+  commentWrite: 30,
+  postEngagement: 60,
+  messageWrite: 60,
+  conversationWrite: 30,
+  messagingKeys: 60,
+  supportWrite: 30,
+  adminEmail: 10,
+  unsubscribe: 10,
+};
 
-const accountScopedLimits: readonly RouteLimitName[] = ["report", "upload", "search", "postWrite", "tagSearch", "verification", "mediaDownload", "sellerPeopleSearch", "sellerTeamWrite", "sellerMoneyWrite", "storeMessageSend", "feedInteraction", "linkPreview", "widgetRead", "widgetToken", "offerClaim", "followWrite"];
+const accountScopedLimits: readonly RouteLimitName[] = [
+  "report",
+  "upload",
+  "search",
+  "postWrite",
+  "tagSearch",
+  "verification",
+  "mediaDownload",
+  "sellerPeopleSearch",
+  "sellerTeamWrite",
+  "sellerMoneyWrite",
+  "storeMessageSend",
+  "feedInteraction",
+  "linkPreview",
+  "widgetRead",
+  "widgetToken",
+  "offerClaim",
+  "followWrite",
+  "mentionsResolve",
+  "commentWrite",
+  "postEngagement",
+  "messageWrite",
+  "conversationWrite",
+  "messagingKeys",
+  "supportWrite",
+  "adminEmail",
+];
 
 const preAuthAdminLoginSteps: ReadonlySet<string> = new Set(["/api/v1/admin/auth/login", "/api/v1/admin/auth/refresh", "/api/v1/admin/auth/accept-invitation", "/api/v1/admin/auth/mfa/enroll/start", "/api/v1/admin/auth/mfa/webauthn/options"]);
 const preAuthAdminCodeSteps: ReadonlySet<string> = new Set(["/api/v1/admin/auth/mfa/verify", "/api/v1/admin/auth/mfa/enroll/confirm"]);
@@ -30,6 +121,17 @@ export function classifyRequestForRateLimit(method: string, path: string): Route
   if (verb === "POST" && (/^\/api\/v1\/seller\/conversations\/[^/]+\/messages$/.test(lowered) || /^\/api\/v1\/conversations\/stores\/[^/]+\/messages$/.test(lowered))) return "storeMessageSend";
   if (verb === "POST" && (lowered === "/api/v1/feeds/interactions" || lowered === "/api/v1/feeds/interactions/batch" || lowered === "/api/v1/analytics/product-interactions")) return "feedInteraction";
   if ((verb === "GET" && lowered === "/api/v1/link-previews/resolve") || (verb === "POST" && /^\/api\/v1\/posts\/[^/]+\/link-preview$/.test(lowered))) return "linkPreview";
+  if (verb === "POST" && lowered === "/api/v1/mentions/resolve") return "mentionsResolve";
+  if (verb === "POST" && /^\/api\/v1\/posts\/[^/]+\/comments$/.test(lowered)) return "commentWrite";
+  if (verb !== "GET" && /^\/api\/v1\/comments\/[^/]+(\/like)?$/.test(lowered)) return "commentWrite";
+  if ((verb === "POST" || verb === "DELETE") && /^\/api\/v1\/posts\/[^/]+\/(like|share|repost|impressions|profile-visits)$/.test(lowered)) return "postEngagement";
+  if ((verb === "POST" || verb === "DELETE") && /^\/api\/v1\/saves(\/|$)/.test(lowered)) return "postEngagement";
+  if (verb === "POST" && (/^\/api\/v1\/conversations\/[^/]+\/messages$/.test(lowered) || /^\/api\/v1\/messages\/[^/]+\/(reactions|poll-votes|live-location\/stop)$/.test(lowered) || /^\/api\/v1\/stories\/[^/]+\/replies$/.test(lowered) || lowered === "/api/v1/chat/shares")) return "messageWrite";
+  if (verb !== "GET" && /^\/api\/v1\/(conversations|channels)(\/|$)/.test(lowered)) return "conversationWrite";
+  if (verb !== "GET" && /^\/api\/v1\/chat\/keys(\/|$)/.test(lowered)) return "messagingKeys";
+  if (verb !== "GET" && (/^\/api\/v1\/support(\/|$)/.test(lowered) || /^\/api\/v1\/help\/topics\/[^/]+\/votes$/.test(lowered))) return "supportWrite";
+  if (verb !== "GET" && (/^\/api\/v1\/admin\/support\/email(\/|$)/.test(lowered) || /^\/api\/v1\/admin\/legal\/.*\/(notice-draft|test-send)$/.test(lowered))) return "adminEmail";
+  if (verb === "POST" && lowered === "/api/v1/email/unsubscribe") return "unsubscribe";
   if (verb === "GET" && lowered.startsWith("/api/v1/widgets/")) return "widgetRead";
   if (verb === "POST" && (lowered === "/api/v1/auth/widget-token" || lowered === "/api/v1/auth/realtime-token")) return "widgetToken";
   if (verb === "GET" && /^\/api\/v1\/subscription-offers\/[^/]+$/.test(lowered)) return "offerRead";

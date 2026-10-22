@@ -41,8 +41,8 @@ export class FakeObjectStorage implements ObjectStorage {
   async abortMultipartUpload(bucket: string, key: string, uploadId: string) {
     this.multipart.delete(`${bucket}/${key}/${uploadId}`);
   }
-  async presignPut(bucket: string, key: string, _contentType: string, expiresInSeconds: number, sizeBytes: number) {
-    return { url: `https://s3.test/${bucket}/${key}?size=${sizeBytes}&expires=${expiresInSeconds}`, headers: {} };
+  async presignPut(bucket: string, key: string, contentType: string, expiresInSeconds: number, sizeBytes: number) {
+    return { url: `https://s3.test/${bucket}/${key}?size=${sizeBytes}&expires=${expiresInSeconds}`, headers: { "content-type": contentType } };
   }
   async headObject(bucket: string, key: string) {
     const found = this.objects.get(this.key(bucket, key));

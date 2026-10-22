@@ -110,6 +110,7 @@ func TestAdminsCannotGrantWhatTheyLackOrTouchSuperadmins(t *testing.T) {
 func TestSecondSuperadminApprovalSettingAndSessionKilling(t *testing.T) {
 	harness := startAdminModuleAgainstFreshSchema(t)
 	root := harness.signedInSuperadmin("root.second@zudomart.com")
+	manager, _ := harness.inviteAndSignIn(root, map[string]any{"email": "manager.second@zudomart.com", "name": "Manager", "role": "ADMIN", "permissions": []string{"staff:manage"}, "reason": "staff manager"})
 	if settings := harness.expect("GET", "/api/v1/admin/staff-settings", nil, bearer(root.token), http.StatusOK); settings["requireSecondSuperadminApproval"] != true {
 		t.Fatalf("the second superadmin approval defaults to on: %v", settings)
 	}
@@ -119,6 +120,8 @@ func TestSecondSuperadminApprovalSettingAndSessionKilling(t *testing.T) {
 	}
 	pendingId := pending["admin"].(map[string]any)["id"].(string)
 	harness.expect("POST", "/api/v1/admin/auth/login", map[string]string{"email": "second.super@zudomart.com", "password": adminPassword}, nil, http.StatusUnauthorized)
+	harness.expect("POST", "/api/v1/admin/admins/"+pendingId+"/approve", map[string]string{"reason": "a manager cannot approve"}, manager.withStepUp(harness), http.StatusForbidden)
+	harness.expect("PUT", "/api/v1/admin/staff-settings", map[string]any{"requireSecondSuperadminApproval": false, "reason": "a manager cannot change this"}, manager.withStepUp(harness), http.StatusForbidden)
 	same := harness.expect("POST", "/api/v1/admin/admins/"+pendingId+"/approve", map[string]string{"reason": "approving my own request"}, root.withStepUp(harness), http.StatusConflict)
 	if same["code"] != "SAME_SUPERADMIN" {
 		t.Fatalf("unexpected %v", same)

@@ -153,6 +153,13 @@ describe("social routes", () => {
     expect(resolveUpstreamRouteForRequest("PUT", "/api/v1/posts//pin")?.authentication).toBe("optional");
   });
 
+  it("requires a token before a post download or link-preview refresh", () => {
+    expect(resolveUpstreamRouteForRequest("POST", "/api/v1/posts/p_1/media/m_1/download")).toMatchObject({ upstream: "social", authentication: "required" });
+    expect(resolveUpstreamRouteForRequest("POST", "/api/v1/posts/p_1/link-preview")).toMatchObject({ upstream: "social", authentication: "required" });
+    expect(resolveUpstreamRouteForRequest("POST", "/api/v1/posts/p_1/media/m_1/download/extra")?.authentication).toBe("optional");
+    expect(resolveUpstreamRouteForRequest("GET", "/api/v1/posts/p_1/link-preview")?.authentication).toBe("optional");
+  });
+
   it("keeps mention privacy and other user routes on identity", () => {
     expect(resolveUpstreamRouteForRequest("PUT", "/api/v1/users/me/mention-privacy")?.upstream).toBe("identity");
     expect(resolveUpstreamRouteForRequest("GET", "/api/v1/users/u_1")?.upstream).toBe("identity");

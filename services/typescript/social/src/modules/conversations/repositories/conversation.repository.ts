@@ -56,4 +56,10 @@ export const conversationRepository = {
 
   memberIds: async (db: Db, conversationId: string): Promise<string[]> =>
     (await db.conversationMember.findMany({ where: { conversationId, leftAt: null }, select: { accountId: true } })).map((row) => row.accountId),
+
+  peerAccountIds: async (db: Db, accountId: string): Promise<string[]> =>
+    [...new Set((await db.conversationMember.findMany({
+      where: { leftAt: null, conversation: { members: { some: { accountId, leftAt: null } } } },
+      select: { accountId: true },
+    })).map((row) => row.accountId))],
 };

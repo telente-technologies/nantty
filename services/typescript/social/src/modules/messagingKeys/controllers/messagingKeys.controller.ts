@@ -13,7 +13,7 @@ export interface MessagingKeysHandlers {
   readonly rotateSignedPreKey: Handler<DeviceInput & { readonly signedPreKey: WireSignedPreKey }, DeviceKeyStatusView>;
   readonly getDeviceStatus: Handler<DeviceInput, DeviceKeyStatusView | null>;
   readonly removeDevice: Handler<DeviceInput, void>;
-  readonly listDevices: Handler<{ readonly userIds: readonly string[] }, { readonly data: UserDevicesView[] }>;
+  readonly listDevices: Handler<{ readonly requesterId: string; readonly userIds: readonly string[] }, { readonly data: UserDevicesView[] }>;
   readonly claimPreKeyBundles: Handler<{ readonly requesterId: string; readonly devices: readonly { readonly userId: string; readonly deviceId: string }[] }, { readonly data: PreKeyBundleView[] }>;
   readonly depositMailbox: Handler<{ readonly senderId: string; readonly senderDeviceId: string; readonly conversationId: string; readonly entries: readonly { readonly userId: string; readonly deviceId: string; readonly ciphertext: string }[] }, { readonly accepted: number }>;
   readonly readMailbox: Handler<DeviceInput, { readonly data: MailboxEntryView[] }>;
@@ -34,7 +34,7 @@ export function createMessagingKeysController(route: RouteFactory, handlers: Mes
       handlers.uploadOneTimePreKeys({ accountId: principal.accountId, deviceId: params.deviceId, oneTimePreKeys: body.oneTimePreKeys })),
     rotateSignedPreKey: route({ ...device, body: rotateSignedPreKeyBodySchema }, ({ principal, params, body }) =>
       handlers.rotateSignedPreKey({ accountId: principal.accountId, deviceId: params.deviceId, signedPreKey: body.signedPreKey })),
-    listDevices: route({ authentication: "required", body: listDevicesBodySchema }, ({ body }) => handlers.listDevices({ userIds: body.userIds })),
+    listDevices: route({ authentication: "required", body: listDevicesBodySchema }, ({ principal, body }) => handlers.listDevices({ requesterId: principal.accountId, userIds: body.userIds })),
     claimBundles: route({ authentication: "required", body: claimBundlesBodySchema }, ({ principal, body }) => handlers.claimPreKeyBundles({ requesterId: principal.accountId, devices: body.devices })),
     depositMailbox: route({ authentication: "required", body: depositMailboxBodySchema, successStatus: 201 }, ({ principal, body }) => handlers.depositMailbox({ senderId: principal.accountId, ...body })),
     readMailbox: route(device, ({ principal, params }) => handlers.readMailbox({ accountId: principal.accountId, deviceId: params.deviceId })),

@@ -87,9 +87,12 @@ export function createS3ObjectStorage(config: MediaConfig["storage"]): ObjectSto
       await client.send(new AbortMultipartUploadCommand({ Bucket: bucket, Key: key, UploadId: uploadId }));
     },
     async presignPut(bucket, key, contentType, expiresInSeconds, sizeBytes): Promise<PresignedUpload> {
-      const url = await getSignedUrl(signingClient, new PutObjectCommand({ Bucket: bucket, Key: key, ContentLength: sizeBytes, ...encryption(bucket) }), { expiresIn: expiresInSeconds, signableHeaders: new Set(["content-length"]) });
-      void contentType;
-      return { url, headers: {} };
+      const url = await getSignedUrl(
+        signingClient,
+        new PutObjectCommand({ Bucket: bucket, Key: key, ContentType: contentType, ContentLength: sizeBytes, ...encryption(bucket) }),
+        { expiresIn: expiresInSeconds, signableHeaders: new Set(["content-length", "content-type"]) },
+      );
+      return { url, headers: { "content-type": contentType } };
     },
     async headObject(bucket, key) {
       try {

@@ -28,9 +28,9 @@ func MountCheckmarksRoutes(mux *http.ServeMux, container *container.Container) {
 	mux.Handle("GET /api/v1/admin/verifications", review(http.HandlerFunc(controller.ListVerifications)))
 	mux.Handle("GET /api/v1/admin/verifications/{verificationId}", review(http.HandlerFunc(controller.GetVerification)))
 	mux.Handle("GET /api/v1/admin/verifications/{verificationId}/documents/{documentId}", guard.RequireStaff("verification:documents", false)(http.HandlerFunc(controller.OpenVerificationDocument)))
-	mux.Handle("POST /api/v1/admin/verifications/{verificationId}/approve", guard.RequireStaff("verification:review", false)(controller.TransitionHandler("approve")))
-	mux.Handle("POST /api/v1/admin/verifications/{verificationId}/reject", guard.RequireStaff("verification:review", false)(controller.TransitionHandler("reject")))
-	mux.Handle("POST /api/v1/admin/verifications/{verificationId}/reinstate", guard.RequireStaff("verification:review", false)(controller.TransitionHandler("reinstate")))
+	mux.Handle("POST /api/v1/admin/verifications/{verificationId}/approve", reviewStepUp(controller.TransitionHandler("approve")))
+	mux.Handle("POST /api/v1/admin/verifications/{verificationId}/reject", reviewStepUp(controller.TransitionHandler("reject")))
+	mux.Handle("POST /api/v1/admin/verifications/{verificationId}/reinstate", reviewStepUp(controller.TransitionHandler("reinstate")))
 	mux.Handle("POST /api/v1/admin/verifications/{verificationId}/suspend", revokeStepUp(controller.TransitionHandler("suspend")))
 	mux.Handle("POST /api/v1/admin/verifications/{verificationId}/revoke", revokeStepUp(controller.TransitionHandler("revoke")))
 

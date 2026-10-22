@@ -70,7 +70,7 @@ func TestCreatorApplicationNeedsInputAndAdminReviewQueueDecides(t *testing.T) {
 	harness.expect("POST", "/api/v1/creators/applications", token, map[string]any{"contentCategories": []string{"tech"}, "payoutAccountId": "pa_1", "acceptedCreatorTermsVersion": "1"}, http.StatusCreated)
 	harness.expect("POST", "/api/v1/creators/applications", token, map[string]any{"contentCategories": []string{"tech"}, "payoutAccountId": "pa_1", "acceptedCreatorTermsVersion": "1"}, http.StatusConflict)
 
-	reviewer, _ := harness.staff("admin", "applications:creators")
+	reviewer, reviewerStepUp := harness.staff("admin", "applications:creators")
 	denied, _ := harness.staff("admin", "users:read")
 	harness.expect("GET", "/api/v1/admin/applications/creators", denied, nil, http.StatusForbidden)
 	queue := harness.expect("GET", "/api/v1/admin/applications/creators", reviewer, nil, http.StatusOK)["data"].([]any)
@@ -78,12 +78,12 @@ func TestCreatorApplicationNeedsInputAndAdminReviewQueueDecides(t *testing.T) {
 		t.Fatalf("the review queue shows the checklist: %v", queue)
 	}
 	id := queue[0].(map[string]any)["id"].(string)
-	harness.expect("POST", "/api/v1/admin/applications/creators/"+id+"/approve", reviewer, map[string]string{"reason": "ok"}, http.StatusBadRequest)
-	approved := harness.expect("POST", "/api/v1/admin/applications/creators/"+id+"/approve", reviewer, map[string]string{"reason": "checked content and followers"}, http.StatusOK)
+	harness.expect("POST", "/api/v1/admin/applications/creators/"+id+"/approve", reviewer, map[string]string{"reason": "ok"}, http.StatusBadRequest, reviewerStepUp...)
+	approved := harness.expect("POST", "/api/v1/admin/applications/creators/"+id+"/approve", reviewer, map[string]string{"reason": "checked content and followers"}, http.StatusOK, reviewerStepUp...)
 	if approved["status"] != "APPROVED" {
 		t.Fatalf("unexpected %v", approved)
 	}
-	harness.expect("POST", "/api/v1/admin/applications/creators/"+id+"/reject", reviewer, map[string]string{"reason": "changed my mind"}, http.StatusConflict)
+	harness.expect("POST", "/api/v1/admin/applications/creators/"+id+"/reject", reviewer, map[string]string{"reason": "changed my mind"}, http.StatusConflict, reviewerStepUp...)
 	if me := harness.expect("GET", "/api/v1/users/me", token, nil, http.StatusOK); me["isCreator"] != true {
 		t.Fatalf("approval turns the personal profile into a creator account: %v", me)
 	}
@@ -108,17 +108,17 @@ func TestCheckmarkRulesFollowTheProfileTypeAndLifetimeGrantsRespectThem(t *testi
 	}
 	harness.expect("POST", "/api/v1/verification/applications", personalToken, map[string]any{"kind": "blue", "planId": "plan_blue", "legalName": "Blue Person"}, http.StatusConflict)
 
-	reviewer, _ := harness.staff("admin", "verification:review", "verification:revoke", "verification:grant", "users:read")
+	reviewer, reviewerStepUp := harness.staff("admin", "verification:review", "verification:revoke", "verification:grant", "users:read")
 	pending := harness.expect("GET", "/api/v1/admin/verifications", reviewer, nil, http.StatusOK)["data"].([]any)
 	if len(pending) != 1 || pending[0].(map[string]any)["color"] != "BLUE" || pending[0].(map[string]any)["subjectKind"] != "PERSON" {
 		t.Fatalf("unexpected queue %v", pending)
 	}
 	verificationId := pending[0].(map[string]any)["id"].(string)
-	approved := harness.expect("POST", "/api/v1/admin/verifications/"+verificationId+"/approve", reviewer, map[string]string{"reason": "identity verified"}, http.StatusOK)
+	approved := harness.expect("POST", "/api/v1/admin/verifications/"+verificationId+"/approve", reviewer, map[string]string{"reason": "identity verified"}, http.StatusOK, reviewerStepUp...)
 	if approved["status"] != "VERIFIED" {
 		t.Fatalf("unexpected %v", approved)
 	}
-	harness.expect("POST", "/api/v1/admin/verifications/"+verificationId+"/approve", reviewer, map[string]string{"reason": "identity verified"}, http.StatusConflict)
+	harness.expect("POST", "/api/v1/admin/verifications/"+verificationId+"/approve", reviewer, map[string]string{"reason": "identity verified"}, http.StatusConflict, reviewerStepUp...)
 	mine := harness.expect("GET", "/api/v1/verification/me", personalToken, nil, http.StatusOK)
 	if mine["current"].(map[string]any)["color"] != "blue" || mine["current"].(map[string]any)["badgeVisible"] != true {
 		t.Fatalf("a personal profile only ever gets blue: %v", mine)

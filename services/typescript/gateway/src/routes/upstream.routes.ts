@@ -79,6 +79,8 @@ export const upstreamRoutes: readonly UpstreamRoute[] = [
   { pathPrefix: "/api/v1/posts/*/comments/*/pin", upstream: "social", authentication: "required", methods: ["PUT", "DELETE"], exactPathOnly: true },
   { pathPrefix: "/api/v1/posts/*/comments/*/hide", upstream: "social", authentication: "required", methods: ["PUT", "DELETE"], exactPathOnly: true },
   { pathPrefix: "/api/v1/posts/*/notifications-mute", upstream: "social", authentication: "required", methods: ["GET", "PUT", "DELETE"], exactPathOnly: true },
+  { pathPrefix: "/api/v1/posts/*/media/*/download", upstream: "social", authentication: "required", methods: ["POST"], exactPathOnly: true },
+  { pathPrefix: "/api/v1/posts/*/link-preview", upstream: "social", authentication: "required", methods: ["POST"], exactPathOnly: true },
   { pathPrefix: "/api/v1/posts", upstream: "social", authentication: "optional" },
   { pathPrefix: "/api/v1/comments/", upstream: "social", authentication: "optional" },
   { pathPrefix: "/api/v1/stories", upstream: "social", authentication: "required" },

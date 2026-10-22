@@ -93,6 +93,10 @@ func (guard Guard) RequireStaffWithAnyPermission(permissions []string, requireSt
 	return guard.requireStaffWhere(func(staff Staff) bool { return staff.CanAny(permissions...) }, requireStepUp)
 }
 
+func (guard Guard) RequireSuperadmin(requireStepUp bool) func(http.Handler) http.Handler {
+	return guard.requireStaffWhere(func(staff Staff) bool { return staff.Role == SuperadminRole }, requireStepUp)
+}
+
 func (guard Guard) requireStaffWhere(permitted func(Staff) bool, requireStepUp bool) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {

@@ -11,7 +11,7 @@ func MountStaffAdminsRoutes(mux *http.ServeMux, container *container.Container) 
 	controller := controllers.StaffAdminsController{Container: container}
 	manage := container.Guard.RequireStaff("staff:manage", false)
 	manageWithStepUp := container.Guard.RequireStaff("staff:manage", true)
-	superadminStepUp := container.Guard.RequireStaff("", true)
+	superadminStepUp := container.Guard.RequireSuperadmin(true)
 	mux.Handle("GET /api/v1/admin/admins", manage(http.HandlerFunc(controller.List)))
 	mux.Handle("GET /api/v1/admin/admins/{staffId}", manage(http.HandlerFunc(controller.Detail)))
 	mux.Handle("POST /api/v1/admin/admins", manageWithStepUp(http.HandlerFunc(controller.Create)))

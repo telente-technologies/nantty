@@ -11,7 +11,7 @@ func TestStaffRevealsPersonalDataWarnsAndForcesLogoutWithAudit(t *testing.T) {
 	userId, _ := harness.newAccount("pii.owner", "Pii Owner")
 	reader, _ := harness.staffHeaders("users:read")
 	revealer, revealerStepUp := harness.staffHeaders("users:read-pii")
-	moderator, _ := harness.staffHeaders("users:moderate")
+	moderator, moderatorStepUp := harness.staffHeaders("users:moderate")
 
 	harness.expect("GET", "/api/v1/admin/users/"+userId+"/personal-data?purpose=support+ticket+123", reader, nil, http.StatusForbidden)
 	harness.expect("GET", "/api/v1/admin/users/"+userId+"/personal-data?purpose=support+ticket+123", revealer, nil, http.StatusForbidden)
@@ -25,16 +25,16 @@ func TestStaffRevealsPersonalDataWarnsAndForcesLogoutWithAudit(t *testing.T) {
 	}
 
 	harness.expect("POST", "/api/v1/admin/users/"+userId+"/warn", reader, map[string]any{"reason": "spam in comments", "policy": "Spam"}, http.StatusForbidden)
-	harness.expect("POST", "/api/v1/admin/users/"+userId+"/warn", moderator, map[string]any{"reason": "spam in comments", "policy": "Spam", "addStrike": true}, http.StatusUnprocessableEntity)
-	warned := harness.expect("POST", "/api/v1/admin/users/"+userId+"/warn", moderator, map[string]any{"reason": "spam in comments", "policy": "Spam", "addStrike": false}, http.StatusOK)
+	harness.expect("POST", "/api/v1/admin/users/"+userId+"/warn", moderator, map[string]any{"reason": "spam in comments", "policy": "Spam", "addStrike": true}, http.StatusUnprocessableEntity, moderatorStepUp...)
+	warned := harness.expect("POST", "/api/v1/admin/users/"+userId+"/warn", moderator, map[string]any{"reason": "spam in comments", "policy": "Spam", "addStrike": false}, http.StatusOK, moderatorStepUp...)
 	if warned["user"].(map[string]any)["id"] != userId {
 		t.Fatalf("warn returns the user detail: %v", warned)
 	}
 	harness.waitForPublishedEvents("account.warned")
 
-	harness.expect("POST", "/api/v1/admin/users/"+userId+"/force-logout", moderator, map[string]any{"reason": "x"}, http.StatusBadRequest)
-	harness.expect("POST", "/api/v1/admin/users/"+userId+"/force-logout", moderator, map[string]any{"reason": "stolen phone", "sessionId": "nope"}, http.StatusBadRequest)
-	harness.expect("POST", "/api/v1/admin/users/"+userId+"/force-logout", moderator, map[string]any{"reason": "stolen phone reported"}, http.StatusOK)
+	harness.expect("POST", "/api/v1/admin/users/"+userId+"/force-logout", moderator, map[string]any{"reason": "x"}, http.StatusBadRequest, moderatorStepUp...)
+	harness.expect("POST", "/api/v1/admin/users/"+userId+"/force-logout", moderator, map[string]any{"reason": "stolen phone", "sessionId": "nope"}, http.StatusBadRequest, moderatorStepUp...)
+	harness.expect("POST", "/api/v1/admin/users/"+userId+"/force-logout", moderator, map[string]any{"reason": "stolen phone reported"}, http.StatusOK, moderatorStepUp...)
 	if !harness.audit.has("user.warned") || !harness.audit.has("user.force_logout") {
 		t.Fatalf("warn and force logout are audited: %v", harness.audit.actions)
 	}

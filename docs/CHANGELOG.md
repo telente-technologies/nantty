@@ -3,6 +3,31 @@
 All notable changes to Zudomart are documented here. Format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [Unreleased] — 2026-10-22
+
+### Security — checkout, uploads, admin actions and route limits
+
+- Direct payment on mobile and web now requires the buyer to type `DIRECT`
+  before switching a store away from escrow. The escrow-loss warning stays
+  visible during confirmation; escrow remains the default.
+- Presigned media uploads now bind both `Content-Type` and `Content-Length`, so
+  an upload intent cannot be reused with a different declared type. Media
+  production config rejects an empty, placeholder or under-32-character
+  `MEDIA_INTERNAL_TOKEN`.
+- The gateway now requires authentication for post-media downloads and
+  link-preview refresh instead of inheriting the optional posts rule.
+- Account-scoped rate limits now cover mentions resolve, comment writes, post
+  engagement and saves, direct messages, conversation/channel writes, chat key
+  operations, support writes, admin email sends and unsubscribe.
+- The chat device directory now returns keys only for the requester and accounts
+  that already share a conversation, closing arbitrary device enumeration.
+  Mobile story replies start or resume the direct conversation before
+  encrypting so first-time recipients still work.
+- Admin user enforcement, verification review, business-document review and
+  creator decisions now require recent re-authentication. Staff settings and
+  superadmin approvals now require the superadmin role rather than an empty
+  permission check.
+
 ## [Unreleased] — 2026-10-21
 
 ### Security — media uploads fail closed

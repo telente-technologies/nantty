@@ -114,6 +114,9 @@ export function loadMediaConfigFromEnvironment(): MediaConfig {
     },
   };
   if (!Number.isInteger(config.port) || config.port <= 0) problems.push("PORT must be a positive integer");
+  if (process.env["NODE_ENV"] === "production" && (config.internalToken.length < 32 || /local[-_]only|change[-_]?me/i.test(config.internalToken))) {
+    problems.push("MEDIA_INTERNAL_TOKEN must be a non-placeholder secret of at least 32 characters in production");
+  }
   if (moderationFailMode !== "allow" && moderationFailMode !== "hold") problems.push("MODERATION_FAIL_MODE must be allow or hold");
   if ((config.cdn.keyPairId === undefined) !== (config.cdn.privateKeyPem === undefined)) problems.push("CDN_SIGNING_KEY_PAIR_ID and CDN_SIGNING_PRIVATE_KEY must be set together");
   if (config.chunkSizeBytes < 5 * 1024 * 1024) problems.push("UPLOAD_CHUNK_SIZE_BYTES must be at least 5 MiB");

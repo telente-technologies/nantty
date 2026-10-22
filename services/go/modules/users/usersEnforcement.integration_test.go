@@ -22,9 +22,9 @@ func TestRestrictSuspendAppealAndReinstate(t *testing.T) {
 		{"features": []string{"POSTING"}, "durationDays": 91, "reason": "spam posting"},
 		{"features": []string{"POSTING"}, "durationDays": 7, "reason": "no"},
 	} {
-		harness.expect("POST", restrictPath, trust, invalid, http.StatusBadRequest)
+		harness.expect("POST", restrictPath, trust, invalid, http.StatusBadRequest, trustStepUp...)
 	}
-	restricted := harness.expect("POST", restrictPath, trust, map[string]any{"features": []string{"POSTING", "MESSAGING"}, "durationDays": 7, "reason": "spam in messages"}, http.StatusOK)
+	restricted := harness.expect("POST", restrictPath, trust, map[string]any{"features": []string{"POSTING", "MESSAGING"}, "durationDays": 7, "reason": "spam in messages"}, http.StatusOK, trustStepUp...)
 	if len(restricted["restrictions"].([]any)) != 1 || restricted["user"].(map[string]any)["status"] != "ACTIVE" {
 		t.Fatalf("a restriction limits features and keeps the account active: %v", restricted)
 	}

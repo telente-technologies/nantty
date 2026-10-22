@@ -227,6 +227,28 @@ describe("S2 link preview limit", () => {
   });
 });
 
+describe("S3 social write limits", () => {
+  it("classifies comment, engagement, message, conversation and support writes", async () => {
+    const { classifyRequestForRateLimit, buildRouteRateLimitKey, defaultRouteLimitsPerMinute } = await import("../src/services/routeRateLimitPolicy.service.js");
+    expect(classifyRequestForRateLimit("POST", "/api/v1/mentions/resolve")).toBe("mentionsResolve");
+    expect(classifyRequestForRateLimit("POST", "/api/v1/posts/p1/comments")).toBe("commentWrite");
+    expect(classifyRequestForRateLimit("DELETE", "/api/v1/comments/c1")).toBe("commentWrite");
+    expect(classifyRequestForRateLimit("POST", "/api/v1/posts/p1/like")).toBe("postEngagement");
+    expect(classifyRequestForRateLimit("POST", "/api/v1/posts/p1/impressions")).toBe("postEngagement");
+    expect(classifyRequestForRateLimit("POST", "/api/v1/posts/p1/media/m1/download")).toBe("mediaDownload");
+    expect(classifyRequestForRateLimit("POST", "/api/v1/conversations/c1/messages")).toBe("messageWrite");
+    expect(classifyRequestForRateLimit("POST", "/api/v1/messages/m1/reactions")).toBe("messageWrite");
+    expect(classifyRequestForRateLimit("POST", "/api/v1/conversations/c1/members")).toBe("conversationWrite");
+    expect(classifyRequestForRateLimit("POST", "/api/v1/chat/keys/claim")).toBe("messagingKeys");
+    expect(classifyRequestForRateLimit("POST", "/api/v1/support/tickets")).toBe("supportWrite");
+    expect(classifyRequestForRateLimit("POST", "/api/v1/admin/support/email/bulk-send")).toBe("adminEmail");
+    expect(classifyRequestForRateLimit("POST", "/api/v1/email/unsubscribe")).toBe("unsubscribe");
+    expect(buildRouteRateLimitKey("commentWrite", "1.2.3.4", "acct")).toBe("rl:route:commentWrite:a:acct");
+    expect(buildRouteRateLimitKey("unsubscribe", "1.2.3.4", undefined)).toBe("rl:route:unsubscribe:i:1.2.3.4");
+    expect(defaultRouteLimitsPerMinute.mentionsResolve).toBeLessThanOrEqual(20);
+  });
+});
+
 describe("M6 CORS answers are rate limited", () => {
   it("counts preflights and rejected origins once each against the global limit", async () => {
     const base = await startGateway({ corsOrigins: ["https://app.zudomart.test"], rateLimitMaxPerMinute: 3 });

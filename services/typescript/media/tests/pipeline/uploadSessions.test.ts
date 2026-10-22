@@ -105,7 +105,7 @@ describe("resumable chunked uploads", () => {
     const { harness, ownerId, session } = await startUpload(3 * mebibyte, { purpose: "post", mimeType: "image/jpeg" });
     expect(session).toMatchObject({ mode: "single", partCount: 1, partSizeBytes: 3 * mebibyte, uploadedChunks: [] });
     expect(session.url).toContain("size=3145728");
-    expect(session.headers).toEqual({});
+    expect(session.headers).toEqual({ "content-type": "image/jpeg" });
     expect(harness.storage.multipart.size).toBe(0);
     await expect(createUploadChunkHandler(harness.context)({ ownerId, uploadId: session.uploadId, chunkIndex: 0, bytes: new Uint8Array(1), sha256: undefined })).rejects.toMatchObject({ code: "CHUNKS_NOT_SUPPORTED" });
     const single = await createGetChunkUploadUrlHandler(harness.context)({ ownerId, uploadId: session.uploadId, chunkIndex: 0 });
