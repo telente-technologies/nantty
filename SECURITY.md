@@ -21,7 +21,7 @@ Every module follows these. A pull request that breaks one needs a written reaso
 ### Authentication (`services/go/modules/auth`)
 - Passwords are hashed with argon2id (`services/go/platform/passwordhash/argon2id.hasher.go`); never logged, never returned.
 - Access tokens are short-lived (15 min). Refresh tokens rotate on each use, are stored only as hashes, and reuse of an old refresh token revokes the whole session.
-- OTPs expire (5 min), are single-use, are stored hashed, and lock after 5 failed attempts (`AUTH_OTP_TTL`, `AUTH_OTP_MAX_ATTEMPTS`).
+- OTPs expire (5 min), are single-use, are stored hashed, and lock after 5 failed attempts (`AUTH_OTP_TTL`, `AUTH_OTP_MAX_ATTEMPTS`). A destination can receive at most 10 codes per hour across signup, reset, login and email verification (`AUTH_OTP_MAX_SENDS_PER_HOUR`).
 - Login, OTP and password-reset endpoints have their own stricter rate limit, and responses never reveal whether an account exists.
 - On mobile, tokens are kept in the OS secure store (`apps/mobile/src/utils/secureStorage.util.ts`), never AsyncStorage.
 

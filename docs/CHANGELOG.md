@@ -20,6 +20,8 @@ All notable changes to Zudomart are documented here. Format follows
   engagement and saves, direct messages, conversation/channel writes, chat key
   operations, support writes, admin email sends, ad events and public profile
   reads. Sitemap pages have their own limit.
+- A destination can receive at most 10 one-time codes per hour across signup,
+  reset, login and email verification by default.
 - Comment previews, digest follow sets and the stories widget now bound their
   fan-out, and support ticket lists are capped with stable ordering.
 - The chat device directory now returns keys only for the requester and accounts

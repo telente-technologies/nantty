@@ -29,3 +29,14 @@ func TestUnknownOtpDeliveryModeIsRefusedSoCodesNeverFallBackToLogs(t *testing.T)
 		t.Fatal("log in development and event anywhere must be accepted")
 	}
 }
+
+func TestOtpSendCapMustBePositive(t *testing.T) {
+	t.Setenv("APP_ENV", "development")
+	t.Setenv("AUTH_OTP_DELIVERY", "log")
+	t.Setenv("AUTH_OTP_MAX_SENDS_PER_HOUR", "0")
+	reader := platformconfig.NewEnvironmentReader()
+	ReadAuthSettingsFromEnvironment(reader)
+	if err := reader.CombinedConfigurationError(); err == nil || !strings.Contains(err.Error(), "AUTH_OTP_MAX_SENDS_PER_HOUR") {
+		t.Fatalf("want a positive send-cap requirement, got %v", err)
+	}
+}

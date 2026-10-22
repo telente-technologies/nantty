@@ -4,6 +4,7 @@ import (
 	"context"
 	"math"
 	"net/http"
+	"time"
 
 	"github.com/google/uuid"
 
@@ -12,6 +13,7 @@ import (
 	"zudomart/modules/auth/src/generated/ent"
 	"zudomart/modules/auth/src/generated/ent/onetimecode"
 	"zudomart/modules/auth/src/modules/emailVerification/dtos"
+	"zudomart/modules/auth/src/services"
 	"zudomart/modules/auth/src/utils"
 	"zudomart/platform/httpserver"
 )
@@ -64,6 +66,11 @@ func (application Handler) Execute(ctx context.Context, command Command) (dtos.E
 			response.ResendAfterSeconds = int(math.Ceil((cooldown - now.Sub(latest.CreatedAt)).Seconds()))
 			response.ExpiresIn = int(latest.ExpiresAt.Sub(now).Seconds())
 			return nil
+		}
+		allowed, err := services.WithinOneTimeCodeSendBudget(ctx, tx.Client(), destination, now, application.Settings.OneTimeCodeMaximumSendsPerHour)
+		if err != nil || !allowed {
+			response.ResendAfterSeconds = int(time.Hour.Seconds())
+			return err
 		}
 		if err := tx.OneTimeCode.Update().Where(onetimecode.Destination(destination), onetimecode.PurposeEQ(purpose), onetimecode.ConsumedAtIsNil()).SetConsumedAt(now).Exec(ctx); err != nil {
 			return err

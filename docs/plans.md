@@ -2333,6 +2333,13 @@ No provider integration is to be built until the V2 design is approved and the s
 - **Rate limits:** the availability and suggestion endpoints share the `usernameCheck` policy, which is account-scoped for signed-in callers.
 - **Still open:** profile/confusables enumeration and the remaining ZM-018 edges.
 
+## 74. One-time-code send budget per destination (2026-10-22) **[DONE]**
+
+- **Auth:** `AUTH_OTP_MAX_SENDS_PER_HOUR` defaults to 10 and must be positive.
+- **Budget:** real code rows count across signup, reset, login and email verification; verified-token rows do not.
+- **Behaviour:** over-budget sends keep the active code and silently skip delivery, so the response does not reveal which destinations exist.
+- **Still open:** brigading weighting, self-gift farming, soft-delete purge and the rest of ZM-012.
+
 ## 73. Fan-out caps and public-read route limits (2026-10-22) **[DONE]**
 
 - **Comments:** preview fan-out is capped at 50 parents and eight concurrent queries.

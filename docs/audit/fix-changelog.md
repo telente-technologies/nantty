@@ -2,6 +2,20 @@
 
 Every code change made while fixing `docs/audit/frontend-backend-audit.md` is logged here with file, lines, audit ID, verification, and rollback notes. Investigations that concluded "no change needed" are logged too. Newest first.
 
+## 2026-10-22 — ZM-012: cap one-time-code sends per destination
+
+**Audit:** ZM-012 (resend cycling minted a new code row, resetting the five-attempt counter)
+**Changes:**
+1. Added `AUTH_OTP_MAX_SENDS_PER_HOUR` (default 10) to auth settings; zero or negative is refused at startup.
+2. `WithinOneTimeCodeSendBudget` counts real code rows for the destination in the last hour across signup, reset, login and email verification, excluding verified-token rows.
+3. Both the public OTP sender and the signed-in email-verification sender check the budget inside the row-locking transaction. Over-budget requests keep the existing active code and do not send another.
+
+**Verified:** `go test ./modules/auth/... -count=1` and `go test ./modules/auth/src/configs -count=1` pass; the new integration test asserts two deliveries under a cap of two across three requests.
+
+**Rollback:** remove the budget check and the `AUTH_OTP_MAX_SENDS_PER_HOUR` setting.
+
+**Remaining:** brigading weighting, self-gift farming, soft-delete purge and the rest of ZM-012.
+
 ## 2026-10-22 — ZM-010/ZM-018/ZM-020: bound fan-out and close route-limit edges
 
 **Audit:** ZM-010 (unbounded fan-out), ZM-018 (public profile/sitemap scraping), ZM-020 (ad event and route-limit gaps)

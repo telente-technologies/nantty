@@ -8,6 +8,7 @@ import (
 	"zudomart/modules/auth/src/generated/ent"
 	"zudomart/modules/auth/src/generated/ent/account"
 	"zudomart/modules/auth/src/generated/ent/onetimecode"
+	"zudomart/modules/auth/src/services"
 	"zudomart/modules/auth/src/utils"
 )
 
@@ -47,6 +48,10 @@ func (application Handler) Execute(ctx context.Context, command Command) (Result
 		}
 		if latest != nil && now.Sub(latest.CreatedAt) < application.Settings.OneTimeCodeResendCooldown {
 			return nil
+		}
+		allowed, err := services.WithinOneTimeCodeSendBudget(ctx, tx.Client(), destination, now, application.Settings.OneTimeCodeMaximumSendsPerHour)
+		if err != nil || !allowed {
+			return err
 		}
 		if err := tx.OneTimeCode.Update().
 			Where(onetimecode.Destination(destination), onetimecode.PurposeEQ(purpose), onetimecode.ConsumedAtIsNil()).

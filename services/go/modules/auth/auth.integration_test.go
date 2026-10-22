@@ -227,6 +227,21 @@ func TestSignupCodeLocksAfterFiveWrongAttempts(t *testing.T) {
 	}
 }
 
+func TestOneTimeCodeSendsPerDestinationAreCapped(t *testing.T) {
+	harness := startAuthModuleAgainstFreshSchema(t, func(settings *configs.AuthSettings) {
+		settings.OneTimeCodeResendCooldown = 0
+		settings.OneTimeCodeMaximumSendsPerHour = 2
+	})
+	email := "capped@example.com"
+	for range 3 {
+		harness.expect("POST", "/api/v1/auth/otp/send", "", map[string]string{"destination": email, "purpose": "signup"}, http.StatusOK)
+	}
+	delivered := regexp.MustCompile(`passcode for capped@example\.com is \d{6}`).FindAllString(harness.logs.String(), -1)
+	if len(delivered) != 2 {
+		t.Fatalf("want two delivered codes before the hourly cap, got %d", len(delivered))
+	}
+}
+
 func waitForPublishedEventTypes(t *testing.T, publisher *events.RecordingPublisher, wanted ...string) {
 	t.Helper()
 	deadline := time.Now().Add(5 * time.Second)
