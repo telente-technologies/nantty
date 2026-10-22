@@ -4,6 +4,18 @@ import { shownToViewers } from "../../../constants/moderation.constant.js";
 
 export type CommentRow = Prisma.CommentGetPayload<object>;
 
+const maximumPreviewParents = 50;
+const previewConcurrency = 8;
+
+const previewWorker = async (db: Db, parentIds: readonly string[], perParent: number, grouped: Map<string, CommentRow[]>, state: { index: number }): Promise<void> => {
+  while (state.index < parentIds.length) {
+    const parentId = parentIds[state.index];
+    state.index += 1;
+    if (parentId === undefined) continue;
+    grouped.set(parentId, await db.comment.findMany({ where: { parentCommentId: parentId, ...visibleTo() }, orderBy: { id: "asc" }, take: perParent }));
+  }
+};
+
 export const visibleTo = (viewerId?: string): Prisma.CommentWhereInput => ({
   ...shownToViewers,
   AND: [viewerId === undefined ? { hiddenAt: null } : { OR: [{ hiddenAt: null }, { authorId: viewerId }] }],
@@ -32,9 +44,10 @@ export const commentRepository = {
 
   previewRepliesFor: async (db: Db, parentIds: readonly string[], perParent: number): Promise<Map<string, CommentRow[]>> => {
     const grouped = new Map<string, CommentRow[]>();
-    await Promise.all(parentIds.map(async (parentId) => {
-      grouped.set(parentId, await db.comment.findMany({ where: { parentCommentId: parentId, ...visibleTo() }, orderBy: { id: "asc" }, take: perParent }));
-    }));
+    const bounded = parentIds.slice(0, maximumPreviewParents);
+    const workers = Math.min(previewConcurrency, bounded.length);
+    const state = { index: 0 };
+    await Promise.all(Array.from({ length: workers }, () => previewWorker(db, bounded, perParent, grouped, state)));
     return grouped;
   },
 

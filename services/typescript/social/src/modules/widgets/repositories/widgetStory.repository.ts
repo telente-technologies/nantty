@@ -7,6 +7,6 @@ export const widgetStoryRepository = {
       where: { authorId: { in: [...authorIds] }, kind: "story", ...shownToViewers, visibility: "public", audience: { in: ["everyone", "followers"] }, expiresAt: { gt: now } },
       select: { id: true, authorId: true, createdAt: true, sensitiveLabels: true, media: { orderBy: { position: "asc" }, take: 1, select: { type: true, url: true, posterUrl: true } } },
       orderBy: { id: "desc" },
-      take: 2000,
+      take: 500,
     }),
 };

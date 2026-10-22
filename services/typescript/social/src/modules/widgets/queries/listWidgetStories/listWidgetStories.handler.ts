@@ -25,7 +25,7 @@ export function createListWidgetStoriesHandler(context: HandlerContext): Handler
     const db = context.database.client;
     const now = context.clock.now();
     const empty: WidgetStoriesPayload = { people: [], generatedAt: now.toISOString() };
-    const followed = (await followRepository.allFollowedAccountIds(db, viewerId, 500)).filter((id) => id !== viewerId);
+    const followed = (await followRepository.allFollowedAccountIds(db, viewerId, 100)).filter((id) => id !== viewerId);
     if (followed.length === 0) return empty;
     const rows = await widgetStoryRepository.activeStoriesByAuthors(db, followed, now);
     if (rows.length === 0) return empty;

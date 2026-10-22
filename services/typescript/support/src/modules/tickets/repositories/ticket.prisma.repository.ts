@@ -79,7 +79,7 @@ export function createTicketPrismaRepository(prisma: PrismaClient): TicketStore 
     findTicket: (ticketId) => findWithThread({ id: ticketId }),
     findTicketByNumber: (number) => findWithThread({ number }),
     async listTicketsForRequester(accountId) {
-      const rows = await prisma.supportTicket.findMany({ where: { requesterAccountId: accountId, anonymizedAt: null }, orderBy: { updatedAt: "desc" }, take: 200 });
+      const rows = await prisma.supportTicket.findMany({ where: { requesterAccountId: accountId, anonymizedAt: null }, orderBy: [{ updatedAt: "desc" }, { id: "desc" }], take: 100 });
       return rows.map(mapTicketRow);
     },
     async listTicketQueue(filter) {

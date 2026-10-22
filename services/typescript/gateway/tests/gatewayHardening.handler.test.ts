@@ -114,6 +114,11 @@ describe("per-route rate limits", () => {
     expect(classifyRequestForRateLimit("GET", "/api/v1/posts/abc/tagged-users")).toBeUndefined();
     expect(classifyRequestForRateLimit("POST", "/api/v1/reports")).toBe("report");
     expect(classifyRequestForRateLimit("POST", "/api/v1/media/uploads")).toBe("upload");
+    expect(classifyRequestForRateLimit("POST", "/api/v1/ads/events")).toBe("adEvent");
+    expect(classifyRequestForRateLimit("GET", "/api/v1/users/01a12b3d-d5cc-7e11-bc61-000000000001")).toBe("profileRead");
+    expect(classifyRequestForRateLimit("GET", "/api/v1/users/by-username/ada")).toBe("profileRead");
+    expect(classifyRequestForRateLimit("GET", "/api/v1/users/me")).toBeUndefined();
+    expect(classifyRequestForRateLimit("GET", "/api/v1/sitemap/profiles?page=2")).toBe("sitemapRead");
     expect(classifyRequestForRateLimit("GET", "/api/v1/search/people")).toBe("search");
     expect(classifyRequestForRateLimit("GET", "/api/v1/auth/login")).toBeUndefined();
   });

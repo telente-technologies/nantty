@@ -2,6 +2,22 @@
 
 Every code change made while fixing `docs/audit/frontend-backend-audit.md` is logged here with file, lines, audit ID, verification, and rollback notes. Investigations that concluded "no change needed" are logged too. Newest first.
 
+## 2026-10-22 — ZM-010/ZM-018/ZM-020: bound fan-out and close route-limit edges
+
+**Audit:** ZM-010 (unbounded fan-out), ZM-018 (public profile/sitemap scraping), ZM-020 (ad event and route-limit gaps)
+**Changes:**
+1. `commentRepository.previewRepliesFor` processes at most 50 parent comments with at most eight concurrent queries; a focused test asserts the parent cap, concurrency ceiling and per-parent `take`.
+2. Digest and stories-widget follow sets cap at 100 accounts, and the widget story query caps at 500 rows.
+3. `listTicketsForRequester` caps at 100 rows with `updatedAt`/`id` ordering.
+4. Recent searches order by `searchedAt`/`id`, making the stale-row sweep deterministic.
+5. Gateway limits add `adEvent` (120/min, account-scoped), `profileRead` (120/min, account-scoped) and `sitemapRead` (20/min, IP-scoped).
+
+**Verified:** social `pnpm vitest run` (87 files, 550 passed), gateway `pnpm vitest run` (35 files, 1705 passed), support `pnpm vitest run` (10 files, 85 passed), search `pnpm vitest run` (13 files, 73 passed), and typechecks for social, gateway, support and search pass.
+
+**Rollback:** remove the caps and the three route-limit names; the queries remain valid without them.
+
+**Remaining:** audio/PDF moderation, mentions-resolve captcha, confusables enumeration and the remaining audit-record gaps.
+
 ## 2026-10-22 — ZM-003: per-store promo issues do not abort checkout
 
 **Audit:** ZM-003 (one invalid coupon aborted every store in a multi-store checkout)

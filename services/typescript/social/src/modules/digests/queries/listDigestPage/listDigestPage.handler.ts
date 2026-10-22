@@ -58,7 +58,7 @@ async function weeklyDigests(context: HandlerContext, query: ListDigestPageQuery
   const groups = await db.follow.groupBy({ by: ["followerId"], where: { state: "accepted", ...(query.cursor === undefined ? {} : { followerId: { gt: query.cursor } }) }, orderBy: { followerId: "asc" }, take: query.limit });
   const data: DigestEntry[] = [];
   for (const group of groups) {
-    const followed = await followRepository.allFollowedAccountIds(db, group.followerId, 500);
+    const followed = await followRepository.allFollowedAccountIds(db, group.followerId, 100);
     const posts = await db.post.findMany({ where: { authorId: { in: followed }, kind: { in: ["post", "clip"] }, audience: "everyone", visibility: "public", ...shownToViewers, createdAt: { gte: weekAgo } }, orderBy: [{ likeCount: "desc" }, { id: "desc" }], take: sampleSize });
     if (posts.length === 0) continue;
     const authors = await context.directory.findUserSummaries(posts.map((post) => post.authorId));

@@ -18,7 +18,10 @@ All notable changes to Zudomart are documented here. Format follows
   link-preview refresh instead of inheriting the optional posts rule.
 - Account-scoped rate limits now cover mentions resolve, comment writes, post
   engagement and saves, direct messages, conversation/channel writes, chat key
-  operations, support writes, admin email sends and unsubscribe.
+  operations, support writes, admin email sends, ad events and public profile
+  reads. Sitemap pages have their own limit.
+- Comment previews, digest follow sets and the stories widget now bound their
+  fan-out, and support ticket lists are capped with stable ordering.
 - The chat device directory now returns keys only for the requester and accounts
   that already share a conversation, closing arbitrary device enumeration.
   Mobile story replies start or resume the direct conversation before

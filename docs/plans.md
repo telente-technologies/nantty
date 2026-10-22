@@ -2333,6 +2333,14 @@ No provider integration is to be built until the V2 design is approved and the s
 - **Rate limits:** the availability and suggestion endpoints share the `usernameCheck` policy, which is account-scoped for signed-in callers.
 - **Still open:** profile/confusables enumeration and the remaining ZM-018 edges.
 
+## 73. Fan-out caps and public-read route limits (2026-10-22) **[DONE]**
+
+- **Comments:** preview fan-out is capped at 50 parents and eight concurrent queries.
+- **Digests and stories:** follow sets cap at 100 accounts; the stories widget caps at 500 story rows.
+- **Support and search:** ticket lists cap at 100 rows with stable ordering, and recent-search sweeps use a deterministic order.
+- **Gateway:** ad events and public profile reads have account-scoped limits; sitemap pages have an IP-scoped limit.
+- **Still open:** audio/PDF moderation, mentions-resolve captcha, confusables enumeration and the remaining audit-record gaps.
+
 ## 72. Per-store promo failures no longer abort checkout (2026-10-22) **[DONE]**
 
 - **Issue:** a bad or inapplicable coupon code for one store returned an error for the whole multi-store checkout.

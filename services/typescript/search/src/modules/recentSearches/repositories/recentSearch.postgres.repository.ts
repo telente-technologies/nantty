@@ -10,11 +10,11 @@ export function createRecentSearchPostgresRepository(prisma: PrismaClient): Rece
         create: { accountId, scope, queryNormalized: normalized, queryDisplay: display },
         update: { searchedAt: new Date(), queryDisplay: display },
       });
-      const stale = await prisma.recentSearch.findMany({ where: { accountId, scope }, orderBy: { searchedAt: "desc" }, skip: maximumRecentSearchesPerScope, select: { id: true } });
+      const stale = await prisma.recentSearch.findMany({ where: { accountId, scope }, orderBy: [{ searchedAt: "desc" }, { id: "desc" }], skip: maximumRecentSearchesPerScope, select: { id: true } });
       if (stale.length > 0) await prisma.recentSearch.deleteMany({ where: { id: { in: stale.map((row) => row.id) } } });
     },
     async list(accountId, scope, limit) {
-      const rows = await prisma.recentSearch.findMany({ where: { accountId, scope }, orderBy: { searchedAt: "desc" }, take: limit });
+      const rows = await prisma.recentSearch.findMany({ where: { accountId, scope }, orderBy: [{ searchedAt: "desc" }, { id: "desc" }], take: limit });
       return rows.map((row) => ({ id: row.id, query: row.queryDisplay, scope: row.scope, searchedAt: row.searchedAt.toISOString() }));
     },
     async remove(accountId, id) {

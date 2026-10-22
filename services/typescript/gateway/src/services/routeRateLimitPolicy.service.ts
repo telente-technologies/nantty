@@ -30,6 +30,9 @@ export type RouteLimitName =
   | "messagingKeys"
   | "supportWrite"
   | "adminEmail"
+  | "adEvent"
+  | "profileRead"
+  | "sitemapRead"
   | "unsubscribe";
 
 export const defaultRouteLimitsPerMinute: Readonly<Record<RouteLimitName, number>> = {
@@ -64,6 +67,9 @@ export const defaultRouteLimitsPerMinute: Readonly<Record<RouteLimitName, number
   messagingKeys: 60,
   supportWrite: 30,
   adminEmail: 10,
+  adEvent: 120,
+  profileRead: 120,
+  sitemapRead: 20,
   unsubscribe: 10,
 };
 
@@ -94,6 +100,8 @@ const accountScopedLimits: readonly RouteLimitName[] = [
   "messagingKeys",
   "supportWrite",
   "adminEmail",
+  "adEvent",
+  "profileRead",
 ];
 
 const preAuthAdminLoginSteps: ReadonlySet<string> = new Set(["/api/v1/admin/auth/login", "/api/v1/admin/auth/refresh", "/api/v1/admin/auth/accept-invitation", "/api/v1/admin/auth/mfa/enroll/start", "/api/v1/admin/auth/mfa/webauthn/options"]);
@@ -102,6 +110,7 @@ const preAuthAdminCodeSteps: ReadonlySet<string> = new Set(["/api/v1/admin/auth/
 export function classifyRequestForRateLimit(method: string, path: string): RouteLimitName | undefined {
   const verb = method.toUpperCase();
   const lowered = path.toLowerCase();
+  const pathname = lowered.split("?")[0] ?? lowered;
   if (verb === "POST" && lowered.startsWith("/api/v1/auth/login")) return "login";
   if (verb === "POST" && preAuthAdminLoginSteps.has(lowered)) return "login";
   if (verb === "POST" && (lowered.startsWith("/api/v1/auth/otp") || lowered.startsWith("/api/v1/auth/verify") || lowered.startsWith("/api/v1/auth/mfa"))) return "otp";
@@ -132,6 +141,9 @@ export function classifyRequestForRateLimit(method: string, path: string): Route
   if (verb !== "GET" && /^\/api\/v1\/chat\/keys(\/|$)/.test(lowered)) return "messagingKeys";
   if (verb !== "GET" && (/^\/api\/v1\/support(\/|$)/.test(lowered) || /^\/api\/v1\/help\/topics\/[^/]+\/votes$/.test(lowered))) return "supportWrite";
   if (verb !== "GET" && (/^\/api\/v1\/admin\/support\/email(\/|$)/.test(lowered) || /^\/api\/v1\/admin\/legal\/.*\/(notice-draft|test-send)$/.test(lowered))) return "adminEmail";
+  if (verb === "POST" && lowered === "/api/v1/ads/events") return "adEvent";
+  if (verb === "GET" && /^\/api\/v1\/users\/(?:by-username\/)?[^/]+$/.test(pathname) && pathname !== "/api/v1/users/me") return "profileRead";
+  if (verb === "GET" && pathname === "/api/v1/sitemap/profiles") return "sitemapRead";
   if (verb === "POST" && lowered === "/api/v1/email/unsubscribe") return "unsubscribe";
   if (verb === "GET" && lowered.startsWith("/api/v1/widgets/")) return "widgetRead";
   if (verb === "POST" && (lowered === "/api/v1/auth/widget-token" || lowered === "/api/v1/auth/realtime-token")) return "widgetToken";
