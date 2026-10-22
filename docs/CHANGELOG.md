@@ -54,6 +54,8 @@ All notable changes to Zudomart are documented here. Format follows
   so a takedown taken by an automation rule is visible in the audit log.
 - A reused unsubscribe link is now recognised and treated as an idempotent
   no-op, so repeat clicks no longer call the identity service again.
+- The support service now refuses to start in staging or production without a
+  staff JWKS and issuer, so staff-only routes cannot run unverified.
 - The currency service now warns when an exchange rate has not been refreshed
   for 45 days. Conversions keep working while the warning is raised.
 - Username changes, account deactivation and deletion requests now leave an

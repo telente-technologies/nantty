@@ -2,6 +2,20 @@
 
 Every code change made while fixing `docs/audit/frontend-backend-audit.md` is logged here with file, lines, audit ID, verification, and rollback notes. Investigations that concluded "no change needed" are logged too. Newest first.
 
+## 2026-10-22 — ZM-020: staff JWKS required in staging
+
+**Audit:** ZM-020 (support staff routes relied on downstream auth while staging could boot without a staff JWKS)
+**Changes:**
+1. `support.config.ts` now requires `AUTH_JWKS_URL` in staging as well as production.
+2. `AUTH_TOKEN_ISSUER` remains mandatory whenever the JWKS is set, so a token cannot be accepted under an empty issuer.
+3. `tests/config/supportConfig.test.ts` asserts the staging failure modes and the valid configuration.
+
+**Verified:** `pnpm test`, `pnpm typecheck` and `pnpm lint` in `services/typescript/support` pass.
+
+**Rollback:** restore the production-only check. The support service still fails closed at request time when no authenticator exists.
+
+**Remaining:** mentions-resolve captcha and the remaining ZM-020 route-limit edges.
+
 ## 2026-10-22 — ZM-020: single-use unsubscribe replay tracking
 
 **Audit:** ZM-020 (unsubscribe link replay)

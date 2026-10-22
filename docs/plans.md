@@ -2318,3 +2318,10 @@ No provider integration is to be built until the V2 design is approved and the s
 - **Replay:** a second POST with the same link returns the same `{ unsubscribed: true }` response without calling the identity service again.
 - **Failure:** if withdrawing consent fails, the receipt is released so a retry can still unsubscribe the account.
 - **Still open:** the staff-JWKS staging assertion and the remaining ZM-020 edges.
+
+## 70. Staff JWKS is required outside local development (2026-10-22) **[DONE]**
+
+- **Startup guard:** the support service now fails to boot in staging or production when `AUTH_JWKS_URL` or `AUTH_TOKEN_ISSUER` is missing.
+- **Failure mode:** without both values there is no staff authenticator, so staff ticket and chat routes cannot be exposed by accident.
+- **Tests:** `supportConfig.test.ts` covers the missing-JWKS, missing-issuer and valid staging cases.
+- **Still open:** mentions-resolve captcha and the remaining ZM-020 route-limit edges.

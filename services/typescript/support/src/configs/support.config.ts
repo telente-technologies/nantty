@@ -64,7 +64,9 @@ export function loadSupportConfigFromEnvironment(): SupportConfig {
   if (config.staffAuth !== undefined && config.staffAuth.issuer === "") problems.push("AUTH_TOKEN_ISSUER is required when AUTH_JWKS_URL is set");
   if (config.intelligence !== undefined && config.intelligence.sharedSecret === "") problems.push("INTELLIGENCE_SHARED_SECRET is required when INTELLIGENCE_URL is set");
   if (config.media !== undefined && config.media.internalToken.length < 24) problems.push("MEDIA_INTERNAL_TOKEN must be at least 24 characters when MEDIA_INTERNAL_URL is set");
-  if (process.env["NODE_ENV"] === "production" && config.staffAuth === undefined) problems.push("AUTH_JWKS_URL is required in production");
+  if (process.env["NODE_ENV"] === "production" || process.env["NODE_ENV"] === "staging") {
+    if (config.staffAuth === undefined) problems.push("AUTH_JWKS_URL is required in production and staging");
+  }
   if (problems.length > 0) throw new Error(`Invalid support configuration: ${problems.join("; ")}`);
   return config;
 }
