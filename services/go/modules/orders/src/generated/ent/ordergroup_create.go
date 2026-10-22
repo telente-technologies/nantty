@@ -213,6 +213,34 @@ func (_c *OrderGroupCreate) SetNillablePromotionID(v *uuid.UUID) *OrderGroupCrea
 	return _c
 }
 
+// SetPromotionIssueCode sets the "promotion_issue_code" field.
+func (_c *OrderGroupCreate) SetPromotionIssueCode(v string) *OrderGroupCreate {
+	_c.mutation.SetPromotionIssueCode(v)
+	return _c
+}
+
+// SetNillablePromotionIssueCode sets the "promotion_issue_code" field if the given value is not nil.
+func (_c *OrderGroupCreate) SetNillablePromotionIssueCode(v *string) *OrderGroupCreate {
+	if v != nil {
+		_c.SetPromotionIssueCode(*v)
+	}
+	return _c
+}
+
+// SetPromotionIssueMessage sets the "promotion_issue_message" field.
+func (_c *OrderGroupCreate) SetPromotionIssueMessage(v string) *OrderGroupCreate {
+	_c.mutation.SetPromotionIssueMessage(v)
+	return _c
+}
+
+// SetNillablePromotionIssueMessage sets the "promotion_issue_message" field if the given value is not nil.
+func (_c *OrderGroupCreate) SetNillablePromotionIssueMessage(v *string) *OrderGroupCreate {
+	if v != nil {
+		_c.SetPromotionIssueMessage(*v)
+	}
+	return _c
+}
+
 // SetStoreCreditMinor sets the "store_credit_minor" field.
 func (_c *OrderGroupCreate) SetStoreCreditMinor(v int64) *OrderGroupCreate {
 	_c.mutation.SetStoreCreditMinor(v)
@@ -610,6 +638,14 @@ func (_c *OrderGroupCreate) defaults() {
 		v := ordergroup.DefaultDiscountMinor
 		_c.mutation.SetDiscountMinor(v)
 	}
+	if _, ok := _c.mutation.PromotionIssueCode(); !ok {
+		v := ordergroup.DefaultPromotionIssueCode
+		_c.mutation.SetPromotionIssueCode(v)
+	}
+	if _, ok := _c.mutation.PromotionIssueMessage(); !ok {
+		v := ordergroup.DefaultPromotionIssueMessage
+		_c.mutation.SetPromotionIssueMessage(v)
+	}
 	if _, ok := _c.mutation.StoreCreditMinor(); !ok {
 		v := ordergroup.DefaultStoreCreditMinor
 		_c.mutation.SetStoreCreditMinor(v)
@@ -722,6 +758,22 @@ func (_c *OrderGroupCreate) check() error {
 	}
 	if _, ok := _c.mutation.DiscountMinor(); !ok {
 		return &ValidationError{Name: "discount_minor", err: errors.New(`ent: missing required field "OrderGroup.discount_minor"`)}
+	}
+	if _, ok := _c.mutation.PromotionIssueCode(); !ok {
+		return &ValidationError{Name: "promotion_issue_code", err: errors.New(`ent: missing required field "OrderGroup.promotion_issue_code"`)}
+	}
+	if v, ok := _c.mutation.PromotionIssueCode(); ok {
+		if err := ordergroup.PromotionIssueCodeValidator(v); err != nil {
+			return &ValidationError{Name: "promotion_issue_code", err: fmt.Errorf(`ent: validator failed for field "OrderGroup.promotion_issue_code": %w`, err)}
+		}
+	}
+	if _, ok := _c.mutation.PromotionIssueMessage(); !ok {
+		return &ValidationError{Name: "promotion_issue_message", err: errors.New(`ent: missing required field "OrderGroup.promotion_issue_message"`)}
+	}
+	if v, ok := _c.mutation.PromotionIssueMessage(); ok {
+		if err := ordergroup.PromotionIssueMessageValidator(v); err != nil {
+			return &ValidationError{Name: "promotion_issue_message", err: fmt.Errorf(`ent: validator failed for field "OrderGroup.promotion_issue_message": %w`, err)}
+		}
 	}
 	if _, ok := _c.mutation.StoreCreditMinor(); !ok {
 		return &ValidationError{Name: "store_credit_minor", err: errors.New(`ent: missing required field "OrderGroup.store_credit_minor"`)}
@@ -892,6 +944,14 @@ func (_c *OrderGroupCreate) createSpec() (*OrderGroup, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.PromotionID(); ok {
 		_spec.SetField(ordergroup.FieldPromotionID, field.TypeUUID, value)
 		_node.PromotionID = &value
+	}
+	if value, ok := _c.mutation.PromotionIssueCode(); ok {
+		_spec.SetField(ordergroup.FieldPromotionIssueCode, field.TypeString, value)
+		_node.PromotionIssueCode = value
+	}
+	if value, ok := _c.mutation.PromotionIssueMessage(); ok {
+		_spec.SetField(ordergroup.FieldPromotionIssueMessage, field.TypeString, value)
+		_node.PromotionIssueMessage = value
 	}
 	if value, ok := _c.mutation.StoreCreditMinor(); ok {
 		_spec.SetField(ordergroup.FieldStoreCreditMinor, field.TypeInt64, value)
@@ -1513,6 +1573,12 @@ func (u *OrderGroupUpsertOne) UpdateNewValues() *OrderGroupUpsertOne {
 		}
 		if _, exists := u.create.mutation.PromotionID(); exists {
 			s.SetIgnore(ordergroup.FieldPromotionID)
+		}
+		if _, exists := u.create.mutation.PromotionIssueCode(); exists {
+			s.SetIgnore(ordergroup.FieldPromotionIssueCode)
+		}
+		if _, exists := u.create.mutation.PromotionIssueMessage(); exists {
+			s.SetIgnore(ordergroup.FieldPromotionIssueMessage)
 		}
 		if _, exists := u.create.mutation.StoreCreditMinor(); exists {
 			s.SetIgnore(ordergroup.FieldStoreCreditMinor)
@@ -2265,6 +2331,12 @@ func (u *OrderGroupUpsertBulk) UpdateNewValues() *OrderGroupUpsertBulk {
 			}
 			if _, exists := b.mutation.PromotionID(); exists {
 				s.SetIgnore(ordergroup.FieldPromotionID)
+			}
+			if _, exists := b.mutation.PromotionIssueCode(); exists {
+				s.SetIgnore(ordergroup.FieldPromotionIssueCode)
+			}
+			if _, exists := b.mutation.PromotionIssueMessage(); exists {
+				s.SetIgnore(ordergroup.FieldPromotionIssueMessage)
 			}
 			if _, exists := b.mutation.StoreCreditMinor(); exists {
 				s.SetIgnore(ordergroup.FieldStoreCreditMinor)

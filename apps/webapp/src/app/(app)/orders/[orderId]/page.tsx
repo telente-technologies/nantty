@@ -179,6 +179,12 @@ export default function OrderDetailPage({ params }: { readonly params: Promise<{
         </p>
       ) : null}
 
+      {order.promotionIssue ? (
+        <p className={styles.notice} role="status">
+          {order.promotionIssue.message} No discount was applied to this store, and the order was placed at the normal price.
+        </p>
+      ) : null}
+
       <section className={styles.panel}>
         <h2 className={styles.panelTitle}>Progress</h2>
         <ol className={styles.timeline}>

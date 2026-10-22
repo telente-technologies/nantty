@@ -59,6 +59,9 @@ All notable changes to Zudomart are documented here. Format follows
 - Signed-out username checks now return a generic “not available” answer with
   no suggestions. Signed-in users still get the specific reason and suggestions,
   and the suggestion endpoint now shares the username-check rate limit.
+- A promo code that cannot be used on one store no longer aborts the whole
+  checkout. That store's order records a `promotionIssue`, automatic promotions
+  still apply, and the order screens explain that no discount was taken.
 - The currency service now warns when an exchange rate has not been refreshed
   for 45 days. Conversions keep working while the warning is raised.
 - Username changes, account deactivation and deletion requests now leave an

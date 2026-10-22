@@ -36,6 +36,9 @@ func buyerOrderView(group *ent.OrderGroup, items []*ent.OrderItem, store commerc
 		view.Shipment = &types.ShipmentView{CourierName: *group.CourierName, TrackingNumber: *group.TrackingNumber, TrackingUrl: group.TrackingURL, ShippedAt: *group.ShippedAt, EstimatedDeliveryAt: group.EstimatedDeliveryAt}
 	}
 	view.Delivery = buyerDeliveryView(group.DeliveryStatus, group.RiderName, group.RiderPhone, group.EstimatedDeliveryAt, group.DeliveryAttempts, group.LastAttemptNote)
+	if group.PromotionIssueCode != "" {
+		view.PromotionIssue = &types.PromotionIssueView{Code: group.PromotionIssueCode, Message: group.PromotionIssueMessage}
+	}
 	return view
 }
 

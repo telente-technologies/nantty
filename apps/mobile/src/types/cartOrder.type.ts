@@ -57,6 +57,12 @@ export interface Order {
   readonly paymentMode?: PaymentMode;
   readonly shipment?: OrderShipment | null;
   readonly delivery?: DeliveryDetails | null;
+  readonly promotionIssue?: PromotionIssue | null;
+}
+
+export interface PromotionIssue {
+  readonly code: string;
+  readonly message: string;
 }
 
 export interface Address {

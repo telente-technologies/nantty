@@ -95,6 +95,7 @@ func persistOrderGroup(ctx context.Context, deployed *container.Container, tx *e
 	group, err := tx.OrderGroup.Create().SetID(planned.GroupId).SetCheckoutID(checkout.ID).SetReference(NewOrderReference()).SetInvoiceNumber(invoice).SetStoreID(planned.Group.StoreId).
 		SetSellerAccountID(planned.Store.OwnerAccountId).SetBuyerAccountID(request.BuyerId).SetBuyerName(buyer.Name).SetBuyerUsername(buyer.Handle).
 		SetCurrency(string(plan.Currency)).SetSubtotalMinor(planned.Group.SubtotalMinor).SetDiscountMinor(planned.DiscountMinor).SetNillablePromotionID(promotionIdOf(planned)).SetStoreCreditMinor(planned.CreditMinor).SetShippingMinor(planned.Shipping.FeeMinor).
+		SetPromotionIssueCode(promotionIssueCodeOf(planned)).SetPromotionIssueMessage(promotionIssueMessageOf(planned)).
 		SetTotalMinor(planned.TotalMinor).SetAddress(plan.Address).SetPaymentMode(planned.PaymentMode).SetStockReserved(stockReserved).Save(ctx)
 	if err != nil {
 		return nil, err
@@ -208,4 +209,18 @@ func promotionIdOf(planned PlannedGroup) *uuid.UUID {
 		return nil
 	}
 	return &planned.Promotion.Id
+}
+
+func promotionIssueCodeOf(planned PlannedGroup) string {
+	if planned.PromotionIssue == nil {
+		return ""
+	}
+	return planned.PromotionIssue.Code
+}
+
+func promotionIssueMessageOf(planned PlannedGroup) string {
+	if planned.PromotionIssue == nil {
+		return ""
+	}
+	return planned.PromotionIssue.Message
 }

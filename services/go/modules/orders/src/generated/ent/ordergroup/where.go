@@ -145,6 +145,16 @@ func PromotionID(v uuid.UUID) predicate.OrderGroup {
 	return predicate.OrderGroup(sql.FieldEQ(FieldPromotionID, v))
 }
 
+// PromotionIssueCode applies equality check predicate on the "promotion_issue_code" field. It's identical to PromotionIssueCodeEQ.
+func PromotionIssueCode(v string) predicate.OrderGroup {
+	return predicate.OrderGroup(sql.FieldEQ(FieldPromotionIssueCode, v))
+}
+
+// PromotionIssueMessage applies equality check predicate on the "promotion_issue_message" field. It's identical to PromotionIssueMessageEQ.
+func PromotionIssueMessage(v string) predicate.OrderGroup {
+	return predicate.OrderGroup(sql.FieldEQ(FieldPromotionIssueMessage, v))
+}
+
 // StoreCreditMinor applies equality check predicate on the "store_credit_minor" field. It's identical to StoreCreditMinorEQ.
 func StoreCreditMinor(v int64) predicate.OrderGroup {
 	return predicate.OrderGroup(sql.FieldEQ(FieldStoreCreditMinor, v))
@@ -1238,6 +1248,136 @@ func PromotionIDIsNil() predicate.OrderGroup {
 // PromotionIDNotNil applies the NotNil predicate on the "promotion_id" field.
 func PromotionIDNotNil() predicate.OrderGroup {
 	return predicate.OrderGroup(sql.FieldNotNull(FieldPromotionID))
+}
+
+// PromotionIssueCodeEQ applies the EQ predicate on the "promotion_issue_code" field.
+func PromotionIssueCodeEQ(v string) predicate.OrderGroup {
+	return predicate.OrderGroup(sql.FieldEQ(FieldPromotionIssueCode, v))
+}
+
+// PromotionIssueCodeNEQ applies the NEQ predicate on the "promotion_issue_code" field.
+func PromotionIssueCodeNEQ(v string) predicate.OrderGroup {
+	return predicate.OrderGroup(sql.FieldNEQ(FieldPromotionIssueCode, v))
+}
+
+// PromotionIssueCodeIn applies the In predicate on the "promotion_issue_code" field.
+func PromotionIssueCodeIn(vs ...string) predicate.OrderGroup {
+	return predicate.OrderGroup(sql.FieldIn(FieldPromotionIssueCode, vs...))
+}
+
+// PromotionIssueCodeNotIn applies the NotIn predicate on the "promotion_issue_code" field.
+func PromotionIssueCodeNotIn(vs ...string) predicate.OrderGroup {
+	return predicate.OrderGroup(sql.FieldNotIn(FieldPromotionIssueCode, vs...))
+}
+
+// PromotionIssueCodeGT applies the GT predicate on the "promotion_issue_code" field.
+func PromotionIssueCodeGT(v string) predicate.OrderGroup {
+	return predicate.OrderGroup(sql.FieldGT(FieldPromotionIssueCode, v))
+}
+
+// PromotionIssueCodeGTE applies the GTE predicate on the "promotion_issue_code" field.
+func PromotionIssueCodeGTE(v string) predicate.OrderGroup {
+	return predicate.OrderGroup(sql.FieldGTE(FieldPromotionIssueCode, v))
+}
+
+// PromotionIssueCodeLT applies the LT predicate on the "promotion_issue_code" field.
+func PromotionIssueCodeLT(v string) predicate.OrderGroup {
+	return predicate.OrderGroup(sql.FieldLT(FieldPromotionIssueCode, v))
+}
+
+// PromotionIssueCodeLTE applies the LTE predicate on the "promotion_issue_code" field.
+func PromotionIssueCodeLTE(v string) predicate.OrderGroup {
+	return predicate.OrderGroup(sql.FieldLTE(FieldPromotionIssueCode, v))
+}
+
+// PromotionIssueCodeContains applies the Contains predicate on the "promotion_issue_code" field.
+func PromotionIssueCodeContains(v string) predicate.OrderGroup {
+	return predicate.OrderGroup(sql.FieldContains(FieldPromotionIssueCode, v))
+}
+
+// PromotionIssueCodeHasPrefix applies the HasPrefix predicate on the "promotion_issue_code" field.
+func PromotionIssueCodeHasPrefix(v string) predicate.OrderGroup {
+	return predicate.OrderGroup(sql.FieldHasPrefix(FieldPromotionIssueCode, v))
+}
+
+// PromotionIssueCodeHasSuffix applies the HasSuffix predicate on the "promotion_issue_code" field.
+func PromotionIssueCodeHasSuffix(v string) predicate.OrderGroup {
+	return predicate.OrderGroup(sql.FieldHasSuffix(FieldPromotionIssueCode, v))
+}
+
+// PromotionIssueCodeEqualFold applies the EqualFold predicate on the "promotion_issue_code" field.
+func PromotionIssueCodeEqualFold(v string) predicate.OrderGroup {
+	return predicate.OrderGroup(sql.FieldEqualFold(FieldPromotionIssueCode, v))
+}
+
+// PromotionIssueCodeContainsFold applies the ContainsFold predicate on the "promotion_issue_code" field.
+func PromotionIssueCodeContainsFold(v string) predicate.OrderGroup {
+	return predicate.OrderGroup(sql.FieldContainsFold(FieldPromotionIssueCode, v))
+}
+
+// PromotionIssueMessageEQ applies the EQ predicate on the "promotion_issue_message" field.
+func PromotionIssueMessageEQ(v string) predicate.OrderGroup {
+	return predicate.OrderGroup(sql.FieldEQ(FieldPromotionIssueMessage, v))
+}
+
+// PromotionIssueMessageNEQ applies the NEQ predicate on the "promotion_issue_message" field.
+func PromotionIssueMessageNEQ(v string) predicate.OrderGroup {
+	return predicate.OrderGroup(sql.FieldNEQ(FieldPromotionIssueMessage, v))
+}
+
+// PromotionIssueMessageIn applies the In predicate on the "promotion_issue_message" field.
+func PromotionIssueMessageIn(vs ...string) predicate.OrderGroup {
+	return predicate.OrderGroup(sql.FieldIn(FieldPromotionIssueMessage, vs...))
+}
+
+// PromotionIssueMessageNotIn applies the NotIn predicate on the "promotion_issue_message" field.
+func PromotionIssueMessageNotIn(vs ...string) predicate.OrderGroup {
+	return predicate.OrderGroup(sql.FieldNotIn(FieldPromotionIssueMessage, vs...))
+}
+
+// PromotionIssueMessageGT applies the GT predicate on the "promotion_issue_message" field.
+func PromotionIssueMessageGT(v string) predicate.OrderGroup {
+	return predicate.OrderGroup(sql.FieldGT(FieldPromotionIssueMessage, v))
+}
+
+// PromotionIssueMessageGTE applies the GTE predicate on the "promotion_issue_message" field.
+func PromotionIssueMessageGTE(v string) predicate.OrderGroup {
+	return predicate.OrderGroup(sql.FieldGTE(FieldPromotionIssueMessage, v))
+}
+
+// PromotionIssueMessageLT applies the LT predicate on the "promotion_issue_message" field.
+func PromotionIssueMessageLT(v string) predicate.OrderGroup {
+	return predicate.OrderGroup(sql.FieldLT(FieldPromotionIssueMessage, v))
+}
+
+// PromotionIssueMessageLTE applies the LTE predicate on the "promotion_issue_message" field.
+func PromotionIssueMessageLTE(v string) predicate.OrderGroup {
+	return predicate.OrderGroup(sql.FieldLTE(FieldPromotionIssueMessage, v))
+}
+
+// PromotionIssueMessageContains applies the Contains predicate on the "promotion_issue_message" field.
+func PromotionIssueMessageContains(v string) predicate.OrderGroup {
+	return predicate.OrderGroup(sql.FieldContains(FieldPromotionIssueMessage, v))
+}
+
+// PromotionIssueMessageHasPrefix applies the HasPrefix predicate on the "promotion_issue_message" field.
+func PromotionIssueMessageHasPrefix(v string) predicate.OrderGroup {
+	return predicate.OrderGroup(sql.FieldHasPrefix(FieldPromotionIssueMessage, v))
+}
+
+// PromotionIssueMessageHasSuffix applies the HasSuffix predicate on the "promotion_issue_message" field.
+func PromotionIssueMessageHasSuffix(v string) predicate.OrderGroup {
+	return predicate.OrderGroup(sql.FieldHasSuffix(FieldPromotionIssueMessage, v))
+}
+
+// PromotionIssueMessageEqualFold applies the EqualFold predicate on the "promotion_issue_message" field.
+func PromotionIssueMessageEqualFold(v string) predicate.OrderGroup {
+	return predicate.OrderGroup(sql.FieldEqualFold(FieldPromotionIssueMessage, v))
+}
+
+// PromotionIssueMessageContainsFold applies the ContainsFold predicate on the "promotion_issue_message" field.
+func PromotionIssueMessageContainsFold(v string) predicate.OrderGroup {
+	return predicate.OrderGroup(sql.FieldContainsFold(FieldPromotionIssueMessage, v))
 }
 
 // StoreCreditMinorEQ applies the EQ predicate on the "store_credit_minor" field.

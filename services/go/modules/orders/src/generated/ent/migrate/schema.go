@@ -485,6 +485,8 @@ var (
 		{Name: "subtotal_minor", Type: field.TypeInt64},
 		{Name: "discount_minor", Type: field.TypeInt64, Default: 0},
 		{Name: "promotion_id", Type: field.TypeUUID, Nullable: true},
+		{Name: "promotion_issue_code", Type: field.TypeString, Size: 64, Default: ""},
+		{Name: "promotion_issue_message", Type: field.TypeString, Size: 255, Default: ""},
 		{Name: "store_credit_minor", Type: field.TypeInt64, Default: 0},
 		{Name: "shipping_minor", Type: field.TypeInt64},
 		{Name: "total_minor", Type: field.TypeInt64},
@@ -574,7 +576,7 @@ var (
 			{
 				Name:    "ordergroup_delivered_release",
 				Unique:  false,
-				Columns: []*schema.Column{OrderGroupsColumns[38]},
+				Columns: []*schema.Column{OrderGroupsColumns[40]},
 				Annotation: &entsql.IndexAnnotation{
 					Where: "status = 'delivered'",
 				},

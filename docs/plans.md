@@ -2332,3 +2332,11 @@ No provider integration is to be built until the V2 design is approved and the s
 - **Signed-in response:** a verified access token still receives `taken`/`recently_used` and up to three suggestions for the settings screen.
 - **Rate limits:** the availability and suggestion endpoints share the `usernameCheck` policy, which is account-scoped for signed-in callers.
 - **Still open:** profile/confusables enumeration and the remaining ZM-018 edges.
+
+## 72. Per-store promo failures no longer abort checkout (2026-10-22) **[DONE]**
+
+- **Issue:** a bad or inapplicable coupon code for one store returned an error for the whole multi-store checkout.
+- **Response:** the affected order now carries `promotionIssue: { code, message }`; automatic promotions still apply, and sibling stores complete normally.
+- **Persistence:** `order_groups.promotion_issue_code` and `promotion_issue_message` are written at checkout and returned by the order presenter.
+- **Frontends:** web and mobile order detail screens show that the code could not be used and no discount was applied to that store.
+- **Still open:** audio/PDF moderation and the remaining ZM-010 items.

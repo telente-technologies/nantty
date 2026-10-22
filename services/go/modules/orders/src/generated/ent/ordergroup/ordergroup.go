@@ -50,6 +50,10 @@ const (
 	FieldDiscountMinor = "discount_minor"
 	// FieldPromotionID holds the string denoting the promotion_id field in the database.
 	FieldPromotionID = "promotion_id"
+	// FieldPromotionIssueCode holds the string denoting the promotion_issue_code field in the database.
+	FieldPromotionIssueCode = "promotion_issue_code"
+	// FieldPromotionIssueMessage holds the string denoting the promotion_issue_message field in the database.
+	FieldPromotionIssueMessage = "promotion_issue_message"
 	// FieldStoreCreditMinor holds the string denoting the store_credit_minor field in the database.
 	FieldStoreCreditMinor = "store_credit_minor"
 	// FieldShippingMinor holds the string denoting the shipping_minor field in the database.
@@ -123,6 +127,8 @@ var Columns = []string{
 	FieldSubtotalMinor,
 	FieldDiscountMinor,
 	FieldPromotionID,
+	FieldPromotionIssueCode,
+	FieldPromotionIssueMessage,
 	FieldStoreCreditMinor,
 	FieldShippingMinor,
 	FieldTotalMinor,
@@ -190,6 +196,14 @@ var (
 	CurrencyValidator func(string) error
 	// DefaultDiscountMinor holds the default value on creation for the "discount_minor" field.
 	DefaultDiscountMinor int64
+	// DefaultPromotionIssueCode holds the default value on creation for the "promotion_issue_code" field.
+	DefaultPromotionIssueCode string
+	// PromotionIssueCodeValidator is a validator for the "promotion_issue_code" field. It is called by the builders before save.
+	PromotionIssueCodeValidator func(string) error
+	// DefaultPromotionIssueMessage holds the default value on creation for the "promotion_issue_message" field.
+	DefaultPromotionIssueMessage string
+	// PromotionIssueMessageValidator is a validator for the "promotion_issue_message" field. It is called by the builders before save.
+	PromotionIssueMessageValidator func(string) error
 	// DefaultStoreCreditMinor holds the default value on creation for the "store_credit_minor" field.
 	DefaultStoreCreditMinor int64
 	// DefaultRefundedMinor holds the default value on creation for the "refunded_minor" field.
@@ -318,6 +332,16 @@ func ByDiscountMinor(opts ...sql.OrderTermOption) OrderOption {
 // ByPromotionID orders the results by the promotion_id field.
 func ByPromotionID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldPromotionID, opts...).ToFunc()
+}
+
+// ByPromotionIssueCode orders the results by the promotion_issue_code field.
+func ByPromotionIssueCode(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldPromotionIssueCode, opts...).ToFunc()
+}
+
+// ByPromotionIssueMessage orders the results by the promotion_issue_message field.
+func ByPromotionIssueMessage(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldPromotionIssueMessage, opts...).ToFunc()
 }
 
 // ByStoreCreditMinor orders the results by the store_credit_minor field.

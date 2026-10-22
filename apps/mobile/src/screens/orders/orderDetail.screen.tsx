@@ -82,6 +82,12 @@ export function OrderDetailScreen({ navigation, route }: MainScreenProps<"OrderD
           <CaretRight24Icon />
         </Pressable>
 
+        {detail.promotionIssue ? (
+          <View style={styles.card}>
+            <Text size={12} lineHeight={16.8} color={colors.textMuted}>{detail.promotionIssue.message} No discount was applied to this store, and the order was placed at the normal price.</Text>
+          </View>
+        ) : null}
+
         {detail.delivery ? (
           <View style={styles.card}>
             <View style={styles.row}>

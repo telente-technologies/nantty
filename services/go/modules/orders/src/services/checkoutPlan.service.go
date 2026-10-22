@@ -13,21 +13,28 @@ import (
 	"zudomart/modules/orders/src/enums"
 	ordererrors "zudomart/modules/orders/src/errors"
 	"zudomart/platform/commerceports"
+	"zudomart/platform/httpserver"
 	"zudomart/platform/money"
 	"zudomart/platform/usersdirectory"
 )
 
 type PlannedGroup struct {
-	GroupId       uuid.UUID
-	Group         SellerGroup
-	Store         commerceports.StoreSnapshot
-	Shipping      ShippingResult
-	CreditMinor   int64
-	DiscountMinor int64
-	Promotion     *PromotionRule
-	Campaigns     CampaignPlan
-	TotalMinor    int64
-	PaymentMode   string
+	GroupId        uuid.UUID
+	Group          SellerGroup
+	Store          commerceports.StoreSnapshot
+	Shipping       ShippingResult
+	CreditMinor    int64
+	DiscountMinor  int64
+	Promotion      *PromotionRule
+	PromotionIssue *PromotionIssue
+	Campaigns      CampaignPlan
+	TotalMinor     int64
+	PaymentMode    string
+}
+
+type PromotionIssue struct {
+	Code    string
+	Message string
 }
 
 type CheckoutPlan struct {
@@ -112,7 +119,7 @@ func planGroups(ctx context.Context, deployed *container.Container, buyerId uuid
 			return *plan, ordererrors.MixedCurrencies
 		}
 		plan.Currency = group.Currency
-		chosen, discount, err := choosePromotion(ctx, deployed, buyerId, group, promoCodes[group.StoreId])
+		chosen, discount, issue, err := ChoosePromotion(ctx, deployed, buyerId, group, promoCodes[group.StoreId])
 		if err != nil {
 			return *plan, err
 		}
@@ -126,7 +133,7 @@ func planGroups(ctx context.Context, deployed *container.Container, buyerId uuid
 		if useCredit {
 			credit = RedeemableCreditMinor(loaded.credits[group.StoreId].BalanceMinor, group.SubtotalMinor-discount)
 		}
-		planned := PlannedGroup{GroupId: uuid.Must(uuid.NewV7()), Group: group, Store: store, Shipping: result, CreditMinor: credit, DiscountMinor: discount, Promotion: chosen, Campaigns: campaigns,
+		planned := PlannedGroup{GroupId: uuid.Must(uuid.NewV7()), Group: group, Store: store, Shipping: result, CreditMinor: credit, DiscountMinor: discount, Promotion: chosen, PromotionIssue: issue, Campaigns: campaigns,
 			TotalMinor: group.SubtotalMinor - discount - credit + result.FeeMinor}
 		plan.Groups = append(plan.Groups, planned)
 		plan.TotalMinor += planned.TotalMinor
@@ -151,11 +158,16 @@ func CheckoutCurrencySupported(allowed []string, currency string) bool {
 	return len(allowed) == 0 || slices.Contains(allowed, currency)
 }
 
-func choosePromotion(ctx context.Context, deployed *container.Container, buyerId uuid.UUID, group SellerGroup, code string) (*PromotionRule, int64, error) {
+func ChoosePromotion(ctx context.Context, deployed *container.Container, buyerId uuid.UUID, group SellerGroup, code string) (*PromotionRule, int64, *PromotionIssue, error) {
 	now := deployed.Now()
+	var issue *PromotionIssue
 	candidates, err := LoadCandidatePromotions(ctx, deployed, group.StoreId, code, now)
 	if err != nil {
-		return nil, 0, err
+		issue = PromotionIssueOf(err)
+		if issue == nil {
+			return nil, 0, nil, err
+		}
+		code = ""
 	}
 	lines := make([]DiscountLine, 0, len(group.Lines))
 	for _, line := range group.Lines {
@@ -165,12 +177,20 @@ func choosePromotion(ctx context.Context, deployed *container.Container, buyerId
 	if code != "" {
 		coupon := candidates[len(candidates)-1]
 		if err := CheckPromotionApplicable(coupon, now, group.SubtotalMinor, CountBuyerRedemptions(ctx, deployed, buyerId, coupon)); err != nil {
-			return nil, 0, err
+			issue = PromotionIssueOf(err)
 		}
 	}
 	best, discount, found := BestPromotion(candidates, lines, now, group.SubtotalMinor, func(rule PromotionRule) int { return CountBuyerRedemptions(ctx, deployed, buyerId, rule) })
 	if !found {
-		return nil, 0, nil
+		return nil, 0, issue, nil
 	}
-	return &best, discount, nil
+	return &best, discount, issue, nil
+}
+
+func PromotionIssueOf(err error) *PromotionIssue {
+	apiError := httpserver.ConvertErrorToApiError(err)
+	if apiError.Code != "COUPON_NOT_FOUND" && apiError.Code != "COUPON_NOT_APPLICABLE" {
+		return nil
+	}
+	return &PromotionIssue{Code: apiError.Code, Message: apiError.Message}
 }

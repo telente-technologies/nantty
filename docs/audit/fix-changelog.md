@@ -2,6 +2,21 @@
 
 Every code change made while fixing `docs/audit/frontend-backend-audit.md` is logged here with file, lines, audit ID, verification, and rollback notes. Investigations that concluded "no change needed" are logged too. Newest first.
 
+## 2026-10-22 — ZM-003: per-store promo issues do not abort checkout
+
+**Audit:** ZM-003 (one invalid coupon aborted every store in a multi-store checkout)
+**Changes:**
+1. `ChoosePromotion` converts `COUPON_NOT_FOUND` and `COUPON_NOT_APPLICABLE` into a `PromotionIssue` and continues with automatic promotions.
+2. `order_groups` stores `promotion_issue_code` and `promotion_issue_message`; migration `20261022041528_add_promotion_issue` adds both columns.
+3. `OrderView` returns `promotionIssue: { code, message }`, and the web and mobile order detail screens show the notice.
+4. `orders.promotionIssue_integration_test.go` covers an unknown code, an inapplicable code, a bad code alongside a valid automatic promotion, and a valid coupon.
+
+**Verified:** `go test ./modules/orders -run 'TestMigrations|TestCheckoutKeepsHealthyStoresWhenACouponCannotBeUsed'`, `go build ./modules/orders/...`, webapp `pnpm typecheck`, and mobile `tsc --noEmit` pass.
+
+**Rollback:** drop the two columns, remove the issue fields from the view and presenters, and restore the early return.
+
+**Remaining:** audio/PDF moderation and the remaining ZM-010 items.
+
 ## 2026-10-22 — ZM-018: signed-out username checks are generic
 
 **Audit:** ZM-018 (username availability returned `taken`/`reserved` plus suggestions to anonymous callers)

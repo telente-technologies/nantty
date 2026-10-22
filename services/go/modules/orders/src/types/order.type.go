@@ -26,26 +26,32 @@ type StoreSummaryView struct {
 }
 
 type OrderView struct {
-	Id               string           `json:"id"`
-	Reference        string           `json:"reference"`
-	Status           string           `json:"status"`
-	FulfilmentStatus string           `json:"fulfilmentStatus"`
-	PaymentStatus    string           `json:"paymentStatus"`
-	PaymentMode      string           `json:"paymentMode"`
-	Items            []CartItemView   `json:"items"`
-	Subtotal         money.Money      `json:"subtotal"`
-	Discount         money.Money      `json:"discount"`
-	StoreCredit      money.Money      `json:"storeCredit"`
-	Shipping         money.Money      `json:"shipping"`
-	Total            money.Money      `json:"total"`
-	Buyer            UserSummaryView  `json:"buyer"`
-	Store            StoreSummaryView `json:"store"`
-	CheckoutId       string           `json:"checkoutId"`
-	CreatedAt        time.Time        `json:"createdAt"`
-	EscrowReleaseAt  *time.Time       `json:"escrowReleaseAt"`
-	Shipment         *ShipmentView    `json:"shipment"`
-	Delivery         *DeliveryView    `json:"delivery"`
-	DeliveredAt      *time.Time       `json:"deliveredAt"`
+	Id               string              `json:"id"`
+	Reference        string              `json:"reference"`
+	Status           string              `json:"status"`
+	FulfilmentStatus string              `json:"fulfilmentStatus"`
+	PaymentStatus    string              `json:"paymentStatus"`
+	PaymentMode      string              `json:"paymentMode"`
+	Items            []CartItemView      `json:"items"`
+	Subtotal         money.Money         `json:"subtotal"`
+	Discount         money.Money         `json:"discount"`
+	StoreCredit      money.Money         `json:"storeCredit"`
+	Shipping         money.Money         `json:"shipping"`
+	Total            money.Money         `json:"total"`
+	Buyer            UserSummaryView     `json:"buyer"`
+	Store            StoreSummaryView    `json:"store"`
+	CheckoutId       string              `json:"checkoutId"`
+	CreatedAt        time.Time           `json:"createdAt"`
+	EscrowReleaseAt  *time.Time          `json:"escrowReleaseAt"`
+	Shipment         *ShipmentView       `json:"shipment"`
+	Delivery         *DeliveryView       `json:"delivery"`
+	PromotionIssue   *PromotionIssueView `json:"promotionIssue"`
+	DeliveredAt      *time.Time          `json:"deliveredAt"`
+}
+
+type PromotionIssueView struct {
+	Code    string `json:"code"`
+	Message string `json:"message"`
 }
 
 type ShipmentView struct {

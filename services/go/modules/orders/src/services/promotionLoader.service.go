@@ -47,7 +47,7 @@ func LoadCandidatePromotions(ctx context.Context, deployed *container.Container,
 	}
 	coupon, err := deployed.Client.Promotion.Query().Where(promotion.StoreID(storeId), promotion.Kind("coupon"), promotion.Code(strings.ToUpper(code))).Only(ctx)
 	if ent.IsNotFound(err) {
-		return nil, CouponNotFound()
+		return rules, CouponNotFound()
 	}
 	if err != nil {
 		return nil, err

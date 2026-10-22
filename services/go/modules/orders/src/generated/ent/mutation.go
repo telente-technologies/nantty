@@ -12998,63 +12998,65 @@ func (m *OrderEventMutation) ResetEdge(name string) error {
 // OrderGroupMutation represents an operation that mutates the OrderGroup nodes in the graph.
 type OrderGroupMutation struct {
 	config
-	op                    Op
-	typ                   string
-	id                    *uuid.UUID
-	created_at            *time.Time
-	checkout_id           *uuid.UUID
-	reference             *string
-	invoice_number        *string
-	store_id              *uuid.UUID
-	seller_account_id     *uuid.UUID
-	buyer_account_id      *uuid.UUID
-	buyer_name            *string
-	buyer_username        *string
-	status                *string
-	previous_status       *string
-	payment_status        *string
-	payment_mode          *string
-	delivery_status       *string
-	currency              *string
-	subtotal_minor        *int64
-	addsubtotal_minor     *int64
-	discount_minor        *int64
-	adddiscount_minor     *int64
-	promotion_id          *uuid.UUID
-	store_credit_minor    *int64
-	addstore_credit_minor *int64
-	shipping_minor        *int64
-	addshipping_minor     *int64
-	total_minor           *int64
-	addtotal_minor        *int64
-	refunded_minor        *int64
-	addrefunded_minor     *int64
-	address               *schema.AddressSnapshot
-	stock_reserved        *bool
-	courier_name          *string
-	tracking_number       *string
-	tracking_url          *string
-	from_location_id      *uuid.UUID
-	rider_name            *string
-	rider_phone           *string
-	delivery_attempts     *int
-	adddelivery_attempts  *int
-	last_attempt_note     *string
-	estimated_delivery_at *time.Time
-	paid_at               *time.Time
-	shipped_at            *time.Time
-	delivered_at          *time.Time
-	completed_at          *time.Time
-	escrow_release_at     *time.Time
-	refund_requested_at   *time.Time
-	cancel_reason         *string
-	version               *int
-	addversion            *int
-	updated_at            *time.Time
-	clearedFields         map[string]struct{}
-	done                  bool
-	oldValue              func(context.Context) (*OrderGroup, error)
-	predicates            []predicate.OrderGroup
+	op                      Op
+	typ                     string
+	id                      *uuid.UUID
+	created_at              *time.Time
+	checkout_id             *uuid.UUID
+	reference               *string
+	invoice_number          *string
+	store_id                *uuid.UUID
+	seller_account_id       *uuid.UUID
+	buyer_account_id        *uuid.UUID
+	buyer_name              *string
+	buyer_username          *string
+	status                  *string
+	previous_status         *string
+	payment_status          *string
+	payment_mode            *string
+	delivery_status         *string
+	currency                *string
+	subtotal_minor          *int64
+	addsubtotal_minor       *int64
+	discount_minor          *int64
+	adddiscount_minor       *int64
+	promotion_id            *uuid.UUID
+	promotion_issue_code    *string
+	promotion_issue_message *string
+	store_credit_minor      *int64
+	addstore_credit_minor   *int64
+	shipping_minor          *int64
+	addshipping_minor       *int64
+	total_minor             *int64
+	addtotal_minor          *int64
+	refunded_minor          *int64
+	addrefunded_minor       *int64
+	address                 *schema.AddressSnapshot
+	stock_reserved          *bool
+	courier_name            *string
+	tracking_number         *string
+	tracking_url            *string
+	from_location_id        *uuid.UUID
+	rider_name              *string
+	rider_phone             *string
+	delivery_attempts       *int
+	adddelivery_attempts    *int
+	last_attempt_note       *string
+	estimated_delivery_at   *time.Time
+	paid_at                 *time.Time
+	shipped_at              *time.Time
+	delivered_at            *time.Time
+	completed_at            *time.Time
+	escrow_release_at       *time.Time
+	refund_requested_at     *time.Time
+	cancel_reason           *string
+	version                 *int
+	addversion              *int
+	updated_at              *time.Time
+	clearedFields           map[string]struct{}
+	done                    bool
+	oldValue                func(context.Context) (*OrderGroup, error)
+	predicates              []predicate.OrderGroup
 }
 
 var _ ent.Mutation = (*OrderGroupMutation)(nil)
@@ -13860,6 +13862,78 @@ func (m *OrderGroupMutation) PromotionIDCleared() bool {
 func (m *OrderGroupMutation) ResetPromotionID() {
 	m.promotion_id = nil
 	delete(m.clearedFields, ordergroup.FieldPromotionID)
+}
+
+// SetPromotionIssueCode sets the "promotion_issue_code" field.
+func (m *OrderGroupMutation) SetPromotionIssueCode(s string) {
+	m.promotion_issue_code = &s
+}
+
+// PromotionIssueCode returns the value of the "promotion_issue_code" field in the mutation.
+func (m *OrderGroupMutation) PromotionIssueCode() (r string, exists bool) {
+	v := m.promotion_issue_code
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldPromotionIssueCode returns the old "promotion_issue_code" field's value of the OrderGroup entity.
+// If the OrderGroup object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *OrderGroupMutation) OldPromotionIssueCode(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldPromotionIssueCode is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldPromotionIssueCode requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldPromotionIssueCode: %w", err)
+	}
+	return oldValue.PromotionIssueCode, nil
+}
+
+// ResetPromotionIssueCode resets all changes to the "promotion_issue_code" field.
+func (m *OrderGroupMutation) ResetPromotionIssueCode() {
+	m.promotion_issue_code = nil
+}
+
+// SetPromotionIssueMessage sets the "promotion_issue_message" field.
+func (m *OrderGroupMutation) SetPromotionIssueMessage(s string) {
+	m.promotion_issue_message = &s
+}
+
+// PromotionIssueMessage returns the value of the "promotion_issue_message" field in the mutation.
+func (m *OrderGroupMutation) PromotionIssueMessage() (r string, exists bool) {
+	v := m.promotion_issue_message
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldPromotionIssueMessage returns the old "promotion_issue_message" field's value of the OrderGroup entity.
+// If the OrderGroup object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *OrderGroupMutation) OldPromotionIssueMessage(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldPromotionIssueMessage is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldPromotionIssueMessage requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldPromotionIssueMessage: %w", err)
+	}
+	return oldValue.PromotionIssueMessage, nil
+}
+
+// ResetPromotionIssueMessage resets all changes to the "promotion_issue_message" field.
+func (m *OrderGroupMutation) ResetPromotionIssueMessage() {
+	m.promotion_issue_message = nil
 }
 
 // SetStoreCreditMinor sets the "store_credit_minor" field.
@@ -15075,7 +15149,7 @@ func (m *OrderGroupMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *OrderGroupMutation) Fields() []string {
-	fields := make([]string, 0, 42)
+	fields := make([]string, 0, 44)
 	if m.created_at != nil {
 		fields = append(fields, ordergroup.FieldCreatedAt)
 	}
@@ -15129,6 +15203,12 @@ func (m *OrderGroupMutation) Fields() []string {
 	}
 	if m.promotion_id != nil {
 		fields = append(fields, ordergroup.FieldPromotionID)
+	}
+	if m.promotion_issue_code != nil {
+		fields = append(fields, ordergroup.FieldPromotionIssueCode)
+	}
+	if m.promotion_issue_message != nil {
+		fields = append(fields, ordergroup.FieldPromotionIssueMessage)
 	}
 	if m.store_credit_minor != nil {
 		fields = append(fields, ordergroup.FieldStoreCreditMinor)
@@ -15246,6 +15326,10 @@ func (m *OrderGroupMutation) Field(name string) (ent.Value, bool) {
 		return m.DiscountMinor()
 	case ordergroup.FieldPromotionID:
 		return m.PromotionID()
+	case ordergroup.FieldPromotionIssueCode:
+		return m.PromotionIssueCode()
+	case ordergroup.FieldPromotionIssueMessage:
+		return m.PromotionIssueMessage()
 	case ordergroup.FieldStoreCreditMinor:
 		return m.StoreCreditMinor()
 	case ordergroup.FieldShippingMinor:
@@ -15339,6 +15423,10 @@ func (m *OrderGroupMutation) OldField(ctx context.Context, name string) (ent.Val
 		return m.OldDiscountMinor(ctx)
 	case ordergroup.FieldPromotionID:
 		return m.OldPromotionID(ctx)
+	case ordergroup.FieldPromotionIssueCode:
+		return m.OldPromotionIssueCode(ctx)
+	case ordergroup.FieldPromotionIssueMessage:
+		return m.OldPromotionIssueMessage(ctx)
 	case ordergroup.FieldStoreCreditMinor:
 		return m.OldStoreCreditMinor(ctx)
 	case ordergroup.FieldShippingMinor:
@@ -15521,6 +15609,20 @@ func (m *OrderGroupMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetPromotionID(v)
+		return nil
+	case ordergroup.FieldPromotionIssueCode:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetPromotionIssueCode(v)
+		return nil
+	case ordergroup.FieldPromotionIssueMessage:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetPromotionIssueMessage(v)
 		return nil
 	case ordergroup.FieldStoreCreditMinor:
 		v, ok := value.(int64)
@@ -15990,6 +16092,12 @@ func (m *OrderGroupMutation) ResetField(name string) error {
 		return nil
 	case ordergroup.FieldPromotionID:
 		m.ResetPromotionID()
+		return nil
+	case ordergroup.FieldPromotionIssueCode:
+		m.ResetPromotionIssueCode()
+		return nil
+	case ordergroup.FieldPromotionIssueMessage:
+		m.ResetPromotionIssueMessage()
 		return nil
 	case ordergroup.FieldStoreCreditMinor:
 		m.ResetStoreCreditMinor()

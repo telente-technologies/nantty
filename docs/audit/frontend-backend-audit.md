@@ -22,7 +22,7 @@ Verified in `services/typescript/gateway/src/handlers/upstreamDispatch.handler.t
 |----|----------|------|-------|--------|
 | ZM-001 | **High (money)** | goMoney `verifyOrderPayment` vs all frontends' verify/status UI | Succeeded intent could fall off 10-window; no early-paid short-circuit; sibling-row buyer check | FIXED 2026-10-17 (window + early paid + own-row 10-16; provider verification capped at newest 3 pending + 5 integration tests 10-17) |
 | ZM-002 | **High (security + availability)** | Gateway admin auth + rate-limit vs `apps/admin` passkey login | Admin login brute-force window 12x + WebAuthn options 401 at edge | FIXED 2026-10-17 (all 7 pre-auth admin paths on login/otp buckets; bare admin OPTIONS answered 204 at edge; gateway 1690 tests pass) |
-| ZM-003 | **Medium (money-protection)** | Checkout `paymentModes` direct vs escrow vs all frontends | `direct` waives escrow/dispute window, no frontend warning | PART-FIXED 2026-10-22 (explicit warning + type-DIRECT confirmation on mobile + web; server now requires `directPaymentAccepted: true` and resolves `direct` only when it is set; per-store promo issues queued) |
+| ZM-003 | **Medium (money-protection)** | Checkout `paymentModes` direct vs escrow vs all frontends | `direct` waives escrow/dispute window, no frontend warning | PART-FIXED 2026-10-22 (explicit warning + type-DIRECT confirmation on mobile + web; server now requires `directPaymentAccepted: true` and resolves `direct` only when it is set; per-store promo failures now become `promotionIssue` without aborting sibling stores) |
 | ZM-004 | **High (privacy)** | Users profile + Lives visibility vs anon `optional` GETs | Public profile + followers-only live metadata served to strangers | FILED below |
 | ZM-005 | **High (money)** | Idempotency + refund/send races (goMoney/ledger/escrow) | Concurrent double-submit 500s, replay outside guard, refund double-send | FILED below |
 | ZM-006 | **Medium (defense)** | Webhooks + BFF CSRF + realtime + internal S2S | Verifiers present; BFF GET+cookie zero-origin-check relies on safe-GET invariant | FILED below |
@@ -163,7 +163,7 @@ Add regression test: seed 1×`succeeded` (old) + 1×`pending` (new) for same ord
 ---
 ## ZM-003 [PART-FIXED 2026-10-21] — Checkout totals are safe; `direct` payment mode silently waives buyer protection
 
-**Status 2026-10-22:** the mobile and web payment-mode choosers now show an explicit warning when `direct` is selected, and selecting it requires typing `DIRECT` before the mode changes. The buyer loses escrow protection, refunds and disputes depend on the seller, and Zudomart cannot hold or reverse the payment. The default remains `escrow`; `direct` still requires a verified store. The checkout API now also requires `directPaymentAccepted: true`, and both clients send it only when at least one store is set to `direct`; the service layer rejects direct without it even if a future caller bypasses request validation. Per-store promo `issues[]` remains queued.
+**Status 2026-10-22:** the mobile and web payment-mode choosers now show an explicit warning when `direct` is selected, and selecting it requires typing `DIRECT` before the mode changes. The buyer loses escrow protection, refunds and disputes depend on the seller, and Zudomart cannot hold or reverse the payment. The default remains `escrow`; `direct` still requires a verified store. The checkout API now also requires `directPaymentAccepted: true`, and both clients send it only when at least one store is set to `direct`; the service layer rejects direct without it even if a future caller bypasses request validation. An invalid or inapplicable promo code now becomes a `promotionIssue` on that store's order instead of aborting the whole multi-store checkout; automatic promotions still apply, and the order detail screens explain that no discount was applied.
 
 **Severity:** Medium (money-protection / UX-safety)
 **Files:**
@@ -187,7 +187,7 @@ Add regression test: seed 1×`succeeded` (old) + 1×`pending` (new) for same ord
 **Suggested fix:**
 1. Frontend: explicit escrow/direct chooser with warning copy + `direct` requires type-to-confirm or checkbox; default stays `escrow`.
 2. Server (optional hardening): require explicit `directAccepted: true` flag + log `paymentMode: direct` to audit trail; consider per-store risk threshold (new/expensive orders force escrow). **Done 2026-10-22 as `directPaymentAccepted`**; the persisted order group still records `paymentMode: direct`.
-3. Promo: return per-store promo errors without aborting sibling stores.
+3. Promo: return per-store promo errors without aborting sibling stores. **Done 2026-10-22:** the affected order carries `promotionIssue: { code, message }`, and automatic promotions still apply.
 
 **Owner decision needed:** confirm direct-warning UX copy + whether to keep buyer-selectable `direct` at all, then I patch frontend checkout + promo error isolation.
 

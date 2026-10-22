@@ -56,6 +56,10 @@ type OrderGroup struct {
 	DiscountMinor int64 `json:"discount_minor,omitempty"`
 	// PromotionID holds the value of the "promotion_id" field.
 	PromotionID *uuid.UUID `json:"promotion_id,omitempty"`
+	// PromotionIssueCode holds the value of the "promotion_issue_code" field.
+	PromotionIssueCode string `json:"promotion_issue_code,omitempty"`
+	// PromotionIssueMessage holds the value of the "promotion_issue_message" field.
+	PromotionIssueMessage string `json:"promotion_issue_message,omitempty"`
 	// StoreCreditMinor holds the value of the "store_credit_minor" field.
 	StoreCreditMinor int64 `json:"store_credit_minor,omitempty"`
 	// ShippingMinor holds the value of the "shipping_minor" field.
@@ -120,7 +124,7 @@ func (*OrderGroup) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullBool)
 		case ordergroup.FieldSubtotalMinor, ordergroup.FieldDiscountMinor, ordergroup.FieldStoreCreditMinor, ordergroup.FieldShippingMinor, ordergroup.FieldTotalMinor, ordergroup.FieldRefundedMinor, ordergroup.FieldDeliveryAttempts, ordergroup.FieldVersion:
 			values[i] = new(sql.NullInt64)
-		case ordergroup.FieldReference, ordergroup.FieldInvoiceNumber, ordergroup.FieldBuyerName, ordergroup.FieldBuyerUsername, ordergroup.FieldStatus, ordergroup.FieldPreviousStatus, ordergroup.FieldPaymentStatus, ordergroup.FieldPaymentMode, ordergroup.FieldDeliveryStatus, ordergroup.FieldCurrency, ordergroup.FieldCourierName, ordergroup.FieldTrackingNumber, ordergroup.FieldTrackingURL, ordergroup.FieldRiderName, ordergroup.FieldRiderPhone, ordergroup.FieldLastAttemptNote, ordergroup.FieldCancelReason:
+		case ordergroup.FieldReference, ordergroup.FieldInvoiceNumber, ordergroup.FieldBuyerName, ordergroup.FieldBuyerUsername, ordergroup.FieldStatus, ordergroup.FieldPreviousStatus, ordergroup.FieldPaymentStatus, ordergroup.FieldPaymentMode, ordergroup.FieldDeliveryStatus, ordergroup.FieldCurrency, ordergroup.FieldPromotionIssueCode, ordergroup.FieldPromotionIssueMessage, ordergroup.FieldCourierName, ordergroup.FieldTrackingNumber, ordergroup.FieldTrackingURL, ordergroup.FieldRiderName, ordergroup.FieldRiderPhone, ordergroup.FieldLastAttemptNote, ordergroup.FieldCancelReason:
 			values[i] = new(sql.NullString)
 		case ordergroup.FieldCreatedAt, ordergroup.FieldEstimatedDeliveryAt, ordergroup.FieldPaidAt, ordergroup.FieldShippedAt, ordergroup.FieldDeliveredAt, ordergroup.FieldCompletedAt, ordergroup.FieldEscrowReleaseAt, ordergroup.FieldRefundRequestedAt, ordergroup.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
@@ -255,6 +259,18 @@ func (_m *OrderGroup) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.PromotionID = new(uuid.UUID)
 				*_m.PromotionID = *value.S.(*uuid.UUID)
+			}
+		case ordergroup.FieldPromotionIssueCode:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field promotion_issue_code", values[i])
+			} else if value.Valid {
+				_m.PromotionIssueCode = value.String
+			}
+		case ordergroup.FieldPromotionIssueMessage:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field promotion_issue_message", values[i])
+			} else if value.Valid {
+				_m.PromotionIssueMessage = value.String
 			}
 		case ordergroup.FieldStoreCreditMinor:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
@@ -508,6 +524,12 @@ func (_m *OrderGroup) String() string {
 		builder.WriteString("promotion_id=")
 		builder.WriteString(fmt.Sprintf("%v", *v))
 	}
+	builder.WriteString(", ")
+	builder.WriteString("promotion_issue_code=")
+	builder.WriteString(_m.PromotionIssueCode)
+	builder.WriteString(", ")
+	builder.WriteString("promotion_issue_message=")
+	builder.WriteString(_m.PromotionIssueMessage)
 	builder.WriteString(", ")
 	builder.WriteString("store_credit_minor=")
 	builder.WriteString(fmt.Sprintf("%v", _m.StoreCreditMinor))

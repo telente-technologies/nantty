@@ -37,6 +37,8 @@ func (OrderGroup) Fields() []ent.Field {
 		field.Int64("subtotal_minor").Immutable(),
 		field.Int64("discount_minor").Default(0).Immutable(),
 		field.UUID("promotion_id", uuid.UUID{}).Optional().Nillable().Immutable(),
+		field.String("promotion_issue_code").Default("").MaxLen(64).Immutable(),
+		field.String("promotion_issue_message").Default("").MaxLen(255).Immutable(),
 		field.Int64("store_credit_minor").Default(0).Immutable(),
 		field.Int64("shipping_minor").Immutable(),
 		field.Int64("total_minor").Immutable(),
