@@ -4,9 +4,9 @@ package ent
 
 import (
 	"fmt"
+	"nantty/modules/escrow/src/generated/ent/outboxevent"
 	"strings"
 	"time"
-	"zudomart/modules/escrow/src/generated/ent/outboxevent"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"

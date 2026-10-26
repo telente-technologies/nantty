@@ -3,16 +3,16 @@
 package ent
 
 import (
+	"nantty/modules/escrow/src/databases/schema"
+	"nantty/modules/escrow/src/generated/ent/dispute"
+	"nantty/modules/escrow/src/generated/ent/disputemessage"
+	"nantty/modules/escrow/src/generated/ent/disputestatusevent"
+	"nantty/modules/escrow/src/generated/ent/escrow"
+	"nantty/modules/escrow/src/generated/ent/escrowevent"
+	"nantty/modules/escrow/src/generated/ent/idempotentrequest"
+	"nantty/modules/escrow/src/generated/ent/outboxevent"
+	"nantty/modules/escrow/src/generated/ent/pendingrefund"
 	"time"
-	"zudomart/modules/escrow/src/databases/schema"
-	"zudomart/modules/escrow/src/generated/ent/dispute"
-	"zudomart/modules/escrow/src/generated/ent/disputemessage"
-	"zudomart/modules/escrow/src/generated/ent/disputestatusevent"
-	"zudomart/modules/escrow/src/generated/ent/escrow"
-	"zudomart/modules/escrow/src/generated/ent/escrowevent"
-	"zudomart/modules/escrow/src/generated/ent/idempotentrequest"
-	"zudomart/modules/escrow/src/generated/ent/outboxevent"
-	"zudomart/modules/escrow/src/generated/ent/pendingrefund"
 
 	"github.com/google/uuid"
 )

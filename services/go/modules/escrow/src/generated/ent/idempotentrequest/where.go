@@ -3,8 +3,8 @@
 package idempotentrequest
 
 import (
+	"nantty/modules/escrow/src/generated/ent/predicate"
 	"time"
-	"zudomart/modules/escrow/src/generated/ent/predicate"
 
 	"entgo.io/ent/dialect/sql"
 	"github.com/google/uuid"

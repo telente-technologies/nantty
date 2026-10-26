@@ -6,9 +6,9 @@ import (
 	"context"
 	"fmt"
 	"math"
-	"zudomart/modules/escrow/src/generated/ent/escrowevent"
-	"zudomart/modules/escrow/src/generated/ent/internal"
-	"zudomart/modules/escrow/src/generated/ent/predicate"
+	"nantty/modules/escrow/src/generated/ent/escrowevent"
+	"nantty/modules/escrow/src/generated/ent/internal"
+	"nantty/modules/escrow/src/generated/ent/predicate"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect"

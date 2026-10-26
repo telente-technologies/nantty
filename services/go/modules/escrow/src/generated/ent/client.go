@@ -9,16 +9,16 @@ import (
 	"log"
 	"reflect"
 
-	"zudomart/modules/escrow/src/generated/ent/migrate"
+	"nantty/modules/escrow/src/generated/ent/migrate"
 
-	"zudomart/modules/escrow/src/generated/ent/dispute"
-	"zudomart/modules/escrow/src/generated/ent/disputemessage"
-	"zudomart/modules/escrow/src/generated/ent/disputestatusevent"
-	"zudomart/modules/escrow/src/generated/ent/escrow"
-	"zudomart/modules/escrow/src/generated/ent/escrowevent"
-	"zudomart/modules/escrow/src/generated/ent/idempotentrequest"
-	"zudomart/modules/escrow/src/generated/ent/outboxevent"
-	"zudomart/modules/escrow/src/generated/ent/pendingrefund"
+	"nantty/modules/escrow/src/generated/ent/dispute"
+	"nantty/modules/escrow/src/generated/ent/disputemessage"
+	"nantty/modules/escrow/src/generated/ent/disputestatusevent"
+	"nantty/modules/escrow/src/generated/ent/escrow"
+	"nantty/modules/escrow/src/generated/ent/escrowevent"
+	"nantty/modules/escrow/src/generated/ent/idempotentrequest"
+	"nantty/modules/escrow/src/generated/ent/outboxevent"
+	"nantty/modules/escrow/src/generated/ent/pendingrefund"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect"
@@ -27,7 +27,7 @@ import (
 	"github.com/google/uuid"
 
 	stdsql "database/sql"
-	"zudomart/modules/escrow/src/generated/ent/internal"
+	"nantty/modules/escrow/src/generated/ent/internal"
 )
 
 // Client is the client that holds all ent builders.

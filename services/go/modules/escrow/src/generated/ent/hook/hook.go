@@ -5,7 +5,7 @@ package hook
 import (
 	"context"
 	"fmt"
-	"zudomart/modules/escrow/src/generated/ent"
+	"nantty/modules/escrow/src/generated/ent"
 )
 
 // The DisputeFunc type is an adapter to allow the use of ordinary

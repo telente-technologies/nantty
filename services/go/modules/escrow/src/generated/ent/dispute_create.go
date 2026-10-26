@@ -6,9 +6,9 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"nantty/modules/escrow/src/generated/ent/dispute"
+	"nantty/modules/escrow/src/generated/ent/escrow"
 	"time"
-	"zudomart/modules/escrow/src/generated/ent/dispute"
-	"zudomart/modules/escrow/src/generated/ent/escrow"
 
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"

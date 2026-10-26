@@ -6,8 +6,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"nantty/modules/escrow/src/generated/ent/disputemessage"
 	"time"
-	"zudomart/modules/escrow/src/generated/ent/disputemessage"
 
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"

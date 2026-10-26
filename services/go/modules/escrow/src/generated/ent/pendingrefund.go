@@ -4,10 +4,10 @@ package ent
 
 import (
 	"fmt"
+	"nantty/modules/escrow/src/generated/ent/escrow"
+	"nantty/modules/escrow/src/generated/ent/pendingrefund"
 	"strings"
 	"time"
-	"zudomart/modules/escrow/src/generated/ent/escrow"
-	"zudomart/modules/escrow/src/generated/ent/pendingrefund"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
