@@ -48,7 +48,7 @@ jobs:
       - uses: gradle/actions/setup-gradle@v6.4.0
 
       - name: Install mobile dependencies
-        run: pnpm install --frozen-lockfile --filter @zudomart/mobile...
+        run: pnpm install --frozen-lockfile --filter @nantty/mobile...
 
       - name: Type-check
         working-directory: apps/mobile

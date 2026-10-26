@@ -1,27 +1,27 @@
 <div align="center">
 
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="docs/assets/brand/zudomartLockupOnDark.svg" />
-  <img src="docs/assets/brand/zudomartLockup.svg" alt="Zudomart: the Call and response symbol and the Polished brush wordmark" height="64" />
+  <source media="(prefers-color-scheme: dark)" srcset="docs/assets/brand/nanttyLockupOnDark.png" />
+  <img src="docs/assets/brand/nanttyLockup.png" alt="Nantty" height="64" />
 </picture>
 
-# Zudomart
+# Nantty
 
 A social network and a marketplace in one, built for African buyers, sellers and creators, starting with Nigeria.
 
-<img src="docs/assets/readme/hero.webp" alt="Five Zudomart mobile screens: shoppable clips, the home feed, a product page, escrow payment protection and a live stream" width="100%" />
+<img src="docs/assets/readme/hero.webp" alt="Five Nantty mobile screens: shoppable clips, the home feed, a product page, escrow payment protection and a live stream" width="100%" />
 
 </div>
 
 > [!NOTE]
-> Zudomart is **pre-launch**. The apps run either on built-in mocks or against the real backend started on a developer machine. Nothing is deployed yet: the AWS Terraform is written but has never been applied, and production payments still need live Flutterwave keys and Flutterwave's written answers.
+> Nantty is **pre-launch**. The apps run either on built-in mocks or against the real backend started on a developer machine. Nothing is deployed yet: the AWS Terraform is written but has never been applied, and production payments still need live Flutterwave keys and Flutterwave's written answers.
 
 ## What it is
 
 - **Social:** feed, clips, stories, comments, follows, mentions and end-to-end encrypted chat.
-- **Live:** live streams on LiveKit, with guests, battles, gifts and ZudoPoints. Creators can go live from the mobile app, from the browser in Studio (WHIP), or from OBS.
+- **Live:** live streams on LiveKit, with guests, battles, gifts and Nantty Points. Creators can go live from the mobile app, from the browser in Studio (WHIP), or from OBS.
 - **Marketplace:** stores, products, carts grouped by seller, seller-run shipping, orders, returns, disputes and reviews. The seller dashboard is an e-commerce back office; it has no in-store register.
-- **Money:** Flutterwave is the only payment provider. In Nigeria each user's money sits in their own Flutterwave payout subaccount, and escrow is a lock on the buyer's own balance, so Zudomart never holds customer money. Outside Nigeria there is no escrow: buyers pay the seller directly, and nobody can sell until they are identity-verified.
+- **Money:** Flutterwave is the only payment provider. In Nigeria each user's money sits in their own Flutterwave payout subaccount, and escrow is a lock on the buyer's own balance, so Nantty never holds customer money. Outside Nigeria there is no escrow: buyers pay the seller directly, and nobody can sell until they are identity-verified.
 - **Profiles:** a personal account can own one store **or** one business page (never both), plus one brand.
 - **Creators and ads:** gifts, creator subscriptions, affiliates, an ads revenue share, an Ads Manager and boosts.
 - **Widgets:** iOS and Android home-screen widgets, and an embeddable web widget for stores and products.
@@ -67,8 +67,8 @@ pnpm install
 
 ```bash
 pnpm mode:mock
-pnpm --filter @zudomart/webapp dev     # http://localhost:3500
-pnpm --filter @zudomart/mobile dev     # Expo
+pnpm --filter @nantty/webapp dev       # http://localhost:3500
+pnpm --filter @nantty/mobile dev       # Expo
 ```
 
 Each app's demo sign-ins are shown on its sign-in page in mock mode.
@@ -79,7 +79,7 @@ Each app's demo sign-ins are shown on its sign-in page in mock mode.
 pnpm backend:up          # infra, migrations, every service on 127.0.0.1, demo seed
 pnpm mode:backend        # point every app at the gateway on :8080, mocks off
 pnpm backend:check       # signs in as the demo buyer and checks the main paths
-pnpm --filter @zudomart/webapp dev
+pnpm --filter @nantty/webapp dev
 # ...
 pnpm mode:mock
 pnpm backend:down
@@ -102,7 +102,7 @@ The development machine has 15 GB of RAM: run one dev server, build or test suit
 | `pnpm backend:test:<service>` | `gateway`, `social`, `notifications`, `support` tests; `realtime` runs in Docker |
 | `pnpm backend:test:smoke` | API smoke suite against a running stack |
 | `pnpm backend:lint` | 300-line limit for backend files, no raw SQL in TypeScript |
-| `pnpm --filter @zudomart/<app> test:contracts` | Mock and API contract tests for webapp, studio, seller, ads and admin |
+| `pnpm --filter @nantty/<app> test:contracts` | Mock and API contract tests for webapp, studio, seller, ads and admin |
 | `pnpm typecheck`, `pnpm lint`, `pnpm lint:styles` | Workspace type check, ESLint, stylelint |
 | `pnpm check:no-mocks` / `check:no-mocks:mobile` | Fail if a production build contains mock code |
 | `pnpm backend:rabbitmq:definitions` | Regenerate the RabbitMQ definitions from `infra/local/rabbitmq/topology.json` |
@@ -119,7 +119,7 @@ The development machine has 15 GB of RAM: run one dev server, build or test suit
 
 ## Contributing
 
-Zudomart is a private, owner-led project. Read [services/zudojsStructure.md](services/zudojsStructure.md) and [SECURITY.md](SECURITY.md) first. House rules: backend files stay at 300 lines or fewer, almost no comments, Prisma or ent + Atlas only (no hand-written SQL), money in integer minor units, and events named `<entity>.<pastTense>` with a JSON Schema.
+Nantty is a private, owner-led project. Read [services/zudojsStructure.md](services/zudojsStructure.md) and [SECURITY.md](SECURITY.md) first. House rules: backend files stay at 300 lines or fewer, almost no comments, Prisma or ent + Atlas only (no hand-written SQL), money in integer minor units, and events named `<entity>.<pastTense>` with a JSON Schema.
 
 ## Licence and contact
 

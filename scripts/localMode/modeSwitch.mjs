@@ -92,7 +92,7 @@ function switchMode() {
   }
   printTable(rows, ["app", "mode", "api url", "env file", "result"]);
   console.log("");
-  console.log("Restart running dev servers so they pick up the change (Next reads env at start; Expo: `pnpm --filter @zudomart/mobile exec expo start -c`).");
+  console.log("Restart running dev servers so they pick up the change (Next reads env at start; Expo: `pnpm --filter @nantty/mobile exec expo start -c`).");
   if (command === "backend") {
     console.log("Backend not running? `pnpm backend:up` (add `-- --lan` so a phone on the same Wi-Fi can reach the gateway). Check it with `pnpm mode:status`.");
   }

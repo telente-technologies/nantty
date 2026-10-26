@@ -44,7 +44,7 @@ Ground rules:
 - Escrow state skips: confirm receipt before shipping, dispute after release, double release.
 - Refund caps: partial refunds summing to more than paid; refund after payout.
 - Subscription: renewal at full price after a discount or trial; plan downgrade timing; Business 1% vs 1.5% fee.
-- Coins and ZudoPoints: negative amounts, transfer to self, conversion rounding.
+- Coins and Nantty Points: negative amounts, transfer to self, conversion rounding.
 
 ## Phase 4: races (`security/race/`, SANDBOX-ONLY, snapshots required)
 - Parallel refund requests for one order; parallel withdrawals beyond balance; double webhook delivery (charge, transfer, refund); concurrent coin transfers.
