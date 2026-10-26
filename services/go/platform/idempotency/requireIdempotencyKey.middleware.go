@@ -12,8 +12,8 @@ import (
 	"slices"
 	"time"
 
-	"zudomart/platform/httpserver"
-	"zudomart/platform/jwtauth"
+	"nantty/platform/httpserver"
+	"nantty/platform/jwtauth"
 )
 
 var idempotencyKeyPattern = regexp.MustCompile(`^[A-Za-z0-9_-]{8,128}$`)

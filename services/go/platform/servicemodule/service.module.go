@@ -5,8 +5,8 @@ import (
 	"log/slog"
 	"net/http"
 
-	"zudomart/platform/config"
-	"zudomart/platform/health"
+	"nantty/platform/config"
+	"nantty/platform/health"
 )
 
 type Dependencies struct {

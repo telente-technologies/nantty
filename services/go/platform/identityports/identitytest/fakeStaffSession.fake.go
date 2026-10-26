@@ -3,7 +3,7 @@ package identitytest
 import (
 	"context"
 
-	"zudomart/platform/identityports"
+	"nantty/platform/identityports"
 )
 
 type ActiveStaffSessionChecker struct{}

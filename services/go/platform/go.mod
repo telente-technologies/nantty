@@ -1,4 +1,4 @@
-module zudomart/platform
+module nantty/platform
 
 go 1.26.9
 

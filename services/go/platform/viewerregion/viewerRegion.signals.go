@@ -4,7 +4,7 @@ import (
 	"context"
 	"net/http"
 
-	"zudomart/platform/httpserver"
+	"nantty/platform/httpserver"
 )
 
 const (

@@ -10,7 +10,7 @@ import (
 	"strings"
 	"testing"
 
-	"zudomart/platform/health"
+	"nantty/platform/health"
 )
 
 func TestReadinessReportsTheBrokerAndCacheDownWhenTheyAreUnreachable(t *testing.T) {

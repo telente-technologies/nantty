@@ -13,8 +13,8 @@ import (
 	"github.com/lestrrat-go/jwx/v3/jwk"
 	"github.com/lestrrat-go/jwx/v3/jwt"
 
-	"zudomart/platform/identityports"
-	"zudomart/platform/staffauth"
+	"nantty/platform/identityports"
+	"nantty/platform/staffauth"
 )
 
 const (

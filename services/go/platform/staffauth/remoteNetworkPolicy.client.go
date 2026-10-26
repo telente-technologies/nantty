@@ -12,8 +12,8 @@ import (
 	"sync"
 	"time"
 
-	"zudomart/platform/httpserver"
-	"zudomart/platform/identityports"
+	"nantty/platform/httpserver"
+	"nantty/platform/identityports"
 )
 
 const (

@@ -12,7 +12,7 @@ import (
 	"github.com/lestrrat-go/jwx/v3/jwt"
 	"github.com/redis/go-redis/v9"
 
-	"zudomart/platform/httpserver"
+	"nantty/platform/httpserver"
 )
 
 const (

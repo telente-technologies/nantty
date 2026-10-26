@@ -11,8 +11,8 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/platform/identityports"
-	"zudomart/platform/staffauth"
+	"nantty/platform/identityports"
+	"nantty/platform/staffauth"
 )
 
 func serveWithStepUp(handler http.Handler, accessToken, stepUpToken, body string) *httptest.ResponseRecorder {

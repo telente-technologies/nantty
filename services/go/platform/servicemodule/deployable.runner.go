@@ -10,14 +10,14 @@ import (
 	"strings"
 	"syscall"
 
-	"zudomart/platform/config"
-	"zudomart/platform/events"
-	"zudomart/platform/health"
-	"zudomart/platform/httpserver"
-	"zudomart/platform/jwtauth"
-	"zudomart/platform/logging"
-	"zudomart/platform/telemetry"
-	"zudomart/platform/viewerregion"
+	"nantty/platform/config"
+	"nantty/platform/events"
+	"nantty/platform/health"
+	"nantty/platform/httpserver"
+	"nantty/platform/jwtauth"
+	"nantty/platform/logging"
+	"nantty/platform/telemetry"
+	"nantty/platform/viewerregion"
 )
 
 func RunDeployableWithModulesUntilTerminationSignal(deployableName string, factories ...Factory) error {

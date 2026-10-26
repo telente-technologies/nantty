@@ -6,7 +6,7 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/platform/identityports"
+	"nantty/platform/identityports"
 )
 
 func (directory *FakeAccountDirectory) setStatus(accountId uuid.UUID, status string) {

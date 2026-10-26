@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"strings"
 
-	"zudomart/platform/httpserver"
+	"nantty/platform/httpserver"
 )
 
 const (

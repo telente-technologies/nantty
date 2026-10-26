@@ -7,7 +7,7 @@ import (
 	"strings"
 	"sync"
 
-	"zudomart/platform/secretbox"
+	"nantty/platform/secretbox"
 )
 
 const AddressPhoneKeyVariable = "ADDRESS_PHONE_ENCRYPTION_KEY"

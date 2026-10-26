@@ -7,9 +7,9 @@ import (
 	"sync"
 	"testing"
 
-	"zudomart/platform/identityports"
-	"zudomart/platform/identityports/identitytest"
-	"zudomart/platform/staffauth"
+	"nantty/platform/identityports"
+	"nantty/platform/identityports/identitytest"
+	"nantty/platform/staffauth"
 )
 
 type allowListPolicy struct{ allowed string }

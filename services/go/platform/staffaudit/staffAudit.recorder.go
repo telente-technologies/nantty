@@ -9,8 +9,8 @@ import (
 	"strings"
 	"time"
 
-	"zudomart/platform/httpserver"
-	"zudomart/platform/staffauth"
+	"nantty/platform/httpserver"
+	"nantty/platform/staffauth"
 )
 
 type Record struct {

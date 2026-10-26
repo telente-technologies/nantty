@@ -6,9 +6,9 @@ import (
 	"slices"
 	"strings"
 
-	"zudomart/platform/httpserver"
-	"zudomart/platform/identityports"
-	"zudomart/platform/jwtauth"
+	"nantty/platform/httpserver"
+	"nantty/platform/identityports"
+	"nantty/platform/jwtauth"
 )
 
 const (

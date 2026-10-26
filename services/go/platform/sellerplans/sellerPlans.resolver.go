@@ -10,7 +10,7 @@ import (
 
 	"github.com/google/uuid"
 
-	platformconfig "zudomart/platform/config"
+	platformconfig "nantty/platform/config"
 )
 
 type Plan string

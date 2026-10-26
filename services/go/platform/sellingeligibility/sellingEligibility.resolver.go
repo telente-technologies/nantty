@@ -8,8 +8,8 @@ import (
 	"sync"
 	"time"
 
-	platformconfig "zudomart/platform/config"
-	"zudomart/platform/httpserver"
+	platformconfig "nantty/platform/config"
+	"nantty/platform/httpserver"
 )
 
 type Eligibility struct {
