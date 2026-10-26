@@ -56,6 +56,37 @@ func (client *MoneyClient) ChargeGiftAndCreditCreator(ctx context.Context, reque
 	}, nil
 }
 
+func (client *MoneyClient) ChargeSpaceCoinGift(ctx context.Context, request interfaces.ChargeSpaceCoinGiftRequest) (interfaces.SpaceCoinGiftReceipt, error) {
+	message := &moneyv1.ChargeSpaceCoinGiftRequest{
+		SenderUserId:   request.SenderUserId,
+		SpaceId:        request.SpaceId,
+		GiftId:         request.GiftId,
+		Quantity:       int32(request.Quantity),
+		IdempotencyKey: request.IdempotencyKey,
+	}
+	response, err := callWithRetryOnUnavailable(ctx, client.options, request.IdempotencyKey != "", func(attempt context.Context) (*moneyv1.ChargeSpaceCoinGiftResponse, error) {
+		return client.service.ChargeSpaceCoinGift(attempt, message)
+	})
+	if err != nil {
+		return interfaces.SpaceCoinGiftReceipt{}, translateMoneyError(err)
+	}
+	return interfaces.SpaceCoinGiftReceipt{
+		GiftTransactionId:   response.GetGiftTransactionId(),
+		LedgerTransactionId: response.GetLedgerTransactionId(),
+		SenderUserId:        response.GetSenderUserId(),
+		HostUserId:          response.GetHostUserId(),
+		SpaceId:             response.GetSpaceId(),
+		GiftId:              response.GetGiftId(),
+		Quantity:            int(response.GetQuantity()),
+		UnitPriceCoins:      response.GetUnitPriceCoins(),
+		TotalCoins:          response.GetTotalCoins(),
+		PlatformFeeCoins:    response.GetPlatformFeeCoins(),
+		CreatorAmountCoins:  response.GetCreatorAmountCoins(),
+		SenderCoinBalance:   response.GetSenderCoinBalance(),
+		Replayed:            response.GetReplayed(),
+	}, nil
+}
+
 func (client *MoneyClient) GetCoinBalance(ctx context.Context, userId string) (int64, error) {
 	response, err := callWithRetryOnUnavailable(ctx, client.options, true, func(attempt context.Context) (*moneyv1.GetCoinBalanceResponse, error) {
 		return client.service.GetCoinBalance(attempt, &moneyv1.GetCoinBalanceRequest{UserId: userId})
@@ -99,6 +130,14 @@ func translateMoneyError(err error) error {
 		return interfaces.ErrIdempotencyKeyReused
 	case reason == "BATTLE_ALREADY_SETTLED_DIFFERENTLY":
 		return interfaces.ErrBattleSettledDifferently
+	case reason == "SPACE_GIFTS_DISABLED":
+		return interfaces.ErrSpaceGiftsDisabled
+	case reason == "SPACE_GIFT_UNAVAILABLE" || reason == "SPACE_NOT_FOUND":
+		return interfaces.ErrSpaceGiftUnavailable
+	case reason == "SPACE_HOST_NOT_CREATOR":
+		return interfaces.ErrSpaceHostNotCreator
+	case reason == "SPACE_GIFT_BLOCKED":
+		return interfaces.ErrSpaceGiftBlocked
 	case grpcStatus.Code() == codes.InvalidArgument:
 		return errors.Join(interfaces.ErrMoneyRequestInvalid, err)
 	}

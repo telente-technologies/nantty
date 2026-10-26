@@ -23,6 +23,7 @@ type ParticipantDirectory interface {
 type MediaRoomController interface {
 	RemoveParticipant(ctx context.Context, room, identity string) error
 	SetParticipantTracksMuted(ctx context.Context, room, identity string, audio, video *bool) error
+	SetParticipantCanPublish(ctx context.Context, room, identity string, canPublish bool) error
 	EnsureRoom(ctx context.Context, room string) error
 	DeleteRoom(ctx context.Context, room string) error
 }

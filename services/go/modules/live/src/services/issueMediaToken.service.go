@@ -58,7 +58,7 @@ func (service *LiveService) IssueMediaToken(ctx context.Context, actor types.Act
 	}
 	token, err := service.Tokens.IssueParticipantToken(integrations.MediaGrant{
 		Room: session.LivekitRoom, Identity: actor.UserId.String(), Name: participants[actor.UserId].Name,
-		CanPublish: canPublish, Role: role, TimeToLive: service.Settings.MediaTokenTimeToLive,
+		CanPublish: canPublish, CanPublishData: true, Role: role, TimeToLive: service.Settings.MediaTokenTimeToLive,
 	})
 	if err != nil {
 		return types.MediaTokenView{}, err

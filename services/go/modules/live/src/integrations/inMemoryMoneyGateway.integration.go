@@ -90,6 +90,10 @@ func (gateway *InMemoryMoneyGateway) GetCoinBalance(_ context.Context, userId st
 	return gateway.balanceLocked(userId), nil
 }
 
+func (gateway *InMemoryMoneyGateway) ChargeSpaceCoinGift(_ context.Context, _ interfaces.ChargeSpaceCoinGiftRequest) (interfaces.SpaceCoinGiftReceipt, error) {
+	return interfaces.SpaceCoinGiftReceipt{}, interfaces.ErrSpaceGiftGatewayUnavailable
+}
+
 func (gateway *InMemoryMoneyGateway) chargeTotal(request interfaces.ChargeGiftRequest) int64 {
 	return request.UnitPriceCoins * int64(request.Quantity)
 }

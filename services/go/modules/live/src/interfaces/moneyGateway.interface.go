@@ -13,6 +13,11 @@ var (
 	ErrIdempotencyKeyReused        = errors.New("idempotency key reused with a different request")
 	ErrBattleSettledDifferently    = errors.New("battle already settled differently")
 	ErrMoneyRequestInvalid         = errors.New("money request invalid")
+	ErrSpaceGiftUnavailable        = errors.New("space gift unavailable")
+	ErrSpaceGiftsDisabled          = errors.New("space gifts disabled")
+	ErrSpaceHostNotCreator         = errors.New("space host is not an approved creator")
+	ErrSpaceGiftBlocked            = errors.New("space gift unavailable between these accounts")
+	ErrSpaceGiftGatewayUnavailable = errors.New("space coin gifts are unavailable in this gateway")
 )
 
 type ChargeGiftRequest struct {
@@ -38,6 +43,32 @@ type ChargedGift struct {
 	LedgerTransactionId string
 	SenderCoinBalance   int64
 	CreatedAt           time.Time
+	Replayed            bool
+}
+
+// ChargeSpaceCoinGiftRequest deliberately contains no recipient or price: the
+// money service resolves the Space host and active catalog price authoritatively.
+type ChargeSpaceCoinGiftRequest struct {
+	SenderUserId   string
+	SpaceId        string
+	GiftId         string
+	Quantity       int
+	IdempotencyKey string
+}
+
+type SpaceCoinGiftReceipt struct {
+	GiftTransactionId   string
+	LedgerTransactionId string
+	SenderUserId        string
+	HostUserId          string
+	SpaceId             string
+	GiftId              string
+	Quantity            int
+	UnitPriceCoins      int64
+	TotalCoins          int64
+	PlatformFeeCoins    int64
+	CreatorAmountCoins  int64
+	SenderCoinBalance   int64
 	Replayed            bool
 }
 
@@ -96,6 +127,7 @@ type BattleGiftTotal struct {
 type MoneyGateway interface {
 	GetBattleGiftTotals(ctx context.Context, battleId string) ([]BattleGiftTotal, error)
 	ChargeGiftAndCreditCreator(ctx context.Context, request ChargeGiftRequest) (ChargedGift, error)
+	ChargeSpaceCoinGift(ctx context.Context, request ChargeSpaceCoinGiftRequest) (SpaceCoinGiftReceipt, error)
 	SettleBattle(ctx context.Context, request SettleBattleRequest) (BattleSettlement, error)
 	GetCoinBalance(ctx context.Context, userId string) (int64, error)
 }

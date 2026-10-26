@@ -18,18 +18,19 @@ type TokenIssuer struct {
 }
 
 type MediaGrant struct {
-	Room       string
-	Identity   string
-	Name       string
-	CanPublish bool
-	Role       string
-	TimeToLive time.Duration
-	AudioOnly  bool
+	Room           string
+	Identity       string
+	Name           string
+	CanPublish     bool
+	CanPublishData bool
+	Role           string
+	TimeToLive     time.Duration
+	AudioOnly      bool
 }
 
 func (issuer *TokenIssuer) IssueParticipantToken(grant MediaGrant) (string, error) {
 	canSubscribe := true
-	canPublishData := grant.CanPublish
+	canPublishData := grant.CanPublishData
 	canPublish := grant.CanPublish
 	canUpdateOwnMetadata := false
 	videoGrant := &auth.VideoGrant{
