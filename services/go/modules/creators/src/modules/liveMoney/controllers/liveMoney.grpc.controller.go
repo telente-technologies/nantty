@@ -36,6 +36,23 @@ func (controller LiveMoneyGrpcController) ChargeGiftAndCreditCreator(ctx context
 	return &moneyv1.ChargeGiftAndCreditCreatorResponse{GiftTransaction: convertGiftTransaction(charged.Transaction), SenderCoinBalance: charged.SenderCoinBalance, Replayed: charged.Replayed}, nil
 }
 
+func (controller LiveMoneyGrpcController) ChargeSpaceCoinGift(ctx context.Context, request *moneyv1.ChargeSpaceCoinGiftRequest) (*moneyv1.ChargeSpaceCoinGiftResponse, error) {
+	receipt, err := controller.LiveMoney.ChargeSpaceCoinGift(ctx, services.SpaceCoinGiftRequest{
+		SenderUserID: request.GetSenderUserId(), SpaceID: request.GetSpaceId(),
+		GiftID: request.GetGiftId(), Quantity: int64(request.GetQuantity()), IdempotencyKey: request.GetIdempotencyKey(),
+	})
+	if err != nil {
+		return nil, controller.convertError(ctx, err)
+	}
+	return &moneyv1.ChargeSpaceCoinGiftResponse{
+		GiftTransactionId: receipt.GiftTransactionID, LedgerTransactionId: receipt.LedgerEntryID,
+		SenderUserId: receipt.SenderUserID, HostUserId: receipt.HostUserID, SpaceId: receipt.SpaceID, GiftId: receipt.GiftID,
+		Quantity: int32(receipt.Quantity), UnitPriceCoins: receipt.UnitPriceCoins, TotalCoins: receipt.TotalCoins,
+		PlatformFeeCoins: receipt.PlatformFeeCoins, CreatorAmountCoins: receipt.CreatorAmount,
+		SenderCoinBalance: receipt.SenderBalance, Replayed: receipt.Replayed,
+	}, nil
+}
+
 var participantOutcomes = map[moneyv1.BattleParticipantOutcome]models.ParticipantOutcome{
 	moneyv1.BattleParticipantOutcome_BATTLE_PARTICIPANT_OUTCOME_ACTIVE:          models.OutcomeActive,
 	moneyv1.BattleParticipantOutcome_BATTLE_PARTICIPANT_OUTCOME_FORFEITED:       models.OutcomeForfeited,

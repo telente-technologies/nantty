@@ -1,4 +1,4 @@
-h1:J2fPKDRN1OOa6nQ5zv/RO18c7czv1IMr4f+xVJCzFJg=
+h1:3RQMzzvdkheBCC9v3RNExnDZ2yi7TaNipfsXlK6lLug=
 20261003112651_create_creators_tables.up.sql h1:fSXY6TTsBu3wUlYGl2nLv+TfPjF+AuhReRGg7zmEiNs=
 20261003112751_grant_read_access_to_other_services.up.sql h1:VavCoRnzO6fKBQeTtixFcg6k8zEmq7Dm6dWXI9vasH4=
 20261005165637_creator_earnings_tips_affiliates.up.sql h1:YTa6zKLvUBB3Wg8sddUS8lWugoJr40eOzdtBfrbUP4Y=
@@ -8,3 +8,4 @@ h1:J2fPKDRN1OOa6nQ5zv/RO18c7czv1IMr4f+xVJCzFJg=
 20261012021458_affiliate_commission_retry_schedule.up.sql h1:Gy8kZULX3eMArNeg1lRTLquig3t4jAGZzaE/GWZ6W5A=
 20261012164054_affiliate_links_and_attributed_sales.up.sql h1:6YKDuR02Pd0yLFa8fezSqMFcPsej9l6jqcKhvrS2PkE=
 20261012220341_affiliate_click_dedupe_and_order_voids.up.sql h1:ksGk3ITFAI9uLPwgzc7MsuZlbvzkS5Jab0FTwJ2tDfE=
+20261026160000_space_coin_gifts.up.sql h1:BWKOjpUXQqGOzX3X+FFhBYkasxXXZHxciz9mVK76jEM=
