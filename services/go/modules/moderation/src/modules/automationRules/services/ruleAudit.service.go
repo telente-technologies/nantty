@@ -5,9 +5,9 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"zudomart/modules/moderation/src/container"
-	"zudomart/modules/moderation/src/integrations"
-	"zudomart/platform/staffauth"
+	"nantty/modules/moderation/src/container"
+	"nantty/modules/moderation/src/integrations"
+	"nantty/platform/staffauth"
 )
 
 type RuleAuditEntry struct {

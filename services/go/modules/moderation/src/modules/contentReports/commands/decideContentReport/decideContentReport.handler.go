@@ -10,16 +10,16 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/moderation/src/container"
-	"zudomart/modules/moderation/src/events"
-	"zudomart/modules/moderation/src/generated/ent"
-	"zudomart/modules/moderation/src/generated/ent/contentreport"
-	"zudomart/modules/moderation/src/generated/ent/contentreportentry"
-	"zudomart/modules/moderation/src/integrations"
-	reportevents "zudomart/modules/moderation/src/modules/contentReports/events"
-	"zudomart/modules/moderation/src/modules/contentReports/services"
-	strikeservices "zudomart/modules/moderation/src/modules/strikes/services"
-	"zudomart/platform/httpserver"
+	"nantty/modules/moderation/src/container"
+	"nantty/modules/moderation/src/events"
+	"nantty/modules/moderation/src/generated/ent"
+	"nantty/modules/moderation/src/generated/ent/contentreport"
+	"nantty/modules/moderation/src/generated/ent/contentreportentry"
+	"nantty/modules/moderation/src/integrations"
+	reportevents "nantty/modules/moderation/src/modules/contentReports/events"
+	"nantty/modules/moderation/src/modules/contentReports/services"
+	strikeservices "nantty/modules/moderation/src/modules/strikes/services"
+	"nantty/platform/httpserver"
 )
 
 type Handler struct {

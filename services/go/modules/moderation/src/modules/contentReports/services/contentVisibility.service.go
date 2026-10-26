@@ -5,9 +5,9 @@ import (
 	"slices"
 	"time"
 
-	"zudomart/modules/moderation/src/events"
-	"zudomart/modules/moderation/src/generated/ent"
-	reportevents "zudomart/modules/moderation/src/modules/contentReports/events"
+	"nantty/modules/moderation/src/events"
+	"nantty/modules/moderation/src/generated/ent"
+	reportevents "nantty/modules/moderation/src/modules/contentReports/events"
 )
 
 var visibilityOrder = []string{"visible", "restricted", "hidden", "removed"}

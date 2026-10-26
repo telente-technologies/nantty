@@ -3,8 +3,8 @@ package getevidenceretention
 import (
 	"context"
 
-	"zudomart/modules/moderation/src/container"
-	"zudomart/modules/moderation/src/modules/chatReports/services"
+	"nantty/modules/moderation/src/container"
+	"nantty/modules/moderation/src/modules/chatReports/services"
 )
 
 type Result struct {

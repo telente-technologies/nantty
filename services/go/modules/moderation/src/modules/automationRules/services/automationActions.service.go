@@ -8,11 +8,11 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/moderation/src/container"
-	"zudomart/modules/moderation/src/generated/ent"
-	"zudomart/modules/moderation/src/generated/ent/contentreport"
-	"zudomart/modules/moderation/src/integrations"
-	reportservices "zudomart/modules/moderation/src/modules/contentReports/services"
+	"nantty/modules/moderation/src/container"
+	"nantty/modules/moderation/src/generated/ent"
+	"nantty/modules/moderation/src/generated/ent/contentreport"
+	"nantty/modules/moderation/src/integrations"
+	reportservices "nantty/modules/moderation/src/modules/contentReports/services"
 )
 
 var defaultUserFields = []string{"targetOwnerId", "ownerId", "userId", "senderId"}

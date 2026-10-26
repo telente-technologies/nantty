@@ -4,9 +4,9 @@ import (
 	"testing"
 	"time"
 
-	"zudomart/modules/moderation/src/generated/ent"
-	"zudomart/modules/moderation/src/generated/ent/strike"
-	copyrightservices "zudomart/modules/moderation/src/modules/copyrightClaims/services"
+	"nantty/modules/moderation/src/generated/ent"
+	"nantty/modules/moderation/src/generated/ent/strike"
+	copyrightservices "nantty/modules/moderation/src/modules/copyrightClaims/services"
 )
 
 var now = time.Date(2026, 10, 4, 12, 0, 0, 0, time.UTC)

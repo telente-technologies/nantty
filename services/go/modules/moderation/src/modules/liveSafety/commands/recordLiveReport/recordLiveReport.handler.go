@@ -4,11 +4,11 @@ import (
 	"context"
 	"strings"
 
-	"zudomart/modules/moderation/src/container"
-	"zudomart/modules/moderation/src/generated/ent"
-	"zudomart/modules/moderation/src/generated/ent/livesafetysignal"
-	"zudomart/modules/moderation/src/modules/liveSafety/services"
-	"zudomart/platform/httpserver"
+	"nantty/modules/moderation/src/container"
+	"nantty/modules/moderation/src/generated/ent"
+	"nantty/modules/moderation/src/generated/ent/livesafetysignal"
+	"nantty/modules/moderation/src/modules/liveSafety/services"
+	"nantty/platform/httpserver"
 )
 
 type Handler struct {

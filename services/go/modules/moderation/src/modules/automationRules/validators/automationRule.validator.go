@@ -9,8 +9,8 @@ import (
 	"strconv"
 	"strings"
 
-	"zudomart/modules/moderation/src/modules/automationRules/services"
-	"zudomart/platform/httpserver"
+	"nantty/modules/moderation/src/modules/automationRules/services"
+	"nantty/platform/httpserver"
 )
 
 var RuleIdPattern = regexp.MustCompile(`^rule_[a-z0-9_]{3,58}$`)

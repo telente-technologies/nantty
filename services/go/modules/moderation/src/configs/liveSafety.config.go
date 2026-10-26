@@ -4,7 +4,7 @@ import (
 	"strconv"
 	"time"
 
-	platformconfig "zudomart/platform/config"
+	platformconfig "nantty/platform/config"
 )
 
 type LiveSafetySettings struct {

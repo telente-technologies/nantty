@@ -3,8 +3,8 @@ package moderation
 import (
 	"context"
 
-	"zudomart/modules/moderation/src"
-	"zudomart/platform/servicemodule"
+	"nantty/modules/moderation/src"
+	"nantty/platform/servicemodule"
 )
 
 type Module = src.Module

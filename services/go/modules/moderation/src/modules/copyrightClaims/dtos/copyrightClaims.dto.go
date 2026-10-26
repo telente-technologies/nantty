@@ -1,8 +1,8 @@
 package dtos
 
 import (
-	recordaudiomatches "zudomart/modules/moderation/src/modules/copyrightClaims/commands/recordAudioMatches"
-	"zudomart/modules/moderation/src/modules/copyrightClaims/validators"
+	recordaudiomatches "nantty/modules/moderation/src/modules/copyrightClaims/commands/recordAudioMatches"
+	"nantty/modules/moderation/src/modules/copyrightClaims/validators"
 )
 
 type SubmitClaimRequest struct {

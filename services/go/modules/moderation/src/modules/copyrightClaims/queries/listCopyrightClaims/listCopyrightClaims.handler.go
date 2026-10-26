@@ -7,11 +7,11 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/moderation/src/container"
-	"zudomart/modules/moderation/src/generated/ent"
-	"zudomart/modules/moderation/src/generated/ent/copyrightclaim"
-	"zudomart/modules/moderation/src/generated/ent/predicate"
-	"zudomart/modules/moderation/src/modules/copyrightClaims/services"
+	"nantty/modules/moderation/src/container"
+	"nantty/modules/moderation/src/generated/ent"
+	"nantty/modules/moderation/src/generated/ent/copyrightclaim"
+	"nantty/modules/moderation/src/generated/ent/predicate"
+	"nantty/modules/moderation/src/modules/copyrightClaims/services"
 )
 
 const pageSize = 25

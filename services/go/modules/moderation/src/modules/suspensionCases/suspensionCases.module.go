@@ -3,9 +3,9 @@ package suspensioncases
 import (
 	"net/http"
 
-	"zudomart/modules/moderation/src/container"
-	"zudomart/modules/moderation/src/modules/suspensionCases/routes"
-	"zudomart/modules/moderation/src/modules/suspensionCases/services"
+	"nantty/modules/moderation/src/container"
+	"nantty/modules/moderation/src/modules/suspensionCases/routes"
+	"nantty/modules/moderation/src/modules/suspensionCases/services"
 )
 
 type AdvisoryConsumer = services.AdvisoryConsumer

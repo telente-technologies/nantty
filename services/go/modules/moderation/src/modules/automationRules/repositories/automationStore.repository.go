@@ -7,12 +7,12 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/moderation/src/container"
-	"zudomart/modules/moderation/src/generated/ent"
-	"zudomart/modules/moderation/src/generated/ent/automationeventoccurrence"
-	"zudomart/modules/moderation/src/generated/ent/automationexecution"
-	"zudomart/modules/moderation/src/generated/ent/automationrule"
-	"zudomart/modules/moderation/src/modules/automationRules/services"
+	"nantty/modules/moderation/src/container"
+	"nantty/modules/moderation/src/generated/ent"
+	"nantty/modules/moderation/src/generated/ent/automationeventoccurrence"
+	"nantty/modules/moderation/src/generated/ent/automationexecution"
+	"nantty/modules/moderation/src/generated/ent/automationrule"
+	"nantty/modules/moderation/src/modules/automationRules/services"
 )
 
 type EntStore struct {

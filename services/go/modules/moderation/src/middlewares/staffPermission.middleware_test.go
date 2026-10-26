@@ -7,9 +7,9 @@ import (
 	"strings"
 	"testing"
 
-	"zudomart/platform/identityports/identitytest"
-	"zudomart/platform/jwtauth"
-	"zudomart/platform/staffauth"
+	"nantty/platform/identityports/identitytest"
+	"nantty/platform/jwtauth"
+	"nantty/platform/staffauth"
 )
 
 func TestStaffGuardDeniesAnEmptyPermissionListAndMissingStepUp(t *testing.T) {

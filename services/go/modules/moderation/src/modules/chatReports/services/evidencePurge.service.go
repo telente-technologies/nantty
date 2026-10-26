@@ -3,10 +3,10 @@ package services
 import (
 	"context"
 
-	"zudomart/modules/moderation/src/container"
-	"zudomart/modules/moderation/src/events"
-	"zudomart/modules/moderation/src/generated/ent"
-	"zudomart/modules/moderation/src/generated/ent/chatreport"
+	"nantty/modules/moderation/src/container"
+	"nantty/modules/moderation/src/events"
+	"nantty/modules/moderation/src/generated/ent"
+	"nantty/modules/moderation/src/generated/ent/chatreport"
 )
 
 type EvidencePurger struct {

@@ -7,9 +7,9 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/moderation/src/generated/ent"
-	"zudomart/modules/moderation/src/generated/ent/livesafetyincident"
-	"zudomart/modules/moderation/src/generated/ent/livesafetysignal"
+	"nantty/modules/moderation/src/generated/ent"
+	"nantty/modules/moderation/src/generated/ent/livesafetyincident"
+	"nantty/modules/moderation/src/generated/ent/livesafetysignal"
 )
 
 func FindOpenIncident(ctx context.Context, client *ent.Client, liveId string) (*ent.LiveSafetyIncident, error) {

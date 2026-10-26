@@ -4,10 +4,10 @@ import (
 	"context"
 	"time"
 
-	"zudomart/modules/moderation/src/events"
-	"zudomart/modules/moderation/src/generated/ent"
-	"zudomart/modules/moderation/src/generated/ent/livesafetyincident"
-	safetyevents "zudomart/modules/moderation/src/modules/liveSafety/events"
+	"nantty/modules/moderation/src/events"
+	"nantty/modules/moderation/src/generated/ent"
+	"nantty/modules/moderation/src/generated/ent/livesafetyincident"
+	safetyevents "nantty/modules/moderation/src/modules/liveSafety/events"
 )
 
 func stamp(moment time.Time) string { return moment.UTC().Format(time.RFC3339) }

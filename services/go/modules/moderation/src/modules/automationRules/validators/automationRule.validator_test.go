@@ -5,8 +5,8 @@ import (
 	"strings"
 	"testing"
 
-	"zudomart/modules/moderation/src/modules/automationRules/services"
-	"zudomart/platform/httpserver"
+	"nantty/modules/moderation/src/modules/automationRules/services"
+	"nantty/platform/httpserver"
 )
 
 func content(overrides map[string]any) json.RawMessage {

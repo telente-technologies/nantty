@@ -7,13 +7,13 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/moderation/src/container"
-	"zudomart/modules/moderation/src/generated/ent"
-	"zudomart/modules/moderation/src/generated/ent/chatreport"
-	"zudomart/modules/moderation/src/modules/chatReports/services"
-	listmycontentreports "zudomart/modules/moderation/src/modules/contentReports/queries/listMyContentReports"
-	"zudomart/modules/moderation/src/types"
-	"zudomart/platform/httpserver"
+	"nantty/modules/moderation/src/container"
+	"nantty/modules/moderation/src/generated/ent"
+	"nantty/modules/moderation/src/generated/ent/chatreport"
+	"nantty/modules/moderation/src/modules/chatReports/services"
+	listmycontentreports "nantty/modules/moderation/src/modules/contentReports/queries/listMyContentReports"
+	"nantty/modules/moderation/src/types"
+	"nantty/platform/httpserver"
 )
 
 const pageSize = 25

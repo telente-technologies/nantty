@@ -3,12 +3,12 @@ package listautomationrules
 import (
 	"context"
 
-	"zudomart/modules/moderation/src/container"
-	"zudomart/modules/moderation/src/generated/ent"
-	"zudomart/modules/moderation/src/generated/ent/automationrule"
-	"zudomart/modules/moderation/src/generated/ent/automationruleversion"
-	"zudomart/modules/moderation/src/modules/automationRules/dtos"
-	"zudomart/modules/moderation/src/modules/automationRules/repositories"
+	"nantty/modules/moderation/src/container"
+	"nantty/modules/moderation/src/generated/ent"
+	"nantty/modules/moderation/src/generated/ent/automationrule"
+	"nantty/modules/moderation/src/generated/ent/automationruleversion"
+	"nantty/modules/moderation/src/modules/automationRules/dtos"
+	"nantty/modules/moderation/src/modules/automationRules/repositories"
 )
 
 type Handler struct {

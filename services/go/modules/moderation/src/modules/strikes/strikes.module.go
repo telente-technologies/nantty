@@ -3,9 +3,9 @@ package strikes
 import (
 	"net/http"
 
-	"zudomart/modules/moderation/src/container"
-	"zudomart/modules/moderation/src/modules/strikes/routes"
-	"zudomart/modules/moderation/src/modules/strikes/services"
+	"nantty/modules/moderation/src/container"
+	"nantty/modules/moderation/src/modules/strikes/routes"
+	"nantty/modules/moderation/src/modules/strikes/services"
 )
 
 type Recorder = services.Recorder

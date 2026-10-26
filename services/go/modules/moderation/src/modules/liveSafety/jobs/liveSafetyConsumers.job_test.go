@@ -8,10 +8,10 @@ import (
 	"testing"
 	"time"
 
-	"zudomart/modules/moderation/src/container"
-	"zudomart/modules/moderation/src/generated/ent"
-	"zudomart/modules/moderation/src/generated/ent/livesafetyincident"
-	platformevents "zudomart/platform/events"
+	"nantty/modules/moderation/src/container"
+	"nantty/modules/moderation/src/generated/ent"
+	"nantty/modules/moderation/src/generated/ent/livesafetyincident"
+	platformevents "nantty/platform/events"
 )
 
 func testContainer() *container.Container {

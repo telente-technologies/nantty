@@ -5,11 +5,11 @@ import (
 	"net/http"
 	"strings"
 
-	"zudomart/modules/moderation/src/container"
-	"zudomart/modules/moderation/src/generated/ent"
-	"zudomart/modules/moderation/src/generated/ent/livesafetyincident"
-	"zudomart/modules/moderation/src/modules/liveSafety/services"
-	"zudomart/platform/httpserver"
+	"nantty/modules/moderation/src/container"
+	"nantty/modules/moderation/src/generated/ent"
+	"nantty/modules/moderation/src/generated/ent/livesafetyincident"
+	"nantty/modules/moderation/src/modules/liveSafety/services"
+	"nantty/platform/httpserver"
 )
 
 type Handler struct {

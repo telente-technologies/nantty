@@ -10,9 +10,9 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/moderation/src/integrations"
-	contentreports "zudomart/modules/moderation/src/modules/contentReports"
-	platformevents "zudomart/platform/events"
+	"nantty/modules/moderation/src/integrations"
+	contentreports "nantty/modules/moderation/src/modules/contentReports"
+	platformevents "nantty/platform/events"
 )
 
 type fakeTargets struct {

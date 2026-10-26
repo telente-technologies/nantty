@@ -20,17 +20,17 @@ import (
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 
-	"zudomart/modules/moderation/src"
-	"zudomart/modules/moderation/src/configs"
-	"zudomart/modules/moderation/src/integrations"
-	"zudomart/modules/moderation/src/middlewares"
-	"zudomart/platform/events"
-	"zudomart/platform/health"
-	"zudomart/platform/identityports/identitytest"
-	"zudomart/platform/jwtauth"
-	"zudomart/platform/postgres"
-	"zudomart/platform/servicemodule"
-	"zudomart/platform/staffauth"
+	"nantty/modules/moderation/src"
+	"nantty/modules/moderation/src/configs"
+	"nantty/modules/moderation/src/integrations"
+	"nantty/modules/moderation/src/middlewares"
+	"nantty/platform/events"
+	"nantty/platform/health"
+	"nantty/platform/identityports/identitytest"
+	"nantty/platform/jwtauth"
+	"nantty/platform/postgres"
+	"nantty/platform/servicemodule"
+	"nantty/platform/staffauth"
 )
 
 type fakeUsers struct {

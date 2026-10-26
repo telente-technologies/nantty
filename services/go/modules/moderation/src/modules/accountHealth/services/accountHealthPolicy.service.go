@@ -4,10 +4,10 @@ import (
 	"slices"
 	"time"
 
-	"zudomart/modules/moderation/src/generated/ent"
-	"zudomart/modules/moderation/src/generated/ent/strike"
-	copyrightservices "zudomart/modules/moderation/src/modules/copyrightClaims/services"
-	strikeservices "zudomart/modules/moderation/src/modules/strikes/services"
+	"nantty/modules/moderation/src/generated/ent"
+	"nantty/modules/moderation/src/generated/ent/strike"
+	copyrightservices "nantty/modules/moderation/src/modules/copyrightClaims/services"
+	strikeservices "nantty/modules/moderation/src/modules/strikes/services"
 )
 
 const (

@@ -9,7 +9,7 @@ import (
 
 	"github.com/google/uuid"
 
-	automationrules "zudomart/modules/moderation/src/modules/automationRules"
+	automationrules "nantty/modules/moderation/src/modules/automationRules"
 )
 
 func automationRuleContent(name string, overrides map[string]any) map[string]any {

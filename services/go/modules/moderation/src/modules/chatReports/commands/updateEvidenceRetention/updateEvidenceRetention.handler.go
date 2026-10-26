@@ -5,13 +5,13 @@ import (
 	"encoding/json"
 	"strings"
 
-	"zudomart/modules/moderation/src/container"
-	"zudomart/modules/moderation/src/events"
-	"zudomart/modules/moderation/src/generated/ent"
-	"zudomart/modules/moderation/src/integrations"
-	chatevents "zudomart/modules/moderation/src/modules/chatReports/events"
-	"zudomart/modules/moderation/src/modules/chatReports/services"
-	"zudomart/platform/httpserver"
+	"nantty/modules/moderation/src/container"
+	"nantty/modules/moderation/src/events"
+	"nantty/modules/moderation/src/generated/ent"
+	"nantty/modules/moderation/src/integrations"
+	chatevents "nantty/modules/moderation/src/modules/chatReports/events"
+	"nantty/modules/moderation/src/modules/chatReports/services"
+	"nantty/platform/httpserver"
 )
 
 type Handler struct {

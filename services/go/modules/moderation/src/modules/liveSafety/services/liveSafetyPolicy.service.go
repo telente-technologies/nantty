@@ -4,7 +4,7 @@ import (
 	"slices"
 	"time"
 
-	"zudomart/modules/moderation/src/configs"
+	"nantty/modules/moderation/src/configs"
 )
 
 const (

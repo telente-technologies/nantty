@@ -3,7 +3,7 @@ package services
 import (
 	"time"
 
-	"zudomart/modules/moderation/src/generated/ent"
+	"nantty/modules/moderation/src/generated/ent"
 )
 
 const (

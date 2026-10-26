@@ -1,6 +1,6 @@
 package decideliveincident
 
-import "zudomart/platform/staffauth"
+import "nantty/platform/staffauth"
 
 const (
 	ActionKeepLive      = "keep_live"

@@ -4,9 +4,9 @@ import (
 	"context"
 	"time"
 
-	"zudomart/modules/moderation/src/container"
-	"zudomart/modules/moderation/src/modules/automationRules/repositories"
-	"zudomart/modules/moderation/src/modules/automationRules/services"
+	"nantty/modules/moderation/src/container"
+	"nantty/modules/moderation/src/modules/automationRules/repositories"
+	"nantty/modules/moderation/src/modules/automationRules/services"
 )
 
 func DeleteExpiredOccurrences(ctx context.Context, c *container.Container) (int, error) {

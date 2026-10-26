@@ -3,14 +3,14 @@ package controllers
 import (
 	"net/http"
 
-	"zudomart/modules/moderation/src/container"
-	recordaccessviolation "zudomart/modules/moderation/src/modules/accessSecurity/commands/recordAccessViolation"
-	recordbotscore "zudomart/modules/moderation/src/modules/accessSecurity/commands/recordBotScore"
-	recordchallengeoutcome "zudomart/modules/moderation/src/modules/accessSecurity/commands/recordChallengeOutcome"
-	recordclientsignals "zudomart/modules/moderation/src/modules/accessSecurity/commands/recordClientSignals"
-	getchallengestate "zudomart/modules/moderation/src/modules/accessSecurity/queries/getChallengeState"
-	"zudomart/platform/httpserver"
-	"zudomart/platform/jwtauth"
+	"nantty/modules/moderation/src/container"
+	recordaccessviolation "nantty/modules/moderation/src/modules/accessSecurity/commands/recordAccessViolation"
+	recordbotscore "nantty/modules/moderation/src/modules/accessSecurity/commands/recordBotScore"
+	recordchallengeoutcome "nantty/modules/moderation/src/modules/accessSecurity/commands/recordChallengeOutcome"
+	recordclientsignals "nantty/modules/moderation/src/modules/accessSecurity/commands/recordClientSignals"
+	getchallengestate "nantty/modules/moderation/src/modules/accessSecurity/queries/getChallengeState"
+	"nantty/platform/httpserver"
+	"nantty/platform/jwtauth"
 )
 
 type AccessSecurityController struct {

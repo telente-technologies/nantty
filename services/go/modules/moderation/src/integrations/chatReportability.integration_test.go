@@ -7,8 +7,8 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"zudomart/modules/moderation/src/configs"
-	"zudomart/platform/httpserver"
+	"nantty/modules/moderation/src/configs"
+	"nantty/platform/httpserver"
 )
 
 const conversationId = "0192f0a0-0000-7000-8000-0000000000d1"

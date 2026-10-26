@@ -9,14 +9,14 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/moderation/src/container"
-	"zudomart/modules/moderation/src/events"
-	"zudomart/modules/moderation/src/generated/ent"
-	"zudomart/modules/moderation/src/generated/ent/securitycase"
-	"zudomart/modules/moderation/src/generated/ent/securityevent"
-	"zudomart/modules/moderation/src/integrations"
-	"zudomart/modules/moderation/src/modules/accessSecurity/services"
-	"zudomart/platform/httpserver"
+	"nantty/modules/moderation/src/container"
+	"nantty/modules/moderation/src/events"
+	"nantty/modules/moderation/src/generated/ent"
+	"nantty/modules/moderation/src/generated/ent/securitycase"
+	"nantty/modules/moderation/src/generated/ent/securityevent"
+	"nantty/modules/moderation/src/integrations"
+	"nantty/modules/moderation/src/modules/accessSecurity/services"
+	"nantty/platform/httpserver"
 )
 
 var actionPermissions = map[string]string{ActionClear: "security:cases", ActionKeepRestricted: "users:restrict", ActionSuspend: "users:suspend", ActionBan: "users:ban", ActionDelete: "users:delete"}

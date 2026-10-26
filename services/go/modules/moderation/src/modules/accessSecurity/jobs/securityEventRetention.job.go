@@ -7,9 +7,9 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 
-	"zudomart/modules/moderation/src/container"
-	"zudomart/modules/moderation/src/generated/ent/securitycase"
-	"zudomart/modules/moderation/src/generated/ent/securityevent"
+	"nantty/modules/moderation/src/container"
+	"nantty/modules/moderation/src/generated/ent/securitycase"
+	"nantty/modules/moderation/src/generated/ent/securityevent"
 )
 
 const DefaultSecurityEventRetention = 365 * 24 * time.Hour

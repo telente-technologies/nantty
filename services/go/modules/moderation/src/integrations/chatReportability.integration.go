@@ -9,8 +9,8 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/moderation/src/configs"
-	"zudomart/platform/httpserver"
+	"nantty/modules/moderation/src/configs"
+	"nantty/platform/httpserver"
 )
 
 type ChatReportabilityRequest struct {

@@ -5,12 +5,12 @@ import (
 	"slices"
 	"strings"
 
-	"zudomart/modules/moderation/src/container"
-	"zudomart/modules/moderation/src/generated/ent"
-	"zudomart/modules/moderation/src/generated/ent/livesafetyincident"
-	"zudomart/modules/moderation/src/generated/ent/livesafetysignal"
-	"zudomart/modules/moderation/src/generated/ent/predicate"
-	"zudomart/modules/moderation/src/modules/liveSafety/services"
+	"nantty/modules/moderation/src/container"
+	"nantty/modules/moderation/src/generated/ent"
+	"nantty/modules/moderation/src/generated/ent/livesafetyincident"
+	"nantty/modules/moderation/src/generated/ent/livesafetysignal"
+	"nantty/modules/moderation/src/generated/ent/predicate"
+	"nantty/modules/moderation/src/modules/liveSafety/services"
 )
 
 const pageSize = 25

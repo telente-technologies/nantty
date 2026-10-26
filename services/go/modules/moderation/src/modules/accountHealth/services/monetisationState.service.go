@@ -6,8 +6,8 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/moderation/src/generated/ent"
-	"zudomart/modules/moderation/src/generated/ent/accountmonetisationstate"
+	"nantty/modules/moderation/src/generated/ent"
+	"nantty/modules/moderation/src/generated/ent/accountmonetisationstate"
 )
 
 const insertMissingMonetisationStateSql = `INSERT INTO account_monetisation_states (id, last_can_monetise, override_reason, override_actor_id, override_actor_name, override_active_strike_count, updated_at)

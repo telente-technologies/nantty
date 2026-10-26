@@ -9,7 +9,7 @@ import (
 
 	"github.com/google/uuid"
 
-	accesssecurityjobs "zudomart/modules/moderation/src/modules/accessSecurity/jobs"
+	accesssecurityjobs "nantty/modules/moderation/src/modules/accessSecurity/jobs"
 )
 
 func (harness *moderationHarness) internal(method, path string, body any, want int) map[string]any {

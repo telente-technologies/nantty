@@ -4,8 +4,8 @@ import (
 	"context"
 	"time"
 
-	"zudomart/modules/moderation/src/container"
-	announceexpiredstrikes "zudomart/modules/moderation/src/modules/accountHealth/commands/announceExpiredStrikes"
+	"nantty/modules/moderation/src/container"
+	announceexpiredstrikes "nantty/modules/moderation/src/modules/accountHealth/commands/announceExpiredStrikes"
 )
 
 func RunStrikeExpiryWorkerUntilContextDone(ctx context.Context, c *container.Container) {

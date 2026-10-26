@@ -4,10 +4,10 @@ import (
 	"context"
 	"net/http"
 
-	"zudomart/modules/moderation/src/container"
-	"zudomart/modules/moderation/src/modules/accessSecurity/jobs"
-	"zudomart/modules/moderation/src/modules/accessSecurity/routes"
-	platformevents "zudomart/platform/events"
+	"nantty/modules/moderation/src/container"
+	"nantty/modules/moderation/src/modules/accessSecurity/jobs"
+	"nantty/modules/moderation/src/modules/accessSecurity/routes"
+	platformevents "nantty/platform/events"
 )
 
 func Mount(mux *http.ServeMux, c *container.Container) {

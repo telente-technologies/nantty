@@ -6,11 +6,11 @@ import (
 	"errors"
 	"net/http"
 
-	"zudomart/modules/moderation/src/container"
-	"zudomart/modules/moderation/src/generated/ent"
-	"zudomart/modules/moderation/src/integrations"
-	recordaudiomatches "zudomart/modules/moderation/src/modules/copyrightClaims/commands/recordAudioMatches"
-	"zudomart/platform/httpserver"
+	"nantty/modules/moderation/src/container"
+	"nantty/modules/moderation/src/generated/ent"
+	"nantty/modules/moderation/src/integrations"
+	recordaudiomatches "nantty/modules/moderation/src/modules/copyrightClaims/commands/recordAudioMatches"
+	"nantty/platform/httpserver"
 )
 
 const AudioMatchAdviceSource = "Chromaprint fingerprint (advice only)"

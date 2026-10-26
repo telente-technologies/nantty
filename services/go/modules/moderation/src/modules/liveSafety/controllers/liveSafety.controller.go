@@ -4,15 +4,15 @@ import (
 	"net/http"
 	"strconv"
 
-	"zudomart/modules/moderation/src/container"
-	appeallivehold "zudomart/modules/moderation/src/modules/liveSafety/commands/appealLiveHold"
-	decideliveincident "zudomart/modules/moderation/src/modules/liveSafety/commands/decideLiveIncident"
-	"zudomart/modules/moderation/src/modules/liveSafety/dtos"
-	getliveincident "zudomart/modules/moderation/src/modules/liveSafety/queries/getLiveIncident"
-	listliveincidents "zudomart/modules/moderation/src/modules/liveSafety/queries/listLiveIncidents"
-	"zudomart/platform/httpserver"
-	"zudomart/platform/jwtauth"
-	"zudomart/platform/staffauth"
+	"nantty/modules/moderation/src/container"
+	appeallivehold "nantty/modules/moderation/src/modules/liveSafety/commands/appealLiveHold"
+	decideliveincident "nantty/modules/moderation/src/modules/liveSafety/commands/decideLiveIncident"
+	"nantty/modules/moderation/src/modules/liveSafety/dtos"
+	getliveincident "nantty/modules/moderation/src/modules/liveSafety/queries/getLiveIncident"
+	listliveincidents "nantty/modules/moderation/src/modules/liveSafety/queries/listLiveIncidents"
+	"nantty/platform/httpserver"
+	"nantty/platform/jwtauth"
+	"nantty/platform/staffauth"
 )
 
 type LiveSafetyController struct {

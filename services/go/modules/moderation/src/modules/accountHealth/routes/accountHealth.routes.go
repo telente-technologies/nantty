@@ -3,10 +3,10 @@ package routes
 import (
 	"net/http"
 
-	"zudomart/modules/moderation/src/container"
-	"zudomart/modules/moderation/src/middlewares"
-	"zudomart/modules/moderation/src/modules/accountHealth/controllers"
-	"zudomart/platform/jwtauth"
+	"nantty/modules/moderation/src/container"
+	"nantty/modules/moderation/src/middlewares"
+	"nantty/modules/moderation/src/modules/accountHealth/controllers"
+	"nantty/platform/jwtauth"
 )
 
 func MountAccountHealthRoutes(mux *http.ServeMux, container *container.Container) {

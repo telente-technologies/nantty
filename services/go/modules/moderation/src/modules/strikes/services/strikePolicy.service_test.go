@@ -4,7 +4,7 @@ import (
 	"testing"
 	"time"
 
-	"zudomart/modules/moderation/src/generated/ent"
+	"nantty/modules/moderation/src/generated/ent"
 )
 
 func TestStrikesExpireAfterTwelveMonthsAndWarningsAfterSix(t *testing.T) {

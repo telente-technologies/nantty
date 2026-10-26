@@ -6,13 +6,13 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/moderation/src/configs"
-	"zudomart/modules/moderation/src/container"
-	"zudomart/modules/moderation/src/generated/ent"
-	"zudomart/modules/moderation/src/generated/ent/livesafetysignal"
-	"zudomart/modules/moderation/src/modules/liveSafety/services"
-	strikeservices "zudomart/modules/moderation/src/modules/strikes/services"
-	"zudomart/platform/httpserver"
+	"nantty/modules/moderation/src/configs"
+	"nantty/modules/moderation/src/container"
+	"nantty/modules/moderation/src/generated/ent"
+	"nantty/modules/moderation/src/generated/ent/livesafetysignal"
+	"nantty/modules/moderation/src/modules/liveSafety/services"
+	strikeservices "nantty/modules/moderation/src/modules/strikes/services"
+	"nantty/platform/httpserver"
 )
 
 type Handler struct {

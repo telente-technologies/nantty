@@ -8,15 +8,15 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/moderation/src/container"
-	"zudomart/modules/moderation/src/events"
-	"zudomart/modules/moderation/src/generated/ent"
-	"zudomart/modules/moderation/src/generated/ent/appeal"
-	"zudomart/modules/moderation/src/generated/ent/strike"
-	"zudomart/modules/moderation/src/integrations"
-	decideappeal "zudomart/modules/moderation/src/modules/appeals/commands/decideAppeal"
-	strikeservices "zudomart/modules/moderation/src/modules/strikes/services"
-	"zudomart/platform/httpserver"
+	"nantty/modules/moderation/src/container"
+	"nantty/modules/moderation/src/events"
+	"nantty/modules/moderation/src/generated/ent"
+	"nantty/modules/moderation/src/generated/ent/appeal"
+	"nantty/modules/moderation/src/generated/ent/strike"
+	"nantty/modules/moderation/src/integrations"
+	decideappeal "nantty/modules/moderation/src/modules/appeals/commands/decideAppeal"
+	strikeservices "nantty/modules/moderation/src/modules/strikes/services"
+	"nantty/platform/httpserver"
 )
 
 const StrikeAppealDecidedType = "strike.appealDecided"

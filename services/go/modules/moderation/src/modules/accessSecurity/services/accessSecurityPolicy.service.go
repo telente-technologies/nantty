@@ -3,7 +3,7 @@ package services
 import (
 	"slices"
 
-	"zudomart/modules/moderation/src/configs"
+	"nantty/modules/moderation/src/configs"
 )
 
 const (

@@ -3,9 +3,9 @@ package accounthealth
 import (
 	"net/http"
 
-	"zudomart/modules/moderation/src/container"
-	"zudomart/modules/moderation/src/modules/accountHealth/jobs"
-	"zudomart/modules/moderation/src/modules/accountHealth/routes"
+	"nantty/modules/moderation/src/container"
+	"nantty/modules/moderation/src/modules/accountHealth/jobs"
+	"nantty/modules/moderation/src/modules/accountHealth/routes"
 )
 
 var RunStrikeExpiryWorkerUntilContextDone = jobs.RunStrikeExpiryWorkerUntilContextDone

@@ -8,7 +8,7 @@ import (
 	"testing"
 	"time"
 
-	platformevents "zudomart/platform/events"
+	platformevents "nantty/platform/events"
 )
 
 type fakeQueueConsumer struct{ platformevents.QueueConsumer }

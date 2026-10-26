@@ -1,6 +1,6 @@
 package decidesecuritycase
 
-import "zudomart/platform/staffauth"
+import "nantty/platform/staffauth"
 
 const (
 	ActionClear          = "clear"

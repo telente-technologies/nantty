@@ -5,12 +5,12 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/moderation/src/generated/ent"
-	updatecopyrightpolicy "zudomart/modules/moderation/src/modules/copyrightClaims/commands/updateCopyrightPolicy"
-	"zudomart/modules/moderation/src/modules/copyrightClaims/dtos"
-	"zudomart/modules/moderation/src/modules/copyrightClaims/services"
-	"zudomart/platform/httpserver"
-	"zudomart/platform/staffauth"
+	"nantty/modules/moderation/src/generated/ent"
+	updatecopyrightpolicy "nantty/modules/moderation/src/modules/copyrightClaims/commands/updateCopyrightPolicy"
+	"nantty/modules/moderation/src/modules/copyrightClaims/dtos"
+	"nantty/modules/moderation/src/modules/copyrightClaims/services"
+	"nantty/platform/httpserver"
+	"nantty/platform/staffauth"
 )
 
 func (controller CopyrightClaimsController) GetPolicy(writer http.ResponseWriter, request *http.Request) {

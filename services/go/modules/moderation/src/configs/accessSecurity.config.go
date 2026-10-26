@@ -3,7 +3,7 @@ package configs
 import (
 	"time"
 
-	platformconfig "zudomart/platform/config"
+	platformconfig "nantty/platform/config"
 )
 
 type AccessSecuritySettings struct {

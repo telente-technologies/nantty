@@ -5,8 +5,8 @@ import (
 	"testing"
 	"time"
 
-	"zudomart/modules/moderation/src/generated/ent"
-	"zudomart/modules/moderation/src/generated/ent/livesafetyincident"
+	"nantty/modules/moderation/src/generated/ent"
+	"nantty/modules/moderation/src/generated/ent/livesafetyincident"
 )
 
 func TestIncidentsSortUrgentAndHeldFirst(t *testing.T) {

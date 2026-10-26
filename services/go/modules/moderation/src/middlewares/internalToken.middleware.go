@@ -4,7 +4,7 @@ import (
 	"crypto/subtle"
 	"net/http"
 
-	"zudomart/platform/httpserver"
+	"nantty/platform/httpserver"
 )
 
 func RequireInternalToken(expected string) func(http.Handler) http.Handler {

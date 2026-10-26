@@ -5,8 +5,8 @@ import (
 	"net/http"
 	"testing"
 
-	"zudomart/modules/moderation/src/integrations"
-	"zudomart/platform/httpserver"
+	"nantty/modules/moderation/src/integrations"
+	"nantty/platform/httpserver"
 )
 
 type refusingReportability struct {

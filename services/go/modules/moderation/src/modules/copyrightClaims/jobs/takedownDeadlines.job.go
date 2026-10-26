@@ -4,8 +4,8 @@ import (
 	"context"
 	"time"
 
-	"zudomart/modules/moderation/src/container"
-	enforcetakedowndeadlines "zudomart/modules/moderation/src/modules/copyrightClaims/commands/enforceTakedownDeadlines"
+	"nantty/modules/moderation/src/container"
+	enforcetakedowndeadlines "nantty/modules/moderation/src/modules/copyrightClaims/commands/enforceTakedownDeadlines"
 )
 
 func RunTakedownDeadlineWorkerUntilContextDone(ctx context.Context, c *container.Container) {

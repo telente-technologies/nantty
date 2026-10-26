@@ -5,9 +5,9 @@ import (
 	"net/http"
 	"time"
 
-	"zudomart/modules/moderation/src/container"
-	"zudomart/modules/moderation/src/modules/chatReports/routes"
-	"zudomart/modules/moderation/src/modules/chatReports/services"
+	"nantty/modules/moderation/src/container"
+	"nantty/modules/moderation/src/modules/chatReports/routes"
+	"nantty/modules/moderation/src/modules/chatReports/services"
 )
 
 func Mount(mux *http.ServeMux, c *container.Container) {

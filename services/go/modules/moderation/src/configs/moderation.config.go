@@ -4,7 +4,7 @@ import (
 	"net/url"
 	"strings"
 
-	platformconfig "zudomart/platform/config"
+	platformconfig "nantty/platform/config"
 )
 
 type ModerationSettings struct {

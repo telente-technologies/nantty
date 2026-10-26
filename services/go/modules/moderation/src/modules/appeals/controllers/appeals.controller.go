@@ -3,15 +3,15 @@ package controllers
 import (
 	"net/http"
 
-	"zudomart/modules/moderation/src/container"
-	decideappeal "zudomart/modules/moderation/src/modules/appeals/commands/decideAppeal"
-	submitdecisionappeal "zudomart/modules/moderation/src/modules/appeals/commands/submitDecisionAppeal"
-	"zudomart/modules/moderation/src/modules/appeals/dtos"
-	listappeals "zudomart/modules/moderation/src/modules/appeals/queries/listAppeals"
-	listmydecisions "zudomart/modules/moderation/src/modules/appeals/queries/listMyDecisions"
-	"zudomart/platform/httpserver"
-	"zudomart/platform/jwtauth"
-	"zudomart/platform/staffauth"
+	"nantty/modules/moderation/src/container"
+	decideappeal "nantty/modules/moderation/src/modules/appeals/commands/decideAppeal"
+	submitdecisionappeal "nantty/modules/moderation/src/modules/appeals/commands/submitDecisionAppeal"
+	"nantty/modules/moderation/src/modules/appeals/dtos"
+	listappeals "nantty/modules/moderation/src/modules/appeals/queries/listAppeals"
+	listmydecisions "nantty/modules/moderation/src/modules/appeals/queries/listMyDecisions"
+	"nantty/platform/httpserver"
+	"nantty/platform/jwtauth"
+	"nantty/platform/staffauth"
 )
 
 type AppealsController struct {

@@ -2,20 +2,20 @@ package contentreports
 
 import (
 	"context"
+	accesssecurity "nantty/modules/moderation/src/modules/accessSecurity"
 	"net/http"
 	"sync"
-	accesssecurity "zudomart/modules/moderation/src/modules/accessSecurity"
 
-	"zudomart/modules/moderation/src/container"
-	automationrules "zudomart/modules/moderation/src/modules/automationRules"
-	submitcontentreport "zudomart/modules/moderation/src/modules/contentReports/commands/submitContentReport"
-	"zudomart/modules/moderation/src/modules/contentReports/jobs"
-	"zudomart/modules/moderation/src/modules/contentReports/routes"
-	copyrightjobs "zudomart/modules/moderation/src/modules/copyrightClaims/jobs"
-	livesafety "zudomart/modules/moderation/src/modules/liveSafety"
-	suspensionjobs "zudomart/modules/moderation/src/modules/suspensionCases/jobs"
-	platformevents "zudomart/platform/events"
-	"zudomart/platform/servicemodule"
+	"nantty/modules/moderation/src/container"
+	automationrules "nantty/modules/moderation/src/modules/automationRules"
+	submitcontentreport "nantty/modules/moderation/src/modules/contentReports/commands/submitContentReport"
+	"nantty/modules/moderation/src/modules/contentReports/jobs"
+	"nantty/modules/moderation/src/modules/contentReports/routes"
+	copyrightjobs "nantty/modules/moderation/src/modules/copyrightClaims/jobs"
+	livesafety "nantty/modules/moderation/src/modules/liveSafety"
+	suspensionjobs "nantty/modules/moderation/src/modules/suspensionCases/jobs"
+	platformevents "nantty/platform/events"
+	"nantty/platform/servicemodule"
 )
 
 func Mount(mux *http.ServeMux, c *container.Container) {

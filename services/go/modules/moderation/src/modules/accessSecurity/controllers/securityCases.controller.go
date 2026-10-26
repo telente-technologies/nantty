@@ -3,11 +3,11 @@ package controllers
 import (
 	"net/http"
 
-	decidesecuritycase "zudomart/modules/moderation/src/modules/accessSecurity/commands/decideSecurityCase"
-	getsecuritycase "zudomart/modules/moderation/src/modules/accessSecurity/queries/getSecurityCase"
-	listsecuritycases "zudomart/modules/moderation/src/modules/accessSecurity/queries/listSecurityCases"
-	"zudomart/platform/httpserver"
-	"zudomart/platform/staffauth"
+	decidesecuritycase "nantty/modules/moderation/src/modules/accessSecurity/commands/decideSecurityCase"
+	getsecuritycase "nantty/modules/moderation/src/modules/accessSecurity/queries/getSecurityCase"
+	listsecuritycases "nantty/modules/moderation/src/modules/accessSecurity/queries/listSecurityCases"
+	"nantty/platform/httpserver"
+	"nantty/platform/staffauth"
 )
 
 func (controller AccessSecurityController) ListCases(writer http.ResponseWriter, request *http.Request) {

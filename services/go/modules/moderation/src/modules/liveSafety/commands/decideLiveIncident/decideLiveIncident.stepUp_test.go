@@ -5,8 +5,8 @@ import (
 	"errors"
 	"testing"
 
-	"zudomart/platform/httpserver"
-	"zudomart/platform/staffauth"
+	"nantty/platform/httpserver"
+	"nantty/platform/staffauth"
 )
 
 func TestEveryStrikeBearingLiveDecisionRequiresStepUp(t *testing.T) {

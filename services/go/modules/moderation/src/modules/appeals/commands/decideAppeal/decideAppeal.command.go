@@ -1,6 +1,6 @@
 package decideappeal
 
-import "zudomart/platform/staffauth"
+import "nantty/platform/staffauth"
 
 type Command struct {
 	Staff     staffauth.Staff

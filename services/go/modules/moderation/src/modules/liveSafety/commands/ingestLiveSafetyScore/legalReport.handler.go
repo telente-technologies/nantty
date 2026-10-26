@@ -3,8 +3,8 @@ package ingestlivesafetyscore
 import (
 	"context"
 
-	"zudomart/modules/moderation/src/generated/ent"
-	"zudomart/modules/moderation/src/generated/ent/legalreport"
+	"nantty/modules/moderation/src/generated/ent"
+	"nantty/modules/moderation/src/generated/ent/legalreport"
 )
 
 func recordLegalReportInTransaction(ctx context.Context, tx *ent.Tx, incident *ent.LiveSafetyIncident, command Command, evidenceKey string) error {

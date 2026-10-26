@@ -4,7 +4,7 @@ import (
 	"testing"
 	"time"
 
-	"zudomart/modules/moderation/src/configs"
+	"nantty/modules/moderation/src/configs"
 )
 
 func TestDecideLiveSafetyActionHoldsSevereHighConfidenceSignals(t *testing.T) {

@@ -8,9 +8,9 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/moderation/src/generated/ent"
-	"zudomart/modules/moderation/src/generated/ent/appeal"
-	reportservices "zudomart/modules/moderation/src/modules/contentReports/services"
+	"nantty/modules/moderation/src/generated/ent"
+	"nantty/modules/moderation/src/generated/ent/appeal"
+	reportservices "nantty/modules/moderation/src/modules/contentReports/services"
 )
 
 const SlaWindow = 48 * time.Hour

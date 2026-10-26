@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"testing"
 
-	"zudomart/modules/moderation/src/generated/ent"
-	"zudomart/modules/moderation/src/integrations"
+	"nantty/modules/moderation/src/generated/ent"
+	"nantty/modules/moderation/src/integrations"
 )
 
 func TestAudioMatchAdviceBecomesAdviceOnlyMatchesWithSegments(t *testing.T) {

@@ -4,15 +4,15 @@ import (
 	"net/http"
 	"strconv"
 
-	"zudomart/modules/moderation/src/container"
-	restoreautomationrule "zudomart/modules/moderation/src/modules/automationRules/commands/restoreAutomationRule"
-	saveautomationrule "zudomart/modules/moderation/src/modules/automationRules/commands/saveAutomationRule"
-	"zudomart/modules/moderation/src/modules/automationRules/dtos"
-	listautomationexecutions "zudomart/modules/moderation/src/modules/automationRules/queries/listAutomationExecutions"
-	listautomationrules "zudomart/modules/moderation/src/modules/automationRules/queries/listAutomationRules"
-	"zudomart/modules/moderation/src/modules/automationRules/services"
-	"zudomart/platform/httpserver"
-	"zudomart/platform/staffauth"
+	"nantty/modules/moderation/src/container"
+	restoreautomationrule "nantty/modules/moderation/src/modules/automationRules/commands/restoreAutomationRule"
+	saveautomationrule "nantty/modules/moderation/src/modules/automationRules/commands/saveAutomationRule"
+	"nantty/modules/moderation/src/modules/automationRules/dtos"
+	listautomationexecutions "nantty/modules/moderation/src/modules/automationRules/queries/listAutomationExecutions"
+	listautomationrules "nantty/modules/moderation/src/modules/automationRules/queries/listAutomationRules"
+	"nantty/modules/moderation/src/modules/automationRules/services"
+	"nantty/platform/httpserver"
+	"nantty/platform/staffauth"
 )
 
 type AutomationRulesController struct {

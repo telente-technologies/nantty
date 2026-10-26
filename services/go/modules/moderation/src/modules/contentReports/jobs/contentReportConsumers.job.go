@@ -6,12 +6,12 @@ import (
 	"fmt"
 	"slices"
 
-	"zudomart/modules/moderation/src/container"
-	ingestcontentscore "zudomart/modules/moderation/src/modules/contentReports/commands/ingestContentScore"
-	submitcontentreport "zudomart/modules/moderation/src/modules/contentReports/commands/submitContentReport"
-	"zudomart/modules/moderation/src/modules/contentReports/services"
-	platformevents "zudomart/platform/events"
-	"zudomart/platform/httpserver"
+	"nantty/modules/moderation/src/container"
+	ingestcontentscore "nantty/modules/moderation/src/modules/contentReports/commands/ingestContentScore"
+	submitcontentreport "nantty/modules/moderation/src/modules/contentReports/commands/submitContentReport"
+	"nantty/modules/moderation/src/modules/contentReports/services"
+	platformevents "nantty/platform/events"
+	"nantty/platform/httpserver"
 )
 
 type reportCreatedData struct {

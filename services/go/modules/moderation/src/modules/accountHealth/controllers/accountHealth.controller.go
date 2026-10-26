@@ -3,17 +3,17 @@ package controllers
 import (
 	"net/http"
 
-	"zudomart/modules/moderation/src/container"
-	appealstrike "zudomart/modules/moderation/src/modules/accountHealth/commands/appealStrike"
-	clearmonetisationoverride "zudomart/modules/moderation/src/modules/accountHealth/commands/clearMonetisationOverride"
-	decidestrikeappeal "zudomart/modules/moderation/src/modules/accountHealth/commands/decideStrikeAppeal"
-	setmonetisationoverride "zudomart/modules/moderation/src/modules/accountHealth/commands/setMonetisationOverride"
-	"zudomart/modules/moderation/src/modules/accountHealth/dtos"
-	getaccounthealth "zudomart/modules/moderation/src/modules/accountHealth/queries/getAccountHealth"
-	liststrikeappeals "zudomart/modules/moderation/src/modules/accountHealth/queries/listStrikeAppeals"
-	"zudomart/platform/httpserver"
-	"zudomart/platform/jwtauth"
-	"zudomart/platform/staffauth"
+	"nantty/modules/moderation/src/container"
+	appealstrike "nantty/modules/moderation/src/modules/accountHealth/commands/appealStrike"
+	clearmonetisationoverride "nantty/modules/moderation/src/modules/accountHealth/commands/clearMonetisationOverride"
+	decidestrikeappeal "nantty/modules/moderation/src/modules/accountHealth/commands/decideStrikeAppeal"
+	setmonetisationoverride "nantty/modules/moderation/src/modules/accountHealth/commands/setMonetisationOverride"
+	"nantty/modules/moderation/src/modules/accountHealth/dtos"
+	getaccounthealth "nantty/modules/moderation/src/modules/accountHealth/queries/getAccountHealth"
+	liststrikeappeals "nantty/modules/moderation/src/modules/accountHealth/queries/listStrikeAppeals"
+	"nantty/platform/httpserver"
+	"nantty/platform/jwtauth"
+	"nantty/platform/staffauth"
 )
 
 type AccountHealthController struct {

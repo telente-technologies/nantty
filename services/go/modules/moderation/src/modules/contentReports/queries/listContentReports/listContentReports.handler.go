@@ -8,11 +8,11 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/moderation/src/container"
-	"zudomart/modules/moderation/src/generated/ent"
-	"zudomart/modules/moderation/src/generated/ent/contentreport"
-	"zudomart/modules/moderation/src/generated/ent/predicate"
-	"zudomart/modules/moderation/src/modules/contentReports/services"
+	"nantty/modules/moderation/src/container"
+	"nantty/modules/moderation/src/generated/ent"
+	"nantty/modules/moderation/src/generated/ent/contentreport"
+	"nantty/modules/moderation/src/generated/ent/predicate"
+	"nantty/modules/moderation/src/modules/contentReports/services"
 )
 
 const pageSize = 25

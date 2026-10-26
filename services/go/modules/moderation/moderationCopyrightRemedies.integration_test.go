@@ -11,9 +11,9 @@ import (
 
 	"github.com/google/uuid"
 
-	announceexpiredstrikes "zudomart/modules/moderation/src/modules/accountHealth/commands/announceExpiredStrikes"
-	enforcetakedowndeadlines "zudomart/modules/moderation/src/modules/copyrightClaims/commands/enforceTakedownDeadlines"
-	restoreacceptedtakedowns "zudomart/modules/moderation/src/modules/copyrightClaims/commands/restoreAcceptedTakedowns"
+	announceexpiredstrikes "nantty/modules/moderation/src/modules/accountHealth/commands/announceExpiredStrikes"
+	enforcetakedowndeadlines "nantty/modules/moderation/src/modules/copyrightClaims/commands/enforceTakedownDeadlines"
+	restoreacceptedtakedowns "nantty/modules/moderation/src/modules/copyrightClaims/commands/restoreAcceptedTakedowns"
 )
 
 func (harness *moderationHarness) fileAndUphold(targetType, targetId, scope, uploader string) (string, map[string]any) {

@@ -8,11 +8,11 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/moderation/src/container"
-	"zudomart/modules/moderation/src/generated/ent"
-	"zudomart/modules/moderation/src/generated/ent/contentreport"
-	"zudomart/modules/moderation/src/generated/ent/contentreportentry"
-	"zudomart/platform/httpserver"
+	"nantty/modules/moderation/src/container"
+	"nantty/modules/moderation/src/generated/ent"
+	"nantty/modules/moderation/src/generated/ent/contentreport"
+	"nantty/modules/moderation/src/generated/ent/contentreportentry"
+	"nantty/platform/httpserver"
 )
 
 type IntakeInput struct {

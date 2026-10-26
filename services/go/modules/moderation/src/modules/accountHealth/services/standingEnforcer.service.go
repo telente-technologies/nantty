@@ -7,15 +7,15 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/moderation/src/container"
-	"zudomart/modules/moderation/src/events"
-	"zudomart/modules/moderation/src/generated/ent"
-	"zudomart/modules/moderation/src/generated/ent/copyrightclaim"
-	"zudomart/modules/moderation/src/generated/ent/strike"
-	"zudomart/modules/moderation/src/integrations"
-	copyrightservices "zudomart/modules/moderation/src/modules/copyrightClaims/services"
-	strikeservices "zudomart/modules/moderation/src/modules/strikes/services"
-	ingestsuspensioncase "zudomart/modules/moderation/src/modules/suspensionCases/commands/ingestSuspensionCase"
+	"nantty/modules/moderation/src/container"
+	"nantty/modules/moderation/src/events"
+	"nantty/modules/moderation/src/generated/ent"
+	"nantty/modules/moderation/src/generated/ent/copyrightclaim"
+	"nantty/modules/moderation/src/generated/ent/strike"
+	"nantty/modules/moderation/src/integrations"
+	copyrightservices "nantty/modules/moderation/src/modules/copyrightClaims/services"
+	strikeservices "nantty/modules/moderation/src/modules/strikes/services"
+	ingestsuspensioncase "nantty/modules/moderation/src/modules/suspensionCases/commands/ingestSuspensionCase"
 )
 
 const AccountHealthChangedType = "accountHealth.changed"

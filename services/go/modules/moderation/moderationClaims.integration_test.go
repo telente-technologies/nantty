@@ -7,7 +7,7 @@ import (
 
 	"github.com/google/uuid"
 
-	restoreacceptedtakedowns "zudomart/modules/moderation/src/modules/copyrightClaims/commands/restoreAcceptedTakedowns"
+	restoreacceptedtakedowns "nantty/modules/moderation/src/modules/copyrightClaims/commands/restoreAcceptedTakedowns"
 )
 
 func copyrightClaimBody(targetType, targetId string) map[string]any {

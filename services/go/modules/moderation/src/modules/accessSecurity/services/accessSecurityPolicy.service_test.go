@@ -3,7 +3,7 @@ package services
 import (
 	"testing"
 
-	"zudomart/modules/moderation/src/configs"
+	"nantty/modules/moderation/src/configs"
 )
 
 var thresholds = EffectiveThresholds(configs.AccessSecuritySettings{})

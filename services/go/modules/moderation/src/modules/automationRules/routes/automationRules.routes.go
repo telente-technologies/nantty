@@ -3,9 +3,9 @@ package routes
 import (
 	"net/http"
 
-	"zudomart/modules/moderation/src/container"
-	"zudomart/modules/moderation/src/middlewares"
-	"zudomart/modules/moderation/src/modules/automationRules/controllers"
+	"nantty/modules/moderation/src/container"
+	"nantty/modules/moderation/src/middlewares"
+	"nantty/modules/moderation/src/modules/automationRules/controllers"
 )
 
 func MountAutomationRulesRoutes(mux *http.ServeMux, container *container.Container) {

@@ -5,8 +5,8 @@ import (
 	"errors"
 	"testing"
 
-	"zudomart/modules/moderation/src/container"
-	platformevents "zudomart/platform/events"
+	"nantty/modules/moderation/src/container"
+	platformevents "nantty/platform/events"
 )
 
 func TestVerificationFraudHandlerIgnoresOtherEventsAndNonAdvisorySignals(t *testing.T) {

@@ -5,9 +5,9 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"zudomart/modules/moderation/src/container"
-	recordvoluntaryremoval "zudomart/modules/moderation/src/modules/copyrightClaims/commands/recordVoluntaryRemoval"
-	platformevents "zudomart/platform/events"
+	"nantty/modules/moderation/src/container"
+	recordvoluntaryremoval "nantty/modules/moderation/src/modules/copyrightClaims/commands/recordVoluntaryRemoval"
+	platformevents "nantty/platform/events"
 )
 
 func HandlePostDeletedMessage(c *container.Container) platformevents.MessageHandler {

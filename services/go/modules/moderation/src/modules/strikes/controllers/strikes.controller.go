@@ -3,13 +3,13 @@ package controllers
 import (
 	"net/http"
 
-	"zudomart/modules/moderation/src/container"
-	issuestrike "zudomart/modules/moderation/src/modules/strikes/commands/issueStrike"
-	revokestrike "zudomart/modules/moderation/src/modules/strikes/commands/revokeStrike"
-	"zudomart/modules/moderation/src/modules/strikes/dtos"
-	countaccountstrikes "zudomart/modules/moderation/src/modules/strikes/queries/countAccountStrikes"
-	listaccountstrikes "zudomart/modules/moderation/src/modules/strikes/queries/listAccountStrikes"
-	"zudomart/platform/httpserver"
+	"nantty/modules/moderation/src/container"
+	issuestrike "nantty/modules/moderation/src/modules/strikes/commands/issueStrike"
+	revokestrike "nantty/modules/moderation/src/modules/strikes/commands/revokeStrike"
+	"nantty/modules/moderation/src/modules/strikes/dtos"
+	countaccountstrikes "nantty/modules/moderation/src/modules/strikes/queries/countAccountStrikes"
+	listaccountstrikes "nantty/modules/moderation/src/modules/strikes/queries/listAccountStrikes"
+	"nantty/platform/httpserver"
 )
 
 type StrikesController struct {

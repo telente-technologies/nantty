@@ -6,11 +6,11 @@ import (
 	"strconv"
 	"strings"
 
-	"zudomart/modules/moderation/src/container"
-	"zudomart/modules/moderation/src/generated/ent"
-	"zudomart/modules/moderation/src/generated/ent/chatreport"
-	"zudomart/modules/moderation/src/generated/ent/predicate"
-	"zudomart/modules/moderation/src/modules/chatReports/services"
+	"nantty/modules/moderation/src/container"
+	"nantty/modules/moderation/src/generated/ent"
+	"nantty/modules/moderation/src/generated/ent/chatreport"
+	"nantty/modules/moderation/src/generated/ent/predicate"
+	"nantty/modules/moderation/src/modules/chatReports/services"
 )
 
 const pageSize = 25

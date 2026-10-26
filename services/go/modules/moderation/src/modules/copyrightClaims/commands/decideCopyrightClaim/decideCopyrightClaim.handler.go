@@ -9,15 +9,15 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/moderation/src/container"
-	"zudomart/modules/moderation/src/events"
-	"zudomart/modules/moderation/src/generated/ent"
-	"zudomart/modules/moderation/src/generated/ent/copyrightclaim"
-	"zudomart/modules/moderation/src/integrations"
-	healthservices "zudomart/modules/moderation/src/modules/accountHealth/services"
-	claimevents "zudomart/modules/moderation/src/modules/copyrightClaims/events"
-	"zudomart/modules/moderation/src/modules/copyrightClaims/services"
-	"zudomart/platform/httpserver"
+	"nantty/modules/moderation/src/container"
+	"nantty/modules/moderation/src/events"
+	"nantty/modules/moderation/src/generated/ent"
+	"nantty/modules/moderation/src/generated/ent/copyrightclaim"
+	"nantty/modules/moderation/src/integrations"
+	healthservices "nantty/modules/moderation/src/modules/accountHealth/services"
+	claimevents "nantty/modules/moderation/src/modules/copyrightClaims/events"
+	"nantty/modules/moderation/src/modules/copyrightClaims/services"
+	"nantty/platform/httpserver"
 )
 
 type Handler struct {

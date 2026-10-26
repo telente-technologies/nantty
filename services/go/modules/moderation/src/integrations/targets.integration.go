@@ -9,7 +9,7 @@ import (
 	"net/url"
 	"time"
 
-	"zudomart/modules/moderation/src/configs"
+	"nantty/modules/moderation/src/configs"
 )
 
 type TargetPreview struct {

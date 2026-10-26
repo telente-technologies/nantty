@@ -7,11 +7,11 @@ import (
 	"log/slog"
 	"time"
 
-	"zudomart/modules/moderation/src/configs"
-	"zudomart/modules/moderation/src/generated/ent"
-	"zudomart/modules/moderation/src/integrations"
-	"zudomart/modules/moderation/src/middlewares"
-	"zudomart/platform/jwtauth"
+	"nantty/modules/moderation/src/configs"
+	"nantty/modules/moderation/src/generated/ent"
+	"nantty/modules/moderation/src/integrations"
+	"nantty/modules/moderation/src/middlewares"
+	"nantty/platform/jwtauth"
 )
 
 type Container struct {

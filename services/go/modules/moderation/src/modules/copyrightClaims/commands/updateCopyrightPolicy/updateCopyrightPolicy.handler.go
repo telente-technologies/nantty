@@ -4,12 +4,12 @@ import (
 	"context"
 	"encoding/json"
 
-	"zudomart/modules/moderation/src/container"
-	"zudomart/modules/moderation/src/generated/ent"
-	"zudomart/modules/moderation/src/integrations"
-	"zudomart/modules/moderation/src/modules/copyrightClaims/services"
-	"zudomart/platform/httpserver"
-	"zudomart/platform/staffauth"
+	"nantty/modules/moderation/src/container"
+	"nantty/modules/moderation/src/generated/ent"
+	"nantty/modules/moderation/src/integrations"
+	"nantty/modules/moderation/src/modules/copyrightClaims/services"
+	"nantty/platform/httpserver"
+	"nantty/platform/staffauth"
 )
 
 type Command struct {

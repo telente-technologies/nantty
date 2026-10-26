@@ -4,8 +4,8 @@ import (
 	"context"
 	"time"
 
-	"zudomart/modules/moderation/src/container"
-	restoreacceptedtakedowns "zudomart/modules/moderation/src/modules/copyrightClaims/commands/restoreAcceptedTakedowns"
+	"nantty/modules/moderation/src/container"
+	restoreacceptedtakedowns "nantty/modules/moderation/src/modules/copyrightClaims/commands/restoreAcceptedTakedowns"
 )
 
 func RunRestoreWorkerUntilContextDone(ctx context.Context, c *container.Container) {

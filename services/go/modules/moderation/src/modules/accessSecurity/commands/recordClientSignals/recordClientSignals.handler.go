@@ -6,12 +6,12 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/moderation/src/container"
-	"zudomart/modules/moderation/src/generated/ent"
-	"zudomart/modules/moderation/src/generated/ent/securityevent"
-	"zudomart/modules/moderation/src/integrations"
-	"zudomart/modules/moderation/src/modules/accessSecurity/services"
-	"zudomart/platform/httpserver"
+	"nantty/modules/moderation/src/container"
+	"nantty/modules/moderation/src/generated/ent"
+	"nantty/modules/moderation/src/generated/ent/securityevent"
+	"nantty/modules/moderation/src/integrations"
+	"nantty/modules/moderation/src/modules/accessSecurity/services"
+	"nantty/platform/httpserver"
 )
 
 var KnownHeadlessSignals = []string{"webdriver", "headless_user_agent", "no_languages", "zero_plugins", "automation_globals", "emulator", "rooted_or_jailbroken"}

@@ -10,10 +10,10 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/moderation/src/modules/chatReports/services"
-	suspensioncases "zudomart/modules/moderation/src/modules/suspensionCases"
-	suspensionservices "zudomart/modules/moderation/src/modules/suspensionCases/services"
-	platformevents "zudomart/platform/events"
+	"nantty/modules/moderation/src/modules/chatReports/services"
+	suspensioncases "nantty/modules/moderation/src/modules/suspensionCases"
+	suspensionservices "nantty/modules/moderation/src/modules/suspensionCases/services"
+	platformevents "nantty/platform/events"
 )
 
 func newPurger(harness *moderationHarness) services.EvidencePurger {

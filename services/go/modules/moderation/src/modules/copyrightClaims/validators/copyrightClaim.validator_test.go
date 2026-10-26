@@ -3,7 +3,7 @@ package validators
 import (
 	"testing"
 
-	"zudomart/platform/httpserver"
+	"nantty/platform/httpserver"
 )
 
 func validEvidence() ClaimEvidence {

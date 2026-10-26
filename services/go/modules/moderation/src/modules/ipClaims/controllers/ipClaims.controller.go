@@ -5,17 +5,17 @@ import (
 	"strconv"
 	"strings"
 
-	"zudomart/modules/moderation/src/container"
-	decideipclaim "zudomart/modules/moderation/src/modules/ipClaims/commands/decideIpClaim"
-	respondtoipclaim "zudomart/modules/moderation/src/modules/ipClaims/commands/respondToIpClaim"
-	submitipclaim "zudomart/modules/moderation/src/modules/ipClaims/commands/submitIpClaim"
-	"zudomart/modules/moderation/src/modules/ipClaims/dtos"
-	getipclaim "zudomart/modules/moderation/src/modules/ipClaims/queries/getIpClaim"
-	listipclaims "zudomart/modules/moderation/src/modules/ipClaims/queries/listIpClaims"
-	strikeservices "zudomart/modules/moderation/src/modules/strikes/services"
-	"zudomart/platform/httpserver"
-	"zudomart/platform/jwtauth"
-	"zudomart/platform/staffauth"
+	"nantty/modules/moderation/src/container"
+	decideipclaim "nantty/modules/moderation/src/modules/ipClaims/commands/decideIpClaim"
+	respondtoipclaim "nantty/modules/moderation/src/modules/ipClaims/commands/respondToIpClaim"
+	submitipclaim "nantty/modules/moderation/src/modules/ipClaims/commands/submitIpClaim"
+	"nantty/modules/moderation/src/modules/ipClaims/dtos"
+	getipclaim "nantty/modules/moderation/src/modules/ipClaims/queries/getIpClaim"
+	listipclaims "nantty/modules/moderation/src/modules/ipClaims/queries/listIpClaims"
+	strikeservices "nantty/modules/moderation/src/modules/strikes/services"
+	"nantty/platform/httpserver"
+	"nantty/platform/jwtauth"
+	"nantty/platform/staffauth"
 )
 
 type IpClaimsController struct {

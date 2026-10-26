@@ -8,12 +8,12 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/moderation/src/container"
-	"zudomart/modules/moderation/src/modules/automationRules/repositories"
-	"zudomart/modules/moderation/src/modules/automationRules/services"
-	reportservices "zudomart/modules/moderation/src/modules/contentReports/services"
-	strikeservices "zudomart/modules/moderation/src/modules/strikes/services"
-	platformevents "zudomart/platform/events"
+	"nantty/modules/moderation/src/container"
+	"nantty/modules/moderation/src/modules/automationRules/repositories"
+	"nantty/modules/moderation/src/modules/automationRules/services"
+	reportservices "nantty/modules/moderation/src/modules/contentReports/services"
+	strikeservices "nantty/modules/moderation/src/modules/strikes/services"
+	platformevents "nantty/platform/events"
 )
 
 type triggerData struct {

@@ -3,7 +3,7 @@ package dtos
 import (
 	"encoding/json"
 
-	"zudomart/modules/moderation/src/modules/automationRules/services"
+	"nantty/modules/moderation/src/modules/automationRules/services"
 )
 
 type VersionAuthor struct {

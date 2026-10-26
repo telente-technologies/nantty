@@ -4,11 +4,11 @@ import (
 	"context"
 	"time"
 
-	"zudomart/modules/moderation/src/configs"
-	"zudomart/modules/moderation/src/events"
-	"zudomart/modules/moderation/src/generated/ent"
-	"zudomart/modules/moderation/src/generated/ent/securitycase"
-	"zudomart/modules/moderation/src/generated/ent/securityevent"
+	"nantty/modules/moderation/src/configs"
+	"nantty/modules/moderation/src/events"
+	"nantty/modules/moderation/src/generated/ent"
+	"nantty/modules/moderation/src/generated/ent/securitycase"
+	"nantty/modules/moderation/src/generated/ent/securityevent"
 )
 
 func EvaluateAndMarkSuspectedBot(ctx context.Context, tx *ent.Tx, state *ent.SecurityAccountState, thresholds configs.AccessSecuritySettings, now time.Time) (bool, []string, error) {

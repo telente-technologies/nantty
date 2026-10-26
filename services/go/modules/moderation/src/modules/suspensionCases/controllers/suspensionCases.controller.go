@@ -4,13 +4,13 @@ import (
 	"crypto/subtle"
 	"net/http"
 
-	"zudomart/modules/moderation/src/container"
-	decidesuspensioncase "zudomart/modules/moderation/src/modules/suspensionCases/commands/decideSuspensionCase"
-	ingestsuspensioncase "zudomart/modules/moderation/src/modules/suspensionCases/commands/ingestSuspensionCase"
-	getsuspensioncase "zudomart/modules/moderation/src/modules/suspensionCases/queries/getSuspensionCase"
-	listsuspensioncases "zudomart/modules/moderation/src/modules/suspensionCases/queries/listSuspensionCases"
-	"zudomart/platform/httpserver"
-	"zudomart/platform/staffauth"
+	"nantty/modules/moderation/src/container"
+	decidesuspensioncase "nantty/modules/moderation/src/modules/suspensionCases/commands/decideSuspensionCase"
+	ingestsuspensioncase "nantty/modules/moderation/src/modules/suspensionCases/commands/ingestSuspensionCase"
+	getsuspensioncase "nantty/modules/moderation/src/modules/suspensionCases/queries/getSuspensionCase"
+	listsuspensioncases "nantty/modules/moderation/src/modules/suspensionCases/queries/listSuspensionCases"
+	"nantty/platform/httpserver"
+	"nantty/platform/staffauth"
 )
 
 type SuspensionCasesController struct {

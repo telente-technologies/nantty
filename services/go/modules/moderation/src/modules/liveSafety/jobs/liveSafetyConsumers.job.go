@@ -6,13 +6,13 @@ import (
 	"errors"
 	"fmt"
 
-	"zudomart/modules/moderation/src/container"
-	"zudomart/modules/moderation/src/generated/ent"
-	"zudomart/modules/moderation/src/generated/ent/livesafetyincident"
-	ingestlivesafetyscore "zudomart/modules/moderation/src/modules/liveSafety/commands/ingestLiveSafetyScore"
-	"zudomart/modules/moderation/src/modules/liveSafety/services"
-	platformevents "zudomart/platform/events"
-	"zudomart/platform/httpserver"
+	"nantty/modules/moderation/src/container"
+	"nantty/modules/moderation/src/generated/ent"
+	"nantty/modules/moderation/src/generated/ent/livesafetyincident"
+	ingestlivesafetyscore "nantty/modules/moderation/src/modules/liveSafety/commands/ingestLiveSafetyScore"
+	"nantty/modules/moderation/src/modules/liveSafety/services"
+	platformevents "nantty/platform/events"
+	"nantty/platform/httpserver"
 )
 
 func HandleLiveSafetyScoreMessage(application *container.Container) platformevents.MessageHandler {

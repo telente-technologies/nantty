@@ -8,12 +8,12 @@ import (
 	"log/slog"
 	"time"
 
-	"zudomart/modules/moderation/src/container"
-	recordaccessviolation "zudomart/modules/moderation/src/modules/accessSecurity/commands/recordAccessViolation"
-	recordbotscore "zudomart/modules/moderation/src/modules/accessSecurity/commands/recordBotScore"
-	"zudomart/modules/moderation/src/modules/accessSecurity/services"
-	platformevents "zudomart/platform/events"
-	"zudomart/platform/httpserver"
+	"nantty/modules/moderation/src/container"
+	recordaccessviolation "nantty/modules/moderation/src/modules/accessSecurity/commands/recordAccessViolation"
+	recordbotscore "nantty/modules/moderation/src/modules/accessSecurity/commands/recordBotScore"
+	"nantty/modules/moderation/src/modules/accessSecurity/services"
+	platformevents "nantty/platform/events"
+	"nantty/platform/httpserver"
 )
 
 const AccessViolationEventType = "security.accessViolationDetected"

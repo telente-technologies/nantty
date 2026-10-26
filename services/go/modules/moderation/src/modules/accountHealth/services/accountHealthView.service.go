@@ -8,11 +8,11 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/moderation/src/generated/ent"
-	"zudomart/modules/moderation/src/generated/ent/copyrightclaim"
-	"zudomart/modules/moderation/src/generated/ent/counternotice"
-	"zudomart/modules/moderation/src/generated/ent/strike"
-	strikeservices "zudomart/modules/moderation/src/modules/strikes/services"
+	"nantty/modules/moderation/src/generated/ent"
+	"nantty/modules/moderation/src/generated/ent/copyrightclaim"
+	"nantty/modules/moderation/src/generated/ent/counternotice"
+	"nantty/modules/moderation/src/generated/ent/strike"
+	strikeservices "nantty/modules/moderation/src/modules/strikes/services"
 )
 
 type ContentReference struct {

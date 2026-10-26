@@ -1,6 +1,6 @@
 package recordclientsignals
 
-import "zudomart/modules/moderation/src/integrations"
+import "nantty/modules/moderation/src/integrations"
 
 type Command struct {
 	AccountId       string                          `json:"-"`

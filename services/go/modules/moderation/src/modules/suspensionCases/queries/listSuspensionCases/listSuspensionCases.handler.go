@@ -7,12 +7,12 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/moderation/src/container"
-	"zudomart/modules/moderation/src/generated/ent"
-	"zudomart/modules/moderation/src/generated/ent/predicate"
-	"zudomart/modules/moderation/src/generated/ent/suspensioncase"
-	"zudomart/modules/moderation/src/integrations"
-	"zudomart/modules/moderation/src/modules/suspensionCases/services"
+	"nantty/modules/moderation/src/container"
+	"nantty/modules/moderation/src/generated/ent"
+	"nantty/modules/moderation/src/generated/ent/predicate"
+	"nantty/modules/moderation/src/generated/ent/suspensioncase"
+	"nantty/modules/moderation/src/integrations"
+	"nantty/modules/moderation/src/modules/suspensionCases/services"
 )
 
 const pageSize = 25

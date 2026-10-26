@@ -4,10 +4,10 @@ import (
 	"context"
 	"time"
 
-	"zudomart/modules/moderation/src/container"
-	"zudomart/modules/moderation/src/generated/ent"
-	"zudomart/modules/moderation/src/generated/ent/automationexecution"
-	"zudomart/modules/moderation/src/modules/automationRules/dtos"
+	"nantty/modules/moderation/src/container"
+	"nantty/modules/moderation/src/generated/ent"
+	"nantty/modules/moderation/src/generated/ent/automationexecution"
+	"nantty/modules/moderation/src/modules/automationRules/dtos"
 )
 
 const pageSize = 100

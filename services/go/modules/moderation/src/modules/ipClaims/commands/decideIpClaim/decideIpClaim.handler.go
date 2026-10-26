@@ -9,16 +9,16 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/moderation/src/container"
-	"zudomart/modules/moderation/src/events"
-	"zudomart/modules/moderation/src/generated/ent"
-	"zudomart/modules/moderation/src/generated/ent/ipclaim"
-	"zudomart/modules/moderation/src/integrations"
-	contentservices "zudomart/modules/moderation/src/modules/contentReports/services"
-	ipevents "zudomart/modules/moderation/src/modules/ipClaims/events"
-	"zudomart/modules/moderation/src/modules/ipClaims/services"
-	strikeservices "zudomart/modules/moderation/src/modules/strikes/services"
-	"zudomart/platform/httpserver"
+	"nantty/modules/moderation/src/container"
+	"nantty/modules/moderation/src/events"
+	"nantty/modules/moderation/src/generated/ent"
+	"nantty/modules/moderation/src/generated/ent/ipclaim"
+	"nantty/modules/moderation/src/integrations"
+	contentservices "nantty/modules/moderation/src/modules/contentReports/services"
+	ipevents "nantty/modules/moderation/src/modules/ipClaims/events"
+	"nantty/modules/moderation/src/modules/ipClaims/services"
+	strikeservices "nantty/modules/moderation/src/modules/strikes/services"
+	"nantty/platform/httpserver"
 )
 
 type Handler struct {

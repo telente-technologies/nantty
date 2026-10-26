@@ -7,9 +7,9 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/moderation/src/generated/ent"
-	"zudomart/modules/moderation/src/generated/ent/appeal"
-	"zudomart/platform/staffauth"
+	"nantty/modules/moderation/src/generated/ent"
+	"nantty/modules/moderation/src/generated/ent/appeal"
+	"nantty/platform/staffauth"
 )
 
 func EncodeDecision(outcome appeal.Status, reason string, staff staffauth.Staff, now time.Time) []byte {

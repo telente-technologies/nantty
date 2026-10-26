@@ -10,9 +10,9 @@ import (
 	"slices"
 	"strings"
 
-	"zudomart/modules/moderation/src/container"
-	ingestsuspensioncase "zudomart/modules/moderation/src/modules/suspensionCases/commands/ingestSuspensionCase"
-	platformevents "zudomart/platform/events"
+	"nantty/modules/moderation/src/container"
+	ingestsuspensioncase "nantty/modules/moderation/src/modules/suspensionCases/commands/ingestSuspensionCase"
+	platformevents "nantty/platform/events"
 )
 
 type advisoryMessage struct {

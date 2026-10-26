@@ -4,10 +4,10 @@ import (
 	"net/http"
 	"strings"
 
-	"zudomart/modules/moderation/src/integrations"
-	"zudomart/platform/httpserver"
-	"zudomart/platform/jwtauth"
-	"zudomart/platform/staffauth"
+	"nantty/modules/moderation/src/integrations"
+	"nantty/platform/httpserver"
+	"nantty/platform/jwtauth"
+	"nantty/platform/staffauth"
 )
 
 type StaffTokenVerifiers struct {

@@ -8,11 +8,11 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/moderation/src/container"
-	"zudomart/modules/moderation/src/generated/ent"
-	"zudomart/modules/moderation/src/generated/ent/counternotice"
-	"zudomart/modules/moderation/src/integrations"
-	strikeservices "zudomart/modules/moderation/src/modules/strikes/services"
+	"nantty/modules/moderation/src/container"
+	"nantty/modules/moderation/src/generated/ent"
+	"nantty/modules/moderation/src/generated/ent/counternotice"
+	"nantty/modules/moderation/src/integrations"
+	strikeservices "nantty/modules/moderation/src/modules/strikes/services"
 )
 
 type Claimant struct {

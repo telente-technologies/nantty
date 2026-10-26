@@ -3,9 +3,9 @@ package copyrightclaims
 import (
 	"net/http"
 
-	"zudomart/modules/moderation/src/container"
-	"zudomart/modules/moderation/src/modules/copyrightClaims/jobs"
-	"zudomart/modules/moderation/src/modules/copyrightClaims/routes"
+	"nantty/modules/moderation/src/container"
+	"nantty/modules/moderation/src/modules/copyrightClaims/jobs"
+	"nantty/modules/moderation/src/modules/copyrightClaims/routes"
 )
 
 var (

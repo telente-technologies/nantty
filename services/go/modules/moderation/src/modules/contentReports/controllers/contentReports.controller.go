@@ -4,13 +4,13 @@ import (
 	"net/http"
 	"strconv"
 
-	"zudomart/modules/moderation/src/container"
-	decidecontentreport "zudomart/modules/moderation/src/modules/contentReports/commands/decideContentReport"
-	"zudomart/modules/moderation/src/modules/contentReports/dtos"
-	getcontentreport "zudomart/modules/moderation/src/modules/contentReports/queries/getContentReport"
-	listcontentreports "zudomart/modules/moderation/src/modules/contentReports/queries/listContentReports"
-	"zudomart/platform/httpserver"
-	"zudomart/platform/staffauth"
+	"nantty/modules/moderation/src/container"
+	decidecontentreport "nantty/modules/moderation/src/modules/contentReports/commands/decideContentReport"
+	"nantty/modules/moderation/src/modules/contentReports/dtos"
+	getcontentreport "nantty/modules/moderation/src/modules/contentReports/queries/getContentReport"
+	listcontentreports "nantty/modules/moderation/src/modules/contentReports/queries/listContentReports"
+	"nantty/platform/httpserver"
+	"nantty/platform/staffauth"
 )
 
 type ContentReportsController struct {

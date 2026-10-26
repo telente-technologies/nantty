@@ -3,7 +3,7 @@ package ingestlivesafetyscore
 import (
 	"encoding/json"
 
-	"zudomart/modules/moderation/src/modules/liveSafety/services"
+	"nantty/modules/moderation/src/modules/liveSafety/services"
 )
 
 type Label struct {

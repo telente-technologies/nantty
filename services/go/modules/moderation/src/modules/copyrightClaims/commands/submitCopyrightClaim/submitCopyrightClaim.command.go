@@ -1,6 +1,6 @@
 package submitcopyrightclaim
 
-import "zudomart/modules/moderation/src/modules/copyrightClaims/validators"
+import "nantty/modules/moderation/src/modules/copyrightClaims/validators"
 
 type Command struct {
 	ClaimantUserId      string

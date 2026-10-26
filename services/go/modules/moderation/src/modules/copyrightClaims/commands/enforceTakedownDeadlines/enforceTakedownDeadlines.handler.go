@@ -5,13 +5,13 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/moderation/src/container"
-	"zudomart/modules/moderation/src/events"
-	"zudomart/modules/moderation/src/generated/ent"
-	"zudomart/modules/moderation/src/generated/ent/copyrightclaim"
-	healthservices "zudomart/modules/moderation/src/modules/accountHealth/services"
-	claimevents "zudomart/modules/moderation/src/modules/copyrightClaims/events"
-	"zudomart/modules/moderation/src/modules/copyrightClaims/services"
+	"nantty/modules/moderation/src/container"
+	"nantty/modules/moderation/src/events"
+	"nantty/modules/moderation/src/generated/ent"
+	"nantty/modules/moderation/src/generated/ent/copyrightclaim"
+	healthservices "nantty/modules/moderation/src/modules/accountHealth/services"
+	claimevents "nantty/modules/moderation/src/modules/copyrightClaims/events"
+	"nantty/modules/moderation/src/modules/copyrightClaims/services"
 )
 
 const deadlineReason = "The content was not removed before the copyright takedown deadline"

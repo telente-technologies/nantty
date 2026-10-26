@@ -8,10 +8,10 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/moderation/src/container"
-	"zudomart/modules/moderation/src/integrations"
-	"zudomart/platform/httpserver"
-	"zudomart/platform/staffauth"
+	"nantty/modules/moderation/src/container"
+	"nantty/modules/moderation/src/integrations"
+	"nantty/platform/httpserver"
+	"nantty/platform/staffauth"
 )
 
 func ValidateMonetisationOverrideRequest(staff staffauth.Staff, reason string) (string, error) {

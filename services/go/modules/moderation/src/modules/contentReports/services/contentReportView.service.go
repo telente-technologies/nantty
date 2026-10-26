@@ -9,12 +9,12 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/moderation/src/container"
-	"zudomart/modules/moderation/src/generated/ent"
-	"zudomart/modules/moderation/src/generated/ent/contentreport"
-	"zudomart/modules/moderation/src/generated/ent/contentreportentry"
-	"zudomart/modules/moderation/src/generated/ent/strike"
-	"zudomart/modules/moderation/src/integrations"
+	"nantty/modules/moderation/src/container"
+	"nantty/modules/moderation/src/generated/ent"
+	"nantty/modules/moderation/src/generated/ent/contentreport"
+	"nantty/modules/moderation/src/generated/ent/contentreportentry"
+	"nantty/modules/moderation/src/generated/ent/strike"
+	"nantty/modules/moderation/src/integrations"
 )
 
 type TargetView struct {

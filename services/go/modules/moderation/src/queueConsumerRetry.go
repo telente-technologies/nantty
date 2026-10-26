@@ -5,7 +5,7 @@ import (
 	"log/slog"
 	"time"
 
-	platformevents "zudomart/platform/events"
+	platformevents "nantty/platform/events"
 )
 
 type queueConsumerOpener func(context.Context, platformevents.MessageBusSelection) (platformevents.JobQueue, platformevents.QueueConsumer, error)

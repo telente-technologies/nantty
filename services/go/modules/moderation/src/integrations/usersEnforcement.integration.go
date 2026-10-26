@@ -11,7 +11,7 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/platform/httpserver"
+	"nantty/platform/httpserver"
 )
 
 type StaffActor struct {

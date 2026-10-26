@@ -4,12 +4,12 @@ import (
 	"context"
 	"time"
 
-	"zudomart/modules/moderation/src/events"
-	"zudomart/modules/moderation/src/generated/ent"
-	"zudomart/modules/moderation/src/generated/ent/copyrightclaim"
-	contentservices "zudomart/modules/moderation/src/modules/contentReports/services"
-	claimevents "zudomart/modules/moderation/src/modules/copyrightClaims/events"
-	strikeservices "zudomart/modules/moderation/src/modules/strikes/services"
+	"nantty/modules/moderation/src/events"
+	"nantty/modules/moderation/src/generated/ent"
+	"nantty/modules/moderation/src/generated/ent/copyrightclaim"
+	contentservices "nantty/modules/moderation/src/modules/contentReports/services"
+	claimevents "nantty/modules/moderation/src/modules/copyrightClaims/events"
+	strikeservices "nantty/modules/moderation/src/modules/strikes/services"
 )
 
 type UpholdParams struct {

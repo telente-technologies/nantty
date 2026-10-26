@@ -3,13 +3,13 @@ package saveautomationrule
 import (
 	"context"
 
-	"zudomart/modules/moderation/src/container"
-	"zudomart/modules/moderation/src/generated/ent"
-	"zudomart/modules/moderation/src/modules/automationRules/dtos"
-	"zudomart/modules/moderation/src/modules/automationRules/repositories"
-	"zudomart/modules/moderation/src/modules/automationRules/services"
-	"zudomart/modules/moderation/src/modules/automationRules/validators"
-	"zudomart/platform/httpserver"
+	"nantty/modules/moderation/src/container"
+	"nantty/modules/moderation/src/generated/ent"
+	"nantty/modules/moderation/src/modules/automationRules/dtos"
+	"nantty/modules/moderation/src/modules/automationRules/repositories"
+	"nantty/modules/moderation/src/modules/automationRules/services"
+	"nantty/modules/moderation/src/modules/automationRules/validators"
+	"nantty/platform/httpserver"
 )
 
 type Handler struct {
