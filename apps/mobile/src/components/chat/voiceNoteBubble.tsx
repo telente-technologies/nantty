@@ -1,4 +1,4 @@
-import { formatVoiceNoteClock, formatVoiceNotePlaybackRate, voiceNoteDisplayLevels } from "@zudomart/chat-crypto";
+import { formatVoiceNoteClock, formatVoiceNotePlaybackRate, voiceNoteDisplayLevels } from "@nantty/chat-crypto";
 import { useEffect, useMemo } from "react";
 import { Pressable, StyleSheet, View } from "react-native";
 

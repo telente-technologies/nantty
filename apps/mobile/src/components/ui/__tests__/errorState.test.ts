@@ -84,7 +84,7 @@ test("renders the not-found screen with search and shortcuts", async () => {
   await render(createElement(NotFoundScreen));
   expect(screen.getByText("This page wandered off")).toBeTruthy();
   expect(screen.getByText("404", { includeHiddenElements: true })).toBeTruthy();
-  expect(screen.getByLabelText("Search Zudomart")).toBeTruthy();
+  expect(screen.getByLabelText("Search Nantty")).toBeTruthy();
   for (const label of ["Feed", "Clips", "Mart", "Live"]) expect(screen.getByText(label)).toBeTruthy();
 });
 

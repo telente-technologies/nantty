@@ -74,7 +74,7 @@ export function MentionSuggestionList({ suggestions }: { readonly suggestions: M
         {candidates.map((candidate, index) => (
           <View key={candidate.user.id}>
             {candidate.rank === "other" && index > 0 && candidates[index - 1]!.rank !== "other" ? (
-              <View style={styles.divider}><Text size={12} weight={600} lineHeight={16.8} color={colors.textMuted}>More people on Zudomart</Text></View>
+              <View style={styles.divider}><Text size={12} weight={600} lineHeight={16.8} color={colors.textMuted}>More people on Nantty</Text></View>
             ) : null}
             <CandidateRow candidate={candidate} onPick={() => onPickCandidate(candidate)} />
           </View>

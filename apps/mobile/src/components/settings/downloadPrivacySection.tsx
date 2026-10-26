@@ -18,7 +18,7 @@ export function DownloadPrivacySection() {
   return (
     <ConsentToggleRow
       label="Allow downloads"
-      description="People can save your photos and clips. Saved copies carry the Zudomart logo and your @username. Private, subscriber-only posts and stories are never downloadable."
+      description="People can save your photos and clips. Saved copies carry the Nantty logo and your @username. Private, subscriber-only posts and stories are never downloadable."
       enabled={allowDownloads}
       onChange={(enabled) => updateSettings.mutate({ allowDownloads: enabled })}
     />

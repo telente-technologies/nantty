@@ -17,9 +17,9 @@ jest.mock("react-native-reanimated", () => {
   };
 });
 
-test("boot splash exposes one Zudomart image with the logo and wordmark", async () => {
+test("boot splash exposes one Nantty image with the logo and wordmark", async () => {
   await render(createElement(BootSplash));
-  const [splash] = screen.getAllByLabelText("Zudomart");
+  const [splash] = screen.getAllByLabelText("Nantty");
   expect(splash.props.accessible).toBe(true);
   expect(splash.props.accessibilityRole).toBe("image");
   expect(JSON.stringify(screen.toJSON())).toContain('"width":160');

@@ -1,4 +1,4 @@
-import type { ChatControl } from "@zudomart/chat-crypto";
+import type { ChatControl } from "@nantty/chat-crypto";
 import { useCallback } from "react";
 
 import { storeDeliveredMessage } from "@/cache/messageRealtimeCache.util";

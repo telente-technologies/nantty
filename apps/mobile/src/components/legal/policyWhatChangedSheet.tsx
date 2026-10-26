@@ -50,7 +50,7 @@ export function PolicyWhatChangedSheet({ visible, versions, onClose, onDismissBa
         ))}
         {materialVersions.map((version) => (
           <Text key={version.policyVersionId} size={13} lineHeight={19} color={colors.textMuted} maxFontSizeMultiplier={2}>
-            You can keep using Zudomart as normal. From {formatPolicyEffectiveDate(version.effectiveAt)} we'll ask you to accept the new {version.title} before you continue.
+            You can keep using Nantty as normal. From {formatPolicyEffectiveDate(version.effectiveAt)} we'll ask you to accept the new {version.title} before you continue.
           </Text>
         ))}
         {acceptErrorMessage ? (

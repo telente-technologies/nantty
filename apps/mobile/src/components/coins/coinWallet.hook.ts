@@ -19,7 +19,7 @@ export const formatCoinAmount = (coins: number) => `${coins.toLocaleString("en-U
 export const describeCoinError = (error: unknown) => {
   if (error instanceof ApiError && error.status === 402) return "You don't have enough coins. Buy more coins and try again.";
   if (error instanceof ApiError) return error.message;
-  return "We couldn't reach Zudomart. Check your data or Wi-Fi and try again.";
+  return "We couldn't reach Nantty. Check your data or Wi-Fi and try again.";
 };
 
 export const isNotEnoughCoinsError = (error: unknown) => error instanceof ApiError && error.status === 402;

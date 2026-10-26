@@ -34,14 +34,14 @@ function DirectPaymentOption({ storeName, selected, onConfirm }: { readonly stor
         <Text size={13} lineHeight={16.9} color={colors.textMuted}>The seller is paid right away.</Text>
         {selected ? (
           <Text size={12} lineHeight={15.6} color={colors.cautionStrongText}>
-            You lose escrow protection. Refunds and disputes depend on the seller, and Zudomart cannot hold or reverse this payment.
+            You lose escrow protection. Refunds and disputes depend on the seller, and Nantty cannot hold or reverse this payment.
           </Text>
         ) : null}
       </SelectableRow>
       {!selected && confirming ? (
         <View style={{ gap: 8, padding: 12, borderRadius: 12, backgroundColor: colors.cautionTint }}>
           <Text size={12} lineHeight={15.6} color={colors.cautionStrongText}>
-            You lose escrow protection. Refunds and disputes depend on the seller, and Zudomart cannot hold or reverse this payment.
+            You lose escrow protection. Refunds and disputes depend on the seller, and Nantty cannot hold or reverse this payment.
           </Text>
           <Text size={12} lineHeight={15.6} color={colors.cautionStrongText}>
             Type DIRECT to confirm paying {storeName} directly.

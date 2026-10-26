@@ -20,7 +20,7 @@ export function SellerWebAppNote() {
         <Text size={14} weight={600} lineHeight={16.8}>Need the full business toolkit?</Text>
       </View>
       <Text size={13} lineHeight={17.5} color={colors.textMuted}>
-        The Zudomart Dashboard is available to verified sellers with a subscription:
+        The Nantty Dashboard is available to verified sellers with a subscription:
       </Text>
       {WEB_ONLY_TOOLS.map((tool) => (
         <BulletLine key={tool} size={13} lineHeight={17.5}>
@@ -29,7 +29,7 @@ export function SellerWebAppNote() {
       ))}
       <Button
         variant="subtle"
-        title="Open Zudomart Dashboard"
+        title="Open Nantty Dashboard"
         icon={<ArrowUpRight24Icon size={18} />}
         onPress={() => openTrustedWebPage(sellerWebAppConfig.dashboardUrl, inAppBrowserColorsFromTheme(colors))}
         style={styles.button}

@@ -1,4 +1,4 @@
-import { downsampleLevelsByBucketMax, formatVoiceNoteClock, voiceNoteBarCount } from "@zudomart/chat-crypto";
+import { downsampleLevelsByBucketMax, formatVoiceNoteClock, voiceNoteBarCount } from "@nantty/chat-crypto";
 import { useMemo } from "react";
 import { Pressable, StyleSheet, View } from "react-native";
 

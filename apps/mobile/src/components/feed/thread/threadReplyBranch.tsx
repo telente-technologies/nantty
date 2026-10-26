@@ -56,7 +56,7 @@ export function ThreadReplyBranch({ reply, postAuthorId, hasParentAbove, showRep
   };
 
   const shareReply = () => {
-    Share.share({ message: `${reply.author?.name ?? "Someone"} on Zudomart: ${webAppLinks.post(reply.postId)}#${reply.id}` }).catch(() => undefined);
+    Share.share({ message: `${reply.author?.name ?? "Someone"} on Nantty: ${webAppLinks.post(reply.postId)}#${reply.id}` }).catch(() => undefined);
   };
 
   return (

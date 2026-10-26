@@ -1,4 +1,4 @@
-import { type VoiceNoteSession, idleVoiceNoteSession } from "@zudomart/chat-crypto";
+import { type VoiceNoteSession, idleVoiceNoteSession } from "@nantty/chat-crypto";
 import { createElement, Fragment } from "react";
 import { fireEvent, render, screen } from "@testing-library/react-native";
 

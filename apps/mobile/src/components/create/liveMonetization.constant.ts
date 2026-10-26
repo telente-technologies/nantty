@@ -3,10 +3,10 @@ import type { LiveAdPlacement, LiveMonetizationInput } from "@/types/socialGraph
 export const LIVE_AD_TERMS_VERSION = "2026-10";
 
 export const LIVE_AD_TERMS_SUMMARY = [
-  "ZudoMart may show ads in this live only in the places you choose.",
+  "Nantty may show ads in this live only in the places you choose.",
   "Ads never run more often than your limits, and viewers can see an ad indicator if you keep it on.",
   "Revenue is shared under the monetization policy that applies when the ad is delivered.",
-  "You stay responsible for your own sponsorship mentions. ZudoMart does not sell them.",
+  "You stay responsible for your own sponsorship mentions. Nantty does not sell them.",
 ] as const;
 
 export const LIVE_AD_PLACEMENT_OPTIONS: readonly { readonly key: LiveAdPlacement; readonly label: string }[] = [

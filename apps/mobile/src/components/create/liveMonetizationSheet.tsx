@@ -54,7 +54,7 @@ export function LiveMonetizationSheet({ visible, onClose, draft, onChangeDraft }
     <BottomSheet visible={visible} onClose={onClose} title="Live monetization" subtitle="Ads stay off unless you opt in" scrollable footerActions={[{ label: "Done", style: "primary", onPress: onClose }]}>
       <View style={styles.body}>
         <SwitchRow
-          label="Allow ZudoMart ads"
+          label="Allow Nantty ads"
           hint="Off by default. Ads only run if you opt in and agree to the live-ad terms."
           value={draft.allowAds}
           onChange={(allowAds) => onChangeDraft({ ...draft, allowAds })}
@@ -106,7 +106,7 @@ export function LiveMonetizationSheet({ visible, onClose, draft, onChangeDraft }
           onChangeText={(sponsorshipLine) => onChangeDraft({ ...draft, sponsorshipLine })}
           maxLength={80}
         />
-        <Text size={12} lineHeight={16} color={colors.textMuted}>Your own sponsors are your business. ZudoMart does not sell or take a share of them.</Text>
+        <Text size={12} lineHeight={16} color={colors.textMuted}>Your own sponsors are your business. Nantty does not sell or take a share of them.</Text>
       </View>
     </BottomSheet>
   );

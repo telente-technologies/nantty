@@ -80,7 +80,7 @@ export function BusinessCategoryPicker({ categories, value, onChange }: Business
       ) : null}
       <TextField label="Something else? Add your own" placeholder="Custom category" value={customName} onChangeText={setCustomName} maxLength={40} />
       <Button title="Add custom category" variant="subtle" disabled={customName.trim().length < 2} onPress={addCustomCategory} />
-      <Text size={12} lineHeight={16.8} color={colors.textMuted}>Custom categories are reviewed by ZudoMart before they become public.</Text>
+      <Text size={12} lineHeight={16.8} color={colors.textMuted}>Custom categories are reviewed by Nantty before they become public.</Text>
     </View>
   );
 }

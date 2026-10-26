@@ -1,4 +1,4 @@
-import { type VoiceNotePlaybackRate, createExclusivePlaybackCoordinator, nextVoiceNotePlaybackRate } from "@zudomart/chat-crypto";
+import { type VoiceNotePlaybackRate, createExclusivePlaybackCoordinator, nextVoiceNotePlaybackRate } from "@nantty/chat-crypto";
 import { type AudioPlayer, useAudioPlayer, useAudioPlayerStatus } from "expo-audio";
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 

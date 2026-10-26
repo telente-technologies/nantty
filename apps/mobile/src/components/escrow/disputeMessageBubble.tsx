@@ -9,7 +9,7 @@ import type { DisputeMessage } from "@/types/commerce.type";
 import { formatFriendlyDateTime } from "./escrowStage.util";
 import { PreviewableImage } from "@/components/ui/previewableImage";
 
-const ROLE_LABELS = { buyer: "Buyer", seller: "Seller", support: "Zudomart Support" } as const;
+const ROLE_LABELS = { buyer: "Buyer", seller: "Seller", support: "Nantty Support" } as const;
 
 export function DisputeMessageBubble({ message, sentByViewer }: { message: DisputeMessage; sentByViewer: boolean }) {
   const { colors } = useTheme();

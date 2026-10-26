@@ -6,18 +6,18 @@ import { Text } from "@/components/ui/text";
 import { makeThemedStyles, useTheme } from "@/theme";
 import { useAuthStore } from "@/store/auth.store";
 
-export function SellOnZudomartBanner() {
+export function SellOnNanttyBanner() {
   const { colors } = useTheme();
   const styles = useStyles();
   const navigation = useNavigation();
   const signedInUserIsSeller = useAuthStore((state) => state.user?.isSeller ?? false);
   if (signedInUserIsSeller) return null;
   return (
-    <Pressable accessibilityRole="button" accessibilityLabel="Start selling on Zudomart" onPress={() => navigation.navigate("SellerApplication")} style={styles.banner}>
+    <Pressable accessibilityRole="button" accessibilityLabel="Start selling on Nantty" onPress={() => navigation.navigate("SellerApplication")} style={styles.banner}>
       <BuildingStore20Icon color={colors.primary} />
       <View style={styles.texts}>
         <Text size={13} weight={600} lineHeight={16.9} color={colors.primary}>Have something to sell?</Text>
-        <Text size={12} lineHeight={16} color={colors.textMuted}>Open your store on Zudomart — get paid safely through escrow.</Text>
+        <Text size={12} lineHeight={16} color={colors.textMuted}>Open your store on Nantty — get paid safely through escrow.</Text>
       </View>
       <ArrowUpRight24Icon size={18} color={colors.primary} />
     </Pressable>

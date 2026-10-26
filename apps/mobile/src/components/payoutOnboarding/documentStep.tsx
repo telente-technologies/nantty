@@ -69,7 +69,7 @@ export function DocumentStep({ state, stepNumber, stepCount, onChanged }: Docume
       stepNumber={stepNumber}
       stepCount={stepCount}
       title={unfinished ? "Verify your ID: not finished" : "Verify your ID"}
-      why="A photo of your government ID is the last check. It is collected on a secure verification page, so the image never passes through the Zudomart app."
+      why="A photo of your government ID is the last check. It is collected on a secure verification page, so the image never passes through the Nantty app."
     >
       <Text size={14} lineHeight={20}>
         A secure page opens inside the app. Upload your ID there and you come straight back here. Your progress is already saved.

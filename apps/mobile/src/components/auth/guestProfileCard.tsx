@@ -29,7 +29,7 @@ export function GuestProfileCard() {
             <UserCircle24Icon />
           </View>
           <Text size={18} weight={600} align="center" accessibilityRole="header">
-            Your Zudomart profile
+            Your Nantty profile
           </Text>
           <Text size={14} align="center" style={styles.message}>
             Sign in to like, follow, shop, message and go live. Your account, orders and wallet will be waiting here.

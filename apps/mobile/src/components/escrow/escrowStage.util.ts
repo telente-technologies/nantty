@@ -47,19 +47,19 @@ export const STAGES_BUYER_CAN_DISPUTE = new Set<EscrowStage>(["seller_preparing"
 export function describeEscrowRelease(escrow: EscrowDetail): string {
   if (escrow.releasedAt) return `Released ${formatFriendlyDate(escrow.releasedAt)}`;
   if (escrow.stage === "disputed") return "Release paused while the dispute is reviewed";
-  if (escrow.stage === "under_review") return "Under review by Zudomart staff. The seller isn't paid until it's settled";
+  if (escrow.stage === "under_review") return "Under review by Nantty staff. The seller isn't paid until it's settled";
   if (escrow.expectedReleaseAt) return `Expected release: ${formatFriendlyDate(escrow.expectedReleaseAt)}`;
   return "Release date appears once the order ships";
 }
 
 export function escrowPausedStepCopy(escrow: EscrowDetail): { readonly title: string; readonly detail: string } {
   if (escrow.stage === "refunded") return { title: "Refunded to buyer", detail: describeRefundReturned(escrow) };
-  if (escrow.stage === "under_review") return { title: "Not delivered after 30 days — under review", detail: "Zudomart staff will contact the buyer and the seller. The money stays held until staff release it or refund it" };
-  return { title: "Dispute open — release paused", detail: "Zudomart is holding the money until the dispute is resolved" };
+  if (escrow.stage === "under_review") return { title: "Not delivered after 30 days — under review", detail: "Nantty staff will contact the buyer and the seller. The money stays held until staff release it or refund it" };
+  return { title: "Dispute open — release paused", detail: "Nantty is holding the money until the dispute is resolved" };
 }
 
 function describeRefundReturned(escrow: EscrowDetail): string {
   const kept = escrow.feesKeptOnRefund;
   if (!kept || kept.amountMinor <= 0) return `${formatMoneyForDisplay(escrow.refundedAmount ?? escrow.heldAmount)} returned to the buyer`;
-  return `${formatMoneyForDisplay(escrow.refundedAmount ?? escrow.heldAmount)} returned to the buyer. The seller had already been paid, so Zudomart kept its ${formatMoneyForDisplay(kept)} fees`;
+  return `${formatMoneyForDisplay(escrow.refundedAmount ?? escrow.heldAmount)} returned to the buyer. The seller had already been paid, so Nantty kept its ${formatMoneyForDisplay(kept)} fees`;
 }

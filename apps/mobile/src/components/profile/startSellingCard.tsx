@@ -19,7 +19,7 @@ export function StartSellingCard({ compact = false }: { compact?: boolean }) {
     <View style={[styles.card, compact && styles.compact]}>
       <View style={styles.titleRow}>
         <BuildingStore20Icon color={colors.primary} />
-        <Text size={15} weight={600} lineHeight={18}>{underReview ? "Your store application is under review" : "Start selling on Zudomart"}</Text>
+        <Text size={15} weight={600} lineHeight={18}>{underReview ? "Your store application is under review" : "Start selling on Nantty"}</Text>
       </View>
       <Text size={13} lineHeight={17.5} color={colors.textMuted}>
         {underReview

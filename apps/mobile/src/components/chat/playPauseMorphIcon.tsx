@@ -1,4 +1,4 @@
-import { interpolatePlayPausePolygons, polygonPathData } from "@zudomart/chat-crypto";
+import { interpolatePlayPausePolygons, polygonPathData } from "@nantty/chat-crypto";
 import Svg, { Path } from "react-native-svg";
 
 import { usePlayPauseMorphProgress } from "./playPauseMorph.hook";

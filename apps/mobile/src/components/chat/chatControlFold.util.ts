@@ -1,4 +1,4 @@
-import { ChatControlLedger, type ControlEntry } from "@zudomart/chat-crypto";
+import { ChatControlLedger, type ControlEntry } from "@nantty/chat-crypto";
 
 import type { LocallyStoredMessage } from "@/cache/messageHistory.type";
 import type { SharedLocation } from "@/types";

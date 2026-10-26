@@ -35,7 +35,7 @@ export function ApplicationReviewStep({ draft, onEditStep }: { draft: SellerAppl
         <SettingsRow label="Account name" trailing={{ text: draft.payoutAccountName, ...muted }} onPress={() => onEditStep(3)} />
       </SettingsGroup>
       <Text size={12} lineHeight={16.8} color={colors.textMuted}>
-        By submitting, you confirm the details are yours and agree to the Zudomart Seller Terms. We usually review applications within 2 working days.
+        By submitting, you confirm the details are yours and agree to the Nantty Seller Terms. We usually review applications within 2 working days.
       </Text>
     </View>
   );

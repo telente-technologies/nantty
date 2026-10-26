@@ -1,7 +1,7 @@
 import {
   type VoiceNoteCaptureMode, type VoiceNoteSession, type VoiceNoteSessionEvent, encodeVoiceNoteWaveform, formatVoiceNoteClock, idleVoiceNoteSession, isSlideToCancelArmed, levelFromDecibels,
   maximumVoiceNoteMilliseconds, reduceVoiceNoteSession, voiceNoteDiscardSettleMilliseconds, voiceNoteLevelSampleIntervalMilliseconds,
-} from "@zudomart/chat-crypto";
+} from "@nantty/chat-crypto";
 import { type RecordingOptions, RecordingPresets, requestRecordingPermissionsAsync, setAudioModeAsync, useAudioRecorder } from "expo-audio";
 import * as Haptics from "expo-haptics";
 import { useCallback, useEffect, useRef, useState } from "react";

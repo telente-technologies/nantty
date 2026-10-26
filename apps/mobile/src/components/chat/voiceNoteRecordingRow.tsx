@@ -1,4 +1,4 @@
-import { type VoiceNoteSession, formatVoiceNoteClock, slideToCancelAppearance } from "@zudomart/chat-crypto";
+import { type VoiceNoteSession, formatVoiceNoteClock, slideToCancelAppearance } from "@nantty/chat-crypto";
 import { useEffect } from "react";
 import { Pressable, StyleSheet, View } from "react-native";
 import Animated, { Easing, cancelAnimation, useAnimatedStyle, useSharedValue, withRepeat, withSequence, withTiming } from "react-native-reanimated";

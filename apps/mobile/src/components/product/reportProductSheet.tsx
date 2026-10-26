@@ -32,7 +32,7 @@ export function ReportProductSheet({ productId, visible, onClose }: { productId:
           <View style={{ width: 40, height: 40, borderRadius: 20, alignItems: "center", justifyContent: "center", backgroundColor: colors.chip }}>
             <SealCheck20Icon size={22} color={colors.textMuted} />
           </View>
-          <Text size={13} lineHeight={17.5} color={colors.textMuted}>We'll review the listing. Brand owners can also file trademark claims from the Zudomart Dashboard.</Text>
+          <Text size={13} lineHeight={17.5} color={colors.textMuted}>We'll review the listing. Brand owners can also file trademark claims from the Nantty Dashboard.</Text>
         </View>
       ) : (
         <ScrollView style={styles.list} contentContainerStyle={styles.body}>

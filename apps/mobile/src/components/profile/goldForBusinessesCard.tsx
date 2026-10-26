@@ -82,7 +82,7 @@ function GoldForBusinessesPurchase({ overview }: { readonly overview: GoldForBus
       {selected.length > 0 && quote.data ? <GoldQuoteBreakdown quote={quote.data} updating={quote.isPlaceholderData || quote.isFetching} /> : null}
       {selected.length > 0 && quote.isPending ? <ListSkeleton rows={2} padding={0} /> : null}
       {failure ? <Text size={12} lineHeight={16} color={colors.error}>{failure}</Text> : null}
-      <Text size={12} lineHeight={16} color={colors.textMuted}>You'll pay on the Zudomart website. The total there matches this price.</Text>
+      <Text size={12} lineHeight={16} color={colors.textMuted}>You'll pay on the Nantty website. The total there matches this price.</Text>
       <Button
         title="Continue on the web"
         disabled={!current || !current.canBuyOnWeb || quote.isFetching}

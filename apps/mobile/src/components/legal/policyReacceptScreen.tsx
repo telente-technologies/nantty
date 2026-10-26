@@ -59,7 +59,7 @@ export function PolicyReacceptScreen({ version }: { readonly version: PolicyVers
           We've updated our {documentNames}
         </Text>
         <Text size={15} lineHeight={22} align="center" color={colors.textMuted} maxFontSizeMultiplier={LARGE_TEXT_MULTIPLIER}>
-          Here's a short summary of what changed. Please read it, then accept the update to keep using Zudomart. Your account, orders and messages are safe either way.
+          Here's a short summary of what changed. Please read it, then accept the update to keep using Nantty. Your account, orders and messages are safe either way.
         </Text>
         <View style={styles.cards}>
           {versions.map((pendingVersion) => (

@@ -55,7 +55,7 @@ export function LiveSetupPanel(props: LiveSetupPanelProps) {
   function shareCredentials() {
     if (!credentials) return;
     void Share.share({
-      message: `Go live on Zudomart\n\nServer URL: ${credentials.ingestUrl}\nStream key: ${credentials.streamKey}`,
+      message: `Go live on Nantty\n\nServer URL: ${credentials.ingestUrl}\nStream key: ${credentials.streamKey}`,
     });
   }
 

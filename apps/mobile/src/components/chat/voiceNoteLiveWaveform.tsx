@@ -1,4 +1,4 @@
-import { liveWaveformWindow, voiceNoteBarCount, voiceNoteBarHeight } from "@zudomart/chat-crypto";
+import { liveWaveformWindow, voiceNoteBarCount, voiceNoteBarHeight } from "@nantty/chat-crypto";
 import { useEffect } from "react";
 import { StyleSheet, View } from "react-native";
 import Animated, { Easing, useAnimatedStyle, useSharedValue, withTiming } from "react-native-reanimated";

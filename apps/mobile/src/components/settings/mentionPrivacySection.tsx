@@ -10,7 +10,7 @@ import type { WhoCanMentionMe } from "@/types/mention.type";
 const MENTION_PRIVACY_QUERY_KEY = ["users", "me", "mention-privacy"] as const;
 
 const MENTION_AUDIENCE_OPTIONS: readonly { readonly value: WhoCanMentionMe; readonly label: string; readonly description: string }[] = [
-  { value: "everyone", label: "Everyone", description: "Anyone on Zudomart can mention you in posts, comments and groups you are in." },
+  { value: "everyone", label: "Everyone", description: "Anyone on Nantty can mention you in posts, comments and groups you are in." },
   { value: "following", label: "People I follow", description: "Only people you follow can mention you. Other mentions show as plain text and you are not notified." },
   { value: "no_one", label: "No one", description: "Mentions of you show as plain text and you are never notified." },
 ];

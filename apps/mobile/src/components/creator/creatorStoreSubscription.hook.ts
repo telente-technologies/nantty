@@ -7,7 +7,7 @@ import { fetchStoreDisplayPrice, purchaseCreatorSubscriptionInStore, restoreCrea
 import { resolveStoreBillingAvailability } from "@/services/money/nativeStoreBilling.service";
 import type { CreatorSubscriptionState } from "@/types/creator.type";
 
-export const NEEDS_APP_BUILD_MESSAGE = "Subscriptions need the Zudomart app build. Install the Zudomart app from the App Store or Google Play to subscribe.";
+export const NEEDS_APP_BUILD_MESSAGE = "Subscriptions need the Nantty app build. Install the Nantty app from the App Store or Google Play to subscribe.";
 
 export function useCreatorStoreSubscription(creatorId: string, storeProductId: string | null | undefined) {
   const queryClient = useQueryClient();

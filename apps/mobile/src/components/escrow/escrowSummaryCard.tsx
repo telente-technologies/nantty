@@ -29,7 +29,7 @@ export function EscrowSummaryCard({ escrow, viewerRole }: { escrow: EscrowDetail
       </Text>
       {viewerRole === "seller" ? (
         <Text size={12} lineHeight={16.8} color={colors.textMuted}>
-          Buyer paid {formatMoneyForDisplay(escrow.heldAmount)} · Zudomart fee {formatMoneyForDisplay(escrow.platformFee)}
+          Buyer paid {formatMoneyForDisplay(escrow.heldAmount)} · Nantty fee {formatMoneyForDisplay(escrow.platformFee)}
         </Text>
       ) : null}
       <Text size={13} weight={500} lineHeight={16.9} color={escrow.stage === "disputed" ? colors.error : colors.primary}>

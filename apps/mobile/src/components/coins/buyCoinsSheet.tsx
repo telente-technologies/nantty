@@ -14,7 +14,7 @@ import { CoinAmountWithIcon } from "./coinAmount";
 const describePurchaseOutcome = (outcome: CoinPurchaseOutcome) => {
   if (outcome.kind === "credited") return `${formatCoinAmount(outcome.coins)} added to your balance.`;
   if (outcome.kind === "pending") return "Your payment is still being confirmed. Your coins will appear shortly.";
-  if (outcome.kind === "availableOnWebsiteOnly") return "Coin purchases are available on zudomart.com";
+  if (outcome.kind === "availableOnWebsiteOnly") return "Coin purchases are available on nantty.com";
   return "The payment wasn't completed. You have not been charged.";
 };
 

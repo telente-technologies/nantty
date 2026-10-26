@@ -1,4 +1,4 @@
-import { isVoiceNoteSessionActive } from "@zudomart/chat-crypto";
+import { isVoiceNoteSessionActive } from "@nantty/chat-crypto";
 import { useEffect, useState } from "react";
 import { StyleSheet, View } from "react-native";
 

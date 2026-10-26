@@ -28,7 +28,7 @@ export function LiveGiftLeaderboardSheet({ liveId, visible, onClose }: { liveId:
           </Text>
         ) : null}
         <Text size={12} lineHeight={16} color={colors.textMuted} align="center">
-          Ranked by ZudoPoints from gifts, likes, shares, follows and watch time.
+          Ranked by Nantty Points from gifts, likes, shares, follows and watch time.
         </Text>
       </View>
     </BottomSheet>

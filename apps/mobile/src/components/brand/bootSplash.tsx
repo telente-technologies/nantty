@@ -7,7 +7,7 @@ import { useBreathingStyle } from "@/components/ui/brandLoader";
 import { useReducedMotionPreference } from "@/hooks/useReducedMotionPreference.hook";
 import { makeThemedStyles } from "@/theme";
 
-import { ZudomartWordmark } from "./zudomartWordmark";
+import { NanttyWordmark } from "./nanttyWordmark";
 
 const splashLogo = require("../../../assets/splashLogo.png");
 
@@ -27,12 +27,12 @@ export function BootSplash({ onLayout }: { readonly onLayout?: (event: LayoutCha
   }, []);
   const breathing = useBreathingStyle(isWaiting && !reduceMotion);
   return (
-    <View style={styles.root} onLayout={onLayout} accessible accessibilityRole="image" accessibilityLabel="Zudomart">
+    <View style={styles.root} onLayout={onLayout} accessible accessibilityRole="image" accessibilityLabel="Nantty">
       <Animated.View style={breathing}>
         <Image source={splashLogo} style={styles.logo} fadeDuration={0} />
       </Animated.View>
       <View style={[styles.wordmark, { bottom }]}>
-        <ZudomartWordmark height={WORDMARK_HEIGHT} />
+        <NanttyWordmark height={WORDMARK_HEIGHT} />
       </View>
     </View>
   );

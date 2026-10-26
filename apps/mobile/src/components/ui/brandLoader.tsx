@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { StyleSheet, View, type StyleProp, type ViewStyle } from "react-native";
 import Animated, { cancelAnimation, Easing, useAnimatedStyle, useSharedValue, withRepeat, withTiming } from "react-native-reanimated";
 
-import { ZudomartLogoMark } from "@/components/brand/zudomartWordmark";
+import { NanttyLogoMark } from "@/components/brand/nanttyWordmark";
 import { useReducedMotionPreference } from "@/hooks/useReducedMotionPreference.hook";
 import { useTheme } from "@/theme";
 
@@ -43,7 +43,7 @@ export function BrandLoader({ size = "md", label = "Loading…", showLabel = fal
   return (
     <View style={[styles.root, style]} accessible accessibilityRole="progressbar" accessibilityLabel={accessibilityLabel ?? label} accessibilityState={{ busy: true }} testID="brand-loader">
       <Animated.View style={reduceMotion ? null : breathing}>
-        <ZudomartLogoMark size={brandLoaderSizes[size]} />
+        <NanttyLogoMark size={brandLoaderSizes[size]} />
       </Animated.View>
       {showLabel ? (
         <Text size={size === "lg" ? 15 : 13} color={colors.textMuted} style={styles.label}>

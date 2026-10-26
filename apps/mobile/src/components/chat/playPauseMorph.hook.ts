@@ -1,4 +1,4 @@
-import { easeOutQuart, playPauseMorphMilliseconds } from "@zudomart/chat-crypto";
+import { easeOutQuart, playPauseMorphMilliseconds } from "@nantty/chat-crypto";
 import { useEffect, useRef, useState } from "react";
 
 export function usePlayPauseMorphProgress(isPlaying: boolean, reduceMotion: boolean) {

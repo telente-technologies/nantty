@@ -34,7 +34,7 @@ function DownloadProgressPill() {
   const reduceMotion = useReducedMotionPreference();
   if (!activeDownload) return null;
   const percent = Math.round(activeDownload.progress * 100);
-  const label = activeDownload.progress < 0.5 ? `Adding the Zudomart tag… ${percent}%` : `Saving ${activeDownload.mediaType === "video" ? "video" : "photo"}… ${percent}%`;
+  const label = activeDownload.progress < 0.5 ? `Adding the Nantty tag… ${percent}%` : `Saving ${activeDownload.mediaType === "video" ? "video" : "photo"}… ${percent}%`;
   return (
     <Animated.View entering={reduceMotion ? undefined : FadeInDown} exiting={reduceMotion ? undefined : FadeOut} style={styles.card} accessibilityLiveRegion="polite">
       <View style={styles.row}>

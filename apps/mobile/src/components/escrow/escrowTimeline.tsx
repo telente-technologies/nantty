@@ -38,7 +38,7 @@ function buildTimelineSteps(escrow: EscrowDetail, viewerRole: "buyer" | "seller"
     {
       key: "paid",
       title: "Paid into escrow",
-      detail: escrow.paidAt ? `${formatMoneyForDisplay(escrow.heldAmount)} held safely by Zudomart · ${formatFriendlyDateTime(escrow.paidAt)}` : "Waiting for your payment",
+      detail: escrow.paidAt ? `${formatMoneyForDisplay(escrow.heldAmount)} held safely by Nantty · ${formatFriendlyDateTime(escrow.paidAt)}` : "Waiting for your payment",
       state: escrow.paidAt ? "done" : "current",
     },
     {

@@ -1,4 +1,4 @@
-import { nextPollVote } from "@zudomart/chat-crypto";
+import { nextPollVote } from "@nantty/chat-crypto";
 import { useState } from "react";
 import { Pressable, StyleSheet, View } from "react-native";
 

@@ -75,7 +75,7 @@ function LiveHostRankingDetails({ ranking, globalLine, categoryLine, ringColor }
         </View>
       ) : null}
       <Text size={12} lineHeight={16} color={colors.textMuted}>
-        Streamer rank from ZudoPoints earned on lives.
+        Streamer rank from Nantty Points earned on lives.
       </Text>
     </View>
   );

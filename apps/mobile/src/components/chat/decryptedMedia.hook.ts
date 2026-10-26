@@ -1,4 +1,4 @@
-import type { AttachmentPointer } from "@zudomart/chat-crypto";
+import type { AttachmentPointer } from "@nantty/chat-crypto";
 import { useEffect, useState } from "react";
 import { AppState } from "react-native";
 

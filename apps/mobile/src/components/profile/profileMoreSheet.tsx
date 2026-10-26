@@ -39,7 +39,7 @@ export function ProfileMoreSheet({ profile, visible, onClose, onBlocked, onSendC
   const requireSignIn = (action: () => void, reason: string) => requireAuthAfterClosingModal(closeAndReset, action, reason);
   const shareProfileLink = () => {
     closeAndReset();
-    Share.share({ message: `${profile.name} on Zudomart: ${webAppLinks.profile(profile.username)}` });
+    Share.share({ message: `${profile.name} on Nantty: ${webAppLinks.profile(profile.username)}` });
   };
 
   const option = (label: string, onPress: () => void, color: string = colors.text, icon?: ReactNode) => (

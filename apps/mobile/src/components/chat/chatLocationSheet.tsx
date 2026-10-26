@@ -72,7 +72,7 @@ export function ChatLocationSheet({ visible, onClose, onSendCurrentLocation, onS
         <View style={styles.message}>
           <Text size={15} weight={600} lineHeight={19.5}>Your location is shared only with this chat</Text>
           <Text size={13} lineHeight={18.2} color={colors.textMuted}>
-            Zudomart only reads your position when you choose to share it. Live location stops by itself at the end time you pick, or when you tap Stop sharing.
+            Nantty only reads your position when you choose to share it. Live location stops by itself at the end time you pick, or when you tap Stop sharing.
           </Text>
           <Button title="Continue" onPress={() => void acceptConsent()} />
           <Button title="Not now" variant="outline" onPress={onClose} />
@@ -88,8 +88,8 @@ export function ChatLocationSheet({ visible, onClose, onSendCurrentLocation, onS
             {accessProblem === "unavailable"
               ? "Check that location services are on and try again."
               : isBlocked
-                ? "Allow Zudomart to use your location in Settings to share it in chats."
-                : "Zudomart needs permission to read your location before it can share it."}
+                ? "Allow Nantty to use your location in Settings to share it in chats."
+                : "Nantty needs permission to read your location before it can share it."}
           </Text>
           {isBlocked ? (
             <Button title="Open Settings" onPress={() => void Linking.openSettings()} />

@@ -31,7 +31,7 @@ export function PlaceSearchSheet({ visible, selected, onSelect, onClose }: Place
   const emptyMessage = search.debounced.length < 2 ? "Type at least 2 letters to search." : places.isError ? "Search isn't available right now. Try again." : "No places match. Try a nearby area or landmark.";
 
   return (
-    <BottomSheet visible={visible} onClose={onClose} title="Add location" subtitle="Search for a place by name. Zudomart never reads your device location for this.">
+    <BottomSheet visible={visible} onClose={onClose} title="Add location" subtitle="Search for a place by name. Nantty never reads your device location for this.">
       <View style={styles.body}>
         <SearchField value={search.typed} onChangeText={search.setTyped} label="Search places" />
         {selected ? (

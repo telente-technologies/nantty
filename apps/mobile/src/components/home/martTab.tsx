@@ -13,7 +13,7 @@ import { CategoryTabs } from "./categoryTabs";
 import { useMartHighlights } from "./martHighlights.hook";
 import { MartShowcase } from "./martShowcase";
 import { ProductMasonry } from "./productMasonry";
-import { SellOnZudomartBanner } from "./sellOnZudomartBanner";
+import { SellOnNanttyBanner } from "./sellOnNanttyBanner";
 import { EmptyState } from "@/components/ui/emptyState";
 import { ErrorState } from "@/components/ui/errorState";
 import { GridSkeleton } from "@/components/ui/gridSkeleton";
@@ -102,7 +102,7 @@ export function MartTab() {
             onLayout: ({ nativeEvent }) => { heroBottom.current = nativeEvent.layout.y + nativeEvent.layout.height; },
           }}
         />
-        <SellOnZudomartBanner />
+        <SellOnNanttyBanner />
       </View>
       <View
         style={[styles.categories, pinned && styles.categoriesPinned]}

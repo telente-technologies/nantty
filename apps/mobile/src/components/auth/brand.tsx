@@ -1,11 +1,11 @@
 import { View } from "react-native";
 
-import { ZudomartWordmark } from "@/components/brand/zudomartWordmark";
+import { NanttyWordmark } from "@/components/brand/nanttyWordmark";
 
 export function BrandWordmark({ height = 30 }: { readonly height?: number }) {
   return (
-    <View accessibilityRole="header" accessibilityLabel="Zudomart">
-      <ZudomartWordmark height={height} />
+    <View accessibilityRole="header" accessibilityLabel="Nantty">
+      <NanttyWordmark height={height} />
     </View>
   );
 }

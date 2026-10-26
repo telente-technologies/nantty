@@ -51,7 +51,7 @@ export function InboxRequestActions({ conversation, onRemoved, showExplanation =
     <View style={styles.root}>
       {showExplanation ? (
         <Text size={12} lineHeight={16} color={colors.textMuted}>
-          {isSpam ? conversation.spamReason ?? "Flagged by Zudomart based on this account's activity." : "They won't see that you've read this until you accept."}
+          {isSpam ? conversation.spamReason ?? "Flagged by Nantty based on this account's activity." : "They won't see that you've read this until you accept."}
         </Text>
       ) : null}
       <View style={styles.buttons}>

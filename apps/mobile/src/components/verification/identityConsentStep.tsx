@@ -33,7 +33,7 @@ export function IdentityConsentStep({ starting, errorMessage, onStart }: { reado
       ))}
       <Pressable accessibilityRole="checkbox" accessibilityState={{ checked: accepted }} onPress={() => setAccepted(!accepted)} style={styles.consentRow}>
         <View style={[styles.checkbox, accepted ? styles.checkboxOn : null]} />
-        <Text size={14} lineHeight={19} style={styles.consentText}>I agree to Smile ID processing my selfie and ID photo to verify my identity for Zudomart.</Text>
+        <Text size={14} lineHeight={19} style={styles.consentText}>I agree to Smile ID processing my selfie and ID photo to verify my identity for Nantty.</Text>
       </Pressable>
       <Text size={14} weight={600}>Where was your ID issued?</Text>
       <View style={styles.wrap}>

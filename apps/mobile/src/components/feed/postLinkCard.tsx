@@ -43,7 +43,7 @@ function GuestInternalLinkCard({ reference }: { readonly reference: SharedConten
   const styles = useStyles();
   const navigation = useNavigation();
   const route = buildInternalRoute(reference);
-  const label = reference.kind === "profile" ? `@${reference.id}` : `View this ${internalKindLabels[reference.kind].toLowerCase()} on Zudomart`;
+  const label = reference.kind === "profile" ? `@${reference.id}` : `View this ${internalKindLabels[reference.kind].toLowerCase()} on Nantty`;
   return (
     <Pressable accessibilityRole="link" accessibilityLabel={label} onPress={() => (navigation.navigate as (name: string, params: object) => void)(route.name, route.params)} style={styles.card}>
       <View style={styles.body}>

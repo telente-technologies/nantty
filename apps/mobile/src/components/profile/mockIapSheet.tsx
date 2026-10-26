@@ -28,7 +28,7 @@ export function MockIapSheet({ visible, plan, purchasing, errorMessage, onConfir
         </View>
         <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
           <SealCheck20Icon size={20} color={colors.primary} />
-          <Text size={15} weight={600} lineHeight={18}>Zudomart Blue ({plan.tier === "PREMIUM" ? "Premium" : "Verified"})</Text>
+          <Text size={15} weight={600} lineHeight={18}>Nantty Blue ({plan.tier === "PREMIUM" ? "Premium" : "Verified"})</Text>
         </View>
         <Text size={14} lineHeight={16.8}>{formatMoneyForDisplay(plan.price)} / {plan.interval}</Text>
         <Text size={12} lineHeight={16.8} color={colors.textSubtle}>

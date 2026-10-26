@@ -12,7 +12,7 @@ describe("undelivered order under staff review", () => {
   it("matches the web copy and keeps the buyer's confirm and dispute actions", () => {
     const reviewed = escrow({ stage: "under_review" });
     expect(ESCROW_STAGE_APPEARANCE.under_review.label).toBe("Under review");
-    expect(describeEscrowRelease(reviewed)).toBe("Under review by Zudomart staff. The seller isn't paid until it's settled");
+    expect(describeEscrowRelease(reviewed)).toBe("Under review by Nantty staff. The seller isn't paid until it's settled");
     expect(escrowPausedStepCopy(reviewed).title).toBe("Not delivered after 30 days — under review");
     expect(STAGES_BUYER_CAN_CONFIRM.has("under_review")).toBe(true);
     expect(STAGES_BUYER_CAN_DISPUTE.has("under_review")).toBe(true);
@@ -20,7 +20,7 @@ describe("undelivered order under staff review", () => {
 
   it("tells the buyer which fees were kept on a refund after the seller was paid", () => {
     const refunded = escrow({ stage: "refunded", refundedAmount: { amountMinor: 971_000, currency: "NGN" }, feesKeptOnRefund: { amountMinor: 29_000, currency: "NGN" } } as Partial<EscrowDetail>);
-    expect(escrowPausedStepCopy(refunded).detail).toMatch(/returned to the buyer\. The seller had already been paid, so Zudomart kept its .*290.* fees/);
+    expect(escrowPausedStepCopy(refunded).detail).toMatch(/returned to the buyer\. The seller had already been paid, so Nantty kept its .*290.* fees/);
   });
 
   it("keeps the dispute copy", () => {

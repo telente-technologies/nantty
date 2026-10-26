@@ -1,16 +1,16 @@
-import { Pressable, StyleSheet, View, useWindowDimensions } from "react-native";
+import { Pressable, StyleSheet, View } from "react-native";
+import { useNavigation } from "@react-navigation/native";
+import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import Animated, { type SharedValue, useAnimatedStyle } from "react-native-reanimated";
 
-import { ZudomartLogoMark, ZudomartWordmark } from "@/components/brand/zudomartWordmark";
 import { Bell24Icon, MagnifyingGlass24Icon } from "@/components/icons";
 import { Text } from "@/components/ui/text";
 import { makeThemedStyles, useTheme } from "@/theme";
+import type { MainStackParamList } from "@/navigation/navigation.types";
 
 import { CartHeaderButtonShownOnlyWhenCartHasItems } from "./cartHeaderButton";
 
 export type HomeSection = "feed" | "mart";
-
-const FULL_WORDMARK_MIN_WIDTH = 380;
 
 export interface HomeHeaderProps {
   readonly activeSection: HomeSection;
@@ -45,8 +45,9 @@ function SectionTabLabel({ label, sectionIndex, isActive, pagerOffset, pageWidth
 }
 
 export function HomeHeader({ activeSection, onChangeSection, pagerOffset, pageWidth, onPressSearch, onPressNotifications }: HomeHeaderProps) {
+  const navigation = useNavigation<NativeStackNavigationProp<MainStackParamList>>();
+  const { colors } = useTheme();
   const styles = useStyles();
-  const { width } = useWindowDimensions();
   const sectionTab = (section: HomeSection, label: string, sectionIndex: number) => {
     const active = activeSection === section;
     return (
@@ -62,14 +63,14 @@ export function HomeHeader({ activeSection, onChangeSection, pagerOffset, pageWi
         {sectionTab("feed", "Feed", 0)}
         {sectionTab("mart", "Mart", 1)}
       </View>
-      <View style={styles.wordmark} pointerEvents="none">
-        {width >= FULL_WORDMARK_MIN_WIDTH ? <ZudomartWordmark height={20} /> : <ZudomartLogoMark size={24} />}
-      </View>
       <View style={styles.actions}>
         <Pressable accessibilityRole="button" accessibilityLabel="Search" hitSlop={10} onPress={onPressSearch}>
           <MagnifyingGlass24Icon />
         </Pressable>
         <CartHeaderButtonShownOnlyWhenCartHasItems />
+        <Pressable accessibilityRole="button" accessibilityLabel="Explore Nantty Spaces" onPress={() => navigation.navigate("Spaces")} hitSlop={10}>
+          <Text size={13} weight={600} color={colors.primary}>Spaces</Text>
+        </Pressable>
         <Pressable accessibilityRole="button" accessibilityLabel="Notifications" hitSlop={10} onPress={onPressNotifications}>
           <Bell24Icon />
         </Pressable>
@@ -91,6 +92,5 @@ const useStyles = makeThemedStyles((colors) => StyleSheet.create({
   divider: { width: StyleSheet.hairlineWidth * 2, height: 16, borderRadius: 1, backgroundColor: colors.divider },
   tabs: { flexDirection: "row", alignItems: "center", gap: 8 },
   labelHighlight: { position: "absolute", left: 0, top: 0 },
-  wordmark: { position: "absolute", left: 0, right: 0, alignItems: "center", justifyContent: "center" },
   actions: { flexDirection: "row", alignItems: "center", gap: 16 },
 }));

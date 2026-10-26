@@ -42,7 +42,7 @@ export function IdentityStep({ state, stepCount, onSaved }: IdentityStepProps) {
       stepNumber={1}
       stepCount={stepCount}
       title="Who you are"
-      why="Nigerian banks and regulators require us to confirm who receives money before we can send it. We only ask once, and the same details cover everything you earn on Zudomart."
+      why="Nigerian banks and regulators require us to confirm who receives money before we can send it. We only ask once, and the same details cover everything you earn on Nantty."
     >
       <TextField label="Legal name" placeholder="As it appears on your ID" value={legalName} onChangeText={setLegalName} autoCapitalize="words" textContentType="name" />
       <TextField label="Date of birth" placeholder="YYYY-MM-DD" keyboardType="numbers-and-punctuation" maxLength={10} value={dateOfBirth} onChangeText={setDateOfBirth} />
@@ -67,7 +67,7 @@ export function IdentityStep({ state, stepCount, onSaved }: IdentityStepProps) {
         </>
       ) : null}
       <Text size={12} lineHeight={16.8} color={colors.textSubtle}>
-        Your BVN or NIN is used once to confirm your name matches your bank account. Zudomart never shows it again, shares it with other users, or uses it for anything else. We keep only the last 4 digits.
+        Your BVN or NIN is used once to confirm your name matches your bank account. Nantty never shows it again, shares it with other users, or uses it for anything else. We keep only the last 4 digits.
       </Text>
       {save.isError ? <Text size={12} lineHeight={14.4} color={colors.error}>{save.error.message}</Text> : null}
       <Button title="Continue" disabled={!ready} loading={save.isPending} onPress={() => save.mutate()} />

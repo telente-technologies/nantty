@@ -23,7 +23,7 @@ export function LiveTopSupportersList({ liveId }: { liveId: string }) {
       </Text>
       <LiveGiftLeaderboardList entries={entries} emptyMessage="" />
       <Text size={11} lineHeight={14} color={colors.textMuted}>
-        Ranked by ZudoPoints.
+        Ranked by Nantty Points.
       </Text>
     </View>
   );

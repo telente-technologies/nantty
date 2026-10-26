@@ -8,7 +8,7 @@ import { makeThemedStyles, useTheme } from "@/theme";
 import type { ProviderWallet } from "@/types/providerWallet.type";
 
 export function walletShareText(wallet: ProviderWallet): string {
-  return `Send money to my Zudomart wallet\nBank: ${wallet.bankName}\nAccount number: ${wallet.accountNumber}\nAccount name: ${wallet.accountName}`;
+  return `Send money to my Nantty wallet\nBank: ${wallet.bankName}\nAccount number: ${wallet.accountNumber}\nAccount name: ${wallet.accountName}`;
 }
 
 function DetailRow({ label, value }: { readonly label: string; readonly value: string }) {

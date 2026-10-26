@@ -1,4 +1,4 @@
-import { playedBarCount, seekFractionFromPosition, voiceNoteBarHeight } from "@zudomart/chat-crypto";
+import { playedBarCount, seekFractionFromPosition, voiceNoteBarHeight } from "@nantty/chat-crypto";
 import { useRef } from "react";
 import { type GestureResponderEvent, StyleSheet, View } from "react-native";
 

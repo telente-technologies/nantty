@@ -14,7 +14,7 @@ interface ThemePreferenceOption {
 }
 
 const THEME_PREFERENCE_OPTIONS: readonly ThemePreferenceOption[] = [
-  { value: "light", label: "Light Mode", description: "The default Zudomart look" },
+  { value: "light", label: "Light Mode", description: "The default Nantty look" },
   { value: "dark", label: "Dark Mode", description: "Easier on the eyes at night", isBeta: true },
   { value: "system", label: "System", description: "Match your phone's appearance setting" },
 ];
@@ -32,7 +32,7 @@ export function ThemePreferenceSheet({ visible, selectedPreference, onSelect, on
   const { colors } = useTheme();
   const styles = useStyles();
   return (
-    <BottomSheet visible={visible} onClose={onClose} title="Theme" subtitle="Choose how Zudomart looks on this device">
+    <BottomSheet visible={visible} onClose={onClose} title="Theme" subtitle="Choose how Nantty looks on this device">
       <View style={styles.content} accessibilityRole="radiogroup">
         {THEME_PREFERENCE_OPTIONS.map((option) => {
           const selected = option.value === selectedPreference;

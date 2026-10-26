@@ -8,11 +8,11 @@ export function PurchaseTermsText() {
   return (
     <Text size={12} lineHeight={16.8} color={colors.textSubtle} align="center">
       By making a purchase, you agree to our{" "}
-      <Text size={12} lineHeight={16.8} color={colors.primary} accessibilityRole="link" onPress={() => openTrustedWebPage("https://zudomart.com/terms", inAppBrowserColorsFromTheme(colors))}>
+      <Text size={12} lineHeight={16.8} color={colors.primary} accessibilityRole="link" onPress={() => openTrustedWebPage("https://nantty.com/terms", inAppBrowserColorsFromTheme(colors))}>
         Terms of Service
       </Text>{" "}
       and{" "}
-      <Text size={12} lineHeight={16.8} color={colors.primary} accessibilityRole="link" onPress={() => openTrustedWebPage("https://zudomart.com/privacy", inAppBrowserColorsFromTheme(colors))}>
+      <Text size={12} lineHeight={16.8} color={colors.primary} accessibilityRole="link" onPress={() => openTrustedWebPage("https://nantty.com/privacy", inAppBrowserColorsFromTheme(colors))}>
         Privacy Policy
       </Text>
       .

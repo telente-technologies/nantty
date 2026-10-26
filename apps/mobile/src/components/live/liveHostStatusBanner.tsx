@@ -12,7 +12,7 @@ const NOTICE_COPY: Readonly<Record<Exclude<LiveHostNotice, "reconnecting">, stri
   mockPreview: "Preview only: mock mode doesn't stream, so nobody else can see your camera.",
   noVideoEngine: "Video streaming isn't in this build yet, so viewers see your cover photo.",
   videoFailed: "Your video couldn't connect, so viewers see your cover photo. Your live stays on.",
-  backgroundPaused: "Your video paused while Zudomart was in the background. Viewers saw your cover photo.",
+  backgroundPaused: "Your video paused while Nantty was in the background. Viewers saw your cover photo.",
   weakConnection: "Weak connection. Viewers may see lower quality video.",
 };
 

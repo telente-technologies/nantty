@@ -1,7 +1,7 @@
 import { readProductIdFromSlug } from "@/config/webAppLinks.config";
 import type { SharedContentKind, SharedContentReference } from "@/types";
 
-const INTERNAL_HOSTS = ["zudomart.app", "www.zudomart.app", "zudomart.com", "www.zudomart.com", "app.zudomart.com"];
+const INTERNAL_HOSTS = ["zudomart.app", "www.zudomart.app", "nantty.com", "www.nantty.com", "web.nantty.com"];
 const URL_PATTERN = /https?:\/\/[^\s<>"']+/gi;
 const INTERNAL_PATH_KINDS: Record<string, SharedContentKind> = { product: "product", products: "product", post: "post", posts: "post", p: "product", clip: "clip", clips: "clip", u: "profile", live: "live", lives: "live", store: "store", stores: "store" };
 const KNOWN_SHORTENER_DOMAINS = ["bit.ly", "tinyurl.com", "t.co", "goo.gl", "ow.ly", "is.gd", "cutt.ly", "rb.gy", "shorturl.at"];

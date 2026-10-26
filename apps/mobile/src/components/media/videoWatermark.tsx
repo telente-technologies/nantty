@@ -7,7 +7,7 @@ export function VideoWatermark({ handle, top = 8 }: { readonly handle: string; r
   return (
     <View pointerEvents="none" style={[styles.mark, { top }]}>
       <Text size={11} weight={600} lineHeight={14} color="#FFFFFF" numberOfLines={1} style={styles.text}>
-        @{handle} · Zudomart
+        @{handle} · Nantty
       </Text>
     </View>
   );
