@@ -106,7 +106,7 @@ export function registerBillingMockHandlers(): void {
     const { account } = requireAccountAccess(request, "billing:view");
     const transaction = findRecordInAccount(readMockDatabase().transactions, account.id, request.params.transactionId, "transaction");
     if (!transaction.receiptAvailable) throw new MockHttpError(404, "NO_RECEIPT", "This transaction has no receipt.");
-    const text = ["Zudomart Ads — payment receipt", `Ad account: ${account.name} (${account.id})`, `Reference: ${transaction.reference}`, `Date: ${transaction.createdAt}`, `Amount: ${formatMoneyForDisplay(transaction.amount)}`, `Description: ${transaction.description}`].join("\n");
+    const text = ["Nantty Ads — payment receipt", `Ad account: ${account.name} (${account.id})`, `Reference: ${transaction.reference}`, `Date: ${transaction.createdAt}`, `Amount: ${formatMoneyForDisplay(transaction.amount)}`, `Description: ${transaction.description}`].join("\n");
     return respondWithDownload(`receipt-${transaction.reference}.txt`, text, "text/plain; charset=utf-8");
   });
 
@@ -119,7 +119,7 @@ export function registerBillingMockHandlers(): void {
   registerMockRoute("GET", "/ads/accounts/:accountId/billing/invoices/:invoiceId/download", (request) => {
     const { account } = requireAccountAccess(request, "billing:view");
     const invoice = findRecordInAccount(readMockDatabase().invoices, account.id, request.params.invoiceId, "invoice");
-    const text = ["Zudomart Ads — tax invoice", `Invoice: ${invoice.number}`, `Ad account: ${account.name} (${account.id})`, `Period: ${invoice.periodStart} to ${invoice.periodEnd}`, `Subtotal: ${formatMoneyForDisplay(invoice.subtotal)}`, `VAT: ${formatMoneyForDisplay(invoice.tax)}`, `Total: ${formatMoneyForDisplay(invoice.total)}`, `Status: ${invoice.status}`].join("\n");
+    const text = ["Nantty Ads — tax invoice", `Invoice: ${invoice.number}`, `Ad account: ${account.name} (${account.id})`, `Period: ${invoice.periodStart} to ${invoice.periodEnd}`, `Subtotal: ${formatMoneyForDisplay(invoice.subtotal)}`, `VAT: ${formatMoneyForDisplay(invoice.tax)}`, `Total: ${formatMoneyForDisplay(invoice.total)}`, `Status: ${invoice.status}`].join("\n");
     return respondWithDownload(`${invoice.number}.txt`, text, "text/plain; charset=utf-8");
   });
 

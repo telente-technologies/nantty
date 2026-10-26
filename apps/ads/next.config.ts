@@ -15,7 +15,7 @@ const securityHeaders = [
 const nextConfig: NextConfig = {
   experimental: { authInterrupts: true },
   reactStrictMode: true,
-  transpilePackages: ["@zudomart/web-kit"],
+  transpilePackages: ["@nantty/web-kit"],
   poweredByHeader: false,
   agentRules: false,
   async headers() {

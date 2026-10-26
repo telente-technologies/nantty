@@ -1,5 +1,5 @@
 {
-  "name": "Zudomart Ads Manager",
+  "name": "Nantty Ads Manager",
   "short_name": "Ads Manager",
   "start_url": "/",
   "scope": "/",
@@ -24,9 +24,9 @@
       "purpose": "maskable"
     },
     {
-      "src": "/brand/icon.svg",
-      "sizes": "any",
-      "type": "image/svg+xml"
+      "src": "/brand/nantty-icon.png",
+      "sizes": "512x512",
+      "type": "image/png"
     }
   ]
 }

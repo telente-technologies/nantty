@@ -75,7 +75,7 @@ export function advanceMockReviewQueue(): void {
       ad.status = violation ? "rejected" : "active";
       ad.submittedAt = null;
       appendMockActivity(ad.accountId, {
-        actor: { id: "system", name: "Zudomart review", isSystem: true },
+        actor: { id: "system", name: "Nantty review", isSystem: true },
         action: violation ? "ad_rejected" : "ad_approved",
         objectType: "ad",
         objectId: ad.id,

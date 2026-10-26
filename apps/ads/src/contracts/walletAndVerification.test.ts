@@ -25,7 +25,7 @@ async function callMock(method: string, path: string, headers: Record<string, st
 }
 
 async function signIn(identifier: string) {
-  const login = await callMock("POST", "/auth/login", {}, { identifier, password: "Zudomart2026!" });
+  const login = await callMock("POST", "/auth/login", {}, { identifier, password: "Nantty2026!" });
   return { authorization: `Bearer ${String(login.body.accessToken)}` };
 }
 

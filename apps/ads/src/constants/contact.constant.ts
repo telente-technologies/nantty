@@ -1,6 +1,6 @@
-import { buildMailtoHref, buildStoreLinks, buildZudomartEmailAddresses } from "@zudomart/web-kit";
+import { buildMailtoHref, buildStoreLinks, buildNanttyEmailAddresses } from "@nantty/web-kit";
 
-export const emailAddresses = buildZudomartEmailAddresses({
+export const emailAddresses = buildNanttyEmailAddresses({
   domain: process.env.NEXT_PUBLIC_MAIL_DOMAIN,
   overrides: { ads: process.env.NEXT_PUBLIC_ADS_EMAIL, billing: process.env.NEXT_PUBLIC_BILLING_EMAIL },
 });
@@ -15,11 +15,11 @@ export const contactEmailDisplayText = emailAddresses.ads;
 
 export const storeLinks = buildStoreLinks({ appStoreId: process.env.NEXT_PUBLIC_APP_STORE_ID, playPackage: process.env.NEXT_PUBLIC_PLAY_PACKAGE });
 
-export function readZudomartMainSiteUrl(): string {
-  const configuredUrl = process.env.NEXT_PUBLIC_MAIN_SITE_URL ?? "https://zudomart.com";
+export function readNanttyMainSiteUrl(): string {
+  const configuredUrl = process.env.NEXT_PUBLIC_MAIN_SITE_URL ?? "https://nantty.com";
   try {
     return new URL(configuredUrl).origin;
   } catch {
-    return "https://zudomart.com";
+    return "https://nantty.com";
   }
 }

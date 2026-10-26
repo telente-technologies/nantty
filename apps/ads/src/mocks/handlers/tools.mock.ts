@@ -46,7 +46,7 @@ export function registerToolMockHandlers(): void {
 
   registerMockRoute("POST", "/ads/accounts/:accountId/conversion-events", (request) => {
     const { account } = requireAccountAccess(request, "tools:manage");
-    if (!account.business) throw new MockHttpError(409, "STORE_REQUIRED", "Conversion events need a business ad account linked to a Zudomart store.");
+    if (!account.business) throw new MockHttpError(409, "STORE_REQUIRED", "Conversion events need a business ad account linked to a Nantty store.");
     const body = readJsonObjectBody(request);
     const eventType = eventTypes.includes(body.eventType as ConversionEventType) ? (body.eventType as ConversionEventType) : failValidation("eventType", "Choose an event type.");
     const event = { id: createMockId("cev"), accountId: account.id, name: readRequiredTrimmedString(body, "name", 80), eventType, storeId: account.business.storeId, storeName: account.business.storeName, isBuiltIn: false, status: "no_recent_activity" as const, lastReceivedAt: null, countLast7Days: 0, tracksValue: body.tracksValue === true };

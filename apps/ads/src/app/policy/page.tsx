@@ -34,7 +34,7 @@ export default async function PolicyPage() {
   const isSignedIn = buildSessionViewFromCookies(await cookies()) !== null;
   return (
     <StandaloneFrame showUserMenu={isSignedIn}>
-      <PageHeader title="Advertising policies" description="Every ad is reviewed before it runs. These rules keep Zudomart safe for buyers and fair for sellers." />
+      <PageHeader title="Advertising policies" description="Every ad is reviewed before it runs. These rules keep Nantty safe for buyers and fair for sellers." />
       <div className={styles.layout}>
         <nav aria-label="On this page" className={styles.toc}>
           <a href="#review">How review works</a>
@@ -66,7 +66,7 @@ export default async function PolicyPage() {
               If you think a rejection is wrong, open the ad and choose Appeal. Explain why it follows the policy. A person reviews every appeal, usually within 24 hours. You can appeal each decision once; after that, edit the ad and it will be reviewed again.
             </p>
             <p className={styles.summary}>
-              Questions about a policy? Email <a href={buildContactMailtoLink("Zudomart Ads policy question")}>{contactEmailDisplayText}</a>.
+              Questions about a policy? Email <a href={buildContactMailtoLink("Nantty Ads policy question")}>{contactEmailDisplayText}</a>.
             </p>
           </Card>
         </div>

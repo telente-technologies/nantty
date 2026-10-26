@@ -8,25 +8,25 @@ import { LandingFooterWithContact } from "@/components/landing/landingFooter";
 import { LandingHeaderWithFloatingNavigation } from "@/components/landing/landingHeader";
 import { LandingHeroWithProductStage } from "@/components/landing/landingHero";
 import { LandingFinalCallToAction, LandingQuestionsSection } from "@/components/landing/landingQuestionsAndCallToAction";
-import { WhatIsZudomartAdsSection } from "@/components/landing/whatIsZudomartAdsSection";
+import { WhatIsNanttyAdsSection } from "@/components/landing/whatIsNanttyAdsSection";
 import landingLayoutStyles from "@/components/landing/landingLayout.module.css";
 import { buildSessionViewFromCookies } from "@/server/adsSessionView.service";
 
 export const metadata: Metadata = {
-  title: { absolute: "Zudomart Ads — advertise across the Zudomart marketplace" },
-  description: "Run ads on Zudomart Marketplace, Feed, Reels and Live. Target buyers across Nigeria and beyond, pay in your local currency and see which ads turned into orders.",
+  title: { absolute: "Nantty Ads — advertise across the Nantty marketplace" },
+  description: "Run ads on Nantty Marketplace, Feed, Reels and Live. Target buyers across Nigeria and beyond, pay in your local currency and see which ads turned into orders.",
   robots: { index: true, follow: true },
 };
 
 export default async function LandingPage() {
   const isSignedIn = buildSessionViewFromCookies(await cookies()) !== null;
-  const primaryAction = isSignedIn ? { href: "/accounts", label: "Open Ads Manager" } : { href: "/login", label: "Sign in with your Zudomart account" };
+  const primaryAction = isSignedIn ? { href: "/accounts", label: "Open Ads Manager" } : { href: "/login", label: "Sign in with your Nantty account" };
   return (
     <div className={landingLayoutStyles.page}>
       <LandingHeaderWithFloatingNavigation primaryAction={primaryAction} />
       <main id="main-content">
         <LandingHeroWithProductStage primaryAction={primaryAction} isSignedIn={isSignedIn} />
-        <WhatIsZudomartAdsSection />
+        <WhatIsNanttyAdsSection />
         <AdFormatsSection />
         <CampaignStepsSection />
         <FeatureShowcaseSections />

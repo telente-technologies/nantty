@@ -1,4 +1,4 @@
-import { requestConfirmation } from "@zudomart/web-kit";
+import { requestConfirmation } from "@nantty/web-kit";
 
 const problemTitles: Readonly<Record<string, string>> = {
   PAYMENT_AMOUNT_OUT_OF_RANGE: "Amount not allowed",

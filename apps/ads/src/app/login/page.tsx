@@ -20,11 +20,11 @@ export default function LoginPage() {
         </Suspense>
         {isMockBackendEnabled() ? (
           <p className={styles.demoHint}>
-            Demo mode: sign in as <strong>adaeze@ifelifestyle.ng</strong> with password <strong>Zudomart2026!</strong>
+            Demo mode: sign in as <strong>adaeze@ifelifestyle.ng</strong> with password <strong>Nantty2026!</strong>
           </p>
         ) : null}
         <p className={styles.contact}>
-          Need help? <a href={buildContactMailtoLink("Zudomart Ads sign-in help")}>{contactEmailDisplayText}</a>
+          Need help? <a href={buildContactMailtoLink("Nantty Ads sign-in help")}>{contactEmailDisplayText}</a>
         </p>
       </main>
     </div>

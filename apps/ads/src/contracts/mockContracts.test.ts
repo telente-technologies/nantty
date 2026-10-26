@@ -16,7 +16,7 @@ async function callMock(method: string, path: string, headers: Record<string, st
 
 describe("ads mock responses match the contracts", () => {
   it("auth login, memberships and campaign list use the server envelopes", async () => {
-    const login = await callMock("POST", "/auth/login", {}, { identifier: "adaeze@ifelifestyle.ng", password: "Zudomart2026!" });
+    const login = await callMock("POST", "/auth/login", {}, { identifier: "adaeze@ifelifestyle.ng", password: "Nantty2026!" });
     assert.equal(login.status, 200);
     assert.deepEqual(validateAgainstContract(c.object({ accessToken: c.string(), refreshToken: c.string(), user: c.any() }), login.body), []);
     const headers = { authorization: `Bearer ${String(login.body.accessToken)}` };

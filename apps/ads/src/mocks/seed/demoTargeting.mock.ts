@@ -19,12 +19,12 @@ export const demoTopics: readonly Topic[] = [
 ].map(([id, name, slug]) => ({ id: id as string, name: name as string, slug: slug as string }));
 
 export const demoBehaviours: readonly Behaviour[] = [
-  { id: "beh_recent_buyers", name: "Bought on Zudomart in the last 30 days", description: "People with at least one completed order." },
+  { id: "beh_recent_buyers", name: "Bought on Nantty in the last 30 days", description: "People with at least one completed order." },
   { id: "beh_frequent_buyers", name: "Frequent buyers", description: "Three or more orders in the last 90 days." },
   { id: "beh_live_shoppers", name: "Live shopping viewers", description: "Watched a live shopping session in the last 30 days." },
   { id: "beh_cart_abandoners", name: "Left items in cart", description: "Added to cart but did not check out in the last 14 days." },
   { id: "beh_clip_watchers", name: "Heavy reel watchers", description: "Watch reels most days." },
-  { id: "beh_new_users", name: "New to Zudomart", description: "Joined in the last 30 days." },
+  { id: "beh_new_users", name: "New to Nantty", description: "Joined in the last 30 days." },
   { id: "beh_pay_on_delivery", name: "Prefers pay on delivery", description: "Chooses pay on delivery at checkout." },
   { id: "beh_android_budget", name: "Uses an entry-level Android phone", description: "Useful for lighter creatives and data-friendly reels." },
 ];

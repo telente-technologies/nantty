@@ -14,10 +14,10 @@ export const objectiveOptions: readonly ObjectiveOption[] = [
   { objective: "awareness", label: "Awareness & reach", description: "Show your ad to as many people as possible in your audience.", resultLabel: "Reach", group: "awareness", defaultCallToAction: "learn_more" },
   { objective: "traffic", label: "Traffic & profile visits", description: "Send people to your profile, store, product page or a website.", resultLabel: "Link clicks", group: "consideration", defaultCallToAction: "learn_more" },
   { objective: "engagement", label: "Engagement", description: "Get more likes, comments, reposts and reel views.", resultLabel: "Engagements", group: "consideration", defaultCallToAction: "watch_more" },
-  { objective: "messages", label: "Messages", description: "Start conversations with buyers in Zudomart messages.", resultLabel: "Conversations started", group: "consideration", defaultCallToAction: "send_message" },
+  { objective: "messages", label: "Messages", description: "Start conversations with buyers in Nantty messages.", resultLabel: "Conversations started", group: "consideration", defaultCallToAction: "send_message" },
   { objective: "followers", label: "Followers", description: "Grow the people who follow your profile or store.", resultLabel: "Follows", group: "consideration", defaultCallToAction: "follow" },
-  { objective: "store_promotion", label: "Store promotion", description: "Bring people into your Zudomart store in the app.", resultLabel: "Store visits", group: "conversion", defaultCallToAction: "visit_store" },
-  { objective: "sales", label: "Sales", description: "Find buyers. Orders in your Zudomart store are attributed automatically.", resultLabel: "Purchases", group: "conversion", defaultCallToAction: "shop_now" },
+  { objective: "store_promotion", label: "Store promotion", description: "Bring people into your Nantty store in the app.", resultLabel: "Store visits", group: "conversion", defaultCallToAction: "visit_store" },
+  { objective: "sales", label: "Sales", description: "Find buyers. Orders in your Nantty store are attributed automatically.", resultLabel: "Purchases", group: "conversion", defaultCallToAction: "shop_now" },
 ];
 
 export function findObjectiveOption(objective: CampaignObjective): ObjectiveOption {

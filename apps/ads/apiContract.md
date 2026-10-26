@@ -1,4 +1,4 @@
-# Zudomart Ads Manager — API contract
+# Nantty Ads Manager — API contract
 
 Consumer: `apps/ads` (Ads Manager, `ads.<domain>`). Implementer: go-ads (`services/go/modules/ads`, deployable `goAds`) behind the gateway; identity routes are go-identity, `/users/me/*` go-users. go-ads calls the Python ads service (`services/python/intelligence`) for ranking, the second-price auction with quality score, pacing and frequency capping. This app never talks to the Python service.
 
@@ -54,7 +54,7 @@ The browser never calls the API directly. It calls the Ads Manager BFF (`/bff/..
 | PATCH | /ads/accounts/:accountId/members/:userId | members:manage | `{ role }` | `AdAccountMember` | 409 OWNER_ROLE_LOCKED |
 | DELETE | /ads/accounts/:accountId/members/:userId | members:manage | — | 204 | 409 OWNER_CANNOT_BE_REMOVED |
 | GET | /ads/accounts/:accountId/invites | account:view | — | `{ items: AdAccountInvite[] }` (pending only; never return tokens) | 404 |
-| POST | /ads/accounts/:accountId/invites | members:manage | `{ email, role }` or `{ username, role }` (an existing Zudomart user; a `username` that is an email address is looked up by email) | 201 `AdAccountInvite` (`username` of the invitee, never their email), valid 7 days. The accept link is `https://ads.<domain>/invites/<inviteId>`; go-ads does not send it yet (see backend gaps) | 400 (unknown user, duplicate pending, already member) |
+| POST | /ads/accounts/:accountId/invites | members:manage | `{ email, role }` or `{ username, role }` (an existing Nantty user; a `username` that is an email address is looked up by email) | 201 `AdAccountInvite` (`username` of the invitee, never their email), valid 7 days. The accept link is `https://ads.<domain>/invites/<inviteId>`; go-ads does not send it yet (see backend gaps) | 400 (unknown user, duplicate pending, already member) |
 | DELETE | /ads/accounts/:accountId/invites/:inviteId | members:manage | — | 204 | 404 |
 | GET | /ads/invites/:inviteId | signed in (invitee) | — | `InvitePreview` | 403 INVITE_USER_MISMATCH, 404 INVITE_NOT_FOUND |
 | POST | /ads/invites/:inviteId/accept | signed in (invitee) | — | `{ accountId }` | 403 INVITE_USER_MISMATCH, 404 |
@@ -166,9 +166,9 @@ Customer lists: the browser normalizes (emails trimmed + lowercased; phones to E
 | GET | /ads/accounts/:accountId/billing | billing:view | — | `BillingOverview` | 404 |
 | POST | /ads/accounts/:accountId/billing/top-ups | billing:manage | `{ amount: Money, provider: "flutterwave", returnPath }` + **Idempotency-Key** (the Go handler accepts `"flutterwave"` or an empty provider and records the one actually used) | 201 `TopUpCheckout` `{ topUpId, reference, provider: "flutterwave", checkoutUrl?, authorizationUrl, accessCode? }` — the app redirects to `checkoutUrl ?? authorizationUrl` (hosted checkout, host allowlisted, no inline script); the provider returns to `https://ads.<domain><returnPath>?status=…&tx_ref=<ref>&transaction_id=…` (Flutterwave). The redirect is display-only: the return page ignores `status` and polls `GET …/top-ups/:reference` every 3 s for up to 2 min, pausing offline | 400 (amount outside min/max, wrong currency), 400 IDEMPOTENCY_KEY_REQUIRED |
 | GET | /ads/accounts/:accountId/billing/top-ups/:reference | billing:view | — | `TopUp` — verify with the provider server-side (and via webhook); credit the balance exactly once | 404 |
-| POST | /ads/accounts/:accountId/billing/fund-from-earnings | billing:manage (and the account owner) | `{ amount: Money }` + **Idempotency-Key** | 201 `EarningsFunding` `{ fundingId, amount, status: "succeeded" }` — moves the caller's "Available to withdraw" (GET /wallets/me) into this ad account's prepaid balance. UI label "Pay from my Zudomart balance", next to the card top-up; a new key per attempt, reused only to retry the same amount after a network/5xx failure | 403 VERIFICATION_REQUIRED, 403 FORBIDDEN (not the owner), 409 IDEMPOTENCY_KEY_REUSED, 422 INSUFFICIENT_FUNDS ("Amount is more than your available balance.") |
+| POST | /ads/accounts/:accountId/billing/fund-from-earnings | billing:manage (and the account owner) | `{ amount: Money }` + **Idempotency-Key** | 201 `EarningsFunding` `{ fundingId, amount, status: "succeeded" }` — moves the caller's "Available to withdraw" (GET /wallets/me) into this ad account's prepaid balance. UI label "Pay from my Nantty balance", next to the card top-up; a new key per attempt, reused only to retry the same amount after a network/5xx failure | 403 VERIFICATION_REQUIRED, 403 FORBIDDEN (not the owner), 409 IDEMPOTENCY_KEY_REUSED, 422 INSUFFICIENT_FUNDS ("Amount is more than your available balance.") |
 | GET | /ads/verification | signed in | — | `AdsVerification` `{ level, verified, nextStep, message, verifyUrl }` — when `verified` is false the app shows a "Verify to advertise" prompt linking to `verifyUrl` (only http/https URLs are followed) | 503 VERIFICATION_UNAVAILABLE |
-| GET | /wallets/me (go-money) | signed in, GET only | — | `ZudomartWalletSummary` (apps/ads/src/types/zudomartWallet.type.ts). The billing page renders `lines` in order with the backend `label` and `description`, coins (currency `"COIN"`) as "N coins", never summed | 401 |
+| GET | /wallets/me (go-money) | signed in, GET only | — | `NanttyWalletSummary` (apps/ads/src/types/zudomartWallet.type.ts). The billing page renders `lines` in order with the backend `label` and `description`, coins (currency `"COIN"`) as "N coins", never summed | 401 |
 | GET | /ads/accounts/:accountId/billing/transactions | billing:view | `?cursor=&limit=` | `Page<BillingTransaction>` (signed amounts) | 404 |
 | GET | /ads/accounts/:accountId/billing/transactions/:transactionId/receipt | billing:view | — | PDF (`Content-Disposition: attachment`) | 404 NO_RECEIPT |
 | GET | /ads/accounts/:accountId/billing/invoices | billing:view | `?cursor=&limit=` | `Page<Invoice>` monthly, with VAT | 404 |
@@ -181,7 +181,7 @@ Customer lists: the browser normalizes (emails trimmed + lowercased; phones to E
 
 go-ads starts a top-up through go-money (`POST /ads/balance/top-ups`), stores the reference, and `GET …/billing/top-ups/:reference` refreshes it from go-money and credits the ad balance exactly once when the provider reports success. The app polls that status endpoint after the hosted checkout redirect. Payment-method management remains mock-only.
 
-Spend order: ad credits (Gold Premium monthly grant, expires at month end) → prepaid balance → default card (when `fundingMode` allows). Delivery pauses at zero available funds or when the monthly spend limit or a campaign `spendCap` is reached. Card data never touches Zudomart servers (tokenized by the provider). The mock adapter returns plain-text receipts and invoices; the real API returns PDFs. The ads service bills on actual second-price clearing; creator revenue share for ads served on creator content is computed server-side and is not exposed to advertisers.
+Spend order: ad credits (Gold Premium monthly grant, expires at month end) → prepaid balance → default card (when `fundingMode` allows). Delivery pauses at zero available funds or when the monthly spend limit or a campaign `spendCap` is reached. Card data never touches Nantty servers (tokenized by the provider). The mock adapter returns plain-text receipts and invoices; the real API returns PDFs. The ads service bills on actual second-price clearing; creator revenue share for ads served on creator content is computed server-side and is not exposed to advertisers.
 
 ## Reports
 
@@ -194,7 +194,7 @@ Spend order: ad credits (Gold Premium monthly grant, expires at month end) → p
 | POST | /ads/accounts/:accountId/reports/scheduled | reports:view | `ScheduledReportInput` (1–10 recipients) | 201 `ScheduledReport` | 400 |
 | DELETE | /ads/accounts/:accountId/reports/scheduled/:scheduledReportId | reports:view | — | 204 | 404 |
 
-Metric definitions: CTR = clicks/impressions; CPC = spend/clicks; CPM = spend/impressions×1000; frequency = impressions/reach; ROAS = conversionValue/spend; `conversions`/`conversionValue` are Zudomart store orders attributed within the chosen click/view windows (last-touch; one order counted once); `averageWatchPercent` is a 0–1 ratio. Demographic rows under 100 people are merged into "Other" to protect privacy.
+Metric definitions: CTR = clicks/impressions; CPC = spend/clicks; CPM = spend/impressions×1000; frequency = impressions/reach; ROAS = conversionValue/spend; `conversions`/`conversionValue` are Nantty store orders attributed within the chosen click/view windows (last-touch; one order counted once); `averageWatchPercent` is a 0–1 ratio. Demographic rows under 100 people are merged into "Other" to protect privacy.
 
 ## Tools
 

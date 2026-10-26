@@ -1,4 +1,4 @@
-export const demoAccountPassword = "Zudomart2026!";
+export const demoAccountPassword = "Nantty2026!";
 
 export interface MockUserRecord {
   readonly id: string;

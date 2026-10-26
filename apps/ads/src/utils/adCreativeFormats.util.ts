@@ -34,7 +34,7 @@ export function isValidUtmValue(value: string): boolean {
 export function buildUtmUrl(rawUrl: string, utm: CreativeUtm | null | undefined): string {
   if (!utm || !isSafeHttpsUrl(rawUrl)) return rawUrl;
   const url = new URL(rawUrl);
-  const entries: [string, string | undefined, string][] = [["utm_source", utm.source, "zudomart"], ["utm_medium", utm.medium, "paid"], ["utm_campaign", utm.campaign, ""], ["utm_content", utm.content, ""], ["utm_term", utm.term, ""]];
+  const entries: [string, string | undefined, string][] = [["utm_source", utm.source, "nantty"], ["utm_medium", utm.medium, "paid"], ["utm_campaign", utm.campaign, ""], ["utm_content", utm.content, ""], ["utm_term", utm.term, ""]];
   for (const [key, value, fallback] of entries) {
     const resolved = (value ?? "").trim() || fallback;
     if (resolved && !url.searchParams.get(key)) url.searchParams.set(key, resolved);

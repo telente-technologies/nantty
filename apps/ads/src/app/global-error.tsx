@@ -1,6 +1,6 @@
 "use client";
 
-import { GlobalErrorScreen, ThemeInitScript } from "@zudomart/web-kit";
+import { GlobalErrorScreen, ThemeInitScript } from "@nantty/web-kit";
 
 import { adsErrorExperience } from "@/components/errors/errorExperience.provider";
 
@@ -11,7 +11,7 @@ export default function GlobalError({ error, retry }: { readonly error: Error & 
     <html lang="en-NG" suppressHydrationWarning>
       <head>
         <ThemeInitScript />
-        <title>Something broke | Zudomart</title>
+        <title>Something broke | Nantty</title>
       </head>
       <body>
         <GlobalErrorScreen error={error} retry={retry} config={adsErrorExperience} />

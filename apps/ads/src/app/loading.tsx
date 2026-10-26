@@ -1,4 +1,4 @@
-import { Skeleton } from "@zudomart/web-kit";
+import { Skeleton } from "@nantty/web-kit";
 
 export default function RootRouteLoading() {
   return (

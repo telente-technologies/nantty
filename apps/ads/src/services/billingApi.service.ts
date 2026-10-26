@@ -2,7 +2,7 @@ import { buildAccountApiPath, sendAdsApiRequest } from "@/services/adsApiClient.
 import type { Page } from "@/types/api.type";
 import type { BillingOverview, BillingTransaction, CampaignCostEstimate, CampaignCostEstimateRequest, FundingMode, Invoice, PaymentProvider, RegionalAdPricing, TopUp, TopUpCheckout } from "@/types/billing.type";
 import type { Money } from "@/types/money.type";
-import type { EarningsFunding } from "@/types/zudomartWallet.type";
+import type { EarningsFunding } from "@/types/nanttyWallet.type";
 
 export const billingApi = {
   estimateCampaignCost: (request: CampaignCostEstimateRequest) => sendAdsApiRequest<CampaignCostEstimate>("/ads/pricing/estimate", { method: "POST", body: request }),
