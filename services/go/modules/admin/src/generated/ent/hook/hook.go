@@ -5,7 +5,7 @@ package hook
 import (
 	"context"
 	"fmt"
-	"zudomart/modules/admin/src/generated/ent"
+	"nantty/modules/admin/src/generated/ent"
 )
 
 // The AuditEventFunc type is an adapter to allow the use of ordinary

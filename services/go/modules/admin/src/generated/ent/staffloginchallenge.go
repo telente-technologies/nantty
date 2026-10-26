@@ -4,10 +4,10 @@ package ent
 
 import (
 	"fmt"
+	"nantty/modules/admin/src/generated/ent/staffaccount"
+	"nantty/modules/admin/src/generated/ent/staffloginchallenge"
 	"strings"
 	"time"
-	"zudomart/modules/admin/src/generated/ent/staffaccount"
-	"zudomart/modules/admin/src/generated/ent/staffloginchallenge"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"

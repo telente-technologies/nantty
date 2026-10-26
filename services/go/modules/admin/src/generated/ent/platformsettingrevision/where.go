@@ -3,8 +3,8 @@
 package platformsettingrevision
 
 import (
+	"nantty/modules/admin/src/generated/ent/predicate"
 	"time"
-	"zudomart/modules/admin/src/generated/ent/predicate"
 
 	"entgo.io/ent/dialect/sql"
 	"github.com/google/uuid"
