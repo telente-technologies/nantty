@@ -6,8 +6,8 @@ import (
 	"context"
 	"fmt"
 	"math"
-	"zudomart/modules/users/src/generated/ent/predicate"
-	"zudomart/modules/users/src/generated/ent/retentionpolicy"
+	"nantty/modules/users/src/generated/ent/predicate"
+	"nantty/modules/users/src/generated/ent/retentionpolicy"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect"

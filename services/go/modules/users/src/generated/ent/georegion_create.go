@@ -6,8 +6,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"nantty/modules/users/src/generated/ent/georegion"
 	"time"
-	"zudomart/modules/users/src/generated/ent/georegion"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"

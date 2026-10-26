@@ -5,7 +5,7 @@ package hook
 import (
 	"context"
 	"fmt"
-	"zudomart/modules/users/src/generated/ent"
+	"nantty/modules/users/src/generated/ent"
 )
 
 // The AccountBanFunc type is an adapter to allow the use of ordinary

@@ -4,9 +4,9 @@ package ent
 
 import (
 	"fmt"
+	"nantty/modules/users/src/generated/ent/geoadminarea"
 	"strings"
 	"time"
-	"zudomart/modules/users/src/generated/ent/geoadminarea"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"

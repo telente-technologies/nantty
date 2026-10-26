@@ -6,8 +6,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"nantty/modules/users/src/generated/ent/accountremoval"
 	"time"
-	"zudomart/modules/users/src/generated/ent/accountremoval"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"

@@ -5,11 +5,11 @@ package enttest
 import (
 	"context"
 
-	"zudomart/modules/users/src/generated/ent"
+	"nantty/modules/users/src/generated/ent"
 	// required by schema hooks.
-	_ "zudomart/modules/users/src/generated/ent/runtime"
+	_ "nantty/modules/users/src/generated/ent/runtime"
 
-	"zudomart/modules/users/src/generated/ent/migrate"
+	"nantty/modules/users/src/generated/ent/migrate"
 
 	"entgo.io/ent/dialect/sql/schema"
 )

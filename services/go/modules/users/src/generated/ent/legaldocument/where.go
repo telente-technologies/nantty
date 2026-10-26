@@ -3,7 +3,7 @@
 package legaldocument
 
 import (
-	"zudomart/modules/users/src/generated/ent/predicate"
+	"nantty/modules/users/src/generated/ent/predicate"
 
 	"entgo.io/ent/dialect/sql"
 )

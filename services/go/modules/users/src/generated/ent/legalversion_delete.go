@@ -4,8 +4,8 @@ package ent
 
 import (
 	"context"
-	"zudomart/modules/users/src/generated/ent/legalversion"
-	"zudomart/modules/users/src/generated/ent/predicate"
+	"nantty/modules/users/src/generated/ent/legalversion"
+	"nantty/modules/users/src/generated/ent/predicate"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"

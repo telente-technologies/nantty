@@ -4,8 +4,8 @@ package ent
 
 import (
 	"fmt"
+	"nantty/modules/users/src/generated/ent/legaldocument"
 	"strings"
-	"zudomart/modules/users/src/generated/ent/legaldocument"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
