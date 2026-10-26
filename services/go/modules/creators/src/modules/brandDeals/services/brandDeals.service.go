@@ -8,13 +8,13 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/creators/src/container"
-	"zudomart/modules/creators/src/generated/ent"
-	"zudomart/modules/creators/src/generated/ent/creatorbranddeal"
-	"zudomart/modules/creators/src/modules/brandDeals/dtos"
-	programservices "zudomart/modules/creators/src/modules/creatorProgram/services"
-	ledgerutils "zudomart/modules/ledger/src/utils"
-	"zudomart/platform/httpserver"
+	"nantty/modules/creators/src/container"
+	"nantty/modules/creators/src/generated/ent"
+	"nantty/modules/creators/src/generated/ent/creatorbranddeal"
+	"nantty/modules/creators/src/modules/brandDeals/dtos"
+	programservices "nantty/modules/creators/src/modules/creatorProgram/services"
+	ledgerutils "nantty/modules/ledger/src/utils"
+	"nantty/platform/httpserver"
 )
 
 var (

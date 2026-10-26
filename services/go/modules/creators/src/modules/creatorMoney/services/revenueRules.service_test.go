@@ -7,9 +7,9 @@ import (
 	"log/slog"
 	"testing"
 
-	"zudomart/modules/creators/src/configs"
-	"zudomart/modules/creators/src/container"
-	"zudomart/modules/ledger/src/loaders"
+	"nantty/modules/creators/src/configs"
+	"nantty/modules/creators/src/container"
+	"nantty/modules/ledger/src/loaders"
 )
 
 func TestRevenueRulesFollowTheAdminRevenueSetting(t *testing.T) {

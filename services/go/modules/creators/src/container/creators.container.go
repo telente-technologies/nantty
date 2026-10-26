@@ -3,16 +3,16 @@ package container
 import (
 	"time"
 
-	"zudomart/modules/creators/src/configs"
-	"zudomart/modules/creators/src/generated/ent"
-	_ "zudomart/modules/creators/src/generated/ent/runtime"
-	"zudomart/modules/creators/src/repositories"
-	"zudomart/modules/ledger/src/databases"
-	ledgerevents "zudomart/modules/ledger/src/events"
-	"zudomart/modules/ledger/src/loaders"
-	ledgerservices "zudomart/modules/ledger/src/modules/journal/services"
-	paymentservices "zudomart/modules/payments/src/modules/gateway/services"
-	"zudomart/platform/staffaudit"
+	"nantty/modules/creators/src/configs"
+	"nantty/modules/creators/src/generated/ent"
+	_ "nantty/modules/creators/src/generated/ent/runtime"
+	"nantty/modules/creators/src/repositories"
+	"nantty/modules/ledger/src/databases"
+	ledgerevents "nantty/modules/ledger/src/events"
+	"nantty/modules/ledger/src/loaders"
+	ledgerservices "nantty/modules/ledger/src/modules/journal/services"
+	paymentservices "nantty/modules/payments/src/modules/gateway/services"
+	"nantty/platform/staffaudit"
 )
 
 type Container struct {

@@ -7,9 +7,9 @@ import (
 
 	"github.com/google/uuid"
 
-	moneyv1 "zudomart/contracts/gen/go/zudomart/money/v1"
-	"zudomart/modules/creators/src/generated/ent/creatorearning"
-	ledgermodels "zudomart/modules/ledger/src/modules/journal/models"
+	moneyv1 "nantty/contracts/gen/go/zudomart/money/v1"
+	"nantty/modules/creators/src/generated/ent/creatorearning"
+	ledgermodels "nantty/modules/ledger/src/modules/journal/models"
 )
 
 func TestBattleHoldingsSettleOnceByRuleAndTiesKeepTheirOwn(t *testing.T) {

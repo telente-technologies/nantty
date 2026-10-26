@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"strings"
 
-	"zudomart/platform/httpserver"
+	"nantty/platform/httpserver"
 )
 
 func (controller AffiliatesController) CommissionRates(writer http.ResponseWriter, request *http.Request) {

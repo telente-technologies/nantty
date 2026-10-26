@@ -3,10 +3,10 @@ package routes
 import (
 	"net/http"
 
-	"zudomart/modules/creators/src/modules/creatorProgram/controllers"
-	"zudomart/modules/creators/src/modules/creatorProgram/services"
-	"zudomart/modules/ledger/src/constants"
-	"zudomart/modules/ledger/src/middlewares"
+	"nantty/modules/creators/src/modules/creatorProgram/controllers"
+	"nantty/modules/creators/src/modules/creatorProgram/services"
+	"nantty/modules/ledger/src/constants"
+	"nantty/modules/ledger/src/middlewares"
 )
 
 func MountCreatorProgramRoutes(mux *http.ServeMux, program services.CreatorProgram) {

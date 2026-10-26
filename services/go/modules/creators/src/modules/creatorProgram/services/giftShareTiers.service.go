@@ -6,8 +6,8 @@ import (
 
 	"github.com/jackc/pgx/v5"
 
-	"zudomart/modules/ledger/src/databases"
-	"zudomart/modules/ledger/src/loaders"
+	"nantty/modules/ledger/src/databases"
+	"nantty/modules/ledger/src/loaders"
 )
 
 func (program CreatorProgram) applyAdminGiftShareTiers(ctx context.Context, executor databases.ExecutorQuerier, userId string, memberTierShareBps int64) (int64, error) {

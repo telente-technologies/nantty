@@ -9,10 +9,10 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/creators/src/generated/ent"
-	"zudomart/modules/creators/src/generated/ent/affiliatelink"
-	"zudomart/modules/creators/src/generated/ent/creatoraffiliation"
-	"zudomart/platform/httpserver"
+	"nantty/modules/creators/src/generated/ent"
+	"nantty/modules/creators/src/generated/ent/affiliatelink"
+	"nantty/modules/creators/src/generated/ent/creatoraffiliation"
+	"nantty/platform/httpserver"
 )
 
 var (

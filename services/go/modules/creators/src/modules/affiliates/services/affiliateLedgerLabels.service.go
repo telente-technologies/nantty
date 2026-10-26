@@ -4,7 +4,7 @@ import (
 	"strconv"
 	"strings"
 
-	"zudomart/modules/creators/src/generated/ent"
+	"nantty/modules/creators/src/generated/ent"
 )
 
 func FormatCommissionPercent(bps int64) string {

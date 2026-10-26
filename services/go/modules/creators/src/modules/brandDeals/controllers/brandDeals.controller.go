@@ -5,11 +5,11 @@ import (
 	"strings"
 	"time"
 
-	"zudomart/modules/creators/src/modules/brandDeals/dtos"
-	"zudomart/modules/creators/src/modules/brandDeals/services"
-	ledgerutils "zudomart/modules/ledger/src/utils"
-	"zudomart/platform/httpserver"
-	"zudomart/platform/regionpricing"
+	"nantty/modules/creators/src/modules/brandDeals/dtos"
+	"nantty/modules/creators/src/modules/brandDeals/services"
+	ledgerutils "nantty/modules/ledger/src/utils"
+	"nantty/platform/httpserver"
+	"nantty/platform/regionpricing"
 )
 
 const maximumBrandDealMinor = 1_000_000_000_000

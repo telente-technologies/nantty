@@ -7,9 +7,9 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/creators/src/generated/ent"
-	"zudomart/modules/creators/src/generated/ent/creatorearning"
-	"zudomart/modules/creators/src/modules/liveMoney/models"
+	"nantty/modules/creators/src/generated/ent"
+	"nantty/modules/creators/src/generated/ent/creatorearning"
+	"nantty/modules/creators/src/modules/liveMoney/models"
 )
 
 type Money struct {

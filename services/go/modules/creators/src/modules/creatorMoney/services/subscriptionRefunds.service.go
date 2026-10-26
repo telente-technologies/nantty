@@ -4,8 +4,8 @@ import (
 	"context"
 	"time"
 
-	"zudomart/modules/creators/src/generated/ent/creatorearning"
-	programservices "zudomart/modules/creators/src/modules/creatorProgram/services"
+	"nantty/modules/creators/src/generated/ent/creatorearning"
+	programservices "nantty/modules/creators/src/modules/creatorProgram/services"
 )
 
 type CreatorSubscriptionRefunded struct {

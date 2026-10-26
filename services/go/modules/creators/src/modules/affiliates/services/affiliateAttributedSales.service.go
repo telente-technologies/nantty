@@ -9,12 +9,12 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/creators/src/generated/ent"
-	"zudomart/modules/creators/src/generated/ent/affiliateattributedsale"
-	"zudomart/modules/creators/src/generated/ent/affiliatecommission"
-	"zudomart/modules/creators/src/generated/ent/affiliateordervoid"
-	"zudomart/modules/creators/src/generated/ent/creatoraffiliation"
-	"zudomart/modules/creators/src/repositories"
+	"nantty/modules/creators/src/generated/ent"
+	"nantty/modules/creators/src/generated/ent/affiliateattributedsale"
+	"nantty/modules/creators/src/generated/ent/affiliatecommission"
+	"nantty/modules/creators/src/generated/ent/affiliateordervoid"
+	"nantty/modules/creators/src/generated/ent/creatoraffiliation"
+	"nantty/modules/creators/src/repositories"
 )
 
 type saleLabels struct {

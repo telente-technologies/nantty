@@ -3,9 +3,9 @@ package routes
 import (
 	"net/http"
 
-	"zudomart/modules/creators/src/modules/affiliates/controllers"
-	"zudomart/modules/ledger/src/middlewares"
-	"zudomart/platform/httpserver"
+	"nantty/modules/creators/src/modules/affiliates/controllers"
+	"nantty/modules/ledger/src/middlewares"
+	"nantty/platform/httpserver"
 )
 
 func MountAffiliatesRoutes(mux *http.ServeMux, controller controllers.AffiliatesController) {

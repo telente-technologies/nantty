@@ -6,11 +6,11 @@ import (
 	"net/http"
 	"time"
 
-	"zudomart/modules/creators/src/modules/affiliates/dtos"
-	"zudomart/modules/creators/src/modules/affiliates/services"
-	"zudomart/modules/creators/src/repositories"
-	ledgerutils "zudomart/modules/ledger/src/utils"
-	"zudomart/platform/httpserver"
+	"nantty/modules/creators/src/modules/affiliates/dtos"
+	"nantty/modules/creators/src/modules/affiliates/services"
+	"nantty/modules/creators/src/repositories"
+	ledgerutils "nantty/modules/ledger/src/utils"
+	"nantty/platform/httpserver"
 )
 
 func (controller AffiliatesController) store(writer http.ResponseWriter, request *http.Request) (string, repositories.StoreSummary, bool) {

@@ -6,7 +6,7 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/creators/src/repositories"
+	"nantty/modules/creators/src/repositories"
 )
 
 func TestCreatorTodayWidgetHidesAmountsAndOnlyAcceptsWidgetScopeOnWidgetRoutes(t *testing.T) {

@@ -8,10 +8,10 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/creators/src/generated/ent"
-	"zudomart/modules/creators/src/generated/ent/affiliatecommission"
-	"zudomart/modules/creators/src/generated/ent/affiliatecommissionreversal"
-	programservices "zudomart/modules/creators/src/modules/creatorProgram/services"
+	"nantty/modules/creators/src/generated/ent"
+	"nantty/modules/creators/src/generated/ent/affiliatecommission"
+	"nantty/modules/creators/src/generated/ent/affiliatecommissionreversal"
+	programservices "nantty/modules/creators/src/modules/creatorProgram/services"
 )
 
 type EscrowRefunded struct {

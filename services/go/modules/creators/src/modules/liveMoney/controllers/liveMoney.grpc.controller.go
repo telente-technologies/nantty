@@ -11,11 +11,11 @@ import (
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/timestamppb"
 
-	moneyv1 "zudomart/contracts/gen/go/zudomart/money/v1"
-	"zudomart/modules/creators/src/generated/ent"
-	"zudomart/modules/creators/src/modules/liveMoney/models"
-	"zudomart/modules/creators/src/modules/liveMoney/services"
-	ledgermodels "zudomart/modules/ledger/src/modules/journal/models"
+	moneyv1 "nantty/contracts/gen/go/zudomart/money/v1"
+	"nantty/modules/creators/src/generated/ent"
+	"nantty/modules/creators/src/modules/liveMoney/models"
+	"nantty/modules/creators/src/modules/liveMoney/services"
+	ledgermodels "nantty/modules/ledger/src/modules/journal/models"
 )
 
 type LiveMoneyGrpcController struct {

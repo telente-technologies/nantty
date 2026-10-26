@@ -9,16 +9,16 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/creators/src/container"
-	"zudomart/modules/creators/src/generated/ent"
-	"zudomart/modules/creators/src/generated/ent/tiptransaction"
-	programservices "zudomart/modules/creators/src/modules/creatorProgram/services"
-	"zudomart/modules/creators/src/modules/liveMoney/models"
-	"zudomart/modules/creators/src/repositories"
-	"zudomart/modules/ledger/src/databases"
-	ledgermodels "zudomart/modules/ledger/src/modules/journal/models"
-	ledgerutils "zudomart/modules/ledger/src/utils"
-	"zudomart/platform/httpserver"
+	"nantty/modules/creators/src/container"
+	"nantty/modules/creators/src/generated/ent"
+	"nantty/modules/creators/src/generated/ent/tiptransaction"
+	programservices "nantty/modules/creators/src/modules/creatorProgram/services"
+	"nantty/modules/creators/src/modules/liveMoney/models"
+	"nantty/modules/creators/src/repositories"
+	"nantty/modules/ledger/src/databases"
+	ledgermodels "nantty/modules/ledger/src/modules/journal/models"
+	ledgerutils "nantty/modules/ledger/src/utils"
+	"nantty/platform/httpserver"
 )
 
 const MaximumTipCoins = 100_000

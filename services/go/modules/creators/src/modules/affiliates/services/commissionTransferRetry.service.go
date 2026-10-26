@@ -5,10 +5,10 @@ import (
 	"database/sql"
 	"time"
 
-	"zudomart/modules/creators/src/generated/ent"
-	"zudomart/modules/creators/src/generated/ent/affiliatecommission"
-	paymentent "zudomart/modules/payments/src/generated/ent"
-	"zudomart/modules/payments/src/generated/ent/providermovement"
+	"nantty/modules/creators/src/generated/ent"
+	"nantty/modules/creators/src/generated/ent/affiliatecommission"
+	paymentent "nantty/modules/payments/src/generated/ent"
+	"nantty/modules/payments/src/generated/ent/providermovement"
 )
 
 const maximumCommissionTransferAttempts = 6

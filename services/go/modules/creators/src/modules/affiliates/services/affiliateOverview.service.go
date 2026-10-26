@@ -3,8 +3,8 @@ package services
 import (
 	"context"
 
-	"zudomart/modules/creators/src/generated/ent/creatoraffiliation"
-	"zudomart/modules/creators/src/repositories"
+	"nantty/modules/creators/src/generated/ent/creatoraffiliation"
+	"nantty/modules/creators/src/repositories"
 )
 
 type AffiliateOverviewView struct {

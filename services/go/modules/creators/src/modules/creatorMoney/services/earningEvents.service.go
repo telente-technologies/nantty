@@ -6,9 +6,9 @@ import (
 	"strings"
 	"time"
 
-	programservices "zudomart/modules/creators/src/modules/creatorProgram/services"
-	"zudomart/modules/ledger/src/databases"
-	ledgermodels "zudomart/modules/ledger/src/modules/journal/models"
+	programservices "nantty/modules/creators/src/modules/creatorProgram/services"
+	"nantty/modules/ledger/src/databases"
+	ledgermodels "nantty/modules/ledger/src/modules/journal/models"
 )
 
 type CreatorSubscriptionPaid struct {

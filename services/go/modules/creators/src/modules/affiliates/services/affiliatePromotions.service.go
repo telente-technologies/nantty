@@ -4,12 +4,12 @@ import (
 	"context"
 	"sort"
 
-	"zudomart/modules/creators/src/generated/ent"
-	"zudomart/modules/creators/src/generated/ent/affiliateattributedsale"
-	"zudomart/modules/creators/src/generated/ent/affiliatecommission"
-	"zudomart/modules/creators/src/generated/ent/affiliatelink"
-	"zudomart/modules/creators/src/generated/ent/affiliateproductcommission"
-	"zudomart/modules/creators/src/repositories"
+	"nantty/modules/creators/src/generated/ent"
+	"nantty/modules/creators/src/generated/ent/affiliateattributedsale"
+	"nantty/modules/creators/src/generated/ent/affiliatecommission"
+	"nantty/modules/creators/src/generated/ent/affiliatelink"
+	"nantty/modules/creators/src/generated/ent/affiliateproductcommission"
+	"nantty/modules/creators/src/repositories"
 )
 
 const maximumPromotionRows = 2000

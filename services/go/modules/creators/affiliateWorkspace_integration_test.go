@@ -8,11 +8,11 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/creators/src/generated/ent/affiliateattributedsale"
-	"zudomart/modules/creators/src/generated/ent/affiliatecommission"
-	"zudomart/modules/creators/src/generated/ent/creatorearning"
-	affiliateservices "zudomart/modules/creators/src/modules/affiliates/services"
-	"zudomart/modules/creators/src/repositories"
+	"nantty/modules/creators/src/generated/ent/affiliateattributedsale"
+	"nantty/modules/creators/src/generated/ent/affiliatecommission"
+	"nantty/modules/creators/src/generated/ent/creatorearning"
+	affiliateservices "nantty/modules/creators/src/modules/affiliates/services"
+	"nantty/modules/creators/src/repositories"
 )
 
 type affiliateWorkspaceScene struct {

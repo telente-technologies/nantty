@@ -4,8 +4,8 @@ import (
 	"strconv"
 	"strings"
 
-	"zudomart/modules/ledger/src/loaders"
-	platformconfig "zudomart/platform/config"
+	"nantty/modules/ledger/src/loaders"
+	platformconfig "nantty/platform/config"
 )
 
 type RevenueSettings struct {

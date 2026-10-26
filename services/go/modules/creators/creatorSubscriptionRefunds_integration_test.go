@@ -8,8 +8,8 @@ import (
 
 	"github.com/google/uuid"
 
-	moneyservices "zudomart/modules/creators/src/modules/creatorMoney/services"
-	"zudomart/modules/creators/src/repositories"
+	moneyservices "nantty/modules/creators/src/modules/creatorMoney/services"
+	"nantty/modules/creators/src/repositories"
 )
 
 func earningStatuses(t *testing.T, harness *httpHarness, creator string) []string {

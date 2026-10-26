@@ -5,12 +5,12 @@ import (
 	"sort"
 	"strconv"
 
-	"zudomart/modules/creators/src/generated/ent"
-	"zudomart/modules/creators/src/generated/ent/affiliatelink"
-	"zudomart/modules/creators/src/generated/ent/affiliateproductcommission"
-	"zudomart/modules/creators/src/generated/ent/affiliateprogramsetting"
-	"zudomart/modules/creators/src/generated/ent/creatoraffiliation"
-	"zudomart/modules/creators/src/repositories"
+	"nantty/modules/creators/src/generated/ent"
+	"nantty/modules/creators/src/generated/ent/affiliatelink"
+	"nantty/modules/creators/src/generated/ent/affiliateproductcommission"
+	"nantty/modules/creators/src/generated/ent/affiliateprogramsetting"
+	"nantty/modules/creators/src/generated/ent/creatoraffiliation"
+	"nantty/modules/creators/src/repositories"
 )
 
 const maximumProgrammeStores = 1000

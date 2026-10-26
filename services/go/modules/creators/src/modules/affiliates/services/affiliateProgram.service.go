@@ -6,13 +6,13 @@ import (
 	"errors"
 	"net/http"
 
-	"zudomart/modules/creators/src/container"
-	"zudomart/modules/creators/src/generated/ent"
-	"zudomart/modules/creators/src/generated/ent/affiliateproductcommission"
-	programservices "zudomart/modules/creators/src/modules/creatorProgram/services"
-	"zudomart/modules/creators/src/repositories"
-	"zudomart/modules/ledger/src/databases"
-	"zudomart/platform/httpserver"
+	"nantty/modules/creators/src/container"
+	"nantty/modules/creators/src/generated/ent"
+	"nantty/modules/creators/src/generated/ent/affiliateproductcommission"
+	programservices "nantty/modules/creators/src/modules/creatorProgram/services"
+	"nantty/modules/creators/src/repositories"
+	"nantty/modules/ledger/src/databases"
+	"nantty/platform/httpserver"
 )
 
 var (

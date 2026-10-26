@@ -6,8 +6,8 @@ import (
 	"errors"
 	"time"
 
-	"zudomart/modules/creators/src/generated/ent"
-	"zudomart/modules/creators/src/generated/ent/creatorearning"
+	"nantty/modules/creators/src/generated/ent"
+	"nantty/modules/creators/src/generated/ent/creatorearning"
 )
 
 const CoinUnit = "COIN"

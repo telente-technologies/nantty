@@ -7,12 +7,12 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/creators/src/generated/ent"
-	"zudomart/modules/creators/src/generated/ent/affiliateattributedsale"
-	"zudomart/modules/creators/src/generated/ent/affiliatecommission"
-	"zudomart/modules/creators/src/generated/ent/affiliateproductcommission"
-	programservices "zudomart/modules/creators/src/modules/creatorProgram/services"
-	"zudomart/modules/creators/src/repositories"
+	"nantty/modules/creators/src/generated/ent"
+	"nantty/modules/creators/src/generated/ent/affiliateattributedsale"
+	"nantty/modules/creators/src/generated/ent/affiliatecommission"
+	"nantty/modules/creators/src/generated/ent/affiliateproductcommission"
+	programservices "nantty/modules/creators/src/modules/creatorProgram/services"
+	"nantty/modules/creators/src/repositories"
 )
 
 func (affiliates Affiliates) CreditCommissionsForRelease(ctx context.Context, sale AffiliateSaleReleased) (int, error) {

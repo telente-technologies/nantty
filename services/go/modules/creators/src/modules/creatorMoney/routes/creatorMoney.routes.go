@@ -3,9 +3,9 @@ package routes
 import (
 	"net/http"
 
-	"zudomart/modules/creators/src/modules/creatorMoney/controllers"
-	"zudomart/modules/ledger/src/middlewares"
-	"zudomart/platform/jwtauth"
+	"nantty/modules/creators/src/modules/creatorMoney/controllers"
+	"nantty/modules/ledger/src/middlewares"
+	"nantty/platform/jwtauth"
 )
 
 func MountCreatorMoneyRoutes(mux *http.ServeMux, controller controllers.CreatorMoneyController) {

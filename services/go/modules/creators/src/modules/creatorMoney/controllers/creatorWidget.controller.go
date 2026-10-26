@@ -6,11 +6,11 @@ import (
 	"net/http"
 	"time"
 
-	"zudomart/modules/creators/src/modules/creatorMoney/services"
-	"zudomart/modules/creators/src/repositories"
-	ledgerutils "zudomart/modules/ledger/src/utils"
-	"zudomart/platform/httpserver"
-	"zudomart/platform/widgets"
+	"nantty/modules/creators/src/modules/creatorMoney/services"
+	"nantty/modules/creators/src/repositories"
+	ledgerutils "nantty/modules/ledger/src/utils"
+	"nantty/platform/httpserver"
+	"nantty/platform/widgets"
 )
 
 type CreatorTodayWidgetPayload struct {

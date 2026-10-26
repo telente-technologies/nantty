@@ -7,9 +7,9 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/creators/src/generated/ent"
-	"zudomart/modules/creators/src/generated/ent/affiliateattributedsale"
-	"zudomart/modules/creators/src/generated/ent/affiliatecommission"
+	"nantty/modules/creators/src/generated/ent"
+	"nantty/modules/creators/src/generated/ent/affiliateattributedsale"
+	"nantty/modules/creators/src/generated/ent/affiliatecommission"
 )
 
 type EarningCounterpartyView struct {

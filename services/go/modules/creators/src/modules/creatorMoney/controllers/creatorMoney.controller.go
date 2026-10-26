@@ -3,10 +3,10 @@ package controllers
 import (
 	"net/http"
 
-	"zudomart/modules/creators/src/modules/creatorMoney/dtos"
-	"zudomart/modules/creators/src/modules/creatorMoney/services"
-	ledgerutils "zudomart/modules/ledger/src/utils"
-	"zudomart/platform/httpserver"
+	"nantty/modules/creators/src/modules/creatorMoney/dtos"
+	"nantty/modules/creators/src/modules/creatorMoney/services"
+	ledgerutils "nantty/modules/ledger/src/utils"
+	"nantty/platform/httpserver"
 )
 
 type CreatorMoneyController struct {

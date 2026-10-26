@@ -5,10 +5,10 @@ import (
 	"sort"
 	"time"
 
-	"zudomart/modules/creators/src/generated/ent"
-	"zudomart/modules/creators/src/generated/ent/creatorearning"
-	"zudomart/modules/creators/src/generated/ent/gifttransaction"
-	ledgermodels "zudomart/modules/ledger/src/modules/journal/models"
+	"nantty/modules/creators/src/generated/ent"
+	"nantty/modules/creators/src/generated/ent/creatorearning"
+	"nantty/modules/creators/src/generated/ent/gifttransaction"
+	ledgermodels "nantty/modules/ledger/src/modules/journal/models"
 )
 
 type DashboardEarnings struct {

@@ -3,8 +3,8 @@ package creators
 import (
 	"context"
 
-	"zudomart/modules/creators/src"
-	"zudomart/platform/servicemodule"
+	"nantty/modules/creators/src"
+	"nantty/platform/servicemodule"
 )
 
 type Module = src.Module

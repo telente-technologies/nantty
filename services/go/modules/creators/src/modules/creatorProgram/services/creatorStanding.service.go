@@ -5,11 +5,11 @@ import (
 	"database/sql"
 	"time"
 
-	"zudomart/modules/creators/src/generated/ent"
-	"zudomart/modules/creators/src/generated/ent/creatorprogrammember"
-	"zudomart/modules/creators/src/generated/ent/creatorviolation"
-	"zudomart/modules/creators/src/modules/creatorProgram/dtos"
-	"zudomart/modules/ledger/src/databases"
+	"nantty/modules/creators/src/generated/ent"
+	"nantty/modules/creators/src/generated/ent/creatorprogrammember"
+	"nantty/modules/creators/src/generated/ent/creatorviolation"
+	"nantty/modules/creators/src/modules/creatorProgram/dtos"
+	"nantty/modules/ledger/src/databases"
 )
 
 type MembershipChange struct {

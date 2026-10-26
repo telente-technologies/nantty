@@ -3,8 +3,8 @@ package routes
 import (
 	"net/http"
 
-	"zudomart/modules/creators/src/modules/brandDeals/controllers"
-	"zudomart/modules/ledger/src/middlewares"
+	"nantty/modules/creators/src/modules/brandDeals/controllers"
+	"nantty/modules/ledger/src/middlewares"
 )
 
 func MountBrandDealsRoutes(mux *http.ServeMux, controller controllers.BrandDealsController) {

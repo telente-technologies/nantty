@@ -9,10 +9,10 @@ import (
 	"slices"
 	"strings"
 
-	"zudomart/modules/creators/src/modules/affiliates/dtos"
-	"zudomart/modules/creators/src/modules/affiliates/services"
-	ledgerutils "zudomart/modules/ledger/src/utils"
-	"zudomart/platform/httpserver"
+	"nantty/modules/creators/src/modules/affiliates/dtos"
+	"nantty/modules/creators/src/modules/affiliates/services"
+	ledgerutils "nantty/modules/ledger/src/utils"
+	"nantty/platform/httpserver"
 )
 
 var (
