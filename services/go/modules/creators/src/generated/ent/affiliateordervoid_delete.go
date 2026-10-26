@@ -4,9 +4,9 @@ package ent
 
 import (
 	"context"
-	"zudomart/modules/creators/src/generated/ent/affiliateordervoid"
-	"zudomart/modules/creators/src/generated/ent/internal"
-	"zudomart/modules/creators/src/generated/ent/predicate"
+	"nantty/modules/creators/src/generated/ent/affiliateordervoid"
+	"nantty/modules/creators/src/generated/ent/internal"
+	"nantty/modules/creators/src/generated/ent/predicate"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"

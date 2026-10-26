@@ -6,9 +6,9 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"zudomart/modules/creators/src/generated/ent/battlesettlement"
-	"zudomart/modules/creators/src/generated/ent/internal"
-	"zudomart/modules/creators/src/generated/ent/predicate"
+	"nantty/modules/creators/src/generated/ent/battlesettlement"
+	"nantty/modules/creators/src/generated/ent/internal"
+	"nantty/modules/creators/src/generated/ent/predicate"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"

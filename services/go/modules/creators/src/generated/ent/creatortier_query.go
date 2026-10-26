@@ -6,9 +6,9 @@ import (
 	"context"
 	"fmt"
 	"math"
-	"zudomart/modules/creators/src/generated/ent/creatortier"
-	"zudomart/modules/creators/src/generated/ent/internal"
-	"zudomart/modules/creators/src/generated/ent/predicate"
+	"nantty/modules/creators/src/generated/ent/creatortier"
+	"nantty/modules/creators/src/generated/ent/internal"
+	"nantty/modules/creators/src/generated/ent/predicate"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect"

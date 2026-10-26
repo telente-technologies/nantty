@@ -3,8 +3,8 @@
 package creatorearning
 
 import (
+	"nantty/modules/creators/src/generated/ent/predicate"
 	"time"
-	"zudomart/modules/creators/src/generated/ent/predicate"
 
 	"entgo.io/ent/dialect/sql"
 	"github.com/google/uuid"

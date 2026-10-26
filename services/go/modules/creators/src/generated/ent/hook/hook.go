@@ -5,7 +5,7 @@ package hook
 import (
 	"context"
 	"fmt"
-	"zudomart/modules/creators/src/generated/ent"
+	"nantty/modules/creators/src/generated/ent"
 )
 
 // The AffiliateAttributedSaleFunc type is an adapter to allow the use of ordinary
