@@ -6,8 +6,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"nantty/modules/inventory/src/generated/ent/stocklocation"
 	"time"
-	"zudomart/modules/inventory/src/generated/ent/stocklocation"
 
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"

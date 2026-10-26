@@ -5,7 +5,7 @@ package hook
 import (
 	"context"
 	"fmt"
-	"zudomart/modules/inventory/src/generated/ent"
+	"nantty/modules/inventory/src/generated/ent"
 )
 
 // The IdempotentRequestFunc type is an adapter to allow the use of ordinary
