@@ -1,7 +1,30 @@
 # Changelog
 
-All notable changes to Zudomart are documented here. Format follows
+All notable changes to Nantty are documented here. Format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
+
+## [Unreleased] — 2026-10-26
+
+### Platform foundation
+
+- Pinned the repository Node baseline to 24.22.1 across the root engine,
+  EAS, CI workflows and TypeScript service container images. The Fastify
+  search pilot passed focused tests (74 passed, 4 skipped), typecheck and
+  build under that runtime; full-repository validation remains open.
+- Started the audio-only Nantty Spaces implementation. Creators host, anyone
+  may listen, and the approved gift model is static, coin-purchased gifts to
+  the host only, without animation or leaderboards. Discussion remains in
+  comments under the feed announcement; there is no separate Space chat. The
+  mobile LiveKit hook and a dedicated server-priced, idempotent coin ledger
+  RPC now have focused passing tests. Gifts remain disabled until the Go live
+  gateway/route, safety gates and static gift UI are integrated; announcement
+  post binding and device audio QA are still open.
+- Updated the Spaces and migration plans to record the approved access/gift
+  rules and the remaining rollout, security and QA gates.
+- Added an opt-in, route-scoped static export for the existing public `apps/web`
+  pages and staged a checked Cloudflare Workers Static Assets bundle. Ads,
+  Seller and Studio landing roots remain excluded until they have a safe,
+  session-free prelaunch export path; nothing was deployed and DNS was untouched.
 
 ## [Unreleased] — 2026-10-22
 

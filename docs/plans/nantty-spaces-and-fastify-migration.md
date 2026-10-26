@@ -5,17 +5,23 @@ Status: **implementation plan / not yet launch-ready** (2026-10-26)
 ## Product decisions
 
 - **Nantty Spaces** is a separate, audio-only live conversation product. It is not a video stream with the camera hidden in the UI: the media grant must reject camera/screen-share tracks as well as the client hiding video controls.
-- Hosts can start now or schedule a Space. A scheduled Space has a public detail page, shareable link, reminder/follow controls, and a publishable feed announcement. Viewers can join as listeners, request the microphone, and speak only after host/moderator approval. Hosts and moderators can mute, remove, or move speakers back to the audience.
+- Only eligible creators can host, start or schedule a Space. A scheduled Space has a public detail page, shareable link, reminder/follow controls, and a publishable feed announcement. Anyone may listen, subject to standard account safety restrictions; listeners can request the microphone and speak only after host/moderator approval. Hosts and moderators can mute, remove, or move speakers back to the audience. Resolve creator eligibility from the canonical server-side account/profile state, never a client-supplied role flag.
 - Space states are `scheduled → live → ended`, with `cancelled` for a host-cancelled schedule. Listing responses distinguish `live` and `upcoming`; an ended Space is not joinable. Scheduling/editing/cancellation is host-only. Use a stable Space ID and UTC timestamps; render local time in `Africa/Lagos` where appropriate.
 - Use Nantty's blue brand token for Space identity and actions. Keep the existing red live indicator for video LIVE; blue “Space” is not a LIVE-state indicator.
 - **Video livestream remains beta** until the reliability, safety and device QA gates below pass. It must not be represented as a launch-ready general feature. Keep existing data and APIs compatible while adding an explicit rollout gate.
-- **Gifts, gift battles, coins, tips, gift leaderboards and gift purchase UI are deferred from launch.** Do not remove or corrupt their persisted records or existing beta code; disable entry points and reject gift mutations whenever the launch/rollout configuration says gifts are unavailable. No gifts or earnings in Spaces.
+- **Spaces gifts are permitted by owner direction, purchased with coins and sent to the Space host only.** Render a static gift confirmation/state; do not animate gifts. Do not add gift leaderboards, gift battles, video/live gifts or cash tips to Spaces. Use the canonical coin wallet/ledger, server-side pricing, idempotency, age-safety and fraud controls; never accept client-provided values or directly mutate balances. Gate the UI and endpoint independently so disabled configuration fails closed. Other video-LIVE gifts remain governed by their beta/launch gate and must not be inferred to be enabled by this Spaces decision.
 
 ## Current architecture and ownership
 
 - The repository's backend plan places live sessions, LiveKit credentials, stage membership and live safety in **Go `go-live`**. The existing Go live service already has scheduled sessions, LiveKit token issuance, audience presence, comments, safety controls and a retention worker. Extend that single authority for Spaces rather than creating a second source of truth.
 - TypeScript deployables are `gateway`, `social`, `notifications`, `media`, `search` and `support`. They currently use `@zudojs/http` and do not declare Fastify. Social uses Prisma; other services have their own storage/integration patterns. Browser/mobile BFFs remain Next.js/Expo and are not Fastify migration targets.
 - Consequently, the Fastify migration is a separate platform migration for the TypeScript HTTP deployables. Space lifecycle and LiveKit authorization remain in `go-live`; TypeScript consumes its existing public/internal contracts and events. Do not dual-write live state from social or gateway.
+
+## Implementation status (2026-10-26)
+
+- **Verified:** creator-gated hosting, public listener participation, speaker request/moderation persistence, rate-limited/idempotent Space mutations, audio-only LiveKit grants, access-filtered list/detail presenters, and a mobile LiveKit connection hook. Focused mobile typecheck/tests and Go controller/route tests pass.
+- **Verified wallet slice, not enabled:** creators money service has a server-priced, Space-host-derived coin-gift RPC with balanced ledger posting, idempotent replay and `gifts_enabled` enforcement. The Go live gateway/HTTP caller, account-age/fraud policy gates and static gift confirmation UI are not yet integrated. Keep gifts disabled until all those layers pass together.
+- **Still open:** publish/link a Space announcement post and expose its post ID so all discussion remains in that post's comment thread; reminders; real device audio QA; web experience; complete integration/security gates; and the six-service Fastify migration. Do not add a Space comment/chat surface, gift animation or leaderboard while closing these gaps.
 
 ## Nantty Spaces implementation
 
@@ -34,8 +40,11 @@ Status: **implementation plan / not yet launch-ready** (2026-10-26)
 | `POST /spaces/{spaceId}/speakers/{userId}/mute` / `remove` / `demote` | Host/moderator controls, audited and broadcast to the room. |
 | `PUT /spaces/{spaceId}/reminder` / `DELETE /spaces/{spaceId}/reminder` | RSVP/reminder subscription, idempotent. |
 | `POST /spaces/{spaceId}/announcement` | Publish a feed announcement referencing the Space; unique per host + Space; no duplicate post on retry. |
+| `POST /spaces/{spaceId}/coin-gifts` | Optional, rollout-gated coin gift to the host only; authenticated sender, server-priced catalog item, idempotent ledger transfer and auditable receipt. UI confirms without animation. |
 
 Every mutation requires authenticated identity, boundary validation, rate limits, authorization checks and audit/event records where it changes room roles or safety. `Idempotency-Key` is required for create/start/end/cancel and announcement creation. Use structured API errors consistent with the existing contract (`code`, `message`, optional safe `details`). Never expose LiveKit API secrets or room names to clients.
+
+Creator eligibility is checked server-side on create/start/schedule and rechecked before host-only controls. Listener access is open by default to accounts permitted by platform safety rules. For coin gifts, resolve the recipient from the Space's immutable host ID; reject requests naming a different recipient. Use the existing coin-gift accounting policy and ledger transaction; retries must return the original result and must never double-debit or double-credit. Coin gifts must remain unavailable when the gift feature flag, account-age policy or wallet safety gate is closed. Do not create a Space gift leaderboard or animated rendering path.
 
 ### Data and media model
 
@@ -48,7 +57,7 @@ Every mutation requires authenticated identity, boundary validation, rate limits
 ### App experience
 
 - Add a Spaces discovery screen with clear `Live now` and `Upcoming` sections, scheduled time in the viewer's locale, host identity, listener count and one clear Join/Set reminder action. Include real loading, empty, retry/offline and sign-in-required states; no seed content outside mock/test mode.
-- Detail/room screen is audio-first: host and speaker portraits, restrained blue sound-wave activity, listener roster/count, mute/unmute, request-to-speak, accessible live captions only if supported, share, report, leave/end controls. No video surfaces, camera permission requests, gift tray, coin balance or sales product assumptions.
+- Detail/room screen is audio-first: host and speaker portraits, restrained blue sound-wave activity, listener roster/count, mute/unmute, request-to-speak, accessible live captions only if supported, share, report, leave/end controls. Only creators see host/scheduling controls; everyone eligible to access a Space can listen. A separately gated coin-gift action may target the host only and uses a static, non-animated confirmation. Discussion is shown in comments under the feed post that announces/hosts the Space; do not build a separate Space chat or leaderboard. No video surfaces, camera permission requests, animated gift tray or sales product assumptions.
 - Host flow supports title, short description, audience, start-now vs schedule, timezone-aware picker, edit/cancel, and optional feed announcement. Add notification/reminder opt-in instead of silently enrolling followers.
 - Webapp gets the same discovery/detail/schedule capabilities after the API contract and mobile beta flow pass. Use a responsive list/room composition rather than copying X's visual layout.
 
@@ -58,7 +67,7 @@ Every mutation requires authenticated identity, boundary validation, rate limits
 2. Pass automated contract/unit/integration tests for host eligibility, creator restrictions, private/restricted access, microphone/camera permission denial, reconnect, host backgrounding, stale room closure, stage role transitions, safety hold/report/block and duplicate start/end.
 3. Run physical iOS/Android device QA for low bandwidth, network handoff, Bluetooth/audio route changes, interruptions, app background/foreground, camera/microphone denial, screen rotation, and OS-level audio focus. Verify TalkBack/VoiceOver and reduce-motion states.
 4. Verify stream health/room closure and telemetry dashboards/alerts, safe rollback, moderation incident process and support guidance. Do not remove the beta label or enable general launch before product sign-off.
-5. Keep gifts disabled for launch even if video LIVE remains in beta; gifts need separate wallet/idempotency/age-safety/fraud/refund and moderation sign-off.
+5. Keep video-LIVE gifts disabled unless separately approved. Spaces coin gifts require wallet/idempotency/age-safety/fraud/refund and host-only recipient enforcement before their rollout flag is enabled; gifts remain static (no animation) and there is no leaderboard.
 
 ## TypeScript services migration to Fastify
 
@@ -100,7 +109,7 @@ Every mutation requires authenticated identity, boundary validation, rate limits
 - [ ] Confirm API and deployment inventory; publish route parity matrix.
 - [ ] Implement Spaces backend schema, migrations, routes, microphone-only LiveKit grants, outbox events and integration tests in Go `go-live`.
 - [ ] Build mobile Space discovery, schedule, detail, listener and speaker-request flows against the real contract.
-- [ ] Add launch/rollout flags: video LIVE beta; gifts off for launch; Spaces audio-only.
+- [ ] Add launch/rollout flags: video LIVE beta; Spaces audio-only; Spaces coin gifts independently gated (host-only recipient); animated/live gifts unavailable in Spaces.
 - [ ] Add webapp Space discovery/detail after mobile+API contract stability.
 - [ ] Complete video LIVE beta exit gates before enabling general launch.
 - [ ] Start Fastify migration with shared platform and search pilot; continue service-by-service through gateway.
