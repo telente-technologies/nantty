@@ -61,7 +61,7 @@ export function buildDemoUserExtras(users: readonly MockPlatformUserRecord[]): M
       index % 4 === 1
         ? [{ id: `unh_${user.id}_1`, fromUsername: `${user.username.replace(/[._]/g, "")}${2020 + (index % 5)}`, toUsername: user.username, kind: "USER_CHANGE", changedAt: minutesAgoIso(200 * 1440), changedByName: user.displayName, reason: null }]
         : [];
-    extras.set(user.id, { bio: user.isSeller ? `${user.displayName} · shop on Zudomart · delivery nationwide` : user.isCreator ? `${user.displayName} · creator · collabs in DM` : null, restriction: buildRestrictionForUser(user), wallet: buildWalletForUser(user, index), strikes, sessions, usernameHistory });
+    extras.set(user.id, { bio: user.isSeller ? `${user.displayName} · shop on Nantty · delivery nationwide` : user.isCreator ? `${user.displayName} · creator · collabs in DM` : null, restriction: buildRestrictionForUser(user), wallet: buildWalletForUser(user, index), strikes, sessions, usernameHistory });
   });
   return extras;
 }

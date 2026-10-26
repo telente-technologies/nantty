@@ -48,7 +48,7 @@ export function registerSubscriptionOfferLinkMockHandlers(): void {
     const singleUse = body.singleUse === true;
     const id = createMockId("offer");
     const link: OfferLink = {
-      id, label: typeof body.label === "string" ? body.label.slice(0, 120) : "", url: `https://zudomart.com/offer/${id.replace(/[^A-Za-z0-9]/g, "").padEnd(43, "x").slice(0, 43)}`, status: "active",
+      id, label: typeof body.label === "string" ? body.label.slice(0, 120) : "", url: `https://nantty.com/offer/${id.replace(/[^A-Za-z0-9]/g, "").padEnd(43, "x").slice(0, 43)}`, status: "active",
       plans: planCodes.map((planCode) => ({ planCode, planLabel: planCode })),
       discount: kind === "percentage" ? { kind, percentOff: readWholeNumber(body, "percentOff", 1, 100) } : { kind, amountOff: { amountMinor: amountOff!.amountMinor as number, currency: amountOff!.currency as string } },
       singleUse, maxClaims: singleUse ? 1 : readWholeNumber(body, "maxClaims", 1, 100_000), claimedCount: 0, redeemedCount: 0, durationCycles: readWholeNumber(body, "durationCycles", 1, 36),

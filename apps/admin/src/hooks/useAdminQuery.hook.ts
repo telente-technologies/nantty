@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 
-import { useOnReconnect } from "@zudomart/web-kit";
+import { useOnReconnect } from "@nantty/web-kit";
 
 import { readErrorMessageForDisplay } from "@/services/adminApiClient.service";
 

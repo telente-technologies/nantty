@@ -1,10 +1,10 @@
-import { isEmailTemplateKey, listEmailTemplateCatalogue, renderEmail, renderEmailSample, type EmailTheme } from "@zudomart/email-templates";
+import { isEmailTemplateKey, listEmailTemplateCatalogue, renderEmail, renderEmailSample, type EmailTheme } from "@nantty/email-templates";
 
 import { requireMockPermission } from "@/mocks/mockGuards.mock";
 import { failValidation, readJsonObjectBody, readOptionalTrimmedString, readRequiredTrimmedString, respondWithError, respondWithJson } from "@/mocks/mockResponses.mock";
 import { registerMockRoute, type MockRequest } from "@/mocks/mockRouter.mock";
 
-const previewLinks = { unsubscribeUrl: "https://zudomart.com/email/unsubscribe?preview=1", preferencesUrl: "https://zudomart.com/settings/notifications/email", manageNotificationsUrl: "https://zudomart.com/settings/notifications" };
+const previewLinks = { unsubscribeUrl: "https://nantty.com/email/unsubscribe?preview=1", preferencesUrl: "https://nantty.com/settings/notifications/email", manageNotificationsUrl: "https://nantty.com/settings/notifications" };
 
 function readTheme(value: unknown): EmailTheme {
   return value === "dark" ? "dark" : "light";

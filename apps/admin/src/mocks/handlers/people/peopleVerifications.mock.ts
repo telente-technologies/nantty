@@ -112,7 +112,7 @@ export function registerPeopleVerificationMockHandlers(): void {
     if (!document) failNotFound("Document");
     const openedAt = readIsoNow();
     recordMockAuditEntry(request, { action: "verification.document_viewed", area: "verification", target: { type: "verification", id: record.id, label: document.label }, after: { documentId: document.id, kind: document.kind } });
-    return respondWithJson(200, { documentId: document.id, kind: document.kind, label: document.label, viewUrl: `mock-private-media://verification/${record.id}/${document.id}?expires=120`, expiresAt: readIsoTimeOffset(2), watermarkText: `Zudomart Admin — confidential · ${principal.email} · ${openedAt}` });
+    return respondWithJson(200, { documentId: document.id, kind: document.kind, label: document.label, viewUrl: `mock-private-media://verification/${record.id}/${document.id}?expires=120`, expiresAt: readIsoTimeOffset(2), watermarkText: `Nantty Admin — confidential · ${principal.email} · ${openedAt}` });
   });
 
   for (const transition of Object.keys(transitionRules) as VerificationTransition[]) {

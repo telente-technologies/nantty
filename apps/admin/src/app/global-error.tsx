@@ -1,6 +1,6 @@
 "use client";
 
-import { GlobalErrorScreen } from "@zudomart/web-kit";
+import { GlobalErrorScreen } from "@nantty/web-kit";
 
 import { adminErrorExperience } from "@/components/errors/errorExperience.provider";
 
@@ -10,7 +10,7 @@ export default function GlobalError({ error, retry }: { readonly error: Error & 
   return (
     <html lang="en-NG" suppressHydrationWarning>
       <head>
-        <title>Something broke | Zudomart</title>
+        <title>Something broke | Nantty</title>
       </head>
       <body>
         <GlobalErrorScreen error={error} retry={retry} config={adminErrorExperience} />

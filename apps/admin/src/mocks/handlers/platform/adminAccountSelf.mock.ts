@@ -54,7 +54,7 @@ export function registerAdminAccountSelfMockHandlers(): void {
     readMockDatabase().webauthnChallenges.set(challenge, { adminId: admin.id, expiresAtEpochMs: Date.now() + 120_000 });
     return respondWithJson(200, {
       challenge,
-      rp: { name: "Zudomart Admin", id: "localhost" },
+      rp: { name: "Nantty Admin", id: "localhost" },
       user: { id: Buffer.from(admin.id).toString("base64url"), name: admin.email, displayName: admin.name },
       pubKeyCredParams: [{ type: "public-key", alg: -7 }, { type: "public-key", alg: -257 }],
       authenticatorSelection: { residentKey: "preferred", userVerification: "required" },

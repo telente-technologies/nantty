@@ -73,7 +73,7 @@ export function registerPeopleBusinessDocumentMockHandlers(): void {
     const item = record?.documents.find((candidate) => candidate.id === request.params.documentId);
     if (!record || !item) failNotFound("Document");
     recordMockAuditEntry(request, { action: "business_document.viewed", area: "verification", target: { type: "businessDocuments", id: record.id, label: `${record.storeName} · ${item.kind}` }, after: { documentId: item.id } });
-    return respondWithJson(200, { documentId: item.id, fileName: item.fileName, viewUrl: `mock-private-media://business-documents/${record.id}/${item.id}?expires=120`, expiresAt: readIsoTimeOffset(2), watermarkText: `Zudomart Admin, confidential · ${principal.email} · ${readIsoNow()}` });
+    return respondWithJson(200, { documentId: item.id, fileName: item.fileName, viewUrl: `mock-private-media://business-documents/${record.id}/${item.id}?expires=120`, expiresAt: readIsoTimeOffset(2), watermarkText: `Nantty Admin, confidential · ${principal.email} · ${readIsoNow()}` });
   });
 
   registerMockRoute("POST", "/admin/business-documents/:submissionId/documents/:documentId/approve", (request) => reviewDocument(request, "APPROVED"));

@@ -65,7 +65,7 @@ async function callRealBackend(call: BackendCall, headers: Headers): Promise<Bac
     });
     return { status: response.status, headers: response.headers, body: new Uint8Array(await response.arrayBuffer()) };
   } catch {
-    const unavailableBody: ApiErrorBody = { message: "The Zudomart API is not reachable right now. Try again in a moment.", code: "UPSTREAM_UNAVAILABLE" };
+    const unavailableBody: ApiErrorBody = { message: "The Nantty API is not reachable right now. Try again in a moment.", code: "UPSTREAM_UNAVAILABLE" };
     return { status: 503, headers: new Headers({ "Content-Type": "application/json" }), body: textEncoder.encode(JSON.stringify(unavailableBody)) };
   } finally {
     clearTimeout(timeoutHandle);

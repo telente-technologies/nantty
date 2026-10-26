@@ -18,5 +18,5 @@ export async function POST(request: NextRequest) {
   if (!challenge?.enrollmentRequired) return respondWithBffError(401, "MFA_CHALLENGE_EXPIRED", "Your sign-in step expired. Enter your password again.");
   const result = await sendJsonToAdminBackend<EnrollmentSecretResponse>("POST", "/admin/auth/mfa/enroll/start", { challengeToken: challenge.mfaToken });
   if (!result.body) return respondWithBackendError(result.status, result.error, "Could not start authenticator setup.");
-  return respondWithJson({ issuer: "Zudomart Admin", accountName: challenge.email, ...result.body });
+  return respondWithJson({ issuer: "Nantty Admin", accountName: challenge.email, ...result.body });
 }

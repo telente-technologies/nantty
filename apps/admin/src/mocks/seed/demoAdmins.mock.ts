@@ -1,7 +1,7 @@
 import type { AdminPermission } from "@/constants/adminPermissions.constant";
 import type { AdminRole, AdminStatus } from "@/types/admin.type";
 
-export const demoAdminPassword = "zudomart-admin-demo";
+export const demoAdminPassword = "nantty-admin-demo";
 export const demoMockTotpCode = "000000";
 
 export interface MockAdminRecord {

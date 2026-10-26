@@ -18,7 +18,7 @@ let screens: Screens;
 
 before(async () => {
   register(pathToFileURL(resolve(process.cwd(), "../../packages/webKit/src/dialog/__tests__/cssStub.loader.mjs")).href);
-  const { ErrorExperienceProvider } = await import("@zudomart/web-kit");
+  const { ErrorExperienceProvider } = await import("@nantty/web-kit");
   const { adminErrorExperience } = await import("@/components/errors/errorExperience.provider");
   screens = {
     NotFoundPage: (await import("@/app/not-found")).default,

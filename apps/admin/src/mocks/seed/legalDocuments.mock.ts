@@ -10,11 +10,11 @@ export type MutableLegalVersion = { -readonly [Key in keyof LegalVersion]: Legal
 function buildBody(title: string): string {
   return [
     `# ${title}`,
-    "## 1. Who we are\nZudomart operates a Nigeria-first social marketplace. Payments and wallets are held by our licensed payment partner in your name, with escrow in Nigeria only. This document explains the rules that apply to you.",
-    "## 2. What you agree to\nBy using Zudomart you agree to follow this document and the other policies linked from it.",
+    "## 1. Who we are\nNantty operates a Nigeria-first social marketplace. Payments and wallets are held by our licensed payment partner in your name, with escrow in Nigeria only. This document explains the rules that apply to you.",
+    "## 2. What you agree to\nBy using Nantty you agree to follow this document and the other policies linked from it.",
     "## 3. Your responsibilities\nGive accurate information, keep your login safe and follow the law where you live.",
     "## 4. Changes to this document\nWe tell you by email when a change matters. For material changes you get at least 30 days before they apply.",
-    "## 5. Contact\nWrite to legal@zudomart.com for questions about this document.",
+    "## 5. Contact\nWrite to legal@nantty.com for questions about this document.",
   ].join("\n\n");
 }
 

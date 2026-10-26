@@ -70,7 +70,7 @@ const seedRows: readonly ReportSeedRow[] = [
     scores: [["impersonation", 0.82]],
   },
   {
-    target: { type: "MESSAGE", id: "msg_993120", title: "Direct message to @ngozi_bakes", text: "Pay the ₦150k deposit to my Opay so we avoid Zudomart charges. I deliver tomorrow.", mediaUrls: [], soundTitle: null },
+    target: { type: "MESSAGE", id: "msg_993120", title: "Direct message to @ngozi_bakes", text: "Pay the ₦150k deposit to my Opay so we avoid Nantty charges. I deliver tomorrow.", mediaUrls: [], soundTitle: null },
     authorUserId: "usr_0014", reasons: [["SCAM", 2]], priority: "HIGH", firstReportedMinutesAgo: 130,
     notes: [["ngozi_bakes", "Asked me to pay outside the app."]],
     scores: [["off_platform_payment", 0.91], ["scam", 0.7]],

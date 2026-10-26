@@ -78,8 +78,8 @@ export function registerAuthenticationMockHandlers(): void {
     const { admin } = readPendingMfaAdmin(request);
     if (admin.mfaEnrolled) throw new MockHttpError(409, "MFA_ALREADY_ENROLLED", "Authenticator already set up.");
     admin.pendingTotpSecret ??= createBase32Secret();
-    const accountName = encodeURIComponent(`Zudomart Admin:${admin.email}`);
-    return respondWithJson(200, { secret: admin.pendingTotpSecret, issuer: "Zudomart Admin", accountName: admin.email, otpauthUri: `otpauth://totp/${accountName}?secret=${admin.pendingTotpSecret}&issuer=Zudomart%20Admin&digits=6&period=30&algorithm=SHA1` });
+    const accountName = encodeURIComponent(`Nantty Admin:${admin.email}`);
+    return respondWithJson(200, { secret: admin.pendingTotpSecret, issuer: "Nantty Admin", accountName: admin.email, otpauthUri: `otpauth://totp/${accountName}?secret=${admin.pendingTotpSecret}&issuer=Nantty%20Admin&digits=6&period=30&algorithm=SHA1` });
   }, { public: true });
 
   registerMockRoute("POST", "/admin/auth/mfa/enroll/confirm", (request) => {

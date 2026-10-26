@@ -4,7 +4,7 @@ import { connection } from "next/server";
 import { cookies, headers } from "next/headers";
 import type { ReactNode } from "react";
 
-import { ConnectionStatus, ThemeInitScript, parseThemePreference, readHtmlThemeAttribute, themeCookieName, themeViewport } from "@zudomart/web-kit";
+import { ConnectionStatus, ThemeInitScript, parseThemePreference, readHtmlThemeAttribute, themeCookieName, themeViewport } from "@nantty/web-kit";
 
 import { ConsentBannerHost } from "@/components/privacy/consentBannerHost";
 import { AppThemeProvider } from "@/components/theme/appThemeProvider";
@@ -21,12 +21,12 @@ const monoFont = JetBrains_Mono({ subsets: ["latin"], display: "swap", variable:
 
 export const metadata: Metadata = {
   title: { default: adminProductName, template: `%s · ${adminProductName}` },
-  description: "Internal administration console for the Zudomart platform.",
+  description: "Internal administration console for the Nantty platform.",
   applicationName: adminProductName,
   robots: { index: false, follow: false, nocache: true, googleBot: { index: false, follow: false } },
   referrer: "no-referrer",
   manifest: "/manifest.webmanifest",
-  icons: { icon: [{ url: "/brand/favicon.ico", sizes: "48x48" }, { url: "/brand/icon.svg", type: "image/svg+xml" }], apple: "/brand/appleTouchIcon.png" },
+  icons: { icon: [{ url: "/brand/nantty-icon.png", type: "image/png" }], apple: "/brand/nantty-icon.png" },
   formatDetection: { telephone: false, email: false, address: false },
 };
 

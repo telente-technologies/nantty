@@ -2,7 +2,7 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import type { ReactNode } from "react";
 
-import { ConfirmDialogHost } from "@zudomart/web-kit";
+import { ConfirmDialogHost } from "@nantty/web-kit";
 
 import { StepUpProvider } from "@/components/security/stepUpProvider";
 import { AdminSessionProvider } from "@/components/session/adminSessionProvider";

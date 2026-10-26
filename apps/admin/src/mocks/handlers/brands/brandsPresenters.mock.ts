@@ -106,7 +106,7 @@ export function presentIpClaimSummary(claim: MockIpClaimRecord): IpClaimSummary 
     status: claim.status,
     claimantBrand: { id: claim.claimantBrandId, name: brand?.name ?? "Unknown brand", logoUrl: brand?.logoPhotoId ? buildUnsplashImageUrl(brand.logoPhotoId, 80) : null, officialStatus: brand?.officialStatus ?? "NONE" },
     accusedSeller: seller,
-    listing: { id: claim.listing.id, title: claim.listing.title, price: { amountMinor: claim.listing.amountMinor, currency: seller.currency }, imageUrl: buildUnsplashImageUrl(claim.listing.photoId, 480), listingUrl: `https://zudomart.com/p/${claim.listing.id}`, storeName: claim.listing.storeName, status: claim.listing.status },
+    listing: { id: claim.listing.id, title: claim.listing.title, price: { amountMinor: claim.listing.amountMinor, currency: seller.currency }, imageUrl: buildUnsplashImageUrl(claim.listing.photoId, 480), listingUrl: `https://nantty.com/p/${claim.listing.id}`, storeName: claim.listing.storeName, status: claim.listing.status },
     filedAt: claim.filedAt,
     slaDueAt: claim.slaDueAt,
     priorStrikeCount: seller.strikeCount,

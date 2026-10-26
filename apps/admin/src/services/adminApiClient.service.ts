@@ -1,4 +1,4 @@
-import { parseRetryAfterHeader, readRequestIdHeader } from "@zudomart/web-kit";
+import { parseRetryAfterHeader, readRequestIdHeader } from "@nantty/web-kit";
 
 import type { ApiErrorBody, ApiValidationIssue } from "@/types/api.type";
 import { resolveAdminErrorMessage } from "@/utils/adminErrorMessages.util";

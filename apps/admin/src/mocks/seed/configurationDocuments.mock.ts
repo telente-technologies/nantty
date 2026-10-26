@@ -18,7 +18,7 @@ export function buildInitialRevenueRules(): RevenueRulesConfiguration {
       { amountMinor: 1, currency: "GBP" },
       { amountMinor: 1, currency: "USD" },
     ],
-    withdrawalFee: { mode: "PASS_THROUGH", note: "We charge exactly what the payment partner charges for the transfer. No Zudomart margin." },
+    withdrawalFee: { mode: "PASS_THROUGH", note: "We charge exactly what the payment partner charges for the transfer. No Nantty margin." },
     escrowFee: { defaultBasisPoints: 150, businessPlanBasisPoints: 100 },
   };
 }

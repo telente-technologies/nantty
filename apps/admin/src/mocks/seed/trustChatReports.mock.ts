@@ -112,9 +112,9 @@ const seedRows: readonly SeedRow[] = [
   },
   {
     id: "chr_0006", targetType: "CONVERSATION", reason: "IMPERSONATION", priority: "NORMAL", status: "ACTIONED", reporter: "usr_0010", reported: "usr_0013", label: "Direct chat", minutesAgo: 3000,
-    details: "Pretends to be Zudomart support and asks for my OTP.", selection: "last_messages",
-    lines: [{ from: "usr_0013", name: "Zudomart Help", minutesAgo: 3050, text: "We detected a problem. Send the code we texted you to confirm your account." }],
-    decision: { chatAction: "SUSPEND_USER", reason: "Impersonating Zudomart support to collect OTPs.", by: "Amaka Obi", minutesAgo: 2900 }, outcome: "TOOK_ACTION",
+    details: "Pretends to be Nantty support and asks for my OTP.", selection: "last_messages",
+    lines: [{ from: "usr_0013", name: "Nantty Help", minutesAgo: 3050, text: "We detected a problem. Send the code we texted you to confirm your account." }],
+    decision: { chatAction: "SUSPEND_USER", reason: "Impersonating Nantty support to collect OTPs.", by: "Amaka Obi", minutesAgo: 2900 }, outcome: "TOOK_ACTION",
   },
   {
     id: "chr_0007", targetType: "MESSAGE", reason: "HATE", priority: "NORMAL", status: "DISMISSED", reporter: "usr_0007", reported: "usr_0015", label: "Group: Naija Sneaker Heads", minutesAgo: 4200,

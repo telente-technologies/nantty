@@ -22,9 +22,9 @@ export function buildDemoLiveChats(): MockLiveChatRecord[] {
 
 export function buildDemoEmailTemplates(): EmailTemplate[] {
   return [
-    { id: "etpl_welcome_review", name: "Account under review", kind: "TRANSACTIONAL", subject: "We are reviewing your Zudomart account", body: "Hi {{user.displayName}},\n\nWe are taking a closer look at your account and will update you within 2 working days. You do not need to do anything now.\n\nThe Zudomart team" },
-    { id: "etpl_docs_help", name: "Business documents reminder", kind: "TRANSACTIONAL", subject: "Finish your business documents", body: "Hi {{user.displayName}},\n\nUpload your CAC certificate, ID and proof of address from the dashboard. You can keep selling while we review them.\n\nThe Zudomart team" },
-    { id: "etpl_seller_promo", name: "Seller tips newsletter", kind: "MARKETING", subject: "Three ways to get more orders this month", body: "Hi {{user.displayName}},\n\nHere are three practical tips to help your store this month.\n\nThe Zudomart team" },
+    { id: "etpl_welcome_review", name: "Account under review", kind: "TRANSACTIONAL", subject: "We are reviewing your Nantty account", body: "Hi {{user.displayName}},\n\nWe are taking a closer look at your account and will update you within 2 working days. You do not need to do anything now.\n\nThe Nantty team" },
+    { id: "etpl_docs_help", name: "Business documents reminder", kind: "TRANSACTIONAL", subject: "Finish your business documents", body: "Hi {{user.displayName}},\n\nUpload your CAC certificate, ID and proof of address from the dashboard. You can keep selling while we review them.\n\nThe Nantty team" },
+    { id: "etpl_seller_promo", name: "Seller tips newsletter", kind: "MARKETING", subject: "Three ways to get more orders this month", body: "Hi {{user.displayName}},\n\nHere are three practical tips to help your store this month.\n\nThe Nantty team" },
   ];
 }
 

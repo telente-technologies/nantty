@@ -65,7 +65,7 @@ export function registerBrandDirectoryMockHandlers(): void {
       kind: document.kind,
       url: `https://media.example.com/private/brands/${brand.id}/${document.id}?signature=demo&expires=300`,
       expiresAt: readIsoTimeOffset(5),
-      watermarkText: `Zudomart Admin — confidential · ${principal.email} · ${new Date().toISOString().slice(0, 16).replace("T", " ")} UTC`,
+      watermarkText: `Nantty Admin — confidential · ${principal.email} · ${new Date().toISOString().slice(0, 16).replace("T", " ")} UTC`,
     });
   });
 

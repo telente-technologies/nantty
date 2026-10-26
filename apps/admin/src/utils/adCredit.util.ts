@@ -15,7 +15,7 @@ export const adCreditStatusFilterOptions: readonly { readonly value: "" | AdCred
 ];
 
 const sourceLabels: Record<AdCreditSource, string> = {
-  admin_issued: "Issued by Zudomart",
+  admin_issued: "Issued by Nantty",
   cashback: "Cashback",
   premium_free_boost: "Premium free boost",
   boost_refund: "Boost refund",

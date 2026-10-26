@@ -1,1 +1,1 @@
-export const adminProductName = "Zudomart Admin";
+export const adminProductName = "Nantty Admin";

@@ -10,7 +10,7 @@ import { buildSideBySideLineDiff } from "@/utils/legalLineDiff.util";
 
 import { findVersionOrFail, listVersionsOfDocument, readDocumentDefinitionOrFail, readLegalStore } from "./legalStore.mock";
 
-const marketingSiteUrl = "https://zudomart.com";
+const marketingSiteUrl = "https://nantty.com";
 
 function summariseChangedLines(version: MutableLegalVersion): string[] {
   const previous = listVersionsOfDocument(version.documentKey).find((candidate) => candidate.versionNumber < version.versionNumber && (candidate.status === "PUBLISHED" || candidate.status === "SUPERSEDED"));
@@ -37,7 +37,7 @@ function buildDefaultDraft(version: MutableLegalVersion): LegalNoticeDraft {
   const definition = readDocumentDefinitionOrFail(version.documentKey);
   return {
     versionId: version.id, documentTitle: definition.title, subject: `We've updated our ${definition.title}`, summaryText: version.changeSummary, whatChanged: summariseChangedLines(version), effectiveAt: version.effectiveAt,
-    reacceptNote: version.isMaterialChange ? `This is a material change. Please review and accept it in the app before the effective date to keep using Zudomart. You have at least ${materialChangeNoticeDays} days.` : null,
+    reacceptNote: version.isMaterialChange ? `This is a material change. Please review and accept it in the app before the effective date to keep using Nantty. You have at least ${materialChangeNoticeDays} days.` : null,
     documentUrl: `${marketingSiteUrl}${definition.publicPath}`, updatedByName: null, updatedAt: null, testSends: [],
   };
 }

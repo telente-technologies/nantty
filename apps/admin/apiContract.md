@@ -1,4 +1,4 @@
-# Zudomart Admin API contract
+# Nantty Admin API contract
 
 Backend contract for the admin console (`apps/admin`, served at `admin.<domain>`). Every endpoint lives under `/api/v1/admin/...` and is called only by the admin console's server (Backend-for-Frontend). Browsers never hold API tokens.
 
@@ -182,7 +182,7 @@ Errors: `400 VALIDATION_FAILED`, `422 RULE_EXISTS`, `404 NOT_FOUND`. Not served 
 
 ## Verification
 
-Colors: **Blue** personal (ESSENTIAL / VERIFIED / PREMIUM; Essential never shows a public badge), **Gold** business/store (ONLY / PRO / BUSINESS; verified Gold grants Zudomart Dashboard access), **Black** government (OFFICIAL; never purchasable, manual official process — confirm from the agency's official domain).
+Colors: **Blue** personal (ESSENTIAL / VERIFIED / PREMIUM; Essential never shows a public badge), **Gold** business/store (ONLY / PRO / BUSINESS; verified Gold grants Nantty Dashboard access), **Black** government (OFFICIAL; never purchasable, manual official process — confirm from the agency's official domain).
 
 State machine (server-enforced, `409 INVALID_TRANSITION` otherwise):
 
@@ -200,7 +200,7 @@ State machine (server-enforced, `409 INVALID_TRANSITION` otherwise):
 |---|---|---|---|---|---|---|
 | GET | `/api/v1/admin/verifications?status&color&search&cursor` | `verification:review` or `verification:revoke` | no | — | `PagedList<VerificationApplication>` (pending first, oldest first) | — |
 | GET | `/api/v1/admin/verifications/:verificationId` | same | no | — | `VerificationApplication & { history: AuditLogEntry[] }` | — |
-| GET | `/api/v1/admin/verifications/:verificationId/documents/:documentId` | `verification:documents` | no | — | `{ documentId, kind, label, viewUrl, expiresAt, watermarkText }` — `viewUrl` is a signed private-media URL valid ≤ 2 minutes; `watermarkText` = `Zudomart Admin — confidential · <admin email> · <timestamp>` | `verification.document_viewed` |
+| GET | `/api/v1/admin/verifications/:verificationId/documents/:documentId` | `verification:documents` | no | — | `{ documentId, kind, label, viewUrl, expiresAt, watermarkText }` — `viewUrl` is a signed private-media URL valid ≤ 2 minutes; `watermarkText` = `Nantty Admin — confidential · <admin email> · <timestamp>` | `verification.document_viewed` |
 | POST | `/api/v1/admin/verifications/:verificationId/approve` | `verification:review` | no | `{ reason }` | detail | `verification.approved` |
 | POST | `/api/v1/admin/verifications/:verificationId/reject` | `verification:review` | no | `{ reason }` | detail | `verification.rejected` |
 | POST | `/api/v1/admin/verifications/:verificationId/suspend` | `verification:revoke` | **yes** | `{ reason }` | detail | `verification.suspended` |
@@ -412,7 +412,7 @@ Brands are profiles that own trademarks. Members are platform users with a brand
 
 ## Official Store verification
 
-Official Store is a **Gold (business) verification** backed by a registered trademark. Approving it gives verified linked stores the "Official Store" badge; Gold verification also grants Zudomart Dashboard access.
+Official Store is a **Gold (business) verification** backed by a registered trademark. Approving it gives verified linked stores the "Official Store" badge; Gold verification also grants Nantty Dashboard access.
 
 `OfficialStoreRequest` = `{ id, submittedAt, submittedBy: PlatformUserSummary|null, trademark: { registrationNumber, jurisdiction, niceClass, registeredOwner, registeredOn, expiresOn }, cacRegistrationNumber, cacCompanyName, contactEmail, documents: [{ id, kind: "TRADEMARK_CERTIFICATE"|"CAC_CERTIFICATE"|"AUTHORIZATION_LETTER", label, uploadedAt }], checks: [{ key, label, outcome: "PASS"|"WARN"|"FAIL", detail }], lastDecisionReason, decidedAt, decidedByName }`.
 
@@ -593,7 +593,7 @@ interface VerificationPlan {
   badgeVisible: boolean;                         // read-only; ESSENTIAL is always false
   isPurchasable: boolean;                        // BLACK is always false
   perks: string[];                               // ≤20, each ≤120
-  dashboardEntitlements: { key: string; label: string; limit: number | null }[]; // GOLD only (Zudomart Dashboard access); null = unlimited
+  dashboardEntitlements: { key: string; label: string; limit: number | null }[]; // GOLD only (Nantty Dashboard access); null = unlimited
   prices: { currency: string; monthly: Money | null; yearly: Money | null }[];   // one row per currency, currency ∈ supportedCurrencies, amounts in that currency
 }
 ```
