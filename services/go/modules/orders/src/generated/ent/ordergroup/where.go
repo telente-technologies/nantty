@@ -3,8 +3,8 @@
 package ordergroup
 
 import (
+	"nantty/modules/orders/src/generated/ent/predicate"
 	"time"
-	"zudomart/modules/orders/src/generated/ent/predicate"
 
 	"entgo.io/ent/dialect/sql"
 	"github.com/google/uuid"

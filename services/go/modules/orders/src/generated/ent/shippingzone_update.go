@@ -6,8 +6,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"zudomart/modules/orders/src/generated/ent/predicate"
-	"zudomart/modules/orders/src/generated/ent/shippingzone"
+	"nantty/modules/orders/src/generated/ent/predicate"
+	"nantty/modules/orders/src/generated/ent/shippingzone"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"

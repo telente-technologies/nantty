@@ -5,7 +5,7 @@ package hook
 import (
 	"context"
 	"fmt"
-	"zudomart/modules/orders/src/generated/ent"
+	"nantty/modules/orders/src/generated/ent"
 )
 
 // The CampaignRedemptionFunc type is an adapter to allow the use of ordinary

@@ -6,9 +6,9 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"nantty/modules/orders/src/databases/schema"
+	"nantty/modules/orders/src/generated/ent/shipment"
 	"time"
-	"zudomart/modules/orders/src/databases/schema"
-	"zudomart/modules/orders/src/generated/ent/shipment"
 
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"

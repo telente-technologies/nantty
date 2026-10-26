@@ -6,7 +6,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"zudomart/modules/orders/src/generated/ent/invoicecounter"
+	"nantty/modules/orders/src/generated/ent/invoicecounter"
 
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"

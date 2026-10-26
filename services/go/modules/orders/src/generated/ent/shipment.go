@@ -5,10 +5,10 @@ package ent
 import (
 	"encoding/json"
 	"fmt"
+	"nantty/modules/orders/src/databases/schema"
+	"nantty/modules/orders/src/generated/ent/shipment"
 	"strings"
 	"time"
-	"zudomart/modules/orders/src/databases/schema"
-	"zudomart/modules/orders/src/generated/ent/shipment"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
