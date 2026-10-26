@@ -177,6 +177,224 @@ func (BattleParticipantOutcome) EnumDescriptor() ([]byte, []int) {
 	return file_zudomart_money_v1_live_money_proto_rawDescGZIP(), []int{2}
 }
 
+type ChargeSpaceCoinGiftRequest struct {
+	state        protoimpl.MessageState `protogen:"open.v1"`
+	SenderUserId string                 `protobuf:"bytes,1,opt,name=sender_user_id,json=senderUserId,proto3" json:"sender_user_id,omitempty"`
+	SpaceId      string                 `protobuf:"bytes,2,opt,name=space_id,json=spaceId,proto3" json:"space_id,omitempty"`
+	GiftId       string                 `protobuf:"bytes,3,opt,name=gift_id,json=giftId,proto3" json:"gift_id,omitempty"`
+	// 1..100
+	Quantity int32 `protobuf:"varint,4,opt,name=quantity,proto3" json:"quantity,omitempty"`
+	// 8..128 chars [A-Za-z0-9_-], scoped to sender_user_id.
+	IdempotencyKey string `protobuf:"bytes,5,opt,name=idempotency_key,json=idempotencyKey,proto3" json:"idempotency_key,omitempty"`
+	unknownFields  protoimpl.UnknownFields
+	sizeCache      protoimpl.SizeCache
+}
+
+func (x *ChargeSpaceCoinGiftRequest) Reset() {
+	*x = ChargeSpaceCoinGiftRequest{}
+	mi := &file_zudomart_money_v1_live_money_proto_msgTypes[0]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ChargeSpaceCoinGiftRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ChargeSpaceCoinGiftRequest) ProtoMessage() {}
+
+func (x *ChargeSpaceCoinGiftRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_zudomart_money_v1_live_money_proto_msgTypes[0]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ChargeSpaceCoinGiftRequest.ProtoReflect.Descriptor instead.
+func (*ChargeSpaceCoinGiftRequest) Descriptor() ([]byte, []int) {
+	return file_zudomart_money_v1_live_money_proto_rawDescGZIP(), []int{0}
+}
+
+func (x *ChargeSpaceCoinGiftRequest) GetSenderUserId() string {
+	if x != nil {
+		return x.SenderUserId
+	}
+	return ""
+}
+
+func (x *ChargeSpaceCoinGiftRequest) GetSpaceId() string {
+	if x != nil {
+		return x.SpaceId
+	}
+	return ""
+}
+
+func (x *ChargeSpaceCoinGiftRequest) GetGiftId() string {
+	if x != nil {
+		return x.GiftId
+	}
+	return ""
+}
+
+func (x *ChargeSpaceCoinGiftRequest) GetQuantity() int32 {
+	if x != nil {
+		return x.Quantity
+	}
+	return 0
+}
+
+func (x *ChargeSpaceCoinGiftRequest) GetIdempotencyKey() string {
+	if x != nil {
+		return x.IdempotencyKey
+	}
+	return ""
+}
+
+type ChargeSpaceCoinGiftResponse struct {
+	state               protoimpl.MessageState `protogen:"open.v1"`
+	GiftTransactionId   string                 `protobuf:"bytes,1,opt,name=gift_transaction_id,json=giftTransactionId,proto3" json:"gift_transaction_id,omitempty"`
+	LedgerTransactionId string                 `protobuf:"bytes,2,opt,name=ledger_transaction_id,json=ledgerTransactionId,proto3" json:"ledger_transaction_id,omitempty"`
+	SenderUserId        string                 `protobuf:"bytes,3,opt,name=sender_user_id,json=senderUserId,proto3" json:"sender_user_id,omitempty"`
+	HostUserId          string                 `protobuf:"bytes,4,opt,name=host_user_id,json=hostUserId,proto3" json:"host_user_id,omitempty"`
+	SpaceId             string                 `protobuf:"bytes,5,opt,name=space_id,json=spaceId,proto3" json:"space_id,omitempty"`
+	GiftId              string                 `protobuf:"bytes,6,opt,name=gift_id,json=giftId,proto3" json:"gift_id,omitempty"`
+	Quantity            int32                  `protobuf:"varint,7,opt,name=quantity,proto3" json:"quantity,omitempty"`
+	UnitPriceCoins      int64                  `protobuf:"varint,8,opt,name=unit_price_coins,json=unitPriceCoins,proto3" json:"unit_price_coins,omitempty"`
+	TotalCoins          int64                  `protobuf:"varint,9,opt,name=total_coins,json=totalCoins,proto3" json:"total_coins,omitempty"`
+	PlatformFeeCoins    int64                  `protobuf:"varint,10,opt,name=platform_fee_coins,json=platformFeeCoins,proto3" json:"platform_fee_coins,omitempty"`
+	CreatorAmountCoins  int64                  `protobuf:"varint,11,opt,name=creator_amount_coins,json=creatorAmountCoins,proto3" json:"creator_amount_coins,omitempty"`
+	SenderCoinBalance   int64                  `protobuf:"varint,12,opt,name=sender_coin_balance,json=senderCoinBalance,proto3" json:"sender_coin_balance,omitempty"`
+	Replayed            bool                   `protobuf:"varint,13,opt,name=replayed,proto3" json:"replayed,omitempty"`
+	unknownFields       protoimpl.UnknownFields
+	sizeCache           protoimpl.SizeCache
+}
+
+func (x *ChargeSpaceCoinGiftResponse) Reset() {
+	*x = ChargeSpaceCoinGiftResponse{}
+	mi := &file_zudomart_money_v1_live_money_proto_msgTypes[1]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ChargeSpaceCoinGiftResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ChargeSpaceCoinGiftResponse) ProtoMessage() {}
+
+func (x *ChargeSpaceCoinGiftResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_zudomart_money_v1_live_money_proto_msgTypes[1]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ChargeSpaceCoinGiftResponse.ProtoReflect.Descriptor instead.
+func (*ChargeSpaceCoinGiftResponse) Descriptor() ([]byte, []int) {
+	return file_zudomart_money_v1_live_money_proto_rawDescGZIP(), []int{1}
+}
+
+func (x *ChargeSpaceCoinGiftResponse) GetGiftTransactionId() string {
+	if x != nil {
+		return x.GiftTransactionId
+	}
+	return ""
+}
+
+func (x *ChargeSpaceCoinGiftResponse) GetLedgerTransactionId() string {
+	if x != nil {
+		return x.LedgerTransactionId
+	}
+	return ""
+}
+
+func (x *ChargeSpaceCoinGiftResponse) GetSenderUserId() string {
+	if x != nil {
+		return x.SenderUserId
+	}
+	return ""
+}
+
+func (x *ChargeSpaceCoinGiftResponse) GetHostUserId() string {
+	if x != nil {
+		return x.HostUserId
+	}
+	return ""
+}
+
+func (x *ChargeSpaceCoinGiftResponse) GetSpaceId() string {
+	if x != nil {
+		return x.SpaceId
+	}
+	return ""
+}
+
+func (x *ChargeSpaceCoinGiftResponse) GetGiftId() string {
+	if x != nil {
+		return x.GiftId
+	}
+	return ""
+}
+
+func (x *ChargeSpaceCoinGiftResponse) GetQuantity() int32 {
+	if x != nil {
+		return x.Quantity
+	}
+	return 0
+}
+
+func (x *ChargeSpaceCoinGiftResponse) GetUnitPriceCoins() int64 {
+	if x != nil {
+		return x.UnitPriceCoins
+	}
+	return 0
+}
+
+func (x *ChargeSpaceCoinGiftResponse) GetTotalCoins() int64 {
+	if x != nil {
+		return x.TotalCoins
+	}
+	return 0
+}
+
+func (x *ChargeSpaceCoinGiftResponse) GetPlatformFeeCoins() int64 {
+	if x != nil {
+		return x.PlatformFeeCoins
+	}
+	return 0
+}
+
+func (x *ChargeSpaceCoinGiftResponse) GetCreatorAmountCoins() int64 {
+	if x != nil {
+		return x.CreatorAmountCoins
+	}
+	return 0
+}
+
+func (x *ChargeSpaceCoinGiftResponse) GetSenderCoinBalance() int64 {
+	if x != nil {
+		return x.SenderCoinBalance
+	}
+	return 0
+}
+
+func (x *ChargeSpaceCoinGiftResponse) GetReplayed() bool {
+	if x != nil {
+		return x.Replayed
+	}
+	return false
+}
+
 type ChargeGiftAndCreditCreatorRequest struct {
 	state          protoimpl.MessageState `protogen:"open.v1"`
 	SenderUserId   string                 `protobuf:"bytes,1,opt,name=sender_user_id,json=senderUserId,proto3" json:"sender_user_id,omitempty"`
@@ -200,7 +418,7 @@ type ChargeGiftAndCreditCreatorRequest struct {
 
 func (x *ChargeGiftAndCreditCreatorRequest) Reset() {
 	*x = ChargeGiftAndCreditCreatorRequest{}
-	mi := &file_zudomart_money_v1_live_money_proto_msgTypes[0]
+	mi := &file_zudomart_money_v1_live_money_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -212,7 +430,7 @@ func (x *ChargeGiftAndCreditCreatorRequest) String() string {
 func (*ChargeGiftAndCreditCreatorRequest) ProtoMessage() {}
 
 func (x *ChargeGiftAndCreditCreatorRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_zudomart_money_v1_live_money_proto_msgTypes[0]
+	mi := &file_zudomart_money_v1_live_money_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -225,7 +443,7 @@ func (x *ChargeGiftAndCreditCreatorRequest) ProtoReflect() protoreflect.Message 
 
 // Deprecated: Use ChargeGiftAndCreditCreatorRequest.ProtoReflect.Descriptor instead.
 func (*ChargeGiftAndCreditCreatorRequest) Descriptor() ([]byte, []int) {
-	return file_zudomart_money_v1_live_money_proto_rawDescGZIP(), []int{0}
+	return file_zudomart_money_v1_live_money_proto_rawDescGZIP(), []int{2}
 }
 
 func (x *ChargeGiftAndCreditCreatorRequest) GetSenderUserId() string {
@@ -324,7 +542,7 @@ type GiftTransaction struct {
 
 func (x *GiftTransaction) Reset() {
 	*x = GiftTransaction{}
-	mi := &file_zudomart_money_v1_live_money_proto_msgTypes[1]
+	mi := &file_zudomart_money_v1_live_money_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -336,7 +554,7 @@ func (x *GiftTransaction) String() string {
 func (*GiftTransaction) ProtoMessage() {}
 
 func (x *GiftTransaction) ProtoReflect() protoreflect.Message {
-	mi := &file_zudomart_money_v1_live_money_proto_msgTypes[1]
+	mi := &file_zudomart_money_v1_live_money_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -349,7 +567,7 @@ func (x *GiftTransaction) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GiftTransaction.ProtoReflect.Descriptor instead.
 func (*GiftTransaction) Descriptor() ([]byte, []int) {
-	return file_zudomart_money_v1_live_money_proto_rawDescGZIP(), []int{1}
+	return file_zudomart_money_v1_live_money_proto_rawDescGZIP(), []int{3}
 }
 
 func (x *GiftTransaction) GetGiftTransactionId() string {
@@ -483,7 +701,7 @@ type ChargeGiftAndCreditCreatorResponse struct {
 
 func (x *ChargeGiftAndCreditCreatorResponse) Reset() {
 	*x = ChargeGiftAndCreditCreatorResponse{}
-	mi := &file_zudomart_money_v1_live_money_proto_msgTypes[2]
+	mi := &file_zudomart_money_v1_live_money_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -495,7 +713,7 @@ func (x *ChargeGiftAndCreditCreatorResponse) String() string {
 func (*ChargeGiftAndCreditCreatorResponse) ProtoMessage() {}
 
 func (x *ChargeGiftAndCreditCreatorResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_zudomart_money_v1_live_money_proto_msgTypes[2]
+	mi := &file_zudomart_money_v1_live_money_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -508,7 +726,7 @@ func (x *ChargeGiftAndCreditCreatorResponse) ProtoReflect() protoreflect.Message
 
 // Deprecated: Use ChargeGiftAndCreditCreatorResponse.ProtoReflect.Descriptor instead.
 func (*ChargeGiftAndCreditCreatorResponse) Descriptor() ([]byte, []int) {
-	return file_zudomart_money_v1_live_money_proto_rawDescGZIP(), []int{2}
+	return file_zudomart_money_v1_live_money_proto_rawDescGZIP(), []int{4}
 }
 
 func (x *ChargeGiftAndCreditCreatorResponse) GetGiftTransaction() *GiftTransaction {
@@ -542,7 +760,7 @@ type BattleParticipant struct {
 
 func (x *BattleParticipant) Reset() {
 	*x = BattleParticipant{}
-	mi := &file_zudomart_money_v1_live_money_proto_msgTypes[3]
+	mi := &file_zudomart_money_v1_live_money_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -554,7 +772,7 @@ func (x *BattleParticipant) String() string {
 func (*BattleParticipant) ProtoMessage() {}
 
 func (x *BattleParticipant) ProtoReflect() protoreflect.Message {
-	mi := &file_zudomart_money_v1_live_money_proto_msgTypes[3]
+	mi := &file_zudomart_money_v1_live_money_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -567,7 +785,7 @@ func (x *BattleParticipant) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use BattleParticipant.ProtoReflect.Descriptor instead.
 func (*BattleParticipant) Descriptor() ([]byte, []int) {
-	return file_zudomart_money_v1_live_money_proto_rawDescGZIP(), []int{3}
+	return file_zudomart_money_v1_live_money_proto_rawDescGZIP(), []int{5}
 }
 
 func (x *BattleParticipant) GetUserId() string {
@@ -599,7 +817,7 @@ type SettleBattleRequest struct {
 
 func (x *SettleBattleRequest) Reset() {
 	*x = SettleBattleRequest{}
-	mi := &file_zudomart_money_v1_live_money_proto_msgTypes[4]
+	mi := &file_zudomart_money_v1_live_money_proto_msgTypes[6]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -611,7 +829,7 @@ func (x *SettleBattleRequest) String() string {
 func (*SettleBattleRequest) ProtoMessage() {}
 
 func (x *SettleBattleRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_zudomart_money_v1_live_money_proto_msgTypes[4]
+	mi := &file_zudomart_money_v1_live_money_proto_msgTypes[6]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -624,7 +842,7 @@ func (x *SettleBattleRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SettleBattleRequest.ProtoReflect.Descriptor instead.
 func (*SettleBattleRequest) Descriptor() ([]byte, []int) {
-	return file_zudomart_money_v1_live_money_proto_rawDescGZIP(), []int{4}
+	return file_zudomart_money_v1_live_money_proto_rawDescGZIP(), []int{6}
 }
 
 func (x *SettleBattleRequest) GetBattleId() string {
@@ -680,7 +898,7 @@ type BattleCoinTransfer struct {
 
 func (x *BattleCoinTransfer) Reset() {
 	*x = BattleCoinTransfer{}
-	mi := &file_zudomart_money_v1_live_money_proto_msgTypes[5]
+	mi := &file_zudomart_money_v1_live_money_proto_msgTypes[7]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -692,7 +910,7 @@ func (x *BattleCoinTransfer) String() string {
 func (*BattleCoinTransfer) ProtoMessage() {}
 
 func (x *BattleCoinTransfer) ProtoReflect() protoreflect.Message {
-	mi := &file_zudomart_money_v1_live_money_proto_msgTypes[5]
+	mi := &file_zudomart_money_v1_live_money_proto_msgTypes[7]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -705,7 +923,7 @@ func (x *BattleCoinTransfer) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use BattleCoinTransfer.ProtoReflect.Descriptor instead.
 func (*BattleCoinTransfer) Descriptor() ([]byte, []int) {
-	return file_zudomart_money_v1_live_money_proto_rawDescGZIP(), []int{5}
+	return file_zudomart_money_v1_live_money_proto_rawDescGZIP(), []int{7}
 }
 
 func (x *BattleCoinTransfer) GetFromUserId() string {
@@ -740,7 +958,7 @@ type BattleParticipantPayout struct {
 
 func (x *BattleParticipantPayout) Reset() {
 	*x = BattleParticipantPayout{}
-	mi := &file_zudomart_money_v1_live_money_proto_msgTypes[6]
+	mi := &file_zudomart_money_v1_live_money_proto_msgTypes[8]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -752,7 +970,7 @@ func (x *BattleParticipantPayout) String() string {
 func (*BattleParticipantPayout) ProtoMessage() {}
 
 func (x *BattleParticipantPayout) ProtoReflect() protoreflect.Message {
-	mi := &file_zudomart_money_v1_live_money_proto_msgTypes[6]
+	mi := &file_zudomart_money_v1_live_money_proto_msgTypes[8]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -765,7 +983,7 @@ func (x *BattleParticipantPayout) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use BattleParticipantPayout.ProtoReflect.Descriptor instead.
 func (*BattleParticipantPayout) Descriptor() ([]byte, []int) {
-	return file_zudomart_money_v1_live_money_proto_rawDescGZIP(), []int{6}
+	return file_zudomart_money_v1_live_money_proto_rawDescGZIP(), []int{8}
 }
 
 func (x *BattleParticipantPayout) GetUserId() string {
@@ -805,7 +1023,7 @@ type BattleSettlement struct {
 
 func (x *BattleSettlement) Reset() {
 	*x = BattleSettlement{}
-	mi := &file_zudomart_money_v1_live_money_proto_msgTypes[7]
+	mi := &file_zudomart_money_v1_live_money_proto_msgTypes[9]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -817,7 +1035,7 @@ func (x *BattleSettlement) String() string {
 func (*BattleSettlement) ProtoMessage() {}
 
 func (x *BattleSettlement) ProtoReflect() protoreflect.Message {
-	mi := &file_zudomart_money_v1_live_money_proto_msgTypes[7]
+	mi := &file_zudomart_money_v1_live_money_proto_msgTypes[9]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -830,7 +1048,7 @@ func (x *BattleSettlement) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use BattleSettlement.ProtoReflect.Descriptor instead.
 func (*BattleSettlement) Descriptor() ([]byte, []int) {
-	return file_zudomart_money_v1_live_money_proto_rawDescGZIP(), []int{7}
+	return file_zudomart_money_v1_live_money_proto_rawDescGZIP(), []int{9}
 }
 
 func (x *BattleSettlement) GetBattleId() string {
@@ -892,7 +1110,7 @@ type SettleBattleResponse struct {
 
 func (x *SettleBattleResponse) Reset() {
 	*x = SettleBattleResponse{}
-	mi := &file_zudomart_money_v1_live_money_proto_msgTypes[8]
+	mi := &file_zudomart_money_v1_live_money_proto_msgTypes[10]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -904,7 +1122,7 @@ func (x *SettleBattleResponse) String() string {
 func (*SettleBattleResponse) ProtoMessage() {}
 
 func (x *SettleBattleResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_zudomart_money_v1_live_money_proto_msgTypes[8]
+	mi := &file_zudomart_money_v1_live_money_proto_msgTypes[10]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -917,7 +1135,7 @@ func (x *SettleBattleResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SettleBattleResponse.ProtoReflect.Descriptor instead.
 func (*SettleBattleResponse) Descriptor() ([]byte, []int) {
-	return file_zudomart_money_v1_live_money_proto_rawDescGZIP(), []int{8}
+	return file_zudomart_money_v1_live_money_proto_rawDescGZIP(), []int{10}
 }
 
 func (x *SettleBattleResponse) GetSettlement() *BattleSettlement {
@@ -943,7 +1161,7 @@ type GetBattleGiftTotalsRequest struct {
 
 func (x *GetBattleGiftTotalsRequest) Reset() {
 	*x = GetBattleGiftTotalsRequest{}
-	mi := &file_zudomart_money_v1_live_money_proto_msgTypes[9]
+	mi := &file_zudomart_money_v1_live_money_proto_msgTypes[11]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -955,7 +1173,7 @@ func (x *GetBattleGiftTotalsRequest) String() string {
 func (*GetBattleGiftTotalsRequest) ProtoMessage() {}
 
 func (x *GetBattleGiftTotalsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_zudomart_money_v1_live_money_proto_msgTypes[9]
+	mi := &file_zudomart_money_v1_live_money_proto_msgTypes[11]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -968,7 +1186,7 @@ func (x *GetBattleGiftTotalsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetBattleGiftTotalsRequest.ProtoReflect.Descriptor instead.
 func (*GetBattleGiftTotalsRequest) Descriptor() ([]byte, []int) {
-	return file_zudomart_money_v1_live_money_proto_rawDescGZIP(), []int{9}
+	return file_zudomart_money_v1_live_money_proto_rawDescGZIP(), []int{11}
 }
 
 func (x *GetBattleGiftTotalsRequest) GetBattleId() string {
@@ -990,7 +1208,7 @@ type BattleGiftTotal struct {
 
 func (x *BattleGiftTotal) Reset() {
 	*x = BattleGiftTotal{}
-	mi := &file_zudomart_money_v1_live_money_proto_msgTypes[10]
+	mi := &file_zudomart_money_v1_live_money_proto_msgTypes[12]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1002,7 +1220,7 @@ func (x *BattleGiftTotal) String() string {
 func (*BattleGiftTotal) ProtoMessage() {}
 
 func (x *BattleGiftTotal) ProtoReflect() protoreflect.Message {
-	mi := &file_zudomart_money_v1_live_money_proto_msgTypes[10]
+	mi := &file_zudomart_money_v1_live_money_proto_msgTypes[12]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1015,7 +1233,7 @@ func (x *BattleGiftTotal) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use BattleGiftTotal.ProtoReflect.Descriptor instead.
 func (*BattleGiftTotal) Descriptor() ([]byte, []int) {
-	return file_zudomart_money_v1_live_money_proto_rawDescGZIP(), []int{10}
+	return file_zudomart_money_v1_live_money_proto_rawDescGZIP(), []int{12}
 }
 
 func (x *BattleGiftTotal) GetReceiverUserId() string {
@@ -1055,7 +1273,7 @@ type GetBattleGiftTotalsResponse struct {
 
 func (x *GetBattleGiftTotalsResponse) Reset() {
 	*x = GetBattleGiftTotalsResponse{}
-	mi := &file_zudomart_money_v1_live_money_proto_msgTypes[11]
+	mi := &file_zudomart_money_v1_live_money_proto_msgTypes[13]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1067,7 +1285,7 @@ func (x *GetBattleGiftTotalsResponse) String() string {
 func (*GetBattleGiftTotalsResponse) ProtoMessage() {}
 
 func (x *GetBattleGiftTotalsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_zudomart_money_v1_live_money_proto_msgTypes[11]
+	mi := &file_zudomart_money_v1_live_money_proto_msgTypes[13]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1080,7 +1298,7 @@ func (x *GetBattleGiftTotalsResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetBattleGiftTotalsResponse.ProtoReflect.Descriptor instead.
 func (*GetBattleGiftTotalsResponse) Descriptor() ([]byte, []int) {
-	return file_zudomart_money_v1_live_money_proto_rawDescGZIP(), []int{11}
+	return file_zudomart_money_v1_live_money_proto_rawDescGZIP(), []int{13}
 }
 
 func (x *GetBattleGiftTotalsResponse) GetTotals() []*BattleGiftTotal {
@@ -1099,7 +1317,7 @@ type GetCoinBalanceRequest struct {
 
 func (x *GetCoinBalanceRequest) Reset() {
 	*x = GetCoinBalanceRequest{}
-	mi := &file_zudomart_money_v1_live_money_proto_msgTypes[12]
+	mi := &file_zudomart_money_v1_live_money_proto_msgTypes[14]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1111,7 +1329,7 @@ func (x *GetCoinBalanceRequest) String() string {
 func (*GetCoinBalanceRequest) ProtoMessage() {}
 
 func (x *GetCoinBalanceRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_zudomart_money_v1_live_money_proto_msgTypes[12]
+	mi := &file_zudomart_money_v1_live_money_proto_msgTypes[14]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1124,7 +1342,7 @@ func (x *GetCoinBalanceRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetCoinBalanceRequest.ProtoReflect.Descriptor instead.
 func (*GetCoinBalanceRequest) Descriptor() ([]byte, []int) {
-	return file_zudomart_money_v1_live_money_proto_rawDescGZIP(), []int{12}
+	return file_zudomart_money_v1_live_money_proto_rawDescGZIP(), []int{14}
 }
 
 func (x *GetCoinBalanceRequest) GetUserId() string {
@@ -1144,7 +1362,7 @@ type GetCoinBalanceResponse struct {
 
 func (x *GetCoinBalanceResponse) Reset() {
 	*x = GetCoinBalanceResponse{}
-	mi := &file_zudomart_money_v1_live_money_proto_msgTypes[13]
+	mi := &file_zudomart_money_v1_live_money_proto_msgTypes[15]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1156,7 +1374,7 @@ func (x *GetCoinBalanceResponse) String() string {
 func (*GetCoinBalanceResponse) ProtoMessage() {}
 
 func (x *GetCoinBalanceResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_zudomart_money_v1_live_money_proto_msgTypes[13]
+	mi := &file_zudomart_money_v1_live_money_proto_msgTypes[15]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1169,7 +1387,7 @@ func (x *GetCoinBalanceResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetCoinBalanceResponse.ProtoReflect.Descriptor instead.
 func (*GetCoinBalanceResponse) Descriptor() ([]byte, []int) {
-	return file_zudomart_money_v1_live_money_proto_rawDescGZIP(), []int{13}
+	return file_zudomart_money_v1_live_money_proto_rawDescGZIP(), []int{15}
 }
 
 func (x *GetCoinBalanceResponse) GetCoins() int64 {
@@ -1190,7 +1408,30 @@ var File_zudomart_money_v1_live_money_proto protoreflect.FileDescriptor
 
 const file_zudomart_money_v1_live_money_proto_rawDesc = "" +
 	"\n" +
-	"\"zudomart/money/v1/live_money.proto\x12\x11zudomart.money.v1\x1a\x1fgoogle/protobuf/timestamp.proto\"\x93\x03\n" +
+	"\"zudomart/money/v1/live_money.proto\x12\x11zudomart.money.v1\x1a\x1fgoogle/protobuf/timestamp.proto\"\xbb\x01\n" +
+	"\x1aChargeSpaceCoinGiftRequest\x12$\n" +
+	"\x0esender_user_id\x18\x01 \x01(\tR\fsenderUserId\x12\x19\n" +
+	"\bspace_id\x18\x02 \x01(\tR\aspaceId\x12\x17\n" +
+	"\agift_id\x18\x03 \x01(\tR\x06giftId\x12\x1a\n" +
+	"\bquantity\x18\x04 \x01(\x05R\bquantity\x12'\n" +
+	"\x0fidempotency_key\x18\x05 \x01(\tR\x0eidempotencyKey\"\x90\x04\n" +
+	"\x1bChargeSpaceCoinGiftResponse\x12.\n" +
+	"\x13gift_transaction_id\x18\x01 \x01(\tR\x11giftTransactionId\x122\n" +
+	"\x15ledger_transaction_id\x18\x02 \x01(\tR\x13ledgerTransactionId\x12$\n" +
+	"\x0esender_user_id\x18\x03 \x01(\tR\fsenderUserId\x12 \n" +
+	"\fhost_user_id\x18\x04 \x01(\tR\n" +
+	"hostUserId\x12\x19\n" +
+	"\bspace_id\x18\x05 \x01(\tR\aspaceId\x12\x17\n" +
+	"\agift_id\x18\x06 \x01(\tR\x06giftId\x12\x1a\n" +
+	"\bquantity\x18\a \x01(\x05R\bquantity\x12(\n" +
+	"\x10unit_price_coins\x18\b \x01(\x03R\x0eunitPriceCoins\x12\x1f\n" +
+	"\vtotal_coins\x18\t \x01(\x03R\n" +
+	"totalCoins\x12,\n" +
+	"\x12platform_fee_coins\x18\n" +
+	" \x01(\x03R\x10platformFeeCoins\x120\n" +
+	"\x14creator_amount_coins\x18\v \x01(\x03R\x12creatorAmountCoins\x12.\n" +
+	"\x13sender_coin_balance\x18\f \x01(\x03R\x11senderCoinBalance\x12\x1a\n" +
+	"\breplayed\x18\r \x01(\bR\breplayed\"\x93\x03\n" +
 	"!ChargeGiftAndCreditCreatorRequest\x12$\n" +
 	"\x0esender_user_id\x18\x01 \x01(\tR\fsenderUserId\x12(\n" +
 	"\x10receiver_user_id\x18\x02 \x01(\tR\x0ereceiverUserId\x12 \n" +
@@ -1302,9 +1543,10 @@ const file_zudomart_money_v1_live_money_proto_rawDesc = "" +
 	"&BATTLE_PARTICIPANT_OUTCOME_UNSPECIFIED\x10\x00\x12%\n" +
 	"!BATTLE_PARTICIPANT_OUTCOME_ACTIVE\x10\x01\x12(\n" +
 	"$BATTLE_PARTICIPANT_OUTCOME_FORFEITED\x10\x02\x12.\n" +
-	"*BATTLE_PARTICIPANT_OUTCOME_REMOVED_BY_HOST\x10\x032\xdc\x03\n" +
+	"*BATTLE_PARTICIPANT_OUTCOME_REMOVED_BY_HOST\x10\x032\xd2\x04\n" +
 	"\x10LiveMoneyService\x12\x89\x01\n" +
-	"\x1aChargeGiftAndCreditCreator\x124.zudomart.money.v1.ChargeGiftAndCreditCreatorRequest\x1a5.zudomart.money.v1.ChargeGiftAndCreditCreatorResponse\x12_\n" +
+	"\x1aChargeGiftAndCreditCreator\x124.zudomart.money.v1.ChargeGiftAndCreditCreatorRequest\x1a5.zudomart.money.v1.ChargeGiftAndCreditCreatorResponse\x12t\n" +
+	"\x13ChargeSpaceCoinGift\x12-.zudomart.money.v1.ChargeSpaceCoinGiftRequest\x1a..zudomart.money.v1.ChargeSpaceCoinGiftResponse\x12_\n" +
 	"\fSettleBattle\x12&.zudomart.money.v1.SettleBattleRequest\x1a'.zudomart.money.v1.SettleBattleResponse\x12t\n" +
 	"\x13GetBattleGiftTotals\x12-.zudomart.money.v1.GetBattleGiftTotalsRequest\x1a..zudomart.money.v1.GetBattleGiftTotalsResponse\x12e\n" +
 	"\x0eGetCoinBalance\x12(.zudomart.money.v1.GetCoinBalanceRequest\x1a).zudomart.money.v1.GetCoinBalanceResponseB\xc2\x01\n" +
@@ -1323,51 +1565,55 @@ func file_zudomart_money_v1_live_money_proto_rawDescGZIP() []byte {
 }
 
 var file_zudomart_money_v1_live_money_proto_enumTypes = make([]protoimpl.EnumInfo, 3)
-var file_zudomart_money_v1_live_money_proto_msgTypes = make([]protoimpl.MessageInfo, 14)
+var file_zudomart_money_v1_live_money_proto_msgTypes = make([]protoimpl.MessageInfo, 16)
 var file_zudomart_money_v1_live_money_proto_goTypes = []any{
 	(GiftTransactionStatus)(0),                 // 0: zudomart.money.v1.GiftTransactionStatus
 	(BattleSettlementRule)(0),                  // 1: zudomart.money.v1.BattleSettlementRule
 	(BattleParticipantOutcome)(0),              // 2: zudomart.money.v1.BattleParticipantOutcome
-	(*ChargeGiftAndCreditCreatorRequest)(nil),  // 3: zudomart.money.v1.ChargeGiftAndCreditCreatorRequest
-	(*GiftTransaction)(nil),                    // 4: zudomart.money.v1.GiftTransaction
-	(*ChargeGiftAndCreditCreatorResponse)(nil), // 5: zudomart.money.v1.ChargeGiftAndCreditCreatorResponse
-	(*BattleParticipant)(nil),                  // 6: zudomart.money.v1.BattleParticipant
-	(*SettleBattleRequest)(nil),                // 7: zudomart.money.v1.SettleBattleRequest
-	(*BattleCoinTransfer)(nil),                 // 8: zudomart.money.v1.BattleCoinTransfer
-	(*BattleParticipantPayout)(nil),            // 9: zudomart.money.v1.BattleParticipantPayout
-	(*BattleSettlement)(nil),                   // 10: zudomart.money.v1.BattleSettlement
-	(*SettleBattleResponse)(nil),               // 11: zudomart.money.v1.SettleBattleResponse
-	(*GetBattleGiftTotalsRequest)(nil),         // 12: zudomart.money.v1.GetBattleGiftTotalsRequest
-	(*BattleGiftTotal)(nil),                    // 13: zudomart.money.v1.BattleGiftTotal
-	(*GetBattleGiftTotalsResponse)(nil),        // 14: zudomart.money.v1.GetBattleGiftTotalsResponse
-	(*GetCoinBalanceRequest)(nil),              // 15: zudomart.money.v1.GetCoinBalanceRequest
-	(*GetCoinBalanceResponse)(nil),             // 16: zudomart.money.v1.GetCoinBalanceResponse
-	(*timestamppb.Timestamp)(nil),              // 17: google.protobuf.Timestamp
+	(*ChargeSpaceCoinGiftRequest)(nil),         // 3: zudomart.money.v1.ChargeSpaceCoinGiftRequest
+	(*ChargeSpaceCoinGiftResponse)(nil),        // 4: zudomart.money.v1.ChargeSpaceCoinGiftResponse
+	(*ChargeGiftAndCreditCreatorRequest)(nil),  // 5: zudomart.money.v1.ChargeGiftAndCreditCreatorRequest
+	(*GiftTransaction)(nil),                    // 6: zudomart.money.v1.GiftTransaction
+	(*ChargeGiftAndCreditCreatorResponse)(nil), // 7: zudomart.money.v1.ChargeGiftAndCreditCreatorResponse
+	(*BattleParticipant)(nil),                  // 8: zudomart.money.v1.BattleParticipant
+	(*SettleBattleRequest)(nil),                // 9: zudomart.money.v1.SettleBattleRequest
+	(*BattleCoinTransfer)(nil),                 // 10: zudomart.money.v1.BattleCoinTransfer
+	(*BattleParticipantPayout)(nil),            // 11: zudomart.money.v1.BattleParticipantPayout
+	(*BattleSettlement)(nil),                   // 12: zudomart.money.v1.BattleSettlement
+	(*SettleBattleResponse)(nil),               // 13: zudomart.money.v1.SettleBattleResponse
+	(*GetBattleGiftTotalsRequest)(nil),         // 14: zudomart.money.v1.GetBattleGiftTotalsRequest
+	(*BattleGiftTotal)(nil),                    // 15: zudomart.money.v1.BattleGiftTotal
+	(*GetBattleGiftTotalsResponse)(nil),        // 16: zudomart.money.v1.GetBattleGiftTotalsResponse
+	(*GetCoinBalanceRequest)(nil),              // 17: zudomart.money.v1.GetCoinBalanceRequest
+	(*GetCoinBalanceResponse)(nil),             // 18: zudomart.money.v1.GetCoinBalanceResponse
+	(*timestamppb.Timestamp)(nil),              // 19: google.protobuf.Timestamp
 }
 var file_zudomart_money_v1_live_money_proto_depIdxs = []int32{
 	0,  // 0: zudomart.money.v1.GiftTransaction.status:type_name -> zudomart.money.v1.GiftTransactionStatus
-	17, // 1: zudomart.money.v1.GiftTransaction.created_at:type_name -> google.protobuf.Timestamp
-	4,  // 2: zudomart.money.v1.ChargeGiftAndCreditCreatorResponse.gift_transaction:type_name -> zudomart.money.v1.GiftTransaction
+	19, // 1: zudomart.money.v1.GiftTransaction.created_at:type_name -> google.protobuf.Timestamp
+	6,  // 2: zudomart.money.v1.ChargeGiftAndCreditCreatorResponse.gift_transaction:type_name -> zudomart.money.v1.GiftTransaction
 	2,  // 3: zudomart.money.v1.BattleParticipant.outcome:type_name -> zudomart.money.v1.BattleParticipantOutcome
 	1,  // 4: zudomart.money.v1.SettleBattleRequest.rule:type_name -> zudomart.money.v1.BattleSettlementRule
-	6,  // 5: zudomart.money.v1.SettleBattleRequest.participants:type_name -> zudomart.money.v1.BattleParticipant
+	8,  // 5: zudomart.money.v1.SettleBattleRequest.participants:type_name -> zudomart.money.v1.BattleParticipant
 	1,  // 6: zudomart.money.v1.BattleSettlement.rule_applied:type_name -> zudomart.money.v1.BattleSettlementRule
-	9,  // 7: zudomart.money.v1.BattleSettlement.payouts:type_name -> zudomart.money.v1.BattleParticipantPayout
-	8,  // 8: zudomart.money.v1.BattleSettlement.transfers:type_name -> zudomart.money.v1.BattleCoinTransfer
-	17, // 9: zudomart.money.v1.BattleSettlement.settled_at:type_name -> google.protobuf.Timestamp
-	10, // 10: zudomart.money.v1.SettleBattleResponse.settlement:type_name -> zudomart.money.v1.BattleSettlement
-	17, // 11: zudomart.money.v1.BattleGiftTotal.reached_at:type_name -> google.protobuf.Timestamp
-	13, // 12: zudomart.money.v1.GetBattleGiftTotalsResponse.totals:type_name -> zudomart.money.v1.BattleGiftTotal
-	3,  // 13: zudomart.money.v1.LiveMoneyService.ChargeGiftAndCreditCreator:input_type -> zudomart.money.v1.ChargeGiftAndCreditCreatorRequest
-	7,  // 14: zudomart.money.v1.LiveMoneyService.SettleBattle:input_type -> zudomart.money.v1.SettleBattleRequest
-	12, // 15: zudomart.money.v1.LiveMoneyService.GetBattleGiftTotals:input_type -> zudomart.money.v1.GetBattleGiftTotalsRequest
-	15, // 16: zudomart.money.v1.LiveMoneyService.GetCoinBalance:input_type -> zudomart.money.v1.GetCoinBalanceRequest
-	5,  // 17: zudomart.money.v1.LiveMoneyService.ChargeGiftAndCreditCreator:output_type -> zudomart.money.v1.ChargeGiftAndCreditCreatorResponse
-	11, // 18: zudomart.money.v1.LiveMoneyService.SettleBattle:output_type -> zudomart.money.v1.SettleBattleResponse
-	14, // 19: zudomart.money.v1.LiveMoneyService.GetBattleGiftTotals:output_type -> zudomart.money.v1.GetBattleGiftTotalsResponse
-	16, // 20: zudomart.money.v1.LiveMoneyService.GetCoinBalance:output_type -> zudomart.money.v1.GetCoinBalanceResponse
-	17, // [17:21] is the sub-list for method output_type
-	13, // [13:17] is the sub-list for method input_type
+	11, // 7: zudomart.money.v1.BattleSettlement.payouts:type_name -> zudomart.money.v1.BattleParticipantPayout
+	10, // 8: zudomart.money.v1.BattleSettlement.transfers:type_name -> zudomart.money.v1.BattleCoinTransfer
+	19, // 9: zudomart.money.v1.BattleSettlement.settled_at:type_name -> google.protobuf.Timestamp
+	12, // 10: zudomart.money.v1.SettleBattleResponse.settlement:type_name -> zudomart.money.v1.BattleSettlement
+	19, // 11: zudomart.money.v1.BattleGiftTotal.reached_at:type_name -> google.protobuf.Timestamp
+	15, // 12: zudomart.money.v1.GetBattleGiftTotalsResponse.totals:type_name -> zudomart.money.v1.BattleGiftTotal
+	5,  // 13: zudomart.money.v1.LiveMoneyService.ChargeGiftAndCreditCreator:input_type -> zudomart.money.v1.ChargeGiftAndCreditCreatorRequest
+	3,  // 14: zudomart.money.v1.LiveMoneyService.ChargeSpaceCoinGift:input_type -> zudomart.money.v1.ChargeSpaceCoinGiftRequest
+	9,  // 15: zudomart.money.v1.LiveMoneyService.SettleBattle:input_type -> zudomart.money.v1.SettleBattleRequest
+	14, // 16: zudomart.money.v1.LiveMoneyService.GetBattleGiftTotals:input_type -> zudomart.money.v1.GetBattleGiftTotalsRequest
+	17, // 17: zudomart.money.v1.LiveMoneyService.GetCoinBalance:input_type -> zudomart.money.v1.GetCoinBalanceRequest
+	7,  // 18: zudomart.money.v1.LiveMoneyService.ChargeGiftAndCreditCreator:output_type -> zudomart.money.v1.ChargeGiftAndCreditCreatorResponse
+	4,  // 19: zudomart.money.v1.LiveMoneyService.ChargeSpaceCoinGift:output_type -> zudomart.money.v1.ChargeSpaceCoinGiftResponse
+	13, // 20: zudomart.money.v1.LiveMoneyService.SettleBattle:output_type -> zudomart.money.v1.SettleBattleResponse
+	16, // 21: zudomart.money.v1.LiveMoneyService.GetBattleGiftTotals:output_type -> zudomart.money.v1.GetBattleGiftTotalsResponse
+	18, // 22: zudomart.money.v1.LiveMoneyService.GetCoinBalance:output_type -> zudomart.money.v1.GetCoinBalanceResponse
+	18, // [18:23] is the sub-list for method output_type
+	13, // [13:18] is the sub-list for method input_type
 	13, // [13:13] is the sub-list for extension type_name
 	13, // [13:13] is the sub-list for extension extendee
 	0,  // [0:13] is the sub-list for field type_name
@@ -1378,17 +1624,17 @@ func file_zudomart_money_v1_live_money_proto_init() {
 	if File_zudomart_money_v1_live_money_proto != nil {
 		return
 	}
-	file_zudomart_money_v1_live_money_proto_msgTypes[0].OneofWrappers = []any{}
-	file_zudomart_money_v1_live_money_proto_msgTypes[1].OneofWrappers = []any{}
-	file_zudomart_money_v1_live_money_proto_msgTypes[4].OneofWrappers = []any{}
-	file_zudomart_money_v1_live_money_proto_msgTypes[7].OneofWrappers = []any{}
+	file_zudomart_money_v1_live_money_proto_msgTypes[2].OneofWrappers = []any{}
+	file_zudomart_money_v1_live_money_proto_msgTypes[3].OneofWrappers = []any{}
+	file_zudomart_money_v1_live_money_proto_msgTypes[6].OneofWrappers = []any{}
+	file_zudomart_money_v1_live_money_proto_msgTypes[9].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_zudomart_money_v1_live_money_proto_rawDesc), len(file_zudomart_money_v1_live_money_proto_rawDesc)),
 			NumEnums:      3,
-			NumMessages:   14,
+			NumMessages:   16,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
