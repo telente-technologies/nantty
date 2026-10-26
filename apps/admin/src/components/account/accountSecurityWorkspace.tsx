@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 
-import { ThemeSwitcher } from "@zudomart/web-kit";
+import { ThemeSwitcher } from "@nantty/web-kit";
 
 import { useAdminSession } from "@/components/session/adminSessionProvider";
 import { Button } from "@/components/ui/button";
@@ -101,7 +101,7 @@ export function AccountSecurityWorkspace() {
         </Card>
         <Card title="Appearance">
           <div className={styles.stack}>
-            <p className={styles.muted}>Choose how the console looks on this and your other Zudomart apps. System follows your device setting.</p>
+            <p className={styles.muted}>Choose how the console looks on this and your other Nantty apps. System follows your device setting.</p>
             <ThemeSwitcher label="Colour theme" />
           </div>
         </Card>

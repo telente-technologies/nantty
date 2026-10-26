@@ -86,7 +86,7 @@ export function CreateOfferLinkDialog({ onClose, onCreated }: { readonly onClose
       isOpen
       width="wide"
       title="New subscription offer link"
-      description="The discount only applies to Zudomart plans bought on the web, and only through this link. It never stacks with yearly or bundle discounts; the buyer gets whichever is better."
+      description="The discount only applies to Nantty plans bought on the web, and only through this link. It never stacks with yearly or bundle discounts; the buyer gets whichever is better."
       onClose={onClose}
       footer={
         <>

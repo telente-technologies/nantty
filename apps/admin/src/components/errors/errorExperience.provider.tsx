@@ -3,7 +3,7 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 
-import { ErrorExperienceProvider, buildMailtoHref, type ErrorExperienceConfig, type ErrorLinkProps } from "@zudomart/web-kit";
+import { ErrorExperienceProvider, buildMailtoHref, type ErrorExperienceConfig, type ErrorLinkProps } from "@nantty/web-kit";
 
 import { adminPermissionGroups } from "@/constants/adminPermissions.constant";
 import { adminSupportContactEmails } from "@/constants/supportContacts.constant";

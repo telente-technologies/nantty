@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
 
-import { ThemeSwitcher, ZudomartLogoMark } from "@zudomart/web-kit";
+import { ThemeSwitcher, NanttyLogoMark } from "@nantty/web-kit";
 
 import { useAdminPermissions, useAdminSession } from "@/components/session/adminSessionProvider";
 import { Button } from "@/components/ui/button";
@@ -47,8 +47,8 @@ export function ConsoleTopBar({ onOpenNavigation }: { readonly onOpenNavigation:
       <button type="button" className={styles.menuButton} onClick={onOpenNavigation} aria-label="Open navigation">
         <ZudoIcon name="squaresFour24" size={18} />
       </button>
-      <Link href="/" className={styles.compactBrand} aria-label="Zudomart Admin start page">
-        <ZudomartLogoMark size={28} />
+      <Link href="/" className={styles.compactBrand} aria-label="Nantty Admin start page">
+        <NanttyLogoMark size={28} />
       </Link>
       {can("users:read") ? (
         <form className={styles.search} role="search" onSubmit={searchUsers}>
@@ -63,7 +63,7 @@ export function ConsoleTopBar({ onOpenNavigation }: { readonly onOpenNavigation:
         <span className={styles.spacer} />
       )}
       <div className={styles.right}>
-        {isMockBackend ? <span className={styles.mockNotice} title="Data comes from the built-in demo backend, not the Zudomart API.">Demo data</span> : null}
+        {isMockBackend ? <span className={styles.mockNotice} title="Data comes from the built-in demo backend, not the Nantty API.">Demo data</span> : null}
         <span className={styles.session} title={`Signed in as ${admin.email}. Session ends by ${sessionEndsAt.toLocaleTimeString("en-NG", { hour: "2-digit", minute: "2-digit" })} at the latest.`}>
           {admin.email}
         </span>

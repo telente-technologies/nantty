@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 
-import { requestConfirmation } from "@zudomart/web-kit";
+import { requestConfirmation } from "@nantty/web-kit";
 
 import { Button } from "@/components/ui/button";
 import { InlineError } from "@/components/ui/feedback";

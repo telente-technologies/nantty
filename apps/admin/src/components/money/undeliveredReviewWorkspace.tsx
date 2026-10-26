@@ -21,7 +21,7 @@ import styles from "./money.module.css";
 type Decision = "release" | "refund";
 
 const decisionCopy: Record<Decision, { title: string; confirm: string; toast: string; consequence: string }> = {
-  release: { title: "Release to the seller", confirm: "Release payment", toast: "Released to the seller", consequence: "The seller is paid the order amount minus Zudomart's fees. Use this only when the seller has shown the order was delivered." },
+  release: { title: "Release to the seller", confirm: "Release payment", toast: "Released to the seller", consequence: "The seller is paid the order amount minus Nantty's fees. Use this only when the seller has shown the order was delivered." },
   refund: { title: "Refund the buyer", confirm: "Refund buyer", toast: "Refunded to the buyer", consequence: "The full amount goes back to the buyer and the seller is not paid." },
 };
 

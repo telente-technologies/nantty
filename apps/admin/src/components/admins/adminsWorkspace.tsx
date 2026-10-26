@@ -42,7 +42,7 @@ export function AdminsWorkspace() {
       <PageHeader
         area="Platform · staff"
         title="Admins & roles"
-        description="Who can operate Zudomart, and exactly what each person may do. Every change here needs your authenticator code."
+        description="Who can operate Nantty, and exactly what each person may do. Every change here needs your authenticator code."
         actions={
           <Button variant="primary" iconName="plus16" onClick={() => setAccessDialogAdmin("new")}>
             Invite admin

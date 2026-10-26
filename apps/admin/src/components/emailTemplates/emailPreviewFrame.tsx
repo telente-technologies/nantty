@@ -18,7 +18,7 @@ export function EmailPreviewFrame({ preview, title, height = 720 }: { readonly p
   return (
     <div className={styles.frameShell}>
       <div className={styles.inboxBar}>
-        <span className={styles.inboxFrom}>Zudomart</span>
+        <span className={styles.inboxFrom}>Nantty</span>
         <span className={styles.inboxSubject}>{preview.subject}</span>
       </div>
       <iframe className={styles.frame} title={title} srcDoc={preview.html} sandbox="allow-popups allow-popups-to-escape-sandbox" referrerPolicy="no-referrer" style={{ height }} />

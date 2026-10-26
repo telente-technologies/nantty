@@ -41,7 +41,7 @@ export function LoginForm({ reasonMessage, nextPath, isMockBackend }: { readonly
       </Button>
       {isMockBackend ? (
         <NoticeBanner tone="caution" title="Demo mode">
-          Superadmin: tolu.adeyemi@example.com · Admin: chidi.okafor@example.com · Needs MFA setup: bola.hassan@example.com. Password <code>zudomart-admin-demo</code>, authenticator code <code>000000</code>. Never available outside demo mode.
+          Superadmin: tolu.adeyemi@example.com · Admin: chidi.okafor@example.com · Needs MFA setup: bola.hassan@example.com. Password <code>nantty-admin-demo</code>, authenticator code <code>000000</code>. Never available outside demo mode.
         </NoticeBanner>
       ) : null}
     </form>

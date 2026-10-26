@@ -57,7 +57,7 @@ export function EmailTemplatesWorkspace() {
       <PageHeader
         area="Support"
         title="Email templates"
-        description="Every email Zudomart sends, rendered with sample data. Marketing emails carry an unsubscribe link; everything else links to notification settings."
+        description="Every email Nantty sends, rendered with sample data. Marketing emails carry an unsubscribe link; everything else links to notification settings."
         meta={catalogue.data ? <span>{items.length} templates · {items.filter((item) => item.kind === "marketing").length} marketing</span> : null}
         actions={<EmailThemeToggle theme={theme} onChange={setTheme} />}
       />

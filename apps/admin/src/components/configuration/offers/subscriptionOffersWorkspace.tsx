@@ -34,7 +34,7 @@ export function SubscriptionOffersWorkspace() {
       <PageHeader
         area="Configuration"
         title="Subscription offers"
-        description="Discount links for Zudomart plans. A link is the only way to claim an offer; there are no promo codes. Offers apply to web checkout only and never stack with yearly or bundle discounts."
+        description="Discount links for Nantty plans. A link is the only way to claim an offer; there are no promo codes. Offers apply to web checkout only and never stack with yearly or bundle discounts."
       />
       {links.errorMessage ? (
         <ErrorBlock variant="section" error={links.error} message={links.errorMessage} onRetry={links.reload} />

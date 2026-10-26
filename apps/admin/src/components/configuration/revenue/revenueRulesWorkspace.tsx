@@ -14,7 +14,7 @@ export function RevenueRulesWorkspace() {
   const { can } = useAdminPermissions();
   return (
     <>
-      <PageHeader area="Configuration" title="Revenue rules" description="How money is shared between creators, sellers and Zudomart. Rates are stored in basis points; amounts are per currency. Changes apply to new transactions only." />
+      <PageHeader area="Configuration" title="Revenue rules" description="How money is shared between creators, sellers and Nantty. Rates are stored in basis points; amounts are per currency. Changes apply to new transactions only." />
       <VersionedDocumentSection<RevenueRulesConfiguration>
         endpoint={revenueEndpoint}
         recordId="revenue"

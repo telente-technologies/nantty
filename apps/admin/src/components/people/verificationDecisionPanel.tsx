@@ -27,13 +27,13 @@ function describeConsequences(application: VerificationApplicationDetail, transi
   if (transition === "approve" || transition === "reinstate") {
     return [
       application.badgeVisibleWhenVerified ? `@${application.user.username} shows the ${application.color.toLowerCase()} badge publicly.` : "Essential is verified internally but never shows a public badge.",
-      ...(application.grantsDashboardAccess ? ["Gold unlocks Zudomart Dashboard access (dashboard.zudomart.com) for this business."] : []),
+      ...(application.grantsDashboardAccess ? ["Gold unlocks Nantty Dashboard access (creator.nantty.com) for this business."] : []),
       ...(application.color === "BLACK" ? ["Black is granted only after the official agency confirmation. It is never sold."] : []),
     ];
   }
   if (transition === "reject") return ["The applicant is told the request was not approved, with your reason.", ...(application.subscription ? ["Any prepaid plan fee is refunded by billing."] : [])];
-  if (transition === "suspend") return [`The ${badgeName} badge is hidden until reinstated.`, ...(application.grantsDashboardAccess ? ["Zudomart Dashboard access is paused."] : [])];
-  return [`The ${badgeName} verification ends permanently. The user must apply again.`, ...(application.grantsDashboardAccess ? ["Zudomart Dashboard access is removed."] : [])];
+  if (transition === "suspend") return [`The ${badgeName} badge is hidden until reinstated.`, ...(application.grantsDashboardAccess ? ["Nantty Dashboard access is paused."] : [])];
+  return [`The ${badgeName} verification ends permanently. The user must apply again.`, ...(application.grantsDashboardAccess ? ["Nantty Dashboard access is removed."] : [])];
 }
 
 export function VerificationDecisionPanel({ application, onUpdated }: { readonly application: VerificationApplicationDetail; readonly onUpdated: (updated: VerificationApplicationDetail) => void }) {
@@ -55,7 +55,7 @@ export function VerificationDecisionPanel({ application, onUpdated }: { readonly
   return (
     <Card title="Decision">
       <div className={styles.stack}>
-        {application.grantsDashboardAccess ? <p className={styles.consequenceNote}>Gold verification grants Zudomart Dashboard access for the business.</p> : null}
+        {application.grantsDashboardAccess ? <p className={styles.consequenceNote}>Gold verification grants Nantty Dashboard access for the business.</p> : null}
         {application.tier === "ESSENTIAL" ? <p className={styles.consequenceNote}>Blue Essential never shows a public badge.</p> : null}
         {application.color === "BLACK" ? <p className={styles.consequenceNote}>Black is for government bodies only. It is never purchasable; approve only after the agency confirms from its official domain.</p> : null}
         {application.reviewedAt ? <p className={styles.faint}>Last decision {formatDateTime(application.reviewedAt)} by {application.reviewedByName}: “{application.decisionReason}”</p> : null}

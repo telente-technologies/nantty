@@ -23,7 +23,7 @@ import styles from "./peopleWorkspace.module.css";
 type StatusTabKey = (typeof applicationStatusTabs)[number]["key"];
 
 const pageCopy: Record<ApplicationKind, { title: string; description: string }> = {
-  sellers: { title: "Seller applications", description: "People asking to sell on Zudomart Mart. Approving lets them list products; Gold verification is separate and unlocks the Dashboard." },
+  sellers: { title: "Seller applications", description: "People asking to sell on Nantty Mart. Approving lets them list products; Gold verification is separate and unlocks the Dashboard." },
   creators: { title: "Creator Program applications", description: "Creator Program members can go live, receive gifts and earn a share of ad revenue on their content." },
 };
 

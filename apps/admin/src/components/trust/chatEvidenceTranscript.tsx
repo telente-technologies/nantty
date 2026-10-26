@@ -12,7 +12,7 @@ const describeAttachment = (attachment: ChatEvidenceMessage["attachments"][numbe
 export function ChatEvidenceTranscript({ messages }: { readonly messages: readonly ChatEvidenceMessage[] }) {
   return (
     <div className={styles.transcript} role="log" aria-label="Messages submitted by the reporter, read only">
-      <p className={styles.transcriptNotice}>Read only. Only the messages the reporter chose to submit are shown. Nothing else in this chat is visible to Zudomart.</p>
+      <p className={styles.transcriptNotice}>Read only. Only the messages the reporter chose to submit are shown. Nothing else in this chat is visible to Nantty.</p>
       {messages.map((message) => (
         <div key={message.messageId} className={`${styles.messageRow} ${message.isReportedUser ? styles.messageRowReported : styles.messageRowOther}`}>
           <span className={styles.messageMeta}>{message.isReportedUser ? `${message.senderName} (reported)` : message.senderName} · {formatDateTime(message.sentAt)}</span>

@@ -2,7 +2,7 @@
 
 import type { ReactNode } from "react";
 
-import { Dialog, type DialogIntent } from "@zudomart/web-kit";
+import { Dialog, type DialogIntent } from "@nantty/web-kit";
 
 interface ModalDialogProps {
   readonly isOpen: boolean;

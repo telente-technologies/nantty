@@ -1,4 +1,4 @@
-import { ZudomartWordmark } from "@zudomart/web-kit";
+import { NanttyWordmark } from "@nantty/web-kit";
 import type { ReactNode } from "react";
 
 import { EnvironmentBadge } from "@/components/shell/environmentBadge";
@@ -14,12 +14,12 @@ export function AuthCard({ environment, title, description, children, footer }: 
     <div className={styles.page}>
       <section className={styles.brandPanel} aria-label="About this console">
         <div className={styles.brandRow}>
-          <ZudomartWordmark productLabel="Admin" tone="onDark" height={28} withSymbol />
+          <NanttyWordmark productLabel="Admin" tone="onDark" height={28} withSymbol />
           <EnvironmentBadge environment={environment} />
         </div>
         <div className={styles.brandBody}>
           <p className={styles.kicker}>Restricted system</p>
-          <p className={styles.statement}>The control room for Zudomart's people, money and content.</p>
+          <p className={styles.statement}>The control room for Nantty's people, money and content.</p>
           <ul className={styles.promises}>
             {securityPromises.map((promise) => (
               <li key={promise}>{promise}</li>

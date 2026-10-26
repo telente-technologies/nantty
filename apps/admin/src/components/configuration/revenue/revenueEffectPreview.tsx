@@ -44,7 +44,7 @@ export function RevenueEffectPreview({ rules }: { readonly rules: RevenueRulesCo
         items={[
           { label: `Gift of ${formatWholeNumber(giftCoins)} coins is worth`, value: formatMoneyForDisplay(moneyOf(giftValueMinor, currency)) },
           { label: `Creator receives (${formatBasisPointsAsPercent(rules.giftCreatorShareBasisPoints)})`, value: formatMoneyForDisplay(moneyOf(creatorGiftMinor, currency)) },
-          { label: "Zudomart keeps from the gift", value: formatMoneyForDisplay(moneyOf(giftValueMinor - creatorGiftMinor, currency)) },
+          { label: "Nantty keeps from the gift", value: formatMoneyForDisplay(moneyOf(giftValueMinor - creatorGiftMinor, currency)) },
           { label: `Fee if these coins are transferred (${formatBasisPointsAsPercent(rules.coinTransferFeeBasisPoints)})`, value: `${formatWholeNumber(transferFeeCoins)} coins` },
           { label: `Escrow fee on this order (${formatBasisPointsAsPercent(rules.escrowFee.defaultBasisPoints)}, no commission)`, value: formatMoneyForDisplay(moneyOf(escrowFeeMinor, currency)) },
           { label: "Seller receives before withdrawal fee", value: formatMoneyForDisplay(moneyOf(effectiveOrderTotal.amountMinor - escrowFeeMinor, currency)) },

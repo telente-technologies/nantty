@@ -10,8 +10,8 @@ export function DashboardEntitlementsEditor({ entitlements, canWrite, onChange }
   }
   return (
     <fieldset className={styles.entitlements}>
-      <legend>Zudomart Dashboard entitlements</legend>
-      <p className={styles.planNote}>Gold subscribers get access to dashboard.zudomart.com with these limits. Leave the limit empty for unlimited.</p>
+      <legend>Nantty Dashboard entitlements</legend>
+      <p className={styles.planNote}>Gold subscribers get access to creator.nantty.com with these limits. Leave the limit empty for unlimited.</p>
       {entitlements.map((entitlement, index) => (
         <div key={index} className={styles.entitlementRow}>
           <TextField label="Key" value={entitlement.key} disabled={!canWrite} onChange={(event) => updateEntitlementAt(index, { key: event.target.value.replace(/[^A-Za-z0-9]/g, "") })} />

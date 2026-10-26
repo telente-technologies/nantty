@@ -53,7 +53,7 @@ export function VerificationQueueWorkspace() {
 
   return (
     <>
-      <PageHeader area="People" title="Verification reviews" description="Blue is personal (including creator accounts), Gold is business and unlocks the Zudomart Dashboard, Black is government and only granted through the official process." />
+      <PageHeader area="People" title="Verification reviews" description="Blue is personal (including creator accounts), Gold is business and unlocks the Nantty Dashboard, Black is government and only granted through the official process." />
       <LinkTabs label="Verification views" items={verificationViewTabs} />
       <SegmentedTabs label="Verification status" items={verificationStatusTabs} activeKey={statusTab} onChange={(key) => { setStatusTab(key); setCursor(undefined); }} />
       <Toolbar>

@@ -29,7 +29,7 @@ export function OverviewWorkspace() {
 
   return (
     <>
-      <PageHeader area="Platform" title="Overview" description="Health of Zudomart right now and the queues that need a person." meta={metrics ? <span className={styles.generated}>Updated {formatDateTime(metrics.generatedAt)}</span> : null} actions={<SegmentedTabs label="Time range" items={rangeTabs} activeKey={range} onChange={setRange} />} />
+      <PageHeader area="Platform" title="Overview" description="Health of Nantty right now and the queues that need a person." meta={metrics ? <span className={styles.generated}>Updated {formatDateTime(metrics.generatedAt)}</span> : null} actions={<SegmentedTabs label="Time range" items={rangeTabs} activeKey={range} onChange={setRange} />} />
       {errorMessage ? <ErrorBlock error={queryError} message={errorMessage} onRetry={reload} /> : null}
       {isLoading && !metrics ? <LoadingBlock lines={6} /> : null}
       {metrics ? (

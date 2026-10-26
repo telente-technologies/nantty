@@ -26,7 +26,7 @@ const targetOptions: { value: MartHomeFeatureTargetType; label: string; placehol
   { value: "COLLECTION", label: "Collection", placeholder: "Collection slug, e.g. daily-deals" },
   { value: "STORE", label: "Store", placeholder: "Store username, e.g. kemi.kitchen" },
   { value: "PRODUCT", label: "Product", placeholder: "Product ID" },
-  { value: "URL", label: "Zudomart link", placeholder: "https://zudomart.com/…" },
+  { value: "URL", label: "Nantty link", placeholder: "https://nantty.com/…" },
 ];
 
 interface FeatureEditorDialogProps {

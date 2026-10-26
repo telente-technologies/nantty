@@ -2,7 +2,7 @@
 
 import { useState, type ReactNode } from "react";
 
-import type { DialogIntent } from "@zudomart/web-kit";
+import type { DialogIntent } from "@nantty/web-kit";
 
 import { Button } from "./button";
 import { TextAreaField, TextField } from "./formFields";
