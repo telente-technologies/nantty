@@ -154,7 +154,7 @@ tests/                                       (mirrors src/, files <name>.<kind>_
 | Wallets, coins, payout accounts, payouts | wallet | go-money | `wallet` | wallet | mobile, seller | PROPOSED |
 | Escrow, disputes | escrow | go-money | `escrow` | escrow | orders | PROPOSED |
 | Gifts, creator earnings, affiliations | creators | go-money | `creators` | creators | live (gRPC) | PROPOSED; see finding F1 |
-| ZudoPoints (engagement and gift points only, never money; referral and purchase loyalty/cashback removed) | live | go-live | `live` | points entries | rankings API | EXISTING in go-live; the go-money `rewards` module was deleted |
+| Nantty Points (engagement and gift points only, never money; referral and purchase loyalty/cashback removed) | live | go-live | `live` | points entries | rankings API | EXISTING in go-live; the go-money `rewards` module was deleted |
 | Plans, entitlements, subscriptions | subscriptions | go-money | `subscriptions` | subscriptions | gateway (entitlement cache), catalog | PROPOSED |
 | Live sessions, guests, battles, live products | live | go-live | `live` | live | Phoenix (events), money | partial |
 | Ads, impressions, attribution | ads | go-ads | `ads` | ads | feed (slot fill), money | PROPOSED |

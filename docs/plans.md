@@ -1,9 +1,10 @@
-# Zudomart — Working Plans
+# Nantty — Working Plans
 
 Living plan for the work in flight. Status markers:
 
 - **[DONE]** — shipped and verified in this repo
 - **[NEXT]** — approved, ready to build
+- **[IN PROGRESS]** — implementation has started but is not yet verified complete
 - **[LATER]** — agreed direction, not scheduled
 
 Update this file whenever a plan item changes shape. The record of what actually changed, file by file, lives in [CHANGELOG.md](./CHANGELOG.md). Paths in older mobile entries are relative to `apps/mobile/`; a few name files in the removed monolith and are kept as history.
@@ -332,14 +333,18 @@ Requirement: tapping **Repost** must offer a choice — *just reshare* or *quote
 
 Requirement: a dedicated **`studio.zudomart.com`** web app where creators **go live**, connect an external encoder like **OBS**, and compose **overlays (text, logos, anything)** on top of the livestream — plus **in-app go-live** on mobile for everyone including gamers, who can stream **their phone screen** or connect an **external source**. Studio is mock-driven exactly like the mobile app and the webapp.
 
+**Launch scope (owner direction, 2026-10-26):** video livestreaming remains a **beta capability** while it is improved; the presence of mobile screens, Studio mocks or backend infrastructure does not mean video LIVE is part of the initial launch. **Nantty Spaces is separate**: the planned launch capability is scheduled/joinable audio-only rooms, with no camera/video or gifts. Spaces implementation is tracked separately and must not be inferred as complete from this video-live section.
+
 ### 8.1 What already exists **[DONE]**
 
-- **Live session metadata in the API** — the old monolith's `posts` module: `controllers/live.controller.ts`, `registerLiveRoutes()` (`routes/posts.routes.ts:72–90`), commands `startLiveSession` / `endLiveSession` / `joinLiveSession` / `leaveLiveSession` / `commentOnLiveSession` / `reactToLiveSession` / `shareLiveSession` / `addLiveProduct`, queries `getLiveSession` / `listLiveSessions` / `listLiveComments`, model `posts.model.ts:75–98`, DTOs `posts.dto.ts:90–111`, `repositories/live.repository.ts` + `live.prisma.repository.ts`. Endpoints: `/api/v1/lives/*`.
-- **Gifting** lives in the `creators` module.
+- **Historical API implementation:** the old monolith's `posts` module provided live-session metadata and `/api/v1/lives/*`; the old monolith's `creators` module handled gifting. Current live ownership is in `services/go/modules/live`.
 - **Mobile live surfaces** — `src/screens/live/*`, `components/create/liveSetupPanel.tsx`, `Live` / `LiveEnded` nav params, `liveShoppingScreen.webp` asset.
-- **Nothing else exists yet:** no RTMP / WebRTC / HLS / ingest infrastructure anywhere in the repo (only the old monolith's compose file), **no overlay/graphics feature anywhere**, no `studio` app, no live surface in the webapp.
+- **Current Go implementation:** `services/go/modules/live` contains live-session lifecycle/scheduling, LiveKit room and media-token integrations, RTMP/WHIP ingress and stream-key services, overlay services, and recording/safety integrations. Mobile has a LiveKit stage component. These are repository capabilities, not proof that production media infrastructure is deployed or that the end-to-end service is launch-ready. The webapp still has no live viewer surface.
+- **Studio app:** `apps/studio` exists with live/control-room and overlay routes, but it does not make video LIVE a launch feature; retain the beta gate above.
 
-### 8.2 Architecture **[DONE (frontend) / LATER (ingest)]**
+### 8.2 Architecture **[CLIENT AND GO INTEGRATION PRESENT; VIDEO LIVE BETA / DEPLOYMENT QA OPEN]**
+
+The diagram below records the earlier proposed topology (MediaMTX/SRS + HLS); it is not a statement of the current deployed topology. The current code integrates LiveKit for room/media tokens and RTMP/WHIP ingress; verify provider deployment and viewer playback before treating video LIVE as operational.
 
 ```
                           ┌───────────────────────────────┐
@@ -374,7 +379,7 @@ Requirement: a dedicated **`studio.zudomart.com`** web app where creators **go l
 | 8.3.5 | **Overlay editor + browser-source page** — `/lives/:id/overlay`: toolbar (text / image / shape / countdown / ticker), 1920×1080 preview canvas, layer list, inspector (content, font size, colours, x/y/w/h, opacity, z-order, delete), save/discard. Public **`/overlay/:sceneId`** renders the scene with no chrome and no session (proxied as public, fetched through `GET /api/v1/overlay-scenes/:sceneId`). | **[DONE]** |
 | 8.3.6 | **Mobile source picker** — Camera / Screen / External segmented picker in `liveSetupPanel.tsx`. Camera = existing backdrop; Screen = capture-stage placeholder; External = creates the session, issues the key via `POST /api/v1/lives/:id/stream-key`, then shows the **server URL + stream key card with a Share sheet** and an "Open live room" action. | **[DONE]** |
 | 8.3.7 | **Screen capture** — iOS ReplayKit broadcast extension + Android MediaProjection. Requires a **dev client** (not Expo Go) and a capability check; falls back to External when unavailable. | **[LATER]** |
-| 8.3.8 | **Media ingest + playback infra** — deploy MediaMTX/SRS, issue/validate stream keys, publish `hlsUrl`, scale/record. **Backend work; not started.** | **[LATER]** |
+| 8.3.8 | **Media ingest + playback infra** — Go now has LiveKit RTMP/WHIP ingress, per-session stream-key services and LiveKit room/token integrations. Verify actual provider deployment, playback path, scaling/recording operations and end-to-end behavior before treating the video-LIVE beta as operational. | **[IMPLEMENTED IN REPOSITORY; DEPLOYMENT/QA OPEN]** |
 | 8.3.9 | **Webapp live viewer + Go-live entry** — Phase 2 (§6.4). | **[LATER]** |
 | 8.3.10 | **Audience / analytics for lives** — retention curve, top moments, earnings per session (extends §5.2). | **[LATER]** |
 
@@ -570,34 +575,36 @@ Requirement: *social sign-in everywhere on the webapp without deviating from the
 
 ---
 
-## 20. Creator (non-selling) live
+## 20. Creator (non-selling) live — video LIVE beta; Spaces is separate
 
-Requirement: streamers who only make content (talk, music, gaming, IRL, education) can go live end-to-end and sell nothing.
+Requirement: streamers who only make content (talk, music, gaming, IRL, education) can create video lives without selling anything. Video LIVE remains a beta capability and is not part of the initial launch. Nantty Spaces is the separate audio-only, scheduled/joinable launch capability; its implementation is tracked independently and is not represented as complete by the existing video-live surfaces below.
 
 ### 20.1 Rules
 
-- Only **Creator Program** members can go live (unchanged). They earn through **gifts, creator subscriptions and affiliate commissions**, never through a store.
+- Only **Creator Program** members can use the existing video go-live flow (unchanged). Gifts are deferred from launch; do not present gifts or gift earnings as an available launch perk. Creator subscriptions and affiliate commissions remain separate monetization features, never a requirement to own a store.
 - Every live has a **category**: `justChatting` / `gaming` / `music` / `irl` / `education` / `shopping`. **Shopping** is offered only to accounts with a store (`hasStore` in Studio, `isSeller` on mobile).
 - **Products are optional.** Pinning, the products card and product counts appear only for accounts with a store. A live without products is a normal live.
-- Dashboard numbers lead with **coins, gifts, subscribers, viewers, top gifters and battle results**, never product counts.
+- Existing beta dashboard surfaces may show **coins, gifts, subscribers, viewers, top gifters and battle results**, never product counts. Hide or disable gift and battle metrics/actions for launch until those capabilities are explicitly enabled.
 
 ### 20.2 Status
 
 | Surface | Scope | Marker |
 | --- | --- | --- |
-| Studio landing | Copy and hero for all creators (OBS gaming, talk, music, battles, gifts); selling is one optional use case | **[DONE]** |
-| Studio create + dashboard | Category picker on create; earnings panel (coins, gifts, subscribers, viewers, top gifters, battles) on `/lives` and the control room; pinning hidden without a store | **[DONE]** |
+| Studio landing | Copy and hero for all creators (OBS gaming, talk, music, battles, gifts); selling is one optional use case. This is beta-facing copy, not a launch availability statement. | **[DONE]** |
+| Studio create + dashboard | Category picker on create; earnings panel (coins, gifts, subscribers, viewers, top gifters, battles) on `/lives` and the control room; pinning hidden without a store. Gift/battle surfaces remain deferred for launch. | **[DONE]** |
 | Studio mock | `LiveSession.category` + `earnings`; `User.hasStore`; `POST /api/v1/lives` accepts `category` | **[DONE]** |
-| Web landing | Live described as creator streaming and shopping; creator program copy says no store is needed | **[DONE]** |
+| Web landing | Live described as creator streaming and shopping; creator program copy says no store is needed. Treat as beta scope until launch copy is updated. | **[DONE]** |
 | Mobile go-live | Category picker in `liveSetupPanel`; no product step in the create flow; `category` sent to `POST /api/v1/lives` | **[DONE]** |
-| Mobile live room | Products button and sheets only when the live has products (host: Creator + products or `shopping`); category chip in `LiveHeader` | **[DONE]** |
+| Mobile live room | Products button and sheets only when the live has products (host: Creator + products or `shopping`); category chip in `LiveHeader`. Video room remains beta; gifts are deferred from launch. | **[DONE]** |
 | Webapp | No live pages exist yet; apply the same rules when the viewer lands (§8.3.9) | **[LATER]** |
 
 ---
 
-## 17. Live gifts (TikTok-style) **[DONE — mock]**
+## 17. Live gifts (TikTok-style) **[IMPLEMENTED IN CLIENT/MOCK AND GO BACKEND; DEFERRED FROM LAUNCH]**
 
-Gifting works on any live, including lives with no products: for content creators, gifts are the main way to earn. No gift UI assumes a store. The mock contract follows [backendPlan.md §4.1](./backendPlan.md) field for field. The deviations are listed in §17.6.
+**Launch gate (owner direction, 2026-10-26): gifts are not required for launch.** Keep gift sending, goals, gift-based earnings and gift entry points out of the launch scope; the implementation documented below is retained for beta/future enablement, not a launch promise. Gifts are not part of Nantty Spaces.
+
+The client/mock flow and Go live-service gift infrastructure exist in the repository. Gifting is designed to work on video lives with no products, but video LIVE remains beta and gifting is deferred from launch. No gift UI assumes a store. The mock contract follows [backendPlan.md §4.1](./backendPlan.md) field for field. The deviations are listed in §17.6.
 
 ### 17.1 Catalogue — `GET /api/v1/gifts` → `{ data: LiveGift[], nextCursor }`
 
@@ -666,7 +673,9 @@ useLiveGiftCatalog(enabled?) → { catalog, giftsById, giftsBySection }
 
 ---
 
-## 18. Multi-guest live & battles (mobile, mock mode) **[DONE (mock) / LATER (LiveKit + go-live)]**
+## 18. Multi-guest live & battles (video LIVE beta; client/mock and Go backend present)
+
+**Launch gate (owner direction, 2026-10-26):** multi-guest video and battles belong to the video-LIVE beta, not the initial launch. This section describes existing implementation and remaining integration work; it does not make video, battles or gifts a launch dependency. Nantty Spaces is a distinct audio-only capability and must not inherit this section's camera, video, battle or gift behavior.
 
 Requirement: TikTok-style multi-guest LIVE (host + up to 9 guests) and gift battles between on-stage streamers. Works on any live, with or without products. The backend contract is [backendPlan.md §4.2](./backendPlan.md); differences are listed in 18.7.
 
@@ -756,7 +765,7 @@ Events the client expects in production (backendPlan §4.2.5): `stage.updated`, 
 
 ### 18.8 Later
 
-- Real media through LiveKit (one publisher per tile). Today the host tile plays the live stream or camera, and guest tiles show the guest's avatar.
+- Mobile LiveKit stage/media components and Go room/token, participant and stage services are now present. Verify production multi-publisher behavior, reconnects and synchronization across devices before marking multi-guest video end-to-end complete; this remains beta scope.
 - Replace polling with `stage.updated` / `battle.score.updated` over `ex.realtime`.
 - Remove `POST /battles/:id/gifts` once `useSendLiveGift` sends `battleId` and the gift service credits scores.
 
@@ -2173,8 +2182,8 @@ Owner request, 2026-10-04.
 
 ### 56.2 Wordmark
 
-- Bricolage Grotesque (OFL), outlined to SVG paths in `packages/webKit/src/brand/zudomartBrand.path.ts`. The rationale is in [design/brandWordmark.md](./design/brandWordmark.md).
-- Mobile home bar: wordmark, divider, Feed / Mart switch. It collapses to the logo mark below 380 pt. Webapp top bar: the logo mark below 380 px. Every web app's `ZudomartWordmark` now draws outlines instead of SVG `<text>`.
+- Bricolage Grotesque (OFL), outlined to SVG paths in `packages/webKit/src/brand/nanttyBrand.path.ts`. The rationale is in [design/brandWordmark.md](./design/brandWordmark.md).
+- Mobile home bar: wordmark, divider, Feed / Mart switch. It collapses to the logo mark below 380 pt. Webapp top bar: the logo mark below 380 px. Every web app's `NanttyWordmark` now draws outlines instead of SVG `<text>`.
 - **[CHECK]** Not yet seen on a device or in a browser.
 
 ## 57. Branded downloads and the screenshot share prompt **[DONE (ts-media, ts-social, gateway, mobile + webapp, mock UI)]**
@@ -2239,6 +2248,52 @@ Owner request, 2026-10-04.
 
 Owner direction, 2026-10-20: provider delivery is a **V2** feature, not launch. Seller-managed delivery remains the current flow. The full design is in [architecture/logisticsV2.md](./architecture/logisticsV2.md).
 
+## Nantty rebrand, landing pages and static waitlist **[IN PROGRESS]**
+
+Owner direction, 2026-10-23 and 2026-10-26: rebrand Zudomart as **Nantty**, update Node.js to the security-patched release, and launch static marketing pages on Cloudflare. Implementation is in progress; the existing Next.js marketing app is the required landing-page source. Do not describe any page, domain, countdown, or waitlist as live until deployment and end-to-end submission are verified.
+
+### 60.1 Decisions and constraints
+
+- Use **Node.js 24.22.1** as the initial project baseline. The official Node.js security advisory was published **2026-10-21** (two days before this plan date, rather than yesterday) and lists 24.22.1 as the patched LTS release, alongside 26.12.1 Current and 22.23.4. Stay on the supported LTS line rather than moving the production toolchain to Current 26. Recheck the official release page immediately before implementation in case a newer patch has shipped.
+- Preserve the existing product landing pages and their layouts; only change the public brand name/logo and the already-requested launch controls. Use `apps/web` at `nantty.com`, `apps/ads` at `ads.nantty.com`, the existing browser app at `web.nantty.com`, and the existing creator-facing page at `creator.nantty.com`. The final mapping between the creator and seller-dashboard apps still needs confirmation before DNS is changed. Do not replace existing landing pages with a new generic design or add duplicate routes to `apps/web`. `admin.nantty.com` is private: use Cloudflare Access or equivalent access control before publishing; a hidden/disabled browser button is not an access-control boundary.
+- Keep the existing apps' server behavior. Do not set `output: "export"` on a whole app that includes authenticated routes, cookie reads, or BFF handlers. If static hosting is still required for the prelaunch surfaces, create route-scoped static artifacts that reuse the existing landing components and prove that the selected outputs contain no app data or working login endpoints. Do not deploy a generic replacement page.
+- Before launch, product login CTAs must be visibly locked and genuinely disabled; do not route them into an existing production login. Use the supplied Nantty icon/lockup in the existing app brand renderers. Do not use the supplied Zudomart-branded banner as a Nantty logo or publish it unchanged.
+- This is a new, explicitly requested static marketing waitlist and does not restore the previously dropped app/API waitlist or `POST /waitlist` service. Keep the marketing pages static and avoid an app-managed backend/database. For immediate in-page writes to Google Sheets, use a small Google Apps Script web app owned by the business and bound to a dedicated Sheet; it is the minimal server-side execution required to keep Google credentials out of browser code. Post to it without navigating away and return an explicit saved/duplicate/error result to the page. Provide setup instructions and a configurable endpoint; require both an endpoint and an explicit enable flag. Until the owner creates the Sheet, deploys the script, completes the privacy notice and retention/deletion/opt-out process, and configures the URL and enable flag, do not accept data or claim that a signup was saved.
+- Show two independent main-page countdowns in `Africa/Lagos`: an early beta target on **2027-01-15** (chosen as a planning date, not stated in the deck) and a public-launch planning target on **2027-03-01**. The deck says public beta in Nigeria is targeted **by March 2027**, without specifying an exact day. Label both dates as targets until the owner approves them. At zero, transition to a live/announcement state without negative values or redirects. Respect reduced motion and provide accessible text equivalents.
+- Offer three clearly distinct signup paths: general launch updates, request beta access, and seller interest. The beta request is an application/request, not a promise of access. Keep form state and confirmation inline on the landing page.
+- Make seller interest an LOI-style intake that captures a seller's stated intent and readiness, then writes the submission to a restricted seller-interest sheet/tab. Unless counsel approves a binding document and signing flow, label it **non-binding expression of interest**, not a binding letter of intent; do not imply guaranteed onboarding, sales, or commercial terms.
+- Confirm the Nantty spelling, legal/trademark clearance, ownership and availability of the intended domain(s), and the external account ownership before migrating live identities. The current AWS/domain configuration is documented but marked proposed in places; verify actual deployed resources before changing DNS or infrastructure.
+- Treat this as a brand and identifier migration, not a blind text replacement. Classify every Zudomart occurrence as user-facing brand copy, source/package identifier, stable protocol or data identifier, historical record, or external-provider identifier. Preserve compatibility during rollout and retain historical names where needed to explain past decisions.
+
+### 60.2 Work sequence
+
+1. **Confirm launch inputs.** Approve Nantty naming/casing, supplied logo variants, legal entity/display-name relationship, exact public launch day, domain ownership and DNS, beta timestamp/timezone, waitlist form and Sheet owner, privacy notice, retention and access controls. Check domain and social/store handles before publishing the new brand. Keep the January beta date explicitly provisional until approved.
+2. **Apply the Node security update.** Add a root version file as the local source of truth at 24.22.1; update `package.json`'s minimum engine and the EAS base image pin; change Node setup in Android, backend, frontend and security workflows to read the shared pin. Update any TypeScript service Docker base images and developer/CI documentation that pin Node. Refresh the lockfile only if required by the package manager. Run install, lint, typecheck, tests, all app builds, mobile export/EAS preflight, and container builds that use Node; record any toolchain incompatibility before proceeding.
+3. **Rebrand the existing pages in Next.js.** Keep the original `apps/web`, `apps/ads`, `apps/seller`, and `apps/studio` page structures; update user-facing names, logo renderers, metadata and agreed domain links. Keep the main-page countdown and disabled waitlist as a reversible prelaunch layer. Make the prelaunch layer removable with one release/build setting so launch removes countdowns, waitlist and locked CTAs while preserving the practical product landing pages and enabling their real app flows. Confirm which existing product app owns `creator.nantty.com` before DNS work. Do not add replacement marketing pages or static-export authenticated apps wholesale.
+4. **Connect and prove the waitlist.** Create a restricted Google Sheet and deploy the Apps Script web app under the business's Google account, then configure its endpoint URL and explicit enable flag for the static build. Test valid, malformed, duplicate and unavailable submissions and verify the visitor remains on Nantty with accurate inline status. Verify no Sheet credentials enter the static bundle; check keyboard/screen-reader feedback and mobile layout; confirm only authorized people can access response rows.
+5. **Inventory and stage the rebrand.** Produce a machine-readable inventory of public copy/assets, app/package names, import scopes, deep links, bundle/application IDs, email addresses/templates, legal/privacy documents, API hosts, cookies/storage keys, telemetry, CI/CD names, AWS resource names, database/event/message identifiers, OAuth/payment/store registrations, and customer support channels. Mark each as directly renameable, compatibility-sensitive, or externally managed. Define the old-to-new mapping and rollback/dual-support period.
+6. **Remove the app wordmark.** Remove the wordmark from the mobile and app/webapp interface as requested; retain the icon-only Nantty mark where branding is needed. This is an app UI change, not permission to rename internal identifiers or rewrite historical/legal records.
+7. **Migrate public-facing identity first.** Update approved public copy, icon/lockup assets, metadata, email templates, legal/privacy references after review, documentation landing pages, support channels, and the new domain. Keep old domains and email addresses forwarding/working; add redirects and allowlists; update CSP/CORS, OAuth callbacks, payment/webhook URLs, app links and certificates as applicable. Do not cut over DNS until the new destinations and rollback path are verified.
+8. **Migrate internal and external identifiers deliberately.** Rename package scopes, workspace names, source references, bundle IDs, app-store product identifiers, cloud resources, secrets, queue/exchange names, database schemas, JWT audiences, cookie/local-storage keys, and event headers only where the owning platform supports a safe migration. Where an identifier is immutable or already persisted externally, keep it as a compatibility alias or stable internal ID while presenting Nantty to users. Never recreate production data/resources just to change a label without a migration and recovery plan.
+9. **Validate, cut over and retire aliases gradually.** Run repository-wide checks for unintended remaining user-facing Zudomart copy and for broken imports/config, full CI and app build matrix, app-link/auth/payment/webhook smoke tests, security review, legal review, and accessibility checks. Roll out by environment, monitor error rates and signup completion, retain old routes/identities through the agreed transition window, then remove aliases only when traffic and provider dependencies confirm they are unused.
+
+### 60.3 Initial implementation inventory and progress
+
+- Node pins currently found: root engine `>=24.0.0`, EAS base `24.19.0`, and Node 24 setup in `.github/workflows/{androidApk,backend,frontend,security}.yml`. Confirm workflow and Docker coverage during implementation; no root `.nvmrc` or `.node-version` was found in the repository search.
+- The prior pass introduced a replacement `apps/web` design, duplicate product routes, static-export configuration and a Worker that did not preserve the existing multi-app pages. Those replacements have been removed/restored. The original homepage composition and server/security configuration are back. The existing shared web logo renderer now uses the supplied Nantty assets, mobile branding is icon-only, and the marketing copy/metadata has been rebranded. A main-page countdown/waitlist section and an Apps Script sample remain; the form is disabled until the Sheet, script endpoint, consent/retention details and enable flag are configured. No Google Sheet, public Apps Script deployment, Cloudflare/DNS change or app deployment has been made.
+- The installed toolchain was Node `24.19.0` during this work, below the planned `24.22.1` baseline. The root engine, EAS pin and CI setup still need the security update and full repository validation; landing-page completion does not close that task.
+- Initial inventory on 2026-10-26 found about **23,699 tracked text lines** containing the former name (excluding the pnpm lockfile) and **51 tracked paths** containing it; this is a line count, not a count of individual occurrences. Most were concentrated in Go module/generated code, protobuf contracts, local RabbitMQ configuration, and app/package identifiers. The migration is now underway in bounded scopes. Public copy and assets are being rebranded; module and package namespaces are being migrated and verified; externally persisted IDs, protobuf wire names, production resources, and old inbound hosts remain only where changing them would break compatibility, pending explicit versioned migrations.
+
+### 60.4 Completion criteria
+
+- Local development, CI and mobile builds use the same patched Node 24 LTS baseline, and the complete relevant test/build matrix passes.
+- The Nantty waitlist page is deployed as static assets on Cloudflare Workers Static Assets, submissions are securely written to the authorized Google Sheet through the Google Apps Script endpoint, and the visitor receives inline feedback without leaving the page.
+- The existing branded landing pages work at their approved destinations; login buttons remain locked prelaunch and become usable with the release transition. The main page shows the early-beta and public-launch targets with safe zero-countdown states. Countdown, waitlist and lock UI can be removed at launch without removing the existing product landing pages.
+- The static waitlist posts in-page to a Google Apps Script endpoint that writes to the owner's Sheet; no app-managed backend or database is added. The page clearly reports when the endpoint has not been configured and never falsely confirms a signup.
+- Mobile and app/webapp surfaces no longer display a wordmark; the icon-only Nantty mark is used where branding is appropriate.
+- Seller-interest submissions clearly record non-binding intent, are access-restricted, and do not promise acceptance or commercial terms; any actual binding LOI is a separate counsel-approved workflow.
+- The approved brand surfaces show Nantty, external integrations and old links continue to work through the transition, stable identifiers remain compatible, and the legal/domain owners approve the final cutover.
+
 - **V1 (now):** sellers set their own delivery price and update delivery status; no third-party courier API.
 - **Foundation (2026-10-20):** product/variant weight, dimensions, package category/count, fragile, contents and declared value are stored, collected in the seller product form and exposed through the seller API; checkout product snapshots carry them. Hidden orders tables for policy, quotes, shipments, parcels, attempts, events, charges, insurance and claims exist behind `LOGISTICS_ENABLED=false`. Adapter interface is in place; buyer order detail now shows seller-managed delivery status, rider contact, ETA and attempts, but no provider adapter, provider delivery route or provider delivery UI is live.
 - **V2.0:** logistics orchestrator, delivery ledger split, live quotes, buyer selection, seller-ready booking gate, Chowdeck Relay adapter, tracking, cancellation and redelivery.
@@ -2248,22 +2303,22 @@ Owner direction, 2026-10-20: provider delivery is a **V2** feature, not launch. 
 
 No provider integration is to be built until the V2 design is approved and the seller-managed flow remains unchanged behind the disabled feature flag.
 
-## 60. Order notifications and fail-closed media (2026-10-21) **[DONE]**
+## Order notifications and fail-closed media (2026-10-21) **[DONE]**
 
 - **Order lifecycle notifications:** `orderGroup.created`, `.paid`, `.statusChanged`, `.shipped`, `.delivered` and `.completed` now map to in-app and push notifications. Buyers get placed/paid/preparing/ready/shipped/delivered/completed/cancelled; sellers get paid/cancelled. Shipped/delivered/completed are not duplicated by `statusChanged`. Producer payloads carry the order number and buyer/seller IDs; shipped/delivered also carry courier/tracking. Email was queued at the time and is now sent; see plan 75.
 - **Media safety:** moderation defaults to `hold` on classifier failure; invalid fail modes fail startup; a skipped ClamAV scan rejects the upload unless `MEDIA_ALLOW_UNSCANNED=true` is explicitly set for local development.
 - **Direct-payment warning:** both checkout choosers now state that direct payment removes escrow protection and that Zudomart cannot reverse it. Escrow remains the default.
-- **Still open:** audio/PDF moderation, presigned Content-Type binding, stronger direct-payment confirmation, per-store promo issues, and the ZM-018/019/020 API sweeps.
+- **Still open at this snapshot:** audio/PDF moderation and the remaining ZM-018/019/020 API sweeps. Presigned upload binding, direct-payment acceptance, and per-store promotion error handling were completed in later entries below.
 
 ## 61. Checkout confirmation, upload binding, admin step-up and route limits (2026-10-22) **[DONE]**
 
-- **Direct payment:** mobile and web checkouts now require the buyer to type `DIRECT` before switching a store from escrow to direct payment. The escrow-loss warning stays visible while confirming; `escrow` remains the default. Server-side acceptance flag and per-store promo issues are still queued.
+- **Direct payment:** mobile and web checkouts now require the buyer to type `DIRECT` before switching a store from escrow to direct payment. The escrow-loss warning stays visible while confirming; `escrow` remains the default. The server-side acceptance flag and per-store promotion issues were completed in later entries below.
 - **Media uploads:** presigned PUTs bind both `Content-Type` and `Content-Length`, so an upload intent cannot be reused with a different declared type. Production media config rejects an empty, placeholder or short `MEDIA_INTERNAL_TOKEN`.
 - **Gateway auth:** media download and link-preview refresh now require authentication at the gateway instead of inheriting the optional posts rule.
 - **Rate limits:** added account-scoped buckets for mentions resolve, comments, post engagement/saves, messages, conversation/channel writes, chat keys, support writes, admin email and unsubscribe.
 - **Device directory:** `chat/keys/devices/query` is scoped to the requester and existing conversation peers, closing arbitrary device enumeration. Mobile story replies start or resume the direct conversation before encrypting so first-time recipients still work.
 - **Admin step-up:** user enforcement, verification review, business-document review and creator decisions now require recent re-auth; staff settings and superadmin approvals now require the superadmin role rather than an empty permission check.
-- **Still open:** provider logistics remains deferred; audio/PDF moderation, single-use unsubscribe replay tracking, staff-JWKS assertion and the remaining ZM-018/ZM-020 items are unchanged.
+- **Still open at this snapshot:** provider logistics remains deferred; audio/PDF moderation, the remaining ZM-018/ZM-020 items and other audit gaps remain. Unsubscribe replay handling was completed in entry 69.
 
 ## 62. Direct-payment acceptance, author-only previews and expiring unsubscribe links (2026-10-22) **[DONE]**
 
@@ -2272,13 +2327,13 @@ No provider integration is to be built until the V2 design is approved and the s
 - **Anonymous counters:** anonymous share, impression and profile-visit requests now return before loading the post, so they can no longer be used for unauthenticated read amplification while reporting success.
 - **Unsubscribe links:** tokens now carry issued-at/expiry claims and default to 90 days (`UNSUBSCRIBE_TOKEN_TTL_DAYS`, 1–365). Expired, future-issued, tampered or legacy claim-less tokens are rejected. Repeat clicks remain idempotent rather than burning the link.
 - **Staff audience:** gateway startup rejects `AUTH_TOKEN_AUDIENCE=zudomart-admin`, preventing a config mistake from making ordinary user tokens satisfy the staff audience.
-- **Still open:** per-store promo `issues[]`, single-use replay tracking for unsubscribe, audio/PDF moderation and the remaining ZM-018/ZM-020 items.
+- **Still open at this snapshot:** audio/PDF moderation and the remaining ZM-018/ZM-020 items. Promotion issues and unsubscribe replay handling were completed in later entries below.
 
 ## 63. Internal route guards (2026-10-22) **[DONE]**
 
 - **Shared guard:** `platform/httpserver.RequireInternalToken` accepts `X-Internal-Token` or a Bearer token, uses a constant-time comparison and fails closed when the configured token is empty.
 - **Coverage:** every `/api/v1/internal/*` mutator in users, wallet, admin, escrow and creators is now guarded at the route level. The existing controller-level checks remain as defence in depth.
-- **Still open:** FX staleness alerting, username oracles, audit-record coverage and the rest of ZM-018/ZM-020.
+- **Still open at this snapshot:** username oracles, audit-record coverage and the remaining ZM-018/ZM-020 work. FX staleness alerting was completed in entry 67.
 
 ## 64. Currency rate seed path and missing-rate handling (2026-10-22) **[DONE]**
 
@@ -2292,7 +2347,7 @@ No provider integration is to be built until the V2 design is approved and the s
 - **Backend URLs:** enforcement appeal URLs now point at `/settings/account-status` and checkmark appeal URLs at `/settings/verification`, both of which exist.
 - **In-app data:** restricted, warned, suspended, banned and appeal-decided notifications carry `{ url, screen: "AccountStatus" }`; revoked checkmarks carry `{ url, screen: "Verification" }`.
 - **Clients:** web notifications navigate to the stored `url` on click, and mobile opens `AccountStatus` or `IdentityVerification` natively from the stored screen.
-- **Still open:** per-store promo `issues[]`, single-use replay tracking for unsubscribe, audio/PDF moderation and the rest of ZM-010/ZM-020.
+- **Still open at this snapshot:** audio/PDF moderation and the remaining ZM-010/ZM-020 work. Promotion issues and unsubscribe replay handling were completed in later entries below.
 
 ## 66. Audit record for automation content hides (2026-10-22) **[DONE]**
 
@@ -2333,14 +2388,14 @@ No provider integration is to be built until the V2 design is approved and the s
 - **Rate limits:** the availability and suggestion endpoints share the `usernameCheck` policy, which is account-scoped for signed-in callers.
 - **Still open:** profile/confusables enumeration and the remaining ZM-018 edges.
 
-## 74. One-time-code send budget per destination (2026-10-22) **[DONE]**
+## One-time-code send budget per destination (2026-10-22) **[DONE]**
 
 - **Auth:** `AUTH_OTP_MAX_SENDS_PER_HOUR` defaults to 10 and must be positive.
 - **Budget:** real code rows count across signup, reset, login and email verification; verified-token rows do not.
 - **Behaviour:** over-budget sends keep the active code and silently skip delivery, so the response does not reveal which destinations exist.
 - **Still open:** brigading weighting, self-gift farming, soft-delete purge and the rest of ZM-012.
 
-## 75. Order-group buyer and seller emails (2026-10-22) **[DONE]**
+## Order-group buyer and seller emails (2026-10-22) **[DONE]**
 
 - **Snapshot:** `order_groups.seller_name` is captured from the checkout store snapshot; old rows default to an empty name.
 - **Payloads:** group events carry names, line items, shipping, payment mode and lifecycle timestamps, so email props no longer need a second lookup.
@@ -2348,7 +2403,7 @@ No provider integration is to be built until the V2 design is approved and the s
 - **Templates:** shipped and delivered handle absent tracking/ETA; the seller template no longer promises an auto-cancel deadline.
 - **Still open:** cancellation emails need a reliable refund amount and restock state in the status-change event.
 
-## 73. Fan-out caps and public-read route limits (2026-10-22) **[DONE]**
+## Fan-out caps and public-read route limits (2026-10-22) **[DONE]**
 
 - **Comments:** preview fan-out is capped at 50 parents and eight concurrent queries.
 - **Digests and stories:** follow sets cap at 100 accounts; the stories widget caps at 500 story rows.
@@ -2356,10 +2411,22 @@ No provider integration is to be built until the V2 design is approved and the s
 - **Gateway:** ad events and public profile reads have account-scoped limits; sitemap pages have an IP-scoped limit.
 - **Still open:** audio/PDF moderation, mentions-resolve captcha, confusables enumeration and the remaining audit-record gaps.
 
-## 72. Per-store promo failures no longer abort checkout (2026-10-22) **[DONE]**
+## Per-store promo failures no longer abort checkout (2026-10-22) **[DONE]**
 
 - **Issue:** a bad or inapplicable coupon code for one store returned an error for the whole multi-store checkout.
 - **Response:** the affected order now carries `promotionIssue: { code, message }`; automatic promotions still apply, and sibling stores complete normally.
 - **Persistence:** `order_groups.promotion_issue_code` and `promotion_issue_message` are written at checkout and returned by the order presenter.
 - **Frontends:** web and mobile order detail screens show that the code could not be used and no discount was applied to that store.
 - **Still open:** audio/PDF moderation and the remaining ZM-010 items.
+
+## Nantty Spaces and TypeScript Fastify migration **[IN PROGRESS]**
+
+Owner direction, 2026-10-26: build **Nantty Spaces** as an audio-only, scheduled/joinable social room, using a blue identity. Video livestreaming remains a beta feature while it is improved; gifts are deferred and must not appear as a Spaces capability at launch. Begin a deliberate migration of the TypeScript backend services to Fastify rather than replacing the whole backend at once.
+
+- The detailed contract, architecture, migration phases and launch/QA gates are in [Nantty Spaces and Fastify migration](./plans/nantty-spaces-and-fastify-migration.md). Keep that document authoritative for endpoint and service-level details.
+- Current implementation is split into non-overlapping work: Go live backend foundation, mobile Spaces screens/flows, and a Fastify pilot for the TypeScript search service. These changes are still in progress; do not mark them shipped until tests and integration checks pass.
+- Keep the existing Go live service as the sole owner of LiveKit sessions, media tokens and stage safety. Spaces must issue microphone-only permissions, with no camera/video or gift/monetization path. Existing video livestream behavior stays outside the Spaces implementation and remains under the beta gate.
+- Migrate TypeScript services incrementally, preserving API contracts and running the old/new service checks before routing production traffic. The pilot must establish the Fastify plugin, validation, auth, error and observability conventions before other services are moved.
+- QA must cover scheduling/time zones, public discovery, host start/end/cancel, listener join/leave, speaker requests and host moderation, reconnects, authorization, rate limits and failure handling. Verify that unavailable video/gift paths are not exposed in the Spaces UI or API.
+- **Current deployment gate:** Nantty's Cloudflare zone is active, but the account currently has no Pages project. `apps/web` is a server-rendered Next.js application and is not configured for a static export; do not upload its build output as static assets or publish the authenticated admin app. First prepare and validate the approved static landing artifacts and a deployment path, then configure only approved hostnames. Keep `admin.nantty.com` private behind Cloudflare Access or an equivalent control. Do not change DNS until origin, access policy and rollback are verified.
+- **Current waitlist gate:** keep collection disabled until the business-owned Sheet/Apps Script endpoint, approved privacy notice, retention/deletion process and access restrictions are configured and tested. The prelaunch page must never report a signup as saved unless the write succeeds.

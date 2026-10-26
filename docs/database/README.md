@@ -71,7 +71,7 @@ Every Go module with a database uses the same layout. `<m>` = `services/go/modul
 | creators | goMoney (gRPC from goLive) | `creators` | EXISTING | 5 | `creators/src/modules/liveMoney/services/{giftCharging,battleSettlement}.service.go` |
 | live | goLive | `live` | EXISTING | 18 | `live/src/services/*.service.go`, `jobs/advanceDueTimers.job.go`; Valkey idempotency in `live/src/app.go` |
 | catalog, inventory, orders | goCommerce | `catalog`, `inventory`, `orders` | EXISTING | see migrations | `goCommerce` mounts all three; `analytics` remains a stub |
-| subscriptions | goMoney | `subscriptions` | EXISTING | see migrations | Billing, plans and creator subscriptions; rewards is removed and ZudoPoints live in `live` |
+| subscriptions | goMoney | `subscriptions` | EXISTING | see migrations | Billing, plans and creator subscriptions; rewards is removed and Nantty Points live in `live` |
 | ads | goAds | `ads` | EXISTING | see migrations | Campaigns, audiences, billing, tracking and reporting |
 | moderation | goTrust | `moderation` | EXISTING | see migrations | Reports, copyright, strikes, suspensions and appeals |
 

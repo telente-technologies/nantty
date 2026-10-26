@@ -490,7 +490,7 @@ erDiagram
 
 Status: all but BATTLE_SETTLEMENT EXISTING WIP (`services/go/modules/live/src/databases/schema/*`, migration `create_live_tables`); BATTLE_SETTLEMENT PROPOSED (belongs in go-money, keyed `battle-settle:{battleId}`). `state_deadline_at` / `ends_at` indexes support the Postgres due-time poller so timers survive restarts.
 
-## 7. Gifts and ZudoPoints
+## 7. Gifts and Nantty Points
 
 ```mermaid
 erDiagram

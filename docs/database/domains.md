@@ -33,7 +33,7 @@ As of 2026-10-03. Labels: **EXISTING** (path cited) · **PARTIAL** (some tables 
 | 21 | Messaging (DM, conversations) | PLANNED | `realtime` | ex-realtime (no DB code today) | legacy `messages.prisma` | Elixir has no Postgres dependency yet |
 | 22 | Live (sessions, stage, viewers, battles) | EXISTING | `live` | live (goLive) | `live/src/migrations/20261003102843_*` | |
 | 23 | Gifts (catalog, charges, combos, goals) | EXISTING | `live` (catalog, read models), `creators` (`gift_transactions`, money) | live; creators | | Money side in `creators`, display side in `live` |
-| 24 | ZudoPoints | PARTIAL | `live` (`points_entries`, `points_rules`) | live | plan: `rewards` schema (`docs/architecture/database.md` §7) | Points are never money; rewards module is a stub |
+| 24 | Nantty Points | PARTIAL | `live` (`points_entries`, `points_rules`) | live | plan: `rewards` schema (`docs/architecture/database.md` §7) | Points are never money; rewards module is a stub |
 | 25 | Ads (accounts, campaigns, impressions, revenue share) | PLANNED | `ads` | ads (goAds) | `docs/architecture/database.md` §8; legacy 22 `Ad*` models | `live_sessions.live_ad_settings` jsonb EXISTING |
 | 26 | Content (posts, comments, stories) | PLANNED | `social` | ts-social | legacy `posts.prisma` | |
 | 27 | Media (uploads, assets, variants) | PLANNED | `media` | ts-io | legacy `media.prisma`; `users` stores `avatar_media_key` | `POST /users/me/media/upload-intents` exists (no table) |
@@ -173,8 +173,8 @@ flowchart LR
 | `live.gift_combos / gift_contributions / processed_gifts` | Gifts (read model) | `sendGiftRecording.service.go` after the money call | owner | C3 (rebuildable from `creators.gift_transactions`) | L / L / XL | tx; `processed_gifts` dedupes by gift tx id | `processed_gifts`: RANGE `created_at` (drop) | `live_id` |
 | `live.gift_goals / goal_contributions` | Gifts | giftGoal services | owner | C3 | M | tx | none | `live_id` |
 | `live.live_leaderboard_entries` | Gifts / Points | leaderboard service | owner | C3 | L | rewrite per live | none | `live_id` |
-| `live.points_entries` | ZudoPoints | `pointsRecording.service.go` (idempotency key unique) | `id, user_id, type, amount, source_type, live_id, category_id, country_code, created_at` | C2 (not money) | XL | single tx, advisory lock per user+action | RANGE `created_at` monthly | `user_id` |
-| `live.points_rules` | ZudoPoints | admin | owner | C4 | XS | single-row | none | none |
+| `live.points_entries` | Nantty Points | `pointsRecording.service.go` (idempotency key unique) | `id, user_id, type, amount, source_type, live_id, category_id, country_code, created_at` | C2 (not money) | XL | single tx, advisory lock per user+action | RANGE `created_at` monthly | `user_id` |
+| `live.points_rules` | Nantty Points | admin | owner | C4 | XS | single-row | none | none |
 
 ## 5. Per-table ownership (PLANNED tables, key ones)
 

@@ -51,7 +51,7 @@ Header and footer markup is now duplicated across seller, ads, web and studio. L
 - Benefit-led subheads in the creator's words; no internal terms (no "RTMP ingest", "webhooks").
 - One clear primary action per section, always the same label: "Go live with Studio" (to `/login`). Secondary is always "Join the Creator Program".
 - Scannable blurbs: one or two sentences, verbs first.
-- Honest numbers only. Example figures are labelled "example". Facts come from the product: up to 10 on stage, 80% of fan subscriptions after app store fees, ₦50 payout fee, ZudoPoints are never cash, Zudomart shares eligible ad revenue and does not pay per view, live ads only when the creator opts in.
+- Honest numbers only. Example figures are labelled "example". Facts come from the product: up to 10 on stage, 80% of fan subscriptions after app store fees, ₦50 payout fee, Nantty Points are never cash, Zudomart shares eligible ad revenue and does not pay per view, live ads only when the creator opts in.
 - Selling is mentioned as optional, never as the point.
 - No emojis; vector icons only.
 

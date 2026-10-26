@@ -4,7 +4,7 @@
 
 ## 1. Scope and method
 
-We compared only the parts of the five platforms' terms and privacy documents that cover things Zudomart actually does: feed posts, clips, stories, lives with gifts and coins, ZudoPoints, the Creator Program (gifts, tips, ads revenue share, Premium pool, fan subscriptions), affiliates, the marketplace (sellers, buyers, escrow, refunds, disputes, seller-set shipping), ads and boosts (ad balance and ad credit), checkmarks and Premium, private accounts and follow requests, end-to-end encrypted chats and group chats, mentions, moderation and appeals, copyright, accounts, guests and deletion, biometric KYC, and the data, sharing, transfer, retention, rights and cookie rules for those features.
+We compared only the parts of the five platforms' terms and privacy documents that cover things Zudomart actually does: feed posts, clips, stories, lives with gifts and coins, Nantty Points, the Creator Program (gifts, tips, ads revenue share, Premium pool, fan subscriptions), affiliates, the marketplace (sellers, buyers, escrow, refunds, disputes, seller-set shipping), ads and boosts (ad balance and ad credit), checkmarks and Premium, private accounts and follow requests, end-to-end encrypted chats and group chats, mentions, moderation and appeals, copyright, accounts, guests and deletion, biometric KYC, and the data, sharing, transfer, retention, rights and cookie rules for those features.
 
 We left out features Zudomart does not have, such as dating, banking-style wallets, crypto and NFTs, vehicle and housing listings, VR, AI chatbots, child-specific messaging apps, ticketing, fundraisers, jobs, Twitch Turbo/Prime and gambling streams.
 
@@ -66,7 +66,7 @@ Gaps in the research: TikTok's LIVE Subscription, Creator Rewards and official a
 | Content licence and AI | Broad, perpetual licence outside the EEA; narrower in the EEA | Licence ends on deletion, with listed exceptions | Ends within a reasonable time after deletion | Licence expressly covers AI training and syndication | Perpetual and irrevocable | Non-exclusive, ends after deletion plus backup time; never sold to others; chats never used for training | Own AI training not decided | Text, done (flagged); owner to decide |
 | Feed ranking and paid reach | Brief | Explains ranking signals | Brief | Brief | None | Ranking signals, fixed checkmark boosts, labelled boosts and ads, "why am I seeing this" | Zudomart is more transparent | None |
 | Coins, gifts and tips | Coins only for gifts and boosts; gifts used up when sent; diamonds measure popularity; share not published; freeze-then-deduct on refunds | Stars not currency or donation; fixed creator rate per Star; forfeited on deletion | Bits are a licence; acceptable-use ban on trading for value or betting | Not offered | KICKs licence, no transfer; 95% to creator; chargebacks offset payouts | Not money or e-money; channel pricing; 25% fee on user-to-user transfers; gifts and tips final; creator gets 50/60/70% by tier; store refunds remove coins or record coin debt; ban on trading, betting and laundering | Web card chargebacks on coin purchases do nothing to coins; gift earnings are never reversed | Both: text done; code to handle coin chargebacks |
-| ZudoPoints | Rewards Policy has cash rewards (different model) | n/a | Channel points (no cash) | n/a | n/a | Never money, never withdrawable or convertible | None | Text, done |
+| Nantty Points | Rewards Policy has cash rewards (different model) | n/a | Channel points (no cash) | n/a | n/a | Never money, never withdrawable or convertible | None | Text, done |
 | Creator ads revenue share | Not published | Share of net ad revenue, rate not fixed | Rate on dashboard (about 55% reported) | Based on Premium users' engagement; formula can change any time | No ad share; partner pay instead | 40% default incl. comment-section ads, Creator Program only; AI content 30% of normal share; invalid traffic filtered; strikes can pause; 30 days' notice before lowering a rate | Strike pause not automatic in code | Both: text done; code for pause |
 | Premium pool | n/a | n/a | n/a | Revenue share uses Premium engagement | n/a | Split by Premium members' watch time | None | None |
 | Fan subscriptions | 18+, perks only (no split published) | Meta takes up to 30%; store fees from Meta's share | Dashboard split (50/50 default) | X sets the split; 60-day payout | Flat price, 95% to creator | Creator keeps 80% of net after store fee; app price grossed up; 7-day hold; refunds reversed | None | Text, done |
@@ -181,7 +181,7 @@ The owner must decide for each open one whether to change the code or the text; 
 12. A transparency report (removals, appeals, government requests), as Meta and Twitch publish.
 13. A public ad library for political and issue ads, if political ads are allowed.
 14. Paystack: resolved — owner confirmed Flutterwave is the only payment provider (2026-10-17); no Paystack work.
-15. A separate Virtual Items Policy page (new document key) once coins, gifts and ZudoPoints rules settle, as TikTok and Kick do.
+15. A separate Virtual Items Policy page (new document key) once coins, gifts and Nantty Points rules settle, as TikTok and Kick do.
 
 ## 8. Prioritised list of policy improvements
 

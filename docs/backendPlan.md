@@ -17,7 +17,7 @@ These apply to every backend file, whether a person or an agent writes it.
 - Function names are long and self-explanatory, for example `calculateCartTotalsInKobo`, `settleLiveBattleAndPostLedgerEntries`, `assertViewerCanGiftStreamerOnStage`.
 - Every route declares its permission and is denied by default. Every body, query and params object is schema-validated before it reaches a handler. Every money-moving route requires `Idempotency-Key`.
 - Money is always `{ amountMinor: integer, currency }`. Coins are plain integers in their own unit (`COIN`) and are never mixed with fiat minor units. The server resolves the viewer's currency, and nothing hardcodes NGN.
-- **Referral and purchase loyalty/cashback removed (owner, 2026-10-03).** There is no referral system and no platform-funded points or cashback on purchases; the go-money `rewards` module and the `referrals` block in `microservicesPlan.json` are gone. ZudoPoints engagement and gift points stay (non-monetary, in go-live). **Seller-funded store rewards (owner, 2026-10-03):** stores may fund store credit (see Store rewards below).
+- **Referral and purchase loyalty/cashback removed (owner, 2026-10-03).** There is no referral system and no platform-funded points or cashback on purchases; the go-money `rewards` module and the `referrals` block in `microservicesPlan.json` are gone. Nantty Points engagement and gift points stay (non-monetary, in go-live). **Seller-funded store rewards (owner, 2026-10-03):** stores may fund store credit (see Store rewards below).
 - **There is no in-store POS or cash register.** No registers, shifts, cash movements, offline sales, parked sales, PIN cashier switching, manager-PIN discount approvals or POS pay links. The `pos` block in `microservicesPlan.json` (registers, shifts, cash sales, `staffPins`) must go. The foundation agent owns that JSON and is removing it. The POS sections of `apps/seller/apiContract.md` and their mocks must also be deleted (§4.3.9).
 
 ---
@@ -26,7 +26,7 @@ These apply to every backend file, whether a person or an agent writes it.
 
 | Stack | Owns | Why this stack |
 | --- | --- | --- |
-| **Go** | users/accounts (auth, profiles, verification/KYB), wallet + ledger, payments, marketplace (catalog, inventory, stores), orders + escrow, subscriptions, creators (gifts, earnings), ZudoPoints, live (sessions, guests, battles), ads decision + attribution, admin | Strong typing and simple concurrency for money and the core state machines |
+| **Go** | users/accounts (auth, profiles, verification/KYB), wallet + ledger, payments, marketplace (catalog, inventory, stores), orders + escrow, subscriptions, creators (gifts, earnings), Nantty Points, live (sessions, guests, battles), ads decision + attribution, admin | Strong typing and simple concurrency for money and the core state machines |
 | **TypeScript (Zudojs)** | gateway, social orchestration (posts, comments, clips, stories, sounds, follows, privacy), feed orchestration, notifications, media, support, integrations (webhooks, couriers, partner APIs) | I/O-heavy fan-out; the existing Zudojs code in the old monolith ports almost line for line |
 | **Elixir / Phoenix** | realtime: chat, presence, typing, live activity (comments, gifts, goals, scores, viewer counts), in-app notification stream | Cheap processes, built-in presence and pub/sub, made for socket fan-out. **Never touches money** |
 | **Python** | `services/python/intelligence`: ranking, recommendations, risk/fraud and moderation **scores**, ads pCTR, analytics pipelines | ML ecosystem. **Python returns scores; Go/TS make the deterministic policy decision** (thresholds live in config tables) |
@@ -231,7 +231,7 @@ Contract: `apps/seller/apiContract.md`, types in `apps/seller/src/types/*.type.t
 | GET /seller/dashboard, /seller/reports/:kind (+`format=csv`) | ◐ | reporting (ClickHouse) | Drop `sales-by-staff` shifts/register kinds and `shifts`. Add xlsx/pdf (§4.3.13) |
 | /seller/wallet/balances, transactions, statements, payout-settings, payouts, banks, payout-accounts | ◐ | go.wallet | Payouts: owner/finance only, step-up re-auth |
 | /seller/settings, /seller/locations | ✗ | go.catalog.stores, go.inventory.locations | Remove POS settings (receipt printer, cash rounding, discount-approval PIN threshold) |
-| /seller/zudomart-users?q, /seller/staff/candidates, /seller/staff CRUD | ◐ (`/stores/:id/members`) | go.catalog.storeMembers | Staff = existing Zudomart users added by username; they accept in the app. Roles change (§4.3.14) |
+| /seller/nantty-users?q, /seller/staff/candidates, /seller/staff CRUD | ◐ (`/stores/:id/members`) | go.catalog.storeMembers | Staff = existing Zudomart users added by username; they accept in the app. Roles change (§4.3.14) |
 | /seller/audit-log | ✗ | go.admin.auditLog (store-scoped view) | |
 | /seller/affiliates/* (settings, overview, requests, creators, product-commissions, ledger, directory, live-invitations) | ◐ | go.creators.affiliations | |
 | /seller/brands/*, /seller/stores/mine, official store, protection claims | ◐ | go.users.brands, go.moderation.trademarkClaims | Official Store still needs a registered brand (plus Gold) |
@@ -897,7 +897,7 @@ Delete from `apps/seller/apiContract.md`, `apps/seller/src/types`, `src/mocks`, 
 
 **4.3.14 Team members, roles and permissions**
 
-- Staff are **existing Zudomart app users**, added by username search (`GET /seller/zudomart-users?q=`). They accept in the app and sign in with their own app credentials. There are no separate staff accounts and no email-only invites.
+- Staff are **existing Zudomart app users**, added by username search (`GET /seller/nantty-users?q=`). They accept in the app and sign in with their own app credentials. There are no separate staff accounts and no email-only invites.
 - Roles: `owner` (one; transfer by owner only, step-up) · `admin` · `manager` · `inventory` · `fulfilment` (replaces cashier) · `support` · `marketing` · `finance` · `analyst` (read-only).
 - Permissions (examples): `products:view|manage`, `inventory:view|manage`, `orders:view|fulfil|cancel|refund`, `customers:view|manage`, `marketing:manage`, `ads:manage`, `analytics:view`, `reports:export`, `wallet:view`, `wallet:withdraw` (owner + finance), `billing:manage` (owner), `staff:manage` (owner + admin), `settings:manage`, `apiKeys:manage`, `messages:reply`, `audit:view`.
 - Seats are counted against the plan (`409 SEAT_LIMIT_REACHED`). Role changes, removals and payouts go to the audit log.
@@ -962,13 +962,13 @@ The pipeline runs `raw impression` (client `POST /ads/events`, batched and idemp
 
 **4.4.5 Launch scope:** sponsored feed, pre-roll, post-roll, Shorts feed ads, attribution, frequency caps, fraud filtering and basic revenue share. Mid-roll and live ads ship later as switches.
 
-### 4.5 ZudoPoints and social graph
+### 4.5 Nantty Points and social graph
 
 > **Creator = personal account upgrade (owner, 2026-10-03).** A creator account is the user's personal account turned into a creator account, not a separate profile. Profile types are Personal, Business/Brand and Government; `creatorStatus` (`none|pending|approved|rejected`) lives on the Personal profile and is set to `approved` when the Creator Program application is approved. It unlocks Creator Studio, going live, monetisation and earnings. Blue applies to the Personal profile whether or not it is creator-enabled.
 
 > **Live part built in go-live (3 Oct 2026).** `points_entries` / `points_rules` live in the `live` schema (not a separate `points` schema). Like points cap at 10/min per user via the `like` rule (`perMinuteCap`), share/follow once per live, watch once a minute; gifts award `support` points to the sender and `stream` points to the receiver (1 per coin, rules `gift`/`giftReceived`). Per-stream boards are stored at `live.ended`; `GET /rankings` aggregates on demand (no hourly rebuild yet); the country scope uses `X-Client-Region` captured when the live starts. Profiles, social graph and follow awards from the users service are not part of this batch. **Host rank in live (10 Oct 2026):** `GET /api/v1/lives/{liveId}` returns `hostRanking: { globalRank, categoryRank, category, period: "week" } | null` for lives that have not ended, from the weekly streamer board (global, and the live's category). It is `null` when the host has no stream points this week or the lookup fails, so the session still loads. The standalone Rankings page in the apps was removed; `GET /api/v1/rankings` stays.
 
-**4.5.1 ZudoPoints** (Go `points` schema; Redis for rate limits and live boards)
+**4.5.1 Nantty Points** (Go `points` schema; Redis for rate limits and live boards)
 
 - **Points are not money.** They are never withdrawable, transferable or convertible to coins or cash, and they live outside the money ledger in their own append-only `PointsEntry { userId, type: engagement|support|stream|community|achievement, amount, sourceType, sourceId, streamId?, categoryId?, idempotencyKey, createdAt }`.
 - **Sources:** money actions (gifts, coin purchases, subscriptions, orders) award `support` points proportional to coins or amount via the `PointsRule` table. Engagement actions also earn points: double-tap like, share, follow, watch time, challenges, goals.

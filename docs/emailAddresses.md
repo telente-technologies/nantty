@@ -4,7 +4,7 @@ Owner decision, 2026-10-04: every Zudomart address is on the company domain. Thi
 
 - **Human mailboxes** live on the root domain: `<name>@zudomart.com`.
 - **Automated mail** is sent through Amazon SES from the sending subdomain `mail.zudomart.com`, so its reputation is kept apart from the people's mailboxes.
-- Nothing in the product hardcodes an address. Each app builds them from its brand config (`NEXT_PUBLIC_MAIL_DOMAIN`, `EXPO_PUBLIC_MAIL_DOMAIN`, `ZUDOMART_MAIL_DOMAIN`, `ZUDOMART_MAIL_SENDING_DOMAIN`), defaulting to the addresses below. The shared helper is `buildZudomartEmailAddresses` in `packages/webKit/src/contact/zudomartEmailAddresses.ts`; email senders are chosen by `selectEmailSender` in `packages/emailTemplates/src/config/emailSenders.config.ts`.
+- Nothing in the product hardcodes an address. Each app builds them from its brand config (`NEXT_PUBLIC_MAIL_DOMAIN`, `EXPO_PUBLIC_MAIL_DOMAIN`, `ZUDOMART_MAIL_DOMAIN`, `ZUDOMART_MAIL_SENDING_DOMAIN`), defaulting to the addresses below. The shared helper is `buildNanttyEmailAddresses` in `packages/webKit/src/contact/nanttyEmailAddresses.ts`; email senders are chosen by `selectEmailSender` in `packages/emailTemplates/src/config/emailSenders.config.ts`.
 
 **Forwarding to the owner.** Until there is a team, the owner's iCloud addresses (oyinlola.tech@icloud.com and oluwayemioyinlola2@icloud.com) can be set as forwarding targets for any mailbox or group below. Configure this in the mail provider only; never put those addresses back in product code, emails or legal pages.
 
