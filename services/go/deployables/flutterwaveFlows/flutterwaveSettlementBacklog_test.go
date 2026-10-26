@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"testing"
 
-	"zudomart/modules/ledger/src/databases"
-	paymentmodels "zudomart/modules/payments/src/modules/gateway/models"
+	"nantty/modules/ledger/src/databases"
+	paymentmodels "nantty/modules/payments/src/modules/gateway/models"
 )
 
 func TestOldMovementsThatNeverUnblockDoNotStarveANewSettlement(t *testing.T) {

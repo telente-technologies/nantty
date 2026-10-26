@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"os"
 
-	"zudomart/modules/live"
-	"zudomart/platform/servicemodule"
+	"nantty/modules/live"
+	"nantty/platform/servicemodule"
 )
 
 func main() {

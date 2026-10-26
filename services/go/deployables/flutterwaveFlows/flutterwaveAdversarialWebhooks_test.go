@@ -6,10 +6,10 @@ import (
 	"sync"
 	"testing"
 
-	ledgermodels "zudomart/modules/ledger/src/modules/journal/models"
-	"zudomart/modules/payments/src/generated/ent/paymentintent"
-	"zudomart/modules/payments/src/integrations"
-	paymentstesting "zudomart/modules/payments/src/integrations/paymentsTesting"
+	ledgermodels "nantty/modules/ledger/src/modules/journal/models"
+	"nantty/modules/payments/src/generated/ent/paymentintent"
+	"nantty/modules/payments/src/integrations"
+	paymentstesting "nantty/modules/payments/src/integrations/paymentsTesting"
 )
 
 func TestForgedWebhookIsRejectedAndCreditsNothing(t *testing.T) {

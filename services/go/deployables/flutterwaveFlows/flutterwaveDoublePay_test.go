@@ -12,12 +12,12 @@ import (
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgconn"
 
-	ledgermodels "zudomart/modules/ledger/src/modules/journal/models"
-	"zudomart/modules/payments/src/generated/ent"
-	"zudomart/modules/payments/src/generated/ent/outboxevent"
-	"zudomart/modules/payments/src/generated/ent/paymentintent"
-	"zudomart/modules/payments/src/generated/ent/reconciliationcase"
-	paymentstesting "zudomart/modules/payments/src/integrations/paymentsTesting"
+	ledgermodels "nantty/modules/ledger/src/modules/journal/models"
+	"nantty/modules/payments/src/generated/ent"
+	"nantty/modules/payments/src/generated/ent/outboxevent"
+	"nantty/modules/payments/src/generated/ent/paymentintent"
+	"nantty/modules/payments/src/generated/ent/reconciliationcase"
+	paymentstesting "nantty/modules/payments/src/integrations/paymentsTesting"
 )
 
 func (harness *flowHarness) spendable(userId string) int64 {

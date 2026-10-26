@@ -4,11 +4,11 @@ import (
 	"fmt"
 	"os"
 
-	"zudomart/modules/analytics"
-	"zudomart/modules/catalog"
-	"zudomart/modules/inventory"
-	"zudomart/modules/orders"
-	"zudomart/platform/servicemodule"
+	"nantty/modules/analytics"
+	"nantty/modules/catalog"
+	"nantty/modules/inventory"
+	"nantty/modules/orders"
+	"nantty/platform/servicemodule"
 )
 
 func main() {

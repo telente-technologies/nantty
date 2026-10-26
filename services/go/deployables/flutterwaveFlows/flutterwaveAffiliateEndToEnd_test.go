@@ -8,10 +8,10 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/creators/src/generated/ent/affiliatecommission"
-	affiliateservices "zudomart/modules/creators/src/modules/affiliates/services"
-	"zudomart/modules/creators/src/repositories"
-	ledgermodels "zudomart/modules/ledger/src/modules/journal/models"
+	"nantty/modules/creators/src/generated/ent/affiliatecommission"
+	affiliateservices "nantty/modules/creators/src/modules/affiliates/services"
+	"nantty/modules/creators/src/repositories"
+	ledgermodels "nantty/modules/ledger/src/modules/journal/models"
 )
 
 type walletSnapshot struct{ seller, creator int64 }

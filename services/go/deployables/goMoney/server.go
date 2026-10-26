@@ -4,13 +4,13 @@ import (
 	"fmt"
 	"os"
 
-	"zudomart/modules/creators"
-	"zudomart/modules/escrow"
-	"zudomart/modules/ledger"
-	"zudomart/modules/payments"
-	"zudomart/modules/subscriptions"
-	"zudomart/modules/wallet"
-	"zudomart/platform/servicemodule"
+	"nantty/modules/creators"
+	"nantty/modules/escrow"
+	"nantty/modules/ledger"
+	"nantty/modules/payments"
+	"nantty/modules/subscriptions"
+	"nantty/modules/wallet"
+	"nantty/platform/servicemodule"
 )
 
 func main() {

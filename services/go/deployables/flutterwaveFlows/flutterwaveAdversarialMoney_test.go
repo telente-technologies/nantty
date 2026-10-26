@@ -7,10 +7,10 @@ import (
 	"testing"
 	"time"
 
-	ledgermodels "zudomart/modules/ledger/src/modules/journal/models"
-	paymentstesting "zudomart/modules/payments/src/integrations/paymentsTesting"
-	"zudomart/modules/payments/src/interfaces"
-	paymentservices "zudomart/modules/payments/src/modules/gateway/services"
+	ledgermodels "nantty/modules/ledger/src/modules/journal/models"
+	paymentstesting "nantty/modules/payments/src/integrations/paymentsTesting"
+	"nantty/modules/payments/src/interfaces"
+	paymentservices "nantty/modules/payments/src/modules/gateway/services"
 )
 
 func (harness *flowHarness) fundedSellerWithPayoutAccount(amountMinor int64) (string, string) {

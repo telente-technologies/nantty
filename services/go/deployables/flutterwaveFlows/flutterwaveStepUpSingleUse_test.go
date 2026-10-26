@@ -6,9 +6,9 @@ import (
 	"sync"
 	"testing"
 
-	ledgermiddlewares "zudomart/modules/ledger/src/middlewares"
-	paymentstesting "zudomart/modules/payments/src/integrations/paymentsTesting"
-	walletconfigs "zudomart/modules/wallet/src/configs"
+	ledgermiddlewares "nantty/modules/ledger/src/middlewares"
+	paymentstesting "nantty/modules/payments/src/integrations/paymentsTesting"
+	walletconfigs "nantty/modules/wallet/src/configs"
 )
 
 func (harness *flowHarness) withdrawWithStepUp(userId, accountId string, amountMinor int64, key string, stepUp http.Header) paymentstesting.HarnessResponse {

@@ -7,9 +7,9 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/creators/src/repositories"
-	ledgermodels "zudomart/modules/ledger/src/modules/journal/models"
-	ledgerservices "zudomart/modules/ledger/src/modules/journal/services"
+	"nantty/modules/creators/src/repositories"
+	ledgermodels "nantty/modules/ledger/src/modules/journal/models"
+	ledgerservices "nantty/modules/ledger/src/modules/journal/services"
 )
 
 func (scene *affiliateScene) statementLines(userId string) []string {

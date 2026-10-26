@@ -9,17 +9,17 @@ import (
 
 	"github.com/google/uuid"
 
-	creatorssrc "zudomart/modules/creators/src"
-	creatorsconfigs "zudomart/modules/creators/src/configs"
-	"zudomart/modules/creators/src/generated/ent"
-	"zudomart/modules/creators/src/generated/ent/affiliatecommission"
-	"zudomart/modules/creators/src/generated/ent/creatoraffiliation"
-	affiliateservices "zudomart/modules/creators/src/modules/affiliates/services"
-	programservices "zudomart/modules/creators/src/modules/creatorProgram/services"
-	"zudomart/modules/creators/src/repositories"
-	"zudomart/modules/ledger/src/databases"
-	moneytesting "zudomart/modules/ledger/src/databases/moneyTesting"
-	ledgermodels "zudomart/modules/ledger/src/modules/journal/models"
+	creatorssrc "nantty/modules/creators/src"
+	creatorsconfigs "nantty/modules/creators/src/configs"
+	"nantty/modules/creators/src/generated/ent"
+	"nantty/modules/creators/src/generated/ent/affiliatecommission"
+	"nantty/modules/creators/src/generated/ent/creatoraffiliation"
+	affiliateservices "nantty/modules/creators/src/modules/affiliates/services"
+	programservices "nantty/modules/creators/src/modules/creatorProgram/services"
+	"nantty/modules/creators/src/repositories"
+	"nantty/modules/ledger/src/databases"
+	moneytesting "nantty/modules/ledger/src/databases/moneyTesting"
+	ledgermodels "nantty/modules/ledger/src/modules/journal/models"
 )
 
 type affiliateScene struct {

@@ -8,8 +8,8 @@ import (
 	"testing"
 	"time"
 
-	"zudomart/modules/ledger/src/databases"
-	ledgermodels "zudomart/modules/ledger/src/modules/journal/models"
+	"nantty/modules/ledger/src/databases"
+	ledgermodels "nantty/modules/ledger/src/modules/journal/models"
 )
 
 var walletLineKeys = []string{"available", "pending", "locked", "earningsPayable", "adCredit", "coins", "debts"}

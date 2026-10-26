@@ -11,11 +11,11 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/orders/src/generated/ent/orderitem"
-	"zudomart/modules/orders/src/generated/ent/outboxevent"
-	"zudomart/modules/orders/src/services"
-	"zudomart/platform/identityports/identitytest"
-	"zudomart/platform/jwtauth"
+	"nantty/modules/orders/src/generated/ent/orderitem"
+	"nantty/modules/orders/src/generated/ent/outboxevent"
+	"nantty/modules/orders/src/services"
+	"nantty/platform/identityports/identitytest"
+	"nantty/platform/jwtauth"
 )
 
 type cartClient struct {

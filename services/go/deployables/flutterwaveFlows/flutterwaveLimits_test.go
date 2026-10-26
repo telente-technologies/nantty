@@ -9,8 +9,8 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/ledger/src/loaders"
-	paymentservices "zudomart/modules/payments/src/modules/gateway/services"
+	"nantty/modules/ledger/src/loaders"
+	paymentservices "nantty/modules/payments/src/modules/gateway/services"
 )
 
 func TestWalletPaymentsStopAtTheTiersDailyLimitAndResetTheNextDay(t *testing.T) {

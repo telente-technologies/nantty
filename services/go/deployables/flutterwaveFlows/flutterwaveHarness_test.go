@@ -11,15 +11,15 @@ import (
 
 	"github.com/google/uuid"
 
-	escrowsrc "zudomart/modules/escrow/src"
-	escrowconfigs "zudomart/modules/escrow/src/configs"
-	moneytesting "zudomart/modules/ledger/src/databases/moneyTesting"
-	ledgermodels "zudomart/modules/ledger/src/modules/journal/models"
-	paymentstesting "zudomart/modules/payments/src/integrations/paymentsTesting"
-	paymentmodels "zudomart/modules/payments/src/modules/gateway/models"
-	paymentservices "zudomart/modules/payments/src/modules/gateway/services"
-	walletsrc "zudomart/modules/wallet/src"
-	walletconfigs "zudomart/modules/wallet/src/configs"
+	escrowsrc "nantty/modules/escrow/src"
+	escrowconfigs "nantty/modules/escrow/src/configs"
+	moneytesting "nantty/modules/ledger/src/databases/moneyTesting"
+	ledgermodels "nantty/modules/ledger/src/modules/journal/models"
+	paymentstesting "nantty/modules/payments/src/integrations/paymentsTesting"
+	paymentmodels "nantty/modules/payments/src/modules/gateway/models"
+	paymentservices "nantty/modules/payments/src/modules/gateway/services"
+	walletsrc "nantty/modules/wallet/src"
+	walletconfigs "nantty/modules/wallet/src/configs"
 )
 
 type flowHarness struct {

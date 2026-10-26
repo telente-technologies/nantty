@@ -9,9 +9,9 @@ import (
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 
-	"zudomart/modules/orders/src/generated/ent/outboxevent"
-	confirmorderreceipt "zudomart/modules/orders/src/modules/orders/commands/confirmOrderReceipt"
-	"zudomart/modules/orders/src/services"
+	"nantty/modules/orders/src/generated/ent/outboxevent"
+	confirmorderreceipt "nantty/modules/orders/src/modules/orders/commands/confirmOrderReceipt"
+	"nantty/modules/orders/src/services"
 )
 
 type directOrderClock struct {

@@ -7,10 +7,10 @@ import (
 	"strings"
 	"testing"
 
-	"zudomart/modules/ledger/src/databases"
-	ledgermodels "zudomart/modules/ledger/src/modules/journal/models"
-	"zudomart/modules/payments/src/generated/ent/paymentintent"
-	paymentmodels "zudomart/modules/payments/src/modules/gateway/models"
+	"nantty/modules/ledger/src/databases"
+	ledgermodels "nantty/modules/ledger/src/modules/journal/models"
+	"nantty/modules/payments/src/generated/ent/paymentintent"
+	paymentmodels "nantty/modules/payments/src/modules/gateway/models"
 )
 
 func TestDeadLetteredFundingIsInspectedRedactedAndReplayedByStaffWithStepUp(t *testing.T) {

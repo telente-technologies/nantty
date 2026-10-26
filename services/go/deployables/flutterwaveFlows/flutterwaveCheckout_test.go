@@ -7,11 +7,11 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/escrow/src/generated/ent"
-	"zudomart/modules/escrow/src/generated/ent/escrow"
-	confirmorderreceipt "zudomart/modules/escrow/src/modules/escrows/commands/confirmOrderReceipt"
-	paymentstesting "zudomart/modules/payments/src/integrations/paymentsTesting"
-	paymentmodels "zudomart/modules/payments/src/modules/gateway/models"
+	"nantty/modules/escrow/src/generated/ent"
+	"nantty/modules/escrow/src/generated/ent/escrow"
+	confirmorderreceipt "nantty/modules/escrow/src/modules/escrows/commands/confirmOrderReceipt"
+	paymentstesting "nantty/modules/payments/src/integrations/paymentsTesting"
+	paymentmodels "nantty/modules/payments/src/modules/gateway/models"
 )
 
 type order struct {

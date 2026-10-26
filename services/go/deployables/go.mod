@@ -1,4 +1,4 @@
-module zudomart/deployables
+module nantty/deployables
 
 go 1.26.9
 
@@ -6,24 +6,24 @@ require (
 	github.com/google/uuid v1.6.0
 	github.com/jackc/pgx/v5 v5.11.0
 	github.com/lestrrat-go/jwx/v3 v3.3.0
-	zudomart/modules/admin v0.0.0
-	zudomart/modules/ads v0.0.0
-	zudomart/modules/analytics v0.0.0
-	zudomart/modules/auth v0.0.0
-	zudomart/modules/catalog v0.0.0
-	zudomart/modules/creators v0.0.0
-	zudomart/modules/currency v0.0.0
-	zudomart/modules/escrow v0.0.0
-	zudomart/modules/inventory v0.0.0
-	zudomart/modules/ledger v0.0.0
-	zudomart/modules/live v0.0.0
-	zudomart/modules/moderation v0.0.0
-	zudomart/modules/orders v0.0.0
-	zudomart/modules/payments v0.0.0
-	zudomart/modules/subscriptions v0.0.0
-	zudomart/modules/users v0.0.0
-	zudomart/modules/wallet v0.0.0
-	zudomart/platform v0.0.0
+	nantty/modules/admin v0.0.0
+	nantty/modules/ads v0.0.0
+	nantty/modules/analytics v0.0.0
+	nantty/modules/auth v0.0.0
+	nantty/modules/catalog v0.0.0
+	nantty/modules/creators v0.0.0
+	nantty/modules/currency v0.0.0
+	nantty/modules/escrow v0.0.0
+	nantty/modules/inventory v0.0.0
+	nantty/modules/ledger v0.0.0
+	nantty/modules/live v0.0.0
+	nantty/modules/moderation v0.0.0
+	nantty/modules/orders v0.0.0
+	nantty/modules/payments v0.0.0
+	nantty/modules/subscriptions v0.0.0
+	nantty/modules/users v0.0.0
+	nantty/modules/wallet v0.0.0
+	nantty/platform v0.0.0
 )
 
 require (
@@ -170,22 +170,22 @@ require (
 )
 
 replace (
-	zudomart/modules/admin => ../modules/admin
-	zudomart/modules/ads => ../modules/ads
-	zudomart/modules/analytics => ../modules/analytics
-	zudomart/modules/auth => ../modules/auth
-	zudomart/modules/catalog => ../modules/catalog
-	zudomart/modules/creators => ../modules/creators
-	zudomart/modules/currency => ../modules/currency
-	zudomart/modules/escrow => ../modules/escrow
-	zudomart/modules/inventory => ../modules/inventory
-	zudomart/modules/ledger => ../modules/ledger
-	zudomart/modules/live => ../modules/live
-	zudomart/modules/moderation => ../modules/moderation
-	zudomart/modules/orders => ../modules/orders
-	zudomart/modules/payments => ../modules/payments
-	zudomart/modules/subscriptions => ../modules/subscriptions
-	zudomart/modules/users => ../modules/users
-	zudomart/modules/wallet => ../modules/wallet
-	zudomart/platform => ../platform
+	nantty/modules/admin => ../modules/admin
+	nantty/modules/ads => ../modules/ads
+	nantty/modules/analytics => ../modules/analytics
+	nantty/modules/auth => ../modules/auth
+	nantty/modules/catalog => ../modules/catalog
+	nantty/modules/creators => ../modules/creators
+	nantty/modules/currency => ../modules/currency
+	nantty/modules/escrow => ../modules/escrow
+	nantty/modules/inventory => ../modules/inventory
+	nantty/modules/ledger => ../modules/ledger
+	nantty/modules/live => ../modules/live
+	nantty/modules/moderation => ../modules/moderation
+	nantty/modules/orders => ../modules/orders
+	nantty/modules/payments => ../modules/payments
+	nantty/modules/subscriptions => ../modules/subscriptions
+	nantty/modules/users => ../modules/users
+	nantty/modules/wallet => ../modules/wallet
+	nantty/platform => ../platform
 )

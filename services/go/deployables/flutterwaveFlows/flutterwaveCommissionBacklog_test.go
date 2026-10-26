@@ -7,8 +7,8 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/creators/src/generated/ent/affiliatecommission"
-	ledgermodels "zudomart/modules/ledger/src/modules/journal/models"
+	"nantty/modules/creators/src/generated/ent/affiliatecommission"
+	ledgermodels "nantty/modules/ledger/src/modules/journal/models"
 )
 
 func (scene *affiliateScene) pendingCommission(sellerId string, attempts int, retryAfter *time.Time) string {
