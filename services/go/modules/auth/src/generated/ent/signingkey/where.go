@@ -3,8 +3,8 @@
 package signingkey
 
 import (
+	"nantty/modules/auth/src/generated/ent/predicate"
 	"time"
-	"zudomart/modules/auth/src/generated/ent/predicate"
 
 	"entgo.io/ent/dialect/sql"
 )

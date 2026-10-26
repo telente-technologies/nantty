@@ -4,10 +4,10 @@ package ent
 
 import (
 	"fmt"
+	"nantty/modules/auth/src/generated/ent/account"
+	"nantty/modules/auth/src/generated/ent/socialidentity"
 	"strings"
 	"time"
-	"zudomart/modules/auth/src/generated/ent/account"
-	"zudomart/modules/auth/src/generated/ent/socialidentity"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"

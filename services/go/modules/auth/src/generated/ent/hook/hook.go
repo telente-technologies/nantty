@@ -5,7 +5,7 @@ package hook
 import (
 	"context"
 	"fmt"
-	"zudomart/modules/auth/src/generated/ent"
+	"nantty/modules/auth/src/generated/ent"
 )
 
 // The AccountFunc type is an adapter to allow the use of ordinary

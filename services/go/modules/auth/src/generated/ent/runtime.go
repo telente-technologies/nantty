@@ -3,17 +3,17 @@
 package ent
 
 import (
+	"nantty/modules/auth/src/databases/schema"
+	"nantty/modules/auth/src/generated/ent/account"
+	"nantty/modules/auth/src/generated/ent/agegaterefusal"
+	"nantty/modules/auth/src/generated/ent/onetimecode"
+	"nantty/modules/auth/src/generated/ent/outboxevent"
+	"nantty/modules/auth/src/generated/ent/refreshtoken"
+	"nantty/modules/auth/src/generated/ent/registrationblock"
+	"nantty/modules/auth/src/generated/ent/session"
+	"nantty/modules/auth/src/generated/ent/signingkey"
+	"nantty/modules/auth/src/generated/ent/socialidentity"
 	"time"
-	"zudomart/modules/auth/src/databases/schema"
-	"zudomart/modules/auth/src/generated/ent/account"
-	"zudomart/modules/auth/src/generated/ent/agegaterefusal"
-	"zudomart/modules/auth/src/generated/ent/onetimecode"
-	"zudomart/modules/auth/src/generated/ent/outboxevent"
-	"zudomart/modules/auth/src/generated/ent/refreshtoken"
-	"zudomart/modules/auth/src/generated/ent/registrationblock"
-	"zudomart/modules/auth/src/generated/ent/session"
-	"zudomart/modules/auth/src/generated/ent/signingkey"
-	"zudomart/modules/auth/src/generated/ent/socialidentity"
 
 	"github.com/google/uuid"
 )

@@ -6,8 +6,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"nantty/modules/auth/src/generated/ent/signingkey"
 	"time"
-	"zudomart/modules/auth/src/generated/ent/signingkey"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"

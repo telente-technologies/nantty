@@ -6,9 +6,9 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"nantty/modules/auth/src/generated/ent/refreshtoken"
+	"nantty/modules/auth/src/generated/ent/session"
 	"time"
-	"zudomart/modules/auth/src/generated/ent/refreshtoken"
-	"zudomart/modules/auth/src/generated/ent/session"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
