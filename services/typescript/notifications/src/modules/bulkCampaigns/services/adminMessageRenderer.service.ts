@@ -1,4 +1,4 @@
-import { defaultEmailBrand, type EmailBrandConfig } from "@zudomart/email-templates";
+import { defaultEmailBrand, type EmailBrandConfig } from "@nantty/email-templates";
 
 const escapeHtml = (value: string) => value.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 

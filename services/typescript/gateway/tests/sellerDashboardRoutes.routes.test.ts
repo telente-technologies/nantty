@@ -5,7 +5,7 @@ import { buildRouteRateLimitKey, classifyRequestForRateLimit } from "../src/serv
 
 describe("seller dashboard routes", () => {
   it("sends every newly backed seller domain to go-commerce behind a signed-in session", () => {
-    const paths = ["/api/v1/seller/settings", "/api/v1/seller/storefront", "/api/v1/seller/staff", "/api/v1/seller/staff/candidates", "/api/v1/seller/audit-log", "/api/v1/seller/zudomart-users",
+    const paths = ["/api/v1/seller/settings", "/api/v1/seller/storefront", "/api/v1/seller/staff", "/api/v1/seller/staff/candidates", "/api/v1/seller/audit-log", "/api/v1/seller/nantty-users", "/api/v1/seller/zudomart-users",
       "/api/v1/seller/wallet/balances", "/api/v1/seller/finance/summary", "/api/v1/seller/dashboard", "/api/v1/seller/analytics/overview", "/api/v1/seller/delivery/areas", "/api/v1/stores/team-requests"];
     for (const path of paths) {
       expect(resolveUpstreamRouteForRequest("GET", path), path).toMatchObject({ upstream: "commerce", authentication: "required" });
@@ -19,6 +19,7 @@ describe("seller dashboard routes", () => {
   });
 
   it("rate limits people search, team changes and money moves per account", () => {
+    expect(classifyRequestForRateLimit("GET", "/api/v1/seller/nantty-users")).toBe("sellerPeopleSearch");
     expect(classifyRequestForRateLimit("GET", "/api/v1/seller/zudomart-users")).toBe("sellerPeopleSearch");
     expect(classifyRequestForRateLimit("PATCH", "/api/v1/seller/staff/abc")).toBe("sellerTeamWrite");
     expect(classifyRequestForRateLimit("POST", "/api/v1/stores/team-requests/abc/accept")).toBe("sellerTeamWrite");

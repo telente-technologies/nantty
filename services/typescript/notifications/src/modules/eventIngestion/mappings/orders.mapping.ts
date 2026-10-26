@@ -1,4 +1,4 @@
-import type { SellerItemGroup } from "@zudomart/email-templates";
+import type { SellerItemGroup } from "@nantty/email-templates";
 
 import type { DomainEventEnvelope } from "../../../types/domainEvent.type.js";
 import type { NotificationIntent, Recipient } from "../../../types/notification.type.js";

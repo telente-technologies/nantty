@@ -1,6 +1,6 @@
 import { symbolLeftHalfPath, symbolPath, symbolRightHalfPath, symbolTileRadius, symbolViewBox, wordmarkPath, wordmarkSmallPath } from "../constants/brandWordmark.constant.js";
 
-export const zudomartBrandColour = "#3A2BFF";
+export const nanttyBrandColour = "#3A2BFF";
 
 const handlePattern = /^[a-z0-9._]{1,30}$/;
 
@@ -51,7 +51,7 @@ const escapeXml = (text: string) => text.replace(/[<>&'"]/g, (character) => `&#$
 
 function symbolTile(x: number, y: number, size: number): string {
   const scale = size / symbolViewBox;
-  return `<g transform="translate(${x} ${y}) scale(${scale.toFixed(5)})"><rect width="${symbolViewBox}" height="${symbolViewBox}" rx="${symbolTileRadius}" fill="${zudomartBrandColour}"/>`
+  return `<g transform="translate(${x} ${y}) scale(${scale.toFixed(5)})"><rect width="${symbolViewBox}" height="${symbolViewBox}" rx="${symbolTileRadius}" fill="${nanttyBrandColour}"/>`
     + `<path d="${symbolPath}" fill="#FFFFFF"/></g>`;
 }
 

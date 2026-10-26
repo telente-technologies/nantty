@@ -1,4 +1,4 @@
-import { isEmailTemplateKey, listEmailTemplateCatalogue, renderEmail, renderEmailSample, type EmailBrandConfig, type EmailTemplateCatalogueEntry, type RenderedEmail } from "@zudomart/email-templates";
+import { isEmailTemplateKey, listEmailTemplateCatalogue, renderEmail, renderEmailSample, type EmailBrandConfig, type EmailTemplateCatalogueEntry, type RenderedEmail } from "@nantty/email-templates";
 
 import { notFoundError } from "../../../../errors/notifications.error.js";
 import type { PolicyUpdatedPreviewBody } from "../../validators/emailTemplates.validator.js";

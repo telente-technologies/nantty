@@ -4,8 +4,8 @@ FROM node:24-alpine AS build
 RUN corepack enable
 WORKDIR /repo
 COPY . .
-RUN pnpm install --frozen-lockfile --filter @zudomart/gateway... && pnpm --filter @zudomart/gateway build \
-    && pnpm --filter @zudomart/gateway deploy --prod --legacy /out
+RUN pnpm install --frozen-lockfile --filter @nantty/gateway... && pnpm --filter @nantty/gateway build \
+    && pnpm --filter @nantty/gateway deploy --prod --legacy /out
 
 FROM node:24-alpine
 ENV NODE_ENV=production

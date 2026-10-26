@@ -1,4 +1,4 @@
-import { readEmailTemplate, renderEmail, type EmailBrandConfig, type EmailTemplateKey } from "@zudomart/email-templates";
+import { readEmailTemplate, renderEmail, type EmailBrandConfig, type EmailTemplateKey } from "@nantty/email-templates";
 
 import { marketingFrequencyWindowMs } from "../../../constants/delivery.constant.js";
 import { defaultEmailEnabledByCategory } from "../../../constants/notificationCategories.constant.js";

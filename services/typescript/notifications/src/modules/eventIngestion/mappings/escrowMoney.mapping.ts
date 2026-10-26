@@ -1,4 +1,4 @@
-import { formatMoney } from "@zudomart/email-templates";
+import { formatMoney } from "@nantty/email-templates";
 
 import type { EventDataReader } from "../../../utils/eventDataReader.util.js";
 import { readGroups } from "./orders.mapping.js";

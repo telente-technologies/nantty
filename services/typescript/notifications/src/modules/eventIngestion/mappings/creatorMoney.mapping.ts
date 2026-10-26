@@ -1,4 +1,4 @@
-import { formatMoney } from "@zudomart/email-templates";
+import { formatMoney } from "@nantty/email-templates";
 
 import type { MoneyValue } from "../../../utils/eventDataReader.util.js";
 import { intentFor, type EventMapping } from "./mappingHelpers.js";

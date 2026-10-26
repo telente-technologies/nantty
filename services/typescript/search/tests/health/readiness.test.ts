@@ -1,5 +1,5 @@
-import { createRequestContext, createRouter } from "@zudojs/http";
 import { describe, expect, it, vi } from "vitest";
+import { createPlatform } from "@nantty/fastify-platform";
 
 import { RabbitMqConnection } from "../../src/integrations/rabbitMqConnection.integration.js";
 import { registerRoutes, type RouteDependencies } from "../../src/routes/index.js";
@@ -10,10 +10,11 @@ const failing: Probe = async () => { throw new Error("down"); };
 
 async function readyz(probeDatabase: Probe, probeBroker: Probe) {
   const dependencies = { probeDatabase, probeBroker } as unknown as RouteDependencies;
-  const router = createRouter({});
-  registerRoutes(router, dependencies);
-  const { response } = await router.dispatch(createRequestContext({ method: "GET", url: "/readyz", path: "/readyz" }));
-  return response.status;
+  const app = await createPlatform({ name: "readiness-test", host: "127.0.0.1", port: 0, logger: false, rateLimit: false });
+  registerRoutes(app, dependencies);
+  const response = await app.inject({ method: "GET", url: "/readyz" });
+  await app.close();
+  return response.statusCode;
 }
 
 describe("/readyz", () => {

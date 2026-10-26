@@ -1,11 +1,11 @@
-import { renderEmail } from "@zudomart/email-templates";
+import { renderEmail } from "@nantty/email-templates";
 
 import { ApiError, notFoundError } from "../../../../errors/notifications.error.js";
 import type { NoticeDraftRepository } from "../../../../interfaces/campaignRepository.interface.js";
 import type { EmailSender } from "../../../../interfaces/emailSender.interface.js";
 import type { IdentityDirectory } from "../../../../interfaces/identityDirectory.interface.js";
 import { convertNoticeDraftToResponse } from "../../../bulkCampaigns/dtos/campaign.dto.js";
-import type { EmailBrandConfig } from "@zudomart/email-templates";
+import type { EmailBrandConfig } from "@nantty/email-templates";
 
 export interface SendNoticeTestEmailCommand {
   readonly versionId: string;

@@ -1,4 +1,4 @@
-import { readEmailBrandFromEnvironment } from "@zudomart/email-templates";
+import { readEmailBrandFromEnvironment } from "@nantty/email-templates";
 import type { Logger } from "@zudojs/logger";
 
 import type { NotificationsConfig } from "./configs/notifications.config.js";

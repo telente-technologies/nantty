@@ -1,5 +1,5 @@
 {
-  "name": "@zudomart/notifications",
+  "name": "@nantty/notifications",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -32,7 +32,7 @@
     "@prisma/client": "^7.10.0",
     "@zudojs/http": "^1.5.0",
     "@zudojs/logger": "^1.5.0",
-    "@zudomart/email-templates": "workspace:*",
+    "@nantty/email-templates": "workspace:*",
     "amqplib": "^2.2.0",
     "jose": "^6.2.12",
     "tsx": "^4.23.15",
@@ -41,7 +41,7 @@
   "devDependencies": {
     "@types/node": "^26.6.5",
     "@types/react": "^19.3.0",
-    "@zudomart/eslint-config": "workspace:*",
+    "@nantty/eslint-config": "workspace:*",
     "eslint": "^10.12.0",
     "prisma": "^7.10.0",
     "typescript": "^7.0.2",

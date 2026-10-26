@@ -7,7 +7,7 @@ import type { Db } from "../../../types/database.type.js";
 import type { LinkPreviewView } from "../models/linkPreview.model.js";
 import { linkPreviewCacheRepository, type LinkPreviewCacheRow } from "../repositories/linkPreviewCache.repository.js";
 import { parseLinkPreviewMetadata, parseOembedMetadata } from "./linkPreviewParser.service.js";
-import { defaultInternalHosts, findFirstExternalUrlInText, isInternalZudomartUrl, normalizeUrlForCache, readDisplayDomain } from "./linkPreviewUrl.service.js";
+import { defaultInternalHosts, findFirstExternalUrlInText, isInternalNanttyUrl, normalizeUrlForCache, readDisplayDomain } from "./linkPreviewUrl.service.js";
 
 const readyLifetimeMs = 24 * 3_600_000;
 const failedLifetimeMs = 3_600_000;
@@ -77,7 +77,7 @@ export function createLinkUnfurler(dependencies: LinkUnfurlerDependencies): Link
 
   async function resolveLinkPreview(rawUrl: string, options: { readonly persist?: boolean } = {}): Promise<LinkPreviewView | null> {
     const persist = options.persist ?? false;
-    if (isInternalZudomartUrl(rawUrl, internalHosts)) return null;
+    if (isInternalNanttyUrl(rawUrl, internalHosts)) return null;
     const normalizedUrl = normalizeUrlForCache(rawUrl);
     if (normalizedUrl === null) return null;
     const cached = await linkPreviewCacheRepository.findFresh(dependencies.db, normalizedUrl, dependencies.clock.now());

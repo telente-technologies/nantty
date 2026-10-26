@@ -21,6 +21,17 @@ afterAll(async () => stop());
 const asAccount = (accountId: string) => ({ "x-zudomart-account-id": accountId });
 
 describe("search http routes", () => {
+  it("keeps probes, not-found behavior, and unsupported methods explicit", async () => {
+    expect(await (await fetch(`${baseUrl}/healthz`)).json()).toEqual({ status: "up", service: "search" });
+    expect(await (await fetch(`${baseUrl}/readyz`)).json()).toEqual({ status: "ready" });
+    const missing = await fetch(`${baseUrl}/missing`);
+    expect(missing.status).toBe(404);
+    expect(await missing.json()).toEqual({ message: "Not found.", code: "NOT_FOUND" });
+    const method = await fetch(`${baseUrl}/api/v1/search`, { method: "POST" });
+    expect(method.status).toBe(405);
+    expect(await method.json()).toEqual({ message: "Method not allowed.", code: "METHOD_NOT_ALLOWED" });
+  });
+
   it("rejects a missing or oversized query", async () => {
     expect((await fetch(`${baseUrl}/api/v1/search`)).status).toBe(400);
     expect((await fetch(`${baseUrl}/api/v1/search?q=${"a".repeat(101)}`)).status).toBe(400);
@@ -57,6 +68,11 @@ describe("search http routes", () => {
   it("answers invalid events with 400 and replays duplicates", async () => {
     const response = await fetch(`${baseUrl}/internal/search/events`, { method: "POST", body: JSON.stringify({ nope: true }), headers: { "x-internal-token": internalToken } });
     expect(response.status).toBe(400);
+    const malformed = await fetch(`${baseUrl}/internal/search/events`, { method: "POST", body: "{", headers: { "content-type": "application/json", "x-internal-token": internalToken } });
+    expect(malformed.status).toBe(400);
+    expect(await malformed.json()).toEqual({ message: "The request body is not valid JSON.", code: "INVALID_JSON" });
+    const types = await fetch(`${baseUrl}/internal/search/event-types`);
+    expect(types.status).toBe(401);
   });
 
   it("keeps recent searches per account, newest first, capped and removable", async () => {

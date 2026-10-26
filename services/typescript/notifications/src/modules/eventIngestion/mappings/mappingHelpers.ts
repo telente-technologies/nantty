@@ -1,4 +1,4 @@
-import type { EmailTemplateKey, EmailTemplateProps } from "@zudomart/email-templates";
+import type { EmailTemplateKey, EmailTemplateProps } from "@nantty/email-templates";
 
 import type { DomainEventEnvelope } from "../../../types/domainEvent.type.js";
 import type { ActorSummary, EmailPlan, InAppContent, NotificationIntent, PreferenceCategory, PushContent, Recipient } from "../../../types/notification.type.js";

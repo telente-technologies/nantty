@@ -1,7 +1,7 @@
 const urlInTextPattern = /https?:\/\/[^\s<>"'`]+/gi;
 const trackingParameterPattern = /^(utm_[a-z]+|fbclid|gclid|dclid|msclkid|mc_cid|mc_eid|igshid|si|ref_src|_hsenc|_hsmi)$/i;
 
-export const defaultInternalHosts: readonly string[] = ["zudomart.com", "app.zudomart.com", "zudomart.app"];
+export const defaultInternalHosts: readonly string[] = ["nantty.com", "zudomart.com", "app.zudomart.com", "zudomart.app"];
 
 export function findUrlsInText(text: string): string[] {
   return (text.match(urlInTextPattern) ?? []).map((url) => url.replace(/[.,!?;:)\]}]+$/, ""));
@@ -16,13 +16,13 @@ function parseHttpUrl(rawUrl: string): URL | null {
   }
 }
 
-export function isInternalZudomartUrl(rawUrl: string, internalHosts: readonly string[] = defaultInternalHosts): boolean {
+export function isInternalNanttyUrl(rawUrl: string, internalHosts: readonly string[] = defaultInternalHosts): boolean {
   const hostname = parseHttpUrl(rawUrl)?.hostname.toLowerCase().replace(/^www\./, "");
   return hostname !== undefined && internalHosts.some((host) => hostname === host || hostname.endsWith(`.${host}`));
 }
 
 export function findFirstExternalUrlInText(text: string, internalHosts: readonly string[] = defaultInternalHosts): string | null {
-  return findUrlsInText(text).find((url) => parseHttpUrl(url) !== null && !isInternalZudomartUrl(url, internalHosts)) ?? null;
+  return findUrlsInText(text).find((url) => parseHttpUrl(url) !== null && !isInternalNanttyUrl(url, internalHosts)) ?? null;
 }
 
 export function normalizeUrlForCache(rawUrl: string): string | null {

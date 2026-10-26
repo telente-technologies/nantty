@@ -1,4 +1,4 @@
-import type { EmailTemplateKey } from "@zudomart/email-templates";
+import type { EmailTemplateKey } from "@nantty/email-templates";
 
 export type InboxCategory = "orders" | "social" | "system";
 export type InboxKind = "mention" | "videoReply" | "quote" | "repost" | "followRequest" | "followRequestAccepted";

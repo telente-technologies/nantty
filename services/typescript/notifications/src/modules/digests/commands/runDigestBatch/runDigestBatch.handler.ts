@@ -1,4 +1,4 @@
-import type { EmailTemplateKey } from "@zudomart/email-templates";
+import type { EmailTemplateKey } from "@nantty/email-templates";
 
 import { digestJobType } from "../../../../constants/delivery.constant.js";
 import type { DigestKind, DigestSource } from "../../../../interfaces/digestSource.interface.js";

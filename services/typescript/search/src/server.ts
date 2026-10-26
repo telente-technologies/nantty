@@ -10,7 +10,7 @@ const stopTelemetry = startTelemetry("search");
 const logger = createLogger({ name: "search" });
 const config = loadSearchConfigFromEnvironment();
 const consumerFactory = config.rabbitMq === undefined ? undefined : createRabbitMqMessageConsumerFactory(config.rabbitMq.url, config.rabbitMq.prefetch, logger);
-const app = createSearchApp(config, consumerFactory, logger);
+const app = await createSearchApp(config, consumerFactory, logger);
 
 const port = await app.start();
 logger.info("search listening", { host: config.host, port });

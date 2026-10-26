@@ -4,9 +4,9 @@ FROM node:24-alpine AS build
 RUN corepack enable
 WORKDIR /repo
 COPY . .
-RUN pnpm install --frozen-lockfile --filter @zudomart/notifications... \
-    && pnpm --filter @zudomart/notifications exec prisma generate \
-    && pnpm --filter @zudomart/notifications deploy --prod --legacy /out \
+RUN pnpm install --frozen-lockfile --filter @nantty/notifications... \
+    && pnpm --filter @nantty/notifications exec prisma generate \
+    && pnpm --filter @nantty/notifications deploy --prod --legacy /out \
     && cp -r services/typescript/notifications/src/generated /out/src/generated
 
 FROM node:24-alpine

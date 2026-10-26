@@ -8,7 +8,7 @@ const clientVector = {
 };
 
 describe("signed prekey verification", () => {
-  it("accepts a signed prekey produced by @zudomart/chat-crypto", () => {
+  it("accepts a signed prekey produced by @nantty/chat-crypto", () => {
     expect(isValidSignedPreKey(clientVector.identityKey, clientVector.signedPreKey)).toBe(true);
   });
 

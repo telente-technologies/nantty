@@ -9,8 +9,8 @@ import { getWordmarkRaster } from "../../src/integrations/brandWordmarkAssets.in
 import { composeEndCardLogoPng, composeWatermarkPng } from "../../src/integrations/brandedDownloadRenderer.integration.js";
 import { buildBrandWatermarkSvg, computeWatermarkBox } from "../../src/utils/brandWatermark.util.js";
 
-const webKitBrandPath = fileURLToPath(new URL("../../../../../packages/webKit/src/brand/zudomartBrand.path.ts", import.meta.url));
-const webKitSymbolPath = fileURLToPath(new URL("../../../../../packages/webKit/src/brand/zudomartSymbol.path.ts", import.meta.url));
+const webKitBrandPath = fileURLToPath(new URL("../../../../../packages/webKit/src/brand/nanttyBrand.path.ts", import.meta.url));
+const webKitSymbolPath = fileURLToPath(new URL("../../../../../packages/webKit/src/brand/nanttySymbol.path.ts", import.meta.url));
 
 describe("brand wordmark and symbol assets", () => {
   it("uses the same paths as the apps", async () => {

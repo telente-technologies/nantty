@@ -1,16 +1,9 @@
-import {
-  HttpMiddlewarePipeline,
-  createHttpServer,
-  createNodeHttpAdapter,
-  createResponseContext,
-  createRouter,
-  type HttpMiddleware,
-  type HttpRequestContext,
-} from "@zudojs/http";
 import { createLogger, type Logger } from "@zudojs/logger";
+import { createRequestContext } from "@zudojs/http";
+import { createPlatform } from "@nantty/fastify-platform";
 
 import type { SearchConfig } from "./configs/search.config.js";
-import { createGatewayIdentityMiddleware } from "./middlewares/gatewayIdentity.middleware.js";
+import { isGatewayIdentityAuthentic } from "./middlewares/gatewayIdentity.middleware.js";
 import { checkRabbitMqConnections } from "./integrations/rabbitMqConnection.integration.js";
 import { createSearchPrisma } from "./databases/prisma.database.js";
 import { createHttpSourceHydrator } from "./integrations/httpSourceHydrator.integration.js";
@@ -24,25 +17,32 @@ import { createRecentSearchPostgresRepository } from "./modules/recentSearches/r
 import { createSearchQueryPostgresRepository } from "./modules/search/repositories/searchQuery.postgres.repository.js";
 import { createSearchQueryService } from "./modules/search/services/searchQuery.service.js";
 import { registerRoutes } from "./routes/index.js";
-import { errorToResponse, json } from "./utils/http.util.js";
-import { dispatchWithRoute, withRequestMetrics } from "./telemetry/requestMetrics.js";
+import { withRequestMetrics } from "./telemetry/requestMetrics.js";
 
 export interface SearchApp {
   readonly start: () => Promise<number>;
   readonly stop: () => Promise<void>;
 }
 
-export function createSearchApp(config: SearchConfig, consumerFactory: MessageConsumerFactory | undefined, logger: Logger = createLogger({ name: "search" })): SearchApp {
+export async function createSearchApp(config: SearchConfig, consumerFactory: MessageConsumerFactory | undefined, logger: Logger = createLogger({ name: "search" })): Promise<SearchApp> {
   const prisma = createSearchPrisma(config.databaseUrl, config.databaseSchema);
   const indexStore = createSearchIndexPostgresRepository(prisma);
   const reranker = config.intelligence === undefined ? noReranker : createPythonSearchReranker({ ...config.intelligence, hasher: createIdentifierHasher(deriveIdentifierHashSecret(config.intelligence.idHashSecret, config.intelligence.sharedSecret)) });
   const eventProcessor = createSearchEventProcessor(indexStore, createHttpSourceHydrator({ identity: config.identity, commerce: config.commerce, social: config.social }), logger);
-  const router = createRouter({
-    onError: (error) => errorToResponse(error) ?? json(500, { message: "Internal Server Error", code: "INTERNAL_ERROR" }),
-    notFoundHandler: () => json(404, { message: "Not found.", code: "NOT_FOUND" }),
-    methodNotAllowedHandler: () => json(405, { message: "Method not allowed.", code: "METHOD_NOT_ALLOWED" }),
+  const app = await createPlatform({ name: "search", host: config.host, port: config.port, bodyLimit: 256 * 1024, trustProxy: true, logger: true, rateLimit: false });
+  app.addHook("onRequest", async (request, reply) => {
+    const context = createRequestContext({
+      method: request.method,
+      url: request.url,
+      path: request.url.split("?", 1)[0] ?? "/",
+      headers: Object.fromEntries(Object.entries(request.headers).flatMap(([name, value]) => value === undefined ? [] : [[name, Array.isArray(value) ? value.join(",") : String(value)]])),
+    });
+    const carriesIdentity = ["x-zudomart-account-id", "x-zudomart-session-id", "x-zudomart-age-bracket", "x-zudomart-viewer", "x-zudomart-identity-signature"].some((name) => context.getHeader(name) !== undefined);
+    if (carriesIdentity && !isGatewayIdentityAuthentic(context, config.gatewayIdentitySecrets ?? [], Math.floor(Date.now() / 1000))) {
+      await reply.code(401).send({ message: "The request did not come through the gateway.", code: "GATEWAY_IDENTITY_INVALID" });
+    }
   });
-  registerRoutes(router, {
+  registerRoutes(app, {
     searchService: createSearchQueryService(createSearchQueryPostgresRepository(prisma), indexStore, reranker),
     recentSearches: createRecentSearchPostgresRepository(prisma),
     eventProcessor,
@@ -50,35 +50,21 @@ export function createSearchApp(config: SearchConfig, consumerFactory: MessageCo
     probeDatabase: async () => void (await prisma.processedEvent.count({ take: 1 })),
     ...(config.rabbitMq === undefined ? {} : { probeBroker: checkRabbitMqConnections }),
   });
-  const dispatch: HttpMiddleware = async (requestContext) => {
-    try {
-      return (await dispatchWithRoute(router, requestContext.request, requestContext.signal)).response;
-    } catch (error) {
-      logger.error("unhandled error", { path: requestContext.request.path, error: error instanceof Error ? error.message : String(error) });
-      return json(500, { message: "Internal Server Error", code: "INTERNAL_ERROR" });
-    }
-  };
-  const pipeline = new HttpMiddlewarePipeline({ middlewares: [createGatewayIdentityMiddleware(config.gatewayIdentitySecrets ?? []), dispatch] });
-  const server = createHttpServer({
-    adapter: createNodeHttpAdapter({ host: config.host, port: config.port, maxBodySize: 256 * 1024, trustProxy: true }),
-    handler: withRequestMetrics((request: HttpRequestContext) => pipeline.execute(request, createResponseContext())),
-  });
   const consumers: QueueConsumer[] = [];
   return {
     async start() {
-      await server.start();
+      await app.listen({ host: config.host, port: config.port });
       if (config.consumersEnabled && consumerFactory !== undefined) {
         const consumer = consumerFactory.createConsumer("searchIndexing", config.domainEventsQueue, async (body) => void (await eventProcessor.processBody(body)));
         consumer.start();
         consumers.push(consumer);
-      } else if (config.consumersEnabled) {
-        logger.warn("no message consumer factory is wired: the index is fed only through POST /internal/search/events");
-      }
-      return server.address?.port ?? config.port;
+      } else if (config.consumersEnabled) logger.warn("no message consumer factory is wired: the index is fed only through POST /internal/search/events");
+      const address = app.server.address();
+      return typeof address === "object" && address !== null ? address.port : config.port;
     },
     async stop() {
       await Promise.all(consumers.map((consumer) => consumer.stop()));
-      await server.stop();
+      await app.close();
       await prisma.$disconnect();
     },
   };

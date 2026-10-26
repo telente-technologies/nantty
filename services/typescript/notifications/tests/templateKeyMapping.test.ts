@@ -1,5 +1,5 @@
 import { testOtpKey } from "./fixtures/eventFixtures.fixture.js";
-import { isEmailTemplateKey, renderEmail } from "@zudomart/email-templates";
+import { isEmailTemplateKey, renderEmail } from "@nantty/email-templates";
 import { describe, expect, it } from "vitest";
 
 import { eventMappings, domainEventTypesConsumed } from "../src/modules/eventIngestion/mappings/eventMappingRegistry.js";

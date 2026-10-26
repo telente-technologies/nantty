@@ -1,4 +1,4 @@
-import type { EmailTemplateKey } from "@zudomart/email-templates";
+import type { EmailTemplateKey } from "@nantty/email-templates";
 
 import type { PreferenceCategory } from "../../../../types/notification.type.js";
 
