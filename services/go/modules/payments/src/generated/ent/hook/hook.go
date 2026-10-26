@@ -5,7 +5,7 @@ package hook
 import (
 	"context"
 	"fmt"
-	"zudomart/modules/payments/src/generated/ent"
+	"nantty/modules/payments/src/generated/ent"
 )
 
 // The BillingAuthorizationFunc type is an adapter to allow the use of ordinary

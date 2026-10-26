@@ -4,9 +4,9 @@ package ent
 
 import (
 	"context"
-	"zudomart/modules/payments/src/generated/ent/billingauthorization"
-	"zudomart/modules/payments/src/generated/ent/internal"
-	"zudomart/modules/payments/src/generated/ent/predicate"
+	"nantty/modules/payments/src/generated/ent/billingauthorization"
+	"nantty/modules/payments/src/generated/ent/internal"
+	"nantty/modules/payments/src/generated/ent/predicate"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"

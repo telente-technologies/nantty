@@ -3,8 +3,8 @@
 package paymentrefund
 
 import (
+	"nantty/modules/payments/src/generated/ent/predicate"
 	"time"
-	"zudomart/modules/payments/src/generated/ent/predicate"
 
 	"entgo.io/ent/dialect/sql"
 	"github.com/google/uuid"

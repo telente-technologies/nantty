@@ -6,9 +6,9 @@ import (
 	"context"
 	"fmt"
 	"math"
-	"zudomart/modules/payments/src/generated/ent/idempotentrequest"
-	"zudomart/modules/payments/src/generated/ent/internal"
-	"zudomart/modules/payments/src/generated/ent/predicate"
+	"nantty/modules/payments/src/generated/ent/idempotentrequest"
+	"nantty/modules/payments/src/generated/ent/internal"
+	"nantty/modules/payments/src/generated/ent/predicate"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect"

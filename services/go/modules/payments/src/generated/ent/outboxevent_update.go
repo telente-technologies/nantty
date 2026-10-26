@@ -6,10 +6,10 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"nantty/modules/payments/src/generated/ent/internal"
+	"nantty/modules/payments/src/generated/ent/outboxevent"
+	"nantty/modules/payments/src/generated/ent/predicate"
 	"time"
-	"zudomart/modules/payments/src/generated/ent/internal"
-	"zudomart/modules/payments/src/generated/ent/outboxevent"
-	"zudomart/modules/payments/src/generated/ent/predicate"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"

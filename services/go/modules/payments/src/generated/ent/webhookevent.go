@@ -4,9 +4,9 @@ package ent
 
 import (
 	"fmt"
+	"nantty/modules/payments/src/generated/ent/webhookevent"
 	"strings"
 	"time"
-	"zudomart/modules/payments/src/generated/ent/webhookevent"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
