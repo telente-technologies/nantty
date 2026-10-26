@@ -23,7 +23,7 @@ func TestSpaceStateTransitions(t *testing.T) {
 			t.Errorf("expected %s -> %s", transition[0], transition[1])
 		}
 	}
-	for _, transition := range [][2]string{{"ended", "live"}, {"cancelled", "live"}, {"ended", "cancelled"}, {"scheduled", "ended"}} {
+	for _, transition := range [][2]string{{"ended", "live"}, {"cancelled", "live"}, {"live", "cancelled"}, {"ended", "cancelled"}, {"scheduled", "ended"}} {
 		if spaceTransitionAllowed(transition[0], transition[1]) {
 			t.Errorf("unexpected %s -> %s", transition[0], transition[1])
 		}

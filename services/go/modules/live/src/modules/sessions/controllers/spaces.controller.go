@@ -130,7 +130,7 @@ func (c SpacesController) transition(w http.ResponseWriter, r *http.Request, tar
 func spaceHostAuthorized(hostID, actorID uuid.UUID) bool { return hostID == actorID }
 
 func spaceTransitionAllowed(current, target string) bool {
-	return target == "live" && current == "scheduled" || target == "ended" && current == "live" || target == "cancelled" && (current == "live" || current == "scheduled")
+	return target == "live" && current == "scheduled" || target == "ended" && current == "live" || target == "cancelled" && current == "scheduled"
 }
 
 func (c SpacesController) Start(w http.ResponseWriter, r *http.Request) { c.transition(w, r, "live") }
