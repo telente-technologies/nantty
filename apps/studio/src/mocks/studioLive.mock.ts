@@ -21,7 +21,7 @@ const hoursAgo = (hours: number) => new Date(Date.now() - hours * 3_600_000).toI
 
 const recordings = new Map<string, LiveRecording[]>([
   ["live_2", [
-    { id: "rec_2a", liveId: "live_2", state: "completed", durationSeconds: 3540, sizeBytes: 812_000_000, createdAt: hoursAgo(51), completedAt: hoursAgo(50), playbackUrl: "https://studio.zudomart.com/replays/live_2/rec_2a.mp4" },
+    { id: "rec_2a", liveId: "live_2", state: "completed", durationSeconds: 3540, sizeBytes: 812_000_000, createdAt: hoursAgo(51), completedAt: hoursAgo(50), playbackUrl: "https://creator.nantty.com/replays/live_2/rec_2a.mp4" },
     { id: "rec_2b", liveId: "live_2", state: "failed", durationSeconds: 0, sizeBytes: 0, createdAt: hoursAgo(51), completedAt: hoursAgo(51), playbackUrl: null },
   ]],
 ]);

@@ -1,5 +1,5 @@
 import { ApiError } from "@/errors/api.error";
-import { isThemePreference, type ThemePreference } from "@zudomart/web-kit";
+import { isThemePreference, type ThemePreference } from "@nantty/web-kit";
 
 import { createMockRoute, type MockRoute } from "./registry.mock";
 

@@ -107,7 +107,7 @@ const affiliateEarning = c.object({
 const affiliateEarningsPage = c.object({ summary: c.object({ pending: c.array(money), earned: c.array(money), paid: c.array(money), reversed: c.array(money) }), data: c.array(affiliateEarning), nextCursor: c.nullable(c.string()) });
 
 export const studioContracts: readonly EndpointContract[] = [
-  { domain: "auth", method: "POST", path: "/api/v1/auth/login", body: { identifier: "creator@zudomart.com", password: "x" }, schema: session },
+  { domain: "auth", method: "POST", path: "/api/v1/auth/login", body: { identifier: "creator@nantty.com", password: "x" }, schema: session },
   { domain: "auth", method: "POST", path: "/api/v1/auth/google", body: { idToken: "a.b.c", nonce: "raw" }, schema: session },
   { domain: "auth", method: "POST", path: "/api/v1/auth/apple", body: { identityToken: "a.b.c", nonce: "raw" }, schema: session },
   { domain: "auth", method: "GET", path: "/api/v1/users/me", schema: user },

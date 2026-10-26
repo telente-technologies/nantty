@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 
-import { requestConfirmation } from "@zudomart/web-kit";
+import { requestConfirmation } from "@nantty/web-kit";
 
 import { Button } from "@/components/ui/button";
 import { Badge, EmptyState, ErrorState, Skeleton } from "@/components/ui/feedback";

@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
 
-import { ThemeSwitcher } from "@zudomart/web-kit";
+import { ThemeSwitcher } from "@nantty/web-kit";
 
 import { AccountStandingCard } from "@/components/accountHealth/accountHealthSummary";
 import { useSession } from "@/components/providers/sessionProvider";
@@ -62,7 +62,7 @@ export default function AccountSettingsPage() {
           />
           <Muted>
             Change your name, photo or bio on{" "}
-            <a href={viewer ? webappLinks.profile(viewer.username) : webappLinks.help} target="_blank" rel="noopener noreferrer">your Zudomart profile</a>.
+            <a href={viewer ? webappLinks.profile(viewer.username) : webappLinks.help} target="_blank" rel="noopener noreferrer">your Nantty profile</a>.
           </Muted>
           <div className={pageStyles.inlineActions}>
             <ThemeSwitcher />

@@ -18,11 +18,11 @@ export default function StudioLoginPage() {
       </Suspense>
       {isMockBackendEnabled() ? (
         <p className={styles.demoHint}>
-          Demo mode: sign in as <strong>creator@zudomart.com</strong> with any password to open the control room.
+          Demo mode: sign in as <strong>creator@nantty.com</strong> with any password to open the control room.
         </p>
       ) : null}
       <p className={styles.contact}>
-        Need help? <a href={buildContactMailtoLink("Zudomart Studio sign-in help")}>{contactEmailDisplayText}</a>
+        Need help? <a href={buildContactMailtoLink("Nantty Studio sign-in help")}>{contactEmailDisplayText}</a>
       </p>
     </AuthSplitLayout>
   );

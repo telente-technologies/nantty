@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { use, useCallback, useEffect, useRef, useState } from "react";
 
-import { requestConfirmation } from "@zudomart/web-kit";
+import { requestConfirmation } from "@nantty/web-kit";
 
 import { BrowserBroadcaster } from "@/components/golive/browserBroadcaster";
 import { EncoderSetupCard } from "@/components/golive/encoderSetupCard";

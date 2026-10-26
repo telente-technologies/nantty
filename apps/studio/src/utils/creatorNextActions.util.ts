@@ -5,14 +5,14 @@ import type { AccountHealthSummary } from "@/types/accountHealth.type";
 import type { SubscriptionPlan } from "@/types/audience.type";
 import type { CreatorStatus } from "@/types/creator.type";
 import type { PayoutOnboardingState } from "@/types/payoutOnboarding.type";
-import type { ZudomartWalletSummary } from "@/types/zudomartWallet.type";
+import type { NanttyWalletSummary } from "@/types/nanttyWallet.type";
 
 import { formatMoneyForDisplay } from "./formatMoney.util";
 
 export interface CreatorSignals {
   readonly health?: AccountHealthSummary;
   readonly status?: CreatorStatus;
-  readonly wallet?: ZudomartWalletSummary;
+  readonly wallet?: NanttyWalletSummary;
   readonly payout?: PayoutOnboardingState;
   readonly plans?: readonly SubscriptionPlan[];
   readonly lives?: readonly LiveSession[];
@@ -36,7 +36,7 @@ function healthActions(health: AccountHealthSummary | undefined): NextAction[] {
   return actions;
 }
 
-function moneyActions(wallet: ZudomartWalletSummary | undefined, payout: PayoutOnboardingState | undefined): NextAction[] {
+function moneyActions(wallet: NanttyWalletSummary | undefined, payout: PayoutOnboardingState | undefined): NextAction[] {
   if (payout?.status === "action_needed") return [{ key: "payout-fix", tone: "urgent", href: "/earnings#payout-setup", label: "Fix payout details", title: "Payout verification needs a fix", detail: payout.reasons[0]?.message ?? "Some payout details were rejected." }];
   const verificationMessage = wallet?.verification?.message;
   if (verificationMessage && !wallet?.verification?.withdrawalsUnlocked) {

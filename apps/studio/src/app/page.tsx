@@ -17,14 +17,14 @@ import { LandingTicker } from "@/components/landing/landingTicker";
 const monoFont = JetBrains_Mono({ subsets: ["latin"], display: "swap", variable: "--font-landing-mono", weight: ["400", "600"] });
 
 export const metadata: Metadata = {
-  title: { absolute: "Zudomart Studio: the creator studio for going live" },
+  title: { absolute: "Nantty Studio: the creator studio for going live" },
   description:
-    "Go live from your phone or OBS, bring up to 10 creators on stage, battle for gifts, run overlays and moderation, and get paid to your bank. Studio is for Zudomart Creator Program members: talk, music, gaming, education and IRL.",
+    "Go live from your phone or OBS, bring up to 10 creators on stage, battle for gifts, run overlays and moderation, and get paid to your bank. Studio is for Nantty Creator Program members: talk, music, gaming, education and IRL.",
   alternates: { canonical: "/" },
   robots: { index: true, follow: true },
   openGraph: {
-    title: "Zudomart Studio",
-    description: "The creator studio for going live on Zudomart: phone or OBS, multi-guest battles, gifts, subscriptions and payouts to your bank.",
+    title: "Nantty Studio",
+    description: "The creator studio for going live on Nantty: phone or OBS, multi-guest battles, gifts, subscriptions and payouts to your bank.",
     images: [{ url: "/photos/creatorMicPortrait.webp", width: 1000, height: 1400, alt: "A creator speaking into a studio microphone" }],
   },
 };

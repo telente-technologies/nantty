@@ -1,4 +1,4 @@
-const webappOrigin = (process.env.NEXT_PUBLIC_WEBAPP_URL ?? "https://app.zudomart.com").replace(/\/+$/, "");
+const webappOrigin = (process.env.NEXT_PUBLIC_WEBAPP_URL ?? "https://web.nantty.com").replace(/\/+$/, "");
 
 export const webappLinks = {
   withdraw: `${webappOrigin}/wallet/payouts`,

@@ -6,7 +6,7 @@ import { Suspense } from "react";
 import { BrandDealsCard } from "@/components/earnings/brandDealsCard";
 import { EarningsHistoryCard, RevenueRulesCard, WithdrawalsCard } from "@/components/earnings/earningsHistoryCard";
 import { PayoutOnboardingPanel } from "@/components/payouts/payoutOnboardingPanel";
-import { WalletVerificationBanner, ZudomartBalanceCard } from "@/components/payouts/zudomartBalanceCard";
+import { WalletVerificationBanner, NanttyBalanceCard } from "@/components/payouts/nanttyBalanceCard";
 import { ErrorState, Skeleton } from "@/components/ui/feedback";
 import { Card, Muted, PageHeader, pageStyles } from "@/components/ui/studioPage";
 import { webappLinks } from "@/config/webappLinks.config";
@@ -22,11 +22,11 @@ export default function EarningsPage() {
     <div className={pageStyles.page}>
       <PageHeader
         title="Earnings"
-        subtitle="One Zudomart wallet holds everything you earn. Verify your payout details once, then withdraw available money to your bank."
+        subtitle="One Nantty wallet holds everything you earn. Verify your payout details once, then withdraw available money to your bank."
         action={canWithdraw ? <a className={pageStyles.textLink} href={webappLinks.withdraw} target="_blank" rel="noopener noreferrer">Withdraw {formatMoneyForDisplay(wallet.data!.available)}</a> : null}
       />
       <WalletVerificationBanner summary={wallet.data} payoutSetupHref="#payout-setup" />
-      <ZudomartBalanceCard wallet={wallet} />
+      <NanttyBalanceCard wallet={wallet} />
       <Card title="Payout details" id="payout-setup">
         <Suspense fallback={<Skeleton height={120} />}>
           <PayoutOnboardingPanel />

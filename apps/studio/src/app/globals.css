@@ -1,4 +1,4 @@
-@import "@zudomart/design-tokens/tokens.css";
+@import "@nantty/design-tokens/tokens.css";
 
 :root {
   --success: var(--color-success);

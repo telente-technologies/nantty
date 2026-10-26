@@ -2,7 +2,7 @@
 
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 
-import { requestConfirmation } from "@zudomart/web-kit";
+import { requestConfirmation } from "@nantty/web-kit";
 
 import { NewPlanForm } from "@/components/subscribers/newPlanForm";
 import { Button } from "@/components/ui/button";

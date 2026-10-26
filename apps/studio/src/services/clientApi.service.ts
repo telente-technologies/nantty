@@ -1,4 +1,4 @@
-import { parseRetryAfterHeader, readFriendlyErrorMessage, readRequestIdHeader } from "@zudomart/web-kit";
+import { parseRetryAfterHeader, readFriendlyErrorMessage, readRequestIdHeader } from "@nantty/web-kit";
 
 export interface ApiErrorBody {
   readonly message: string;

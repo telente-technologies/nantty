@@ -3,7 +3,7 @@ import { Inter } from "next/font/google";
 import { cookies } from "next/headers";
 import type { ReactNode } from "react";
 
-import { ThemeInitScript, parseThemePreference, readHtmlThemeAttribute, themeCookieName, themeViewport } from "@zudomart/web-kit";
+import { ThemeInitScript, parseThemePreference, readHtmlThemeAttribute, themeCookieName, themeViewport } from "@nantty/web-kit";
 
 import { AppProviders } from "@/components/providers/appProviders";
 import { readPublicSiteUrl } from "@/config/studioEnvironment.config";
@@ -16,11 +16,11 @@ const interFont = Inter({ subsets: ["latin"], display: "swap", variable: "--font
 
 export const metadata: Metadata = {
   metadataBase: new URL(readPublicSiteUrl()),
-  title: { default: "Zudomart Studio", template: "%s · Zudomart Studio" },
-  description: "Go live on Zudomart: talk, music, gaming and more, with OBS, overlays, gifts and analytics.",
-  applicationName: "Zudomart Studio",
+  title: { default: "Nantty Studio", template: "%s · Nantty Studio" },
+  description: "Go live on Nantty: talk, music, gaming and more, with OBS, overlays, gifts and analytics.",
+  applicationName: "Nantty Studio",
   manifest: "/manifest.webmanifest",
-  icons: { icon: [{ url: "/brand/favicon.ico", sizes: "48x48" }, { url: "/brand/icon.svg", type: "image/svg+xml" }], apple: "/brand/appleTouchIcon.png" },
+  icons: { icon: [{ url: "/brand/nantty-icon.png", type: "image/png" }], apple: "/brand/nantty-icon.png" },
   formatDetection: { telephone: false },
   robots: { index: false, follow: false },
 };

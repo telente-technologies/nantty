@@ -26,7 +26,7 @@ function readRealtimeConnectOrigin(): string {
   return readOriginOrEmpty(socketUrl.replace(/^http(s?):\/\//i, (_, secure: string) => (secure ? "wss://" : "ws://")));
 }
 
-const embedPreviewOrigin = readOriginOrEmpty(process.env.NEXT_PUBLIC_WEBAPP_URL ?? (isDevelopmentBuild ? "http://localhost:3500" : "https://app.zudomart.com"));
+const embedPreviewOrigin = readOriginOrEmpty(process.env.NEXT_PUBLIC_WEBAPP_URL ?? (isDevelopmentBuild ? "http://localhost:3500" : "https://web.nantty.com"));
 
 const contentSecurityPolicyDirectives: Record<string, string[]> = {
   "default-src": ["'self'"],
@@ -61,7 +61,7 @@ const securityHeaders = [
 const nextConfig: NextConfig = {
   experimental: { authInterrupts: true },
   reactStrictMode: true,
-  transpilePackages: ["@zudomart/web-kit"],
+  transpilePackages: ["@nantty/web-kit"],
   poweredByHeader: false,
   images: {
     formats: ["image/avif", "image/webp"],

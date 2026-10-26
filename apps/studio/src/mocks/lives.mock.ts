@@ -6,11 +6,11 @@ import { createMockRoute, type MockRoute } from "./registry.mock";
 const hoursAgo = (hours: number): ISODate => new Date(Date.now() - hours * 3_600_000).toISOString();
 const minutesAgo = (minutes: number): ISODate => new Date(Date.now() - minutes * 60_000).toISOString();
 
-const readIngestUrl = () => process.env.RTMP_INGEST_URL ?? "rtmp://studio.zudomart.com/live";
+const readIngestUrl = () => process.env.RTMP_INGEST_URL ?? "rtmp://creator.nantty.com/live";
 export const MOCK_WHIP_INGEST_URL = "mock://whip";
 export const MOCK_HOST_ID = "u_me";
 const MAX_SCHEDULE_DAYS = 90;
-const readHlsBaseUrl = () => process.env.HLS_PLAYBACK_URL ?? "https://studio.zudomart.com/hls";
+const readHlsBaseUrl = () => process.env.HLS_PLAYBACK_URL ?? "https://creator.nantty.com/hls";
 
 const buildStreamKey = (liveId: ID) => `sk_${liveId}_${btoa(liveId).replace(/=/g, "").slice(0, 16)}`;
 

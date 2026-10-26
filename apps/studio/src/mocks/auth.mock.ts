@@ -8,7 +8,7 @@ const studioViewer: User = {
   name: "Temitope Adeyemi",
   username: "temi.creates",
   avatarUrl: null,
-  email: "creator@zudomart.com",
+  email: "creator@nantty.com",
   isCreator: true,
   hasStore: true,
   storeId: "store_1",

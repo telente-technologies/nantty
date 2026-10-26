@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useRef, useState, type FormEvent } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
-import { requestConfirmation } from "@zudomart/web-kit";
+import { requestConfirmation } from "@nantty/web-kit";
 
 import { LiveDetailsFields, useLiveDetails, type LiveDetailsValue } from "@/components/golive/liveDetailsFields";
 import { Button } from "@/components/ui/button";

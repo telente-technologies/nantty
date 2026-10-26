@@ -1,7 +1,7 @@
 "use client";
 
 import { keepPreviousData, useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
-import { useRealtimeStatus } from "@zudomart/web-kit/src/realtime/realtimeHooks";
+import { useRealtimeStatus } from "@nantty/web-kit/src/realtime/realtimeHooks";
 import { useDeferredValue, useMemo, useState } from "react";
 
 import { CommentItem } from "@/components/comments/commentItem";

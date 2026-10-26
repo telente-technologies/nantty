@@ -90,5 +90,5 @@
       "description": "man sitting on couch holding controllers"
     }
   ],
-  "screenshots": "public/screens/*.webp are screenshots of Studio and the Zudomart app rendered with their own mock data."
+  "screenshots": "public/screens/*.webp are screenshots of Studio and the Nantty app rendered with their own mock data."
 }

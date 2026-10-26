@@ -1,12 +1,12 @@
 import { createMockRoute, type MockRoute } from "@/mocks/registry.mock";
 import { readMockPayoutOnboardingState } from "@/mocks/payoutOnboarding.mock";
 import type { Money } from "@/types";
-import type { ZudomartWalletSummary } from "@/types/zudomartWallet.type";
+import type { NanttyWalletSummary } from "@/types/nanttyWallet.type";
 
 const ngn = (amountMinor: number): Money => ({ amountMinor, currency: "NGN" });
 const nairaText = (money: Money) => `₦${new Intl.NumberFormat("en-NG").format(money.amountMinor / 100)}`;
 
-function buildMockWallet(): ZudomartWalletSummary {
+function buildMockWallet(): NanttyWalletSummary {
   const unlocked = readMockPayoutOnboardingState().withdrawalsEnabled;
   const available = ngn(0);
   const earningsPayable = ngn(1_250_000);
@@ -20,9 +20,9 @@ function buildMockWallet(): ZudomartWalletSummary {
       { key: "pending", label: "Pending (escrow)", description: "Order money held until the buyer confirms delivery.", amount: ngn(0) },
       { key: "locked", label: "Locked", description: "Released order money in its short safety hold before it becomes available.", amount: ngn(0) },
       { key: "earningsPayable", label: "Creator earnings", description: "Gift, subscription and ad-share earnings waiting to move to your available balance.", amount: earningsPayable },
-      { key: "adCredit", label: "Ad credit", description: "Prepaid credit for Zudomart ads and boosts. It cannot be withdrawn.", amount: ngn(0) },
+      { key: "adCredit", label: "Ad credit", description: "Prepaid credit for Nantty ads and boosts. It cannot be withdrawn.", amount: ngn(0) },
       { key: "coins", label: "Coins", description: "Coins to send as gifts, plus coins you earned. Coins are not cash.", amount: { amountMinor: coins.spendable + coins.earned, currency: "COIN" } },
-      { key: "debts", label: "Owed to Zudomart", description: "Refunds or chargebacks taken from your next earnings.", amount: ngn(0) },
+      { key: "debts", label: "Owed to Nantty", description: "Refunds or chargebacks taken from your next earnings.", amount: ngn(0) },
     ],
     verification: {
       level: unlocked ? 1 : 0,

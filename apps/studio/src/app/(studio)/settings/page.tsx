@@ -16,7 +16,7 @@ const CATEGORY_COPY: Partial<Record<NotificationCategory, { readonly label: stri
   social: { label: "Comments, mentions and follows", detail: "New followers, comments and mentions on your posts." },
   payments: { label: "Payouts and earnings", detail: "Payouts sent, failed or held." },
   milestones: { label: "Milestones", detail: "Follower and earnings milestones." },
-  marketing: { label: "Tips and offers", detail: "Product news and creator tips from Zudomart." },
+  marketing: { label: "Tips and offers", detail: "Product news and creator tips from Nantty." },
   trust: { label: "Account safety", detail: "Strikes, appeals and copyright notices. Always on." },
   privacy: { label: "Privacy", detail: "Data exports and privacy changes." },
   support: { label: "Support", detail: "Replies to your support tickets." },
@@ -57,7 +57,7 @@ function NotificationsCard() {
   const rows = (preferences.data ?? []).filter((entry) => CATEGORY_COPY[entry.category]);
   return (
     <Card title="Notifications">
-      <Muted>Choose how Zudomart tells you about activity on your channel. In-app notifications always stay in your inbox.</Muted>
+      <Muted>Choose how Nantty tells you about activity on your channel. In-app notifications always stay in your inbox.</Muted>
       {preferences.isLoading ? <Skeleton height={200} /> : (
         <ul className={styles.toggleList}>
           <li className={styles.toggleRow} aria-hidden="true">
