@@ -3,7 +3,7 @@
 package adaudiencemember
 
 import (
-	"zudomart/modules/ads/src/generated/ent/predicate"
+	"nantty/modules/ads/src/generated/ent/predicate"
 
 	"entgo.io/ent/dialect/sql"
 	"github.com/google/uuid"

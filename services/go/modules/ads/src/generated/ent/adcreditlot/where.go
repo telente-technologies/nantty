@@ -3,8 +3,8 @@
 package adcreditlot
 
 import (
+	"nantty/modules/ads/src/generated/ent/predicate"
 	"time"
-	"zudomart/modules/ads/src/generated/ent/predicate"
 
 	"entgo.io/ent/dialect/sql"
 	"github.com/google/uuid"

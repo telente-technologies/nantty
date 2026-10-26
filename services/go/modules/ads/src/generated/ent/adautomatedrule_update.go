@@ -6,10 +6,10 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"nantty/modules/ads/src/generated/ent/adautomatedrule"
+	"nantty/modules/ads/src/generated/ent/predicate"
+	"nantty/modules/ads/src/types"
 	"time"
-	"zudomart/modules/ads/src/generated/ent/adautomatedrule"
-	"zudomart/modules/ads/src/generated/ent/predicate"
-	"zudomart/modules/ads/src/types"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"

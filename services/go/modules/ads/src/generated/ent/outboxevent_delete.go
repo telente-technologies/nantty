@@ -4,8 +4,8 @@ package ent
 
 import (
 	"context"
-	"zudomart/modules/ads/src/generated/ent/outboxevent"
-	"zudomart/modules/ads/src/generated/ent/predicate"
+	"nantty/modules/ads/src/generated/ent/outboxevent"
+	"nantty/modules/ads/src/generated/ent/predicate"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"

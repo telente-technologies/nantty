@@ -4,8 +4,8 @@ package ad
 
 import (
 	"fmt"
+	"nantty/modules/ads/src/types"
 	"time"
-	"zudomart/modules/ads/src/types"
 
 	"entgo.io/ent/dialect/sql"
 	"github.com/google/uuid"

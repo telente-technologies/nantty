@@ -6,9 +6,9 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"nantty/modules/ads/src/generated/ent/ad"
+	"nantty/modules/ads/src/types"
 	"time"
-	"zudomart/modules/ads/src/generated/ent/ad"
-	"zudomart/modules/ads/src/types"
 
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"

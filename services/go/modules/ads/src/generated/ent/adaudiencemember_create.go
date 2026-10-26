@@ -6,7 +6,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"zudomart/modules/ads/src/generated/ent/adaudiencemember"
+	"nantty/modules/ads/src/generated/ent/adaudiencemember"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"

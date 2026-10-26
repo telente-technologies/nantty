@@ -5,7 +5,7 @@ package hook
 import (
 	"context"
 	"fmt"
-	"zudomart/modules/ads/src/generated/ent"
+	"nantty/modules/ads/src/generated/ent"
 )
 
 // The AdFunc type is an adapter to allow the use of ordinary

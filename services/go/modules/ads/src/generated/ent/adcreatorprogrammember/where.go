@@ -3,8 +3,8 @@
 package adcreatorprogrammember
 
 import (
+	"nantty/modules/ads/src/generated/ent/predicate"
 	"time"
-	"zudomart/modules/ads/src/generated/ent/predicate"
 
 	"entgo.io/ent/dialect/sql"
 )

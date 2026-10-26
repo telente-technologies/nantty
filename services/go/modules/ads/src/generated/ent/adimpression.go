@@ -4,9 +4,9 @@ package ent
 
 import (
 	"fmt"
+	"nantty/modules/ads/src/generated/ent/adimpression"
 	"strings"
 	"time"
-	"zudomart/modules/ads/src/generated/ent/adimpression"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"

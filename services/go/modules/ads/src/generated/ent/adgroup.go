@@ -5,10 +5,10 @@ package ent
 import (
 	"encoding/json"
 	"fmt"
+	"nantty/modules/ads/src/generated/ent/adgroup"
+	"nantty/modules/ads/src/types"
 	"strings"
 	"time"
-	"zudomart/modules/ads/src/generated/ent/adgroup"
-	"zudomart/modules/ads/src/types"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"

@@ -6,8 +6,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"zudomart/modules/ads/src/generated/ent/adcreatorearning"
-	"zudomart/modules/ads/src/generated/ent/predicate"
+	"nantty/modules/ads/src/generated/ent/adcreatorearning"
+	"nantty/modules/ads/src/generated/ent/predicate"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
