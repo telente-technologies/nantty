@@ -17,7 +17,7 @@ func TestSpaceHostAuthorization(t *testing.T) {
 }
 
 func TestSpaceStateTransitions(t *testing.T) {
-	allowed := [][2]string{{"scheduled", "live"}, {"scheduled", "cancelled"}, {"live", "ended"}, {"live", "cancelled"}}
+	allowed := [][2]string{{"scheduled", "live"}, {"scheduled", "cancelled"}, {"live", "ended"}}
 	for _, transition := range allowed {
 		if !spaceTransitionAllowed(transition[0], transition[1]) {
 			t.Errorf("expected %s -> %s", transition[0], transition[1])
