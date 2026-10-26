@@ -5,7 +5,7 @@ tags: ai, ai generated, artificial intelligence, label, deepfake, edited with ai
 related: create-a-post, create-a-clip, creator-earnings, community-guidelines, report-a-problem
 ---
 
-If a photo, video or sound was created or heavily changed with AI, Zudomart asks you to say so. The post then carries an **AI generated** label so viewers know what they're looking at.
+If a photo, video or sound was created or heavily changed with AI, Nantty asks you to say so. The post then carries an **AI generated** label so viewers know what they're looking at.
 
 ## How to label a post or clip
 

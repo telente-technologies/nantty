@@ -5,14 +5,14 @@ tags: dark mode, light mode, theme, appearance, night mode, black background, ch
 related: settings-overview, language-and-currency, text-size-and-display, accessibility-overview, reduce-motion
 ---
 
-Zudomart comes in a light and a dark look. You can pick one or let your phone decide.
+Nantty comes in a light and a dark look. You can pick one or let your phone decide.
 
 ## How to change the theme in the app
 
 1. Go to **Profile > More (top right) > Settings > App Preference**.
 2. Tap **Theme**. The row shows your current choice.
 3. Choose one:
-   - **Light Mode**: the default Zudomart look.
+   - **Light Mode**: the default Nantty look.
    - **Dark Mode**: easier on the eyes at night.
    - **System**: matches your phone's appearance setting, switching automatically when your phone does.
 
@@ -20,7 +20,7 @@ The change applies straight away.
 
 ## On the web
 
-1. Open **Settings** on **app.zudomart.com**.
+1. Open **Settings** on **app.nantty.com**.
 2. Under **Appearance**, use **Theme** to choose light, dark or match your device.
 3. The line underneath confirms your choice, for example "Following your device (dark right now)" or "Always dark".
 

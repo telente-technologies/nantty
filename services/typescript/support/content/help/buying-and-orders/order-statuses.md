@@ -42,5 +42,5 @@ Direct-payment orders show **Paid to seller** instead of **Paid into escrow**.
 
 ## Good to know
 
-- On the web (app.zudomart.com) the same statuses appear in **Your orders** with simpler filters: **Pending**, **Paid**, **Shipped**, **Delivered**, **Completed**, **Cancelled**.
+- On the web (app.nantty.com) the same statuses appear in **Your orders** with simpler filters: **Pending**, **Paid**, **Shipped**, **Delivered**, **Completed**, **Cancelled**.
 - You can cancel only while an order is awaiting payment or just paid. See [Cancelling an order](/help/buying-and-orders/cancel-an-order).

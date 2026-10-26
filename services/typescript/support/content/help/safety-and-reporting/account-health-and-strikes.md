@@ -13,7 +13,7 @@ Everyone, and especially creators and sellers, because strikes can pause earning
 
 ## How to check your account status
 
-1. Go to **Settings > Account status**. On the web, open **Settings > Account status** on **app.zudomart.com**.
+1. Go to **Settings > Account status**. On the web, open **Settings > Account status** on **app.nantty.com**.
 2. The card at the top shows your standing and, for example, "1 of 2 active strikes".
 3. Scroll down to see **Copyright notices**, **Active strikes** and **Warnings on record**.
 

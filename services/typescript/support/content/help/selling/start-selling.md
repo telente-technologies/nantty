@@ -5,7 +5,7 @@ tags: sell, open store, start selling, apply, become a seller, how to sell, sell
 related: verify-your-store, unverified-seller-limits, selling-outside-nigeria, seller-plans, seller-dashboard-overview, guide-seller
 ---
 
-Anyone with a Zudomart account can apply to open a store. It's free to apply and free to sell on the Free plan.
+Anyone with a Nantty account can apply to open a store. It's free to apply and free to sell on the Free plan.
 
 ## Who this is for
 
@@ -13,7 +13,7 @@ New sellers. In Nigeria you can start selling with escrow before your business i
 
 ## How to apply
 
-1. Tap **Start selling on Zudomart** in **Settings**, on your profile, or on the home banner.
+1. Tap **Start selling on Nantty** in **Settings**, on your profile, or on the home banner.
 2. **Tell us about your store**: name and what you sell.
 3. **How can buyers and couriers reach you?**: contact details and address.
 4. **Verify your identity**: choose **NIN slip or card**, **International passport**, **Driver's licence** or **Voter's card (PVC)**, enter the **Document number** and add a **Photo of your document**.
@@ -28,8 +28,8 @@ When approved: **You're approved!** "Your store is live. Add your first products
 
 ## What's free
 
-- Selling, orders, products, delivery, payouts and the seller dashboard on **dashboard.zudomart.com** are free on every plan.
-- Zudomart takes **0% commission**. Escrow orders carry a small escrow fee. See [Seller fees](/help/selling/fees-and-escrow-fee).
+- Selling, orders, products, delivery, payouts and the seller dashboard on **dashboard.nantty.com** are free on every plan.
+- Nantty takes **0% commission**. Escrow orders carry a small escrow fee. See [Seller fees](/help/selling/fees-and-escrow-fee).
 - Paid plans add capacity and tools. See [Seller plans](/help/selling/seller-plans).
 
 ## Payment rules for new stores
@@ -38,4 +38,4 @@ Until your business is verified, every order is paid through escrow and your sto
 
 ## Stay safe
 
-Zudomart will never ask you to pay a fee to get approved, or for your password or one-time codes. Applications are only made in the app.
+Nantty will never ask you to pay a fee to get approved, or for your password or one-time codes. Applications are only made in the app.

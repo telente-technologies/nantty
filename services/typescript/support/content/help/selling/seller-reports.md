@@ -5,7 +5,7 @@ tags: reports, export, csv, excel, pdf, tax report, accountant, statement, sales
 related: seller-dashboard-overview, fees-and-escrow-fee, seller-payouts, seller-plans, transactions-and-receipts
 ---
 
-Reports give you and your accountant a clear record of your business. You'll find them under **Reports** at **dashboard.zudomart.com**.
+Reports give you and your accountant a clear record of your business. You'll find them under **Reports** at **dashboard.nantty.com**.
 
 ## Who this is for
 

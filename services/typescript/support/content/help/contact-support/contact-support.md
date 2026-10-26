@@ -16,7 +16,7 @@ Most answers are here in the Help Centre. If you still need help, our support te
 5. Optionally, **Link an order or payment** and **Add screenshot** (up to 5 per message).
 6. Tap **Send**. You'll get a reference like SUP-10421.
 
-On the web, go to **app.zudomart.com > Help Centre > Contact support**.
+On the web, go to **app.nantty.com > Help Centre > Contact support**.
 
 ## When we'll reply
 
@@ -28,16 +28,16 @@ You'll get a push notification, a badge on **My support requests** and an email 
 
 ## Email us
 
-If you can't open the app, write to the right team. Every address ends in **zudomart.com**.
+If you can't open the app, write to the right team. Every address ends in **nantty.com**.
 
-- Orders, payments and your account: **support@zudomart.com**
-- Seller stores and payouts: **sellers@zudomart.com**
-- Creator Program: **creators@zudomart.com**
-- Your personal data: **privacy@zudomart.com**
-- Copyright notices: **copyright@zudomart.com**
-- Security problems you've found: **security@zudomart.com**
+- Orders, payments and your account: **support@nantty.com**
+- Seller stores and payouts: **sellers@nantty.com**
+- Creator Program: **creators@nantty.com**
+- Your personal data: **privacy@nantty.com**
+- Copyright notices: **copyright@nantty.com**
+- Security problems you've found: **security@nantty.com**
 
-**Contact Us** in **Settings > Support** opens an email to support@zudomart.com. Emails we send automatically come from **mail.zudomart.com**, such as noreply@mail.zudomart.com. Replies to those go to support@zudomart.com.
+**Contact Us** in **Settings > Support** opens an email to support@nantty.com. Emails we send automatically come from **mail.nantty.com**, such as noreply@mail.nantty.com. Replies to those go to support@nantty.com.
 
 ## If something goes wrong
 
@@ -45,4 +45,4 @@ If you can't open the app, write to the right team. Every address ends in **zudo
 
 ## Stay safe
 
-Never include your password, card PIN or one-time codes. Zudomart will never ask for them. See [What support will never ask for](/help/contact-support/what-support-never-asks).
+Never include your password, card PIN or one-time codes. Nantty will never ask for them. See [What support will never ask for](/help/contact-support/what-support-never-asks).

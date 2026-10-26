@@ -5,7 +5,7 @@ tags: content preferences, sensitive content, nsfw, personalisation, not interes
 related: sensitive-content-and-age, how-your-feed-works, privacy-settings, why-you-see-an-ad, settings-overview, notifications-faq
 ---
 
-You can shape what you see on Zudomart: how sensitive posts are shown, whether your feed and ads are tailored to you, and what you'd like to see less of.
+You can shape what you see on Nantty: how sensitive posts are shown, whether your feed and ads are tailored to you, and what you'd like to see less of.
 
 ## Sensitive content warnings
 

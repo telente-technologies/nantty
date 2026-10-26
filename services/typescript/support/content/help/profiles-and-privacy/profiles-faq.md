@@ -59,4 +59,4 @@ Yes. One account can run your personal profile, plus one Store or one Business p
 
 ## Can people download my photos and clips?
 
-Only if **Allow downloads** is on in **Settings > Privacy**. Downloads carry the Zudomart logo and your username. Stories and private or subscriber-only posts are never downloadable.
+Only if **Allow downloads** is on in **Settings > Privacy**. Downloads carry the Nantty logo and your username. Stories and private or subscriber-only posts are never downloadable.

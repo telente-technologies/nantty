@@ -20,13 +20,13 @@ Buyers expecting money back from an order.
 
 ## How long it takes
 
-- **Escrow, before release:** the money was never paid out, so it's unlocked in your own Zudomart wallet straight away. You can spend it or withdraw it to your bank.
+- **Escrow, before release:** the money was never paid out, so it's unlocked in your own Nantty wallet straight away. You can spend it or withdraw it to your bank.
 - **Back to a card:** "Card refunds can take up to 10 business days", depending on your bank.
 - **Back to a bank account:** usually faster than cards, but your bank sets the timing.
 
 You get a **Refund issued** or **Partial refund issued** notification when we send it. It says where the money went:
 
-- "The money is back in your Zudomart wallet." This is the usual case for escrow orders.
+- "The money is back in your Nantty wallet." This is the usual case for escrow orders.
 - "Your refund is on its way back to the card or account you paid with." This happens when the order is refunded before your card payment settled, and for direct-payment orders.
 
 ## Good to know

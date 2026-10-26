@@ -33,4 +33,4 @@ Buyers who paid with escrow in Nigeria. Direct payments have already gone to the
 
 ## Stay safe
 
-Never confirm because a seller or delivery rider asks you to before you've checked the parcel. Zudomart will never ask you to confirm delivery to "unlock" anything.
+Never confirm because a seller or delivery rider asks you to before you've checked the parcel. Nantty will never ask you to confirm delivery to "unlock" anything.

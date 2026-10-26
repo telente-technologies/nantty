@@ -16,7 +16,7 @@ Government ministries, departments, agencies, state and local governments and pu
 1. Create or switch to your government profile. See [Government accounts](/help/business-and-brands/government-accounts).
 2. Go to **Profile > More > Get verified**. Under **Black: government**, tap **Apply for government verification**.
 3. The application continues on the web. Provide the official details and documents requested.
-4. Our team vets the application with official sources. Two separate Zudomart staff must approve it.
+4. Our team vets the application with official sources. Two separate Nantty staff must approve it.
 
 ## Price and billing
 

@@ -1,6 +1,6 @@
 ---
 title: Troubleshooting FAQ
-summary: Quick fixes for the most common Zudomart problems, from loading errors and missing codes to failed payments, uploads and notifications.
+summary: Quick fixes for the most common Nantty problems, from loading errors and missing codes to failed payments, uploads and notifications.
 tags: troubleshooting, help, fix, problem, app not working, quick fix, common problems, wahala
 related: app-not-loading, cant-sign-in, not-getting-emails, checkout-problems, common-error-messages, update-the-app
 ---
@@ -19,11 +19,11 @@ Tap **Forgot password?** on the sign-in screen and we'll email you a 6-digit cod
 
 ## My code never arrived.
 
-Check spam and every inbox tab for **noreply@mail.zudomart.com**, then ask for a new code after 60 seconds. See [Not getting emails or codes](/help/troubleshooting/not-getting-emails).
+Check spam and every inbox tab for **noreply@mail.nantty.com**, then ask for a new code after 60 seconds. See [Not getting emails or codes](/help/troubleshooting/not-getting-emails).
 
 ## Can I get my code by SMS instead?
 
-No. Zudomart only sends codes by email.
+No. Nantty only sends codes by email.
 
 ## My payment failed but money left my account.
 
@@ -43,7 +43,7 @@ Check **Settings > Notification > Push notifications** and **System notification
 
 ## How do I know which version of the app I have?
 
-Go to **Settings > About** and look at **Version**. See [Update the Zudomart app](/help/troubleshooting/update-the-app).
+Go to **Settings > About** and look at **Version**. See [Update the Nantty app](/help/troubleshooting/update-the-app).
 
 ## Will reinstalling the app delete my account?
 

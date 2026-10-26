@@ -1,26 +1,26 @@
 ---
 title: Widget troubleshooting
-summary: Fix Zudomart widgets that are blank, out of date, missing from the widget list or asking you to sign in.
+summary: Fix Nantty widgets that are blank, out of date, missing from the widget list or asking you to sign in.
 tags: widget not working, widget blank, widget not updating, widget sign in, widget missing, widget error, widget stuck
 related: home-screen-widgets, iphone-widgets, android-widgets, widgets-and-embeds-faq, app-not-loading, active-sessions
 ---
 
-Most widget problems are fixed by opening the Zudomart app once. Here is what to try for each problem.
+Most widget problems are fixed by opening the Nantty app once. Here is what to try for each problem.
 
 ## Who this is for
 
-Anyone using Zudomart widgets on iPhone or Android.
+Anyone using Nantty widgets on iPhone or Android.
 
-## Zudomart doesn't appear in the widget list
+## Nantty doesn't appear in the widget list
 
-1. Make sure you installed Zudomart from the App Store or Google Play. Widgets don't work in Expo Go or developer preview builds.
+1. Make sure you installed Nantty from the App Store or Google Play. Widgets don't work in Expo Go or developer preview builds.
 2. Update the app to the latest version. See [Update the app](/help/troubleshooting/update-the-app).
 3. Open the app once and sign in.
 4. Restart your phone, then look again.
 
 ## The widget is blank or asks you to sign in
 
-- Open the Zudomart app and make sure you're signed in. Widgets use a limited sign-in that lasts 24 hours and renews when you open the app.
+- Open the Nantty app and make sure you're signed in. Widgets use a limited sign-in that lasts 24 hours and renews when you open the app.
 - If you signed out, or ended this phone's session from [Active sessions](/help/account-and-login/active-sessions), sign in again.
 - If your account is suspended, widgets stop working. See [Account suspensions and appeals](/help/safety-and-reporting/suspensions-and-appeals).
 
@@ -28,7 +28,7 @@ Anyone using Zudomart widgets on iPhone or Android.
 
 - Widget information can be up to about a minute old, and your phone controls how often widgets refresh.
 - Open the app to refresh them straight away.
-- On Android, allow Zudomart to run in the background (see [Add widgets on Android](/help/widgets-and-embeds/android-widgets)).
+- On Android, allow Nantty to run in the background (see [Add widgets on Android](/help/widgets-and-embeds/android-widgets)).
 - On iPhone, Low Power Mode can slow widget updates.
 - Check your internet connection.
 

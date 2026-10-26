@@ -27,7 +27,7 @@ Buyers in Nigeria. Outside Nigeria there is no escrow; every order is a direct p
 
 1. In checkout, find **How to pay each seller**.
 2. For each verified store, tap **Escrow protection (recommended)** or **Pay directly**.
-3. Stores that aren't verified show **Protected by Zudomart Escrow**. That's their only option.
+3. Stores that aren't verified show **Protected by Nantty Escrow**. That's their only option.
 
 The note at the bottom sums it up: "Escrow orders are held until you confirm delivery. Direct orders pay the seller right away."
 
@@ -44,4 +44,4 @@ The note at the bottom sums it up: "Escrow orders are held until you confirm del
 
 ## Stay safe
 
-A seller who pushes you to pay directly, or to pay outside Zudomart altogether, may be trying to avoid escrow. Pick escrow, and report pressure like this. See [Report a scam](/help/safety-and-reporting/report-a-scam).
+A seller who pushes you to pay directly, or to pay outside Nantty altogether, may be trying to avoid escrow. Pick escrow, and report pressure like this. See [Report a scam](/help/safety-and-reporting/report-a-scam).

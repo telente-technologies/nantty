@@ -5,7 +5,7 @@ tags: profile, profile types, business profile, brand, creator, government, swit
 related: edit-your-profile, creator-program, checkmarks-explained, business-profiles, switch-profiles, profile-menu-shortcuts
 ---
 
-Your Zudomart account is the login. Inside it you can run more than one public profile, so a shop owner can keep their personal life and their business apart without a second login.
+Your Nantty account is the login. Inside it you can run more than one public profile, so a shop owner can keep their personal life and their business apart without a second login.
 
 ## Profile types
 

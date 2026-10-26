@@ -5,7 +5,7 @@ tags: reviews, ratings, stars, reply to review, bad review, fake review, report 
 related: leave-a-review, seller-dashboard-overview, respond-to-a-dispute, community-guidelines, selling-faq
 ---
 
-Reviews build trust. Every review on Zudomart comes from a buyer who actually received the order, and shows **Verified purchase**.
+Reviews build trust. Every review on Nantty comes from a buyer who actually received the order, and shows **Verified purchase**.
 
 ## Who this is for
 
@@ -13,7 +13,7 @@ Sellers and team members with access to **Reviews**.
 
 ## Where to find reviews
 
-At **dashboard.zudomart.com** open **Reviews**: "What buyers say about your products and your store in the Zudomart app. Reply publicly, and report reviews that break the rules."
+At **dashboard.nantty.com** open **Reviews**: "What buyers say about your products and your store in the Nantty app. Reply publicly, and report reviews that break the rules."
 
 You'll see **Reputation**, **Rating distribution** and **Rating trend**, and you can filter by **Needs a reply** or **Most helpful**.
 
@@ -27,7 +27,7 @@ You'll see **Reputation**, **Rating distribution** and **Rating trend**, and you
 
 1. Open the review and choose **Report this review**.
 2. Pick a reason: **Fake — this person did not buy**, **Abusive or offensive**, **Spam or advertising**, **Shares private information**, **Not about the product or order** or **Something else**.
-3. Send it. "Thanks. Zudomart will review it within 2 working days. The review stays up until then."
+3. Send it. "Thanks. Nantty will review it within 2 working days. The review stays up until then."
 
 ## How your rating works
 

@@ -8,16 +8,16 @@ export interface HelpCategorySeed {
 }
 
 export const helpCategorySeeds: readonly HelpCategorySeed[] = [
-  { slug: "getting-started", title: "Getting started", description: "What Zudomart is, browsing as a guest and finding your way around the app and web.", iconName: "compass" },
+  { slug: "getting-started", title: "Getting started", description: "What Nantty is, browsing as a guest and finding your way around the app and web.", iconName: "compass" },
   { slug: "account-and-login", title: "Account and login", description: "Signing up, signing in, passwords, two-factor authentication, usernames and sessions.", iconName: "userCircle" },
   { slug: "profiles-and-privacy", title: "Profiles and privacy", description: "Personal, creator, business and government profiles, private accounts, followers and blocking.", iconName: "identification" },
   { slug: "posts-and-feed", title: "Posts and feed", description: "Your feed, posting, comments, threads, reposts and quotes, pinning, mentions, bookmarks, views and sensitive content.", iconName: "squaresFour" },
   { slug: "clips-and-stories", title: "Clips and stories", description: "Watching and making clips, the player controls, landscape videos, and who sees and replies to your stories.", iconName: "filmStrip" },
   { slug: "chat", title: "Chat and messages", description: "Message requests, spam, chat passcode, streaks, disappearing media, encryption and reporting chats.", iconName: "chatCircle" },
-  { slug: "live", title: "Live", description: "Going live, streaming software, guests, battles, gifts, ZudoPoints, goals and live safety.", iconName: "broadcast" },
+  { slug: "live", title: "Live", description: "Going live, streaming software, guests, battles, gifts, Nantty Points, goals and live safety.", iconName: "broadcast" },
   { slug: "creators-and-earnings", title: "Creators and earnings", description: "The Creator Program, earnings, fan subscriptions, payout setup and withdrawals.", iconName: "star" },
   { slug: "checkmarks-and-verification", title: "Checkmarks and verification", description: "Blue, Gold and Black checkmarks, who can get them, prices and business documents.", iconName: "sealCheck" },
-  { slug: "selling", title: "Selling on Zudomart", description: "The seller dashboard, plans, products, inventory, orders, shipping, escrow, fees, rewards and payouts.", iconName: "storefront" },
+  { slug: "selling", title: "Selling on Nantty", description: "The seller dashboard, plans, products, inventory, orders, shipping, escrow, fees, rewards and payouts.", iconName: "storefront" },
   { slug: "business-and-brands", title: "Business and brands", description: "Business and brand profiles, Gold-only brand pages, government accounts, switching profiles and marketing emails.", iconName: "buildings" },
   { slug: "buying-and-orders", title: "Buying and orders", description: "Cart, shipping, checkout, escrow protection, confirming delivery, disputes and refunds.", iconName: "shoppingBag" },
   { slug: "payments-and-wallet", title: "Payments, coins and Premium", description: "Your wallet, adding money, payment methods, saved cards, coins, Premium, subscriptions and receipts.", iconName: "wallet" },

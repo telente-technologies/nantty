@@ -1,11 +1,11 @@
 ---
-title: Creator's guide: growing and earning on Zudomart
+title: Creator's guide: growing and earning on Nantty
 summary: Step by step to join the Creator Program, go live, earn from gifts, fan subscriptions and ads revenue share, and withdraw your earnings.
 tags: creator guide, influencer, content creator, how to earn, monetise, go live, creator program, make money
 related: creator-program, going-live, creator-earnings, fan-subscriptions, payout-setup, creators-faq
 ---
 
-Zudomart doesn't pay for views; it shares eligible monetisation revenue with creators. Here's how to get set up.
+Nantty doesn't pay for views; it shares eligible monetisation revenue with creators. Here's how to get set up.
 
 ## Step 1: Build your profile
 
@@ -21,14 +21,14 @@ The Blue checkmark helps fans trust it's really you. See [The Blue checkmark](/h
 
 ## Step 4: Go live
 
-Approved creators get **LIVE** in the **Create** tab, or can stream from a computer with **studio.zudomart.com**. See [Going live](/help/live/going-live) and [Streaming with OBS](/help/live/streaming-with-obs).
+Approved creators get **LIVE** in the **Create** tab, or can stream from a computer with **studio.nantty.com**. See [Going live](/help/live/going-live) and [Streaming with OBS](/help/live/streaming-with-obs).
 
 ## Step 5: Earn
 
 - **Gifts**: fans send gifts with coins during lives. See [Gifts and coins on live](/help/live/gifts-and-coins-on-live).
 - **Fan subscriptions**: set a monthly price for subscriber perks. You keep 80% of the net. See [Fan subscriptions](/help/creators-and-earnings/fan-subscriptions).
 - **Ads revenue share**: see [Ads revenue share](/help/creators-and-earnings/ads-revenue-share).
-- **ZudoPoints** rank your supporters but are never money. See [ZudoPoints](/help/live/zudopoints).
+- **Nantty Points** rank your supporters but are never money. See [Nantty Points](/help/live/zudopoints).
 
 ## Step 6: Set up payouts
 

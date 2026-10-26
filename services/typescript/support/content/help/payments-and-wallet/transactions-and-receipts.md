@@ -16,7 +16,7 @@ Coins have their own list. See [Coins](/help/payments-and-wallet/buy-coins).
 
 ## Withdrawals
 
-On the web (**app.zudomart.com**), **Wallet** > **Payout accounts & withdraw** shows your **Withdrawal history**.
+On the web (**app.nantty.com**), **Wallet** > **Payout accounts & withdraw** shows your **Withdrawal history**.
 
 ## Receipts
 
@@ -26,7 +26,7 @@ Purchases made through the App Store or Google Play also get a receipt from Appl
 
 ## Sellers
 
-Sellers get fee breakdowns, settlements and monthly statements on the web at **dashboard.zudomart.com**. See [Seller payouts](/help/selling/seller-payouts).
+Sellers get fee breakdowns, settlements and monthly statements on the web at **dashboard.nantty.com**. See [Seller payouts](/help/selling/seller-payouts).
 
 ## Something looks wrong
 

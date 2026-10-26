@@ -5,7 +5,7 @@ tags: shipping rules, delivery fee, free shipping, delivery areas, lga, state, l
 related: seller-orders-and-shipping, shipping-costs-and-delivery-areas, products-and-inventory, seller-plans, selling-faq
 ---
 
-Zudomart doesn't deliver for you. You decide where you ship and how much it costs, and we show buyers the right fee at checkout.
+Nantty doesn't deliver for you. You decide where you ship and how much it costs, and we show buyers the right fee at checkout.
 
 ## Who this is for
 
@@ -13,7 +13,7 @@ All sellers. Shipping rules are "Included on every plan, including Free."
 
 ## How to add a shipping rule
 
-1. At **dashboard.zudomart.com** go to **Delivery > Shipping rules**.
+1. At **dashboard.nantty.com** go to **Delivery > Shipping rules**.
 2. Tap **Add rule**.
 3. Enter a **Destination group name**, such as South West.
 4. Choose the **Rule**: **Flat fee per order** (then enter the **Fee per order**) or **Free shipping**.

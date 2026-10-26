@@ -24,7 +24,7 @@ To change or remove one, open it and edit, or tap **Delete address**.
 
 ## On the web
 
-At app.zudomart.com go to **Settings > Addresses**. Use **Add address**, **Edit**, **Delete** and **Make this my default address**. Your default shows a **Default** tag.
+At app.nantty.com go to **Settings > Addresses**. Use **Add address**, **Edit**, **Delete** and **Make this my default address**. Your default shows a **Default** tag.
 
 ## Good to know
 

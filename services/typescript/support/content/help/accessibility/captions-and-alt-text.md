@@ -1,11 +1,11 @@
 ---
 title: Captions and image descriptions
-summary: What Zudomart offers today for people who are deaf, hard of hearing, blind or low vision, and tips for creators to make posts easier for everyone.
+summary: What Nantty offers today for people who are deaf, hard of hearing, blind or low vision, and tips for creators to make posts easier for everyone.
 tags: captions, subtitles, closed captions, alt text, image description, deaf, hard of hearing, blind, accessible posts
 related: accessibility-overview, screen-readers, reduce-motion, create-a-post, accessibility-faq
 ---
 
-Captions and image descriptions help people who can't hear the sound or see the picture. Here is what Zudomart offers today and how you can make your own posts more accessible.
+Captions and image descriptions help people who can't hear the sound or see the picture. Here is what Nantty offers today and how you can make your own posts more accessible.
 
 ## Who this is for
 

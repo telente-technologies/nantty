@@ -9,7 +9,7 @@ related: sensitive-content-and-age, privacy-settings, checkmarks-explained, expl
 
 - Nobody gets a secret advantage. The only boosts are the ones on this page, and each one has a fixed upper limit.
 - Nobody can pay for reach in the feed, apart from ads, which are always labelled **Promoted**, **Sponsored** or **Ad**.
-- Zudomart staff cannot push a post or a trend. Staff can only demote or remove content that breaks our rules. Every removal needs a written policy reason and is logged.
+- Nantty staff cannot push a post or a trend. Staff can only demote or remove content that breaks our rules. Every removal needs a written policy reason and is logged.
 - Good posts from free accounts can go viral. Quality and real engagement count for much more than any boost.
 
 ## How posts are chosen
@@ -34,7 +34,7 @@ Accounts with a checkmark get a small ranking boost, like the one X gives Premiu
 
 The order is always Black ≥ Gold ≥ Premium ≥ Blue Verified ≥ Blue Essential.
 
-**Official** accounts are accounts Zudomart created for public bodies, brands or our own teams and gave a checkmark. They show an **Official** label and get an extra editorial boost of up to 15%, so their important updates can trend. Together with the checkmark boost this can never go above 25%.
+**Official** accounts are accounts Nantty created for public bodies, brands or our own teams and gave a checkmark. They show an **Official** label and get an extra editorial boost of up to 15%, so their important updates can trend. Together with the checkmark boost this can never go above 25%.
 
 Admins can lower these numbers, but the limits are enforced by our servers and can't be raised from the admin console. Every change is recorded in our audit log.
 

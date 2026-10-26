@@ -42,4 +42,4 @@ Stories don't have quick emoji reactions. To react, send a short reply. Inside t
 - **"You can't reply to your own story."**
 - **"Story not found."** The story expired or was removed.
 - **"This account isn't accepting message requests from you."** The author only accepts messages from certain people.
-- **"They haven't set up secure chat yet. Ask them to open Zudomart, then try again."** The author needs to open the app once so encrypted chat can start.
+- **"They haven't set up secure chat yet. Ask them to open Nantty, then try again."** The author needs to open the app once so encrypted chat can start.

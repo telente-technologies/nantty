@@ -5,7 +5,7 @@ tags: name mismatch, account name, own name, third party account, pay to my frie
 related: payout-setup, new-payout-account-cooldown, withdrawal-limits, who-holds-your-money, payment-scams, wallet-security-faq
 ---
 
-Zudomart never pays out to someone else's account. This is one of the most important protections on your wallet: even if someone got into your Zudomart account, they couldn't send your money to their own bank.
+Nantty never pays out to someone else's account. This is one of the most important protections on your wallet: even if someone got into your Nantty account, they couldn't send your money to their own bank.
 
 ## Who this is for
 

@@ -9,7 +9,7 @@ Fan subscriptions let your most loyal followers support you every month or year 
 
 ## Who this is for
 
-Approved [Creator Program](/help/creators-and-earnings/creator-program) members can create plans. Anyone with a Zudomart account can subscribe.
+Approved [Creator Program](/help/creators-and-earnings/creator-program) members can create plans. Anyone with a Nantty account can subscribe.
 
 ## For creators: create a plan
 
@@ -52,4 +52,4 @@ Go to **Settings > Payment Methods > Subscriptions**.
 - **"Your subscription is still running; resume it instead of subscribing again."** Tap **Resume subscription**.
 - **"This creator is not accepting subscriptions right now."** The creator paused or left the program.
 - **"This subscription is billed by the app store. Manage it in your store subscription settings."** Cancel with Apple or Google.
-- **"You've reached the in-app limit for subscriptions at this price. Subscribe on the web instead."** Subscribe at **app.zudomart.com**.
+- **"You've reached the in-app limit for subscriptions at this price. Subscribe on the web instead."** Subscribe at **app.nantty.com**.

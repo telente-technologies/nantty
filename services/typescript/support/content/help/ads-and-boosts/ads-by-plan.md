@@ -22,7 +22,7 @@ How many ads you see depends on your plan. Fewer ads means fewer ad spaces get f
 | Black Official (government) | about 20% |
 | No plan | the usual amount |
 
-These are default levels. Zudomart can adjust them, but ad-free plans always stay at zero.
+These are default levels. Nantty can adjust them, but ad-free plans always stay at zero.
 
 ## If you have more than one plan
 

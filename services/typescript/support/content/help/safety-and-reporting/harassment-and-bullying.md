@@ -1,11 +1,11 @@
 ---
 title: Harassment and bullying
-summary: Tools to stop unwanted contact, from limiting replies and message requests to blocking and reporting, and what counts as harassment on Zudomart.
+summary: Tools to stop unwanted contact, from limiting replies and message requests to blocking and reporting, and what counts as harassment on Nantty.
 tags: harassment, bullying, abuse, insult, threats, stalking, troll, leave me alone, doxxing, cyberbullying
 related: blocking-people, reply-controls, chat-requests-and-spam, live-chat-moderation, report-a-problem, child-safety
 ---
 
-Nobody should be bullied, threatened or targeted on Zudomart. You have tools to control who can reach you, and our safety team acts on reports.
+Nobody should be bullied, threatened or targeted on Nantty. You have tools to control who can reach you, and our safety team acts on reports.
 
 ## Who this is for
 

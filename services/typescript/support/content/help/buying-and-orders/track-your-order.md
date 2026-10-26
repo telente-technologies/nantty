@@ -32,7 +32,7 @@ If the seller added rider contact details or an estimate, the order's **Delivery
 
 - Statuses are explained in [Order statuses](/help/buying-and-orders/order-statuses).
 - Orders paid directly show "Paid to seller" instead of "Paid into escrow".
-- The web app (app.zudomart.com) shows the same tracking link, rider details, estimated delivery and failed-attempt information at **Your orders**. The app and the web update when the page is opened or refreshed.
+- The web app (app.nantty.com) shows the same tracking link, rider details, estimated delivery and failed-attempt information at **Your orders**. The app and the web update when the page is opened or refreshed.
 
 ## If something goes wrong
 

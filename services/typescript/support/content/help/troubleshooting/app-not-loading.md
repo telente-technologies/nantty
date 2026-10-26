@@ -1,6 +1,6 @@
 ---
 title: App not loading or showing errors
-summary: What to do when Zudomart won't load, shows "You're offline", keeps spinning or says "Something went wrong", in the app or on the web.
+summary: What to do when Nantty won't load, shows "You're offline", keeps spinning or says "Something went wrong", in the app or on the web.
 tags: app not working, not loading, network error, something went wrong, you're offline, app crash, blank screen, app no dey work, slow
 related: common-error-messages, update-the-app, video-wont-play, troubleshooting-faq, report-a-bug
 ---
@@ -9,7 +9,7 @@ Most loading problems come from the connection or an old version of the app. Wor
 
 ## Who this is for
 
-Anyone using the Zudomart app on iPhone or Android, or **app.zudomart.com** in a browser.
+Anyone using the Nantty app on iPhone or Android, or **app.nantty.com** in a browser.
 
 ## Quick fixes
 
@@ -23,17 +23,17 @@ Anyone using the Zudomart app on iPhone or Android, or **app.zudomart.com** in a
 
 ## On Android: clear the cache
 
-Go to your phone's **Settings > Apps > Zudomart > Storage** and tap **Clear cache**. Don't tap **Clear data** unless you're happy to sign in again.
+Go to your phone's **Settings > Apps > Nantty > Storage** and tap **Clear cache**. Don't tap **Clear data** unless you're happy to sign in again.
 
 ## On the web
 
 - Refresh the page. If that doesn't work, do a hard refresh (Ctrl and Shift and R on Windows, Cmd and Shift and R on Mac).
 - Use an up-to-date version of Chrome, Safari, Edge or Firefox.
-- Turn off ad blockers or extensions for **app.zudomart.com**, then try again.
+- Turn off ad blockers or extensions for **app.nantty.com**, then try again.
 
 ## What the messages mean
 
-- **"You're offline"** with "Check your connection, then try again." Your phone has no internet. Zudomart may show what it saved earlier ("You're offline — showing saved content") until you're back online.
+- **"You're offline"** with "Check your connection, then try again." Your phone has no internet. Nantty may show what it saved earlier ("You're offline — showing saved content") until you're back online.
 - **"Something went wrong."** A temporary problem. Tap **Try again**.
 - **"Couldn't load your orders."** (or wallet, cart, profile and so on) That one section didn't load. Tap **Try again** or pull down to refresh.
 - **"The service is unavailable. Try again."** One of our services is briefly down. Wait a few minutes.

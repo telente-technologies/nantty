@@ -5,7 +5,7 @@ tags: price, currency, country, naira, dollar, cedi, why is my price different, 
 related: app-store-purchases, checkmark-prices, payments-outside-nigeria, language-and-currency, prices-per-country, payments-faq
 ---
 
-Zudomart sets prices separately for each country so they make sense locally.
+Nantty sets prices separately for each country so they make sense locally.
 
 ## Who this is for
 
@@ -20,7 +20,7 @@ See [Checkmark and plan prices by country](/help/checkmarks-and-verification/che
 ## How we decide your price
 
 - **In the app**, through the App Store or Google Play: your price comes from your Apple or Google account's country.
-- **On the web and at Zudomart checkout**: the currency you're charged in comes from your account's verified country. It can't be changed by switching your phone or browser settings, so everyone in a country pays the same.
+- **On the web and at Nantty checkout**: the currency you're charged in comes from your account's verified country. It can't be changed by switching your phone or browser settings, so everyone in a country pays the same.
 
 You can change the region used to show prices in **Settings > App preferences > Region**. Converted prices are marked approximate, and you always see the exact amount before you pay. See [Region and currency](/help/notifications-and-settings/language-and-currency).
 
@@ -37,6 +37,6 @@ Sellers set their own product prices. They can set a different price for some co
 ## If something goes wrong
 
 - **"Payments in this currency are not supported yet."** Checkout can't take payments in your currency yet.
-- **"Web checkout isn't available in your currency or in USD yet. Buy coins in the Zudomart app, or try again later."** Buy coins in the app instead.
+- **"Web checkout isn't available in your currency or in USD yet. Buy coins in the Nantty app, or try again later."** Buy coins in the app instead.
 - **"This coin package has no price in your currency."** That pack isn't sold in your country. Choose another pack.
 - **The price looks wrong.** Check which country your account is verified in. If it's wrong, contact support from **Help**.

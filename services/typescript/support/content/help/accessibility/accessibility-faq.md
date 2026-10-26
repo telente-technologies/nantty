@@ -1,21 +1,21 @@
 ---
 title: Accessibility FAQ
-summary: Quick answers about screen readers, text size, dark mode, reduced motion, captions and keyboard use on Zudomart.
+summary: Quick answers about screen readers, text size, dark mode, reduced motion, captions and keyboard use on Nantty.
 tags: accessibility faq, screen reader, voiceover, talkback, captions, bigger text, keyboard, disability help
 related: accessibility-overview, screen-readers, text-size-and-display, captions-and-alt-text, reduce-motion
 ---
 
-## Does Zudomart work with VoiceOver and TalkBack?
+## Does Nantty work with VoiceOver and TalkBack?
 
-Yes. Buttons, tabs and media controls have spoken names, and posts and comments have quick actions. See [Using Zudomart with a screen reader](/help/accessibility/screen-readers).
+Yes. Buttons, tabs and media controls have spoken names, and posts and comments have quick actions. See [Using Nantty with a screen reader](/help/accessibility/screen-readers).
 
 ## Where are the accessibility settings in the app?
 
-Go to **Settings > App Preference > Accessibility**. It opens your phone's settings, because Zudomart follows your device's accessibility options.
+Go to **Settings > App Preference > Accessibility**. It opens your phone's settings, because Nantty follows your device's accessibility options.
 
 ## How do I make text bigger?
 
-Increase your phone's text size. Zudomart follows it. See [Text size and display](/help/accessibility/text-size-and-display).
+Increase your phone's text size. Nantty follows it. See [Text size and display](/help/accessibility/text-size-and-display).
 
 ## Why doesn't all text get as big as my phone setting?
 
@@ -37,9 +37,9 @@ Not yet. You can mute, seek, skip 10 seconds and change playback speed. See [Cap
 
 Not yet. Describe your photo in the post text for now.
 
-## Can I use Zudomart with a keyboard?
+## Can I use Nantty with a keyboard?
 
-On **app.zudomart.com**, yes. Press Tab to move, use **Skip to content**, and use Space or K, J, L and the arrow keys to control videos.
+On **app.nantty.com**, yes. Press Tab to move, use **Skip to content**, and use Space or K, J, L and the arrow keys to control videos.
 
 ## Can I slow down or speed up clips?
 

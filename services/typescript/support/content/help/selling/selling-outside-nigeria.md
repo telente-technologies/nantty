@@ -22,7 +22,7 @@ Until both are done, you can't publish products and buyers can't check out your 
 
 ## How you get paid
 
-- Buyers pay you directly through checkout. There is no escrow and no stored Zudomart balance.
+- Buyers pay you directly through checkout. There is no escrow and no stored Nantty balance.
 - The money settles to your payout account.
 - You pay only the payment processing fee. No escrow fee and no commission.
 
@@ -40,4 +40,4 @@ Until both are done, you can't publish products and buyers can't check out your 
 
 ## Stay safe
 
-Only take payment through Zudomart checkout. Payments outside the app aren't covered by any of our protection and can get your store closed.
+Only take payment through Nantty checkout. Payments outside the app aren't covered by any of our protection and can get your store closed.

@@ -1,6 +1,6 @@
 ---
 title: Streaming from a computer with OBS
-summary: Use Studio at studio.zudomart.com to get a server URL and stream key, then stream from OBS or any RTMP encoder. Add overlays as a browser source.
+summary: Use Studio at studio.nantty.com to get a server URL and stream key, then stream from OBS or any RTMP encoder. Add overlays as a browser source.
 tags: obs, encoder, stream key, studio, overlay, rtmp, streamlabs, pc live
 related: going-live, live-safety, creator-analytics, live-goals, live-faq
 ---
@@ -9,7 +9,7 @@ Creator Program members can stream from a computer with OBS, Streamlabs or any R
 
 ## Set up
 
-1. Sign in at **studio.zudomart.com** with your Zudomart account.
+1. Sign in at **studio.nantty.com** with your Nantty account.
 2. Create a live: add a **Live title**, pick a **Stream category** and choose **Stream for** (yourself, **Just me (no products)**, or a store you belong to).
 3. Open the live's control room and tap **Create stream key**.
 4. In OBS, open **Settings > Stream** and choose **Custom...** as the service.

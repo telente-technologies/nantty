@@ -5,7 +5,7 @@ tags: shipping fee, delivery fee, delivery cost, free shipping, do you deliver t
 related: cart-and-checkout, saved-addresses, track-your-order, shipping-settings, buying-outside-nigeria
 ---
 
-Zudomart doesn't deliver orders itself. Each store chooses where it ships and how much it charges, and the fee is worked out from your address.
+Nantty doesn't deliver orders itself. Each store chooses where it ships and how much it charges, and the fee is worked out from your address.
 
 ## Who this is for
 

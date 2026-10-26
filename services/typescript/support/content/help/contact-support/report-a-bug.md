@@ -10,7 +10,7 @@ Bugs are things that don't work the way they should: a button that does nothing,
 ## How to report a bug in the app
 
 1. Go to **Settings > Support > Report a bug**.
-2. Your email app opens a message to support@zudomart.com with the subject "Bug report".
+2. Your email app opens a message to support@nantty.com with the subject "Bug report".
 3. Tell us:
    - what you were trying to do
    - what you expected to happen
@@ -28,7 +28,7 @@ If you'd rather stay in the app, open **Settings > Support > Contact support**, 
 
 ## Security problems
 
-If you find a security weakness, such as a way to see someone else's data, email **security@zudomart.com** instead. Please don't share it publicly or test it on other people's accounts.
+If you find a security weakness, such as a way to see someone else's data, email **security@nantty.com** instead. Please don't share it publicly or test it on other people's accounts.
 
 ## Good to know
 

@@ -15,7 +15,7 @@ Everyone. If you signed up with **Email**, the code you entered during sign-up a
 
 If checkout or a payment screen asks you to verify:
 
-1. Go to **app.zudomart.com**, open **Settings** and choose **Email** ("Verify the email used for receipts and payments").
+1. Go to **app.nantty.com**, open **Settings** and choose **Email** ("Verify the email used for receipts and payments").
 2. Tap **Send code**. We email a 6-digit code to the address on your account.
 3. Type the code under **Verification code** and tap **Verify email**.
 4. You'll see **Email verified**, then **Your email is verified**. Tap **Continue** to go back to what you were doing.
@@ -30,7 +30,7 @@ If checkout or a payment screen asks you to verify:
 ## Good to know
 
 - Codes expire after 5 minutes. **Resend code** unlocks after a short countdown.
-- Check your spam or promotions folder. Our emails come from addresses ending in **mail.zudomart.com**.
+- Check your spam or promotions folder. Our emails come from addresses ending in **mail.nantty.com**.
 - You can't change your email in the app yet. See [Changing your email address](/help/account-and-login/change-your-email).
 
 ## If something goes wrong
@@ -44,4 +44,4 @@ If checkout or a payment screen asks you to verify:
 
 ## Stay safe
 
-Never share your email code. Zudomart staff will never ask for it.
+Never share your email code. Nantty staff will never ask for it.

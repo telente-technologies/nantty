@@ -9,7 +9,7 @@ If checkout isn't working, the message on screen usually tells you why. Here is 
 
 ## Who this is for
 
-Buyers paying for orders in the app or on **app.zudomart.com**.
+Buyers paying for orders in the app or on **app.nantty.com**.
 
 ## If your payment didn't go through
 
@@ -51,4 +51,4 @@ These are temporary. Wait a few minutes and try again. You won't be charged twic
 
 ## Stay safe
 
-Only pay through Zudomart checkout. Never pay a seller directly by bank transfer outside the app, even if checkout seems slow. Zudomart will never ask for your card PIN or one-time codes in chat.
+Only pay through Nantty checkout. Never pay a seller directly by bank transfer outside the app, even if checkout seems slow. Nantty will never ask for your card PIN or one-time codes in chat.

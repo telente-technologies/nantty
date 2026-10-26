@@ -5,7 +5,7 @@ tags: ads revenue, revenue share, ad money, creator ads, premium pool, monetisat
 related: creator-earnings, ads-in-comments, live-ads, ai-generated-label, creator-earnings-holds, why-you-see-an-ad, creators-faq
 ---
 
-Zudomart doesn't pay per view. Instead, when an advertiser pays for an ad shown next to your content, part of that money goes to you.
+Nantty doesn't pay per view. Instead, when an advertiser pays for an ad shown next to your content, part of that money goes to you.
 
 ## Who this is for
 
@@ -31,8 +31,8 @@ Ads earnings are added to your **Creator earnings** in batches as ads are settle
 ## Good to know
 
 - Views alone don't earn money. Revenue depends on ads actually delivered and paid for.
-- Your own sponsorships are your business. Zudomart doesn't take a share of deals you make yourself.
-- Rates are set by Zudomart and can change. Changes apply from when an ad is delivered.
+- Your own sponsorships are your business. Nantty doesn't take a share of deals you make yourself.
+- Rates are set by Nantty and can change. Changes apply from when an ad is delivered.
 
 ## If something goes wrong
 

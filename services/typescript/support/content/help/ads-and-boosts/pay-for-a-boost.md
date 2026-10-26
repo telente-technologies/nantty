@@ -34,12 +34,12 @@ The boost shows **Waiting for payment** until your payment is confirmed, then **
 
 ## If something goes wrong
 
-- **"Pay from your earnings on zudomart.com."** Earnings payments only work on the web. In the app, pay by card or from your ad credit and balance.
+- **"Pay from your earnings on nantty.com."** Earnings payments only work on the web. In the app, pay by card or from your ad credit and balance.
 - **"Your ad credit and balance don't cover this. Pay by card or add funds."** Top up, pick a smaller budget, or pay by card.
-- **"Verify your payout details to use Zudomart Ads."** Paying from your balance needs payout verification.
+- **"Verify your payout details to use Nantty Ads."** Paying from your balance needs payout verification.
 - **"Amount is more than your available balance."** Pay by card, or choose a smaller budget.
 - Stuck on **Waiting for payment**? If money left your account but the boost didn't start within an hour, [contact support](/help/contact-support/contact-support) with your payment receipt. Don't pay twice.
 
 ## Stay safe
 
-Only pay inside the Zudomart checkout. Zudomart staff will never ask you to pay for a boost by transfer to a personal account, or ask for your card PIN or one-time codes.
+Only pay inside the Nantty checkout. Nantty staff will never ask you to pay for a boost by transfer to a personal account, or ask for your card PIN or one-time codes.

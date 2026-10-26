@@ -5,7 +5,7 @@ tags: sensitive, sensitive content, age, nsfw, under 18, warning, blur, content 
 related: community-guidelines, report-a-problem, how-your-feed-works, create-a-post, explore-and-trends
 ---
 
-Some posts are fine for Zudomart but not for everyone. These are covered with a **Sensitive content** warning so you choose whether to see them.
+Some posts are fine for Nantty but not for everyone. These are covered with a **Sensitive content** warning so you choose whether to see them.
 
 ## Sensitive content warnings
 

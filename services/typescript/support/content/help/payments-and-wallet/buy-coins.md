@@ -14,7 +14,7 @@ Some packs include bonus coins, shown under the pack as **+ bonus**.
 
 Prices depend on where you buy. In Nigeria, 100 coins cost about ₦1,000 on the web and ₦1,200 in the iPhone or Android app, because Apple and Google take a fee. The web often gives you more coins for the same money. The price on the pack is what you pay.
 
-If you see **"Coin purchases are available on zudomart.com"**, buying coins isn't available in this version of the app. Buy them on the website instead. They show up in the app right away.
+If you see **"Coin purchases are available on nantty.com"**, buying coins isn't available in this version of the app. Buy them on the website instead. They show up in the app right away.
 
 ## After you pay
 
@@ -32,7 +32,7 @@ A gift or coin transfer is final once sent. Coins can't be withdrawn or turned b
 
 ## Coin activity
 
-Coin activity lists the coins you buy, send and receive. On the web (**app.zudomart.com**) it's under **Wallet** > **Coin activity**. In the app, creators find it in Creator Studio.
+Coin activity lists the coins you buy, send and receive. On the web (**app.nantty.com**) it's under **Wallet** > **Coin activity**. In the app, creators find it in Creator Studio.
 
 ## Refunds
 

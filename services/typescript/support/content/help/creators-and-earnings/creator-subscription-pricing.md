@@ -17,7 +17,7 @@ Other countries have their own tiers in their own currency (for example Ghana, K
 
 ## Web price and app price
 
-The tier you pick is the **web price**: what fans pay at **app.zudomart.com**. In the iPhone and Android apps, Apple and Google take a fee, so we add it to the fan's price instead of taking it from you. When you choose a tier, the form shows exactly what fans will pay in the iPhone app and on Android.
+The tier you pick is the **web price**: what fans pay at **app.nantty.com**. In the iPhone and Android apps, Apple and Google take a fee, so we add it to the fan's price instead of taking it from you. When you choose a tier, the form shows exactly what fans will pay in the iPhone app and on Android.
 
 Apple's fee is usually higher than Google's, so the iPhone price is usually the highest. The web is always the cheapest place for fans to subscribe.
 

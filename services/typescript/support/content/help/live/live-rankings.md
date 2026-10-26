@@ -5,7 +5,7 @@ tags: live ranking, rank ring, streamer rank, top streamer, leaderboard, global 
 related: zudopoints, supporters-leaderboard, gifts-and-coins-on-live, watch-a-live, live-faq
 ---
 
-There's no separate Rankings page on Zudomart. Instead, a streamer's rank shows right on their avatar in the live header.
+There's no separate Rankings page on Nantty. Instead, a streamer's rank shows right on their avatar in the live header.
 
 ## Reading the rank ring
 
@@ -29,13 +29,13 @@ Tap the ringed avatar to open the host's ranking. It shows:
 
 ## How rank is worked out
 
-Streamer rank comes from ZudoPoints earned on lives. A streamer earns 1 ZudoPoint for every coin gifted to them. Ranks cover the last 7 days and update as gifts land, so a streamer can move up or down during a live.
+Streamer rank comes from Nantty Points earned on lives. A streamer earns 1 Nantty Point for every coin gifted to them. Ranks cover the last 7 days and update as gifts land, so a streamer can move up or down during a live.
 
 The category rank only counts points earned in lives of that category: Just chatting, Gaming, Music, IRL, Education or Shopping.
 
 ## Good to know
 
-- Rankings are for fun and discovery. ZudoPoints are never money and can't be bought, sold, withdrawn or exchanged. See [ZudoPoints](/help/live/zudopoints).
+- Rankings are for fun and discovery. Nantty Points are never money and can't be bought, sold, withdrawn or exchanged. See [Nantty Points](/help/live/zudopoints).
 - Viewers have their own ranking on each live: the [Top supporters](/help/live/supporters-leaderboard) list.
 - Buying fake engagement or using several accounts to gift yourself breaks our [Community guidelines](/help/safety-and-reporting/community-guidelines) and can lead to points being removed and strikes.
 

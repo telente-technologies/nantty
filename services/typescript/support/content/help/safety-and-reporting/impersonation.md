@@ -5,7 +5,7 @@ tags: impersonation, fake account, fake page, someone is using my name, fake pro
 related: report-a-problem, checkmarks-explained, usernames, copyright-takedown-request, hacked-account, safety-faq
 ---
 
-Pretending to be another person, brand, store or government body is not allowed on Zudomart. Parody and fan accounts are fine only when they clearly say they are not the real person.
+Pretending to be another person, brand, store or government body is not allowed on Nantty. Parody and fan accounts are fine only when they clearly say they are not the real person.
 
 ## Who this is for
 
@@ -34,7 +34,7 @@ We review the report. If the account is impersonating, we remove it or make it c
 
 - Look for a checkmark. Blue is for verified people and creators, Gold for verified businesses and brands, and Black for government accounts. See [Checkmarks explained](/help/checkmarks-and-verification/checkmarks-explained).
 - Check the exact username, the join date and the follower count.
-- A real store takes payment only through Zudomart checkout.
+- A real store takes payment only through Nantty checkout.
 
 ## If your username was taken
 

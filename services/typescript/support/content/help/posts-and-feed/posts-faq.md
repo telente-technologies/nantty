@@ -41,7 +41,7 @@ Open its menu and tap **Turn off notifications for this post**.
 
 Each time a post appears on someone else's screen counts as a view, including repeats. You only see totals, never names. Tap **Views** on your own post for analytics. See [About views](/help/posts-and-feed/views-and-analytics).
 
-## Does Zudomart pay for views?
+## Does Nantty pay for views?
 
 No. Creators earn a share of eligible monetisation revenue. See [Creator earnings](/help/creators-and-earnings/creator-earnings).
 

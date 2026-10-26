@@ -39,4 +39,4 @@ If you're not signed in, you'll be asked to sign in first and then brought back.
 
 ## Stay safe
 
-Never send coins to someone who promises to send back money, more coins or a prize. Coins are not a way to pay for products. Buy products only through Zudomart checkout. See [Payment scams](/help/wallet-security/payment-scams).
+Never send coins to someone who promises to send back money, more coins or a prize. Coins are not a way to pay for products. Buy products only through Nantty checkout. See [Payment scams](/help/wallet-security/payment-scams).

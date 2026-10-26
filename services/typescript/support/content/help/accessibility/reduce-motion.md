@@ -1,11 +1,11 @@
 ---
 title: Reduce motion
-summary: Turn on reduced motion on your phone or computer and Zudomart turns off sliding sheets, auto-scrolling banners and most celebration animations.
+summary: Turn on reduced motion on your phone or computer and Nantty turns off sliding sheets, auto-scrolling banners and most celebration animations.
 tags: reduce motion, animations, motion sickness, dizzy, vestibular, stop animations, auto scroll, confetti
 related: accessibility-overview, text-size-and-display, screen-readers, accessibility-faq
 ---
 
-If movement on screen makes you dizzy or distracts you, turn on reduced motion in your device settings. Zudomart checks this setting and calms things down.
+If movement on screen makes you dizzy or distracts you, turn on reduced motion in your device settings. Nantty checks this setting and calms things down.
 
 ## Who this is for
 
@@ -18,7 +18,7 @@ Anyone with motion sensitivity, vestibular conditions or who just prefers fewer 
 - **Windows**: **Settings > Accessibility > Visual effects > Animation effects**, turned off.
 - **Mac**: **System Settings > Accessibility > Display > Reduce motion**.
 
-Zudomart picks up the change straight away; you don't need to restart.
+Nantty picks up the change straight away; you don't need to restart.
 
 ## What changes in the app
 
@@ -35,7 +35,7 @@ Zudomart picks up the change straight away; you don't need to restart.
 
 ## On the web
 
-**app.zudomart.com** follows your system's reduced motion setting and turns off non-essential animations.
+**app.nantty.com** follows your system's reduced motion setting and turns off non-essential animations.
 
 ## If something goes wrong
 

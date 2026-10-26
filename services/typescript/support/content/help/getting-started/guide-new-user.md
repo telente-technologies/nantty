@@ -1,7 +1,7 @@
 ---
-title: Your first steps on Zudomart
+title: Your first steps on Nantty
 summary: A step-by-step path for new users, from creating your account and setting up your profile to following people, staying safe and finding help.
-tags: new user, beginner, getting started, first time, how to start, new on zudomart, setup guide
+tags: new user, beginner, getting started, first time, how to start, new on nantty, setup guide
 related: create-an-account, find-your-way-around, edit-your-profile, glossary, getting-started-faq, guide-buyer
 ---
 

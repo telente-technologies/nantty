@@ -5,7 +5,7 @@ tags: plans, pro, business, free, subscription, trial, upgrade, seller plan pric
 related: fees-and-escrow-fee, checkmark-prices, verify-your-store, seller-dashboard-overview, prices-by-country, gold-checkmark
 ---
 
-Every seller starts on Free. Paid plans add room to grow and advanced tools. Zudomart never takes a commission on any plan.
+Every seller starts on Free. Paid plans add room to grow and advanced tools. Nantty never takes a commission on any plan.
 
 ## Who this is for
 
@@ -35,7 +35,7 @@ Plans are priced locally each month: Pro is GH₵60, KSh 1,000, R149.99, £15, �
 
 ## How to buy a plan
 
-1. Sign in at **dashboard.zudomart.com**.
+1. Sign in at **dashboard.nantty.com**.
 2. Go to **Settings > Billing**.
 3. Choose **Upgrade to** Pro or Business, or **Start 7-day free trial** if you're eligible.
 4. Pay through the on-screen checkout. Yearly billing saves 20%.
@@ -46,7 +46,7 @@ Plans are bought on the web, not inside the mobile app.
 
 - Free trials last 7 days. You need a verified email and an account at least 7 days old, and there's one trial per person, card and device.
 - Paid plans give the Gold checkmark only after your business documents are approved. See [Verify your store](/help/selling/verify-your-store).
-- Don't sell on Zudomart but want Gold? The Gold-only plan is ₦3,000 a month.
+- Don't sell on Nantty but want Gold? The Gold-only plan is ₦3,000 a month.
 
 ## If something goes wrong
 

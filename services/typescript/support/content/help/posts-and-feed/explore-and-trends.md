@@ -5,7 +5,7 @@ tags: explore, trends, trending, hashtags, search, what's happening, who to foll
 related: how-your-feed-works, mentions, followers-and-following, create-a-post, sensitive-content-and-age
 ---
 
-Explore is where you discover what people across Zudomart are talking about right now, beyond the accounts you follow.
+Explore is where you discover what people across Nantty are talking about right now, beyond the accounts you follow.
 
 ## How to open Explore
 
@@ -17,7 +17,7 @@ Explore is where you discover what people across Zudomart are talking about righ
 - **Category chips**: **For you**, **Trending**, **News**, **Sports**, **Entertainment**, **Music**, **Tech**, **Business**, **Fashion**, **Gaming**, **Comedy**, **Religion**, **Food**, **Politics** and **Lifestyle**. Pick one to filter everything below it.
 - **What's happening**: short stories that group related posts under a neutral headline, with the category and number of posts.
 - **Trends for you**: hashtags and topics taking off now, each with its post count. Tap **Show more** to see more. Tap a trend to search it.
-- **Who to follow**: suggested accounts. Accounts Zudomart runs for public bodies or brands show an **Official** label.
+- **Who to follow**: suggested accounts. Accounts Nantty runs for public bodies or brands show an **Official** label.
 - **Posts for you**: popular posts in that category. Tap **Why am I seeing this?** under a post to see the reasons, and **Show more posts** to keep going.
 
 ## Search
@@ -30,7 +30,7 @@ You can remove single recent searches or clear them all.
 
 ## How trends work
 
-A trend needs posts from many different accounts, so one account can't make something trend. Posts and hashtags with fake engagement can't trend, and sensitive or age-restricted posts are left out. Nobody can pay to make something trend, and Zudomart staff can't push a trend. See [How your feed works](/help/posts-and-feed/how-your-feed-works).
+A trend needs posts from many different accounts, so one account can't make something trend. Posts and hashtags with fake engagement can't trend, and sensitive or age-restricted posts are left out. Nobody can pay to make something trend, and Nantty staff can't push a trend. See [How your feed works](/help/posts-and-feed/how-your-feed-works).
 
 ## If something goes wrong
 

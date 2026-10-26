@@ -25,8 +25,8 @@ Finish business verification. See [Verify your store](/help/selling/verify-your-
 
 ## Good to know
 
-- The limit is set by Zudomart and may change. The figure above is the current default.
-- Buyers see your store without a checkmark and with **Protected by Zudomart Escrow** at checkout.
+- The limit is set by Nantty and may change. The figure above is the current default.
+- Buyers see your store without a checkmark and with **Protected by Nantty Escrow** at checkout.
 - You still pay only the escrow fee and processing fee on each order.
 
 ## If something goes wrong
@@ -37,4 +37,4 @@ Finish business verification. See [Verify your store](/help/selling/verify-your-
 
 ## Stay safe
 
-Never ask buyers to pay you outside Zudomart to get round the limit. It removes their protection and can get your store closed.
+Never ask buyers to pay you outside Nantty to get round the limit. It removes their protection and can get your store closed.

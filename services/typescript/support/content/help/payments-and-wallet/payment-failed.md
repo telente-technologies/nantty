@@ -45,4 +45,4 @@ Check that your card has enough money and is enabled for online payments, or try
 
 ## Stay safe
 
-Zudomart support will never ask for your card PIN, CVV or one-time codes to "fix" a payment, and never asks you to pay again into a personal account.
+Nantty support will never ask for your card PIN, CVV or one-time codes to "fix" a payment, and never asks you to pay again into a personal account.

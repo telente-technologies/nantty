@@ -1,15 +1,15 @@
 ---
 title: Saved cards
-summary: Save a card on your phone to pay faster next time. Only a secure token is kept on the device, unlocked with your fingerprint or face, and Zudomart never stores your card number.
+summary: Save a card on your phone to pay faster next time. Only a secure token is kept on the device, unlocked with your fingerprint or face, and Nantty never stores your card number.
 tags: saved card, save card, remove card, card on file, fingerprint, face id, card not working, delete card, debit card
 related: payment-methods, payment-failed, manage-subscriptions, step-up-codes, payments-faq
 ---
 
-A saved card lets you skip typing your card details at checkout. It lives on your phone, not on Zudomart's servers.
+A saved card lets you skip typing your card details at checkout. It lives on your phone, not on Nantty's servers.
 
 ## Who this is for
 
-Anyone paying by card in the Zudomart app. Your phone needs fingerprint or face unlock turned on.
+Anyone paying by card in the Nantty app. Your phone needs fingerprint or face unlock turned on.
 
 ## How to save a card
 
@@ -41,4 +41,4 @@ Next time, your card appears under **Payment method** as the brand and last 4 di
 
 ## Stay safe
 
-Zudomart will never ask you to read out your card number, CVV, PIN or a one-time code. Only enter card details in the secure payment window that opens from Zudomart checkout. See [Payment scams](/help/wallet-security/payment-scams).
+Nantty will never ask you to read out your card number, CVV, PIN or a one-time code. Only enter card details in the secure payment window that opens from Nantty checkout. See [Payment scams](/help/wallet-security/payment-scams).

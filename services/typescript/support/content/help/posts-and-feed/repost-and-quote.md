@@ -9,7 +9,7 @@ A repost shares someone's post with your followers. A quote does the same but ad
 
 ## Who this is for
 
-Anyone signed in. If you are browsing as a guest, Zudomart asks you to sign in first and then brings you back to the post.
+Anyone signed in. If you are browsing as a guest, Nantty asks you to sign in first and then brings you back to the post.
 
 ## How to repost or quote
 
@@ -21,7 +21,7 @@ Anyone signed in. If you are browsing as a guest, Zudomart asks you to sign in f
 
 ## Quote by pasting a link
 
-You don't have to use the button. Copy a post's link (post menu > **Copy link**) and paste it into a new post or a comment. When the link points to a Zudomart post or clip, it becomes a quote card showing the original. If the link is at the end of your text, we hide the raw link and show only the card. See [Link and quote cards](/help/posts-and-feed/link-cards).
+You don't have to use the button. Copy a post's link (post menu > **Copy link**) and paste it into a new post or a comment. When the link points to a Nantty post or clip, it becomes a quote card showing the original. If the link is at the end of your text, we hide the raw link and show only the card. See [Link and quote cards](/help/posts-and-feed/link-cards).
 
 A link in a comment counts as a quote too: the original post's quote count goes up and its author is notified.
 

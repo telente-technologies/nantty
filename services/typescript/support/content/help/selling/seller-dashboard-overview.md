@@ -1,11 +1,11 @@
 ---
 title: The seller dashboard
-summary: Run your store on the web at dashboard.zudomart.com: orders, delivery, products, inventory, marketing, money, reports and team.
+summary: Run your store on the web at dashboard.nantty.com: orders, delivery, products, inventory, marketing, money, reports and team.
 tags: dashboard, seller dashboard, manage store, seller tools, web dashboard, store admin
 related: seller-plans, products-and-inventory, seller-orders-and-shipping, seller-team, seller-reports, shipping-settings
 ---
 
-The app is for selling from anywhere. The dashboard is for running your business. It's free for every Zudomart seller at **dashboard.zudomart.com**. Sign in with your Zudomart account.
+The app is for selling from anywhere. The dashboard is for running your business. It's free for every Nantty seller at **dashboard.nantty.com**. Sign in with your Nantty account.
 
 ## Who this is for
 
@@ -22,7 +22,7 @@ Store owners and their team members.
 
 ## Good to know
 
-- Orders in the dashboard are the same marketplace orders customers place in the Zudomart app and on the web. There's no in-store till or cash register.
+- Orders in the dashboard are the same marketplace orders customers place in the Nantty app and on the web. There's no in-store till or cash register.
 - Features from a higher plan stay visible with an upgrade notice, so you can see what you'd get.
 - Team members only see the sections their role allows. See [Adding staff to your store](/help/selling/seller-team).
 - In the app, open your profile menu and tap **Seller dashboard** for orders and products on the go.
@@ -34,4 +34,4 @@ Store owners and their team members.
 
 ## Stay safe
 
-Only sign in at dashboard.zudomart.com. Never share your login with staff; add them to your team instead.
+Only sign in at dashboard.nantty.com. Never share your login with staff; add them to your team instead.

@@ -5,7 +5,7 @@ tags: live shopping, buy on live, shop live, livestream, products in this live, 
 related: cart-and-checkout, escrow-or-direct-payment, watch-a-live, sell-on-live, live-safety
 ---
 
-Stores can go live to show off their products. While you watch, you can see what's for sale and buy it without leaving Zudomart.
+Stores can go live to show off their products. While you watch, you can see what's for sale and buy it without leaving Nantty.
 
 ## Who this is for
 
@@ -18,7 +18,7 @@ Anyone watching a shopping live from a store. Buying follows the same rules as a
 3. Tap a product to open its product page. You can go back to the live afterwards.
 4. Choose options such as size or colour, add it to your cart and check out as usual. See [Cart, shipping and checkout](/help/buying-and-orders/cart-and-checkout).
 
-On the web (app.zudomart.com), the products appear in a strip under the video.
+On the web (app.nantty.com), the products appear in a strip under the video.
 
 ## Good to know
 

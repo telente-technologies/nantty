@@ -33,7 +33,7 @@ Sellers can tag published products from their store. Only posts with tagged prod
 
 ## Links in posts
 
-Links become preview cards. A link to another Zudomart post becomes a quote card. See [Link and quote cards](/help/posts-and-feed/link-cards).
+Links become preview cards. A link to another Nantty post becomes a quote card. See [Link and quote cards](/help/posts-and-feed/link-cards).
 
 ## After posting
 

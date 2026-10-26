@@ -14,7 +14,7 @@ Creator Program members hosting a live.
 ## Turn on live ads
 
 1. When setting up your live, tap **Live monetization** (it shows **Ads off**).
-2. Turn on **Allow ZudoMart ads**.
+2. Turn on **Allow Nantty ads**.
 3. Read the **Live-ad terms** and tick **I agree to the live-ad terms**. Ads stay off until you agree.
 4. Pick **Placements**: **Before viewers join**, **Natural breaks**, **Between segments**, **Overlay** or **At the end**.
 5. Set **Max interruptions** (0 to 3) and a **Minimum interval** between ads: 5, 10, 15 or 30 minutes.
@@ -27,7 +27,7 @@ Creator Program members hosting a live.
 - Ads only appear in the places you choose.
 - Ads never run more often than your limits.
 - Revenue is shared under the monetisation policy that applies when the ad is delivered.
-- You're responsible for your own sponsorship mentions. Zudomart doesn't sell them or take a share of them.
+- You're responsible for your own sponsorship mentions. Nantty doesn't sell them or take a share of them.
 
 ## Good to know
 

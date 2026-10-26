@@ -1,11 +1,11 @@
 ---
 title: Verification levels (L0, L1, L2)
-summary: Zudomart has three money verification levels. L0 is a verified email, L1 confirms your payout details, and L2 adds a selfie and ID check.
+summary: Nantty has three money verification levels. L0 is a verified email, L1 confirms your payout details, and L2 adds a selfie and ID check.
 tags: verification level, l0, l1, l2, kyc, bvn, payout verification, verify identity, get paid, why verify
 related: identity-check, payout-setup, withdrawal-limits, checkmarks-explained, payout-name-match, verification-faq
 ---
 
-Verification levels decide what you can do with money on Zudomart. They're separate from checkmarks, although the selfie and ID check is shared.
+Verification levels decide what you can do with money on Nantty. They're separate from checkmarks, although the selfie and ID check is shared.
 
 ## L0: verified email
 
@@ -50,4 +50,4 @@ L2 unlocks higher withdrawal caps, the Blue or Gold checkmark and business plans
 
 ## Stay safe
 
-Only enter your BVN, NIN or ID inside the Zudomart app or on app.zudomart.com. Zudomart staff will never ask for them in chat.
+Only enter your BVN, NIN or ID inside the Nantty app or on app.nantty.com. Nantty staff will never ask for them in chat.

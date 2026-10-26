@@ -1,6 +1,6 @@
 ---
 title: Send a copyright takedown request
-summary: If someone uses your music, video or other work on Zudomart without permission, file a copyright claim from the content's menu or by email. Here is what you need.
+summary: If someone uses your music, video or other work on Nantty without permission, file a copyright claim from the content's menu or by email. Here is what you need.
 tags: copyright claim, takedown, stolen video, my song, dmca, report copyright, infringement, someone used my content, trademark
 related: copyright-and-account-status, sounds-and-copyright, report-a-problem, impersonation, appeal-a-decision
 ---
@@ -9,7 +9,7 @@ You can ask us to remove or mute content that uses your work without permission.
 
 ## Who this is for
 
-Rights owners and people authorised to act for them: musicians, labels, filmmakers, photographers, brands and their agents. You need a Zudomart account to claim from the app. If you don't have one, email copyright@zudomart.com.
+Rights owners and people authorised to act for them: musicians, labels, filmmakers, photographers, brands and their agents. You need a Nantty account to claim from the app. If you don't have one, email copyright@nantty.com.
 
 ## How to file a claim in the app
 
@@ -36,7 +36,7 @@ You'll see "Our copyright team will review your claim and contact you by email."
 
 ## Trademarks and counterfeits
 
-For fake or counterfeit products using your brand, report the listing with **Counterfeit or fake product**, or email copyright@zudomart.com with proof of your trademark and links to the listings.
+For fake or counterfeit products using your brand, report the listing with **Counterfeit or fake product**, or email copyright@nantty.com with proof of your trademark and links to the listings.
 
 ## If something goes wrong
 

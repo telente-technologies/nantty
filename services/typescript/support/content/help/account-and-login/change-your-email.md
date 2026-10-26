@@ -15,14 +15,14 @@ Your email address is your sign-in, your recovery route and where receipts go, s
 
 - **You still use the old email**: keep using it. Everything keeps working, and you can still reset your password.
 - **You've lost access to the old email**: while you're still signed in, open **Settings > Support > Contact support**, choose **My account**, and explain what happened. Our team will check it's really you before changing anything.
-- **You can't sign in either**: write to **support@zudomart.com** from the email you now use, with your username. We'll reply with how to prove the account is yours.
+- **You can't sign in either**: write to **support@nantty.com** from the email you now use, with your username. We'll reply with how to prove the account is yours.
 - **You'd rather start fresh**: you can create a new account with the new email. Your old account, orders and wallet don't move across, so talk to us first if you have money or a store on the old account.
 
 ## Good to know
 
 - Your phone number is a contact detail only. You can add or update it in **Settings > Account > Phone number**, but it can't be used to sign in or recover your account.
-- If you joined with Google or Apple, your account uses the email they shared at the time. Changing your Google or Apple email doesn't change your Zudomart email.
+- If you joined with Google or Apple, your account uses the email they shared at the time. Changing your Google or Apple email doesn't change your Nantty email.
 
 ## Stay safe
 
-Nobody from Zudomart will contact you first offering to change your email. Requests come from you, through the app or support@zudomart.com. Never send your password or codes to anyone.
+Nobody from Nantty will contact you first offering to change your email. Requests come from you, through the app or support@nantty.com. Never send your password or codes to anyone.

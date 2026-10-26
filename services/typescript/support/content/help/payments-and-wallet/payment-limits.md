@@ -9,7 +9,7 @@ To keep buyers and sellers safe, every payment has an upper limit. This page lis
 
 ## Who this is for
 
-Anyone paying on Zudomart: buyers, creators buying coins, and advertisers topping up ads.
+Anyone paying on Nantty: buyers, creators buying coins, and advertisers topping up ads.
 
 ## The limits for one payment
 
@@ -24,7 +24,7 @@ The order limit applies to each store's order. If you check out from several sto
 
 ## Daily limits for wallet payments
 
-When you pay from your Zudomart wallet, there's also a limit on how much you can pay in one day. It depends on how far you've verified:
+When you pay from your Nantty wallet, there's also a limit on how much you can pay in one day. It depends on how far you've verified:
 
 | Your wallet tier | How you get it | Wallet payments per day |
 |---|---|---|
@@ -46,4 +46,4 @@ The same limits apply in your local currency, converted from the naira amounts a
 
 ## Good to know
 
-Zudomart may change these limits. The figures above are the current ones.
+Nantty may change these limits. The figures above are the current ones.

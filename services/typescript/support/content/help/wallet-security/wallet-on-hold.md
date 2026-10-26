@@ -2,10 +2,10 @@
 title: Wallet or payouts on hold
 summary: If something looks unusual, we may pause your wallet or your payouts while our team checks. Your money stays yours and stays in your wallet while we look.
 tags: wallet on hold, payouts on hold, frozen, wallet frozen, withdrawal on hold, can't withdraw, account under review, my money hold
-related: who-holds-your-money, withdrawal-limits, owed-to-zudomart, deposit-holds, wallet-security-faq, contact-support
+related: who-holds-your-money, withdrawal-limits, owed-to-nantty, deposit-holds, wallet-security-faq, contact-support
 ---
 
-A hold is a pause while we check something. It isn't a penalty, and nothing is taken from you. Zudomart never holds your money. It stays in your own wallet with our licensed payment partner during the check.
+A hold is a pause while we check something. It isn't a penalty, and nothing is taken from you. Nantty never holds your money. It stays in your own wallet with our licensed payment partner during the check.
 
 ## What you might see
 

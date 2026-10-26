@@ -1,5 +1,5 @@
 {
-  "name": "@zudomart/support",
+  "name": "@nantty/support",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -37,7 +37,7 @@
   },
   "devDependencies": {
     "@types/node": "^26.6.5",
-    "@zudomart/eslint-config": "workspace:*",
+    "@nantty/eslint-config": "workspace:*",
     "eslint": "^10.12.0",
     "prisma": "^7.10.0",
     "typescript": "^7.0.2",

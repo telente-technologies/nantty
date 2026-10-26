@@ -1,6 +1,6 @@
 ---
 title: Downloading your data
-summary: Request a copy of your Zudomart data from Settings > Privacy & Data.
+summary: Request a copy of your Nantty data from Settings > Privacy & Data.
 tags: data export, download data, gdpr, privacy
 related: delete-your-account, privacy-settings
 ---

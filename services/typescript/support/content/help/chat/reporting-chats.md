@@ -35,14 +35,14 @@ If someone in a chat is harassing you, scamming you or breaking our rules, repor
 
 ## Choose the evidence
 
-Chats are end-to-end encrypted, so Zudomart can't see them. The report screen says: "Chats are end-to-end encrypted, so Zudomart can't read them. Only the messages you choose below leave your device."
+Chats are end-to-end encrypted, so Nantty can't see them. The report screen says: "Chats are end-to-end encrypted, so Nantty can't read them. Only the messages you choose below leave your device."
 
 Choose either:
 
 - **Last messages**: the last 10, 20 or 50, or
 - **Pick messages**: select up to 100 yourself.
 
-"These messages will be sent to Zudomart for review. The other person won't be told who reported them."
+"These messages will be sent to Nantty for review. The other person won't be told who reported them."
 
 ## After you report
 
@@ -54,7 +54,7 @@ If you or someone else is in immediate danger, contact local emergency services 
 
 ## Stay safe
 
-Zudomart staff will never message you asking for your password, card PIN or one-time codes. Report anyone who does.
+Nantty staff will never message you asking for your password, card PIN or one-time codes. Report anyone who does.
 
 ## If something goes wrong
 

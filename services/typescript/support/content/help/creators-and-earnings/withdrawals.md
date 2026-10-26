@@ -19,7 +19,7 @@ related: payout-setup, withdrawal-limits, step-up-codes, new-payout-account-cool
 
 ## How to withdraw
 
-1. Open **Wallet** and tap **Withdraw**. On the web (**app.zudomart.com**), open **Wallet** > **Payout accounts & withdraw**.
+1. Open **Wallet** and tap **Withdraw**. On the web (**app.nantty.com**), open **Wallet** > **Payout accounts & withdraw**.
 2. Enter the amount. You'll see your **Available** balance at the top.
 3. Under **Send to**, choose a payout account.
 4. Check the payout fee, then tap **Withdraw**.
@@ -41,7 +41,7 @@ Up to 3 withdrawals a day, at least 10 minutes apart, one at a time, and a daily
 - **"Withdrawals are locked"**: tap **Finish payout setup**.
 - **"Finish business verification to withdraw your sales earnings."** Your earnings are safe and keep building. Finish verification, then withdraw.
 - **"This withdrawal is too small to cover the bank transfer fee."** Withdraw a larger amount.
-- **"Clear the amount you owe before withdrawing."** Money owed to Zudomart from a refund or chargeback is repaid first.
+- **"Clear the amount you owe before withdrawing."** Money owed to Nantty from a refund or chargeback is repaid first.
 
 ## If a withdrawal fails
 

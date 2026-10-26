@@ -45,4 +45,4 @@ You'll see "This doesn't match" your legal name. Use an account in your own name
 
 Add another account in **Wallet** > **Payout accounts**. New accounts can receive withdrawals 48 hours after you add them. See [New payout account wait](/help/wallet-security/new-payout-account-cooldown).
 
-You never need a separate login with a payment company. Everything is managed inside Zudomart.
+You never need a separate login with a payment company. Everything is managed inside Nantty.

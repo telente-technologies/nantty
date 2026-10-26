@@ -28,7 +28,7 @@ Every withdrawal also needs a fresh [step-up check](/help/wallet-security/step-u
 | "This would go over your daily withdrawal limit." | Withdraw a smaller amount, or wait. Reaching level 2 raises your limit. |
 | "New payout accounts can receive withdrawals 48 hours after they are added." | Choose an older account, or wait. |
 | "Withdrawals go only to a bank account in your own verified name." | Add an account in your own name. |
-| "Clear the amount you owe before withdrawing. Add money or wait for incoming funds." | Money you owe Zudomart (from a refund or chargeback) is repaid first. |
+| "Clear the amount you owe before withdrawing. Add money or wait for incoming funds." | Money you owe Nantty (from a refund or chargeback) is repaid first. |
 | "This withdrawal is too small to cover the bank transfer fee." | Withdraw a larger amount. |
 
 ## Raising your limit

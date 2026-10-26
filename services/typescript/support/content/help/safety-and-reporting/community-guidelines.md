@@ -1,15 +1,15 @@
 ---
 title: Community guidelines in short
-summary: Be respectful, be honest, sell legally and keep children safe. Here is what is not allowed on Zudomart and what happens when rules are broken.
+summary: Be respectful, be honest, sell legally and keep children safe. Here is what is not allowed on Nantty and what happens when rules are broken.
 tags: guidelines, rules, banned content, what is allowed, community standards, prohibited, policy, why was my post removed
 related: report-a-problem, account-health-and-strikes, suspensions-and-appeals, prohibited-items, sensitive-content-and-age, appeal-a-decision
 ---
 
-Our Community Guidelines apply to everything on Zudomart: posts, clips, stories, lives, comments, usernames, profiles, product listings, ads, boosts and chats. They apply to everyone, including sellers, creators, brands and Zudomart staff. The full version is on **zudomart.com/community-guidelines**. This is the short version.
+Our Community Guidelines apply to everything on Nantty: posts, clips, stories, lives, comments, usernames, profiles, product listings, ads, boosts and chats. They apply to everyone, including sellers, creators, brands and Nantty staff. The full version is on **nantty.com/community-guidelines**. This is the short version.
 
 ## Who this is for
 
-Everyone who uses Zudomart, in every country. Breaking the law where you live is always a breach too.
+Everyone who uses Nantty, in every country. Breaking the law where you live is always a breach too.
 
 ## Keep people safe
 
@@ -26,7 +26,7 @@ Everyone who uses Zudomart, in every country. Breaking the law where you live is
 - No pretending to be another person, brand, store or government body. See [Impersonation](/help/safety-and-reporting/impersonation).
 - No fake reviews and no buying or selling followers, likes or views.
 - Label AI-generated or edited media of real people and events. See [AI-generated label](/help/posts-and-feed/ai-generated-label).
-- No asking people to pay or chat outside Zudomart to avoid escrow, fees or safety checks.
+- No asking people to pay or chat outside Nantty to avoid escrow, fees or safety checks.
 
 ## Sell legally
 

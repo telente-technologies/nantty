@@ -1,6 +1,6 @@
 ---
 title: Payment methods and saved cards
-summary: Pay at checkout by card, bank transfer or USSD in a secure payment window, or use your Zudomart wallet balance when it covers the order. You can save a card on your phone, unlocked with your fingerprint or face.
+summary: Pay at checkout by card, bank transfer or USSD in a secure payment window, or use your Nantty wallet balance when it covers the order. You can save a card on your phone, unlocked with your fingerprint or face.
 tags: payment, payment method, card, bank transfer, ussd, saved card, remove card, checkout, pay, debit card
 related: cart-and-checkout, saved-cards, payment-failed, pay-from-your-wallet, transactions-and-receipts, payment-scams
 ---
@@ -20,8 +20,8 @@ For escrow orders in Nigeria, the money stays locked in your own wallet until yo
 ## Saved cards
 
 - To save a card, tick **Save my card on this device for next time** before you pay.
-- The card is saved **on this phone only**, not on Zudomart's servers. Only a secure token is kept, and you confirm each payment with your fingerprint or face. Your phone needs fingerprint or face unlock turned on.
-- You enter your card number only in the secure payment window. Zudomart never sees or stores it.
+- The card is saved **on this phone only**, not on Nantty's servers. Only a secure token is kept, and you confirm each payment with your fingerprint or face. Your phone needs fingerprint or face unlock turned on.
+- You enter your card number only in the secure payment window. Nantty never sees or stores it.
 - To see or remove it, go to **Settings** > **Payment Methods** > **Card**, then tap **Remove from this device**.
 
 A new phone won't have your saved card. Save it again the next time you pay. See [Saved cards](/help/payments-and-wallet/saved-cards).
@@ -41,4 +41,4 @@ Receipts go to your account's verified email. Checkout never asks you for an ema
 
 ## Stay safe
 
-Only pay inside the Zudomart app or on **app.zudomart.com**. Never pay a seller outside Zudomart, and never share your card PIN or one-time codes. See [Payment scams](/help/wallet-security/payment-scams).
+Only pay inside the Nantty app or on **app.nantty.com**. Never pay a seller outside Nantty, and never share your card PIN or one-time codes. See [Payment scams](/help/wallet-security/payment-scams).

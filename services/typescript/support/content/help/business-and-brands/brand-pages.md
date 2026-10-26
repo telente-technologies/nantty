@@ -5,7 +5,7 @@ tags: brand, brand page, official store, authorised reseller, counterfeit, fake 
 related: business-profiles, gold-checkmark, business-documents, products-and-inventory, report-a-scam, business-and-brands-faq
 ---
 
-A brand page is the home of a brand on Zudomart. Buyers use it to find the brand's official store and to see which other sellers stock its products.
+A brand page is the home of a brand on Nantty. Buyers use it to find the brand's official store and to see which other sellers stock its products.
 
 ## Who this is for
 
@@ -31,7 +31,7 @@ The app explains it this way: "A brand profile represents your business or organ
 
 ## Official Store status
 
-Only registered brands selling through a Gold-verified store can become an Official Store. Our brand team checks the trademark registration, that the trademark owner matches the CAC company, that the contact email is on the brand's own website domain, and that at least one linked store is Gold verified. When approved, the brand's verified stores show the **Official Store** badge. Brand owners manage this on the web in the seller dashboard on **dashboard.zudomart.com** (the app shows **Manage on the web**).
+Only registered brands selling through a Gold-verified store can become an Official Store. Our brand team checks the trademark registration, that the trademark owner matches the CAC company, that the contact email is on the brand's own website domain, and that at least one linked store is Gold verified. When approved, the brand's verified stores show the **Official Store** badge. Brand owners manage this on the web in the seller dashboard on **dashboard.nantty.com** (the app shows **Manage on the web**).
 
 ## Tagging a brand on your products (sellers)
 

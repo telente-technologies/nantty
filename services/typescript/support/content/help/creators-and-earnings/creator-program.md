@@ -5,7 +5,7 @@ tags: creator program, apply, eligibility, become a creator, creator account, cr
 related: creator-earnings, going-live, payout-setup, fan-subscriptions, profile-types, creators-faq
 ---
 
-The Creator Program lets you earn on Zudomart. Accepted creators can go live, receive gifts, offer fan subscriptions, earn affiliate commissions on sellers' products and share in eligible ads revenue. You don't need a store to be a creator.
+The Creator Program lets you earn on Nantty. Accepted creators can go live, receive gifts, offer fan subscriptions, earn affiliate commissions on sellers' products and share in eligible ads revenue. You don't need a store to be a creator.
 
 ## Who this is for
 
@@ -21,7 +21,7 @@ People with a personal profile who make original content. Business, brand and go
    - No violations in the last 90 days
 3. You also need a verified email address.
 
-The exact targets are set by Zudomart, shown in the app and can change. The list updates automatically as you grow.
+The exact targets are set by Nantty, shown in the app and can change. The list updates automatically as you grow.
 
 ## Apply
 

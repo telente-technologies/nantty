@@ -5,7 +5,7 @@ tags: login, log in, sign in, password, forgot password, reset password, change 
 related: create-an-account, hacked-account, active-sessions, two-factor-authentication, cant-sign-in, step-up-codes
 ---
 
-Zudomart sign-in is email based. There is no phone number or SMS login, and every code we send goes to your email.
+Nantty sign-in is email based. There is no phone number or SMS login, and every code we send goes to your email.
 
 ## How to sign in
 
@@ -13,7 +13,7 @@ Zudomart sign-in is email based. There is no phone number or SMS login, and ever
 2. Enter your email address or your username, and your password.
 3. Tap **Log in**.
 
-If you joined with Google or Apple, tap **Continue with Google** or **Continue with Apple** instead. On the web, go to **app.zudomart.com** and choose **Log in**.
+If you joined with Google or Apple, tap **Continue with Google** or **Continue with Apple** instead. On the web, go to **app.nantty.com** and choose **Log in**.
 
 ## Forgot your password
 
@@ -58,4 +58,4 @@ Other devices are signed out; the device you're using stays signed in. We send y
 
 ## Stay safe
 
-Zudomart will never ask for your password or your email codes by chat, phone or email. Never type them anywhere except the Zudomart app or app.zudomart.com.
+Nantty will never ask for your password or your email codes by chat, phone or email. Never type them anywhere except the Nantty app or app.nantty.com.

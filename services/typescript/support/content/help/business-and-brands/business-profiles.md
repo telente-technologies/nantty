@@ -5,7 +5,7 @@ tags: business profile, business account, organisation, company page, ngo, creat
 related: stores-business-pages-and-brands, switch-profiles, brand-pages, profile-types, gold-checkmark, business-documents, start-selling
 ---
 
-A business profile is a public profile for an organisation: a shop, a brand, an NGO, a media house, a venue or anything else that isn't you as a person. It sits in the same Zudomart account as your personal profile, so you don't need a second login.
+A business profile is a public profile for an organisation: a shop, a brand, an NGO, a media house, a venue or anything else that isn't you as a person. It sits in the same Nantty account as your personal profile, so you don't need a second login.
 
 ## Who this is for
 
@@ -21,7 +21,7 @@ Anyone running an organisation, in any country. You don't need a store to have a
 
 ## What you can change later
 
-From the business profile you can edit the display name, description, website and whether the profile is private. Custom categories are "reviewed by ZudoMart before they become public".
+From the business profile you can edit the display name, description, website and whether the profile is private. Custom categories are "reviewed by Nantty before they become public".
 
 ## Good to know
 

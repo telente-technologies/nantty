@@ -9,7 +9,7 @@ Every post and clip has a three-dot menu (**More options**). The options change 
 
 ## Options on your own posts
 
-- **Promote post**: boost the post with Zudomart ads. See [Boost a post](/help/ads-and-boosts/boost-a-post).
+- **Promote post**: boost the post with Nantty ads. See [Boost a post](/help/ads-and-boosts/boost-a-post).
 - **Copy link**: copies the post's link. You'll see "Link copied".
 - **Download**: saves the photo or video to your phone, when the post has downloadable media.
 - **Edit reply settings**: choose who can reply. See [Who can reply](/help/posts-and-feed/reply-controls).
@@ -20,7 +20,7 @@ Every post and clip has a three-dot menu (**More options**). The options change 
 ## Options on other people's posts
 
 - **Copy link** and **Share via…**
-- **Download**, if the author allows downloads. Downloaded copies carry the Zudomart logo and the author's username.
+- **Download**, if the author allows downloads. Downloaded copies carry the Nantty logo and the author's username.
 - **Turn off notifications for this post**: stops alerts about a post you replied to or were mentioned in. You'll see "You won't get notifications for this post". Tap again to see "Notifications for this post are back on".
 - **Not interested**: "See fewer posts like this". The post disappears and your feed learns from it.
 - **Hide this post** (or **Hide this clip**): removes it from your feed.

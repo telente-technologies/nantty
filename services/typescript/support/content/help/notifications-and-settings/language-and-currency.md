@@ -5,7 +5,7 @@ tags: currency, region, country, language, naira, prices in dollars, change curr
 related: countries-and-availability, prices-by-country, checkmark-prices, settings-overview, payments-outside-nigeria
 ---
 
-Zudomart shows prices in your local currency and uses your country to decide which payment options, plans and prices apply to you.
+Nantty shows prices in your local currency and uses your country to decide which payment options, plans and prices apply to you.
 
 ## Supported countries and currencies
 
@@ -23,7 +23,7 @@ We use the country on your profile first, then your connection. You can change i
 
 ## Language
 
-**Language** shows **English**. Zudomart is in English only for now.
+**Language** shows **English**. Nantty is in English only for now.
 
 ## Good to know
 

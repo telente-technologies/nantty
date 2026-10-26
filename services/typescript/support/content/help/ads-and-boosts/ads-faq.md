@@ -35,7 +35,7 @@ Blue Premium members get one free boost a month, worth up to ₦1,000 in Nigeria
 
 ## Can I withdraw my ad balance or ad credit?
 
-Your **ad balance** (real money you added) can be withdrawn to your Zudomart wallet once it has been settled for 24 hours, if you're payout verified, minus the payment provider fee shown before you confirm. **Ad credit** is promotional and can never be withdrawn. See [Ad credit, ad balance and refunds](/help/ads-and-boosts/ad-credit-and-refunds).
+Your **ad balance** (real money you added) can be withdrawn to your Nantty wallet once it has been settled for 24 hours, if you're payout verified, minus the payment provider fee shown before you confirm. **Ad credit** is promotional and can never be withdrawn. See [Ad credit, ad balance and refunds](/help/ads-and-boosts/ad-credit-and-refunds).
 
 ## What is cashback?
 

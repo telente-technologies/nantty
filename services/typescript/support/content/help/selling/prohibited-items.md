@@ -1,11 +1,11 @@
 ---
 title: Prohibited and restricted items
-summary: What you can never sell on Zudomart, and the restricted items only verified sellers can sell under extra rules.
+summary: What you can never sell on Nantty, and the restricted items only verified sellers can sell under extra rules.
 tags: prohibited items, banned items, what can I sell, restricted, not allowed, counterfeit, first copy, drugs, nafdac
 related: community-guidelines, products-and-inventory, brand-pages, account-health-and-strikes, start-selling, selling-faq
 ---
 
-Some things can't be sold on Zudomart at all, and some only by verified sellers who meet extra rules. These lists come from our Community Guidelines on zudomart.com.
+Some things can't be sold on Nantty at all, and some only by verified sellers who meet extra rules. These lists come from our Community Guidelines on nantty.com.
 
 ## Who this is for
 

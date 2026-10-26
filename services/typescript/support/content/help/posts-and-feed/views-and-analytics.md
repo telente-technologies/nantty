@@ -14,7 +14,7 @@ Every post and clip shows a **Views** count. It tells you how many times the pos
 
 ## What counts as a view
 
-A view is counted each time a post or clip appears on someone's screen in Zudomart: in a feed, on a profile, in search results, in a list of quotes, or when the post is opened from a link.
+A view is counted each time a post or clip appears on someone's screen in Nantty: in a feed, on a profile, in search results, in a list of quotes, or when the post is opened from a link.
 
 - Repeat views by the same person count.
 - Views by people who aren't signed in count.
@@ -39,4 +39,4 @@ If you don't want your activity used to personalise your feed, turn off **Person
 
 ## Good to know
 
-Zudomart doesn't pay for views. Creators earn a share of eligible monetisation revenue instead. See [Creator earnings](/help/creators-and-earnings/creator-earnings).
+Nantty doesn't pay for views. Creators earn a share of eligible monetisation revenue instead. See [Creator earnings](/help/creators-and-earnings/creator-earnings).

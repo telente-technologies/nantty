@@ -5,7 +5,7 @@ tags: payouts, seller, balance, escrow, withdraw, collect my money, my money nev
 related: fees-and-escrow-fee, withdrawal-limits, your-wallet-explained, unverified-seller-limits, verification-levels, new-payout-account-cooldown
 ---
 
-Your sales money lives in your own wallet, held by our licensed payment partner. Zudomart never holds it. This is how an order turns into money you can withdraw.
+Your sales money lives in your own wallet, held by our licensed payment partner. Nantty never holds it. This is how an order turns into money you can withdraw.
 
 ## Who this is for
 
@@ -31,9 +31,9 @@ Open **Wallet** in the app to see seven lines:
 - **Creator earnings**: gift, subscription and ad-share earnings on their way to your available balance.
 - **Ad credit**: prepaid credit for ads and boosts. It can't be withdrawn.
 - **Coins**: coins are not cash.
-- **Owed to Zudomart**: "Refunds or chargebacks taken from your next earnings."
+- **Owed to Nantty**: "Refunds or chargebacks taken from your next earnings."
 
-The dashboard on **dashboard.zudomart.com** shows the same money plus the fee breakdown and statements.
+The dashboard on **dashboard.nantty.com** shows the same money plus the fee breakdown and statements.
 
 ## Withdrawing
 
@@ -51,4 +51,4 @@ The dashboard on **dashboard.zudomart.com** shows the same money plus the fee br
 
 ## Stay safe
 
-Zudomart will never ask for your password, card PIN or security codes, and will never ask you to "release" an order by sending money. Withdrawals only go to a bank account in your own name.
+Nantty will never ask for your password, card PIN or security codes, and will never ask you to "release" an order by sending money. Withdrawals only go to a bank account in your own name.

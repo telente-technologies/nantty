@@ -40,4 +40,4 @@ Order and payment problems are the most common reasons people contact us. Pickin
 
 ## Stay safe
 
-Never pay a seller outside Zudomart or send money to "unlock" an order. Support will never ask you to pay into a personal account. See [Payment scams](/help/wallet-security/payment-scams).
+Never pay a seller outside Nantty or send money to "unlock" an order. Support will never ask you to pay into a personal account. See [Payment scams](/help/wallet-security/payment-scams).

@@ -1,6 +1,6 @@
 ---
 title: Wallet safety basics
-summary: The protections on your Zudomart wallet and the simple habits that keep your money safe, from step-up codes to own-name payouts.
+summary: The protections on your Nantty wallet and the simple habits that keep your money safe, from step-up codes to own-name payouts.
 tags: wallet safety, protect my money, secure wallet, account security, safe, hacked, security tips, scam
 related: who-holds-your-money, step-up-codes, payment-scams, two-factor-authentication, withdrawal-limits, wallet-security-faq
 ---
@@ -9,7 +9,7 @@ Your wallet has several layers of protection built in. A few habits on your side
 
 ## What protects your wallet
 
-- **Your money is in your name.** In Nigeria it sits in your own wallet with our licensed payment partner. Zudomart never holds it. See [Who holds your money](/help/wallet-security/who-holds-your-money).
+- **Your money is in your name.** In Nigeria it sits in your own wallet with our licensed payment partner. Nantty never holds it. See [Who holds your money](/help/wallet-security/who-holds-your-money).
 - **Money only leaves to you.** Withdrawals go only to a bank account in your own verified name. See [Payouts go only to your own name](/help/wallet-security/payout-name-match).
 - **Step-up checks.** You confirm it's you with your password or an emailed code before withdrawing or adding a payout account. See [Step-up codes](/help/wallet-security/step-up-codes).
 - **A 48-hour wait for new payout accounts.** See [New payout account wait](/help/wallet-security/new-payout-account-cooldown).
@@ -20,12 +20,12 @@ Your wallet has several layers of protection built in. A few habits on your side
 
 ## Habits that keep you safe
 
-1. **Use a strong, unique password** for Zudomart and for your email. Anyone who gets into your email can get your codes.
+1. **Use a strong, unique password** for Nantty and for your email. Anyone who gets into your email can get your codes.
 2. **Turn on two-factor authentication.** See [Two-factor authentication](/help/account-and-login/two-factor-authentication).
-3. **Never share codes.** Zudomart will never ask for your password, card PIN, bank PIN or any code we email you.
+3. **Never share codes.** Nantty will never ask for your password, card PIN, bank PIN or any code we email you.
 4. **Check your sessions.** Sign out of devices you don't recognise. See [Active sessions](/help/account-and-login/active-sessions).
 5. **Check your payout accounts** now and then, and remove any you don't recognise.
-6. **Only pay through Zudomart checkout.** Never pay a seller or a "support agent" directly.
+6. **Only pay through Nantty checkout.** Never pay a seller or a "support agent" directly.
 7. **Lock your phone.** Saved cards and chat passcodes rely on your phone's fingerprint or face unlock.
 
 ## If you think someone got in

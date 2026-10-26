@@ -11,7 +11,7 @@ If someone ever got into your account, the first thing they'd try is adding thei
 
 ## Adding a payout account
 
-1. In the app, open **Wallet** > **Payout accounts**. On the web (**app.zudomart.com**), open **Wallet** > **Payout accounts & withdraw**.
+1. In the app, open **Wallet** > **Payout accounts**. On the web (**app.nantty.com**), open **Wallet** > **Payout accounts & withdraw**.
 2. Under **Add a bank account**, choose your bank and enter your 10-digit account number.
 3. Tap **Add account** and [confirm it's you](/help/wallet-security/step-up-codes).
 
@@ -31,7 +31,7 @@ You can save up to 5 payout accounts.
 - **"We could not find that account. Check the number and bank."** Check the account number and that you chose the right bank.
 - **"We could not confirm this account right now. Try again shortly."** The bank check is temporarily unavailable. Try again later.
 - **"You can save up to 5 payout accounts."** Remove one you no longer use first.
-- **The name doesn't match.** Use an account in your own name. Zudomart never pays out to someone else's account.
+- **The name doesn't match.** Use an account in your own name. Nantty never pays out to someone else's account.
 
 ## If you didn't add it
 

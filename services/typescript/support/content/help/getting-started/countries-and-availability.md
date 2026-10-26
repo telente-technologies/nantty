@@ -1,11 +1,11 @@
 ---
 title: Countries and availability
-summary: Zudomart works worldwide with local prices in seven regions. Escrow and wallets are Nigeria-only for now; elsewhere buyers pay sellers directly.
+summary: Nantty works worldwide with local prices in seven regions. Escrow and wallets are Nigeria-only for now; elsewhere buyers pay sellers directly.
 tags: countries, available in my country, ghana, kenya, south africa, uk, usa, outside nigeria, international, diaspora
 related: language-and-currency, payments-outside-nigeria, buying-outside-nigeria, selling-outside-nigeria, prices-by-country, identity-check
 ---
 
-You can sign up and use Zudomart's social features from anywhere. Payments, selling and verification work a little differently depending on where you are.
+You can sign up and use Nantty's social features from anywhere. Payments, selling and verification work a little differently depending on where you are.
 
 ## Local prices
 

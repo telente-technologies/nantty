@@ -4,8 +4,8 @@ FROM node:24-alpine AS build
 RUN corepack enable
 WORKDIR /repo
 COPY . .
-RUN pnpm install --frozen-lockfile --filter @zudomart/support... \
-    && pnpm --filter @zudomart/support exec prisma generate && pnpm --filter @zudomart/support deploy --prod --legacy /out \
+RUN pnpm install --frozen-lockfile --filter @nantty/support... \
+    && pnpm --filter @nantty/support exec prisma generate && pnpm --filter @nantty/support deploy --prod --legacy /out \
     && cp -r services/typescript/support/prisma services/typescript/support/prisma.config.ts services/typescript/support/content /out/ \
     && cp -r services/typescript/support/src/generated /out/src/generated
 

@@ -27,7 +27,7 @@ Usernames are changed in **Settings > Account > Username**, not on the Edit prof
 1. Type your **New username**. Up to 20 characters, no spaces. It's saved in lowercase.
 2. Tap **Save username**.
 
-The screen shows how many changes you have left this year, or when your next change is possible. "Some usernames are reserved for Zudomart and can't be used." See [Usernames](/help/account-and-login/usernames).
+The screen shows how many changes you have left this year, or when your next change is possible. "Some usernames are reserved for Nantty and can't be used." See [Usernames](/help/account-and-login/usernames).
 
 Changing your username also changes your profile link. See [Sharing your profile](/help/profiles-and-privacy/share-your-profile).
 

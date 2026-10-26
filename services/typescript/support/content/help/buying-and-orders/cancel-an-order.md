@@ -13,7 +13,7 @@ Buyers. Cancelling yourself is done on the web for now.
 
 ## How to cancel
 
-1. On the web (app.zudomart.com), open **Your orders** and the order.
+1. On the web (app.nantty.com), open **Your orders** and the order.
 2. Tap **Cancel order**. The page explains: "You can cancel until the seller starts preparing your order. After that, ask the seller or open a dispute."
 3. Confirm in **Cancel this order?**: "The seller won't ship it. Any payment held in escrow is returned to you."
 4. Tap **Cancel order** again, or **Keep order** to go back.

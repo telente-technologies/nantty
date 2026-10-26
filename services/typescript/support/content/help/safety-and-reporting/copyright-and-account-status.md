@@ -39,7 +39,7 @@ Claims about live videos are taken down straight away.
 
 ## Strikes and your account status
 
-Open **Settings > Account status** in the app, or **Settings > Account status** on **app.zudomart.com**, to see where you stand:
+Open **Settings > Account status** in the app, or **Settings > Account status** on **app.nantty.com**, to see where you stand:
 
 - **Good standing**: no active strikes and no pending deadlines.
 - **At risk**: you have an active strike, or a takedown deadline is running.
@@ -63,4 +63,4 @@ You can appeal any active strike or warning from your Account status page: tap *
 
 ## Need help?
 
-Go to **Settings > Support > Contact support** and choose **Safety**, or email copyright@zudomart.com.
+Go to **Settings > Support > Contact support** and choose **Safety**, or email copyright@nantty.com.

@@ -1,11 +1,11 @@
 ---
 title: Common error messages and what to do
-summary: A list of the messages you might see in Zudomart, grouped by area, with what each one means and how to fix it.
+summary: A list of the messages you might see in Nantty, grouped by area, with what each one means and how to fix it.
 tags: error message, error code, what does this mean, something went wrong, try again, error list, fix error, wetin be this error
 related: app-not-loading, cant-sign-in, checkout-problems, upload-failed, withdrawal-limits, troubleshooting-faq
 ---
 
-Find the message you saw (use your browser's find, or search the Help Centre for a few of its words). Messages are shown exactly as they appear in Zudomart.
+Find the message you saw (use your browser's find, or search the Help Centre for a few of its words). Messages are shown exactly as they appear in Nantty.
 
 ## Connection and general
 

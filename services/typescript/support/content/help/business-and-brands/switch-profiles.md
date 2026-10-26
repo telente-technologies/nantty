@@ -5,7 +5,7 @@ tags: switch profile, switch account, change profile, posting as, business profi
 related: business-profiles, brand-pages, profile-types, create-a-post, seller-team
 ---
 
-One Zudomart account can hold your personal profile plus at most two linked profiles: one Store or one Business page, and one Brand. With Blue Premium it can hold up to 5 business profiles, with only one Store. See [Stores, business pages and brands](/help/business-and-brands/stores-business-pages-and-brands). The switcher labels each one Store, Business page or Brand. You sign in once and switch between them.
+One Nantty account can hold your personal profile plus at most two linked profiles: one Store or one Business page, and one Brand. With Blue Premium it can hold up to 5 business profiles, with only one Store. See [Stores, business pages and brands](/help/business-and-brands/stores-business-pages-and-brands). The switcher labels each one Store, Business page or Brand. You sign in once and switch between them.
 
 ## Who this is for
 
@@ -27,8 +27,8 @@ From the **Switch profile** sheet tap **Create business profile** or **Create a 
 
 - Posts, comments, likes, messages and store actions all come from the profile you are switched to. Check before you post.
 - Your login, password and two-factor settings belong to your account, so you sign in once for every profile.
-- Switching profiles is done in the mobile app. Store tools are also on the web at **dashboard.zudomart.com**.
-- Staff who help with your store should use their own Zudomart accounts. See [Adding staff to your store](/help/selling/seller-team).
+- Switching profiles is done in the mobile app. Store tools are also on the web at **dashboard.nantty.com**.
+- Staff who help with your store should use their own Nantty accounts. See [Adding staff to your store](/help/selling/seller-team).
 
 ## If something goes wrong
 

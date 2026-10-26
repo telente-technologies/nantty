@@ -1,11 +1,11 @@
 ---
-title: Buyer's guide: shopping safely on Zudomart
+title: Buyer's guide: shopping safely on Nantty
 summary: Step by step from finding a product to paying, tracking delivery, confirming receipt and getting a refund if something goes wrong.
 tags: buyer guide, how to buy, shopping, first order, buy safely, escrow, how to order, pay for item
 related: cart-and-checkout, how-escrow-protects-your-order, track-your-order, confirm-delivery, disputes-and-refunds, buying-faq
 ---
 
-Here's how buying works on Zudomart, from browsing to a finished order.
+Here's how buying works on Nantty, from browsing to a finished order.
 
 ## Step 1: Find what you want
 
@@ -44,4 +44,4 @@ Help other buyers. See [Leaving a review](/help/buying-and-orders/leave-a-review
 
 ## Stay safe
 
-Always pay inside Zudomart. Never send money to a seller's personal account or pay a "delivery fee" by transfer outside checkout. See [Staying safe when buying and selling](/help/safety-and-reporting/stay-safe-when-buying-and-selling).
+Always pay inside Nantty. Never send money to a seller's personal account or pay a "delivery fee" by transfer outside checkout. See [Staying safe when buying and selling](/help/safety-and-reporting/stay-safe-when-buying-and-selling).

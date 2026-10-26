@@ -31,6 +31,6 @@ After you confirm, you won't be asked again for a few minutes, so you can finish
 
 ## Keep it to yourself
 
-Your password and your codes are only for you to type into Zudomart. **Zudomart staff will never ask for them**, by phone, chat, email or social media. Anyone who asks for a code is trying to take your money. See [Payment scams](/help/wallet-security/payment-scams).
+Your password and your codes are only for you to type into Nantty. **Nantty staff will never ask for them**, by phone, chat, email or social media. Anyone who asks for a code is trying to take your money. See [Payment scams](/help/wallet-security/payment-scams).
 
 If you get a code you didn't ask for, someone may know your email or password. Change your password and check your [active sessions](/help/account-and-login/active-sessions).

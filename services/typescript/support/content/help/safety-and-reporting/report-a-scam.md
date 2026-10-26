@@ -1,6 +1,6 @@
 ---
 title: Report a scam
-summary: Spotted a fake seller, a phishing message or someone asking you to pay outside Zudomart? Here is how to report it and protect your money.
+summary: Spotted a fake seller, a phishing message or someone asking you to pay outside Nantty? Here is how to report it and protect your money.
 tags: scam, fraud, fake seller, 419, yahoo, phishing, report scammer, i don pay, scammed, fake alert
 related: stay-safe-when-buying-and-selling, payment-scams, report-a-problem, reporting-chats, hacked-account, disputes-and-refunds
 ---
@@ -16,7 +16,7 @@ Buyers, sellers, creators and anyone who gets a suspicious message, listing or p
 - A seller asks you to **pay by bank transfer outside the app** "to avoid fees" or "because checkout is down".
 - A buyer sends a **fake payment alert** or receipt and asks you to ship.
 - Someone says they **paid too much** and asks you to send the difference back.
-- A message or email claiming to be **Zudomart support** asks for your password, PIN or a one-time code.
+- A message or email claiming to be **Nantty support** asks for your password, PIN or a one-time code.
 - **Giveaways, investments or "double your money"** offers.
 - A profile pretending to be a brand, a celebrity or a store you trust.
 
@@ -32,8 +32,8 @@ Track your report in **Settings > Support > My reports**.
 
 ## If you already paid
 
-1. **Paid through Zudomart checkout with escrow (Nigeria)?** Don't confirm delivery. Open a dispute from the order before it's released. See [Disputes and refunds](/help/buying-and-orders/disputes-and-refunds).
-2. **Paid outside Zudomart?** Call your bank straight away and ask them to stop or trace the transfer. Then report the account to us. We can't reverse payments made outside the app.
+1. **Paid through Nantty checkout with escrow (Nigeria)?** Don't confirm delivery. Open a dispute from the order before it's released. See [Disputes and refunds](/help/buying-and-orders/disputes-and-refunds).
+2. **Paid outside Nantty?** Call your bank straight away and ask them to stop or trace the transfer. Then report the account to us. We can't reverse payments made outside the app.
 3. Go to **Settings > Support > Contact support**, choose **Payments & wallet** or **Safety**, and include the order number and screenshots.
 
 ## If you shared a code or password
@@ -42,4 +42,4 @@ Change your password now, sign out of other devices and turn on two-factor authe
 
 ## Stay safe
 
-Zudomart will never ask for your password, card PIN or one-time codes, and will never ask you to pay into a personal account. See [Payment scams](/help/wallet-security/payment-scams).
+Nantty will never ask for your password, card PIN or one-time codes, and will never ask you to pay into a personal account. See [Payment scams](/help/wallet-security/payment-scams).

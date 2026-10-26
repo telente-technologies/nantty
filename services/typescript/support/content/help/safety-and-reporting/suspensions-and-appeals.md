@@ -43,4 +43,4 @@ A person reviews every appeal. Automated systems can flag accounts and suggest a
 ## If something goes wrong
 
 - **"Your account has been suspended for security reasons. You can appeal from the suspension notice."** We paused the account to protect it. Tap **Appeal this decision** or [contact support](/help/contact-support/contact-support).
-- If the appeal button shows an error, check your connection and try again, or email support@zudomart.com from the email on your account.
+- If the appeal button shows an error, check your connection and try again, or email support@nantty.com from the email on your account.

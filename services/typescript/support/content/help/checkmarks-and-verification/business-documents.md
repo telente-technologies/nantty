@@ -43,4 +43,4 @@ Sellers. The **Business documents** row only appears in Settings once you have a
 
 ## Stay safe
 
-Only upload documents in the Zudomart app or on the seller dashboard. We never ask for documents by chat or email.
+Only upload documents in the Nantty app or on the seller dashboard. We never ask for documents by chat or email.

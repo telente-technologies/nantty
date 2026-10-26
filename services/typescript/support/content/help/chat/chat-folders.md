@@ -5,7 +5,7 @@ tags: inbox, folders, chats, requests, spam, message requests, missing message, 
 related: chat-requests-and-spam, end-to-end-encryption, group-chats, blocking-people, reporting-chats, chat-faq
 ---
 
-Your Zudomart inbox keeps conversations with people you know apart from messages from strangers and likely spam.
+Your Nantty inbox keeps conversations with people you know apart from messages from strangers and likely spam.
 
 ## Switch folders
 
@@ -27,7 +27,7 @@ You control who can send you requests in **Chat settings > Who can send you mess
 
 ## Spam
 
-Conversations Zudomart flagged because of how the sender is behaving, for example a new account messaging lots of people, or someone sending to many new people in an hour. A note says "Flagged by Zudomart based on this account's activity." We never read your messages to decide.
+Conversations Nantty flagged because of how the sender is behaving, for example a new account messaging lots of people, or someone sending to many new people in an hour. A note says "Flagged by Nantty based on this account's activity." We never read your messages to decide.
 
 For each one you can tap **Not spam**, **Delete**, **Block**, **Report** or **Report and block**. **Not spam** moves the conversation to **Requests**, where you can then accept it. If it's empty: "No chats flagged as spam."
 
@@ -39,4 +39,4 @@ For each one you can tap **Not spam**, **Delete**, **Block**, **Report** or **Re
 
 ## Stay safe
 
-Scammers often message strangers. Be careful with requests asking you to pay outside Zudomart, share codes or click unusual links. Zudomart will never ask for your password, card PIN or one-time codes in a chat.
+Scammers often message strangers. Be careful with requests asking you to pay outside Nantty, share codes or click unusual links. Nantty will never ask for your password, card PIN or one-time codes in a chat.

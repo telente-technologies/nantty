@@ -5,7 +5,7 @@ tags: country prices, regional pricing, currency, ghana price, kenya price, doll
 related: products-and-inventory, selling-outside-nigeria, buying-outside-nigeria, prices-by-country, shipping-settings
 ---
 
-Buyers see prices in their own currency. You can let Zudomart convert your price, or set exact prices for each country.
+Buyers see prices in their own currency. You can let Nantty convert your price, or set exact prices for each country.
 
 ## Who this is for
 
@@ -13,7 +13,7 @@ Sellers who ship to more than one country.
 
 ## How to set country prices
 
-1. At **dashboard.zudomart.com**, open **Products** and the product.
+1. At **dashboard.nantty.com**, open **Products** and the product.
 2. Scroll to **Prices by country**.
 3. Each country has its own box: Nigeria (NGN), Ghana (GHS), Kenya (KES), South Africa (ZAR), United Kingdom (GBP), Eurozone (EUR) and United States (USD). An empty box shows **Default**.
 4. Enter a price for the countries you want and save.

@@ -5,9 +5,9 @@ tags: faq, wallet security, is my money safe, withdrawal limit, 48 hours, hold, 
 related: who-holds-your-money, wallet-safety-basics, step-up-codes, withdrawal-limits, payment-scams, payments-faq
 ---
 
-## Is my money safe with Zudomart?
+## Is my money safe with Nantty?
 
-Zudomart never holds your money. In Nigeria it sits in your own wallet, in your name, with our licensed payment partner. See [Who holds your money](/help/wallet-security/who-holds-your-money).
+Nantty never holds your money. In Nigeria it sits in your own wallet, in your name, with our licensed payment partner. See [Who holds your money](/help/wallet-security/who-holds-your-money).
 
 ## Why am I asked to "Confirm it's you" when I'm already signed in?
 
@@ -31,19 +31,19 @@ No. Withdrawals only go to an account in your own verified name. See [Payouts go
 
 ## Why can't I withdraw money I just added?
 
-Deposits are held for 24 hours, or 72 hours for your first deposit. You can still spend it on Zudomart. See [Deposit holds](/help/wallet-security/deposit-holds).
+Deposits are held for 24 hours, or 72 hours for your first deposit. You can still spend it on Nantty. See [Deposit holds](/help/wallet-security/deposit-holds).
 
 ## My wallet says it's on hold. Have I lost my money?
 
 No. A hold is a pause while we check something. Your money stays in your wallet. See [Wallet or payouts on hold](/help/wallet-security/wallet-on-hold).
 
-## Someone says they're from Zudomart and wants my code. Should I give it?
+## Someone says they're from Nantty and wants my code. Should I give it?
 
-Never. Zudomart staff never ask for passwords, PINs or codes. See [Payment scams](/help/wallet-security/payment-scams).
+Never. Nantty staff never ask for passwords, PINs or codes. See [Payment scams](/help/wallet-security/payment-scams).
 
 ## A buyer sent me a payment screenshot. Can I ship?
 
-Only ship once the order shows as paid in Zudomart. Screenshots and bank alerts can be faked.
+Only ship once the order shows as paid in Nantty. Screenshots and bank alerts can be faked.
 
 ## A payout account I don't recognise appeared. What do I do?
 

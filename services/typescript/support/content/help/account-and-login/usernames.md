@@ -5,7 +5,7 @@ tags: username, handle, change username, rename, my name, profile link, username
 related: create-an-account, edit-your-profile, share-your-profile, impersonation, account-and-login-faq
 ---
 
-Your username is your handle (shown with the at sign in front) and your profile link, app.zudomart.com/yourusername.
+Your username is your handle (shown with the at sign in front) and your profile link, app.nantty.com/yourusername.
 
 ## How to change your username
 
@@ -18,18 +18,18 @@ Your username is your handle (shown with the at sign in front) and your profile 
 
 - 3 to 20 characters: lowercase letters, numbers, underscores or full stops. It must include a letter and can't start or end with a full stop or use two in a row.
 - You can change it once every 30 days, up to 3 times a year.
-- Some usernames are reserved for Zudomart, brands or public bodies, and look-alike names are blocked.
-- Zudomart may withhold or reclaim a username that breaks our policies, impersonates someone or is needed for legal reasons.
+- Some usernames are reserved for Nantty, brands or public bodies, and look-alike names are blocked.
+- Nantty may withhold or reclaim a username that breaks our policies, impersonates someone or is needed for legal reasons.
 
 ## What happens to your old username
 
-Your previous username is held for 120 days before anyone else can claim it. Old links to your profile stop working, so update links you've shared elsewhere. Only Zudomart staff can release a username earlier, for example to settle an impersonation or trademark case.
+Your previous username is held for 120 days before anyone else can claim it. Old links to your profile stop working, so update links you've shared elsewhere. Only Nantty staff can release a username earlier, for example to settle an impersonation or trademark case.
 
 ## If something goes wrong
 
 - **"That username isn't available. Try another one."** or **"That username is taken"** Someone has it. Try a variation.
 - **"That username was used recently and isn't available yet."** It's in its 120-day hold.
-- **"That username is reserved for Zudomart and can't be used."** Pick another.
+- **"That username is reserved for Nantty and can't be used."** Pick another.
 - **"That username has been withheld under our policies."** It can't be used.
 - **"Next change available"** with a date: wait until that date.
 - **"You've used all your username changes for this year"** Your allowance resets a year after your earliest change.

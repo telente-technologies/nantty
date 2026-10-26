@@ -19,7 +19,7 @@ You'll see **Cancelled — your badge stays until** the date your period ends. Y
 
 **Business and brand profiles:** tap **Manage on the web** on the Verification screen.
 
-**Paid through the App Store or Google Play:** cancel in your phone's subscription settings. If you try in Zudomart you'll see **"This subscription is billed by the app store. Manage it in your store subscription settings."**
+**Paid through the App Store or Google Play:** cancel in your phone's subscription settings. If you try in Nantty you'll see **"This subscription is billed by the app store. Manage it in your store subscription settings."**
 
 ## Renewals
 

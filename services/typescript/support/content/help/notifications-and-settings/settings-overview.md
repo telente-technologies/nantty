@@ -1,6 +1,6 @@
 ---
 title: A tour of Settings
-summary: Where to find every setting in the Zudomart app and on the web, from your account and security to privacy, notifications, payments and support.
+summary: Where to find every setting in the Nantty app and on the web, from your account and security to privacy, notifications, payments and support.
 tags: settings, where is settings, menu, preferences, account settings, find setting, options
 related: find-your-way-around, notification-settings, dark-mode-and-appearance, privacy-settings, content-preferences, data-and-storage
 ---
@@ -30,7 +30,7 @@ In the app tap the **Profile** tab, then **More** at the top right, then **Setti
 
 **Selling and profiles**
 
-- **Start selling on Zudomart** (or **Business documents** once you sell).
+- **Start selling on Nantty** (or **Business documents** once you sell).
 - **Create business profile** and **Create a brand profile**.
 
 **Help**
@@ -44,7 +44,7 @@ Home-screen widgets and website embeds have their own guide: see [Widgets and em
 
 ## On the web
 
-**app.zudomart.com > Settings** has **Appearance**, **Milestones** notifications, and links to **Privacy & data**, **Verification**, **Addresses**, **Email**, **Profile**, **Saved items**, **Account status**, **Your reports**, **Orders** and the **Help Centre**.
+**app.nantty.com > Settings** has **Appearance**, **Milestones** notifications, and links to **Privacy & data**, **Verification**, **Addresses**, **Email**, **Profile**, **Saved items**, **Account status**, **Your reports**, **Orders** and the **Help Centre**.
 
 ## Good to know
 

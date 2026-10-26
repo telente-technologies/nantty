@@ -5,7 +5,7 @@ tags: add money, deposit, fund wallet, top up, transfer to wallet, account numbe
 related: deposit-holds, your-wallet-explained, pay-from-your-wallet, who-holds-your-money, payment-methods, verification-levels
 ---
 
-Your Zudomart wallet holds money in your own name with our licensed payment partner. Zudomart never holds your money.
+Your Nantty wallet holds money in your own name with our licensed payment partner. Nantty never holds your money.
 
 ## Who this is for
 
@@ -13,13 +13,13 @@ Nigeria only. Wallets that hold money exist only in Nigeria. In other countries 
 
 ## Add money
 
-1. At **app.zudomart.com**, open **Wallet**, then **Add money**. In the app, open **Wallet** and choose **Add money**.
+1. At **app.nantty.com**, open **Wallet**, then **Add money**. In the app, open **Wallet** and choose **Add money**.
 2. If you haven't opened your wallet yet, finish payout verification first. See [Verification levels](/help/checkmarks-and-verification/verification-levels).
 3. Tap **Get my account number**. Your wallet account is created in your verified name.
 4. The screen shows the **Bank**, **Account number** and **Account name**. Some wallets also show another funding number under **Also works**.
 5. Transfer from any Nigerian bank app to that account number. It usually arrives within a few minutes.
 
-You can copy the account number or share the details from the same screen. The account number is only ever shown inside the Zudomart app or on **app.zudomart.com**. If anyone sends you an account number and says it's your "Zudomart wallet", don't pay into it. See [Payment scams](/help/wallet-security/payment-scams).
+You can copy the account number or share the details from the same screen. The account number is only ever shown inside the Nantty app or on **app.nantty.com**. If anyone sends you an account number and says it's your "Nantty wallet", don't pay into it. See [Payment scams](/help/wallet-security/payment-scams).
 
 If your wallet is on hold while we check it, deposits still arrive. Contact support if the hold lasts.
 
@@ -30,7 +30,7 @@ These rules apply to the wallet:
 - **You need payout verification (level 1)**: your BVN consent and a bank account in your own name. Your wallet is opened in your verified name. See [Verification levels](/help/checkmarks-and-verification/verification-levels).
 - **Only confirmed money counts.** A deposit is added only after we've checked it with our payment partner. A screenshot or bank alert is never proof.
 - **Fees are shown.** Any deposit fee is taken from the deposit and shown on the transaction.
-- **Spend at once, withdraw later.** Deposited money can be spent on Zudomart straight away. You can withdraw it 24 hours after the deposit, or 72 hours after your first deposit. See [Deposit holds](/help/wallet-security/deposit-holds).
+- **Spend at once, withdraw later.** Deposited money can be spent on Nantty straight away. You can withdraw it 24 hours after the deposit, or 72 hours after your first deposit. See [Deposit holds](/help/wallet-security/deposit-holds).
 - **Some deposits are sent back.** If a deposit can't be accepted, for example because the wallet is closed or the account is suspended, it goes back to the account it came from.
 
 ## If something goes wrong
@@ -41,4 +41,4 @@ These rules apply to the wallet:
 
 ## Stay safe
 
-Zudomart will never ask for your password, card PIN, bank PIN or one-time codes, and never asks you to send money to "activate" or "unlock" a wallet.
+Nantty will never ask for your password, card PIN, bank PIN or one-time codes, and never asks you to send money to "activate" or "unlock" a wallet.

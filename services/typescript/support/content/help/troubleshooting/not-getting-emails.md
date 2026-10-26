@@ -1,28 +1,28 @@
 ---
 title: Not getting emails or codes
-summary: Can't find your Zudomart code or email? Check spam, the address on your account and your email provider, then ask for a new code.
+summary: Can't find your Nantty code or email? Check spam, the address on your account and your email provider, then ask for a new code.
 tags: no email, code not coming, didn't get code, verification email, check spam, otp not received, email not arriving, my code never come
 related: cant-sign-in, verify-your-email, change-your-email, notification-settings, troubleshooting-faq
 ---
 
-Zudomart sends sign-in codes, password resets, receipts and important account emails by email. We never send codes by SMS.
+Nantty sends sign-in codes, password resets, receipts and important account emails by email. We never send codes by SMS.
 
 ## Who this is for
 
-Anyone waiting for a code or email from Zudomart.
+Anyone waiting for a code or email from Nantty.
 
 ## Quick checks
 
 1. **Wait a minute.** Most emails arrive within a minute or two.
 2. **Check Spam, Junk, Promotions and Updates folders.** In Gmail, check every tab.
-3. **Search your inbox** for "Zudomart". Our emails come from **noreply@mail.zudomart.com**.
+3. **Search your inbox** for "Nantty". Our emails come from **noreply@mail.nantty.com**.
 4. **Check the address.** Make sure you typed the right email, with no extra spaces or typos (for example gmial instead of gmail).
 5. **Ask for a new code.** On the code screen, you can request another code after 60 seconds. Only the newest code works, and codes expire after 5 minutes.
 6. **Check your mailbox isn't full.** A full mailbox rejects new emails.
 
 ## Stop it happening again
 
-- Add **noreply@mail.zudomart.com** to your contacts or safe senders list.
+- Add **noreply@mail.nantty.com** to your contacts or safe senders list.
 - If you found our email in spam, mark it **Not spam**.
 - If you use a work or school email, its filters may block us. A personal email address is more reliable.
 
@@ -42,8 +42,8 @@ Some emails, like order updates or marketing, can be turned off. Check your sett
 - **"Verify your email address first."** Finish verifying your email before doing this. See [Verify your email](/help/account-and-login/verify-your-email).
 - **"Your email address is already verified."** Nothing more to do.
 
-Still nothing after these steps? Go to **Settings > Support > Contact support** (or email support@zudomart.com from the address on your account) and tell us which email you're expecting.
+Still nothing after these steps? Go to **Settings > Support > Contact support** (or email support@nantty.com from the address on your account) and tell us which email you're expecting.
 
 ## Stay safe
 
-Only type codes into the Zudomart app or **app.zudomart.com**. Never read a code out to anyone, even someone who says they are from Zudomart.
+Only type codes into the Nantty app or **app.nantty.com**. Never read a code out to anyone, even someone who says they are from Nantty.

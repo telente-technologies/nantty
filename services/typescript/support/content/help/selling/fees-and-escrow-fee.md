@@ -1,11 +1,11 @@
 ---
 title: Seller fees: 0% commission, escrow fee and processing
-summary: Zudomart takes no commission on products. Escrow orders pay a 1.5% escrow fee (1% on Business) plus the payment processing fee.
+summary: Nantty takes no commission on products. Escrow orders pay a 1.5% escrow fee (1% on Business) plus the payment processing fee.
 tags: fees, commission, escrow fee, processing fee, charges, how much una dey collect, deductions
 related: seller-payouts, seller-plans, how-escrow-protects-your-order, escrow-or-direct-payment, seller-refunds
 ---
 
-Zudomart takes **0% commission** on what you sell. You only see fees that pay for escrow protection and for moving money.
+Nantty takes **0% commission** on what you sell. You only see fees that pay for escrow protection and for moving money.
 
 ## Who this is for
 
@@ -21,7 +21,7 @@ The escrow fee and processing fee come off the order money before it is released
 
 ## Where to see them
 
-In the seller dashboard on **dashboard.zudomart.com**, the fee breakdown lists **Escrow fee** ("Charged on each escrow order before the money is released."), **Payment processing** ("The payment provider's card and transfer fee."), **Withdrawals**, **Ads** and **Subscription** charges for the period, with your gross sales and net earnings.
+In the seller dashboard on **dashboard.nantty.com**, the fee breakdown lists **Escrow fee** ("Charged on each escrow order before the money is released."), **Payment processing** ("The payment provider's card and transfer fee."), **Withdrawals**, **Ads** and **Subscription** charges for the period, with your gross sales and net earnings.
 
 ## Example
 
@@ -30,7 +30,7 @@ A ₦20,000 escrow order on the Free or Pro plan: the escrow fee is ₦300. On B
 ## Good to know
 
 - Buyers never pay a checkout fee or an escrow fee.
-- No escrow fee is charged when an order is refunded before release. If you have already been paid, a refund recovers only your seller portion; Zudomart's escrow and processing fees are not refunded.
+- No escrow fee is charged when an order is refunded before release. If you have already been paid, a refund recovers only your seller portion; Nantty's escrow and processing fees are not refunded.
 - Plan charges and ads you pay from your wallet show in the same breakdown, but they are not order fees.
 
 See [Seller plans](/help/selling/seller-plans) for what Business includes and [Seller payouts](/help/selling/seller-payouts) for when money becomes yours to withdraw.

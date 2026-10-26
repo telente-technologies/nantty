@@ -1,11 +1,11 @@
 ---
 title: Your Ads hub in the app
-summary: Create, run and manage ads for your posts, products, store or profile from the Zudomart app or web, without Ads Manager. Pause, add budget, see results and manage your ad balance in one place.
+summary: Create, run and manage ads for your posts, products, store or profile from the Nantty app or web, without Ads Manager. Pause, add budget, see results and manage your ad balance in one place.
 tags: ads hub, my ads, create ad, run ads in app, promote product, promote store, promote profile, pause ad, stop ad, extend ad, ad results, ads without ads manager
 related: boost-a-post, pay-for-a-boost, ad-credit-and-refunds, ad-results, who-can-advertise, ads-manager-campaigns, ads-faq
 ---
 
-Everything you need to advertise is inside the Zudomart app and on the web at **app.zudomart.com**. [Ads Manager](/help/ads-and-boosts/ads-manager-campaigns) is optional, for people who want extra tools.
+Everything you need to advertise is inside the Nantty app and on the web at **app.nantty.com**. [Ads Manager](/help/ads-and-boosts/ads-manager-campaigns) is optional, for people who want extra tools.
 
 ## Open your Ads hub
 
@@ -24,7 +24,7 @@ The hub lists your ads with their status, how much of the budget is spent, the m
 6. **Preview:** see how the ad will look in the feed.
 7. Tap **Submit for review**.
 
-Prices are always worked out by Zudomart and shown before you pay.
+Prices are always worked out by Nantty and shown before you pay.
 
 ## Manage an ad
 
@@ -44,8 +44,8 @@ Each ad shows impressions, people reached, clicks or visits, spend, cost per res
 
 The **Ad balance** page shows two separate amounts:
 
-- **Ad balance (withdrawable):** real money you added. You can top it up, and withdraw what you haven't spent to your Zudomart wallet.
-- **Ad credit (ads only):** promotional credit from Zudomart. It can only be spent on ads and can't be withdrawn. If some credit expires, you see when.
+- **Ad balance (withdrawable):** real money you added. You can top it up, and withdraw what you haven't spent to your Nantty wallet.
+- **Ad credit (ads only):** promotional credit from Nantty. It can only be spent on ads and can't be withdrawn. If some credit expires, you see when.
 
 See [Ad credit, ad balance and refunds](/help/ads-and-boosts/ad-credit-and-refunds).
 

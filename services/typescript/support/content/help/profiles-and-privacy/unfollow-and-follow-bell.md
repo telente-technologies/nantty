@@ -29,7 +29,7 @@ It starts as **Off** for everyone you follow. On the web the bell works the same
 ## Unfollow
 
 1. Tap **Following** on their profile.
-2. Zudomart always asks first: "Unfollow" them? "Their posts will no longer show up in your Following feed."
+2. Nantty always asks first: "Unfollow" them? "Their posts will no longer show up in your Following feed."
 3. Tap **Unfollow**, or **Cancel** to keep following.
 
 They aren't told that you unfollowed. Unfollowing also turns their post notifications back to **Off**.

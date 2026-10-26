@@ -10,10 +10,10 @@ If you see a sign-in you don't recognise, posts or messages you didn't send, or 
 ## What to do now
 
 1. **Reset your password.** On the log-in screen tap **Forgot password?**, enter your email and follow the code. A reset signs out every device, including the attacker's.
-2. **Secure your email account.** Your Zudomart password can be reset through your email, so change your email password too and turn on its own 2FA.
-3. **Check your sessions.** Sellers can review **Settings > Security** on **dashboard.zudomart.com** and tap **Sign out all others**. See [Devices and active sessions](/help/account-and-login/active-sessions).
+2. **Secure your email account.** Your Nantty password can be reset through your email, so change your email password too and turn on its own 2FA.
+3. **Check your sessions.** Sellers can review **Settings > Security** on **dashboard.nantty.com** and tap **Sign out all others**. See [Devices and active sessions](/help/account-and-login/active-sessions).
 4. **Check your wallet.** Open **Wallet > Payout accounts** and **All transactions**. Report any payout account you didn't add.
-5. **Tell us.** In the app go to **Settings > Support > Contact support**, choose **My account**, and say what happened. If you can't sign in, email **support@zudomart.com** from the address on your account.
+5. **Tell us.** In the app go to **Settings > Support > Contact support**, choose **My account**, and say what happened. If you can't sign in, email **support@nantty.com** from the address on your account.
 
 ## How your money is protected
 
@@ -38,4 +38,4 @@ See [Wallet safety basics](/help/wallet-security/wallet-safety-basics).
 
 ## Stay safe
 
-Most takeovers start with a fake message asking for a code or a "verification" link. Zudomart will never ask for your password, card PIN or codes. See [Payment scams](/help/wallet-security/payment-scams).
+Most takeovers start with a fake message asking for a code or a "verification" link. Nantty will never ask for your password, card PIN or codes. See [Payment scams](/help/wallet-security/payment-scams).

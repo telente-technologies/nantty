@@ -1,7 +1,7 @@
 ---
 title: Live FAQ
-summary: Quick answers about watching, hosting, gifts, ZudoPoints, rankings, battles, OBS and live safety.
-tags: live faq, live questions, livestream help, gifts questions, zudopoints questions, go live problem
+summary: Quick answers about watching, hosting, gifts, Nantty Points, rankings, battles, OBS and live safety.
+tags: live faq, live questions, livestream help, gifts questions, nantty points questions, go live problem
 related: going-live, watch-a-live, gifts-and-coins-on-live, zudopoints, live-rankings, live-safety
 ---
 
@@ -15,15 +15,15 @@ Yes. You'll be asked to sign in to comment, gift or report. See [Watching a live
 
 ## How do I go live from my computer?
 
-Use **studio.zudomart.com** and OBS or any RTMP encoder. See [Streaming with OBS](/help/live/streaming-with-obs).
+Use **studio.nantty.com** and OBS or any RTMP encoder. See [Streaming with OBS](/help/live/streaming-with-obs).
 
 ## How do gifts work?
 
 You buy coins and send gifts. Gifts are final. See [Sending gifts on a live](/help/live/gifts-and-coins-on-live).
 
-## Are ZudoPoints money?
+## Are Nantty Points money?
 
-No. ZudoPoints are never money. You can't buy, sell, withdraw or exchange them. See [ZudoPoints](/help/live/zudopoints).
+No. Nantty Points are never money. You can't buy, sell, withdraw or exchange them. See [Nantty Points](/help/live/zudopoints).
 
 ## What is the ring around the host's picture?
 
@@ -31,7 +31,7 @@ It shows their global streamer rank this week. Tap it to see their category rank
 
 ## How do I get on the Top supporters list?
 
-Earn ZudoPoints on that live by gifting, watching, liking, sharing and following. See [Top supporters](/help/live/supporters-leaderboard).
+Earn Nantty Points on that live by gifting, watching, liking, sharing and following. See [Top supporters](/help/live/supporters-leaderboard).
 
 ## How many people can be on stage?
 

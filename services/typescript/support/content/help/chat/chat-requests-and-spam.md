@@ -33,17 +33,17 @@ You can:
 
 ## Spam
 
-Chats go to Spam based on how the sender behaves, never on what they write. Zudomart can't read your messages. Reasons include:
+Chats go to Spam based on how the sender behaves, never on what they write. Nantty can't read your messages. Reasons include:
 
 - an account that's sending to many new people in a short time,
 - a new account messaging lots of people,
 - our behaviour model flagging the account.
 
-A spam chat shows "Flagged by Zudomart based on this account's activity." Tap **Not spam** to move it to **Requests**, then accept it if you want.
+A spam chat shows "Flagged by Nantty based on this account's activity." Tap **Not spam** to move it to **Requests**, then accept it if you want.
 
 ## Stay safe
 
-Many scams start with a message from a stranger. Don't pay anyone outside Zudomart checkout, don't share one-time codes, and be careful with unusual links. Zudomart will never ask for your password, card PIN or codes in a chat. See [Stay safe when buying and selling](/help/safety-and-reporting/stay-safe-when-buying-and-selling).
+Many scams start with a message from a stranger. Don't pay anyone outside Nantty checkout, don't share one-time codes, and be careful with unusual links. Nantty will never ask for your password, card PIN or codes in a chat. See [Stay safe when buying and selling](/help/safety-and-reporting/stay-safe-when-buying-and-selling).
 
 ## If something goes wrong
 

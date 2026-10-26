@@ -50,7 +50,7 @@ Go to **Settings › Store, Business page and Brand** to pick one. Once you have
 
 A brand storefront is a sales channel of your Brand. It doesn't use your Store slot, so you can still have one Store or one Business page as well.
 
-Brand selling follows the same money rules as stores: your Zudomart wallet, escrow in Nigeria, identity verification before selling outside Nigeria, and seller debt limits.
+Brand selling follows the same money rules as stores: your Nantty wallet, escrow in Nigeria, identity verification before selling outside Nigeria, and seller debt limits.
 
 ## Turning brand selling off
 

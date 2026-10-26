@@ -9,7 +9,7 @@ Post analytics show how a post or clip is doing: how often it was seen, by how m
 
 ## Who this is for
 
-Anyone, for their own posts and clips. If you post as a business or brand profile, the account that owns that profile can see its analytics. Nobody else can, and Zudomart never shows your numbers to other users apart from the public view, like and comment counts.
+Anyone, for their own posts and clips. If you post as a business or brand profile, the account that owns that profile can see its analytics. Nobody else can, and Nantty never shows your numbers to other users apart from the public view, like and comment counts.
 
 ## How to open analytics
 
@@ -45,7 +45,7 @@ Pull down to refresh.
 
 - Your own views never count.
 - Views are anonymous. You see totals, never a list of who viewed a post. Stories are different: you can see who viewed your story. See [Story viewers](/help/clips-and-stories/story-viewers-and-privacy).
-- Zudomart doesn't pay for views. Creators earn from eligible monetisation instead. See [Creator earnings](/help/creators-and-earnings/creator-earnings).
+- Nantty doesn't pay for views. Creators earn from eligible monetisation instead. See [Creator earnings](/help/creators-and-earnings/creator-earnings).
 
 ## If something goes wrong
 

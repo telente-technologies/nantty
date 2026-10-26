@@ -43,7 +43,7 @@ Check **Push notifications** is **ON**, then your phone's settings. See [Notific
 
 ## Can I change the language?
 
-Not yet. Zudomart is in English for now.
+Not yet. Nantty is in English for now.
 
 ## Prices are in the wrong currency.
 

@@ -1,11 +1,11 @@
 ---
 title: Adding staff to your store
-summary: On Pro or Business, add existing Zudomart users by username and give them a role. They sign in with their own accounts.
+summary: On Pro or Business, add existing Nantty users by username and give them a role. They sign in with their own accounts.
 tags: team, staff, roles, permissions, add staff, employee, manager, accountant
 related: seller-dashboard-overview, seller-plans, switch-profiles, business-profiles, seller-reports
 ---
 
-Your team signs in with their own Zudomart accounts. There are no shared logins or separate staff accounts.
+Your team signs in with their own Nantty accounts. There are no shared logins or separate staff accounts.
 
 ## Who this is for
 
@@ -13,9 +13,9 @@ Store owners on Pro (5 seats) or Business (25 seats). "On Free, only the owner s
 
 ## How to add a team member
 
-1. Sign in at **dashboard.zudomart.com** and go to **Team**.
+1. Sign in at **dashboard.nantty.com** and go to **Team**.
 2. Tap **Add team member**.
-3. Under **Find a Zudomart user**, search for their username.
+3. Under **Find a Nantty user**, search for their username.
 4. Pick a **Role**: **Manager**, **Inventory staff**, **Sales staff** or **Accountant**. Choose which locations they can work in.
 5. Tap **Send team request**.
 6. They accept in the app. Until then they show as **Waiting to accept**.
@@ -35,7 +35,7 @@ Store owners on Pro (5 seats) or Business (25 seats). "On Free, only the owner s
 ## If something goes wrong
 
 - **"Every team seat on your plan is in use"** or **"Your plan has no free team seats. Upgrade or remove someone first."** Remove someone or upgrade.
-- Can't find someone? They need their own Zudomart account first.
+- Can't find someone? They need their own Nantty account first.
 
 ## Stay safe
 

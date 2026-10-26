@@ -9,9 +9,9 @@ Every message you send to support becomes a request you can follow from start to
 
 ## How to see your requests
 
-Open **Settings > Support > My support requests**, or **My requests** at the top of the **Help centre**. A count such as "2 new" shows replies you haven't read. Tap a request to read the conversation and reply in the box at the bottom (**Message Zudomart Support…**).
+Open **Settings > Support > My support requests**, or **My requests** at the top of the **Help centre**. A count such as "2 new" shows replies you haven't read. Tap a request to read the conversation and reply in the box at the bottom (**Message Nantty Support…**).
 
-On the web: **app.zudomart.com > Help Centre > My support requests**.
+On the web: **app.nantty.com > Help Centre > My support requests**.
 
 ## Statuses
 

@@ -1,17 +1,17 @@
 ---
 title: Notifications not arriving
-summary: Not getting Zudomart push notifications for orders, messages or lives? Check the app setting, your phone's settings and battery saving.
+summary: Not getting Nantty push notifications for orders, messages or lives? Check the app setting, your phone's settings and battery saving.
 tags: no notifications, push not working, notification not coming, not getting alerts, missed messages, notifications off, i no dey get notification
 related: notification-settings, post-notifications-bell, mute-a-post, not-getting-emails, notifications-faq, troubleshooting-faq
 ---
 
-Push notifications need to be on in both Zudomart and your phone. Work through these checks.
+Push notifications need to be on in both Nantty and your phone. Work through these checks.
 
 ## Who this is for
 
 Anyone missing push notifications on iPhone or Android.
 
-## Check Zudomart's setting
+## Check Nantty's setting
 
 1. Go to **Settings > Notification**.
 2. Make sure **Push notifications** shows **ON**. Tap it to switch.
@@ -20,13 +20,13 @@ If you see "Couldn't load your notification settings.", tap **Try again**.
 
 ## Check your phone's setting
 
-1. In **Settings > Notification**, tap **System notification settings**. This opens your phone's settings for Zudomart.
+1. In **Settings > Notification**, tap **System notification settings**. This opens your phone's settings for Nantty.
 2. Allow notifications, and turn on sounds, banners and lock screen alerts.
 
 ## Other things that block notifications
 
 - **Do Not Disturb or Focus mode** silences notifications. Check your phone's quick settings.
-- **Battery saving (Android)**: some phones stop apps in the background. Go to your phone's **Settings > Apps > Zudomart > Battery** and choose **Unrestricted**, or turn off battery optimisation for Zudomart.
+- **Battery saving (Android)**: some phones stop apps in the background. Go to your phone's **Settings > Apps > Nantty > Battery** and choose **Unrestricted**, or turn off battery optimisation for Nantty.
 - **Low Power Mode (iPhone)** can delay some notifications.
 - **Signed out**: notifications only go to devices where you're signed in. Open the app to check.
 - **Old app version**: update the app. See [Update the app](/help/troubleshooting/update-the-app).

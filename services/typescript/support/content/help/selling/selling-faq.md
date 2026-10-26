@@ -7,9 +7,9 @@ related: start-selling, fees-and-escrow-fee, seller-plans, verify-your-store, se
 
 ## How do I start selling?
 
-Tap **Start selling on Zudomart** in **Settings** or on your profile and apply. See [Opening a store](/help/selling/start-selling).
+Tap **Start selling on Nantty** in **Settings** or on your profile and apply. See [Opening a store](/help/selling/start-selling).
 
-## Does Zudomart take commission?
+## Does Nantty take commission?
 
 No. You pay a 1.5% escrow fee on escrow orders (1% on Business) plus the payment processing fee. See [Seller fees](/help/selling/fees-and-escrow-fee).
 
@@ -33,11 +33,11 @@ Yes, after you verify your identity and a payout account in your own name. Buyer
 
 In Nigeria, after the buyer confirms or 3 days after delivery, then a 24-hour hold. See [Seller payouts](/help/selling/seller-payouts).
 
-## Does Zudomart hold my money?
+## Does Nantty hold my money?
 
 No. Your money is in your own wallet with our licensed payment partner. See [Who holds your money](/help/wallet-security/who-holds-your-money).
 
-## Does Zudomart deliver for me?
+## Does Nantty deliver for me?
 
 No. You choose couriers and set shipping rules. See [Shipping settings](/help/selling/shipping-settings).
 

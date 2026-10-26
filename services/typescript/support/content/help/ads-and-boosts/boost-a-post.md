@@ -5,11 +5,11 @@ tags: boost, promote, promote post, promote profile, promote store, ads, boost p
 related: pay-for-a-boost, free-boost-with-premium, boosted-vs-sponsored, ad-results, ad-review-and-policies, ads-faq
 ---
 
-A boost shows one of your posts to more people, labelled **Boosted**. It's the quickest way to advertise on Zudomart. You can also promote a product, your store or your profile, and manage everything from your [Ads hub](/help/ads-and-boosts/ads-in-the-app). [Ads Manager](/help/ads-and-boosts/ads-manager-campaigns) is optional.
+A boost shows one of your posts to more people, labelled **Boosted**. It's the quickest way to advertise on Nantty. You can also promote a product, your store or your profile, and manage everything from your [Ads hub](/help/ads-and-boosts/ads-in-the-app). [Ads Manager](/help/ads-and-boosts/ads-manager-campaigns) is optional.
 
 ## Who this is for
 
-Anyone with a Zudomart account can boost their own posts. Paying by card or from your ad credit and balance doesn't need payout verification. Paying from your earnings does. See [Who can advertise](/help/ads-and-boosts/who-can-advertise).
+Anyone with a Nantty account can boost their own posts. Paying by card or from your ad credit and balance doesn't need payout verification. Paying from your earnings does. See [Who can advertise](/help/ads-and-boosts/who-can-advertise).
 
 ## How to boost a post
 

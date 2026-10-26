@@ -26,7 +26,7 @@ Documents are uploaded in the app:
 2. For each document tap **Add photo**.
 3. Tap **Send for review**.
 
-On the web, **Settings > Verification** at **dashboard.zudomart.com** shows your **Gold badge** and **Documents** status. To change documents, use the app.
+On the web, **Settings > Verification** at **dashboard.nantty.com** shows your **Gold badge** and **Documents** status. To change documents, use the app.
 
 Each document shows **Not uploaded**, **Pending review**, **Approved** or **Rejected**. If one is rejected, fix it and tap **Send again**.
 
@@ -51,4 +51,4 @@ Each document shows **Not uploaded**, **Pending review**, **Approved** or **Reje
 
 ## Stay safe
 
-Only upload documents inside the Zudomart app or dashboard. We never ask for documents or fees by chat or email.
+Only upload documents inside the Nantty app or dashboard. We never ask for documents or fees by chat or email.

@@ -5,7 +5,7 @@ tags: checkmark, verified, verified badge, blue tick, gold tick, black tick, blu
 related: checkmark-prices, blue-checkmark, gold-checkmark, black-checkmark, identity-check, verification-faq
 ---
 
-A checkmark next to a name tells people Zudomart has confirmed who is behind the profile. The colour tells you what kind of profile it is.
+A checkmark next to a name tells people Nantty has confirmed who is behind the profile. The colour tells you what kind of profile it is.
 
 ## Blue: people
 
@@ -25,12 +25,12 @@ For business and brand profiles after business verification. Gold comes with the
 
 ## Black: government
 
-Only for official government bodies and public institutions. It needs official vetting, two independent approvals by Zudomart staff and yearly re-verification. It can't be bought in the app. See [The Black checkmark](/help/checkmarks-and-verification/black-checkmark).
+Only for official government bodies and public institutions. It needs official vetting, two independent approvals by Nantty staff and yearly re-verification. It can't be bought in the app. See [The Black checkmark](/help/checkmarks-and-verification/black-checkmark).
 
 ## Where to manage it
 
 - **App**: **Profile > More (top right) > Get verified** (or **Verification** once you have a badge).
-- **Web**: **app.zudomart.com > Settings > Verification**.
+- **Web**: **app.nantty.com > Settings > Verification**.
 - Business billing: **Manage on the web** opens your plan on the web.
 
 ## Good to know

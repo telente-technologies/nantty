@@ -5,7 +5,7 @@ tags: business guide, brand guide, company account, business profile, brand page
 related: business-profiles, brand-pages, switch-profiles, gold-checkmark, seller-team, business-and-brands-faq
 ---
 
-Businesses and brands get their own profiles on Zudomart, separate from your personal one but run from the same account.
+Businesses and brands get their own profiles on Nantty, separate from your personal one but run from the same account.
 
 ## Step 1: Choose the right profile type
 

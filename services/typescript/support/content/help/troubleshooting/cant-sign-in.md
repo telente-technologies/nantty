@@ -1,15 +1,15 @@
 ---
 title: Can't sign in
-summary: Fix sign-in problems with Zudomart, from a wrong password or expired code to Google and Apple sign-in errors and suspended accounts.
+summary: Fix sign-in problems with Nantty, from a wrong password or expired code to Google and Apple sign-in errors and suspended accounts.
 tags: can't log in, login problem, forgot password, wrong password, sign in error, code expired, locked out, i no fit login
 related: sign-in-and-passwords, hacked-account, not-getting-emails, two-factor-authentication, common-error-messages, troubleshooting-faq
 ---
 
-You sign in to Zudomart with your email or username and your password, or with **Continue with Google** or **Continue with Apple** if you set your account up that way. Phone numbers can't be used to sign in, and we never text you sign-in codes.
+You sign in to Nantty with your email or username and your password, or with **Continue with Google** or **Continue with Apple** if you set your account up that way. Phone numbers can't be used to sign in, and we never text you sign-in codes.
 
 ## Who this is for
 
-Anyone who can't get into their Zudomart account.
+Anyone who can't get into their Nantty account.
 
 ## Forgot your password
 
@@ -49,4 +49,4 @@ If your password stopped working and you didn't change it, or you got a sign-in 
 
 ## Stay safe
 
-Zudomart will never ask for your password or codes by phone, chat or email. Never share them.
+Nantty will never ask for your password or codes by phone, chat or email. Never share them.

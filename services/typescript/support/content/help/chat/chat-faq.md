@@ -5,7 +5,7 @@ tags: chat faq, messages faq, encryption, new phone, message requests, spam, pas
 related: end-to-end-encryption, chat-devices-and-keys, chat-folders, chat-requests-and-spam, share-to-chat, chat-media-and-encryption
 ---
 
-## Can Zudomart read my messages?
+## Can Nantty read my messages?
 
 No. Message text, photos, videos, voice notes and files are end-to-end encrypted. Locations and polls are not, and our servers know who you chat with and when. See [End-to-end encryption](/help/chat/end-to-end-encryption).
 

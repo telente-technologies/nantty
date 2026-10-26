@@ -1,11 +1,11 @@
 ---
 title: Creating your account
 summary: Sign up with your email address, Google or Apple. We email you a 6-digit code to confirm the address is yours.
-tags: sign up, register, create account, new account, join zudomart, open account, email code
+tags: sign up, register, create account, new account, join nantty, open account, email code
 related: sign-in-and-passwords, verify-your-email, usernames, browsing-as-a-guest, guide-new-user
 ---
 
-You need a Zudomart account to like, follow, comment, message, post, buy or sell. Signing up takes about two minutes and only needs an email address.
+You need a Nantty account to like, follow, comment, message, post, buy or sell. Signing up takes about two minutes and only needs an email address.
 
 ## Who this is for
 
@@ -13,7 +13,7 @@ Anyone aged 13 or older, in any country. Your phone number is not used to sign u
 
 ## How to sign up with your email
 
-1. Open the app and tap **Email** on the welcome screen. On the web, go to **app.zudomart.com** and choose **Sign up**.
+1. Open the app and tap **Email** on the welcome screen. On the web, go to **app.nantty.com** and choose **Sign up**.
 2. Under **What's your email?**, enter your email address and tap **Send Code**.
 3. Check your inbox for a 6-digit code and type it on the **Enter 6-digit code** screen.
 4. Under **When's your birthday?**, enter your date of birth as dd/mm/yyyy. It is never shown publicly.
@@ -37,7 +37,7 @@ Tap **Continue with Google**, or **Continue with Apple** on an iPhone, and follo
 ## If something goes wrong
 
 - **"An account with this email already exists."** Sign in instead, or use **Forgot password?**.
-- **"You must be at least 13 years old to use Zudomart."** You can't create an account yet.
+- **"You must be at least 13 years old to use Nantty."** You can't create an account yet.
 - **"Enter a real date, like 27/10/2000."** Check the birthday format: day, month, then year.
 - **"That code didn't work. Try again."** or **"The code is invalid or has expired."** Request a new code and use the latest email.
 - **"Your verification expired. Go back and request a new code."** You took longer than 15 minutes after confirming the code. Start again.
@@ -47,4 +47,4 @@ Tap **Continue with Google**, or **Continue with Apple** on an iPhone, and follo
 
 ## Stay safe
 
-Zudomart will never ask for your password or the codes we email you. Anyone who asks is trying to take over your account.
+Nantty will never ask for your password or the codes we email you. Anyone who asks is trying to take over your account.

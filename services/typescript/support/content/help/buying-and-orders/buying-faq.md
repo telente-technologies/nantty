@@ -5,11 +5,11 @@ tags: buying faq, order questions, escrow questions, refund questions, how to bu
 related: how-escrow-protects-your-order, cart-and-checkout, disputes-and-refunds, refund-timelines, cancel-an-order, order-statuses
 ---
 
-## Is it safe to buy on Zudomart?
+## Is it safe to buy on Nantty?
 
 In Nigeria, escrow keeps your money locked in your own wallet with our payment partner until you confirm delivery. See [How escrow protects your order](/help/buying-and-orders/how-escrow-protects-your-order).
 
-## Does Zudomart hold my money?
+## Does Nantty hold my money?
 
 No. Escrow money stays in your own wallet with our licensed payment partner until it is released. See [Who holds your money](/help/wallet-security/who-holds-your-money).
 

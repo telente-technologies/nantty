@@ -2,10 +2,10 @@
 title: Finding your way around the app
 summary: A quick tour of the five tabs at the bottom of the app (Home, Clips, Create, Chats, Profile) and the menus behind them.
 tags: navigation, tabs, menu, where is, layout, home tab, profile menu, how to use the app, find settings
-related: guide-new-user, settings-overview, what-is-zudomart, app-and-web, glossary, getting-started-faq
+related: guide-new-user, settings-overview, what-is-nantty, app-and-web, glossary, getting-started-faq
 ---
 
-The Zudomart app has five tabs along the bottom. Here's what each one does and where things live.
+The Nantty app has five tabs along the bottom. Here's what each one does and where things live.
 
 ## Home
 

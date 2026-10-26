@@ -1,11 +1,11 @@
 ---
-title: Child safety on Zudomart
+title: Child safety on Nantty
 summary: We have zero tolerance for anything that sexualises, grooms or endangers children. How to report it, what we do, and how teens are protected.
 tags: child safety, child abuse, grooming, minors, teen safety, underage, csam, protect children, parents
 related: report-a-problem, community-guidelines, harassment-and-bullying, sensitive-content-and-age, reporting-chats, live-safety
 ---
 
-Keeping children safe comes before everything else on Zudomart. Anything that sexualises, grooms or endangers a child is removed, the account is banned, and we report it to the authorities.
+Keeping children safe comes before everything else on Nantty. Anything that sexualises, grooms or endangers a child is removed, the account is banned, and we report it to the authorities.
 
 ## Who this is for
 

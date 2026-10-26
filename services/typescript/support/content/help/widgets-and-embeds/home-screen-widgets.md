@@ -1,15 +1,15 @@
 ---
-title: Zudomart home-screen widgets
+title: Nantty home-screen widgets
 summary: See your orders, today's sales, who is live and more right on your phone's home screen, without opening the app. Here is what each widget shows.
 tags: widget, home screen, order tracking widget, sales widget, live now, creator stats, stories widget, how far my order
 related: iphone-widgets, android-widgets, widget-troubleshooting, website-embed, widgets-and-embeds-faq, track-your-order
 ---
 
-Zudomart widgets put the things you check most on your home screen. Tap a widget to jump straight to that part of the app.
+Nantty widgets put the things you check most on your home screen. Tap a widget to jump straight to that part of the app.
 
 ## Who this is for
 
-Anyone with the Zudomart app on an iPhone or Android phone. Some widgets are for buyers, some for sellers and some for creators. Widgets need the Zudomart app installed from the App Store or Google Play.
+Anyone with the Nantty app on an iPhone or Android phone. Some widgets are for buyers, some for sellers and some for creators. Widgets need the Nantty app installed from the App Store or Google Play.
 
 ## The widgets
 

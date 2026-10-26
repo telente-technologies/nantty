@@ -5,7 +5,7 @@ tags: advertiser guide, advertise, promote, boost post, run ads, ads manager, ma
 related: who-can-advertise, boost-a-post, ads-manager-campaigns, boosted-vs-sponsored, ad-results, ads-faq
 ---
 
-Zudomart has two ways to reach more people: a quick boost on one post, or a full campaign in Ads Manager.
+Nantty has two ways to reach more people: a quick boost on one post, or a full campaign in Ads Manager.
 
 ## Step 1: Check you can advertise
 
@@ -24,7 +24,7 @@ Open your post's menu and tap **Promote post**. Choose a goal and budget, then p
 
 ## Step 4: Run a campaign
 
-Sign in at **ads.zudomart.com**, create a campaign, choose your audience and budget, and submit it for review. See [Ads Manager campaigns](/help/ads-and-boosts/ads-manager-campaigns) and [Ad review and policies](/help/ads-and-boosts/ad-review-and-policies).
+Sign in at **ads.nantty.com**, create a campaign, choose your audience and budget, and submit it for review. See [Ads Manager campaigns](/help/ads-and-boosts/ads-manager-campaigns) and [Ad review and policies](/help/ads-and-boosts/ad-review-and-policies).
 
 ## Step 5: Pay
 

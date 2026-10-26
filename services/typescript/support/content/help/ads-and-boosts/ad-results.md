@@ -22,12 +22,12 @@ Before you boost, **Estimated reach** and the estimated results (for example "Ab
 
 ## Ads Manager reports
 
-Sign in at **ads.zudomart.com** and open **Reports** for your ad account. You can pick a **Date range**, **Compare with previous period**, use **Break down by** to split results, and choose a **Chart metric**. Metrics include:
+Sign in at **ads.nantty.com** and open **Reports** for your ad account. You can pick a **Date range**, **Compare with previous period**, use **Break down by** to split results, and choose a **Chart metric**. Metrics include:
 
 - **Amount spent**
 - **Impressions**, **Reach** and **Frequency** (average times each person saw your ad)
 - **Clicks**, **Click-through rate**, **Cost per click** and **Cost per 1,000 impressions**
-- **Purchases** and **Return on ad spend**, for business accounts linked to a Zudomart store
+- **Purchases** and **Return on ad spend**, for business accounts linked to a Nantty store
 
 You can also schedule reports to be emailed daily, every Monday or on the first day of each month, to up to 10 addresses.
 

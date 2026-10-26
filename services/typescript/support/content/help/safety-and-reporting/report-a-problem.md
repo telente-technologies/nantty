@@ -5,11 +5,11 @@ tags: report, flag, abuse, scam, harassment, report account, report post, my rep
 related: report-a-scam, harassment-and-bullying, reporting-chats, live-safety, blocking-people, safety-faq
 ---
 
-If something on Zudomart breaks our [Community guidelines](/help/safety-and-reporting/community-guidelines), report it. Reports go to our safety team, and the person you report is never told who reported them.
+If something on Nantty breaks our [Community guidelines](/help/safety-and-reporting/community-guidelines), report it. Reports go to our safety team, and the person you report is never told who reported them.
 
 ## Who this is for
 
-Anyone with a Zudomart account. You need to be signed in to report; if you aren't, the app asks you to sign in and brings you back.
+Anyone with a Nantty account. You need to be signed in to report; if you aren't, the app asks you to sign in and brings you back.
 
 ## How to report a post, clip, comment or product
 
@@ -31,7 +31,7 @@ You'll see "Thanks for letting us know".
 - **Lives** have their own report sheet with urgent reasons such as **Child safety**, **Self-harm or suicide** and **Violence or dangerous acts**. See [Live safety](/help/live/live-safety).
 - **Chats** are end-to-end encrypted, so you choose which messages to send us. See [Reporting chats](/help/chat/reporting-chats).
 
-On the web (**app.zudomart.com**) the steps are the same: use the three-dot menu and choose **Report**.
+On the web (**app.nantty.com**) the steps are the same: use the three-dot menu and choose **Report**.
 
 ## After you report
 

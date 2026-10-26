@@ -5,7 +5,7 @@ tags: outside nigeria, ghana, kenya, south africa, uk, direct payment, internati
 related: escrow-or-direct-payment, payments-outside-nigeria, prices-by-country, disputes-and-refunds, selling-outside-nigeria, cart-and-checkout
 ---
 
-You can buy on Zudomart from Ghana, Kenya, South Africa and other countries. The way you pay is different from Nigeria.
+You can buy on Nantty from Ghana, Kenya, South Africa and other countries. The way you pay is different from Nigeria.
 
 ## Who this is for
 
@@ -20,7 +20,7 @@ Buyers paying in any currency other than naira.
 
 ## What's different from Nigeria
 
-- **No escrow.** Zudomart doesn't hold or lock your money, and there is no stored wallet balance.
+- **No escrow.** Nantty doesn't hold or lock your money, and there is no stored wallet balance.
 - **No dispute button.** If something goes wrong, contact the seller from the order or tap **Get help with this order**.
 - **Every seller is verified.** Outside Nigeria nobody can sell until they have verified their identity and a payout account in their own name with our identity partner.
 
@@ -38,4 +38,4 @@ Buyers paying in any currency other than naira.
 
 ## Stay safe
 
-Look at the store's rating, success rate and reviews before you buy. Never pay a seller outside Zudomart checkout; then we can't help at all. See [Payments outside Nigeria](/help/payments-and-wallet/payments-outside-nigeria).
+Look at the store's rating, success rate and reviews before you buy. Never pay a seller outside Nantty checkout; then we can't help at all. See [Payments outside Nigeria](/help/payments-and-wallet/payments-outside-nigeria).

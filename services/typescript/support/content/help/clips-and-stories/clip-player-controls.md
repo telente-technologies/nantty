@@ -46,4 +46,4 @@ The first time you open Clips, a **How clips work** card lists these gestures. T
 
 - Skipping and the seek bar don't work on clips shorter than 5 seconds. On those, double-tap anywhere likes the clip.
 - Ads, promoted lives and subscriber-only clips you haven't unlocked can't be skipped. Double-tap likes them instead.
-- On the web (app.zudomart.com) there's a **Mute clips** button, and you can press M to mute.
+- On the web (app.nantty.com) there's a **Mute clips** button, and you can press M to mute.

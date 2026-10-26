@@ -37,7 +37,7 @@ Tap **More options** (three dots). You'll see:
 
 After a report you'll see "Thanks for letting us know" and "We'll review this account. You can follow the outcome in Settings › Support › My reports."
 
-## On the web (app.zudomart.com)
+## On the web (app.nantty.com)
 
 - **Your profile** has icon shortcuts for **Saved items**, **Your orders**, **Notifications** and **Settings**.
 - **Someone else's profile** has a **More options** menu with **Send in chat**, **Copy link** and **Report**. Blocking is only in the app for now.

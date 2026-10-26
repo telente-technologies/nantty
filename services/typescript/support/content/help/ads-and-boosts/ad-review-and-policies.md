@@ -5,7 +5,7 @@ tags: ad review, rejected, policy, ad not approved, advertising rules, appeal ad
 related: ads-manager-campaigns, boost-a-post, ad-credit-and-refunds, who-can-advertise, community-guidelines, ads-faq
 ---
 
-Every ad and every boost is checked against our advertising policies before it runs. The rules keep Zudomart safe for buyers and fair for sellers. The full policy is in Ads Manager at **ads.zudomart.com/policy**.
+Every ad and every boost is checked against our advertising policies before it runs. The rules keep Nantty safe for buyers and fair for sellers. The full policy is in Ads Manager at **ads.nantty.com/policy**.
 
 ## How review works
 

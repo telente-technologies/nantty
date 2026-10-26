@@ -5,15 +5,15 @@ tags: seller guide, how to sell, open a store, start selling, sell online, first
 related: start-selling, seller-dashboard-overview, products-and-inventory, seller-orders-and-shipping, seller-payouts, selling-faq
 ---
 
-Selling on Zudomart is free to start, with no commission on product sales. Here's the path from opening a store to money in your bank.
+Selling on Nantty is free to start, with no commission on product sales. Here's the path from opening a store to money in your bank.
 
 ## Step 1: Apply to sell
 
-Go to **Settings > Start selling on Zudomart** ("Free to apply"). See [Start selling](/help/selling/start-selling).
+Go to **Settings > Start selling on Nantty** ("Free to apply"). See [Start selling](/help/selling/start-selling).
 
 ## Step 2: Learn the seller dashboard
 
-Once approved, **Seller dashboard** appears in your **Profile > More** menu. For the full toolset, sign in at **dashboard.zudomart.com**. See [The seller dashboard](/help/selling/seller-dashboard-overview).
+Once approved, **Seller dashboard** appears in your **Profile > More** menu. For the full toolset, sign in at **dashboard.nantty.com**. See [The seller dashboard](/help/selling/seller-dashboard-overview).
 
 ## Step 3: Set up payouts and verify
 
@@ -47,4 +47,4 @@ When the buyer confirms (or 3 days after delivery), escrow money moves to your w
 
 ## Stay safe
 
-Never ship before an order is paid in Zudomart, and never take payment outside the app. See [Staying safe when buying and selling](/help/safety-and-reporting/stay-safe-when-buying-and-selling).
+Never ship before an order is paid in Nantty, and never take payment outside the app. See [Staying safe when buying and selling](/help/safety-and-reporting/stay-safe-when-buying-and-selling).

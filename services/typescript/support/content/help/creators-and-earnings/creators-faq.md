@@ -21,7 +21,7 @@ No. You need a verified email and a payout account in your own name. A store is 
 
 After 30 days. The date is shown on the **Creator application** screen.
 
-## Does Zudomart pay for views?
+## Does Nantty pay for views?
 
 No. You earn from gifts, tips, fan subscriptions, affiliate commissions and a share of eligible ads revenue. See [How creators earn](/help/creators-and-earnings/creator-earnings).
 

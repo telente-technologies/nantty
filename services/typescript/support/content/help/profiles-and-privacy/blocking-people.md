@@ -5,7 +5,7 @@ tags: block, unblock, blocked accounts, harassment, stalker, stop someone, block
 related: mute-accounts, report-a-problem, private-account, chat-requests-and-spam, reporting-chats, harassment-and-bullying
 ---
 
-Blocking is the strongest way to stop someone reaching you on Zudomart. It works in both directions, so you won't see them either.
+Blocking is the strongest way to stop someone reaching you on Nantty. It works in both directions, so you won't see them either.
 
 ## How to block someone
 

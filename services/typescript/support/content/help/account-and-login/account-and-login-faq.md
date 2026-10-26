@@ -7,7 +7,7 @@ related: create-an-account, sign-in-and-passwords, hacked-account, usernames, ch
 
 ## Can I sign up or sign in with my phone number?
 
-No. Zudomart uses email only, plus Google or Apple sign-in. Your phone number is just a contact detail you can add in **Settings > Account**. See [Creating your account](/help/account-and-login/create-an-account).
+No. Nantty uses email only, plus Google or Apple sign-in. Your phone number is just a contact detail you can add in **Settings > Account**. See [Creating your account](/help/account-and-login/create-an-account).
 
 ## Can I sign in with my username?
 

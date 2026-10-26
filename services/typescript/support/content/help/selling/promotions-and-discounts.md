@@ -5,7 +5,7 @@ tags: discounts, promotions, coupon code, flash sale, bundles, sale, promo code,
 related: store-rewards, seller-plans, boost-a-post, ads-manager-campaigns, seller-reports, selling-faq
 ---
 
-Promotions help you win new buyers and bring old ones back. You'll find them under **Marketing** in **dashboard.zudomart.com**.
+Promotions help you win new buyers and bring old ones back. You'll find them under **Marketing** in **dashboard.nantty.com**.
 
 ## Who this is for
 
@@ -15,7 +15,7 @@ All sellers. Discount codes, product discounts and scheduled sales are "Included
 
 1. Go to **Marketing** and choose **Discount code**, **Product discount** or **Scheduled sale**.
 2. Give it a **Name**.
-3. For a code, enter the **Coupon code**, such as WELCOME10 (3 to 24 letters, numbers, dashes or underscores). "Customers enter the code at checkout in the Zudomart app." A product discount applies automatically, with no code.
+3. For a code, enter the **Coupon code**, such as WELCOME10 (3 to 24 letters, numbers, dashes or underscores). "Customers enter the code at checkout in the Nantty app." A product discount applies automatically, with no code.
 4. Pick the **Discount type**: **Percent off** or **Amount off**.
 5. Under **Applies to**, choose **Everything**, **Categories** or **Chosen products**.
 6. Optionally set **Minimum spend**, **Total uses** and **Uses per customer**.
@@ -25,7 +25,7 @@ All sellers. Discount codes, product discounts and scheduled sales are "Included
 
 - **Flash sale**: a short sale of up to 7 days on 1 to 20 products, each with a **Flash price** and an optional **Stock cap**.
 - **Bundle**: 1 to 10 products sold together for less. The bundle price must be lower than buying them separately.
-- **Featured products**: "Promote up to 4 products in Zudomart Mart."
+- **Featured products**: "Promote up to 4 products in Nantty Mart."
 
 ## Other ways to promote
 
@@ -35,7 +35,7 @@ All sellers. Discount codes, product discounts and scheduled sales are "Included
 
 ## Good to know
 
-- Discounts come out of your price. Zudomart still takes no commission.
+- Discounts come out of your price. Nantty still takes no commission.
 - Discounts show as their own line in the buyer's cart.
 - Results show in **Reports** and **Analytics**.
 

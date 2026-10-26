@@ -1,6 +1,6 @@
 ---
 title: Deposit holds
-summary: Money you add to your wallet can be spent on Zudomart straight away, but can only be withdrawn 24 hours after the deposit, or 72 hours after your first deposit.
+summary: Money you add to your wallet can be spent on Nantty straight away, but can only be withdrawn 24 hours after the deposit, or 72 hours after your first deposit.
 tags: deposit hold, can't withdraw deposit, added money, 24 hours, 72 hours, first deposit, hold, locked, why can't i withdraw
 related: add-money-to-your-wallet, withdrawal-limits, your-wallet-explained, who-holds-your-money, payment-scams
 ---
@@ -14,7 +14,7 @@ Nigeria, where wallets can hold money. The app doesn't have an **Add money** but
 - **24 hours** after each deposit.
 - **72 hours** after your very first deposit.
 
-During the hold you can still **spend** the money on Zudomart, for example on an order. When you spend, money still on hold is used first. You just can't **withdraw** it to a bank until the hold ends. After that it becomes available on its own. You don't need to do anything.
+During the hold you can still **spend** the money on Nantty, for example on an order. When you spend, money still on hold is used first. You just can't **withdraw** it to a bank until the hold ends. After that it becomes available on its own. You don't need to do anything.
 
 ## Why we hold deposits
 

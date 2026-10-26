@@ -18,7 +18,7 @@ Stories are created in the mobile app.
 
 Each story is one photo or one video. To share several, post several stories.
 
-On the web (app.zudomart.com) you can watch stories, but the page says "Story creation with camera upload is available in the mobile app."
+On the web (app.nantty.com) you can watch stories, but the page says "Story creation with camera upload is available in the mobile app."
 
 ## Watch stories
 

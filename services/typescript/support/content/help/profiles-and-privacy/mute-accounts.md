@@ -1,11 +1,11 @@
 ---
 title: Muting accounts and quieter alternatives
-summary: Zudomart doesn't have an account mute yet. Here's how to see less of someone without blocking them, using unfollow, Not interested, post notifications and chat mute.
+summary: Nantty doesn't have an account mute yet. Here's how to see less of someone without blocking them, using unfollow, Not interested, post notifications and chat mute.
 tags: mute, mute account, see less, hide posts, quiet, silence, unfollow quietly, mute chat, stop notifications
 related: blocking-people, unfollow-and-follow-bell, post-menu, chat-passcode-and-notifications, how-your-feed-works, privacy-settings
 ---
 
-Sometimes you want to see less of someone without blocking them. Zudomart doesn't have a single **Mute** button for accounts yet, but you can get the same result with the tools below. None of them tell the other person.
+Sometimes you want to see less of someone without blocking them. Nantty doesn't have a single **Mute** button for accounts yet, but you can get the same result with the tools below. None of them tell the other person.
 
 ## See less of their posts
 

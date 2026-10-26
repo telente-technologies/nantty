@@ -1,6 +1,6 @@
 ---
-title: Marketing emails from Zudomart
-summary: Choose whether Zudomart emails you picks, price drops and digests, how often, and how to unsubscribe. Security and legal emails always arrive.
+title: Marketing emails from Nantty
+summary: Choose whether Nantty emails you picks, price drops and digests, how often, and how to unsubscribe. Security and legal emails always arrive.
 tags: marketing emails, unsubscribe, stop emails, newsletter, promotions, spam, too many emails, email preferences
 related: notification-settings, terms-privacy-and-cookies, business-profiles, promotions-and-discounts, not-getting-emails
 ---
@@ -25,7 +25,7 @@ In the app:
 2. Under **Your choices**, turn **Marketing messages** on or off: "Personalised picks from verified sellers, price drops, back in stock, weekly digest."
 3. Under **How often should we email you?** pick **Weekly**, **Only important** or **Off**.
 
-On the web (app.zudomart.com), the same **Marketing messages** choice is in your privacy settings.
+On the web (app.nantty.com), the same **Marketing messages** choice is in your privacy settings.
 
 ## Unsubscribe from an email
 
@@ -36,7 +36,7 @@ Every marketing email has **Unsubscribe** and **Email preferences** links at the
 - We send at most 3 marketing emails in 7 days, or 1 a week if you chose **Weekly**.
 - **Only important** and **Off** stop marketing emails completely.
 - If you mark one of our emails as spam, we stop sending you marketing emails.
-- Sellers on Zudomart can't email you marketing from their stores. They reach buyers through discounts, flash sales and ads inside Zudomart instead. See [Promotions and discounts](/help/selling/promotions-and-discounts).
+- Sellers on Nantty can't email you marketing from their stores. They reach buyers through discounts, flash sales and ads inside Nantty instead. See [Promotions and discounts](/help/selling/promotions-and-discounts).
 
 ## If something goes wrong
 
@@ -45,4 +45,4 @@ Every marketing email has **Unsubscribe** and **Email preferences** links at the
 
 ## Stay safe
 
-Our emails only come from zudomart.com or mail.zudomart.com addresses. We never ask for your password, card PIN or codes by email. If an email looks like us but asks for those, it isn't us. See [Report a scam](/help/safety-and-reporting/report-a-scam).
+Our emails only come from nantty.com or mail.nantty.com addresses. We never ask for your password, card PIN or codes by email. If an email looks like us but asks for those, it isn't us. See [Report a scam](/help/safety-and-reporting/report-a-scam).

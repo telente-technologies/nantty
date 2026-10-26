@@ -5,7 +5,7 @@ tags: escrow, protection, safe payment, buyer protection, is it safe, scam, mone
 related: escrow-or-direct-payment, confirm-delivery, disputes-and-refunds, buying-from-unverified-stores, who-holds-your-money, order-statuses
 ---
 
-Escrow means the seller doesn't get your money until you have your order. Zudomart never holds your money: it stays locked in your own wallet with our licensed payment partner.
+Escrow means the seller doesn't get your money until you have your order. Nantty never holds your money: it stays locked in your own wallet with our licensed payment partner.
 
 ## Who this is for
 
@@ -28,4 +28,4 @@ Buyers in Nigeria. Escrow isn't available outside Nigeria. See [Buying outside N
 
 ## Stay safe
 
-Escrow only protects payments made through Zudomart checkout. If a seller asks you to pay outside the app, you lose that protection. Never confirm delivery before you have checked the item.
+Escrow only protects payments made through Nantty checkout. If a seller asks you to pay outside the app, you lose that protection. Never confirm delivery before you have checked the item.

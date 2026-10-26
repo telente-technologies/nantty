@@ -7,7 +7,7 @@ related: clips-for-you-and-following, clip-player-controls, landscape-videos, cr
 
 ## What's the difference between For You and Following?
 
-**For You** picks clips from all of Zudomart. **Following** shows only people you follow. See [For You and Following](/help/clips-and-stories/clips-for-you-and-following).
+**For You** picks clips from all of Nantty. **Following** shows only people you follow. See [For You and Following](/help/clips-and-stories/clips-for-you-and-following).
 
 ## How do I skip forward or back?
 

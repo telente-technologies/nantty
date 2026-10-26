@@ -1,7 +1,7 @@
 ---
 title: Ads Manager campaigns
-summary: Use Ads Manager at ads.zudomart.com for full campaigns with objectives, audiences, placements, budgets, formats, tests and reports.
-tags: ads manager, campaign, budget, targeting, advertise, ad account, zudomart ads, run ads, store promotion, promote store, promote profile, followers campaign
+summary: Use Ads Manager at ads.nantty.com for full campaigns with objectives, audiences, placements, budgets, formats, tests and reports.
+tags: ads manager, campaign, budget, targeting, advertise, ad account, nantty ads, run ads, store promotion, promote store, promote profile, followers campaign
 related: who-can-advertise, boost-a-post, ad-review-and-policies, ad-results, fund-ads-from-earnings, ads-faq
 ---
 
@@ -13,9 +13,9 @@ Verified users only. You need payout verification to create an ad account, add f
 
 ## Get started
 
-1. Go to **ads.zudomart.com** and sign in with your Zudomart account.
-2. Create an ad account. Personal and business accounts are available; business accounts can link a Zudomart store.
-3. Open **Billing** and tap **Add funds**, or **Pay from my Zudomart balance**. See [Fund ads from your earnings](/help/ads-and-boosts/fund-ads-from-earnings).
+1. Go to **ads.nantty.com** and sign in with your Nantty account.
+2. Create an ad account. Personal and business accounts are available; business accounts can link a Nantty store.
+3. Open **Billing** and tap **Add funds**, or **Pay from my Nantty balance**. See [Fund ads from your earnings](/help/ads-and-boosts/fund-ads-from-earnings).
 
 ## Build a campaign
 
@@ -53,7 +53,7 @@ Ads are always labelled **Sponsored**. They appear in lives only when the creato
 
 ## If something goes wrong
 
-- **"Verify your payout details to use Zudomart Ads. Your verification keeps advertisers and creators safe."** Finish verification first.
+- **"Verify your payout details to use Nantty Ads. Your verification keeps advertisers and creators safe."** Finish verification first.
 - **"Add funds to your ad account to run this campaign."** Top up your balance.
 - **"This ad account is not active."** Contact support.
 - **"Upload a JPG, PNG, WebP, AVIF, MP4 or MOV file."** Change the file format.

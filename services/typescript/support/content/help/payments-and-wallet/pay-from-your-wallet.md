@@ -1,11 +1,11 @@
 ---
 title: Paying from your wallet
-summary: In Nigeria you can pay for an order from your Zudomart wallet when your spendable balance covers the full total. The money stays locked in escrow until you confirm delivery.
+summary: In Nigeria you can pay for an order from your Nantty wallet when your spendable balance covers the full total. The money stays locked in escrow until you confirm delivery.
 tags: pay with wallet, wallet balance, use my balance, pay from balance, checkout, spend earnings, wallet payment
 related: payment-limits, add-money-to-your-wallet, payment-methods, your-wallet-explained, saved-cards, who-holds-your-money, payments-faq
 ---
 
-In Nigeria your wallet is held in your own name by our licensed payment partner. Zudomart never holds your money. This page explains what you can and can't do with your wallet balance today.
+In Nigeria your wallet is held in your own name by our licensed payment partner. Nantty never holds your money. This page explains what you can and can't do with your wallet balance today.
 
 ## Who this is for
 
@@ -50,4 +50,4 @@ These rules apply whenever wallet money is spent:
 
 ## Stay safe
 
-Never pay a seller outside Zudomart to "use your balance" or "skip fees". Only Zudomart checkout keeps your escrow protection. See [Payment scams](/help/wallet-security/payment-scams).
+Never pay a seller outside Nantty to "use your balance" or "skip fees". Only Nantty checkout keeps your escrow protection. See [Payment scams](/help/wallet-security/payment-scams).

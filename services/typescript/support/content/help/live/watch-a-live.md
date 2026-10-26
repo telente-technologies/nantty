@@ -5,7 +5,7 @@ tags: watch live, join live, livestream, live now, live chat, comment on live, h
 related: gifts-and-coins-on-live, zudopoints, supporters-leaderboard, live-rankings, browsing-as-a-guest, live-faq
 ---
 
-Anyone can watch public lives on Zudomart, in the app or on the web at **app.zudomart.com**.
+Anyone can watch public lives on Nantty, in the app or on the web at **app.nantty.com**.
 
 ## Find a live
 
@@ -23,7 +23,7 @@ Anyone can watch public lives on Zudomart, in the app or on the web at **app.zud
 - **Share**: open the live's options and choose **Send in chat**, **Share with people** or **Copy link**.
 - **Join the stage**: if the host invites you, tap **Join stage**. See [Guests and battles](/help/live/live-guests-and-battles).
 
-Watching, liking, sharing, following and gifting all earn you ZudoPoints on that live. See [ZudoPoints](/help/live/zudopoints).
+Watching, liking, sharing, following and gifting all earn you Nantty Points on that live. See [Nantty Points](/help/live/zudopoints).
 
 ## Leave a live
 
@@ -38,6 +38,6 @@ Tap **Leave live**. When a live ends you'll see an ended screen with **View prof
 
 - **"Couldn't join this live. Try again."** Check your connection and try again.
 - **"This live has ended."** or **"This live is not active."** The host has finished.
-- **"You can't join this live."** The host or Zudomart has restricted access.
+- **"You can't join this live."** The host or Nantty has restricted access.
 - **"You were removed from this live."** The host or a moderator removed you.
 - Video stuck? Leave and rejoin, or switch between Wi-Fi and mobile data.

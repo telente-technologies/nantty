@@ -20,13 +20,13 @@ Saving is a private way to keep something for later, whether it's a recipe clip,
 2. The bookmark fills in to show it's saved.
 3. Tap it again to remove it from Saved.
 
-If you're browsing as a guest, Zudomart asks you to sign in first and then saves the item.
+If you're browsing as a guest, Nantty asks you to sign in first and then saves the item.
 
 ## Find your saved items
 
 **On the app:** go to your profile, tap the three-dot menu (**More**) at the top and choose **Saved**.
 
-**On the web (app.zudomart.com):** open your profile and tap the **Saved items** icon.
+**On the web (app.nantty.com):** open your profile and tap the **Saved items** icon.
 
 The **Saved** screen has filters along the top: **All**, **Posts**, **Videos**, **Clips**, **Products** and **Replies**. Tap any item to open it. Pull down to refresh.
 

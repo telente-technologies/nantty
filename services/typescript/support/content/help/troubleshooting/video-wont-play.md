@@ -9,7 +9,7 @@ Video needs a steady connection. Most playback problems are fixed by checking yo
 
 ## Who this is for
 
-Anyone watching posts, clips, stories or lives in the app or on **app.zudomart.com**.
+Anyone watching posts, clips, stories or lives in the app or on **app.nantty.com**.
 
 ## No sound
 
@@ -47,7 +47,7 @@ Anyone watching posts, clips, stories or lives in the app or on **app.zudomart.c
 ## On the web
 
 - Use an up-to-date Chrome, Safari, Edge or Firefox.
-- Allow sound for **app.zudomart.com** if your browser blocked autoplay sound, then click the video.
+- Allow sound for **app.nantty.com** if your browser blocked autoplay sound, then click the video.
 - Turn off extensions that block media.
 
 ## If it still doesn't work

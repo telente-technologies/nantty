@@ -19,7 +19,7 @@ Buyers who paid with escrow in Nigeria. For direct payments and orders outside N
 4. Add photos. They are required for damaged, wrong or not-as-described items. You can add up to 5.
 5. Tap **Submit dispute**.
 
-The app tells you: "The seller can't receive the money until the dispute is resolved. They have 48 hours to respond, then Zudomart support steps in."
+The app tells you: "The seller can't receive the money until the dispute is resolved. They have 48 hours to respond, then Nantty support steps in."
 
 ## What happens next
 
@@ -42,8 +42,8 @@ The app tells you: "The seller can't receive the money until the dispute is reso
 
 ## Direct payments and orders outside Nigeria
 
-Escrow and buyer protection are only in Nigeria. With **Pay directly**, and everywhere outside Nigeria, the seller is paid right away and you buy at your own risk. For a refund, contact the seller or support from the order. We can ask the seller to refund you, restrict or close their store, and pass the case to our payment partner, but we can't reverse a payment or guarantee a refund. See [Buying outside Nigeria](/help/buying-and-orders/buying-outside-nigeria) and our Terms on zudomart.com/terms.
+Escrow and buyer protection are only in Nigeria. With **Pay directly**, and everywhere outside Nigeria, the seller is paid right away and you buy at your own risk. For a refund, contact the seller or support from the order. We can ask the seller to refund you, restrict or close their store, and pass the case to our payment partner, but we can't reverse a payment or guarantee a refund. See [Buying outside Nigeria](/help/buying-and-orders/buying-outside-nigeria) and our Terms on nantty.com/terms.
 
 ## Stay safe
 
-Keep all chat and payment inside Zudomart. Never agree to "cancel the dispute and I'll pay you back outside the app".
+Keep all chat and payment inside Nantty. Never agree to "cancel the dispute and I'll pay you back outside the app".

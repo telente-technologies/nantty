@@ -7,7 +7,7 @@ related: your-data-rights, privacy-settings, download-your-data, delete-your-acc
 
 Read our policies on the website. Each is version 1.0, a draft that isn't in effect yet, and shows the date it is planned to take effect. After launch, earlier versions stay available on each page:
 
-- **Terms of Service**: the main rules for using Zudomart
+- **Terms of Service**: the main rules for using Nantty
 - **Privacy Policy**: what data we collect, why, who we share it with and how long we keep it, with annexes for Ghana, Kenya, South Africa, the UK, the EU and the US
 - **Cookie Policy**: the cookies and storage we use and how to control them
 - **Community Guidelines**: what's allowed, the prohibited items list and how we enforce
@@ -18,11 +18,11 @@ Read our policies on the website. Each is version 1.0, a draft that isn't in eff
 
 ## Key points
 
-- **Zudomart never holds your money.** Your wallet is held by our licensed payment partner in your name. We only instruct transfers and take our fees.
+- **Nantty never holds your money.** Your wallet is held by our licensed payment partner in your name. We only instruct transfers and take our fees.
 - **Escrow is Nigeria only.** Outside Nigeria you pay sellers directly, at your own risk. We can act against the seller and escalate to our payment partner, but we can't reverse payments.
 - **Nigerian law applies.** Disputes go first to our support team, then mediation if you both agree, then arbitration seated in Lagos. Small claims courts and regulators such as the FCCPC and the Nigeria Data Protection Commission stay open to you, and consumers abroad keep their local rights.
 - **Your consumer rights are not affected.** Sellers must accept returns of goods that are defective or not as described.
-- **Coins aren't money.** Gifts and tips are final once sent. ZudoPoints can never be withdrawn, and ad credit is never cash.
+- **Coins aren't money.** Gifts and tips are final once sent. Nantty Points can never be withdrawn, and ad credit is never cash.
 - **Sellers pay the fees.** There's no commission on products. Sellers pay the escrow fee and processing fee; buyers never pay a checkout or escrow fee.
 - **We never sell your personal data,** and we can't read your end-to-end encrypted chats.
 

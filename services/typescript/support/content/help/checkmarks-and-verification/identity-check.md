@@ -1,6 +1,6 @@
 ---
 title: The selfie and ID check
-summary: How the identity check works: a short selfie video and a photo of your government ID, checked by our identity partner. Zudomart keeps only the result.
+summary: How the identity check works: a short selfie video and a photo of your government ID, checked by our identity partner. Nantty keeps only the result.
 tags: identity check, selfie, id check, face match, liveness, nin, verify identity, kyc, smile id
 related: verification-levels, blue-checkmark, gold-checkmark, checkmark-rejected, verification-faq
 ---
@@ -32,7 +32,7 @@ Where available we also confirm your ID number with the government database, for
 
 ## Your privacy
 
-Zudomart keeps only the result, your ID type, country and the verification date. We never store your face data or keep your selfie or ID images. Biometric data is sensitive personal data; you can withdraw consent before the check by closing the screen.
+Nantty keeps only the result, your ID type, country and the verification date. We never store your face data or keep your selfie or ID images. Biometric data is sensitive personal data; you can withdraw consent before the check by closing the screen.
 
 ## Good to know
 

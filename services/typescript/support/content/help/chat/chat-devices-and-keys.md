@@ -5,11 +5,11 @@ tags: new phone, devices, keys, chat history, lost messages, reinstall, web chat
 related: end-to-end-encryption, chat-media-and-encryption, active-sessions, chat-passcode-and-notifications, chat-faq
 ---
 
-Because chats are end-to-end encrypted, the keys that unlock your messages live on your devices, not on Zudomart's servers. That keeps your chats private, but it also changes what happens when you get a new phone.
+Because chats are end-to-end encrypted, the keys that unlock your messages live on your devices, not on Nantty's servers. That keeps your chats private, but it also changes what happens when you get a new phone.
 
 ## Each device has its own keys
 
-- When you sign in on a phone or on the web (app.zudomart.com), that device creates its own encryption keys and joins secure chat.
+- When you sign in on a phone or on the web (app.nantty.com), that device creates its own encryption keys and joins secure chat.
 - New messages are encrypted separately for each of your devices and each of the other person's devices.
 - You can use secure chat on up to 5 devices at once.
 - When you sign out on a device, it leaves secure chat and its keys are removed from our key directory.
@@ -28,7 +28,7 @@ Your contacts will see a "security code changed" notice after you reinstall or a
 
 ## Chat on the web
 
-The web app at **app.zudomart.com** supports chat. It counts as one of your 5 devices and keeps its keys in that browser. If you clear your browser data, it joins as a new device next time.
+The web app at **app.nantty.com** supports chat. It counts as one of your 5 devices and keeps its keys in that browser. If you clear your browser data, it joins as a new device next time.
 
 ## Messages that won't open
 
@@ -40,7 +40,7 @@ The web app at **app.zudomart.com** supports chat. It counts as one of your 5 de
 
 - **"Secure chat works on up to 5 devices. Sign out on another device first."** Sign out of an old phone or browser. You can see and end sessions in [Active sessions](/help/account-and-login/active-sessions).
 - **"Secure chat isn't set up on this device yet. Try again in a moment."**
-- **"They haven't set up secure chat yet. Ask them to open Zudomart, then try again."**
+- **"They haven't set up secure chat yet. Ask them to open Nantty, then try again."**
 - **"This group has too many devices for one encrypted message."** The group's members have too many devices between them. Try again later, or start a smaller group.
 
 ## Stay safe

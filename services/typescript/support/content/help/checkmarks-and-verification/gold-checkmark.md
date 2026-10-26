@@ -15,7 +15,7 @@ Business and brand profiles. Personal and creator profiles get Blue instead. To 
 
 - **Gold Pro** (seller plan): Gold badge, seller dashboard access, verified store label, 3 staff seats, 1 store location and bulk catalogue import.
 - **Gold Business** (seller plan): everything in Gold Pro plus a dedicated account manager, a lower escrow fee, 15 staff seats and 10 store locations.
-- **Gold** (no selling): Gold badge and verified store label for brands that don't sell on Zudomart.
+- **Gold** (no selling): Gold badge and verified store label for brands that don't sell on Nantty.
 
 Gold plans are bought on the web. See [Checkmark and plan prices by country](/help/checkmarks-and-verification/checkmark-prices) and [Seller plans](/help/selling/seller-plans).
 

@@ -1,11 +1,11 @@
 ---
-title: Using Zudomart with a screen reader
-summary: Tips for using Zudomart with VoiceOver, TalkBack and web screen readers, including actions on posts, comments and the video seek bar.
+title: Using Nantty with a screen reader
+summary: Tips for using Nantty with VoiceOver, TalkBack and web screen readers, including actions on posts, comments and the video seek bar.
 tags: screen reader, voiceover, talkback, blind, visually impaired, nvda, jaws, accessibility actions, rotor
 related: accessibility-overview, captions-and-alt-text, reduce-motion, text-size-and-display, accessibility-faq
 ---
 
-Zudomart works with VoiceOver on iPhone, TalkBack on Android and screen readers on the web. Most buttons, tabs, menus and media controls have spoken names and hints.
+Nantty works with VoiceOver on iPhone, TalkBack on Android and screen readers on the web. Most buttons, tabs, menus and media controls have spoken names and hints.
 
 ## Who this is for
 
@@ -15,7 +15,7 @@ Blind and low-vision users, and anyone who uses a screen reader.
 
 - **iPhone**: **Settings > Accessibility > VoiceOver**.
 - **Android**: **Settings > Accessibility > TalkBack** (the path differs slightly by phone).
-- **Computer**: use your usual screen reader with **app.zudomart.com**.
+- **Computer**: use your usual screen reader with **app.nantty.com**.
 
 ## Posts and comments
 

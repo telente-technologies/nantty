@@ -28,14 +28,14 @@ Open the chat menu > **Conversation info** to set disappearing messages to **Off
 - **Text, photos and videos.**
 - **Voice notes** from 1 second to 5 minutes.
 - **Documents** up to 100 MB: PDF, Office files, text, zip or images.
-- **Location**: tap **Share location**, then **Send current location**, or share your live location for **15 minutes**, **1 hour** or **8 hours**. "Your location is shared only with this chat." Locations are not end-to-end encrypted, so Zudomart's servers can see them. Only share with people you trust.
+- **Location**: tap **Share location**, then **Send current location**, or share your live location for **15 minutes**, **1 hour** or **8 hours**. "Your location is shared only with this chat." Locations are not end-to-end encrypted, so Nantty's servers can see them. Only share with people you trust.
 - **Polls**: **Create poll** with 2 to 6 options, and turn on **Allow multiple answers** if you like, then **Send poll**. Polls are not end-to-end encrypted either.
 - **Reactions**: press and hold a message to open **React to message** and pick an emoji.
 - **Posts, products, stores, profiles and lives** using **Send in chat**. See [Share to chat](/help/chat/share-to-chat).
 
 ## Link previews
 
-Previews of outside links are created on the sender's phone and travel encrypted with the message. Shortened or unusual links show a warning before they open. Links to Zudomart content show a card that respects the content's privacy.
+Previews of outside links are created on the sender's phone and travel encrypted with the message. Shortened or unusual links show a warning before they open. Links to Nantty content show a card that respects the content's privacy.
 
 ## Good to know
 

@@ -11,14 +11,14 @@ You don't need a separate chat tool. Every support request is a conversation you
 
 1. Send a request from **Settings > Support > Contact support**.
 2. Open it from **My support requests**.
-3. When an agent picks it up, their replies appear as they send them. You'll see **Zudomart Support is typing…** while they write.
+3. When an agent picks it up, their replies appear as they send them. You'll see **Nantty Support is typing…** while they write.
 4. Reply in the box at the bottom. Add screenshots if they help.
 
 If you leave the screen, you'll get a notification and an email when the agent replies, so you can carry on later.
 
 ## Recording and privacy
 
-A notice in the chat reminds you: this chat is not end-to-end encrypted. It is recorded and reviewed for quality and safety. That's different from your private chats with other people, which Zudomart can't read. See [End-to-end encryption](/help/chat/end-to-end-encryption).
+A notice in the chat reminds you: this chat is not end-to-end encrypted. It is recorded and reviewed for quality and safety. That's different from your private chats with other people, which Nantty can't read. See [End-to-end encryption](/help/chat/end-to-end-encryption).
 
 ## When the chat ends
 

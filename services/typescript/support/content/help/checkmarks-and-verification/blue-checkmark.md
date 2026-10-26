@@ -13,7 +13,7 @@ Personal profiles, including creators. Business and brand profiles get Gold inst
 
 ## How to get Blue
 
-1. Go to **Profile > More (top right) > Get verified**. On the web: **app.zudomart.com > Settings > Verification**.
+1. Go to **Profile > More (top right) > Get verified**. On the web: **app.nantty.com > Settings > Verification**.
 2. Under **Blue: people**, compare the plans and tap **Get the blue badge**.
 3. If you qualify you'll see **You qualify** and a **Buy now** button. If not, tap **Request verification** and check the **What helps** list.
 4. Pay for **Blue Verified** or **Blue Premium**. You'll see **Payment received**.

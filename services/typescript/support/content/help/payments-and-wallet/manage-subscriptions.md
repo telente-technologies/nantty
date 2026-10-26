@@ -21,7 +21,7 @@ Open your profile menu, tap **Verification**, then **Cancel subscription**. Your
 
 ## Seller plans and Gold
 
-Seller Pro, Seller Business and Gold-only plans are managed on the web at **dashboard.zudomart.com**. See [Seller plans](/help/selling/seller-plans).
+Seller Pro, Seller Business and Gold-only plans are managed on the web at **dashboard.nantty.com**. See [Seller plans](/help/selling/seller-plans).
 
 ## Renewals
 

@@ -27,7 +27,7 @@ In a group chat, type **@all** to notify every member. Group admins can turn on 
 
 Go to **Settings > Privacy > Who can mention me**:
 
-- **Everyone**: "Anyone on Zudomart can mention you in posts, comments and groups you are in."
+- **Everyone**: "Anyone on Nantty can mention you in posts, comments and groups you are in."
 - **People I follow**: "Only people you follow can mention you. Other mentions show as plain text and you are not notified."
 - **No one**: "Mentions of you show as plain text and you are never notified."
 

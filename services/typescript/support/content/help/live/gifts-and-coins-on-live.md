@@ -1,6 +1,6 @@
 ---
 title: Sending gifts on a live
-summary: Send gifts with coins to support streamers. Gifts are final, appear on screen for everyone and earn you ZudoPoints.
+summary: Send gifts with coins to support streamers. Gifts are final, appear on screen for everyone and earn you Nantty Points.
 tags: gifts, coins, send gift, combo, support streamer, recharge coins, tip host
 related: buy-coins, zudopoints, supporters-leaderboard, live-goals, creator-earnings, live-guests-and-battles
 ---
@@ -26,13 +26,13 @@ When several people are on stage, tap a streamer's tile to gift them. If a guest
 
 - It plays on screen for everyone.
 - It adds to the streamer's gift goal, if one is running. See [Gift goals](/help/live/live-goals).
-- You earn 1 ZudoPoint per coin, which ranks you on the live's **Top supporters**. See [ZudoPoints](/help/live/zudopoints).
+- You earn 1 Nantty Point per coin, which ranks you on the live's **Top supporters**. See [Nantty Points](/help/live/zudopoints).
 - The streamer earns a share of the coins. See [How creators earn](/help/creators-and-earnings/creator-earnings).
 
 ## Good to know
 
 - Gifts are final. Coins spent on gifts can't be refunded.
-- Coins are not cash, and ZudoPoints are never money.
+- Coins are not cash, and Nantty Points are never money.
 - Streamers can turn gifts off for a live.
 - You need to sign in to send gifts. Guests can watch without an account.
 
@@ -46,4 +46,4 @@ When several people are on stage, tap a streamer's tile to gift them. If a guest
 
 ## Stay safe
 
-Nobody from Zudomart will ask you to send gifts to "verify" your account or win a prize. Report anyone who does.
+Nobody from Nantty will ask you to send gifts to "verify" your account or win a prize. Report anyone who does.

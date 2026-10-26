@@ -29,4 +29,4 @@ Security alerts tell you about important changes to your account so you can reac
 
 ## Stay safe
 
-Our security emails come from addresses ending in **mail.zudomart.com** and never ask you to reply with a code or password. If an "alert" asks you to log in through a link to another website, it's fake. Open the Zudomart app directly instead.
+Our security emails come from addresses ending in **mail.nantty.com** and never ask you to reply with a code or password. If an "alert" asks you to log in through a link to another website, it's fake. Open the Nantty app directly instead.

@@ -14,7 +14,7 @@ Chat settings let you add an extra lock to your messages and control how loudly 
 3. Turn on **Unlock with biometrics** to use Face ID or your fingerprint, if your phone supports it.
 4. Choose **Auto-lock**: **Immediately**, **After 1 min**, **After 5 min**, **After 15 min** or **After 1 hour**.
 
-"The passcode locks your chats on this device only. It is never sent to Zudomart. If you forget it, you'll need to log in again to reset it."
+"The passcode locks your chats on this device only. It is never sent to Nantty. If you forget it, you'll need to log in again to reset it."
 
 When your chats are locked you'll see **Chats are locked**. Enter your passcode or tap **Use biometrics**. Use **Change passcode** or **Remove passcode** to update it later.
 

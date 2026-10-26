@@ -11,7 +11,7 @@ Your privacy choices are spread across three screens: **Settings > Privacy**, **
 
 - **Profile visibility**: **Public** or **Private**. See [Private accounts](/help/profiles-and-privacy/private-account).
 - **Who can mention me**: **Everyone**, **People I follow** or **No one**. See [Mentions](/help/posts-and-feed/mentions).
-- **Allow downloads**: "People can save your photos and clips. Saved copies carry the Zudomart logo and your username. Private, subscriber-only posts and stories are never downloadable."
+- **Allow downloads**: "People can save your photos and clips. Saved copies carry the Nantty logo and your username. Private, subscriber-only posts and stories are never downloadable."
 - **Content preferences**: sensitive content warnings. See [Sensitive content](/help/posts-and-feed/sensitive-content-and-age).
 
 ## Settings > Privacy & Data
@@ -19,7 +19,7 @@ Your privacy choices are spread across three screens: **Settings > Privacy**, **
 - **Personal information** and **Private profile** shortcuts.
 - **Personalization**: "Use what you view, search and buy to tailor your feed and recommendations." Off still gives you a feed, just less tailored.
 - **Personalized ads**: "Show ads based on your activity. Turning this off still shows ads, just less relevant."
-- **Analytics**: "Share anonymous usage data so we can fix problems and improve Zudomart."
+- **Analytics**: "Share anonymous usage data so we can fix problems and improve Nantty."
 - **Marketing messages**: "Personalised picks from verified sellers, price drops, back in stock, weekly digest."
 - Links to the **Privacy Policy**, **Cookie Policy**, **Terms of Service** and **Data rights requests**.
 - **Delete my account**. See [Delete your account](/help/legal-and-data/delete-your-account).

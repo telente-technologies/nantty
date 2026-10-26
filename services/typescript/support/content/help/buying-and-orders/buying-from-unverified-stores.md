@@ -14,7 +14,7 @@ Buyers in Nigeria. Outside Nigeria, sellers can't sell at all until they are ver
 ## How to tell if a store is verified
 
 - Verified stores show the **Gold** checkmark, labelled **Verified business**.
-- Stores that aren't verified have no badge. At checkout they show **Protected by Zudomart Escrow**, and a brand-new store shows **New store** instead of a rating.
+- Stores that aren't verified have no badge. At checkout they show **Protected by Nantty Escrow**, and a brand-new store shows **New store** instead of a rating.
 
 ## What's different when you buy
 
@@ -35,4 +35,4 @@ Buyers in Nigeria. Outside Nigeria, sellers can't sell at all until they are ver
 
 ## Stay safe
 
-Never agree to pay an unverified store outside Zudomart "to skip the limit". That removes your escrow protection. Report the store instead.
+Never agree to pay an unverified store outside Nantty "to skip the limit". That removes your escrow protection. Report the store instead.

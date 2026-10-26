@@ -14,7 +14,7 @@ Approved sellers. Outside Nigeria you must be identity-verified before you can p
 ## How to add a product
 
 In the app: open your profile menu, tap **Seller dashboard**, then **Add product**.
-On the web: in **dashboard.zudomart.com** go to **Products** and choose **New product**.
+On the web: in **dashboard.nantty.com** go to **Products** and choose **New product**.
 
 1. Add a name (2 to 120 characters) and a description (up to 5,000 characters).
 2. Add **Photos**: "Up to 10 JPEG, PNG, WebP or AVIF photos, 10 MB each." You can also add up to 3 videos.

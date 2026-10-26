@@ -33,7 +33,7 @@ You don't need a code. When you check out with items from that store, your credi
 - Credit only works at the store that gave it.
 - If an order that earned credit is refunded, that credit is taken back.
 - If you used credit on an order that is fully refunded, the credit you used is given back for 180 days.
-- Zudomart doesn't run a platform-wide cashback scheme. Rewards come from individual stores.
+- Nantty doesn't run a platform-wide cashback scheme. Rewards come from individual stores.
 
 ## If something goes wrong
 

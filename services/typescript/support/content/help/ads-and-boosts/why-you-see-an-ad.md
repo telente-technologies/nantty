@@ -5,7 +5,7 @@ tags: why am I seeing this ad, personalised ads, personalized ads, ad preference
 related: ads-by-plan, ads-in-comments, boosted-vs-sponsored, how-your-feed-works, privacy-settings, terms-privacy-and-cookies, ads-faq
 ---
 
-Ads help keep Zudomart free and pay creators. Here's how we decide which ones you see, and how to control them.
+Ads help keep Nantty free and pay creators. Here's how we decide which ones you see, and how to control them.
 
 ## How ads are chosen
 
@@ -19,7 +19,7 @@ There are limits on how often one person sees the same ad. Checkmark plans see f
 
 ## What can be used
 
-If **Personalized ads** is on, ads can be based on your activity on Zudomart, such as what you view, follow, search for and buy. Advertisers can also target broad groups such as location and age.
+If **Personalized ads** is on, ads can be based on your activity on Nantty, such as what you view, follow, search for and buy. Advertisers can also target broad groups such as location and age.
 
 Advertisers can't target you by private traits. Ads that imply they know your health, finances, religion or similar are not allowed.
 

@@ -17,9 +17,9 @@ In the app go to **Settings** and tap **Log out** at the bottom, then confirm **
 
 ## See and end sessions (sellers)
 
-1. Sign in at **dashboard.zudomart.com**.
+1. Sign in at **dashboard.nantty.com**.
 2. Go to **Settings > Security**.
-3. **Where you are signed in** lists your dashboard and Zudomart app sessions with device, location and when each was last active. Your current one is marked **This device**.
+3. **Where you are signed in** lists your dashboard and Nantty app sessions with device, location and when each was last active. Your current one is marked **This device**.
 4. Tap **Sign out** next to a session, or **Sign out all others** to end every session except this one.
 
 The same page shows **Recent sign-ins**, including blocked attempts and wrong passwords.

@@ -27,7 +27,7 @@ Upload your CAC certificate, a government ID and proof of address, then be on a 
 
 ## How much is Gold for a business that doesn't sell?
 
-The Gold-only plan is ₦3,000 a month in Nigeria, paid on the web. It is "For brands and businesses that do not sell on Zudomart." Yearly billing is 20% cheaper. See [Checkmark prices](/help/checkmarks-and-verification/checkmark-prices).
+The Gold-only plan is ₦3,000 a month in Nigeria, paid on the web. It is "For brands and businesses that do not sell on Nantty." Yearly billing is 20% cheaper. See [Checkmark prices](/help/checkmarks-and-verification/checkmark-prices).
 
 ## What is an Official Store?
 
@@ -35,7 +35,7 @@ The brand's own store, approved by our brand team. Only registered brands sellin
 
 ## Someone is selling fakes of my brand. What do I do?
 
-Report the listing from its menu, or file a claim from the brand tools in the seller dashboard on **dashboard.zudomart.com**. See [Report a scam](/help/safety-and-reporting/report-a-scam).
+Report the listing from its menu, or file a claim from the brand tools in the seller dashboard on **dashboard.nantty.com**. See [Report a scam](/help/safety-and-reporting/report-a-scam).
 
 ## Who can have a government account?
 
@@ -45,11 +45,11 @@ Only official public bodies. They go through deep vetting, two separate approval
 
 Switching profiles is done in the mobile app. Long-press the **Me** tab, pick the business profile, then post.
 
-## Can I email my store's customers from Zudomart?
+## Can I email my store's customers from Nantty?
 
-No. Sellers can't send marketing emails through Zudomart. Use discount codes, flash sales, store rewards and ads instead. See [Promotions and discounts](/help/selling/promotions-and-discounts).
+No. Sellers can't send marketing emails through Nantty. Use discount codes, flash sales, store rewards and ads instead. See [Promotions and discounts](/help/selling/promotions-and-discounts).
 
-## How do I stop Zudomart marketing emails?
+## How do I stop Nantty marketing emails?
 
 Tap **Unsubscribe** in any marketing email, or turn off **Marketing messages** in **Settings > Privacy & Data**. See [Marketing emails](/help/business-and-brands/marketing-emails).
 

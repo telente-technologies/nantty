@@ -1,6 +1,6 @@
 ---
 title: Converting earned coins to cash
-summary: Turn the coins you earn from gifts and tips into money in your Zudomart wallet, then withdraw it to your bank.
+summary: Turn the coins you earn from gifts and tips into money in your Nantty wallet, then withdraw it to your bank.
 tags: convert coins, earned coins, gift coins to cash, cash out coins, coins to naira, collect my money
 related: creator-earnings, creator-earnings-holds, withdrawals, payout-setup, gifts-and-coins-on-live, buy-coins
 ---
@@ -47,4 +47,4 @@ Converted money joins your **Creator earnings** line in your wallet and moves to
 
 ## Stay safe
 
-Zudomart will never ask you to send coins or money to "unlock" a conversion. Nobody from Zudomart will ask for your password or one-time codes.
+Nantty will never ask you to send coins or money to "unlock" a conversion. Nobody from Nantty will ask for your password or one-time codes.

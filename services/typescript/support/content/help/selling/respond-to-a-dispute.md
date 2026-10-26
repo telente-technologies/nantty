@@ -16,14 +16,14 @@ Sellers in Nigeria with escrow orders. Direct-payment orders have no dispute but
 - You get a notification and the order shows the dispute.
 - The money stays frozen: "This order is under dispute; its funds stay frozen until the dispute is resolved."
 - The buyer chose a reason (not received, not as described, damaged, wrong item or something else) and added a description and photos.
-- You have **48 hours** to respond. Then Zudomart support steps in.
+- You have **48 hours** to respond. Then Nantty support steps in.
 
 ## How to respond
 
 On the web:
-1. At **dashboard.zudomart.com** open **Orders** and the dispute (**Dispute on** the order). You'll see **Amount on hold** and when to **Reply**.
+1. At **dashboard.nantty.com** open **Orders** and the dispute (**Dispute on** the order). You'll see **Amount on hold** and when to **Reply**.
 2. In **Your response**, "Describe what was sent, how it was packed and any evidence (photos, courier receipt numbers). Be factual."
-3. Tap **Send response**. You'll see "Response sent. Zudomart will review it."
+3. Tap **Send response**. You'll see "Response sent. Nantty will review it."
 
 In the app, open the dispute and use **Messages with support** to reply to the buyer and support.
 
@@ -39,15 +39,15 @@ You can't choose the outcome yourself while a dispute is open, but you can offer
 
 ## Good to know
 
-- Escrow fees aren't charged when money is refunded before release. After release, only the seller portion is recovered; Zudomart's escrow and processing fees stay with Zudomart.
+- Escrow fees aren't charged when money is refunded before release. After release, only the seller portion is recovered; Nantty's escrow and processing fees stay with Nantty.
 - Good evidence wins disputes: packing photos, courier receipts and tracking numbers.
 
 ## If something goes wrong
 
 - **"Write your response (10–2,000 characters)."** Add more detail, or shorten it.
-- **"Zudomart decides refunds while a dispute is open."** You can't refund from the order until the dispute is settled.
+- **"Nantty decides refunds while a dispute is open."** You can't refund from the order until the dispute is settled.
 - **"This dispute is closed."** A decision was made.
 
 ## Stay safe
 
-Never pressure a buyer to close a dispute, or offer to pay them outside Zudomart. Keep everything in the dispute thread.
+Never pressure a buyer to close a dispute, or offer to pay them outside Nantty. Keep everything in the dispute thread.

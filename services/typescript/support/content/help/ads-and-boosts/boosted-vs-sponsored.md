@@ -5,7 +5,7 @@ tags: boosted label, sponsored label, what is boosted, what is sponsored, ad lab
 related: boost-a-post, ads-manager-campaigns, why-you-see-an-ad, live-ads, ads-faq
 ---
 
-Every paid placement on Zudomart is labelled, so you always know when someone paid for you to see something.
+Every paid placement on Nantty is labelled, so you always know when someone paid for you to see something.
 
 ## Boosted
 
@@ -38,4 +38,4 @@ Both go through [ad review](/help/ads-and-boosts/ad-review-and-policies) before 
 
 ## Stay safe
 
-Ads are reviewed, but always check a seller before paying. Never pay outside Zudomart checkout for something you saw in an ad. See [Stay safe when buying and selling](/help/safety-and-reporting/stay-safe-when-buying-and-selling).
+Ads are reviewed, but always check a seller before paying. Never pay outside Nantty checkout for something you saw in an ad. See [Stay safe when buying and selling](/help/safety-and-reporting/stay-safe-when-buying-and-selling).

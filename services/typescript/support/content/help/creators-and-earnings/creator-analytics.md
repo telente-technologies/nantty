@@ -1,6 +1,6 @@
 ---
 title: Creator Studio and analytics
-summary: See your earnings, followers, top lives and posts, and per-live stats in Creator Studio on the app and studio.zudomart.com.
+summary: See your earnings, followers, top lives and posts, and per-live stats in Creator Studio on the app and studio.nantty.com.
 tags: creator studio, analytics, stats, insights, top posts, earnings dashboard, creator tools
 related: creator-earnings, post-analytics, views-and-analytics, convert-earned-coins, streaming-with-obs
 ---
@@ -14,7 +14,7 @@ Approved [Creator Program](/help/creators-and-earnings/creator-program) members.
 ## Open Creator Studio
 
 - **In the app**: open your profile menu and tap **Creator tools**.
-- **On a computer**: sign in at **studio.zudomart.com** with your Zudomart account.
+- **On a computer**: sign in at **studio.nantty.com** with your Nantty account.
 
 ## What you see in the app
 
@@ -33,12 +33,12 @@ Tap **Views** on your own post, or a post in **Top lives & posts**, to open **Po
 
 ## Per-live stats on the web
 
-At **studio.zudomart.com**, open a live to see **Earnings and audience**: peak viewers, people watching now, gifts received, coins earned, new subscribers, **Top gifters** and **Battle results**.
+At **studio.nantty.com**, open a live to see **Earnings and audience**: peak viewers, people watching now, gifts received, coins earned, new subscribers, **Top gifters** and **Battle results**.
 
 ## Good to know
 
 - Earnings figures are estimates until money moves into your wallet. The wallet is the final record.
-- Zudomart doesn't pay for views. Views help you see what works; earnings come from gifts, subscriptions, commissions and ads share.
+- Nantty doesn't pay for views. Views help you see what works; earnings come from gifts, subscriptions, commissions and ads share.
 - Creator Studio numbers refresh when you pull down to refresh.
 
 ## If something goes wrong

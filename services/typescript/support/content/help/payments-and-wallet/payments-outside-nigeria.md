@@ -5,7 +5,7 @@ tags: ghana, kenya, south africa, outside nigeria, international, direct payment
 related: buying-outside-nigeria, selling-outside-nigeria, prices-by-country, who-holds-your-money, verification-levels, payments-faq
 ---
 
-Zudomart works differently outside Nigeria because wallets that hold money are only available in Nigeria for now. Zudomart never holds your money anywhere.
+Nantty works differently outside Nigeria because wallets that hold money are only available in Nigeria for now. Nantty never holds your money anywhere.
 
 ## Who this is for
 
@@ -21,7 +21,7 @@ Buyers and sellers in Ghana, Kenya, South Africa and every other country outside
 
 - **You must verify your identity before you can sell.** That means a government ID check with our identity partner, plus a payout bank or mobile-money account in your own name. Until then you can set up your store, but you can't publish listings, sell on lives, take orders or run ads.
 - There's no unverified selling and no sales cap outside Nigeria.
-- Your share of each sale is paid straight to your payout account once the buyer's payment settles. Nothing waits in a Zudomart balance. See [Selling outside Nigeria](/help/selling/selling-outside-nigeria).
+- Your share of each sale is paid straight to your payout account once the buyer's payment settles. Nothing waits in a Nantty balance. See [Selling outside Nigeria](/help/selling/selling-outside-nigeria).
 
 ## Your wallet
 
@@ -37,4 +37,4 @@ Buyers and sellers in Ghana, Kenya, South Africa and every other country outside
 
 ## Stay safe
 
-Because there's no escrow outside Nigeria, never agree to pay a seller outside Zudomart checkout. Paying through checkout keeps your dispute and refund rights. See [Payment scams](/help/wallet-security/payment-scams).
+Because there's no escrow outside Nigeria, never agree to pay a seller outside Nantty checkout. Paying through checkout keeps your dispute and refund rights. See [Payment scams](/help/wallet-security/payment-scams).

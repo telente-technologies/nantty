@@ -5,7 +5,7 @@ tags: faq, payments questions, wallet questions, coins, premium, receipts, refun
 related: your-wallet-explained, payment-methods, payment-limits, payment-failed, buy-coins, premium, who-holds-your-money
 ---
 
-## Does Zudomart hold my money?
+## Does Nantty hold my money?
 
 No. In Nigeria your money sits in your own wallet with our licensed payment partner, in your name. See [Who holds your money](/help/wallet-security/who-holds-your-money).
 
@@ -45,9 +45,9 @@ Premium: **Verification** > **Cancel subscription**. Creators: **Settings** > **
 
 In your verified email, and in **Wallet** > **All transactions**. See [Transactions and receipts](/help/payments-and-wallet/transactions-and-receipts).
 
-## Why does my wallet say I owe Zudomart?
+## Why does my wallet say I owe Nantty?
 
-A refund or chargeback couldn't be covered by your balance. It's repaid from your next earnings. See [Owed to Zudomart](/help/payments-and-wallet/owed-to-zudomart).
+A refund or chargeback couldn't be covered by your balance. It's repaid from your next earnings. See [Owed to Nantty](/help/payments-and-wallet/owed-to-nantty).
 
 ## Why is my price different from my friend's?
 
@@ -57,6 +57,6 @@ Prices are set per country and differ between the app and the web. See [Prices b
 
 No escrow and no stored balance. You pay the seller through checkout. See [Payments outside Nigeria](/help/payments-and-wallet/payments-outside-nigeria).
 
-## Will Zudomart ever ask for my PIN or a code?
+## Will Nantty ever ask for my PIN or a code?
 
 Never. See [Payment scams](/help/wallet-security/payment-scams).

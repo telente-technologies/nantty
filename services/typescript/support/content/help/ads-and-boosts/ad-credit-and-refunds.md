@@ -19,14 +19,14 @@ You can spend it on ads, or withdraw what you haven't spent.
 
 ## Ad credit (ads only)
 
-Promotional credit from Zudomart. It can only be spent on ads and boosts in the app or on the web, and it can **never** be withdrawn or turned into cash. It comes from:
+Promotional credit from Nantty. It can only be spent on ads and boosts in the app or on the web, and it can **never** be withdrawn or turned into cash. It comes from:
 
-- **Issued by Zudomart**, for example a promotion. This credit may have an expiry date.
+- **Issued by Nantty**, for example a promotion. This credit may have an expiry date.
 - **Cashback**: some advertisers get a share of their ad spend back as credit.
 - **Free Premium boost**: the value of your free boost.
 - **Refunds** of ad spend that was paid with credit.
 
-Credit you earn in the app, such as cashback and refunds, never expires. Credit issued by Zudomart may expire; you see a line such as "₦5,000 expires on 30 Nov". Expired credit is removed automatically and shows as **Expired** in your history.
+Credit you earn in the app, such as cashback and refunds, never expires. Credit issued by Nantty may expire; you see a line such as "₦5,000 expires on 30 Nov". Expired credit is removed automatically and shows as **Expired** in your history.
 
 ## The order your money is spent
 
@@ -37,7 +37,7 @@ Credit you earn in the app, such as cashback and refunds, never expires. Credit 
 
 ## Cashback
 
-If Zudomart has added you to cashback, you get a share of your ad spend back as ad credit, usually 10%. It's added when your spend is settled. You only earn cashback on spend paid with real money, never on spend paid with ad credit. If that spend is refunded, the cashback is taken back.
+If Nantty has added you to cashback, you get a share of your ad spend back as ad credit, usually 10%. It's added when your spend is settled. You only earn cashback on spend paid with real money, never on spend paid with ad credit. If that spend is refunded, the cashback is taken back.
 
 ## Withdraw your ad balance
 
@@ -45,7 +45,7 @@ If Zudomart has added you to cashback, you get a share of your ad spend back as 
 2. Enter an amount. You see the payment provider fee and what you'll receive before you confirm.
 3. Confirm it's you when asked.
 
-The money goes to your Zudomart wallet, and from there normal [wallet withdrawal](/help/payments-and-wallet/your-wallet-explained) rules apply.
+The money goes to your Nantty wallet, and from there normal [wallet withdrawal](/help/payments-and-wallet/your-wallet-explained) rules apply.
 
 - You need payout verification.
 - Money from a top-up can be withdrawn once that top-up has been settled for 24 hours.
@@ -55,7 +55,7 @@ The money goes to your Zudomart wallet, and from there normal [wallet withdrawal
 ## Refunds
 
 - **Rejected boost paid by card:** the budget stays in your ad balance, and you can withdraw it or use it to resubmit the ad.
-- **Stopped boost paid from your earnings:** what wasn't spent goes back to your Zudomart balance.
+- **Stopped boost paid from your earnings:** what wasn't spent goes back to your Nantty balance.
 - **Free Premium boost:** if it's rejected or stopped before it delivers, the credit is removed and you get that month's free boost back.
 - **Charged twice, or paid for a boost that never started?** [Contact support](/help/contact-support/contact-support) with your receipt.
 
@@ -67,7 +67,7 @@ You're not charged for clicks and views our systems mark as invalid, such as bot
 
 ## History and receipts
 
-Your ad balance history shows each entry with its reason: **Top-up**, **Spent on ads**, **Issued by Zudomart**, **Cashback**, **Refund**, **Expired**, **Removed by Zudomart** or **Withdrawn to wallet**. Ads Manager's billing history also has receipts for top-ups, refunds and card charges.
+Your ad balance history shows each entry with its reason: **Top-up**, **Spent on ads**, **Issued by Nantty**, **Cashback**, **Refund**, **Expired**, **Removed by Nantty** or **Withdrawn to wallet**. Ads Manager's billing history also has receipts for top-ups, refunds and card charges.
 
 ## If something goes wrong
 

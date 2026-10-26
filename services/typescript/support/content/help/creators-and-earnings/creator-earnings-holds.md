@@ -12,7 +12,7 @@ Money you earn as a creator doesn't go straight to **Available to withdraw**. It
 1. **You earn it.** Gifts and tips arrive as earned coins. Subscription payments, ads share and Premium pool money arrive as cash.
 2. **Convert coins.** Earned coins only become money when you [convert them](/help/creators-and-earnings/convert-earned-coins).
 3. **Creator earnings.** Cash waits here. The wallet describes it as "Gift, subscription and ad-share earnings waiting to move to your available balance."
-4. **Daily move.** Once a day, Zudomart moves your whole Creator earnings balance to **Available to withdraw** if all the checks below pass.
+4. **Daily move.** Once a day, Nantty moves your whole Creator earnings balance to **Available to withdraw** if all the checks below pass.
 5. **Withdraw.** From Available to withdraw you can [withdraw to your bank](/help/creators-and-earnings/withdrawals).
 
 ## Why your earnings might not move yet
@@ -29,7 +29,7 @@ Affiliate commissions show as **Pending** until the order completes, for escrow 
 
 ## Refunds and chargebacks
 
-If a fan's payment is refunded or charged back after you were paid, your share is taken back. If your balance can't cover it, the amount shows under **Owed to Zudomart** and comes out of your next earnings.
+If a fan's payment is refunded or charged back after you were paid, your share is taken back. If your balance can't cover it, the amount shows under **Owed to Nantty** and comes out of your next earnings.
 
 ## Good to know
 

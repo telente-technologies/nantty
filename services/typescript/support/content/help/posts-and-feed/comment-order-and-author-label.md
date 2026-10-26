@@ -30,7 +30,7 @@ When a conversation goes deeper or has more replies, you'll see **View thread**.
 
 ## Quotes in comments
 
-If you paste a link to a Zudomart post in a comment, it shows as a quote card inside your comment and counts as a quote of that post. See [Link and quote cards](/help/posts-and-feed/link-cards).
+If you paste a link to a Nantty post in a comment, it shows as a quote card inside your comment and counts as a quote of that post. See [Link and quote cards](/help/posts-and-feed/link-cards).
 
 ## Good to know
 

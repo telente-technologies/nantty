@@ -1,11 +1,11 @@
 ---
 title: Contact support FAQ
-summary: Quick answers about reaching Zudomart support, reply times, your requests, live chat, email addresses and staying safe.
-tags: support faq, customer care, contact zudomart, how to reach support, ticket help, phone number
+summary: Quick answers about reaching Nantty support, reply times, your requests, live chat, email addresses and staying safe.
+tags: support faq, customer care, contact nantty, how to reach support, ticket help, phone number
 related: contact-support, support-tickets, live-chat-with-support, get-help-with-an-order, what-support-never-asks, report-a-bug
 ---
 
-## How do I contact Zudomart?
+## How do I contact Nantty?
 
 In the app: **Settings > Support > Contact support**. See [Contacting support](/help/contact-support/contact-support).
 
@@ -39,7 +39,7 @@ Use **Get help with this order** on the order, or open a dispute. See [Getting h
 
 ## I can't sign in. How do I reach you?
 
-Email **support@zudomart.com** from the address on your account. See [I can't sign in](/help/troubleshooting/cant-sign-in).
+Email **support@nantty.com** from the address on your account. See [I can't sign in](/help/troubleshooting/cant-sign-in).
 
 ## How do I report a bug?
 
@@ -49,9 +49,9 @@ Email **support@zudomart.com** from the address on your account. See [I can't si
 
 Use **Report** on the post, profile or chat. Track it in **Settings > Support > My reports**. See [Reporting a problem](/help/safety-and-reporting/report-a-problem).
 
-## Someone says they're Zudomart support. Are they?
+## Someone says they're Nantty support. Are they?
 
-Only if the message is in **My support requests** or from an email ending in zudomart.com. See [What Zudomart support will never ask for](/help/contact-support/what-support-never-asks).
+Only if the message is in **My support requests** or from an email ending in nantty.com. See [What Nantty support will never ask for](/help/contact-support/what-support-never-asks).
 
 ## Can support see my private messages?
 

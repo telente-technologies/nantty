@@ -6,7 +6,7 @@ import type { TicketAttachment } from "../../../types/ticket.type.js";
 const contentTypeByExtension: Readonly<Record<string, string>> = { jpg: "image/jpeg", jpeg: "image/jpeg", png: "image/png", webp: "image/webp", avif: "image/avif", heic: "image/heic", gif: "image/gif", mp4: "video/mp4", pdf: "application/pdf" };
 const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const unusableStatuses = new Set(["uploading", "rejected", "deleted", "failed"]);
-const notUploadedThroughZudomart = () => badRequest("INVALID_ATTACHMENT", "Attachments must be uploaded through Zudomart first.");
+const notUploadedThroughNantty = () => badRequest("INVALID_ATTACHMENT", "Attachments must be uploaded through Nantty first.");
 
 export interface ParsedAttachment extends TicketAttachment {
   readonly mediaId: string | null;
@@ -19,11 +19,11 @@ export function validateAttachmentUrls(urls: readonly string[], allowedBaseUrls:
     try {
       parsed = new URL(raw);
     } catch {
-      throw notUploadedThroughZudomart();
+      throw notUploadedThroughNantty();
     }
     const base = allowedBaseUrls.find((candidate) => raw.startsWith(`${candidate}/`));
     const allowed = allowedBaseUrls.length === 0 ? parsed.protocol === "https:" : base !== undefined;
-    if (!allowed || parsed.username !== "" || parsed.password !== "") throw notUploadedThroughZudomart();
+    if (!allowed || parsed.username !== "" || parsed.password !== "") throw notUploadedThroughNantty();
     const relativeSegments = (base === undefined ? parsed.pathname : raw.slice(base.length).split(/[?#]/)[0] ?? "").split("/").filter(Boolean);
     const extension = parsed.pathname.split(".").pop()?.toLowerCase() ?? "";
     return { url: parsed.toString(), contentType: contentTypeByExtension[extension] ?? null, mediaId: relativeSegments.find((segment) => uuidPattern.test(segment))?.toLowerCase() ?? null };
@@ -36,12 +36,12 @@ export async function validateRequesterAttachments(urls: readonly string[], opti
   if (options.media === undefined) throw new SupportError(503, "ATTACHMENTS_UNAVAILABLE", "Attachments are not available right now. Send your message without them.");
   const checked = new Map<string, boolean>();
   for (const attachment of attachments) {
-    if (attachment.mediaId === null) throw notUploadedThroughZudomart();
+    if (attachment.mediaId === null) throw notUploadedThroughNantty();
     if (!checked.has(attachment.mediaId)) {
       const record = await options.media.findMedia(attachment.mediaId);
       checked.set(attachment.mediaId, record !== null && record.ownerId.toLowerCase() === options.requesterId.toLowerCase() && !unusableStatuses.has(record.status));
     }
-    if (checked.get(attachment.mediaId) !== true) throw notUploadedThroughZudomart();
+    if (checked.get(attachment.mediaId) !== true) throw notUploadedThroughNantty();
   }
   return attachments.map(({ url, contentType }) => ({ url, contentType }));
 }

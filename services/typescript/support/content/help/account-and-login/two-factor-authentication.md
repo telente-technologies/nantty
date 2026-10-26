@@ -23,10 +23,10 @@ Two-factor sign-in is not available yet. If you try to turn it on today you'll s
 
 ## Good to know
 
-- All codes go to your email. Zudomart doesn't send login codes by SMS.
-- Keep your email account itself secure, with its own strong password and 2FA, because it is the key to resetting your Zudomart password.
-- Sellers see a **Sign-in protection** card on **dashboard.zudomart.com** under **Settings > Security**. It points back to this same setting in the app.
+- All codes go to your email. Nantty doesn't send login codes by SMS.
+- Keep your email account itself secure, with its own strong password and 2FA, because it is the key to resetting your Nantty password.
+- Sellers see a **Sign-in protection** card on **dashboard.nantty.com** under **Settings > Security**. It points back to this same setting in the app.
 
 ## Stay safe
 
-If you receive a Zudomart code you didn't request, someone may know your email or password. Change your password now and read [If your account was hacked](/help/account-and-login/hacked-account). Never share a code with anyone, including people who say they work for Zudomart.
+If you receive a Nantty code you didn't request, someone may know your email or password. Change your password now and read [If your account was hacked](/help/account-and-login/hacked-account). Never share a code with anyone, including people who say they work for Nantty.

@@ -5,7 +5,7 @@ tags: orders, shipping, delivery, accept order, reject order, mark shipped, trac
 related: shipping-settings, seller-payouts, respond-to-a-dispute, seller-refunds, fees-and-escrow-fee, seller-dashboard-overview
 ---
 
-Every order arrives in the app and in **Orders** on **dashboard.zudomart.com**. These are marketplace orders from Zudomart buyers.
+Every order arrives in the app and in **Orders** on **dashboard.nantty.com**. These are marketplace orders from Nantty buyers.
 
 ## Who this is for
 
@@ -43,4 +43,4 @@ You set where you deliver and what it costs in **Delivery > Shipping rules**. Bu
 
 ## Stay safe
 
-Only mark an order delivered when it has really arrived. Never ask buyers to confirm receipt before they have the parcel, or to pay you outside Zudomart.
+Only mark an order delivered when it has really arrived. Never ask buyers to confirm receipt before they have the parcel, or to pay you outside Nantty.

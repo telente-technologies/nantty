@@ -1,11 +1,11 @@
 ---
 title: How creators earn
-summary: Creators earn from gifts, tips, fan subscriptions, affiliate commissions and a share of eligible ads revenue. Zudomart doesn't pay for views.
+summary: Creators earn from gifts, tips, fan subscriptions, affiliate commissions and a share of eligible ads revenue. Nantty doesn't pay for views.
 tags: earnings, gifts, revenue share, ads revenue, how creators make money, creator pay, monetisation, collect my money
 related: convert-earned-coins, fan-subscriptions, ads-revenue-share, creator-earnings-holds, withdrawals, gifts-and-coins-on-live
 ---
 
-Zudomart doesn't pay for views. It shares eligible monetisation revenue with creators in the [Creator Program](/help/creators-and-earnings/creator-program). Your current rates are always listed in Creator Studio under **How you earn**.
+Nantty doesn't pay for views. It shares eligible monetisation revenue with creators in the [Creator Program](/help/creators-and-earnings/creator-program). Your current rates are always listed in Creator Studio under **How you earn**.
 
 ## Gifts and tips
 
@@ -29,7 +29,7 @@ A commission is paid only when the order completes: the buyer confirms receipt, 
 
 Open your profile menu and tap **Creator tools** to open **Creator Studio**. Pick **This week**, **This month** or **All time** to see **Earnings this period**, split into Gifts, Affiliate commissions and Bonuses, plus new followers, your **Available** balance and your top lives and posts. See [Creator analytics](/help/creators-and-earnings/creator-analytics).
 
-On a computer, **studio.zudomart.com** shows earnings per live, top gifters and battle results.
+On a computer, **studio.nantty.com** shows earnings per live, top gifters and battle results.
 
 ## Getting paid
 

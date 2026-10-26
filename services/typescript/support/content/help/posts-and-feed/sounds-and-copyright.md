@@ -5,7 +5,7 @@ tags: sound, sounds, music, audio, copyright, claim, original sound, use this so
 related: create-a-clip, clips, copyright-and-account-status, report-a-problem, post-menu
 ---
 
-Every clip has a sound: either a sound picked from Zudomart or the clip's own audio, shown as **Original sound**. Sounds can be reused, so a trend can spread while the creator stays credited.
+Every clip has a sound: either a sound picked from Nantty or the clip's own audio, shown as **Original sound**. Sounds can be reused, so a trend can spread while the creator stays credited.
 
 ## Use a sound
 
