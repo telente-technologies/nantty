@@ -1,15 +1,15 @@
-export type ZudomartSymbolConcept = "meet" | "callResponse" | "moment" | "shift";
+export type NanttySymbolConcept = "meet" | "callResponse" | "moment" | "shift";
 
-export const zudomartSymbolColourCandidates = {
+export const nanttySymbolColourCandidates = {
   ultramarine: "#3A2BFF",
   zobo: "#A3195B",
   marigold: "#FFA41B",
 } as const;
 
-export const zudomartSymbolViewBox = 1024;
-export const zudomartSymbolTileRadius = 229;
+export const nanttySymbolViewBox = 1024;
+export const nanttySymbolTileRadius = 229;
 
-export const zudomartSymbolConcepts: Record<ZudomartSymbolConcept, { readonly title: string; readonly path: string }> = {
+export const nanttySymbolConcepts: Record<NanttySymbolConcept, { readonly title: string; readonly path: string }> = {
   meet: {
     title: "Meet",
     path: "M678.6 493C642.6 510 617 545.6 614.2 587.4C609.7 676.8 535.8 747.9 445.3 747.9C351.9 747.9 276.1 672.1 276.1 578.7C276.1 488.2 347.2 414.3 436.6 409.8C478.4 407 514 381.4 531 345.4C548.1 304.7 588.2 276.1 635.1 276.1C697.4 276.1 747.9 326.6 747.9 388.9C747.9 435.8 719.3 475.9 678.6 493Z",
@@ -28,10 +28,10 @@ export const zudomartSymbolConcepts: Record<ZudomartSymbolConcept, { readonly ti
   },
 };
 
-export const defaultZudomartSymbol: ZudomartSymbolConcept = "callResponse";
+export const defaultNanttySymbol: NanttySymbolConcept = "callResponse";
 
-export const zudomartSymbolBounds = { x: 214, y: 308, width: 596, height: 408 } as const;
+export const nanttySymbolBounds = { x: 214, y: 308, width: 596, height: 408 } as const;
 
-export function zudomartSymbolPath(concept: ZudomartSymbolConcept = defaultZudomartSymbol): string {
-  return zudomartSymbolConcepts[concept].path;
+export function nanttySymbolPath(concept: NanttySymbolConcept = defaultNanttySymbol): string {
+  return nanttySymbolConcepts[concept].path;
 }

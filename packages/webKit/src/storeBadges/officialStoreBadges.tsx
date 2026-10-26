@@ -32,7 +32,7 @@ export function OfficialStoreBadges({ links, height = 40, assetBasePath = "/stor
   const isComingSoon = !links.appStoreUrl && !links.playStoreUrl;
   return (
     <div className={[styles.group, align === "center" ? styles.center : "", className ?? ""].join(" ")}>
-      <ul className={styles.list} aria-label={isComingSoon ? `${comingSoonLabel} to the App Store and Google Play` : "Get the Zudomart app"}>
+      <ul className={styles.list} aria-label={isComingSoon ? `${comingSoonLabel} to the App Store and Google Play` : "Get the Nantty app"}>
         <li style={{ padding: clearSpace }}>
           <BadgeSlot href={links.appStoreUrl} label="Download on the App Store">
             <img src={`${assetBasePath}/app-store-badge-black.svg`} alt="Download on the App Store" width={Math.round(badgeHeight * appleAspect)} height={badgeHeight} className={styles.image} />

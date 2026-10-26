@@ -1,7 +1,7 @@
-export { ZudomartLogoMark, ZudomartSymbol, ZudomartWordmark } from "./zudomartWordmark";
-export type { ZudomartProductLabel, ZudomartWordmarkTone } from "./zudomartWordmark";
-export { defaultZudomartWordmarkVariant, zudomartWordmarkFor, zudomartWordmarkPath, zudomartWordmarkVariants } from "./brand/zudomartBrand.path";
-export type { ZudomartBrandPath, ZudomartWordmarkVariant } from "./brand/zudomartBrand.path";
+export { NanttyLogoMark, NanttySymbol, NanttyWordmark } from "./nanttyWordmark";
+export type { NanttyProductLabel, NanttyWordmarkTone } from "./nanttyWordmark";
+export { defaultNanttyWordmarkVariant, nanttyWordmarkFor, nanttyWordmarkPath, nanttyWordmarkVariants } from "./brand/nanttyBrand.path";
+export type { NanttyBrandPath, NanttyWordmarkVariant } from "./brand/nanttyBrand.path";
 export { Skeleton } from "./skeleton";
 export { EmptyState } from "./emptyState";
 export * from "./errorExperience";
@@ -24,10 +24,10 @@ export type { ResolvedTheme, ThemePreference } from "./theme/themePreference.con
 export { OfficialStoreBadges } from "./storeBadges/officialStoreBadges";
 export { buildStoreLinks, defaultPlayPackage } from "./storeBadges/storeLinks";
 export type { StoreLinkConfig, StoreLinks } from "./storeBadges/storeLinks";
-export { buildMailtoHref, buildZudomartEmailAddresses, zudomartMailboxDomain, zudomartMailboxNames, zudomartSendingDomain } from "./contact/zudomartEmailAddresses";
-export type { ZudomartEmailAddresses, ZudomartMailboxName } from "./contact/zudomartEmailAddresses";
-export { defaultZudomartSymbol, zudomartSymbolBounds, zudomartSymbolColourCandidates, zudomartSymbolConcepts, zudomartSymbolPath, zudomartSymbolTileRadius, zudomartSymbolViewBox } from "./brand/zudomartSymbol.path";
-export type { ZudomartSymbolConcept } from "./brand/zudomartSymbol.path";
+export { buildMailtoHref, buildNanttyEmailAddresses, nanttyMailboxDomain, nanttyMailboxNames, nanttySendingDomain } from "./contact/nanttyEmailAddresses";
+export type { NanttyEmailAddresses, NanttyMailboxName } from "./contact/nanttyEmailAddresses";
+export { defaultNanttySymbol, nanttySymbolBounds, nanttySymbolColourCandidates, nanttySymbolConcepts, nanttySymbolPath, nanttySymbolTileRadius, nanttySymbolViewBox } from "./brand/nanttySymbol.path";
+export type { NanttySymbolConcept } from "./brand/nanttySymbol.path";
 export { buildEmbedFrameUrl, buildEmbedSnippet, embedPreviewSandbox } from "./embed/embedSnippet";
 export type { EmbedSnippetKind, EmbedSnippetLayout, EmbedSnippetOptions, EmbedSnippetSize, EmbedSnippetTheme } from "./embed/embedSnippet";
 export { Dialog, isDialogBusy, resolveDialogTone } from "./dialog/dialog";

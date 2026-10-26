@@ -67,7 +67,7 @@ export function CookieConsentBanner({ privacyPolicyHref = "/privacy", cookiePoli
     <section className={styles.banner} role="dialog" aria-modal="false" aria-labelledby={headingId}>
       <h2 id={headingId} className={styles.heading}>Your privacy choices</h2>
       <p className={styles.text}>
-        We use essential cookies to run Zudomart. With your permission we also use analytics, personalization and advertising cookies. You can change this at any time. Read our <a href={cookiePolicyHref}>Cookie Policy</a> and <a href={privacyPolicyHref}>Privacy Policy</a>.
+        We use essential cookies to run Nantty. With your permission we also use analytics, personalization and advertising cookies. You can change this at any time. Read our <a href={cookiePolicyHref}>Cookie Policy</a> and <a href={privacyPolicyHref}>Privacy Policy</a>.
       </p>
       {isManaging ? (
         <ul className={styles.categoryList}>

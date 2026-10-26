@@ -31,9 +31,9 @@ export function NotFoundScreen({ kind = "notFound", subject, title, description,
                 <ErrorIcon name="magnifyingGlass" size={18} weight="regular" />
               </span>
               <label htmlFor="not-found-search" className={styles.visuallyHidden}>
-                Search Zudomart
+                Search Nantty
               </label>
-              <input id="not-found-search" name={config.searchParam ?? "q"} type="search" className={styles.searchInput} placeholder={config.searchPlaceholder ?? "Search Zudomart"} autoComplete="off" enterKeyHint="search" />
+              <input id="not-found-search" name={config.searchParam ?? "q"} type="search" className={styles.searchInput} placeholder={config.searchPlaceholder ?? "Search Nantty"} autoComplete="off" enterKeyHint="search" />
             </form>
           ) : null}
           {resolvedDestinations.length > 0 ? (

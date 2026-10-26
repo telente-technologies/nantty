@@ -1,6 +1,6 @@
 /** @jsxRuntime automatic */
 /** @jsxImportSource react */
-import { ZudomartLogoMark } from "../zudomartWordmark";
+import { NanttyLogoMark } from "../nanttyWordmark";
 import styles from "./brandLoader.module.css";
 
 export type BrandLoaderSize = "sm" | "md" | "lg";
@@ -19,7 +19,7 @@ export function BrandLoader({ size = "md", label = "Loading…", showLabel = fal
   return (
     <span className={[styles.loader, styles[fill], className].filter(Boolean).join(" ")} role="status" aria-live="polite" data-size={size}>
       <span className={styles.mark} aria-hidden="true">
-        <ZudomartLogoMark size={brandLoaderSizes[size]} />
+        <NanttyLogoMark size={brandLoaderSizes[size]} />
       </span>
       <span className={showLabel ? styles.label : styles.visuallyHidden}>{label}</span>
     </span>

@@ -1,7 +1,8 @@
-export const zudomartMailboxDomain = "zudomart.com";
-export const zudomartSendingDomain = "mail.zudomart.com";
+// Keep the legacy export names for source compatibility; the default brand domain is Nantty.
+export const nanttyMailboxDomain = "nantty.com";
+export const nanttySendingDomain = "mail.zudomart.com";
 
-export const zudomartMailboxNames = [
+export const nanttyMailboxNames = [
   "support",
   "help",
   "billing",
@@ -23,8 +24,8 @@ export const zudomartMailboxNames = [
   "hello",
 ] as const;
 
-export type ZudomartMailboxName = (typeof zudomartMailboxNames)[number];
-export type ZudomartEmailAddresses = Readonly<Record<ZudomartMailboxName, string>>;
+export type NanttyMailboxName = (typeof nanttyMailboxNames)[number];
+export type NanttyEmailAddresses = Readonly<Record<NanttyMailboxName, string>>;
 
 function cleanDomain(value: string | undefined, fallback: string): string {
   const trimmed = value?.trim().toLowerCase().replace(/^@/, "") ?? "";
@@ -36,10 +37,10 @@ function cleanAddress(value: string | undefined): string | undefined {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed) ? trimmed : undefined;
 }
 
-export function buildZudomartEmailAddresses(options: { readonly domain?: string; readonly overrides?: Partial<Record<ZudomartMailboxName, string | undefined>> } = {}): ZudomartEmailAddresses {
-  const domain = cleanDomain(options.domain, zudomartMailboxDomain);
-  const entries = zudomartMailboxNames.map((name) => [name, cleanAddress(options.overrides?.[name]) ?? `${name}@${domain}`] as const);
-  return Object.fromEntries(entries) as ZudomartEmailAddresses;
+export function buildNanttyEmailAddresses(options: { readonly domain?: string; readonly overrides?: Partial<Record<NanttyMailboxName, string | undefined>> } = {}): NanttyEmailAddresses {
+  const domain = cleanDomain(options.domain, nanttyMailboxDomain);
+  const entries = nanttyMailboxNames.map((name) => [name, cleanAddress(options.overrides?.[name]) ?? `${name}@${domain}`] as const);
+  return Object.fromEntries(entries) as NanttyEmailAddresses;
 }
 
 export function buildMailtoHref(address: string, subject?: string): string {

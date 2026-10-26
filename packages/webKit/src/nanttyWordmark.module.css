@@ -6,7 +6,26 @@
 }
 
 .word {
+  display: inline-flex;
+  align-items: center;
+  flex: none;
+}
+
+.lockup {
   display: block;
+  width: auto;
+  max-width: min(34vw, 190px);
+  object-fit: contain;
+  flex: none;
+}
+
+.brandName {
+  font-size: 1.12em;
+  font-weight: 750;
+  letter-spacing: -0.055em;
+}
+
+.brandIcon {
   flex: none;
 }
 
