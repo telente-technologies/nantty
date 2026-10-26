@@ -3,8 +3,8 @@
 package exchangeraterevision
 
 import (
+	"nantty/modules/currency/src/generated/ent/predicate"
 	"time"
-	"zudomart/modules/currency/src/generated/ent/predicate"
 
 	"entgo.io/ent/dialect/sql"
 	"github.com/google/uuid"

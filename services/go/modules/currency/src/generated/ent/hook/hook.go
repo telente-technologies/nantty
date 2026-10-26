@@ -5,7 +5,7 @@ package hook
 import (
 	"context"
 	"fmt"
-	"zudomart/modules/currency/src/generated/ent"
+	"nantty/modules/currency/src/generated/ent"
 )
 
 // The ExchangeRateRevisionFunc type is an adapter to allow the use of ordinary

@@ -4,9 +4,9 @@ package ent
 
 import (
 	"fmt"
+	"nantty/modules/currency/src/generated/ent/exchangeraterevision"
 	"strings"
 	"time"
-	"zudomart/modules/currency/src/generated/ent/exchangeraterevision"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"

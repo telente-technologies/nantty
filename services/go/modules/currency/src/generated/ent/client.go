@@ -9,10 +9,10 @@ import (
 	"log"
 	"reflect"
 
-	"zudomart/modules/currency/src/generated/ent/migrate"
+	"nantty/modules/currency/src/generated/ent/migrate"
 
-	"zudomart/modules/currency/src/generated/ent/exchangeraterevision"
-	"zudomart/modules/currency/src/generated/ent/outboxevent"
+	"nantty/modules/currency/src/generated/ent/exchangeraterevision"
+	"nantty/modules/currency/src/generated/ent/outboxevent"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect"

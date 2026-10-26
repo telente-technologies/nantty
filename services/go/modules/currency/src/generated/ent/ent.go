@@ -6,10 +6,10 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"nantty/modules/currency/src/generated/ent/exchangeraterevision"
+	"nantty/modules/currency/src/generated/ent/outboxevent"
 	"reflect"
 	"sync"
-	"zudomart/modules/currency/src/generated/ent/exchangeraterevision"
-	"zudomart/modules/currency/src/generated/ent/outboxevent"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"

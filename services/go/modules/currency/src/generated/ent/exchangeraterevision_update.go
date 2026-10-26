@@ -6,8 +6,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"zudomart/modules/currency/src/generated/ent/exchangeraterevision"
-	"zudomart/modules/currency/src/generated/ent/predicate"
+	"nantty/modules/currency/src/generated/ent/exchangeraterevision"
+	"nantty/modules/currency/src/generated/ent/predicate"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"

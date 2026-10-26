@@ -3,10 +3,10 @@
 package ent
 
 import (
+	"nantty/modules/currency/src/databases/schema"
+	"nantty/modules/currency/src/generated/ent/exchangeraterevision"
+	"nantty/modules/currency/src/generated/ent/outboxevent"
 	"time"
-	"zudomart/modules/currency/src/databases/schema"
-	"zudomart/modules/currency/src/generated/ent/exchangeraterevision"
-	"zudomart/modules/currency/src/generated/ent/outboxevent"
 
 	"github.com/google/uuid"
 )

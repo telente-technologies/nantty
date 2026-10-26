@@ -6,8 +6,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"nantty/modules/currency/src/generated/ent/outboxevent"
 	"time"
-	"zudomart/modules/currency/src/generated/ent/outboxevent"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
