@@ -17,7 +17,7 @@ import { deleteAllLocallySavedMessageHistory } from "@/cache/messageSync.util";
 import { OfflineIndicator } from "@/cache/offlineIndicator";
 import {
   connectReactQueryToNetworkAndAppState,
-  createZudomartQueryClient,
+  createNanttyQueryClient,
   reactQueryAsyncStoragePersister,
   reactQueryPersistOptions,
 } from "@/cache/queryClient.config";
@@ -50,7 +50,7 @@ const hideNativeSplash = () => {
 };
 
 export default function App() {
-  const [queryClient] = useState(createZudomartQueryClient);
+  const [queryClient] = useState(createNanttyQueryClient);
   const [fontsLoaded, fontError] = useFonts({
     Inter_400Regular,
     Inter_500Medium,

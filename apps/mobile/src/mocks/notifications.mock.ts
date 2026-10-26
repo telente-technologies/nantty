@@ -12,9 +12,9 @@ const buyerNotifications: CategorizedNotification[] = [
   { id: "n_3", category: "social", title: "Adaeze Okafor", body: "posted a new drop: The Owambe Edit.", createdAt: isoDateHoursAgo(6), read: false, actor: userSummaryById("u_1") },
   { id: "n_4", category: "social", title: "Bisola Ogunleye", body: "and 12 others liked your post.", createdAt: isoDateHoursAgo(8), read: true, actor: userSummaryById("u_10") },
   { id: "n_5", category: "orders", title: "Payment held in escrow", body: "Your payment for Stone-Free Ofada Rice is safe. Mama Nkechi Foods is preparing your order.", createdAt: isoDateHoursAgo(5), read: true, actor: null },
-  { id: "n_6", category: "orders", title: "Dispute update", body: "Zudomart support replied about your Classic White Low-Top Sneakers order.", createdAt: isoDateHoursAgo(70), read: true, actor: userSummaryById("u_25") },
+  { id: "n_6", category: "orders", title: "Dispute update", body: "Nantty support replied about your Classic White Low-Top Sneakers order.", createdAt: isoDateHoursAgo(70), read: true, actor: userSummaryById("u_25") },
   { id: "n_7", category: "social", title: "Chinedu Okeke", body: "started following you.", createdAt: isoDateHoursAgo(30), read: true, actor: userSummaryById("u_7") },
-  { id: "n_8", category: "system", title: "Welcome to Zudomart", body: "Buy from real sellers near you — your money stays in escrow until you confirm delivery.", createdAt: isoDateHoursAgo(900), read: true, actor: null },
+  { id: "n_8", category: "system", title: "Welcome to Nantty", body: "Buy from real sellers near you — your money stays in escrow until you confirm delivery.", createdAt: isoDateHoursAgo(900), read: true, actor: null },
 ];
 
 const sellerNotifications: CategorizedNotification[] = [

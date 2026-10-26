@@ -25,7 +25,7 @@ const androidPackage = "com.zudomart.app";
 export function readAppStoreUrl(): string {
   if (Platform.OS === "android") return `market://details?id=${androidPackage}`;
   const configured = (Constants.expoConfig?.ios as { appStoreUrl?: string } | undefined)?.appStoreUrl;
-  return configured ?? "https://apps.apple.com/search?term=zudomart";
+  return configured ?? "https://apps.apple.com/search?term=nantty";
 }
 
 export function openAppStoreListing(): void {

@@ -1,4 +1,4 @@
-import { brandPalette } from "@zudomart/design-tokens/native";
+import { brandPalette } from "@nantty/design-tokens/native";
 
 export const palette = {
   primary: brandPalette,

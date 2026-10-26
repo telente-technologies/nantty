@@ -41,7 +41,7 @@ const persistableQueryKeyPrefixes = new Set(Object.keys(staleTimeByQueryKeyPrefi
 export const isQuerySafeToPersistOnDevice = (query: Query) =>
   query.state.status === "success" && typeof query.queryKey[0] === "string" && persistableQueryKeyPrefixes.has(query.queryKey[0]);
 
-export function createZudomartQueryClient() {
+export function createNanttyQueryClient() {
   const queryClient = new QueryClient({
     queryCache: new QueryCache({ onError: (error) => handleGlobalApiError(error) }),
     mutationCache: new MutationCache({ onError: (error) => handleGlobalApiError(error) }),

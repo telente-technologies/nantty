@@ -5,7 +5,7 @@ import type { LiveGiftGoal, LiveGiftLeaderboardEntry, LiveGiftSentEvent, LiveGif
 import { COIN_CASH_VALUE_MINOR, spendMockCoinsOrThrow } from "./coins.mock";
 import { getSignedInMockUser } from "./fixtures.mock";
 import { findMockLiveGiftById, mockLiveGiftCatalog } from "./giftCatalog.mock";
-import { awardMockLivePoints, readMockLivePoints } from "./zudoPoints.mock";
+import { awardMockLivePoints, readMockLivePoints } from "./nanttyPoints.mock";
 import { createMockRoute, type MockContext, type MockRoute } from "./registry.mock";
 
 const CREATOR_SHARE_BASIS_POINTS = 7_000;

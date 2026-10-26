@@ -23,7 +23,7 @@ struct LiveNowWidgetView: View {
   @Environment(\.widgetFamily) private var family
   let entry: LiveNowEntry
   var body: some View {
-    WidgetStateView(title: "Live now", state: entry.state, unavailableMessage: "Open Zudomart to refresh.") { payload, images in
+    WidgetStateView(title: "Live now", state: entry.state, unavailableMessage: "Open Nantty to refresh.") { payload, images in
       if let first = payload.lives.first {
         VStack(alignment: .leading, spacing: 6) {
           WidgetHeader(title: "Live now")
@@ -50,7 +50,7 @@ struct LiveNowWidgetView: View {
   }
 }
 
-struct ZudomartLiveNowWidget: Widget {
+struct NanttyLiveNowWidget: Widget {
   var body: some WidgetConfiguration {
     StaticConfiguration(kind: "ZudomartLiveNowWidget", provider: LiveNowProvider()) { entry in LiveNowWidgetView(entry: entry) }
       .configurationDisplayName("Live now")
@@ -81,7 +81,7 @@ struct CreatorTodayWidgetView: View {
   @Environment(\.widgetFamily) private var family
   let entry: CreatorTodayEntry
   var body: some View {
-    WidgetStateView(title: "Creator stats", state: entry.state, unavailableMessage: "Open Zudomart to refresh.") { payload, _ in
+    WidgetStateView(title: "Creator stats", state: entry.state, unavailableMessage: "Open Nantty to refresh.") { payload, _ in
       if payload.creatorProgramMember {
         VStack(alignment: .leading, spacing: 8) {
           WidgetHeader(title: "Today")
@@ -100,7 +100,7 @@ struct CreatorTodayWidgetView: View {
   }
 }
 
-struct ZudomartCreatorTodayWidget: Widget {
+struct NanttyCreatorTodayWidget: Widget {
   var body: some WidgetConfiguration {
     StaticConfiguration(kind: "ZudomartCreatorTodayWidget", provider: CreatorTodayProvider()) { entry in CreatorTodayWidgetView(entry: entry) }
       .configurationDisplayName("Creator stats")

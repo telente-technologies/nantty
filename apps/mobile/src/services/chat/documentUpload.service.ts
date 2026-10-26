@@ -1,4 +1,4 @@
-import type { AttachmentPointer } from "@zudomart/chat-crypto";
+import type { AttachmentPointer } from "@nantty/chat-crypto";
 
 import { useDocumentUploadsStore } from "@/store/documentUploads.store";
 import type { ID, MessageDocument } from "@/types";

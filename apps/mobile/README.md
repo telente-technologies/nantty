@@ -1,4 +1,4 @@
-# Zudomart mobile
+# Nantty mobile
 
 ## Keyboard handling
 

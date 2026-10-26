@@ -1,4 +1,4 @@
-import { encryptedAttachmentMimeType } from "@zudomart/chat-crypto";
+import { encryptedAttachmentMimeType } from "@nantty/chat-crypto";
 
 import { ApiError } from "@/errors/api.error";
 import type { CreateUploadSessionRequest, Media, MediaAsset, NewPostInput, Post } from "@/types";

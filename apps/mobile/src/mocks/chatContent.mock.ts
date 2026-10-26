@@ -80,7 +80,7 @@ export const chatContentMocks: MockRoute[] = [
     if (input.note) throw new ApiError(400, "Notes travel encrypted, never as plain text.", "VALIDATION_FAILED");
     if (input.conversationIds.length === 0) throw new ApiError(400, "Pick at least one chat");
     if (input.conversationIds.some((conversationId) => !input.encryptions?.some((entry) => entry.conversationId === conversationId))) {
-      throw new ApiError(422, "Shared items are end-to-end encrypted. Update Zudomart to share to chats.", "ENCRYPTION_REQUIRED");
+      throw new ApiError(422, "Shared items are end-to-end encrypted. Update Nantty to share to chats.", "ENCRYPTION_REQUIRED");
     }
     const card = resolveSharedContentCard(input.reference);
     if (card.availability !== "available") throw new ApiError(409, card.title);

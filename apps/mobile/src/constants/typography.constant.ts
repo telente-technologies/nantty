@@ -21,4 +21,4 @@ export const textStyles = {
   micro: { size: 11, lineHeight: 15 },
 } as const;
 
-export { typeScale } from "@zudomart/design-tokens/native";
+export { typeScale } from "@nantty/design-tokens/native";

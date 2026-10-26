@@ -29,7 +29,7 @@ export async function ensureLiveCameraAndMicrophone(needsCamera: boolean): Promi
 
 export function promptToEnableLiveMediaInSettings(needsCamera: boolean) {
   const devices = needsCamera ? "camera and microphone" : "microphone";
-  showAlertWithButtons(`Turn on your ${devices}`, `Zudomart needs your ${devices} to go live. You can turn ${needsCamera ? "them" : "it"} on in Settings.`, [
+  showAlertWithButtons(`Turn on your ${devices}`, `Nantty needs your ${devices} to go live. You can turn ${needsCamera ? "them" : "it"} on in Settings.`, [
     { text: "Not now", style: "cancel" },
     { text: "Open Settings", onPress: () => void Linking.openSettings().catch(() => undefined) },
   ]);

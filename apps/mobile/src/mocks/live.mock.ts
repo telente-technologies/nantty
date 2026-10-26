@@ -67,7 +67,7 @@ const findStreamPreviewForHost = (hostId: string) => {
 export const buildLiveSession = (liveId: string, host = userSummaryById(findKnownLiveOrDefault(liveId).hostId)): LiveSessionDetails => ({
   id: liveId,
   host: { ...host, followers: findDirectoryUserById(host.id)?.followers ?? 0, following: findDirectoryUserById(host.id)?.following ?? 0 },
-  title: findKnownLiveOrDefault(liveId).hostId === host.id ? findKnownLiveOrDefault(liveId).title : "Live on Zudomart",
+  title: findKnownLiveOrDefault(liveId).hostId === host.id ? findKnownLiveOrDefault(liveId).title : "Live on Nantty",
   viewers: 1268,
   status: liveId.startsWith("ended") ? "ended" : "live",
   products: CONTENT_ONLY_LIVE_IDS.has(liveId) ? [] : (["f1", "f2", "f4", "f6"] as const).map((key) => productSummaryByKey(key)),
@@ -85,7 +85,7 @@ const buildStreamCredentials = (liveId: string) => {
   const existing = issuedStreamKeys.get(liveId);
   if (existing) return existing;
   const issued = {
-    ingestUrl: "rtmp://studio.zudomart.com/live",
+    ingestUrl: "rtmp://creator.nantty.com/live",
     streamKey: `sk_live_${liveId.replace(/[^a-z0-9]/gi, "")}_${Math.random().toString(36).slice(2, 10)}`,
   };
   issuedStreamKeys.set(liveId, issued);

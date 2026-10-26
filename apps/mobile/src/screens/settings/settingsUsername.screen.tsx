@@ -17,8 +17,8 @@ import { useAuthStore } from "@/store/auth.store";
 import { BulletLine } from "@/components/ui/bulletLine";
 
 const POLICY_NOTES = [
-  "Some usernames are reserved for Zudomart and can't be used.",
-  "Zudomart may withhold or reclaim a username that violates our policies, impersonates someone or is needed for legal reasons.",
+  "Some usernames are reserved for Nantty and can't be used.",
+  "Nantty may withhold or reclaim a username that violates our policies, impersonates someone or is needed for legal reasons.",
 ];
 
 export function SettingsUsernameScreen({ navigation }: MainScreenProps<"SettingsUsername">) {

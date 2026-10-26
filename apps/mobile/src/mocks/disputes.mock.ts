@@ -24,7 +24,7 @@ const disputeRecords: MockDisputeRecord[] = [
     statusHistory: [
       { status: "open", label: "Dispute opened — escrow release paused", occurredAt: isoDateHoursAgo(110) },
       { status: "awaiting_seller", label: "Waiting for Kicks by Emeka to respond", occurredAt: isoDateHoursAgo(109) },
-      { status: "under_review", label: "Zudomart support is reviewing", occurredAt: isoDateHoursAgo(70) },
+      { status: "under_review", label: "Nantty support is reviewing", occurredAt: isoDateHoursAgo(70) },
     ],
     messages: [
       { id: "dm_1", authorRole: "buyer", text: "Hi, the sneakers arrived with a glue stain and the heel is peeling. I've added photos.", attachmentUrls: [], createdAt: isoDateHoursAgo(110) },
@@ -122,7 +122,7 @@ export const disputesMocks: MockRoute[] = [
     record.messages.push(message);
     if (message.authorRole === "seller" && record.status === "awaiting_seller") {
       record.status = "under_review";
-      record.statusHistory = [...record.statusHistory, statusEvent("under_review", "Seller responded — Zudomart support is reviewing")];
+      record.statusHistory = [...record.statusHistory, statusEvent("under_review", "Seller responded — Nantty support is reviewing")];
     }
     return presentDispute(record).messages.at(-1);
   }),

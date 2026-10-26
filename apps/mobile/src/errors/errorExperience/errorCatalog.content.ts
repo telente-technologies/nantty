@@ -7,7 +7,7 @@ const goneCopy: Partial<Record<ErrorSubject, readonly [string, string]>> = {
   clip: ["This clip is gone", "It was deleted or is no longer available. Keep watching more clips."],
   story: ["This story has ended", "Stories disappear after 24 hours, or the person removed it."],
   product: ["This product isn't available", "The seller removed it or it's no longer for sale. Similar items are waiting in Mart."],
-  store: ["This store has closed", "The store isn't on Zudomart anymore. Discover other sellers in Mart."],
+  store: ["This store has closed", "The store isn't on Nantty anymore. Discover other sellers in Mart."],
   profile: ["This account isn't available", "The account was deleted or deactivated."],
   live: ["This live has ended", "The broadcast is over. Follow the host to catch their next one."],
   comment: ["This comment was deleted", "The person who wrote it removed it."],
@@ -56,7 +56,7 @@ export const contentAndCommerceCatalog: Partial<Record<ErrorKind, (context: Cata
   },
   liveUnavailable: (context) => {
     const reason = context.details?.["reason"];
-    if (reason === "needsApp") return { title: "Update to watch this live", description: "This live uses features your version of Zudomart doesn't support yet. Update the app to join.", icon: "videoCameraSlash", tone: "brand", motion: "float", primary: "update" };
+    if (reason === "needsApp") return { title: "Update to watch this live", description: "This live uses features your version of Nantty doesn't support yet. Update the app to join.", icon: "videoCameraSlash", tone: "brand", motion: "float", primary: "update" };
     if (reason === "ended") return { title: "This live has ended", description: "The broadcast is over. Follow the host to catch their next one.", icon: "videoCameraSlash", tone: "neutral", motion: "float", primary: "browse" };
     return { title: "This live isn't available", description: "It may have ended, or the host limited who can watch.", icon: "videoCameraSlash", tone: "neutral", motion: "float", primary: "browse", secondary: "retry" };
   },
@@ -67,7 +67,7 @@ export const contentAndCommerceCatalog: Partial<Record<ErrorKind, (context: Cata
     icon: "storefront", tone: "neutral", motion: "float", primary: "browse",
   }),
   outOfStock: () => ({ title: "Sold out", description: "This item just ran out. Follow the store to hear when it's back, or find something similar.", icon: "package", tone: "neutral", motion: "float", primary: "browse" }),
-  regionUnavailable: () => ({ title: "Not available in your country", description: "This isn't offered where you are yet. We're working to bring more of Zudomart to you.", icon: "globe", tone: "neutral", motion: "float", primary: "browse" }),
+  regionUnavailable: () => ({ title: "Not available in your country", description: "This isn't offered where you are yet. We're working to bring more of Nantty to you.", icon: "globe", tone: "neutral", motion: "float", primary: "browse" }),
   deliveryUnavailable: () => ({ title: "We can't deliver there yet", description: "This seller doesn't ship to your address. Try another address or look for sellers closer to you.", icon: "truck", tone: "neutral", motion: "float", primary: "changeAddress", secondary: "browse" }),
   checkoutExpired: () => ({ title: "Your checkout timed out", description: "For your safety, checkout sessions expire after a while. Nothing was charged. Start again from your cart.", icon: "clockCounterClockwise", tone: "caution", motion: "breathe", primary: "viewCart" }),
   cartChanged: (context) => ({

@@ -23,7 +23,7 @@ export function SubscriptionOfferHandoffScreen({ route, navigation }: MainScreen
     <Screen>
       <EmptyState
         title="Claim your offer on the web"
-        body="Plan discounts are paid on the Zudomart website because app store purchases can't take them. Sign in there with this account and your plan shows up here too."
+        body="Plan discounts are paid on the Nantty website because app store purchases can't take them. Sign in there with this account and your plan shows up here too."
         actionLabel="Open the offer"
         onAction={() => void openOfferOnTheWeb()}
       />

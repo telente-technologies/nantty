@@ -9,13 +9,13 @@ import { useTheme } from "@/theme";
 
 const iosSteps = [
   "Touch and hold an empty spot on your Home Screen until the apps jiggle.",
-  "Tap Edit, then Add Widget, and search for Zudomart.",
+  "Tap Edit, then Add Widget, and search for Nantty.",
   "Pick Orders, Sales today, Live now, Creator stats or Stories, choose a size and tap Add Widget.",
 ];
 
 const androidSteps = [
   "Touch and hold an empty spot on your home screen.",
-  "Tap Widgets and scroll to Zudomart.",
+  "Tap Widgets and scroll to Nantty.",
   "Drag Orders, Sales today, Live now, Creator stats or Stories onto your home screen.",
 ];
 
@@ -42,10 +42,10 @@ export function SettingsWidgetsScreen() {
           </View>
         ))}
         <Text size={12} lineHeight={16.8} color={colors.textMuted}>
-          Widgets refresh about every 30 minutes and when you open Zudomart. Signing out clears them on this device.
+          Widgets refresh about every 30 minutes and when you open Nantty. Signing out clears them on this device.
         </Text>
         {areHomeScreenWidgetsSupported() ? null : (
-          <Text size={12} lineHeight={16.8} color={colors.textMuted}>Widgets need the installed Zudomart app. They are not available in this preview.</Text>
+          <Text size={12} lineHeight={16.8} color={colors.textMuted}>Widgets need the installed Nantty app. They are not available in this preview.</Text>
         )}
       </View>
     </SettingsPage>

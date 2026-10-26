@@ -1,4 +1,4 @@
-import { decodeBase64 } from "@zudomart/chat-crypto";
+import { decodeBase64 } from "@nantty/chat-crypto";
 import { Directory, File, Paths } from "expo-file-system";
 import { AppState, type AppStateStatus, Platform } from "react-native";
 

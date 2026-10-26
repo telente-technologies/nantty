@@ -207,7 +207,7 @@ export function CreatePostScreen({ navigation, route }: MainScreenProps<"CreateP
     mutationFn: async () => {
       if (!canGoLive) throw new Error("Join the Creator Program to go live");
       const category = liveCategory === "shopping" && !hostStore.storeId ? "justChatting" : liveCategory;
-      const session = await liveService.startLiveSessionWithTitle(liveTitle || "Live on Zudomart", category, buildLiveMonetizationInput(liveMonetization), hostStore.storeId);
+      const session = await liveService.startLiveSessionWithTitle(liveTitle || "Live on Nantty", category, buildLiveMonetizationInput(liveMonetization), hostStore.storeId);
       if (liveSource !== "external") return { session, credentials: null as LiveStreamCredentials | null };
       const issued = await liveService.issueStreamKey(session.id);
       return { session, credentials: { liveId: session.id, ...issued } satisfies LiveStreamCredentials };

@@ -1,4 +1,4 @@
-import { ChatCryptoClient, type ChatPayload, type ChatPayloadInput, createHttpKeyDirectory, describeDecryptionFailure, type EncryptedOutgoingMessage, type GroupAttributes } from "@zudomart/chat-crypto";
+import { ChatCryptoClient, type ChatPayload, type ChatPayloadInput, createHttpKeyDirectory, describeDecryptionFailure, type EncryptedOutgoingMessage, type GroupAttributes } from "@nantty/chat-crypto";
 
 import { registerSignOutHook, useAuthStore } from "@/store/auth.store";
 import type { Conversation, Message } from "@/types";
@@ -92,7 +92,7 @@ registerSignOutHook(() => chatCryptoService.signOut());
 
 export const readChatCryptoErrorMessage = (error: unknown): string | null => {
   const code = (error as { code?: string } | null)?.code;
-  if (code === "NO_RECIPIENT_DEVICES") return "They haven't set up secure chat yet. Ask them to open Zudomart, then try again.";
+  if (code === "NO_RECIPIENT_DEVICES") return "They haven't set up secure chat yet. Ask them to open Nantty, then try again.";
   if (code === "ENVELOPE_TOO_LARGE") return "This group has too many devices for one encrypted message.";
   if (code === "NOT_REGISTERED") return "Secure chat isn't set up on this device yet. Try again in a moment.";
   return null;

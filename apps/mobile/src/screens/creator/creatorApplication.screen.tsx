@@ -126,7 +126,7 @@ export function CreatorApplicationScreen({ navigation }: MainScreenProps<"Creato
         <SelectableRow selected={acceptedTerms} onPress={() => setAcceptedTerms((value) => !value)} accessibilityLabel="I agree to the Creator Terms">
           <Text size={13} lineHeight={17.5}>
             I agree to the{" "}
-            <Text size={13} lineHeight={17.5} color={colors.primary} onPress={() => openTrustedWebPage("https://zudomart.com/creator-terms", inAppBrowserColorsFromTheme(colors))}>Creator Terms</Text>
+            <Text size={13} lineHeight={17.5} color={colors.primary} onPress={() => openTrustedWebPage("https://nantty.com/creator-terms", inAppBrowserColorsFromTheme(colors))}>Creator Terms</Text>
             , including honest disclosure of sponsored and affiliate content.
           </Text>
         </SelectableRow>

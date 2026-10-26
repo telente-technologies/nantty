@@ -1,4 +1,4 @@
-import { darkColors as semanticDark } from "@zudomart/design-tokens/native";
+import { darkColors as semanticDark } from "@nantty/design-tokens/native";
 
 export type StatusToneName = "primary" | "success" | "caution" | "error" | "neutral";
 

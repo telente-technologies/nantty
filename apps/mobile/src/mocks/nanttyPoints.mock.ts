@@ -87,7 +87,7 @@ const awardEngagement = (liveId: string, action: LivePointsAction): LivePointsAw
   return { awarded, totalPoints: board.pointsByUserId.get(viewer.id)?.points ?? 0, likePointsThisMinute: likePointsInLastMinute(board, viewer.id) };
 };
 
-export const zudoPointsMocks: MockRoute[] = [
+export const nanttyPointsMocks: MockRoute[] = [
   createMockRoute("GET", "/api/v1/lives/:liveId/points/me", ({ params }) => {
     const board = boardFor(params.liveId!);
     const viewerId = getSignedInMockUser().id;

@@ -16,4 +16,4 @@ export function paidThroughLabel(provider: string | null | undefined): string {
   return provider === "flutterwave" ? "Flutterwave" : "Card / bank transfer";
 }
 
-export const OUTSIDE_NIGERIA_NOTE = "Outside Nigeria you pay at checkout by card or mobile money, directly to the seller. Zudomart doesn't keep a balance for you.";
+export const OUTSIDE_NIGERIA_NOTE = "Outside Nigeria you pay at checkout by card or mobile money, directly to the seller. Nantty doesn't keep a balance for you.";

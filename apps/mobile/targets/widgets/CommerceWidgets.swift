@@ -23,7 +23,7 @@ struct OrdersWidgetView: View {
   @Environment(\.widgetFamily) private var family
   let entry: OrdersEntry
   var body: some View {
-    WidgetStateView(title: "Orders", state: entry.state, unavailableMessage: "Open Zudomart to refresh.") { payload, _ in
+    WidgetStateView(title: "Orders", state: entry.state, unavailableMessage: "Open Nantty to refresh.") { payload, _ in
       if let first = payload.orders.first {
         VStack(alignment: .leading, spacing: 6) {
           WidgetHeader(title: payload.activeCount > 1 ? "\(payload.activeCount) active orders" : "Your order")
@@ -48,7 +48,7 @@ struct OrdersWidgetView: View {
   }
 }
 
-struct ZudomartOrdersWidget: Widget {
+struct NanttyOrdersWidget: Widget {
   var body: some WidgetConfiguration {
     StaticConfiguration(kind: "ZudomartOrdersWidget", provider: OrdersProvider()) { entry in OrdersWidgetView(entry: entry) }
       .configurationDisplayName("Orders")
@@ -97,7 +97,7 @@ struct SellerTodayWidgetView: View {
   }
 }
 
-struct ZudomartSellerTodayWidget: Widget {
+struct NanttySellerTodayWidget: Widget {
   var body: some WidgetConfiguration {
     StaticConfiguration(kind: "ZudomartSellerTodayWidget", provider: SellerTodayProvider()) { entry in SellerTodayWidgetView(entry: entry) }
       .configurationDisplayName("Sales today")

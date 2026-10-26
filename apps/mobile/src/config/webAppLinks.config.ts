@@ -6,7 +6,7 @@ declare global {
   }
 }
 
-const PRODUCTION_WEBAPP_URL = "https://app.zudomart.com";
+const PRODUCTION_WEBAPP_URL = "https://web.nantty.com";
 const uuidAtEndPattern = /([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})$/i;
 
 export const webAppBaseUrl = (process.env.EXPO_PUBLIC_WEBAPP_URL || PRODUCTION_WEBAPP_URL).replace(/\/+$/, "");
@@ -16,8 +16,8 @@ export const deepLinkPrefixes: readonly string[] = [
   "com.zudomart.app://",
   webAppBaseUrl,
   PRODUCTION_WEBAPP_URL,
-  "https://zudomart.com",
-  "https://www.zudomart.com",
+  "https://nantty.com",
+  "https://www.nantty.com",
 ];
 
 export function slugifyForUrl(text: string): string {
@@ -40,6 +40,7 @@ export const webAppLinks = {
   post: (postId: string) => `${webAppBaseUrl}/post/${encodeURIComponent(postId)}`,
   clip: (clipId: string) => `${webAppBaseUrl}/post/${encodeURIComponent(clipId)}`,
   live: (liveId: string) => `${webAppBaseUrl}/live/${encodeURIComponent(liveId)}`,
+  space: (spaceId: string) => `${webAppBaseUrl}/spaces/${encodeURIComponent(spaceId)}`,
   subscriptionOffer: (token: string) => `${webAppBaseUrl}/offer/${encodeURIComponent(token)}`,
   goldForBusinessesCheckout: (input: { readonly profileIds: readonly string[]; readonly interval: "month" | "year"; readonly expectedTotalMinor: number }) =>
     `${webAppBaseUrl}/verification?goldProfiles=${encodeURIComponent(input.profileIds.join(","))}&goldInterval=${input.interval}`,

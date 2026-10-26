@@ -7,7 +7,7 @@ import { convertUsdCentsToViewerCurrency } from "./locale.mock";
 import { createMockRoute, type MockRoute } from "./registry.mock";
 
 const COIN_TRANSFER_FEE_PERCENT = 25;
-const MOCK_CHECKOUT_PAGE_URL = "https://zudomart.com/pay/mock";
+const MOCK_CHECKOUT_PAGE_URL = "https://nantty.com/pay/mock";
 
 export const COIN_CASH_VALUE_MINOR: Record<CurrencyCode, number> = { NGN: 1_000, GHS: 10, KES: 100, ZAR: 15, GBP: 1, EUR: 1, USD: 1 };
 const MINIMUM_PAYOUT_MINOR = 1_000;

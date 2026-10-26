@@ -20,7 +20,7 @@ export const buildMockPostMediaDownload = (post: Post, mediaId: string, now = Da
   const extension = media.type === "video" ? "mp4" : "jpg";
   const ready: PostMediaDownload = {
     status: "ready", progress: 1, url: media.url, expiresAt: new Date(now + 300_000).toISOString(),
-    fileName: `zudomart-${post.author.username}-${mediaId.slice(0, 8)}.${extension}`, contentType: media.type === "video" ? "video/mp4" : "image/jpeg",
+    fileName: `nantty-${post.author.username}-${mediaId.slice(0, 8)}.${extension}`, contentType: media.type === "video" ? "video/mp4" : "image/jpeg",
   };
   if (media.type !== "video") return ready;
   const key = `${post.id}:${mediaId}`;

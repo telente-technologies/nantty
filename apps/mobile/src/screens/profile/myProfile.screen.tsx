@@ -47,7 +47,7 @@ export function MeScreen() {
 
   const shareMyProfileLink = () => {
     if (!profile) return;
-    Share.share({ message: `Follow ${profile.name} on Zudomart: ${webAppLinks.profile(profile.username)}` });
+    Share.share({ message: `Follow ${profile.name} on Nantty: ${webAppLinks.profile(profile.username)}` });
   };
 
   const refreshProfileAndPosts = () => {

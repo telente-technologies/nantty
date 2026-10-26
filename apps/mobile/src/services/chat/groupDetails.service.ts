@@ -1,4 +1,4 @@
-import type { GroupAttributes, GroupAvatar } from "@zudomart/chat-crypto";
+import type { GroupAttributes, GroupAvatar } from "@nantty/chat-crypto";
 
 import type { Conversation } from "@/types";
 

@@ -41,7 +41,7 @@ export function SellerApplicationStatusScreen({ navigation }: MainScreenProps<"S
         ) : (
           <View style={styles.empty}>
             <Text align="center" color={colors.textSubtle}>You haven't applied yet.</Text>
-            <Button title="Start selling on Zudomart" onPress={() => navigation.replace("SellerApplication")} />
+            <Button title="Start selling on Nantty" onPress={() => navigation.replace("SellerApplication")} />
           </View>
         )
       ) : (

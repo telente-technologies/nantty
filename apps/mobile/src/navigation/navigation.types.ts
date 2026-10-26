@@ -31,6 +31,7 @@ export type MainTabParamList = {
 
 export type MainStackParamList = {
   NotFound: undefined;
+  Spaces: { spaceId?: string } | undefined;
   Tabs: NavigatorScreenParams<MainTabParamList> | undefined;
   Search: { scope?: SearchScopeKey | "all" | "messages"; scopeLabel?: string } | undefined;
   Notifications: undefined;

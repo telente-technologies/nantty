@@ -54,7 +54,7 @@ export function usePostInteractions() {
   };
 
   const sharePost = async (post: SharablePost) => {
-    const result = await Share.share({ message: `${post.author.name} on Zudomart: ${webAppLinks.post(post.id)}` }).catch(() => null);
+    const result = await Share.share({ message: `${post.author.name} on Nantty: ${webAppLinks.post(post.id)}` }).catch(() => null);
     if (result?.action === Share.sharedAction) postsService.recordPostShare(post.id).catch(() => undefined);
   };
 

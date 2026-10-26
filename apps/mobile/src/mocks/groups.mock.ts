@@ -101,13 +101,13 @@ export const groupsMocks: MockRoute[] = [
   createMockRoute("POST", "/api/v1/conversations/stores/:storeId/messages", ({ body }) => {
     const input = (body ?? {}) as Record<string, unknown>;
     if (["body", "text", "location", "poll", "document", "sharedContent"].some((field) => input[field] !== undefined && input[field] !== null && input[field] !== "")) {
-      throw new ApiError(422, "Chats are end-to-end encrypted. Update Zudomart to send this.", "PLAINTEXT_NOT_ACCEPTED");
+      throw new ApiError(422, "Chats are end-to-end encrypted. Update Nantty to send this.", "PLAINTEXT_NOT_ACCEPTED");
     }
     throw new ApiError(422, "Open the store chat and send an encrypted message.", "ENCRYPTION_REQUIRED");
   }),
   createMockRoute("POST", "/api/v1/conversations/groups", ({ body }) => {
     const input = body as { readonly name?: unknown; readonly encryptedAttributes?: string; readonly memberIds: readonly string[]; readonly photoMediaId?: string };
-    if (input.name !== undefined && input.name !== "") throw new ApiError(422, "Group names and photos are end-to-end encrypted. Update Zudomart to create or rename groups.", "PLAINTEXT_NOT_ACCEPTED");
+    if (input.name !== undefined && input.name !== "") throw new ApiError(422, "Group names and photos are end-to-end encrypted. Update Nantty to create or rename groups.", "PLAINTEXT_NOT_ACCEPTED");
     if (!input.encryptedAttributes || input.encryptedAttributes.length < 64) throw new ApiError(422, "A new group needs its encrypted details.", "ENCRYPTION_REQUIRED");
     const me = getSignedInMockUser();
     const conversation: Conversation = {
@@ -168,7 +168,7 @@ export const groupsMocks: MockRoute[] = [
   createMockRoute("PATCH", "/api/v1/conversations/:conversationId", ({ params, body }) => {
     const update = body as ConversationSettingsUpdate & { readonly encryptedAttributes?: string; readonly photoMediaId?: string | null };
     const target = mockConversations.find((c) => c.id === params.conversationId);
-    if (target?.kind === "group" && update.name !== undefined) throw new ApiError(422, "Group names and photos are end-to-end encrypted. Update Zudomart to create or rename groups.", "PLAINTEXT_NOT_ACCEPTED");
+    if (target?.kind === "group" && update.name !== undefined) throw new ApiError(422, "Group names and photos are end-to-end encrypted. Update Nantty to create or rename groups.", "PLAINTEXT_NOT_ACCEPTED");
     if (update.encryptedAttributes !== undefined || (target?.kind === "group" && update.photoMediaId !== undefined)) requireGroupAdmin(params.conversationId!);
     const me = getSignedInMockUser();
     const conversationNoun = mockConversations.find((c) => c.id === params.conversationId)?.kind === "channel" ? "channel" : "group";

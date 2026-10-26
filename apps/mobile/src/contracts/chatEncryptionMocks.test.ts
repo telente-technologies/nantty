@@ -1,4 +1,4 @@
-import { ChatCryptoClient, createHttpKeyDirectory, MemoryKeyValueStore } from "@zudomart/chat-crypto";
+import { ChatCryptoClient, createHttpKeyDirectory, MemoryKeyValueStore } from "@nantty/chat-crypto";
 import { webcrypto } from "node:crypto";
 
 import { resolveMockApiRequest } from "@/mocks";
@@ -7,7 +7,7 @@ import type { Message } from "@/types";
 
 jest.mock("@/services/chatCrypto/mobileKeyStore", () => ({
   randomBytesFromDevice: (length: number) => require("node:crypto").webcrypto.getRandomValues(new Uint8Array(length)),
-  createMobileChatCryptoStorage: () => ({ secrets: new (require("@zudomart/chat-crypto").MemoryKeyValueStore)(), records: new (require("@zudomart/chat-crypto").MemoryKeyValueStore)() }),
+  createMobileChatCryptoStorage: () => ({ secrets: new (require("@nantty/chat-crypto").MemoryKeyValueStore)(), records: new (require("@nantty/chat-crypto").MemoryKeyValueStore)() }),
 }));
 
 const random = (length: number) => webcrypto.getRandomValues(new Uint8Array(length));

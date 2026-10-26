@@ -7,9 +7,9 @@ const gone = (message: string) => () => {
 };
 
 export const chatAttachmentMocks: MockRoute[] = [
-  createMockRoute("PATCH", "/api/v1/messages/:messageId/location", gone("Live locations are now end-to-end encrypted. Update Zudomart to share your location.")),
-  createMockRoute("POST", "/api/v1/messages/:messageId/live-location/stop", gone("Live locations are now end-to-end encrypted. Update Zudomart to share your location.")),
-  createMockRoute("POST", "/api/v1/messages/:messageId/poll-votes", gone("Poll votes are now end-to-end encrypted. Update Zudomart to vote.")),
-  createMockRoute("POST", "/api/v1/messages/:messageId/reactions", gone("Reactions are now end-to-end encrypted. Update Zudomart to react to messages.")),
-  createMockRoute("DELETE", "/api/v1/messages/:messageId/reactions/:emoji", gone("Reactions are now end-to-end encrypted. Update Zudomart to react to messages.")),
+  createMockRoute("PATCH", "/api/v1/messages/:messageId/location", gone("Live locations are now end-to-end encrypted. Update Nantty to share your location.")),
+  createMockRoute("POST", "/api/v1/messages/:messageId/live-location/stop", gone("Live locations are now end-to-end encrypted. Update Nantty to share your location.")),
+  createMockRoute("POST", "/api/v1/messages/:messageId/poll-votes", gone("Poll votes are now end-to-end encrypted. Update Nantty to vote.")),
+  createMockRoute("POST", "/api/v1/messages/:messageId/reactions", gone("Reactions are now end-to-end encrypted. Update Nantty to react to messages.")),
+  createMockRoute("DELETE", "/api/v1/messages/:messageId/reactions/:emoji", gone("Reactions are now end-to-end encrypted. Update Nantty to react to messages.")),
 ];

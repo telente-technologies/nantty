@@ -85,7 +85,7 @@ export function SupportTicketDetailScreen({ route }: MainScreenProps<"SupportTic
           {details.canRate ? <TicketRatingCard ticketId={ticketId} onRated={() => ticket.refetch()} /> : null}
           {details.satisfactionScore ? <Text size={typeScale.xs} lineHeight={16.8} color={colors.textSubtle}>You rated this {details.satisfactionScore} out of 5. Thank you.</Text> : null}
           {closed ? <Text size={typeScale.xs} lineHeight={16.8} color={colors.textSubtle}>This request is closed. Contact support again if you still need help.</Text> : null}
-          {details.agentTyping ? <Text size={typeScale.xs} lineHeight={16.8} color={colors.textSubtle} accessibilityLiveRegion="polite">Zudomart Support is typing…</Text> : null}
+          {details.agentTyping ? <Text size={typeScale.xs} lineHeight={16.8} color={colors.textSubtle} accessibilityLiveRegion="polite">Nantty Support is typing…</Text> : null}
         </ScrollView>
         {closed ? null : (
           <PillComposer
@@ -95,7 +95,7 @@ export function SupportTicketDetailScreen({ route }: MainScreenProps<"SupportTic
             isSending={reply.isPending}
             onFocus={() => { isComposing.current = true; }}
             onBlur={() => { isComposing.current = false; }}
-            placeholder="Message Zudomart Support…"
+            placeholder="Message Nantty Support…"
             inputLabel="Reply"
             sendLabel="Send reply"
           />

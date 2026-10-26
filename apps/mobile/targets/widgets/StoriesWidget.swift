@@ -32,7 +32,7 @@ struct StoriesWidgetView: View {
   }
 
   var body: some View {
-    WidgetStateView(title: "Stories", state: entry.state, unavailableMessage: "Open Zudomart to refresh.") { payload, images in
+    WidgetStateView(title: "Stories", state: entry.state, unavailableMessage: "Open Nantty to refresh.") { payload, images in
       let people = Array(payload.people.prefix(visibleCount))
       if let first = people.first {
         if family == .systemSmall {
@@ -68,7 +68,7 @@ struct StoriesWidgetView: View {
   }
 }
 
-struct ZudomartStoriesWidget: Widget {
+struct NanttyStoriesWidget: Widget {
   var body: some WidgetConfiguration {
     StaticConfiguration(kind: "ZudomartStoriesWidget", provider: StoriesProvider()) { entry in StoriesWidgetView(entry: entry) }
       .configurationDisplayName("Stories")

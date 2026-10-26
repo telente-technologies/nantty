@@ -18,7 +18,7 @@ import { describeWalletDailyLimit } from "@/utils/walletLimits.util";
 
 export const ADD_MONEY_NOTES = [
   "Transfer from any Nigerian bank app. It usually arrives in a few minutes.",
-  "You can spend it on Zudomart straight away. It can be withdrawn 24 hours after it arrives (72 hours for your first deposit).",
+  "You can spend it on Nantty straight away. It can be withdrawn 24 hours after it arrives (72 hours for your first deposit).",
   "Any deposit fee shows on your receipt.",
   "You can pay up to ₦50,000, ₦200,000 or ₦5,000,000 a day from your wallet, depending on your verification level.",
 ] as const;
@@ -47,7 +47,7 @@ export function AddMoneyScreen({ navigation }: MainScreenProps<"AddMoney">) {
           <View style={styles.section}>
             <Text size={15} weight={600} lineHeight={20}>Get your own account number</Text>
             <Text size={13} lineHeight={18} color={colors.textMuted}>
-              Finish payout verification to get your own account number. Your wallet is held in your name by our licensed payment partner, not by Zudomart.
+              Finish payout verification to get your own account number. Your wallet is held in your name by our licensed payment partner, not by Nantty.
             </Text>
             {verification.data?.payoutVerified ? (
               <Button title="Create my account number" loading={activate.isPending} onPress={() => activate.mutate()} />

@@ -56,7 +56,7 @@ export function SettingsScreen({ navigation }: MainScreenProps<"Settings">) {
   };
 
   const confirmLogOut = () =>
-    showAlertWithButtons("Log out?", "You'll need to log in again to use Zudomart.", [
+    showAlertWithButtons("Log out?", "You'll need to log in again to use Nantty.", [
       { text: "Cancel", style: "cancel" },
       { text: "Log out", style: "destructive", onPress: logOutAndClearSession },
     ], { intent: "signOut" });
@@ -115,7 +115,7 @@ export function SettingsScreen({ navigation }: MainScreenProps<"Settings">) {
 
       <SettingsGroup>
         {profile?.isSeller || !linked.data?.canCreate.store ? null : (
-          <SettingsRow label="Start selling on Zudomart" icon={<Tag24Icon />} trailing={{ text: "Free to apply" }} onPress={() => navigation.navigate("SellerApplication")} />
+          <SettingsRow label="Start selling on Nantty" icon={<Tag24Icon />} trailing={{ text: "Free to apply" }} onPress={() => navigation.navigate("SellerApplication")} />
         )}
         {profile?.isSeller ? <SettingsRow label="Business documents" icon={<Document24Icon />} onPress={() => navigation.navigate("BusinessDocuments")} /> : null}
         <SettingsRow

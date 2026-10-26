@@ -1,4 +1,4 @@
-import { type AttachmentDetails, type AttachmentPointer, decryptAttachment, encodeBase64, encryptAttachment, encryptedAttachmentMimeType } from "@zudomart/chat-crypto";
+import { type AttachmentDetails, type AttachmentPointer, decryptAttachment, encodeBase64, encryptAttachment, encryptedAttachmentMimeType } from "@nantty/chat-crypto";
 import { File } from "expo-file-system";
 import { ImageManipulator, SaveFormat } from "expo-image-manipulator";
 import { Platform } from "react-native";

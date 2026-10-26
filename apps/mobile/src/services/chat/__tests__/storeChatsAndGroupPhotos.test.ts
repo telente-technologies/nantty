@@ -18,8 +18,8 @@ jest.mock("@/services/core/apiClient.service", () => ({
 }));
 jest.mock("@/services/chatCrypto/mobileKeyStore", () => ({ randomBytesFromDevice: (length: number) => new Uint8Array(length).fill(3), createMobileChatCryptoStorage: () => ({}) }));
 jest.mock("@/store/auth.store", () => ({ registerSignOutHook: () => undefined, useAuthStore: { getState: () => ({ user: { id: "buyer" } }) } }));
-jest.mock("@zudomart/chat-crypto", () => {
-  const actual = jest.requireActual("@zudomart/chat-crypto");
+jest.mock("@nantty/chat-crypto", () => {
+  const actual = jest.requireActual("@nantty/chat-crypto");
   return {
     ...actual,
     ChatCryptoClient: class {

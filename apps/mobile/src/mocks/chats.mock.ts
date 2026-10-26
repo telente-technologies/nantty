@@ -41,7 +41,7 @@ export const mockConversations: Conversation[] = [
   {
     ...directConversation("ch_deals", "u_25", "Flash sale: free delivery on all orders above your city's threshold today", 5, 2, false),
     kind: "channel",
-    title: "Zudomart Deals",
+    title: "Nantty Deals",
     subscriberCount: 58200,
     myRole: "subscriber",
   },
@@ -115,7 +115,7 @@ export const mockMessagesByConversation = new Map<string, Message[]>([
     "ch_deals",
     [
       {
-        ...textMessage("m_ch_1", "ch_deals", "u_25", "Welcome to Zudomart Deals! We post the best verified offers here every day.", 48),
+        ...textMessage("m_ch_1", "ch_deals", "u_25", "Welcome to Nantty Deals! We post the best verified offers here every day.", 48),
         reactions: [{ emoji: "👍", count: 1204, reactedByMe: false }],
       },
       {
@@ -190,7 +190,7 @@ export const chatsMocks: MockRoute[] = [
   createMockRoute("POST", "/api/v1/conversations/:conversationId/messages", ({ params, body }) => {
     const input = body as { text?: unknown; location?: unknown; poll?: unknown; document?: unknown; sharedContent?: unknown; encryption?: { deviceId: string; ciphertext: string; protocol?: string }; kind?: NonNullable<Message["kind"]>; mediaId?: string; durationSeconds?: number; linkPreview?: string | null; mentions?: Message["mentions"] };
     const plaintextFields = (["text", "location", "poll", "document", "sharedContent"] as const).filter((field) => input[field] !== undefined && input[field] !== null && input[field] !== "");
-    if (plaintextFields.length > 0) throw new ApiError(422, "Chats are end-to-end encrypted. Update Zudomart to send this.", "PLAINTEXT_NOT_ACCEPTED");
+    if (plaintextFields.length > 0) throw new ApiError(422, "Chats are end-to-end encrypted. Update Nantty to send this.", "PLAINTEXT_NOT_ACCEPTED");
     if (!input.encryption?.ciphertext) throw new ApiError(422, "Every chat message needs an encryption envelope.", "ENCRYPTION_REQUIRED");
     if (input.kind === "control" && input.mediaId) throw new ApiError(422, "This message kind has no media.", "MEDIA_NOT_ALLOWED");
     const conversation = findMockConversation(params.conversationId!);

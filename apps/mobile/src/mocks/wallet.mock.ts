@@ -83,9 +83,9 @@ const buildWalletSummary = (): WalletSummary => {
       { key: "pending", label: "Pending (escrow)", description: "Order money held until the buyer confirms delivery.", amount: pending },
       { key: "locked", label: "Locked", description: "Released order money in its short safety hold before it becomes available.", amount: locked },
       { key: "earningsPayable", label: "Creator earnings", description: "Gift, subscription and ad-share earnings waiting to move to your available balance.", amount: earningsPayable },
-      { key: "adCredit", label: "Ad credit", description: "Prepaid credit for Zudomart ads and boosts. It cannot be withdrawn.", amount: adCredit },
+      { key: "adCredit", label: "Ad credit", description: "Prepaid credit for Nantty ads and boosts. It cannot be withdrawn.", amount: adCredit },
       { key: "coins", label: "Coins", description: "Coins to send as gifts, plus coins you earned. Coins are not cash.", amount: { amountMinor: coins.spendable + coins.earned, currency: "COIN" } },
-      { key: "debts", label: "Owed to Zudomart", description: "Refunds or chargebacks taken from your next earnings.", amount: debts },
+      { key: "debts", label: "Owed to Nantty", description: "Refunds or chargebacks taken from your next earnings.", amount: debts },
     ],
     verification: {
       level: unlocked ? 1 : 0,

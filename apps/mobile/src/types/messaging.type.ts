@@ -1,4 +1,4 @@
-import type { AttachmentPointer, ChatControl, ChatPoll, GroupAvatar } from "@zudomart/chat-crypto";
+import type { AttachmentPointer, ChatControl, ChatPoll, GroupAvatar } from "@nantty/chat-crypto";
 
 import type { ChatStreak, InboxFolder, LinkPreview, MessageEncryptionEnvelope, SharedContentReference } from "./chatSafety.type";
 import type { MentionEntity } from "./mention.type";

@@ -175,7 +175,7 @@ function WithdrawSection({ balance, onVerify }: { readonly balance: AdBalance; r
     <View style={styles.section}>
       {stepUpSheet}
       <Text size={14} weight={600} lineHeight={16.8}>Withdraw ad balance</Text>
-      <Text size={12} lineHeight={16} color={colors.textMuted}>{formatMoneyForDisplay(balance.withdrawable)} can be withdrawn to your Zudomart wallet now.</Text>
+      <Text size={12} lineHeight={16} color={colors.textMuted}>{formatMoneyForDisplay(balance.withdrawable)} can be withdrawn to your Nantty wallet now.</Text>
       {!balance.withdrawal.available ? (
         <>
           <Text size={13} lineHeight={16.9} color={colors.textMuted}>{balance.withdrawal.reason ?? "Withdrawals aren't available right now."}</Text>

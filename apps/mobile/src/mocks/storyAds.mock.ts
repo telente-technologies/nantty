@@ -31,7 +31,7 @@ export const decideStoryAdMock = (slot: StorySlotRequest, viewerUserId: string |
         headline: "Mama Put Party Trays",
         primaryText: "Feeding 10 to 200 guests? Order same-day party trays.",
         callToAction: "Order now",
-        destination: { type: "url", targetId: null, url: "https://zudomart.com/stores/st_mama_put" },
+        destination: { type: "url", targetId: null, url: "https://nantty.com/stores/st_mama_put" },
         identity: { name: "Mama Put Kitchens", handle: "mamaputkitchens", avatarUrl: null },
       },
     },

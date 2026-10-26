@@ -37,7 +37,7 @@ export async function requestBrandedMediaLink(postId: string, mediaId: string, o
 
 export async function saveBrandedPostMediaToDevice({ postId, media, onProgress, signal }: SaveBrandedMediaOptions): Promise<SaveBrandedMediaOutcome> {
   const ready = await requestBrandedMediaLink(postId, media.id, onProgress, signal);
-  const fileName = ready.fileName ?? `zudomart-${media.id}.${media.type === "video" ? "mp4" : "jpg"}`;
+  const fileName = ready.fileName ?? `nantty-${media.id}.${media.type === "video" ? "mp4" : "jpg"}`;
   const file = await downloadSignedFileIntoCache(ready.url, fileName, onProgress, signal);
   const permission = await requestPermissionsAsync(true, [media.type === "video" ? "video" : "photo"]);
   if (permission.granted) {

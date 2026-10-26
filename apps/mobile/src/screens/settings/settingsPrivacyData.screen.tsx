@@ -22,7 +22,7 @@ import type { ConsentKey } from "@/types";
 const CONSENT_OPTIONS: { key: ConsentKey; label: string; description: string }[] = [
   { key: "personalization", label: "Personalization", description: "Use what you view, search and buy to tailor your feed and recommendations." },
   { key: "advertising", label: "Personalized ads", description: "Show ads based on your activity. Turning this off still shows ads, just less relevant." },
-  { key: "analytics", label: "Analytics", description: "Share anonymous usage data so we can fix problems and improve Zudomart." },
+  { key: "analytics", label: "Analytics", description: "Share anonymous usage data so we can fix problems and improve Nantty." },
   { key: "marketing", label: "Marketing messages", description: "Personalised picks from verified sellers, price drops, back in stock, weekly digest." },
 ];
 

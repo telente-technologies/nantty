@@ -6,13 +6,13 @@ import { listCreateModesForViewer } from "../createMenu.util";
 
 describe("profile share links", () => {
   it("use the web app domain and /username with no @", () => {
-    expect(webAppLinks.profile("@ada.lovelace")).toBe("https://app.zudomart.com/ada.lovelace");
+    expect(webAppLinks.profile("@ada.lovelace")).toBe("https://web.nantty.com/ada.lovelace");
     expect(webAppLinks.profile("tolu_1")).not.toContain("@");
   });
 
   it("build clean product slugs that round-trip to the id", () => {
     const link = webAppLinks.product({ id: "pr_f1", name: "Ankara Wrap Midi Dress" });
-    expect(link).toBe("https://app.zudomart.com/p/ankara-wrap-midi-dress-pr_f1");
+    expect(link).toBe("https://web.nantty.com/p/ankara-wrap-midi-dress-pr_f1");
     expect(readProductIdFromSlug("ankara-wrap-midi-dress-pr_f1")).toBe("pr_f1");
     expect(readProductIdFromSlug("shoe-0192f000-0000-7000-8000-000000000001")).toBe("0192f000-0000-7000-8000-000000000001");
   });
@@ -20,7 +20,7 @@ describe("profile share links", () => {
 
 describe("internal link parsing", () => {
   it("opens /username links as profiles by username", () => {
-    const reference = readInternalReferenceFromUrl("https://app.zudomart.com/ada.lovelace");
+    const reference = readInternalReferenceFromUrl("https://web.nantty.com/ada.lovelace");
     expect(reference).toEqual({ kind: "profile", id: "ada.lovelace" });
     expect(buildInternalRoute(reference!)).toEqual({ name: "UserProfileByUsername", params: { username: "ada.lovelace" } });
   });
@@ -30,7 +30,7 @@ describe("internal link parsing", () => {
   });
 
   it("reads products from /p/<slug>-<id> and ignores external hosts", () => {
-    expect(readInternalReferenceFromUrl("https://app.zudomart.com/p/ankara-wrap-midi-dress-pr_f1")).toEqual({ kind: "product", id: "pr_f1" });
+    expect(readInternalReferenceFromUrl("https://web.nantty.com/p/ankara-wrap-midi-dress-pr_f1")).toEqual({ kind: "product", id: "pr_f1" });
     expect(readInternalReferenceFromUrl("https://evil.example/ada")).toBeNull();
   });
 });

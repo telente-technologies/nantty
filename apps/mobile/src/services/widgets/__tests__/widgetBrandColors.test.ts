@@ -1,4 +1,4 @@
-import { darkColors, lightColors } from "@zudomart/design-tokens/native";
+import { darkColors, lightColors } from "@nantty/design-tokens/native";
 
 import { figmaDarkCanvas } from "@/theme/themeColors.constant";
 
@@ -10,7 +10,7 @@ const widgetColors = require("../../../../targets/widgets/widgetColors.json") as
 };
 
 describe("iOS widget colors", () => {
-  it("stay in sync with the Zudomart design tokens", () => {
+  it("stay in sync with the Nantty design tokens", () => {
     for (const [name, value] of Object.entries(widgetColors.lightColors)) expect(value).toBe(lightColors[name as keyof typeof lightColors]);
     for (const [name, value] of Object.entries(widgetColors.darkColors)) {
       if (name === "canvas") expect(value).toBe(figmaDarkCanvas);

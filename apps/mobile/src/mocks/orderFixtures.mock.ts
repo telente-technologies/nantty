@@ -72,7 +72,7 @@ const deliveryStatusForOrderStatus = (status: OrderStatus): DeliveryStatus => {
 export const buildShipment = (courierName: string, trackingNumber: string, shippedAt: string): ShipmentDetails => ({
   courierName,
   trackingNumber,
-  trackingUrl: `https://track.zudomart.com/${encodeURIComponent(trackingNumber)}`,
+  trackingUrl: `https://track.nantty.com/${encodeURIComponent(trackingNumber)}`,
   shippedAt,
   estimatedDeliveryAt: new Date(new Date(shippedAt).getTime() + 3 * 86_400_000).toISOString(),
 });

@@ -38,7 +38,7 @@ export const clipVideoSeeds: readonly ClipVideoSeed[] = [
   {
     id: "clip_amaka_haul",
     authorId: "u_13",
-    caption: "POV: you finally found the exact Ankara set from my last video on Zudomart 😭🛍️ Store tab has everything #ZudomartFinds #LagosShopping",
+    caption: "POV: you finally found the exact Ankara set from my last video on Nantty 😭🛍️ Store tab has everything #NanttyFinds #LagosShopping",
     ...mixkitVideo(42136, "woman-exploring-an-online-sales-page-on-her-cell-phone"),
     durationSeconds: 10, hoursAgo: 2, likes: 48_300, comments: 1_240, views: 612_000,
   },
@@ -71,7 +71,7 @@ export const clipVideoSeeds: readonly ClipVideoSeed[] = [
     caption: "Bridal glam with our Matte Finish Foundation 💄 12 hours, zero melting in Lagos heat 💯 #BridalGlam #MelaninBeauty",
     ...mixkitVideo(40556, "makeup-artist-powdering-a-bride"),
     durationSeconds: 12, hoursAgo: 11, likes: 22_900, comments: 918, views: 301_000,
-    sponsoredCampaign: { campaignId: "cmp_clip_glow_bridal", advertiserName: "Glow by Zainab", ctaLabel: "Shop now", ctaUrl: "https://zudomart.com/stores/s_glow" },
+    sponsoredCampaign: { campaignId: "cmp_clip_glow_bridal", advertiserName: "Glow by Zainab", ctaLabel: "Shop now", ctaUrl: "https://nantty.com/stores/s_glow" },
     taggedProductKeys: ["b6"],
   },
   {
@@ -118,7 +118,7 @@ export const clipVideoSeeds: readonly ClipVideoSeed[] = [
     caption: "Wireless Earbuds Pro are back in stock at Computer Village 🎧 1-year warranty, pay on escrow #Gadgets #ComputerVillage",
     ...mixkitVideo(41174, "happy-man-texting-on-his-smartphone"),
     durationSeconds: 7, hoursAgo: 33, likes: 8_310, comments: 402, views: 120_500,
-    sponsoredCampaign: { campaignId: "cmp_clip_tunde_earbuds", advertiserName: "TundeTech Gadgets", ctaLabel: "Buy now", ctaUrl: "https://zudomart.com/stores/s_tunde" },
+    sponsoredCampaign: { campaignId: "cmp_clip_tunde_earbuds", advertiserName: "TundeTech Gadgets", ctaLabel: "Buy now", ctaUrl: "https://nantty.com/stores/s_tunde" },
     taggedProductKeys: ["g1"],
   },
   {

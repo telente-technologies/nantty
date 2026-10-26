@@ -6,11 +6,11 @@
       "@/*": [
         "./src/*"
       ],
-      "@zudomart/design-tokens/native": [
+      "@nantty/design-tokens/native": [
         "../../packages/designTokens/native.ts"
       ],
-      "@zudomart/web-kit/brandPath": [
-        "../../packages/webKit/src/brand/zudomartBrand.path.ts"
+      "@nantty/web-kit/brandPath": [
+        "../../packages/webKit/src/brand/nanttyBrand.path.ts"
       ]
     }
   },

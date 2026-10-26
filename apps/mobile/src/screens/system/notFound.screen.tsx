@@ -31,9 +31,9 @@ export function KeepExploring() {
   const styles = useStyles();
   return (
     <View style={styles.explore}>
-      <Pressable accessibilityRole="search" accessibilityLabel="Search Zudomart" onPress={() => navigate("Search")} style={[styles.search, { borderColor: colors.divider, backgroundColor: colors.surface }]}>
+      <Pressable accessibilityRole="search" accessibilityLabel="Search Nantty" onPress={() => navigate("Search")} style={[styles.search, { borderColor: colors.divider, backgroundColor: colors.surface }]}>
         <SearchGlyph color={colors.textSubtle} />
-        <Text size={15} color={colors.textSubtle}>Search Zudomart</Text>
+        <Text size={15} color={colors.textSubtle}>Search Nantty</Text>
       </Pressable>
       <View style={styles.chips}>
         {notFoundDestinations.map((destination) => (

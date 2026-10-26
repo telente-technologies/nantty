@@ -1,4 +1,4 @@
-import { type ChatCryptoStorage, MemoryKeyValueStore } from "@zudomart/chat-crypto";
+import { type ChatCryptoStorage, MemoryKeyValueStore } from "@nantty/chat-crypto";
 
 export const randomBytesFromDevice = (length: number) => crypto.getRandomValues(new Uint8Array(length));
 

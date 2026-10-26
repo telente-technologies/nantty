@@ -35,13 +35,13 @@ const systemAndAccessCatalog: Partial<Record<ErrorKind, (context: CatalogContext
     description: context.retryAfterSeconds ? `Too many attempts. To protect your account, you can try again in ${formatWaitDuration(context.retryAfterSeconds)}, or reset your password.` : "Too many attempts. To protect your account, wait a few minutes before trying again, or reset your password.",
     icon: "lockKey", tone: "danger", motion: "breathe", primary: "retry", secondary: "support",
   }),
-  updateRequired: () => ({ title: "Update Zudomart to continue", description: "This version of the app is no longer supported. Update to get the latest fixes and keep your account secure.", icon: "arrowCircleUp", tone: "brand", motion: "float", primary: "update" }),
+  updateRequired: () => ({ title: "Update Nantty to continue", description: "This version of the app is no longer supported. Update to get the latest fixes and keep your account secure.", icon: "arrowCircleUp", tone: "brand", motion: "float", primary: "update" }),
   unsupportedBrowser: (context) => ({
     title: context.subject === "live" ? "Live video can't play on this device" : "This device isn't supported",
-    description: context.subject === "live" ? "Update Zudomart and your phone's software to watch lives here." : "Update Zudomart and your phone's software to keep using this feature.",
+    description: context.subject === "live" ? "Update Nantty and your phone's software to watch lives here." : "Update Nantty and your phone's software to keep using this feature.",
     icon: "browser", tone: "neutral", motion: "float", primary: "update",
   }),
-  storageDisabled: () => ({ title: "Turn on cookies to continue", description: "Your browser is blocking cookies or site storage, so we can't keep you signed in. Allow them for Zudomart, then reload.", icon: "cookie", tone: "caution", motion: "float", primary: "reload" }),
+  storageDisabled: () => ({ title: "Turn on cookies to continue", description: "Your browser is blocking cookies or site storage, so we can't keep you signed in. Allow them for Nantty, then reload.", icon: "cookie", tone: "caution", motion: "float", primary: "reload" }),
   clockSkew: () => ({ title: "Your device time looks wrong", description: "Secure sign-in fails when the clock is off. Turn on automatic date and time in your phone settings, then try again.", icon: "clock", tone: "caution", motion: "breathe", primary: "retry", secondary: "openSettings" }),
   securityCheckFailed: () => ({ title: "We couldn't confirm you're human", description: "The security check didn't go through. Reload the page and try again. A VPN or ad blocker can sometimes cause this.", icon: "robot", tone: "caution", motion: "breathe", primary: "reload" }),
   notFound: () => ({ title: "This page wandered off", description: "The link may be broken, or the page may have moved. Let's get you somewhere useful.", icon: "mapTrifold", tone: "brand", motion: "float", hero: "404", primary: "home", secondary: "back" }),
@@ -72,9 +72,9 @@ const systemAndAccessCatalog: Partial<Record<ErrorKind, (context: CatalogContext
   permissionDenied: (context) => {
     const subject = context.subject === "microphone" ? "microphone" : context.subject === "location" ? "location" : "camera";
     const reason = subject === "microphone" ? "record audio and go live" : subject === "location" ? "find delivery options and nearby stores" : "take photos, scan and go live";
-    return { title: `Allow ${subject} access`, description: `Zudomart needs your ${subject} to ${reason}. Turn it on in your settings, then come back.`, icon: subject === "microphone" ? "microphone" : subject === "location" ? "mapPin" : "camera", tone: "neutral", motion: "float", primary: "openSettings" };
+    return { title: `Allow ${subject} access`, description: `Nantty needs your ${subject} to ${reason}. Turn it on in your settings, then come back.`, icon: subject === "microphone" ? "microphone" : subject === "location" ? "mapPin" : "camera", tone: "neutral", motion: "float", primary: "openSettings" };
   },
-  embedUnavailable: () => ({ title: "This store isn't available", description: "It may have moved or been closed. Visit Zudomart to keep shopping.", icon: "storefront", tone: "neutral", motion: "float", primary: "home" }),
+  embedUnavailable: () => ({ title: "This store isn't available", description: "It may have moved or been closed. Visit Nantty to keep shopping.", icon: "storefront", tone: "neutral", motion: "float", primary: "home" }),
   planFeatureRequired: (context) => {
     const plan = readText(context.details, "requiredPlan") ?? readText(context.details, "plan");
     return { title: plan ? `Available on ${plan}` : "Not included in your plan", description: "Upgrade your seller plan to unlock this. You can change or cancel your plan any time.", icon: "crown", tone: "brand", motion: "float", primary: "upgrade", secondary: "back" };

@@ -16,7 +16,7 @@ export function SettingsSupportScreen({ navigation }: MainScreenProps<"SettingsS
         <SettingsRow label="Contact support" icon={<Lifebuoy24Icon />} onPress={() => navigation.navigate("NewSupportTicket")} />
         <SettingsRow label="My support requests" icon={<Ticket24Icon />} trailing={unreadReplies > 0 ? { text: `${unreadReplies} new`, weight: 500 } : "chevron"} onPress={() => navigation.navigate("SupportTickets")} />
         <SettingsRow label="My reports" icon={<Flag24Icon />} onPress={() => navigation.navigate("MyReports")} />
-        <SettingsRow label="Contact Us" icon={<ChatTeardropText24Icon />} trailing="external" onPress={() => Linking.openURL(buildContactMailtoUrl("Zudomart support"))} />
+        <SettingsRow label="Contact Us" icon={<ChatTeardropText24Icon />} trailing="external" onPress={() => Linking.openURL(buildContactMailtoUrl("Nantty support"))} />
         <SettingsRow
           label="Report a bug"
           icon={<Bug24Icon />}

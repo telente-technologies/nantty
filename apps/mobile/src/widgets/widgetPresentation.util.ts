@@ -1,4 +1,4 @@
-import { darkColors, lightColors } from "@zudomart/design-tokens/native";
+import { darkColors, lightColors } from "@nantty/design-tokens/native";
 
 import type { Money } from "@/types/money.type";
 import { formatMoneyForDisplay } from "@/utils/formatMoney.util";

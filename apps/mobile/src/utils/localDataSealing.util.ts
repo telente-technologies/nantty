@@ -1,4 +1,4 @@
-import { decodeBase64, encodeBase64, openString, sealString } from "@zudomart/chat-crypto";
+import { decodeBase64, encodeBase64, openString, sealString } from "@nantty/chat-crypto";
 import { getRandomBytes } from "expo-crypto";
 import * as SecureStore from "expo-secure-store";
 import { Platform } from "react-native";

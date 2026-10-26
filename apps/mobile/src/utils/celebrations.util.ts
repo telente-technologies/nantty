@@ -13,12 +13,12 @@ export function firstNameOf(name: string): string {
 
 export function birthdayMessage(name: string, age: number): { title: string; message: string } {
   const title = `Happy ${ordinal(age)} birthday, ${firstNameOf(name)}!`;
-  return { title, message: `${title} Wishing you an amazing year ahead from all of us at Zudomart.` };
+  return { title, message: `${title} Wishing you an amazing year ahead from all of us at Nantty.` };
 }
 
 export function anniversaryMessage(years: number): { title: string; message: string } {
   const title = `Happy ${ordinal(years)} Zudoversary!`;
-  return { title, message: `${title} Thanks for being part of Zudomart for ${years === 1 ? "1 year" : `${years} years`}.` };
+  return { title, message: `${title} Thanks for being part of Nantty for ${years === 1 ? "1 year" : `${years} years`}.` };
 }
 
 export function celebrationSeenKey(accountId: string, kind: CelebrationKind, surface: CelebrationSurface, localDate: string): string {

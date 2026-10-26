@@ -1,4 +1,4 @@
-import { type ChatCryptoStorage, type KeyValueStore, SealedKeyValueStore, createAeadSealer, decodeBase64, encodeBase64 } from "@zudomart/chat-crypto";
+import { type ChatCryptoStorage, type KeyValueStore, SealedKeyValueStore, createAeadSealer, decodeBase64, encodeBase64 } from "@nantty/chat-crypto";
 import { getRandomBytes } from "expo-crypto";
 import { openDatabaseSync, type SQLiteDatabase } from "expo-sqlite";
 

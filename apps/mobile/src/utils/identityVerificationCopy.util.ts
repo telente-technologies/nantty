@@ -42,6 +42,6 @@ export function describeRefund(refundMethod: string, refundStatus: string, refun
 export const biometricConsentPoints: readonly string[] = [
   "Our verification partner Smile ID will capture a short selfie video to check you're a real person, and a photo of your government ID.",
   "Smile ID compares your face with the photo on your ID and, where available, checks your ID number with the government database (for example NIN).",
-  "Zudomart keeps only the result, your ID type, country and the verification date. We never store your face data or keep your selfie or ID images.",
+  "Nantty keeps only the result, your ID type, country and the verification date. We never store your face data or keep your selfie or ID images.",
   "Biometric data is sensitive personal data under the Nigeria Data Protection Act. You can withdraw consent before the check by closing this screen.",
 ];

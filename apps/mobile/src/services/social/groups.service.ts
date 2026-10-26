@@ -1,4 +1,4 @@
-import type { GroupAvatar } from "@zudomart/chat-crypto";
+import type { GroupAvatar } from "@nantty/chat-crypto";
 
 import type { Conversation, ConversationMember, NewGroupConversationInput } from "@/types";
 

@@ -115,6 +115,7 @@ import { AuthFlowScreen } from "@/screens/auth/authFlow.screen";
 import { MainTabsNavigator } from "./mainTabs.navigator";
 import type { MainStackParamList } from "./navigation.types";
 import { SoundScreen } from "@/screens/sounds/sound.screen";
+import { SpacesScreen } from "@/screens/spaces/spaces.screen";
 
 const Stack = createNativeStackNavigator<MainStackParamList>();
 const modal = { presentation: "fullScreenModal", animation: "slide_from_bottom" } as const;
@@ -127,6 +128,7 @@ export function MainNavigator() {
   return (
     <Stack.Navigator screenOptions={{ headerShown: false, animation: "slide_from_right" }} screenLayout={screenLayout}>
       <Stack.Screen name="Tabs" component={MainTabsNavigator} />
+      <Stack.Screen name="Spaces" component={SpacesScreen} />
       <Stack.Screen name="Search" component={SearchScreen} />
       <Stack.Screen name="Notifications" component={NotificationsScreen} />
       <Stack.Screen name="Category" component={CategoryScreen} />

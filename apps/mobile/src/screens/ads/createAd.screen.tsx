@@ -173,7 +173,7 @@ export function CreateAdScreen({ navigation, route }: MainScreenProps<"CreateAd"
                 <Text size={18} weight={600} lineHeight={22}>{estimate.data.estimatedReachMin.toLocaleString()}–{estimate.data.estimatedReachMax.toLocaleString()} people</Text>
                 <Text size={13} lineHeight={16.9}>{estimate.data.estimatedResultsLabel}</Text>
                 <Text size={14} weight={600} lineHeight={16.8}>Total: {formatMoneyForDisplay(estimate.data.totalCost)}</Text>
-                <Text size={11} lineHeight={14} color={colors.textMuted}>Estimates, not guarantees. The price is set by Zudomart for your region.</Text>
+                <Text size={11} lineHeight={14} color={colors.textMuted}>Estimates, not guarantees. The price is set by Nantty for your region.</Text>
               </>
             ) : null}
             {estimate.isError ? <Text size={12} lineHeight={16} color={colors.error}>{describeActionFailure(estimate.error)}</Text> : null}

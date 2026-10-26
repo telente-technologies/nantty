@@ -1,4 +1,4 @@
-import { darkColors as semanticDark } from "@zudomart/design-tokens/native";
+import { darkColors as semanticDark } from "@nantty/design-tokens/native";
 
 import { colors, palette } from "@/constants/colors.constant";
 

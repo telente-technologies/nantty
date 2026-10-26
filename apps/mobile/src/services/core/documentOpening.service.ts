@@ -1,4 +1,4 @@
-import type { AttachmentPointer } from "@zudomart/chat-crypto";
+import type { AttachmentPointer } from "@nantty/chat-crypto";
 import { Directory, File } from "expo-file-system";
 import * as Sharing from "expo-sharing";
 

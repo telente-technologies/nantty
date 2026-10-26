@@ -1,4 +1,4 @@
-const mailboxDomain = process.env.EXPO_PUBLIC_MAIL_DOMAIN?.trim() || "zudomart.com";
+const mailboxDomain = process.env.EXPO_PUBLIC_MAIL_DOMAIN?.trim() || "nantty.com";
 
 export const ZUDOMART_EMAIL_ADDRESSES = {
   support: process.env.EXPO_PUBLIC_SUPPORT_EMAIL?.trim() || `support@${mailboxDomain}`,

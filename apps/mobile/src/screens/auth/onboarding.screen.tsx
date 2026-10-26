@@ -58,7 +58,7 @@ export function OnboardingScreen({ navigation, route }: AuthScreenProps<"Onboard
         <Pressable
           accessibilityRole="button"
           accessibilityLabel={isDismissible ? "Not now" : "Skip"}
-          accessibilityHint={isDismissible ? "Closes sign in" : "Browse Zudomart without an account"}
+          accessibilityHint={isDismissible ? "Closes sign in" : "Browse Nantty without an account"}
           hitSlop={8}
           onPress={() => (isDismissible ? navigation.getParent()?.goBack() : startBrowsingAsGuest())}
           style={({ pressed }) => [styles.skip, pressed && styles.skipPressed]}

@@ -49,7 +49,7 @@ export function CreatorProgramScreen({ navigation }: MainScreenProps<"CreatorPro
         refreshControl={<RefreshControl refreshing={eligibility.isRefetching} onRefresh={() => Promise.all([eligibility.refetch(), application.refetch()])} tintColor={colors.primary} colors={[colors.primary]} />}
       >
         <View style={styles.hero}>
-          {approved ? <StatusPill label="You're a Zudomart Creator" tone="success" /> : null}
+          {approved ? <StatusPill label="You're a Nantty Creator" tone="success" /> : null}
           <Text size={21} weight={600} lineHeight={25.2} color={colors.white}>Turn your audience into income</Text>
           <Text size={typeScale.md} lineHeight={19.6} color={palette.primary[50]}>
             Accepted creators can go live, receive gifts, earn commissions on sellers' products and offer paid subscriptions.

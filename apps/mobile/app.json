@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "Zudomart",
+    "name": "Nantty",
     "slug": "zudomart",
     "version": "0.1.0",
     "orientation": "portrait",
@@ -44,6 +44,7 @@
       }
     },
     "scheme": [
+      "nantty",
       "zudomart",
       "com.zudomart.app"
     ],
@@ -57,7 +58,7 @@
       [
         "expo-local-authentication",
         {
-          "faceIDPermission": "Allow Zudomart to unlock your chats with Face ID."
+          "faceIDPermission": "Allow Nantty to unlock your chats with Face ID."
         }
       ],
       [
@@ -77,7 +78,7 @@
       [
         "expo-location",
         {
-          "locationWhenInUsePermission": "Allow Zudomart to use your location when you choose to share it in a chat."
+          "locationWhenInUsePermission": "Allow Nantty to use your location when you choose to share it in a chat."
         }
       ],
       "expo-document-picker",
@@ -85,7 +86,7 @@
         "expo-media-library",
         {
           "photosPermission": false,
-          "savePhotosPermission": "Allow Zudomart to save photos and videos you download.",
+          "savePhotosPermission": "Allow Nantty to save photos and videos you download.",
           "granularPermissions": ["photo", "video"]
         }
       ],
@@ -165,8 +166,8 @@
       [
         "@config-plugins/react-native-webrtc",
         {
-          "cameraPermission": "Allow Zudomart to use your camera when you go live.",
-          "microphonePermission": "Allow Zudomart to use your microphone when you go live."
+          "cameraPermission": "Allow Nantty to use your camera when you go live.",
+          "microphonePermission": "Allow Nantty to use your microphone when you go live."
         }
       ]
     ],

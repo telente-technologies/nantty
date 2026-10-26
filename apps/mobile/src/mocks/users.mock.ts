@@ -86,7 +86,7 @@ const actingProfileAsUserFields = (profileId: string): Partial<User> | null => {
       name: business.name,
       username: business.handle,
       avatarUrl: business.avatarUrl,
-      bio: `${business.name} on Zudomart`,
+      bio: `${business.name} on Nantty`,
       verified: false,
       followers: 0,
       following: 0,

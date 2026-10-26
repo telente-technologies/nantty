@@ -52,7 +52,7 @@ export function SignUpBirthdayScreen({ navigation }: AuthScreenProps<"SignUpBirt
       {isComplete && !isValid ? (
         <Text size={12} weight={500} lineHeight={14.4} color={colors.error} style={styles.error} accessibilityRole="alert">
           {parseBirthdayFromDayMonthYear(birthdayText)
-            ? `You must be at least ${MINIMUM_ACCOUNT_AGE_IN_YEARS} years old to use Zudomart.`
+            ? `You must be at least ${MINIMUM_ACCOUNT_AGE_IN_YEARS} years old to use Nantty.`
             : "Enter a real date, like 27/10/2000."}
         </Text>
       ) : null}

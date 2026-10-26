@@ -14,11 +14,11 @@ describe("celebration copy", () => {
   });
 
   it("writes the warm birthday message with the age and first name", () => {
-    expect(birthdayMessage("Ada Obi", 25).message).toBe("Happy 25th birthday, Ada! Wishing you an amazing year ahead from all of us at Zudomart.");
+    expect(birthdayMessage("Ada Obi", 25).message).toBe("Happy 25th birthday, Ada! Wishing you an amazing year ahead from all of us at Nantty.");
   });
 
   it("writes the Zudoversary message", () => {
-    expect(anniversaryMessage(2).message).toBe("Happy 2nd Zudoversary! Thanks for being part of Zudomart for 2 years.");
+    expect(anniversaryMessage(2).message).toBe("Happy 2nd Zudoversary! Thanks for being part of Nantty for 2 years.");
     expect(anniversaryMessage(1).message).toContain("for 1 year.");
   });
 });

@@ -3,8 +3,8 @@ const { brandPalette, darkColors, lightColors } = require("./widgetColors.json")
 /** @type {import('@bacons/apple-targets/app.plugin').ConfigFunction} */
 module.exports = (config) => ({
   type: "widget",
-  name: "ZudomartWidgets",
-  displayName: "Zudomart",
+  name: "NanttyWidgets",
+  displayName: "Nantty",
   bundleIdentifier: ".widgets",
   deploymentTarget: "17.0",
   frameworks: ["SwiftUI", "WidgetKit", "Security"],

@@ -11,8 +11,8 @@ export function SettingsAboutScreen() {
   return (
     <SettingsPage title="About">
       <SettingsGroup>
-        <SettingsRow label="Terms of Service" icon={<Scales24Icon />} onPress={() => openTrustedWebPage("https://zudomart.com/terms", inAppBrowserColorsFromTheme(colors))} />
-        <SettingsRow label="Privacy Policy" icon={<FileLock24Icon />} onPress={() => openTrustedWebPage("https://zudomart.com/privacy", inAppBrowserColorsFromTheme(colors))} />
+        <SettingsRow label="Terms of Service" icon={<Scales24Icon />} onPress={() => openTrustedWebPage("https://nantty.com/terms", inAppBrowserColorsFromTheme(colors))} />
+        <SettingsRow label="Privacy Policy" icon={<FileLock24Icon />} onPress={() => openTrustedWebPage("https://nantty.com/privacy", inAppBrowserColorsFromTheme(colors))} />
         <SettingsRow label="Version" icon={<Hash24Icon />} trailing={{ text: Constants.expoConfig?.version ?? "1.0.0", color: colors.text }} />
       </SettingsGroup>
     </SettingsPage>

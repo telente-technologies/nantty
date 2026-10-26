@@ -1,4 +1,4 @@
-const MARKETING_SITE_URL = process.env.EXPO_PUBLIC_MARKETING_SITE_URL || "https://zudomart.com";
+const MARKETING_SITE_URL = process.env.EXPO_PUBLIC_MARKETING_SITE_URL || "https://nantty.com";
 
 export const CURRENT_POLICY_VERSION = "2026-10-01";
 

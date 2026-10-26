@@ -32,7 +32,7 @@ jest.mock("expo-file-system", () => {
   return { File, Directory, Paths: { cache: "cache" } };
 });
 
-import { encryptAttachment } from "@zudomart/chat-crypto";
+import { encryptAttachment } from "@nantty/chat-crypto";
 
 import { decryptionStrategyFor } from "@/components/chat/decryptedMedia.hook";
 

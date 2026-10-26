@@ -21,7 +21,7 @@ const buildWallet = () => {
       provider: "flutterwave",
       currency: "NGN",
       status: "active",
-      accountName: `${user.name ?? "Zudomart User"}`.toUpperCase(),
+      accountName: `${user.name ?? "Nantty User"}`.toUpperCase(),
       accountNumber: "8571234567",
       bankName: "Wema Bank",
       bankCode: "035",

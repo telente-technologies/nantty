@@ -148,7 +148,7 @@ function StoryViewer({ navigation, route }: MainScreenProps<"Story">) {
     else if (destination.type === "store" && destination.targetId) navigation.navigate("Store", { storeId: destination.targetId });
     else if (destination.type === "post" && destination.targetId) navigation.navigate("PostDetail", { postId: destination.targetId });
     else if (destination.type === "profile" && destination.targetId) openUserProfile(destination.targetId);
-    else showToast("This link opens in the Zudomart app");
+    else showToast("This link opens in the Nantty app");
   }, [navigation, openUserProfile]);
 
   useEffect(() => {

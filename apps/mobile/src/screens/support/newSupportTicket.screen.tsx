@@ -75,7 +75,7 @@ export function NewSupportTicketScreen({ navigation, route }: MainScreenProps<"N
         <TextField label="Tell us more" placeholder="Include order numbers and what you've tried" value={message} onChangeText={setMessage} multiline maxLength={1500} boxStyle={styles.multiline} />
         <Text size={14} lineHeight={16.8}>Screenshots (optional)</Text>
         <PhotoEvidencePicker photoUrls={attachmentUrls} onChangePhotoUrls={setAttachmentUrls} maximumPhotos={3} addLabel="Add screenshot" onUploadingChange={setUploading} />
-        <Text size={12} lineHeight={16.8} color={colors.textSubtle}>Never share your password, card PIN or OTP. Zudomart will never ask for them.</Text>
+        <Text size={12} lineHeight={16.8} color={colors.textSubtle}>Never share your password, card PIN or OTP. Nantty will never ask for them.</Text>
       </KeyboardAwareForm>
     </Screen>
   );

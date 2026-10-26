@@ -82,7 +82,7 @@ export function goalsForDestination(type: BoostDestinationType, options: BoostOp
 export const PAYMENT_METHOD_LABELS: Readonly<Record<BoostPaymentMethod, string>> = {
   card: "Card or bank transfer",
   ad_balance: "Ad credit & balance",
-  balance: "Zudomart earnings",
+  balance: "Nantty earnings",
   free: "Free Premium boost",
 };
 
@@ -261,12 +261,12 @@ const TRANSACTION_REASON_BY_KIND: Readonly<Record<AdBalanceTransactionKind, stri
   spent: "Spent on ads",
   refund: "Refund",
   withdrawal: "Withdrawn to wallet",
-  credit_issued: "Issued by Zudomart",
+  credit_issued: "Issued by Nantty",
   cashback: "Cashback",
   cashback_reversed: "Cashback reversed",
   credit_spent: "Spent on ads",
   credit_expired: "Expired",
-  credit_revoked: "Removed by Zudomart",
+  credit_revoked: "Removed by Nantty",
   debt: "Amount owed",
 };
 

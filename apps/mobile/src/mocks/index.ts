@@ -75,7 +75,7 @@ import { supportMocks } from "./support.mock";
 import { usernameMocks } from "./username.mock";
 import { usersMocks } from "./users.mock";
 import { verificationMocks } from "./verification.mock";
-import { zudoPointsMocks } from "./zudoPoints.mock";
+import { nanttyPointsMocks } from "./nanttyPoints.mock";
 import { walletMocks } from "./wallet.mock";
 import { widgetsMocks } from "./widgets.mock";
 import { payoutOnboardingMocks } from "./payoutOnboarding.mock";
@@ -149,7 +149,7 @@ const routes: MockRoute[] = [
   ...liveMocks.filter((route) => route.path === "/api/v1/lives/suggested"),
   ...creatorsMocks,
   ...giftsMocks,
-  ...zudoPointsMocks,
+  ...nanttyPointsMocks,
   ...liveMocks,
   ...liveGuestsMocks,
   ...liveBattleMocks,

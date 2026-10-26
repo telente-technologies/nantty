@@ -83,7 +83,7 @@ export function ChatPasscodeScreen() {
   return (
     <SettingsPage title="Chat passcode" contentTopSpacing={24} gap={24}>
       <Text size={13} lineHeight={18} color={colors.textMuted}>
-        The passcode locks your chats on this device only. It is never sent to Zudomart. If you forget it, you'll need to log in again to reset it.
+        The passcode locks your chats on this device only. It is never sent to Nantty. If you forget it, you'll need to log in again to reset it.
       </Text>
       {isPasscodeSet ? (
         <>

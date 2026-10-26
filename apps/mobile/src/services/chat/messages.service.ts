@@ -15,7 +15,7 @@ import type {
 
 import type { MentionEntity } from "@/types/mention.type";
 
-import { type AttachmentPointer, type ChatControl, type ChatLocation, type ChatPayloadInput, createPollOptions, maximumLiveLocationMilliseconds } from "@zudomart/chat-crypto";
+import { type AttachmentPointer, type ChatControl, type ChatLocation, type ChatPayloadInput, createPollOptions, maximumLiveLocationMilliseconds } from "@nantty/chat-crypto";
 
 import { api, generateIdempotencyKey } from "../core/apiClient.service";
 import { chatCryptoService, messageFieldsFromPayload } from "../chatCrypto/chatCrypto.service";

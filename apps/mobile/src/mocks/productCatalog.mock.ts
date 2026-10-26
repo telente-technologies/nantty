@@ -43,7 +43,7 @@ export const buildSponsoredPlacementForSeed = (seed: CatalogProductSeed): Sponso
   label: "Sponsored",
   advertiserName: findDirectoryStoreById(seed.storeId).name,
   ctaLabel: "Shop now",
-  ctaUrl: `https://zudomart.com/products/${productIdForKey(seed.key)}`,
+  ctaUrl: `https://nantty.com/products/${productIdForKey(seed.key)}`,
 });
 
 export const isMartSponsoredSeed = (seed: CatalogProductSeed) => MART_SPONSORED_PRODUCT_KEYS.includes(seed.key);

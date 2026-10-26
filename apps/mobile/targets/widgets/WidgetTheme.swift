@@ -94,7 +94,7 @@ struct WidgetStateView<Payload, Content: View>: View {
   @ViewBuilder let content: (Payload, [String: Data]) -> Content
   var body: some View {
     switch state {
-    case .signedOut: WidgetMessageView(title: title, message: "Sign in to Zudomart").widgetURL(URL(string: "zudomart://"))
+    case .signedOut: WidgetMessageView(title: title, message: "Sign in to Nantty").widgetURL(URL(string: "zudomart://"))
     case .unavailable: WidgetMessageView(title: title, message: unavailableMessage)
     case .ready(let payload, let images): content(payload, images)
     }

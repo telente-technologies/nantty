@@ -24,7 +24,7 @@ import { LiveCommentsFeed } from "@/components/live/liveCommentsFeed";
 import { LiveHeader } from "@/components/live/liveHeader";
 import { LiveProductsSheet } from "@/components/live/liveProductsSheet";
 import { LivePinProductsSheet } from "@/components/live/livePinProductsSheet";
-import { useLiveEngagementPoints } from "@/components/live/points/liveZudoPoints.hook";
+import { useLiveEngagementPoints } from "@/components/live/points/liveNanttyPoints.hook";
 import { LiveReactionRail } from "@/components/live/liveReactionRail";
 import { useLiveSessionWithActions } from "@/components/live/liveSession.hook";
 import { useLiveHostConnection } from "@/components/live/liveHostConnection.hook";

@@ -142,7 +142,7 @@ export function ProductDetailScreen({ navigation, route }: MainScreenProps<"Prod
           product={detail}
           bookmarked={productSave.isSaved}
           saveCount={(detail.saveCount ?? 0) + productSave.savedDelta}
-          onShare={() => offerSendInChat({ kind: "product", id: detail.id }, () => Share.share({ message: `${detail.name} on Zudomart: ${webAppLinks.product(detail)}` }))}
+          onShare={() => offerSendInChat({ kind: "product", id: detail.id }, () => Share.share({ message: `${detail.name} on Nantty: ${webAppLinks.product(detail)}` }))}
           onToggleBookmark={productSave.toggleSaved}
           onPressRating={() => navigation.navigate("ProductReviews", { productId })}
         />

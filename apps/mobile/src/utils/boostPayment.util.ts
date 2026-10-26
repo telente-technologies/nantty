@@ -26,7 +26,7 @@ const BOOST_ERROR_MESSAGES: Record<string, string> = {
   FORBIDDEN: "Only the person who created this ad can change it.",
   WITHDRAWAL_ABOVE_AVAILABLE: "That is more than you can withdraw right now.",
   TOP_UPS_UNAVAILABLE: "Top-ups are not available right now. Try again later.",
-  VERIFICATION_REQUIRED: "Verify your payout details to use Zudomart Ads.",
+  VERIFICATION_REQUIRED: "Verify your payout details to use Nantty Ads.",
   VERIFICATION_UNAVAILABLE: "We couldn't check your verification just now. Please try again in a moment.",
   IDEMPOTENCY_KEY_REUSED: "This boost was already sent. Please try again.",
 };
@@ -93,7 +93,7 @@ export function boostErrorMessage(error: unknown): string {
 export function describeBoostPaymentMethodForDisplay(method: string | null | undefined): string | null {
   if (method === "card") return "card or bank transfer";
   if (method === "ad_balance") return "your ad credit & balance";
-  if (method === "balance" || method === "wallet") return "your Zudomart earnings";
+  if (method === "balance" || method === "wallet") return "your Nantty earnings";
   if (method === "free") return "your free Premium boost";
   return null;
 }

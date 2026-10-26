@@ -70,7 +70,7 @@ export function OpenDisputeScreen({ navigation, route }: MainScreenProps<"OpenDi
             Your payment is paused while we look into this
           </Text>
           <Text size={12} lineHeight={16.8} color={colors.textMuted}>
-            The seller can't receive the money until the dispute is resolved. They have 48 hours to respond, then Zudomart support steps in.
+            The seller can't receive the money until the dispute is resolved. They have 48 hours to respond, then Nantty support steps in.
           </Text>
         </View>
 
@@ -106,7 +106,7 @@ export function OpenDisputeScreen({ navigation, route }: MainScreenProps<"OpenDi
         <View style={styles.field}>
           <Text size={16} weight={600} lineHeight={19.2}>Photo evidence{photosRequired ? "" : " (optional)"}</Text>
           <Text size={12} lineHeight={16.8} color={colors.textMuted}>
-            Clear photos of the item, packaging and label help us resolve this faster. Only you, the seller and Zudomart support can see them.
+            Clear photos of the item, packaging and label help us resolve this faster. Only you, the seller and Nantty support can see them.
           </Text>
           <PhotoEvidencePicker photoUrls={evidenceUrls} onChangePhotoUrls={setEvidenceUrls} onUploadingChange={setUploadingEvidence} />
         </View>

@@ -29,7 +29,7 @@ const describeDataExport = (): DataExportRequest => {
   return {
     status: "ready",
     requestedAt,
-    downloadUrl: "https://zudomart.com/mock/my-data-export.zip",
+    downloadUrl: "https://nantty.com/mock/my-data-export.zip",
     expiresAt: new Date(exportRequestedAtMs + READY_AFTER_MS + EXPORT_LINK_LIFETIME_MS).toISOString(),
   };
 };

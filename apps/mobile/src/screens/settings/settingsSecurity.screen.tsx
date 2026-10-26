@@ -44,7 +44,7 @@ export function SettingsSecurityScreen({ navigation }: MainScreenProps<"Settings
       <InfoSheet
         visible={openSheet === "data"}
         title="Your data"
-        message="Request a copy of the data Zudomart holds about you. We'll email it to the address on your account within 30 days."
+        message="Request a copy of the data Nantty holds about you. We'll email it to the address on your account within 30 days."
         actionTitle="Request my data"
         onAction={() => {
           setOpenSheet(null);

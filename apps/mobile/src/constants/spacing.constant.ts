@@ -21,4 +21,4 @@ export const elevation = {
   extreme: { shadowColor: "#000", shadowOffset: { width: 0, height: 0 }, shadowOpacity: 0.2, shadowRadius: 12, elevation: 16 },
 } as const;
 
-export { spacing } from "@zudomart/design-tokens/native";
+export { spacing } from "@nantty/design-tokens/native";

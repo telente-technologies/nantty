@@ -62,7 +62,7 @@ const paymentOptions = (): BoostPaymentOption[] => {
   return [
     { method: "card", available: true, reasonCode: null, reason: null },
     spendableUsdCents() > 0 ? { method: "ad_balance", available: true, reasonCode: null, reason: null } : { method: "ad_balance", available: false, reasonCode: "NO_AD_FUNDS", reason: "You have no ad credit or balance" },
-    { method: "balance", available: false, reasonCode: "NOT_AVAILABLE_IN_APP", reason: "Pay from your earnings on zudomart.com" },
+    { method: "balance", available: false, reasonCode: "NOT_AVAILABLE_IN_APP", reason: "Pay from your earnings on nantty.com" },
     free.premium
       ? free.eligible ? { method: "free", available: true, reasonCode: null, reason: null } : { method: "free", available: false, reasonCode: "FREE_BOOST_USED", reason: "You've used this month's free boost" }
       : { method: "free", available: false, reasonCode: "PREMIUM_REQUIRED", reason: "Free boosts come with Premium" },
@@ -274,7 +274,7 @@ export const boostsMocks: MockRoute[] = [
     const amountUsdCents = convertViewerMoneyToUsdCents(amount);
     const fee = convertUsdCentsToViewerCurrency(withdrawalFeeUsdCents(amountUsdCents));
     adFunds.balanceUsdCents -= amountUsdCents;
-    adBalanceHistory.push({ id: `abt_${key}`, pot: "balance", kind: "withdrawal", amount: { amountMinor: -amount.amountMinor, currency: amount.currency }, description: "To your Zudomart wallet", createdAt: new Date().toISOString() });
+    adBalanceHistory.push({ id: `abt_${key}`, pot: "balance", kind: "withdrawal", amount: { amountMinor: -amount.amountMinor, currency: amount.currency }, description: "To your Nantty wallet", createdAt: new Date().toISOString() });
     const result = { id: `wd_${key}`, status: "completed", amount, fee, net: { amountMinor: amount.amountMinor - fee.amountMinor, currency: amount.currency }, destination: "wallet", createdAt: new Date().toISOString() };
     withdrawalsByKey.set(key, result);
     return result;
