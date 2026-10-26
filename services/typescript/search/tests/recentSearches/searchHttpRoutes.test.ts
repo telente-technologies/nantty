@@ -30,6 +30,10 @@ describe("search http routes", () => {
     const method = await fetch(`${baseUrl}/api/v1/search`, { method: "POST" });
     expect(method.status).toBe(405);
     expect(await method.json()).toEqual({ message: "Method not allowed.", code: "METHOD_NOT_ALLOWED" });
+    const options = await fetch(`${baseUrl}/api/v1/search`, { method: "OPTIONS" });
+    expect(options.status).toBe(204);
+    expect(options.headers.get("allow")).toContain("GET");
+    expect(options.headers.get("allow")).toContain("OPTIONS");
   });
 
   it("rejects a missing or oversized query", async () => {

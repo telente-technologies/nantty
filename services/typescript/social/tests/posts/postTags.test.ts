@@ -98,17 +98,24 @@ describe("tag candidates", () => {
     taggingSetting: { findMany: async () => [{ accountId: taggingOff }] },
   };
 
-  it("lists only users the author may tag and pages with a cursor", async () => {
+  it("keeps opted-out users visible but unselectable while preserving block and status filtering", async () => {
     const handler = createListTagCandidatesHandler(contextWith(overrides));
-    const first = await handler({ viewerId: authorId, term: "user", cursor: undefined, limit: 1 });
-    expect(first.data.map((entry) => entry.user.id)).toEqual([active]);
-    expect(first.nextCursor).toBeNull();
-    expect(first.candidates).toEqual(first.data);
+    const result = await handler({ viewerId: authorId, term: "user", cursor: undefined, limit: 20 });
+
+    expect(result.data.map(({ user }) => user.id)).toEqual([active, taggingOff]);
+    expect(result.data[0]).toMatchObject({ user: { id: active }, canTag: true, unavailableReason: null });
+    expect(result.data[1]).toMatchObject({ user: { id: taggingOff }, canTag: false, unavailableReason: "Doesn't allow tags" });
+    expect(Object.keys(result.data[1] ?? {}).sort()).toEqual(["canTag", "unavailableReason", "user"]);
+    expect(result.data.some(({ user }) => [blockedByAuthor, blocksAuthor, suspended, deleted].includes(user.id))).toBe(false);
+    expect(result.nextCursor).toBeNull();
+    expect(result.candidates).toEqual(result.data);
   });
 
-  it("pages when more than one candidate is eligible", async () => {
-    const handler = createListTagCandidatesHandler(contextWith({ block: { findMany: async () => [] }, taggingSetting: { findMany: async () => [] } }));
+  it("pages through visible eligible and opted-out candidates", async () => {
+    const handler = createListTagCandidatesHandler(contextWith({ block: { findMany: async () => [] }, taggingSetting: { findMany: async () => [{ accountId: taggingOff }] } }));
     const first = await handler({ viewerId: authorId, term: "user", cursor: undefined, limit: 1 });
+    expect(first.data).toHaveLength(1);
+    expect(first.candidates).toEqual(first.data);
     expect(first.nextCursor).not.toBeNull();
     const second = await handler({ viewerId: authorId, term: "user", cursor: first.nextCursor ?? undefined, limit: 1 });
     expect(second.data[0]?.user.id).not.toBe(first.data[0]?.user.id);
