@@ -4,6 +4,23 @@ import rateLimit from "@fastify/rate-limit";
 import sensible from "@fastify/sensible";
 import { metrics } from "@opentelemetry/api";
 
+export interface PlatformPrincipal {
+  readonly subject: string;
+  readonly permissions: readonly string[];
+}
+
+export interface OpenApiDocumentOptions {
+  readonly title: string;
+  readonly version: string;
+  readonly routes: readonly { readonly method: string; readonly path: string; readonly summary: string; readonly tags?: readonly string[] }[];
+}
+
+export type BoundarySchema = Readonly<Record<string, unknown>>;
+
+declare module "fastify" {
+  interface FastifyRequest { principal: PlatformPrincipal | null }
+}
+
 export interface PlatformOptions {
   readonly name: string;
   readonly host: string;
@@ -29,6 +46,7 @@ export async function createPlatform(options: PlatformOptions): Promise<FastifyI
   await app.register(sensible);
   await app.register(helmet, { contentSecurityPolicy: false });
   await app.register(rateLimit, options.rateLimit === false ? { global: false } : { global: false, ...options.rateLimit });
+  app.decorateRequest("principal", null);
 
   app.addHook("onRoute", (route) => {
     const methods = methodsByPath.get(route.url) ?? new Set<string>();
@@ -54,7 +72,13 @@ export async function createPlatform(options: PlatformOptions): Promise<FastifyI
 
   app.setNotFoundHandler((request, reply) => {
     const methods = methodsByPath.get(request.url.split("?", 1)[0] ?? "");
-    if (methods !== undefined) return reply.code(405).send({ message: "Method not allowed.", code: "METHOD_NOT_ALLOWED" });
+    if (methods !== undefined) {
+      const allowed = new Set(methods);
+      if (allowed.has("GET")) allowed.add("HEAD");
+      allowed.add("OPTIONS");
+      if (request.method === "OPTIONS") return reply.header("allow", [...allowed].join(", ")).code(204).send();
+      return reply.code(405).send({ message: "Method not allowed.", code: "METHOD_NOT_ALLOWED" });
+    }
     return reply.code(404).send({ message: "Not found.", code: "NOT_FOUND" });
   });
   app.setErrorHandler((error, _request, reply) => {
@@ -66,6 +90,37 @@ export async function createPlatform(options: PlatformOptions): Promise<FastifyI
   app.addHook("onClose", async () => { app.log.info({ service: options.name }, "HTTP platform closed"); });
   app.decorate("platformAddress", () => app.server.address());
   return app;
+}
+
+export function requirePrincipal(request: import("fastify").FastifyRequest, reply: import("fastify").FastifyReply): boolean {
+  if (request.principal !== null) return true;
+  void reply.code(401).send({ message: "Authentication required.", code: "UNAUTHENTICATED" });
+  return false;
+}
+
+export function requirePermission(permission: string) {
+  return async (request: import("fastify").FastifyRequest, reply: import("fastify").FastifyReply): Promise<void> => {
+    if (!requirePrincipal(request, reply)) return;
+    if (!request.principal?.permissions.includes(permission)) void reply.code(403).send({ message: "Permission denied.", code: "FORBIDDEN" });
+  };
+}
+
+export async function checkReadiness(probes: Readonly<Record<string, () => Promise<unknown>>>): Promise<boolean> {
+  const results = await Promise.allSettled(Object.values(probes).map((probe) => probe()));
+  return results.every((result) => result.status === "fulfilled");
+}
+
+export function createOpenApiDocument(options: OpenApiDocumentOptions) {
+  const paths: Record<string, Record<string, unknown>> = {};
+  for (const route of options.routes) {
+    const path = paths[route.path] ?? (paths[route.path] = {});
+    path[route.method.toLowerCase()] = { summary: route.summary, ...(route.tags === undefined ? {} : { tags: route.tags }), responses: { "200": { description: "Successful response" } } };
+  }
+  return { openapi: "3.1.0", info: { title: options.title, version: options.version }, paths } as const;
+}
+
+export function boundarySchema<T extends BoundarySchema>(schema: T): T {
+  return schema;
 }
 
 export function sendLegacyResponse(reply: import("fastify").FastifyReply, response: { readonly status: number; readonly body: unknown; readonly headers: Readonly<Record<string, string | readonly string[] | undefined>> }): void {
