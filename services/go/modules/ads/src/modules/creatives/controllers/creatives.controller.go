@@ -6,16 +6,16 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/ads/src/container"
-	completemediaupload "zudomart/modules/ads/src/modules/creatives/commands/completeMediaUpload"
-	createmediaupload "zudomart/modules/ads/src/modules/creatives/commands/createMediaUpload"
-	recordmediaprocessed "zudomart/modules/ads/src/modules/creatives/commands/recordMediaProcessed"
-	"zudomart/modules/ads/src/modules/creatives/dtos"
-	getmedia "zudomart/modules/ads/src/modules/creatives/queries/getMedia"
-	listcontentsources "zudomart/modules/ads/src/modules/creatives/queries/listContentSources"
-	listpromotabledestinations "zudomart/modules/ads/src/modules/creatives/queries/listPromotableDestinations"
-	"zudomart/modules/ads/src/utils"
-	"zudomart/platform/httpserver"
+	"nantty/modules/ads/src/container"
+	completemediaupload "nantty/modules/ads/src/modules/creatives/commands/completeMediaUpload"
+	createmediaupload "nantty/modules/ads/src/modules/creatives/commands/createMediaUpload"
+	recordmediaprocessed "nantty/modules/ads/src/modules/creatives/commands/recordMediaProcessed"
+	"nantty/modules/ads/src/modules/creatives/dtos"
+	getmedia "nantty/modules/ads/src/modules/creatives/queries/getMedia"
+	listcontentsources "nantty/modules/ads/src/modules/creatives/queries/listContentSources"
+	listpromotabledestinations "nantty/modules/ads/src/modules/creatives/queries/listPromotableDestinations"
+	"nantty/modules/ads/src/utils"
+	"nantty/platform/httpserver"
 )
 
 type CreativesController struct{ Container *container.Container }

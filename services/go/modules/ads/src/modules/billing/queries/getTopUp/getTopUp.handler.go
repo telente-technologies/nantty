@@ -4,15 +4,15 @@ import (
 	"context"
 	"time"
 
-	"zudomart/modules/ads/src/container"
-	adserrors "zudomart/modules/ads/src/errors"
-	"zudomart/modules/ads/src/generated/ent"
-	"zudomart/modules/ads/src/generated/ent/adtopup"
-	accountservices "zudomart/modules/ads/src/modules/adAccounts/services"
-	applytopupresult "zudomart/modules/ads/src/modules/billing/commands/applyTopUpResult"
-	"zudomart/modules/ads/src/modules/billing/dtos"
-	adsservices "zudomart/modules/ads/src/services"
-	"zudomart/modules/ads/src/types"
+	"nantty/modules/ads/src/container"
+	adserrors "nantty/modules/ads/src/errors"
+	"nantty/modules/ads/src/generated/ent"
+	"nantty/modules/ads/src/generated/ent/adtopup"
+	accountservices "nantty/modules/ads/src/modules/adAccounts/services"
+	applytopupresult "nantty/modules/ads/src/modules/billing/commands/applyTopUpResult"
+	"nantty/modules/ads/src/modules/billing/dtos"
+	adsservices "nantty/modules/ads/src/services"
+	"nantty/modules/ads/src/types"
 )
 
 const abandonedAfter = 24 * time.Hour

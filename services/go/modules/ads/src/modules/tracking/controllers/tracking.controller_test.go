@@ -6,8 +6,8 @@ import (
 	"testing"
 	"time"
 
-	"zudomart/modules/ads/src/container"
-	"zudomart/modules/ads/src/services"
+	"nantty/modules/ads/src/container"
+	"nantty/modules/ads/src/services"
 )
 
 func TestRedirectClickNeverRedirectsOnBadTokens(t *testing.T) {

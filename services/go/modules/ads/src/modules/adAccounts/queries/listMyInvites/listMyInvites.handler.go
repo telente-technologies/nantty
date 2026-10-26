@@ -6,11 +6,11 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/ads/src/container"
-	"zudomart/modules/ads/src/generated/ent"
-	"zudomart/modules/ads/src/generated/ent/adaccount"
-	"zudomart/modules/ads/src/generated/ent/adaccountinvite"
-	"zudomart/modules/ads/src/modules/adAccounts/dtos"
+	"nantty/modules/ads/src/container"
+	"nantty/modules/ads/src/generated/ent"
+	"nantty/modules/ads/src/generated/ent/adaccount"
+	"nantty/modules/ads/src/generated/ent/adaccountinvite"
+	"nantty/modules/ads/src/modules/adAccounts/dtos"
 )
 
 type Handler struct{ Container *container.Container }

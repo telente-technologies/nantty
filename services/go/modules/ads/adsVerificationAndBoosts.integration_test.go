@@ -8,12 +8,12 @@ import (
 
 	"github.com/google/uuid"
 
-	src "zudomart/modules/ads/src"
-	"zudomart/modules/ads/src/configs"
-	adserrors "zudomart/modules/ads/src/errors"
-	"zudomart/modules/ads/src/integrations"
-	"zudomart/modules/ads/src/interfaces"
-	"zudomart/modules/ads/src/jobs"
+	src "nantty/modules/ads/src"
+	"nantty/modules/ads/src/configs"
+	adserrors "nantty/modules/ads/src/errors"
+	"nantty/modules/ads/src/integrations"
+	"nantty/modules/ads/src/interfaces"
+	"nantty/modules/ads/src/jobs"
 )
 
 type fakeMoneyAccounts struct {

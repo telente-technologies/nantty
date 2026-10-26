@@ -3,8 +3,8 @@ package decideadforslot
 import (
 	"context"
 
-	"zudomart/modules/ads/src/services"
-	"zudomart/modules/ads/src/types"
+	"nantty/modules/ads/src/services"
+	"nantty/modules/ads/src/types"
 )
 
 func (handler Handler) scoreAndAuction(ctx context.Context, slot *slotContext, eligible []types.CandidateAd) (services.AuctionOutcome, types.CandidateAd, int64, bool, error) {

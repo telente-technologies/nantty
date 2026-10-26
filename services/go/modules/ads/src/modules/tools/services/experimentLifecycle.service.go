@@ -7,10 +7,10 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/ads/src/generated/ent"
-	"zudomart/modules/ads/src/generated/ent/adexperiment"
-	"zudomart/modules/ads/src/generated/ent/adgroup"
-	"zudomart/modules/ads/src/types"
+	"nantty/modules/ads/src/generated/ent"
+	"nantty/modules/ads/src/generated/ent/adexperiment"
+	"nantty/modules/ads/src/generated/ent/adgroup"
+	"nantty/modules/ads/src/types"
 )
 
 func FinishExperimentInTransaction(ctx context.Context, tx *ent.Tx, database *sql.DB, experiment *ent.AdExperiment, status adexperiment.Status, now time.Time) (*ent.AdExperiment, error) {

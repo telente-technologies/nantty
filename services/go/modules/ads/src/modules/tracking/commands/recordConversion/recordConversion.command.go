@@ -3,7 +3,7 @@ package recordconversion
 import (
 	"time"
 
-	"zudomart/platform/httpserver"
+	"nantty/platform/httpserver"
 )
 
 const attributionWindow = 28 * 24 * time.Hour

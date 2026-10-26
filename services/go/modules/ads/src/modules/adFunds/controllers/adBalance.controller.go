@@ -5,16 +5,16 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/ads/src/container"
-	"zudomart/modules/ads/src/middlewares"
-	"zudomart/modules/ads/src/modules/adFunds/services"
-	starttopup "zudomart/modules/ads/src/modules/billing/commands/startTopUp"
-	billingdtos "zudomart/modules/ads/src/modules/billing/dtos"
-	boostdtos "zudomart/modules/ads/src/modules/boosts/dtos"
-	boostservices "zudomart/modules/ads/src/modules/boosts/services"
-	adsservices "zudomart/modules/ads/src/services"
-	"zudomart/modules/ads/src/utils"
-	"zudomart/platform/httpserver"
+	"nantty/modules/ads/src/container"
+	"nantty/modules/ads/src/middlewares"
+	"nantty/modules/ads/src/modules/adFunds/services"
+	starttopup "nantty/modules/ads/src/modules/billing/commands/startTopUp"
+	billingdtos "nantty/modules/ads/src/modules/billing/dtos"
+	boostdtos "nantty/modules/ads/src/modules/boosts/dtos"
+	boostservices "nantty/modules/ads/src/modules/boosts/services"
+	adsservices "nantty/modules/ads/src/services"
+	"nantty/modules/ads/src/utils"
+	"nantty/platform/httpserver"
 )
 
 type AdFundsController struct{ Container *container.Container }

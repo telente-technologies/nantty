@@ -5,8 +5,8 @@ import (
 	"slices"
 	"strings"
 
-	"zudomart/modules/ads/src/services"
-	"zudomart/modules/ads/src/types"
+	"nantty/modules/ads/src/services"
+	"nantty/modules/ads/src/types"
 )
 
 var creativeTypes = []string{"single", "carousel", "app_install", "promoted_post"}

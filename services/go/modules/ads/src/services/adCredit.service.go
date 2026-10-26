@@ -7,10 +7,10 @@ import (
 	entsql "entgo.io/ent/dialect/sql"
 	"github.com/google/uuid"
 
-	"zudomart/modules/ads/src/events"
-	"zudomart/modules/ads/src/generated/ent"
-	"zudomart/modules/ads/src/generated/ent/adcreditlot"
-	"zudomart/modules/ads/src/generated/ent/adfundstransaction"
+	"nantty/modules/ads/src/events"
+	"nantty/modules/ads/src/generated/ent"
+	"nantty/modules/ads/src/generated/ent/adcreditlot"
+	"nantty/modules/ads/src/generated/ent/adfundstransaction"
 )
 
 const (

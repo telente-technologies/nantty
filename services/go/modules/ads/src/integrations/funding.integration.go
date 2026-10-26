@@ -4,7 +4,7 @@ import (
 	"context"
 	"sync"
 
-	adserrors "zudomart/modules/ads/src/errors"
+	adserrors "nantty/modules/ads/src/errors"
 )
 
 type UnconfiguredFundingGateway struct{}

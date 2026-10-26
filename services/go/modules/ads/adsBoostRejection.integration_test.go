@@ -5,8 +5,8 @@ import (
 	"net/http"
 	"testing"
 
-	"zudomart/modules/ads/src/generated/ent/ad"
-	"zudomart/modules/ads/src/generated/ent/adboost"
+	"nantty/modules/ads/src/generated/ent/ad"
+	"nantty/modules/ads/src/generated/ent/adboost"
 )
 
 func (h *harness) rejectBoostAd(staff *testUser, adId string, wantStatus int) {

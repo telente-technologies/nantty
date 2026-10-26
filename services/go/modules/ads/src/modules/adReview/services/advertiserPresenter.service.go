@@ -5,11 +5,11 @@ import (
 	"encoding/json"
 	"time"
 
-	"zudomart/modules/ads/src/container"
-	"zudomart/modules/ads/src/generated/ent"
-	"zudomart/modules/ads/src/generated/ent/adcampaign"
-	"zudomart/modules/ads/src/modules/adReview/dtos"
-	"zudomart/modules/ads/src/types"
+	"nantty/modules/ads/src/container"
+	"nantty/modules/ads/src/generated/ent"
+	"nantty/modules/ads/src/generated/ent/adcampaign"
+	"nantty/modules/ads/src/modules/adReview/dtos"
+	"nantty/modules/ads/src/types"
 )
 
 const (

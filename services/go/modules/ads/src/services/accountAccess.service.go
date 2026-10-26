@@ -6,10 +6,10 @@ import (
 
 	"github.com/google/uuid"
 
-	adserrors "zudomart/modules/ads/src/errors"
-	"zudomart/modules/ads/src/generated/ent"
-	"zudomart/modules/ads/src/generated/ent/adaccountmember"
-	"zudomart/platform/httpserver"
+	adserrors "nantty/modules/ads/src/errors"
+	"nantty/modules/ads/src/generated/ent"
+	"nantty/modules/ads/src/generated/ent/adaccountmember"
+	"nantty/platform/httpserver"
 )
 
 const (

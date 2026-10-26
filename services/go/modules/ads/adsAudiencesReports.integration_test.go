@@ -16,12 +16,12 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/ads/src"
-	"zudomart/modules/ads/src/configs"
-	"zudomart/modules/ads/src/events"
-	"zudomart/modules/ads/src/integrations"
-	"zudomart/modules/ads/src/interfaces"
-	"zudomart/modules/ads/src/modules/reporting/delivery"
+	"nantty/modules/ads/src"
+	"nantty/modules/ads/src/configs"
+	"nantty/modules/ads/src/events"
+	"nantty/modules/ads/src/integrations"
+	"nantty/modules/ads/src/interfaces"
+	"nantty/modules/ads/src/modules/reporting/delivery"
 )
 
 type fakeAudienceSource struct{ members []string }

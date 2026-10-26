@@ -6,11 +6,11 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"github.com/google/uuid"
 
-	"zudomart/modules/ads/src/generated/ent"
-	"zudomart/modules/ads/src/generated/ent/adstatsdaily"
-	"zudomart/modules/ads/src/generated/ent/predicate"
-	"zudomart/modules/ads/src/modules/campaigns/dtos"
-	"zudomart/modules/ads/src/types"
+	"nantty/modules/ads/src/generated/ent"
+	"nantty/modules/ads/src/generated/ent/adstatsdaily"
+	"nantty/modules/ads/src/generated/ent/predicate"
+	"nantty/modules/ads/src/modules/campaigns/dtos"
+	"nantty/modules/ads/src/types"
 )
 
 type DeliveryWindow struct {

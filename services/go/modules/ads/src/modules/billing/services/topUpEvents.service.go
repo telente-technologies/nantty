@@ -7,9 +7,9 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/ads/src/container"
-	applytopupresult "zudomart/modules/ads/src/modules/billing/commands/applyTopUpResult"
-	platformevents "zudomart/platform/events"
+	"nantty/modules/ads/src/container"
+	applytopupresult "nantty/modules/ads/src/modules/billing/commands/applyTopUpResult"
+	platformevents "nantty/platform/events"
 )
 
 const AdBalanceToppedUp = "adBalance.toppedUp"

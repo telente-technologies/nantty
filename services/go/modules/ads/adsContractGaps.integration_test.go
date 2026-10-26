@@ -6,8 +6,8 @@ import (
 	"testing"
 	"time"
 
-	"zudomart/modules/ads/src/generated/ent/adcustomaudience"
-	"zudomart/modules/ads/src/generated/ent/outboxevent"
+	"nantty/modules/ads/src/generated/ent/adcustomaudience"
+	"nantty/modules/ads/src/generated/ent/outboxevent"
 )
 
 func createBundle(h *harness, owner *testUser, accountId, key string, mutate func(map[string]any)) map[string]any {

@@ -6,9 +6,9 @@ import (
 	"fmt"
 	"time"
 
-	"zudomart/modules/ads/src/generated/ent"
-	"zudomart/modules/ads/src/generated/ent/adcreatormonetisationhold"
-	platformevents "zudomart/platform/events"
+	"nantty/modules/ads/src/generated/ent"
+	"nantty/modules/ads/src/generated/ent/adcreatormonetisationhold"
+	platformevents "nantty/platform/events"
 )
 
 type CreatorMonetisationHolds struct {

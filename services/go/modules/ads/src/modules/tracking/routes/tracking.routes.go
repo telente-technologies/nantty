@@ -3,9 +3,9 @@ package routes
 import (
 	"net/http"
 
-	"zudomart/modules/ads/src/container"
-	"zudomart/modules/ads/src/middlewares"
-	"zudomart/modules/ads/src/modules/tracking/controllers"
+	"nantty/modules/ads/src/container"
+	"nantty/modules/ads/src/middlewares"
+	"nantty/modules/ads/src/modules/tracking/controllers"
 )
 
 func MountTrackingRoutes(mux *http.ServeMux, deployed *container.Container) {

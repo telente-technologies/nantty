@@ -1,4 +1,4 @@
-module zudomart/modules/ads
+module nantty/modules/ads
 
 go 1.26.9
 
@@ -91,10 +91,10 @@ require (
 	golang.org/x/sys v0.49.0 // indirect
 	golang.org/x/text v0.43.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
-	zudomart/contracts v0.0.0
-	zudomart/platform v0.0.0
+	nantty/contracts v0.0.0
+	nantty/platform v0.0.0
 )
 
-replace zudomart/platform => ../../platform
+replace nantty/platform => ../../platform
 
-replace zudomart/contracts => ../../../contracts
+replace nantty/contracts => ../../../contracts

@@ -5,8 +5,8 @@ import (
 	"errors"
 	"testing"
 
-	"zudomart/modules/ads/src/interfaces"
-	"zudomart/modules/ads/src/types"
+	"nantty/modules/ads/src/interfaces"
+	"nantty/modules/ads/src/types"
 )
 
 type stubPromotedDirectory struct {

@@ -6,9 +6,9 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/ads/src/generated/ent"
-	"zudomart/modules/ads/src/generated/ent/adexperiment"
-	"zudomart/modules/ads/src/types"
+	"nantty/modules/ads/src/generated/ent"
+	"nantty/modules/ads/src/generated/ent/adexperiment"
+	"nantty/modules/ads/src/types"
 )
 
 type experimentSlice struct {

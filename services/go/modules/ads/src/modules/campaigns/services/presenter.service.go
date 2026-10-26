@@ -3,9 +3,9 @@ package services
 import (
 	"time"
 
-	"zudomart/modules/ads/src/generated/ent"
-	"zudomart/modules/ads/src/modules/campaigns/dtos"
-	"zudomart/modules/ads/src/types"
+	"nantty/modules/ads/src/generated/ent"
+	"nantty/modules/ads/src/modules/campaigns/dtos"
+	"nantty/modules/ads/src/types"
 )
 
 func formatTime(at time.Time) string { return at.UTC().Format(time.RFC3339) }

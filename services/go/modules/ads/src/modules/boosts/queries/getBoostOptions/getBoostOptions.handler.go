@@ -3,11 +3,11 @@ package getboostoptions
 import (
 	"context"
 
-	"zudomart/modules/ads/src/container"
-	"zudomart/modules/ads/src/modules/boosts/dtos"
-	"zudomart/modules/ads/src/modules/boosts/services"
-	"zudomart/modules/ads/src/types"
-	"zudomart/platform/regionpricing"
+	"nantty/modules/ads/src/container"
+	"nantty/modules/ads/src/modules/boosts/dtos"
+	"nantty/modules/ads/src/modules/boosts/services"
+	"nantty/modules/ads/src/types"
+	"nantty/platform/regionpricing"
 )
 
 type Handler struct{ Container *container.Container }

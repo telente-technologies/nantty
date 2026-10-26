@@ -3,8 +3,8 @@ package services
 import (
 	"strings"
 
-	"zudomart/modules/ads/src/generated/ent"
-	"zudomart/modules/ads/src/types"
+	"nantty/modules/ads/src/generated/ent"
+	"nantty/modules/ads/src/types"
 )
 
 func ResolveCreative(input types.CreativeInput, account *ent.AdAccount, mediaBaseUrl string) types.StoredCreative {

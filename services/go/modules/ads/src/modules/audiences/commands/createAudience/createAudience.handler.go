@@ -7,15 +7,15 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/ads/src/container"
-	"zudomart/modules/ads/src/generated/ent"
-	"zudomart/modules/ads/src/generated/ent/adcustomaudience"
-	accountservices "zudomart/modules/ads/src/modules/adAccounts/services"
-	"zudomart/modules/ads/src/modules/audiences/dtos"
-	"zudomart/modules/ads/src/modules/audiences/services"
-	"zudomart/modules/ads/src/modules/audiences/validators"
-	adsservices "zudomart/modules/ads/src/services"
-	"zudomart/platform/httpserver"
+	"nantty/modules/ads/src/container"
+	"nantty/modules/ads/src/generated/ent"
+	"nantty/modules/ads/src/generated/ent/adcustomaudience"
+	accountservices "nantty/modules/ads/src/modules/adAccounts/services"
+	"nantty/modules/ads/src/modules/audiences/dtos"
+	"nantty/modules/ads/src/modules/audiences/services"
+	"nantty/modules/ads/src/modules/audiences/validators"
+	adsservices "nantty/modules/ads/src/services"
+	"nantty/platform/httpserver"
 )
 
 type Handler struct{ Container *container.Container }

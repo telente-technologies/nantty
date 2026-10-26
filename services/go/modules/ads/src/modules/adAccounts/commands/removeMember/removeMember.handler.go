@@ -3,12 +3,12 @@ package removemember
 import (
 	"context"
 
-	"zudomart/modules/ads/src/container"
-	adserrors "zudomart/modules/ads/src/errors"
-	"zudomart/modules/ads/src/generated/ent"
-	"zudomart/modules/ads/src/generated/ent/adaccountmember"
-	accountservices "zudomart/modules/ads/src/modules/adAccounts/services"
-	"zudomart/modules/ads/src/services"
+	"nantty/modules/ads/src/container"
+	adserrors "nantty/modules/ads/src/errors"
+	"nantty/modules/ads/src/generated/ent"
+	"nantty/modules/ads/src/generated/ent/adaccountmember"
+	accountservices "nantty/modules/ads/src/modules/adAccounts/services"
+	"nantty/modules/ads/src/services"
 )
 
 type Handler struct{ Container *container.Container }

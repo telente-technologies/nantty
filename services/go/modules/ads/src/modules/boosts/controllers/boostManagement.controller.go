@@ -3,14 +3,14 @@ package controllers
 import (
 	"net/http"
 
-	changeboostbudget "zudomart/modules/ads/src/modules/boosts/commands/changeBoostBudget"
-	changeboostdelivery "zudomart/modules/ads/src/modules/boosts/commands/changeBoostDelivery"
-	"zudomart/modules/ads/src/modules/boosts/dtos"
-	getboost "zudomart/modules/ads/src/modules/boosts/queries/getBoost"
-	getboostreport "zudomart/modules/ads/src/modules/boosts/queries/getBoostReport"
-	listboosts "zudomart/modules/ads/src/modules/boosts/queries/listBoosts"
-	"zudomart/modules/ads/src/utils"
-	"zudomart/platform/httpserver"
+	changeboostbudget "nantty/modules/ads/src/modules/boosts/commands/changeBoostBudget"
+	changeboostdelivery "nantty/modules/ads/src/modules/boosts/commands/changeBoostDelivery"
+	"nantty/modules/ads/src/modules/boosts/dtos"
+	getboost "nantty/modules/ads/src/modules/boosts/queries/getBoost"
+	getboostreport "nantty/modules/ads/src/modules/boosts/queries/getBoostReport"
+	listboosts "nantty/modules/ads/src/modules/boosts/queries/listBoosts"
+	"nantty/modules/ads/src/utils"
+	"nantty/platform/httpserver"
 )
 
 func (controller BoostsController) List(writer http.ResponseWriter, request *http.Request) {

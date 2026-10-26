@@ -7,12 +7,12 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/ads/src/generated/ent"
-	"zudomart/modules/ads/src/generated/ent/adconversionevent"
-	"zudomart/modules/ads/src/generated/ent/adcustomaudience"
-	"zudomart/modules/ads/src/modules/campaigns/dtos"
-	"zudomart/modules/ads/src/types"
-	"zudomart/platform/httpserver"
+	"nantty/modules/ads/src/generated/ent"
+	"nantty/modules/ads/src/generated/ent/adconversionevent"
+	"nantty/modules/ads/src/generated/ent/adcustomaudience"
+	"nantty/modules/ads/src/modules/campaigns/dtos"
+	"nantty/modules/ads/src/types"
+	"nantty/platform/httpserver"
 )
 
 const maximumCustomAudiences = 25

@@ -3,13 +3,13 @@ package listpromotabledestinations
 import (
 	"context"
 
-	"zudomart/modules/ads/src/container"
-	"zudomart/modules/ads/src/generated/ent"
-	"zudomart/modules/ads/src/interfaces"
-	accountservices "zudomart/modules/ads/src/modules/adAccounts/services"
-	"zudomart/modules/ads/src/modules/creatives/dtos"
-	adsservices "zudomart/modules/ads/src/services"
-	"zudomart/platform/httpserver"
+	"nantty/modules/ads/src/container"
+	"nantty/modules/ads/src/generated/ent"
+	"nantty/modules/ads/src/interfaces"
+	accountservices "nantty/modules/ads/src/modules/adAccounts/services"
+	"nantty/modules/ads/src/modules/creatives/dtos"
+	adsservices "nantty/modules/ads/src/services"
+	"nantty/platform/httpserver"
 )
 
 const unavailableReason = "This is suspended or no longer active, so it can't be promoted."

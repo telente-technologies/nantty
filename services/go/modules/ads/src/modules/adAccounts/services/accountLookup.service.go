@@ -5,12 +5,12 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/ads/src/container"
-	adserrors "zudomart/modules/ads/src/errors"
-	"zudomart/modules/ads/src/generated/ent"
-	"zudomart/modules/ads/src/generated/ent/adaccount"
-	"zudomart/modules/ads/src/generated/ent/adcampaign"
-	adsservices "zudomart/modules/ads/src/services"
+	"nantty/modules/ads/src/container"
+	adserrors "nantty/modules/ads/src/errors"
+	"nantty/modules/ads/src/generated/ent"
+	"nantty/modules/ads/src/generated/ent/adaccount"
+	"nantty/modules/ads/src/generated/ent/adcampaign"
+	adsservices "nantty/modules/ads/src/services"
 )
 
 func LoadAccountForPermission(ctx context.Context, deployed *container.Container, accountId, userId uuid.UUID, permission string) (*ent.AdAccount, *ent.AdAccountMember, error) {

@@ -6,9 +6,9 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/ads/src/container"
-	"zudomart/modules/ads/src/utils"
-	"zudomart/platform/httpserver"
+	"nantty/modules/ads/src/container"
+	"nantty/modules/ads/src/utils"
+	"nantty/platform/httpserver"
 )
 
 type CampaignsController struct{ Container *container.Container }

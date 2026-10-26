@@ -5,8 +5,8 @@ import (
 
 	"github.com/google/uuid"
 
-	adserrors "zudomart/modules/ads/src/errors"
-	"zudomart/modules/ads/src/generated/ent"
+	adserrors "nantty/modules/ads/src/errors"
+	"nantty/modules/ads/src/generated/ent"
 )
 
 type ReviewContext struct {

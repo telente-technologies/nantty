@@ -12,13 +12,13 @@ import (
 	"github.com/lestrrat-go/jwx/v3/jwa"
 	"github.com/lestrrat-go/jwx/v3/jwt"
 
-	src "zudomart/modules/ads/src"
-	"zudomart/modules/ads/src/configs"
-	"zudomart/modules/ads/src/generated/ent"
-	"zudomart/modules/ads/src/generated/ent/adcreditlot"
-	"zudomart/modules/ads/src/services"
-	"zudomart/platform/staffaudit"
-	"zudomart/platform/staffauth"
+	src "nantty/modules/ads/src"
+	"nantty/modules/ads/src/configs"
+	"nantty/modules/ads/src/generated/ent"
+	"nantty/modules/ads/src/generated/ent/adcreditlot"
+	"nantty/modules/ads/src/services"
+	"nantty/platform/staffaudit"
+	"nantty/platform/staffauth"
 )
 
 type recordingAudit struct {

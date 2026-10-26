@@ -8,19 +8,19 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/ads/src/container"
-	"zudomart/modules/ads/src/events"
-	"zudomart/modules/ads/src/generated/ent"
-	"zudomart/modules/ads/src/generated/ent/ad"
-	"zudomart/modules/ads/src/generated/ent/adboost"
-	"zudomart/modules/ads/src/generated/ent/adcampaign"
-	"zudomart/modules/ads/src/generated/ent/adcreditlot"
-	"zudomart/modules/ads/src/generated/ent/adfreeboostgrant"
-	"zudomart/modules/ads/src/generated/ent/adgroup"
-	"zudomart/modules/ads/src/generated/ent/adimpression"
-	adsservices "zudomart/modules/ads/src/services"
-	"zudomart/modules/ads/src/types"
-	platformevents "zudomart/platform/events"
+	"nantty/modules/ads/src/container"
+	"nantty/modules/ads/src/events"
+	"nantty/modules/ads/src/generated/ent"
+	"nantty/modules/ads/src/generated/ent/ad"
+	"nantty/modules/ads/src/generated/ent/adboost"
+	"nantty/modules/ads/src/generated/ent/adcampaign"
+	"nantty/modules/ads/src/generated/ent/adcreditlot"
+	"nantty/modules/ads/src/generated/ent/adfreeboostgrant"
+	"nantty/modules/ads/src/generated/ent/adgroup"
+	"nantty/modules/ads/src/generated/ent/adimpression"
+	adsservices "nantty/modules/ads/src/services"
+	"nantty/modules/ads/src/types"
+	platformevents "nantty/platform/events"
 )
 
 const (

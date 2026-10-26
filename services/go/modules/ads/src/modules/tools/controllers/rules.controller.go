@@ -5,12 +5,12 @@ import (
 
 	"github.com/google/uuid"
 
-	deleterule "zudomart/modules/ads/src/modules/tools/commands/deleteRule"
-	saverule "zudomart/modules/ads/src/modules/tools/commands/saveRule"
-	"zudomart/modules/ads/src/modules/tools/dtos"
-	listrules "zudomart/modules/ads/src/modules/tools/queries/listRules"
-	"zudomart/modules/ads/src/utils"
-	"zudomart/platform/httpserver"
+	deleterule "nantty/modules/ads/src/modules/tools/commands/deleteRule"
+	saverule "nantty/modules/ads/src/modules/tools/commands/saveRule"
+	"nantty/modules/ads/src/modules/tools/dtos"
+	listrules "nantty/modules/ads/src/modules/tools/queries/listRules"
+	"nantty/modules/ads/src/utils"
+	"nantty/platform/httpserver"
 )
 
 func (controller ToolsController) ListRules(writer http.ResponseWriter, request *http.Request) {

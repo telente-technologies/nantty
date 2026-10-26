@@ -6,9 +6,9 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/ads/src/container"
-	"zudomart/modules/ads/src/generated/ent"
-	"zudomart/modules/ads/src/modules/audiences/dtos"
+	"nantty/modules/ads/src/container"
+	"nantty/modules/ads/src/generated/ent"
+	"nantty/modules/ads/src/modules/audiences/dtos"
 )
 
 func PresentAudience(row *ent.AdCustomAudience, usedInAdSets int) dtos.CustomAudience {

@@ -5,11 +5,11 @@ import (
 	"slices"
 	"strings"
 
-	"zudomart/modules/ads/src/container"
-	"zudomart/modules/ads/src/interfaces"
-	accountservices "zudomart/modules/ads/src/modules/adAccounts/services"
-	adsservices "zudomart/modules/ads/src/services"
-	"zudomart/platform/httpserver"
+	"nantty/modules/ads/src/container"
+	"nantty/modules/ads/src/interfaces"
+	accountservices "nantty/modules/ads/src/modules/adAccounts/services"
+	adsservices "nantty/modules/ads/src/services"
+	"nantty/platform/httpserver"
 )
 
 var sourceTypes = []string{"", "post", "clip", "product", "live", "store"}

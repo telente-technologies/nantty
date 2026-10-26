@@ -3,7 +3,7 @@ package upsertfrequencypolicy
 import (
 	"context"
 
-	"zudomart/modules/ads/src/container"
+	"nantty/modules/ads/src/container"
 )
 
 type Handler struct{ Container *container.Container }

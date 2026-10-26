@@ -9,7 +9,7 @@ import (
 
 	"github.com/jackc/pgx/v5"
 
-	"zudomart/modules/ads/src/interfaces"
+	"nantty/modules/ads/src/interfaces"
 )
 
 type AuthSchemaUserDirectory struct {

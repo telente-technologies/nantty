@@ -3,9 +3,9 @@ package services
 import (
 	"context"
 
-	"zudomart/modules/ads/src/container"
-	"zudomart/modules/ads/src/generated/ent"
-	"zudomart/modules/ads/src/generated/ent/adconversionevent"
+	"nantty/modules/ads/src/container"
+	"nantty/modules/ads/src/generated/ent"
+	"nantty/modules/ads/src/generated/ent/adconversionevent"
 )
 
 func StoreName(ctx context.Context, deployed *container.Container, account *ent.AdAccount) string {

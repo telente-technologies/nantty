@@ -5,8 +5,8 @@ import (
 	"slices"
 	"time"
 
-	"zudomart/modules/ads/src/services"
-	"zudomart/modules/ads/src/types"
+	"nantty/modules/ads/src/services"
+	"nantty/modules/ads/src/types"
 )
 
 func (handler Handler) collectEligibleCandidates(ctx context.Context, slot *slotContext) ([]types.CandidateAd, error) {

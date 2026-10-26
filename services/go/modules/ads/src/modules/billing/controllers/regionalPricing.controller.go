@@ -6,9 +6,9 @@ import (
 	"strings"
 	"time"
 
-	"zudomart/modules/ads/src/utils"
-	"zudomart/platform/httpserver"
-	"zudomart/platform/regionpricing"
+	"nantty/modules/ads/src/utils"
+	"nantty/platform/httpserver"
+	"nantty/platform/regionpricing"
 )
 
 func readCountryList(raw []string) []string {

@@ -3,17 +3,17 @@ package controllers
 import (
 	"net/http"
 
-	"zudomart/modules/ads/src/modules/campaigns/commands/applyBulkAction"
-	createcampaignbundle "zudomart/modules/ads/src/modules/campaigns/commands/createCampaignBundle"
-	deletecampaign "zudomart/modules/ads/src/modules/campaigns/commands/deleteCampaign"
-	duplicatecampaign "zudomart/modules/ads/src/modules/campaigns/commands/duplicateCampaign"
-	submitcampaignforreview "zudomart/modules/ads/src/modules/campaigns/commands/submitCampaignForReview"
-	updatecampaign "zudomart/modules/ads/src/modules/campaigns/commands/updateCampaign"
-	"zudomart/modules/ads/src/modules/campaigns/dtos"
-	getcampaign "zudomart/modules/ads/src/modules/campaigns/queries/getCampaign"
-	listcampaigns "zudomart/modules/ads/src/modules/campaigns/queries/listCampaigns"
-	"zudomart/modules/ads/src/utils"
-	"zudomart/platform/httpserver"
+	"nantty/modules/ads/src/modules/campaigns/commands/applyBulkAction"
+	createcampaignbundle "nantty/modules/ads/src/modules/campaigns/commands/createCampaignBundle"
+	deletecampaign "nantty/modules/ads/src/modules/campaigns/commands/deleteCampaign"
+	duplicatecampaign "nantty/modules/ads/src/modules/campaigns/commands/duplicateCampaign"
+	submitcampaignforreview "nantty/modules/ads/src/modules/campaigns/commands/submitCampaignForReview"
+	updatecampaign "nantty/modules/ads/src/modules/campaigns/commands/updateCampaign"
+	"nantty/modules/ads/src/modules/campaigns/dtos"
+	getcampaign "nantty/modules/ads/src/modules/campaigns/queries/getCampaign"
+	listcampaigns "nantty/modules/ads/src/modules/campaigns/queries/listCampaigns"
+	"nantty/modules/ads/src/utils"
+	"nantty/platform/httpserver"
 )
 
 func (controller CampaignsController) ListCampaigns(writer http.ResponseWriter, request *http.Request) {

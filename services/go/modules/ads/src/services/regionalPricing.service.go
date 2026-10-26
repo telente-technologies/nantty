@@ -3,8 +3,8 @@ package services
 import (
 	"context"
 
-	"zudomart/modules/ads/src/types"
-	"zudomart/platform/regionpricing"
+	"nantty/modules/ads/src/types"
+	"nantty/platform/regionpricing"
 )
 
 type ExchangeRateReader interface {

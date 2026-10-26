@@ -7,14 +7,14 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/ads/src/container"
-	adserrors "zudomart/modules/ads/src/errors"
-	"zudomart/modules/ads/src/generated/ent"
-	"zudomart/modules/ads/src/generated/ent/adfundstransaction"
-	accountservices "zudomart/modules/ads/src/modules/adAccounts/services"
-	"zudomart/modules/ads/src/modules/billing/services"
-	reportingservices "zudomart/modules/ads/src/modules/reporting/services"
-	adsservices "zudomart/modules/ads/src/services"
+	"nantty/modules/ads/src/container"
+	adserrors "nantty/modules/ads/src/errors"
+	"nantty/modules/ads/src/generated/ent"
+	"nantty/modules/ads/src/generated/ent/adfundstransaction"
+	accountservices "nantty/modules/ads/src/modules/adAccounts/services"
+	"nantty/modules/ads/src/modules/billing/services"
+	reportingservices "nantty/modules/ads/src/modules/reporting/services"
+	adsservices "nantty/modules/ads/src/services"
 )
 
 var unsafeFileCharacters = regexp.MustCompile(`[^A-Za-z0-9_-]`)

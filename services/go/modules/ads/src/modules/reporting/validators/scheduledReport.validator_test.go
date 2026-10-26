@@ -3,7 +3,7 @@ package validators
 import (
 	"testing"
 
-	"zudomart/modules/ads/src/modules/reporting/dtos"
+	"nantty/modules/ads/src/modules/reporting/dtos"
 )
 
 func valid() dtos.ScheduledReportInput {

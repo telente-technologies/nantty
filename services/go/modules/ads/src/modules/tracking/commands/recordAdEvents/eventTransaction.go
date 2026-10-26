@@ -8,11 +8,11 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/ads/src/events"
-	"zudomart/modules/ads/src/generated/ent"
-	"zudomart/modules/ads/src/generated/ent/adimpression"
-	"zudomart/modules/ads/src/modules/tracking/dtos"
-	"zudomart/modules/ads/src/services"
+	"nantty/modules/ads/src/events"
+	"nantty/modules/ads/src/generated/ent"
+	"nantty/modules/ads/src/generated/ent/adimpression"
+	"nantty/modules/ads/src/modules/tracking/dtos"
+	"nantty/modules/ads/src/services"
 )
 
 func (handler Handler) applyInTransaction(ctx context.Context, claims services.AdTokenClaims, event dtos.AdEventDto, verdict services.FraudVerdict) (services.EventEffects, bool, error) {

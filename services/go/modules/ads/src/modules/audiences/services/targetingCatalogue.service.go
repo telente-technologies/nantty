@@ -1,6 +1,6 @@
 package services
 
-import "zudomart/modules/ads/src/types"
+import "nantty/modules/ads/src/types"
 
 type Behaviour struct {
 	Id          string `json:"id"`

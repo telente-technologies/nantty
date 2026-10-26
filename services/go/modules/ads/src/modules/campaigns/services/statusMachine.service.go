@@ -6,12 +6,12 @@ import (
 
 	"github.com/google/uuid"
 
-	adserrors "zudomart/modules/ads/src/errors"
-	"zudomart/modules/ads/src/generated/ent"
-	"zudomart/modules/ads/src/generated/ent/ad"
-	"zudomart/modules/ads/src/generated/ent/adaccount"
-	"zudomart/modules/ads/src/generated/ent/adcampaign"
-	"zudomart/modules/ads/src/generated/ent/adgroup"
+	adserrors "nantty/modules/ads/src/errors"
+	"nantty/modules/ads/src/generated/ent"
+	"nantty/modules/ads/src/generated/ent/ad"
+	"nantty/modules/ads/src/generated/ent/adaccount"
+	"nantty/modules/ads/src/generated/ent/adcampaign"
+	"nantty/modules/ads/src/generated/ent/adgroup"
 )
 
 func RequireStatusChangeAllowed(current, target string) error {

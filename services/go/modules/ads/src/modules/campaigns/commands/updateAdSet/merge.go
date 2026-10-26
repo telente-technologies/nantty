@@ -3,9 +3,9 @@ package updateadset
 import (
 	"time"
 
-	"zudomart/modules/ads/src/generated/ent"
-	"zudomart/modules/ads/src/generated/ent/adgroup"
-	"zudomart/modules/ads/src/modules/campaigns/dtos"
+	"nantty/modules/ads/src/generated/ent"
+	"nantty/modules/ads/src/generated/ent/adgroup"
+	"nantty/modules/ads/src/modules/campaigns/dtos"
 )
 
 func merge(current dtos.AdSetInput, patch dtos.AdSetPatch) dtos.AdSetInput {

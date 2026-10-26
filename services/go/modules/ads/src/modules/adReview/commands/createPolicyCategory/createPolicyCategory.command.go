@@ -3,8 +3,8 @@ package createpolicycategory
 import (
 	"strings"
 
-	"zudomart/modules/ads/src/modules/adReview/dtos"
-	"zudomart/platform/httpserver"
+	"nantty/modules/ads/src/modules/adReview/dtos"
+	"nantty/platform/httpserver"
 )
 
 type Command struct{ Request dtos.PolicyCategoryRequest }

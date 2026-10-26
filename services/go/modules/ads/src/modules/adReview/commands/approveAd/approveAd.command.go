@@ -3,7 +3,7 @@ package approvead
 import (
 	"github.com/google/uuid"
 
-	"zudomart/modules/ads/src/modules/adReview/services"
+	"nantty/modules/ads/src/modules/adReview/services"
 )
 
 type Command struct {

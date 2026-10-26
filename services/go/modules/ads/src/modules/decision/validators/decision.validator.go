@@ -3,9 +3,9 @@ package validators
 import (
 	"regexp"
 
-	"zudomart/modules/ads/src/modules/decision/dtos"
-	"zudomart/modules/ads/src/services"
-	"zudomart/platform/httpserver"
+	"nantty/modules/ads/src/modules/decision/dtos"
+	"nantty/modules/ads/src/services"
+	"nantty/platform/httpserver"
 )
 
 var identifierPattern = regexp.MustCompile(`^[A-Za-z0-9_\-:.]{1,128}$`)

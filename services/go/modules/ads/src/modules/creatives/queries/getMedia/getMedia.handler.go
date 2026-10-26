@@ -5,14 +5,14 @@ import (
 	"strings"
 	"time"
 
-	"zudomart/modules/ads/src/container"
-	adserrors "zudomart/modules/ads/src/errors"
-	"zudomart/modules/ads/src/generated/ent"
-	"zudomart/modules/ads/src/generated/ent/admedia"
-	accountservices "zudomart/modules/ads/src/modules/adAccounts/services"
-	"zudomart/modules/ads/src/modules/creatives/dtos"
-	adsservices "zudomart/modules/ads/src/services"
-	"zudomart/modules/ads/src/types"
+	"nantty/modules/ads/src/container"
+	adserrors "nantty/modules/ads/src/errors"
+	"nantty/modules/ads/src/generated/ent"
+	"nantty/modules/ads/src/generated/ent/admedia"
+	accountservices "nantty/modules/ads/src/modules/adAccounts/services"
+	"nantty/modules/ads/src/modules/creatives/dtos"
+	adsservices "nantty/modules/ads/src/services"
+	"nantty/modules/ads/src/types"
 )
 
 type Handler struct{ Container *container.Container }

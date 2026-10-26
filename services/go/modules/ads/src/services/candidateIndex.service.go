@@ -8,14 +8,14 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/ads/src/generated/ent"
-	"zudomart/modules/ads/src/generated/ent/ad"
-	"zudomart/modules/ads/src/generated/ent/adaccount"
-	"zudomart/modules/ads/src/generated/ent/adcampaign"
-	"zudomart/modules/ads/src/generated/ent/adgroup"
-	"zudomart/modules/ads/src/generated/ent/adstatsdaily"
-	"zudomart/modules/ads/src/interfaces"
-	"zudomart/modules/ads/src/types"
+	"nantty/modules/ads/src/generated/ent"
+	"nantty/modules/ads/src/generated/ent/ad"
+	"nantty/modules/ads/src/generated/ent/adaccount"
+	"nantty/modules/ads/src/generated/ent/adcampaign"
+	"nantty/modules/ads/src/generated/ent/adgroup"
+	"nantty/modules/ads/src/generated/ent/adstatsdaily"
+	"nantty/modules/ads/src/interfaces"
+	"nantty/modules/ads/src/types"
 )
 
 const candidateLoadLimit = 5_000

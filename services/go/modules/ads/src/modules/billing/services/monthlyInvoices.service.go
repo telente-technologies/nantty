@@ -8,9 +8,9 @@ import (
 	"strings"
 	"time"
 
-	"zudomart/modules/ads/src/generated/ent"
-	"zudomart/modules/ads/src/modules/billing/dtos"
-	"zudomart/modules/ads/src/types"
+	"nantty/modules/ads/src/generated/ent"
+	"nantty/modules/ads/src/modules/billing/dtos"
+	"nantty/modules/ads/src/types"
 )
 
 type monthlySpend struct {

@@ -7,9 +7,9 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/ads/src/generated/ent/adcardstatsdaily"
-	"zudomart/modules/ads/src/modules/tracking/dtos"
-	"zudomart/modules/ads/src/services"
+	"nantty/modules/ads/src/generated/ent/adcardstatsdaily"
+	"nantty/modules/ads/src/modules/tracking/dtos"
+	"nantty/modules/ads/src/services"
 )
 
 const maximumCardIndex = 9

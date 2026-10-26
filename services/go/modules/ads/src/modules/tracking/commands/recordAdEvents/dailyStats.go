@@ -5,9 +5,9 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/ads/src/generated/ent"
-	"zudomart/modules/ads/src/generated/ent/adstatsdaily"
-	"zudomart/modules/ads/src/services"
+	"nantty/modules/ads/src/generated/ent"
+	"nantty/modules/ads/src/generated/ent/adstatsdaily"
+	"nantty/modules/ads/src/services"
 )
 
 func upsertDailyStats(ctx context.Context, tx *ent.Tx, claims services.AdTokenClaims, effects services.EventEffects, day string) error {

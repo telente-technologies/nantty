@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"time"
 
-	"zudomart/modules/ads/src/services"
-	"zudomart/modules/ads/src/types"
+	"nantty/modules/ads/src/services"
+	"nantty/modules/ads/src/types"
 )
 
 const (

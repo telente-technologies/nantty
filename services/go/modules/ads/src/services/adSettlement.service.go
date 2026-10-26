@@ -8,13 +8,13 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/ads/src/events"
-	"zudomart/modules/ads/src/generated/ent"
-	"zudomart/modules/ads/src/generated/ent/adaccount"
-	"zudomart/modules/ads/src/generated/ent/adcreatorearning"
-	"zudomart/modules/ads/src/generated/ent/adimpression"
-	"zudomart/modules/ads/src/generated/ent/adpooldaily"
-	"zudomart/modules/ads/src/types"
+	"nantty/modules/ads/src/events"
+	"nantty/modules/ads/src/generated/ent"
+	"nantty/modules/ads/src/generated/ent/adaccount"
+	"nantty/modules/ads/src/generated/ent/adcreatorearning"
+	"nantty/modules/ads/src/generated/ent/adimpression"
+	"nantty/modules/ads/src/generated/ent/adpooldaily"
+	"nantty/modules/ads/src/types"
 )
 
 const settlementBatchLimit = 5_000

@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	"zudomart/modules/ads/src/types"
+	"nantty/modules/ads/src/types"
 )
 
 func str(value string) *string { return &value }

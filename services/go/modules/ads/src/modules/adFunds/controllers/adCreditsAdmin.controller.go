@@ -6,15 +6,15 @@ import (
 
 	"github.com/google/uuid"
 
-	adserrors "zudomart/modules/ads/src/errors"
-	"zudomart/modules/ads/src/middlewares"
-	"zudomart/modules/ads/src/modules/adFunds/dtos"
-	"zudomart/modules/ads/src/modules/adFunds/services"
-	adreviewservices "zudomart/modules/ads/src/modules/adReview/services"
-	"zudomart/modules/ads/src/utils"
-	"zudomart/platform/httpserver"
-	"zudomart/platform/idempotency"
-	"zudomart/platform/jwtauth"
+	adserrors "nantty/modules/ads/src/errors"
+	"nantty/modules/ads/src/middlewares"
+	"nantty/modules/ads/src/modules/adFunds/dtos"
+	"nantty/modules/ads/src/modules/adFunds/services"
+	adreviewservices "nantty/modules/ads/src/modules/adReview/services"
+	"nantty/modules/ads/src/utils"
+	"nantty/platform/httpserver"
+	"nantty/platform/idempotency"
+	"nantty/platform/jwtauth"
 )
 
 var (

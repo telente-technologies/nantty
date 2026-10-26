@@ -7,9 +7,9 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/ads/src/generated/ent"
-	"zudomart/modules/ads/src/generated/ent/adaccountmember"
-	accountservices "zudomart/modules/ads/src/modules/adAccounts/services"
+	"nantty/modules/ads/src/generated/ent"
+	"nantty/modules/ads/src/generated/ent/adaccountmember"
+	accountservices "nantty/modules/ads/src/modules/adAccounts/services"
 )
 
 func EnsurePersonalBoostAccount(ctx context.Context, client *ent.Client, userId uuid.UUID, currency, countryCode string) (*ent.AdAccount, error) {

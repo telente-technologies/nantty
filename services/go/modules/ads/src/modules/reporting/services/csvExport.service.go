@@ -7,8 +7,8 @@ import (
 	"strconv"
 	"strings"
 
-	"zudomart/modules/ads/src/modules/reporting/dtos"
-	"zudomart/modules/ads/src/types"
+	"nantty/modules/ads/src/modules/reporting/dtos"
+	"nantty/modules/ads/src/types"
 )
 
 var DefaultExportColumns = []string{"spend", "impressions", "reach", "clicks", "ctr", "cpc", "cpm", "conversions", "conversionValue", "roas"}

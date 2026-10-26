@@ -6,9 +6,9 @@ import (
 	"strconv"
 	"strings"
 
-	"zudomart/modules/ads/src/modules/audiences/dtos"
-	"zudomart/modules/ads/src/modules/audiences/services"
-	"zudomart/platform/httpserver"
+	"nantty/modules/ads/src/modules/audiences/dtos"
+	"nantty/modules/ads/src/modules/audiences/services"
+	"nantty/platform/httpserver"
 )
 
 const MaximumCustomerListRows = 50_000

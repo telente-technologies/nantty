@@ -3,7 +3,7 @@ package changeboostbudget
 import (
 	"github.com/google/uuid"
 
-	"zudomart/modules/ads/src/modules/boosts/dtos"
+	"nantty/modules/ads/src/modules/boosts/dtos"
 )
 
 type Command struct {

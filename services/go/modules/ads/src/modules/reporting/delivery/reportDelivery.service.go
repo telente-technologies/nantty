@@ -10,16 +10,16 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/ads/src/container"
-	adserrors "zudomart/modules/ads/src/errors"
-	"zudomart/modules/ads/src/events"
-	"zudomart/modules/ads/src/generated/ent"
-	"zudomart/modules/ads/src/generated/ent/adscheduledreport"
-	"zudomart/modules/ads/src/modules/reporting/dtos"
-	getreport "zudomart/modules/ads/src/modules/reporting/queries/getReport"
-	"zudomart/modules/ads/src/modules/reporting/services"
-	platformevents "zudomart/platform/events"
-	"zudomart/platform/httpserver"
+	"nantty/modules/ads/src/container"
+	adserrors "nantty/modules/ads/src/errors"
+	"nantty/modules/ads/src/events"
+	"nantty/modules/ads/src/generated/ent"
+	"nantty/modules/ads/src/generated/ent/adscheduledreport"
+	"nantty/modules/ads/src/modules/reporting/dtos"
+	getreport "nantty/modules/ads/src/modules/reporting/queries/getReport"
+	"nantty/modules/ads/src/modules/reporting/services"
+	platformevents "nantty/platform/events"
+	"nantty/platform/httpserver"
 )
 
 const (

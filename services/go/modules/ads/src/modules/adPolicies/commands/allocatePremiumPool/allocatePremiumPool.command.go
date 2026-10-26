@@ -3,8 +3,8 @@ package allocatepremiumpool
 import (
 	"regexp"
 
-	"zudomart/modules/ads/src/modules/adPolicies/dtos"
-	"zudomart/platform/httpserver"
+	"nantty/modules/ads/src/modules/adPolicies/dtos"
+	"nantty/platform/httpserver"
 )
 
 var monthPattern = regexp.MustCompile(`^\d{4}-(0[1-9]|1[0-2])$`)

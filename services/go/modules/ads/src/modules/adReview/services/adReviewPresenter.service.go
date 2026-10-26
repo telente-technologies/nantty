@@ -4,11 +4,11 @@ import (
 	"fmt"
 	"time"
 
-	"zudomart/modules/ads/src/generated/ent"
-	"zudomart/modules/ads/src/generated/ent/ad"
-	"zudomart/modules/ads/src/modules/adReview/dtos"
-	adsservices "zudomart/modules/ads/src/services"
-	"zudomart/modules/ads/src/types"
+	"nantty/modules/ads/src/generated/ent"
+	"nantty/modules/ads/src/generated/ent/ad"
+	"nantty/modules/ads/src/modules/adReview/dtos"
+	adsservices "nantty/modules/ads/src/services"
+	"nantty/modules/ads/src/types"
 )
 
 var reviewStatusLabels = map[ad.ReviewStatus]string{ad.ReviewStatusPending: "PENDING", ad.ReviewStatusApproved: "APPROVED", ad.ReviewStatusRejected: "REJECTED", ad.ReviewStatusNotSubmitted: "PENDING"}

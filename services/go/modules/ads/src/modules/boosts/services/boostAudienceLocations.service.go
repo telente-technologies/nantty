@@ -3,8 +3,8 @@ package services
 import (
 	"strings"
 
-	audienceservices "zudomart/modules/ads/src/modules/audiences/services"
-	"zudomart/modules/ads/src/types"
+	audienceservices "nantty/modules/ads/src/modules/audiences/services"
+	"nantty/modules/ads/src/types"
 )
 
 func StateTargetFor(countryCode, requested string) types.LocationTarget {

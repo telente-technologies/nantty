@@ -3,11 +3,11 @@ package deletescheduledreport
 import (
 	"context"
 
-	"zudomart/modules/ads/src/container"
-	adserrors "zudomart/modules/ads/src/errors"
-	"zudomart/modules/ads/src/generated/ent/adscheduledreport"
-	accountservices "zudomart/modules/ads/src/modules/adAccounts/services"
-	adsservices "zudomart/modules/ads/src/services"
+	"nantty/modules/ads/src/container"
+	adserrors "nantty/modules/ads/src/errors"
+	"nantty/modules/ads/src/generated/ent/adscheduledreport"
+	accountservices "nantty/modules/ads/src/modules/adAccounts/services"
+	adsservices "nantty/modules/ads/src/services"
 )
 
 type Handler struct{ Container *container.Container }

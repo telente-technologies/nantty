@@ -3,7 +3,7 @@ package listboosts
 import (
 	"github.com/google/uuid"
 
-	"zudomart/modules/ads/src/generated/ent/adboost"
+	"nantty/modules/ads/src/generated/ent/adboost"
 )
 
 type Query struct {

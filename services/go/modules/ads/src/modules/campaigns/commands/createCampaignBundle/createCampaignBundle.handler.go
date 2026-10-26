@@ -5,14 +5,14 @@ import (
 	"fmt"
 	"github.com/google/uuid"
 
-	"zudomart/modules/ads/src/container"
-	"zudomart/modules/ads/src/generated/ent"
-	"zudomart/modules/ads/src/generated/ent/ad"
-	accountservices "zudomart/modules/ads/src/modules/adAccounts/services"
-	"zudomart/modules/ads/src/modules/campaigns/dtos"
-	"zudomart/modules/ads/src/modules/campaigns/services"
-	"zudomart/modules/ads/src/modules/campaigns/validators"
-	adsservices "zudomart/modules/ads/src/services"
+	"nantty/modules/ads/src/container"
+	"nantty/modules/ads/src/generated/ent"
+	"nantty/modules/ads/src/generated/ent/ad"
+	accountservices "nantty/modules/ads/src/modules/adAccounts/services"
+	"nantty/modules/ads/src/modules/campaigns/dtos"
+	"nantty/modules/ads/src/modules/campaigns/services"
+	"nantty/modules/ads/src/modules/campaigns/validators"
+	adsservices "nantty/modules/ads/src/services"
 )
 
 type Handler struct{ Container *container.Container }

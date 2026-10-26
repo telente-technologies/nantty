@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	"zudomart/modules/ads/src/interfaces"
+	"nantty/modules/ads/src/interfaces"
 )
 
 const FrequencyPolicyAllFormats = "all"

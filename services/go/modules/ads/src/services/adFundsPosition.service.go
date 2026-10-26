@@ -6,11 +6,11 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/ads/src/generated/ent"
-	"zudomart/modules/ads/src/generated/ent/adboost"
-	"zudomart/modules/ads/src/generated/ent/adfundstransaction"
-	"zudomart/modules/ads/src/generated/ent/adimpression"
-	"zudomart/modules/ads/src/types"
+	"nantty/modules/ads/src/generated/ent"
+	"nantty/modules/ads/src/generated/ent/adboost"
+	"nantty/modules/ads/src/generated/ent/adfundstransaction"
+	"nantty/modules/ads/src/generated/ent/adimpression"
+	"nantty/modules/ads/src/types"
 )
 
 const WithdrawalSettlementWait = 24 * time.Hour

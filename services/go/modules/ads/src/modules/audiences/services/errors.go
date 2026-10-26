@@ -1,5 +1,5 @@
 package services
 
-import adserrors "zudomart/modules/ads/src/errors"
+import adserrors "nantty/modules/ads/src/errors"
 
 var errAudienceNotFound = adserrors.AudienceNotFound

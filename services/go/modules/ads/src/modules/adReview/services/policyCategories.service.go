@@ -3,9 +3,9 @@ package services
 import (
 	"context"
 
-	"zudomart/modules/ads/src/generated/ent"
-	"zudomart/modules/ads/src/generated/ent/adpolicycategory"
-	"zudomart/modules/ads/src/modules/adReview/dtos"
+	"nantty/modules/ads/src/generated/ent"
+	"nantty/modules/ads/src/generated/ent/adpolicycategory"
+	"nantty/modules/ads/src/modules/adReview/dtos"
 )
 
 func PresentPolicyCategory(row *ent.AdPolicyCategory) dtos.PolicyCategory {

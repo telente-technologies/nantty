@@ -4,9 +4,9 @@ import (
 	"context"
 	"time"
 
-	"zudomart/modules/ads/src/container"
-	adfundsservices "zudomart/modules/ads/src/modules/adFunds/services"
-	"zudomart/modules/ads/src/services"
+	"nantty/modules/ads/src/container"
+	adfundsservices "nantty/modules/ads/src/modules/adFunds/services"
+	"nantty/modules/ads/src/services"
 )
 
 func ExpireDueAdCredit(ctx context.Context, deployed *container.Container) (int, error) {

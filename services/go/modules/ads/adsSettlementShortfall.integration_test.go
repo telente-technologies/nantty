@@ -6,10 +6,10 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/ads/src/generated/ent/adaccount"
-	"zudomart/modules/ads/src/generated/ent/adfundstransaction"
-	"zudomart/modules/ads/src/generated/ent/adimpression"
-	"zudomart/modules/ads/src/services"
+	"nantty/modules/ads/src/generated/ent/adaccount"
+	"nantty/modules/ads/src/generated/ent/adfundstransaction"
+	"nantty/modules/ads/src/generated/ent/adimpression"
+	"nantty/modules/ads/src/services"
 )
 
 func TestOneAdvertisersShortfallIsRecordedAsDebtOnceAndOtherAdvertisersStillSettle(t *testing.T) {

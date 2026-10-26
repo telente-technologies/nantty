@@ -5,10 +5,10 @@ import (
 	"strings"
 	"time"
 
-	"zudomart/modules/ads/src/modules/boosts/dtos"
-	"zudomart/modules/ads/src/modules/boosts/services"
-	"zudomart/platform/httpserver"
-	"zudomart/platform/regionpricing"
+	"nantty/modules/ads/src/modules/boosts/dtos"
+	"nantty/modules/ads/src/modules/boosts/services"
+	"nantty/platform/httpserver"
+	"nantty/platform/regionpricing"
 )
 
 var createPaymentMethods = []string{"card", "balance", "free", "wallet", "ad_balance"}

@@ -3,7 +3,7 @@ package updatepolicycategory
 import (
 	"github.com/google/uuid"
 
-	"zudomart/modules/ads/src/modules/adReview/dtos"
+	"nantty/modules/ads/src/modules/adReview/dtos"
 )
 
 type Command struct {

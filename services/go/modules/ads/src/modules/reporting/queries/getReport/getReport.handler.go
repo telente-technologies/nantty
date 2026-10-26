@@ -7,12 +7,12 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/ads/src/container"
-	"zudomart/modules/ads/src/generated/ent"
-	accountservices "zudomart/modules/ads/src/modules/adAccounts/services"
-	"zudomart/modules/ads/src/modules/reporting/dtos"
-	"zudomart/modules/ads/src/modules/reporting/services"
-	adsservices "zudomart/modules/ads/src/services"
+	"nantty/modules/ads/src/container"
+	"nantty/modules/ads/src/generated/ent"
+	accountservices "nantty/modules/ads/src/modules/adAccounts/services"
+	"nantty/modules/ads/src/modules/reporting/dtos"
+	"nantty/modules/ads/src/modules/reporting/services"
+	adsservices "nantty/modules/ads/src/services"
 )
 
 type Handler struct{ Container *container.Container }

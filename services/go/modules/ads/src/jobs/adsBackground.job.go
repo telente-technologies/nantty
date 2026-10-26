@@ -5,12 +5,12 @@ import (
 	"log/slog"
 	"time"
 
-	"zudomart/modules/ads/src/container"
-	"zudomart/modules/ads/src/modules/reporting/delivery"
-	advanceexperiments "zudomart/modules/ads/src/modules/tools/commands/advanceExperiments"
-	evaluaterules "zudomart/modules/ads/src/modules/tools/commands/evaluateRules"
-	"zudomart/modules/ads/src/services"
-	"zudomart/platform/servicemodule"
+	"nantty/modules/ads/src/container"
+	"nantty/modules/ads/src/modules/reporting/delivery"
+	advanceexperiments "nantty/modules/ads/src/modules/tools/commands/advanceExperiments"
+	evaluaterules "nantty/modules/ads/src/modules/tools/commands/evaluateRules"
+	"nantty/modules/ads/src/services"
+	"nantty/platform/servicemodule"
 )
 
 func RunBackgroundJobsUntilContextDone(ctx context.Context, deployed *container.Container) {

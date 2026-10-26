@@ -11,12 +11,12 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/ads/src"
-	"zudomart/modules/ads/src/configs"
-	"zudomart/modules/ads/src/generated/ent/adcampaign"
-	"zudomart/modules/ads/src/interfaces"
-	"zudomart/modules/ads/src/jobs"
-	evaluaterules "zudomart/modules/ads/src/modules/tools/commands/evaluateRules"
+	"nantty/modules/ads/src"
+	"nantty/modules/ads/src/configs"
+	"nantty/modules/ads/src/generated/ent/adcampaign"
+	"nantty/modules/ads/src/interfaces"
+	"nantty/modules/ads/src/jobs"
+	evaluaterules "nantty/modules/ads/src/modules/tools/commands/evaluateRules"
 )
 
 type fakeTopUps struct {

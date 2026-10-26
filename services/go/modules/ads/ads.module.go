@@ -3,8 +3,8 @@ package ads
 import (
 	"context"
 
-	"zudomart/modules/ads/src"
-	"zudomart/platform/servicemodule"
+	"nantty/modules/ads/src"
+	"nantty/platform/servicemodule"
 )
 
 type Module = src.Module

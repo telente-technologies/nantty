@@ -8,9 +8,9 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/ads/src"
-	"zudomart/modules/ads/src/configs"
-	"zudomart/modules/ads/src/interfaces"
+	"nantty/modules/ads/src"
+	"nantty/modules/ads/src/configs"
+	"nantty/modules/ads/src/interfaces"
 )
 
 type fakeDestinationOwnership struct {

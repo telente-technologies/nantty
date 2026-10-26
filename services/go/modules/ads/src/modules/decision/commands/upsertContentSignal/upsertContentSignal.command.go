@@ -1,8 +1,8 @@
 package upsertcontentsignal
 
 import (
-	"zudomart/modules/ads/src/modules/decision/dtos"
-	"zudomart/platform/httpserver"
+	"nantty/modules/ads/src/modules/decision/dtos"
+	"nantty/platform/httpserver"
 )
 
 func Validate(signal dtos.InternalContentSignal) error {

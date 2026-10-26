@@ -3,18 +3,18 @@ package controllers
 import (
 	"net/http"
 
-	appealadrejection "zudomart/modules/ads/src/modules/campaigns/commands/appealAdRejection"
-	createad "zudomart/modules/ads/src/modules/campaigns/commands/createAd"
-	createadset "zudomart/modules/ads/src/modules/campaigns/commands/createAdSet"
-	updatead "zudomart/modules/ads/src/modules/campaigns/commands/updateAd"
-	updateadset "zudomart/modules/ads/src/modules/campaigns/commands/updateAdSet"
-	"zudomart/modules/ads/src/modules/campaigns/dtos"
-	getad "zudomart/modules/ads/src/modules/campaigns/queries/getAd"
-	getadset "zudomart/modules/ads/src/modules/campaigns/queries/getAdSet"
-	listadsets "zudomart/modules/ads/src/modules/campaigns/queries/listAdSets"
-	listads "zudomart/modules/ads/src/modules/campaigns/queries/listAds"
-	"zudomart/modules/ads/src/utils"
-	"zudomart/platform/httpserver"
+	appealadrejection "nantty/modules/ads/src/modules/campaigns/commands/appealAdRejection"
+	createad "nantty/modules/ads/src/modules/campaigns/commands/createAd"
+	createadset "nantty/modules/ads/src/modules/campaigns/commands/createAdSet"
+	updatead "nantty/modules/ads/src/modules/campaigns/commands/updateAd"
+	updateadset "nantty/modules/ads/src/modules/campaigns/commands/updateAdSet"
+	"nantty/modules/ads/src/modules/campaigns/dtos"
+	getad "nantty/modules/ads/src/modules/campaigns/queries/getAd"
+	getadset "nantty/modules/ads/src/modules/campaigns/queries/getAdSet"
+	listadsets "nantty/modules/ads/src/modules/campaigns/queries/listAdSets"
+	listads "nantty/modules/ads/src/modules/campaigns/queries/listAds"
+	"nantty/modules/ads/src/utils"
+	"nantty/platform/httpserver"
 )
 
 func (controller CampaignsController) ListAdSets(writer http.ResponseWriter, request *http.Request) {

@@ -5,9 +5,9 @@ import (
 	"errors"
 	"testing"
 
-	"zudomart/modules/ads/src/interfaces"
-	"zudomart/modules/ads/src/types"
-	"zudomart/platform/httpserver"
+	"nantty/modules/ads/src/interfaces"
+	"nantty/modules/ads/src/types"
+	"nantty/platform/httpserver"
 )
 
 type fakeOwnership struct {

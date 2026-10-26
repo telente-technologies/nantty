@@ -10,17 +10,17 @@ import (
 
 	"github.com/redis/go-redis/v9"
 
-	"zudomart/modules/ads/src/configs"
-	"zudomart/modules/ads/src/container"
-	"zudomart/modules/ads/src/generated/ent"
-	"zudomart/modules/ads/src/integrations"
-	"zudomart/modules/ads/src/interfaces"
-	"zudomart/modules/ads/src/services"
-	platformevents "zudomart/platform/events"
-	"zudomart/platform/idempotency"
-	"zudomart/platform/jwtauth"
-	"zudomart/platform/staffaudit"
-	"zudomart/platform/staffauth"
+	"nantty/modules/ads/src/configs"
+	"nantty/modules/ads/src/container"
+	"nantty/modules/ads/src/generated/ent"
+	"nantty/modules/ads/src/integrations"
+	"nantty/modules/ads/src/interfaces"
+	"nantty/modules/ads/src/services"
+	platformevents "nantty/platform/events"
+	"nantty/platform/idempotency"
+	"nantty/platform/jwtauth"
+	"nantty/platform/staffaudit"
+	"nantty/platform/staffauth"
 )
 
 type Collaborators struct {

@@ -3,10 +3,10 @@ package services
 import (
 	"time"
 
-	"zudomart/modules/ads/src/generated/ent"
-	"zudomart/modules/ads/src/generated/ent/adcampaign"
-	"zudomart/modules/ads/src/generated/ent/adgroup"
-	"zudomart/modules/ads/src/modules/campaigns/dtos"
+	"nantty/modules/ads/src/generated/ent"
+	"nantty/modules/ads/src/generated/ent/adcampaign"
+	"nantty/modules/ads/src/generated/ent/adgroup"
+	"nantty/modules/ads/src/modules/campaigns/dtos"
 )
 
 func mustParse(value string) time.Time {

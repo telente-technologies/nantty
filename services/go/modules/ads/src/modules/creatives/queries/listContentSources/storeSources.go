@@ -4,7 +4,7 @@ import (
 	"context"
 	"strings"
 
-	listpromotabledestinations "zudomart/modules/ads/src/modules/creatives/queries/listPromotableDestinations"
+	listpromotabledestinations "nantty/modules/ads/src/modules/creatives/queries/listPromotableDestinations"
 )
 
 func (handler Handler) listStores(ctx context.Context, query Query) ([]map[string]any, string, error) {

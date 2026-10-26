@@ -3,8 +3,8 @@ package tracking
 import (
 	"net/http"
 
-	"zudomart/modules/ads/src/container"
-	"zudomart/modules/ads/src/modules/tracking/routes"
+	"nantty/modules/ads/src/container"
+	"nantty/modules/ads/src/modules/tracking/routes"
 )
 
 func Mount(mux *http.ServeMux, deployed *container.Container) {

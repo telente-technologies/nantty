@@ -1,8 +1,8 @@
 package decideadforslot
 
 import (
-	"zudomart/modules/ads/src/modules/decision/dtos"
-	"zudomart/modules/ads/src/types"
+	"nantty/modules/ads/src/modules/decision/dtos"
+	"nantty/modules/ads/src/types"
 )
 
 type Command struct {

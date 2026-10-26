@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"zudomart/modules/ads/src/integrations"
+	"nantty/modules/ads/src/integrations"
 )
 
 func newGuard(now time.Time) (FrequencyGuard, *time.Time) {

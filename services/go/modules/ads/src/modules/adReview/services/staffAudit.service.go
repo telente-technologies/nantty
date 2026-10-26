@@ -3,11 +3,11 @@ package services
 import (
 	"net/http"
 
-	"zudomart/modules/ads/src/container"
-	adserrors "zudomart/modules/ads/src/errors"
-	"zudomart/platform/jwtauth"
-	"zudomart/platform/staffaudit"
-	"zudomart/platform/staffauth"
+	"nantty/modules/ads/src/container"
+	adserrors "nantty/modules/ads/src/errors"
+	"nantty/platform/jwtauth"
+	"nantty/platform/staffaudit"
+	"nantty/platform/staffauth"
 )
 
 func staffFromRequest(request *http.Request) staffauth.Staff {

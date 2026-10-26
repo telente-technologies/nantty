@@ -7,11 +7,11 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/ads/src/generated/ent"
-	"zudomart/modules/ads/src/generated/ent/adboost"
-	"zudomart/modules/ads/src/modules/boosts/dtos"
-	campaignservices "zudomart/modules/ads/src/modules/campaigns/services"
-	"zudomart/modules/ads/src/types"
+	"nantty/modules/ads/src/generated/ent"
+	"nantty/modules/ads/src/generated/ent/adboost"
+	"nantty/modules/ads/src/modules/boosts/dtos"
+	campaignservices "nantty/modules/ads/src/modules/campaigns/services"
+	"nantty/modules/ads/src/types"
 )
 
 var keyResultLabels = map[adboost.Goal]string{

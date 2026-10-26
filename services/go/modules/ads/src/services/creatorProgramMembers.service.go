@@ -6,9 +6,9 @@ import (
 	"fmt"
 	"time"
 
-	"zudomart/modules/ads/src/generated/ent"
-	"zudomart/modules/ads/src/generated/ent/adcreatorprogrammember"
-	platformevents "zudomart/platform/events"
+	"nantty/modules/ads/src/generated/ent"
+	"nantty/modules/ads/src/generated/ent/adcreatorprogrammember"
+	platformevents "nantty/platform/events"
 )
 
 const (

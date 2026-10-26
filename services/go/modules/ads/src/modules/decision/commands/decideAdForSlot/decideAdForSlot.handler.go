@@ -7,10 +7,10 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/ads/src/container"
-	"zudomart/modules/ads/src/modules/decision/dtos"
-	"zudomart/modules/ads/src/services"
-	"zudomart/modules/ads/src/types"
+	"nantty/modules/ads/src/container"
+	"nantty/modules/ads/src/modules/decision/dtos"
+	"nantty/modules/ads/src/services"
+	"nantty/modules/ads/src/types"
 )
 
 type Handler struct{ Container *container.Container }

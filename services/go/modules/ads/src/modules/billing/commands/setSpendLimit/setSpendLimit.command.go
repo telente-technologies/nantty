@@ -3,7 +3,7 @@ package setspendlimit
 import (
 	"github.com/google/uuid"
 
-	"zudomart/modules/ads/src/types"
+	"nantty/modules/ads/src/types"
 )
 
 type Command struct {

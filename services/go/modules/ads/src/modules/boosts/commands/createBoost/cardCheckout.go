@@ -7,11 +7,11 @@ import (
 	"encoding/hex"
 	"errors"
 
-	"zudomart/modules/ads/src/generated/ent"
-	"zudomart/modules/ads/src/generated/ent/adboost"
-	"zudomart/modules/ads/src/generated/ent/adtopup"
-	"zudomart/modules/ads/src/interfaces"
-	"zudomart/modules/ads/src/types"
+	"nantty/modules/ads/src/generated/ent"
+	"nantty/modules/ads/src/generated/ent/adboost"
+	"nantty/modules/ads/src/generated/ent/adtopup"
+	"nantty/modules/ads/src/interfaces"
+	"nantty/modules/ads/src/types"
 )
 
 func freeBoostCap(capMinor int64, command Command) types.Money {

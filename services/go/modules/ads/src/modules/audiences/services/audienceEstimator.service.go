@@ -5,8 +5,8 @@ import (
 	"slices"
 	"time"
 
-	"zudomart/modules/ads/src/modules/audiences/dtos"
-	"zudomart/modules/ads/src/types"
+	"nantty/modules/ads/src/modules/audiences/dtos"
+	"nantty/modules/ads/src/types"
 )
 
 type EstimateInputs struct {

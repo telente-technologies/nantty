@@ -4,8 +4,8 @@ import (
 	"crypto/subtle"
 	"net/http"
 
-	"zudomart/modules/ads/src/container"
-	"zudomart/platform/httpserver"
+	"nantty/modules/ads/src/container"
+	"nantty/platform/httpserver"
 )
 
 func InternalToken(deployed *container.Container) func(http.HandlerFunc) http.Handler {

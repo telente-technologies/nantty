@@ -5,9 +5,9 @@ import (
 
 	"github.com/google/uuid"
 
-	adserrors "zudomart/modules/ads/src/errors"
-	"zudomart/modules/ads/src/services"
-	"zudomart/platform/httpserver"
+	adserrors "nantty/modules/ads/src/errors"
+	"nantty/modules/ads/src/services"
+	"nantty/platform/httpserver"
 )
 
 type verificationView struct {

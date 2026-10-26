@@ -9,7 +9,7 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/ads/src/services"
+	"nantty/modules/ads/src/services"
 )
 
 func nigeriaAudience() map[string]any {

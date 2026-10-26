@@ -3,10 +3,10 @@ package advanceexperiments
 import (
 	"context"
 
-	"zudomart/modules/ads/src/container"
-	"zudomart/modules/ads/src/generated/ent"
-	"zudomart/modules/ads/src/generated/ent/adexperiment"
-	"zudomart/modules/ads/src/modules/tools/services"
+	"nantty/modules/ads/src/container"
+	"nantty/modules/ads/src/generated/ent"
+	"nantty/modules/ads/src/generated/ent/adexperiment"
+	"nantty/modules/ads/src/modules/tools/services"
 )
 
 type Handler struct{ Container *container.Container }

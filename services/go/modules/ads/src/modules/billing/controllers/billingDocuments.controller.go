@@ -6,10 +6,10 @@ import (
 
 	"github.com/google/uuid"
 
-	listinvoices "zudomart/modules/ads/src/modules/billing/queries/listInvoices"
-	renderbillingdocument "zudomart/modules/ads/src/modules/billing/queries/renderBillingDocument"
-	"zudomart/modules/ads/src/utils"
-	"zudomart/platform/httpserver"
+	listinvoices "nantty/modules/ads/src/modules/billing/queries/listInvoices"
+	renderbillingdocument "nantty/modules/ads/src/modules/billing/queries/renderBillingDocument"
+	"nantty/modules/ads/src/utils"
+	"nantty/platform/httpserver"
 )
 
 func (controller BillingController) ListInvoices(writer http.ResponseWriter, request *http.Request) {

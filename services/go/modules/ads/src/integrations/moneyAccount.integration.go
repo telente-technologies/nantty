@@ -9,8 +9,8 @@ import (
 	"strings"
 	"sync"
 
-	adserrors "zudomart/modules/ads/src/errors"
-	"zudomart/modules/ads/src/interfaces"
+	adserrors "nantty/modules/ads/src/errors"
+	"nantty/modules/ads/src/interfaces"
 )
 
 type HttpMoneyAccountGateway struct {

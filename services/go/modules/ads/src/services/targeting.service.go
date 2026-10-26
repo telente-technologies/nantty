@@ -5,7 +5,7 @@ import (
 	"strconv"
 	"strings"
 
-	"zudomart/modules/ads/src/types"
+	"nantty/modules/ads/src/types"
 )
 
 func MatchesTargeting(audience types.AudienceSpec, viewer types.Viewer, contentTopics []string) (bool, string) {

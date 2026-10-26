@@ -3,12 +3,12 @@ package controllers
 import (
 	"net/http"
 
-	adserrors "zudomart/modules/ads/src/errors"
-	"zudomart/modules/ads/src/generated/ent/adboost"
-	getboost "zudomart/modules/ads/src/modules/boosts/queries/getBoost"
-	"zudomart/modules/ads/src/modules/boosts/services"
-	"zudomart/modules/ads/src/utils"
-	"zudomart/platform/httpserver"
+	adserrors "nantty/modules/ads/src/errors"
+	"nantty/modules/ads/src/generated/ent/adboost"
+	getboost "nantty/modules/ads/src/modules/boosts/queries/getBoost"
+	"nantty/modules/ads/src/modules/boosts/services"
+	"nantty/modules/ads/src/utils"
+	"nantty/platform/httpserver"
 )
 
 func (controller BoostsController) Cancel(writer http.ResponseWriter, request *http.Request) {

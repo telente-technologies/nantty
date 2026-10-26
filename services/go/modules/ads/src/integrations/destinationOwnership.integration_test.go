@@ -6,7 +6,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"zudomart/modules/ads/src/interfaces"
+	"nantty/modules/ads/src/interfaces"
 )
 
 func TestHttpOwnershipRoutesByKindAndFailsClosed(t *testing.T) {

@@ -6,14 +6,14 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/ads/src/container"
-	"zudomart/modules/ads/src/generated/ent"
-	"zudomart/modules/ads/src/generated/ent/adcashbacksetting"
-	billingservices "zudomart/modules/ads/src/modules/billing/services"
-	boostdtos "zudomart/modules/ads/src/modules/boosts/dtos"
-	boostservices "zudomart/modules/ads/src/modules/boosts/services"
-	adsservices "zudomart/modules/ads/src/services"
-	"zudomart/modules/ads/src/types"
+	"nantty/modules/ads/src/container"
+	"nantty/modules/ads/src/generated/ent"
+	"nantty/modules/ads/src/generated/ent/adcashbacksetting"
+	billingservices "nantty/modules/ads/src/modules/billing/services"
+	boostdtos "nantty/modules/ads/src/modules/boosts/dtos"
+	boostservices "nantty/modules/ads/src/modules/boosts/services"
+	adsservices "nantty/modules/ads/src/services"
+	"nantty/modules/ads/src/types"
 )
 
 func reasonPointers(code, reason string) (*string, *string) {

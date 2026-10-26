@@ -3,7 +3,7 @@ package createmediaupload
 import (
 	"github.com/google/uuid"
 
-	"zudomart/modules/ads/src/modules/creatives/dtos"
+	"nantty/modules/ads/src/modules/creatives/dtos"
 )
 
 type Command struct {

@@ -3,8 +3,8 @@ package decideadforslot
 import (
 	"strings"
 
-	"zudomart/modules/ads/src/services"
-	"zudomart/modules/ads/src/types"
+	"nantty/modules/ads/src/services"
+	"nantty/modules/ads/src/types"
 )
 
 func (handler Handler) buildClickLinks(creative types.Creative, impressionToken string, claims services.AdTokenClaims) (*types.CreativeClickLinks, error) {

@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"zudomart/modules/ads/src/modules/reporting/dtos"
+	"nantty/modules/ads/src/modules/reporting/dtos"
 )
 
 const (

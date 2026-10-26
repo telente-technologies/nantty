@@ -3,9 +3,9 @@ package services
 import (
 	"time"
 
-	"zudomart/modules/ads/src/generated/ent"
-	"zudomart/modules/ads/src/modules/adAccounts/dtos"
-	"zudomart/modules/ads/src/types"
+	"nantty/modules/ads/src/generated/ent"
+	"nantty/modules/ads/src/modules/adAccounts/dtos"
+	"nantty/modules/ads/src/types"
 )
 
 func PresentAccountSummary(account *ent.AdAccount, role string, activeCampaigns int) dtos.AdAccountSummary {

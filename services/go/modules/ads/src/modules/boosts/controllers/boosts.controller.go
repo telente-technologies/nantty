@@ -3,18 +3,18 @@ package controllers
 import (
 	"net/http"
 
-	"zudomart/modules/ads/src/container"
-	"zudomart/modules/ads/src/middlewares"
-	confirmboostpayment "zudomart/modules/ads/src/modules/boosts/commands/confirmBoostPayment"
-	createboost "zudomart/modules/ads/src/modules/boosts/commands/createBoost"
-	"zudomart/modules/ads/src/modules/boosts/dtos"
-	estimateboost "zudomart/modules/ads/src/modules/boosts/queries/estimateBoost"
-	getboost "zudomart/modules/ads/src/modules/boosts/queries/getBoost"
-	getboostoptions "zudomart/modules/ads/src/modules/boosts/queries/getBoostOptions"
-	"zudomart/modules/ads/src/modules/boosts/services"
-	"zudomart/modules/ads/src/utils"
-	"zudomart/platform/httpserver"
-	"zudomart/platform/regionpricing"
+	"nantty/modules/ads/src/container"
+	"nantty/modules/ads/src/middlewares"
+	confirmboostpayment "nantty/modules/ads/src/modules/boosts/commands/confirmBoostPayment"
+	createboost "nantty/modules/ads/src/modules/boosts/commands/createBoost"
+	"nantty/modules/ads/src/modules/boosts/dtos"
+	estimateboost "nantty/modules/ads/src/modules/boosts/queries/estimateBoost"
+	getboost "nantty/modules/ads/src/modules/boosts/queries/getBoost"
+	getboostoptions "nantty/modules/ads/src/modules/boosts/queries/getBoostOptions"
+	"nantty/modules/ads/src/modules/boosts/services"
+	"nantty/modules/ads/src/utils"
+	"nantty/platform/httpserver"
+	"nantty/platform/regionpricing"
 )
 
 type BoostsController struct{ Container *container.Container }

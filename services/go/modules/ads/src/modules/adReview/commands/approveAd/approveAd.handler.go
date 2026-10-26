@@ -3,17 +3,17 @@ package approvead
 import (
 	"context"
 
-	"zudomart/modules/ads/src/constants"
-	"zudomart/modules/ads/src/container"
-	adserrors "zudomart/modules/ads/src/errors"
-	"zudomart/modules/ads/src/generated/ent"
-	"zudomart/modules/ads/src/generated/ent/ad"
-	"zudomart/modules/ads/src/generated/ent/adaccount"
-	"zudomart/modules/ads/src/modules/adReview/dtos"
-	"zudomart/modules/ads/src/modules/adReview/services"
-	campaignservices "zudomart/modules/ads/src/modules/campaigns/services"
-	adsservices "zudomart/modules/ads/src/services"
-	"zudomart/platform/httpserver"
+	"nantty/modules/ads/src/constants"
+	"nantty/modules/ads/src/container"
+	adserrors "nantty/modules/ads/src/errors"
+	"nantty/modules/ads/src/generated/ent"
+	"nantty/modules/ads/src/generated/ent/ad"
+	"nantty/modules/ads/src/generated/ent/adaccount"
+	"nantty/modules/ads/src/modules/adReview/dtos"
+	"nantty/modules/ads/src/modules/adReview/services"
+	campaignservices "nantty/modules/ads/src/modules/campaigns/services"
+	adsservices "nantty/modules/ads/src/services"
+	"nantty/platform/httpserver"
 )
 
 type Handler struct{ Container *container.Container }

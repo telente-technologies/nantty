@@ -1,6 +1,6 @@
 package dtos
 
-import "zudomart/modules/ads/src/types"
+import "nantty/modules/ads/src/types"
 
 type StaffReference struct {
 	Id   string `json:"id"`

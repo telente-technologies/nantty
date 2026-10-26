@@ -5,9 +5,9 @@ import (
 	"slices"
 	"strings"
 
-	"zudomart/modules/ads/src/modules/reporting/dtos"
-	"zudomart/modules/ads/src/modules/reporting/services"
-	"zudomart/platform/httpserver"
+	"nantty/modules/ads/src/modules/reporting/dtos"
+	"nantty/modules/ads/src/modules/reporting/services"
+	"nantty/platform/httpserver"
 )
 
 func ValidateScheduledReport(input dtos.ScheduledReportInput) (dtos.ScheduledReportInput, error) {

@@ -3,9 +3,9 @@ package createboost
 import (
 	"github.com/google/uuid"
 
-	"zudomart/platform/regionpricing"
+	"nantty/platform/regionpricing"
 
-	"zudomart/modules/ads/src/modules/boosts/dtos"
+	"nantty/modules/ads/src/modules/boosts/dtos"
 )
 
 type Command struct {

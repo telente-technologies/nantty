@@ -5,11 +5,11 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/ads/src/container"
-	"zudomart/modules/ads/src/generated/ent/adcardstatsdaily"
-	accountservices "zudomart/modules/ads/src/modules/adAccounts/services"
-	campaignservices "zudomart/modules/ads/src/modules/campaigns/services"
-	adsservices "zudomart/modules/ads/src/services"
+	"nantty/modules/ads/src/container"
+	"nantty/modules/ads/src/generated/ent/adcardstatsdaily"
+	accountservices "nantty/modules/ads/src/modules/adAccounts/services"
+	campaignservices "nantty/modules/ads/src/modules/campaigns/services"
+	adsservices "nantty/modules/ads/src/services"
 )
 
 type Query struct {

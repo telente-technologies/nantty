@@ -7,12 +7,12 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/ads/src/container"
-	"zudomart/modules/ads/src/events"
-	"zudomart/modules/ads/src/generated/ent"
-	"zudomart/modules/ads/src/generated/ent/adautomatedrule"
-	"zudomart/modules/ads/src/modules/tools/services"
-	adsservices "zudomart/modules/ads/src/services"
+	"nantty/modules/ads/src/container"
+	"nantty/modules/ads/src/events"
+	"nantty/modules/ads/src/generated/ent"
+	"nantty/modules/ads/src/generated/ent/adautomatedrule"
+	"nantty/modules/ads/src/modules/tools/services"
+	adsservices "nantty/modules/ads/src/services"
 )
 
 const rulesPerSweep = 100

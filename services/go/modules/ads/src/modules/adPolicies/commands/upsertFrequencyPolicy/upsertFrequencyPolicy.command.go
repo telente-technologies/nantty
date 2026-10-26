@@ -1,8 +1,8 @@
 package upsertfrequencypolicy
 
 import (
-	"zudomart/modules/ads/src/modules/adPolicies/dtos"
-	"zudomart/platform/httpserver"
+	"nantty/modules/ads/src/modules/adPolicies/dtos"
+	"nantty/platform/httpserver"
 )
 
 type Command struct{ Policy dtos.FrequencyPolicy }

@@ -2,19 +2,19 @@ package updatecampaign
 
 import (
 	"context"
-	"zudomart/modules/ads/src/constants"
+	"nantty/modules/ads/src/constants"
 
-	"zudomart/modules/ads/src/container"
-	"zudomart/modules/ads/src/generated/ent"
-	"zudomart/modules/ads/src/generated/ent/ad"
-	"zudomart/modules/ads/src/generated/ent/adcampaign"
-	"zudomart/modules/ads/src/generated/ent/adgroup"
-	accountservices "zudomart/modules/ads/src/modules/adAccounts/services"
-	"zudomart/modules/ads/src/modules/campaigns/dtos"
-	"zudomart/modules/ads/src/modules/campaigns/services"
-	"zudomart/modules/ads/src/modules/campaigns/validators"
-	adsservices "zudomart/modules/ads/src/services"
-	"zudomart/platform/httpserver"
+	"nantty/modules/ads/src/container"
+	"nantty/modules/ads/src/generated/ent"
+	"nantty/modules/ads/src/generated/ent/ad"
+	"nantty/modules/ads/src/generated/ent/adcampaign"
+	"nantty/modules/ads/src/generated/ent/adgroup"
+	accountservices "nantty/modules/ads/src/modules/adAccounts/services"
+	"nantty/modules/ads/src/modules/campaigns/dtos"
+	"nantty/modules/ads/src/modules/campaigns/services"
+	"nantty/modules/ads/src/modules/campaigns/validators"
+	adsservices "nantty/modules/ads/src/services"
+	"nantty/platform/httpserver"
 )
 
 type Handler struct{ Container *container.Container }

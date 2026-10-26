@@ -4,7 +4,7 @@ import (
 	"context"
 	"slices"
 
-	"zudomart/modules/ads/src/services"
+	"nantty/modules/ads/src/services"
 )
 
 func (handler Handler) checkViewerEligibility(ctx context.Context, slot *slotContext) (string, error) {

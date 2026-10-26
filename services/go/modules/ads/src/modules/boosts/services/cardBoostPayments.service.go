@@ -3,10 +3,10 @@ package services
 import (
 	"context"
 
-	"zudomart/modules/ads/src/container"
-	"zudomart/modules/ads/src/generated/ent"
-	"zudomart/modules/ads/src/generated/ent/adboost"
-	campaignservices "zudomart/modules/ads/src/modules/campaigns/services"
+	"nantty/modules/ads/src/container"
+	"nantty/modules/ads/src/generated/ent"
+	"nantty/modules/ads/src/generated/ent/adboost"
+	campaignservices "nantty/modules/ads/src/modules/campaigns/services"
 )
 
 func StartBoostsPaidByTopUp(ctx context.Context, deployed *container.Container, topUpId string) error {

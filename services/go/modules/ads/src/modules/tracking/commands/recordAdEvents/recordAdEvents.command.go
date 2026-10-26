@@ -1,6 +1,6 @@
 package recordadevents
 
-import "zudomart/modules/ads/src/modules/tracking/dtos"
+import "nantty/modules/ads/src/modules/tracking/dtos"
 
 const MaximumEventsPerBatch = 100
 

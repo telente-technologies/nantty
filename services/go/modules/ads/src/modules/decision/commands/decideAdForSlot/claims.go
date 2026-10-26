@@ -3,8 +3,8 @@ package decideadforslot
 import (
 	"context"
 
-	"zudomart/modules/ads/src/services"
-	"zudomart/modules/ads/src/types"
+	"nantty/modules/ads/src/services"
+	"nantty/modules/ads/src/types"
 )
 
 func (handler Handler) buildClaims(ctx context.Context, slot *slotContext, winner types.CandidateAd, outcome services.AuctionOutcome, pctrPpm int64, impressionId string, newReach bool) services.AdTokenClaims {

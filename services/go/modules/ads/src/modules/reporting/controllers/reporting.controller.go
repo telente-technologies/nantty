@@ -2,16 +2,16 @@ package controllers
 
 import (
 	"github.com/google/uuid"
+	"nantty/modules/ads/src/modules/reporting/dtos"
 	"net/http"
-	"zudomart/modules/ads/src/modules/reporting/dtos"
 
-	"zudomart/modules/ads/src/container"
-	exportreportcsv "zudomart/modules/ads/src/modules/reporting/queries/exportReportCsv"
-	getadcardreport "zudomart/modules/ads/src/modules/reporting/queries/getAdCardReport"
-	getreport "zudomart/modules/ads/src/modules/reporting/queries/getReport"
-	"zudomart/modules/ads/src/modules/reporting/validators"
-	"zudomart/modules/ads/src/utils"
-	"zudomart/platform/httpserver"
+	"nantty/modules/ads/src/container"
+	exportreportcsv "nantty/modules/ads/src/modules/reporting/queries/exportReportCsv"
+	getadcardreport "nantty/modules/ads/src/modules/reporting/queries/getAdCardReport"
+	getreport "nantty/modules/ads/src/modules/reporting/queries/getReport"
+	"nantty/modules/ads/src/modules/reporting/validators"
+	"nantty/modules/ads/src/utils"
+	"nantty/platform/httpserver"
 )
 
 type ReportingController struct{ Container *container.Container }

@@ -4,7 +4,7 @@ import (
 	"strings"
 	"testing"
 
-	"zudomart/modules/ads/src/modules/audiences/dtos"
+	"nantty/modules/ads/src/modules/audiences/dtos"
 )
 
 func TestCustomerListsAcceptOnlyLowercaseSha256DigestsAndDeduplicate(t *testing.T) {

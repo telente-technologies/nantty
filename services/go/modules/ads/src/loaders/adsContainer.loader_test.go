@@ -3,8 +3,8 @@ package loaders
 import (
 	"testing"
 
-	"zudomart/modules/ads/src/configs"
-	"zudomart/modules/ads/src/integrations"
+	"nantty/modules/ads/src/configs"
+	"nantty/modules/ads/src/integrations"
 )
 
 func TestTheInMemoryFundingFakeIsRefusedInProductionOnly(t *testing.T) {

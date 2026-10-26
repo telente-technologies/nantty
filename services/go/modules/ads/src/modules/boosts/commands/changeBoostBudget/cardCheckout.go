@@ -7,10 +7,10 @@ import (
 	"encoding/hex"
 	"errors"
 
-	"zudomart/modules/ads/src/generated/ent"
-	"zudomart/modules/ads/src/generated/ent/adboostchange"
-	"zudomart/modules/ads/src/generated/ent/adtopup"
-	"zudomart/modules/ads/src/interfaces"
+	"nantty/modules/ads/src/generated/ent"
+	"nantty/modules/ads/src/generated/ent/adboostchange"
+	"nantty/modules/ads/src/generated/ent/adtopup"
+	"nantty/modules/ads/src/interfaces"
 )
 
 func changeTopUpKey(command Command) string {

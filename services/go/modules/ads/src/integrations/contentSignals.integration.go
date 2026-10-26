@@ -3,9 +3,9 @@ package integrations
 import (
 	"context"
 
-	"zudomart/modules/ads/src/generated/ent"
-	"zudomart/modules/ads/src/generated/ent/adcontentsignal"
-	"zudomart/modules/ads/src/types"
+	"nantty/modules/ads/src/generated/ent"
+	"nantty/modules/ads/src/generated/ent/adcontentsignal"
+	"nantty/modules/ads/src/types"
 )
 
 type EntContentSignalReader struct{ Client *ent.Client }

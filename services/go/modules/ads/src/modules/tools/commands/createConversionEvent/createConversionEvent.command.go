@@ -3,7 +3,7 @@ package createconversionevent
 import (
 	"github.com/google/uuid"
 
-	"zudomart/modules/ads/src/modules/tools/dtos"
+	"nantty/modules/ads/src/modules/tools/dtos"
 )
 
 type Command struct {

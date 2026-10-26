@@ -5,11 +5,11 @@ import (
 
 	"context"
 
-	"zudomart/modules/ads/src/container"
-	"zudomart/modules/ads/src/generated/ent/adaccount"
-	"zudomart/modules/ads/src/generated/ent/adaccountmember"
-	"zudomart/modules/ads/src/modules/adAccounts/dtos"
-	accountservices "zudomart/modules/ads/src/modules/adAccounts/services"
+	"nantty/modules/ads/src/container"
+	"nantty/modules/ads/src/generated/ent/adaccount"
+	"nantty/modules/ads/src/generated/ent/adaccountmember"
+	"nantty/modules/ads/src/modules/adAccounts/dtos"
+	accountservices "nantty/modules/ads/src/modules/adAccounts/services"
 )
 
 type Handler struct{ Container *container.Container }

@@ -3,8 +3,8 @@ package createboost
 import (
 	"context"
 
-	"zudomart/modules/ads/src/generated/ent"
-	"zudomart/modules/ads/src/generated/ent/adaccountmember"
+	"nantty/modules/ads/src/generated/ent"
+	"nantty/modules/ads/src/generated/ent/adaccountmember"
 )
 
 func ensureOwnerMembership(ctx context.Context, tx *ent.Tx, account *ent.AdAccount, command Command) error {

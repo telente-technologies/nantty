@@ -8,15 +8,15 @@ import (
 
 	"github.com/google/uuid"
 
-	src "zudomart/modules/ads/src"
-	"zudomart/modules/ads/src/configs"
-	"zudomart/modules/ads/src/generated/ent"
-	"zudomart/modules/ads/src/generated/ent/adboost"
-	"zudomart/modules/ads/src/generated/ent/adfundstransaction"
-	"zudomart/modules/ads/src/generated/ent/adimpression"
-	"zudomart/modules/ads/src/generated/ent/outboxevent"
-	"zudomart/modules/ads/src/jobs"
-	confirmboostpayment "zudomart/modules/ads/src/modules/boosts/commands/confirmBoostPayment"
+	src "nantty/modules/ads/src"
+	"nantty/modules/ads/src/configs"
+	"nantty/modules/ads/src/generated/ent"
+	"nantty/modules/ads/src/generated/ent/adboost"
+	"nantty/modules/ads/src/generated/ent/adfundstransaction"
+	"nantty/modules/ads/src/generated/ent/adimpression"
+	"nantty/modules/ads/src/generated/ent/outboxevent"
+	"nantty/modules/ads/src/jobs"
+	confirmboostpayment "nantty/modules/ads/src/modules/boosts/commands/confirmBoostPayment"
 )
 
 type boostRefund struct {

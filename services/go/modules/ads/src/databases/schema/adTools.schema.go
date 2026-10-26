@@ -10,7 +10,7 @@ import (
 	"entgo.io/ent/schema/index"
 	"github.com/google/uuid"
 
-	"zudomart/modules/ads/src/types"
+	"nantty/modules/ads/src/types"
 )
 
 type AdConversionEvent struct{ ent.Schema }

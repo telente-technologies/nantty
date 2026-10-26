@@ -3,14 +3,14 @@ package createscheduledreport
 import (
 	"context"
 
-	"zudomart/modules/ads/src/container"
-	"zudomart/modules/ads/src/generated/ent/adscheduledreport"
-	accountservices "zudomart/modules/ads/src/modules/adAccounts/services"
-	"zudomart/modules/ads/src/modules/reporting/dtos"
-	"zudomart/modules/ads/src/modules/reporting/services"
-	"zudomart/modules/ads/src/modules/reporting/validators"
-	adsservices "zudomart/modules/ads/src/services"
-	"zudomart/platform/httpserver"
+	"nantty/modules/ads/src/container"
+	"nantty/modules/ads/src/generated/ent/adscheduledreport"
+	accountservices "nantty/modules/ads/src/modules/adAccounts/services"
+	"nantty/modules/ads/src/modules/reporting/dtos"
+	"nantty/modules/ads/src/modules/reporting/services"
+	"nantty/modules/ads/src/modules/reporting/validators"
+	adsservices "nantty/modules/ads/src/services"
+	"nantty/platform/httpserver"
 )
 
 const maximumScheduledReportsPerAccount = 25

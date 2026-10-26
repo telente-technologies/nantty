@@ -3,11 +3,11 @@ package setfundingmode
 import (
 	"context"
 
-	"zudomart/modules/ads/src/container"
-	"zudomart/modules/ads/src/generated/ent/adaccount"
-	accountservices "zudomart/modules/ads/src/modules/adAccounts/services"
-	adsservices "zudomart/modules/ads/src/services"
-	"zudomart/platform/httpserver"
+	"nantty/modules/ads/src/container"
+	"nantty/modules/ads/src/generated/ent/adaccount"
+	accountservices "nantty/modules/ads/src/modules/adAccounts/services"
+	adsservices "nantty/modules/ads/src/services"
+	"nantty/platform/httpserver"
 )
 
 type Handler struct{ Container *container.Container }

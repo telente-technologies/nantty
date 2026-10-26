@@ -4,8 +4,8 @@ import (
 	"slices"
 	"strings"
 
-	"zudomart/modules/ads/src/modules/boosts/dtos"
-	"zudomart/modules/ads/src/types"
+	"nantty/modules/ads/src/modules/boosts/dtos"
+	"nantty/modules/ads/src/types"
 )
 
 const (

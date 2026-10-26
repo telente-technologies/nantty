@@ -1,8 +1,8 @@
 package dtos
 
 import (
-	"zudomart/modules/ads/src/types"
-	"zudomart/platform/regionpricing"
+	"nantty/modules/ads/src/types"
+	"nantty/platform/regionpricing"
 )
 
 type BoostAudience struct {

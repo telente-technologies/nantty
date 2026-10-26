@@ -3,7 +3,7 @@ package services
 import (
 	"testing"
 
-	"zudomart/modules/ads/src/types"
+	"nantty/modules/ads/src/types"
 )
 
 func TestRuleMetricsUseMajorUnitsAndRefuseEmptyDenominators(t *testing.T) {

@@ -15,7 +15,7 @@ import (
 	s3types "github.com/aws/aws-sdk-go-v2/service/s3/types"
 	"github.com/aws/smithy-go"
 
-	"zudomart/modules/ads/src/interfaces"
+	"nantty/modules/ads/src/interfaces"
 )
 
 type S3ObjectStorage struct {

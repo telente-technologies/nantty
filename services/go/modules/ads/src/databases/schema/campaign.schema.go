@@ -9,7 +9,7 @@ import (
 	"entgo.io/ent/schema/index"
 	"github.com/google/uuid"
 
-	"zudomart/modules/ads/src/types"
+	"nantty/modules/ads/src/types"
 )
 
 var deliveryStatuses = []string{"draft", "in_review", "active", "paused", "completed", "rejected"}

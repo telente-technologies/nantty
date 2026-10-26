@@ -8,7 +8,7 @@ import (
 	"strconv"
 	"time"
 
-	adserrors "zudomart/modules/ads/src/errors"
+	adserrors "nantty/modules/ads/src/errors"
 )
 
 const (

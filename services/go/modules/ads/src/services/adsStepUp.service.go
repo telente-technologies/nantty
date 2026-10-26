@@ -8,10 +8,10 @@ import (
 	"net/http"
 	"strings"
 
-	adserrors "zudomart/modules/ads/src/errors"
-	"zudomart/modules/ads/src/interfaces"
-	"zudomart/platform/jwtauth"
-	"zudomart/platform/regionpricing"
+	adserrors "nantty/modules/ads/src/errors"
+	"nantty/modules/ads/src/interfaces"
+	"nantty/platform/jwtauth"
+	"nantty/platform/regionpricing"
 )
 
 const DefaultAdsStepUpAboveNgnMinor = 5_000_000

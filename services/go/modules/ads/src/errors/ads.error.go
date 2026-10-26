@@ -3,7 +3,7 @@ package errors
 import (
 	"net/http"
 
-	"zudomart/platform/httpserver"
+	"nantty/platform/httpserver"
 )
 
 func Api(status int, code, message string) *httpserver.ApiError {

@@ -7,13 +7,13 @@ import (
 	"testing"
 	"time"
 
-	"zudomart/modules/ads/src/generated/ent"
-	"zudomart/modules/ads/src/generated/ent/adcreditlot"
-	"zudomart/modules/ads/src/generated/ent/adfundstransaction"
-	"zudomart/modules/ads/src/generated/ent/outboxevent"
-	"zudomart/modules/ads/src/integrations"
-	"zudomart/modules/ads/src/jobs"
-	"zudomart/modules/ads/src/services"
+	"nantty/modules/ads/src/generated/ent"
+	"nantty/modules/ads/src/generated/ent/adcreditlot"
+	"nantty/modules/ads/src/generated/ent/adfundstransaction"
+	"nantty/modules/ads/src/generated/ent/outboxevent"
+	"nantty/modules/ads/src/integrations"
+	"nantty/modules/ads/src/jobs"
+	"nantty/modules/ads/src/services"
 )
 
 func TestAdminCreditNeedsPermissionAndStepUpIsAuditedAndRevokesOnlyTheRemainder(t *testing.T) {

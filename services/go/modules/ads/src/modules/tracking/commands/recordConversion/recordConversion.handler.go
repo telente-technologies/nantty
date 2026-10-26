@@ -3,13 +3,13 @@ package recordconversion
 import (
 	"context"
 
-	"zudomart/modules/ads/src/container"
-	"zudomart/modules/ads/src/generated/ent"
-	"zudomart/modules/ads/src/generated/ent/adaccount"
-	"zudomart/modules/ads/src/generated/ent/adconversion"
-	"zudomart/modules/ads/src/generated/ent/adimpression"
-	"zudomart/modules/ads/src/generated/ent/adstatsdaily"
-	adsservices "zudomart/modules/ads/src/services"
+	"nantty/modules/ads/src/container"
+	"nantty/modules/ads/src/generated/ent"
+	"nantty/modules/ads/src/generated/ent/adaccount"
+	"nantty/modules/ads/src/generated/ent/adconversion"
+	"nantty/modules/ads/src/generated/ent/adimpression"
+	"nantty/modules/ads/src/generated/ent/adstatsdaily"
+	adsservices "nantty/modules/ads/src/services"
 )
 
 type Handler struct{ Container *container.Container }

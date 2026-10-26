@@ -5,16 +5,16 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/ads/src/container"
-	createconversionevent "zudomart/modules/ads/src/modules/tools/commands/createConversionEvent"
-	createexperiment "zudomart/modules/ads/src/modules/tools/commands/createExperiment"
-	stopexperiment "zudomart/modules/ads/src/modules/tools/commands/stopExperiment"
-	updateconversionevent "zudomart/modules/ads/src/modules/tools/commands/updateConversionEvent"
-	"zudomart/modules/ads/src/modules/tools/dtos"
-	listconversionevents "zudomart/modules/ads/src/modules/tools/queries/listConversionEvents"
-	listexperiments "zudomart/modules/ads/src/modules/tools/queries/listExperiments"
-	"zudomart/modules/ads/src/utils"
-	"zudomart/platform/httpserver"
+	"nantty/modules/ads/src/container"
+	createconversionevent "nantty/modules/ads/src/modules/tools/commands/createConversionEvent"
+	createexperiment "nantty/modules/ads/src/modules/tools/commands/createExperiment"
+	stopexperiment "nantty/modules/ads/src/modules/tools/commands/stopExperiment"
+	updateconversionevent "nantty/modules/ads/src/modules/tools/commands/updateConversionEvent"
+	"nantty/modules/ads/src/modules/tools/dtos"
+	listconversionevents "nantty/modules/ads/src/modules/tools/queries/listConversionEvents"
+	listexperiments "nantty/modules/ads/src/modules/tools/queries/listExperiments"
+	"nantty/modules/ads/src/utils"
+	"nantty/platform/httpserver"
 )
 
 type ToolsController struct{ Container *container.Container }

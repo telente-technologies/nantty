@@ -8,8 +8,8 @@ import (
 	"testing"
 	"time"
 
-	"zudomart/modules/ads/src"
-	"zudomart/modules/ads/src/configs"
+	"nantty/modules/ads/src"
+	"nantty/modules/ads/src/configs"
 )
 
 type viewerAgesByUser struct {

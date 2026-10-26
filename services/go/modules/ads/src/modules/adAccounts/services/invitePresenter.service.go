@@ -3,8 +3,8 @@ package services
 import (
 	"time"
 
-	"zudomart/modules/ads/src/generated/ent"
-	"zudomart/modules/ads/src/modules/adAccounts/dtos"
+	"nantty/modules/ads/src/generated/ent"
+	"nantty/modules/ads/src/modules/adAccounts/dtos"
 )
 
 func PresentInvite(invite *ent.AdAccountInvite) dtos.AdAccountInvite {

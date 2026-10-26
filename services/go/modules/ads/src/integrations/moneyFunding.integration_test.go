@@ -15,9 +15,9 @@ import (
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
 
-	commonv1 "zudomart/contracts/gen/go/zudomart/common/v1"
-	moneyv1 "zudomart/contracts/gen/go/zudomart/money/v1"
-	adserrors "zudomart/modules/ads/src/errors"
+	commonv1 "nantty/contracts/gen/go/zudomart/common/v1"
+	moneyv1 "nantty/contracts/gen/go/zudomart/money/v1"
+	adserrors "nantty/modules/ads/src/errors"
 )
 
 type fakeAdsMoneyServer struct {

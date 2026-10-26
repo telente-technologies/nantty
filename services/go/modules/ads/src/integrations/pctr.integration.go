@@ -16,7 +16,7 @@ import (
 	"sync"
 	"time"
 
-	"zudomart/modules/ads/src/types"
+	"nantty/modules/ads/src/types"
 )
 
 var baselineCtrPpmByFormat = map[string]int64{"feed_post": 12_000, "clip": 20_000, "product": 18_000, "store": 10_000, "story": 15_000, "live": 25_000}

@@ -3,8 +3,8 @@ package listbusinessprofiles
 import (
 	"context"
 
-	"zudomart/modules/ads/src/container"
-	"zudomart/modules/ads/src/modules/adAccounts/dtos"
+	"nantty/modules/ads/src/container"
+	"nantty/modules/ads/src/modules/adAccounts/dtos"
 )
 
 type Handler struct{ Container *container.Container }

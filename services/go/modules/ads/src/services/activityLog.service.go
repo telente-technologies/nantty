@@ -6,7 +6,7 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/ads/src/generated/ent"
+	"nantty/modules/ads/src/generated/ent"
 )
 
 type ActivityActor struct {

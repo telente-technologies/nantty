@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"time"
 
-	"zudomart/modules/ads/src/types"
+	"nantty/modules/ads/src/types"
 )
 
 type ConsentReader interface {

@@ -3,9 +3,9 @@ package services
 import (
 	"testing"
 
-	"zudomart/modules/ads/src/modules/boosts/dtos"
-	"zudomart/modules/ads/src/types"
-	"zudomart/platform/regionpricing"
+	"nantty/modules/ads/src/modules/boosts/dtos"
+	"nantty/modules/ads/src/types"
+	"nantty/platform/regionpricing"
 )
 
 func TestBoostEstimateTotalsDailyBudgetOverDurationAndNarrowsCustomAudiences(t *testing.T) {

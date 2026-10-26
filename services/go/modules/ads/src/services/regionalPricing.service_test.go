@@ -6,8 +6,8 @@ import (
 	"testing"
 	"time"
 
-	"zudomart/modules/ads/src/types"
-	"zudomart/platform/regionpricing"
+	"nantty/modules/ads/src/types"
+	"nantty/platform/regionpricing"
 )
 
 type fakeSettingReader map[string]json.RawMessage

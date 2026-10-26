@@ -5,9 +5,9 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/ads/src/modules/adAccounts/dtos"
-	"zudomart/modules/ads/src/modules/adAccounts/services"
-	"zudomart/platform/httpserver"
+	"nantty/modules/ads/src/modules/adAccounts/dtos"
+	"nantty/modules/ads/src/modules/adAccounts/services"
+	"nantty/platform/httpserver"
 )
 
 type Command struct {

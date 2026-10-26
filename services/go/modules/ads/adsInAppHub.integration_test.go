@@ -8,9 +8,9 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/ads/src/generated/ent/adboost"
-	"zudomart/modules/ads/src/generated/ent/adboostchange"
-	"zudomart/modules/ads/src/jobs"
+	"nantty/modules/ads/src/generated/ent/adboost"
+	"nantty/modules/ads/src/generated/ent/adboostchange"
+	"nantty/modules/ads/src/jobs"
 )
 
 func (h *harness) approveBoost(staff *testUser, boostId string) {

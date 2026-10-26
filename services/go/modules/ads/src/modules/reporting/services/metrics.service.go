@@ -1,8 +1,8 @@
 package services
 
 import (
-	"zudomart/modules/ads/src/modules/reporting/dtos"
-	"zudomart/modules/ads/src/types"
+	"nantty/modules/ads/src/modules/reporting/dtos"
+	"nantty/modules/ads/src/types"
 )
 
 type RawMetrics struct {

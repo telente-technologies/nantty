@@ -3,7 +3,7 @@ package createaudience
 import (
 	"github.com/google/uuid"
 
-	"zudomart/modules/ads/src/modules/audiences/dtos"
+	"nantty/modules/ads/src/modules/audiences/dtos"
 )
 
 type Command struct {

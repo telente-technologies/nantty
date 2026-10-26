@@ -10,7 +10,7 @@ import (
 
 	"github.com/jackc/pgx/v5"
 
-	"zudomart/platform/regionpricing"
+	"nantty/platform/regionpricing"
 )
 
 type CurrencyExchangeRates struct {

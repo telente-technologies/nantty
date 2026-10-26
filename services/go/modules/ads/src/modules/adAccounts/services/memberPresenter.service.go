@@ -4,9 +4,9 @@ import (
 	"context"
 	"time"
 
-	"zudomart/modules/ads/src/container"
-	"zudomart/modules/ads/src/generated/ent"
-	"zudomart/modules/ads/src/modules/adAccounts/dtos"
+	"nantty/modules/ads/src/container"
+	"nantty/modules/ads/src/generated/ent"
+	"nantty/modules/ads/src/modules/adAccounts/dtos"
 )
 
 func PresentMembers(ctx context.Context, deployed *container.Container, members []*ent.AdAccountMember) ([]dtos.AdAccountMember, error) {

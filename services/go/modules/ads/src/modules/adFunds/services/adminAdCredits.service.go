@@ -8,17 +8,17 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"github.com/google/uuid"
 
-	"zudomart/modules/ads/src/container"
-	adserrors "zudomart/modules/ads/src/errors"
-	"zudomart/modules/ads/src/generated/ent"
-	"zudomart/modules/ads/src/generated/ent/adcreditlot"
-	"zudomart/modules/ads/src/modules/adFunds/dtos"
-	boostservices "zudomart/modules/ads/src/modules/boosts/services"
-	adsservices "zudomart/modules/ads/src/services"
-	"zudomart/modules/ads/src/types"
-	"zudomart/modules/ads/src/utils"
-	"zudomart/platform/httpserver"
-	"zudomart/platform/regionpricing"
+	"nantty/modules/ads/src/container"
+	adserrors "nantty/modules/ads/src/errors"
+	"nantty/modules/ads/src/generated/ent"
+	"nantty/modules/ads/src/generated/ent/adcreditlot"
+	"nantty/modules/ads/src/modules/adFunds/dtos"
+	boostservices "nantty/modules/ads/src/modules/boosts/services"
+	adsservices "nantty/modules/ads/src/services"
+	"nantty/modules/ads/src/types"
+	"nantty/modules/ads/src/utils"
+	"nantty/platform/httpserver"
+	"nantty/platform/regionpricing"
 )
 
 type StaffActor struct {

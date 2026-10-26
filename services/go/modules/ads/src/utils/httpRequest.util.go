@@ -9,10 +9,10 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/platform/httpserver"
-	"zudomart/platform/jwtauth"
+	"nantty/platform/httpserver"
+	"nantty/platform/jwtauth"
 
-	"zudomart/platform/regionpricing"
+	"nantty/platform/regionpricing"
 )
 
 type Responder struct{ Logger *slog.Logger }

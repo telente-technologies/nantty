@@ -24,16 +24,16 @@ import (
 	"github.com/lestrrat-go/jwx/v3/jwk"
 	"github.com/lestrrat-go/jwx/v3/jwt"
 
-	"zudomart/modules/ads/src"
-	"zudomart/modules/ads/src/configs"
-	"zudomart/modules/ads/src/integrations"
-	"zudomart/modules/ads/src/interfaces"
-	"zudomart/platform/events"
-	"zudomart/platform/health"
-	"zudomart/platform/jwtauth"
-	"zudomart/platform/postgres"
-	"zudomart/platform/servicemodule"
-	"zudomart/platform/staffauth"
+	"nantty/modules/ads/src"
+	"nantty/modules/ads/src/configs"
+	"nantty/modules/ads/src/integrations"
+	"nantty/modules/ads/src/interfaces"
+	"nantty/platform/events"
+	"nantty/platform/health"
+	"nantty/platform/jwtauth"
+	"nantty/platform/postgres"
+	"nantty/platform/servicemodule"
+	"nantty/platform/staffauth"
 )
 
 const (

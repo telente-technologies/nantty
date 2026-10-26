@@ -1,6 +1,6 @@
 package dtos
 
-import "zudomart/modules/ads/src/types"
+import "nantty/modules/ads/src/types"
 
 type SlotRequest struct {
 	Kind                string   `json:"kind"`

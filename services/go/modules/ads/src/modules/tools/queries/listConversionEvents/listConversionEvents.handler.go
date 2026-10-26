@@ -5,13 +5,13 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 
-	"zudomart/modules/ads/src/container"
-	"zudomart/modules/ads/src/generated/ent/adconversionevent"
-	accountservices "zudomart/modules/ads/src/modules/adAccounts/services"
-	"zudomart/modules/ads/src/modules/tools/dtos"
-	"zudomart/modules/ads/src/modules/tools/services"
-	adsservices "zudomart/modules/ads/src/services"
-	"zudomart/modules/ads/src/utils"
+	"nantty/modules/ads/src/container"
+	"nantty/modules/ads/src/generated/ent/adconversionevent"
+	accountservices "nantty/modules/ads/src/modules/adAccounts/services"
+	"nantty/modules/ads/src/modules/tools/dtos"
+	"nantty/modules/ads/src/modules/tools/services"
+	adsservices "nantty/modules/ads/src/services"
+	"nantty/modules/ads/src/utils"
 )
 
 type Handler struct{ Container *container.Container }

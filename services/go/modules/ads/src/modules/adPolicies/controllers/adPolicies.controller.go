@@ -3,13 +3,13 @@ package controllers
 import (
 	"net/http"
 
-	"zudomart/modules/ads/src/container"
-	allocatepremiumpool "zudomart/modules/ads/src/modules/adPolicies/commands/allocatePremiumPool"
-	upsertfrequencypolicy "zudomart/modules/ads/src/modules/adPolicies/commands/upsertFrequencyPolicy"
-	"zudomart/modules/ads/src/modules/adPolicies/dtos"
-	listadpolicies "zudomart/modules/ads/src/modules/adPolicies/queries/listAdPolicies"
-	"zudomart/modules/ads/src/utils"
-	"zudomart/platform/httpserver"
+	"nantty/modules/ads/src/container"
+	allocatepremiumpool "nantty/modules/ads/src/modules/adPolicies/commands/allocatePremiumPool"
+	upsertfrequencypolicy "nantty/modules/ads/src/modules/adPolicies/commands/upsertFrequencyPolicy"
+	"nantty/modules/ads/src/modules/adPolicies/dtos"
+	listadpolicies "nantty/modules/ads/src/modules/adPolicies/queries/listAdPolicies"
+	"nantty/modules/ads/src/utils"
+	"nantty/platform/httpserver"
 )
 
 type AdPoliciesController struct{ Container *container.Container }

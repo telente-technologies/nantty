@@ -2,17 +2,17 @@ package controllers
 
 import (
 	"github.com/google/uuid"
+	audienceservices "nantty/modules/ads/src/modules/audiences/services"
 	"net/http"
-	audienceservices "zudomart/modules/ads/src/modules/audiences/services"
 
-	"zudomart/modules/ads/src/container"
-	decideadforslot "zudomart/modules/ads/src/modules/decision/commands/decideAdForSlot"
-	upsertcontentsignal "zudomart/modules/ads/src/modules/decision/commands/upsertContentSignal"
-	"zudomart/modules/ads/src/modules/decision/dtos"
-	"zudomart/modules/ads/src/modules/decision/validators"
-	"zudomart/modules/ads/src/types"
-	"zudomart/modules/ads/src/utils"
-	"zudomart/platform/httpserver"
+	"nantty/modules/ads/src/container"
+	decideadforslot "nantty/modules/ads/src/modules/decision/commands/decideAdForSlot"
+	upsertcontentsignal "nantty/modules/ads/src/modules/decision/commands/upsertContentSignal"
+	"nantty/modules/ads/src/modules/decision/dtos"
+	"nantty/modules/ads/src/modules/decision/validators"
+	"nantty/modules/ads/src/types"
+	"nantty/modules/ads/src/utils"
+	"nantty/platform/httpserver"
 )
 
 type DecisionController struct{ Container *container.Container }

@@ -4,8 +4,8 @@ import (
 	"context"
 	"time"
 
-	"zudomart/modules/ads/src/container"
-	"zudomart/modules/ads/src/generated/ent/adimpression"
+	"nantty/modules/ads/src/container"
+	"nantty/modules/ads/src/generated/ent/adimpression"
 )
 
 const pruneBatchSize = 5_000

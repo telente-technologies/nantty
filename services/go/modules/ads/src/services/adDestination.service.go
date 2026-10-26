@@ -7,7 +7,7 @@ import (
 	"regexp"
 	"strings"
 
-	"zudomart/modules/ads/src/types"
+	"nantty/modules/ads/src/types"
 )
 
 var (

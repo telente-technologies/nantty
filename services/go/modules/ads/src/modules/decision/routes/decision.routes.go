@@ -3,9 +3,9 @@ package routes
 import (
 	"net/http"
 
-	"zudomart/modules/ads/src/container"
-	"zudomart/modules/ads/src/middlewares"
-	"zudomart/modules/ads/src/modules/decision/controllers"
+	"nantty/modules/ads/src/container"
+	"nantty/modules/ads/src/middlewares"
+	"nantty/modules/ads/src/modules/decision/controllers"
 )
 
 func MountDecisionRoutes(mux *http.ServeMux, deployed *container.Container) {

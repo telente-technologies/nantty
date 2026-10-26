@@ -3,7 +3,7 @@ package services
 import (
 	"slices"
 
-	"zudomart/modules/ads/src/types"
+	"nantty/modules/ads/src/types"
 )
 
 var AllAdvertiserPlacements = []string{"feed", "clips", "mart", "search", "stories", "live"}

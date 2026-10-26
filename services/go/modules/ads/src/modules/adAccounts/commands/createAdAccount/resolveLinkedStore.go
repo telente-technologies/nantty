@@ -3,9 +3,9 @@ package createadaccount
 import (
 	"context"
 
-	"zudomart/modules/ads/src/generated/ent/adaccount"
-	"zudomart/modules/ads/src/interfaces"
-	"zudomart/platform/httpserver"
+	"nantty/modules/ads/src/generated/ent/adaccount"
+	"nantty/modules/ads/src/interfaces"
+	"nantty/platform/httpserver"
 )
 
 func (handler Handler) resolveLinkedStore(ctx context.Context, command Command) (*interfaces.ManagedStore, error) {

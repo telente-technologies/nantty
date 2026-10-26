@@ -3,7 +3,7 @@ package storecampaignreport
 import (
 	"time"
 
-	"zudomart/modules/ads/src/types"
+	"nantty/modules/ads/src/types"
 )
 
 type Query struct {

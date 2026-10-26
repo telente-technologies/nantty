@@ -4,11 +4,11 @@ import (
 	"net/http"
 	"time"
 
-	"zudomart/modules/ads/src/configs"
-	"zudomart/modules/ads/src/container"
-	"zudomart/modules/ads/src/integrations"
-	"zudomart/modules/ads/src/interfaces"
-	"zudomart/platform/staffaudit"
+	"nantty/modules/ads/src/configs"
+	"nantty/modules/ads/src/container"
+	"nantty/modules/ads/src/integrations"
+	"nantty/modules/ads/src/interfaces"
+	"nantty/platform/staffaudit"
 )
 
 func completeStaffAndMoneyCollaborators(deployed *container.Container, collaborators Collaborators, settings configs.AdsSettings) {

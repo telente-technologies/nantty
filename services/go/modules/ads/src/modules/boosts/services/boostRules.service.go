@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"slices"
 
-	"zudomart/modules/ads/src/modules/boosts/dtos"
-	"zudomart/modules/ads/src/types"
-	"zudomart/platform/regionpricing"
+	"nantty/modules/ads/src/modules/boosts/dtos"
+	"nantty/modules/ads/src/types"
+	"nantty/platform/regionpricing"
 )
 
 var DurationDayOptions = []int{1, 3, 7, 14}

@@ -1,8 +1,8 @@
 package middlewares
 
 import (
-	"zudomart/modules/ads/src/container"
-	"zudomart/modules/ads/src/services"
+	"nantty/modules/ads/src/container"
+	"nantty/modules/ads/src/services"
 )
 
 func StepUpGate(deployed *container.Container) services.AdsStepUpGate {

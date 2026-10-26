@@ -3,9 +3,9 @@ package searchlocations
 import (
 	"strings"
 
-	"zudomart/modules/ads/src/modules/audiences/services"
-	"zudomart/modules/ads/src/types"
-	"zudomart/platform/httpserver"
+	"nantty/modules/ads/src/modules/audiences/services"
+	"nantty/modules/ads/src/types"
+	"nantty/platform/httpserver"
 )
 
 const maximumResults = 25

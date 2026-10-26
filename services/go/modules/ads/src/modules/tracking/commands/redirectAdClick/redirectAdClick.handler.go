@@ -6,10 +6,10 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/ads/src/container"
-	"zudomart/modules/ads/src/modules/tracking/commands/recordAdEvents"
-	"zudomart/modules/ads/src/modules/tracking/dtos"
-	"zudomart/modules/ads/src/services"
+	"nantty/modules/ads/src/container"
+	"nantty/modules/ads/src/modules/tracking/commands/recordAdEvents"
+	"nantty/modules/ads/src/modules/tracking/dtos"
+	"nantty/modules/ads/src/services"
 )
 
 var ErrInvalidClick = errors.New("click link is invalid or expired")

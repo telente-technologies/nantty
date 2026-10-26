@@ -4,9 +4,9 @@ import (
 	"net/http"
 	"time"
 
-	storecampaignreport "zudomart/modules/ads/src/modules/reporting/queries/storeCampaignReport"
-	"zudomart/modules/ads/src/utils"
-	"zudomart/platform/httpserver"
+	storecampaignreport "nantty/modules/ads/src/modules/reporting/queries/storeCampaignReport"
+	"nantty/modules/ads/src/utils"
+	"nantty/platform/httpserver"
 )
 
 const maximumStoreReportDays = 366

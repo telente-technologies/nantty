@@ -7,9 +7,9 @@ import (
 	"sync"
 	"time"
 
-	"zudomart/modules/ads/src/generated/ent"
-	"zudomart/modules/ads/src/generated/ent/adfrequencypolicy"
-	"zudomart/modules/ads/src/generated/ent/predicate"
+	"nantty/modules/ads/src/generated/ent"
+	"nantty/modules/ads/src/generated/ent/adfrequencypolicy"
+	"nantty/modules/ads/src/generated/ent/predicate"
 )
 
 const policyCacheLifetime = 30 * time.Second

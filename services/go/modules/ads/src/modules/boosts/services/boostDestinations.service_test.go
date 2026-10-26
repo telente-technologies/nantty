@@ -3,7 +3,7 @@ package services
 import (
 	"testing"
 
-	"zudomart/modules/ads/src/modules/boosts/dtos"
+	"nantty/modules/ads/src/modules/boosts/dtos"
 )
 
 func TestBoostDestinationsDefaultToPostsAndKeepTheirOwnGoals(t *testing.T) {

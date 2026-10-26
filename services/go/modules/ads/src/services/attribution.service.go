@@ -4,7 +4,7 @@ import (
 	"slices"
 	"time"
 
-	"zudomart/platform/money"
+	"nantty/platform/money"
 )
 
 const (

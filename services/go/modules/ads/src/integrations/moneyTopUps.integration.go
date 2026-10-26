@@ -11,9 +11,9 @@ import (
 	"strings"
 	"time"
 
-	adserrors "zudomart/modules/ads/src/errors"
-	"zudomart/modules/ads/src/interfaces"
-	"zudomart/platform/httpserver"
+	adserrors "nantty/modules/ads/src/errors"
+	"nantty/modules/ads/src/interfaces"
+	"nantty/platform/httpserver"
 )
 
 type HttpMoneyTopUpGateway struct {

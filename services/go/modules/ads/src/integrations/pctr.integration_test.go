@@ -8,7 +8,7 @@ import (
 	"testing"
 	"time"
 
-	"zudomart/modules/ads/src/types"
+	"nantty/modules/ads/src/types"
 )
 
 func request() types.PctrRequest {

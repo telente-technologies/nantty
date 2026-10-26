@@ -3,9 +3,9 @@ package listadpolicies
 import (
 	"context"
 
-	"zudomart/modules/ads/src/container"
-	"zudomart/modules/ads/src/generated/ent/adfrequencypolicy"
-	"zudomart/modules/ads/src/modules/adPolicies/dtos"
+	"nantty/modules/ads/src/container"
+	"nantty/modules/ads/src/generated/ent/adfrequencypolicy"
+	"nantty/modules/ads/src/modules/adPolicies/dtos"
 )
 
 type Handler struct{ Container *container.Container }

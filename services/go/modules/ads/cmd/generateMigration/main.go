@@ -12,7 +12,7 @@ import (
 	"entgo.io/ent/dialect/sql/schema"
 	"github.com/jackc/pgx/v5/stdlib"
 
-	entmigrate "zudomart/modules/ads/src/generated/ent/migrate"
+	entmigrate "nantty/modules/ads/src/generated/ent/migrate"
 )
 
 const migrationsDirectory = "src/migrations"

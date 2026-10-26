@@ -5,17 +5,17 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/ads/src/container"
-	createaudience "zudomart/modules/ads/src/modules/audiences/commands/createAudience"
-	deleteaudience "zudomart/modules/ads/src/modules/audiences/commands/deleteAudience"
-	renameaudience "zudomart/modules/ads/src/modules/audiences/commands/renameAudience"
-	uploadcustomerlist "zudomart/modules/ads/src/modules/audiences/commands/uploadCustomerList"
-	"zudomart/modules/ads/src/modules/audiences/dtos"
-	estimateaudience "zudomart/modules/ads/src/modules/audiences/queries/estimateAudience"
-	listaudiences "zudomart/modules/ads/src/modules/audiences/queries/listAudiences"
-	"zudomart/modules/ads/src/modules/audiences/services"
-	"zudomart/modules/ads/src/utils"
-	"zudomart/platform/httpserver"
+	"nantty/modules/ads/src/container"
+	createaudience "nantty/modules/ads/src/modules/audiences/commands/createAudience"
+	deleteaudience "nantty/modules/ads/src/modules/audiences/commands/deleteAudience"
+	renameaudience "nantty/modules/ads/src/modules/audiences/commands/renameAudience"
+	uploadcustomerlist "nantty/modules/ads/src/modules/audiences/commands/uploadCustomerList"
+	"nantty/modules/ads/src/modules/audiences/dtos"
+	estimateaudience "nantty/modules/ads/src/modules/audiences/queries/estimateAudience"
+	listaudiences "nantty/modules/ads/src/modules/audiences/queries/listAudiences"
+	"nantty/modules/ads/src/modules/audiences/services"
+	"nantty/modules/ads/src/utils"
+	"nantty/platform/httpserver"
 )
 
 type AudiencesController struct{ Container *container.Container }

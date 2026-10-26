@@ -5,13 +5,13 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"zudomart/modules/ads/src/container"
-	"zudomart/modules/ads/src/events"
-	"zudomart/modules/ads/src/generated/ent/adcontentsignal"
-	billingservices "zudomart/modules/ads/src/modules/billing/services"
-	boostservices "zudomart/modules/ads/src/modules/boosts/services"
-	"zudomart/modules/ads/src/services"
-	platformevents "zudomart/platform/events"
+	"nantty/modules/ads/src/container"
+	"nantty/modules/ads/src/events"
+	"nantty/modules/ads/src/generated/ent/adcontentsignal"
+	billingservices "nantty/modules/ads/src/modules/billing/services"
+	boostservices "nantty/modules/ads/src/modules/boosts/services"
+	"nantty/modules/ads/src/services"
+	platformevents "nantty/platform/events"
 )
 
 func HandleDomainEventMessage(deployed *container.Container) func(context.Context, []byte) error {

@@ -6,8 +6,8 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/ads/src/generated/ent"
-	"zudomart/modules/ads/src/generated/ent/adaccount"
+	"nantty/modules/ads/src/generated/ent"
+	"nantty/modules/ads/src/generated/ent/adaccount"
 )
 
 const shortfallDisabledReason = "Unpaid ad spend: top up to clear the amount owed"

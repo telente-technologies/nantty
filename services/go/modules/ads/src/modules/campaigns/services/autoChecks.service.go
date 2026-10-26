@@ -4,8 +4,8 @@ import (
 	"strings"
 	"sync/atomic"
 
-	adsservices "zudomart/modules/ads/src/services"
-	"zudomart/modules/ads/src/types"
+	adsservices "nantty/modules/ads/src/services"
+	"nantty/modules/ads/src/types"
 )
 
 type policyKeywordRule struct {

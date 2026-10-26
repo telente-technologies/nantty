@@ -7,8 +7,8 @@ import (
 	"strings"
 	"time"
 
-	"zudomart/modules/ads/src/modules/tools/dtos"
-	"zudomart/platform/httpserver"
+	"nantty/modules/ads/src/modules/tools/dtos"
+	"nantty/platform/httpserver"
 )
 
 const minimumExperimentLength = 4 * 24 * time.Hour

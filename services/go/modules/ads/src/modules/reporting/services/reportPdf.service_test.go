@@ -6,8 +6,8 @@ import (
 	"strings"
 	"testing"
 
-	"zudomart/modules/ads/src/modules/reporting/dtos"
-	"zudomart/modules/ads/src/types"
+	"nantty/modules/ads/src/modules/reporting/dtos"
+	"nantty/modules/ads/src/types"
 )
 
 func sampleReport(rows int) dtos.ReportResponse {

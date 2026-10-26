@@ -3,9 +3,9 @@ package createboost
 import (
 	"context"
 
-	adserrors "zudomart/modules/ads/src/errors"
-	"zudomart/modules/ads/src/interfaces"
-	"zudomart/modules/ads/src/modules/boosts/services"
+	adserrors "nantty/modules/ads/src/errors"
+	"nantty/modules/ads/src/interfaces"
+	"nantty/modules/ads/src/modules/boosts/services"
 )
 
 func (handler Handler) requireOwnedDestination(ctx context.Context, command Command) error {

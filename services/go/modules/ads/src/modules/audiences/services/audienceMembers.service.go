@@ -5,11 +5,11 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/ads/src/container"
-	"zudomart/modules/ads/src/generated/ent"
-	"zudomart/modules/ads/src/generated/ent/adaudiencemember"
-	"zudomart/modules/ads/src/generated/ent/adcustomaudience"
-	"zudomart/modules/ads/src/modules/audiences/dtos"
+	"nantty/modules/ads/src/container"
+	"nantty/modules/ads/src/generated/ent"
+	"nantty/modules/ads/src/generated/ent/adaudiencemember"
+	"nantty/modules/ads/src/generated/ent/adcustomaudience"
+	"nantty/modules/ads/src/modules/audiences/dtos"
 )
 
 const memberInsertChunk = 2000

@@ -8,12 +8,12 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"github.com/google/uuid"
 
-	"zudomart/modules/ads/src/container"
-	"zudomart/modules/ads/src/generated/ent"
-	"zudomart/modules/ads/src/generated/ent/adcashbacksetting"
-	"zudomart/modules/ads/src/modules/adFunds/dtos"
-	"zudomart/modules/ads/src/utils"
-	"zudomart/platform/httpserver"
+	"nantty/modules/ads/src/container"
+	"nantty/modules/ads/src/generated/ent"
+	"nantty/modules/ads/src/generated/ent/adcashbacksetting"
+	"nantty/modules/ads/src/modules/adFunds/dtos"
+	"nantty/modules/ads/src/utils"
+	"nantty/platform/httpserver"
 )
 
 func presentCashback(ctx context.Context, deployed *container.Container, rows []*ent.AdCashbackSetting) []dtos.AdminCashbackSetting {

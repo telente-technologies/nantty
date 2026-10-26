@@ -3,13 +3,13 @@ package controllers
 import (
 	"net/http"
 
-	"zudomart/modules/ads/src/container"
-	recordadevents "zudomart/modules/ads/src/modules/tracking/commands/recordAdEvents"
-	recordconversion "zudomart/modules/ads/src/modules/tracking/commands/recordConversion"
-	redirectadclick "zudomart/modules/ads/src/modules/tracking/commands/redirectAdClick"
-	"zudomart/modules/ads/src/modules/tracking/dtos"
-	"zudomart/modules/ads/src/utils"
-	"zudomart/platform/httpserver"
+	"nantty/modules/ads/src/container"
+	recordadevents "nantty/modules/ads/src/modules/tracking/commands/recordAdEvents"
+	recordconversion "nantty/modules/ads/src/modules/tracking/commands/recordConversion"
+	redirectadclick "nantty/modules/ads/src/modules/tracking/commands/redirectAdClick"
+	"nantty/modules/ads/src/modules/tracking/dtos"
+	"nantty/modules/ads/src/utils"
+	"nantty/platform/httpserver"
 )
 
 type TrackingController struct{ Container *container.Container }

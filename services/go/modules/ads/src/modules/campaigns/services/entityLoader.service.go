@@ -2,17 +2,17 @@ package services
 
 import (
 	"context"
+	adserrors "nantty/modules/ads/src/errors"
+	"nantty/modules/ads/src/generated/ent/adcampaign"
 	"time"
-	adserrors "zudomart/modules/ads/src/errors"
-	"zudomart/modules/ads/src/generated/ent/adcampaign"
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/ads/src/generated/ent"
-	"zudomart/modules/ads/src/generated/ent/ad"
-	"zudomart/modules/ads/src/generated/ent/adgroup"
-	"zudomart/modules/ads/src/modules/campaigns/dtos"
-	adsservices "zudomart/modules/ads/src/services"
+	"nantty/modules/ads/src/generated/ent"
+	"nantty/modules/ads/src/generated/ent/ad"
+	"nantty/modules/ads/src/generated/ent/adgroup"
+	"nantty/modules/ads/src/modules/campaigns/dtos"
+	adsservices "nantty/modules/ads/src/services"
 )
 
 type Loader struct {

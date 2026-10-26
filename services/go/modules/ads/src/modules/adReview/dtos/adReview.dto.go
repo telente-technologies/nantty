@@ -3,7 +3,7 @@ package dtos
 import (
 	"encoding/json"
 
-	"zudomart/modules/ads/src/types"
+	"nantty/modules/ads/src/types"
 )
 
 type AdvertiserRef struct {

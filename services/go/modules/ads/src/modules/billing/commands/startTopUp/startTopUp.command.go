@@ -5,8 +5,8 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/ads/src/modules/billing/dtos"
-	"zudomart/platform/httpserver"
+	"nantty/modules/ads/src/modules/billing/dtos"
+	"nantty/platform/httpserver"
 )
 
 type Command struct {

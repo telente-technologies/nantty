@@ -9,9 +9,9 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/ads/src/generated/ent/adimpression"
-	"zudomart/modules/ads/src/jobs"
-	platformevents "zudomart/platform/events"
+	"nantty/modules/ads/src/generated/ent/adimpression"
+	"nantty/modules/ads/src/jobs"
+	platformevents "nantty/platform/events"
 )
 
 func creatorProgramEvent(eventType, data string, occurredAt time.Time) []byte {

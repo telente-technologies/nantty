@@ -4,8 +4,8 @@ import (
 	"testing"
 	"time"
 
-	"zudomart/modules/ads/src/modules/audiences/dtos"
-	"zudomart/modules/ads/src/types"
+	"nantty/modules/ads/src/modules/audiences/dtos"
+	"nantty/modules/ads/src/types"
 )
 
 func nigeria() types.AudienceSpec {

@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"math"
 
-	"zudomart/modules/ads/src/types"
+	"nantty/modules/ads/src/types"
 )
 
 const winnerConfidencePercent = 90

@@ -1,8 +1,8 @@
 package services
 
 import (
-	"zudomart/modules/ads/src/constants"
-	"zudomart/modules/ads/src/generated/ent"
+	"nantty/modules/ads/src/constants"
+	"nantty/modules/ads/src/generated/ent"
 )
 
 func EffectiveAdCategory(row *ent.Ad, campaign *ent.AdCampaign) string {

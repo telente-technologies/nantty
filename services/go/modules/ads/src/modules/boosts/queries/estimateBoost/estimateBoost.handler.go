@@ -3,10 +3,10 @@ package estimateboost
 import (
 	"context"
 
-	"zudomart/modules/ads/src/container"
-	"zudomart/modules/ads/src/modules/boosts/dtos"
-	"zudomart/modules/ads/src/modules/boosts/services"
-	"zudomart/modules/ads/src/modules/boosts/validators"
+	"nantty/modules/ads/src/container"
+	"nantty/modules/ads/src/modules/boosts/dtos"
+	"nantty/modules/ads/src/modules/boosts/services"
+	"nantty/modules/ads/src/modules/boosts/validators"
 )
 
 type Handler struct{ Container *container.Container }

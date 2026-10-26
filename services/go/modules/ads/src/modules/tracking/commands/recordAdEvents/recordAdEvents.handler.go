@@ -8,10 +8,10 @@ import (
 	"strings"
 	"time"
 
-	"zudomart/modules/ads/src/container"
-	"zudomart/modules/ads/src/modules/tracking/dtos"
-	"zudomart/modules/ads/src/services"
-	"zudomart/modules/ads/src/types"
+	"nantty/modules/ads/src/container"
+	"nantty/modules/ads/src/modules/tracking/dtos"
+	"nantty/modules/ads/src/services"
+	"nantty/modules/ads/src/types"
 )
 
 var botUserAgent = regexp.MustCompile(`(?i)bot|crawler|spider|headless|python-requests|curl/`)

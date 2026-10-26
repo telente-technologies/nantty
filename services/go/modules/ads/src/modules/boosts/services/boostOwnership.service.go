@@ -5,10 +5,10 @@ import (
 
 	"github.com/google/uuid"
 
-	adserrors "zudomart/modules/ads/src/errors"
-	"zudomart/modules/ads/src/generated/ent"
-	"zudomart/modules/ads/src/generated/ent/adboost"
-	"zudomart/platform/httpserver"
+	adserrors "nantty/modules/ads/src/errors"
+	"nantty/modules/ads/src/generated/ent"
+	"nantty/modules/ads/src/generated/ent/adboost"
+	"nantty/platform/httpserver"
 )
 
 func LoadOwnedBoostForUpdate(ctx context.Context, tx *ent.Tx, boostId, userId uuid.UUID) (*ent.AdBoost, error) {

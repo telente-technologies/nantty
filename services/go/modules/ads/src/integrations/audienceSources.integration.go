@@ -8,7 +8,7 @@ import (
 
 	"github.com/jackc/pgx/v5"
 
-	adserrors "zudomart/modules/ads/src/errors"
+	adserrors "nantty/modules/ads/src/errors"
 )
 
 type UnavailableAudienceSource struct{}

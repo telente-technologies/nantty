@@ -6,9 +6,9 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/ads/src/generated/ent"
-	"zudomart/modules/ads/src/generated/ent/adcashbacksetting"
-	"zudomart/modules/ads/src/generated/ent/adcreditlot"
+	"nantty/modules/ads/src/generated/ent"
+	"nantty/modules/ads/src/generated/ent/adcashbacksetting"
+	"nantty/modules/ads/src/generated/ent/adcreditlot"
 )
 
 const DefaultCashbackPercent = 10

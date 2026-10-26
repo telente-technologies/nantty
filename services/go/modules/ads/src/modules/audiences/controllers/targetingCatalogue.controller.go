@@ -3,10 +3,10 @@ package controllers
 import (
 	"net/http"
 
-	listbehaviours "zudomart/modules/ads/src/modules/audiences/queries/listBehaviours"
-	searchlocations "zudomart/modules/ads/src/modules/audiences/queries/searchLocations"
-	"zudomart/modules/ads/src/utils"
-	"zudomart/platform/httpserver"
+	listbehaviours "nantty/modules/ads/src/modules/audiences/queries/listBehaviours"
+	searchlocations "nantty/modules/ads/src/modules/audiences/queries/searchLocations"
+	"nantty/modules/ads/src/utils"
+	"nantty/platform/httpserver"
 )
 
 func (controller AudiencesController) SearchLocations(writer http.ResponseWriter, request *http.Request) {

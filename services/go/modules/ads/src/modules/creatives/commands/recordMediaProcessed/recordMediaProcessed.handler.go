@@ -3,11 +3,11 @@ package recordmediaprocessed
 import (
 	"context"
 
-	"zudomart/modules/ads/src/container"
-	adserrors "zudomart/modules/ads/src/errors"
-	"zudomart/modules/ads/src/generated/ent"
-	"zudomart/modules/ads/src/generated/ent/admedia"
-	"zudomart/platform/httpserver"
+	"nantty/modules/ads/src/container"
+	adserrors "nantty/modules/ads/src/errors"
+	"nantty/modules/ads/src/generated/ent"
+	"nantty/modules/ads/src/generated/ent/admedia"
+	"nantty/platform/httpserver"
 )
 
 type Handler struct{ Container *container.Container }

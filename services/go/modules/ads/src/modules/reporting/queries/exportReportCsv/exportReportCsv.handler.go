@@ -3,9 +3,9 @@ package exportreportcsv
 import (
 	"context"
 
-	"zudomart/modules/ads/src/container"
-	getreport "zudomart/modules/ads/src/modules/reporting/queries/getReport"
-	"zudomart/modules/ads/src/modules/reporting/services"
+	"nantty/modules/ads/src/container"
+	getreport "nantty/modules/ads/src/modules/reporting/queries/getReport"
+	"nantty/modules/ads/src/modules/reporting/services"
 )
 
 type Handler struct{ Container *container.Container }

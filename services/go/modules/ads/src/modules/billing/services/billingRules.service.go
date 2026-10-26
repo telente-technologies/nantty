@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"zudomart/modules/ads/src/container"
+	"nantty/modules/ads/src/container"
 )
 
 type Limits struct {

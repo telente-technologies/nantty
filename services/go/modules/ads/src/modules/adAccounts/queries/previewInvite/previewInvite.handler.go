@@ -4,11 +4,11 @@ import (
 	"context"
 	"time"
 
-	"zudomart/modules/ads/src/container"
-	adserrors "zudomart/modules/ads/src/errors"
-	"zudomart/modules/ads/src/generated/ent"
-	"zudomart/modules/ads/src/generated/ent/adaccountinvite"
-	"zudomart/modules/ads/src/modules/adAccounts/dtos"
+	"nantty/modules/ads/src/container"
+	adserrors "nantty/modules/ads/src/errors"
+	"nantty/modules/ads/src/generated/ent"
+	"nantty/modules/ads/src/generated/ent/adaccountinvite"
+	"nantty/modules/ads/src/modules/adAccounts/dtos"
 )
 
 type Handler struct{ Container *container.Container }

@@ -6,12 +6,12 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/ads/src/generated/ent"
-	"zudomart/modules/ads/src/generated/ent/adcampaign"
-	"zudomart/modules/ads/src/generated/ent/adconversion"
-	"zudomart/modules/ads/src/generated/ent/adconversionevent"
-	"zudomart/modules/ads/src/generated/ent/adgroup"
-	"zudomart/modules/ads/src/modules/tools/dtos"
+	"nantty/modules/ads/src/generated/ent"
+	"nantty/modules/ads/src/generated/ent/adcampaign"
+	"nantty/modules/ads/src/generated/ent/adconversion"
+	"nantty/modules/ads/src/generated/ent/adconversionevent"
+	"nantty/modules/ads/src/generated/ent/adgroup"
+	"nantty/modules/ads/src/modules/tools/dtos"
 )
 
 func formatOptional(at *time.Time) *string {

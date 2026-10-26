@@ -5,14 +5,14 @@ import (
 
 	"github.com/google/uuid"
 
-	createscheduledreport "zudomart/modules/ads/src/modules/reporting/commands/createScheduledReport"
-	deletescheduledreport "zudomart/modules/ads/src/modules/reporting/commands/deleteScheduledReport"
-	"zudomart/modules/ads/src/modules/reporting/dtos"
-	exportreportpdf "zudomart/modules/ads/src/modules/reporting/queries/exportReportPdf"
-	getreport "zudomart/modules/ads/src/modules/reporting/queries/getReport"
-	listscheduledreports "zudomart/modules/ads/src/modules/reporting/queries/listScheduledReports"
-	"zudomart/modules/ads/src/utils"
-	"zudomart/platform/httpserver"
+	createscheduledreport "nantty/modules/ads/src/modules/reporting/commands/createScheduledReport"
+	deletescheduledreport "nantty/modules/ads/src/modules/reporting/commands/deleteScheduledReport"
+	"nantty/modules/ads/src/modules/reporting/dtos"
+	exportreportpdf "nantty/modules/ads/src/modules/reporting/queries/exportReportPdf"
+	getreport "nantty/modules/ads/src/modules/reporting/queries/getReport"
+	listscheduledreports "nantty/modules/ads/src/modules/reporting/queries/listScheduledReports"
+	"nantty/modules/ads/src/utils"
+	"nantty/platform/httpserver"
 )
 
 func (controller ReportingController) scoped(writer http.ResponseWriter, request *http.Request, work func(user, account uuid.UUID) error) {

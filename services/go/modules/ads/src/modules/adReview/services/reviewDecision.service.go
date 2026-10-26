@@ -4,15 +4,15 @@ import (
 	"context"
 	"time"
 
-	adserrors "zudomart/modules/ads/src/errors"
-	"zudomart/modules/ads/src/events"
-	"zudomart/modules/ads/src/generated/ent"
-	"zudomart/modules/ads/src/generated/ent/ad"
-	"zudomart/modules/ads/src/generated/ent/adboost"
-	"zudomart/modules/ads/src/generated/ent/adcampaign"
-	"zudomart/modules/ads/src/generated/ent/adgroup"
-	boostservices "zudomart/modules/ads/src/modules/boosts/services"
-	campaignservices "zudomart/modules/ads/src/modules/campaigns/services"
+	adserrors "nantty/modules/ads/src/errors"
+	"nantty/modules/ads/src/events"
+	"nantty/modules/ads/src/generated/ent"
+	"nantty/modules/ads/src/generated/ent/ad"
+	"nantty/modules/ads/src/generated/ent/adboost"
+	"nantty/modules/ads/src/generated/ent/adcampaign"
+	"nantty/modules/ads/src/generated/ent/adgroup"
+	boostservices "nantty/modules/ads/src/modules/boosts/services"
+	campaignservices "nantty/modules/ads/src/modules/campaigns/services"
 )
 
 type Reviewer struct {
