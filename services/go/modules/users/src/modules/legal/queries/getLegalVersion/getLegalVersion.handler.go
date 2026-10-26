@@ -4,10 +4,10 @@ import (
 	"context"
 	"time"
 
-	"zudomart/modules/users/src/container"
-	"zudomart/modules/users/src/generated/ent"
-	"zudomart/modules/users/src/generated/ent/termsacceptance"
-	"zudomart/modules/users/src/modules/legal/services"
+	"nantty/modules/users/src/container"
+	"nantty/modules/users/src/generated/ent"
+	"nantty/modules/users/src/generated/ent/termsacceptance"
+	"nantty/modules/users/src/modules/legal/services"
 )
 
 type Acceptance struct {

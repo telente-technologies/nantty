@@ -6,12 +6,12 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 
-	"zudomart/modules/users/src/container"
-	usersErrors "zudomart/modules/users/src/errors"
-	"zudomart/modules/users/src/generated/ent"
-	"zudomart/modules/users/src/generated/ent/topic"
-	"zudomart/modules/users/src/modules/topics/services"
-	"zudomart/platform/identityports"
+	"nantty/modules/users/src/container"
+	usersErrors "nantty/modules/users/src/errors"
+	"nantty/modules/users/src/generated/ent"
+	"nantty/modules/users/src/generated/ent/topic"
+	"nantty/modules/users/src/modules/topics/services"
+	"nantty/platform/identityports"
 )
 
 type Query struct {

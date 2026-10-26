@@ -6,16 +6,16 @@ import (
 	"strings"
 	"unicode"
 
-	"zudomart/modules/users/src/container"
-	usersErrors "zudomart/modules/users/src/errors"
-	"zudomart/modules/users/src/generated/ent"
-	"zudomart/modules/users/src/generated/ent/admincreatedaccount"
-	"zudomart/modules/users/src/generated/ent/profile"
-	accountservices "zudomart/modules/users/src/modules/accountEnforcement/services"
-	"zudomart/modules/users/src/modules/checkmarks/services"
-	usersservices "zudomart/modules/users/src/services"
-	"zudomart/platform/identityports"
-	"zudomart/platform/usernames"
+	"nantty/modules/users/src/container"
+	usersErrors "nantty/modules/users/src/errors"
+	"nantty/modules/users/src/generated/ent"
+	"nantty/modules/users/src/generated/ent/admincreatedaccount"
+	"nantty/modules/users/src/generated/ent/profile"
+	accountservices "nantty/modules/users/src/modules/accountEnforcement/services"
+	"nantty/modules/users/src/modules/checkmarks/services"
+	usersservices "nantty/modules/users/src/services"
+	"nantty/platform/identityports"
+	"nantty/platform/usernames"
 )
 
 type Handler struct {

@@ -11,7 +11,7 @@ import (
 	awsconfig "github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 
-	"zudomart/modules/users/src/configs"
+	"nantty/modules/users/src/configs"
 )
 
 type ObjectStore interface {

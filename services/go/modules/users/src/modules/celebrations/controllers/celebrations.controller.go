@@ -5,15 +5,15 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/users/src/container"
-	usersErrors "zudomart/modules/users/src/errors"
-	"zudomart/modules/users/src/modules/celebrations/dtos"
-	"zudomart/modules/users/src/modules/celebrations/services"
-	"zudomart/modules/users/src/modules/celebrations/validators"
-	usersservices "zudomart/modules/users/src/services"
-	"zudomart/modules/users/src/utils"
-	"zudomart/platform/httpserver"
-	"zudomart/platform/identityports"
+	"nantty/modules/users/src/container"
+	usersErrors "nantty/modules/users/src/errors"
+	"nantty/modules/users/src/modules/celebrations/dtos"
+	"nantty/modules/users/src/modules/celebrations/services"
+	"nantty/modules/users/src/modules/celebrations/validators"
+	usersservices "nantty/modules/users/src/services"
+	"nantty/modules/users/src/utils"
+	"nantty/platform/httpserver"
+	"nantty/platform/identityports"
 )
 
 type CelebrationsController struct {

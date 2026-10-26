@@ -6,12 +6,12 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/users/src/container"
-	"zudomart/modules/users/src/generated/ent"
-	"zudomart/modules/users/src/generated/ent/profile"
-	"zudomart/modules/users/src/generated/ent/usernamehold"
-	"zudomart/platform/identityports"
-	"zudomart/platform/usernames"
+	"nantty/modules/users/src/container"
+	"nantty/modules/users/src/generated/ent"
+	"nantty/modules/users/src/generated/ent/profile"
+	"nantty/modules/users/src/generated/ent/usernamehold"
+	"nantty/platform/identityports"
+	"nantty/platform/usernames"
 )
 
 type Availability struct {

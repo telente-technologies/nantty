@@ -3,9 +3,9 @@ package getconsentstates
 import (
 	"context"
 
-	"zudomart/modules/users/src/container"
-	"zudomart/modules/users/src/modules/consents/models"
-	"zudomart/modules/users/src/modules/consents/services"
+	"nantty/modules/users/src/container"
+	"nantty/modules/users/src/modules/consents/models"
+	"nantty/modules/users/src/modules/consents/services"
 )
 
 type Handler struct {

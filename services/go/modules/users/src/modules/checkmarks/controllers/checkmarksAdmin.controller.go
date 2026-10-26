@@ -1,21 +1,21 @@
 package controllers
 
 import (
+	openverificationdocument "nantty/modules/users/src/modules/checkmarks/queries/openVerificationDocument"
 	"net/http"
-	openverificationdocument "zudomart/modules/users/src/modules/checkmarks/queries/openVerificationDocument"
 
-	createaccountbyadmin "zudomart/modules/users/src/modules/checkmarks/commands/createAccountByAdmin"
-	grantlifetimecheckmark "zudomart/modules/users/src/modules/checkmarks/commands/grantLifetimeCheckmark"
-	revokelifetimecheckmark "zudomart/modules/users/src/modules/checkmarks/commands/revokeLifetimeCheckmark"
-	transitionblackapplication "zudomart/modules/users/src/modules/checkmarks/commands/transitionBlackApplication"
-	transitionverification "zudomart/modules/users/src/modules/checkmarks/commands/transitionVerification"
-	"zudomart/modules/users/src/modules/checkmarks/dtos"
-	getverification "zudomart/modules/users/src/modules/checkmarks/queries/getVerification"
-	listadmincreatedaccounts "zudomart/modules/users/src/modules/checkmarks/queries/listAdminCreatedAccounts"
-	listblackapplications "zudomart/modules/users/src/modules/checkmarks/queries/listBlackApplications"
-	listcheckmarkgrants "zudomart/modules/users/src/modules/checkmarks/queries/listCheckmarkGrants"
-	listverifications "zudomart/modules/users/src/modules/checkmarks/queries/listVerifications"
-	"zudomart/modules/users/src/utils"
+	createaccountbyadmin "nantty/modules/users/src/modules/checkmarks/commands/createAccountByAdmin"
+	grantlifetimecheckmark "nantty/modules/users/src/modules/checkmarks/commands/grantLifetimeCheckmark"
+	revokelifetimecheckmark "nantty/modules/users/src/modules/checkmarks/commands/revokeLifetimeCheckmark"
+	transitionblackapplication "nantty/modules/users/src/modules/checkmarks/commands/transitionBlackApplication"
+	transitionverification "nantty/modules/users/src/modules/checkmarks/commands/transitionVerification"
+	"nantty/modules/users/src/modules/checkmarks/dtos"
+	getverification "nantty/modules/users/src/modules/checkmarks/queries/getVerification"
+	listadmincreatedaccounts "nantty/modules/users/src/modules/checkmarks/queries/listAdminCreatedAccounts"
+	listblackapplications "nantty/modules/users/src/modules/checkmarks/queries/listBlackApplications"
+	listcheckmarkgrants "nantty/modules/users/src/modules/checkmarks/queries/listCheckmarkGrants"
+	listverifications "nantty/modules/users/src/modules/checkmarks/queries/listVerifications"
+	"nantty/modules/users/src/utils"
 )
 
 func (controller CheckmarksController) ListVerifications(writer http.ResponseWriter, request *http.Request) {

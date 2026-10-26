@@ -5,8 +5,8 @@ import (
 	"strings"
 	"time"
 
-	"zudomart/modules/users/src/generated/ent"
-	"zudomart/modules/users/src/generated/ent/verificationapplication"
+	"nantty/modules/users/src/generated/ent"
+	"nantty/modules/users/src/generated/ent/verificationapplication"
 )
 
 type VerificationDocument struct {

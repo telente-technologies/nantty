@@ -4,7 +4,7 @@ import (
 	"regexp"
 	"slices"
 
-	"zudomart/platform/httpserver"
+	"nantty/platform/httpserver"
 )
 
 type IssueCollector struct {

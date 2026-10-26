@@ -3,10 +3,10 @@ package services
 import (
 	"context"
 
-	"zudomart/modules/users/src/container"
-	"zudomart/modules/users/src/generated/ent"
-	"zudomart/modules/users/src/generated/ent/verificationeligibility"
-	usersservices "zudomart/modules/users/src/services"
+	"nantty/modules/users/src/container"
+	"nantty/modules/users/src/generated/ent"
+	"nantty/modules/users/src/generated/ent/verificationeligibility"
+	usersservices "nantty/modules/users/src/services"
 )
 
 func RecheckQueuedEligibilityOnce(ctx context.Context, application *container.Container, limit int) (checked int, becameEligible int) {

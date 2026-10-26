@@ -3,11 +3,11 @@ package requestverification
 import (
 	"context"
 
-	"zudomart/modules/users/src/container"
-	usersErrors "zudomart/modules/users/src/errors"
-	checkmarkservices "zudomart/modules/users/src/modules/checkmarks/services"
-	getverificationjourney "zudomart/modules/users/src/modules/identityVerification/queries/getVerificationJourney"
-	"zudomart/modules/users/src/modules/identityVerification/services"
+	"nantty/modules/users/src/container"
+	usersErrors "nantty/modules/users/src/errors"
+	checkmarkservices "nantty/modules/users/src/modules/checkmarks/services"
+	getverificationjourney "nantty/modules/users/src/modules/identityVerification/queries/getVerificationJourney"
+	"nantty/modules/users/src/modules/identityVerification/services"
 )
 
 type Handler struct {

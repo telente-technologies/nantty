@@ -4,8 +4,8 @@ import (
 	"context"
 	"testing"
 
-	"zudomart/modules/users/src/configs"
-	"zudomart/modules/users/src/container"
+	"nantty/modules/users/src/configs"
+	"nantty/modules/users/src/container"
 )
 
 func TestCaptureNeedsExplicitCurrentConsentAndASupportedPhotoId(t *testing.T) {

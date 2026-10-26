@@ -3,7 +3,7 @@ package validators
 import (
 	"testing"
 
-	"zudomart/modules/users/src/modules/consents/dtos"
+	"nantty/modules/users/src/modules/consents/dtos"
 )
 
 func TestValidateSetConsentsRequest(t *testing.T) {

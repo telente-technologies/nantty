@@ -7,14 +7,14 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/users/src/container"
-	usersevents "zudomart/modules/users/src/events"
-	"zudomart/modules/users/src/generated/ent"
-	"zudomart/modules/users/src/generated/ent/accountremoval"
-	deletionevents "zudomart/modules/users/src/modules/accountDeletion/events"
-	deletionservices "zudomart/modules/users/src/modules/accountDeletion/services"
-	retentionmodels "zudomart/modules/users/src/modules/retention/models"
-	"zudomart/platform/identityports"
+	"nantty/modules/users/src/container"
+	usersevents "nantty/modules/users/src/events"
+	"nantty/modules/users/src/generated/ent"
+	"nantty/modules/users/src/generated/ent/accountremoval"
+	deletionevents "nantty/modules/users/src/modules/accountDeletion/events"
+	deletionservices "nantty/modules/users/src/modules/accountDeletion/services"
+	retentionmodels "nantty/modules/users/src/modules/retention/models"
+	"nantty/platform/identityports"
 )
 
 const financialRecordRetentionDays = 2555

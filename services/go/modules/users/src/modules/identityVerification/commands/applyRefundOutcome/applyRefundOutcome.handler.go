@@ -5,12 +5,12 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/users/src/container"
-	usersevents "zudomart/modules/users/src/events"
-	"zudomart/modules/users/src/generated/ent"
-	"zudomart/modules/users/src/generated/ent/verificationcase"
-	verificationevents "zudomart/modules/users/src/modules/identityVerification/events"
-	"zudomart/modules/users/src/modules/identityVerification/services"
+	"nantty/modules/users/src/container"
+	usersevents "nantty/modules/users/src/events"
+	"nantty/modules/users/src/generated/ent"
+	"nantty/modules/users/src/generated/ent/verificationcase"
+	verificationevents "nantty/modules/users/src/modules/identityVerification/events"
+	"nantty/modules/users/src/modules/identityVerification/services"
 )
 
 var refundStatusByEvent = map[string]verificationcase.RefundStatus{

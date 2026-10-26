@@ -4,11 +4,11 @@ import (
 	"context"
 	"strings"
 
-	"zudomart/modules/users/src/container"
-	usersErrors "zudomart/modules/users/src/errors"
-	"zudomart/modules/users/src/generated/ent/usernamehold"
-	"zudomart/platform/identityports"
-	"zudomart/platform/usernames"
+	"nantty/modules/users/src/container"
+	usersErrors "nantty/modules/users/src/errors"
+	"nantty/modules/users/src/generated/ent/usernamehold"
+	"nantty/platform/identityports"
+	"nantty/platform/usernames"
 )
 
 var kindLabels = map[string]string{"exact": "EXACT", "prefix": "PREFIX", "contains": "PATTERN", "brand": "PATTERN"}

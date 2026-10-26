@@ -7,9 +7,9 @@ import (
 	"slices"
 	"testing"
 
-	platformevents "zudomart/platform/events"
-	"zudomart/platform/identityports"
-	"zudomart/platform/identityports/identitytest"
+	platformevents "nantty/platform/events"
+	"nantty/platform/identityports"
+	"nantty/platform/identityports/identitytest"
 )
 
 func TestApprovedSellerApplicationsGrantTheSellerRoleOnce(t *testing.T) {

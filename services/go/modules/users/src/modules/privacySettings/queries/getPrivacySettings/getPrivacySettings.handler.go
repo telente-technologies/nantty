@@ -3,9 +3,9 @@ package getprivacysettings
 import (
 	"context"
 
-	"zudomart/modules/users/src/container"
-	"zudomart/modules/users/src/modules/privacySettings/models"
-	"zudomart/modules/users/src/modules/privacySettings/services"
+	"nantty/modules/users/src/container"
+	"nantty/modules/users/src/modules/privacySettings/models"
+	"nantty/modules/users/src/modules/privacySettings/services"
 )
 
 type Handler struct {

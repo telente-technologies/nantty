@@ -4,7 +4,7 @@ import (
 	"context"
 	"testing"
 
-	exportservices "zudomart/modules/users/src/modules/dataExport/services"
+	exportservices "nantty/modules/users/src/modules/dataExport/services"
 )
 
 func TestExpirySweepAndWorkerDoNotTouchObjectStorageWhenIdle(t *testing.T) {

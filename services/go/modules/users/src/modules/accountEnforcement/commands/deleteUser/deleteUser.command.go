@@ -1,8 +1,8 @@
 package deleteuser
 
 import (
-	"zudomart/modules/users/src/modules/accountEnforcement/services"
-	"zudomart/modules/users/src/types"
+	"nantty/modules/users/src/modules/accountEnforcement/services"
+	"nantty/modules/users/src/types"
 )
 
 type Command struct {

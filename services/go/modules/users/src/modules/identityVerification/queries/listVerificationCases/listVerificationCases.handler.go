@@ -3,10 +3,10 @@ package listverificationcases
 import (
 	"context"
 
-	"zudomart/modules/users/src/container"
-	"zudomart/modules/users/src/generated/ent"
-	"zudomart/modules/users/src/generated/ent/verificationcase"
-	"zudomart/modules/users/src/modules/identityVerification/services"
+	"nantty/modules/users/src/container"
+	"nantty/modules/users/src/generated/ent"
+	"nantty/modules/users/src/generated/ent/verificationcase"
+	"nantty/modules/users/src/modules/identityVerification/services"
 )
 
 type Query struct {

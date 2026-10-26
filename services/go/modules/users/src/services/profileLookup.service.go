@@ -2,16 +2,16 @@ package services
 
 import (
 	"context"
+	"nantty/modules/users/src/container"
+	usersErrors "nantty/modules/users/src/errors"
 	"strings"
-	"zudomart/modules/users/src/container"
-	usersErrors "zudomart/modules/users/src/errors"
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/users/src/generated/ent"
-	"zudomart/modules/users/src/generated/ent/actingprofile"
-	"zudomart/modules/users/src/generated/ent/profile"
-	"zudomart/platform/identityports"
+	"nantty/modules/users/src/generated/ent"
+	"nantty/modules/users/src/generated/ent/actingprofile"
+	"nantty/modules/users/src/generated/ent/profile"
+	"nantty/platform/identityports"
 )
 
 func LoadActiveAccountSummary(ctx context.Context, accountId uuid.UUID) (identityports.AccountSummary, error) {

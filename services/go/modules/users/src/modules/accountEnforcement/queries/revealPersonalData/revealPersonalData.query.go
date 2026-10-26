@@ -1,6 +1,6 @@
 package revealpersonaldata
 
-import "zudomart/modules/users/src/types"
+import "nantty/modules/users/src/types"
 
 type Query struct {
 	Actor    types.StaffActor

@@ -5,12 +5,12 @@ import (
 	"encoding/json"
 	"time"
 
-	"zudomart/modules/users/src/container"
-	usersevents "zudomart/modules/users/src/events"
-	"zudomart/modules/users/src/generated/ent"
-	legalevents "zudomart/modules/users/src/modules/legal/events"
-	"zudomart/modules/users/src/modules/legal/services"
-	usersservices "zudomart/modules/users/src/services"
+	"nantty/modules/users/src/container"
+	usersevents "nantty/modules/users/src/events"
+	"nantty/modules/users/src/generated/ent"
+	legalevents "nantty/modules/users/src/modules/legal/events"
+	"nantty/modules/users/src/modules/legal/services"
+	usersservices "nantty/modules/users/src/services"
 )
 
 type Handler struct {

@@ -3,12 +3,12 @@ package updatemyprivacysettings
 import (
 	"context"
 
-	"zudomart/modules/users/src/container"
-	"zudomart/modules/users/src/generated/ent"
-	consentmodels "zudomart/modules/users/src/modules/consents/models"
-	consentservices "zudomart/modules/users/src/modules/consents/services"
-	"zudomart/modules/users/src/modules/privacySettings/models"
-	"zudomart/modules/users/src/modules/privacySettings/services"
+	"nantty/modules/users/src/container"
+	"nantty/modules/users/src/generated/ent"
+	consentmodels "nantty/modules/users/src/modules/consents/models"
+	consentservices "nantty/modules/users/src/modules/consents/services"
+	"nantty/modules/users/src/modules/privacySettings/models"
+	"nantty/modules/users/src/modules/privacySettings/services"
 )
 
 type Handler struct {

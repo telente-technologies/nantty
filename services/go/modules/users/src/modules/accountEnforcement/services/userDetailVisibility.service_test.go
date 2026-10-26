@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"testing"
 
-	"zudomart/platform/staffauth"
+	"nantty/platform/staffauth"
 )
 
 func detailWithAuditAndSessions() UserDetail {

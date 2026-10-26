@@ -3,7 +3,7 @@ package validators
 import (
 	"testing"
 
-	"zudomart/modules/users/src/modules/retention/dtos"
+	"nantty/modules/users/src/modules/retention/dtos"
 )
 
 func TestValidateUpdateRetentionPolicyRequest(t *testing.T) {

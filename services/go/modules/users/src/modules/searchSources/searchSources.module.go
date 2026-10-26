@@ -3,8 +3,8 @@ package searchsources
 import (
 	"net/http"
 
-	"zudomart/modules/users/src/container"
-	"zudomart/modules/users/src/modules/searchSources/routes"
+	"nantty/modules/users/src/container"
+	"nantty/modules/users/src/modules/searchSources/routes"
 )
 
 func Mount(mux *http.ServeMux, deployed *container.Container) {

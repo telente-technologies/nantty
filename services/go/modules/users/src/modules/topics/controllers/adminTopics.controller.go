@@ -3,12 +3,12 @@ package controllers
 import (
 	"net/http"
 
-	createtopic "zudomart/modules/users/src/modules/topics/commands/createTopic"
-	updatetopic "zudomart/modules/users/src/modules/topics/commands/updateTopic"
-	"zudomart/modules/users/src/modules/topics/dtos"
-	listadmintopics "zudomart/modules/users/src/modules/topics/queries/listAdminTopics"
-	"zudomart/modules/users/src/utils"
-	"zudomart/platform/httpserver"
+	createtopic "nantty/modules/users/src/modules/topics/commands/createTopic"
+	updatetopic "nantty/modules/users/src/modules/topics/commands/updateTopic"
+	"nantty/modules/users/src/modules/topics/dtos"
+	listadmintopics "nantty/modules/users/src/modules/topics/queries/listAdminTopics"
+	"nantty/modules/users/src/utils"
+	"nantty/platform/httpserver"
 )
 
 func acceptAny[Request any](Request) error { return nil }

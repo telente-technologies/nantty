@@ -5,9 +5,9 @@ import (
 	"net/http"
 	"time"
 
-	"zudomart/modules/users/src/container"
-	executedueaccountdeletions "zudomart/modules/users/src/modules/accountDeletion/commands/executeDueAccountDeletions"
-	"zudomart/modules/users/src/modules/accountDeletion/routes"
+	"nantty/modules/users/src/container"
+	executedueaccountdeletions "nantty/modules/users/src/modules/accountDeletion/commands/executeDueAccountDeletions"
+	"nantty/modules/users/src/modules/accountDeletion/routes"
 )
 
 func Mount(mux *http.ServeMux, c *container.Container) {

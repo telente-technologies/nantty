@@ -4,13 +4,13 @@ import (
 	"context"
 	"time"
 
-	"zudomart/modules/users/src/container"
-	usersevents "zudomart/modules/users/src/events"
-	"zudomart/modules/users/src/generated/ent"
-	"zudomart/modules/users/src/generated/ent/deletionrequest"
-	deletionevents "zudomart/modules/users/src/modules/accountDeletion/events"
-	"zudomart/modules/users/src/modules/accountDeletion/services"
-	"zudomart/modules/users/src/useraudit"
+	"nantty/modules/users/src/container"
+	usersevents "nantty/modules/users/src/events"
+	"nantty/modules/users/src/generated/ent"
+	"nantty/modules/users/src/generated/ent/deletionrequest"
+	deletionevents "nantty/modules/users/src/modules/accountDeletion/events"
+	"nantty/modules/users/src/modules/accountDeletion/services"
+	"nantty/modules/users/src/useraudit"
 )
 
 type Handler struct {

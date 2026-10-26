@@ -4,11 +4,11 @@ import (
 	"context"
 	"time"
 
-	"zudomart/modules/users/src/container"
-	usersErrors "zudomart/modules/users/src/errors"
-	"zudomart/modules/users/src/generated/ent"
-	"zudomart/modules/users/src/generated/ent/profilecheckmark"
-	"zudomart/modules/users/src/modules/checkmarks/services"
+	"nantty/modules/users/src/container"
+	usersErrors "nantty/modules/users/src/errors"
+	"nantty/modules/users/src/generated/ent"
+	"nantty/modules/users/src/generated/ent/profilecheckmark"
+	"nantty/modules/users/src/modules/checkmarks/services"
 )
 
 type Handler struct {

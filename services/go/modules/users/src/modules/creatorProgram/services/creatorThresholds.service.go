@@ -4,7 +4,7 @@ import (
 	"context"
 	"encoding/json"
 
-	"zudomart/platform/identityports"
+	"nantty/platform/identityports"
 )
 
 type AutoApproveRules struct {

@@ -5,10 +5,10 @@ import (
 
 	"github.com/google/uuid"
 
+	"nantty/modules/users/src/generated/ent"
+	"nantty/modules/users/src/generated/ent/legalversion"
+	"nantty/modules/users/src/generated/ent/termsacceptance"
 	"time"
-	"zudomart/modules/users/src/generated/ent"
-	"zudomart/modules/users/src/generated/ent/legalversion"
-	"zudomart/modules/users/src/generated/ent/termsacceptance"
 )
 
 type PolicyGate struct {

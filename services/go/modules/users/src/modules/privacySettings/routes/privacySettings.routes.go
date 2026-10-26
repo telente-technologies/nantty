@@ -3,9 +3,9 @@ package routes
 import (
 	"net/http"
 
-	"zudomart/modules/users/src/container"
-	"zudomart/modules/users/src/modules/privacySettings/controllers"
-	"zudomart/platform/jwtauth"
+	"nantty/modules/users/src/container"
+	"nantty/modules/users/src/modules/privacySettings/controllers"
+	"nantty/platform/jwtauth"
 )
 
 func MountPrivacySettingsRoutes(mux *http.ServeMux, c *container.Container) {

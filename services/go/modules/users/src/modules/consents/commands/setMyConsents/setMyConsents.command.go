@@ -3,7 +3,7 @@ package setmyconsents
 import (
 	"github.com/google/uuid"
 
-	"zudomart/modules/users/src/modules/consents/models"
+	"nantty/modules/users/src/modules/consents/models"
 )
 
 type Command struct {

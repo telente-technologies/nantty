@@ -7,11 +7,11 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/users/src/container"
-	usersErrors "zudomart/modules/users/src/errors"
-	withdrawmarketingconsent "zudomart/modules/users/src/modules/notificationDirectory/commands/withdrawMarketingConsent"
-	"zudomart/modules/users/src/modules/notificationDirectory/services"
-	"zudomart/platform/httpserver"
+	"nantty/modules/users/src/container"
+	usersErrors "nantty/modules/users/src/errors"
+	withdrawmarketingconsent "nantty/modules/users/src/modules/notificationDirectory/commands/withdrawMarketingConsent"
+	"nantty/modules/users/src/modules/notificationDirectory/services"
+	"nantty/platform/httpserver"
 )
 
 type NotificationDirectoryController struct {

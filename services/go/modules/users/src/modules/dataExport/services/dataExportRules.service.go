@@ -4,9 +4,9 @@ import (
 	"net/http"
 	"time"
 
-	"zudomart/modules/users/src/generated/ent"
-	"zudomart/modules/users/src/generated/ent/dataexportrequest"
-	"zudomart/platform/httpserver"
+	"nantty/modules/users/src/generated/ent"
+	"nantty/modules/users/src/generated/ent/dataexportrequest"
+	"nantty/platform/httpserver"
 )
 
 const ExportCooldown = 24 * time.Hour

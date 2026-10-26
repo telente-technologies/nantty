@@ -6,14 +6,14 @@ import (
 
 	"golang.org/x/sync/errgroup"
 
-	"zudomart/modules/users/src/container"
-	"zudomart/modules/users/src/modules/accountDeletion"
-	"zudomart/modules/users/src/modules/addresses"
-	"zudomart/modules/users/src/modules/consents"
-	"zudomart/modules/users/src/modules/dataExport"
-	"zudomart/modules/users/src/modules/geo"
-	"zudomart/modules/users/src/modules/privacySettings"
-	"zudomart/modules/users/src/modules/retention"
+	"nantty/modules/users/src/container"
+	"nantty/modules/users/src/modules/accountDeletion"
+	"nantty/modules/users/src/modules/addresses"
+	"nantty/modules/users/src/modules/consents"
+	"nantty/modules/users/src/modules/dataExport"
+	"nantty/modules/users/src/modules/geo"
+	"nantty/modules/users/src/modules/privacySettings"
+	"nantty/modules/users/src/modules/retention"
 )
 
 func Mount(mux *http.ServeMux, c *container.Container) {

@@ -4,8 +4,8 @@ import (
 	"context"
 	"time"
 
-	usersevents "zudomart/modules/users/src/events"
-	"zudomart/modules/users/src/generated/ent"
+	usersevents "nantty/modules/users/src/events"
+	"nantty/modules/users/src/generated/ent"
 )
 
 const checkmarkAppealUrl = "https://zudomart.com/settings/verification"

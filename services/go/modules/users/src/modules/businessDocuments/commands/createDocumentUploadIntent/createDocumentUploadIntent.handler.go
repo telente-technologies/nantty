@@ -8,11 +8,11 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/users/src/container"
-	usersErrors "zudomart/modules/users/src/errors"
-	"zudomart/modules/users/src/generated/ent/businessdocument"
-	"zudomart/modules/users/src/integrations"
-	"zudomart/modules/users/src/modules/businessDocuments/services"
+	"nantty/modules/users/src/container"
+	usersErrors "nantty/modules/users/src/errors"
+	"nantty/modules/users/src/generated/ent/businessdocument"
+	"nantty/modules/users/src/integrations"
+	"nantty/modules/users/src/modules/businessDocuments/services"
 )
 
 const uploadIntentTimeToLive = 10 * time.Minute

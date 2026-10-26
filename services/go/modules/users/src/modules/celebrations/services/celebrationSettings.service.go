@@ -6,12 +6,12 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/users/src/container"
-	"zudomart/modules/users/src/generated/ent"
-	"zudomart/modules/users/src/generated/ent/celebrationsetting"
-	"zudomart/modules/users/src/generated/ent/celebrationview"
-	"zudomart/modules/users/src/generated/ent/profilesignal"
-	"zudomart/modules/users/src/modules/celebrations/dtos"
+	"nantty/modules/users/src/container"
+	"nantty/modules/users/src/generated/ent"
+	"nantty/modules/users/src/generated/ent/celebrationsetting"
+	"nantty/modules/users/src/generated/ent/celebrationview"
+	"nantty/modules/users/src/generated/ent/profilesignal"
+	"nantty/modules/users/src/modules/celebrations/dtos"
 )
 
 type SettingsView struct {

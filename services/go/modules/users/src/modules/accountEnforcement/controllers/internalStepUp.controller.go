@@ -4,9 +4,9 @@ import (
 	"net/http"
 	"strings"
 
-	"zudomart/platform/identityports"
-	"zudomart/platform/jwtauth"
-	"zudomart/platform/staffauth"
+	"nantty/platform/identityports"
+	"nantty/platform/jwtauth"
+	"nantty/platform/staffauth"
 )
 
 func forwardedStepUpIsValid(registry *identityports.Registry, request *http.Request, staffId string) bool {

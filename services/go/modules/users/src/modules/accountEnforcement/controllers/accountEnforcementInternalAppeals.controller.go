@@ -5,15 +5,15 @@ import (
 	"errors"
 	"net/http"
 
-	usersErrors "zudomart/modules/users/src/errors"
-	decidesuspensionappeal "zudomart/modules/users/src/modules/accountEnforcement/commands/decideSuspensionAppeal"
-	reinstateuser "zudomart/modules/users/src/modules/accountEnforcement/commands/reinstateUser"
-	"zudomart/modules/users/src/modules/accountEnforcement/dtos"
-	"zudomart/modules/users/src/modules/accountEnforcement/services"
-	"zudomart/modules/users/src/types"
-	"zudomart/modules/users/src/utils"
-	"zudomart/platform/httpserver"
-	"zudomart/platform/identityports"
+	usersErrors "nantty/modules/users/src/errors"
+	decidesuspensionappeal "nantty/modules/users/src/modules/accountEnforcement/commands/decideSuspensionAppeal"
+	reinstateuser "nantty/modules/users/src/modules/accountEnforcement/commands/reinstateUser"
+	"nantty/modules/users/src/modules/accountEnforcement/dtos"
+	"nantty/modules/users/src/modules/accountEnforcement/services"
+	"nantty/modules/users/src/types"
+	"nantty/modules/users/src/utils"
+	"nantty/platform/httpserver"
+	"nantty/platform/identityports"
 )
 
 type internalAppealDecisionRequest struct {

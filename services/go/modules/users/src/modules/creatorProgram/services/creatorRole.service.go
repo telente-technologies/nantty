@@ -5,7 +5,7 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/platform/identityports"
+	"nantty/platform/identityports"
 )
 
 const CreatorAccountRole = "creator"

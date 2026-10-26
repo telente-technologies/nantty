@@ -3,7 +3,7 @@ package dtos
 import (
 	"time"
 
-	"zudomart/modules/users/src/modules/addresses/services"
+	"nantty/modules/users/src/modules/addresses/services"
 )
 
 type AddressRequest struct {

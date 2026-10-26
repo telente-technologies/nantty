@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"time"
 
-	"zudomart/modules/users/src/generated/ent"
+	"nantty/modules/users/src/generated/ent"
 )
 
 type VersionView struct {

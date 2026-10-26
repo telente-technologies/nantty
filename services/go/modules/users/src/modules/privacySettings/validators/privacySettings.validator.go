@@ -3,8 +3,8 @@ package validators
 import (
 	"regexp"
 
-	"zudomart/modules/users/src/modules/privacySettings/dtos"
-	"zudomart/modules/users/src/utils"
+	"nantty/modules/users/src/modules/privacySettings/dtos"
+	"nantty/modules/users/src/utils"
 )
 
 var policyVersionPattern = regexp.MustCompile(`^[A-Za-z0-9._-]{1,40}$`)

@@ -4,9 +4,9 @@ import (
 	"context"
 	"net/http"
 
-	"zudomart/modules/users/src/container"
-	"zudomart/modules/users/src/modules/geo/routes"
-	"zudomart/modules/users/src/modules/geo/services"
+	"nantty/modules/users/src/container"
+	"nantty/modules/users/src/modules/geo/routes"
+	"nantty/modules/users/src/modules/geo/services"
 )
 
 func Mount(mux *http.ServeMux, c *container.Container) {

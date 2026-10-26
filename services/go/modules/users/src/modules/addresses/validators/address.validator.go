@@ -5,10 +5,10 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/users/src/modules/addresses/dtos"
-	"zudomart/modules/users/src/modules/addresses/models"
-	"zudomart/modules/users/src/modules/addresses/services"
-	"zudomart/modules/users/src/utils"
+	"nantty/modules/users/src/modules/addresses/dtos"
+	"nantty/modules/users/src/modules/addresses/models"
+	"nantty/modules/users/src/modules/addresses/services"
+	"nantty/modules/users/src/utils"
 )
 
 func text(value *string) string {

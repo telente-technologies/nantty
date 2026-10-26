@@ -5,15 +5,15 @@ import (
 
 	"github.com/google/uuid"
 
-	usersErrors "zudomart/modules/users/src/errors"
-	"zudomart/modules/users/src/generated/ent"
-	"zudomart/modules/users/src/generated/ent/linkedprofile"
-	transferbrand "zudomart/modules/users/src/modules/linkedProfiles/commands/transferBrand"
-	"zudomart/modules/users/src/modules/linkedProfiles/dtos"
-	"zudomart/modules/users/src/modules/linkedProfiles/services"
-	usersservices "zudomart/modules/users/src/services"
-	"zudomart/modules/users/src/utils"
-	"zudomart/platform/httpserver"
+	usersErrors "nantty/modules/users/src/errors"
+	"nantty/modules/users/src/generated/ent"
+	"nantty/modules/users/src/generated/ent/linkedprofile"
+	transferbrand "nantty/modules/users/src/modules/linkedProfiles/commands/transferBrand"
+	"nantty/modules/users/src/modules/linkedProfiles/dtos"
+	"nantty/modules/users/src/modules/linkedProfiles/services"
+	usersservices "nantty/modules/users/src/services"
+	"nantty/modules/users/src/utils"
+	"nantty/platform/httpserver"
 )
 
 type claimResult struct {

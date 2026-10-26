@@ -1,8 +1,8 @@
 package validators
 
 import (
-	"zudomart/modules/users/src/modules/actingProfiles/dtos"
-	"zudomart/modules/users/src/utils"
+	"nantty/modules/users/src/modules/actingProfiles/dtos"
+	"nantty/modules/users/src/utils"
 )
 
 func ValidateSwitchActingProfileRequest(request dtos.SwitchActingProfileRequest) error {

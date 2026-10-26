@@ -3,12 +3,12 @@ package createlegalversion
 import (
 	"context"
 
-	"zudomart/modules/users/src/container"
-	usersErrors "zudomart/modules/users/src/errors"
-	"zudomart/modules/users/src/generated/ent"
-	"zudomart/modules/users/src/generated/ent/legalversion"
-	"zudomart/modules/users/src/modules/legal/services"
-	usersservices "zudomart/modules/users/src/services"
+	"nantty/modules/users/src/container"
+	usersErrors "nantty/modules/users/src/errors"
+	"nantty/modules/users/src/generated/ent"
+	"nantty/modules/users/src/generated/ent/legalversion"
+	"nantty/modules/users/src/modules/legal/services"
+	usersservices "nantty/modules/users/src/services"
 )
 
 type Handler struct {

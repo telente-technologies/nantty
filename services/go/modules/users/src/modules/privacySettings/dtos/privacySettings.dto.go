@@ -3,7 +3,7 @@ package dtos
 import (
 	"time"
 
-	"zudomart/modules/users/src/modules/privacySettings/models"
+	"nantty/modules/users/src/modules/privacySettings/models"
 )
 
 type UpdatePrivacySettingsRequest struct {

@@ -3,17 +3,17 @@ package controllers
 import (
 	"net/http"
 
-	usersErrors "zudomart/modules/users/src/errors"
-	forcelogout "zudomart/modules/users/src/modules/accountEnforcement/commands/forceLogout"
-	reclaimwithheldusername "zudomart/modules/users/src/modules/accountEnforcement/commands/reclaimWithheldUsername"
-	warnuser "zudomart/modules/users/src/modules/accountEnforcement/commands/warnUser"
-	withholdaccountusername "zudomart/modules/users/src/modules/accountEnforcement/commands/withholdAccountUsername"
-	"zudomart/modules/users/src/modules/accountEnforcement/dtos"
-	listwithheldusernames "zudomart/modules/users/src/modules/accountEnforcement/queries/listWithheldUsernames"
-	previewusernameconfusables "zudomart/modules/users/src/modules/accountEnforcement/queries/previewUsernameConfusables"
-	revealpersonaldata "zudomart/modules/users/src/modules/accountEnforcement/queries/revealPersonalData"
-	"zudomart/modules/users/src/modules/accountEnforcement/services"
-	"zudomart/modules/users/src/utils"
+	usersErrors "nantty/modules/users/src/errors"
+	forcelogout "nantty/modules/users/src/modules/accountEnforcement/commands/forceLogout"
+	reclaimwithheldusername "nantty/modules/users/src/modules/accountEnforcement/commands/reclaimWithheldUsername"
+	warnuser "nantty/modules/users/src/modules/accountEnforcement/commands/warnUser"
+	withholdaccountusername "nantty/modules/users/src/modules/accountEnforcement/commands/withholdAccountUsername"
+	"nantty/modules/users/src/modules/accountEnforcement/dtos"
+	listwithheldusernames "nantty/modules/users/src/modules/accountEnforcement/queries/listWithheldUsernames"
+	previewusernameconfusables "nantty/modules/users/src/modules/accountEnforcement/queries/previewUsernameConfusables"
+	revealpersonaldata "nantty/modules/users/src/modules/accountEnforcement/queries/revealPersonalData"
+	"nantty/modules/users/src/modules/accountEnforcement/services"
+	"nantty/modules/users/src/utils"
 )
 
 func (controller AccountEnforcementController) RevealPersonalData(writer http.ResponseWriter, request *http.Request) {

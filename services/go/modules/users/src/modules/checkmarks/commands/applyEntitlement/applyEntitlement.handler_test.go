@@ -3,8 +3,8 @@ package applyentitlement
 import (
 	"testing"
 
-	"zudomart/modules/users/src/generated/ent/profilecheckmark"
-	"zudomart/modules/users/src/generated/ent/profilesignal"
+	"nantty/modules/users/src/generated/ent/profilecheckmark"
+	"nantty/modules/users/src/generated/ent/profilesignal"
 )
 
 func TestEntitlementEventsMapToCheckmarkAndPlanState(t *testing.T) {

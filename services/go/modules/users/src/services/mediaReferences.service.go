@@ -5,11 +5,11 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"fmt"
+	"nantty/modules/users/src/container"
+	usersErrors "nantty/modules/users/src/errors"
 	"net/url"
 	"strings"
 	"time"
-	"zudomart/modules/users/src/container"
-	usersErrors "zudomart/modules/users/src/errors"
 )
 
 const MaximumProfileImageBytes = 5 * 1024 * 1024

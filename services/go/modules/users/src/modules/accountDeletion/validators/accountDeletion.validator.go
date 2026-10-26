@@ -1,9 +1,9 @@
 package validators
 
 import (
-	"zudomart/modules/users/src/modules/accountDeletion/dtos"
-	"zudomart/modules/users/src/modules/accountDeletion/services"
-	"zudomart/modules/users/src/utils"
+	"nantty/modules/users/src/modules/accountDeletion/dtos"
+	"nantty/modules/users/src/modules/accountDeletion/services"
+	"nantty/modules/users/src/utils"
 )
 
 func ValidateRequestDeletionRequest(request dtos.RequestDeletionRequest) error {

@@ -3,14 +3,14 @@ package controllers
 import (
 	"net/http"
 
-	"zudomart/modules/users/src/container"
-	consentmodels "zudomart/modules/users/src/modules/consents/models"
-	updatemyprivacysettings "zudomart/modules/users/src/modules/privacySettings/commands/updateMyPrivacySettings"
-	"zudomart/modules/users/src/modules/privacySettings/dtos"
-	getprivacysettings "zudomart/modules/users/src/modules/privacySettings/queries/getPrivacySettings"
-	"zudomart/modules/users/src/modules/privacySettings/validators"
-	"zudomart/modules/users/src/utils"
-	"zudomart/platform/httpserver"
+	"nantty/modules/users/src/container"
+	consentmodels "nantty/modules/users/src/modules/consents/models"
+	updatemyprivacysettings "nantty/modules/users/src/modules/privacySettings/commands/updateMyPrivacySettings"
+	"nantty/modules/users/src/modules/privacySettings/dtos"
+	getprivacysettings "nantty/modules/users/src/modules/privacySettings/queries/getPrivacySettings"
+	"nantty/modules/users/src/modules/privacySettings/validators"
+	"nantty/modules/users/src/utils"
+	"nantty/platform/httpserver"
 )
 
 type PrivacySettingsController struct {

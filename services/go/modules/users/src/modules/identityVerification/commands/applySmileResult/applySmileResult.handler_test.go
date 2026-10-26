@@ -6,8 +6,8 @@ import (
 	"testing"
 	"time"
 
-	"zudomart/modules/users/src/container"
-	"zudomart/modules/users/src/integrations"
+	"nantty/modules/users/src/container"
+	"nantty/modules/users/src/integrations"
 )
 
 func TestCallbackSignatureIsVerifiedBeforeAnythingIsRead(t *testing.T) {

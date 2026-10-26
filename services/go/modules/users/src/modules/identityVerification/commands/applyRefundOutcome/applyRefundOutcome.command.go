@@ -1,6 +1,6 @@
 package applyrefundoutcome
 
-import verificationevents "zudomart/modules/users/src/modules/identityVerification/events"
+import verificationevents "nantty/modules/users/src/modules/identityVerification/events"
 
 type Command struct {
 	EventType    string

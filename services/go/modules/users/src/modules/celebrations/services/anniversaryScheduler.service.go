@@ -8,16 +8,16 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"github.com/google/uuid"
 
-	"zudomart/modules/users/src/container"
-	usersevents "zudomart/modules/users/src/events"
-	"zudomart/modules/users/src/generated/ent"
-	"zudomart/modules/users/src/generated/ent/celebrationsetting"
-	"zudomart/modules/users/src/generated/ent/celebrationview"
-	"zudomart/modules/users/src/generated/ent/predicate"
-	"zudomart/modules/users/src/generated/ent/profile"
-	celebrationevents "zudomart/modules/users/src/modules/celebrations/events"
-	usersservices "zudomart/modules/users/src/services"
-	"zudomart/modules/users/src/utils"
+	"nantty/modules/users/src/container"
+	usersevents "nantty/modules/users/src/events"
+	"nantty/modules/users/src/generated/ent"
+	"nantty/modules/users/src/generated/ent/celebrationsetting"
+	"nantty/modules/users/src/generated/ent/celebrationview"
+	"nantty/modules/users/src/generated/ent/predicate"
+	"nantty/modules/users/src/generated/ent/profile"
+	celebrationevents "nantty/modules/users/src/modules/celebrations/events"
+	usersservices "nantty/modules/users/src/services"
+	"nantty/modules/users/src/utils"
 )
 
 const (

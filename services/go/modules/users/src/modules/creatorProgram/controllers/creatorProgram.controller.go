@@ -6,18 +6,18 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/users/src/container"
-	usersErrors "zudomart/modules/users/src/errors"
-	decidecreatorapplication "zudomart/modules/users/src/modules/creatorProgram/commands/decideCreatorApplication"
-	submitcreatorapplication "zudomart/modules/users/src/modules/creatorProgram/commands/submitCreatorApplication"
-	upsertprofilesignals "zudomart/modules/users/src/modules/creatorProgram/commands/upsertProfileSignals"
-	"zudomart/modules/users/src/modules/creatorProgram/dtos"
-	getcreatorapplicationdetail "zudomart/modules/users/src/modules/creatorProgram/queries/getCreatorApplicationDetail"
-	getcreatoreligibility "zudomart/modules/users/src/modules/creatorProgram/queries/getCreatorEligibility"
-	getmycreatorapplication "zudomart/modules/users/src/modules/creatorProgram/queries/getMyCreatorApplication"
-	listcreatorapplications "zudomart/modules/users/src/modules/creatorProgram/queries/listCreatorApplications"
-	"zudomart/modules/users/src/utils"
-	"zudomart/platform/httpserver"
+	"nantty/modules/users/src/container"
+	usersErrors "nantty/modules/users/src/errors"
+	decidecreatorapplication "nantty/modules/users/src/modules/creatorProgram/commands/decideCreatorApplication"
+	submitcreatorapplication "nantty/modules/users/src/modules/creatorProgram/commands/submitCreatorApplication"
+	upsertprofilesignals "nantty/modules/users/src/modules/creatorProgram/commands/upsertProfileSignals"
+	"nantty/modules/users/src/modules/creatorProgram/dtos"
+	getcreatorapplicationdetail "nantty/modules/users/src/modules/creatorProgram/queries/getCreatorApplicationDetail"
+	getcreatoreligibility "nantty/modules/users/src/modules/creatorProgram/queries/getCreatorEligibility"
+	getmycreatorapplication "nantty/modules/users/src/modules/creatorProgram/queries/getMyCreatorApplication"
+	listcreatorapplications "nantty/modules/users/src/modules/creatorProgram/queries/listCreatorApplications"
+	"nantty/modules/users/src/utils"
+	"nantty/platform/httpserver"
 )
 
 type CreatorProgramController struct {

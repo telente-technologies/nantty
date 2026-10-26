@@ -7,15 +7,15 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/users/src/container"
-	usersErrors "zudomart/modules/users/src/errors"
-	usersevents "zudomart/modules/users/src/events"
-	"zudomart/modules/users/src/generated/ent"
-	"zudomart/modules/users/src/generated/ent/blackapplication"
-	"zudomart/modules/users/src/generated/ent/profile"
-	checkmarkevents "zudomart/modules/users/src/modules/checkmarks/events"
-	"zudomart/modules/users/src/modules/checkmarks/services"
-	usersservices "zudomart/modules/users/src/services"
+	"nantty/modules/users/src/container"
+	usersErrors "nantty/modules/users/src/errors"
+	usersevents "nantty/modules/users/src/events"
+	"nantty/modules/users/src/generated/ent"
+	"nantty/modules/users/src/generated/ent/blackapplication"
+	"nantty/modules/users/src/generated/ent/profile"
+	checkmarkevents "nantty/modules/users/src/modules/checkmarks/events"
+	"nantty/modules/users/src/modules/checkmarks/services"
+	usersservices "nantty/modules/users/src/services"
 )
 
 type Handler struct {

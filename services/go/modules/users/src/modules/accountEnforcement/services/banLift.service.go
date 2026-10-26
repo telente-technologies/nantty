@@ -3,13 +3,13 @@ package services
 import (
 	"context"
 
-	"zudomart/modules/users/src/container"
-	usersevents "zudomart/modules/users/src/events"
-	"zudomart/modules/users/src/generated/ent"
-	"zudomart/modules/users/src/generated/ent/accountban"
-	usersservices "zudomart/modules/users/src/services"
-	"zudomart/modules/users/src/types"
-	"zudomart/platform/identityports"
+	"nantty/modules/users/src/container"
+	usersevents "nantty/modules/users/src/events"
+	"nantty/modules/users/src/generated/ent"
+	"nantty/modules/users/src/generated/ent/accountban"
+	usersservices "nantty/modules/users/src/services"
+	"nantty/modules/users/src/types"
+	"nantty/platform/identityports"
 )
 
 func LiftActiveBan(ctx context.Context, application *container.Container, target Target, actor types.StaffActor, reason, auditAction string) error {

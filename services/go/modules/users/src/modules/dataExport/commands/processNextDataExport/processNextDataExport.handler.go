@@ -3,8 +3,8 @@ package processnextdataexport
 import (
 	"context"
 
-	"zudomart/modules/users/src/container"
-	"zudomart/modules/users/src/modules/dataExport/services"
+	"nantty/modules/users/src/container"
+	"nantty/modules/users/src/modules/dataExport/services"
 )
 
 type Handler struct {

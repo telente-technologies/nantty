@@ -6,13 +6,13 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/users/src/container"
-	"zudomart/modules/users/src/generated/ent"
-	"zudomart/modules/users/src/generated/ent/businessdocument"
-	"zudomart/modules/users/src/generated/ent/profilecheckmark"
-	"zudomart/modules/users/src/generated/ent/suggestiondismissal"
-	creatorservices "zudomart/modules/users/src/modules/creatorProgram/services"
-	"zudomart/platform/identityports"
+	"nantty/modules/users/src/container"
+	"nantty/modules/users/src/generated/ent"
+	"nantty/modules/users/src/generated/ent/businessdocument"
+	"nantty/modules/users/src/generated/ent/profilecheckmark"
+	"nantty/modules/users/src/generated/ent/suggestiondismissal"
+	creatorservices "nantty/modules/users/src/modules/creatorProgram/services"
+	"nantty/platform/identityports"
 )
 
 type Rule struct {

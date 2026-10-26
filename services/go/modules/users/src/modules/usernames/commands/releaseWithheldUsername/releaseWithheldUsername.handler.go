@@ -4,12 +4,12 @@ import (
 	"context"
 	"strings"
 
-	"zudomart/modules/users/src/container"
-	usersErrors "zudomart/modules/users/src/errors"
-	"zudomart/modules/users/src/generated/ent/usernamehold"
-	"zudomart/modules/users/src/services"
-	"zudomart/platform/httpserver"
-	"zudomart/platform/usernames"
+	"nantty/modules/users/src/container"
+	usersErrors "nantty/modules/users/src/errors"
+	"nantty/modules/users/src/generated/ent/usernamehold"
+	"nantty/modules/users/src/services"
+	"nantty/platform/httpserver"
+	"nantty/platform/usernames"
 )
 
 type Handler struct {

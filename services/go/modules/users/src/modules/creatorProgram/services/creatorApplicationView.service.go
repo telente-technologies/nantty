@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"time"
 
-	"zudomart/modules/users/src/generated/ent"
-	"zudomart/modules/users/src/generated/ent/creatorapplication"
+	"nantty/modules/users/src/generated/ent"
+	"nantty/modules/users/src/generated/ent/creatorapplication"
 )
 
 type ApplicationView struct {

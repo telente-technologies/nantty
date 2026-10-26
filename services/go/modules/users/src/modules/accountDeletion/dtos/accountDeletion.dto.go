@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"time"
 
-	"zudomart/modules/users/src/generated/ent"
-	retentionmodels "zudomart/modules/users/src/modules/retention/models"
+	"nantty/modules/users/src/generated/ent"
+	retentionmodels "nantty/modules/users/src/modules/retention/models"
 )
 
 type RequestDeletionRequest struct {

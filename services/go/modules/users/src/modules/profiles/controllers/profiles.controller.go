@@ -3,18 +3,18 @@ package controllers
 import (
 	"net/http"
 
-	"zudomart/modules/users/src/container"
-	createprofileimageuploadintent "zudomart/modules/users/src/modules/profiles/commands/createProfileImageUploadIntent"
-	deactivateaccount "zudomart/modules/users/src/modules/profiles/commands/deactivateAccount"
-	updatecountrypreference "zudomart/modules/users/src/modules/profiles/commands/updateCountryPreference"
-	updateprofiledetails "zudomart/modules/users/src/modules/profiles/commands/updateProfileDetails"
-	"zudomart/modules/users/src/modules/profiles/dtos"
-	getmyprofile "zudomart/modules/users/src/modules/profiles/queries/getMyProfile"
-	getuserprofile "zudomart/modules/users/src/modules/profiles/queries/getUserProfile"
-	getuserprofilebyusername "zudomart/modules/users/src/modules/profiles/queries/getUserProfileByUsername"
-	"zudomart/modules/users/src/modules/profiles/validators"
-	"zudomart/modules/users/src/utils"
-	"zudomart/platform/httpserver"
+	"nantty/modules/users/src/container"
+	createprofileimageuploadintent "nantty/modules/users/src/modules/profiles/commands/createProfileImageUploadIntent"
+	deactivateaccount "nantty/modules/users/src/modules/profiles/commands/deactivateAccount"
+	updatecountrypreference "nantty/modules/users/src/modules/profiles/commands/updateCountryPreference"
+	updateprofiledetails "nantty/modules/users/src/modules/profiles/commands/updateProfileDetails"
+	"nantty/modules/users/src/modules/profiles/dtos"
+	getmyprofile "nantty/modules/users/src/modules/profiles/queries/getMyProfile"
+	getuserprofile "nantty/modules/users/src/modules/profiles/queries/getUserProfile"
+	getuserprofilebyusername "nantty/modules/users/src/modules/profiles/queries/getUserProfileByUsername"
+	"nantty/modules/users/src/modules/profiles/validators"
+	"nantty/modules/users/src/utils"
+	"nantty/platform/httpserver"
 )
 
 type ProfilesController struct {

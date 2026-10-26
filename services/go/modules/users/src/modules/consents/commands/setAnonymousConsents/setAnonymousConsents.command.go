@@ -1,6 +1,6 @@
 package setanonymousconsents
 
-import "zudomart/modules/users/src/modules/consents/models"
+import "nantty/modules/users/src/modules/consents/models"
 
 type Command struct {
 	DeviceId      string

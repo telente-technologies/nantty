@@ -4,10 +4,10 @@ import (
 	"context"
 	"time"
 
-	"zudomart/modules/users/src/container"
-	"zudomart/modules/users/src/generated/ent/accountban"
-	"zudomart/modules/users/src/generated/ent/accountsuspension"
-	"zudomart/modules/users/src/types"
+	"nantty/modules/users/src/container"
+	"nantty/modules/users/src/generated/ent/accountban"
+	"nantty/modules/users/src/generated/ent/accountsuspension"
+	"nantty/modules/users/src/types"
 )
 
 type EnforcementWorker struct {

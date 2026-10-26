@@ -3,10 +3,10 @@ package routes
 import (
 	"net/http"
 
-	"zudomart/modules/users/src/container"
-	"zudomart/modules/users/src/modules/retention/controllers"
-	"zudomart/platform/identityports"
-	"zudomart/platform/staffauth"
+	"nantty/modules/users/src/container"
+	"nantty/modules/users/src/modules/retention/controllers"
+	"nantty/platform/identityports"
+	"nantty/platform/staffauth"
 )
 
 func MountRetentionRoutes(mux *http.ServeMux, c *container.Container) {

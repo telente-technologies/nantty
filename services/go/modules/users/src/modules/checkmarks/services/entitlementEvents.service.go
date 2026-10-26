@@ -4,10 +4,10 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	usersservices "nantty/modules/users/src/services"
 	"strings"
-	usersservices "zudomart/modules/users/src/services"
 
-	platformevents "zudomart/platform/events"
+	platformevents "nantty/platform/events"
 )
 
 const AccountRegisteredEventType = "account.registered"

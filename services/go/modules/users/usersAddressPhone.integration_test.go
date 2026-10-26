@@ -6,8 +6,8 @@ import (
 	"net/http"
 	"testing"
 
-	"zudomart/modules/users/src/generated/ent/shippingaddress"
-	addressservices "zudomart/modules/users/src/modules/addresses/services"
+	"nantty/modules/users/src/generated/ent/shippingaddress"
+	addressservices "nantty/modules/users/src/modules/addresses/services"
 )
 
 func TestShippingAddressPhonesAreEncryptedAtRest(t *testing.T) {

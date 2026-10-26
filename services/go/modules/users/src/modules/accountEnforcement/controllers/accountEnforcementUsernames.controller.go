@@ -3,18 +3,18 @@ package controllers
 import (
 	"net/http"
 
-	assignheldusername "zudomart/modules/users/src/modules/accountEnforcement/commands/assignHeldUsername"
-	decidesuspensionappeal "zudomart/modules/users/src/modules/accountEnforcement/commands/decideSuspensionAppeal"
-	reassignusername "zudomart/modules/users/src/modules/accountEnforcement/commands/reassignUsername"
-	reinstateuser "zudomart/modules/users/src/modules/accountEnforcement/commands/reinstateUser"
-	submitsuspensionappeal "zudomart/modules/users/src/modules/accountEnforcement/commands/submitSuspensionAppeal"
-	"zudomart/modules/users/src/modules/accountEnforcement/dtos"
-	getmysuspension "zudomart/modules/users/src/modules/accountEnforcement/queries/getMySuspension"
-	getusernamehold "zudomart/modules/users/src/modules/accountEnforcement/queries/getUsernameHold"
-	listheldusernames "zudomart/modules/users/src/modules/accountEnforcement/queries/listHeldUsernames"
-	listsuspendedaccounts "zudomart/modules/users/src/modules/accountEnforcement/queries/listSuspendedAccounts"
-	"zudomart/modules/users/src/utils"
-	"zudomart/platform/httpserver"
+	assignheldusername "nantty/modules/users/src/modules/accountEnforcement/commands/assignHeldUsername"
+	decidesuspensionappeal "nantty/modules/users/src/modules/accountEnforcement/commands/decideSuspensionAppeal"
+	reassignusername "nantty/modules/users/src/modules/accountEnforcement/commands/reassignUsername"
+	reinstateuser "nantty/modules/users/src/modules/accountEnforcement/commands/reinstateUser"
+	submitsuspensionappeal "nantty/modules/users/src/modules/accountEnforcement/commands/submitSuspensionAppeal"
+	"nantty/modules/users/src/modules/accountEnforcement/dtos"
+	getmysuspension "nantty/modules/users/src/modules/accountEnforcement/queries/getMySuspension"
+	getusernamehold "nantty/modules/users/src/modules/accountEnforcement/queries/getUsernameHold"
+	listheldusernames "nantty/modules/users/src/modules/accountEnforcement/queries/listHeldUsernames"
+	listsuspendedaccounts "nantty/modules/users/src/modules/accountEnforcement/queries/listSuspendedAccounts"
+	"nantty/modules/users/src/utils"
+	"nantty/platform/httpserver"
 )
 
 func (controller AccountEnforcementController) Reassign(writer http.ResponseWriter, request *http.Request) {

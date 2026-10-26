@@ -3,8 +3,8 @@ package getuserdetail
 import (
 	"context"
 
-	"zudomart/modules/users/src/container"
-	"zudomart/modules/users/src/modules/accountEnforcement/services"
+	"nantty/modules/users/src/container"
+	"nantty/modules/users/src/modules/accountEnforcement/services"
 )
 
 type Handler struct {

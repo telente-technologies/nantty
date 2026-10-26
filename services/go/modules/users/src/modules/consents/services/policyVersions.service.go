@@ -6,10 +6,10 @@ import (
 	"net/http"
 	"time"
 
-	"zudomart/modules/users/src/generated/ent"
-	"zudomart/modules/users/src/generated/ent/policyversion"
-	"zudomart/modules/users/src/modules/consents/models"
-	"zudomart/platform/httpserver"
+	"nantty/modules/users/src/generated/ent"
+	"nantty/modules/users/src/generated/ent/policyversion"
+	"nantty/modules/users/src/modules/consents/models"
+	"nantty/platform/httpserver"
 )
 
 var PolicyKinds = []string{models.PolicyPrivacy, models.PolicyCookie, models.PolicyTerms}

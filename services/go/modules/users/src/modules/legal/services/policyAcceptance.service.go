@@ -7,10 +7,10 @@ import (
 
 	"github.com/google/uuid"
 
-	usersErrors "zudomart/modules/users/src/errors"
-	"zudomart/modules/users/src/generated/ent"
-	"zudomart/modules/users/src/generated/ent/legalversion"
-	"zudomart/modules/users/src/generated/ent/termsacceptance"
+	usersErrors "nantty/modules/users/src/errors"
+	"nantty/modules/users/src/generated/ent"
+	"nantty/modules/users/src/generated/ent/legalversion"
+	"nantty/modules/users/src/generated/ent/termsacceptance"
 )
 
 func CurrentPublishedVersion(ctx context.Context, client *ent.Client, documentKey string) (*ent.LegalVersion, error) {

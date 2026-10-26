@@ -3,11 +3,11 @@ package getusernamehold
 import (
 	"context"
 
-	"zudomart/modules/users/src/container"
-	"zudomart/modules/users/src/generated/ent"
-	"zudomart/modules/users/src/generated/ent/usernamehold"
-	listheldusernames "zudomart/modules/users/src/modules/accountEnforcement/queries/listHeldUsernames"
-	"zudomart/platform/usernames"
+	"nantty/modules/users/src/container"
+	"nantty/modules/users/src/generated/ent"
+	"nantty/modules/users/src/generated/ent/usernamehold"
+	listheldusernames "nantty/modules/users/src/modules/accountEnforcement/queries/listHeldUsernames"
+	"nantty/platform/usernames"
 )
 
 type Handler struct {

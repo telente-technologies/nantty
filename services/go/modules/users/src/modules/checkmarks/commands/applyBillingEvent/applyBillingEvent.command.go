@@ -3,7 +3,7 @@ package applybillingevent
 import (
 	"time"
 
-	"zudomart/modules/users/src/modules/checkmarks/services"
+	"nantty/modules/users/src/modules/checkmarks/services"
 
 	"github.com/google/uuid"
 )

@@ -3,10 +3,10 @@ package controllers
 import (
 	"net/http"
 
-	"zudomart/modules/users/src/container"
-	applyforcreator "zudomart/modules/users/src/modules/creatorStatus/commands/applyForCreator"
-	"zudomart/modules/users/src/utils"
-	"zudomart/platform/httpserver"
+	"nantty/modules/users/src/container"
+	applyforcreator "nantty/modules/users/src/modules/creatorStatus/commands/applyForCreator"
+	"nantty/modules/users/src/utils"
+	"nantty/platform/httpserver"
 )
 
 type CreatorStatusController struct {

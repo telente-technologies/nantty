@@ -3,11 +3,11 @@ package services
 import (
 	"context"
 
-	"zudomart/modules/users/src/container"
-	usersevents "zudomart/modules/users/src/events"
-	"zudomart/modules/users/src/generated/ent"
-	"zudomart/modules/users/src/generated/ent/profilesignal"
-	"zudomart/platform/identityports"
+	"nantty/modules/users/src/container"
+	usersevents "nantty/modules/users/src/events"
+	"nantty/modules/users/src/generated/ent"
+	"nantty/modules/users/src/generated/ent/profilesignal"
+	"nantty/platform/identityports"
 )
 
 const suggestionBatchSize = 100

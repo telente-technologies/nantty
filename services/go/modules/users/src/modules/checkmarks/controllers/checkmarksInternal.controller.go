@@ -8,12 +8,12 @@ import (
 
 	"github.com/google/uuid"
 
-	usersErrors "zudomart/modules/users/src/errors"
-	applybillingevent "zudomart/modules/users/src/modules/checkmarks/commands/applyBillingEvent"
-	"zudomart/modules/users/src/modules/checkmarks/dtos"
-	"zudomart/modules/users/src/modules/checkmarks/services"
-	"zudomart/modules/users/src/utils"
-	"zudomart/platform/httpserver"
+	usersErrors "nantty/modules/users/src/errors"
+	applybillingevent "nantty/modules/users/src/modules/checkmarks/commands/applyBillingEvent"
+	"nantty/modules/users/src/modules/checkmarks/dtos"
+	"nantty/modules/users/src/modules/checkmarks/services"
+	"nantty/modules/users/src/utils"
+	"nantty/platform/httpserver"
 )
 
 func (controller CheckmarksController) respondBlack(writer http.ResponseWriter, request *http.Request) {

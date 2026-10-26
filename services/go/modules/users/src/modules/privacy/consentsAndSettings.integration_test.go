@@ -1,10 +1,10 @@
 package privacy
 
 import (
+	"nantty/modules/users/src/configs"
 	"net/http"
 	"testing"
 	"time"
-	"zudomart/modules/users/src/configs"
 )
 
 const testDeviceId = "device-abcdef123456-xyz"

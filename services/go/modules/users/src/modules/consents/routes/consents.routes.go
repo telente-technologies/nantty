@@ -3,12 +3,12 @@ package routes
 import (
 	"net/http"
 
-	"zudomart/modules/users/src/container"
-	"zudomart/modules/users/src/modules/consents/controllers"
-	"zudomart/modules/users/src/utils"
-	"zudomart/platform/identityports"
-	"zudomart/platform/jwtauth"
-	"zudomart/platform/staffauth"
+	"nantty/modules/users/src/container"
+	"nantty/modules/users/src/modules/consents/controllers"
+	"nantty/modules/users/src/utils"
+	"nantty/platform/identityports"
+	"nantty/platform/jwtauth"
+	"nantty/platform/staffauth"
 )
 
 func MountConsentsRoutes(mux *http.ServeMux, c *container.Container) {

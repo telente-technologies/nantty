@@ -7,8 +7,8 @@ import (
 
 	"github.com/google/uuid"
 
-	platformevents "zudomart/platform/events"
-	"zudomart/platform/identityports"
+	platformevents "nantty/platform/events"
+	"nantty/platform/identityports"
 )
 
 const SellerApplicationReviewedEventType = "sellerApplication.reviewed"

@@ -3,11 +3,11 @@ package routes
 import (
 	"net/http"
 
-	"zudomart/modules/users/src/container"
-	"zudomart/modules/users/src/modules/businessDocuments/controllers"
-	"zudomart/platform/identityports"
-	"zudomart/platform/jwtauth"
-	"zudomart/platform/staffauth"
+	"nantty/modules/users/src/container"
+	"nantty/modules/users/src/modules/businessDocuments/controllers"
+	"nantty/platform/identityports"
+	"nantty/platform/jwtauth"
+	"nantty/platform/staffauth"
 )
 
 func MountBusinessDocumentsRoutes(mux *http.ServeMux, container *container.Container) {

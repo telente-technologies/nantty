@@ -11,7 +11,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	s3types "github.com/aws/aws-sdk-go-v2/service/s3/types"
 
-	"zudomart/modules/users/src/configs"
+	"nantty/modules/users/src/configs"
 )
 
 type UploadTicket struct {

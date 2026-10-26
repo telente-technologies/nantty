@@ -21,15 +21,15 @@ import (
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 
-	"zudomart/modules/users/src/configs"
-	"zudomart/modules/users/src/container"
-	"zudomart/modules/users/src/generated/ent"
-	"zudomart/modules/users/src/migrations"
-	exportservices "zudomart/modules/users/src/modules/dataExport/services"
-	"zudomart/platform/identityports"
-	"zudomart/platform/identityports/identitytest"
-	"zudomart/platform/jwtauth"
-	"zudomart/platform/postgres"
+	"nantty/modules/users/src/configs"
+	"nantty/modules/users/src/container"
+	"nantty/modules/users/src/generated/ent"
+	"nantty/modules/users/src/migrations"
+	exportservices "nantty/modules/users/src/modules/dataExport/services"
+	"nantty/platform/identityports"
+	"nantty/platform/identityports/identitytest"
+	"nantty/platform/jwtauth"
+	"nantty/platform/postgres"
 )
 
 type testClock struct {

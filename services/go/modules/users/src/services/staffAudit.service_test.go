@@ -4,8 +4,8 @@ import (
 	"context"
 	"testing"
 
-	"zudomart/modules/users/src/types"
-	"zudomart/platform/identityports"
+	"nantty/modules/users/src/types"
+	"nantty/platform/identityports"
 )
 
 type recordingAuditRecorder struct{ events []identityports.AuditEvent }

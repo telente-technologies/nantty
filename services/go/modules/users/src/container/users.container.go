@@ -9,11 +9,11 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/users/src/configs"
-	"zudomart/modules/users/src/generated/ent"
-	"zudomart/modules/users/src/integrations"
-	"zudomart/platform/identityports"
-	"zudomart/platform/jwtauth"
+	"nantty/modules/users/src/configs"
+	"nantty/modules/users/src/generated/ent"
+	"nantty/modules/users/src/integrations"
+	"nantty/platform/identityports"
+	"nantty/platform/jwtauth"
 )
 
 type Container struct {

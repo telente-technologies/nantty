@@ -4,8 +4,8 @@ import (
 	"context"
 	"encoding/json"
 
-	"zudomart/platform/identityports"
-	"zudomart/platform/regionpricing"
+	"nantty/platform/identityports"
+	"nantty/platform/regionpricing"
 )
 
 type SuggestionRules struct {

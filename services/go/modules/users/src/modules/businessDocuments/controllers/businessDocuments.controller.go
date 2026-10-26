@@ -3,17 +3,17 @@ package controllers
 import (
 	"net/http"
 
-	"zudomart/modules/users/src/container"
-	confirmbusinessdocumentupload "zudomart/modules/users/src/modules/businessDocuments/commands/confirmBusinessDocumentUpload"
-	createdocumentuploadintent "zudomart/modules/users/src/modules/businessDocuments/commands/createDocumentUploadIntent"
-	reviewbusinessdocument "zudomart/modules/users/src/modules/businessDocuments/commands/reviewBusinessDocument"
-	"zudomart/modules/users/src/modules/businessDocuments/dtos"
-	getmybusinessdocuments "zudomart/modules/users/src/modules/businessDocuments/queries/getMyBusinessDocuments"
-	getsellerverification "zudomart/modules/users/src/modules/businessDocuments/queries/getSellerVerification"
-	listbusinessdocumentsubmissions "zudomart/modules/users/src/modules/businessDocuments/queries/listBusinessDocumentSubmissions"
-	openbusinessdocument "zudomart/modules/users/src/modules/businessDocuments/queries/openBusinessDocument"
-	"zudomart/modules/users/src/utils"
-	"zudomart/platform/httpserver"
+	"nantty/modules/users/src/container"
+	confirmbusinessdocumentupload "nantty/modules/users/src/modules/businessDocuments/commands/confirmBusinessDocumentUpload"
+	createdocumentuploadintent "nantty/modules/users/src/modules/businessDocuments/commands/createDocumentUploadIntent"
+	reviewbusinessdocument "nantty/modules/users/src/modules/businessDocuments/commands/reviewBusinessDocument"
+	"nantty/modules/users/src/modules/businessDocuments/dtos"
+	getmybusinessdocuments "nantty/modules/users/src/modules/businessDocuments/queries/getMyBusinessDocuments"
+	getsellerverification "nantty/modules/users/src/modules/businessDocuments/queries/getSellerVerification"
+	listbusinessdocumentsubmissions "nantty/modules/users/src/modules/businessDocuments/queries/listBusinessDocumentSubmissions"
+	openbusinessdocument "nantty/modules/users/src/modules/businessDocuments/queries/openBusinessDocument"
+	"nantty/modules/users/src/utils"
+	"nantty/platform/httpserver"
 )
 
 type BusinessDocumentsController struct {

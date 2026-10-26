@@ -5,11 +5,11 @@ import (
 	"fmt"
 	"time"
 
-	"zudomart/modules/users/src/container"
-	usersevents "zudomart/modules/users/src/events"
-	"zudomart/modules/users/src/generated/ent"
-	"zudomart/modules/users/src/generated/ent/dataexportrequest"
-	exportevents "zudomart/modules/users/src/modules/dataExport/events"
+	"nantty/modules/users/src/container"
+	usersevents "nantty/modules/users/src/events"
+	"nantty/modules/users/src/generated/ent"
+	"nantty/modules/users/src/generated/ent/dataexportrequest"
+	exportevents "nantty/modules/users/src/modules/dataExport/events"
 )
 
 const staleProcessingAfter = 15 * time.Minute

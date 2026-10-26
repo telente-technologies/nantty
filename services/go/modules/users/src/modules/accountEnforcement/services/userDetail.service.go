@@ -6,14 +6,14 @@ import (
 	"strings"
 	"time"
 
-	"zudomart/modules/users/src/container"
-	"zudomart/modules/users/src/generated/ent"
-	"zudomart/modules/users/src/generated/ent/accountban"
-	"zudomart/modules/users/src/generated/ent/accountrestriction"
-	"zudomart/modules/users/src/generated/ent/accountsuspension"
-	"zudomart/modules/users/src/generated/ent/usernamechange"
-	"zudomart/modules/users/src/generated/ent/usernamehold"
-	"zudomart/platform/identityports"
+	"nantty/modules/users/src/container"
+	"nantty/modules/users/src/generated/ent"
+	"nantty/modules/users/src/generated/ent/accountban"
+	"nantty/modules/users/src/generated/ent/accountrestriction"
+	"nantty/modules/users/src/generated/ent/accountsuspension"
+	"nantty/modules/users/src/generated/ent/usernamechange"
+	"nantty/modules/users/src/generated/ent/usernamehold"
+	"nantty/platform/identityports"
 )
 
 type RestrictionView struct {

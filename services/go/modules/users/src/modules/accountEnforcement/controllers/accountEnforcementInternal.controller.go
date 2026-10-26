@@ -5,18 +5,18 @@ import (
 
 	"github.com/google/uuid"
 
-	usersErrors "zudomart/modules/users/src/errors"
-	banuser "zudomart/modules/users/src/modules/accountEnforcement/commands/banUser"
-	deleteuser "zudomart/modules/users/src/modules/accountEnforcement/commands/deleteUser"
-	restrictuser "zudomart/modules/users/src/modules/accountEnforcement/commands/restrictUser"
-	suspenduser "zudomart/modules/users/src/modules/accountEnforcement/commands/suspendUser"
-	warnuser "zudomart/modules/users/src/modules/accountEnforcement/commands/warnUser"
-	"zudomart/modules/users/src/modules/accountEnforcement/dtos"
-	"zudomart/modules/users/src/modules/accountEnforcement/services"
-	revokeaccountcheckmarks "zudomart/modules/users/src/modules/checkmarks/commands/revokeAccountCheckmarks"
-	"zudomart/modules/users/src/types"
-	"zudomart/modules/users/src/utils"
-	"zudomart/platform/identityports"
+	usersErrors "nantty/modules/users/src/errors"
+	banuser "nantty/modules/users/src/modules/accountEnforcement/commands/banUser"
+	deleteuser "nantty/modules/users/src/modules/accountEnforcement/commands/deleteUser"
+	restrictuser "nantty/modules/users/src/modules/accountEnforcement/commands/restrictUser"
+	suspenduser "nantty/modules/users/src/modules/accountEnforcement/commands/suspendUser"
+	warnuser "nantty/modules/users/src/modules/accountEnforcement/commands/warnUser"
+	"nantty/modules/users/src/modules/accountEnforcement/dtos"
+	"nantty/modules/users/src/modules/accountEnforcement/services"
+	revokeaccountcheckmarks "nantty/modules/users/src/modules/checkmarks/commands/revokeAccountCheckmarks"
+	"nantty/modules/users/src/types"
+	"nantty/modules/users/src/utils"
+	"nantty/platform/identityports"
 )
 
 func (controller AccountEnforcementController) InternalAction(writer http.ResponseWriter, request *http.Request) {

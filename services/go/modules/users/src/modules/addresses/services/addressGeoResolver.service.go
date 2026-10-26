@@ -5,13 +5,13 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/users/src/generated/ent"
-	"zudomart/modules/users/src/generated/ent/geoadminarea"
-	"zudomart/modules/users/src/generated/ent/geocity"
-	"zudomart/modules/users/src/generated/ent/georegion"
-	addressmodels "zudomart/modules/users/src/modules/addresses/models"
-	geoservices "zudomart/modules/users/src/modules/geo/services"
-	"zudomart/platform/httpserver"
+	"nantty/modules/users/src/generated/ent"
+	"nantty/modules/users/src/generated/ent/geoadminarea"
+	"nantty/modules/users/src/generated/ent/geocity"
+	"nantty/modules/users/src/generated/ent/georegion"
+	addressmodels "nantty/modules/users/src/modules/addresses/models"
+	geoservices "nantty/modules/users/src/modules/geo/services"
+	"nantty/platform/httpserver"
 )
 
 type ResolvedGeo struct {

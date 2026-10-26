@@ -6,10 +6,10 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/users/src/container"
-	"zudomart/modules/users/src/generated/ent/deletionrequest"
-	cancelaccountdeletion "zudomart/modules/users/src/modules/accountDeletion/commands/cancelAccountDeletion"
-	deletionservices "zudomart/modules/users/src/modules/accountDeletion/services"
+	"nantty/modules/users/src/container"
+	"nantty/modules/users/src/generated/ent/deletionrequest"
+	cancelaccountdeletion "nantty/modules/users/src/modules/accountDeletion/commands/cancelAccountDeletion"
+	deletionservices "nantty/modules/users/src/modules/accountDeletion/services"
 )
 
 type DeletionGraceCancelService struct {

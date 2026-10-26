@@ -3,8 +3,8 @@ package listcheckmarksuggestions
 import (
 	"context"
 
-	"zudomart/modules/users/src/container"
-	"zudomart/modules/users/src/modules/checkmarks/services"
+	"nantty/modules/users/src/container"
+	"nantty/modules/users/src/modules/checkmarks/services"
 )
 
 type Handler struct {

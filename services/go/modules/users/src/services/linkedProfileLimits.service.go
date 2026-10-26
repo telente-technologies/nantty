@@ -7,10 +7,10 @@ import (
 
 	"github.com/google/uuid"
 
-	usersErrors "zudomart/modules/users/src/errors"
-	"zudomart/modules/users/src/generated/ent"
-	"zudomart/modules/users/src/generated/ent/linkedprofile"
-	"zudomart/modules/users/src/generated/ent/profilesignal"
+	usersErrors "nantty/modules/users/src/errors"
+	"nantty/modules/users/src/generated/ent"
+	"nantty/modules/users/src/generated/ent/linkedprofile"
+	"nantty/modules/users/src/generated/ent/profilesignal"
 )
 
 const (

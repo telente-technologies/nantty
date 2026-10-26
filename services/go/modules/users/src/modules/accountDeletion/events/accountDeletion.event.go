@@ -1,6 +1,6 @@
 package events
 
-import retentionmodels "zudomart/modules/users/src/modules/retention/models"
+import retentionmodels "nantty/modules/users/src/modules/retention/models"
 
 const (
 	AccountDeletionRequestedType = "account.deletionRequested"

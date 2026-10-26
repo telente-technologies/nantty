@@ -3,15 +3,15 @@ package revokeaccountcheckmarks
 import (
 	"context"
 
-	"zudomart/modules/users/src/container"
-	"zudomart/modules/users/src/generated/ent"
-	"zudomart/modules/users/src/generated/ent/profilecheckmark"
-	"zudomart/modules/users/src/generated/ent/verificationapplication"
-	accountservices "zudomart/modules/users/src/modules/accountEnforcement/services"
-	transitionverification "zudomart/modules/users/src/modules/checkmarks/commands/transitionVerification"
-	"zudomart/modules/users/src/modules/checkmarks/services"
-	usersservices "zudomart/modules/users/src/services"
-	"zudomart/modules/users/src/types"
+	"nantty/modules/users/src/container"
+	"nantty/modules/users/src/generated/ent"
+	"nantty/modules/users/src/generated/ent/profilecheckmark"
+	"nantty/modules/users/src/generated/ent/verificationapplication"
+	accountservices "nantty/modules/users/src/modules/accountEnforcement/services"
+	transitionverification "nantty/modules/users/src/modules/checkmarks/commands/transitionVerification"
+	"nantty/modules/users/src/modules/checkmarks/services"
+	usersservices "nantty/modules/users/src/services"
+	"nantty/modules/users/src/types"
 )
 
 type Command struct {

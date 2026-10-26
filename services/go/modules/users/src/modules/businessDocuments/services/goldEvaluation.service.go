@@ -6,15 +6,15 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/users/src/container"
-	usersevents "zudomart/modules/users/src/events"
-	"zudomart/modules/users/src/generated/ent"
-	"zudomart/modules/users/src/generated/ent/businessdocument"
-	"zudomart/modules/users/src/generated/ent/profile"
-	"zudomart/modules/users/src/generated/ent/profilecheckmark"
-	"zudomart/modules/users/src/generated/ent/profilesignal"
-	businessevents "zudomart/modules/users/src/modules/businessDocuments/events"
-	checkmarkservices "zudomart/modules/users/src/modules/checkmarks/services"
+	"nantty/modules/users/src/container"
+	usersevents "nantty/modules/users/src/events"
+	"nantty/modules/users/src/generated/ent"
+	"nantty/modules/users/src/generated/ent/businessdocument"
+	"nantty/modules/users/src/generated/ent/profile"
+	"nantty/modules/users/src/generated/ent/profilecheckmark"
+	"nantty/modules/users/src/generated/ent/profilesignal"
+	businessevents "nantty/modules/users/src/modules/businessDocuments/events"
+	checkmarkservices "nantty/modules/users/src/modules/checkmarks/services"
 )
 
 func StoreProfileOf(ctx context.Context, client *ent.Client, accountId uuid.UUID) (*ent.Profile, error) {

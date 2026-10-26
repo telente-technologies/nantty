@@ -5,8 +5,8 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/users/src/generated/ent"
-	"zudomart/modules/users/src/generated/ent/shippingaddress"
+	"nantty/modules/users/src/generated/ent"
+	"nantty/modules/users/src/generated/ent/shippingaddress"
 )
 
 func LockAddressesOfAccountInTransaction(ctx context.Context, tx *ent.Tx, accountId uuid.UUID) ([]*ent.ShippingAddress, error) {

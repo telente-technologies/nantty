@@ -1,8 +1,8 @@
 package dtos
 
 import (
-	"zudomart/modules/users/src/generated/ent"
-	"zudomart/modules/users/src/modules/geo/services"
+	"nantty/modules/users/src/generated/ent"
+	"nantty/modules/users/src/modules/geo/services"
 )
 
 type GeoCountryResponse struct {

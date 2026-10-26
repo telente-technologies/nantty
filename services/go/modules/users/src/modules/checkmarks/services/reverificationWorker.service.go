@@ -4,12 +4,12 @@ import (
 	"context"
 	"time"
 
-	"zudomart/modules/users/src/container"
-	usersevents "zudomart/modules/users/src/events"
-	"zudomart/modules/users/src/generated/ent"
-	"zudomart/modules/users/src/generated/ent/blackapplication"
-	"zudomart/modules/users/src/generated/ent/profilecheckmark"
-	checkmarkevents "zudomart/modules/users/src/modules/checkmarks/events"
+	"nantty/modules/users/src/container"
+	usersevents "nantty/modules/users/src/events"
+	"nantty/modules/users/src/generated/ent"
+	"nantty/modules/users/src/generated/ent/blackapplication"
+	"nantty/modules/users/src/generated/ent/profilecheckmark"
+	checkmarkevents "nantty/modules/users/src/modules/checkmarks/events"
 )
 
 type ReverificationWorker struct {

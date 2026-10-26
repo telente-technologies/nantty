@@ -3,8 +3,8 @@ package controllers
 import (
 	"net/http"
 
-	"zudomart/modules/users/src/generated/ent"
-	"zudomart/modules/users/src/modules/geo/services"
+	"nantty/modules/users/src/generated/ent"
+	"nantty/modules/users/src/modules/geo/services"
 )
 
 func findCountry(controller GeoController, request *http.Request) (*ent.GeoCountry, error) {

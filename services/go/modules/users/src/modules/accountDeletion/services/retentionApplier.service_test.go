@@ -5,7 +5,7 @@ import (
 
 	"github.com/google/uuid"
 
-	retentionmodels "zudomart/modules/users/src/modules/retention/models"
+	retentionmodels "nantty/modules/users/src/modules/retention/models"
 )
 
 func TestDecideOutcomeNeverInventsDeletionAndDefersConfiguredPeriods(t *testing.T) {

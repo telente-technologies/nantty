@@ -6,9 +6,9 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/users/src/generated/ent"
-	"zudomart/modules/users/src/generated/ent/userconsent"
-	"zudomart/modules/users/src/modules/consents/models"
+	"nantty/modules/users/src/generated/ent"
+	"nantty/modules/users/src/generated/ent/userconsent"
+	"nantty/modules/users/src/modules/consents/models"
 )
 
 type DeviceDecision struct {

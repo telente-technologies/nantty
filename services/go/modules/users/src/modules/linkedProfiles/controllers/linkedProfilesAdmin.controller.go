@@ -5,13 +5,13 @@ import (
 
 	"github.com/google/uuid"
 
-	usersErrors "zudomart/modules/users/src/errors"
-	chooselinkedprofiles "zudomart/modules/users/src/modules/linkedProfiles/commands/chooseLinkedProfiles"
-	convertlinkedprofile "zudomart/modules/users/src/modules/linkedProfiles/commands/convertLinkedProfile"
-	"zudomart/modules/users/src/modules/linkedProfiles/dtos"
-	listruleconflicts "zudomart/modules/users/src/modules/linkedProfiles/queries/listRuleConflicts"
-	"zudomart/modules/users/src/modules/linkedProfiles/services"
-	"zudomart/modules/users/src/utils"
+	usersErrors "nantty/modules/users/src/errors"
+	chooselinkedprofiles "nantty/modules/users/src/modules/linkedProfiles/commands/chooseLinkedProfiles"
+	convertlinkedprofile "nantty/modules/users/src/modules/linkedProfiles/commands/convertLinkedProfile"
+	"nantty/modules/users/src/modules/linkedProfiles/dtos"
+	listruleconflicts "nantty/modules/users/src/modules/linkedProfiles/queries/listRuleConflicts"
+	"nantty/modules/users/src/modules/linkedProfiles/services"
+	"nantty/modules/users/src/utils"
 )
 
 func (controller LinkedProfilesController) AdminConflicts(writer http.ResponseWriter, request *http.Request) {

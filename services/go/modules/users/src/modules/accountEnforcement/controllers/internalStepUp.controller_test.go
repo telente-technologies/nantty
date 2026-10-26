@@ -5,9 +5,9 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"zudomart/platform/identityports"
-	"zudomart/platform/identityports/identitytest"
-	"zudomart/platform/staffauth"
+	"nantty/platform/identityports"
+	"nantty/platform/identityports/identitytest"
+	"nantty/platform/staffauth"
 )
 
 func TestInternalEnforcementTrustsStepUpOnlyFromAValidTokenForTheSameStaff(t *testing.T) {

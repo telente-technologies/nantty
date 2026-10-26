@@ -3,12 +3,12 @@ package getlegaldocument
 import (
 	"context"
 
-	"zudomart/modules/users/src/container"
-	usersErrors "zudomart/modules/users/src/errors"
-	"zudomart/modules/users/src/generated/ent"
-	"zudomart/modules/users/src/generated/ent/legalversion"
-	listlegaldocuments "zudomart/modules/users/src/modules/legal/queries/listLegalDocuments"
-	"zudomart/modules/users/src/modules/legal/services"
+	"nantty/modules/users/src/container"
+	usersErrors "nantty/modules/users/src/errors"
+	"nantty/modules/users/src/generated/ent"
+	"nantty/modules/users/src/generated/ent/legalversion"
+	listlegaldocuments "nantty/modules/users/src/modules/legal/queries/listLegalDocuments"
+	"nantty/modules/users/src/modules/legal/services"
 )
 
 type Result struct {

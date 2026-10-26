@@ -8,12 +8,12 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 
-	"zudomart/modules/users/src/container"
-	"zudomart/modules/users/src/generated/ent"
-	"zudomart/modules/users/src/generated/ent/accountsuspension"
-	"zudomart/modules/users/src/generated/ent/predicate"
-	"zudomart/modules/users/src/generated/ent/profile"
-	"zudomart/modules/users/src/modules/accountEnforcement/services"
+	"nantty/modules/users/src/container"
+	"nantty/modules/users/src/generated/ent"
+	"nantty/modules/users/src/generated/ent/accountsuspension"
+	"nantty/modules/users/src/generated/ent/predicate"
+	"nantty/modules/users/src/generated/ent/profile"
+	"nantty/modules/users/src/modules/accountEnforcement/services"
 )
 
 const pageSize = 25

@@ -5,11 +5,11 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/users/src/container"
-	usersErrors "zudomart/modules/users/src/errors"
-	"zudomart/modules/users/src/generated/ent"
-	"zudomart/modules/users/src/generated/ent/privacysetting"
-	"zudomart/modules/users/src/modules/accountSettings/models"
+	"nantty/modules/users/src/container"
+	usersErrors "nantty/modules/users/src/errors"
+	"nantty/modules/users/src/generated/ent"
+	"nantty/modules/users/src/generated/ent/privacysetting"
+	"nantty/modules/users/src/modules/accountSettings/models"
 )
 
 type Handler struct {

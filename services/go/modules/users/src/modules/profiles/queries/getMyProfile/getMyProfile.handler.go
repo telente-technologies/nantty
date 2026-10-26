@@ -5,11 +5,11 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/users/src/container"
-	usersErrors "zudomart/modules/users/src/errors"
-	celebrationservices "zudomart/modules/users/src/modules/celebrations/services"
-	"zudomart/modules/users/src/services"
-	"zudomart/modules/users/src/types"
+	"nantty/modules/users/src/container"
+	usersErrors "nantty/modules/users/src/errors"
+	celebrationservices "nantty/modules/users/src/modules/celebrations/services"
+	"nantty/modules/users/src/services"
+	"nantty/modules/users/src/types"
 )
 
 type Handler struct {

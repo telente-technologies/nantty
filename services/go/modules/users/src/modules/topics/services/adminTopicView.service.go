@@ -6,8 +6,8 @@ import (
 	"time"
 	"unicode"
 
-	"zudomart/modules/users/src/generated/ent"
-	"zudomart/modules/users/src/generated/ent/accounttopic"
+	"nantty/modules/users/src/generated/ent"
+	"nantty/modules/users/src/generated/ent/accounttopic"
 )
 
 const SubjectType = "topic"

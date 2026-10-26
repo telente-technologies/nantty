@@ -7,12 +7,12 @@ import (
 	"testing"
 	"time"
 
-	"zudomart/modules/users/src/generated/ent/profile"
-	"zudomart/modules/users/src/generated/ent/retentionpolicy"
-	"zudomart/modules/users/src/generated/ent/shippingaddress"
-	"zudomart/modules/users/src/generated/ent/userconsent"
-	executedueaccountdeletions "zudomart/modules/users/src/modules/accountDeletion/commands/executeDueAccountDeletions"
-	"zudomart/modules/users/src/services"
+	"nantty/modules/users/src/generated/ent/profile"
+	"nantty/modules/users/src/generated/ent/retentionpolicy"
+	"nantty/modules/users/src/generated/ent/shippingaddress"
+	"nantty/modules/users/src/generated/ent/userconsent"
+	executedueaccountdeletions "nantty/modules/users/src/modules/accountDeletion/commands/executeDueAccountDeletions"
+	"nantty/modules/users/src/services"
 )
 
 func setRetentionAction(t *testing.T, harness *privacyHarness, category, action string) {

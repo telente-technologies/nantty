@@ -5,10 +5,10 @@ import (
 	"strings"
 	"time"
 
-	"zudomart/modules/users/src/container"
-	"zudomart/modules/users/src/generated/ent"
-	"zudomart/modules/users/src/generated/ent/creatorapplication"
-	accountservices "zudomart/modules/users/src/modules/accountEnforcement/services"
+	"nantty/modules/users/src/container"
+	"nantty/modules/users/src/generated/ent"
+	"nantty/modules/users/src/generated/ent/creatorapplication"
+	accountservices "nantty/modules/users/src/modules/accountEnforcement/services"
 )
 
 type EligibilityLine struct {

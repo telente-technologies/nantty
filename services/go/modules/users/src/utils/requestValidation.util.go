@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"regexp"
 
-	"zudomart/platform/httpserver"
+	"nantty/platform/httpserver"
 )
 
 var SixDigitCodePattern = regexp.MustCompile(`^\d{6}$`)

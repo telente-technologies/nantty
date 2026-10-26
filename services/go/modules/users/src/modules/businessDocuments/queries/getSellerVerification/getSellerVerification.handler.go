@@ -3,8 +3,8 @@ package getsellerverification
 import (
 	"context"
 
-	"zudomart/modules/users/src/container"
-	getmybusinessdocuments "zudomart/modules/users/src/modules/businessDocuments/queries/getMyBusinessDocuments"
+	"nantty/modules/users/src/container"
+	getmybusinessdocuments "nantty/modules/users/src/modules/businessDocuments/queries/getMyBusinessDocuments"
 )
 
 type DocumentStatus struct {

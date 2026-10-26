@@ -5,11 +5,11 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/users/src/container"
-	"zudomart/modules/users/src/generated/ent"
-	"zudomart/modules/users/src/generated/ent/linkedprofile"
-	"zudomart/modules/users/src/generated/ent/profile"
-	usersservices "zudomart/modules/users/src/services"
+	"nantty/modules/users/src/container"
+	"nantty/modules/users/src/generated/ent"
+	"nantty/modules/users/src/generated/ent/linkedprofile"
+	"nantty/modules/users/src/generated/ent/profile"
+	usersservices "nantty/modules/users/src/services"
 )
 
 type LinkedProfileItem struct {

@@ -5,9 +5,9 @@ import (
 	"net/http"
 	"testing"
 
-	"zudomart/modules/users/src/generated/ent"
-	"zudomart/modules/users/src/modules/consents/models"
-	"zudomart/platform/httpserver"
+	"nantty/modules/users/src/generated/ent"
+	"nantty/modules/users/src/modules/consents/models"
+	"nantty/platform/httpserver"
 )
 
 func TestRequireCurrentVersionRejectsStaleVersionsWithTheCurrentOne(t *testing.T) {

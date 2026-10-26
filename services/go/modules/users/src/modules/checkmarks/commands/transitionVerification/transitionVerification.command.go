@@ -1,6 +1,6 @@
 package transitionverification
 
-import "zudomart/modules/users/src/types"
+import "nantty/modules/users/src/types"
 
 const (
 	ActionApprove   = "approve"

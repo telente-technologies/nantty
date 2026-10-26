@@ -3,9 +3,9 @@ package routes
 import (
 	"net/http"
 
-	"zudomart/modules/users/src/container"
-	"zudomart/modules/users/src/modules/accountSettings/controllers"
-	"zudomart/platform/jwtauth"
+	"nantty/modules/users/src/container"
+	"nantty/modules/users/src/modules/accountSettings/controllers"
+	"nantty/platform/jwtauth"
 )
 
 func MountAccountSettingsRoutes(mux *http.ServeMux, container *container.Container) {

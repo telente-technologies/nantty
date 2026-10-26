@@ -3,12 +3,12 @@ package routes
 import (
 	"net/http"
 
-	"zudomart/modules/users/src/container"
-	"zudomart/modules/users/src/modules/creatorProgram/controllers"
-	"zudomart/platform/httpserver"
-	"zudomart/platform/identityports"
-	"zudomart/platform/jwtauth"
-	"zudomart/platform/staffauth"
+	"nantty/modules/users/src/container"
+	"nantty/modules/users/src/modules/creatorProgram/controllers"
+	"nantty/platform/httpserver"
+	"nantty/platform/identityports"
+	"nantty/platform/jwtauth"
+	"nantty/platform/staffauth"
 )
 
 func MountCreatorProgramRoutes(mux *http.ServeMux, container *container.Container) {

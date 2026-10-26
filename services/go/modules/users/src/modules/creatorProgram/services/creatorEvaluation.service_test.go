@@ -3,7 +3,7 @@ package services
 import (
 	"testing"
 
-	"zudomart/modules/users/src/generated/ent"
+	"nantty/modules/users/src/generated/ent"
 )
 
 func TestQualifiesForManualReviewFollowsTheAdminConfiguredRules(t *testing.T) {

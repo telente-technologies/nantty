@@ -3,14 +3,14 @@ package getuserprofilebyusername
 import (
 	"context"
 
-	"zudomart/modules/users/src/container"
-	usersErrors "zudomart/modules/users/src/errors"
-	"zudomart/modules/users/src/generated/ent"
-	"zudomart/modules/users/src/generated/ent/profile"
-	getuserprofile "zudomart/modules/users/src/modules/profiles/queries/getUserProfile"
-	"zudomart/modules/users/src/types"
-	"zudomart/platform/identityports"
-	"zudomart/platform/usernames"
+	"nantty/modules/users/src/container"
+	usersErrors "nantty/modules/users/src/errors"
+	"nantty/modules/users/src/generated/ent"
+	"nantty/modules/users/src/generated/ent/profile"
+	getuserprofile "nantty/modules/users/src/modules/profiles/queries/getUserProfile"
+	"nantty/modules/users/src/types"
+	"nantty/platform/identityports"
+	"nantty/platform/usernames"
 )
 
 type Handler struct {

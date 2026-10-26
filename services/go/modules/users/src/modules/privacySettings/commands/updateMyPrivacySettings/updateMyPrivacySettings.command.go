@@ -3,7 +3,7 @@ package updatemyprivacysettings
 import (
 	"github.com/google/uuid"
 
-	consentmodels "zudomart/modules/users/src/modules/consents/models"
+	consentmodels "nantty/modules/users/src/modules/consents/models"
 )
 
 type Command struct {

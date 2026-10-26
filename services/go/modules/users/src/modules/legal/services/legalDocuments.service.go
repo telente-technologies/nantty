@@ -3,8 +3,8 @@ package services
 import (
 	"context"
 
-	"zudomart/modules/users/src/generated/ent"
-	"zudomart/modules/users/src/generated/ent/legaldocument"
+	"nantty/modules/users/src/generated/ent"
+	"nantty/modules/users/src/generated/ent/legaldocument"
 )
 
 type DocumentDefinition struct {

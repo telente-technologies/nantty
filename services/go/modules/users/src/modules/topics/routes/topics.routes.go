@@ -3,11 +3,11 @@ package routes
 import (
 	"net/http"
 
-	"zudomart/modules/users/src/container"
-	"zudomart/modules/users/src/modules/topics/controllers"
-	"zudomart/platform/identityports"
-	"zudomart/platform/jwtauth"
-	"zudomart/platform/staffauth"
+	"nantty/modules/users/src/container"
+	"nantty/modules/users/src/modules/topics/controllers"
+	"nantty/platform/identityports"
+	"nantty/platform/jwtauth"
+	"nantty/platform/staffauth"
 )
 
 func MountTopicsRoutes(mux *http.ServeMux, container *container.Container) {

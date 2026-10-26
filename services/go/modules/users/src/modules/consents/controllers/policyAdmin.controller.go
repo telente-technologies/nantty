@@ -3,12 +3,12 @@ package controllers
 import (
 	"net/http"
 
-	publishpolicyversion "zudomart/modules/users/src/modules/consents/commands/publishPolicyVersion"
-	"zudomart/modules/users/src/modules/consents/dtos"
-	"zudomart/modules/users/src/modules/consents/validators"
-	"zudomart/modules/users/src/utils"
-	"zudomart/platform/httpserver"
-	"zudomart/platform/staffauth"
+	publishpolicyversion "nantty/modules/users/src/modules/consents/commands/publishPolicyVersion"
+	"nantty/modules/users/src/modules/consents/dtos"
+	"nantty/modules/users/src/modules/consents/validators"
+	"nantty/modules/users/src/utils"
+	"nantty/platform/httpserver"
+	"nantty/platform/staffauth"
 )
 
 func (controller ConsentsController) PublishPolicyVersion(writer http.ResponseWriter, request *http.Request) {

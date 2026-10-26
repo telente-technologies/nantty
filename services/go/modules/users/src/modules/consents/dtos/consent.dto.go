@@ -3,9 +3,9 @@ package dtos
 import (
 	"time"
 
-	"zudomart/modules/users/src/generated/ent"
-	"zudomart/modules/users/src/modules/consents/models"
-	getconsentstates "zudomart/modules/users/src/modules/consents/queries/getConsentStates"
+	"nantty/modules/users/src/generated/ent"
+	"nantty/modules/users/src/modules/consents/models"
+	getconsentstates "nantty/modules/users/src/modules/consents/queries/getConsentStates"
 )
 
 type SetConsentsRequest struct {

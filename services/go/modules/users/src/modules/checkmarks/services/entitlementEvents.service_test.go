@@ -6,7 +6,7 @@ import (
 	"errors"
 	"testing"
 
-	platformevents "zudomart/platform/events"
+	platformevents "nantty/platform/events"
 )
 
 func TestEntitlementMessagesAreDispatchedAndOthersIgnored(t *testing.T) {

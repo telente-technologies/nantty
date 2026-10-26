@@ -3,15 +3,15 @@ package controllers
 import (
 	"net/http"
 
-	"zudomart/modules/users/src/container"
-	"zudomart/modules/users/src/generated/ent"
-	cancelaccountdeletion "zudomart/modules/users/src/modules/accountDeletion/commands/cancelAccountDeletion"
-	requestaccountdeletion "zudomart/modules/users/src/modules/accountDeletion/commands/requestAccountDeletion"
-	"zudomart/modules/users/src/modules/accountDeletion/dtos"
-	getmydeletionrequest "zudomart/modules/users/src/modules/accountDeletion/queries/getMyDeletionRequest"
-	"zudomart/modules/users/src/modules/accountDeletion/validators"
-	"zudomart/modules/users/src/utils"
-	"zudomart/platform/httpserver"
+	"nantty/modules/users/src/container"
+	"nantty/modules/users/src/generated/ent"
+	cancelaccountdeletion "nantty/modules/users/src/modules/accountDeletion/commands/cancelAccountDeletion"
+	requestaccountdeletion "nantty/modules/users/src/modules/accountDeletion/commands/requestAccountDeletion"
+	"nantty/modules/users/src/modules/accountDeletion/dtos"
+	getmydeletionrequest "nantty/modules/users/src/modules/accountDeletion/queries/getMyDeletionRequest"
+	"nantty/modules/users/src/modules/accountDeletion/validators"
+	"nantty/modules/users/src/utils"
+	"nantty/platform/httpserver"
 )
 
 type AccountDeletionController struct {

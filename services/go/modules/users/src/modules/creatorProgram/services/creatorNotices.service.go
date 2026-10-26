@@ -4,9 +4,9 @@ import (
 	"context"
 	"time"
 
-	usersevents "zudomart/modules/users/src/events"
-	"zudomart/modules/users/src/generated/ent"
-	creatorevents "zudomart/modules/users/src/modules/creatorProgram/events"
+	usersevents "nantty/modules/users/src/events"
+	"nantty/modules/users/src/generated/ent"
+	creatorevents "nantty/modules/users/src/modules/creatorProgram/events"
 )
 
 func UnmetRequirementNotices(requirements []Requirement) []creatorevents.RequirementNotice {

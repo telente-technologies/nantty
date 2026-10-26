@@ -6,10 +6,10 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/users/src/container"
-	"zudomart/modules/users/src/generated/ent"
-	"zudomart/modules/users/src/generated/ent/profilesignal"
-	"zudomart/platform/identityports"
+	"nantty/modules/users/src/container"
+	"nantty/modules/users/src/generated/ent"
+	"nantty/modules/users/src/generated/ent/profilesignal"
+	"nantty/platform/identityports"
 )
 
 const (

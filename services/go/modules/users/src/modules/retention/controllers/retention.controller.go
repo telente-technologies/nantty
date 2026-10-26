@@ -3,14 +3,14 @@ package controllers
 import (
 	"net/http"
 
-	"zudomart/modules/users/src/container"
-	updateretentionpolicy "zudomart/modules/users/src/modules/retention/commands/updateRetentionPolicy"
-	"zudomart/modules/users/src/modules/retention/dtos"
-	listretentionpolicies "zudomart/modules/users/src/modules/retention/queries/listRetentionPolicies"
-	"zudomart/modules/users/src/modules/retention/validators"
-	"zudomart/modules/users/src/utils"
-	"zudomart/platform/httpserver"
-	"zudomart/platform/staffauth"
+	"nantty/modules/users/src/container"
+	updateretentionpolicy "nantty/modules/users/src/modules/retention/commands/updateRetentionPolicy"
+	"nantty/modules/users/src/modules/retention/dtos"
+	listretentionpolicies "nantty/modules/users/src/modules/retention/queries/listRetentionPolicies"
+	"nantty/modules/users/src/modules/retention/validators"
+	"nantty/modules/users/src/utils"
+	"nantty/platform/httpserver"
+	"nantty/platform/staffauth"
 )
 
 type RetentionController struct {

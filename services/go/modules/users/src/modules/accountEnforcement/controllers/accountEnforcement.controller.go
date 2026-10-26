@@ -3,19 +3,19 @@ package controllers
 import (
 	"net/http"
 
-	"zudomart/modules/users/src/container"
-	banuser "zudomart/modules/users/src/modules/accountEnforcement/commands/banUser"
-	deleteuser "zudomart/modules/users/src/modules/accountEnforcement/commands/deleteUser"
-	reinstateuser "zudomart/modules/users/src/modules/accountEnforcement/commands/reinstateUser"
-	restrictuser "zudomart/modules/users/src/modules/accountEnforcement/commands/restrictUser"
-	suspenduser "zudomart/modules/users/src/modules/accountEnforcement/commands/suspendUser"
-	unbanuser "zudomart/modules/users/src/modules/accountEnforcement/commands/unbanUser"
-	"zudomart/modules/users/src/modules/accountEnforcement/dtos"
-	getuserdetail "zudomart/modules/users/src/modules/accountEnforcement/queries/getUserDetail"
-	listusers "zudomart/modules/users/src/modules/accountEnforcement/queries/listUsers"
-	"zudomart/modules/users/src/utils"
-	"zudomart/platform/httpserver"
-	"zudomart/platform/staffauth"
+	"nantty/modules/users/src/container"
+	banuser "nantty/modules/users/src/modules/accountEnforcement/commands/banUser"
+	deleteuser "nantty/modules/users/src/modules/accountEnforcement/commands/deleteUser"
+	reinstateuser "nantty/modules/users/src/modules/accountEnforcement/commands/reinstateUser"
+	restrictuser "nantty/modules/users/src/modules/accountEnforcement/commands/restrictUser"
+	suspenduser "nantty/modules/users/src/modules/accountEnforcement/commands/suspendUser"
+	unbanuser "nantty/modules/users/src/modules/accountEnforcement/commands/unbanUser"
+	"nantty/modules/users/src/modules/accountEnforcement/dtos"
+	getuserdetail "nantty/modules/users/src/modules/accountEnforcement/queries/getUserDetail"
+	listusers "nantty/modules/users/src/modules/accountEnforcement/queries/listUsers"
+	"nantty/modules/users/src/utils"
+	"nantty/platform/httpserver"
+	"nantty/platform/staffauth"
 )
 
 type AccountEnforcementController struct {

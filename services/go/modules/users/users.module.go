@@ -3,10 +3,10 @@ package users
 import (
 	"context"
 
-	"zudomart/modules/users/src"
-	"zudomart/modules/users/src/configs"
-	platformevents "zudomart/platform/events"
-	"zudomart/platform/servicemodule"
+	"nantty/modules/users/src"
+	"nantty/modules/users/src/configs"
+	platformevents "nantty/platform/events"
+	"nantty/platform/servicemodule"
 )
 
 type Module = src.Module

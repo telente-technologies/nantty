@@ -8,12 +8,12 @@ import (
 
 	"github.com/google/uuid"
 
-	usersErrors "zudomart/modules/users/src/errors"
-	"zudomart/modules/users/src/generated/ent"
-	"zudomart/modules/users/src/generated/ent/legalnoticedraft"
-	"zudomart/modules/users/src/generated/ent/legalversion"
-	"zudomart/modules/users/src/generated/ent/profile"
-	legalevents "zudomart/modules/users/src/modules/legal/events"
+	usersErrors "nantty/modules/users/src/errors"
+	"nantty/modules/users/src/generated/ent"
+	"nantty/modules/users/src/generated/ent/legalnoticedraft"
+	"nantty/modules/users/src/generated/ent/legalversion"
+	"nantty/modules/users/src/generated/ent/profile"
+	legalevents "nantty/modules/users/src/modules/legal/events"
 )
 
 const (

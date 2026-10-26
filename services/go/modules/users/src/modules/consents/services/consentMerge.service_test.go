@@ -4,8 +4,8 @@ import (
 	"testing"
 	"time"
 
-	"zudomart/modules/users/src/generated/ent"
-	"zudomart/modules/users/src/generated/ent/userconsent"
+	"nantty/modules/users/src/generated/ent"
+	"nantty/modules/users/src/generated/ent/userconsent"
 )
 
 func consentRow(status userconsent.Status, at time.Time) *ent.UserConsent {

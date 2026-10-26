@@ -6,13 +6,13 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/users/src/container"
-	usersevents "zudomart/modules/users/src/events"
-	"zudomart/modules/users/src/generated/ent"
-	"zudomart/modules/users/src/generated/ent/privacysetting"
-	consentmodels "zudomart/modules/users/src/modules/consents/models"
-	consentservices "zudomart/modules/users/src/modules/consents/services"
-	privacyevents "zudomart/modules/users/src/modules/privacySettings/events"
+	"nantty/modules/users/src/container"
+	usersevents "nantty/modules/users/src/events"
+	"nantty/modules/users/src/generated/ent"
+	"nantty/modules/users/src/generated/ent/privacysetting"
+	consentmodels "nantty/modules/users/src/modules/consents/models"
+	consentservices "nantty/modules/users/src/modules/consents/services"
+	privacyevents "nantty/modules/users/src/modules/privacySettings/events"
 )
 
 func RunAccountDecisionTransaction(ctx context.Context, c *container.Container, work func(tx *ent.Tx) error) error {

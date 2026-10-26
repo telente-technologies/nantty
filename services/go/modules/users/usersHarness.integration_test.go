@@ -19,14 +19,14 @@ import (
 
 	"github.com/jackc/pgx/v5"
 
-	"zudomart/modules/users/src/configs"
-	checkmarkservices "zudomart/modules/users/src/modules/checkmarks/services"
-	"zudomart/platform/events"
-	"zudomart/platform/health"
-	"zudomart/platform/identityports"
-	"zudomart/platform/identityports/identitytest"
-	"zudomart/platform/postgres"
-	"zudomart/platform/servicemodule"
+	"nantty/modules/users/src/configs"
+	checkmarkservices "nantty/modules/users/src/modules/checkmarks/services"
+	"nantty/platform/events"
+	"nantty/platform/health"
+	"nantty/platform/identityports"
+	"nantty/platform/identityports/identitytest"
+	"nantty/platform/postgres"
+	"nantty/platform/servicemodule"
 )
 
 type usersTestHarness struct {

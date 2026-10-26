@@ -3,9 +3,9 @@ package routes
 import (
 	"net/http"
 
-	"zudomart/modules/users/src/container"
-	"zudomart/modules/users/src/modules/contactPrivacy/controllers"
-	"zudomart/platform/jwtauth"
+	"nantty/modules/users/src/container"
+	"nantty/modules/users/src/modules/contactPrivacy/controllers"
+	"nantty/platform/jwtauth"
 )
 
 func MountContactPrivacyRoutes(mux *http.ServeMux, container *container.Container) {

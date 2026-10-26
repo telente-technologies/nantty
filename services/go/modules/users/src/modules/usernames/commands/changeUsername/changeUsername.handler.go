@@ -9,17 +9,17 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/users/src/container"
-	usersErrors "zudomart/modules/users/src/errors"
-	"zudomart/modules/users/src/events"
-	"zudomart/modules/users/src/generated/ent"
-	"zudomart/modules/users/src/generated/ent/usernamehold"
-	usernameservices "zudomart/modules/users/src/modules/usernames/services"
-	"zudomart/modules/users/src/services"
-	"zudomart/modules/users/src/types"
-	"zudomart/modules/users/src/useraudit"
-	"zudomart/platform/httpserver"
-	"zudomart/platform/identityports"
+	"nantty/modules/users/src/container"
+	usersErrors "nantty/modules/users/src/errors"
+	"nantty/modules/users/src/events"
+	"nantty/modules/users/src/generated/ent"
+	"nantty/modules/users/src/generated/ent/usernamehold"
+	usernameservices "nantty/modules/users/src/modules/usernames/services"
+	"nantty/modules/users/src/services"
+	"nantty/modules/users/src/types"
+	"nantty/modules/users/src/useraudit"
+	"nantty/platform/httpserver"
+	"nantty/platform/identityports"
 )
 
 type Handler struct {

@@ -4,11 +4,11 @@ import (
 	"context"
 	"fmt"
 
-	"zudomart/modules/users/src/container"
-	usersErrors "zudomart/modules/users/src/errors"
-	accountservices "zudomart/modules/users/src/modules/accountEnforcement/services"
-	createlegalversion "zudomart/modules/users/src/modules/legal/commands/createLegalVersion"
-	"zudomart/modules/users/src/modules/legal/services"
+	"nantty/modules/users/src/container"
+	usersErrors "nantty/modules/users/src/errors"
+	accountservices "nantty/modules/users/src/modules/accountEnforcement/services"
+	createlegalversion "nantty/modules/users/src/modules/legal/commands/createLegalVersion"
+	"nantty/modules/users/src/modules/legal/services"
 )
 
 type Handler struct {

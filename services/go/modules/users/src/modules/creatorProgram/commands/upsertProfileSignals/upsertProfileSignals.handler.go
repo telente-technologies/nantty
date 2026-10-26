@@ -3,12 +3,12 @@ package upsertprofilesignals
 import (
 	"context"
 
-	"zudomart/modules/users/src/container"
-	usersErrors "zudomart/modules/users/src/errors"
-	"zudomart/modules/users/src/generated/ent"
-	"zudomart/modules/users/src/generated/ent/profile"
-	"zudomart/modules/users/src/generated/ent/profilesignal"
-	businessservices "zudomart/modules/users/src/modules/businessDocuments/services"
+	"nantty/modules/users/src/container"
+	usersErrors "nantty/modules/users/src/errors"
+	"nantty/modules/users/src/generated/ent"
+	"nantty/modules/users/src/generated/ent/profile"
+	"nantty/modules/users/src/generated/ent/profilesignal"
+	businessservices "nantty/modules/users/src/modules/businessDocuments/services"
 )
 
 type Handler struct {

@@ -1,8 +1,8 @@
 package services
 
 import (
-	"zudomart/modules/users/src/generated/ent"
-	"zudomart/platform/usersdirectory"
+	"nantty/modules/users/src/generated/ent"
+	"nantty/platform/usersdirectory"
 )
 
 type phoneSetter[Builder any] interface {

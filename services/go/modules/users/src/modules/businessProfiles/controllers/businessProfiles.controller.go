@@ -3,14 +3,14 @@ package controllers
 import (
 	"net/http"
 
-	"zudomart/modules/users/src/container"
-	createbusinessprofile "zudomart/modules/users/src/modules/businessProfiles/commands/createBusinessProfile"
-	updatebusinessprofile "zudomart/modules/users/src/modules/businessProfiles/commands/updateBusinessProfile"
-	"zudomart/modules/users/src/modules/businessProfiles/dtos"
-	listbusinesscategories "zudomart/modules/users/src/modules/businessProfiles/queries/listBusinessCategories"
-	"zudomart/modules/users/src/modules/businessProfiles/validators"
-	"zudomart/modules/users/src/utils"
-	"zudomart/platform/httpserver"
+	"nantty/modules/users/src/container"
+	createbusinessprofile "nantty/modules/users/src/modules/businessProfiles/commands/createBusinessProfile"
+	updatebusinessprofile "nantty/modules/users/src/modules/businessProfiles/commands/updateBusinessProfile"
+	"nantty/modules/users/src/modules/businessProfiles/dtos"
+	listbusinesscategories "nantty/modules/users/src/modules/businessProfiles/queries/listBusinessCategories"
+	"nantty/modules/users/src/modules/businessProfiles/validators"
+	"nantty/modules/users/src/utils"
+	"nantty/platform/httpserver"
 )
 
 type BusinessProfilesController struct {

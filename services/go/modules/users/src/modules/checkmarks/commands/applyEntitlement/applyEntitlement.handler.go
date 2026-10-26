@@ -7,13 +7,13 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/users/src/container"
-	"zudomart/modules/users/src/generated/ent"
-	"zudomart/modules/users/src/generated/ent/profilecheckmark"
-	"zudomart/modules/users/src/generated/ent/profilesignal"
-	businessservices "zudomart/modules/users/src/modules/businessDocuments/services"
-	"zudomart/modules/users/src/modules/checkmarks/services"
-	verificationservices "zudomart/modules/users/src/modules/identityVerification/services"
+	"nantty/modules/users/src/container"
+	"nantty/modules/users/src/generated/ent"
+	"nantty/modules/users/src/generated/ent/profilecheckmark"
+	"nantty/modules/users/src/generated/ent/profilesignal"
+	businessservices "nantty/modules/users/src/modules/businessDocuments/services"
+	"nantty/modules/users/src/modules/checkmarks/services"
+	verificationservices "nantty/modules/users/src/modules/identityVerification/services"
 )
 
 type Decision struct {

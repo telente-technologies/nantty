@@ -3,9 +3,9 @@ package listretentionpolicies
 import (
 	"context"
 
-	"zudomart/modules/users/src/container"
-	"zudomart/modules/users/src/generated/ent"
-	"zudomart/modules/users/src/modules/retention/services"
+	"nantty/modules/users/src/container"
+	"nantty/modules/users/src/generated/ent"
+	"nantty/modules/users/src/modules/retention/services"
 )
 
 type Handler struct {

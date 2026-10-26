@@ -3,9 +3,9 @@ package routes
 import (
 	"net/http"
 
-	"zudomart/modules/users/src/container"
-	"zudomart/modules/users/src/modules/creatorStatus/controllers"
-	"zudomart/platform/jwtauth"
+	"nantty/modules/users/src/container"
+	"nantty/modules/users/src/modules/creatorStatus/controllers"
+	"nantty/platform/jwtauth"
 )
 
 func MountCreatorStatusRoutes(mux *http.ServeMux, container *container.Container) {

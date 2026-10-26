@@ -3,10 +3,10 @@ package utils
 import (
 	"net/http"
 
-	"zudomart/modules/users/src/types"
-	"zudomart/platform/httpserver"
-	"zudomart/platform/jwtauth"
-	"zudomart/platform/staffauth"
+	"nantty/modules/users/src/types"
+	"nantty/platform/httpserver"
+	"nantty/platform/jwtauth"
+	"nantty/platform/staffauth"
 )
 
 func AccountIdFromRequest(request *http.Request) string {

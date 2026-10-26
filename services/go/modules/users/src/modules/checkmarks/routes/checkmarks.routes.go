@@ -3,13 +3,13 @@ package routes
 import (
 	"net/http"
 
-	"zudomart/modules/users/src/container"
-	transitionblackapplication "zudomart/modules/users/src/modules/checkmarks/commands/transitionBlackApplication"
-	"zudomart/modules/users/src/modules/checkmarks/controllers"
-	"zudomart/platform/httpserver"
-	"zudomart/platform/identityports"
-	"zudomart/platform/jwtauth"
-	"zudomart/platform/staffauth"
+	"nantty/modules/users/src/container"
+	transitionblackapplication "nantty/modules/users/src/modules/checkmarks/commands/transitionBlackApplication"
+	"nantty/modules/users/src/modules/checkmarks/controllers"
+	"nantty/platform/httpserver"
+	"nantty/platform/identityports"
+	"nantty/platform/jwtauth"
+	"nantty/platform/staffauth"
 )
 
 func MountCheckmarksRoutes(mux *http.ServeMux, container *container.Container) {

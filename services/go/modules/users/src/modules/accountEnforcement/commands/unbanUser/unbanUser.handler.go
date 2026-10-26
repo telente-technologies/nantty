@@ -3,9 +3,9 @@ package unbanuser
 import (
 	"context"
 
-	"zudomart/modules/users/src/container"
-	usersErrors "zudomart/modules/users/src/errors"
-	"zudomart/modules/users/src/modules/accountEnforcement/services"
+	"nantty/modules/users/src/container"
+	usersErrors "nantty/modules/users/src/errors"
+	"nantty/modules/users/src/modules/accountEnforcement/services"
 )
 
 type Handler struct {

@@ -1,6 +1,6 @@
 package dtos
 
-import "zudomart/modules/users/src/utils"
+import "nantty/modules/users/src/utils"
 
 type CategorySelectionRequest struct {
 	CategoryId    *string `json:"categoryId"`

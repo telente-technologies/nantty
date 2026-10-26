@@ -3,7 +3,7 @@ package services
 import (
 	"encoding/json"
 
-	"zudomart/platform/staffauth"
+	"nantty/platform/staffauth"
 )
 
 func (detail UserDetail) VisibleTo(staff staffauth.Staff) UserDetail {

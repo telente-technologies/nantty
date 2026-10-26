@@ -6,8 +6,8 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/users/src/generated/ent"
-	verificationevents "zudomart/modules/users/src/modules/identityVerification/events"
+	"nantty/modules/users/src/generated/ent"
+	verificationevents "nantty/modules/users/src/modules/identityVerification/events"
 )
 
 func TestRefundScopeFollowsWhatThePlanSells(t *testing.T) {

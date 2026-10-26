@@ -5,11 +5,11 @@ import (
 	"regexp"
 	"strings"
 
-	"zudomart/modules/users/src/container"
-	usersErrors "zudomart/modules/users/src/errors"
-	"zudomart/modules/users/src/generated/ent"
-	"zudomart/modules/users/src/generated/ent/reservedusernamerule"
-	"zudomart/modules/users/src/services"
+	"nantty/modules/users/src/container"
+	usersErrors "nantty/modules/users/src/errors"
+	"nantty/modules/users/src/generated/ent"
+	"nantty/modules/users/src/generated/ent/reservedusernamerule"
+	"nantty/modules/users/src/services"
 )
 
 var termPattern = regexp.MustCompile(`^[a-z0-9._]{2,30}$`)

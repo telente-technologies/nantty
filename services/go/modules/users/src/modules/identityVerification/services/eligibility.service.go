@@ -4,17 +4,17 @@ import (
 	"context"
 	"time"
 
-	"zudomart/modules/users/src/container"
-	usersErrors "zudomart/modules/users/src/errors"
-	usersevents "zudomart/modules/users/src/events"
-	"zudomart/modules/users/src/generated/ent"
-	"zudomart/modules/users/src/generated/ent/profilecheckmark"
-	"zudomart/modules/users/src/generated/ent/verificationeligibility"
-	"zudomart/modules/users/src/integrations"
-	checkmarkservices "zudomart/modules/users/src/modules/checkmarks/services"
-	creatorservices "zudomart/modules/users/src/modules/creatorProgram/services"
-	verificationevents "zudomart/modules/users/src/modules/identityVerification/events"
-	"zudomart/platform/identityports"
+	"nantty/modules/users/src/container"
+	usersErrors "nantty/modules/users/src/errors"
+	usersevents "nantty/modules/users/src/events"
+	"nantty/modules/users/src/generated/ent"
+	"nantty/modules/users/src/generated/ent/profilecheckmark"
+	"nantty/modules/users/src/generated/ent/verificationeligibility"
+	"nantty/modules/users/src/integrations"
+	checkmarkservices "nantty/modules/users/src/modules/checkmarks/services"
+	creatorservices "nantty/modules/users/src/modules/creatorProgram/services"
+	verificationevents "nantty/modules/users/src/modules/identityVerification/events"
+	"nantty/platform/identityports"
 )
 
 const (

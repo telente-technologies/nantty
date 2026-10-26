@@ -3,12 +3,12 @@ package routes
 import (
 	"net/http"
 
-	"zudomart/modules/users/src/container"
-	decideverificationcase "zudomart/modules/users/src/modules/identityVerification/commands/decideVerificationCase"
-	"zudomart/modules/users/src/modules/identityVerification/controllers"
-	"zudomart/platform/identityports"
-	"zudomart/platform/jwtauth"
-	"zudomart/platform/staffauth"
+	"nantty/modules/users/src/container"
+	decideverificationcase "nantty/modules/users/src/modules/identityVerification/commands/decideVerificationCase"
+	"nantty/modules/users/src/modules/identityVerification/controllers"
+	"nantty/platform/identityports"
+	"nantty/platform/jwtauth"
+	"nantty/platform/staffauth"
 )
 
 func MountIdentityVerificationRoutes(mux *http.ServeMux, container *container.Container) {

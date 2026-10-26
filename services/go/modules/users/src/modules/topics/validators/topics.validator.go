@@ -3,9 +3,9 @@ package validators
 import (
 	"fmt"
 
-	"zudomart/modules/users/src/modules/topics/constants"
-	"zudomart/modules/users/src/modules/topics/dtos"
-	"zudomart/modules/users/src/utils"
+	"nantty/modules/users/src/modules/topics/constants"
+	"nantty/modules/users/src/modules/topics/dtos"
+	"nantty/modules/users/src/utils"
 )
 
 func ValidateSaveTopicsRequest(request dtos.SaveTopicsRequest) error {

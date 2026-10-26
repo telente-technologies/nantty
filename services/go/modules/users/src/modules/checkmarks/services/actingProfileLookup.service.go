@@ -5,11 +5,11 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/users/src/container"
-	usersErrors "zudomart/modules/users/src/errors"
-	"zudomart/modules/users/src/generated/ent"
-	usersservices "zudomart/modules/users/src/services"
-	"zudomart/platform/identityports"
+	"nantty/modules/users/src/container"
+	usersErrors "nantty/modules/users/src/errors"
+	"nantty/modules/users/src/generated/ent"
+	usersservices "nantty/modules/users/src/services"
+	"nantty/platform/identityports"
 )
 
 func LoadActingProfile(ctx context.Context, application *container.Container, rawAccountId string) (*ent.Profile, identityports.AccountSummary, error) {

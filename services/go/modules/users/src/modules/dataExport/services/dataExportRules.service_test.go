@@ -4,8 +4,8 @@ import (
 	"testing"
 	"time"
 
-	"zudomart/modules/users/src/generated/ent"
-	"zudomart/modules/users/src/generated/ent/dataexportrequest"
+	"nantty/modules/users/src/generated/ent"
+	"nantty/modules/users/src/generated/ent/dataexportrequest"
 )
 
 func TestEvaluateExportRequestEligibility(t *testing.T) {

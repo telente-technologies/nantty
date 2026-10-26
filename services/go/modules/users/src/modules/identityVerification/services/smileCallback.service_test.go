@@ -8,7 +8,7 @@ import (
 
 	"entgo.io/ent"
 
-	"zudomart/modules/users/src/databases/schema"
+	"nantty/modules/users/src/databases/schema"
 )
 
 const passingCallback = `{

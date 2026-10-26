@@ -4,16 +4,16 @@ import (
 	"io"
 	"net/http"
 
-	"zudomart/modules/users/src/container"
-	"zudomart/modules/users/src/integrations"
-	applysmileresult "zudomart/modules/users/src/modules/identityVerification/commands/applySmileResult"
-	requestverification "zudomart/modules/users/src/modules/identityVerification/commands/requestVerification"
-	startidentitycapture "zudomart/modules/users/src/modules/identityVerification/commands/startIdentityCapture"
-	"zudomart/modules/users/src/modules/identityVerification/dtos"
-	getverificationjourney "zudomart/modules/users/src/modules/identityVerification/queries/getVerificationJourney"
-	"zudomart/modules/users/src/modules/identityVerification/services"
-	"zudomart/modules/users/src/utils"
-	"zudomart/platform/httpserver"
+	"nantty/modules/users/src/container"
+	"nantty/modules/users/src/integrations"
+	applysmileresult "nantty/modules/users/src/modules/identityVerification/commands/applySmileResult"
+	requestverification "nantty/modules/users/src/modules/identityVerification/commands/requestVerification"
+	startidentitycapture "nantty/modules/users/src/modules/identityVerification/commands/startIdentityCapture"
+	"nantty/modules/users/src/modules/identityVerification/dtos"
+	getverificationjourney "nantty/modules/users/src/modules/identityVerification/queries/getVerificationJourney"
+	"nantty/modules/users/src/modules/identityVerification/services"
+	"nantty/modules/users/src/utils"
+	"nantty/platform/httpserver"
 )
 
 const maximumCallbackBytes = 256 << 10

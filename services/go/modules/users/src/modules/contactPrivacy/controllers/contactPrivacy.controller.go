@@ -6,12 +6,12 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/users/src/container"
-	usersErrors "zudomart/modules/users/src/errors"
-	updatecontactprivacy "zudomart/modules/users/src/modules/contactPrivacy/commands/updateContactPrivacy"
-	"zudomart/modules/users/src/modules/contactPrivacy/services"
-	"zudomart/modules/users/src/utils"
-	"zudomart/platform/httpserver"
+	"nantty/modules/users/src/container"
+	usersErrors "nantty/modules/users/src/errors"
+	updatecontactprivacy "nantty/modules/users/src/modules/contactPrivacy/commands/updateContactPrivacy"
+	"nantty/modules/users/src/modules/contactPrivacy/services"
+	"nantty/modules/users/src/utils"
+	"nantty/platform/httpserver"
 )
 
 type ContactPrivacyController struct {

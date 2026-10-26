@@ -6,13 +6,13 @@ import (
 
 	"github.com/google/uuid"
 
-	usersevents "zudomart/modules/users/src/events"
-	"zudomart/modules/users/src/generated/ent"
-	"zudomart/modules/users/src/generated/ent/profilecheckmark"
-	"zudomart/modules/users/src/generated/ent/verificationcase"
-	"zudomart/modules/users/src/generated/ent/verificationeligibility"
-	checkmarkservices "zudomart/modules/users/src/modules/checkmarks/services"
-	verificationevents "zudomart/modules/users/src/modules/identityVerification/events"
+	usersevents "nantty/modules/users/src/events"
+	"nantty/modules/users/src/generated/ent"
+	"nantty/modules/users/src/generated/ent/profilecheckmark"
+	"nantty/modules/users/src/generated/ent/verificationcase"
+	"nantty/modules/users/src/generated/ent/verificationeligibility"
+	checkmarkservices "nantty/modules/users/src/modules/checkmarks/services"
+	verificationevents "nantty/modules/users/src/modules/identityVerification/events"
 )
 
 var refundablePlans = map[string]bool{"blue": true, "gold_only": true}

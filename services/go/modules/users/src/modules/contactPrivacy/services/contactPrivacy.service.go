@@ -5,9 +5,9 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/users/src/generated/ent"
-	"zudomart/modules/users/src/generated/ent/privacysetting"
-	"zudomart/modules/users/src/generated/ent/profile"
+	"nantty/modules/users/src/generated/ent"
+	"nantty/modules/users/src/generated/ent/privacysetting"
+	"nantty/modules/users/src/generated/ent/profile"
 )
 
 type ContactPrivacy struct {

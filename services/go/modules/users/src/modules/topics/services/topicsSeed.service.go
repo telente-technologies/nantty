@@ -3,8 +3,8 @@ package services
 import (
 	"context"
 
-	"zudomart/modules/users/src/generated/ent"
-	"zudomart/modules/users/src/modules/topics/constants"
+	"nantty/modules/users/src/generated/ent"
+	"nantty/modules/users/src/modules/topics/constants"
 )
 
 func SeedTopicsIfMissing(ctx context.Context, client *ent.Client) error {

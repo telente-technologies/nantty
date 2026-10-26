@@ -7,7 +7,7 @@ import (
 
 	"github.com/jackc/pgx/v5"
 
-	linkedprofiles "zudomart/modules/users/src/modules/linkedProfiles"
+	linkedprofiles "nantty/modules/users/src/modules/linkedProfiles"
 )
 
 func TestRuleBreakingAccountsAreGrandfatheredUntilTheOwnerChooses(t *testing.T) {

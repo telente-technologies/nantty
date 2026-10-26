@@ -3,10 +3,10 @@ package getmydeletionrequest
 import (
 	"context"
 
-	"zudomart/modules/users/src/container"
-	"zudomart/modules/users/src/generated/ent"
-	"zudomart/modules/users/src/generated/ent/deletionrequest"
-	"zudomart/modules/users/src/modules/accountDeletion/services"
+	"nantty/modules/users/src/container"
+	"nantty/modules/users/src/generated/ent"
+	"nantty/modules/users/src/generated/ent/deletionrequest"
+	"nantty/modules/users/src/modules/accountDeletion/services"
 )
 
 type Handler struct {

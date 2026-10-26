@@ -4,15 +4,15 @@ import (
 	"context"
 	"net/http"
 
-	"zudomart/modules/users/src/container"
-	usersevents "zudomart/modules/users/src/events"
-	"zudomart/modules/users/src/generated/ent"
-	"zudomart/modules/users/src/generated/ent/verificationcase"
-	checkmarkservices "zudomart/modules/users/src/modules/checkmarks/services"
-	verificationevents "zudomart/modules/users/src/modules/identityVerification/events"
-	"zudomart/modules/users/src/modules/identityVerification/services"
-	usersservices "zudomart/modules/users/src/services"
-	"zudomart/platform/httpserver"
+	"nantty/modules/users/src/container"
+	usersevents "nantty/modules/users/src/events"
+	"nantty/modules/users/src/generated/ent"
+	"nantty/modules/users/src/generated/ent/verificationcase"
+	checkmarkservices "nantty/modules/users/src/modules/checkmarks/services"
+	verificationevents "nantty/modules/users/src/modules/identityVerification/events"
+	"nantty/modules/users/src/modules/identityVerification/services"
+	usersservices "nantty/modules/users/src/services"
+	"nantty/platform/httpserver"
 )
 
 var (

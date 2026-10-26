@@ -8,13 +8,13 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/users/src/container"
-	usersErrors "zudomart/modules/users/src/errors"
-	"zudomart/modules/users/src/generated/ent"
-	"zudomart/modules/users/src/generated/ent/verificationcase"
-	"zudomart/modules/users/src/integrations"
-	"zudomart/modules/users/src/modules/identityVerification/services"
-	"zudomart/platform/httpserver"
+	"nantty/modules/users/src/container"
+	usersErrors "nantty/modules/users/src/errors"
+	"nantty/modules/users/src/generated/ent"
+	"nantty/modules/users/src/generated/ent/verificationcase"
+	"nantty/modules/users/src/integrations"
+	"nantty/modules/users/src/modules/identityVerification/services"
+	"nantty/platform/httpserver"
 )
 
 var ErrCaptureUnavailable = httpserver.NewApiError(http.StatusServiceUnavailable, "IDENTITY_CHECK_UNAVAILABLE", "The identity check is not available right now. Try again in a few minutes.")

@@ -4,10 +4,10 @@ import (
 	"context"
 
 	"github.com/google/uuid"
-	"zudomart/modules/users/src/container"
-	submitcreatorapplication "zudomart/modules/users/src/modules/creatorProgram/commands/submitCreatorApplication"
-	"zudomart/modules/users/src/services"
-	"zudomart/modules/users/src/types"
+	"nantty/modules/users/src/container"
+	submitcreatorapplication "nantty/modules/users/src/modules/creatorProgram/commands/submitCreatorApplication"
+	"nantty/modules/users/src/services"
+	"nantty/modules/users/src/types"
 )
 
 type Handler struct {

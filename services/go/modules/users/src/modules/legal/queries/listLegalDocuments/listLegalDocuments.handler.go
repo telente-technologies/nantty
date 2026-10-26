@@ -3,9 +3,9 @@ package listlegaldocuments
 import (
 	"context"
 
-	"zudomart/modules/users/src/container"
-	"zudomart/modules/users/src/generated/ent/legalversion"
-	"zudomart/modules/users/src/modules/legal/services"
+	"nantty/modules/users/src/container"
+	"nantty/modules/users/src/generated/ent/legalversion"
+	"nantty/modules/users/src/modules/legal/services"
 )
 
 type DocumentSummary struct {

@@ -15,11 +15,11 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/users/src/generated/ent/profile"
-	"zudomart/modules/users/src/generated/ent/userconsent"
-	expiredataexports "zudomart/modules/users/src/modules/dataExport/commands/expireDataExports"
-	processnextdataexport "zudomart/modules/users/src/modules/dataExport/commands/processNextDataExport"
-	exportservices "zudomart/modules/users/src/modules/dataExport/services"
+	"nantty/modules/users/src/generated/ent/profile"
+	"nantty/modules/users/src/generated/ent/userconsent"
+	expiredataexports "nantty/modules/users/src/modules/dataExport/commands/expireDataExports"
+	processnextdataexport "nantty/modules/users/src/modules/dataExport/commands/processNextDataExport"
+	exportservices "nantty/modules/users/src/modules/dataExport/services"
 )
 
 type memoryObjectStore struct {

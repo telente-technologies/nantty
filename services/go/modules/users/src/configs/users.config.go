@@ -4,8 +4,8 @@ import (
 	"encoding/base64"
 	"time"
 
-	platformconfig "zudomart/platform/config"
-	"zudomart/platform/usersdirectory"
+	platformconfig "nantty/platform/config"
+	"nantty/platform/usersdirectory"
 )
 
 type UsersSettings struct {

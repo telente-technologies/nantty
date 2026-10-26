@@ -3,8 +3,8 @@ package routes
 import (
 	"net/http"
 
-	"zudomart/modules/users/src/container"
-	"zudomart/modules/users/src/modules/geo/controllers"
+	"nantty/modules/users/src/container"
+	"nantty/modules/users/src/modules/geo/controllers"
 )
 
 func MountGeoRoutes(mux *http.ServeMux, c *container.Container) {

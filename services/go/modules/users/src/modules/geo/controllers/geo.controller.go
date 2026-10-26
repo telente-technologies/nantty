@@ -6,15 +6,15 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/users/src/container"
-	"zudomart/modules/users/src/modules/geo/dtos"
-	listadminareas "zudomart/modules/users/src/modules/geo/queries/listAdminAreas"
-	listcities "zudomart/modules/users/src/modules/geo/queries/listCities"
-	listcountries "zudomart/modules/users/src/modules/geo/queries/listCountries"
-	listregions "zudomart/modules/users/src/modules/geo/queries/listRegions"
-	"zudomart/modules/users/src/modules/geo/services"
-	"zudomart/modules/users/src/utils"
-	"zudomart/platform/httpserver"
+	"nantty/modules/users/src/container"
+	"nantty/modules/users/src/modules/geo/dtos"
+	listadminareas "nantty/modules/users/src/modules/geo/queries/listAdminAreas"
+	listcities "nantty/modules/users/src/modules/geo/queries/listCities"
+	listcountries "nantty/modules/users/src/modules/geo/queries/listCountries"
+	listregions "nantty/modules/users/src/modules/geo/queries/listRegions"
+	"nantty/modules/users/src/modules/geo/services"
+	"nantty/modules/users/src/utils"
+	"nantty/platform/httpserver"
 )
 
 type GeoController struct {

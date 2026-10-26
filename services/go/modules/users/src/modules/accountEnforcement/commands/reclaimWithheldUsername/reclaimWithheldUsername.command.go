@@ -1,6 +1,6 @@
 package reclaimwithheldusername
 
-import "zudomart/modules/users/src/types"
+import "nantty/modules/users/src/types"
 
 const (
 	ModeRestoreToOwner   = "RESTORE_TO_OWNER"

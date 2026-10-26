@@ -3,7 +3,7 @@ package getsellerverification
 import (
 	"testing"
 
-	getmybusinessdocuments "zudomart/modules/users/src/modules/businessDocuments/queries/getMyBusinessDocuments"
+	getmybusinessdocuments "nantty/modules/users/src/modules/businessDocuments/queries/getMyBusinessDocuments"
 )
 
 func TestVerificationSummaryFollowsTheDocuments(t *testing.T) {

@@ -3,7 +3,7 @@ package services
 import (
 	"time"
 
-	"zudomart/modules/users/src/generated/ent"
+	"nantty/modules/users/src/generated/ent"
 )
 
 type ChecksView struct {

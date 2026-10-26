@@ -8,7 +8,7 @@ import (
 	"testing"
 	"time"
 
-	"zudomart/modules/users/src/integrations"
+	"nantty/modules/users/src/integrations"
 )
 
 type fakeDocumentStorage struct {

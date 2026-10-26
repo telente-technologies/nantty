@@ -1,8 +1,8 @@
 package validators
 
 import (
-	"zudomart/modules/users/src/modules/profiles/dtos"
-	"zudomart/modules/users/src/utils"
+	"nantty/modules/users/src/modules/profiles/dtos"
+	"nantty/modules/users/src/utils"
 )
 
 func ValidateUpdateProfileRequest(request dtos.UpdateProfileRequest) error {

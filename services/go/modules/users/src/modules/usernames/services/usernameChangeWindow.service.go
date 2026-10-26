@@ -6,10 +6,10 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/users/src/container"
-	"zudomart/modules/users/src/generated/ent"
-	"zudomart/modules/users/src/generated/ent/usernamechange"
-	"zudomart/modules/users/src/services"
+	"nantty/modules/users/src/container"
+	"nantty/modules/users/src/generated/ent"
+	"nantty/modules/users/src/generated/ent/usernamechange"
+	"nantty/modules/users/src/services"
 )
 
 const oneYear = 365 * 24 * time.Hour

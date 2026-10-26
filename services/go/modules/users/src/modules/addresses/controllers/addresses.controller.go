@@ -5,17 +5,17 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/users/src/container"
-	createaddress "zudomart/modules/users/src/modules/addresses/commands/createAddress"
-	deleteaddress "zudomart/modules/users/src/modules/addresses/commands/deleteAddress"
-	updateaddress "zudomart/modules/users/src/modules/addresses/commands/updateAddress"
-	"zudomart/modules/users/src/modules/addresses/dtos"
-	getaddress "zudomart/modules/users/src/modules/addresses/queries/getAddress"
-	listaddresses "zudomart/modules/users/src/modules/addresses/queries/listAddresses"
-	"zudomart/modules/users/src/modules/addresses/services"
-	"zudomart/modules/users/src/modules/addresses/validators"
-	"zudomart/modules/users/src/utils"
-	"zudomart/platform/httpserver"
+	"nantty/modules/users/src/container"
+	createaddress "nantty/modules/users/src/modules/addresses/commands/createAddress"
+	deleteaddress "nantty/modules/users/src/modules/addresses/commands/deleteAddress"
+	updateaddress "nantty/modules/users/src/modules/addresses/commands/updateAddress"
+	"nantty/modules/users/src/modules/addresses/dtos"
+	getaddress "nantty/modules/users/src/modules/addresses/queries/getAddress"
+	listaddresses "nantty/modules/users/src/modules/addresses/queries/listAddresses"
+	"nantty/modules/users/src/modules/addresses/services"
+	"nantty/modules/users/src/modules/addresses/validators"
+	"nantty/modules/users/src/utils"
+	"nantty/platform/httpserver"
 )
 
 type AddressesController struct {

@@ -1,6 +1,6 @@
 package getconsentstates
 
-import "zudomart/modules/users/src/modules/consents/models"
+import "nantty/modules/users/src/modules/consents/models"
 
 type Query struct {
 	Subject models.Subject

@@ -3,15 +3,15 @@ package controllers
 import (
 	"net/http"
 
-	"zudomart/modules/users/src/container"
-	"zudomart/modules/users/src/generated/ent"
-	savemytopics "zudomart/modules/users/src/modules/topics/commands/saveMyTopics"
-	"zudomart/modules/users/src/modules/topics/dtos"
-	listmytopics "zudomart/modules/users/src/modules/topics/queries/listMyTopics"
-	listtopics "zudomart/modules/users/src/modules/topics/queries/listTopics"
-	"zudomart/modules/users/src/modules/topics/validators"
-	"zudomart/modules/users/src/utils"
-	"zudomart/platform/httpserver"
+	"nantty/modules/users/src/container"
+	"nantty/modules/users/src/generated/ent"
+	savemytopics "nantty/modules/users/src/modules/topics/commands/saveMyTopics"
+	"nantty/modules/users/src/modules/topics/dtos"
+	listmytopics "nantty/modules/users/src/modules/topics/queries/listMyTopics"
+	listtopics "nantty/modules/users/src/modules/topics/queries/listTopics"
+	"nantty/modules/users/src/modules/topics/validators"
+	"nantty/modules/users/src/utils"
+	"nantty/platform/httpserver"
 )
 
 type TopicsController struct {

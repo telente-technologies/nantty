@@ -3,19 +3,19 @@ package controllers
 import (
 	"net/http"
 
-	"zudomart/modules/users/src/container"
-	addreservedusernamerule "zudomart/modules/users/src/modules/usernames/commands/addReservedUsernameRule"
-	changeusername "zudomart/modules/users/src/modules/usernames/commands/changeUsername"
-	releasewithheldusername "zudomart/modules/users/src/modules/usernames/commands/releaseWithheldUsername"
-	removereservedusernamerule "zudomart/modules/users/src/modules/usernames/commands/removeReservedUsernameRule"
-	withholdusername "zudomart/modules/users/src/modules/usernames/commands/withholdUsername"
-	"zudomart/modules/users/src/modules/usernames/dtos"
-	getusernamepolicy "zudomart/modules/users/src/modules/usernames/queries/getUsernamePolicy"
-	listreservedusernamerules "zudomart/modules/users/src/modules/usernames/queries/listReservedUsernameRules"
-	suggestusername "zudomart/modules/users/src/modules/usernames/queries/suggestUsername"
-	"zudomart/modules/users/src/modules/usernames/validators"
-	"zudomart/modules/users/src/utils"
-	"zudomart/platform/httpserver"
+	"nantty/modules/users/src/container"
+	addreservedusernamerule "nantty/modules/users/src/modules/usernames/commands/addReservedUsernameRule"
+	changeusername "nantty/modules/users/src/modules/usernames/commands/changeUsername"
+	releasewithheldusername "nantty/modules/users/src/modules/usernames/commands/releaseWithheldUsername"
+	removereservedusernamerule "nantty/modules/users/src/modules/usernames/commands/removeReservedUsernameRule"
+	withholdusername "nantty/modules/users/src/modules/usernames/commands/withholdUsername"
+	"nantty/modules/users/src/modules/usernames/dtos"
+	getusernamepolicy "nantty/modules/users/src/modules/usernames/queries/getUsernamePolicy"
+	listreservedusernamerules "nantty/modules/users/src/modules/usernames/queries/listReservedUsernameRules"
+	suggestusername "nantty/modules/users/src/modules/usernames/queries/suggestUsername"
+	"nantty/modules/users/src/modules/usernames/validators"
+	"nantty/modules/users/src/utils"
+	"nantty/platform/httpserver"
 )
 
 type UsernamesController struct {

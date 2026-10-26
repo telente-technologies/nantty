@@ -8,9 +8,9 @@ import (
 
 	"github.com/google/uuid"
 
-	celebrationservices "zudomart/modules/users/src/modules/celebrations/services"
-	"zudomart/platform/identityports"
-	"zudomart/platform/identityports/identitytest"
+	celebrationservices "nantty/modules/users/src/modules/celebrations/services"
+	"nantty/platform/identityports"
+	"nantty/platform/identityports/identitytest"
 )
 
 type celebrationDirectory struct {

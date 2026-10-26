@@ -6,14 +6,14 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/users/src/container"
-	usersErrors "zudomart/modules/users/src/errors"
-	usersevents "zudomart/modules/users/src/events"
-	"zudomart/modules/users/src/generated/ent"
-	"zudomart/modules/users/src/generated/ent/businessdocument"
-	"zudomart/modules/users/src/integrations"
-	businessevents "zudomart/modules/users/src/modules/businessDocuments/events"
-	"zudomart/modules/users/src/modules/businessDocuments/services"
+	"nantty/modules/users/src/container"
+	usersErrors "nantty/modules/users/src/errors"
+	usersevents "nantty/modules/users/src/events"
+	"nantty/modules/users/src/generated/ent"
+	"nantty/modules/users/src/generated/ent/businessdocument"
+	"nantty/modules/users/src/integrations"
+	businessevents "nantty/modules/users/src/modules/businessDocuments/events"
+	"nantty/modules/users/src/modules/businessDocuments/services"
 )
 
 type Handler struct {

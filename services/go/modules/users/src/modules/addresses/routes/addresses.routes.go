@@ -3,9 +3,9 @@ package routes
 import (
 	"net/http"
 
-	"zudomart/modules/users/src/container"
-	"zudomart/modules/users/src/modules/addresses/controllers"
-	"zudomart/platform/jwtauth"
+	"nantty/modules/users/src/container"
+	"nantty/modules/users/src/modules/addresses/controllers"
+	"nantty/platform/jwtauth"
 )
 
 func MountAddressesRoutes(mux *http.ServeMux, c *container.Container) {

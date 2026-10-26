@@ -5,13 +5,13 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/users/src/container"
-	usersErrors "zudomart/modules/users/src/errors"
-	chooselinkedprofiles "zudomart/modules/users/src/modules/linkedProfiles/commands/chooseLinkedProfiles"
-	"zudomart/modules/users/src/modules/linkedProfiles/dtos"
-	"zudomart/modules/users/src/modules/linkedProfiles/services"
-	"zudomart/modules/users/src/utils"
-	"zudomart/platform/httpserver"
+	"nantty/modules/users/src/container"
+	usersErrors "nantty/modules/users/src/errors"
+	chooselinkedprofiles "nantty/modules/users/src/modules/linkedProfiles/commands/chooseLinkedProfiles"
+	"nantty/modules/users/src/modules/linkedProfiles/dtos"
+	"nantty/modules/users/src/modules/linkedProfiles/services"
+	"nantty/modules/users/src/utils"
+	"nantty/platform/httpserver"
 )
 
 type LinkedProfilesController struct {

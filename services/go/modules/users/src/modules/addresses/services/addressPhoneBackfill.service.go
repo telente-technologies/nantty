@@ -3,9 +3,9 @@ package services
 import (
 	"context"
 
-	"zudomart/modules/users/src/generated/ent"
-	"zudomart/modules/users/src/generated/ent/shippingaddress"
-	"zudomart/platform/usersdirectory"
+	"nantty/modules/users/src/generated/ent"
+	"nantty/modules/users/src/generated/ent/shippingaddress"
+	"nantty/platform/usersdirectory"
 )
 
 const backfillBatch = 200

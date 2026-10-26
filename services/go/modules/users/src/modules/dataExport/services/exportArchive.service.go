@@ -9,15 +9,15 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/users/src/generated/ent"
-	"zudomart/modules/users/src/generated/ent/privacysetting"
-	"zudomart/modules/users/src/generated/ent/profile"
-	"zudomart/modules/users/src/generated/ent/shippingaddress"
-	"zudomart/modules/users/src/generated/ent/termsacceptance"
-	"zudomart/modules/users/src/generated/ent/userconsent"
-	"zudomart/modules/users/src/generated/ent/usernamechange"
-	"zudomart/platform/identityports"
-	"zudomart/platform/usersdirectory"
+	"nantty/modules/users/src/generated/ent"
+	"nantty/modules/users/src/generated/ent/privacysetting"
+	"nantty/modules/users/src/generated/ent/profile"
+	"nantty/modules/users/src/generated/ent/shippingaddress"
+	"nantty/modules/users/src/generated/ent/termsacceptance"
+	"nantty/modules/users/src/generated/ent/userconsent"
+	"nantty/modules/users/src/generated/ent/usernamechange"
+	"nantty/platform/identityports"
+	"nantty/platform/usersdirectory"
 )
 
 type ArchiveContents map[string]any

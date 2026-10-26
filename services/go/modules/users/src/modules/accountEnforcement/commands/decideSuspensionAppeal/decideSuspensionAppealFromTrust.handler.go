@@ -5,10 +5,10 @@ import (
 
 	"github.com/google/uuid"
 
-	usersErrors "zudomart/modules/users/src/errors"
-	"zudomart/modules/users/src/generated/ent"
-	"zudomart/modules/users/src/generated/ent/accountsuspension"
-	"zudomart/modules/users/src/modules/accountEnforcement/services"
+	usersErrors "nantty/modules/users/src/errors"
+	"nantty/modules/users/src/generated/ent"
+	"nantty/modules/users/src/generated/ent/accountsuspension"
+	"nantty/modules/users/src/modules/accountEnforcement/services"
 )
 
 type TrustDecision struct {

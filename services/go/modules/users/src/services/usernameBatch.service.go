@@ -3,9 +3,9 @@ package services
 import (
 	"context"
 
-	"zudomart/modules/users/src/generated/ent/profile"
-	"zudomart/modules/users/src/generated/ent/usernamehold"
-	"zudomart/platform/usernames"
+	"nantty/modules/users/src/generated/ent/profile"
+	"nantty/modules/users/src/generated/ent/usernamehold"
+	"nantty/platform/usernames"
 )
 
 func (guard UsernameGuardService) FindBlockedUsernames(ctx context.Context, candidates []string) ([]string, error) {

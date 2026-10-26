@@ -1,6 +1,6 @@
 package dtos
 
-import "zudomart/modules/users/src/generated/ent"
+import "nantty/modules/users/src/generated/ent"
 
 type TopicResponse struct {
 	Id   string `json:"id"`

@@ -7,13 +7,13 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/users/src/generated/ent"
-	"zudomart/modules/users/src/generated/ent/geoadminarea"
-	"zudomart/modules/users/src/generated/ent/geocity"
-	"zudomart/modules/users/src/generated/ent/geocountry"
-	"zudomart/modules/users/src/generated/ent/georegion"
-	"zudomart/modules/users/src/modules/geo/constants"
-	"zudomart/modules/users/src/modules/geo/models"
+	"nantty/modules/users/src/generated/ent"
+	"nantty/modules/users/src/generated/ent/geoadminarea"
+	"nantty/modules/users/src/generated/ent/geocity"
+	"nantty/modules/users/src/generated/ent/geocountry"
+	"nantty/modules/users/src/generated/ent/georegion"
+	"nantty/modules/users/src/modules/geo/constants"
+	"nantty/modules/users/src/modules/geo/models"
 )
 
 const seedBatchSize = 200

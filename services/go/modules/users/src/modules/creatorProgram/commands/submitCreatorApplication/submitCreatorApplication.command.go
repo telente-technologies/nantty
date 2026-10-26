@@ -1,6 +1,6 @@
 package submitcreatorapplication
 
-import "zudomart/modules/users/src/modules/creatorProgram/dtos"
+import "nantty/modules/users/src/modules/creatorProgram/dtos"
 
 type Command struct {
 	AccountId string

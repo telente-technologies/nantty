@@ -1,8 +1,8 @@
 package validators
 
 import (
-	"zudomart/modules/users/src/modules/businessProfiles/dtos"
-	"zudomart/modules/users/src/utils"
+	"nantty/modules/users/src/modules/businessProfiles/dtos"
+	"nantty/modules/users/src/utils"
 )
 
 func ValidateCreateBusinessProfileRequest(request dtos.CreateBusinessProfileRequest) error {

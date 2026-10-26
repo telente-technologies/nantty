@@ -3,9 +3,9 @@ package routes
 import (
 	"net/http"
 
-	"zudomart/modules/users/src/container"
-	"zudomart/modules/users/src/modules/notificationDirectory/controllers"
-	"zudomart/platform/httpserver"
+	"nantty/modules/users/src/container"
+	"nantty/modules/users/src/modules/notificationDirectory/controllers"
+	"nantty/platform/httpserver"
 )
 
 func MountNotificationDirectoryRoutes(mux *http.ServeMux, container *container.Container) {

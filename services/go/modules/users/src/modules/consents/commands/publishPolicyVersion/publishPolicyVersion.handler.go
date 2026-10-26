@@ -6,13 +6,13 @@ import (
 	"net/http"
 	"time"
 
-	"zudomart/modules/users/src/container"
-	usersevents "zudomart/modules/users/src/events"
-	"zudomart/modules/users/src/generated/ent"
-	"zudomart/modules/users/src/generated/ent/policyversion"
-	consentevents "zudomart/modules/users/src/modules/consents/events"
-	"zudomart/platform/httpserver"
-	"zudomart/platform/identityports"
+	"nantty/modules/users/src/container"
+	usersevents "nantty/modules/users/src/events"
+	"nantty/modules/users/src/generated/ent"
+	"nantty/modules/users/src/generated/ent/policyversion"
+	consentevents "nantty/modules/users/src/modules/consents/events"
+	"nantty/platform/httpserver"
+	"nantty/platform/identityports"
 )
 
 type Handler struct {

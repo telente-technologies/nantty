@@ -6,9 +6,9 @@ import (
 	"slices"
 	"time"
 
-	"zudomart/modules/users/src/modules/consents/dtos"
-	"zudomart/modules/users/src/modules/consents/models"
-	"zudomart/modules/users/src/utils"
+	"nantty/modules/users/src/modules/consents/dtos"
+	"nantty/modules/users/src/modules/consents/models"
+	"nantty/modules/users/src/utils"
 )
 
 var (

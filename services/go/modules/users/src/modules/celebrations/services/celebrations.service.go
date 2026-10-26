@@ -5,11 +5,11 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/users/src/container"
-	"zudomart/modules/users/src/modules/celebrations/dtos"
-	usersservices "zudomart/modules/users/src/services"
-	"zudomart/modules/users/src/utils"
-	"zudomart/platform/identityports"
+	"nantty/modules/users/src/container"
+	"nantty/modules/users/src/modules/celebrations/dtos"
+	usersservices "nantty/modules/users/src/services"
+	"nantty/modules/users/src/utils"
+	"nantty/platform/identityports"
 )
 
 func BuildViewerCelebrations(ctx context.Context, application *container.Container, accountId uuid.UUID) (dtos.ViewerCelebrations, error) {

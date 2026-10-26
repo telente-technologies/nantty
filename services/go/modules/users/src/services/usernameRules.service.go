@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"time"
 
-	"zudomart/modules/users/src/container"
+	"nantty/modules/users/src/container"
 )
 
 const UsernameRulesSettingKey = "username-rules"

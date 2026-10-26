@@ -3,7 +3,7 @@ package upsertprofilesignals
 import (
 	"github.com/google/uuid"
 
-	"zudomart/modules/users/src/modules/creatorProgram/dtos"
+	"nantty/modules/users/src/modules/creatorProgram/dtos"
 )
 
 type Command struct {

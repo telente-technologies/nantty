@@ -10,7 +10,7 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/users/src/generated/ent/profilesignal"
+	"nantty/modules/users/src/generated/ent/profilesignal"
 )
 
 func (harness *usersTestHarness) setPremium(accountId string, until time.Time) {

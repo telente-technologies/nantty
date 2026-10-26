@@ -7,13 +7,13 @@ import (
 	"testing"
 	"time"
 
-	"zudomart/modules/users/src/configs"
-	"zudomart/modules/users/src/generated/ent/verificationcase"
-	"zudomart/modules/users/src/generated/ent/verificationeligibility"
-	"zudomart/modules/users/src/integrations"
-	applyentitlement "zudomart/modules/users/src/modules/checkmarks/commands/applyEntitlement"
-	identityverification "zudomart/modules/users/src/modules/identityVerification"
-	verificationservices "zudomart/modules/users/src/modules/identityVerification/services"
+	"nantty/modules/users/src/configs"
+	"nantty/modules/users/src/generated/ent/verificationcase"
+	"nantty/modules/users/src/generated/ent/verificationeligibility"
+	"nantty/modules/users/src/integrations"
+	applyentitlement "nantty/modules/users/src/modules/checkmarks/commands/applyEntitlement"
+	identityverification "nantty/modules/users/src/modules/identityVerification"
+	verificationservices "nantty/modules/users/src/modules/identityVerification/services"
 )
 
 type scriptedEligibility struct {

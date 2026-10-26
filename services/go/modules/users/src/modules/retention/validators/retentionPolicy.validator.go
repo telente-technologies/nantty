@@ -1,9 +1,9 @@
 package validators
 
 import (
-	"zudomart/modules/users/src/modules/retention/dtos"
-	"zudomart/modules/users/src/modules/retention/models"
-	"zudomart/modules/users/src/utils"
+	"nantty/modules/users/src/modules/retention/dtos"
+	"nantty/modules/users/src/modules/retention/models"
+	"nantty/modules/users/src/utils"
 )
 
 const maximumRetentionDays = 36500

@@ -5,12 +5,12 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 
-	usersErrors "zudomart/modules/users/src/errors"
-	"zudomart/modules/users/src/generated/ent/predicate"
-	"zudomart/modules/users/src/generated/ent/profile"
-	"zudomart/modules/users/src/generated/ent/profilecheckmark"
-	"zudomart/modules/users/src/generated/ent/profilesignal"
-	"zudomart/modules/users/src/modules/accountEnforcement/services"
+	usersErrors "nantty/modules/users/src/errors"
+	"nantty/modules/users/src/generated/ent/predicate"
+	"nantty/modules/users/src/generated/ent/profile"
+	"nantty/modules/users/src/generated/ent/profilecheckmark"
+	"nantty/modules/users/src/generated/ent/profilesignal"
+	"nantty/modules/users/src/modules/accountEnforcement/services"
 )
 
 var liveCheckmarkStatuses = []any{string(profilecheckmark.StatusVerified), string(profilecheckmark.StatusGrace)}

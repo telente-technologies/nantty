@@ -3,9 +3,9 @@ package services
 import (
 	"context"
 
-	"zudomart/modules/users/src/generated/ent"
-	"zudomart/modules/users/src/generated/ent/retentionpolicy"
-	"zudomart/modules/users/src/modules/retention/models"
+	"nantty/modules/users/src/generated/ent"
+	"nantty/modules/users/src/generated/ent/retentionpolicy"
+	"nantty/modules/users/src/modules/retention/models"
 )
 
 func SeedDefaultRetentionPoliciesIfMissing(ctx context.Context, client *ent.Client) error {

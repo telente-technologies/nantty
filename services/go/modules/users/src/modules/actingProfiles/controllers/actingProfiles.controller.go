@@ -3,14 +3,14 @@ package controllers
 import (
 	"net/http"
 
-	"zudomart/modules/users/src/container"
-	switchactingprofile "zudomart/modules/users/src/modules/actingProfiles/commands/switchActingProfile"
-	"zudomart/modules/users/src/modules/actingProfiles/dtos"
-	getactingprofile "zudomart/modules/users/src/modules/actingProfiles/queries/getActingProfile"
-	listmyprofiles "zudomart/modules/users/src/modules/actingProfiles/queries/listMyProfiles"
-	"zudomart/modules/users/src/modules/actingProfiles/validators"
-	"zudomart/modules/users/src/utils"
-	"zudomart/platform/httpserver"
+	"nantty/modules/users/src/container"
+	switchactingprofile "nantty/modules/users/src/modules/actingProfiles/commands/switchActingProfile"
+	"nantty/modules/users/src/modules/actingProfiles/dtos"
+	getactingprofile "nantty/modules/users/src/modules/actingProfiles/queries/getActingProfile"
+	listmyprofiles "nantty/modules/users/src/modules/actingProfiles/queries/listMyProfiles"
+	"nantty/modules/users/src/modules/actingProfiles/validators"
+	"nantty/modules/users/src/utils"
+	"nantty/platform/httpserver"
 )
 
 type ActingProfilesController struct {

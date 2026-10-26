@@ -1,8 +1,8 @@
 package services
 
 import (
-	"zudomart/modules/users/src/errors"
-	"zudomart/modules/users/src/types"
+	"nantty/modules/users/src/errors"
+	"nantty/modules/users/src/types"
 )
 
 func RequireSuperadmin(actor types.StaffActor) error {

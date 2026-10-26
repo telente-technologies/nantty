@@ -5,13 +5,13 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/users/src/container"
-	usersErrors "zudomart/modules/users/src/errors"
-	"zudomart/modules/users/src/generated/ent"
-	consentmodels "zudomart/modules/users/src/modules/consents/models"
-	consentservices "zudomart/modules/users/src/modules/consents/services"
-	privacyservices "zudomart/modules/users/src/modules/privacySettings/services"
-	"zudomart/platform/identityports"
+	"nantty/modules/users/src/container"
+	usersErrors "nantty/modules/users/src/errors"
+	"nantty/modules/users/src/generated/ent"
+	consentmodels "nantty/modules/users/src/modules/consents/models"
+	consentservices "nantty/modules/users/src/modules/consents/services"
+	privacyservices "nantty/modules/users/src/modules/privacySettings/services"
+	"nantty/platform/identityports"
 )
 
 type Handler struct {

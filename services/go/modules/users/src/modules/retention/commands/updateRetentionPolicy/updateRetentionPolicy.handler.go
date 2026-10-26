@@ -5,13 +5,13 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"zudomart/modules/users/src/container"
-	usersevents "zudomart/modules/users/src/events"
-	"zudomart/modules/users/src/generated/ent"
-	"zudomart/modules/users/src/generated/ent/retentionpolicy"
-	retentionevents "zudomart/modules/users/src/modules/retention/events"
-	"zudomart/platform/httpserver"
-	"zudomart/platform/identityports"
+	"nantty/modules/users/src/container"
+	usersevents "nantty/modules/users/src/events"
+	"nantty/modules/users/src/generated/ent"
+	"nantty/modules/users/src/generated/ent/retentionpolicy"
+	retentionevents "nantty/modules/users/src/modules/retention/events"
+	"nantty/platform/httpserver"
+	"nantty/platform/identityports"
 )
 
 type Handler struct {

@@ -1,8 +1,8 @@
 package validators
 
 import (
-	"zudomart/modules/users/src/modules/accountSettings/dtos"
-	"zudomart/modules/users/src/utils"
+	"nantty/modules/users/src/modules/accountSettings/dtos"
+	"nantty/modules/users/src/utils"
 )
 
 var MarketingFrequencies = []string{"weekly", "important_only", "off"}

@@ -1,8 +1,8 @@
 package validators
 
 import (
-	"zudomart/modules/users/src/modules/usernames/dtos"
-	"zudomart/modules/users/src/utils"
+	"nantty/modules/users/src/modules/usernames/dtos"
+	"nantty/modules/users/src/utils"
 )
 
 func ValidateChangeUsernameRequest(request dtos.ChangeUsernameRequest) error {

@@ -3,8 +3,8 @@ package services
 import (
 	"testing"
 
-	"zudomart/modules/users/src/generated/ent"
-	"zudomart/modules/users/src/generated/ent/retentionpolicy"
+	"nantty/modules/users/src/generated/ent"
+	"nantty/modules/users/src/generated/ent/retentionpolicy"
 )
 
 func TestActionForDefaultsToRetainWhenNothingIsConfigured(t *testing.T) {

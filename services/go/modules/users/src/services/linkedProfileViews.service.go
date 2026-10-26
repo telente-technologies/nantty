@@ -5,12 +5,12 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/users/src/container"
-	"zudomart/modules/users/src/generated/ent"
-	"zudomart/modules/users/src/generated/ent/linkedprofile"
-	"zudomart/modules/users/src/generated/ent/profile"
-	"zudomart/modules/users/src/integrations"
-	"zudomart/modules/users/src/types"
+	"nantty/modules/users/src/container"
+	"nantty/modules/users/src/generated/ent"
+	"nantty/modules/users/src/generated/ent/linkedprofile"
+	"nantty/modules/users/src/generated/ent/profile"
+	"nantty/modules/users/src/integrations"
+	"nantty/modules/users/src/types"
 )
 
 type OwnedProfiles struct {

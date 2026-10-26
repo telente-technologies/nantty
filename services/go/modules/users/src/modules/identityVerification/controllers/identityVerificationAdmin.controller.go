@@ -4,11 +4,11 @@ import (
 	"net/http"
 	"strconv"
 
-	decideverificationcase "zudomart/modules/users/src/modules/identityVerification/commands/decideVerificationCase"
-	"zudomart/modules/users/src/modules/identityVerification/dtos"
-	getverificationcase "zudomart/modules/users/src/modules/identityVerification/queries/getVerificationCase"
-	listverificationcases "zudomart/modules/users/src/modules/identityVerification/queries/listVerificationCases"
-	"zudomart/modules/users/src/utils"
+	decideverificationcase "nantty/modules/users/src/modules/identityVerification/commands/decideVerificationCase"
+	"nantty/modules/users/src/modules/identityVerification/dtos"
+	getverificationcase "nantty/modules/users/src/modules/identityVerification/queries/getVerificationCase"
+	listverificationcases "nantty/modules/users/src/modules/identityVerification/queries/listVerificationCases"
+	"nantty/modules/users/src/utils"
 )
 
 func (controller IdentityVerificationController) ListCases(writer http.ResponseWriter, request *http.Request) {

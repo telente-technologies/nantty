@@ -1,8 +1,8 @@
 package validators
 
 import (
-	"zudomart/modules/users/src/modules/celebrations/dtos"
-	"zudomart/modules/users/src/utils"
+	"nantty/modules/users/src/modules/celebrations/dtos"
+	"nantty/modules/users/src/utils"
 )
 
 func ValidateMarkSeenRequest(request dtos.MarkSeenRequest) error {

@@ -5,8 +5,8 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/platform/httpserver"
-	"zudomart/platform/jwtauth"
+	"nantty/platform/httpserver"
+	"nantty/platform/jwtauth"
 )
 
 func ClientIpAddress(request *http.Request) string {

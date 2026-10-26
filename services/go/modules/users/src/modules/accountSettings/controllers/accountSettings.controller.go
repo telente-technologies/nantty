@@ -3,15 +3,15 @@ package controllers
 import (
 	"net/http"
 
-	"zudomart/modules/users/src/container"
-	updatemarketingpreferences "zudomart/modules/users/src/modules/accountSettings/commands/updateMarketingPreferences"
-	updatemysettings "zudomart/modules/users/src/modules/accountSettings/commands/updateMySettings"
-	"zudomart/modules/users/src/modules/accountSettings/dtos"
-	getmarketingpreferences "zudomart/modules/users/src/modules/accountSettings/queries/getMarketingPreferences"
-	getmysettings "zudomart/modules/users/src/modules/accountSettings/queries/getMySettings"
-	"zudomart/modules/users/src/modules/accountSettings/validators"
-	"zudomart/modules/users/src/utils"
-	"zudomart/platform/httpserver"
+	"nantty/modules/users/src/container"
+	updatemarketingpreferences "nantty/modules/users/src/modules/accountSettings/commands/updateMarketingPreferences"
+	updatemysettings "nantty/modules/users/src/modules/accountSettings/commands/updateMySettings"
+	"nantty/modules/users/src/modules/accountSettings/dtos"
+	getmarketingpreferences "nantty/modules/users/src/modules/accountSettings/queries/getMarketingPreferences"
+	getmysettings "nantty/modules/users/src/modules/accountSettings/queries/getMySettings"
+	"nantty/modules/users/src/modules/accountSettings/validators"
+	"nantty/modules/users/src/utils"
+	"nantty/platform/httpserver"
 )
 
 type AccountSettingsController struct {

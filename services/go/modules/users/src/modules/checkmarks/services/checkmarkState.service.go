@@ -6,11 +6,11 @@ import (
 
 	"github.com/google/uuid"
 
-	usersevents "zudomart/modules/users/src/events"
-	"zudomart/modules/users/src/generated/ent"
-	"zudomart/modules/users/src/generated/ent/profile"
-	"zudomart/modules/users/src/generated/ent/profilecheckmark"
-	checkmarkevents "zudomart/modules/users/src/modules/checkmarks/events"
+	usersevents "nantty/modules/users/src/events"
+	"nantty/modules/users/src/generated/ent"
+	"nantty/modules/users/src/generated/ent/profile"
+	"nantty/modules/users/src/generated/ent/profilecheckmark"
+	checkmarkevents "nantty/modules/users/src/modules/checkmarks/events"
 )
 
 func ColorForProfileType(profileType profile.ProfileType) profilecheckmark.Color {

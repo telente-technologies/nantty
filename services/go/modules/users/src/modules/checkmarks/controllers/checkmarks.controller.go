@@ -3,15 +3,15 @@ package controllers
 import (
 	"net/http"
 
-	"zudomart/modules/users/src/container"
-	dismisssuggestion "zudomart/modules/users/src/modules/checkmarks/commands/dismissSuggestion"
-	submitblackapplication "zudomart/modules/users/src/modules/checkmarks/commands/submitBlackApplication"
-	submitverificationapplication "zudomart/modules/users/src/modules/checkmarks/commands/submitVerificationApplication"
-	"zudomart/modules/users/src/modules/checkmarks/dtos"
-	getmyverification "zudomart/modules/users/src/modules/checkmarks/queries/getMyVerification"
-	listcheckmarksuggestions "zudomart/modules/users/src/modules/checkmarks/queries/listCheckmarkSuggestions"
-	"zudomart/modules/users/src/utils"
-	"zudomart/platform/httpserver"
+	"nantty/modules/users/src/container"
+	dismisssuggestion "nantty/modules/users/src/modules/checkmarks/commands/dismissSuggestion"
+	submitblackapplication "nantty/modules/users/src/modules/checkmarks/commands/submitBlackApplication"
+	submitverificationapplication "nantty/modules/users/src/modules/checkmarks/commands/submitVerificationApplication"
+	"nantty/modules/users/src/modules/checkmarks/dtos"
+	getmyverification "nantty/modules/users/src/modules/checkmarks/queries/getMyVerification"
+	listcheckmarksuggestions "nantty/modules/users/src/modules/checkmarks/queries/listCheckmarkSuggestions"
+	"nantty/modules/users/src/utils"
+	"nantty/platform/httpserver"
 )
 
 type CheckmarksController struct {

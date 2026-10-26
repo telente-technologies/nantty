@@ -1,6 +1,6 @@
 package reassignusername
 
-import "zudomart/modules/users/src/types"
+import "nantty/modules/users/src/types"
 
 type Command struct {
 	Actor           types.StaffActor
