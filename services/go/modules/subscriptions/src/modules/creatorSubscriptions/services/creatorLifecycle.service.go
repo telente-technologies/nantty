@@ -6,10 +6,10 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/ledger/src/databases"
-	"zudomart/modules/subscriptions/src/generated/ent"
-	"zudomart/modules/subscriptions/src/generated/ent/creatorsubscription"
-	"zudomart/modules/subscriptions/src/models"
+	"nantty/modules/ledger/src/databases"
+	"nantty/modules/subscriptions/src/generated/ent"
+	"nantty/modules/subscriptions/src/generated/ent/creatorsubscription"
+	"nantty/modules/subscriptions/src/models"
 )
 
 func (service CreatorSubscriptions) FindForMember(ctx context.Context, userId, subscriptionId string) (*ent.CreatorSubscription, error) {

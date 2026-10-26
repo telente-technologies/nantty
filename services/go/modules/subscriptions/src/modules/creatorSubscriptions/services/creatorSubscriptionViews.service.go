@@ -4,11 +4,11 @@ import (
 	"net/http"
 	"time"
 
-	"zudomart/modules/subscriptions/src/container"
-	"zudomart/modules/subscriptions/src/generated/ent"
-	"zudomart/modules/subscriptions/src/models"
-	"zudomart/modules/subscriptions/src/repositories"
-	"zudomart/platform/httpserver"
+	"nantty/modules/subscriptions/src/container"
+	"nantty/modules/subscriptions/src/generated/ent"
+	"nantty/modules/subscriptions/src/models"
+	"nantty/modules/subscriptions/src/repositories"
+	"nantty/platform/httpserver"
 )
 
 var (

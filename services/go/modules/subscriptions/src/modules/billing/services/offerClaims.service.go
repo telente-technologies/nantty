@@ -9,12 +9,12 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/ledger/src/databases"
-	"zudomart/modules/subscriptions/src/generated/ent"
-	"zudomart/modules/subscriptions/src/generated/ent/subscriptionofferclaim"
-	"zudomart/modules/subscriptions/src/generated/ent/subscriptionofferlink"
-	"zudomart/modules/subscriptions/src/repositories"
-	"zudomart/platform/httpserver"
+	"nantty/modules/ledger/src/databases"
+	"nantty/modules/subscriptions/src/generated/ent"
+	"nantty/modules/subscriptions/src/generated/ent/subscriptionofferclaim"
+	"nantty/modules/subscriptions/src/generated/ent/subscriptionofferlink"
+	"nantty/modules/subscriptions/src/repositories"
+	"nantty/platform/httpserver"
 )
 
 const OfferReservationWindow = time.Hour

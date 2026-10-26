@@ -3,8 +3,8 @@ package subscriptions
 import (
 	"context"
 
-	"zudomart/modules/subscriptions/src"
-	"zudomart/platform/servicemodule"
+	"nantty/modules/subscriptions/src"
+	"nantty/platform/servicemodule"
 )
 
 type Module = src.Module

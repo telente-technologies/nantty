@@ -10,14 +10,14 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/subscriptions/src/constants"
-	"zudomart/modules/subscriptions/src/container"
-	"zudomart/modules/subscriptions/src/generated/ent"
-	"zudomart/modules/subscriptions/src/generated/ent/subscription"
-	"zudomart/modules/subscriptions/src/loaders"
-	"zudomart/modules/subscriptions/src/models"
-	"zudomart/platform/httpserver"
-	"zudomart/platform/regionpricing"
+	"nantty/modules/subscriptions/src/constants"
+	"nantty/modules/subscriptions/src/container"
+	"nantty/modules/subscriptions/src/generated/ent"
+	"nantty/modules/subscriptions/src/generated/ent/subscription"
+	"nantty/modules/subscriptions/src/loaders"
+	"nantty/modules/subscriptions/src/models"
+	"nantty/platform/httpserver"
+	"nantty/platform/regionpricing"
 )
 
 var (

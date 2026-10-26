@@ -4,8 +4,8 @@ import (
 	"context"
 	"database/sql"
 
-	"zudomart/modules/ledger/src/databases"
-	paymentmodels "zudomart/modules/payments/src/modules/gateway/models"
+	"nantty/modules/ledger/src/databases"
+	paymentmodels "nantty/modules/payments/src/modules/gateway/models"
 )
 
 func (billing Billing) HandleBillingSubscriptionChangedForTest(ctx context.Context, reference, status string) error {

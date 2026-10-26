@@ -10,10 +10,10 @@ import (
 
 	"github.com/google/uuid"
 
-	ledgermodels "zudomart/modules/ledger/src/modules/journal/models"
-	"zudomart/modules/payments/src/interfaces"
-	"zudomart/modules/subscriptions/src/generated/ent/creatorsubscriptioncharge"
-	"zudomart/modules/subscriptions/src/repositories"
+	ledgermodels "nantty/modules/ledger/src/modules/journal/models"
+	"nantty/modules/payments/src/interfaces"
+	"nantty/modules/subscriptions/src/generated/ent/creatorsubscriptioncharge"
+	"nantty/modules/subscriptions/src/repositories"
 )
 
 type fakeCreatorStore struct {

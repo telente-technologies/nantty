@@ -4,10 +4,10 @@ import (
 	"net/http"
 	"strings"
 
-	ledgerutils "zudomart/modules/ledger/src/utils"
-	"zudomart/modules/subscriptions/src/modules/creatorSubscriptions/dtos"
-	"zudomart/modules/subscriptions/src/modules/creatorSubscriptions/services"
-	"zudomart/platform/httpserver"
+	ledgerutils "nantty/modules/ledger/src/utils"
+	"nantty/modules/subscriptions/src/modules/creatorSubscriptions/dtos"
+	"nantty/modules/subscriptions/src/modules/creatorSubscriptions/services"
+	"nantty/platform/httpserver"
 )
 
 const maximumStoreReceiptBytes = 64 << 10

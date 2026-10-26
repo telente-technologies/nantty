@@ -6,10 +6,10 @@ import (
 	"errors"
 	"strings"
 
-	"zudomart/modules/subscriptions/src/constants"
-	"zudomart/modules/subscriptions/src/generated/ent"
-	"zudomart/modules/subscriptions/src/generated/ent/planprice"
-	"zudomart/platform/regionpricing"
+	"nantty/modules/subscriptions/src/constants"
+	"nantty/modules/subscriptions/src/generated/ent"
+	"nantty/modules/subscriptions/src/generated/ent/planprice"
+	"nantty/platform/regionpricing"
 )
 
 type PlanPriceRow struct {

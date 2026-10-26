@@ -8,14 +8,14 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/ledger/src/databases"
-	paymentmodels "zudomart/modules/payments/src/modules/gateway/models"
-	"zudomart/modules/subscriptions/src/generated/ent"
-	"zudomart/modules/subscriptions/src/generated/ent/creatorsubscription"
-	"zudomart/modules/subscriptions/src/generated/ent/creatorsubscriptionplan"
-	"zudomart/modules/subscriptions/src/models"
-	"zudomart/modules/subscriptions/src/repositories"
-	"zudomart/platform/regionpricing"
+	"nantty/modules/ledger/src/databases"
+	paymentmodels "nantty/modules/payments/src/modules/gateway/models"
+	"nantty/modules/subscriptions/src/generated/ent"
+	"nantty/modules/subscriptions/src/generated/ent/creatorsubscription"
+	"nantty/modules/subscriptions/src/generated/ent/creatorsubscriptionplan"
+	"nantty/modules/subscriptions/src/models"
+	"nantty/modules/subscriptions/src/repositories"
+	"nantty/platform/regionpricing"
 )
 
 type NewCreatorPlan struct {

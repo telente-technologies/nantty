@@ -8,11 +8,11 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/ledger/src/databases"
-	"zudomart/modules/subscriptions/src/generated/ent"
-	"zudomart/modules/subscriptions/src/generated/ent/subscription"
-	"zudomart/modules/subscriptions/src/generated/ent/subscriptionreminder"
-	"zudomart/modules/subscriptions/src/models"
+	"nantty/modules/ledger/src/databases"
+	"nantty/modules/subscriptions/src/generated/ent"
+	"nantty/modules/subscriptions/src/generated/ent/subscription"
+	"nantty/modules/subscriptions/src/generated/ent/subscriptionreminder"
+	"nantty/modules/subscriptions/src/models"
 )
 
 func (billing Billing) SendDueReminders(ctx context.Context, limit int) int {

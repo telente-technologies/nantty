@@ -9,13 +9,13 @@ import (
 
 	"github.com/google/uuid"
 
-	moneytesting "zudomart/modules/ledger/src/databases/moneyTesting"
-	paymentstesting "zudomart/modules/payments/src/integrations/paymentsTesting"
-	"zudomart/modules/payments/src/interfaces"
-	"zudomart/modules/subscriptions/src"
-	"zudomart/modules/subscriptions/src/configs"
-	"zudomart/modules/subscriptions/src/generated/ent/subscription"
-	"zudomart/modules/subscriptions/src/repositories"
+	moneytesting "nantty/modules/ledger/src/databases/moneyTesting"
+	paymentstesting "nantty/modules/payments/src/integrations/paymentsTesting"
+	"nantty/modules/payments/src/interfaces"
+	"nantty/modules/subscriptions/src"
+	"nantty/modules/subscriptions/src/configs"
+	"nantty/modules/subscriptions/src/generated/ent/subscription"
+	"nantty/modules/subscriptions/src/repositories"
 )
 
 type subscriptionsHarness struct {

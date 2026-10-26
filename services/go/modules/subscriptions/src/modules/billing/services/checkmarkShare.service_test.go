@@ -4,9 +4,9 @@ import (
 	"testing"
 	"time"
 
-	"zudomart/modules/subscriptions/src/generated/ent"
-	"zudomart/modules/subscriptions/src/generated/ent/subscription"
-	"zudomart/platform/regionpricing"
+	"nantty/modules/subscriptions/src/generated/ent"
+	"nantty/modules/subscriptions/src/generated/ent/subscription"
+	"nantty/platform/regionpricing"
 )
 
 func TestOnlyPlansSellingMoreThanTheCheckmarkKeepRunningOnRejection(t *testing.T) {

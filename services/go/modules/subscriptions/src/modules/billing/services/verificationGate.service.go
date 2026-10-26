@@ -4,9 +4,9 @@ import (
 	"context"
 	"net/http"
 
-	"zudomart/modules/subscriptions/src/constants"
-	"zudomart/modules/subscriptions/src/repositories"
-	"zudomart/platform/httpserver"
+	"nantty/modules/subscriptions/src/constants"
+	"nantty/modules/subscriptions/src/repositories"
+	"nantty/platform/httpserver"
 )
 
 var ErrVerificationNotEligible = httpserver.NewApiError(http.StatusConflict, "VERIFICATION_NOT_ELIGIBLE", "Request verification first. We'll let you know as soon as you can apply.")

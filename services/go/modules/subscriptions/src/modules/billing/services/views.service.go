@@ -4,12 +4,12 @@ import (
 	"context"
 	"time"
 
-	"zudomart/modules/subscriptions/src/constants"
-	"zudomart/modules/subscriptions/src/generated/ent"
-	"zudomart/modules/subscriptions/src/generated/ent/subscription"
-	"zudomart/modules/subscriptions/src/loaders"
-	"zudomart/modules/subscriptions/src/models"
-	"zudomart/platform/regionpricing"
+	"nantty/modules/subscriptions/src/constants"
+	"nantty/modules/subscriptions/src/generated/ent"
+	"nantty/modules/subscriptions/src/generated/ent/subscription"
+	"nantty/modules/subscriptions/src/loaders"
+	"nantty/modules/subscriptions/src/models"
+	"nantty/platform/regionpricing"
 )
 
 type SubscriptionView struct {

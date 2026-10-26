@@ -6,9 +6,9 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/subscriptions/src/generated/ent"
-	"zudomart/modules/subscriptions/src/generated/ent/subscriptionperiod"
-	"zudomart/modules/subscriptions/src/models"
+	"nantty/modules/subscriptions/src/generated/ent"
+	"nantty/modules/subscriptions/src/generated/ent/subscriptionperiod"
+	"nantty/modules/subscriptions/src/models"
 )
 
 type PeriodView struct {

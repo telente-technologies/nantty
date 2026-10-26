@@ -1,6 +1,6 @@
 package loaders
 
-import "zudomart/modules/subscriptions/src/models"
+import "nantty/modules/subscriptions/src/models"
 
 type combinedGoldSettings struct {
 	MultiBusinessSingleProfilePercent *int    `json:"multiBusinessSingleProfilePercent"`

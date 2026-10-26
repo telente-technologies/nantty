@@ -5,9 +5,9 @@ import (
 	"net/http"
 	"strings"
 
-	paymentconstants "zudomart/modules/payments/src/constants"
-	"zudomart/platform/httpserver"
-	"zudomart/platform/regionpricing"
+	paymentconstants "nantty/modules/payments/src/constants"
+	"nantty/platform/httpserver"
+	"nantty/platform/regionpricing"
 )
 
 var (

@@ -8,11 +8,11 @@ import (
 
 	"github.com/google/uuid"
 
-	ledgerutils "zudomart/modules/ledger/src/utils"
-	paymentinterfaces "zudomart/modules/payments/src/interfaces"
-	"zudomart/modules/subscriptions/src/generated/ent"
-	"zudomart/modules/subscriptions/src/generated/ent/creatorsubscription"
-	"zudomart/platform/regionpricing"
+	ledgerutils "nantty/modules/ledger/src/utils"
+	paymentinterfaces "nantty/modules/payments/src/interfaces"
+	"nantty/modules/subscriptions/src/generated/ent"
+	"nantty/modules/subscriptions/src/generated/ent/creatorsubscription"
+	"nantty/platform/regionpricing"
 )
 
 const pendingStoreSlotHold = 30 * time.Minute

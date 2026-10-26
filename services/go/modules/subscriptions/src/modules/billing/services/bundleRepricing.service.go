@@ -5,8 +5,8 @@ import (
 	"log/slog"
 	"time"
 
-	paymentservices "zudomart/modules/payments/src/modules/gateway/services"
-	"zudomart/modules/subscriptions/src/generated/ent/subscription"
+	paymentservices "nantty/modules/payments/src/modules/gateway/services"
+	"nantty/modules/subscriptions/src/generated/ent/subscription"
 )
 
 func (billing Billing) RepriceLapsedBundles(ctx context.Context, limit int) int {

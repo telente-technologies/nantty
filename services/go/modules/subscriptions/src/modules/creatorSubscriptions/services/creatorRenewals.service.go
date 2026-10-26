@@ -8,12 +8,12 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/ledger/src/databases"
-	paymentservices "zudomart/modules/payments/src/modules/gateway/services"
-	"zudomart/modules/subscriptions/src/generated/ent"
-	"zudomart/modules/subscriptions/src/generated/ent/creatorsubscription"
-	"zudomart/modules/subscriptions/src/generated/ent/creatorsubscriptioncharge"
-	"zudomart/modules/subscriptions/src/models"
+	"nantty/modules/ledger/src/databases"
+	paymentservices "nantty/modules/payments/src/modules/gateway/services"
+	"nantty/modules/subscriptions/src/generated/ent"
+	"nantty/modules/subscriptions/src/generated/ent/creatorsubscription"
+	"nantty/modules/subscriptions/src/generated/ent/creatorsubscriptioncharge"
+	"nantty/modules/subscriptions/src/models"
 )
 
 const creatorRenewalLease = 15 * time.Minute

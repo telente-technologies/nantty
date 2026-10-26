@@ -6,10 +6,10 @@ import (
 	"log/slog"
 	"time"
 
-	"zudomart/modules/ledger/src/databases"
-	paymentservices "zudomart/modules/payments/src/modules/gateway/services"
-	"zudomart/modules/subscriptions/src/generated/ent/subscription"
-	"zudomart/modules/subscriptions/src/models"
+	"nantty/modules/ledger/src/databases"
+	paymentservices "nantty/modules/payments/src/modules/gateway/services"
+	"nantty/modules/subscriptions/src/generated/ent/subscription"
+	"nantty/modules/subscriptions/src/models"
 )
 
 type JobReport struct {

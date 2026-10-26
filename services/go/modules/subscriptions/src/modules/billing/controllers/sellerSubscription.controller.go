@@ -6,9 +6,9 @@ import (
 
 	"github.com/google/uuid"
 
-	ledgerutils "zudomart/modules/ledger/src/utils"
-	"zudomart/modules/subscriptions/src/repositories"
-	"zudomart/platform/httpserver"
+	ledgerutils "nantty/modules/ledger/src/utils"
+	"nantty/modules/subscriptions/src/repositories"
+	"nantty/platform/httpserver"
 )
 
 type referenceBody struct {

@@ -6,10 +6,10 @@ import (
 	"testing"
 	"time"
 
-	"zudomart/modules/subscriptions/src/container"
-	"zudomart/modules/subscriptions/src/generated/ent"
-	"zudomart/modules/subscriptions/src/generated/ent/subscription"
-	"zudomart/modules/subscriptions/src/repositories"
+	"nantty/modules/subscriptions/src/container"
+	"nantty/modules/subscriptions/src/generated/ent"
+	"nantty/modules/subscriptions/src/generated/ent/subscription"
+	"nantty/modules/subscriptions/src/repositories"
 )
 
 func TestRejectedVerificationRefundPathPerChannel(t *testing.T) {

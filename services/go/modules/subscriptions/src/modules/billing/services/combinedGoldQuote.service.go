@@ -5,13 +5,13 @@ import (
 	"net/http"
 	"slices"
 
-	"zudomart/modules/subscriptions/src/constants"
-	"zudomart/modules/subscriptions/src/generated/ent"
-	"zudomart/modules/subscriptions/src/generated/ent/subscription"
-	"zudomart/modules/subscriptions/src/models"
-	"zudomart/modules/subscriptions/src/repositories"
-	"zudomart/platform/httpserver"
-	"zudomart/platform/regionpricing"
+	"nantty/modules/subscriptions/src/constants"
+	"nantty/modules/subscriptions/src/generated/ent"
+	"nantty/modules/subscriptions/src/generated/ent/subscription"
+	"nantty/modules/subscriptions/src/models"
+	"nantty/modules/subscriptions/src/repositories"
+	"nantty/platform/httpserver"
+	"nantty/platform/regionpricing"
 )
 
 var (

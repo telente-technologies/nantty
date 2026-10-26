@@ -7,11 +7,11 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/ledger/src/databases"
-	"zudomart/modules/subscriptions/src/generated/ent"
-	"zudomart/modules/subscriptions/src/generated/ent/subscriptionofferclaim"
-	"zudomart/modules/subscriptions/src/generated/ent/subscriptionoffersend"
-	"zudomart/modules/subscriptions/src/models"
+	"nantty/modules/ledger/src/databases"
+	"nantty/modules/subscriptions/src/generated/ent"
+	"nantty/modules/subscriptions/src/generated/ent/subscriptionofferclaim"
+	"nantty/modules/subscriptions/src/generated/ent/subscriptionoffersend"
+	"nantty/modules/subscriptions/src/models"
 )
 
 const OfferSentEvent = "subscriptionOffer.sent"

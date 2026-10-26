@@ -8,11 +8,11 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/ledger/src/databases"
-	"zudomart/modules/subscriptions/src/generated/ent"
-	"zudomart/modules/subscriptions/src/generated/ent/subscriptionofferlink"
-	"zudomart/modules/subscriptions/src/models"
-	"zudomart/platform/httpserver"
+	"nantty/modules/ledger/src/databases"
+	"nantty/modules/subscriptions/src/generated/ent"
+	"nantty/modules/subscriptions/src/generated/ent/subscriptionofferlink"
+	"nantty/modules/subscriptions/src/models"
+	"nantty/platform/httpserver"
 )
 
 var (

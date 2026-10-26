@@ -9,8 +9,8 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/subscriptions/src/generated/ent/subscription"
-	"zudomart/modules/subscriptions/src/repositories"
+	"nantty/modules/subscriptions/src/generated/ent/subscription"
+	"nantty/modules/subscriptions/src/repositories"
 )
 
 func TestRenewalWithALostProviderReplyChargesTheCardOnce(t *testing.T) {

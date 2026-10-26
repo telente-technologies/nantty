@@ -7,8 +7,8 @@ import (
 	"testing"
 	"time"
 
-	ledgerloaders "zudomart/modules/ledger/src/loaders"
-	"zudomart/modules/subscriptions/src/constants"
+	ledgerloaders "nantty/modules/ledger/src/loaders"
+	"nantty/modules/subscriptions/src/constants"
 )
 
 func sourceWithPlans(document string) *ledgerloaders.PlatformSettingsSource {

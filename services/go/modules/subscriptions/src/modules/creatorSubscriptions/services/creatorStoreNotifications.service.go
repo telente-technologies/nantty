@@ -5,12 +5,12 @@ import (
 	"database/sql"
 	"errors"
 
-	paymentinterfaces "zudomart/modules/payments/src/interfaces"
-	paymentmodels "zudomart/modules/payments/src/modules/gateway/models"
-	"zudomart/modules/subscriptions/src/generated/ent"
-	"zudomart/modules/subscriptions/src/generated/ent/creatorsubscription"
-	"zudomart/modules/subscriptions/src/models"
-	"zudomart/platform/regionpricing"
+	paymentinterfaces "nantty/modules/payments/src/interfaces"
+	paymentmodels "nantty/modules/payments/src/modules/gateway/models"
+	"nantty/modules/subscriptions/src/generated/ent"
+	"nantty/modules/subscriptions/src/generated/ent/creatorsubscription"
+	"nantty/modules/subscriptions/src/models"
+	"nantty/platform/regionpricing"
 )
 
 func (service CreatorSubscriptions) HandleStoreSubscriptionNotice(ctx context.Context, transaction *sql.Tx, notice paymentmodels.StoreSubscriptionNotice) error {

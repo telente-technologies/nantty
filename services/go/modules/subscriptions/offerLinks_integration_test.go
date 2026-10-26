@@ -9,9 +9,9 @@ import (
 
 	"github.com/google/uuid"
 
-	paymentstesting "zudomart/modules/payments/src/integrations/paymentsTesting"
-	"zudomart/modules/subscriptions/src/generated/ent/outboxevent"
-	"zudomart/modules/subscriptions/src/repositories"
+	paymentstesting "nantty/modules/payments/src/integrations/paymentsTesting"
+	"nantty/modules/subscriptions/src/generated/ent/outboxevent"
+	"nantty/modules/subscriptions/src/repositories"
 )
 
 const manageMonetization = "money.monetization.manage"

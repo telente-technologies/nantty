@@ -8,9 +8,9 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/subscriptions/src/generated/ent/outboxevent"
-	"zudomart/modules/subscriptions/src/generated/ent/subscription"
-	"zudomart/modules/subscriptions/src/repositories"
+	"nantty/modules/subscriptions/src/generated/ent/outboxevent"
+	"nantty/modules/subscriptions/src/generated/ent/subscription"
+	"nantty/modules/subscriptions/src/repositories"
 )
 
 func TestCancellingAProviderBilledPlanCommitsLocallyFirstAndCancelsAtTheProviderThroughTheOutbox(t *testing.T) {

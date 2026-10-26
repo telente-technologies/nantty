@@ -4,10 +4,10 @@ import (
 	"context"
 	"strings"
 
-	"zudomart/modules/subscriptions/src/generated/ent"
-	"zudomart/modules/subscriptions/src/generated/ent/subscription"
-	"zudomart/modules/subscriptions/src/generated/ent/trialclaim"
-	"zudomart/modules/subscriptions/src/models"
+	"nantty/modules/subscriptions/src/generated/ent"
+	"nantty/modules/subscriptions/src/generated/ent/subscription"
+	"nantty/modules/subscriptions/src/generated/ent/trialclaim"
+	"nantty/modules/subscriptions/src/models"
 )
 
 func (billing Billing) TrialIneligibility(ctx context.Context, client *ent.Client, request CheckoutRequest, planAllowsTrial bool) ([]models.IneligibleReason, error) {

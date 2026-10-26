@@ -8,7 +8,7 @@ import (
 	"entgo.io/ent/schema/field"
 	"entgo.io/ent/schema/index"
 
-	"zudomart/modules/subscriptions/src/models"
+	"nantty/modules/subscriptions/src/models"
 )
 
 type CreatorSubscriptionPlan struct {

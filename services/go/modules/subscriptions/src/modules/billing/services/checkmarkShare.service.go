@@ -5,11 +5,11 @@ import (
 	"log/slog"
 	"strings"
 
-	paymentservices "zudomart/modules/payments/src/modules/gateway/services"
-	"zudomart/modules/subscriptions/src/constants"
-	"zudomart/modules/subscriptions/src/generated/ent"
-	"zudomart/modules/subscriptions/src/generated/ent/subscription"
-	"zudomart/platform/regionpricing"
+	paymentservices "nantty/modules/payments/src/modules/gateway/services"
+	"nantty/modules/subscriptions/src/constants"
+	"nantty/modules/subscriptions/src/generated/ent"
+	"nantty/modules/subscriptions/src/generated/ent/subscription"
+	"nantty/platform/regionpricing"
 )
 
 func KeepsPlanOnRejection(planCode string) bool {

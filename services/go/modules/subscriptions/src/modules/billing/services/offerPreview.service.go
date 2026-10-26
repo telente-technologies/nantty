@@ -4,9 +4,9 @@ import (
 	"context"
 	"time"
 
-	"zudomart/modules/subscriptions/src/generated/ent"
-	"zudomart/modules/subscriptions/src/generated/ent/subscriptionofferclaim"
-	"zudomart/modules/subscriptions/src/models"
+	"nantty/modules/subscriptions/src/generated/ent"
+	"nantty/modules/subscriptions/src/generated/ent/subscriptionofferclaim"
+	"nantty/modules/subscriptions/src/models"
 )
 
 const (

@@ -7,7 +7,7 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/subscriptions/src/repositories"
+	"nantty/modules/subscriptions/src/repositories"
 )
 
 func TestOneTrialPerEmailAcrossAccounts(t *testing.T) {

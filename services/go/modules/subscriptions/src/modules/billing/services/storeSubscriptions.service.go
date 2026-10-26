@@ -7,14 +7,14 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/ledger/src/databases"
-	paymentconstants "zudomart/modules/payments/src/constants"
-	paymentinterfaces "zudomart/modules/payments/src/interfaces"
-	paymentmodels "zudomart/modules/payments/src/modules/gateway/models"
-	"zudomart/modules/subscriptions/src/constants"
-	"zudomart/modules/subscriptions/src/generated/ent"
-	"zudomart/modules/subscriptions/src/generated/ent/subscription"
-	"zudomart/platform/httpserver"
+	"nantty/modules/ledger/src/databases"
+	paymentconstants "nantty/modules/payments/src/constants"
+	paymentinterfaces "nantty/modules/payments/src/interfaces"
+	paymentmodels "nantty/modules/payments/src/modules/gateway/models"
+	"nantty/modules/subscriptions/src/constants"
+	"nantty/modules/subscriptions/src/generated/ent"
+	"nantty/modules/subscriptions/src/generated/ent/subscription"
+	"nantty/platform/httpserver"
 )
 
 var ErrStoreProductUnknown = httpserver.NewApiError(http.StatusUnprocessableEntity, "STORE_PRODUCT_NOT_A_SUBSCRIPTION", "This product is not a subscription.")

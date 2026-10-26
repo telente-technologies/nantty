@@ -5,12 +5,12 @@ import (
 	"database/sql"
 	"maps"
 
-	"zudomart/modules/subscriptions/src/constants"
-	"zudomart/modules/subscriptions/src/generated/ent"
-	"zudomart/modules/subscriptions/src/generated/ent/subscription"
-	"zudomart/modules/subscriptions/src/generated/ent/subscriptioncoveredprofile"
-	"zudomart/modules/subscriptions/src/generated/ent/subscriptionperiod"
-	"zudomart/modules/subscriptions/src/models"
+	"nantty/modules/subscriptions/src/constants"
+	"nantty/modules/subscriptions/src/generated/ent"
+	"nantty/modules/subscriptions/src/generated/ent/subscription"
+	"nantty/modules/subscriptions/src/generated/ent/subscriptioncoveredprofile"
+	"nantty/modules/subscriptions/src/generated/ent/subscriptionperiod"
+	"nantty/modules/subscriptions/src/models"
 )
 
 var grantedCoverageStatuses = []subscriptioncoveredprofile.Status{subscriptioncoveredprofile.StatusActive, subscriptioncoveredprofile.StatusRemoving}

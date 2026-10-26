@@ -4,12 +4,12 @@ import (
 	"context"
 	"database/sql"
 
-	"zudomart/modules/ledger/src/databases"
-	"zudomart/modules/subscriptions/src/generated/ent"
-	"zudomart/modules/subscriptions/src/generated/ent/subscription"
-	"zudomart/modules/subscriptions/src/generated/ent/subscriptionofferclaim"
-	"zudomart/modules/subscriptions/src/generated/ent/subscriptionofferlink"
-	"zudomart/modules/subscriptions/src/models"
+	"nantty/modules/ledger/src/databases"
+	"nantty/modules/subscriptions/src/generated/ent"
+	"nantty/modules/subscriptions/src/generated/ent/subscription"
+	"nantty/modules/subscriptions/src/generated/ent/subscriptionofferclaim"
+	"nantty/modules/subscriptions/src/generated/ent/subscriptionofferlink"
+	"nantty/modules/subscriptions/src/models"
 )
 
 func (billing Billing) releaseOfferClaimInTransaction(ctx context.Context, client *ent.Client, claim *ent.SubscriptionOfferClaim) error {

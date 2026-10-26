@@ -5,8 +5,8 @@ import (
 	"encoding/json"
 	"strings"
 
-	ledgerloaders "zudomart/modules/ledger/src/loaders"
-	"zudomart/modules/subscriptions/src/constants"
+	ledgerloaders "nantty/modules/ledger/src/loaders"
+	"nantty/modules/subscriptions/src/constants"
 )
 
 const PlansSettingKey = "plans"

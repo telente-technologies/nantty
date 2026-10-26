@@ -7,11 +7,11 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/subscriptions/src/generated/ent"
-	"zudomart/modules/subscriptions/src/generated/ent/subscription"
-	"zudomart/modules/subscriptions/src/generated/ent/subscriptionofferclaim"
-	"zudomart/modules/subscriptions/src/models"
-	"zudomart/platform/httpserver"
+	"nantty/modules/subscriptions/src/generated/ent"
+	"nantty/modules/subscriptions/src/generated/ent/subscription"
+	"nantty/modules/subscriptions/src/generated/ent/subscriptionofferclaim"
+	"nantty/modules/subscriptions/src/models"
+	"nantty/platform/httpserver"
 )
 
 var (

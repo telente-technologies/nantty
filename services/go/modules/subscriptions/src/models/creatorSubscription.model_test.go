@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"zudomart/platform/regionpricing"
+	"nantty/platform/regionpricing"
 )
 
 func TestCreatorKeepsEightyPercentOfNetAfterTheProviderFee(t *testing.T) {

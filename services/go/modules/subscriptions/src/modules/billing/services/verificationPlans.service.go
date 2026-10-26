@@ -7,12 +7,12 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/subscriptions/src/constants"
-	"zudomart/modules/subscriptions/src/generated/ent"
-	"zudomart/modules/subscriptions/src/generated/ent/subscription"
-	"zudomart/modules/subscriptions/src/loaders"
-	"zudomart/platform/httpserver"
-	"zudomart/platform/regionpricing"
+	"nantty/modules/subscriptions/src/constants"
+	"nantty/modules/subscriptions/src/generated/ent"
+	"nantty/modules/subscriptions/src/generated/ent/subscription"
+	"nantty/modules/subscriptions/src/loaders"
+	"nantty/platform/httpserver"
+	"nantty/platform/regionpricing"
 )
 
 var ErrNoVerificationSubscription = httpserver.NewApiError(http.StatusConflict, "NO_ACTIVE_SUBSCRIPTION", "You don't have an active verification subscription.")

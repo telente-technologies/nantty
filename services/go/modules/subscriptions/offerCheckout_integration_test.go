@@ -8,10 +8,10 @@ import (
 
 	"github.com/google/uuid"
 
-	paymentstesting "zudomart/modules/payments/src/integrations/paymentsTesting"
-	"zudomart/modules/subscriptions/src/generated/ent/subscription"
-	"zudomart/modules/subscriptions/src/generated/ent/subscriptionofferclaim"
-	"zudomart/modules/subscriptions/src/repositories"
+	paymentstesting "nantty/modules/payments/src/integrations/paymentsTesting"
+	"nantty/modules/subscriptions/src/generated/ent/subscription"
+	"nantty/modules/subscriptions/src/generated/ent/subscriptionofferclaim"
+	"nantty/modules/subscriptions/src/repositories"
 )
 
 func (harness *subscriptionsHarness) offerCheckout(account offerAccount, planId, claimId string) paymentstesting.HarnessResponse {

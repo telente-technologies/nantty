@@ -6,12 +6,12 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/subscriptions/src/constants"
-	"zudomart/modules/subscriptions/src/generated/ent"
-	"zudomart/modules/subscriptions/src/generated/ent/subscription"
-	"zudomart/modules/subscriptions/src/generated/ent/subscriptionofferclaim"
-	"zudomart/modules/subscriptions/src/generated/ent/subscriptionofferlink"
-	"zudomart/modules/subscriptions/src/generated/ent/subscriptionoffersend"
+	"nantty/modules/subscriptions/src/constants"
+	"nantty/modules/subscriptions/src/generated/ent"
+	"nantty/modules/subscriptions/src/generated/ent/subscription"
+	"nantty/modules/subscriptions/src/generated/ent/subscriptionofferclaim"
+	"nantty/modules/subscriptions/src/generated/ent/subscriptionofferlink"
+	"nantty/modules/subscriptions/src/generated/ent/subscriptionoffersend"
 )
 
 const maximumOfferSendsConsideredForDiscounts = 20

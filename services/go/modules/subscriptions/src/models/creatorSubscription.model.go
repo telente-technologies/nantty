@@ -4,7 +4,7 @@ import (
 	"errors"
 	"time"
 
-	"zudomart/platform/regionpricing"
+	"nantty/platform/regionpricing"
 )
 
 const (

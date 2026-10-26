@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 
-	"zudomart/modules/subscriptions/src/models"
+	"nantty/modules/subscriptions/src/models"
 )
 
 type MoneyDto struct {

@@ -3,9 +3,9 @@ package routes
 import (
 	"net/http"
 
-	"zudomart/modules/ledger/src/constants"
-	"zudomart/modules/ledger/src/middlewares"
-	"zudomart/modules/subscriptions/src/modules/billing/controllers"
+	"nantty/modules/ledger/src/constants"
+	"nantty/modules/ledger/src/middlewares"
+	"nantty/modules/subscriptions/src/modules/billing/controllers"
 )
 
 func MountBillingRoutes(mux *http.ServeMux, controller controllers.BillingController) {

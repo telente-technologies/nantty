@@ -9,8 +9,8 @@ import (
 
 	"github.com/google/uuid"
 
-	ledgermodels "zudomart/modules/ledger/src/modules/journal/models"
-	"zudomart/modules/subscriptions/src/repositories"
+	ledgermodels "nantty/modules/ledger/src/modules/journal/models"
+	"nantty/modules/subscriptions/src/repositories"
 )
 
 func startCreatorSubscriptionsHarness(t *testing.T, creator, fan, blocked string) *subscriptionsHarness {

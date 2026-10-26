@@ -7,13 +7,13 @@ import (
 
 	"github.com/google/uuid"
 
-	paymentmodels "zudomart/modules/payments/src/modules/gateway/models"
-	"zudomart/modules/subscriptions/src/constants"
-	"zudomart/modules/subscriptions/src/generated/ent"
-	"zudomart/modules/subscriptions/src/generated/ent/subscription"
-	"zudomart/modules/subscriptions/src/generated/ent/subscriptionreminder"
-	"zudomart/modules/subscriptions/src/generated/ent/trialclaim"
-	"zudomart/modules/subscriptions/src/models"
+	paymentmodels "nantty/modules/payments/src/modules/gateway/models"
+	"nantty/modules/subscriptions/src/constants"
+	"nantty/modules/subscriptions/src/generated/ent"
+	"nantty/modules/subscriptions/src/generated/ent/subscription"
+	"nantty/modules/subscriptions/src/generated/ent/subscriptionreminder"
+	"nantty/modules/subscriptions/src/generated/ent/trialclaim"
+	"nantty/modules/subscriptions/src/models"
 )
 
 func (billing Billing) HandleBillingSubscriptionChanged(ctx context.Context, transaction *sql.Tx, change paymentmodels.BillingSubscriptionChange) error {

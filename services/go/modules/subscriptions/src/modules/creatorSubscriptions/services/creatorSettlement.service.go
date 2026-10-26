@@ -7,12 +7,12 @@ import (
 
 	"github.com/google/uuid"
 
-	ledgermodels "zudomart/modules/ledger/src/modules/journal/models"
-	paymentmodels "zudomart/modules/payments/src/modules/gateway/models"
-	"zudomart/modules/subscriptions/src/generated/ent"
-	"zudomart/modules/subscriptions/src/generated/ent/creatorsubscription"
-	"zudomart/modules/subscriptions/src/generated/ent/creatorsubscriptioncharge"
-	"zudomart/modules/subscriptions/src/models"
+	ledgermodels "nantty/modules/ledger/src/modules/journal/models"
+	paymentmodels "nantty/modules/payments/src/modules/gateway/models"
+	"nantty/modules/subscriptions/src/generated/ent"
+	"nantty/modules/subscriptions/src/generated/ent/creatorsubscription"
+	"nantty/modules/subscriptions/src/generated/ent/creatorsubscriptioncharge"
+	"nantty/modules/subscriptions/src/models"
 )
 
 func (service CreatorSubscriptions) lockCharge(ctx context.Context, transaction *sql.Tx, chargeId string) (*ent.CreatorSubscriptionCharge, *ent.CreatorSubscription, error) {

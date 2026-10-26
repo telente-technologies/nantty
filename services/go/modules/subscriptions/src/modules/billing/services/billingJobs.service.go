@@ -7,7 +7,7 @@ import (
 
 	"github.com/google/uuid"
 
-	platformevents "zudomart/platform/events"
+	platformevents "nantty/platform/events"
 )
 
 const SubscriptionBillingJobType = "subscriptionBilling.processDue"

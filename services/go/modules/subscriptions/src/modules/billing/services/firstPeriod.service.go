@@ -7,11 +7,11 @@ import (
 
 	"github.com/google/uuid"
 
-	paymentconstants "zudomart/modules/payments/src/constants"
-	paymentmodels "zudomart/modules/payments/src/modules/gateway/models"
-	"zudomart/modules/subscriptions/src/generated/ent/subscription"
-	"zudomart/modules/subscriptions/src/generated/ent/subscriptionperiod"
-	"zudomart/modules/subscriptions/src/models"
+	paymentconstants "nantty/modules/payments/src/constants"
+	paymentmodels "nantty/modules/payments/src/modules/gateway/models"
+	"nantty/modules/subscriptions/src/generated/ent/subscription"
+	"nantty/modules/subscriptions/src/generated/ent/subscriptionperiod"
+	"nantty/modules/subscriptions/src/models"
 )
 
 type firstPeriodRequest struct {

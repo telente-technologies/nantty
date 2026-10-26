@@ -5,11 +5,11 @@ import (
 	"errors"
 	"testing"
 
-	"zudomart/modules/subscriptions/src/container"
-	"zudomart/modules/subscriptions/src/generated/ent"
-	"zudomart/modules/subscriptions/src/generated/ent/subscription"
-	"zudomart/modules/subscriptions/src/models"
-	platformevents "zudomart/platform/events"
+	"nantty/modules/subscriptions/src/container"
+	"nantty/modules/subscriptions/src/generated/ent"
+	"nantty/modules/subscriptions/src/generated/ent/subscription"
+	"nantty/modules/subscriptions/src/models"
+	platformevents "nantty/platform/events"
 )
 
 func TestCheckmarkComponentPerPlan(t *testing.T) {

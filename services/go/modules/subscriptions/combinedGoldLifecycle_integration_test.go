@@ -9,9 +9,9 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/subscriptions/src/generated/ent/subscription"
-	"zudomart/modules/subscriptions/src/generated/ent/subscriptioncoveredprofile"
-	billingservices "zudomart/modules/subscriptions/src/modules/billing/services"
+	"nantty/modules/subscriptions/src/generated/ent/subscription"
+	"nantty/modules/subscriptions/src/generated/ent/subscriptioncoveredprofile"
+	billingservices "nantty/modules/subscriptions/src/modules/billing/services"
 )
 
 func (harness *subscriptionsHarness) coverageOf(subscriptionId uuid.UUID) map[string]string {

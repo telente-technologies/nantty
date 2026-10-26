@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"testing"
 
-	"zudomart/modules/subscriptions/src/models"
+	"nantty/modules/subscriptions/src/models"
 )
 
 func TestCombinedGoldSettingsComeFromTheCheckmarkPricingDocument(t *testing.T) {
