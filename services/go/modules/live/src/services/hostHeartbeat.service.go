@@ -7,11 +7,11 @@ import (
 
 	"github.com/google/uuid"
 
-	liveerrors "zudomart/modules/live/src/errors"
-	"zudomart/modules/live/src/generated/ent"
-	"zudomart/modules/live/src/generated/ent/guestslot"
-	"zudomart/modules/live/src/generated/ent/livesession"
-	"zudomart/modules/live/src/types"
+	liveerrors "nantty/modules/live/src/errors"
+	"nantty/modules/live/src/generated/ent"
+	"nantty/modules/live/src/generated/ent/guestslot"
+	"nantty/modules/live/src/generated/ent/livesession"
+	"nantty/modules/live/src/types"
 )
 
 const HostHeartbeatTimeout = 60 * time.Second

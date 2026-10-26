@@ -8,7 +8,7 @@ import (
 
 	"github.com/livekit/protocol/auth"
 
-	"zudomart/modules/live/src/services"
+	"nantty/modules/live/src/services"
 )
 
 func (harness *liveHarness) mediaGrant(liveId string, user liveUser) *auth.ClaimGrants {

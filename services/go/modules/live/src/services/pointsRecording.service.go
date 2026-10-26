@@ -2,12 +2,12 @@ package services
 
 import (
 	"context"
-	"zudomart/modules/live/src/generated/ent/pointsentry"
+	"nantty/modules/live/src/generated/ent/pointsentry"
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/live/src/generated/ent"
-	"zudomart/modules/live/src/generated/ent/pointsrule"
+	"nantty/modules/live/src/generated/ent"
+	"nantty/modules/live/src/generated/ent/pointsrule"
 )
 
 type pointsContext struct {

@@ -7,10 +7,10 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/live/src/configs"
-	"zudomart/modules/live/src/container"
-	liveerrors "zudomart/modules/live/src/errors"
-	"zudomart/modules/live/src/types"
+	"nantty/modules/live/src/configs"
+	"nantty/modules/live/src/container"
+	liveerrors "nantty/modules/live/src/errors"
+	"nantty/modules/live/src/types"
 )
 
 func TestOnlyCreatorProgramMembersCanGoLive(t *testing.T) {

@@ -3,8 +3,8 @@ package cancelpendingbattle
 import (
 	"context"
 
-	"zudomart/modules/live/src/container"
-	"zudomart/modules/live/src/services"
+	"nantty/modules/live/src/container"
+	"nantty/modules/live/src/services"
 
 	"github.com/google/uuid"
 )

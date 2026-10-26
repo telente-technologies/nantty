@@ -3,8 +3,8 @@ package jobs
 import (
 	"context"
 
-	"zudomart/modules/live/src/container"
-	"zudomart/modules/live/src/services"
+	"nantty/modules/live/src/container"
+	"nantty/modules/live/src/services"
 )
 
 func RunDueTimerSweepsUntilContextDone(ctx context.Context, deployed *container.Container) error {

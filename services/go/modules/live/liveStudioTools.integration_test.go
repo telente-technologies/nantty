@@ -8,7 +8,7 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/live/src/interfaces"
+	"nantty/modules/live/src/interfaces"
 )
 
 func TestStreamHealthIsHostOnlyAndReportsIngressState(t *testing.T) {

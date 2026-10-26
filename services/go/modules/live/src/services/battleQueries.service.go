@@ -6,12 +6,12 @@ import (
 
 	"github.com/google/uuid"
 
-	liveerrors "zudomart/modules/live/src/errors"
-	"zudomart/modules/live/src/generated/ent"
-	battlerecord "zudomart/modules/live/src/generated/ent/battle"
-	"zudomart/modules/live/src/generated/ent/battleparticipant"
-	"zudomart/modules/live/src/interfaces"
-	"zudomart/modules/live/src/types"
+	liveerrors "nantty/modules/live/src/errors"
+	"nantty/modules/live/src/generated/ent"
+	battlerecord "nantty/modules/live/src/generated/ent/battle"
+	"nantty/modules/live/src/generated/ent/battleparticipant"
+	"nantty/modules/live/src/interfaces"
+	"nantty/modules/live/src/types"
 )
 
 func (service *LiveService) GetBattle(ctx context.Context, viewer, battleId uuid.UUID) (types.BattleView, error) {

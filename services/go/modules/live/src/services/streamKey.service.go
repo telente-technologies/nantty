@@ -7,14 +7,14 @@ import (
 
 	"github.com/google/uuid"
 
-	liveerrors "zudomart/modules/live/src/errors"
-	"zudomart/modules/live/src/generated/ent"
-	"zudomart/modules/live/src/generated/ent/liveingress"
-	"zudomart/modules/live/src/generated/ent/livesession"
-	"zudomart/modules/live/src/generated/ent/predicate"
-	"zudomart/modules/live/src/integrations"
-	"zudomart/modules/live/src/interfaces"
-	"zudomart/modules/live/src/types"
+	liveerrors "nantty/modules/live/src/errors"
+	"nantty/modules/live/src/generated/ent"
+	"nantty/modules/live/src/generated/ent/liveingress"
+	"nantty/modules/live/src/generated/ent/livesession"
+	"nantty/modules/live/src/generated/ent/predicate"
+	"nantty/modules/live/src/integrations"
+	"nantty/modules/live/src/interfaces"
+	"nantty/modules/live/src/types"
 )
 
 func keyHint(streamKey string) string {

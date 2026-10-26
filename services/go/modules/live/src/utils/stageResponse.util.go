@@ -5,10 +5,10 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/live/src/container"
-	getlivestage "zudomart/modules/live/src/modules/stage/queries/getLiveStage"
-	"zudomart/modules/live/src/types"
-	"zudomart/platform/httpserver"
+	"nantty/modules/live/src/container"
+	getlivestage "nantty/modules/live/src/modules/stage/queries/getLiveStage"
+	"nantty/modules/live/src/types"
+	"nantty/platform/httpserver"
 )
 
 func RespondWithStage(deployed *container.Container, writer http.ResponseWriter, request *http.Request, actor types.Actor, liveId uuid.UUID, extra *types.MediaTokenView) {

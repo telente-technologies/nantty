@@ -7,7 +7,7 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/live/src/interfaces"
+	"nantty/modules/live/src/interfaces"
 )
 
 func (gateway *InMemoryMoneyGateway) SettleBattle(_ context.Context, request interfaces.SettleBattleRequest) (interfaces.BattleSettlement, error) {

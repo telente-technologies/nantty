@@ -2,12 +2,12 @@ package services
 
 import (
 	"context"
-	liveerrors "zudomart/modules/live/src/errors"
-	"zudomart/modules/live/src/types"
+	liveerrors "nantty/modules/live/src/errors"
+	"nantty/modules/live/src/types"
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/live/src/generated/ent"
+	"nantty/modules/live/src/generated/ent"
 )
 
 func (service *LiveService) GetLiveGiftStreamStats(ctx context.Context, actor types.Actor, liveId uuid.UUID) (types.StreamStatsView, error) {

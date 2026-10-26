@@ -4,11 +4,11 @@ import (
 	"context"
 	"net/http"
 
-	"zudomart/modules/live/src/container"
-	"zudomart/modules/live/src/modules/widgets/dtos"
-	listfollowedlives "zudomart/modules/live/src/modules/widgets/queries/listFollowedLives"
-	"zudomart/modules/live/src/utils"
-	"zudomart/platform/widgets"
+	"nantty/modules/live/src/container"
+	"nantty/modules/live/src/modules/widgets/dtos"
+	listfollowedlives "nantty/modules/live/src/modules/widgets/queries/listFollowedLives"
+	"nantty/modules/live/src/utils"
+	"nantty/platform/widgets"
 )
 
 const livesShownOnWidget = 8

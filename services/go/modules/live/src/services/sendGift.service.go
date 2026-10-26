@@ -3,22 +3,22 @@ package services
 import (
 	"context"
 	"errors"
+	liveerrors "nantty/modules/live/src/errors"
+	"nantty/modules/live/src/interfaces"
+	"nantty/modules/live/src/types"
 	"strconv"
 	"time"
-	liveerrors "zudomart/modules/live/src/errors"
-	"zudomart/modules/live/src/interfaces"
-	"zudomart/modules/live/src/types"
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/live/src/generated/ent"
-	battlerecord "zudomart/modules/live/src/generated/ent/battle"
-	"zudomart/modules/live/src/generated/ent/battleparticipant"
-	"zudomart/modules/live/src/generated/ent/gift"
-	"zudomart/modules/live/src/generated/ent/guestslot"
-	"zudomart/modules/live/src/generated/ent/livesession"
-	"zudomart/modules/live/src/generated/ent/processedgift"
-	"zudomart/platform/httpserver"
+	"nantty/modules/live/src/generated/ent"
+	battlerecord "nantty/modules/live/src/generated/ent/battle"
+	"nantty/modules/live/src/generated/ent/battleparticipant"
+	"nantty/modules/live/src/generated/ent/gift"
+	"nantty/modules/live/src/generated/ent/guestslot"
+	"nantty/modules/live/src/generated/ent/livesession"
+	"nantty/modules/live/src/generated/ent/processedgift"
+	"nantty/platform/httpserver"
 )
 
 const (

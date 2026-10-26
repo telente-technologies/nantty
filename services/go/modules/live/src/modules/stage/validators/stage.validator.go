@@ -1,9 +1,9 @@
 package validators
 
 import (
-	"zudomart/modules/live/src/modules/stage/dtos"
-	"zudomart/modules/live/src/utils"
-	"zudomart/platform/httpserver"
+	"nantty/modules/live/src/modules/stage/dtos"
+	"nantty/modules/live/src/utils"
+	"nantty/platform/httpserver"
 )
 
 func ValidateInviteGuestRequest(body dtos.InviteGuestRequest) error {

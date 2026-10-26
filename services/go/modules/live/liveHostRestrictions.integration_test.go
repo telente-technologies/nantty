@@ -9,7 +9,7 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/live/src/jobs"
+	"nantty/modules/live/src/jobs"
 )
 
 func accountHealthEnvelope(accountId string, canGoLive bool, occurredAt time.Time) []byte {

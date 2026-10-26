@@ -2,10 +2,10 @@ package services
 
 import (
 	"context"
-	"zudomart/modules/live/src/types"
+	"nantty/modules/live/src/types"
 
-	"zudomart/modules/live/src/generated/ent"
-	"zudomart/modules/live/src/generated/ent/gift"
+	"nantty/modules/live/src/generated/ent"
+	"nantty/modules/live/src/generated/ent/gift"
 )
 
 func (service *LiveService) ListGiftCatalog(ctx context.Context, includeInactive bool) ([]types.LiveGiftView, error) {

@@ -5,8 +5,8 @@ import (
 	"log/slog"
 	"time"
 
-	"zudomart/modules/live/src/container"
-	"zudomart/modules/live/src/services"
+	"nantty/modules/live/src/container"
+	"nantty/modules/live/src/services"
 )
 
 func RunLiveRecordingRetentionUntilContextDone(ctx context.Context, deployed *container.Container) {

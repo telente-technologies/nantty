@@ -5,8 +5,8 @@ import (
 	"database/sql"
 	"log/slog"
 
-	"zudomart/modules/live/src/configs"
-	"zudomart/modules/live/src/integrations"
+	"nantty/modules/live/src/configs"
+	"nantty/modules/live/src/integrations"
 )
 
 func completeMediaAndSocialCollaborators(ctx context.Context, collaborators *Collaborators, settings configs.LiveSettings, database *sql.DB, logger *slog.Logger) error {

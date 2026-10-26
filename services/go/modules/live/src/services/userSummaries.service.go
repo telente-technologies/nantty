@@ -2,8 +2,8 @@ package services
 
 import (
 	"context"
-	"zudomart/modules/live/src/interfaces"
-	"zudomart/modules/live/src/types"
+	"nantty/modules/live/src/interfaces"
+	"nantty/modules/live/src/types"
 
 	"github.com/google/uuid"
 )

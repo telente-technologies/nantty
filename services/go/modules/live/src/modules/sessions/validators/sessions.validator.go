@@ -6,9 +6,9 @@ import (
 	"strings"
 	"time"
 
-	"zudomart/modules/live/src/modules/sessions/dtos"
-	"zudomart/modules/live/src/utils"
-	"zudomart/platform/httpserver"
+	"nantty/modules/live/src/modules/sessions/dtos"
+	"nantty/modules/live/src/utils"
+	"nantty/platform/httpserver"
 )
 
 func ValidateCreateLiveRequest(body dtos.CreateLiveRequest) error {

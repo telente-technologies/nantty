@@ -3,8 +3,8 @@ package integrations
 import (
 	"context"
 
-	moneyv1 "zudomart/contracts/gen/go/zudomart/money/v1"
-	"zudomart/modules/live/src/interfaces"
+	moneyv1 "nantty/contracts/gen/go/zudomart/money/v1"
+	"nantty/modules/live/src/interfaces"
 )
 
 func (client *MoneyClient) SettleBattle(ctx context.Context, request interfaces.SettleBattleRequest) (interfaces.BattleSettlement, error) {

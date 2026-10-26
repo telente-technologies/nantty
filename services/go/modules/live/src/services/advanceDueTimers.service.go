@@ -3,13 +3,13 @@ package services
 import (
 	"context"
 	"log/slog"
+	"nantty/modules/live/src/events"
 	"time"
-	"zudomart/modules/live/src/events"
 
-	"zudomart/modules/live/src/generated/ent"
-	battlerecord "zudomart/modules/live/src/generated/ent/battle"
-	"zudomart/modules/live/src/generated/ent/battleparticipant"
-	"zudomart/modules/live/src/generated/ent/guestslot"
+	"nantty/modules/live/src/generated/ent"
+	battlerecord "nantty/modules/live/src/generated/ent/battle"
+	"nantty/modules/live/src/generated/ent/battleparticipant"
+	"nantty/modules/live/src/generated/ent/guestslot"
 
 	"entgo.io/ent/dialect/sql"
 	"github.com/google/uuid"

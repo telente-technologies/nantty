@@ -1,17 +1,17 @@
 package controllers
 
 import (
+	"nantty/modules/live/src/container"
+	awardengagementpoints "nantty/modules/live/src/modules/points/commands/awardEngagementPoints"
+	getmylivepoints "nantty/modules/live/src/modules/points/queries/getMyLivePoints"
+	getrankings "nantty/modules/live/src/modules/points/queries/getRankings"
+	"nantty/modules/live/src/modules/points/validators"
+	"nantty/modules/live/src/types"
+	"nantty/modules/live/src/utils"
+	"nantty/platform/httpserver"
 	"net/http"
 	"slices"
 	"strconv"
-	"zudomart/modules/live/src/container"
-	awardengagementpoints "zudomart/modules/live/src/modules/points/commands/awardEngagementPoints"
-	getmylivepoints "zudomart/modules/live/src/modules/points/queries/getMyLivePoints"
-	getrankings "zudomart/modules/live/src/modules/points/queries/getRankings"
-	"zudomart/modules/live/src/modules/points/validators"
-	"zudomart/modules/live/src/types"
-	"zudomart/modules/live/src/utils"
-	"zudomart/platform/httpserver"
 
 	"github.com/google/uuid"
 )

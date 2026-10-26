@@ -1,8 +1,8 @@
 package services
 
 import (
-	"zudomart/modules/live/src/generated/ent"
-	"zudomart/modules/live/src/types"
+	"nantty/modules/live/src/generated/ent"
+	"nantty/modules/live/src/types"
 )
 
 func presentGift(gift *ent.Gift) types.LiveGiftView {

@@ -7,8 +7,8 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/live/src/generated/ent/livesession"
-	"zudomart/platform/httpserver"
+	"nantty/modules/live/src/generated/ent/livesession"
+	"nantty/platform/httpserver"
 )
 
 func (controller InternalApiController) GetAccountActivityCounts(writer http.ResponseWriter, request *http.Request) {

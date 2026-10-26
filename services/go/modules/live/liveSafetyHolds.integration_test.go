@@ -8,8 +8,8 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/live/src/generated/ent/livesafetystate"
-	"zudomart/modules/live/src/jobs"
+	"nantty/modules/live/src/generated/ent/livesafetystate"
+	"nantty/modules/live/src/jobs"
 )
 
 func liveSafetyEnvelope(eventType, liveId, incidentId string) []byte {

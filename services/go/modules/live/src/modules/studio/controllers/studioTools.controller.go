@@ -5,15 +5,15 @@ import (
 
 	"github.com/google/uuid"
 
-	deleteliverecording "zudomart/modules/live/src/modules/studio/commands/deleteLiveRecording"
-	repostliverecording "zudomart/modules/live/src/modules/studio/commands/repostLiveRecording"
-	updatehostdefaults "zudomart/modules/live/src/modules/studio/commands/updateHostDefaults"
-	gethostdefaults "zudomart/modules/live/src/modules/studio/queries/getHostDefaults"
-	getstreamhealth "zudomart/modules/live/src/modules/studio/queries/getStreamHealth"
-	"zudomart/modules/live/src/modules/studio/validators"
-	"zudomart/modules/live/src/types"
-	"zudomart/modules/live/src/utils"
-	"zudomart/platform/httpserver"
+	deleteliverecording "nantty/modules/live/src/modules/studio/commands/deleteLiveRecording"
+	repostliverecording "nantty/modules/live/src/modules/studio/commands/repostLiveRecording"
+	updatehostdefaults "nantty/modules/live/src/modules/studio/commands/updateHostDefaults"
+	gethostdefaults "nantty/modules/live/src/modules/studio/queries/getHostDefaults"
+	getstreamhealth "nantty/modules/live/src/modules/studio/queries/getStreamHealth"
+	"nantty/modules/live/src/modules/studio/validators"
+	"nantty/modules/live/src/types"
+	"nantty/modules/live/src/utils"
+	"nantty/platform/httpserver"
 )
 
 func (controller StudioController) GetStreamHealth(writer http.ResponseWriter, request *http.Request) {

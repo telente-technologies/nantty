@@ -8,13 +8,13 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/live/src/events"
-	"zudomart/modules/live/src/generated/ent"
-	"zudomart/modules/live/src/generated/ent/guestslot"
-	"zudomart/modules/live/src/generated/ent/livesafetystate"
-	"zudomart/modules/live/src/generated/ent/livesession"
-	"zudomart/modules/live/src/interfaces"
-	"zudomart/modules/live/src/types"
+	"nantty/modules/live/src/events"
+	"nantty/modules/live/src/generated/ent"
+	"nantty/modules/live/src/generated/ent/guestslot"
+	"nantty/modules/live/src/generated/ent/livesafetystate"
+	"nantty/modules/live/src/generated/ent/livesession"
+	"nantty/modules/live/src/interfaces"
+	"nantty/modules/live/src/types"
 )
 
 const warningDisplayWindow = 2 * time.Minute

@@ -23,13 +23,13 @@ import (
 	"github.com/lestrrat-go/jwx/v3/jwk"
 	"github.com/lestrrat-go/jwx/v3/jwt"
 
-	"zudomart/modules/live/src/configs"
-	"zudomart/modules/live/src/integrations"
-	"zudomart/platform/events"
-	"zudomart/platform/health"
-	"zudomart/platform/jwtauth"
-	"zudomart/platform/postgres"
-	"zudomart/platform/servicemodule"
+	"nantty/modules/live/src/configs"
+	"nantty/modules/live/src/integrations"
+	"nantty/platform/events"
+	"nantty/platform/health"
+	"nantty/platform/jwtauth"
+	"nantty/platform/postgres"
+	"nantty/platform/servicemodule"
 )
 
 const (

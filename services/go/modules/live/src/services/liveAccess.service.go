@@ -7,13 +7,13 @@ import (
 
 	"github.com/google/uuid"
 
-	liveerrors "zudomart/modules/live/src/errors"
-	"zudomart/modules/live/src/generated/ent"
-	"zudomart/modules/live/src/generated/ent/battle"
-	"zudomart/modules/live/src/generated/ent/livemoderator"
-	"zudomart/modules/live/src/generated/ent/liverestriction"
-	"zudomart/modules/live/src/generated/ent/livesession"
-	"zudomart/modules/live/src/types"
+	liveerrors "nantty/modules/live/src/errors"
+	"nantty/modules/live/src/generated/ent"
+	"nantty/modules/live/src/generated/ent/battle"
+	"nantty/modules/live/src/generated/ent/livemoderator"
+	"nantty/modules/live/src/generated/ent/liverestriction"
+	"nantty/modules/live/src/generated/ent/livesession"
+	"nantty/modules/live/src/types"
 )
 
 const (

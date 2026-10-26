@@ -4,16 +4,16 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	liveerrors "nantty/modules/live/src/errors"
+	"nantty/modules/live/src/interfaces"
+	"nantty/modules/live/src/types"
 	"time"
-	liveerrors "zudomart/modules/live/src/errors"
-	"zudomart/modules/live/src/interfaces"
-	"zudomart/modules/live/src/types"
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/live/src/generated/ent"
-	"zudomart/modules/live/src/generated/ent/giftcombo"
-	"zudomart/modules/live/src/generated/ent/processedgift"
+	"nantty/modules/live/src/generated/ent"
+	"nantty/modules/live/src/generated/ent/giftcombo"
+	"nantty/modules/live/src/generated/ent/processedgift"
 )
 
 type committedGift struct {

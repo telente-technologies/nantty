@@ -1,7 +1,7 @@
 package decidestagejoinrequest
 
 import (
-	"zudomart/modules/live/src/types"
+	"nantty/modules/live/src/types"
 
 	"github.com/google/uuid"
 )

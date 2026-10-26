@@ -3,7 +3,7 @@ package repostliverecording
 import (
 	"github.com/google/uuid"
 
-	"zudomart/modules/live/src/types"
+	"nantty/modules/live/src/types"
 )
 
 type Command struct {

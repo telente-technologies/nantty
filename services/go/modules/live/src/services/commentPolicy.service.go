@@ -5,7 +5,7 @@ import (
 	"time"
 	"unicode"
 
-	liveerrors "zudomart/modules/live/src/errors"
+	liveerrors "nantty/modules/live/src/errors"
 )
 
 const (

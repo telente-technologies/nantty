@@ -11,7 +11,7 @@ import (
 
 	"github.com/livekit/protocol/auth"
 
-	"zudomart/modules/live/src/integrations"
+	"nantty/modules/live/src/integrations"
 )
 
 func (harness *liveHarness) sendLiveKitWebhook(payload map[string]any, secret string) int {

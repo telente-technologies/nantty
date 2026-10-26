@@ -3,8 +3,8 @@ package cancelguestinvitation
 import (
 	"context"
 
-	"zudomart/modules/live/src/container"
-	"zudomart/modules/live/src/services"
+	"nantty/modules/live/src/container"
+	"nantty/modules/live/src/services"
 )
 
 type Handler struct {

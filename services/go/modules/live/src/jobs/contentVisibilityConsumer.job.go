@@ -9,12 +9,12 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/live/src/container"
-	"zudomart/modules/live/src/generated/ent"
-	"zudomart/modules/live/src/generated/ent/livesession"
-	"zudomart/modules/live/src/services"
-	"zudomart/modules/live/src/types"
-	platformevents "zudomart/platform/events"
+	"nantty/modules/live/src/container"
+	"nantty/modules/live/src/generated/ent"
+	"nantty/modules/live/src/generated/ent/livesession"
+	"nantty/modules/live/src/services"
+	"nantty/modules/live/src/types"
+	platformevents "nantty/platform/events"
 )
 
 var knownModerationVisibilities = map[string]bool{"visible": true, "restricted": true, "hidden": true, "removed": true}

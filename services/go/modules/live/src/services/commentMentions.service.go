@@ -8,9 +8,9 @@ import (
 
 	"github.com/google/uuid"
 
-	liveerrors "zudomart/modules/live/src/errors"
-	"zudomart/modules/live/src/interfaces"
-	"zudomart/modules/live/src/types"
+	liveerrors "nantty/modules/live/src/errors"
+	"nantty/modules/live/src/interfaces"
+	"nantty/modules/live/src/types"
 )
 
 const maximumMentionsPerComment = 20

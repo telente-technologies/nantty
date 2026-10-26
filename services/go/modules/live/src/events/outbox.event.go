@@ -8,9 +8,9 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"github.com/google/uuid"
 
-	"zudomart/modules/live/src/generated/ent"
-	"zudomart/modules/live/src/generated/ent/outboxevent"
-	"zudomart/platform/events"
+	"nantty/modules/live/src/generated/ent"
+	"nantty/modules/live/src/generated/ent/outboxevent"
+	"nantty/platform/events"
 )
 
 func EnqueueOutboxEventInTransaction(ctx context.Context, tx *ent.Tx, eventType, subject string, occurredAt time.Time, data any) error {

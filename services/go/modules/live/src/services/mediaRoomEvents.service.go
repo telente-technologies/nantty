@@ -5,9 +5,9 @@ import (
 	"log/slog"
 	"time"
 
-	"zudomart/modules/live/src/generated/ent"
-	"zudomart/modules/live/src/generated/ent/guestslot"
-	"zudomart/modules/live/src/generated/ent/livesession"
+	"nantty/modules/live/src/generated/ent"
+	"nantty/modules/live/src/generated/ent/guestslot"
+	"nantty/modules/live/src/generated/ent/livesession"
 )
 
 const HostLeftMediaRoomGrace = 20 * time.Second

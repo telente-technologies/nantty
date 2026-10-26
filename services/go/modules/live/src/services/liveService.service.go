@@ -1,6 +1,6 @@
 package services
 
-import "zudomart/modules/live/src/container"
+import "nantty/modules/live/src/container"
 
 type LiveService struct {
 	*container.Container

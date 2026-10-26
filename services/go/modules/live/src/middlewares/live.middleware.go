@@ -6,11 +6,11 @@ import (
 	"slices"
 	"strings"
 
-	"zudomart/modules/live/src/container"
-	"zudomart/platform/httpserver"
-	"zudomart/platform/idempotency"
-	"zudomart/platform/jwtauth"
-	"zudomart/platform/staffauth"
+	"nantty/modules/live/src/container"
+	"nantty/platform/httpserver"
+	"nantty/platform/idempotency"
+	"nantty/platform/jwtauth"
+	"nantty/platform/staffauth"
 )
 
 func Authenticated(deployed *container.Container) func(http.HandlerFunc) http.Handler {

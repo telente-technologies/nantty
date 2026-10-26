@@ -9,7 +9,7 @@ import (
 	"github.com/lestrrat-go/jwx/v3/jwa"
 	"github.com/lestrrat-go/jwx/v3/jwt"
 
-	"zudomart/platform/jwtauth"
+	"nantty/platform/jwtauth"
 )
 
 func (harness *liveHarness) widgetTokenFor(user liveUser) liveUser {

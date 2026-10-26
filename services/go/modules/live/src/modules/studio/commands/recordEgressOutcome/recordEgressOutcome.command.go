@@ -1,7 +1,7 @@
 package recordegressoutcome
 
 import (
-	"zudomart/modules/live/src/services"
+	"nantty/modules/live/src/services"
 )
 
 type Command struct {

@@ -1,6 +1,6 @@
 package events
 
-import "zudomart/modules/live/src/types"
+import "nantty/modules/live/src/types"
 
 const (
 	LiveCommentCreated   = "liveComment.created"

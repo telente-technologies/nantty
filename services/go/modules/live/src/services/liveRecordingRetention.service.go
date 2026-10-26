@@ -9,11 +9,11 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"github.com/google/uuid"
 
-	liveerrors "zudomart/modules/live/src/errors"
-	"zudomart/modules/live/src/generated/ent"
-	"zudomart/modules/live/src/generated/ent/liverecording"
-	"zudomart/modules/live/src/generated/ent/livesafetystate"
-	"zudomart/modules/live/src/types"
+	liveerrors "nantty/modules/live/src/errors"
+	"nantty/modules/live/src/generated/ent"
+	"nantty/modules/live/src/generated/ent/liverecording"
+	"nantty/modules/live/src/generated/ent/livesafetystate"
+	"nantty/modules/live/src/types"
 )
 
 const (

@@ -5,9 +5,9 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/live/src/generated/ent"
-	"zudomart/modules/live/src/generated/ent/livesession"
-	"zudomart/modules/live/src/types"
+	"nantty/modules/live/src/generated/ent"
+	"nantty/modules/live/src/generated/ent/livesession"
+	"nantty/modules/live/src/types"
 )
 
 func (service *LiveService) BuildLiveShareCard(ctx context.Context, liveId, viewerId uuid.UUID) (types.ShareCardView, error) {

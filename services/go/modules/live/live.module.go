@@ -3,9 +3,9 @@ package live
 import (
 	"context"
 
-	"zudomart/modules/live/src"
-	"zudomart/modules/live/src/configs"
-	"zudomart/platform/servicemodule"
+	"nantty/modules/live/src"
+	"nantty/modules/live/src/configs"
+	"nantty/platform/servicemodule"
 )
 
 type (

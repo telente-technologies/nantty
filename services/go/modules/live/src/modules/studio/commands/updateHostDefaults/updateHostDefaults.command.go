@@ -1,6 +1,6 @@
 package updatehostdefaults
 
-import "zudomart/modules/live/src/types"
+import "nantty/modules/live/src/types"
 
 type Command struct {
 	Actor types.Actor

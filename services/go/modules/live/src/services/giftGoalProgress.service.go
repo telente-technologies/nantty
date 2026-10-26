@@ -2,13 +2,13 @@ package services
 
 import (
 	"context"
-	"zudomart/modules/live/src/events"
+	"nantty/modules/live/src/events"
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/live/src/generated/ent"
-	"zudomart/modules/live/src/generated/ent/giftgoal"
-	"zudomart/modules/live/src/generated/ent/goalcontribution"
+	"nantty/modules/live/src/generated/ent"
+	"nantty/modules/live/src/generated/ent/giftgoal"
+	"nantty/modules/live/src/generated/ent/goalcontribution"
 )
 
 func (service *LiveService) applyGiftToActiveGoal(ctx context.Context, tx *ent.Tx, liveId uuid.UUID, gift committedGift) error {

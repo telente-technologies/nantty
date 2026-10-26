@@ -10,7 +10,7 @@ import (
 	"github.com/livekit/protocol/livekit"
 	"github.com/twitchtv/twirp"
 
-	"zudomart/modules/live/src/interfaces"
+	"nantty/modules/live/src/interfaces"
 )
 
 type LiveKitIngressController struct {

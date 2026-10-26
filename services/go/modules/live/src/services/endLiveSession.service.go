@@ -2,18 +2,18 @@ package services
 
 import (
 	"context"
+	liveerrors "nantty/modules/live/src/errors"
+	"nantty/modules/live/src/events"
+	"nantty/modules/live/src/types"
 	"time"
-	liveerrors "zudomart/modules/live/src/errors"
-	"zudomart/modules/live/src/events"
-	"zudomart/modules/live/src/types"
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/live/src/generated/ent"
-	battlerecord "zudomart/modules/live/src/generated/ent/battle"
-	"zudomart/modules/live/src/generated/ent/guestslot"
-	"zudomart/modules/live/src/generated/ent/livesession"
-	"zudomart/modules/live/src/generated/ent/liveviewer"
+	"nantty/modules/live/src/generated/ent"
+	battlerecord "nantty/modules/live/src/generated/ent/battle"
+	"nantty/modules/live/src/generated/ent/guestslot"
+	"nantty/modules/live/src/generated/ent/livesession"
+	"nantty/modules/live/src/generated/ent/liveviewer"
 )
 
 const finalLeaderboardSize = 20

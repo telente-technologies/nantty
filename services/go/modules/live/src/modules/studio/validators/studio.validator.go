@@ -3,9 +3,9 @@ package validators
 import (
 	"net/http"
 
-	"zudomart/modules/live/src/interfaces"
-	"zudomart/modules/live/src/modules/studio/dtos"
-	"zudomart/modules/live/src/utils"
+	"nantty/modules/live/src/interfaces"
+	"nantty/modules/live/src/modules/studio/dtos"
+	"nantty/modules/live/src/utils"
 )
 
 func ReadIngressProtocol(request *http.Request) (interfaces.IngressProtocol, error) {

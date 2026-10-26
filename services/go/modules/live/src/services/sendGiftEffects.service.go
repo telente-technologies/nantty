@@ -2,14 +2,14 @@ package services
 
 import (
 	"context"
+	"nantty/modules/live/src/events"
+	"nantty/modules/live/src/interfaces"
 	"sort"
-	"zudomart/modules/live/src/events"
-	"zudomart/modules/live/src/interfaces"
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/live/src/generated/ent"
-	"zudomart/modules/live/src/generated/ent/battleparticipant"
+	"nantty/modules/live/src/generated/ent"
+	"nantty/modules/live/src/generated/ent/battleparticipant"
 )
 
 func (service *LiveService) applyGiftEffects(ctx context.Context, tx *ent.Tx, session *ent.LiveSession, gift committedGift, catalogGift *ent.Gift, sender interfaces.Participant) error {

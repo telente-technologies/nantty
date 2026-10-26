@@ -13,7 +13,7 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/live/src/interfaces"
+	"nantty/modules/live/src/interfaces"
 )
 
 var ErrCatalogUnavailable = errors.New("catalog is unavailable")

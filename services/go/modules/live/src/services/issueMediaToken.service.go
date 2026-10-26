@@ -2,16 +2,16 @@ package services
 
 import (
 	"context"
-	liveerrors "zudomart/modules/live/src/errors"
-	"zudomart/modules/live/src/integrations"
-	"zudomart/modules/live/src/types"
+	liveerrors "nantty/modules/live/src/errors"
+	"nantty/modules/live/src/integrations"
+	"nantty/modules/live/src/types"
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/live/src/generated/ent"
-	"zudomart/modules/live/src/generated/ent/guestslot"
-	"zudomart/modules/live/src/generated/ent/livesafetystate"
-	"zudomart/modules/live/src/generated/ent/livesession"
+	"nantty/modules/live/src/generated/ent"
+	"nantty/modules/live/src/generated/ent/guestslot"
+	"nantty/modules/live/src/generated/ent/livesafetystate"
+	"nantty/modules/live/src/generated/ent/livesession"
 )
 
 func (service *LiveService) IssueMediaToken(ctx context.Context, actor types.Actor, liveId uuid.UUID) (types.MediaTokenView, error) {

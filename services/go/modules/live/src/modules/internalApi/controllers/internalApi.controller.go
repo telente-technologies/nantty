@@ -5,15 +5,15 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/live/src/container"
-	applypresencechange "zudomart/modules/live/src/modules/internalApi/commands/applyPresenceChange"
-	decidetopicaccess "zudomart/modules/live/src/modules/internalApi/queries/decideTopicAccess"
-	getliveadeligibility "zudomart/modules/live/src/modules/internalApi/queries/getLiveAdEligibility"
-	getlivesharecard "zudomart/modules/live/src/modules/internalApi/queries/getLiveShareCard"
-	getmoderationtargetpreview "zudomart/modules/live/src/modules/internalApi/queries/getModerationTargetPreview"
-	"zudomart/modules/live/src/types"
-	"zudomart/modules/live/src/utils"
-	"zudomart/platform/httpserver"
+	"nantty/modules/live/src/container"
+	applypresencechange "nantty/modules/live/src/modules/internalApi/commands/applyPresenceChange"
+	decidetopicaccess "nantty/modules/live/src/modules/internalApi/queries/decideTopicAccess"
+	getliveadeligibility "nantty/modules/live/src/modules/internalApi/queries/getLiveAdEligibility"
+	getlivesharecard "nantty/modules/live/src/modules/internalApi/queries/getLiveShareCard"
+	getmoderationtargetpreview "nantty/modules/live/src/modules/internalApi/queries/getModerationTargetPreview"
+	"nantty/modules/live/src/types"
+	"nantty/modules/live/src/utils"
+	"nantty/platform/httpserver"
 )
 
 type InternalApiController struct {

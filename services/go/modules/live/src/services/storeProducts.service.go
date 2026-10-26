@@ -5,9 +5,9 @@ import (
 
 	"github.com/google/uuid"
 
-	liveerrors "zudomart/modules/live/src/errors"
-	"zudomart/modules/live/src/generated/ent"
-	"zudomart/modules/live/src/interfaces"
+	liveerrors "nantty/modules/live/src/errors"
+	"nantty/modules/live/src/generated/ent"
+	"nantty/modules/live/src/interfaces"
 )
 
 const draftProductStatus = "draft"

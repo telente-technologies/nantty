@@ -3,9 +3,9 @@ package services
 import (
 	"context"
 	"log/slog"
-	liveerrors "zudomart/modules/live/src/errors"
-	"zudomart/modules/live/src/generated/ent"
-	"zudomart/modules/live/src/generated/ent/livesafetystate"
+	liveerrors "nantty/modules/live/src/errors"
+	"nantty/modules/live/src/generated/ent"
+	"nantty/modules/live/src/generated/ent/livesafetystate"
 )
 
 func liveAdsAllowed(session *ent.LiveSession) bool {

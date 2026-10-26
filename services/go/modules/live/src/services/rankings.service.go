@@ -2,15 +2,15 @@ package services
 
 import (
 	"context"
+	"nantty/modules/live/src/types"
 	"strconv"
 	"time"
-	"zudomart/modules/live/src/types"
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/live/src/generated/ent"
-	"zudomart/modules/live/src/generated/ent/pointsentry"
-	"zudomart/modules/live/src/generated/ent/predicate"
+	"nantty/modules/live/src/generated/ent"
+	"nantty/modules/live/src/generated/ent/pointsentry"
+	"nantty/modules/live/src/generated/ent/predicate"
 )
 
 func rankingPredicates(query types.RankingQuery, now time.Time) []predicate.PointsEntry {

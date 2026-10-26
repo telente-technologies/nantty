@@ -5,8 +5,8 @@ import (
 	"errors"
 	"testing"
 
-	"zudomart/modules/live/src/container"
-	platformevents "zudomart/platform/events"
+	"nantty/modules/live/src/container"
+	platformevents "nantty/platform/events"
 )
 
 func TestLiveSafetyEventsAreRecognised(t *testing.T) {

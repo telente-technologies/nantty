@@ -8,9 +8,9 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/live/src/types"
-	"zudomart/platform/httpserver"
-	"zudomart/platform/jwtauth"
+	"nantty/modules/live/src/types"
+	"nantty/platform/httpserver"
+	"nantty/platform/jwtauth"
 )
 
 type Responder struct {

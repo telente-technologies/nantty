@@ -1,6 +1,6 @@
 package dtos
 
-import "zudomart/modules/live/src/types"
+import "nantty/modules/live/src/types"
 
 type OverlaySceneRequest struct {
 	Name    *string               `json:"name"`

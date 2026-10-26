@@ -7,7 +7,7 @@ import (
 	"sync"
 	"time"
 
-	"zudomart/modules/live/src/interfaces"
+	"nantty/modules/live/src/interfaces"
 )
 
 type InMemoryIngressController struct {

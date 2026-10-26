@@ -6,10 +6,10 @@ import (
 	"fmt"
 	"time"
 
-	liveerrors "zudomart/modules/live/src/errors"
-	"zudomart/modules/live/src/generated/ent"
-	"zudomart/modules/live/src/generated/ent/livehostrestriction"
-	platformevents "zudomart/platform/events"
+	liveerrors "nantty/modules/live/src/errors"
+	"nantty/modules/live/src/generated/ent"
+	"nantty/modules/live/src/generated/ent/livehostrestriction"
+	platformevents "nantty/platform/events"
 )
 
 func (service *LiveService) EnsureHostCanGoLive(ctx context.Context, hostId string) error {

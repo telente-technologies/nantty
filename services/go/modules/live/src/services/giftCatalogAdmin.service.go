@@ -2,11 +2,11 @@ package services
 
 import (
 	"context"
-	liveerrors "zudomart/modules/live/src/errors"
-	"zudomart/modules/live/src/types"
+	liveerrors "nantty/modules/live/src/errors"
+	"nantty/modules/live/src/types"
 
-	"zudomart/modules/live/src/generated/ent"
-	"zudomart/modules/live/src/generated/ent/gift"
+	"nantty/modules/live/src/generated/ent"
+	"nantty/modules/live/src/generated/ent/gift"
 )
 
 func (service *LiveService) CreateGift(ctx context.Context, input types.GiftInput) (types.LiveGiftView, error) {

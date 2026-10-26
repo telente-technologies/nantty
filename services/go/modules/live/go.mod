@@ -1,4 +1,4 @@
-module zudomart/modules/live
+module nantty/modules/live
 
 go 1.26.9
 
@@ -137,10 +137,10 @@ require (
 	golang.org/x/sys v0.49.0 // indirect
 	golang.org/x/text v0.43.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
-	zudomart/platform v0.0.0
+	nantty/platform v0.0.0
 )
 
-replace zudomart/platform => ../../platform
+replace nantty/platform => ../../platform
 
 require (
 	github.com/aws/aws-sdk-go-v2 v1.47.3
@@ -151,7 +151,7 @@ require (
 	github.com/twitchtv/twirp v8.1.3+incompatible
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20261005182115-fad411399dd8
 	google.golang.org/grpc v1.86.0-dev
-	zudomart/contracts v0.0.0
+	nantty/contracts v0.0.0
 )
 
-replace zudomart/contracts => ../../../contracts
+replace nantty/contracts => ../../../contracts

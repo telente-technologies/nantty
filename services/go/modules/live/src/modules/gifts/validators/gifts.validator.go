@@ -4,8 +4,8 @@ import (
 	"slices"
 	"strings"
 
-	"zudomart/modules/live/src/modules/gifts/dtos"
-	"zudomart/modules/live/src/utils"
+	"nantty/modules/live/src/modules/gifts/dtos"
+	"nantty/modules/live/src/utils"
 )
 
 func ValidateSendGiftRequest(body dtos.SendGiftRequest) error {

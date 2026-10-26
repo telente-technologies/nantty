@@ -11,8 +11,8 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/live/src/integrations"
-	"zudomart/platform/postgres"
+	"nantty/modules/live/src/integrations"
+	"nantty/platform/postgres"
 )
 
 func TestStreamStatsCountSubscriptionsStartedDuringTheLive(t *testing.T) {

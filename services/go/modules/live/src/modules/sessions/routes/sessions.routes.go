@@ -3,15 +3,22 @@ package routes
 import (
 	"net/http"
 
-	"zudomart/modules/live/src/container"
-	"zudomart/modules/live/src/middlewares"
-	"zudomart/modules/live/src/modules/sessions/controllers"
+	"nantty/modules/live/src/container"
+	"nantty/modules/live/src/middlewares"
+	"nantty/modules/live/src/modules/sessions/controllers"
 )
 
 func MountSessionsRoutes(mux *http.ServeMux, deployed *container.Container) {
 	controller := controllers.SessionsController{Container: deployed}
+	spaces := controllers.SpacesController{Container: deployed}
 	authenticated := middlewares.Authenticated(deployed)
 	optional := middlewares.OptionallyAuthenticated(deployed)
+	mux.HandleFunc("GET /api/v1/spaces", spaces.List)
+	mux.Handle("POST /api/v1/spaces", authenticated(http.HandlerFunc(spaces.Create)))
+	mux.Handle("POST /api/v1/spaces/{spaceId}/start", authenticated(http.HandlerFunc(spaces.Start)))
+	mux.Handle("POST /api/v1/spaces/{spaceId}/end", authenticated(http.HandlerFunc(spaces.End)))
+	mux.Handle("POST /api/v1/spaces/{spaceId}/cancel", authenticated(http.HandlerFunc(spaces.Cancel)))
+	mux.Handle("POST /api/v1/spaces/{spaceId}/media-token", authenticated(http.HandlerFunc(spaces.MediaToken)))
 	mux.Handle("POST /api/v1/lives", authenticated(controller.CreateLiveSession))
 	mux.Handle("GET /api/v1/lives/suggested", authenticated(controller.ListSuggestedLives))
 	mux.Handle("GET /api/v1/lives/{liveId}", optional(controller.GetLiveSession))

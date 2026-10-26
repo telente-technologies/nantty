@@ -2,16 +2,16 @@ package services
 
 import (
 	"context"
+	liveerrors "nantty/modules/live/src/errors"
+	"nantty/modules/live/src/events"
 	"net/http"
 	"time"
-	liveerrors "zudomart/modules/live/src/errors"
-	"zudomart/modules/live/src/events"
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/live/src/generated/ent"
-	battlerecord "zudomart/modules/live/src/generated/ent/battle"
-	"zudomart/modules/live/src/generated/ent/battleparticipant"
+	"nantty/modules/live/src/generated/ent"
+	battlerecord "nantty/modules/live/src/generated/ent/battle"
+	"nantty/modules/live/src/generated/ent/battleparticipant"
 )
 
 func (service *LiveService) lockBattle(ctx context.Context, tx *ent.Tx, battleId uuid.UUID) (*ent.Battle, error) {

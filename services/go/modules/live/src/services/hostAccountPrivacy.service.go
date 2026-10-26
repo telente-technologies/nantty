@@ -5,7 +5,7 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/live/src/generated/ent"
+	"nantty/modules/live/src/generated/ent"
 )
 
 func (service *LiveService) hostHiddenByPrivateAccount(ctx context.Context, hostId, viewer uuid.UUID) (bool, error) {

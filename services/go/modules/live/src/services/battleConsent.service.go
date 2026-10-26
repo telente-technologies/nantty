@@ -2,14 +2,14 @@ package services
 
 import (
 	"context"
-	liveerrors "zudomart/modules/live/src/errors"
-	"zudomart/modules/live/src/types"
+	liveerrors "nantty/modules/live/src/errors"
+	"nantty/modules/live/src/types"
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/live/src/generated/ent"
-	battlerecord "zudomart/modules/live/src/generated/ent/battle"
-	"zudomart/modules/live/src/generated/ent/battleparticipant"
+	"nantty/modules/live/src/generated/ent"
+	battlerecord "nantty/modules/live/src/generated/ent/battle"
+	"nantty/modules/live/src/generated/ent/battleparticipant"
 )
 
 func (service *LiveService) RespondToWinnerTakesAllProposal(ctx context.Context, actor types.Actor, battleId uuid.UUID, accept bool) (uuid.UUID, error) {

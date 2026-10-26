@@ -6,13 +6,13 @@ import (
 
 	"github.com/google/uuid"
 
-	cancellivesession "zudomart/modules/live/src/modules/sessions/commands/cancelLiveSession"
-	updatelivedetails "zudomart/modules/live/src/modules/sessions/commands/updateLiveDetails"
-	"zudomart/modules/live/src/modules/sessions/dtos"
-	"zudomart/modules/live/src/modules/sessions/validators"
-	"zudomart/modules/live/src/types"
-	"zudomart/modules/live/src/utils"
-	"zudomart/platform/httpserver"
+	cancellivesession "nantty/modules/live/src/modules/sessions/commands/cancelLiveSession"
+	updatelivedetails "nantty/modules/live/src/modules/sessions/commands/updateLiveDetails"
+	"nantty/modules/live/src/modules/sessions/dtos"
+	"nantty/modules/live/src/modules/sessions/validators"
+	"nantty/modules/live/src/types"
+	"nantty/modules/live/src/utils"
+	"nantty/platform/httpserver"
 )
 
 func startNowFor(body dtos.CreateLiveRequest) bool {

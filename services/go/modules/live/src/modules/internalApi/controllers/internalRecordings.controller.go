@@ -3,11 +3,11 @@ package controllers
 import (
 	"net/http"
 
-	setrecordinglegalhold "zudomart/modules/live/src/modules/internalApi/commands/setRecordingLegalHold"
-	setrecordingrepost "zudomart/modules/live/src/modules/internalApi/commands/setRecordingRepost"
-	"zudomart/modules/live/src/modules/internalApi/dtos"
-	"zudomart/modules/live/src/utils"
-	"zudomart/platform/httpserver"
+	setrecordinglegalhold "nantty/modules/live/src/modules/internalApi/commands/setRecordingLegalHold"
+	setrecordingrepost "nantty/modules/live/src/modules/internalApi/commands/setRecordingRepost"
+	"nantty/modules/live/src/modules/internalApi/dtos"
+	"nantty/modules/live/src/utils"
+	"nantty/platform/httpserver"
 )
 
 func (controller InternalApiController) SetRecordingLegalHold(writer http.ResponseWriter, request *http.Request) {

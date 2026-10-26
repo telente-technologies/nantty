@@ -2,17 +2,17 @@ package services
 
 import (
 	"context"
+	liveerrors "nantty/modules/live/src/errors"
+	"nantty/modules/live/src/events"
+	"nantty/modules/live/src/types"
 	"net/http"
 	"time"
-	liveerrors "zudomart/modules/live/src/errors"
-	"zudomart/modules/live/src/events"
-	"zudomart/modules/live/src/types"
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/live/src/generated/ent"
-	"zudomart/modules/live/src/generated/ent/guestslot"
-	"zudomart/modules/live/src/generated/ent/livesession"
+	"nantty/modules/live/src/generated/ent"
+	"nantty/modules/live/src/generated/ent/guestslot"
+	"nantty/modules/live/src/generated/ent/livesession"
 )
 
 func (service *LiveService) lockLiveForStageChange(ctx context.Context, tx *ent.Tx, liveId uuid.UUID, actor *types.Actor, hostOnly bool) (*ent.LiveSession, error) {

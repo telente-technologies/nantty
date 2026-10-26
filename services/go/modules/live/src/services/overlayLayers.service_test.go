@@ -4,8 +4,8 @@ import (
 	"strings"
 	"testing"
 
-	"zudomart/modules/live/src/databases/schema"
-	"zudomart/modules/live/src/types"
+	"nantty/modules/live/src/databases/schema"
+	"nantty/modules/live/src/types"
 )
 
 func validLayer(identifier string) types.OverlayLayer {

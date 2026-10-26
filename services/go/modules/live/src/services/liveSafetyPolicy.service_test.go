@@ -5,10 +5,10 @@ import (
 	"testing"
 	"time"
 
-	"zudomart/modules/live/src/configs"
-	"zudomart/modules/live/src/events"
-	"zudomart/modules/live/src/generated/ent"
-	"zudomart/modules/live/src/interfaces"
+	"nantty/modules/live/src/configs"
+	"nantty/modules/live/src/events"
+	"nantty/modules/live/src/generated/ent"
+	"nantty/modules/live/src/interfaces"
 )
 
 func safetySettings() configs.LiveSafetySettings {

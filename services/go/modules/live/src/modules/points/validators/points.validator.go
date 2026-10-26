@@ -3,8 +3,8 @@ package validators
 import (
 	"slices"
 
-	"zudomart/modules/live/src/modules/points/dtos"
-	"zudomart/platform/httpserver"
+	"nantty/modules/live/src/modules/points/dtos"
+	"nantty/platform/httpserver"
 )
 
 func ValidateEngagementRequest(body dtos.EngagementRequest) error {

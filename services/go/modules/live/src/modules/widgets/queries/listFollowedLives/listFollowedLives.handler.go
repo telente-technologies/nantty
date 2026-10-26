@@ -6,11 +6,11 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/live/src/container"
-	"zudomart/modules/live/src/generated/ent"
-	"zudomart/modules/live/src/generated/ent/livesession"
-	"zudomart/modules/live/src/modules/widgets/dtos"
-	"zudomart/platform/widgets"
+	"nantty/modules/live/src/container"
+	"nantty/modules/live/src/generated/ent"
+	"nantty/modules/live/src/generated/ent/livesession"
+	"nantty/modules/live/src/modules/widgets/dtos"
+	"nantty/platform/widgets"
 )
 
 const liveCandidatesScanned = 500

@@ -3,9 +3,9 @@ package routes
 import (
 	"net/http"
 
-	"zudomart/modules/live/src/container"
-	"zudomart/modules/live/src/middlewares"
-	"zudomart/modules/live/src/modules/studio/controllers"
+	"nantty/modules/live/src/container"
+	"nantty/modules/live/src/middlewares"
+	"nantty/modules/live/src/modules/studio/controllers"
 )
 
 func MountStudioRoutes(mux *http.ServeMux, deployed *container.Container) {

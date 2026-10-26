@@ -9,9 +9,9 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/live/src/generated/ent"
-	"zudomart/modules/live/src/generated/ent/livesafetystate"
-	"zudomart/modules/live/src/generated/ent/livesession"
+	"nantty/modules/live/src/generated/ent"
+	"nantty/modules/live/src/generated/ent/livesafetystate"
+	"nantty/modules/live/src/generated/ent/livesession"
 )
 
 const (

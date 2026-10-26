@@ -3,9 +3,9 @@ package routes
 import (
 	"net/http"
 
-	"zudomart/modules/live/src/container"
-	"zudomart/modules/live/src/modules/widgets/controllers"
-	"zudomart/platform/jwtauth"
+	"nantty/modules/live/src/container"
+	"nantty/modules/live/src/modules/widgets/controllers"
+	"nantty/platform/jwtauth"
 )
 
 func MountWidgetRoutes(mux *http.ServeMux, deployed *container.Container) {

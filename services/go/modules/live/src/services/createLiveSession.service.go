@@ -2,18 +2,18 @@ package services
 
 import (
 	"context"
+	liveerrors "nantty/modules/live/src/errors"
+	"nantty/modules/live/src/events"
+	"nantty/modules/live/src/interfaces"
+	"nantty/modules/live/src/types"
 	"slices"
 	"strings"
-	liveerrors "zudomart/modules/live/src/errors"
-	"zudomart/modules/live/src/events"
-	"zudomart/modules/live/src/interfaces"
-	"zudomart/modules/live/src/types"
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/live/src/databases/schema"
-	"zudomart/modules/live/src/generated/ent"
-	"zudomart/modules/live/src/generated/ent/livesession"
+	"nantty/modules/live/src/databases/schema"
+	"nantty/modules/live/src/generated/ent"
+	"nantty/modules/live/src/generated/ent/livesession"
 )
 
 var liveAdPlacements = []string{"beforeJoin", "naturalBreak", "betweenSegments", "overlay", "end"}

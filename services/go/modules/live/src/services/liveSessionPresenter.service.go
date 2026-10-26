@@ -2,13 +2,13 @@ package services
 
 import (
 	"context"
+	liveerrors "nantty/modules/live/src/errors"
+	"nantty/modules/live/src/types"
 	"time"
-	liveerrors "zudomart/modules/live/src/errors"
-	"zudomart/modules/live/src/types"
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/live/src/generated/ent"
+	"nantty/modules/live/src/generated/ent"
 )
 
 func formatTime(moment time.Time) string { return moment.UTC().Format(time.RFC3339Nano) }

@@ -7,13 +7,13 @@ import (
 	"log/slog"
 	"time"
 
-	"zudomart/modules/live/src/configs"
-	"zudomart/modules/live/src/generated/ent"
-	"zudomart/modules/live/src/integrations"
-	"zudomart/modules/live/src/interfaces"
-	platformevents "zudomart/platform/events"
-	"zudomart/platform/idempotency"
-	"zudomart/platform/jwtauth"
+	"nantty/modules/live/src/configs"
+	"nantty/modules/live/src/generated/ent"
+	"nantty/modules/live/src/integrations"
+	"nantty/modules/live/src/interfaces"
+	platformevents "nantty/platform/events"
+	"nantty/platform/idempotency"
+	"nantty/platform/jwtauth"
 )
 
 type Container struct {

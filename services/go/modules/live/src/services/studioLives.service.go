@@ -5,13 +5,13 @@ import (
 
 	"github.com/google/uuid"
 
-	liveerrors "zudomart/modules/live/src/errors"
-	"zudomart/modules/live/src/generated/ent"
-	"zudomart/modules/live/src/generated/ent/liveingress"
-	"zudomart/modules/live/src/generated/ent/liveproduct"
-	"zudomart/modules/live/src/generated/ent/liveroomsetting"
-	"zudomart/modules/live/src/generated/ent/livesession"
-	"zudomart/modules/live/src/types"
+	liveerrors "nantty/modules/live/src/errors"
+	"nantty/modules/live/src/generated/ent"
+	"nantty/modules/live/src/generated/ent/liveingress"
+	"nantty/modules/live/src/generated/ent/liveproduct"
+	"nantty/modules/live/src/generated/ent/liveroomsetting"
+	"nantty/modules/live/src/generated/ent/livesession"
+	"nantty/modules/live/src/types"
 )
 
 func (service *LiveService) ListMyLives(ctx context.Context, actor types.Actor, cursor string, limit int) ([]types.StudioLiveView, string, error) {

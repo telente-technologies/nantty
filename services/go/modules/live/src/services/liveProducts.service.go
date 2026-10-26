@@ -2,14 +2,14 @@ package services
 
 import (
 	"context"
-	liveerrors "zudomart/modules/live/src/errors"
-	"zudomart/modules/live/src/types"
+	liveerrors "nantty/modules/live/src/errors"
+	"nantty/modules/live/src/types"
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/live/src/generated/ent"
-	"zudomart/modules/live/src/generated/ent/liveproduct"
-	"zudomart/modules/live/src/generated/ent/livesession"
+	"nantty/modules/live/src/generated/ent"
+	"nantty/modules/live/src/generated/ent/liveproduct"
+	"nantty/modules/live/src/generated/ent/livesession"
 )
 
 func requirePinnableSession(session *ent.LiveSession, actor types.Actor) error {

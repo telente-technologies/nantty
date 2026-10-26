@@ -5,12 +5,12 @@ import (
 
 	"github.com/google/uuid"
 
-	liveerrors "zudomart/modules/live/src/errors"
-	"zudomart/modules/live/src/generated/ent"
-	"zudomart/modules/live/src/generated/ent/livehostdefault"
-	"zudomart/modules/live/src/generated/ent/livemoderator"
-	"zudomart/modules/live/src/generated/ent/liveroomsetting"
-	"zudomart/modules/live/src/types"
+	liveerrors "nantty/modules/live/src/errors"
+	"nantty/modules/live/src/generated/ent"
+	"nantty/modules/live/src/generated/ent/livehostdefault"
+	"nantty/modules/live/src/generated/ent/livemoderator"
+	"nantty/modules/live/src/generated/ent/liveroomsetting"
+	"nantty/modules/live/src/types"
 )
 
 const (

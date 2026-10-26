@@ -3,7 +3,7 @@ package services
 import (
 	"context"
 
-	"zudomart/modules/live/src/generated/ent/gift"
+	"nantty/modules/live/src/generated/ent/gift"
 )
 
 type seedGiftGroup struct {

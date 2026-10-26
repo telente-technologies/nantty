@@ -8,9 +8,9 @@ import (
 	"slices"
 	"strings"
 
-	liveerrors "zudomart/modules/live/src/errors"
-	"zudomart/modules/live/src/types"
-	"zudomart/platform/httpserver"
+	liveerrors "nantty/modules/live/src/errors"
+	"nantty/modules/live/src/types"
+	"nantty/platform/httpserver"
 )
 
 const (

@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"zudomart/modules/live/src/interfaces"
+	"nantty/modules/live/src/interfaces"
 )
 
 func (harness *liveHarness) comment(liveId string, user liveUser, text string, want int) map[string]any {

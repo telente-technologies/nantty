@@ -5,9 +5,9 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/live/src/generated/ent"
-	"zudomart/modules/live/src/generated/ent/overlayscene"
-	"zudomart/modules/live/src/types"
+	"nantty/modules/live/src/generated/ent"
+	"nantty/modules/live/src/generated/ent/overlayscene"
+	"nantty/modules/live/src/types"
 )
 
 func (service *LiveService) findOrCreateMainScene(ctx context.Context, actor types.Actor, liveId uuid.UUID) (*ent.OverlayScene, error) {

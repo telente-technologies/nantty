@@ -2,16 +2,16 @@ package services
 
 import (
 	"context"
+	liveerrors "nantty/modules/live/src/errors"
+	"nantty/modules/live/src/types"
 	"sort"
-	liveerrors "zudomart/modules/live/src/errors"
-	"zudomart/modules/live/src/types"
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/live/src/generated/ent"
-	"zudomart/modules/live/src/generated/ent/giftcontribution"
-	"zudomart/modules/live/src/generated/ent/liveleaderboardentry"
-	"zudomart/modules/live/src/generated/ent/pointsentry"
+	"nantty/modules/live/src/generated/ent"
+	"nantty/modules/live/src/generated/ent/giftcontribution"
+	"nantty/modules/live/src/generated/ent/liveleaderboardentry"
+	"nantty/modules/live/src/generated/ent/pointsentry"
 )
 
 const liveScopeKey = "live"

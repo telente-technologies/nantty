@@ -3,7 +3,7 @@ package events
 import (
 	"time"
 
-	"zudomart/modules/live/src/types"
+	"nantty/modules/live/src/types"
 )
 
 const (

@@ -1,7 +1,7 @@
 package getrankings
 
 import (
-	"zudomart/modules/live/src/types"
+	"nantty/modules/live/src/types"
 )
 
 type Query struct {

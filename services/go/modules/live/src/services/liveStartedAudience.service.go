@@ -7,9 +7,9 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/live/src/events"
-	"zudomart/modules/live/src/generated/ent"
-	"zudomart/modules/live/src/types"
+	"nantty/modules/live/src/events"
+	"nantty/modules/live/src/generated/ent"
+	"nantty/modules/live/src/types"
 )
 
 const maximumLiveAlertRecipients = 1000

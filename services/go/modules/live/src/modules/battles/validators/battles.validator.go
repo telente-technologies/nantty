@@ -3,8 +3,8 @@ package validators
 import (
 	"github.com/google/uuid"
 
-	"zudomart/modules/live/src/modules/battles/dtos"
-	"zudomart/modules/live/src/utils"
+	"nantty/modules/live/src/modules/battles/dtos"
+	"nantty/modules/live/src/utils"
 )
 
 func ValidateCreateBattleRequest(body dtos.CreateBattleRequest) error {

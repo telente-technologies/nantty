@@ -2,14 +2,14 @@ package services
 
 import (
 	"context"
+	"nantty/modules/live/src/types"
 	"time"
-	"zudomart/modules/live/src/types"
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/live/src/generated/ent"
-	battlerecord "zudomart/modules/live/src/generated/ent/battle"
-	"zudomart/modules/live/src/generated/ent/battleparticipant"
+	"nantty/modules/live/src/generated/ent"
+	battlerecord "nantty/modules/live/src/generated/ent/battle"
+	"nantty/modules/live/src/generated/ent/battleparticipant"
 )
 
 func (service *LiveService) attachBattleToStage(ctx context.Context, db *ent.Client, view *types.LiveStageView, shown *ent.Battle, forfeited map[uuid.UUID]bool, now time.Time) error {

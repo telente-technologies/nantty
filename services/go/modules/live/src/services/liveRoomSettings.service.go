@@ -5,11 +5,11 @@ import (
 
 	"github.com/google/uuid"
 
-	liveerrors "zudomart/modules/live/src/errors"
-	"zudomart/modules/live/src/events"
-	"zudomart/modules/live/src/generated/ent"
-	"zudomart/modules/live/src/generated/ent/liveroomsetting"
-	"zudomart/modules/live/src/types"
+	liveerrors "nantty/modules/live/src/errors"
+	"nantty/modules/live/src/events"
+	"nantty/modules/live/src/generated/ent"
+	"nantty/modules/live/src/generated/ent/liveroomsetting"
+	"nantty/modules/live/src/types"
 )
 
 type roomSettings struct {

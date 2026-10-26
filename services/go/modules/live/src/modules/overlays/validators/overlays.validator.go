@@ -3,9 +3,9 @@ package validators
 import (
 	"strings"
 
-	"zudomart/modules/live/src/modules/overlays/dtos"
-	"zudomart/modules/live/src/services"
-	"zudomart/modules/live/src/utils"
+	"nantty/modules/live/src/modules/overlays/dtos"
+	"nantty/modules/live/src/services"
+	"nantty/modules/live/src/utils"
 )
 
 func ValidateOverlaySceneRequest(body dtos.OverlaySceneRequest) error {

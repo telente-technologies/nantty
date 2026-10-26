@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"zudomart/modules/live/src/integrations"
+	"nantty/modules/live/src/integrations"
 )
 
 func TestLiveKitRoomControllerToleratesMissingParticipantsOnTheLocalServer(t *testing.T) {

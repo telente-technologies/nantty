@@ -8,8 +8,8 @@ import (
 	"github.com/google/uuid"
 	"google.golang.org/grpc"
 
-	authv1 "zudomart/contracts/gen/go/zudomart/auth/v1"
-	"zudomart/modules/live/src/interfaces"
+	authv1 "nantty/contracts/gen/go/zudomart/auth/v1"
+	"nantty/modules/live/src/interfaces"
 )
 
 type AccountDirectoryClient struct {

@@ -5,10 +5,10 @@ import (
 
 	"github.com/google/uuid"
 
-	liveerrors "zudomart/modules/live/src/errors"
-	"zudomart/modules/live/src/generated/ent"
-	"zudomart/modules/live/src/generated/ent/livecomment"
-	"zudomart/modules/live/src/types"
+	liveerrors "nantty/modules/live/src/errors"
+	"nantty/modules/live/src/generated/ent"
+	"nantty/modules/live/src/generated/ent/livecomment"
+	"nantty/modules/live/src/types"
 )
 
 func decodeStoredMentions(stored []map[string]any) []types.CommentMentionView {

@@ -24,6 +24,7 @@ type MediaGrant struct {
 	CanPublish bool
 	Role       string
 	TimeToLive time.Duration
+	AudioOnly  bool
 }
 
 func (issuer *TokenIssuer) IssueParticipantToken(grant MediaGrant) (string, error) {
@@ -36,7 +37,7 @@ func (issuer *TokenIssuer) IssueParticipantToken(grant MediaGrant) (string, erro
 		CanUpdateOwnMetadata: &canUpdateOwnMetadata,
 	}
 	if canPublish {
-		videoGrant.SetCanPublishSources(publisherSources)
+		videoGrant.SetCanPublishSources(publisherSourcesFor(grant.AudioOnly))
 	}
 	token := auth.NewAccessToken(issuer.ApiKey, issuer.ApiSecret).
 		SetVideoGrant(videoGrant).
@@ -45,4 +46,11 @@ func (issuer *TokenIssuer) IssueParticipantToken(grant MediaGrant) (string, erro
 		SetMetadata(`{"role":"` + grant.Role + `"}`).
 		SetValidFor(grant.TimeToLive)
 	return token.ToJWT()
+}
+
+func publisherSourcesFor(audioOnly bool) []livekit.TrackSource {
+	if audioOnly {
+		return []livekit.TrackSource{livekit.TrackSource_MICROPHONE}
+	}
+	return publisherSources
 }

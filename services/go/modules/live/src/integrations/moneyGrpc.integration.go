@@ -10,8 +10,8 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
-	moneyv1 "zudomart/contracts/gen/go/zudomart/money/v1"
-	"zudomart/modules/live/src/interfaces"
+	moneyv1 "nantty/contracts/gen/go/zudomart/money/v1"
+	"nantty/modules/live/src/interfaces"
 )
 
 type MoneyClient struct {

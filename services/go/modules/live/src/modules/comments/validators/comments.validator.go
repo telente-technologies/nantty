@@ -3,8 +3,8 @@ package validators
 import (
 	"strings"
 
-	"zudomart/modules/live/src/modules/comments/dtos"
-	"zudomart/modules/live/src/utils"
+	"nantty/modules/live/src/modules/comments/dtos"
+	"nantty/modules/live/src/utils"
 )
 
 func ValidatePostCommentRequest(body dtos.PostCommentRequest) error {

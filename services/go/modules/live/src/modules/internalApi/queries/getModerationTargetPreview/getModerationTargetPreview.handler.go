@@ -5,9 +5,9 @@ import (
 	"net/http"
 	"time"
 
-	"zudomart/modules/live/src/container"
-	"zudomart/modules/live/src/generated/ent"
-	"zudomart/platform/httpserver"
+	"nantty/modules/live/src/container"
+	"nantty/modules/live/src/generated/ent"
+	"nantty/platform/httpserver"
 )
 
 type Handler struct {

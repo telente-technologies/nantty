@@ -1,18 +1,18 @@
 package controllers
 
 import (
+	"nantty/modules/live/src/container"
+	cancelpendingbattle "nantty/modules/live/src/modules/battles/commands/cancelPendingBattle"
+	createlivebattle "nantty/modules/live/src/modules/battles/commands/createLiveBattle"
+	endbattleearlyashost "nantty/modules/live/src/modules/battles/commands/endBattleEarlyAsHost"
+	respondtowinnertakesallproposal "nantty/modules/live/src/modules/battles/commands/respondToWinnerTakesAllProposal"
+	startpendingbattlewithoutwinnertakesall "nantty/modules/live/src/modules/battles/commands/startPendingBattleWithoutWinnerTakesAll"
+	getbattle "nantty/modules/live/src/modules/battles/queries/getBattle"
+	"nantty/modules/live/src/modules/battles/validators"
+	"nantty/modules/live/src/types"
+	"nantty/modules/live/src/utils"
+	"nantty/platform/httpserver"
 	"net/http"
-	"zudomart/modules/live/src/container"
-	cancelpendingbattle "zudomart/modules/live/src/modules/battles/commands/cancelPendingBattle"
-	createlivebattle "zudomart/modules/live/src/modules/battles/commands/createLiveBattle"
-	endbattleearlyashost "zudomart/modules/live/src/modules/battles/commands/endBattleEarlyAsHost"
-	respondtowinnertakesallproposal "zudomart/modules/live/src/modules/battles/commands/respondToWinnerTakesAllProposal"
-	startpendingbattlewithoutwinnertakesall "zudomart/modules/live/src/modules/battles/commands/startPendingBattleWithoutWinnerTakesAll"
-	getbattle "zudomart/modules/live/src/modules/battles/queries/getBattle"
-	"zudomart/modules/live/src/modules/battles/validators"
-	"zudomart/modules/live/src/types"
-	"zudomart/modules/live/src/utils"
-	"zudomart/platform/httpserver"
 
 	"github.com/google/uuid"
 )
