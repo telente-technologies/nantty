@@ -1,6 +1,6 @@
 import type { LandingIconName } from "./landingIcons";
 
-export const zudomartMainSiteUrl = process.env.NEXT_PUBLIC_MARKETING_SITE_URL ?? "https://zudomart.com";
+export const zudomartMainSiteUrl = process.env.NEXT_PUBLIC_MARKETING_SITE_URL ?? "https://nantty.com";
 
 export const landingNavigationLinks = [
   { href: "#go-live", label: "Go live" },
@@ -44,8 +44,8 @@ export const creatorCategories: readonly CreatorCategory[] = [
 
 export const landingQuestions = [
   {
-    question: "Who can use Zudomart Studio?",
-    answer: "Studio is for members of the Zudomart Creator Program. Apply in the Zudomart app under Profile, Creator Program. Once you are approved, sign in here with the same Zudomart account. There is no separate Studio sign-up.",
+    question: "Who can use Nantty Studio?",
+    answer: "Studio is for members of the Nantty Creator Program. Apply in the Nantty app under Profile, Creator Program. Once you are approved, sign in here with the same Nantty account. There is no separate Studio sign-up.",
   },
   {
     question: "Do I need OBS or special gear?",
@@ -65,18 +65,18 @@ export const landingQuestions = [
   },
   {
     question: "How much of a fan subscription do I keep?",
-    answer: "You keep 80% of each subscription after app store fees. Eligible content, including ads in your comment sections, can also earn a share of ad revenue. Zudomart shares eligible revenue; it does not pay per view.",
+    answer: "You keep 80% of each subscription after app store fees. Eligible content, including ads in your comment sections, can also earn a share of ad revenue. Nantty shares eligible revenue; it does not pay per view.",
   },
   {
-    question: "What are ZudoPoints?",
-    answer: "ZudoPoints rank fans on your live and category leaderboards. They come from gifts and engagement such as watching, sharing and following. Points are for rankings only and are never cash.",
+    question: "What are Nantty Points?",
+    answer: "Nantty Points rank fans on your live and category leaderboards. They come from gifts and engagement such as watching, sharing and following. Points are for rankings only and are never cash.",
   },
   {
     question: "Do I have to sell anything?",
-    answer: "No. Most lives never pin a product. If you have a Zudomart store, you can pin products to a live; if you do not, Studio works exactly the same.",
+    answer: "No. Most lives never pin a product. If you have a Nantty store, you can pin products to a live; if you do not, Studio works exactly the same.",
   },
   {
     question: "How do I get the Blue checkmark?",
-    answer: "Creators can apply for the Blue checkmark from the Zudomart app once their account is verified. It shows viewers your profile is really you.",
+    answer: "Creators can apply for the Blue checkmark from the Nantty app once their account is verified. It shows viewers your profile is really you.",
   },
 ] as const;

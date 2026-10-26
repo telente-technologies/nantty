@@ -132,8 +132,8 @@ export function LoginForm() {
 
       <p className={styles.footNote}>
         New here? Create your account on the{" "}
-        <Link href="https://zudomart.com/welcome" className={styles.linkStrong}>
-          Zudomart app
+        <Link href="https://nantty.com/welcome" className={styles.linkStrong}>
+          Nantty app
         </Link>
         .
       </p>

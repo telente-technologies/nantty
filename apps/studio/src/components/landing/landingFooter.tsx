@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-import { ThemeSwitcher, ZudomartWordmark } from "@zudomart/web-kit";
+import { ThemeSwitcher, NanttyWordmark } from "@nantty/web-kit";
 
 import { buildContactMailtoLink, contactEmailRecipients } from "@/constants/contact.constant";
 
@@ -9,7 +9,7 @@ import styles from "./landingFooter.module.css";
 
 const linkGroups = [
   { heading: "Studio", links: [{ label: "Sign in", href: "/login" }, { label: "Go live your way", href: "#go-live" }, { label: "Features", href: "#features" }, { label: "Earnings", href: "#earnings" }, { label: "FAQ", href: "#faq" }] },
-  { heading: "Zudomart", links: [{ label: "Zudomart.com", href: zudomartMainSiteUrl }, { label: "Join the Creator Program", href: "#creator-program" }, { label: "Sell on Zudomart", href: `${zudomartMainSiteUrl}/sellers` }] },
+  { heading: "Nantty", links: [{ label: "Nantty.com", href: zudomartMainSiteUrl }, { label: "Join the Creator Program", href: "#creator-program" }, { label: "Sell on Nantty", href: `${zudomartMainSiteUrl}/sellers` }] },
   {
     heading: "Legal",
     links: [
@@ -27,12 +27,12 @@ export function LandingFooter() {
     <footer className={styles.footer}>
       <div className={styles.topRow}>
         <div className={styles.brandColumn}>
-          <ZudomartWordmark productLabel="Studio" tone="onDark" withSymbol />
-          <p>The creator studio for going live on Zudomart. Talk, music, gaming, education and IRL. Built in Nigeria.</p>
+          <NanttyWordmark productLabel="Studio" tone="onDark" withSymbol />
+          <p>The creator studio for going live on Nantty. Talk, music, gaming, education and IRL. Built in Nigeria.</p>
           <ul className={styles.emailList} aria-label="Contact email addresses">
             {contactEmailRecipients.map((email) => (
               <li key={email}>
-                <a href={buildContactMailtoLink("Zudomart Studio")} className={styles.emailLink}>
+                <a href={buildContactMailtoLink("Nantty Studio")} className={styles.emailLink}>
                   {email}
                 </a>
               </li>
@@ -53,7 +53,7 @@ export function LandingFooter() {
         </nav>
       </div>
       <div className={styles.bottomRow}>
-        <p>© {new Date().getFullYear()} Zudomart. Made in Nigeria.</p>
+        <p>© {new Date().getFullYear()} Nantty. Made in Nigeria.</p>
         <p>Creator photography via Unsplash.</p>
         <ThemeSwitcher label="Colour theme" className={styles.themeSwitcher} />
       </div>

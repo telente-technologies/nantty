@@ -1,10 +1,10 @@
 import type { ReactNode } from "react";
 
-import { BrandLoader, ErrorState as KitErrorState, resolveCallerErrorCopy, type BrandLoaderSize, type ErrorStateProps } from "@zudomart/web-kit";
+import { BrandLoader, ErrorState as KitErrorState, resolveCallerErrorCopy, type BrandLoaderSize, type ErrorStateProps } from "@nantty/web-kit";
 
 import styles from "./feedback.module.css";
 
-export { EmptyState, Skeleton } from "@zudomart/web-kit";
+export { EmptyState, Skeleton } from "@nantty/web-kit";
 
 export function ErrorState(props: ErrorStateProps) {
   const copy = props.error !== undefined && props.description === undefined ? resolveCallerErrorCopy(props.error, undefined) : {};

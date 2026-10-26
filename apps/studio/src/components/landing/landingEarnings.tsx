@@ -7,7 +7,7 @@ import styles from "./landingEarnings.module.css";
 const earningStreams: readonly { title: string; figure: string; description: string; icon: LandingIconName }[] = [
   { title: "Gifts", figure: "Every gift counts", description: "Viewers send gifts during your live and battles. Coins are added to your earnings as they land, with top gifters listed per live.", icon: "gift" },
   { title: "Fan subscriptions", figure: "You keep 80%", description: "Fans subscribe monthly for badges and perks you choose. You keep 80% of each subscription after app store fees.", icon: "star" },
-  { title: "Ad revenue share", figure: "For eligible content", description: "Eligible replays, clips and the comment sections under your posts earn a share of ad revenue. Live ads only run if you turn them on. Zudomart shares revenue; it does not pay per view.", icon: "megaphone" },
+  { title: "Ad revenue share", figure: "For eligible content", description: "Eligible replays, clips and the comment sections under your posts earn a share of ad revenue. Live ads only run if you turn them on. Nantty shares revenue; it does not pay per view.", icon: "megaphone" },
 ];
 
 const payoutFacts = ["Verify your ID once, then withdraw any time", "A small flat fee per withdrawal, shown before you confirm", "Nigerian bank transfers usually arrive within minutes", "Your first withdrawal gets one quick safety review"];

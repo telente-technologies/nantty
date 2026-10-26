@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useId, useRef, useState } from "react";
 
-import { ThemeSwitcher } from "@zudomart/web-kit";
+import { ThemeSwitcher } from "@nantty/web-kit";
 
 import { useSession } from "@/components/providers/sessionProvider";
 import { SignOutButton } from "@/components/shell/signOutButton";

@@ -1,7 +1,7 @@
 "use client";
 
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useIsOnline } from "@zudomart/web-kit";
+import { useIsOnline } from "@nantty/web-kit";
 import { useRef, useState } from "react";
 
 import { Button } from "@/components/ui/button";

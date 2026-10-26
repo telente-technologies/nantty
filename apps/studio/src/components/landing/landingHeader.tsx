@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 
-import { ZudomartWordmark } from "@zudomart/web-kit";
+import { NanttyWordmark } from "@nantty/web-kit";
 
 import { landingNavigationLinks } from "./landingContent.constant";
 import styles from "./landingHeader.module.css";
@@ -41,8 +41,8 @@ export function LandingHeader() {
   return (
     <header className={`${styles.header} ${hasScrolled ? styles.scrolled : ""}`}>
       <div className={styles.pill}>
-        <Link href="/" className={styles.brand} aria-label="Zudomart Studio home">
-          <ZudomartWordmark productLabel="Studio" tone="onDark" withSymbol />
+        <Link href="/" className={styles.brand} aria-label="Nantty Studio home">
+          <NanttyWordmark productLabel="Studio" tone="onDark" withSymbol />
         </Link>
         <nav aria-label="Main" className={styles.desktopNavigation}>
           <ul>
@@ -76,7 +76,7 @@ export function LandingHeader() {
           </ul>
         </nav>
         <Link href="/login" className={styles.mobileSignIn}>
-          Sign in with your Zudomart account
+          Sign in with your Nantty account
         </Link>
       </div>
     </header>

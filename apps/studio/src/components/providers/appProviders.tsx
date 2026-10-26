@@ -7,7 +7,7 @@ import { isRetryableApiFailure } from "@/services/clientApi.service";
 
 import { ConsentBannerHost } from "@/components/privacy/consentBannerHost";
 import { StudioThemeProvider } from "@/components/theme/studioThemeProvider";
-import { ConfirmDialogHost, type ThemePreference } from "@zudomart/web-kit";
+import { ConfirmDialogHost, type ThemePreference } from "@nantty/web-kit";
 
 import { StudioErrorExperienceProvider } from "@/components/errors/errorExperience.provider";
 

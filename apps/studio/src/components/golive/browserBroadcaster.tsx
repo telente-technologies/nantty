@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 
-import { requestConfirmation } from "@zudomart/web-kit";
+import { requestConfirmation } from "@nantty/web-kit";
 
 import { Button } from "@/components/ui/button";
 import { SelectField } from "@/components/ui/field";

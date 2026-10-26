@@ -53,13 +53,13 @@ export function ObsControlRoomVisual() {
           <span />
           <span />
           <span />
-          <p>studio.zudomart.com</p>
+          <p>studio.nantty.com</p>
         </div>
         <Image src="/screens/studioControlRoom.webp" alt="The Studio control room: server URL, stream key, overlay browser source, coins earned, gifts and top gifters" width={1440} height={880} sizes="(max-width: 900px) 92vw, 600px" className={styles.screenshot} />
       </div>
       <figcaption className={styles.keyCard}>
         <span className={styles.keyLabel}>Server URL</span>
-        <code>rtmp://studio.zudomart.com/live</code>
+        <code>rtmp://studio.nantty.com/live</code>
         <span className={styles.keyLabel}>Stream key</span>
         <code>••••••••••••••••</code>
       </figcaption>

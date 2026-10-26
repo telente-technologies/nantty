@@ -1,12 +1,12 @@
 const uuidAtEnd = /([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})$/i;
 
-export function readProductIdFromZudomartLink(input: string): string | null {
+export function readProductIdFromNanttyLink(input: string): string | null {
   const text = input.trim();
   if (text === "") return null;
   let path: string;
   try {
     const parsed = new URL(text);
-    if (!/(^|\.)zudomart\.com$/.test(parsed.hostname) && parsed.hostname !== "localhost") return null;
+    if (!/(^|\.)(?:nantty|zudomart)\.com$/.test(parsed.hostname) && parsed.hostname !== "localhost") return null;
     path = parsed.pathname;
   } catch {
     return /^[A-Za-z0-9_.~-]{1,100}$/.test(text) ? text : null;

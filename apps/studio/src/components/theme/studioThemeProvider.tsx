@@ -2,7 +2,7 @@
 
 import { useCallback, type ReactNode } from "react";
 
-import { ThemeProvider, type ThemePreference } from "@zudomart/web-kit";
+import { ThemeProvider, type ThemePreference } from "@nantty/web-kit";
 
 import { useSession } from "@/components/providers/sessionProvider";
 import { sendRequestToStudioServer } from "@/services/clientApi.service";

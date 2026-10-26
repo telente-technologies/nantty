@@ -3,12 +3,12 @@
 import type { UseQueryResult } from "@tanstack/react-query";
 
 import { ErrorState, Skeleton } from "@/components/ui/feedback";
-import type { ZudomartWalletSummary } from "@/types/zudomartWallet.type";
-import { formatWalletLineAmount, readVerificationMessage, readWalletLines } from "@/utils/zudomartWallet.util";
+import type { NanttyWalletSummary } from "@/types/nanttyWallet.type";
+import { formatWalletLineAmount, readVerificationMessage, readWalletLines } from "@/utils/nanttyWallet.util";
 
 import styles from "./payoutOnboarding.module.css";
 
-export function WalletVerificationBanner({ summary, payoutSetupHref }: { readonly summary: ZudomartWalletSummary | undefined; readonly payoutSetupHref: string }) {
+export function WalletVerificationBanner({ summary, payoutSetupHref }: { readonly summary: NanttyWalletSummary | undefined; readonly payoutSetupHref: string }) {
   const message = readVerificationMessage(summary);
   if (!message) return null;
   return (
@@ -22,16 +22,16 @@ export function WalletVerificationBanner({ summary, payoutSetupHref }: { readonl
   );
 }
 
-export function ZudomartBalanceCard({ wallet }: { readonly wallet: UseQueryResult<ZudomartWalletSummary> }) {
-  if (wallet.isError) return <ErrorState title="Your Zudomart balance didn't load" error={wallet.error} onRetry={() => void wallet.refetch()} />;
+export function NanttyBalanceCard({ wallet }: { readonly wallet: UseQueryResult<NanttyWalletSummary> }) {
+  if (wallet.isError) return <ErrorState title="Your Nantty balance didn't load" error={wallet.error} onRetry={() => void wallet.refetch()} />;
   if (!wallet.data) return <Skeleton height={220} />;
   const lines = readWalletLines(wallet.data);
   return (
-    <section className={styles.walletCard} aria-label="Zudomart balance">
-      <strong>Zudomart balance</strong>
+    <section className={styles.walletCard} aria-label="Nantty balance">
+      <strong>Nantty balance</strong>
       <p className={styles.muted}>Sales, creator earnings, ad credit and coins are kept separately and never added together.</p>
       {lines.length === 0 ? (
-        <p className={styles.muted}>Nothing in your Zudomart balance yet.</p>
+        <p className={styles.muted}>Nothing in your Nantty balance yet.</p>
       ) : (
         <ul className={styles.walletLines}>
           {lines.map((line) => (

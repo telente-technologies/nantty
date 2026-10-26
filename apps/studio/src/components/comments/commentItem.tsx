@@ -3,7 +3,7 @@
 import { useMutation } from "@tanstack/react-query";
 import { useRef, useState, type FormEvent } from "react";
 
-import { requestConfirmation } from "@zudomart/web-kit";
+import { requestConfirmation } from "@nantty/web-kit";
 
 import { Button } from "@/components/ui/button";
 import { TextAreaField } from "@/components/ui/field";

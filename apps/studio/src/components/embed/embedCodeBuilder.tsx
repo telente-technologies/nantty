@@ -1,15 +1,15 @@
 "use client";
 
-import { buildEmbedFrameUrl, buildEmbedSnippet, embedPreviewSandbox, type EmbedSnippetKind, type EmbedSnippetLayout, type EmbedSnippetTheme } from "@zudomart/web-kit";
+import { buildEmbedFrameUrl, buildEmbedSnippet, embedPreviewSandbox, type EmbedSnippetKind, type EmbedSnippetLayout, type EmbedSnippetTheme } from "@nantty/web-kit";
 import { useState } from "react";
 
 import { useSession } from "@/components/providers/sessionProvider";
 import { CodeIcon, CopyIcon } from "@/components/ui/icons";
 
-import { readProductIdFromZudomartLink } from "./embedProductLink.util";
+import { readProductIdFromNanttyLink } from "./embedProductLink.util";
 import styles from "./embedBuilder.module.css";
 
-const embedOrigin = (process.env.NEXT_PUBLIC_WEBAPP_URL ?? "https://app.zudomart.com").replace(/\/+$/, "");
+const embedOrigin = (process.env.NEXT_PUBLIC_WEBAPP_URL ?? "https://web.nantty.com").replace(/\/+$/, "");
 const kinds: readonly { readonly value: EmbedSnippetKind; readonly label: string; readonly needsStore: boolean }[] = [
   { value: "button", label: "Buy button", needsStore: false }, { value: "store", label: "Store card", needsStore: true }, { value: "products", label: "Products", needsStore: true },
 ];
@@ -32,9 +32,9 @@ export function StudioEmbedCodeBuilder() {
   const [layout, setLayout] = useState<EmbedSnippetLayout>("grid");
   const [productLink, setProductLink] = useState("");
   const [copied, setCopied] = useState(false);
-  const productId = readProductIdFromZudomartLink(productLink) ?? undefined;
+  const productId = readProductIdFromNanttyLink(productLink) ?? undefined;
   const options = { origin: embedOrigin, kind, storeId, productId, theme, layout };
-  const missing = kind === "button" ? (productId === undefined ? "Paste a Zudomart product link." : null) : storeId === "" ? "Open a store on Zudomart to embed a store card or products." : null;
+  const missing = kind === "button" ? (productId === undefined ? "Paste a Nantty product link." : null) : storeId === "" ? "Open a store on Nantty to embed a store card or products." : null;
   const snippet = missing === null ? buildEmbedSnippet(options) : "";
 
   async function copySnippet() {
@@ -45,7 +45,7 @@ export function StudioEmbedCodeBuilder() {
     <div className={styles.page}>
       <header>
         <h2 className={styles.title}>Embed on your site</h2>
-        <p className={styles.subtitle}>Add a Buy on Zudomart button for products you promote, or your store and products, to your own website or blog. Buying always opens Zudomart.</p>
+        <p className={styles.subtitle}>Add a Buy on Nantty button for products you promote, or your store and products, to your own website or blog. Buying always opens Nantty.</p>
       </header>
       <div className={styles.layout}>
         <div className={styles.card}>
@@ -53,7 +53,7 @@ export function StudioEmbedCodeBuilder() {
           <ChoiceGroup options={kinds.map((option) => ({ value: option.value, label: option.label, disabled: option.needsStore && storeId === "" }))} value={kind} onChange={(next) => { setKind(next); setCopied(false); }} />
           {kind === "button" ? (
             <label className={styles.field}>Product link
-              <input className={styles.input} value={productLink} onChange={(event) => { setProductLink(event.target.value); setCopied(false); }} placeholder="https://zudomart.com/p/adire-two-piece-…" />
+              <input className={styles.input} value={productLink} onChange={(event) => { setProductLink(event.target.value); setCopied(false); }} placeholder="https://nantty.com/p/adire-two-piece-…" />
             </label>
           ) : null}
           <span className={styles.cardTitle}>Theme</span>

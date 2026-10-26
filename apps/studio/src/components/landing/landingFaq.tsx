@@ -14,7 +14,7 @@ export function LandingFaq() {
             Questions, answered.
           </h2>
           <p className={styles.contactNote}>
-            Something else? Email <a href={buildContactMailtoLink("Zudomart Studio question")}>{contactEmailDisplayText}</a>.
+            Something else? Email <a href={buildContactMailtoLink("Nantty Studio question")}>{contactEmailDisplayText}</a>.
           </p>
         </div>
         <div className={styles.list}>

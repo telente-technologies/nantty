@@ -12,7 +12,7 @@ export function LandingHero() {
     <section className={styles.hero} aria-labelledby="landing-hero-heading">
       <div className={styles.layout}>
         <div className={styles.copy}>
-          <p className={shared.eyebrow}>Zudomart Studio · for Creator Program members</p>
+          <p className={shared.eyebrow}>Nantty Studio · for Creator Program members</p>
           <h1 id="landing-hero-heading" className={styles.heading}>
             <span className={styles.headingLine}>Go live.</span> <span className={styles.headingLine}>Get gifted.</span>{" "}
             <span className={styles.headingLine}>
@@ -39,7 +39,7 @@ export function LandingHero() {
               </li>
             ))}
           </ul>
-          <p className={styles.note}>Sign in with your Zudomart app account. New to the Creator Program? Apply in the Zudomart app first.</p>
+          <p className={styles.note}>Sign in with your Nantty app account. New to the Creator Program? Apply in the Nantty app first.</p>
         </div>
         <LiveStageMockup />
       </div>

@@ -3,7 +3,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState, type FormEvent } from "react";
 
-import { requestConfirmation } from "@zudomart/web-kit";
+import { requestConfirmation } from "@nantty/web-kit";
 
 import { Button } from "@/components/ui/button";
 import { TextField } from "@/components/ui/field";
@@ -66,7 +66,7 @@ export function BrandDealsCard({ currency }: { readonly currency: string }) {
 
   return (
     <Card title="Brand deals">
-      <Muted>Record paid partnerships so your posts carry the right disclosure. Brands pay you directly; Zudomart doesn't take a cut.</Muted>
+      <Muted>Record paid partnerships so your posts carry the right disclosure. Brands pay you directly; Nantty doesn't take a cut.</Muted>
       {deals.isError ? <ErrorState title="Brand deals didn't load" error={deals.error} onRetry={() => void deals.refetch()} /> : null}
       {deals.isLoading ? <Skeleton height={60} /> : null}
       {deals.data && deals.data.data.length === 0 ? <EmptyState title="No brand deals recorded" description="Add one below when a brand pays you to feature them." /> : null}

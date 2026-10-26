@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ConnectionStatus, ThemeSwitcher, ZudomartWordmark } from "@zudomart/web-kit";
+import { ConnectionStatus, ThemeSwitcher, NanttyWordmark } from "@nantty/web-kit";
 import type { ReactNode } from "react";
 
 import styles from "./authSplitLayout.module.css";
@@ -15,13 +15,13 @@ export function AuthSplitLayout({ children }: { readonly children: ReactNode }) 
     <>
       <ConnectionStatus />
       <div className={styles.page}>
-        <aside className={styles.aside} aria-label="About Zudomart Studio">
+        <aside className={styles.aside} aria-label="About Nantty Studio">
           <div className={styles.asideInner}>
             <Link href="/" className={styles.wordmark}>
-              <ZudomartWordmark productLabel="Studio" tone="onDark" withSymbol />
+              <NanttyWordmark productLabel="Studio" tone="onDark" withSymbol />
             </Link>
             <div className={styles.asideCopy}>
-              <p className={styles.eyebrow}>Zudomart Studio</p>
+              <p className={styles.eyebrow}>Nantty Studio</p>
               <p className={styles.headline}>Go live, and bring your whole shop with you.</p>
               <p className={styles.lede}>
                 One control room for your broadcasts: connect an encoder, build your overlays, pin products and watch the comments roll in.

@@ -17,10 +17,10 @@ const bentoFeatures: readonly BentoFeature[] = [
   { title: "Battles that pull a crowd", description: "Timed battles with live scores. Turn on winner takes all when you want the stakes high.", visual: <BattleVisual />, size: "regular" },
   { title: "Overlays and scenes", description: "Lower thirds, logos, countdowns and tickers on a 1920 × 1080 canvas, added to OBS as one browser source.", visual: <OverlayVisual />, size: "regular" },
   { title: "Comments you control", description: "Hold messages with blocked words, turn on slow mode and add moderators you trust.", visual: <ModerationVisual />, size: "regular" },
-  { title: "ZudoPoints leaderboards", description: "Fans climb your leaderboard with gifts and engagement. Points rank fans; they are never cash.", visual: <LeaderboardVisual />, size: "regular" },
+  { title: "Nantty Points leaderboards", description: "Fans climb your leaderboard with gifts and engagement. Points rank fans; they are never cash.", visual: <LeaderboardVisual />, size: "regular" },
   { title: "Replays of every live", description: "Each live is recorded so fans who missed it can catch up and you can cut highlights.", visual: <RecordingsVisual />, size: "regular" },
   { title: "Analytics after every show", description: "Peak viewers, watch time, new followers and top gifters for each live.", visual: <AnalyticsVisual />, size: "regular" },
-  { title: "Blue checkmark for creators", description: "Show viewers it is really you. Apply for the Blue checkmark from the Zudomart app.", visual: <CheckmarkVisual />, size: "regular" },
+  { title: "Blue checkmark for creators", description: "Show viewers it is really you. Apply for the Blue checkmark from the Nantty app.", visual: <CheckmarkVisual />, size: "regular" },
 ];
 
 export function LandingFeatureBento() {

@@ -1,7 +1,7 @@
 "use client";
 
 import { useQueryClient } from "@tanstack/react-query";
-import { useRealtimeEvents, useRealtimeTopic } from "@zudomart/web-kit/src/realtime/realtimeHooks";
+import { useRealtimeEvents, useRealtimeTopic } from "@nantty/web-kit/src/realtime/realtimeHooks";
 import { useEffect, useRef } from "react";
 
 import { studioRealtime } from "@/services/realtime/studioRealtime.service";

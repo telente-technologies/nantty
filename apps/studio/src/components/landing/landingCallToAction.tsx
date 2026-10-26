@@ -1,7 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 
-import { OfficialStoreBadges } from "@zudomart/web-kit";
+import { OfficialStoreBadges } from "@nantty/web-kit";
 
 import { storeLinks } from "@/constants/contact.constant";
 
@@ -15,7 +15,7 @@ export function LandingCallToAction() {
           <h2 id="cta-heading" className={styles.heading}>
             Your audience is waiting. Go live tonight.
           </h2>
-          <p className={styles.description}>Sign in with the account you use in the Zudomart app. Not in the Creator Program yet? Apply in the app, then come back here to go live.</p>
+          <p className={styles.description}>Sign in with the account you use in the Nantty app. Not in the Creator Program yet? Apply in the app, then come back here to go live.</p>
           <div className={styles.actions}>
             <Link href="/login" className={styles.primaryAction}>
               Go live with Studio

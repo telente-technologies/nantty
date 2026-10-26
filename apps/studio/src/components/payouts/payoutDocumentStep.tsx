@@ -62,7 +62,7 @@ export function PayoutDocumentStep({ state, stepNumber, stepCount, onChanged }: 
   const isUnavailable = open.error instanceof StudioRequestError && open.error.status === 503;
   const isUnfinished = state.documentStatus === "link_issued" && !open.isError;
   return (
-    <PayoutStepFrame stepNumber={stepNumber} stepCount={stepCount} title={isUnfinished ? "Verify your ID: not finished" : "Verify your ID"} why="A photo of your government ID is the last check. It is collected on a secure verification page, so the image never passes through Zudomart.">
+    <PayoutStepFrame stepNumber={stepNumber} stepCount={stepCount} title={isUnfinished ? "Verify your ID: not finished" : "Verify your ID"} why="A photo of your government ID is the last check. It is collected on a secure verification page, so the image never passes through Nantty.">
       <p className={styles.muted}>A secure page opens in a new window. Upload your ID there and it closes and brings you back here. Your progress is already saved.</p>
       <p className={styles.muted}>Accepted: national ID card, international passport, driver's licence or voter's card. Photos must be clear and show all four corners.</p>
       {isUnavailable ? <p className={styles.notice}>We couldn't open the verification page right now. Try again in a moment.</p> : null}

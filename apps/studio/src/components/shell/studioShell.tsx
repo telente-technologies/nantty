@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState, type ComponentType, type ReactNode } from "react";
 
-import { ConnectionStatus, ZudomartWordmark } from "@zudomart/web-kit";
+import { ConnectionStatus, NanttyWordmark } from "@nantty/web-kit";
 
 import { AccountMenu } from "@/components/shell/accountMenu";
 import { NotificationsLink } from "@/components/shell/notificationsLink";
@@ -62,8 +62,8 @@ export function StudioShell({ children }: { readonly children: ReactNode }) {
       <ConnectionStatus />
       <aside className={styles.sidebar} data-open={navOpen ? "true" : undefined}>
         <div className={styles.brandRow}>
-          <Link href="/home" className={styles.brand} aria-label="Zudomart Studio home">
-            <ZudomartWordmark productLabel="Studio" height={20} withSymbol collapseToMarkOnSmallScreens />
+          <Link href="/home" className={styles.brand} aria-label="Nantty Studio home">
+            <NanttyWordmark productLabel="Studio" height={20} withSymbol collapseToMarkOnSmallScreens />
           </Link>
           {showSections ? (
             <button type="button" className={styles.menuButton} aria-expanded={navOpen} aria-controls="studio-navigation" onClick={() => setNavOpen((open) => !open)}>

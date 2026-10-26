@@ -2,7 +2,7 @@
 
 import { useCallback, useRef, useState, type ReactNode } from "react";
 
-import { Dialog } from "@zudomart/web-kit";
+import { Dialog } from "@nantty/web-kit";
 
 import { Button } from "@/components/ui/button";
 import { TextField } from "@/components/ui/field";

@@ -38,7 +38,7 @@ export function PayoutIdentityForm({ state, stepCount, onSaved }: PayoutIdentity
   }
 
   return (
-    <PayoutStepFrame stepNumber={1} stepCount={stepCount} title="Who you are" why="Nigerian banks and regulators require us to confirm who receives money before we can send it. We only ask once, and the same details cover everything you earn on Zudomart.">
+    <PayoutStepFrame stepNumber={1} stepCount={stepCount} title="Who you are" why="Nigerian banks and regulators require us to confirm who receives money before we can send it. We only ask once, and the same details cover everything you earn on Nantty.">
       <form className={styles.stack} onSubmit={submit} noValidate>
         <TextField label="Legal name" hint="As it appears on your ID" value={legalName} onChange={(event) => setLegalName(event.target.value)} autoComplete="name" />
         <div className={styles.grid}>
@@ -59,7 +59,7 @@ export function PayoutIdentityForm({ state, stepCount, onSaved }: PayoutIdentity
             <input type="checkbox" checked={registeredBusiness} onChange={(event) => setRegisteredBusiness(event.target.checked)} /> I also sell as a registered business
           </label>
         ) : null}
-        <p className={styles.muted}>Your BVN or NIN is used once to confirm your name matches your bank account. Zudomart never shows it again, shares it with other users, or uses it for anything else. We keep only the last 4 digits.</p>
+        <p className={styles.muted}>Your BVN or NIN is used once to confirm your name matches your bank account. Nantty never shows it again, shares it with other users, or uses it for anything else. We keep only the last 4 digits.</p>
         {save.isError ? <p className={`${styles.notice} ${styles.noticeError}`} role="alert">{save.error.message}</p> : null}
         <div className={styles.actions}><Button type="submit" busy={save.isPending} disabled={!ready}>Save and continue</Button></div>
       </form>

@@ -2,7 +2,7 @@
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
-import { requestConfirmation } from "@zudomart/web-kit";
+import { requestConfirmation } from "@nantty/web-kit";
 
 import { Button } from "@/components/ui/button";
 import { readPublicSiteUrl } from "@/config/studioEnvironment.config";

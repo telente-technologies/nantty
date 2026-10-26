@@ -81,7 +81,7 @@ export function PayoutOnboardingPanel() {
         </p>
       ) : null}
       {state.currentStep === "identity" ? <PayoutIdentityForm state={state} stepCount={stepCount} onSaved={() => void refresh()} /> : null}
-      {state.currentStep === "business" ? <p className={styles.notice}>Add your CAC business details in the Zudomart app or the seller dashboard under Payouts. Your creator payouts follow the same account.</p> : null}
+      {state.currentStep === "business" ? <p className={styles.notice}>Add your CAC business details in the Nantty app or the seller dashboard under Payouts. Your creator payouts follow the same account.</p> : null}
       {state.currentStep === "bank" ? <PayoutBankForm state={state} stepNumber={stepNumber} stepCount={stepCount} onSaved={() => void refresh()} /> : null}
       {state.currentStep === "done" ? <p className={styles.notice} role="status">Your payout details are saved. We'll let you know if anything else is needed.</p> : null}
       {state.currentStep === "document" ? <PayoutDocumentStep state={state} stepNumber={stepNumber} stepCount={stepCount} onChanged={refresh} /> : null}

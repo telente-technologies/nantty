@@ -6,12 +6,12 @@ import styles from "./landingSteps.module.css";
 const steps = [
   {
     title: "Join the Creator Program",
-    description: "In the Zudomart app, open Profile, then Creator Program. Some accounts are approved straight away; others get a quick review with a checklist.",
+    description: "In the Nantty app, open Profile, then Creator Program. Some accounts are approved straight away; others get a quick review with a checklist.",
     media: { kind: "photo", src: "/photos/deskStreamSetup.webp", alt: "A creator at his desk setting up a stream on a large monitor", width: 1600, height: 1067 },
   },
   {
     title: "Sign in to Studio",
-    description: "Use the same Zudomart account. No new password, no separate sign-up. Your control room, overlays and earnings are ready.",
+    description: "Use the same Nantty account. No new password, no separate sign-up. Your control room, overlays and earnings are ready.",
     media: { kind: "screen", src: "/screens/studioControlRoomLight.webp", alt: "The Studio control room in light mode with stream settings and live stats", width: 1440, height: 880 },
   },
   {
@@ -30,7 +30,7 @@ export function LandingSteps() {
           <h2 id="steps-heading" className={shared.heading}>
             From the app to your first live in three steps.
           </h2>
-          <p className={shared.lede}>Studio is open to approved members of the Zudomart Creator Program. Apply in the Zudomart app, then come back here.</p>
+          <p className={shared.lede}>Studio is open to approved members of the Nantty Creator Program. Apply in the Nantty app, then come back here.</p>
         </div>
         <ol className={styles.steps}>
           {steps.map((step, index) => (
