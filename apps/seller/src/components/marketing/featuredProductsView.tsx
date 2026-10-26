@@ -69,7 +69,7 @@ function FeaturedProductsEditor() {
         padded={false}
         actions={<Button variant="primary" disabled={!isDirty} isBusy={isSaving} onClick={() => void saveFeaturedProducts()}>Save changes</Button>}
       >
-        {items.length === 0 ? <EmptyState iconName="star16" title="Nothing featured yet" description="Pick up to 4 products to promote in Zudomart Mart." /> : null}
+        {items.length === 0 ? <EmptyState iconName="star16" title="Nothing featured yet" description="Pick up to 4 products to promote in Nantty Mart." /> : null}
         <ol>
           {items.map((item, index) => (
             <li key={item.productId} className={styles.featuredRow}>
@@ -103,9 +103,9 @@ export function FeaturedProductsView() {
   const { hasFeature } = usePlanFeatures();
   return (
     <PageStack>
-      <MarketingSectionHeader title="Featured products" description="Promote up to 4 products in Zudomart Mart. Products featured on your own store page are chosen in Storefront." />
+      <MarketingSectionHeader title="Featured products" description="Promote up to 4 products in Nantty Mart. Products featured on your own store page are chosen in Storefront." />
       <Callout tone="info" action={<ButtonLink href="/storefront" size="small">Open Storefront</ButtonLink>}>Featured products on your store page are managed in Storefront, so there is one list.</Callout>
-      <PlanGate feature="advanced_promotions" description="Promote your best products in Zudomart Mart. Available on Pro and Business. Featuring products on your store page is free in Storefront.">
+      <PlanGate feature="advanced_promotions" description="Promote your best products in Nantty Mart. Available on Pro and Business. Featuring products on your store page is free in Storefront.">
         {hasFeature("advanced_promotions") ? <FeaturedProductsEditor /> : null}
       </PlanGate>
     </PageStack>

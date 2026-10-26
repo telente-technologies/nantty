@@ -51,7 +51,7 @@ export function ReturnsListView() {
 
   return (
     <PageStack>
-      <PageHeader title="Returns" description="Buyers request returns from the Zudomart app and they appear here. Approve, then refund once the item is back with you." />
+      <PageHeader title="Returns" description="Buyers request returns from the Nantty app and they appear here. Approve, then refund once the item is back with you." />
       <LinkTabs label="Order sections" tabs={ordersSectionTabs} />
       <SegmentedControl
         label="Filter returns"

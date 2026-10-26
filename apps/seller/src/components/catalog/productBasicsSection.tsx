@@ -31,7 +31,7 @@ export function ProductBasicsSection({ draft, fieldErrors, onDraftChange }: Prod
           hint={<Link href="/products/categories">Manage categories</Link>}
           options={[{ value: "", label: "No category" }, ...(categoriesQuery.data?.data ?? []).map((category) => ({ value: category.id, label: category.name }))]}
         />
-        <TextAreaField className={styles.fullRow} label="Description" value={draft.description} maxLength={5000} rows={5} onChange={(event) => onDraftChange({ description: event.target.value })} errorMessage={fieldErrors.description} hint="Shown on the product page in the Zudomart app." />
+        <TextAreaField className={styles.fullRow} label="Description" value={draft.description} maxLength={5000} rows={5} onChange={(event) => onDraftChange({ description: event.target.value })} errorMessage={fieldErrors.description} hint="Shown on the product page in the Nantty app." />
         <TextField className={styles.fullRow} label="Tags" value={draft.tagsText} onChange={(event) => onDraftChange({ tagsText: event.target.value })} errorMessage={fieldErrors.tags} hint="Separate with commas, for example bestseller, made-in-nigeria." maxLength={640} />
       </div>
       <div className={styles.toggleList}>

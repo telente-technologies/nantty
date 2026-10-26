@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 
-import { requestConfirmation } from "@zudomart/web-kit";
+import { requestConfirmation } from "@nantty/web-kit";
 
 import { PlanGate } from "@/components/billing/planGate";
 import { CustomerSegmentEditorDialog } from "@/components/customers/customerSegmentEditorDialog";
@@ -103,7 +103,7 @@ export function CustomerSegmentsView() {
   const { hasFeature } = usePlanFeatures();
   return (
     <PageStack>
-      <PageHeader eyebrow={<Link href="/customers"><IconLabel name="arrowLeft24" size={16}>Customers</IconLabel></Link>} title="Customer segments" description="Group your Zudomart buyers by how much and how often they order, then target them with discount codes and flash sales." />
+      <PageHeader eyebrow={<Link href="/customers"><IconLabel name="arrowLeft24" size={16}>Customers</IconLabel></Link>} title="Customer segments" description="Group your Nantty buyers by how much and how often they order, then target them with discount codes and flash sales." />
       <PlanGate feature="customer_segments" description="Segments group customers into New, Returning, VIP and At risk automatically, and let you build your own rules. Available on Pro and Business.">
         {hasFeature("customer_segments") ? <CustomerSegmentsList /> : null}
       </PlanGate>

@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 
-import { requestConfirmation } from "@zudomart/web-kit";
+import { requestConfirmation } from "@nantty/web-kit";
 
 import { PlanGate } from "@/components/billing/planGate";
 import { InventoryTabs } from "@/components/inventory/inventoryTabs";

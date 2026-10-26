@@ -45,7 +45,7 @@ export function DashboardRevenueChartPanel({ summary }: { readonly summary: Dash
     values: { revenue: point.revenue.amountMinor },
   }));
   return (
-    <Panel title="Sales, last 30 days" description="Orders customers placed in the Zudomart app, before fees and refunds" actions={<ButtonLink href="/analytics" size="small">Open analytics</ButtonLink>}>
+    <Panel title="Sales, last 30 days" description="Orders customers placed in the Nantty app, before fees and refunds" actions={<ButtonLink href="/analytics" size="small">Open analytics</ButtonLink>}>
       <LineChart
         title="Daily sales for the last 30 days"
         description="A line showing sales from app orders for each of the last 30 days."

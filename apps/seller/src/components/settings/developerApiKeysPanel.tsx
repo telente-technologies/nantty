@@ -90,7 +90,7 @@ export function DeveloperApiKeysPanel() {
   }
 
   return (
-    <Panel title="API keys" description="Use these with the Zudomart Seller API. Send the key in the Authorization header." padded={false} actions={<Button variant="primary" size="small" iconName="plus16" onClick={() => setIsCreating(true)}>New key</Button>}>
+    <Panel title="API keys" description="Use these with the Nantty Seller API. Send the key in the Authorization header." padded={false} actions={<Button variant="primary" size="small" iconName="plus16" onClick={() => setIsCreating(true)}>New key</Button>}>
       <DataTable<ApiKey>
         caption="API keys"
         rows={apiKeysQuery.data?.data ?? null}

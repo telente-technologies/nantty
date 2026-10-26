@@ -27,7 +27,7 @@ export function AnalyticsView() {
 
   return (
     <PageStack>
-      <PageHeader title="Sales & analytics" description="How your app orders, buyers and products are performing. Net sales are gross sales minus refunds and Zudomart fees." />
+      <PageHeader title="Sales & analytics" description="How your app orders, buyers and products are performing. Net sales are gross sales minus refunds and Nantty fees." />
       <div className={styles.toolbar}>
         <DateRangeControl value={dateRange} onValueChange={setDateRange} />
         <Button size="small" variant="ghost" iconName="refresh20" onClick={overviewQuery.reload} isBusy={overviewQuery.isLoading && Boolean(overview)}>

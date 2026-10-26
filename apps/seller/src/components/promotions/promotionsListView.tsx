@@ -37,7 +37,7 @@ export function PromotionsListView() {
 
   return (
     <PageStack>
-      <MarketingSectionHeader title="Discount codes & product discounts" description="Codes buyers enter at checkout, automatic product discounts and scheduled sales for orders in the Zudomart app. Included on every plan." actions={<ButtonLink href="/promotions/new" variant="primary" iconName="plus16">New discount</ButtonLink>} />
+      <MarketingSectionHeader title="Discount codes & product discounts" description="Codes buyers enter at checkout, automatic product discounts and scheduled sales for orders in the Nantty app. Included on every plan." actions={<ButtonLink href="/promotions/new" variant="primary" iconName="plus16">New discount</ButtonLink>} />
       <FilterBar>
       <SegmentedControl
         label="Discount type"

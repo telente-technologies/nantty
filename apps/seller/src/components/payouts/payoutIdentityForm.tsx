@@ -39,7 +39,7 @@ export function PayoutIdentityForm({ state, stepCount, onSaved }: { readonly sta
   }
 
   return (
-    <PayoutStepFrame stepNumber={1} stepCount={stepCount} title="Who you are" why="Nigerian banks and regulators require us to confirm who receives money before we can send it. We only ask once, and the same details cover everything you earn on Zudomart.">
+    <PayoutStepFrame stepNumber={1} stepCount={stepCount} title="Who you are" why="Nigerian banks and regulators require us to confirm who receives money before we can send it. We only ask once, and the same details cover everything you earn on Nantty.">
       <form className={styles.stack} onSubmit={submit} noValidate>
         <TextField label="Legal name" hint="As it appears on your ID" value={legalName} onChange={(event) => setLegalName(event.target.value)} autoComplete="name" />
         <div className={styles.grid}>
@@ -53,7 +53,7 @@ export function PayoutIdentityForm({ state, stepCount, onSaved }: { readonly sta
           <TextField label={`${idType.toUpperCase()} (11 digits)`} inputMode="numeric" maxLength={11} value={idNumber} onChange={(event) => setIdNumber(event.target.value.replace(/\D/g, ""))} />
         </div>
         {state.role !== "creator" ? <ToggleSwitch label="I sell as a registered business" description="You will add your CAC details next." checked={registeredBusiness} onCheckedChange={setRegisteredBusiness} /> : null}
-        <p className={styles.muted}>Your ID number is sent securely to our payment partner for verification. Zudomart never shows it again, shares it with other users, or uses it for anything else. We keep only the last 4 digits.</p>
+        <p className={styles.muted}>Your ID number is sent securely to our payment partner for verification. Nantty never shows it again, shares it with other users, or uses it for anything else. We keep only the last 4 digits.</p>
         {errorMessage ? <Callout tone="error">{errorMessage}</Callout> : null}
         <div className={styles.actions}><Button type="submit" variant="primary" isBusy={isBusy} disabled={!ready}>Save and continue</Button></div>
       </form>

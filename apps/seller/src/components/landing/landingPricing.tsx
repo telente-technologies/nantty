@@ -20,10 +20,10 @@ export function LandingPricing({ plans, locale }: { readonly plans: Subscription
         <div className={styles.intro}>
           <p className={styles.eyebrow}>Who it is for</p>
           <h2 id="pricing-heading" className={styles.heading}>
-            <span className={styles.goldWord}>Free</span> for every Zudomart seller.
+            <span className={styles.goldWord}>Free</span> for every Nantty seller.
           </h2>
           <p className={styles.lede}>
-            {freePlanPromise} Sign in with your Zudomart app account — no Gold verification or paid plan needed. Paid plans show in your local currency.
+            {freePlanPromise} Sign in with your Nantty app account — no Gold verification or paid plan needed. Paid plans show in your local currency.
           </p>
         </div>
         {plansToShow.length === 0 ? (

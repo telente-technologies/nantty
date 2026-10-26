@@ -38,7 +38,7 @@ export function FinanceFeesView() {
 
   return (
     <PageStack>
-      <PageHeader title="Fees" description="What you paid to sell on Zudomart. The payment processing fee and, on escrow orders, the escrow fee come out of each order before it reaches your wallet." />
+      <PageHeader title="Fees" description="What you paid to sell on Nantty. The payment processing fee and, on escrow orders, the escrow fee come out of each order before it reaches your wallet." />
       <WalletTabs />
       <FilterBar>
         <DateRangeControl value={dateRange} onValueChange={setDateRange} />
@@ -80,7 +80,7 @@ export function FinanceFeesView() {
               )}
             </Panel>
           </div>
-          <Callout tone="info" title="Withdrawal fees">The withdrawal fee is the transfer charge for sending money to your bank. Zudomart adds nothing on top.</Callout>
+          <Callout tone="info" title="Withdrawal fees">The withdrawal fee is the transfer charge for sending money to your bank. Nantty adds nothing on top.</Callout>
         </>
       ) : null}
     </PageStack>

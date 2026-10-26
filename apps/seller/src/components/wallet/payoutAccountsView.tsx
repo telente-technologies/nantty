@@ -63,7 +63,7 @@ export function PayoutAccountsView({ embedded = false }: { readonly embedded?: b
   return (
     <Wrapper>
       {stepUpDialog}
-      {embedded ? null : <PageHeader title="Payout accounts" description="Account numbers are always partly hidden. Zudomart stores them encrypted." actions={addAccountButton} />}
+      {embedded ? null : <PageHeader title="Payout accounts" description="Account numbers are always partly hidden. Nantty stores them encrypted." actions={addAccountButton} />}
       {embedded ? null : <WalletTabs />}
       {!canManageAccounts ? <Callout tone="info">Only the store owner can add or remove payout accounts.</Callout> : null}
       <Panel title={embedded ? "Payout accounts" : undefined} description={embedded ? "Where withdrawals are sent. Account numbers are always partly hidden." : undefined} actions={embedded ? addAccountButton : undefined}>

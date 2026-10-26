@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 
-import { requestConfirmation } from "@zudomart/web-kit";
+import { requestConfirmation } from "@nantty/web-kit";
 
 import { PlanLockedNotice } from "@/components/billing/planGate";
 import { CompactSelect } from "@/components/catalog/productListFilters";
@@ -69,7 +69,7 @@ export function ProductBulkActionBar({ selectedProductIds, onFinished }: { reado
     <div role="region" aria-label="Bulk actions" className={styles.bar}>
       <strong>{selectedProductIds.length} selected</strong>
       <div className={styles.group}>
-        <Button size="small" onClick={() => void applyBulkActionToSelectedProducts("publish")} isBusy={runningAction === "publish"} disabled={isBusy}>List on Zudomart</Button>
+        <Button size="small" onClick={() => void applyBulkActionToSelectedProducts("publish")} isBusy={runningAction === "publish"} disabled={isBusy}>List on Nantty</Button>
         <Button size="small" onClick={() => void applyBulkActionToSelectedProducts("unpublish")} isBusy={runningAction === "unpublish"} disabled={isBusy}>Unlist</Button>
         <Button size="small" variant="ghost" onClick={() => void applyBulkActionToSelectedProducts("archive")} isBusy={runningAction === "archive"} disabled={isBusy}>Archive</Button>
       </div>

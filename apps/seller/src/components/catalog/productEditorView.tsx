@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
-import { requestConfirmation } from "@zudomart/web-kit";
+import { requestConfirmation } from "@nantty/web-kit";
 
 import { ProductAttributesSection } from "@/components/catalog/productAttributesSection";
 import { ProductBasicsSection } from "@/components/catalog/productBasicsSection";
@@ -143,7 +143,7 @@ export function ProductEditorView({ productId }: { readonly productId: string | 
       <PageHeader
         eyebrow={<ButtonLink href="/products" variant="ghost" size="small" iconName="arrowLeft24">Products</ButtonLink>}
         title={isNewProduct ? "New product" : draft.name || "Product"}
-        description={isNewProduct ? "Add it once. When it is active and listed, customers can buy it in the Zudomart app." : undefined}
+        description={isNewProduct ? "Add it once. When it is active and listed, customers can buy it in the Nantty app." : undefined}
         actions={!isNewProduct && productQuery.data ? (
           <>
             <StatusBadge tone={describeProductPublicationState(productQuery.data).tone}>{describeProductPublicationState(productQuery.data).label}</StatusBadge>

@@ -37,8 +37,8 @@ export function LoginForm({ nextPath, initialIdentifier, getTheAppUrl }: { reado
   return (
     <div className={styles.formStack}>
       <div>
-        <h1 className={styles.title}>Sign in with your Zudomart account</h1>
-        <p className={styles.subtitle}>Use the same details you use in the Zudomart app. There is no separate dashboard account.</p>
+        <h1 className={styles.title}>Sign in with your Nantty account</h1>
+        <p className={styles.subtitle}>Use the same details you use in the Nantty app. There is no separate dashboard account.</p>
       </div>
       <form onSubmit={submitSignInForm} noValidate className={styles.formStack}>
         {errorMessage ? <Callout tone="error">{errorMessage}</Callout> : null}
@@ -56,7 +56,7 @@ export function LoginForm({ nextPath, initialIdentifier, getTheAppUrl }: { reado
       </form>
       <p className={styles.syncNote}>Your products, stock, orders, customers and wallet are the same here as in the app. Changes here show in the app straight away.</p>
       <p className={styles.footnote}>
-        New to Zudomart? <a href={getTheAppUrl}>Get the app</a> to create your account and verify your business.
+        New to Nantty? <a href={getTheAppUrl}>Get the app</a> to create your account and verify your business.
       </p>
     </div>
   );

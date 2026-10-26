@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 
-import { requestConfirmation } from "@zudomart/web-kit";
+import { requestConfirmation } from "@nantty/web-kit";
 
 import { DeliveryAreaFormDialog } from "@/components/delivery/deliveryAreaFormDialog";
 import { useSellerSession } from "@/components/session/sellerSessionProvider";
@@ -46,7 +46,7 @@ export function DeliveryAreasManager() {
   return (
     <Panel
       title="Delivery areas & fees"
-      description="Where you deliver, what it costs the customer and how long it takes. Shown at checkout in the Zudomart app."
+      description="Where you deliver, what it costs the customer and how long it takes. Shown at checkout in the Nantty app."
       actions={canEdit ? <Button variant="primary" iconName="plus16" onClick={() => setEditingArea("new")}>Add area</Button> : null}
     >
       {areasQuery.isLoading && !areasQuery.data ? <LoadingBlock label="Loading delivery areas" /> : null}

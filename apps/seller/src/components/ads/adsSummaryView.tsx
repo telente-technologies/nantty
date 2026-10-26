@@ -108,7 +108,7 @@ export function AdsSummaryView({ adsManagerUrl }: { readonly adsManagerUrl: stri
   const { hasFeature } = usePlanFeatures();
   return (
     <PageStack>
-      <PageHeader title="Ads" description="How your Zudomart ads are performing. Create and edit campaigns in Ads Manager at ads.zudomart.com." actions={<AdsManagerLinks adsManagerUrl={adsManagerUrl} />} />
+      <PageHeader title="Ads" description="How your Nantty ads are performing. Create and edit campaigns in Ads Manager at ads.nantty.com." actions={<AdsManagerLinks adsManagerUrl={adsManagerUrl} />} />
       {hasFeature("ads_tools") ? <AdsPerformancePanels /> : <AdsFreePlanTeaser />}
     </PageStack>
   );

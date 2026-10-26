@@ -61,7 +61,7 @@ export function CustomersListView({ initialSegmentId = "" }: { readonly initialS
   }
 
   const columns: DataTableColumn<Customer>[] = [
-    { key: "name", header: "Customer", sortKey: "name", render: (customer) => <span className={styles.primaryCell}><strong>{customer.name}</strong><span className={styles.muted}>{customer.zudomartUsername ? `@${customer.zudomartUsername}` : "No Zudomart username"}{customer.city ? ` · ${customer.city}` : ""}</span></span> },
+    { key: "name", header: "Customer", sortKey: "name", render: (customer) => <span className={styles.primaryCell}><strong>{customer.name}</strong><span className={styles.muted}>{customer.zudomartUsername ? `@${customer.zudomartUsername}` : "No Nantty username"}{customer.city ? ` · ${customer.city}` : ""}</span></span> },
     { key: "type", header: "Type", render: (customer) => { const type = deriveCustomerTypeFromPurchases(customer); return <StatusBadge tone={customerTypeTones[type]}>{customerTypeLabels[type]}</StatusBadge>; } },
     { key: "tags", header: "Tags", hideBelowTablet: true, render: (customer) => <span className={styles.tagList}>{customer.tags.map((tag) => <StatusBadge key={tag} tone="info">{tag}</StatusBadge>)}</span> },
     { key: "purchases", header: "Orders", align: "end", sortKey: "purchases", render: (customer) => customer.purchasesCount },
@@ -76,7 +76,7 @@ export function CustomersListView({ initialSegmentId = "" }: { readonly initialS
     <PageStack>
       <PageHeader
         title="Customers"
-        description="Everyone who has bought from you in the Zudomart app, with their order history, spend, notes and segments."
+        description="Everyone who has bought from you in the Nantty app, with their order history, spend, notes and segments."
         actions={
           <>
             <ButtonLink href="/customers/segments" iconName="userCircle24">Segments <FeaturePlanBadge feature="customer_segments" /></ButtonLink>
@@ -107,7 +107,7 @@ export function CustomersListView({ initialSegmentId = "" }: { readonly initialS
           hasMore={customersList.hasMore}
           onLoadMore={customersList.loadMore}
           isLoadingMore={customersList.isLoadingMore}
-          emptyState={<EmptyState iconName="userCircle24" title="No customers found" description="Customers appear here when they order from you in the Zudomart app. Try a different filter." />}
+          emptyState={<EmptyState iconName="userCircle24" title="No customers found" description="Customers appear here when they order from you in the Nantty app. Try a different filter." />}
         />
       </Panel>
       {isCreateDialogOpen ? <CustomerFormDialog isOpen customer={null} onClose={() => setIsCreateDialogOpen(false)} onSaved={(customer) => router.push(`/customers/${customer.id}`)} /> : null}

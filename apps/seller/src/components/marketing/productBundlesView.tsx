@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 
-import { requestConfirmation } from "@zudomart/web-kit";
+import { requestConfirmation } from "@nantty/web-kit";
 
 import { PlanGate } from "@/components/billing/planGate";
 import { MarketingSectionHeader } from "@/components/marketing/marketingSectionHeader";

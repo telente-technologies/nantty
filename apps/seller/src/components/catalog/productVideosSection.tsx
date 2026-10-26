@@ -12,7 +12,7 @@ export function ProductVideosSection({ videos, fieldErrors, onVideosChange }: { 
   return (
     <Panel
       title="Videos"
-      description="Link up to 3 videos, such as a clip you posted in the Zudomart app or an MP4 on your site."
+      description="Link up to 3 videos, such as a clip you posted in the Nantty app or an MP4 on your site."
       actions={videos.length < maximumProductVideos ? <Button size="small" iconName="videoCamera24" onClick={() => onVideosChange([...videos, { key: createDraftKey(), url: "", title: "" }])}>Add video</Button> : null}
     >
       {videos.length === 0 ? <p className={styles.muted}>No videos yet. Products with a short video tend to sell faster.</p> : null}

@@ -56,7 +56,7 @@ export function DeveloperWebhookDialog({ webhook, onClose, onSaved }: { readonly
   if (signingSecret) {
     return (
       <ModalDialog intent="success" isOpen onClose={onClose} title="Webhook added" footer={<Button variant="primary" onClick={onClose}>I have copied it</Button>}>
-        <p className={styles.mutedText}>Use this secret to check the Zudomart-Signature header on every delivery.</p>
+        <p className={styles.mutedText}>Use this secret to check the Nantty-Signature header on every delivery.</p>
         <OneTimeSecretNotice label="signing secret" secret={signingSecret} />
       </ModalDialog>
     );

@@ -39,7 +39,7 @@ export function OrderCancelDialog({ order, mode = "cancel", isOpen, onClose, onC
       isOpen={isOpen}
       onClose={onClose}
       title={`${isRejecting ? "Reject" : "Cancel"} ${order.orderNumber}?`}
-      description="The buyer gets a full refund from escrow and a notification in the Zudomart app. This cannot be undone."
+      description="The buyer gets a full refund from escrow and a notification in the Nantty app. This cannot be undone."
       width="small"
       footer={
         <>

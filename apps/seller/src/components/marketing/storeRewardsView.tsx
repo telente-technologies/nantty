@@ -85,7 +85,7 @@ function StoreRewardsLiability() {
 export function StoreRewardsView() {
   return (
     <PageStack>
-      <MarketingSectionHeader title="Store rewards" description="Give customers store credit for coming back. You fund it, Zudomart never holds money for it." />
+      <MarketingSectionHeader title="Store rewards" description="Give customers store credit for coming back. You fund it, Nantty never holds money for it." />
       <StoreRewardsLiability />
       <StoreSettingsLoadedGate>{(settings) => <StoreRewardsForm key={JSON.stringify(settings.storeRewards)} settings={settings} />}</StoreSettingsLoadedGate>
     </PageStack>

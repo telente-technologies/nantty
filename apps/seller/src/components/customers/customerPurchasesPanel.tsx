@@ -25,7 +25,7 @@ export function CustomerPurchasesPanel({ customerId }: { readonly customerId: st
   ];
 
   return (
-    <Panel title="Order history" description="Orders placed in the Zudomart app" padded={false}>
+    <Panel title="Order history" description="Orders placed in the Nantty app" padded={false}>
       {purchases.errorMessage ? <ErrorCallout error={purchases.error} message={purchases.errorMessage} onRetry={purchases.reload} /> : null}
       <DataTable
         caption="Order history"

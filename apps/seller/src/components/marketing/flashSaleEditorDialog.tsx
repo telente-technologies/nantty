@@ -76,7 +76,7 @@ export function FlashSaleEditorDialog({ sale, currency, onClose, onSaved }: { re
       onClose={onClose}
       width="large"
       title={sale ? `Edit ${sale.name}` : "New flash sale"}
-      description="A short, time-boxed price drop with a countdown in the Zudomart app. Optional stock caps stop the sale price once that many units sell."
+      description="A short, time-boxed price drop with a countdown in the Nantty app. Optional stock caps stop the sale price once that many units sell."
       footer={
         <>
           <Button onClick={onClose}>Cancel</Button>

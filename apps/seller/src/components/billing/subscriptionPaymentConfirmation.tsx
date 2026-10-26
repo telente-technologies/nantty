@@ -1,6 +1,6 @@
 "use client";
 
-import { useIsOnline } from "@zudomart/web-kit";
+import { useIsOnline } from "@nantty/web-kit";
 import { useEffect, useState } from "react";
 
 import { Button, ButtonLink } from "@/components/ui/button";

@@ -5,20 +5,20 @@ import { useState } from "react";
 import { Callout } from "@/components/ui/feedback";
 import { SearchInput } from "@/components/ui/filterControls";
 import { useSellerQuery } from "@/hooks/useSellerQuery.hook";
-import type { ZudomartUserCandidate } from "@/types/staff.type";
+import type { NanttyUserCandidate } from "@/types/staff.type";
 
 import styles from "./staff.module.css";
 
-export interface ZudomartUserPickerProps {
-  readonly selectedUser: ZudomartUserCandidate | null;
-  readonly onSelectUser: (user: ZudomartUserCandidate | null) => void;
+export interface NanttyUserPickerProps {
+  readonly selectedUser: NanttyUserCandidate | null;
+  readonly onSelectUser: (user: NanttyUserCandidate | null) => void;
   readonly searchApiPath?: string;
 }
 
-export function ZudomartUserPicker({ selectedUser, onSelectUser, searchApiPath = "/seller/zudomart-users" }: ZudomartUserPickerProps) {
+export function NanttyUserPicker({ selectedUser, onSelectUser, searchApiPath = "/seller/nantty-users" }: NanttyUserPickerProps) {
   const [searchText, setSearchText] = useState("");
   const trimmedSearchText = searchText.trim();
-  const candidateSearch = useSellerQuery<{ data: ZudomartUserCandidate[] }>(trimmedSearchText.length >= 2 ? searchApiPath : null, { q: trimmedSearchText });
+  const candidateSearch = useSellerQuery<{ data: NanttyUserCandidate[] }>(trimmedSearchText.length >= 2 ? searchApiPath : null, { q: trimmedSearchText });
   const candidates = candidateSearch.data?.data ?? [];
 
   if (selectedUser) {
@@ -32,12 +32,12 @@ export function ZudomartUserPicker({ selectedUser, onSelectUser, searchApiPath =
 
   return (
     <div className={styles.stack}>
-      <SearchInput label="Find a Zudomart user" placeholder="Search by @username or name" value={searchText} onValueChange={setSearchText} />
+      <SearchInput label="Find a Nantty user" placeholder="Search by @username or name" value={searchText} onValueChange={setSearchText} />
       {candidateSearch.isLoading ? <p className={styles.memberContact}>Searching…</p> : null}
       {trimmedSearchText.length >= 2 && !candidateSearch.isLoading && candidates.length === 0 ? (
-        <p className={styles.memberContact}>No Zudomart user matches “{trimmedSearchText}”. Ask them for their exact username in the app.</p>
+        <p className={styles.memberContact}>No Nantty user matches “{trimmedSearchText}”. Ask them for their exact username in the app.</p>
       ) : null}
-      <ul className={styles.candidateList} aria-label="Matching Zudomart users">
+      <ul className={styles.candidateList} aria-label="Matching Nantty users">
         {candidates.map((candidate) => (
           <li key={candidate.userId}>
             <button type="button" className={styles.candidateButton} onClick={() => onSelectUser(candidate)}>

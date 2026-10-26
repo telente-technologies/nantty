@@ -76,7 +76,7 @@ export function MessagesInboxView({ initialConversationId }: { readonly initialC
 
   return (
     <PageStack>
-      <PageHeader title="Messages" description="Your customer conversations — the same chats as in the Zudomart app. Messages are end-to-end encrypted: only the customer and your team can read them, and new team members only see messages sent after they join." />
+      <PageHeader title="Messages" description="Your customer conversations — the same chats as in the Nantty app. Messages are end-to-end encrypted: only the customer and your team can read them, and new team members only see messages sent after they join." />
       <div className={`${styles.inbox} ${selectedConversationId ? styles.inboxShowingThread : styles.inboxShowingList}`}>
         <ConversationListPane
           conversations={visibleConversations}

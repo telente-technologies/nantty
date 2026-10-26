@@ -8,7 +8,7 @@ import { walletBalanceBucketLabels, walletTransactionKindLabels } from "@/compon
 import { PayoutSetupBanner } from "@/components/payouts/payoutSetupBanner";
 import { WalletAccountCard } from "@/components/wallet/walletAccountCard";
 import { WalletTabs } from "@/components/wallet/walletTabs";
-import { WalletVerificationCallout, ZudomartBalancePanel } from "@/components/wallet/zudomartBalancePanel";
+import { WalletVerificationCallout, NanttyBalancePanel } from "@/components/wallet/nanttyBalancePanel";
 import { useWalletCursorPages } from "@/components/wallet/useWalletCursorPages.hook";
 import { useSellerSession } from "@/components/session/sellerSessionProvider";
 import { ButtonLink } from "@/components/ui/button";
@@ -21,7 +21,7 @@ import { useMoneyFormatter } from "@/hooks/useMoneyFormatter.hook";
 import { useSellerQuery } from "@/hooks/useSellerQuery.hook";
 import type { FinanceSummary } from "@/types/finance.type";
 import type { WalletBalances, WalletTransaction } from "@/types/wallet.type";
-import type { ZudomartWalletSummary } from "@/types/zudomartWallet.type";
+import type { NanttyWalletSummary } from "@/types/nanttyWallet.type";
 import { buildDateRangeEndingToday, formatDateTimeForDisplay } from "@/utils/dateFormatting.util";
 
 import styles from "./wallet.module.css";
@@ -81,7 +81,7 @@ export function WalletOverviewView() {
   const { can } = useSellerSession();
   const balancesQuery = useSellerQuery<WalletBalances>("/seller/wallet/balances");
   const summaryQuery = useSellerQuery<FinanceSummary>("/seller/finance/summary");
-  const walletQuery = useSellerQuery<ZudomartWalletSummary>(can("wallet:view") ? "/wallets/me" : null);
+  const walletQuery = useSellerQuery<NanttyWalletSummary>(can("wallet:view") ? "/wallets/me" : null);
 
   return (
     <PageStack>
@@ -104,7 +104,7 @@ export function WalletOverviewView() {
         <WalletTransactionsPanel />
         <div className={styles.sideStack}>
           {can("wallet:withdraw") ? <WalletAccountCard /> : null}
-          {can("wallet:view") ? <ZudomartBalancePanel walletQuery={walletQuery} /> : null}
+          {can("wallet:view") ? <NanttyBalancePanel walletQuery={walletQuery} /> : null}
           {summaryQuery.data ? <UpcomingEscrowReleasesPanel summary={summaryQuery.data} /> : null}
           <AccountingExportPanel />
         </div>

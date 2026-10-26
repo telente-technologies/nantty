@@ -87,7 +87,7 @@ export function BrandWorkspace({ children }: { readonly children: ReactNode }) {
     return (
       <PageStack>
         <PageHeader title="Brand" description="Sell under your own brand name and protect it from counterfeits." />
-        <EmptyState iconName="sealCheck20" title="You don't manage a brand yet" description="Create your brand in the Zudomart app (Profile › Your brand), then link this store to it here." action={<ButtonLink href="/settings" variant="secondary">Back to settings</ButtonLink>} />
+        <EmptyState iconName="sealCheck20" title="You don't manage a brand yet" description="Create your brand in the Nantty app (Profile › Your brand), then link this store to it here." action={<ButtonLink href="/settings" variant="secondary">Back to settings</ButtonLink>} />
       </PageStack>
     );
   }

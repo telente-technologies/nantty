@@ -49,7 +49,7 @@ export function BrandClaimDialog({ isOpen, selectedListings, onClose, onFiled }:
         method: "POST",
         body: { kind, listingIds: selectedListings.map((listing) => listing.id), evidence: evidence.trim(), declaration: true },
       });
-      showToast("Claim filed. The Zudomart brand team usually replies within 2 working days.");
+      showToast("Claim filed. The Nantty brand team usually replies within 2 working days.");
       setEvidence("");
       onFiled();
     } catch (error) {
@@ -64,7 +64,7 @@ export function BrandClaimDialog({ isOpen, selectedListings, onClose, onFiled }:
       isOpen={isOpen}
       onClose={onClose}
       title="File a brand claim"
-      description={`${selectedListings.length} listing${selectedListings.length === 1 ? "" : "s"} selected. Zudomart reviews every claim before anything is taken down.`}
+      description={`${selectedListings.length} listing${selectedListings.length === 1 ? "" : "s"} selected. Nantty reviews every claim before anything is taken down.`}
       footer={<><Button onClick={onClose}>Cancel</Button><Button variant="danger" isBusy={isFiling} onClick={() => void fileBrandClaim()}>File claim</Button></>}
     >
       <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>

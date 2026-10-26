@@ -10,7 +10,7 @@ import { usePlanFeatures } from "@/hooks/usePlanFeatures.hook";
 import styles from "./reports.module.css";
 
 const reportGroupDescriptions: Record<(typeof reportGroups)[number], string> = {
-  Sales: "Revenue from orders placed in the Zudomart app.",
+  Sales: "Revenue from orders placed in the Nantty app.",
   Orders: "How quickly orders move and where they end up.",
   Inventory: "What your stock is worth and what to reorder.",
   Customers: "Who buys from you and who comes back.",

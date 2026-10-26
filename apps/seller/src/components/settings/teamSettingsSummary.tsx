@@ -21,7 +21,7 @@ export function TeamSettingsSummary() {
   return (
     <Panel
       title="Team"
-      description="Team members are Zudomart app users you add by username. They sign in with their own Zudomart account."
+      description="Team members are Nantty app users you add by username. They sign in with their own Nantty account."
       actions={
         <>
           <ButtonLink href="/staff/roles" size="small">Roles & permissions</ButtonLink>

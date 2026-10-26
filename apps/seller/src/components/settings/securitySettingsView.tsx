@@ -59,9 +59,9 @@ export function SecuritySettingsView() {
 
   return (
     <>
-      <Panel title="Sign-in protection" description="These settings belong to your Zudomart account and also protect the app. Change them in the Zudomart app under Profile › Security.">
+      <Panel title="Sign-in protection" description="These settings belong to your Nantty account and also protect the app. Change them in the Nantty app under Profile › Security.">
         <div className={styles.formStack}>
-          {security.twoStepVerification.enabled ? null : <Callout tone="caution" title="Turn on 2-step verification">Anyone with your password could get into your store and withdraw money. Add an authenticator app or email code in the Zudomart app.</Callout>}
+          {security.twoStepVerification.enabled ? null : <Callout tone="caution" title="Turn on 2-step verification">Anyone with your password could get into your store and withdraw money. Add an authenticator app or email code in the Nantty app.</Callout>}
           <KeyValueList
             items={[
               { label: "2-step verification", value: security.twoStepVerification.enabled ? <StatusBadge tone="success">On · {security.twoStepVerification.method === "email" ? "Email code" : "Authenticator app"}</StatusBadge> : <StatusBadge tone="caution">Off</StatusBadge> },
@@ -72,7 +72,7 @@ export function SecuritySettingsView() {
       </Panel>
       <Panel
         title="Where you are signed in"
-        description="Dashboard and Zudomart app sessions for your account."
+        description="Dashboard and Nantty app sessions for your account."
         padded={false}
         actions={otherSessionCount > 0 ? <Button size="small" isBusy={busySessionId === "others"} onClick={() => void signOutEveryOtherSession()}>Sign out all others</Button> : null}
       >
@@ -83,14 +83,14 @@ export function SecuritySettingsView() {
           emptyState="Only this session is active."
           columns={[
             { key: "device", header: "Device", render: (session) => <span className={styles.rowTitle}>{session.device}{session.isCurrent ? <StatusBadge tone="info">This device</StatusBadge> : null}</span> },
-            { key: "app", header: "Where", hideBelowTablet: true, render: (session) => (session.app === "dashboard" ? "Dashboard" : "Zudomart app") },
+            { key: "app", header: "Where", hideBelowTablet: true, render: (session) => (session.app === "dashboard" ? "Dashboard" : "Nantty app") },
             { key: "location", header: "Location", hideBelowTablet: true, render: (session) => `${session.location} · ${session.ipAddress}` },
             { key: "lastActive", header: "Last active", render: (session) => (session.isCurrent ? "Now" : formatRelativeTimeFromNow(session.lastActiveAt)) },
             { key: "action", header: <span className="visuallyHidden">Action</span>, align: "end", render: (session) => (session.isCurrent ? null : <Button size="small" variant="ghost" isBusy={busySessionId === session.id} onClick={() => void signOutSession(session)}>Sign out</Button>) },
           ]}
         />
       </Panel>
-      <Panel title="Recent sign-ins" description="Blocked attempts were stopped by Zudomart. If you do not recognise a sign-in, change your password in the app." padded={false}>
+      <Panel title="Recent sign-ins" description="Blocked attempts were stopped by Nantty. If you do not recognise a sign-in, change your password in the app." padded={false}>
         <DataTable<LoginHistoryEntry>
           caption="Sign-in history"
           rows={security.loginHistory}

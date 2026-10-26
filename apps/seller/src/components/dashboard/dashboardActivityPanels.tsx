@@ -28,7 +28,7 @@ const alertToneBySeverity: Record<DashboardAlert["severity"], StatusTone> = { in
 export function DashboardRecentOrdersPanel({ summary }: { readonly summary: DashboardSummary }) {
   const { formatMoney } = useMoneyFormatter();
   return (
-    <Panel title="Recent orders" description="Placed by customers in the Zudomart app" actions={<ButtonLink href="/orders" size="small">All orders</ButtonLink>}>
+    <Panel title="Recent orders" description="Placed by customers in the Nantty app" actions={<ButtonLink href="/orders" size="small">All orders</ButtonLink>}>
       {summary.recentOrders.length === 0 ? (
         <EmptyState iconName="shoppingCart24" title="No orders yet" description="Orders from the app show up here the moment customers pay." />
       ) : (

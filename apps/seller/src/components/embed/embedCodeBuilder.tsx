@@ -1,6 +1,6 @@
 "use client";
 
-import { buildEmbedFrameUrl, buildEmbedSnippet, embedPreviewSandbox, type EmbedSnippetKind, type EmbedSnippetLayout, type EmbedSnippetSize, type EmbedSnippetTheme } from "@zudomart/web-kit";
+import { buildEmbedFrameUrl, buildEmbedSnippet, embedPreviewSandbox, type EmbedSnippetKind, type EmbedSnippetLayout, type EmbedSnippetSize, type EmbedSnippetTheme } from "@nantty/web-kit";
 import { useMemo, useState } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -14,7 +14,7 @@ import type { Product } from "@/types/catalog.type";
 
 import styles from "./embedCodeBuilder.module.css";
 
-const embedOrigin = (process.env.NEXT_PUBLIC_WEBAPP_URL ?? "https://app.zudomart.com").replace(/\/+$/, "");
+const embedOrigin = (process.env.NEXT_PUBLIC_WEBAPP_URL ?? "https://web.nantty.com").replace(/\/+$/, "");
 const kindOptions: readonly { readonly value: EmbedSnippetKind; readonly label: string }[] = [
   { value: "store", label: "Store card" }, { value: "products", label: "Products" }, { value: "button", label: "Buy button" },
 ];
@@ -56,7 +56,7 @@ export function EmbedCodeBuilder() {
 
   return (
     <PageStack>
-      <PageHeader title="Embed on your site" description="Show your store, products or a Buy on Zudomart button on your own website. Buying always opens Zudomart, so payments stay protected." />
+      <PageHeader title="Embed on your site" description="Show your store, products or a Buy on Nantty button on your own website. Buying always opens Nantty, so payments stay protected." />
       <div className={styles.layout}>
         <div className={styles.controls}>
           <Panel title="What to show">

@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 
-import { ThemeSwitcher, ZudomartLogoMark } from "@zudomart/web-kit";
+import { ThemeSwitcher, NanttyLogoMark } from "@nantty/web-kit";
 
 import { CompactWorkspaceSwitcher } from "@/components/layout/compactWorkspaceSwitcher";
 import { StoreSwitcher } from "@/components/layout/storeSwitcher";
@@ -30,8 +30,8 @@ export function TopBar({ onOpenNavigation, onOpenCommandPalette }: { readonly on
   return (
     <header className={`${styles.topBar} noPrint`}>
       <IconButton iconName="textIndent24" label="Open navigation" className={styles.menuButton} onClick={onOpenNavigation} />
-      <Link href="/dashboard" className={styles.compactBrand} aria-label="Zudomart Dashboard overview">
-        <ZudomartLogoMark size={28} />
+      <Link href="/dashboard" className={styles.compactBrand} aria-label="Nantty Dashboard overview">
+        <NanttyLogoMark size={28} />
       </Link>
       <div className={styles.wideOnly}>
         <StoreSwitcher />
@@ -57,7 +57,7 @@ export function TopBar({ onOpenNavigation, onOpenCommandPalette }: { readonly on
         <span className={styles.commandLabel}>Search or jump to…</span>
         <kbd className={styles.shortcut}>Ctrl K</kbd>
       </button>
-      <a href={`${process.env.NEXT_PUBLIC_WEBAPP_URL ?? "https://app.zudomart.com"}/help/selling`} className={styles.commandButton} target="_blank" rel="noopener noreferrer" aria-label="Help, opens in a new tab">
+      <a href={`${process.env.NEXT_PUBLIC_WEBAPP_URL ?? "https://web.nantty.com"}/help/selling`} className={styles.commandButton} target="_blank" rel="noopener noreferrer" aria-label="Help, opens in a new tab">
         <ZudoIcon name="question24" size={16} />
         <span className={styles.commandLabel}>Help</span>
       </a>

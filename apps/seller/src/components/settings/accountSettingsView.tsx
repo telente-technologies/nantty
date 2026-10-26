@@ -1,6 +1,6 @@
 "use client";
 
-import { ThemeSwitcher } from "@zudomart/web-kit";
+import { ThemeSwitcher } from "@nantty/web-kit";
 
 import { useSellerSession } from "@/components/session/sellerSessionProvider";
 import { KeyValueList, Panel } from "@/components/ui/panel";
@@ -21,7 +21,7 @@ export function AccountSettingsView() {
   const isUsingCustomPermissions = Boolean(access.permissions) && role !== "owner";
   return (
     <>
-      <Panel title="Your Zudomart account" description="You sign in to the dashboard with the same account you use in the Zudomart app. Change your name, photo, email, phone or password in the app under Profile › Account.">
+      <Panel title="Your Nantty account" description="You sign in to the dashboard with the same account you use in the Nantty app. Change your name, photo, email, phone or password in the app under Profile › Account.">
         <KeyValueList
           items={[
             { label: "Name", value: user.name ?? "—" },
@@ -33,7 +33,7 @@ export function AccountSettingsView() {
           ]}
         />
       </Panel>
-      <Panel title="Appearance" description="Choose light or dark, or follow your device. Your choice follows your account to every Zudomart app.">
+      <Panel title="Appearance" description="Choose light or dark, or follow your device. Your choice follows your account to every Nantty app.">
         <ThemeSwitcher label="Colour theme" />
       </Panel>
       <Panel

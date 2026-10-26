@@ -37,7 +37,7 @@ export function CustomerDetailView({ customerId }: { readonly customerId: string
       <PageHeader
         eyebrow={<Link href="/customers"><IconLabel name="arrowLeft24" size={16}>Customers</IconLabel></Link>}
         title={customer.name}
-        description={`${customer.zudomartUsername ? `@${customer.zudomartUsername} on Zudomart` : "No Zudomart username"}${customer.city ? ` · ${customer.city}` : ""}`}
+        description={`${customer.zudomartUsername ? `@${customer.zudomartUsername} on Nantty` : "No Nantty username"}${customer.city ? ` · ${customer.city}` : ""}`}
         actions={
           <>
             <StatusBadge tone={customerTypeTones[customerType]}>{customerTypeLabels[customerType]}</StatusBadge>

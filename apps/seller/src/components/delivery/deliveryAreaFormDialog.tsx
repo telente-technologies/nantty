@@ -58,7 +58,7 @@ export function DeliveryAreaFormDialog({ area, onClose, onSaved }: { readonly ar
       isOpen
       onClose={onClose}
       title={area ? `Edit ${area.name}` : "Add a delivery area"}
-      description="Customers in these cities see this fee and delivery time at checkout in the Zudomart app."
+      description="Customers in these cities see this fee and delivery time at checkout in the Nantty app."
       footer={
         <>
           <Button onClick={onClose}>Cancel</Button>

@@ -125,7 +125,7 @@ export function SubscriptionPlanPicker({ currentPlanId, currentPlan, offer }: { 
               <h3 className={styles.planName}>Gold only</h3>
               {offer.goldOnlyPlan.isActive ? <StatusBadge tone="success">Current plan</StatusBadge> : null}
             </header>
-            <p className={styles.footnote}>For brands and businesses that do not sell on Zudomart.</p>
+            <p className={styles.footnote}>For brands and businesses that do not sell on Nantty.</p>
             {(() => {
               const gold = computeDisplayedPrice(offer.goldOnlyPlan.monthly, billingInterval, offer);
               return <p className={styles.price}>{formatMoneyForDisplay(gold.price)}<span className={styles.interval}>/{billingInterval}</span></p>;

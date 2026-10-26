@@ -1,6 +1,6 @@
 "use client";
 
-import { BrandLoader } from "@zudomart/web-kit";
+import { BrandLoader } from "@nantty/web-kit";
 
 import { EmptyState } from "@/components/ui/feedback";
 import { SearchInput } from "@/components/ui/filterControls";
@@ -51,7 +51,7 @@ export function ConversationListPane({ conversations, previews, isLoading, error
         {isLoading && !conversations ? <BrandLoader size="md" label="Loading conversations" fill="section" /> : null}
         {errorMessage ? <p role="alert" style={{ padding: 12 }}>{errorMessage}</p> : null}
         {conversations && conversations.length === 0 ? (
-          <EmptyState iconName="chatCircle24" title={filter === "unread" ? "You are all caught up" : "No conversations found"} description="Messages customers send you in the Zudomart app show up here." />
+          <EmptyState iconName="chatCircle24" title={filter === "unread" ? "You are all caught up" : "No conversations found"} description="Messages customers send you in the Nantty app show up here." />
         ) : null}
         <ul>
           {(conversations ?? []).map((conversation) => (

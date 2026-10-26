@@ -1,10 +1,10 @@
 "use client";
 
-import { CookieConsentBanner, type ConsentChoice } from "@zudomart/web-kit";
+import { CookieConsentBanner, type ConsentChoice } from "@nantty/web-kit";
 
 import { sendSellerApiRequest } from "@/services/clientApi.service";
 
-const marketingSiteUrl = process.env.NEXT_PUBLIC_MARKETING_SITE_URL ?? "https://zudomart.com";
+const marketingSiteUrl = process.env.NEXT_PUBLIC_MARKETING_SITE_URL ?? "https://nantty.com";
 
 function sendConsentChoiceToServer(choice: ConsentChoice): Promise<void> {
   return sendSellerApiRequest<void>("/users/me/consents", { method: "PUT", body: { policyVersion: choice.policyVersion, consents: choice.categories } });

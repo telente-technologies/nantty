@@ -44,7 +44,7 @@ export function AnalyticsSalesChartPanel({ overview }: { readonly overview: Anal
       ) : (
         <LineChart
           title={`Gross and net sales ${bucketDescription}`}
-          description="Two lines: gross sales from app orders and net sales after refunds and Zudomart fees."
+          description="Two lines: gross sales from app orders and net sales after refunds and Nantty fees."
           series={[
             { key: "gross", label: "Gross sales", colorVariable: "--chart-1" },
             { key: "net", label: "Net sales", colorVariable: "--success" },
@@ -67,7 +67,7 @@ export function AnalyticsNetSalesBreakdownPanel({ overview }: { readonly overvie
         items={[
           { label: "Gross sales", value: formatMoney(overview.grossSales) },
           { label: "Refunds", value: negative(overview.refunds.amountMinor) },
-          { label: "Zudomart fees", value: negative(overview.fees.amountMinor) },
+          { label: "Nantty fees", value: negative(overview.fees.amountMinor) },
           { label: "Net sales", value: <strong>{formatMoney(overview.netSales)}</strong> },
           { label: "Store views", value: overview.storeViews.toLocaleString("en-NG") },
         ]}

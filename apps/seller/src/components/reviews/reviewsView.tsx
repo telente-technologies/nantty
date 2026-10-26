@@ -37,7 +37,7 @@ export function ReviewsView() {
 
   return (
     <PageStack>
-      <PageHeader title="Reviews" description="What buyers say about your products and your store in the Zudomart app. Reply publicly, and report reviews that break the rules." />
+      <PageHeader title="Reviews" description="What buyers say about your products and your store in the Nantty app. Reply publicly, and report reviews that break the rules." />
       {summaryQuery.data ? <ReviewsSummaryPanel summary={summaryQuery.data} locale={locale} /> : summaryQuery.isLoading ? <LoadingBlock label="Loading your rating" /> : null}
       {summaryQuery.errorMessage ? <ErrorCallout error={summaryQuery.error} message={summaryQuery.errorMessage} onRetry={summaryQuery.reload} /> : null}
       <SegmentedControl label="Review type" value={kindFilter} onValueChange={setKindFilter} options={[{ value: "all", label: "All reviews" }, { value: "product", label: "Products" }, { value: "store", label: "Store" }]} />

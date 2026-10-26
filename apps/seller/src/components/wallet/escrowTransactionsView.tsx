@@ -62,7 +62,7 @@ export function EscrowTransactionsView() {
 
   return (
     <PageStack>
-      <PageHeader title="Escrow" description="Every app order is paid into escrow first. You see what the buyer paid, Zudomart's fees and what reaches your wallet once delivery is confirmed." />
+      <PageHeader title="Escrow" description="Every app order is paid into escrow first. You see what the buyer paid, Nantty's fees and what reaches your wallet once delivery is confirmed." />
       <WalletTabs />
       {page ? (
         <ResponsiveGrid minimumColumnWidth={180}>

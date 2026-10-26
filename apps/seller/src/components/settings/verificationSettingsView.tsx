@@ -33,9 +33,9 @@ export function VerificationSettingsView() {
           ]}
         />
       </Panel>
-      <Panel title="Documents" description="Update documents from the Zudomart app under Profile › Store verification.">
+      <Panel title="Documents" description="Update documents from the Nantty app under Profile › Store verification.">
         {verificationQuery.isLoading ? <LoadingBlock /> : verificationQuery.data ? <VerificationDocumentsList details={verificationQuery.data} /> : <ErrorCallout error={verificationQuery.error} message={verificationQuery.errorMessage} onRetry={verificationQuery.reload} />}
-        {verificationQuery.data?.note ? <Callout tone="info" title="Note from Zudomart">{verificationQuery.data.note}</Callout> : null}
+        {verificationQuery.data?.note ? <Callout tone="info" title="Note from Nantty">{verificationQuery.data.note}</Callout> : null}
       </Panel>
     </>
   );

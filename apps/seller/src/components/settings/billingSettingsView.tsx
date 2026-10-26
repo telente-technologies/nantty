@@ -79,7 +79,7 @@ export function BillingSettingsView() {
       {offer && plan === "free" ? <TrialOfferNotice offer={offer} /> : null}
       <Panel
         title={`${sellerPlanLabels[plan]} plan`}
-        description={plan === "free" ? "You are on Free. Every basic selling tool is included — upgrade when you need more." : "Thanks for growing with Zudomart."}
+        description={plan === "free" ? "You are on Free. Every basic selling tool is included — upgrade when you need more." : "Thanks for growing with Nantty."}
         actions={subscription ? <StatusBadge tone={subscriptionStatusTone[subscription.status]}>{subscriptionStatusLabel[subscription.status]}</StatusBadge> : null}
       >
         <div className={styles.formStack}>

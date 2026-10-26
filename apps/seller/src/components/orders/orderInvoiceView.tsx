@@ -44,7 +44,7 @@ export function OrderInvoiceView({ orderId, documentKind }: { readonly orderId: 
             <p className={styles.small}>
               {settings?.phone} · {settings?.email}
             </p>
-            <p className={styles.small}>zudomart.com/@{settings?.handle}</p>
+            <p className={styles.small}>nantty.com/@{settings?.handle}</p>
           </div>
           <div className={styles.orderMeta}>
             <p className={styles.slipTitle}>{isReceipt ? "Payment receipt" : "Invoice"}</p>
@@ -118,7 +118,7 @@ export function OrderInvoiceView({ orderId, documentKind }: { readonly orderId: 
           <p className={styles.small}>
             {order.paymentMode === "escrow" ? "Paid with escrow protection" : "Paid directly"} · {paymentProviderLabels[order.paymentProvider]} · reference {order.paymentReference}
           </p>
-          <p className={styles.small}>Questions? Message us on Zudomart @{settings?.handle}.</p>
+          <p className={styles.small}>Questions? Message us on Nantty @{settings?.handle}.</p>
         </footer>
       </article>
     </div>

@@ -30,7 +30,7 @@ export function ShippingConfigView() {
   return (
     <div className={styles.stack}>
       <Callout tone="info" title="Shipping is priced per order group, never per item">
-        You ship your own orders. Zudomart checks the customer&apos;s address against these rules and works out one shipping charge for everything in the order group, however many items it holds. Included on every plan, including Free.
+        You ship your own orders. Nantty checks the customer&apos;s address against these rules and works out one shipping charge for everything in the order group, however many items it holds. Included on every plan, including Free.
       </Callout>
       <Panel
         title="Shipping rules"

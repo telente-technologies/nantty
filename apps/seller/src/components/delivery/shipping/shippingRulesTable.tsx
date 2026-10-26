@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 
-import { requestConfirmation } from "@zudomart/web-kit";
+import { requestConfirmation } from "@nantty/web-kit";
 
 import type { ShippingRuleWithZone } from "@/components/delivery/shipping/shippingRuleFormDialog";
 import { Button } from "@/components/ui/button";

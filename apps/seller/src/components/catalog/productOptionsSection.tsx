@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 
-import { requestConfirmation } from "@zudomart/web-kit";
+import { requestConfirmation } from "@nantty/web-kit";
 
 import { OptionValuesInput } from "@/components/catalog/optionValuesInput";
 import { applyOptionChanges, createOptionDraft, describeVariantDraftTitle, findDroppedVariantDrafts, variantDraftHasStock, type OptionDraft, type VariantDraft } from "@/components/catalog/productEditorDraft.util";

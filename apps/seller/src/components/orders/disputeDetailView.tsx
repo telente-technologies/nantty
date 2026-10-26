@@ -20,7 +20,7 @@ import { formatDateTimeForDisplay, formatRelativeTimeFromNow } from "@/utils/dat
 import styles from "./orders.module.css";
 import { IconLabel } from "@/components/ui/zudoIcon";
 
-const senderLabels = { buyer: "Buyer", seller: "You", zudomart: "Zudomart" } as const;
+const senderLabels = { buyer: "Buyer", seller: "You", zudomart: "Nantty" } as const;
 
 export function DisputeDetailView({ disputeId }: { readonly disputeId: string }) {
   const { can } = useSellerSession();
@@ -49,7 +49,7 @@ export function DisputeDetailView({ disputeId }: { readonly disputeId: string })
       const updated = await sendSellerApiRequest<OrderDispute>(`/seller/disputes/${dispute?.id}/responses`, { method: "POST", body: { body: trimmedResponse }, idempotencyKey: createIdempotencyKey("dispute_reply") });
       disputeQuery.replaceData(() => updated);
       setResponseText("");
-      showToast("Response sent. Zudomart will review it.");
+      showToast("Response sent. Nantty will review it.");
     } catch (error) {
       setResponseError(readErrorMessageForDisplay(error));
     } finally {
@@ -72,7 +72,7 @@ export function DisputeDetailView({ disputeId }: { readonly disputeId: string })
       />
       {dispute.status === "awaiting_seller" && dispute.respondBy ? (
         <Callout tone="caution" title={`Reply ${formatRelativeTimeFromNow(dispute.respondBy)}`}>
-          If you do not reply by {formatDateTimeForDisplay(dispute.respondBy)}, Zudomart may refund the buyer.
+          If you do not reply by {formatDateTimeForDisplay(dispute.respondBy)}, Nantty may refund the buyer.
         </Callout>
       ) : null}
       <div className={styles.detailGrid}>

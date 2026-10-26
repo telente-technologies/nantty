@@ -52,15 +52,15 @@ export function ProductPublishingSection({ draft, fieldErrors, onDraftChange, is
             min={new Date(Date.now() - new Date().getTimezoneOffset() * 60_000).toISOString().slice(0, 16)}
             onChange={(event) => onDraftChange({ publishAtLocalText: event.target.value })}
             errorMessage={fieldErrors.publishAt}
-            hint="Leave empty to keep it as a draft. At this time it becomes active and, if it has a photo, listed on Zudomart."
+            hint="Leave empty to keep it as a draft. At this time it becomes active and, if it has a photo, listed on Nantty."
           />
         ) : null}
       </div>
       {scheduledDate && !Number.isNaN(scheduledDate.getTime()) ? <Callout tone="info">Scheduled to go live {formatDateTimeForDisplay(scheduledDate.toISOString())}.</Callout> : null}
       <div className={styles.toggleList}>
         <ToggleSwitch
-          label="List on the Zudomart marketplace"
-          description="Customers can buy it in the Zudomart app. Needs an active status and at least one photo. App orders hold stock automatically."
+          label="List on the Nantty marketplace"
+          description="Customers can buy it in the Nantty app. Needs an active status and at least one photo. App orders hold stock automatically."
           checked={draft.publishedOnline}
           disabled={draft.status !== "active" || isPublishing}
           onCheckedChange={onPublishedOnlineChange}

@@ -72,7 +72,7 @@ export function OrderDetailView({ orderId }: { readonly orderId: string }) {
       <PageHeader
         eyebrow={<Link href="/orders"><IconLabel name="arrowLeft24" size={16}>Orders</IconLabel></Link>}
         title={`Order ${order.orderNumber}`}
-        description={`Placed in the Zudomart app ${formatDateTimeForDisplay(order.createdAt)} by ${order.buyer.name} (@${order.buyer.username})`}
+        description={`Placed in the Nantty app ${formatDateTimeForDisplay(order.createdAt)} by ${order.buyer.name} (@${order.buyer.username})`}
         actions={
           <div className={styles.headerActions}>
             <StatusBadge tone={orderStatusPresentation[order.status].tone}>{orderStatusPresentation[order.status].label}</StatusBadge>
@@ -105,7 +105,7 @@ export function OrderDetailView({ orderId }: { readonly orderId: string }) {
       />
       {order.status === "disputed" ? (
         <Callout tone="error" title="The customer opened a dispute" action={<ButtonLink href="/orders/disputes" size="small">Respond</ButtonLink>}>
-          Escrow is paused until Zudomart decides. Reply with photos and delivery proof from Disputes.
+          Escrow is paused until Nantty decides. Reply with photos and delivery proof from Disputes.
         </Callout>
       ) : null}
       <div className={styles.detailGrid}>
@@ -135,7 +135,7 @@ export function OrderDetailView({ orderId }: { readonly orderId: string }) {
             <KeyValueList
               items={[
                 { label: "Name", value: order.buyer.name },
-                { label: "Zudomart", value: `@${order.buyer.username}` },
+                { label: "Nantty", value: `@${order.buyer.username}` },
                 { label: "Phone", value: order.buyer.phone ? <a href={`tel:${order.buyer.phone}`}>{order.buyer.phone}</a> : "—" },
               ]}
             />

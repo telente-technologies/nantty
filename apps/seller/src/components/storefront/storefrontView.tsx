@@ -66,7 +66,7 @@ export function StorefrontView() {
     <PageStack>
       <PageHeader
         title="Storefront"
-        description="Your store page in the Zudomart app: name, look, policies, hours and the products you want buyers to see first."
+        description="Your store page in the Nantty app: name, look, policies, hours and the products you want buyers to see first."
         actions={
           <>
             {profile ? (

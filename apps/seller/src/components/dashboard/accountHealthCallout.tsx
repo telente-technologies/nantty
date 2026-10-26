@@ -4,7 +4,7 @@ import { Callout } from "@/components/ui/feedback";
 import { useSellerQuery } from "@/hooks/useSellerQuery.hook";
 import type { SellerAccountHealth } from "@/types/accountHealth.type";
 
-const webappUrl = process.env.NEXT_PUBLIC_WEBAPP_URL ?? "https://app.zudomart.com";
+const webappUrl = process.env.NEXT_PUBLIC_WEBAPP_URL ?? "https://web.nantty.com";
 const labels = { GOOD_STANDING: "Good standing", AT_RISK: "At risk", RESTRICTED: "Restricted" } as const;
 const tones = { GOOD_STANDING: "success", AT_RISK: "caution", RESTRICTED: "error" } as const;
 

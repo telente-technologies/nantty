@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 
-import { requestConfirmation } from "@zudomart/web-kit";
+import { requestConfirmation } from "@nantty/web-kit";
 
 import { PlanGate } from "@/components/billing/planGate";
 import { FlashSaleCard, type FlashSaleAction } from "@/components/marketing/flashSaleCard";
@@ -84,7 +84,7 @@ export function FlashSalesView() {
   const { hasFeature } = usePlanFeatures();
   return (
     <PageStack>
-      <MarketingSectionHeader title="Flash sales" description="Time-boxed price drops with a live countdown and optional stock caps, shown to buyers in the Zudomart app." />
+      <MarketingSectionHeader title="Flash sales" description="Time-boxed price drops with a live countdown and optional stock caps, shown to buyers in the Nantty app." />
       <PlanGate feature="advanced_promotions" description="Flash sales put a countdown on your products in the app and stop the deal when the time or stock runs out. Available on Pro and Business.">
         {hasFeature("advanced_promotions") ? <FlashSalesBoard /> : null}
       </PlanGate>

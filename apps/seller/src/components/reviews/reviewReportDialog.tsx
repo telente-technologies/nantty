@@ -33,7 +33,7 @@ export function ReviewReportDialog({ review, onClose, onReported }: { readonly r
     setIsSending(true);
     try {
       const updated = await sendSellerApiRequest<Review>(`/seller/reviews/${encodeURIComponent(review.id)}/report`, { method: "POST", body: { reason, details: details.trim() } });
-      showToast("Thanks. Zudomart will review it within 2 working days. The review stays up until then.");
+      showToast("Thanks. Nantty will review it within 2 working days. The review stays up until then.");
       onReported(updated);
     } catch (error) {
       showToast(readErrorMessageForDisplay(error), "error");
@@ -48,7 +48,7 @@ export function ReviewReportDialog({ review, onClose, onReported }: { readonly r
       onClose={onClose}
       width="small"
       title="Report this review"
-      description={`From @${review.author.username}. Reports go to Zudomart's trust team — the buyer is not told who reported.`}
+      description={`From @${review.author.username}. Reports go to Nantty's trust team — the buyer is not told who reported.`}
       footer={
         <>
           <Button onClick={onClose}>Cancel</Button>

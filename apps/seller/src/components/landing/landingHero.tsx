@@ -6,12 +6,12 @@ export function LandingHero() {
     <section className={styles.hero} aria-labelledby="landing-hero-heading">
       <div className={styles.layout}>
         <div className={styles.copy}>
-          <p className={styles.eyebrow}>Zudomart Dashboard · free for every seller</p>
+          <p className={styles.eyebrow}>Nantty Dashboard · free for every seller</p>
           <h1 id="landing-hero-heading" className={styles.heading}>
             Sell from anywhere with the app. Run your business <span className={styles.receiptTag}>here.</span>
           </h1>
           <p className={styles.lede}>
-            Your seller operating system: manage products and stock, fulfil the orders customers place in the Zudomart app, see what sells, run promotions, track your payouts and bring your team in — with the same account as your app. Free for every Zudomart seller; upgrade to Pro or Business when you grow.
+            Your seller operating system: manage products and stock, fulfil the orders customers place in the Nantty app, see what sells, run promotions, track your payouts and bring your team in — with the same account as your app. Free for every Nantty seller; upgrade to Pro or Business when you grow.
           </p>
           <form action="/login" method="get" className={styles.signInPill}>
             <label htmlFor="hero-identifier" className="visuallyHidden">
@@ -19,7 +19,7 @@ export function LandingHero() {
             </label>
             <input id="hero-identifier" name="identifier" type="text" autoComplete="username" placeholder="Email or username" maxLength={254} className={styles.signInInput} />
             <button type="submit" className={styles.signInButton}>
-              Sign in with your Zudomart account
+              Sign in with your Nantty account
             </button>
           </form>
           <ul className={styles.proofList}>
@@ -35,7 +35,7 @@ export function LandingHero() {
               <span />
               <span />
               <span />
-              <p>dashboard.zudomart.com</p>
+              <p>creator.nantty.com</p>
             </div>
             <img src="/screenshots/dashboardOverview.webp" alt="The dashboard home: sales today, a 30-day revenue chart, wallet balances and online orders by status" width={1440} height={900} className={styles.browserScreenshot} />
           </figure>

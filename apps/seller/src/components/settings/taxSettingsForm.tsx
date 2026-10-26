@@ -70,7 +70,7 @@ function TaxRatesForm({ settings }: { readonly settings: StoreSettings }) {
   }
 
   return (
-    <SettingsFormFrame title="Taxes" description="Rates added to orders in the Zudomart app. Category rates override the default." errorMessages={[...errorMessages, ...Object.values(serverFieldErrors)]} isSaving={isSaving} onSubmit={() => void saveTaxSettings()}>
+    <SettingsFormFrame title="Taxes" description="Rates added to orders in the Nantty app. Category rates override the default." errorMessages={[...errorMessages, ...Object.values(serverFieldErrors)]} isSaving={isSaving} onSubmit={() => void saveTaxSettings()}>
       <ToggleSwitch
         label="My prices already include tax"
         description={pricesIncludeTax ? "Shelf prices are final. Receipts show the tax that is inside each price." : "Tax is added on top of shelf prices at checkout."}

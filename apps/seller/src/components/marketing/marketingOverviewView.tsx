@@ -57,7 +57,7 @@ export function MarketingOverviewView() {
     <PageStack>
       <MarketingSectionHeader
         title="Marketing"
-        description="Every discount, sale, bundle and featured spot you run for buyers in the Zudomart app, and how each one is doing."
+        description="Every discount, sale, bundle and featured spot you run for buyers in the Nantty app, and how each one is doing."
         actions={
           <>
             <ButtonLink href="/marketing/flash-sales" iconName="star16">Flash sale <FeaturePlanBadge feature="advanced_promotions" /></ButtonLink>

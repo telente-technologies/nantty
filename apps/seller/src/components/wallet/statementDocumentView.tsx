@@ -1,6 +1,6 @@
 "use client";
 
-import { ZudomartWordmark } from "@zudomart/web-kit";
+import { NanttyWordmark } from "@nantty/web-kit";
 import Link from "next/link";
 
 import { formatStatementMonthLabel, walletTransactionKindLabels } from "@/components/wallet/walletPresentation.constant";
@@ -33,7 +33,7 @@ export function StatementDocumentView({ month }: { readonly month: string }) {
           <header className={styles.header}>
             <div>
               <div className={styles.brand}>
-                <ZudomartWordmark height={26} />
+                <NanttyWordmark height={26} />
               </div>
               <h1 className={styles.title}>Wallet statement</h1>
               <p className={styles.muted}>{formatStatementMonthLabel(month, locale)}</p>

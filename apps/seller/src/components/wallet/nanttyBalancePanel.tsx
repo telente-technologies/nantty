@@ -6,13 +6,13 @@ import { Callout, ErrorCallout, LoadingBlock } from "@/components/ui/feedback";
 import { Panel } from "@/components/ui/panel";
 import { useMoneyFormatter } from "@/hooks/useMoneyFormatter.hook";
 import type { SellerQueryState } from "@/hooks/useSellerQuery.hook";
-import type { WalletLineAmount, ZudomartWalletSummary } from "@/types/zudomartWallet.type";
+import type { WalletLineAmount, NanttyWalletSummary } from "@/types/nanttyWallet.type";
 import { isSupportedCurrencyCode } from "@/utils/money.util";
-import { formatCoinCount, readVerificationMessage, readWalletLines } from "@/utils/zudomartWallet.util";
+import { formatCoinCount, readVerificationMessage, readWalletLines } from "@/utils/nanttyWallet.util";
 
 import styles from "./wallet.module.css";
 
-export function WalletVerificationCallout({ summary }: { readonly summary: ZudomartWalletSummary | null }) {
+export function WalletVerificationCallout({ summary }: { readonly summary: NanttyWalletSummary | null }) {
   const { can } = useSellerSession();
   const message = readVerificationMessage(summary);
   if (!message) return null;
@@ -27,7 +27,7 @@ export function WalletVerificationCallout({ summary }: { readonly summary: Zudom
   );
 }
 
-export function ZudomartBalancePanel({ walletQuery }: { readonly walletQuery: SellerQueryState<ZudomartWalletSummary> }) {
+export function NanttyBalancePanel({ walletQuery }: { readonly walletQuery: SellerQueryState<NanttyWalletSummary> }) {
   const { formatMoney, locale } = useMoneyFormatter();
   const formatLineAmount = (amount: WalletLineAmount) => {
     if (amount.currency === "COIN") return formatCoinCount(amount.amountMinor, locale);
@@ -36,12 +36,12 @@ export function ZudomartBalancePanel({ walletQuery }: { readonly walletQuery: Se
   };
   const lines = readWalletLines(walletQuery.data);
   return (
-    <Panel title="Zudomart balance" description="Your sales, creator earnings, ad credit and coins are kept separately. They are never added together.">
+    <Panel title="Nantty balance" description="Your sales, creator earnings, ad credit and coins are kept separately. They are never added together.">
         {walletQuery.data ? (
           lines.length === 0 ? (
-            <p className={styles.muted}>Nothing in your Zudomart balance yet.</p>
+            <p className={styles.muted}>Nothing in your Nantty balance yet.</p>
           ) : (
-            <ul className={styles.releaseList} aria-label="Zudomart balance">
+            <ul className={styles.releaseList} aria-label="Nantty balance">
               {lines.map((line) => (
                 <li key={line.key} className={styles.releaseRow}>
                   <span className={styles.releaseMain}>
@@ -56,7 +56,7 @@ export function ZudomartBalancePanel({ walletQuery }: { readonly walletQuery: Se
         ) : walletQuery.errorMessage ? (
           <ErrorCallout error={walletQuery.error} message={walletQuery.errorMessage} onRetry={walletQuery.reload} />
         ) : (
-          <LoadingBlock label="Loading your Zudomart balance" />
+          <LoadingBlock label="Loading your Nantty balance" />
         )}
     </Panel>
   );

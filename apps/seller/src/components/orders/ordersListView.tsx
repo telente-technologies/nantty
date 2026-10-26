@@ -79,7 +79,7 @@ export function OrdersListView({ initialStatusFilter = "all" }: { readonly initi
     <PageStack>
       <PageHeader
         title="Orders"
-        description="The marketplace orders customers place in the Zudomart app. Buyers pay into escrow; accept new orders, pack and ship them, and you are paid when the buyer confirms delivery. Changes here show in the app straight away."
+        description="The marketplace orders customers place in the Nantty app. Buyers pay into escrow; accept new orders, pack and ship them, and you are paid when the buyer confirms delivery. Changes here show in the app straight away."
       />
       <LinkTabs label="Order sections" tabs={ordersSectionTabs} />
       <div className={styles.chipRow} role="group" aria-label="Filter by status">
@@ -100,7 +100,7 @@ export function OrdersListView({ initialStatusFilter = "all" }: { readonly initi
       </FilterBar>
       <Panel padded={false}>
         <DataTable
-          caption="Orders from the Zudomart app"
+          caption="Orders from the Nantty app"
           columns={columns}
           rows={ordersList.items}
           readRowKey={(order) => order.id}
@@ -117,7 +117,7 @@ export function OrdersListView({ initialStatusFilter = "all" }: { readonly initi
             <EmptyState
               iconName="shoppingCart24"
               title={statusFilter === "all" && !searchText ? "No orders in this period" : "No orders match these filters"}
-              description="Orders appear here the moment a customer pays in the Zudomart app. Try another status or a wider date range."
+              description="Orders appear here the moment a customer pays in the Nantty app. Try another status or a wider date range."
             />
           }
         />

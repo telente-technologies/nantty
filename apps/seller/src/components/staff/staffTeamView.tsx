@@ -33,7 +33,7 @@ export function StaffTeamView() {
     <PageStack>
       <PageHeader
         title="Team"
-        description="People who help run your store. Each one is an existing Zudomart app user who accepts your request in the app and signs in here with their own account."
+        description="People who help run your store. Each one is an existing Nantty app user who accepts your request in the app and signs in here with their own account."
         actions={
           <>
             <ButtonLink href="/staff/roles" iconName="shield24">Roles & permissions</ButtonLink>
@@ -42,7 +42,7 @@ export function StaffTeamView() {
           </>
         }
       />
-      {canUseTeam ? null : <PlanLockedNotice feature="team" description="On Free, only the owner signs in. Upgrade to Pro to add up to 5 Zudomart users as Managers, Inventory staff, Sales staff or Accountants." />}
+      {canUseTeam ? null : <PlanLockedNotice feature="team" description="On Free, only the owner signs in. Upgrade to Pro to add up to 5 Nantty users as Managers, Inventory staff, Sales staff or Accountants." />}
       {canUseTeam && !searchText && staffQuery.data ? <StaffSeatMeter seatsInUse={seatsInUse} maximumSeats={limits.maxStaffSeats} /> : null}
       {canUseTeam && !hasFreeSeat && staffQuery.data ? (
         <Callout tone="caution" title="Every team seat on your plan is in use" action={can("billing:manage") ? <ButtonLink href="/settings/billing" size="small">See plans</ButtonLink> : null}>
@@ -56,7 +56,7 @@ export function StaffTeamView() {
           errorMessage={staffQuery.errorMessage}
           onRetry={staffQuery.reload}
           onOpenMember={setOpenMember}
-          emptyText={searchText ? `No one matches “${searchText}”.` : "Add your first team member by their Zudomart username."}
+          emptyText={searchText ? `No one matches “${searchText}”.` : "Add your first team member by their Nantty username."}
         />
       </Panel>
       {openMember ? <StaffMemberDialog key={openMember.id} member={openMember} hasFreeSeat={hasFreeSeat} onClose={() => setOpenMember(null)} onMemberChanged={staffQuery.reload} /> : null}

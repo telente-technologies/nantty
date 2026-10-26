@@ -50,7 +50,7 @@ export function AffiliateOverviewView() {
           />
         </Panel>
       </div>
-      <p className={styles.muted}>You never pay creators yourself. Zudomart deducts each commission from the order when escrow is released and pays the creator through the ledger.</p>
+      <p className={styles.muted}>You never pay creators yourself. Nantty deducts each commission from the order when escrow is released and pays the creator through the ledger.</p>
     </>
   );
 }

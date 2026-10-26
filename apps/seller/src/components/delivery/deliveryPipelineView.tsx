@@ -94,7 +94,7 @@ export function DeliveryPipelineView() {
           sortState={table.sortState}
           onSortChange={table.setSortState}
           onRowActivate={setOpenShipment}
-          emptyState={<EmptyState iconName="truck24" title="Nothing here right now" description="Shipments appear as soon as customers order in the Zudomart app." />}
+          emptyState={<EmptyState iconName="truck24" title="Nothing here right now" description="Shipments appear as soon as customers order in the Nantty app." />}
           footer={<TablePagination pageIndex={table.pageIndex} pageCount={table.pageCount} totalCount={table.totalCount} pageSize={table.pageSize} onPageChange={table.setPageIndex} itemLabel="shipments" />}
         />
       </Panel>

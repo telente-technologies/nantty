@@ -42,7 +42,7 @@ export function PasswordResetForm({ demoCode }: { readonly demoCode: string | nu
   function submitCurrentStep(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (step === "destination") {
-      if (destination.trim().length < 3) return setErrorMessage("Enter the email address on your Zudomart account.");
+      if (destination.trim().length < 3) return setErrorMessage("Enter the email address on your Nantty account.");
       void runStep(async () => {
         await sendRequestToDashboardServer("/bff/auth/password-reset/code", { method: "POST", body: { destination: destination.trim() } });
         setStep("code");
@@ -68,10 +68,10 @@ export function PasswordResetForm({ demoCode }: { readonly demoCode: string | nu
       <div>
         <h1 className={styles.title}>{step === "done" ? "Password changed" : "Reset your password"}</h1>
         <p className={styles.subtitle}>
-          {step === "destination" && "This resets the password for your Zudomart account everywhere: the app and this dashboard."}
-          {step === "code" && `If ${destination.trim()} belongs to a Zudomart account, we have sent it a 6-digit code. It expires in 5 minutes.`}
+          {step === "destination" && "This resets the password for your Nantty account everywhere: the app and this dashboard."}
+          {step === "code" && `If ${destination.trim()} belongs to a Nantty account, we have sent it a 6-digit code. It expires in 5 minutes.`}
           {step === "password" && "Choose a new password. Other devices signed in to your account will be signed out."}
-          {step === "done" && "Sign in with your new password, here and in the Zudomart app."}
+          {step === "done" && "Sign in with your new password, here and in the Nantty app."}
         </p>
       </div>
       {errorMessage ? <Callout tone="error">{errorMessage}</Callout> : null}

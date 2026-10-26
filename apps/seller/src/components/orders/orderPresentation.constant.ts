@@ -19,7 +19,7 @@ export const escrowStatusPresentation: Record<EscrowStatus, { readonly label: st
   held: { label: "In escrow", tone: "caution", explanation: "The buyer has paid. The money stays locked in the buyer's own wallet until they confirm delivery, then it moves to your wallet." },
   released: { label: "Paid out", tone: "success", explanation: "The buyer confirmed delivery and the money is in your wallet." },
   refunded: { label: "Refunded", tone: "neutral", explanation: "The money went back to the buyer." },
-  disputed: { label: "On hold", tone: "error", explanation: "The buyer opened a dispute. Release is paused until Zudomart decides." },
+  disputed: { label: "On hold", tone: "error", explanation: "The buyer opened a dispute. Release is paused until Nantty decides." },
 };
 
 export const returnStatusPresentation: Record<ReturnRequestStatus, { readonly label: string; readonly tone: StatusTone }> = {
@@ -33,7 +33,7 @@ export const returnStatusPresentation: Record<ReturnRequestStatus, { readonly la
 export const disputeStatusPresentation: Record<DisputeStatus, { readonly label: string; readonly tone: StatusTone }> = {
   open: { label: "Open", tone: "caution" },
   awaiting_seller: { label: "Your reply needed", tone: "error" },
-  under_review: { label: "Zudomart reviewing", tone: "info" },
+  under_review: { label: "Nantty reviewing", tone: "info" },
   resolved_for_buyer: { label: "Resolved for buyer", tone: "neutral" },
   resolved_for_seller: { label: "Resolved for you", tone: "success" },
 };

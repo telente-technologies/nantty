@@ -59,7 +59,7 @@ export function ProductImagesSection({ images, onImagesChange, onUploadingChange
   }
 
   return (
-    <Panel title="Photos" description="The first photo is the cover in the Zudomart app. Up to 10 JPEG, PNG, WebP or AVIF photos, 10 MB each.">
+    <Panel title="Photos" description="The first photo is the cover in the Nantty app. Up to 10 JPEG, PNG, WebP or AVIF photos, 10 MB each.">
       <div className={styles.imageGrid}>
         {images.map((image, index) => (
           <div key={image.mediaId} className={styles.imageTile}>

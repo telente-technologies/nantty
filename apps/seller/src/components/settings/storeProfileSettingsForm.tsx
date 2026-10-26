@@ -36,10 +36,10 @@ function StoreProfileForm({ settings }: { readonly settings: StoreSettings }) {
   }
 
   return (
-    <SettingsFormFrame title="Store profile" description="Shown on invoices, packing slips and your Zudomart store page. Edit your logo, cover and policies in Storefront." errorMessages={Object.values(errors)} isSaving={isSaving} onSubmit={() => void saveStoreProfile()}>
+    <SettingsFormFrame title="Store profile" description="Shown on invoices, packing slips and your Nantty store page. Edit your logo, cover and policies in Storefront." errorMessages={Object.values(errors)} isSaving={isSaving} onSubmit={() => void saveStoreProfile()}>
       <div className={styles.twoColumns}>
         <TextField label="Store name" value={draft.name} maxLength={80} onChange={(event) => updateDraftField("name", event.target.value)} errorMessage={errors.name} />
-        <TextField label="Store handle" value={`@${settings.handle}`} readOnly hint="Change your handle in the Zudomart app." />
+        <TextField label="Store handle" value={`@${settings.handle}`} readOnly hint="Change your handle in the Nantty app." />
         <TextField label="Phone" type="tel" value={draft.phone} maxLength={20} onChange={(event) => updateDraftField("phone", event.target.value)} errorMessage={errors.phone} />
         <TextField label="Email" type="email" value={draft.email} maxLength={254} onChange={(event) => updateDraftField("email", event.target.value)} errorMessage={errors.email} />
       </div>
@@ -58,7 +58,7 @@ function StoreProfileForm({ settings }: { readonly settings: StoreSettings }) {
           </div>
         ))}
       </div>
-      <p className={styles.mutedText}>Country, currency and time zone come from your verified business details. Change your logo in the Zudomart app; contact support to change the others.</p>
+      <p className={styles.mutedText}>Country, currency and time zone come from your verified business details. Change your logo in the Nantty app; contact support to change the others.</p>
     </SettingsFormFrame>
   );
 }

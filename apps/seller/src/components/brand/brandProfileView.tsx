@@ -107,7 +107,7 @@ export function BrandProfileView() {
         </div>
         <div className={styles.formStack}>
           <FormErrorSummary messages={Object.values(errors)} />
-          <TextField label="Brand name" value={name} maxLength={60} onChange={(event) => setName(event.target.value)} errorMessage={errors.name} disabled={!canEdit || isNameLocked} hint={isNameLocked ? "Registered brand names match the trademark. Change it through brand registration in the Zudomart app." : undefined} />
+          <TextField label="Brand name" value={name} maxLength={60} onChange={(event) => setName(event.target.value)} errorMessage={errors.name} disabled={!canEdit || isNameLocked} hint={isNameLocked ? "Registered brand names match the trademark. Change it through brand registration in the Nantty app." : undefined} />
           <TextAreaField label="About the brand" value={description} maxLength={1000} onChange={(event) => setDescription(event.target.value)} errorMessage={errors.description} disabled={!canEdit} hint={`${description.length}/1000`} />
           <TextField label="Website" type="url" placeholder="https://" value={website} maxLength={200} onChange={(event) => setWebsite(event.target.value)} errorMessage={errors.website} disabled={!canEdit} />
           {canEdit ? (
@@ -132,7 +132,7 @@ export function BrandProfileView() {
         />
         {brand.registration.note ? <div style={{ marginTop: 12 }}><Callout tone={brand.registration.status === "rejected" ? "error" : "info"}>{brand.registration.note}</Callout></div> : null}
         {brand.registration.status !== "registered" ? (
-          <p className={styles.muted} style={{ marginTop: 12 }}>Register your brand in the Zudomart app (Profile › Your brand › Register) with your trademark certificate or CAC registration. Registration unlocks the Official Store badge and brand protection.</p>
+          <p className={styles.muted} style={{ marginTop: 12 }}>Register your brand in the Nantty app (Profile › Your brand › Register) with your trademark certificate or CAC registration. Registration unlocks the Official Store badge and brand protection.</p>
         ) : null}
       </Panel>
     </div>

@@ -3,7 +3,7 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 
-import { ErrorExperienceProvider, type ErrorExperienceConfig, type ErrorLinkProps } from "@zudomart/web-kit";
+import { ErrorExperienceProvider, type ErrorExperienceConfig, type ErrorLinkProps } from "@nantty/web-kit";
 
 import { contactMailtoHref } from "@/config/siteMetadata.config";
 

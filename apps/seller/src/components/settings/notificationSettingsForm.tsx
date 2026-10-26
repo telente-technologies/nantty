@@ -14,7 +14,7 @@ import styles from "./settings.module.css";
 type NotificationKey = keyof NotificationPreferences;
 
 const everydayNotificationDescriptions: Partial<Record<NotificationKey, { label: string; description: string }>> = {
-  newOrderEmail: { label: "New order emails", description: "An email when a customer pays for an order in the Zudomart app." },
+  newOrderEmail: { label: "New order emails", description: "An email when a customer pays for an order in the Nantty app." },
   newOrderSms: { label: "New order texts", description: "An SMS to the store phone for each paid order." },
   payoutEmail: { label: "Payout updates", description: "An email when a withdrawal is paid or fails." },
   disputeEmail: { label: "Disputes", description: "An email as soon as a buyer opens a dispute, with the reply deadline." },

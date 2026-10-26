@@ -57,7 +57,7 @@ export function BrandOfficialStoreView() {
         ) : details.officialStore.status === "suspended" ? (
           <Callout tone="error" title="The badge is paused">{details.officialStore.reason ?? "A requirement below is no longer met."}</Callout>
         ) : details.officialStore.status === "eligible" ? (
-          <Callout tone="info" title="You meet every requirement">Apply now and the badge appears on {officialStoreName ?? "your store"} once Zudomart confirms it.</Callout>
+          <Callout tone="info" title="You meet every requirement">Apply now and the badge appears on {officialStoreName ?? "your store"} once Nantty confirms it.</Callout>
         ) : (
           <Callout tone="caution" title="A few steps to go">Finish the unticked items below, then come back to apply.</Callout>
         )}
@@ -93,7 +93,7 @@ export function BrandOfficialStoreView() {
             </li>
           ))}
         </ul>
-        <p className={styles.muted} style={{ marginTop: 12 }}>How to get it: register the brand in the Zudomart app with your trademark or CAC documents, sell through a Gold-verified store linked to the brand, and keep Gold Pro or Gold Premium active.</p>
+        <p className={styles.muted} style={{ marginTop: 12 }}>How to get it: register the brand in the Nantty app with your trademark or CAC documents, sell through a Gold-verified store linked to the brand, and keep Gold Pro or Gold Premium active.</p>
       </Panel>
     </div>
   );

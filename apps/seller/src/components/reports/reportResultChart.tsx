@@ -15,7 +15,7 @@ export function ReportResultChart({ catalogEntry, report, timeZone }: { readonly
     return (
       <LineChart
         title={`Revenue per day from ${report.from} to ${report.to}`}
-        description="Daily revenue from orders placed in the Zudomart app."
+        description="Daily revenue from orders placed in the Nantty app."
         series={[{ key: "revenue", label: "Revenue", colorVariable: "--chart-1" }]}
         points={report.rows.map((row) => ({ label: String(row.date), shortLabel: formatShortDateLabel(String(row.date), locale), values: { revenue: isMoneyCellValue(row.revenue ?? null) ? (row.revenue as { amountMinor: number }).amountMinor : 0 } }))}
         formatValue={(value) => formatMoney({ amountMinor: value, currency })}

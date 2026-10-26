@@ -57,7 +57,7 @@ export function PayoutOnboardingPanel({ context }: { readonly context: "seller" 
 
   if (!state) return query.errorMessage ? <ErrorCallout error={query.error} message={query.errorMessage} onRetry={query.reload} /> : <LoadingBlock />;
   if (verificationParam === "returned" || verificationParam === "mock") {
-    return <Callout tone="success" title="Thanks, we've got your documents">You can close this window. The Zudomart tab you came from will pick up where you left off.</Callout>;
+    return <Callout tone="success" title="Thanks, we've got your documents">You can close this window. The Nantty tab you came from will pick up where you left off.</Callout>;
   }
   const showStatus = state.status === "pending_review" || state.status === "verified" || (state.status === "action_needed" && !isEditing);
   const { stepCount, stepNumber } = stepOrderNumbers(state);
@@ -71,7 +71,7 @@ export function PayoutOnboardingPanel({ context }: { readonly context: "seller" 
     );
   }
   return (
-    <Panel title="Get paid" description="Set up once. The same details cover everything you earn on Zudomart.">
+    <Panel title="Get paid" description="Set up once. The same details cover everything you earn on Nantty.">
       <PayoutSyncList state={state} />
       {state.accountStatus === "failed" ? (
         <Callout tone="caution" title="We couldn't reach our payment partner" action={<Button size="small" onClick={() => void sendSellerApiRequest("/payments/payout-onboarding/me/retry", { method: "POST" }).then(reload)}>Try again</Button>}>We'll keep trying automatically. Your details are saved.</Callout>

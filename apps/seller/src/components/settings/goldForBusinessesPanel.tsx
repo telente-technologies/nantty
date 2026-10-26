@@ -10,7 +10,7 @@ import { formatDateForDisplay } from "@/utils/dateFormatting.util";
 
 import styles from "./settings.module.css";
 
-const webappUrl = process.env.NEXT_PUBLIC_WEBAPP_URL ?? "https://app.zudomart.com";
+const webappUrl = process.env.NEXT_PUBLIC_WEBAPP_URL ?? "https://web.nantty.com";
 const coverageLabels: Record<GoldForBusinessesCoverage, string> = { active: "Active", removing: "Leaves at renewal", pending: "Pending", none: "Not covered" };
 const coverageTones: Record<GoldForBusinessesCoverage, StatusTone> = { active: "success", removing: "caution", pending: "info", none: "neutral" };
 const discountKindLabels: Record<GoldForBusinessesDiscountKind, string> = { multi_business: "Multi-business discount", offer: "Offer discount", yearly: "Yearly discount", none: "No discount" };

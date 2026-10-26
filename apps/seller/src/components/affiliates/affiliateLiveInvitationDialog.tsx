@@ -80,7 +80,7 @@ export function AffiliateLiveInvitationDialog({ isOpen, onClose, onInvited }: { 
     <ModalDialog intent="live"
       isOpen={isOpen}
       title="Invite a creator to live-sell"
-      description="The creator gets your invitation in the Zudomart app and can accept or decline."
+      description="The creator gets your invitation in the Nantty app and can accept or decline."
       onClose={onClose}
       width="large"
       footer={

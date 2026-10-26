@@ -40,7 +40,7 @@ export function ProductListFilters({ value, onValueChange }: { readonly value: P
       <SearchInput label="Search products" placeholder="Search name, SKU or barcode" value={value.searchText} onValueChange={(searchText) => update({ searchText })} />
       <CompactSelect label="Category" value={value.categoryId} onChange={(categoryId) => update({ categoryId })} options={[["", "All categories"], ...(categoriesQuery.data?.data ?? []).map((category): [string, string] => [category.id, category.name])]} />
       <CompactSelect label="Status" value={value.status} onChange={(status) => update({ status })} options={[["", "Active and drafts"], ["active", "Active"], ["draft", "Drafts"], ["scheduled", "Scheduled"], ["archived", "Archived"], ["all", "All statuses"]]} />
-      <CompactSelect label="Marketplace" value={value.online} onChange={(online) => update({ online })} options={[["", "Listed or not"], ["true", "Listed on Zudomart"], ["false", "Not listed"]]} />
+      <CompactSelect label="Marketplace" value={value.online} onChange={(online) => update({ online })} options={[["", "Listed or not"], ["true", "Listed on Nantty"], ["false", "Not listed"]]} />
       <CompactSelect label="Visibility" value={value.visibility} onChange={(visibility) => update({ visibility })} options={[["", "Any visibility"], ["public", "Everyone"], ["store_only", "Store page only"], ["link_only", "Link only"]]} />
       <CompactSelect label="Stock" value={value.stock} onChange={(stock) => update({ stock })} options={[["", "Any stock"], ["low", "Low stock"], ["out", "Out of stock"]]} />
     </FilterBar>

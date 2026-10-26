@@ -33,7 +33,7 @@ export function LandingHeader() {
   return (
     <header className={`${styles.header} ${hasScrolled ? styles.scrolled : ""}`}>
       <div className={styles.pill}>
-        <Link href="/" className={styles.brand} aria-label="Zudomart Dashboard home">
+        <Link href="/" className={styles.brand} aria-label="Nantty Dashboard home">
           <DashboardWordmark withSymbol />
         </Link>
         <nav aria-label="Main" className={styles.desktopNavigation}>
@@ -68,7 +68,7 @@ export function LandingHeader() {
           </ul>
         </nav>
         <Link href="/login" className={styles.mobileSignIn}>
-          Sign in with your Zudomart account
+          Sign in with your Nantty account
         </Link>
       </div>
     </header>

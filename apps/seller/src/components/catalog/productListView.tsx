@@ -67,7 +67,7 @@ export function ProductListView({ initialCategoryId = "", initialStatus = "", in
     <PageStack>
       <PageHeader
         title="Products"
-        description="Everything you sell on Zudomart. Listed products show in the app; drafts and scheduled products wait here until you publish them."
+        description="Everything you sell on Nantty. Listed products show in the app; drafts and scheduled products wait here until you publish them."
         actions={
           <span className={styles.headerActions}>
             <ButtonLink href="/products/import" iconName="export24">Import & export</ButtonLink>

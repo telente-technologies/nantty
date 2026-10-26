@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useEffect, useMemo, useRef } from "react";
 
-import { BrandLoader } from "@zudomart/web-kit";
+import { BrandLoader } from "@nantty/web-kit";
 
 import { readInitialsFromName } from "@/components/messages/conversationListPane";
 import { MessageBubble } from "@/components/messages/messageBubble";
@@ -37,7 +37,7 @@ export function ConversationThreadPane({ conversationId, onBack, onConversationC
     return (
       <section className={styles.threadPane} aria-label="Conversation">
         <div className={styles.placeholder}>
-          <EmptyState iconName="chatCircle24" title="Pick a conversation" description="These are the same chats customers see in the Zudomart app. Replies are end-to-end encrypted on this device before they're sent." />
+          <EmptyState iconName="chatCircle24" title="Pick a conversation" description="These are the same chats customers see in the Nantty app. Replies are end-to-end encrypted on this device before they're sent." />
         </div>
       </section>
     );
@@ -84,7 +84,7 @@ export function ConversationThreadPane({ conversationId, onBack, onConversationC
         <p className={styles.preview}><IconLabel name="lockKey24" size={14}>Messages are end-to-end encrypted. New team members only see messages sent after they join.</IconLabel></p>
         {thread.isLoading && thread.messages.length === 0 ? <BrandLoader size="md" label="Loading messages" /> : null}
         {thread.errorMessage ? <Callout tone="error" action={<Button size="small" onClick={thread.reload}>Try again</Button>}>{thread.errorMessage}</Callout> : null}
-        {conversation && !thread.isLoading && visible.length === 0 ? <p className={styles.preview}>No messages yet. Say hello — the customer gets it in the Zudomart app.</p> : null}
+        {conversation && !thread.isLoading && visible.length === 0 ? <p className={styles.preview}>No messages yet. Say hello — the customer gets it in the Nantty app.</p> : null}
         {visible.map((message) => (
           <MessageBubble key={message.id} message={message} reactions={ledger.reactions(message.id, viewerId ?? "")} isSeen={message.id === lastSeenId} onRetry={thread.retry} onDiscard={thread.discard} />
         ))}

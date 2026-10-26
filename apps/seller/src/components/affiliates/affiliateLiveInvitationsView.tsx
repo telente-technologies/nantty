@@ -43,7 +43,7 @@ export function AffiliateLiveInvitationsView() {
     <>
       <Panel
         title="Live selling invitations"
-        description="Invite a creator to feature your products in a Zudomart live. Sales from the live earn them commission like any other affiliate sale."
+        description="Invite a creator to feature your products in a Nantty live. Sales from the live earn them commission like any other affiliate sale."
         actions={<Button variant="primary" iconName="videoCamera24" onClick={() => setIsInviteDialogOpen(true)}>Invite a creator</Button>}
         padded={false}
       >

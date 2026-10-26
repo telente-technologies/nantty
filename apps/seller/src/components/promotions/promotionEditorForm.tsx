@@ -75,7 +75,7 @@ export function PromotionEditorForm({ promotion, currency, isSaving, onSubmit }:
         <Panel title="Basics">
           <div className={styles.stack}>
             <TextField label="Name" hint="Only your team sees this." value={name} onChange={(event) => setName(event.target.value)} maxLength={80} errorMessage={fieldErrors.name} />
-            <SelectField label="Type" value={kind} onChange={(event) => setKind(event.target.value as Promotion["kind"])} options={(Object.keys(promotionKindLabel) as Promotion["kind"][]).map((value) => ({ value, label: promotionKindLabel[value] }))} hint={kind === "coupon" ? "Customers enter the code at checkout in the Zudomart app." : kind === "automatic" ? "Applies by itself when the rules match." : "A storewide or category sale between two dates."} />
+            <SelectField label="Type" value={kind} onChange={(event) => setKind(event.target.value as Promotion["kind"])} options={(Object.keys(promotionKindLabel) as Promotion["kind"][]).map((value) => ({ value, label: promotionKindLabel[value] }))} hint={kind === "coupon" ? "Customers enter the code at checkout in the Nantty app." : kind === "automatic" ? "Applies by itself when the rules match." : "A storewide or category sale between two dates."} />
             {kind === "coupon" ? <TextField label="Coupon code" value={code} onChange={(event) => setCode(event.target.value.toUpperCase().replace(/[^A-Z0-9_-]/g, ""))} maxLength={24} errorMessage={fieldErrors.code} placeholder="WELCOME10" /> : null}
           </div>
         </Panel>
@@ -109,7 +109,7 @@ export function PromotionEditorForm({ promotion, currency, isSaving, onSubmit }:
           <p className={styles.summaryLine}><strong>{previewInput.name || "Untitled promotion"}</strong></p>
           <p className={styles.summaryLine}>{Number.isNaN(previewInput.discount.value) ? "Set a discount" : describePromotionDiscount(previewInput, formatMoney, currency)} {scope.kind === "all" ? "everything" : `${scope.ids.length} ${scope.kind === "products" ? "product(s)" : "categories"}`}</p>
           {kind === "coupon" && previewInput.code ? <p className={styles.summaryLine}>Code <code className={styles.code}>{previewInput.code}</code></p> : null}
-          <p className={styles.summaryLine}>Applies to orders in the Zudomart app</p>
+          <p className={styles.summaryLine}>Applies to orders in the Nantty app</p>
           <div style={{ marginTop: 12 }}>
             <Button type="submit" variant="primary" fullWidth isBusy={isSaving}>{promotion ? "Save promotion" : "Create promotion"}</Button>
           </div>

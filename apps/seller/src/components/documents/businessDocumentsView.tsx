@@ -70,7 +70,7 @@ export function BusinessDocumentsView() {
     <>
       <Callout tone="info" title="Selling never waits for this">You can create your store, list products and take orders without these documents. They unlock the Gold checkmark.</Callout>
       <GoldCheckmarkPreview storeName={sessionView?.access.storeName ?? "Your store"} goldCheckmark={overview.goldCheckmark} />
-      <Panel title="Business documents" description="PDF, JPEG, PNG or WebP, up to 10 MB each. Only the Zudomart review team can open them.">
+      <Panel title="Business documents" description="PDF, JPEG, PNG or WebP, up to 10 MB each. Only the Nantty review team can open them.">
         <ul style={{ listStyle: "none", margin: 0, padding: 0 }}>
           {overview.documents.map((document) => <DocumentRow key={document.kind} document={document} isBusy={busyKind === document.kind} onChoose={(kind, file) => void upload(kind, file)} />)}
         </ul>

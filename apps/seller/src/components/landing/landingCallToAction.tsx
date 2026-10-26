@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { OfficialStoreBadges } from "@zudomart/web-kit";
+import { OfficialStoreBadges } from "@nantty/web-kit";
 
 import { storeLinks } from "@/config/siteMetadata.config";
 
@@ -13,19 +13,19 @@ export function LandingCallToAction({ getTheAppUrl }: { readonly getTheAppUrl: s
           <h2 id="cta-heading" className={styles.heading}>
             Your business is waiting. It is free to start.
           </h2>
-          <p className={styles.description}>Sign in with the account you use in the Zudomart app — free for every Zudomart seller, upgrade to Pro or Business when you grow. Not selling on Zudomart yet? Start in the app, then come back here.</p>
+          <p className={styles.description}>Sign in with the account you use in the Nantty app — free for every Nantty seller, upgrade to Pro or Business when you grow. Not selling on Nantty yet? Start in the app, then come back here.</p>
           <div className={styles.actions}>
             <Link href="/login" className={styles.primaryAction}>
-              Sign in with your Zudomart account
+              Sign in with your Nantty account
             </Link>
           </div>
           <p className={styles.appPrompt}>
-            New to Zudomart? <a href={getTheAppUrl}>Get the app</a> to open your store.
+            New to Nantty? <a href={getTheAppUrl}>Get the app</a> to open your store.
           </p>
           <OfficialStoreBadges links={storeLinks} className={styles.storeBadges} />
         </div>
         <div className={styles.photoColumn}>
-          <img src="/photos/shopCounterOwner.webp" alt="A Zudomart seller smiling in her provisions store" width={1400} height={933} loading="lazy" className={styles.photo} />
+          <img src="/photos/shopCounterOwner.webp" alt="A Nantty seller smiling in her provisions store" width={1400} height={933} loading="lazy" className={styles.photo} />
         </div>
       </div>
     </section>

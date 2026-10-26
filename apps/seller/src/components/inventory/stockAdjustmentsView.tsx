@@ -55,7 +55,7 @@ export function StockAdjustmentsView({ initialVariantId, initialLocationId, shou
 
   return (
     <PageStack>
-      <PageHeader title="Stock adjustments" description="Deliveries, counts, damage and losses. Each change updates the stock customers can buy in the Zudomart app." actions={<Button variant="primary" iconName="plus16" onClick={() => setIsDialogOpen(true)}>New adjustment</Button>} />
+      <PageHeader title="Stock adjustments" description="Deliveries, counts, damage and losses. Each change updates the stock customers can buy in the Nantty app." actions={<Button variant="primary" iconName="plus16" onClick={() => setIsDialogOpen(true)}>New adjustment</Button>} />
       <InventoryTabs />
       <Panel padded={false}>
         <div className={styles.toolbar}>

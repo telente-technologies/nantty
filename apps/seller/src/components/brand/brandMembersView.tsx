@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 
-import { requestConfirmation } from "@zudomart/web-kit";
+import { requestConfirmation } from "@nantty/web-kit";
 
 import { useBrandWorkspace } from "@/components/brand/brandWorkspace";
 import { Button, IconButton } from "@/components/ui/button";
@@ -17,8 +17,8 @@ import { readErrorMessageForDisplay, sendSellerApiRequest } from "@/services/cli
 import type { BrandMember, BrandMemberRole } from "@/types/brand.type";
 import { brandMemberRoleDescriptions, brandMemberRoleLabels, canBrandRoleManage } from "@/utils/brandPresentation.util";
 import { fieldChecks, validateObjectAgainstChecks } from "@/utils/formValidation.util";
-import { ZudomartUserPicker } from "@/components/staff/zudomartUserPicker";
-import type { ZudomartUserCandidate } from "@/types/staff.type";
+import { NanttyUserPicker } from "@/components/staff/nanttyUserPicker";
+import type { NanttyUserCandidate } from "@/types/staff.type";
 
 type AssignableRole = Exclude<BrandMemberRole, "owner">;
 const assignableRoles: AssignableRole[] = ["admin", "editor", "viewer"];
@@ -26,20 +26,20 @@ const assignableRoles: AssignableRole[] = ["admin", "editor", "viewer"];
 function InviteBrandMemberDialog({ isOpen, onClose, allowAdmin }: { readonly isOpen: boolean; readonly onClose: () => void; readonly allowAdmin: boolean }) {
   const { brand, reloadBrand } = useBrandWorkspace();
   const { showToast } = useToast();
-  const [selectedUser, setSelectedUser] = useState<ZudomartUserCandidate | null>(null);
+  const [selectedUser, setSelectedUser] = useState<NanttyUserCandidate | null>(null);
   const [role, setRole] = useState<AssignableRole>("editor");
   const [errors, setErrors] = useState<string[]>([]);
   const [isSending, setIsSending] = useState(false);
 
   async function sendBrandInvitation() {
     const issues = validateObjectAgainstChecks({ role }, { role: fieldChecks.oneOf("Role", assignableRoles) });
-    if (!selectedUser) issues.push({ path: "userId", message: "Search for the person's Zudomart username and select them." });
+    if (!selectedUser) issues.push({ path: "userId", message: "Search for the person's Nantty username and select them." });
     setErrors(issues.map((issue) => issue.message));
     if (issues.length > 0 || !selectedUser) return;
     setIsSending(true);
     try {
       await sendSellerApiRequest(`/seller/brands/${encodeURIComponent(brand.id)}/members`, { method: "POST", body: { userId: selectedUser.userId, role } });
-      showToast(`Brand team request sent to @${selectedUser.username}. They accept it in the Zudomart app.`);
+      showToast(`Brand team request sent to @${selectedUser.username}. They accept it in the Nantty app.`);
       setSelectedUser(null);
       reloadBrand();
       onClose();
@@ -51,10 +51,10 @@ function InviteBrandMemberDialog({ isOpen, onClose, allowAdmin }: { readonly isO
   }
 
   return (
-    <ModalDialog intent="addMember" isOpen={isOpen} onClose={onClose} title="Add someone to the brand" description="Add someone who already uses the Zudomart app. They accept in the app and sign in with their own account." width="small" footer={<><Button onClick={onClose}>Cancel</Button><Button variant="primary" isBusy={isSending} onClick={() => void sendBrandInvitation()}>Send invitation</Button></>}>
+    <ModalDialog intent="addMember" isOpen={isOpen} onClose={onClose} title="Add someone to the brand" description="Add someone who already uses the Nantty app. They accept in the app and sign in with their own account." width="small" footer={<><Button onClick={onClose}>Cancel</Button><Button variant="primary" isBusy={isSending} onClick={() => void sendBrandInvitation()}>Send invitation</Button></>}>
       <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
         <FormErrorSummary messages={errors} />
-        <ZudomartUserPicker selectedUser={selectedUser} onSelectUser={setSelectedUser} />
+        <NanttyUserPicker selectedUser={selectedUser} onSelectUser={setSelectedUser} />
         <SelectField label="Role" value={role} onChange={(event) => setRole(event.target.value as AssignableRole)} options={assignableRoles.filter((candidate) => allowAdmin || candidate !== "admin").map((candidate) => ({ value: candidate, label: brandMemberRoleLabels[candidate] }))} hint={brandMemberRoleDescriptions[role]} />
       </div>
     </ModalDialog>

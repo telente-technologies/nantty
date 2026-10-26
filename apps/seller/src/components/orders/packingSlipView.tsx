@@ -75,8 +75,8 @@ export function PackingSlipView({ orderId }: { readonly orderId: string }) {
         </table>
         <footer className={styles.slipFooter}>
           <p>Items: {order.lines.reduce((sum, line) => sum + line.quantity, 0)}</p>
-          <p className={styles.small}>Something not right? Request a return from the order in the Zudomart app.</p>
-          <p className={styles.small}>Questions? Message us on Zudomart @{settings?.handle}</p>
+          <p className={styles.small}>Something not right? Request a return from the order in the Nantty app.</p>
+          <p className={styles.small}>Questions? Message us on Nantty @{settings?.handle}</p>
         </footer>
       </article>
     </div>

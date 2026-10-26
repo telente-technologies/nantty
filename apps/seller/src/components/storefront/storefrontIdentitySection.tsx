@@ -61,7 +61,7 @@ function StorefrontImagePicker({ slot, imageUrl, onImageUploaded, onImageRemoved
 
 export function StorefrontIdentitySection({ draft, onDraftChange }: { readonly draft: StorefrontDraft; readonly onDraftChange: StorefrontDraftUpdater }) {
   return (
-    <Panel title="Name and look" description="What buyers see first on your store page in the Zudomart app.">
+    <Panel title="Name and look" description="What buyers see first on your store page in the Nantty app.">
       <div className={styles.stack}>
         <div className={styles.imagePickers}>
           <StorefrontImagePicker slot="logo" imageUrl={draft.logoUrl} onImageUploaded={(mediaId, url) => onDraftChange({ logoMediaId: mediaId, logoUrl: url })} onImageRemoved={() => onDraftChange({ logoMediaId: null, logoUrl: null })} />
