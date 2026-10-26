@@ -3,8 +3,8 @@ package models
 import (
 	"time"
 
-	"zudomart/modules/currency/src/generated/ent"
-	"zudomart/modules/currency/src/modules/exchangeRates/services"
+	"nantty/modules/currency/src/generated/ent"
+	"nantty/modules/currency/src/modules/exchangeRates/services"
 )
 
 type CurrencyView struct {

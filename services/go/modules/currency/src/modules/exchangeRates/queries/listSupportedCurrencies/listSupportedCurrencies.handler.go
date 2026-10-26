@@ -4,11 +4,11 @@ import (
 	"context"
 	"time"
 
-	"zudomart/modules/currency/src/constants"
-	"zudomart/modules/currency/src/container"
-	"zudomart/modules/currency/src/modules/exchangeRates/models"
-	"zudomart/modules/currency/src/modules/exchangeRates/repositories"
-	"zudomart/modules/currency/src/modules/exchangeRates/services"
+	"nantty/modules/currency/src/constants"
+	"nantty/modules/currency/src/container"
+	"nantty/modules/currency/src/modules/exchangeRates/models"
+	"nantty/modules/currency/src/modules/exchangeRates/repositories"
+	"nantty/modules/currency/src/modules/exchangeRates/services"
 )
 
 type Handler struct {

@@ -3,9 +3,9 @@ package routes
 import (
 	"net/http"
 
-	"zudomart/modules/currency/src/container"
-	"zudomart/modules/currency/src/modules/exchangeRates/controllers"
-	"zudomart/platform/staffauth"
+	"nantty/modules/currency/src/container"
+	"nantty/modules/currency/src/modules/exchangeRates/controllers"
+	"nantty/platform/staffauth"
 )
 
 const (

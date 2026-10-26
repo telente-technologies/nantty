@@ -3,7 +3,7 @@ package resolveviewerlocale
 import (
 	"github.com/google/uuid"
 
-	"zudomart/modules/currency/src/modules/locale/models"
+	"nantty/modules/currency/src/modules/locale/models"
 )
 
 type Query struct {

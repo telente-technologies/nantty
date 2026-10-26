@@ -1,6 +1,6 @@
 package listexchangeratehistory
 
-import "zudomart/modules/currency/src/modules/exchangeRates/models"
+import "nantty/modules/currency/src/modules/exchangeRates/models"
 
 type Query struct {
 	Currency string

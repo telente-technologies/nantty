@@ -5,12 +5,12 @@ import (
 	"net/http"
 	"time"
 
-	"zudomart/modules/currency/src/constants"
-	"zudomart/modules/currency/src/container"
-	"zudomart/modules/currency/src/generated/ent"
-	"zudomart/modules/currency/src/modules/exchangeRates/commands/seedDefaultRates"
-	"zudomart/modules/currency/src/modules/exchangeRates/repositories"
-	"zudomart/modules/currency/src/modules/exchangeRates/routes"
+	"nantty/modules/currency/src/constants"
+	"nantty/modules/currency/src/container"
+	"nantty/modules/currency/src/generated/ent"
+	"nantty/modules/currency/src/modules/exchangeRates/commands/seedDefaultRates"
+	"nantty/modules/currency/src/modules/exchangeRates/repositories"
+	"nantty/modules/currency/src/modules/exchangeRates/routes"
 )
 
 const DefaultRateStaleAfter = 45 * 24 * time.Hour

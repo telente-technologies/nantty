@@ -5,11 +5,11 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/currency/src/container"
-	"zudomart/modules/currency/src/modules/locale/queries/listSupportedCountries"
-	"zudomart/modules/currency/src/modules/locale/queries/resolveViewerLocale"
-	"zudomart/platform/httpserver"
-	"zudomart/platform/jwtauth"
+	"nantty/modules/currency/src/container"
+	"nantty/modules/currency/src/modules/locale/queries/listSupportedCountries"
+	"nantty/modules/currency/src/modules/locale/queries/resolveViewerLocale"
+	"nantty/platform/httpserver"
+	"nantty/platform/jwtauth"
 )
 
 type LocaleController struct {

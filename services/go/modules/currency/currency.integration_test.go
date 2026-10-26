@@ -18,15 +18,15 @@ import (
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 
-	"zudomart/modules/currency/src/configs"
-	exchangerates "zudomart/modules/currency/src/modules/exchangeRates"
-	"zudomart/platform/events"
-	"zudomart/platform/health"
-	"zudomart/platform/identityports"
-	"zudomart/platform/identityports/identitytest"
-	"zudomart/platform/postgres"
-	"zudomart/platform/servicemodule"
-	"zudomart/platform/staffauth"
+	"nantty/modules/currency/src/configs"
+	exchangerates "nantty/modules/currency/src/modules/exchangeRates"
+	"nantty/platform/events"
+	"nantty/platform/health"
+	"nantty/platform/identityports"
+	"nantty/platform/identityports/identitytest"
+	"nantty/platform/postgres"
+	"nantty/platform/servicemodule"
+	"nantty/platform/staffauth"
 )
 
 type countryLookupByAccount map[uuid.UUID]string

@@ -8,9 +8,9 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"github.com/google/uuid"
 
-	"zudomart/modules/currency/src/generated/ent"
-	"zudomart/modules/currency/src/generated/ent/outboxevent"
-	"zudomart/platform/events"
+	"nantty/modules/currency/src/generated/ent"
+	"nantty/modules/currency/src/generated/ent/outboxevent"
+	"nantty/platform/events"
 )
 
 const EventSource = "zudomart.currency"

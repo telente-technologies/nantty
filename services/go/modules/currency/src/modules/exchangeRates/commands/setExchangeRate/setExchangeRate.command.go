@@ -1,6 +1,6 @@
 package setexchangerate
 
-import "zudomart/modules/currency/src/modules/exchangeRates/models"
+import "nantty/modules/currency/src/modules/exchangeRates/models"
 
 type Command struct {
 	StaffId            string

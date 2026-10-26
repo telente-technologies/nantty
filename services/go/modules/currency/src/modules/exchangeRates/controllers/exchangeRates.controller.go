@@ -5,14 +5,14 @@ import (
 	"strconv"
 	"strings"
 
-	"zudomart/modules/currency/src/container"
-	"zudomart/modules/currency/src/modules/exchangeRates/commands/setExchangeRate"
-	"zudomart/modules/currency/src/modules/exchangeRates/dtos"
-	"zudomart/modules/currency/src/modules/exchangeRates/queries/convertMoney"
-	"zudomart/modules/currency/src/modules/exchangeRates/queries/listExchangeRateHistory"
-	"zudomart/modules/currency/src/modules/exchangeRates/queries/listSupportedCurrencies"
-	"zudomart/platform/httpserver"
-	"zudomart/platform/staffauth"
+	"nantty/modules/currency/src/container"
+	"nantty/modules/currency/src/modules/exchangeRates/commands/setExchangeRate"
+	"nantty/modules/currency/src/modules/exchangeRates/dtos"
+	"nantty/modules/currency/src/modules/exchangeRates/queries/convertMoney"
+	"nantty/modules/currency/src/modules/exchangeRates/queries/listExchangeRateHistory"
+	"nantty/modules/currency/src/modules/exchangeRates/queries/listSupportedCurrencies"
+	"nantty/platform/httpserver"
+	"nantty/platform/staffauth"
 )
 
 type ExchangeRatesController struct {

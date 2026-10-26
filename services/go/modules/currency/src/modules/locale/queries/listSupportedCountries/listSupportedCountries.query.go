@@ -1,6 +1,6 @@
 package listsupportedcountries
 
-import "zudomart/modules/currency/src/modules/locale/dtos"
+import "nantty/modules/currency/src/modules/locale/dtos"
 
 type Query struct{}
 

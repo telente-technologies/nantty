@@ -5,12 +5,12 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/currency/src/constants"
-	"zudomart/modules/currency/src/container"
-	currencyerrors "zudomart/modules/currency/src/errors"
-	"zudomart/modules/currency/src/generated/ent"
-	"zudomart/modules/currency/src/generated/ent/exchangeraterevision"
-	"zudomart/modules/currency/src/modules/exchangeRates/models"
+	"nantty/modules/currency/src/constants"
+	"nantty/modules/currency/src/container"
+	currencyerrors "nantty/modules/currency/src/errors"
+	"nantty/modules/currency/src/generated/ent"
+	"nantty/modules/currency/src/generated/ent/exchangeraterevision"
+	"nantty/modules/currency/src/modules/exchangeRates/models"
 )
 
 const historyPageSize = 50

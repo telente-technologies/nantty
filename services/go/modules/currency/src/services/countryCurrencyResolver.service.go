@@ -1,6 +1,6 @@
 package services
 
-import "zudomart/modules/currency/src/constants"
+import "nantty/modules/currency/src/constants"
 
 type CountryCurrencyResolver struct{}
 

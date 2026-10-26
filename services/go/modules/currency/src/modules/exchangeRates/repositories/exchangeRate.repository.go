@@ -3,10 +3,10 @@ package repositories
 import (
 	"context"
 
-	"zudomart/modules/currency/src/constants"
-	currencyerrors "zudomart/modules/currency/src/errors"
-	"zudomart/modules/currency/src/generated/ent"
-	"zudomart/modules/currency/src/generated/ent/exchangeraterevision"
+	"nantty/modules/currency/src/constants"
+	currencyerrors "nantty/modules/currency/src/errors"
+	"nantty/modules/currency/src/generated/ent"
+	"nantty/modules/currency/src/generated/ent/exchangeraterevision"
 )
 
 func FindLatestRevisionForCurrency(ctx context.Context, client *ent.Client, code string) (*ent.ExchangeRateRevision, error) {

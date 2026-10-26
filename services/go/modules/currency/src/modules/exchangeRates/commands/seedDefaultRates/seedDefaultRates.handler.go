@@ -3,10 +3,10 @@ package seeddefaultrates
 import (
 	"context"
 
-	"zudomart/modules/currency/src/constants"
-	"zudomart/modules/currency/src/container"
-	"zudomart/modules/currency/src/generated/ent"
-	"zudomart/modules/currency/src/generated/ent/exchangeraterevision"
+	"nantty/modules/currency/src/constants"
+	"nantty/modules/currency/src/container"
+	"nantty/modules/currency/src/generated/ent"
+	"nantty/modules/currency/src/generated/ent/exchangeraterevision"
 )
 
 type Handler struct {

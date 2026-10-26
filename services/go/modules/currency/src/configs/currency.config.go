@@ -1,6 +1,6 @@
 package configs
 
-import platformconfig "zudomart/platform/config"
+import platformconfig "nantty/platform/config"
 
 type CurrencySettings struct {
 	Environment          string

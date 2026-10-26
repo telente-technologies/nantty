@@ -3,10 +3,10 @@ package currency
 import (
 	"context"
 
-	"zudomart/modules/currency/src"
-	"zudomart/modules/currency/src/configs"
-	"zudomart/platform/events"
-	"zudomart/platform/servicemodule"
+	"nantty/modules/currency/src"
+	"nantty/modules/currency/src/configs"
+	"nantty/platform/events"
+	"nantty/platform/servicemodule"
 )
 
 type Module = src.Module

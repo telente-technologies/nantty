@@ -3,8 +3,8 @@ package routes
 import (
 	"net/http"
 
-	"zudomart/modules/currency/src/container"
-	"zudomart/modules/currency/src/modules/locale/controllers"
+	"nantty/modules/currency/src/container"
+	"nantty/modules/currency/src/modules/locale/controllers"
 )
 
 func MountLocaleRoutes(mux *http.ServeMux, container *container.Container) {
