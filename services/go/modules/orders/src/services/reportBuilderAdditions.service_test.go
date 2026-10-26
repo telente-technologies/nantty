@@ -6,11 +6,11 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/orders/src/databases/schema"
-	"zudomart/modules/orders/src/enums"
-	"zudomart/modules/orders/src/generated/ent"
-	"zudomart/platform/commerceports"
-	"zudomart/platform/money"
+	"nantty/modules/orders/src/databases/schema"
+	"nantty/modules/orders/src/enums"
+	"nantty/modules/orders/src/generated/ent"
+	"nantty/platform/commerceports"
+	"nantty/platform/money"
 )
 
 func additionsFixture() (ReportData, uuid.UUID, uuid.UUID) {

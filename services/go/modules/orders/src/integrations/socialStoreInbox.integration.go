@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"time"
 
-	"zudomart/platform/httpserver"
+	"nantty/platform/httpserver"
 )
 
 var ErrStoreInboxUnavailable = httpserver.NewApiError(http.StatusBadGateway, "UPSTREAM_UNAVAILABLE", "Messages are unavailable right now. Try again.")

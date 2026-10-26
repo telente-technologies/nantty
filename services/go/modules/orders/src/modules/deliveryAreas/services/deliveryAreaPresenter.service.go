@@ -6,11 +6,11 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/orders/src/container"
-	"zudomart/modules/orders/src/generated/ent"
-	"zudomart/modules/orders/src/generated/ent/deliveryarea"
-	"zudomart/modules/orders/src/modules/deliveryAreas/dtos"
-	"zudomart/platform/money"
+	"nantty/modules/orders/src/container"
+	"nantty/modules/orders/src/generated/ent"
+	"nantty/modules/orders/src/generated/ent/deliveryarea"
+	"nantty/modules/orders/src/modules/deliveryAreas/dtos"
+	"nantty/platform/money"
 )
 
 func PresentDeliveryArea(row *ent.DeliveryArea) dtos.DeliveryAreaView {

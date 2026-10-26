@@ -6,12 +6,12 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/orders/src/container"
-	"zudomart/modules/orders/src/enums"
-	"zudomart/modules/orders/src/generated/ent"
-	"zudomart/modules/orders/src/generated/ent/storecreditentry"
-	"zudomart/modules/orders/src/services"
-	"zudomart/platform/money"
+	"nantty/modules/orders/src/container"
+	"nantty/modules/orders/src/enums"
+	"nantty/modules/orders/src/generated/ent"
+	"nantty/modules/orders/src/generated/ent/storecreditentry"
+	"nantty/modules/orders/src/services"
+	"nantty/platform/money"
 )
 
 type Handler struct {

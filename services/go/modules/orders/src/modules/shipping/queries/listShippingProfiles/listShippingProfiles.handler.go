@@ -3,12 +3,12 @@ package listshippingprofiles
 import (
 	"context"
 
-	"zudomart/modules/orders/src/container"
-	"zudomart/modules/orders/src/generated/ent"
-	"zudomart/modules/orders/src/generated/ent/shippingprofile"
-	"zudomart/modules/orders/src/services"
-	"zudomart/modules/orders/src/types"
-	"zudomart/platform/httpserver"
+	"nantty/modules/orders/src/container"
+	"nantty/modules/orders/src/generated/ent"
+	"nantty/modules/orders/src/generated/ent/shippingprofile"
+	"nantty/modules/orders/src/services"
+	"nantty/modules/orders/src/types"
+	"nantty/platform/httpserver"
 )
 
 type Handler struct {

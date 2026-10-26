@@ -6,10 +6,10 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/orders/src/enums"
-	"zudomart/modules/orders/src/generated/ent"
-	"zudomart/platform/commerceports"
-	"zudomart/platform/money"
+	"nantty/modules/orders/src/enums"
+	"nantty/modules/orders/src/generated/ent"
+	"nantty/platform/commerceports"
+	"nantty/platform/money"
 )
 
 type ReportColumn struct {

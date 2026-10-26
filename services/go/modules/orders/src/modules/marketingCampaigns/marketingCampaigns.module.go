@@ -3,8 +3,8 @@ package marketingcampaigns
 import (
 	"net/http"
 
-	"zudomart/modules/orders/src/container"
-	"zudomart/modules/orders/src/modules/marketingCampaigns/routes"
+	"nantty/modules/orders/src/container"
+	"nantty/modules/orders/src/modules/marketingCampaigns/routes"
 )
 
 func Mount(mux *http.ServeMux, deployed *container.Container) {

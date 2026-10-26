@@ -5,8 +5,8 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/orders/src/databases/schema"
-	"zudomart/modules/orders/src/generated/ent"
+	"nantty/modules/orders/src/databases/schema"
+	"nantty/modules/orders/src/generated/ent"
 )
 
 func TestReturnRefundCoversOnlyChosenLinesAndScalesForDiscounts(t *testing.T) {

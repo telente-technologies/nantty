@@ -3,12 +3,12 @@ package controllers
 import (
 	"net/http"
 
-	"zudomart/modules/orders/src/container"
-	"zudomart/modules/orders/src/middlewares"
-	getmarketingoverview "zudomart/modules/orders/src/modules/marketingOverview/queries/getMarketingOverview"
-	"zudomart/modules/orders/src/utils"
-	"zudomart/platform/httpserver"
-	"zudomart/platform/sellerplans"
+	"nantty/modules/orders/src/container"
+	"nantty/modules/orders/src/middlewares"
+	getmarketingoverview "nantty/modules/orders/src/modules/marketingOverview/queries/getMarketingOverview"
+	"nantty/modules/orders/src/utils"
+	"nantty/platform/httpserver"
+	"nantty/platform/sellerplans"
 )
 
 type MarketingOverviewController struct {

@@ -1,6 +1,6 @@
 package services
 
-import "zudomart/modules/orders/src/enums"
+import "nantty/modules/orders/src/enums"
 
 var ActiveOrderStatuses = []string{enums.StatusNew, enums.StatusProcessing, enums.StatusReady, enums.StatusShipped, enums.StatusDelivered}
 

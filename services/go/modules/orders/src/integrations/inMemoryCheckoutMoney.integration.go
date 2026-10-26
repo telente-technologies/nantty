@@ -5,7 +5,7 @@ import (
 	"sync"
 	"time"
 
-	"zudomart/modules/orders/src/interfaces"
+	"nantty/modules/orders/src/interfaces"
 )
 
 type InMemoryCheckoutMoney struct {

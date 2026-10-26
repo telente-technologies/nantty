@@ -5,12 +5,12 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/orders/src/container"
-	"zudomart/modules/orders/src/generated/ent"
-	"zudomart/modules/orders/src/generated/ent/shippingdestination"
-	"zudomart/modules/orders/src/generated/ent/shippingprofile"
-	"zudomart/modules/orders/src/generated/ent/shippingrule"
-	"zudomart/modules/orders/src/generated/ent/shippingzone"
+	"nantty/modules/orders/src/container"
+	"nantty/modules/orders/src/generated/ent"
+	"nantty/modules/orders/src/generated/ent/shippingdestination"
+	"nantty/modules/orders/src/generated/ent/shippingprofile"
+	"nantty/modules/orders/src/generated/ent/shippingrule"
+	"nantty/modules/orders/src/generated/ent/shippingzone"
 )
 
 func LoadShippingProfileRules(ctx context.Context, deployed *container.Container, storeIds []uuid.UUID) (map[uuid.UUID]*ShippingProfileRules, error) {

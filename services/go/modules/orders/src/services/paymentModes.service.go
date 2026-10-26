@@ -3,8 +3,8 @@ package services
 import (
 	"github.com/google/uuid"
 
-	"zudomart/modules/orders/src/enums"
-	ordererrors "zudomart/modules/orders/src/errors"
+	"nantty/modules/orders/src/enums"
+	ordererrors "nantty/modules/orders/src/errors"
 )
 
 func ResolvePaymentModes(plan *CheckoutPlan, requested map[uuid.UUID]string, acceptedDirect bool) error {

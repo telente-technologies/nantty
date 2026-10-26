@@ -1,8 +1,8 @@
 package getanalyticsbreakdowns
 
 import (
-	"zudomart/modules/orders/src/modules/sellerInsights/services"
-	"zudomart/platform/commerceports"
+	"nantty/modules/orders/src/modules/sellerInsights/services"
+	"nantty/platform/commerceports"
 )
 
 type Query struct {

@@ -5,11 +5,11 @@ import (
 	"log/slog"
 	"time"
 
-	"zudomart/modules/orders/src/container"
-	"zudomart/modules/orders/src/enums"
-	"zudomart/modules/orders/src/generated/ent"
-	"zudomart/modules/orders/src/generated/ent/checkout"
-	"zudomart/modules/orders/src/services"
+	"nantty/modules/orders/src/container"
+	"nantty/modules/orders/src/enums"
+	"nantty/modules/orders/src/generated/ent"
+	"nantty/modules/orders/src/generated/ent/checkout"
+	"nantty/modules/orders/src/services"
 )
 
 func ExpireOpenCheckouts(ctx context.Context, deployed *container.Container, batch int) (int, error) {

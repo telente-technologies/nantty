@@ -7,15 +7,15 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"github.com/google/uuid"
 
-	"zudomart/modules/orders/src/container"
-	"zudomart/modules/orders/src/enums"
-	"zudomart/modules/orders/src/generated/ent"
-	"zudomart/modules/orders/src/generated/ent/ordergroup"
-	"zudomart/modules/orders/src/generated/ent/predicate"
-	"zudomart/modules/orders/src/services"
-	"zudomart/modules/orders/src/types"
-	"zudomart/modules/orders/src/utils"
-	"zudomart/platform/httpserver"
+	"nantty/modules/orders/src/container"
+	"nantty/modules/orders/src/enums"
+	"nantty/modules/orders/src/generated/ent"
+	"nantty/modules/orders/src/generated/ent/ordergroup"
+	"nantty/modules/orders/src/generated/ent/predicate"
+	"nantty/modules/orders/src/services"
+	"nantty/modules/orders/src/types"
+	"nantty/modules/orders/src/utils"
+	"nantty/platform/httpserver"
 )
 
 type Handler struct {

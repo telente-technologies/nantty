@@ -1,6 +1,6 @@
 package listdeliveryareas
 
-import "zudomart/platform/commerceports"
+import "nantty/platform/commerceports"
 
 type Query struct {
 	Store commerceports.StoreAccess

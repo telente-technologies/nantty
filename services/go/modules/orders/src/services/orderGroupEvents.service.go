@@ -4,8 +4,8 @@ import (
 	"context"
 	"strings"
 
-	"zudomart/modules/orders/src/generated/ent"
-	"zudomart/modules/orders/src/generated/ent/orderitem"
+	"nantty/modules/orders/src/generated/ent"
+	"nantty/modules/orders/src/generated/ent/orderitem"
 )
 
 func OrderGroupEventData(ctx context.Context, tx *ent.Tx, group *ent.OrderGroup, extra map[string]any) (map[string]any, error) {

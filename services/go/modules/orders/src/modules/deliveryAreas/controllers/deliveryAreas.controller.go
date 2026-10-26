@@ -3,15 +3,15 @@ package controllers
 import (
 	"net/http"
 
-	"zudomart/modules/orders/src/container"
-	"zudomart/modules/orders/src/middlewares"
-	deletedeliveryarea "zudomart/modules/orders/src/modules/deliveryAreas/commands/deleteDeliveryArea"
-	savedeliveryarea "zudomart/modules/orders/src/modules/deliveryAreas/commands/saveDeliveryArea"
-	"zudomart/modules/orders/src/modules/deliveryAreas/dtos"
-	listdeliveryareas "zudomart/modules/orders/src/modules/deliveryAreas/queries/listDeliveryAreas"
-	"zudomart/modules/orders/src/modules/deliveryAreas/validators"
-	"zudomart/modules/orders/src/utils"
-	"zudomart/platform/httpserver"
+	"nantty/modules/orders/src/container"
+	"nantty/modules/orders/src/middlewares"
+	deletedeliveryarea "nantty/modules/orders/src/modules/deliveryAreas/commands/deleteDeliveryArea"
+	savedeliveryarea "nantty/modules/orders/src/modules/deliveryAreas/commands/saveDeliveryArea"
+	"nantty/modules/orders/src/modules/deliveryAreas/dtos"
+	listdeliveryareas "nantty/modules/orders/src/modules/deliveryAreas/queries/listDeliveryAreas"
+	"nantty/modules/orders/src/modules/deliveryAreas/validators"
+	"nantty/modules/orders/src/utils"
+	"nantty/platform/httpserver"
 )
 
 type DeliveryAreasController struct {

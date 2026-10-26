@@ -8,12 +8,12 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/orders/src/container"
-	"zudomart/modules/orders/src/enums"
-	"zudomart/modules/orders/src/generated/ent"
-	"zudomart/modules/orders/src/generated/ent/customernote"
-	"zudomart/modules/orders/src/generated/ent/ordergroup"
-	"zudomart/platform/money"
+	"nantty/modules/orders/src/container"
+	"nantty/modules/orders/src/enums"
+	"nantty/modules/orders/src/generated/ent"
+	"nantty/modules/orders/src/generated/ent/customernote"
+	"nantty/modules/orders/src/generated/ent/ordergroup"
+	"nantty/platform/money"
 )
 
 type CustomerNoteView struct {

@@ -6,8 +6,8 @@ import (
 	"slices"
 	"strings"
 
-	"zudomart/modules/orders/src/modules/sellerOrders/dtos"
-	"zudomart/modules/orders/src/utils"
+	"nantty/modules/orders/src/modules/sellerOrders/dtos"
+	"nantty/modules/orders/src/utils"
 )
 
 var trackingPattern = regexp.MustCompile(`^[A-Za-z0-9-]{4,40}$`)

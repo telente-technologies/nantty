@@ -3,9 +3,9 @@ package validators
 import (
 	"slices"
 
-	"zudomart/modules/orders/src/modules/cart/dtos"
-	"zudomart/modules/orders/src/types"
-	"zudomart/modules/orders/src/utils"
+	"nantty/modules/orders/src/modules/cart/dtos"
+	"nantty/modules/orders/src/types"
+	"nantty/modules/orders/src/utils"
 )
 
 func ValidateAddCartItem(body dtos.AddCartItemRequest) error {

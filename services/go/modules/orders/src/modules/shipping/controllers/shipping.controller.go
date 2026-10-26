@@ -6,19 +6,19 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/orders/src/container"
-	"zudomart/modules/orders/src/middlewares"
-	deleteshippingrule "zudomart/modules/orders/src/modules/shipping/commands/deleteShippingRule"
-	saveshippingrule "zudomart/modules/orders/src/modules/shipping/commands/saveShippingRule"
-	setfreeshippingthreshold "zudomart/modules/orders/src/modules/shipping/commands/setFreeShippingThreshold"
-	"zudomart/modules/orders/src/modules/shipping/dtos"
-	getshippingprofile "zudomart/modules/orders/src/modules/shipping/queries/getShippingProfile"
-	listshippingprofiles "zudomart/modules/orders/src/modules/shipping/queries/listShippingProfiles"
-	previewshipping "zudomart/modules/orders/src/modules/shipping/queries/previewShipping"
-	"zudomart/modules/orders/src/modules/shipping/validators"
-	"zudomart/modules/orders/src/services"
-	"zudomart/modules/orders/src/utils"
-	"zudomart/platform/httpserver"
+	"nantty/modules/orders/src/container"
+	"nantty/modules/orders/src/middlewares"
+	deleteshippingrule "nantty/modules/orders/src/modules/shipping/commands/deleteShippingRule"
+	saveshippingrule "nantty/modules/orders/src/modules/shipping/commands/saveShippingRule"
+	setfreeshippingthreshold "nantty/modules/orders/src/modules/shipping/commands/setFreeShippingThreshold"
+	"nantty/modules/orders/src/modules/shipping/dtos"
+	getshippingprofile "nantty/modules/orders/src/modules/shipping/queries/getShippingProfile"
+	listshippingprofiles "nantty/modules/orders/src/modules/shipping/queries/listShippingProfiles"
+	previewshipping "nantty/modules/orders/src/modules/shipping/queries/previewShipping"
+	"nantty/modules/orders/src/modules/shipping/validators"
+	"nantty/modules/orders/src/services"
+	"nantty/modules/orders/src/utils"
+	"nantty/platform/httpserver"
 )
 
 type ShippingController struct {

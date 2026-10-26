@@ -4,7 +4,7 @@ import (
 	"strings"
 	"testing"
 
-	platformconfig "zudomart/platform/config"
+	platformconfig "nantty/platform/config"
 )
 
 func TestProductionRequiresTheOrdersIdempotencyRedis(t *testing.T) {

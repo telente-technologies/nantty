@@ -4,7 +4,7 @@ import (
 	"testing"
 	"time"
 
-	"zudomart/modules/orders/src/enums"
+	"nantty/modules/orders/src/enums"
 )
 
 func TestCreditBalanceConsumesOldestExpiryFirst(t *testing.T) {

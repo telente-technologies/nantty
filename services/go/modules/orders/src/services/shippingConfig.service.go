@@ -5,13 +5,13 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/orders/src/container"
-	"zudomart/modules/orders/src/generated/ent"
-	"zudomart/modules/orders/src/generated/ent/shippingprofile"
-	"zudomart/modules/orders/src/types"
-	"zudomart/platform/commerceports"
-	"zudomart/platform/money"
-	"zudomart/platform/usersdirectory"
+	"nantty/modules/orders/src/container"
+	"nantty/modules/orders/src/generated/ent"
+	"nantty/modules/orders/src/generated/ent/shippingprofile"
+	"nantty/modules/orders/src/types"
+	"nantty/platform/commerceports"
+	"nantty/platform/money"
+	"nantty/platform/usersdirectory"
 )
 
 func EnsureDefaultShippingProfile(ctx context.Context, deployed *container.Container, store commerceports.StoreAccess) (*ent.ShippingProfile, error) {

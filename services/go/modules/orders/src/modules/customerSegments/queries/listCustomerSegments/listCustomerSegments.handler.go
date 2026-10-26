@@ -3,9 +3,9 @@ package listcustomersegments
 import (
 	"context"
 
-	"zudomart/modules/orders/src/container"
-	"zudomart/modules/orders/src/services"
-	"zudomart/platform/httpserver"
+	"nantty/modules/orders/src/container"
+	"nantty/modules/orders/src/services"
+	"nantty/platform/httpserver"
 )
 
 type Handler struct {

@@ -3,9 +3,9 @@ package services
 import (
 	"time"
 
-	"zudomart/modules/orders/src/generated/ent"
-	"zudomart/modules/orders/src/modules/promotions/dtos"
-	"zudomart/platform/money"
+	"nantty/modules/orders/src/generated/ent"
+	"nantty/modules/orders/src/modules/promotions/dtos"
+	"nantty/platform/money"
 )
 
 func PromotionView(row *ent.Promotion, currency money.CurrencyCode, now time.Time) dtos.PromotionView {

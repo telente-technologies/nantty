@@ -6,7 +6,7 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/orders/src/modules/marketingCampaigns/dtos"
+	"nantty/modules/orders/src/modules/marketingCampaigns/dtos"
 )
 
 func flashSale(length time.Duration, items []dtos.FlashSaleItemInput) dtos.FlashSaleRequest {

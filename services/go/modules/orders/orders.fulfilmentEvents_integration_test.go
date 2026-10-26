@@ -10,15 +10,15 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/orders/src"
-	"zudomart/modules/orders/src/databases/schema"
-	"zudomart/modules/orders/src/generated/ent"
-	"zudomart/modules/orders/src/generated/ent/outboxevent"
-	"zudomart/modules/orders/src/interfaces"
-	"zudomart/modules/orders/src/services"
-	"zudomart/platform/commerceports"
-	platformevents "zudomart/platform/events"
-	"zudomart/platform/httpserver"
+	"nantty/modules/orders/src"
+	"nantty/modules/orders/src/databases/schema"
+	"nantty/modules/orders/src/generated/ent"
+	"nantty/modules/orders/src/generated/ent/outboxevent"
+	"nantty/modules/orders/src/interfaces"
+	"nantty/modules/orders/src/services"
+	"nantty/platform/commerceports"
+	platformevents "nantty/platform/events"
+	"nantty/platform/httpserver"
 )
 
 type countingMoney struct {

@@ -5,15 +5,15 @@ import (
 	"log/slog"
 	"time"
 
-	"zudomart/modules/orders/src/configs"
-	"zudomart/modules/orders/src/generated/ent"
-	"zudomart/modules/orders/src/interfaces"
-	"zudomart/modules/orders/src/logistics"
-	"zudomart/platform/commerceports"
-	"zudomart/platform/idempotency"
-	"zudomart/platform/jwtauth"
-	"zudomart/platform/staffaudit"
-	"zudomart/platform/usersdirectory"
+	"nantty/modules/orders/src/configs"
+	"nantty/modules/orders/src/generated/ent"
+	"nantty/modules/orders/src/interfaces"
+	"nantty/modules/orders/src/logistics"
+	"nantty/platform/commerceports"
+	"nantty/platform/idempotency"
+	"nantty/platform/jwtauth"
+	"nantty/platform/staffaudit"
+	"nantty/platform/usersdirectory"
 )
 
 type Container struct {

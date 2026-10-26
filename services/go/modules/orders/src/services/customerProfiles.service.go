@@ -6,10 +6,10 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/orders/src/container"
-	"zudomart/modules/orders/src/generated/ent"
-	"zudomart/modules/orders/src/generated/ent/storecustomerprofile"
-	"zudomart/platform/money"
+	"nantty/modules/orders/src/container"
+	"nantty/modules/orders/src/generated/ent"
+	"nantty/modules/orders/src/generated/ent/storecustomerprofile"
+	"nantty/platform/money"
 )
 
 func applyCustomerProfiles(ctx context.Context, deployed *container.Container, storeId uuid.UUID, currency money.CurrencyCode, customers []CustomerView) ([]CustomerView, error) {

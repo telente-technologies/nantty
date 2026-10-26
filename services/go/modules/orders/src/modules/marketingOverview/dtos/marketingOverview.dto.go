@@ -1,6 +1,6 @@
 package dtos
 
-import "zudomart/platform/money"
+import "nantty/platform/money"
 
 type MarketingCampaign struct {
 	Id          string      `json:"id"`

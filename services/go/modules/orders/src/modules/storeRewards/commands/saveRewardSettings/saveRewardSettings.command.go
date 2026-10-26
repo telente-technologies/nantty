@@ -1,8 +1,8 @@
 package saverewardsettings
 
 import (
-	"zudomart/modules/orders/src/modules/storeRewards/dtos"
-	"zudomart/platform/commerceports"
+	"nantty/modules/orders/src/modules/storeRewards/dtos"
+	"nantty/platform/commerceports"
 )
 
 type Command struct {

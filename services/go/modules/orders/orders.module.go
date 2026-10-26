@@ -3,8 +3,8 @@ package orders
 import (
 	"context"
 
-	"zudomart/modules/orders/src"
-	"zudomart/platform/servicemodule"
+	"nantty/modules/orders/src"
+	"nantty/platform/servicemodule"
 )
 
 type Module = src.Module

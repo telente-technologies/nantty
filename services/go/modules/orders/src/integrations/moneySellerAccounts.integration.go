@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"time"
 
-	"zudomart/platform/httpserver"
+	"nantty/platform/httpserver"
 )
 
 type MoneySellerResponse struct {

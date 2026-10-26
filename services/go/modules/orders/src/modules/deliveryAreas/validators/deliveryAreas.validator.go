@@ -4,8 +4,8 @@ import (
 	"strconv"
 	"strings"
 
-	"zudomart/modules/orders/src/modules/deliveryAreas/dtos"
-	"zudomart/modules/orders/src/utils"
+	"nantty/modules/orders/src/modules/deliveryAreas/dtos"
+	"nantty/modules/orders/src/utils"
 )
 
 func ValidateDeliveryAreaValues(values dtos.DeliveryAreaValues) error {

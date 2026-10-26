@@ -10,7 +10,7 @@ import (
 	"entgo.io/ent/dialect"
 	entsql "entgo.io/ent/dialect/sql"
 
-	"zudomart/modules/orders/src/generated/ent"
+	"nantty/modules/orders/src/generated/ent"
 )
 
 type sharedTransactionDriver struct {

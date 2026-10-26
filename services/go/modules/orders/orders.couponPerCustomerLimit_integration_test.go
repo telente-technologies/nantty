@@ -8,9 +8,9 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/orders/src/databases/schema"
-	"zudomart/modules/orders/src/generated/ent"
-	"zudomart/modules/orders/src/services"
+	"nantty/modules/orders/src/databases/schema"
+	"nantty/modules/orders/src/generated/ent"
+	"nantty/modules/orders/src/services"
 )
 
 func TestPerCustomerCouponLimitHoldsUnderConcurrentCheckouts(t *testing.T) {

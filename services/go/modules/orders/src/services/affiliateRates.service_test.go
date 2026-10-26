@@ -11,10 +11,10 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/orders/src/configs"
-	"zudomart/modules/orders/src/container"
-	"zudomart/modules/orders/src/generated/ent"
-	"zudomart/platform/commerceports"
+	"nantty/modules/orders/src/configs"
+	"nantty/modules/orders/src/container"
+	"nantty/modules/orders/src/generated/ent"
+	"nantty/platform/commerceports"
 )
 
 func TestCheckoutLocksTheAffiliateRateForAttributedLinesOnly(t *testing.T) {

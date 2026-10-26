@@ -7,13 +7,13 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/orders/src/databases/schema"
-	ordererrors "zudomart/modules/orders/src/errors"
-	"zudomart/modules/orders/src/generated/ent/outboxevent"
-	"zudomart/modules/orders/src/interfaces"
-	"zudomart/modules/orders/src/services"
-	"zudomart/platform/commerceports"
-	"zudomart/platform/httpserver"
+	"nantty/modules/orders/src/databases/schema"
+	ordererrors "nantty/modules/orders/src/errors"
+	"nantty/modules/orders/src/generated/ent/outboxevent"
+	"nantty/modules/orders/src/interfaces"
+	"nantty/modules/orders/src/services"
+	"nantty/platform/commerceports"
+	"nantty/platform/httpserver"
 )
 
 type fakeEscrowMoney struct {

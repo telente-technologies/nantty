@@ -7,10 +7,10 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/orders/src/container"
-	"zudomart/modules/orders/src/generated/ent"
-	"zudomart/modules/orders/src/generated/ent/promotion"
-	"zudomart/modules/orders/src/generated/ent/promotionredemption"
+	"nantty/modules/orders/src/container"
+	"nantty/modules/orders/src/generated/ent"
+	"nantty/modules/orders/src/generated/ent/promotion"
+	"nantty/modules/orders/src/generated/ent/promotionredemption"
 )
 
 func RuleOf(row *ent.Promotion) PromotionRule {

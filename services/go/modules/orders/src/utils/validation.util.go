@@ -6,7 +6,7 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/platform/httpserver"
+	"nantty/platform/httpserver"
 )
 
 type Issues []httpserver.ValidationIssue

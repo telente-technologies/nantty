@@ -7,10 +7,10 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/orders/src/container"
-	"zudomart/platform/commerceports"
-	"zudomart/platform/httpserver"
-	"zudomart/platform/money"
+	"nantty/modules/orders/src/container"
+	"nantty/platform/commerceports"
+	"nantty/platform/httpserver"
+	"nantty/platform/money"
 )
 
 type relayedPayout struct {

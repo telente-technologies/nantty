@@ -7,11 +7,11 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/orders/src/container"
-	"zudomart/modules/orders/src/generated/ent"
-	"zudomart/modules/orders/src/generated/ent/cart"
-	"zudomart/modules/orders/src/generated/ent/cartitem"
-	"zudomart/modules/orders/src/generated/ent/orderitem"
+	"nantty/modules/orders/src/container"
+	"nantty/modules/orders/src/generated/ent"
+	"nantty/modules/orders/src/generated/ent/cart"
+	"nantty/modules/orders/src/generated/ent/cartitem"
+	"nantty/modules/orders/src/generated/ent/orderitem"
 )
 
 const maximumCartQuantityPerLine = 99

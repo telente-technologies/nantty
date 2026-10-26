@@ -5,8 +5,8 @@ import (
 	"strconv"
 	"strings"
 
-	"zudomart/modules/orders/src/modules/customers/dtos"
-	"zudomart/modules/orders/src/utils"
+	"nantty/modules/orders/src/modules/customers/dtos"
+	"nantty/modules/orders/src/utils"
 )
 
 var (

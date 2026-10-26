@@ -3,7 +3,7 @@ package services
 import (
 	"testing"
 
-	"zudomart/modules/orders/src/enums"
+	"nantty/modules/orders/src/enums"
 )
 
 func TestHappyPathWalksEveryStatusInOrder(t *testing.T) {

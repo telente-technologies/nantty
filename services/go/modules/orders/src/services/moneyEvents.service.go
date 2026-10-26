@@ -8,9 +8,9 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/orders/src/container"
-	"zudomart/modules/orders/src/generated/ent/processedevent"
-	platformevents "zudomart/platform/events"
+	"nantty/modules/orders/src/container"
+	"nantty/modules/orders/src/generated/ent/processedevent"
+	platformevents "nantty/platform/events"
 )
 
 type EscrowEventData struct {

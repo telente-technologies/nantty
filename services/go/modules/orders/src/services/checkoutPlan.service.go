@@ -1,21 +1,21 @@
 package services
 
 import (
-	"zudomart/platform/regionpricing"
+	"nantty/platform/regionpricing"
 
 	"context"
 	"slices"
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/orders/src/container"
-	"zudomart/modules/orders/src/databases/schema"
-	"zudomart/modules/orders/src/enums"
-	ordererrors "zudomart/modules/orders/src/errors"
-	"zudomart/platform/commerceports"
-	"zudomart/platform/httpserver"
-	"zudomart/platform/money"
-	"zudomart/platform/usersdirectory"
+	"nantty/modules/orders/src/container"
+	"nantty/modules/orders/src/databases/schema"
+	"nantty/modules/orders/src/enums"
+	ordererrors "nantty/modules/orders/src/errors"
+	"nantty/platform/commerceports"
+	"nantty/platform/httpserver"
+	"nantty/platform/money"
+	"nantty/platform/usersdirectory"
 )
 
 type PlannedGroup struct {

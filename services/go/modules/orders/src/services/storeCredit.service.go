@@ -4,7 +4,7 @@ import (
 	"slices"
 	"time"
 
-	"zudomart/modules/orders/src/enums"
+	"nantty/modules/orders/src/enums"
 )
 
 type CreditEntry struct {

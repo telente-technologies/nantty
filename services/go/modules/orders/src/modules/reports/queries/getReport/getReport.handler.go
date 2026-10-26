@@ -3,8 +3,8 @@ package getreport
 import (
 	"context"
 
-	"zudomart/modules/orders/src/container"
-	"zudomart/modules/orders/src/services"
+	"nantty/modules/orders/src/container"
+	"nantty/modules/orders/src/services"
 )
 
 type Handler struct {

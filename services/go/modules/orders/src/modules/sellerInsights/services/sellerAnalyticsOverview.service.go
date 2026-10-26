@@ -3,8 +3,8 @@ package services
 import (
 	"time"
 
-	"zudomart/modules/orders/src/modules/sellerInsights/dtos"
-	"zudomart/platform/commerceports"
+	"nantty/modules/orders/src/modules/sellerInsights/dtos"
+	"nantty/platform/commerceports"
 )
 
 type AnalyticsRange struct {

@@ -5,12 +5,12 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/orders/src/container"
-	ordererrors "zudomart/modules/orders/src/errors"
-	"zudomart/modules/orders/src/generated/ent"
-	"zudomart/modules/orders/src/generated/ent/customersegment"
-	"zudomart/platform/commerceports"
-	"zudomart/platform/sellerplans"
+	"nantty/modules/orders/src/container"
+	ordererrors "nantty/modules/orders/src/errors"
+	"nantty/modules/orders/src/generated/ent"
+	"nantty/modules/orders/src/generated/ent/customersegment"
+	"nantty/platform/commerceports"
+	"nantty/platform/sellerplans"
 )
 
 func LoadSegmentDefinitions(ctx context.Context, deployed *container.Container, storeId uuid.UUID, customers []CustomerView) ([]SegmentDefinition, error) {

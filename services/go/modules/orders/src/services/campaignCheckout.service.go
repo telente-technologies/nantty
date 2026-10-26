@@ -6,13 +6,13 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/orders/src/container"
-	ordererrors "zudomart/modules/orders/src/errors"
-	"zudomart/modules/orders/src/generated/ent"
-	"zudomart/modules/orders/src/generated/ent/flashsale"
-	"zudomart/modules/orders/src/generated/ent/flashsaleitem"
-	"zudomart/modules/orders/src/generated/ent/productbundle"
-	"zudomart/modules/orders/src/generated/ent/productbundleitem"
+	"nantty/modules/orders/src/container"
+	ordererrors "nantty/modules/orders/src/errors"
+	"nantty/modules/orders/src/generated/ent"
+	"nantty/modules/orders/src/generated/ent/flashsale"
+	"nantty/modules/orders/src/generated/ent/flashsaleitem"
+	"nantty/modules/orders/src/generated/ent/productbundle"
+	"nantty/modules/orders/src/generated/ent/productbundleitem"
 )
 
 var ErrFlashSaleSoldOut = ordererrors.Api(409, "FLASH_SALE_SOLD_OUT", "A flash sale price in your cart just sold out. Review your cart and try again.")

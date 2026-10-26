@@ -6,13 +6,13 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/orders/src/container"
-	"zudomart/modules/orders/src/generated/ent"
-	"zudomart/modules/orders/src/generated/ent/ordergroup"
-	"zudomart/modules/orders/src/modules/widgets/dtos"
-	widgetservices "zudomart/modules/orders/src/modules/widgets/services"
-	"zudomart/modules/orders/src/services"
-	"zudomart/platform/widgets"
+	"nantty/modules/orders/src/container"
+	"nantty/modules/orders/src/generated/ent"
+	"nantty/modules/orders/src/generated/ent/ordergroup"
+	"nantty/modules/orders/src/modules/widgets/dtos"
+	widgetservices "nantty/modules/orders/src/modules/widgets/services"
+	"nantty/modules/orders/src/services"
+	"nantty/platform/widgets"
 )
 
 type Handler struct {

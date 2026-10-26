@@ -3,7 +3,7 @@ package validators
 import (
 	"testing"
 
-	"zudomart/modules/orders/src/modules/orders/dtos"
+	"nantty/modules/orders/src/modules/orders/dtos"
 )
 
 const validStoreId = "0192f0a0-0000-7000-8000-000000000001"

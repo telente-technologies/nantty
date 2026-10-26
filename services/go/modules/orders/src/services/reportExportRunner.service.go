@@ -8,12 +8,12 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"github.com/google/uuid"
 
-	"zudomart/modules/orders/src/container"
-	"zudomart/modules/orders/src/generated/ent"
-	"zudomart/modules/orders/src/generated/ent/reportexportjob"
-	"zudomart/modules/orders/src/modules/reports/dtos"
-	"zudomart/platform/commerceports"
-	"zudomart/platform/money"
+	"nantty/modules/orders/src/container"
+	"nantty/modules/orders/src/generated/ent"
+	"nantty/modules/orders/src/generated/ent/reportexportjob"
+	"nantty/modules/orders/src/modules/reports/dtos"
+	"nantty/platform/commerceports"
+	"nantty/platform/money"
 )
 
 func RunQueuedReportExports(ctx context.Context, deployed *container.Container, batch int) (int, error) {

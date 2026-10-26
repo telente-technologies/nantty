@@ -1,6 +1,6 @@
 package setfreeshippingthreshold
 
-import "zudomart/platform/commerceports"
+import "nantty/platform/commerceports"
 
 type Command struct {
 	Store          commerceports.StoreAccess

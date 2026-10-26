@@ -8,7 +8,7 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/orders/src/databases/schema"
+	"nantty/modules/orders/src/databases/schema"
 )
 
 func TestBuyerShoppedStoresListOnlyCompletedOrdersBehindTheInternalToken(t *testing.T) {

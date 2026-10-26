@@ -5,8 +5,8 @@ import (
 	"slices"
 	"strings"
 
-	"zudomart/modules/orders/src/modules/promotions/dtos"
-	"zudomart/modules/orders/src/utils"
+	"nantty/modules/orders/src/modules/promotions/dtos"
+	"nantty/modules/orders/src/utils"
 )
 
 var codePattern = regexp.MustCompile(`^[A-Z0-9_-]{3,24}$`)

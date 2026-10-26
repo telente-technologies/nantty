@@ -1,6 +1,6 @@
 package dtos
 
-import "zudomart/platform/money"
+import "nantty/platform/money"
 
 type RewardSettingsRequest struct {
 	Enabled                bool        `json:"enabled"`

@@ -4,7 +4,7 @@ import (
 	"strings"
 	"time"
 
-	platformconfig "zudomart/platform/config"
+	platformconfig "nantty/platform/config"
 )
 
 type OrdersSettings struct {

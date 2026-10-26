@@ -5,12 +5,12 @@ import (
 	"net/http"
 	"strings"
 
-	"zudomart/modules/orders/src/container"
-	ordererrors "zudomart/modules/orders/src/errors"
-	"zudomart/modules/orders/src/generated/ent"
-	"zudomart/modules/orders/src/generated/ent/promotion"
-	"zudomart/modules/orders/src/modules/promotions/dtos"
-	"zudomart/modules/orders/src/services"
+	"nantty/modules/orders/src/container"
+	ordererrors "nantty/modules/orders/src/errors"
+	"nantty/modules/orders/src/generated/ent"
+	"nantty/modules/orders/src/generated/ent/promotion"
+	"nantty/modules/orders/src/modules/promotions/dtos"
+	"nantty/modules/orders/src/services"
 )
 
 type Handler struct {

@@ -3,8 +3,8 @@ package dtos
 import (
 	"time"
 
-	"zudomart/modules/orders/src/types"
-	"zudomart/platform/money"
+	"nantty/modules/orders/src/types"
+	"nantty/platform/money"
 )
 
 type UserSummary struct {

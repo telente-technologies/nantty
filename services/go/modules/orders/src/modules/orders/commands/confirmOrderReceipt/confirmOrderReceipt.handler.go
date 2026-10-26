@@ -3,13 +3,13 @@ package confirmorderreceipt
 import (
 	"context"
 
-	"zudomart/modules/orders/src/container"
-	"zudomart/modules/orders/src/enums"
-	ordererrors "zudomart/modules/orders/src/errors"
-	"zudomart/modules/orders/src/generated/ent"
-	"zudomart/modules/orders/src/generated/ent/ordergroup"
-	"zudomart/modules/orders/src/services"
-	"zudomart/modules/orders/src/types"
+	"nantty/modules/orders/src/container"
+	"nantty/modules/orders/src/enums"
+	ordererrors "nantty/modules/orders/src/errors"
+	"nantty/modules/orders/src/generated/ent"
+	"nantty/modules/orders/src/generated/ent/ordergroup"
+	"nantty/modules/orders/src/services"
+	"nantty/modules/orders/src/types"
 )
 
 type Handler struct {

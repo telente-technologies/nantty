@@ -5,7 +5,7 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/orders/src/generated/ent"
+	"nantty/modules/orders/src/generated/ent"
 )
 
 func TestOnlyAttributedOrderItemsAreOfferedForCommission(t *testing.T) {

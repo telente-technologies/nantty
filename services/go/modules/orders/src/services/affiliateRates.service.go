@@ -5,7 +5,7 @@ import (
 	"net/url"
 	"strings"
 
-	"zudomart/modules/orders/src/container"
+	"nantty/modules/orders/src/container"
 )
 
 func LockAffiliateCommissionRates(ctx context.Context, deployed *container.Container, plan *CheckoutPlan) {

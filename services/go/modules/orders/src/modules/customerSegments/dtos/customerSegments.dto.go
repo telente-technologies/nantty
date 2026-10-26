@@ -1,6 +1,6 @@
 package dtos
 
-import "zudomart/modules/orders/src/databases/schema"
+import "nantty/modules/orders/src/databases/schema"
 
 type CustomerSegmentInput struct {
 	Name        string                       `json:"name"`

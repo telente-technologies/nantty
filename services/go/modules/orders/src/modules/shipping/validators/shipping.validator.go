@@ -3,8 +3,8 @@ package validators
 import (
 	"strconv"
 
-	"zudomart/modules/orders/src/modules/shipping/dtos"
-	"zudomart/modules/orders/src/utils"
+	"nantty/modules/orders/src/modules/shipping/dtos"
+	"nantty/modules/orders/src/utils"
 )
 
 func ValidateRule(body dtos.RuleRequest, creating bool) error {

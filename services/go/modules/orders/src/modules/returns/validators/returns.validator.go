@@ -3,8 +3,8 @@ package validators
 import (
 	"strconv"
 
-	"zudomart/modules/orders/src/modules/returns/dtos"
-	"zudomart/modules/orders/src/utils"
+	"nantty/modules/orders/src/modules/returns/dtos"
+	"nantty/modules/orders/src/utils"
 )
 
 func ValidateRequestReturn(body dtos.RequestReturnRequest) error {

@@ -3,7 +3,7 @@ package dtos
 import (
 	"time"
 
-	"zudomart/platform/money"
+	"nantty/platform/money"
 )
 
 type DiscountInput struct {

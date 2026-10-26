@@ -7,9 +7,9 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/orders/src/generated/ent"
-	"zudomart/modules/orders/src/modules/sellerInsights/dtos"
-	"zudomart/platform/commerceports"
+	"nantty/modules/orders/src/generated/ent"
+	"nantty/modules/orders/src/modules/sellerInsights/dtos"
+	"nantty/platform/commerceports"
 )
 
 type segmentTally struct {

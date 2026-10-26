@@ -3,11 +3,11 @@ package saverewardsettings
 import (
 	"context"
 
-	"zudomart/modules/orders/src/container"
-	ordererrors "zudomart/modules/orders/src/errors"
-	"zudomart/modules/orders/src/events"
-	"zudomart/modules/orders/src/generated/ent"
-	"zudomart/modules/orders/src/modules/storeRewards/dtos"
+	"nantty/modules/orders/src/container"
+	ordererrors "nantty/modules/orders/src/errors"
+	"nantty/modules/orders/src/events"
+	"nantty/modules/orders/src/generated/ent"
+	"nantty/modules/orders/src/modules/storeRewards/dtos"
 )
 
 type Handler struct {

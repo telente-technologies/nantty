@@ -1,8 +1,8 @@
 package validators
 
 import (
-	"zudomart/modules/orders/src/modules/storeRewards/dtos"
-	"zudomart/modules/orders/src/utils"
+	"nantty/modules/orders/src/modules/storeRewards/dtos"
+	"nantty/modules/orders/src/utils"
 )
 
 func ValidateRewardSettings(body dtos.RewardSettingsRequest) error {

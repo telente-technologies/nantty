@@ -7,9 +7,9 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/orders/src/databases/schema"
-	ordererrors "zudomart/modules/orders/src/errors"
-	getmyorder "zudomart/modules/orders/src/modules/orders/queries/getMyOrder"
+	"nantty/modules/orders/src/databases/schema"
+	ordererrors "nantty/modules/orders/src/errors"
+	getmyorder "nantty/modules/orders/src/modules/orders/queries/getMyOrder"
 )
 
 func TestAnotherBuyersOrderLooksExactlyLikeAMissingOrder(t *testing.T) {

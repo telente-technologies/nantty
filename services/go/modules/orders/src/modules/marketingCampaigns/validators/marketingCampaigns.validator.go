@@ -7,8 +7,8 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/orders/src/modules/marketingCampaigns/dtos"
-	"zudomart/modules/orders/src/utils"
+	"nantty/modules/orders/src/modules/marketingCampaigns/dtos"
+	"nantty/modules/orders/src/utils"
 )
 
 const maximumFlashSaleLength = 7 * 24 * time.Hour

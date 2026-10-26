@@ -5,13 +5,13 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/orders/src/container"
-	"zudomart/modules/orders/src/enums"
-	"zudomart/modules/orders/src/generated/ent"
-	"zudomart/modules/orders/src/modules/adminOrders/dtos"
-	orderservices "zudomart/modules/orders/src/services"
-	"zudomart/platform/money"
-	"zudomart/platform/usersdirectory"
+	"nantty/modules/orders/src/container"
+	"nantty/modules/orders/src/enums"
+	"nantty/modules/orders/src/generated/ent"
+	"nantty/modules/orders/src/modules/adminOrders/dtos"
+	orderservices "nantty/modules/orders/src/services"
+	"nantty/platform/money"
+	"nantty/platform/usersdirectory"
 )
 
 type Directory struct {

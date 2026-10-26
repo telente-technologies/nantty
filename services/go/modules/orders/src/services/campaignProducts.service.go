@@ -6,8 +6,8 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/orders/src/container"
-	"zudomart/modules/orders/src/utils"
+	"nantty/modules/orders/src/container"
+	"nantty/modules/orders/src/utils"
 )
 
 type CampaignProduct struct {

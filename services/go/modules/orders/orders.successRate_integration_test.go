@@ -8,10 +8,10 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/orders/src"
-	"zudomart/modules/orders/src/databases/schema"
-	"zudomart/modules/orders/src/enums"
-	"zudomart/modules/orders/src/services"
+	"nantty/modules/orders/src"
+	"nantty/modules/orders/src/databases/schema"
+	"nantty/modules/orders/src/enums"
+	"nantty/modules/orders/src/services"
 )
 
 type seededGroup struct {

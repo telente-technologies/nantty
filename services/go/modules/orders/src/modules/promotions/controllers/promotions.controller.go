@@ -3,17 +3,17 @@ package controllers
 import (
 	"net/http"
 
-	"zudomart/modules/orders/src/container"
-	"zudomart/modules/orders/src/middlewares"
-	deletepromotion "zudomart/modules/orders/src/modules/promotions/commands/deletePromotion"
-	savepromotion "zudomart/modules/orders/src/modules/promotions/commands/savePromotion"
-	"zudomart/modules/orders/src/modules/promotions/dtos"
-	getpromotion "zudomart/modules/orders/src/modules/promotions/queries/getPromotion"
-	listpromotions "zudomart/modules/orders/src/modules/promotions/queries/listPromotions"
-	validatepromotioncode "zudomart/modules/orders/src/modules/promotions/queries/validatePromotionCode"
-	"zudomart/modules/orders/src/modules/promotions/validators"
-	"zudomart/modules/orders/src/utils"
-	"zudomart/platform/httpserver"
+	"nantty/modules/orders/src/container"
+	"nantty/modules/orders/src/middlewares"
+	deletepromotion "nantty/modules/orders/src/modules/promotions/commands/deletePromotion"
+	savepromotion "nantty/modules/orders/src/modules/promotions/commands/savePromotion"
+	"nantty/modules/orders/src/modules/promotions/dtos"
+	getpromotion "nantty/modules/orders/src/modules/promotions/queries/getPromotion"
+	listpromotions "nantty/modules/orders/src/modules/promotions/queries/listPromotions"
+	validatepromotioncode "nantty/modules/orders/src/modules/promotions/queries/validatePromotionCode"
+	"nantty/modules/orders/src/modules/promotions/validators"
+	"nantty/modules/orders/src/utils"
+	"nantty/platform/httpserver"
 )
 
 type PromotionsController struct {

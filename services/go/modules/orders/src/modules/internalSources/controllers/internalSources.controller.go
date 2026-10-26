@@ -8,12 +8,12 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/orders/src/container"
-	getordersharecard "zudomart/modules/orders/src/modules/internalSources/queries/getOrderShareCard"
-	listbuyerstores "zudomart/modules/orders/src/modules/internalSources/queries/listBuyerStores"
-	liststorepurchasers "zudomart/modules/orders/src/modules/internalSources/queries/listStorePurchasers"
-	"zudomart/modules/orders/src/utils"
-	"zudomart/platform/httpserver"
+	"nantty/modules/orders/src/container"
+	getordersharecard "nantty/modules/orders/src/modules/internalSources/queries/getOrderShareCard"
+	listbuyerstores "nantty/modules/orders/src/modules/internalSources/queries/listBuyerStores"
+	liststorepurchasers "nantty/modules/orders/src/modules/internalSources/queries/listStorePurchasers"
+	"nantty/modules/orders/src/utils"
+	"nantty/platform/httpserver"
 )
 
 type InternalSourcesController struct {

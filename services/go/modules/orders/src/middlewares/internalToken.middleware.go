@@ -5,8 +5,8 @@ import (
 	"net/http"
 	"strings"
 
-	"zudomart/modules/orders/src/container"
-	"zudomart/platform/httpserver"
+	"nantty/modules/orders/src/container"
+	"nantty/platform/httpserver"
 )
 
 func RequireInternalToken(deployed *container.Container) func(http.HandlerFunc) http.Handler {

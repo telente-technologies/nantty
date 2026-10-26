@@ -7,9 +7,9 @@ import (
 	"strings"
 	"unicode/utf8"
 
-	"zudomart/modules/orders/src/enums"
-	"zudomart/modules/orders/src/modules/adminOrders/dtos"
-	"zudomart/modules/orders/src/utils"
+	"nantty/modules/orders/src/enums"
+	"nantty/modules/orders/src/modules/adminOrders/dtos"
+	"nantty/modules/orders/src/utils"
 )
 
 var currencyPattern = regexp.MustCompile(`^[A-Z]{3}$`)

@@ -3,8 +3,8 @@ package sellerconversations
 import (
 	"net/http"
 
-	"zudomart/modules/orders/src/container"
-	"zudomart/modules/orders/src/modules/sellerConversations/routes"
+	"nantty/modules/orders/src/container"
+	"nantty/modules/orders/src/modules/sellerConversations/routes"
 )
 
 func Mount(mux *http.ServeMux, deployed *container.Container) {

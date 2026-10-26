@@ -3,11 +3,11 @@ package services
 import (
 	"time"
 
-	"zudomart/modules/orders/src/generated/ent"
-	"zudomart/modules/orders/src/types"
-	"zudomart/platform/commerceports"
-	"zudomart/platform/money"
-	"zudomart/platform/usersdirectory"
+	"nantty/modules/orders/src/generated/ent"
+	"nantty/modules/orders/src/types"
+	"nantty/platform/commerceports"
+	"nantty/platform/money"
+	"nantty/platform/usersdirectory"
 )
 
 func groupMoney(group *ent.OrderGroup, amountMinor int64) money.Money {

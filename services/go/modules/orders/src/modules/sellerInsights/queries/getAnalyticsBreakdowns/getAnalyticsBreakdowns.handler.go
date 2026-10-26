@@ -5,10 +5,10 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/orders/src/container"
-	"zudomart/modules/orders/src/modules/sellerInsights/dtos"
-	"zudomart/modules/orders/src/modules/sellerInsights/services"
-	"zudomart/platform/commerceports"
+	"nantty/modules/orders/src/container"
+	"nantty/modules/orders/src/modules/sellerInsights/dtos"
+	"nantty/modules/orders/src/modules/sellerInsights/services"
+	"nantty/platform/commerceports"
 )
 
 type Handler struct {

@@ -6,10 +6,10 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/orders/src/generated/ent"
-	"zudomart/modules/orders/src/generated/ent/cart"
-	"zudomart/modules/orders/src/generated/ent/cartitem"
-	"zudomart/modules/orders/src/services"
+	"nantty/modules/orders/src/generated/ent"
+	"nantty/modules/orders/src/generated/ent/cart"
+	"nantty/modules/orders/src/generated/ent/cartitem"
+	"nantty/modules/orders/src/services"
 )
 
 func TestARefusedCheckoutPutsTheItemsBackInTheBuyersCart(t *testing.T) {

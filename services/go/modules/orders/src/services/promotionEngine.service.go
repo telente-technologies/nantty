@@ -6,8 +6,8 @@ import (
 
 	"github.com/google/uuid"
 
-	ordererrors "zudomart/modules/orders/src/errors"
-	"zudomart/platform/httpserver"
+	ordererrors "nantty/modules/orders/src/errors"
+	"nantty/platform/httpserver"
 )
 
 type PromotionRule struct {

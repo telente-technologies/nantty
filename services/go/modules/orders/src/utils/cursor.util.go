@@ -7,7 +7,7 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/platform/httpserver"
+	"nantty/platform/httpserver"
 )
 
 var errInvalidCursor = httpserver.NewApiError(http.StatusBadRequest, "INVALID_CURSOR", "The cursor is not valid.")

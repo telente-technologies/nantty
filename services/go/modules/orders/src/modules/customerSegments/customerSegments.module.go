@@ -3,8 +3,8 @@ package customersegments
 import (
 	"net/http"
 
-	"zudomart/modules/orders/src/container"
-	"zudomart/modules/orders/src/modules/customerSegments/routes"
+	"nantty/modules/orders/src/container"
+	"nantty/modules/orders/src/modules/customerSegments/routes"
 )
 
 func Mount(mux *http.ServeMux, deployed *container.Container) {

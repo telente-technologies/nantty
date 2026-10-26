@@ -1,9 +1,9 @@
 package validators
 
 import (
-	"zudomart/modules/orders/src/enums"
-	"zudomart/modules/orders/src/modules/orders/dtos"
-	"zudomart/modules/orders/src/utils"
+	"nantty/modules/orders/src/enums"
+	"nantty/modules/orders/src/modules/orders/dtos"
+	"nantty/modules/orders/src/utils"
 )
 
 func ValidateCheckout(body dtos.CheckoutRequest) error {

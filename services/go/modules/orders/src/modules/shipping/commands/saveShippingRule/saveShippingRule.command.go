@@ -3,8 +3,8 @@ package saveshippingrule
 import (
 	"github.com/google/uuid"
 
-	"zudomart/modules/orders/src/services"
-	"zudomart/platform/commerceports"
+	"nantty/modules/orders/src/services"
+	"nantty/platform/commerceports"
 )
 
 type Command struct {

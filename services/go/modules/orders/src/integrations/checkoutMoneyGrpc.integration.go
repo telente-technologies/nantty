@@ -7,10 +7,10 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/protobuf/types/known/timestamppb"
 
-	commonv1 "zudomart/contracts/gen/go/zudomart/common/v1"
-	moneyv1 "zudomart/contracts/gen/go/zudomart/money/v1"
-	"zudomart/modules/orders/src/interfaces"
-	"zudomart/platform/money"
+	commonv1 "nantty/contracts/gen/go/zudomart/common/v1"
+	moneyv1 "nantty/contracts/gen/go/zudomart/money/v1"
+	"nantty/modules/orders/src/interfaces"
+	"nantty/platform/money"
 )
 
 type CheckoutMoneyClient struct {

@@ -3,9 +3,9 @@ package routes
 import (
 	"net/http"
 
-	"zudomart/modules/orders/src/container"
-	"zudomart/modules/orders/src/middlewares"
-	"zudomart/modules/orders/src/modules/sellerInsights/controllers"
+	"nantty/modules/orders/src/container"
+	"nantty/modules/orders/src/middlewares"
+	"nantty/modules/orders/src/modules/sellerInsights/controllers"
 )
 
 func MountSellerInsightsRoutes(mux *http.ServeMux, deployed *container.Container) {

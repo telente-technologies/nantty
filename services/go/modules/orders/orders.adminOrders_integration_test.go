@@ -10,15 +10,15 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/orders/src"
-	"zudomart/modules/orders/src/container"
-	"zudomart/modules/orders/src/databases/schema"
-	"zudomart/modules/orders/src/generated/ent/outboxevent"
-	"zudomart/modules/orders/src/generated/ent/refundrecord"
-	"zudomart/modules/orders/src/services"
-	"zudomart/platform/identityports/identitytest"
-	"zudomart/platform/jwtauth"
-	"zudomart/platform/staffauth"
+	"nantty/modules/orders/src"
+	"nantty/modules/orders/src/container"
+	"nantty/modules/orders/src/databases/schema"
+	"nantty/modules/orders/src/generated/ent/outboxevent"
+	"nantty/modules/orders/src/generated/ent/refundrecord"
+	"nantty/modules/orders/src/services"
+	"nantty/platform/identityports/identitytest"
+	"nantty/platform/jwtauth"
+	"nantty/platform/staffauth"
 )
 
 type adminHarness struct {

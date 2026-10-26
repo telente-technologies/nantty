@@ -6,10 +6,10 @@ import (
 	"net/url"
 	"strings"
 
-	"zudomart/modules/orders/src/container"
-	"zudomart/modules/orders/src/integrations"
-	"zudomart/modules/orders/src/middlewares"
-	"zudomart/modules/orders/src/utils"
+	"nantty/modules/orders/src/container"
+	"nantty/modules/orders/src/integrations"
+	"nantty/modules/orders/src/middlewares"
+	"nantty/modules/orders/src/utils"
 )
 
 type SellerDisputesController struct {

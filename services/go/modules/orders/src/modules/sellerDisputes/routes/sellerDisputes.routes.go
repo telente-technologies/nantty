@@ -3,10 +3,10 @@ package routes
 import (
 	"net/http"
 
-	"zudomart/modules/orders/src/container"
-	"zudomart/modules/orders/src/integrations"
-	"zudomart/modules/orders/src/middlewares"
-	"zudomart/modules/orders/src/modules/sellerDisputes/controllers"
+	"nantty/modules/orders/src/container"
+	"nantty/modules/orders/src/integrations"
+	"nantty/modules/orders/src/middlewares"
+	"nantty/modules/orders/src/modules/sellerDisputes/controllers"
 )
 
 func MountSellerDisputesRoutes(mux *http.ServeMux, deployed *container.Container) {

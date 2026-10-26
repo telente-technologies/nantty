@@ -6,9 +6,9 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/orders/src/enums"
-	"zudomart/modules/orders/src/modules/sellerInsights/dtos"
-	"zudomart/platform/commerceports"
+	"nantty/modules/orders/src/enums"
+	"nantty/modules/orders/src/modules/sellerInsights/dtos"
+	"nantty/platform/commerceports"
 )
 
 func (orders StoreOrders) periodSales(label string, days int) dtos.PeriodSales {

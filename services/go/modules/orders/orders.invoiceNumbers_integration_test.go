@@ -8,8 +8,8 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/orders/src/generated/ent"
-	"zudomart/modules/orders/src/services"
+	"nantty/modules/orders/src/generated/ent"
+	"nantty/modules/orders/src/services"
 )
 
 func TestInvoiceNumbersAreUniqueAndSequentialUnderConcurrency(t *testing.T) {

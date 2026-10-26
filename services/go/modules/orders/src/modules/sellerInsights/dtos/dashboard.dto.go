@@ -3,7 +3,7 @@ package dtos
 import (
 	"encoding/json"
 
-	"zudomart/platform/money"
+	"nantty/platform/money"
 )
 
 type PeriodSales struct {

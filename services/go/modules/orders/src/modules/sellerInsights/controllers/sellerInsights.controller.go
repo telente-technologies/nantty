@@ -7,16 +7,16 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/orders/src/container"
-	"zudomart/modules/orders/src/middlewares"
-	getanalyticsbreakdowns "zudomart/modules/orders/src/modules/sellerInsights/queries/getAnalyticsBreakdowns"
-	getanalyticsoverview "zudomart/modules/orders/src/modules/sellerInsights/queries/getAnalyticsOverview"
-	getsellerdashboard "zudomart/modules/orders/src/modules/sellerInsights/queries/getSellerDashboard"
-	"zudomart/modules/orders/src/modules/sellerInsights/services"
-	"zudomart/modules/orders/src/utils"
-	"zudomart/platform/commerceports"
-	"zudomart/platform/httpserver"
-	"zudomart/platform/sellerplans"
+	"nantty/modules/orders/src/container"
+	"nantty/modules/orders/src/middlewares"
+	getanalyticsbreakdowns "nantty/modules/orders/src/modules/sellerInsights/queries/getAnalyticsBreakdowns"
+	getanalyticsoverview "nantty/modules/orders/src/modules/sellerInsights/queries/getAnalyticsOverview"
+	getsellerdashboard "nantty/modules/orders/src/modules/sellerInsights/queries/getSellerDashboard"
+	"nantty/modules/orders/src/modules/sellerInsights/services"
+	"nantty/modules/orders/src/utils"
+	"nantty/platform/commerceports"
+	"nantty/platform/httpserver"
+	"nantty/platform/sellerplans"
 )
 
 type SellerInsightsController struct {

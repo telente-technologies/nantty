@@ -5,7 +5,7 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/platform/commerceports"
+	"nantty/platform/commerceports"
 )
 
 type Command struct {

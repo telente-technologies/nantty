@@ -5,17 +5,17 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/orders/src/container"
-	ordererrors "zudomart/modules/orders/src/errors"
-	"zudomart/modules/orders/src/middlewares"
-	deletecustomersegment "zudomart/modules/orders/src/modules/customerSegments/commands/deleteCustomerSegment"
-	savecustomersegment "zudomart/modules/orders/src/modules/customerSegments/commands/saveCustomerSegment"
-	"zudomart/modules/orders/src/modules/customerSegments/dtos"
-	listcustomersegments "zudomart/modules/orders/src/modules/customerSegments/queries/listCustomerSegments"
-	"zudomart/modules/orders/src/modules/customerSegments/validators"
-	"zudomart/modules/orders/src/services"
-	"zudomart/modules/orders/src/utils"
-	"zudomart/platform/httpserver"
+	"nantty/modules/orders/src/container"
+	ordererrors "nantty/modules/orders/src/errors"
+	"nantty/modules/orders/src/middlewares"
+	deletecustomersegment "nantty/modules/orders/src/modules/customerSegments/commands/deleteCustomerSegment"
+	savecustomersegment "nantty/modules/orders/src/modules/customerSegments/commands/saveCustomerSegment"
+	"nantty/modules/orders/src/modules/customerSegments/dtos"
+	listcustomersegments "nantty/modules/orders/src/modules/customerSegments/queries/listCustomerSegments"
+	"nantty/modules/orders/src/modules/customerSegments/validators"
+	"nantty/modules/orders/src/services"
+	"nantty/modules/orders/src/utils"
+	"nantty/platform/httpserver"
 )
 
 type CustomerSegmentsController struct {

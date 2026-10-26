@@ -5,13 +5,13 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/orders/src/container"
-	"zudomart/modules/orders/src/generated/ent"
-	"zudomart/modules/orders/src/generated/ent/orderevent"
-	"zudomart/modules/orders/src/generated/ent/orderitem"
-	"zudomart/modules/orders/src/generated/ent/refundrecord"
-	"zudomart/modules/orders/src/modules/adminOrders/dtos"
-	"zudomart/modules/orders/src/types"
+	"nantty/modules/orders/src/container"
+	"nantty/modules/orders/src/generated/ent"
+	"nantty/modules/orders/src/generated/ent/orderevent"
+	"nantty/modules/orders/src/generated/ent/orderitem"
+	"nantty/modules/orders/src/generated/ent/refundrecord"
+	"nantty/modules/orders/src/modules/adminOrders/dtos"
+	"nantty/modules/orders/src/types"
 )
 
 func Detail(ctx context.Context, deployed *container.Container, group *ent.OrderGroup) (dtos.OrderDetail, error) {

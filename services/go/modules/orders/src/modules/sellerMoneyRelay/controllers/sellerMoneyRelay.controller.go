@@ -8,13 +8,13 @@ import (
 	"net/url"
 	"strings"
 
-	"zudomart/modules/orders/src/container"
-	"zudomart/modules/orders/src/integrations"
-	"zudomart/modules/orders/src/middlewares"
-	"zudomart/modules/orders/src/modules/sellerMoneyRelay/services"
-	"zudomart/modules/orders/src/utils"
-	"zudomart/platform/httpserver"
-	"zudomart/platform/jwtauth"
+	"nantty/modules/orders/src/container"
+	"nantty/modules/orders/src/integrations"
+	"nantty/modules/orders/src/middlewares"
+	"nantty/modules/orders/src/modules/sellerMoneyRelay/services"
+	"nantty/modules/orders/src/utils"
+	"nantty/platform/httpserver"
+	"nantty/platform/jwtauth"
 )
 
 const maximumRelayedBodyBytes = 64 << 10

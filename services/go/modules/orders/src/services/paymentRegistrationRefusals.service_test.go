@@ -9,7 +9,7 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
-	"zudomart/platform/httpserver"
+	"nantty/platform/httpserver"
 )
 
 func TestBuyerSeesTheSellerDebtAndOrderLimitRefusalsWithTheirDetails(t *testing.T) {

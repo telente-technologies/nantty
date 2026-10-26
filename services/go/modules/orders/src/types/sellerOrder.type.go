@@ -3,7 +3,7 @@ package types
 import (
 	"time"
 
-	"zudomart/platform/money"
+	"nantty/platform/money"
 )
 
 type SellerBuyerView struct {

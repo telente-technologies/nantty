@@ -7,8 +7,8 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/orders/src/generated/ent/orderevent"
-	"zudomart/modules/orders/src/services"
+	"nantty/modules/orders/src/generated/ent/orderevent"
+	"nantty/modules/orders/src/services"
 )
 
 func escrowEnvelope(eventType string, orderId uuid.UUID, data map[string]any) []byte {

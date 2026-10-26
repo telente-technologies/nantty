@@ -5,11 +5,11 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/orders/src/container"
-	"zudomart/modules/orders/src/generated/ent"
-	"zudomart/modules/orders/src/generated/ent/orderitem"
-	"zudomart/modules/orders/src/types"
-	"zudomart/platform/money"
+	"nantty/modules/orders/src/container"
+	"nantty/modules/orders/src/generated/ent"
+	"nantty/modules/orders/src/generated/ent/orderitem"
+	"nantty/modules/orders/src/types"
+	"nantty/platform/money"
 )
 
 func LoadItemsByGroup(ctx context.Context, deployed *container.Container, groupIds []uuid.UUID) (map[uuid.UUID][]*ent.OrderItem, error) {

@@ -7,9 +7,9 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/orders/src/services"
-	"zudomart/platform/commerceports"
-	"zudomart/platform/money"
+	"nantty/modules/orders/src/services"
+	"nantty/platform/commerceports"
+	"nantty/platform/money"
 )
 
 func promotionTestGroup(storeId uuid.UUID) services.SellerGroup {

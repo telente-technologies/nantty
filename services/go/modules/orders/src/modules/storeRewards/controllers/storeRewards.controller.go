@@ -3,16 +3,16 @@ package controllers
 import (
 	"net/http"
 
-	"zudomart/modules/orders/src/container"
-	"zudomart/modules/orders/src/middlewares"
-	saverewardsettings "zudomart/modules/orders/src/modules/storeRewards/commands/saveRewardSettings"
-	"zudomart/modules/orders/src/modules/storeRewards/dtos"
-	getrewardsettings "zudomart/modules/orders/src/modules/storeRewards/queries/getRewardSettings"
-	getrewardssummary "zudomart/modules/orders/src/modules/storeRewards/queries/getRewardsSummary"
-	listmystorecredit "zudomart/modules/orders/src/modules/storeRewards/queries/listMyStoreCredit"
-	"zudomart/modules/orders/src/modules/storeRewards/validators"
-	"zudomart/modules/orders/src/utils"
-	"zudomart/platform/httpserver"
+	"nantty/modules/orders/src/container"
+	"nantty/modules/orders/src/middlewares"
+	saverewardsettings "nantty/modules/orders/src/modules/storeRewards/commands/saveRewardSettings"
+	"nantty/modules/orders/src/modules/storeRewards/dtos"
+	getrewardsettings "nantty/modules/orders/src/modules/storeRewards/queries/getRewardSettings"
+	getrewardssummary "nantty/modules/orders/src/modules/storeRewards/queries/getRewardsSummary"
+	listmystorecredit "nantty/modules/orders/src/modules/storeRewards/queries/listMyStoreCredit"
+	"nantty/modules/orders/src/modules/storeRewards/validators"
+	"nantty/modules/orders/src/utils"
+	"nantty/platform/httpserver"
 )
 
 type StoreRewardsController struct {

@@ -3,8 +3,8 @@ package savecustomerprofile
 import (
 	"github.com/google/uuid"
 
-	"zudomart/modules/orders/src/modules/customers/dtos"
-	"zudomart/platform/commerceports"
+	"nantty/modules/orders/src/modules/customers/dtos"
+	"nantty/platform/commerceports"
 )
 
 type Command struct {

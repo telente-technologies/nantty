@@ -1,6 +1,6 @@
 package types
 
-import "zudomart/platform/money"
+import "nantty/platform/money"
 
 type ProductSummaryView struct {
 	Id       string      `json:"id"`

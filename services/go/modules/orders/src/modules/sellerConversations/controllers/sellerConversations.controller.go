@@ -7,14 +7,14 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/orders/src/container"
-	ordererrors "zudomart/modules/orders/src/errors"
-	"zudomart/modules/orders/src/generated/ent"
-	"zudomart/modules/orders/src/generated/ent/ordergroup"
-	"zudomart/modules/orders/src/integrations"
-	"zudomart/modules/orders/src/middlewares"
-	"zudomart/modules/orders/src/utils"
-	"zudomart/platform/httpserver"
+	"nantty/modules/orders/src/container"
+	ordererrors "nantty/modules/orders/src/errors"
+	"nantty/modules/orders/src/generated/ent"
+	"nantty/modules/orders/src/generated/ent/ordergroup"
+	"nantty/modules/orders/src/integrations"
+	"nantty/modules/orders/src/middlewares"
+	"nantty/modules/orders/src/utils"
+	"nantty/platform/httpserver"
 )
 
 type SellerConversationsController struct {

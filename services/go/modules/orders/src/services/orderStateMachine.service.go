@@ -3,7 +3,7 @@ package services
 import (
 	"slices"
 
-	"zudomart/modules/orders/src/enums"
+	"nantty/modules/orders/src/enums"
 )
 
 var allowedTransitions = map[string][]string{

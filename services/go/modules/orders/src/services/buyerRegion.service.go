@@ -5,9 +5,9 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/orders/src/container"
-	"zudomart/platform/usersdirectory"
-	"zudomart/platform/viewerregion"
+	"nantty/modules/orders/src/container"
+	"nantty/platform/usersdirectory"
+	"nantty/platform/viewerregion"
 )
 
 func BuyerCountry(ctx context.Context, deployed *container.Container, accountId uuid.UUID, address *usersdirectory.ShippingAddress) string {

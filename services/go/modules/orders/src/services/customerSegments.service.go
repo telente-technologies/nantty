@@ -7,8 +7,8 @@ import (
 	"strings"
 	"time"
 
-	"zudomart/modules/orders/src/databases/schema"
-	"zudomart/platform/money"
+	"nantty/modules/orders/src/databases/schema"
+	"nantty/platform/money"
 )
 
 type SegmentDefinition struct {

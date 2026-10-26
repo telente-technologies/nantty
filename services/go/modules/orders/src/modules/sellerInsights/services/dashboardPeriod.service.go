@@ -3,7 +3,7 @@ package services
 import (
 	"time"
 
-	"zudomart/modules/orders/src/modules/sellerInsights/dtos"
+	"nantty/modules/orders/src/modules/sellerInsights/dtos"
 )
 
 var DashboardPeriods = []string{"live", "today", "yesterday", "week", "month", "all"}

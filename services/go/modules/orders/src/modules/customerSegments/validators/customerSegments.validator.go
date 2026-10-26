@@ -4,9 +4,9 @@ import (
 	"slices"
 	"strconv"
 
-	"zudomart/modules/orders/src/databases/schema"
-	"zudomart/modules/orders/src/modules/customerSegments/dtos"
-	"zudomart/modules/orders/src/utils"
+	"nantty/modules/orders/src/databases/schema"
+	"nantty/modules/orders/src/modules/customerSegments/dtos"
+	"nantty/modules/orders/src/utils"
 )
 
 var numericFields = []string{"total_spent", "average_order_value", "purchases_count", "days_since_last_purchase", "days_since_first_purchase"}

@@ -10,11 +10,11 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/orders/src/configs"
-	"zudomart/modules/orders/src/container"
-	"zudomart/platform/commerceports"
-	"zudomart/platform/identityports/identitytest"
-	"zudomart/platform/jwtauth"
+	"nantty/modules/orders/src/configs"
+	"nantty/modules/orders/src/container"
+	"nantty/platform/commerceports"
+	"nantty/platform/identityports/identitytest"
+	"nantty/platform/jwtauth"
 )
 
 type ownerOnlyCatalog struct {

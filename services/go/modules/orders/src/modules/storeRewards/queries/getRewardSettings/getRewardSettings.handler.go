@@ -3,11 +3,11 @@ package getrewardsettings
 import (
 	"context"
 
-	"zudomart/modules/orders/src/container"
-	"zudomart/modules/orders/src/generated/ent"
-	"zudomart/modules/orders/src/generated/ent/storerewardsettings"
-	"zudomart/modules/orders/src/modules/storeRewards/dtos"
-	"zudomart/platform/money"
+	"nantty/modules/orders/src/container"
+	"nantty/modules/orders/src/generated/ent"
+	"nantty/modules/orders/src/generated/ent/storerewardsettings"
+	"nantty/modules/orders/src/modules/storeRewards/dtos"
+	"nantty/platform/money"
 )
 
 type Handler struct {

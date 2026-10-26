@@ -4,11 +4,11 @@ import (
 	"context"
 	"strings"
 
-	"zudomart/modules/orders/src/container"
-	"zudomart/modules/orders/src/generated/ent"
-	"zudomart/modules/orders/src/generated/ent/promotion"
-	"zudomart/modules/orders/src/modules/promotions/dtos"
-	"zudomart/modules/orders/src/services"
+	"nantty/modules/orders/src/container"
+	"nantty/modules/orders/src/generated/ent"
+	"nantty/modules/orders/src/generated/ent/promotion"
+	"nantty/modules/orders/src/modules/promotions/dtos"
+	"nantty/modules/orders/src/services"
 )
 
 type Handler struct {

@@ -1,6 +1,6 @@
 package dtos
 
-import "zudomart/platform/money"
+import "nantty/platform/money"
 
 type ComparableTotals struct {
 	GrossSales                money.Money `json:"grossSales"`

@@ -6,8 +6,8 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/orders/src/container"
-	"zudomart/platform/commerceports"
+	"nantty/modules/orders/src/container"
+	"nantty/platform/commerceports"
 )
 
 type storeStock struct {

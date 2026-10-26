@@ -6,9 +6,9 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/orders/src/databases/schema"
-	"zudomart/modules/orders/src/generated/ent"
-	"zudomart/platform/commerceports"
+	"nantty/modules/orders/src/databases/schema"
+	"nantty/modules/orders/src/generated/ent"
+	"nantty/platform/commerceports"
 )
 
 func fixtureOrders(now time.Time) StoreOrders {

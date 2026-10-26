@@ -5,18 +5,18 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/orders/src/container"
-	"zudomart/modules/orders/src/middlewares"
-	cancelmyorder "zudomart/modules/orders/src/modules/orders/commands/cancelMyOrder"
-	checkoutcart "zudomart/modules/orders/src/modules/orders/commands/checkoutCart"
-	confirmorderreceipt "zudomart/modules/orders/src/modules/orders/commands/confirmOrderReceipt"
-	"zudomart/modules/orders/src/modules/orders/dtos"
-	getmyorder "zudomart/modules/orders/src/modules/orders/queries/getMyOrder"
-	listmyorders "zudomart/modules/orders/src/modules/orders/queries/listMyOrders"
-	"zudomart/modules/orders/src/modules/orders/validators"
-	"zudomart/modules/orders/src/services"
-	"zudomart/modules/orders/src/utils"
-	"zudomart/platform/httpserver"
+	"nantty/modules/orders/src/container"
+	"nantty/modules/orders/src/middlewares"
+	cancelmyorder "nantty/modules/orders/src/modules/orders/commands/cancelMyOrder"
+	checkoutcart "nantty/modules/orders/src/modules/orders/commands/checkoutCart"
+	confirmorderreceipt "nantty/modules/orders/src/modules/orders/commands/confirmOrderReceipt"
+	"nantty/modules/orders/src/modules/orders/dtos"
+	getmyorder "nantty/modules/orders/src/modules/orders/queries/getMyOrder"
+	listmyorders "nantty/modules/orders/src/modules/orders/queries/listMyOrders"
+	"nantty/modules/orders/src/modules/orders/validators"
+	"nantty/modules/orders/src/services"
+	"nantty/modules/orders/src/utils"
+	"nantty/platform/httpserver"
 )
 
 type OrdersController struct {

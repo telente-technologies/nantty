@@ -3,9 +3,9 @@ package getanalyticsoverview
 import (
 	"context"
 
-	"zudomart/modules/orders/src/container"
-	"zudomart/modules/orders/src/modules/sellerInsights/dtos"
-	"zudomart/modules/orders/src/modules/sellerInsights/services"
+	"nantty/modules/orders/src/container"
+	"nantty/modules/orders/src/modules/sellerInsights/dtos"
+	"nantty/modules/orders/src/modules/sellerInsights/services"
 )
 
 type Handler struct {

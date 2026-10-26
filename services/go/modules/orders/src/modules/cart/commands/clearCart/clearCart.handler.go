@@ -3,11 +3,11 @@ package clearcart
 import (
 	"context"
 
-	"zudomart/modules/orders/src/container"
-	"zudomart/modules/orders/src/generated/ent/cart"
-	"zudomart/modules/orders/src/generated/ent/cartitem"
-	"zudomart/modules/orders/src/services"
-	"zudomart/modules/orders/src/types"
+	"nantty/modules/orders/src/container"
+	"nantty/modules/orders/src/generated/ent/cart"
+	"nantty/modules/orders/src/generated/ent/cartitem"
+	"nantty/modules/orders/src/services"
+	"nantty/modules/orders/src/types"
 )
 
 type Handler struct {

@@ -5,12 +5,12 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/orders/src/container"
-	"zudomart/modules/orders/src/generated/ent"
-	"zudomart/modules/orders/src/generated/ent/ordergroup"
-	"zudomart/modules/orders/src/generated/ent/orderitem"
-	"zudomart/modules/orders/src/modules/returns/dtos"
-	"zudomart/platform/money"
+	"nantty/modules/orders/src/container"
+	"nantty/modules/orders/src/generated/ent"
+	"nantty/modules/orders/src/generated/ent/ordergroup"
+	"nantty/modules/orders/src/generated/ent/orderitem"
+	"nantty/modules/orders/src/modules/returns/dtos"
+	"nantty/platform/money"
 )
 
 func ReturnViews(ctx context.Context, deployed *container.Container, rows []*ent.ReturnRequest) ([]dtos.ReturnView, error) {

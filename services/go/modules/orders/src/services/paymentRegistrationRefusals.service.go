@@ -7,8 +7,8 @@ import (
 	"google.golang.org/genproto/googleapis/rpc/errdetails"
 	"google.golang.org/grpc/status"
 
-	ordererrors "zudomart/modules/orders/src/errors"
-	"zudomart/platform/httpserver"
+	ordererrors "nantty/modules/orders/src/errors"
+	"nantty/platform/httpserver"
 )
 
 var paymentRefusalsByReason = map[string]*httpserver.ApiError{

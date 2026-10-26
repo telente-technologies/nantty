@@ -7,11 +7,11 @@ import (
 
 	"github.com/google/uuid"
 
-	src "zudomart/modules/orders/src"
-	"zudomart/modules/orders/src/databases/schema"
-	getsellertoday "zudomart/modules/orders/src/modules/widgets/queries/getSellerToday"
-	listactiveorders "zudomart/modules/orders/src/modules/widgets/queries/listActiveOrders"
-	"zudomart/platform/commerceports"
+	src "nantty/modules/orders/src"
+	"nantty/modules/orders/src/databases/schema"
+	getsellertoday "nantty/modules/orders/src/modules/widgets/queries/getSellerToday"
+	listactiveorders "nantty/modules/orders/src/modules/widgets/queries/listActiveOrders"
+	"nantty/platform/commerceports"
 )
 
 func seedWidgetOrder(t *testing.T, module *src.Module, store, buyer uuid.UUID, reference, status, paymentStatus string, rider *string) uuid.UUID {

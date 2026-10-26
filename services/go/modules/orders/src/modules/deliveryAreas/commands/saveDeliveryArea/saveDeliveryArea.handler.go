@@ -4,14 +4,14 @@ import (
 	"context"
 	"strings"
 
-	"zudomart/modules/orders/src/container"
-	ordererrors "zudomart/modules/orders/src/errors"
-	"zudomart/modules/orders/src/events"
-	"zudomart/modules/orders/src/generated/ent"
-	"zudomart/modules/orders/src/generated/ent/deliveryarea"
-	"zudomart/modules/orders/src/modules/deliveryAreas/dtos"
-	"zudomart/modules/orders/src/modules/deliveryAreas/services"
-	"zudomart/modules/orders/src/modules/deliveryAreas/validators"
+	"nantty/modules/orders/src/container"
+	ordererrors "nantty/modules/orders/src/errors"
+	"nantty/modules/orders/src/events"
+	"nantty/modules/orders/src/generated/ent"
+	"nantty/modules/orders/src/generated/ent/deliveryarea"
+	"nantty/modules/orders/src/modules/deliveryAreas/dtos"
+	"nantty/modules/orders/src/modules/deliveryAreas/services"
+	"nantty/modules/orders/src/modules/deliveryAreas/validators"
 )
 
 const maximumDeliveryAreas = 50

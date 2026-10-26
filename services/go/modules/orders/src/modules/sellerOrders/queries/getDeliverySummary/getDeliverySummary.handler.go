@@ -4,11 +4,11 @@ import (
 	"context"
 	"math"
 
-	"zudomart/modules/orders/src/container"
-	"zudomart/modules/orders/src/generated/ent/ordergroup"
-	listsellerorders "zudomart/modules/orders/src/modules/sellerOrders/queries/listSellerOrders"
-	listshipments "zudomart/modules/orders/src/modules/sellerOrders/queries/listShipments"
-	"zudomart/platform/money"
+	"nantty/modules/orders/src/container"
+	"nantty/modules/orders/src/generated/ent/ordergroup"
+	listsellerorders "nantty/modules/orders/src/modules/sellerOrders/queries/listSellerOrders"
+	listshipments "nantty/modules/orders/src/modules/sellerOrders/queries/listShipments"
+	"nantty/platform/money"
 )
 
 type Handler struct {

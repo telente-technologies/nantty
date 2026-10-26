@@ -3,7 +3,7 @@ package addcartitem
 import (
 	"github.com/google/uuid"
 
-	"zudomart/modules/orders/src/modules/cart/dtos"
+	"nantty/modules/orders/src/modules/cart/dtos"
 )
 
 type Command struct {

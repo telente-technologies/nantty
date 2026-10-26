@@ -5,17 +5,17 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/orders/src/container"
-	"zudomart/modules/orders/src/middlewares"
-	decidereturn "zudomart/modules/orders/src/modules/returns/commands/decideReturn"
-	receivereturn "zudomart/modules/orders/src/modules/returns/commands/receiveReturn"
-	requestreturn "zudomart/modules/orders/src/modules/returns/commands/requestReturn"
-	"zudomart/modules/orders/src/modules/returns/dtos"
-	listsellerreturns "zudomart/modules/orders/src/modules/returns/queries/listSellerReturns"
-	"zudomart/modules/orders/src/modules/returns/validators"
-	"zudomart/modules/orders/src/services"
-	"zudomart/modules/orders/src/utils"
-	"zudomart/platform/httpserver"
+	"nantty/modules/orders/src/container"
+	"nantty/modules/orders/src/middlewares"
+	decidereturn "nantty/modules/orders/src/modules/returns/commands/decideReturn"
+	receivereturn "nantty/modules/orders/src/modules/returns/commands/receiveReturn"
+	requestreturn "nantty/modules/orders/src/modules/returns/commands/requestReturn"
+	"nantty/modules/orders/src/modules/returns/dtos"
+	listsellerreturns "nantty/modules/orders/src/modules/returns/queries/listSellerReturns"
+	"nantty/modules/orders/src/modules/returns/validators"
+	"nantty/modules/orders/src/services"
+	"nantty/modules/orders/src/utils"
+	"nantty/platform/httpserver"
 )
 
 type ReturnsController struct {

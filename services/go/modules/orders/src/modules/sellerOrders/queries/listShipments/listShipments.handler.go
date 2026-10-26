@@ -7,15 +7,15 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/orders/src/container"
-	"zudomart/modules/orders/src/generated/ent"
-	"zudomart/modules/orders/src/generated/ent/ordergroup"
-	"zudomart/modules/orders/src/generated/ent/orderitem"
-	"zudomart/modules/orders/src/generated/ent/predicate"
-	listsellerorders "zudomart/modules/orders/src/modules/sellerOrders/queries/listSellerOrders"
-	"zudomart/modules/orders/src/utils"
-	"zudomart/platform/httpserver"
-	"zudomart/platform/money"
+	"nantty/modules/orders/src/container"
+	"nantty/modules/orders/src/generated/ent"
+	"nantty/modules/orders/src/generated/ent/ordergroup"
+	"nantty/modules/orders/src/generated/ent/orderitem"
+	"nantty/modules/orders/src/generated/ent/predicate"
+	listsellerorders "nantty/modules/orders/src/modules/sellerOrders/queries/listSellerOrders"
+	"nantty/modules/orders/src/utils"
+	"nantty/platform/httpserver"
+	"nantty/platform/money"
 )
 
 type Handler struct {

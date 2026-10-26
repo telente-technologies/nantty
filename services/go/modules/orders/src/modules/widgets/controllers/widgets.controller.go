@@ -4,13 +4,13 @@ import (
 	"context"
 	"net/http"
 
-	"zudomart/modules/orders/src/container"
-	"zudomart/modules/orders/src/middlewares"
-	"zudomart/modules/orders/src/modules/widgets/dtos"
-	getsellertoday "zudomart/modules/orders/src/modules/widgets/queries/getSellerToday"
-	listactiveorders "zudomart/modules/orders/src/modules/widgets/queries/listActiveOrders"
-	"zudomart/platform/httpserver"
-	"zudomart/platform/widgets"
+	"nantty/modules/orders/src/container"
+	"nantty/modules/orders/src/middlewares"
+	"nantty/modules/orders/src/modules/widgets/dtos"
+	getsellertoday "nantty/modules/orders/src/modules/widgets/queries/getSellerToday"
+	listactiveorders "nantty/modules/orders/src/modules/widgets/queries/listActiveOrders"
+	"nantty/platform/httpserver"
+	"nantty/platform/widgets"
 )
 
 const activeOrdersShownOnWidget = 3

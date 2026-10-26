@@ -3,7 +3,7 @@ package requestreturn
 import (
 	"github.com/google/uuid"
 
-	"zudomart/modules/orders/src/modules/returns/dtos"
+	"nantty/modules/orders/src/modules/returns/dtos"
 )
 
 type Command struct {

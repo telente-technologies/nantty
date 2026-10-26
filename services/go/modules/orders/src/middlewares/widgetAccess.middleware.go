@@ -3,9 +3,9 @@ package middlewares
 import (
 	"net/http"
 
-	"zudomart/modules/orders/src/container"
-	"zudomart/platform/httpserver"
-	"zudomart/platform/jwtauth"
+	"nantty/modules/orders/src/container"
+	"nantty/platform/httpserver"
+	"nantty/platform/jwtauth"
 )
 
 func WidgetReader(deployed *container.Container) func(http.HandlerFunc) http.Handler {

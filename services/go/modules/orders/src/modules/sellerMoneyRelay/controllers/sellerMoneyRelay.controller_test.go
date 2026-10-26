@@ -10,11 +10,11 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/orders/src/container"
-	"zudomart/modules/orders/src/integrations"
-	"zudomart/modules/orders/src/middlewares"
-	"zudomart/platform/commerceports"
-	"zudomart/platform/jwtauth"
+	"nantty/modules/orders/src/container"
+	"nantty/modules/orders/src/integrations"
+	"nantty/modules/orders/src/middlewares"
+	"nantty/platform/commerceports"
+	"nantty/platform/jwtauth"
 )
 
 func TestRelayForwardsTheOwnersWalletWithStoreContextAndAllowListedQuery(t *testing.T) {

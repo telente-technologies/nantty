@@ -8,10 +8,10 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/orders/src/generated/ent/orderevent"
-	"zudomart/modules/orders/src/generated/ent/refundrecord"
-	"zudomart/modules/orders/src/services"
-	"zudomart/platform/staffauth"
+	"nantty/modules/orders/src/generated/ent/orderevent"
+	"nantty/modules/orders/src/generated/ent/refundrecord"
+	"nantty/modules/orders/src/services"
+	"nantty/platform/staffauth"
 )
 
 func TestARefundScheduledByEscrowIsShownAsScheduledAndCompletesOnTheRefundEvent(t *testing.T) {

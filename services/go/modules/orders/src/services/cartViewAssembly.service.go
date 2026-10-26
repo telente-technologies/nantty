@@ -3,9 +3,9 @@ package services
 import (
 	"github.com/google/uuid"
 
-	"zudomart/modules/orders/src/types"
-	"zudomart/platform/money"
-	"zudomart/platform/usersdirectory"
+	"nantty/modules/orders/src/types"
+	"nantty/platform/money"
+	"nantty/platform/usersdirectory"
 )
 
 func cartItemView(line PricedCartLine, unavailable map[uuid.UUID]bool) types.CartItemView {

@@ -6,14 +6,14 @@ import (
 
 	"github.com/google/uuid"
 
-	ordererrors "zudomart/modules/orders/src/errors"
-	"zudomart/modules/orders/src/middlewares"
-	savecustomerprofile "zudomart/modules/orders/src/modules/customers/commands/saveCustomerProfile"
-	"zudomart/modules/orders/src/modules/customers/dtos"
-	"zudomart/modules/orders/src/modules/customers/validators"
-	"zudomart/modules/orders/src/services"
-	"zudomart/modules/orders/src/utils"
-	"zudomart/platform/httpserver"
+	ordererrors "nantty/modules/orders/src/errors"
+	"nantty/modules/orders/src/middlewares"
+	savecustomerprofile "nantty/modules/orders/src/modules/customers/commands/saveCustomerProfile"
+	"nantty/modules/orders/src/modules/customers/dtos"
+	"nantty/modules/orders/src/modules/customers/validators"
+	"nantty/modules/orders/src/services"
+	"nantty/modules/orders/src/utils"
+	"nantty/platform/httpserver"
 )
 
 type customerExistsBody struct {
