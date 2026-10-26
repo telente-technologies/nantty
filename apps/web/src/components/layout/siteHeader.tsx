@@ -4,14 +4,14 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
-import { ThemeSwitcher } from "@zudomart/web-kit";
+import { ThemeSwitcher } from "@nantty/web-kit";
 
 import { businessAppLinks, siteConfig } from "@/lib/siteConfig.config";
 
 import { FigmaIconTintedWithCurrentColor } from "../ui/figmaIcon";
 import { ForBusinessDisclosureMenu } from "./forBusinessMenu";
 import styles from "./siteHeader.module.css";
-import { ZudomartWordmarkHomeLink } from "./zudomartWordmark";
+import { NanttyWordmarkHomeLink } from "./nanttyWordmark";
 
 export function SiteHeaderWithFloatingNavigation() {
   const currentPathname = usePathname();
@@ -61,7 +61,7 @@ export function SiteHeaderWithFloatingNavigation() {
   return (
     <header className={`${styles.header} ${hasScrolledPastTop ? styles.scrolled : ""}`}>
       <div ref={headerPillRef} className={styles.pill}>
-        <ZudomartWordmarkHomeLink collapseOnSmallScreens />
+        <NanttyWordmarkHomeLink collapseOnSmallScreens />
         <nav aria-label="Main" className={styles.desktopNavigation}>
           <ul className={styles.navigationList}>
             {siteConfig.primaryNavigation.map((navigationLink) => (
@@ -117,7 +117,7 @@ export function SiteHeaderWithFloatingNavigation() {
           <ul className={styles.mobileBusinessList}>
             <li>
               <Link href="/sellers" className={styles.mobileBusinessLink} onClick={() => setIsMobileMenuOpen(false)}>
-                Sell on Zudomart
+                Sell on Nantty
               </Link>
             </li>
             {[businessAppLinks.sellerDashboard, businessAppLinks.adsManager].map((businessAppLink) => (

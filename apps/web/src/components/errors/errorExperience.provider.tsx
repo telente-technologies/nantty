@@ -1,6 +1,6 @@
 "use client";
 
-import { ErrorExperienceProvider, type ErrorExperienceConfig, type ErrorLinkProps } from "@zudomart/web-kit";
+import { ErrorExperienceProvider, type ErrorExperienceConfig, type ErrorLinkProps } from "@nantty/web-kit";
 import Link from "next/link";
 import type { ReactNode } from "react";
 
@@ -22,7 +22,7 @@ export const marketingErrorConfig: ErrorExperienceConfig = {
   renderLink: renderNextLink,
   destinations: [
     { label: "Home", href: "/", icon: "house" },
-    { label: "Sell on Zudomart", href: "/sellers", icon: "storefront" },
+    { label: "Sell on Nantty", href: "/sellers", icon: "storefront" },
     { label: "About", href: "/about", icon: "compass" },
     { label: "Contact", href: "/contact", icon: "envelope" },
     { label: "Open the web app", href: webAppLink.href, icon: "squaresFour" },

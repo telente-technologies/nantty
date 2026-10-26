@@ -20,14 +20,14 @@ export function SellerDashboardSection() {
     <section id="dashboard" className={styles.section} aria-labelledby="dashboard-heading">
       <div className={`pageContainer ${styles.layout}`}>
         <div className={styles.visual}>
-          <PhoneFrameWithAppScreen screen="sellerDashboardScreen" alt="Seller dashboard in the Zudomart app with today's sales in naira, an hourly chart and recent orders to ship" className={styles.phone} sizes="(min-width: 960px) 300px, 66vw" />
+          <PhoneFrameWithAppScreen screen="sellerDashboardScreen" alt="Seller dashboard in the Nantty app with today's sales in naira, an hourly chart and recent orders to ship" className={styles.phone} sizes="(min-width: 960px) 300px, 66vw" />
         </div>
         <div className={styles.copyColumn}>
           <SectionIntroWithEyebrowAndHeading
             eyebrow="Seller dashboard"
             headingId="dashboard-heading"
             heading="Run the whole store from your phone."
-            description="Every store gets a seller dashboard inside the Zudomart app. Growing businesses can add the Zudomart Dashboard on the web."
+            description="Every store gets a seller dashboard inside the Nantty app. Growing businesses can add the Nantty Dashboard on the web."
           />
           <ul className={styles.capabilityList}>
             {dashboardCapabilities.map((dashboardCapability) => (
@@ -47,7 +47,7 @@ export function SellerDashboardSection() {
               {businessAppLinks.sellerDashboard.label} on the web
             </h3>
             <p className={styles.webDashboardDescription}>
-              Sign in with the same account you use in the Zudomart app. Your store, products, orders and wallet are already there.
+              Sign in with the same account you use in the Nantty app. Your store, products, orders and wallet are already there.
             </p>
             <ul className={styles.webDashboardFeatureList}>
               {webDashboardFeatures.map((webDashboardFeature) => (

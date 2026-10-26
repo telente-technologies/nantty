@@ -15,7 +15,7 @@ const buyerJourneySteps: readonly BuyerJourneyStep[] = [
     title: "Discover",
     description: "Scroll posts, clips and live streams from sellers and creators. Tap a tagged item to see the product.",
     screen: "martProductsScreen",
-    screenAlt: "Zudomart Mart tab with Ankara dresses, earbuds and skincare priced in naira",
+    screenAlt: "Nantty Mart tab with Ankara dresses, earbuds and skincare priced in naira",
   },
   {
     title: "Ask the seller",
@@ -25,9 +25,9 @@ const buyerJourneySteps: readonly BuyerJourneyStep[] = [
   },
   {
     title: "Pay into escrow",
-    description: "Check out from one or many stores in your local currency. Your payment is held by Zudomart, not sent to the seller yet.",
+    description: "Check out from one or many stores in your local currency. Your payment is held by Nantty, not sent to the seller yet.",
     screen: "shoppingCartScreen",
-    screenAlt: "Zudomart cart with earbuds, a vitamin C serum and suya spice, with the order summary",
+    screenAlt: "Nantty cart with earbuds, a vitamin C serum and suya spice, with the order summary",
   },
   {
     title: "Confirm and release",

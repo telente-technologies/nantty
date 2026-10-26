@@ -56,7 +56,7 @@ export function ForBusinessDisclosureMenu() {
         <Link href="/sellers" className={styles.panelLink} aria-current={currentPathname === "/sellers" ? "page" : undefined}>
           <FigmaIconTintedWithCurrentColor name="buildingStore20" size={20} className={styles.panelIcon} />
           <span>
-            <strong>Sell on Zudomart</strong>
+            <strong>Sell on Nantty</strong>
             <small>Open a store in the app, sell through posts, clips and lives.</small>
           </span>
         </Link>

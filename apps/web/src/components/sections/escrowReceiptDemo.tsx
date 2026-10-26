@@ -8,7 +8,7 @@ import styles from "./escrowReceiptDemo.module.css";
 
 const escrowStages = [
   { label: "Payment received", detail: "Paid in your local currency by card, bank transfer or another local method." },
-  { label: "Held in escrow", detail: "Zudomart keeps the money. The seller is told to ship." },
+  { label: "Held in escrow", detail: "Nantty keeps the money. The seller is told to ship." },
   { label: "Out for delivery", detail: "Track it, and chat with the seller if anything changes." },
   { label: "Released to seller", detail: "You confirmed delivery, so the seller's wallet is paid." },
 ] as const;
@@ -82,7 +82,7 @@ export function InteractiveEscrowReceiptDemo() {
         {!isAwaitingBuyerConfirmation && !isReleased ? <p className={styles.waitingNote}>The seller is not paid yet.</p> : null}
       </div>
       <figcaption id="escrow-receipt-caption" className="visuallyHidden">
-        Interactive example of a Zudomart order moving through escrow, from payment to release.
+        Interactive example of a Nantty order moving through escrow, from payment to release.
       </figcaption>
     </figure>
   );

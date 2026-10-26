@@ -1,15 +1,13 @@
 import Link from "next/link";
 
-import { ThemeSwitcher, defaultZudomartWordmarkVariant, zudomartWordmarkFor } from "@zudomart/web-kit";
+import { ThemeSwitcher } from "@nantty/web-kit";
 
 import { businessAppLinks, contactEmailDisplayText, contactMailtoHref } from "@/lib/siteConfig.config";
 
 import { FigmaIconTintedWithCurrentColor } from "../ui/figmaIcon";
 import { CookieSettingsButton } from "./cookieSettingsButton";
 import styles from "./siteFooter.module.css";
-import { ZudomartWordmarkHomeLink } from "./zudomartWordmark";
-
-const giantWordmark = zudomartWordmarkFor(defaultZudomartWordmarkVariant, 400);
+import { NanttyWordmarkHomeLink } from "./nanttyWordmark";
 
 const footerLinkGroups = [
   {
@@ -25,7 +23,7 @@ const footerLinkGroups = [
   {
     heading: "Business",
     links: [
-      { label: "Sell on Zudomart", href: "/sellers" },
+      { label: "Sell on Nantty", href: "/sellers" },
       { label: businessAppLinks.sellerDashboard.label, href: businessAppLinks.sellerDashboard.href },
       { label: businessAppLinks.adsManager.label, href: businessAppLinks.adsManager.href },
       { label: "Payouts", href: "/sellers#payouts" },
@@ -61,7 +59,7 @@ export function SiteFooterWithGiantWordmark() {
     <footer className={styles.footer}>
       <div className={`pageContainer ${styles.topRow}`}>
         <div className={styles.brandColumn}>
-          <ZudomartWordmarkHomeLink tone="light" />
+          <NanttyWordmarkHomeLink tone="light" />
           <p className={styles.brandLine}>Social Commerce, built in Nigeria. Real sellers, prices in your local currency, and your money held safely until your order arrives.</p>
           <a href={contactMailtoHref} className={styles.emailLink}>
             {contactEmailDisplayText}
@@ -91,15 +89,11 @@ export function SiteFooterWithGiantWordmark() {
         </nav>
       </div>
       <div className={`pageContainer ${styles.bottomRow}`}>
-        <p>© {currentYear} Zudomart. Made in Nigeria. <CookieSettingsButton className={styles.footerLink} /></p>
+        <p>© {currentYear} Nantty. Made in Nigeria. <CookieSettingsButton className={styles.footerLink} /></p>
         <p>Prices in your local currency. Payments held in escrow until delivery is confirmed.</p>
         <ThemeSwitcher label="Colour theme" className={styles.themeSwitcher} />
       </div>
-      <div className={styles.giantWordmark} aria-hidden="true">
-        <svg viewBox={`0 0 ${giantWordmark.width} ${giantWordmark.height}`} focusable="false">
-          <path d={giantWordmark.d} fill="currentColor" />
-        </svg>
-      </div>
+      <p className={styles.giantWordmark} aria-hidden="true">Nantty</p>
     </footer>
   );
 }

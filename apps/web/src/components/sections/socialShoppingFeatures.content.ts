@@ -19,7 +19,7 @@ export const socialShoppingFeatures: readonly SocialShoppingFeature[] = [
     headline: "A feed where every post can be a shop window",
     description: "Follow sellers and creators, see what your friends liked, and tap the bag icon on a post to open the products in it.",
     screen: "homeFeedScreen",
-    screenAlt: "Zudomart feed with Adaeze Okafor's Owambe Edit post and a shop bag on the photo",
+    screenAlt: "Nantty feed with Adaeze Okafor's Owambe Edit post and a shop bag on the photo",
   },
   {
     id: "clips",
@@ -28,7 +28,7 @@ export const socialShoppingFeatures: readonly SocialShoppingFeature[] = [
     headline: "Short clips that show the real thing",
     description: "See the fabric move, the sneaker from every side and the phone switched on. Follow the seller or comment without leaving the clip.",
     screen: "shoppableClipsScreen",
-    screenAlt: "Zudomart clip of Adaeze Styles packing orders, with likes, comments and share",
+    screenAlt: "Nantty clip of Adaeze Styles packing orders, with likes, comments and share",
   },
   {
     id: "live",

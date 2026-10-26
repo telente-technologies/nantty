@@ -1,6 +1,6 @@
 "use client";
 
-import { openCookieSettings } from "@zudomart/web-kit";
+import { openCookieSettings } from "@nantty/web-kit";
 
 export function CookieSettingsButton({ className }: { readonly className?: string }) {
   return (

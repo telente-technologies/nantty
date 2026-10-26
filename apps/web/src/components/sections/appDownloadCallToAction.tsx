@@ -1,4 +1,4 @@
-import { OfficialStoreBadges } from "@zudomart/web-kit";
+import { OfficialStoreBadges } from "@nantty/web-kit";
 
 import { storeLinks, webAppLink } from "@/lib/siteConfig.config";
 
@@ -18,7 +18,7 @@ interface AppDownloadCallToActionProps {
 export function AppDownloadCallToActionPanel({
   headingId = "download-heading",
   heading = "Shop the sellers you already watch.",
-  description = "Get Zudomart on iPhone and Android, or open the web app and start shopping in your browser.",
+  description = "Get Nantty on iPhone and Android, or open the web app and start shopping in your browser.",
   actionLabel = webAppLink.label,
   actionHref = webAppLink.href,
   sectionId = "download",
@@ -38,7 +38,7 @@ export function AppDownloadCallToActionPanel({
             <OfficialStoreBadges links={storeLinks} className={styles.storeBadges} />
           </div>
           <div className={styles.phoneColumn}>
-            <PhoneFrameWithAppScreen screen="homeMartScreen" alt="Zudomart Mart tab with Sales of the Day, Featured Brands and New Arrivals" className={styles.phone} sizes="(min-width: 960px) 320px, 70vw" />
+            <PhoneFrameWithAppScreen screen="homeMartScreen" alt="Nantty Mart tab with Sales of the Day, Featured Brands and New Arrivals" className={styles.phone} sizes="(min-width: 960px) 320px, 70vw" />
           </div>
         </div>
       </div>

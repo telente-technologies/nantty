@@ -10,7 +10,7 @@ export function LaunchAnnouncementBar() {
       <p className={styles.message}>
         <span className={styles.badge}>Launching</span>
         <span>
-          Zudomart opens in {siteConfig.launchCountry} first.{" "}
+          Nantty opens in {siteConfig.launchCountry} first.{" "}
           <Link href="/#download" className={styles.link}>
             Get the app
           </Link>

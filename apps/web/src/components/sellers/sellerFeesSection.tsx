@@ -26,7 +26,7 @@ export function SellerFeesPlaceholderSection() {
             </p>
             <p className={styles.notice} role="note">
               <FigmaIconTintedWithCurrentColor name="warning20" size={20} />
-              Placeholder: the Zudomart team will replace this section with the confirmed fee schedule.
+              Placeholder: the Nantty team will replace this section with the confirmed fee schedule.
             </p>
             <p className={styles.contact}>
               Questions about pricing? Email <a href={contactMailtoHref}>{contactEmailDisplayText}</a>.

@@ -25,7 +25,7 @@ export function SellersTeaserSection() {
             Your followers keep asking “how much?” Give them a checkout.
           </h2>
           <p className={styles.description}>
-            Stop sending account numbers in DMs. Open a Zudomart store, tag products in your content, and get paid once buyers confirm delivery.
+            Stop sending account numbers in DMs. Open a Nantty store, tag products in your content, and get paid once buyers confirm delivery.
           </p>
           <ul className={styles.benefitList}>
             {sellerBenefits.map((sellerBenefit) => (

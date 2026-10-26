@@ -29,7 +29,7 @@ function CategoryList({ isDecorativeCopy }: { readonly isDecorativeCopy: boolean
 
 export function ScrollingShoppingCategoryMarquee() {
   return (
-    <section className={styles.marquee} aria-label="Things people sell on Zudomart">
+    <section className={styles.marquee} aria-label="Things people sell on Nantty">
       <div className={styles.track}>
         <CategoryList isDecorativeCopy={false} />
         <CategoryList isDecorativeCopy />

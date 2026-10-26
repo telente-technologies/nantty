@@ -31,7 +31,7 @@ export function EscrowTrustSection() {
             eyebrow="Escrow on every order"
             headingId="escrow-heading"
             heading="What you ordered is what you pay for."
-            description="Zudomart holds your payment until your order is in your hands. Try it: watch the example order move, then confirm delivery."
+            description="Nantty holds your payment until your order is in your hands. Try it: watch the example order move, then confirm delivery."
           />
           <ul className={styles.promiseList}>
             {escrowPromises.map((escrowPromise) => (

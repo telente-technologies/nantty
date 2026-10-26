@@ -6,7 +6,7 @@ import styles from "./sellerPayoutsSection.module.css";
 const payoutFlowStages: ReadonlyArray<{ readonly icon: FigmaIconName; readonly title: string; readonly description: string }> = [
   { icon: "shield24", title: "Escrow", description: "The buyer's payment is held safely while the order is on its way." },
   { icon: "check16", title: "Delivery confirmed", description: "The buyer confirms the order arrived as described." },
-  { icon: "speedometer24", title: "Your wallet", description: "The sale lands in your Zudomart wallet, minus any fees." },
+  { icon: "speedometer24", title: "Your wallet", description: "The sale lands in your Nantty wallet, minus any fees." },
   { icon: "buildingStore20", title: "Your bank", description: "Withdraw to your verified bank account in your local currency." },
 ];
 

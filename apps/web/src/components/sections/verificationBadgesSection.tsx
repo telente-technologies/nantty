@@ -8,7 +8,7 @@ const verificationBadgeKinds = [
     badgeClassName: styles.blueBadge,
     title: "Blue badge",
     audience: "People and creators",
-    description: "A personal account whose identity Zudomart has checked.",
+    description: "A personal account whose identity Nantty has checked.",
   },
   {
     badgeClassName: styles.goldBadge,

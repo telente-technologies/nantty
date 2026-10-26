@@ -9,7 +9,7 @@ export function SellersPageHeroSection() {
     <section className={`${styles.hero} lightIsland`} aria-labelledby="sellers-hero-heading">
       <div className={`pageContainer ${styles.layout}`}>
         <div className={styles.copyColumn}>
-          <p className={styles.eyebrow}>Sell on Zudomart</p>
+          <p className={styles.eyebrow}>Sell on Nantty</p>
           <h1 id="sellers-hero-heading" className={styles.heading}>
             Turn your followers into paying customers.
           </h1>
@@ -28,7 +28,7 @@ export function SellersPageHeroSection() {
               Open {businessAppLinks.sellerDashboard.label}
               <span className="visuallyHidden"> (opens in a new tab)</span>
             </a>{" "}
-            and sign in with your Zudomart app account. It&apos;s free for every seller.
+            and sign in with your Nantty app account. It&apos;s free for every seller.
           </p>
         </div>
         <div className={styles.visual}>

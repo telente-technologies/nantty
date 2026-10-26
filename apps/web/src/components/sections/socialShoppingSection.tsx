@@ -34,7 +34,7 @@ export function SocialShoppingFeatureTabsSection() {
             eyebrow="Social Commerce"
             headingId="social-shopping-heading"
             heading="Watch it, ask about it, buy it. Same app."
-            description="Zudomart puts the way Nigerians already shop online, through posts, videos and DMs, next to a proper cart and checkout."
+            description="Nantty puts the way Nigerians already shop online, through posts, videos and DMs, next to a proper cart and checkout."
           />
           <div className={styles.tabList} role="tablist" aria-label="Ways to shop" aria-orientation="vertical" onKeyDown={moveTabSelectionWithArrowKeys}>
             {socialShoppingFeatures.map((feature, featureIndex) => {
