@@ -6,9 +6,9 @@ import (
 	"context"
 	"fmt"
 	"math"
-	"zudomart/modules/subscriptions/src/generated/ent/internal"
-	"zudomart/modules/subscriptions/src/generated/ent/planprice"
-	"zudomart/modules/subscriptions/src/generated/ent/predicate"
+	"nantty/modules/subscriptions/src/generated/ent/internal"
+	"nantty/modules/subscriptions/src/generated/ent/planprice"
+	"nantty/modules/subscriptions/src/generated/ent/predicate"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect"

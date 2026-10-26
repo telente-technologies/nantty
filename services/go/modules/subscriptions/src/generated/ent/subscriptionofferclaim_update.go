@@ -6,10 +6,10 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"nantty/modules/subscriptions/src/generated/ent/internal"
+	"nantty/modules/subscriptions/src/generated/ent/predicate"
+	"nantty/modules/subscriptions/src/generated/ent/subscriptionofferclaim"
 	"time"
-	"zudomart/modules/subscriptions/src/generated/ent/internal"
-	"zudomart/modules/subscriptions/src/generated/ent/predicate"
-	"zudomart/modules/subscriptions/src/generated/ent/subscriptionofferclaim"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"

@@ -5,7 +5,7 @@ package hook
 import (
 	"context"
 	"fmt"
-	"zudomart/modules/subscriptions/src/generated/ent"
+	"nantty/modules/subscriptions/src/generated/ent"
 )
 
 // The CreatorSubscriptionFunc type is an adapter to allow the use of ordinary

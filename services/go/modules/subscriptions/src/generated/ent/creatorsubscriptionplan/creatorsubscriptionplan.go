@@ -4,8 +4,8 @@ package creatorsubscriptionplan
 
 import (
 	"fmt"
+	"nantty/modules/subscriptions/src/models"
 	"time"
-	"zudomart/modules/subscriptions/src/models"
 
 	"entgo.io/ent/dialect/sql"
 	"github.com/google/uuid"

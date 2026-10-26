@@ -4,9 +4,9 @@ package ent
 
 import (
 	"context"
-	"zudomart/modules/subscriptions/src/generated/ent/creatorsubscriptioncharge"
-	"zudomart/modules/subscriptions/src/generated/ent/internal"
-	"zudomart/modules/subscriptions/src/generated/ent/predicate"
+	"nantty/modules/subscriptions/src/generated/ent/creatorsubscriptioncharge"
+	"nantty/modules/subscriptions/src/generated/ent/internal"
+	"nantty/modules/subscriptions/src/generated/ent/predicate"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"

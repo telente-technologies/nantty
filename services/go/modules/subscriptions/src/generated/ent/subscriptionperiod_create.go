@@ -6,9 +6,9 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"nantty/modules/subscriptions/src/generated/ent/subscriptionperiod"
+	"nantty/modules/subscriptions/src/models"
 	"time"
-	"zudomart/modules/subscriptions/src/generated/ent/subscriptionperiod"
-	"zudomart/modules/subscriptions/src/models"
 
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"

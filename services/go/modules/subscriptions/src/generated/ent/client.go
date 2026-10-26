@@ -9,23 +9,23 @@ import (
 	"log"
 	"reflect"
 
-	"zudomart/modules/subscriptions/src/generated/ent/migrate"
+	"nantty/modules/subscriptions/src/generated/ent/migrate"
 
-	"zudomart/modules/subscriptions/src/generated/ent/creatorsubscription"
-	"zudomart/modules/subscriptions/src/generated/ent/creatorsubscriptioncharge"
-	"zudomart/modules/subscriptions/src/generated/ent/creatorsubscriptionplan"
-	"zudomart/modules/subscriptions/src/generated/ent/idempotentrequest"
-	"zudomart/modules/subscriptions/src/generated/ent/outboxevent"
-	"zudomart/modules/subscriptions/src/generated/ent/planprice"
-	"zudomart/modules/subscriptions/src/generated/ent/providerplan"
-	"zudomart/modules/subscriptions/src/generated/ent/subscription"
-	"zudomart/modules/subscriptions/src/generated/ent/subscriptioncoveredprofile"
-	"zudomart/modules/subscriptions/src/generated/ent/subscriptionofferclaim"
-	"zudomart/modules/subscriptions/src/generated/ent/subscriptionofferlink"
-	"zudomart/modules/subscriptions/src/generated/ent/subscriptionoffersend"
-	"zudomart/modules/subscriptions/src/generated/ent/subscriptionperiod"
-	"zudomart/modules/subscriptions/src/generated/ent/subscriptionreminder"
-	"zudomart/modules/subscriptions/src/generated/ent/trialclaim"
+	"nantty/modules/subscriptions/src/generated/ent/creatorsubscription"
+	"nantty/modules/subscriptions/src/generated/ent/creatorsubscriptioncharge"
+	"nantty/modules/subscriptions/src/generated/ent/creatorsubscriptionplan"
+	"nantty/modules/subscriptions/src/generated/ent/idempotentrequest"
+	"nantty/modules/subscriptions/src/generated/ent/outboxevent"
+	"nantty/modules/subscriptions/src/generated/ent/planprice"
+	"nantty/modules/subscriptions/src/generated/ent/providerplan"
+	"nantty/modules/subscriptions/src/generated/ent/subscription"
+	"nantty/modules/subscriptions/src/generated/ent/subscriptioncoveredprofile"
+	"nantty/modules/subscriptions/src/generated/ent/subscriptionofferclaim"
+	"nantty/modules/subscriptions/src/generated/ent/subscriptionofferlink"
+	"nantty/modules/subscriptions/src/generated/ent/subscriptionoffersend"
+	"nantty/modules/subscriptions/src/generated/ent/subscriptionperiod"
+	"nantty/modules/subscriptions/src/generated/ent/subscriptionreminder"
+	"nantty/modules/subscriptions/src/generated/ent/trialclaim"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect"
@@ -33,7 +33,7 @@ import (
 	"github.com/google/uuid"
 
 	stdsql "database/sql"
-	"zudomart/modules/subscriptions/src/generated/ent/internal"
+	"nantty/modules/subscriptions/src/generated/ent/internal"
 )
 
 // Client is the client that holds all ent builders.

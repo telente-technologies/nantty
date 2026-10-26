@@ -3,8 +3,8 @@
 package planprice
 
 import (
+	"nantty/modules/subscriptions/src/generated/ent/predicate"
 	"time"
-	"zudomart/modules/subscriptions/src/generated/ent/predicate"
 
 	"entgo.io/ent/dialect/sql"
 	"github.com/google/uuid"
