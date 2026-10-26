@@ -70,6 +70,8 @@ type Tx struct {
 	PointsRule *PointsRuleClient
 	// ProcessedGift is the client for interacting with the ProcessedGift builders.
 	ProcessedGift *ProcessedGiftClient
+	// Space is the client for interacting with the Space builders.
+	Space *SpaceClient
 
 	// lazily loaded.
 	client     *Client
@@ -229,6 +231,7 @@ func (tx *Tx) init() {
 	tx.PointsEntry = NewPointsEntryClient(tx.config)
 	tx.PointsRule = NewPointsRuleClient(tx.config)
 	tx.ProcessedGift = NewProcessedGiftClient(tx.config)
+	tx.Space = NewSpaceClient(tx.config)
 }
 
 // txDriver wraps the given dialect.Tx with a nop dialect.Driver implementation.

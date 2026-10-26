@@ -5,7 +5,7 @@ package hook
 import (
 	"context"
 	"fmt"
-	"zudomart/modules/live/src/generated/ent"
+	"nantty/modules/live/src/generated/ent"
 )
 
 // The BattleFunc type is an adapter to allow the use of ordinary
@@ -342,6 +342,18 @@ func (f ProcessedGiftFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Valu
 		return f(ctx, mv)
 	}
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.ProcessedGiftMutation", m)
+}
+
+// The SpaceFunc type is an adapter to allow the use of ordinary
+// function as Space mutator.
+type SpaceFunc func(context.Context, *ent.SpaceMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f SpaceFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.SpaceMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.SpaceMutation", m)
 }
 
 // Condition is a hook condition function.

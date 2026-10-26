@@ -6,7 +6,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"zudomart/modules/live/src/generated/ent/liveroomsetting"
+	"nantty/modules/live/src/generated/ent/liveroomsetting"
 
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"

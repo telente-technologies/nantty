@@ -6,7 +6,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"zudomart/modules/live/src/generated/ent/pointsrule"
+	"nantty/modules/live/src/generated/ent/pointsrule"
 
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"

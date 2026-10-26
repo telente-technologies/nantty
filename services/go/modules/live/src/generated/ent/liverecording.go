@@ -4,9 +4,9 @@ package ent
 
 import (
 	"fmt"
+	"nantty/modules/live/src/generated/ent/liverecording"
 	"strings"
 	"time"
-	"zudomart/modules/live/src/generated/ent/liverecording"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"

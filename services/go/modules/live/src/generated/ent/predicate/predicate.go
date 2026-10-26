@@ -89,3 +89,6 @@ type PointsRule func(*sql.Selector)
 
 // ProcessedGift is the predicate function for processedgift builders.
 type ProcessedGift func(*sql.Selector)
+
+// Space is the predicate function for space builders.
+type Space func(*sql.Selector)

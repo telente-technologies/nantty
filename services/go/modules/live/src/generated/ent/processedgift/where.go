@@ -3,8 +3,8 @@
 package processedgift
 
 import (
+	"nantty/modules/live/src/generated/ent/predicate"
 	"time"
-	"zudomart/modules/live/src/generated/ent/predicate"
 
 	"entgo.io/ent/dialect/sql"
 	"github.com/google/uuid"

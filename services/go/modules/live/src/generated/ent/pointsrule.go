@@ -4,8 +4,8 @@ package ent
 
 import (
 	"fmt"
+	"nantty/modules/live/src/generated/ent/pointsrule"
 	"strings"
-	"zudomart/modules/live/src/generated/ent/pointsrule"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"

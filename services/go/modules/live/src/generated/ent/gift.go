@@ -5,9 +5,9 @@ package ent
 import (
 	"encoding/json"
 	"fmt"
+	"nantty/modules/live/src/generated/ent/gift"
 	"strings"
 	"time"
-	"zudomart/modules/live/src/generated/ent/gift"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"

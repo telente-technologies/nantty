@@ -3,7 +3,7 @@
 package liveroomsetting
 
 import (
-	"zudomart/modules/live/src/generated/ent/predicate"
+	"nantty/modules/live/src/generated/ent/predicate"
 
 	"entgo.io/ent/dialect/sql"
 	"github.com/google/uuid"

@@ -847,6 +847,45 @@ var (
 			},
 		},
 	}
+	// SpacesColumns holds the columns for the "spaces" table.
+	SpacesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "host_id", Type: field.TypeUUID},
+		{Name: "title", Type: field.TypeString, Size: 140},
+		{Name: "description", Type: field.TypeString, Size: 2000, Default: ""},
+		{Name: "state", Type: field.TypeEnum, Enums: []string{"scheduled", "live", "ended", "cancelled"}, Default: "scheduled"},
+		{Name: "visibility", Type: field.TypeEnum, Enums: []string{"public", "followers", "subscribers"}, Default: "public"},
+		{Name: "scheduled_at", Type: field.TypeTime, Nullable: true},
+		{Name: "started_at", Type: field.TypeTime, Nullable: true},
+		{Name: "ended_at", Type: field.TypeTime, Nullable: true},
+		{Name: "livekit_room", Type: field.TypeString, Unique: true},
+		{Name: "listeners", Type: field.TypeInt, Default: 0},
+		{Name: "peak_listeners", Type: field.TypeInt, Default: 0},
+		{Name: "moderation_visibility", Type: field.TypeString, Default: "visible"},
+		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "gifts_enabled", Type: field.TypeBool, Default: false},
+		{Name: "video_enabled", Type: field.TypeBool, Default: false},
+		{Name: "metadata", Type: field.TypeJSON, Nullable: true, SchemaType: map[string]string{"postgres": "jsonb"}},
+	}
+	// SpacesTable holds the schema information for the "spaces" table.
+	SpacesTable = &schema.Table{
+		Name:       "spaces",
+		Columns:    SpacesColumns,
+		PrimaryKey: []*schema.Column{SpacesColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "space_state_scheduled_at",
+				Unique:  false,
+				Columns: []*schema.Column{SpacesColumns[5], SpacesColumns[7]},
+			},
+			{
+				Name:    "space_host_id_state",
+				Unique:  false,
+				Columns: []*schema.Column{SpacesColumns[2], SpacesColumns[5]},
+			},
+		},
+	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
 		BattlesTable,
@@ -877,6 +916,7 @@ var (
 		PointsEntriesTable,
 		PointsRulesTable,
 		ProcessedGiftsTable,
+		SpacesTable,
 	}
 )
 

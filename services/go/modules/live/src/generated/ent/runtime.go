@@ -3,36 +3,37 @@
 package ent
 
 import (
+	"nantty/modules/live/src/databases/schema"
+	"nantty/modules/live/src/generated/ent/battle"
+	"nantty/modules/live/src/generated/ent/battlegiftevent"
+	"nantty/modules/live/src/generated/ent/battleparticipant"
+	"nantty/modules/live/src/generated/ent/gift"
+	"nantty/modules/live/src/generated/ent/giftcombo"
+	"nantty/modules/live/src/generated/ent/giftcontribution"
+	"nantty/modules/live/src/generated/ent/giftgoal"
+	"nantty/modules/live/src/generated/ent/goalcontribution"
+	"nantty/modules/live/src/generated/ent/guestslot"
+	"nantty/modules/live/src/generated/ent/joinrequest"
+	"nantty/modules/live/src/generated/ent/livecomment"
+	"nantty/modules/live/src/generated/ent/livehostdefault"
+	"nantty/modules/live/src/generated/ent/livehostrestriction"
+	"nantty/modules/live/src/generated/ent/liveingress"
+	"nantty/modules/live/src/generated/ent/liveleaderboardentry"
+	"nantty/modules/live/src/generated/ent/livemoderator"
+	"nantty/modules/live/src/generated/ent/liveproduct"
+	"nantty/modules/live/src/generated/ent/liverecording"
+	"nantty/modules/live/src/generated/ent/liverestriction"
+	"nantty/modules/live/src/generated/ent/liveroomsetting"
+	"nantty/modules/live/src/generated/ent/livesafetystate"
+	"nantty/modules/live/src/generated/ent/livesession"
+	"nantty/modules/live/src/generated/ent/liveviewer"
+	"nantty/modules/live/src/generated/ent/outboxevent"
+	"nantty/modules/live/src/generated/ent/overlayscene"
+	"nantty/modules/live/src/generated/ent/pointsentry"
+	"nantty/modules/live/src/generated/ent/pointsrule"
+	"nantty/modules/live/src/generated/ent/processedgift"
+	"nantty/modules/live/src/generated/ent/space"
 	"time"
-	"zudomart/modules/live/src/databases/schema"
-	"zudomart/modules/live/src/generated/ent/battle"
-	"zudomart/modules/live/src/generated/ent/battlegiftevent"
-	"zudomart/modules/live/src/generated/ent/battleparticipant"
-	"zudomart/modules/live/src/generated/ent/gift"
-	"zudomart/modules/live/src/generated/ent/giftcombo"
-	"zudomart/modules/live/src/generated/ent/giftcontribution"
-	"zudomart/modules/live/src/generated/ent/giftgoal"
-	"zudomart/modules/live/src/generated/ent/goalcontribution"
-	"zudomart/modules/live/src/generated/ent/guestslot"
-	"zudomart/modules/live/src/generated/ent/joinrequest"
-	"zudomart/modules/live/src/generated/ent/livecomment"
-	"zudomart/modules/live/src/generated/ent/livehostdefault"
-	"zudomart/modules/live/src/generated/ent/livehostrestriction"
-	"zudomart/modules/live/src/generated/ent/liveingress"
-	"zudomart/modules/live/src/generated/ent/liveleaderboardentry"
-	"zudomart/modules/live/src/generated/ent/livemoderator"
-	"zudomart/modules/live/src/generated/ent/liveproduct"
-	"zudomart/modules/live/src/generated/ent/liverecording"
-	"zudomart/modules/live/src/generated/ent/liverestriction"
-	"zudomart/modules/live/src/generated/ent/liveroomsetting"
-	"zudomart/modules/live/src/generated/ent/livesafetystate"
-	"zudomart/modules/live/src/generated/ent/livesession"
-	"zudomart/modules/live/src/generated/ent/liveviewer"
-	"zudomart/modules/live/src/generated/ent/outboxevent"
-	"zudomart/modules/live/src/generated/ent/overlayscene"
-	"zudomart/modules/live/src/generated/ent/pointsentry"
-	"zudomart/modules/live/src/generated/ent/pointsrule"
-	"zudomart/modules/live/src/generated/ent/processedgift"
 
 	"github.com/google/uuid"
 )
@@ -888,4 +889,71 @@ func init() {
 	processedgiftDescCreatedAt := processedgiftFields[2].Descriptor()
 	// processedgift.DefaultCreatedAt holds the default value on creation for the created_at field.
 	processedgift.DefaultCreatedAt = processedgiftDescCreatedAt.Default.(func() time.Time)
+	spaceMixin := schema.Space{}.Mixin()
+	spaceMixinFields0 := spaceMixin[0].Fields()
+	_ = spaceMixinFields0
+	spaceFields := schema.Space{}.Fields()
+	_ = spaceFields
+	// spaceDescCreatedAt is the schema descriptor for created_at field.
+	spaceDescCreatedAt := spaceMixinFields0[1].Descriptor()
+	// space.DefaultCreatedAt holds the default value on creation for the created_at field.
+	space.DefaultCreatedAt = spaceDescCreatedAt.Default.(func() time.Time)
+	// spaceDescTitle is the schema descriptor for title field.
+	spaceDescTitle := spaceFields[1].Descriptor()
+	// space.TitleValidator is a validator for the "title" field. It is called by the builders before save.
+	space.TitleValidator = func() func(string) error {
+		validators := spaceDescTitle.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(title string) error {
+			for _, fn := range fns {
+				if err := fn(title); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// spaceDescDescription is the schema descriptor for description field.
+	spaceDescDescription := spaceFields[2].Descriptor()
+	// space.DefaultDescription holds the default value on creation for the description field.
+	space.DefaultDescription = spaceDescDescription.Default.(string)
+	// space.DescriptionValidator is a validator for the "description" field. It is called by the builders before save.
+	space.DescriptionValidator = spaceDescDescription.Validators[0].(func(string) error)
+	// spaceDescLivekitRoom is the schema descriptor for livekit_room field.
+	spaceDescLivekitRoom := spaceFields[8].Descriptor()
+	// space.LivekitRoomValidator is a validator for the "livekit_room" field. It is called by the builders before save.
+	space.LivekitRoomValidator = spaceDescLivekitRoom.Validators[0].(func(string) error)
+	// spaceDescListeners is the schema descriptor for listeners field.
+	spaceDescListeners := spaceFields[9].Descriptor()
+	// space.DefaultListeners holds the default value on creation for the listeners field.
+	space.DefaultListeners = spaceDescListeners.Default.(int)
+	// spaceDescPeakListeners is the schema descriptor for peak_listeners field.
+	spaceDescPeakListeners := spaceFields[10].Descriptor()
+	// space.DefaultPeakListeners holds the default value on creation for the peak_listeners field.
+	space.DefaultPeakListeners = spaceDescPeakListeners.Default.(int)
+	// spaceDescModerationVisibility is the schema descriptor for moderation_visibility field.
+	spaceDescModerationVisibility := spaceFields[11].Descriptor()
+	// space.DefaultModerationVisibility holds the default value on creation for the moderation_visibility field.
+	space.DefaultModerationVisibility = spaceDescModerationVisibility.Default.(string)
+	// spaceDescUpdatedAt is the schema descriptor for updated_at field.
+	spaceDescUpdatedAt := spaceFields[12].Descriptor()
+	// space.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	space.DefaultUpdatedAt = spaceDescUpdatedAt.Default.(func() time.Time)
+	// space.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	space.UpdateDefaultUpdatedAt = spaceDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// spaceDescGiftsEnabled is the schema descriptor for gifts_enabled field.
+	spaceDescGiftsEnabled := spaceFields[13].Descriptor()
+	// space.DefaultGiftsEnabled holds the default value on creation for the gifts_enabled field.
+	space.DefaultGiftsEnabled = spaceDescGiftsEnabled.Default.(bool)
+	// spaceDescVideoEnabled is the schema descriptor for video_enabled field.
+	spaceDescVideoEnabled := spaceFields[14].Descriptor()
+	// space.DefaultVideoEnabled holds the default value on creation for the video_enabled field.
+	space.DefaultVideoEnabled = spaceDescVideoEnabled.Default.(bool)
+	// spaceDescID is the schema descriptor for id field.
+	spaceDescID := spaceMixinFields0[0].Descriptor()
+	// space.DefaultID holds the default value on creation for the id field.
+	space.DefaultID = spaceDescID.Default.(func() uuid.UUID)
 }

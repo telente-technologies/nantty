@@ -9,36 +9,37 @@ import (
 	"log"
 	"reflect"
 
-	"zudomart/modules/live/src/generated/ent/migrate"
+	"nantty/modules/live/src/generated/ent/migrate"
 
-	"zudomart/modules/live/src/generated/ent/battle"
-	"zudomart/modules/live/src/generated/ent/battlegiftevent"
-	"zudomart/modules/live/src/generated/ent/battleparticipant"
-	"zudomart/modules/live/src/generated/ent/gift"
-	"zudomart/modules/live/src/generated/ent/giftcombo"
-	"zudomart/modules/live/src/generated/ent/giftcontribution"
-	"zudomart/modules/live/src/generated/ent/giftgoal"
-	"zudomart/modules/live/src/generated/ent/goalcontribution"
-	"zudomart/modules/live/src/generated/ent/guestslot"
-	"zudomart/modules/live/src/generated/ent/joinrequest"
-	"zudomart/modules/live/src/generated/ent/livecomment"
-	"zudomart/modules/live/src/generated/ent/livehostdefault"
-	"zudomart/modules/live/src/generated/ent/livehostrestriction"
-	"zudomart/modules/live/src/generated/ent/liveingress"
-	"zudomart/modules/live/src/generated/ent/liveleaderboardentry"
-	"zudomart/modules/live/src/generated/ent/livemoderator"
-	"zudomart/modules/live/src/generated/ent/liveproduct"
-	"zudomart/modules/live/src/generated/ent/liverecording"
-	"zudomart/modules/live/src/generated/ent/liverestriction"
-	"zudomart/modules/live/src/generated/ent/liveroomsetting"
-	"zudomart/modules/live/src/generated/ent/livesafetystate"
-	"zudomart/modules/live/src/generated/ent/livesession"
-	"zudomart/modules/live/src/generated/ent/liveviewer"
-	"zudomart/modules/live/src/generated/ent/outboxevent"
-	"zudomart/modules/live/src/generated/ent/overlayscene"
-	"zudomart/modules/live/src/generated/ent/pointsentry"
-	"zudomart/modules/live/src/generated/ent/pointsrule"
-	"zudomart/modules/live/src/generated/ent/processedgift"
+	"nantty/modules/live/src/generated/ent/battle"
+	"nantty/modules/live/src/generated/ent/battlegiftevent"
+	"nantty/modules/live/src/generated/ent/battleparticipant"
+	"nantty/modules/live/src/generated/ent/gift"
+	"nantty/modules/live/src/generated/ent/giftcombo"
+	"nantty/modules/live/src/generated/ent/giftcontribution"
+	"nantty/modules/live/src/generated/ent/giftgoal"
+	"nantty/modules/live/src/generated/ent/goalcontribution"
+	"nantty/modules/live/src/generated/ent/guestslot"
+	"nantty/modules/live/src/generated/ent/joinrequest"
+	"nantty/modules/live/src/generated/ent/livecomment"
+	"nantty/modules/live/src/generated/ent/livehostdefault"
+	"nantty/modules/live/src/generated/ent/livehostrestriction"
+	"nantty/modules/live/src/generated/ent/liveingress"
+	"nantty/modules/live/src/generated/ent/liveleaderboardentry"
+	"nantty/modules/live/src/generated/ent/livemoderator"
+	"nantty/modules/live/src/generated/ent/liveproduct"
+	"nantty/modules/live/src/generated/ent/liverecording"
+	"nantty/modules/live/src/generated/ent/liverestriction"
+	"nantty/modules/live/src/generated/ent/liveroomsetting"
+	"nantty/modules/live/src/generated/ent/livesafetystate"
+	"nantty/modules/live/src/generated/ent/livesession"
+	"nantty/modules/live/src/generated/ent/liveviewer"
+	"nantty/modules/live/src/generated/ent/outboxevent"
+	"nantty/modules/live/src/generated/ent/overlayscene"
+	"nantty/modules/live/src/generated/ent/pointsentry"
+	"nantty/modules/live/src/generated/ent/pointsrule"
+	"nantty/modules/live/src/generated/ent/processedgift"
+	"nantty/modules/live/src/generated/ent/space"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect"
@@ -109,6 +110,8 @@ type Client struct {
 	PointsRule *PointsRuleClient
 	// ProcessedGift is the client for interacting with the ProcessedGift builders.
 	ProcessedGift *ProcessedGiftClient
+	// Space is the client for interacting with the Space builders.
+	Space *SpaceClient
 }
 
 // NewClient creates a new client configured with the given options.
@@ -148,6 +151,7 @@ func (c *Client) init() {
 	c.PointsEntry = NewPointsEntryClient(c.config)
 	c.PointsRule = NewPointsRuleClient(c.config)
 	c.ProcessedGift = NewProcessedGiftClient(c.config)
+	c.Space = NewSpaceClient(c.config)
 }
 
 type (
@@ -268,6 +272,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		PointsEntry:          NewPointsEntryClient(cfg),
 		PointsRule:           NewPointsRuleClient(cfg),
 		ProcessedGift:        NewProcessedGiftClient(cfg),
+		Space:                NewSpaceClient(cfg),
 	}, nil
 }
 
@@ -315,6 +320,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		PointsEntry:          NewPointsEntryClient(cfg),
 		PointsRule:           NewPointsRuleClient(cfg),
 		ProcessedGift:        NewProcessedGiftClient(cfg),
+		Space:                NewSpaceClient(cfg),
 	}, nil
 }
 
@@ -350,7 +356,7 @@ func (c *Client) Use(hooks ...Hook) {
 		c.LiveLeaderboardEntry, c.LiveModerator, c.LiveProduct, c.LiveRecording,
 		c.LiveRestriction, c.LiveRoomSetting, c.LiveSafetyState, c.LiveSession,
 		c.LiveViewer, c.OutboxEvent, c.OverlayScene, c.PointsEntry, c.PointsRule,
-		c.ProcessedGift,
+		c.ProcessedGift, c.Space,
 	} {
 		n.Use(hooks...)
 	}
@@ -366,7 +372,7 @@ func (c *Client) Intercept(interceptors ...Interceptor) {
 		c.LiveLeaderboardEntry, c.LiveModerator, c.LiveProduct, c.LiveRecording,
 		c.LiveRestriction, c.LiveRoomSetting, c.LiveSafetyState, c.LiveSession,
 		c.LiveViewer, c.OutboxEvent, c.OverlayScene, c.PointsEntry, c.PointsRule,
-		c.ProcessedGift,
+		c.ProcessedGift, c.Space,
 	} {
 		n.Intercept(interceptors...)
 	}
@@ -431,6 +437,8 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.PointsRule.mutate(ctx, m)
 	case *ProcessedGiftMutation:
 		return c.ProcessedGift.mutate(ctx, m)
+	case *SpaceMutation:
+		return c.Space.mutate(ctx, m)
 	default:
 		return nil, fmt.Errorf("ent: unknown mutation type %T", m)
 	}
@@ -4160,6 +4168,139 @@ func (c *ProcessedGiftClient) mutate(ctx context.Context, m *ProcessedGiftMutati
 	}
 }
 
+// SpaceClient is a client for the Space schema.
+type SpaceClient struct {
+	config
+}
+
+// NewSpaceClient returns a client for the Space from the given config.
+func NewSpaceClient(c config) *SpaceClient {
+	return &SpaceClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `space.Hooks(f(g(h())))`.
+func (c *SpaceClient) Use(hooks ...Hook) {
+	c.hooks.Space = append(c.hooks.Space, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `space.Intercept(f(g(h())))`.
+func (c *SpaceClient) Intercept(interceptors ...Interceptor) {
+	c.inters.Space = append(c.inters.Space, interceptors...)
+}
+
+// Create returns a builder for creating a Space entity.
+func (c *SpaceClient) Create() *SpaceCreate {
+	mutation := newSpaceMutation(c.config, OpCreate)
+	return &SpaceCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of Space entities.
+func (c *SpaceClient) CreateBulk(builders ...*SpaceCreate) *SpaceCreateBulk {
+	return &SpaceCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *SpaceClient) MapCreateBulk(slice any, setFunc func(*SpaceCreate, int)) *SpaceCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &SpaceCreateBulk{err: fmt.Errorf("calling to SpaceClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*SpaceCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &SpaceCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for Space.
+func (c *SpaceClient) Update() *SpaceUpdate {
+	mutation := newSpaceMutation(c.config, OpUpdate)
+	return &SpaceUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *SpaceClient) UpdateOne(_m *Space) *SpaceUpdateOne {
+	mutation := newSpaceMutation(c.config, OpUpdateOne, withSpace(_m))
+	return &SpaceUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *SpaceClient) UpdateOneID(id uuid.UUID) *SpaceUpdateOne {
+	mutation := newSpaceMutation(c.config, OpUpdateOne, withSpaceID(id))
+	return &SpaceUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for Space.
+func (c *SpaceClient) Delete() *SpaceDelete {
+	mutation := newSpaceMutation(c.config, OpDelete)
+	return &SpaceDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *SpaceClient) DeleteOne(_m *Space) *SpaceDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *SpaceClient) DeleteOneID(id uuid.UUID) *SpaceDeleteOne {
+	builder := c.Delete().Where(space.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &SpaceDeleteOne{builder}
+}
+
+// Query returns a query builder for Space.
+func (c *SpaceClient) Query() *SpaceQuery {
+	return &SpaceQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeSpace},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a Space entity by its id.
+func (c *SpaceClient) Get(ctx context.Context, id uuid.UUID) (*Space, error) {
+	return c.Query().Where(space.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *SpaceClient) GetX(ctx context.Context, id uuid.UUID) *Space {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *SpaceClient) Hooks() []Hook {
+	return c.hooks.Space
+}
+
+// Interceptors returns the client interceptors.
+func (c *SpaceClient) Interceptors() []Interceptor {
+	return c.inters.Space
+}
+
+func (c *SpaceClient) mutate(ctx context.Context, m *SpaceMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&SpaceCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&SpaceUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&SpaceUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&SpaceDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown Space mutation op: %q", m.Op())
+	}
+}
+
 // hooks and interceptors per client, for fast access.
 type (
 	hooks struct {
@@ -4168,7 +4309,7 @@ type (
 		LiveHostDefault, LiveHostRestriction, LiveIngress, LiveLeaderboardEntry,
 		LiveModerator, LiveProduct, LiveRecording, LiveRestriction, LiveRoomSetting,
 		LiveSafetyState, LiveSession, LiveViewer, OutboxEvent, OverlayScene,
-		PointsEntry, PointsRule, ProcessedGift []ent.Hook
+		PointsEntry, PointsRule, ProcessedGift, Space []ent.Hook
 	}
 	inters struct {
 		Battle, BattleGiftEvent, BattleParticipant, Gift, GiftCombo, GiftContribution,
@@ -4176,7 +4317,7 @@ type (
 		LiveHostDefault, LiveHostRestriction, LiveIngress, LiveLeaderboardEntry,
 		LiveModerator, LiveProduct, LiveRecording, LiveRestriction, LiveRoomSetting,
 		LiveSafetyState, LiveSession, LiveViewer, OutboxEvent, OverlayScene,
-		PointsEntry, PointsRule, ProcessedGift []ent.Interceptor
+		PointsEntry, PointsRule, ProcessedGift, Space []ent.Interceptor
 	}
 )
 

@@ -6,8 +6,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"nantty/modules/live/src/generated/ent/liverecording"
 	"time"
-	"zudomart/modules/live/src/generated/ent/liverecording"
 
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"

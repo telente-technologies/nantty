@@ -6,37 +6,38 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"nantty/modules/live/src/generated/ent/battle"
+	"nantty/modules/live/src/generated/ent/battlegiftevent"
+	"nantty/modules/live/src/generated/ent/battleparticipant"
+	"nantty/modules/live/src/generated/ent/gift"
+	"nantty/modules/live/src/generated/ent/giftcombo"
+	"nantty/modules/live/src/generated/ent/giftcontribution"
+	"nantty/modules/live/src/generated/ent/giftgoal"
+	"nantty/modules/live/src/generated/ent/goalcontribution"
+	"nantty/modules/live/src/generated/ent/guestslot"
+	"nantty/modules/live/src/generated/ent/joinrequest"
+	"nantty/modules/live/src/generated/ent/livecomment"
+	"nantty/modules/live/src/generated/ent/livehostdefault"
+	"nantty/modules/live/src/generated/ent/livehostrestriction"
+	"nantty/modules/live/src/generated/ent/liveingress"
+	"nantty/modules/live/src/generated/ent/liveleaderboardentry"
+	"nantty/modules/live/src/generated/ent/livemoderator"
+	"nantty/modules/live/src/generated/ent/liveproduct"
+	"nantty/modules/live/src/generated/ent/liverecording"
+	"nantty/modules/live/src/generated/ent/liverestriction"
+	"nantty/modules/live/src/generated/ent/liveroomsetting"
+	"nantty/modules/live/src/generated/ent/livesafetystate"
+	"nantty/modules/live/src/generated/ent/livesession"
+	"nantty/modules/live/src/generated/ent/liveviewer"
+	"nantty/modules/live/src/generated/ent/outboxevent"
+	"nantty/modules/live/src/generated/ent/overlayscene"
+	"nantty/modules/live/src/generated/ent/pointsentry"
+	"nantty/modules/live/src/generated/ent/pointsrule"
+	"nantty/modules/live/src/generated/ent/predicate"
+	"nantty/modules/live/src/generated/ent/processedgift"
+	"nantty/modules/live/src/generated/ent/space"
 	"sync"
 	"time"
-	"zudomart/modules/live/src/generated/ent/battle"
-	"zudomart/modules/live/src/generated/ent/battlegiftevent"
-	"zudomart/modules/live/src/generated/ent/battleparticipant"
-	"zudomart/modules/live/src/generated/ent/gift"
-	"zudomart/modules/live/src/generated/ent/giftcombo"
-	"zudomart/modules/live/src/generated/ent/giftcontribution"
-	"zudomart/modules/live/src/generated/ent/giftgoal"
-	"zudomart/modules/live/src/generated/ent/goalcontribution"
-	"zudomart/modules/live/src/generated/ent/guestslot"
-	"zudomart/modules/live/src/generated/ent/joinrequest"
-	"zudomart/modules/live/src/generated/ent/livecomment"
-	"zudomart/modules/live/src/generated/ent/livehostdefault"
-	"zudomart/modules/live/src/generated/ent/livehostrestriction"
-	"zudomart/modules/live/src/generated/ent/liveingress"
-	"zudomart/modules/live/src/generated/ent/liveleaderboardentry"
-	"zudomart/modules/live/src/generated/ent/livemoderator"
-	"zudomart/modules/live/src/generated/ent/liveproduct"
-	"zudomart/modules/live/src/generated/ent/liverecording"
-	"zudomart/modules/live/src/generated/ent/liverestriction"
-	"zudomart/modules/live/src/generated/ent/liveroomsetting"
-	"zudomart/modules/live/src/generated/ent/livesafetystate"
-	"zudomart/modules/live/src/generated/ent/livesession"
-	"zudomart/modules/live/src/generated/ent/liveviewer"
-	"zudomart/modules/live/src/generated/ent/outboxevent"
-	"zudomart/modules/live/src/generated/ent/overlayscene"
-	"zudomart/modules/live/src/generated/ent/pointsentry"
-	"zudomart/modules/live/src/generated/ent/pointsrule"
-	"zudomart/modules/live/src/generated/ent/predicate"
-	"zudomart/modules/live/src/generated/ent/processedgift"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
@@ -80,6 +81,7 @@ const (
 	TypePointsEntry          = "PointsEntry"
 	TypePointsRule           = "PointsRule"
 	TypeProcessedGift        = "ProcessedGift"
+	TypeSpace                = "Space"
 )
 
 // BattleMutation represents an operation that mutates the Battle nodes in the graph.
@@ -23915,4 +23917,1348 @@ func (m *ProcessedGiftMutation) ClearEdge(name string) error {
 // It returns an error if the edge is not defined in the schema.
 func (m *ProcessedGiftMutation) ResetEdge(name string) error {
 	return fmt.Errorf("unknown ProcessedGift edge %s", name)
+}
+
+// SpaceMutation represents an operation that mutates the Space nodes in the graph.
+type SpaceMutation struct {
+	config
+	op                    Op
+	typ                   string
+	id                    *uuid.UUID
+	created_at            *time.Time
+	host_id               *uuid.UUID
+	title                 *string
+	description           *string
+	state                 *space.State
+	visibility            *space.Visibility
+	scheduled_at          *time.Time
+	started_at            *time.Time
+	ended_at              *time.Time
+	livekit_room          *string
+	listeners             *int
+	addlisteners          *int
+	peak_listeners        *int
+	addpeak_listeners     *int
+	moderation_visibility *string
+	updated_at            *time.Time
+	gifts_enabled         *bool
+	video_enabled         *bool
+	metadata              *map[string]interface{}
+	clearedFields         map[string]struct{}
+	done                  bool
+	oldValue              func(context.Context) (*Space, error)
+	predicates            []predicate.Space
+}
+
+var _ ent.Mutation = (*SpaceMutation)(nil)
+
+// spaceOption allows management of the mutation configuration using functional options.
+type spaceOption func(*SpaceMutation)
+
+// newSpaceMutation creates new mutation for the Space entity.
+func newSpaceMutation(c config, op Op, opts ...spaceOption) *SpaceMutation {
+	m := &SpaceMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeSpace,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withSpaceID sets the ID field of the mutation.
+func withSpaceID(id uuid.UUID) spaceOption {
+	return func(m *SpaceMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *Space
+		)
+		m.oldValue = func(ctx context.Context) (*Space, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().Space.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withSpace sets the old Space of the mutation.
+func withSpace(node *Space) spaceOption {
+	return func(m *SpaceMutation) {
+		m.oldValue = func(context.Context) (*Space, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m SpaceMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m SpaceMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of Space entities.
+func (m *SpaceMutation) SetID(id uuid.UUID) {
+	m.id = &id
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *SpaceMutation) ID() (id uuid.UUID, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *SpaceMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []uuid.UUID{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().Space.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (m *SpaceMutation) SetCreatedAt(t time.Time) {
+	m.created_at = &t
+}
+
+// CreatedAt returns the value of the "created_at" field in the mutation.
+func (m *SpaceMutation) CreatedAt() (r time.Time, exists bool) {
+	v := m.created_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreatedAt returns the old "created_at" field's value of the Space entity.
+// If the Space object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SpaceMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
+	}
+	return oldValue.CreatedAt, nil
+}
+
+// ResetCreatedAt resets all changes to the "created_at" field.
+func (m *SpaceMutation) ResetCreatedAt() {
+	m.created_at = nil
+}
+
+// SetHostID sets the "host_id" field.
+func (m *SpaceMutation) SetHostID(u uuid.UUID) {
+	m.host_id = &u
+}
+
+// HostID returns the value of the "host_id" field in the mutation.
+func (m *SpaceMutation) HostID() (r uuid.UUID, exists bool) {
+	v := m.host_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldHostID returns the old "host_id" field's value of the Space entity.
+// If the Space object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SpaceMutation) OldHostID(ctx context.Context) (v uuid.UUID, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldHostID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldHostID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldHostID: %w", err)
+	}
+	return oldValue.HostID, nil
+}
+
+// ResetHostID resets all changes to the "host_id" field.
+func (m *SpaceMutation) ResetHostID() {
+	m.host_id = nil
+}
+
+// SetTitle sets the "title" field.
+func (m *SpaceMutation) SetTitle(s string) {
+	m.title = &s
+}
+
+// Title returns the value of the "title" field in the mutation.
+func (m *SpaceMutation) Title() (r string, exists bool) {
+	v := m.title
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldTitle returns the old "title" field's value of the Space entity.
+// If the Space object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SpaceMutation) OldTitle(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldTitle is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldTitle requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldTitle: %w", err)
+	}
+	return oldValue.Title, nil
+}
+
+// ResetTitle resets all changes to the "title" field.
+func (m *SpaceMutation) ResetTitle() {
+	m.title = nil
+}
+
+// SetDescription sets the "description" field.
+func (m *SpaceMutation) SetDescription(s string) {
+	m.description = &s
+}
+
+// Description returns the value of the "description" field in the mutation.
+func (m *SpaceMutation) Description() (r string, exists bool) {
+	v := m.description
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDescription returns the old "description" field's value of the Space entity.
+// If the Space object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SpaceMutation) OldDescription(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDescription is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDescription requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDescription: %w", err)
+	}
+	return oldValue.Description, nil
+}
+
+// ResetDescription resets all changes to the "description" field.
+func (m *SpaceMutation) ResetDescription() {
+	m.description = nil
+}
+
+// SetState sets the "state" field.
+func (m *SpaceMutation) SetState(s space.State) {
+	m.state = &s
+}
+
+// State returns the value of the "state" field in the mutation.
+func (m *SpaceMutation) State() (r space.State, exists bool) {
+	v := m.state
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldState returns the old "state" field's value of the Space entity.
+// If the Space object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SpaceMutation) OldState(ctx context.Context) (v space.State, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldState is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldState requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldState: %w", err)
+	}
+	return oldValue.State, nil
+}
+
+// ResetState resets all changes to the "state" field.
+func (m *SpaceMutation) ResetState() {
+	m.state = nil
+}
+
+// SetVisibility sets the "visibility" field.
+func (m *SpaceMutation) SetVisibility(s space.Visibility) {
+	m.visibility = &s
+}
+
+// Visibility returns the value of the "visibility" field in the mutation.
+func (m *SpaceMutation) Visibility() (r space.Visibility, exists bool) {
+	v := m.visibility
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldVisibility returns the old "visibility" field's value of the Space entity.
+// If the Space object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SpaceMutation) OldVisibility(ctx context.Context) (v space.Visibility, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldVisibility is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldVisibility requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldVisibility: %w", err)
+	}
+	return oldValue.Visibility, nil
+}
+
+// ResetVisibility resets all changes to the "visibility" field.
+func (m *SpaceMutation) ResetVisibility() {
+	m.visibility = nil
+}
+
+// SetScheduledAt sets the "scheduled_at" field.
+func (m *SpaceMutation) SetScheduledAt(t time.Time) {
+	m.scheduled_at = &t
+}
+
+// ScheduledAt returns the value of the "scheduled_at" field in the mutation.
+func (m *SpaceMutation) ScheduledAt() (r time.Time, exists bool) {
+	v := m.scheduled_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldScheduledAt returns the old "scheduled_at" field's value of the Space entity.
+// If the Space object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SpaceMutation) OldScheduledAt(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldScheduledAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldScheduledAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldScheduledAt: %w", err)
+	}
+	return oldValue.ScheduledAt, nil
+}
+
+// ClearScheduledAt clears the value of the "scheduled_at" field.
+func (m *SpaceMutation) ClearScheduledAt() {
+	m.scheduled_at = nil
+	m.clearedFields[space.FieldScheduledAt] = struct{}{}
+}
+
+// ScheduledAtCleared returns if the "scheduled_at" field was cleared in this mutation.
+func (m *SpaceMutation) ScheduledAtCleared() bool {
+	_, ok := m.clearedFields[space.FieldScheduledAt]
+	return ok
+}
+
+// ResetScheduledAt resets all changes to the "scheduled_at" field.
+func (m *SpaceMutation) ResetScheduledAt() {
+	m.scheduled_at = nil
+	delete(m.clearedFields, space.FieldScheduledAt)
+}
+
+// SetStartedAt sets the "started_at" field.
+func (m *SpaceMutation) SetStartedAt(t time.Time) {
+	m.started_at = &t
+}
+
+// StartedAt returns the value of the "started_at" field in the mutation.
+func (m *SpaceMutation) StartedAt() (r time.Time, exists bool) {
+	v := m.started_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldStartedAt returns the old "started_at" field's value of the Space entity.
+// If the Space object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SpaceMutation) OldStartedAt(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldStartedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldStartedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldStartedAt: %w", err)
+	}
+	return oldValue.StartedAt, nil
+}
+
+// ClearStartedAt clears the value of the "started_at" field.
+func (m *SpaceMutation) ClearStartedAt() {
+	m.started_at = nil
+	m.clearedFields[space.FieldStartedAt] = struct{}{}
+}
+
+// StartedAtCleared returns if the "started_at" field was cleared in this mutation.
+func (m *SpaceMutation) StartedAtCleared() bool {
+	_, ok := m.clearedFields[space.FieldStartedAt]
+	return ok
+}
+
+// ResetStartedAt resets all changes to the "started_at" field.
+func (m *SpaceMutation) ResetStartedAt() {
+	m.started_at = nil
+	delete(m.clearedFields, space.FieldStartedAt)
+}
+
+// SetEndedAt sets the "ended_at" field.
+func (m *SpaceMutation) SetEndedAt(t time.Time) {
+	m.ended_at = &t
+}
+
+// EndedAt returns the value of the "ended_at" field in the mutation.
+func (m *SpaceMutation) EndedAt() (r time.Time, exists bool) {
+	v := m.ended_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldEndedAt returns the old "ended_at" field's value of the Space entity.
+// If the Space object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SpaceMutation) OldEndedAt(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldEndedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldEndedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldEndedAt: %w", err)
+	}
+	return oldValue.EndedAt, nil
+}
+
+// ClearEndedAt clears the value of the "ended_at" field.
+func (m *SpaceMutation) ClearEndedAt() {
+	m.ended_at = nil
+	m.clearedFields[space.FieldEndedAt] = struct{}{}
+}
+
+// EndedAtCleared returns if the "ended_at" field was cleared in this mutation.
+func (m *SpaceMutation) EndedAtCleared() bool {
+	_, ok := m.clearedFields[space.FieldEndedAt]
+	return ok
+}
+
+// ResetEndedAt resets all changes to the "ended_at" field.
+func (m *SpaceMutation) ResetEndedAt() {
+	m.ended_at = nil
+	delete(m.clearedFields, space.FieldEndedAt)
+}
+
+// SetLivekitRoom sets the "livekit_room" field.
+func (m *SpaceMutation) SetLivekitRoom(s string) {
+	m.livekit_room = &s
+}
+
+// LivekitRoom returns the value of the "livekit_room" field in the mutation.
+func (m *SpaceMutation) LivekitRoom() (r string, exists bool) {
+	v := m.livekit_room
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldLivekitRoom returns the old "livekit_room" field's value of the Space entity.
+// If the Space object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SpaceMutation) OldLivekitRoom(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldLivekitRoom is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldLivekitRoom requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldLivekitRoom: %w", err)
+	}
+	return oldValue.LivekitRoom, nil
+}
+
+// ResetLivekitRoom resets all changes to the "livekit_room" field.
+func (m *SpaceMutation) ResetLivekitRoom() {
+	m.livekit_room = nil
+}
+
+// SetListeners sets the "listeners" field.
+func (m *SpaceMutation) SetListeners(i int) {
+	m.listeners = &i
+	m.addlisteners = nil
+}
+
+// Listeners returns the value of the "listeners" field in the mutation.
+func (m *SpaceMutation) Listeners() (r int, exists bool) {
+	v := m.listeners
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldListeners returns the old "listeners" field's value of the Space entity.
+// If the Space object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SpaceMutation) OldListeners(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldListeners is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldListeners requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldListeners: %w", err)
+	}
+	return oldValue.Listeners, nil
+}
+
+// AddListeners adds i to the "listeners" field.
+func (m *SpaceMutation) AddListeners(i int) {
+	if m.addlisteners != nil {
+		*m.addlisteners += i
+	} else {
+		m.addlisteners = &i
+	}
+}
+
+// AddedListeners returns the value that was added to the "listeners" field in this mutation.
+func (m *SpaceMutation) AddedListeners() (r int, exists bool) {
+	v := m.addlisteners
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetListeners resets all changes to the "listeners" field.
+func (m *SpaceMutation) ResetListeners() {
+	m.listeners = nil
+	m.addlisteners = nil
+}
+
+// SetPeakListeners sets the "peak_listeners" field.
+func (m *SpaceMutation) SetPeakListeners(i int) {
+	m.peak_listeners = &i
+	m.addpeak_listeners = nil
+}
+
+// PeakListeners returns the value of the "peak_listeners" field in the mutation.
+func (m *SpaceMutation) PeakListeners() (r int, exists bool) {
+	v := m.peak_listeners
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldPeakListeners returns the old "peak_listeners" field's value of the Space entity.
+// If the Space object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SpaceMutation) OldPeakListeners(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldPeakListeners is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldPeakListeners requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldPeakListeners: %w", err)
+	}
+	return oldValue.PeakListeners, nil
+}
+
+// AddPeakListeners adds i to the "peak_listeners" field.
+func (m *SpaceMutation) AddPeakListeners(i int) {
+	if m.addpeak_listeners != nil {
+		*m.addpeak_listeners += i
+	} else {
+		m.addpeak_listeners = &i
+	}
+}
+
+// AddedPeakListeners returns the value that was added to the "peak_listeners" field in this mutation.
+func (m *SpaceMutation) AddedPeakListeners() (r int, exists bool) {
+	v := m.addpeak_listeners
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetPeakListeners resets all changes to the "peak_listeners" field.
+func (m *SpaceMutation) ResetPeakListeners() {
+	m.peak_listeners = nil
+	m.addpeak_listeners = nil
+}
+
+// SetModerationVisibility sets the "moderation_visibility" field.
+func (m *SpaceMutation) SetModerationVisibility(s string) {
+	m.moderation_visibility = &s
+}
+
+// ModerationVisibility returns the value of the "moderation_visibility" field in the mutation.
+func (m *SpaceMutation) ModerationVisibility() (r string, exists bool) {
+	v := m.moderation_visibility
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldModerationVisibility returns the old "moderation_visibility" field's value of the Space entity.
+// If the Space object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SpaceMutation) OldModerationVisibility(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldModerationVisibility is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldModerationVisibility requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldModerationVisibility: %w", err)
+	}
+	return oldValue.ModerationVisibility, nil
+}
+
+// ResetModerationVisibility resets all changes to the "moderation_visibility" field.
+func (m *SpaceMutation) ResetModerationVisibility() {
+	m.moderation_visibility = nil
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (m *SpaceMutation) SetUpdatedAt(t time.Time) {
+	m.updated_at = &t
+}
+
+// UpdatedAt returns the value of the "updated_at" field in the mutation.
+func (m *SpaceMutation) UpdatedAt() (r time.Time, exists bool) {
+	v := m.updated_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUpdatedAt returns the old "updated_at" field's value of the Space entity.
+// If the Space object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SpaceMutation) OldUpdatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUpdatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUpdatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUpdatedAt: %w", err)
+	}
+	return oldValue.UpdatedAt, nil
+}
+
+// ResetUpdatedAt resets all changes to the "updated_at" field.
+func (m *SpaceMutation) ResetUpdatedAt() {
+	m.updated_at = nil
+}
+
+// SetGiftsEnabled sets the "gifts_enabled" field.
+func (m *SpaceMutation) SetGiftsEnabled(b bool) {
+	m.gifts_enabled = &b
+}
+
+// GiftsEnabled returns the value of the "gifts_enabled" field in the mutation.
+func (m *SpaceMutation) GiftsEnabled() (r bool, exists bool) {
+	v := m.gifts_enabled
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldGiftsEnabled returns the old "gifts_enabled" field's value of the Space entity.
+// If the Space object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SpaceMutation) OldGiftsEnabled(ctx context.Context) (v bool, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldGiftsEnabled is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldGiftsEnabled requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldGiftsEnabled: %w", err)
+	}
+	return oldValue.GiftsEnabled, nil
+}
+
+// ResetGiftsEnabled resets all changes to the "gifts_enabled" field.
+func (m *SpaceMutation) ResetGiftsEnabled() {
+	m.gifts_enabled = nil
+}
+
+// SetVideoEnabled sets the "video_enabled" field.
+func (m *SpaceMutation) SetVideoEnabled(b bool) {
+	m.video_enabled = &b
+}
+
+// VideoEnabled returns the value of the "video_enabled" field in the mutation.
+func (m *SpaceMutation) VideoEnabled() (r bool, exists bool) {
+	v := m.video_enabled
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldVideoEnabled returns the old "video_enabled" field's value of the Space entity.
+// If the Space object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SpaceMutation) OldVideoEnabled(ctx context.Context) (v bool, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldVideoEnabled is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldVideoEnabled requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldVideoEnabled: %w", err)
+	}
+	return oldValue.VideoEnabled, nil
+}
+
+// ResetVideoEnabled resets all changes to the "video_enabled" field.
+func (m *SpaceMutation) ResetVideoEnabled() {
+	m.video_enabled = nil
+}
+
+// SetMetadata sets the "metadata" field.
+func (m *SpaceMutation) SetMetadata(value map[string]interface{}) {
+	m.metadata = &value
+}
+
+// Metadata returns the value of the "metadata" field in the mutation.
+func (m *SpaceMutation) Metadata() (r map[string]interface{}, exists bool) {
+	v := m.metadata
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldMetadata returns the old "metadata" field's value of the Space entity.
+// If the Space object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SpaceMutation) OldMetadata(ctx context.Context) (v map[string]interface{}, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldMetadata is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldMetadata requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldMetadata: %w", err)
+	}
+	return oldValue.Metadata, nil
+}
+
+// ClearMetadata clears the value of the "metadata" field.
+func (m *SpaceMutation) ClearMetadata() {
+	m.metadata = nil
+	m.clearedFields[space.FieldMetadata] = struct{}{}
+}
+
+// MetadataCleared returns if the "metadata" field was cleared in this mutation.
+func (m *SpaceMutation) MetadataCleared() bool {
+	_, ok := m.clearedFields[space.FieldMetadata]
+	return ok
+}
+
+// ResetMetadata resets all changes to the "metadata" field.
+func (m *SpaceMutation) ResetMetadata() {
+	m.metadata = nil
+	delete(m.clearedFields, space.FieldMetadata)
+}
+
+// Where appends a list predicates to the SpaceMutation builder.
+func (m *SpaceMutation) Where(ps ...predicate.Space) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the SpaceMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *SpaceMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.Space, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *SpaceMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *SpaceMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (Space).
+func (m *SpaceMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *SpaceMutation) Fields() []string {
+	fields := make([]string, 0, 17)
+	if m.created_at != nil {
+		fields = append(fields, space.FieldCreatedAt)
+	}
+	if m.host_id != nil {
+		fields = append(fields, space.FieldHostID)
+	}
+	if m.title != nil {
+		fields = append(fields, space.FieldTitle)
+	}
+	if m.description != nil {
+		fields = append(fields, space.FieldDescription)
+	}
+	if m.state != nil {
+		fields = append(fields, space.FieldState)
+	}
+	if m.visibility != nil {
+		fields = append(fields, space.FieldVisibility)
+	}
+	if m.scheduled_at != nil {
+		fields = append(fields, space.FieldScheduledAt)
+	}
+	if m.started_at != nil {
+		fields = append(fields, space.FieldStartedAt)
+	}
+	if m.ended_at != nil {
+		fields = append(fields, space.FieldEndedAt)
+	}
+	if m.livekit_room != nil {
+		fields = append(fields, space.FieldLivekitRoom)
+	}
+	if m.listeners != nil {
+		fields = append(fields, space.FieldListeners)
+	}
+	if m.peak_listeners != nil {
+		fields = append(fields, space.FieldPeakListeners)
+	}
+	if m.moderation_visibility != nil {
+		fields = append(fields, space.FieldModerationVisibility)
+	}
+	if m.updated_at != nil {
+		fields = append(fields, space.FieldUpdatedAt)
+	}
+	if m.gifts_enabled != nil {
+		fields = append(fields, space.FieldGiftsEnabled)
+	}
+	if m.video_enabled != nil {
+		fields = append(fields, space.FieldVideoEnabled)
+	}
+	if m.metadata != nil {
+		fields = append(fields, space.FieldMetadata)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *SpaceMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case space.FieldCreatedAt:
+		return m.CreatedAt()
+	case space.FieldHostID:
+		return m.HostID()
+	case space.FieldTitle:
+		return m.Title()
+	case space.FieldDescription:
+		return m.Description()
+	case space.FieldState:
+		return m.State()
+	case space.FieldVisibility:
+		return m.Visibility()
+	case space.FieldScheduledAt:
+		return m.ScheduledAt()
+	case space.FieldStartedAt:
+		return m.StartedAt()
+	case space.FieldEndedAt:
+		return m.EndedAt()
+	case space.FieldLivekitRoom:
+		return m.LivekitRoom()
+	case space.FieldListeners:
+		return m.Listeners()
+	case space.FieldPeakListeners:
+		return m.PeakListeners()
+	case space.FieldModerationVisibility:
+		return m.ModerationVisibility()
+	case space.FieldUpdatedAt:
+		return m.UpdatedAt()
+	case space.FieldGiftsEnabled:
+		return m.GiftsEnabled()
+	case space.FieldVideoEnabled:
+		return m.VideoEnabled()
+	case space.FieldMetadata:
+		return m.Metadata()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *SpaceMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case space.FieldCreatedAt:
+		return m.OldCreatedAt(ctx)
+	case space.FieldHostID:
+		return m.OldHostID(ctx)
+	case space.FieldTitle:
+		return m.OldTitle(ctx)
+	case space.FieldDescription:
+		return m.OldDescription(ctx)
+	case space.FieldState:
+		return m.OldState(ctx)
+	case space.FieldVisibility:
+		return m.OldVisibility(ctx)
+	case space.FieldScheduledAt:
+		return m.OldScheduledAt(ctx)
+	case space.FieldStartedAt:
+		return m.OldStartedAt(ctx)
+	case space.FieldEndedAt:
+		return m.OldEndedAt(ctx)
+	case space.FieldLivekitRoom:
+		return m.OldLivekitRoom(ctx)
+	case space.FieldListeners:
+		return m.OldListeners(ctx)
+	case space.FieldPeakListeners:
+		return m.OldPeakListeners(ctx)
+	case space.FieldModerationVisibility:
+		return m.OldModerationVisibility(ctx)
+	case space.FieldUpdatedAt:
+		return m.OldUpdatedAt(ctx)
+	case space.FieldGiftsEnabled:
+		return m.OldGiftsEnabled(ctx)
+	case space.FieldVideoEnabled:
+		return m.OldVideoEnabled(ctx)
+	case space.FieldMetadata:
+		return m.OldMetadata(ctx)
+	}
+	return nil, fmt.Errorf("unknown Space field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *SpaceMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case space.FieldCreatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatedAt(v)
+		return nil
+	case space.FieldHostID:
+		v, ok := value.(uuid.UUID)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetHostID(v)
+		return nil
+	case space.FieldTitle:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetTitle(v)
+		return nil
+	case space.FieldDescription:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDescription(v)
+		return nil
+	case space.FieldState:
+		v, ok := value.(space.State)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetState(v)
+		return nil
+	case space.FieldVisibility:
+		v, ok := value.(space.Visibility)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetVisibility(v)
+		return nil
+	case space.FieldScheduledAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetScheduledAt(v)
+		return nil
+	case space.FieldStartedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetStartedAt(v)
+		return nil
+	case space.FieldEndedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetEndedAt(v)
+		return nil
+	case space.FieldLivekitRoom:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetLivekitRoom(v)
+		return nil
+	case space.FieldListeners:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetListeners(v)
+		return nil
+	case space.FieldPeakListeners:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetPeakListeners(v)
+		return nil
+	case space.FieldModerationVisibility:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetModerationVisibility(v)
+		return nil
+	case space.FieldUpdatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUpdatedAt(v)
+		return nil
+	case space.FieldGiftsEnabled:
+		v, ok := value.(bool)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetGiftsEnabled(v)
+		return nil
+	case space.FieldVideoEnabled:
+		v, ok := value.(bool)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetVideoEnabled(v)
+		return nil
+	case space.FieldMetadata:
+		v, ok := value.(map[string]interface{})
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetMetadata(v)
+		return nil
+	}
+	return fmt.Errorf("unknown Space field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *SpaceMutation) AddedFields() []string {
+	var fields []string
+	if m.addlisteners != nil {
+		fields = append(fields, space.FieldListeners)
+	}
+	if m.addpeak_listeners != nil {
+		fields = append(fields, space.FieldPeakListeners)
+	}
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *SpaceMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case space.FieldListeners:
+		return m.AddedListeners()
+	case space.FieldPeakListeners:
+		return m.AddedPeakListeners()
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *SpaceMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	case space.FieldListeners:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddListeners(v)
+		return nil
+	case space.FieldPeakListeners:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddPeakListeners(v)
+		return nil
+	}
+	return fmt.Errorf("unknown Space numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *SpaceMutation) ClearedFields() []string {
+	var fields []string
+	if m.FieldCleared(space.FieldScheduledAt) {
+		fields = append(fields, space.FieldScheduledAt)
+	}
+	if m.FieldCleared(space.FieldStartedAt) {
+		fields = append(fields, space.FieldStartedAt)
+	}
+	if m.FieldCleared(space.FieldEndedAt) {
+		fields = append(fields, space.FieldEndedAt)
+	}
+	if m.FieldCleared(space.FieldMetadata) {
+		fields = append(fields, space.FieldMetadata)
+	}
+	return fields
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *SpaceMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *SpaceMutation) ClearField(name string) error {
+	switch name {
+	case space.FieldScheduledAt:
+		m.ClearScheduledAt()
+		return nil
+	case space.FieldStartedAt:
+		m.ClearStartedAt()
+		return nil
+	case space.FieldEndedAt:
+		m.ClearEndedAt()
+		return nil
+	case space.FieldMetadata:
+		m.ClearMetadata()
+		return nil
+	}
+	return fmt.Errorf("unknown Space nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *SpaceMutation) ResetField(name string) error {
+	switch name {
+	case space.FieldCreatedAt:
+		m.ResetCreatedAt()
+		return nil
+	case space.FieldHostID:
+		m.ResetHostID()
+		return nil
+	case space.FieldTitle:
+		m.ResetTitle()
+		return nil
+	case space.FieldDescription:
+		m.ResetDescription()
+		return nil
+	case space.FieldState:
+		m.ResetState()
+		return nil
+	case space.FieldVisibility:
+		m.ResetVisibility()
+		return nil
+	case space.FieldScheduledAt:
+		m.ResetScheduledAt()
+		return nil
+	case space.FieldStartedAt:
+		m.ResetStartedAt()
+		return nil
+	case space.FieldEndedAt:
+		m.ResetEndedAt()
+		return nil
+	case space.FieldLivekitRoom:
+		m.ResetLivekitRoom()
+		return nil
+	case space.FieldListeners:
+		m.ResetListeners()
+		return nil
+	case space.FieldPeakListeners:
+		m.ResetPeakListeners()
+		return nil
+	case space.FieldModerationVisibility:
+		m.ResetModerationVisibility()
+		return nil
+	case space.FieldUpdatedAt:
+		m.ResetUpdatedAt()
+		return nil
+	case space.FieldGiftsEnabled:
+		m.ResetGiftsEnabled()
+		return nil
+	case space.FieldVideoEnabled:
+		m.ResetVideoEnabled()
+		return nil
+	case space.FieldMetadata:
+		m.ResetMetadata()
+		return nil
+	}
+	return fmt.Errorf("unknown Space field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *SpaceMutation) AddedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *SpaceMutation) AddedIDs(name string) []ent.Value {
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *SpaceMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *SpaceMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *SpaceMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *SpaceMutation) EdgeCleared(name string) bool {
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *SpaceMutation) ClearEdge(name string) error {
+	return fmt.Errorf("unknown Space unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *SpaceMutation) ResetEdge(name string) error {
+	return fmt.Errorf("unknown Space edge %s", name)
 }
