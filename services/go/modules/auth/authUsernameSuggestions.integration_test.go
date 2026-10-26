@@ -5,7 +5,7 @@ import (
 	"net/url"
 	"testing"
 
-	"zudomart/platform/usernames"
+	"nantty/platform/usernames"
 )
 
 func (harness *authTestHarness) registerWithUsername(email, username string, wantStatus int) map[string]any {

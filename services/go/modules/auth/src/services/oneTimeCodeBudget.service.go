@@ -4,8 +4,8 @@ import (
 	"context"
 	"time"
 
-	"zudomart/modules/auth/src/generated/ent"
-	"zudomart/modules/auth/src/generated/ent/onetimecode"
+	"nantty/modules/auth/src/generated/ent"
+	"nantty/modules/auth/src/generated/ent/onetimecode"
 )
 
 func WithinOneTimeCodeSendBudget(ctx context.Context, client *ent.Client, destination string, now time.Time, maximum int) (bool, error) {

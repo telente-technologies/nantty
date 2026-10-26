@@ -15,7 +15,7 @@ import (
 	"github.com/lestrrat-go/jwx/v3/jwk"
 	"github.com/lestrrat-go/jwx/v3/jwt"
 
-	"zudomart/modules/auth/src/configs"
+	"nantty/modules/auth/src/configs"
 )
 
 type fakeIdentityProvider struct {

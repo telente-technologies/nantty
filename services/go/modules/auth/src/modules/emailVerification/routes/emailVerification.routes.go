@@ -3,9 +3,9 @@ package routes
 import (
 	"net/http"
 
-	"zudomart/modules/auth/src/container"
-	"zudomart/modules/auth/src/modules/emailVerification/controllers"
-	"zudomart/platform/jwtauth"
+	"nantty/modules/auth/src/container"
+	"nantty/modules/auth/src/modules/emailVerification/controllers"
+	"nantty/platform/jwtauth"
 )
 
 func MountEmailVerificationRoutes(mux *http.ServeMux, container *container.Container) {

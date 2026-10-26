@@ -6,10 +6,10 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/auth/src/container"
-	"zudomart/modules/auth/src/events"
-	"zudomart/modules/auth/src/generated/ent"
-	"zudomart/modules/auth/src/generated/ent/session"
+	"nantty/modules/auth/src/container"
+	"nantty/modules/auth/src/events"
+	"nantty/modules/auth/src/generated/ent"
+	"nantty/modules/auth/src/generated/ent/session"
 )
 
 func RevokeActiveSessionsExceptInTransaction(ctx context.Context, tx *ent.Tx, accountId, keepSessionId uuid.UUID, reason session.RevokedReason, now time.Time) (int, error) {

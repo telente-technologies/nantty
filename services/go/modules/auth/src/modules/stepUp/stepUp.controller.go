@@ -3,10 +3,10 @@ package stepup
 import (
 	"net/http"
 
-	"zudomart/modules/auth/src/container"
-	"zudomart/modules/auth/src/utils"
-	"zudomart/platform/httpserver"
-	"zudomart/platform/jwtauth"
+	"nantty/modules/auth/src/container"
+	"nantty/modules/auth/src/utils"
+	"nantty/platform/httpserver"
+	"nantty/platform/jwtauth"
 )
 
 type StepUpRequest struct {

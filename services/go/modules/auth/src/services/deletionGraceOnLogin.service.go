@@ -5,8 +5,8 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/auth/src/container"
-	"zudomart/platform/identityports"
+	"nantty/modules/auth/src/container"
+	"nantty/platform/identityports"
 )
 
 func CancelPendingDeletionOnLogin(ctx context.Context, application *container.Container, accountId uuid.UUID) bool {

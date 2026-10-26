@@ -1,8 +1,8 @@
 package validators
 
 import (
-	"zudomart/modules/auth/src/modules/socialSignIn/dtos"
-	"zudomart/modules/auth/src/utils"
+	"nantty/modules/auth/src/modules/socialSignIn/dtos"
+	"nantty/modules/auth/src/utils"
 )
 
 func ValidateGoogleSignInRequest(request dtos.GoogleSignInRequest) error {

@@ -8,9 +8,9 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"github.com/google/uuid"
 
-	"zudomart/modules/auth/src/generated/ent"
-	"zudomart/modules/auth/src/generated/ent/outboxevent"
-	platformevents "zudomart/platform/events"
+	"nantty/modules/auth/src/generated/ent"
+	"nantty/modules/auth/src/generated/ent/outboxevent"
+	platformevents "nantty/platform/events"
 )
 
 const EventSource = "zudomart.auth"

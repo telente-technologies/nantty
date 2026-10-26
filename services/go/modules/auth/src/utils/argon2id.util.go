@@ -1,6 +1,6 @@
 package utils
 
-import "zudomart/platform/passwordhash"
+import "nantty/platform/passwordhash"
 
 type Argon2idParameters = passwordhash.Argon2idParameters
 

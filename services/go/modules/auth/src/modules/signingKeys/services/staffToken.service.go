@@ -6,8 +6,8 @@ import (
 
 	"github.com/lestrrat-go/jwx/v3/jwk"
 
-	"zudomart/platform/identityports"
-	"zudomart/platform/staffauth"
+	"nantty/platform/identityports"
+	"nantty/platform/staffauth"
 )
 
 type StaffTokenService struct {

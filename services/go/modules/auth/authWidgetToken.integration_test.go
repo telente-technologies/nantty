@@ -6,8 +6,8 @@ import (
 	"testing"
 	"time"
 
-	"zudomart/modules/auth/src/configs"
-	"zudomart/platform/jwtauth"
+	"nantty/modules/auth/src/configs"
+	"nantty/platform/jwtauth"
 )
 
 func widgetTokenVerifierForHarness(t *testing.T, harness *authTestHarness) *jwtauth.AccessTokenVerifier {

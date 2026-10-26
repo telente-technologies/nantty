@@ -5,15 +5,15 @@ import (
 	"strings"
 	"time"
 
-	"zudomart/modules/auth/src/container"
-	authErrors "zudomart/modules/auth/src/errors"
-	"zudomart/modules/auth/src/events"
-	"zudomart/modules/auth/src/generated/ent"
-	"zudomart/modules/auth/src/generated/ent/account"
-	"zudomart/modules/auth/src/services"
-	"zudomart/modules/auth/src/types"
-	"zudomart/platform/loginthrottle"
-	"zudomart/platform/usernames"
+	"nantty/modules/auth/src/container"
+	authErrors "nantty/modules/auth/src/errors"
+	"nantty/modules/auth/src/events"
+	"nantty/modules/auth/src/generated/ent"
+	"nantty/modules/auth/src/generated/ent/account"
+	"nantty/modules/auth/src/services"
+	"nantty/modules/auth/src/types"
+	"nantty/platform/loginthrottle"
+	"nantty/platform/usernames"
 )
 
 var passwordFailures = loginthrottle.New(10, 15*time.Minute, 15*time.Minute)

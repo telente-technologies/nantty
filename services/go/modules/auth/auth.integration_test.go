@@ -19,12 +19,12 @@ import (
 
 	"github.com/jackc/pgx/v5"
 
-	"zudomart/modules/auth/src/configs"
-	"zudomart/platform/events"
-	"zudomart/platform/health"
-	"zudomart/platform/jwtauth"
-	"zudomart/platform/postgres"
-	"zudomart/platform/servicemodule"
+	"nantty/modules/auth/src/configs"
+	"nantty/platform/events"
+	"nantty/platform/health"
+	"nantty/platform/jwtauth"
+	"nantty/platform/postgres"
+	"nantty/platform/servicemodule"
 )
 
 type lockedBuffer struct {

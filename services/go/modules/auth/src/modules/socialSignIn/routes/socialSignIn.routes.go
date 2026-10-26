@@ -3,9 +3,9 @@ package routes
 import (
 	"net/http"
 
-	"zudomart/modules/auth/src/container"
-	"zudomart/modules/auth/src/modules/socialSignIn/controllers"
-	"zudomart/platform/httpserver"
+	"nantty/modules/auth/src/container"
+	"nantty/modules/auth/src/modules/socialSignIn/controllers"
+	"nantty/platform/httpserver"
 )
 
 func MountSocialSignInRoutes(mux *http.ServeMux, container *container.Container) {

@@ -4,14 +4,14 @@ import (
 	"net/http"
 	"strings"
 
-	"zudomart/modules/auth/src/container"
-	identity "zudomart/modules/auth/src/integrations"
-	signinwithsocialprovider "zudomart/modules/auth/src/modules/socialSignIn/commands/signInWithSocialProvider"
-	"zudomart/modules/auth/src/modules/socialSignIn/dtos"
-	"zudomart/modules/auth/src/modules/socialSignIn/validators"
-	"zudomart/modules/auth/src/types"
-	"zudomart/modules/auth/src/utils"
-	"zudomart/platform/httpserver"
+	"nantty/modules/auth/src/container"
+	identity "nantty/modules/auth/src/integrations"
+	signinwithsocialprovider "nantty/modules/auth/src/modules/socialSignIn/commands/signInWithSocialProvider"
+	"nantty/modules/auth/src/modules/socialSignIn/dtos"
+	"nantty/modules/auth/src/modules/socialSignIn/validators"
+	"nantty/modules/auth/src/types"
+	"nantty/modules/auth/src/utils"
+	"nantty/platform/httpserver"
 )
 
 type SocialSignInController struct {

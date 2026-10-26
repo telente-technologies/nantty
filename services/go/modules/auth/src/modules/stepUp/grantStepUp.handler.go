@@ -7,16 +7,16 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/auth/src/container"
-	authErrors "zudomart/modules/auth/src/errors"
-	"zudomart/modules/auth/src/generated/ent"
-	"zudomart/modules/auth/src/generated/ent/account"
-	"zudomart/modules/auth/src/generated/ent/onetimecode"
-	"zudomart/modules/auth/src/generated/ent/session"
-	signingkeys "zudomart/modules/auth/src/modules/signingKeys/services"
-	"zudomart/modules/auth/src/services"
-	"zudomart/platform/httpserver"
-	"zudomart/platform/jwtauth"
+	"nantty/modules/auth/src/container"
+	authErrors "nantty/modules/auth/src/errors"
+	"nantty/modules/auth/src/generated/ent"
+	"nantty/modules/auth/src/generated/ent/account"
+	"nantty/modules/auth/src/generated/ent/onetimecode"
+	"nantty/modules/auth/src/generated/ent/session"
+	signingkeys "nantty/modules/auth/src/modules/signingKeys/services"
+	"nantty/modules/auth/src/services"
+	"nantty/platform/httpserver"
+	"nantty/platform/jwtauth"
 )
 
 const StepUpTimeToLive = 5 * time.Minute

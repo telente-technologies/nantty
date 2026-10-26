@@ -4,11 +4,11 @@ import (
 	"context"
 	"crypto/subtle"
 
-	"zudomart/modules/auth/src/container"
-	authErrors "zudomart/modules/auth/src/errors"
-	"zudomart/modules/auth/src/generated/ent"
-	"zudomart/modules/auth/src/generated/ent/onetimecode"
-	"zudomart/modules/auth/src/utils"
+	"nantty/modules/auth/src/container"
+	authErrors "nantty/modules/auth/src/errors"
+	"nantty/modules/auth/src/generated/ent"
+	"nantty/modules/auth/src/generated/ent/onetimecode"
+	"nantty/modules/auth/src/utils"
 )
 
 type Handler struct {

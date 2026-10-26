@@ -4,7 +4,7 @@ import (
 	"slices"
 	"time"
 
-	"zudomart/modules/auth/src/generated/ent"
+	"nantty/modules/auth/src/generated/ent"
 )
 
 type CurrentUserResponse struct {

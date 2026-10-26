@@ -4,7 +4,7 @@ import (
 	"context"
 	"encoding/json"
 
-	"zudomart/modules/auth/src/container"
+	"nantty/modules/auth/src/container"
 )
 
 type Handler struct {

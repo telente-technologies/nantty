@@ -7,7 +7,7 @@ import (
 
 	"github.com/lestrrat-go/jwx/v3/jwt"
 
-	"zudomart/platform/jwtauth"
+	"nantty/platform/jwtauth"
 )
 
 func TestRealtimeTokenIsShortLivedSocketOnlyAndSessionBound(t *testing.T) {

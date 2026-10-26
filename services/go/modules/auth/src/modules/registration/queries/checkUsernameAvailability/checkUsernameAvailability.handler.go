@@ -3,8 +3,8 @@ package checkusernameavailability
 import (
 	"context"
 
-	"zudomart/modules/auth/src/container"
-	"zudomart/modules/auth/src/services"
+	"nantty/modules/auth/src/container"
+	"nantty/modules/auth/src/services"
 )
 
 type Handler struct {

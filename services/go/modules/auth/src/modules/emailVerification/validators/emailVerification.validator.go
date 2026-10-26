@@ -1,8 +1,8 @@
 package validators
 
 import (
-	"zudomart/modules/auth/src/modules/emailVerification/dtos"
-	"zudomart/modules/auth/src/utils"
+	"nantty/modules/auth/src/modules/emailVerification/dtos"
+	"nantty/modules/auth/src/utils"
 )
 
 func ValidateConfirmEmailVerificationRequest(request dtos.ConfirmEmailVerificationRequest) error {

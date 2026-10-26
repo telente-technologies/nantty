@@ -1,8 +1,8 @@
 package validators
 
 import (
-	"zudomart/modules/auth/src/modules/passwords/dtos"
-	"zudomart/modules/auth/src/utils"
+	"nantty/modules/auth/src/modules/passwords/dtos"
+	"nantty/modules/auth/src/utils"
 )
 
 func ValidateResetPasswordRequest(request dtos.ResetPasswordRequest) error {

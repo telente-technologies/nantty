@@ -1,7 +1,7 @@
 package utils
 
 import (
-	authErrors "zudomart/modules/auth/src/errors"
+	authErrors "nantty/modules/auth/src/errors"
 
 	"net/mail"
 	"strings"

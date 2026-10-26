@@ -5,10 +5,10 @@ import (
 	"log/slog"
 	"time"
 
-	authErrors "zudomart/modules/auth/src/errors"
-	"zudomart/modules/auth/src/generated/ent"
-	"zudomart/modules/auth/src/generated/ent/agegaterefusal"
-	"zudomart/modules/auth/src/utils"
+	authErrors "nantty/modules/auth/src/errors"
+	"nantty/modules/auth/src/generated/ent"
+	"nantty/modules/auth/src/generated/ent/agegaterefusal"
+	"nantty/modules/auth/src/utils"
 )
 
 const (

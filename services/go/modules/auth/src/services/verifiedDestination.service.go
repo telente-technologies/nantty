@@ -4,10 +4,10 @@ import (
 	"context"
 	"time"
 
-	authErrors "zudomart/modules/auth/src/errors"
-	"zudomart/modules/auth/src/generated/ent"
-	"zudomart/modules/auth/src/generated/ent/onetimecode"
-	"zudomart/modules/auth/src/utils"
+	authErrors "nantty/modules/auth/src/errors"
+	"nantty/modules/auth/src/generated/ent"
+	"nantty/modules/auth/src/generated/ent/onetimecode"
+	"nantty/modules/auth/src/utils"
 )
 
 func ConsumeVerifiedDestinationTokenInTransaction(ctx context.Context, tx *ent.Tx, purpose onetimecode.Purpose, verifiedToken string, now func() time.Time) (string, error) {

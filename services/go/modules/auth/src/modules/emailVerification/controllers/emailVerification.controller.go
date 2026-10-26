@@ -3,14 +3,14 @@ package controllers
 import (
 	"net/http"
 
-	"zudomart/modules/auth/src/container"
-	confirmemailverification "zudomart/modules/auth/src/modules/emailVerification/commands/confirmEmailVerification"
-	sendemailverificationcode "zudomart/modules/auth/src/modules/emailVerification/commands/sendEmailVerificationCode"
-	"zudomart/modules/auth/src/modules/emailVerification/dtos"
-	"zudomart/modules/auth/src/modules/emailVerification/validators"
-	"zudomart/modules/auth/src/utils"
-	"zudomart/platform/httpserver"
-	"zudomart/platform/jwtauth"
+	"nantty/modules/auth/src/container"
+	confirmemailverification "nantty/modules/auth/src/modules/emailVerification/commands/confirmEmailVerification"
+	sendemailverificationcode "nantty/modules/auth/src/modules/emailVerification/commands/sendEmailVerificationCode"
+	"nantty/modules/auth/src/modules/emailVerification/dtos"
+	"nantty/modules/auth/src/modules/emailVerification/validators"
+	"nantty/modules/auth/src/utils"
+	"nantty/platform/httpserver"
+	"nantty/platform/jwtauth"
 )
 
 type EmailVerificationController struct {

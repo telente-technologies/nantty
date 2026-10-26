@@ -3,8 +3,8 @@ package services
 import (
 	"strings"
 
-	authErrors "zudomart/modules/auth/src/errors"
-	"zudomart/modules/auth/src/generated/ent"
+	authErrors "nantty/modules/auth/src/errors"
+	"nantty/modules/auth/src/generated/ent"
 )
 
 func MapUniqueViolationToConflict(err error) error {

@@ -7,12 +7,12 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/auth/src/container"
-	"zudomart/modules/auth/src/generated/ent"
-	entaccount "zudomart/modules/auth/src/generated/ent/account"
-	signingkeys "zudomart/modules/auth/src/modules/signingKeys/services"
-	"zudomart/modules/auth/src/types"
-	"zudomart/modules/auth/src/utils"
+	"nantty/modules/auth/src/container"
+	"nantty/modules/auth/src/generated/ent"
+	entaccount "nantty/modules/auth/src/generated/ent/account"
+	signingkeys "nantty/modules/auth/src/modules/signingKeys/services"
+	"nantty/modules/auth/src/types"
+	"nantty/modules/auth/src/utils"
 )
 
 type StartedSession struct {

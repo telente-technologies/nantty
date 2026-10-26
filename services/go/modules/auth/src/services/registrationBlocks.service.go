@@ -7,9 +7,9 @@ import (
 	"encoding/hex"
 	"strings"
 
-	authErrors "zudomart/modules/auth/src/errors"
-	"zudomart/modules/auth/src/generated/ent"
-	"zudomart/modules/auth/src/generated/ent/registrationblock"
+	authErrors "nantty/modules/auth/src/errors"
+	"nantty/modules/auth/src/generated/ent"
+	"nantty/modules/auth/src/generated/ent/registrationblock"
 )
 
 func HashBlockedIdentifier(pepper []byte, kind, value string) string {

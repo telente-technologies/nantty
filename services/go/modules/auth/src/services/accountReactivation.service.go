@@ -6,11 +6,11 @@ import (
 
 	"github.com/google/uuid"
 
-	authErrors "zudomart/modules/auth/src/errors"
-	"zudomart/modules/auth/src/events"
-	"zudomart/modules/auth/src/generated/ent"
-	"zudomart/modules/auth/src/generated/ent/account"
-	"zudomart/platform/identityports"
+	authErrors "nantty/modules/auth/src/errors"
+	"nantty/modules/auth/src/events"
+	"nantty/modules/auth/src/generated/ent"
+	"nantty/modules/auth/src/generated/ent/account"
+	"nantty/platform/identityports"
 )
 
 func AssertDeactivatedAccountMayReturn(ctx context.Context, accountId uuid.UUID) error {

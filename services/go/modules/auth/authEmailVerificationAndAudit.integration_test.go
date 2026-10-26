@@ -7,8 +7,8 @@ import (
 	"sync"
 	"testing"
 
-	"zudomart/platform/identityports"
-	"zudomart/platform/postgres"
+	"nantty/platform/identityports"
+	"nantty/platform/postgres"
 )
 
 type recordingSecurityAudit struct {

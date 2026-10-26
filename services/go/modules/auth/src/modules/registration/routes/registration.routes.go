@@ -3,10 +3,10 @@ package routes
 import (
 	"net/http"
 
-	"zudomart/modules/auth/src/container"
-	"zudomart/modules/auth/src/modules/registration/controllers"
-	"zudomart/platform/httpserver"
-	"zudomart/platform/jwtauth"
+	"nantty/modules/auth/src/container"
+	"nantty/modules/auth/src/modules/registration/controllers"
+	"nantty/platform/httpserver"
+	"nantty/platform/jwtauth"
 )
 
 func MountRegistrationRoutes(mux *http.ServeMux, container *container.Container) {

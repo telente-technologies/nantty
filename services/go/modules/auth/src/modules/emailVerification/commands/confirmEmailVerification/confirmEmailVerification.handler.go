@@ -7,14 +7,14 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/auth/src/container"
-	authErrors "zudomart/modules/auth/src/errors"
-	"zudomart/modules/auth/src/generated/ent"
-	"zudomart/modules/auth/src/generated/ent/onetimecode"
-	sendemailverificationcode "zudomart/modules/auth/src/modules/emailVerification/commands/sendEmailVerificationCode"
-	"zudomart/modules/auth/src/modules/emailVerification/dtos"
-	"zudomart/modules/auth/src/utils"
-	"zudomart/platform/httpserver"
+	"nantty/modules/auth/src/container"
+	authErrors "nantty/modules/auth/src/errors"
+	"nantty/modules/auth/src/generated/ent"
+	"nantty/modules/auth/src/generated/ent/onetimecode"
+	sendemailverificationcode "nantty/modules/auth/src/modules/emailVerification/commands/sendEmailVerificationCode"
+	"nantty/modules/auth/src/modules/emailVerification/dtos"
+	"nantty/modules/auth/src/utils"
+	"nantty/platform/httpserver"
 )
 
 var ErrCodeNotSent = httpserver.NewApiError(http.StatusConflict, "CODE_NOT_SENT", "Request a verification code first.")

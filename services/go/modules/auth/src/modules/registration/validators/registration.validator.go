@@ -1,8 +1,8 @@
 package validators
 
 import (
-	"zudomart/modules/auth/src/modules/registration/dtos"
-	"zudomart/modules/auth/src/utils"
+	"nantty/modules/auth/src/modules/registration/dtos"
+	"nantty/modules/auth/src/utils"
 )
 
 func ValidateRegisterRequest(request dtos.RegisterRequest) error {

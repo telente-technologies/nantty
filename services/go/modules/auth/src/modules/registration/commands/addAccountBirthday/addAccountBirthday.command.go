@@ -1,6 +1,6 @@
 package addaccountbirthday
 
-import "zudomart/modules/auth/src/types"
+import "nantty/modules/auth/src/types"
 
 type Command struct {
 	AccountId string

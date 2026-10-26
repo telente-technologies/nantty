@@ -3,9 +3,9 @@ package widgettokens
 import (
 	"net/http"
 
-	"zudomart/modules/auth/src/container"
-	"zudomart/platform/httpserver"
-	"zudomart/platform/jwtauth"
+	"nantty/modules/auth/src/container"
+	"nantty/platform/httpserver"
+	"nantty/platform/jwtauth"
 )
 
 type WidgetTokenController struct {

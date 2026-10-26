@@ -15,8 +15,8 @@ import (
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/timestamppb"
 
-	authv1 "zudomart/contracts/gen/go/zudomart/auth/v1"
-	"zudomart/platform/identityports"
+	authv1 "nantty/contracts/gen/go/zudomart/auth/v1"
+	"nantty/platform/identityports"
 )
 
 const maximumAccountSummariesPerRequest = 200

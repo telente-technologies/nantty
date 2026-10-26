@@ -1,6 +1,6 @@
 package types
 
-import "zudomart/modules/auth/src/generated/ent"
+import "nantty/modules/auth/src/generated/ent"
 
 type ClientDetails struct {
 	UserAgent string

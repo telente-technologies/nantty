@@ -14,9 +14,9 @@ import (
 	"github.com/lestrrat-go/jwx/v3/jwa"
 	"github.com/lestrrat-go/jwx/v3/jwk"
 
-	"zudomart/modules/auth/src/generated/ent"
-	"zudomart/modules/auth/src/generated/ent/signingkey"
-	"zudomart/modules/auth/src/utils"
+	"nantty/modules/auth/src/generated/ent"
+	"nantty/modules/auth/src/generated/ent/signingkey"
+	"nantty/modules/auth/src/utils"
 )
 
 type Settings struct {

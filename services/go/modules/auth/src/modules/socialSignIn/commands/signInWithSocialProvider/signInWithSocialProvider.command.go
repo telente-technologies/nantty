@@ -1,8 +1,8 @@
 package signinwithsocialprovider
 
 import (
-	identity "zudomart/modules/auth/src/integrations"
-	"zudomart/modules/auth/src/types"
+	identity "nantty/modules/auth/src/integrations"
+	"nantty/modules/auth/src/types"
 )
 
 type Command struct {

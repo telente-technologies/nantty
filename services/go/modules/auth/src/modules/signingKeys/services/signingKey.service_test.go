@@ -4,7 +4,7 @@ import (
 	"testing"
 	"time"
 
-	"zudomart/modules/auth/src/generated/ent"
+	"nantty/modules/auth/src/generated/ent"
 )
 
 func TestChooseActiveSigningKeyWaitsForJwksCachesBeforeActivating(t *testing.T) {

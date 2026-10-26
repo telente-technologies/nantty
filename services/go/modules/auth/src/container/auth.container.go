@@ -7,12 +7,12 @@ import (
 	"log/slog"
 	"time"
 
-	"zudomart/modules/auth/src/configs"
-	"zudomart/modules/auth/src/generated/ent"
-	"zudomart/modules/auth/src/integrations"
-	signingkeys "zudomart/modules/auth/src/modules/signingKeys/services"
-	"zudomart/modules/auth/src/utils"
-	"zudomart/platform/jwtauth"
+	"nantty/modules/auth/src/configs"
+	"nantty/modules/auth/src/generated/ent"
+	"nantty/modules/auth/src/integrations"
+	signingkeys "nantty/modules/auth/src/modules/signingKeys/services"
+	"nantty/modules/auth/src/utils"
+	"nantty/platform/jwtauth"
 )
 
 type Container struct {

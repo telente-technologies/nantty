@@ -4,11 +4,11 @@ import (
 	"context"
 	"time"
 
-	"zudomart/modules/auth/src/generated/ent"
-	"zudomart/modules/auth/src/generated/ent/account"
-	"zudomart/platform/httpserver"
-	"zudomart/platform/identityports"
-	"zudomart/platform/usernames"
+	"nantty/modules/auth/src/generated/ent"
+	"nantty/modules/auth/src/generated/ent/account"
+	"nantty/platform/httpserver"
+	"nantty/platform/identityports"
+	"nantty/platform/usernames"
 )
 
 const suggestionCount = 3

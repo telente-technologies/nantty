@@ -3,16 +3,16 @@ package controllers
 import (
 	"net/http"
 
-	"zudomart/modules/auth/src/container"
-	addaccountbirthday "zudomart/modules/auth/src/modules/registration/commands/addAccountBirthday"
-	registeraccount "zudomart/modules/auth/src/modules/registration/commands/registerAccount"
-	"zudomart/modules/auth/src/modules/registration/dtos"
-	checkusernameavailability "zudomart/modules/auth/src/modules/registration/queries/checkUsernameAvailability"
-	"zudomart/modules/auth/src/modules/registration/validators"
-	"zudomart/modules/auth/src/types"
-	"zudomart/modules/auth/src/utils"
-	"zudomart/platform/httpserver"
-	"zudomart/platform/jwtauth"
+	"nantty/modules/auth/src/container"
+	addaccountbirthday "nantty/modules/auth/src/modules/registration/commands/addAccountBirthday"
+	registeraccount "nantty/modules/auth/src/modules/registration/commands/registerAccount"
+	"nantty/modules/auth/src/modules/registration/dtos"
+	checkusernameavailability "nantty/modules/auth/src/modules/registration/queries/checkUsernameAvailability"
+	"nantty/modules/auth/src/modules/registration/validators"
+	"nantty/modules/auth/src/types"
+	"nantty/modules/auth/src/utils"
+	"nantty/platform/httpserver"
+	"nantty/platform/jwtauth"
 )
 
 type RegistrationController struct {

@@ -3,9 +3,9 @@ package controllers
 import (
 	"net/http"
 
-	"zudomart/modules/auth/src/container"
-	getjsonwebkeyset "zudomart/modules/auth/src/modules/signingKeys/queries/getJsonWebKeySet"
-	"zudomart/platform/httpserver"
+	"nantty/modules/auth/src/container"
+	getjsonwebkeyset "nantty/modules/auth/src/modules/signingKeys/queries/getJsonWebKeySet"
+	"nantty/platform/httpserver"
 )
 
 type SigningKeysController struct {

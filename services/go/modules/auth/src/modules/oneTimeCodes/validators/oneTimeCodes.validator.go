@@ -1,8 +1,8 @@
 package validators
 
 import (
-	"zudomart/modules/auth/src/modules/oneTimeCodes/dtos"
-	"zudomart/modules/auth/src/utils"
+	"nantty/modules/auth/src/modules/oneTimeCodes/dtos"
+	"nantty/modules/auth/src/utils"
 )
 
 var oneTimeCodePurposes = []string{"signup", "reset", "login"}

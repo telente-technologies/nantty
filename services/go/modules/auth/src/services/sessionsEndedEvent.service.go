@@ -6,8 +6,8 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/auth/src/events"
-	"zudomart/modules/auth/src/generated/ent"
+	"nantty/modules/auth/src/events"
+	"nantty/modules/auth/src/generated/ent"
 )
 
 const SessionsEndedBySecurityReason = "security"

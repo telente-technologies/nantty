@@ -5,12 +5,12 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/auth/src/container"
-	"zudomart/modules/auth/src/events"
-	"zudomart/modules/auth/src/generated/ent"
-	"zudomart/modules/auth/src/generated/ent/account"
-	"zudomart/modules/auth/src/generated/ent/session"
-	"zudomart/platform/identityports"
+	"nantty/modules/auth/src/container"
+	"nantty/modules/auth/src/events"
+	"nantty/modules/auth/src/generated/ent"
+	"nantty/modules/auth/src/generated/ent/account"
+	"nantty/modules/auth/src/generated/ent/session"
+	"nantty/platform/identityports"
 )
 
 type AccountDirectoryService struct {

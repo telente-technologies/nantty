@@ -7,10 +7,10 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/auth/src/generated/ent"
-	"zudomart/modules/auth/src/generated/ent/hook"
-	"zudomart/modules/auth/src/generated/ent/session"
-	"zudomart/platform/jwtauth"
+	"nantty/modules/auth/src/generated/ent"
+	"nantty/modules/auth/src/generated/ent/hook"
+	"nantty/modules/auth/src/generated/ent/session"
+	"nantty/platform/jwtauth"
 )
 
 const revokedSessionSweepInterval = 30 * time.Second

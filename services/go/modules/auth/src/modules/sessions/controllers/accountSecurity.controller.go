@@ -5,12 +5,12 @@ import (
 
 	"github.com/google/uuid"
 
-	authErrors "zudomart/modules/auth/src/errors"
-	revokeothersessions "zudomart/modules/auth/src/modules/sessions/commands/revokeOtherSessions"
-	revokesession "zudomart/modules/auth/src/modules/sessions/commands/revokeSession"
-	getsecurityoverview "zudomart/modules/auth/src/modules/sessions/queries/getSecurityOverview"
-	"zudomart/platform/httpserver"
-	"zudomart/platform/jwtauth"
+	authErrors "nantty/modules/auth/src/errors"
+	revokeothersessions "nantty/modules/auth/src/modules/sessions/commands/revokeOtherSessions"
+	revokesession "nantty/modules/auth/src/modules/sessions/commands/revokeSession"
+	getsecurityoverview "nantty/modules/auth/src/modules/sessions/queries/getSecurityOverview"
+	"nantty/platform/httpserver"
+	"nantty/platform/jwtauth"
 )
 
 var errCurrentSession = httpserver.NewApiError(http.StatusConflict, "CURRENT_SESSION", "Use sign out to end the session you are using.")

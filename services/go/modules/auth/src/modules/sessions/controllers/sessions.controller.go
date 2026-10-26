@@ -3,19 +3,19 @@ package controllers
 import (
 	"net/http"
 
-	"zudomart/modules/auth/src/container"
-	loginwithpassword "zudomart/modules/auth/src/modules/sessions/commands/logInWithPassword"
-	logoutsession "zudomart/modules/auth/src/modules/sessions/commands/logOutSession"
-	refreshsessiontokens "zudomart/modules/auth/src/modules/sessions/commands/refreshSessionTokens"
-	revokeothersessions "zudomart/modules/auth/src/modules/sessions/commands/revokeOtherSessions"
-	revokesession "zudomart/modules/auth/src/modules/sessions/commands/revokeSession"
-	"zudomart/modules/auth/src/modules/sessions/dtos"
-	listactivesessions "zudomart/modules/auth/src/modules/sessions/queries/listActiveSessions"
-	"zudomart/modules/auth/src/modules/sessions/validators"
-	"zudomart/modules/auth/src/types"
-	"zudomart/modules/auth/src/utils"
-	"zudomart/platform/httpserver"
-	"zudomart/platform/jwtauth"
+	"nantty/modules/auth/src/container"
+	loginwithpassword "nantty/modules/auth/src/modules/sessions/commands/logInWithPassword"
+	logoutsession "nantty/modules/auth/src/modules/sessions/commands/logOutSession"
+	refreshsessiontokens "nantty/modules/auth/src/modules/sessions/commands/refreshSessionTokens"
+	revokeothersessions "nantty/modules/auth/src/modules/sessions/commands/revokeOtherSessions"
+	revokesession "nantty/modules/auth/src/modules/sessions/commands/revokeSession"
+	"nantty/modules/auth/src/modules/sessions/dtos"
+	listactivesessions "nantty/modules/auth/src/modules/sessions/queries/listActiveSessions"
+	"nantty/modules/auth/src/modules/sessions/validators"
+	"nantty/modules/auth/src/types"
+	"nantty/modules/auth/src/utils"
+	"nantty/platform/httpserver"
+	"nantty/platform/jwtauth"
 )
 
 type SessionsController struct {

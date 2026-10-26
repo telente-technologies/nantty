@@ -9,8 +9,8 @@ import (
 	"testing"
 	"time"
 
-	"zudomart/modules/auth/src/configs"
-	"zudomart/platform/postgres"
+	"nantty/modules/auth/src/configs"
+	"nantty/platform/postgres"
 )
 
 func (harness *authTestHarness) verifiedSignupToken(email string) string {

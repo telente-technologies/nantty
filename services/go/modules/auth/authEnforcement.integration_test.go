@@ -12,10 +12,10 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/auth/src/configs"
-	"zudomart/platform/identityports"
-	"zudomart/platform/jwtauth"
-	"zudomart/platform/secretbox"
+	"nantty/modules/auth/src/configs"
+	"nantty/platform/identityports"
+	"nantty/platform/jwtauth"
+	"nantty/platform/secretbox"
 )
 
 func (harness *authTestHarness) callWithDevice(method, path, deviceId string, body any) (int, map[string]any) {

@@ -1,8 +1,8 @@
 package validators
 
 import (
-	"zudomart/modules/auth/src/modules/sessions/dtos"
-	"zudomart/modules/auth/src/utils"
+	"nantty/modules/auth/src/modules/sessions/dtos"
+	"nantty/modules/auth/src/utils"
 )
 
 func ValidateLogInRequest(request dtos.LogInRequest) error {

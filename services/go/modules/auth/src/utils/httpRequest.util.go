@@ -5,8 +5,8 @@ import (
 	"regexp"
 	"strings"
 
-	"zudomart/modules/auth/src/types"
-	"zudomart/platform/httpserver"
+	"nantty/modules/auth/src/types"
+	"nantty/platform/httpserver"
 )
 
 var acceptableDeviceIdPattern = regexp.MustCompile(`^[A-Za-z0-9._:-]{8,128}$`)

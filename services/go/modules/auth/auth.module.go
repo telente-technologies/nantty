@@ -3,10 +3,10 @@ package auth
 import (
 	"context"
 
-	"zudomart/modules/auth/src"
-	"zudomart/modules/auth/src/configs"
-	platformevents "zudomart/platform/events"
-	"zudomart/platform/servicemodule"
+	"nantty/modules/auth/src"
+	"nantty/modules/auth/src/configs"
+	platformevents "nantty/platform/events"
+	"nantty/platform/servicemodule"
 )
 
 type Module = src.Module

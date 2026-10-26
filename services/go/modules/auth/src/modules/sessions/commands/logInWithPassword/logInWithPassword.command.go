@@ -1,7 +1,7 @@
 package loginwithpassword
 
 import (
-	"zudomart/modules/auth/src/types"
+	"nantty/modules/auth/src/types"
 )
 
 type Command struct {

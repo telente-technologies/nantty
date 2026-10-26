@@ -3,13 +3,13 @@ package controllers
 import (
 	"net/http"
 
-	"zudomart/modules/auth/src/container"
-	sendonetimecode "zudomart/modules/auth/src/modules/oneTimeCodes/commands/sendOneTimeCode"
-	verifyonetimecode "zudomart/modules/auth/src/modules/oneTimeCodes/commands/verifyOneTimeCode"
-	"zudomart/modules/auth/src/modules/oneTimeCodes/dtos"
-	"zudomart/modules/auth/src/modules/oneTimeCodes/validators"
-	"zudomart/modules/auth/src/utils"
-	"zudomart/platform/httpserver"
+	"nantty/modules/auth/src/container"
+	sendonetimecode "nantty/modules/auth/src/modules/oneTimeCodes/commands/sendOneTimeCode"
+	verifyonetimecode "nantty/modules/auth/src/modules/oneTimeCodes/commands/verifyOneTimeCode"
+	"nantty/modules/auth/src/modules/oneTimeCodes/dtos"
+	"nantty/modules/auth/src/modules/oneTimeCodes/validators"
+	"nantty/modules/auth/src/utils"
+	"nantty/platform/httpserver"
 )
 
 type OneTimeCodesController struct {

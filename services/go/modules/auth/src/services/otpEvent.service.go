@@ -5,11 +5,11 @@ import (
 	"encoding/base64"
 	"time"
 
-	"zudomart/modules/auth/src/container"
-	"zudomart/modules/auth/src/events"
-	"zudomart/modules/auth/src/generated/ent"
-	"zudomart/modules/auth/src/integrations"
-	"zudomart/platform/secretbox"
+	"nantty/modules/auth/src/container"
+	"nantty/modules/auth/src/events"
+	"nantty/modules/auth/src/generated/ent"
+	"nantty/modules/auth/src/integrations"
+	"nantty/platform/secretbox"
 )
 
 func WriteOneTimeCodeEvent(application *container.Container) integrations.OtpEventWriter {

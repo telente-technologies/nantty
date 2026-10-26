@@ -8,8 +8,8 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/platform/identityports"
-	"zudomart/platform/jwtauth"
+	"nantty/platform/identityports"
+	"nantty/platform/jwtauth"
 )
 
 func registerValkeyDenylistForTest(t *testing.T) {

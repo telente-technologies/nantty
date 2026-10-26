@@ -9,8 +9,8 @@ import (
 
 	"github.com/jackc/pgx/v5"
 
-	"zudomart/platform/jwtauth"
-	"zudomart/platform/postgres"
+	"nantty/platform/jwtauth"
+	"nantty/platform/postgres"
 )
 
 func refillAuthRateLimitAroundTest(t *testing.T) {

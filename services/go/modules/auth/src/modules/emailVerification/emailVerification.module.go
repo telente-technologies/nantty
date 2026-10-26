@@ -3,8 +3,8 @@ package emailverification
 import (
 	"net/http"
 
-	"zudomart/modules/auth/src/container"
-	"zudomart/modules/auth/src/modules/emailVerification/routes"
+	"nantty/modules/auth/src/container"
+	"nantty/modules/auth/src/modules/emailVerification/routes"
 )
 
 func Mount(mux *http.ServeMux, container *container.Container) {

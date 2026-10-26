@@ -3,14 +3,14 @@ package controllers
 import (
 	"net/http"
 
-	"zudomart/modules/auth/src/container"
-	changepassword "zudomart/modules/auth/src/modules/passwords/commands/changePassword"
-	resetpassword "zudomart/modules/auth/src/modules/passwords/commands/resetPassword"
-	"zudomart/modules/auth/src/modules/passwords/dtos"
-	"zudomart/modules/auth/src/modules/passwords/validators"
-	"zudomart/modules/auth/src/utils"
-	"zudomart/platform/httpserver"
-	"zudomart/platform/jwtauth"
+	"nantty/modules/auth/src/container"
+	changepassword "nantty/modules/auth/src/modules/passwords/commands/changePassword"
+	resetpassword "nantty/modules/auth/src/modules/passwords/commands/resetPassword"
+	"nantty/modules/auth/src/modules/passwords/dtos"
+	"nantty/modules/auth/src/modules/passwords/validators"
+	"nantty/modules/auth/src/utils"
+	"nantty/platform/httpserver"
+	"nantty/platform/jwtauth"
 )
 
 type PasswordsController struct {
