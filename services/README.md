@@ -423,7 +423,7 @@ winner, a tie settles as keep-own, viewers are never refunded. Money events are 
 The subscriptions module (web billing and creator subscriptions), App Store and Play verification, wallet deposits into
 Flutterwave payout subaccounts and payout-account name matching are built (updated 2026-10-11). Open payment items are in
 `docs/integrations/flutterwaveMigration.md` (cutover status). Referrals and purchase loyalty/cashback were removed by the owner
-(no rewards module); engagement ZudoPoints in go-live are not money.
+(no rewards module); engagement Nantty Points in go-live are not money.
 
 **Money settings (admin-owned).** go-money reads `gift.shareTiers` and `escrow.policy` (`autoReleaseDays` 3, `sellerCreditHoldHours` 24, `sellerReserveBps` 0) from `admin.platform_settings` through the read-only grant (`ADMIN_DATABASE_SCHEMA`, cached `MONEY_PLATFORM_SETTINGS_TTL` 30s, last good value kept if the read fails). `ESCROW_INSPECTION_PERIOD`, `SELLER_CREDIT_HOLD_PERIOD` and the creator tier table are the fallback. The admin `revenue` document is the source for the coin transfer fee and coin cash values (wallet, creators), the creator ad share (creators, go-ads) and the escrow fee including the Business rate (payments); `COIN_TRANSFER_FEE_BPS`, `COIN_CASH_VALUES`, `ADS_CREATOR_SHARE_BPS`, `ADS_REVENUE_CREATOR_SHARE_BPS` and `ESCROW_FEE_*` are the fallback when it is missing or unreadable (logged as a warning). Gift share = max(staff-granted member tier, admin tier reached by this month's gift coins), capped at 7000 bps.
 

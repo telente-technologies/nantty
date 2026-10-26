@@ -1,4 +1,4 @@
-module zudomart/contracts
+module nantty/contracts
 
 go 1.26.9
 

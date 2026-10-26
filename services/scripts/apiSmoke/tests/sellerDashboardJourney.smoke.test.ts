@@ -44,7 +44,7 @@ describe("seller dashboard journey: product → stock → order → fulfil → p
     expect(customer.status, describeResponse(customer)).toBe(201);
     expectClearError(await seller("POST", "/api/v1/seller/customers", { body: { name: "Bayo again", phone: customer.body.phone } }), 409, "CUSTOMER_EXISTS");
     expectClearError(await seller("POST", "/api/v1/seller/staff", { body: { userId: buyer.accountId, role: "sales", locationIds: [store.locationId] } }), 402, "PLAN_FEATURE_REQUIRED");
-    const candidates = await seller("GET", `/api/v1/seller/zudomart-users?q=${encodeURIComponent(buyer.username.slice(0, 6))}`);
+    const candidates = await seller("GET", `/api/v1/seller/nantty-users?q=${encodeURIComponent(buyer.username.slice(0, 6))}`);
     expect(candidates.status, describeResponse(candidates)).toBe(200);
     expect(JSON.stringify(candidates.body)).not.toMatch(/@|phone/i);
   });
