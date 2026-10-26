@@ -105,7 +105,7 @@ export default function OpenDisputePage({ params }: { readonly params: Promise<{
       {header}
       <div className={styles.notice}>
         <p className={styles.noticeTitle}>Your payment is paused while we look into this</p>
-        <p className={styles.muted}>The seller can&apos;t receive the money until the dispute is resolved. They have 48 hours to respond, then Zudomart support steps in.</p>
+        <p className={styles.muted}>The seller can&apos;t receive the money until the dispute is resolved. They have 48 hours to respond, then Nantty support steps in.</p>
       </div>
       <fieldset className={styles.reasons}>
         <legend className={styles.cardTitle}>What went wrong?</legend>
@@ -131,7 +131,7 @@ export default function OpenDisputePage({ params }: { readonly params: Promise<{
       />
       <section className={styles.actions} aria-labelledby="evidence-title">
         <h2 id="evidence-title" className={styles.cardTitle}>Photo evidence{photosRequired ? "" : " (optional)"}</h2>
-        <p className={styles.muted}>Clear photos of the item, packaging and label help us resolve this faster. Only you, the seller and Zudomart support can see them.</p>
+        <p className={styles.muted}>Clear photos of the item, packaging and label help us resolve this faster. Only you, the seller and Nantty support can see them.</p>
         <EvidencePhotoPicker onChangePhotoUrls={onChangePhotoUrls} onUploadingChange={onUploadingChange} disabled={isSubmitting} />
       </section>
       {!isOnline ? <p className={styles.error} role="status">You&apos;re offline. Reconnect to submit your dispute.</p> : null}

@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
-import type { GroupAttributes } from "@zudomart/chat-crypto";
+import type { GroupAttributes } from "@nantty/chat-crypto";
 
 import { groupPhotoSource, validateGroupPhotoFile } from "./groupPhoto.util";
 

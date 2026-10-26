@@ -1,4 +1,4 @@
-import { ChatControlLedger, type ChatControl, type ControlEntry } from "@zudomart/chat-crypto";
+import { ChatControlLedger, type ChatControl, type ControlEntry } from "@nantty/chat-crypto";
 
 import type { Message } from "@/types";
 

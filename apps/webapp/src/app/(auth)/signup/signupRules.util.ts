@@ -4,7 +4,7 @@ export const STEP_ORDER: readonly SignUpStep[] = ["contact", "verify", "birthday
 
 export const USERNAME_UNAVAILABLE_MESSAGES: Record<string, string> = {
   taken: "That username is taken",
-  reserved: "That username is reserved for Zudomart and can't be used.",
+  reserved: "That username is reserved for Nantty and can't be used.",
   invalid: "Use 3–20 letters, numbers, underscores or full stops.",
   recently_used: "That username was used recently and isn't available yet.",
   withheld: "That username has been withheld under our policies.",

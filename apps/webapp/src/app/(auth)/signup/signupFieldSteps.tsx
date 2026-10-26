@@ -59,7 +59,7 @@ export function BirthdayStepFields({ birthdayText, onBirthdayTextChange, canCont
         error={
           birthdayText.length === 10 && !isBirthdayValidForNewAccount(birthdayText)
             ? parseBirthdayFromDayMonthYear(birthdayText)
-              ? `You must be at least ${MINIMUM_ACCOUNT_AGE_IN_YEARS} years old to use Zudomart.`
+              ? `You must be at least ${MINIMUM_ACCOUNT_AGE_IN_YEARS} years old to use Nantty.`
               : "Enter a real date, like 27/10/2000."
             : null
         }

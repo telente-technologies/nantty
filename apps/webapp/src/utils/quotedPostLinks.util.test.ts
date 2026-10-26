@@ -7,6 +7,8 @@ import { findFirstPostLinkInText, readPostIdFromLink } from "./quotedPostLinks.u
 describe("quoted post links", () => {
   it("accepts only our own post links", () => {
     assert.equal(readPostIdFromLink("https://app.zudomart.com/post/post_1"), "post_1");
+    assert.equal(readPostIdFromLink("https://web.nantty.com/post/post_2"), "post_2");
+    assert.equal(readPostIdFromLink("https://creator.nantty.com/clips/clip_3"), "clip_3");
     assert.equal(readPostIdFromLink("http://www.zudomart.com/clips/clip_2/"), "clip_2");
     assert.equal(readPostIdFromLink("https://zudomart.com.evil.io/post/post_1"), null);
     assert.equal(readPostIdFromLink("https://evil.io/post/post_1"), null);

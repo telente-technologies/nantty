@@ -115,7 +115,7 @@ export default function DisputeDetailPage({ params }: { readonly params: Promise
         <ol className={styles.messages}>
           {dispute.messages.map((message) => (
             <li key={message.id} className={styles.bubble} data-mine={message.authorRole === dispute.viewerRole} data-role={message.authorRole}>
-              <span className={styles.bubbleAuthor}>{message.authorRole === "support" ? "Zudomart support" : message.authorName}</span>
+              <span className={styles.bubbleAuthor}>{message.authorRole === "support" ? "Nantty support" : message.authorName}</span>
               <span className={styles.bubbleText}>{message.text}</span>
               <span className={styles.faint}>{formatFriendlyDateTime(message.createdAt)}</span>
             </li>

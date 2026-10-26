@@ -73,7 +73,7 @@ const findStreamPreviewForHost = (hostId: string) => {
 const buildLiveSession = (liveId: string, host = userSummaryById(findKnownLiveOrDefault(liveId).hostId)): LiveSessionDetails => ({
   id: liveId,
   host: { ...host, followers: findDirectoryUserById(host.id)?.followers ?? 0, following: findDirectoryUserById(host.id)?.following ?? 0 },
-  title: findKnownLiveOrDefault(liveId).hostId === host.id ? findKnownLiveOrDefault(liveId).title : "Live on Zudomart",
+  title: findKnownLiveOrDefault(liveId).hostId === host.id ? findKnownLiveOrDefault(liveId).title : "Live on Nantty",
   viewers: 1268,
   status: liveId.startsWith("ended") ? "ended" : "live",
   products: (["f1", "f2", "f4", "f6"] as const).map((key) => productSummaryByKey(key)),

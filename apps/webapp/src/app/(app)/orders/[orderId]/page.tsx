@@ -201,7 +201,7 @@ export default function OrderDetailPage({ params }: { readonly params: Promise<{
         <p className={styles.escrowNote}>
           {isDirect
             ? `Paid directly: ${order.store.name} was paid right away. For a refund, contact the seller or support.`
-            : "Protected by Zudomart Escrow: your money is held until you confirm delivery. You can open a dispute if something is wrong."}
+            : "Protected by Nantty Escrow: your money is held until you confirm delivery. You can open a dispute if something is wrong."}
         </p>
         {isDirect ? <p className={styles.escrowNote}>{ESCROW_REGION_NOTE}</p> : (
           <Link href={`/orders/${encodeURIComponent(order.id)}/escrow`} className={styles.escrowNote}>View payment protection</Link>

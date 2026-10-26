@@ -11,9 +11,9 @@ interface HelpHomeProps {
 
 export const metadata: Metadata = {
   title: "Help Centre",
-  description: "Answers about every part of Zudomart: accounts, posts, chat, live, creators, selling, buying, payments, safety and your data.",
+  description: "Answers about every part of Nantty: accounts, posts, chat, live, creators, selling, buying, payments, safety and your data.",
   alternates: { canonical: "/help" },
-  openGraph: { type: "website", url: "/help", siteName: "Zudomart", title: "Zudomart Help Centre", description: "Answers about every part of Zudomart." },
+  openGraph: { type: "website", url: "/help", siteName: "Nantty", title: "Nantty Help Centre", description: "Answers about every part of Nantty." },
 };
 
 export default async function HelpHomePage({ searchParams }: HelpHomeProps) {

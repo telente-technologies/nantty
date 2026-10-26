@@ -18,7 +18,7 @@ import { CountryRequiredPicker, countryRequiredCode } from "@/components/commerc
 import { ordersService } from "@/services/orders.service";
 import { emailVerificationService } from "@/services/webActions.service";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { describeErrorSignal, readErrorSignal } from "@zudomart/web-kit";
+import { describeErrorSignal, readErrorSignal } from "@nantty/web-kit";
 import { CheckoutPaymentChoice, canPayFromWallet, type CheckoutPaymentSource } from "@/components/commerce/checkoutPaymentChoice";
 import { providerWalletQueryKeys, providerWalletService } from "@/services/providerWallet.service";
 import { formatMoneyForDisplay } from "@/utils/formatMoney.util";
@@ -265,7 +265,7 @@ export default function CheckoutPage() {
           <p className={styles.terms}>
             {isNigeria
               ? "Escrow orders stay locked in your own wallet, held by our licensed payment partner, until you confirm delivery. Direct orders pay the seller right away."
-              : "Outside Nigeria there's no escrow: you pay the seller directly, and our dispute process still applies. Zudomart doesn't hold your money."}
+              : "Outside Nigeria there's no escrow: you pay the seller directly, and our dispute process still applies. Nantty doesn't hold your money."}
           </p>
         </aside>
       </div>

@@ -5,7 +5,7 @@ import { getSignedInMockUser, isoDateHoursAgo } from "./fixtures.mock";
 import { listMyChatReportsMock } from "./chatReports.mock";
 import { createMockRoute, type MockRoute } from "./registry.mock";
 
-const SUPPORT_AGENT_NAME = "Zudomart Support";
+const SUPPORT_AGENT_NAME = "Nantty Support";
 const AGENT_TYPING_MS = 1500;
 const AGENT_REPLY_TEXT = "Thanks for the update. I'm looking into this now and will confirm the next step shortly.";
 
@@ -31,7 +31,7 @@ const tickets: SupportTicketDetail[] = [
 ];
 
 const reports: ContentReport[] = [
-  { id: "rp_1", targetType: "user", targetLabel: "@cheap_iphones_lagos", reason: "Scam or fraud", status: "action_taken", outcomeNote: "We removed this account. Thanks for keeping Zudomart safe.", createdAt: isoDateHoursAgo(300), updatedAt: isoDateHoursAgo(250) },
+  { id: "rp_1", targetType: "user", targetLabel: "@cheap_iphones_lagos", reason: "Scam or fraud", status: "action_taken", outcomeNote: "We removed this account. Thanks for keeping Nantty safe.", createdAt: isoDateHoursAgo(300), updatedAt: isoDateHoursAgo(250) },
   { id: "rp_2", targetType: "post", targetLabel: "Post: \"DM for crypto doubling…\"", reason: "Spam", status: "reviewing", outcomeNote: null, createdAt: isoDateHoursAgo(30), updatedAt: isoDateHoursAgo(20) },
   { id: "rp_3", targetType: "comment", targetLabel: "Comment on Owambe Edit post", reason: "Harassment", status: "no_violation", outcomeNote: "This didn't break our guidelines, but you can block the account.", createdAt: isoDateHoursAgo(500), updatedAt: isoDateHoursAgo(480) },
 ];

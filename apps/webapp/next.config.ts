@@ -28,7 +28,7 @@ const everyPathExceptEmbeds = "/:path((?!embed(?:/|$)|oembed(?:/|$)).*)";
 const nextConfig: NextConfig = {
   experimental: { authInterrupts: true },
   reactStrictMode: true,
-  transpilePackages: ["@zudomart/web-kit", "@zudomart/chat-crypto"],
+  transpilePackages: ["@nantty/web-kit", "@nantty/chat-crypto"],
   poweredByHeader: false,
   images: {
     formats: ["image/avif", "image/webp"],

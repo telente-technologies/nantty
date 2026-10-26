@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useState, type FormEvent } from "react";
 
-import { describeErrorSignal, readErrorSignal } from "@zudomart/web-kit";
+import { describeErrorSignal, readErrorSignal } from "@nantty/web-kit";
 
 import { Button } from "@/components/ui/button";
 import { ErrorState } from "@/components/ui/feedback";

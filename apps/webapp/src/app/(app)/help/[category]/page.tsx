@@ -15,7 +15,7 @@ export async function generateMetadata({ params }: HelpCategoryPageProps): Promi
   const found = await fetchHelpCategory((await params).category);
   if (!found) return { title: "Help topic not found", robots: { index: false } };
   const path = `/help/${found.category.slug}`;
-  return { title: `${found.category.title} · Help Centre`, description: found.category.description, alternates: { canonical: path }, openGraph: { type: "website", url: path, siteName: "Zudomart", title: found.category.title, description: found.category.description } };
+  return { title: `${found.category.title} · Help Centre`, description: found.category.description, alternates: { canonical: path }, openGraph: { type: "website", url: path, siteName: "Nantty", title: found.category.title, description: found.category.description } };
 }
 
 export default async function HelpCategoryPage({ params }: HelpCategoryPageProps) {

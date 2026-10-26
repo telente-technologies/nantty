@@ -17,11 +17,11 @@ describe("celebration copy", () => {
   });
 
   it("writes the warm birthday message with the age and first name", () => {
-    assert.equal(birthdayMessage("Ada Obi", 25).message, "Happy 25th birthday, Ada! Wishing you an amazing year ahead from all of us at Zudomart.");
+    assert.equal(birthdayMessage("Ada Obi", 25).message, "Happy 25th birthday, Ada! Wishing you an amazing year ahead from all of us at Nantty.");
   });
 
   it("writes the Zudoversary message", () => {
-    assert.equal(anniversaryMessage(2).message, "Happy 2nd Zudoversary! Thanks for being part of Zudomart for 2 years.");
+    assert.equal(anniversaryMessage(2).message, "Happy 2nd Zudoversary! Thanks for being part of Nantty for 2 years.");
     assert.ok(anniversaryMessage(1).message.endsWith("for 1 year."));
   });
 });

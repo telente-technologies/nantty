@@ -10,7 +10,7 @@ import { fetchPublicProduct, fetchPublicStore, fetchPublicStoreProducts } from "
 const embedCacheSeconds = 300;
 const unavailableCacheSeconds = 60;
 const embedRequestsPerMinutePerClient = 120;
-const unavailableMessage = "This store isn't available on Zudomart right now.";
+const unavailableMessage = "This store isn't available on Nantty right now.";
 
 const rateLimiter = new EmbedRateLimiter(embedRequestsPerMinutePerClient);
 const renderedEmbeds = new EmbedResponseCache(embedCacheSeconds * 1000);
@@ -25,7 +25,7 @@ function htmlResponse(rendered: RenderedEmbed, cacheSeconds: number): Response {
 }
 
 function unavailable(theme: EmbedTheme, message = unavailableMessage): RenderedEmbed {
-  return { status: 404, body: renderEmbedDocument("Zudomart", theme, renderUnavailableMarkup(message)) };
+  return { status: 404, body: renderEmbedDocument("Nantty", theme, renderUnavailableMarkup(message)) };
 }
 
 function toProductCard(product: Pick<ProductSummary, "id" | "name" | "price" | "imageUrl" | "stock">): EmbedProductCard {
@@ -47,12 +47,12 @@ async function renderProducts(options: EmbedOptions): Promise<RenderedEmbed> {
     ? options.productIds.flatMap((id) => listed.filter((product) => product.id === id))
     : listed.filter((product) => isProductInStock(product));
   const markup = renderProductCollectionMarkup(chosen.slice(0, options.limit).map(toProductCard), options.layout, store.name, buildAbsoluteSiteUrl(buildStorePath(store.id)));
-  return { status: 200, body: renderEmbedDocument(`${store.name} on Zudomart`, options.theme, markup) };
+  return { status: 200, body: renderEmbedDocument(`${store.name} on Nantty`, options.theme, markup) };
 }
 
 async function renderProduct(options: EmbedOptions): Promise<RenderedEmbed> {
   const product = await fetchPublicProduct(options.id);
-  if (product === null) return unavailable(options.theme, "This product isn't available on Zudomart right now.");
+  if (product === null) return unavailable(options.theme, "This product isn't available on Nantty right now.");
   const store = await fetchPublicStore(product.store.id);
   if (store === null) return unavailable(options.theme);
   const card = toProductCard({ ...product, name: product.name ?? product.title, imageUrl: product.imageUrl ?? product.images[0] ?? null });
@@ -63,7 +63,7 @@ export async function respondWithEmbed(kind: string, id: string, query: URLSearc
   const options = parseEmbedOptions(kind, id, query);
   const theme: EmbedTheme = query.get("theme") === "dark" ? "dark" : "light";
   if (!rateLimiter.allow(clientKey)) {
-    const limited = htmlResponse({ status: 429, body: renderEmbedDocument("Zudomart", theme, renderUnavailableMarkup("Too many requests. Try again shortly.")) }, 0);
+    const limited = htmlResponse({ status: 429, body: renderEmbedDocument("Nantty", theme, renderUnavailableMarkup("Too many requests. Try again shortly.")) }, 0);
     limited.headers.set("Retry-After", "60");
     return limited;
   }

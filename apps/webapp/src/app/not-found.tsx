@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { NotFoundScreen } from "@zudomart/web-kit";
+import { NotFoundScreen } from "@nantty/web-kit";
 
 import styles from "./routeFallback.module.css";
 

@@ -1,6 +1,6 @@
-import { buildStoreLinks, buildZudomartEmailAddresses } from "@zudomart/web-kit";
+import { buildStoreLinks, buildNanttyEmailAddresses } from "@nantty/web-kit";
 
-export const emailAddresses = buildZudomartEmailAddresses({
+export const emailAddresses = buildNanttyEmailAddresses({
   domain: process.env.NEXT_PUBLIC_MAIL_DOMAIN,
   overrides: { support: process.env.NEXT_PUBLIC_SUPPORT_EMAIL, privacy: process.env.NEXT_PUBLIC_PRIVACY_EMAIL },
 });

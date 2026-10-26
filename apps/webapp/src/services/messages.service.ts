@@ -1,4 +1,4 @@
-import { type AttachmentPointer, type ChatControl, type ChatLocation, type ChatPayloadInput, type ChatPoll, createPollOptions, defaultRandomSource } from "@zudomart/chat-crypto";
+import { type AttachmentPointer, type ChatControl, type ChatLocation, type ChatPayloadInput, type ChatPoll, createPollOptions, defaultRandomSource } from "@nantty/chat-crypto";
 
 import type { ChatSearchResults, Page } from "@/types";
 import type { Conversation, ConversationFilter, InboxFolder, Message, UserSummary } from "@/types";

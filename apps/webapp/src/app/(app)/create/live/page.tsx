@@ -2,7 +2,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
-import { OfficialStoreBadges } from "@zudomart/web-kit";
+import { OfficialStoreBadges } from "@nantty/web-kit";
 
 import { SignInRequiredState } from "@/components/auth/signInRequiredState";
 import styles from "@/components/create/composer.module.css";
@@ -24,7 +24,7 @@ export default function GoLivePage() {
         <h1 id="go-live-title" className={styles.title}>Go live</h1>
         {creatorStatus.isLoading ? <Spinner label="Checking your creator status" /> : isApprovedCreator ? (
           <>
-            <p>Go live from the Zudomart app. Hosting needs your phone&apos;s camera, live gifts and host controls, so it isn&apos;t available on the web yet.</p>
+            <p>Go live from the Nantty app. Hosting needs your phone&apos;s camera, live gifts and host controls, so it isn&apos;t available on the web yet.</p>
             <p className={styles.hint}>Your followers can watch, chat and send gifts from the web once you&apos;re live.</p>
             <OfficialStoreBadges links={storeLinks} />
             <Link href="/live" className={styles.textButton}>See who&apos;s live now</Link>

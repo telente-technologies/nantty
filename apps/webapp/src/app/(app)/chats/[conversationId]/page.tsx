@@ -27,10 +27,10 @@ import { readChatCryptoErrorMessage } from "@/services/chatCrypto/chatCrypto.ser
 import { readErrorMessageForDisplay } from "@/services/clientApi.service";
 import { messagesService } from "@/services/messages.service";
 import { webappRealtime } from "@/services/realtime/webappRealtime.service";
-import { useRealtimeTopic } from "@zudomart/web-kit/src/realtime/realtimeHooks";
+import { useRealtimeTopic } from "@nantty/web-kit/src/realtime/realtimeHooks";
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import type { ChatControl } from "@zudomart/chat-crypto";
-import { nextPollVote } from "@zudomart/chat-crypto";
+import type { ChatControl } from "@nantty/chat-crypto";
+import { nextPollVote } from "@nantty/chat-crypto";
 import type { Message } from "@/types";
 import { buildChatThread } from "@/utils/chatThread.util";
 import { mergeOptimisticMessages } from "@/utils/chatOptimistic.util";

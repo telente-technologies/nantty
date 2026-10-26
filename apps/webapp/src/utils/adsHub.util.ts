@@ -60,7 +60,7 @@ export function goalsForDestination(options: BoostOptions | undefined, type: Boo
   return fromServer.map((goal) => fallback.find((option) => option.id === goal) ?? { id: goal, label: goal.replace(/_/g, " "), hint: "" });
 }
 
-const PAYMENT_LABELS: Record<BoostPaymentMethod, string> = { card: "Card or bank transfer", ad_balance: "Ad credit & balance", balance: "Zudomart earnings", free: "Free Premium boost" };
+const PAYMENT_LABELS: Record<BoostPaymentMethod, string> = { card: "Card or bank transfer", ad_balance: "Ad credit & balance", balance: "Nantty earnings", free: "Free Premium boost" };
 
 export const paymentMethodLabel = (method: BoostPaymentMethod): string => PAYMENT_LABELS[method] ?? method;
 
@@ -235,14 +235,14 @@ export function adDestinationHref(destination: BoostDestination): string {
 
 const TRANSACTION_KIND_LABELS: Record<string, string> = {
   top_up: "Top-up", boost_funding: "Ad payment", earnings_funding: "Added from earnings", spent: "Spent on ads", refund: "Refund", withdrawal: "Withdrawn to wallet",
-  credit_issued: "Issued by Zudomart", cashback: "Cashback", cashback_reversed: "Cashback reversed", credit_spent: "Spent on ads", credit_expired: "Expired", credit_revoked: "Removed by Zudomart", debt: "Amount owed",
+  credit_issued: "Issued by Nantty", cashback: "Cashback", cashback_reversed: "Cashback reversed", credit_spent: "Spent on ads", credit_expired: "Expired", credit_revoked: "Removed by Nantty", debt: "Amount owed",
 };
 
 export const adTransactionKindLabel = (kind: string): string => TRANSACTION_KIND_LABELS[kind] ?? kind.replace(/_/g, " ");
 
 export const adTransactionPotLabel = (pot: "balance" | "credit"): string => (pot === "credit" ? "Ad credit" : "Ad balance");
 
-const CREDIT_SOURCE_LABELS: Record<string, string> = { admin_issued: "From Zudomart", cashback: "Cashback", premium_free_boost: "Premium free boost", boost_refund: "Ad refund", legacy: "Ad credit" };
+const CREDIT_SOURCE_LABELS: Record<string, string> = { admin_issued: "From Nantty", cashback: "Cashback", premium_free_boost: "Premium free boost", boost_refund: "Ad refund", legacy: "Ad credit" };
 
 export const adCreditSourceLabel = (source: string): string => CREDIT_SOURCE_LABELS[source] ?? "Ad credit";
 

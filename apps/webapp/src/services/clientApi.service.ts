@@ -1,4 +1,4 @@
-import { describeErrorSignal, parseRetryAfterHeader, readRequestIdHeader } from "@zudomart/web-kit/src/errorExperience/core";
+import { describeErrorSignal, parseRetryAfterHeader, readRequestIdHeader } from "@nantty/web-kit/src/errorExperience/core";
 
 import { useAuthPromptStore } from "@/components/auth/authPrompt.store";
 import { useHumanVerificationStore } from "@/components/security/humanVerification.store";

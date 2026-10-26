@@ -6,7 +6,7 @@ import { SubscriptionOfferView } from "@/components/subscriptionOffers/subscript
 import { Spinner } from "@/components/ui/feedback";
 import { readOfferTokenFromPath } from "@/utils/subscriptionOfferCopy.util";
 
-export const metadata: Metadata = { title: "Your Zudomart offer", robots: { index: false, follow: false }, referrer: "no-referrer" };
+export const metadata: Metadata = { title: "Your Nantty offer", robots: { index: false, follow: false }, referrer: "no-referrer" };
 
 interface OfferPageProps {
   readonly params: Promise<{ readonly token: string }>;

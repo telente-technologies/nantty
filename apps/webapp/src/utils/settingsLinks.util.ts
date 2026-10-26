@@ -18,7 +18,7 @@ export function buildSettingsLinkGroups(isSeller: boolean): readonly { readonly 
         { href: "/settings/privacy#privacy-controls", label: "Privacy", description: "Private account, mentions, downloads and sensitive content", icon: "eyeSlash24" },
         { href: "/settings/hidden-comments", label: "Hidden comments", description: "Comments you hid on your posts and clips", icon: "chatCircle24" },
         { href: "/settings/privacy#your-data", label: "Privacy & Data", description: "Cookie choices, download your data, delete your account", icon: "shieldCheck24" },
-        { href: "#notification-settings", label: "Notification", description: "Choose what Zudomart tells you about", icon: "bell24" },
+        { href: "#notification-settings", label: "Notification", description: "Choose what Nantty tells you about", icon: "bell24" },
       ],
     },
     {
@@ -33,7 +33,7 @@ export function buildSettingsLinkGroups(isSeller: boolean): readonly { readonly 
       title: "Selling",
       links: isSeller
         ? [{ href: "/seller", label: "Seller dashboard", description: "Products, orders and payouts for your store", icon: "speedometer24" }]
-        : [{ href: "/seller/apply", label: "Start selling on Zudomart", description: "Free to apply", icon: "tag24" }],
+        : [{ href: "/seller/apply", label: "Start selling on Nantty", description: "Free to apply", icon: "tag24" }],
     },
     {
       title: "Profiles",

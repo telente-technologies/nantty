@@ -18,7 +18,7 @@ function parseHttpUrl(rawUrl: string): URL | null {
 
 function readInternalHosts(): readonly string[] {
   const siteHost = parseHttpUrl(process.env.NEXT_PUBLIC_SITE_URL ?? "")?.hostname;
-  return ["zudomart.com", "app.zudomart.com", "zudomart.app", ...(siteHost ? [siteHost] : [])];
+  return ["nantty.com", "www.nantty.com", "web.nantty.com", "creator.nantty.com", "zudomart.com", "www.zudomart.com", "app.zudomart.com", "zudomart.app", "www.zudomart.app", ...(siteHost ? [siteHost] : [])];
 }
 
 export function findUrlsInText(text: string): string[] {

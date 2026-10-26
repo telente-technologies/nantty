@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { ZudomartWordmark } from "@zudomart/web-kit";
+import { NanttyWordmark } from "@nantty/web-kit";
 import { useEffect, useState } from "react";
 
 import { AppIcon } from "@/components/ui/appIcon";
@@ -42,15 +42,15 @@ export default function WelcomePage() {
   return (
     <div>
       {showSplash ? (
-        <div className={styles.splash} role="status" aria-label="Zudomart">
+        <div className={styles.splash} role="status" aria-label="Nantty">
           <span>
-            <ZudomartWordmark height={28} />
+            <NanttyWordmark height={28} />
           </span>
         </div>
       ) : null}
 
       <div className={styles.topBar}>
-        <Link href="/" className={styles.skip} title="Browse Zudomart without an account">
+        <Link href="/" className={styles.skip} title="Browse Nantty without an account">
           Skip
         </Link>
       </div>
@@ -95,9 +95,9 @@ export default function WelcomePage() {
 
       <div className={styles.footer}>
         <p className={styles.legal}>
-          By continuing, you agree to our <a href={`${process.env.NEXT_PUBLIC_MARKETING_SITE_URL ?? "https://zudomart.com"}/terms`}>Terms of Service</a> and acknowledge you have read our{" "}
-          <a href={`${process.env.NEXT_PUBLIC_MARKETING_SITE_URL ?? "https://zudomart.com"}/privacy`}>Privacy Policy</a> and{" "}
-          <a href={`${process.env.NEXT_PUBLIC_MARKETING_SITE_URL ?? "https://zudomart.com"}/cookies`}>Cookie Use</a> to learn how we collect, use, and share your data.
+          By continuing, you agree to our <a href={`${process.env.NEXT_PUBLIC_MARKETING_SITE_URL ?? "https://nantty.com"}/terms`}>Terms of Service</a> and acknowledge you have read our{" "}
+          <a href={`${process.env.NEXT_PUBLIC_MARKETING_SITE_URL ?? "https://nantty.com"}/privacy`}>Privacy Policy</a> and{" "}
+          <a href={`${process.env.NEXT_PUBLIC_MARKETING_SITE_URL ?? "https://nantty.com"}/cookies`}>Cookie Use</a> to learn how we collect, use, and share your data.
         </p>
         <p className={formStyles.switchPrompt}>
           {mode === "login" ? "Don’t have an account?" : "Already have an account?"}{" "}

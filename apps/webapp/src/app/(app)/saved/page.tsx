@@ -3,7 +3,7 @@
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import { useState } from "react";
-import { Skeleton } from "@zudomart/web-kit";
+import { Skeleton } from "@nantty/web-kit";
 
 import { SaveCollectionsBar } from "@/components/saves/saveCollectionsBar";
 import { SavedItemCard } from "@/components/saves/savedItemCard";

@@ -38,7 +38,7 @@ export const mockConversations: Conversation[] = [
   {
     ...directConversation("ch_deals", "u_25", "Flash sale: free delivery on all orders above your city's threshold today", 5, 2, false),
     kind: "channel",
-    title: "Zudomart Deals",
+    title: "Nantty Deals",
     subscriberCount: 58200,
     myRole: "subscriber",
   },
@@ -48,7 +48,7 @@ export const mockConversations: Conversation[] = [
   {
     ...directConversation("c_spam_prize", "u_14", "Congrats! You won a free phone. Send your bank details to claim it.", 12, 1, false),
     inboxFolder: "spam",
-    spamReason: "Flagged by Zudomart because this account sent the same message to many people.",
+    spamReason: "Flagged by Nantty because this account sent the same message to many people.",
   },
 ];
 
@@ -91,7 +91,7 @@ export const mockMessagesByConversation = new Map<string, Message[]>([
   [
     "ch_deals",
     [
-      textMessage("m_ch_1", "ch_deals", "u_25", "Welcome to Zudomart Deals! We post the best verified offers here every day.", 48),
+      textMessage("m_ch_1", "ch_deals", "u_25", "Welcome to Nantty Deals! We post the best verified offers here every day.", 48),
       textMessage("m_ch_2", "ch_deals", "u_25", "Flash sale: free delivery on all orders above your city's threshold today", 5),
     ],
   ],
@@ -144,7 +144,7 @@ const sendableKinds = new Set<string>(["text", "voice", "image", "video", "docum
 export function rejectMockPlaintext(input: Partial<Record<(typeof plaintextFields)[number], unknown>>) {
   const sent = plaintextFields.filter((field) => input[field] !== undefined && input[field] !== null && input[field] !== "");
   if (sent.length > 0) {
-    throw new ApiError(422, "Chats are end-to-end encrypted. Update Zudomart to send this: text, locations, polls, documents and shared items must be inside the encrypted message.", "PLAINTEXT_NOT_ACCEPTED");
+    throw new ApiError(422, "Chats are end-to-end encrypted. Update Nantty to send this: text, locations, polls, documents and shared items must be inside the encrypted message.", "PLAINTEXT_NOT_ACCEPTED");
   }
 }
 

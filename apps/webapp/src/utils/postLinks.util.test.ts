@@ -6,6 +6,7 @@ import { readInternalPathFromUrl } from "./postLinks.util";
 describe("readInternalPathFromUrl", () => {
   it("keeps ordinary internal paths", () => {
     assert.equal(readInternalPathFromUrl("https://zudomart.com/post/abc?x=1#c"), "/post/abc?x=1#c");
+    assert.equal(readInternalPathFromUrl("https://web.nantty.com/post/abc?x=1#c"), "/post/abc?x=1#c");
   });
 
   it("never returns a protocol-relative path that would leave the site", () => {

@@ -1,4 +1,4 @@
-import type { AttachmentPointer, ChatControl, ChatLinkPreview, ChatLocation, ChatPoll, LiveLocationState, PollOptionTally } from "@zudomart/chat-crypto";
+import type { AttachmentPointer, ChatControl, ChatLinkPreview, ChatLocation, ChatPoll, LiveLocationState, PollOptionTally } from "@nantty/chat-crypto";
 
 import type { AdAppInstall, AdCard, AdClickLinks, AdCreativeType, AdDestination, AdPromotedEntity } from "./adCreative.type";
 import type { InboxFolder, SharedContentReference } from "./chatSafety.type";

@@ -15,7 +15,7 @@ function buildCarouselAd(source: Post): Post {
     headline: `${source.products[0]?.name ?? "New arrival"} ${index + 1}`,
     description: "Pay into escrow, release when it fits.",
     ctaLabel: index === 0 ? "Shop now" : "Learn more",
-    destination: source.products[0] ? { type: "product", targetId: source.products[0].id } : { type: "url", url: "https://zudomart.com" },
+    destination: source.products[0] ? { type: "product", targetId: source.products[0].id } : { type: "url", url: "https://nantty.com" },
   }));
   return {
     ...source,
@@ -47,7 +47,7 @@ function buildAppInstallAd(source: Post): Post {
         rating: 4.6,
         iosStoreUrl: "https://apps.apple.com/ng/app/zudo-companion/id1000000000",
         androidStoreUrl: "https://play.google.com/store/apps/details?id=com.zudomart.companion",
-        webFallbackUrl: "https://zudomart.com/app",
+        webFallbackUrl: "https://nantty.com/app",
         iosDeepLink: "zudocompanion://home",
         androidDeepLink: "zudocompanion://home",
       },

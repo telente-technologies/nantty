@@ -14,13 +14,13 @@ The email-sized `@2x` PNGs are not kept in this folder. They live with the email
 Apple, App Store marketing guidelines: https://developer.apple.com/app-store/marketing/guidelines/
 - Use the black badge; never change its colour, proportions or text. The grey outline is part of the artwork.
 - Minimum height 40 px on screen. Clear space around the badge of at least a quarter of its height (10 px at 40 px).
-- Link the badge only to the Zudomart App Store product page (`https://apps.apple.com/app/id<APP_STORE_ID>`).
+- Link the badge only to the Nantty App Store product page (`https://apps.apple.com/app/id<APP_STORE_ID>`).
 - Alt text: "Download on the App Store". Place it before or level with other store badges; do not make it smaller than other badges.
 - Legal line where space allows: "Apple and the Apple logo are trademarks of Apple Inc., registered in the U.S. and other countries and regions. App Store is a service mark of Apple Inc."
 
 Google Play badge guidelines: https://partnermarketinghub.withgoogle.com/brands/google-play/visual-identity/badge-guidelines/
 - Use the official badge only, unaltered, with its built-in clear space; show it at the same visual height as other store badges.
-- Link it only to the Zudomart listing (`https://play.google.com/store/apps/details?id=<PLAY_PACKAGE>`).
+- Link it only to the Nantty listing (`https://play.google.com/store/apps/details?id=<PLAY_PACKAGE>`).
 - Alt text: "Get it on Google Play".
 - Legal line where space allows: "Google Play and the Google Play logo are trademarks of Google LLC."
 

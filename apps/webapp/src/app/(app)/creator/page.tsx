@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 
-import { OfficialStoreBadges } from "@zudomart/web-kit";
+import { OfficialStoreBadges } from "@nantty/web-kit";
 
 import { SubscriptionPlansSection } from "@/components/creator/subscriptionPlansSection";
 import { storeLinks } from "@/config/brandContact.config";
@@ -41,7 +41,7 @@ export default function CreatorDashboardPage() {
       <EmptyState
         icon={<CreatorIcon size={28} />}
         title="Join the Creator Program"
-        description="Approved creators can go live, earn from gifts and subscriptions, and see their analytics here. Apply in the Zudomart app: Profile, then Creator Program."
+        description="Approved creators can go live, earn from gifts and subscriptions, and see their analytics here. Apply in the Nantty app: Profile, then Creator Program."
         action={<OfficialStoreBadges links={storeLinks} align="center" />}
       />
     );

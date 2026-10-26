@@ -71,7 +71,7 @@ export default function HomePage() {
   const feed = (
     <div className={styles.page}>
       {isGuest ? (
-        <p className={styles.guestNote}>Popular on Zudomart right now. Sign in to get a feed picked for you.</p>
+        <p className={styles.guestNote}>Popular on Nantty right now. Sign in to get a feed picked for you.</p>
       ) : (
         <FeedTopicFilterRow feedMode={feedMode} activeTopicId={activeTopicId} onSelectMode={setFeedMode} onSelectTopic={setActiveTopicId} />
       )}

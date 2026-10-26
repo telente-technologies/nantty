@@ -1,4 +1,4 @@
-import { type ChatCryptoStorage, type KeyValueStore, type Sealer, SealedKeyValueStore } from "@zudomart/chat-crypto";
+import { type ChatCryptoStorage, type KeyValueStore, type Sealer, SealedKeyValueStore } from "@nantty/chat-crypto";
 
 const databaseName = "zudomart-chat-crypto";
 const storeNames = ["secrets", "records", "wrapping"] as const;

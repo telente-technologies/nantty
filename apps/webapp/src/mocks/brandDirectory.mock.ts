@@ -43,7 +43,7 @@ export const mockBrandRecords: MockBrandRecord[] = [
   },
   {
     id: "br_lekki", name: "Lekki Gadgets", handle: "lekkigadgets", ownerUserKey: null, officialStoreId: null, categoryId: "cat_gadgets",
-    description: "Everyday tech accessories. This brand hasn't opened an official store on Zudomart yet.",
+    description: "Everyday tech accessories. This brand hasn't opened an official store on Nantty yet.",
     website: null, verification: null, followers: 2_300,
     logoUrl: productImageUrlsForProduct("g4")[0] ?? null, coverUrl: productImageUrlsForProduct("g5")[0] ?? null,
   },

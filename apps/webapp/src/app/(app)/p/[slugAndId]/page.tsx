@@ -36,7 +36,7 @@ export async function generateMetadata({ params }: ProductPageProps): Promise<Me
     title: `${product.name || product.title} · ${price}`,
     description,
     alternates: { canonical: canonicalUrl, languages: { "en-NG": canonicalUrl, "x-default": canonicalUrl } },
-    openGraph: { type: "website", url: canonicalUrl, siteName: "Zudomart", title: product.name || product.title, description, images: images.map((url) => ({ url, alt: product.title })) },
+    openGraph: { type: "website", url: canonicalUrl, siteName: "Nantty", title: product.name || product.title, description, images: images.map((url) => ({ url, alt: product.title })) },
     twitter: { card: images.length > 0 ? "summary_large_image" : "summary", title: product.name || product.title, description, images },
     other: {
       "product:price:amount": convertMinorAmountToDecimalString(product.price.amountMinor, product.price.currency),

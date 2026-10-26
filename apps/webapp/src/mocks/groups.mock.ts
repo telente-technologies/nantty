@@ -76,7 +76,7 @@ const setMemberRole = (conversationId: string, userId: string, role: Conversatio
 const sealedPattern = /^[A-Za-z0-9+/]+={0,2}$/;
 
 function requireMockSealedAttributes(name: unknown, encryptedAttributes: unknown): string {
-  if (name !== undefined && name !== null && name !== "") throw new ApiError(422, "Group names and photos are end-to-end encrypted. Update Zudomart to create or rename groups.", "PLAINTEXT_NOT_ACCEPTED");
+  if (name !== undefined && name !== null && name !== "") throw new ApiError(422, "Group names and photos are end-to-end encrypted. Update Nantty to create or rename groups.", "PLAINTEXT_NOT_ACCEPTED");
   if (typeof encryptedAttributes !== "string" || encryptedAttributes.length < 64 || !sealedPattern.test(encryptedAttributes)) throw new ApiError(422, "A new group needs its encrypted details.", "ENCRYPTION_REQUIRED");
   return encryptedAttributes;
 }

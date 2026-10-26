@@ -1,6 +1,6 @@
 "use client";
 
-import { RouteErrorScreen } from "@zudomart/web-kit";
+import { RouteErrorScreen } from "@nantty/web-kit";
 
 import styles from "./routeFallback.module.css";
 

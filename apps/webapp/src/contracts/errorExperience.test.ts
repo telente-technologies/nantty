@@ -4,7 +4,7 @@ import { register } from "node:module";
 import { resolve } from "node:path";
 import { pathToFileURL } from "node:url";
 
-import { describeErrorSignal } from "@zudomart/web-kit/src/errorExperience/core";
+import { describeErrorSignal } from "@nantty/web-kit/src/errorExperience/core";
 import { readErrorMessageForDisplay, sendRequestToWebappServer, WebappRequestError } from "@/services/clientApi.service";
 
 register(pathToFileURL(resolve(process.cwd(), "../../packages/webKit/src/dialog/__tests__/cssStub.loader.mjs")).href);
@@ -72,7 +72,7 @@ describe("not-found pages", () => {
   it("render the branded 404 with search and the main destinations", async () => {
     const { createElement } = await import("react");
     const { renderToStaticMarkup } = await import("react-dom/server");
-    const { ErrorExperienceProvider } = await import("@zudomart/web-kit");
+    const { ErrorExperienceProvider } = await import("@nantty/web-kit");
     const { buildWebappErrorConfig } = await import("@/components/errors/errorExperience.provider");
     const { default: NotFoundPage } = await import("@/app/not-found");
     const html = renderToStaticMarkup(createElement(ErrorExperienceProvider, { value: { ...buildWebappErrorConfig(), renderLink: undefined }, children: createElement(NotFoundPage) }));

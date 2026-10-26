@@ -1,4 +1,4 @@
-import type { AttachmentPointer, GroupAttributes } from "@zudomart/chat-crypto";
+import type { AttachmentPointer, GroupAttributes } from "@nantty/chat-crypto";
 
 import type { Conversation } from "@/types";
 

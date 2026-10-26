@@ -64,7 +64,7 @@ function outboundLink(url: string, className: string, content: string, label?: s
   return `<a class="${className}" href="${escapeHtml(url)}" target="_blank" rel="noopener noreferrer"${label === undefined ? "" : ` aria-label="${escapeHtml(label)}"`}>${content}</a>`;
 }
 
-const poweredBy = `<span class="brandmark">${renderEmbedIcon("storefrontBold", 12, "")}Zudomart</span>`;
+const poweredBy = `<span class="brandmark">${renderEmbedIcon("storefrontBold", 12, "")}Nantty</span>`;
 
 export function renderEmbedDocument(title: string, theme: EmbedTheme, body: string): string {
   return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex"><title>${escapeHtml(title)}</title><style>:root{${themeVariables[theme]};color-scheme:${theme}}${embedStyles}</style></head><body><main class="zd">${body}</main><script>${embedResizeScript}</script></body></html>`;
@@ -78,7 +78,7 @@ export function renderStoreCardMarkup(store: EmbedStoreCard): string {
 }
 
 function productTile(product: EmbedProductCard): string {
-  const buy = product.inStock ? outboundLink(product.url, "btn", `${renderEmbedIcon("shoppingBagBold", 14, "")}Buy`, `Buy ${product.name} on Zudomart`) : `<span class="btn" aria-disabled="true">Sold out</span>`;
+  const buy = product.inStock ? outboundLink(product.url, "btn", `${renderEmbedIcon("shoppingBagBold", 14, "")}Buy`, `Buy ${product.name} on Nantty`) : `<span class="btn" aria-disabled="true">Sold out</span>`;
   return `<div class="tile">${outboundLink(product.url, "", image(product.imageUrl, "thumb", product.name), product.name)}<div class="body"><div class="clip">${escapeHtml(product.name)}</div>`
     + `<div class="price">${escapeHtml(formatMoneyForDisplay(product.price, { showDecimals: false }))}</div>${buy}</div></div>`;
 }
@@ -90,10 +90,10 @@ export function renderProductCollectionMarkup(products: readonly EmbedProductCar
 
 export function renderBuyButtonMarkup(product: EmbedProductCard, view: "button" | "card"): string {
   if (view === "card") return `<div style="max-width:320px">${productTile(product)}</div>`;
-  if (!product.inStock) return `<span class="btn" aria-disabled="true">Sold out on Zudomart</span>`;
-  return outboundLink(product.url, "btn", `${renderEmbedIcon("shoppingBagBold", 16, "")}Buy on Zudomart`, `Buy ${product.name} on Zudomart`);
+  if (!product.inStock) return `<span class="btn" aria-disabled="true">Sold out on Nantty</span>`;
+  return outboundLink(product.url, "btn", `${renderEmbedIcon("shoppingBagBold", 16, "")}Buy on Nantty`, `Buy ${product.name} on Nantty`);
 }
 
 export function renderUnavailableMarkup(message: string): string {
-  return `<div class="unavailable" role="status"><span class="unavailableIcon">${renderEmbedIcon("storefrontBold", 22, "")}</span><strong>${escapeHtml(message)}</strong><span>It may have moved or closed. Visit Zudomart to keep shopping.</span></div>`;
+  return `<div class="unavailable" role="status"><span class="unavailableIcon">${renderEmbedIcon("storefrontBold", 22, "")}</span><strong>${escapeHtml(message)}</strong><span>It may have moved or closed. Visit Nantty to keep shopping.</span></div>`;
 }

@@ -121,7 +121,7 @@ const chargeOrThrow = (request: CreateBoostRequest, totalCost: Money) => {
     return;
   }
   if (request.paymentMethod === "balance") {
-    if (!signedInUserIsPayoutVerified()) throw new ApiError(403, "Verify your payout details to use Zudomart Ads. Your verification keeps advertisers and creators safe.", "VERIFICATION_REQUIRED");
+    if (!signedInUserIsPayoutVerified()) throw new ApiError(403, "Verify your payout details to use Nantty Ads. Your verification keeps advertisers and creators safe.", "VERIFICATION_REQUIRED");
     if (totalCost.amountMinor > buildWalletSummary().available.amountMinor) throw new ApiError(422, "Amount is more than your available balance.", "INSUFFICIENT_FUNDS");
     return;
   }
@@ -263,7 +263,7 @@ export const boostsMocks: MockRoute[] = [
   createMockRoute("GET", "/api/v1/ads/boosts/balance", () => buildAdBalance()),
   createMockRoute("GET", "/api/v1/ads/boosts/balance/transactions", () => ({ data: adHistoryByUserId.get(getSignedInMockUser().id) ?? [], nextCursor: null })),
   createMockRoute("POST", "/api/v1/ads/boosts/balance/top-ups", ({ body }) => {
-    if (!signedInUserIsPayoutVerified()) throw new ApiError(403, "Verify your payout details to use Zudomart Ads.", "VERIFICATION_REQUIRED");
+    if (!signedInUserIsPayoutVerified()) throw new ApiError(403, "Verify your payout details to use Nantty Ads.", "VERIFICATION_REQUIRED");
     const amount = (body as { amount?: Money }).amount;
     if (!amount || amount.amountMinor <= 0) throw new ApiError(400, "Enter an amount above zero.", "VALIDATION_FAILED");
     const reference = `adtop_${Date.now()}`;
@@ -275,7 +275,7 @@ export const boostsMocks: MockRoute[] = [
     const quote = withdrawalQuote((body as { amount: Money }).amount);
     const userId = getSignedInMockUser().id;
     adFundsFor(userId).balance -= convertViewerMoneyToUsdCents(quote.amount);
-    recordAdHistory(userId, { pot: "balance", kind: "withdrawal", amount: { amountMinor: -quote.amount.amountMinor, currency: quote.amount.currency }, description: "To your Zudomart wallet" });
+    recordAdHistory(userId, { pot: "balance", kind: "withdrawal", amount: { amountMinor: -quote.amount.amountMinor, currency: quote.amount.currency }, description: "To your Nantty wallet" });
     return { id: `adwd_${Date.now()}`, status: "completed", amount: quote.amount, fee: quote.fee, net: quote.net, destination: "wallet", createdAt: new Date().toISOString() };
   }),
   createMockRoute("POST", "/api/v1/ads/boosts/estimate", ({ body }) => estimate(body as BoostEstimateRequest)),

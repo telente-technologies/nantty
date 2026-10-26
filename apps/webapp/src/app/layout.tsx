@@ -2,7 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import { cookies } from "next/headers";
 import type { ReactNode } from "react";
-import { parseThemePreference, readHtmlThemeAttribute, ThemeInitScript, themeCookieName, themeViewport } from "@zudomart/web-kit";
+import { parseThemePreference, readHtmlThemeAttribute, ThemeInitScript, themeCookieName, themeViewport } from "@nantty/web-kit";
 
 import { AppProviders } from "@/components/providers/appProviders";
 import { deriveCsrfTokenForSession } from "@/server/signedCookie.service";
@@ -14,11 +14,11 @@ const interFont = Inter({ subsets: ["latin"], display: "swap", variable: "--font
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3500"),
-  title: { default: "Zudomart", template: "%s · Zudomart" },
+  title: { default: "Nantty", template: "%s · Nantty" },
   description: "Shop the sellers you already watch.",
-  applicationName: "Zudomart",
+  applicationName: "Nantty",
   manifest: "/manifest.webmanifest",
-  icons: { icon: [{ url: "/brand/favicon.ico", sizes: "48x48" }, { url: "/brand/icon.svg", type: "image/svg+xml" }], apple: "/brand/appleTouchIcon.png" },
+  icons: { icon: [{ url: "/brand/nantty-icon.png", type: "image/png" }], apple: "/brand/nantty-icon.png" },
   formatDetection: { telephone: false },
 };
 

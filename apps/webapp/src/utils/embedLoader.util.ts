@@ -18,7 +18,7 @@ var id=el.getAttribute(kind==="product"?"data-product":"data-store")||"";if(!idP
 var frame=frameId();var iframe=document.createElement("iframe");var text=query.toString();
 iframe.src=origin+"/embed/"+kind+"/"+encodeURIComponent(id)+(text?"?"+text:"")+"#frame="+frame;
 iframe.setAttribute("sandbox","allow-scripts allow-popups allow-popups-to-escape-sandbox");iframe.setAttribute("referrerpolicy","strict-origin-when-cross-origin");
-iframe.setAttribute("loading","lazy");iframe.setAttribute("title",el.getAttribute("data-title")||"Zudomart");
+iframe.setAttribute("loading","lazy");iframe.setAttribute("title",el.getAttribute("data-title")||"Nantty");
 iframe.style.cssText="border:0;width:100%;max-width:100%;display:block;height:"+(query.get("view")==="button"?"64px":"200px");
 el.setAttribute("data-zudomart-ready","1");el.appendChild(iframe);
 window.addEventListener("message",function(event){if(event.source!==iframe.contentWindow)return;if(event.origin!=="null"&&event.origin!==origin)return;var data=event.data;

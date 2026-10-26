@@ -21,7 +21,7 @@ export default function AboutSettingsPage() {
         <Link href="/settings"><IconLabel name="arrowLeft24" size={16}>Settings</IconLabel></Link>
         <h1 className={styles.title}>About</h1>
       </div>
-      <nav className={homeStyles.card} aria-label="About Zudomart">
+      <nav className={homeStyles.card} aria-label="About Nantty">
         <ul className={homeStyles.linkList}>
           {aboutLinks.map((link) => (
             <li key={link.label}>

@@ -21,9 +21,9 @@ export function buildOrganizationJsonLd(): JsonLd {
   return {
     "@context": "https://schema.org",
     "@type": "Organization",
-    name: "Zudomart",
+    name: "Nantty",
     url: buildAbsoluteSiteUrl("/"),
-    logo: buildAbsoluteSiteUrl("/zudomartLogo.png"),
+    logo: buildAbsoluteSiteUrl("/brand/nantty-icon.png"),
   };
 }
 

@@ -21,7 +21,7 @@ export async function generateMetadata({ params }: HelpTopicPageProps): Promise<
     title: `${topic.title} · Help Centre`,
     description,
     alternates: { canonical: path },
-    openGraph: { type: "article", url: path, siteName: "Zudomart", title: topic.title, description, modifiedTime: topic.updatedAt },
+    openGraph: { type: "article", url: path, siteName: "Nantty", title: topic.title, description, modifiedTime: topic.updatedAt },
     twitter: { card: "summary", title: topic.title, description },
   };
 }
@@ -33,7 +33,7 @@ export default async function HelpTopicPage({ params }: HelpTopicPageProps) {
   const path = `/help/${topic.categorySlug}/${topic.slug}`;
   if (topic.categorySlug !== category || topic.slug !== slug) permanentRedirect(path);
   const structuredData = [
-    { "@context": "https://schema.org", "@type": "Article", headline: topic.title, description: topic.summary, dateModified: topic.updatedAt, ...(topic.publishedAt ? { datePublished: topic.publishedAt } : {}), publisher: { "@type": "Organization", name: "Zudomart" } },
+    { "@context": "https://schema.org", "@type": "Article", headline: topic.title, description: topic.summary, dateModified: topic.updatedAt, ...(topic.publishedAt ? { datePublished: topic.publishedAt } : {}), publisher: { "@type": "Organization", name: "Nantty" } },
     buildBreadcrumbJsonLd([{ name: "Help Centre", path: "/help" }, { name: topic.categoryTitle, path: `/help/${topic.categorySlug}` }, { name: topic.title, path }]),
   ];
   return (

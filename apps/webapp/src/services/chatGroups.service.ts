@@ -1,4 +1,4 @@
-import type { GroupAttributes, GroupAvatar } from "@zudomart/chat-crypto";
+import type { GroupAttributes, GroupAvatar } from "@nantty/chat-crypto";
 
 import type { ChatMuteDuration, ChatSettings, Conversation, ConversationMember, ConversationSettingsUpdate, ID, SharedContentCard, SharedContentReference } from "@/types";
 

@@ -1,4 +1,4 @@
-const marketingSiteUrl = process.env.NEXT_PUBLIC_MARKETING_SITE_URL ?? "https://zudomart.com";
+const marketingSiteUrl = process.env.NEXT_PUBLIC_MARKETING_SITE_URL ?? "https://nantty.com";
 
 export const currentPolicyVersion = "2026-10-01";
 

@@ -1,4 +1,4 @@
-import { createMockKeyDirectoryBackend, type DeviceAddress, type DeviceRegistrationRequest, type MailboxEntryInput, type WireOneTimePreKey, type WireSignedPreKey } from "@zudomart/chat-crypto";
+import { createMockKeyDirectoryBackend, type DeviceAddress, type DeviceRegistrationRequest, type MailboxEntryInput, type WireOneTimePreKey, type WireSignedPreKey } from "@nantty/chat-crypto";
 
 import { ApiError } from "@/errors/api.error";
 

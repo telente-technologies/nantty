@@ -1,4 +1,4 @@
-import { ZudomartWordmark } from "@zudomart/web-kit";
+import { NanttyWordmark } from "@nantty/web-kit";
 import Link from "next/link";
 import type { ReactNode } from "react";
 
@@ -42,7 +42,7 @@ export default function AuthLayout({ children }: { readonly children: ReactNode 
               alt="Seller profile with followers and a View Shop button"
               className={`${styles.phone} ${styles.phoneLeft}`}
             />
-            <PhoneFrameWithAppScreen screen="homeFeedScreen" alt="Zudomart home feed" className={`${styles.phone} ${styles.phoneCenter}`} priority />
+            <PhoneFrameWithAppScreen screen="homeFeedScreen" alt="Nantty home feed" className={`${styles.phone} ${styles.phoneCenter}`} priority />
             <PhoneFrameWithAppScreen screen="productDetailScreen" alt="Product page with its naira price and Add to Cart" className={`${styles.phone} ${styles.phoneRight}`} />
           </div>
         </div>
@@ -50,8 +50,8 @@ export default function AuthLayout({ children }: { readonly children: ReactNode 
 
       <main id="main-content" className={styles.main} tabIndex={-1}>
         <div className={styles.panel}>
-          <Link href="/welcome" className={styles.wordmark} aria-label="Zudomart">
-            <ZudomartWordmark height={30} />
+          <Link href="/welcome" className={styles.wordmark} aria-label="Nantty">
+            <NanttyWordmark height={30} />
           </Link>
           <CookiesRequiredNotice />
           {children}

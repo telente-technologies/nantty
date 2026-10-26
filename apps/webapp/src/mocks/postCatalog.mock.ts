@@ -63,7 +63,7 @@ const POST_SEEDS: readonly PostSeed[] = [
   { id: "post_28", authorKey: "u_23", hoursAgo: 190, engagement: [980, 120, 17, 11_200], text: "Six cakes delivered today and not one fell in traffic 🙌🏾 Owerri drivers, I salute you." },
   { id: "post_29", authorKey: "u_15", hoursAgo: 200, photoKey: "airportTravel", engagement: [770, 91, 23, 10_100], text: "Off to Calabar for the Carnival! Who else is going? ✈️🎉" },
   { id: "post_31", authorKey: "u_7", hoursAgo: 15, engagement: [356, 47, 33, 8_900], text: "Good read on how Nigerian fintechs are handling the new CBN rules https://techcabal.com/2026/10/02/fintech-compliance-guide/", linkPreview: { url: "https://techcabal.com/2026/10/02/fintech-compliance-guide/", domain: "techcabal.com", title: "How Nigerian fintechs are adapting to the new CBN rules", description: "Founders and compliance leads explain what changes for wallets, KYC tiers and cross-border payments this quarter.", siteName: "TechCabal", imageUrl: postImageUrlsForPhotoKey("laptopDesk")[0] ?? null, imageMediaId: null } },
-  { id: "post_32", authorKey: "u_10", hoursAgo: 18, engagement: [212, 19, 8, 4_100], text: "This dress is everything for December 😍 https://app.zudomart.com/p/ankara-wrap-midi-dress-pr_f1" },
+  { id: "post_32", authorKey: "u_10", hoursAgo: 18, engagement: [212, 19, 8, 4_100], text: "This dress is everything for December 😍 https://web.nantty.com/p/ankara-wrap-midi-dress-pr_f1" },
   { id: "post_30", authorKey: "u_3", hoursAgo: 210, productKeys: ["b5"], engagement: [1190, 205, 60, 16_400], text: "Edges gone? 😅 Chebe & rosemary oil is back — only 2 bottles left in this batch." },
 ];
 

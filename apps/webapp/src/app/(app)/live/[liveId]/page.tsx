@@ -3,7 +3,7 @@
 import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import { use, useEffect, useRef, useState } from "react";
-import { isLiveVideoSupported } from "@zudomart/web-kit";
+import { isLiveVideoSupported } from "@nantty/web-kit";
 
 import { ContentActionsMenu } from "@/components/actions/contentActionsMenu";
 import { useFollowUser } from "@/components/follow/useFollowUser.hook";

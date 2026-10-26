@@ -36,7 +36,7 @@ describe("embed markup", () => {
     assert.equal(safeImageUrl("https://cdn.example/a.png"), "https://cdn.example/a.png");
   });
 
-  it("opens Zudomart in a new tab for buying and never embeds checkout", () => {
+  it("opens Nantty in a new tab for buying and never embeds checkout", () => {
     const html = renderBuyButtonMarkup({ name: "Adire set", price, imageUrl: null, inStock: true, url: "https://zudomart.com/p/adire-set-p1" }, "button");
     assert.ok(html.includes('target="_blank"') && html.includes('rel="noopener noreferrer"'));
     assert.ok(!/<form|<input/.test(html));
@@ -51,8 +51,9 @@ describe("embed markup", () => {
 });
 
 describe("oEmbed", () => {
-  it("accepts only Zudomart store and product links", () => {
+  it("accepts only Nantty store and product links", () => {
     assert.deepEqual(readOembedTarget("https://zudomart.com/store/s1", "https://app.zudomart.com"), { kind: "store", id: "s1" });
+  assert.deepEqual(readOembedTarget("https://nantty.com/store/s1", "https://web.nantty.com"), { kind: "store", id: "s1" });
     assert.deepEqual(readOembedTarget("https://zudomart.com/p/adire-set-p1", "https://app.zudomart.com"), { kind: "product", id: "p1" });
     assert.equal(readOembedTarget("https://evil.example/store/s1", "https://app.zudomart.com"), null);
     assert.equal(readOembedTarget("https://zudomart.com/settings", "https://app.zudomart.com"), null);
@@ -67,7 +68,7 @@ describe("oEmbed", () => {
 });
 
 describe("embed snippets from the builders", async () => {
-  const { buildEmbedFrameUrl, buildEmbedSnippet } = await import("@zudomart/web-kit/src/embed/embedSnippet");
+  const { buildEmbedFrameUrl, buildEmbedSnippet } = await import("@nantty/web-kit/src/embed/embedSnippet");
 
   it("produce a loader snippet that points at the embed origin and escapes attributes", () => {
     const snippet = buildEmbedSnippet({ origin: "https://app.zudomart.com", kind: "products", storeId: "s\"1", theme: "dark", layout: "carousel", productIds: ["p1", "p2"] });

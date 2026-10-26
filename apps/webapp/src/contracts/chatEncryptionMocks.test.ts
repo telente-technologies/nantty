@@ -3,7 +3,7 @@ import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, it } from "node:test";
 
-import { ChatCryptoClient, createHttpKeyDirectory, createPollOptions, defaultRandomSource, MemoryKeyValueStore } from "@zudomart/chat-crypto";
+import { ChatCryptoClient, createHttpKeyDirectory, createPollOptions, defaultRandomSource, MemoryKeyValueStore } from "@nantty/chat-crypto";
 
 import { dispatchMockApiRequest } from "@/mocks/dispatch.mock";
 import { getSignedInMockUser } from "@/mocks/fixtures.mock";

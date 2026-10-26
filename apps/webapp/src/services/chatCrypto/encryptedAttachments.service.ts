@@ -1,4 +1,4 @@
-import { type AttachmentDetails, type AttachmentPointer, encryptAttachment, encryptedAttachmentMimeType } from "@zudomart/chat-crypto";
+import { type AttachmentDetails, type AttachmentPointer, encryptAttachment, encryptedAttachmentMimeType } from "@nantty/chat-crypto";
 
 import type { ID } from "@/types";
 

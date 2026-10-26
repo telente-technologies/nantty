@@ -26,7 +26,7 @@ function shareReferenceIntoConversations(body: ChatShareBody) {
   if (!shareableKinds.has(kind) || !referenceId) throw new ApiError(422, "This can't be shared");
   if (typeof body.note === "string" && body.note !== "") throw new ApiError(400, "Notes can't be sent with a share.", "VALIDATION_FAILED");
   const sealedFor = (conversationId: string) => (body.encryptions ?? []).find((entry) => entry.conversationId === conversationId && typeof entry.ciphertext === "string" && typeof entry.deviceId === "string");
-  if (conversationIds.some((conversationId) => !sealedFor(conversationId))) throw new ApiError(422, "Shared items are end-to-end encrypted. Update Zudomart to share to chats.", "ENCRYPTION_REQUIRED");
+  if (conversationIds.some((conversationId) => !sealedFor(conversationId))) throw new ApiError(422, "Shared items are end-to-end encrypted. Update Nantty to share to chats.", "ENCRYPTION_REQUIRED");
   let sentCount = 0;
   for (const conversationId of conversationIds) {
     if (!mockConversations.some((conversation) => conversation.id === conversationId)) continue;

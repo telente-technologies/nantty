@@ -22,12 +22,12 @@ export async function generateMetadata({ params }: ProfilePageProps): Promise<Me
   if (!user) return { title: "Profile not found", robots: { index: false } };
   const canonicalUrl = buildAbsoluteSiteUrl(buildProfilePath(user.username));
   const displayName = user.name || user.username;
-  const description = (user.bio || `See posts, clips and lives from ${displayName} on Zudomart.`).replace(/\s+/g, " ").slice(0, 160);
+  const description = (user.bio || `See posts, clips and lives from ${displayName} on Nantty.`).replace(/\s+/g, " ").slice(0, 160);
   return {
     title: `${displayName} (@${user.username})`,
     description,
     alternates: { canonical: canonicalUrl, languages: { "en-NG": canonicalUrl, "x-default": canonicalUrl } },
-    openGraph: { type: "profile", url: canonicalUrl, siteName: "Zudomart", title: `${displayName} (@${user.username})`, description, username: user.username, images: user.avatarUrl ? [{ url: user.avatarUrl, alt: displayName }] : [] },
+    openGraph: { type: "profile", url: canonicalUrl, siteName: "Nantty", title: `${displayName} (@${user.username})`, description, username: user.username, images: user.avatarUrl ? [{ url: user.avatarUrl, alt: displayName }] : [] },
     twitter: { card: "summary", title: `${displayName} (@${user.username})`, description, images: user.avatarUrl ? [user.avatarUrl] : [] },
   };
 }

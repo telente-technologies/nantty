@@ -15,13 +15,13 @@ export async function generateMetadata({ params }: StorePageProps): Promise<Meta
   const store = await fetchPublicStore(decodeURIComponent((await params).storeId));
   if (!store) return { title: "Store not found", robots: { index: false } };
   const canonicalUrl = buildAbsoluteSiteUrl(buildStorePath(store.id));
-  const description = (store.bio || `Shop ${store.productsCount} products from ${store.name} on Zudomart, with escrow-protected payments.`).replace(/\s+/g, " ").slice(0, 160);
+  const description = (store.bio || `Shop ${store.productsCount} products from ${store.name} on Nantty, with escrow-protected payments.`).replace(/\s+/g, " ").slice(0, 160);
   const images = [store.bannerUrl, store.logoUrl].filter((image): image is string => !!image);
   return {
     title: `${store.name} store`,
     description,
     alternates: { canonical: canonicalUrl, languages: { "en-NG": canonicalUrl, "x-default": canonicalUrl } },
-    openGraph: { type: "website", url: canonicalUrl, siteName: "Zudomart", title: store.name, description, images: images.map((url) => ({ url, alt: store.name })) },
+    openGraph: { type: "website", url: canonicalUrl, siteName: "Nantty", title: store.name, description, images: images.map((url) => ({ url, alt: store.name })) },
     twitter: { card: store.bannerUrl ? "summary_large_image" : "summary", title: store.name, description, images },
   };
 }

@@ -1,9 +1,9 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
-import { createRealtimeConnection, type RealtimeConnectionOptions, type RealtimeSocketLike, type TicketRequest, type TicketResult } from "@zudomart/web-kit/src/realtime/realtimeConnection";
-import { createRealtimeHub, type RealtimeEvent } from "@zudomart/web-kit/src/realtime/realtimeHub";
-import { createRealtimeTicketFetcher } from "@zudomart/web-kit/src/realtime/realtimeTicket";
+import { createRealtimeConnection, type RealtimeConnectionOptions, type RealtimeSocketLike, type TicketRequest, type TicketResult } from "@nantty/web-kit/src/realtime/realtimeConnection";
+import { createRealtimeHub, type RealtimeEvent } from "@nantty/web-kit/src/realtime/realtimeHub";
+import { createRealtimeTicketFetcher } from "@nantty/web-kit/src/realtime/realtimeTicket";
 
 import type { CategorizedNotification } from "@/types/commerce.type";
 import { prependLiveComment, readRealtimeLiveComment, readRealtimeNotification, upsertNotification } from "@/utils/realtimeCache.util";

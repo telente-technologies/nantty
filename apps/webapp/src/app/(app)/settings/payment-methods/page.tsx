@@ -23,7 +23,7 @@ export default function PaymentMethodsSettingsPage() {
       <section className={homeStyles.card} aria-labelledby="cards-title">
         <h2 id="cards-title" className={homeStyles.cardTitle}><IconLabel name="creditCard24" size={18}>Cards</IconLabel></h2>
         <p className={homeStyles.linkDescription}>
-          You pay securely in our payment partner&apos;s window at checkout. Zudomart never stores your card number, and cards aren&apos;t saved in your browser.
+          You pay securely in our payment partner&apos;s window at checkout. Nantty never stores your card number, and cards aren&apos;t saved in your browser.
         </p>
       </section>
       <nav className={homeStyles.card} aria-label="Payment methods">

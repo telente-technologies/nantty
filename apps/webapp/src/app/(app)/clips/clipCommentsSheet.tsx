@@ -1,6 +1,6 @@
 "use client";
 
-import { useModalFocusTrap } from "@zudomart/web-kit";
+import { useModalFocusTrap } from "@nantty/web-kit";
 import { useRef, useState } from "react";
 
 import { EmptyState, ErrorState, Skeleton } from "@/components/ui/feedback";

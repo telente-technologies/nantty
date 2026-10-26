@@ -10,9 +10,9 @@ let mockChatSettings: ChatSettings = {
 };
 
 const legacyCopy = {
-  reactions: "Reactions are now end-to-end encrypted. Update Zudomart to react to messages.",
-  pollVotes: "Poll votes are now end-to-end encrypted. Update Zudomart to vote.",
-  liveLocation: "Live locations are now end-to-end encrypted. Update Zudomart to share your location.",
+  reactions: "Reactions are now end-to-end encrypted. Update Nantty to react to messages.",
+  pollVotes: "Poll votes are now end-to-end encrypted. Update Nantty to vote.",
+  liveLocation: "Live locations are now end-to-end encrypted. Update Nantty to share your location.",
 } as const;
 
 const gone = (feature: keyof typeof legacyCopy) => () => {
