@@ -9,20 +9,20 @@ export const termsOfServiceSections: readonly LegalDocumentSection[] = [
     id: "agreement",
     heading: "Agreement to these terms",
     paragraphs: [
-      `Zudomart is operated by ${legalEntityPlaceholder}, a company registered in Nigeria ("Zudomart", "we", "us"). These terms apply when you use the Zudomart mobile app, the Zudomart web app, this website, the seller dashboard, Creator Studio and Zudomart Ads.`,
-      "By creating an account, or by using Zudomart without an account, you agree to these terms. If you use Zudomart for a business, you confirm that you can bind that business, and these terms apply to it too.",
+      `Nantty is operated by ${legalEntityPlaceholder}, a company registered in Nigeria (the "Company", "we", "us"). These terms apply when you use the Nantty mobile app, the Nantty web app, this website, the seller dashboard, Creator Studio and Nantty Ads.`,
+      "By creating an account, or by using Nantty without an account, you agree to these terms. If you use Nantty for a business, you confirm that you can bind that business, and these terms apply to it too.",
       "These policies form part of these terms: the Privacy Policy, Cookie Policy, Community Guidelines, Refund and Escrow Policy, Copyright and IP Policy, and, when they apply to you, the Seller Terms, Creator Program Terms and Ads Policy. If they conflict, the more specific policy wins for its subject.",
       "These terms are written in English, and the English version controls.",
     ],
   },
   {
     id: "eligibility",
-    heading: "Who can use Zudomart",
+    heading: "Who can use Nantty",
     paragraphs: [
       "You must be at least 13 years old to have an account, or older where your local law sets a higher age for using online services without a parent's consent. [Team to confirm the minimum age with counsel: 13 is the working proposal.]",
-      "We ask for your date of birth when you sign up. If you are under 18, you need the permission of a parent or guardian, who accepts these terms for you and is responsible for your use. In Nigeria, section 31 of the Nigeria Data Protection Act 2023 requires that consent for processing a child's data comes from a parent or guardian. [Team to confirm: Zudomart does not yet have a parental consent or age-assurance flow, so this requirement is not checked today. Build it before launch or change the minimum age with counsel.]",
+      "We ask for your date of birth when you sign up. If you are under 18, you need the permission of a parent or guardian, who accepts these terms for you and is responsible for your use. In Nigeria, section 31 of the Nigeria Data Protection Act 2023 requires that consent for processing a child's data comes from a parent or guardian. [Team to confirm: Nantty does not yet have a parental consent or age-assurance flow, so this requirement is not checked today. Build it before launch or change the minimum age with counsel.]",
       "Under-18 accounts never see nudity or dangerous content, are not shown ads, and cannot sell, receive payouts, join the Creator Program or run ads. [Team to confirm whether under-18s may go live, buy coins or send gifts. Most large platforms require 18 or over to buy virtual currency or receive gifts, and we recommend the same.]",
-      "You cannot use Zudomart if we have permanently banned you, or if the law or sanctions rules that apply to us prevent us from serving you.",
+      "You cannot use Nantty if we have permanently banned you, or if the law or sanctions rules that apply to us prevent us from serving you.",
     ],
   },
   {
@@ -46,17 +46,17 @@ export const termsOfServiceSections: readonly LegalDocumentSection[] = [
     id: "usernames",
     heading: "Usernames",
     paragraphs: [
-      "When you sign up, Zudomart creates a username for you. You can change it in your account settings, but the number of changes in a period is limited, and the app shows when you can next change it.",
-      "Some usernames are reserved and cannot be chosen, including names of Zudomart products and teams, government bodies, well-known brands and public figures, and words that could mislead people about who they are dealing with.",
+      "When you sign up, Nantty creates a username for you. You can change it in your account settings, but the number of changes in a period is limited, and the app shows when you can next change it.",
+      "Some usernames are reserved and cannot be chosen, including names of Nantty products and teams, government bodies, well-known brands and public figures, and words that could mislead people about who they are dealing with.",
       "Your username does not belong to you. We may withhold, change or reclaim a username, including when it impersonates a person, brand, store or government body, breaks our policies, infringes a trademark or other rights, or when the law requires it. Where we can, we tell you first and let you choose a new one. A username you give up is held for 120 days before anyone else can take it, unless our staff reassign it to resolve an impersonation or trademark case.",
       "[Team to replace: the exact number of username changes allowed and the waiting period between changes.]",
     ],
   },
   {
     id: "our-role",
-    heading: "What Zudomart is, and is not",
+    heading: "What Nantty is, and is not",
     paragraphs: [
-      "Zudomart is a platform where people post, watch, chat, sell and buy. Products are sold by independent sellers, not by Zudomart. When you buy, your contract for the goods is with the seller. We do not own, inspect, store or ship goods, and we do not provide delivery.",
+      "Nantty is a platform where people post, watch, chat, sell and buy. Products are sold by independent sellers, not by Nantty. When you buy, your contract for the goods is with the seller. We do not own, inspect, store or ship goods, and we do not provide delivery.",
       "We help in other ways: we verify sellers, show reviews and success rates, run escrow in Nigeria, review disputes and remove sellers who break the rules. Those steps reduce risk but do not make us the seller.",
     ],
   },
@@ -65,17 +65,17 @@ export const termsOfServiceSections: readonly LegalDocumentSection[] = [
     id: "content",
     heading: "Your content and the licence you give us",
     paragraphs: [
-      "You keep ownership of the posts, clips, stories, lives, comments, product listings and other content you create. You give Zudomart a worldwide, non-exclusive, royalty-free licence to host, store, copy, adapt (for example to resize or caption), display, distribute and promote your content in Zudomart and in marketing for Zudomart, for as long as it is on Zudomart and for a reasonable time after you delete it to clear backups and caches. The licence lets us run the service; it does not let us sell your content to others.",
-      "Other users can view and share your public content inside Zudomart, and quote or embed it where the feature allows. You confirm that you have the rights needed for everything you post, including music, images and the people who appear in it.",
+      "You keep ownership of the posts, clips, stories, lives, comments, product listings and other content you create. You give Nantty a worldwide, non-exclusive, royalty-free licence to host, store, copy, adapt (for example to resize or caption), display, distribute and promote your content in Nantty and in marketing for Nantty, for as long as it is on Nantty and for a reasonable time after you delete it to clear backups and caches. The licence lets us run the service; it does not let us sell your content to others.",
+      "Other users can view and share your public content inside Nantty, and quote or embed it where the feature allows. You confirm that you have the rights needed for everything you post, including music, images and the people who appear in it.",
       "If you label content as AI-generated, or we detect that it is, it shows an AI-generated label. AI-generated content earns a lower share of ads revenue under the Creator Program Terms.",
-      "We do not use your chats to train any model, because we cannot read them. [Team to confirm whether Zudomart will train its own models on public content. If it will, say so here, in the Privacy Policy, and give an opt-out. Do not license user content to others for AI training without consent.]",
+      "We do not use your chats to train any model, because we cannot read them. [Team to confirm whether Nantty will train its own models on public content. If it will, say so here, in the Privacy Policy, and give an opt-out. Do not license user content to others for AI training without consent.]",
     ],
   },
   {
     id: "conduct",
-    heading: "Rules for using Zudomart",
+    heading: "Rules for using Nantty",
     paragraphs: [
-      "Follow the Community Guidelines and the law. In particular, do not: post illegal content or list prohibited items; harass, threaten or exploit anyone, especially children; impersonate others; scam, phish or run advance-fee fraud; fake reviews, followers or engagement; spam; scrape, reverse engineer or overload our systems; get around security checks, sales limits or verification; or use Zudomart to launder money or evade sanctions.",
+      "Follow the Community Guidelines and the law. In particular, do not: post illegal content or list prohibited items; harass, threaten or exploit anyone, especially children; impersonate others; scam, phish or run advance-fee fraud; fake reviews, followers or engagement; spam; scrape, reverse engineer or overload our systems; get around security checks, sales limits or verification; or use Nantty to launder money or evade sanctions.",
     ],
   },
   {
@@ -83,15 +83,15 @@ export const termsOfServiceSections: readonly LegalDocumentSection[] = [
     heading: "How we rank content",
     paragraphs: [
       "Your feed, trends and suggestions are based on what is trending and what you engage with. Engagement that looks fake, such as bots, coordinated groups, engagement pods or bought likes, is discounted and cannot make a post or hashtag trend.",
-      "Accounts with a checkmark get a small ranking boost with a fixed upper limit: up to 15% for Black, 12% for Gold, 10% for Premium, 8% for Blue Verified and 5% for Blue Essential. Official accounts that Zudomart created and verified show an Official label and get an extra editorial boost of up to 15%, never more than 25% in total. A post with much better engagement always outranks a boosted post with weak engagement.",
-      "Nobody can pay for reach in the feed except through boosts and ads, which are always labelled. Zudomart staff cannot push posts or trends. They can only demote or remove content for policy reasons, and every change is logged. You can see why a post was shown to you from its menu. Rankings of people (for example gift leaderboards) appear only inside live streams.",
+      "Accounts with a checkmark get a small ranking boost with a fixed upper limit: up to 15% for Black, 12% for Gold, 10% for Premium, 8% for Blue Verified and 5% for Blue Essential. Official accounts that Nantty created and verified show an Official label and get an extra editorial boost of up to 15%, never more than 25% in total. A post with much better engagement always outranks a boosted post with weak engagement.",
+      "Nobody can pay for reach in the feed except through boosts and ads, which are always labelled. Nantty staff cannot push posts or trends. They can only demote or remove content for policy reasons, and every change is logged. You can see why a post was shown to you from its menu. Rankings of people (for example gift leaderboards) appear only inside live streams.",
     ],
   },
   {
     id: "chat",
     heading: "Chats are end-to-end encrypted",
     paragraphs: [
-      "Messages, photos, videos and voice notes in Zudomart chats, including group chats, are end-to-end encrypted. Zudomart cannot read them. We still process information needed to deliver messages, such as who is in a chat, who sent each message and when, and we use it to fight spam and abuse without reading content. Locations and polls you share in a chat are not end-to-end encrypted, so we can see them.",
+      "Messages, photos, videos and voice notes in Nantty chats, including group chats, are end-to-end encrypted. Nantty cannot read them. We still process information needed to deliver messages, such as who is in a chat, who sent each message and when, and we use it to fight spam and abuse without reading content. Locations and polls you share in a chat are not end-to-end encrypted, so we can see them.",
       "If you report a chat, your device sends only the messages you select to our safety team, with your permission. Chat media is deleted from our servers automatically after 30 days. You are responsible for what you send. Chats with our support team are not end-to-end encrypted, so we can help you, and they are logged.",
     ],
   },
@@ -124,7 +124,7 @@ export const termsOfServiceSections: readonly LegalDocumentSection[] = [
     id: "disclaimers",
     heading: "What we do not promise",
     paragraphs: [
-      "We work hard to keep Zudomart running, safe and accurate, but we provide it as it is and as available. To the extent the law allows, we do not promise that it will always be available or error-free, or that content, listings or other users are accurate, lawful or safe. We are not responsible for goods sold by sellers, for content posted by users, or for third-party services such as payment partners, app stores and delivery companies, except where the law makes us responsible.",
+      "We work hard to keep Nantty running, safe and accurate, but we provide it as it is and as available. To the extent the law allows, we do not promise that it will always be available or error-free, or that content, listings or other users are accurate, lawful or safe. We are not responsible for goods sold by sellers, for content posted by users, or for third-party services such as payment partners, app stores and delivery companies, except where the law makes us responsible.",
     ],
   },
   {
@@ -132,7 +132,7 @@ export const termsOfServiceSections: readonly LegalDocumentSection[] = [
     heading: "Limits of liability",
     paragraphs: [
       "Nothing in these terms limits liability that cannot be limited by law, including liability for death or personal injury caused by negligence, for fraud, or for breaching consumer rights that cannot be excluded.",
-      "Subject to that, Zudomart is not liable for indirect or consequential loss, loss of profit, revenue, goodwill or data, or for losses caused by sellers, other users, payment partners or events outside our reasonable control. Our total liability to you for all claims about Zudomart in any 12 months is limited to the greater of the fees you paid to Zudomart in those 12 months and ₦100,000 (or the equivalent in your currency). [Team to confirm the liability cap with counsel.]",
+      "Subject to that, Nantty is not liable for indirect or consequential loss, loss of profit, revenue, goodwill or data, or for losses caused by sellers, other users, payment partners or events outside our reasonable control. Our total liability to you for all claims about Nantty in any 12 months is limited to the greater of the fees you paid to Nantty in those 12 months and ₦100,000 (or the equivalent in your currency). [Team to confirm the liability cap with counsel.]",
       "Money held for you by our payment partner is not part of this limit: it belongs to you, and we never deduct this cap from it.",
     ],
   },
@@ -140,7 +140,7 @@ export const termsOfServiceSections: readonly LegalDocumentSection[] = [
     id: "indemnity",
     heading: "Responsibility for your actions",
     paragraphs: [
-      "If you use Zudomart for business, you agree to cover our reasonable losses and legal costs from claims by others that result from your breach of these terms, your content, your products or your breach of the law. If you use Zudomart as a consumer, this applies only to the extent your local law allows.",
+      "If you use Nantty for business, you agree to cover our reasonable losses and legal costs from claims by others that result from your breach of these terms, your content, your products or your breach of the law. If you use Nantty as a consumer, this applies only to the extent your local law allows.",
     ],
   },
   {
@@ -179,7 +179,7 @@ export const termsOfServiceSections: readonly LegalDocumentSection[] = [
     id: "general",
     heading: "General",
     paragraphs: [
-      "We may transfer these terms to a company that takes over Zudomart or the relevant part of it, and we will tell you. You may not transfer your account or these terms without our written consent. If a court finds part of these terms unenforceable, the rest stays in force. If we do not enforce a right at once, we can still enforce it later. These terms and the policies they mention are the whole agreement between you and us about Zudomart.",
+      "We may transfer these terms to a company that takes over Nantty or the relevant part of it, and we will tell you. You may not transfer your account or these terms without our written consent. If a court finds part of these terms unenforceable, the rest stays in force. If we do not enforce a right at once, we can still enforce it later. These terms and the policies they mention are the whole agreement between you and us about Nantty.",
       "Neither of us is responsible for delay caused by events outside reasonable control, such as power or network failures, bank or payment partner outages, strikes, natural disasters or government action, as long as we try to limit the effect.",
     ],
   },
@@ -187,7 +187,7 @@ export const termsOfServiceSections: readonly LegalDocumentSection[] = [
     id: "contact",
     heading: "Contact and legal notices",
     paragraphs: [
-      `Questions about these terms: ${emailAddresses.legal}. Formal legal notices to Zudomart go to ${legalEntityPlaceholder}, with a copy to ${emailAddresses.legal}.`,
+      `Questions about these terms: ${emailAddresses.legal}. Formal legal notices to Nantty go to ${legalEntityPlaceholder}, with a copy to ${emailAddresses.legal}.`,
       "[Team to replace: the physical contact address in Nigeria and the liaison officer for government communications that the NITDA Code of Practice expects of large platforms.]",
     ],
   },

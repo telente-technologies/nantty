@@ -6,7 +6,7 @@ export const sellerTermsSections: readonly LegalDocumentSection[] = [
     id: "scope",
     heading: "Scope",
     paragraphs: [
-      "These Seller Terms apply on top of the Terms of Service whenever you list or sell on Zudomart, as an individual or a business. They also cover anyone on your seller team. If they conflict with the Terms of Service on selling, these Seller Terms win.",
+      "These Seller Terms apply on top of the Terms of Service whenever you list or sell on Nantty, as an individual or a business. They also cover anyone on your seller team. If they conflict with the Terms of Service on selling, these Seller Terms win.",
     ],
   },
   {
@@ -14,7 +14,7 @@ export const sellerTermsSections: readonly LegalDocumentSection[] = [
     heading: "Who can sell",
     paragraphs: [
       "You must be 18 or over. A business must be lawfully registered where the law requires, for example with the Corporate Affairs Commission in Nigeria.",
-      "In Nigeria, you can open a store and sell before you are verified, but only through escrow and only up to a total sales limit set by Zudomart and shown in your dashboard. Your earnings accrue and stay yours, but you cannot withdraw until you are payout-verified (Level 1: BVN and a bank account in your own name, checked through our payment partner).",
+      "In Nigeria, you can open a store and sell before you are verified, but only through escrow and only up to a total sales limit set by Nantty and shown in your dashboard. Your earnings accrue and stay yours, but you cannot withdraw until you are payout-verified (Level 1: BVN and a bank account in your own name, checked through our payment partner).",
       "Outside Nigeria, you must verify your identity with Smile ID and a payout account in your own name before you can list or sell anything. Accounts that try to get around this, for example by using someone else's details, are suspended.",
       "A Gold business checkmark needs business verification. We may ask for business documents at any time; uploading them does not block your store while they are reviewed.",
     ],
@@ -40,7 +40,7 @@ export const sellerTermsSections: readonly LegalDocumentSection[] = [
     id: "orders",
     heading: "Orders, shipping and delivery",
     paragraphs: [
-      "Zudomart does not provide delivery. You set your delivery destinations, fees, free-delivery areas and thresholds. Delivery is charged once per seller order, not per item. Ship within the time you promise, add tracking where you can, keep the buyer updated, and mark the order delivered only when it is delivered.",
+      "Nantty does not provide delivery. You set your delivery destinations, fees, free-delivery areas and thresholds. Delivery is charged once per seller order, not per item. Ship within the time you promise, add tracking where you can, keep the buyer updated, and mark the order delivered only when it is delivered.",
       "Risk in the goods stays with you until the buyer receives them. If goods are lost or damaged in transit, you deal with your courier and the buyer is refunded.",
       "Use the buyer's details only to fulfil the order. You are a separate data controller for them under the NDPA. Do not add buyers to marketing lists without their consent, and keep their data secure.",
     ],
@@ -49,19 +49,19 @@ export const sellerTermsSections: readonly LegalDocumentSection[] = [
     id: "escrow-and-payouts",
     heading: "Escrow, payouts and wallets",
     paragraphs: [
-      "Zudomart never holds your money. Your wallet is held by our licensed payment partner in your name.",
+      "Nantty never holds your money. Your wallet is held by our licensed payment partner in your name.",
       "In Nigeria, escrow orders: the buyer's payment stays locked in the buyer's own wallet until the buyer confirms delivery, or 3 days after delivery if there is no dispute. It then moves to your wallet, minus fees, is locked for 24 hours, and then becomes available to withdraw. Payouts go to a verified bank account in your own name, in the daily payout run or when you request a withdrawal.",
       "Verified stores in Nigeria may also offer direct payment where available. Direct payments reach you when the payment settles, with no escrow, and you remain responsible for refunds you owe. A direct order completes automatically 3 days after you mark it delivered, unless the buyer opens a dispute or asks for a refund before then.",
       "If an order is still not marked delivered 30 days after the buyer paid, our staff review it, contact you and the buyer, and decide whether to release the payment to you or refund the buyer. The payment is not released automatically while that review is open.",
       "Outside Nigeria, there is no escrow. You are paid directly when the buyer's payment settles, and you are fully responsible for refunds you owe the buyer. If you fail to pay a refund, we may restrict or close your store and report you to our payment partner and the authorities.",
-      "If a refund or chargeback happens after you were paid, we take back your portion of the order (what you received after fees) from your wallet, up to your available balance, and refund it to the buyer. Any amount still owed shows as owed to Zudomart and comes out of your next earnings, and you cannot withdraw until it is cleared. The escrow fee and processing fee are not refunded.",
+      "If a refund or chargeback happens after you were paid, we take back your portion of the order (what you received after fees) from your wallet, up to your available balance, and refund it to the buyer. Any amount still owed shows as owed to Nantty and comes out of your next earnings, and you cannot withdraw until it is cleared. The escrow fee and processing fee are not refunded.",
     ],
   },
   {
     id: "fees",
     heading: "Fees and plans",
     paragraphs: [
-      "Zudomart takes no commission on what you sell. Fees are shown in your dashboard before they apply:",
+      "Nantty takes no commission on what you sell. Fees are shown in your dashboard before they apply:",
     ],
     bullets: [
       "Escrow fee: 1.5% of the seller order total including delivery, or 1% on the Business plan. If an order is refunded before escrow releases, no escrow fee is charged on the refunded part. If it is refunded after you were paid, the fee is not returned. Direct orders have no escrow fee.",
@@ -83,7 +83,7 @@ export const sellerTermsSections: readonly LegalDocumentSection[] = [
     id: "tax",
     heading: "Tax",
     paragraphs: [
-      "You are responsible for your own taxes, including income tax and, if you are registered, VAT on your sales under the Nigeria Tax Act 2025. If the law requires us or our payment partner to collect, withhold or report tax or seller information to the Nigeria Revenue Service or another tax authority, we will, and we will tell you. [Team to confirm with a tax adviser whether Zudomart has any marketplace collection or reporting duty under the Nigeria Tax Act 2025 and the Nigeria Tax Administration Act 2025.]",
+      "You are responsible for your own taxes, including income tax and, if you are registered, VAT on your sales under the Nigeria Tax Act 2025. If the law requires us or our payment partner to collect, withhold or report tax or seller information to the Nigeria Revenue Service or another tax authority, we will, and we will tell you. [Team to confirm with a tax adviser whether Nantty has any marketplace collection or reporting duty under the Nigeria Tax Act 2025 and the Nigeria Tax Administration Act 2025.]",
     ],
   },
   {
@@ -97,7 +97,7 @@ export const sellerTermsSections: readonly LegalDocumentSection[] = [
     id: "affiliates",
     heading: "Affiliate programs",
     paragraphs: [
-      "You can invite creators to promote your products for a commission you set, up to 50% of the item price. You fund the commission: it is taken from your proceeds for that order, never from the buyer and never paid by Zudomart.",
+      "You can invite creators to promote your products for a commission you set, up to 50% of the item price. You fund the commission: it is taken from your proceeds for that order, never from the buyer and never paid by Nantty.",
       "A commission is owed only when the order completes, never while it is in escrow or before a direct order completes. The rate is locked at checkout. Attribution goes to the first creator link the buyer used, within your attribution window (30 days unless you change it). A creator never earns commission on their own purchase or on sales from a store they own. If the order is refunded, cancelled or returned before completion, no commission is paid; a partial refund reduces it in proportion; a refund after completion takes it back from the creator.",
     ],
   },
@@ -112,7 +112,7 @@ export const sellerTermsSections: readonly LegalDocumentSection[] = [
     id: "enforcement",
     heading: "Performance and enforcement",
     paragraphs: [
-      "We show your order success rate to buyers. Late shipping, high dispute rates, counterfeit or prohibited items, or asking buyers to pay outside Zudomart can lead to lower sales limits, loss of the checkmark, payout holds where the law allows, or store closure, as the Community Guidelines set out. You can appeal.",
+      "We show your order success rate to buyers. Late shipping, high dispute rates, counterfeit or prohibited items, or asking buyers to pay outside Nantty can lead to lower sales limits, loss of the checkmark, payout holds where the law allows, or store closure, as the Community Guidelines set out. You can appeal.",
       `Seller questions: ${emailAddresses.sellers}.`,
     ],
   },

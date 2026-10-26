@@ -1,5 +1,5 @@
 {
-  "description": "Media shown inside the app screenshots in public/screens. The screenshots were captured from the Zudomart mobile app's Expo web preview using its demo data; all names, usernames, stores and brands are fictional demo data.",
+  "description": "Media shown inside the app screenshots in public/screens. The screenshots were captured from the Nantty mobile app's Expo web preview using its demo data; all names, usernames, stores and brands are fictional demo data.",
   "sources": [
     {
       "provider": "Unsplash",

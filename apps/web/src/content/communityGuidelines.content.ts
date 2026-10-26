@@ -6,7 +6,7 @@ export const communityGuidelinesSections: readonly LegalDocumentSection[] = [
     id: "introduction",
     heading: "Why we have these guidelines",
     paragraphs: [
-      "Zudomart is for discovering, watching, chatting, selling and buying. These guidelines apply to everything on Zudomart: posts, clips, stories, lives, comments, usernames, profiles, product listings, ads, boosts and chats. They apply to everyone, including sellers, creators, brands and Zudomart staff. Breaking the law in your country is always a breach.",
+      "Nantty is for discovering, watching, chatting, selling and buying. These guidelines apply to everything on Nantty: posts, clips, stories, lives, comments, usernames, profiles, product listings, ads, boosts and chats. They apply to everyone, including sellers, creators, brands and Nantty staff. Breaking the law in your country is always a breach.",
     ],
   },
   {
@@ -35,7 +35,7 @@ export const communityGuidelinesSections: readonly LegalDocumentSection[] = [
       "Misleading AI-generated or edited media that is not labelled, especially of real people or events.",
       "False information that could cause real harm, such as fake health cures, election misinformation, or false emergency alerts.",
       "Pyramid schemes, Ponzi schemes and 'double your money' offers.",
-      "Asking people to pay or chat outside Zudomart to avoid escrow, fees or our safety checks.",
+      "Asking people to pay or chat outside Nantty to avoid escrow, fees or our safety checks.",
     ],
   },
   {
@@ -89,7 +89,7 @@ export const communityGuidelinesSections: readonly LegalDocumentSection[] = [
     heading: "Live streams and gifts",
     paragraphs: [
       "Everything in these guidelines applies to lives. Do not pressure viewers, especially young people, to send gifts, do not promise anything in return for gifts that you will not deliver, and do not use lives to sell prohibited items. Gift rankings and leaderboards appear only inside lives.",
-      "Do not trade coins or gifts for money, goods or services outside Zudomart, run bets, raffles or lotteries with them, or use them to move money. Coins and gifts involved can be removed.",
+      "Do not trade coins or gifts for money, goods or services outside Nantty, run bets, raffles or lotteries with them, or use them to move money. Coins and gifts involved can be removed.",
       "Automated systems sample live video and audio (using Amazon Rekognition and Amazon Transcribe) to spot severe harm. They can blur, hide or pause a live and send it to a moderator, but they never ban an account on their own. The samples are deleted automatically after a day. [Team to confirm how evidence is kept when a moderator opens a case.]",
     ],
   },

@@ -26,7 +26,7 @@ export interface LegalPolicy {
 
 const currentVersionLabel = "1.0 (draft)";
 const currentEffectiveOn = "2026-12-01";
-const firstVersionSummary = "First version, not yet in effect. Written under Nigerian law (NDPA 2023 and GAID 2025, FCCPA 2018, Copyright Act 2022, ARCON Act 2022, Arbitration and Mediation Act 2023), checked against how Zudomart works today and against the published terms of large social and streaming platforms. [Team to confirm the effective date with counsel.]";
+const firstVersionSummary = "First version, not yet in effect. Written under Nigerian law (NDPA 2023 and GAID 2025, FCCPA 2018, Copyright Act 2022, ARCON Act 2022, Arbitration and Mediation Act 2023), checked against how Nantty works today and against the published terms of large social and streaming platforms. [Team to confirm the effective date with counsel.]";
 
 function buildPolicy(slug: LegalPolicySlug, title: string, summary: string, sections: readonly LegalDocumentSection[]): LegalPolicy {
   return {
@@ -37,13 +37,13 @@ function buildPolicy(slug: LegalPolicySlug, title: string, summary: string, sect
 }
 
 export const legalPolicies: readonly LegalPolicy[] = [
-  buildPolicy("terms", "Terms of service", "The rules for buying, selling, posting, streaming and earning on Zudomart.", termsOfServiceSections),
-  buildPolicy("privacy", "Privacy policy", "What personal data Zudomart collects, why, and the choices you have.", privacyPolicySections),
-  buildPolicy("cookies", "Cookie policy", "Which cookies Zudomart uses, why, and how you stay in control.", cookiePolicySections),
-  buildPolicy("community-guidelines", "Community guidelines", "How we expect everyone to behave on Zudomart.", communityGuidelinesSections),
-  buildPolicy("seller-terms", "Seller terms", "The extra terms that apply when you sell on Zudomart.", sellerTermsSections),
-  buildPolicy("creator-terms", "Creator Program terms", "The terms for earning as a Zudomart creator.", creatorTermsSections),
-  buildPolicy("ads-policy", "Ads policy", "What can be advertised on Zudomart, and how ad balance and ad credit work.", adsPolicySections),
+  buildPolicy("terms", "Terms of service", "The rules for buying, selling, posting, streaming and earning on Nantty.", termsOfServiceSections),
+  buildPolicy("privacy", "Privacy policy", "What personal data Nantty collects, why, and the choices you have.", privacyPolicySections),
+  buildPolicy("cookies", "Cookie policy", "Which cookies Nantty uses, why, and how you stay in control.", cookiePolicySections),
+  buildPolicy("community-guidelines", "Community guidelines", "How we expect everyone to behave on Nantty.", communityGuidelinesSections),
+  buildPolicy("seller-terms", "Seller terms", "The extra terms that apply when you sell on Nantty.", sellerTermsSections),
+  buildPolicy("creator-terms", "Creator Program terms", "The terms for earning as a Nantty creator.", creatorTermsSections),
+  buildPolicy("ads-policy", "Ads policy", "What can be advertised on Nantty, and how ad balance and ad credit work.", adsPolicySections),
   buildPolicy("refund-escrow-policy", "Refund and escrow policy", "How payments are held, released and refunded.", refundEscrowPolicySections),
   buildPolicy("copyright-policy", "Copyright and IP policy", "How to report infringement and counterfeits, and how we handle repeat infringers.", copyrightPolicySections),
   buildPolicy("data-rights", "Data rights requests", "How to access, correct, delete or move your personal data.", dataRightsRequestsSections),

@@ -5,7 +5,7 @@ import { findLegalPolicyOrThrow } from "@/content/legalPolicies.content";
 
 export const metadata: Metadata = {
   title: "Cookie policy",
-  description: "The cookies Zudomart uses, what each category is for and how to control them.",
+  description: "The cookies Nantty uses, what each category is for and how to control them.",
   alternates: { canonical: "/cookies" },
 };
 

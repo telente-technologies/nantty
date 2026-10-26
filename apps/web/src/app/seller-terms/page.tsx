@@ -5,7 +5,7 @@ import { findLegalPolicyOrThrow } from "@/content/legalPolicies.content";
 
 export const metadata: Metadata = {
   title: "Seller terms",
-  description: "The extra terms that apply when you sell on Zudomart.",
+  description: "The extra terms that apply when you sell on Nantty.",
   alternates: { canonical: "/seller-terms" },
 };
 

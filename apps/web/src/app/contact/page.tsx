@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 
 import { FigmaIconTintedWithCurrentColor, type FigmaIconName } from "@/components/ui/figmaIcon";
 import { PageHeaderWithTitleAndLede } from "@/components/ui/pageHeader";
-import { buildMailtoHref } from "@zudomart/web-kit";
+import { buildMailtoHref } from "@nantty/web-kit";
 
 import { emailAddresses, siteConfig } from "@/lib/siteConfig.config";
 
@@ -10,14 +10,14 @@ import styles from "./contact.module.css";
 
 export const metadata: Metadata = {
   title: "Contact",
-  description: "Contact the Zudomart team about shopping, selling, press or privacy.",
+  description: "Contact the Nantty team about shopping, selling, press or privacy.",
   alternates: { canonical: "/contact" },
-  openGraph: { title: "Contact Zudomart", url: "/contact" },
+  openGraph: { title: "Contact Nantty", url: "/contact" },
 };
 
 const contactChannels: ReadonlyArray<{ readonly icon: FigmaIconName; readonly title: string; readonly description: string; readonly email: string }> = [
   { icon: "headset24", title: "Help with an order", description: "Questions about payments, escrow, delivery or a dispute.", email: emailAddresses.support },
-  { icon: "buildingStore20", title: "Selling on Zudomart", description: "Store applications, listings, payouts and seller fees.", email: emailAddresses.sellers },
+  { icon: "buildingStore20", title: "Selling on Nantty", description: "Store applications, listings, payouts and seller fees.", email: emailAddresses.sellers },
   { icon: "paperPlaneTilt24", title: "Press and partnerships", description: "Interviews, media assets and working together.", email: emailAddresses.press },
   { icon: "shield24", title: "Privacy and data", description: "Requests about your personal data and how we use it.", email: emailAddresses.privacy },
 ];
@@ -27,7 +27,7 @@ export default function ContactPage() {
     <>
       <PageHeaderWithTitleAndLede
         eyebrow="Contact"
-        title="Talk to a person at Zudomart."
+        title="Talk to a person at Nantty."
         lede="Pick the inbox that matches your question and the right team will pick it up."
       />
       <section className="pageContainer" aria-label="Ways to contact us">

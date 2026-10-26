@@ -5,7 +5,7 @@ import { findLegalPolicyOrThrow } from "@/content/legalPolicies.content";
 
 export const metadata: Metadata = {
   title: "Copyright and IP policy",
-  description: "How to report copyright and trademark infringement or counterfeits on Zudomart, and how we handle repeat infringers.",
+  description: "How to report copyright and trademark infringement or counterfeits on Nantty, and how we handle repeat infringers.",
   alternates: { canonical: "/copyright-policy" },
 };
 

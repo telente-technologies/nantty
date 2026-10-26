@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { ErrorScreen } from "@zudomart/web-kit";
+import { ErrorScreen } from "@nantty/web-kit";
 
 export const metadata: Metadata = { title: "You don't have access", robots: { index: false } };
 

@@ -9,6 +9,9 @@ import { SellersTeaserSection } from "@/components/sections/sellersTeaserSection
 import { SocialShoppingFeatureTabsSection } from "@/components/sections/socialShoppingSection";
 import { VerificationBadgesSection } from "@/components/sections/verificationBadgesSection";
 import { homeQuestions } from "@/content/homeQuestions.content";
+import { NanttyPrelaunchSection } from "@/components/nantty/nanttyPrelaunchSection";
+
+const isPrelaunchMode = process.env.NEXT_PUBLIC_PRELAUNCH_MODE !== "false";
 
 export default function HomePage() {
   return (
@@ -23,6 +26,7 @@ export default function HomePage() {
       <SellersTeaserSection />
       <FrequentlyAskedQuestionsAccordion questions={homeQuestions} />
       <AppDownloadCallToActionPanel />
+      {isPrelaunchMode ? <NanttyPrelaunchSection /> : null}
     </>
   );
 }

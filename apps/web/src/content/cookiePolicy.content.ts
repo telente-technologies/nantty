@@ -8,7 +8,7 @@ export const cookiePolicySections: readonly LegalDocumentSection[] = [
     id: "what-are-cookies",
     heading: "What cookies are",
     paragraphs: [
-      "Cookies are small files a website stores on your device. Session cookies expire when you close the browser; persistent cookies stay until they expire or you delete them. We also use similar technologies: browser local storage, and in our apps, secure device storage and software development kits (SDKs). This policy covers all of them, on our websites (zudomart.com, the web app, the seller dashboard, Creator Studio and Zudomart Ads) and our apps. It sits alongside our Privacy Policy.",
+      "Cookies are small files a website stores on your device. Session cookies expire when you close the browser; persistent cookies stay until they expire or you delete them. We also use similar technologies: browser local storage, and in our apps, secure device storage and software development kits (SDKs). This policy covers all of them, on our websites (nantty.com, the web app, the seller dashboard, Creator Studio and Nantty Ads) and our apps. It sits alongside our Privacy Policy.",
     ],
   },
   {
@@ -43,8 +43,8 @@ export const cookiePolicySections: readonly LegalDocumentSection[] = [
         ["zd_viewer", "Essential", "Caches basic details of the signed-in account to load pages faster.", "5 minutes"],
         ["zd_reset", "Essential", "Protects a password reset in progress.", "Until the reset finishes"],
         ["theme", "Essential", "Remembers light or dark mode.", "Until you change it"],
-        ["zudomart_consent", "Essential", "Stores your cookie choice and the policy version you answered.", "180 days"],
-        ["zudomart_consent_synced_at (local storage)", "Essential", "Records when your choice was saved to your account.", "Until you clear site data"],
+        ["zudomart_consent", "Essential", "Legacy cookie name retained so returning visitors keep their saved cookie choice and policy version.", "180 days"],
+        ["zudomart_consent_synced_at (local storage)", "Essential", "Legacy storage key retained to keep the saved consent choice in sync with your account.", "Until you clear site data"],
         ["Cloudflare Turnstile", "Essential", "Human check that protects sign-up, sign-in and sensitive actions. It does not use cookies to track you across sites.", "Per check"],
       ],
     },
@@ -60,14 +60,14 @@ export const cookiePolicySections: readonly LegalDocumentSection[] = [
     id: "our-consent-cookie",
     heading: "How we record your choice",
     paragraphs: [
-      "We store your choice in the zudomart_consent cookie, with the policy version you answered. If you are signed in, we also save the choice to your account so it applies on your other devices, and we keep a record of it to show we asked. If the policy version changes in a way that affects consent, we ask again.",
+      "We store your choice in the zudomart_consent cookie, a legacy cookie name retained so returning visitors keep their saved choice, with the policy version you answered. If you are signed in, we also save the choice to your account so it applies on your other devices, and we keep a record of it to show we asked. If the policy version changes in a way that affects consent, we ask again.",
     ],
   },
   {
     id: "manage",
     heading: "How to manage your choices",
     paragraphs: [
-      "Change your choice at any time with Cookie settings in the footer of our websites, or Settings, Privacy & Data in the app. You can also block or delete cookies in your browser, but parts of Zudomart, such as staying signed in, will stop working. We honour the Global Privacy Control signal as an opt-out of advertising cookies.",
+      "Change your choice at any time with Cookie settings in the footer of our websites, or Settings, Privacy & Data in the app. You can also block or delete cookies in your browser, but parts of Nantty, such as staying signed in, will stop working. We honour the Global Privacy Control signal as an opt-out of advertising cookies.",
     ],
   },
   {

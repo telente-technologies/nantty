@@ -5,7 +5,7 @@ import { findLegalPolicyOrThrow } from "@/content/legalPolicies.content";
 
 export const metadata: Metadata = {
   title: "Community guidelines",
-  description: "How we expect everyone to behave on Zudomart.",
+  description: "How we expect everyone to behave on Nantty.",
   alternates: { canonical: "/community-guidelines" },
 };
 

@@ -6,7 +6,7 @@ export const copyrightPolicySections: readonly LegalDocumentSection[] = [
     id: "scope",
     heading: "What this policy covers",
     paragraphs: [
-      "This policy explains how rights owners report content or listings on Zudomart that infringe copyright, trademarks or designs, or that are counterfeit; how the person who posted can respond; and what happens to repeat infringers. It follows Part VII of Nigeria's Copyright Act 2022 (sections 54 to 58), and the notice-and-takedown rules of other countries where we operate.",
+      "This policy explains how rights owners report content or listings on Nantty that infringe copyright, trademarks or designs, or that are counterfeit; how the person who posted can respond; and what happens to repeat infringers. It follows Part VII of Nigeria's Copyright Act 2022 (sections 54 to 58), and the notice-and-takedown rules of other countries where we operate.",
     ],
   },
   {
@@ -73,7 +73,7 @@ export const copyrightPolicySections: readonly LegalDocumentSection[] = [
     id: "other-countries",
     heading: "Other countries",
     paragraphs: [
-      "For users in the United States, we follow the notice-and-takedown process of the Digital Millennium Copyright Act. [Team to replace: Zudomart's designated DMCA agent registered with the US Copyright Office.] For users in the EU, notices are handled under the Digital Services Act, and we give a statement of reasons for every removal.",
+      "For users in the United States, we follow the notice-and-takedown process of the Digital Millennium Copyright Act. [Team to replace: Nantty's designated DMCA agent registered with the US Copyright Office.] For users in the EU, notices are handled under the Digital Services Act, and we give a statement of reasons for every removal.",
     ],
   },
 ];

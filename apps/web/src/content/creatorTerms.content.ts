@@ -6,7 +6,7 @@ export const creatorTermsSections: readonly LegalDocumentSection[] = [
     id: "program",
     heading: "The Creator Program",
     paragraphs: [
-      "These terms apply on top of the Terms of Service when your personal profile is approved for the Creator Program. Creator status is an upgrade to your personal profile, not a separate account. You take part as an independent creator, not as an employee or agent of Zudomart.",
+      "These terms apply on top of the Terms of Service when your personal profile is approved for the Creator Program. Creator status is an upgrade to your personal profile, not a separate account. You take part as an independent creator, not as an employee or agent of Nantty.",
       "Eligibility is based on criteria shown in Creator Studio, such as real followers, account age, policy record and risk checks. Some accounts are approved automatically, some are reviewed by a person, and the checklist shows what is missing. You must be 18 or over and payout-verified (Level 1) to receive money. We may change the criteria with notice, and we may remove creator status for breaches of these terms or the Community Guidelines.",
     ],
   },
@@ -14,16 +14,16 @@ export const creatorTermsSections: readonly LegalDocumentSection[] = [
     id: "content",
     heading: "Your content",
     paragraphs: [
-      "You keep ownership of what you post and give Zudomart the licence in the Terms of Service. You confirm that you own or have licensed everything in your content, including music, and that people who appear in it agreed.",
+      "You keep ownership of what you post and give Nantty the licence in the Terms of Service. You confirm that you own or have licensed everything in your content, including music, and that people who appear in it agreed.",
       "Label paid partnerships and gifted products clearly with the Paid partnership label, and follow the Ads Policy and the rules of the Advertising Regulatory Council of Nigeria (ARCON) on endorsements. Label AI-generated content honestly.",
     ],
   },
   {
     id: "earnings",
     heading: "How you earn",
-    paragraphs: ["Zudomart does not pay for views. It shares eligible revenue with Creator Program members only:"],
+    paragraphs: ["Nantty does not pay for views. It shares eligible revenue with Creator Program members only:"],
     bullets: [
-      "Gifts and tips: viewers spend coins on gifts and tips on your lives and content. You receive a share of each one that depends on your creator tier: 50% (Starter), 60% (Partner) or 70% (Top), set by your monthly gift volume. You receive it as earned coins, which you can convert to money in Creator Studio. Zudomart keeps the rest. [Team to confirm the tier thresholds shown in Creator Studio.]",
+      "Gifts and tips: viewers spend coins on gifts and tips on your lives and content. You receive a share of each one that depends on your creator tier: 50% (Starter), 60% (Partner) or 70% (Top), set by your monthly gift volume. You receive it as earned coins, which you can convert to money in Creator Studio. Nantty keeps the rest. [Team to confirm the tier thresholds shown in Creator Studio.]",
       "Fan subscriptions: you set the price and benefits. You keep 80% of what fans pay after the app store or payment processing fee. In the apps the price is raised to cover the store fee, so your share is the same as on the web.",
       "Ads revenue share: 40% of what advertisers pay for eligible ads shown with your posts and clips, including Promoted ads shown between replies in the comment sections of your posts, and in your lives if you turn live ads on. You do not earn from ads you see on your own posts.",
       "Premium pool: part of Premium subscription revenue goes into a pool each month, shared among creators according to how much time Premium members spend watching their content.",
@@ -36,8 +36,8 @@ export const creatorTermsSections: readonly LegalDocumentSection[] = [
     bullets: [
       "AI-generated content earns 30% of the normal ads share, which is 12% of ad revenue at the default rate. [Team to confirm the multiplier before publishing.]",
       "Invalid traffic, such as fake, automated or bought views and clicks, is filtered out first. Advertisers are not charged for it and you are not paid for it.",
-      "Strikes can pause monetisation. While it is paused you earn no gifts, tips, ads share, subscriptions or pool money, and comment-section ads on your posts still show, with the share kept by Zudomart. It comes back when strikes expire or an appeal succeeds. [Team to confirm: the code does not pause monetisation automatically at a strike threshold today; staff suspend Creator Program status by hand.]",
-      "Rates are set by Zudomart and shown in Creator Studio under How you earn. We give at least 30 days' notice before lowering a rate, and a change never applies to earnings already made. [Team to confirm the notice period.]",
+      "Strikes can pause monetisation. While it is paused you earn no gifts, tips, ads share, subscriptions or pool money, and comment-section ads on your posts still show, with the share kept by Nantty. It comes back when strikes expire or an appeal succeeds. [Team to confirm: the code does not pause monetisation automatically at a strike threshold today; staff suspend Creator Program status by hand.]",
+      "Rates are set by Nantty and shown in Creator Studio under How you earn. We give at least 30 days' notice before lowering a rate, and a change never applies to earnings already made. [Team to confirm the notice period.]",
     ],
   },
   {
@@ -45,7 +45,7 @@ export const creatorTermsSections: readonly LegalDocumentSection[] = [
     heading: "Affiliate commissions",
     paragraphs: ["When a seller runs an affiliate program, you can share its products with your link and earn the commission the seller sets:"],
     bullets: [
-      "Commissions are paid by the seller, not by Zudomart, and only on completed orders: the buyer confirms delivery, or 3 days pass after delivery with no dispute, return or refund request. Nothing is paid while the money is in escrow, and an order refunded, cancelled or returned before it completes pays nothing. A partial refund reduces the commission in proportion.",
+      "Commissions are paid by the seller, not by Nantty, and only on completed orders: the buyer confirms delivery, or 3 days pass after delivery with no dispute, return or refund request. Nothing is paid while the money is in escrow, and an order refunded, cancelled or returned before it completes pays nothing. A partial refund reduces the commission in proportion.",
       "The commission rate is locked when the buyer checks out, so later changes by the seller do not affect that order.",
       "Attribution is first click: the first creator link the buyer used for that product gets the sale, within the seller's attribution window, which is 30 days unless the seller sets another.",
       "You never earn a commission on your own purchases or on sales from your own store.",
@@ -67,7 +67,7 @@ export const creatorTermsSections: readonly LegalDocumentSection[] = [
     id: "payouts",
     heading: "Payouts and tax",
     paragraphs: [
-      "Earnings are paid into your wallet held by our licensed payment partner in your name, and withdrawn to a verified account in your own name. Zudomart never holds your earnings. Earnings already earned and validated are never forfeited because you leave the program or close your account.",
+      "Earnings are paid into your wallet held by our licensed payment partner in your name, and withdrawn to a verified account in your own name. Nantty never holds your earnings. Earnings already earned and validated are never forfeited because you leave the program or close your account.",
       "You are responsible for your taxes. If the law requires us or our payment partner to withhold or report tax, we will, and we will tell you.",
       "[Team to replace: the earned-coin conversion rate and the minimum withdrawal amount.]",
     ],
@@ -76,7 +76,7 @@ export const creatorTermsSections: readonly LegalDocumentSection[] = [
     id: "conduct",
     heading: "Creator conduct",
     paragraphs: [
-      "Do not pressure fans, especially young people, to gift, tip or subscribe, promise rewards you will not deliver, offer anything outside Zudomart in exchange for gifts, or deliver subscriber content that breaks the Community Guidelines. Subscriber-only content must match what the plan promised.",
+      "Do not pressure fans, especially young people, to gift, tip or subscribe, promise rewards you will not deliver, offer anything outside Nantty in exchange for gifts, or deliver subscriber content that breaks the Community Guidelines. Subscriber-only content must match what the plan promised.",
       `Creator questions: ${emailAddresses.creators}.`,
     ],
   },

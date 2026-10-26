@@ -5,7 +5,7 @@ import { findLegalPolicyOrThrow } from "@/content/legalPolicies.content";
 
 export const metadata: Metadata = {
   title: "Creator Program terms",
-  description: "The terms for earning as a Zudomart creator.",
+  description: "The terms for earning as a Nantty creator.",
   alternates: { canonical: "/creator-terms" },
 };
 

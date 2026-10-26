@@ -9,9 +9,9 @@ import styles from "./about.module.css";
 
 export const metadata: Metadata = {
   title: "About",
-  description: "Why we are building Zudomart: Social Commerce in Nigeria with real sellers and escrow-protected payments.",
+  description: "Why we are building Nantty: Social Commerce in Nigeria with real sellers and escrow-protected payments.",
   alternates: { canonical: "/about" },
-  openGraph: { title: "About Zudomart", url: "/about" },
+  openGraph: { title: "About Nantty", url: "/about" },
 };
 
 const companyPrinciples: ReadonlyArray<{ readonly icon: FigmaIconName; readonly title: string; readonly description: string }> = [
@@ -25,9 +25,9 @@ export default function AboutPage() {
   return (
     <>
       <PageHeaderWithTitleAndLede
-        eyebrow="About Zudomart"
+        eyebrow="About Nantty"
         title="Buying from a seller you follow shouldn't feel like a gamble."
-        lede="In Nigeria, a lot of shopping already happens on social media: a post, a DM, a transfer to an account number, then a wait. Zudomart keeps the part people love and fixes the part that goes wrong."
+        lede="In Nigeria, a lot of shopping already happens on social media: a post, a DM, a transfer to an account number, then a wait. Nantty keeps the part people love and fixes the part that goes wrong."
       />
       <section className={`pageContainer ${styles.story}`} aria-labelledby="story-heading">
         <div className={styles.storyText}>
@@ -38,10 +38,10 @@ export default function AboutPage() {
             Small sellers build real audiences with photos, videos and live streams. Buyers love discovering them. But the checkout is usually a chat thread and a bank transfer, and when an order goes missing or arrives wrong, there is little a buyer can do.
           </p>
           <p>
-            Zudomart puts those sellers, their content and a proper multi-vendor checkout in one app. Payments sit in escrow until the buyer confirms delivery, so trust no longer depends on how many followers a store has.
+            Nantty puts those sellers, their content and a proper multi-vendor checkout in one app. Payments sit in escrow until the buyer confirms delivery, so trust no longer depends on how many followers a store has.
           </p>
         </div>
-        <PhoneFrameWithAppScreen screen="homeFeedScreen" alt="Zudomart home feed with a post from a Lagos fashion seller" className={styles.phone} sizes="(min-width: 960px) 280px, 60vw" />
+        <PhoneFrameWithAppScreen screen="homeFeedScreen" alt="Nantty home feed with a post from a Lagos fashion seller" className={styles.phone} sizes="(min-width: 960px) 280px, 60vw" />
       </section>
       <section className={styles.principles} aria-labelledby="principles-heading">
         <div className="pageContainer">
@@ -70,7 +70,7 @@ export default function AboutPage() {
         <div className={`${styles.splitCard} ${styles.splitCardSeller} lightIsland`}>
           <h2 className={styles.splitHeading}>Selling?</h2>
           <p>See how stores, live selling, escrow and payouts work for sellers.</p>
-          <ActionLinkStyledAsButton href="/sellers">Sell on Zudomart</ActionLinkStyledAsButton>
+          <ActionLinkStyledAsButton href="/sellers">Sell on Nantty</ActionLinkStyledAsButton>
         </div>
       </section>
     </>

@@ -45,7 +45,7 @@ const nextConfig: NextConfig = {
   experimental: { authInterrupts: true },
   reactStrictMode: true,
   poweredByHeader: false,
-  transpilePackages: ["@zudomart/web-kit"],
+  transpilePackages: ["@nantty/web-kit"],
   images: {
     formats: ["image/avif", "image/webp"],
   },

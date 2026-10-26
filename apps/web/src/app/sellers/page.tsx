@@ -11,10 +11,10 @@ import { sellerQuestions } from "@/content/sellerQuestions.content";
 import { businessAppLinks } from "@/lib/siteConfig.config";
 
 export const metadata: Metadata = {
-  title: "Sell on Zudomart",
-  description: "Open a Zudomart store, sell through posts, clips and live streams, manage orders from the seller dashboard, and get paid to your wallet when buyers confirm delivery.",
+  title: "Sell on Nantty",
+  description: "Open a Nantty store, sell through posts, clips and live streams, manage orders from the seller dashboard, and get paid to your wallet when buyers confirm delivery.",
   alternates: { canonical: "/sellers" },
-  openGraph: { title: "Sell on Zudomart", url: "/sellers" },
+  openGraph: { title: "Sell on Nantty", url: "/sellers" },
 };
 
 export default function SellersPage() {
@@ -30,7 +30,7 @@ export default function SellersPage() {
         sectionId="apply"
         headingId="apply-heading"
         heading="Open your store."
-        description="Apply to sell from the Zudomart app or the Zudomart Dashboard. We review every seller before their store opens."
+        description="Apply to sell from the Nantty app or the Nantty Dashboard. We review every seller before their store opens."
         actionLabel={`Apply on ${businessAppLinks.sellerDashboard.label}`}
         actionHref={businessAppLinks.sellerDashboard.href}
       />

@@ -5,7 +5,7 @@ import { findLegalPolicyOrThrow } from "@/content/legalPolicies.content";
 
 export const metadata: Metadata = {
   title: "Privacy policy",
-  description: "How Zudomart collects, uses and protects your personal data.",
+  description: "How Nantty collects, uses and protects your personal data.",
   alternates: { canonical: "/privacy" },
 };
 

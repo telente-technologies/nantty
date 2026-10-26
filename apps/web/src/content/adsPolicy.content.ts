@@ -6,8 +6,8 @@ export const adsPolicySections: readonly LegalDocumentSection[] = [
     id: "who-can-advertise",
     heading: "Who can advertise",
     paragraphs: [
-      "Zudomart Ads is open only to verified users: at least Level 1 (identity and a payout account in your own name verified), and business verification for some categories. Advertisers must be 18 or over. You can pay for ads from your ad balance, your ad credit, your card or your earnings wallet.",
-      "This policy applies to sponsored ads bought in Zudomart Ads, to boosts, and to paid partnerships between creators and brands.",
+      "Nantty Ads is open only to verified users: at least Level 1 (identity and a payout account in your own name verified), and business verification for some categories. Advertisers must be 18 or over. You can pay for ads from your ad balance, your ad credit, your card or your earnings wallet.",
+      "This policy applies to sponsored ads bought in Nantty Ads, to boosts, and to paid partnerships between creators and brands.",
     ],
   },
   {
@@ -15,8 +15,8 @@ export const adsPolicySections: readonly LegalDocumentSection[] = [
     heading: "Boosted, Sponsored and Paid partnership",
     paragraphs: ["Paid reach is always labelled, so people know what they are seeing:"],
     bullets: [
-      "Boosted: you paid to show your own post, profile or store to more people. Premium members get 1 free boost a month. Store and profile ads can also be bought in Zudomart Ads.",
-      "Sponsored: an ad bought in Zudomart Ads, shown in feeds, between clips, before or after videos, and in lives only if the creator turned live ads on.",
+      "Boosted: you paid to show your own post, profile or store to more people. Premium members get 1 free boost a month. Store and profile ads can also be bought in Nantty Ads.",
+      "Sponsored: an ad bought in Nantty Ads, shown in feeds, between clips, before or after videos, and in lives only if the creator turned live ads on.",
       "Promoted: an ad shown between replies in a comment section.",
       "Paid partnership: a creator was paid or given something to post about a brand, or earns affiliate commission on it. The creator must turn on the label.",
     ],
@@ -24,11 +24,11 @@ export const adsPolicySections: readonly LegalDocumentSection[] = [
   {
     id: "ad-balance-and-credit",
     heading: "Ad balance and ad credit",
-    paragraphs: ["Zudomart Ads keeps two kinds of funds apart:"],
+    paragraphs: ["Nantty Ads keeps two kinds of funds apart:"],
     bullets: [
-      "Ad balance is real money you top up to pay for ads. Unspent ad balance can be withdrawn after a 24-hour hold from the top-up, once you are payout-verified. It goes to your Zudomart wallet and from there to your verified payout account. Any fee is shown before you confirm. [Team to confirm the fee: the code charges a Zudomart fee of 1.5%, capped at ₦2,000, with a ₦1,000 minimum, not only the provider's fee.]",
-      "Ad credit is promotional value. It can be used only for ads and boosts in Zudomart, is never money, and can never be withdrawn, transferred or exchanged for cash. Credit Zudomart gives you, for example in a promotion or as goodwill, may expire on a date shown when we give it. Credit you earn in the app, such as cashback, never expires.",
-      "Cashback: selected advertisers, chosen by Zudomart, receive 10% of their delivered ad spend back as ad credit. We tell you if your account is selected, and we may change or end the offer with notice for future spend.",
+      "Ad balance is real money you top up to pay for ads. Unspent ad balance can be withdrawn after a 24-hour hold from the top-up, once you are payout-verified. It goes to your Nantty wallet and from there to your verified payout account. Any fee is shown before you confirm. [Team to confirm the fee: the code charges a Nantty fee of 1.5%, capped at ₦2,000, with a ₦1,000 minimum, not only the provider's fee.]",
+      "Ad credit is promotional value. It can be used only for ads and boosts in Nantty, is never money, and can never be withdrawn, transferred or exchanged for cash. Credit Nantty gives you, for example in a promotion or as goodwill, may expire on a date shown when we give it. Credit you earn in the app, such as cashback, never expires.",
+      "Cashback: selected advertisers, chosen by Nantty, receive 10% of their delivered ad spend back as ad credit. We tell you if your account is selected, and we may change or end the offer with notice for future spend.",
     ],
   },
   {
@@ -47,7 +47,7 @@ export const adsPolicySections: readonly LegalDocumentSection[] = [
     id: "arcon",
     heading: "Nigerian advertising law (ARCON)",
     paragraphs: [
-      "Ads shown to people in Nigeria must follow the Advertising Regulatory Council of Nigeria Act 2022 and the Nigerian Code of Advertising Practice. ARCON requires advertising to be vetted and approved before it is exposed to the public, and it applies this to online ads, influencer posts and skits. The advertiser is responsible for getting that approval, and we may ask for the approval reference before or after an ad runs. [Team to confirm with counsel which Zudomart ad formats and boosts need ARCON pre-exposure approval, and whether Zudomart must register with ARCON as an advertising platform.]",
+      "Ads shown to people in Nigeria must follow the Advertising Regulatory Council of Nigeria Act 2022 and the Nigerian Code of Advertising Practice. ARCON requires advertising to be vetted and approved before it is exposed to the public, and it applies this to online ads, influencer posts and skits. The advertiser is responsible for getting that approval, and we may ask for the approval reference before or after an ad runs. [Team to confirm with counsel which Nantty ad formats and boosts need ARCON pre-exposure approval, and whether Nantty must register with ARCON as an advertising platform.]",
       "Ads must be legal, decent, honest and truthful. Claims must be backed by evidence. Prices must be the full price. Comparisons must be fair. Endorsements must reflect the endorser's genuine experience.",
       "Ads in other countries must follow their rules too, such as the UK CAP Code, the EU Digital Services Act and the US FTC Endorsement Guides.",
     ],
@@ -66,7 +66,7 @@ export const adsPolicySections: readonly LegalDocumentSection[] = [
       "Misleading claims: miracle cures, unrealistic before-and-after results, fake scarcity, countdown timers that reset, fake reviews.",
       "Discrimination and hate, and ads that exclude people by ethnicity, tribe, religion or other protected traits.",
       "Ads that imply knowledge of someone's private traits, such as health, finances or religion.",
-      "Ads that copy Zudomart's interface to trick people, or that link to malware or phishing.",
+      "Ads that copy Nantty's interface to trick people, or that link to malware or phishing.",
     ],
   },
   {
@@ -87,7 +87,7 @@ export const adsPolicySections: readonly LegalDocumentSection[] = [
     heading: "Targeting and data",
     paragraphs: [
       "Ads are chosen by a system separate from feed ranking, with frequency caps. Personalised ads are shown only to adults who allowed them. Under-18s and guests are not shown ads. You may not target ads using sensitive data such as health, religion, ethnicity or sexuality.",
-      "If you upload a customer list, upload only people who agreed to hear from you. Emails and phone numbers are hashed and matched inside Zudomart; we never give you personal data about the people who see your ads, only aggregated results. Lookalike audiences are built inside Zudomart in the same way.",
+      "If you upload a customer list, upload only people who agreed to hear from you. Emails and phone numbers are hashed and matched inside Nantty; we never give you personal data about the people who see your ads, only aggregated results. Lookalike audiences are built inside Nantty in the same way.",
       "Advertisers are not charged for invalid traffic, such as fake or automated impressions and clicks. Creators who show your ads are paid a share of what you pay, as the Creator Program Terms explain.",
     ],
   },
@@ -95,7 +95,7 @@ export const adsPolicySections: readonly LegalDocumentSection[] = [
     id: "landing-pages",
     heading: "Destinations",
     paragraphs: [
-      "Links must use https, work, and lead to what the ad promises. Product ads should link to a Zudomart product or store, so buyers in Nigeria are protected by escrow.",
+      "Links must use https, work, and lead to what the ad promises. Product ads should link to a Nantty product or store, so buyers in Nigeria are protected by escrow.",
     ],
   },
   {
@@ -103,7 +103,7 @@ export const adsPolicySections: readonly LegalDocumentSection[] = [
     heading: "Review, payment and enforcement",
     paragraphs: [
       "Every ad and boost is reviewed before it runs, usually within a few hours, and may be re-checked while it runs. If an ad is rejected, the reason is shown. You can edit and resubmit, or appeal once; a person reviews every appeal, usually within 24 hours.",
-      "We may pause or remove ads that break this policy, and suspend advertisers who repeatedly do. Spend on ads removed for breaking this policy is not refunded unless the law requires it. Spend that was not delivered is returned to the funding source or wallet. Prices are per country, with a minimum cost per thousand impressions shown in Zudomart Ads.",
+      "We may pause or remove ads that break this policy, and suspend advertisers who repeatedly do. Spend on ads removed for breaking this policy is not refunded unless the law requires it. Spend that was not delivered is returned to the funding source or wallet. Prices are per country, with a minimum cost per thousand impressions shown in Nantty Ads.",
       `Ads questions: ${emailAddresses.ads}.`,
     ],
   },
