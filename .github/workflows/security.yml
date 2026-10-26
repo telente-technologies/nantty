@@ -55,7 +55,7 @@ jobs:
           done
           exit $status
         working-directory: services/go
-      - uses: astral-sh/setup-uv@v10.3.0
+      - uses: astral-sh/setup-uv@v10.3.2
       - run: uv export --frozen --no-dev --no-emit-project -o /tmp/requirements.txt && uvx pip-audit -r /tmp/requirements.txt --no-deps --disable-pip
         working-directory: services/python/intelligence
       - uses: erlef/setup-beam@v1
