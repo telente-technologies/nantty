@@ -3,10 +3,10 @@ package controllers
 import (
 	"net/http"
 
-	"zudomart/modules/admin/src/container"
-	getoverviewmetrics "zudomart/modules/admin/src/modules/platformMetrics/queries/getOverviewMetrics"
-	httprequests "zudomart/modules/admin/src/utils/httpRequests"
-	"zudomart/platform/httpserver"
+	"nantty/modules/admin/src/container"
+	getoverviewmetrics "nantty/modules/admin/src/modules/platformMetrics/queries/getOverviewMetrics"
+	httprequests "nantty/modules/admin/src/utils/httpRequests"
+	"nantty/platform/httpserver"
 )
 
 type PlatformMetricsController struct {

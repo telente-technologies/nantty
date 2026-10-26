@@ -4,7 +4,7 @@ import (
 	"strings"
 	"time"
 
-	"zudomart/modules/admin/src/generated/ent"
+	"nantty/modules/admin/src/generated/ent"
 )
 
 type StaffView struct {

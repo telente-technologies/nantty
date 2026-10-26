@@ -6,10 +6,10 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"github.com/google/uuid"
 
-	adminerrors "zudomart/modules/admin/src/errors"
-	"zudomart/modules/admin/src/generated/ent/auditevent"
-	"zudomart/modules/admin/src/generated/ent/predicate"
-	"zudomart/modules/admin/src/modules/auditLog/models"
+	adminerrors "nantty/modules/admin/src/errors"
+	"nantty/modules/admin/src/generated/ent/auditevent"
+	"nantty/modules/admin/src/generated/ent/predicate"
+	"nantty/modules/admin/src/modules/auditLog/models"
 )
 
 var searchableAuditColumns = []string{auditevent.FieldAction, auditevent.FieldActorName, auditevent.FieldSubjectLabel, auditevent.FieldSubjectID, auditevent.FieldReason}

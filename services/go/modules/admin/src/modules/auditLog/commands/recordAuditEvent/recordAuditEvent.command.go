@@ -1,6 +1,6 @@
 package recordauditevent
 
-import "zudomart/platform/identityports"
+import "nantty/platform/identityports"
 
 type Command struct {
 	Event identityports.AuditEvent

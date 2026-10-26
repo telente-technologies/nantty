@@ -5,8 +5,8 @@ import (
 	"net/http"
 	"net/netip"
 
-	"zudomart/modules/admin/src/modules/staffAdmins/services"
-	"zudomart/platform/httpserver"
+	"nantty/modules/admin/src/modules/staffAdmins/services"
+	"nantty/platform/httpserver"
 )
 
 func (controller StaffAdminsController) NetworkPolicy(writer http.ResponseWriter, request *http.Request) {

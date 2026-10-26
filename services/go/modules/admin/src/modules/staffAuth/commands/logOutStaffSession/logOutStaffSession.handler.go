@@ -5,9 +5,9 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/admin/src/container"
-	adminerrors "zudomart/modules/admin/src/errors"
-	"zudomart/modules/admin/src/generated/ent/staffsession"
+	"nantty/modules/admin/src/container"
+	adminerrors "nantty/modules/admin/src/errors"
+	"nantty/modules/admin/src/generated/ent/staffsession"
 )
 
 type Handler struct {

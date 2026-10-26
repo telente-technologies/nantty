@@ -5,8 +5,8 @@ import (
 	"net/url"
 	"time"
 
-	ipallowlist "zudomart/modules/admin/src/utils/ipAllowList"
-	platformconfig "zudomart/platform/config"
+	ipallowlist "nantty/modules/admin/src/utils/ipAllowList"
+	platformconfig "nantty/platform/config"
 )
 
 type AdminSettings struct {

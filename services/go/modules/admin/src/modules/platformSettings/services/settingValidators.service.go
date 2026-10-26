@@ -5,8 +5,8 @@ import (
 	"encoding/json"
 	"fmt"
 
-	adminerrors "zudomart/modules/admin/src/errors"
-	"zudomart/platform/regionpricing"
+	adminerrors "nantty/modules/admin/src/errors"
+	"nantty/platform/regionpricing"
 )
 
 func decodeStrictly[Value any](raw json.RawMessage, destination *Value) error {

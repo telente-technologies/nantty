@@ -8,8 +8,8 @@ import (
 	"testing"
 	"time"
 
-	"zudomart/modules/admin/src/generated/ent/staffsession"
-	"zudomart/platform/jwtauth"
+	"nantty/modules/admin/src/generated/ent/staffsession"
+	"nantty/platform/jwtauth"
 )
 
 type recordingSessionDenylist struct {

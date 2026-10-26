@@ -5,10 +5,10 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/admin/src/container"
-	"zudomart/modules/admin/src/generated/ent"
-	"zudomart/modules/admin/src/modules/auditLog/models"
-	"zudomart/platform/httpserver"
+	"nantty/modules/admin/src/container"
+	"nantty/modules/admin/src/generated/ent"
+	"nantty/modules/admin/src/modules/auditLog/models"
+	"nantty/platform/httpserver"
 )
 
 type Handler struct {

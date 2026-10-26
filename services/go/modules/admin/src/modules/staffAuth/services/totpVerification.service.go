@@ -3,10 +3,10 @@ package services
 import (
 	"time"
 
-	adminerrors "zudomart/modules/admin/src/errors"
-	"zudomart/modules/admin/src/generated/ent"
-	"zudomart/modules/admin/src/utils/totp"
-	"zudomart/platform/secretbox"
+	adminerrors "nantty/modules/admin/src/errors"
+	"nantty/modules/admin/src/generated/ent"
+	"nantty/modules/admin/src/utils/totp"
+	"nantty/platform/secretbox"
 )
 
 func (service StaffAuthService) SealNewTotpSecret() (secret []byte, sealed []byte, err error) {

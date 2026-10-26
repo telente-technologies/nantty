@@ -6,9 +6,9 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/admin/src/generated/ent"
-	"zudomart/modules/admin/src/generated/ent/hook"
-	"zudomart/platform/jwtauth"
+	"nantty/modules/admin/src/generated/ent"
+	"nantty/modules/admin/src/generated/ent/hook"
+	"nantty/platform/jwtauth"
 )
 
 func StaffSessionDenylistTtl(staffAccessTokenTimeToLive time.Duration) time.Duration {

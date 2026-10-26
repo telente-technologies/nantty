@@ -4,7 +4,7 @@ import (
 	"log/slog"
 	"net/http"
 
-	"zudomart/platform/httpserver"
+	"nantty/platform/httpserver"
 )
 
 func DecodeAndValidate[Request any](writer http.ResponseWriter, request *http.Request, validate func(Request) error) (Request, error) {

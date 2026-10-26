@@ -1,6 +1,6 @@
 package liststaff
 
-import "zudomart/modules/admin/src/types"
+import "nantty/modules/admin/src/types"
 
 type Query struct {
 	Cursor string

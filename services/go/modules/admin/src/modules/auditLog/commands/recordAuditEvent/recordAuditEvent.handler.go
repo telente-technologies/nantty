@@ -3,9 +3,9 @@ package recordauditevent
 import (
 	"context"
 
-	"zudomart/modules/admin/src/container"
-	"zudomart/modules/admin/src/generated/ent"
-	"zudomart/modules/admin/src/repositories"
+	"nantty/modules/admin/src/container"
+	"nantty/modules/admin/src/generated/ent"
+	"nantty/modules/admin/src/repositories"
 )
 
 type Handler struct {

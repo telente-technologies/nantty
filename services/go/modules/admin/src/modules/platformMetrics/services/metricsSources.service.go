@@ -8,8 +8,8 @@ import (
 
 	"github.com/jackc/pgx/v5"
 
-	"zudomart/modules/admin/src/configs"
-	"zudomart/modules/admin/src/modules/platformMetrics/models"
+	"nantty/modules/admin/src/configs"
+	"nantty/modules/admin/src/modules/platformMetrics/models"
 )
 
 const sourceQueryTimeout = 2 * time.Second

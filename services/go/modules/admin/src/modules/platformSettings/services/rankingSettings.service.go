@@ -7,7 +7,7 @@ import (
 	"strings"
 	"time"
 
-	adminerrors "zudomart/modules/admin/src/errors"
+	adminerrors "nantty/modules/admin/src/errors"
 )
 
 const (

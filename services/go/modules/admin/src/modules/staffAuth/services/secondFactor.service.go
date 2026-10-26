@@ -6,10 +6,10 @@ import (
 	"errors"
 	"time"
 
-	"zudomart/modules/admin/src/generated/ent"
-	ipallowlist "zudomart/modules/admin/src/utils/ipAllowList"
-	recoverycodes "zudomart/modules/admin/src/utils/recoveryCodes"
-	"zudomart/platform/httpserver"
+	"nantty/modules/admin/src/generated/ent"
+	ipallowlist "nantty/modules/admin/src/utils/ipAllowList"
+	recoverycodes "nantty/modules/admin/src/utils/recoveryCodes"
+	"nantty/platform/httpserver"
 )
 
 type SecondFactorProof struct {

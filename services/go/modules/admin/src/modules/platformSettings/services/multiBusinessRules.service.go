@@ -1,6 +1,6 @@
 package services
 
-import adminerrors "zudomart/modules/admin/src/errors"
+import adminerrors "nantty/modules/admin/src/errors"
 
 type MultiBusinessRules struct {
 	MultiBusinessSingleProfilePercent *int    `json:"multiBusinessSingleProfilePercent,omitempty"`

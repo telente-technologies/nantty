@@ -10,7 +10,7 @@ import (
 	"strings"
 	"unicode/utf8"
 
-	"zudomart/platform/httpserver"
+	"nantty/platform/httpserver"
 )
 
 func GenerateOpaqueUrlSafeToken() (string, error) {

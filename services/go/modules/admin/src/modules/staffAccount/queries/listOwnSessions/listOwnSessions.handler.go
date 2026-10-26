@@ -3,11 +3,11 @@ package listownsessions
 import (
 	"context"
 
-	"zudomart/modules/admin/src/container"
-	"zudomart/modules/admin/src/generated/ent"
-	"zudomart/modules/admin/src/generated/ent/staffsession"
-	"zudomart/modules/admin/src/modules/staffAccount/models"
-	"zudomart/modules/admin/src/modules/staffAccount/services"
+	"nantty/modules/admin/src/container"
+	"nantty/modules/admin/src/generated/ent"
+	"nantty/modules/admin/src/generated/ent/staffsession"
+	"nantty/modules/admin/src/modules/staffAccount/models"
+	"nantty/modules/admin/src/modules/staffAccount/services"
 )
 
 type Handler struct {

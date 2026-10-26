@@ -5,8 +5,8 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/admin/src/generated/ent"
-	"zudomart/modules/admin/src/generated/ent/staffaccount"
+	"nantty/modules/admin/src/generated/ent"
+	"nantty/modules/admin/src/generated/ent/staffaccount"
 )
 
 func (service StaffAuthService) RecordFailedPasswordAttemptAndMaybeLock(ctx context.Context, staffId uuid.UUID, rejection error) error {

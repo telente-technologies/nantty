@@ -10,14 +10,14 @@ import (
 
 	"github.com/go-webauthn/webauthn/webauthn"
 
-	"zudomart/modules/admin/src/configs"
-	"zudomart/modules/admin/src/generated/ent"
-	"zudomart/modules/admin/src/integrations"
-	"zudomart/modules/admin/src/middlewares"
-	recoverycodes "zudomart/modules/admin/src/utils/recoveryCodes"
-	"zudomart/platform/identityports"
-	"zudomart/platform/passwordhash"
-	"zudomart/platform/staffauth"
+	"nantty/modules/admin/src/configs"
+	"nantty/modules/admin/src/generated/ent"
+	"nantty/modules/admin/src/integrations"
+	"nantty/modules/admin/src/middlewares"
+	recoverycodes "nantty/modules/admin/src/utils/recoveryCodes"
+	"nantty/platform/identityports"
+	"nantty/platform/passwordhash"
+	"nantty/platform/staffauth"
 )
 
 type Container struct {

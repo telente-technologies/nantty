@@ -5,9 +5,9 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/admin/src/generated/ent"
-	"zudomart/modules/admin/src/generated/ent/staffrole"
-	"zudomart/platform/staffauth"
+	"nantty/modules/admin/src/generated/ent"
+	"nantty/modules/admin/src/generated/ent/staffrole"
+	"nantty/platform/staffauth"
 )
 
 var templateIdentifierNamespace = uuid.MustParse("5f0c7a0e-3c1d-4f6e-9a55-0a6d5c2b7e11")

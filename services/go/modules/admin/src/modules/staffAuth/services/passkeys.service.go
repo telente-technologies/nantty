@@ -8,9 +8,9 @@ import (
 	"github.com/go-webauthn/webauthn/protocol"
 	"github.com/go-webauthn/webauthn/webauthn"
 
-	adminerrors "zudomart/modules/admin/src/errors"
-	"zudomart/modules/admin/src/generated/ent"
-	"zudomart/modules/admin/src/generated/ent/staffwebauthncredential"
+	adminerrors "nantty/modules/admin/src/errors"
+	"nantty/modules/admin/src/generated/ent"
+	"nantty/modules/admin/src/generated/ent/staffwebauthncredential"
 )
 
 type staffPasskeyUser struct {

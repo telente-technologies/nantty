@@ -13,12 +13,12 @@ import (
 	entsql "entgo.io/ent/dialect/sql"
 	"golang.org/x/term"
 
-	"zudomart/modules/admin/src/container"
-	"zudomart/modules/admin/src/generated/ent"
-	"zudomart/modules/admin/src/migrations"
-	bootstrapsuperadmin "zudomart/modules/admin/src/modules/staffAdmins/commands/bootstrapSuperadmin"
-	"zudomart/platform/passwordhash"
-	"zudomart/platform/postgres"
+	"nantty/modules/admin/src/container"
+	"nantty/modules/admin/src/generated/ent"
+	"nantty/modules/admin/src/migrations"
+	bootstrapsuperadmin "nantty/modules/admin/src/modules/staffAdmins/commands/bootstrapSuperadmin"
+	"nantty/platform/passwordhash"
+	"nantty/platform/postgres"
 )
 
 func main() {

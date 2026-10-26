@@ -3,9 +3,9 @@ package platformsettings
 import (
 	"net/http"
 
-	"zudomart/modules/admin/src/container"
-	"zudomart/modules/admin/src/modules/platformSettings/routes"
-	"zudomart/modules/admin/src/modules/platformSettings/services"
+	"nantty/modules/admin/src/container"
+	"nantty/modules/admin/src/modules/platformSettings/routes"
+	"nantty/modules/admin/src/modules/platformSettings/services"
 )
 
 func MountRoutes(mux *http.ServeMux, container *container.Container) {

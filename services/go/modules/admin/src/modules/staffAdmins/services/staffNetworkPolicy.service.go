@@ -5,10 +5,10 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/admin/src/container"
-	"zudomart/modules/admin/src/generated/ent"
-	"zudomart/modules/admin/src/generated/ent/staffaccount"
-	ipallowlist "zudomart/modules/admin/src/utils/ipAllowList"
+	"nantty/modules/admin/src/container"
+	"nantty/modules/admin/src/generated/ent"
+	"nantty/modules/admin/src/generated/ent/staffaccount"
+	ipallowlist "nantty/modules/admin/src/utils/ipAllowList"
 )
 
 type StaffNetworkPolicy struct {

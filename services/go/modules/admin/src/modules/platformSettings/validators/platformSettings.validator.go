@@ -1,8 +1,8 @@
 package validators
 
 import (
-	"zudomart/modules/admin/src/modules/platformSettings/dtos"
-	"zudomart/modules/admin/src/utils/validation"
+	"nantty/modules/admin/src/modules/platformSettings/dtos"
+	"nantty/modules/admin/src/utils/validation"
 )
 
 func ValidateUpdateSettingRequest(request dtos.UpdateSettingRequest) error {

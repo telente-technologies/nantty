@@ -3,8 +3,8 @@ package routes
 import (
 	"net/http"
 
-	"zudomart/modules/admin/src/container"
-	"zudomart/modules/admin/src/modules/staffAuth/controllers"
+	"nantty/modules/admin/src/container"
+	"nantty/modules/admin/src/modules/staffAuth/controllers"
 )
 
 func MountStaffAuthRoutes(mux *http.ServeMux, container *container.Container) {

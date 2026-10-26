@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"time"
 
-	"zudomart/modules/admin/src/generated/ent"
+	"nantty/modules/admin/src/generated/ent"
 )
 
 type VersionAuthor struct {

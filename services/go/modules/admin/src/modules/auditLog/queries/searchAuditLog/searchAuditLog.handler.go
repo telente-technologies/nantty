@@ -3,11 +3,11 @@ package searchauditlog
 import (
 	"context"
 
-	"zudomart/modules/admin/src/container"
-	"zudomart/modules/admin/src/generated/ent"
-	"zudomart/modules/admin/src/generated/ent/auditevent"
-	"zudomart/modules/admin/src/modules/auditLog/models"
-	"zudomart/modules/admin/src/modules/auditLog/services"
+	"nantty/modules/admin/src/container"
+	"nantty/modules/admin/src/generated/ent"
+	"nantty/modules/admin/src/generated/ent/auditevent"
+	"nantty/modules/admin/src/modules/auditLog/models"
+	"nantty/modules/admin/src/modules/auditLog/services"
 )
 
 const pageSize = 50

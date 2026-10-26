@@ -3,9 +3,9 @@ package getplatformsetting
 import (
 	"context"
 
-	"zudomart/modules/admin/src/container"
-	"zudomart/modules/admin/src/modules/platformSettings/models"
-	"zudomart/modules/admin/src/modules/platformSettings/services"
+	"nantty/modules/admin/src/container"
+	"nantty/modules/admin/src/modules/platformSettings/models"
+	"nantty/modules/admin/src/modules/platformSettings/services"
 )
 
 type Handler struct {

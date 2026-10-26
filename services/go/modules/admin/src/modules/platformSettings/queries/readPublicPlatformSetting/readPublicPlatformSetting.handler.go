@@ -3,10 +3,10 @@ package readpublicplatformsetting
 import (
 	"context"
 
-	"zudomart/modules/admin/src/container"
-	adminerrors "zudomart/modules/admin/src/errors"
-	"zudomart/modules/admin/src/modules/platformSettings/models"
-	"zudomart/modules/admin/src/modules/platformSettings/services"
+	"nantty/modules/admin/src/container"
+	adminerrors "nantty/modules/admin/src/errors"
+	"nantty/modules/admin/src/modules/platformSettings/models"
+	"nantty/modules/admin/src/modules/platformSettings/services"
 )
 
 type Handler struct {

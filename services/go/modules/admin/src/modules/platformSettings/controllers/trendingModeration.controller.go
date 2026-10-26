@@ -3,12 +3,12 @@ package controllers
 import (
 	"net/http"
 
-	updateplatformsetting "zudomart/modules/admin/src/modules/platformSettings/commands/updatePlatformSetting"
-	getplatformsetting "zudomart/modules/admin/src/modules/platformSettings/queries/getPlatformSetting"
-	"zudomart/modules/admin/src/modules/platformSettings/services"
-	"zudomart/modules/admin/src/modules/platformSettings/validators"
-	httprequests "zudomart/modules/admin/src/utils/httpRequests"
-	"zudomart/platform/staffauth"
+	updateplatformsetting "nantty/modules/admin/src/modules/platformSettings/commands/updatePlatformSetting"
+	getplatformsetting "nantty/modules/admin/src/modules/platformSettings/queries/getPlatformSetting"
+	"nantty/modules/admin/src/modules/platformSettings/services"
+	"nantty/modules/admin/src/modules/platformSettings/validators"
+	httprequests "nantty/modules/admin/src/utils/httpRequests"
+	"nantty/platform/staffauth"
 )
 
 func (controller PlatformSettingsController) GetTrendingModeration(writer http.ResponseWriter, request *http.Request) {

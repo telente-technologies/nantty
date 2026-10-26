@@ -7,11 +7,11 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/admin/src/generated/ent"
-	"zudomart/modules/admin/src/generated/ent/staffrole"
-	"zudomart/modules/admin/src/types"
-	"zudomart/platform/identityports"
-	"zudomart/platform/staffauth"
+	"nantty/modules/admin/src/generated/ent"
+	"nantty/modules/admin/src/generated/ent/staffrole"
+	"nantty/modules/admin/src/types"
+	"nantty/platform/identityports"
+	"nantty/platform/staffauth"
 )
 
 func RecordAuditEventInTransaction(ctx context.Context, tx *ent.Tx, event identityports.AuditEvent) error {

@@ -1,8 +1,8 @@
 package getstaffdetail
 
 import (
-	"zudomart/modules/admin/src/modules/auditLog/models"
-	"zudomart/modules/admin/src/types"
+	"nantty/modules/admin/src/modules/auditLog/models"
+	"nantty/modules/admin/src/types"
 )
 
 type Query struct {

@@ -3,12 +3,12 @@ package getownaccount
 import (
 	"context"
 
-	"zudomart/modules/admin/src/container"
-	"zudomart/modules/admin/src/generated/ent"
-	"zudomart/modules/admin/src/generated/ent/staffwebauthncredential"
-	"zudomart/modules/admin/src/modules/staffAccount/models"
-	"zudomart/modules/admin/src/modules/staffAccount/services"
-	staffadminservices "zudomart/modules/admin/src/modules/staffAdmins/services"
+	"nantty/modules/admin/src/container"
+	"nantty/modules/admin/src/generated/ent"
+	"nantty/modules/admin/src/generated/ent/staffwebauthncredential"
+	"nantty/modules/admin/src/modules/staffAccount/models"
+	"nantty/modules/admin/src/modules/staffAccount/services"
+	staffadminservices "nantty/modules/admin/src/modules/staffAdmins/services"
 )
 
 type Handler struct {

@@ -5,7 +5,7 @@ import (
 	"slices"
 	"strings"
 
-	"zudomart/modules/admin/src/modules/platformSettings/models"
+	"nantty/modules/admin/src/modules/platformSettings/models"
 )
 
 type SettingProjection struct {

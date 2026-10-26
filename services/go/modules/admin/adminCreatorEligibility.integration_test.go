@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"testing"
 
-	"zudomart/platform/identityports"
+	"nantty/platform/identityports"
 )
 
 func TestCreatorEligibilityIsAViewOfTheCreatorThresholds(t *testing.T) {

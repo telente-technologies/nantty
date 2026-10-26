@@ -3,7 +3,7 @@ package updateplatformsetting
 import (
 	"encoding/json"
 
-	"zudomart/platform/staffauth"
+	"nantty/platform/staffauth"
 )
 
 type Command struct {

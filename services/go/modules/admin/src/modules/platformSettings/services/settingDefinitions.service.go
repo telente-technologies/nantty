@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"regexp"
 
-	"zudomart/platform/regionpricing"
+	"nantty/platform/regionpricing"
 )
 
 const (

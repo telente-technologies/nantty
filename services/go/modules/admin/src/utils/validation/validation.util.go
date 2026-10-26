@@ -3,7 +3,7 @@ package validation
 import (
 	"regexp"
 
-	"zudomart/platform/httpserver"
+	"nantty/platform/httpserver"
 )
 
 var sixDigitCodePattern = regexp.MustCompile(`^\d{6}$`)

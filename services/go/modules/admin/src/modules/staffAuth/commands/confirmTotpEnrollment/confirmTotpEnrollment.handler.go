@@ -3,10 +3,10 @@ package confirmtotpenrollment
 import (
 	"context"
 
-	"zudomart/modules/admin/src/container"
-	"zudomart/modules/admin/src/generated/ent/staffloginchallenge"
-	"zudomart/modules/admin/src/modules/staffAuth/models"
-	"zudomart/modules/admin/src/modules/staffAuth/services"
+	"nantty/modules/admin/src/container"
+	"nantty/modules/admin/src/generated/ent/staffloginchallenge"
+	"nantty/modules/admin/src/modules/staffAuth/models"
+	"nantty/modules/admin/src/modules/staffAuth/services"
 )
 
 type Handler struct {

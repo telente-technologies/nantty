@@ -10,8 +10,8 @@ import (
 	"testing"
 	"time"
 
-	"zudomart/modules/admin/src/modules/platformSettings/services"
-	"zudomart/platform/identityports"
+	"nantty/modules/admin/src/modules/platformSettings/services"
+	"nantty/platform/identityports"
 )
 
 func waitForEventTypes(t *testing.T, harness *adminHarness, wanted ...string) {

@@ -5,16 +5,16 @@ import (
 
 	"github.com/google/uuid"
 
-	adminerrors "zudomart/modules/admin/src/errors"
-	"zudomart/modules/admin/src/generated/ent"
-	"zudomart/modules/admin/src/generated/ent/staffaccount"
-	"zudomart/modules/admin/src/generated/ent/staffloginchallenge"
-	"zudomart/modules/admin/src/modules/staffAuth/models"
-	"zudomart/modules/admin/src/repositories"
-	"zudomart/modules/admin/src/types"
-	jsonencoding "zudomart/modules/admin/src/utils/jsonEncoding"
-	secrettokens "zudomart/modules/admin/src/utils/secretTokens"
-	"zudomart/platform/identityports"
+	adminerrors "nantty/modules/admin/src/errors"
+	"nantty/modules/admin/src/generated/ent"
+	"nantty/modules/admin/src/generated/ent/staffaccount"
+	"nantty/modules/admin/src/generated/ent/staffloginchallenge"
+	"nantty/modules/admin/src/modules/staffAuth/models"
+	"nantty/modules/admin/src/repositories"
+	"nantty/modules/admin/src/types"
+	jsonencoding "nantty/modules/admin/src/utils/jsonEncoding"
+	secrettokens "nantty/modules/admin/src/utils/secretTokens"
+	"nantty/platform/identityports"
 )
 
 func (service StaffAuthService) FindUsableChallengeInTransaction(ctx context.Context, tx *ent.Tx, challengeToken string, purpose staffloginchallenge.Purpose) (*ent.StaffLoginChallenge, error) {

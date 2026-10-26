@@ -1,6 +1,6 @@
 package models
 
-import "zudomart/modules/admin/src/types"
+import "nantty/modules/admin/src/types"
 
 type LoginChallengeResult struct {
 	Status           string `json:"status"`

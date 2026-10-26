@@ -6,13 +6,13 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/admin/src/container"
-	"zudomart/modules/admin/src/generated/ent"
-	"zudomart/modules/admin/src/generated/ent/staffaccount"
-	"zudomart/modules/admin/src/generated/ent/staffrole"
-	"zudomart/modules/admin/src/generated/ent/staffsession"
-	"zudomart/modules/admin/src/generated/ent/staffwebauthncredential"
-	"zudomart/modules/admin/src/types"
+	"nantty/modules/admin/src/container"
+	"nantty/modules/admin/src/generated/ent"
+	"nantty/modules/admin/src/generated/ent/staffaccount"
+	"nantty/modules/admin/src/generated/ent/staffrole"
+	"nantty/modules/admin/src/generated/ent/staffsession"
+	"nantty/modules/admin/src/generated/ent/staffwebauthncredential"
+	"nantty/modules/admin/src/types"
 )
 
 func BuildStaffViews(ctx context.Context, client *ent.Client, rows []*ent.StaffAccount) ([]types.StaffView, error) {

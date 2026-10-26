@@ -3,8 +3,8 @@ package middlewares
 import (
 	"net/http"
 
-	"zudomart/modules/admin/src/types"
-	"zudomart/platform/httpserver"
+	"nantty/modules/admin/src/types"
+	"nantty/platform/httpserver"
 )
 
 func AttachClientDetailsToContext(next http.Handler) http.Handler {

@@ -7,9 +7,9 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/admin/src/generated/ent"
-	"zudomart/modules/admin/src/generated/ent/platformsetting"
-	secrettokens "zudomart/modules/admin/src/utils/secretTokens"
+	"nantty/modules/admin/src/generated/ent"
+	"nantty/modules/admin/src/generated/ent/platformsetting"
+	secrettokens "nantty/modules/admin/src/utils/secretTokens"
 )
 
 func CreateInvitationInTransaction(ctx context.Context, tx *ent.Tx, staffId uuid.UUID, token string, expiresAt time.Time) error {

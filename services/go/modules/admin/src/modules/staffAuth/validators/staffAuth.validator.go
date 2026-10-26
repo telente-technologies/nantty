@@ -3,9 +3,9 @@ package validators
 import (
 	"regexp"
 
-	"zudomart/modules/admin/src/modules/staffAuth/dtos"
-	recoverycodes "zudomart/modules/admin/src/utils/recoveryCodes"
-	"zudomart/modules/admin/src/utils/validation"
+	"nantty/modules/admin/src/modules/staffAuth/dtos"
+	recoverycodes "nantty/modules/admin/src/utils/recoveryCodes"
+	"nantty/modules/admin/src/utils/validation"
 )
 
 var sixDigitCode = regexp.MustCompile(`^\d{6}$`)

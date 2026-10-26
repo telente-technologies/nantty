@@ -3,10 +3,10 @@ package admin
 import (
 	"context"
 
-	"zudomart/modules/admin/src"
-	"zudomart/modules/admin/src/configs"
-	"zudomart/platform/events"
-	"zudomart/platform/servicemodule"
+	"nantty/modules/admin/src"
+	"nantty/modules/admin/src/configs"
+	"nantty/platform/events"
+	"nantty/platform/servicemodule"
 )
 
 func NewAdminModule(ctx context.Context, dependencies servicemodule.Dependencies) (servicemodule.Module, error) {

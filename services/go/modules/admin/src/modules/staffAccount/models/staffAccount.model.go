@@ -3,8 +3,8 @@ package models
 import (
 	"time"
 
-	"zudomart/modules/admin/src/generated/ent"
-	"zudomart/modules/admin/src/types"
+	"nantty/modules/admin/src/generated/ent"
+	"nantty/modules/admin/src/types"
 )
 
 type PasskeyView struct {

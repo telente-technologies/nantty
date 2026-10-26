@@ -3,8 +3,8 @@ package routes
 import (
 	"net/http"
 
-	"zudomart/modules/admin/src/container"
-	"zudomart/modules/admin/src/modules/platformMetrics/controllers"
+	"nantty/modules/admin/src/container"
+	"nantty/modules/admin/src/modules/platformMetrics/controllers"
 )
 
 func MountPlatformMetricsRoutes(mux *http.ServeMux, container *container.Container) {

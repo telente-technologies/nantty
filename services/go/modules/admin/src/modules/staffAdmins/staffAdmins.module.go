@@ -3,8 +3,8 @@ package staffadmins
 import (
 	"net/http"
 
-	"zudomart/modules/admin/src/container"
-	"zudomart/modules/admin/src/modules/staffAdmins/routes"
+	"nantty/modules/admin/src/container"
+	"nantty/modules/admin/src/modules/staffAdmins/routes"
 )
 
 func MountRoutes(mux *http.ServeMux, container *container.Container) {

@@ -5,17 +5,17 @@ import (
 	"net/http"
 	"strconv"
 
-	"zudomart/modules/admin/src/container"
-	adminerrors "zudomart/modules/admin/src/errors"
-	updateplatformsetting "zudomart/modules/admin/src/modules/platformSettings/commands/updatePlatformSetting"
-	getplatformsetting "zudomart/modules/admin/src/modules/platformSettings/queries/getPlatformSetting"
-	listplatformsettings "zudomart/modules/admin/src/modules/platformSettings/queries/listPlatformSettings"
-	listsettingversions "zudomart/modules/admin/src/modules/platformSettings/queries/listSettingVersions"
-	readpublicplatformsetting "zudomart/modules/admin/src/modules/platformSettings/queries/readPublicPlatformSetting"
-	"zudomart/modules/admin/src/modules/platformSettings/validators"
-	httprequests "zudomart/modules/admin/src/utils/httpRequests"
-	"zudomart/platform/httpserver"
-	"zudomart/platform/staffauth"
+	"nantty/modules/admin/src/container"
+	adminerrors "nantty/modules/admin/src/errors"
+	updateplatformsetting "nantty/modules/admin/src/modules/platformSettings/commands/updatePlatformSetting"
+	getplatformsetting "nantty/modules/admin/src/modules/platformSettings/queries/getPlatformSetting"
+	listplatformsettings "nantty/modules/admin/src/modules/platformSettings/queries/listPlatformSettings"
+	listsettingversions "nantty/modules/admin/src/modules/platformSettings/queries/listSettingVersions"
+	readpublicplatformsetting "nantty/modules/admin/src/modules/platformSettings/queries/readPublicPlatformSetting"
+	"nantty/modules/admin/src/modules/platformSettings/validators"
+	httprequests "nantty/modules/admin/src/utils/httpRequests"
+	"nantty/platform/httpserver"
+	"nantty/platform/staffauth"
 )
 
 type PlatformSettingsController struct {

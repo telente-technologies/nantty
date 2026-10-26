@@ -6,17 +6,17 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/admin/src/container"
-	adminerrors "zudomart/modules/admin/src/errors"
-	"zudomart/modules/admin/src/generated/ent"
-	"zudomart/modules/admin/src/generated/ent/staffaccount"
-	"zudomart/modules/admin/src/generated/ent/staffsession"
-	staffadminservices "zudomart/modules/admin/src/modules/staffAdmins/services"
-	"zudomart/modules/admin/src/modules/staffAuth/models"
-	"zudomart/modules/admin/src/types"
-	secrettokens "zudomart/modules/admin/src/utils/secretTokens"
-	"zudomart/platform/identityports"
-	"zudomart/platform/staffauth"
+	"nantty/modules/admin/src/container"
+	adminerrors "nantty/modules/admin/src/errors"
+	"nantty/modules/admin/src/generated/ent"
+	"nantty/modules/admin/src/generated/ent/staffaccount"
+	"nantty/modules/admin/src/generated/ent/staffsession"
+	staffadminservices "nantty/modules/admin/src/modules/staffAdmins/services"
+	"nantty/modules/admin/src/modules/staffAuth/models"
+	"nantty/modules/admin/src/types"
+	secrettokens "nantty/modules/admin/src/utils/secretTokens"
+	"nantty/platform/identityports"
+	"nantty/platform/staffauth"
 )
 
 const (

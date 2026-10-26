@@ -3,9 +3,9 @@ package routes
 import (
 	"net/http"
 
-	"zudomart/modules/admin/src/container"
-	"zudomart/modules/admin/src/modules/auditLog/controllers"
-	"zudomart/platform/httpserver"
+	"nantty/modules/admin/src/container"
+	"nantty/modules/admin/src/modules/auditLog/controllers"
+	"nantty/platform/httpserver"
 )
 
 func MountAuditLogRoutes(mux *http.ServeMux, container *container.Container) {

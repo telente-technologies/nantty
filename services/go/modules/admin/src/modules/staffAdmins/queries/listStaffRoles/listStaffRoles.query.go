@@ -1,6 +1,6 @@
 package liststaffroles
 
-import "zudomart/modules/admin/src/modules/staffAdmins/models"
+import "nantty/modules/admin/src/modules/staffAdmins/models"
 
 type Query struct{}
 

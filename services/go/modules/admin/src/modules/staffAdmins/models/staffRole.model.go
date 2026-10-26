@@ -1,6 +1,6 @@
 package models
 
-import "zudomart/modules/admin/src/generated/ent"
+import "nantty/modules/admin/src/generated/ent"
 
 type StaffRoleView struct {
 	Id          string   `json:"id"`

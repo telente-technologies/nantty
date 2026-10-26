@@ -3,7 +3,7 @@ package validators
 import (
 	"testing"
 
-	"zudomart/modules/admin/src/modules/staffAuth/dtos"
+	"nantty/modules/admin/src/modules/staffAuth/dtos"
 )
 
 func TestChallengeCodeRequestValidation(t *testing.T) {

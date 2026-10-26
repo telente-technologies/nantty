@@ -4,9 +4,9 @@ import (
 	"context"
 	"slices"
 
-	"zudomart/modules/admin/src/container"
-	"zudomart/modules/admin/src/generated/ent/auditevent"
-	"zudomart/modules/admin/src/modules/auditLog/models"
+	"nantty/modules/admin/src/container"
+	"nantty/modules/admin/src/generated/ent/auditevent"
+	"nantty/modules/admin/src/modules/auditLog/models"
 )
 
 type Handler struct {
