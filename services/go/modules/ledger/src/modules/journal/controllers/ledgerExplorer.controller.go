@@ -6,12 +6,12 @@ import (
 
 	"github.com/google/uuid"
 
-	listjournalentries "zudomart/modules/ledger/src/modules/journal/queries/listJournalEntries"
-	listledgeraccounts "zudomart/modules/ledger/src/modules/journal/queries/listLedgerAccounts"
-	listledgercurrencies "zudomart/modules/ledger/src/modules/journal/queries/listLedgerCurrencies"
-	"zudomart/modules/ledger/src/modules/journal/validators"
-	"zudomart/modules/ledger/src/utils"
-	"zudomart/platform/httpserver"
+	listjournalentries "nantty/modules/ledger/src/modules/journal/queries/listJournalEntries"
+	listledgeraccounts "nantty/modules/ledger/src/modules/journal/queries/listLedgerAccounts"
+	listledgercurrencies "nantty/modules/ledger/src/modules/journal/queries/listLedgerCurrencies"
+	"nantty/modules/ledger/src/modules/journal/validators"
+	"nantty/modules/ledger/src/utils"
+	"nantty/platform/httpserver"
 )
 
 func (controller JournalController) ListLedgerCurrencies(writer http.ResponseWriter, request *http.Request) {

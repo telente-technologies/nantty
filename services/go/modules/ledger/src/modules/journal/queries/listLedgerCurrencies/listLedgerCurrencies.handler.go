@@ -3,8 +3,8 @@ package listledgercurrencies
 import (
 	"context"
 
-	"zudomart/modules/ledger/src/container"
-	"zudomart/platform/httpserver"
+	"nantty/modules/ledger/src/container"
+	"nantty/platform/httpserver"
 )
 
 type Handler struct {

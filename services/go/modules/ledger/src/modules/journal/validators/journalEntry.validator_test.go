@@ -5,7 +5,7 @@ import (
 	"math"
 	"testing"
 
-	"zudomart/modules/ledger/src/modules/journal/models"
+	"nantty/modules/ledger/src/modules/journal/models"
 )
 
 func TestValidateJournalEntryRequestRejectsEveryMalformedEntry(t *testing.T) {

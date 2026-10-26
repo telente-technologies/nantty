@@ -3,8 +3,8 @@ package getledgerintegrityreport
 import (
 	"context"
 
-	"zudomart/modules/ledger/src/container"
-	"zudomart/modules/ledger/src/modules/journal/services"
+	"nantty/modules/ledger/src/container"
+	"nantty/modules/ledger/src/modules/journal/services"
 )
 
 type Handler struct {

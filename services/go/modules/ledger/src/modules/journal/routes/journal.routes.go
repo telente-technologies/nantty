@@ -3,10 +3,10 @@ package routes
 import (
 	"net/http"
 
-	"zudomart/modules/ledger/src/constants"
-	"zudomart/modules/ledger/src/container"
-	"zudomart/modules/ledger/src/middlewares"
-	"zudomart/modules/ledger/src/modules/journal/controllers"
+	"nantty/modules/ledger/src/constants"
+	"nantty/modules/ledger/src/container"
+	"nantty/modules/ledger/src/middlewares"
+	"nantty/modules/ledger/src/modules/journal/controllers"
 )
 
 func MountJournalRoutes(mux *http.ServeMux, container *container.Container) {

@@ -6,7 +6,7 @@ import (
 	"sync"
 	"time"
 
-	"zudomart/modules/ledger/src/databases"
+	"nantty/modules/ledger/src/databases"
 )
 
 type Terms struct {

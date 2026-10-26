@@ -13,9 +13,9 @@ import (
 
 	"github.com/jackc/pgx/v5"
 
-	"zudomart/modules/ledger/src/databases"
-	"zudomart/modules/ledger/src/loaders"
-	"zudomart/platform/postgres"
+	"nantty/modules/ledger/src/databases"
+	"nantty/modules/ledger/src/loaders"
+	"nantty/platform/postgres"
 )
 
 var schemaCounter atomic.Int64

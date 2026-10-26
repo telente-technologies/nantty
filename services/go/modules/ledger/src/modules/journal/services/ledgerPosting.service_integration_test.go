@@ -10,12 +10,12 @@ import (
 	"testing"
 	"time"
 
-	"zudomart/modules/ledger/src/modules/journal/models"
+	"nantty/modules/ledger/src/modules/journal/models"
 
-	"zudomart/modules/ledger/src/databases"
-	moneytesting "zudomart/modules/ledger/src/databases/moneyTesting"
-	"zudomart/modules/ledger/src/generated/ent/journalentry"
-	"zudomart/modules/ledger/src/migrations"
+	"nantty/modules/ledger/src/databases"
+	moneytesting "nantty/modules/ledger/src/databases/moneyTesting"
+	"nantty/modules/ledger/src/generated/ent/journalentry"
+	"nantty/modules/ledger/src/migrations"
 )
 
 type ledgerHarness struct {

@@ -5,14 +5,14 @@ import (
 	"net/http"
 	"time"
 
-	"zudomart/modules/ledger/src/container"
-	"zudomart/modules/ledger/src/events"
-	"zudomart/modules/ledger/src/jobs"
-	"zudomart/modules/ledger/src/loaders"
-	"zudomart/modules/ledger/src/migrations"
-	"zudomart/modules/ledger/src/modules/journal"
-	platformevents "zudomart/platform/events"
-	"zudomart/platform/servicemodule"
+	"nantty/modules/ledger/src/container"
+	"nantty/modules/ledger/src/events"
+	"nantty/modules/ledger/src/jobs"
+	"nantty/modules/ledger/src/loaders"
+	"nantty/modules/ledger/src/migrations"
+	"nantty/modules/ledger/src/modules/journal"
+	platformevents "nantty/platform/events"
+	"nantty/platform/servicemodule"
 )
 
 type Module struct {

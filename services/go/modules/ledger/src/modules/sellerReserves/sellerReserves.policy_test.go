@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"zudomart/modules/ledger/src/databases"
+	"nantty/modules/ledger/src/databases"
 )
 
 func TestReserveAmountRoundsHalfUpAndNeverExceedsTheRelease(t *testing.T) {

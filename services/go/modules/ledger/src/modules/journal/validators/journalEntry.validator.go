@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"sort"
 
-	"zudomart/modules/ledger/src/modules/journal/models"
-	"zudomart/platform/viewerregion"
+	"nantty/modules/ledger/src/modules/journal/models"
+	"nantty/platform/viewerregion"
 )
 
 func ValidateJournalEntryRequest(request models.JournalEntryRequest) error {

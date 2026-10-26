@@ -6,8 +6,8 @@ import (
 	"testing"
 	"time"
 
-	"zudomart/modules/ledger/src/databases"
-	"zudomart/modules/ledger/src/modules/journal/models"
+	"nantty/modules/ledger/src/databases"
+	"nantty/modules/ledger/src/modules/journal/models"
 )
 
 func TestReconciliationMatchesByReferenceWhateverThePostedDate(t *testing.T) {

@@ -9,9 +9,9 @@ import (
 	"testing"
 	"time"
 
-	"zudomart/modules/ledger/src/databases"
-	"zudomart/modules/ledger/src/generated/ent/ledgeraccount"
-	"zudomart/modules/ledger/src/modules/journal/models"
+	"nantty/modules/ledger/src/databases"
+	"nantty/modules/ledger/src/generated/ent/ledgeraccount"
+	"nantty/modules/ledger/src/modules/journal/models"
 )
 
 func giftEntry(reference, sender string, coins int64) models.JournalEntryRequest {

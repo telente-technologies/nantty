@@ -8,7 +8,7 @@ import (
 	"strings"
 	"sync"
 
-	"zudomart/platform/postgres"
+	"nantty/platform/postgres"
 )
 
 type sharedPoolEntry struct {

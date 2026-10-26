@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"strings"
 
-	"zudomart/platform/regionpricing"
+	"nantty/platform/regionpricing"
 )
 
 const (

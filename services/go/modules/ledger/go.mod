@@ -1,4 +1,4 @@
-module zudomart/modules/ledger
+module nantty/modules/ledger
 
 go 1.26.9
 
@@ -9,7 +9,7 @@ require (
 	github.com/jackc/pgx/v5 v5.11.0
 	github.com/lestrrat-go/jwx/v3 v3.3.0
 	google.golang.org/grpc v1.86.0-dev
-	zudomart/platform v0.0.0
+	nantty/platform v0.0.0
 )
 
 require (
@@ -87,4 +87,4 @@ require (
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 
-replace zudomart/platform => ../../platform
+replace nantty/platform => ../../platform

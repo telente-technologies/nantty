@@ -3,10 +3,10 @@ package getaccountstatement
 import (
 	"context"
 
-	"zudomart/modules/ledger/src/container"
-	"zudomart/modules/ledger/src/modules/journal/dtos"
-	"zudomart/modules/ledger/src/modules/journal/models"
-	"zudomart/modules/ledger/src/modules/journal/services"
+	"nantty/modules/ledger/src/container"
+	"nantty/modules/ledger/src/modules/journal/dtos"
+	"nantty/modules/ledger/src/modules/journal/models"
+	"nantty/modules/ledger/src/modules/journal/services"
 )
 
 type Handler struct {

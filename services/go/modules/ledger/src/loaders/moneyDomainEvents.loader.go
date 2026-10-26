@@ -7,8 +7,8 @@ import (
 	"log/slog"
 	"sync"
 
-	"zudomart/platform/events"
-	"zudomart/platform/servicemodule"
+	"nantty/platform/events"
+	"nantty/platform/servicemodule"
 )
 
 const MoneyDomainEventsQueue = "money-domain-events"

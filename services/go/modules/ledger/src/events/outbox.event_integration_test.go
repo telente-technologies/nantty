@@ -7,10 +7,10 @@ import (
 	"testing"
 	"time"
 
-	"zudomart/modules/ledger/src/databases"
-	moneytesting "zudomart/modules/ledger/src/databases/moneyTesting"
-	"zudomart/modules/ledger/src/migrations"
-	platformevents "zudomart/platform/events"
+	"nantty/modules/ledger/src/databases"
+	moneytesting "nantty/modules/ledger/src/databases/moneyTesting"
+	"nantty/modules/ledger/src/migrations"
+	platformevents "nantty/platform/events"
 )
 
 func TestStuckEventKeepsRetryingPastTheAlertThresholdAndIsDeliveredWhenTheBrokerRecovers(t *testing.T) {

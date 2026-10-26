@@ -6,8 +6,8 @@ import (
 	"errors"
 	"testing"
 
-	"zudomart/modules/ledger/src/databases"
-	"zudomart/modules/ledger/src/modules/journal/models"
+	"nantty/modules/ledger/src/databases"
+	"nantty/modules/ledger/src/modules/journal/models"
 )
 
 func TestStaffCanReverseOnlyAllowlistedJournalKinds(t *testing.T) {

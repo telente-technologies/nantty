@@ -3,9 +3,9 @@ package container
 import (
 	"time"
 
-	"zudomart/modules/ledger/src/events"
-	"zudomart/modules/ledger/src/loaders"
-	"zudomart/modules/ledger/src/modules/journal/services"
+	"nantty/modules/ledger/src/events"
+	"nantty/modules/ledger/src/loaders"
+	"nantty/modules/ledger/src/modules/journal/services"
 )
 
 type Container struct {

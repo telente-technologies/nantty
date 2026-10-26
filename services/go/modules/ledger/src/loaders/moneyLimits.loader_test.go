@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"zudomart/platform/regionpricing"
+	"nantty/platform/regionpricing"
 )
 
 func TestSellerDebtLimitsPickTheLevelAndHalveOutsideNigeria(t *testing.T) {

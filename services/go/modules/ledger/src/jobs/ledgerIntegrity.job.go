@@ -7,8 +7,8 @@ import (
 	"sync"
 	"time"
 
-	"zudomart/modules/ledger/src/container"
-	"zudomart/modules/ledger/src/databases"
+	"nantty/modules/ledger/src/container"
+	"nantty/modules/ledger/src/databases"
 )
 
 type ProviderMirrorReconciler interface {

@@ -3,12 +3,12 @@ package listjournalentries
 import (
 	"context"
 
-	"zudomart/modules/ledger/src/container"
-	"zudomart/modules/ledger/src/generated/ent"
-	"zudomart/modules/ledger/src/modules/journal/dtos"
-	"zudomart/modules/ledger/src/modules/journal/models"
-	"zudomart/modules/ledger/src/modules/journal/services"
-	"zudomart/platform/httpserver"
+	"nantty/modules/ledger/src/container"
+	"nantty/modules/ledger/src/generated/ent"
+	"nantty/modules/ledger/src/modules/journal/dtos"
+	"nantty/modules/ledger/src/modules/journal/models"
+	"nantty/modules/ledger/src/modules/journal/services"
+	"nantty/platform/httpserver"
 )
 
 type Handler struct {

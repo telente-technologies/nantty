@@ -8,17 +8,17 @@ import (
 	"strings"
 	"time"
 
-	"zudomart/modules/ledger/src/modules/journal/models"
+	"nantty/modules/ledger/src/modules/journal/models"
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/ledger/src/generated/ent"
-	"zudomart/modules/ledger/src/generated/ent/journalentry"
-	"zudomart/modules/ledger/src/generated/ent/journalline"
-	"zudomart/modules/ledger/src/generated/ent/ledgeraccount"
-	"zudomart/modules/ledger/src/generated/ent/predicate"
-	"zudomart/modules/ledger/src/generated/ent/reconciliationbreak"
-	"zudomart/platform/events"
+	"nantty/modules/ledger/src/generated/ent"
+	"nantty/modules/ledger/src/generated/ent/journalentry"
+	"nantty/modules/ledger/src/generated/ent/journalline"
+	"nantty/modules/ledger/src/generated/ent/ledgeraccount"
+	"nantty/modules/ledger/src/generated/ent/predicate"
+	"nantty/modules/ledger/src/generated/ent/reconciliationbreak"
+	"nantty/platform/events"
 )
 
 type ProviderSettlementItem struct {

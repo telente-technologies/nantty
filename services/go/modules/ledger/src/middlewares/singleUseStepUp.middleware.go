@@ -8,9 +8,9 @@ import (
 	"strings"
 	"time"
 
-	"zudomart/platform/httpserver"
-	"zudomart/platform/jwtauth"
-	"zudomart/platform/staffauth"
+	"nantty/platform/httpserver"
+	"nantty/platform/jwtauth"
+	"nantty/platform/staffauth"
 )
 
 const singleUseStepUpRetention = 15 * time.Minute

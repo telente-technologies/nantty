@@ -6,19 +6,19 @@ import (
 	"errors"
 	"io/fs"
 	"log/slog"
+	"nantty/platform/viewerregion"
 	"strings"
 	"sync"
 	"time"
-	"zudomart/platform/viewerregion"
 
-	"zudomart/modules/ledger/src/databases"
-	"zudomart/modules/ledger/src/middlewares"
-	platformconfig "zudomart/platform/config"
-	"zudomart/platform/events"
-	"zudomart/platform/jwtauth"
-	"zudomart/platform/postgres"
-	"zudomart/platform/servicemodule"
-	"zudomart/platform/staffauth"
+	"nantty/modules/ledger/src/databases"
+	"nantty/modules/ledger/src/middlewares"
+	platformconfig "nantty/platform/config"
+	"nantty/platform/events"
+	"nantty/platform/jwtauth"
+	"nantty/platform/postgres"
+	"nantty/platform/servicemodule"
+	"nantty/platform/staffauth"
 )
 
 type MoneyModuleSettings struct {

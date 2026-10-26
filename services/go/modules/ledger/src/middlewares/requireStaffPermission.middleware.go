@@ -4,9 +4,9 @@ import (
 	"net/http"
 	"strings"
 
-	"zudomart/platform/httpserver"
-	"zudomart/platform/jwtauth"
-	"zudomart/platform/staffauth"
+	"nantty/platform/httpserver"
+	"nantty/platform/jwtauth"
+	"nantty/platform/staffauth"
 )
 
 const staffPermissionClaimPrefix = "perm:"

@@ -10,11 +10,11 @@ import (
 
 	"github.com/jackc/pgx/v5"
 
-	"zudomart/modules/ledger/src/databases"
-	moneytesting "zudomart/modules/ledger/src/databases/moneyTesting"
-	"zudomart/modules/ledger/src/migrations"
-	"zudomart/modules/ledger/src/modules/journal/models"
-	"zudomart/platform/postgres"
+	"nantty/modules/ledger/src/databases"
+	moneytesting "nantty/modules/ledger/src/databases/moneyTesting"
+	"nantty/modules/ledger/src/migrations"
+	"nantty/modules/ledger/src/modules/journal/models"
+	"nantty/platform/postgres"
 )
 
 func openAsServiceRole(t *testing.T, role, password string) (*sql.DB, string) {

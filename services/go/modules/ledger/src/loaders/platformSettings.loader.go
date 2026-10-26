@@ -6,9 +6,9 @@ import (
 	"encoding/json"
 	"errors"
 	"log/slog"
+	"nantty/platform/viewerregion"
 	"sync"
 	"time"
-	"zudomart/platform/viewerregion"
 
 	"github.com/jackc/pgx/v5"
 )

@@ -5,7 +5,7 @@ import (
 	"errors"
 	"testing"
 
-	"zudomart/platform/events"
+	"nantty/platform/events"
 )
 
 func TestMoneyDomainEventsAreDispatchedByTypeAndGarbageIsPoison(t *testing.T) {

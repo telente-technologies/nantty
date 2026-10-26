@@ -1,6 +1,6 @@
 package dtos
 
-import "zudomart/modules/ledger/src/modules/journal/services"
+import "nantty/modules/ledger/src/modules/journal/services"
 
 type AccountStatementDto struct {
 	Balances   []services.AccountBalance `json:"balances"`

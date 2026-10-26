@@ -3,8 +3,8 @@ package ledger
 import (
 	"context"
 
-	"zudomart/modules/ledger/src"
-	"zudomart/platform/servicemodule"
+	"nantty/modules/ledger/src"
+	"nantty/platform/servicemodule"
 )
 
 type Module = src.Module

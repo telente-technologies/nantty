@@ -10,7 +10,7 @@ import (
 
 	"github.com/jackc/pgx/v5"
 
-	platformevents "zudomart/platform/events"
+	platformevents "nantty/platform/events"
 )
 
 const (

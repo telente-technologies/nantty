@@ -7,7 +7,7 @@ import (
 
 	"github.com/jackc/pgx/v5"
 
-	"zudomart/modules/ledger/src/utils"
+	"nantty/modules/ledger/src/utils"
 )
 
 type PartySummary struct {

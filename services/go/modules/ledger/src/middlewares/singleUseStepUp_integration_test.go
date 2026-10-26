@@ -7,10 +7,10 @@ import (
 	"sync/atomic"
 	"testing"
 
-	moneytesting "zudomart/modules/ledger/src/databases/moneyTesting"
-	"zudomart/modules/ledger/src/loaders"
-	"zudomart/modules/ledger/src/middlewares"
-	"zudomart/modules/ledger/src/migrations"
+	moneytesting "nantty/modules/ledger/src/databases/moneyTesting"
+	"nantty/modules/ledger/src/loaders"
+	"nantty/modules/ledger/src/middlewares"
+	"nantty/modules/ledger/src/migrations"
 )
 
 func TestMoneyActionStepUpIsSingleUseEvenUnderConcurrentRequests(t *testing.T) {

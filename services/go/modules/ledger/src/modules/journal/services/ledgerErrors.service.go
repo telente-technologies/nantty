@@ -4,11 +4,11 @@ import (
 	"errors"
 	"net/http"
 
-	"zudomart/modules/ledger/src/databases"
-	"zudomart/modules/ledger/src/generated/ent"
+	"nantty/modules/ledger/src/databases"
+	"nantty/modules/ledger/src/generated/ent"
 
-	"zudomart/modules/ledger/src/modules/journal/models"
-	"zudomart/platform/httpserver"
+	"nantty/modules/ledger/src/modules/journal/models"
+	"nantty/platform/httpserver"
 )
 
 func ConvertLedgerErrorToApiError(err error) error {

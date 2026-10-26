@@ -9,8 +9,8 @@ import (
 
 	"github.com/jackc/pgx/v5"
 
-	moneytesting "zudomart/modules/ledger/src/databases/moneyTesting"
-	"zudomart/modules/ledger/src/loaders"
+	moneytesting "nantty/modules/ledger/src/databases/moneyTesting"
+	"nantty/modules/ledger/src/loaders"
 )
 
 func TestPlatformSettingsAreReadFromTheAdminSchemaCachedAndFallBackToTheEnvironment(t *testing.T) {
