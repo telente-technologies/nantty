@@ -28,11 +28,22 @@
   font-weight: 700;
 }
 
-.announcement a {
+.announcement a,
+.announcement button {
   color: var(--night-ink);
   font-weight: 650;
   text-decoration: underline;
   text-underline-offset: 3px;
+}
+
+.announcement button {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-decoration: underline;
+  cursor: not-allowed;
 }
 
 .announcement a:hover {

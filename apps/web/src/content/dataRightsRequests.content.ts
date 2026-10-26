@@ -32,14 +32,14 @@ export const dataRightsRequestsSections: readonly LegalDocumentSection[] = [
     id: "timelines",
     heading: "How long we take",
     paragraphs: [
-      "We confirm we received your request within 72 hours [Team to confirm]. We answer as soon as we can and within the time your law sets:",
+      "We confirm we received your request within 72 hours. We answer as soon as we can and within the time your law sets:",
     ],
     table: {
       columns: ["Where you live", "Time to answer"],
       rows: [
-        ["Nigeria", "Within 30 days, the period the NDPC expects under the GAID. [Team to confirm with counsel.]"],
-        ["Kenya", "Access requests within 7 days; other requests within 14 days. [Team to confirm the 14-day period with counsel.]"],
-        ["Ghana", "Within 21 days. [Team to confirm with counsel.]"],
+        ["Nigeria", "Within 30 days, the period the NDPC expects under the GAID."],
+        ["Kenya", "Access requests within 7 days; other requests within 14 days."],
+        ["Ghana", "Within 21 days."],
         ["South Africa", "Within 30 days, as PAIA sets for access requests."],
         ["United Kingdom and European Union", "Within one month, extendable by two months for complex requests."],
         ["United States", "Within 45 days, extendable by 45 days where state law allows."],
@@ -64,7 +64,7 @@ export const dataRightsRequestsSections: readonly LegalDocumentSection[] = [
     id: "records",
     heading: "Our records",
     paragraphs: [
-      "We keep a log of each request, what we did and when, to show regulators that we answer on time. The log is kept for 3 years after the request closes. [Team to confirm.]",
+      "We keep a log of each request, what we did and when, to show regulators that we answer on time. The log is kept for 3 years after the request closes.",
     ],
   },
 ];

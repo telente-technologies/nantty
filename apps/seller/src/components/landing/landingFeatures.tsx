@@ -1,6 +1,7 @@
 import { landingFeatures } from "@/constants/landingContent.constant";
 
 import styles from "./landingFeatures.module.css";
+import { LandingProductPreview } from "./landingProductPreview";
 
 export function LandingFeatures() {
   return (
@@ -21,7 +22,7 @@ export function LandingFeatures() {
                 <p className={styles.cardDescription}>{feature.description}</p>
               </div>
               <div className={styles.screenWindow}>
-                <img src={`/screenshots/${feature.screenshot}.webp`} alt={feature.screenshotAlt} width={1440} height={900} loading="lazy" className={styles.screenshot} />
+                {process.env.NEXT_PUBLIC_NANTTY_STATIC_PRELAUNCH === "1" ? <LandingProductPreview title={feature.title} /> : <img src={`/screenshots/${feature.screenshot}.webp`} alt={feature.screenshotAlt} width={1440} height={900} loading="lazy" className={styles.screenshot} />}
               </div>
             </li>
           ))}

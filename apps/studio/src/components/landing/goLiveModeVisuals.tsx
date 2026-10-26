@@ -2,6 +2,7 @@ import Image from "next/image";
 
 import { LandingIcon } from "./landingIcons";
 import styles from "./goLiveModeVisuals.module.css";
+import { LandingStudioPreview } from "./landingStudioPreview";
 
 export function PhoneLiveVisual() {
   return (
@@ -55,7 +56,7 @@ export function ObsControlRoomVisual() {
           <span />
           <p>studio.nantty.com</p>
         </div>
-        <Image src="/screens/studioControlRoom.webp" alt="The Studio control room: server URL, stream key, overlay browser source, coins earned, gifts and top gifters" width={1440} height={880} sizes="(max-width: 900px) 92vw, 600px" className={styles.screenshot} />
+        {process.env.NEXT_PUBLIC_NANTTY_STATIC_PRELAUNCH === "1" ? <LandingStudioPreview title="Stream setup and controls" /> : <Image src="/screens/studioControlRoom.webp" alt="The Studio control room: server URL, stream key, overlay browser source, coins earned, gifts and top gifters" width={1440} height={880} sizes="(max-width: 900px) 92vw, 600px" className={styles.screenshot} />}
       </div>
       <figcaption className={styles.keyCard}>
         <span className={styles.keyLabel}>Server URL</span>

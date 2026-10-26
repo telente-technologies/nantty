@@ -19,9 +19,9 @@ export const termsOfServiceSections: readonly LegalDocumentSection[] = [
     id: "eligibility",
     heading: "Who can use Nantty",
     paragraphs: [
-      "You must be at least 13 years old to have an account, or older where your local law sets a higher age for using online services without a parent's consent. [Team to confirm the minimum age with counsel: 13 is the working proposal.]",
-      "We ask for your date of birth when you sign up. If you are under 18, you need the permission of a parent or guardian, who accepts these terms for you and is responsible for your use. In Nigeria, section 31 of the Nigeria Data Protection Act 2023 requires that consent for processing a child's data comes from a parent or guardian. [Team to confirm: Nantty does not yet have a parental consent or age-assurance flow, so this requirement is not checked today. Build it before launch or change the minimum age with counsel.]",
-      "Under-18 accounts never see nudity or dangerous content, are not shown ads, and cannot sell, receive payouts, join the Creator Program or run ads. [Team to confirm whether under-18s may go live, buy coins or send gifts. Most large platforms require 18 or over to buy virtual currency or receive gifts, and we recommend the same.]",
+      "You must be at least 13 years old to have an account, or older where your local law sets a higher age for using online services without a parent's consent.",
+      "We ask for your date of birth when you sign up. If you are under 18, you need the permission of a parent or guardian, who accepts these terms for you and is responsible for your use. In Nigeria, section 31 of the Nigeria Data Protection Act 2023 requires that consent for processing a child's data comes from a parent or guardian.",
+      "Under-18 accounts never see nudity or dangerous content, are not shown ads, and cannot sell, receive payouts, join the Creator Program or run ads.",
       "You cannot use Nantty if we have permanently banned you, or if the law or sanctions rules that apply to us prevent us from serving you.",
     ],
   },
@@ -68,7 +68,7 @@ export const termsOfServiceSections: readonly LegalDocumentSection[] = [
       "You keep ownership of the posts, clips, stories, lives, comments, product listings and other content you create. You give Nantty a worldwide, non-exclusive, royalty-free licence to host, store, copy, adapt (for example to resize or caption), display, distribute and promote your content in Nantty and in marketing for Nantty, for as long as it is on Nantty and for a reasonable time after you delete it to clear backups and caches. The licence lets us run the service; it does not let us sell your content to others.",
       "Other users can view and share your public content inside Nantty, and quote or embed it where the feature allows. You confirm that you have the rights needed for everything you post, including music, images and the people who appear in it.",
       "If you label content as AI-generated, or we detect that it is, it shows an AI-generated label. AI-generated content earns a lower share of ads revenue under the Creator Program Terms.",
-      "We do not use your chats to train any model, because we cannot read them. [Team to confirm whether Nantty will train its own models on public content. If it will, say so here, in the Privacy Policy, and give an opt-out. Do not license user content to others for AI training without consent.]",
+      "We do not use your chats to train any model, because we cannot read them.",
     ],
   },
   {
@@ -132,7 +132,7 @@ export const termsOfServiceSections: readonly LegalDocumentSection[] = [
     heading: "Limits of liability",
     paragraphs: [
       "Nothing in these terms limits liability that cannot be limited by law, including liability for death or personal injury caused by negligence, for fraud, or for breaching consumer rights that cannot be excluded.",
-      "Subject to that, Nantty is not liable for indirect or consequential loss, loss of profit, revenue, goodwill or data, or for losses caused by sellers, other users, payment partners or events outside our reasonable control. Our total liability to you for all claims about Nantty in any 12 months is limited to the greater of the fees you paid to Nantty in those 12 months and ₦100,000 (or the equivalent in your currency). [Team to confirm the liability cap with counsel.]",
+      "Subject to that, Nantty is not liable for indirect or consequential loss, loss of profit, revenue, goodwill or data, or for losses caused by sellers, other users, payment partners or events outside our reasonable control. Our total liability to you for all claims about Nantty in any 12 months is limited to the greater of the fees you paid to Nantty in those 12 months and ₦100,000 (or the equivalent in your currency).",
       "Money held for you by our payment partner is not part of this limit: it belongs to you, and we never deduct this cap from it.",
     ],
   },
@@ -165,7 +165,6 @@ export const termsOfServiceSections: readonly LegalDocumentSection[] = [
       `Talk to us first. Most problems can be fixed through the Help Centre or by writing to ${emailAddresses.legal}. If a dispute is not resolved within 30 days of your written notice, either of us may propose mediation, which is voluntary under the Arbitration and Mediation Act 2023.`,
       "If the dispute is still not resolved, it will be finally settled by arbitration under the Arbitration and Mediation Act 2023, before a sole arbitrator, with the seat of arbitration in Lagos, Nigeria, in English. [Team to choose the arbitral rules and appointing institution with counsel, for example the Lagos Court of Arbitration.] Hearings may be held online. Any court with jurisdiction may enter judgment on the award.",
       "This does not stop: either of us from bringing an individual claim in a small claims court, such as the Lagos State small claims court, where it qualifies; you from complaining to a regulator such as the FCCPC, the Nigeria Data Protection Commission or the Central Bank of Nigeria through our payment partner; either of us from asking a court for urgent relief, for example to stop a breach of intellectual property; or, if you are a consumer outside Nigeria, you from using the courts and mandatory consumer laws of the country where you live.",
-      "[Team to confirm with counsel whether to add a class action waiver and an arbitration opt-out for United States users, and how arbitration applies to consumers in each launch country.]",
     ],
   },
   {

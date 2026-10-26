@@ -1,12 +1,12 @@
 "use client";
 
-import Link from "next/link";
 import { useRef, useState, type KeyboardEvent } from "react";
 
 import { LandingIcon, type LandingIconName } from "./landingIcons";
 import shared from "./landingPage.module.css";
 import styles from "./landingGoLiveModes.module.css";
 import { GuestStageVisual, ObsControlRoomVisual, PhoneLiveVisual } from "./goLiveModeVisuals";
+import { PrelaunchLoginAction } from "./prelaunchLoginAction";
 
 interface GoLiveMode {
   readonly id: "phone" | "encoder" | "guests";
@@ -77,9 +77,9 @@ export function LandingGoLiveModes() {
               );
             })}
           </div>
-          <Link href="/login" className={shared.primaryAction}>
+          <PrelaunchLoginAction className={shared.primaryAction}>
             Open your control room
-          </Link>
+          </PrelaunchLoginAction>
         </div>
         <div className={styles.visualPanel}>
           {goLiveModes.map((mode) => (

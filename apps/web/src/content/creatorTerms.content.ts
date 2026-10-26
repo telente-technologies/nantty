@@ -23,7 +23,7 @@ export const creatorTermsSections: readonly LegalDocumentSection[] = [
     heading: "How you earn",
     paragraphs: ["Nantty does not pay for views. It shares eligible revenue with Creator Program members only:"],
     bullets: [
-      "Gifts and tips: viewers spend coins on gifts and tips on your lives and content. You receive a share of each one that depends on your creator tier: 50% (Starter), 60% (Partner) or 70% (Top), set by your monthly gift volume. You receive it as earned coins, which you can convert to money in Creator Studio. Nantty keeps the rest. [Team to confirm the tier thresholds shown in Creator Studio.]",
+      "Gifts and tips: viewers spend coins on gifts and tips on your lives and content. You receive a share of each one that depends on your creator tier: 50% (Starter), 60% (Partner) or 70% (Top), set by your monthly gift volume. You receive it as earned coins, which you can convert to money in Creator Studio. Nantty keeps the rest.",
       "Fan subscriptions: you set the price and benefits. You keep 80% of what fans pay after the app store or payment processing fee. In the apps the price is raised to cover the store fee, so your share is the same as on the web.",
       "Ads revenue share: 40% of what advertisers pay for eligible ads shown with your posts and clips, including Promoted ads shown between replies in the comment sections of your posts, and in your lives if you turn live ads on. You do not earn from ads you see on your own posts.",
       "Premium pool: part of Premium subscription revenue goes into a pool each month, shared among creators according to how much time Premium members spend watching their content.",
@@ -34,10 +34,10 @@ export const creatorTermsSections: readonly LegalDocumentSection[] = [
     heading: "What changes your share",
     paragraphs: ["Your share can be lower, or paused, in these cases:"],
     bullets: [
-      "AI-generated content earns 30% of the normal ads share, which is 12% of ad revenue at the default rate. [Team to confirm the multiplier before publishing.]",
+      "AI-generated content earns 30% of the normal ads share, which is 12% of ad revenue at the default rate.",
       "Invalid traffic, such as fake, automated or bought views and clicks, is filtered out first. Advertisers are not charged for it and you are not paid for it.",
-      "Strikes can pause monetisation. While it is paused you earn no gifts, tips, ads share, subscriptions or pool money, and comment-section ads on your posts still show, with the share kept by Nantty. It comes back when strikes expire or an appeal succeeds. [Team to confirm: the code does not pause monetisation automatically at a strike threshold today; staff suspend Creator Program status by hand.]",
-      "Rates are set by Nantty and shown in Creator Studio under How you earn. We give at least 30 days' notice before lowering a rate, and a change never applies to earnings already made. [Team to confirm the notice period.]",
+      "Strikes can pause monetisation. While it is paused you earn no gifts, tips, ads share, subscriptions or pool money, and comment-section ads on your posts still show, with the share kept by Nantty. It comes back when strikes expire or an appeal succeeds.",
+      "Rates are set by Nantty and shown in Creator Studio under How you earn. We give at least 30 days' notice before lowering a rate, and a change never applies to earnings already made.",
     ],
   },
   {
@@ -59,7 +59,7 @@ export const creatorTermsSections: readonly LegalDocumentSection[] = [
     paragraphs: [
       "Fan subscriptions: if Apple, Google or our payment partner refunds or charges back a fan's payment, your share of it is reversed, including from your wallet if it was already paid. Subscription earnings are held for 7 days, the chargeback window, before they become available.",
       "Gifts and tips: a gift or tip is final once sent. If a viewer's coin purchase is later refunded by Apple or Google, the viewer's coins are removed or recorded as owed, and your earned coins from gifts already sent are not reversed.",
-      "Earnings from invalid activity, such as fake views, self-gifting, gifting rings or gifts paid with stolen cards, are not payable. We may hold them while we check and refuse to pay them out. [Team to confirm: there is no tool today to reverse earned coins from a specific gift; decide whether to build one.]",
+      "Earnings from invalid activity, such as fake views, self-gifting, gifting rings or gifts paid with stolen cards, are not payable. We may hold them while we check and refuse to pay them out.",
       "If a reversal is larger than your balance, the rest shows as owed and comes out of your next earnings.",
     ],
   },

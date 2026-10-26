@@ -1,9 +1,9 @@
-import Link from "next/link";
 import type { ReactNode } from "react";
 
 import { AnalyticsVisual, BattleVisual, CheckmarkVisual, GiftsVisual, LeaderboardVisual, ModerationVisual, OverlayVisual, RecordingsVisual } from "./featureBentoVisuals";
 import shared from "./landingPage.module.css";
 import styles from "./landingFeatureBento.module.css";
+import { PrelaunchLoginAction } from "./prelaunchLoginAction";
 
 interface BentoFeature {
   readonly title: string;
@@ -35,9 +35,9 @@ export function LandingFeatureBento() {
             </h2>
             <p className={shared.lede}>No plugins to stitch together. Gifts, battles, overlays, moderation and replays work the moment you go live.</p>
           </div>
-          <Link href="/login" className={shared.secondaryAction}>
+          <PrelaunchLoginAction className={shared.secondaryAction}>
             See it in your control room
-          </Link>
+          </PrelaunchLoginAction>
         </div>
         <ul className={styles.grid}>
           {bentoFeatures.map((feature) => (

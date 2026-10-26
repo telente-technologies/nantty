@@ -36,7 +36,6 @@ export interface PostAnalyticsView {
   readonly shares: number;
   readonly saves: number;
   readonly profileVisits: number;
-  readonly profileClicks: number;
   readonly linkClicks: number;
   readonly newFollows: number;
   readonly engagements: number;
@@ -69,7 +68,7 @@ export function createGetPostAnalyticsHandler(context: HandlerContext): Handler<
     return {
       postId, kind: post.kind, hasLink: post.linkPreview !== null, author: authors.get(viewerId) ?? { id: viewerId, name: "", username: "", avatarUrl: null, verified: false, isCreator: false }, postedAt: post.createdAt.toISOString(),
       impressions: post.viewCount, uniqueViewers, reach: uniqueViewers, likes: post.likeCount, comments: post.commentCount, reposts: post.repostCount, shares: post.shareCount, saves,
-      profileVisits: post.profileVisitCount, profileClicks: post.profileVisitCount, linkClicks: totals._sum.linkClicks ?? 0, newFollows: totals._sum.newFollows ?? 0, ...engagement,
+      profileVisits: post.profileVisitCount, linkClicks: totals._sum.linkClicks ?? 0, newFollows: totals._sum.newFollows ?? 0, ...engagement,
       video: hasVideo ? buildVideoAnalytics(totals._sum.videoViews ?? 0, totals._sum.watchTimeSeconds ?? 0, totals._sum.completedViews ?? 0) : null,
       audience: buildAudienceSplit(followerViewers, viewerKeys.length), daily: buildLastSevenDays(now, new Map(stats.map((stat) => [stat.day, stat.impressions]))),
     };

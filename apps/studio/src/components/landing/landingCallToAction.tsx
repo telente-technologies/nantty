@@ -1,11 +1,11 @@
 import Image from "next/image";
-import Link from "next/link";
 
 import { OfficialStoreBadges } from "@nantty/web-kit";
 
 import { storeLinks } from "@/constants/contact.constant";
 
 import styles from "./landingCallToAction.module.css";
+import { PrelaunchLoginAction } from "./prelaunchLoginAction";
 
 export function LandingCallToAction() {
   return (
@@ -17,9 +17,9 @@ export function LandingCallToAction() {
           </h2>
           <p className={styles.description}>Sign in with the account you use in the Nantty app. Not in the Creator Program yet? Apply in the app, then come back here to go live.</p>
           <div className={styles.actions}>
-            <Link href="/login" className={styles.primaryAction}>
+            <PrelaunchLoginAction className={styles.primaryAction}>
               Go live with Studio
-            </Link>
+            </PrelaunchLoginAction>
             <a href="#creator-program" className={styles.secondaryAction}>
               Join the Creator Program
             </a>

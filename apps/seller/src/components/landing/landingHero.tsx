@@ -1,5 +1,7 @@
 import styles from "./landingHero.module.css";
 import { ZudoIcon } from "@/components/ui/zudoIcon";
+import { PrelaunchLoginAction } from "./prelaunchLoginAction";
+import { LandingProductPreview } from "./landingProductPreview";
 
 export function LandingHero() {
   return (
@@ -13,15 +15,17 @@ export function LandingHero() {
           <p className={styles.lede}>
             Your seller operating system: manage products and stock, fulfil the orders customers place in the Nantty app, see what sells, run promotions, track your payouts and bring your team in — with the same account as your app. Free for every Nantty seller; upgrade to Pro or Business when you grow.
           </p>
-          <form action="/login" method="get" className={styles.signInPill}>
-            <label htmlFor="hero-identifier" className="visuallyHidden">
-              Email or username
-            </label>
-            <input id="hero-identifier" name="identifier" type="text" autoComplete="username" placeholder="Email or username" maxLength={254} className={styles.signInInput} />
-            <button type="submit" className={styles.signInButton}>
-              Sign in with your Nantty account
-            </button>
-          </form>
+          {process.env.NEXT_PUBLIC_NANTTY_STATIC_PRELAUNCH === "1" ? (
+            <div className={styles.signInPill}>
+              <PrelaunchLoginAction className={styles.signInButton}>Sign in with your Nantty account</PrelaunchLoginAction>
+            </div>
+          ) : (
+            <form action="/login" method="get" className={styles.signInPill}>
+              <label htmlFor="hero-identifier" className="visuallyHidden">Email or username</label>
+              <input id="hero-identifier" name="identifier" type="text" autoComplete="username" placeholder="Email or username" maxLength={254} className={styles.signInInput} />
+              <button type="submit" className={styles.signInButton}>Sign in with your Nantty account</button>
+            </form>
+          )}
           <ul className={styles.proofList}>
             <li>Same account as the app</li>
             <li>Free plan, no card needed</li>
@@ -37,10 +41,10 @@ export function LandingHero() {
               <span />
               <p>creator.nantty.com</p>
             </div>
-            <img src="/screenshots/dashboardOverview.webp" alt="The dashboard home: sales today, a 30-day revenue chart, wallet balances and online orders by status" width={1440} height={900} className={styles.browserScreenshot} />
+            {process.env.NEXT_PUBLIC_NANTTY_STATIC_PRELAUNCH === "1" ? <LandingProductPreview title="Your business at a glance" /> : <img src="/screenshots/dashboardOverview.webp" alt="The dashboard home: sales today, a 30-day revenue chart, wallet balances and online orders by status" width={1440} height={900} className={styles.browserScreenshot} />}
           </figure>
           <figure className={styles.tabletFrame}>
-            <img src="/screenshots/orderEscrow.webp" alt="An app order with escrow status and the mark-as-shipped form" width={1180} height={820} className={styles.tabletScreenshot} />
+            {process.env.NEXT_PUBLIC_NANTTY_STATIC_PRELAUNCH === "1" ? <LandingProductPreview title="Orders protected by escrow" /> : <img src="/screenshots/orderEscrow.webp" alt="An app order with escrow status and the mark-as-shipped form" width={1180} height={820} className={styles.tabletScreenshot} />}
           </figure>
           <p className={`${styles.chip} ${styles.offlineChip}`}>
             <span className={styles.chipDot} aria-hidden="true" />

@@ -58,13 +58,17 @@ const securityHeaders = [
   { key: "Permissions-Policy", value: "camera=(self), microphone=(self), display-capture=(self), geolocation=(), payment=()" },
 ];
 
+const isCloudflarePrelaunchExport = process.env.NANTTY_CLOUDFLARE_PRELAUNCH === "1";
+
 const nextConfig: NextConfig = {
+  ...(isCloudflarePrelaunchExport ? { output: "export" as const } : {}),
   experimental: { authInterrupts: true },
   reactStrictMode: true,
   transpilePackages: ["@nantty/web-kit"],
   poweredByHeader: false,
   images: {
     formats: ["image/avif", "image/webp"],
+    ...(isCloudflarePrelaunchExport ? { unoptimized: true } : {}),
     remotePatterns: [{ protocol: "https", hostname: "**" }, ...(isDevelopmentBuild ? [{ protocol: "http" as const, hostname: "**" }] : [])],
     dangerouslyAllowLocalIP: isDevelopmentBuild,
   },

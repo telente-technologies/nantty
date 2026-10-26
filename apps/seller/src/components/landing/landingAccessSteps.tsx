@@ -1,4 +1,5 @@
 import styles from "./landingAccessSteps.module.css";
+import { LandingProductPreview } from "./landingProductPreview";
 
 const accessSteps = [
   { title: "Start selling in the app", description: "In the Nantty app, go to Profile › Start selling and set up your store. In Nigeria you can start selling straight away and verify your payout account to withdraw. Outside Nigeria, verify your identity before you sell.", image: "/photos/shopkeeperPhone.webp", imageAlt: "A shop owner in an apron checking his phone at his stall", kind: "photo" as const },
@@ -25,7 +26,7 @@ export function LandingAccessSteps() {
                 <p className={styles.stepDescription}>{step.description}</p>
               </div>
               <div className={`${styles.imageWindow} ${step.kind === "screenshot" ? styles.screenshotWindow : ""}`}>
-                <img src={step.image} alt={step.imageAlt} loading="lazy" width={1400} height={933} className={step.kind === "screenshot" ? styles.screenshot : styles.photo} />
+                {step.kind === "screenshot" && process.env.NEXT_PUBLIC_NANTTY_STATIC_PRELAUNCH === "1" ? <LandingProductPreview title="Dashboard tools when you need them" /> : <img src={step.image} alt={step.imageAlt} loading="lazy" width={1400} height={933} className={step.kind === "screenshot" ? styles.screenshot : styles.photo} />}
               </div>
             </li>
           ))}

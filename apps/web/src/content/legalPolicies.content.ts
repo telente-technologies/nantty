@@ -26,7 +26,7 @@ export interface LegalPolicy {
 
 const currentVersionLabel = "1.0 (draft)";
 const currentEffectiveOn = "2026-12-01";
-const firstVersionSummary = "First version, not yet in effect. Written under Nigerian law (NDPA 2023 and GAID 2025, FCCPA 2018, Copyright Act 2022, ARCON Act 2022, Arbitration and Mediation Act 2023), checked against how Nantty works today and against the published terms of large social and streaming platforms. [Team to confirm the effective date with counsel.]";
+const firstVersionSummary = "First version, not yet in effect. Written under Nigerian law (NDPA 2023 and GAID 2025, FCCPA 2018, Copyright Act 2022, ARCON Act 2022, Arbitration and Mediation Act 2023), checked against how Nantty works today and against the published terms of large social and streaming platforms.";
 
 function buildPolicy(slug: LegalPolicySlug, title: string, summary: string, sections: readonly LegalDocumentSection[]): LegalPolicy {
   return {

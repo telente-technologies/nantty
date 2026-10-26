@@ -167,6 +167,9 @@ export const mediaMocks: MockRoute[] = [
   }),
   createMockRoute("POST", "/api/v1/posts", ({ body }) => {
     const input = body as NewPostInput;
+    if (input.audience !== undefined && input.audience !== "everyone" && input.audience !== "followers") {
+      throw new ApiError(400, "Choose Everyone or Followers for this post.", "VALIDATION_FAILED");
+    }
     if (input.mediaIds.length > 10) throw new ApiError(422, "A post can have up to 10 photos or videos", "TOO_MANY_MEDIA");
     const uploadedMedia = input.mediaIds.map((mediaId) => {
       const asset = currentMediaAsset(mediaId);

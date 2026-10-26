@@ -1,0 +1,11 @@
+.preview{min-height:230px;height:100%;padding:18px;background:linear-gradient(145deg,#f4f8ff,#e9f1ff);color:#15243d}
+.header{display:flex;align-items:center;gap:9px;font-size:.84rem}
+.mark{display:grid;place-items:center;width:27px;height:27px;border-radius:8px;background:#1769e0;color:white;font-weight:800}
+.live{margin-left:auto;padding:4px 9px;border-radius:999px;background:#e0f5e9;color:#14733b;font-size:.67rem;font-weight:800;letter-spacing:.05em}
+.body{max-width:540px;margin:20px auto 0;padding:17px;border:1px solid #dce5f2;border-radius:14px;background:white;box-shadow:0 12px 35px #16346112}
+.body>p{margin:0;color:#4776b5;font-size:.65rem;font-weight:800;letter-spacing:.08em}
+.body h4{margin:6px 0 12px;font-size:1.05rem}
+.stage{display:grid;place-content:center;justify-items:center;gap:7px;min-height:86px;border-radius:10px;background:linear-gradient(135deg,#e4efff,#f3f7ff);color:#62738b;font-size:.75rem}
+.play{display:grid;place-items:center;width:30px;height:30px;border-radius:50%;background:#1769e0;color:white;font-size:.7rem}
+.controls{display:flex;flex-wrap:wrap;gap:7px;margin-top:12px}
+.controls span{padding:5px 9px;border-radius:8px;background:#f2f6fc;color:#40536e;font-size:.67rem;font-weight:650}

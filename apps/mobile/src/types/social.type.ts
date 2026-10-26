@@ -99,7 +99,6 @@ export interface NewPostInput {
   readonly replyToComment?: ReplyToComment;
   readonly stickerLayout?: CommentStickerLayout;
   readonly replyPolicy?: ReplyPolicy;
-  readonly visibility?: "public" | "subscribers";
   readonly sensitiveLabels?: readonly SensitiveLabel[];
   readonly media?: readonly ClipMediaInput[];
   readonly slideshow?: ClipSlideshowInput;

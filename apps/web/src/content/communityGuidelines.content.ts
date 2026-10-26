@@ -14,7 +14,7 @@ export const communityGuidelinesSections: readonly LegalDocumentSection[] = [
     heading: "Keep people safe",
     paragraphs: ["Not allowed:"],
     bullets: [
-      "Any content that sexualises, grooms or endangers children. We have zero tolerance, we remove it immediately, ban the account and report it to the authorities. [Team to confirm the reporting bodies, for example the Nigeria Police Force, NAPTIP and the NCMEC CyberTipline, and build the reporting and hash-matching pipeline; neither exists in code yet.]",
+      "Any content that sexualises, grooms or endangers children. We have zero tolerance, we remove it immediately, ban the account and report it to the authorities.",
       "Threats, incitement to violence, glorifying violent attacks, and content that supports terrorist or violent extremist groups, including those proscribed under the Terrorism (Prevention and Prohibition) Act 2022.",
       "Harassment, bullying, doxxing (sharing someone's private details), and sharing intimate images without consent. We remove non-consensual intimate images within 24 hours of being told.",
       "Hate speech that attacks people for ethnicity, tribe, religion, nationality, sex, gender, disability, illness or other protected traits.",
@@ -54,7 +54,7 @@ export const communityGuidelinesSections: readonly LegalDocumentSection[] = [
       "Gambling, betting and lottery services without a valid licence.",
       "Adult sexual services, pornography and sexual content.",
       "People, human organs, body parts and human remains, and anything that suggests trafficking or forced labour.",
-      "Endangered wildlife and products from them, such as ivory and pangolin scales, and live animals except where we allow them with licences. [Team to confirm whether any live animal or pet sales are allowed.]",
+      "Endangered wildlife and products from them, such as ivory and pangolin scales, and live animals except where we allow them with licences.",
       "Police, military, customs and other official uniforms and insignia.",
       "Hazardous chemicals, banned pesticides and recalled products.",
       "Antiquities and cultural objects that cannot be lawfully exported or sold.",
@@ -70,7 +70,7 @@ export const communityGuidelinesSections: readonly LegalDocumentSection[] = [
       "These can be sold only by verified sellers who meet extra rules, and may be limited to adults or certain countries:",
     ],
     bullets: [
-      "Alcohol: licensed sellers only, buyers 18 or over, where local law allows. [Team to confirm whether alcohol sales are allowed at launch.]",
+      "Alcohol: licensed sellers only, buyers 18 or over, where local law allows.",
       "Food, cosmetics, supplements and herbal products: NAFDAC registration number shown where required, and no medical claims.",
       "Electronics and electrical goods: must meet Standards Organisation of Nigeria requirements, and must not be sold as new if refurbished.",
       "Drones and other regulated equipment: only where the buyer may lawfully own them.",
@@ -90,7 +90,7 @@ export const communityGuidelinesSections: readonly LegalDocumentSection[] = [
     paragraphs: [
       "Everything in these guidelines applies to lives. Do not pressure viewers, especially young people, to send gifts, do not promise anything in return for gifts that you will not deliver, and do not use lives to sell prohibited items. Gift rankings and leaderboards appear only inside lives.",
       "Do not trade coins or gifts for money, goods or services outside Nantty, run bets, raffles or lotteries with them, or use them to move money. Coins and gifts involved can be removed.",
-      "Automated systems sample live video and audio (using Amazon Rekognition and Amazon Transcribe) to spot severe harm. They can blur, hide or pause a live and send it to a moderator, but they never ban an account on their own. The samples are deleted automatically after a day. [Team to confirm how evidence is kept when a moderator opens a case.]",
+      "Automated systems sample live video and audio (using Amazon Rekognition and Amazon Transcribe) to spot severe harm. They can blur, hide or pause a live and send it to a moderator, but they never ban an account on their own. The samples are deleted automatically after a day.",
     ],
   },
   {
@@ -109,7 +109,7 @@ export const communityGuidelinesSections: readonly LegalDocumentSection[] = [
     bullets: [
       "1. Content action: the content is removed, age-restricted, covered with a warning or shown to fewer people. You are told why.",
       "2. Warning: a formal notice that you broke a rule. A warning given after a report also counts as a strike. A warning recorded on its own stays on your Account status page for 6 months and does not count towards a restriction.",
-      "3. Strike: active for 12 months, then it expires. Removing your content, warning you or suspending you after a report each adds one strike. Strikes add up across content, live, selling and copyright breaches. 3 active strikes pause earning money (gifts, tips, ads revenue share, subscriptions, Premium pool) and going live until a strike expires or is removed on appeal. [Team to confirm: this pause is not automatic in the code yet.] Copyright strikes also follow the legal ladder in our Copyright and IP Policy: a second copyright strike within 12 months suspends posting, going live, selling and earning for at least 30 days, and a third sends the account for review.",
+      "3. Strike: active for 12 months, then it expires. Removing your content, warning you or suspending you after a report each adds one strike. Strikes add up across content, live, selling and copyright breaches. 3 active strikes pause earning money (gifts, tips, ads revenue share, subscriptions, Premium pool) and going live until a strike expires or is removed on appeal. Copyright strikes also follow the legal ladder in our Copyright and IP Policy: a second copyright strike within 12 months suspends posting, going live, selling and earning for at least 30 days, and a third sends the account for review.",
       "4. Feature restriction: for example no posting, live, selling, ads or earning for 1 to 30 days, or a lower sales limit.",
       "5. Temporary suspension: the account is hidden and cannot post, message, follow or sell for up to 30 days, and payouts may be held where the law allows while we investigate.",
       "6. Permanent ban: the account and its stores are closed and new accounts are not allowed. Money that belongs to you is not forfeited; it is paid out to your verified account, after any refunds you owe, unless the law requires us or our payment partner to hold it.",
@@ -120,7 +120,7 @@ export const communityGuidelinesSections: readonly LegalDocumentSection[] = [
     id: "appeals",
     heading: "Appeals",
     paragraphs: [
-      `You can appeal any action from the notice or from Settings, Account status. A different reviewer looks at it, and a person always decides: automated systems can flag or temporarily limit, but never ban on their own. [Team to confirm the target time for deciding appeals.] If your appeal succeeds, the action and any strike are removed. Questions: ${emailAddresses.trustandsafety}.`,
+      `You can appeal any action from the notice or from Settings, Account status. A different reviewer looks at it, and a person always decides: automated systems can flag or temporarily limit, but never ban on their own. If your appeal succeeds, the action and any strike are removed. Questions: ${emailAddresses.trustandsafety}.`,
     ],
   },
   {

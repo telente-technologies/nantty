@@ -6,6 +6,7 @@ import { useEffect, useRef, useState } from "react";
 import { NanttyWordmark } from "@nantty/web-kit";
 
 import { landingNavigationLinks } from "./landingContent.constant";
+import { PrelaunchLoginAction } from "./prelaunchLoginAction";
 import styles from "./landingHeader.module.css";
 
 export function LandingHeader() {
@@ -55,9 +56,9 @@ export function LandingHeader() {
             ))}
           </ul>
         </nav>
-        <Link href="/login" className={styles.signInButton}>
+        <PrelaunchLoginAction className={styles.signInButton}>
           Sign in
-        </Link>
+        </PrelaunchLoginAction>
         <button ref={menuButtonRef} type="button" className={styles.menuButton} aria-expanded={isMenuOpen} aria-controls="landing-mobile-menu" onClick={() => setIsMenuOpen((wasOpen) => !wasOpen)}>
           <span className="visuallyHidden">{isMenuOpen ? "Close menu" : "Open menu"}</span>
           <span className={styles.menuBars} aria-hidden="true" />
@@ -75,9 +76,9 @@ export function LandingHeader() {
             ))}
           </ul>
         </nav>
-        <Link href="/login" className={styles.mobileSignIn}>
+        <PrelaunchLoginAction className={styles.mobileSignIn}>
           Sign in with your Nantty account
-        </Link>
+        </PrelaunchLoginAction>
       </div>
     </header>
   );

@@ -12,6 +12,7 @@ const securityHeaders = [
 ];
 
 const nextConfig: NextConfig = {
+  ...(process.env.NANTTY_CLOUDFLARE_PRELAUNCH === "1" ? { output: "export" as const, images: { unoptimized: true } } : {}),
   experimental: { authInterrupts: true },
   reactStrictMode: true,
   poweredByHeader: false,

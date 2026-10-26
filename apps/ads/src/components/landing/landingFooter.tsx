@@ -4,6 +4,7 @@ import { NanttyWordmark } from "@nantty/web-kit";
 import { buildContactMailtoLink, contactEmailDisplayText, readNanttyMainSiteUrl } from "@/constants/contact.constant";
 
 import styles from "./landingFooter.module.css";
+import { PrelaunchLoginAction } from "./prelaunchLoginAction";
 
 export function LandingFooterWithContact() {
   const mainSiteUrl = readNanttyMainSiteUrl();
@@ -36,7 +37,7 @@ export function LandingFooterWithContact() {
             <h2>Rules</h2>
             <ul>
               <li>
-                <Link href="/policy">Advertising policies</Link>
+                <Link href={process.env.NEXT_PUBLIC_NANTTY_STATIC_PRELAUNCH === "1" ? `${mainSiteUrl}/ads-policy` : "/policy"}>Advertising policies</Link>
               </li>
               <li>
                 <a href={`${mainSiteUrl}/privacy`}>Privacy policy</a>
@@ -59,7 +60,7 @@ export function LandingFooterWithContact() {
                 <a href={`${mainSiteUrl}/sellers`}>Sell on Nantty</a>
               </li>
               <li>
-                <Link href="/login">Sign in</Link>
+                <PrelaunchLoginAction>Sign in</PrelaunchLoginAction>
               </li>
             </ul>
           </div>

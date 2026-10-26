@@ -74,7 +74,31 @@ async function assertStaticHtmlIsSafe(filePath, route) {
   for (const pattern of unsafeReferences) {
     if (pattern.test(html)) throw new Error(`Unsafe app endpoint, server image optimizer, or secret-like value in ${route}`);
   }
+  if (/zudomart/i.test(html)) throw new Error(`Legacy brand is visible in public static HTML on ${route}`);
   if (!html.includes("Nantty")) throw new Error(`Expected Nantty branding was not rendered on ${route}`);
+}
+
+async function assertStaticJavaScriptIsSafe(directory) {
+  const unsafeReferences = [
+    /\/api\//i,
+    /\/bff\//i,
+    /(?:https?:)?[^\s"'`]*\/login(?:[/?#]|["'`])/i,
+    /\/api\/v1\/locale/i,
+  ];
+  async function visit(currentDirectory) {
+    for (const entry of await readdir(currentDirectory, { withFileTypes: true })) {
+      const fullPath = path.join(currentDirectory, entry.name);
+      if (entry.isDirectory()) {
+        await visit(fullPath);
+      } else if (entry.isFile() && entry.name.endsWith(".js")) {
+        const source = await readFile(fullPath, "utf8");
+        if (unsafeReferences.some((pattern) => pattern.test(source))) {
+          throw new Error(`Unsafe app API, BFF, or login reference in ${path.relative(artifactRoot, fullPath)}`);
+        }
+      }
+    }
+  }
+  await visit(directory);
 }
 
 async function assertInternalLinksResolve(htmlFile, route) {
@@ -105,7 +129,12 @@ async function main() {
   const debugBuildPaths = sourcePages.join(",");
   await run("pnpm", ["exec", "next", "build", "--debug-build-paths", debugBuildPaths], {
     cwd: webRoot,
-    env: { ...process.env, NANTTY_CLOUDFLARE_STATIC_EXPORT: "1" },
+    env: {
+      ...process.env,
+      NANTTY_CLOUDFLARE_STATIC_EXPORT: "1",
+      NEXT_PUBLIC_WAITLIST_ENABLED: "false",
+      NEXT_PUBLIC_WAITLIST_APPS_SCRIPT_URL: "",
+    },
   });
 
   const manifest = JSON.parse(await readFile(path.join(webRoot, ".next/prerender-manifest.json"), "utf8"));
@@ -146,6 +175,7 @@ async function main() {
 
   await copyRequiredFile(path.join(nextOutput, "404.html"), path.join(artifactRoot, "404.html"));
   await copyDirectoryContents(path.join(nextOutput, "_next"), path.join(artifactRoot, "_next"));
+  await assertStaticJavaScriptIsSafe(path.join(artifactRoot, "_next"));
 
   // Public assets are copied as files (not app/server output); this preserves the
   // existing Nantty icon, screenshots and store badges exactly as authored.

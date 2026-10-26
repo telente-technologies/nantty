@@ -3,6 +3,7 @@ import Image from "next/image";
 import { LandingIcon, type LandingIconName } from "./landingIcons";
 import baseStyles from "./featureBentoVisuals.module.css";
 import partStyles from "./featureBentoVisualsParts.module.css";
+import { LandingStudioPreview } from "./landingStudioPreview";
 
 const styles = { ...baseStyles, ...partStyles };
 
@@ -78,7 +79,7 @@ export function BattleVisual() {
 export function OverlayVisual() {
   return (
     <div className={styles.screenFrame}>
-      <Image src="/screens/studioOverlayEditor.webp" alt="The Studio overlay editor with layers for a logo plate and a lower third" width={1440} height={840} sizes="(max-width: 700px) 90vw, 360px" className={styles.screenshot} />
+      {process.env.NEXT_PUBLIC_NANTTY_STATIC_PRELAUNCH === "1" ? <LandingStudioPreview title="Overlay and scene editor" /> : <Image src="/screens/studioOverlayEditor.webp" alt="The Studio overlay editor with layers for a logo plate and a lower third" width={1440} height={840} sizes="(max-width: 700px) 90vw, 360px" className={styles.screenshot} />}
     </div>
   );
 }

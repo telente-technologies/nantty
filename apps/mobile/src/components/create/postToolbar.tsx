@@ -16,6 +16,8 @@ export interface PostToolbarProps {
   readonly isKeyboardOpen?: boolean;
 }
 
+export const nextPostAudience = (audience: PostAudience): PostAudience => audience === "everyone" ? "followers" : "everyone";
+
 export function PostToolbar(props: PostToolbarProps) {
   const { colors } = useTheme();
   const styles = useStyles();

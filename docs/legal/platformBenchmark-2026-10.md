@@ -138,12 +138,12 @@ These are the places where copying a foreign platform's approach would mean some
 - Keeping fees after a post-payout refund (FCCPA).
 - Parental consent not implemented while under-18s can sign up (NDPA s.31).
 - Ad balance as possible stored value; undelivered ad spend returning as non-withdrawable ad credit.
-- Policy promises that the code does not yet keep (section 6), which could be treated as misleading under FCCPA s.123-type rules on false representations. [Team to confirm the exact FCCPA section with counsel.]
+- Policy promises that the code does not yet keep (section 6), which could be treated as misleading under FCCPA s.123-type rules on false representations. Counsel should verify the exact FCCPA section.
 - No CSAM reporting pipeline at launch.
 
 ## 6. Code vs policy mismatches
 
-The owner must decide for each open one whether to change the code or the text; rows marked **Resolved** now match the code. The 1.0 draft states the owner rule and flags any remaining mismatch with `[Team to confirm ...]`.
+The owner must decide for each open one whether to change the code or the text; rows marked **Resolved** now match the code. The 1.0 draft states the owner rule and flags any remaining mismatch with a `[verification pending: ...]` note.
 
 | # | Rule | What the policy says | What the code does | Where |
 | --- | --- | --- | --- | --- |

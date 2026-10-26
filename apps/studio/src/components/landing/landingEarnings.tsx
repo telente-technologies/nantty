@@ -1,8 +1,7 @@
-import Link from "next/link";
-
 import { LandingIcon, type LandingIconName } from "./landingIcons";
 import shared from "./landingPage.module.css";
 import styles from "./landingEarnings.module.css";
+import { PrelaunchLoginAction } from "./prelaunchLoginAction";
 
 const earningStreams: readonly { title: string; figure: string; description: string; icon: LandingIconName }[] = [
   { title: "Gifts", figure: "Every gift counts", description: "Viewers send gifts during your live and battles. Coins are added to your earnings as they land, with top gifters listed per live.", icon: "gift" },
@@ -63,9 +62,9 @@ export function LandingEarnings() {
                 </li>
               ))}
             </ul>
-            <Link href="/login" className={shared.primaryAction}>
+            <PrelaunchLoginAction className={shared.primaryAction}>
               Go live with Studio
-            </Link>
+            </PrelaunchLoginAction>
           </article>
         </div>
       </div>

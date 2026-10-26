@@ -1,9 +1,9 @@
-import Link from "next/link";
 import { OfficialStoreBadges } from "@nantty/web-kit";
 
 import { storeLinks } from "@/config/siteMetadata.config";
 
 import styles from "./landingCallToAction.module.css";
+import { PrelaunchLoginAction } from "./prelaunchLoginAction";
 
 export function LandingCallToAction({ getTheAppUrl }: { readonly getTheAppUrl: string }) {
   return (
@@ -15,9 +15,9 @@ export function LandingCallToAction({ getTheAppUrl }: { readonly getTheAppUrl: s
           </h2>
           <p className={styles.description}>Sign in with the account you use in the Nantty app — free for every Nantty seller, upgrade to Pro or Business when you grow. Not selling on Nantty yet? Start in the app, then come back here.</p>
           <div className={styles.actions}>
-            <Link href="/login" className={styles.primaryAction}>
+            <PrelaunchLoginAction className={styles.primaryAction}>
               Sign in with your Nantty account
-            </Link>
+            </PrelaunchLoginAction>
           </div>
           <p className={styles.appPrompt}>
             New to Nantty? <a href={getTheAppUrl}>Get the app</a> to open your store.

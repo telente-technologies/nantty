@@ -7,6 +7,7 @@ import { DashboardWordmark } from "@/components/layout/sidebarNavigation";
 import { landingNavigationLinks } from "@/constants/landingContent.constant";
 
 import styles from "./landingHeader.module.css";
+import { PrelaunchLoginAction } from "./prelaunchLoginAction";
 
 export function LandingHeader() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -47,9 +48,9 @@ export function LandingHeader() {
             ))}
           </ul>
         </nav>
-        <Link href="/login" className={styles.signInButton}>
+        <PrelaunchLoginAction className={styles.signInButton}>
           Sign in
-        </Link>
+        </PrelaunchLoginAction>
         <button type="button" className={styles.menuButton} aria-expanded={isMenuOpen} aria-controls="landing-mobile-menu" onClick={() => setIsMenuOpen((wasOpen) => !wasOpen)}>
           <span className="visuallyHidden">{isMenuOpen ? "Close menu" : "Open menu"}</span>
           <span className={styles.menuBars} aria-hidden="true" />
@@ -67,9 +68,9 @@ export function LandingHeader() {
             ))}
           </ul>
         </nav>
-        <Link href="/login" className={styles.mobileSignIn}>
+        <PrelaunchLoginAction className={styles.mobileSignIn}>
           Sign in with your Nantty account
-        </Link>
+        </PrelaunchLoginAction>
       </div>
     </header>
   );

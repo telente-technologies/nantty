@@ -1,19 +1,17 @@
 import { useState } from "react";
 import { Pressable, StyleSheet, Switch, View } from "react-native";
 
-import { At24Icon, BellSlash24Icon, ChatTeardropText24Icon, EyeSlash24Icon, GlobeHemisphereWest24Icon, LockSimple24Icon, UserPlus24Icon, Users24Icon } from "@/components/icons";
+import { At24Icon, BellSlash24Icon, ChatTeardropText24Icon, EyeSlash24Icon, GlobeHemisphereWest24Icon, UserPlus24Icon, Users24Icon } from "@/components/icons";
 import { ActionSheet } from "@/components/ui/actionSheet";
 import { Chip } from "@/components/ui/chip";
 import { Text } from "@/components/ui/text";
 import { replyPolicyLabel, replyPolicyOptions, sensitiveLabelOptions } from "@/constants/postAudienceCopy.constant";
 import { useContentPreferences } from "@/hooks/useContentPreferences.hook";
-import { useCreatorStatus } from "@/hooks/useCreatorStatus.hook";
 import { useTheme } from "@/theme";
 import type { ReplyPolicy, SensitiveLabel } from "@/types/postAudience.type";
 
 export interface PostAudienceSettingsValue {
   readonly replyPolicy: ReplyPolicy;
-  readonly visibility: "public" | "subscribers";
   readonly sensitiveLabels: readonly SensitiveLabel[];
 }
 
@@ -26,7 +24,6 @@ export function PostAudienceSettings({ value, onChange }: PostAudienceSettingsPr
   const { colors } = useTheme();
   const [isReplyPickerOpen, setIsReplyPickerOpen] = useState(false);
   const [isMarkedSensitive, setIsMarkedSensitive] = useState(value.sensitiveLabels.length > 0);
-  const { isApprovedCreator } = useCreatorStatus();
   const { isAdult } = useContentPreferences();
   const availableLabels = sensitiveLabelOptions.filter((option) => isAdult || !option.adultsOnly);
   const toggleLabel = (label: SensitiveLabel) =>
@@ -42,21 +39,6 @@ export function PostAudienceSettings({ value, onChange }: PostAudienceSettingsPr
         </View>
         <Text size={14} weight={500} lineHeight={16.8} color={colors.primary}>{replyPolicyLabel(value.replyPolicy)}</Text>
       </Pressable>
-      {isApprovedCreator ? (
-        <View style={styles.row}>
-          <LockSimple24Icon size={20} color={colors.textMuted} />
-          <View style={styles.texts}>
-            <Text size={14} weight={500} lineHeight={16.8}>Subscribers only</Text>
-            <Text size={12} lineHeight={16.8} color={colors.textMuted}>Only your subscribers can see this post. Others see a locked preview with a Subscribe button.</Text>
-          </View>
-          <Switch
-            value={value.visibility === "subscribers"}
-            onValueChange={(isOn) => onChange({ ...value, visibility: isOn ? "subscribers" : "public" })}
-            accessibilityLabel="Subscribers only"
-            trackColor={{ true: colors.primary, false: colors.divider }}
-          />
-        </View>
-      ) : null}
       <View style={styles.row}>
         <EyeSlash24Icon size={20} color={colors.textMuted} />
         <View style={styles.texts}>

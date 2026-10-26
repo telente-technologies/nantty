@@ -36,6 +36,12 @@ function setup(extraPosts: Row[] = []) {
 }
 
 describe("repost by link", () => {
+  it("persists the selected followers audience on the created post", async () => {
+    const { store, post } = setup();
+    await post("Followers only", { audience: "followers" });
+    expect(store.posts.at(-1)).toMatchObject({ audience: "followers" });
+  });
+
   it("turns a trailing post link into a quote, strips it and bumps counters", async () => {
     const { store, post, target } = setup();
     const view = await post(`So true ${link(targetId)}`);

@@ -52,6 +52,19 @@ const nextConfig: NextConfig = {
     formats: ["image/avif", "image/webp"],
     ...(isCloudflareStaticExport ? { unoptimized: true } : {}),
   },
+  ...(isCloudflareStaticExport
+    ? {
+        turbopack: {
+          // The locale API client must not enter a static prelaunch bundle.
+          // Alias only this build; normal server-rendered builds keep the real
+          // API-backed service.
+          resolveAlias: {
+            "@/lib/visitorLocale.service": "./src/lib/visitorLocale.static.service.ts",
+            "@/components/errors/errorExperience.provider": "./src/components/errors/errorExperience.static.provider.tsx",
+          },
+        },
+      }
+    : {}),
   // Static hosts cannot apply Next's runtime headers(); the Cloudflare artifact
   // includes an explicit static-host header file instead.
   ...(!isCloudflareStaticExport

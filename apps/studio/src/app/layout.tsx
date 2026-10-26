@@ -3,9 +3,8 @@ import { Inter } from "next/font/google";
 import { cookies } from "next/headers";
 import type { ReactNode } from "react";
 
-import { ThemeInitScript, parseThemePreference, readHtmlThemeAttribute, themeCookieName, themeViewport } from "@nantty/web-kit";
+import { ThemeInitScript, ThemeProvider, parseThemePreference, readHtmlThemeAttribute, themeCookieName, themeViewport } from "@nantty/web-kit";
 
-import { AppProviders } from "@/components/providers/appProviders";
 import { readPublicSiteUrl } from "@/config/studioEnvironment.config";
 import { deriveCsrfTokenForSession } from "@/server/signedCookie.service";
 import { readCachedViewerFromCookies, readSessionIdFromCookies } from "@/server/session.service";
@@ -22,7 +21,7 @@ export const metadata: Metadata = {
   manifest: "/manifest.webmanifest",
   icons: { icon: [{ url: "/brand/nantty-icon.png", type: "image/png" }], apple: "/brand/nantty-icon.png" },
   formatDetection: { telephone: false },
-  robots: { index: false, follow: false },
+  robots: process.env.NANTTY_CLOUDFLARE_PRELAUNCH === "1" ? { index: true, follow: true } : { index: false, follow: false },
 };
 
 export const viewport: Viewport = {
@@ -33,10 +32,18 @@ export const viewport: Viewport = {
 };
 
 export default async function RootLayout({ children }: Readonly<{ children: ReactNode }>) {
+  if (process.env.NANTTY_CLOUDFLARE_PRELAUNCH === "1") {
+    return (
+      <html lang="en-NG" className={interFont.variable} data-theme="light">
+        <body><ThemeProvider initialPreference="light">{children}</ThemeProvider></body>
+      </html>
+    );
+  }
   const cookieStore = await cookies();
   const sessionId = readSessionIdFromCookies(cookieStore);
   const viewer = readCachedViewerFromCookies(cookieStore);
   const themePreference = parseThemePreference(cookieStore.get(themeCookieName)?.value);
+  const { AppProviders } = await import("@/components/providers/appProviders");
 
   return (
     <html lang="en-NG" className={interFont.variable} data-theme={readHtmlThemeAttribute(themePreference)} suppressHydrationWarning>

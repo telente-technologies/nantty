@@ -41,7 +41,7 @@ const privacyPolicyIntroductionSections: readonly LegalDocumentSection[] = [
     heading: "Sensitive data, biometrics and ID numbers",
     paragraphs: [
       "Some data is sensitive under the NDPA, such as biometric data, or high risk, such as BVN, NIN and ID images. We collect it only for verification, fraud prevention and legal compliance, and only when you start a verification.",
-      "We ask for your explicit consent before any biometric check, and we record the version of the consent text you agreed to and when. Smile ID runs a liveness check, compares your selfie with your ID photo and returns a result. Nantty does not create or store face templates or your ID images; we keep the result, the match scores, the document type and country, and a fingerprint of the document number so it cannot be reused on another account. [Team to confirm how long Smile ID keeps images and selfies under its contract with us.]",
+      "We ask for your explicit consent before any biometric check, and we record the version of the consent text you agreed to and when. Smile ID runs a liveness check, compares your selfie with your ID photo and returns a result. Nantty does not create or store face templates or your ID images; we keep the result, the match scores, the document type and country, and a fingerprint of the document number so it cannot be reused on another account.",
       "If you do not want a biometric check, you can still use Nantty, but you cannot get a checkmark, and outside Nigeria you cannot sell or receive payouts.",
     ],
   },

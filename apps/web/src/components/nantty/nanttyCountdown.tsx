@@ -41,11 +41,11 @@ export function NanttyCountdown({ target, label }: { readonly target: string; re
     return () => window.clearInterval(timer);
   }, [target]);
 
-  if (!isReady) return <p className={styles.countdownLoading}>Preparing countdown…</p>;
+  if (!isReady) return <p className={styles.countdownLoading} data-countdown-target={target} data-countdown-label={label}>Preparing countdown…</p>;
   if (!parts) return <p className={styles.countdownLive}>{label} starts now</p>;
 
   return (
-    <div className={styles.countdown} role="timer" aria-label={`Time remaining until ${label}`}>
+    <div className={styles.countdown} data-countdown-target={target} data-countdown-label={label} role="timer" aria-label={`Time remaining until ${label}`}>
       {[
         [parts.days, "days"],
         [pad(parts.hours), "hours"],

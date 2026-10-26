@@ -43,8 +43,8 @@ export const cookiePolicySections: readonly LegalDocumentSection[] = [
         ["zd_viewer", "Essential", "Caches basic details of the signed-in account to load pages faster.", "5 minutes"],
         ["zd_reset", "Essential", "Protects a password reset in progress.", "Until the reset finishes"],
         ["theme", "Essential", "Remembers light or dark mode.", "Until you change it"],
-        ["zudomart_consent", "Essential", "Legacy cookie name retained so returning visitors keep their saved cookie choice and policy version.", "180 days"],
-        ["zudomart_consent_synced_at (local storage)", "Essential", "Legacy storage key retained to keep the saved consent choice in sync with your account.", "Until you clear site data"],
+        ["Consent preferences", "Essential", "Stores your optional-cookie choices and the policy version you answered, so returning visitors do not have to repeat them.", "Up to 180 days"],
+        ["Session storage (consent sync)", "Essential", "Prevents a saved choice from being sent to your account more than once in the same tab session.", "Until the tab closes"],
         ["Cloudflare Turnstile", "Essential", "Human check that protects sign-up, sign-in and sensitive actions. It does not use cookies to track you across sites.", "Per check"],
       ],
     },
@@ -60,7 +60,7 @@ export const cookiePolicySections: readonly LegalDocumentSection[] = [
     id: "our-consent-cookie",
     heading: "How we record your choice",
     paragraphs: [
-      "We store your choice in the zudomart_consent cookie, a legacy cookie name retained so returning visitors keep their saved choice, with the policy version you answered. If you are signed in, we also save the choice to your account so it applies on your other devices, and we keep a record of it to show we asked. If the policy version changes in a way that affects consent, we ask again.",
+      "We store your choice in an essential preference cookie for up to 180 days, together with the policy version you answered. If you are signed in, we also save the choice to your account so it applies on your other devices, and we keep a record of it to show we asked. A tab-session entry prevents us from syncing the same choice twice in one tab. If the policy version changes in a way that affects consent, we ask again.",
     ],
   },
   {

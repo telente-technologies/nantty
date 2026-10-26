@@ -1,11 +1,7 @@
-import {
-  HttpMiddlewarePipeline,
-  createHttpServer,
-  createNodeHttpAdapter,
-  createResponseContext,
-  type HttpRequestContext,
-} from "@zudojs/http";
+import { createRequestContext, HttpMiddlewarePipeline, createResponseContext, type HttpRequestContext, type HttpResponseContext } from "@zudojs/http";
 import { createLogger, type Logger } from "@zudojs/logger";
+import { createPlatform, sendLegacyResponse } from "@nantty/fastify-platform";
+import type { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
 
 import { createAdminNetworkMiddleware } from "./middlewares/adminNetwork.middleware.js";
 import { createGlobalRateLimitMiddleware } from "./middlewares/routeRateLimit.middleware.js";
@@ -22,8 +18,22 @@ import { IdentityPolicyGateSource, type PolicyGateSource } from "./services/poli
 import { AccessTokenVerifier, ValkeySessionRevocationSource } from "./services/accessTokenVerifier.service.js";
 import { ValkeyWidgetTokenRevocationSource, WidgetTokenVerifier } from "./services/widgetTokenVerifier.service.js";
 import { buildSecurityServices, type SecurityServiceOverrides } from "./services/security/securityServices.service.js";
-import { createRealtimeProxyingServer } from "./services/realtimeSocketProxy.service.js";
+import { attachRealtimeSocketProxy } from "./services/realtimeSocketProxy.service.js";
 import { withRequestMetrics } from "./telemetry/requestMetrics.js";
+
+const incomingRequestIdPattern = /^[A-Za-z0-9._:-]{1,128}$/;
+
+function resolveGatewayRequestId(value: string | string[] | undefined): string {
+  const candidate = Array.isArray(value) ? value.join(", ") : value;
+  const requestId = candidate?.trim() ?? "";
+  return incomingRequestIdPattern.test(requestId) ? requestId : crypto.randomUUID();
+}
+
+export interface GatewayServer {
+  readonly address: { readonly host: string; readonly port: number; readonly family: string } | undefined;
+  start(): Promise<void>;
+  stop(): Promise<void>;
+}
 
 export interface GatewayServerOptions {
   readonly config: GatewayConfig;
@@ -42,7 +52,62 @@ function buildRateLimitStore(connection: ValkeyConnection | undefined, logger: L
   return new ValkeyRateLimitStore(connection, memory, (error) => logger.warn("valkey rate limit unavailable; using in-memory counters", { error: error instanceof Error ? error.message : String(error) }));
 }
 
-export function createGatewayServer(options: GatewayServerOptions) {
+function normalizeHeaders(request: FastifyRequest): Record<string, string> {
+  return Object.fromEntries(Object.entries(request.headers).flatMap(([name, value]) => value === undefined ? [] : [[name, Array.isArray(value) ? value.join(", ") : String(value)]]));
+}
+
+function toLegacyRequest(request: FastifyRequest): HttpRequestContext {
+  const url = request.raw.url ?? request.url;
+  const parsed = new URL(url, "http://gateway.invalid");
+  const requestId = resolveGatewayRequestId(request.headers["x-request-id"]);
+  const body = request.method === "GET" || request.method === "HEAD" ? undefined : request.body;
+  return createRequestContext({
+    id: requestId,
+    method: request.method,
+    url,
+    path: parsed.pathname,
+    headers: normalizeHeaders(request),
+    body,
+    remoteAddress: request.ip,
+    protocol: request.protocol,
+    hostname: request.hostname,
+  });
+}
+
+function sendGatewayResponse(reply: FastifyReply, response: HttpResponseContext): FastifyReply {
+  if (!(response.body instanceof Uint8Array)) {
+    sendLegacyResponse(reply, response);
+    return reply;
+  }
+  for (const [name, value] of Object.entries(response.headers)) {
+    if (value !== undefined) reply.header(name, value);
+  }
+  reply.code(response.status);
+  if (response.status === 204 || response.body.byteLength === 0) return reply.send();
+  return reply.send(Buffer.from(response.body));
+}
+
+function setLegacyBodyLimitErrorHandler(app: FastifyInstance): void {
+  app.setErrorHandler((error, request, reply) => {
+    if ((error as Error & { statusCode?: number }).statusCode === 413) {
+      return reply
+        .header("x-content-type-options", "nosniff")
+        .header("x-frame-options", "DENY")
+        .header("referrer-policy", "no-referrer")
+        .header("strict-transport-security", "max-age=63072000; includeSubDomains; preload")
+        .header("content-security-policy", "default-src 'none'; frame-ancestors 'none'")
+        .header("cross-origin-resource-policy", "same-site")
+        .header("permissions-policy", "camera=(), microphone=(), geolocation=()")
+        .header("x-request-id", resolveGatewayRequestId(request.headers["x-request-id"]))
+        .code(413)
+        .send({ error: "Payload Too Large", code: "PAYLOAD_TOO_LARGE" });
+    }
+    app.log.error({ err: error }, "unhandled request error");
+    return reply.code(500).send({ message: "Internal Server Error", code: "INTERNAL_ERROR" });
+  });
+}
+
+export function createGatewayServer(options: GatewayServerOptions): GatewayServer {
   const logger = options.logger ?? createLogger({ name: "gateway" });
   const policyGate = options.policyGate ?? (options.config.policyGate === null ? undefined : new IdentityPolicyGateSource(options.config.upstreams.identity, options.config.policyGate.internalToken));
   const connection = options.config.valkeyUrl === undefined || options.config.valkeyUrl === null ? undefined : new ValkeyConnection(new URL(options.config.valkeyUrl));
@@ -72,9 +137,50 @@ export function createGatewayServer(options: GatewayServerOptions) {
       createUpstreamDispatchHandler({ config: options.config, verifier, widgetVerifier, logger, rateLimitStore, security, staffNetworkGate, ...(policyGate === undefined ? {} : { policyGate }), ...(connection === undefined ? {} : { cacheProbe: () => connection.command(["PING"]) }) }),
     ],
   });
-  const realtimeServer = createRealtimeProxyingServer(options.config.realtimeUpstream, logger);
-  return createHttpServer({
-    adapter: createNodeHttpAdapter({ host: options.config.host, port: options.config.port, maxBodySize: maximumRequestBodyBytes, trustProxy: options.config.trustedProxyHops ?? 0, ...(realtimeServer === undefined ? {} : { server: realtimeServer }) }),
-    handler: withRequestMetrics((request: HttpRequestContext) => pipeline.execute(request, createResponseContext())),
-  });
+  let app: FastifyInstance | undefined;
+  let starting: Promise<void> | undefined;
+  async function initializeAndListen(): Promise<void> {
+    app = await createPlatform({
+      name: "gateway",
+      host: options.config.host,
+      port: options.config.port,
+      bodyLimit: maximumRequestBodyBytes,
+      trustProxy: options.config.trustedProxyHops ?? 0,
+      logger: true,
+      rateLimit: false,
+    });
+
+    // The Gateway is a byte-preserving proxy. Parse bodies as buffers rather than
+    // JSON so webhook signatures and arbitrary upstream payloads remain intact.
+    app.removeAllContentTypeParsers();
+    app.addContentTypeParser("*", { parseAs: "buffer" }, (_request, body, done) => done(null, body));
+    setLegacyBodyLimitErrorHandler(app);
+
+    const dispatch = async (request: FastifyRequest, reply: FastifyReply): Promise<FastifyReply> => {
+      const legacyRequest = toLegacyRequest(request);
+      const response = await withRequestMetrics(async (context) => pipeline.execute(context, createResponseContext()))(legacyRequest);
+      return sendGatewayResponse(reply, response);
+    };
+    app.all("/", dispatch);
+    app.all("/*", dispatch);
+
+    if (options.config.realtimeUpstream) attachRealtimeSocketProxy(app.server, options.config.realtimeUpstream, logger);
+    await app.listen({ host: options.config.host, port: options.config.port });
+  }
+
+  return {
+    get address() {
+      const address = app?.server.address();
+      if (typeof address !== "object" || address === null) return undefined;
+      return { host: address.address, port: address.port, family: String(address.family) };
+    },
+    async start() {
+      starting ??= initializeAndListen();
+      await starting;
+    },
+    async stop() {
+      if (starting !== undefined) await starting;
+      await app?.close();
+    },
+  };
 }

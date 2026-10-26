@@ -1,17 +1,16 @@
-import Link from "next/link";
-
 import { freePlanPromise, planHighlightsByPlan } from "@/config/planFeatures.config";
 import type { SubscriptionPlan } from "@/types/subscription.type";
 import { formatMoneyForDisplay } from "@/utils/money.util";
 
 import styles from "./landingPricing.module.css";
 import { ZudoIcon } from "@/components/ui/zudoIcon";
+import { PrelaunchLoginAction } from "./prelaunchLoginAction";
 
 function findYearlyPlanForTier(plans: readonly SubscriptionPlan[], tier: SubscriptionPlan["tier"]): SubscriptionPlan | undefined {
   return plans.find((plan) => plan.tier === tier && plan.interval === "year");
 }
 
-export function LandingPricing({ plans, locale }: { readonly plans: SubscriptionPlan[]; readonly locale: string }) {
+export function LandingPricing({ plans, locale, prelaunch = false }: { readonly plans: SubscriptionPlan[]; readonly locale: string; readonly prelaunch?: boolean }) {
   const monthlyPlans = plans.filter((plan) => plan.interval === "month");
   const plansToShow = monthlyPlans.length > 0 ? monthlyPlans : plans;
   return (
@@ -27,7 +26,7 @@ export function LandingPricing({ plans, locale }: { readonly plans: Subscription
           </p>
         </div>
         {plansToShow.length === 0 ? (
-          <p className={styles.unavailable}>Paid plan prices are loading slowly right now. The Free plan is always available — just sign in.</p>
+          <p className={styles.unavailable}>{prelaunch ? "Paid plan pricing will be available at launch. The Free plan remains available to every seller." : "Paid plan prices are loading slowly right now. The Free plan is always available — just sign in."}</p>
         ) : (
           <ul className={styles.planGrid}>
             <li className={styles.planCard}>
@@ -42,9 +41,9 @@ export function LandingPricing({ plans, locale }: { readonly plans: Subscription
                   <li key={highlight}>{highlight}</li>
                 ))}
               </ul>
-              <Link href="/login" className={styles.planButton}>
+              <PrelaunchLoginAction className={styles.planButton}>
                 Sign in free
-              </Link>
+              </PrelaunchLoginAction>
             </li>
             {plansToShow.map((plan) => {
               const yearlyPlan = findYearlyPlanForTier(plans, plan.tier);
@@ -75,9 +74,9 @@ export function LandingPricing({ plans, locale }: { readonly plans: Subscription
                       </li>
                     ))}
                   </ul>
-                  <Link href="/login" className={styles.planButton}>
+                  <PrelaunchLoginAction className={styles.planButton}>
                     Sign in to upgrade to {planName}
-                  </Link>
+                  </PrelaunchLoginAction>
                 </li>
               );
             })}

@@ -13,7 +13,7 @@ import { DismissKeyboardScrollView } from "./dismissKeyboardScrollView";
 import { DraftMediaStrip } from "./draftMediaStrip";
 import { MAXIMUM_MEDIA_PER_POST, pickPhotosAndVideosFromLibrary, takePhotoWithSystemCamera } from "./pickMedia.util";
 import type { PostDraftMediaItem } from "./postDraftUploads.hook";
-import { PostToolbar } from "./postToolbar";
+import { nextPostAudience, PostToolbar } from "./postToolbar";
 import { PostSettingsStep } from "./settings/postSettingsStep";
 import type { PostSettingsValue } from "./settings/postSettings.type";
 
@@ -109,7 +109,7 @@ export function PostComposerPanel(props: PostComposerPanelProps) {
       <PostToolbar
         audience={draft.audience}
         isKeyboardOpen={caption.focused}
-        onToggleAudience={() => onChangeDraft({ ...draft, audience: draft.audience === "everyone" ? "followers" : "everyone" })}
+        onToggleAudience={() => onChangeDraft({ ...draft, audience: nextPostAudience(draft.audience) })}
         onTakePhoto={async () => {
           if (remainingMediaSlots > 0) onAddPickedMedia(await takePhotoWithSystemCamera());
         }}

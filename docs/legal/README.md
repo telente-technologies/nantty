@@ -23,7 +23,7 @@ All are rendered by `apps/web/src/components/legal/legalPolicyPage.tsx` from con
 
 The drafts were benchmarked against TikTok, Meta, Twitch, X and Kick and checked against the code in October 2026: see [platformBenchmark-2026-10.md](platformBenchmark-2026-10.md), including the code vs policy mismatches the owner must resolve.
 
-Shared placeholders (entity name, credit line) live in `legalPlaceholders.content.ts`. Every remaining gap is marked `[Team to replace: ...]` or `[Team to confirm ...]`; search for `[Team to` to list them.
+Shared placeholders (entity name, credit line) live in `legalPlaceholders.content.ts`. Every remaining gap has an editorial marker such as `[Team to replace: ...]` or `[verification pending: ...]`; search for those markers to list them.
 
 The same document keys are registered in: `apps/admin/src/constants/legalDocuments.constant.ts` (+ `types/legal.type.ts`, `apiContract.md`), `services/go/modules/users/src/modules/legal/services/legalDocuments.service.go`, `services/typescript/notifications/src/constants/policyDocuments.constant.ts`, and the `PolicyDocumentKey` types in webapp and mobile. Help Centre: `services/typescript/support/content/help/legal-and-data/terms-privacy-and-cookies.md`, the new `your-data-rights.md`, and a Nigeria repeat-notice section in `safety-and-reporting/copyright-and-account-status.md`.
 
@@ -119,21 +119,23 @@ Status column is for the team to fill in.
 
 ## 4. Product gaps found while drafting
 
-1. **Parental consent:** the policies say under-18s need a parent's consent (NDPA s.31), but sign-up has no parental-consent or age-assurance flow. Decide the minimum age and build it.
-2. **Repeat infringers:** Copyright Act s.56 requires a warning with acknowledgment and, after a further notice, a suspension of at least one month. The moderation service uses 3 strikes in 90 days. The copyright policy describes both; the service should implement the s.56 path for Nigerian accounts.
+**Owner product decision (2026-10-26):** minimum age is 13; a parent or guardian is responsible for users under 18. Keep the experience lightweight and do not collect identity documents from parents unless counsel confirms they are required. Ads may be shown to any age, but minor ads must be age-appropriate and non-personalized/contextual. This product direction does not by itself satisfy a legal-consent requirement.
+
+1. **Parental consent and age assurance:** the policies say under-18s need a parent's consent (NDPA s.31), but sign-up has no parental-consent flow. Sign-up enforces 13+ and auth can issue an adult/minor/unknown age bracket; service-boundary enforcement for paid features and personalized-ads suppression still needs verification. Counsel must confirm a simple, proportionate consent/verification method before enabling age-restricted paid features. Do not build an unnecessarily complex identity-document flow by default.
+2. **Repeat infringers:** the current moderation code defaults to automatic restriction at 2 copyright strikes in a 365-day window, a 365-day strike lifetime and suspension review at 3; this replaces the old plan text that said 3 strikes in 90 days. Counsel must review the policy and user-facing wording against Copyright Act s.56 before launch.
 3. **Takedown speed:** s.55 requires "expeditious" takedown. The product gives uploaders 48 hours to remove a video before automatic takedown. Counsel to confirm this is acceptable, or disable access immediately in Nigeria.
 4. **Counter-notice wait:** the service waits 10 business days (Copyright Act allows restoring after 7 days). Lawful, but confirm.
-5. **No personalised ads for under-18s** is promised in the policies; check the ad decision engine enforces it.
+5. **Minor ad controls:** the product decision allows ads to all ages, but no personalized/behavioral ads for minors. Verify age-aware ad decisions enforce contextual-only inventory and do not leak minor signals into targeting or measurement.
 6. **Data-rights request log and 72-hour acknowledgment** are described in the Data rights page; the support service should track them.
 7. **Direct payment in Nigeria** is mentioned for verified stores (existing help content). Confirm it still exists in the Flutterwave design.
-8. **Code vs policy mismatches** found in the October 2026 benchmark are listed in `platformBenchmark-2026-10.md`. Two were resolved in code on 2026-10-19: undelivered escrows now move to staff review at payment + 30 days instead of auto-releasing, and post-payout refunds recover only the seller's portion while keeping Zudomart's fees. The remaining mismatches include no automatic strike pause, no CSAM reporting pipeline, web coin chargebacks not debited, the ad balance withdrawal fee and destination, Gold ad load, and the offer-link limit. Paystack is resolved: Flutterwave only.
+8. **Code vs policy mismatches** found in the October 2026 benchmark are listed in `platformBenchmark-2026-10.md`. Two were resolved in code on 2026-10-19: undelivered escrows now move to staff review at payment + 30 days instead of auto-releasing, and post-payout refunds recover only the seller's portion while keeping platform fees. Current gaps still include no CSAM detection/reporting pipeline (provider disabled; authorities and evidence handling require counsel's instructions), incomplete minor-ad/paid-feature enforcement, web coin chargebacks not debited, the ad balance withdrawal fee and destination, Gold ad load, and the offer-link limit. Paystack is resolved: Flutterwave only.
 
 ## 5. Questions for a Nigerian lawyer
 
 1. Does the Flutterwave payout-subaccount model (wallets in each user's name, Zudomart only instructing transfers and taking fees, escrow as a ledger lock) keep Zudomart outside CBN licensing (PSSP, switching, mobile money, or escrow regulation)? Do we need any CBN or NIBSS approval for the escrow wording?
 2. Which NDPC tier will Zudomart fall into at launch, what are the current registration and CAR fees, and must the DPO be in Nigeria?
 3. Is our biometric verification flow (explicit consent, no face template stored, Smile ID as processor) compliant with NDPA s.30 and the GAID? Do we need a DPIA filed with the NDPC?
-4. What minimum age should we set, and what parental consent and age-verification method satisfies NDPA s.31?
+4. Does the owner-selected 13+ minimum with parent/guardian responsibility for under-18s meet NDPA s.31, and what is the simplest lawful parental-consent and age-assurance method for launch?
 5. Are the transfer bases for AWS in Ireland and Germany and US vendors adequate under NDPA ss.41–43 and the GAID, and has the NDPC issued any adequacy list we can rely on?
 6. Does the NITDA Code of Practice bind us as a "Large Service Platform" from launch, and what local incorporation, address and liaison officer steps are needed? Is the Code's legal status settled?
 7. Do boosts, in-app sponsored posts and creator paid partnerships each need ARCON pre-exposure approval, who must obtain it, and must Zudomart register with ARCON?

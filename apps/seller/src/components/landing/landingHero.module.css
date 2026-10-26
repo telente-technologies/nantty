@@ -99,6 +99,16 @@
   background: var(--color-brand-solid-hover);
 }
 
+.signInButton:disabled {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: 0;
+  font: inherit;
+  cursor: not-allowed;
+  opacity: 0.9;
+}
+
 .proofList {
   display: flex;
   flex-wrap: wrap;

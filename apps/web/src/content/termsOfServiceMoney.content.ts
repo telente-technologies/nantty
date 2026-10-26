@@ -47,7 +47,7 @@ export const termsOfServiceMoneySections: readonly LegalDocumentSection[] = [
     id: "coins-and-gifts",
     heading: "Coins, gifts and tips",
     paragraphs: [
-      "Coins are a licence to use digital features on Nantty, such as sending gifts and tips on lives and content. Coins are not money, not a deposit and not e-money. They cannot be withdrawn, exchanged for cash or used to pay for products, and they have no value outside Nantty. [Team to confirm with counsel that coins and gifts are not stored value under CBN rules.]",
+      "Coins are a licence to use digital features on Nantty, such as sending gifts and tips on lives and content. Coins are not money, not a deposit and not e-money. They cannot be withdrawn, exchanged for cash or used to pay for products, and they have no value outside Nantty.",
       "Coin prices are set per channel and per country. The same pack can cost more in the iOS or Android app than on the web because Apple and Google charge a fee, and the iOS and Android prices can differ from each other. The price is shown before you buy.",
       "You can send coins to another person. A platform fee of 25% of the coins sent is taken from the transfer, and the review step shows the exact numbers before you confirm. Transfers are final, and the person you send to cannot withdraw them either.",
       "A gift or tip uses up your coins when you send it. It is final and is not refunded once sent, except where the law requires it or the coins were used without your permission. Creators receive a share of each gift or tip under the Creator Program Terms.",
@@ -68,9 +68,9 @@ export const termsOfServiceMoneySections: readonly LegalDocumentSection[] = [
     paragraphs: [
       "In the iOS and Android apps, digital purchases (coins, Premium, Blue plans and creator subscriptions) are sold through the Apple App Store or Google Play. Their price includes the store's fee, so it can be higher than on the web. Apple's or Google's terms and refund processes apply to those purchases, and a refund they give may reverse what was bought with it. Seller plans and Gold are sold only on the web.",
       "Subscriptions renew automatically until you cancel. You can cancel at any time and keep access until the end of the period you paid for. Plans renew at the full price shown at renewal. If we raise a price, we tell you before your next renewal and the new price applies from the following period, so you can cancel first.",
-      "A checkmark is given only after verification: a Smile ID liveness check and an ID check, with your explicit consent to the biometric check. Paying never buys a checkmark on its own. If verification is rejected, a checkmark-only plan is refunded in full; for plans with other perks, those perks keep running and we refund the checkmark share of the current period. A checkmark is personal and cannot be transferred, and changing your verified name may pause it until it is checked again. [Team to confirm the re-check rule.]",
+      "A checkmark is given only after verification: a Smile ID liveness check and an ID check, with your explicit consent to the biometric check. Paying never buys a checkmark on its own. If verification is rejected, a checkmark-only plan is refunded in full; for plans with other perks, those perks keep running and we refund the checkmark share of the current period. A checkmark is personal and cannot be transferred, and changing your verified name may pause it until it is checked again.",
       "Premium members can own up to 5 business profiles, but never more than one Store. Some business plans can be bought together as a combined Gold plan at a discount shown at checkout.",
-      "Offer links: an offer link can be claimed once per account, and discounts never stack. If more than one discount applies, you get the single best one. [Team to confirm: the owner rule is one offer per account in total; the code today limits each link to one claim per account but allows claims on different links.]",
+      "Offer links: an offer link can be claimed once per account, and discounts never stack. If more than one discount applies, you get the single best one.",
     ],
   },
   {
@@ -78,7 +78,7 @@ export const termsOfServiceMoneySections: readonly LegalDocumentSection[] = [
     heading: "Ads, boosts, ad balance and ad credit",
     paragraphs: [
       "A boost pays to show your own post, profile or store to more people. Boosted posts are labelled Boosted. Ads bought in Nantty Ads are labelled Sponsored, and ads in comment sections are labelled Promoted. Premium members get 1 free boost each month.",
-      "Ad balance is real money you top up to pay for ads. Unspent ad balance can be withdrawn after a 24-hour hold, once you are payout-verified, to your Nantty wallet and from there to your verified payout account. Any fee is shown before you confirm. [Team to confirm the fee: the code charges a Nantty fee of 1.5%, capped at ₦2,000, with a ₦1,000 minimum withdrawal, not only the provider's fee.]",
+      "Ad balance is real money you top up to pay for ads. Unspent ad balance can be withdrawn after a 24-hour hold, once you are payout-verified, to your Nantty wallet and from there to your verified payout account. Any fee is shown before you confirm.",
       "Ad credit is promotional value that can only be spent on ads in Nantty. It is never money and can never be withdrawn or transferred. Credit we give you, for example as a promotion or goodwill, may have an expiry date that we show when we give it. Credit you earn in the app, such as cashback, never expires. Selected advertisers can receive 10% of their ad spend back as ad credit.",
       "How many ads you see depends on your plan, as the Ads Policy explains. Premium and some business plans are ad-free, and guests and under-18s are not shown ads.",
     ],

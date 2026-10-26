@@ -19,8 +19,13 @@ export const metadata: Metadata = {
 };
 
 export default async function LandingPage() {
-  const isSignedIn = buildSessionViewFromCookies(await cookies()) !== null;
-  const primaryAction = isSignedIn ? { href: "/accounts", label: "Open Ads Manager" } : { href: "/login", label: "Sign in with your Nantty account" };
+  const isPrelaunchStatic = process.env.NANTTY_CLOUDFLARE_PRELAUNCH === "1";
+  const isSignedIn = isPrelaunchStatic ? false : buildSessionViewFromCookies(await cookies()) !== null;
+  const primaryAction = isPrelaunchStatic
+    ? { href: "/login", label: "Sign in with your Nantty account", locked: true }
+    : isSignedIn
+      ? { href: "/accounts", label: "Open Ads Manager" }
+      : { href: "/login", label: "Sign in with your Nantty account" };
   return (
     <div className={landingLayoutStyles.page}>
       <LandingHeaderWithFloatingNavigation primaryAction={primaryAction} />

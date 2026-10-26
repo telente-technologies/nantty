@@ -55,6 +55,14 @@
   color: var(--blue-900);
 }
 
+.primaryAction:disabled {
+  gap: 8px;
+  border: 0;
+  font: inherit;
+  cursor: not-allowed;
+  opacity: 0.9;
+}
+
 .secondaryAction {
   background: var(--deep-scrim);
   color: var(--deep-ink);

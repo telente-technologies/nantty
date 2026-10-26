@@ -6,9 +6,12 @@ import { buildContactMailtoLink, contactEmailRecipients } from "@/constants/cont
 
 import { zudomartMainSiteUrl } from "./landingContent.constant";
 import styles from "./landingFooter.module.css";
+import { PrelaunchLoginAction } from "./prelaunchLoginAction";
 
 const linkGroups = [
-  { heading: "Studio", links: [{ label: "Sign in", href: "/login" }, { label: "Go live your way", href: "#go-live" }, { label: "Features", href: "#features" }, { label: "Earnings", href: "#earnings" }, { label: "FAQ", href: "#faq" }] },
+  { heading: "Studio", links: process.env.NEXT_PUBLIC_NANTTY_STATIC_PRELAUNCH === "1"
+    ? [{ label: "Sign in", locked: true }, { label: "Go live your way", href: "#go-live" }, { label: "Features", href: "#features" }, { label: "Earnings", href: "#earnings" }, { label: "FAQ", href: "#faq" }]
+    : [{ label: "Sign in", href: "/login" }, { label: "Go live your way", href: "#go-live" }, { label: "Features", href: "#features" }, { label: "Earnings", href: "#earnings" }, { label: "FAQ", href: "#faq" }] },
   { heading: "Nantty", links: [{ label: "Nantty.com", href: zudomartMainSiteUrl }, { label: "Join the Creator Program", href: "#creator-program" }, { label: "Sell on Nantty", href: `${zudomartMainSiteUrl}/sellers` }] },
   {
     heading: "Legal",
@@ -45,7 +48,8 @@ export function LandingFooter() {
               <h2 className={styles.groupHeading}>{group.heading}</h2>
               <ul className={styles.linkList}>
                 {group.links.map((link) => (
-                  <li key={link.label}>{link.href.startsWith("/") ? <Link href={link.href}>{link.label}</Link> : <a href={link.href}>{link.label}</a>}</li>
+                  <li key={link.label}>{"locked" in link && link.locked ? <PrelaunchLoginAction className={styles.footerLink}>{link.label}</PrelaunchLoginAction>
+                    : link.href?.startsWith("/") ? <Link href={link.href}>{link.label}</Link> : link.href ? <a href={link.href}>{link.label}</a> : null}</li>
                 ))}
               </ul>
             </div>

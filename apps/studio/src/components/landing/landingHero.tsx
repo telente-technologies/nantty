@@ -1,9 +1,8 @@
-import Link from "next/link";
-
 import shared from "./landingPage.module.css";
 import styles from "./landingHero.module.css";
 import { LandingIcon } from "./landingIcons";
 import { LiveStageMockup } from "./liveStageMockup";
+import { PrelaunchLoginAction } from "./prelaunchLoginAction";
 
 const heroProofPoints = ["Phone, OBS or WHIP", "Up to 10 creators on stage", "Payouts to your bank"];
 
@@ -23,10 +22,10 @@ export function LandingHero() {
             Studio is your creator control room. Stream from your phone or OBS, bring up to 10 creators on stage, battle for gifts and withdraw to your bank. Talk, music, gaming, classes or IRL. Selling is optional.
           </p>
           <div className={styles.actions}>
-            <Link href="/login" className={shared.primaryAction}>
+            <PrelaunchLoginAction className={shared.primaryAction}>
               Go live with Studio
               <LandingIcon name="arrowRight" size={18} strokeWidth={2.2} />
-            </Link>
+            </PrelaunchLoginAction>
             <a href="#creator-program" className={shared.secondaryAction}>
               Join the Creator Program
             </a>

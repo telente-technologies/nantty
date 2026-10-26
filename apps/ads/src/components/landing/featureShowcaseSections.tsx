@@ -51,7 +51,7 @@ export function PolicyAndReviewSection() {
               </li>
             ))}
           </ul>
-          <Link href="/policy" className={styles.inlineLink}>
+          <Link href={process.env.NEXT_PUBLIC_NANTTY_STATIC_PRELAUNCH === "1" ? "https://nantty.com/ads-policy" : "/policy"} className={styles.inlineLink}>
             Read the advertising policies
             <ZudoIcon name="arrowUpRight24" size={16} />
           </Link>

@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 
 import { LandingAccessSteps } from "@/components/landing/landingAccessSteps";
 import { LandingCallToAction } from "@/components/landing/landingCallToAction";
@@ -16,6 +15,7 @@ import { readAdsManagerUrl, readMarketingSiteUrl } from "@/config/siteMetadata.c
 import { loadPublicSubscriptionPlansForVisitor } from "@/server/publicPlans.service";
 
 import styles from "@/components/landing/landingPage.module.css";
+import { PrelaunchLoginAction } from "@/components/landing/prelaunchLoginAction";
 
 export const metadata: Metadata = {
   title: { absolute: "Nantty Dashboard — run your business, free for every seller" },
@@ -26,14 +26,16 @@ export const metadata: Metadata = {
 };
 
 export default async function LandingPage() {
-  const { plans, locale } = await loadPublicSubscriptionPlansForVisitor();
+  const { plans, locale } = process.env.NANTTY_CLOUDFLARE_PRELAUNCH === "1"
+    ? { plans: [], locale: "en-NG" }
+    : await loadPublicSubscriptionPlansForVisitor();
   const marketingSiteUrl = readMarketingSiteUrl();
   return (
     <div className={styles.page}>
       <aside className={styles.announcement} aria-label="Announcement">
         <span className={styles.announcementBadge}>Free</span>
         <span>
-          {freePlanPromise} <Link href="/login">Sign in with your app account</Link>
+          {freePlanPromise} <PrelaunchLoginAction className={styles.announcementLink}>Sign in with your app account</PrelaunchLoginAction>
         </span>
       </aside>
       <LandingHeader />
@@ -43,7 +45,7 @@ export default async function LandingPage() {
         <LandingFeatures />
         <LandingSyncSection />
         <LandingAccessSteps />
-        <LandingPricing plans={plans} locale={locale} />
+        <LandingPricing plans={plans} locale={locale} prelaunch={process.env.NANTTY_CLOUDFLARE_PRELAUNCH === "1"} />
         <LandingQuestions />
         <LandingCallToAction getTheAppUrl={marketingSiteUrl} />
       </main>

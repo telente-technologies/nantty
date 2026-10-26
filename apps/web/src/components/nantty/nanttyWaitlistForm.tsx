@@ -4,8 +4,9 @@ import { FormEvent, useEffect, useRef, useState } from "react";
 
 import styles from "./nanttyLanding.module.css";
 
-const waitlistEndpoint = process.env.NEXT_PUBLIC_WAITLIST_APPS_SCRIPT_URL?.trim() ?? "";
-const waitlistEnabled = process.env.NEXT_PUBLIC_WAITLIST_ENABLED === "true" && waitlistEndpoint.length > 0;
+const isStaticPrelaunchExport = process.env.NANTTY_CLOUDFLARE_STATIC_EXPORT === "1";
+const waitlistEndpoint = isStaticPrelaunchExport ? "" : process.env.NEXT_PUBLIC_WAITLIST_APPS_SCRIPT_URL?.trim() ?? "";
+const waitlistEnabled = !isStaticPrelaunchExport && process.env.NEXT_PUBLIC_WAITLIST_ENABLED === "true" && waitlistEndpoint.length > 0;
 const knownGoogleOrigins = new Set(["https://script.google.com"]);
 
 interface WaitlistMessage {

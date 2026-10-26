@@ -49,6 +49,18 @@
   color: var(--color-on-brand);
 }
 
+.footerLinks button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--color-on-brand);
+  font: inherit;
+  cursor: not-allowed;
+}
+
 .footerBottom {
   margin-top: 48px;
   padding-block: var(--space-5);

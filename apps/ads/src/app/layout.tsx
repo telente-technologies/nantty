@@ -24,7 +24,7 @@ export const metadata: Metadata = {
   title: { default: adsManagerProductName, template: `%s · ${adsManagerProductName}` },
   description: "Create, run and measure Nantty ads for your store, products, posts and clips.",
   applicationName: adsManagerProductName,
-  robots: { index: false, follow: false },
+  robots: process.env.NANTTY_CLOUDFLARE_PRELAUNCH === "1" ? { index: true, follow: true } : { index: false, follow: false },
   manifest: "/manifest.webmanifest",
   icons: { icon: [{ url: "/brand/nantty-icon.png", type: "image/png" }], apple: "/brand/nantty-icon.png" },
   formatDetection: { telephone: false },
@@ -37,6 +37,13 @@ export const viewport: Viewport = {
 };
 
 export default async function RootLayout({ children }: Readonly<{ children: ReactNode }>) {
+  if (process.env.NANTTY_CLOUDFLARE_PRELAUNCH === "1") {
+    return (
+      <html lang="en-NG" className={interFont.variable} data-theme="light">
+        <body>{children}</body>
+      </html>
+    );
+  }
   const cookieStore = await cookies();
   const sessionView = buildSessionViewFromCookies(cookieStore);
   const themePreference = parseThemePreference(cookieStore.get(themeCookieName)?.value);

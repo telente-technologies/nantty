@@ -2,6 +2,7 @@ import Image from "next/image";
 
 import shared from "./landingPage.module.css";
 import styles from "./landingSteps.module.css";
+import { LandingStudioPreview } from "./landingStudioPreview";
 
 const steps = [
   {
@@ -43,7 +44,7 @@ export function LandingSteps() {
                 <p className={styles.stepDescription}>{step.description}</p>
               </div>
               <div className={`${styles.imageWindow} ${step.media.kind === "screen" ? styles.screenWindow : ""}`}>
-                <Image src={step.media.src} alt={step.media.alt} width={step.media.width} height={step.media.height} sizes="(max-width: 900px) 92vw, 380px" className={step.media.kind === "screen" ? styles.screenshot : styles.photo} />
+                {step.media.kind === "screen" && process.env.NEXT_PUBLIC_NANTTY_STATIC_PRELAUNCH === "1" ? <LandingStudioPreview title="Live setup and stream health" /> : <Image src={step.media.src} alt={step.media.alt} width={step.media.width} height={step.media.height} sizes="(max-width: 900px) 92vw, 380px" className={step.media.kind === "screen" ? styles.screenshot : styles.photo} />}
               </div>
             </li>
           ))}
