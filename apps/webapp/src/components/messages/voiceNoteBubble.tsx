@@ -1,6 +1,6 @@
 "use client";
 
-import { formatVoiceNoteClock, formatVoiceNotePlaybackRate, voiceNoteDisplayLevels } from "@zudomart/chat-crypto";
+import { formatVoiceNoteClock, formatVoiceNotePlaybackRate, voiceNoteDisplayLevels } from "@nantty/chat-crypto";
 import { type CSSProperties, useMemo } from "react";
 
 import { PlayPauseMorphIcon } from "./playPauseMorphIcon";

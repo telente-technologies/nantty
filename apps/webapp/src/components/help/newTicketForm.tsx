@@ -65,7 +65,7 @@ export function NewTicketForm() {
         Tell us more
         <textarea className={styles.textarea} value={message} onChange={(event) => setMessage(event.target.value)} minLength={10} maxLength={5000} required placeholder="Include what happened and what you've tried. Add order numbers if they help." />
       </label>
-      <p className={styles.muted}>Never share your password, card PIN or one-time codes. Zudomart will never ask for them.</p>
+      <p className={styles.muted}>Never share your password, card PIN or one-time codes. Nantty will never ask for them.</p>
       {create.isError ? <p className={styles.error} role="alert">{readErrorMessageForDisplay(create.error)}</p> : null}
       <div className={styles.row}>
         <button type="submit" className={styles.button} disabled={create.isPending || subject.trim().length < 4 || message.trim().length < 10}>{create.isPending ? "Sending…" : "Send"}</button>

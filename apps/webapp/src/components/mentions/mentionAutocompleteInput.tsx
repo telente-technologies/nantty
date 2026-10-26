@@ -122,7 +122,7 @@ export function MentionAutocompleteInput({ id, value, onChange, chosenMentions, 
           {suggestions.map(({ user: suggestion, allowsMentions, rank }, index) => (
             <Fragment key={suggestion.id}>
               {rank === "other" && index > 0 && suggestions[index - 1]!.rank !== "other" ? (
-                <li role="presentation" className={styles.suggestionDivider}>More people on Zudomart</li>
+                <li role="presentation" className={styles.suggestionDivider}>More people on Nantty</li>
               ) : null}
             <li
               id={`${listId}-${index}`}

@@ -32,7 +32,7 @@ export function PlacePicker({ selected, onChange }: { readonly selected: PostLoc
   return (
     <div className={styles.picker}>
       <label htmlFor={inputId} className={styles.pickerLabel}>Add location</label>
-      <span id={hintId} className={styles.hint}>Search for a place by name. Zudomart never reads your device location for this.</span>
+      <span id={hintId} className={styles.hint}>Search for a place by name. Nantty never reads your device location for this.</span>
       {selected ? (
         <ul className={styles.chosenList} aria-label="Location">
           <li className={styles.chosenChip}>

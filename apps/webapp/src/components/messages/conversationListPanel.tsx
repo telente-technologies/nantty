@@ -14,7 +14,7 @@ import { EmptyState, ErrorState, Skeleton, Spinner } from "@/components/ui/feedb
 import { InlineLink } from "@/components/ui/controls";
 import { messagesService } from "@/services/messages.service";
 import { webappRealtime } from "@/services/realtime/webappRealtime.service";
-import { useRealtimeStatus } from "@zudomart/web-kit/src/realtime/realtimeHooks";
+import { useRealtimeStatus } from "@nantty/web-kit/src/realtime/realtimeHooks";
 import { useQueries, useQuery } from "@tanstack/react-query";
 import { chatCryptoService } from "@/services/chatCrypto/chatCrypto.service";
 import { formatTimeSincePosted } from "@/utils/formatDate.util";

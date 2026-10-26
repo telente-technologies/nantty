@@ -155,7 +155,7 @@ export function BoostCheckoutFlow({ destination }: { readonly destination: Boost
           {freeBoost ? <button type="button" className={chipClass(paymentMethod === "free")} aria-pressed={paymentMethod === "free"} onClick={chooseFree}>Free boost</button> : null}
           {methods.includes("card") ? <button type="button" className={chipClass(paymentMethod === "card")} aria-pressed={paymentMethod === "card"} onClick={() => choosePaid("card")}>Card or bank transfer</button> : null}
           {methods.includes("balance") ? (
-            <button type="button" className={chipClass(paymentMethod === "balance")} aria-pressed={paymentMethod === "balance"} disabled={!verified || !balanceCovers} onClick={() => choosePaid("balance")}>Pay from my Zudomart balance</button>
+            <button type="button" className={chipClass(paymentMethod === "balance")} aria-pressed={paymentMethod === "balance"} disabled={!verified || !balanceCovers} onClick={() => choosePaid("balance")}>Pay from my Nantty balance</button>
           ) : null}
         </div>
         {methods.includes("balance") ? <BalanceNote loading={wallet.isLoading} failed={wallet.isError} verified={verified} available={available} covers={balanceCovers} /> : null}

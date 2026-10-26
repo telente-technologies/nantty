@@ -48,7 +48,7 @@ function Stat({ label, value, href }: { readonly label: string; readonly value: 
 
 async function shareProfileLink(user: User) {
   const url = `${window.location.origin}${buildProfilePath(user.username)}`;
-  const text = `Follow ${user.name} on Zudomart`;
+  const text = `Follow ${user.name} on Nantty`;
   if (typeof navigator.share === "function") {
     await navigator.share({ title: text, text, url }).catch(() => undefined);
     return;
@@ -165,7 +165,7 @@ export async function signOut(): Promise<void> {
 
 export async function confirmThenSignOut(): Promise<boolean> {
   const confirmed = await requestConfirmation({
-    title: "Sign out of Zudomart?",
+    title: "Sign out of Nantty?",
     description: "You'll need to sign in again to message, buy or post.",
     confirmLabel: "Sign out",
     intent: "signOut",

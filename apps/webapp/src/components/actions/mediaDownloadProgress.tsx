@@ -5,7 +5,7 @@ import styles from "./mediaDownloadProgress.module.css";
 
 export function MediaDownloadProgress({ download, onCancel }: { readonly download: BrandedDownloadProgress; readonly onCancel: () => void }) {
   const percent = Math.round(download.progress * 100);
-  const label = download.progress >= 1 ? "Starting download…" : `Adding the Zudomart tag to your ${download.mediaType === "video" ? "video" : "photo"}… ${percent}%`;
+  const label = download.progress >= 1 ? "Starting download…" : `Adding the Nantty tag to your ${download.mediaType === "video" ? "video" : "photo"}… ${percent}%`;
   return (
     <div className={styles.card} role="status" aria-live="polite">
       <div className={styles.row}>

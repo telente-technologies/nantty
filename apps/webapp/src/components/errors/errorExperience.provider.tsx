@@ -1,7 +1,7 @@
 "use client";
 
 import { useQueryClient } from "@tanstack/react-query";
-import { ErrorExperienceProvider, type ErrorDestination, type ErrorExperienceConfig, type ErrorLinkProps } from "@zudomart/web-kit";
+import { ErrorExperienceProvider, type ErrorDestination, type ErrorExperienceConfig, type ErrorLinkProps } from "@nantty/web-kit";
 import Link from "next/link";
 import { useMemo, useState, type ReactNode } from "react";
 

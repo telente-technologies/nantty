@@ -65,7 +65,7 @@ export function AdBudgetChangeDialog({ boost, isOpen, onClose, onApplied }: AdBu
     <ModalDialog
       isOpen={isOpen}
       title="Extend or add budget"
-      description="You only pay the difference. Zudomart works out the price before you pay."
+      description="You only pay the difference. Nantty works out the price before you pay."
       onClose={onClose}
       intent="ads"
       busy={change.isPending}

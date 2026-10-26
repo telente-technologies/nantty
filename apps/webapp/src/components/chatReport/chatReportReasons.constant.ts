@@ -25,9 +25,9 @@ export const LAST_MESSAGES_COUNT_CHOICES = [10, 20, 50] as const;
 export const MAXIMUM_CHAT_REPORT_DETAILS_LENGTH = 500;
 
 export const CHAT_REPORT_EVIDENCE_CONSENT_NOTICE =
-  "These messages will be sent to Zudomart for review. The other person won't be told who reported them.";
+  "These messages will be sent to Nantty for review. The other person won't be told who reported them.";
 export const CHAT_REPORT_ENCRYPTION_NOTICE =
-  "Chats are end-to-end encrypted, so Zudomart can't read them. Only the messages you choose below leave your device.";
+  "Chats are end-to-end encrypted, so Nantty can't read them. Only the messages you choose below leave your device.";
 export const SELF_HARM_SUPPORT_NOTICE =
   "You're not alone. If you or someone else is in immediate danger, contact your local emergency number now. Talking to someone you trust or a local crisis line can help. You can find free helplines at findahelpline.com.";
 export const CHILD_SAFETY_PRIORITY_NOTICE = "Child safety reports are reviewed first by a specialist team.";

@@ -1,6 +1,6 @@
 "use client";
 
-import { EmptyState } from "@zudomart/web-kit";
+import { EmptyState } from "@nantty/web-kit";
 
 import { Button } from "@/components/ui/button";
 
@@ -11,7 +11,7 @@ interface SignInRequiredStateProps {
   readonly description?: string;
 }
 
-export function SignInRequiredState({ title = "Sign in to see this", description = "This part of Zudomart is for members. Sign in or create a free account to continue." }: SignInRequiredStateProps) {
+export function SignInRequiredState({ title = "Sign in to see this", description = "This part of Nantty is for members. Sign in or create a free account to continue." }: SignInRequiredStateProps) {
   const openAuthPrompt = useAuthPromptStore((state) => state.openAuthPrompt);
   return <EmptyState title={title} description={description} action={<Button onClick={() => openAuthPrompt(description)}>Sign in</Button>} />;
 }

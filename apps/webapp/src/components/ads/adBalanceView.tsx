@@ -181,7 +181,7 @@ function WithdrawDialog({ balance, onClose }: { readonly balance: AdBalance; rea
       return withStepUpIfRequired((stepUpToken) => adsHubService.withdrawAdBalance(amount!, key, stepUpToken));
     },
     onSuccess: (withdrawal) => {
-      setDone(`${format(withdrawal.net)} is on its way to your Zudomart wallet.`);
+      setDone(`${format(withdrawal.net)} is on its way to your Nantty wallet.`);
       keyHolder.current.reset();
       void queryClient.invalidateQueries({ queryKey: ["ads", "balance"] });
       void queryClient.invalidateQueries({ queryKey: ["wallet"] });
@@ -191,7 +191,7 @@ function WithdrawDialog({ balance, onClose }: { readonly balance: AdBalance; rea
   return (
     <>
     {stepUpDialog}
-    <ModalDialog isOpen title="Withdraw ad balance" description="Money goes to your Zudomart wallet. Ad credit can't be withdrawn." onClose={onClose} intent="money" busy={withdraw.isPending} errorMessage={error}
+    <ModalDialog isOpen title="Withdraw ad balance" description="Money goes to your Nantty wallet. Ad credit can't be withdrawn." onClose={onClose} intent="money" busy={withdraw.isPending} errorMessage={error}
       footer={done ? <Button onClick={onClose}>Done</Button> : <><Button variant="secondary" onClick={onClose}>Cancel</Button><Button disabled={Boolean(rangeIssue) || !quote.data || quote.isFetching} busy={withdraw.isPending} onClick={() => { setError(null); withdraw.mutate(); }}>{quote.data ? `Withdraw ${format(quote.data.net)}` : "Withdraw"}</Button></>}>
       <div className={styles.dialogBody}>
         {done ? <p className={styles.note} role="status">{done}</p> : (

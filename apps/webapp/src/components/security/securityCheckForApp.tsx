@@ -18,7 +18,7 @@ function SecurityCheckContent() {
 
   function returnToApp(token: string) {
     if (!isValidReturn) {
-      setMessage("Check complete. Go back to the Zudomart app to continue.");
+      setMessage("Check complete. Go back to the Nantty app to continue.");
       return;
     }
     window.location.replace(`${returnUrl}#token=${encodeURIComponent(token)}`);

@@ -67,7 +67,7 @@ export function SupportTicketThread({ ticketId, initialScore }: { readonly ticke
         <form className={styles.page} onSubmit={submit}>
           <label className={styles.field}>
             Reply
-            <textarea className={styles.textarea} value={draft} onChange={(event) => setDraft(event.target.value)} maxLength={5000} placeholder={details.status === "resolved" ? "Reply within 7 days to reopen this request" : "Write a reply to Zudomart Support"} />
+            <textarea className={styles.textarea} value={draft} onChange={(event) => setDraft(event.target.value)} maxLength={5000} placeholder={details.status === "resolved" ? "Reply within 7 days to reopen this request" : "Write a reply to Nantty Support"} />
           </label>
           {reply.isError ? <p className={styles.error} role="alert">{readErrorMessageForDisplay(reply.error)}</p> : null}
           <div className={styles.row}>

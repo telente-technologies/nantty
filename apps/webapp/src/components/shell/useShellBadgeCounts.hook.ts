@@ -1,7 +1,7 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { useRealtimeStatus } from "@zudomart/web-kit/src/realtime/realtimeHooks";
+import { useRealtimeStatus } from "@nantty/web-kit/src/realtime/realtimeHooks";
 
 import { cartsService } from "@/services/carts.service";
 import { messagesService } from "@/services/messages.service";

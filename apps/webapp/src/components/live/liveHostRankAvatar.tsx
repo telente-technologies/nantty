@@ -70,7 +70,7 @@ export function LiveHostRankAvatar({ hostName, avatarUrl, ranking }: LiveHostRan
               {description.categoryLine}
             </span>
           ) : null}
-          <span className={styles.note}>Streamer rank from ZudoPoints earned on lives.</span>
+          <span className={styles.note}>Streamer rank from Nantty Points earned on lives.</span>
         </span>
       ) : null}
     </span>

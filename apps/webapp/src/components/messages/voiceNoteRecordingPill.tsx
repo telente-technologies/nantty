@@ -1,6 +1,6 @@
 "use client";
 
-import { type VoiceNoteSession, formatVoiceNoteClock, slideToCancelAppearance } from "@zudomart/chat-crypto";
+import { type VoiceNoteSession, formatVoiceNoteClock, slideToCancelAppearance } from "@nantty/chat-crypto";
 import type { Ref } from "react";
 
 import { CloseIcon, SendIcon, StopIcon } from "@/components/ui/icons";

@@ -71,7 +71,7 @@ export function IdentityVerificationHub() {
   const journey = journeyQuery.data;
   const badge = journey.color === "gold" ? "Gold" : "Blue";
 
-  if (journey.blackVetting) return <StatusBlock title="Black checkmark: government" text="Government bodies are verified through official vetting with two independent approvals, not this check. Apply from the Zudomart Dashboard." />;
+  if (journey.blackVetting) return <StatusBlock title="Black checkmark: government" text="Government bodies are verified through official vetting with two independent approvals, not this check. Apply from the Nantty Dashboard." />;
   if (journey.checkmark?.badgeVisible) return <StatusBlock title="You're verified" text={`Your ${badge} checkmark is on your profile.`} />;
   const verification = journey.case;
   if (verification?.status === "under_review") return <StatusBlock title="Under review" text="Some checks need a closer look. A person will review them within 3 days and we'll notify you. If we can't approve it, you get a full refund." />;

@@ -50,7 +50,7 @@ export function BusinessProfilesOverview({ linked }: { readonly linked: LinkedPr
             <div className={styles.buttonRow}><Link href="/seller/apply" className={styles.choiceChip}>Open a store</Link></div>
           </>
         ) : null}
-        {canCreateNonSelling ? <p className={styles.muted}>Business pages and Brands are created in the Zudomart app.</p> : null}
+        {canCreateNonSelling ? <p className={styles.muted}>Business pages and Brands are created in the Nantty app.</p> : null}
         {!notice && !linked.canCreate.store && !canCreateNonSelling ? <p className={styles.muted}>You can&apos;t add another business profile right now.</p> : null}
       </section>
     </>

@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { ZudomartWordmark } from "@zudomart/web-kit";
 
 import { BellIcon, CartIcon } from "@/components/ui/icons";
 
@@ -14,9 +13,6 @@ export function TopBar({ badgeCounts }: { readonly badgeCounts: ShellBadgeCounts
   return (
     <header className={styles.topBar}>
       <div className={styles.topBarInner}>
-        <Link href="/" className={styles.brand} aria-label="Zudomart home">
-          <ZudomartWordmark height={20} collapseToMarkOnSmallScreens />
-        </Link>
         <div className={styles.topBarSearch}>
           <SearchBar />
         </div>

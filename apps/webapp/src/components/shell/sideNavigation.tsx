@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ZudomartLogoMark, ZudomartWordmark } from "@zudomart/web-kit";
+import { NanttyLogoMark, NanttyWordmark } from "@nantty/web-kit";
 
 import { SidebarToggleIcon } from "@/components/ui/icons";
 
@@ -24,10 +24,10 @@ export function SideNavigation({ navigationGroups, isExpandedOnTablet, isCollaps
   return (
     <aside className={stateClasses} id="primary-navigation">
       <div className={styles.brandRow}>
-        <Link href="/" className={styles.brand} aria-label="Zudomart home" onClick={onNavigate}>
-          <ZudomartLogoMark size={36} className={styles.brandMark} />
+        <Link href="/" className={styles.brand} aria-label="Nantty home" onClick={onNavigate}>
+          <NanttyLogoMark size={36} className={styles.brandMark} />
           <span className={styles.brandWordmark}>
-            <ZudomartWordmark />
+            <NanttyWordmark />
           </span>
         </Link>
       </div>

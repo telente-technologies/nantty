@@ -1,6 +1,6 @@
 "use client";
 
-import { liveWaveformWindow, playedBarCount, seekFractionFromPosition, voiceNoteBarHeight } from "@zudomart/chat-crypto";
+import { liveWaveformWindow, playedBarCount, seekFractionFromPosition, voiceNoteBarHeight } from "@nantty/chat-crypto";
 import { type KeyboardEvent, type PointerEvent, useRef } from "react";
 
 import styles from "./voiceNote.module.css";

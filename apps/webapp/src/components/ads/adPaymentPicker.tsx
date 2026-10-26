@@ -45,7 +45,7 @@ export function AdPaymentPicker({ states, reasonCodes, selected, onSelect, label
           );
         })}
       </div>
-      <p className={styles.note}>Prices are worked out by Zudomart before you pay. Your ad is reviewed before it runs.</p>
+      <p className={styles.note}>Prices are worked out by Nantty before you pay. Your ad is reviewed before it runs.</p>
     </section>
   );
 }

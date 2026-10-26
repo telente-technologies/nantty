@@ -79,7 +79,7 @@ function InternalLinkCard({ reference }: { readonly reference: InternalLinkRefer
   }
   if (reference.kind === "product" || reference.kind === "store") return null;
   const href = reference.kind === "profile" ? buildProfilePath(reference.id) : reference.kind === "live" ? `/live/${encodeURIComponent(reference.id)}` : buildPostPath(reference.id);
-  const label = reference.kind === "profile" ? `@${reference.id}` : reference.kind === "live" ? "Live on Zudomart" : "Post on Zudomart";
+  const label = reference.kind === "profile" ? `@${reference.id}` : reference.kind === "live" ? "Live on Nantty" : "Post on Nantty";
   return (
     <Link href={href} className={styles.card}>
       <span className={styles.body}>

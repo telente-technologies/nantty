@@ -1,7 +1,7 @@
 "use client";
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { ThemeProvider, type ThemePreference } from "@zudomart/web-kit";
+import { ThemeProvider, type ThemePreference } from "@nantty/web-kit";
 import { Suspense, useCallback, useState, type ReactNode } from "react";
 
 import { isRetryableApiFailure, sendRequestToWebappServer } from "@/services/clientApi.service";

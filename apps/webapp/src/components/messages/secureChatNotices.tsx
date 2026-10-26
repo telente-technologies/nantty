@@ -6,8 +6,8 @@ import { useState } from "react";
 
 import { chatCryptoService } from "@/services/chatCrypto/chatCrypto.service";
 import type { SharedContentCard } from "@/types";
-import type { ChatLinkPreview } from "@zudomart/chat-crypto";
-import { ErrorIcon } from "@zudomart/web-kit";
+import type { ChatLinkPreview } from "@nantty/chat-crypto";
+import { ErrorIcon } from "@nantty/web-kit";
 
 import styles from "./secureChatNotices.module.css";
 

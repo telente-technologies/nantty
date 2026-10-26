@@ -3,7 +3,7 @@
 import {
   type VoiceNoteCaptureMode, type VoiceNoteSession, type VoiceNoteSessionEvent, encodeVoiceNoteWaveform, idleVoiceNoteSession, levelFromTimeDomainSamples, reduceVoiceNoteSession,
   voiceNoteDiscardSettleMilliseconds, voiceNoteLevelSampleIntervalMilliseconds,
-} from "@zudomart/chat-crypto";
+} from "@nantty/chat-crypto";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 export interface RecordedWebVoiceNote {

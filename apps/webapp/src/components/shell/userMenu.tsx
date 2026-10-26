@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect } from "react";
-import { ThemeSwitcher } from "@zudomart/web-kit";
+import { ThemeSwitcher } from "@nantty/web-kit";
 
 import { useSession } from "@/components/providers/sessionProvider";
 import { confirmThenSignOut } from "@/components/profile/profileView";

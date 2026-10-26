@@ -50,7 +50,7 @@ function DirectPaymentOption({ storeName, selected, onConfirm }: { readonly stor
       {selected || confirming ? (
         <div className={styles.directWarning}>
           <p className={styles.warning} role="note">
-            You lose escrow protection. Refunds and disputes depend on the seller, and Zudomart cannot hold or reverse this payment.
+            You lose escrow protection. Refunds and disputes depend on the seller, and Nantty cannot hold or reverse this payment.
           </p>
           {!selected ? (
             <label className={styles.confirmLabel}>
@@ -101,7 +101,7 @@ export function PaymentModeChooser({ groups, modes, onChange }: PaymentModeChoos
                 <DirectPaymentOption storeName={group.store?.name ?? "this seller"} selected={chosen === "direct"} onConfirm={() => onChange(group.storeId, "direct")} />
               </div>
             ) : (
-              <p className={styles.meta}>Protected by Zudomart Escrow</p>
+              <p className={styles.meta}>Protected by Nantty Escrow</p>
             )}
           </li>
         );

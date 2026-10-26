@@ -2,7 +2,7 @@
 
 import { useQuery, type QueryKey } from "@tanstack/react-query";
 import { useState } from "react";
-import { useIsOnline } from "@zudomart/web-kit";
+import { useIsOnline } from "@nantty/web-kit";
 
 import { WebappRequestError } from "@/services/clientApi.service";
 import { nextPaymentPollDelay } from "@/utils/paymentPollSchedule.util";

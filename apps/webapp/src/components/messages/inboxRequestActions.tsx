@@ -64,7 +64,7 @@ export function InboxRequestActions({ conversation, viewerId, showExplanation = 
     <div className={styles.requestActions}>
       {showExplanation ? (
         <p className={styles.requestExplanation}>
-          {isSpam ? (conversation.spamReason ?? "Flagged by Zudomart based on this account's activity.") : "They won't see that you've read this until you accept."}
+          {isSpam ? (conversation.spamReason ?? "Flagged by Nantty based on this account's activity.") : "They won't see that you've read this until you accept."}
         </p>
       ) : null}
       <div className={styles.requestButtons}>

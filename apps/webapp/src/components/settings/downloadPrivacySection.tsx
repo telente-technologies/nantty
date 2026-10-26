@@ -24,7 +24,7 @@ export function DownloadPrivacySection() {
       <h2 id="download-privacy-heading" className={styles.blockHeading}>Downloads</h2>
       <ConsentToggleRow
         label="Allow downloads"
-        description="People can save your photos and clips. Saved copies carry the Zudomart logo and your @username. Private, subscriber-only posts and stories are never downloadable."
+        description="People can save your photos and clips. Saved copies carry the Nantty logo and your @username. Private, subscriber-only posts and stories are never downloadable."
         enabled={update.variables ?? query.data?.allowDownloads ?? true}
         disabled={update.isPending || query.isLoading}
         onChange={(enabled) => update.mutate(enabled)}

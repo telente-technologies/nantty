@@ -43,7 +43,7 @@ export function ReportDialog({ isOpen, onClose, targetType, targetId }: ReportDi
   const reportMutation = useMutation({
     mutationFn: () => reportsService.submitReport(targetType, targetId, reason, details.trim()),
     onSuccess: () => {
-      showToast({ text: "Report sent. Thanks for helping keep Zudomart safe." });
+      showToast({ text: "Report sent. Thanks for helping keep Nantty safe." });
       setReason("");
       setDetails("");
       onClose();

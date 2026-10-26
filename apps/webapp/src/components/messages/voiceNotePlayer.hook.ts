@@ -1,6 +1,6 @@
 "use client";
 
-import { type VoiceNotePlaybackRate, createExclusivePlaybackCoordinator, nextVoiceNotePlaybackRate } from "@zudomart/chat-crypto";
+import { type VoiceNotePlaybackRate, createExclusivePlaybackCoordinator, nextVoiceNotePlaybackRate } from "@nantty/chat-crypto";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 export const voiceNotePlaybackCoordinator = createExclusivePlaybackCoordinator();

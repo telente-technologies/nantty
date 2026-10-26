@@ -22,7 +22,7 @@ export function IdentityConsentForm({ busy, errorMessage, onStart }: { readonly 
       <ul className={styles.bulletList}>{biometricConsentPoints.map((point) => <li key={point}>{point}</li>)}</ul>
       <label className={styles.radioRow}>
         <input type="checkbox" checked={accepted} onChange={(event) => setAccepted(event.target.checked)} />
-        <span>I agree to Smile ID processing my selfie and ID photo to verify my identity for Zudomart.</span>
+        <span>I agree to Smile ID processing my selfie and ID photo to verify my identity for Nantty.</span>
       </label>
       <label className={styles.subHeading} htmlFor="id-country">Where was your ID issued?</label>
       <select id="id-country" value={country} onChange={(event) => { setCountry(event.target.value); setDocumentType(""); }}>

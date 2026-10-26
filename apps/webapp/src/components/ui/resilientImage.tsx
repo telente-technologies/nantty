@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useState } from "react";
-import { ErrorIcon } from "@zudomart/web-kit";
+import { ErrorIcon } from "@nantty/web-kit";
 
 import styles from "./media.module.css";
 

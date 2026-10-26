@@ -1,7 +1,7 @@
 "use client";
 
 import { useMutation } from "@tanstack/react-query";
-import { trapTabKey, ZudomartWordmark } from "@zudomart/web-kit";
+import { trapTabKey, NanttyWordmark } from "@nantty/web-kit";
 import { useEffect, useId, useRef, useState, type RefObject } from "react";
 
 import { DeleteAccountDialog } from "@/components/settings/deleteAccountDialog";
@@ -56,7 +56,7 @@ export function PolicyReacceptScreen({ versions, onAccept, isAccepting, errorMes
       <div className={styles.reacceptScroll}>
         <div className={styles.reacceptColumn}>
           <div className={styles.reacceptBrand}>
-            <ZudomartWordmark height={26} />
+            <NanttyWordmark height={26} />
           </div>
           <span className={styles.reacceptBadge} aria-hidden="true">
             <ShieldIcon size={30} />
@@ -65,7 +65,7 @@ export function PolicyReacceptScreen({ versions, onAccept, isAccepting, errorMes
             We&apos;ve updated our {joinPolicyTitles(versions)}
           </h1>
           <p className={styles.reacceptLead}>
-            Here&apos;s a short summary of what changed. Please read it, then accept the update to keep using Zudomart. Your account, orders and messages are safe either way.
+            Here&apos;s a short summary of what changed. Please read it, then accept the update to keep using Nantty. Your account, orders and messages are safe either way.
           </p>
           <div className={styles.documentStack}>
             {versions.map((version) => (

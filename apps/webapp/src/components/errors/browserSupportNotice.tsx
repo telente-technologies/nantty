@@ -1,6 +1,6 @@
 "use client";
 
-import { isBrowserStorageAvailable } from "@zudomart/web-kit";
+import { isBrowserStorageAvailable } from "@nantty/web-kit";
 import { useEffect, useState } from "react";
 
 import { ErrorState } from "@/components/ui/feedback";

@@ -1,6 +1,6 @@
 "use client";
 
-import { downsampleLevelsByBucketMax, formatVoiceNoteClock, voiceNoteBarCount } from "@zudomart/chat-crypto";
+import { downsampleLevelsByBucketMax, formatVoiceNoteClock, voiceNoteBarCount } from "@nantty/chat-crypto";
 import { type Ref, useEffect, useMemo } from "react";
 
 import { CloseIcon, SendIcon } from "@/components/ui/icons";

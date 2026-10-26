@@ -32,7 +32,7 @@ function firstSelectable(offer: OfferPreview): OfferSelection | null {
 function OfferSummary({ offer }: { readonly offer: OfferPreview }) {
   return (
     <header className={styles.summary}>
-      <p className={styles.eyebrow}>Zudomart offer</p>
+      <p className={styles.eyebrow}>Nantty offer</p>
       <h1 className={styles.headline}>{describeOfferHeadline(offer)}</h1>
       <dl className={styles.facts}>
         <div><dt>Discount applies to</dt><dd>{describeOfferDuration(offer.durationCycles)}</dd></div>

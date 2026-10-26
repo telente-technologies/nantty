@@ -1,6 +1,6 @@
 "use client";
 
-import { ThemeSwitcher, useTheme } from "@zudomart/web-kit";
+import { ThemeSwitcher, useTheme } from "@nantty/web-kit";
 
 import styles from "./settingsHome.module.css";
 
@@ -13,7 +13,7 @@ export function AppearanceSection() {
         <h2 id="appearance-heading" className={styles.cardTitle}>
           Appearance
         </h2>
-        <p className={styles.cardDescription}>Choose light, dark, or match your device. Your choice syncs to the Zudomart app on your account.</p>
+        <p className={styles.cardDescription}>Choose light, dark, or match your device. Your choice syncs to the Nantty app on your account.</p>
       </div>
       <ThemeSwitcher label="Theme" showLabel />
       <p className={styles.cardStatus} aria-live="polite">

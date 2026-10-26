@@ -1,6 +1,6 @@
 "use client";
 
-import { useRealtimeEvents } from "@zudomart/web-kit/src/realtime/realtimeHooks";
+import { useRealtimeEvents } from "@nantty/web-kit/src/realtime/realtimeHooks";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import { webappRealtime } from "@/services/realtime/webappRealtime.service";

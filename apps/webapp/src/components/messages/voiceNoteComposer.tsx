@@ -1,6 +1,6 @@
 "use client";
 
-import { isVoiceNoteSessionActive } from "@zudomart/chat-crypto";
+import { isVoiceNoteSessionActive } from "@nantty/chat-crypto";
 import { useEffect, useRef, useState } from "react";
 
 import { requireAuthThen } from "@/components/auth/authPrompt.store";

@@ -40,7 +40,7 @@ function WhatChangedDialog({ versions, isOpen, onClose, onRemindLater, onAcknowl
         ))}
         {materialVersions.map((version) => (
           <p key={version.policyVersionId} className={styles.mutedText}>
-            You can keep using Zudomart as normal. From {formatPolicyEffectiveDate(version.effectiveAt)} we&apos;ll ask you to accept the new {version.title} before you continue.
+            You can keep using Nantty as normal. From {formatPolicyEffectiveDate(version.effectiveAt)} we&apos;ll ask you to accept the new {version.title} before you continue.
           </p>
         ))}
         {errorMessage ? <p className={styles.errorText} role="alert">{errorMessage}</p> : null}

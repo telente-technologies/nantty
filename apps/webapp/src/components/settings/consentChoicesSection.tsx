@@ -13,7 +13,7 @@ import { ListRowsSkeleton } from "@/components/ui/pageSkeletons";
 const consentOptions: readonly { readonly key: ConsentKey; readonly label: string; readonly description: string }[] = [
   { key: "personalization", label: "Personalization", description: "Use what you view, search and buy to tailor your feed and recommendations." },
   { key: "personalizedAds", label: "Personalized ads", description: "Show ads based on your activity. Turning this off still shows ads, just less relevant." },
-  { key: "analytics", label: "Analytics", description: "Share anonymous usage data so we can fix problems and improve Zudomart." },
+  { key: "analytics", label: "Analytics", description: "Share anonymous usage data so we can fix problems and improve Nantty." },
   { key: "marketing", label: "Marketing messages", description: "Receive offers, news and product updates by email and push." },
 ];
 

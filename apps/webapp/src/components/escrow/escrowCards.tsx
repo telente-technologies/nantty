@@ -52,7 +52,7 @@ export function EscrowSummaryCard({ escrow, viewerRole }: { readonly escrow: Esc
       <span className={styles.faint}>{viewerRole === "buyer" ? "Held in escrow" : "Your payout"}</span>
       <strong className={styles.amount}>{formatMoneyForDisplay(shownAmount)}</strong>
       {viewerRole === "seller" ? (
-        <span className={styles.muted}>Buyer paid {formatMoneyForDisplay(escrow.heldAmount)} · Zudomart fee {formatMoneyForDisplay(escrow.platformFee)}</span>
+        <span className={styles.muted}>Buyer paid {formatMoneyForDisplay(escrow.heldAmount)} · Nantty fee {formatMoneyForDisplay(escrow.platformFee)}</span>
       ) : null}
       <span className={styles.releaseLine} data-tone={escrow.stage === "disputed" ? "error" : undefined}>{describeEscrowRelease(escrow)}</span>
     </section>

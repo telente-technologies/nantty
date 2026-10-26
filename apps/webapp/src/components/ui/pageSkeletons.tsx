@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { Skeleton } from "@zudomart/web-kit";
+import { Skeleton } from "@nantty/web-kit";
 
 import styles from "./pageSkeletons.module.css";
 

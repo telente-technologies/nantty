@@ -26,7 +26,7 @@ export function AdSpendMeter({ spent, budget }: { readonly spent: Money; readonl
   );
 }
 
-const adsManagerUrl = process.env.NEXT_PUBLIC_ADS_MANAGER_URL || "https://ads.zudomart.com";
+const adsManagerUrl = process.env.NEXT_PUBLIC_ADS_MANAGER_URL || "https://ads.nantty.com";
 
 export function AdsManagerOptionalLink() {
   return (

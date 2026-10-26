@@ -1,6 +1,6 @@
 "use client";
 
-import type { GroupAttributes } from "@zudomart/chat-crypto";
+import type { GroupAttributes } from "@nantty/chat-crypto";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 

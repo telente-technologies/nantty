@@ -65,7 +65,7 @@ export function LiveReportDialog({ isOpen, onClose, liveId, startedAt }: LiveRep
     },
     onSuccess: () => {
       lastReportAtByLiveId.set(liveId, Date.now());
-      showToast({ text: selected?.isUrgent ? "Report sent. Our safety team is looking at this live now." : "Report sent. Thanks for helping keep Zudomart safe." });
+      showToast({ text: selected?.isUrgent ? "Report sent. Our safety team is looking at this live now." : "Report sent. Thanks for helping keep Nantty safe." });
       setReason("");
       setDetails("");
       onClose();

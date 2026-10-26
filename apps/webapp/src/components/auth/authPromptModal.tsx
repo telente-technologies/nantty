@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState, type FormEvent } from "react";
 
-import { OfficialStoreBadges } from "@zudomart/web-kit";
+import { OfficialStoreBadges } from "@nantty/web-kit";
 
 import { useSession } from "@/components/providers/sessionProvider";
 import { storeLinks } from "@/config/brandContact.config";
@@ -62,7 +62,7 @@ export function AuthPromptModal() {
   }
 
   return (
-    <Dialog isOpen={isOpen} onClose={closeAuthPrompt} title="Sign in to Zudomart" description={reason ?? undefined} layout="sheet" intent="signIn">
+    <Dialog isOpen={isOpen} onClose={closeAuthPrompt} title="Sign in to Nantty" description={reason ?? undefined} layout="sheet" intent="signIn">
       <form className={styles.form} onSubmit={signInWithoutLeavingThePage} noValidate>
         {formError ? (
           <p className={styles.error} role="alert">
@@ -86,7 +86,7 @@ export function AuthPromptModal() {
         </Link>
       </p>
       <div className={styles.appPrompt}>
-        <p className={styles.appPromptText}>Shop, sell and go live on the Zudomart app.</p>
+        <p className={styles.appPromptText}>Shop, sell and go live on the Nantty app.</p>
         <OfficialStoreBadges links={storeLinks} align="center" />
       </div>
     </Dialog>

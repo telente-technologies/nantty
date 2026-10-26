@@ -17,13 +17,13 @@ import { describeWalletDailyLimit } from "@/utils/walletLimits.util";
 
 export const walletDepositNotes = [
   "Transfer from any Nigerian bank app to this account. It usually arrives within a few minutes.",
-  "You can spend it on Zudomart straight away. It can be withdrawn 24 hours after it arrives (72 hours for your first deposit).",
+  "You can spend it on Nantty straight away. It can be withdrawn 24 hours after it arrives (72 hours for your first deposit).",
   "Any deposit fee is shown on your receipt. Your bank may also charge for the transfer.",
   "Daily wallet payment limits: ₦50,000 once your payout details are verified, ₦200,000 after identity verification, and ₦5,000,000 for verified businesses.",
 ] as const;
 
 export function walletAccountShareText(wallet: ProviderWallet): string {
-  return `Send money to my Zudomart wallet\nBank: ${wallet.bankName}\nAccount number: ${wallet.accountNumber}\nAccount name: ${wallet.accountName}`;
+  return `Send money to my Nantty wallet\nBank: ${wallet.bankName}\nAccount number: ${wallet.accountNumber}\nAccount name: ${wallet.accountName}`;
 }
 
 async function copyText(text: string): Promise<boolean> {
@@ -41,7 +41,7 @@ function AccountDetails({ wallet }: { readonly wallet: ProviderWallet }) {
     const text = walletAccountShareText(wallet);
     try {
       if (navigator.share) {
-        await navigator.share({ title: "My Zudomart wallet", text });
+        await navigator.share({ title: "My Nantty wallet", text });
         return;
       }
     } catch {
@@ -100,7 +100,7 @@ export function WalletAccountCard({ showNotes = true }: { readonly showNotes?: b
       <section className={styles.card} aria-label="How you pay">
         <h2 className={styles.title}>Paying outside Nigeria</h2>
         <p className={styles.note}>
-          You pay at checkout by card, bank or mobile money, directly to the seller. Zudomart doesn&apos;t keep a balance for you, and there&apos;s no escrow outside Nigeria; our dispute process still applies.
+          You pay at checkout by card, bank or mobile money, directly to the seller. Nantty doesn&apos;t keep a balance for you, and there&apos;s no escrow outside Nigeria; our dispute process still applies.
         </p>
       </section>
     );
@@ -113,7 +113,7 @@ export function WalletAccountCard({ showNotes = true }: { readonly showNotes?: b
       <h2 className={styles.title}>Add money</h2>
       {wallet ? (
         <>
-          <p className={styles.note}>This account is your own wallet, held in your name by our licensed payment partner. Zudomart never holds your money.</p>
+          <p className={styles.note}>This account is your own wallet, held in your name by our licensed payment partner. Nantty never holds your money.</p>
           {wallet.status !== "active" ? <p className={styles.status} role="alert">Your wallet is on hold while we check it. Deposits still arrive; contact support if this lasts.</p> : null}
           <AccountDetails wallet={wallet} />
         </>

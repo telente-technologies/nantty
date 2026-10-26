@@ -1,7 +1,7 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { OfficialStoreBadges } from "@zudomart/web-kit";
+import { OfficialStoreBadges } from "@nantty/web-kit";
 
 import styles from "@/components/escrow/escrow.module.css";
 import { storeLinks } from "@/config/brandContact.config";
@@ -22,7 +22,7 @@ export function PayoutSetupCard({ context }: { readonly context?: PayoutSetupCar
     <section className={styles.notice} aria-labelledby="payout-setup-title">
       <h2 id="payout-setup-title" className={styles.noticeTitle}>{card.title}</h2>
       <p className={styles.muted}>{card.body}</p>
-      <p className={styles.muted}><strong>{card.actionLabel} in the Zudomart app.</strong> Payout setup checks your ID with our payment partner, so it&apos;s only available in the app for now.</p>
+      <p className={styles.muted}><strong>{card.actionLabel} in the Nantty app.</strong> Payout setup checks your ID with our payment partner, so it&apos;s only available in the app for now.</p>
       <OfficialStoreBadges links={storeLinks} />
     </section>
   );

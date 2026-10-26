@@ -1,6 +1,6 @@
 "use client";
 
-import { decryptAttachment, type GroupAttributes } from "@zudomart/chat-crypto";
+import { decryptAttachment, type GroupAttributes } from "@nantty/chat-crypto";
 import { useEffect, useState } from "react";
 
 import type { Conversation } from "@/types";

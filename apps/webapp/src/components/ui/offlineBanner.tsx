@@ -1,1 +1,1 @@
-export { ConnectionStatus as OfflineBanner } from "@zudomart/web-kit";
+export { ConnectionStatus as OfflineBanner } from "@nantty/web-kit";

@@ -1,6 +1,6 @@
 "use client";
 
-import { type AttachmentPointer, decryptAttachment } from "@zudomart/chat-crypto";
+import { type AttachmentPointer, decryptAttachment } from "@nantty/chat-crypto";
 import { useEffect, useState } from "react";
 
 import { VoiceNoteBubble } from "./voiceNoteBubble";

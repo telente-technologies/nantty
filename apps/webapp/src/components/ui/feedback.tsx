@@ -1,13 +1,13 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { BrandLoader, ErrorState as KitErrorState, type BrandLoaderSize, type ErrorStateProps as KitErrorStateProps } from "@zudomart/web-kit";
+import { BrandLoader, ErrorState as KitErrorState, type BrandLoaderSize, type ErrorStateProps as KitErrorStateProps } from "@nantty/web-kit";
 
 import { isSignInRequiredError } from "@/services/clientApi.service";
 
 import styles from "./feedback.module.css";
 
-export { EmptyState, ErrorScreen, NotFoundScreen, Skeleton } from "@zudomart/web-kit";
+export { EmptyState, ErrorScreen, NotFoundScreen, Skeleton } from "@nantty/web-kit";
 
 type ErrorStateProps = KitErrorStateProps & { readonly signInDescription?: string };
 

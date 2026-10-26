@@ -28,7 +28,7 @@ export function RightRail({ modules }: { readonly modules: readonly RightRailMod
         <a href={legalLinks.cookiePolicy} target="_blank" rel="noreferrer">
           Cookies
         </a>
-        <span>© {new Date().getFullYear()} Zudomart</span>
+        <span>© {new Date().getFullYear()} Nantty</span>
       </footer>
     </aside>
   );

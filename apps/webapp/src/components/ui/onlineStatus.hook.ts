@@ -1,1 +1,1 @@
-export { useIsOnline } from "@zudomart/web-kit";
+export { useIsOnline } from "@nantty/web-kit";

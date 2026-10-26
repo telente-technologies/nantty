@@ -1,6 +1,6 @@
 "use client";
 
-import { easeOutQuart, interpolatePlayPausePolygons, playPauseMorphMilliseconds, polygonPathData } from "@zudomart/chat-crypto";
+import { easeOutQuart, interpolatePlayPausePolygons, playPauseMorphMilliseconds, polygonPathData } from "@nantty/chat-crypto";
 import { useEffect, useRef, useState } from "react";
 
 const prefersReducedMotion = () => typeof window !== "undefined" && typeof window.matchMedia === "function" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
