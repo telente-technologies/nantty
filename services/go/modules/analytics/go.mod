@@ -1,8 +1,8 @@
-module zudomart/modules/analytics
+module nantty/modules/analytics
 
 go 1.26.9
 
-require zudomart/platform v0.0.0
+require nantty/platform v0.0.0
 
 require (
 	github.com/aws/aws-sdk-go-v2 v1.47.3 // indirect
@@ -66,4 +66,4 @@ require (
 	google.golang.org/protobuf v1.36.12 // indirect
 )
 
-replace zudomart/platform => ../../platform
+replace nantty/platform => ../../platform

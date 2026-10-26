@@ -3,7 +3,7 @@ package analytics
 import (
 	"context"
 
-	"zudomart/platform/servicemodule"
+	"nantty/platform/servicemodule"
 )
 
 func NewAnalyticsModule(context.Context, servicemodule.Dependencies) (servicemodule.Module, error) {
