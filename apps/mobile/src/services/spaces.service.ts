@@ -37,6 +37,16 @@ export interface SpacePage {
   readonly nextCursor: string | null;
 }
 
+/** Short-lived, audio-only LiveKit grant returned by POST /spaces/:id/join. */
+export interface SpaceJoinGrant {
+  readonly spaceId: string;
+  readonly role: SpaceRole;
+  readonly token: string;
+  readonly url: string;
+  readonly canPublish: boolean;
+  readonly listeners: number;
+}
+
 export interface CreateSpaceInput {
   readonly title: string;
   readonly description?: string;
@@ -50,7 +60,7 @@ export const spacesService = {
   list: (cursor?: string) => api.getPage<SpaceSummary>("/api/v1/spaces", { state: "live,upcoming", cursor, limit: 30 }),
   create: (input: CreateSpaceInput) => api.post<SpaceDetails>("/api/v1/spaces", input, { idempotencyKey: generateIdempotencyKey() }),
   detail: (spaceId: string) => api.get<SpaceDetails>(pathFor(spaceId)),
-  join: (spaceId: string) => api.post<{ role: SpaceRole }>(`${pathFor(spaceId)}/join`),
+  join: (spaceId: string) => api.post<SpaceJoinGrant>(`${pathFor(spaceId)}/join`),
   leave: (spaceId: string) => api.post<void>(`${pathFor(spaceId)}/leave`),
   requestToSpeak: (spaceId: string) => api.post<{ id: string; state: string }>(`${pathFor(spaceId)}/speaker-requests`),
   approveSpeakerRequest: (spaceId: string, requestId: string) => api.post<void>(`${pathFor(spaceId)}/speaker-requests/${encodeURIComponent(requestId)}/approve`),

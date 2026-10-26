@@ -33,6 +33,14 @@ describe("spacesService contract", () => {
     expect(mockedApi.post).toHaveBeenNthCalledWith(2, "/api/v1/spaces/space%2F42/speaker-requests");
   });
 
+  it("returns the server-issued audio grant and publish permission from join", async () => {
+    const grant = { spaceId: "space-42", role: "listener", token: "space-jwt", url: "wss://audio.test", canPublish: false, listeners: 12 } as const;
+    mockedApi.post.mockResolvedValueOnce(grant);
+
+    await expect(spacesService.join("space-42")).resolves.toEqual(grant);
+    expect(mockedApi.post).toHaveBeenCalledWith("/api/v1/spaces/space-42/join");
+  });
+
   it("wires role controls and end/leave transitions to session routes", async () => {
     await spacesService.approveSpeakerRequest("s1", "r1");
     await spacesService.muteSpeaker("s1", "u1");

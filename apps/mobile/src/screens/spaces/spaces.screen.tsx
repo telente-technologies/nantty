@@ -9,8 +9,10 @@ import { ErrorState } from "@/components/ui/errorState";
 import { Text } from "@/components/ui/text";
 import type { MainScreenProps } from "@/navigation/navigation.types";
 import { reportsService } from "@/services/reports.service";
-import { spacesService, type SpaceDetails, type SpaceSummary, type CreateSpaceInput } from "@/services/spaces.service";
+import { spacesService, type SpaceDetails, type SpaceSummary, type CreateSpaceInput, type SpaceJoinGrant } from "@/services/spaces.service";
 import { webAppLinks } from "@/config/webAppLinks.config";
+import { openCreatorProgramOrSettings, useCreatorEntry } from "@/hooks/useCreatorStatus.hook";
+import { useSpaceAudioConnection } from "./useSpaceAudioConnection.hook";
 import { makeThemedStyles, useTheme } from "@/theme";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -20,6 +22,8 @@ export function SpacesScreen({ navigation, route }: MainScreenProps<"Spaces">) {
   const styles = useStyles();
   const { colors } = useTheme();
   const insets = useSafeAreaInsets();
+  const creatorEntry = useCreatorEntry();
+  const canHostSpace = creatorEntry.route === "CreatorDashboard";
   const [spaceId, setSpaceId] = useState(route.params?.spaceId);
   const [creating, setCreating] = useState(false);
   const [title, setTitle] = useState("");
@@ -27,16 +31,20 @@ export function SpacesScreen({ navigation, route }: MainScreenProps<"Spaces">) {
   const [scheduledAt, setScheduledAt] = useState("");
   const [audiencePolicy, setAudiencePolicy] = useState<CreateSpaceInput["audiencePolicy"]>("public");
   const [busy, setBusy] = useState(false);
-  const [muted, setMuted] = useState(false);
+  const [joinGrant, setJoinGrant] = useState<SpaceJoinGrant | null>(null);
   const [message, setMessage] = useState("");
   const listing = useQuery({ queryKey: ["spaces"], queryFn: () => spacesService.list() });
   const detail = useQuery({ queryKey: ["spaces", spaceId], queryFn: () => spacesService.detail(spaceId!), enabled: Boolean(spaceId) });
   const space = detail.data;
+  const audio = useSpaceAudioConnection(spaceId ?? "", Boolean(spaceId && space?.state === "live" && joinGrant), joinGrant);
   const isHost = space?.viewerRole === "host";
   const canModerate = isHost || space?.viewerRole === "moderator";
   const isJoined = space?.viewerJoined || ["listener", "speaker", "host", "moderator"].includes(space?.viewerRole ?? "");
 
-  useEffect(() => setSpaceId(route.params?.spaceId), [route.params?.spaceId]);
+  useEffect(() => {
+    setSpaceId(route.params?.spaceId);
+    setJoinGrant(null);
+  }, [route.params?.spaceId]);
 
   const refresh = async () => {
     await Promise.all([listing.refetch(), spaceId ? detail.refetch() : Promise.resolve()]);
@@ -75,14 +83,40 @@ export function SpacesScreen({ navigation, route }: MainScreenProps<"Spaces">) {
   const join = async (item: SpaceSummary) => {
     setBusy(true);
     setMessage("");
-    try { await spacesService.join(item.id); setSpaceId(item.id); await detail.refetch(); }
+    try {
+      const grant = await spacesService.join(item.id);
+      setJoinGrant(grant);
+      setSpaceId(item.id);
+      await detail.refetch();
+    }
     catch (error) { setMessage(error instanceof Error ? error.message : "Couldn't join this Space."); }
     finally { setBusy(false); }
   };
 
   const openRoom = async (item: SpaceSummary) => {
+    if (spaceId !== item.id) setJoinGrant(null);
     setSpaceId(item.id);
     setMessage("");
+  };
+
+  const leaveSpace = async () => {
+    if (!space) return;
+    setBusy(true);
+    setMessage("");
+    try {
+      await spacesService.leave(space.id);
+      setJoinGrant(null);
+      setMessage("You left the Space.");
+      await refresh();
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "Couldn't leave this Space.");
+    } finally { setBusy(false); }
+  };
+
+  const openHostFlow = () => {
+    if (creatorEntry.isLoading) return;
+    if (canHostSpace) setCreating(true);
+    else openCreatorProgramOrSettings(navigation, creatorEntry.route);
   };
 
   const report = async (session: SpaceDetails) => {
@@ -112,7 +146,7 @@ export function SpacesScreen({ navigation, route }: MainScreenProps<"Spaces">) {
       </View>
       {message ? <Text accessibilityRole="alert" style={styles.notice}>{message}</Text> : null}
 
-      {creating ? <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
+      {creating && canHostSpace ? <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
         <Text size={25} weight={700} accessibilityRole="header">Create a Space</Text>
         <Text color={colors.textMuted} style={styles.intro}>Start an audio conversation now or choose a time for people to join.</Text>
         <Text style={styles.label}>Title</Text><TextInput accessibilityLabel="Space title" maxLength={80} value={title} onChangeText={setTitle} placeholder="What are you talking about?" placeholderTextColor={colors.textSubtle} style={styles.input} />
@@ -124,6 +158,10 @@ export function SpacesScreen({ navigation, route }: MainScreenProps<"Spaces">) {
         </View>
         <Text size={12} color={colors.textMuted}>Use a future date with timezone offset, or leave blank to start now.</Text>
         {actionButton(scheduledAt.trim() ? "Schedule Space" : "Start Space", create)}
+      </ScrollView> : creating ? <ScrollView contentContainerStyle={styles.content}>
+        <Text size={25} weight={700} accessibilityRole="header">Host a Space</Text>
+        <Text color={colors.textMuted} style={styles.intro}>Spaces are hosted by approved creators. Anyone can listen to public Spaces.</Text>
+        <Button title={creatorEntry.isLoading ? "Checking creator access…" : creatorEntry.label} onPress={() => openCreatorProgramOrSettings(navigation, creatorEntry.route)} disabled={creatorEntry.isLoading} />
       </ScrollView> : spaceId ? <ScrollView contentContainerStyle={styles.content}>
         {detail.isLoading ? <Text accessibilityLiveRegion="polite">Loading Space…</Text> : null}
         {detail.isError && !space ? <ErrorState error={detail.error} compact message="Couldn't load this Space." onRetry={() => detail.refetch()} retrying={detail.isRefetching} /> : null}
@@ -135,28 +173,34 @@ export function SpacesScreen({ navigation, route }: MainScreenProps<"Spaces">) {
           <View style={styles.roomPanel}>
             <View style={styles.wave} accessibilityLabel="Audio only Space" accessibilityRole="image"><View style={styles.waveBar} /><View style={[styles.waveBar, styles.waveTall]} /><View style={styles.waveBar} /><View style={[styles.waveBar, styles.waveShort]} /><View style={styles.waveBar} /></View>
             <Text weight={600}>{space.listenerCount} listening</Text>
-            <Text size={12} color={colors.textMuted}>Audio conversation · camera is not used</Text>
+            <Text size={12} color={colors.textMuted}>{audio.status === "connected" ? "Connected to live audio" : audio.status === "connecting" || audio.status === "reconnecting" ? "Connecting to live audio…" : "Audio conversation · camera is not used"}</Text>
           </View>
+          {audio.error ? <Text accessibilityRole="alert" color={colors.error}>{audio.error}</Text> : null}
+          {audio.status === "failed" || audio.status === "unavailable" ? actionButton("Retry audio", audio.retry, "secondary", false) : null}
           <Text size={16} weight={700} accessibilityRole="header">On stage</Text>
           {personRow(space.host)}{space.speakers.map((person) => personRow(person, true))}
           {space.pendingSpeakerRequests?.length ? <><Text size={16} weight={700} accessibilityRole="header" style={styles.sectionTitle}>Requests to speak</Text>{space.pendingSpeakerRequests.map((request) => <View key={request.id} style={styles.requestRow}><Text style={styles.personCopy}>{request.user.name}</Text><Pressable accessibilityRole="button" onPress={() => act(() => spacesService.approveSpeakerRequest(space.id, request.id))}><Text color={SPACE_BLUE}>Approve</Text></Pressable><Pressable accessibilityRole="button" onPress={() => act(() => spacesService.declineSpeakerRequest(space.id, request.id))}><Text color={colors.error}>Decline</Text></Pressable></View>)}</> : null}
           {space.state === "scheduled" && !isHost ? actionButton(space.viewerReminder ? "Remove reminder" : "Set reminder", () => act(() => space.viewerReminder ? spacesService.removeReminder(space.id) : spacesService.setReminder(space.id), space.viewerReminder ? "Reminder removed." : "Reminder set."), "secondary") : null}
-          {space.state === "scheduled" && isHost ? actionButton("Start now", () => act(() => spacesService.start(space.id)), "primary") : null}
+          {space.state === "scheduled" && isHost ? actionButton("Start now", () => act(async () => {
+            await spacesService.start(space.id);
+            setJoinGrant(await spacesService.join(space.id));
+          }), "primary") : null}
           {space.state === "live" && !isJoined ? actionButton("Join as listener", () => join(space)) : null}
+          {space.state === "live" && isJoined && !joinGrant ? actionButton("Connect to audio", () => join(space), "secondary") : null}
           {space.state === "live" && isJoined && space.viewerRole === "listener" ? <>
             {actionButton(space.speakerRequestState === "pending" ? "Request sent" : "Request microphone", () => act(() => spacesService.requestToSpeak(space.id), "Your request was sent to the host."), "secondary", busy || space.speakerRequestState === "pending")}
           </> : null}
-          {space.state === "live" && (space.viewerRole === "speaker" || isHost) ? actionButton(muted ? "Unmute microphone" : "Mute microphone", () => setMuted((value) => !value), "secondary", false) : null}
-          {space.state === "live" && isJoined && !isHost ? actionButton("Leave Space", () => act(() => spacesService.leave(space.id), "You left the Space."), "destructive") : null}
+          {space.state === "live" && audio.canPublish ? actionButton(audio.isMuted ? "Unmute microphone" : "Mute microphone", () => { void audio.toggleMicrophone(); }, "secondary", audio.status !== "connected") : null}
+          {space.state === "live" && isJoined && !isHost ? actionButton("Leave Space", leaveSpace, "destructive") : null}
           {space.state === "live" && isHost ? actionButton("End Space", () => act(() => spacesService.end(space.id), "Space ended."), "destructive") : null}
           {space.state === "scheduled" && isHost ? actionButton("Cancel Space", () => act(() => spacesService.cancel(space.id), "Space cancelled."), "destructive") : null}
           {space.state === "live" && !isHost ? <Pressable accessibilityRole="button" onPress={() => report(space)} style={styles.report}><Text color={colors.textMuted}>Report this Space</Text></Pressable> : null}
         </> : null}
       </ScrollView> : <ScrollView contentContainerStyle={styles.content}>
-        <View style={styles.discoveryHeading}><View><Text size={26} weight={700} accessibilityRole="header">Talk, listen, connect.</Text><Text color={colors.textMuted} style={styles.intro}>Join live audio conversations or find one coming up.</Text></View><Pressable accessibilityRole="button" accessibilityLabel="Create a Space" onPress={() => { setCreating(true); setMessage(""); }} style={styles.createButton}><Text weight={600} color="#FFFFFF">Create</Text></Pressable></View>
+        <View style={styles.discoveryHeading}><View><Text size={26} weight={700} accessibilityRole="header">Talk, listen, connect.</Text><Text color={colors.textMuted} style={styles.intro}>Join live audio conversations or find one coming up.</Text></View><Pressable accessibilityRole="button" accessibilityLabel={canHostSpace ? "Create a Space" : "Creator access required to host a Space"} accessibilityState={{ disabled: creatorEntry.isLoading }} onPress={openHostFlow} style={styles.createButton}><Text weight={600} color="#FFFFFF">{canHostSpace ? "Create" : "Host"}</Text></Pressable></View>
         {listing.isLoading ? <Text accessibilityLiveRegion="polite">Finding Spaces…</Text> : null}
         {listing.isError && !listing.data ? <ErrorState error={listing.error} compact message="Spaces couldn't load." onRetry={() => listing.refetch()} retrying={listing.isRefetching} /> : null}
-        {listing.data?.data.length === 0 ? <View style={styles.empty}><Text size={18} weight={600} accessibilityRole="header">No Spaces right now</Text><Text color={colors.textMuted}>Start a conversation or check back later for upcoming rooms.</Text><Button title="Create a Space" onPress={() => setCreating(true)} /></View> : null}
+        {listing.data?.data.length === 0 ? <View style={styles.empty}><Text size={18} weight={600} accessibilityRole="header">No Spaces right now</Text><Text color={colors.textMuted}>Join the conversation when a Space is live, or check back for upcoming rooms.</Text>{canHostSpace ? <Button title="Create a Space" onPress={openHostFlow} /> : null}</View> : null}
         {listing.data?.data.some((item) => item.state === "live") ? <><Text size={17} weight={700} accessibilityRole="header" style={styles.sectionTitle}>Live now</Text>{listing.data.data.filter((item) => item.state === "live").map((item) => <SpaceCard key={item.id} item={item} onOpen={() => openRoom(item)} onJoin={() => join(item)} />)}</> : null}
         {listing.data?.data.some((item) => item.state === "scheduled") ? <><Text size={17} weight={700} accessibilityRole="header" style={styles.sectionTitle}>Upcoming</Text>{listing.data.data.filter((item) => item.state === "scheduled").map((item) => <SpaceCard key={item.id} item={item} onOpen={() => openRoom(item)} onJoin={() => openRoom(item)} />)}</> : null}
       </ScrollView>}
