@@ -2,7 +2,7 @@
 
 package runtime
 
-// The schema-stitching logic is generated in zudomart/modules/catalog/src/generated/ent/runtime.go
+// The schema-stitching logic is generated in nantty/modules/catalog/src/generated/ent/runtime.go
 
 const (
 	Version = "v0.14.6"                                         // Version of ent codegen.

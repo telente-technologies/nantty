@@ -5,7 +5,7 @@ package hook
 import (
 	"context"
 	"fmt"
-	"zudomart/modules/catalog/src/generated/ent"
+	"nantty/modules/catalog/src/generated/ent"
 )
 
 // The BrandFunc type is an adapter to allow the use of ordinary

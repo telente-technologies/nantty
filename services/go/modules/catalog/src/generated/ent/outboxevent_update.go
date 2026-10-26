@@ -6,9 +6,9 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"nantty/modules/catalog/src/generated/ent/outboxevent"
+	"nantty/modules/catalog/src/generated/ent/predicate"
 	"time"
-	"zudomart/modules/catalog/src/generated/ent/outboxevent"
-	"zudomart/modules/catalog/src/generated/ent/predicate"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"

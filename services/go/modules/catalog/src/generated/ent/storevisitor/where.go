@@ -3,8 +3,8 @@
 package storevisitor
 
 import (
+	"nantty/modules/catalog/src/generated/ent/predicate"
 	"time"
-	"zudomart/modules/catalog/src/generated/ent/predicate"
 
 	"entgo.io/ent/dialect/sql"
 	"github.com/google/uuid"
