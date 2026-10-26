@@ -12,11 +12,11 @@ import (
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgconn"
 
-	"zudomart/modules/ledger/src/databases"
-	"zudomart/modules/payments/src/generated/ent"
-	"zudomart/modules/payments/src/generated/ent/paymentintent"
-	"zudomart/modules/payments/src/interfaces"
-	"zudomart/modules/payments/src/modules/gateway/models"
+	"nantty/modules/ledger/src/databases"
+	"nantty/modules/payments/src/generated/ent"
+	"nantty/modules/payments/src/generated/ent/paymentintent"
+	"nantty/modules/payments/src/interfaces"
+	"nantty/modules/payments/src/modules/gateway/models"
 )
 
 const oneSettlementPerSubjectIndex = "payment_intents_one_settlement_per_subject"

@@ -9,9 +9,9 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/ledger/src/databases"
-	"zudomart/modules/payments/src/generated/ent"
-	"zudomart/modules/payments/src/generated/ent/paymentrefund"
+	"nantty/modules/ledger/src/databases"
+	"nantty/modules/payments/src/generated/ent"
+	"nantty/modules/payments/src/generated/ent/paymentrefund"
 )
 
 var CardVerificationRefundRetryDelays = []time.Duration{5 * time.Second, 30 * time.Second, 2 * time.Minute}

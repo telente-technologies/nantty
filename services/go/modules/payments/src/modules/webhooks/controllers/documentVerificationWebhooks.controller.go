@@ -3,7 +3,7 @@ package controllers
 import (
 	"net/http"
 
-	"zudomart/platform/httpserver"
+	"nantty/platform/httpserver"
 )
 
 func (controller WebhooksController) ReceiveDocumentVerificationWebhook(writer http.ResponseWriter, request *http.Request) {

@@ -9,9 +9,9 @@ import (
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 
-	moneytesting "zudomart/modules/ledger/src/databases/moneyTesting"
-	paymentstesting "zudomart/modules/payments/src/integrations/paymentsTesting"
-	"zudomart/modules/payments/src/modules/gateway/services"
+	moneytesting "nantty/modules/ledger/src/databases/moneyTesting"
+	paymentstesting "nantty/modules/payments/src/integrations/paymentsTesting"
+	"nantty/modules/payments/src/modules/gateway/services"
 )
 
 func countPaymentsOutbox(t *testing.T, harness *paymentstesting.MoneyHarness, eventType, subject string) int {

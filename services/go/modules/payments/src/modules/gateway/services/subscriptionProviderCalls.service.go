@@ -3,7 +3,7 @@ package services
 import (
 	"context"
 
-	"zudomart/modules/payments/src/interfaces"
+	"nantty/modules/payments/src/interfaces"
 )
 
 func (gateway *PaymentGateway) CreateRecurringPlanProduct(ctx context.Context, request interfaces.RecurringPlanRequest) (string, error) {

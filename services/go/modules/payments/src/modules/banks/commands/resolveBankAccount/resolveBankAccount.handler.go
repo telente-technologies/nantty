@@ -5,11 +5,11 @@ import (
 	"errors"
 	"net/http"
 
-	"zudomart/modules/payments/src/interfaces"
-	bankservices "zudomart/modules/payments/src/modules/banks/services"
-	"zudomart/modules/payments/src/modules/gateway"
-	"zudomart/modules/payments/src/modules/gateway/services"
-	"zudomart/platform/httpserver"
+	"nantty/modules/payments/src/interfaces"
+	bankservices "nantty/modules/payments/src/modules/banks/services"
+	"nantty/modules/payments/src/modules/gateway"
+	"nantty/modules/payments/src/modules/gateway/services"
+	"nantty/platform/httpserver"
 )
 
 var (

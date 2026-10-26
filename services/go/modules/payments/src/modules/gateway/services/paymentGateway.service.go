@@ -6,9 +6,9 @@ import (
 	"net/http"
 	"sync"
 
-	"zudomart/modules/payments/src/container"
-	"zudomart/modules/payments/src/modules/gateway/models"
-	"zudomart/platform/httpserver"
+	"nantty/modules/payments/src/container"
+	"nantty/modules/payments/src/modules/gateway/models"
+	"nantty/platform/httpserver"
 )
 
 type PaymentGateway struct {

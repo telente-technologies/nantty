@@ -7,13 +7,13 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/ledger/src/databases"
-	"zudomart/modules/payments/src/generated/ent/paymentintent"
+	"nantty/modules/ledger/src/databases"
+	"nantty/modules/payments/src/generated/ent/paymentintent"
 
-	"zudomart/modules/payments/src/generated/ent"
-	"zudomart/modules/payments/src/generated/ent/payouttransfer"
-	"zudomart/modules/payments/src/interfaces"
-	"zudomart/modules/payments/src/modules/gateway/models"
+	"nantty/modules/payments/src/generated/ent"
+	"nantty/modules/payments/src/generated/ent/payouttransfer"
+	"nantty/modules/payments/src/interfaces"
+	"nantty/modules/payments/src/modules/gateway/models"
 )
 
 type sealedPayoutDestination struct {

@@ -3,8 +3,8 @@ package listbanks
 import (
 	"context"
 
-	"zudomart/modules/payments/src/interfaces"
-	"zudomart/modules/payments/src/modules/gateway"
+	"nantty/modules/payments/src/interfaces"
+	"nantty/modules/payments/src/modules/gateway"
 )
 
 type Handler struct {

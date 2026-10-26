@@ -6,12 +6,12 @@ import (
 	"errors"
 	"net/http"
 
-	"zudomart/modules/ledger/src/databases"
-	"zudomart/modules/payments/src/generated/ent"
-	"zudomart/modules/payments/src/generated/ent/storepurchase"
-	"zudomart/modules/payments/src/generated/ent/webhookevent"
-	"zudomart/modules/payments/src/interfaces"
-	"zudomart/modules/payments/src/modules/gateway/models"
+	"nantty/modules/ledger/src/databases"
+	"nantty/modules/payments/src/generated/ent"
+	"nantty/modules/payments/src/generated/ent/storepurchase"
+	"nantty/modules/payments/src/generated/ent/webhookevent"
+	"nantty/modules/payments/src/interfaces"
+	"nantty/modules/payments/src/modules/gateway/models"
 )
 
 func (gateway *PaymentGateway) VerifyStoreReceipt(ctx context.Context, store string, receipt interfaces.StoreReceipt) (interfaces.VerifiedStorePurchase, error) {

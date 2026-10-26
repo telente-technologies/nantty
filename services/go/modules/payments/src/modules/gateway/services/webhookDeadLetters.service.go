@@ -9,10 +9,10 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/payments/src/generated/ent"
-	"zudomart/modules/payments/src/generated/ent/webhookevent"
-	"zudomart/modules/payments/src/integrations/providerHttp"
-	"zudomart/platform/httpserver"
+	"nantty/modules/payments/src/generated/ent"
+	"nantty/modules/payments/src/generated/ent/webhookevent"
+	"nantty/modules/payments/src/integrations/providerHttp"
+	"nantty/platform/httpserver"
 )
 
 var (

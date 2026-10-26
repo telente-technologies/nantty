@@ -1,4 +1,4 @@
-module zudomart/modules/payments
+module nantty/modules/payments
 
 go 1.26.9
 
@@ -7,8 +7,8 @@ require (
 	entgo.io/ent v0.14.6
 	github.com/google/uuid v1.6.0
 	github.com/jackc/pgx/v5 v5.11.0
-	zudomart/modules/ledger v0.0.0-00010101000000-000000000000
-	zudomart/platform v0.0.0
+	nantty/modules/ledger v0.0.0-00010101000000-000000000000
+	nantty/platform v0.0.0
 )
 
 require (
@@ -88,6 +88,6 @@ require (
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 
-replace zudomart/platform => ../../platform
+replace nantty/platform => ../../platform
 
-replace zudomart/modules/ledger => ../ledger
+replace nantty/modules/ledger => ../ledger

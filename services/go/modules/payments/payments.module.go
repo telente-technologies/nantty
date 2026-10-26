@@ -3,8 +3,8 @@ package payments
 import (
 	"context"
 
-	"zudomart/modules/payments/src"
-	"zudomart/platform/servicemodule"
+	"nantty/modules/payments/src"
+	"nantty/platform/servicemodule"
 )
 
 type Module = src.Module

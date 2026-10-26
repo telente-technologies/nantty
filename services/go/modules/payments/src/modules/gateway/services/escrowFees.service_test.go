@@ -7,9 +7,9 @@ import (
 	"log/slog"
 	"testing"
 
-	"zudomart/modules/ledger/src/loaders"
-	"zudomart/modules/payments/src/configs"
-	"zudomart/modules/payments/src/container"
+	"nantty/modules/ledger/src/loaders"
+	"nantty/modules/payments/src/configs"
+	"nantty/modules/payments/src/container"
 )
 
 func TestEscrowFeeIsOnePointFivePercentOrOnePercentOnTheBusinessPlan(t *testing.T) {

@@ -10,13 +10,13 @@ import (
 
 	"github.com/jackc/pgx/v5"
 
-	"zudomart/modules/ledger/src/databases"
-	ledgerutils "zudomart/modules/ledger/src/utils"
-	"zudomart/modules/payments/src/generated/ent"
-	"zudomart/modules/payments/src/generated/ent/orderpayable"
-	"zudomart/modules/payments/src/generated/ent/sellerverification"
-	"zudomart/modules/payments/src/modules/gateway/models"
-	"zudomart/platform/httpserver"
+	"nantty/modules/ledger/src/databases"
+	ledgerutils "nantty/modules/ledger/src/utils"
+	"nantty/modules/payments/src/generated/ent"
+	"nantty/modules/payments/src/generated/ent/orderpayable"
+	"nantty/modules/payments/src/generated/ent/sellerverification"
+	"nantty/modules/payments/src/modules/gateway/models"
+	"nantty/platform/httpserver"
 )
 
 var (

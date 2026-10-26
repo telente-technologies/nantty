@@ -7,9 +7,9 @@ import (
 
 	"github.com/jackc/pgx/v5"
 
-	ledgermodels "zudomart/modules/ledger/src/modules/journal/models"
-	"zudomart/modules/payments/src/modules/gateway/models"
-	"zudomart/platform/sellingeligibility"
+	ledgermodels "nantty/modules/ledger/src/modules/journal/models"
+	"nantty/modules/payments/src/modules/gateway/models"
+	"nantty/platform/sellingeligibility"
 )
 
 func (gateway *PaymentGateway) ReadSellingEligibility(ctx context.Context, sellerUserId string) (sellingeligibility.Eligibility, error) {

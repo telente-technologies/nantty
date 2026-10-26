@@ -4,9 +4,9 @@ import (
 	"context"
 	"testing"
 
-	ledgermodels "zudomart/modules/ledger/src/modules/journal/models"
-	paymentstesting "zudomart/modules/payments/src/integrations/paymentsTesting"
-	paymentservices "zudomart/modules/payments/src/modules/gateway/services"
+	ledgermodels "nantty/modules/ledger/src/modules/journal/models"
+	paymentstesting "nantty/modules/payments/src/integrations/paymentsTesting"
+	paymentservices "nantty/modules/payments/src/modules/gateway/services"
 )
 
 func TestCheckmarkShareRefundPostsOneLedgerEntryAcrossRetries(t *testing.T) {

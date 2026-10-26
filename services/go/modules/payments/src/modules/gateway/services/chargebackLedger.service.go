@@ -4,12 +4,12 @@ import (
 	"context"
 	"database/sql"
 
-	ledgermodels "zudomart/modules/ledger/src/modules/journal/models"
-	"zudomart/modules/payments/src/constants"
-	"zudomart/modules/payments/src/generated/ent"
-	"zudomart/modules/payments/src/generated/ent/paymentintent"
-	"zudomart/modules/payments/src/generated/ent/predicate"
-	"zudomart/modules/payments/src/interfaces"
+	ledgermodels "nantty/modules/ledger/src/modules/journal/models"
+	"nantty/modules/payments/src/constants"
+	"nantty/modules/payments/src/generated/ent"
+	"nantty/modules/payments/src/generated/ent/paymentintent"
+	"nantty/modules/payments/src/generated/ent/predicate"
+	"nantty/modules/payments/src/interfaces"
 )
 
 func findDisputedIntent(ctx context.Context, client *ent.Client, provider string, dispute interfaces.ProviderDispute) (*ent.PaymentIntent, error) {

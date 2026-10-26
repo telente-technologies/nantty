@@ -5,9 +5,9 @@ import (
 
 	entsql "entgo.io/ent/dialect/sql"
 
-	"zudomart/modules/ledger/src/databases"
-	"zudomart/modules/payments/src/generated/ent/paymentintent"
-	"zudomart/modules/payments/src/generated/ent/providerdispute"
+	"nantty/modules/ledger/src/databases"
+	"nantty/modules/payments/src/generated/ent/paymentintent"
+	"nantty/modules/payments/src/generated/ent/providerdispute"
 )
 
 func (gateway *PaymentGateway) UserHasChargebackHistory(ctx context.Context, executor databases.ExecutorQuerier, userId string) (bool, error) {

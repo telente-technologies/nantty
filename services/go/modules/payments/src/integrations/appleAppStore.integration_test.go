@@ -10,7 +10,7 @@ import (
 	"testing"
 	"time"
 
-	"zudomart/modules/payments/src/interfaces"
+	"nantty/modules/payments/src/interfaces"
 )
 
 func readAppStoreFixture(t *testing.T, name string) []byte {

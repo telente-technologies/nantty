@@ -4,10 +4,10 @@ import (
 	"strconv"
 	"strings"
 
-	"zudomart/modules/payments/src/configs"
-	"zudomart/modules/payments/src/constants"
-	"zudomart/modules/payments/src/integrations"
-	"zudomart/modules/payments/src/interfaces"
+	"nantty/modules/payments/src/configs"
+	"nantty/modules/payments/src/constants"
+	"nantty/modules/payments/src/integrations"
+	"nantty/modules/payments/src/interfaces"
 )
 
 func NewStoreVerifiersFromSettings(settings configs.PaymentsSettings) (map[string]interfaces.StoreReceiptVerifier, error) {

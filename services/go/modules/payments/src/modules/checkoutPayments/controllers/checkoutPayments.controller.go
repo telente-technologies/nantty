@@ -3,12 +3,12 @@ package controllers
 import (
 	"net/http"
 
-	ledgerutils "zudomart/modules/ledger/src/utils"
-	initializeorderpayment "zudomart/modules/payments/src/modules/checkoutPayments/commands/initializeOrderPayment"
-	verifyorderpayment "zudomart/modules/payments/src/modules/checkoutPayments/commands/verifyOrderPayment"
-	"zudomart/modules/payments/src/modules/checkoutPayments/validators"
-	"zudomart/modules/payments/src/modules/gateway"
-	"zudomart/platform/httpserver"
+	ledgerutils "nantty/modules/ledger/src/utils"
+	initializeorderpayment "nantty/modules/payments/src/modules/checkoutPayments/commands/initializeOrderPayment"
+	verifyorderpayment "nantty/modules/payments/src/modules/checkoutPayments/commands/verifyOrderPayment"
+	"nantty/modules/payments/src/modules/checkoutPayments/validators"
+	"nantty/modules/payments/src/modules/gateway"
+	"nantty/platform/httpserver"
 )
 
 type CheckoutPaymentsController struct {

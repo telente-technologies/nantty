@@ -5,11 +5,11 @@ import (
 	"errors"
 	"testing"
 
-	"zudomart/modules/ledger/src/loaders"
-	"zudomart/modules/payments/src/configs"
-	"zudomart/modules/payments/src/constants"
-	"zudomart/modules/payments/src/container"
-	"zudomart/platform/httpserver"
+	"nantty/modules/ledger/src/loaders"
+	"nantty/modules/payments/src/configs"
+	"nantty/modules/payments/src/constants"
+	"nantty/modules/payments/src/container"
+	"nantty/platform/httpserver"
 )
 
 func TestPaymentAmountsAreCappedPerPaymentType(t *testing.T) {

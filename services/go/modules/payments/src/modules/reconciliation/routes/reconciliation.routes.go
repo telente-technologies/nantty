@@ -3,10 +3,10 @@ package routes
 import (
 	"net/http"
 
-	"zudomart/modules/ledger/src/constants"
-	"zudomart/modules/ledger/src/middlewares"
-	"zudomart/modules/payments/src/modules/gateway"
-	"zudomart/modules/payments/src/modules/reconciliation/controllers"
+	"nantty/modules/ledger/src/constants"
+	"nantty/modules/ledger/src/middlewares"
+	"nantty/modules/payments/src/modules/gateway"
+	"nantty/modules/payments/src/modules/reconciliation/controllers"
 )
 
 func MountReconciliationRoutes(mux *http.ServeMux, application *gateway.Application) {

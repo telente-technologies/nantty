@@ -8,8 +8,8 @@ import (
 	"testing"
 	"time"
 
-	"zudomart/modules/payments/src/integrations"
-	"zudomart/modules/payments/src/interfaces"
+	"nantty/modules/payments/src/integrations"
+	"nantty/modules/payments/src/interfaces"
 )
 
 func writeSmokeFlutterwaveWebhook(writer http.ResponseWriter, body []byte, headers http.Header) {

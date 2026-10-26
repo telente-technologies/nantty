@@ -3,7 +3,7 @@ package services
 import (
 	"testing"
 
-	"zudomart/modules/payments/src/interfaces"
+	"nantty/modules/payments/src/interfaces"
 )
 
 func TestBvnDecisionNeedsMatchingNamesAndNoWatchlistHit(t *testing.T) {

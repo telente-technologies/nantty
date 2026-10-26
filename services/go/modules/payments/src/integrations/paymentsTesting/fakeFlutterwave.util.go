@@ -9,8 +9,8 @@ import (
 	"testing"
 	"time"
 
-	"zudomart/modules/payments/src/integrations"
-	"zudomart/platform/money"
+	"nantty/modules/payments/src/integrations"
+	"nantty/platform/money"
 )
 
 const (

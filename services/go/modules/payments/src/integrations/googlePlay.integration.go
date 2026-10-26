@@ -10,7 +10,7 @@ import (
 	"strings"
 	"time"
 
-	"zudomart/modules/payments/src/interfaces"
+	"nantty/modules/payments/src/interfaces"
 )
 
 const GooglePlayPushTokenHeader = "X-Zudomart-Push-Token"

@@ -6,12 +6,12 @@ import (
 	"net/http"
 	"strings"
 
-	ledgerutils "zudomart/modules/ledger/src/utils"
-	"zudomart/modules/payments/src/interfaces"
-	"zudomart/modules/payments/src/modules/connectedAccounts/dtos"
-	"zudomart/modules/payments/src/modules/gateway"
-	"zudomart/modules/payments/src/modules/gateway/services"
-	"zudomart/platform/httpserver"
+	ledgerutils "nantty/modules/ledger/src/utils"
+	"nantty/modules/payments/src/interfaces"
+	"nantty/modules/payments/src/modules/connectedAccounts/dtos"
+	"nantty/modules/payments/src/modules/gateway"
+	"nantty/modules/payments/src/modules/gateway/services"
+	"nantty/platform/httpserver"
 )
 
 type ConnectedAccountsController struct {

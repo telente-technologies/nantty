@@ -4,7 +4,7 @@ import (
 	"context"
 	"net/http"
 
-	"zudomart/modules/payments/src/interfaces"
+	"nantty/modules/payments/src/interfaces"
 )
 
 type AppStoreReceiptVerifierSettings struct {

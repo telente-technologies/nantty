@@ -1,12 +1,12 @@
 package routes
 
 import (
+	"nantty/platform/httpserver"
 	"net/http"
-	"zudomart/platform/httpserver"
 
-	"zudomart/modules/ledger/src/middlewares"
-	"zudomart/modules/payments/src/modules/checkoutPayments/controllers"
-	"zudomart/modules/payments/src/modules/gateway"
+	"nantty/modules/ledger/src/middlewares"
+	"nantty/modules/payments/src/modules/checkoutPayments/controllers"
+	"nantty/modules/payments/src/modules/gateway"
 )
 
 func MountCheckoutPaymentsRoutes(mux *http.ServeMux, application *gateway.Application) {

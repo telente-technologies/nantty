@@ -10,12 +10,12 @@ import (
 	"net/http"
 	"strings"
 
-	"zudomart/modules/ledger/src/databases"
-	"zudomart/modules/payments/src/generated/ent"
-	"zudomart/modules/payments/src/generated/ent/connectedaccount"
-	"zudomart/modules/payments/src/generated/ent/providerpayoutdestination"
-	"zudomart/modules/payments/src/interfaces"
-	"zudomart/platform/httpserver"
+	"nantty/modules/ledger/src/databases"
+	"nantty/modules/payments/src/generated/ent"
+	"nantty/modules/payments/src/generated/ent/connectedaccount"
+	"nantty/modules/payments/src/generated/ent/providerpayoutdestination"
+	"nantty/modules/payments/src/interfaces"
+	"nantty/platform/httpserver"
 )
 
 const (

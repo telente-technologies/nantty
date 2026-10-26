@@ -3,7 +3,7 @@ package paymentstesting
 import (
 	"net/http"
 
-	"zudomart/modules/payments/src/interfaces"
+	"nantty/modules/payments/src/interfaces"
 )
 
 type FakeWriteKind string

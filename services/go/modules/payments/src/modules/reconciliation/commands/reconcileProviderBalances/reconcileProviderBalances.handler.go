@@ -3,8 +3,8 @@ package reconcileproviderbalances
 import (
 	"context"
 
-	"zudomart/modules/payments/src/modules/gateway"
-	"zudomart/modules/payments/src/modules/gateway/services"
+	"nantty/modules/payments/src/modules/gateway"
+	"nantty/modules/payments/src/modules/gateway/services"
 )
 
 type Handler struct {

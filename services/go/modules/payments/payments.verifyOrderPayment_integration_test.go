@@ -8,9 +8,9 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/payments/src/generated/ent/paymentintent"
-	paymentstesting "zudomart/modules/payments/src/integrations/paymentsTesting"
-	"zudomart/modules/payments/src/modules/gateway/models"
+	"nantty/modules/payments/src/generated/ent/paymentintent"
+	paymentstesting "nantty/modules/payments/src/integrations/paymentsTesting"
+	"nantty/modules/payments/src/modules/gateway/models"
 )
 
 type verifyOrderPaymentCase struct {

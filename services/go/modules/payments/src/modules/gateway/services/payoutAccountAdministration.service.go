@@ -3,10 +3,10 @@ package services
 import (
 	"context"
 
-	"zudomart/modules/payments/src/generated/ent"
-	"zudomart/modules/payments/src/generated/ent/connectedaccount"
-	"zudomart/modules/payments/src/generated/ent/connectedaccountjob"
-	"zudomart/modules/payments/src/modules/gateway/models"
+	"nantty/modules/payments/src/generated/ent"
+	"nantty/modules/payments/src/generated/ent/connectedaccount"
+	"nantty/modules/payments/src/generated/ent/connectedaccountjob"
+	"nantty/modules/payments/src/modules/gateway/models"
 )
 
 type StuckPayoutAccountView struct {

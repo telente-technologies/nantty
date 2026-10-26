@@ -6,11 +6,11 @@ import (
 	"errors"
 	"time"
 
-	"zudomart/modules/ledger/src/databases"
-	"zudomart/modules/payments/src/generated/ent"
-	"zudomart/modules/payments/src/generated/ent/providerdispute"
-	"zudomart/modules/payments/src/interfaces"
-	"zudomart/modules/payments/src/modules/gateway/models"
+	"nantty/modules/ledger/src/databases"
+	"nantty/modules/payments/src/generated/ent"
+	"nantty/modules/payments/src/generated/ent/providerdispute"
+	"nantty/modules/payments/src/interfaces"
+	"nantty/modules/payments/src/modules/gateway/models"
 )
 
 func (gateway *PaymentGateway) HandleProviderDisputeNotification(ctx context.Context, notification interfaces.WebhookNotification) error {

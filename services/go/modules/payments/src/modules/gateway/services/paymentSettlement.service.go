@@ -7,13 +7,13 @@ import (
 	"fmt"
 	"strings"
 
-	"zudomart/modules/ledger/src/databases"
-	"zudomart/modules/payments/src/constants"
-	"zudomart/modules/payments/src/generated/ent"
-	"zudomart/modules/payments/src/generated/ent/orderpayable"
-	"zudomart/modules/payments/src/generated/ent/paymentintent"
-	"zudomart/modules/payments/src/interfaces"
-	"zudomart/modules/payments/src/modules/gateway/models"
+	"nantty/modules/ledger/src/databases"
+	"nantty/modules/payments/src/constants"
+	"nantty/modules/payments/src/generated/ent"
+	"nantty/modules/payments/src/generated/ent/orderpayable"
+	"nantty/modules/payments/src/generated/ent/paymentintent"
+	"nantty/modules/payments/src/interfaces"
+	"nantty/modules/payments/src/modules/gateway/models"
 )
 
 func (gateway *PaymentGateway) VerifyAndSettlePaymentIntentByReference(ctx context.Context, reference string) (models.PaymentIntentView, error) {

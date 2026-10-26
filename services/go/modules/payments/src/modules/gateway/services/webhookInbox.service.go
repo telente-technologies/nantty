@@ -11,12 +11,12 @@ import (
 	entsql "entgo.io/ent/dialect/sql"
 	"github.com/google/uuid"
 
-	"zudomart/modules/ledger/src/databases"
-	"zudomart/modules/payments/src/generated/ent"
-	"zudomart/modules/payments/src/generated/ent/predicate"
-	"zudomart/modules/payments/src/generated/ent/webhookevent"
-	"zudomart/modules/payments/src/integrations/providerHttp"
-	"zudomart/modules/payments/src/interfaces"
+	"nantty/modules/ledger/src/databases"
+	"nantty/modules/payments/src/generated/ent"
+	"nantty/modules/payments/src/generated/ent/predicate"
+	"nantty/modules/payments/src/generated/ent/webhookevent"
+	"nantty/modules/payments/src/integrations/providerHttp"
+	"nantty/modules/payments/src/interfaces"
 )
 
 const (

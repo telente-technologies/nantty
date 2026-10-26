@@ -14,14 +14,14 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/payments/src/constants"
-	"zudomart/modules/payments/src/generated/ent"
-	"zudomart/modules/payments/src/generated/ent/paymentintent"
-	"zudomart/modules/payments/src/interfaces"
-	"zudomart/modules/payments/src/modules/gateway/models"
-	"zudomart/modules/payments/src/repositories"
-	"zudomart/modules/payments/src/utils"
-	"zudomart/platform/httpserver"
+	"nantty/modules/payments/src/constants"
+	"nantty/modules/payments/src/generated/ent"
+	"nantty/modules/payments/src/generated/ent/paymentintent"
+	"nantty/modules/payments/src/interfaces"
+	"nantty/modules/payments/src/modules/gateway/models"
+	"nantty/modules/payments/src/repositories"
+	"nantty/modules/payments/src/utils"
+	"nantty/platform/httpserver"
 )
 
 var ErrAlreadyPaid = httpserver.NewApiError(http.StatusConflict, "ALREADY_PAID", "This has already been paid.")

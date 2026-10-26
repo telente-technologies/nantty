@@ -8,7 +8,7 @@ import (
 	"net/url"
 	"strings"
 
-	"zudomart/modules/payments/src/interfaces"
+	"nantty/modules/payments/src/interfaces"
 )
 
 func (verifier *GooglePlayVerifier) RevokeSubscriptionWithFullRefund(ctx context.Context, purchaseToken string) error {

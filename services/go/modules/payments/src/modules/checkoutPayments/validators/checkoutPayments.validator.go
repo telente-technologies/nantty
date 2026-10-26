@@ -1,8 +1,8 @@
 package validators
 
 import (
-	ledgerutils "zudomart/modules/ledger/src/utils"
-	"zudomart/modules/payments/src/modules/checkoutPayments/dtos"
+	ledgerutils "nantty/modules/ledger/src/utils"
+	"nantty/modules/payments/src/modules/checkoutPayments/dtos"
 )
 
 func ValidateInitializeOrderPaymentRequest(request dtos.InitializeOrderPaymentRequestDto) error {

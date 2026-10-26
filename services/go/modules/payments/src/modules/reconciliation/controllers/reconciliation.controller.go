@@ -3,9 +3,9 @@ package controllers
 import (
 	"net/http"
 
-	"zudomart/modules/payments/src/modules/gateway"
-	reconcileproviderbalances "zudomart/modules/payments/src/modules/reconciliation/commands/reconcileProviderBalances"
-	"zudomart/platform/httpserver"
+	"nantty/modules/payments/src/modules/gateway"
+	reconcileproviderbalances "nantty/modules/payments/src/modules/reconciliation/commands/reconcileProviderBalances"
+	"nantty/platform/httpserver"
 )
 
 type ReconciliationController struct {

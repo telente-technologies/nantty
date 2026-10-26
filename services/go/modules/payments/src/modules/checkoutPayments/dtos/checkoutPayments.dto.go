@@ -1,6 +1,6 @@
 package dtos
 
-import "zudomart/modules/payments/src/modules/gateway/models"
+import "nantty/modules/payments/src/modules/gateway/models"
 
 type InitializeOrderPaymentRequestDto struct {
 	OrderId    string `json:"orderId,omitempty"`

@@ -6,10 +6,10 @@ import (
 	"net/http"
 	"time"
 
-	"zudomart/modules/payments/src/generated/ent"
-	"zudomart/modules/payments/src/generated/ent/paymentintent"
-	"zudomart/modules/payments/src/integrations"
-	"zudomart/modules/payments/src/interfaces"
+	"nantty/modules/payments/src/generated/ent"
+	"nantty/modules/payments/src/generated/ent/paymentintent"
+	"nantty/modules/payments/src/integrations"
+	"nantty/modules/payments/src/interfaces"
 )
 
 const (

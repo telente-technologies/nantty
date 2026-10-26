@@ -7,12 +7,12 @@ import (
 	"regexp"
 	"time"
 
-	"zudomart/modules/ledger/src/databases"
-	"zudomart/modules/payments/src/generated/ent"
-	"zudomart/modules/payments/src/generated/ent/payouttransfer"
-	"zudomart/modules/payments/src/integrations"
-	"zudomart/modules/payments/src/interfaces"
-	"zudomart/modules/payments/src/modules/gateway/models"
+	"nantty/modules/ledger/src/databases"
+	"nantty/modules/payments/src/generated/ent"
+	"nantty/modules/payments/src/generated/ent/payouttransfer"
+	"nantty/modules/payments/src/integrations"
+	"nantty/modules/payments/src/interfaces"
+	"nantty/modules/payments/src/modules/gateway/models"
 )
 
 var providerTransferReferencePattern = regexp.MustCompile(`^[a-z0-9_-]{16,100}$`)

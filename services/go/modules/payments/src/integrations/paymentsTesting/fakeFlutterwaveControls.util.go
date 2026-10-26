@@ -5,8 +5,8 @@ import (
 	"net/http"
 	"strings"
 
-	"zudomart/modules/payments/src/integrations"
-	"zudomart/modules/payments/src/interfaces"
+	"nantty/modules/payments/src/integrations"
+	"nantty/modules/payments/src/interfaces"
 )
 
 var _ FakeWalletServer = (*FakeFlutterwave)(nil)

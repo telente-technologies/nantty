@@ -5,9 +5,9 @@ import (
 	"net/http"
 	"strings"
 
-	"zudomart/modules/ledger/src/loaders"
-	"zudomart/modules/payments/src/constants"
-	"zudomart/platform/httpserver"
+	"nantty/modules/ledger/src/loaders"
+	"nantty/modules/payments/src/constants"
+	"nantty/platform/httpserver"
 )
 
 var (

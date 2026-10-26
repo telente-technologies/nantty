@@ -8,11 +8,11 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/ledger/src/databases"
-	ledgermodels "zudomart/modules/ledger/src/modules/journal/models"
-	"zudomart/modules/payments/src/generated/ent"
-	"zudomart/modules/payments/src/generated/ent/walletfunding"
-	"zudomart/platform/httpserver"
+	"nantty/modules/ledger/src/databases"
+	ledgermodels "nantty/modules/ledger/src/modules/journal/models"
+	"nantty/modules/payments/src/generated/ent"
+	"nantty/modules/payments/src/generated/ent/walletfunding"
+	"nantty/platform/httpserver"
 )
 
 var ErrFundingNotRejectable = httpserver.NewApiError(http.StatusConflict, "FUNDING_NOT_REJECTABLE", "This deposit can no longer be sent back.")

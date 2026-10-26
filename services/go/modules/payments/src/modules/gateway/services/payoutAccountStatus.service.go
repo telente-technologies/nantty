@@ -6,7 +6,7 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/payments/src/generated/ent/connectedaccount"
+	"nantty/modules/payments/src/generated/ent/connectedaccount"
 )
 
 func (gateway *PaymentGateway) applyPayoutAccountStatusInTransaction(ctx context.Context, transaction *sql.Tx, accountId uuid.UUID) error {

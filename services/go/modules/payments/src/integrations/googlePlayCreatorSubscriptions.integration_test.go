@@ -10,7 +10,7 @@ import (
 	"testing"
 	"time"
 
-	"zudomart/modules/payments/src/interfaces"
+	"nantty/modules/payments/src/interfaces"
 )
 
 const creatorSubscriptionV2 = `{"subscriptionState":"SUBSCRIPTION_STATE_ACTIVE","latestOrderId":"GPA.1111-2222-3333-44444..1","startTime":"2026-09-21T10:00:00Z",

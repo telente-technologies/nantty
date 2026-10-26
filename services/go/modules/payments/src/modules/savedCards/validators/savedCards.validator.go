@@ -5,8 +5,8 @@ import (
 
 	"github.com/google/uuid"
 
-	ledgerutils "zudomart/modules/ledger/src/utils"
-	"zudomart/modules/payments/src/modules/savedCards/dtos"
+	ledgerutils "nantty/modules/ledger/src/utils"
+	"nantty/modules/payments/src/modules/savedCards/dtos"
 )
 
 var (

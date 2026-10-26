@@ -8,9 +8,9 @@ import (
 	"strings"
 	"time"
 
-	"zudomart/modules/payments/src/integrations/providerHttp"
-	"zudomart/modules/payments/src/interfaces"
-	"zudomart/platform/money"
+	"nantty/modules/payments/src/integrations/providerHttp"
+	"nantty/modules/payments/src/interfaces"
+	"nantty/platform/money"
 )
 
 const FlutterwaveProviderName = "flutterwave"

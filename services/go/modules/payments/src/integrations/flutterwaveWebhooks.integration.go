@@ -9,7 +9,7 @@ import (
 	"net/http"
 	"strings"
 
-	"zudomart/modules/payments/src/interfaces"
+	"nantty/modules/payments/src/interfaces"
 )
 
 const FlutterwaveSignatureHeader = "Verif-Hash"

@@ -4,9 +4,9 @@ import (
 	"context"
 	"fmt"
 
-	"zudomart/modules/ledger/src/databases"
-	"zudomart/modules/payments/src/interfaces"
-	"zudomart/modules/payments/src/modules/gateway/models"
+	"nantty/modules/ledger/src/databases"
+	"nantty/modules/payments/src/interfaces"
+	"nantty/modules/payments/src/modules/gateway/models"
 )
 
 func (gateway *PaymentGateway) AllocateCheckoutPayables(ctx context.Context, executor databases.ExecutorQuerier, payables []models.OrderPayable) ([]models.CheckoutGroupAllocation, int64, string, error) {

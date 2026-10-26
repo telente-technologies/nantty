@@ -4,10 +4,10 @@ import (
 	"context"
 	"database/sql"
 
-	"zudomart/modules/ledger/src/databases"
-	ledgermodels "zudomart/modules/ledger/src/modules/journal/models"
-	"zudomart/modules/payments/src/constants"
-	"zudomart/modules/payments/src/generated/ent/paymentintent"
+	"nantty/modules/ledger/src/databases"
+	ledgermodels "nantty/modules/ledger/src/modules/journal/models"
+	"nantty/modules/payments/src/constants"
+	"nantty/modules/payments/src/generated/ent/paymentintent"
 )
 
 func (gateway *PaymentGateway) ProcessProviderSettlements(ctx context.Context, report *WalletReconciliationReport) int {

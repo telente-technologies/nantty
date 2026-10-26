@@ -8,10 +8,10 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/payments/src/generated/ent/paymentintent"
-	"zudomart/modules/payments/src/generated/ent/webhookevent"
-	paymentstesting "zudomart/modules/payments/src/integrations/paymentsTesting"
-	"zudomart/modules/payments/src/modules/gateway/services"
+	"nantty/modules/payments/src/generated/ent/paymentintent"
+	"nantty/modules/payments/src/generated/ent/webhookevent"
+	paymentstesting "nantty/modules/payments/src/integrations/paymentsTesting"
+	"nantty/modules/payments/src/modules/gateway/services"
 )
 
 func TestAnUnderpaidChargeWebhookIsDeadLetteredForFinanceInsteadOfMarkedProcessed(t *testing.T) {

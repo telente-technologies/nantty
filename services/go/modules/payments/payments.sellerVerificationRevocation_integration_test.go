@@ -7,7 +7,7 @@ import (
 
 	"github.com/google/uuid"
 
-	paymentstesting "zudomart/modules/payments/src/integrations/paymentsTesting"
+	paymentstesting "nantty/modules/payments/src/integrations/paymentsTesting"
 )
 
 func TestBusinessVerificationRevocationUnverifiesTheSellerIdempotentlyAndInOrder(t *testing.T) {

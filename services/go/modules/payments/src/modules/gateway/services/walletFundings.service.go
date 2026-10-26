@@ -8,13 +8,13 @@ import (
 	"strings"
 	"time"
 
-	"zudomart/modules/ledger/src/databases"
-	ledgermodels "zudomart/modules/ledger/src/modules/journal/models"
-	"zudomart/modules/payments/src/generated/ent"
-	"zudomart/modules/payments/src/generated/ent/providerwallet"
-	"zudomart/modules/payments/src/generated/ent/walletfunding"
-	"zudomart/modules/payments/src/interfaces"
-	"zudomart/modules/payments/src/modules/gateway/models"
+	"nantty/modules/ledger/src/databases"
+	ledgermodels "nantty/modules/ledger/src/modules/journal/models"
+	"nantty/modules/payments/src/generated/ent"
+	"nantty/modules/payments/src/generated/ent/providerwallet"
+	"nantty/modules/payments/src/generated/ent/walletfunding"
+	"nantty/modules/payments/src/interfaces"
+	"nantty/modules/payments/src/modules/gateway/models"
 )
 
 var errFundingNotYetInStatement = errors.New("the funding is not in the wallet statement yet; it is checked again")

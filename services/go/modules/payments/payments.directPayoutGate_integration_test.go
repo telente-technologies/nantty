@@ -10,11 +10,11 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/ledger/src/databases"
-	ledgermodels "zudomart/modules/ledger/src/modules/journal/models"
-	paymentstesting "zudomart/modules/payments/src/integrations/paymentsTesting"
-	"zudomart/modules/payments/src/modules/gateway/models"
-	"zudomart/modules/payments/src/modules/gateway/services"
+	"nantty/modules/ledger/src/databases"
+	ledgermodels "nantty/modules/ledger/src/modules/journal/models"
+	paymentstesting "nantty/modules/payments/src/integrations/paymentsTesting"
+	"nantty/modules/payments/src/modules/gateway/models"
+	"nantty/modules/payments/src/modules/gateway/services"
 )
 
 func prepareDirectPayout(harness *paymentstesting.MoneyHarness, sellerId string) error {

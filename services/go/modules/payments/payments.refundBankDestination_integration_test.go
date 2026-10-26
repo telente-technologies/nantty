@@ -9,11 +9,11 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/payments/src/generated/ent/paymentintent"
-	"zudomart/modules/payments/src/generated/ent/paymentrefund"
-	"zudomart/modules/payments/src/integrations"
-	paymentstesting "zudomart/modules/payments/src/integrations/paymentsTesting"
-	"zudomart/modules/payments/src/interfaces"
+	"nantty/modules/payments/src/generated/ent/paymentintent"
+	"nantty/modules/payments/src/generated/ent/paymentrefund"
+	"nantty/modules/payments/src/integrations"
+	paymentstesting "nantty/modules/payments/src/integrations/paymentsTesting"
+	"nantty/modules/payments/src/interfaces"
 )
 
 type bankRefundCountingProvider struct {

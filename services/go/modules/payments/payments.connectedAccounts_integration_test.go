@@ -8,8 +8,8 @@ import (
 
 	"github.com/google/uuid"
 
-	paymentstesting "zudomart/modules/payments/src/integrations/paymentsTesting"
-	"zudomart/modules/payments/src/modules/gateway/models"
+	paymentstesting "nantty/modules/payments/src/integrations/paymentsTesting"
+	"nantty/modules/payments/src/modules/gateway/models"
 )
 
 func registerOrder(t *testing.T, harness *paymentstesting.MoneyHarness, buyer, seller string, amount int64, mode string, verified bool) string {

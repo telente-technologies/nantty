@@ -7,13 +7,13 @@ import (
 	"net/http"
 	"time"
 
-	"zudomart/modules/ledger/src/databases"
-	"zudomart/modules/payments/src/generated/ent"
-	"zudomart/modules/payments/src/generated/ent/connectedaccount"
-	"zudomart/modules/payments/src/generated/ent/payoutonboarding"
-	"zudomart/modules/payments/src/interfaces"
-	"zudomart/modules/payments/src/modules/gateway/models"
-	"zudomart/platform/httpserver"
+	"nantty/modules/ledger/src/databases"
+	"nantty/modules/payments/src/generated/ent"
+	"nantty/modules/payments/src/generated/ent/connectedaccount"
+	"nantty/modules/payments/src/generated/ent/payoutonboarding"
+	"nantty/modules/payments/src/interfaces"
+	"nantty/modules/payments/src/modules/gateway/models"
+	"nantty/platform/httpserver"
 )
 
 const documentLinkReuseMargin = time.Minute

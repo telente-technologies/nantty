@@ -5,7 +5,7 @@ import (
 	"sync"
 	"time"
 
-	"zudomart/modules/payments/src/interfaces"
+	"nantty/modules/payments/src/interfaces"
 )
 
 const bankListCacheLifetime = 12 * time.Hour

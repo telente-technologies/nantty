@@ -6,10 +6,10 @@ import (
 	"encoding/json"
 	"fmt"
 
-	ledgermodels "zudomart/modules/ledger/src/modules/journal/models"
-	"zudomart/modules/payments/src/constants"
-	"zudomart/modules/payments/src/generated/ent"
-	"zudomart/modules/payments/src/modules/gateway/models"
+	ledgermodels "nantty/modules/ledger/src/modules/journal/models"
+	"nantty/modules/payments/src/constants"
+	"nantty/modules/payments/src/generated/ent"
+	"nantty/modules/payments/src/modules/gateway/models"
 )
 
 func IsConnectedAccountCharge(intent *ent.PaymentIntent) bool {

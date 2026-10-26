@@ -1,10 +1,10 @@
 package gateway
 
 import (
-	"zudomart/modules/payments/src/constants"
-	"zudomart/modules/payments/src/container"
-	bankservices "zudomart/modules/payments/src/modules/banks/services"
-	"zudomart/modules/payments/src/modules/gateway/services"
+	"nantty/modules/payments/src/constants"
+	"nantty/modules/payments/src/container"
+	bankservices "nantty/modules/payments/src/modules/banks/services"
+	"nantty/modules/payments/src/modules/gateway/services"
 )
 
 type Application struct {

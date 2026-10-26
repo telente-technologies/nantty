@@ -11,14 +11,14 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/ledger/src/databases"
-	"zudomart/modules/payments/src/constants"
-	"zudomart/modules/payments/src/generated/ent"
-	"zudomart/modules/payments/src/generated/ent/connectedaccount"
-	"zudomart/modules/payments/src/generated/ent/connectedaccountjob"
-	"zudomart/modules/payments/src/modules/gateway/models"
-	"zudomart/platform/httpserver"
-	"zudomart/platform/secretbox"
+	"nantty/modules/ledger/src/databases"
+	"nantty/modules/payments/src/constants"
+	"nantty/modules/payments/src/generated/ent"
+	"nantty/modules/payments/src/generated/ent/connectedaccount"
+	"nantty/modules/payments/src/generated/ent/connectedaccountjob"
+	"nantty/modules/payments/src/modules/gateway/models"
+	"nantty/platform/httpserver"
+	"nantty/platform/secretbox"
 )
 
 var (

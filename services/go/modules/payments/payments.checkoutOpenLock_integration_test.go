@@ -8,11 +8,11 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/ledger/src/databases"
-	"zudomart/modules/payments/src/constants"
-	paymentstesting "zudomart/modules/payments/src/integrations/paymentsTesting"
-	"zudomart/modules/payments/src/modules/gateway/models"
-	gatewayservices "zudomart/modules/payments/src/modules/gateway/services"
+	"nantty/modules/ledger/src/databases"
+	"nantty/modules/payments/src/constants"
+	paymentstesting "nantty/modules/payments/src/integrations/paymentsTesting"
+	"nantty/modules/payments/src/modules/gateway/models"
+	gatewayservices "nantty/modules/payments/src/modules/gateway/services"
 )
 
 func TestAConcurrentCheckoutOpenReturnsRetryInsteadOfOpeningASecondProviderSession(t *testing.T) {

@@ -5,7 +5,7 @@ import (
 	"database/sql"
 	"sync"
 
-	"zudomart/modules/payments/src/modules/gateway/models"
+	"nantty/modules/payments/src/modules/gateway/models"
 )
 
 type gatewayObservers struct {

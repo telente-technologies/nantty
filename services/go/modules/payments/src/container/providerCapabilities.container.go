@@ -5,11 +5,11 @@ import (
 	"net/http"
 	"time"
 
-	"zudomart/modules/payments/src/configs"
-	"zudomart/modules/payments/src/constants"
-	"zudomart/modules/payments/src/integrations"
-	"zudomart/modules/payments/src/interfaces"
-	"zudomart/platform/httpserver"
+	"nantty/modules/payments/src/configs"
+	"nantty/modules/payments/src/constants"
+	"nantty/modules/payments/src/integrations"
+	"nantty/modules/payments/src/interfaces"
+	"nantty/platform/httpserver"
 )
 
 var ErrProviderCapabilityMissing = httpserver.NewApiError(http.StatusUnprocessableEntity, "PAYMENT_PROVIDER_CAPABILITY_MISSING", "This payment provider does not support this operation.")

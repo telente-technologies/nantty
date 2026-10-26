@@ -4,7 +4,7 @@ import (
 	"strings"
 	"testing"
 
-	"zudomart/modules/ledger/src/loaders"
+	"nantty/modules/ledger/src/loaders"
 )
 
 func validFlutterwave(key string) FlutterwaveSettings {

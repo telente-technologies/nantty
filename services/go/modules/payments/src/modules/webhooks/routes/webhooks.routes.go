@@ -3,8 +3,8 @@ package routes
 import (
 	"net/http"
 
-	"zudomart/modules/payments/src/modules/gateway"
-	"zudomart/modules/payments/src/modules/webhooks/controllers"
+	"nantty/modules/payments/src/modules/gateway"
+	"nantty/modules/payments/src/modules/webhooks/controllers"
 )
 
 func MountWebhooksRoutes(mux *http.ServeMux, application *gateway.Application) {

@@ -4,9 +4,9 @@ import (
 	"net/http"
 	"regexp"
 
-	ledgerutils "zudomart/modules/ledger/src/utils"
-	"zudomart/modules/payments/src/modules/connectedAccounts/dtos"
-	"zudomart/platform/httpserver"
+	ledgerutils "nantty/modules/ledger/src/utils"
+	"nantty/modules/payments/src/modules/connectedAccounts/dtos"
+	"nantty/platform/httpserver"
 )
 
 var (

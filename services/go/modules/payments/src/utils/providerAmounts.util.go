@@ -8,7 +8,7 @@ import (
 	"strconv"
 	"strings"
 
-	"zudomart/platform/money"
+	"nantty/platform/money"
 )
 
 var ErrInvalidProviderAmount = errors.New("provider amount is not a valid decimal in this currency")

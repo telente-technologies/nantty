@@ -4,8 +4,8 @@ import (
 	"context"
 	"database/sql"
 
-	ledgermodels "zudomart/modules/ledger/src/modules/journal/models"
-	"zudomart/modules/payments/src/modules/gateway/models"
+	ledgermodels "nantty/modules/ledger/src/modules/journal/models"
+	"nantty/modules/payments/src/modules/gateway/models"
 )
 
 type ledgerMovementHandler struct {

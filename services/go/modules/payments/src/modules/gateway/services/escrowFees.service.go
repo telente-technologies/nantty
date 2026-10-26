@@ -5,8 +5,8 @@ import (
 	"database/sql"
 	"sync"
 
-	"zudomart/modules/ledger/src/databases"
-	"zudomart/modules/payments/src/utils"
+	"nantty/modules/ledger/src/databases"
+	"nantty/modules/payments/src/utils"
 )
 
 type SellerPlanLookup func(ctx context.Context, sellerUserId string) string

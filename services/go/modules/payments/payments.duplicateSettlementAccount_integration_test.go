@@ -9,11 +9,11 @@ import (
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 
-	"zudomart/modules/payments/src/generated/ent/connectedaccountjob"
-	paymentstesting "zudomart/modules/payments/src/integrations/paymentsTesting"
-	"zudomart/modules/payments/src/interfaces"
-	"zudomart/modules/payments/src/modules/gateway/models"
-	"zudomart/modules/payments/src/modules/gateway/services"
+	"nantty/modules/payments/src/generated/ent/connectedaccountjob"
+	paymentstesting "nantty/modules/payments/src/integrations/paymentsTesting"
+	"nantty/modules/payments/src/interfaces"
+	"nantty/modules/payments/src/modules/gateway/models"
+	"nantty/modules/payments/src/modules/gateway/services"
 )
 
 func onboardSellerIdentity(t *testing.T, harness *paymentstesting.MoneyHarness) (string, string) {

@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"zudomart/modules/payments/src/interfaces"
+	"nantty/modules/payments/src/interfaces"
 )
 
 type ProviderRequestError struct {

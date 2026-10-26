@@ -9,11 +9,11 @@ import (
 	"strings"
 	"time"
 
-	"zudomart/modules/payments/src/generated/ent"
-	"zudomart/modules/payments/src/generated/ent/providermovement"
-	"zudomart/modules/payments/src/integrations/providerHttp"
-	"zudomart/modules/payments/src/interfaces"
-	"zudomart/modules/payments/src/modules/gateway/models"
+	"nantty/modules/payments/src/generated/ent"
+	"nantty/modules/payments/src/generated/ent/providermovement"
+	"nantty/modules/payments/src/integrations/providerHttp"
+	"nantty/modules/payments/src/interfaces"
+	"nantty/modules/payments/src/modules/gateway/models"
 )
 
 func (gateway *PaymentGateway) EnqueueMovementInTransaction(ctx context.Context, transaction *sql.Tx, request models.MovementRequest) (*ent.ProviderMovement, error) {

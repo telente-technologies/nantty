@@ -17,7 +17,7 @@ import (
 	"testing"
 	"time"
 
-	"zudomart/modules/payments/src/interfaces"
+	"nantty/modules/payments/src/interfaces"
 )
 
 type testAppleSigner struct {

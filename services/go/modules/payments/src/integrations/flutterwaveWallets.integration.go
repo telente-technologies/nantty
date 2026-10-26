@@ -10,8 +10,8 @@ import (
 	"strings"
 	"time"
 
-	"zudomart/modules/payments/src/integrations/providerHttp"
-	"zudomart/modules/payments/src/interfaces"
+	"nantty/modules/payments/src/integrations/providerHttp"
+	"nantty/modules/payments/src/interfaces"
 )
 
 type flutterwaveSubaccount struct {

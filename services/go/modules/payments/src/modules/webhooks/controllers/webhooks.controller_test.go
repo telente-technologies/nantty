@@ -5,7 +5,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"zudomart/modules/payments/src/integrations"
+	"nantty/modules/payments/src/integrations"
 )
 
 func TestPushTokenComesFromHeadersNeverTheQueryString(t *testing.T) {

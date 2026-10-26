@@ -5,12 +5,12 @@ import (
 	"regexp"
 	"strings"
 
-	"zudomart/modules/ledger/src/utils"
-	resolvebankaccount "zudomart/modules/payments/src/modules/banks/commands/resolveBankAccount"
-	"zudomart/modules/payments/src/modules/banks/dtos"
-	listbanks "zudomart/modules/payments/src/modules/banks/queries/listBanks"
-	"zudomart/modules/payments/src/modules/gateway"
-	"zudomart/platform/httpserver"
+	"nantty/modules/ledger/src/utils"
+	resolvebankaccount "nantty/modules/payments/src/modules/banks/commands/resolveBankAccount"
+	"nantty/modules/payments/src/modules/banks/dtos"
+	listbanks "nantty/modules/payments/src/modules/banks/queries/listBanks"
+	"nantty/modules/payments/src/modules/gateway"
+	"nantty/platform/httpserver"
 )
 
 var (

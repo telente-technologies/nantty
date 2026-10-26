@@ -3,11 +3,11 @@ package routes
 import (
 	"net/http"
 
-	"zudomart/modules/ledger/src/constants"
-	"zudomart/modules/ledger/src/middlewares"
-	paymentmiddlewares "zudomart/modules/payments/src/middlewares"
-	"zudomart/modules/payments/src/modules/connectedAccounts/controllers"
-	"zudomart/modules/payments/src/modules/gateway"
+	"nantty/modules/ledger/src/constants"
+	"nantty/modules/ledger/src/middlewares"
+	paymentmiddlewares "nantty/modules/payments/src/middlewares"
+	"nantty/modules/payments/src/modules/connectedAccounts/controllers"
+	"nantty/modules/payments/src/modules/gateway"
 )
 
 func MountConnectedAccountsRoutes(mux *http.ServeMux, application *gateway.Application) {

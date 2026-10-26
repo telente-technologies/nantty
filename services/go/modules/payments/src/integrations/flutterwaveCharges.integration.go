@@ -13,8 +13,8 @@ import (
 	"strconv"
 	"strings"
 
-	"zudomart/modules/payments/src/integrations/providerHttp"
-	"zudomart/modules/payments/src/interfaces"
+	"nantty/modules/payments/src/integrations/providerHttp"
+	"nantty/modules/payments/src/interfaces"
 )
 
 var flutterwaveChargeIdPattern = regexp.MustCompile(`^[0-9]{1,20}$`)

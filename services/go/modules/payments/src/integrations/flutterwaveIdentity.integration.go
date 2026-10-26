@@ -9,7 +9,7 @@ import (
 	"regexp"
 	"strings"
 
-	"zudomart/modules/payments/src/interfaces"
+	"nantty/modules/payments/src/interfaces"
 )
 
 var (

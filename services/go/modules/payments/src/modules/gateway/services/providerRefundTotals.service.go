@@ -6,7 +6,7 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/payments/src/generated/ent"
+	"nantty/modules/payments/src/generated/ent"
 )
 
 func (gateway *PaymentGateway) ProviderRefundedMinorForPaymentInTransaction(ctx context.Context, transaction *sql.Tx, paymentIntentId uuid.UUID) (int64, error) {

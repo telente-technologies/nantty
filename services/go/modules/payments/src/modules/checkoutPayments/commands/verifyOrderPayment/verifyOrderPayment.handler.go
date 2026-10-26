@@ -5,13 +5,13 @@ import (
 	"errors"
 	"net/http"
 
-	"zudomart/modules/payments/src/constants"
-	"zudomart/modules/payments/src/generated/ent"
-	"zudomart/modules/payments/src/generated/ent/paymentintent"
-	"zudomart/modules/payments/src/modules/checkoutPayments/dtos"
-	"zudomart/modules/payments/src/modules/gateway"
-	"zudomart/modules/payments/src/modules/gateway/services"
-	"zudomart/platform/httpserver"
+	"nantty/modules/payments/src/constants"
+	"nantty/modules/payments/src/generated/ent"
+	"nantty/modules/payments/src/generated/ent/paymentintent"
+	"nantty/modules/payments/src/modules/checkoutPayments/dtos"
+	"nantty/modules/payments/src/modules/gateway"
+	"nantty/modules/payments/src/modules/gateway/services"
+	"nantty/platform/httpserver"
 )
 
 const newestPendingIntentsVerifiedWithProvider = 3

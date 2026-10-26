@@ -6,9 +6,9 @@ import (
 	"net/http"
 	"strings"
 
-	"zudomart/modules/payments/src/integrations"
-	"zudomart/modules/payments/src/modules/gateway"
-	"zudomart/platform/httpserver"
+	"nantty/modules/payments/src/integrations"
+	"nantty/modules/payments/src/modules/gateway"
+	"nantty/platform/httpserver"
 )
 
 const maximumWebhookBodyBytes = 1 << 20

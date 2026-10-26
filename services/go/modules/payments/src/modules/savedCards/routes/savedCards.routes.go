@@ -3,9 +3,9 @@ package routes
 import (
 	"net/http"
 
-	"zudomart/modules/ledger/src/middlewares"
-	"zudomart/modules/payments/src/modules/gateway"
-	"zudomart/modules/payments/src/modules/savedCards/controllers"
+	"nantty/modules/ledger/src/middlewares"
+	"nantty/modules/payments/src/modules/gateway"
+	"nantty/modules/payments/src/modules/savedCards/controllers"
 )
 
 func MountSavedCardsRoutes(mux *http.ServeMux, application *gateway.Application) {

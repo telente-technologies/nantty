@@ -4,13 +4,13 @@ import (
 	"errors"
 	"net/http"
 
-	ledgermodels "zudomart/modules/ledger/src/modules/journal/models"
-	ledgerutils "zudomart/modules/ledger/src/utils"
-	"zudomart/modules/payments/src/generated/ent/providerwalletnumber"
-	"zudomart/modules/payments/src/modules/gateway"
-	"zudomart/modules/payments/src/modules/gateway/models"
-	"zudomart/modules/payments/src/modules/gateway/services"
-	"zudomart/platform/httpserver"
+	ledgermodels "nantty/modules/ledger/src/modules/journal/models"
+	ledgerutils "nantty/modules/ledger/src/utils"
+	"nantty/modules/payments/src/generated/ent/providerwalletnumber"
+	"nantty/modules/payments/src/modules/gateway"
+	"nantty/modules/payments/src/modules/gateway/models"
+	"nantty/modules/payments/src/modules/gateway/services"
+	"nantty/platform/httpserver"
 )
 
 type ProviderWalletsController struct {

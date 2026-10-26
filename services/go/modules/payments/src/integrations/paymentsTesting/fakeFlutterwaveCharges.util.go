@@ -8,7 +8,7 @@ import (
 	"strings"
 	"time"
 
-	"zudomart/modules/payments/src/integrations"
+	"nantty/modules/payments/src/integrations"
 )
 
 func (fake *FakeFlutterwave) routeCharges(request fakeFlwRequest) (int, any, any) {

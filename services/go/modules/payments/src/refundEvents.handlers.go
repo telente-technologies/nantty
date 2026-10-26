@@ -6,9 +6,9 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/ledger/src/loaders"
-	"zudomart/modules/payments/src/modules/gateway/services"
-	platformevents "zudomart/platform/events"
+	"nantty/modules/ledger/src/loaders"
+	"nantty/modules/payments/src/modules/gateway/services"
+	platformevents "nantty/platform/events"
 )
 
 type refundEventData struct {

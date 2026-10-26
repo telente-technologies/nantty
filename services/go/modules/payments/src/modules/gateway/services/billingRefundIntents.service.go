@@ -11,10 +11,10 @@ import (
 	"net/http"
 	"time"
 
-	"zudomart/modules/ledger/src/databases"
-	"zudomart/modules/payments/src/generated/ent/idempotentrequest"
-	"zudomart/modules/payments/src/interfaces"
-	"zudomart/platform/httpserver"
+	"nantty/modules/ledger/src/databases"
+	"nantty/modules/payments/src/generated/ent/idempotentrequest"
+	"nantty/modules/payments/src/interfaces"
+	"nantty/platform/httpserver"
 )
 
 const (

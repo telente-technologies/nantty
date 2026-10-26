@@ -7,10 +7,10 @@ import (
 	"fmt"
 	"time"
 
-	"zudomart/modules/ledger/src/databases"
-	"zudomart/modules/payments/src/generated/ent"
-	"zudomart/modules/payments/src/generated/ent/sellerverification"
-	"zudomart/platform/events"
+	"nantty/modules/ledger/src/databases"
+	"nantty/modules/payments/src/generated/ent"
+	"nantty/modules/payments/src/generated/ent/sellerverification"
+	"nantty/platform/events"
 )
 
 func (gateway *PaymentGateway) RecordSellerVerification(ctx context.Context, accountId, eventId string, verifiedAt time.Time) error {

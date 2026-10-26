@@ -6,10 +6,10 @@ import (
 	"slices"
 	"time"
 
-	"zudomart/modules/ledger/src/databases"
-	"zudomart/modules/payments/src/constants"
-	"zudomart/modules/payments/src/generated/ent"
-	"zudomart/modules/payments/src/generated/ent/connectedaccount"
+	"nantty/modules/ledger/src/databases"
+	"nantty/modules/payments/src/constants"
+	"nantty/modules/payments/src/generated/ent"
+	"nantty/modules/payments/src/generated/ent/connectedaccount"
 )
 
 type ConnectedAccountView struct {

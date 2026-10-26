@@ -17,8 +17,8 @@ import (
 	"strings"
 	"time"
 
-	"zudomart/modules/payments/src/interfaces"
-	"zudomart/platform/money"
+	"nantty/modules/payments/src/interfaces"
+	"nantty/platform/money"
 )
 
 type AppleAppStoreSettings struct {
