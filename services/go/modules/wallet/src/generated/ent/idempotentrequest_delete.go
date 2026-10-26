@@ -4,9 +4,9 @@ package ent
 
 import (
 	"context"
-	"zudomart/modules/wallet/src/generated/ent/idempotentrequest"
-	"zudomart/modules/wallet/src/generated/ent/internal"
-	"zudomart/modules/wallet/src/generated/ent/predicate"
+	"nantty/modules/wallet/src/generated/ent/idempotentrequest"
+	"nantty/modules/wallet/src/generated/ent/internal"
+	"nantty/modules/wallet/src/generated/ent/predicate"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"

@@ -4,9 +4,9 @@ package ent
 
 import (
 	"fmt"
+	"nantty/modules/wallet/src/generated/ent/payoutaccount"
 	"strings"
 	"time"
-	"zudomart/modules/wallet/src/generated/ent/payoutaccount"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"

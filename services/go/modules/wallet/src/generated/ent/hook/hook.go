@@ -5,7 +5,7 @@ package hook
 import (
 	"context"
 	"fmt"
-	"zudomart/modules/wallet/src/generated/ent"
+	"nantty/modules/wallet/src/generated/ent"
 )
 
 // The AdBalanceEarningsTransferFunc type is an adapter to allow the use of ordinary

@@ -6,8 +6,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"nantty/modules/wallet/src/generated/ent/monetisationhold"
 	"time"
-	"zudomart/modules/wallet/src/generated/ent/monetisationhold"
 
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
