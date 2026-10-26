@@ -30,7 +30,7 @@ const goldForBusinessesContract = c.object({
 });
 
 async function signIn(identifier: string) {
-  const login = await callMock("POST", "/auth/login", {}, { identifier, password: "Zudomart2026!" });
+  const login = await callMock("POST", "/auth/login", {}, { identifier, password: "Nantty2026!" });
   return `Bearer ${(login.body as { accessToken: string }).accessToken}`;
 }
 

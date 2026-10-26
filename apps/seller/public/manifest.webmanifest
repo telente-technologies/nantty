@@ -1,7 +1,7 @@
 {
-  "name": "Zudomart Dashboard",
-  "short_name": "Zudomart POS",
-  "description": "Point of sale and back office for Zudomart sellers.",
+  "name": "Nantty Dashboard",
+  "short_name": "Nantty POS",
+  "description": "Point of sale and back office for Nantty sellers.",
   "start_url": "/pos",
   "scope": "/",
   "display": "standalone",
@@ -12,6 +12,6 @@
     { "src": "/brand/icon192.png", "sizes": "192x192", "type": "image/png" },
     { "src": "/brand/icon512.png", "sizes": "512x512", "type": "image/png" },
     { "src": "/brand/icon512Maskable.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" },
-    { "src": "/brand/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+    { "src": "/brand/nantty-icon.png", "sizes": "512x512", "type": "image/png", "purpose": "any" }
   ]
 }

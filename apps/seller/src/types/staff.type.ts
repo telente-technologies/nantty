@@ -26,7 +26,7 @@ export interface AuditLogEntry {
   readonly createdAt: string;
 }
 
-export interface ZudomartUserCandidate {
+export interface NanttyUserCandidate {
   readonly userId: string;
   readonly name: string;
   readonly username: string;

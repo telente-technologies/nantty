@@ -1,4 +1,4 @@
-import type { AttachmentPointer, ChatControl, ChatLocation, ChatPoll } from "@zudomart/chat-crypto";
+import type { AttachmentPointer, ChatControl, ChatLocation, ChatPoll } from "@nantty/chat-crypto";
 
 export interface ConversationParticipant {
   readonly id: string;

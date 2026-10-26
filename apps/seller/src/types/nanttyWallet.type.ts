@@ -5,16 +5,16 @@ export interface WalletLineAmount {
   readonly currency: string;
 }
 
-export type ZudomartWalletLineKey = "available" | "pending" | "locked" | "earningsPayable" | "adCredit" | "coins" | "debts";
+export type NanttyWalletLineKey = "available" | "pending" | "locked" | "earningsPayable" | "adCredit" | "coins" | "debts";
 
-export interface ZudomartWalletLine {
-  readonly key: ZudomartWalletLineKey | string;
+export interface NanttyWalletLine {
+  readonly key: NanttyWalletLineKey | string;
   readonly label: string;
   readonly description: string;
   readonly amount: WalletLineAmount;
 }
 
-export interface ZudomartWalletVerification {
+export interface NanttyWalletVerification {
   readonly level: number;
   readonly withdrawalsUnlocked: boolean;
   readonly waitingForVerification: Money;
@@ -22,7 +22,7 @@ export interface ZudomartWalletVerification {
   readonly message: string | null;
 }
 
-export interface ZudomartWalletSummary {
+export interface NanttyWalletSummary {
   readonly available: Money;
   readonly pending: Money;
   readonly locked?: Money;
@@ -34,6 +34,6 @@ export interface ZudomartWalletSummary {
   readonly earningsPayable?: Money;
   readonly debts?: Money;
   readonly coins?: { readonly spendable: number; readonly earned: number };
-  readonly lines?: readonly ZudomartWalletLine[];
-  readonly verification?: ZudomartWalletVerification | null;
+  readonly lines?: readonly NanttyWalletLine[];
+  readonly verification?: NanttyWalletVerification | null;
 }

@@ -16,9 +16,9 @@ export interface MockWorkspaceState {
 function buildDemoSessions(): SecuritySession[] {
   return [
     { id: "ses_current", device: "Chrome on Windows", app: "dashboard", location: "Lekki, Lagos", ipAddress: "102.89.•••.14", signedInAt: hoursAgo(3), lastActiveAt: hoursAgo(0), isCurrent: true },
-    { id: "ses_iphone", device: "Zudomart app on iPhone 13", app: "mobile_app", location: "Lekki, Lagos", ipAddress: "102.89.•••.14", signedInAt: hoursAgo(240), lastActiveAt: hoursAgo(1), isCurrent: false },
+    { id: "ses_iphone", device: "Nantty app on iPhone 13", app: "mobile_app", location: "Lekki, Lagos", ipAddress: "102.89.•••.14", signedInAt: hoursAgo(240), lastActiveAt: hoursAgo(1), isCurrent: false },
     { id: "ses_macbook", device: "Safari on macOS", app: "dashboard", location: "Wuse 2, Abuja", ipAddress: "197.210.•••.88", signedInAt: hoursAgo(96), lastActiveAt: hoursAgo(30), isCurrent: false },
-    { id: "ses_tecno", device: "Zudomart app on Tecno Camon 20", app: "mobile_app", location: "Ikeja, Lagos", ipAddress: "105.112.•••.201", signedInAt: hoursAgo(600), lastActiveAt: hoursAgo(72), isCurrent: false },
+    { id: "ses_tecno", device: "Nantty app on Tecno Camon 20", app: "mobile_app", location: "Ikeja, Lagos", ipAddress: "105.112.•••.201", signedInAt: hoursAgo(600), lastActiveAt: hoursAgo(72), isCurrent: false },
   ];
 }
 
@@ -28,7 +28,7 @@ function buildDemoLoginHistory(): LoginHistoryEntry[] {
     { id: "lgn_2", outcome: "wrong_password", device: "Chrome on Windows", location: "Lekki, Lagos", ipAddress: "102.89.•••.14", occurredAt: hoursAgo(3.1) },
     { id: "lgn_3", outcome: "success", device: "Safari on macOS", location: "Wuse 2, Abuja", ipAddress: "197.210.•••.88", occurredAt: hoursAgo(96) },
     { id: "lgn_4", outcome: "blocked", device: "Firefox on Linux", location: "Unknown, Netherlands", ipAddress: "185.220.•••.5", occurredAt: hoursAgo(130) },
-    { id: "lgn_5", outcome: "success", device: "Zudomart app on iPhone 13", location: "Lekki, Lagos", ipAddress: "102.89.•••.14", occurredAt: hoursAgo(240) },
+    { id: "lgn_5", outcome: "success", device: "Nantty app on iPhone 13", location: "Lekki, Lagos", ipAddress: "102.89.•••.14", occurredAt: hoursAgo(240) },
   ];
 }
 

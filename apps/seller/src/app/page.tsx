@@ -18,11 +18,11 @@ import { loadPublicSubscriptionPlansForVisitor } from "@/server/publicPlans.serv
 import styles from "@/components/landing/landingPage.module.css";
 
 export const metadata: Metadata = {
-  title: { absolute: "Zudomart Dashboard — run your business, free for every seller" },
-  description: "The Zudomart App lets you sell from anywhere. Zudomart Dashboard is where you run your business: products, inventory, app orders with escrow, customers, analytics, marketing, payouts, team and reports. Free for every Zudomart seller.",
+  title: { absolute: "Nantty Dashboard — run your business, free for every seller" },
+  description: "The Nantty App lets you sell from anywhere. Nantty Dashboard is where you run your business: products, inventory, app orders with escrow, customers, analytics, marketing, payouts, team and reports. Free for every Nantty seller.",
   alternates: { canonical: "/" },
   robots: { index: true, follow: true },
-  openGraph: { type: "website", title: "Zudomart Dashboard", description: "Run your Zudomart business from one screen. Free for every seller — upgrade to Pro or Business when you grow.", url: "/", images: [{ url: "/screenshots/dashboardOverview.webp", width: 2880, height: 1800, alt: "Zudomart Dashboard home" }] },
+  openGraph: { type: "website", title: "Nantty Dashboard", description: "Run your Nantty business from one screen. Free for every seller — upgrade to Pro or Business when you grow.", url: "/", images: [{ url: "/screenshots/dashboardOverview.webp", width: 2880, height: 1800, alt: "Nantty Dashboard home" }] },
 };
 
 export default async function LandingPage() {

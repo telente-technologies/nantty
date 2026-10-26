@@ -45,7 +45,7 @@ describe("product option chips map to catalog's ProductUpsertRequest", () => {
   });
 
   it("keeps saved variant ids and SKUs through rename, reorder, a new value and a new option", async () => {
-    const login = await callMock("POST", "/auth/login", {}, { identifier: "adaeze@ifelifestyle.ng", password: "Zudomart2026!" });
+    const login = await callMock("POST", "/auth/login", {}, { identifier: "adaeze@ifelifestyle.ng", password: "Nantty2026!" });
     const headers = { authorization: `Bearer ${(login.body as { accessToken: string }).accessToken}` };
     let draft: ProductDraft = withOptions({ ...createEmptyProductDraft(), name: "Option chips tee" }, () => [createOptionDraft("Size", ["S", "M"])]);
     const created = await callMock("POST", "/seller/products", headers, convertDraftToUpsertRequest(priced(draft, "CHIPTEE"), "NGN", true).request);

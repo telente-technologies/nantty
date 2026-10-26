@@ -14,7 +14,7 @@ async function callMock(method: string, path: string, headers: Record<string, st
 }
 
 describe("newly backed seller domains: mock responses match the backend contracts", async () => {
-  const login = await callMock("POST", "/auth/login", {}, { identifier: "adaeze@ifelifestyle.ng", password: "Zudomart2026!" });
+  const login = await callMock("POST", "/auth/login", {}, { identifier: "adaeze@ifelifestyle.ng", password: "Nantty2026!" });
   const token = (login.body as { accessToken: string }).accessToken;
   for (const contract of sellerDomainContracts) {
     it(`${contract.method} ${contract.path}`, async () => {

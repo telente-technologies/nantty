@@ -90,7 +90,7 @@ function registerOrderNoteRefundAndContactHandlers(): void {
       else if (amountMinor > refundableMinor) issues.push({ path: "amountMinor", message: "You cannot refund more than the buyer paid." });
       if (reason.length < 5 || reason.length > 500) issues.push({ path: "reason", message: "Tell the buyer why (5–500 characters)." });
       if (issues.length > 0) return respondWithValidationFailure(issues);
-      if (order.status === "cancelled" || order.status === "refunded" || order.status === "disputed") throw new MockHttpError(409, "ORDER_NOT_REFUNDABLE", order.status === "disputed" ? "Zudomart decides refunds while a dispute is open." : "This order has already been refunded.");
+      if (order.status === "cancelled" || order.status === "refunded" || order.status === "disputed") throw new MockHttpError(409, "ORDER_NOT_REFUNDABLE", order.status === "disputed" ? "Nantty decides refunds while a dispute is open." : "This order has already been refunded.");
       const isFullRefund = amountMinor === refundableMinor;
       const refundedAmount = { amountMinor: order.refundedAmount.amountMinor + amountMinor, currency: order.total.currency };
       const refund = { id: `rf_${crypto.randomUUID().slice(0, 10)}`, amount: { amountMinor, currency: order.total.currency }, reason, createdAt: new Date().toISOString() };

@@ -109,7 +109,7 @@ export function registerReviewMockRoutes(): void {
     if (!reportReasons.includes(reason)) issues.push({ path: "reason", message: "Choose a reason." });
     if (details.length > 500 || (reason === "other" && details.length < 5)) issues.push({ path: "details", message: reason === "other" ? "Tell us what is wrong (5–500 characters)." : "Keep details under 500 characters." });
     if (issues.length > 0) return respondWithValidationFailure(issues);
-    if ((reviews[index] as Review).status === "reported") throw new MockHttpError(409, "ALREADY_REPORTED", "You already reported this review. Zudomart is looking at it.");
+    if ((reviews[index] as Review).status === "reported") throw new MockHttpError(409, "ALREADY_REPORTED", "You already reported this review. Nantty is looking at it.");
     const updated: Review = { ...(reviews[index] as Review), status: "reported" };
     reviews[index] = updated;
     return respondWithJson(200, updated);

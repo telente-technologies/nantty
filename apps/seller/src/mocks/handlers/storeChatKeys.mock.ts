@@ -1,4 +1,4 @@
-import { ChatCryptoClient, type DeviceAddress, type DeviceRegistrationRequest, InMemoryKeyDirectory, type MailboxEntryInput, MemoryKeyValueStore, type WireOneTimePreKey, type WireSignedPreKey } from "@zudomart/chat-crypto";
+import { ChatCryptoClient, type DeviceAddress, type DeviceRegistrationRequest, InMemoryKeyDirectory, type MailboxEntryInput, MemoryKeyValueStore, type WireOneTimePreKey, type WireSignedPreKey } from "@nantty/chat-crypto";
 
 import { MockHttpError, readJsonObjectBody, respondWithJson } from "@/mocks/mockResponses.mock";
 import { registerMockRoute, type MockRequest } from "@/mocks/mockRouter.mock";

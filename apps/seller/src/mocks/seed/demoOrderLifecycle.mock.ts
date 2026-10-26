@@ -69,7 +69,7 @@ export function buildDemoOrderTimeline({ orderKey, status, daysAgo, buyerName, c
   const events: OrderTimelineEvent[] = [];
   const pushEvent = (kind: OrderTimelineEvent["kind"], summary: string, eventDaysAgo: number, hour: number, actorName: string | null) =>
     events.push({ id: `tl_${orderKey}_${events.length + 1}`, kind, summary, actorName, createdAt: buildIsoDateDaysAgo(Math.max(eventDaysAgo, 0), hour) });
-  pushEvent("placed", `${buyerName} placed the order in the Zudomart app`, daysAgo, 9, buyerName);
+  pushEvent("placed", `${buyerName} placed the order in the Nantty app`, daysAgo, 9, buyerName);
   pushEvent("paid", "Payment confirmed and held in escrow", daysAgo, 9, null);
   if (status === "new") return events;
   if (status === "cancelled") {

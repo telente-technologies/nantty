@@ -58,7 +58,7 @@ function buildDemoBrandRecords(): MockBrandRecord[] {
       handle: "ife.lifestyle",
       logoUrl: null,
       coverUrl: "https://images.unsplash.com/photo-1603006905003-be475563bc59?w=800&q=80&fm=webp",
-      description: "Everyday fashion, adire pieces and home scents designed in Lagos. Made in small batches and sold in our Lekki, Ikeja and Abuja stores and on Zudomart.",
+      description: "Everyday fashion, adire pieces and home scents designed in Lagos. Made in small batches and sold in our Lekki, Ikeja and Abuja stores and on Nantty.",
       website: "https://ifelifestyle.ng",
       country: "NG",
       registration: { status: "registered", trademarkNumber: "NG/TM/O/2025/118042", registeredAt: buildIsoDateDaysAgo(210), note: null },

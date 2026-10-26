@@ -1,4 +1,4 @@
-import { isBrowserOffline, parseRetryAfterHeader, readFriendlyErrorMessage, readRequestIdHeader } from "@zudomart/web-kit";
+import { isBrowserOffline, parseRetryAfterHeader, readFriendlyErrorMessage, readRequestIdHeader } from "@nantty/web-kit";
 
 import { describeLimitError } from "@/utils/limitErrors.util";
 

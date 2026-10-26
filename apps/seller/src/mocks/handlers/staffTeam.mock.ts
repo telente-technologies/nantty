@@ -7,7 +7,7 @@ import { createMockIdentifier, matchesSearchText, MockHttpError, paginateMockLis
 import { registerMockRoute, type MockRequest } from "@/mocks/mockRouter.mock";
 import { buildDemoUserAccounts, type MockStaffRecord } from "@/mocks/seed/demoPeople.mock";
 import type { StaffRole } from "@/types/sellerAccess.type";
-import type { StaffMember, ZudomartUserCandidate } from "@/types/staff.type";
+import type { StaffMember, NanttyUserCandidate } from "@/types/staff.type";
 import { fieldChecks, validateObjectAgainstChecks, type ValidationIssue } from "@/utils/formValidation.util";
 
 const invitableRoles = staffRoles.filter((role) => role !== "owner");
@@ -83,18 +83,18 @@ export function registerStaffTeamMockHandlers(): void {
     const candidates = buildDemoUserAccounts()
       .filter((account) => !existingStaffUserIds.has(account.id) && matchesSearchText(searchText, account.name, account.username))
       .slice(0, 10)
-      .map((account): ZudomartUserCandidate => ({ userId: account.id, name: account.name, username: account.username, avatarUrl: account.avatarUrl }));
+      .map((account): NanttyUserCandidate => ({ userId: account.id, name: account.name, username: account.username, avatarUrl: account.avatarUrl }));
     return respondWithJson(200, { data: candidates });
   });
 
-  registerMockRoute("GET", "/seller/zudomart-users", (request) => {
+  registerMockRoute("GET", "/seller/nantty-users", (request) => {
     requireMockStorePrincipal(request);
     const searchText = (request.query.get("q") ?? "").trim().replace(/^@/, "");
     if (searchText.length < 2) return respondWithJson(200, { data: [] });
     const matchingUsers = buildDemoUserAccounts()
       .filter((account) => matchesSearchText(searchText, account.name, account.username))
       .slice(0, 10)
-      .map((account): ZudomartUserCandidate => ({ userId: account.id, name: account.name, username: account.username, avatarUrl: account.avatarUrl }));
+      .map((account): NanttyUserCandidate => ({ userId: account.id, name: account.name, username: account.username, avatarUrl: account.avatarUrl }));
     return respondWithJson(200, { data: matchingUsers });
   });
 
@@ -103,7 +103,7 @@ export function registerStaffTeamMockHandlers(): void {
     const body = readJsonObjectBody(request);
     const issues = validateObjectAgainstChecks(body, { role: fieldChecks.oneOf("Role", invitableRoles) });
     const zudomartAccount = buildDemoUserAccounts().find((account) => account.id === body.userId);
-    if (!zudomartAccount) issues.push({ path: "userId", message: "Choose someone who already has a Zudomart account." });
+    if (!zudomartAccount) issues.push({ path: "userId", message: "Choose someone who already has a Nantty account." });
     const locationIds = validateLocationIds(body.locationIds, issues);
     const customPermissions = readCustomPermissionsFromBody(principal.storeId, body.permissions, issues);
     if (issues.length > 0 || !zudomartAccount) return respondWithValidationFailure(issues);

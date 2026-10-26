@@ -13,7 +13,7 @@ async function callMock(method: string, path: string, headers: Record<string, st
 
 describe("seller mock responses match the contracts", () => {
   it("auth login returns tokens and the current user", async () => {
-    const login = await callMock("POST", "/auth/login", {}, { identifier: "adaeze@ifelifestyle.ng", password: "Zudomart2026!" });
+    const login = await callMock("POST", "/auth/login", {}, { identifier: "adaeze@ifelifestyle.ng", password: "Nantty2026!" });
     assert.equal(login.status, 200);
     assert.deepEqual(validateAgainstContract(c.object({ accessToken: c.string(), refreshToken: c.string(), user: c.object({ id: c.string() }) }), login.body), []);
   });

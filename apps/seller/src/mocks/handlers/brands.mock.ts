@@ -89,7 +89,7 @@ export function registerBrandsMockHandlers(): void {
     const issues = validateBrandProfilePatch(body);
     if (issues.length > 0) return respondWithValidationFailure(issues);
     if (typeof body.name === "string" && body.name.trim() !== brand.name && brand.registration.status === "registered") {
-      throw new MockHttpError(409, "REGISTERED_NAME_LOCKED", "A registered brand's name matches its trademark. Change it through brand registration in the Zudomart app.");
+      throw new MockHttpError(409, "REGISTERED_NAME_LOCKED", "A registered brand's name matches its trademark. Change it through brand registration in the Nantty app.");
     }
     if (typeof body.name === "string") brand.name = body.name.trim();
     if (typeof body.description === "string") brand.description = body.description.trim();
@@ -133,7 +133,7 @@ export function registerBrandsMockHandlers(): void {
     requireBrandRole(member, ["owner", "admin"], "unlink stores");
     const storeId = request.params.storeId ?? "";
     if (!brand.storeIds.includes(storeId)) throw new MockHttpError(404, "STORE_NOT_LINKED", "That store is not linked to this brand.");
-    if (brand.officialStore.status === "active" && brand.officialStore.storeId === storeId) throw new MockHttpError(409, "OFFICIAL_STORE_LINKED", "This is your Official Store. Contact Zudomart to move the Official Store badge before unlinking it.");
+    if (brand.officialStore.status === "active" && brand.officialStore.storeId === storeId) throw new MockHttpError(409, "OFFICIAL_STORE_LINKED", "This is your Official Store. Contact Nantty to move the Official Store badge before unlinking it.");
     brand.storeIds = brand.storeIds.filter((candidate) => candidate !== storeId);
     recordBrandAuditEntry(principal, "brand.store_unlinked", brand.id, `Unlinked a store from ${brand.name}`);
     return respondWithNoContent();

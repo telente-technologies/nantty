@@ -162,7 +162,7 @@ export function registerCustomerMockHandlers(): void {
       customer.name, customer.phone, customer.email, customer.zudomartUsername, customer.city, customer.tags.join(" "),
       convertMinorUnitsToMajorInputText(customer.totalSpent.amountMinor, customer.totalSpent.currency), customer.averageOrderValue ? convertMinorUnitsToMajorInputText(customer.averageOrderValue.amountMinor, customer.averageOrderValue.currency) : "", customer.totalSpent.currency, customer.purchasesCount, customer.firstPurchaseAt, customer.lastPurchaseAt, customer.marketingOptIn ? "yes" : "no",
     ]);
-    const csvText = convertRowsToCsvText(["Name", "Phone", "Email", "Zudomart username", "City", "Tags", "Total spent", "Average order value", "Currency", "Orders", "First order", "Last order", "Marketing opt-in"], rows);
+    const csvText = convertRowsToCsvText(["Name", "Phone", "Email", "Nantty username", "City", "Tags", "Total spent", "Average order value", "Currency", "Orders", "First order", "Last order", "Marketing opt-in"], rows);
     return respondWithCsv("customers.csv", csvText);
   });
 

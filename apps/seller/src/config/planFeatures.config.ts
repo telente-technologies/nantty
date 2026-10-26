@@ -49,7 +49,7 @@ export const planFeatureDescriptions: Record<PlanFeature, { readonly title: stri
   advanced_analytics: { title: "Advanced analytics", description: "Breakdowns by category, location and hour, plus longer date ranges." },
   advanced_reports: { title: "Advanced reports", description: "Every report, in CSV, Excel and PDF." },
   customer_segments: { title: "Customer segments", description: "Group customers by spend and recency." },
-  team: { title: "Team members", description: "Add Zudomart users to your team with roles." },
+  team: { title: "Team members", description: "Add Nantty users to your team with roles." },
   advanced_promotions: { title: "Advanced promotions", description: "Flash sales, bundles and featured products." },
   ads_tools: { title: "Ads tools", description: "See ad spend, clicks and attributed orders here." },
   multiple_warehouses: { title: "Multiple warehouses", description: "Hold stock in more than one location." },
@@ -93,11 +93,11 @@ export function listFeaturesUnlockedByPlan(plan: SellerPlan): PlanFeature[] {
 
 export const paidPlanCheckmarkNote = "Gold business checkmark after business verification";
 
-export const freePlanPromise = "Free for every Zudomart seller — upgrade to Pro or Business when you grow.";
+export const freePlanPromise = "Free for every Nantty seller — upgrade to Pro or Business when you grow.";
 
 export const planHighlightsByPlan: Record<SellerPlan, readonly string[]> = {
   free: [
-    "Every order from the Zudomart app, with escrow and payouts",
+    "Every order from the Nantty app, with escrow and payouts",
     "Up to 100 active products, with variants and photos",
     "Stock levels and low-stock warnings",
     "Customers, messages, reviews and delivery",

@@ -1,4 +1,4 @@
-import { ChatCryptoClient, type ChatPayloadInput, createHttpKeyDirectory, createWebLocksMutex, describeDecryptionFailure, type EncryptedOutgoingMessage, type KeyValueStore } from "@zudomart/chat-crypto";
+import { ChatCryptoClient, type ChatPayloadInput, createHttpKeyDirectory, createWebLocksMutex, describeDecryptionFailure, type EncryptedOutgoingMessage, type KeyValueStore } from "@nantty/chat-crypto";
 
 import { SellerApiRequestError, sendSellerApiRequest } from "@/services/clientApi.service";
 import type { ConversationMessage, ConversationMessageKind, ConversationRecipients, DecryptedConversationMessage, DecryptedPreview } from "@/types/conversation.type";

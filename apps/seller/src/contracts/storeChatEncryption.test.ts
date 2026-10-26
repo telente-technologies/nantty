@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
-import { ChatCryptoClient, createHttpKeyDirectory, MemoryKeyValueStore } from "@zudomart/chat-crypto";
+import { ChatCryptoClient, createHttpKeyDirectory, MemoryKeyValueStore } from "@nantty/chat-crypto";
 
 import { findPermissionRequiredForApiCall } from "@/config/rolePermissions.config";
 import { dispatchMockApiRequest } from "@/mocks/mockBackend.mock";
@@ -23,7 +23,7 @@ async function callMock(method: string, path: string, headers: Record<string, st
 }
 
 async function signIn() {
-  const login = await callMock("POST", "/auth/login", {}, { identifier: "adaeze@ifelifestyle.ng", password: "Zudomart2026!" });
+  const login = await callMock("POST", "/auth/login", {}, { identifier: "adaeze@ifelifestyle.ng", password: "Nantty2026!" });
   const { accessToken, user } = login.body as { accessToken: string; user: { id: string } };
   const headers = { authorization: `Bearer ${accessToken}` };
   const call = async <T>(method: string, path: string, body?: unknown, extra: Record<string, string> = {}): Promise<T> => {

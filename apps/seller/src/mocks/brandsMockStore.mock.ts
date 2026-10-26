@@ -41,11 +41,11 @@ export function buildOfficialStoreDetails(brand: MockBrandRecord): OfficialStore
   const candidateStore = readGateStore(candidateStoreId);
   const hasOpenTrademarkClaimAgainstBrand = false;
   const requirements: OfficialStoreRequirement[] = [
-    { key: "brand_registered", label: "Brand registered with Zudomart", met: brand.registration.status === "registered", howToFix: "In the Zudomart app, open your brand, choose Register brand and upload your trademark certificate or CAC business name registration." },
+    { key: "brand_registered", label: "Brand registered with Nantty", met: brand.registration.status === "registered", howToFix: "In the Nantty app, open your brand, choose Register brand and upload your trademark certificate or CAC business name registration." },
     { key: "store_linked", label: "A store is linked to the brand", met: brand.storeIds.length > 0, howToFix: "Link the store that sells your brand on the Stores tab." },
-    { key: "store_gold_verified", label: "That store is Gold verified", met: candidateStore?.verificationStatus === "verified", howToFix: "Finish business verification for the store in the Zudomart app." },
+    { key: "store_gold_verified", label: "That store is Gold verified", met: candidateStore?.verificationStatus === "verified", howToFix: "Finish business verification for the store in the Nantty app." },
     { key: "gold_plan_active", label: "Gold Pro or Gold Premium is active", met: isGateStoreGoldActive(candidateStoreId), howToFix: "Keep a Gold plan active on the store (Settings → Billing & Gold plan)." },
-    { key: "no_open_trademark_disputes", label: "No open trademark disputes against the brand", met: !hasOpenTrademarkClaimAgainstBrand, howToFix: "Resolve any trademark dispute with the Zudomart brand team first." },
+    { key: "no_open_trademark_disputes", label: "No open trademark disputes against the brand", met: !hasOpenTrademarkClaimAgainstBrand, howToFix: "Resolve any trademark dispute with the Nantty brand team first." },
   ];
   const everyRequirementMet = requirements.every((requirement) => requirement.met);
   if (brand.officialStore.status === "active") {

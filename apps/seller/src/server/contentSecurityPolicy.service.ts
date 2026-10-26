@@ -18,7 +18,7 @@ function readOriginOrEmpty(configuredUrl: string | undefined): string {
 export function buildContentSecurityPolicyHeaderValue(): string {
   const mediaOrigin = readOriginOrEmpty(readRuntimeEnv("SELLER_MEDIA_URL"));
   const apiOrigin = readOriginOrEmpty(readRuntimeEnv("SELLER_API_URL") ?? (isDevelopmentBuild ? "http://localhost:8080" : undefined));
-  const embedOrigin = readOriginOrEmpty(readRuntimeEnv("NEXT_PUBLIC_WEBAPP_URL") ?? (isDevelopmentBuild ? "http://localhost:3500" : "https://app.zudomart.com"));
+  const embedOrigin = readOriginOrEmpty(readRuntimeEnv("NEXT_PUBLIC_WEBAPP_URL") ?? (isDevelopmentBuild ? "http://localhost:3500" : "https://web.nantty.com"));
   const realtimeOrigin = readOriginOrEmpty((readRuntimeEnv("SELLER_REALTIME_URL") ?? (apiOrigin ? `${apiOrigin}/ws` : "")).replace(/^http(s?):\/\//i, (_, secure: string) => (secure ? "wss://" : "ws://")));
   const uploadOrigins = (readRuntimeEnv("SELLER_UPLOAD_ORIGINS") ?? "").split(",").map((origin) => readOriginOrEmpty(origin.trim())).filter(Boolean);
   const directives: Record<string, string[]> = {

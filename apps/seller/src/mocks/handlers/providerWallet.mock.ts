@@ -25,7 +25,7 @@ export function registerProviderWalletMockHandlers(): void {
     const state = readMockPayoutOnboardingState(requireMockStorePrincipal(request).storeId);
     if (state.status !== "verified") throw new MockHttpError(409, "WALLET_NOT_READY", "Your wallet is not ready yet. Finish verification first.");
     return respondWithJson(200, {
-      wallet: { provider: "flutterwave", currency: "NGN", status: "active", accountName: state.legalName ?? "ZUDOMART SELLER", accountNumber: "8573920146", bankName: "Mock Microfinance Bank", bankCode: "090000", fundingNumbers: [{ accountNumber: "8573920146", bankName: "Mock Microfinance Bank" }], createdAt: new Date(Date.now() - 86_400_000).toISOString(), frozenAt: null },
+      wallet: { provider: "flutterwave", currency: "NGN", status: "active", accountName: state.legalName ?? "NANTTY SELLER", accountNumber: "8573920146", bankName: "Mock Microfinance Bank", bankCode: "090000", fundingNumbers: [{ accountNumber: "8573920146", bankName: "Mock Microfinance Bank" }], createdAt: new Date(Date.now() - 86_400_000).toISOString(), frozenAt: null },
       balances: { currency: "NGN", availableMinor: 1_250_000, depositHoldMinor: 0, escrowLockedMinor: 0, outgoingMinor: 0, reservedPayoutMinor: 0, debtMinor: 0 },
     });
   });

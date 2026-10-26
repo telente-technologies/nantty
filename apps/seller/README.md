@@ -1,8 +1,8 @@
-# Zudomart Dashboard
+# Nantty Dashboard
 
-The seller operating system for Zudomart, served on its own subdomain: `https://dashboard.<domain>` (for example `https://dashboard.zudomart.com`).
+The seller operating system for Nantty, served on its own subdomain: `https://dashboard.<domain>` (for example `https://dashboard.zudomart.com`).
 
-**ZudoMart App = sell from anywhere. ZudoMart Dashboard = run your business.** Free for every approved Zudomart seller — upgrade to Pro or Business when you grow. There is no in-store register: online orders are the marketplace orders customers place in the Zudomart app, and team members are existing Zudomart users who sign in with their own app credentials.
+**Nantty App = sell from anywhere. Nantty Dashboard = run your business.** Free for every approved Nantty seller — upgrade to Pro or Business when you grow. There is no in-store register: online orders are the marketplace orders customers place in the Nantty app, and team members are existing Nantty users who sign in with their own app credentials.
 
 ## Plans and gating
 
@@ -17,7 +17,7 @@ cp .env.example .env.local   # optional; development defaults work without it
 pnpm dev                     # http://localhost:3200, demo data on by default
 ```
 
-With `SELLER_USE_MOCKS=true` (the default in development) every API call is answered by an in-memory demo backend with Nigerian demo stores. Sign in with any demo account listed on the sign-in page; the password is `Zudomart2026!`. Ìfẹ́ Lifestyle is on Business, Adire Lab Studio on Pro, Kelechi Kicks and Funmi Bakes on Free.
+With `SELLER_USE_MOCKS=true` (the default in development) every API call is answered by an in-memory demo backend with Nigerian demo stores. Sign in with any demo account listed on the sign-in page; the password is `Nantty2026!`. Ìfẹ́ Lifestyle is on Business, Adire Lab Studio on Pro, Kelechi Kicks and Funmi Bakes on Free.
 
 ## Configuration
 
@@ -25,7 +25,7 @@ With `SELLER_USE_MOCKS=true` (the default in development) every API call is answ
 | --- | --- |
 | `NEXT_PUBLIC_SITE_URL` | Public URL of the dashboard, used for metadata and absolute links. Dev: `http://localhost:3200`. Prod: `https://dashboard.zudomart.com`. |
 | `DASHBOARD_ORIGIN` | Origin accepted for state-changing requests (CSRF origin check). Usually the same as `NEXT_PUBLIC_SITE_URL`. |
-| `SELLER_API_URL` | Base URL of the Zudomart API (server-side only). |
+| `SELLER_API_URL` | Base URL of the Nantty API (server-side only). |
 | `SELLER_MEDIA_URL` | Optional media CDN origin allowed in the image CSP. |
 | `SELLER_USE_MOCKS` | `true` to use the demo backend. Defaults to `true` in development and `false` in production. |
 | `SELLER_SESSION_SECRET` | At least 32 random characters. Signs session, access-cache, operator and CSRF values. Required in production. |

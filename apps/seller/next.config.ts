@@ -15,7 +15,7 @@ const nextConfig: NextConfig = {
   experimental: { authInterrupts: true },
   reactStrictMode: true,
   poweredByHeader: false,
-  transpilePackages: ["@zudomart/web-kit", "@zudomart/chat-crypto"],
+  transpilePackages: ["@nantty/web-kit", "@nantty/chat-crypto"],
   serverExternalPackages: [],
   async headers() {
     return [

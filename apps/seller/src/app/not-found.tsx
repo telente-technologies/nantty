@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 
-import { NotFoundScreen } from "@zudomart/web-kit";
+import { NotFoundScreen } from "@nantty/web-kit";
 
 export const metadata: Metadata = { title: "Page not found", robots: { index: false } };
 

@@ -10,7 +10,7 @@ async function callMock(method: string, path: string, headers: Record<string, st
 }
 
 describe("brand selling toggle in mock mode", async () => {
-  const login = await callMock("POST", "/auth/login", {}, { identifier: "adaeze@ifelifestyle.ng", password: "Zudomart2026!" });
+  const login = await callMock("POST", "/auth/login", {}, { identifier: "adaeze@ifelifestyle.ng", password: "Nantty2026!" });
   const authorization = `Bearer ${(login.body as { accessToken: string }).accessToken}`;
   const brands = await callMock("GET", "/seller/brands", { authorization });
   const owned = (brands.body.data as { id: string; myRole: string }[]).find((brand) => brand.myRole === "owner");

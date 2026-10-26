@@ -1,6 +1,6 @@
 "use client";
 
-import type { ChatPayloadInput } from "@zudomart/chat-crypto";
+import type { ChatPayloadInput } from "@nantty/chat-crypto";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import { uploadEncryptedChatAttachment } from "@/services/chatCrypto/chatAttachmentUpload.service";

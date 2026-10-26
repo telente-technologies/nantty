@@ -27,7 +27,7 @@ export function buildStorefrontProfileForCurrentStore(): StorefrontProfile {
     storeId: database.settings.storeId,
     name: database.settings.name,
     handle: database.settings.handle,
-    publicUrl: `https://zudomart.com/@${database.settings.handle}`,
+    publicUrl: `https://nantty.com/@${database.settings.handle}`,
     logoUrl: record.logoUrl ?? database.settings.logoUrl,
     coverUrl: record.coverUrl,
     tagline: record.tagline,

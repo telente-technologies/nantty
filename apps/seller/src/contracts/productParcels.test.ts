@@ -60,7 +60,7 @@ describe("product parcel fields map to the seller API and survive a round trip",
   });
 
   it("persists the fields through create and update in the demo backend", async () => {
-    const login = await callMock("POST", "/auth/login", {}, { identifier: "adaeze@ifelifestyle.ng", password: "Zudomart2026!" });
+    const login = await callMock("POST", "/auth/login", {}, { identifier: "adaeze@ifelifestyle.ng", password: "Nantty2026!" });
     const headers = { authorization: `Bearer ${(login.body as { accessToken: string }).accessToken}` };
     const created = await callMock("POST", "/seller/products", headers, convertDraftToUpsertRequest(parcelDraft(), "NGN", true).request);
     assert.ok(created.status < 300, JSON.stringify(created.body));

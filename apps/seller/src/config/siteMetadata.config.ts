@@ -1,7 +1,7 @@
-import { buildMailtoHref, buildZudomartEmailAddresses } from "@zudomart/web-kit/src/contact/zudomartEmailAddresses";
-import { buildStoreLinks } from "@zudomart/web-kit/src/storeBadges/storeLinks";
+import { buildMailtoHref, buildNanttyEmailAddresses } from "@nantty/web-kit/src/contact/nanttyEmailAddresses";
+import { buildStoreLinks } from "@nantty/web-kit/src/storeBadges/storeLinks";
 
-export const dashboardProductName = "Zudomart Dashboard";
+export const dashboardProductName = "Nantty Dashboard";
 
 export function readPublicSiteUrl(): string {
   return (process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3200").replace(/\/+$/, "");
@@ -10,10 +10,10 @@ export function readPublicSiteUrl(): string {
 export function readAdsManagerUrl(): string {
   const configuredUrl = process.env.NEXT_PUBLIC_ADS_MANAGER_URL;
   if (configuredUrl) return configuredUrl.replace(/\/+$/, "");
-  return process.env.NODE_ENV === "production" ? "https://ads.zudomart.com" : "http://localhost:3300";
+  return process.env.NODE_ENV === "production" ? "https://ads.nantty.com" : "http://localhost:3300";
 }
 
-export const emailAddresses = buildZudomartEmailAddresses({
+export const emailAddresses = buildNanttyEmailAddresses({
   domain: process.env.NEXT_PUBLIC_MAIL_DOMAIN,
   overrides: { sellers: process.env.NEXT_PUBLIC_SELLERS_EMAIL, support: process.env.NEXT_PUBLIC_SUPPORT_EMAIL },
 });
@@ -26,5 +26,5 @@ export const storeLinks = buildStoreLinks({ appStoreId: process.env.NEXT_PUBLIC_
 export function readMarketingSiteUrl(): string {
   const configuredUrl = process.env.NEXT_PUBLIC_MARKETING_SITE_URL;
   if (configuredUrl) return configuredUrl.replace(/\/+$/, "");
-  return process.env.NODE_ENV === "production" ? "https://zudomart.com" : "http://localhost:3100";
+  return process.env.NODE_ENV === "production" ? "https://nantty.com" : "http://localhost:3100";
 }

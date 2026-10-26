@@ -34,7 +34,7 @@ export interface ReportCatalogEntry {
 }
 
 export const reportCatalog: ReportCatalogEntry[] = [
-  { kind: "sales-by-day", title: "Sales by day", description: "Daily orders, items and revenue from the Zudomart app.", group: "Sales", usesDateRange: true, supportsLocationFilter: true, needsAdvancedReports: false, chart: "daily-revenue" },
+  { kind: "sales-by-day", title: "Sales by day", description: "Daily orders, items and revenue from the Nantty app.", group: "Sales", usesDateRange: true, supportsLocationFilter: true, needsAdvancedReports: false, chart: "daily-revenue" },
   { kind: "sales-by-product", title: "Sales by product", description: "Units, revenue, cost and margin for each product.", group: "Sales", usesDateRange: true, supportsLocationFilter: true, needsAdvancedReports: false, chart: null },
   { kind: "sales-by-category", title: "Sales by category", description: "Which categories bring in the most money.", group: "Sales", usesDateRange: true, supportsLocationFilter: true, needsAdvancedReports: false, chart: "ranked" },
   { kind: "sales-by-location", title: "Sales by location", description: "Revenue by the state your customers order from.", group: "Sales", usesDateRange: true, supportsLocationFilter: false, needsAdvancedReports: false, chart: "ranked" },

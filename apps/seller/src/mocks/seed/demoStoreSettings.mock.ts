@@ -38,7 +38,7 @@ export function buildDemoStoreSettingsFromBasics(basics: DemoStoreSettingsBasics
     policies: {
       returns: basics.returnPolicy,
       shipping: basics.shippingPolicy,
-      privacy: "We only use your details to deliver your order and reply to your messages in the Zudomart app.",
+      privacy: "We only use your details to deliver your order and reply to your messages in the Nantty app.",
     },
     storeRewards: { enabled: true, percentBackBasisPoints: 500, minimumOrder: { amountMinor: 500_000, currency }, maxPerOrder: { amountMinor: 200_000, currency }, expiryDays: 180 },
     notifications: { newOrderEmail: true, newOrderSms: false, lowStockEmail: true, payoutEmail: true, disputeEmail: true, dailySummaryEmail: true, lowStockSms: false, reviewEmail: true, messageDigestEmail: true, weeklyPerformanceEmail: true },

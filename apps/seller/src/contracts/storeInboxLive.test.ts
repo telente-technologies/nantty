@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
-import { ChatCryptoClient, decryptAttachment, encryptAttachment, encryptedAttachmentMimeType, InMemoryKeyDirectory, MemoryKeyValueStore } from "@zudomart/chat-crypto";
+import { ChatCryptoClient, decryptAttachment, encryptAttachment, encryptedAttachmentMimeType, InMemoryKeyDirectory, MemoryKeyValueStore } from "@nantty/chat-crypto";
 
 import { grantsChatMediaAccess } from "@/config/rolePermissions.config";
 import { dispatchMockApiRequest } from "@/mocks/mockBackend.mock";
@@ -259,7 +259,7 @@ async function mockCall(method: string, path: string, headers: Record<string, st
 
 describe("encrypted attachments (mock backend)", () => {
   it("abandons a failed upload without sending, then delivers an encrypted file the dashboard can open", async () => {
-    const login = await mockCall("POST", "/auth/login", {}, { identifier: "adaeze@ifelifestyle.ng", password: "Zudomart2026!" });
+    const login = await mockCall("POST", "/auth/login", {}, { identifier: "adaeze@ifelifestyle.ng", password: "Nantty2026!" });
     const auth = { authorization: `Bearer ${(login.body as { accessToken: string }).accessToken}` };
     const { blob, pointer } = encryptAttachment(new TextEncoder().encode("%PDF-1.7 invoice"), { contentType: "application/pdf", fileName: "invoice.pdf", width: null, height: null, thumbnail: null, durationSeconds: null });
     const start = async () => (await mockCall("POST", "/media/uploads", auth, { fileName: "attachment.bin", mimeType: encryptedAttachmentMimeType, sizeBytes: blob.byteLength, purpose: "chat" })).body as { uploadId: string };

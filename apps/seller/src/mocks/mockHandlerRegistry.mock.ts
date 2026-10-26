@@ -11,7 +11,7 @@ import { registerGoldForBusinessesMockHandlers } from "@/mocks/handlers/goldForB
 import { registerBusinessDocumentMockHandlers } from "@/mocks/handlers/businessDocuments.mock";
 import { registerPayoutOnboardingMockHandlers } from "@/mocks/handlers/payoutOnboarding.mock";
 import { registerProviderWalletMockHandlers } from "@/mocks/handlers/providerWallet.mock";
-import { registerZudomartWalletMockHandlers } from "@/mocks/handlers/zudomartWallet.mock";
+import { registerNanttyWalletMockHandlers } from "@/mocks/handlers/nanttyWallet.mock";
 import { registerAffiliatesMockHandlers } from "@/mocks/handlers/affiliates.mock";
 import { registerBrandsMockHandlers } from "@/mocks/handlers/brands.mock";
 import { registerConsentsMockHandlers } from "@/mocks/handlers/consentsHandlers.mock";
@@ -28,7 +28,7 @@ export function registerEveryMockHandler(): void {
   registerAccountHealthMockHandlers();
   registerPayoutOnboardingMockHandlers();
   registerProviderWalletMockHandlers();
-  registerZudomartWalletMockHandlers();
+  registerNanttyWalletMockHandlers();
   registerConsentsMockHandlers();
   registerTeamAndSettingsMockHandlers();
   registerCatalogMockHandlers();

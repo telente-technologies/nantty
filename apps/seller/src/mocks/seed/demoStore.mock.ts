@@ -9,7 +9,7 @@ export function buildIfeLifestyleStoreSettings(): StoreSettings {
     name: "Ìfẹ́ Lifestyle",
     handle: "ife.lifestyle",
     logoUrl: null,
-    description: "Everyday fashion, beauty and gadgets from Lagos and Abuja, delivered across Nigeria through Zudomart.",
+    description: "Everyday fashion, beauty and gadgets from Lagos and Abuja, delivered across Nigeria through Nantty.",
     country: "NG",
     currency: "NGN",
     timezone: "Africa/Lagos",
@@ -22,7 +22,7 @@ export function buildIfeLifestyleStoreSettings(): StoreSettings {
     policies: {
       returns: "Returns and exchanges within 7 days of delivery for unworn items with tags. Food items and earrings cannot be returned.",
       shipping: "Lagos orders ship the same day if paid before 2pm. Abuja and other states take 2–4 working days.",
-      privacy: "We only use your details to deliver your order and reply to your messages in the Zudomart app.",
+      privacy: "We only use your details to deliver your order and reply to your messages in the Nantty app.",
     },
     storeRewards: { enabled: true, percentBackBasisPoints: 500, minimumOrder: { amountMinor: 500_000, currency: "NGN" }, maxPerOrder: { amountMinor: 200_000, currency: "NGN" }, expiryDays: 180 },
     notifications: { newOrderEmail: true, newOrderSms: true, lowStockEmail: true, payoutEmail: true, disputeEmail: true, dailySummaryEmail: false, lowStockSms: false, reviewEmail: true, messageDigestEmail: true, weeklyPerformanceEmail: true },

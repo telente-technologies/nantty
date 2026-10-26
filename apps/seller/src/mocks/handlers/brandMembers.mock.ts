@@ -22,7 +22,7 @@ export function registerBrandMembersMockRoutes(): void {
     const body = readJsonObjectBody(request);
     const issues = validateObjectAgainstChecks(body, { role: fieldChecks.oneOf("Role", assignableBrandRoles) });
     const zudomartAccount = buildDemoUserAccounts().find((account) => account.id === body.userId);
-    if (!zudomartAccount) issues.push({ path: "userId", message: "Choose someone who already has a Zudomart account." });
+    if (!zudomartAccount) issues.push({ path: "userId", message: "Choose someone who already has a Nantty account." });
     if (issues.length > 0 || !zudomartAccount) return respondWithValidationFailure(issues);
     if (brand.members.some((candidate) => candidate.userId === zudomartAccount.id)) throw new MockHttpError(409, "MEMBER_EXISTS", `@${zudomartAccount.username} is already on the brand team.`);
     if (brand.members.length >= maximumBrandMembers) throw new MockHttpError(409, "MEMBER_LIMIT_REACHED", `A brand team can have up to ${maximumBrandMembers} people.`);

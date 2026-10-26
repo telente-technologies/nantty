@@ -85,7 +85,7 @@ export async function forwardBffRequestToSellerApi(request: NextRequest, pathSeg
   if (requiredPermission === null) return respondWithBffError(403, "FORBIDDEN", "You do not have access to this.");
   const isAvailableBeforeStoreIsActive = gateApiPathPattern.test(apiPath) || isReadOnlyAccountPath;
   if (!isAvailableBeforeStoreIsActive && decideSellerAccessDestination(cachedAccess.access) !== "app") {
-    return respondWithBffError(403, "STORE_NOT_ACTIVE", "This store is restricted. Check the note from Zudomart.");
+    return respondWithBffError(403, "STORE_NOT_ACTIVE", "This store is restricted. Check the note from Nantty.");
   }
   if (requiredPermission !== "signed_in" && !doesAccessGrantPermission(cachedAccess.access, requiredPermission) && !grantsChatMediaAccess(cachedAccess.access, apiPath)) {
     return respondWithBffError(403, "FORBIDDEN", "Your role does not allow this. Ask a manager or the store owner.");

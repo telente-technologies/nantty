@@ -1,4 +1,4 @@
-import { ChatControlLedger, type ChatPayload } from "@zudomart/chat-crypto";
+import { ChatControlLedger, type ChatPayload } from "@nantty/chat-crypto";
 
 import type { Conversation, ConversationMessage, ConversationMessageKind, DecryptedConversationMessage, DecryptedPreview } from "@/types/conversation.type";
 
@@ -56,7 +56,7 @@ export function filterConversationsLocally(conversations: readonly Conversation[
 
 export function describeStoreChatError(error: unknown): string | null {
   const code = (error as { code?: string } | null)?.code;
-  if (code === "NO_RECIPIENT_DEVICES") return "This customer hasn't set up secure chat yet. They need to open the Zudomart app once before you can reply.";
+  if (code === "NO_RECIPIENT_DEVICES") return "This customer hasn't set up secure chat yet. They need to open the Nantty app once before you can reply.";
   if (code === "NOT_STORE_INBOX_MEMBER") return "You no longer have access to this store's messages.";
   if (code === "DEVICE_NOT_REGISTERED" || code === "NOT_REGISTERED") return "Secure chat isn't set up in this browser yet. Reload the page and try again.";
   if (code === "ENVELOPE_TOO_LARGE") return "This store has too many team devices for one encrypted message.";

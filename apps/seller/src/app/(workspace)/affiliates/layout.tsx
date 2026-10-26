@@ -16,7 +16,7 @@ export default function AffiliatesLayout({ children }: { readonly children: Reac
     <PageStack>
       <PageHeader
         title="Affiliates & creators"
-        description="Creators in the Zudomart Creator Program sell your products in posts, clips and lives. They earn a commission, paid automatically when escrow is released."
+        description="Creators in the Nantty Creator Program sell your products in posts, clips and lives. They earn a commission, paid automatically when escrow is released."
       />
       <LinkTabs label="Affiliate sections" tabs={affiliateTabs} />
       {children}

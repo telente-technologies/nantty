@@ -1,4 +1,4 @@
-import { type AttachmentDetails, type AttachmentPointer, encryptAttachment, encryptedAttachmentMimeType } from "@zudomart/chat-crypto";
+import { type AttachmentDetails, type AttachmentPointer, encryptAttachment, encryptedAttachmentMimeType } from "@nantty/chat-crypto";
 
 import { sendSellerApiRequest } from "@/services/clientApi.service";
 import { hashArrayBufferAsHex, retryChunk, sendBytesToUploadTarget, sendMultipartChunks } from "@/services/mediaUpload.service";

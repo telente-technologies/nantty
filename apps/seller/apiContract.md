@@ -1,12 +1,12 @@
-# Zudomart Dashboard — API contract
+# Nantty Dashboard — API contract
 
-The Zudomart Dashboard (`apps/seller`, hosted at `https://dashboard.<domain>`) is a Backend-for-Frontend: the browser only talks to the dashboard's own `/bff/*` routes, and the dashboard's server calls the API below with the seller's bearer token. The API must add the dashboard origin (`DASHBOARD_ORIGIN`, e.g. `https://dashboard.zudomart.com`) to its CORS allow-list (`CORS_ORIGINS`). Today every call is server-to-server from the dashboard's `/bff` routes, but the origin must be allowed for any browser call and the payment callback flow.
+The Nantty Dashboard (`apps/seller`, hosted at `https://dashboard.<domain>`) is a Backend-for-Frontend: the browser only talks to the dashboard's own `/bff/*` routes, and the dashboard's server calls the API below with the seller's bearer token. The API must add the dashboard origin (`DASHBOARD_ORIGIN`, e.g. `https://dashboard.zudomart.com`) to its CORS allow-list (`CORS_ORIGINS`). Today every call is server-to-server from the dashboard's `/bff` routes, but the origin must be allowed for any browser call and the payment callback flow.
 
 ## Conventions
 
 - Base path: `/api/v1`. All seller-scoped resources live under `/api/v1/seller/...` and are scoped to the caller's store (the store the authenticated user is a member of). Every resource id taken from a path or body must be checked for ownership on the server.
 - Auth: `Authorization: Bearer <accessToken>` (15 min). Refresh tokens rotate on every use; reuse of an old refresh token revokes the session.
-- Staff: every team member is an existing Zudomart app user who signs in with their own app credentials. There are no shared-device operator tokens, PINs or separate staff accounts.
+- Staff: every team member is an existing Nantty app user who signs in with their own app credentials. There are no shared-device operator tokens, PINs or separate staff accounts.
 - Plans: `free | pro | business`, derived from `SellerAccess.subscription` (no active subscription = free). Feature gating lives in `apps/seller/src/config/planFeatures.config.ts` (`minimumPlanByFeature`, `planLimitsByPlan`). Any endpoint marked **Plan: pro** or **Plan: business** must return `402 PLAN_FEATURE_REQUIRED` `{ message, code, requiredPlan }` when the store's plan is lower. Basic selling (products, stock levels, app orders, customers, messages, delivery, reviews, payouts) is never gated.
 - Store: `X-Seller-Store: <storeId>` is sent when someone who manages several stores has switched store in the top bar. The API must check the caller is a member of that store and scope everything to it; without it, use the caller's default store.
 - Location: `X-Seller-Location: <locationId>` carries the location selected in the top bar. It is a default, never an authorisation: validate it belongs to the store.
@@ -50,7 +50,7 @@ Response 200: CurrentUserDto (`id, name, username, email, avatarUrl, ...`).
 
 ## Access and plans
 
-Dashboard access = **any approved Zudomart seller** (a store member). It does not need Gold verification or a paid subscription: a store without an active subscription is on the **Free** plan. Non-members see "start selling in the app"; stores whose verification status is `suspended` or `revoked` see a restricted-store page. Paid plans (Pro, Business) only unlock the features listed in `planFeatures.config.ts`. Gold verification is separate and only controls the gold badge.
+Dashboard access = **any approved Nantty seller** (a store member). It does not need Gold verification or a paid subscription: a store without an active subscription is on the **Free** plan. Non-members see "start selling in the app"; stores whose verification status is `suspended` or `revoked` see a restricted-store page. Paid plans (Pro, Business) only unlock the features listed in `planFeatures.config.ts`. Gold verification is separate and only controls the gold badge.
 
 ### GET /api/v1/seller/access
 Permission: signed in (any user).
@@ -293,7 +293,7 @@ Response 200: `{ id, type, status: "processing"|"ready"|"failed", purpose, width
 
 ## Orders, returns and disputes (online marketplace)
 
-Online orders are the marketplace orders customers place in the Zudomart mobile app — the same records the app shows; the dashboard never creates orders. Types: `OnlineOrder`, `OrderTimelineEvent`, `OrderInternalNote`, `OrderRefund`, `OrderDeliveryDetails`, `ReturnRequest`, `OrderDispute` in `apps/seller/src/types/order.type.ts`; `DeliveryStatus` in `apps/seller/src/types/delivery.type.ts`. All resources are scoped to the caller's store; any id from another store returns 404. Every mutation appends an `OrderTimelineEvent` (visible to the seller) and an audit log entry, and notifies the buyer in the app where noted. Not plan-gated.
+Online orders are the marketplace orders customers place in the Nantty mobile app — the same records the app shows; the dashboard never creates orders. Types: `OnlineOrder`, `OrderTimelineEvent`, `OrderInternalNote`, `OrderRefund`, `OrderDeliveryDetails`, `ReturnRequest`, `OrderDispute` in `apps/seller/src/types/order.type.ts`; `DeliveryStatus` in `apps/seller/src/types/delivery.type.ts`. All resources are scoped to the caller's store; any id from another store returns 404. Every mutation appends an `OrderTimelineEvent` (visible to the seller) and an audit log entry, and notifies the buyer in the app where noted. Not plan-gated.
 
 `OnlineOrder` (additions to the previous shape): `invoiceNumber` (e.g. `INV-10482`), `buyer.phone: string | null`, `paymentStatus: "paid" | "partially_refunded" | "refunded"`, `paymentProvider: "flutterwave"`, `paymentMode: "escrow" | "direct"` (chosen by the buyer per seller group at checkout; direct only for verified stores, the seller is paid right away and refunds are issued by the seller via `/refunds`), `escrowFee: Money`, `escrowFeeBasisPoints` (150, or 100 on Business), `paymentProcessingFee: Money` (Flutterwave's fee, charged to the seller on every order; escrow orders also carry the escrow fee, both on the seller-group total including shipping and deducted at payout), `paymentReference` (the provider transaction reference), `paidAt`, `refundedAmount: Money`, `refunds: OrderRefund[]`, `delivery: { status: DeliveryStatus, riderName, riderPhone, estimatedDeliveryAt, attempts, lastAttemptNote }`, `timeline: OrderTimelineEvent[]` (oldest first; `kind` ∈ placed | paid | accepted | rejected | processing | ready | shipped | delivery_failed | delivered | completed | cancelled | returned | refunded | disputed | note), `notes: OrderInternalNote[]` (seller-only, never shown to the buyer), `conversationId: string | null` (the order-linked chat, if one exists).
 
@@ -355,7 +355,7 @@ Permission: orders:manage
 Headers: Idempotency-Key required.
 Body: `{ amountMinor: integer > 0 (store currency), reason: string 5–500 }`
 Response 201: `OnlineOrder` with the `OrderRefund` appended, `refundedAmount` increased and `paymentStatus` "partially_refunded", or — when the whole remaining amount is refunded — `paymentStatus` "refunded", status "refunded", escrowStatus "refunded". Timeline `refunded`.
-Errors: 400 VALIDATION_FAILED (amount above `total − refundedAmount`), 404, 409 ORDER_NOT_REFUNDABLE (cancelled, already fully refunded, or disputed — Zudomart decides refunds while a dispute is open).
+Errors: 400 VALIDATION_FAILED (amount above `total − refundedAmount`), 404, 409 ORDER_NOT_REFUNDABLE (cancelled, already fully refunded, or disputed — Nantty decides refunds while a dispute is open).
 Rules: refunds come out of escrow while held, otherwise from the seller's wallet balance through the ledger (may take it negative — show as owed); the provider fee is not refunded to the seller; notify the buyer.
 
 ### POST /api/v1/seller/orders/:orderId/conversation
@@ -422,7 +422,7 @@ Errors: 400 VALIDATION_FAILED, 404, 409 NOT_IN_TRANSIT (only in_transit or faile
 
 ### GET /api/v1/seller/delivery/areas
 Permission: delivery:manage. Response 200: `CursorPage<DeliveryArea>` (all areas, nextCursor null).
-These areas drive the delivery fee and ETA the buyer sees at checkout in the Zudomart app for this store.
+These areas drive the delivery fee and ETA the buyer sees at checkout in the Nantty app for this store.
 
 ### POST /api/v1/seller/delivery/areas
 Permission: delivery:manage
@@ -438,7 +438,7 @@ Permission: delivery:manage. Response 204. Errors: 404 AREA_NOT_FOUND. Orders al
 
 ## Shipping configuration
 
-Sellers ship their own orders; ZudoMart validates the customer's address against the seller's rules and calculates the charge. Shipping is priced **per order group** (all items from this seller in one checkout), never per item. **Available on every plan including Free** (`shipping_rules` in `planFeatures.config.ts`, minimum plan `free`; never returns 402). Permission: `delivery:manage` for writes, any store member for reads. Types in `apps/seller/src/types/shipping.type.ts`; Nigeria geo data (36 states + FCT; LGAs for the major states) in `apps/seller/src/constants/nigeriaGeo.constant.ts`. All amounts are `Money` `{ amountMinor, currency }`.
+Sellers ship their own orders; Nantty validates the customer's address against the seller's rules and calculates the charge. Shipping is priced **per order group** (all items from this seller in one checkout), never per item. **Available on every plan including Free** (`shipping_rules` in `planFeatures.config.ts`, minimum plan `free`; never returns 402). Permission: `delivery:manage` for writes, any store member for reads. Types in `apps/seller/src/types/shipping.type.ts`; Nigeria geo data (36 states + FCT; LGAs for the major states) in `apps/seller/src/constants/nigeriaGeo.constant.ts`. All amounts are `Money` `{ amountMinor, currency }`.
 
 Shapes:
 - `ShippingDestination`: `{ level: "country" | "state" | "lga", countryCode: "NG", stateCode: string | null (ISO 3166-2 suffix, e.g. "OG"), lgaName: string | null }`. A `country` destination covers every state; a `state` destination covers every LGA in it.
@@ -475,7 +475,7 @@ Permission: orders:view. Response 200: `ShippingCalculationSnapshot` — destina
 
 ## Messages (customer conversations)
 
-These are the same buyer↔store conversations as the Zudomart mobile app (one conversation per buyer per store, optionally linked to an order). They are **end-to-end encrypted**: each store conversation is a sender-key group of the customer's devices plus the devices of every current team member with `messages:manage`. The server and Zudomart staff only see ciphertext and routing metadata. Removing a team member or their inbox permission rotates the keys on the next message; new team members only see messages sent after they join (no history re-share). Seller-side messages carry the acting staff member's name in `senderName`; the buyer sees them as the store. Not plan-gated. Types in `apps/seller/src/types/conversation.type.ts`.
+These are the same buyer↔store conversations as the Nantty mobile app (one conversation per buyer per store, optionally linked to an order). They are **end-to-end encrypted**: each store conversation is a sender-key group of the customer's devices plus the devices of every current team member with `messages:manage`. The server and Nantty staff only see ciphertext and routing metadata. Removing a team member or their inbox permission rotates the keys on the next message; new team members only see messages sent after they join (no history re-share). Seller-side messages carry the acting staff member's name in `senderName`; the buyer sees them as the store. Not plan-gated. Types in `apps/seller/src/types/conversation.type.ts`.
 
 The dashboard registers a device for the signed-in staff member through the key directory (`/api/v1/chat/keys/...`, forwarded by the BFF for `messages:manage` only). Keys and decrypted previews stay in this browser's sealed IndexedDB store and are deleted on sign-out. There are no quick replies, macros or auto-replies; anything like that must be inserted in the browser and sent encrypted.
 
@@ -511,7 +511,7 @@ Errors: 404.
 
 ## Customers (CRM)
 
-Customers are Zudomart app buyers (the people who placed marketplace orders in the app), plus anyone the seller adds by hand. Types: `Customer`, `CustomerPurchase`, `CustomersSummary`, `CustomerSegment`, `CustomerSegmentRule`, `CustomerSegmentInput` in `apps/seller/src/types/customer.type.ts`. Segment rule evaluation is mirrored in `apps/seller/src/utils/customerSegmentRules.util.ts`. All Money is in the store currency. Stats (`totalSpent`, `averageOrderValue`, `purchasesCount`, `firstPurchaseAt`, `lastPurchaseAt`, `city`) are computed server-side from the buyer's app orders (cancelled and refunded orders excluded). There are no in-store sales.
+Customers are Nantty app buyers (the people who placed marketplace orders in the app), plus anyone the seller adds by hand. Types: `Customer`, `CustomerPurchase`, `CustomersSummary`, `CustomerSegment`, `CustomerSegmentRule`, `CustomerSegmentInput` in `apps/seller/src/types/customer.type.ts`. Segment rule evaluation is mirrored in `apps/seller/src/utils/customerSegmentRules.util.ts`. All Money is in the store currency. Stats (`totalSpent`, `averageOrderValue`, `purchasesCount`, `firstPurchaseAt`, `lastPurchaseAt`, `city`) are computed server-side from the buyer's app orders (cancelled and refunded orders excluded). There are no in-store sales.
 
 ### GET /api/v1/seller/customers
 Permission: customers:view
@@ -529,7 +529,7 @@ Body: `{ name 2–80, phone?, email?, tags?: string[] (≤10, lower-cased, ≤24
 Response 201: Customer. Errors: 400 VALIDATION_FAILED; 409 CUSTOMER_EXISTS `{ message, code, customer }` (same phone or email).
 
 ### GET /api/v1/seller/customers/export
-Permission: customers:view. Same query as the list. Returns CSV: Name, Phone, Email, Zudomart username, City, Tags, Total spent, Average order value, Currency, Orders, First order, Last order, Marketing opt-in.
+Permission: customers:view. Same query as the list. Returns CSV: Name, Phone, Email, Nantty username, City, Tags, Total spent, Average order value, Currency, Orders, First order, Last order, Marketing opt-in.
 
 ### GET /api/v1/seller/customers/:customerId
 ### PATCH /api/v1/seller/customers/:customerId
@@ -557,7 +557,7 @@ Permission: customers:manage. **Plan: pro**. Response 204. Custom segments only.
 
 ## Promotions (discount codes and product discounts)
 
-Types: `Promotion`, `PromotionStatus` (`apps/seller/src/types/promotion.type.ts`); validation `apps/seller/src/utils/promotionValidation.util.ts`. Promotions apply to marketplace orders in the Zudomart app only — there is no channel field and no in-store use. Discount codes (`coupon`) and product discounts (`automatic`) are included on every plan; `scheduled_sale` too.
+Types: `Promotion`, `PromotionStatus` (`apps/seller/src/types/promotion.type.ts`); validation `apps/seller/src/utils/promotionValidation.util.ts`. Promotions apply to marketplace orders in the Nantty app only — there is no channel field and no in-store use. Discount codes (`coupon`) and product discounts (`automatic`) are included on every plan; `scheduled_sale` too.
 
 ### GET /api/v1/seller/promotions
 Permission: promotions:manage. Query: status? ("all"|"active"|"scheduled"|"expired"|"disabled"), kind? ("all"|"coupon"|"automatic"|"scheduled_sale"), q?, cursor?, limit? (default 50).
@@ -646,11 +646,11 @@ Permission: reviews:manage. Body `{ body: 2–1000 }`. Creates or edits the stor
 Permission: reviews:manage. Response 200: Review with `reply: null`.
 
 ### POST /api/v1/seller/reviews/:reviewId/report
-Permission: reviews:manage. Body `{ reason: "spam"|"offensive"|"fake"|"not_about_purchase"|"personal_information"|"other", details?: ≤500 (5–500 required when reason is "other") }`. Sends the review to Zudomart moderation; it stays visible until a moderator decides. Response 200: Review (status "reported"). Errors: 400 VALIDATION_FAILED, 404 REVIEW_NOT_FOUND, 409 ALREADY_REPORTED.
+Permission: reviews:manage. Body `{ reason: "spam"|"offensive"|"fake"|"not_about_purchase"|"personal_information"|"other", details?: ≤500 (5–500 required when reason is "other") }`. Sends the review to Nantty moderation; it stays visible until a moderator decides. Response 200: Review (status "reported"). Errors: 400 VALIDATION_FAILED, 404 REVIEW_NOT_FOUND, 409 ALREADY_REPORTED.
 
 ## Dashboard, reports, wallet and payouts
 
-Types: `apps/seller/src/types/dashboard.type.ts`, `report.type.ts`, `wallet.type.ts`, `walletExtra.type.ts`, `finance.type.ts`; report kinds and groups in `apps/seller/src/constants/reportCatalog.constant.ts`. All Money is in the store currency. Dates in query strings are `YYYY-MM-DD` store-local dates (store `timezone`), inclusive. Online orders are the marketplace orders placed in the Zudomart app; there are no in-store sales, so reports have no channel filter. Fee model (code and [pricing.md](../../docs/pricing.md) are the source of truth): 0% commission on products; a 1.5% escrow fee on the seller-group total including shipping (1% on the Business plan); plus Flutterwave's payment-processing fee. The escrow and processing fees are deducted before release. Shipping is not the seller's revenue; the withdrawal fee is the payment provider's fee.
+Types: `apps/seller/src/types/dashboard.type.ts`, `report.type.ts`, `wallet.type.ts`, `walletExtra.type.ts`, `finance.type.ts`; report kinds and groups in `apps/seller/src/constants/reportCatalog.constant.ts`. All Money is in the store currency. Dates in query strings are `YYYY-MM-DD` store-local dates (store `timezone`), inclusive. Online orders are the marketplace orders placed in the Nantty app; there are no in-store sales, so reports have no channel filter. Fee model (code and [pricing.md](../../docs/pricing.md) are the source of truth): 0% commission on products; a 1.5% escrow fee on the seller-group total including shipping (1% on the Business plan); plus Flutterwave's payment-processing fee. The escrow and processing fees are deducted before release. Shipping is not the seller's revenue; the withdrawal fee is the payment provider's fee.
 
 ### GET /api/v1/seller/dashboard
 Permission: dashboard:view (every role). Plan: free.
@@ -702,10 +702,10 @@ Errors: 400 VALIDATION_FAILED (bad dates/location), 402 PLAN_FEATURE_REQUIRED, 4
 Permission: wallet:view
 Response 200: WalletBalances { escrow, pending (released, clearing — shown as "pending settlement"), available, nextEscrowReleaseAt }. Balances come only from the ledger.
 
-### GET /api/v1/wallets/me (go-money, the signed-in user's Zudomart balance)
+### GET /api/v1/wallets/me (go-money, the signed-in user's Nantty balance)
 Permission: wallet:view (the BFF allows GET only). Type: `apps/seller/src/types/zudomartWallet.type.ts`.
 Response 200: `{ available, pending (escrow only), locked, inEscrow, payoutRequested, negativeBalance, nextAvailableAt, adCredit, earningsPayable, debts, coins: { spendable, earned }, lines: [{ key, label, description, amount }], verification: { level, withdrawalsUnlocked, waitingForVerification: Money, nextStep: "payout_setup"|"bank_validation"|"identity_check"|"business_verification"|null, message: string|null } }`.
-- `lines` keys in order: available ("Available to withdraw"), pending ("Pending (escrow)"), locked, earningsPayable ("Creator earnings"), adCredit ("Ad credit"), coins ("Coins", currency `"COIN"`, `amountMinor` = whole coins), debts ("Owed to Zudomart"). The dashboard renders them in order with the backend `label` (description as secondary text), formats coins as "N coins" and never sums the lines. Older backends without `lines` fall back to available + pending.
+- `lines` keys in order: available ("Available to withdraw"), pending ("Pending (escrow)"), locked, earningsPayable ("Creator earnings"), adCredit ("Ad credit"), coins ("Coins", currency `"COIN"`, `amountMinor` = whole coins), debts ("Owed to Nantty"). The dashboard renders them in order with the backend `label` (description as secondary text), formats coins as "N coins" and never sums the lines. Older backends without `lines` fall back to available + pending.
 - `verification.message` (e.g. "Verify to withdraw ₦12,500") is null once withdrawals are unlocked (L1). When set, the finance page shows it as a banner with a "Get paid" link to `/settings/payouts`, or "Verify business" to `/settings/business-documents` when `nextStep` is `"business_verification"` (payout details verified, business verification pending). Unknown `nextStep` values fall back to payout setup. The message may read "Verify to withdraw your earnings" when the amount is zero.
 
 ### GET /api/v1/seller/wallet/transactions
@@ -825,7 +825,7 @@ Errors: 400 VALIDATION_FAILED (paths mode, weekday, dayOfMonth, keepMinimumBalan
 
 ## Sales analytics
 
-Types: `apps/seller/src/types/analytics.type.ts`. Same sales definition as the dashboard (app orders, line subtotals, excluding cancelled/refunded orders, store timezone). Refunds = totals of refunded orders plus refund amounts of returns with status `refunded` in the range. Fees = Zudomart commission per order (`subtotal − sellerPayout`). **Net sales = gross − refunds − fees.** Conversion = orders ÷ unique visitors (basis points).
+Types: `apps/seller/src/types/analytics.type.ts`. Same sales definition as the dashboard (app orders, line subtotals, excluding cancelled/refunded orders, store timezone). Refunds = totals of refunded orders plus refund amounts of returns with status `refunded` in the range. Fees = Nantty commission per order (`subtotal − sellerPayout`). **Net sales = gross − refunds − fees.** Conversion = orders ÷ unique visitors (basis points).
 
 Common query: `from`, `to` (YYYY-MM-DD, inclusive, store timezone). Defaults: last 30 days ending today. Rules: `from ≤ to`, `to` not in the future, span ≤ 731 days. Errors: 400 VALIDATION_FAILED `issues[{ path: "from"|"to", message }]`.
 
@@ -878,13 +878,13 @@ Response 200: StoreLocation
 Errors: 404 LOCATION_NOT_FOUND; 409 DEFAULT_LOCATION (cannot deactivate the default; default must be active); 409 LOCATION_LIMIT_REACHED (re-activation over the plan limit).
 Rules: no delete — deactivate instead. Setting isDefault moves the default flag from the previous default.
 
-Staff are always existing Zudomart app users. There are no separate staff accounts and no email/SMS invites: the store adds a Zudomart user, the user gets a team request in the Zudomart app, accepts it there, and signs in to the dashboard with their own Zudomart credentials.
+Staff are always existing Nantty app users. There are no separate staff accounts and no email/SMS invites: the store adds a Nantty user, the user gets a team request in the Nantty app, accepts it there, and signs in to the dashboard with their own Nantty credentials.
 
-### GET /api/v1/seller/zudomart-users
-Permission: any signed-in store member. Query: `q` (≥2 chars; username with or without "@", or display name). Response 200: `{ data: ZudomartUserCandidate[] }` (max 10) where `ZudomartUserCandidate = { userId, name, username, avatarUrl }`. Public profile fields only — never email, phone or other private data. Excludes suspended/banned accounts and accounts that block the caller.
+### GET /api/v1/seller/nantty-users
+Permission: any signed-in store member. Query: `q` (≥2 chars; username with or without "@", or display name). Response 200: `{ data: NanttyUserCandidate[] }` (max 10) where `NanttyUserCandidate = { userId, name, username, avatarUrl }`. Public profile fields only — never email, phone or other private data. Excludes suspended/banned accounts and accounts that block the caller.
 
 ### GET /api/v1/seller/staff/candidates
-Permission: staff:manage. Same as `/seller/zudomart-users` but excludes users already on this store's team.
+Permission: staff:manage. Same as `/seller/nantty-users` but excludes users already on this store's team.
 
 ### GET /api/v1/seller/staff
 Permission: staff:manage (owner, manager)
@@ -893,8 +893,8 @@ Response 200: CursorPage<StaffMember> where `StaffMember = { id, userId, name, u
 
 ### POST /api/v1/seller/staff
 Permission: staff:manage. Plan: pro (`team`).
-Body: { userId (an existing Zudomart user), role: manager|inventory|sales|accountant, locationIds: non-empty array of the store's location ids, permissions?: SellerPermission[] | null }
-Response 201: StaffMember with status "invited" — the user receives a team request in the Zudomart app (push + in-app) and becomes "active" when they accept there. They sign in with their own Zudomart credentials; there are no staff passwords, PINs or email invites.
+Body: { userId (an existing Nantty user), role: manager|inventory|sales|accountant, locationIds: non-empty array of the store's location ids, permissions?: SellerPermission[] | null }
+Response 201: StaffMember with status "invited" — the user receives a team request in the Nantty app (push + in-app) and becomes "active" when they accept there. They sign in with their own Nantty credentials; there are no staff passwords, PINs or email invites.
 Errors: 400 VALIDATION_FAILED (unknown userId, unknown permission, or a permission reserved for the owner: billing:manage, developer:manage, wallet:withdraw); 402 PLAN_FEATURE_REQUIRED (Free plan, or `permissions` sent without the Business `advanced_permissions` feature); 403 OWNER_ROLE_RESERVED; 403 OWNER_ONLY (only the owner may add managers); 409 STAFF_EXISTS; 409 SEAT_LIMIT_REACHED when non-suspended staff (active + invited, owner excluded) ≥ planLimitsByPlan[plan].maxStaffSeats (Pro 5, Business 25).
 
 ### PATCH /api/v1/seller/staff/:staffId
@@ -923,7 +923,7 @@ GET /seller/subscription → SubscriptionDetails; POST /seller/subscription/chec
 
 ## Storefront
 
-The store page buyers see in the Zudomart app. One source of truth for featured products (Marketing → Featured reads and writes the same list).
+The store page buyers see in the Nantty app. One source of truth for featured products (Marketing → Featured reads and writes the same list).
 
 ### GET /api/v1/seller/storefront
 Permission: storefront:manage (owner, manager). Not plan-gated.
@@ -955,11 +955,11 @@ Errors: 400 VALIDATION_FAILED (paths `openingHours`, `socialLinks.instagram`, `p
 
 ## Account security
 
-Account-level settings of the signed-in Zudomart user (they also protect the app). 2-step verification and password changes stay in the Zudomart app. Suggested permission: **signed in** (every member should be able to see and end their own sessions) — today `apiPermissionRules` maps `/seller/security` writes to settings:manage; please relax to `signed_in` when implementing.
+Account-level settings of the signed-in Nantty user (they also protect the app). 2-step verification and password changes stay in the Nantty app. Suggested permission: **signed in** (every member should be able to see and end their own sessions) — today `apiPermissionRules` maps `/seller/security` writes to settings:manage; please relax to `signed_in` when implementing.
 
 ### GET /api/v1/seller/security
 Response 200: SecurityOverview `{ twoStepVerification: { enabled, method: "authenticator_app"|"email"|null, enabledAt }, passwordChangedAt, sessions: SecuritySession[], loginHistory: LoginHistoryEntry[] }`.
-`SecuritySession = { id, device ("Chrome on Windows", "Zudomart app on iPhone 13"), app: "dashboard"|"mobile_app", location ("Lekki, Lagos"), ipAddress (masked, e.g. "102.89.•••.14"), signedInAt, lastActiveAt, isCurrent }` — all sessions of the user's account, dashboard and app.
+`SecuritySession = { id, device ("Chrome on Windows", "Nantty app on iPhone 13"), app: "dashboard"|"mobile_app", location ("Lekki, Lagos"), ipAddress (masked, e.g. "102.89.•••.14"), signedInAt, lastActiveAt, isCurrent }` — all sessions of the user's account, dashboard and app.
 `LoginHistoryEntry = { id, outcome: "success"|"wrong_password"|"blocked", device, location, ipAddress (masked), occurredAt }` — last 20, newest first.
 
 ### DELETE /api/v1/seller/security/sessions/:sessionId
@@ -993,7 +993,7 @@ Response 200: CursorPage<WebhookEndpoint> `{ id, url, description, events: Webho
 
 ### POST /api/v1/seller/developers/webhooks
 Body: { url (public https only; reject localhost/private IPs/internal hosts — SSRF), description? ≤80, events: non-empty WebhookEvent[] }
-Response 201: `{ webhook: WebhookEndpoint, signingSecret: "whsec_…" }` (secret shown once). Deliveries are POSTs with JSON body `{ id, event, createdAt, data }` and header `Zudomart-Signature: t=<unix>,v1=<HMAC-SHA256(secret, "t.body")>`; retried with backoff for 24 hours. Audit `developer.webhook_created`.
+Response 201: `{ webhook: WebhookEndpoint, signingSecret: "whsec_…" }` (secret shown once). Deliveries are POSTs with JSON body `{ id, event, createdAt, data }` and header `Nantty-Signature: t=<unix>,v1=<HMAC-SHA256(secret, "t.body")>`; retried with backoff for 24 hours. Audit `developer.webhook_created`.
 
 ### PATCH /api/v1/seller/developers/webhooks/:webhookId
 Body: any of { url, events, active bool }. Response 200: WebhookEndpoint. 404 WEBHOOK_NOT_FOUND. Audit `developer.webhook_updated`.
@@ -1099,7 +1099,7 @@ Rules: status mirrors the order's escrow: held/disputed → owed, released → p
 ### GET /api/v1/seller/affiliates/creator-directory
 Permission: affiliates:manage
 Query: q? (username/name); niche?; cursor?; limit?
-Response 200: CursorPage<AffiliateCreator & {isInYourProgram: boolean}> — only creators accepted into the Zudomart Creator Program
+Response 200: CursorPage<AffiliateCreator & {isInYourProgram: boolean}> — only creators accepted into the Nantty Creator Program
 
 ### GET /api/v1/seller/affiliates/live-invitations
 Permission: affiliates:manage
@@ -1153,7 +1153,7 @@ Response 200: `Brand`. Errors: 400 VALIDATION_FAILED, 403 BRAND_ROLE_FORBIDDEN, 
 Response 200: `CursorPage<BrandMember>`.
 
 ### POST /api/v1/seller/brands/:brandId/members
-Permission: settings:manage + brand owner/admin. Body: `{ userId, role: "admin"|"editor"|"viewer" }` — `userId` is an existing Zudomart user found via `GET /seller/zudomart-users` (only the owner may add admins). Creates an `invited` member `{ id, userId, name, username, role, status }`; the user accepts the brand team request in the Zudomart app. No email invitations.
+Permission: settings:manage + brand owner/admin. Body: `{ userId, role: "admin"|"editor"|"viewer" }` — `userId` is an existing Nantty user found via `GET /seller/nantty-users` (only the owner may add admins). Creates an `invited` member `{ id, userId, name, username, role, status }`; the user accepts the brand team request in the Nantty app. No email invitations.
 Response 201: `BrandMember`. Errors: 400 VALIDATION_FAILED (unknown userId), 409 MEMBER_EXISTS, 409 MEMBER_LIMIT_REACHED (30), 403 BRAND_ROLE_FORBIDDEN.
 
 ### PATCH /api/v1/seller/brands/:brandId/members/:memberId
@@ -1185,7 +1185,7 @@ Same access rule. Response 200: `CursorPage<BrandClaim>` newest first.
 ### POST /api/v1/seller/brands/:brandId/protection/claims
 Permission: settings:manage + brand owner/admin + Official Store active.
 Body: `{ kind: "counterfeit"|"trademark"|"unauthorised_seller", listingIds: string[] (1–20, must be this brand's listings without an open claim), evidence: string (30–2000), declaration: true }`.
-Response 201: `BrandClaim` (status `submitted`); the listings get `openClaimId`. Zudomart's brand team reviews and moves the claim to `under_review` → `upheld` (listings removed, sellers notified) or `rejected`, with `resolution`. Errors: 400 VALIDATION_FAILED.
+Response 201: `BrandClaim` (status `submitted`); the listings get `openClaimId`. Nantty's brand team reviews and moves the claim to `under_review` → `upheld` (listings removed, sellers notified) or `rejected`, with `resolution`. Errors: 400 VALIDATION_FAILED.
 
 ### POST /api/v1/seller/brands/:brandId/protection/claims/:claimId/withdraw
 Only `submitted`/`under_review` claims (409 CLAIM_CLOSED otherwise). Response 200: `BrandClaim` (status `withdrawn`, listings' `openClaimId` cleared).
@@ -1204,7 +1204,7 @@ Permission: billing:manage. Response 200: `BillingOffer` = `{ profileName, accou
 Pricing display: monthly with active Blue = price x (1 - bundle%). Yearly = monthly x 12 x (1 - max(yearly%, bundle%)); the bigger discount wins and they never stack. The bundle applies to at most `maximumBusinesses` businesses, lapses at renewal if Blue ends, and never to Black.
 
 ### POST /api/v1/seller/subscription/trial/checkout
-Body `{ planId }` (a Pro/Business plan, or `gold_only_monthly` / `gold_only_yearly`). Response 201: `{ checkoutUrl, authorizationUrl, reference, provider: "flutterwave" }`. The dashboard redirects to `checkoutUrl ?? authorizationUrl` (redirect to `authorizationUrl` as the fallback); the card is never handled by Zudomart. Flutterwave makes a small verification charge (NGN 50) that is refunded at once, and the first renewal is scheduled by Zudomart at the end of the free period. Errors: 404 PLAN_NOT_FOUND, 409 TRIAL_NOT_AVAILABLE (message explains why).
+Body `{ planId }` (a Pro/Business plan, or `gold_only_monthly` / `gold_only_yearly`). Response 201: `{ checkoutUrl, authorizationUrl, reference, provider: "flutterwave" }`. The dashboard redirects to `checkoutUrl ?? authorizationUrl` (redirect to `authorizationUrl` as the fallback); the card is never handled by Nantty. Flutterwave makes a small verification charge (NGN 50) that is refunded at once, and the first renewal is scheduled by Nantty at the end of the free period. Errors: 404 PLAN_NOT_FOUND, 409 TRIAL_NOT_AVAILABLE (message explains why).
 
 ### POST /api/v1/seller/subscription/trial/verify
 Body `{ reference }` (references start `TRL_` for trials, `GLD_` for Gold-only). Response 200: `BillingOffer`. A trial sets the subscription to `trialing` with `currentPeriodEnd` = trial end. Gold appears only after business verification. Error: 404 PAYMENT_NOT_FOUND.
@@ -1224,7 +1224,7 @@ Body `{ fileName ≤200, contentType: "application/pdf"|"image/jpeg"|"image/png"
 Body `{ documentId }` (or `{ fileUrl }`). Response 200: the same body as the GET; the document becomes `pending` and goes to the admin queue. Errors: 404 (no upload intent), 409 UPLOAD_MISSING.
 
 ## Store rewards (seller-funded; owner, 2026-10-03)
-Seller-funded store credit. Zudomart does not fund or hold money for it: it is a price reduction the seller absorbs. Credit is valid only at the issuing store, is never cash, never withdrawable, and never usable at other stores. It is earned only when an order completes (after escrow release) and is reversed if the order is refunded.
+Seller-funded store credit. Nantty does not fund or hold money for it: it is a price reduction the seller absorbs. Credit is valid only at the issuing store, is never cash, never withdrawable, and never usable at other stores. It is earned only when an order completes (after escrow release) and is reversed if the order is refunded.
 
 Types: `StoreRewardsRules`, `StoreRewardsSummary` (src/types/store.type.ts). `StoreSettings.storeRewards = { enabled, percentBackBasisPoints (0–2000), minimumOrder: Money, maxPerOrder: Money, expiryDays (7–730) }`, edited through `PATCH /api/v1/seller/settings` (key `storeRewards`, same rules as other settings keys, store currency only).
 `Customer.storeCreditBalance: Money` and `storeCreditExpiresAt: ISO | null` are read-only (derived from the per-store credit ledger).

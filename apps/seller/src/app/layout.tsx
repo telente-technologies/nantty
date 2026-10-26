@@ -3,7 +3,7 @@ import { Inter, JetBrains_Mono } from "next/font/google";
 import { cookies } from "next/headers";
 import type { ReactNode } from "react";
 
-import { ConfirmDialogHost, ConnectionStatus, ThemeInitScript, parseThemePreference, readHtmlThemeAttribute, themeCookieName, themeViewport } from "@zudomart/web-kit";
+import { ConfirmDialogHost, ConnectionStatus, ThemeInitScript, parseThemePreference, readHtmlThemeAttribute, themeCookieName, themeViewport } from "@nantty/web-kit";
 
 import { ConsentBannerHost } from "@/components/privacy/consentBannerHost";
 import { SellerSessionProvider } from "@/components/session/sellerSessionProvider";
@@ -22,12 +22,12 @@ const receiptFont = JetBrains_Mono({ subsets: ["latin"], display: "swap", variab
 export const metadata: Metadata = {
   metadataBase: new URL(readPublicSiteUrl()),
   title: { default: dashboardProductName, template: `%s · ${dashboardProductName}` },
-  description: "Run your Zudomart business: products, inventory, app orders, customers, analytics, payouts and team in one place.",
+  description: "Run your Nantty business: products, inventory, app orders, customers, analytics, payouts and team in one place.",
   applicationName: dashboardProductName,
   manifest: "/manifest.webmanifest",
   robots: { index: false, follow: false },
   openGraph: { type: "website", siteName: dashboardProductName, title: dashboardProductName, url: "/", locale: "en_NG" },
-  icons: { icon: [{ url: "/brand/favicon.ico", sizes: "48x48" }, { url: "/brand/icon.svg", type: "image/svg+xml" }], apple: "/brand/appleTouchIcon.png" },
+  icons: { icon: [{ url: "/brand/nantty-icon.png", type: "image/png" }], apple: "/brand/nantty-icon.png" },
   formatDetection: { telephone: false },
 };
 
