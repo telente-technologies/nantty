@@ -11,9 +11,9 @@ import (
 
 	"github.com/google/uuid"
 
-	catalogerrors "zudomart/modules/catalog/src/errors"
-	"zudomart/modules/catalog/src/interfaces"
-	"zudomart/platform/httpserver"
+	catalogerrors "nantty/modules/catalog/src/errors"
+	"nantty/modules/catalog/src/interfaces"
+	"nantty/platform/httpserver"
 )
 
 type HttpLinkedProfiles struct {

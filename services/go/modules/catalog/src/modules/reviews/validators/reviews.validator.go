@@ -4,8 +4,8 @@ import (
 	"slices"
 	"strings"
 
-	"zudomart/modules/catalog/src/modules/reviews/dtos"
-	"zudomart/modules/catalog/src/utils"
+	"nantty/modules/catalog/src/modules/reviews/dtos"
+	"nantty/modules/catalog/src/utils"
 )
 
 var reportReasons = []string{"spam", "offensive", "fake", "not_about_purchase", "personal_information", "other"}

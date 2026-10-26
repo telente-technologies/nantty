@@ -8,8 +8,8 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"github.com/google/uuid"
 
-	"zudomart/modules/catalog/src/databases/schema"
-	"zudomart/modules/catalog/src/generated/ent"
+	"nantty/modules/catalog/src/databases/schema"
+	"nantty/modules/catalog/src/generated/ent"
 )
 
 func variantWith(prices ...schema.RegionalPrice) *ent.ProductVariant {

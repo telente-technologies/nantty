@@ -6,7 +6,7 @@ import (
 	"strconv"
 	"strings"
 
-	"zudomart/platform/money"
+	"nantty/platform/money"
 )
 
 var amountPattern = regexp.MustCompile(`^\d{1,12}(\.\d{1,3})?$`)

@@ -5,8 +5,8 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/catalog/src/modules/featuredProducts/dtos"
-	"zudomart/modules/catalog/src/utils"
+	"nantty/modules/catalog/src/modules/featuredProducts/dtos"
+	"nantty/modules/catalog/src/utils"
 )
 
 const (

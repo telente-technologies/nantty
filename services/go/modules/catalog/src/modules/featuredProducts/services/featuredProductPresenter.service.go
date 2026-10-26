@@ -6,13 +6,13 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/catalog/src/container"
-	"zudomart/modules/catalog/src/generated/ent"
-	"zudomart/modules/catalog/src/generated/ent/featuredproduct"
-	"zudomart/modules/catalog/src/generated/ent/product"
-	"zudomart/modules/catalog/src/generated/ent/productmedia"
-	"zudomart/modules/catalog/src/modules/featuredProducts/dtos"
-	"zudomart/platform/money"
+	"nantty/modules/catalog/src/container"
+	"nantty/modules/catalog/src/generated/ent"
+	"nantty/modules/catalog/src/generated/ent/featuredproduct"
+	"nantty/modules/catalog/src/generated/ent/product"
+	"nantty/modules/catalog/src/generated/ent/productmedia"
+	"nantty/modules/catalog/src/modules/featuredProducts/dtos"
+	"nantty/platform/money"
 )
 
 func ListFeaturedProductViews(ctx context.Context, deployed *container.Container, storeId uuid.UUID) ([]dtos.FeaturedProductView, error) {

@@ -3,16 +3,19 @@ package routes
 import (
 	"net/http"
 
-	"zudomart/modules/catalog/src/container"
-	"zudomart/modules/catalog/src/middlewares"
-	"zudomart/modules/catalog/src/modules/storeTeam/controllers"
+	"nantty/modules/catalog/src/container"
+	"nantty/modules/catalog/src/middlewares"
+	"nantty/modules/catalog/src/modules/storeTeam/controllers"
 )
 
 func MountStoreTeamRoutes(mux *http.ServeMux, deployed *container.Container) {
 	team := controllers.StoreTeamController{Container: deployed}
 	requests := controllers.TeamRequestsController{Container: deployed}
 	staffManager := middlewares.StoreMember(deployed, "staff:manage", false)
-	mux.Handle("GET /api/v1/seller/zudomart-users", middlewares.StoreMember(deployed, "dashboard:view", false)(team.SearchZudomartUsers))
+	searchUsers := middlewares.StoreMember(deployed, "dashboard:view", false)(team.SearchNanttyUsers)
+	mux.Handle("GET /api/v1/seller/nantty-users", searchUsers)
+	// Keep the old endpoint as a compatibility alias for existing clients.
+	mux.Handle("GET /api/v1/seller/zudomart-users", searchUsers)
 	mux.Handle("GET /api/v1/seller/staff/candidates", staffManager(team.SearchStaffCandidates))
 	mux.Handle("GET /api/v1/seller/staff", staffManager(team.ListStaff))
 	mux.Handle("POST /api/v1/seller/staff", middlewares.StoreMemberFeatureWithOptionalKey(deployed, "staff:manage", "team")(team.AddStaff))

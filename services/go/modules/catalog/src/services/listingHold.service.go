@@ -3,10 +3,10 @@ package services
 import (
 	"context"
 
-	"zudomart/modules/catalog/src/container"
-	"zudomart/modules/catalog/src/enums"
-	catalogerrors "zudomart/modules/catalog/src/errors"
-	"zudomart/modules/catalog/src/generated/ent"
+	"nantty/modules/catalog/src/container"
+	"nantty/modules/catalog/src/enums"
+	catalogerrors "nantty/modules/catalog/src/errors"
+	"nantty/modules/catalog/src/generated/ent"
 )
 
 func AssertStoreAcceptsNewListings(ctx context.Context, deployed *container.Container, row *ent.Store) error {

@@ -8,7 +8,7 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/catalog/src/jobs"
+	"nantty/modules/catalog/src/jobs"
 )
 
 func visibilityEnvelope(targetType, targetId, visibility string, occurredAt time.Time) []byte {

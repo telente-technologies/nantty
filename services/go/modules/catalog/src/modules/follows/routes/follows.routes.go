@@ -3,10 +3,10 @@ package routes
 import (
 	"net/http"
 
-	"zudomart/modules/catalog/src/container"
-	"zudomart/modules/catalog/src/middlewares"
-	setfollow "zudomart/modules/catalog/src/modules/follows/commands/setFollow"
-	"zudomart/modules/catalog/src/modules/follows/controllers"
+	"nantty/modules/catalog/src/container"
+	"nantty/modules/catalog/src/middlewares"
+	setfollow "nantty/modules/catalog/src/modules/follows/commands/setFollow"
+	"nantty/modules/catalog/src/modules/follows/controllers"
 )
 
 func MountFollowsRoutes(mux *http.ServeMux, deployed *container.Container) {

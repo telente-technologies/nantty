@@ -3,11 +3,11 @@ package listbrands
 import (
 	"context"
 
-	"zudomart/modules/catalog/src/container"
-	"zudomart/modules/catalog/src/generated/ent"
-	"zudomart/modules/catalog/src/generated/ent/brand"
-	brandservices "zudomart/modules/catalog/src/modules/brands/services"
-	"zudomart/platform/httpserver"
+	"nantty/modules/catalog/src/container"
+	"nantty/modules/catalog/src/generated/ent"
+	"nantty/modules/catalog/src/generated/ent/brand"
+	brandservices "nantty/modules/catalog/src/modules/brands/services"
+	"nantty/platform/httpserver"
 )
 
 type Handler struct {

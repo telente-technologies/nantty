@@ -1,8 +1,8 @@
 package updatestore
 
 import (
-	"zudomart/modules/catalog/src/modules/stores/dtos"
-	"zudomart/platform/commerceports"
+	"nantty/modules/catalog/src/modules/stores/dtos"
+	"nantty/platform/commerceports"
 )
 
 type Command struct {

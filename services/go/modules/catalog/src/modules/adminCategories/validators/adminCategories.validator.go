@@ -4,8 +4,8 @@ import (
 	"regexp"
 	"strings"
 
-	"zudomart/modules/catalog/src/modules/adminCategories/dtos"
-	"zudomart/modules/catalog/src/utils"
+	"nantty/modules/catalog/src/modules/adminCategories/dtos"
+	"nantty/modules/catalog/src/utils"
 )
 
 var (

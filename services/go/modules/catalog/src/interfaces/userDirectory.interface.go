@@ -5,7 +5,7 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/platform/usersdirectory"
+	"nantty/platform/usersdirectory"
 )
 
 type UserDirectory interface {

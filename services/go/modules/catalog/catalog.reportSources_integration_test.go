@@ -6,8 +6,8 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/catalog/src/databases/schema"
-	"zudomart/platform/commerceports"
+	"nantty/modules/catalog/src/databases/schema"
+	"nantty/platform/commerceports"
 )
 
 func TestStoreTaxRatesReaderExposesStoreSettings(t *testing.T) {

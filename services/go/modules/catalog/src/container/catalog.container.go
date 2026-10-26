@@ -5,13 +5,13 @@ import (
 	"log/slog"
 	"time"
 
-	"zudomart/modules/catalog/src/configs"
-	"zudomart/modules/catalog/src/generated/ent"
-	"zudomart/modules/catalog/src/interfaces"
-	platformevents "zudomart/platform/events"
-	"zudomart/platform/idempotency"
-	"zudomart/platform/jwtauth"
-	"zudomart/platform/viewerregion"
+	"nantty/modules/catalog/src/configs"
+	"nantty/modules/catalog/src/generated/ent"
+	"nantty/modules/catalog/src/interfaces"
+	platformevents "nantty/platform/events"
+	"nantty/platform/idempotency"
+	"nantty/platform/jwtauth"
+	"nantty/platform/viewerregion"
 )
 
 type Container struct {

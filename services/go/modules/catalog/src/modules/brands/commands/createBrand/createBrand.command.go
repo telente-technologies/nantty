@@ -3,7 +3,7 @@ package createbrand
 import (
 	"github.com/google/uuid"
 
-	"zudomart/modules/catalog/src/modules/brands/dtos"
+	"nantty/modules/catalog/src/modules/brands/dtos"
 )
 
 type Command struct {

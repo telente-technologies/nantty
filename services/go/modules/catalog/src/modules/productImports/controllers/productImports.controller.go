@@ -3,12 +3,12 @@ package controllers
 import (
 	"net/http"
 
-	"zudomart/modules/catalog/src/container"
-	"zudomart/modules/catalog/src/middlewares"
-	importproducts "zudomart/modules/catalog/src/modules/productImports/commands/importProducts"
-	"zudomart/modules/catalog/src/services"
-	"zudomart/modules/catalog/src/utils"
-	"zudomart/platform/httpserver"
+	"nantty/modules/catalog/src/container"
+	"nantty/modules/catalog/src/middlewares"
+	importproducts "nantty/modules/catalog/src/modules/productImports/commands/importProducts"
+	"nantty/modules/catalog/src/services"
+	"nantty/modules/catalog/src/utils"
+	"nantty/platform/httpserver"
 )
 
 type ProductImportsController struct {

@@ -4,13 +4,13 @@ import (
 	"context"
 	"strings"
 
-	"zudomart/modules/catalog/src/container"
-	"zudomart/modules/catalog/src/generated/ent"
-	"zudomart/modules/catalog/src/generated/ent/predicate"
-	"zudomart/modules/catalog/src/generated/ent/sellerapplication"
-	applicationservices "zudomart/modules/catalog/src/modules/sellerApplications/services"
-	"zudomart/modules/catalog/src/utils"
-	"zudomart/platform/httpserver"
+	"nantty/modules/catalog/src/container"
+	"nantty/modules/catalog/src/generated/ent"
+	"nantty/modules/catalog/src/generated/ent/predicate"
+	"nantty/modules/catalog/src/generated/ent/sellerapplication"
+	applicationservices "nantty/modules/catalog/src/modules/sellerApplications/services"
+	"nantty/modules/catalog/src/utils"
+	"nantty/platform/httpserver"
 )
 
 type Query struct {

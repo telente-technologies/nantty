@@ -1,6 +1,6 @@
 package dtos
 
-import "zudomart/modules/catalog/src/databases/schema"
+import "nantty/modules/catalog/src/databases/schema"
 
 type ImportRow struct {
 	RowNumber         int    `json:"rowNumber"`

@@ -3,9 +3,9 @@ package services
 import (
 	"context"
 
-	"zudomart/modules/catalog/src/container"
-	"zudomart/modules/catalog/src/generated/ent"
-	"zudomart/modules/catalog/src/generated/ent/category"
+	"nantty/modules/catalog/src/container"
+	"nantty/modules/catalog/src/generated/ent"
+	"nantty/modules/catalog/src/generated/ent/category"
 )
 
 var starterTaxonomy = []struct {

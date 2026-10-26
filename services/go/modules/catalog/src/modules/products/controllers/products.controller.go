@@ -8,16 +8,16 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/catalog/src/container"
-	"zudomart/modules/catalog/src/enums"
-	"zudomart/modules/catalog/src/middlewares"
-	setproductreaction "zudomart/modules/catalog/src/modules/products/commands/setProductReaction"
-	getmarthome "zudomart/modules/catalog/src/modules/products/queries/getMartHome"
-	getproductdetail "zudomart/modules/catalog/src/modules/products/queries/getProductDetail"
-	listproducts "zudomart/modules/catalog/src/modules/products/queries/listProducts"
-	"zudomart/modules/catalog/src/utils"
-	"zudomart/platform/httpserver"
-	"zudomart/platform/jwtauth"
+	"nantty/modules/catalog/src/container"
+	"nantty/modules/catalog/src/enums"
+	"nantty/modules/catalog/src/middlewares"
+	setproductreaction "nantty/modules/catalog/src/modules/products/commands/setProductReaction"
+	getmarthome "nantty/modules/catalog/src/modules/products/queries/getMartHome"
+	getproductdetail "nantty/modules/catalog/src/modules/products/queries/getProductDetail"
+	listproducts "nantty/modules/catalog/src/modules/products/queries/listProducts"
+	"nantty/modules/catalog/src/utils"
+	"nantty/platform/httpserver"
+	"nantty/platform/jwtauth"
 )
 
 type ProductsController struct {

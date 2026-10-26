@@ -4,8 +4,8 @@ import (
 	"net/url"
 	"regexp"
 
-	"zudomart/modules/catalog/src/modules/stores/dtos"
-	"zudomart/modules/catalog/src/utils"
+	"nantty/modules/catalog/src/modules/stores/dtos"
+	"nantty/modules/catalog/src/utils"
 )
 
 var slugPattern = regexp.MustCompile(`^[a-z0-9](?:[a-z0-9-]{1,48}[a-z0-9])$`)

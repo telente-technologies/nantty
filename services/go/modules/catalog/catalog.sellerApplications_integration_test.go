@@ -4,7 +4,7 @@ import (
 	"context"
 	"testing"
 
-	"zudomart/modules/catalog/src/generated/ent/category"
+	"nantty/modules/catalog/src/generated/ent/category"
 )
 
 func applicationBody(categoryId string) map[string]any {

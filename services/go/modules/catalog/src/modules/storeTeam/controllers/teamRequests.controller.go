@@ -3,13 +3,13 @@ package controllers
 import (
 	"net/http"
 
-	"zudomart/modules/catalog/src/container"
-	"zudomart/modules/catalog/src/middlewares"
-	respondtoteamrequest "zudomart/modules/catalog/src/modules/storeTeam/commands/respondToTeamRequest"
-	listteamrequests "zudomart/modules/catalog/src/modules/storeTeam/queries/listTeamRequests"
-	catalogservices "zudomart/modules/catalog/src/services"
-	"zudomart/modules/catalog/src/utils"
-	"zudomart/platform/httpserver"
+	"nantty/modules/catalog/src/container"
+	"nantty/modules/catalog/src/middlewares"
+	respondtoteamrequest "nantty/modules/catalog/src/modules/storeTeam/commands/respondToTeamRequest"
+	listteamrequests "nantty/modules/catalog/src/modules/storeTeam/queries/listTeamRequests"
+	catalogservices "nantty/modules/catalog/src/services"
+	"nantty/modules/catalog/src/utils"
+	"nantty/platform/httpserver"
 )
 
 type TeamRequestsController struct {

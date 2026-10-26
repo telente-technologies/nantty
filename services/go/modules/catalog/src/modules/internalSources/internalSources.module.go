@@ -3,8 +3,8 @@ package internalsources
 import (
 	"net/http"
 
-	"zudomart/modules/catalog/src/container"
-	"zudomart/modules/catalog/src/modules/internalSources/routes"
+	"nantty/modules/catalog/src/container"
+	"nantty/modules/catalog/src/modules/internalSources/routes"
 )
 
 func Mount(mux *http.ServeMux, deployed *container.Container) {

@@ -1,8 +1,8 @@
 package createfeature
 
 import (
-	"zudomart/modules/catalog/src/modules/martFeatures/dtos"
-	"zudomart/modules/catalog/src/services"
+	"nantty/modules/catalog/src/modules/martFeatures/dtos"
+	"nantty/modules/catalog/src/services"
 )
 
 type Command struct {

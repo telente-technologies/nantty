@@ -5,8 +5,8 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"zudomart/modules/catalog/src/configs"
-	"zudomart/modules/catalog/src/container"
+	"nantty/modules/catalog/src/configs"
+	"nantty/modules/catalog/src/container"
 )
 
 func TestMoneyRoutesRefuseWithoutAnIdempotencyStoreInProduction(t *testing.T) {

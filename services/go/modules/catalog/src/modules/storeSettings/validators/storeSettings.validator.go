@@ -8,9 +8,9 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/catalog/src/databases/schema"
-	"zudomart/modules/catalog/src/modules/storeSettings/dtos"
-	"zudomart/modules/catalog/src/utils"
+	"nantty/modules/catalog/src/databases/schema"
+	"nantty/modules/catalog/src/modules/storeSettings/dtos"
+	"nantty/modules/catalog/src/utils"
 )
 
 var (

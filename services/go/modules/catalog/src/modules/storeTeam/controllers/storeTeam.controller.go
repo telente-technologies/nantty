@@ -4,20 +4,20 @@ import (
 	"net/http"
 	"time"
 
-	"zudomart/modules/catalog/src/container"
-	"zudomart/modules/catalog/src/middlewares"
-	addstaffmember "zudomart/modules/catalog/src/modules/storeTeam/commands/addStaffMember"
-	removestaffmember "zudomart/modules/catalog/src/modules/storeTeam/commands/removeStaffMember"
-	updatestaffmember "zudomart/modules/catalog/src/modules/storeTeam/commands/updateStaffMember"
-	"zudomart/modules/catalog/src/modules/storeTeam/dtos"
-	listauditlog "zudomart/modules/catalog/src/modules/storeTeam/queries/listAuditLog"
-	liststaff "zudomart/modules/catalog/src/modules/storeTeam/queries/listStaff"
-	searchzudomartusers "zudomart/modules/catalog/src/modules/storeTeam/queries/searchZudomartUsers"
-	"zudomart/modules/catalog/src/modules/storeTeam/validators"
-	catalogservices "zudomart/modules/catalog/src/services"
-	"zudomart/modules/catalog/src/utils"
-	"zudomart/platform/httpserver"
-	"zudomart/platform/sellerplans"
+	"nantty/modules/catalog/src/container"
+	"nantty/modules/catalog/src/middlewares"
+	addstaffmember "nantty/modules/catalog/src/modules/storeTeam/commands/addStaffMember"
+	removestaffmember "nantty/modules/catalog/src/modules/storeTeam/commands/removeStaffMember"
+	updatestaffmember "nantty/modules/catalog/src/modules/storeTeam/commands/updateStaffMember"
+	"nantty/modules/catalog/src/modules/storeTeam/dtos"
+	listauditlog "nantty/modules/catalog/src/modules/storeTeam/queries/listAuditLog"
+	liststaff "nantty/modules/catalog/src/modules/storeTeam/queries/listStaff"
+	searchnanttyusers "nantty/modules/catalog/src/modules/storeTeam/queries/searchNanttyUsers"
+	"nantty/modules/catalog/src/modules/storeTeam/validators"
+	catalogservices "nantty/modules/catalog/src/services"
+	"nantty/modules/catalog/src/utils"
+	"nantty/platform/httpserver"
+	"nantty/platform/sellerplans"
 )
 
 type StoreTeamController struct {
@@ -43,14 +43,15 @@ func (controller StoreTeamController) search(writer http.ResponseWriter, request
 		controller.respond(writer, request, 0, nil, err)
 		return
 	}
-	query := searchzudomartusers.Query{Store: middlewares.StoreAccessFrom(request.Context()), CallerId: middlewares.AccountIdFrom(request.Context()), Text: text, ExcludeTeam: excludeTeam}
-	view, err := searchzudomartusers.Handler{Container: controller.Container}.Execute(request.Context(), query)
+	query := searchnanttyusers.Query{Store: middlewares.StoreAccessFrom(request.Context()), CallerId: middlewares.AccountIdFrom(request.Context()), Text: text, ExcludeTeam: excludeTeam}
+	view, err := searchnanttyusers.Handler{Container: controller.Container}.Execute(request.Context(), query)
 	controller.respond(writer, request, http.StatusOK, view, err)
 }
 
-func (controller StoreTeamController) SearchZudomartUsers(writer http.ResponseWriter, request *http.Request) {
+func (controller StoreTeamController) SearchNanttyUsers(writer http.ResponseWriter, request *http.Request) {
 	controller.search(writer, request, false)
 }
+
 
 func (controller StoreTeamController) SearchStaffCandidates(writer http.ResponseWriter, request *http.Request) {
 	controller.search(writer, request, true)

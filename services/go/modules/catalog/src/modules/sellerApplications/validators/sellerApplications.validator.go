@@ -5,8 +5,8 @@ import (
 	"regexp"
 	"slices"
 
-	"zudomart/modules/catalog/src/modules/sellerApplications/dtos"
-	"zudomart/modules/catalog/src/utils"
+	"nantty/modules/catalog/src/modules/sellerApplications/dtos"
+	"nantty/modules/catalog/src/utils"
 )
 
 var (

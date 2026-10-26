@@ -1,6 +1,6 @@
 package dtos
 
-import "zudomart/platform/money"
+import "nantty/platform/money"
 
 type FeaturedProductInput struct {
 	ProductId string `json:"productId"`

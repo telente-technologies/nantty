@@ -8,14 +8,14 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/catalog/src/container"
-	"zudomart/modules/catalog/src/events"
-	"zudomart/modules/catalog/src/generated/ent"
-	"zudomart/modules/catalog/src/generated/ent/category"
-	"zudomart/modules/catalog/src/modules/storeSettings/dtos"
-	"zudomart/modules/catalog/src/modules/storeSettings/services"
-	catalogservices "zudomart/modules/catalog/src/services"
-	"zudomart/modules/catalog/src/utils"
+	"nantty/modules/catalog/src/container"
+	"nantty/modules/catalog/src/events"
+	"nantty/modules/catalog/src/generated/ent"
+	"nantty/modules/catalog/src/generated/ent/category"
+	"nantty/modules/catalog/src/modules/storeSettings/dtos"
+	"nantty/modules/catalog/src/modules/storeSettings/services"
+	catalogservices "nantty/modules/catalog/src/services"
+	"nantty/modules/catalog/src/utils"
 )
 
 type Handler struct {

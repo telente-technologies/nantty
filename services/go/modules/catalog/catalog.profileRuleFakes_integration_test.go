@@ -6,9 +6,9 @@ import (
 
 	"github.com/google/uuid"
 
-	catalogerrors "zudomart/modules/catalog/src/errors"
-	"zudomart/modules/catalog/src/interfaces"
-	"zudomart/platform/usersdirectory"
+	catalogerrors "nantty/modules/catalog/src/errors"
+	"nantty/modules/catalog/src/interfaces"
+	"nantty/platform/usersdirectory"
 )
 
 type fakeRegistry struct {

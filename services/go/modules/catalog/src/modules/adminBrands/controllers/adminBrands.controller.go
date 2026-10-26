@@ -3,17 +3,17 @@ package controllers
 import (
 	"net/http"
 
-	"zudomart/modules/catalog/src/container"
-	decideofficialstatus "zudomart/modules/catalog/src/modules/adminBrands/commands/decideOfficialStatus"
-	reassignbrand "zudomart/modules/catalog/src/modules/adminBrands/commands/reassignBrand"
-	getbrand "zudomart/modules/catalog/src/modules/adminBrands/queries/getBrand"
-	listbrands "zudomart/modules/catalog/src/modules/adminBrands/queries/listBrands"
-	viewdocument "zudomart/modules/catalog/src/modules/adminBrands/queries/viewDocument"
-	"zudomart/modules/catalog/src/modules/brands/dtos"
-	"zudomart/modules/catalog/src/modules/brands/validators"
-	"zudomart/modules/catalog/src/services"
-	"zudomart/modules/catalog/src/utils"
-	"zudomart/platform/httpserver"
+	"nantty/modules/catalog/src/container"
+	decideofficialstatus "nantty/modules/catalog/src/modules/adminBrands/commands/decideOfficialStatus"
+	reassignbrand "nantty/modules/catalog/src/modules/adminBrands/commands/reassignBrand"
+	getbrand "nantty/modules/catalog/src/modules/adminBrands/queries/getBrand"
+	listbrands "nantty/modules/catalog/src/modules/adminBrands/queries/listBrands"
+	viewdocument "nantty/modules/catalog/src/modules/adminBrands/queries/viewDocument"
+	"nantty/modules/catalog/src/modules/brands/dtos"
+	"nantty/modules/catalog/src/modules/brands/validators"
+	"nantty/modules/catalog/src/services"
+	"nantty/modules/catalog/src/utils"
+	"nantty/platform/httpserver"
 )
 
 type AdminBrandsController struct {

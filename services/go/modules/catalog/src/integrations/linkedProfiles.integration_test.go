@@ -10,8 +10,8 @@ import (
 
 	"github.com/google/uuid"
 
-	catalogerrors "zudomart/modules/catalog/src/errors"
-	"zudomart/modules/catalog/src/interfaces"
+	catalogerrors "nantty/modules/catalog/src/errors"
+	"nantty/modules/catalog/src/interfaces"
 )
 
 func TestLinkedProfileClientSpeaksTheInternalContract(t *testing.T) {

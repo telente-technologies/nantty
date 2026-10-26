@@ -4,10 +4,10 @@ import (
 	"context"
 	"strings"
 
-	"zudomart/modules/catalog/src/container"
-	"zudomart/modules/catalog/src/services"
-	"zudomart/modules/catalog/src/types"
-	"zudomart/platform/sellerplans"
+	"nantty/modules/catalog/src/container"
+	"nantty/modules/catalog/src/services"
+	"nantty/modules/catalog/src/types"
+	"nantty/platform/sellerplans"
 )
 
 type Handler struct {

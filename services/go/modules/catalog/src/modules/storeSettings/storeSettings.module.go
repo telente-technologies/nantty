@@ -3,8 +3,8 @@ package storesettings
 import (
 	"net/http"
 
-	"zudomart/modules/catalog/src/container"
-	"zudomart/modules/catalog/src/modules/storeSettings/routes"
+	"nantty/modules/catalog/src/container"
+	"nantty/modules/catalog/src/modules/storeSettings/routes"
 )
 
 func Mount(mux *http.ServeMux, deployed *container.Container) {

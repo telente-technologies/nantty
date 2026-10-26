@@ -3,8 +3,8 @@ package dtos
 import (
 	"time"
 
-	"zudomart/modules/catalog/src/interfaces"
-	"zudomart/modules/catalog/src/utils"
+	"nantty/modules/catalog/src/interfaces"
+	"nantty/modules/catalog/src/utils"
 )
 
 type FeatureRequest struct {

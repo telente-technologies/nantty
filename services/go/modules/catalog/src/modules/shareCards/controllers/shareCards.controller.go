@@ -5,11 +5,11 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/catalog/src/container"
-	getsharecard "zudomart/modules/catalog/src/modules/shareCards/queries/getShareCard"
-	"zudomart/modules/catalog/src/utils"
-	"zudomart/platform/httpserver"
-	"zudomart/platform/viewerregion"
+	"nantty/modules/catalog/src/container"
+	getsharecard "nantty/modules/catalog/src/modules/shareCards/queries/getShareCard"
+	"nantty/modules/catalog/src/utils"
+	"nantty/platform/httpserver"
+	"nantty/platform/viewerregion"
 )
 
 type ShareCardsController struct {

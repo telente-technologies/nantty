@@ -1,8 +1,8 @@
 package validators
 
 import (
-	"zudomart/modules/catalog/src/modules/martFeatures/dtos"
-	"zudomart/modules/catalog/src/utils"
+	"nantty/modules/catalog/src/modules/martFeatures/dtos"
+	"nantty/modules/catalog/src/utils"
 )
 
 func ValidateFeatureReason(request dtos.FeatureRequest) error {

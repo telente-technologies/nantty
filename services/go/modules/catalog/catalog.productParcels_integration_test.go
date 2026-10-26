@@ -6,7 +6,7 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/catalog/src/integrations"
+	"nantty/modules/catalog/src/integrations"
 )
 
 func TestProductParcelFieldsSaveUpdateAndFlowIntoCheckoutSnapshot(t *testing.T) {

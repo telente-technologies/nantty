@@ -5,9 +5,9 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/catalog/src/generated/ent"
-	"zudomart/modules/catalog/src/services"
-	"zudomart/platform/httpserver"
+	"nantty/modules/catalog/src/generated/ent"
+	"nantty/modules/catalog/src/services"
+	"nantty/platform/httpserver"
 )
 
 var rolesThatManageAStore = map[string]bool{"owner": true, "manager": true}

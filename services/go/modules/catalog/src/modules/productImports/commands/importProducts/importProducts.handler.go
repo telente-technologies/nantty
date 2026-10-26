@@ -7,16 +7,16 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/catalog/src/container"
-	"zudomart/modules/catalog/src/databases/schema"
-	catalogerrors "zudomart/modules/catalog/src/errors"
-	"zudomart/modules/catalog/src/generated/ent"
-	"zudomart/modules/catalog/src/generated/ent/productimportjob"
-	"zudomart/modules/catalog/src/modules/productImports/dtos"
-	"zudomart/modules/catalog/src/modules/productImports/jobs"
-	"zudomart/modules/catalog/src/services"
-	"zudomart/modules/catalog/src/utils"
-	"zudomart/platform/commerceports"
+	"nantty/modules/catalog/src/container"
+	"nantty/modules/catalog/src/databases/schema"
+	catalogerrors "nantty/modules/catalog/src/errors"
+	"nantty/modules/catalog/src/generated/ent"
+	"nantty/modules/catalog/src/generated/ent/productimportjob"
+	"nantty/modules/catalog/src/modules/productImports/dtos"
+	"nantty/modules/catalog/src/modules/productImports/jobs"
+	"nantty/modules/catalog/src/services"
+	"nantty/modules/catalog/src/utils"
+	"nantty/platform/commerceports"
 )
 
 const MaximumRows = 2000

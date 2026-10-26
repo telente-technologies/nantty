@@ -5,19 +5,19 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/catalog/src/container"
-	"zudomart/modules/catalog/src/middlewares"
-	createbrand "zudomart/modules/catalog/src/modules/brands/commands/createBrand"
-	createbrandstorefront "zudomart/modules/catalog/src/modules/brands/commands/createBrandStorefront"
-	setbrandselling "zudomart/modules/catalog/src/modules/brands/commands/setBrandSelling"
-	"zudomart/modules/catalog/src/modules/brands/dtos"
-	getbrand "zudomart/modules/catalog/src/modules/brands/queries/getBrand"
-	listbrandproducts "zudomart/modules/catalog/src/modules/brands/queries/listBrandProducts"
-	listbrands "zudomart/modules/catalog/src/modules/brands/queries/listBrands"
-	"zudomart/modules/catalog/src/modules/brands/validators"
-	"zudomart/modules/catalog/src/utils"
-	"zudomart/platform/httpserver"
-	"zudomart/platform/jwtauth"
+	"nantty/modules/catalog/src/container"
+	"nantty/modules/catalog/src/middlewares"
+	createbrand "nantty/modules/catalog/src/modules/brands/commands/createBrand"
+	createbrandstorefront "nantty/modules/catalog/src/modules/brands/commands/createBrandStorefront"
+	setbrandselling "nantty/modules/catalog/src/modules/brands/commands/setBrandSelling"
+	"nantty/modules/catalog/src/modules/brands/dtos"
+	getbrand "nantty/modules/catalog/src/modules/brands/queries/getBrand"
+	listbrandproducts "nantty/modules/catalog/src/modules/brands/queries/listBrandProducts"
+	listbrands "nantty/modules/catalog/src/modules/brands/queries/listBrands"
+	"nantty/modules/catalog/src/modules/brands/validators"
+	"nantty/modules/catalog/src/utils"
+	"nantty/platform/httpserver"
+	"nantty/platform/jwtauth"
 )
 
 type BrandsController struct {

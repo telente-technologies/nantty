@@ -5,10 +5,10 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"zudomart/modules/catalog/src/container"
-	"zudomart/platform/httpserver"
-	"zudomart/platform/staffaudit"
-	"zudomart/platform/staffauth"
+	"nantty/modules/catalog/src/container"
+	"nantty/platform/httpserver"
+	"nantty/platform/staffaudit"
+	"nantty/platform/staffauth"
 )
 
 var errAuditUnavailable = httpserver.NewApiError(http.StatusServiceUnavailable, "AUDIT_UNAVAILABLE", "The change could not be audited. Try again.")

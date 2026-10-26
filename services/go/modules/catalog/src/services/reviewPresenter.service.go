@@ -5,11 +5,11 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/catalog/src/container"
-	"zudomart/modules/catalog/src/generated/ent"
-	"zudomart/modules/catalog/src/generated/ent/predicate"
-	"zudomart/modules/catalog/src/generated/ent/product"
-	"zudomart/modules/catalog/src/types"
+	"nantty/modules/catalog/src/container"
+	"nantty/modules/catalog/src/generated/ent"
+	"nantty/modules/catalog/src/generated/ent/predicate"
+	"nantty/modules/catalog/src/generated/ent/product"
+	"nantty/modules/catalog/src/types"
 )
 
 func replyViewOf(row *ent.Review) *types.ReviewReplyView {

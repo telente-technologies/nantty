@@ -6,11 +6,11 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/catalog/src/container"
-	"zudomart/platform/commerceports"
-	"zudomart/platform/httpserver"
-	"zudomart/platform/jwtauth"
-	"zudomart/platform/sellerplans"
+	"nantty/modules/catalog/src/container"
+	"nantty/platform/commerceports"
+	"nantty/platform/httpserver"
+	"nantty/platform/jwtauth"
+	"nantty/platform/sellerplans"
 )
 
 type storeAccessContextKey struct{}

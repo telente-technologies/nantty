@@ -3,8 +3,8 @@ package listcategories
 import (
 	"context"
 
-	"zudomart/modules/catalog/src/container"
-	categoryservices "zudomart/modules/catalog/src/modules/adminCategories/services"
+	"nantty/modules/catalog/src/container"
+	categoryservices "nantty/modules/catalog/src/modules/adminCategories/services"
 )
 
 type Query struct{}

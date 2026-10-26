@@ -5,15 +5,15 @@ import (
 	"sort"
 	"strings"
 
-	"zudomart/modules/catalog/src/container"
-	"zudomart/modules/catalog/src/events"
-	"zudomart/modules/catalog/src/generated/ent"
-	replacefeatured "zudomart/modules/catalog/src/modules/featuredProducts/commands/replaceFeaturedProducts"
-	featureddtos "zudomart/modules/catalog/src/modules/featuredProducts/dtos"
-	"zudomart/modules/catalog/src/modules/storeSettings/dtos"
-	"zudomart/modules/catalog/src/modules/storeSettings/queries/getStorefront"
-	"zudomart/modules/catalog/src/modules/storeSettings/services"
-	catalogservices "zudomart/modules/catalog/src/services"
+	"nantty/modules/catalog/src/container"
+	"nantty/modules/catalog/src/events"
+	"nantty/modules/catalog/src/generated/ent"
+	replacefeatured "nantty/modules/catalog/src/modules/featuredProducts/commands/replaceFeaturedProducts"
+	featureddtos "nantty/modules/catalog/src/modules/featuredProducts/dtos"
+	"nantty/modules/catalog/src/modules/storeSettings/dtos"
+	"nantty/modules/catalog/src/modules/storeSettings/queries/getStorefront"
+	"nantty/modules/catalog/src/modules/storeSettings/services"
+	catalogservices "nantty/modules/catalog/src/services"
 )
 
 type Handler struct {

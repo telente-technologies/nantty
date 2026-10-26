@@ -6,11 +6,11 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"github.com/google/uuid"
 
-	"zudomart/modules/catalog/src/generated/ent"
-	"zudomart/modules/catalog/src/generated/ent/predicate"
-	"zudomart/modules/catalog/src/generated/ent/product"
-	"zudomart/modules/catalog/src/utils"
-	"zudomart/platform/httpserver"
+	"nantty/modules/catalog/src/generated/ent"
+	"nantty/modules/catalog/src/generated/ent/predicate"
+	"nantty/modules/catalog/src/generated/ent/product"
+	"nantty/modules/catalog/src/utils"
+	"nantty/platform/httpserver"
 )
 
 var Sorts = []string{"newest", "price_asc", "price_desc", "popular"}

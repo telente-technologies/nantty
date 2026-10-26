@@ -3,12 +3,12 @@ package listplatformcategories
 import (
 	"context"
 
-	"zudomart/modules/catalog/src/container"
-	"zudomart/modules/catalog/src/generated/ent"
-	"zudomart/modules/catalog/src/generated/ent/category"
-	"zudomart/modules/catalog/src/services"
-	"zudomart/modules/catalog/src/types"
-	"zudomart/platform/httpserver"
+	"nantty/modules/catalog/src/container"
+	"nantty/modules/catalog/src/generated/ent"
+	"nantty/modules/catalog/src/generated/ent/category"
+	"nantty/modules/catalog/src/services"
+	"nantty/modules/catalog/src/types"
+	"nantty/platform/httpserver"
 )
 
 type Handler struct {

@@ -5,13 +5,13 @@ import (
 
 	"github.com/google/uuid"
 
+	catalogerrors "nantty/modules/catalog/src/errors"
+	"nantty/modules/catalog/src/events"
+	"nantty/modules/catalog/src/generated/ent"
+	"nantty/modules/catalog/src/generated/ent/store"
+	"nantty/modules/catalog/src/generated/ent/storemember"
+	"nantty/platform/sellerplans"
 	"time"
-	catalogerrors "zudomart/modules/catalog/src/errors"
-	"zudomart/modules/catalog/src/events"
-	"zudomart/modules/catalog/src/generated/ent"
-	"zudomart/modules/catalog/src/generated/ent/store"
-	"zudomart/modules/catalog/src/generated/ent/storemember"
-	"zudomart/platform/sellerplans"
 )
 
 func LockStoreForTeamChange(ctx context.Context, tx *ent.Tx, storeId uuid.UUID) (*ent.Store, error) {

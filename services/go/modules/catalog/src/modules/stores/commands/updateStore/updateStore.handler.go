@@ -4,9 +4,9 @@ import (
 	"context"
 	"strings"
 
-	"zudomart/modules/catalog/src/container"
-	"zudomart/modules/catalog/src/events"
-	"zudomart/modules/catalog/src/generated/ent"
+	"nantty/modules/catalog/src/container"
+	"nantty/modules/catalog/src/events"
+	"nantty/modules/catalog/src/generated/ent"
 )
 
 type Handler struct {

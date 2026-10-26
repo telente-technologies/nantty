@@ -3,11 +3,11 @@ package deletereview
 import (
 	"context"
 
-	"zudomart/modules/catalog/src/container"
-	catalogerrors "zudomart/modules/catalog/src/errors"
-	"zudomart/modules/catalog/src/events"
-	"zudomart/modules/catalog/src/generated/ent"
-	"zudomart/modules/catalog/src/generated/ent/review"
+	"nantty/modules/catalog/src/container"
+	catalogerrors "nantty/modules/catalog/src/errors"
+	"nantty/modules/catalog/src/events"
+	"nantty/modules/catalog/src/generated/ent"
+	"nantty/modules/catalog/src/generated/ent/review"
 )
 
 type Handler struct {

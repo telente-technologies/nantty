@@ -3,9 +3,9 @@ package getstoresettings
 import (
 	"context"
 
-	"zudomart/modules/catalog/src/container"
-	"zudomart/modules/catalog/src/modules/storeSettings/dtos"
-	"zudomart/modules/catalog/src/modules/storeSettings/services"
+	"nantty/modules/catalog/src/container"
+	"nantty/modules/catalog/src/modules/storeSettings/dtos"
+	"nantty/modules/catalog/src/modules/storeSettings/services"
 )
 
 type Handler struct {

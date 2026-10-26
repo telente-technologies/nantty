@@ -3,15 +3,15 @@ package controllers
 import (
 	"net/http"
 
-	"zudomart/modules/catalog/src/container"
-	"zudomart/modules/catalog/src/middlewares"
-	replacefeaturedproducts "zudomart/modules/catalog/src/modules/featuredProducts/commands/replaceFeaturedProducts"
-	"zudomart/modules/catalog/src/modules/featuredProducts/dtos"
-	listfeaturedproducts "zudomart/modules/catalog/src/modules/featuredProducts/queries/listFeaturedProducts"
-	listproductoptions "zudomart/modules/catalog/src/modules/featuredProducts/queries/listProductOptions"
-	"zudomart/modules/catalog/src/modules/featuredProducts/validators"
-	"zudomart/modules/catalog/src/utils"
-	"zudomart/platform/httpserver"
+	"nantty/modules/catalog/src/container"
+	"nantty/modules/catalog/src/middlewares"
+	replacefeaturedproducts "nantty/modules/catalog/src/modules/featuredProducts/commands/replaceFeaturedProducts"
+	"nantty/modules/catalog/src/modules/featuredProducts/dtos"
+	listfeaturedproducts "nantty/modules/catalog/src/modules/featuredProducts/queries/listFeaturedProducts"
+	listproductoptions "nantty/modules/catalog/src/modules/featuredProducts/queries/listProductOptions"
+	"nantty/modules/catalog/src/modules/featuredProducts/validators"
+	"nantty/modules/catalog/src/utils"
+	"nantty/platform/httpserver"
 )
 
 type FeaturedProductsController struct {

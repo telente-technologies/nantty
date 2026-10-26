@@ -3,10 +3,10 @@ package routes
 import (
 	"net/http"
 
-	"zudomart/modules/catalog/src/container"
-	"zudomart/modules/catalog/src/middlewares"
-	"zudomart/modules/catalog/src/modules/brands/controllers"
-	"zudomart/platform/jwtauth"
+	"nantty/modules/catalog/src/container"
+	"nantty/modules/catalog/src/middlewares"
+	"nantty/modules/catalog/src/modules/brands/controllers"
+	"nantty/platform/jwtauth"
 )
 
 func MountBrandsRoutes(mux *http.ServeMux, deployed *container.Container) {

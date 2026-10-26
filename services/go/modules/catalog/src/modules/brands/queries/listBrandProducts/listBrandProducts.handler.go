@@ -5,17 +5,17 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/catalog/src/container"
-	"zudomart/modules/catalog/src/enums"
-	catalogerrors "zudomart/modules/catalog/src/errors"
-	"zudomart/modules/catalog/src/generated/ent"
-	"zudomart/modules/catalog/src/generated/ent/brand"
-	"zudomart/modules/catalog/src/generated/ent/product"
-	"zudomart/modules/catalog/src/generated/ent/store"
-	brandservices "zudomart/modules/catalog/src/modules/brands/services"
-	listproducts "zudomart/modules/catalog/src/modules/products/queries/listProducts"
-	"zudomart/modules/catalog/src/services"
-	"zudomart/modules/catalog/src/types"
+	"nantty/modules/catalog/src/container"
+	"nantty/modules/catalog/src/enums"
+	catalogerrors "nantty/modules/catalog/src/errors"
+	"nantty/modules/catalog/src/generated/ent"
+	"nantty/modules/catalog/src/generated/ent/brand"
+	"nantty/modules/catalog/src/generated/ent/product"
+	"nantty/modules/catalog/src/generated/ent/store"
+	brandservices "nantty/modules/catalog/src/modules/brands/services"
+	listproducts "nantty/modules/catalog/src/modules/products/queries/listProducts"
+	"nantty/modules/catalog/src/services"
+	"nantty/modules/catalog/src/types"
 )
 
 const sectionLimit = 40

@@ -6,7 +6,7 @@ import (
 	"strings"
 	"time"
 
-	"zudomart/modules/catalog/src/databases/schema"
+	"nantty/modules/catalog/src/databases/schema"
 )
 
 type OfficialCheck struct {

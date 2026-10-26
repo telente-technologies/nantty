@@ -1,8 +1,8 @@
 package bulkproductaction
 
 import (
-	"zudomart/modules/catalog/src/modules/sellerProducts/dtos"
-	"zudomart/platform/commerceports"
+	"nantty/modules/catalog/src/modules/sellerProducts/dtos"
+	"nantty/platform/commerceports"
 )
 
 type Command struct {

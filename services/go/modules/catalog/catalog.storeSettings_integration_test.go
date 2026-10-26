@@ -5,15 +5,15 @@ import (
 	"strings"
 	"testing"
 
-	"zudomart/modules/catalog/src/databases/schema"
-	updatestoresettings "zudomart/modules/catalog/src/modules/storeSettings/commands/updateStoreSettings"
-	updatestorefront "zudomart/modules/catalog/src/modules/storeSettings/commands/updateStorefront"
-	"zudomart/modules/catalog/src/modules/storeSettings/dtos"
-	getstoresettings "zudomart/modules/catalog/src/modules/storeSettings/queries/getStoreSettings"
-	settingsservices "zudomart/modules/catalog/src/modules/storeSettings/services"
-	listauditlog "zudomart/modules/catalog/src/modules/storeTeam/queries/listAuditLog"
-	"zudomart/modules/catalog/src/services"
-	"zudomart/platform/httpserver"
+	"nantty/modules/catalog/src/databases/schema"
+	updatestoresettings "nantty/modules/catalog/src/modules/storeSettings/commands/updateStoreSettings"
+	updatestorefront "nantty/modules/catalog/src/modules/storeSettings/commands/updateStorefront"
+	"nantty/modules/catalog/src/modules/storeSettings/dtos"
+	getstoresettings "nantty/modules/catalog/src/modules/storeSettings/queries/getStoreSettings"
+	settingsservices "nantty/modules/catalog/src/modules/storeSettings/services"
+	listauditlog "nantty/modules/catalog/src/modules/storeTeam/queries/listAuditLog"
+	"nantty/modules/catalog/src/services"
+	"nantty/platform/httpserver"
 )
 
 func TestStoreSettingsAndStorefrontSaveMergeAndAudit(t *testing.T) {

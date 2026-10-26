@@ -3,7 +3,7 @@ package submitapplication
 import (
 	"github.com/google/uuid"
 
-	"zudomart/modules/catalog/src/modules/sellerApplications/dtos"
+	"nantty/modules/catalog/src/modules/sellerApplications/dtos"
 )
 
 type Command struct {

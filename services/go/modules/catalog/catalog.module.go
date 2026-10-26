@@ -3,8 +3,8 @@ package catalog
 import (
 	"context"
 
-	"zudomart/modules/catalog/src"
-	"zudomart/platform/servicemodule"
+	"nantty/modules/catalog/src"
+	"nantty/platform/servicemodule"
 )
 
 type Module = src.Module

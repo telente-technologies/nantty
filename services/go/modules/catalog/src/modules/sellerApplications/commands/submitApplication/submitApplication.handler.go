@@ -8,17 +8,17 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/catalog/src/container"
-	"zudomart/modules/catalog/src/databases/schema"
-	catalogerrors "zudomart/modules/catalog/src/errors"
-	"zudomart/modules/catalog/src/events"
-	"zudomart/modules/catalog/src/generated/ent"
-	"zudomart/modules/catalog/src/generated/ent/category"
-	"zudomart/modules/catalog/src/generated/ent/sellerapplication"
-	"zudomart/modules/catalog/src/interfaces"
-	applicationservices "zudomart/modules/catalog/src/modules/sellerApplications/services"
-	"zudomart/modules/catalog/src/utils"
-	"zudomart/platform/secretbox"
+	"nantty/modules/catalog/src/container"
+	"nantty/modules/catalog/src/databases/schema"
+	catalogerrors "nantty/modules/catalog/src/errors"
+	"nantty/modules/catalog/src/events"
+	"nantty/modules/catalog/src/generated/ent"
+	"nantty/modules/catalog/src/generated/ent/category"
+	"nantty/modules/catalog/src/generated/ent/sellerapplication"
+	"nantty/modules/catalog/src/interfaces"
+	applicationservices "nantty/modules/catalog/src/modules/sellerApplications/services"
+	"nantty/modules/catalog/src/utils"
+	"nantty/platform/secretbox"
 )
 
 var phoneDigits = regexp.MustCompile(`[^0-9+]`)

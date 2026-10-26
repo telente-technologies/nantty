@@ -3,10 +3,10 @@ package updatestaffmember
 import (
 	"github.com/google/uuid"
 
-	"zudomart/modules/catalog/src/modules/storeTeam/dtos"
-	catalogservices "zudomart/modules/catalog/src/services"
-	"zudomart/platform/commerceports"
-	"zudomart/platform/sellerplans"
+	"nantty/modules/catalog/src/modules/storeTeam/dtos"
+	catalogservices "nantty/modules/catalog/src/services"
+	"nantty/platform/commerceports"
+	"nantty/platform/sellerplans"
 )
 
 type Command struct {

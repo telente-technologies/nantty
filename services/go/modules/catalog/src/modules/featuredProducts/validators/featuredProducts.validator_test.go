@@ -5,7 +5,7 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/catalog/src/modules/featuredProducts/dtos"
+	"nantty/modules/catalog/src/modules/featuredProducts/dtos"
 )
 
 func featuredItems(count int, placement string) []dtos.FeaturedProductInput {

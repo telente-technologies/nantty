@@ -9,8 +9,8 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/catalog/src/generated/ent"
-	"zudomart/modules/catalog/src/generated/ent/store"
+	"nantty/modules/catalog/src/generated/ent"
+	"nantty/modules/catalog/src/generated/ent/store"
 )
 
 const maximumInteractionQueryLength = 200

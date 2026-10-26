@@ -1,9 +1,9 @@
 package importproducts
 
 import (
-	"zudomart/modules/catalog/src/modules/productImports/dtos"
-	"zudomart/modules/catalog/src/services"
-	"zudomart/platform/commerceports"
+	"nantty/modules/catalog/src/modules/productImports/dtos"
+	"nantty/modules/catalog/src/services"
+	"nantty/platform/commerceports"
 )
 
 type Command struct {

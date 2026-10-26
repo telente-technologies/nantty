@@ -7,12 +7,12 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/catalog/src/container"
-	"zudomart/modules/catalog/src/databases/schema"
-	"zudomart/modules/catalog/src/generated/ent"
-	"zudomart/modules/catalog/src/modules/storeSettings/dtos"
-	"zudomart/platform/commerceports"
-	"zudomart/platform/money"
+	"nantty/modules/catalog/src/container"
+	"nantty/modules/catalog/src/databases/schema"
+	"nantty/modules/catalog/src/generated/ent"
+	"nantty/modules/catalog/src/modules/storeSettings/dtos"
+	"nantty/platform/commerceports"
+	"nantty/platform/money"
 )
 
 func NotificationPreferencesWithDefaults(saved map[string]bool) map[string]bool {

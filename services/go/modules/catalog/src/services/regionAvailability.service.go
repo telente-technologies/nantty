@@ -7,12 +7,12 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"github.com/google/uuid"
 
-	"zudomart/modules/catalog/src/container"
-	"zudomart/modules/catalog/src/generated/ent"
-	"zudomart/modules/catalog/src/generated/ent/predicate"
-	"zudomart/modules/catalog/src/generated/ent/product"
-	"zudomart/modules/catalog/src/generated/ent/storemember"
-	"zudomart/platform/viewerregion"
+	"nantty/modules/catalog/src/container"
+	"nantty/modules/catalog/src/generated/ent"
+	"nantty/modules/catalog/src/generated/ent/predicate"
+	"nantty/modules/catalog/src/generated/ent/product"
+	"nantty/modules/catalog/src/generated/ent/storemember"
+	"nantty/platform/viewerregion"
 )
 
 func ViewerCountry(ctx context.Context, deployed *container.Container, viewer *uuid.UUID) string {

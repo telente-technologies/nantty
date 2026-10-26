@@ -13,7 +13,7 @@ import (
 	"strconv"
 	"time"
 
-	"zudomart/modules/catalog/src/interfaces"
+	"nantty/modules/catalog/src/interfaces"
 )
 
 const martAdDecidePath = "/internal/v1/ads/decide"

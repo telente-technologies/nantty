@@ -6,14 +6,14 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/catalog/src/enums"
-	"zudomart/modules/catalog/src/events"
-	"zudomart/modules/catalog/src/generated/ent"
-	"zudomart/modules/catalog/src/generated/ent/product"
-	"zudomart/modules/catalog/src/generated/ent/store"
-	"zudomart/modules/catalog/src/services"
-	"zudomart/platform/commerceports"
-	"zudomart/platform/money"
+	"nantty/modules/catalog/src/enums"
+	"nantty/modules/catalog/src/events"
+	"nantty/modules/catalog/src/generated/ent"
+	"nantty/modules/catalog/src/generated/ent/product"
+	"nantty/modules/catalog/src/generated/ent/store"
+	"nantty/modules/catalog/src/services"
+	"nantty/platform/commerceports"
+	"nantty/platform/money"
 )
 
 func (catalog CommerceCatalog) applyRegionToSnapshots(ctx context.Context, variants []*ent.ProductVariant, snapshots map[uuid.UUID]commerceports.ProductSnapshot, countryCode string) error {

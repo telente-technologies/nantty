@@ -3,9 +3,9 @@ package getratingsummary
 import (
 	"context"
 
-	"zudomart/modules/catalog/src/container"
-	"zudomart/modules/catalog/src/enums"
-	"zudomart/modules/catalog/src/generated/ent/review"
+	"nantty/modules/catalog/src/container"
+	"nantty/modules/catalog/src/enums"
+	"nantty/modules/catalog/src/generated/ent/review"
 )
 
 type Handler struct {

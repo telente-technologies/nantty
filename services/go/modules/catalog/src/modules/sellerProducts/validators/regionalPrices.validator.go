@@ -3,9 +3,9 @@ package validators
 import (
 	"strconv"
 
-	"zudomart/modules/catalog/src/modules/sellerProducts/dtos"
-	"zudomart/modules/catalog/src/utils"
-	"zudomart/platform/viewerregion"
+	"nantty/modules/catalog/src/modules/sellerProducts/dtos"
+	"nantty/modules/catalog/src/utils"
+	"nantty/platform/viewerregion"
 )
 
 const maxRegionalPriceMinor = 100_000_000_000

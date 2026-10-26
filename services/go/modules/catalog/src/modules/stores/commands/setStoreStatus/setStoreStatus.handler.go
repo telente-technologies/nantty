@@ -4,12 +4,12 @@ import (
 	"context"
 	"time"
 
-	"zudomart/modules/catalog/src/container"
-	"zudomart/modules/catalog/src/enums"
-	catalogerrors "zudomart/modules/catalog/src/errors"
-	"zudomart/modules/catalog/src/events"
-	"zudomart/modules/catalog/src/generated/ent"
-	"zudomart/modules/catalog/src/services"
+	"nantty/modules/catalog/src/container"
+	"nantty/modules/catalog/src/enums"
+	catalogerrors "nantty/modules/catalog/src/errors"
+	"nantty/modules/catalog/src/events"
+	"nantty/modules/catalog/src/generated/ent"
+	"nantty/modules/catalog/src/services"
 )
 
 type Handler struct {

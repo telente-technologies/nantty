@@ -5,12 +5,12 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/catalog/src/container"
-	"zudomart/modules/catalog/src/enums"
-	"zudomart/modules/catalog/src/generated/ent"
-	"zudomart/modules/catalog/src/generated/ent/product"
-	"zudomart/modules/catalog/src/generated/ent/productmedia"
-	"zudomart/platform/money"
+	"nantty/modules/catalog/src/container"
+	"nantty/modules/catalog/src/enums"
+	"nantty/modules/catalog/src/generated/ent"
+	"nantty/modules/catalog/src/generated/ent/product"
+	"nantty/modules/catalog/src/generated/ent/productmedia"
+	"nantty/platform/money"
 )
 
 type Query struct {

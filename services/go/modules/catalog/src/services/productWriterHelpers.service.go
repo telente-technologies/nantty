@@ -6,13 +6,13 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/catalog/src/databases/schema"
-	catalogerrors "zudomart/modules/catalog/src/errors"
-	"zudomart/modules/catalog/src/generated/ent"
-	"zudomart/modules/catalog/src/generated/ent/brand"
-	"zudomart/modules/catalog/src/generated/ent/predicate"
-	"zudomart/modules/catalog/src/modules/sellerProducts/dtos"
-	"zudomart/platform/commerceports"
+	"nantty/modules/catalog/src/databases/schema"
+	catalogerrors "nantty/modules/catalog/src/errors"
+	"nantty/modules/catalog/src/generated/ent"
+	"nantty/modules/catalog/src/generated/ent/brand"
+	"nantty/modules/catalog/src/generated/ent/predicate"
+	"nantty/modules/catalog/src/modules/sellerProducts/dtos"
+	"nantty/platform/commerceports"
 )
 
 func brandIdentifier(raw string) predicate.Brand {

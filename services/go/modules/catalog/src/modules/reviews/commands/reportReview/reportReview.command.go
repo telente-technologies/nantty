@@ -3,8 +3,8 @@ package reportreview
 import (
 	"github.com/google/uuid"
 
-	"zudomart/modules/catalog/src/modules/reviews/dtos"
-	"zudomart/platform/commerceports"
+	"nantty/modules/catalog/src/modules/reviews/dtos"
+	"nantty/platform/commerceports"
 )
 
 type Command struct {

@@ -6,17 +6,17 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/catalog/src/container"
-	"zudomart/modules/catalog/src/databases/schema"
-	"zudomart/modules/catalog/src/enums"
-	"zudomart/modules/catalog/src/generated/ent/category"
-	"zudomart/modules/catalog/src/generated/ent/product"
-	"zudomart/modules/catalog/src/generated/ent/productvariant"
-	"zudomart/modules/catalog/src/modules/productImports/dtos"
-	productdtos "zudomart/modules/catalog/src/modules/sellerProducts/dtos"
-	"zudomart/modules/catalog/src/modules/sellerProducts/validators"
-	"zudomart/platform/commerceports"
-	"zudomart/platform/httpserver"
+	"nantty/modules/catalog/src/container"
+	"nantty/modules/catalog/src/databases/schema"
+	"nantty/modules/catalog/src/enums"
+	"nantty/modules/catalog/src/generated/ent/category"
+	"nantty/modules/catalog/src/generated/ent/product"
+	"nantty/modules/catalog/src/generated/ent/productvariant"
+	"nantty/modules/catalog/src/modules/productImports/dtos"
+	productdtos "nantty/modules/catalog/src/modules/sellerProducts/dtos"
+	"nantty/modules/catalog/src/modules/sellerProducts/validators"
+	"nantty/platform/commerceports"
+	"nantty/platform/httpserver"
 )
 
 type VariantUpdate struct {

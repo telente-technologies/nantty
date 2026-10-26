@@ -8,10 +8,10 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/catalog/src"
-	"zudomart/modules/catalog/src/generated/ent"
-	"zudomart/platform/commerceports"
-	"zudomart/platform/usersdirectory"
+	"nantty/modules/catalog/src"
+	"nantty/modules/catalog/src/generated/ent"
+	"nantty/platform/commerceports"
+	"nantty/platform/usersdirectory"
 )
 
 type fakeDirectory struct {

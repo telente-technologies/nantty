@@ -3,10 +3,10 @@ package replaceproduct
 import (
 	"context"
 
-	"zudomart/modules/catalog/src/container"
-	getsellerproduct "zudomart/modules/catalog/src/modules/sellerProducts/queries/getSellerProduct"
-	"zudomart/modules/catalog/src/services"
-	"zudomart/modules/catalog/src/types"
+	"nantty/modules/catalog/src/container"
+	getsellerproduct "nantty/modules/catalog/src/modules/sellerProducts/queries/getSellerProduct"
+	"nantty/modules/catalog/src/services"
+	"nantty/modules/catalog/src/types"
 )
 
 type Handler struct {

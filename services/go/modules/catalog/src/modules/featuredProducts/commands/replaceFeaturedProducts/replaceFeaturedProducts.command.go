@@ -1,8 +1,8 @@
 package replacefeaturedproducts
 
 import (
-	"zudomart/modules/catalog/src/modules/featuredProducts/dtos"
-	"zudomart/platform/commerceports"
+	"nantty/modules/catalog/src/modules/featuredProducts/dtos"
+	"nantty/platform/commerceports"
 )
 
 type Command struct {

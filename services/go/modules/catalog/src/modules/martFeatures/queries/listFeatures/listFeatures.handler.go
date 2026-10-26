@@ -3,8 +3,8 @@ package listfeatures
 import (
 	"context"
 
-	"zudomart/modules/catalog/src/container"
-	featureservices "zudomart/modules/catalog/src/modules/martFeatures/services"
+	"nantty/modules/catalog/src/container"
+	featureservices "nantty/modules/catalog/src/modules/martFeatures/services"
 )
 
 type Query struct{}

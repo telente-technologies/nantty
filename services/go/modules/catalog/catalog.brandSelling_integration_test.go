@@ -8,9 +8,9 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/catalog/src/enums"
-	catalogerrors "zudomart/modules/catalog/src/errors"
-	"zudomart/modules/catalog/src/services"
+	"nantty/modules/catalog/src/enums"
+	catalogerrors "nantty/modules/catalog/src/errors"
+	"nantty/modules/catalog/src/services"
 )
 
 func TestBrandSellingToggleHidesTheStorefrontButKeepsOrdersWorking(t *testing.T) {

@@ -4,11 +4,11 @@ import (
 	"context"
 	"time"
 
-	"zudomart/modules/catalog/src/configs"
-	"zudomart/modules/catalog/src/container"
-	"zudomart/modules/catalog/src/generated/ent"
-	"zudomart/modules/catalog/src/generated/ent/martfeature"
-	"zudomart/modules/catalog/src/modules/martFeatures/dtos"
+	"nantty/modules/catalog/src/configs"
+	"nantty/modules/catalog/src/container"
+	"nantty/modules/catalog/src/generated/ent"
+	"nantty/modules/catalog/src/generated/ent/martfeature"
+	"nantty/modules/catalog/src/modules/martFeatures/dtos"
 )
 
 const SubjectType = "martHomeFeature"

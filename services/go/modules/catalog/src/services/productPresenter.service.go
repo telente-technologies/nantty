@@ -5,15 +5,15 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/catalog/src/container"
-	"zudomart/modules/catalog/src/generated/ent"
-	"zudomart/modules/catalog/src/generated/ent/brand"
-	"zudomart/modules/catalog/src/generated/ent/category"
-	"zudomart/modules/catalog/src/generated/ent/productmedia"
-	"zudomart/modules/catalog/src/generated/ent/productvariant"
-	"zudomart/modules/catalog/src/types"
-	"zudomart/platform/commerceports"
-	"zudomart/platform/money"
+	"nantty/modules/catalog/src/container"
+	"nantty/modules/catalog/src/generated/ent"
+	"nantty/modules/catalog/src/generated/ent/brand"
+	"nantty/modules/catalog/src/generated/ent/category"
+	"nantty/modules/catalog/src/generated/ent/productmedia"
+	"nantty/modules/catalog/src/generated/ent/productvariant"
+	"nantty/modules/catalog/src/types"
+	"nantty/platform/commerceports"
+	"nantty/platform/money"
 )
 
 func idString(identifier *uuid.UUID) *string {

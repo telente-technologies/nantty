@@ -4,11 +4,11 @@ import (
 	"context"
 	"net/http"
 
-	"zudomart/modules/catalog/src/container"
-	"zudomart/modules/catalog/src/generated/ent"
-	"zudomart/modules/catalog/src/modules/internalSources/dtos"
-	"zudomart/modules/catalog/src/modules/internalSources/services"
-	"zudomart/platform/httpserver"
+	"nantty/modules/catalog/src/container"
+	"nantty/modules/catalog/src/generated/ent"
+	"nantty/modules/catalog/src/modules/internalSources/dtos"
+	"nantty/modules/catalog/src/modules/internalSources/services"
+	"nantty/platform/httpserver"
 )
 
 type Handler struct {

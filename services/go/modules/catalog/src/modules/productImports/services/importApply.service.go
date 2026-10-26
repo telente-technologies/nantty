@@ -5,14 +5,14 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/catalog/src/container"
-	"zudomart/modules/catalog/src/databases/schema"
-	"zudomart/modules/catalog/src/events"
-	"zudomart/modules/catalog/src/generated/ent"
-	"zudomart/modules/catalog/src/generated/ent/productvariant"
-	catalogservices "zudomart/modules/catalog/src/services"
-	"zudomart/platform/commerceports"
-	"zudomart/platform/httpserver"
+	"nantty/modules/catalog/src/container"
+	"nantty/modules/catalog/src/databases/schema"
+	"nantty/modules/catalog/src/events"
+	"nantty/modules/catalog/src/generated/ent"
+	"nantty/modules/catalog/src/generated/ent/productvariant"
+	catalogservices "nantty/modules/catalog/src/services"
+	"nantty/platform/commerceports"
+	"nantty/platform/httpserver"
 )
 
 type ImportOutcome struct {

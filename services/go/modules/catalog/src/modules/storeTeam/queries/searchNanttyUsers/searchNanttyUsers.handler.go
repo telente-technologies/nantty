@@ -1,14 +1,14 @@
-package searchzudomartusers
+package searchnanttyusers
 
 import (
 	"context"
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/catalog/src/container"
-	"zudomart/modules/catalog/src/generated/ent/storemember"
-	"zudomart/modules/catalog/src/modules/storeTeam/dtos"
-	"zudomart/modules/catalog/src/modules/storeTeam/services"
+	"nantty/modules/catalog/src/container"
+	"nantty/modules/catalog/src/generated/ent/storemember"
+	"nantty/modules/catalog/src/modules/storeTeam/dtos"
+	"nantty/modules/catalog/src/modules/storeTeam/services"
 )
 
 type Handler struct {

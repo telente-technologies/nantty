@@ -5,8 +5,8 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/catalog/src/container"
-	"zudomart/platform/commerceports"
+	"nantty/modules/catalog/src/container"
+	"nantty/platform/commerceports"
 )
 
 type StoreTaxRates struct {

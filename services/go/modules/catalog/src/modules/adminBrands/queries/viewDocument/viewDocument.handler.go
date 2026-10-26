@@ -6,12 +6,12 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/catalog/src/container"
-	catalogerrors "zudomart/modules/catalog/src/errors"
-	"zudomart/modules/catalog/src/generated/ent"
-	"zudomart/modules/catalog/src/generated/ent/brandofficialrequest"
-	brandservices "zudomart/modules/catalog/src/modules/adminBrands/services"
-	"zudomart/modules/catalog/src/services"
+	"nantty/modules/catalog/src/container"
+	catalogerrors "nantty/modules/catalog/src/errors"
+	"nantty/modules/catalog/src/generated/ent"
+	"nantty/modules/catalog/src/generated/ent/brandofficialrequest"
+	brandservices "nantty/modules/catalog/src/modules/adminBrands/services"
+	"nantty/modules/catalog/src/services"
 )
 
 type Query struct {

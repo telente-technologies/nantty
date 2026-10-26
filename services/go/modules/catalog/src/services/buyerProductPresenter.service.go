@@ -5,14 +5,14 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/catalog/src/container"
-	"zudomart/modules/catalog/src/enums"
-	"zudomart/modules/catalog/src/generated/ent"
-	"zudomart/modules/catalog/src/generated/ent/productmedia"
-	"zudomart/modules/catalog/src/generated/ent/productreaction"
-	"zudomart/modules/catalog/src/generated/ent/productvariant"
-	"zudomart/modules/catalog/src/types"
-	"zudomart/platform/commerceports"
+	"nantty/modules/catalog/src/container"
+	"nantty/modules/catalog/src/enums"
+	"nantty/modules/catalog/src/generated/ent"
+	"nantty/modules/catalog/src/generated/ent/productmedia"
+	"nantty/modules/catalog/src/generated/ent/productreaction"
+	"nantty/modules/catalog/src/generated/ent/productvariant"
+	"nantty/modules/catalog/src/types"
+	"nantty/platform/commerceports"
 )
 
 func LoadProductSummaries(ctx context.Context, deployed *container.Container, products []*ent.Product, viewer *uuid.UUID) ([]types.ProductSummaryView, error) {

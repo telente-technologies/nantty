@@ -6,7 +6,7 @@ import (
 
 	"github.com/google/uuid"
 
-	productdtos "zudomart/modules/catalog/src/modules/sellerProducts/dtos"
+	productdtos "nantty/modules/catalog/src/modules/sellerProducts/dtos"
 )
 
 func buildProductRequest(group []parsedRow, categoryByName map[string]string, locationId uuid.UUID) (productdtos.ProductUpsertRequest, string) {

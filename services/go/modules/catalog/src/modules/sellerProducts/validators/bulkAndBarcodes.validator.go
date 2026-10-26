@@ -3,9 +3,9 @@ package validators
 import (
 	"slices"
 
-	"zudomart/modules/catalog/src/enums"
-	"zudomart/modules/catalog/src/modules/sellerProducts/dtos"
-	"zudomart/modules/catalog/src/utils"
+	"nantty/modules/catalog/src/enums"
+	"nantty/modules/catalog/src/modules/sellerProducts/dtos"
+	"nantty/modules/catalog/src/utils"
 )
 
 var bulkActions = []string{"publish", "unpublish", "archive", "set_category", "set_visibility", "change_price_percent"}

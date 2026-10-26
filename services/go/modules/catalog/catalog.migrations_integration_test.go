@@ -11,13 +11,13 @@ import (
 
 	"github.com/jackc/pgx/v5"
 
-	"zudomart/modules/catalog/src"
-	"zudomart/modules/catalog/src/configs"
-	"zudomart/platform/config"
-	"zudomart/platform/health"
-	"zudomart/platform/postgres"
-	"zudomart/platform/sellerplans"
-	"zudomart/platform/servicemodule"
+	"nantty/modules/catalog/src"
+	"nantty/modules/catalog/src/configs"
+	"nantty/platform/config"
+	"nantty/platform/health"
+	"nantty/platform/postgres"
+	"nantty/platform/sellerplans"
+	"nantty/platform/servicemodule"
 )
 
 func startAgainstFreshSchema(t *testing.T) *src.Module {

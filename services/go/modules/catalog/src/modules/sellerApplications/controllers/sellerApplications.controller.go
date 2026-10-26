@@ -3,18 +3,18 @@ package controllers
 import (
 	"net/http"
 
-	"zudomart/modules/catalog/src/container"
-	"zudomart/modules/catalog/src/middlewares"
-	decideapplication "zudomart/modules/catalog/src/modules/sellerApplications/commands/decideApplication"
-	submitapplication "zudomart/modules/catalog/src/modules/sellerApplications/commands/submitApplication"
-	"zudomart/modules/catalog/src/modules/sellerApplications/dtos"
-	getapplication "zudomart/modules/catalog/src/modules/sellerApplications/queries/getApplication"
-	getmyapplication "zudomart/modules/catalog/src/modules/sellerApplications/queries/getMyApplication"
-	listapplications "zudomart/modules/catalog/src/modules/sellerApplications/queries/listApplications"
-	"zudomart/modules/catalog/src/modules/sellerApplications/validators"
-	"zudomart/modules/catalog/src/services"
-	"zudomart/modules/catalog/src/utils"
-	"zudomart/platform/httpserver"
+	"nantty/modules/catalog/src/container"
+	"nantty/modules/catalog/src/middlewares"
+	decideapplication "nantty/modules/catalog/src/modules/sellerApplications/commands/decideApplication"
+	submitapplication "nantty/modules/catalog/src/modules/sellerApplications/commands/submitApplication"
+	"nantty/modules/catalog/src/modules/sellerApplications/dtos"
+	getapplication "nantty/modules/catalog/src/modules/sellerApplications/queries/getApplication"
+	getmyapplication "nantty/modules/catalog/src/modules/sellerApplications/queries/getMyApplication"
+	listapplications "nantty/modules/catalog/src/modules/sellerApplications/queries/listApplications"
+	"nantty/modules/catalog/src/modules/sellerApplications/validators"
+	"nantty/modules/catalog/src/services"
+	"nantty/modules/catalog/src/utils"
+	"nantty/platform/httpserver"
 )
 
 type SellerApplicationsController struct {

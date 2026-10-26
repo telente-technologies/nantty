@@ -3,18 +3,18 @@ package controllers
 import (
 	"net/http"
 
-	"zudomart/modules/catalog/src/container"
-	"zudomart/modules/catalog/src/middlewares"
-	createstorecategory "zudomart/modules/catalog/src/modules/categories/commands/createStoreCategory"
-	deletestorecategory "zudomart/modules/catalog/src/modules/categories/commands/deleteStoreCategory"
-	updatestorecategory "zudomart/modules/catalog/src/modules/categories/commands/updateStoreCategory"
-	"zudomart/modules/catalog/src/modules/categories/dtos"
-	getplatformcategory "zudomart/modules/catalog/src/modules/categories/queries/getPlatformCategory"
-	listplatformcategories "zudomart/modules/catalog/src/modules/categories/queries/listPlatformCategories"
-	liststorecategories "zudomart/modules/catalog/src/modules/categories/queries/listStoreCategories"
-	"zudomart/modules/catalog/src/modules/categories/validators"
-	"zudomart/modules/catalog/src/utils"
-	"zudomart/platform/httpserver"
+	"nantty/modules/catalog/src/container"
+	"nantty/modules/catalog/src/middlewares"
+	createstorecategory "nantty/modules/catalog/src/modules/categories/commands/createStoreCategory"
+	deletestorecategory "nantty/modules/catalog/src/modules/categories/commands/deleteStoreCategory"
+	updatestorecategory "nantty/modules/catalog/src/modules/categories/commands/updateStoreCategory"
+	"nantty/modules/catalog/src/modules/categories/dtos"
+	getplatformcategory "nantty/modules/catalog/src/modules/categories/queries/getPlatformCategory"
+	listplatformcategories "nantty/modules/catalog/src/modules/categories/queries/listPlatformCategories"
+	liststorecategories "nantty/modules/catalog/src/modules/categories/queries/listStoreCategories"
+	"nantty/modules/catalog/src/modules/categories/validators"
+	"nantty/modules/catalog/src/utils"
+	"nantty/platform/httpserver"
 )
 
 type CategoriesController struct {

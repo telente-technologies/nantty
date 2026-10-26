@@ -12,15 +12,15 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/catalog/src"
-	"zudomart/modules/catalog/src/configs"
-	"zudomart/modules/catalog/src/container"
-	"zudomart/modules/catalog/src/generated/ent"
-	"zudomart/platform/commerceports"
-	"zudomart/platform/identityports/identitytest"
-	"zudomart/platform/jwtauth"
-	"zudomart/platform/staffaudit"
-	"zudomart/platform/usersdirectory"
+	"nantty/modules/catalog/src"
+	"nantty/modules/catalog/src/configs"
+	"nantty/modules/catalog/src/container"
+	"nantty/modules/catalog/src/generated/ent"
+	"nantty/platform/commerceports"
+	"nantty/platform/identityports/identitytest"
+	"nantty/platform/jwtauth"
+	"nantty/platform/staffaudit"
+	"nantty/platform/usersdirectory"
 )
 
 const harnessInternalToken = "catalog-test-internal-token-0123456789"

@@ -5,10 +5,10 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/catalog/src/container"
-	catalogerrors "zudomart/modules/catalog/src/errors"
-	"zudomart/modules/catalog/src/generated/ent"
-	brandservices "zudomart/modules/catalog/src/modules/adminBrands/services"
+	"nantty/modules/catalog/src/container"
+	catalogerrors "nantty/modules/catalog/src/errors"
+	"nantty/modules/catalog/src/generated/ent"
+	brandservices "nantty/modules/catalog/src/modules/adminBrands/services"
 )
 
 type Query struct {

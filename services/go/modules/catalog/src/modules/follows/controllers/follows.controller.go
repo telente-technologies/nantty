@@ -3,11 +3,11 @@ package controllers
 import (
 	"net/http"
 
-	"zudomart/modules/catalog/src/container"
-	"zudomart/modules/catalog/src/middlewares"
-	setfollow "zudomart/modules/catalog/src/modules/follows/commands/setFollow"
-	"zudomart/modules/catalog/src/utils"
-	"zudomart/platform/httpserver"
+	"nantty/modules/catalog/src/container"
+	"nantty/modules/catalog/src/middlewares"
+	setfollow "nantty/modules/catalog/src/modules/follows/commands/setFollow"
+	"nantty/modules/catalog/src/utils"
+	"nantty/platform/httpserver"
 )
 
 type FollowsController struct {

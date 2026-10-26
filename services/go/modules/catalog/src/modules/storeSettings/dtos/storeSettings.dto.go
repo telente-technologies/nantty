@@ -3,8 +3,8 @@ package dtos
 import (
 	"encoding/json"
 
-	"zudomart/modules/catalog/src/databases/schema"
-	"zudomart/platform/money"
+	"nantty/modules/catalog/src/databases/schema"
+	"nantty/platform/money"
 )
 
 var NotificationPreferenceKeys = []string{

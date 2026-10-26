@@ -14,7 +14,7 @@ type StaffMemberView struct {
 	InvitedAt    string   `json:"invitedAt"`
 }
 
-type ZudomartUserCandidateView struct {
+type NanttyUserCandidateView struct {
 	UserId    string  `json:"userId"`
 	Name      string  `json:"name"`
 	Username  string  `json:"username"`
@@ -22,7 +22,7 @@ type ZudomartUserCandidateView struct {
 }
 
 type CandidateList struct {
-	Data []ZudomartUserCandidateView `json:"data"`
+	Data []NanttyUserCandidateView `json:"data"`
 }
 
 type AuditActorView struct {

@@ -1,8 +1,8 @@
 package services
 
 import (
-	"zudomart/modules/catalog/src/databases/schema"
-	"zudomart/modules/catalog/src/modules/sellerProducts/dtos"
+	"nantty/modules/catalog/src/databases/schema"
+	"nantty/modules/catalog/src/modules/sellerProducts/dtos"
 )
 
 func regionalPricesOf(request dtos.VariantRequest, baseCurrency string) []schema.RegionalPrice {

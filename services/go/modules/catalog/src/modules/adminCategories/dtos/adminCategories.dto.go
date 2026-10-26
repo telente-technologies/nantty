@@ -3,7 +3,7 @@ package dtos
 import (
 	"time"
 
-	"zudomart/modules/catalog/src/utils"
+	"nantty/modules/catalog/src/utils"
 )
 
 type CreateCategoryRequest struct {

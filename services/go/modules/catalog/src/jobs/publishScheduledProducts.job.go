@@ -7,12 +7,12 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 
-	"zudomart/modules/catalog/src/container"
-	"zudomart/modules/catalog/src/enums"
-	"zudomart/modules/catalog/src/events"
-	"zudomart/modules/catalog/src/generated/ent"
-	"zudomart/modules/catalog/src/generated/ent/product"
-	"zudomart/modules/catalog/src/generated/ent/productmedia"
+	"nantty/modules/catalog/src/container"
+	"nantty/modules/catalog/src/enums"
+	"nantty/modules/catalog/src/events"
+	"nantty/modules/catalog/src/generated/ent"
+	"nantty/modules/catalog/src/generated/ent/product"
+	"nantty/modules/catalog/src/generated/ent/productmedia"
 )
 
 func PublishDueScheduledProducts(ctx context.Context, deployed *container.Container, batch int) (int, error) {

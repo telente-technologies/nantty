@@ -3,10 +3,10 @@ package services
 import (
 	"context"
 
-	"zudomart/modules/catalog/src/container"
-	"zudomart/modules/catalog/src/generated/ent"
-	"zudomart/platform/money"
-	"zudomart/platform/viewerregion"
+	"nantty/modules/catalog/src/container"
+	"nantty/modules/catalog/src/generated/ent"
+	"nantty/platform/money"
+	"nantty/platform/viewerregion"
 )
 
 type DisplayPricing struct {

@@ -8,9 +8,9 @@ import (
 	"strings"
 	"time"
 
-	"zudomart/modules/catalog/src/enums"
-	"zudomart/modules/catalog/src/modules/sellerProducts/dtos"
-	"zudomart/modules/catalog/src/utils"
+	"nantty/modules/catalog/src/enums"
+	"nantty/modules/catalog/src/modules/sellerProducts/dtos"
+	"nantty/modules/catalog/src/utils"
 )
 
 var skuPattern = regexp.MustCompile(`^[A-Za-z0-9._-]{1,64}$`)

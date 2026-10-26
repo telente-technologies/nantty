@@ -3,7 +3,7 @@ package listauditlog
 import (
 	"time"
 
-	"zudomart/platform/commerceports"
+	"nantty/platform/commerceports"
 )
 
 type Query struct {

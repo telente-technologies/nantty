@@ -7,11 +7,11 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/catalog/src/container"
-	"zudomart/modules/catalog/src/generated/ent"
-	"zudomart/modules/catalog/src/generated/ent/storeauditentry"
-	"zudomart/platform/commerceports"
-	"zudomart/platform/httpserver"
+	"nantty/modules/catalog/src/container"
+	"nantty/modules/catalog/src/generated/ent"
+	"nantty/modules/catalog/src/generated/ent/storeauditentry"
+	"nantty/platform/commerceports"
+	"nantty/platform/httpserver"
 )
 
 type StoreActor struct {

@@ -3,14 +3,14 @@ package controllers
 import (
 	"net/http"
 
-	"zudomart/modules/catalog/src/container"
-	"zudomart/modules/catalog/src/middlewares"
-	recordproductinteractions "zudomart/modules/catalog/src/modules/interactions/commands/recordProductInteractions"
-	"zudomart/modules/catalog/src/modules/interactions/dtos"
-	"zudomart/modules/catalog/src/services"
-	"zudomart/modules/catalog/src/utils"
-	"zudomart/platform/httpserver"
-	"zudomart/platform/jwtauth"
+	"nantty/modules/catalog/src/container"
+	"nantty/modules/catalog/src/middlewares"
+	recordproductinteractions "nantty/modules/catalog/src/modules/interactions/commands/recordProductInteractions"
+	"nantty/modules/catalog/src/modules/interactions/dtos"
+	"nantty/modules/catalog/src/services"
+	"nantty/modules/catalog/src/utils"
+	"nantty/platform/httpserver"
+	"nantty/platform/jwtauth"
 )
 
 type InteractionsController struct {

@@ -7,7 +7,7 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/platform/staffaudit"
+	"nantty/platform/staffaudit"
 )
 
 type AuditTrail interface {

@@ -7,8 +7,8 @@ import (
 	"strconv"
 	"strings"
 
-	"zudomart/modules/catalog/src/container"
-	"zudomart/modules/catalog/src/generated/ent/productvariant"
+	"nantty/modules/catalog/src/container"
+	"nantty/modules/catalog/src/generated/ent/productvariant"
 )
 
 type Handler struct {

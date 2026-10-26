@@ -3,10 +3,10 @@ package controllers
 import (
 	"net/http"
 
-	"zudomart/modules/catalog/src/modules/internalSources/dtos"
-	getstoremembership "zudomart/modules/catalog/src/modules/internalSources/queries/getStoreMembership"
-	resolveproductownership "zudomart/modules/catalog/src/modules/internalSources/queries/resolveProductOwnership"
-	"zudomart/modules/catalog/src/utils"
+	"nantty/modules/catalog/src/modules/internalSources/dtos"
+	getstoremembership "nantty/modules/catalog/src/modules/internalSources/queries/getStoreMembership"
+	resolveproductownership "nantty/modules/catalog/src/modules/internalSources/queries/resolveProductOwnership"
+	"nantty/modules/catalog/src/utils"
 )
 
 const maximumOwnershipProducts = 100

@@ -4,9 +4,9 @@ import (
 	"strings"
 	"testing"
 
-	"zudomart/modules/catalog/src/databases/schema"
-	"zudomart/modules/catalog/src/modules/storeSettings/dtos"
-	"zudomart/platform/httpserver"
+	"nantty/modules/catalog/src/databases/schema"
+	"nantty/modules/catalog/src/modules/storeSettings/dtos"
+	"nantty/platform/httpserver"
 )
 
 func TestSettingsValidationRejectsBadTaxesContactsAndUnknownNotifications(t *testing.T) {

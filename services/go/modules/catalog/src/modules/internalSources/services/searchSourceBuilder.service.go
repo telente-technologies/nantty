@@ -7,16 +7,16 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/catalog/src/container"
-	"zudomart/modules/catalog/src/enums"
-	"zudomart/modules/catalog/src/generated/ent"
-	"zudomart/modules/catalog/src/generated/ent/category"
-	"zudomart/modules/catalog/src/generated/ent/productmedia"
-	"zudomart/modules/catalog/src/generated/ent/productvariant"
-	"zudomart/modules/catalog/src/integrations"
-	"zudomart/modules/catalog/src/modules/internalSources/dtos"
-	catalogservices "zudomart/modules/catalog/src/services"
-	"zudomart/platform/commerceports"
+	"nantty/modules/catalog/src/container"
+	"nantty/modules/catalog/src/enums"
+	"nantty/modules/catalog/src/generated/ent"
+	"nantty/modules/catalog/src/generated/ent/category"
+	"nantty/modules/catalog/src/generated/ent/productmedia"
+	"nantty/modules/catalog/src/generated/ent/productvariant"
+	"nantty/modules/catalog/src/integrations"
+	"nantty/modules/catalog/src/modules/internalSources/dtos"
+	catalogservices "nantty/modules/catalog/src/services"
+	"nantty/platform/commerceports"
 )
 
 const untrackedStockQuantity = 1_000_000

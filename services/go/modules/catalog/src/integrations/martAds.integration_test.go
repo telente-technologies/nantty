@@ -14,7 +14,7 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/catalog/src/interfaces"
+	"nantty/modules/catalog/src/interfaces"
 )
 
 const adsSecret = "a-shared-secret-of-at-least-32-chars"

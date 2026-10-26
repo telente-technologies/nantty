@@ -5,17 +5,17 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/catalog/src/container"
-	"zudomart/modules/catalog/src/enums"
-	catalogerrors "zudomart/modules/catalog/src/errors"
-	"zudomart/modules/catalog/src/events"
-	"zudomart/modules/catalog/src/generated/ent"
-	"zudomart/modules/catalog/src/generated/ent/category"
-	"zudomart/modules/catalog/src/generated/ent/product"
-	"zudomart/modules/catalog/src/generated/ent/productmedia"
-	"zudomart/modules/catalog/src/generated/ent/productvariant"
-	"zudomart/modules/catalog/src/modules/sellerProducts/dtos"
-	"zudomart/platform/money"
+	"nantty/modules/catalog/src/container"
+	"nantty/modules/catalog/src/enums"
+	catalogerrors "nantty/modules/catalog/src/errors"
+	"nantty/modules/catalog/src/events"
+	"nantty/modules/catalog/src/generated/ent"
+	"nantty/modules/catalog/src/generated/ent/category"
+	"nantty/modules/catalog/src/generated/ent/product"
+	"nantty/modules/catalog/src/generated/ent/productmedia"
+	"nantty/modules/catalog/src/generated/ent/productvariant"
+	"nantty/modules/catalog/src/modules/sellerProducts/dtos"
+	"nantty/platform/money"
 )
 
 type Handler struct {

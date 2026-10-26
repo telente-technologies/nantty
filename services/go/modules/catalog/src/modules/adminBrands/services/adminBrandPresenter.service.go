@@ -7,12 +7,12 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/catalog/src/container"
-	"zudomart/modules/catalog/src/databases/schema"
-	"zudomart/modules/catalog/src/generated/ent"
-	"zudomart/modules/catalog/src/generated/ent/brandofficialrequest"
-	"zudomart/modules/catalog/src/generated/ent/store"
-	catalogservices "zudomart/modules/catalog/src/services"
+	"nantty/modules/catalog/src/container"
+	"nantty/modules/catalog/src/databases/schema"
+	"nantty/modules/catalog/src/generated/ent"
+	"nantty/modules/catalog/src/generated/ent/brandofficialrequest"
+	"nantty/modules/catalog/src/generated/ent/store"
+	catalogservices "nantty/modules/catalog/src/services"
 )
 
 type BrandSummary struct {

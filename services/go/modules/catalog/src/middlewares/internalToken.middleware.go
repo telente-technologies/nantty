@@ -5,8 +5,8 @@ import (
 	"net/http"
 	"strings"
 
-	"zudomart/modules/catalog/src/container"
-	"zudomart/platform/httpserver"
+	"nantty/modules/catalog/src/container"
+	"nantty/platform/httpserver"
 )
 
 func PresentedInternalToken(request *http.Request) string {

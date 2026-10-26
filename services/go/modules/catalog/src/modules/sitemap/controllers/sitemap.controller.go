@@ -4,10 +4,10 @@ import (
 	"net/http"
 	"strconv"
 
-	"zudomart/modules/catalog/src/container"
-	listsitemapentries "zudomart/modules/catalog/src/modules/sitemap/queries/listSitemapEntries"
-	"zudomart/modules/catalog/src/utils"
-	"zudomart/platform/httpserver"
+	"nantty/modules/catalog/src/container"
+	listsitemapentries "nantty/modules/catalog/src/modules/sitemap/queries/listSitemapEntries"
+	"nantty/modules/catalog/src/utils"
+	"nantty/platform/httpserver"
 )
 
 type SitemapController struct {

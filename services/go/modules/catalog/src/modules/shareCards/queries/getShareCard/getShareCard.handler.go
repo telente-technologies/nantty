@@ -3,12 +3,12 @@ package getsharecard
 import (
 	"context"
 
-	"zudomart/modules/catalog/src/container"
-	"zudomart/modules/catalog/src/enums"
-	"zudomart/modules/catalog/src/generated/ent"
-	"zudomart/modules/catalog/src/integrations"
-	"zudomart/modules/catalog/src/services"
-	"zudomart/platform/money"
+	"nantty/modules/catalog/src/container"
+	"nantty/modules/catalog/src/enums"
+	"nantty/modules/catalog/src/generated/ent"
+	"nantty/modules/catalog/src/integrations"
+	"nantty/modules/catalog/src/services"
+	"nantty/platform/money"
 )
 
 type Handler struct {

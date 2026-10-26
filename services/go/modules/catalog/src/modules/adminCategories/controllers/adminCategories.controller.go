@@ -3,18 +3,18 @@ package controllers
 import (
 	"net/http"
 
-	"zudomart/modules/catalog/src/container"
-	createcategory "zudomart/modules/catalog/src/modules/adminCategories/commands/createCategory"
-	movecategory "zudomart/modules/catalog/src/modules/adminCategories/commands/moveCategory"
-	setcategoryactive "zudomart/modules/catalog/src/modules/adminCategories/commands/setCategoryActive"
-	updatecategory "zudomart/modules/catalog/src/modules/adminCategories/commands/updateCategory"
-	"zudomart/modules/catalog/src/modules/adminCategories/dtos"
-	getcategory "zudomart/modules/catalog/src/modules/adminCategories/queries/getCategory"
-	listcategories "zudomart/modules/catalog/src/modules/adminCategories/queries/listCategories"
-	"zudomart/modules/catalog/src/modules/adminCategories/validators"
-	"zudomart/modules/catalog/src/services"
-	"zudomart/modules/catalog/src/utils"
-	"zudomart/platform/httpserver"
+	"nantty/modules/catalog/src/container"
+	createcategory "nantty/modules/catalog/src/modules/adminCategories/commands/createCategory"
+	movecategory "nantty/modules/catalog/src/modules/adminCategories/commands/moveCategory"
+	setcategoryactive "nantty/modules/catalog/src/modules/adminCategories/commands/setCategoryActive"
+	updatecategory "nantty/modules/catalog/src/modules/adminCategories/commands/updateCategory"
+	"nantty/modules/catalog/src/modules/adminCategories/dtos"
+	getcategory "nantty/modules/catalog/src/modules/adminCategories/queries/getCategory"
+	listcategories "nantty/modules/catalog/src/modules/adminCategories/queries/listCategories"
+	"nantty/modules/catalog/src/modules/adminCategories/validators"
+	"nantty/modules/catalog/src/services"
+	"nantty/modules/catalog/src/utils"
+	"nantty/platform/httpserver"
 )
 
 type AdminCategoriesController struct {

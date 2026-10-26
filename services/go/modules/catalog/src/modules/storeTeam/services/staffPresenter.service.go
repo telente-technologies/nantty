@@ -6,10 +6,10 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/catalog/src/container"
-	"zudomart/modules/catalog/src/generated/ent"
-	"zudomart/modules/catalog/src/modules/storeTeam/dtos"
-	"zudomart/platform/usersdirectory"
+	"nantty/modules/catalog/src/container"
+	"nantty/modules/catalog/src/generated/ent"
+	"nantty/modules/catalog/src/modules/storeTeam/dtos"
+	"nantty/platform/usersdirectory"
 )
 
 func PresentStaffMembers(ctx context.Context, deployed *container.Container, members []*ent.StoreMember) ([]dtos.StaffMemberView, error) {
@@ -50,9 +50,9 @@ func PresentStaffMember(member *ent.StoreMember, profile usersdirectory.ProfileN
 }
 
 func PresentCandidates(profiles []usersdirectory.ProfileName) dtos.CandidateList {
-	candidates := make([]dtos.ZudomartUserCandidateView, 0, len(profiles))
+	candidates := make([]dtos.NanttyUserCandidateView, 0, len(profiles))
 	for _, profile := range profiles {
-		candidates = append(candidates, dtos.ZudomartUserCandidateView{UserId: profile.AccountId.String(), Name: profile.Name, Username: profile.Handle, AvatarUrl: optionalText(profile.AvatarUrl)})
+		candidates = append(candidates, dtos.NanttyUserCandidateView{UserId: profile.AccountId.String(), Name: profile.Name, Username: profile.Handle, AvatarUrl: optionalText(profile.AvatarUrl)})
 	}
 	return dtos.CandidateList{Data: candidates}
 }

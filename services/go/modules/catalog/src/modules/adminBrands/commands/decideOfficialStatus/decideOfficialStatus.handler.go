@@ -5,13 +5,13 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/catalog/src/container"
-	catalogerrors "zudomart/modules/catalog/src/errors"
-	"zudomart/modules/catalog/src/events"
-	"zudomart/modules/catalog/src/generated/ent"
-	"zudomart/modules/catalog/src/generated/ent/store"
-	brandservices "zudomart/modules/catalog/src/modules/adminBrands/services"
-	"zudomart/modules/catalog/src/services"
+	"nantty/modules/catalog/src/container"
+	catalogerrors "nantty/modules/catalog/src/errors"
+	"nantty/modules/catalog/src/events"
+	"nantty/modules/catalog/src/generated/ent"
+	"nantty/modules/catalog/src/generated/ent/store"
+	brandservices "nantty/modules/catalog/src/modules/adminBrands/services"
+	"nantty/modules/catalog/src/services"
 )
 
 type Handler struct {

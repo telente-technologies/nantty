@@ -1,8 +1,8 @@
 package recordproductinteractions
 
 import (
-	"zudomart/modules/catalog/src/modules/interactions/dtos"
-	"zudomart/modules/catalog/src/services"
+	"nantty/modules/catalog/src/modules/interactions/dtos"
+	"nantty/modules/catalog/src/services"
 )
 
 type Command struct {

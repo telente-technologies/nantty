@@ -3,10 +3,10 @@ package listfeaturedproducts
 import (
 	"context"
 
-	"zudomart/modules/catalog/src/container"
-	"zudomart/modules/catalog/src/modules/featuredProducts/dtos"
-	"zudomart/modules/catalog/src/modules/featuredProducts/services"
-	"zudomart/platform/httpserver"
+	"nantty/modules/catalog/src/container"
+	"nantty/modules/catalog/src/modules/featuredProducts/dtos"
+	"nantty/modules/catalog/src/modules/featuredProducts/services"
+	"nantty/platform/httpserver"
 )
 
 type Handler struct {

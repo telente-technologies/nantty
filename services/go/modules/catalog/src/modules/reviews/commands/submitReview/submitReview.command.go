@@ -3,7 +3,7 @@ package submitreview
 import (
 	"github.com/google/uuid"
 
-	"zudomart/modules/catalog/src/modules/reviews/dtos"
+	"nantty/modules/catalog/src/modules/reviews/dtos"
 )
 
 type Command struct {

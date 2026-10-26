@@ -3,8 +3,8 @@ package removestaffmember
 import (
 	"github.com/google/uuid"
 
-	catalogservices "zudomart/modules/catalog/src/services"
-	"zudomart/platform/commerceports"
+	catalogservices "nantty/modules/catalog/src/services"
+	"nantty/platform/commerceports"
 )
 
 type Command struct {

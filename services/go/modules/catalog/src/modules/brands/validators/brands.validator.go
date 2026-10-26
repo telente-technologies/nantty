@@ -5,8 +5,8 @@ import (
 	"regexp"
 	"strings"
 
-	"zudomart/modules/catalog/src/modules/brands/dtos"
-	"zudomart/modules/catalog/src/utils"
+	"nantty/modules/catalog/src/modules/brands/dtos"
+	"nantty/modules/catalog/src/utils"
 )
 
 var handlePattern = regexp.MustCompile(`^[a-z0-9][a-z0-9._-]{1,38}[a-z0-9]$`)

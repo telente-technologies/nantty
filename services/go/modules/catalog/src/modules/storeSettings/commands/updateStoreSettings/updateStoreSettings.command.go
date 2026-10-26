@@ -1,9 +1,9 @@
 package updatestoresettings
 
 import (
-	"zudomart/modules/catalog/src/modules/storeSettings/dtos"
-	catalogservices "zudomart/modules/catalog/src/services"
-	"zudomart/platform/commerceports"
+	"nantty/modules/catalog/src/modules/storeSettings/dtos"
+	catalogservices "nantty/modules/catalog/src/services"
+	"nantty/platform/commerceports"
 )
 
 type Command struct {

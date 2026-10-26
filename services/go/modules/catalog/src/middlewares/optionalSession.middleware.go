@@ -3,9 +3,9 @@ package middlewares
 import (
 	"net/http"
 
-	"zudomart/modules/catalog/src/container"
-	"zudomart/platform/httpserver"
-	"zudomart/platform/jwtauth"
+	"nantty/modules/catalog/src/container"
+	"nantty/platform/httpserver"
+	"nantty/platform/jwtauth"
 )
 
 func OptionallyAuthenticated(deployed *container.Container) func(http.HandlerFunc) http.Handler {

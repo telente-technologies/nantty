@@ -7,8 +7,8 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/catalog/src/interfaces"
-	"zudomart/modules/catalog/src/modules/martFeatures/dtos"
+	"nantty/modules/catalog/src/interfaces"
+	"nantty/modules/catalog/src/modules/martFeatures/dtos"
 )
 
 type fakeMartAds struct {

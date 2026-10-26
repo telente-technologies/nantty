@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"strings"
 
-	"zudomart/modules/catalog/src/configs"
-	"zudomart/modules/catalog/src/modules/martFeatures/dtos"
+	"nantty/modules/catalog/src/configs"
+	"nantty/modules/catalog/src/modules/martFeatures/dtos"
 )
 
 var developmentLibrary = []struct{ id, label string }{

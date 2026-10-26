@@ -7,18 +7,18 @@ import (
 
 	"github.com/google/uuid"
 
-	catalogerrors "zudomart/modules/catalog/src/errors"
-	addstaffmember "zudomart/modules/catalog/src/modules/storeTeam/commands/addStaffMember"
-	removestaffmember "zudomart/modules/catalog/src/modules/storeTeam/commands/removeStaffMember"
-	respondtoteamrequest "zudomart/modules/catalog/src/modules/storeTeam/commands/respondToTeamRequest"
-	updatestaffmember "zudomart/modules/catalog/src/modules/storeTeam/commands/updateStaffMember"
-	"zudomart/modules/catalog/src/modules/storeTeam/dtos"
-	listauditlog "zudomart/modules/catalog/src/modules/storeTeam/queries/listAuditLog"
-	liststaff "zudomart/modules/catalog/src/modules/storeTeam/queries/listStaff"
-	listteamrequests "zudomart/modules/catalog/src/modules/storeTeam/queries/listTeamRequests"
-	searchzudomartusers "zudomart/modules/catalog/src/modules/storeTeam/queries/searchZudomartUsers"
-	"zudomart/modules/catalog/src/services"
-	"zudomart/platform/sellerplans"
+	catalogerrors "nantty/modules/catalog/src/errors"
+	addstaffmember "nantty/modules/catalog/src/modules/storeTeam/commands/addStaffMember"
+	removestaffmember "nantty/modules/catalog/src/modules/storeTeam/commands/removeStaffMember"
+	respondtoteamrequest "nantty/modules/catalog/src/modules/storeTeam/commands/respondToTeamRequest"
+	updatestaffmember "nantty/modules/catalog/src/modules/storeTeam/commands/updateStaffMember"
+	"nantty/modules/catalog/src/modules/storeTeam/dtos"
+	listauditlog "nantty/modules/catalog/src/modules/storeTeam/queries/listAuditLog"
+	liststaff "nantty/modules/catalog/src/modules/storeTeam/queries/listStaff"
+	listteamrequests "nantty/modules/catalog/src/modules/storeTeam/queries/listTeamRequests"
+	searchnanttyusers "nantty/modules/catalog/src/modules/storeTeam/queries/searchNanttyUsers"
+	"nantty/modules/catalog/src/services"
+	"nantty/platform/sellerplans"
 )
 
 func TestStaffAreInvitedAcceptInTheAppAndEveryChangeIsAudited(t *testing.T) {
@@ -43,7 +43,7 @@ func TestStaffAreInvitedAcceptInTheAppAndEveryChangeIsAudited(t *testing.T) {
 	if _, found, _ := services.FindStoreAccess(ctx, deployed, tolu, &fixture.store.ID); found {
 		t.Fatal("an invited member must not reach the dashboard before accepting")
 	}
-	candidates, _ := searchzudomartusers.Handler{Container: deployed}.Execute(ctx, searchzudomartusers.Query{Store: fixture.ownerAccess(), CallerId: fixture.ownerId, Text: "tolu", ExcludeTeam: true})
+	candidates, _ := searchnanttyusers.Handler{Container: deployed}.Execute(ctx, searchnanttyusers.Query{Store: fixture.ownerAccess(), CallerId: fixture.ownerId, Text: "tolu", ExcludeTeam: true})
 	if len(candidates.Data) != 0 {
 		t.Fatalf("candidates must exclude the team: %+v", candidates.Data)
 	}

@@ -7,8 +7,8 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"github.com/google/uuid"
 
-	"zudomart/modules/catalog/src/generated/ent"
-	"zudomart/modules/catalog/src/generated/ent/storevisitor"
+	"nantty/modules/catalog/src/generated/ent"
+	"nantty/modules/catalog/src/generated/ent/storevisitor"
 )
 
 var storeVisitEvents = map[string]bool{"product.viewed": true, "product.clicked": true, "seller.viewed": true, "product.addedToCart": true}

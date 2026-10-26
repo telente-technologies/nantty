@@ -1,8 +1,8 @@
 package validators
 
 import (
-	"zudomart/modules/catalog/src/modules/categories/dtos"
-	"zudomart/modules/catalog/src/utils"
+	"nantty/modules/catalog/src/modules/categories/dtos"
+	"nantty/modules/catalog/src/utils"
 )
 
 func ValidateCategory(body dtos.CategoryRequest) error {

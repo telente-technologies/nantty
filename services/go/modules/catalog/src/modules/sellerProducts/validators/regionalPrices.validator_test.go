@@ -4,7 +4,7 @@ import (
 	"testing"
 	"time"
 
-	"zudomart/modules/catalog/src/modules/sellerProducts/dtos"
+	"nantty/modules/catalog/src/modules/sellerProducts/dtos"
 )
 
 func TestRegionalPricesAreOptionalAndValidated(t *testing.T) {

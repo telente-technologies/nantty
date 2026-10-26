@@ -1,9 +1,9 @@
 package services
 
 import (
-	"zudomart/modules/catalog/src/databases/schema"
-	"zudomart/modules/catalog/src/generated/ent"
-	"zudomart/platform/viewerregion"
+	"nantty/modules/catalog/src/databases/schema"
+	"nantty/modules/catalog/src/generated/ent"
+	"nantty/platform/viewerregion"
 )
 
 func RegionalPriceIn(variant *ent.ProductVariant, currency string) (schema.RegionalPrice, bool) {

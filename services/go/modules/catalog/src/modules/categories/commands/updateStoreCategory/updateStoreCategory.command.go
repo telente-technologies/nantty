@@ -3,8 +3,8 @@ package updatestorecategory
 import (
 	"github.com/google/uuid"
 
-	"zudomart/modules/catalog/src/modules/categories/dtos"
-	"zudomart/platform/commerceports"
+	"nantty/modules/catalog/src/modules/categories/dtos"
+	"nantty/platform/commerceports"
 )
 
 type Command struct {

@@ -5,13 +5,13 @@ import (
 	"strconv"
 	"strings"
 
-	"zudomart/modules/catalog/src/container"
-	"zudomart/modules/catalog/src/enums"
-	"zudomart/modules/catalog/src/generated/ent/productvariant"
-	"zudomart/modules/catalog/src/modules/sellerProducts/dtos"
-	getsellerproduct "zudomart/modules/catalog/src/modules/sellerProducts/queries/getSellerProduct"
-	"zudomart/modules/catalog/src/services"
-	"zudomart/modules/catalog/src/types"
+	"nantty/modules/catalog/src/container"
+	"nantty/modules/catalog/src/enums"
+	"nantty/modules/catalog/src/generated/ent/productvariant"
+	"nantty/modules/catalog/src/modules/sellerProducts/dtos"
+	getsellerproduct "nantty/modules/catalog/src/modules/sellerProducts/queries/getSellerProduct"
+	"nantty/modules/catalog/src/services"
+	"nantty/modules/catalog/src/types"
 )
 
 type Handler struct {

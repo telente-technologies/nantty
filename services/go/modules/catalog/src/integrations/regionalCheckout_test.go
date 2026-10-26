@@ -5,10 +5,10 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/catalog/src/databases/schema"
-	"zudomart/modules/catalog/src/generated/ent"
-	"zudomart/platform/commerceports"
-	"zudomart/platform/money"
+	"nantty/modules/catalog/src/databases/schema"
+	"nantty/modules/catalog/src/generated/ent"
+	"nantty/platform/commerceports"
+	"nantty/platform/money"
 )
 
 func checkoutFixture(storeCountry string, shipsTo []string, regional ...schema.RegionalPrice) (*ent.Store, map[uuid.UUID][]*ent.ProductVariant, map[uuid.UUID]commerceports.ProductSnapshot, *ent.ProductVariant) {

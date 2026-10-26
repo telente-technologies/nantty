@@ -6,12 +6,12 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/catalog/src/container"
-	"zudomart/modules/catalog/src/generated/ent/productimportjob"
-	"zudomart/modules/catalog/src/modules/productImports/dtos"
-	"zudomart/modules/catalog/src/modules/productImports/services"
-	catalogservices "zudomart/modules/catalog/src/services"
-	platformevents "zudomart/platform/events"
+	"nantty/modules/catalog/src/container"
+	"nantty/modules/catalog/src/generated/ent/productimportjob"
+	"nantty/modules/catalog/src/modules/productImports/dtos"
+	"nantty/modules/catalog/src/modules/productImports/services"
+	catalogservices "nantty/modules/catalog/src/services"
+	platformevents "nantty/platform/events"
 )
 
 const ProductImportJobType = "catalog.productImport"

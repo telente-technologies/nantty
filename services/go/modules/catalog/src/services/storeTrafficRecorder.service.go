@@ -7,10 +7,10 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"github.com/google/uuid"
 
-	"zudomart/modules/catalog/src/generated/ent"
-	"zudomart/modules/catalog/src/generated/ent/productdailyview"
-	"zudomart/modules/catalog/src/generated/ent/storedailytraffic"
-	"zudomart/modules/catalog/src/generated/ent/storevisitor"
+	"nantty/modules/catalog/src/generated/ent"
+	"nantty/modules/catalog/src/generated/ent/productdailyview"
+	"nantty/modules/catalog/src/generated/ent/storedailytraffic"
+	"nantty/modules/catalog/src/generated/ent/storevisitor"
 )
 
 var trafficEvents = map[string]bool{"product.viewed": true, "seller.viewed": true}
