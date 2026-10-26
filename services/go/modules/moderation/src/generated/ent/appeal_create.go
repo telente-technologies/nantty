@@ -6,8 +6,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"nantty/modules/moderation/src/generated/ent/appeal"
 	"time"
-	"zudomart/modules/moderation/src/generated/ent/appeal"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"

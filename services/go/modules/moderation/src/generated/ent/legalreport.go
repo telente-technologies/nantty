@@ -4,9 +4,9 @@ package ent
 
 import (
 	"fmt"
+	"nantty/modules/moderation/src/generated/ent/legalreport"
 	"strings"
 	"time"
-	"zudomart/modules/moderation/src/generated/ent/legalreport"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"

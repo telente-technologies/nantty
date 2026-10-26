@@ -4,9 +4,9 @@ package ent
 
 import (
 	"fmt"
+	"nantty/modules/moderation/src/generated/ent/ipclaim"
 	"strings"
 	"time"
-	"zudomart/modules/moderation/src/generated/ent/ipclaim"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"

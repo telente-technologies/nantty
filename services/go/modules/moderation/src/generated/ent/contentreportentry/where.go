@@ -3,8 +3,8 @@
 package contentreportentry
 
 import (
+	"nantty/modules/moderation/src/generated/ent/predicate"
 	"time"
-	"zudomart/modules/moderation/src/generated/ent/predicate"
 
 	"entgo.io/ent/dialect/sql"
 	"github.com/google/uuid"

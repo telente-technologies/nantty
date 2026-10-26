@@ -6,9 +6,9 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"nantty/modules/moderation/src/generated/ent/automationexecution"
+	"nantty/modules/moderation/src/generated/ent/predicate"
 	"time"
-	"zudomart/modules/moderation/src/generated/ent/automationexecution"
-	"zudomart/modules/moderation/src/generated/ent/predicate"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"

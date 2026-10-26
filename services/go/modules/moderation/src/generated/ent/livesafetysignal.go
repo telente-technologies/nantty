@@ -4,9 +4,9 @@ package ent
 
 import (
 	"fmt"
+	"nantty/modules/moderation/src/generated/ent/livesafetysignal"
 	"strings"
 	"time"
-	"zudomart/modules/moderation/src/generated/ent/livesafetysignal"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"

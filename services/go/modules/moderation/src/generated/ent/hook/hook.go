@@ -5,7 +5,7 @@ package hook
 import (
 	"context"
 	"fmt"
-	"zudomart/modules/moderation/src/generated/ent"
+	"nantty/modules/moderation/src/generated/ent"
 )
 
 // The AccountMonetisationStateFunc type is an adapter to allow the use of ordinary
