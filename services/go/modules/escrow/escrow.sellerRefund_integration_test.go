@@ -7,8 +7,8 @@ import (
 
 	"github.com/google/uuid"
 
-	ledgermodels "zudomart/modules/ledger/src/modules/journal/models"
-	paymentstesting "zudomart/modules/payments/src/integrations/paymentsTesting"
+	ledgermodels "nantty/modules/ledger/src/modules/journal/models"
+	paymentstesting "nantty/modules/payments/src/integrations/paymentsTesting"
 )
 
 func sellerRefundRequest(harness *escrowHarness, orderId, buyer string, amountMinor int64) paymentstesting.HarnessResponse {

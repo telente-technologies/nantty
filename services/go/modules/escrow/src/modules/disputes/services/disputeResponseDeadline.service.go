@@ -4,9 +4,9 @@ import (
 	"context"
 	"database/sql"
 
-	"zudomart/modules/escrow/src/generated/ent"
-	"zudomart/modules/escrow/src/generated/ent/dispute"
-	"zudomart/modules/ledger/src/databases"
+	"nantty/modules/escrow/src/generated/ent"
+	"nantty/modules/escrow/src/generated/ent/dispute"
+	"nantty/modules/ledger/src/databases"
 )
 
 func (service DisputeService) EscalateDisputesPastSellerDeadline(ctx context.Context, limit int) int {

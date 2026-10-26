@@ -6,14 +6,14 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/escrow/src/container"
-	"zudomart/modules/escrow/src/generated/ent"
-	"zudomart/modules/escrow/src/generated/ent/dispute"
-	"zudomart/modules/escrow/src/generated/ent/disputemessage"
-	"zudomart/modules/escrow/src/generated/ent/disputestatusevent"
-	"zudomart/modules/escrow/src/generated/ent/escrow"
-	"zudomart/modules/escrow/src/modules/disputes/dtos"
-	escrowdtos "zudomart/modules/escrow/src/modules/escrows/dtos"
+	"nantty/modules/escrow/src/container"
+	"nantty/modules/escrow/src/generated/ent"
+	"nantty/modules/escrow/src/generated/ent/dispute"
+	"nantty/modules/escrow/src/generated/ent/disputemessage"
+	"nantty/modules/escrow/src/generated/ent/disputestatusevent"
+	"nantty/modules/escrow/src/generated/ent/escrow"
+	"nantty/modules/escrow/src/modules/disputes/dtos"
+	escrowdtos "nantty/modules/escrow/src/modules/escrows/dtos"
 )
 
 const urgentWhenDueWithin = 12 * time.Hour

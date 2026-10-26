@@ -3,7 +3,7 @@ package dtos
 import (
 	"time"
 
-	escrowdtos "zudomart/modules/escrow/src/modules/escrows/dtos"
+	escrowdtos "nantty/modules/escrow/src/modules/escrows/dtos"
 )
 
 type OpenDisputeRequestDto struct {

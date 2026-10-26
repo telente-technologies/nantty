@@ -6,11 +6,11 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/escrow/src/generated/ent"
-	"zudomart/modules/escrow/src/generated/ent/escrow"
-	ledgermodels "zudomart/modules/ledger/src/modules/journal/models"
-	paymentmodels "zudomart/modules/payments/src/modules/gateway/models"
-	paymentservices "zudomart/modules/payments/src/modules/gateway/services"
+	"nantty/modules/escrow/src/generated/ent"
+	"nantty/modules/escrow/src/generated/ent/escrow"
+	ledgermodels "nantty/modules/ledger/src/modules/journal/models"
+	paymentmodels "nantty/modules/payments/src/modules/gateway/models"
+	paymentservices "nantty/modules/payments/src/modules/gateway/services"
 )
 
 type EscrowMovementHandler struct {

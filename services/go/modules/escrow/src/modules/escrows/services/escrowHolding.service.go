@@ -9,11 +9,11 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/escrow/src/container"
-	"zudomart/modules/escrow/src/generated/ent"
-	"zudomart/modules/escrow/src/generated/ent/escrow"
-	paymentmodels "zudomart/modules/payments/src/modules/gateway/models"
-	"zudomart/platform/httpserver"
+	"nantty/modules/escrow/src/container"
+	"nantty/modules/escrow/src/generated/ent"
+	"nantty/modules/escrow/src/generated/ent/escrow"
+	paymentmodels "nantty/modules/payments/src/modules/gateway/models"
+	"nantty/platform/httpserver"
 )
 
 var (

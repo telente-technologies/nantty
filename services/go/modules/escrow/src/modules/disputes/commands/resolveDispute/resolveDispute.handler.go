@@ -4,10 +4,10 @@ import (
 	"context"
 	"database/sql"
 
-	"zudomart/modules/escrow/src/modules/disputes/dtos"
-	getstaffdispute "zudomart/modules/escrow/src/modules/disputes/queries/getStaffDispute"
-	"zudomart/modules/escrow/src/modules/escrows"
-	ledgerutils "zudomart/modules/ledger/src/utils"
+	"nantty/modules/escrow/src/modules/disputes/dtos"
+	getstaffdispute "nantty/modules/escrow/src/modules/disputes/queries/getStaffDispute"
+	"nantty/modules/escrow/src/modules/escrows"
+	ledgerutils "nantty/modules/ledger/src/utils"
 )
 
 type Handler struct {

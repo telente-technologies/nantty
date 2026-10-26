@@ -5,11 +5,11 @@ import (
 	"database/sql"
 	"time"
 
-	"zudomart/modules/escrow/src/generated/ent"
-	"zudomart/modules/escrow/src/generated/ent/dispute"
-	"zudomart/modules/escrow/src/generated/ent/escrow"
-	"zudomart/modules/escrow/src/generated/ent/predicate"
-	paymentmodels "zudomart/modules/payments/src/modules/gateway/models"
+	"nantty/modules/escrow/src/generated/ent"
+	"nantty/modules/escrow/src/generated/ent/dispute"
+	"nantty/modules/escrow/src/generated/ent/escrow"
+	"nantty/modules/escrow/src/generated/ent/predicate"
+	paymentmodels "nantty/modules/payments/src/modules/gateway/models"
 )
 
 func (service EscrowService) HandleProviderDispute(ctx context.Context, transaction *sql.Tx, notice paymentmodels.ProviderDisputeNotice) error {

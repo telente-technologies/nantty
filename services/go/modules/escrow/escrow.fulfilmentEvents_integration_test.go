@@ -9,10 +9,10 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/escrow/src/generated/ent/escrow"
-	"zudomart/modules/escrow/src/generated/ent/escrowevent"
-	recordorderfulfilment "zudomart/modules/escrow/src/modules/escrows/commands/recordOrderFulfilment"
-	platformevents "zudomart/platform/events"
+	"nantty/modules/escrow/src/generated/ent/escrow"
+	"nantty/modules/escrow/src/generated/ent/escrowevent"
+	recordorderfulfilment "nantty/modules/escrow/src/modules/escrows/commands/recordOrderFulfilment"
+	platformevents "nantty/platform/events"
 )
 
 func (harness *escrowHarness) deliverOrderEvent(eventType, orderId string, occurredAt time.Time) {

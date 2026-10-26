@@ -8,11 +8,11 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/escrow/src/generated/ent/escrow"
-	escrowservices "zudomart/modules/escrow/src/modules/escrows/services"
-	ledgermodels "zudomart/modules/ledger/src/modules/journal/models"
-	paymentmodels "zudomart/modules/payments/src/modules/gateway/models"
-	paymentservices "zudomart/modules/payments/src/modules/gateway/services"
+	"nantty/modules/escrow/src/generated/ent/escrow"
+	escrowservices "nantty/modules/escrow/src/modules/escrows/services"
+	ledgermodels "nantty/modules/ledger/src/modules/journal/models"
+	paymentmodels "nantty/modules/payments/src/modules/gateway/models"
+	paymentservices "nantty/modules/payments/src/modules/gateway/services"
 )
 
 func (harness *escrowHarness) failPendingReleaseMovement(escrowId string) {

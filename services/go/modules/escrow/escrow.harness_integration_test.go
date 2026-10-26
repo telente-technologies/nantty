@@ -10,13 +10,13 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/escrow/src"
-	"zudomart/modules/escrow/src/configs"
-	"zudomart/modules/ledger/src/databases"
-	moneytesting "zudomart/modules/ledger/src/databases/moneyTesting"
-	ledgermodels "zudomart/modules/ledger/src/modules/journal/models"
-	paymentstesting "zudomart/modules/payments/src/integrations/paymentsTesting"
-	paymentmodels "zudomart/modules/payments/src/modules/gateway/models"
+	"nantty/modules/escrow/src"
+	"nantty/modules/escrow/src/configs"
+	"nantty/modules/ledger/src/databases"
+	moneytesting "nantty/modules/ledger/src/databases/moneyTesting"
+	ledgermodels "nantty/modules/ledger/src/modules/journal/models"
+	paymentstesting "nantty/modules/payments/src/integrations/paymentsTesting"
+	paymentmodels "nantty/modules/payments/src/modules/gateway/models"
 )
 
 type escrowHarness struct {

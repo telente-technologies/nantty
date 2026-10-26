@@ -10,12 +10,12 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/escrow/src/generated/ent"
-	"zudomart/modules/escrow/src/generated/ent/dispute"
-	"zudomart/modules/escrow/src/generated/ent/escrow"
-	"zudomart/modules/escrow/src/modules/escrows/models"
-	escrowservices "zudomart/modules/escrow/src/modules/escrows/services"
-	"zudomart/platform/httpserver"
+	"nantty/modules/escrow/src/generated/ent"
+	"nantty/modules/escrow/src/generated/ent/dispute"
+	"nantty/modules/escrow/src/generated/ent/escrow"
+	"nantty/modules/escrow/src/modules/escrows/models"
+	escrowservices "nantty/modules/escrow/src/modules/escrows/services"
+	"nantty/platform/httpserver"
 )
 
 var (

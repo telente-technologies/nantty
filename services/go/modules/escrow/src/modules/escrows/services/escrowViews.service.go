@@ -4,9 +4,9 @@ import (
 	"encoding/json"
 	"time"
 
-	"zudomart/modules/escrow/src/generated/ent"
-	"zudomart/modules/escrow/src/generated/ent/escrow"
-	"zudomart/modules/escrow/src/modules/escrows/dtos"
+	"nantty/modules/escrow/src/generated/ent"
+	"nantty/modules/escrow/src/generated/ent/escrow"
+	"nantty/modules/escrow/src/modules/escrows/dtos"
 )
 
 const sellerPreparationAllowance = 72 * time.Hour

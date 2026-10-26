@@ -3,13 +3,13 @@ package listdisputes
 import (
 	"context"
 
-	"zudomart/modules/escrow/src/generated/ent"
-	"zudomart/modules/escrow/src/generated/ent/dispute"
-	"zudomart/modules/escrow/src/generated/ent/escrow"
-	"zudomart/modules/escrow/src/modules/disputes/dtos"
-	"zudomart/modules/escrow/src/modules/disputes/services"
-	"zudomart/modules/escrow/src/modules/escrows"
-	"zudomart/platform/httpserver"
+	"nantty/modules/escrow/src/generated/ent"
+	"nantty/modules/escrow/src/generated/ent/dispute"
+	"nantty/modules/escrow/src/generated/ent/escrow"
+	"nantty/modules/escrow/src/modules/disputes/dtos"
+	"nantty/modules/escrow/src/modules/disputes/services"
+	"nantty/modules/escrow/src/modules/escrows"
+	"nantty/platform/httpserver"
 )
 
 type Handler struct {

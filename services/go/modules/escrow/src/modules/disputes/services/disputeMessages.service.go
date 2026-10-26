@@ -8,10 +8,10 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/escrow/src/generated/ent"
-	"zudomart/modules/escrow/src/generated/ent/dispute"
-	"zudomart/modules/escrow/src/generated/ent/disputemessage"
-	"zudomart/modules/escrow/src/generated/ent/escrow"
+	"nantty/modules/escrow/src/generated/ent"
+	"nantty/modules/escrow/src/generated/ent/dispute"
+	"nantty/modules/escrow/src/generated/ent/disputemessage"
+	"nantty/modules/escrow/src/generated/ent/escrow"
 )
 
 type DisputeMessageInput struct {

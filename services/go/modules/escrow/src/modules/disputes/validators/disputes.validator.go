@@ -4,8 +4,8 @@ import (
 	"net/url"
 	"strings"
 
-	"zudomart/modules/escrow/src/modules/disputes/dtos"
-	ledgerutils "zudomart/modules/ledger/src/utils"
+	"nantty/modules/escrow/src/modules/disputes/dtos"
+	ledgerutils "nantty/modules/ledger/src/utils"
 )
 
 func requireHttpsUrls(collector *ledgerutils.IssueCollector, path string, urls []string) {

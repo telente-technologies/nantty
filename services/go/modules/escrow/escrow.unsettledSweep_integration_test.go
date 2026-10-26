@@ -8,7 +8,7 @@ import (
 
 	"github.com/google/uuid"
 
-	escrowservices "zudomart/modules/escrow/src/modules/escrows/services"
+	escrowservices "nantty/modules/escrow/src/modules/escrows/services"
 )
 
 func TestAnUnsettledCardEscrowDoesNotBlockTheAutoReleaseOfOthers(t *testing.T) {

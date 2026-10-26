@@ -7,12 +7,12 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/escrow/src/generated/ent"
-	"zudomart/modules/escrow/src/generated/ent/escrow"
-	"zudomart/modules/ledger/src/databases"
-	ledgermodels "zudomart/modules/ledger/src/modules/journal/models"
-	paymentconstants "zudomart/modules/payments/src/constants"
-	paymentmodels "zudomart/modules/payments/src/modules/gateway/models"
+	"nantty/modules/escrow/src/generated/ent"
+	"nantty/modules/escrow/src/generated/ent/escrow"
+	"nantty/modules/ledger/src/databases"
+	ledgermodels "nantty/modules/ledger/src/modules/journal/models"
+	paymentconstants "nantty/modules/payments/src/constants"
+	paymentmodels "nantty/modules/payments/src/modules/gateway/models"
 )
 
 const PurposeDirectSale = "direct_sale"

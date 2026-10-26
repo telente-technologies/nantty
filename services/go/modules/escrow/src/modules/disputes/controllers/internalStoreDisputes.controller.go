@@ -7,12 +7,12 @@ import (
 
 	"github.com/google/uuid"
 
-	postdisputemessage "zudomart/modules/escrow/src/modules/disputes/commands/postDisputeMessage"
-	getdispute "zudomart/modules/escrow/src/modules/disputes/queries/getDispute"
-	listdisputes "zudomart/modules/escrow/src/modules/disputes/queries/listDisputes"
-	"zudomart/modules/escrow/src/modules/disputes/services"
-	ledgerutils "zudomart/modules/ledger/src/utils"
-	"zudomart/platform/httpserver"
+	postdisputemessage "nantty/modules/escrow/src/modules/disputes/commands/postDisputeMessage"
+	getdispute "nantty/modules/escrow/src/modules/disputes/queries/getDispute"
+	listdisputes "nantty/modules/escrow/src/modules/disputes/queries/listDisputes"
+	"nantty/modules/escrow/src/modules/disputes/services"
+	ledgerutils "nantty/modules/ledger/src/utils"
+	"nantty/platform/httpserver"
 )
 
 type storeDisputeResponseRequest struct {

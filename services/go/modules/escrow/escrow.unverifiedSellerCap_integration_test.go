@@ -11,10 +11,10 @@ import (
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
 
-	commonv1 "zudomart/contracts/gen/go/zudomart/common/v1"
-	moneyv1 "zudomart/contracts/gen/go/zudomart/money/v1"
-	paymentmodels "zudomart/modules/payments/src/modules/gateway/models"
-	paymentservices "zudomart/modules/payments/src/modules/gateway/services"
+	commonv1 "nantty/contracts/gen/go/zudomart/common/v1"
+	moneyv1 "nantty/contracts/gen/go/zudomart/money/v1"
+	paymentmodels "nantty/modules/payments/src/modules/gateway/models"
+	paymentservices "nantty/modules/payments/src/modules/gateway/services"
 )
 
 func (harness *escrowHarness) registerSellerOrder(buyer, seller, orderId string, amount int64, mode string) error {

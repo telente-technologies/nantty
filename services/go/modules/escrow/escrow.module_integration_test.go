@@ -10,8 +10,8 @@ import (
 
 	"github.com/google/uuid"
 
-	escrowservices "zudomart/modules/escrow/src/modules/escrows/services"
-	ledgermodels "zudomart/modules/ledger/src/modules/journal/models"
+	escrowservices "nantty/modules/escrow/src/modules/escrows/services"
+	ledgermodels "nantty/modules/ledger/src/modules/journal/models"
 )
 
 func TestCheckoutPaymentIsHeldInEscrowOnceAndReleasedAfterInspection(t *testing.T) {

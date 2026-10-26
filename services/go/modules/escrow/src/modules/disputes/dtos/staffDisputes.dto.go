@@ -3,8 +3,8 @@ package dtos
 import (
 	"time"
 
-	escrowdtos "zudomart/modules/escrow/src/modules/escrows/dtos"
-	ledgerrepositories "zudomart/modules/ledger/src/repositories"
+	escrowdtos "nantty/modules/escrow/src/modules/escrows/dtos"
+	ledgerrepositories "nantty/modules/ledger/src/repositories"
 )
 
 type StaffDisputeSummaryDto struct {

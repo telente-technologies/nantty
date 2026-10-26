@@ -6,10 +6,10 @@ import (
 
 	"github.com/google/uuid"
 
-	getstaffdispute "zudomart/modules/escrow/src/modules/disputes/queries/getStaffDispute"
-	liststaffdisputes "zudomart/modules/escrow/src/modules/disputes/queries/listStaffDisputes"
-	ledgerutils "zudomart/modules/ledger/src/utils"
-	"zudomart/platform/httpserver"
+	getstaffdispute "nantty/modules/escrow/src/modules/disputes/queries/getStaffDispute"
+	liststaffdisputes "nantty/modules/escrow/src/modules/disputes/queries/listStaffDisputes"
+	ledgerutils "nantty/modules/ledger/src/utils"
+	"nantty/platform/httpserver"
 )
 
 var staffStatusGroups = map[string][]string{

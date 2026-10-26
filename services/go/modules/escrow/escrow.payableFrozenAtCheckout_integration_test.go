@@ -7,8 +7,8 @@ import (
 
 	"github.com/google/uuid"
 
-	paymentmodels "zudomart/modules/payments/src/modules/gateway/models"
-	paymentservices "zudomart/modules/payments/src/modules/gateway/services"
+	paymentmodels "nantty/modules/payments/src/modules/gateway/models"
+	paymentservices "nantty/modules/payments/src/modules/gateway/services"
 )
 
 func TestAnOrdersPayableCannotBeRepricedAfterCheckoutSoTheHoldMatchesTheOrderTotal(t *testing.T) {

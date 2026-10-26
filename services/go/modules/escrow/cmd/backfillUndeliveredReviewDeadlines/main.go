@@ -9,9 +9,9 @@ import (
 
 	_ "github.com/jackc/pgx/v5/stdlib"
 
-	"zudomart/modules/escrow/src/configs"
-	"zudomart/modules/escrow/src/modules/escrows/services"
-	platformconfig "zudomart/platform/config"
+	"nantty/modules/escrow/src/configs"
+	"nantty/modules/escrow/src/modules/escrows/services"
+	platformconfig "nantty/platform/config"
 )
 
 func main() {

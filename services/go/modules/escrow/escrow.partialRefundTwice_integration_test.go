@@ -1,10 +1,10 @@
 package escrow
 
 import (
+	ledgermodels "nantty/modules/ledger/src/modules/journal/models"
 	"net/http"
 	"strings"
 	"testing"
-	ledgermodels "zudomart/modules/ledger/src/modules/journal/models"
 
 	"github.com/google/uuid"
 )

@@ -3,11 +3,11 @@ package routes
 import (
 	"net/http"
 
-	"zudomart/modules/escrow/src/modules/escrows"
-	"zudomart/modules/escrow/src/modules/escrows/controllers"
-	"zudomart/modules/ledger/src/constants"
-	"zudomart/modules/ledger/src/middlewares"
-	"zudomart/platform/httpserver"
+	"nantty/modules/escrow/src/modules/escrows"
+	"nantty/modules/escrow/src/modules/escrows/controllers"
+	"nantty/modules/ledger/src/constants"
+	"nantty/modules/ledger/src/middlewares"
+	"nantty/platform/httpserver"
 )
 
 func MountEscrowsRoutes(mux *http.ServeMux, application *escrows.Application) {

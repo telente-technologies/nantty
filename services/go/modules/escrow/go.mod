@@ -1,4 +1,4 @@
-module zudomart/modules/escrow
+module nantty/modules/escrow
 
 go 1.26.9
 
@@ -10,10 +10,10 @@ require (
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20261005182115-fad411399dd8
 	google.golang.org/grpc v1.86.0-dev
 	google.golang.org/protobuf v1.36.12
-	zudomart/contracts v0.0.0-00010101000000-000000000000
-	zudomart/modules/ledger v0.0.0-00010101000000-000000000000
-	zudomart/modules/payments v0.0.0-00010101000000-000000000000
-	zudomart/platform v0.0.0
+	nantty/contracts v0.0.0-00010101000000-000000000000
+	nantty/modules/ledger v0.0.0-00010101000000-000000000000
+	nantty/modules/payments v0.0.0-00010101000000-000000000000
+	nantty/platform v0.0.0
 )
 
 require (
@@ -90,10 +90,10 @@ require (
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 
-replace zudomart/platform => ../../platform
+replace nantty/platform => ../../platform
 
-replace zudomart/modules/ledger => ../ledger
+replace nantty/modules/ledger => ../ledger
 
-replace zudomart/modules/payments => ../payments
+replace nantty/modules/payments => ../payments
 
-replace zudomart/contracts => ../../../contracts
+replace nantty/contracts => ../../../contracts

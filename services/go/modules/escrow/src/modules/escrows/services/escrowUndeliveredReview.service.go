@@ -8,9 +8,9 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/escrow/src/generated/ent"
-	"zudomart/modules/escrow/src/generated/ent/escrow"
-	"zudomart/platform/httpserver"
+	"nantty/modules/escrow/src/generated/ent"
+	"nantty/modules/escrow/src/generated/ent/escrow"
+	"nantty/platform/httpserver"
 )
 
 var ErrEscrowNotUnderReview = httpserver.NewApiError(http.StatusConflict, "ESCROW_NOT_UNDER_REVIEW", "This order is not waiting for a staff review.")

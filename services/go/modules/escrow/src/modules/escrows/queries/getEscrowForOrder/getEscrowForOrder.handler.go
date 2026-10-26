@@ -3,13 +3,13 @@ package getescrowfororder
 import (
 	"context"
 
-	"zudomart/modules/escrow/src/generated/ent"
-	"zudomart/modules/escrow/src/generated/ent/dispute"
-	"zudomart/modules/escrow/src/generated/ent/escrow"
-	"zudomart/modules/escrow/src/generated/ent/escrowevent"
-	"zudomart/modules/escrow/src/modules/escrows"
-	"zudomart/modules/escrow/src/modules/escrows/dtos"
-	"zudomart/modules/escrow/src/modules/escrows/services"
+	"nantty/modules/escrow/src/generated/ent"
+	"nantty/modules/escrow/src/generated/ent/dispute"
+	"nantty/modules/escrow/src/generated/ent/escrow"
+	"nantty/modules/escrow/src/generated/ent/escrowevent"
+	"nantty/modules/escrow/src/modules/escrows"
+	"nantty/modules/escrow/src/modules/escrows/dtos"
+	"nantty/modules/escrow/src/modules/escrows/services"
 )
 
 type Handler struct {

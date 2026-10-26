@@ -6,13 +6,13 @@ import (
 	"fmt"
 	"net/http"
 
-	"zudomart/modules/escrow/src/generated/ent"
-	"zudomart/modules/escrow/src/generated/ent/escrow"
-	ledgermodels "zudomart/modules/ledger/src/modules/journal/models"
-	paymentconstants "zudomart/modules/payments/src/constants"
-	paymentmodels "zudomart/modules/payments/src/modules/gateway/models"
-	paymentservices "zudomart/modules/payments/src/modules/gateway/services"
-	"zudomart/platform/httpserver"
+	"nantty/modules/escrow/src/generated/ent"
+	"nantty/modules/escrow/src/generated/ent/escrow"
+	ledgermodels "nantty/modules/ledger/src/modules/journal/models"
+	paymentconstants "nantty/modules/payments/src/constants"
+	paymentmodels "nantty/modules/payments/src/modules/gateway/models"
+	paymentservices "nantty/modules/payments/src/modules/gateway/services"
+	"nantty/platform/httpserver"
 )
 
 var ErrEscrowFundsNotSettled = httpserver.NewApiError(http.StatusConflict, "ESCROW_FUNDS_NOT_SETTLED", "The card payment for this order has not reached the buyer's wallet yet. Try again later.")

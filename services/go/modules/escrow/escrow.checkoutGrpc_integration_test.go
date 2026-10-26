@@ -17,9 +17,9 @@ import (
 	"google.golang.org/grpc/test/bufconn"
 	"google.golang.org/protobuf/types/known/timestamppb"
 
-	commonv1 "zudomart/contracts/gen/go/zudomart/common/v1"
-	moneyv1 "zudomart/contracts/gen/go/zudomart/money/v1"
-	"zudomart/modules/ledger/src/loaders"
+	commonv1 "nantty/contracts/gen/go/zudomart/common/v1"
+	moneyv1 "nantty/contracts/gen/go/zudomart/money/v1"
+	"nantty/modules/ledger/src/loaders"
 )
 
 func startCheckoutMoneyClient(t *testing.T, harness *escrowHarness) moneyv1.CheckoutMoneyServiceClient {

@@ -8,9 +8,9 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/escrow/src/generated/ent/escrow"
-	"zudomart/modules/escrow/src/generated/ent/escrowevent"
-	"zudomart/modules/escrow/src/modules/escrows/services"
+	"nantty/modules/escrow/src/generated/ent/escrow"
+	"nantty/modules/escrow/src/generated/ent/escrowevent"
+	"nantty/modules/escrow/src/modules/escrows/services"
 )
 
 func (harness *escrowHarness) reviewStartedAt(orderId string) *time.Time {

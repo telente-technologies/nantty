@@ -1,9 +1,9 @@
 package escrows
 
 import (
-	"zudomart/modules/escrow/src/container"
-	disputeservices "zudomart/modules/escrow/src/modules/disputes/services"
-	"zudomart/modules/escrow/src/modules/escrows/services"
+	"nantty/modules/escrow/src/container"
+	disputeservices "nantty/modules/escrow/src/modules/disputes/services"
+	"nantty/modules/escrow/src/modules/escrows/services"
 )
 
 type Application struct {

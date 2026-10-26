@@ -4,7 +4,7 @@ import (
 	"context"
 	"database/sql"
 
-	sellerreserves "zudomart/modules/ledger/src/modules/sellerReserves"
+	sellerreserves "nantty/modules/ledger/src/modules/sellerReserves"
 )
 
 // holdSaleInSellerWallet holds released sale money in the seller's wallet for the policy period.

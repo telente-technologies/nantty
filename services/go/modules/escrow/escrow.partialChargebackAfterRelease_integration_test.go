@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"testing"
 
-	"zudomart/modules/escrow/src/generated/ent/escrow"
-	ledgermodels "zudomart/modules/ledger/src/modules/journal/models"
+	"nantty/modules/escrow/src/generated/ent/escrow"
+	ledgermodels "nantty/modules/ledger/src/modules/journal/models"
 )
 
 func TestAPartialChargebackOnAReleasedWalletEscrowRecoversOnlyTheDisputedShare(t *testing.T) {

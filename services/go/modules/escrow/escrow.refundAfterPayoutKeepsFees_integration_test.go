@@ -9,8 +9,8 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/escrow/src/generated/ent/escrow"
-	ledgermodels "zudomart/modules/ledger/src/modules/journal/models"
+	"nantty/modules/escrow/src/generated/ent/escrow"
+	ledgermodels "nantty/modules/ledger/src/modules/journal/models"
 )
 
 func (harness *escrowHarness) releaseAfterDelivery(orderId string) {

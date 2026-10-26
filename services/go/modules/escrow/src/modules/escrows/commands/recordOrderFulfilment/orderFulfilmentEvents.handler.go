@@ -6,9 +6,9 @@ import (
 	"fmt"
 	"time"
 
-	"zudomart/modules/escrow/src/modules/escrows/services"
-	"zudomart/modules/ledger/src/loaders"
-	platformevents "zudomart/platform/events"
+	"nantty/modules/escrow/src/modules/escrows/services"
+	"nantty/modules/ledger/src/loaders"
+	platformevents "nantty/platform/events"
 )
 
 type orderFulfilmentEventData struct {

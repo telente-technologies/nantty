@@ -3,8 +3,8 @@ package escrow
 import (
 	"context"
 
-	"zudomart/modules/escrow/src"
-	"zudomart/platform/servicemodule"
+	"nantty/modules/escrow/src"
+	"nantty/platform/servicemodule"
 )
 
 type Module = src.Module

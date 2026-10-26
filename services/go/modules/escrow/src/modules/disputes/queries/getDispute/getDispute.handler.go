@@ -3,12 +3,12 @@ package getdispute
 import (
 	"context"
 
-	"zudomart/modules/escrow/src/generated/ent"
-	"zudomart/modules/escrow/src/generated/ent/escrow"
-	"zudomart/modules/escrow/src/modules/disputes/dtos"
-	"zudomart/modules/escrow/src/modules/disputes/services"
-	"zudomart/modules/escrow/src/modules/escrows"
-	"zudomart/modules/ledger/src/databases"
+	"nantty/modules/escrow/src/generated/ent"
+	"nantty/modules/escrow/src/generated/ent/escrow"
+	"nantty/modules/escrow/src/modules/disputes/dtos"
+	"nantty/modules/escrow/src/modules/disputes/services"
+	"nantty/modules/escrow/src/modules/escrows"
+	"nantty/modules/ledger/src/databases"
 )
 
 type Handler struct {

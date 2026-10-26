@@ -3,10 +3,10 @@ package routes
 import (
 	"net/http"
 
-	"zudomart/modules/escrow/src/modules/disputes/controllers"
-	"zudomart/modules/escrow/src/modules/escrows"
-	"zudomart/modules/ledger/src/constants"
-	"zudomart/modules/ledger/src/middlewares"
+	"nantty/modules/escrow/src/modules/disputes/controllers"
+	"nantty/modules/escrow/src/modules/escrows"
+	"nantty/modules/ledger/src/constants"
+	"nantty/modules/ledger/src/middlewares"
 )
 
 func MountDisputesRoutes(mux *http.ServeMux, application *escrows.Application) {

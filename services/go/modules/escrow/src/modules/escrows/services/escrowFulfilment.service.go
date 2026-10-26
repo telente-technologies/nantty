@@ -11,10 +11,10 @@ import (
 	entsql "entgo.io/ent/dialect/sql"
 	"github.com/google/uuid"
 
-	"zudomart/modules/escrow/src/generated/ent"
-	"zudomart/modules/escrow/src/generated/ent/escrow"
-	"zudomart/modules/escrow/src/generated/ent/pendingrefund"
-	"zudomart/modules/ledger/src/databases"
+	"nantty/modules/escrow/src/generated/ent"
+	"nantty/modules/escrow/src/generated/ent/escrow"
+	"nantty/modules/escrow/src/generated/ent/pendingrefund"
+	"nantty/modules/ledger/src/databases"
 )
 
 type OrderFulfilment struct {

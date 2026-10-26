@@ -6,14 +6,14 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/escrow/src/generated/ent"
-	"zudomart/modules/escrow/src/generated/ent/dispute"
-	"zudomart/modules/escrow/src/generated/ent/escrow"
-	"zudomart/modules/escrow/src/generated/ent/predicate"
-	"zudomart/modules/escrow/src/modules/disputes/dtos"
-	"zudomart/modules/escrow/src/modules/disputes/services"
-	"zudomart/modules/escrow/src/modules/escrows"
-	ledgerutils "zudomart/modules/ledger/src/utils"
+	"nantty/modules/escrow/src/generated/ent"
+	"nantty/modules/escrow/src/generated/ent/dispute"
+	"nantty/modules/escrow/src/generated/ent/escrow"
+	"nantty/modules/escrow/src/generated/ent/predicate"
+	"nantty/modules/escrow/src/modules/disputes/dtos"
+	"nantty/modules/escrow/src/modules/disputes/services"
+	"nantty/modules/escrow/src/modules/escrows"
+	ledgerutils "nantty/modules/ledger/src/utils"
 )
 
 type Handler struct {

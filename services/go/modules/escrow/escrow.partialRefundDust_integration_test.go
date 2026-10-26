@@ -8,7 +8,7 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/escrow/src/generated/ent/escrow"
+	"nantty/modules/escrow/src/generated/ent/escrow"
 )
 
 func TestAPartialRefundKeepsTheHeldCommissionProRataWithTheRoundingDustToTheSeller(t *testing.T) {

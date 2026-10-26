@@ -3,12 +3,12 @@ package listsellerescrowholds
 import (
 	"context"
 
-	"zudomart/modules/escrow/src/generated/ent"
-	"zudomart/modules/escrow/src/generated/ent/escrow"
-	"zudomart/modules/escrow/src/modules/escrows"
-	"zudomart/modules/escrow/src/modules/escrows/dtos"
-	"zudomart/modules/escrow/src/modules/escrows/services"
-	"zudomart/platform/httpserver"
+	"nantty/modules/escrow/src/generated/ent"
+	"nantty/modules/escrow/src/generated/ent/escrow"
+	"nantty/modules/escrow/src/modules/escrows"
+	"nantty/modules/escrow/src/modules/escrows/dtos"
+	"nantty/modules/escrow/src/modules/escrows/services"
+	"nantty/platform/httpserver"
 )
 
 type Handler struct {

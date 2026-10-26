@@ -6,19 +6,19 @@ import (
 
 	"github.com/google/uuid"
 
-	closedispute "zudomart/modules/escrow/src/modules/disputes/commands/closeDispute"
-	opendispute "zudomart/modules/escrow/src/modules/disputes/commands/openDispute"
-	postdisputemessage "zudomart/modules/escrow/src/modules/disputes/commands/postDisputeMessage"
-	resolvedispute "zudomart/modules/escrow/src/modules/disputes/commands/resolveDispute"
-	"zudomart/modules/escrow/src/modules/disputes/dtos"
-	getdispute "zudomart/modules/escrow/src/modules/disputes/queries/getDispute"
-	listdisputes "zudomart/modules/escrow/src/modules/disputes/queries/listDisputes"
-	"zudomart/modules/escrow/src/modules/disputes/services"
-	"zudomart/modules/escrow/src/modules/disputes/validators"
-	"zudomart/modules/escrow/src/modules/escrows"
-	ledgerutils "zudomart/modules/ledger/src/utils"
-	"zudomart/platform/httpserver"
-	"zudomart/platform/staffauth"
+	closedispute "nantty/modules/escrow/src/modules/disputes/commands/closeDispute"
+	opendispute "nantty/modules/escrow/src/modules/disputes/commands/openDispute"
+	postdisputemessage "nantty/modules/escrow/src/modules/disputes/commands/postDisputeMessage"
+	resolvedispute "nantty/modules/escrow/src/modules/disputes/commands/resolveDispute"
+	"nantty/modules/escrow/src/modules/disputes/dtos"
+	getdispute "nantty/modules/escrow/src/modules/disputes/queries/getDispute"
+	listdisputes "nantty/modules/escrow/src/modules/disputes/queries/listDisputes"
+	"nantty/modules/escrow/src/modules/disputes/services"
+	"nantty/modules/escrow/src/modules/disputes/validators"
+	"nantty/modules/escrow/src/modules/escrows"
+	ledgerutils "nantty/modules/ledger/src/utils"
+	"nantty/platform/httpserver"
+	"nantty/platform/staffauth"
 )
 
 type DisputesController struct {

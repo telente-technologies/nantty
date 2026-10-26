@@ -7,8 +7,8 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/escrow/src/generated/ent/escrow"
-	paymentservices "zudomart/modules/payments/src/modules/gateway/services"
+	"nantty/modules/escrow/src/generated/ent/escrow"
+	paymentservices "nantty/modules/payments/src/modules/gateway/services"
 )
 
 func TestTheAutoReleaseSweepSkipsAPoisonRowAndReleasesTheRowsBehindIt(t *testing.T) {
