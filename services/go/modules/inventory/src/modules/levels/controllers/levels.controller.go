@@ -5,19 +5,19 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/inventory/src/container"
-	"zudomart/modules/inventory/src/generated/ent"
-	"zudomart/modules/inventory/src/middlewares"
-	updatereorderlevels "zudomart/modules/inventory/src/modules/levels/commands/updateReorderLevels"
-	"zudomart/modules/inventory/src/modules/levels/dtos"
-	getinventorysummary "zudomart/modules/inventory/src/modules/levels/queries/getInventorySummary"
-	listinventorylevels "zudomart/modules/inventory/src/modules/levels/queries/listInventoryLevels"
-	listinventorylocationsummaries "zudomart/modules/inventory/src/modules/levels/queries/listInventoryLocationSummaries"
-	listreordersuggestions "zudomart/modules/inventory/src/modules/levels/queries/listReorderSuggestions"
-	"zudomart/modules/inventory/src/modules/levels/validators"
-	"zudomart/modules/inventory/src/services"
-	"zudomart/modules/inventory/src/utils"
-	"zudomart/platform/httpserver"
+	"nantty/modules/inventory/src/container"
+	"nantty/modules/inventory/src/generated/ent"
+	"nantty/modules/inventory/src/middlewares"
+	updatereorderlevels "nantty/modules/inventory/src/modules/levels/commands/updateReorderLevels"
+	"nantty/modules/inventory/src/modules/levels/dtos"
+	getinventorysummary "nantty/modules/inventory/src/modules/levels/queries/getInventorySummary"
+	listinventorylevels "nantty/modules/inventory/src/modules/levels/queries/listInventoryLevels"
+	listinventorylocationsummaries "nantty/modules/inventory/src/modules/levels/queries/listInventoryLocationSummaries"
+	listreordersuggestions "nantty/modules/inventory/src/modules/levels/queries/listReorderSuggestions"
+	"nantty/modules/inventory/src/modules/levels/validators"
+	"nantty/modules/inventory/src/services"
+	"nantty/modules/inventory/src/utils"
+	"nantty/platform/httpserver"
 )
 
 type LevelsController struct {

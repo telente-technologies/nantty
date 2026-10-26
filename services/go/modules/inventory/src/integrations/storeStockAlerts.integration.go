@@ -6,9 +6,9 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/inventory/src/container"
-	"zudomart/modules/inventory/src/generated/ent/stocklevel"
-	"zudomart/platform/commerceports"
+	"nantty/modules/inventory/src/container"
+	"nantty/modules/inventory/src/generated/ent/stocklevel"
+	"nantty/platform/commerceports"
 )
 
 type StoreStockAlerts struct {

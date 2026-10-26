@@ -9,8 +9,8 @@ import (
 	entsql "entgo.io/ent/dialect/sql"
 	"github.com/jackc/pgx/v5"
 
-	"zudomart/modules/inventory/src/generated/ent"
-	"zudomart/platform/commerceports"
+	"nantty/modules/inventory/src/generated/ent"
+	"nantty/platform/commerceports"
 )
 
 type sharedTransactionDriver struct {

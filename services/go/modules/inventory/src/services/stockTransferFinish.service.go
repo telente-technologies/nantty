@@ -5,15 +5,15 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/inventory/src/container"
-	"zudomart/modules/inventory/src/enums"
-	inventoryerrors "zudomart/modules/inventory/src/errors"
-	"zudomart/modules/inventory/src/events"
-	"zudomart/modules/inventory/src/generated/ent"
-	"zudomart/modules/inventory/src/generated/ent/stocklevel"
-	"zudomart/modules/inventory/src/generated/ent/stocktransfer"
-	"zudomart/modules/inventory/src/generated/ent/stocktransferline"
-	"zudomart/modules/inventory/src/types"
+	"nantty/modules/inventory/src/container"
+	"nantty/modules/inventory/src/enums"
+	inventoryerrors "nantty/modules/inventory/src/errors"
+	"nantty/modules/inventory/src/events"
+	"nantty/modules/inventory/src/generated/ent"
+	"nantty/modules/inventory/src/generated/ent/stocklevel"
+	"nantty/modules/inventory/src/generated/ent/stocktransfer"
+	"nantty/modules/inventory/src/generated/ent/stocktransferline"
+	"nantty/modules/inventory/src/types"
 )
 
 type FinishTransferRequest struct {

@@ -3,16 +3,16 @@ package controllers
 import (
 	"net/http"
 
-	"zudomart/modules/inventory/src/container"
-	"zudomart/modules/inventory/src/middlewares"
-	cancelstocktransfer "zudomart/modules/inventory/src/modules/transfers/commands/cancelStockTransfer"
-	createstocktransfer "zudomart/modules/inventory/src/modules/transfers/commands/createStockTransfer"
-	receivestocktransfer "zudomart/modules/inventory/src/modules/transfers/commands/receiveStockTransfer"
-	"zudomart/modules/inventory/src/modules/transfers/dtos"
-	liststocktransfers "zudomart/modules/inventory/src/modules/transfers/queries/listStockTransfers"
-	"zudomart/modules/inventory/src/modules/transfers/validators"
-	"zudomart/modules/inventory/src/utils"
-	"zudomart/platform/httpserver"
+	"nantty/modules/inventory/src/container"
+	"nantty/modules/inventory/src/middlewares"
+	cancelstocktransfer "nantty/modules/inventory/src/modules/transfers/commands/cancelStockTransfer"
+	createstocktransfer "nantty/modules/inventory/src/modules/transfers/commands/createStockTransfer"
+	receivestocktransfer "nantty/modules/inventory/src/modules/transfers/commands/receiveStockTransfer"
+	"nantty/modules/inventory/src/modules/transfers/dtos"
+	liststocktransfers "nantty/modules/inventory/src/modules/transfers/queries/listStockTransfers"
+	"nantty/modules/inventory/src/modules/transfers/validators"
+	"nantty/modules/inventory/src/utils"
+	"nantty/platform/httpserver"
 )
 
 type TransfersController struct {

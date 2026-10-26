@@ -3,9 +3,9 @@ package cancelstocktransfer
 import (
 	"context"
 
-	"zudomart/modules/inventory/src/container"
-	"zudomart/modules/inventory/src/services"
-	"zudomart/modules/inventory/src/types"
+	"nantty/modules/inventory/src/container"
+	"nantty/modules/inventory/src/services"
+	"nantty/modules/inventory/src/types"
 )
 
 type Handler struct {

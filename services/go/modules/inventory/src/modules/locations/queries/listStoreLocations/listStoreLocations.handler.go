@@ -3,12 +3,12 @@ package liststorelocations
 import (
 	"context"
 
-	"zudomart/modules/inventory/src/container"
-	"zudomart/modules/inventory/src/generated/ent"
-	"zudomart/modules/inventory/src/generated/ent/stocklocation"
-	"zudomart/modules/inventory/src/services"
-	"zudomart/modules/inventory/src/types"
-	"zudomart/platform/httpserver"
+	"nantty/modules/inventory/src/container"
+	"nantty/modules/inventory/src/generated/ent"
+	"nantty/modules/inventory/src/generated/ent/stocklocation"
+	"nantty/modules/inventory/src/services"
+	"nantty/modules/inventory/src/types"
+	"nantty/platform/httpserver"
 )
 
 type Handler struct {

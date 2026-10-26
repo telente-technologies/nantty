@@ -3,8 +3,8 @@ package createstorelocation
 import (
 	"github.com/google/uuid"
 
-	"zudomart/modules/inventory/src/generated/ent/predicate"
-	"zudomart/modules/inventory/src/generated/ent/stocklocation"
+	"nantty/modules/inventory/src/generated/ent/predicate"
+	"nantty/modules/inventory/src/generated/ent/stocklocation"
 )
 
 func stockLocationDefaultOf(storeId uuid.UUID) predicate.StockLocation {

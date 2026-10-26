@@ -5,10 +5,10 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/inventory/src/container"
-	inventoryerrors "zudomart/modules/inventory/src/errors"
-	"zudomart/modules/inventory/src/generated/ent"
-	"zudomart/modules/inventory/src/generated/ent/stocklocation"
+	"nantty/modules/inventory/src/container"
+	inventoryerrors "nantty/modules/inventory/src/errors"
+	"nantty/modules/inventory/src/generated/ent"
+	"nantty/modules/inventory/src/generated/ent/stocklocation"
 )
 
 func ResolveLocationOfStore(ctx context.Context, deployed *container.Container, storeId uuid.UUID, requested *uuid.UUID) (*ent.StockLocation, error) {

@@ -3,11 +3,11 @@ package updatereorderlevels
 import (
 	"context"
 
-	"zudomart/modules/inventory/src/container"
-	inventoryerrors "zudomart/modules/inventory/src/errors"
-	"zudomart/modules/inventory/src/events"
-	"zudomart/modules/inventory/src/generated/ent"
-	"zudomart/modules/inventory/src/generated/ent/stocklevel"
+	"nantty/modules/inventory/src/container"
+	inventoryerrors "nantty/modules/inventory/src/errors"
+	"nantty/modules/inventory/src/events"
+	"nantty/modules/inventory/src/generated/ent"
+	"nantty/modules/inventory/src/generated/ent/stocklevel"
 )
 
 type Handler struct {

@@ -1,4 +1,4 @@
-module zudomart/modules/inventory
+module nantty/modules/inventory
 
 go 1.26.9
 
@@ -8,7 +8,7 @@ require (
 	github.com/google/uuid v1.6.0
 	github.com/jackc/pgx/v5 v5.11.0
 	github.com/redis/go-redis/v9 v9.23.0
-	zudomart/platform v0.0.0
+	nantty/platform v0.0.0
 )
 
 require (
@@ -87,4 +87,4 @@ require (
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 
-replace zudomart/platform => ../../platform
+replace nantty/platform => ../../platform

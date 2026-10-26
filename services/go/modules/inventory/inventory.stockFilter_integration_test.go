@@ -7,8 +7,8 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/inventory/src/integrations"
-	"zudomart/platform/commerceports"
+	"nantty/modules/inventory/src/integrations"
+	"nantty/platform/commerceports"
 )
 
 func TestProductIdsMatchingStockFiltersByLevelAndLocation(t *testing.T) {

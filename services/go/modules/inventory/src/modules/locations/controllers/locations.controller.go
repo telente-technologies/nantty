@@ -3,15 +3,15 @@ package controllers
 import (
 	"net/http"
 
-	"zudomart/modules/inventory/src/container"
-	"zudomart/modules/inventory/src/middlewares"
-	createstorelocation "zudomart/modules/inventory/src/modules/locations/commands/createStoreLocation"
-	updatestorelocation "zudomart/modules/inventory/src/modules/locations/commands/updateStoreLocation"
-	"zudomart/modules/inventory/src/modules/locations/dtos"
-	liststorelocations "zudomart/modules/inventory/src/modules/locations/queries/listStoreLocations"
-	"zudomart/modules/inventory/src/modules/locations/validators"
-	"zudomart/modules/inventory/src/utils"
-	"zudomart/platform/httpserver"
+	"nantty/modules/inventory/src/container"
+	"nantty/modules/inventory/src/middlewares"
+	createstorelocation "nantty/modules/inventory/src/modules/locations/commands/createStoreLocation"
+	updatestorelocation "nantty/modules/inventory/src/modules/locations/commands/updateStoreLocation"
+	"nantty/modules/inventory/src/modules/locations/dtos"
+	liststorelocations "nantty/modules/inventory/src/modules/locations/queries/listStoreLocations"
+	"nantty/modules/inventory/src/modules/locations/validators"
+	"nantty/modules/inventory/src/utils"
+	"nantty/platform/httpserver"
 )
 
 type LocationsController struct {

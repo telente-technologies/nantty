@@ -3,8 +3,8 @@ package createstocktransfer
 import (
 	"github.com/google/uuid"
 
-	"zudomart/modules/inventory/src/generated/ent/predicate"
-	"zudomart/modules/inventory/src/generated/ent/stocktransferline"
+	"nantty/modules/inventory/src/generated/ent/predicate"
+	"nantty/modules/inventory/src/generated/ent/stocktransferline"
 )
 
 func transferLineOf(transferId uuid.UUID) predicate.StockTransferLine {

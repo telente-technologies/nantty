@@ -3,16 +3,16 @@ package controllers
 import (
 	"net/http"
 
-	"zudomart/modules/inventory/src/container"
-	"zudomart/modules/inventory/src/middlewares"
-	createsupplier "zudomart/modules/inventory/src/modules/suppliers/commands/createSupplier"
-	deletesupplier "zudomart/modules/inventory/src/modules/suppliers/commands/deleteSupplier"
-	updatesupplier "zudomart/modules/inventory/src/modules/suppliers/commands/updateSupplier"
-	"zudomart/modules/inventory/src/modules/suppliers/dtos"
-	listsuppliers "zudomart/modules/inventory/src/modules/suppliers/queries/listSuppliers"
-	"zudomart/modules/inventory/src/modules/suppliers/validators"
-	"zudomart/modules/inventory/src/utils"
-	"zudomart/platform/httpserver"
+	"nantty/modules/inventory/src/container"
+	"nantty/modules/inventory/src/middlewares"
+	createsupplier "nantty/modules/inventory/src/modules/suppliers/commands/createSupplier"
+	deletesupplier "nantty/modules/inventory/src/modules/suppliers/commands/deleteSupplier"
+	updatesupplier "nantty/modules/inventory/src/modules/suppliers/commands/updateSupplier"
+	"nantty/modules/inventory/src/modules/suppliers/dtos"
+	listsuppliers "nantty/modules/inventory/src/modules/suppliers/queries/listSuppliers"
+	"nantty/modules/inventory/src/modules/suppliers/validators"
+	"nantty/modules/inventory/src/utils"
+	"nantty/platform/httpserver"
 )
 
 type SuppliersController struct {

@@ -6,14 +6,14 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/inventory/src/container"
-	"zudomart/modules/inventory/src/enums"
-	"zudomart/modules/inventory/src/generated/ent"
-	"zudomart/modules/inventory/src/generated/ent/stocklevel"
-	"zudomart/modules/inventory/src/generated/ent/stocklocation"
-	"zudomart/modules/inventory/src/generated/ent/supplier"
-	"zudomart/modules/inventory/src/services"
-	"zudomart/platform/commerceports"
+	"nantty/modules/inventory/src/container"
+	"nantty/modules/inventory/src/enums"
+	"nantty/modules/inventory/src/generated/ent"
+	"nantty/modules/inventory/src/generated/ent/stocklevel"
+	"nantty/modules/inventory/src/generated/ent/stocklocation"
+	"nantty/modules/inventory/src/generated/ent/supplier"
+	"nantty/modules/inventory/src/services"
+	"nantty/platform/commerceports"
 )
 
 type CommerceStock struct {

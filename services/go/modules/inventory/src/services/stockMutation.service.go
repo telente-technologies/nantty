@@ -7,11 +7,11 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"github.com/google/uuid"
 
-	inventoryerrors "zudomart/modules/inventory/src/errors"
-	"zudomart/modules/inventory/src/generated/ent"
-	"zudomart/modules/inventory/src/generated/ent/predicate"
-	"zudomart/modules/inventory/src/generated/ent/stocklevel"
-	"zudomart/modules/inventory/src/generated/ent/stockmovement"
+	inventoryerrors "nantty/modules/inventory/src/errors"
+	"nantty/modules/inventory/src/generated/ent"
+	"nantty/modules/inventory/src/generated/ent/predicate"
+	"nantty/modules/inventory/src/generated/ent/stocklevel"
+	"nantty/modules/inventory/src/generated/ent/stockmovement"
 )
 
 type StockChange struct {

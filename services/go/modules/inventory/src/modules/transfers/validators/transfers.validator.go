@@ -4,8 +4,8 @@ import (
 	"strconv"
 	"strings"
 
-	"zudomart/modules/inventory/src/modules/transfers/dtos"
-	"zudomart/modules/inventory/src/utils"
+	"nantty/modules/inventory/src/modules/transfers/dtos"
+	"nantty/modules/inventory/src/utils"
 )
 
 func ValidateTransfer(body dtos.TransferRequest) error {

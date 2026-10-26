@@ -4,9 +4,9 @@ import (
 	"context"
 	"fmt"
 
-	"zudomart/modules/inventory/src/enums"
-	"zudomart/modules/inventory/src/generated/ent"
-	"zudomart/modules/inventory/src/generated/ent/stockreservation"
+	"nantty/modules/inventory/src/enums"
+	"nantty/modules/inventory/src/generated/ent"
+	"nantty/modules/inventory/src/generated/ent/stockreservation"
 )
 
 func reservationMovementReference(reference string, attempt int) string {

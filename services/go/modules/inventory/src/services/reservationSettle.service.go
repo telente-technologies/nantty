@@ -4,12 +4,12 @@ import (
 	"context"
 	"time"
 
-	"zudomart/modules/inventory/src/enums"
-	inventoryerrors "zudomart/modules/inventory/src/errors"
-	"zudomart/modules/inventory/src/events"
-	"zudomart/modules/inventory/src/generated/ent"
-	"zudomart/modules/inventory/src/generated/ent/stocklevel"
-	"zudomart/modules/inventory/src/generated/ent/stockreservation"
+	"nantty/modules/inventory/src/enums"
+	inventoryerrors "nantty/modules/inventory/src/errors"
+	"nantty/modules/inventory/src/events"
+	"nantty/modules/inventory/src/generated/ent"
+	"nantty/modules/inventory/src/generated/ent/stocklevel"
+	"nantty/modules/inventory/src/generated/ent/stockreservation"
 )
 
 func (service ReservationService) Release(ctx context.Context, reference string) error {

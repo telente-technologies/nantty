@@ -5,8 +5,8 @@ import (
 	"regexp"
 	"strings"
 
-	"zudomart/modules/inventory/src/modules/suppliers/dtos"
-	"zudomart/modules/inventory/src/utils"
+	"nantty/modules/inventory/src/modules/suppliers/dtos"
+	"nantty/modules/inventory/src/utils"
 )
 
 var phonePattern = regexp.MustCompile(`^\+?[0-9 ]{7,20}$`)

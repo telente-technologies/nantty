@@ -5,12 +5,12 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/inventory/src/container"
-	"zudomart/modules/inventory/src/enums"
-	"zudomart/modules/inventory/src/generated/ent"
-	"zudomart/modules/inventory/src/generated/ent/stocklevel"
-	"zudomart/modules/inventory/src/generated/ent/stocklocation"
-	"zudomart/platform/commerceports"
+	"nantty/modules/inventory/src/container"
+	"nantty/modules/inventory/src/enums"
+	"nantty/modules/inventory/src/generated/ent"
+	"nantty/modules/inventory/src/generated/ent/stocklevel"
+	"nantty/modules/inventory/src/generated/ent/stocklocation"
+	"nantty/platform/commerceports"
 )
 
 func ProvisionVariantStock(ctx context.Context, deployed *container.Container, request commerceports.ProvisionVariantStockRequest) error {

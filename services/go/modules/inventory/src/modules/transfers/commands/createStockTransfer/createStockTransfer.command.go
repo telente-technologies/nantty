@@ -3,8 +3,8 @@ package createstocktransfer
 import (
 	"github.com/google/uuid"
 
-	"zudomart/modules/inventory/src/modules/transfers/dtos"
-	"zudomart/platform/commerceports"
+	"nantty/modules/inventory/src/modules/transfers/dtos"
+	"nantty/platform/commerceports"
 )
 
 type Command struct {

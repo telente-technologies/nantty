@@ -5,8 +5,8 @@ import (
 	"errors"
 	"testing"
 
-	"zudomart/modules/inventory/src/container"
-	"zudomart/modules/inventory/src/generated/ent"
+	"nantty/modules/inventory/src/container"
+	"nantty/modules/inventory/src/generated/ent"
 )
 
 func TestIdempotentCommandsRunOnceAndReplayTheStoredResult(t *testing.T) {

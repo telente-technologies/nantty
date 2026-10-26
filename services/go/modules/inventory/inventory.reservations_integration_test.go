@@ -13,15 +13,15 @@ import (
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 
-	"zudomart/modules/inventory/src"
-	"zudomart/modules/inventory/src/configs"
-	"zudomart/modules/inventory/src/generated/ent/stocklevel"
-	"zudomart/modules/inventory/src/services"
-	"zudomart/platform/commerceports"
-	"zudomart/platform/config"
-	"zudomart/platform/health"
-	"zudomart/platform/postgres"
-	"zudomart/platform/servicemodule"
+	"nantty/modules/inventory/src"
+	"nantty/modules/inventory/src/configs"
+	"nantty/modules/inventory/src/generated/ent/stocklevel"
+	"nantty/modules/inventory/src/services"
+	"nantty/platform/commerceports"
+	"nantty/platform/config"
+	"nantty/platform/health"
+	"nantty/platform/postgres"
+	"nantty/platform/servicemodule"
 )
 
 func startInventoryAgainstFreshSchema(t *testing.T) *src.Module {

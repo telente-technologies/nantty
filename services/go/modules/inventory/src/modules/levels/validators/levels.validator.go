@@ -1,8 +1,8 @@
 package validators
 
 import (
-	"zudomart/modules/inventory/src/modules/levels/dtos"
-	"zudomart/modules/inventory/src/utils"
+	"nantty/modules/inventory/src/modules/levels/dtos"
+	"nantty/modules/inventory/src/utils"
 )
 
 func ValidateReorderLevelUpdate(body dtos.ReorderLevelUpdateRequest) error {

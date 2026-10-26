@@ -3,8 +3,8 @@ package inventory
 import (
 	"context"
 
-	"zudomart/modules/inventory/src"
-	"zudomart/platform/servicemodule"
+	"nantty/modules/inventory/src"
+	"nantty/platform/servicemodule"
 )
 
 type Module = src.Module

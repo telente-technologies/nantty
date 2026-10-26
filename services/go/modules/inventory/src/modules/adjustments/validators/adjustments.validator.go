@@ -5,9 +5,9 @@ import (
 	"strconv"
 	"strings"
 
-	"zudomart/modules/inventory/src/enums"
-	"zudomart/modules/inventory/src/modules/adjustments/dtos"
-	"zudomart/modules/inventory/src/utils"
+	"nantty/modules/inventory/src/enums"
+	"nantty/modules/inventory/src/modules/adjustments/dtos"
+	"nantty/modules/inventory/src/utils"
 )
 
 func ValidateAdjustment(body dtos.AdjustmentRequest) error {

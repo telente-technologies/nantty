@@ -5,7 +5,7 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/platform/money"
+	"nantty/platform/money"
 )
 
 type StoreLocationView struct {

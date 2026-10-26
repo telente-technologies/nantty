@@ -5,8 +5,8 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/inventory/src/container"
-	"zudomart/platform/commerceports"
+	"nantty/modules/inventory/src/container"
+	"nantty/platform/commerceports"
 )
 
 func DescribeVariantsOfStore(ctx context.Context, storeId uuid.UUID, variantIds []uuid.UUID) (map[uuid.UUID]commerceports.VariantDescription, error) {

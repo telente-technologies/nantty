@@ -5,9 +5,9 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/inventory/src/container"
-	"zudomart/modules/inventory/src/generated/ent/stocklocation"
-	"zudomart/platform/commerceports"
+	"nantty/modules/inventory/src/container"
+	"nantty/modules/inventory/src/generated/ent/stocklocation"
+	"nantty/platform/commerceports"
 )
 
 type StoreLocationNames struct {

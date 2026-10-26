@@ -3,13 +3,13 @@ package services
 import (
 	"context"
 
-	"zudomart/modules/inventory/src/enums"
-	inventoryerrors "zudomart/modules/inventory/src/errors"
-	"zudomart/modules/inventory/src/events"
-	"zudomart/modules/inventory/src/generated/ent"
-	"zudomart/modules/inventory/src/generated/ent/stocklevel"
-	"zudomart/modules/inventory/src/generated/ent/stockreservation"
-	"zudomart/platform/commerceports"
+	"nantty/modules/inventory/src/enums"
+	inventoryerrors "nantty/modules/inventory/src/errors"
+	"nantty/modules/inventory/src/events"
+	"nantty/modules/inventory/src/generated/ent"
+	"nantty/modules/inventory/src/generated/ent/stocklevel"
+	"nantty/modules/inventory/src/generated/ent/stockreservation"
+	"nantty/platform/commerceports"
 )
 
 func (service ReservationService) Fulfil(ctx context.Context, request commerceports.FulfilStockRequest) error {

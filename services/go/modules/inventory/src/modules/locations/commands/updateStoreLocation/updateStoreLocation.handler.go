@@ -4,12 +4,12 @@ import (
 	"context"
 	"strings"
 
-	"zudomart/modules/inventory/src/container"
-	inventoryerrors "zudomart/modules/inventory/src/errors"
-	"zudomart/modules/inventory/src/generated/ent"
-	"zudomart/modules/inventory/src/generated/ent/stocklocation"
-	"zudomart/modules/inventory/src/services"
-	"zudomart/modules/inventory/src/types"
+	"nantty/modules/inventory/src/container"
+	inventoryerrors "nantty/modules/inventory/src/errors"
+	"nantty/modules/inventory/src/generated/ent"
+	"nantty/modules/inventory/src/generated/ent/stocklocation"
+	"nantty/modules/inventory/src/services"
+	"nantty/modules/inventory/src/types"
 )
 
 type Handler struct {

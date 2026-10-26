@@ -4,11 +4,11 @@ import (
 	"net/http"
 	"time"
 
-	"zudomart/modules/inventory/src/container"
-	"zudomart/modules/inventory/src/middlewares"
-	listinventorymovements "zudomart/modules/inventory/src/modules/movements/queries/listInventoryMovements"
-	"zudomart/modules/inventory/src/utils"
-	"zudomart/platform/httpserver"
+	"nantty/modules/inventory/src/container"
+	"nantty/modules/inventory/src/middlewares"
+	listinventorymovements "nantty/modules/inventory/src/modules/movements/queries/listInventoryMovements"
+	"nantty/modules/inventory/src/utils"
+	"nantty/platform/httpserver"
 )
 
 type MovementsController struct {

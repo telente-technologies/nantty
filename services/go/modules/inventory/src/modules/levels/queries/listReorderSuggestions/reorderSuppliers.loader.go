@@ -5,9 +5,9 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/inventory/src/generated/ent/supplier"
-	"zudomart/modules/inventory/src/types"
-	"zudomart/platform/commerceports"
+	"nantty/modules/inventory/src/generated/ent/supplier"
+	"nantty/modules/inventory/src/types"
+	"nantty/platform/commerceports"
 )
 
 func (handler Handler) loadSuppliers(ctx context.Context, storeId uuid.UUID, descriptions map[uuid.UUID]commerceports.VariantDescription) (map[uuid.UUID]*types.ReorderSupplierView, error) {

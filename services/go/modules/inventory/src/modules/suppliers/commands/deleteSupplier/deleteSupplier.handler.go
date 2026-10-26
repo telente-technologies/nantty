@@ -3,10 +3,10 @@ package deletesupplier
 import (
 	"context"
 
-	"zudomart/modules/inventory/src/container"
-	inventoryerrors "zudomart/modules/inventory/src/errors"
-	"zudomart/modules/inventory/src/generated/ent/supplier"
-	"zudomart/platform/commerceports"
+	"nantty/modules/inventory/src/container"
+	inventoryerrors "nantty/modules/inventory/src/errors"
+	"nantty/modules/inventory/src/generated/ent/supplier"
+	"nantty/platform/commerceports"
 )
 
 type Handler struct {

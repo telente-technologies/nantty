@@ -3,11 +3,11 @@ package services
 import (
 	"github.com/google/uuid"
 
-	"zudomart/modules/inventory/src/enums"
-	"zudomart/modules/inventory/src/generated/ent"
-	"zudomart/modules/inventory/src/types"
-	"zudomart/platform/commerceports"
-	"zudomart/platform/money"
+	"nantty/modules/inventory/src/enums"
+	"nantty/modules/inventory/src/generated/ent"
+	"nantty/modules/inventory/src/types"
+	"nantty/platform/commerceports"
+	"nantty/platform/money"
 )
 
 func NoteOrNil(note string) *string {

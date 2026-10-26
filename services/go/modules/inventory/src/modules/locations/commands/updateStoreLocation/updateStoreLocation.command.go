@@ -3,8 +3,8 @@ package updatestorelocation
 import (
 	"github.com/google/uuid"
 
-	"zudomart/modules/inventory/src/modules/locations/dtos"
-	"zudomart/platform/commerceports"
+	"nantty/modules/inventory/src/modules/locations/dtos"
+	"nantty/platform/commerceports"
 )
 
 type Command struct {

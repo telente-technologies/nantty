@@ -3,8 +3,8 @@ package validators
 import (
 	"regexp"
 
-	"zudomart/modules/inventory/src/modules/locations/dtos"
-	"zudomart/modules/inventory/src/utils"
+	"nantty/modules/inventory/src/modules/locations/dtos"
+	"nantty/modules/inventory/src/utils"
 )
 
 var phonePattern = regexp.MustCompile(`^\+?[0-9 ]{7,20}$`)

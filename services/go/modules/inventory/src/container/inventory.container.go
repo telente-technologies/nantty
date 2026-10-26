@@ -5,11 +5,11 @@ import (
 	"log/slog"
 	"time"
 
-	"zudomart/modules/inventory/src/configs"
-	"zudomart/modules/inventory/src/generated/ent"
-	"zudomart/platform/idempotency"
-	"zudomart/platform/jwtauth"
-	"zudomart/platform/usersdirectory"
+	"nantty/modules/inventory/src/configs"
+	"nantty/modules/inventory/src/generated/ent"
+	"nantty/platform/idempotency"
+	"nantty/platform/jwtauth"
+	"nantty/platform/usersdirectory"
 )
 
 type Container struct {

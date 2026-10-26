@@ -7,9 +7,9 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/inventory/src/generated/ent/stocklevel"
-	"zudomart/modules/inventory/src/services"
-	"zudomart/platform/commerceports"
+	"nantty/modules/inventory/src/generated/ent/stocklevel"
+	"nantty/modules/inventory/src/services"
+	"nantty/platform/commerceports"
 )
 
 func TestReReserveAfterExpiryHoldsStockAgainAndShipsOnce(t *testing.T) {

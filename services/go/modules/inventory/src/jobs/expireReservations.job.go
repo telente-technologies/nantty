@@ -5,8 +5,8 @@ import (
 	"log/slog"
 	"time"
 
-	"zudomart/modules/inventory/src/container"
-	"zudomart/modules/inventory/src/services"
+	"nantty/modules/inventory/src/container"
+	"nantty/modules/inventory/src/services"
 )
 
 func RunReservationExpirySweepUntilContextDone(ctx context.Context, deployed *container.Container) {

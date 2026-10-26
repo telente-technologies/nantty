@@ -13,9 +13,9 @@ import (
 
 	"github.com/jackc/pgx/v5/pgconn"
 
-	"zudomart/modules/inventory/src/generated/ent"
-	"zudomart/modules/inventory/src/generated/ent/idempotentrequest"
-	"zudomart/platform/httpserver"
+	"nantty/modules/inventory/src/generated/ent"
+	"nantty/modules/inventory/src/generated/ent/idempotentrequest"
+	"nantty/platform/httpserver"
 )
 
 var ErrIdempotencyKeyReused = httpserver.NewApiError(http.StatusConflict, "IDEMPOTENCY_KEY_REUSED", "This Idempotency-Key was already used with a different request.")

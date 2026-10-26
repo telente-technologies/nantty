@@ -3,14 +3,14 @@ package controllers
 import (
 	"net/http"
 
-	"zudomart/modules/inventory/src/container"
-	"zudomart/modules/inventory/src/middlewares"
-	applystockadjustments "zudomart/modules/inventory/src/modules/adjustments/commands/applyStockAdjustments"
-	"zudomart/modules/inventory/src/modules/adjustments/dtos"
-	liststockadjustments "zudomart/modules/inventory/src/modules/adjustments/queries/listStockAdjustments"
-	"zudomart/modules/inventory/src/modules/adjustments/validators"
-	"zudomart/modules/inventory/src/utils"
-	"zudomart/platform/httpserver"
+	"nantty/modules/inventory/src/container"
+	"nantty/modules/inventory/src/middlewares"
+	applystockadjustments "nantty/modules/inventory/src/modules/adjustments/commands/applyStockAdjustments"
+	"nantty/modules/inventory/src/modules/adjustments/dtos"
+	liststockadjustments "nantty/modules/inventory/src/modules/adjustments/queries/listStockAdjustments"
+	"nantty/modules/inventory/src/modules/adjustments/validators"
+	"nantty/modules/inventory/src/utils"
+	"nantty/platform/httpserver"
 )
 
 type AdjustmentsController struct {
