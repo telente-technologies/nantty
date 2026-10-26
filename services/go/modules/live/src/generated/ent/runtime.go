@@ -33,6 +33,8 @@ import (
 	"nantty/modules/live/src/generated/ent/pointsrule"
 	"nantty/modules/live/src/generated/ent/processedgift"
 	"nantty/modules/live/src/generated/ent/space"
+	"nantty/modules/live/src/generated/ent/spaceparticipant"
+	"nantty/modules/live/src/generated/ent/spacespeakerrequest"
 	"time"
 
 	"github.com/google/uuid"
@@ -956,4 +958,48 @@ func init() {
 	spaceDescID := spaceMixinFields0[0].Descriptor()
 	// space.DefaultID holds the default value on creation for the id field.
 	space.DefaultID = spaceDescID.Default.(func() uuid.UUID)
+	spaceparticipantMixin := schema.SpaceParticipant{}.Mixin()
+	spaceparticipantMixinFields0 := spaceparticipantMixin[0].Fields()
+	_ = spaceparticipantMixinFields0
+	spaceparticipantFields := schema.SpaceParticipant{}.Fields()
+	_ = spaceparticipantFields
+	// spaceparticipantDescCreatedAt is the schema descriptor for created_at field.
+	spaceparticipantDescCreatedAt := spaceparticipantMixinFields0[1].Descriptor()
+	// spaceparticipant.DefaultCreatedAt holds the default value on creation for the created_at field.
+	spaceparticipant.DefaultCreatedAt = spaceparticipantDescCreatedAt.Default.(func() time.Time)
+	// spaceparticipantDescMutedByHost is the schema descriptor for muted_by_host field.
+	spaceparticipantDescMutedByHost := spaceparticipantFields[4].Descriptor()
+	// spaceparticipant.DefaultMutedByHost holds the default value on creation for the muted_by_host field.
+	spaceparticipant.DefaultMutedByHost = spaceparticipantDescMutedByHost.Default.(bool)
+	// spaceparticipantDescJoinedAt is the schema descriptor for joined_at field.
+	spaceparticipantDescJoinedAt := spaceparticipantFields[5].Descriptor()
+	// spaceparticipant.DefaultJoinedAt holds the default value on creation for the joined_at field.
+	spaceparticipant.DefaultJoinedAt = spaceparticipantDescJoinedAt.Default.(func() time.Time)
+	// spaceparticipantDescLastSeenAt is the schema descriptor for last_seen_at field.
+	spaceparticipantDescLastSeenAt := spaceparticipantFields[6].Descriptor()
+	// spaceparticipant.DefaultLastSeenAt holds the default value on creation for the last_seen_at field.
+	spaceparticipant.DefaultLastSeenAt = spaceparticipantDescLastSeenAt.Default.(func() time.Time)
+	// spaceparticipant.UpdateDefaultLastSeenAt holds the default value on update for the last_seen_at field.
+	spaceparticipant.UpdateDefaultLastSeenAt = spaceparticipantDescLastSeenAt.UpdateDefault.(func() time.Time)
+	// spaceparticipantDescID is the schema descriptor for id field.
+	spaceparticipantDescID := spaceparticipantMixinFields0[0].Descriptor()
+	// spaceparticipant.DefaultID holds the default value on creation for the id field.
+	spaceparticipant.DefaultID = spaceparticipantDescID.Default.(func() uuid.UUID)
+	spacespeakerrequestMixin := schema.SpaceSpeakerRequest{}.Mixin()
+	spacespeakerrequestMixinFields0 := spacespeakerrequestMixin[0].Fields()
+	_ = spacespeakerrequestMixinFields0
+	spacespeakerrequestFields := schema.SpaceSpeakerRequest{}.Fields()
+	_ = spacespeakerrequestFields
+	// spacespeakerrequestDescCreatedAt is the schema descriptor for created_at field.
+	spacespeakerrequestDescCreatedAt := spacespeakerrequestMixinFields0[1].Descriptor()
+	// spacespeakerrequest.DefaultCreatedAt holds the default value on creation for the created_at field.
+	spacespeakerrequest.DefaultCreatedAt = spacespeakerrequestDescCreatedAt.Default.(func() time.Time)
+	// spacespeakerrequestDescExpiresAt is the schema descriptor for expires_at field.
+	spacespeakerrequestDescExpiresAt := spacespeakerrequestFields[5].Descriptor()
+	// spacespeakerrequest.DefaultExpiresAt holds the default value on creation for the expires_at field.
+	spacespeakerrequest.DefaultExpiresAt = spacespeakerrequestDescExpiresAt.Default.(func() time.Time)
+	// spacespeakerrequestDescID is the schema descriptor for id field.
+	spacespeakerrequestDescID := spacespeakerrequestMixinFields0[0].Descriptor()
+	// spacespeakerrequest.DefaultID holds the default value on creation for the id field.
+	spacespeakerrequest.DefaultID = spacespeakerrequestDescID.Default.(func() uuid.UUID)
 }

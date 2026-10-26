@@ -886,6 +886,79 @@ var (
 			},
 		},
 	}
+	// SpaceParticipantsColumns holds the columns for the "space_participants" table.
+	SpaceParticipantsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "space_id", Type: field.TypeUUID},
+		{Name: "account_id", Type: field.TypeUUID},
+		{Name: "role", Type: field.TypeEnum, Enums: []string{"host", "listener", "speaker"}, Default: "listener"},
+		{Name: "state", Type: field.TypeEnum, Enums: []string{"active", "left", "removed"}, Default: "active"},
+		{Name: "muted_by_host", Type: field.TypeBool, Default: false},
+		{Name: "joined_at", Type: field.TypeTime},
+		{Name: "last_seen_at", Type: field.TypeTime},
+		{Name: "left_at", Type: field.TypeTime, Nullable: true},
+	}
+	// SpaceParticipantsTable holds the schema information for the "space_participants" table.
+	SpaceParticipantsTable = &schema.Table{
+		Name:       "space_participants",
+		Columns:    SpaceParticipantsColumns,
+		PrimaryKey: []*schema.Column{SpaceParticipantsColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "spaceparticipant_space_id_account_id",
+				Unique:  true,
+				Columns: []*schema.Column{SpaceParticipantsColumns[2], SpaceParticipantsColumns[3]},
+			},
+			{
+				Name:    "spaceparticipant_space_id_state_role",
+				Unique:  false,
+				Columns: []*schema.Column{SpaceParticipantsColumns[2], SpaceParticipantsColumns[5], SpaceParticipantsColumns[4]},
+			},
+			{
+				Name:    "spaceparticipant_state_last_seen_at",
+				Unique:  false,
+				Columns: []*schema.Column{SpaceParticipantsColumns[5], SpaceParticipantsColumns[8]},
+			},
+		},
+	}
+	// SpaceSpeakerRequestsColumns holds the columns for the "space_speaker_requests" table.
+	SpaceSpeakerRequestsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "space_id", Type: field.TypeUUID},
+		{Name: "account_id", Type: field.TypeUUID},
+		{Name: "state", Type: field.TypeEnum, Enums: []string{"pending", "approved", "declined", "cancelled"}, Default: "pending"},
+		{Name: "decided_by", Type: field.TypeUUID, Nullable: true},
+		{Name: "decided_at", Type: field.TypeTime, Nullable: true},
+		{Name: "expires_at", Type: field.TypeTime},
+	}
+	// SpaceSpeakerRequestsTable holds the schema information for the "space_speaker_requests" table.
+	SpaceSpeakerRequestsTable = &schema.Table{
+		Name:       "space_speaker_requests",
+		Columns:    SpaceSpeakerRequestsColumns,
+		PrimaryKey: []*schema.Column{SpaceSpeakerRequestsColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "spacespeakerrequest_space_id_account_id",
+				Unique:  true,
+				Columns: []*schema.Column{SpaceSpeakerRequestsColumns[2], SpaceSpeakerRequestsColumns[3]},
+				Annotation: &entsql.IndexAnnotation{
+					Where: "state = 'pending'",
+				},
+			},
+			{
+				Name:    "spacespeakerrequest_space_id_state_created_at",
+				Unique:  false,
+				Columns: []*schema.Column{SpaceSpeakerRequestsColumns[2], SpaceSpeakerRequestsColumns[4], SpaceSpeakerRequestsColumns[1]},
+			},
+			{
+				Name:    "spacespeakerrequest_state_expires_at",
+				Unique:  false,
+				Columns: []*schema.Column{SpaceSpeakerRequestsColumns[4], SpaceSpeakerRequestsColumns[7]},
+			},
+		},
+	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
 		BattlesTable,
@@ -917,6 +990,8 @@ var (
 		PointsRulesTable,
 		ProcessedGiftsTable,
 		SpacesTable,
+		SpaceParticipantsTable,
+		SpaceSpeakerRequestsTable,
 	}
 )
 

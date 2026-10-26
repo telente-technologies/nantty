@@ -92,3 +92,9 @@ type ProcessedGift func(*sql.Selector)
 
 // Space is the predicate function for space builders.
 type Space func(*sql.Selector)
+
+// SpaceParticipant is the predicate function for spaceparticipant builders.
+type SpaceParticipant func(*sql.Selector)
+
+// SpaceSpeakerRequest is the predicate function for spacespeakerrequest builders.
+type SpaceSpeakerRequest func(*sql.Selector)

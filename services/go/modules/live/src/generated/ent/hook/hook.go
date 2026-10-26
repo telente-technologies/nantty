@@ -356,6 +356,30 @@ func (f SpaceFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.SpaceMutation", m)
 }
 
+// The SpaceParticipantFunc type is an adapter to allow the use of ordinary
+// function as SpaceParticipant mutator.
+type SpaceParticipantFunc func(context.Context, *ent.SpaceParticipantMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f SpaceParticipantFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.SpaceParticipantMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.SpaceParticipantMutation", m)
+}
+
+// The SpaceSpeakerRequestFunc type is an adapter to allow the use of ordinary
+// function as SpaceSpeakerRequest mutator.
+type SpaceSpeakerRequestFunc func(context.Context, *ent.SpaceSpeakerRequestMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f SpaceSpeakerRequestFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.SpaceSpeakerRequestMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.SpaceSpeakerRequestMutation", m)
+}
+
 // Condition is a hook condition function.
 type Condition func(context.Context, ent.Mutation) bool
 

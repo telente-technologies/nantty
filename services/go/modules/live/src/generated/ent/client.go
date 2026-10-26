@@ -40,6 +40,8 @@ import (
 	"nantty/modules/live/src/generated/ent/pointsrule"
 	"nantty/modules/live/src/generated/ent/processedgift"
 	"nantty/modules/live/src/generated/ent/space"
+	"nantty/modules/live/src/generated/ent/spaceparticipant"
+	"nantty/modules/live/src/generated/ent/spacespeakerrequest"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect"
@@ -112,6 +114,10 @@ type Client struct {
 	ProcessedGift *ProcessedGiftClient
 	// Space is the client for interacting with the Space builders.
 	Space *SpaceClient
+	// SpaceParticipant is the client for interacting with the SpaceParticipant builders.
+	SpaceParticipant *SpaceParticipantClient
+	// SpaceSpeakerRequest is the client for interacting with the SpaceSpeakerRequest builders.
+	SpaceSpeakerRequest *SpaceSpeakerRequestClient
 }
 
 // NewClient creates a new client configured with the given options.
@@ -152,6 +158,8 @@ func (c *Client) init() {
 	c.PointsRule = NewPointsRuleClient(c.config)
 	c.ProcessedGift = NewProcessedGiftClient(c.config)
 	c.Space = NewSpaceClient(c.config)
+	c.SpaceParticipant = NewSpaceParticipantClient(c.config)
+	c.SpaceSpeakerRequest = NewSpaceSpeakerRequestClient(c.config)
 }
 
 type (
@@ -273,6 +281,8 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		PointsRule:           NewPointsRuleClient(cfg),
 		ProcessedGift:        NewProcessedGiftClient(cfg),
 		Space:                NewSpaceClient(cfg),
+		SpaceParticipant:     NewSpaceParticipantClient(cfg),
+		SpaceSpeakerRequest:  NewSpaceSpeakerRequestClient(cfg),
 	}, nil
 }
 
@@ -321,6 +331,8 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		PointsRule:           NewPointsRuleClient(cfg),
 		ProcessedGift:        NewProcessedGiftClient(cfg),
 		Space:                NewSpaceClient(cfg),
+		SpaceParticipant:     NewSpaceParticipantClient(cfg),
+		SpaceSpeakerRequest:  NewSpaceSpeakerRequestClient(cfg),
 	}, nil
 }
 
@@ -356,7 +368,7 @@ func (c *Client) Use(hooks ...Hook) {
 		c.LiveLeaderboardEntry, c.LiveModerator, c.LiveProduct, c.LiveRecording,
 		c.LiveRestriction, c.LiveRoomSetting, c.LiveSafetyState, c.LiveSession,
 		c.LiveViewer, c.OutboxEvent, c.OverlayScene, c.PointsEntry, c.PointsRule,
-		c.ProcessedGift, c.Space,
+		c.ProcessedGift, c.Space, c.SpaceParticipant, c.SpaceSpeakerRequest,
 	} {
 		n.Use(hooks...)
 	}
@@ -372,7 +384,7 @@ func (c *Client) Intercept(interceptors ...Interceptor) {
 		c.LiveLeaderboardEntry, c.LiveModerator, c.LiveProduct, c.LiveRecording,
 		c.LiveRestriction, c.LiveRoomSetting, c.LiveSafetyState, c.LiveSession,
 		c.LiveViewer, c.OutboxEvent, c.OverlayScene, c.PointsEntry, c.PointsRule,
-		c.ProcessedGift, c.Space,
+		c.ProcessedGift, c.Space, c.SpaceParticipant, c.SpaceSpeakerRequest,
 	} {
 		n.Intercept(interceptors...)
 	}
@@ -439,6 +451,10 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.ProcessedGift.mutate(ctx, m)
 	case *SpaceMutation:
 		return c.Space.mutate(ctx, m)
+	case *SpaceParticipantMutation:
+		return c.SpaceParticipant.mutate(ctx, m)
+	case *SpaceSpeakerRequestMutation:
+		return c.SpaceSpeakerRequest.mutate(ctx, m)
 	default:
 		return nil, fmt.Errorf("ent: unknown mutation type %T", m)
 	}
@@ -4301,6 +4317,272 @@ func (c *SpaceClient) mutate(ctx context.Context, m *SpaceMutation) (Value, erro
 	}
 }
 
+// SpaceParticipantClient is a client for the SpaceParticipant schema.
+type SpaceParticipantClient struct {
+	config
+}
+
+// NewSpaceParticipantClient returns a client for the SpaceParticipant from the given config.
+func NewSpaceParticipantClient(c config) *SpaceParticipantClient {
+	return &SpaceParticipantClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `spaceparticipant.Hooks(f(g(h())))`.
+func (c *SpaceParticipantClient) Use(hooks ...Hook) {
+	c.hooks.SpaceParticipant = append(c.hooks.SpaceParticipant, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `spaceparticipant.Intercept(f(g(h())))`.
+func (c *SpaceParticipantClient) Intercept(interceptors ...Interceptor) {
+	c.inters.SpaceParticipant = append(c.inters.SpaceParticipant, interceptors...)
+}
+
+// Create returns a builder for creating a SpaceParticipant entity.
+func (c *SpaceParticipantClient) Create() *SpaceParticipantCreate {
+	mutation := newSpaceParticipantMutation(c.config, OpCreate)
+	return &SpaceParticipantCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of SpaceParticipant entities.
+func (c *SpaceParticipantClient) CreateBulk(builders ...*SpaceParticipantCreate) *SpaceParticipantCreateBulk {
+	return &SpaceParticipantCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *SpaceParticipantClient) MapCreateBulk(slice any, setFunc func(*SpaceParticipantCreate, int)) *SpaceParticipantCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &SpaceParticipantCreateBulk{err: fmt.Errorf("calling to SpaceParticipantClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*SpaceParticipantCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &SpaceParticipantCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for SpaceParticipant.
+func (c *SpaceParticipantClient) Update() *SpaceParticipantUpdate {
+	mutation := newSpaceParticipantMutation(c.config, OpUpdate)
+	return &SpaceParticipantUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *SpaceParticipantClient) UpdateOne(_m *SpaceParticipant) *SpaceParticipantUpdateOne {
+	mutation := newSpaceParticipantMutation(c.config, OpUpdateOne, withSpaceParticipant(_m))
+	return &SpaceParticipantUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *SpaceParticipantClient) UpdateOneID(id uuid.UUID) *SpaceParticipantUpdateOne {
+	mutation := newSpaceParticipantMutation(c.config, OpUpdateOne, withSpaceParticipantID(id))
+	return &SpaceParticipantUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for SpaceParticipant.
+func (c *SpaceParticipantClient) Delete() *SpaceParticipantDelete {
+	mutation := newSpaceParticipantMutation(c.config, OpDelete)
+	return &SpaceParticipantDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *SpaceParticipantClient) DeleteOne(_m *SpaceParticipant) *SpaceParticipantDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *SpaceParticipantClient) DeleteOneID(id uuid.UUID) *SpaceParticipantDeleteOne {
+	builder := c.Delete().Where(spaceparticipant.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &SpaceParticipantDeleteOne{builder}
+}
+
+// Query returns a query builder for SpaceParticipant.
+func (c *SpaceParticipantClient) Query() *SpaceParticipantQuery {
+	return &SpaceParticipantQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeSpaceParticipant},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a SpaceParticipant entity by its id.
+func (c *SpaceParticipantClient) Get(ctx context.Context, id uuid.UUID) (*SpaceParticipant, error) {
+	return c.Query().Where(spaceparticipant.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *SpaceParticipantClient) GetX(ctx context.Context, id uuid.UUID) *SpaceParticipant {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *SpaceParticipantClient) Hooks() []Hook {
+	return c.hooks.SpaceParticipant
+}
+
+// Interceptors returns the client interceptors.
+func (c *SpaceParticipantClient) Interceptors() []Interceptor {
+	return c.inters.SpaceParticipant
+}
+
+func (c *SpaceParticipantClient) mutate(ctx context.Context, m *SpaceParticipantMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&SpaceParticipantCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&SpaceParticipantUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&SpaceParticipantUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&SpaceParticipantDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown SpaceParticipant mutation op: %q", m.Op())
+	}
+}
+
+// SpaceSpeakerRequestClient is a client for the SpaceSpeakerRequest schema.
+type SpaceSpeakerRequestClient struct {
+	config
+}
+
+// NewSpaceSpeakerRequestClient returns a client for the SpaceSpeakerRequest from the given config.
+func NewSpaceSpeakerRequestClient(c config) *SpaceSpeakerRequestClient {
+	return &SpaceSpeakerRequestClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `spacespeakerrequest.Hooks(f(g(h())))`.
+func (c *SpaceSpeakerRequestClient) Use(hooks ...Hook) {
+	c.hooks.SpaceSpeakerRequest = append(c.hooks.SpaceSpeakerRequest, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `spacespeakerrequest.Intercept(f(g(h())))`.
+func (c *SpaceSpeakerRequestClient) Intercept(interceptors ...Interceptor) {
+	c.inters.SpaceSpeakerRequest = append(c.inters.SpaceSpeakerRequest, interceptors...)
+}
+
+// Create returns a builder for creating a SpaceSpeakerRequest entity.
+func (c *SpaceSpeakerRequestClient) Create() *SpaceSpeakerRequestCreate {
+	mutation := newSpaceSpeakerRequestMutation(c.config, OpCreate)
+	return &SpaceSpeakerRequestCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of SpaceSpeakerRequest entities.
+func (c *SpaceSpeakerRequestClient) CreateBulk(builders ...*SpaceSpeakerRequestCreate) *SpaceSpeakerRequestCreateBulk {
+	return &SpaceSpeakerRequestCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *SpaceSpeakerRequestClient) MapCreateBulk(slice any, setFunc func(*SpaceSpeakerRequestCreate, int)) *SpaceSpeakerRequestCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &SpaceSpeakerRequestCreateBulk{err: fmt.Errorf("calling to SpaceSpeakerRequestClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*SpaceSpeakerRequestCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &SpaceSpeakerRequestCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for SpaceSpeakerRequest.
+func (c *SpaceSpeakerRequestClient) Update() *SpaceSpeakerRequestUpdate {
+	mutation := newSpaceSpeakerRequestMutation(c.config, OpUpdate)
+	return &SpaceSpeakerRequestUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *SpaceSpeakerRequestClient) UpdateOne(_m *SpaceSpeakerRequest) *SpaceSpeakerRequestUpdateOne {
+	mutation := newSpaceSpeakerRequestMutation(c.config, OpUpdateOne, withSpaceSpeakerRequest(_m))
+	return &SpaceSpeakerRequestUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *SpaceSpeakerRequestClient) UpdateOneID(id uuid.UUID) *SpaceSpeakerRequestUpdateOne {
+	mutation := newSpaceSpeakerRequestMutation(c.config, OpUpdateOne, withSpaceSpeakerRequestID(id))
+	return &SpaceSpeakerRequestUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for SpaceSpeakerRequest.
+func (c *SpaceSpeakerRequestClient) Delete() *SpaceSpeakerRequestDelete {
+	mutation := newSpaceSpeakerRequestMutation(c.config, OpDelete)
+	return &SpaceSpeakerRequestDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *SpaceSpeakerRequestClient) DeleteOne(_m *SpaceSpeakerRequest) *SpaceSpeakerRequestDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *SpaceSpeakerRequestClient) DeleteOneID(id uuid.UUID) *SpaceSpeakerRequestDeleteOne {
+	builder := c.Delete().Where(spacespeakerrequest.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &SpaceSpeakerRequestDeleteOne{builder}
+}
+
+// Query returns a query builder for SpaceSpeakerRequest.
+func (c *SpaceSpeakerRequestClient) Query() *SpaceSpeakerRequestQuery {
+	return &SpaceSpeakerRequestQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeSpaceSpeakerRequest},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a SpaceSpeakerRequest entity by its id.
+func (c *SpaceSpeakerRequestClient) Get(ctx context.Context, id uuid.UUID) (*SpaceSpeakerRequest, error) {
+	return c.Query().Where(spacespeakerrequest.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *SpaceSpeakerRequestClient) GetX(ctx context.Context, id uuid.UUID) *SpaceSpeakerRequest {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *SpaceSpeakerRequestClient) Hooks() []Hook {
+	return c.hooks.SpaceSpeakerRequest
+}
+
+// Interceptors returns the client interceptors.
+func (c *SpaceSpeakerRequestClient) Interceptors() []Interceptor {
+	return c.inters.SpaceSpeakerRequest
+}
+
+func (c *SpaceSpeakerRequestClient) mutate(ctx context.Context, m *SpaceSpeakerRequestMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&SpaceSpeakerRequestCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&SpaceSpeakerRequestUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&SpaceSpeakerRequestUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&SpaceSpeakerRequestDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown SpaceSpeakerRequest mutation op: %q", m.Op())
+	}
+}
+
 // hooks and interceptors per client, for fast access.
 type (
 	hooks struct {
@@ -4309,7 +4591,8 @@ type (
 		LiveHostDefault, LiveHostRestriction, LiveIngress, LiveLeaderboardEntry,
 		LiveModerator, LiveProduct, LiveRecording, LiveRestriction, LiveRoomSetting,
 		LiveSafetyState, LiveSession, LiveViewer, OutboxEvent, OverlayScene,
-		PointsEntry, PointsRule, ProcessedGift, Space []ent.Hook
+		PointsEntry, PointsRule, ProcessedGift, Space, SpaceParticipant,
+		SpaceSpeakerRequest []ent.Hook
 	}
 	inters struct {
 		Battle, BattleGiftEvent, BattleParticipant, Gift, GiftCombo, GiftContribution,
@@ -4317,7 +4600,8 @@ type (
 		LiveHostDefault, LiveHostRestriction, LiveIngress, LiveLeaderboardEntry,
 		LiveModerator, LiveProduct, LiveRecording, LiveRestriction, LiveRoomSetting,
 		LiveSafetyState, LiveSession, LiveViewer, OutboxEvent, OverlayScene,
-		PointsEntry, PointsRule, ProcessedGift, Space []ent.Interceptor
+		PointsEntry, PointsRule, ProcessedGift, Space, SpaceParticipant,
+		SpaceSpeakerRequest []ent.Interceptor
 	}
 )
 

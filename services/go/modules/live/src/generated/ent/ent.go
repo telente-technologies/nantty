@@ -35,6 +35,8 @@ import (
 	"nantty/modules/live/src/generated/ent/pointsrule"
 	"nantty/modules/live/src/generated/ent/processedgift"
 	"nantty/modules/live/src/generated/ent/space"
+	"nantty/modules/live/src/generated/ent/spaceparticipant"
+	"nantty/modules/live/src/generated/ent/spacespeakerrequest"
 	"reflect"
 	"sync"
 
@@ -130,6 +132,8 @@ func checkColumn(t, c string) error {
 			pointsrule.Table:           pointsrule.ValidColumn,
 			processedgift.Table:        processedgift.ValidColumn,
 			space.Table:                space.ValidColumn,
+			spaceparticipant.Table:     spaceparticipant.ValidColumn,
+			spacespeakerrequest.Table:  spacespeakerrequest.ValidColumn,
 		})
 	})
 	return columnCheck(t, c)
