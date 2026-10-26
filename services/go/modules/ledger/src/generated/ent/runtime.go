@@ -2,4 +2,4 @@
 
 package ent
 
-// The schema-stitching logic is generated in zudomart/modules/ledger/src/generated/ent/runtime/runtime.go
+// The schema-stitching logic is generated in nantty/modules/ledger/src/generated/ent/runtime/runtime.go

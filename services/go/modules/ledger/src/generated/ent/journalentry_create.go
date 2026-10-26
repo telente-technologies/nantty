@@ -6,9 +6,9 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"nantty/modules/ledger/src/generated/ent/journalentry"
+	"nantty/modules/ledger/src/generated/ent/journalline"
 	"time"
-	"zudomart/modules/ledger/src/generated/ent/journalentry"
-	"zudomart/modules/ledger/src/generated/ent/journalline"
 
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"

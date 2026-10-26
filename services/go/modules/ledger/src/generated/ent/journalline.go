@@ -4,11 +4,11 @@ package ent
 
 import (
 	"fmt"
+	"nantty/modules/ledger/src/generated/ent/journalentry"
+	"nantty/modules/ledger/src/generated/ent/journalline"
+	"nantty/modules/ledger/src/generated/ent/ledgeraccount"
 	"strings"
 	"time"
-	"zudomart/modules/ledger/src/generated/ent/journalentry"
-	"zudomart/modules/ledger/src/generated/ent/journalline"
-	"zudomart/modules/ledger/src/generated/ent/ledgeraccount"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"

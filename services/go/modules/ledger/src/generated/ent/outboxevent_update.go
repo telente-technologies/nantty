@@ -6,10 +6,10 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"nantty/modules/ledger/src/generated/ent/internal"
+	"nantty/modules/ledger/src/generated/ent/outboxevent"
+	"nantty/modules/ledger/src/generated/ent/predicate"
 	"time"
-	"zudomart/modules/ledger/src/generated/ent/internal"
-	"zudomart/modules/ledger/src/generated/ent/outboxevent"
-	"zudomart/modules/ledger/src/generated/ent/predicate"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"

@@ -4,9 +4,9 @@ package ent
 
 import (
 	"fmt"
+	"nantty/modules/ledger/src/generated/ent/reconciliationrun"
 	"strings"
 	"time"
-	"zudomart/modules/ledger/src/generated/ent/reconciliationrun"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"

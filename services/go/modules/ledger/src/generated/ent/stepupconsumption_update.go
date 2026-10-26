@@ -6,9 +6,9 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"zudomart/modules/ledger/src/generated/ent/internal"
-	"zudomart/modules/ledger/src/generated/ent/predicate"
-	"zudomart/modules/ledger/src/generated/ent/stepupconsumption"
+	"nantty/modules/ledger/src/generated/ent/internal"
+	"nantty/modules/ledger/src/generated/ent/predicate"
+	"nantty/modules/ledger/src/generated/ent/stepupconsumption"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"

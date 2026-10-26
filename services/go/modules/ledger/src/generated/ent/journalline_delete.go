@@ -4,9 +4,9 @@ package ent
 
 import (
 	"context"
-	"zudomart/modules/ledger/src/generated/ent/internal"
-	"zudomart/modules/ledger/src/generated/ent/journalline"
-	"zudomart/modules/ledger/src/generated/ent/predicate"
+	"nantty/modules/ledger/src/generated/ent/internal"
+	"nantty/modules/ledger/src/generated/ent/journalline"
+	"nantty/modules/ledger/src/generated/ent/predicate"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"

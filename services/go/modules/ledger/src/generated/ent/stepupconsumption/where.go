@@ -3,8 +3,8 @@
 package stepupconsumption
 
 import (
+	"nantty/modules/ledger/src/generated/ent/predicate"
 	"time"
-	"zudomart/modules/ledger/src/generated/ent/predicate"
 
 	"entgo.io/ent/dialect/sql"
 	"github.com/google/uuid"

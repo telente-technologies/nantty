@@ -3,9 +3,9 @@
 package ledgeraccount
 
 import (
+	"nantty/modules/ledger/src/generated/ent/internal"
+	"nantty/modules/ledger/src/generated/ent/predicate"
 	"time"
-	"zudomart/modules/ledger/src/generated/ent/internal"
-	"zudomart/modules/ledger/src/generated/ent/predicate"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"

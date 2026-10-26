@@ -4,9 +4,9 @@ package ent
 
 import (
 	"fmt"
+	"nantty/modules/ledger/src/generated/ent/stepupconsumption"
 	"strings"
 	"time"
-	"zudomart/modules/ledger/src/generated/ent/stepupconsumption"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"

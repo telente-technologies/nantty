@@ -5,7 +5,7 @@ package hook
 import (
 	"context"
 	"fmt"
-	"zudomart/modules/ledger/src/generated/ent"
+	"nantty/modules/ledger/src/generated/ent"
 )
 
 // The JournalEntryFunc type is an adapter to allow the use of ordinary

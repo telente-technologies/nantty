@@ -9,16 +9,16 @@ import (
 	"log"
 	"reflect"
 
-	"zudomart/modules/ledger/src/generated/ent/migrate"
+	"nantty/modules/ledger/src/generated/ent/migrate"
 
-	"zudomart/modules/ledger/src/generated/ent/journalentry"
-	"zudomart/modules/ledger/src/generated/ent/journalline"
-	"zudomart/modules/ledger/src/generated/ent/ledgeraccount"
-	"zudomart/modules/ledger/src/generated/ent/outboxevent"
-	"zudomart/modules/ledger/src/generated/ent/reconciliationbreak"
-	"zudomart/modules/ledger/src/generated/ent/reconciliationrun"
-	"zudomart/modules/ledger/src/generated/ent/sellercreditmaturity"
-	"zudomart/modules/ledger/src/generated/ent/stepupconsumption"
+	"nantty/modules/ledger/src/generated/ent/journalentry"
+	"nantty/modules/ledger/src/generated/ent/journalline"
+	"nantty/modules/ledger/src/generated/ent/ledgeraccount"
+	"nantty/modules/ledger/src/generated/ent/outboxevent"
+	"nantty/modules/ledger/src/generated/ent/reconciliationbreak"
+	"nantty/modules/ledger/src/generated/ent/reconciliationrun"
+	"nantty/modules/ledger/src/generated/ent/sellercreditmaturity"
+	"nantty/modules/ledger/src/generated/ent/stepupconsumption"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect"
@@ -27,7 +27,7 @@ import (
 	"github.com/google/uuid"
 
 	stdsql "database/sql"
-	"zudomart/modules/ledger/src/generated/ent/internal"
+	"nantty/modules/ledger/src/generated/ent/internal"
 )
 
 // Client is the client that holds all ent builders.
