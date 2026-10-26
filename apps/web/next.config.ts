@@ -1,6 +1,7 @@
 import type { NextConfig } from "next";
 
 const isDevelopmentBuild = process.env.NODE_ENV === "development";
+const isCloudflareStaticExport = process.env.NANTTY_CLOUDFLARE_STATIC_EXPORT === "1";
 
 function readApiOriginForConnectSource(): string {
   const configuredApiUrl = process.env.NEXT_PUBLIC_API_URL ?? (isDevelopmentBuild ? "http://localhost:3000" : "");
@@ -42,16 +43,24 @@ const securityHeaders = [
 ];
 
 const nextConfig: NextConfig = {
+  ...(isCloudflareStaticExport ? { output: "export" as const } : {}),
   experimental: { authInterrupts: true },
   reactStrictMode: true,
   poweredByHeader: false,
   transpilePackages: ["@nantty/web-kit"],
   images: {
     formats: ["image/avif", "image/webp"],
+    ...(isCloudflareStaticExport ? { unoptimized: true } : {}),
   },
-  async headers() {
-    return [{ source: "/:path*", headers: securityHeaders }];
-  },
+  // Static hosts cannot apply Next's runtime headers(); the Cloudflare artifact
+  // includes an explicit static-host header file instead.
+  ...(!isCloudflareStaticExport
+    ? {
+        async headers() {
+          return [{ source: "/:path*", headers: securityHeaders }];
+        },
+      }
+    : {}),
 };
 
 export default nextConfig;
