@@ -60,7 +60,7 @@ export function renderPlainText(blocks: readonly EmailBlock[], context: EmailCon
     manage,
     `Help Centre: ${brand.helpCenterUrl}`,
     `Support: ${brand.supportEmails.join(" or ")}`,
-    "Zudomart will never ask for your password, PIN or one-time code by email.",
+    "Nantty will never ask for your password, PIN or one-time code by email.",
     `App Store: ${brand.appStoreUrl}`,
     `Google Play: ${brand.playStoreUrl}`,
     `© ${new Date().getFullYear()} ${brand.companyLegalName}. ${brand.companyAddress}.`,

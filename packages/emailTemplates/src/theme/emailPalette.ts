@@ -1,4 +1,4 @@
-import { brandPalette, darkColors, lightColors } from "@zudomart/design-tokens/native";
+import { brandPalette, darkColors, lightColors } from "@nantty/design-tokens/native";
 
 import type { EmailTheme, Tone } from "../emailTypes";
 

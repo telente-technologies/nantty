@@ -9,7 +9,7 @@ interface TicketProps {
   readonly ticketUrl: string;
 }
 
-const sampleTicket: TicketProps = { firstName: "Amaka", ticketId: "SUP-20419", subjectLine: "Refund hasn't arrived for order ZM-48213", ticketUrl: "https://zudomart.com/help/tickets/7b9e2f3a-1111-4222-8333-123456789abc" };
+const sampleTicket: TicketProps = { firstName: "Amaka", ticketId: "SUP-20419", subjectLine: "Refund hasn't arrived for order ZM-48213", ticketUrl: "https://nantty.com/help/tickets/7b9e2f3a-1111-4222-8333-123456789abc" };
 const ref = (p: TicketProps) => `TICKET ${p.ticketId}`;
 
 export const supportTicketReceived = defineEmailTemplate<TicketProps & { readonly firstResponseHours: number }>({
@@ -33,7 +33,7 @@ export const supportAgentReplied = defineEmailTemplate<TicketProps & { readonly 
   reference: ref,
   blocks: (p, c) => [
     { type: "hero", eyebrow: "Support reply", title: `${p.agentName} replied to your ticket` },
-    { type: "quote", author: `${p.agentName}, Zudomart Support`, meta: c.dateTime(p.repliedAt), text: p.message },
+    { type: "quote", author: `${p.agentName}, Nantty Support`, meta: c.dateTime(p.repliedAt), text: p.message },
     { type: "button", label: "Reply", href: p.ticketUrl },
     { type: "paragraph", muted: true, text: "Replies to this email are not monitored. Reply from the ticket instead." },
   ],

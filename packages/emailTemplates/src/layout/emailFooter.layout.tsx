@@ -6,10 +6,10 @@ import type { EmailKind } from "../emailTypes";
 import { fontStack } from "../theme/emailPalette";
 
 export const defaultReasons: Record<EmailKind, string> = {
-  transactional: "You're getting this email because of activity on your Zudomart account.",
+  transactional: "You're getting this email because of activity on your Nantty account.",
   security: "We send security emails to every account owner so you always know what happens to your account. You can't turn these off.",
-  legal: "We send this to everyone with a Zudomart account because it affects your rights and how we handle your information.",
-  marketing: "You're getting this because you said yes to deals and recommendations from Zudomart. We only feature verified sellers and brands.",
+  legal: "We send this to everyone with a Nantty account because it affects your rights and how we handle your information.",
+  marketing: "You're getting this because you said yes to deals and recommendations from Nantty. We only feature verified sellers and brands.",
 };
 
 export const storeTrademarkLine = "Apple and the Apple logo are trademarks of Apple Inc., registered in the U.S. and other countries and regions. App Store is a service mark of Apple Inc. Google Play and the Google Play logo are trademarks of Google LLC.";
@@ -68,7 +68,7 @@ export function EmailFooter({ kind, reason }: { readonly kind: EmailKind; readon
         <tr>
           <td className="zm-foot" style={{ padding: "28px 40px 8px" }}>
             <Text className="zm-text" style={{ ...small, fontSize: 14, lineHeight: "20px", fontWeight: 700, color: palette.text }}>
-              Shop, sell and go live on the Zudomart app
+              Shop, sell and go live on the Nantty app
             </Text>
             <StoreBadges />
             <Text className="zm-muted" style={{ ...small, color: palette.muted, paddingTop: 10, paddingBottom: 14 }}>

@@ -34,7 +34,7 @@ export const creatorApplicationReceived = defineEmailTemplate<{ readonly firstNa
 
 export const creatorApproved = defineEmailTemplate<{ readonly firstName: string; readonly handle: string }>({
   ...base, key: "creatorApproved", name: "Creator approved", trigger: "creator.application.approved",
-  subject: () => "You're in the Zudomart Creator Program",
+  subject: () => "You're in the Nantty Creator Program",
   preheader: () => "Earn from ads revenue share, gifts and subscriptions.",
   blocks: (p, c) => [
     { type: "hero", eyebrow: "Creator Program", title: `Welcome aboard, @${p.handle}`, tone: "success" },

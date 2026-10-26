@@ -20,12 +20,12 @@ const notYou = (url: string) => ({ type: "callout" as const, tone: "danger" as c
 
 export const emailOtp = defineEmailTemplate<RecipientProps & { readonly code: string; readonly expiresInMinutes: number; readonly purpose: string }>({
   key: "emailOtp", name: "Email one-time code", category: "auth", kind: "security", audience: "Any user", trigger: "auth.otp.requested", consent: consentRules.security,
-  subject: (p) => `${p.code} is your Zudomart code`,
+  subject: (p) => `${p.code} is your Nantty code`,
   preheader: (p) => `Use it to ${p.purpose}. It expires in ${p.expiresInMinutes} minutes.`,
   blocks: (p) => [
     { type: "hero", eyebrow: "Verification code", title: `Here's your code to ${p.purpose}` },
     { type: "code", code: p.code, caption: `Expires in ${p.expiresInMinutes} minutes · Use it once` },
-    { type: "paragraph", text: "Enter this code in the Zudomart app or on the website. Never share it with anyone — Zudomart staff will never ask for it, not even on a call or in chat." },
+    { type: "paragraph", text: "Enter this code in the Nantty app or on the website. Never share it with anyone — Nantty staff will never ask for it, not even on a call or in chat." },
     { type: "paragraph", muted: true, text: "Didn't ask for a code? Someone may have typed your email by mistake. You can ignore this email; nobody can get in without the code." },
   ],
   sample: { firstName: "Amaka", code: "482913", expiresInMinutes: 10, purpose: "sign in" },
@@ -33,11 +33,11 @@ export const emailOtp = defineEmailTemplate<RecipientProps & { readonly code: st
 
 export const welcome = defineEmailTemplate<RecipientProps & { readonly username: string }>({
   key: "welcome", name: "Welcome", category: "auth", kind: "transactional", audience: "New user", trigger: "identity.account.created", consent: consentRules.always,
-  subject: (p) => `Welcome to Zudomart, ${p.firstName}`,
+  subject: (p) => `Welcome to Nantty, ${p.firstName}`,
   preheader: () => "Shop from verified sellers, pay safely through escrow, and catch live drops.",
   blocks: (p, c) => [
     { type: "hero", eyebrow: "Welcome", title: `You're in, @${p.username}` },
-    { type: "paragraph", text: `Hi ${p.firstName}, welcome to Zudomart — a marketplace where every payment is held safely in escrow until your order arrives.` },
+    { type: "paragraph", text: `Hi ${p.firstName}, welcome to Nantty — a marketplace where every payment is held safely in escrow until your order arrives.` },
     { type: "list", title: "Three things worth doing first", items: [
       [{ strong: "Follow sellers you love" }, " — their drops and lives show up first in your feed."],
       [{ strong: "Add a delivery address" }, " — checkout takes seconds after that."],
@@ -57,14 +57,14 @@ export const verifyEmail = defineEmailTemplate<RecipientProps & { readonly verif
     { type: "hero", eyebrow: "Confirm email", title: "Is this your email address?" },
     { type: "paragraph", text: `Hi ${p.firstName}, tap the button to confirm this address. We'll use it for receipts, order updates and security alerts.` },
     { type: "button", label: "Confirm email address", href: p.verifyUrl },
-    { type: "paragraph", muted: true, text: `The link expires in ${p.expiresInHours} hours. If you didn't create a Zudomart account, ignore this email and the address won't be added.` },
+    { type: "paragraph", muted: true, text: `The link expires in ${p.expiresInHours} hours. If you didn't create a Nantty account, ignore this email and the address won't be added.` },
   ],
-  sample: { firstName: "Amaka", verifyUrl: "https://zudomart.com/verify-email?token=sample", expiresInHours: 24 },
+  sample: { firstName: "Amaka", verifyUrl: "https://nantty.com/verify-email?token=sample", expiresInHours: 24 },
 });
 
 export const passwordReset = defineEmailTemplate<RecipientProps & { readonly resetUrl: string; readonly expiresInMinutes: number } & Omit<DeviceProps, "firstName">>({
   key: "passwordReset", name: "Password reset", category: "auth", kind: "security", audience: "Any user", trigger: "identity.password.reset_requested", consent: consentRules.security,
-  subject: () => "Reset your Zudomart password",
+  subject: () => "Reset your Nantty password",
   preheader: (p) => `This link expires in ${p.expiresInMinutes} minutes.`,
   blocks: (p, c) => [
     { type: "hero", eyebrow: "Password reset", title: "Reset your password" },
@@ -73,12 +73,12 @@ export const passwordReset = defineEmailTemplate<RecipientProps & { readonly res
     { type: "details", title: "Request details", rows: deviceRows({ ...p }, c.dateTime(p.occurredAt)) },
     { type: "paragraph", muted: true, text: `The link expires in ${p.expiresInMinutes} minutes and works once. Didn't ask for this? Ignore this email — your password stays the same.` },
   ],
-  sample: { firstName: "Amaka", resetUrl: "https://zudomart.com/reset-password?token=sample", expiresInMinutes: 30, ...sampleDevice },
+  sample: { firstName: "Amaka", resetUrl: "https://nantty.com/reset-password?token=sample", expiresInMinutes: 30, ...sampleDevice },
 });
 
 export const passwordChanged = defineEmailTemplate<DeviceProps>({
   key: "passwordChanged", name: "Password changed", category: "auth", kind: "security", audience: "Any user", trigger: "identity.password.changed", consent: consentRules.security,
-  subject: () => "Your Zudomart password was changed",
+  subject: () => "Your Nantty password was changed",
   preheader: () => "If this was you, there's nothing else to do.",
   blocks: (p, c) => [
     { type: "hero", eyebrow: "Security", title: "Your password was changed", tone: "success" },
@@ -100,10 +100,10 @@ export const newSignIn = defineEmailTemplate<DeviceProps & { readonly reviewUrl:
     { type: "button", label: "Review your devices", href: p.reviewUrl },
     notYou(c.url("/account/recover")),
   ],
-  sample: { firstName: "Amaka", reviewUrl: "https://zudomart.com/settings/security/sessions", ...sampleDevice },
+  sample: { firstName: "Amaka", reviewUrl: "https://nantty.com/settings/security/sessions", ...sampleDevice },
 });
 
-export const sessionsRevoked = defineEmailTemplate<RecipientProps & { readonly sessionCount: number; readonly initiatedBy: "you" | "zudomart"; readonly occurredAt: string }>({
+export const sessionsRevoked = defineEmailTemplate<RecipientProps & { readonly sessionCount: number; readonly initiatedBy: "you" | "nantty"; readonly occurredAt: string }>({
   key: "sessionsRevoked", name: "Sessions revoked", category: "auth", kind: "security", audience: "Any user", trigger: "identity.sessions.revoked", consent: consentRules.security,
   subject: (p) => `You were signed out of ${p.sessionCount} devices`,
   preheader: () => "Sign in again on the devices you still use.",

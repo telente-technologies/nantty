@@ -4,8 +4,8 @@ import { defaultEmailBrand, readEmailBrandFromEnvironment } from "../src/config/
 
 describe("email header logo", () => {
   it("serves the lockup PNG from the asset base", () => {
-    expect(defaultEmailBrand.logoUrl).toBe("https://cdn.zudomart.com/email/brand/zudomartLockup@2x.png");
-    expect(readEmailBrandFromEnvironment({ ZUDOMART_EMAIL_ASSET_BASE_URL: "https://assets.example.com/mail/" }).logoUrl).toBe("https://assets.example.com/mail/brand/zudomartLockup@2x.png");
+    expect(defaultEmailBrand.logoUrl).toBe("https://nantty.com/brand/nantty-lockup.png");
+    expect(readEmailBrandFromEnvironment({ ZUDOMART_EMAIL_ASSET_BASE_URL: "https://assets.example.com/mail/" }).logoUrl).toBe("https://assets.example.com/mail/brand/nantty-lockup.png");
   });
 
   it("falls back to the text wordmark when the logo is turned off", () => {

@@ -27,7 +27,7 @@ export const storeCreditEarned = defineEmailTemplate<StoreCreditProps & { readon
     { type: "button", label: `Shop ${p.storeName}`, href: p.storeUrl },
     { type: "paragraph", muted: true, text: rules(p, c.money) },
   ],
-  sample: { firstName: "Amaka", storeName: "Adire Lagos Studio", storeUrl: "https://zudomart.com/@adirelagos", earned: ngn(3300), balance: ngn(4800), expiresAt: "2027-01-06T23:59:00.000Z", orderNumber: "ZM-48213", minimumOrder: ngn(10000) },
+  sample: { firstName: "Amaka", storeName: "Adire Lagos Studio", storeUrl: "https://nantty.com/@adirelagos", earned: ngn(3300), balance: ngn(4800), expiresAt: "2027-01-06T23:59:00.000Z", orderNumber: "ZM-48213", minimumOrder: ngn(10000) },
 });
 
 export const storeCreditExpiring = defineEmailTemplate<StoreCreditProps>({
@@ -40,5 +40,5 @@ export const storeCreditExpiring = defineEmailTemplate<StoreCreditProps>({
     { type: "button", label: `Shop ${p.storeName}`, href: p.storeUrl },
     { type: "paragraph", muted: true, text: rules(p, c.money) },
   ],
-  sample: { firstName: "Amaka", storeName: "Adire Lagos Studio", storeUrl: "https://zudomart.com/@adirelagos", balance: ngn(4800), expiresAt: "2026-10-10T23:59:00.000Z" },
+  sample: { firstName: "Amaka", storeName: "Adire Lagos Studio", storeUrl: "https://nantty.com/@adirelagos", balance: ngn(4800), expiresAt: "2026-10-10T23:59:00.000Z" },
 });

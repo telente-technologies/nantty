@@ -22,6 +22,6 @@ for (const entry of catalogue) {
   rows.push(`<tr><td>${entry.category}</td><td><a href="${entry.key}.html">${escapeHtml(entry.name)}</a> · <a href="${entry.key}.dark.html">dark</a> · <a href="${entry.key}.txt">text</a></td><td>${entry.kind}</td><td>${escapeHtml(light.subject)}</td></tr>`);
 }
 
-const index = `<!doctype html><meta charset="utf-8"><title>Zudomart email previews</title><style>body{font:14px system-ui;margin:32px}td{padding:6px 10px;border-bottom:1px solid #ddd}</style><h1>Zudomart email previews (${catalogue.length})</h1><table>${rows.join("")}</table>`;
+const index = `<!doctype html><meta charset="utf-8"><title>Nantty email previews</title><style>body{font:14px system-ui;margin:32px}td{padding:6px 10px;border-bottom:1px solid #ddd}</style><h1>Nantty email previews (${catalogue.length})</h1><table>${rows.join("")}</table>`;
 await writeFile(join(outputDirectory, "index.html"), index);
 console.log(`Rendered ${catalogue.length} templates (light, dark and text) into ${outputDirectory}`);

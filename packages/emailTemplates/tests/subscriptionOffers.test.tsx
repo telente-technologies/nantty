@@ -6,7 +6,7 @@ describe("subscription offer email", () => {
   it("leads with the offer, quotes the note and has one claim button", async () => {
     const sample = readEmailTemplate("subscriptionOfferInvite").sample;
     const rendered = await renderEmailSample("subscriptionOfferInvite", { locale: "en-NG" });
-    expect(rendered.subject).toBe("Your Zudomart offer: 30% off Pro plan");
+    expect(rendered.subject).toBe("Your Nantty offer: 30% off Pro plan");
     expect(rendered.html).toContain(sample.claimUrl);
     expect(rendered.text.match(/Claim your offer/g)?.length).toBe(1);
     expect(rendered.text).toContain("Thanks for joining our seller pilot.");
@@ -17,7 +17,7 @@ describe("subscription offer email", () => {
   it("formats fixed amounts in the offer currency and escapes the note", async () => {
     const rendered = await renderEmail("subscriptionOfferInvite", {
       planLabels: ["Pro plan", "Business plan"], amountOff: { amountMinor: 200000, currency: "NGN" }, durationCycles: 1,
-      note: "<script>alert(1)</script> & <b>bold</b>", claimUrl: "https://zudomart.com/offer/abc", singleUse: false,
+      note: "<script>alert(1)</script> & <b>bold</b>", claimUrl: "https://nantty.com/offer/abc", singleUse: false,
     }, { locale: "en-NG" });
     expect(rendered.subject).toContain("₦2,000.00 off Pro plan or Business plan");
     expect(rendered.html).not.toContain("<script>alert(1)</script>");

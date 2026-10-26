@@ -16,7 +16,7 @@ interface DisputeProps {
   readonly amount: Money;
 }
 
-const sampleDispute: DisputeProps = { firstName: "Amaka", role: "buyer", caseNumber: "DSP-10294", orderNumber: "ZM-48213", caseUrl: "https://zudomart.com/disputes/DSP-10294", amount: ngn(62000) };
+const sampleDispute: DisputeProps = { firstName: "Amaka", role: "buyer", caseNumber: "DSP-10294", orderNumber: "ZM-48213", caseUrl: "https://nantty.com/disputes/DSP-10294", amount: ngn(62000) };
 
 export const escrowFundsProtected = defineEmailTemplate<OrderProps & { readonly releaseRule: string }>({
   ...base, key: "escrowFundsProtected", name: "Funds protected in escrow", audience: "Buyer", trigger: "escrow.hold.created",
@@ -35,7 +35,7 @@ export const escrowFundsProtected = defineEmailTemplate<OrderProps & { readonly 
     { type: "button", label: "View order", href: p.orderUrl },
     { type: "links", items: [{ label: "Learn how escrow works", href: c.url("/help/escrow") }] },
   ],
-  sample: { firstName: "Amaka", orderNumber: "ZM-48213", orderUrl: "https://zudomart.com/orders/ZM-48213", groups: sampleOrderGroups, releaseRule: "Each seller is paid separately once you confirm their part of the order." },
+  sample: { firstName: "Amaka", orderNumber: "ZM-48213", orderUrl: "https://nantty.com/orders/ZM-48213", groups: sampleOrderGroups, releaseRule: "Each seller is paid separately once you confirm their part of the order." },
 });
 
 export const escrowAutoReleaseReminder = defineEmailTemplate<{ readonly firstName: string; readonly orderNumber: string; readonly sellerName: string; readonly amount: Money; readonly releaseAt: string; readonly confirmUrl: string; readonly disputeUrl: string }>({
@@ -50,7 +50,7 @@ export const escrowAutoReleaseReminder = defineEmailTemplate<{ readonly firstNam
     { type: "button", label: "Confirm everything's fine", href: p.confirmUrl },
     { type: "links", items: [{ label: "Report a problem", href: p.disputeUrl }] },
   ],
-  sample: { firstName: "Amaka", orderNumber: "ZM-48213", sellerName: "Adire Lagos Studio", amount: ngn(69000), releaseAt: "2026-10-09T14:20:00.000Z", confirmUrl: "https://zudomart.com/orders/ZM-48213/confirm", disputeUrl: "https://zudomart.com/orders/ZM-48213/dispute" },
+  sample: { firstName: "Amaka", orderNumber: "ZM-48213", sellerName: "Adire Lagos Studio", amount: ngn(69000), releaseAt: "2026-10-09T14:20:00.000Z", confirmUrl: "https://nantty.com/orders/ZM-48213/confirm", disputeUrl: "https://nantty.com/orders/ZM-48213/dispute" },
 });
 
 export const escrowReleased = defineEmailTemplate<{ readonly firstName: string; readonly orderNumber: string; readonly gross: Money; readonly commission: Money; readonly paymentFee: Money; readonly net: Money; readonly availableAt: string; readonly releasedBecause: "confirmed" | "auto" | "dispute" }>({
@@ -61,7 +61,7 @@ export const escrowReleased = defineEmailTemplate<{ readonly firstName: string; 
   blocks: (p, c) => [
     { type: "hero", eyebrow: "Escrow released", title: `You've been paid ${c.money(p.net)}`, tone: "success" },
     { type: "paragraph", text: `Hi ${p.firstName}, ${p.releasedBecause === "confirmed" ? "the buyer confirmed delivery" : p.releasedBecause === "auto" ? "the 3-day check window ended with no problems reported" : "the dispute was resolved in your favour"}, so escrow released the payment for order ${p.orderNumber}.` },
-    { type: "totals", rows: [{ label: "Order value", amount: p.gross }, { label: "Zudomart platform fee", amount: p.commission, credit: true }, { label: "Payment processing", amount: p.paymentFee, credit: true }], total: { label: "Released to your balance", amount: p.net } },
+    { type: "totals", rows: [{ label: "Order value", amount: p.gross }, { label: "Nantty platform fee", amount: p.commission, credit: true }, { label: "Payment processing", amount: p.paymentFee, credit: true }], total: { label: "Released to your balance", amount: p.net } },
     { type: "callout", tone: "brand", text: ["Funds become available to withdraw on ", { strong: c.date(p.availableAt) }, " after the standard 24-hour lock. Payouts run daily."] },
     { type: "button", label: "Open your balance", href: `${c.brand.sellerDashboardUrl}/balance` },
   ],
@@ -78,10 +78,10 @@ export const disputeOpened = defineEmailTemplate<DisputeProps & { readonly reaso
     { type: "track", steps: disputeTrackSteps, current: 1, tone: "danger" },
     { type: "details", rows: [{ label: "Case", value: p.caseNumber, mono: true }, { label: "Order", value: p.orderNumber, mono: true }, { label: "Amount on hold", value: c.money(p.amount), strong: true }, { label: "Reason", value: p.reason }, { label: "Opened by", value: p.openedBy }] },
     { type: "paragraph", text: p.role === "buyer"
-      ? `Add photos, videos or messages that show the problem by ${c.dateTime(p.respondBy)}. The seller can respond too, then a Zudomart specialist reviews both sides.`
+      ? `Add photos, videos or messages that show the problem by ${c.dateTime(p.respondBy)}. The seller can respond too, then a Nantty specialist reviews both sides.`
       : `Reply with your side and any proof — dispatch receipts, photos, chat history — by ${c.dateTime(p.respondBy)}. If you don't respond, the case may be decided for the buyer.` },
     { type: "button", label: p.role === "buyer" ? "Add evidence" : "Respond to the case", href: p.caseUrl, tone: p.role === "seller" ? "danger" : "brand" },
-    { type: "paragraph", muted: true, text: "Keep all messages about this case inside Zudomart. We can't consider deals made off the platform." },
+    { type: "paragraph", muted: true, text: "Keep all messages about this case inside Nantty. We can't consider deals made off the platform." },
   ],
   sample: { ...sampleDispute, reason: "Item not as described", respondBy: "2026-10-10T14:00:00.000Z", openedBy: "Buyer (@amaka.styles)" },
 });
@@ -98,7 +98,7 @@ export const disputeUpdate = defineEmailTemplate<DisputeProps & { readonly updat
     ...(p.actionNeededBy ? [{ type: "callout" as const, tone: "warn" as const, title: "Reply by " + c.dateTime(p.actionNeededBy), text: "If we don't hear back, we'll decide using the information we already have." }] : []),
     { type: "button", label: "Open case", href: p.caseUrl },
   ],
-  sample: { ...sampleDispute, from: "Zudomart Resolution Team", update: "Thanks for the photos. Could you also share a short video showing the left ear cup not charging? That helps us confirm the fault quickly.", stage: 1, actionNeededBy: "2026-10-11T18:00:00.000Z" },
+  sample: { ...sampleDispute, from: "Nantty Resolution Team", update: "Thanks for the photos. Could you also share a short video showing the left ear cup not charging? That helps us confirm the fault quickly.", stage: 1, actionNeededBy: "2026-10-11T18:00:00.000Z" },
 });
 
 export const disputeResolved = defineEmailTemplate<DisputeProps & { readonly outcome: "refund_full" | "refund_partial" | "release_seller"; readonly buyerRefund: Money; readonly sellerPayout: Money; readonly summary: string }>({

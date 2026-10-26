@@ -13,7 +13,7 @@ export interface SubscriptionOfferEmailProps {
 }
 
 function joinPlanLabels(labels: readonly string[]): string {
-  if (labels.length <= 1) return labels[0] ?? "a Zudomart plan";
+  if (labels.length <= 1) return labels[0] ?? "a Nantty plan";
   return `${labels.slice(0, -1).join(", ")} or ${labels[labels.length - 1]}`;
 }
 
@@ -29,11 +29,11 @@ function durationText(cycles: number): string {
 export const subscriptionOfferInvite = defineEmailTemplate<SubscriptionOfferEmailProps>({
   category: "payments", kind: "transactional", audience: "Person a staff member sent a subscription offer link to (may not have an account yet)", consent: consentRules.always,
   key: "subscriptionOfferInvite", name: "Subscription offer link", trigger: "subscriptionOffer.sent",
-  subject: (p, c) => `Your Zudomart offer: ${subscriptionOfferHeadline(p, c)}`,
+  subject: (p, c) => `Your Nantty offer: ${subscriptionOfferHeadline(p, c)}`,
   preheader: (p, c) => (p.expiresAt ? `Claim it before ${c.date(p.expiresAt)}.` : "Claim it whenever you're ready."),
   blocks: (p, c) => [
-    { type: "hero", eyebrow: "A Zudomart offer for you", title: subscriptionOfferHeadline(p, c) },
-    ...(p.note ? [{ type: "quote" as const, author: "A note from the Zudomart team", text: p.note }] : []),
+    { type: "hero", eyebrow: "A Nantty offer for you", title: subscriptionOfferHeadline(p, c) },
+    ...(p.note ? [{ type: "quote" as const, author: "A note from the Nantty team", text: p.note }] : []),
     {
       type: "details",
       rows: [
@@ -45,10 +45,10 @@ export const subscriptionOfferInvite = defineEmailTemplate<SubscriptionOfferEmai
     { type: "button", label: "Claim your offer", href: p.claimUrl },
     {
       type: "paragraph", muted: true,
-      text: `Sign in or create a Zudomart account to claim it, then pay on the web. The offer can't be combined with other discounts; we always give you the better price.${p.singleUse ? " This link can be claimed once, so the first person to use it gets the offer." : ""}`,
+      text: `Sign in or create a Nantty account to claim it, then pay on the web. The offer can't be combined with other discounts; we always give you the better price.${p.singleUse ? " This link can be claimed once, so the first person to use it gets the offer." : ""}`,
     },
     { type: "paragraph", muted: true, text: "If you weren't expecting this, you can ignore this email." },
   ],
-  sample: { planLabels: ["Pro plan"], percentOff: 30, durationCycles: 3, expiresAt: "2026-11-01T09:00:00.000Z", note: "Thanks for joining our seller pilot.\nThis is on us for the first three months.", claimUrl: "https://zudomart.com/offer/Xq3v0mZp9bT2nR8kL5wA7cD1eF4gH6jK0lM2nP4qR6s", singleUse: true },
+  sample: { planLabels: ["Pro plan"], percentOff: 30, durationCycles: 3, expiresAt: "2026-11-01T09:00:00.000Z", note: "Thanks for joining our seller pilot.\nThis is on us for the first three months.", claimUrl: "https://nantty.com/offer/Xq3v0mZp9bT2nR8kL5wA7cD1eF4gH6jK0lM2nP4qR6s", singleUse: true },
 });
 

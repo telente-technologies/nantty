@@ -3,16 +3,17 @@ import type { EmailBrandConfig } from "../emailTypes";
 export const companyLegalNamePlaceholder = "ZUDOMART_COMPANY_LEGAL_NAME";
 export const companyAddressPlaceholder = "ZUDOMART_COMPANY_ADDRESS";
 
-export const defaultMailboxDomain = "zudomart.com";
-export const defaultSendingDomain = "mail.zudomart.com";
-export const defaultEmailAssetBaseUrl = "https://cdn.zudomart.com/email";
+export const defaultMailboxDomain = "nantty.com";
+// Keep the currently authenticated outbound domain until a Nantty sending provider and its SPF/DKIM records are configured.
+export const defaultSendingDomain = "mail.nantty.com";
+export const defaultEmailAssetBaseUrl = "https://nantty.com";
 
 export const storeBadgeFiles = {
   appStore: "storeBadges/app-store-badge-black@2x.png",
   playStore: "storeBadges/google-play-badge@2x.png",
 } as const;
 
-export const emailLogoFile = "brand/zudomartLockup@2x.png";
+export const emailLogoFile = "brand/nantty-lockup.png";
 
 export function buildEmailLogoUrl(assetBaseUrl: string): string {
   return `${assetBaseUrl.replace(/\/+$/, "")}/${emailLogoFile}`;
@@ -24,22 +25,22 @@ export function buildStoreBadgeUrls(assetBaseUrl: string): { readonly appStoreBa
 }
 
 export const defaultEmailBrand: EmailBrandConfig = {
-  productName: "Zudomart",
+  productName: "Nantty",
   companyLegalName: companyLegalNamePlaceholder,
   companyAddress: companyAddressPlaceholder,
-  webBaseUrl: "https://zudomart.com",
-  helpCenterUrl: "https://zudomart.com/help",
-  sellerDashboardUrl: "https://dashboard.zudomart.com",
-  studioUrl: "https://studio.zudomart.com",
+  webBaseUrl: "https://nantty.com",
+  helpCenterUrl: "https://nantty.com/help",
+  sellerDashboardUrl: "https://creator.nantty.com",
+  studioUrl: "https://creator.nantty.com",
   supportEmails: [`support@${defaultMailboxDomain}`],
   logoUrl: buildEmailLogoUrl(defaultEmailAssetBaseUrl),
   logoWidth: 150,
-  appStoreUrl: "https://apps.apple.com/app/zudomart/id0000000000",
-  playStoreUrl: "https://play.google.com/store/apps/details?id=com.zudomart.app",
+  appStoreUrl: "https://apps.apple.com/app/id0000000000",
+  playStoreUrl: "https://play.google.com/store/apps/details?id=com.nantty.app",
   ...buildStoreBadgeUrls(defaultEmailAssetBaseUrl),
   mailboxDomain: defaultMailboxDomain,
   sendingDomain: defaultSendingDomain,
-  senderName: "Zudomart",
+  senderName: "Nantty",
 };
 
 export type EmailBrandEnvironment = Readonly<Record<string, string | undefined>>;

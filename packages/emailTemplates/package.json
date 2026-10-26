@@ -1,5 +1,5 @@
 {
-  "name": "@zudomart/email-templates",
+  "name": "@nantty/email-templates",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -15,7 +15,7 @@
   },
   "dependencies": {
     "@react-email/render": "^2.1.0",
-    "@zudomart/design-tokens": "workspace:*",
+    "@nantty/design-tokens": "workspace:*",
     "react": "^19.3.0",
     "react-dom": "^19.3.0",
     "react-email": "^6.11.1"

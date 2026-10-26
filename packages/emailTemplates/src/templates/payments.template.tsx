@@ -14,7 +14,7 @@ interface ReceiptMeta {
 
 export const paymentReceipt = defineEmailTemplate<OrderProps & ReceiptMeta & { readonly discount?: Money }>({
   ...base, key: "paymentReceipt", name: "Payment receipt (products)", trigger: "payments.charge.succeeded (receipt)",
-  subject: (p, c) => `Your Zudomart receipt — ${c.money(orderTotal(p.groups, p.discount))}`,
+  subject: (p, c) => `Your Nantty receipt — ${c.money(orderTotal(p.groups, p.discount))}`,
   preheader: (p) => `Order ${p.orderNumber} · ${p.paymentMethod}`,
   reference: (p) => p.receiptNumber,
   blocks: (p, c) => [
@@ -22,10 +22,10 @@ export const paymentReceipt = defineEmailTemplate<OrderProps & ReceiptMeta & { r
     { type: "details", rows: [{ label: "Receipt", value: p.receiptNumber, mono: true }, { label: "Order", value: p.orderNumber, mono: true }, { label: "Paid on", value: c.dateTime(p.paidAt) }, { label: "Payment method", value: p.paymentMethod }] },
     { type: "orderGroups", groups: p.groups },
     orderTotalsBlock(p.groups, { discount: p.discount, totalLabel: "Total paid" }),
-    { type: "paragraph", muted: true, text: "Each seller is paid through their own Zudomart seller account. Your payment for each seller stays in escrow until you confirm that part of the order." },
+    { type: "paragraph", muted: true, text: "Each seller is paid through their own Nantty seller account. Your payment for each seller stays in escrow until you confirm that part of the order." },
     { type: "button", label: "View order", href: p.orderUrl },
   ],
-  sample: { firstName: "Amaka", orderNumber: "ZM-48213", orderUrl: "https://zudomart.com/orders/ZM-48213", groups: sampleOrderGroups, receiptNumber: "RC-20261003-55120", paidAt: "2026-10-03T09:12:00.000Z", paymentMethod: "Visa •••• 4242", discount: ngn(5000) },
+  sample: { firstName: "Amaka", orderNumber: "ZM-48213", orderUrl: "https://nantty.com/orders/ZM-48213", groups: sampleOrderGroups, receiptNumber: "RC-20261003-55120", paidAt: "2026-10-03T09:12:00.000Z", paymentMethod: "Visa •••• 4242", discount: ngn(5000) },
 });
 
 export const coinPurchaseReceipt = defineEmailTemplate<ReceiptMeta & { readonly firstName: string; readonly packName: string; readonly coins: number; readonly bonusCoins: number; readonly price: Money; readonly balanceAfter: number }>({
@@ -42,7 +42,7 @@ export const coinPurchaseReceipt = defineEmailTemplate<ReceiptMeta & { readonly 
   sample: { firstName: "Amaka", packName: "Starter pack", coins: 1000, bonusCoins: 150, price: ngn(2000), balanceAfter: 1840, receiptNumber: "RC-COIN-77120", paidAt: "2026-10-03T19:40:00.000Z", paymentMethod: "Verve •••• 1180" },
 });
 
-export const subscriptionReceipt = defineEmailTemplate<ReceiptMeta & { readonly firstName: string; readonly product: "Blue checkmark" | "Gold checkmark" | "Black checkmark" | "Zudomart Premium"; readonly price: Money; readonly vat: Money; readonly interval: "month" | "year"; readonly periodEnd: string; readonly discountLabel?: string; readonly discount?: Money }>({
+export const subscriptionReceipt = defineEmailTemplate<ReceiptMeta & { readonly firstName: string; readonly product: "Blue checkmark" | "Gold checkmark" | "Black checkmark" | "Nantty Premium"; readonly price: Money; readonly vat: Money; readonly interval: "month" | "year"; readonly periodEnd: string; readonly discountLabel?: string; readonly discount?: Money }>({
   ...base, key: "subscriptionReceipt", name: "Subscription receipt (Blue/Gold/Black/Premium)", audience: "Subscriber", trigger: "billing.subscription.invoice_paid",
   subject: (p) => `Receipt for ${p.product}`,
   preheader: (p, c) => `Renews ${c.date(p.periodEnd)}.`,
@@ -71,7 +71,7 @@ export const paymentFailed = defineEmailTemplate<{ readonly firstName: string; r
     { type: "button", label: "Try again", href: p.retryUrl },
     { type: "paragraph", muted: true, text: p.holdUntil ? `We'll keep your items reserved until ${c.dateTime(p.holdUntil)}.` : "Try a different card, or check with your bank that online payments are turned on." },
   ],
-  sample: { firstName: "Amaka", description: "order ZM-48213", amount: ngn(131000), paymentMethod: "Visa •••• 4242", reason: "Your bank declined the payment. This often happens when online or international payments are turned off.", retryUrl: "https://zudomart.com/checkout/pay/ZM-48213", holdUntil: "2026-10-03T20:00:00.000Z" },
+  sample: { firstName: "Amaka", description: "order ZM-48213", amount: ngn(131000), paymentMethod: "Visa •••• 4242", reason: "Your bank declined the payment. This often happens when online or international payments are turned off.", retryUrl: "https://nantty.com/checkout/pay/ZM-48213", holdUntil: "2026-10-03T20:00:00.000Z" },
 });
 
 export const cardVerificationRefunded = defineEmailTemplate<{ readonly firstName: string; readonly amount: Money; readonly cardLabel: string; readonly reason: string; readonly reference: string }>({

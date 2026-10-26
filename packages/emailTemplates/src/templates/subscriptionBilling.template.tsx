@@ -18,7 +18,7 @@ interface SubscriberProps {
   readonly manageUrl: string;
 }
 
-const sampleSubscriber: SubscriberProps = { firstName: "Tobi", planLabel: "Pro plan", accountName: "Adire Lagos Studio", interval: "month", manageUrl: "https://dashboard.zudomart.com/settings/billing" };
+const sampleSubscriber: SubscriberProps = { firstName: "Tobi", planLabel: "Pro plan", accountName: "Adire Lagos Studio", interval: "month", manageUrl: "https://dashboard.nantty.com/settings/billing" };
 const sampleItems: readonly BillingLineItem[] = [{ kind: "plan_base", label: "Pro plan", amount: ngn(2000) }, { kind: "checkmark", label: "Gold checkmark", amount: ngn(3000) }];
 const intervalWord = (interval: "month" | "year") => (interval === "year" ? "yearly" : "monthly");
 
@@ -47,7 +47,7 @@ export const subscriptionTrialEnding = defineEmailTemplate<SubscriberProps & { r
     { type: "button", label: "Keep my plan", href: p.manageUrl },
     { type: "links", items: [{ label: "Cancel the trial — you won't be charged", href: p.cancelUrl }] },
   ],
-  sample: { ...sampleSubscriber, daysLeft: 3, trialEndsAt: "2026-10-11T09:00:00.000Z", amount: ngn(5000), lineItems: sampleItems, cardLabel: "Mastercard •••• 5521", cancelUrl: "https://dashboard.zudomart.com/settings/billing/cancel" },
+  sample: { ...sampleSubscriber, daysLeft: 3, trialEndsAt: "2026-10-11T09:00:00.000Z", amount: ngn(5000), lineItems: sampleItems, cardLabel: "Mastercard •••• 5521", cancelUrl: "https://dashboard.nantty.com/settings/billing/cancel" },
 });
 
 export const subscriptionRenewalUpcoming = defineEmailTemplate<SubscriberProps & { readonly chargeAt: string; readonly amount: Money; readonly lineItems: readonly BillingLineItem[]; readonly cardLabel: string; readonly cancelUrl: string }>({
@@ -63,7 +63,7 @@ export const subscriptionRenewalUpcoming = defineEmailTemplate<SubscriberProps &
     { type: "links", items: [{ label: "Cancel renewal", href: p.cancelUrl }] },
     { type: "paragraph", muted: true, text: "If you cancel, you keep everything until the end of the year you've paid for. We don't give partial refunds." },
   ],
-  sample: { ...sampleSubscriber, interval: "year", chargeAt: "2027-10-04T09:00:00.000Z", amount: ngn(48000), lineItems: [{ kind: "plan_base", label: "Pro plan", amount: ngn(19000) }, { kind: "checkmark", label: "Gold checkmark", amount: ngn(29000) }], cardLabel: "Visa •••• 4081", cancelUrl: "https://dashboard.zudomart.com/settings/billing/cancel" },
+  sample: { ...sampleSubscriber, interval: "year", chargeAt: "2027-10-04T09:00:00.000Z", amount: ngn(48000), lineItems: [{ kind: "plan_base", label: "Pro plan", amount: ngn(19000) }, { kind: "checkmark", label: "Gold checkmark", amount: ngn(29000) }], cardLabel: "Visa •••• 4081", cancelUrl: "https://dashboard.nantty.com/settings/billing/cancel" },
 });
 
 export const subscriptionRenewalReceipt = defineEmailTemplate<SubscriberProps & { readonly invoiceNumber: string; readonly paidAt: string; readonly periodStart: string; readonly periodEnd: string; readonly lineItems: readonly BillingLineItem[]; readonly total: Money; readonly cardLabel: string; readonly firstCharge: boolean }>({
@@ -93,7 +93,7 @@ export const subscriptionPaymentFailed = defineEmailTemplate<SubscriberProps & {
     { type: "button", label: "Pay now or update card", href: p.payUrl, tone: "danger" },
     { type: "paragraph", muted: true, text: "Your plan stays active until then. If it ends, you move to Free and the checkmark comes off, unless you also hold it on its own." },
   ],
-  sample: { ...sampleSubscriber, attempt: 1, retryAt: "2026-11-12T09:00:00.000Z", downgradeAt: "2026-11-23T09:00:00.000Z", reason: "Your bank declined the payment for insufficient funds.", amount: ngn(5000), cardLabel: "Mastercard •••• 5521", payUrl: "https://dashboard.zudomart.com/settings/billing/pay", trialConversion: false },
+  sample: { ...sampleSubscriber, attempt: 1, retryAt: "2026-11-12T09:00:00.000Z", downgradeAt: "2026-11-23T09:00:00.000Z", reason: "Your bank declined the payment for insufficient funds.", amount: ngn(5000), cardLabel: "Mastercard •••• 5521", payUrl: "https://dashboard.nantty.com/settings/billing/pay", trialConversion: false },
 });
 
 export const subscriptionGraceEnding = defineEmailTemplate<SubscriberProps & { readonly graceEndsAt: string; readonly amount: Money; readonly payUrl: string }>({
@@ -105,7 +105,7 @@ export const subscriptionGraceEnding = defineEmailTemplate<SubscriberProps & { r
     { type: "paragraph", text: ["Your grace period ends ", { strong: c.dateTime(p.graceEndsAt) }, ". After that you'll move to the Free plan."] },
     { type: "button", label: `Pay ${c.money(p.amount)} now`, href: p.payUrl, tone: "danger" },
   ],
-  sample: { ...sampleSubscriber, graceEndsAt: "2026-11-23T09:00:00.000Z", amount: ngn(5000), payUrl: "https://dashboard.zudomart.com/settings/billing/pay" },
+  sample: { ...sampleSubscriber, graceEndsAt: "2026-11-23T09:00:00.000Z", amount: ngn(5000), payUrl: "https://dashboard.nantty.com/settings/billing/pay" },
 });
 
 export const subscriptionDowngraded = defineEmailTemplate<SubscriberProps & { readonly checkmarkRemoved: boolean; readonly trialEnded: boolean }>({
@@ -130,7 +130,7 @@ export const subscriptionCardExpiring = defineEmailTemplate<SubscriberProps & { 
     { type: "details", rows: [{ label: "Card", value: p.cardLabel }, { label: "Expires", value: `${String(p.expiryMonth).padStart(2, "0")}/${p.expiryYear}` }, { label: "Next charge", value: c.date(p.chargeAt) }] },
     { type: "button", label: "Update card", href: p.updateCardUrl },
   ],
-  sample: { ...sampleSubscriber, cardLabel: "Visa •••• 4081", expiryMonth: 11, expiryYear: 2026, chargeAt: "2026-12-04T09:00:00.000Z", updateCardUrl: "https://dashboard.zudomart.com/settings/billing/payment-method" },
+  sample: { ...sampleSubscriber, cardLabel: "Visa •••• 4081", expiryMonth: 11, expiryYear: 2026, chargeAt: "2026-12-04T09:00:00.000Z", updateCardUrl: "https://dashboard.nantty.com/settings/billing/payment-method" },
 });
 
 export const subscriptionPriceChange = defineEmailTemplate<SubscriberProps & { readonly oldPrice: Money; readonly newPrice: Money; readonly effectiveAt: string; readonly cancelUrl: string }>({
@@ -143,6 +143,6 @@ export const subscriptionPriceChange = defineEmailTemplate<SubscriberProps & { r
     { type: "button", label: "Review my plan", href: p.manageUrl },
     { type: "links", items: [{ label: "Cancel before the new price", href: p.cancelUrl }] },
   ],
-  sample: { ...sampleSubscriber, oldPrice: ngn(5000), newPrice: ngn(6000), effectiveAt: "2026-12-04T09:00:00.000Z", cancelUrl: "https://dashboard.zudomart.com/settings/billing/cancel" },
+  sample: { ...sampleSubscriber, oldPrice: ngn(5000), newPrice: ngn(6000), effectiveAt: "2026-12-04T09:00:00.000Z", cancelUrl: "https://dashboard.nantty.com/settings/billing/cancel" },
 });
 

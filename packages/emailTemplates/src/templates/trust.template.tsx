@@ -11,13 +11,13 @@ interface ActionProps {
   readonly appealUrl: string;
 }
 
-const sampleAction: ActionProps = { firstName: "Amaka", caseId: "TS-3391", reason: "Repeated listings of counterfeit designer bags after two warnings.", policy: "Counterfeit and intellectual property policy", policyUrl: "https://zudomart.com/legal/counterfeits", appealUrl: "https://zudomart.com/appeals/new?case=TS-3391" };
+const sampleAction: ActionProps = { firstName: "Amaka", caseId: "TS-3391", reason: "Repeated listings of counterfeit designer bags after two warnings.", policy: "Counterfeit and intellectual property policy", policyUrl: "https://nantty.com/legal/counterfeits", appealUrl: "https://nantty.com/appeals/new?case=TS-3391" };
 const policyBlock = (p: ActionProps) => ({ type: "details" as const, rows: [{ label: "Case", value: p.caseId, mono: true }, { label: "Policy", value: p.policy }] });
 
 export const accountRestricted = defineEmailTemplate<ActionProps & { readonly restrictions: readonly string[]; readonly until: string }>({
   ...base, key: "accountRestricted", name: "Account restricted", trigger: "trust.enforcement.restricted",
   subject: () => "Some features on your account are limited",
-  preheader: (p, c) => `Until ${c.date(p.until)}. You can still use the rest of Zudomart.`,
+  preheader: (p, c) => `Until ${c.date(p.until)}. You can still use the rest of Nantty.`,
   reference: (p) => `CASE ${p.caseId}`,
   blocks: (p, c) => [
     { type: "hero", eyebrow: "Account restricted", title: `Limited until ${c.date(p.until)}`, tone: "warn" },
@@ -33,7 +33,7 @@ export const accountRestricted = defineEmailTemplate<ActionProps & { readonly re
 
 export const accountSuspended = defineEmailTemplate<ActionProps & { readonly appealBy: string; readonly deletionAt: string }>({
   ...base, key: "accountSuspended", name: "Account suspended", trigger: "trust.enforcement.suspended",
-  subject: () => "Your Zudomart account is suspended",
+  subject: () => "Your Nantty account is suspended",
   preheader: (p, c) => `You can appeal until ${c.date(p.appealBy)}.`,
   reference: (p) => `CASE ${p.caseId}`,
   blocks: (p, c) => [
@@ -60,14 +60,14 @@ export const appealDecision = defineEmailTemplate<{ readonly firstName: string; 
   blocks: (p, c) => [
     { type: "hero", eyebrow: "Appeal decision", title: p.outcome === "overturned" ? "We reversed our decision" : "Our decision stands", tone: p.outcome === "overturned" ? "success" : "neutral" },
     { type: "paragraph", text: p.explanation },
-    p.outcome === "overturned" ? { type: "button", label: "Go to Zudomart", href: c.url("/") } : { type: "paragraph", muted: true, text: "This was the final review for this case." },
+    p.outcome === "overturned" ? { type: "button", label: "Go to Nantty", href: c.url("/") } : { type: "paragraph", muted: true, text: "This was the final review for this case." },
   ],
   sample: { firstName: "Amaka", caseId: "TS-3391", outcome: "overturned", explanation: "A second reviewer found the bags were authentic, backed by the receipts you shared. We've lifted the suspension, restored your listings and removed the strike from your record. Sorry for the trouble." },
 });
 
 export const accountBanned = defineEmailTemplate<ActionProps>({
   ...base, key: "accountBanned", name: "Account banned", trigger: "trust.enforcement.banned",
-  subject: () => "Your Zudomart account has been permanently closed",
+  subject: () => "Your Nantty account has been permanently closed",
   preheader: (p) => p.policy,
   reference: (p) => `CASE ${p.caseId}`,
   blocks: (p, c) => [
@@ -84,7 +84,7 @@ export const accountBanned = defineEmailTemplate<ActionProps>({
 export const reportOutcome = defineEmailTemplate<{ readonly firstName: string; readonly reportId: string; readonly reportedWhat: string; readonly outcome: "action_taken" | "no_violation"; readonly reportedAt: string }>({
   ...base, key: "reportOutcome", name: "Report outcome", audience: "Reporter", trigger: "trust.report.closed", consent: consentRules.transactionalOptOut,
   subject: () => "Update on your report",
-  preheader: (p) => (p.outcome === "action_taken" ? "We took action. Thanks for helping keep Zudomart safe." : "We reviewed it and didn't find a rule break."),
+  preheader: (p) => (p.outcome === "action_taken" ? "We took action. Thanks for helping keep Nantty safe." : "We reviewed it and didn't find a rule break."),
   reference: (p) => p.reportId,
   blocks: (p, c) => [
     { type: "hero", eyebrow: "Your report", title: p.outcome === "action_taken" ? "We took action" : "We reviewed your report", tone: p.outcome === "action_taken" ? "success" : "neutral" },

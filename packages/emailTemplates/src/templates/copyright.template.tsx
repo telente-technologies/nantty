@@ -14,9 +14,9 @@ interface ContentProps {
 }
 
 const sampleContent: ContentProps = {
-  firstName: "Tobi", claimId: "0192f0a1-7c3e-7000-8000-00000000c1a1", contentLabel: "your clip “Owambe dance challenge”", contentUrl: "https://zudomart.com/clips/0192f0a1",
+  firstName: "Tobi", claimId: "0192f0a1-7c3e-7000-8000-00000000c1a1", contentLabel: "your clip “Owambe dance challenge”", contentUrl: "https://nantty.com/clips/0192f0a1",
   workTitle: "“Lagos Nights” by DJ Kaz (Kaz Records)", reason: "The rights holder showed registration and release records for this song.",
-  accountStatusUrl: "https://zudomart.com/settings/account-status", helpUrl: "https://zudomart.com/help/safety-and-reporting/copyright-and-account-status",
+  accountStatusUrl: "https://nantty.com/settings/account-status", helpUrl: "https://nantty.com/help/safety-and-reporting/copyright-and-account-status",
 };
 
 const claimDetails = (p: ContentProps) => ({ type: "details" as const, rows: [{ label: "Claim", value: p.claimId.slice(0, 8).toUpperCase(), mono: true }, { label: "Claimed work", value: p.workTitle }] });
@@ -61,7 +61,7 @@ export const audioMuted = defineEmailTemplate<ContentProps>({
 export const contentTakenDown = defineEmailTemplate<ContentProps & { readonly strikeAdded: boolean }>({
   ...base, key: "contentTakenDown", name: "Copyright content taken down", trigger: "copyrightClaim.contentTakenDown",
   subject: () => "We took down content that was claimed for copyright",
-  preheader: (p) => (p.strikeAdded ? "A copyright strike was added to your account." : "It is no longer visible on Zudomart."),
+  preheader: (p) => (p.strikeAdded ? "A copyright strike was added to your account." : "It is no longer visible on Nantty."),
   reference: (p) => `CLAIM ${p.claimId.slice(0, 8).toUpperCase()}`,
   blocks: (p) => [
     { type: "hero", eyebrow: "Content taken down", title: "This content is no longer visible", tone: "danger" },
@@ -76,7 +76,7 @@ export const contentTakenDown = defineEmailTemplate<ContentProps & { readonly st
 
 export const strikeIssued = defineEmailTemplate<{ readonly firstName: string; readonly policy: string; readonly expiresAt: string; readonly activeStrikeCount: number; readonly threshold: number; readonly accountStatusUrl: string; readonly helpUrl: string }>({
   ...base, key: "strikeIssued", name: "Strike issued", trigger: "strike.issued",
-  subject: () => "A strike was added to your Zudomart account",
+  subject: () => "A strike was added to your Nantty account",
   preheader: (p, c) => `It expires on ${c.date(p.expiresAt)}.`,
   blocks: (p, c) => [
     { type: "hero", eyebrow: "Account status", title: `You have ${p.activeStrikeCount} active ${p.activeStrikeCount === 1 ? "strike" : "strikes"}`, tone: p.activeStrikeCount >= p.threshold ? "danger" : "warn" },

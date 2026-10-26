@@ -4,13 +4,13 @@ import { consentRules, defineEmailTemplate } from "./defineTemplate";
 import { buyerTrackSteps, orderTotal, orderTotalsBlock, sellerCount, type OrderProps } from "./orderHelpers";
 
 const base = { category: "orders", kind: "transactional", audience: "Buyer", consent: consentRules.always } as const;
-const sampleOrder = { firstName: "Amaka", orderNumber: "ZM-48213", orderUrl: "https://zudomart.com/orders/ZM-48213", groups: sampleOrderGroups };
+const sampleOrder = { firstName: "Amaka", orderNumber: "ZM-48213", orderUrl: "https://nantty.com/orders/ZM-48213", groups: sampleOrderGroups };
 const firstGroup = sampleOrderGroups[0] as SellerItemGroup;
 const ref = (p: { readonly orderNumber: string }) => `ORDER ${p.orderNumber}`;
 const pendingRefundRows = (refundMethod: string | undefined) =>
   refundMethod
     ? [{ label: "Back to", value: refundMethod }, { label: "Arrives", value: "Within 3–5 business days" }]
-    : [{ label: "Goes to", value: "Your Zudomart wallet, or your card if the payment hadn't settled yet" }, { label: "Arrives", value: "Wallet: straight away. Card: 3–5 business days" }];
+    : [{ label: "Goes to", value: "Your Nantty wallet, or your card if the payment hadn't settled yet" }, { label: "Arrives", value: "Wallet: straight away. Card: 3–5 business days" }];
 
 export const orderPlaced = defineEmailTemplate<OrderProps & { readonly payBy: string; readonly paymentUrl: string }>({
   ...base, key: "orderPlaced", name: "Order placed", trigger: "commerce.order.placed",
@@ -25,7 +25,7 @@ export const orderPlaced = defineEmailTemplate<OrderProps & { readonly payBy: st
     { type: "orderGroups", groups: p.groups },
     orderTotalsBlock(p.groups),
   ],
-  sample: { ...sampleOrder, payBy: "2026-10-03T20:00:00.000Z", paymentUrl: "https://zudomart.com/checkout/pay/ZM-48213" },
+  sample: { ...sampleOrder, payBy: "2026-10-03T20:00:00.000Z", paymentUrl: "https://nantty.com/checkout/pay/ZM-48213" },
 });
 
 export const paymentConfirmed = defineEmailTemplate<OrderProps & { readonly paymentMethod?: string; readonly paidAt: string }>({
@@ -92,7 +92,7 @@ export const orderShipped = defineEmailTemplate<OrderProps & { readonly sellerNa
     { type: "orderGroups", groups: p.groups.filter((group) => group.sellerName === p.sellerName) },
     { type: "paragraph", muted: true, text: "Check your items when they arrive. You'll have 3 days to confirm or report a problem before payment is released." },
   ],
-  sample: { ...sampleOrder, sellerName: firstGroup.sellerName, carrier: "GIG Logistics", trackingNumber: "GIG-7782-1190-NG", trackingUrl: "https://zudomart.com/orders/ZM-48213/tracking", estimatedDelivery: "2026-10-07T12:00:00.000Z" },
+  sample: { ...sampleOrder, sellerName: firstGroup.sellerName, carrier: "GIG Logistics", trackingNumber: "GIG-7782-1190-NG", trackingUrl: "https://nantty.com/orders/ZM-48213/tracking", estimatedDelivery: "2026-10-07T12:00:00.000Z" },
 });
 
 export const orderDelivered = defineEmailTemplate<OrderProps & { readonly sellerName: string; readonly deliveredAt: string; readonly confirmBy: string; readonly confirmUrl: string; readonly disputeUrl: string }>({
@@ -108,7 +108,7 @@ export const orderDelivered = defineEmailTemplate<OrderProps & { readonly seller
     { type: "links", items: [{ label: "Something's wrong — report a problem", href: p.disputeUrl }] },
     { type: "orderGroups", groups: p.groups.filter((group) => group.sellerName === p.sellerName) },
   ],
-  sample: { ...sampleOrder, sellerName: firstGroup.sellerName, deliveredAt: "2026-10-06T14:20:00.000Z", confirmBy: "2026-10-09T14:20:00.000Z", confirmUrl: "https://zudomart.com/orders/ZM-48213/confirm", disputeUrl: "https://zudomart.com/orders/ZM-48213/dispute" },
+  sample: { ...sampleOrder, sellerName: firstGroup.sellerName, deliveredAt: "2026-10-06T14:20:00.000Z", confirmBy: "2026-10-09T14:20:00.000Z", confirmUrl: "https://nantty.com/orders/ZM-48213/confirm", disputeUrl: "https://nantty.com/orders/ZM-48213/dispute" },
 });
 
 export const orderCompleted = defineEmailTemplate<OrderProps & { readonly sellerName: string; readonly reviewUrl: string }>({
@@ -123,17 +123,17 @@ export const orderCompleted = defineEmailTemplate<OrderProps & { readonly seller
     { type: "button", label: `Review ${p.sellerName}`, href: p.reviewUrl },
     { type: "paragraph", muted: true, text: "Reviews are public and help other buyers shop with confidence. Problem later? Sellers' return policies still apply — reach them from your order page." },
   ],
-  sample: { ...sampleOrder, sellerName: firstGroup.sellerName, reviewUrl: "https://zudomart.com/orders/ZM-48213/review" },
+  sample: { ...sampleOrder, sellerName: firstGroup.sellerName, reviewUrl: "https://nantty.com/orders/ZM-48213/review" },
 });
 
-export const orderCancelled = defineEmailTemplate<OrderProps & { readonly cancelledBy: "you" | "seller" | "zudomart"; readonly reason: string; readonly refund: Money | null; readonly refundMethod?: string }>({
+export const orderCancelled = defineEmailTemplate<OrderProps & { readonly cancelledBy: "you" | "seller" | "nantty"; readonly reason: string; readonly refund: Money | null; readonly refundMethod?: string }>({
   ...base, key: "orderCancelled", name: "Order cancelled", trigger: "commerce.order.cancelled",
   subject: (p) => `Order ${p.orderNumber} was cancelled`,
   preheader: (p, c) => (p.refund ? `${c.money(p.refund)} is being refunded.` : "You weren't charged."),
   reference: ref,
   blocks: (p, c) => [
     { type: "hero", eyebrow: "Cancelled", title: "Your order was cancelled", tone: "danger" },
-    { type: "paragraph", text: `Hi ${p.firstName}, order ${p.orderNumber} was cancelled ${p.cancelledBy === "you" ? "at your request" : p.cancelledBy === "seller" ? "by the seller" : "by Zudomart"}.` },
+    { type: "paragraph", text: `Hi ${p.firstName}, order ${p.orderNumber} was cancelled ${p.cancelledBy === "you" ? "at your request" : p.cancelledBy === "seller" ? "by the seller" : "by Nantty"}.` },
     { type: "callout", tone: "neutral", title: "Reason", text: p.reason },
     p.refund
       ? { type: "details", title: "Refund", rows: [{ label: "Amount", value: c.money(p.refund), strong: true }, ...pendingRefundRows(p.refundMethod)] }
@@ -146,17 +146,17 @@ export const orderCancelled = defineEmailTemplate<OrderProps & { readonly cancel
 
 export const refundIssued = defineEmailTemplate<{ readonly firstName: string; readonly orderNumber: string; readonly refund: Money; readonly refundDestination: "wallet" | "paymentMethod"; readonly refundMethod: string; readonly reference: string; readonly reason: string; readonly itemName: string }>({
   ...base, key: "refundIssued", name: "Refund issued", trigger: "payments.refund.succeeded",
-  subject: (p, c) => (p.refundDestination === "wallet" ? `Your ${c.money(p.refund)} refund is in your Zudomart wallet` : `Your ${c.money(p.refund)} refund is on its way`),
-  preheader: (p) => (p.refundDestination === "wallet" ? "It's back in your Zudomart wallet now." : `Back to ${p.refundMethod} in 3–5 business days.`),
+  subject: (p, c) => (p.refundDestination === "wallet" ? `Your ${c.money(p.refund)} refund is in your Nantty wallet` : `Your ${c.money(p.refund)} refund is on its way`),
+  preheader: (p) => (p.refundDestination === "wallet" ? "It's back in your Nantty wallet now." : `Back to ${p.refundMethod} in 3–5 business days.`),
   reference: ref,
   blocks: (p, c) => [
     { type: "hero", eyebrow: "Refund issued", title: p.refundDestination === "wallet" ? `${c.money(p.refund)} is back in your wallet` : `${c.money(p.refund)} is on its way back`, tone: "success" },
     { type: "paragraph", text: `Hi ${p.firstName}, we've refunded you for ${p.itemName}. ${p.reason}` },
     { type: "details", rows: [{ label: "Refund", value: c.money(p.refund), strong: true }, { label: "Back to", value: p.refundMethod }, { label: "Arrives", value: p.refundDestination === "wallet" ? "Now" : "3–5 business days, depending on your bank" }, { label: "Reference", value: p.reference, mono: true }] },
     p.refundDestination === "wallet"
-      ? { type: "paragraph", muted: true, text: "You can spend it on Zudomart or withdraw it to your bank from your wallet." }
+      ? { type: "paragraph", muted: true, text: "You can spend it on Nantty or withdraw it to your bank from your wallet." }
       : { type: "paragraph", muted: true, text: "Card and bank refunds can take a few days to show on your statement. If you need to ask your bank, give them the reference above." },
     { type: "button", label: "View order", href: c.url(`/orders/${p.orderNumber}`) },
   ],
-  sample: { firstName: "Amaka", orderNumber: "ZM-48213", refund: ngn(62000), refundDestination: "wallet", refundMethod: "Your Zudomart wallet", reference: "RF-20261003-8841", reason: "Your dispute was resolved in your favour.", itemName: "Wireless over-ear headphones" },
+  sample: { firstName: "Amaka", orderNumber: "ZM-48213", refund: ngn(62000), refundDestination: "wallet", refundMethod: "Your Nantty wallet", reference: "RF-20261003-8841", reason: "Your dispute was resolved in your favour.", itemName: "Wireless over-ear headphones" },
 });

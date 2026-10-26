@@ -43,7 +43,7 @@ export const verificationEligible = defineEmailTemplate<MarkProps & { readonly p
     ] },
     { type: "button", label: "Apply now", href: p.payUrl },
   ],
-  sample: { firstName: "Amaka", checkmark: "Blue", accountName: "@amaka.styles", payUrl: "https://zudomart.com/settings/verification?step=pay" },
+  sample: { firstName: "Amaka", checkmark: "Blue", accountName: "@amaka.styles", payUrl: "https://nantty.com/settings/verification?step=pay" },
 });
 
 export const verificationUnderReview = defineEmailTemplate<MarkProps & { readonly caseId: string; readonly reviewWithinDays: number }>({

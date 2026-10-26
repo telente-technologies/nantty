@@ -35,15 +35,15 @@ export const zudoversary = defineEmailTemplate<ZudoversaryProps>({
   key: "zudoversary", name: "Zudoversary (account anniversary)", category: "milestones", kind: "transactional", audience: "Any user on their join anniversary",
   trigger: "account.anniversaryReached (daily scheduler, user's timezone)", consent: consentRules.transactionalOptOut,
   subject: (p) => `Happy ${ordinal(p.years)} Zudoversary, ${p.firstName}`,
-  preheader: (p) => `Thanks for being part of Zudomart for ${yearsLabel(p.years)}.`,
+  preheader: (p) => `Thanks for being part of Nantty for ${yearsLabel(p.years)}.`,
   reason: () => milestonesReason,
   blocks: (p, c) => {
     const rows = statRows(p.stats);
     return [
       { type: "hero", eyebrow: "Zudoversary", title: `Happy ${ordinal(p.years)} Zudoversary!`, tone: "success" },
-      { type: "paragraph", text: `Hi ${p.firstName}, thanks for being part of Zudomart for ${yearsLabel(p.years)}. We're glad you're here and we're looking forward to what you do next.` },
-      ...(rows.length > 0 ? [{ type: "details" as const, title: "Your time on Zudomart", rows }] : []),
-      { type: "button", label: "Open Zudomart", href: c.url("/me") },
+      { type: "paragraph", text: `Hi ${p.firstName}, thanks for being part of Nantty for ${yearsLabel(p.years)}. We're glad you're here and we're looking forward to what you do next.` },
+      ...(rows.length > 0 ? [{ type: "details" as const, title: "Your time on Nantty", rows }] : []),
+      { type: "button", label: "Open Nantty", href: c.url("/me") },
     ];
   },
   sample: { firstName: "Ada", years: 2, stats: { posts: 148, followers: 1260, orders: 37, lives: 9 } },

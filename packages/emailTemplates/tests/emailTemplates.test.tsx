@@ -27,7 +27,7 @@ describe.each(emailTemplateKeys)("%s", (key) => {
       expect(rendered.html).toContain('name="color-scheme"');
       expect(rendered.html).toContain("ZUDOMART_COMPANY_LEGAL_NAME");
       expect(rendered.html).toContain("ZUDOMART_COMPANY_ADDRESS");
-      expect(rendered.html).toContain("support@zudomart.com");
+      expect(rendered.html).toContain("support@nantty.com");
       expect(rendered.html).not.toContain("icloud.com");
       expect(rendered.html).toContain('alt="Download on the App Store"');
       expect(rendered.html).toContain('alt="Get it on Google Play"');
@@ -39,10 +39,10 @@ describe.each(emailTemplateKeys)("%s", (key) => {
 
 describe("footer links", () => {
   it.each(marketingKeys)("%s includes unsubscribe", async (key) => {
-    const rendered = await renderEmailSample(key, { links: { unsubscribeUrl: "https://zudomart.com/u/token-123" } });
-    expect(rendered.html).toContain("https://zudomart.com/u/token-123");
+    const rendered = await renderEmailSample(key, { links: { unsubscribeUrl: "https://nantty.com/u/token-123" } });
+    expect(rendered.html).toContain("https://nantty.com/u/token-123");
     expect(rendered.html).toContain("Unsubscribe");
-    expect(rendered.text).toContain("Unsubscribe: https://zudomart.com/u/token-123");
+    expect(rendered.text).toContain("Unsubscribe: https://nantty.com/u/token-123");
   });
 
   it.each(otherKeys)("%s has manage notifications and no unsubscribe", async (key) => {
@@ -91,20 +91,20 @@ describe("zudoversary", () => {
     expect(withStats.text).toContain("1,260");
     expect(withStats.text).not.toContain("Orders completed");
     const withoutStats = await renderEmail("zudoversary", { firstName: "Ada", years: 1 });
-    expect(withoutStats.text).not.toContain("Your time on Zudomart");
-    expect(withoutStats.text).toContain("thanks for being part of Zudomart for 1 year");
+    expect(withoutStats.text).not.toContain("Your time on Nantty");
+    expect(withoutStats.text).toContain("thanks for being part of Nantty for 1 year");
   });
 });
 
 describe("senders and brand", () => {
   it("sends receipts from receipts@mail and replies to billing", async () => {
     const rendered = await renderEmailSample("paymentReceipt");
-    expect(rendered.sender).toEqual({ from: "Zudomart Receipts <receipts@mail.zudomart.com>", replyTo: "billing@zudomart.com" });
+    expect(rendered.sender).toEqual({ from: "Nantty Receipts <receipts@mail.zudomart.com>", replyTo: "billing@nantty.com" });
   });
 
   it("sends security mail from noreply@mail with replies to support", async () => {
     const rendered = await renderEmailSample("emailOtp");
-    expect(rendered.sender).toEqual({ from: "Zudomart <noreply@mail.zudomart.com>", replyTo: "support@zudomart.com" });
+    expect(rendered.sender).toEqual({ from: "Nantty <noreply@mail.zudomart.com>", replyTo: "support@nantty.com" });
   });
 
   it("derives addresses and hosted badges from the environment", () => {
@@ -151,10 +151,10 @@ describe("verification rejection when the plan keeps running", () => {
 describe("refund emails say where the money lands", () => {
   const sample = readEmailTemplate("refundIssued").sample;
 
-  it("tells a wallet refund that the money is already in the Zudomart wallet", async () => {
+  it("tells a wallet refund that the money is already in the Nantty wallet", async () => {
     const rendered = await renderEmail("refundIssued", sample);
-    expect(rendered.subject).toContain("is in your Zudomart wallet");
-    expect(rendered.text).toContain("Back to: Your Zudomart wallet");
+    expect(rendered.subject).toContain("is in your Nantty wallet");
+    expect(rendered.text).toContain("Back to: Your Nantty wallet");
     expect(rendered.text).toContain("Arrives: Now");
     expect(rendered.text).not.toContain("original payment method");
     expect(rendered.text).not.toContain("on your statement");
@@ -169,7 +169,7 @@ describe("refund emails say where the money lands", () => {
 
   it("does not promise the original payment method when an order is cancelled", async () => {
     const rendered = await renderEmail("orderCancelled", readEmailTemplate("orderCancelled").sample);
-    expect(rendered.text).toContain("Your Zudomart wallet, or your card if the payment hadn't settled yet");
+    expect(rendered.text).toContain("Your Nantty wallet, or your card if the payment hadn't settled yet");
     expect(rendered.text).not.toContain("Original payment method");
   });
 });

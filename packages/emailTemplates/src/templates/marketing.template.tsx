@@ -59,20 +59,20 @@ export const abandonedCart = defineEmailTemplate<{ readonly firstName: string; r
     { type: "button", label: "Go to checkout", href: p.cartUrl },
     { type: "paragraph", muted: true, text: "Pay safely: your money is held in escrow until you confirm delivery." },
   ],
-  sample: { firstName: "Amaka", items: sampleVerified.slice(1, 3), cartUrl: "https://zudomart.com/cart" },
+  sample: { firstName: "Amaka", items: sampleVerified.slice(1, 3), cartUrl: "https://nantty.com/cart" },
 });
 
 export const weeklyDigest = defineEmailTemplate<{ readonly firstName: string; readonly weekLabel: string; readonly trending: readonly VerifiedProduct[]; readonly upcomingLives: readonly { readonly name: string; readonly handle: string; readonly note: string }[] }>({
   ...base, key: "weeklyDigest", name: "Weekly digest", trigger: "marketing.digest.weekly",
-  subject: (p) => `Your week on Zudomart: ${p.weekLabel}`,
+  subject: (p) => `Your week on Nantty: ${p.weekLabel}`,
   preheader: () => "Trending from verified sellers, plus lives worth tuning into.",
   blocks: (p, c) => [
-    { type: "hero", eyebrow: p.weekLabel, title: "This week on Zudomart" },
+    { type: "hero", eyebrow: p.weekLabel, title: "This week on Nantty" },
     { type: "products", title: "Trending from verified sellers", items: onlyVerified(p.trending) },
     { type: "divider" },
     { type: "paragraph", text: [{ strong: "Lives coming up" }] },
     { type: "people", items: p.upcomingLives },
-    { type: "button", label: "Open Zudomart", href: c.url("/") },
+    { type: "button", label: "Open Nantty", href: c.url("/") },
   ],
   sample: { firstName: "Amaka", weekLabel: "29 Sep – 5 Oct", trending: sampleVerified, upcomingLives: [{ name: "Adire Lagos Studio", handle: "adirelagos", note: "Thu 7pm · New indigo drop" }, { name: "Kemi Cooks", handle: "kemicooks", note: "Sat 11am · Jollof masterclass" }] },
 });

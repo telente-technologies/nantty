@@ -43,7 +43,7 @@ export const checkmarkApplicationReceived = defineEmailTemplate<MarkProps & { re
 export const checkmarkApproved = defineEmailTemplate<MarkProps & { readonly renewsAt: string }>({
   ...base, key: "checkmarkApproved", name: "Checkmark approved", trigger: "verification.application.approved",
   subject: (p) => `${p.accountName} is now verified`,
-  preheader: (p) => `Your ${p.checkmark} checkmark is live everywhere on Zudomart.`,
+  preheader: (p) => `Your ${p.checkmark} checkmark is live everywhere on Nantty.`,
   blocks: (p, c) => [
     { type: "hero", eyebrow: `${p.checkmark} checkmark`, title: "You're verified", tone: "success" },
     { type: "paragraph", text: `Congratulations, ${p.firstName}. The ${p.checkmark} checkmark now shows next to ${p.accountName} on your profile, posts, lives and store.` },
@@ -105,5 +105,5 @@ export const checkmarkRevoked = defineEmailTemplate<MarkProps & { readonly reaso
     { type: "callout", tone: "danger", title: "Reason", text: p.reason },
     { type: "button", label: "Appeal this decision", href: p.appealUrl },
   ],
-  sample: { firstName: "Amaka", checkmark: "Blue", accountName: "@amaka.styles", reason: "Your account was used to impersonate another creator, which breaks our verification rules.", appealUrl: "https://zudomart.com/appeals/new?type=checkmark" },
+  sample: { firstName: "Amaka", checkmark: "Blue", accountName: "@amaka.styles", reason: "Your account was used to impersonate another creator, which breaks our verification rules.", appealUrl: "https://nantty.com/appeals/new?type=checkmark" },
 });

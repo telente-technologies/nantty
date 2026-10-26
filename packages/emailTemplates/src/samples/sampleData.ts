@@ -41,10 +41,10 @@ export const sampleOrderGroups: readonly SellerItemGroup[] = [
 ];
 
 export const sampleProducts: readonly ProductCard[] = [
-  { name: "Classic chronograph watch", imageUrl: sampleImages.watch, price: ngn(84500), compareAtPrice: ngn(99000), sellerName: "Timepiece Co.", href: "https://zudomart.com/p/classic-chronograph" },
-  { name: "Oud & amber eau de parfum", imageUrl: sampleImages.perfume, price: ngn(46000), sellerName: "Scent Bar Abuja", href: "https://zudomart.com/p/oud-amber" },
-  { name: "Mirrorless camera kit", imageUrl: sampleImages.camera, price: ngn(615000), compareAtPrice: ngn(680000), sellerName: "Gadget Hub NG", href: "https://zudomart.com/p/mirrorless-kit" },
-  { name: "Everyday leather tote", imageUrl: sampleImages.bag, price: ngn(52000), sellerName: "Adire Lagos Studio", href: "https://zudomart.com/p/leather-tote" },
+  { name: "Classic chronograph watch", imageUrl: sampleImages.watch, price: ngn(84500), compareAtPrice: ngn(99000), sellerName: "Timepiece Co.", href: "https://nantty.com/p/classic-chronograph" },
+  { name: "Oud & amber eau de parfum", imageUrl: sampleImages.perfume, price: ngn(46000), sellerName: "Scent Bar Abuja", href: "https://nantty.com/p/oud-amber" },
+  { name: "Mirrorless camera kit", imageUrl: sampleImages.camera, price: ngn(615000), compareAtPrice: ngn(680000), sellerName: "Gadget Hub NG", href: "https://nantty.com/p/mirrorless-kit" },
+  { name: "Everyday leather tote", imageUrl: sampleImages.bag, price: ngn(52000), sellerName: "Adire Lagos Studio", href: "https://nantty.com/p/leather-tote" },
 ];
 
-export const sampleDevice = { device: "iPhone 16 Pro · Zudomart app", location: "Ikeja, Lagos, Nigeria (approximate)", ipAddress: "102.89.34.17", occurredAt: "2026-10-03T08:42:00.000Z" };
+export const sampleDevice = { device: "iPhone 16 Pro · Nantty app", location: "Ikeja, Lagos, Nigeria (approximate)", ipAddress: "102.89.34.17", occurredAt: "2026-10-03T08:42:00.000Z" };

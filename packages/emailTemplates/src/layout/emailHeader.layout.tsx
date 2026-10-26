@@ -7,7 +7,7 @@ function InlineWordmark() {
   const { palette } = useEmailEnvironment();
   return (
     <span className="zm-brand" style={{ fontFamily: fontStack, fontSize: 22, lineHeight: "28px", fontWeight: 700, fontStyle: "italic", letterSpacing: "-0.02em", color: palette.brand }}>
-      zudomart
+      nantty
     </span>
   );
 }

@@ -33,14 +33,14 @@ export const sellerNewOrder = defineEmailTemplate<{ readonly firstName: string; 
   sample: { firstName: "Tobi", orderNumber: "ZM-48213", buyerName: "Amaka O.", group: sampleGroup, acceptBy: "2026-10-05T09:12:00.000Z", paymentMode: "escrow" },
 });
 
-export const sellerOrderCancelled = defineEmailTemplate<{ readonly firstName: string; readonly orderNumber: string; readonly cancelledBy: "buyer" | "system" | "zudomart"; readonly reason: string; readonly group: SellerItemGroup; readonly restocked: boolean }>({
+export const sellerOrderCancelled = defineEmailTemplate<{ readonly firstName: string; readonly orderNumber: string; readonly cancelledBy: "buyer" | "system" | "nantty"; readonly reason: string; readonly group: SellerItemGroup; readonly restocked: boolean }>({
   ...base, key: "sellerOrderCancelled", name: "Seller order cancelled", trigger: "commerce.order.cancelled (per seller group)",
   subject: (p) => `Order ${p.orderNumber} was cancelled — don't ship it`,
   preheader: (p) => p.reason,
   reference: (p) => `ORDER ${p.orderNumber}`,
   blocks: (p, c) => [
     { type: "hero", eyebrow: "Order cancelled", title: "Stop — don't ship this order", tone: "danger" },
-    { type: "paragraph", text: `Hi ${p.firstName}, order ${p.orderNumber} was cancelled ${p.cancelledBy === "buyer" ? "by the buyer before dispatch" : p.cancelledBy === "system" ? "automatically because it wasn't accepted in time" : "by Zudomart"}. The buyer has been refunded.` },
+    { type: "paragraph", text: `Hi ${p.firstName}, order ${p.orderNumber} was cancelled ${p.cancelledBy === "buyer" ? "by the buyer before dispatch" : p.cancelledBy === "system" ? "automatically because it wasn't accepted in time" : "by Nantty"}. The buyer has been refunded.` },
     { type: "callout", tone: "neutral", title: "Reason", text: p.reason },
     { type: "orderGroups", groups: [p.group] },
     { type: "paragraph", text: p.restocked ? "We've put the stock back on your listings." : "Stock wasn't restored automatically. Update your inventory if the items are still available." },
