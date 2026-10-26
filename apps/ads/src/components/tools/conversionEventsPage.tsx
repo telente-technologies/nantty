@@ -118,11 +118,11 @@ export function ConversionEventsPage() {
       <PageHeader
         eyebrow="Tools"
         title="Conversion events"
-        description="Actions in your Zudomart store that count as results."
+        description="Actions in your Nantty store that count as results."
         actions={canManageTools && account.business ? <Button variant="primary" iconName="plus16" onClick={() => setIsCreateOpen(true)}>Custom event</Button> : null}
       />
       <InlineNotice tone="info" title="Sales attribution is automatic">
-        Orders, carts, checkouts and store visits in your Zudomart store are recorded for you — no pixel or code to install. A sale is credited to an ad when the buyer tapped it within your click window or saw it within your view window.
+        Orders, carts, checkouts and store visits in your Nantty store are recorded for you — no pixel or code to install. A sale is credited to an ad when the buyer tapped it within your click window or saw it within your view window.
       </InlineNotice>
       {!account.business ? <InlineNotice tone="caution">Link a store to this ad account (business accounts) to use store conversion events.</InlineNotice> : null}
       {eventsQuery.errorMessage ? <ErrorState error={eventsQuery.error} message={eventsQuery.errorMessage} onRetry={eventsQuery.reload} /> : null}

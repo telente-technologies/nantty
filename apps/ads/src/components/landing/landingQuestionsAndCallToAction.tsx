@@ -1,7 +1,7 @@
-import { OfficialStoreBadges } from "@zudomart/web-kit";
+import { OfficialStoreBadges } from "@nantty/web-kit";
 
 import { ZudoIcon } from "@/components/ui/zudoIcon";
-import { buildContactMailtoLink, contactEmailDisplayText, readZudomartMainSiteUrl, storeLinks } from "@/constants/contact.constant";
+import { buildContactMailtoLink, contactEmailDisplayText, readNanttyMainSiteUrl, storeLinks } from "@/constants/contact.constant";
 
 import { MarketplaceGridIllustration } from "./landingAdIllustrations";
 import { landingQuestions } from "./landingCopy.content";
@@ -15,7 +15,7 @@ export function LandingQuestionsSection() {
         <div>
           <SectionIntro eyebrow="FAQ" headingId="questions-heading" heading="Questions, answered." />
           <p className={styles.contactNote}>
-            Something else? Email <a href={buildContactMailtoLink("Zudomart Ads question")}>{contactEmailDisplayText}</a>.
+            Something else? Email <a href={buildContactMailtoLink("Nantty Ads question")}>{contactEmailDisplayText}</a>.
           </p>
         </div>
         <div className={styles.questionList}>
@@ -41,14 +41,14 @@ export function LandingFinalCallToAction({ primaryAction, isSignedIn }: { readon
         <div className={styles.callToActionPanel}>
           <div className={styles.callToActionCopy}>
             <h2 id="final-cta-heading" className={styles.callToActionHeading}>
-              Your next buyer is scrolling Zudomart right now.
+              Your next buyer is scrolling Nantty right now.
             </h2>
-            <p className={styles.callToActionLede}>Sign in with your Zudomart account and launch your first campaign in minutes. Your store, posts and clips are already there.</p>
+            <p className={styles.callToActionLede}>Sign in with your Nantty account and launch your first campaign in minutes. Your store, posts and clips are already there.</p>
             <div className={styles.callToActionActions}>
               <LandingActionLink action={primaryAction} tone="accent" />
               {isSignedIn ? null : (
-                <a href={readZudomartMainSiteUrl()} className={styles.callToActionSecondary}>
-                  New to Zudomart? Get the app
+                <a href={readNanttyMainSiteUrl()} className={styles.callToActionSecondary}>
+                  New to Nantty? Get the app
                 </a>
               )}
             </div>

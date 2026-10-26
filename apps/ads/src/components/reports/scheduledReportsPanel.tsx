@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 
-import { requestConfirmation } from "@zudomart/web-kit";
+import { requestConfirmation } from "@nantty/web-kit";
 
 import { ScheduleReportDialog } from "@/components/reports/scheduleReportDialog";
 import { useAdsSession } from "@/components/session/adsSessionProvider";

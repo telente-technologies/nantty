@@ -8,7 +8,7 @@ import { isSafeHttpsUrl } from "@/utils/formValidation.util";
 import styles from "./richFormatEditor.module.css";
 
 const utmFields: readonly { readonly key: keyof CreativeUtm; readonly label: string; readonly placeholder: string }[] = [
-  { key: "source", label: "UTM source", placeholder: "zudomart" },
+  { key: "source", label: "UTM source", placeholder: "nantty" },
   { key: "medium", label: "UTM medium", placeholder: "paid" },
   { key: "campaign", label: "UTM campaign", placeholder: "spring_launch" },
   { key: "content", label: "UTM content", placeholder: "carousel_1" },
@@ -31,7 +31,7 @@ export function UtmBuilder({ url, utm, onUtmChange }: UtmBuilderProps) {
           return <TextField key={field.key} label={field.label} placeholder={field.placeholder} value={value} maxLength={60} error={isValidUtmValue(value) ? undefined : "Use letters, numbers, dashes or underscores."} onValueChange={(next) => onUtmChange({ ...utm, [field.key]: next })} />;
         })}
       </div>
-      {hasValues && isSafeHttpsUrl(url) ? <p className={styles.destinationPreview}>People will land on {buildUtmUrl(url, utm)}</p> : <p className={styles.muted}>Missing source and medium default to zudomart and paid when you fill any field.</p>}
+      {hasValues && isSafeHttpsUrl(url) ? <p className={styles.destinationPreview}>People will land on {buildUtmUrl(url, utm)}</p> : <p className={styles.muted}>Missing source and medium default to nantty and paid when you fill any field.</p>}
     </fieldset>
   );
 }

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 
-import { requestConfirmation } from "@zudomart/web-kit";
+import { requestConfirmation } from "@nantty/web-kit";
 
 import { useAdAccount } from "@/components/session/adAccountProvider";
 import { Button } from "@/components/ui/button";
@@ -28,7 +28,7 @@ import { CustomerListUploadDialog } from "./customerListUploadDialog";
 type OpenDialog = { kind: "chooser" } | { kind: "create"; audienceType: CreatableAudienceType } | { kind: "customerList" } | { kind: "rename"; audience: CustomAudience } | null;
 
 const createOptions: readonly { type: CreatableAudienceType | "customer_list"; title: string; description: string; needsStore: boolean }[] = [
-  { type: "store_customers", title: "Store customers", description: "People who ordered from your Zudomart store.", needsStore: true },
+  { type: "store_customers", title: "Store customers", description: "People who ordered from your Nantty store.", needsStore: true },
   { type: "engagers", title: "Engaged people", description: "People who liked, watched, saved or messaged.", needsStore: false },
   { type: "followers", title: "Followers", description: "Everyone who follows your profile.", needsStore: false },
   { type: "customer_list", title: "Customer list", description: "Emails or phone numbers, hashed on your device.", needsStore: false },

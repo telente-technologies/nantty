@@ -2,7 +2,7 @@
 
 import type { ReactNode } from "react";
 
-import { ThemeProvider, type ThemePreference } from "@zudomart/web-kit";
+import { ThemeProvider, type ThemePreference } from "@nantty/web-kit";
 
 import { sendAdsApiRequest } from "@/services/adsApiClient.service";
 

@@ -79,7 +79,7 @@ export function CreateAdAccountForm() {
               <input type="radio" name="kind" value={option} checked={kind === option} onChange={() => setKind(option)} className="visuallyHidden" />
               <span className={styles.kindTitle}>{option === "business" ? "A business or store" : "Just me"}</span>
               <span className={styles.kindDescription}>
-                {option === "business" ? "Linked to your Zudomart store. Sales are attributed automatically and verified Gold businesses get a badge and monthly ad credit." : "Promote your own posts, clips and profile."}
+                {option === "business" ? "Linked to your Nantty store. Sales are attributed automatically and verified Gold businesses get a badge and monthly ad credit." : "Promote your own posts, clips and profile."}
               </span>
             </label>
           ))}

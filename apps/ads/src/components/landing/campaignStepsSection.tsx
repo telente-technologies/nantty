@@ -23,7 +23,7 @@ export function CampaignStepsSection() {
           </ol>
         </div>
         <div className={styles.stepsScreenshot}>
-          <ScreenshotInBrowserFrame src="/screenshots/wizardObjective.webp" alt="Create campaign screen with the six-step progress list and objective choices such as sales, messages and store promotion" address="ads.zudomart.com/campaigns/new" />
+          <ScreenshotInBrowserFrame src="/screenshots/wizardObjective.webp" alt="Create campaign screen with the six-step progress list and objective choices such as sales, messages and store promotion" address="ads.nantty.com/campaigns/new" />
         </div>
       </div>
     </section>

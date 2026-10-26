@@ -41,7 +41,7 @@ export function ContentSourcePicker({ accountId, sourceType, selectedSourceId, o
       <TextField label={`Search your ${pluralSourceNames[sourceType]}`} hideLabel placeholder={`Search ${pluralSourceNames[sourceType]}`} value={searchText} onValueChange={setSearchText} type="search" />
       {sourcesQuery.errorMessage ? <ErrorState error={sourcesQuery.error} message={sourcesQuery.errorMessage} onRetry={sourcesQuery.reload} /> : null}
       {sourcesQuery.isLoading && sources.length === 0 ? <LoadingBlock height={120} label="Loading content" /> : null}
-      {!sourcesQuery.isLoading && sources.length === 0 && !sourcesQuery.errorMessage ? <p className={styles.muted}>Nothing to promote here yet. Publish from the Zudomart app first, or upload new media.</p> : null}
+      {!sourcesQuery.isLoading && sources.length === 0 && !sourcesQuery.errorMessage ? <p className={styles.muted}>Nothing to promote here yet. Publish from the Nantty app first, or upload new media.</p> : null}
       <ul className={styles.sourceGrid} role="radiogroup" aria-label={`Choose a ${sourceType}`}>
         {sources.map((source) => {
           const thumbnail = source.media[0];

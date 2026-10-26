@@ -3,7 +3,7 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 
-import { ErrorExperienceProvider, type ErrorExperienceConfig, type ErrorLinkProps } from "@zudomart/web-kit";
+import { ErrorExperienceProvider, type ErrorExperienceConfig, type ErrorLinkProps } from "@nantty/web-kit";
 
 import { buildContactMailtoLink } from "@/constants/contact.constant";
 import { verificationRequiredEventName } from "@/services/adsApiClient.service";
@@ -23,7 +23,7 @@ function openVerificationPrompt(): void {
 export const adsErrorExperience: ErrorExperienceConfig = {
   homeHref: "/accounts",
   homeLabel: "Go to your ad accounts",
-  hrefs: { signIn: "/login", support: buildContactMailtoLink("Help with Zudomart Ads"), browse: "/accounts" },
+  hrefs: { signIn: "/login", support: buildContactMailtoLink("Help with Nantty Ads"), browse: "/accounts" },
   handlers: { verify: openVerificationPrompt },
   labels: { browse: "Go to your ad accounts" },
   destinations: [

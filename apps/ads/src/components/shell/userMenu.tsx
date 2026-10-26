@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 
-import { ThemeSwitcher } from "@zudomart/web-kit";
+import { ThemeSwitcher } from "@nantty/web-kit";
 
 import { useAdsSession } from "@/components/session/adsSessionProvider";
 import { accountsApi } from "@/services/accountsApi.service";

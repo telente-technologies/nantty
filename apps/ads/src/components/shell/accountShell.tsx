@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
 
 import { AccountSwitcher } from "@/components/shell/accountSwitcher";
-import { ZudomartWordmark } from "@zudomart/web-kit";
+import { NanttyWordmark } from "@nantty/web-kit";
 import { UserMenu } from "@/components/shell/userMenu";
 import { AdAccountProvider, useAdAccount } from "@/components/session/adAccountProvider";
 import { ButtonLink } from "@/components/ui/button";
@@ -27,7 +27,7 @@ function AccountRail({ accountId, role }: { readonly accountId: string; readonly
   return (
     <aside className={styles.rail}>
       <Link href="/accounts" className={styles.wordmarkLink} aria-label="All ad accounts">
-        <ZudomartWordmark productLabel="Ads" tone="onDark" height={20} hideWordOnNarrowScreens withSymbol />
+        <NanttyWordmark productLabel="Ads" tone="onDark" height={20} hideWordOnNarrowScreens withSymbol />
       </Link>
       <nav aria-label="Ad account" className={styles.navigation}>
         {(["manage", "tools", "account"] as const).map((group) => (

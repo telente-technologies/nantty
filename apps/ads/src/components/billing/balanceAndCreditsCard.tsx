@@ -60,7 +60,7 @@ export function BalanceAndCreditsCard({ overview, entitlements, canManageBilling
             Add funds
           </Button>
           <Button variant="secondary" disabled={!availableToWithdraw} onClick={onRequestPayFromBalance}>
-            Pay from my Zudomart balance
+            Pay from my Nantty balance
           </Button>
           <span className={styles.muted} style={{ alignSelf: "center" }}>
             Available to withdraw: {availableToWithdraw ? formatMoneyForDisplay(availableToWithdraw) : "—"}

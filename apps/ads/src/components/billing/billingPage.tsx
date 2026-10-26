@@ -9,7 +9,7 @@ import { useAdsQuery } from "@/hooks/useAdsQuery.hook";
 import { accountsApi } from "@/services/accountsApi.service";
 import { billingApi } from "@/services/billingApi.service";
 import { walletApi } from "@/services/walletApi.service";
-import { readAvailableToWithdraw } from "@/utils/zudomartWallet.util";
+import { readAvailableToWithdraw } from "@/utils/nanttyWallet.util";
 
 import { BalanceAndCreditsCard } from "./balanceAndCreditsCard";
 import { BillingHistoryTables } from "./billingHistoryTables";
@@ -17,7 +17,7 @@ import styles from "./billingPage.module.css";
 import { PayFromBalanceDialog } from "./payFromBalanceDialog";
 import { PaymentSettingsCard } from "./paymentSettingsCard";
 import { TopUpDialog } from "./topUpDialog";
-import { ZudomartBalanceCard } from "./zudomartBalanceCard";
+import { NanttyBalanceCard } from "./nanttyBalanceCard";
 
 export function BillingPage() {
   const { accountId, account, canPerform, reloadAccount } = useAdAccount();
@@ -49,7 +49,7 @@ export function BillingPage() {
             onReloadOverview={overviewQuery.reload}
           />
           <div className={styles.fullWidth}>
-            <ZudomartBalanceCard walletQuery={walletQuery} />
+            <NanttyBalanceCard walletQuery={walletQuery} />
           </div>
           <div className={`${styles.fullWidth} ${styles.stack}`}>
             <BillingHistoryTables accountId={accountId} />

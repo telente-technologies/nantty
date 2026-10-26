@@ -10,18 +10,18 @@ export function LandingHeroWithProductStage({ primaryAction, isSignedIn }: { rea
     <section className={styles.hero} aria-labelledby="hero-heading">
       <div className={`${styles.container} ${styles.heroLayout}`}>
         <div className={styles.heroCopy}>
-          <p className={styles.heroEyebrow}>Zudomart Ads Manager</p>
+          <p className={styles.heroEyebrow}>Nantty Ads Manager</p>
           <h1 id="hero-heading" className={styles.heroHeading}>
             Put your store where Nigeria <span className={styles.priceTag}>shops.</span>
           </h1>
           <p className={styles.heroLede}>
-            Promote your products, posts, clips and live streams to buyers across Zudomart. Target by city, interest and your own customers, pay in your local currency, and see which ads turned into orders.
+            Promote your products, posts, clips and live streams to buyers across Nantty. Target by city, interest and your own customers, pay in your local currency, and see which ads turned into orders.
           </p>
           <div className={styles.heroActions}>
             <LandingActionLink action={primaryAction} />
             <LandingActionLink action={{ href: "#formats", label: "See where ads appear" }} tone="quiet" />
           </div>
-          {isSignedIn ? null : <p className={styles.heroNote}>Use the same account as the Zudomart app. There is nothing new to sign up for.</p>}
+          {isSignedIn ? null : <p className={styles.heroNote}>Use the same account as the Nantty app. There is nothing new to sign up for.</p>}
           <ul className={styles.proofList}>
             <li>
               <ZudoIcon name="shield24" size={18} />
@@ -40,7 +40,7 @@ export function LandingHeroWithProductStage({ primaryAction, isSignedIn }: { rea
         <div className={styles.heroStage}>
           <div className={styles.heroStagePanel} aria-hidden />
           <div className={styles.heroScreenshot}>
-            <ScreenshotInBrowserFrame src="/screenshots/overview.webp" alt="Ads Manager overview with spend, results, reach and a daily spend chart for a Lagos fashion store" address="ads.zudomart.com/overview" priority />
+            <ScreenshotInBrowserFrame src="/screenshots/overview.webp" alt="Ads Manager overview with spend, results, reach and a daily spend chart for a Lagos fashion store" address="ads.nantty.com/overview" priority />
           </div>
           <div className={styles.heroPhone}>
             <FeedCardIllustration post={heroFeedPost} />

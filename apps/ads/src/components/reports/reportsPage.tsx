@@ -69,7 +69,7 @@ export function ReportsPage() {
 
   return (
     <>
-      <PageHeader title="Reports" description={`Delivery and results for ${rangeLabel}. Sales from your Zudomart store are attributed automatically.`} actions={<Button iconName="boxArrowDown24" isLoading={isExporting} onClick={downloadReportAsCsv}>Export CSV</Button>} />
+      <PageHeader title="Reports" description={`Delivery and results for ${rangeLabel}. Sales from your Nantty store are attributed automatically.`} actions={<Button iconName="boxArrowDown24" isLoading={isExporting} onClick={downloadReportAsCsv}>Export CSV</Button>} />
       <Card>
         <ReportFilters state={state} onStateChange={replaceViewState} />
       </Card>

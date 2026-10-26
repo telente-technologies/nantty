@@ -77,7 +77,7 @@ export function BudgetScheduleStep({ state, dispatch, errors, currency, accountI
         ) : null}
       </fieldset>
       {state.objective === "sales" ? (
-        <SelectField label="Conversion event" value={state.conversionEventId} options={conversionEventOptions} onValueChange={(conversionEventId) => updateFields({ conversionEventId })} hint="Orders in your Zudomart store are attributed automatically — no pixel needed." fieldClassName={styles.narrowField} />
+        <SelectField label="Conversion event" value={state.conversionEventId} options={conversionEventOptions} onValueChange={(conversionEventId) => updateFields({ conversionEventId })} hint="Orders in your Nantty store are attributed automatically — no pixel needed." fieldClassName={styles.narrowField} />
       ) : null}
     </div>
   );

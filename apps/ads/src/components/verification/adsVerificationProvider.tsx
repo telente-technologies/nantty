@@ -4,10 +4,10 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useState, t
 
 import { verificationRequiredEventName } from "@/services/adsApiClient.service";
 import { walletApi } from "@/services/walletApi.service";
-import { readZudomartMainSiteUrl } from "@/constants/contact.constant";
-import { readSafeVerifyUrl } from "@/utils/zudomartWallet.util";
+import { readNanttyMainSiteUrl } from "@/constants/contact.constant";
+import { readSafeVerifyUrl } from "@/utils/nanttyWallet.util";
 
-const defaultMessage = "Verify your payout details to use Zudomart Ads. Your verification keeps advertisers and creators safe.";
+const defaultMessage = "Verify your payout details to use Nantty Ads. Your verification keeps advertisers and creators safe.";
 
 interface AdsVerificationState {
   readonly needsVerification: boolean;
@@ -16,7 +16,7 @@ interface AdsVerificationState {
   readonly reload: () => void;
 }
 
-const fallbackVerifyUrl = () => `${readZudomartMainSiteUrl()}/settings/payouts`;
+const fallbackVerifyUrl = () => `${readNanttyMainSiteUrl()}/settings/payouts`;
 const AdsVerificationContext = createContext<AdsVerificationState>({ needsVerification: false, message: defaultMessage, verifyUrl: fallbackVerifyUrl(), reload: () => undefined });
 
 export function AdsVerificationProvider({ isSignedIn, children }: { readonly isSignedIn: boolean; readonly children: ReactNode }) {

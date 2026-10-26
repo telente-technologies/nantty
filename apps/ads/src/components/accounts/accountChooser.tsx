@@ -50,7 +50,7 @@ export function AccountChooser() {
         <EmptyState
           iconName="speedometer24"
           title="Create your first ad account"
-          description="Use a personal account to promote your own posts and clips, or a business account linked to your Zudomart store."
+          description="Use a personal account to promote your own posts and clips, or a business account linked to your Nantty store."
           action={
             <ButtonLink href="/accounts/new" variant="primary">
               Create ad account

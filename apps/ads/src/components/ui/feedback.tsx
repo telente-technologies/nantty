@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 
-import { ErrorState as KitErrorState, resolveCallerErrorCopy, type ErrorKind, type ErrorStateVariant } from "@zudomart/web-kit";
+import { ErrorState as KitErrorState, resolveCallerErrorCopy, type ErrorKind, type ErrorStateVariant } from "@nantty/web-kit";
 
 import { ZudoIcon, type ZudoIconName } from "@/components/ui/zudoIcon";
 

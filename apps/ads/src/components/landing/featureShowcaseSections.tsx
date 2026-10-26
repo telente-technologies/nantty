@@ -23,7 +23,7 @@ export function FeatureShowcaseSections() {
                 ))}
               </ul>
             </div>
-            <ScreenshotInBrowserFrame src={feature.screenshot} alt={feature.screenshotAlt} address={`ads.zudomart.com/${feature.id === "targeting" ? "campaigns/new" : feature.id === "billing" ? "billing" : "reports"}`} />
+            <ScreenshotInBrowserFrame src={feature.screenshot} alt={feature.screenshotAlt} address={`ads.nantty.com/${feature.id === "targeting" ? "campaigns/new" : feature.id === "billing" ? "billing" : "reports"}`} />
           </div>
         </section>
       ))}
@@ -56,7 +56,7 @@ export function PolicyAndReviewSection() {
             <ZudoIcon name="arrowUpRight24" size={16} />
           </Link>
         </div>
-        <ScreenshotInBrowserFrame src="/screenshots/campaignsList.webp" alt="Campaigns table showing active, paused, in review and rejected campaigns with spend, results and pacing" address="ads.zudomart.com/campaigns" />
+        <ScreenshotInBrowserFrame src="/screenshots/campaignsList.webp" alt="Campaigns table showing active, paused, in review and rejected campaigns with spend, results and pacing" address="ads.nantty.com/campaigns" />
       </div>
     </section>
   );

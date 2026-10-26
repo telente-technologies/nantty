@@ -1,7 +1,7 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 
-import { ZudomartWordmark } from "@zudomart/web-kit";
+import { NanttyWordmark } from "@nantty/web-kit";
 import { UserMenu } from "@/components/shell/userMenu";
 import { VerificationBanner } from "@/components/verification/verificationPrompt";
 import { buildContactMailtoLink, contactEmailDisplayText } from "@/constants/contact.constant";
@@ -12,8 +12,8 @@ export function StandaloneFrame({ children, showUserMenu = true, width = "regula
   return (
     <div className={styles.frame}>
       <header className={styles.bar}>
-        <Link href="/accounts" className={styles.wordmarkLink} aria-label="Zudomart Ads Manager home">
-          <ZudomartWordmark productLabel="Ads" tone="onDark" withSymbol />
+        <Link href="/accounts" className={styles.wordmarkLink} aria-label="Nantty Ads Manager home">
+          <NanttyWordmark productLabel="Ads" tone="onDark" withSymbol />
         </Link>
         <nav aria-label="Help" className={styles.links}>
           <Link href="/policy">Advertising policies</Link>
@@ -26,7 +26,7 @@ export function StandaloneFrame({ children, showUserMenu = true, width = "regula
       </main>
       <footer className={styles.footer}>
         <p>
-          Questions about Zudomart Ads? Email <a href={buildContactMailtoLink("Zudomart Ads")}>{contactEmailDisplayText}</a>
+          Questions about Nantty Ads? Email <a href={buildContactMailtoLink("Nantty Ads")}>{contactEmailDisplayText}</a>
         </p>
         <Link href="/policy">Advertising policies</Link>
       </footer>

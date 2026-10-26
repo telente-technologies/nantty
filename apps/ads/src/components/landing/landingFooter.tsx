@@ -1,21 +1,19 @@
 import Link from "next/link";
 
-import { ZudomartWordmark, defaultZudomartWordmarkVariant, zudomartWordmarkFor } from "@zudomart/web-kit";
-import { buildContactMailtoLink, contactEmailDisplayText, readZudomartMainSiteUrl } from "@/constants/contact.constant";
+import { NanttyWordmark } from "@nantty/web-kit";
+import { buildContactMailtoLink, contactEmailDisplayText, readNanttyMainSiteUrl } from "@/constants/contact.constant";
 
 import styles from "./landingFooter.module.css";
 
-const giantWordmark = zudomartWordmarkFor(defaultZudomartWordmarkVariant, 400);
-
 export function LandingFooterWithContact() {
-  const mainSiteUrl = readZudomartMainSiteUrl();
+  const mainSiteUrl = readNanttyMainSiteUrl();
   return (
     <footer className={styles.footer}>
       <div className={`${styles.container} ${styles.footerTop}`}>
         <div className={styles.footerBrand}>
-          <ZudomartWordmark productLabel="Ads" tone="onDark" withSymbol />
-          <p>Ads for the Zudomart marketplace: Marketplace, Feed, Reels and Live. Built in Nigeria.</p>
-          <a href={buildContactMailtoLink("Zudomart Ads")} className={styles.footerEmail}>
+          <NanttyWordmark productLabel="Ads" tone="onDark" withSymbol />
+          <p>Ads for the Nantty marketplace: Marketplace, Feed, Reels and Live. Built in Nigeria.</p>
+          <a href={buildContactMailtoLink("Nantty Ads")} className={styles.footerEmail}>
             {contactEmailDisplayText}
           </a>
         </div>
@@ -52,13 +50,13 @@ export function LandingFooterWithContact() {
             </ul>
           </div>
           <div>
-            <h2>Zudomart</h2>
+            <h2>Nantty</h2>
             <ul>
               <li>
                 <a href={mainSiteUrl}>Get the app</a>
               </li>
               <li>
-                <a href={`${mainSiteUrl}/sellers`}>Sell on Zudomart</a>
+                <a href={`${mainSiteUrl}/sellers`}>Sell on Nantty</a>
               </li>
               <li>
                 <Link href="/login">Sign in</Link>
@@ -68,14 +66,9 @@ export function LandingFooterWithContact() {
         </nav>
       </div>
       <div className={`${styles.container} ${styles.footerBottom}`}>
-        <p>© {new Date().getFullYear()} Zudomart. Budgets and billing in your local currency.</p>
+        <p>© {new Date().getFullYear()} Nantty. Budgets and billing in your local currency.</p>
       </div>
-      <p className={styles.giantWordmark} aria-hidden>
-        <svg className={styles.giantWordmarkSvg} viewBox={`0 0 ${giantWordmark.width} ${giantWordmark.height}`} focusable="false">
-          <path d={giantWordmark.d} fill="currentColor" />
-        </svg>
-        ads
-      </p>
+      <p className={styles.giantWordmark} aria-hidden>Nantty Ads</p>
     </footer>
   );
 }

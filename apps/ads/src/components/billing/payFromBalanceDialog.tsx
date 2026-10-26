@@ -27,7 +27,7 @@ interface PayFromBalanceDialogProps {
 const knownErrorMessages: Record<string, string> = {
   INSUFFICIENT_FUNDS: "Amount is more than your available balance. Enter a smaller amount.",
   IDEMPOTENCY_KEY_REUSED: "This payment was already started with a different amount. Check your balance, then try again.",
-  FORBIDDEN: "Only the owner of this ad account can pay from their Zudomart balance.",
+  FORBIDDEN: "Only the owner of this ad account can pay from their Nantty balance.",
 };
 
 function validateAmount(amount: Money | null, available: Money): string | undefined {
@@ -69,7 +69,7 @@ export function PayFromBalanceDialog({ accountId, accountCurrency, availableToWi
       attemptRef.current = null;
       setStepUpNeeded(false);
       setPassword("");
-      showToast(`Added ${formatMoneyForDisplay(funding.amount)} from your Zudomart balance`);
+      showToast(`Added ${formatMoneyForDisplay(funding.amount)} from your Nantty balance`);
       onPaid();
       onClose();
     } catch (error) {
@@ -92,7 +92,7 @@ export function PayFromBalanceDialog({ accountId, accountCurrency, availableToWi
     <OverlayDialog
       isOpen={isOpen}
       onClose={onClose}
-      title="Pay from my Zudomart balance"
+      title="Pay from my Nantty balance"
       description="Move money you can withdraw into this ad account's balance. Ad balance cannot be withdrawn again."
       footer={
         <>
@@ -109,7 +109,7 @@ export function PayFromBalanceDialog({ accountId, accountCurrency, availableToWi
         Available to withdraw: <strong>{formatMoneyForDisplay(availableToWithdraw)}</strong>
       </p>
       {needsVerification || verificationMessage ? <VerificationPrompt message={verificationMessage} /> : null}
-      {!isSameCurrency ? <InlineNotice tone="info">Your Zudomart balance is in {availableToWithdraw.currency} and this ad account bills in {accountCurrency}. Add funds by card instead.</InlineNotice> : null}
+      {!isSameCurrency ? <InlineNotice tone="info">Your Nantty balance is in {availableToWithdraw.currency} and this ad account bills in {accountCurrency}. Add funds by card instead.</InlineNotice> : null}
       {isSameCurrency && availableToWithdraw.amountMinor <= 0 && !needsVerification ? <InlineNotice tone="info">You have nothing available to withdraw yet. Add funds by card or bank transfer instead.</InlineNotice> : null}
       {!cannotPay ? (
         <TextField
@@ -124,7 +124,7 @@ export function PayFromBalanceDialog({ accountId, accountCurrency, availableToWi
         />
       ) : null}
       {stepUpNeeded && !cannotPay ? (
-        <TextField label="Your Zudomart password" type="password" autoComplete="current-password" value={password} onValueChange={setPassword} hint="We ask again before larger payments leave your balance." />
+        <TextField label="Your Nantty password" type="password" autoComplete="current-password" value={password} onValueChange={setPassword} hint="We ask again before larger payments leave your balance." />
       ) : null}
       {errorMessage ? <InlineNotice tone="error">{errorMessage}</InlineNotice> : null}
     </OverlayDialog>

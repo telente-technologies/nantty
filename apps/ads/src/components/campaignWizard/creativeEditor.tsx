@@ -29,7 +29,7 @@ const sourceTabs: readonly { readonly value: CreativeSourceType; readonly label:
   { value: "upload", label: "Upload new" },
 ];
 
-const destinationLabels: Record<DestinationType, string> = { post: "The post, reel or live", profile: "Your profile", store: "Your store", product: "The product page", messages: "Zudomart messages", url: "A website", app_store: "The app store" };
+const destinationLabels: Record<DestinationType, string> = { post: "The post, reel or live", profile: "Your profile", store: "Your store", product: "The product page", messages: "Nantty messages", url: "A website", app_store: "The app store" };
 const singleDestinationTypes: readonly DestinationType[] = ["post", "profile", "store", "product", "messages", "url"];
 
 const formatBySourceType: Record<Exclude<CreativeSourceType, "upload">, CreativeFormat> = { post: "feed_post", clip: "clip", product: "product", store: "store", live: "live" };
@@ -152,7 +152,7 @@ export function CreativeEditor({ accountId, account, ad, adIndex, placements, er
       <aside className={styles.previewColumn} aria-label="Ad preview">
         <p className={styles.fieldLabel}>Preview</p>
         <AdPreviewWithSurfaceSwitcher creative={buildPreviewCreativeFromAdDraft(ad, account)} availablePlacements={placements} />
-        <p className={styles.muted}>Shown the way people see it in the Zudomart app.</p>
+        <p className={styles.muted}>Shown the way people see it in the Nantty app.</p>
       </aside>
     </div>
   );

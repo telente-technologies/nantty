@@ -108,7 +108,7 @@ export function CustomerListUploadDialog({ accountId, defaultCountryCode, onClos
       }
     >
       <InlineNotice tone="info" title="Private by design">
-        Your list is cleaned and scrambled with SHA-256 here in your browser. Only the scrambled values are sent to Zudomart — raw emails and phone numbers never leave this device.
+        Your list is cleaned and scrambled with SHA-256 here in your browser. Only the scrambled values are sent to Nantty — raw emails and phone numbers never leave this device.
       </InlineNotice>
       <TextField label="Audience name" value={name} onValueChange={setName} maxLength={100} placeholder="e.g. WhatsApp VIP customers" />
       <div>

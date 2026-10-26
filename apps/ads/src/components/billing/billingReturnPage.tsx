@@ -1,7 +1,7 @@
 "use client";
 
 import { useSearchParams } from "next/navigation";
-import { useIsOnline } from "@zudomart/web-kit";
+import { useIsOnline } from "@nantty/web-kit";
 import { useEffect, useState } from "react";
 
 import { useAdAccount } from "@/components/session/adAccountProvider";
