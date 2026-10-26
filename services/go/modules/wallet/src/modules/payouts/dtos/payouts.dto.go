@@ -3,7 +3,7 @@ package dtos
 import (
 	"time"
 
-	ledgerrepositories "zudomart/modules/ledger/src/repositories"
+	ledgerrepositories "nantty/modules/ledger/src/repositories"
 )
 
 type MoneyDto struct {

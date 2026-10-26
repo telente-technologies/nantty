@@ -1,6 +1,6 @@
 package requestsellerpayout
 
-import "zudomart/modules/wallet/src/modules/sellerMoney/dtos"
+import "nantty/modules/wallet/src/modules/sellerMoney/dtos"
 
 type Command struct {
 	Seller         dtos.SellerContext

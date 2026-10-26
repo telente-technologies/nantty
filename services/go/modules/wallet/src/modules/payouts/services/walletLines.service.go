@@ -6,12 +6,12 @@ import (
 	"fmt"
 	"strconv"
 
-	ledgermodels "zudomart/modules/ledger/src/modules/journal/models"
-	paymentmodels "zudomart/modules/payments/src/modules/gateway/models"
-	paymentservices "zudomart/modules/payments/src/modules/gateway/services"
-	"zudomart/modules/wallet/src/generated/ent/adbalanceearningstransfer"
-	"zudomart/modules/wallet/src/generated/ent/adbalancetopup"
-	"zudomart/modules/wallet/src/modules/payouts/dtos"
+	ledgermodels "nantty/modules/ledger/src/modules/journal/models"
+	paymentmodels "nantty/modules/payments/src/modules/gateway/models"
+	paymentservices "nantty/modules/payments/src/modules/gateway/services"
+	"nantty/modules/wallet/src/generated/ent/adbalanceearningstransfer"
+	"nantty/modules/wallet/src/generated/ent/adbalancetopup"
+	"nantty/modules/wallet/src/modules/payouts/dtos"
 )
 
 type walletLineDefinition struct {

@@ -1,7 +1,7 @@
 package resolvesellerpayoutaccount
 
 import (
-	"zudomart/modules/wallet/src/modules/sellerMoney/dtos"
+	"nantty/modules/wallet/src/modules/sellerMoney/dtos"
 )
 
 type Command struct {

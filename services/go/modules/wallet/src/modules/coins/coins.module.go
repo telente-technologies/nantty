@@ -1,9 +1,9 @@
 package coins
 
 import (
-	"zudomart/modules/wallet/src/container"
-	"zudomart/modules/wallet/src/modules/coins/services"
-	"zudomart/modules/wallet/src/repositories"
+	"nantty/modules/wallet/src/container"
+	"nantty/modules/wallet/src/modules/coins/services"
+	"nantty/modules/wallet/src/repositories"
 )
 
 type Application struct {

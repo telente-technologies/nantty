@@ -4,15 +4,15 @@ import (
 	"net/http"
 	"regexp"
 
-	"zudomart/modules/wallet/src/modules/sellerMoney/dtos"
-	getsellerfees "zudomart/modules/wallet/src/modules/sellerMoney/queries/getSellerFees"
-	getsellerfinancesummary "zudomart/modules/wallet/src/modules/sellerMoney/queries/getSellerFinanceSummary"
-	getsellersettlement "zudomart/modules/wallet/src/modules/sellerMoney/queries/getSellerSettlement"
-	listsellerescrow "zudomart/modules/wallet/src/modules/sellerMoney/queries/listSellerEscrow"
-	listsellerrefunds "zudomart/modules/wallet/src/modules/sellerMoney/queries/listSellerRefunds"
-	listsellersettlements "zudomart/modules/wallet/src/modules/sellerMoney/queries/listSellerSettlements"
-	"zudomart/modules/wallet/src/modules/sellerMoney/validators"
-	"zudomart/platform/httpserver"
+	"nantty/modules/wallet/src/modules/sellerMoney/dtos"
+	getsellerfees "nantty/modules/wallet/src/modules/sellerMoney/queries/getSellerFees"
+	getsellerfinancesummary "nantty/modules/wallet/src/modules/sellerMoney/queries/getSellerFinanceSummary"
+	getsellersettlement "nantty/modules/wallet/src/modules/sellerMoney/queries/getSellerSettlement"
+	listsellerescrow "nantty/modules/wallet/src/modules/sellerMoney/queries/listSellerEscrow"
+	listsellerrefunds "nantty/modules/wallet/src/modules/sellerMoney/queries/listSellerRefunds"
+	listsellersettlements "nantty/modules/wallet/src/modules/sellerMoney/queries/listSellerSettlements"
+	"nantty/modules/wallet/src/modules/sellerMoney/validators"
+	"nantty/platform/httpserver"
 )
 
 var settlementIdPattern = regexp.MustCompile(`^stl_[0-9]{8}$`)

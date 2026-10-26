@@ -8,8 +8,8 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/wallet/src/modules/sellerMoney/dtos"
-	"zudomart/modules/wallet/src/modules/sellerMoney/services"
+	"nantty/modules/wallet/src/modules/sellerMoney/dtos"
+	"nantty/modules/wallet/src/modules/sellerMoney/services"
 )
 
 var transactionKinds = []string{"escrow_hold", "escrow_release", "payout", "refund", "fee", "affiliate_commission", "ads_charge", "subscription_charge", "adjustment"}

@@ -7,14 +7,14 @@ import (
 
 	"github.com/google/uuid"
 
-	ledgermodels "zudomart/modules/ledger/src/modules/journal/models"
-	paymentconstants "zudomart/modules/payments/src/constants"
-	"zudomart/modules/payments/src/interfaces"
-	paymentmodels "zudomart/modules/payments/src/modules/gateway/models"
-	"zudomart/modules/wallet/src/generated/ent/coinpackage"
-	"zudomart/modules/wallet/src/generated/ent/coinpurchase"
-	"zudomart/modules/wallet/src/modules/coins/dtos"
-	"zudomart/modules/wallet/src/modules/coins/models"
+	ledgermodels "nantty/modules/ledger/src/modules/journal/models"
+	paymentconstants "nantty/modules/payments/src/constants"
+	"nantty/modules/payments/src/interfaces"
+	paymentmodels "nantty/modules/payments/src/modules/gateway/models"
+	"nantty/modules/wallet/src/generated/ent/coinpackage"
+	"nantty/modules/wallet/src/generated/ent/coinpurchase"
+	"nantty/modules/wallet/src/modules/coins/dtos"
+	"nantty/modules/wallet/src/modules/coins/models"
 )
 
 var sourceByStore = map[string]coinpurchase.Source{paymentconstants.StoreAppleIap: coinpurchase.SourceApple, paymentconstants.StoreGooglePlay: coinpurchase.SourceGoogle}

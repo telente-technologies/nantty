@@ -6,12 +6,12 @@ import (
 
 	"github.com/google/uuid"
 
-	escrowent "zudomart/modules/escrow/src/generated/ent"
-	"zudomart/modules/escrow/src/generated/ent/escrow"
-	"zudomart/modules/ledger/src/databases"
-	"zudomart/modules/wallet/src/container"
-	"zudomart/modules/wallet/src/modules/sellerMoney/dtos"
-	"zudomart/platform/usersdirectory"
+	escrowent "nantty/modules/escrow/src/generated/ent"
+	"nantty/modules/escrow/src/generated/ent/escrow"
+	"nantty/modules/ledger/src/databases"
+	"nantty/modules/wallet/src/container"
+	"nantty/modules/wallet/src/modules/sellerMoney/dtos"
+	"nantty/platform/usersdirectory"
 )
 
 type SellerEscrows struct {

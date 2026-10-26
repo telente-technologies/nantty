@@ -7,11 +7,11 @@ import (
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 
-	ledgercontainer "zudomart/modules/ledger/src/container"
-	moneytesting "zudomart/modules/ledger/src/databases/moneyTesting"
-	ledgermodels "zudomart/modules/ledger/src/modules/journal/models"
-	journalroutes "zudomart/modules/ledger/src/modules/journal/routes"
-	"zudomart/modules/wallet/src/repositories"
+	ledgercontainer "nantty/modules/ledger/src/container"
+	moneytesting "nantty/modules/ledger/src/databases/moneyTesting"
+	ledgermodels "nantty/modules/ledger/src/modules/journal/models"
+	journalroutes "nantty/modules/ledger/src/modules/journal/routes"
+	"nantty/modules/wallet/src/repositories"
 )
 
 func TestCoinTransfersAreRefusedBetweenBlockedUsers(t *testing.T) {

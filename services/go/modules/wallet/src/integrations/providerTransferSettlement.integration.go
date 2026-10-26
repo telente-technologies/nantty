@@ -5,10 +5,10 @@ import (
 	"database/sql"
 	"errors"
 
-	paymentconstants "zudomart/modules/payments/src/constants"
-	paymentmodels "zudomart/modules/payments/src/modules/gateway/models"
-	paymentservices "zudomart/modules/payments/src/modules/gateway/services"
-	"zudomart/modules/wallet/src/interfaces"
+	paymentconstants "nantty/modules/payments/src/constants"
+	paymentmodels "nantty/modules/payments/src/modules/gateway/models"
+	paymentservices "nantty/modules/payments/src/modules/gateway/services"
+	"nantty/modules/wallet/src/interfaces"
 )
 
 type ProviderTransferSettlement struct {

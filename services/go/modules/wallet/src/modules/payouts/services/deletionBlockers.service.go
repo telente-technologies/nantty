@@ -3,7 +3,7 @@ package services
 import (
 	"context"
 
-	"zudomart/modules/wallet/src/generated/ent/withdrawal"
+	"nantty/modules/wallet/src/generated/ent/withdrawal"
 )
 
 var settledCurrencies = []string{"NGN", "GHS", "KES", "ZAR", "GBP", "EUR", "USD"}

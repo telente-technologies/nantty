@@ -3,9 +3,9 @@ package listcoinactivity
 import (
 	"context"
 
-	"zudomart/modules/wallet/src/modules/coins"
-	"zudomart/modules/wallet/src/modules/coins/dtos"
-	"zudomart/platform/httpserver"
+	"nantty/modules/wallet/src/modules/coins"
+	"nantty/modules/wallet/src/modules/coins/dtos"
+	"nantty/platform/httpserver"
 )
 
 type Handler struct {

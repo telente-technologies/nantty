@@ -3,7 +3,7 @@ package services
 import (
 	"testing"
 
-	"zudomart/modules/wallet/src/configs"
+	"nantty/modules/wallet/src/configs"
 )
 
 func TestNameMatchedOnlyBankGetsTheReducedDailyCap(t *testing.T) {

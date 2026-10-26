@@ -7,8 +7,8 @@ import (
 
 	"github.com/google/uuid"
 
-	ledgermodels "zudomart/modules/ledger/src/modules/journal/models"
-	"zudomart/modules/wallet/src/modules/adBalances/dtos"
+	ledgermodels "nantty/modules/ledger/src/modules/journal/models"
+	"nantty/modules/wallet/src/modules/adBalances/dtos"
 )
 
 func (harness *walletHarness) withdrawAdBalance(adAccountId, userId, key string, grossMinor, feeMinor int64) (int, map[string]any) {

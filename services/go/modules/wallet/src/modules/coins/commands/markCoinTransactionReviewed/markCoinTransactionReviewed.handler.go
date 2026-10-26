@@ -3,7 +3,7 @@ package markcointransactionreviewed
 import (
 	"context"
 
-	"zudomart/modules/wallet/src/modules/coins"
+	"nantty/modules/wallet/src/modules/coins"
 )
 
 type Handler struct {

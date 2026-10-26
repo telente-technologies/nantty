@@ -1,6 +1,6 @@
 package services
 
-import "zudomart/platform/money"
+import "nantty/platform/money"
 
 func moneyOf(amountMinor int64, currency string) money.Money {
 	return money.Money{AmountMinor: amountMinor, Currency: money.CurrencyCode(currency)}

@@ -4,9 +4,9 @@ import (
 	"context"
 	"database/sql"
 
-	"zudomart/modules/ledger/src/databases"
-	"zudomart/modules/wallet/src/modules/payouts"
-	"zudomart/modules/wallet/src/modules/payouts/dtos"
+	"nantty/modules/ledger/src/databases"
+	"nantty/modules/wallet/src/modules/payouts"
+	"nantty/modules/wallet/src/modules/payouts/dtos"
 )
 
 type Handler struct {

@@ -8,13 +8,13 @@ import (
 	"fmt"
 	"net/http"
 
-	"zudomart/modules/wallet/src/container"
-	"zudomart/modules/wallet/src/generated/ent"
-	"zudomart/modules/wallet/src/generated/ent/coinpackage"
-	"zudomart/modules/wallet/src/modules/coins/dtos"
-	"zudomart/modules/wallet/src/modules/coins/models"
-	"zudomart/platform/httpserver"
-	"zudomart/platform/regionpricing"
+	"nantty/modules/wallet/src/container"
+	"nantty/modules/wallet/src/generated/ent"
+	"nantty/modules/wallet/src/generated/ent/coinpackage"
+	"nantty/modules/wallet/src/modules/coins/dtos"
+	"nantty/modules/wallet/src/modules/coins/models"
+	"nantty/platform/httpserver"
+	"nantty/platform/regionpricing"
 )
 
 var (

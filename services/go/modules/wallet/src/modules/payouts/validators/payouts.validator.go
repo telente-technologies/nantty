@@ -8,9 +8,9 @@ import (
 
 	"github.com/google/uuid"
 
-	ledgerutils "zudomart/modules/ledger/src/utils"
-	"zudomart/modules/wallet/src/modules/payouts/dtos"
-	"zudomart/platform/httpserver"
+	ledgerutils "nantty/modules/ledger/src/utils"
+	"nantty/modules/wallet/src/modules/payouts/dtos"
+	"nantty/platform/httpserver"
 )
 
 var (

@@ -5,10 +5,10 @@ import (
 	"database/sql"
 	"net/http"
 
-	ledgermodels "zudomart/modules/ledger/src/modules/journal/models"
-	paymentutils "zudomart/modules/payments/src/utils"
-	"zudomart/modules/wallet/src/generated/ent"
-	"zudomart/platform/httpserver"
+	ledgermodels "nantty/modules/ledger/src/modules/journal/models"
+	paymentutils "nantty/modules/payments/src/utils"
+	"nantty/modules/wallet/src/generated/ent"
+	"nantty/platform/httpserver"
 )
 
 var (

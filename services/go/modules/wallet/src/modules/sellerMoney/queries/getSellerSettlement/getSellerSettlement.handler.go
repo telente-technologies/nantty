@@ -4,9 +4,9 @@ import (
 	"context"
 	"net/http"
 
-	sellermoney "zudomart/modules/wallet/src/modules/sellerMoney"
-	"zudomart/modules/wallet/src/modules/sellerMoney/dtos"
-	"zudomart/platform/httpserver"
+	sellermoney "nantty/modules/wallet/src/modules/sellerMoney"
+	"nantty/modules/wallet/src/modules/sellerMoney/dtos"
+	"nantty/platform/httpserver"
 )
 
 var ErrSettlementNotFound = httpserver.NewApiError(http.StatusNotFound, "SETTLEMENT_NOT_FOUND", "That settlement could not be found.")

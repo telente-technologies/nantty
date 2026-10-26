@@ -1,8 +1,8 @@
 package sellermoney
 
 import (
-	"zudomart/modules/wallet/src/modules/payouts"
-	"zudomart/modules/wallet/src/modules/sellerMoney/services"
+	"nantty/modules/wallet/src/modules/payouts"
+	"nantty/modules/wallet/src/modules/sellerMoney/services"
 )
 
 type Application struct {

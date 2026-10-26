@@ -6,8 +6,8 @@ import (
 
 	"github.com/google/uuid"
 
-	ledgermodels "zudomart/modules/ledger/src/modules/journal/models"
-	paymentstesting "zudomart/modules/payments/src/integrations/paymentsTesting"
+	ledgermodels "nantty/modules/ledger/src/modules/journal/models"
+	paymentstesting "nantty/modules/payments/src/integrations/paymentsTesting"
 )
 
 func (harness *walletHarness) creditEarnedCoins(userId string, coins int64) {

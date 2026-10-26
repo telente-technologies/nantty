@@ -3,7 +3,7 @@ package listsellerescrow
 import (
 	"github.com/google/uuid"
 
-	"zudomart/modules/wallet/src/modules/sellerMoney/dtos"
+	"nantty/modules/wallet/src/modules/sellerMoney/dtos"
 )
 
 type Query struct {

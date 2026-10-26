@@ -6,7 +6,7 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/platform/regionpricing"
+	"nantty/platform/regionpricing"
 )
 
 func TestCoinPurchasePriceComesFromTheServerNotTheRegionHeader(t *testing.T) {

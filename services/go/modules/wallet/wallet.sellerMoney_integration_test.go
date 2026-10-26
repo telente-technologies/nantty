@@ -9,12 +9,12 @@ import (
 
 	"github.com/google/uuid"
 
-	escrowent "zudomart/modules/escrow/src/generated/ent"
-	escrowschema "zudomart/modules/escrow/src/generated/ent/escrow"
-	escrowmigrations "zudomart/modules/escrow/src/migrations"
-	"zudomart/modules/ledger/src/databases"
-	moneytesting "zudomart/modules/ledger/src/databases/moneyTesting"
-	ledgermodels "zudomart/modules/ledger/src/modules/journal/models"
+	escrowent "nantty/modules/escrow/src/generated/ent"
+	escrowschema "nantty/modules/escrow/src/generated/ent/escrow"
+	escrowmigrations "nantty/modules/escrow/src/migrations"
+	"nantty/modules/ledger/src/databases"
+	moneytesting "nantty/modules/ledger/src/databases/moneyTesting"
+	ledgermodels "nantty/modules/ledger/src/modules/journal/models"
 )
 
 func sellerHeaders(storeId string) http.Header {

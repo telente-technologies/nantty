@@ -5,12 +5,12 @@ import (
 	"database/sql"
 	"net/http"
 
-	ledgerutils "zudomart/modules/ledger/src/utils"
-	"zudomart/modules/wallet/src/generated/ent/coinpackage"
-	"zudomart/modules/wallet/src/modules/coins"
-	"zudomart/modules/wallet/src/modules/coins/dtos"
-	"zudomart/modules/wallet/src/modules/coins/services"
-	"zudomart/platform/httpserver"
+	ledgerutils "nantty/modules/ledger/src/utils"
+	"nantty/modules/wallet/src/generated/ent/coinpackage"
+	"nantty/modules/wallet/src/modules/coins"
+	"nantty/modules/wallet/src/modules/coins/dtos"
+	"nantty/modules/wallet/src/modules/coins/services"
+	"nantty/platform/httpserver"
 )
 
 var ErrInAppPurchaseRequired = httpserver.NewApiError(http.StatusConflict, "IN_APP_PURCHASE_REQUIRED", "Buy coins through the App Store or Google Play in the app.")

@@ -6,8 +6,8 @@ import (
 	"strings"
 	"time"
 
-	"zudomart/modules/ledger/src/loaders"
-	platformconfig "zudomart/platform/config"
+	"nantty/modules/ledger/src/loaders"
+	platformconfig "nantty/platform/config"
 )
 
 type WalletSettings struct {

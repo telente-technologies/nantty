@@ -14,13 +14,13 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/ledger/src/databases"
-	moneytesting "zudomart/modules/ledger/src/databases/moneyTesting"
-	ledgermodels "zudomart/modules/ledger/src/modules/journal/models"
-	paymentstesting "zudomart/modules/payments/src/integrations/paymentsTesting"
-	"zudomart/modules/payments/src/interfaces"
-	"zudomart/modules/wallet/src"
-	"zudomart/modules/wallet/src/configs"
+	"nantty/modules/ledger/src/databases"
+	moneytesting "nantty/modules/ledger/src/databases/moneyTesting"
+	ledgermodels "nantty/modules/ledger/src/modules/journal/models"
+	paymentstesting "nantty/modules/payments/src/integrations/paymentsTesting"
+	"nantty/modules/payments/src/interfaces"
+	"nantty/modules/wallet/src"
+	"nantty/modules/wallet/src/configs"
 )
 
 type fakeStoreVerifier struct {

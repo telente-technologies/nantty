@@ -7,12 +7,12 @@ import (
 
 	"github.com/google/uuid"
 
-	ledgermodels "zudomart/modules/ledger/src/modules/journal/models"
-	ledgerservices "zudomart/modules/ledger/src/modules/journal/services"
-	"zudomart/modules/wallet/src/container"
-	payoutservices "zudomart/modules/wallet/src/modules/payouts/services"
-	"zudomart/modules/wallet/src/modules/sellerMoney/dtos"
-	"zudomart/platform/httpserver"
+	ledgermodels "nantty/modules/ledger/src/modules/journal/models"
+	ledgerservices "nantty/modules/ledger/src/modules/journal/services"
+	"nantty/modules/wallet/src/container"
+	payoutservices "nantty/modules/wallet/src/modules/payouts/services"
+	"nantty/modules/wallet/src/modules/sellerMoney/dtos"
+	"nantty/platform/httpserver"
 )
 
 const maximumStatementPages = 40

@@ -10,8 +10,8 @@ import (
 
 	"github.com/google/uuid"
 
-	ledgermodels "zudomart/modules/ledger/src/modules/journal/models"
-	"zudomart/modules/wallet/src/configs"
+	ledgermodels "nantty/modules/ledger/src/modules/journal/models"
+	"nantty/modules/wallet/src/configs"
 )
 
 func (harness *walletHarness) withdrawalStatus(reference string) string {

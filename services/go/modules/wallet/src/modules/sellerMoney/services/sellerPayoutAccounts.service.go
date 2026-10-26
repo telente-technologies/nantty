@@ -8,15 +8,15 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/payments/src/interfaces"
-	bankservices "zudomart/modules/payments/src/modules/banks/services"
-	"zudomart/modules/wallet/src/generated/ent"
-	"zudomart/modules/wallet/src/generated/ent/payoutaccount"
-	"zudomart/modules/wallet/src/generated/ent/payoutaccountresolution"
-	"zudomart/modules/wallet/src/generated/ent/withdrawal"
-	"zudomart/modules/wallet/src/modules/payouts"
-	"zudomart/modules/wallet/src/modules/sellerMoney/dtos"
-	"zudomart/platform/httpserver"
+	"nantty/modules/payments/src/interfaces"
+	bankservices "nantty/modules/payments/src/modules/banks/services"
+	"nantty/modules/wallet/src/generated/ent"
+	"nantty/modules/wallet/src/generated/ent/payoutaccount"
+	"nantty/modules/wallet/src/generated/ent/payoutaccountresolution"
+	"nantty/modules/wallet/src/generated/ent/withdrawal"
+	"nantty/modules/wallet/src/modules/payouts"
+	"nantty/modules/wallet/src/modules/sellerMoney/dtos"
+	"nantty/platform/httpserver"
 )
 
 const resolutionLifetime = 10 * time.Minute

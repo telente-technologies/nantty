@@ -5,8 +5,8 @@ import (
 	"testing"
 	"time"
 
-	"zudomart/modules/wallet/src/modules/sellerMoney/dtos"
-	"zudomart/platform/money"
+	"nantty/modules/wallet/src/modules/sellerMoney/dtos"
+	"nantty/platform/money"
 )
 
 func TestNextScheduledRunPicksNineAmStoreTimeOnTheNextMatchingDay(t *testing.T) {

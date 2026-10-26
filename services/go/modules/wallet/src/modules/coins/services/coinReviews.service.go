@@ -8,14 +8,14 @@ import (
 
 	"github.com/google/uuid"
 
-	ledgerutils "zudomart/modules/ledger/src/utils"
-	"zudomart/modules/wallet/src/container"
-	"zudomart/modules/wallet/src/generated/ent"
-	"zudomart/modules/wallet/src/generated/ent/coinpurchase"
-	"zudomart/modules/wallet/src/generated/ent/cointransfer"
-	"zudomart/modules/wallet/src/generated/ent/walletriskflag"
-	"zudomart/modules/wallet/src/modules/coins/dtos"
-	"zudomart/platform/httpserver"
+	ledgerutils "nantty/modules/ledger/src/utils"
+	"nantty/modules/wallet/src/container"
+	"nantty/modules/wallet/src/generated/ent"
+	"nantty/modules/wallet/src/generated/ent/coinpurchase"
+	"nantty/modules/wallet/src/generated/ent/cointransfer"
+	"nantty/modules/wallet/src/generated/ent/walletriskflag"
+	"nantty/modules/wallet/src/modules/coins/dtos"
+	"nantty/platform/httpserver"
 )
 
 var (

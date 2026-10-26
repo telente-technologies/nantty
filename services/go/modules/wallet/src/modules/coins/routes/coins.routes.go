@@ -3,10 +3,10 @@ package routes
 import (
 	"net/http"
 
-	"zudomart/modules/ledger/src/constants"
-	"zudomart/modules/ledger/src/middlewares"
-	"zudomart/modules/wallet/src/modules/coins"
-	"zudomart/modules/wallet/src/modules/coins/controllers"
+	"nantty/modules/ledger/src/constants"
+	"nantty/modules/ledger/src/middlewares"
+	"nantty/modules/wallet/src/modules/coins"
+	"nantty/modules/wallet/src/modules/coins/controllers"
 )
 
 func MountCoinsRoutes(mux *http.ServeMux, application *coins.Application) {

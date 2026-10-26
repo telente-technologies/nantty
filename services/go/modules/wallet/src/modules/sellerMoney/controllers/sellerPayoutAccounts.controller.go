@@ -5,15 +5,15 @@ import (
 
 	"github.com/google/uuid"
 
-	addsellerpayoutaccount "zudomart/modules/wallet/src/modules/sellerMoney/commands/addSellerPayoutAccount"
-	removesellerpayoutaccount "zudomart/modules/wallet/src/modules/sellerMoney/commands/removeSellerPayoutAccount"
-	resolvesellerpayoutaccount "zudomart/modules/wallet/src/modules/sellerMoney/commands/resolveSellerPayoutAccount"
-	setdefaultsellerpayoutaccount "zudomart/modules/wallet/src/modules/sellerMoney/commands/setDefaultSellerPayoutAccount"
-	"zudomart/modules/wallet/src/modules/sellerMoney/dtos"
-	listsellerbanks "zudomart/modules/wallet/src/modules/sellerMoney/queries/listSellerBanks"
-	listsellerpayoutaccounts "zudomart/modules/wallet/src/modules/sellerMoney/queries/listSellerPayoutAccounts"
-	"zudomart/modules/wallet/src/modules/sellerMoney/validators"
-	"zudomart/platform/httpserver"
+	addsellerpayoutaccount "nantty/modules/wallet/src/modules/sellerMoney/commands/addSellerPayoutAccount"
+	removesellerpayoutaccount "nantty/modules/wallet/src/modules/sellerMoney/commands/removeSellerPayoutAccount"
+	resolvesellerpayoutaccount "nantty/modules/wallet/src/modules/sellerMoney/commands/resolveSellerPayoutAccount"
+	setdefaultsellerpayoutaccount "nantty/modules/wallet/src/modules/sellerMoney/commands/setDefaultSellerPayoutAccount"
+	"nantty/modules/wallet/src/modules/sellerMoney/dtos"
+	listsellerbanks "nantty/modules/wallet/src/modules/sellerMoney/queries/listSellerBanks"
+	listsellerpayoutaccounts "nantty/modules/wallet/src/modules/sellerMoney/queries/listSellerPayoutAccounts"
+	"nantty/modules/wallet/src/modules/sellerMoney/validators"
+	"nantty/platform/httpserver"
 )
 
 func (controller SellerMoneyController) Banks(writer http.ResponseWriter, request *http.Request, seller dtos.SellerContext) {

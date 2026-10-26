@@ -8,7 +8,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 
-	ledgermodels "zudomart/modules/ledger/src/modules/journal/models"
+	ledgermodels "nantty/modules/ledger/src/modules/journal/models"
 )
 
 func TestAdsServiceStartsAndTracksAccountTopUpsThroughTheInternalApi(t *testing.T) {

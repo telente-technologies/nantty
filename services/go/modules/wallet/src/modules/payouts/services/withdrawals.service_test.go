@@ -5,7 +5,7 @@ import (
 	"slices"
 	"testing"
 
-	"zudomart/modules/wallet/src/generated/ent/withdrawal"
+	"nantty/modules/wallet/src/generated/ent/withdrawal"
 )
 
 func TestWithdrawalFitsAvailableBalance(t *testing.T) {

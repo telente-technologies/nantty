@@ -3,9 +3,9 @@ package liststaffcointransactions
 import (
 	"context"
 
-	"zudomart/modules/wallet/src/modules/coins"
-	"zudomart/modules/wallet/src/modules/coins/dtos"
-	"zudomart/modules/wallet/src/modules/coins/services"
+	"nantty/modules/wallet/src/modules/coins"
+	"nantty/modules/wallet/src/modules/coins/dtos"
+	"nantty/modules/wallet/src/modules/coins/services"
 )
 
 type Handler struct {

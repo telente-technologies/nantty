@@ -6,10 +6,10 @@ import (
 	"net/http"
 	"sort"
 
-	"zudomart/modules/wallet/src/generated/ent"
-	"zudomart/modules/wallet/src/generated/ent/adbalanceearningstransfer"
-	"zudomart/modules/wallet/src/generated/ent/adbalancetopup"
-	"zudomart/platform/httpserver"
+	"nantty/modules/wallet/src/generated/ent"
+	"nantty/modules/wallet/src/generated/ent/adbalanceearningstransfer"
+	"nantty/modules/wallet/src/generated/ent/adbalancetopup"
+	"nantty/platform/httpserver"
 )
 
 var ErrNothingToRefund = httpserver.NewApiError(http.StatusConflict, "NOTHING_TO_REFUND", "There is no unused ad balance left to return.")

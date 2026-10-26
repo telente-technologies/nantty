@@ -5,12 +5,12 @@ import (
 	"database/sql"
 	"strconv"
 
-	"zudomart/modules/ledger/src/databases"
-	ledgermodels "zudomart/modules/ledger/src/modules/journal/models"
-	paymentmodels "zudomart/modules/payments/src/modules/gateway/models"
-	"zudomart/modules/wallet/src/generated/ent"
-	"zudomart/modules/wallet/src/generated/ent/adspenddebit"
-	"zudomart/modules/wallet/src/modules/adBalances/dtos"
+	"nantty/modules/ledger/src/databases"
+	ledgermodels "nantty/modules/ledger/src/modules/journal/models"
+	paymentmodels "nantty/modules/payments/src/modules/gateway/models"
+	"nantty/modules/wallet/src/generated/ent"
+	"nantty/modules/wallet/src/generated/ent/adspenddebit"
+	"nantty/modules/wallet/src/modules/adBalances/dtos"
 )
 
 func AdSpendDebitSplit(requestedMinor, balanceMinor int64) (int64, int64) {

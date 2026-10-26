@@ -5,9 +5,9 @@ import (
 	"log/slog"
 	"time"
 
-	"zudomart/modules/wallet/src/generated/ent"
-	"zudomart/modules/wallet/src/generated/ent/sellerpayoutschedule"
-	"zudomart/modules/wallet/src/modules/sellerMoney/dtos"
+	"nantty/modules/wallet/src/generated/ent"
+	"nantty/modules/wallet/src/generated/ent/sellerpayoutschedule"
+	"nantty/modules/wallet/src/modules/sellerMoney/dtos"
 )
 
 type SellerScheduledPayouts struct {

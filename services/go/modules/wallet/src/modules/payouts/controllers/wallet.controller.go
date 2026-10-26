@@ -5,16 +5,16 @@ import (
 
 	"github.com/google/uuid"
 
-	ledgerutils "zudomart/modules/ledger/src/utils"
-	"zudomart/modules/wallet/src/modules/payouts"
-	addpayoutaccount "zudomart/modules/wallet/src/modules/payouts/commands/addPayoutAccount"
-	removepayoutaccount "zudomart/modules/wallet/src/modules/payouts/commands/removePayoutAccount"
-	getwalletsummary "zudomart/modules/wallet/src/modules/payouts/queries/getWalletSummary"
-	listpayoutaccounts "zudomart/modules/wallet/src/modules/payouts/queries/listPayoutAccounts"
-	listwallettransactions "zudomart/modules/wallet/src/modules/payouts/queries/listWalletTransactions"
-	"zudomart/modules/wallet/src/modules/payouts/services"
-	"zudomart/modules/wallet/src/modules/payouts/validators"
-	"zudomart/platform/httpserver"
+	ledgerutils "nantty/modules/ledger/src/utils"
+	"nantty/modules/wallet/src/modules/payouts"
+	addpayoutaccount "nantty/modules/wallet/src/modules/payouts/commands/addPayoutAccount"
+	removepayoutaccount "nantty/modules/wallet/src/modules/payouts/commands/removePayoutAccount"
+	getwalletsummary "nantty/modules/wallet/src/modules/payouts/queries/getWalletSummary"
+	listpayoutaccounts "nantty/modules/wallet/src/modules/payouts/queries/listPayoutAccounts"
+	listwallettransactions "nantty/modules/wallet/src/modules/payouts/queries/listWalletTransactions"
+	"nantty/modules/wallet/src/modules/payouts/services"
+	"nantty/modules/wallet/src/modules/payouts/validators"
+	"nantty/platform/httpserver"
 )
 
 type WalletController struct {

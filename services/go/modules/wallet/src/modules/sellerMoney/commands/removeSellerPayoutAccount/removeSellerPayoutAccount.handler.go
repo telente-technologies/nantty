@@ -3,7 +3,7 @@ package removesellerpayoutaccount
 import (
 	"context"
 
-	sellermoney "zudomart/modules/wallet/src/modules/sellerMoney"
+	sellermoney "nantty/modules/wallet/src/modules/sellerMoney"
 )
 
 type Handler struct {

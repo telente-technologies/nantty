@@ -7,8 +7,8 @@ import (
 
 	"github.com/google/uuid"
 
-	ledgermodels "zudomart/modules/ledger/src/modules/journal/models"
-	"zudomart/modules/wallet/src/modules/payouts/services"
+	ledgermodels "nantty/modules/ledger/src/modules/journal/models"
+	"nantty/modules/wallet/src/modules/payouts/services"
 )
 
 func TestASecondCreatorEarningsRunOnTheSameDayMovesNewEarningsButNeverMovesTheSameBalanceTwice(t *testing.T) {

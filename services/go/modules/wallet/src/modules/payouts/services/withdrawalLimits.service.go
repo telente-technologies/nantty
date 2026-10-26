@@ -5,11 +5,11 @@ import (
 	"database/sql"
 	"net/http"
 
-	paymentmodels "zudomart/modules/payments/src/modules/gateway/models"
-	"zudomart/modules/wallet/src/configs"
-	"zudomart/modules/wallet/src/generated/ent"
-	"zudomart/modules/wallet/src/generated/ent/withdrawal"
-	"zudomart/platform/httpserver"
+	paymentmodels "nantty/modules/payments/src/modules/gateway/models"
+	"nantty/modules/wallet/src/configs"
+	"nantty/modules/wallet/src/generated/ent"
+	"nantty/modules/wallet/src/generated/ent/withdrawal"
+	"nantty/platform/httpserver"
 )
 
 var (

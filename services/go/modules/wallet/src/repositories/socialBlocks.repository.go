@@ -6,7 +6,7 @@ import (
 
 	"github.com/jackc/pgx/v5"
 
-	ledgerutils "zudomart/modules/ledger/src/utils"
+	ledgerutils "nantty/modules/ledger/src/utils"
 )
 
 type SocialBlocks struct {

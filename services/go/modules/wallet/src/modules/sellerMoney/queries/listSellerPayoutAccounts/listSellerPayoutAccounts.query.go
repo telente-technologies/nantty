@@ -1,7 +1,7 @@
 package listsellerpayoutaccounts
 
 import (
-	"zudomart/modules/wallet/src/modules/sellerMoney/dtos"
+	"nantty/modules/wallet/src/modules/sellerMoney/dtos"
 )
 
 type Query struct {

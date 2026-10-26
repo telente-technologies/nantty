@@ -3,8 +3,8 @@ package addpayoutaccount
 import (
 	"context"
 
-	"zudomart/modules/wallet/src/modules/payouts"
-	"zudomart/modules/wallet/src/modules/payouts/dtos"
+	"nantty/modules/wallet/src/modules/payouts"
+	"nantty/modules/wallet/src/modules/payouts/dtos"
 )
 
 type Handler struct {

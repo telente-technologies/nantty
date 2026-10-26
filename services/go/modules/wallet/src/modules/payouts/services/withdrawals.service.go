@@ -10,13 +10,13 @@ import (
 
 	"github.com/google/uuid"
 
-	ledgermodels "zudomart/modules/ledger/src/modules/journal/models"
-	"zudomart/modules/wallet/src/container"
-	"zudomart/modules/wallet/src/generated/ent"
-	"zudomart/modules/wallet/src/generated/ent/payoutaccount"
-	"zudomart/modules/wallet/src/generated/ent/withdrawal"
-	"zudomart/modules/wallet/src/modules/payouts/dtos"
-	"zudomart/platform/httpserver"
+	ledgermodels "nantty/modules/ledger/src/modules/journal/models"
+	"nantty/modules/wallet/src/container"
+	"nantty/modules/wallet/src/generated/ent"
+	"nantty/modules/wallet/src/generated/ent/payoutaccount"
+	"nantty/modules/wallet/src/generated/ent/withdrawal"
+	"nantty/modules/wallet/src/modules/payouts/dtos"
+	"nantty/platform/httpserver"
 )
 
 var (

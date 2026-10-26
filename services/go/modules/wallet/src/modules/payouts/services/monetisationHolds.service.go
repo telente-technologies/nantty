@@ -8,10 +8,10 @@ import (
 
 	entsql "entgo.io/ent/dialect/sql"
 
-	"zudomart/modules/ledger/src/databases"
-	"zudomart/modules/wallet/src/container"
-	"zudomart/modules/wallet/src/generated/ent"
-	"zudomart/modules/wallet/src/generated/ent/monetisationhold"
+	"nantty/modules/ledger/src/databases"
+	"nantty/modules/wallet/src/container"
+	"nantty/modules/wallet/src/generated/ent"
+	"nantty/modules/wallet/src/generated/ent/monetisationhold"
 )
 
 type AccountHealthChange struct {

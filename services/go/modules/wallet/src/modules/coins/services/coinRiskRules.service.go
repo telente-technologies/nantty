@@ -7,10 +7,10 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/wallet/src/container"
-	"zudomart/modules/wallet/src/generated/ent/coinpurchase"
-	"zudomart/modules/wallet/src/generated/ent/cointransfer"
-	"zudomart/modules/wallet/src/generated/ent/walletriskflag"
+	"nantty/modules/wallet/src/container"
+	"nantty/modules/wallet/src/generated/ent/coinpurchase"
+	"nantty/modules/wallet/src/generated/ent/cointransfer"
+	"nantty/modules/wallet/src/generated/ent/walletriskflag"
 )
 
 const (

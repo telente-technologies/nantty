@@ -3,7 +3,7 @@ package interfaces
 import (
 	"net/http"
 
-	"zudomart/platform/regionpricing"
+	"nantty/platform/regionpricing"
 )
 
 type ViewerCurrencyResolver interface {

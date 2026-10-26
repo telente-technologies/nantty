@@ -4,8 +4,8 @@ import (
 	"crypto/subtle"
 	"net/http"
 
-	"zudomart/modules/wallet/src/modules/payouts"
-	"zudomart/platform/httpserver"
+	"nantty/modules/wallet/src/modules/payouts"
+	"nantty/platform/httpserver"
 )
 
 type InternalAccountsController struct {

@@ -3,8 +3,8 @@ package validators
 import (
 	"regexp"
 
-	ledgerutils "zudomart/modules/ledger/src/utils"
-	"zudomart/modules/wallet/src/modules/coins/dtos"
+	ledgerutils "nantty/modules/ledger/src/utils"
+	"nantty/modules/wallet/src/modules/coins/dtos"
 )
 
 var (

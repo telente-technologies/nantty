@@ -5,16 +5,16 @@ import (
 
 	"github.com/google/uuid"
 
-	ledgerutils "zudomart/modules/ledger/src/utils"
-	"zudomart/modules/wallet/src/modules/payouts"
-	cancelwithdrawal "zudomart/modules/wallet/src/modules/payouts/commands/cancelWithdrawal"
-	requestwithdrawal "zudomart/modules/wallet/src/modules/payouts/commands/requestWithdrawal"
-	runpayouts "zudomart/modules/wallet/src/modules/payouts/commands/runPayouts"
-	listwithdrawals "zudomart/modules/wallet/src/modules/payouts/queries/listWithdrawals"
-	quotewithdrawal "zudomart/modules/wallet/src/modules/payouts/queries/quoteWithdrawal"
-	"zudomart/modules/wallet/src/modules/payouts/services"
-	"zudomart/modules/wallet/src/modules/payouts/validators"
-	"zudomart/platform/httpserver"
+	ledgerutils "nantty/modules/ledger/src/utils"
+	"nantty/modules/wallet/src/modules/payouts"
+	cancelwithdrawal "nantty/modules/wallet/src/modules/payouts/commands/cancelWithdrawal"
+	requestwithdrawal "nantty/modules/wallet/src/modules/payouts/commands/requestWithdrawal"
+	runpayouts "nantty/modules/wallet/src/modules/payouts/commands/runPayouts"
+	listwithdrawals "nantty/modules/wallet/src/modules/payouts/queries/listWithdrawals"
+	quotewithdrawal "nantty/modules/wallet/src/modules/payouts/queries/quoteWithdrawal"
+	"nantty/modules/wallet/src/modules/payouts/services"
+	"nantty/modules/wallet/src/modules/payouts/validators"
+	"nantty/platform/httpserver"
 )
 
 var withdrawalStatuses = []string{"pending_review", "on_hold", "queued", "processing", "paid", "failed", "cancelled"}

@@ -6,8 +6,8 @@ import (
 	"regexp"
 	"time"
 
-	"zudomart/modules/ledger/src/middlewares"
-	"zudomart/platform/httpserver"
+	"nantty/modules/ledger/src/middlewares"
+	"nantty/platform/httpserver"
 )
 
 var stepUpDigestPattern = regexp.MustCompile(`^[0-9a-f]{64}$`)

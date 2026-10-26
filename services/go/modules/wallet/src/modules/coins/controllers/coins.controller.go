@@ -1,7 +1,7 @@
 package controllers
 
 import (
-	"zudomart/platform/regionpricing"
+	"nantty/platform/regionpricing"
 
 	"net/http"
 	"strconv"
@@ -9,20 +9,20 @@ import (
 
 	"github.com/google/uuid"
 
-	ledgerutils "zudomart/modules/ledger/src/utils"
-	"zudomart/modules/wallet/src/modules/coins"
-	convertearnedcoins "zudomart/modules/wallet/src/modules/coins/commands/convertEarnedCoins"
-	redeemstorereceipt "zudomart/modules/wallet/src/modules/coins/commands/redeemStoreReceipt"
-	startcoinpurchase "zudomart/modules/wallet/src/modules/coins/commands/startCoinPurchase"
-	transfercoins "zudomart/modules/wallet/src/modules/coins/commands/transferCoins"
-	verifycoinpurchase "zudomart/modules/wallet/src/modules/coins/commands/verifyCoinPurchase"
-	getcoinbalance "zudomart/modules/wallet/src/modules/coins/queries/getCoinBalance"
-	listcoinactivity "zudomart/modules/wallet/src/modules/coins/queries/listCoinActivity"
-	listcoinpackages "zudomart/modules/wallet/src/modules/coins/queries/listCoinPackages"
-	quotecointransfer "zudomart/modules/wallet/src/modules/coins/queries/quoteCoinTransfer"
-	"zudomart/modules/wallet/src/modules/coins/services"
-	"zudomart/modules/wallet/src/modules/coins/validators"
-	"zudomart/platform/httpserver"
+	ledgerutils "nantty/modules/ledger/src/utils"
+	"nantty/modules/wallet/src/modules/coins"
+	convertearnedcoins "nantty/modules/wallet/src/modules/coins/commands/convertEarnedCoins"
+	redeemstorereceipt "nantty/modules/wallet/src/modules/coins/commands/redeemStoreReceipt"
+	startcoinpurchase "nantty/modules/wallet/src/modules/coins/commands/startCoinPurchase"
+	transfercoins "nantty/modules/wallet/src/modules/coins/commands/transferCoins"
+	verifycoinpurchase "nantty/modules/wallet/src/modules/coins/commands/verifyCoinPurchase"
+	getcoinbalance "nantty/modules/wallet/src/modules/coins/queries/getCoinBalance"
+	listcoinactivity "nantty/modules/wallet/src/modules/coins/queries/listCoinActivity"
+	listcoinpackages "nantty/modules/wallet/src/modules/coins/queries/listCoinPackages"
+	quotecointransfer "nantty/modules/wallet/src/modules/coins/queries/quoteCoinTransfer"
+	"nantty/modules/wallet/src/modules/coins/services"
+	"nantty/modules/wallet/src/modules/coins/validators"
+	"nantty/platform/httpserver"
 )
 
 var ErrConversionCurrencyNotAllowed = httpserver.NewApiError(http.StatusUnprocessableEntity, "CURRENCY_NOT_ALLOWED", "Earned coins convert into the currency of your verified country.")

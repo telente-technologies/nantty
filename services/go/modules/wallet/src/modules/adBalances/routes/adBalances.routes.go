@@ -3,9 +3,9 @@ package routes
 import (
 	"net/http"
 
-	"zudomart/modules/ledger/src/middlewares"
-	"zudomart/modules/wallet/src/modules/adBalances/controllers"
-	"zudomart/platform/httpserver"
+	"nantty/modules/ledger/src/middlewares"
+	"nantty/modules/wallet/src/modules/adBalances/controllers"
+	"nantty/platform/httpserver"
 )
 
 func MountAdBalancesRoutes(mux *http.ServeMux, controller controllers.AdBalancesController) {

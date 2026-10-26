@@ -8,9 +8,9 @@ import (
 
 	"github.com/jackc/pgx/v5"
 
-	ledgerutils "zudomart/modules/ledger/src/utils"
-	"zudomart/platform/jwtauth"
-	"zudomart/platform/regionpricing"
+	ledgerutils "nantty/modules/ledger/src/utils"
+	"nantty/platform/jwtauth"
+	"nantty/platform/regionpricing"
 )
 
 type ProfileCountryLookup func(ctx context.Context, accountId string) string

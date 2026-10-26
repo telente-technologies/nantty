@@ -3,11 +3,11 @@ package controllers
 import (
 	"net/http"
 
-	ledgerutils "zudomart/modules/ledger/src/utils"
-	"zudomart/modules/wallet/src/modules/payouts"
-	"zudomart/modules/wallet/src/modules/payouts/services"
-	"zudomart/platform/httpserver"
-	"zudomart/platform/staffauth"
+	ledgerutils "nantty/modules/ledger/src/utils"
+	"nantty/modules/wallet/src/modules/payouts"
+	"nantty/modules/wallet/src/modules/payouts/services"
+	"nantty/platform/httpserver"
+	"nantty/platform/staffauth"
 )
 
 type SellerReservesController struct {

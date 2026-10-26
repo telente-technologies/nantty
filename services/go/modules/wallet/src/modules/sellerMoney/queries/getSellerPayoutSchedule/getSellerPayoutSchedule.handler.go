@@ -3,8 +3,8 @@ package getsellerpayoutschedule
 import (
 	"context"
 
-	sellermoney "zudomart/modules/wallet/src/modules/sellerMoney"
-	"zudomart/modules/wallet/src/modules/sellerMoney/dtos"
+	sellermoney "nantty/modules/wallet/src/modules/sellerMoney"
+	"nantty/modules/wallet/src/modules/sellerMoney/dtos"
 )
 
 type Handler struct {

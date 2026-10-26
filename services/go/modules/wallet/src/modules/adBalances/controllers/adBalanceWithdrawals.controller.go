@@ -3,9 +3,9 @@ package controllers
 import (
 	"net/http"
 
-	ledgerutils "zudomart/modules/ledger/src/utils"
-	"zudomart/modules/wallet/src/modules/adBalances/dtos"
-	"zudomart/platform/httpserver"
+	ledgerutils "nantty/modules/ledger/src/utils"
+	"nantty/modules/wallet/src/modules/adBalances/dtos"
+	"nantty/platform/httpserver"
 )
 
 func (controller AdBalancesController) WithdrawAdBalanceToWallet(writer http.ResponseWriter, request *http.Request) {

@@ -8,14 +8,14 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/wallet/src/generated/ent"
-	"zudomart/modules/wallet/src/generated/ent/payoutaccount"
-	"zudomart/modules/wallet/src/generated/ent/withdrawal"
-	"zudomart/modules/wallet/src/modules/payouts"
-	requestwithdrawal "zudomart/modules/wallet/src/modules/payouts/commands/requestWithdrawal"
-	payoutservices "zudomart/modules/wallet/src/modules/payouts/services"
-	"zudomart/modules/wallet/src/modules/sellerMoney/dtos"
-	"zudomart/platform/httpserver"
+	"nantty/modules/wallet/src/generated/ent"
+	"nantty/modules/wallet/src/generated/ent/payoutaccount"
+	"nantty/modules/wallet/src/generated/ent/withdrawal"
+	"nantty/modules/wallet/src/modules/payouts"
+	requestwithdrawal "nantty/modules/wallet/src/modules/payouts/commands/requestWithdrawal"
+	payoutservices "nantty/modules/wallet/src/modules/payouts/services"
+	"nantty/modules/wallet/src/modules/sellerMoney/dtos"
+	"nantty/platform/httpserver"
 )
 
 var (

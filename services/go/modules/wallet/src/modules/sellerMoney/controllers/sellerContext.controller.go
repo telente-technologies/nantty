@@ -8,9 +8,9 @@ import (
 
 	"github.com/google/uuid"
 
-	sellermoney "zudomart/modules/wallet/src/modules/sellerMoney"
-	"zudomart/modules/wallet/src/modules/sellerMoney/dtos"
-	"zudomart/platform/httpserver"
+	sellermoney "nantty/modules/wallet/src/modules/sellerMoney"
+	"nantty/modules/wallet/src/modules/sellerMoney/dtos"
+	"nantty/platform/httpserver"
 )
 
 var (

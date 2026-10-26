@@ -8,8 +8,8 @@ import (
 	"strings"
 	"time"
 
-	ledgerservices "zudomart/modules/ledger/src/modules/journal/services"
-	"zudomart/modules/wallet/src/modules/sellerMoney/dtos"
+	ledgerservices "nantty/modules/ledger/src/modules/journal/services"
+	"nantty/modules/wallet/src/modules/sellerMoney/dtos"
 )
 
 func monthBounds(month time.Time, location *time.Location) (time.Time, time.Time) {

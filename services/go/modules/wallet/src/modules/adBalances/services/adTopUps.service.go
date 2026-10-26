@@ -8,15 +8,15 @@ import (
 
 	"github.com/google/uuid"
 
-	ledgermodels "zudomart/modules/ledger/src/modules/journal/models"
-	paymentconstants "zudomart/modules/payments/src/constants"
-	paymentmodels "zudomart/modules/payments/src/modules/gateway/models"
-	"zudomart/modules/wallet/src/container"
-	"zudomart/modules/wallet/src/generated/ent"
-	"zudomart/modules/wallet/src/generated/ent/adbalanceearningstransfer"
-	"zudomart/modules/wallet/src/generated/ent/adbalancetopup"
-	"zudomart/modules/wallet/src/modules/adBalances/dtos"
-	"zudomart/platform/httpserver"
+	ledgermodels "nantty/modules/ledger/src/modules/journal/models"
+	paymentconstants "nantty/modules/payments/src/constants"
+	paymentmodels "nantty/modules/payments/src/modules/gateway/models"
+	"nantty/modules/wallet/src/container"
+	"nantty/modules/wallet/src/generated/ent"
+	"nantty/modules/wallet/src/generated/ent/adbalanceearningstransfer"
+	"nantty/modules/wallet/src/generated/ent/adbalancetopup"
+	"nantty/modules/wallet/src/modules/adBalances/dtos"
+	"nantty/platform/httpserver"
 )
 
 var (

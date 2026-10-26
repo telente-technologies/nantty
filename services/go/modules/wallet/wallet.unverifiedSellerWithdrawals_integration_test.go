@@ -9,8 +9,8 @@ import (
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 
-	moneytesting "zudomart/modules/ledger/src/databases/moneyTesting"
-	paymentmodels "zudomart/modules/payments/src/modules/gateway/models"
+	moneytesting "nantty/modules/ledger/src/databases/moneyTesting"
+	paymentmodels "nantty/modules/payments/src/modules/gateway/models"
 )
 
 func (harness *walletHarness) recordSale(sellerId string, amountMinor int64) {

@@ -3,8 +3,8 @@ package wallet
 import (
 	"context"
 
-	"zudomart/modules/wallet/src"
-	"zudomart/platform/servicemodule"
+	"nantty/modules/wallet/src"
+	"nantty/platform/servicemodule"
 )
 
 type Module = src.Module

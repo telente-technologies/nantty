@@ -9,14 +9,14 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/ledger/src/databases"
-	"zudomart/modules/payments/src/interfaces"
-	bankservices "zudomart/modules/payments/src/modules/banks/services"
-	"zudomart/modules/wallet/src/container"
-	"zudomart/modules/wallet/src/generated/ent"
-	"zudomart/modules/wallet/src/generated/ent/payoutaccount"
-	"zudomart/modules/wallet/src/modules/payouts/dtos"
-	"zudomart/platform/httpserver"
+	"nantty/modules/ledger/src/databases"
+	"nantty/modules/payments/src/interfaces"
+	bankservices "nantty/modules/payments/src/modules/banks/services"
+	"nantty/modules/wallet/src/container"
+	"nantty/modules/wallet/src/generated/ent"
+	"nantty/modules/wallet/src/generated/ent/payoutaccount"
+	"nantty/modules/wallet/src/modules/payouts/dtos"
+	"nantty/platform/httpserver"
 )
 
 var (

@@ -3,8 +3,8 @@ package verifycoinpurchase
 import (
 	"context"
 
-	"zudomart/modules/wallet/src/modules/coins"
-	"zudomart/modules/wallet/src/modules/coins/dtos"
+	"nantty/modules/wallet/src/modules/coins"
+	"nantty/modules/wallet/src/modules/coins/dtos"
 )
 
 type Handler struct {

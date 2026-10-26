@@ -7,7 +7,7 @@ import (
 	"entgo.io/ent/dialect"
 	entsql "entgo.io/ent/dialect/sql"
 
-	"zudomart/modules/wallet/src/generated/ent/monetisationhold"
+	"nantty/modules/wallet/src/generated/ent/monetisationhold"
 )
 
 func TestHealthChangeUpsertOnlyOverwritesWithANewerOrEqualEvent(t *testing.T) {

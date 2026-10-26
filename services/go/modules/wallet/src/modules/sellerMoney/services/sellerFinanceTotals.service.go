@@ -6,11 +6,11 @@ import (
 
 	"github.com/google/uuid"
 
-	escrowent "zudomart/modules/escrow/src/generated/ent"
-	"zudomart/modules/escrow/src/generated/ent/escrow"
-	"zudomart/modules/wallet/src/generated/ent/withdrawal"
-	"zudomart/modules/wallet/src/modules/sellerMoney/dtos"
-	"zudomart/platform/httpserver"
+	escrowent "nantty/modules/escrow/src/generated/ent"
+	"nantty/modules/escrow/src/generated/ent/escrow"
+	"nantty/modules/wallet/src/generated/ent/withdrawal"
+	"nantty/modules/wallet/src/modules/sellerMoney/dtos"
+	"nantty/platform/httpserver"
 )
 
 type DateRange struct {

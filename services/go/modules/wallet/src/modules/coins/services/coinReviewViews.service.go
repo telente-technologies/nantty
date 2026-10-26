@@ -1,8 +1,8 @@
 package services
 
 import (
-	ledgerrepositories "zudomart/modules/ledger/src/repositories"
-	"zudomart/modules/wallet/src/modules/coins/dtos"
+	ledgerrepositories "nantty/modules/ledger/src/repositories"
+	"nantty/modules/wallet/src/modules/coins/dtos"
 )
 
 func convertCoinRecord(record CoinTransactionRecord, parties map[string]ledgerrepositories.PartySummary, flags map[string][]string) dtos.CoinTransactionDto {

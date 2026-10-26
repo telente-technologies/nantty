@@ -4,11 +4,11 @@ import (
 	"context"
 	"database/sql"
 
-	ledgerutils "zudomart/modules/ledger/src/utils"
-	paymentconstants "zudomart/modules/payments/src/constants"
-	"zudomart/modules/payments/src/interfaces"
-	"zudomart/modules/wallet/src/modules/coins"
-	"zudomart/modules/wallet/src/modules/coins/dtos"
+	ledgerutils "nantty/modules/ledger/src/utils"
+	paymentconstants "nantty/modules/payments/src/constants"
+	"nantty/modules/payments/src/interfaces"
+	"nantty/modules/wallet/src/modules/coins"
+	"nantty/modules/wallet/src/modules/coins/dtos"
 )
 
 var storeByPlatform = map[string]string{"ios": paymentconstants.StoreAppleIap, "android": paymentconstants.StoreGooglePlay}

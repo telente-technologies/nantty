@@ -8,13 +8,13 @@ import (
 
 	"github.com/google/uuid"
 
-	ledgermodels "zudomart/modules/ledger/src/modules/journal/models"
-	paymentmodels "zudomart/modules/payments/src/modules/gateway/models"
-	"zudomart/modules/wallet/src/generated/ent"
-	"zudomart/modules/wallet/src/generated/ent/coinpurchase"
-	"zudomart/modules/wallet/src/generated/ent/cointransfer"
-	"zudomart/modules/wallet/src/modules/coins/models"
-	"zudomart/platform/httpserver"
+	ledgermodels "nantty/modules/ledger/src/modules/journal/models"
+	paymentmodels "nantty/modules/payments/src/modules/gateway/models"
+	"nantty/modules/wallet/src/generated/ent"
+	"nantty/modules/wallet/src/generated/ent/coinpurchase"
+	"nantty/modules/wallet/src/generated/ent/cointransfer"
+	"nantty/modules/wallet/src/modules/coins/models"
+	"nantty/platform/httpserver"
 )
 
 var (

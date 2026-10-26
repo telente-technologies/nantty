@@ -9,8 +9,8 @@ import (
 
 	"github.com/google/uuid"
 
-	ledgermodels "zudomart/modules/ledger/src/modules/journal/models"
-	payoutservices "zudomart/modules/wallet/src/modules/payouts/services"
+	ledgermodels "nantty/modules/ledger/src/modules/journal/models"
+	payoutservices "nantty/modules/wallet/src/modules/payouts/services"
 )
 
 func TestRestrictedCreatorEarningsStayPendingUntilMonetisationIsRestored(t *testing.T) {

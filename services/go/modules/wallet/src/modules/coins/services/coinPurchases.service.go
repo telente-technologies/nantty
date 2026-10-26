@@ -8,16 +8,16 @@ import (
 
 	"github.com/google/uuid"
 
-	ledgermodels "zudomart/modules/ledger/src/modules/journal/models"
-	paymentconstants "zudomart/modules/payments/src/constants"
-	paymentmodels "zudomart/modules/payments/src/modules/gateway/models"
-	"zudomart/modules/wallet/src/container"
-	"zudomart/modules/wallet/src/generated/ent"
-	"zudomart/modules/wallet/src/generated/ent/coinpackage"
-	"zudomart/modules/wallet/src/generated/ent/coinpurchase"
-	"zudomart/modules/wallet/src/modules/coins/dtos"
-	"zudomart/modules/wallet/src/modules/coins/models"
-	"zudomart/platform/httpserver"
+	ledgermodels "nantty/modules/ledger/src/modules/journal/models"
+	paymentconstants "nantty/modules/payments/src/constants"
+	paymentmodels "nantty/modules/payments/src/modules/gateway/models"
+	"nantty/modules/wallet/src/container"
+	"nantty/modules/wallet/src/generated/ent"
+	"nantty/modules/wallet/src/generated/ent/coinpackage"
+	"nantty/modules/wallet/src/generated/ent/coinpurchase"
+	"nantty/modules/wallet/src/modules/coins/dtos"
+	"nantty/modules/wallet/src/modules/coins/models"
+	"nantty/platform/httpserver"
 )
 
 var ErrCoinPurchaseNotFound = httpserver.NewApiError(http.StatusNotFound, "COIN_PURCHASE_NOT_FOUND", "Coin purchase was not found.")

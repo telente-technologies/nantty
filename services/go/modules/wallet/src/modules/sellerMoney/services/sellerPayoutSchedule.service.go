@@ -7,11 +7,11 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/wallet/src/generated/ent"
-	"zudomart/modules/wallet/src/generated/ent/payoutaccount"
-	"zudomart/modules/wallet/src/generated/ent/sellerpayoutschedule"
-	"zudomart/modules/wallet/src/modules/sellerMoney/dtos"
-	"zudomart/platform/httpserver"
+	"nantty/modules/wallet/src/generated/ent"
+	"nantty/modules/wallet/src/generated/ent/payoutaccount"
+	"nantty/modules/wallet/src/generated/ent/sellerpayoutschedule"
+	"nantty/modules/wallet/src/modules/sellerMoney/dtos"
+	"nantty/platform/httpserver"
 )
 
 var weekdayNames = []string{"Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"}

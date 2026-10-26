@@ -11,11 +11,11 @@ import (
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/timestamppb"
 
-	commonv1 "zudomart/contracts/gen/go/zudomart/common/v1"
-	moneyv1 "zudomart/contracts/gen/go/zudomart/money/v1"
-	"zudomart/modules/wallet/src/modules/adBalances/dtos"
-	"zudomart/modules/wallet/src/modules/adBalances/services"
-	"zudomart/platform/httpserver"
+	commonv1 "nantty/contracts/gen/go/zudomart/common/v1"
+	moneyv1 "nantty/contracts/gen/go/zudomart/money/v1"
+	"nantty/modules/wallet/src/modules/adBalances/dtos"
+	"nantty/modules/wallet/src/modules/adBalances/services"
+	"nantty/platform/httpserver"
 )
 
 var grpcIdempotencyKeyPattern = regexp.MustCompile(`^[A-Za-z0-9_-]{8,128}$`)

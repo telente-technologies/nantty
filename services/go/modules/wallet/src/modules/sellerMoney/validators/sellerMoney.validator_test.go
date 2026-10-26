@@ -3,7 +3,7 @@ package validators
 import (
 	"testing"
 
-	"zudomart/modules/wallet/src/modules/sellerMoney/dtos"
+	"nantty/modules/wallet/src/modules/sellerMoney/dtos"
 )
 
 func TestPayoutAccountNumbersFollowCountryRules(t *testing.T) {

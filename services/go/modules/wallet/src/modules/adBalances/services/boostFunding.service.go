@@ -5,12 +5,12 @@ import (
 	"database/sql"
 	"net/http"
 
-	"zudomart/modules/ledger/src/databases"
-	ledgermodels "zudomart/modules/ledger/src/modules/journal/models"
-	"zudomart/modules/wallet/src/generated/ent"
-	"zudomart/modules/wallet/src/generated/ent/adspenddebit"
-	"zudomart/modules/wallet/src/modules/adBalances/dtos"
-	"zudomart/platform/httpserver"
+	"nantty/modules/ledger/src/databases"
+	ledgermodels "nantty/modules/ledger/src/modules/journal/models"
+	"nantty/modules/wallet/src/generated/ent"
+	"nantty/modules/wallet/src/generated/ent/adspenddebit"
+	"nantty/modules/wallet/src/modules/adBalances/dtos"
+	"nantty/platform/httpserver"
 )
 
 var (

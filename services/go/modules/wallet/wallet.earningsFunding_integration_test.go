@@ -11,8 +11,8 @@ import (
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 
-	ledgermodels "zudomart/modules/ledger/src/modules/journal/models"
-	paymentstesting "zudomart/modules/payments/src/integrations/paymentsTesting"
+	ledgermodels "nantty/modules/ledger/src/modules/journal/models"
+	paymentstesting "nantty/modules/payments/src/integrations/paymentsTesting"
 )
 
 var internalHeaders = http.Header{"X-Internal-Token": {strings.Repeat("w", 32)}}

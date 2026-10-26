@@ -7,12 +7,12 @@ import (
 
 	"github.com/google/uuid"
 
-	escrowent "zudomart/modules/escrow/src/generated/ent"
-	"zudomart/modules/escrow/src/generated/ent/escrow"
-	"zudomart/modules/escrow/src/generated/ent/predicate"
-	"zudomart/modules/wallet/src/modules/sellerMoney/dtos"
-	"zudomart/platform/httpserver"
-	"zudomart/platform/money"
+	escrowent "nantty/modules/escrow/src/generated/ent"
+	"nantty/modules/escrow/src/generated/ent/escrow"
+	"nantty/modules/escrow/src/generated/ent/predicate"
+	"nantty/modules/wallet/src/modules/sellerMoney/dtos"
+	"nantty/platform/httpserver"
+	"nantty/platform/money"
 )
 
 var escrowStatuses = []string{"held", "released", "refunded", "disputed"}

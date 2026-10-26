@@ -1,9 +1,9 @@
 package payouts
 
 import (
-	bankservices "zudomart/modules/payments/src/modules/banks/services"
-	"zudomart/modules/wallet/src/container"
-	"zudomart/modules/wallet/src/modules/payouts/services"
+	bankservices "nantty/modules/payments/src/modules/banks/services"
+	"nantty/modules/wallet/src/container"
+	"nantty/modules/wallet/src/modules/payouts/services"
 )
 
 type Application struct {

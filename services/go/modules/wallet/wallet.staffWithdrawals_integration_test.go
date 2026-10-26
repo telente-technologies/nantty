@@ -9,7 +9,7 @@ import (
 
 	"github.com/google/uuid"
 
-	ledgermodels "zudomart/modules/ledger/src/modules/journal/models"
+	ledgermodels "nantty/modules/ledger/src/modules/journal/models"
 )
 
 func (harness *walletHarness) fundWithdrawableBalance(userId string, amountMinor int64) (string, string) {

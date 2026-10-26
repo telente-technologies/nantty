@@ -6,8 +6,8 @@ import (
 
 	"github.com/google/uuid"
 
-	"zudomart/modules/wallet/src/modules/sellerMoney/dtos"
-	"zudomart/platform/httpserver"
+	"nantty/modules/wallet/src/modules/sellerMoney/dtos"
+	"nantty/platform/httpserver"
 )
 
 var accountNumberPatternByCountry = map[string]*regexp.Regexp{

@@ -6,14 +6,14 @@ import (
 	"errors"
 	"net/http"
 
-	"zudomart/modules/ledger/src/databases"
-	ledgermodels "zudomart/modules/ledger/src/modules/journal/models"
-	paymentmodels "zudomart/modules/payments/src/modules/gateway/models"
-	paymentservices "zudomart/modules/payments/src/modules/gateway/services"
-	"zudomart/modules/wallet/src/generated/ent"
-	"zudomart/modules/wallet/src/generated/ent/adbalanceearningstransfer"
-	"zudomart/modules/wallet/src/modules/adBalances/dtos"
-	"zudomart/platform/httpserver"
+	"nantty/modules/ledger/src/databases"
+	ledgermodels "nantty/modules/ledger/src/modules/journal/models"
+	paymentmodels "nantty/modules/payments/src/modules/gateway/models"
+	paymentservices "nantty/modules/payments/src/modules/gateway/services"
+	"nantty/modules/wallet/src/generated/ent"
+	"nantty/modules/wallet/src/generated/ent/adbalanceearningstransfer"
+	"nantty/modules/wallet/src/modules/adBalances/dtos"
+	"nantty/platform/httpserver"
 )
 
 var ErrInsufficientEarnings = httpserver.NewApiError(http.StatusUnprocessableEntity, "INSUFFICIENT_FUNDS", "Amount is more than your available balance.")

@@ -3,7 +3,7 @@ package removepayoutaccount
 import (
 	"context"
 
-	"zudomart/modules/wallet/src/modules/payouts"
+	"nantty/modules/wallet/src/modules/payouts"
 )
 
 type Handler struct {

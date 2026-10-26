@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"time"
 
-	"zudomart/platform/httpserver"
+	"nantty/platform/httpserver"
 )
 
 func PayoutAccountCoolingDown(cooldown time.Duration, withdrawableFrom time.Time) *httpserver.ApiError {

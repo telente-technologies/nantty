@@ -3,9 +3,9 @@ package listwithdrawals
 import (
 	"context"
 
-	"zudomart/modules/wallet/src/modules/payouts"
-	"zudomart/modules/wallet/src/modules/payouts/dtos"
-	"zudomart/platform/httpserver"
+	"nantty/modules/wallet/src/modules/payouts"
+	"nantty/modules/wallet/src/modules/payouts/dtos"
+	"nantty/platform/httpserver"
 )
 
 type Handler struct {

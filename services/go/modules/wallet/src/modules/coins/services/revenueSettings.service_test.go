@@ -7,9 +7,9 @@ import (
 	"log/slog"
 	"testing"
 
-	"zudomart/modules/ledger/src/loaders"
-	"zudomart/modules/wallet/src/configs"
-	"zudomart/modules/wallet/src/container"
+	"nantty/modules/ledger/src/loaders"
+	"nantty/modules/wallet/src/configs"
+	"nantty/modules/wallet/src/container"
 )
 
 func TestCoinTransferFeeAndCashValuesFollowTheAdminRevenueSetting(t *testing.T) {
