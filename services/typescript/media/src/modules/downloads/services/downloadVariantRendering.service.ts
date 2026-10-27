@@ -28,7 +28,7 @@ export function computeDownloadCacheKey(sourceKey: string, watermarkHandle: stri
 export const shouldStripDownloadAudio = (asset: MediaAssetWithVariants, requested: boolean) => requested || isAudioMuted(asset);
 
 async function withWorkDirectory<T>(work: (directory: string) => Promise<T>): Promise<T> {
-  const directory = await mkdtemp(join(tmpdir(), "zudomart-download-"));
+  const directory = await mkdtemp(join(tmpdir(), "nantty-download-"));
   try {
     return await work(directory);
   } finally {

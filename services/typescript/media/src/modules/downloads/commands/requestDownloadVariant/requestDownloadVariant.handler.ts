@@ -22,7 +22,7 @@ export function estimateDownloadRenderProgress(row: Pick<DownloadVariantRow, "st
 async function signReadyVariant(context: HandlerContext, asset: MediaAssetWithVariants, row: DownloadVariantRow, requesterId: string): Promise<DownloadVariantView> {
   if (row.bucket === null || row.key === null) throw conflict("DOWNLOAD_NOT_READY", "This download is still being prepared.");
   const extension = row.key.slice(row.key.lastIndexOf(".") + 1);
-  const fileName = `zudomart-${row.watermarkHandle}-${asset.id.slice(0, 8)}.${extension}`;
+  const fileName = `nantty-${row.watermarkHandle}-${asset.id.slice(0, 8)}.${extension}`;
   const expiresAt = new Date(context.clock.now().getTime() + downloadSignedUrlLifetimeSeconds * 1000);
   await context.database.client.mediaAccessLog.create({ data: { mediaId: asset.id, actorId: requesterId, reason: "branded_download", expiresAt } });
   const url = await context.storage.signGetUrl(row.bucket, row.key, downloadSignedUrlLifetimeSeconds, fileName);

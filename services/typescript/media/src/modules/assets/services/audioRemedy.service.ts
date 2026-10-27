@@ -29,7 +29,7 @@ export async function muteMediaAudio(context: HandlerContext, mediaId: string, c
   if (!canCarryRemedy(asset) || isAudioMuted(asset)) return "skipped";
   const source = asset.variants.find((variant) => variant.format === "mp4");
   if (source === undefined) return "skipped";
-  const workDirectory = await mkdtemp(join(tmpdir(), "zudomart-mute-"));
+  const workDirectory = await mkdtemp(join(tmpdir(), "nantty-mute-"));
   try {
     const inputPath = join(workDirectory, "source.mp4");
     await context.storage.downloadToFile(source.bucket, source.key, inputPath);

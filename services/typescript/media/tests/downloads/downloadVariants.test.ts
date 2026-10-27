@@ -53,7 +53,7 @@ describe("branded download variants", () => {
     expect(videoInputs[0]).toMatchObject({ watermarkHandle: "ada", stripAudio: false });
 
     const ready = await request({ mediaId: id, requesterId: "viewer-1", watermarkHandle: "ada", stripAudio: false });
-    expect(ready).toMatchObject({ status: "ready", progress: 1, contentType: "video/mp4", fileName: `zudomart-ada-${id.slice(0, 8)}.mp4` });
+    expect(ready).toMatchObject({ status: "ready", progress: 1, contentType: "video/mp4", fileName: `nantty-ada-${id.slice(0, 8)}.mp4` });
     const stored = harness.storage.keysIn(harness.context.config.storage.privateBucket);
     expect(stored.some((key) => key.startsWith(`p/${id}/download/`))).toBe(true);
     expect(harness.db.accessLogs).toHaveLength(1);

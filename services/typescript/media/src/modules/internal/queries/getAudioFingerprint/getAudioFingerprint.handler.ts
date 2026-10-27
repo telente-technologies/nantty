@@ -21,7 +21,7 @@ export function createGetAudioFingerprintHandler(context: HandlerContext): Handl
     if (asset === null || asset.status !== "ready") throw notFound("MEDIA_NOT_FOUND", "Media not found");
     const source = asset.variants.find((variant) => fingerprintableFormats.includes(variant.format) && !variant.key.includes("/muted/"));
     if (source === undefined || (asset.kind !== "video" && asset.kind !== "audio")) return { mediaId, available: false, fingerprint: null };
-    const workDirectory = await mkdtemp(join(tmpdir(), "zudomart-fingerprint-"));
+    const workDirectory = await mkdtemp(join(tmpdir(), "nantty-fingerprint-"));
     try {
       const inputPath = join(workDirectory, `source.${source.format}`);
       await context.storage.downloadToFile(source.bucket, source.key, inputPath);

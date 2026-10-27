@@ -94,7 +94,7 @@ export async function runMediaPipeline(context: HandlerContext, mediaId: string,
   await mediaAssetRepository.update(context.database.client, asset.id, { status: "processing" });
   const purpose = asset.purpose as MediaPurposeName;
   const policy = purposePolicies[purpose];
-  const workDirectory = await mkdtemp(join(tmpdir(), "zudomart-media-"));
+  const workDirectory = await mkdtemp(join(tmpdir(), "nantty-media-"));
   try {
     const inputPath = join(workDirectory, "original");
     await context.storage.downloadToFile(asset.quarantineBucket, asset.quarantineKey, inputPath);
