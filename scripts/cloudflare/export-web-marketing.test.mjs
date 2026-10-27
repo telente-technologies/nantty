@@ -65,7 +65,7 @@ describe("static web marketing artifact", () => {
       assert.match(response.headers.get("content-type") ?? "", /text\/html/);
       const html = await response.text();
       assert.match(html, /Nantty/);
-      assert.doesNotMatch(html, /zudomart/i, `${route} must not expose the legacy brand in rendered content`);
+      assert.doesNotMatch(html, /nantty/i, `${route} must not expose the legacy brand in rendered content`);
     }
     for (const deniedPath of ["/api/v1/locale", "/bff/session", "/login"]) {
       assert.equal((await fetch(`${origin}${deniedPath}`)).status, 404, `${deniedPath} must not be an exported route`);

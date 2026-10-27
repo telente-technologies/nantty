@@ -4,7 +4,7 @@ set -euo pipefail
 service=$1
 image=$2
 environment=$3
-cluster="zudomart-${environment}"
+cluster="nantty-${environment}"
 blue_green=${4:-false}
 port=${5:-8080}
 
@@ -22,8 +22,8 @@ if [ "$blue_green" = "true" ]; then
     '{version: 1, Resources: [{TargetService: {Type: "AWS::ECS::Service", Properties: {TaskDefinition: $task, LoadBalancerInfo: {ContainerName: $name, ContainerPort: $port}}}}]}')
   revision=$(jq -cn --arg content "$appspec" '{revisionType: "AppSpecContent", appSpecContent: {content: $content}}')
   deployment=$(aws deploy create-deployment \
-    --application-name "zudomart-${environment}-${service}" \
-    --deployment-group-name "zudomart-${environment}-${service}" \
+    --application-name "nantty-${environment}-${service}" \
+    --deployment-group-name "nantty-${environment}-${service}" \
     --revision "$revision" --query deploymentId --output text)
   echo "codedeploy deployment $deployment (10 percent canary, alarm rollback)"
   aws deploy wait deployment-successful --deployment-id "$deployment"

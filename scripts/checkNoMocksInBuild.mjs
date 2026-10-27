@@ -12,7 +12,7 @@ const requireBuild = args.includes("--require-build");
 const exportFlag = args.indexOf("--mobile-export");
 const mobileExportDirectory = exportFlag === -1 ? null : resolve(args[exportFlag + 1] ?? "");
 const requested = args.filter((argument, index) => !argument.startsWith("--") && (exportFlag === -1 || index !== exportFlag + 1));
-const fixedMarkers = ["zudomart-mock-backend-bundled", "The demo backend hit an error."];
+const fixedMarkers = ["nantty-mock-backend-bundled", "The demo backend hit an error."];
 const problems = [];
 
 function listFiles(directory, accept, skip = () => false) {

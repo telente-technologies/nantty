@@ -74,7 +74,7 @@ async function assertStaticHtmlIsSafe(filePath, route) {
   for (const pattern of unsafeReferences) {
     if (pattern.test(html)) throw new Error(`Unsafe app endpoint, server image optimizer, or secret-like value in ${route}`);
   }
-  if (/zudomart/i.test(html)) throw new Error(`Legacy brand is visible in public static HTML on ${route}`);
+  if (/nantty/i.test(html)) throw new Error(`Legacy brand is visible in public static HTML on ${route}`);
   if (!html.includes("Nantty")) throw new Error(`Expected Nantty branding was not rendered on ${route}`);
 }
 

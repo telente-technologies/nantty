@@ -98,12 +98,12 @@ jobs:
       postgres:
         image: postgis/postgis:17-3.5
         env:
-          POSTGRES_USER: zudomart
-          POSTGRES_PASSWORD: zudomart
-          POSTGRES_DB: zudomart
+          POSTGRES_USER: nantty
+          POSTGRES_PASSWORD: nantty
+          POSTGRES_DB: nantty
         ports: ["15432:5432"]
         options: >-
-          --health-cmd "pg_isready -U zudomart" --health-interval 5s --health-timeout 5s --health-retries 20
+          --health-cmd "pg_isready -U nantty" --health-interval 5s --health-timeout 5s --health-retries 20
       valkey:
         image: valkey/valkey:9-alpine
         ports: ["16379:6379"]
@@ -117,9 +117,9 @@ jobs:
     env:
       PGHOST: localhost
       PGPORT: "15432"
-      PGPASSWORD: zudomart
-      POSTGRES_USER: zudomart
-      POSTGRES_DB: zudomart
+      PGPASSWORD: nantty
+      POSTGRES_USER: nantty
+      POSTGRES_DB: nantty
     steps:
       - name: Free runner disk space (the full Go workspace build, vet and test cache does not fit the default free space)
         run: |
@@ -140,7 +140,7 @@ jobs:
         working-directory: services/go
         env:
           REDIS_URL: redis://localhost:16379
-          RABBITMQ_URL: amqp://guest:guest@localhost:5672/zudomart
+          RABBITMQ_URL: amqp://guest:guest@localhost:5672/nantty
         run: bash ../scripts/test-go-workspace.sh
       - uses: pnpm/action-setup@v6.1.0
       - uses: actions/setup-node@v7.1.0
@@ -150,9 +150,9 @@ jobs:
       - run: pnpm install --frozen-lockfile --filter @nantty/social... --filter @nantty/notifications... --filter @nantty/media...
       - name: TypeScript service tests that use the database
         env:
-          DATABASE_URL: postgres://zudomart:zudomart@localhost:15432/zudomart_test
+          DATABASE_URL: postgres://nantty:nantty@localhost:15432/nantty_test
           VALKEY_URL: redis://localhost:16379
-          RABBITMQ_URL: amqp://guest:guest@localhost:5672/zudomart
+          RABBITMQ_URL: amqp://guest:guest@localhost:5672/nantty
         run: |
           pnpm --filter @nantty/social test
           pnpm --filter @nantty/notifications test
@@ -166,17 +166,17 @@ jobs:
       postgres:
         image: postgis/postgis:17-3.5
         env:
-          POSTGRES_USER: zudomart
-          POSTGRES_PASSWORD: zudomart
-          POSTGRES_DB: zudomart
+          POSTGRES_USER: nantty
+          POSTGRES_PASSWORD: nantty
+          POSTGRES_DB: nantty
         ports: ["15432:5432"]
         options: >-
-          --health-cmd "pg_isready -U zudomart" --health-interval 5s --health-timeout 5s --health-retries 20
+          --health-cmd "pg_isready -U nantty" --health-interval 5s --health-timeout 5s --health-retries 20
     env:
       PGHOST: localhost
       PGPORT: "15432"
-      PGUSER: zudomart
-      PGPASSWORD: zudomart
+      PGUSER: nantty
+      PGPASSWORD: nantty
     steps:
       - uses: actions/checkout@v7.0.1
         with:
@@ -192,7 +192,7 @@ jobs:
           echo "$RUNNER_TEMP" >> "$GITHUB_PATH"
       - name: Lint every module migration directory against a clean dev database
         run: |
-          psql -d postgres -c "CREATE ROLE zudomart_readers NOLOGIN"
+          psql -d postgres -c "CREATE ROLE nantty_readers NOLOGIN"
           status=0
           for dir in services/go/modules/*/src/migrations; do
             [ -f "$dir/atlas.sum" ] || continue
@@ -201,7 +201,7 @@ jobs:
             echo "::group::$dir"
             atlas migrate validate --dir "file://$dir?format=golang-migrate" || status=1
             atlas migrate lint --dir "file://$dir?format=golang-migrate" \
-              --dev-url "postgres://zudomart:zudomart@localhost:15432/atlas_dev?sslmode=disable&search_path=public" \
+              --dev-url "postgres://nantty:nantty@localhost:15432/atlas_dev?sslmode=disable&search_path=public" \
               --git-base "origin/${{ github.base_ref || 'main' }}" || status=1
             echo "::endgroup::"
           done
@@ -282,7 +282,7 @@ jobs:
       - uses: actions/checkout@v7.0.1
       - env:
           DEPLOYABLE: ${{ matrix.deployable }}
-        run: docker build -f "services/go/deployables/$DEPLOYABLE/Dockerfile" -t "zudomart/ci-${DEPLOYABLE,,}" services
+        run: docker build -f "services/go/deployables/$DEPLOYABLE/Dockerfile" -t "nantty/ci-${DEPLOYABLE,,}" services
 
   gateway:
     needs: changes

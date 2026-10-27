@@ -20,7 +20,7 @@ paths = ['''^security/regression/sandboxSecrets\.env$''']
 [[allowlists]]
 description = "KDF info label, not a secret"
 regexTarget = "match"
-regexes = ['''"ZudomartRatchetv1"''']
+regexes = ['''"NanttyRatchetv1"''']
 
 [[allowlists]]
 description = "Default guest login of the throwaway RabbitMQ CI service container"

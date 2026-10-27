@@ -27,8 +27,8 @@ jobs:
     timeout-minutes: 60
     env:
       EXPO_PUBLIC_USE_MOCKS: "true"
-      EXPO_PUBLIC_SELLER_WEB_URL: https://dashboard.zudomart.com
-      EXPO_PUBLIC_ADS_MANAGER_URL: https://ads.zudomart.com
+      EXPO_PUBLIC_SELLER_WEB_URL: https://dashboard.nantty.com
+      EXPO_PUBLIC_ADS_MANAGER_URL: https://ads.nantty.com
       NODE_ENV: production
     steps:
       - uses: actions/checkout@v7.0.1
@@ -64,11 +64,11 @@ jobs:
 
       - name: Name the APK with the commit
         working-directory: apps/mobile/android/app/build/outputs/apk/release
-        run: mv app-release.apk "zudomart-${GITHUB_SHA::7}.apk"
+        run: mv app-release.apk "nantty-${GITHUB_SHA::7}.apk"
 
       - uses: actions/upload-artifact@v7.0.2
         with:
-          name: zudomart-android-apk
+          name: nantty-android-apk
           path: apps/mobile/android/app/build/outputs/apk/release/*.apk
           retention-days: 14
           if-no-files-found: error
