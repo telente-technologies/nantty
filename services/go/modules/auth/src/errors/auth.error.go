@@ -24,7 +24,7 @@ var (
 	ErrAccountBanned             = httpserver.NewApiError(http.StatusForbidden, "ACCOUNT_BANNED", "This account has been banned.")
 	ErrAccountSuspended          = httpserver.NewApiError(http.StatusForbidden, "ACCOUNT_SUSPENDED", "This account has been suspended.")
 	ErrAccountDeleted            = httpserver.NewApiError(http.StatusForbidden, "ACCOUNT_DELETED", "This account was deleted. Create a new account to come back.")
-	ErrBelowMinimumAge           = httpserver.NewApiError(http.StatusForbidden, "BELOW_MINIMUM_AGE", "Sorry, you need to be at least 13 to use Zudomart. We have not saved your birthday.")
+	ErrBelowMinimumAge           = httpserver.NewApiError(http.StatusForbidden, "BELOW_MINIMUM_AGE", "Sorry, you need to be at least 13 to use Nantty. We have not saved your birthday.")
 	ErrBirthdayRequired          = httpserver.NewApiError(http.StatusUnprocessableEntity, "BIRTHDAY_REQUIRED", "Add your birthday to finish creating your account.")
 	ErrBirthdayAlreadySet        = httpserver.NewApiError(http.StatusConflict, "BIRTHDAY_ALREADY_SET", "Your birthday is already on your account. Contact support to correct it.")
 	ErrSessionNotFound           = httpserver.NewApiError(http.StatusNotFound, "SESSION_NOT_FOUND", "That session was not found.")

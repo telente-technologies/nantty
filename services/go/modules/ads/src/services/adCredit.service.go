@@ -68,8 +68,8 @@ func IssueCreditLotInTransaction(ctx context.Context, tx *ent.Tx, input CreditLo
 }
 
 var creditDescriptions = map[string]string{
-	CreditChangeIssued: "Ad credit issued by Zudomart", CreditChangeCashback: "Cashback on ad spend", CreditChangeExpired: "Ad credit expired",
-	CreditChangeRevoked: "Ad credit removed by Zudomart", CreditChangeCashbackReversed: "Cashback reversed after a refund",
+	CreditChangeIssued: "Ad credit issued by Nantty", CreditChangeCashback: "Cashback on ad spend", CreditChangeExpired: "Ad credit expired",
+	CreditChangeRevoked: "Ad credit removed by Nantty", CreditChangeCashbackReversed: "Cashback reversed after a refund",
 }
 
 func recordCreditChange(ctx context.Context, tx *ent.Tx, lot *ent.AdCreditLot, kind string, transactionType adfundstransaction.Type, signedMinor int64, description, reference string, now time.Time) error {

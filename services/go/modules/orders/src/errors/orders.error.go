@@ -36,7 +36,7 @@ var (
 	OrderNotCancellable              = Api(http.StatusConflict, "ORDER_NOT_CANCELLABLE", "That order can no longer be cancelled.")
 	RefundAmountInvalid              = Api(http.StatusUnprocessableEntity, "REFUND_AMOUNT_INVALID", "Enter a refund amount above zero.")
 	OrderNotRefundable               = Api(http.StatusConflict, "ORDER_NOT_REFUNDABLE", "This order has already been refunded or a refund is on its way.")
-	OrderRefundDisputed              = Api(http.StatusConflict, "ORDER_NOT_REFUNDABLE", "Zudomart decides refunds while a dispute is open.")
+	OrderRefundDisputed              = Api(http.StatusConflict, "ORDER_NOT_REFUNDABLE", "Nantty decides refunds while a dispute is open.")
 	OrderRefundOnlyInFull            = Api(http.StatusConflict, "ORDER_NOT_REFUNDABLE", "This order was already paid out to you, so it can only be refunded in full.")
 	OrderNotConfirmable              = Api(http.StatusConflict, "ORDER_NOT_CONFIRMABLE", "Only delivered orders can be confirmed.")
 	NotInTransit                     = Api(http.StatusConflict, "NOT_IN_TRANSIT", "Only shipments in transit can record a delivery attempt.")

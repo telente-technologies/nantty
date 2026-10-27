@@ -57,7 +57,7 @@ func (handler Handler) Execute(ctx context.Context, query Query) (DocumentView, 
 				viewer = query.Actor.Staff.Id
 			}
 			view := DocumentView{DocumentId: document.Id, Kind: document.Kind, Url: url, ExpiresAt: expiresAt,
-				WatermarkText: "Zudomart Admin — confidential · " + viewer + " · " + handler.Container.Now().UTC().Format(time.RFC3339)}
+				WatermarkText: "Nantty Admin — confidential · " + viewer + " · " + handler.Container.Now().UTC().Format(time.RFC3339)}
 			return view, services.RecordStaffChange(ctx, handler.Container, query.Actor, services.StaffChange{
 				Action: "brand.document_viewed", SubjectType: brandservices.SubjectType, SubjectId: query.BrandId.String(), Reason: "Opened " + document.Kind,
 				After: map[string]string{"documentId": document.Id, "kind": document.Kind},

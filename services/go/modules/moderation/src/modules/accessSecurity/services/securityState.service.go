@@ -29,7 +29,7 @@ type EventInput struct {
 	Detail            any
 }
 
-var SystemActor = integrations.StaffActor{Id: "system:go-trust", Name: "Zudomart Security", Role: "system"}
+var SystemActor = integrations.StaffActor{Id: "system:go-trust", Name: "Nantty Security", Role: "system"}
 
 func Thresholds(application *container.Container) configs.AccessSecuritySettings {
 	return EffectiveThresholds(application.Settings.AccessSecurity)

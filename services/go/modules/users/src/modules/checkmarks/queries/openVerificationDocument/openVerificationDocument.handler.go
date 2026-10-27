@@ -69,6 +69,6 @@ func (handler Handler) open(ctx context.Context, actor types.StaffActor, row *en
 	})
 	return Result{
 		DocumentId: document.Id, Kind: document.Kind, Label: document.Label, ViewUrl: url, ExpiresAt: now.Add(viewLinkTimeToLive).UTC().Format(time.RFC3339),
-		WatermarkText: "Zudomart Admin — confidential · " + actor.Name + " · " + now.UTC().Format(time.RFC3339),
+		WatermarkText: "Nantty Admin — confidential · " + actor.Name + " · " + now.UTC().Format(time.RFC3339),
 	}, err
 }

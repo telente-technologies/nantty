@@ -52,7 +52,7 @@ func (service DisputeService) escalateOverdueDisputeInTransaction(ctx context.Co
 	if err != nil {
 		return false, err
 	}
-	if err := service.recordStatus(ctx, client, locked.ID, string(dispute.StatusUnderReview), "Seller did not respond within 48 hours — Zudomart support is reviewing"); err != nil {
+	if err := service.recordStatus(ctx, client, locked.ID, string(dispute.StatusUnderReview), "Seller did not respond within 48 hours — Nantty support is reviewing"); err != nil {
 		return false, err
 	}
 	if err := service.recordEscrowEvent(ctx, client, held.ID, "dispute_seller_deadline_missed", "system", "", map[string]any{"disputeId": locked.ID.String()}); err != nil {

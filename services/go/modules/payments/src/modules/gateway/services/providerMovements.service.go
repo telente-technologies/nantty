@@ -99,7 +99,7 @@ func (gateway *PaymentGateway) SendMovement(ctx context.Context, reference strin
 func (gateway *PaymentGateway) sendClaimedMovement(ctx context.Context, provider interfaces.WalletProvider, movement *ent.ProviderMovement) error {
 	result, err := provider.MoveBetweenWallets(ctx, interfaces.WalletMove{
 		FromAccountRef: movement.FromWalletRef, FromPlatformBalance: movement.FromWalletRef == "", ToBarterId: movement.ToBarterID, ToPlatformBalance: movement.ToPlatform,
-		AmountMinor: movement.AmountMinor, Currency: movement.Currency, Reference: movement.Reference, Narration: "Zudomart " + movement.Kind,
+		AmountMinor: movement.AmountMinor, Currency: movement.Currency, Reference: movement.Reference, Narration: "Nantty " + movement.Kind,
 	})
 	switch {
 	case errors.Is(err, providerhttp.ErrOutcomeUnknown):

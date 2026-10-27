@@ -23,7 +23,7 @@ func (service *LiveService) lookupParticipants(ctx context.Context, identifiers 
 	}
 	for _, identifier := range unique {
 		if _, known := found[identifier]; !known {
-			found[identifier] = interfaces.Participant{Id: identifier, Name: "Zudomart user", Username: identifier.String()[:8]}
+			found[identifier] = interfaces.Participant{Id: identifier, Name: "Nantty user", Username: identifier.String()[:8]}
 		}
 	}
 	return found, nil

@@ -58,9 +58,9 @@ func (handler Handler) Execute(ctx context.Context, command Command) (dtos.AdAcc
 
 func findInvitee(ctx context.Context, deployed *container.Container, request dtos.InviteMemberRequest) (interfaces.UserSummary, error) {
 	identifier, byEmail := InviteeIdentifier(request)
-	lookup, message := deployed.Users.FindUserByUsername, "No Zudomart user has that username."
+	lookup, message := deployed.Users.FindUserByUsername, "No Nantty user has that username."
 	if byEmail {
-		lookup, message = deployed.Users.FindUserByEmail, "No Zudomart user has that email. Ask them to sign up first, then invite them."
+		lookup, message = deployed.Users.FindUserByEmail, "No Nantty user has that email. Ask them to sign up first, then invite them."
 	}
 	path := issuePath(byEmail)
 	invitee, found, err := lookup(ctx, identifier)

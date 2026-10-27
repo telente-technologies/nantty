@@ -126,7 +126,7 @@ func reserveWithdrawal(ctx context.Context, deployed *container.Container, userI
 			return err
 		}
 		return tx.AdFundsTransaction.Create().SetAccountID(account.ID).SetType(adfundstransaction.TypeWithdrawal).SetAmountMinor(-amount.AmountMinor).SetCurrency(currency).
-			SetDescription("Withdrawn to your Zudomart wallet").SetReference("withdrawal:" + reserved.ID.String()).Exec(ctx)
+			SetDescription("Withdrawn to your Nantty wallet").SetReference("withdrawal:" + reserved.ID.String()).Exec(ctx)
 	})
 	return reserved, err
 }

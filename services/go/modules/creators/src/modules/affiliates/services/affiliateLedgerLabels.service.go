@@ -65,5 +65,5 @@ func CreatorCommissionReversalFailedDescription(commission *ent.AffiliateCommiss
 }
 
 func SellerCommissionShortfallDescription(commission *ent.AffiliateCommission) string {
-	return "Affiliate commission refund covered by Zudomart while " + creatorLabel(commission) + " repays it, " + orderLabel(commission)
+	return "Affiliate commission refund covered by Nantty while " + creatorLabel(commission) + " repays it, " + orderLabel(commission)
 }

@@ -21,7 +21,7 @@ func Validate(request dtos.InviteMemberRequest) error {
 	username, email := strings.TrimSpace(request.Username), strings.TrimSpace(request.Email)
 	switch {
 	case username == "" && email == "":
-		issues = append(issues, httpserver.ValidationIssue{Path: "username", Message: "Enter the username or email of an existing Zudomart user."})
+		issues = append(issues, httpserver.ValidationIssue{Path: "username", Message: "Enter the username or email of an existing Nantty user."})
 	case username != "" && email != "":
 		issues = append(issues, httpserver.ValidationIssue{Path: "email", Message: "Enter either a username or an email, not both."})
 	case email != "" && !looksLikeEmail(email):

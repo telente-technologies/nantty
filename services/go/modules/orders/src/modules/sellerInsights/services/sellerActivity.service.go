@@ -67,7 +67,7 @@ func (orders StoreOrders) Alerts(requestedReturns, disputesAwaiting int, stock c
 	}
 	candidates := []dtos.Alert{
 		{Kind: "orders_to_accept", Severity: "caution", Count: toAccept, Title: plural(toAccept, "order", "orders") + " to accept", Description: "Accept or reject new orders so buyers know you are on it.", Href: "/orders?status=new"},
-		{Kind: "disputes_awaiting_response", Severity: "error", Count: disputesAwaiting, Title: plural(disputesAwaiting, "dispute", "disputes") + " need your reply", Description: "Reply before the deadline or Zudomart decides without you.", Href: "/orders/disputes"},
+		{Kind: "disputes_awaiting_response", Severity: "error", Count: disputesAwaiting, Title: plural(disputesAwaiting, "dispute", "disputes") + " need your reply", Description: "Reply before the deadline or Nantty decides without you.", Href: "/orders/disputes"},
 		{Kind: "returns_requested", Severity: "caution", Count: requestedReturns, Title: plural(requestedReturns, "return request", "return requests"), Description: "Approve or decline return requests.", Href: "/orders/returns"},
 		{Kind: "out_of_stock", Severity: "error", Count: stock.OutOfStockCount, Title: plural(stock.OutOfStockCount, "item", "items") + " out of stock", Description: "Buyers cannot order these until you restock.", Href: "/inventory?status=out_of_stock"},
 		{Kind: "low_stock", Severity: "info", Count: stock.LowStockCount, Title: plural(stock.LowStockCount, "item", "items") + " running low", Description: "Restock before they sell out.", Href: "/inventory?status=low_stock"},

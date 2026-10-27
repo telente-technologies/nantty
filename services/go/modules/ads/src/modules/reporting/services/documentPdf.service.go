@@ -4,7 +4,7 @@ func BuildLabelledDocumentPdf(title string, lines [][2]string) []byte {
 	document := &pdfDocument{}
 	page := document.newPage()
 	y := float64(pdfPageHeight) - pdfMargin
-	page.text(pdfMargin, y, 18, true, "Zudomart Ads")
+	page.text(pdfMargin, y, 18, true, "Nantty Ads")
 	page.text(pdfMargin, y-24, 13, false, title)
 	page.line(pdfMargin, y-34, pdfPageWidth-pdfMargin)
 	y -= 62

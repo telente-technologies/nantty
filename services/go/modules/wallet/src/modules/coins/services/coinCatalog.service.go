@@ -19,7 +19,7 @@ import (
 
 var (
 	ErrCoinPackageNotFound = httpserver.NewApiError(http.StatusNotFound, "COIN_PACKAGE_NOT_FOUND", "Coin package was not found.")
-	ErrWebCurrencyDisabled = httpserver.NewApiError(http.StatusUnprocessableEntity, "WEB_CURRENCY_NOT_ENABLED", "Web checkout isn't available in your currency or in USD yet. Buy coins in the Zudomart app, or try again later.")
+	ErrWebCurrencyDisabled = httpserver.NewApiError(http.StatusUnprocessableEntity, "WEB_CURRENCY_NOT_ENABLED", "Web checkout isn't available in your currency or in USD yet. Buy coins in the Nantty app, or try again later.")
 )
 
 type CoinPackDefinition struct {

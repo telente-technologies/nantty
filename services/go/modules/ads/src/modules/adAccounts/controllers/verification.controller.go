@@ -29,7 +29,7 @@ func (controller AdAccountsController) GetVerification(writer http.ResponseWrite
 			view.NextStep = &status.NextStep
 		}
 		if !view.Verified {
-			message := "Verify your payout details to use Zudomart Ads."
+			message := "Verify your payout details to use Nantty Ads."
 			view.Message = &message
 		}
 		writer.Header().Set("Cache-Control", "no-store")

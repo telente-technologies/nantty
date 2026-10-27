@@ -17,7 +17,7 @@ import (
 	"nantty/platform/httpserver"
 )
 
-var ErrOwnerOnly = httpserver.NewApiError(http.StatusForbidden, "FORBIDDEN", "Only the ad account owner can pay from their own Zudomart balance.")
+var ErrOwnerOnly = httpserver.NewApiError(http.StatusForbidden, "FORBIDDEN", "Only the ad account owner can pay from their own Nantty balance.")
 
 type Handler struct{ Container *container.Container }
 
@@ -49,7 +49,7 @@ func (handler Handler) Execute(ctx context.Context, command Command) (dtos.Earni
 		return dtos.EarningsFunding{}, adserrors.IdempotencyKeyReused
 	}
 	credit := creditaccountfunds.Command{AccountId: account.ID, Request: dtos.CreditFundsRequest{
-		Reference: "top-up:" + funded.FundingId, Type: "top_up", AmountMinor: funded.AmountMinor, Currency: funded.Currency, Description: "Paid from your Zudomart balance",
+		Reference: "top-up:" + funded.FundingId, Type: "top_up", AmountMinor: funded.AmountMinor, Currency: funded.Currency, Description: "Paid from your Nantty balance",
 	}}
 	if err := (creditaccountfunds.Handler{Container: deployed}).Execute(ctx, credit); err != nil {
 		deployed.Logger.Warn("earnings funding will be credited when the money event arrives", "fundingId", funded.FundingId, "error", err)

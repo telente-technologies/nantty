@@ -165,7 +165,7 @@ func (provider *FlutterwaveProvider) ChargeAuthorization(ctx context.Context, re
 	body := map[string]any{
 		"token": request.AuthorizationCode, "email": request.CustomerEmail, "currency": request.Currency, "country": provider.settings.MerchantCountry,
 		"amount": majorUnits(request.AmountMinor, request.Currency), "tx_ref": request.Reference, "redirect_url": provider.settings.RenewalRedirectUrl,
-		"narration": "Zudomart", "meta": request.Metadata,
+		"narration": "Nantty", "meta": request.Metadata,
 	}
 	var transaction flutterwaveTransaction
 	_, err := provider.http.send(ctx, flutterwaveRequest{method: http.MethodPost, path: "/tokenized-charges", body: body}, &transaction)

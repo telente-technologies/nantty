@@ -23,9 +23,9 @@ var walletLineDefinitions = []walletLineDefinition{
 	{"pending", "Pending (escrow)", "Order money held until the buyer confirms delivery."},
 	{"locked", "Locked", "Released order money in its short safety hold before it becomes available."},
 	{"earningsPayable", "Creator earnings", "Gift, subscription and ad-share earnings waiting to move to your available balance."},
-	{"adCredit", "Ad credit", "Prepaid credit for Zudomart ads and boosts. It cannot be withdrawn."},
+	{"adCredit", "Ad credit", "Prepaid credit for Nantty ads and boosts. It cannot be withdrawn."},
 	{"coins", "Coins", "Coins to send as gifts, plus coins you earned. Coins are not cash."},
-	{"debts", "Owed to Zudomart", "Refunds or chargebacks taken from your next earnings."},
+	{"debts", "Owed to Nantty", "Refunds or chargebacks taken from your next earnings."},
 }
 
 func (overview WalletOverview) completeWalletSummary(ctx context.Context, summary *dtos.WalletSummaryDto, userId, currency string, withdrawableMinor int64) error {

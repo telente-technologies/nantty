@@ -191,7 +191,7 @@ func (provider *FlutterwaveProvider) MoveBetweenWallets(ctx context.Context, mov
 	if destination == "" || move.Reference == "" || move.AmountMinor <= 0 || (move.FromAccountRef == "" && !move.FromPlatformBalance) || (move.FromPlatformBalance && move.ToPlatformBalance) {
 		return interfaces.TransferResult{}, errors.New("flutterwave: a wallet move needs a source, a destination, a reference and a positive amount")
 	}
-	body := provider.transferBody(move.Reference, move.Currency, move.AmountMinor, firstNonEmptyString(move.Narration, "Zudomart wallet transfer"))
+	body := provider.transferBody(move.Reference, move.Currency, move.AmountMinor, firstNonEmptyString(move.Narration, "Nantty wallet transfer"))
 	body["account_bank"], body["account_number"] = "flutterwave", destination
 	if !move.FromPlatformBalance {
 		body["debit_subaccount"] = move.FromAccountRef

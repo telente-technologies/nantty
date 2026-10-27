@@ -9,12 +9,12 @@ type Behaviour struct {
 }
 
 var Behaviours = []Behaviour{
-	{Id: "beh_recent_buyers", Name: "Bought on Zudomart in the last 30 days", Description: "People with at least one completed order."},
+	{Id: "beh_recent_buyers", Name: "Bought on Nantty in the last 30 days", Description: "People with at least one completed order."},
 	{Id: "beh_frequent_buyers", Name: "Frequent buyers", Description: "Three or more orders in the last 90 days."},
 	{Id: "beh_live_shoppers", Name: "Live shopping viewers", Description: "Watched a live shopping session in the last 30 days."},
 	{Id: "beh_cart_abandoners", Name: "Left items in cart", Description: "Added to cart but did not check out in the last 14 days."},
 	{Id: "beh_clip_watchers", Name: "Heavy reel watchers", Description: "Watch reels most days."},
-	{Id: "beh_new_users", Name: "New to Zudomart", Description: "Joined in the last 30 days."},
+	{Id: "beh_new_users", Name: "New to Nantty", Description: "Joined in the last 30 days."},
 	{Id: "beh_pay_on_delivery", Name: "Prefers pay on delivery", Description: "Chooses pay on delivery at checkout."},
 	{Id: "beh_android_budget", Name: "Uses an entry-level Android phone", Description: "Useful for lighter creatives and data-friendly reels."},
 }

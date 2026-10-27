@@ -33,7 +33,7 @@ func (service EscrowService) takeFromSellerWallet(ctx context.Context, transacti
 	return take, nil
 }
 
-// clawBackReleasedEscrowInTransaction refunds the buyer only the seller's portion: once the seller was paid, Zudomart keeps its escrow fee and the processing fee.
+// clawBackReleasedEscrowInTransaction refunds the buyer only the seller's portion: once the seller was paid, Nantty keeps its escrow fee and the processing fee.
 func (service EscrowService) clawBackReleasedEscrowInTransaction(ctx context.Context, transaction *sql.Tx, held *ent.Escrow, reason string, finalStatus escrow.Status) (*ent.Escrow, error) {
 	take, err := service.takeFromSellerWallet(ctx, transaction, held.SellerUserID, held.Currency, held.ReleasedToSellerMinor)
 	if err != nil {

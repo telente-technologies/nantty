@@ -54,7 +54,7 @@ func (provider *FlutterwaveProvider) CreateTransfer(ctx context.Context, request
 	if request.BankCode == "" || request.AccountNumber == "" || request.Reference == "" || request.AmountMinor <= 0 {
 		return interfaces.TransferResult{}, errors.New("flutterwave: a payout needs a bank code, an account number, a reference and a positive amount")
 	}
-	body := provider.transferBody(request.Reference, request.Currency, request.AmountMinor, firstNonEmptyString(request.Reason, "Zudomart withdrawal"))
+	body := provider.transferBody(request.Reference, request.Currency, request.AmountMinor, firstNonEmptyString(request.Reason, "Nantty withdrawal"))
 	body["account_bank"], body["account_number"] = request.BankCode, request.AccountNumber
 	if request.BeneficiaryName != "" {
 		body["beneficiary_name"] = request.BeneficiaryName

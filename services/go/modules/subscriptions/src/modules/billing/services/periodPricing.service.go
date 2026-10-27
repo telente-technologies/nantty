@@ -25,7 +25,7 @@ type NextPeriodPlan struct {
 
 var planLabels = map[string]string{
 	constants.PlanSellerPro: "Pro plan", constants.PlanSellerBusiness: "Business plan", constants.PlanGoldOnly: "Gold checkmark", constants.PlanBlack: "Black checkmark",
-	constants.PlanBlueEssential: "Blue Essential", constants.PlanBlue: "Blue checkmark", constants.PlanPremium: "Zudomart Premium",
+	constants.PlanBlueEssential: "Blue Essential", constants.PlanBlue: "Blue checkmark", constants.PlanPremium: "Nantty Premium",
 }
 
 func PlanLabel(planCode string) string {

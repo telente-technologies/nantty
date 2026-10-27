@@ -11,7 +11,7 @@ import (
 	escrowdtos "nantty/modules/escrow/src/modules/escrows/dtos"
 )
 
-var authorNameByRole = map[string]string{"buyer": "Buyer", "seller": "Seller", "support": "Zudomart support"}
+var authorNameByRole = map[string]string{"buyer": "Buyer", "seller": "Seller", "support": "Nantty support"}
 
 func LoadDisputeView(ctx context.Context, client *ent.Client, found *ent.Dispute, held *ent.Escrow, viewerRole string) (dtos.DisputeDto, error) {
 	statusEvents, err := client.DisputeStatusEvent.Query().Where(disputestatusevent.DisputeID(found.ID)).Order(ent.Asc(disputestatusevent.FieldCreatedAt), ent.Asc(disputestatusevent.FieldID)).All(ctx)

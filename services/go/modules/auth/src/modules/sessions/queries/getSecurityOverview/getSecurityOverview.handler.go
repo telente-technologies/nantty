@@ -45,14 +45,14 @@ func (application Handler) Execute(ctx context.Context, query Query) (SecurityOv
 
 func DescribeUserAgent(userAgent string) (string, string) {
 	lowered := strings.ToLower(userAgent)
-	if strings.Contains(lowered, "zudomart") || strings.Contains(lowered, "okhttp") || strings.Contains(lowered, "cfnetwork") || strings.Contains(lowered, "expo") {
+	if strings.Contains(lowered, "zudomart") || strings.Contains(lowered, "nantty") || strings.Contains(lowered, "okhttp") || strings.Contains(lowered, "cfnetwork") || strings.Contains(lowered, "expo") {
 		platform := "phone"
 		if strings.Contains(lowered, "iphone") || strings.Contains(lowered, "ios") || strings.Contains(lowered, "cfnetwork") {
 			platform = "iPhone"
 		} else if strings.Contains(lowered, "android") || strings.Contains(lowered, "okhttp") {
 			platform = "Android"
 		}
-		return "Zudomart app on " + platform, "mobile_app"
+		return "Nantty app on " + platform, "mobile_app"
 	}
 	browser := "Browser"
 	for _, candidate := range []struct{ token, name string }{{"edg/", "Edge"}, {"firefox", "Firefox"}, {"chrome", "Chrome"}, {"safari", "Safari"}} {

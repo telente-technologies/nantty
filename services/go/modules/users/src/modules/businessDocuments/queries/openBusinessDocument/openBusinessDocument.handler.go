@@ -55,5 +55,5 @@ func (handler Handler) Execute(ctx context.Context, actor types.StaffActor, rawA
 		Action: "business_document.viewed", SubjectType: "business_document", SubjectId: document.ID.String(), SubjectLabel: string(document.Kind), Reason: "document opened for review",
 	})
 	return Result{DocumentId: document.ID.String(), FileName: document.FileName, ViewUrl: url, ExpiresAt: now.Add(viewLinkTimeToLive).UTC().Format(time.RFC3339),
-		WatermarkText: "Zudomart Admin — confidential · " + actor.Name + " · " + now.UTC().Format(time.RFC3339)}, err
+		WatermarkText: "Nantty Admin — confidential · " + actor.Name + " · " + now.UTC().Format(time.RFC3339)}, err
 }

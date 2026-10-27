@@ -29,7 +29,7 @@ type Handler struct {
 var collectionHighlights = map[string]struct{ kind, name, code, label string }{
 	"sales_of_the_day": {"deals_of_the_day", "Sales of the day", "time_sensitive", "Ends soon"},
 	"new_arrivals":     {"new_arrivals", "New arrivals", "fresh_listings", "Just listed"},
-	"featured_brands":  {"featured_brands", "Featured brands", "followed_brands", "Brands on Zudomart"},
+	"featured_brands":  {"featured_brands", "Featured brands", "followed_brands", "Brands on Nantty"},
 }
 
 var editorialOrder = []string{"sales_of_the_day", "new_arrivals", "featured_brands"}

@@ -30,7 +30,7 @@ var (
 	ErrWebCurrencyDisabled = httpserver.NewApiError(http.StatusUnprocessableEntity, "WEB_CURRENCY_NOT_ENABLED", WebCurrencyNotEnabledMessage)
 )
 
-const WebCurrencyNotEnabledMessage = "Web checkout isn't available in your currency or in USD yet. Buy in the Zudomart app, or try again later."
+const WebCurrencyNotEnabledMessage = "Web checkout isn't available in your currency or in USD yet. Buy in the Nantty app, or try again later."
 
 type Billing struct {
 	Container *container.Container

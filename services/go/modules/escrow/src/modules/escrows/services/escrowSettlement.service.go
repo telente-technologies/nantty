@@ -168,7 +168,7 @@ func (service EscrowService) finishSettlement(ctx context.Context, transaction *
 }
 
 // refundDestination says where the buyer's money lands: a provider refund goes back to the card or account they paid with,
-// every other escrow refund unlocks the money in their own Zudomart (Flutterwave) wallet.
+// every other escrow refund unlocks the money in their own Nantty (Flutterwave) wallet.
 func refundDestination(providerRefundId *uuid.UUID) string {
 	if providerRefundId != nil {
 		return "paymentMethod"

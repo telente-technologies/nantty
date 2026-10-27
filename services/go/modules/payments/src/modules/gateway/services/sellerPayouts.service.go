@@ -101,7 +101,7 @@ func (gateway *PaymentGateway) claimAndSendPayoutToProvider(ctx context.Context,
 func (gateway *PaymentGateway) sendPayoutToProvider(ctx context.Context, provider interfaces.PayoutProvider, transfer *ent.PayoutTransfer) (PayoutTransferStatus, error) {
 	request := interfaces.TransferRequest{
 		RecipientCode: transfer.ProviderDestinationID, AmountMinor: transfer.AmountMinor, Currency: transfer.Currency, Reference: transfer.Reference,
-		Reason: "Zudomart payout " + transfer.Purpose, SourceWalletRef: transfer.SourceWalletRef,
+		Reason: "Nantty payout " + transfer.Purpose, SourceWalletRef: transfer.SourceWalletRef,
 	}
 	if transfer.SealedDestination != nil {
 		if refusal, err := gateway.completeWalletPayoutRequest(ctx, transfer, &request); err != nil || refusal != "" {

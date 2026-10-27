@@ -60,7 +60,7 @@ func (reviews CoinReviews) reverseTransfer(ctx context.Context, transaction *sql
 	if transfer.FeeCoins > 0 {
 		lines = append(lines, ledgermodels.JournalLineRequest{Account: ledgermodels.PlatformCoinTransferFeeRevenueAccount(), Direction: ledgermodels.Debit, AmountMinor: transfer.FeeCoins})
 	}
-	if err := reviews.postReversal(ctx, transaction, "coin-transfer-reversal:"+transfer.ID.String(), "coins.transferReversed", "Coin transfer reversed by Zudomart", lines, clawback); err != nil {
+	if err := reviews.postReversal(ctx, transaction, "coin-transfer-reversal:"+transfer.ID.String(), "coins.transferReversed", "Coin transfer reversed by Nantty", lines, clawback); err != nil {
 		return err
 	}
 	now := reviews.Container.Now().UTC()

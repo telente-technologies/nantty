@@ -19,7 +19,7 @@ func RecordOrderRefund(ctx context.Context, deployed *container.Container, order
 }
 
 // RecordSettledOrderRefund marks the order refunded in full when escrow says nothing more is refundable,
-// even if the amount is below the total because Zudomart kept its fees on a refund after the seller was paid.
+// even if the amount is below the total because Nantty kept its fees on a refund after the seller was paid.
 func RecordSettledOrderRefund(ctx context.Context, deployed *container.Container, orderId uuid.UUID, refundedMinor int64, disputeId string, complete bool) error {
 	released := false
 	err := deployed.RunInTransaction(ctx, func(tx *ent.Tx) error {
@@ -136,6 +136,6 @@ func RecordEscrowReleaseRetry(ctx context.Context, deployed *container.Container
 				return err
 			}
 		}
-		return AppendTimelineEvent(ctx, tx, group.ID, "sellerPayoutRetrying", "Paying the seller failed; Zudomart retries automatically", SystemActor)
+		return AppendTimelineEvent(ctx, tx, group.ID, "sellerPayoutRetrying", "Paying the seller failed; Nantty retries automatically", SystemActor)
 	})
 }

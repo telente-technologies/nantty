@@ -90,7 +90,7 @@ func IssueAdminRefund(ctx context.Context, deployed *container.Container, refund
 			return err
 		}
 		actor := orderservices.OrderActor{Kind: "admin", Name: refund.Staff.Name}
-		summary := fmt.Sprintf("Refund of %d %s (minor units) issued by Zudomart support: %s", refund.AmountMinor, group.Currency, refund.Reason)
+		summary := fmt.Sprintf("Refund of %d %s (minor units) issued by Nantty support: %s", refund.AmountMinor, group.Currency, refund.Reason)
 		if err := orderservices.AppendTimelineEvent(ctx, tx, group.ID, "note", truncate(summary, 300), actor); err != nil {
 			return err
 		}

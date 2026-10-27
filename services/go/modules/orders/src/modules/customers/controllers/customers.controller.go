@@ -247,7 +247,7 @@ func (controller CustomersController) Export(writer http.ResponseWriter, request
 		return
 	}
 	store := middlewares.StoreAccessFrom(request.Context())
-	result := services.ReportResult{Columns: []services.ReportColumn{{Key: "name", Label: "Name", Kind: "text"}, {Key: "phone", Label: "Phone", Kind: "text"}, {Key: "username", Label: "Zudomart username", Kind: "text"},
+	result := services.ReportResult{Columns: []services.ReportColumn{{Key: "name", Label: "Name", Kind: "text"}, {Key: "phone", Label: "Phone", Kind: "text"}, {Key: "username", Label: "Nantty username", Kind: "text"},
 		{Key: "city", Label: "City", Kind: "text"}, {Key: "spent", Label: "Total spent", Kind: "money"}, {Key: "orders", Label: "Orders", Kind: "number"}}}
 	for _, customer := range customers {
 		result.Rows = append(result.Rows, map[string]any{"name": customer.Name, "phone": derefText(customer.Phone), "username": derefText(customer.ZudomartUsername),

@@ -109,7 +109,7 @@ func defaultPlansConfiguration() PlansConfiguration {
 		plan("BLUE_PREMIUM", "BLUE", "PREMIUM", "Blue Premium", true, true, "Everything in Blue Verified", "No ads anywhere", "Monthly boost credit", "Priority support",
 			"Up to 5 business profiles", "One Gold plan for all your businesses, up to 16% off"),
 		plan("GOLD_ONLY", "GOLD", "ONLY", "Gold", true, true, "Gold business badge", "Verified store label on products", "Fewer ads"),
-		sellerPlan(plan("GOLD_PRO", "GOLD", "PRO", "Gold Pro", true, true, "Gold business badge", "Zudomart Dashboard access", "Verified store label on products", "Fewer ads"), 3, 1, 2_000),
+		sellerPlan(plan("GOLD_PRO", "GOLD", "PRO", "Gold Pro", true, true, "Gold business badge", "Nantty Dashboard access", "Verified store label on products", "Fewer ads"), 3, 1, 2_000),
 		sellerPlan(plan("GOLD_BUSINESS", "GOLD", "BUSINESS", "Gold Business", true, true, "Everything in Gold Pro", "Dedicated account manager", "Lower escrow fee", "No ads anywhere"), 15, 10, 20_000),
 		plan("BLACK_OFFICIAL", "BLACK", "OFFICIAL", "Black Official", true, false, "Government and public institution badge", "Very few ads"),
 	}}
@@ -123,7 +123,7 @@ func defaultRevenueRules() RevenueRulesConfiguration {
 			{AmountMinor: 1, Currency: "GBP"}, {AmountMinor: 1, Currency: "EUR"}, {AmountMinor: 1, Currency: "USD"},
 		},
 	}
-	rules.WithdrawalFee.Mode, rules.WithdrawalFee.Note = "PASS_THROUGH", "Daily automatic payouts are free; any provider transfer fee is passed through at cost with no Zudomart margin."
+	rules.WithdrawalFee.Mode, rules.WithdrawalFee.Note = "PASS_THROUGH", "Daily automatic payouts are free; any provider transfer fee is passed through at cost with no Nantty margin."
 	rules.EscrowFee.DefaultBasisPoints, rules.EscrowFee.BusinessPlanBasisPoints = 150, 100
 	return rules
 }

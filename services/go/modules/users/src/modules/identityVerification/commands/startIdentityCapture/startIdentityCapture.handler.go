@@ -68,7 +68,7 @@ func (handler Handler) Execute(ctx context.Context, command Command) (Result, er
 	} else {
 		result.Mode = "hosted_link"
 		result.Url, err = handler.Container.IdentityCapture.CreateSmileLink(ctx, integrations.SmileLinkRequest{
-			UserId: result.UserId, JobId: jobId, Name: "Zudomart checkmark verification", CompanyName: "Zudomart", PrivacyPolicyUrl: settings.PrivacyPolicyUrl,
+			UserId: result.UserId, JobId: jobId, Name: "Nantty checkmark verification", CompanyName: "Nantty", PrivacyPolicyUrl: settings.PrivacyPolicyUrl,
 			IdTypes:   []integrations.SmileIdIdType{{Country: country, IdType: documentType, VerificationMethod: product}},
 			ExpiresAt: handler.Container.Now().Add(time.Hour),
 		})

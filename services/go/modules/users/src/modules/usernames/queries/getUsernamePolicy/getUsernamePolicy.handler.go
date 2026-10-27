@@ -43,7 +43,7 @@ func (handler Handler) Execute(ctx context.Context, query Query) (models.Usernam
 			"A username cannot start or end with a dot or contain two dots in a row.",
 			changeAllowanceRule(rules, cooldownDays),
 			fmt.Sprintf("Your previous username is held for %d days before anyone else can claim it.", quarantineDays),
-			"Names that impersonate people, brands or Zudomart are not allowed, and Zudomart may reclaim a username that breaks the Terms.",
+			"Names that impersonate people, brands or Nantty are not allowed, and Nantty may reclaim a username that breaks the Terms.",
 		},
 		History: make([]models.UsernameChangeView, 0, len(window.History)),
 	}

@@ -54,7 +54,7 @@ func ReadAdminSettingsFromEnvironment(reader *platformconfig.EnvironmentReader) 
 		DatabaseSchema:         reader.ReadStringOrDefault("ADMIN_DATABASE_SCHEMA", "admin"),
 		DomainEventsTopicArn:   reader.ReadStringOrDefault("DOMAIN_EVENTS_TOPIC_ARN", ""),
 		TotpEncryptionKey:      readBase64Key(reader, "ADMIN_TOTP_ENCRYPTION_KEY", 32),
-		TotpIssuerLabel:        reader.ReadStringOrDefault("ADMIN_TOTP_ISSUER_LABEL", "Zudomart"),
+		TotpIssuerLabel:        reader.ReadStringOrDefault("ADMIN_TOTP_ISSUER_LABEL", "Nantty"),
 		StaffRefreshTokenTtl:   reader.ReadDurationOrDefault("ADMIN_STAFF_REFRESH_TOKEN_TTL", 12*time.Hour),
 		StaffAccessTokenTtl:    reader.ReadDurationOrDefault("AUTH_STAFF_ACCESS_TOKEN_TTL", 10*time.Minute),
 		InvitationTtl:          reader.ReadDurationOrDefault("ADMIN_INVITATION_TTL", 72*time.Hour),
@@ -99,7 +99,7 @@ func readWebAuthnSettings(reader *platformconfig.EnvironmentReader) WebAuthnSett
 	}
 	return WebAuthnSettings{
 		RelyingPartyId:   relyingPartyId,
-		RelyingPartyName: reader.ReadStringOrDefault("ADMIN_WEBAUTHN_RP_NAME", "Zudomart Admin"),
+		RelyingPartyName: reader.ReadStringOrDefault("ADMIN_WEBAUTHN_RP_NAME", "Nantty Admin"),
 		Origins:          reader.ReadCommaSeparatedListOrDefault("ADMIN_WEBAUTHN_ORIGINS", []string{consoleUrl}),
 	}
 }

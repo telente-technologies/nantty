@@ -64,7 +64,7 @@ func (handler Handler) Execute(ctx context.Context, command Command) (dtos.Staff
 		if request.Status != nil && *request.Status != member.Status {
 			if member.Status == "invited" {
 				var issues utils.Issues
-				issues.Add("status", "the person must accept the team request in the Zudomart app first")
+				issues.Add("status", "the person must accept the team request in the Nantty app first")
 				return issues.AsError()
 			}
 			if *request.Status == "active" {

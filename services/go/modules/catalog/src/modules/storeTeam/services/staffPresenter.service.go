@@ -40,7 +40,7 @@ func PresentStaffMember(member *ent.StoreMember, profile usersdirectory.ProfileN
 	}
 	name := profile.Name
 	if name == "" {
-		name = "Zudomart user"
+		name = "Nantty user"
 	}
 	return dtos.StaffMemberView{
 		Id: member.ID.String(), UserId: member.AccountID.String(), Name: name, Username: profile.Handle, AvatarUrl: optionalText(profile.AvatarUrl),

@@ -120,7 +120,7 @@ func escrowEventData(held *ent.Escrow) map[string]any {
 	}
 }
 
-// FeesKeptOnRefund is what Zudomart keeps when an order is refunded after the seller was paid: its escrow fee and the processing fee.
+// FeesKeptOnRefund is what Nantty keeps when an order is refunded after the seller was paid: its escrow fee and the processing fee.
 func FeesKeptOnRefund(held *ent.Escrow) int64 {
 	if held.Status != escrow.StatusRefunded && held.Status != escrow.StatusClawedBack {
 		return 0

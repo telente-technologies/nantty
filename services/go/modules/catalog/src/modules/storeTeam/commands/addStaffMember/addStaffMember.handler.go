@@ -35,7 +35,7 @@ func (handler Handler) Execute(ctx context.Context, command Command) (dtos.Staff
 	}
 	if !active {
 		var issues utils.Issues
-		issues.Add("userId", "must be an existing Zudomart user")
+		issues.Add("userId", "must be an existing Nantty user")
 		return dtos.StaffMemberView{}, issues.AsError()
 	}
 	if err := RequireStoreLocations(ctx, command.Store, request.LocationIds); err != nil {

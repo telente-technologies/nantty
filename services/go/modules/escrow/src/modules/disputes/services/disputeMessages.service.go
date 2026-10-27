@@ -74,7 +74,7 @@ func (service DisputeService) AddDisputeMessageInTransaction(ctx context.Context
 		if err := locked.Update().AddVersion(1).SetStatus(dispute.StatusUnderReview).Exec(ctx); err != nil {
 			return nil, err
 		}
-		if err := service.recordStatus(ctx, client, locked.ID, string(dispute.StatusUnderReview), "Seller responded — Zudomart support is reviewing"); err != nil {
+		if err := service.recordStatus(ctx, client, locked.ID, string(dispute.StatusUnderReview), "Seller responded — Nantty support is reviewing"); err != nil {
 			return nil, err
 		}
 	}

@@ -26,7 +26,7 @@ func NewFlutterwaveProviderFromSettings(settings configs.PaymentsSettings) *inte
 	return integrations.NewFlutterwaveProvider(integrations.FlutterwaveSettings{
 		BaseUrl: flutterwave.BaseUrl, SecretKey: flutterwave.SecretKey, WebhookHash: flutterwave.WebhookHash, MerchantId: flutterwave.MerchantId,
 		SupportedCurrencies: flutterwave.SupportedCurrencies, TransferCallbackUrl: flutterwave.TransferCallbackUrl, MaximumAttempts: flutterwave.MaximumAttempts,
-		RetryBaseDelay: 250 * time.Millisecond, RenewalRedirectUrl: firstAllowedReturnUrl(settings), CheckoutTitle: "Zudomart",
+		RetryBaseDelay: 250 * time.Millisecond, RenewalRedirectUrl: firstAllowedReturnUrl(settings), CheckoutTitle: "Nantty",
 	})
 }
 

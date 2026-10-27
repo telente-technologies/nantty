@@ -201,7 +201,7 @@ func (billing Billing) ensureProviderPlan(ctx context.Context, planCode, interva
 	}
 	providerInterval := map[string]string{"month": "monthly", "year": "annually"}[interval]
 	code, err := billing.Container.Payments.CreateRecurringPlanProduct(ctx, paymentinterfaces.RecurringPlanRequest{
-		Name: fmt.Sprintf("Zudomart %s %s %d", planCode, interval, amountMinor), AmountMinor: amountMinor, Currency: currency, Interval: providerInterval,
+		Name: fmt.Sprintf("Nantty %s %s %d", planCode, interval, amountMinor), AmountMinor: amountMinor, Currency: currency, Interval: providerInterval,
 	})
 	if err != nil {
 		return "", err
