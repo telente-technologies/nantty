@@ -58,7 +58,7 @@ export function AuditLogWorkspace() {
   async function exportCsv() {
     setIsExporting(true);
     try {
-      saveBlobAsDownloadedFile(await downloadAuditLogCsv({ ...filters, cursor: undefined }), `zudomart-audit-${new Date().toISOString().slice(0, 10)}.csv`);
+      saveBlobAsDownloadedFile(await downloadAuditLogCsv({ ...filters, cursor: undefined }), `nantty-audit-${new Date().toISOString().slice(0, 10)}.csv`);
       showToast("Export downloaded. The export itself was recorded in the audit log.");
     } catch (error) {
       showToast(readErrorMessageForDisplay(error), "error");

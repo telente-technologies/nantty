@@ -121,7 +121,7 @@ export function ReservedUsernamesWorkspace() {
         }
       />
       <ConfirmActionDialog intent="lock" isOpen={isAddOpen} title="Reserve a name" confirmLabel="Reserve" requiresReason={false} isConfirmDisabled={!/^[a-z0-9._]{2,30}$/.test(newValue.trim())} isBusy={addMutation.isRunning} errorMessage={addMutation.validationIssues.length > 0 ? null : addMutation.errorMessage} onConfirm={addEntry} onClose={() => setIsAddOpen(false)}>
-        <TextField label="Name" value={newValue} onChange={(event) => setNewValue(event.target.value.toLowerCase())} placeholder={newKind === "exact" ? "davido" : "zudomart"} error={readIssueMessageForField(addMutation.validationIssues, "term")} spellCheck={false} hint="2–30 letters, numbers, dots or underscores. No wildcards." />
+        <TextField label="Name" value={newValue} onChange={(event) => setNewValue(event.target.value.toLowerCase())} placeholder={newKind === "exact" ? "davido" : "nantty"} error={readIssueMessageForField(addMutation.validationIssues, "term")} spellCheck={false} hint="2–30 letters, numbers, dots or underscores. No wildcards." />
         <SelectField label="Match" options={kindOptions} value={newKind} onChange={(event) => setNewKind(event.target.value as ReservedUsernameMatchKind)} hint="Starts with and Contains block every username built on this name." />
       </ConfirmActionDialog>
       <ConfirmActionDialog intent="remove" isOpen={entryToRemove !== null} title={`Remove ${entryToRemove?.term ?? ""}`} description="Anyone will be able to register this name again." confirmLabel="Remove" tone="danger" requiresReason={false} isBusy={removeMutation.isRunning} errorMessage={removeMutation.errorMessage} onConfirm={removeEntry} onClose={() => setEntryToRemove(null)} />

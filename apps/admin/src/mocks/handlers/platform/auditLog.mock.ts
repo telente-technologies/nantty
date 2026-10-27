@@ -59,7 +59,7 @@ export function registerAuditLogMockHandlers(): void {
         .join(","),
     );
     recordMockAuditEntry(request, { action: "audit.exported", area: "audit", target: { type: "auditExport", id: "csv", label: `${entries.length} entries` }, after: Object.fromEntries(request.query) });
-    return respondWithDownload(`zudomart-audit-${new Date().toISOString().slice(0, 10)}.csv`, [header.join(","), ...rows].join("\n"), "text/csv; charset=utf-8");
+    return respondWithDownload(`nantty-audit-${new Date().toISOString().slice(0, 10)}.csv`, [header.join(","), ...rows].join("\n"), "text/csv; charset=utf-8");
   });
 
   registerMockRoute("GET", "/admin/audit/:entryId", (request) => {

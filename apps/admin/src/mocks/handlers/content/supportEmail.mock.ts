@@ -14,7 +14,7 @@ interface SegmentDefinition {
   readonly includes: (user: MockPlatformUserRecord) => boolean;
 }
 
-const unsubscribeFooter = "\n\n--\nYou get this because you agreed to ZudoMart updates. Unsubscribe: {{unsubscribeUrl}}";
+const unsubscribeFooter = "\n\n--\nYou get this because you agreed to Nantty updates. Unsubscribe: {{unsubscribeUrl}}";
 const segments: readonly SegmentDefinition[] = [
   { id: "all-users", label: "All users", description: "Every active account.", includes: (user) => user.status === "ACTIVE" },
   { id: "creators", label: "Creators", description: "Creator Program members.", includes: (user) => user.isCreator && user.status === "ACTIVE" },
