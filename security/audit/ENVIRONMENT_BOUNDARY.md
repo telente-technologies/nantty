@@ -9,14 +9,14 @@ Reviewed 4 Oct 2026 from the repo, `.env.example` files, `infra/local/docker-com
 Three things still look production-like:
 
 1. **`FLUTTERWAVE_API_BASE_URL=https://api.flutterwave.com/v3`** is the default in `services/go/.env.example`. With a `FLWSECK_TEST-` key it reaches Flutterwave's real test mode on the internet. Active tests must point it at the fake Flutterwave server (`services/go/modules/payments/src/integrations/paymentsTesting`, sandbox on 127.0.0.1:18998) or `services/scripts/apiSmoke` fakes.
-2. **Terraform is initialised for dev, staging and prod** (`infra/aws/envs/*/.terraform` exists, provider plugins downloaded). State lives in S3 (`zudomart-terraform-state-{env}`, `eu-west-1`), so local files cannot tell whether real AWS resources exist. Treat every AWS name as real. No `terraform plan/apply` and no AWS CLI call in any phase.
+2. **Terraform is initialised for dev, staging and prod** (`infra/aws/envs/*/.terraform` exists, provider plugins downloaded). State lives in S3 (`nantty-terraform-state-{env}`, `eu-west-1`), so local files cannot tell whether real AWS resources exist. Treat every AWS name as real. No `terraform plan/apply` and no AWS CLI call in any phase.
 3. **`SMILE_ID_*` and `HUMAN_VERIFICATION_*`** point at real third parties when keys are set. Smile ID must stay `SMILE_ID_ENVIRONMENT=sandbox`; Turnstile uses Cloudflare's published test keys (`1x0000…AA`).
 
 ## In scope (local only)
 
 | Component | Host:port | Source |
 |---|---|---|
-| Postgres (all service schemas) | 127.0.0.1:15432 | compose `postgres` (container `zudomart-backend-postgres-1`) |
+| Postgres (all service schemas) | 127.0.0.1:15432 | compose `postgres` (container `nantty-backend-postgres-1`) |
 | Valkey | 127.0.0.1:16379 | compose `valkey` |
 | LocalStack (SQS/SNS/SES) | 127.0.0.1:14566 | compose `localstack`, creds `test/test` |
 | RabbitMQ | 127.0.0.1:5672, mgmt 15672, metrics 15692 | compose `rabbitmq` |
@@ -52,7 +52,7 @@ Every compose port binds to `127.0.0.1` only.
 | Postgres roles | `infra/local/postgres/create-databases.sh` | `<role>_local_only` | local only |
 | LiveKit | `services/go/.env.example:33-34` | `devk…/secr…` | local only |
 | Turnstile | `services/typescript/gateway/.env.example` | Cloudflare public test keys | none |
-| Google Play service account | `payments/src/integrations/testdata/googlePlay/serviceAccount.json` | generated test RSA key, project `zudomart-test`, `TOKEN_URI` placeholder | none, but trips secret scanners (accepted, SEC-0019) |
+| Google Play service account | `payments/src/integrations/testdata/googlePlay/serviceAccount.json` | generated test RSA key, project `nantty-test`, `TOKEN_URI` placeholder | none, but trips secret scanners (accepted, SEC-0019) |
 | Smile ID | `services/go/.env.example:212-213` | empty, `sandbox` | none |
 
 Git history scan (`git log --all -p -G` for `sk_live_`, `AKIA`, private keys, Slack/GitHub/Google/SendGrid tokens, `whsec_`) found only test fixtures.

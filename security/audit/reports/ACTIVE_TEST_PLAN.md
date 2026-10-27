@@ -25,7 +25,7 @@ Ground rules:
 | SEC-0005/0006 | Render `//evil.test`, `javascript:` and `intent:` links in web and mobile link utils | external or blocked | SAFE |
 | SEC-0007 | Burst verification starts | 429 after the limit | SAFE |
 | SEC-0009 | Uphold a copyright claim and decide a counter-notice with an access token only | 403; 200 with step-up; audit rows present | SAFE |
-| SEC-0010 | Call each TS service port (8104/8105/8108/8109/8111) directly with `x-zudomart-account-id` but no signature, an expired signature, a signature for a different path or method, or a tampered age bracket | 401 `GATEWAY_IDENTITY_INVALID` every time; through the gateway the same calls succeed | SAFE |
+| SEC-0010 | Call each TS service port (8104/8105/8108/8109/8111) directly with `x-nantty-account-id` but no signature, an expired signature, a signature for a different path or method, or a tampered age bracket | 401 `GATEWAY_IDENTITY_INVALID` every time; through the gateway the same calls succeed | SAFE |
 | SEC-0011 | As `svc_social`, `svc_ads`, `svc_search` and `svc_intelligence`: `SELECT phone FROM users.shipping_addresses LIMIT 1` | permission denied; `svc_commerce` succeeds | SAFE (read-only SQL) |
 | SEC-0012 | gRPC request to goMoney with no `:authority` | no panic; service stays up | SAFE |
 | SEC-0014 | Fire 50 concurrent health events (newest = restricted) at the wallet consumer | hold ends paused; payout run moves no creator funds | SANDBOX-ONLY |
@@ -52,7 +52,7 @@ Ground rules:
 
 ## Phase 5: abuse and fuzzing (`security/abuse/`, `security/fuzz/`)
 - OTP, login, report and verification-start floods per IP and device.
-- JSON body fuzzing on high-traffic routes: oversized fields, type confusion, unicode, deep nesting. Header fuzzing on the gateway, including spoofed `x-zudomart-*` headers.
+- JSON body fuzzing on high-traffic routes: oversized fields, type confusion, unicode, deep nesting. Header fuzzing on the gateway, including spoofed `x-nantty-*` headers.
 - Realtime: subscription flood, frames that are too large, auth deadline.
 
 ## Phase 6: resilience (`security/resilience/`, bounded)

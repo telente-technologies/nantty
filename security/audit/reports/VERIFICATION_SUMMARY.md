@@ -127,7 +127,7 @@ No rows are left in this table.
 
 **Dependency upgrades needed:** none.
 
-## QA run (all through the heavy lock, `GOTMPDIR=/home/oyinlola/.cache/zudomart-gotmp`, `go test -p 1`)
+## QA run (all through the heavy lock, `GOTMPDIR=/home/oyinlola/.cache/nantty-gotmp`, `go test -p 1`)
 
 **Go**
 - Passing: platform, admin, auth, moderation, ads, catalog, currency, inventory, live, orders and subscriptions tests.

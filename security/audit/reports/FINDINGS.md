@@ -105,10 +105,10 @@ Status values:
 - **Status:** Fixed.
 
 ## SEC-0010 Unsigned gateway identity header
-- **Where:** social, notifications, media, search and support read `x-zudomart-account-id` with no proof that it came from the gateway.
+- **Where:** social, notifications, media, search and support read `x-nantty-account-id` with no proof that it came from the gateway.
 - **Issue:** anything that can reach a TS service port can act as any user. The Go services re-verify the bearer token; the TS services did not.
 - **Fix:**
-  - The gateway signs the identity context with HMAC-SHA256, using `GATEWAY_IDENTITY_SECRET` (at least 32 characters). The signature goes in `x-zudomart-identity-signature` and covers:
+  - The gateway signs the identity context with HMAC-SHA256, using `GATEWAY_IDENTITY_SECRET` (at least 32 characters). The signature goes in `x-nantty-identity-signature` and covers:
     - version and timestamp;
     - method, path and request id;
     - account id, session id, age bracket and viewer.
@@ -125,11 +125,11 @@ Status values:
 - **Status:** Fixed.
 
 ## SEC-0011 Shipping address PII readable by every service
-- **Where:** `users` migration `20261003170000` granted the address columns to `zudomart_readers`, and every `svc_*` role belongs to that group.
+- **Where:** `users` migration `20261003170000` granted the address columns to `nantty_readers`, and every `svc_*` role belongs to that group.
 - **Issue:** social, ads, search, intelligence and other services could read recipient name, phone and street address. Only orders actually reads them, through `platform/usersdirectory.FindShippingAddress`.
 - **Fix:** migration `users/src/migrations/20261004210000_restrict_shipping_address_reads_to_orders.up.sql`:
-  1. grants the same columns to `svc_orders` and `svc_commerce`, but only if the role exists and already belongs to `zudomart_readers`;
-  2. revokes `shipping_addresses` from `zudomart_readers`.
+  1. grants the same columns to `svc_orders` and `svc_commerce`, but only if the role exists and already belongs to `nantty_readers`;
+  2. revokes `shipping_addresses` from `nantty_readers`.
 
   The net effect only removes access; no role gains access it did not already have. Payments does not read addresses, so receipts are unaffected. `atlas.sum` has been rehashed.
 - **Status:** Fixed. Owner approved on 2026-10-04.
@@ -158,8 +158,8 @@ Status values:
 - **Where:** `payments/src/modules/webhooks/controllers/webhooks.controller.go`.
 - **Issue:** a `?token=` value ends up in ALB, CDN and gateway access logs.
 - **Fix:**
-  - The controller ignores the query string and reads the token from `X-Zudomart-Push-Token` or `Authorization: Bearer`.
-  - The gateway forwards `x-zudomart-push-token` on webhook routes.
+  - The controller ignores the query string and reads the token from `X-Nantty-Push-Token` or `Authorization: Bearer`.
+  - The gateway forwards `x-nantty-push-token` on webhook routes.
 - **Test:** `webhooks.controller_test.go`.
 - **Follow-up (payments owner):** Google Pub/Sub push cannot set custom headers. Before enabling Play billing:
   - switch the subscription to Pub/Sub OIDC push auth;
@@ -182,7 +182,7 @@ Status values:
 - **Issue:** clicks on `/api/v1/ads/r/{token}` failed, because the gateway dropped `Location` and required a bearer token on that route. A naive fix that forwards any `Location` would create an open redirect.
 - **Fix:**
   - A dedicated gateway route, `GET /api/v1/ads/r/` with optional auth and `redirectPassthrough`, forwards `Location` only on that route.
-  - It forwards only `https://` targets (with a host and no credentials) or `zudomart://` targets. Anything else returns `502 UNSAFE_REDIRECT`.
+  - It forwards only `https://` targets (with a host and no credentials) or `nantty://` targets. Anything else returns `502 UNSAFE_REDIRECT`.
   - On the backend, the target still comes only from the signed click token and the approved creative, and must now pass `IsSafeClickTarget` before the redirect.
 - **Test:** `gateway/tests/adRedirect.handler.test.ts`, `ads/src/services/adDestination.service_test.go`.
 - **Status:** Fixed.
@@ -198,7 +198,7 @@ Status values:
 - **Status:** Fixed.
 
 ## SEC-0019 Test RSA key in testdata (accepted risk)
-- `payments/src/integrations/testdata/googlePlay/serviceAccount.json` is a generated key for project `zudomart-test`, with a placeholder token URI. It grants nothing. Add it to the secret-scanner allowlist.
+- `payments/src/integrations/testdata/googlePlay/serviceAccount.json` is a generated key for project `nantty-test`, with a placeholder token URI. It grants nothing. Add it to the secret-scanner allowlist.
 
 ## SEC-0020 Build-time pnpm highs (accepted risk)
 - `audit/evidence/pnpmAudit-prod-2026-10-04.txt`: the high advisories are in build tooling that never ships in a runtime image. Recheck on every dependency bump.

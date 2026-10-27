@@ -1,4 +1,4 @@
-# Zudomart TypeScript Backend — Deep Scan Report
+# Nantty TypeScript Backend — Deep Scan Report
 
 > **Historical scan (2026-10-08).** The `apps/api` monolith named below was removed on 2026-10-10; its paths no longer exist. The ported Go services and the 2026-10-10 verification table at the end are the current evidence.
 
@@ -10,7 +10,7 @@
 
 ## 1. EXECUTIVE SUMMARY
 
-This report documents gaps, bugs, and security issues found across the Zudomart TypeScript backend. The codebase is **well-architected** (modular, double-entry ledger, serializable transactions, RBAC, idempotency, webhook verification), but contains **multiple exploitable security vulnerabilities** — most critically a proxy-trust misconfiguration that defeats every IP-based control, and an admin surface that defaults to unauthenticated.
+This report documents gaps, bugs, and security issues found across the Nantty TypeScript backend. The codebase is **well-architected** (modular, double-entry ledger, serializable transactions, RBAC, idempotency, webhook verification), but contains **multiple exploitable security vulnerabilities** — most critically a proxy-trust misconfiguration that defeats every IP-based control, and an admin surface that defaults to unauthenticated.
 
 **Priority actions:**
 1. Fix proxy-trust default (C1) — breaks IP spoofing.
@@ -265,8 +265,8 @@ No HaveIBeenPwned integration. Consider adding password strength/breach detectio
 **File:** `apps/api/src/modules/auth/services/token.service.ts:33-35`
 
 ```ts
-issuer: "zudomart-api",
-audience: "zudomart-app",
+issuer: "nantty-api",
+audience: "nantty-app",
 ```
 
 These are hardcoded. Consider making them configurable.
@@ -391,8 +391,8 @@ No HaveIBeenPwned integration. Consider adding password strength/breach detectio
 ### A6 — Default JWT audience/issuer hardcoded
 **File:** `apps/api/src/modules/auth/services/token.service.ts:33-35`
 ```ts
-issuer: "zudomart-api",
-audience: "zudomart-app",
+issuer: "nantty-api",
+audience: "nantty-app",
 ```
 These are hardcoded. Consider making them configurable.
 
@@ -436,7 +436,7 @@ Only event key claim, no timestamp validation. Consider adding webhook replay wi
 
 ## 10. CONCLUSION
 
-The Zudomart TypeScript backend is **well-architected** with strong financial integrity controls (double-entry ledger, serializable transactions, amount verification) and good security hygiene (token hashing, idempotency, webhook verification, audit trails). However, it contains **multiple exploitable security vulnerabilities** — most critically a proxy-trust misconfiguration that defeats every IP-based control, and an admin surface that defaults to unauthenticated. The priority recommendations above should be addressed before production deployment.
+The Nantty TypeScript backend is **well-architected** with strong financial integrity controls (double-entry ledger, serializable transactions, amount verification) and good security hygiene (token hashing, idempotency, webhook verification, audit trails). However, it contains **multiple exploitable security vulnerabilities** — most critically a proxy-trust misconfiguration that defeats every IP-based control, and an admin surface that defaults to unauthenticated. The priority recommendations above should be addressed before production deployment.
 
 ---
 
@@ -447,7 +447,7 @@ Checked against the current working tree on 2026-10-10. `apps/api` is deleted, s
 | ID | Severity | Status | Evidence | Fix / test |
 |---|---|---|---|---|
 | C1 | Critical | Fixed now | `gateway/src/configs/gateway.config.ts:71` defaults `TRUSTED_PROXY_HOPS` to 0, and `gateway/src/app.ts:67` falls back to 0. `productionHardening.config.ts` refuses to start in production without an explicit hop count; infra sets `TRUSTED_PROXY_HOPS=1` (`infra/aws/modules/platform/deploy.tf:71`) | `gateway/tests/deepScanHardening.test.ts` "C1 proxy trust" (the right-most XFF entry rotates and still hits one bucket) |
-| H1 | High | Fixed now (staff gate). The allowlist default is still open | `gateway/src/handlers/upstreamDispatch.handler.ts:65` + `services/adminStaffGate.service.ts`: every `/api/v1/admin` request except the 7 public staff-auth POSTs needs a verified staff token (audience `zudomart-admin`, matching `platform/staffauth`). Missing, garbage and customer tokens get 401. `ADMIN_IP_ALLOWLIST` is still open when empty, and infra doesn't set it | "H1 admin routes need a staff token". Infra owner: set `ADMIN_IP_ALLOWLIST` in `deploy.tf` |
+| H1 | High | Fixed now (staff gate). The allowlist default is still open | `gateway/src/handlers/upstreamDispatch.handler.ts:65` + `services/adminStaffGate.service.ts`: every `/api/v1/admin` request except the 7 public staff-auth POSTs needs a verified staff token (audience `nantty-admin`, matching `platform/staffauth`). Missing, garbage and customer tokens get 401. `ADMIN_IP_ALLOWLIST` is still open when empty, and infra doesn't set it | "H1 admin routes need a staff token". Infra owner: set `ADMIN_IP_ALLOWLIST` in `deploy.tf` |
 | H2 | High | Fixed now | `gateway/src/configs/productionHardening.config.ts`: in production, `local-only*`/`change-me`/placeholder values and tokens under 32 characters are rejected for `GATEWAY_IDENTITY_SECRET`, `IDENTITY_INTERNAL_TOKEN` and `TRUST_INTERNAL_TOKEN` | "H2 placeholder secrets" |
 | H3 | High | Fixed now | When a lookup fails, the last restrictive answer is kept: `policyAcceptanceGate.service.ts:48`, `security/humanVerificationGate.service.ts:44`. With no cached restriction the request still fails open; that is deliberate, so an outage doesn't lock everyone out | "H3 gate lookups keep the last restrictive answer" |
 | H4 | High | Fixed now | `upstreamDispatch.handler.ts:93`: the guest key is IP only (no `x-device-id`/`x-client-region`) | "H4 guest limit ignores client device headers" |

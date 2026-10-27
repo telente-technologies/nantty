@@ -1,4 +1,4 @@
-# Zudomart security audit: final report (4–5 Oct 2026)
+# Nantty security audit: final report (4–5 Oct 2026)
 
 Sandbox audit of the local checkout only. No production system, live key or real money was touched. Companion reports in this folder: `FINDINGS.md`, `ATTACK_COVERAGE.md`, `FINANCIAL_INTEGRITY.md`, `REMEDIATIONS.md`, `ATTACK_SURFACE.md`, `ACTIVE_TEST_PLAN.md`, and `../ENVIRONMENT_BOUNDARY.md`.
 
@@ -91,7 +91,7 @@ See `FINANCIAL_INTEGRITY.md`. Snapshot diff: zero historical changes. The ledger
 ## 11. Database security
 
 - One Postgres with a schema per service, each owned by its `svc_<service>` role, with `REVOKE ALL ... FROM PUBLIC` and no CREATE on `public`.
-- Cross-service reads go through column-level grants to `zudomart_readers`.
+- Cross-service reads go through column-level grants to `nantty_readers`.
 - Shipping-address PII is now restricted to orders and commerce (SEC-0011, owner approved).
 - Ledger and escrow history are append-only by trigger, with UPDATE/DELETE/TRUNCATE revoked from runtime roles (`UPDATE (id)` only, for foreign-key locks).
 - **Open: SEC-0022.** The schema owner can drop triggers. Separate the migration owner from the runtime roles.
@@ -166,7 +166,7 @@ This section is evidence-based, from the migrations, `infra/local/postgres/creat
 |---|---|---|---|
 | One user account or token | That user's data and actions, until logout or revocation (now immediate via the denylist) | Other users' data (ownership checks), admin routes (separate audience), money beyond their own balance | Abuse detection and probing flags, Turnstile challenge; revoke sessions |
 | One staff account | Its permissions; destructive actions need step-up | Actions beyond its role; step-up bound to its session | Every admin action is audit-logged; revoke the staff session (checked on every request) |
-| A TypeScript service (e.g. social) | Its own schema plus column-limited reads via `zudomart_readers`; can sign nothing (no gateway secret) | Money schemas (not a member of the money roles), shipping PII (SEC-0011), forging identity to other services | Service logs and OTel; rotate its DB password and internal token |
+| A TypeScript service (e.g. social) | Its own schema plus column-limited reads via `nantty_readers`; can sign nothing (no gateway secret) | Money schemas (not a member of the money roles), shipping PII (SEC-0011), forging identity to other services | Service logs and OTel; rotate its DB password and internal token |
 | goMoney / `svc_money` | All 7 money schemas (payments, wallet, ledger, escrow, subscriptions, creators, rewards) through role membership, plus the previous payment provider secret key | Rewriting ledger history (triggers plus revokes), unless it owns the schema (SEC-0022) | Reconciliation runs against the previous payment provider, ledger balance checks; rotate the previous payment provider key and DB role |
 | goCommerce / `svc_commerce` | catalog, inventory, orders, shipping addresses | Money schemas, ledger | Rotate the role |
 | The gateway | `GATEWAY_IDENTITY_SECRET`, so it could forge identity to the TS services. Go services still verify the JWT themselves | Forging identity to Go services (they need a valid JWT signed by identity's key) | Rotate the secret with the previous-secret overlap |

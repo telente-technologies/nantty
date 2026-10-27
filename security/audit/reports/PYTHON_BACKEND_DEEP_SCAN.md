@@ -1,6 +1,6 @@
 # Python Backend Deep Scan — Gaps, Bugs & Security Issues
 
-**Scope:** `services/python/intelligence` (Zudomart Intelligence — FastAPI, Python 3.14) — ~21.4K LOC across `src/` + `tests/`
+**Scope:** `services/python/intelligence` (Nantty Intelligence — FastAPI, Python 3.14) — ~21.4K LOC across `src/` + `tests/`
 **Date:** 8 Oct 2026 · **Method:** automated tooling + 6 parallel deep-review agents + lead review of core security infrastructure
 **Companion to:** `GO_BACKEND_DEEP_SCAN.md` (Go backend, same directory)
 
@@ -122,7 +122,7 @@ Deep review was split across six parallel agents: HTTP surface (PYHTTP), crypto/
 
 **[PYEVT-006] `nack(requeue=True)` on retry-publish failure can loop forever without incrementing the attempt header**
 - **Locations:** `src/utils/amqp_message_settlement_util.py:77-82,63-71`; `src/modules/domain_events/repositories/amqp_domain_event_queue_repository.py:41`
-- **Detail:** Attempt counting relies solely on `x-zudomart-attempt` written when a retry copy is published. If `publish_retry` itself raises (retry queue full, binding missing, channel error) the message is `nack(requeue=True)` with headers unchanged → `failed_attempt` recomputes to the same value forever. The same failing message redelivers in a tight loop (no sleep, no DLQ, no cap) burning CPU and Redis until publish succeeds. The `MAXIMUM_DELIVERY_ATTEMPTS` cap never engages because it only counts *successful* retry publishes.
+- **Detail:** Attempt counting relies solely on `x-nantty-attempt` written when a retry copy is published. If `publish_retry` itself raises (retry queue full, binding missing, channel error) the message is `nack(requeue=True)` with headers unchanged → `failed_attempt` recomputes to the same value forever. The same failing message redelivers in a tight loop (no sleep, no DLQ, no cap) burning CPU and Redis until publish succeeds. The `MAXIMUM_DELIVERY_ATTEMPTS` cap never engages because it only counts *successful* retry publishes.
 - **Fix:** Persist/increment the attempt header before attempting the retry publish; cap requeues with `reject(requeue=False)` → DLX; small backoff on the requeue path.
 
 
@@ -740,7 +740,7 @@ Gates after this pass: `uv run ruff check`, `uv run ruff format --check` and `uv
 | PYBUG-019 | Low | Fixed now | `transcribe_batch_transcription_service.py:103-106` runs `Body.read` in `to_thread` | T-E `test_transcription_retry_reuses_the_existing_job` |
 | PYBUG-023 | Low | Fixed now (= PYEVT-017) | as PYEVT-017 | as PYEVT-017 |
 | PYBUG-024 | Low | Fixed now (= PYML-013) | as PYML-013 | as PYML-013 |
-| PYBUG-025 | Low | Fixed | `amqp_message_settlement_util.py:42-45` writes the attempt and `x-zudomart-last-error` on every retry copy | messaging tests |
+| PYBUG-025 | Low | Fixed | `amqp_message_settlement_util.py:42-45` writes the attempt and `x-nantty-last-error` on every retry copy | messaging tests |
 | PYML-019 | Info | Not a finding (verified) | `/v1/models` is read-only, with no promote route | — |
 | PYML-020 | Info | Not a finding (verified) | hot swap is copy-on-write | — |
 

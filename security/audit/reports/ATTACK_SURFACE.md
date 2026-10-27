@@ -6,7 +6,7 @@ Generated 4 Oct 2026 by `python3 security/authorization/routeInventory.py` (stat
 
 | Surface | Count / location | Auth model |
 |---|---|---|
-| Public HTTP gateway | `services/typescript/gateway`, 156 route prefixes in `src/routes/upstream.routes.ts` | JWT (EdDSA, JWKS) verified at the gateway; identity forwarded as `x-zudomart-account-id`; Go backends re-verify the bearer token (`jwtauth`); TS services (social, media, search, support, notifications) trust the gateway-set `x-zudomart-account-id` header without a signature (SEC-0010) |
+| Public HTTP gateway | `services/typescript/gateway`, 156 route prefixes in `src/routes/upstream.routes.ts` | JWT (EdDSA, JWKS) verified at the gateway; identity forwarded as `x-nantty-account-id`; Go backends re-verify the bearer token (`jwtauth`); TS services (social, media, search, support, notifications) trust the gateway-set `x-nantty-account-id` header without a signature (SEC-0010) |
 | Go services (ServeMux) | 6 deployables, ~690 routes | `jwtauth.RequireVerifiedAccessToken`, `staffauth.Guard.RequireStaff(permission, stepUp)`, `RequireInternalToken` (constant-time) |
 | TS services | social, media, search, notifications, support | route factory `authentication: required/optional/internal` keyed off the gateway header; staff routes verify a staff JWT with `perm:` roles |
 | Python intelligence | 29 routes on 127.0.0.1:8090 | HMAC request signature (`request_signature_util.py:84`, `compare_digest`); never routed by the gateway |

@@ -3,7 +3,7 @@
 ## Run 1: 4 Oct 2026 (static authn/authz + pre-flight)
 Environment: target stack NOT running (only out-of-scope betng-* up). Dynamic phases deferred.
 
-- Phase 0 setup/pre-flight: DONE (static). `security/authorization/preflight.sh` enforces loopback-only, refuses `sk_live_`/`pk_live_`, refuses `APP_ENV=production`, requires loopback `LEGACY_PROVIDER_API_BASE_URL`, warns on missing `GATEWAY_IDENTITY_SECRET`, flags non-loopback zudomart listeners and the out-of-scope betng-* ports. Ran green.
+- Phase 0 setup/pre-flight: DONE (static). `security/authorization/preflight.sh` enforces loopback-only, refuses `sk_live_`/`pk_live_`, refuses `APP_ENV=production`, requires loopback `LEGACY_PROVIDER_API_BASE_URL`, warns on missing `GATEWAY_IDENTITY_SECRET`, flags non-loopback nantty listeners and the out-of-scope betng-* ports. Ran green.
 - Phase 1 regression (SEC-0001..0018): NOT RUN — requires running stack + seeded actors. Scripts not written to avoid unvalidatable dynamic exploit code.
 - Phase 2 authn/authz (static source review): DONE for the identity/auth surface:
   - Login enumeration/timing: PASS (constant-time spend on missing account; single `ErrInvalidCredentials`; banned blocked after verify).
@@ -12,7 +12,7 @@ Environment: target stack NOT running (only out-of-scope betng-* up). Dynamic ph
   - Logout / password-change session invalidation: PARTIAL — DB revocation correct, but not enforced on the user read path -> SEC-0023.
   - Privilege persistence after suspension/role downgrade: user side -> SEC-0023 (TTL-bounded window; suspend/ban do revoke sessions in DB). Staff side: session rechecked every request, but permissions/role come from JWT claims, so a downgraded-but-not-session-revoked staff member keeps old perms until the 10-min staff TTL — bounded, noted, not raised as a separate finding.
   - Unicode/case normalisation: email consistent; username login lookup inconsistent -> SEC-0024.
-  - Staff step-up: PASS (separate `zudomart-admin-step-up` audience, token must match staff id + session id).
+  - Staff step-up: PASS (separate `nantty-admin-step-up` audience, token must match staff id + session id).
 - Phase 2 IDOR across every route, internal-route encodings, Go HMAC-only rejection: NOT RUN — require running services/route exercise.
 - Phases 3-6 (business logic, races, abuse/fuzz, resilience): out of this session's scope/not run.
 

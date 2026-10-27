@@ -8,7 +8,7 @@
 #                      forced to the fake. Writes PIDs + logs to $ZLOGS. SANDBOX_RELAXED_LIMITS=1 raises gateway
 #                      route limits so a single-IP smoke run is not throttled.
 # Dangerous behavior:  A listener on 0.0.0.0, or goMoney reaching api.flutterwave.com. Pre-flight refuses either.
-# Cleanup:             kill $(cat "$ZLOGS"/*.pid); docker stop zudomart-realtime-smoke;
+# Cleanup:             kill $(cat "$ZLOGS"/*.pid); docker stop nantty-realtime-smoke;
 #                      then docker compose -f infra/local/docker-compose.yml stop
 # Financial safety:    SANDBOX-ONLY (fake Flutterwave, FLWSECK_TEST- fake key; snapshot money tables before tests)
 set -euo pipefail
@@ -35,7 +35,7 @@ goEnv() {
   done <"$ROOT/security/regression/sandboxSecrets.env"
   export PAYMENTS_PROVIDER=flutterwave FLUTTERWAVE_API_BASE_URL="http://127.0.0.1:18998/v3"
   export FLUTTERWAVE_SECRET_KEY="FLWSECK_TEST-fakeflutterwave0000000000-X" FLUTTERWAVE_WEBHOOK_HASH="fake-flutterwave-webhook-hash-0123456789abcdef"
-  export FLUTTERWAVE_MERCHANT_ID="F400000001" WALLET_ALIAS_EMAIL_DOMAIN="wallets.zudomart.test" PAYMENTS_PROCESS_WEBHOOKS_IN_BACKGROUND=false
+  export FLUTTERWAVE_MERCHANT_ID="F400000001" WALLET_ALIAS_EMAIL_DOMAIN="wallets.nantty.test" PAYMENTS_PROCESS_WEBHOOKS_IN_BACKGROUND=false
   if [ "${SANDBOX_RELAXED_LIMITS:-0}" = 1 ]; then
     export DEPOSIT_WITHDRAWAL_COOLDOWN=1s FIRST_DEPOSIT_WITHDRAWAL_COOLDOWN=1s NEW_PAYOUT_ACCOUNT_COOLDOWN=1s SELLER_CREDIT_HOLD_PERIOD=1s WALLET_WITHDRAWAL_MINIMUM_GAP=1s
     export WALLET_MOVEMENT_WORKER_INTERVAL=3s PAYMENTS_SETTLEMENT_POLL_INTERVAL=5s
@@ -50,7 +50,7 @@ goEnv() {
 for spec in goIdentity:8101:go-identity goLive:8102:go-live goMoney:8103:go-money goTrust:8106:go-trust goCommerce:8107:go-commerce goAds:8110:go-ads; do
   IFS=: read -r bin port user <<<"$spec"
   ( goEnv; export HTTP_ADDRESS="127.0.0.1:$port"
-    if [ "$bin" != goIdentity ]; then export RABBITMQ_URL="amqp://$user:$user-local-only@localhost:5672/zudomart"; fi
+    if [ "$bin" != goIdentity ]; then export RABBITMQ_URL="amqp://$user:$user-local-only@localhost:5672/nantty"; fi
     cd "$ROOT/services/go" && start "$bin" "$ZBIN/$bin" )
 done
 
@@ -70,15 +70,15 @@ done
 
 ( cd "$ROOT/services/python/intelligence"; set -a; . ./.env.example; set +a
   export INTELLIGENCE_HOST=127.0.0.1 INTELLIGENCE_SERVER_WORKERS=1
-  start intelligence uv run --frozen zudomart-intelligence-serve )
+  start intelligence uv run --frozen nantty-intelligence-serve )
 
-docker rm -f zudomart-realtime-smoke >/dev/null 2>&1 || true
-docker run -d --name zudomart-realtime-smoke --network host --user "$(id -u):$(id -g)" \
+docker rm -f nantty-realtime-smoke >/dev/null 2>&1 || true
+docker run -d --name nantty-realtime-smoke --network host --user "$(id -u):$(id -g)" \
   -e HOME=/tmp/home -e MIX_HOME=/tmp/home/.mix -e HEX_HOME=/tmp/home/.hex -e MIX_ENV=dev -e PHX_SERVER=true \
   -e REALTIME_HTTP_IP=127.0.0.1 -e PORT=4000 -e LIVE_INTERNAL_API_TOKEN=local-only-live-internal-api-token-0123456 \
   -e LIVE_INTERNAL_URL=http://127.0.0.1:8102 -e SOCIAL_INTERNAL_URL=http://127.0.0.1:8105 \
   -e SOCIAL_INTERNAL_TOKEN=local-only-social-internal-token-0123456789 \
   -v "$ROOT/services/elixir/realtime:/work" -w /work elixir:1.19 \
   bash -c 'mkdir -p /tmp/home && mix local.hex --force >/dev/null && mix local.rebar --force >/dev/null && mix deps.get >/dev/null && mix phx.server' >/dev/null
-( docker logs -f zudomart-realtime-smoke >"$ZLOGS/realtime.log" 2>&1 & echo $! >"$ZLOGS/realtimeLogs.pid" )
+( docker logs -f nantty-realtime-smoke >"$ZLOGS/realtime.log" 2>&1 & echo $! >"$ZLOGS/realtimeLogs.pid" )
 echo "started; logs in $ZLOGS"

@@ -53,7 +53,7 @@ Critical ads settlement (TRU-001) and the remaining findings are still open. MON
 | SEC-0001…0007 | See FINDINGS (static agent) | as listed there | their unit tests |
 | SEC-0009 | Step-up on uphold and counter-notice accept/reject/court-action; admin client marks them step-up | `moderation/.../copyrightClaims.routes.go`, `apps/admin/src/config/apiAccess.config.ts`, moderation integration tests | moderation copyright integration tests (Postgres) pass |
 | SEC-0010 | Gateway HMAC identity signature; verifying middleware in five services; secret in config, `.env.example` and Terraform | `gateway/src/services/gatewayIdentitySigner.service.ts`, `upstreamProxy.service.ts`, `gateway.config.ts`, `*/src/middlewares/gatewayIdentity.middleware.ts`, `*/src/app.ts`, `*/src/configs/*.config.ts`, `infra/aws/modules/platform/services.tf` | gateway vitest (13 files, 1063 tests); middleware tests in each service; `tsc` clean in all six |
-| SEC-0011 | Address columns revoked from `zudomart_readers` and kept for `svc_orders` and `svc_commerce` | `users/src/migrations/20261004210000_restrict_shipping_address_reads_to_orders.{up,down}.sql`, `atlas.sum` | migration applies in the users integration run; owner approved 2026-10-04 |
+| SEC-0011 | Address columns revoked from `nantty_readers` and kept for `svc_orders` and `svc_commerce` | `users/src/migrations/20261004210000_restrict_shipping_address_reads_to_orders.{up,down}.sql`, `atlas.sum` | migration applies in the users integration run; owner approved 2026-10-04 |
 | SEC-0012 | grpc moved to the fixed commit | `services/contracts/go.mod`, `services/go/platform/go.mod`, `services/go/deployables/go.mod`, go.sum files, `go.work.sum` | `go build` and `go test` for deployables, platform, contracts; govulncheck shows 0 reachable |
 | SEC-0014 | Atomic conditional upsert; a suppressed stale update returns nil | `wallet/.../monetisationHolds.service.go` and its tests | unit test; two wallet integration tests pass on Postgres |
 | SEC-0015 | Query token ignored; header or bearer accepted; gateway forwards the push-token header on webhooks | `payments/.../webhooks.controller.go`, its test, `gateway/.../upstreamProxy.service.ts` | controller unit test |
@@ -107,7 +107,7 @@ No code comments are added to the codebase by this work (user policy).
 
 **Clips (apps/mobile):** clip video now sits flush above the bottom tab bar with no gap
 (`clipPage.tsx` renders the bottom chrome only while paused and drops the
-defunct 50 pt comment-bar offset); the `@handle · Zudomart` playback overlay
+defunct 50 pt comment-bar offset); the `@handle · Nantty` playback overlay
 was removed from the playing clip. Downloaded copies were already burned
 server-side (ffmpeg watermark + end card in `services/typescript/media`).
 

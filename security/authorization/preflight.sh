@@ -45,7 +45,7 @@ if command -v docker >/dev/null 2>&1; then
   fi
 fi
 
-# 6. Report any non-loopback listeners among the known zudomart ports.
+# 6. Report any non-loopback listeners among the known nantty ports.
 ports='4000 8080 8090 8101 8102 8103 8104 8105 8106 8107 8108 8109 8110 8111 15432 16379 14566'
 if command -v ss >/dev/null 2>&1; then
   for p in $ports; do

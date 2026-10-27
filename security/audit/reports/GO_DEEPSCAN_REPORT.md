@@ -1,4 +1,4 @@
-# Zudomart Go Backend - Deep Scan Report
+# Nantty Go Backend - Deep Scan Report
 
 > Status update (2026-10-08): not all findings are resolved. The session denylist, trusted-proxy IP resolution, webhook allowlist default, HTTP security headers/CORS, financial arithmetic items F1/F2/F3/F5/F6/F11, and invalid-duration config guard have been remediated with focused tests. The critical payout duplicate-retry and message-handler panic findings are guarded in current code and now have regression tests. Ads settlement and the remaining findings are still open. See `security/audit/reports/REMEDIATIONS.md` for verified status.
 
@@ -307,7 +307,7 @@ Fix: Generate the request ID server-side, or validate that it matches a specific
 ### L2 - Known Dummy Password Constant for Timing Equalisation
 File: services/go/modules/auth/src/utils/argon2id.util.go:26
 go
-const dummyPasswordForTimingEqualisation = "zudomart-timing-equaliser-1"
+const dummyPasswordForTimingEqualisation = "nantty-timing-equaliser-1"
 
 Risk: This is a known constant used to compute a dummy hash for timing equalisation when an account is not found. While the purpose is legitimate (prevent timing-based account enumeration), the constant is hardcoded and visible in source code.
 

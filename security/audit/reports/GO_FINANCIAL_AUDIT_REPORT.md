@@ -1,4 +1,4 @@
-# Zudomart Go Backend - Financial Correctness Audit Report
+# Nantty Go Backend - Financial Correctness Audit Report
 
 > Status update (2026-10-08): this report is not fully closed. Remediated and focused-tested: F1/F2 signed multiplication overflow, F3 withdrawal reservation subtraction underflow, F5 weighted-allocation intermediate overflow, F6 seller reserve overflow, and F11 validation against the supported operational currency set. The earlier auth fail-open issues and HTTP hardening are also addressed. MONEY-001's duplicate-transfer failure mode and INFRA-001's queue panic failure mode were verified as already guarded in current code, with regression tests added. All other financial findings remain open unless explicitly listed as fixed in `security/audit/reports/REMEDIATIONS.md`.
 
