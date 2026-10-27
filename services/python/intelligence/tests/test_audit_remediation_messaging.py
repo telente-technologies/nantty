@@ -140,7 +140,7 @@ async def test_side_effect_publish_failure_does_not_poison_domain_pipeline(
 class FakeIncomingMessage:
     def __init__(self, body: str, attempt: int = 0) -> None:
         self.body = body.encode()
-        self.headers: dict[str, Any] = {"x-zudomart-attempt": attempt} if attempt else {}
+        self.headers: dict[str, Any] = {"x-nantty-attempt": attempt} if attempt else {}
         self.message_id = "msg-regression"
         self.type = "post.created"
         self.content_type = "application/json"

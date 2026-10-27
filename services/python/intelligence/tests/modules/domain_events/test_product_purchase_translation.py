@@ -12,7 +12,7 @@ def purchase_envelope(data: dict[str, Any], occurred_at: datetime) -> dict[str, 
     return {
         "id": "evt_purchase_1",
         "type": "product.purchased",
-        "source": "zudomart.orders",
+        "source": "nantty.orders",
         "subject": "product_1",
         "schemaVersion": 1,
         "occurredAt": occurred_at.isoformat(),

@@ -6,7 +6,7 @@ import unicodedata
 HASHED_USER_PREFIX = "u_"
 HASHED_QUERY_PREFIX = "q_"
 HASH_HEX_LENGTH = 40
-DERIVATION_LABEL = b"zudomart:intelligence:user-id-hash"
+DERIVATION_LABEL = b"nantty:intelligence:user-id-hash"
 HASHED_USER_PATTERN = re.compile(rf"^{HASHED_USER_PREFIX}[0-9a-f]{{{HASH_HEX_LENGTH}}}$")
 
 

@@ -54,9 +54,9 @@ def build_signed_headers(
     signature = compute_request_signature_header_value(secret, method, path_with_query, unix_timestamp, nonce, body)
     return {
         "content-type": "application/json",
-        "x-zudo-timestamp": unix_timestamp,
-        "x-zudo-nonce": nonce,
-        "x-zudo-signature": signature,
+        "x-nantty-timestamp": unix_timestamp,
+        "x-nantty-nonce": nonce,
+        "x-nantty-signature": signature,
     }
 
 

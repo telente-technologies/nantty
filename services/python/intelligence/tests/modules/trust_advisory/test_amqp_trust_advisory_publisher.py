@@ -46,7 +46,7 @@ async def test_suggestions_are_persistent_jobs_routed_to_the_trust_advisory_queu
         generated_at=datetime(2026, 10, 3, tzinfo=UTC),
     )
     await publisher.publish_suspension_suggestion(suggestion)
-    message, routing_key, mandatory = provider.channel.exchanges["zudomart.jobs"].published[0]
+    message, routing_key, mandatory = provider.channel.exchanges["nantty.jobs"].published[0]
     assert (routing_key, mandatory) == ("intelligence-trust-advisory", True)
     assert message.message_id == "sg-1"
     assert message.delivery_mode == DeliveryMode.PERSISTENT

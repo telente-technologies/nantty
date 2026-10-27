@@ -50,7 +50,7 @@ async def account_affinity(container: ApplicationContainer, actor_id: str) -> li
 
 def test_hasher_matches_the_shared_algorithm_and_is_idempotent() -> None:
     key = derive_identifier_hash_key("", "s" * 32)
-    expected_key = hmac.new(b"s" * 32, b"zudomart:intelligence:user-id-hash", hashlib.sha256).digest()
+    expected_key = hmac.new(b"s" * 32, b"nantty:intelligence:user-id-hash", hashlib.sha256).digest()
     assert key == expected_key
     hasher = OpaqueIdentifierHasher(key)
     expected = "u_" + hmac.new(key, b"user:account-1", hashlib.sha256).hexdigest()[:40]

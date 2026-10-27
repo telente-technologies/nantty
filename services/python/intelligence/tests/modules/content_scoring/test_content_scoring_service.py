@@ -126,7 +126,7 @@ class FakeChannelProvider:
 
         class Channel:
             async def get_exchange(self, name: str, *, ensure: bool = True) -> FakeExchange:
-                assert name == "zudomart.jobs"
+                assert name == "nantty.jobs"
                 assert ensure is False
                 return provider.exchange
 

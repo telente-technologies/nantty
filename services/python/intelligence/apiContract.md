@@ -23,7 +23,7 @@ gets back and falls back to deterministic logic whenever Python is slow, down or
   `HMAC-SHA256(key, "user:" + rawUserId)`. Search queries: `q_` + 40 hex of `HMAC-SHA256(key, "query:" + q)`
   where `q` is NFKC-normalised, trimmed, lowercased and whitespace-collapsed. `key` is
   `INTELLIGENCE_ID_HASH_SECRET` (UTF-8) when set, otherwise `HMAC-SHA256(INTELLIGENCE_SHARED_SECRET,
-  "zudomart:intelligence:user-id-hash")` (raw 32 bytes), so every caller that signs requests can derive it.
+  "nantty:intelligence:user-id-hash")` (raw 32 bytes), so every caller that signs requests can derive it.
   Hashing is idempotent: a value already matching `^u_[0-9a-f]{40}$` is used unchanged. Python hashes the
   raw ids it receives in domain events with the same key, so features written from events and ids sent
   over HTTP line up. Risk, trust, bot, chat-spam, gift and value-flow endpoints keep raw account ids,
@@ -80,9 +80,9 @@ Headers:
 
 | header | value |
 |---|---|
-| `x-zudo-timestamp` | Unix time in seconds (9–11 digits) |
-| `x-zudo-nonce` | 16–64 chars, `^[A-Za-z0-9_\-]+$`, unique per request |
-| `x-zudo-signature` | `v1=` + lowercase hex HMAC-SHA256 |
+| `x-nantty-timestamp` | Unix time in seconds (9–11 digits) |
+| `x-nantty-nonce` | 16–64 chars, `^[A-Za-z0-9_\-]+$`, unique per request |
+| `x-nantty-signature` | `v1=` + lowercase hex HMAC-SHA256 |
 | `content-type` | `application/json` |
 
 Canonical string (lines joined with `\n`, no trailing newline):
@@ -123,9 +123,9 @@ export function signIntelligenceRequest(secret: string, method: string, pathWith
   const signature = createHmac("sha256", secret).update(canonical, "utf8").digest("hex");
   return {
     "content-type": "application/json",
-    "x-zudo-timestamp": timestamp,
-    "x-zudo-nonce": nonce,
-    "x-zudo-signature": `v1=${signature}`,
+    "x-nantty-timestamp": timestamp,
+    "x-nantty-nonce": nonce,
+    "x-nantty-signature": `v1=${signature}`,
   };
 }
 // const body = JSON.stringify(payload); fetch(url, { method: "POST", body, headers: signIntelligenceRequest(secret, "POST", "/v1/feed/rank", body) })
@@ -793,7 +793,7 @@ Subjects not covered by `/v1/risk/score`: `account, payment, ad_click, refund, m
 ### Suspension suggestions (goTrust advisory queue)
 
 When an `account`, `ad_click` or `marketplace` risk score, or a chat spam score, is >= 0.8, Python publishes one message per
-account, source and UTC day as a persistent RabbitMQ job (exchange `zudomart.jobs`, routing key `INTELLIGENCE_TRUST_ADVISORY_QUEUE`, default `intelligence-trust-advisory`; `EVENT_BUS=sqs` keeps `INTELLIGENCE_TRUST_ADVISORY_QUEUE_URL`):
+account, source and UTC day as a persistent RabbitMQ job (exchange `nantty.jobs`, routing key `INTELLIGENCE_TRUST_ADVISORY_QUEUE`, default `intelligence-trust-advisory`; `EVENT_BUS=sqs` keeps `INTELLIGENCE_TRUST_ADVISORY_QUEUE_URL`):
 `{suggestionId, subjectType:"account", subjectId, source, score, evidence:[{code,weight}], advisoryOnly:true, generatedAt}`, `message_id = suggestionId`, `type = suspension.suggested`.
 It never suspends anything; goTrust opens an advisory case. Publish failures are logged and never fail the scoring call.
 
@@ -875,7 +875,7 @@ Event `context` accepts `actorTrust` (`new`, `low`, `normal`) and `actorClusterK
 
 `POST /v1/trending/headlines` takes `{ country?, category?, posts: [{ postId, authorId, text, hashtags, topics, createdAt, likeCount, commentCount, repostCount, shareCount, viewCount, isSensitive, ageRestricted, isPublic, integrity? }], limit (<= 20), minimumPostsPerStory (3), minimumDistinctAuthors (3), excludedStoryKeys }` and returns `headlines: [{ storyKey, title, summary, category, postIds (<= 10), postCount, authorCount, topHashtags, sourceLabel: "Summarised from posts", generatedBy: "extractive_v1" | "template_v1", updatedAt }]`. Sensitive, age-restricted, non-public and manipulated posts are dropped; politics and religion always use the template title.
 
-`content.sensitivityAdvised` (domain event, exchange `zudomart.events`) is published after a processed image scores on a mapped category: `data: { targetType: "post" | "clip", targetId, ownerId, mediaId, scores: [{ label: "nudity" | "graphic_violence" | "dangerous_acts" | "self_harm", score }], confidence, modelVersion, advisoryOnly: true }`. Rekognition needs `INTELLIGENCE_MEDIA_BUCKET` and AWS credentials; otherwise the image model reports no signal and nothing is published.
+`content.sensitivityAdvised` (domain event, exchange `nantty.events`) is published after a processed image scores on a mapped category: `data: { targetType: "post" | "clip", targetId, ownerId, mediaId, scores: [{ label: "nudity" | "graphic_violence" | "dangerous_acts" | "self_harm", score }], confidence, modelVersion, advisoryOnly: true }`. Rekognition needs `INTELLIGENCE_MEDIA_BUCKET` and AWS credentials; otherwise the image model reports no signal and nothing is published.
 
 `INTELLIGENCE_SERVER_WORKERS` runs that many uvicorn worker processes (default 1).
 

@@ -17,7 +17,7 @@ QUEUE = "intelligence-domain-events"
 class FakeIncomingMessage:
     def __init__(self, body: str, attempt: int = 0) -> None:
         self.body = body.encode()
-        self.headers: dict[str, Any] = {"x-zudomart-attempt": attempt} if attempt else {}
+        self.headers: dict[str, Any] = {"x-nantty-attempt": attempt} if attempt else {}
         self.message_id = "msg-1"
         self.type = "post.created"
         self.content_type = "application/json"

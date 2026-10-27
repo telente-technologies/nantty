@@ -40,7 +40,7 @@ def staging_settings(**overrides: object) -> IntelligenceSettings:
         "shared_secret": "staging-shared-secret-that-is-long-enough-0",
         "model_signing_secret": "staging-model-signing-secret-long-enough-00",
         "redis_url": "redis://localhost:6379/0",
-        "rabbitmq_url": "amqp://intelligence:secret@rabbit:5672/zudomart",
+        "rabbitmq_url": "amqp://intelligence:secret@rabbit:5672/nantty",
     }
     values.update(overrides)
     return IntelligenceSettings(**values)  # type: ignore[arg-type]
@@ -172,9 +172,9 @@ async def test_signature_over_the_raw_encoded_path_is_accepted() -> None:
         "raw_path": raw_path.encode(),
         "query_string": b"",
         "headers": [
-            (b"x-zudo-timestamp", timestamp.encode()),
-            (b"x-zudo-nonce", nonce.encode()),
-            (b"x-zudo-signature", signature.encode()),
+            (b"x-nantty-timestamp", timestamp.encode()),
+            (b"x-nantty-nonce", nonce.encode()),
+            (b"x-nantty-signature", signature.encode()),
         ],
     }
 
@@ -215,8 +215,8 @@ def test_rekognition_refuses_images_outside_the_media_bucket() -> None:
         def detect_faces(self, **_arguments: object) -> dict[str, object]:
             return {"FaceDetails": []}
 
-    model = RekognitionImageModerationModel(Client(), 50.0, frozenset({"zudo-media"}))
-    assert model.classify_image(ImageModerationRequest(media_id="m", image_url="s3://zudo-media/a.jpg")) == {}
+    model = RekognitionImageModerationModel(Client(), 50.0, frozenset({"nantty-media"}))
+    assert model.classify_image(ImageModerationRequest(media_id="m", image_url="s3://nantty-media/a.jpg")) == {}
     with pytest.raises(ImageSourceNotAllowedError):
         model.classify_image(ImageModerationRequest(media_id="m", image_url="s3://other-bucket/secret.jpg"))
 

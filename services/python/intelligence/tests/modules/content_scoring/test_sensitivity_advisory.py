@@ -51,7 +51,7 @@ class RecordingRekognitionLikeModel:
 
 
 async def build_service(
-    scores: dict[str, float], bucket: str = "zudomart-media"
+    scores: dict[str, float], bucket: str = "nantty-media"
 ) -> tuple[ContentScoringService, RecordingSensitivityPublisher, RecordingRekognitionLikeModel]:
     holder = ImageModerationModelHolder()
     model = RecordingRekognitionLikeModel(scores)
@@ -73,7 +73,7 @@ async def build_service(
 async def test_processed_media_publishes_the_social_sensitivity_contract() -> None:
     service, sensitivity, model = await build_service({"sexual_explicit": 0.93, "gore": 0.4, "drugs": 0.9})
     await service.score_processed_media("media-9", "author-9", "post", NOW, "posts/media-9/1080.jpg")
-    assert model.requested_urls == ["s3://zudomart-media/posts/media-9/1080.jpg"]
+    assert model.requested_urls == ["s3://nantty-media/posts/media-9/1080.jpg"]
     assert len(sensitivity.events) == 1
     body = json.loads(sensitivity.events[0].model_dump_json(by_alias=True))
     assert body["type"] == "content.sensitivityAdvised"

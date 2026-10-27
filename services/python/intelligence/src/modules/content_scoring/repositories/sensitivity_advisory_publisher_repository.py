@@ -35,7 +35,7 @@ class AmqpSensitivityAdvisoryPublisher:
             type=event.type,
             content_type="application/json",
             delivery_mode=DeliveryMode.PERSISTENT,
-            headers={"x-zudomart-subject": event.subject, "x-zudomart-schema": "envelope.v1"},
+            headers={"x-nantty-subject": event.subject, "x-nantty-schema": "envelope.v1"},
         )
         channel = await self.channels.channel_for_publishing()
         exchange = await channel.get_exchange(DOMAIN_EVENTS_EXCHANGE, ensure=False)

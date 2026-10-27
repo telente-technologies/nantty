@@ -17,7 +17,7 @@ def envelope(event_id: str, event_type: str, data: dict[str, Any], occurred_at: 
         {
             "id": event_id,
             "type": event_type,
-            "source": "zudomart.social",
+            "source": "nantty.social",
             "subject": data.get("commentId", "subject"),
             "schemaVersion": 1,
             "occurredAt": occurred_at.isoformat(),

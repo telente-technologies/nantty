@@ -54,7 +54,7 @@ Modules: `feed`, `clips`, `social_proof`, `recommendations`, `ads`, `trending`, 
 `experiments`, `audio`, `events_ingestion`, `model_registry`, `domain_events` (RabbitMQ consumer, consent, purge), `chat_spam`, `moderation`, `extended_risk`, `creator_eligibility`, `ad_click_prediction`, `trust_advisory` (suspension suggestions to goTrust). Mutations (event ingestion, fingerprint
 registration, sound status, experiment exposure) are commands; ranking/scoring/matching are queries.
 
-**Naming**: Zudojs uses `<name>.<kind>.ts`; a dot inside a Python module name cannot be imported, so
+**Naming**: Nanttyjs uses `<name>.<kind>.ts`; a dot inside a Python module name cannot be imported, so
 the same intent is kept with a snake_case `_<kind>` suffix (`feed_ranking_service.py`,
 `rank_feed_candidates_query.py`, `rank_feed_candidates_handler.py`, `feed_module.py`).
 
