@@ -1,5 +1,5 @@
-import type { HttpResponseContext, HttpRouterContext } from "@zudojs/http";
-import type { Schema } from "@zudojs/schema";
+import type { HttpResponseContext, HttpRouterContext } from "@nantty/fastify-platform";
+import type { Schema } from "@nantty/fastify-platform";
 
 import { errorToResponse, json, validationFailed } from "../../../utils/http.util.js";
 import { clampPageSize } from "../../../utils/cursor.util.js";
@@ -11,7 +11,7 @@ import { searchQuerySchema, suggestQuerySchema } from "../validators/search.vali
 export function parseQuery<T>(schemaDefinition: Schema<T>, context: HttpRouterContext): { readonly ok: true; readonly data: T } | { readonly ok: false; readonly response: HttpResponseContext } {
   const flattened = Object.fromEntries(Object.entries(context.query).map(([key, value]) => [key, Array.isArray(value) ? (value[0] ?? "") : value]));
   const result = schemaDefinition.safeParse(flattened);
-  return result.success ? { ok: true, data: result.data } : { ok: false, response: validationFailed(result.issues) };
+  return result.success ? { ok: true, data: result.data } : { ok: false, response: validationFailed(result.error.issues) };
 }
 
 const invalidScope = () => validationFailed([{ code: "invalid_scope", path: ["scope"], message: "scope must be global, mart, store:<id> or profile:<id>." }]);

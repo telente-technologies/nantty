@@ -1,4 +1,4 @@
-import type { Logger } from "@zudojs/logger";
+import type { Logger } from "@nantty/fastify-platform";
 
 import type { SearchIndexStore } from "../../../interfaces/searchStore.interface.js";
 import type { SourceHydrator } from "../../../interfaces/sourceHydrator.interface.js";

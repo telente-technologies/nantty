@@ -1,4 +1,4 @@
-import { schema } from "@zudojs/schema";
+import { schema } from "@nantty/fastify-platform";
 
 import { maximumPageSize, maximumQueryLength, maximumScopeLength } from "../../../constants/search.constant.js";
 import { searchTypes } from "../../../enums/searchType.enum.js";

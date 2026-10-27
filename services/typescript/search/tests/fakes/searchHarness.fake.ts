@@ -1,4 +1,4 @@
-import { createLogger } from "@zudojs/logger";
+import { createLogger } from "@nantty/fastify-platform";
 
 import { noReranker, type SearchReranker } from "../../src/interfaces/searchReranker.interface.js";
 import { createSearchEventProcessor } from "../../src/modules/indexing/services/searchEventProcessor.service.js";

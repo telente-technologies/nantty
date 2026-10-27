@@ -1,5 +1,5 @@
-import { createLogger, type Logger } from "@zudojs/logger";
-import { createRequestContext } from "@zudojs/http";
+import { createLogger, type Logger } from "@nantty/fastify-platform";
+import { createRequestContext } from "@nantty/fastify-platform";
 import { createPlatform } from "@nantty/fastify-platform";
 
 import type { SearchConfig } from "./configs/search.config.js";
@@ -37,7 +37,7 @@ export async function createSearchApp(config: SearchConfig, consumerFactory: Mes
       path: request.url.split("?", 1)[0] ?? "/",
       headers: Object.fromEntries(Object.entries(request.headers).flatMap(([name, value]) => value === undefined ? [] : [[name, Array.isArray(value) ? value.join(",") : String(value)]])),
     });
-    const carriesIdentity = ["x-zudomart-account-id", "x-zudomart-session-id", "x-zudomart-age-bracket", "x-zudomart-viewer", "x-zudomart-identity-signature"].some((name) => context.getHeader(name) !== undefined);
+    const carriesIdentity = ["x-nantty-account-id", "x-nantty-session-id", "x-nantty-age-bracket", "x-nantty-viewer", "x-nantty-identity-signature"].some((name) => context.getHeader(name) !== undefined);
     if (carriesIdentity && !isGatewayIdentityAuthentic(context, config.gatewayIdentitySecrets ?? [], Math.floor(Date.now() / 1000))) {
       await reply.code(401).send({ message: "The request did not come through the gateway.", code: "GATEWAY_IDENTITY_INVALID" });
     }

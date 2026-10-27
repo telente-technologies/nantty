@@ -23,8 +23,8 @@ describe("python search reranker", () => {
     expect(await reranker.rerank("viewer", candidates, 2)).toEqual(["product:b", "product:a"]);
     const headers = captured?.init.headers as Record<string, string>;
     const body = captured?.init.body as string;
-    const canonical = ["v1", "POST", "/v1/search/rerank", headers["x-zudo-timestamp"], headers["x-zudo-nonce"], createHash("sha256").update(body).digest("hex")].join("\n");
-    expect(headers["x-zudo-signature"]).toBe(`v1=${createHmac("sha256", "secret").update(canonical).digest("hex")}`);
+    const canonical = ["v1", "POST", "/v1/search/rerank", headers["x-nantty-timestamp"], headers["x-nantty-nonce"], createHash("sha256").update(body).digest("hex")].join("\n");
+    expect(headers["x-nantty-signature"]).toBe(`v1=${createHmac("sha256", "secret").update(canonical).digest("hex")}`);
     expect(JSON.parse(body)).not.toHaveProperty("query");
     expect(captured?.url).toBe("http://intelligence:8090/v1/search/rerank");
   });

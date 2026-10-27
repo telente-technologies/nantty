@@ -11,7 +11,7 @@ export interface IdentifierHasher {
 
 export function deriveIdentifierHashSecret(configuredSecret: string, fallbackKeyMaterial: string): Buffer {
   return configuredSecret === ""
-    ? createHmac("sha256", Buffer.from(fallbackKeyMaterial, "utf8")).update("zudomart:intelligence:user-id-hash").digest()
+    ? createHmac("sha256", Buffer.from(fallbackKeyMaterial, "utf8")).update("nantty:intelligence:user-id-hash").digest()
     : Buffer.from(configuredSecret, "utf8");
 }
 

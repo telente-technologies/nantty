@@ -1,4 +1,4 @@
-import { createLogger } from "@zudojs/logger";
+import { createLogger } from "@nantty/fastify-platform";
 
 import { createSearchApp } from "./app.js";
 import { createRabbitMqMessageConsumerFactory } from "./integrations/rabbitMqMessageConsumerFactory.integration.js";

@@ -1,4 +1,4 @@
-import { createRequestContext, type HttpRouterContext } from "@zudojs/http";
+import { createRequestContext, type HttpRouterContext } from "@nantty/fastify-platform";
 import type { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
 
 import { createIndexingController } from "../modules/indexing/controllers/indexing.controller.js";
@@ -30,7 +30,7 @@ function controllerContext(request: FastifyRequest): HttpRouterContext {
   return { request: context, params: request.params as Record<string, string>, query, route: undefined as never, state: new Map(), middleware: undefined as never, signal: request.raw.signal };
 }
 
-async function invoke(reply: FastifyReply, request: FastifyRequest, handler: (context: HttpRouterContext) => Promise<import("@zudojs/http").HttpResponseContext>): Promise<void> {
+async function invoke(reply: FastifyReply, request: FastifyRequest, handler: (context: HttpRouterContext) => Promise<import("@nantty/fastify-platform").HttpResponseContext>): Promise<void> {
   sendLegacyResponse(reply, await handler(controllerContext(request)));
 }
 

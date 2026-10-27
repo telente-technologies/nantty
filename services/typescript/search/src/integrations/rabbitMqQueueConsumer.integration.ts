@@ -1,5 +1,5 @@
 import type { ConsumeMessage } from "amqplib";
-import type { Logger } from "@zudojs/logger";
+import type { Logger } from "@nantty/fastify-platform";
 
 import { retryExchange } from "../constants/rabbitMq.constant.js";
 import { PoisonEventError } from "../errors/search.error.js";

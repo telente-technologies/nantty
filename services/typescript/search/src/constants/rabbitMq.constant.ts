@@ -1,9 +1,9 @@
-export const domainEventsExchange = "zudomart.events";
-export const jobsExchange = "zudomart.jobs";
-export const retryExchange = "zudomart.retry";
+export const domainEventsExchange = "nantty.events";
+export const jobsExchange = "nantty.jobs";
+export const retryExchange = "nantty.retry";
 export const maximumDeliveryAttempts = 5;
-export const attemptHeader = "x-zudomart-attempt";
-export const lastErrorHeader = "x-zudomart-last-error";
+export const attemptHeader = "x-nantty-attempt";
+export const lastErrorHeader = "x-nantty-last-error";
 
 export interface RetryTier {
   readonly name: string;

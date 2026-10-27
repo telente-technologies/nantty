@@ -1,4 +1,4 @@
-import type { HttpRouterContext } from "@zudojs/http";
+import type { HttpRouterContext } from "@nantty/fastify-platform";
 
 import { PoisonEventError, SearchError } from "../../../errors/search.error.js";
 import { assertInternalToken } from "../../../middlewares/principal.middleware.js";

@@ -18,7 +18,7 @@ beforeAll(async () => {
 
 afterAll(async () => stop());
 
-const asAccount = (accountId: string) => ({ "x-zudomart-account-id": accountId });
+const asAccount = (accountId: string) => ({ "x-nantty-account-id": accountId });
 
 describe("search http routes", () => {
   it("keeps probes, not-found behavior, and unsupported methods explicit", async () => {

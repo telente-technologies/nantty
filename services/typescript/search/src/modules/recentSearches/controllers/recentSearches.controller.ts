@@ -1,5 +1,5 @@
-import type { HttpRouterContext } from "@zudojs/http";
-import { schema } from "@zudojs/schema";
+import type { HttpRouterContext } from "@nantty/fastify-platform";
+import { schema } from "@nantty/fastify-platform";
 
 import { maximumQueryLength, maximumScopeLength } from "../../../constants/search.constant.js";
 import { badRequest } from "../../../errors/search.error.js";
