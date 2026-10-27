@@ -1,4 +1,4 @@
-# Zudomart backend services
+# Nantty backend services
 
 The backend is polyglot and lives here (the old `apps/api` monolith was removed on 2026-10-10 after everything still in
 use was ported into these services). The current service map is
@@ -334,7 +334,7 @@ return the original; different lines are rejected. Reversals post an opposite en
 Integrity: `VerifyTrialBalanceAndCachedBalances` pages accounts by id (500 per page) and compares cached balances with their
 lines; it runs daily, also runs the provider mirror reconciliation, and is exposed at `GET /api/v1/admin/ledger/integrity`.
 
-**Flutterwave, Zudomart holding no customer money.** Flutterwave is the only payment provider. Each verified user in
+**Flutterwave, Nantty holding no customer money.** Flutterwave is the only payment provider. Each verified user in
 Nigeria gets a Flutterwave payout subaccount (PSA, `WALLET_PSA_COUNTRIES`); the ledger mirrors it as
 `asset:providerWallet:flutterwave:{ref}` against the user's liability accounts. Escrow money stays locked (in the ledger)
 inside the buyer's own PSA and moves buyer PSA → seller PSA on release, with the escrow fee sent PSA → main. Card checkouts
@@ -382,7 +382,7 @@ table at `GET/PUT /api/v1/admin/coins/price-table[/{packageId}]` (`money.monetiz
 purchases through payments, IAP receipts with the store fee booked as `expense:appStoreFees:{store}`, store refunds that claw
 back coins and record the spent part as `user:{id}:coinDebt` plus a `wallet_risk_flags` row. Transfers take 25%
 (`COIN_TRANSFER_FEE_BPS`, the recipient rounds down). Earned coins convert to cash (`COIN_CASH_VALUES`,
-`CREATOR_MINIMUM_PAYOUTS`) into `creator:{id}:earningsPayable` (Zudomart owes it); the daily run moves it to `seller:{id}:available` once
+`CREATOR_MINIMUM_PAYOUTS`) into `creator:{id}:earningsPayable` (Nantty owes it); the daily run moves it to `seller:{id}:available` once
 the creator's payout account is verified (`CREATOR_TRANSFER_MINIMUMS`); gap earnings stay payable until then. Payout accounts are AES-256-GCM encrypted (owner id as associated
 data, `DATA_ENCRYPTION_KEY`), the name comes from the provider's resolve call. Withdrawals take only available money capped
 by the user's PSA balance (read before the transaction; the Flutterwave transfer fee quoted on top), go `pending_review → queued → processing → paid | failed`, can be cancelled before processing, and
