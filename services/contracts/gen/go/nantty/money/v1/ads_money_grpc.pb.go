@@ -2,7 +2,7 @@
 // versions:
 // - protoc-gen-go-grpc v1.5.1
 // - protoc             (unknown)
-// source: zudomart/money/v1/ads_money.proto
+// source: nantty/money/v1/ads_money.proto
 
 package moneyv1
 
@@ -19,8 +19,8 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	AdsMoneyService_DebitWalletForBoost_FullMethodName  = "/zudomart.money.v1.AdsMoneyService/DebitWalletForBoost"
-	AdsMoneyService_RefundBoostRemainder_FullMethodName = "/zudomart.money.v1.AdsMoneyService/RefundBoostRemainder"
+	AdsMoneyService_DebitWalletForBoost_FullMethodName  = "/nantty.money.v1.AdsMoneyService/DebitWalletForBoost"
+	AdsMoneyService_RefundBoostRemainder_FullMethodName = "/nantty.money.v1.AdsMoneyService/RefundBoostRemainder"
 )
 
 // AdsMoneyServiceClient is the client API for AdsMoneyService service.
@@ -164,7 +164,7 @@ func _AdsMoneyService_RefundBoostRemainder_Handler(srv interface{}, ctx context.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var AdsMoneyService_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "zudomart.money.v1.AdsMoneyService",
+	ServiceName: "nantty.money.v1.AdsMoneyService",
 	HandlerType: (*AdsMoneyServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
@@ -177,5 +177,5 @@ var AdsMoneyService_ServiceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "zudomart/money/v1/ads_money.proto",
+	Metadata: "nantty/money/v1/ads_money.proto",
 }

@@ -4,7 +4,7 @@ import { waitFor } from "../src/apiClient.util.js";
 import { writeSmokeReport } from "../src/smokeReport.util.js";
 
 const managementUrl = process.env["SMOKE_RABBITMQ_MANAGEMENT_URL"] ?? "http://localhost:15672";
-const managementAuthorization = `Basic ${Buffer.from(process.env["SMOKE_RABBITMQ_MANAGEMENT_CREDENTIALS"] ?? "zudomart:zudomart-local-only").toString("base64")}`;
+const managementAuthorization = `Basic ${Buffer.from(process.env["SMOKE_RABBITMQ_MANAGEMENT_CREDENTIALS"] ?? "nantty:nantty-local-only").toString("base64")}`;
 
 interface QueueState {
   readonly name: string;
@@ -13,7 +13,7 @@ interface QueueState {
 }
 
 async function readQueues(): Promise<QueueState[]> {
-  const response = await fetch(`${managementUrl}/api/queues/zudomart?columns=name,messages,consumers`, { headers: { authorization: managementAuthorization } });
+  const response = await fetch(`${managementUrl}/api/queues/nantty?columns=name,messages,consumers`, { headers: { authorization: managementAuthorization } });
   return ((await response.json()) as Array<{ name: string; messages?: number; consumers?: number }>).map((queue) => ({ name: queue.name, messages: queue.messages ?? 0, consumers: queue.consumers ?? 0 }));
 }
 

@@ -39,7 +39,7 @@ describe("contract fixes: theme preference and ads invites by email or username"
     expect(JSON.stringify(mail.body), "the invite never echoes the invitee's email").not.toContain(byEmail.email);
     const name = await callApi("POST", invites, { token: owner.accessToken, body: { username: `@${byName.username}`, role: "advertiser" } });
     expect(name.status, describeResponse(name)).toBe(201);
-    const nobody = await callApi("POST", invites, { token: owner.accessToken, body: { email: `nobody.${Date.now()}@smoke.zudomart.test`, role: "analyst" } });
+    const nobody = await callApi("POST", invites, { token: owner.accessToken, body: { email: `nobody.${Date.now()}@smoke.nantty.test`, role: "analyst" } });
     expectClearError(nobody, 400, "VALIDATION_FAILED");
     expect(JSON.stringify(nobody.body)).toMatch(/sign up first/);
     const duplicate = await callApi("POST", invites, { token: owner.accessToken, body: { username: byEmail.username, role: "analyst" } });

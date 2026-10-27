@@ -7,7 +7,7 @@ import { createSamplePng, registerUser, uniqueSuffix, verifyNigerianUserToLevelO
 import { expect, test } from "../../src/test.js";
 
 test.describe.configure({ mode: "serial" });
-test.use({ guardOptions: { allowConsoleErrors: [/status of 401 .*\/bff\/auth\/login$/, /Loading the image 'https:\/\/cdn\.zudomart\.com\/media\/[0-9a-f-]+' violates the following Content Security Policy/], allowServerErrors: [] } });
+test.use({ guardOptions: { allowConsoleErrors: [/status of 401 .*\/bff\/auth\/login$/, /Loading the image 'https:\/\/cdn\.nantty\.com\/media\/[0-9a-f-]+' violates the following Content Security Policy/], allowServerErrors: [] } });
 
 let advertiser: UserActor;
 let accountPath = "";

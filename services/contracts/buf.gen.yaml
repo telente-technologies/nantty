@@ -3,7 +3,7 @@ managed:
   enabled: true
   override:
     - file_option: go_package_prefix
-      value: zudomart/contracts/gen/go
+      value: nantty/contracts/gen/go
 plugins:
   - remote: buf.build/protocolbuffers/go
     out: gen/go

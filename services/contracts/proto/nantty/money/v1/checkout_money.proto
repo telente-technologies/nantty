@@ -1,9 +1,9 @@
 syntax = "proto3";
 
-package zudomart.money.v1;
+package nantty.money.v1;
 
 import "google/protobuf/timestamp.proto";
-import "zudomart/common/v1/money.proto";
+import "nantty/common/v1/money.proto";
 
 // Internal only (go-commerce -> go-money). Amounts are always computed by go-commerce on the server.
 service CheckoutMoneyService {
@@ -25,7 +25,7 @@ message OrderPayable {
   string order_reference = 2;
   string store_id = 3;
   string seller_user_id = 4;
-  zudomart.common.v1.Money amount = 5;
+  nantty.common.v1.Money amount = 5;
   string product_summary = 6;
   OrderPaymentMode payment_mode = 7;
   bool store_verified = 8;
@@ -72,10 +72,10 @@ message OrderEscrow {
   string order_id = 2;
   string status = 3;
   OrderPaymentMode payment_mode = 4;
-  zudomart.common.v1.Money held_amount = 5;
-  zudomart.common.v1.Money platform_fee = 6;
-  zudomart.common.v1.Money seller_amount = 7;
-  zudomart.common.v1.Money refunded_amount = 8;
+  nantty.common.v1.Money held_amount = 5;
+  nantty.common.v1.Money platform_fee = 6;
+  nantty.common.v1.Money seller_amount = 7;
+  nantty.common.v1.Money refunded_amount = 8;
   optional google.protobuf.Timestamp auto_release_at = 9;
   optional google.protobuf.Timestamp released_at = 10;
   optional google.protobuf.Timestamp refunded_at = 11;

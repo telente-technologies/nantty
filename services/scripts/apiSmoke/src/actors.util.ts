@@ -53,7 +53,7 @@ async function callAuthApi(method: string, path: string, options: ApiRequestOpti
 export async function registerUser(prefix: string): Promise<UserActor> {
   const suffix = uniqueSuffix();
   const username = `${prefix}${suffix}`.toLowerCase().slice(0, 28);
-  const email = `${username}@smoke.zudomart.test`;
+  const email = `${username}@smoke.nantty.test`;
   const sent = await callAuthApi("POST", "/api/v1/auth/otp/send", { body: { destination: email, purpose: "signup" } });
   if (sent.status !== 200) throw new Error(`otp send: ${describeResponse(sent)}`);
   const code = await readOneTimeCodeFromIdentityLog(email, "signup");
@@ -74,14 +74,14 @@ export async function logInUser(email: string): Promise<{ readonly accessToken: 
 }
 
 function bootstrapSuperadmin(email: string, password: string): void {
-  const environment = { ...process.env, ADMIN_DATABASE_URL: process.env["SMOKE_ADMIN_DATABASE_URL"] ?? "postgres://svc_admin:svc_admin_local_only@localhost:15432/zudomart?sslmode=disable", ADMIN_BOOTSTRAP_PASSWORD: password };
+  const environment = { ...process.env, ADMIN_DATABASE_URL: process.env["SMOKE_ADMIN_DATABASE_URL"] ?? "postgres://svc_admin:svc_admin_local_only@localhost:15432/nantty?sslmode=disable", ADMIN_BOOTSTRAP_PASSWORD: password };
   const binary = process.env["SMOKE_BOOTSTRAP_SUPERADMIN_BINARY"];
   if (binary !== undefined && binary !== "") execFileSync(binary, ["-email", email, "-name", "Smoke Staff"], { env: environment, stdio: "pipe" });
   else execFileSync("go", ["run", "./cmd/bootstrapSuperadmin", "-email", email, "-name", "Smoke Staff"], { cwd: resolve(repositoryRoot, "services/go/modules/admin"), env: environment, stdio: "pipe" });
 }
 
 export async function createSuperadmin(): Promise<StaffActor> {
-  const email = `smoke.staff.${uniqueSuffix()}@zudomart.com`;
+  const email = `smoke.staff.${uniqueSuffix()}@nantty.com`;
   const password = "Quartz-Lantern-Pass-2026!";
   bootstrapSuperadmin(email, password);
   const login = await callApi("POST", "/api/v1/admin/auth/login", { body: { email, password } });

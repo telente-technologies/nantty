@@ -1,9 +1,9 @@
 syntax = "proto3";
 
-package zudomart.money.v1;
+package nantty.money.v1;
 
 import "google/protobuf/timestamp.proto";
-import "zudomart/common/v1/money.proto";
+import "nantty/common/v1/money.proto";
 
 // Internal only (go-ads -> go-money). Never exposed through the gateway.
 // Errors are gRPC statuses with a google.rpc.ErrorInfo reason:
@@ -21,7 +21,7 @@ service AdsMoneyService {
 message DebitWalletForBoostRequest {
   string user_id = 1;
   // > 0, in the user's wallet currency.
-  zudomart.common.v1.Money amount = 2;
+  nantty.common.v1.Money amount = 2;
   // 8..128 chars [A-Za-z0-9_-], scoped to user_id. go-ads passes the client's Idempotency-Key of the boost request,
   // because the boost row does not exist yet when the debit happens.
   string idempotency_key = 3;
@@ -30,14 +30,14 @@ message DebitWalletForBoostRequest {
 message DebitWalletForBoostResponse {
   string ledger_transaction_id = 1;
   // Spendable wallet balance after the debit.
-  zudomart.common.v1.Money balance_after = 2;
+  nantty.common.v1.Money balance_after = 2;
   google.protobuf.Timestamp debited_at = 3;
   bool replayed = 4;
 }
 
 message RefundBoostRemainderRequest {
   string user_id = 1;
-  zudomart.common.v1.Money amount = 2;
+  nantty.common.v1.Money amount = 2;
   // 8..128 chars [A-Za-z0-9_-], scoped to user_id. go-ads passes "refund-" + the debit idempotency key.
   string idempotency_key = 3;
   // Idempotency key of the debit being reversed; go-money rejects an amount above the amount debited under it.
@@ -46,6 +46,6 @@ message RefundBoostRemainderRequest {
 
 message RefundBoostRemainderResponse {
   string ledger_transaction_id = 1;
-  zudomart.common.v1.Money balance_after = 2;
+  nantty.common.v1.Money balance_after = 2;
   bool replayed = 3;
 }

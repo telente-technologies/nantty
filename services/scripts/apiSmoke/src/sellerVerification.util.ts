@@ -7,7 +7,7 @@ const businessDocumentKinds = ["cac_certificate", "identity", "address_proof"] a
 const samplePdf = Buffer.from("%PDF-1.4\n1 0 obj << /Type /Catalog >> endobj\ntrailer << /Root 1 0 R >>\n%%EOF\n");
 
 function isSellerVerifiedInMoney(accountId: string): boolean {
-  const output = execFileSync("docker", ["exec", "zudomart-backend-postgres-1", "psql", "-U", "zudomart", "-d", "zudomart", "-At", "-c", `select count(*) from payments.seller_verifications where account_id = '${accountId}' and revoked_at is null`], { encoding: "utf8" });
+  const output = execFileSync("docker", ["exec", "nantty-backend-postgres-1", "psql", "-U", "nantty", "-d", "nantty", "-At", "-c", `select count(*) from payments.seller_verifications where account_id = '${accountId}' and revoked_at is null`], { encoding: "utf8" });
   return output.trim() === "1";
 }
 

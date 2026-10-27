@@ -2,7 +2,7 @@
 // versions:
 // - protoc-gen-go-grpc v1.5.1
 // - protoc             (unknown)
-// source: zudomart/auth/v1/account_directory.proto
+// source: nantty/auth/v1/account_directory.proto
 
 package authv1
 
@@ -19,8 +19,8 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	AccountDirectoryService_GetAccountSummaries_FullMethodName         = "/zudomart.auth.v1.AccountDirectoryService/GetAccountSummaries"
-	AccountDirectoryService_RevokeAllSessionsForAccount_FullMethodName = "/zudomart.auth.v1.AccountDirectoryService/RevokeAllSessionsForAccount"
+	AccountDirectoryService_GetAccountSummaries_FullMethodName         = "/nantty.auth.v1.AccountDirectoryService/GetAccountSummaries"
+	AccountDirectoryService_RevokeAllSessionsForAccount_FullMethodName = "/nantty.auth.v1.AccountDirectoryService/RevokeAllSessionsForAccount"
 )
 
 // AccountDirectoryServiceClient is the client API for AccountDirectoryService service.
@@ -143,7 +143,7 @@ func _AccountDirectoryService_RevokeAllSessionsForAccount_Handler(srv interface{
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var AccountDirectoryService_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "zudomart.auth.v1.AccountDirectoryService",
+	ServiceName: "nantty.auth.v1.AccountDirectoryService",
 	HandlerType: (*AccountDirectoryServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
@@ -156,5 +156,5 @@ var AccountDirectoryService_ServiceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "zudomart/auth/v1/account_directory.proto",
+	Metadata: "nantty/auth/v1/account_directory.proto",
 }

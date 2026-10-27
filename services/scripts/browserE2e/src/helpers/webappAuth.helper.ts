@@ -9,7 +9,7 @@ export interface BrowserAccount {
 }
 
 export function freshEmail(prefix: string): string {
-  return `${prefix}${uniqueSuffix()}@smoke.zudomart.test`.toLowerCase();
+  return `${prefix}${uniqueSuffix()}@smoke.nantty.test`.toLowerCase();
 }
 
 export async function logInThroughLoginPage(page: Page, identifier: string, password = smokePassword, next?: string): Promise<void> {

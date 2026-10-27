@@ -30,7 +30,7 @@ function signIntelligence(path, body) {
   const timestamp = String(Math.floor(Date.now() / 1000));
   const nonce = `k6${__VU}x${__ITER}x${Math.random().toString(36).slice(2, 14)}`;
   const canonical = ["v1", "POST", path, timestamp, nonce, crypto.sha256(body, "hex")].join("\n");
-  return { "content-type": "application/json", "x-zudo-timestamp": timestamp, "x-zudo-nonce": nonce, "x-zudo-signature": `v1=${crypto.hmac("sha256", fixtures.intelligenceSecret, canonical, "hex")}` };
+  return { "content-type": "application/json", "x-nantty-timestamp": timestamp, "x-nantty-nonce": nonce, "x-nantty-signature": `v1=${crypto.hmac("sha256", fixtures.intelligenceSecret, canonical, "hex")}` };
 }
 
 function feedCandidates(count) {

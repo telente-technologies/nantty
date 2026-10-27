@@ -2,7 +2,7 @@
 // versions:
 // - protoc-gen-go-grpc v1.5.1
 // - protoc             (unknown)
-// source: zudomart/money/v1/checkout_money.proto
+// source: nantty/money/v1/checkout_money.proto
 
 package moneyv1
 
@@ -19,10 +19,10 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	CheckoutMoneyService_RegisterCheckoutPayables_FullMethodName = "/zudomart.money.v1.CheckoutMoneyService/RegisterCheckoutPayables"
-	CheckoutMoneyService_RecordOrderFulfilment_FullMethodName    = "/zudomart.money.v1.CheckoutMoneyService/RecordOrderFulfilment"
-	CheckoutMoneyService_ConfirmOrderReceipt_FullMethodName      = "/zudomart.money.v1.CheckoutMoneyService/ConfirmOrderReceipt"
-	CheckoutMoneyService_GetOrderEscrow_FullMethodName           = "/zudomart.money.v1.CheckoutMoneyService/GetOrderEscrow"
+	CheckoutMoneyService_RegisterCheckoutPayables_FullMethodName = "/nantty.money.v1.CheckoutMoneyService/RegisterCheckoutPayables"
+	CheckoutMoneyService_RecordOrderFulfilment_FullMethodName    = "/nantty.money.v1.CheckoutMoneyService/RecordOrderFulfilment"
+	CheckoutMoneyService_ConfirmOrderReceipt_FullMethodName      = "/nantty.money.v1.CheckoutMoneyService/ConfirmOrderReceipt"
+	CheckoutMoneyService_GetOrderEscrow_FullMethodName           = "/nantty.money.v1.CheckoutMoneyService/GetOrderEscrow"
 )
 
 // CheckoutMoneyServiceClient is the client API for CheckoutMoneyService service.
@@ -214,7 +214,7 @@ func _CheckoutMoneyService_GetOrderEscrow_Handler(srv interface{}, ctx context.C
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var CheckoutMoneyService_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "zudomart.money.v1.CheckoutMoneyService",
+	ServiceName: "nantty.money.v1.CheckoutMoneyService",
 	HandlerType: (*CheckoutMoneyServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
@@ -235,5 +235,5 @@ var CheckoutMoneyService_ServiceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "zudomart/money/v1/checkout_money.proto",
+	Metadata: "nantty/money/v1/checkout_money.proto",
 }

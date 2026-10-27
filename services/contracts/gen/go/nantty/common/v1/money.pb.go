@@ -2,7 +2,7 @@
 // versions:
 // 	protoc-gen-go v1.36.12
 // 	protoc        (unknown)
-// source: zudomart/common/v1/money.proto
+// source: nantty/common/v1/money.proto
 
 package commonv1
 
@@ -31,7 +31,7 @@ type Money struct {
 
 func (x *Money) Reset() {
 	*x = Money{}
-	mi := &file_zudomart_common_v1_money_proto_msgTypes[0]
+	mi := &file_nantty_common_v1_money_proto_msgTypes[0]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -43,7 +43,7 @@ func (x *Money) String() string {
 func (*Money) ProtoMessage() {}
 
 func (x *Money) ProtoReflect() protoreflect.Message {
-	mi := &file_zudomart_common_v1_money_proto_msgTypes[0]
+	mi := &file_nantty_common_v1_money_proto_msgTypes[0]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -56,7 +56,7 @@ func (x *Money) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Money.ProtoReflect.Descriptor instead.
 func (*Money) Descriptor() ([]byte, []int) {
-	return file_zudomart_common_v1_money_proto_rawDescGZIP(), []int{0}
+	return file_nantty_common_v1_money_proto_rawDescGZIP(), []int{0}
 }
 
 func (x *Money) GetAmountMinor() int64 {
@@ -82,7 +82,7 @@ type CoinAmount struct {
 
 func (x *CoinAmount) Reset() {
 	*x = CoinAmount{}
-	mi := &file_zudomart_common_v1_money_proto_msgTypes[1]
+	mi := &file_nantty_common_v1_money_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -94,7 +94,7 @@ func (x *CoinAmount) String() string {
 func (*CoinAmount) ProtoMessage() {}
 
 func (x *CoinAmount) ProtoReflect() protoreflect.Message {
-	mi := &file_zudomart_common_v1_money_proto_msgTypes[1]
+	mi := &file_nantty_common_v1_money_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -107,7 +107,7 @@ func (x *CoinAmount) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CoinAmount.ProtoReflect.Descriptor instead.
 func (*CoinAmount) Descriptor() ([]byte, []int) {
-	return file_zudomart_common_v1_money_proto_rawDescGZIP(), []int{1}
+	return file_nantty_common_v1_money_proto_rawDescGZIP(), []int{1}
 }
 
 func (x *CoinAmount) GetCoins() int64 {
@@ -117,38 +117,38 @@ func (x *CoinAmount) GetCoins() int64 {
 	return 0
 }
 
-var File_zudomart_common_v1_money_proto protoreflect.FileDescriptor
+var File_nantty_common_v1_money_proto protoreflect.FileDescriptor
 
-const file_zudomart_common_v1_money_proto_rawDesc = "" +
+const file_nantty_common_v1_money_proto_rawDesc = "" +
 	"\n" +
-	"\x1ezudomart/common/v1/money.proto\x12\x12zudomart.common.v1\"F\n" +
+	"\x1enantty/common/v1/money.proto\x12\x12nantty.common.v1\"F\n" +
 	"\x05Money\x12!\n" +
 	"\famount_minor\x18\x01 \x01(\x03R\vamountMinor\x12\x1a\n" +
 	"\bcurrency\x18\x02 \x01(\tR\bcurrency\"\"\n" +
 	"\n" +
 	"CoinAmount\x12\x14\n" +
 	"\x05coins\x18\x01 \x01(\x03R\x05coinsB\xc5\x01\n" +
-	"\x16com.zudomart.common.v1B\n" +
-	"MoneyProtoP\x01Z5zudomart/contracts/gen/go/zudomart/common/v1;commonv1\xa2\x02\x03ZCX\xaa\x02\x12Zudomart.Common.V1\xca\x02\x12Zudomart\\Common\\V1\xe2\x02\x1eZudomart\\Common\\V1\\GPBMetadata\xea\x02\x14Zudomart::Common::V1b\x06proto3"
+	"\x16com.nantty.common.v1B\n" +
+	"MoneyProtoP\x01Z5nantty/contracts/gen/go/nantty/common/v1;commonv1\xa2\x02\x03ZCX\xaa\x02\x12Nantty.Common.V1\xca\x02\x12Nantty\\Common\\V1\xe2\x02\x1eNantty\\Common\\V1\\GPBMetadata\xea\x02\x14Nantty::Common::V1b\x06proto3"
 
 var (
-	file_zudomart_common_v1_money_proto_rawDescOnce sync.Once
-	file_zudomart_common_v1_money_proto_rawDescData []byte
+	file_nantty_common_v1_money_proto_rawDescOnce sync.Once
+	file_nantty_common_v1_money_proto_rawDescData []byte
 )
 
-func file_zudomart_common_v1_money_proto_rawDescGZIP() []byte {
-	file_zudomart_common_v1_money_proto_rawDescOnce.Do(func() {
-		file_zudomart_common_v1_money_proto_rawDescData = protoimpl.X.CompressGZIP(unsafe.Slice(unsafe.StringData(file_zudomart_common_v1_money_proto_rawDesc), len(file_zudomart_common_v1_money_proto_rawDesc)))
+func file_nantty_common_v1_money_proto_rawDescGZIP() []byte {
+	file_nantty_common_v1_money_proto_rawDescOnce.Do(func() {
+		file_nantty_common_v1_money_proto_rawDescData = protoimpl.X.CompressGZIP(unsafe.Slice(unsafe.StringData(file_nantty_common_v1_money_proto_rawDesc), len(file_nantty_common_v1_money_proto_rawDesc)))
 	})
-	return file_zudomart_common_v1_money_proto_rawDescData
+	return file_nantty_common_v1_money_proto_rawDescData
 }
 
-var file_zudomart_common_v1_money_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
-var file_zudomart_common_v1_money_proto_goTypes = []any{
-	(*Money)(nil),      // 0: zudomart.common.v1.Money
-	(*CoinAmount)(nil), // 1: zudomart.common.v1.CoinAmount
+var file_nantty_common_v1_money_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
+var file_nantty_common_v1_money_proto_goTypes = []any{
+	(*Money)(nil),      // 0: nantty.common.v1.Money
+	(*CoinAmount)(nil), // 1: nantty.common.v1.CoinAmount
 }
-var file_zudomart_common_v1_money_proto_depIdxs = []int32{
+var file_nantty_common_v1_money_proto_depIdxs = []int32{
 	0, // [0:0] is the sub-list for method output_type
 	0, // [0:0] is the sub-list for method input_type
 	0, // [0:0] is the sub-list for extension type_name
@@ -156,26 +156,26 @@ var file_zudomart_common_v1_money_proto_depIdxs = []int32{
 	0, // [0:0] is the sub-list for field type_name
 }
 
-func init() { file_zudomart_common_v1_money_proto_init() }
-func file_zudomart_common_v1_money_proto_init() {
-	if File_zudomart_common_v1_money_proto != nil {
+func init() { file_nantty_common_v1_money_proto_init() }
+func file_nantty_common_v1_money_proto_init() {
+	if File_nantty_common_v1_money_proto != nil {
 		return
 	}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
-			RawDescriptor: unsafe.Slice(unsafe.StringData(file_zudomart_common_v1_money_proto_rawDesc), len(file_zudomart_common_v1_money_proto_rawDesc)),
+			RawDescriptor: unsafe.Slice(unsafe.StringData(file_nantty_common_v1_money_proto_rawDesc), len(file_nantty_common_v1_money_proto_rawDesc)),
 			NumEnums:      0,
 			NumMessages:   2,
 			NumExtensions: 0,
 			NumServices:   0,
 		},
-		GoTypes:           file_zudomart_common_v1_money_proto_goTypes,
-		DependencyIndexes: file_zudomart_common_v1_money_proto_depIdxs,
-		MessageInfos:      file_zudomart_common_v1_money_proto_msgTypes,
+		GoTypes:           file_nantty_common_v1_money_proto_goTypes,
+		DependencyIndexes: file_nantty_common_v1_money_proto_depIdxs,
+		MessageInfos:      file_nantty_common_v1_money_proto_msgTypes,
 	}.Build()
-	File_zudomart_common_v1_money_proto = out.File
-	file_zudomart_common_v1_money_proto_goTypes = nil
-	file_zudomart_common_v1_money_proto_depIdxs = nil
+	File_nantty_common_v1_money_proto = out.File
+	file_nantty_common_v1_money_proto_goTypes = nil
+	file_nantty_common_v1_money_proto_depIdxs = nil
 }

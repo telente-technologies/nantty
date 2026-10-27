@@ -2,7 +2,7 @@
 // versions:
 // 	protoc-gen-go v1.36.12
 // 	protoc        (unknown)
-// source: zudomart/money/v1/ads_money.proto
+// source: nantty/money/v1/ads_money.proto
 
 package moneyv1
 
@@ -13,7 +13,7 @@ import (
 	reflect "reflect"
 	sync "sync"
 	unsafe "unsafe"
-	v1 "nantty/contracts/gen/go/zudomart/common/v1"
+	v1 "nantty/contracts/gen/go/nantty/common/v1"
 )
 
 const (
@@ -37,7 +37,7 @@ type DebitWalletForBoostRequest struct {
 
 func (x *DebitWalletForBoostRequest) Reset() {
 	*x = DebitWalletForBoostRequest{}
-	mi := &file_zudomart_money_v1_ads_money_proto_msgTypes[0]
+	mi := &file_nantty_money_v1_ads_money_proto_msgTypes[0]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -49,7 +49,7 @@ func (x *DebitWalletForBoostRequest) String() string {
 func (*DebitWalletForBoostRequest) ProtoMessage() {}
 
 func (x *DebitWalletForBoostRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_zudomart_money_v1_ads_money_proto_msgTypes[0]
+	mi := &file_nantty_money_v1_ads_money_proto_msgTypes[0]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -62,7 +62,7 @@ func (x *DebitWalletForBoostRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DebitWalletForBoostRequest.ProtoReflect.Descriptor instead.
 func (*DebitWalletForBoostRequest) Descriptor() ([]byte, []int) {
-	return file_zudomart_money_v1_ads_money_proto_rawDescGZIP(), []int{0}
+	return file_nantty_money_v1_ads_money_proto_rawDescGZIP(), []int{0}
 }
 
 func (x *DebitWalletForBoostRequest) GetUserId() string {
@@ -99,7 +99,7 @@ type DebitWalletForBoostResponse struct {
 
 func (x *DebitWalletForBoostResponse) Reset() {
 	*x = DebitWalletForBoostResponse{}
-	mi := &file_zudomart_money_v1_ads_money_proto_msgTypes[1]
+	mi := &file_nantty_money_v1_ads_money_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -111,7 +111,7 @@ func (x *DebitWalletForBoostResponse) String() string {
 func (*DebitWalletForBoostResponse) ProtoMessage() {}
 
 func (x *DebitWalletForBoostResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_zudomart_money_v1_ads_money_proto_msgTypes[1]
+	mi := &file_nantty_money_v1_ads_money_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -124,7 +124,7 @@ func (x *DebitWalletForBoostResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DebitWalletForBoostResponse.ProtoReflect.Descriptor instead.
 func (*DebitWalletForBoostResponse) Descriptor() ([]byte, []int) {
-	return file_zudomart_money_v1_ads_money_proto_rawDescGZIP(), []int{1}
+	return file_nantty_money_v1_ads_money_proto_rawDescGZIP(), []int{1}
 }
 
 func (x *DebitWalletForBoostResponse) GetLedgerTransactionId() string {
@@ -169,7 +169,7 @@ type RefundBoostRemainderRequest struct {
 
 func (x *RefundBoostRemainderRequest) Reset() {
 	*x = RefundBoostRemainderRequest{}
-	mi := &file_zudomart_money_v1_ads_money_proto_msgTypes[2]
+	mi := &file_nantty_money_v1_ads_money_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -181,7 +181,7 @@ func (x *RefundBoostRemainderRequest) String() string {
 func (*RefundBoostRemainderRequest) ProtoMessage() {}
 
 func (x *RefundBoostRemainderRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_zudomart_money_v1_ads_money_proto_msgTypes[2]
+	mi := &file_nantty_money_v1_ads_money_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -194,7 +194,7 @@ func (x *RefundBoostRemainderRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RefundBoostRemainderRequest.ProtoReflect.Descriptor instead.
 func (*RefundBoostRemainderRequest) Descriptor() ([]byte, []int) {
-	return file_zudomart_money_v1_ads_money_proto_rawDescGZIP(), []int{2}
+	return file_nantty_money_v1_ads_money_proto_rawDescGZIP(), []int{2}
 }
 
 func (x *RefundBoostRemainderRequest) GetUserId() string {
@@ -236,7 +236,7 @@ type RefundBoostRemainderResponse struct {
 
 func (x *RefundBoostRemainderResponse) Reset() {
 	*x = RefundBoostRemainderResponse{}
-	mi := &file_zudomart_money_v1_ads_money_proto_msgTypes[3]
+	mi := &file_nantty_money_v1_ads_money_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -248,7 +248,7 @@ func (x *RefundBoostRemainderResponse) String() string {
 func (*RefundBoostRemainderResponse) ProtoMessage() {}
 
 func (x *RefundBoostRemainderResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_zudomart_money_v1_ads_money_proto_msgTypes[3]
+	mi := &file_nantty_money_v1_ads_money_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -261,7 +261,7 @@ func (x *RefundBoostRemainderResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RefundBoostRemainderResponse.ProtoReflect.Descriptor instead.
 func (*RefundBoostRemainderResponse) Descriptor() ([]byte, []int) {
-	return file_zudomart_money_v1_ads_money_proto_rawDescGZIP(), []int{3}
+	return file_nantty_money_v1_ads_money_proto_rawDescGZIP(), []int{3}
 }
 
 func (x *RefundBoostRemainderResponse) GetLedgerTransactionId() string {
@@ -285,66 +285,66 @@ func (x *RefundBoostRemainderResponse) GetReplayed() bool {
 	return false
 }
 
-var File_zudomart_money_v1_ads_money_proto protoreflect.FileDescriptor
+var File_nantty_money_v1_ads_money_proto protoreflect.FileDescriptor
 
-const file_zudomart_money_v1_ads_money_proto_rawDesc = "" +
+const file_nantty_money_v1_ads_money_proto_rawDesc = "" +
 	"\n" +
-	"!zudomart/money/v1/ads_money.proto\x12\x11zudomart.money.v1\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x1ezudomart/common/v1/money.proto\"\x91\x01\n" +
+	"!nantty/money/v1/ads_money.proto\x12\x11nantty.money.v1\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x1enantty/common/v1/money.proto\"\x91\x01\n" +
 	"\x1aDebitWalletForBoostRequest\x12\x17\n" +
 	"\auser_id\x18\x01 \x01(\tR\x06userId\x121\n" +
-	"\x06amount\x18\x02 \x01(\v2\x19.zudomart.common.v1.MoneyR\x06amount\x12'\n" +
+	"\x06amount\x18\x02 \x01(\v2\x19.nantty.common.v1.MoneyR\x06amount\x12'\n" +
 	"\x0fidempotency_key\x18\x03 \x01(\tR\x0eidempotencyKey\"\xe8\x01\n" +
 	"\x1bDebitWalletForBoostResponse\x122\n" +
 	"\x15ledger_transaction_id\x18\x01 \x01(\tR\x13ledgerTransactionId\x12>\n" +
-	"\rbalance_after\x18\x02 \x01(\v2\x19.zudomart.common.v1.MoneyR\fbalanceAfter\x129\n" +
+	"\rbalance_after\x18\x02 \x01(\v2\x19.nantty.common.v1.MoneyR\fbalanceAfter\x129\n" +
 	"\n" +
 	"debited_at\x18\x03 \x01(\v2\x1a.google.protobuf.TimestampR\tdebitedAt\x12\x1a\n" +
 	"\breplayed\x18\x04 \x01(\bR\breplayed\"\xc6\x01\n" +
 	"\x1bRefundBoostRemainderRequest\x12\x17\n" +
 	"\auser_id\x18\x01 \x01(\tR\x06userId\x121\n" +
-	"\x06amount\x18\x02 \x01(\v2\x19.zudomart.common.v1.MoneyR\x06amount\x12'\n" +
+	"\x06amount\x18\x02 \x01(\v2\x19.nantty.common.v1.MoneyR\x06amount\x12'\n" +
 	"\x0fidempotency_key\x18\x03 \x01(\tR\x0eidempotencyKey\x122\n" +
 	"\x15debit_idempotency_key\x18\x04 \x01(\tR\x13debitIdempotencyKey\"\xae\x01\n" +
 	"\x1cRefundBoostRemainderResponse\x122\n" +
 	"\x15ledger_transaction_id\x18\x01 \x01(\tR\x13ledgerTransactionId\x12>\n" +
-	"\rbalance_after\x18\x02 \x01(\v2\x19.zudomart.common.v1.MoneyR\fbalanceAfter\x12\x1a\n" +
+	"\rbalance_after\x18\x02 \x01(\v2\x19.nantty.common.v1.MoneyR\fbalanceAfter\x12\x1a\n" +
 	"\breplayed\x18\x03 \x01(\bR\breplayed2\x80\x02\n" +
 	"\x0fAdsMoneyService\x12t\n" +
-	"\x13DebitWalletForBoost\x12-.zudomart.money.v1.DebitWalletForBoostRequest\x1a..zudomart.money.v1.DebitWalletForBoostResponse\x12w\n" +
-	"\x14RefundBoostRemainder\x12..zudomart.money.v1.RefundBoostRemainderRequest\x1a/.zudomart.money.v1.RefundBoostRemainderResponseB\xc1\x01\n" +
-	"\x15com.zudomart.money.v1B\rAdsMoneyProtoP\x01Z3zudomart/contracts/gen/go/zudomart/money/v1;moneyv1\xa2\x02\x03ZMX\xaa\x02\x11Zudomart.Money.V1\xca\x02\x11Zudomart\\Money\\V1\xe2\x02\x1dZudomart\\Money\\V1\\GPBMetadata\xea\x02\x13Zudomart::Money::V1b\x06proto3"
+	"\x13DebitWalletForBoost\x12-.nantty.money.v1.DebitWalletForBoostRequest\x1a..nantty.money.v1.DebitWalletForBoostResponse\x12w\n" +
+	"\x14RefundBoostRemainder\x12..nantty.money.v1.RefundBoostRemainderRequest\x1a/.nantty.money.v1.RefundBoostRemainderResponseB\xc1\x01\n" +
+	"\x15com.nantty.money.v1B\rAdsMoneyProtoP\x01Z3nantty/contracts/gen/go/nantty/money/v1;moneyv1\xa2\x02\x03ZMX\xaa\x02\x11Nantty.Money.V1\xca\x02\x11Nantty\\Money\\V1\xe2\x02\x1dNantty\\Money\\V1\\GPBMetadata\xea\x02\x13Nantty::Money::V1b\x06proto3"
 
 var (
-	file_zudomart_money_v1_ads_money_proto_rawDescOnce sync.Once
-	file_zudomart_money_v1_ads_money_proto_rawDescData []byte
+	file_nantty_money_v1_ads_money_proto_rawDescOnce sync.Once
+	file_nantty_money_v1_ads_money_proto_rawDescData []byte
 )
 
-func file_zudomart_money_v1_ads_money_proto_rawDescGZIP() []byte {
-	file_zudomart_money_v1_ads_money_proto_rawDescOnce.Do(func() {
-		file_zudomart_money_v1_ads_money_proto_rawDescData = protoimpl.X.CompressGZIP(unsafe.Slice(unsafe.StringData(file_zudomart_money_v1_ads_money_proto_rawDesc), len(file_zudomart_money_v1_ads_money_proto_rawDesc)))
+func file_nantty_money_v1_ads_money_proto_rawDescGZIP() []byte {
+	file_nantty_money_v1_ads_money_proto_rawDescOnce.Do(func() {
+		file_nantty_money_v1_ads_money_proto_rawDescData = protoimpl.X.CompressGZIP(unsafe.Slice(unsafe.StringData(file_nantty_money_v1_ads_money_proto_rawDesc), len(file_nantty_money_v1_ads_money_proto_rawDesc)))
 	})
-	return file_zudomart_money_v1_ads_money_proto_rawDescData
+	return file_nantty_money_v1_ads_money_proto_rawDescData
 }
 
-var file_zudomart_money_v1_ads_money_proto_msgTypes = make([]protoimpl.MessageInfo, 4)
-var file_zudomart_money_v1_ads_money_proto_goTypes = []any{
-	(*DebitWalletForBoostRequest)(nil),   // 0: zudomart.money.v1.DebitWalletForBoostRequest
-	(*DebitWalletForBoostResponse)(nil),  // 1: zudomart.money.v1.DebitWalletForBoostResponse
-	(*RefundBoostRemainderRequest)(nil),  // 2: zudomart.money.v1.RefundBoostRemainderRequest
-	(*RefundBoostRemainderResponse)(nil), // 3: zudomart.money.v1.RefundBoostRemainderResponse
-	(*v1.Money)(nil),                     // 4: zudomart.common.v1.Money
+var file_nantty_money_v1_ads_money_proto_msgTypes = make([]protoimpl.MessageInfo, 4)
+var file_nantty_money_v1_ads_money_proto_goTypes = []any{
+	(*DebitWalletForBoostRequest)(nil),   // 0: nantty.money.v1.DebitWalletForBoostRequest
+	(*DebitWalletForBoostResponse)(nil),  // 1: nantty.money.v1.DebitWalletForBoostResponse
+	(*RefundBoostRemainderRequest)(nil),  // 2: nantty.money.v1.RefundBoostRemainderRequest
+	(*RefundBoostRemainderResponse)(nil), // 3: nantty.money.v1.RefundBoostRemainderResponse
+	(*v1.Money)(nil),                     // 4: nantty.common.v1.Money
 	(*timestamppb.Timestamp)(nil),        // 5: google.protobuf.Timestamp
 }
-var file_zudomart_money_v1_ads_money_proto_depIdxs = []int32{
-	4, // 0: zudomart.money.v1.DebitWalletForBoostRequest.amount:type_name -> zudomart.common.v1.Money
-	4, // 1: zudomart.money.v1.DebitWalletForBoostResponse.balance_after:type_name -> zudomart.common.v1.Money
-	5, // 2: zudomart.money.v1.DebitWalletForBoostResponse.debited_at:type_name -> google.protobuf.Timestamp
-	4, // 3: zudomart.money.v1.RefundBoostRemainderRequest.amount:type_name -> zudomart.common.v1.Money
-	4, // 4: zudomart.money.v1.RefundBoostRemainderResponse.balance_after:type_name -> zudomart.common.v1.Money
-	0, // 5: zudomart.money.v1.AdsMoneyService.DebitWalletForBoost:input_type -> zudomart.money.v1.DebitWalletForBoostRequest
-	2, // 6: zudomart.money.v1.AdsMoneyService.RefundBoostRemainder:input_type -> zudomart.money.v1.RefundBoostRemainderRequest
-	1, // 7: zudomart.money.v1.AdsMoneyService.DebitWalletForBoost:output_type -> zudomart.money.v1.DebitWalletForBoostResponse
-	3, // 8: zudomart.money.v1.AdsMoneyService.RefundBoostRemainder:output_type -> zudomart.money.v1.RefundBoostRemainderResponse
+var file_nantty_money_v1_ads_money_proto_depIdxs = []int32{
+	4, // 0: nantty.money.v1.DebitWalletForBoostRequest.amount:type_name -> nantty.common.v1.Money
+	4, // 1: nantty.money.v1.DebitWalletForBoostResponse.balance_after:type_name -> nantty.common.v1.Money
+	5, // 2: nantty.money.v1.DebitWalletForBoostResponse.debited_at:type_name -> google.protobuf.Timestamp
+	4, // 3: nantty.money.v1.RefundBoostRemainderRequest.amount:type_name -> nantty.common.v1.Money
+	4, // 4: nantty.money.v1.RefundBoostRemainderResponse.balance_after:type_name -> nantty.common.v1.Money
+	0, // 5: nantty.money.v1.AdsMoneyService.DebitWalletForBoost:input_type -> nantty.money.v1.DebitWalletForBoostRequest
+	2, // 6: nantty.money.v1.AdsMoneyService.RefundBoostRemainder:input_type -> nantty.money.v1.RefundBoostRemainderRequest
+	1, // 7: nantty.money.v1.AdsMoneyService.DebitWalletForBoost:output_type -> nantty.money.v1.DebitWalletForBoostResponse
+	3, // 8: nantty.money.v1.AdsMoneyService.RefundBoostRemainder:output_type -> nantty.money.v1.RefundBoostRemainderResponse
 	7, // [7:9] is the sub-list for method output_type
 	5, // [5:7] is the sub-list for method input_type
 	5, // [5:5] is the sub-list for extension type_name
@@ -352,26 +352,26 @@ var file_zudomart_money_v1_ads_money_proto_depIdxs = []int32{
 	0, // [0:5] is the sub-list for field type_name
 }
 
-func init() { file_zudomart_money_v1_ads_money_proto_init() }
-func file_zudomart_money_v1_ads_money_proto_init() {
-	if File_zudomart_money_v1_ads_money_proto != nil {
+func init() { file_nantty_money_v1_ads_money_proto_init() }
+func file_nantty_money_v1_ads_money_proto_init() {
+	if File_nantty_money_v1_ads_money_proto != nil {
 		return
 	}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
-			RawDescriptor: unsafe.Slice(unsafe.StringData(file_zudomart_money_v1_ads_money_proto_rawDesc), len(file_zudomart_money_v1_ads_money_proto_rawDesc)),
+			RawDescriptor: unsafe.Slice(unsafe.StringData(file_nantty_money_v1_ads_money_proto_rawDesc), len(file_nantty_money_v1_ads_money_proto_rawDesc)),
 			NumEnums:      0,
 			NumMessages:   4,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
-		GoTypes:           file_zudomart_money_v1_ads_money_proto_goTypes,
-		DependencyIndexes: file_zudomart_money_v1_ads_money_proto_depIdxs,
-		MessageInfos:      file_zudomart_money_v1_ads_money_proto_msgTypes,
+		GoTypes:           file_nantty_money_v1_ads_money_proto_goTypes,
+		DependencyIndexes: file_nantty_money_v1_ads_money_proto_depIdxs,
+		MessageInfos:      file_nantty_money_v1_ads_money_proto_msgTypes,
 	}.Build()
-	File_zudomart_money_v1_ads_money_proto = out.File
-	file_zudomart_money_v1_ads_money_proto_goTypes = nil
-	file_zudomart_money_v1_ads_money_proto_depIdxs = nil
+	File_nantty_money_v1_ads_money_proto = out.File
+	file_nantty_money_v1_ads_money_proto_goTypes = nil
+	file_nantty_money_v1_ads_money_proto_depIdxs = nil
 }

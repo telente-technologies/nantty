@@ -1,7 +1,7 @@
 import { resolve } from "node:path";
 
 export const repositoryRoot = resolve(import.meta.dirname, "../../../..");
-const scratchpad = "/tmp/claude-1000/-home-oyinlola-Desktop-zudomart/2de9a368-cb79-4f3f-8721-930271160239/scratchpad";
+const scratchpad = "/tmp/claude-1000/-home-oyinlola-Desktop-nantty/2de9a368-cb79-4f3f-8721-930271160239/scratchpad";
 
 process.env["SMOKE_IDENTITY_LOG"] ??= `${scratchpad}/logs/goIdentity.log`;
 process.env["SMOKE_GATEWAY_URL"] ??= "http://127.0.0.1:8080";
@@ -17,4 +17,4 @@ export function appUrl(app: AppName): string {
 
 export const gatewayUrl = process.env["SMOKE_GATEWAY_URL"];
 export const fakeFlutterwaveUrl = process.env["SMOKE_FAKE_FLUTTERWAVE_URL"];
-export const socialDatabaseUrl = process.env["E2E_SOCIAL_DATABASE_URL"] ?? "postgres://svc_social:svc_social_local_only@localhost:15432/zudomart";
+export const socialDatabaseUrl = process.env["E2E_SOCIAL_DATABASE_URL"] ?? "postgres://svc_social:svc_social_local_only@localhost:15432/nantty";

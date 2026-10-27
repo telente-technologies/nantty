@@ -3,7 +3,7 @@ import { generateKeyPairSync, sign, type KeyObject } from "node:crypto";
 import type { UserActor } from "./actors.util.js";
 import { callApi, describeResponse } from "./apiClient.util.js";
 
-const signedPreKeyLabel = Buffer.from("zudomart-signed-prekey-v1", "utf8");
+const signedPreKeyLabel = Buffer.from("nantty-signed-prekey-v1", "utf8");
 
 function rawPublicKey(publicKey: KeyObject): Buffer {
   return Buffer.from(publicKey.export({ format: "jwk" }).x as string, "base64url");

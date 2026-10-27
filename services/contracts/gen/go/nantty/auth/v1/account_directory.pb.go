@@ -2,7 +2,7 @@
 // versions:
 // 	protoc-gen-go v1.36.12
 // 	protoc        (unknown)
-// source: zudomart/auth/v1/account_directory.proto
+// source: nantty/auth/v1/account_directory.proto
 
 package authv1
 
@@ -36,7 +36,7 @@ type AccountSummary struct {
 
 func (x *AccountSummary) Reset() {
 	*x = AccountSummary{}
-	mi := &file_zudomart_auth_v1_account_directory_proto_msgTypes[0]
+	mi := &file_nantty_auth_v1_account_directory_proto_msgTypes[0]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -48,7 +48,7 @@ func (x *AccountSummary) String() string {
 func (*AccountSummary) ProtoMessage() {}
 
 func (x *AccountSummary) ProtoReflect() protoreflect.Message {
-	mi := &file_zudomart_auth_v1_account_directory_proto_msgTypes[0]
+	mi := &file_nantty_auth_v1_account_directory_proto_msgTypes[0]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -61,7 +61,7 @@ func (x *AccountSummary) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AccountSummary.ProtoReflect.Descriptor instead.
 func (*AccountSummary) Descriptor() ([]byte, []int) {
-	return file_zudomart_auth_v1_account_directory_proto_rawDescGZIP(), []int{0}
+	return file_nantty_auth_v1_account_directory_proto_rawDescGZIP(), []int{0}
 }
 
 func (x *AccountSummary) GetAccountId() string {
@@ -115,7 +115,7 @@ type GetAccountSummariesRequest struct {
 
 func (x *GetAccountSummariesRequest) Reset() {
 	*x = GetAccountSummariesRequest{}
-	mi := &file_zudomart_auth_v1_account_directory_proto_msgTypes[1]
+	mi := &file_nantty_auth_v1_account_directory_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -127,7 +127,7 @@ func (x *GetAccountSummariesRequest) String() string {
 func (*GetAccountSummariesRequest) ProtoMessage() {}
 
 func (x *GetAccountSummariesRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_zudomart_auth_v1_account_directory_proto_msgTypes[1]
+	mi := &file_nantty_auth_v1_account_directory_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -140,7 +140,7 @@ func (x *GetAccountSummariesRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetAccountSummariesRequest.ProtoReflect.Descriptor instead.
 func (*GetAccountSummariesRequest) Descriptor() ([]byte, []int) {
-	return file_zudomart_auth_v1_account_directory_proto_rawDescGZIP(), []int{1}
+	return file_nantty_auth_v1_account_directory_proto_rawDescGZIP(), []int{1}
 }
 
 func (x *GetAccountSummariesRequest) GetAccountIds() []string {
@@ -159,7 +159,7 @@ type GetAccountSummariesResponse struct {
 
 func (x *GetAccountSummariesResponse) Reset() {
 	*x = GetAccountSummariesResponse{}
-	mi := &file_zudomart_auth_v1_account_directory_proto_msgTypes[2]
+	mi := &file_nantty_auth_v1_account_directory_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -171,7 +171,7 @@ func (x *GetAccountSummariesResponse) String() string {
 func (*GetAccountSummariesResponse) ProtoMessage() {}
 
 func (x *GetAccountSummariesResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_zudomart_auth_v1_account_directory_proto_msgTypes[2]
+	mi := &file_nantty_auth_v1_account_directory_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -184,7 +184,7 @@ func (x *GetAccountSummariesResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetAccountSummariesResponse.ProtoReflect.Descriptor instead.
 func (*GetAccountSummariesResponse) Descriptor() ([]byte, []int) {
-	return file_zudomart_auth_v1_account_directory_proto_rawDescGZIP(), []int{2}
+	return file_nantty_auth_v1_account_directory_proto_rawDescGZIP(), []int{2}
 }
 
 func (x *GetAccountSummariesResponse) GetAccounts() []*AccountSummary {
@@ -204,7 +204,7 @@ type RevokeAllSessionsForAccountRequest struct {
 
 func (x *RevokeAllSessionsForAccountRequest) Reset() {
 	*x = RevokeAllSessionsForAccountRequest{}
-	mi := &file_zudomart_auth_v1_account_directory_proto_msgTypes[3]
+	mi := &file_nantty_auth_v1_account_directory_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -216,7 +216,7 @@ func (x *RevokeAllSessionsForAccountRequest) String() string {
 func (*RevokeAllSessionsForAccountRequest) ProtoMessage() {}
 
 func (x *RevokeAllSessionsForAccountRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_zudomart_auth_v1_account_directory_proto_msgTypes[3]
+	mi := &file_nantty_auth_v1_account_directory_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -229,7 +229,7 @@ func (x *RevokeAllSessionsForAccountRequest) ProtoReflect() protoreflect.Message
 
 // Deprecated: Use RevokeAllSessionsForAccountRequest.ProtoReflect.Descriptor instead.
 func (*RevokeAllSessionsForAccountRequest) Descriptor() ([]byte, []int) {
-	return file_zudomart_auth_v1_account_directory_proto_rawDescGZIP(), []int{3}
+	return file_nantty_auth_v1_account_directory_proto_rawDescGZIP(), []int{3}
 }
 
 func (x *RevokeAllSessionsForAccountRequest) GetAccountId() string {
@@ -255,7 +255,7 @@ type RevokeAllSessionsForAccountResponse struct {
 
 func (x *RevokeAllSessionsForAccountResponse) Reset() {
 	*x = RevokeAllSessionsForAccountResponse{}
-	mi := &file_zudomart_auth_v1_account_directory_proto_msgTypes[4]
+	mi := &file_nantty_auth_v1_account_directory_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -267,7 +267,7 @@ func (x *RevokeAllSessionsForAccountResponse) String() string {
 func (*RevokeAllSessionsForAccountResponse) ProtoMessage() {}
 
 func (x *RevokeAllSessionsForAccountResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_zudomart_auth_v1_account_directory_proto_msgTypes[4]
+	mi := &file_nantty_auth_v1_account_directory_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -280,7 +280,7 @@ func (x *RevokeAllSessionsForAccountResponse) ProtoReflect() protoreflect.Messag
 
 // Deprecated: Use RevokeAllSessionsForAccountResponse.ProtoReflect.Descriptor instead.
 func (*RevokeAllSessionsForAccountResponse) Descriptor() ([]byte, []int) {
-	return file_zudomart_auth_v1_account_directory_proto_rawDescGZIP(), []int{4}
+	return file_nantty_auth_v1_account_directory_proto_rawDescGZIP(), []int{4}
 }
 
 func (x *RevokeAllSessionsForAccountResponse) GetRevokedSessionCount() int32 {
@@ -290,11 +290,11 @@ func (x *RevokeAllSessionsForAccountResponse) GetRevokedSessionCount() int32 {
 	return 0
 }
 
-var File_zudomart_auth_v1_account_directory_proto protoreflect.FileDescriptor
+var File_nantty_auth_v1_account_directory_proto protoreflect.FileDescriptor
 
-const file_zudomart_auth_v1_account_directory_proto_rawDesc = "" +
+const file_nantty_auth_v1_account_directory_proto_rawDesc = "" +
 	"\n" +
-	"(zudomart/auth/v1/account_directory.proto\x12\x10zudomart.auth.v1\x1a\x1fgoogle/protobuf/timestamp.proto\"\xc8\x01\n" +
+	"(nantty/auth/v1/account_directory.proto\x12\x10nantty.auth.v1\x1a\x1fgoogle/protobuf/timestamp.proto\"\xc8\x01\n" +
 	"\x0eAccountSummary\x12\x1d\n" +
 	"\n" +
 	"account_id\x18\x01 \x01(\tR\taccountId\x12\x1a\n" +
@@ -308,7 +308,7 @@ const file_zudomart_auth_v1_account_directory_proto_rawDesc = "" +
 	"\vaccount_ids\x18\x01 \x03(\tR\n" +
 	"accountIds\"[\n" +
 	"\x1bGetAccountSummariesResponse\x12<\n" +
-	"\baccounts\x18\x01 \x03(\v2 .zudomart.auth.v1.AccountSummaryR\baccounts\"[\n" +
+	"\baccounts\x18\x01 \x03(\v2 .nantty.auth.v1.AccountSummaryR\baccounts\"[\n" +
 	"\"RevokeAllSessionsForAccountRequest\x12\x1d\n" +
 	"\n" +
 	"account_id\x18\x01 \x01(\tR\taccountId\x12\x16\n" +
@@ -316,38 +316,38 @@ const file_zudomart_auth_v1_account_directory_proto_rawDesc = "" +
 	"#RevokeAllSessionsForAccountResponse\x122\n" +
 	"\x15revoked_session_count\x18\x01 \x01(\x05R\x13revokedSessionCount2\x9a\x02\n" +
 	"\x17AccountDirectoryService\x12r\n" +
-	"\x13GetAccountSummaries\x12,.zudomart.auth.v1.GetAccountSummariesRequest\x1a-.zudomart.auth.v1.GetAccountSummariesResponse\x12\x8a\x01\n" +
-	"\x1bRevokeAllSessionsForAccount\x124.zudomart.auth.v1.RevokeAllSessionsForAccountRequest\x1a5.zudomart.auth.v1.RevokeAllSessionsForAccountResponseB\xc2\x01\n" +
-	"\x14com.zudomart.auth.v1B\x15AccountDirectoryProtoP\x01Z1zudomart/contracts/gen/go/zudomart/auth/v1;authv1\xa2\x02\x03ZAX\xaa\x02\x10Zudomart.Auth.V1\xca\x02\x10Zudomart\\Auth\\V1\xe2\x02\x1cZudomart\\Auth\\V1\\GPBMetadata\xea\x02\x12Zudomart::Auth::V1b\x06proto3"
+	"\x13GetAccountSummaries\x12,.nantty.auth.v1.GetAccountSummariesRequest\x1a-.nantty.auth.v1.GetAccountSummariesResponse\x12\x8a\x01\n" +
+	"\x1bRevokeAllSessionsForAccount\x124.nantty.auth.v1.RevokeAllSessionsForAccountRequest\x1a5.nantty.auth.v1.RevokeAllSessionsForAccountResponseB\xc2\x01\n" +
+	"\x14com.nantty.auth.v1B\x15AccountDirectoryProtoP\x01Z1nantty/contracts/gen/go/nantty/auth/v1;authv1\xa2\x02\x03ZAX\xaa\x02\x10Nantty.Auth.V1\xca\x02\x10Nantty\\Auth\\V1\xe2\x02\x1cNantty\\Auth\\V1\\GPBMetadata\xea\x02\x12Nantty::Auth::V1b\x06proto3"
 
 var (
-	file_zudomart_auth_v1_account_directory_proto_rawDescOnce sync.Once
-	file_zudomart_auth_v1_account_directory_proto_rawDescData []byte
+	file_nantty_auth_v1_account_directory_proto_rawDescOnce sync.Once
+	file_nantty_auth_v1_account_directory_proto_rawDescData []byte
 )
 
-func file_zudomart_auth_v1_account_directory_proto_rawDescGZIP() []byte {
-	file_zudomart_auth_v1_account_directory_proto_rawDescOnce.Do(func() {
-		file_zudomart_auth_v1_account_directory_proto_rawDescData = protoimpl.X.CompressGZIP(unsafe.Slice(unsafe.StringData(file_zudomart_auth_v1_account_directory_proto_rawDesc), len(file_zudomart_auth_v1_account_directory_proto_rawDesc)))
+func file_nantty_auth_v1_account_directory_proto_rawDescGZIP() []byte {
+	file_nantty_auth_v1_account_directory_proto_rawDescOnce.Do(func() {
+		file_nantty_auth_v1_account_directory_proto_rawDescData = protoimpl.X.CompressGZIP(unsafe.Slice(unsafe.StringData(file_nantty_auth_v1_account_directory_proto_rawDesc), len(file_nantty_auth_v1_account_directory_proto_rawDesc)))
 	})
-	return file_zudomart_auth_v1_account_directory_proto_rawDescData
+	return file_nantty_auth_v1_account_directory_proto_rawDescData
 }
 
-var file_zudomart_auth_v1_account_directory_proto_msgTypes = make([]protoimpl.MessageInfo, 5)
-var file_zudomart_auth_v1_account_directory_proto_goTypes = []any{
-	(*AccountSummary)(nil),                      // 0: zudomart.auth.v1.AccountSummary
-	(*GetAccountSummariesRequest)(nil),          // 1: zudomart.auth.v1.GetAccountSummariesRequest
-	(*GetAccountSummariesResponse)(nil),         // 2: zudomart.auth.v1.GetAccountSummariesResponse
-	(*RevokeAllSessionsForAccountRequest)(nil),  // 3: zudomart.auth.v1.RevokeAllSessionsForAccountRequest
-	(*RevokeAllSessionsForAccountResponse)(nil), // 4: zudomart.auth.v1.RevokeAllSessionsForAccountResponse
+var file_nantty_auth_v1_account_directory_proto_msgTypes = make([]protoimpl.MessageInfo, 5)
+var file_nantty_auth_v1_account_directory_proto_goTypes = []any{
+	(*AccountSummary)(nil),                      // 0: nantty.auth.v1.AccountSummary
+	(*GetAccountSummariesRequest)(nil),          // 1: nantty.auth.v1.GetAccountSummariesRequest
+	(*GetAccountSummariesResponse)(nil),         // 2: nantty.auth.v1.GetAccountSummariesResponse
+	(*RevokeAllSessionsForAccountRequest)(nil),  // 3: nantty.auth.v1.RevokeAllSessionsForAccountRequest
+	(*RevokeAllSessionsForAccountResponse)(nil), // 4: nantty.auth.v1.RevokeAllSessionsForAccountResponse
 	(*timestamppb.Timestamp)(nil),               // 5: google.protobuf.Timestamp
 }
-var file_zudomart_auth_v1_account_directory_proto_depIdxs = []int32{
-	5, // 0: zudomart.auth.v1.AccountSummary.created_at:type_name -> google.protobuf.Timestamp
-	0, // 1: zudomart.auth.v1.GetAccountSummariesResponse.accounts:type_name -> zudomart.auth.v1.AccountSummary
-	1, // 2: zudomart.auth.v1.AccountDirectoryService.GetAccountSummaries:input_type -> zudomart.auth.v1.GetAccountSummariesRequest
-	3, // 3: zudomart.auth.v1.AccountDirectoryService.RevokeAllSessionsForAccount:input_type -> zudomart.auth.v1.RevokeAllSessionsForAccountRequest
-	2, // 4: zudomart.auth.v1.AccountDirectoryService.GetAccountSummaries:output_type -> zudomart.auth.v1.GetAccountSummariesResponse
-	4, // 5: zudomart.auth.v1.AccountDirectoryService.RevokeAllSessionsForAccount:output_type -> zudomart.auth.v1.RevokeAllSessionsForAccountResponse
+var file_nantty_auth_v1_account_directory_proto_depIdxs = []int32{
+	5, // 0: nantty.auth.v1.AccountSummary.created_at:type_name -> google.protobuf.Timestamp
+	0, // 1: nantty.auth.v1.GetAccountSummariesResponse.accounts:type_name -> nantty.auth.v1.AccountSummary
+	1, // 2: nantty.auth.v1.AccountDirectoryService.GetAccountSummaries:input_type -> nantty.auth.v1.GetAccountSummariesRequest
+	3, // 3: nantty.auth.v1.AccountDirectoryService.RevokeAllSessionsForAccount:input_type -> nantty.auth.v1.RevokeAllSessionsForAccountRequest
+	2, // 4: nantty.auth.v1.AccountDirectoryService.GetAccountSummaries:output_type -> nantty.auth.v1.GetAccountSummariesResponse
+	4, // 5: nantty.auth.v1.AccountDirectoryService.RevokeAllSessionsForAccount:output_type -> nantty.auth.v1.RevokeAllSessionsForAccountResponse
 	4, // [4:6] is the sub-list for method output_type
 	2, // [2:4] is the sub-list for method input_type
 	2, // [2:2] is the sub-list for extension type_name
@@ -355,26 +355,26 @@ var file_zudomart_auth_v1_account_directory_proto_depIdxs = []int32{
 	0, // [0:2] is the sub-list for field type_name
 }
 
-func init() { file_zudomart_auth_v1_account_directory_proto_init() }
-func file_zudomart_auth_v1_account_directory_proto_init() {
-	if File_zudomart_auth_v1_account_directory_proto != nil {
+func init() { file_nantty_auth_v1_account_directory_proto_init() }
+func file_nantty_auth_v1_account_directory_proto_init() {
+	if File_nantty_auth_v1_account_directory_proto != nil {
 		return
 	}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
-			RawDescriptor: unsafe.Slice(unsafe.StringData(file_zudomart_auth_v1_account_directory_proto_rawDesc), len(file_zudomart_auth_v1_account_directory_proto_rawDesc)),
+			RawDescriptor: unsafe.Slice(unsafe.StringData(file_nantty_auth_v1_account_directory_proto_rawDesc), len(file_nantty_auth_v1_account_directory_proto_rawDesc)),
 			NumEnums:      0,
 			NumMessages:   5,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
-		GoTypes:           file_zudomart_auth_v1_account_directory_proto_goTypes,
-		DependencyIndexes: file_zudomart_auth_v1_account_directory_proto_depIdxs,
-		MessageInfos:      file_zudomart_auth_v1_account_directory_proto_msgTypes,
+		GoTypes:           file_nantty_auth_v1_account_directory_proto_goTypes,
+		DependencyIndexes: file_nantty_auth_v1_account_directory_proto_depIdxs,
+		MessageInfos:      file_nantty_auth_v1_account_directory_proto_msgTypes,
 	}.Build()
-	File_zudomart_auth_v1_account_directory_proto = out.File
-	file_zudomart_auth_v1_account_directory_proto_goTypes = nil
-	file_zudomart_auth_v1_account_directory_proto_depIdxs = nil
+	File_nantty_auth_v1_account_directory_proto = out.File
+	file_nantty_auth_v1_account_directory_proto_goTypes = nil
+	file_nantty_auth_v1_account_directory_proto_depIdxs = nil
 }

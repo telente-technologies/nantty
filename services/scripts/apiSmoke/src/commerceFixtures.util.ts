@@ -16,7 +16,7 @@ export interface SmokeStore {
 }
 
 export function psql(statement: string): string[][] {
-  const output = execFileSync("docker", ["exec", "zudomart-backend-postgres-1", "psql", "-U", "zudomart", "-d", "zudomart", "-At", "-F", "|", "-c", statement], { encoding: "utf8" });
+  const output = execFileSync("docker", ["exec", "nantty-backend-postgres-1", "psql", "-U", "nantty", "-d", "nantty", "-At", "-F", "|", "-c", statement], { encoding: "utf8" });
   return output.split("\n").filter((line) => line !== "" && !/^(UPDATE|INSERT|DELETE) \d+$/.test(line)).map((line) => line.split("|"));
 }
 

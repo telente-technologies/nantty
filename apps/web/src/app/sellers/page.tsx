@@ -1,7 +1,7 @@
 import { AppDownloadCallToActionPanel } from "@/components/sections/appDownloadCallToAction";
 import { FrequentlyAskedQuestionsAccordion } from "@/components/sections/frequentlyAskedQuestions";
 import { SellerDashboardSection } from "@/components/sellers/sellerDashboardSection";
-import { SellerFeesPlaceholderSection } from "@/components/sellers/sellerFeesSection";
+import { SellerFeesSection } from "@/components/sellers/sellerFeesSection";
 import { SellerPayoutsSection } from "@/components/sellers/sellerPayoutsSection";
 import { SellersPageHeroSection } from "@/components/sellers/sellersHeroSection";
 import { SellerOnboardingStepsSection } from "@/components/sellers/sellerStepsSection";
@@ -18,7 +18,7 @@ export default function SellersPage() {
       <SellerOnboardingStepsSection />
       <SellerDashboardSection />
       <SellerPayoutsSection />
-      <SellerFeesPlaceholderSection />
+      <SellerFeesSection />
       <FrequentlyAskedQuestionsAccordion questions={sellerQuestions} headingId="seller-questions-heading" heading="Seller questions." sectionId="seller-questions" />
       <AppDownloadCallToActionPanel
         sectionId="apply"

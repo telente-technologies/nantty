@@ -17,7 +17,7 @@ function pageBody(purpose: "store" | "business"): Record<string, unknown> {
 function applicationBody(): Record<string, unknown> {
   return {
     storeName: `Rule shop ${uniqueSuffix()}`, categoryId: marketplaceCategoryId, description: "Profile rule smoke", phone: "+234 801 234 5678", addressLine: "12 Allen Avenue", city: "Ikeja", state: "Lagos",
-    identityDocument: { documentType: "nin_slip", documentNumber: "12345678901", documentPhotoUrl: "https://media.zudomart.com/kyc/nin.jpg" },
+    identityDocument: { documentType: "nin_slip", documentNumber: "12345678901", documentPhotoUrl: "https://media.nantty.com/kyc/nin.jpg" },
     payoutAccount: { bankCode: "058", accountNumber: "0123456789" },
   };
 }

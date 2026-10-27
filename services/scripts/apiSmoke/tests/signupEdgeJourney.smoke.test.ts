@@ -22,7 +22,7 @@ function signupBody(email: string, username: string, otpToken: string) {
 
 describe("sign up the way people really do it: taken names, wrong codes, closing the app midway", () => {
   const suffix = uniqueSuffix();
-  const email = `edge${suffix}@smoke.zudomart.test`;
+  const email = `edge${suffix}@smoke.nantty.test`;
   const wantedName = `edge${suffix}`.slice(0, 24);
   let otpToken = "";
 
@@ -39,7 +39,7 @@ describe("sign up the way people really do it: taken names, wrong codes, closing
   });
 
   it("locks the code after too many wrong guesses and lets a fresh code through", async () => {
-    const lockedEmail = `edgelock${suffix}@smoke.zudomart.test`;
+    const lockedEmail = `edgelock${suffix}@smoke.nantty.test`;
     await sendSignupCode(lockedEmail);
     const code = await readOneTimeCodeFromIdentityLog(lockedEmail, "signup");
     let last = await callApi("POST", "/api/v1/auth/otp/verify", { body: { destination: lockedEmail, code: wrongCodeFor(code), purpose: "signup" } });
@@ -74,7 +74,7 @@ describe("sign up the way people really do it: taken names, wrong codes, closing
   });
 
   it("resumes a signup that was closed after the code step: a new code works and the old code is dead", async () => {
-    const resumedEmail = `edgeresume${suffix}@smoke.zudomart.test`;
+    const resumedEmail = `edgeresume${suffix}@smoke.nantty.test`;
     await sendSignupCode(resumedEmail);
     const firstCode = await readOneTimeCodeFromIdentityLog(resumedEmail, "signup");
     await sendSignupCode(resumedEmail);
@@ -87,7 +87,7 @@ describe("sign up the way people really do it: taken names, wrong codes, closing
     expect(verified.status, describeResponse(verified)).toBe(200);
     const withoutProof = await callApi("POST", "/api/v1/auth/register", { body: signupBody(resumedEmail, `res${suffix}`.slice(0, 24), randomBytes(32).toString("base64url")) });
     expectClearError(withoutProof, [400, 401], ["DESTINATION_NOT_VERIFIED", "INVALID_CODE"]);
-    const otherEmail = await callApi("POST", "/api/v1/auth/register", { body: signupBody(`other${suffix}@smoke.zudomart.test`, `oth${suffix}`.slice(0, 24), verified.body.otpToken) });
+    const otherEmail = await callApi("POST", "/api/v1/auth/register", { body: signupBody(`other${suffix}@smoke.nantty.test`, `oth${suffix}`.slice(0, 24), verified.body.otpToken) });
     expectClearError(otherEmail, [400, 401], ["DESTINATION_NOT_VERIFIED", "INVALID_CODE"]);
     const registered = await callApi("POST", "/api/v1/auth/register", { body: signupBody(resumedEmail, `res${suffix}`.slice(0, 24), verified.body.otpToken) });
     expect([200, 201], describeResponse(registered)).toContain(registered.status);

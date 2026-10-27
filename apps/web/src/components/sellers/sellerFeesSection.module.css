@@ -69,11 +69,13 @@
   font-weight: 500;
 }
 
-.pendingLabel {
+.feeValue {
   flex: none;
-  color: var(--ink-faint);
-  font-weight: 500;
+  max-width: 25ch;
+  color: var(--ink-muted);
+  font-weight: 600;
   font-size: 0.9rem;
+  text-align: end;
 }
 
 @media (min-width: 960px) {

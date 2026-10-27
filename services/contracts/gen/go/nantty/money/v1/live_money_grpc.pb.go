@@ -2,7 +2,7 @@
 // versions:
 // - protoc-gen-go-grpc v1.5.1
 // - protoc             (unknown)
-// source: zudomart/money/v1/live_money.proto
+// source: nantty/money/v1/live_money.proto
 
 package moneyv1
 
@@ -19,11 +19,11 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	LiveMoneyService_ChargeGiftAndCreditCreator_FullMethodName = "/zudomart.money.v1.LiveMoneyService/ChargeGiftAndCreditCreator"
-	LiveMoneyService_ChargeSpaceCoinGift_FullMethodName        = "/zudomart.money.v1.LiveMoneyService/ChargeSpaceCoinGift"
-	LiveMoneyService_SettleBattle_FullMethodName               = "/zudomart.money.v1.LiveMoneyService/SettleBattle"
-	LiveMoneyService_GetBattleGiftTotals_FullMethodName        = "/zudomart.money.v1.LiveMoneyService/GetBattleGiftTotals"
-	LiveMoneyService_GetCoinBalance_FullMethodName             = "/zudomart.money.v1.LiveMoneyService/GetCoinBalance"
+	LiveMoneyService_ChargeGiftAndCreditCreator_FullMethodName = "/nantty.money.v1.LiveMoneyService/ChargeGiftAndCreditCreator"
+	LiveMoneyService_ChargeSpaceCoinGift_FullMethodName        = "/nantty.money.v1.LiveMoneyService/ChargeSpaceCoinGift"
+	LiveMoneyService_SettleBattle_FullMethodName               = "/nantty.money.v1.LiveMoneyService/SettleBattle"
+	LiveMoneyService_GetBattleGiftTotals_FullMethodName        = "/nantty.money.v1.LiveMoneyService/GetBattleGiftTotals"
+	LiveMoneyService_GetCoinBalance_FullMethodName             = "/nantty.money.v1.LiveMoneyService/GetCoinBalance"
 )
 
 // LiveMoneyServiceClient is the client API for LiveMoneyService service.
@@ -266,7 +266,7 @@ func _LiveMoneyService_GetCoinBalance_Handler(srv interface{}, ctx context.Conte
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var LiveMoneyService_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "zudomart.money.v1.LiveMoneyService",
+	ServiceName: "nantty.money.v1.LiveMoneyService",
 	HandlerType: (*LiveMoneyServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
@@ -291,5 +291,5 @@ var LiveMoneyService_ServiceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "zudomart/money/v1/live_money.proto",
+	Metadata: "nantty/money/v1/live_money.proto",
 }

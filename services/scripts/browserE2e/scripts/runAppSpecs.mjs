@@ -7,7 +7,7 @@ import { fileURLToPath } from "node:url";
 
 const packageRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const repositoryRoot = resolve(packageRoot, "../../..");
-const lockFile = process.env.E2E_HEAVY_LOCK ?? "/tmp/claude-1000/-home-oyinlola-Desktop-zudomart/2de9a368-cb79-4f3f-8721-930271160239/scratchpad/heavy.lock";
+const lockFile = process.env.E2E_HEAVY_LOCK ?? "/tmp/claude-1000/-home-oyinlola-Desktop-nantty/2de9a368-cb79-4f3f-8721-930271160239/scratchpad/heavy.lock";
 
 if (process.env.E2E_LOCK_HELD !== "1" && process.env.E2E_NO_LOCK !== "1") {
   mkdirSync(dirname(lockFile), { recursive: true });
