@@ -1,4 +1,4 @@
-import { ZudoIcon } from "@/components/ui/zudoIcon";
+import { NanttyIcon } from "@/components/ui/nanttyIcon";
 
 import styles from "./landingIllustrations.module.css";
 
@@ -9,7 +9,7 @@ export function StoreIdentityRow({ storeName, inverted = false, labelText = "Spo
         {storeName.slice(0, 1)}
       </span>
       <span className={styles.identityName}>{storeName}</span>
-      {isVerifiedBusiness ? <ZudoIcon name="sealCheck20" size={13} className={styles.identitySeal} label="Verified business" /> : null}
+      {isVerifiedBusiness ? <NanttyIcon name="sealCheck20" size={13} className={styles.identitySeal} label="Verified business" /> : null}
       <span className={styles.identityLabel}>{labelText}</span>
     </div>
   );

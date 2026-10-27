@@ -1,5 +1,5 @@
 import { PreviewAvatar, PreviewMedia, SponsoredLabel, VerifiedSeal } from "@/components/creative/adPreviewParts";
-import { ZudoIcon } from "@/components/ui/zudoIcon";
+import { NanttyIcon } from "@/components/ui/nanttyIcon";
 import { callToActionLabels } from "@/constants/campaignOptions.constant";
 import type { Creative } from "@/types/creative.type";
 
@@ -37,7 +37,7 @@ export function AppInstallRow({ creative, inverted = false }: { readonly creativ
         <span className={styles.appName}>{app.appName || "Your app"}</span>
         {app.rating !== null ? (
           <span className={styles.appRating}>
-            <ZudoIcon name="star16" size={12} />
+            <NanttyIcon name="star16" size={12} />
             {app.rating.toFixed(1)}
           </span>
         ) : null}
@@ -56,7 +56,7 @@ export function MediaWithTapHint({ creative, children }: { readonly creative: Cr
     <div className={styles.mediaTap}>
       {children}
       <span className={styles.mediaTapHint}>
-        <ZudoIcon name="arrowUpRight24" size={12} />
+        <NanttyIcon name="arrowUpRight24" size={12} />
         {creative.type === "promoted_post" ? "Opens post" : creative.type === "app_install" ? "Opens store" : "Opens link"}
       </span>
     </div>

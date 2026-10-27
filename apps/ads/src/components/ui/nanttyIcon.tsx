@@ -55,13 +55,13 @@ import {
 } from "@phosphor-icons/react/dist/ssr";
 import type { Icon } from "@phosphor-icons/react/dist/lib/types";
 
-import type { zudoIconNames } from "@/constants/zudoIconNames.constant";
+import type { nanttyIconNames } from "@/constants/nanttyIconNames.constant";
 
-import styles from "./zudoIcon.module.css";
+import styles from "./nanttyIcon.module.css";
 
-export type ZudoIconName = (typeof zudoIconNames)[number];
+export type NanttyIconName = (typeof nanttyIconNames)[number];
 
-const phosphorIconByName: Record<ZudoIconName, Icon> = {
+const phosphorIconByName: Record<NanttyIconName, Icon> = {
   arrowLeft24: ArrowLeft,
   arrowsOutSimple24: ArrowsOutSimple,
   arrowUpRight24: ArrowUpRight,
@@ -124,14 +124,14 @@ const phosphorIconByName: Record<ZudoIconName, Icon> = {
   warning20: Warning,
 };
 
-interface ZudoIconProps {
-  readonly name: ZudoIconName;
+interface NanttyIconProps {
+  readonly name: NanttyIconName;
   readonly size?: number;
   readonly className?: string;
   readonly label?: string;
 }
 
-export function ZudoIcon({ name, size = 18, className, label }: ZudoIconProps) {
+export function NanttyIcon({ name, size = 18, className, label }: NanttyIconProps) {
   const PhosphorIcon = phosphorIconByName[name];
   return (
     <span

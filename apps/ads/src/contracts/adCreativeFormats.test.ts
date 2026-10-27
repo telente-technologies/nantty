@@ -6,7 +6,7 @@ import type { CreativeApp, CreativeCardInput } from "@/types/creative.type";
 import { buildUtmUrl, moveItem, isAndroidStoreUrl, isAppDeepLink, isIosStoreUrl, selectAppLink, validateAppInstallFields, validateCarouselFields } from "@/utils/adCreativeFormats.util";
 
 const card = (overrides: Partial<CreativeCardInput> = {}): CreativeCardInput => ({ mediaId: "m", headline: "Card", description: "", callToAction: "learn_more", destination: { type: "url", targetId: null, url: "https://shop.example/a" }, ...overrides });
-const app = (overrides: Partial<CreativeApp> = {}): CreativeApp => ({ appName: "Zudo", rating: null, iosStoreUrl: "https://apps.apple.com/ng/app/zudo/id1", androidStoreUrl: "https://play.google.com/store/apps/details?id=com.zudo", webFallbackUrl: "", iosDeepLink: "", androidDeepLink: "", ...overrides });
+const app = (overrides: Partial<CreativeApp> = {}): CreativeApp => ({ appName: "Nantty", rating: null, iosStoreUrl: "https://apps.apple.com/ng/app/nantty/id1", androidStoreUrl: "https://play.google.com/store/apps/details?id=com.nantty", webFallbackUrl: "", iosDeepLink: "", androidDeepLink: "", ...overrides });
 
 describe("carousel validation", () => {
   it("needs 2 to 10 cards", () => {
@@ -29,21 +29,21 @@ describe("carousel validation", () => {
 
 describe("app install links", () => {
   it("validates store urls and deep links", () => {
-    assert.ok(isIosStoreUrl("https://apps.apple.com/ng/app/zudo/id1"));
+    assert.ok(isIosStoreUrl("https://apps.apple.com/ng/app/nantty/id1"));
     assert.ok(!isIosStoreUrl("https://evil.example/app/x"));
-    assert.ok(isAndroidStoreUrl("https://play.google.com/store/apps/details?id=com.zudo"));
+    assert.ok(isAndroidStoreUrl("https://play.google.com/store/apps/details?id=com.nantty"));
     assert.ok(!isAndroidStoreUrl("https://play.google.com/store/apps/details"));
-    assert.ok(isAppDeepLink("zudoapp://promo"));
-    assert.ok(!isAppDeepLink("javascript://x") && !isAppDeepLink("https://zudo.example"));
+    assert.ok(isAppDeepLink("nanttyapp://promo"));
+    assert.ok(!isAppDeepLink("javascript://x") && !isAppDeepLink("https://nantty.example"));
     assert.deepEqual(validateAppInstallFields(app()), {});
     assert.ok(validateAppInstallFields(app({ androidStoreUrl: "" }))["app.webFallbackUrl"]);
   });
   it("selects the link by platform and falls back to the web link", () => {
-    const full = app({ webFallbackUrl: "https://zudo.example/get" });
+    const full = app({ webFallbackUrl: "https://nantty.example/get" });
     assert.equal(selectAppLink(full, "ios"), full.iosStoreUrl);
     assert.equal(selectAppLink(full, "android"), full.androidStoreUrl);
     assert.equal(selectAppLink(full, "web"), full.webFallbackUrl);
-    assert.equal(selectAppLink(app({ iosStoreUrl: "", webFallbackUrl: "https://zudo.example/get" }), "ios"), "https://zudo.example/get");
+    assert.equal(selectAppLink(app({ iosStoreUrl: "", webFallbackUrl: "https://nantty.example/get" }), "ios"), "https://nantty.example/get");
   });
   it("builds utm links without overriding existing parameters", () => {
     const tagged = new URL(buildUtmUrl("https://shop.example/p?utm_source=mine", { campaign: "spring" }));

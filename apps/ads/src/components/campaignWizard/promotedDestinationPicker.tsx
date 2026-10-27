@@ -3,7 +3,7 @@
 import { useEffect, useRef } from "react";
 
 import { ErrorState, LoadingBlock } from "@/components/ui/feedback";
-import { ZudoIcon } from "@/components/ui/zudoIcon";
+import { NanttyIcon } from "@/components/ui/nanttyIcon";
 import { useAdsQuery } from "@/hooks/useAdsQuery.hook";
 import { campaignsApi } from "@/services/campaignsApi.service";
 import type { PromotableDestination, PromotableDestinationKind } from "@/types/creative.type";
@@ -61,12 +61,12 @@ export function PromotedDestinationPicker({ accountId, kind, chosenDestinationId
             <li key={destination.id}>
               <button type="button" role="radio" aria-checked={isChosen} disabled={!destination.eligible} title={destination.ineligibleReason ?? undefined} className={isChosen ? `${styles.sourceCard} ${styles.sourceCardSelected}` : styles.sourceCard} onClick={() => onDestinationChosen(destination)}>
                 <span className={`${styles.sourceThumb} ${styles.destinationAvatar}`}>
-                  {destination.avatarUrl ? <img src={destination.avatarUrl} alt="" /> : <ZudoIcon name={kind === "store" ? "buildingStore20" : "userCircle24"} size={22} />}
+                  {destination.avatarUrl ? <img src={destination.avatarUrl} alt="" /> : <NanttyIcon name={kind === "store" ? "buildingStore20" : "userCircle24"} size={22} />}
                 </span>
                 <span className={styles.sourceText}>
                   <span className={`${styles.sourceTitle} ${styles.destinationName}`}>
                     {destination.name}
-                    {destination.verified ? <ZudoIcon name="sealCheck20" size={14} className={styles.destinationSeal} label="Verified" /> : null}
+                    {destination.verified ? <NanttyIcon name="sealCheck20" size={14} className={styles.destinationSeal} label="Verified" /> : null}
                   </span>
                   <span className={styles.sourceMeta}>{describeDestinationMeta(destination)}</span>
                 </span>

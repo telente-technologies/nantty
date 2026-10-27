@@ -1,10 +1,10 @@
-import type { ZudoIconName } from "@/components/ui/zudoIcon";
+import type { NanttyIconName } from "@/components/ui/nanttyIcon";
 import type { AdsPermission } from "@/config/rolePermissions.config";
 
 export interface AccountNavigationItem {
   readonly subPath: string;
   readonly label: string;
-  readonly iconName: ZudoIconName;
+  readonly iconName: NanttyIconName;
   readonly permission: AdsPermission;
   readonly group: "manage" | "tools" | "account";
 }

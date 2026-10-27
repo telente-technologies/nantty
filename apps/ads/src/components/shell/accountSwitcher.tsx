@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 
-import { ZudoIcon } from "@/components/ui/zudoIcon";
+import { NanttyIcon } from "@/components/ui/nanttyIcon";
 import { roleLabels } from "@/config/rolePermissions.config";
 import { accountsApi } from "@/services/accountsApi.service";
 import type { AdAccount, AdAccountSummary } from "@/types/adAccount.type";
@@ -45,7 +45,7 @@ export function AccountSwitcher({ currentAccount }: { readonly currentAccount: A
             {currentAccount.kind === "business" ? "Business" : "Personal"} · {currentAccount.currency} · {roleLabels[currentAccount.myRole]}
           </span>
         </span>
-        <ZudoIcon name="caretDown24" size={14} />
+        <NanttyIcon name="caretDown24" size={14} />
       </button>
       {isOpen ? (
         <div className={styles.menu}>
@@ -63,7 +63,7 @@ export function AccountSwitcher({ currentAccount }: { readonly currentAccount: A
                       {account.id} · {account.currency}
                     </span>
                   </span>
-                  {account.id === currentAccount.id ? <ZudoIcon name="check16" size={14} /> : null}
+                  {account.id === currentAccount.id ? <NanttyIcon name="check16" size={14} /> : null}
                 </Link>
               </li>
             ))}

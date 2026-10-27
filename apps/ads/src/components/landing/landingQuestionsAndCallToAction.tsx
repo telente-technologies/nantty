@@ -1,6 +1,6 @@
 import { OfficialStoreBadges } from "@nantty/web-kit";
 
-import { ZudoIcon } from "@/components/ui/zudoIcon";
+import { NanttyIcon } from "@/components/ui/nanttyIcon";
 import { buildContactMailtoLink, contactEmailDisplayText, readNanttyMainSiteUrl, storeLinks } from "@/constants/contact.constant";
 
 import { MarketplaceGridIllustration } from "./landingAdIllustrations";
@@ -23,7 +23,7 @@ export function LandingQuestionsSection() {
             <details key={item.question} className={styles.questionItem}>
               <summary className={styles.question}>
                 {item.question}
-                <ZudoIcon name="plus16" size={16} className={styles.questionToggle} />
+                <NanttyIcon name="plus16" size={16} className={styles.questionToggle} />
               </summary>
               <p className={styles.answer}>{item.answer}</p>
             </details>

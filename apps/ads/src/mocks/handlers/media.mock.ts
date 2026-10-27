@@ -7,8 +7,8 @@ const maximumMockUploadBytes = 12 * 1024 * 1024;
 const acceptedMimeTypes = ["image/jpeg", "image/png", "image/webp", "image/avif", "video/mp4", "video/quicktime"];
 const uploadUrlLifetimeMilliseconds = 30 * 60 * 1000;
 
-const globalHolder = globalThis as typeof globalThis & { zudomartAdsMockFiles?: Map<string, { mimeType: string; bytes: Buffer }> };
-const fileStore = (globalHolder.zudomartAdsMockFiles ??= new Map());
+const globalHolder = globalThis as typeof globalThis & { nanttyAdsMockFiles?: Map<string, { mimeType: string; bytes: Buffer }> };
+const fileStore = (globalHolder.nanttyAdsMockFiles ??= new Map());
 
 function readClientMetadata(value: unknown) {
   if (value === null || value === undefined) return null;

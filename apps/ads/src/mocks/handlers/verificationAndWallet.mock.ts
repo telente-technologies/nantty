@@ -14,10 +14,10 @@ interface MockUserWallet {
 
 const unverifiedUserIds = new Set(["usr_ibrahim"]);
 const verificationRequiredMessage = "Verify your payout details to use Nantty Ads. Your verification keeps advertisers and creators safe.";
-const holder = globalThis as typeof globalThis & { __zudomartAdsMockWallets?: Map<string, MockUserWallet> };
+const holder = globalThis as typeof globalThis & { __nanttyAdsMockWallets?: Map<string, MockUserWallet> };
 
 function readMockUserWallet(userId: string): MockUserWallet {
-  const wallets = (holder.__zudomartAdsMockWallets ??= new Map());
+  const wallets = (holder.__nanttyAdsMockWallets ??= new Map());
   if (!wallets.has(userId)) wallets.set(userId, { level: unverifiedUserIds.has(userId) ? 0 : 1, availableMinor: unverifiedUserIds.has(userId) ? 1_250_000 : 8_500_000, fundings: new Map() });
   return wallets.get(userId) as MockUserWallet;
 }

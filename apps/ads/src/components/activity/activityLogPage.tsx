@@ -8,7 +8,7 @@ import { EmptyState, ErrorState, LoadingBlock } from "@/components/ui/feedback";
 import { SelectField } from "@/components/ui/formFields";
 import { StatusBadge } from "@/components/ui/statusBadge";
 import { Card, PageHeader } from "@/components/ui/surfaces";
-import { ZudoIcon } from "@/components/ui/zudoIcon";
+import { NanttyIcon } from "@/components/ui/nanttyIcon";
 import { accountsApi } from "@/services/accountsApi.service";
 import { readErrorMessageForDisplay } from "@/services/adsApiClient.service";
 import type { ActivityEntry, ActivityObjectType } from "@/types/tools.type";
@@ -34,7 +34,7 @@ function ActivityEntryRow({ entry }: { readonly entry: ActivityEntry }) {
   return (
     <li className={styles.entry}>
       <span className={entry.actor.isSystem ? `${styles.actorMark} ${styles.systemMark}` : styles.actorMark} aria-hidden>
-        {entry.actor.isSystem ? <ZudoIcon name="shield24" size={16} /> : entry.actor.name.slice(0, 1).toUpperCase()}
+        {entry.actor.isSystem ? <NanttyIcon name="shield24" size={16} /> : entry.actor.name.slice(0, 1).toUpperCase()}
       </span>
       <div className={styles.entryBody}>
         <p className={styles.headline}>

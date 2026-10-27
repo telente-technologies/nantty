@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useAdAccount } from "@/components/session/adAccountProvider";
 import { Card } from "@/components/ui/surfaces";
 import { StatusBadge } from "@/components/ui/statusBadge";
-import { ZudoIcon, type ZudoIconName } from "@/components/ui/zudoIcon";
+import { NanttyIcon, type NanttyIconName } from "@/components/ui/nanttyIcon";
 import { useAdsQuery } from "@/hooks/useAdsQuery.hook";
 import { accountsApi } from "@/services/accountsApi.service";
 import { billingApi } from "@/services/billingApi.service";
@@ -17,7 +17,7 @@ import styles from "./needsAttentionPanel.module.css";
 
 interface AttentionItem {
   readonly key: string;
-  readonly iconName: ZudoIconName;
+  readonly iconName: NanttyIconName;
   readonly tone: "error" | "caution" | "info" | "accent";
   readonly title: string;
   readonly detail: string;
@@ -63,7 +63,7 @@ export function NeedsAttentionPanel() {
       {isLoading ? <p className={styles.quiet}>Checking…</p> : null}
       {!isLoading && items.length === 0 ? (
         <p className={styles.allClear}>
-          <ZudoIcon name="check16" size={14} />
+          <NanttyIcon name="check16" size={14} />
           Nothing needs your attention.
         </p>
       ) : null}
@@ -71,7 +71,7 @@ export function NeedsAttentionPanel() {
         {items.slice(0, 6).map((item) => (
           <li key={item.key} className={styles.item}>
             <span className={`${styles.icon} ${styles[item.tone]}`}>
-              <ZudoIcon name={item.iconName} size={16} />
+              <NanttyIcon name={item.iconName} size={16} />
             </span>
             <div className={styles.text}>
               <p className={styles.title}>{item.title}</p>

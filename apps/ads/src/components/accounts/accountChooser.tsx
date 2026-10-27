@@ -8,7 +8,7 @@ import { ButtonLink } from "@/components/ui/button";
 import { EmptyState, ErrorState, InlineNotice, LoadingBlock } from "@/components/ui/feedback";
 import { StatusBadge } from "@/components/ui/statusBadge";
 import { PageHeader } from "@/components/ui/surfaces";
-import { ZudoIcon } from "@/components/ui/zudoIcon";
+import { NanttyIcon } from "@/components/ui/nanttyIcon";
 import { roleLabels } from "@/config/rolePermissions.config";
 import { useAdsQuery } from "@/hooks/useAdsQuery.hook";
 import { accountsApi } from "@/services/accountsApi.service";
@@ -72,7 +72,7 @@ export function AccountChooser() {
                     {account.kind === "business" ? "Business" : "Personal"} · {account.currency} · {account.id}
                   </span>
                 </div>
-                <ZudoIcon name="caretRight24" size={16} className={styles.chevron} />
+                <NanttyIcon name="caretRight24" size={16} className={styles.chevron} />
               </div>
               <div className={styles.badges}>
                 <StatusBadge tone="info">{roleLabels[account.myRole]}</StatusBadge>

@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-import { ZudoIcon } from "@/components/ui/zudoIcon";
+import { NanttyIcon } from "@/components/ui/nanttyIcon";
 
 import { featureShowcases } from "./landingCopy.content";
 import { ScreenshotInBrowserFrame, SectionIntro } from "./landingPrimitives";
@@ -17,7 +17,7 @@ export function FeatureShowcaseSections() {
               <ul className={styles.pointList}>
                 {feature.points.map((point) => (
                   <li key={point}>
-                    <ZudoIcon name="check16" size={14} className={styles.pointIcon} />
+                    <NanttyIcon name="check16" size={14} className={styles.pointIcon} />
                     {point}
                   </li>
                 ))}
@@ -53,7 +53,7 @@ export function PolicyAndReviewSection() {
           </ul>
           <Link href={process.env.NEXT_PUBLIC_NANTTY_STATIC_PRELAUNCH === "1" ? "https://nantty.com/ads-policy" : "/policy"} className={styles.inlineLink}>
             Read the advertising policies
-            <ZudoIcon name="arrowUpRight24" size={16} />
+            <NanttyIcon name="arrowUpRight24" size={16} />
           </Link>
         </div>
         <ScreenshotInBrowserFrame src="/screenshots/campaignsList.webp" alt="Campaigns table showing active, paused, in review and rejected campaigns with spend, results and pacing" address="ads.nantty.com/campaigns" />

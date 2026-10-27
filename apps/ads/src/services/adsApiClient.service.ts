@@ -58,7 +58,7 @@ export function buildQueryString(query: AdsApiRequestOptions["query"]): string {
 }
 
 export const verificationRequiredErrorCode = "VERIFICATION_REQUIRED";
-export const verificationRequiredEventName = "zudomart-ads:verification-required";
+export const verificationRequiredEventName = "nantty-ads:verification-required";
 
 function announceVerificationRequired(message: string | undefined): void {
   if (typeof window === "undefined") return;

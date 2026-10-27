@@ -2,7 +2,7 @@
 
 import { useId, useMemo, useState, type KeyboardEvent } from "react";
 
-import { ZudoIcon } from "@/components/ui/zudoIcon";
+import { NanttyIcon } from "@/components/ui/nanttyIcon";
 
 import styles from "./searchableMultiSelect.module.css";
 
@@ -75,7 +75,7 @@ export function SearchableMultiSelect(props: SearchableMultiSelectProps) {
             <li key={option.value} className={props.tone === "exclude" ? `${styles.chip} ${styles.excludeChip}` : styles.chip}>
               {option.label}
               <button type="button" aria-label={`Remove ${option.label}`} onClick={() => onSelectedOptionsChange(selectedOptions.filter((selected) => selected.value !== option.value))}>
-                <ZudoIcon name="cancel20" size={12} />
+                <NanttyIcon name="cancel20" size={12} />
               </button>
             </li>
           ))}

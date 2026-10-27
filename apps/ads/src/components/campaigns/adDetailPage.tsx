@@ -10,7 +10,7 @@ import { ErrorState, LoadingBlock } from "@/components/ui/feedback";
 import { SegmentedControl } from "@/components/ui/formFields";
 import { DeliveryStatusBadge } from "@/components/ui/statusBadge";
 import { Card, KeyValueList, PageHeader } from "@/components/ui/surfaces";
-import { ZudoIcon } from "@/components/ui/zudoIcon";
+import { NanttyIcon } from "@/components/ui/nanttyIcon";
 import { callToActionLabels, creativeFormatLabels, creativeTypeLabels, findObjectiveOption, placementLabels } from "@/constants/campaignOptions.constant";
 import { useAdsQuery } from "@/hooks/useAdsQuery.hook";
 import { campaignsApi } from "@/services/campaignsApi.service";
@@ -55,7 +55,7 @@ export function AdDetailPage({ adId }: { readonly adId: string }) {
       <PageHeader
         eyebrow={
           <Link href={buildAccountPagePath(`/ad-sets/${ad.adSetId}`)} className={styles.backLink}>
-            <ZudoIcon name="arrowLeft24" size={14} /> {adSet?.name ?? "Ad set"}
+            <NanttyIcon name="arrowLeft24" size={14} /> {adSet?.name ?? "Ad set"}
           </Link>
         }
         title={

@@ -20,7 +20,7 @@ export async function POST(request: NextRequest) {
     return respondWithBffError(400, "VALIDATION_FAILED", "Enter your email or username and your password.");
   }
 
-  const userAgent = request.headers.get("user-agent")?.slice(0, 200) ?? "zudomart-ads-manager";
+  const userAgent = request.headers.get("user-agent")?.slice(0, 200) ?? "nantty-ads-manager";
   const loginResult = await callAdsBackend({ method: "POST", path: "/auth/login", body: encodeJsonRequestBody({ identifier, password }), contentType: "application/json", forwardedHeaders: { "User-Agent": userAgent } });
   if (loginResult.status !== 200) {
     const errorBody = readJsonFromBackendResult<ApiErrorBody>(loginResult);

@@ -8,7 +8,7 @@ import { SegmentedControl, TextField } from "@/components/ui/formFields";
 import { StatusBadge } from "@/components/ui/statusBadge";
 import { Card } from "@/components/ui/surfaces";
 import { useToast } from "@/components/ui/toastProvider";
-import { ZudoIcon } from "@/components/ui/zudoIcon";
+import { NanttyIcon } from "@/components/ui/nanttyIcon";
 import { billingApi } from "@/services/billingApi.service";
 import { readErrorMessageForDisplay } from "@/services/adsApiClient.service";
 import type { BillingOverview, FundingMode } from "@/types/billing.type";
@@ -97,7 +97,7 @@ export function PaymentSettingsCard({ accountId, overview, canManageBilling, onO
         <ul className={styles.cardList}>
           {overview.paymentMethods.map((method) => (
             <li key={method.id} className={styles.cardRow}>
-              <ZudoIcon name="creditCard24" size={20} />
+              <NanttyIcon name="creditCard24" size={20} />
               <div>
                 <p className={styles.cardBrand}>
                   {method.brand} ···· {method.last4}

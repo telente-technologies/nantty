@@ -4,7 +4,7 @@ import { useState } from "react";
 
 import { TextField } from "@/components/ui/formFields";
 import { ErrorState, LoadingBlock } from "@/components/ui/feedback";
-import { ZudoIcon } from "@/components/ui/zudoIcon";
+import { NanttyIcon } from "@/components/ui/nanttyIcon";
 import { useAdsQuery } from "@/hooks/useAdsQuery.hook";
 import { useDebouncedValue } from "@/hooks/useDebouncedValue.hook";
 import { campaignsApi } from "@/services/campaignsApi.service";
@@ -59,8 +59,8 @@ export function ContentSourcePicker({ accountId, sourceType, selectedSourceId, o
                 onClick={() => onSourceSelected(source)}
               >
                 <span className={styles.sourceThumb}>
-                  {thumbnailUrl ? <img src={thumbnailUrl} alt="" /> : <ZudoIcon name="imageSquare24" size={20} />}
-                  {thumbnail?.kind === "video" ? <ZudoIcon name="play24" size={16} className={styles.sourcePlay} /> : null}
+                  {thumbnailUrl ? <img src={thumbnailUrl} alt="" /> : <NanttyIcon name="imageSquare24" size={20} />}
+                  {thumbnail?.kind === "video" ? <NanttyIcon name="play24" size={16} className={styles.sourcePlay} /> : null}
                 </span>
                 <span className={styles.sourceText}>
                   <span className={styles.sourceTitle}>{source.title}</span>

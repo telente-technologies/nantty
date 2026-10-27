@@ -1,4 +1,4 @@
-import { ZudoIcon } from "@/components/ui/zudoIcon";
+import { NanttyIcon } from "@/components/ui/nanttyIcon";
 import { formatMoneyForDisplay } from "@/utils/money.util";
 
 import { AdBadge, CallToActionBar, StoreIdentityRow } from "./landingIllustrationParts";
@@ -16,7 +16,7 @@ function MarketplaceProductTile({ tile }: { readonly tile: ShowcaseProductTile }
       <p className={styles.productTitle}>{tile.title}</p>
       <p className={styles.productPrice}>{formatMoneyForDisplay(tile.price, { showMinorUnits: false })}</p>
       <p className={styles.productMeta}>
-        <ZudoIcon name="star16" size={11} className={styles.productStar} />
+        <NanttyIcon name="star16" size={11} className={styles.productStar} />
         {tile.rating} · {tile.storeName}
       </p>
     </li>
@@ -27,7 +27,7 @@ export function MarketplaceGridIllustration() {
   return (
     <figure className={styles.screen} aria-label="Mart grid with one sponsored product tile marked Ad">
       <div className={styles.screenBar}>
-        <ZudoIcon name="magnifyingGlass16" size={13} />
+        <NanttyIcon name="magnifyingGlass16" size={13} />
         <span>Search Mart</span>
       </div>
       <ul className={styles.productGrid}>
@@ -51,15 +51,15 @@ export function FeedCardIllustration({ post = feedShowcasePost }: { readonly pos
         </div>
         <div className={styles.feedCounters} aria-hidden>
           <span>
-            <ZudoIcon name="heart24Alt" size={16} /> {post.likes}
+            <NanttyIcon name="heart24Alt" size={16} /> {post.likes}
           </span>
           <span>
-            <ZudoIcon name="brandLine24" size={16} /> {post.comments}
+            <NanttyIcon name="brandLine24" size={16} /> {post.comments}
           </span>
           <span>
-            <ZudoIcon name="refresh24" size={16} /> {post.reposts}
+            <NanttyIcon name="refresh24" size={16} /> {post.reposts}
           </span>
-          <ZudoIcon name="share24" size={16} />
+          <NanttyIcon name="share24" size={16} />
         </div>
       </div>
     </figure>
@@ -71,12 +71,12 @@ export function ReelsIllustration() {
     <figure className={`${styles.screen} ${styles.reelsScreen}`} aria-label="Promoted clip playing full screen in Reels">
       <img src={buildLandingPhotoUrl(reelsShowcaseClip.photoKey, 600)} alt="Face serum bottle in the promoted clip" className={styles.reelsImage} loading="lazy" width={600} height={1066} />
       <span className={styles.reelsDuration}>
-        <ZudoIcon name="play24" size={12} /> {reelsShowcaseClip.duration}
+        <NanttyIcon name="play24" size={12} /> {reelsShowcaseClip.duration}
       </span>
       <div className={styles.reelsActions} aria-hidden>
-        <ZudoIcon name="heart24Alt" size={20} />
-        <ZudoIcon name="brandLine24" size={20} />
-        <ZudoIcon name="share24" size={20} />
+        <NanttyIcon name="heart24Alt" size={20} />
+        <NanttyIcon name="brandLine24" size={20} />
+        <NanttyIcon name="share24" size={20} />
       </div>
       <div className={styles.reelsOverlay}>
         <StoreIdentityRow storeName={reelsShowcaseClip.storeName} inverted />
@@ -97,7 +97,7 @@ export function LiveCardIllustration() {
           LIVE
         </span>
         <span className={liveStyles.liveWatching}>
-          <ZudoIcon name="eye16" size={12} /> {liveShowcaseStream.watching}
+          <NanttyIcon name="eye16" size={12} /> {liveShowcaseStream.watching}
         </span>
       </div>
       <div className={liveStyles.liveBody}>

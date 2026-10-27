@@ -1,4 +1,4 @@
-import { ZudoIcon } from "@/components/ui/zudoIcon";
+import { NanttyIcon } from "@/components/ui/nanttyIcon";
 
 import { FeedCardIllustration } from "./landingAdIllustrations";
 import { LandingActionLink, ScreenshotInBrowserFrame, type LandingAction } from "./landingPrimitives";
@@ -24,15 +24,15 @@ export function LandingHeroWithProductStage({ primaryAction, isSignedIn }: { rea
           {isSignedIn ? null : <p className={styles.heroNote}>Use the same account as the Nantty app. There is nothing new to sign up for.</p>}
           <ul className={styles.proofList}>
             <li>
-              <ZudoIcon name="shield24" size={18} />
+              <NanttyIcon name="shield24" size={18} />
               Every ad reviewed before it runs
             </li>
             <li>
-              <ZudoIcon name="shoppingCart24" size={18} />
+              <NanttyIcon name="shoppingCart24" size={18} />
               Store sales attributed automatically
             </li>
             <li>
-              <ZudoIcon name="creditCard24" size={18} />
+              <NanttyIcon name="creditCard24" size={18} />
               Billing in your local currency
             </li>
           </ul>

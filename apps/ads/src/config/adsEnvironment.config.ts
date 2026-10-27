@@ -1,5 +1,5 @@
 const isProductionRuntime = process.env.NODE_ENV === "production";
-const developmentOnlySessionSecret = "zudomart-ads-manager-development-only-secret-never-use-in-production";
+const developmentOnlySessionSecret = "nantty-ads-manager-development-only-secret-never-use-in-production";
 const defaultHostedCheckoutHosts = ["checkout.flutterwave.com", "checkout-testing.flutterwave.com"];
 
 export function readAdsApiBaseUrl(): string {

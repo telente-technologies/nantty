@@ -1,5 +1,5 @@
 import { campaignWizardSteps } from "@/components/campaignWizard/campaignWizardSteps.constant";
-import { ZudoIcon } from "@/components/ui/zudoIcon";
+import { NanttyIcon } from "@/components/ui/nanttyIcon";
 
 import styles from "./campaignWizard.module.css";
 
@@ -27,7 +27,7 @@ export function WizardStepper({ currentStepIndex, highestVisitedStepIndex, onSte
                 onClick={() => onStepSelected(index)}
               >
                 <span className={styles.stepMarker} aria-hidden>
-                  {isComplete && !isCurrent ? <ZudoIcon name="check16" size={12} /> : index + 1}
+                  {isComplete && !isCurrent ? <NanttyIcon name="check16" size={12} /> : index + 1}
                 </span>
                 <span className={styles.stepText}>
                   <span className={styles.stepLabel}>{step.label}</span>

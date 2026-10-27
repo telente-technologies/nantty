@@ -1,7 +1,7 @@
 import Link from "next/link";
 import type { ButtonHTMLAttributes, ReactNode } from "react";
 
-import { ZudoIcon, type ZudoIconName } from "@/components/ui/zudoIcon";
+import { NanttyIcon, type NanttyIconName } from "@/components/ui/nanttyIcon";
 
 import styles from "./button.module.css";
 
@@ -11,8 +11,8 @@ export type ButtonSize = "small" | "medium";
 interface SharedButtonProps {
   readonly variant?: ButtonVariant;
   readonly size?: ButtonSize;
-  readonly iconName?: ZudoIconName;
-  readonly trailingIconName?: ZudoIconName;
+  readonly iconName?: NanttyIconName;
+  readonly trailingIconName?: NanttyIconName;
   readonly children?: ReactNode;
   readonly className?: string;
 }
@@ -29,9 +29,9 @@ export function Button({ variant, size, iconName, trailingIconName, children, cl
   const iconSize = size === "small" ? 14 : 16;
   return (
     <button type={type} className={buildButtonClassName(variant, size, className, !children)} disabled={disabled || isLoading} aria-busy={isLoading || undefined} {...buttonAttributes}>
-      {isLoading ? <span className={styles.spinner} aria-hidden /> : iconName ? <ZudoIcon name={iconName} size={iconSize} /> : null}
+      {isLoading ? <span className={styles.spinner} aria-hidden /> : iconName ? <NanttyIcon name={iconName} size={iconSize} /> : null}
       {children}
-      {trailingIconName ? <ZudoIcon name={trailingIconName} size={iconSize} /> : null}
+      {trailingIconName ? <NanttyIcon name={trailingIconName} size={iconSize} /> : null}
     </button>
   );
 }
@@ -45,9 +45,9 @@ export function ButtonLink({ href, variant, size, iconName, trailingIconName, ch
   const iconSize = size === "small" ? 14 : 16;
   return (
     <Link href={href} className={buildButtonClassName(variant, size, className, !children)} aria-label={ariaLabel}>
-      {iconName ? <ZudoIcon name={iconName} size={iconSize} /> : null}
+      {iconName ? <NanttyIcon name={iconName} size={iconSize} /> : null}
       {children}
-      {trailingIconName ? <ZudoIcon name={trailingIconName} size={iconSize} /> : null}
+      {trailingIconName ? <NanttyIcon name={trailingIconName} size={iconSize} /> : null}
     </Link>
   );
 }

@@ -11,7 +11,7 @@ import { OverlayDialog } from "@/components/ui/overlayDialog";
 import { DeliveryStatusBadge } from "@/components/ui/statusBadge";
 import { Card, PageHeader } from "@/components/ui/surfaces";
 import { useToast } from "@/components/ui/toastProvider";
-import { ZudoIcon } from "@/components/ui/zudoIcon";
+import { NanttyIcon } from "@/components/ui/nanttyIcon";
 import { findObjectiveOption } from "@/constants/campaignOptions.constant";
 import { useAdsQuery } from "@/hooks/useAdsQuery.hook";
 import { campaignsApi } from "@/services/campaignsApi.service";
@@ -87,7 +87,7 @@ export function CampaignDetailPage({ campaignId }: { readonly campaignId: string
       <PageHeader
         eyebrow={
           <Link href={buildAccountPagePath("/campaigns")} className={styles.backLink}>
-            <ZudoIcon name="arrowLeft24" size={14} /> Campaigns
+            <NanttyIcon name="arrowLeft24" size={14} /> Campaigns
           </Link>
         }
         title={

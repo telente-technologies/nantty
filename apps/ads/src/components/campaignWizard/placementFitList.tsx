@@ -1,6 +1,6 @@
 import type { WizardAdDraft } from "@/components/campaignWizard/campaignWizardState.store";
 import { buildCreativeShapeFromAdDraft } from "@/components/campaignWizard/campaignWizardSubmission.util";
-import { ZudoIcon } from "@/components/ui/zudoIcon";
+import { NanttyIcon } from "@/components/ui/nanttyIcon";
 import { placementLabels } from "@/constants/campaignOptions.constant";
 import type { AdAccount } from "@/types/adAccount.type";
 import type { AdPlacement } from "@/types/campaign.type";
@@ -30,7 +30,7 @@ export function PlacementFitList({ ad, placements, error }: PlacementFitListProp
       <ul className={styles.list}>
         {fits.map((fit) => (
           <li key={fit.placement} className={`${styles.row} ${styles[fit.status]}`}>
-            <ZudoIcon name={statusIcons[fit.status]} size={14} className={styles.icon} />
+            <NanttyIcon name={statusIcons[fit.status]} size={14} className={styles.icon} />
             <span className={styles.placementName}>{placementLabels[fit.placement]}</span>
             <span className={styles.statusLabel}>{statusLabels[fit.status]}</span>
             <span className={styles.message}>{fit.message}</span>

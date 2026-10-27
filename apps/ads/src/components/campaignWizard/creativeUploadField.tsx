@@ -2,7 +2,7 @@
 
 import { useId, useState, type ChangeEvent } from "react";
 
-import { ZudoIcon } from "@/components/ui/zudoIcon";
+import { NanttyIcon } from "@/components/ui/nanttyIcon";
 import { describeWhyCreativeFileIsNotAccepted, uploadCreativeFile, acceptedCreativeMimeTypes } from "@/services/mediaUpload.service";
 import { readErrorMessageForDisplay } from "@/services/adsApiClient.service";
 import type { CreativeMedia } from "@/types/creative.type";
@@ -53,12 +53,12 @@ export function CreativeUploadField({ accountId, uploadedMedia, onUploadedMediaC
           <figure key={media.id} className={styles.uploadedItem}>
             {media.kind === "video" ? <video src={media.url} muted aria-label="Uploaded video" /> : <img src={media.url} alt="Uploaded creative" />}
             <button type="button" className={styles.removeUpload} aria-label="Remove this file" onClick={() => onUploadedMediaChange(uploadedMedia.filter((candidate) => candidate.id !== media.id))}>
-              <ZudoIcon name="cancel20" size={14} />
+              <NanttyIcon name="cancel20" size={14} />
             </button>
           </figure>
         ))}
         <label htmlFor={inputId} className={styles.dropZone} aria-disabled={progressFraction !== null}>
-          <ZudoIcon name="plus24" size={20} />
+          <NanttyIcon name="plus24" size={20} />
           <span>{progressFraction === null ? "Add image or video" : "Uploading…"}</span>
           <input id={inputId} type="file" accept={acceptedCreativeMimeTypes.join(",")} className="visuallyHidden" onChange={uploadChosenFile} disabled={progressFraction !== null} />
         </label>

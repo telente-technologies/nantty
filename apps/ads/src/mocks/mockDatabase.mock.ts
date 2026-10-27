@@ -148,11 +148,11 @@ function buildFreshMockDatabase(): MockAdsDatabase {
   };
 }
 
-const globalHolder = globalThis as typeof globalThis & { zudomartAdsMockDatabaseWithFormats?: MockAdsDatabase };
+const globalHolder = globalThis as typeof globalThis & { nanttyAdsMockDatabaseWithFormats?: MockAdsDatabase };
 
 export function readMockDatabase(): MockAdsDatabase {
-  globalHolder.zudomartAdsMockDatabaseWithFormats ??= buildFreshMockDatabase();
-  return globalHolder.zudomartAdsMockDatabaseWithFormats;
+  globalHolder.nanttyAdsMockDatabaseWithFormats ??= buildFreshMockDatabase();
+  return globalHolder.nanttyAdsMockDatabaseWithFormats;
 }
 
 export function appendMockActivity(accountId: string, entry: Omit<ActivityEntry, "id" | "createdAt">): void {

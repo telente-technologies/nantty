@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { ErrorState, LoadingBlock } from "@/components/ui/feedback";
 import { DeliveryStatusBadge } from "@/components/ui/statusBadge";
 import { Card, KeyValueList, PageHeader } from "@/components/ui/surfaces";
-import { ZudoIcon } from "@/components/ui/zudoIcon";
+import { NanttyIcon } from "@/components/ui/nanttyIcon";
 import { bidStrategyOptions, findObjectiveOption, placementLabels } from "@/constants/campaignOptions.constant";
 import { useAdsQuery } from "@/hooks/useAdsQuery.hook";
 import { campaignsApi } from "@/services/campaignsApi.service";
@@ -59,7 +59,7 @@ export function AdSetDetailPage({ adSetId }: { readonly adSetId: string }) {
       <PageHeader
         eyebrow={
           <Link href={buildAccountPagePath(`/campaigns/${adSet.campaignId}`)} className={styles.backLink}>
-            <ZudoIcon name="arrowLeft24" size={14} /> {campaign?.name ?? "Campaign"}
+            <NanttyIcon name="arrowLeft24" size={14} /> {campaign?.name ?? "Campaign"}
           </Link>
         }
         title={

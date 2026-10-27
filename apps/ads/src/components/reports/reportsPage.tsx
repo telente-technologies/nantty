@@ -46,7 +46,7 @@ export function ReportsPage() {
     setIsExporting(true);
     try {
       const blob = await reportsApi.exportReportAsCsv(accountId, query, state.columns);
-      saveBlobAsDownloadedFile(blob, `zudomart-ads-${state.breakdown}-${state.from}-to-${state.to}.csv`);
+      saveBlobAsDownloadedFile(blob, `nantty-ads-${state.breakdown}-${state.from}-to-${state.to}.csv`);
       showToast("CSV downloaded");
     } catch (error) {
       showToast(readErrorMessageForDisplay(error), "error");

@@ -9,7 +9,7 @@ import { SelectField, TextField } from "@/components/ui/formFields";
 import { StatusBadge } from "@/components/ui/statusBadge";
 import { Card, KeyValueList } from "@/components/ui/surfaces";
 import { useToast } from "@/components/ui/toastProvider";
-import { ZudoIcon } from "@/components/ui/zudoIcon";
+import { NanttyIcon } from "@/components/ui/nanttyIcon";
 import { supportedAccountCountries } from "@/constants/locale.constant";
 import { accountsApi } from "@/services/accountsApi.service";
 import { readErrorMessageForDisplay } from "@/services/adsApiClient.service";
@@ -112,7 +112,7 @@ export function BusinessVerificationCard() {
       <div className={styles.stack}>
         <div className={styles.businessRow}>
           <span className={styles.storeMark} aria-hidden>
-            <ZudoIcon name="buildingStore20" size={20} />
+            <NanttyIcon name="buildingStore20" size={20} />
           </span>
           <div>
             <p>

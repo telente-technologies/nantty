@@ -1,7 +1,7 @@
 import { LiveCardPreview } from "@/components/creative/adPreviewMarketplaceAndLive";
 import { AppInstallRow, CarouselStrip, MediaWithTapHint } from "@/components/creative/adPreviewRichFormats";
 import { IdentityAvatar, IdentitySeal, PreviewAvatar, PreviewMedia, SponsoredLabel, VerifiedSeal } from "@/components/creative/adPreviewParts";
-import { ZudoIcon } from "@/components/ui/zudoIcon";
+import { NanttyIcon } from "@/components/ui/nanttyIcon";
 import { callToActionLabels } from "@/constants/campaignOptions.constant";
 import type { Creative, PromotableDestinationKind, PromotedDestinationIdentity } from "@/types/creative.type";
 import { isLandscapeMedia } from "@/utils/adPlacementRules.util";
@@ -50,7 +50,7 @@ export function FeedCardPreview({ creative }: { readonly creative: Creative }) {
           <span className={styles.postedTime}>Now</span>
           <SponsoredLabel />
         </div>
-        <ZudoIcon name="dotsThreeVertical24" size={20} />
+        <NanttyIcon name="dotsThreeVertical24" size={20} />
       </div>
       {creative.primaryText ? <p className={styles.bodyText}>{creative.primaryText}</p> : null}
       {creative.live ? (
@@ -78,15 +78,15 @@ export function FeedCardPreview({ creative }: { readonly creative: Creative }) {
       )}
       <div className={styles.interactions} aria-hidden>
         <span className={styles.counter}>
-          <ZudoIcon name="heart24Alt" size={20} />0
+          <NanttyIcon name="heart24Alt" size={20} />0
         </span>
         <span className={styles.counter}>
-          <ZudoIcon name="brandLine24" size={20} />0
+          <NanttyIcon name="brandLine24" size={20} />0
         </span>
         <span className={styles.counter}>
-          <ZudoIcon name="refresh24" size={20} />0
+          <NanttyIcon name="refresh24" size={20} />0
         </span>
-        <ZudoIcon name="share24" size={20} />
+        <NanttyIcon name="share24" size={20} />
       </div>
     </article>
   );
@@ -102,7 +102,7 @@ export function ClipPreview({ creative, variant }: { readonly creative: Creative
         <div className={styles.letterbox}>
           <PreviewMedia media={firstMedia} altText={creative.headline} className={styles.wideMedia} />
           <span className={styles.viewFullScreen}>
-            <ZudoIcon name="arrowsOutSimple24" size={14} />
+            <NanttyIcon name="arrowsOutSimple24" size={14} />
             View full screen
           </span>
         </div>
@@ -135,9 +135,9 @@ export function ClipPreview({ creative, variant }: { readonly creative: Creative
       </div>
       {variant === "clip" ? (
         <div className={styles.clipActions} aria-hidden>
-          <ZudoIcon name="heart24" size={24} />
-          <ZudoIcon name="chatCircle24" size={24} />
-          <ZudoIcon name="share24" size={24} />
+          <NanttyIcon name="heart24" size={24} />
+          <NanttyIcon name="chatCircle24" size={24} />
+          <NanttyIcon name="share24" size={24} />
         </div>
       ) : null}
     </article>

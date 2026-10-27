@@ -10,7 +10,7 @@ import { UserMenu } from "@/components/shell/userMenu";
 import { AdAccountProvider, useAdAccount } from "@/components/session/adAccountProvider";
 import { ButtonLink } from "@/components/ui/button";
 import { StatusBadge } from "@/components/ui/statusBadge";
-import { ZudoIcon } from "@/components/ui/zudoIcon";
+import { NanttyIcon } from "@/components/ui/nanttyIcon";
 import { VerificationBanner } from "@/components/verification/verificationPrompt";
 import { accountNavigationItems } from "@/config/navigation.config";
 import { doesRoleHavePermission } from "@/config/rolePermissions.config";
@@ -42,7 +42,7 @@ function AccountRail({ accountId, role }: { readonly accountId: string; readonly
                   return (
                     <li key={item.subPath}>
                       <Link href={href} className={isActive ? `${styles.navigationLink} ${styles.activeLink}` : styles.navigationLink} aria-current={isActive ? "page" : undefined} title={item.label}>
-                        <ZudoIcon name={item.iconName} size={18} />
+                        <NanttyIcon name={item.iconName} size={18} />
                         <span className={styles.navigationLabel}>{item.label}</span>
                       </Link>
                     </li>
@@ -53,7 +53,7 @@ function AccountRail({ accountId, role }: { readonly accountId: string; readonly
         ))}
       </nav>
       <Link href="/policy" className={styles.policyLink}>
-        <ZudoIcon name="shield24" size={16} />
+        <NanttyIcon name="shield24" size={16} />
         <span className={styles.navigationLabel}>Advertising policies</span>
       </Link>
     </aside>

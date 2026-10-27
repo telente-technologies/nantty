@@ -1,6 +1,6 @@
 import { PreviewAvatar, PreviewMedia, VerifiedSeal } from "@/components/creative/adPreviewParts";
 import { neighbourLiveCards, neighbourProductTiles } from "@/components/creative/previewNeighbourContent.constant";
-import { ZudoIcon } from "@/components/ui/zudoIcon";
+import { NanttyIcon } from "@/components/ui/nanttyIcon";
 import type { Creative } from "@/types/creative.type";
 import { formatMoneyForDisplay } from "@/utils/money.util";
 import { formatCompactCount } from "@/utils/numberFormatting.util";
@@ -34,7 +34,7 @@ function SponsoredProductTile({ creative }: { readonly creative: Creative }) {
         <p className={styles.tileMeta}>
           {product?.rating ? (
             <span className={styles.rating}>
-              <ZudoIcon name="star16" size={12} />
+              <NanttyIcon name="star16" size={12} />
               {product.rating.toFixed(1)}
             </span>
           ) : null}
@@ -60,7 +60,7 @@ export function MarketplaceGridPreview({ creative, context }: { readonly creativ
         {referencePrice ? <p className={styles.tilePrice}>{formatMoneyForDisplay({ amountMinor: Math.round((referencePrice.amountMinor * tile.priceRatio) / 100) * 100, currency: referencePrice.currency })}</p> : null}
         <p className={styles.tileMeta}>
           <span className={styles.rating}>
-            <ZudoIcon name="star16" size={12} />
+            <NanttyIcon name="star16" size={12} />
             {tile.rating.toFixed(1)}
           </span>
         </p>
@@ -70,7 +70,7 @@ export function MarketplaceGridPreview({ creative, context }: { readonly creativ
   return (
     <div className={styles.marketplace}>
       <div className={styles.marketplaceBar}>
-        <ZudoIcon name={context === "search" ? "magnifyingGlass16" : "squaresFour24"} size={14} />
+        <NanttyIcon name={context === "search" ? "magnifyingGlass16" : "squaresFour24"} size={14} />
         <span>{context === "search" ? `Search: ${creative.product?.title.split(" ").slice(0, 2).join(" ").toLowerCase() ?? "products"}` : "Mart · For you"}</span>
       </div>
       <div className={styles.marketplaceGrid}>
@@ -90,7 +90,7 @@ function LiveBadge({ viewerCount, isScheduled }: { readonly viewerCount: number;
       <span className={isScheduled ? `${styles.liveBadge} ${styles.scheduledBadge}` : styles.liveBadge}>{isScheduled ? "Soon" : "LIVE"}</span>
       {isScheduled ? null : (
         <span className={styles.viewerCount}>
-          <ZudoIcon name="eye16" size={12} />
+          <NanttyIcon name="eye16" size={12} />
           {formatCompactCount(viewerCount)}
         </span>
       )}
@@ -126,7 +126,7 @@ export function LiveDiscoveryPreview({ creative }: { readonly creative: Creative
   return (
     <div className={styles.liveDiscovery}>
       <div className={styles.marketplaceBar}>
-        <ZudoIcon name="videoCamera24" size={14} />
+        <NanttyIcon name="videoCamera24" size={14} />
         <span>Live now</span>
       </div>
       <div className={styles.liveGrid}>
@@ -151,7 +151,7 @@ export function LiveDiscoveryPreview({ creative }: { readonly creative: Creative
 export function BlockedPlacementNotice({ placementLabel, reason }: { readonly placementLabel: string; readonly reason: string }) {
   return (
     <div className={styles.blockedNotice} role="note">
-      <ZudoIcon name="warning20" size={22} />
+      <NanttyIcon name="warning20" size={22} />
       <p className={styles.blockedTitle}>Not shown in {placementLabel}</p>
       <p>{reason}</p>
     </div>

@@ -1,4 +1,4 @@
-import { ZudoIcon } from "@/components/ui/zudoIcon";
+import { NanttyIcon } from "@/components/ui/nanttyIcon";
 import type { Creative, CreativeMedia } from "@/types/creative.type";
 
 import styles from "./adPreviewParts.module.css";
@@ -17,7 +17,7 @@ export function PreviewAvatar({ creative, size = 32 }: { readonly creative: Crea
 }
 
 export function IdentitySeal({ label }: { readonly label: string }) {
-  return <ZudoIcon name="sealCheck20" size={14} className={styles.seal} label={label} />;
+  return <NanttyIcon name="sealCheck20" size={14} className={styles.seal} label={label} />;
 }
 
 export function VerifiedSeal({ creative }: { readonly creative: Creative }) {
@@ -36,7 +36,7 @@ export function PreviewMedia({ media, altText, className }: { readonly media: Cr
   if (!media) {
     return (
       <div className={`${styles.mediaPlaceholder} ${className ?? ""}`}>
-        <ZudoIcon name="imageSquare24" size={28} />
+        <NanttyIcon name="imageSquare24" size={28} />
         <span>Choose media</span>
       </div>
     );
@@ -50,7 +50,7 @@ export function PreviewMedia({ media, altText, className }: { readonly media: Cr
       {imageUrl ? <img className={styles.media} src={imageUrl} alt={altText} /> : <div className={styles.mediaPlaceholder} />}
       {media.kind === "video" ? (
         <span className={styles.playBadge}>
-          <ZudoIcon name="play24" size={16} />
+          <NanttyIcon name="play24" size={16} />
           {formatDurationAsMinutesAndSeconds(media.durationSeconds)}
         </span>
       ) : null}
