@@ -35,7 +35,7 @@ export const featureShowcases: readonly FeatureShowcase[] = [
       "Lookalikes that find people similar to your best buyers",
     ],
     screenshot: "/screenshots/wizardAudience.webp",
-    screenshotAlt: "Campaign creation audience step with locations, age range, interests and a live audience size estimate",
+    screenshotAlt: "Current Ads Manager audiences page showing saved customer, follower and engagement audiences",
   },
   {
     id: "billing",

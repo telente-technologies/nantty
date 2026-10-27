@@ -9,7 +9,14 @@ import { buildSessionViewFromCookies } from "@/server/adsSessionView.service";
 
 import styles from "./policyPage.module.css";
 
-export const metadata: Metadata = { title: "Advertising policies" };
+export const metadata: Metadata = {
+  title: "Advertising policies",
+  description: "Learn which ads can run on Nantty, how reviews and appeals work, and the rules for restricted categories.",
+  alternates: { canonical: "/policy" },
+  robots: { index: true, follow: true },
+  openGraph: { type: "website", siteName: "Nantty Ads", locale: "en_NG", title: "Advertising policies | Nantty Ads", description: "Learn which ads can run on Nantty, how reviews and appeals work, and the rules for restricted categories.", url: "/policy", images: [{ url: "/screenshots/overview.webp", width: 2880, height: 1800, alt: "Nantty Ads Manager" }] },
+  twitter: { card: "summary_large_image", title: "Advertising policies | Nantty Ads", description: "Learn which ads can run on Nantty, how reviews and appeals work, and the rules for restricted categories.", images: ["/screenshots/overview.webp"] },
+};
 
 function PolicyList({ sections }: { readonly sections: readonly PolicySection[] }) {
   return (

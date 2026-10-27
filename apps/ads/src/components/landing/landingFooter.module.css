@@ -3,7 +3,7 @@
   overflow: hidden;
   padding-top: clamp(var(--space-9), 8vw, 96px);
   background: var(--surface-rail);
-  color: var(--blue-50);
+  color: var(--blue-100);
 }
 
 .footerTop {
@@ -14,20 +14,26 @@
 .footerBrand {
   display: grid;
   gap: var(--space-4);
+  align-content: start;
   justify-items: start;
   max-width: 380px;
 }
 
+.footerBrand p {
+  color: var(--blue-100);
+}
+
 .footerEmail {
-  color: var(--yellow-500);
+  color: var(--blue-50);
   font-weight: 600;
   overflow-wrap: anywhere;
+  text-underline-offset: 4px;
 }
 
 .footerLinks {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 150px), 1fr));
-  gap: var(--space-6);
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-7) var(--space-6);
 }
 
 .footerLinks h2 {
@@ -35,18 +41,28 @@
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.06em;
-  color: var(--blue-200);
-  margin-bottom: var(--space-3);
+  color: var(--blue-50);
+  margin-bottom: 14px;
 }
 
 .footerLinks ul {
   display: grid;
-  gap: var(--space-2);
+  gap: 10px;
+  margin: 0;
+  padding: 0;
   list-style: none;
 }
 
 .footerLinks a {
-  color: var(--color-on-brand);
+  color: var(--blue-100);
+  text-decoration: none;
+}
+
+.footerLinks a:hover,
+.footerEmail:hover {
+  color: var(--yellow-500);
+  text-decoration: underline;
+  text-underline-offset: 4px;
 }
 
 .footerLinks button {
@@ -56,39 +72,34 @@
   padding: 0;
   border: 0;
   background: transparent;
-  color: var(--color-on-brand);
+  color: var(--blue-100);
   font: inherit;
   cursor: not-allowed;
 }
 
 .footerBottom {
-  margin-top: 48px;
-  padding-block: var(--space-5);
-  border-top: 1px solid color-mix(in srgb, var(--color-on-brand) 12%, transparent);
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 8px 24px;
+  margin-top: var(--space-9);
+  padding-block: var(--space-6) 0;
+  border-top: 1px solid color-mix(in srgb, var(--blue-50) 16%, transparent);
   font-size: var(--fs-14);
   color: var(--blue-200);
 }
 
 .giantWordmark {
-  margin: 0 0 -0.22em;
-  padding-inline: var(--gutter);
-  font-size: clamp(4rem, 17vw, 15rem);
+  width: min(92%, 1280px);
+  margin: clamp(24px, 4vw, 48px) auto -0.19em;
+  font-size: clamp(4.5rem, 25vw, 22rem);
   font-weight: 850;
-  letter-spacing: -0.07em;
+  letter-spacing: -0.085em;
   line-height: 1;
+  text-align: center;
   white-space: nowrap;
-  color: color-mix(in srgb, var(--color-on-brand) 6%, transparent);
+  color: color-mix(in srgb, var(--blue-500) 52%, var(--surface-rail));
   user-select: none;
-  display: flex;
-  align-items: baseline;
-  gap: 0.18em;
-}
-
-.giantWordmarkSvg {
-  height: 0.95em;
-  width: auto;
-  flex: none;
-  transform: translateY(0.18em);
 }
 
 .footer a:focus-visible {
@@ -102,8 +113,28 @@
   padding-inline: var(--gutter);
 }
 
-@media (min-width: 960px) {
+@media (min-width: 720px) {
   .footerTop {
-    grid-template-columns: 1fr 1.4fr;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr);
+  }
+}
+
+@media (max-width: 719px) {
+  .footerTop {
+    gap: 36px;
+  }
+
+  .footerLinks {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 30px 20px;
+  }
+
+  .footerLinks > :last-child {
+    grid-column: 1 / -1;
+  }
+
+  .footerBottom {
+    flex-direction: column;
+    gap: 8px;
   }
 }

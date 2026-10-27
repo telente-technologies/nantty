@@ -16,6 +16,22 @@ export const metadata: Metadata = {
   title: { absolute: "Nantty Ads — advertise across the Nantty marketplace" },
   description: "Run ads on Nantty Marketplace, Feed, Reels and Live. Target buyers across Nigeria and beyond, pay in your local currency and see which ads turned into orders.",
   robots: { index: true, follow: true },
+  alternates: { canonical: "/" },
+  openGraph: {
+    type: "website",
+    locale: "en_NG",
+    siteName: "Nantty Ads",
+    title: "Nantty Ads — advertise across the Nantty marketplace",
+    description: "Run ads on Nantty Marketplace, Feed, Reels and Live. Target buyers across Nigeria and beyond, pay in your local currency and see which ads turned into orders.",
+    url: "/",
+    images: [{ url: "/screenshots/overview.webp", width: 2880, height: 1800, alt: "Nantty Ads Manager overview" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Nantty Ads — advertise across the Nantty marketplace",
+    description: "Run ads on Nantty Marketplace, Feed, Reels and Live. Target buyers across Nigeria and beyond, pay in your local currency and see which ads turned into orders.",
+    images: ["/screenshots/overview.webp"],
+  },
 };
 
 export default async function LandingPage() {

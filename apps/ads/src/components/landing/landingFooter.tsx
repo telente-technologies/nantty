@@ -67,9 +67,10 @@ export function LandingFooterWithContact() {
         </nav>
       </div>
       <div className={`${styles.container} ${styles.footerBottom}`}>
-        <p>© {new Date().getFullYear()} Nantty. Budgets and billing in your local currency.</p>
+        <p>© {new Date().getFullYear()} Nantty. Made in Nigeria.</p>
+        <p>Budgets and billing in your local currency.</p>
       </div>
-      <p className={styles.giantWordmark} aria-hidden>Nantty Ads</p>
+      <p className={styles.giantWordmark} aria-hidden="true">Nantty</p>
     </footer>
   );
 }

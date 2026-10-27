@@ -3,7 +3,7 @@ import { Inter } from "next/font/google";
 import { cookies } from "next/headers";
 import type { ReactNode } from "react";
 
-import { ConfirmDialogHost, ConnectionStatus, ThemeInitScript, parseThemePreference, readHtmlThemeAttribute, themeCookieName, themeViewport } from "@nantty/web-kit";
+import { ConfirmDialogHost, ConnectionStatus, StaticThemeScript, ThemeInitScript, ThemeProvider, parseThemePreference, readHtmlThemeAttribute, themeCookieName, themeViewport } from "@nantty/web-kit";
 
 import { ConsentBannerHost } from "@/components/privacy/consentBannerHost";
 import { AdsSessionProvider } from "@/components/session/adsSessionProvider";
@@ -24,7 +24,21 @@ export const metadata: Metadata = {
   title: { default: adsManagerProductName, template: `%s · ${adsManagerProductName}` },
   description: "Create, run and measure Nantty ads for your store, products, posts and clips.",
   applicationName: adsManagerProductName,
-  robots: process.env.NANTTY_CLOUDFLARE_PRELAUNCH === "1" ? { index: true, follow: true } : { index: false, follow: false },
+  alternates: { canonical: "/" },
+  openGraph: {
+    type: "website",
+    locale: "en_NG",
+    siteName: "Nantty Ads",
+    title: "Nantty Ads — advertise across the Nantty marketplace",
+    description: "Create, run and measure Nantty ads for your store, products, posts and clips.",
+    url: "/",
+  },
+  twitter: {
+    card: "summary",
+    title: "Nantty Ads — advertise across the Nantty marketplace",
+    description: "Create, run and measure Nantty ads for your store, products, posts and clips.",
+  },
+  robots: { index: false, follow: false },
   manifest: "/manifest.webmanifest",
   icons: { icon: [{ url: "/brand/nantty-icon.png", type: "image/png" }], apple: "/brand/nantty-icon.png" },
   formatDetection: { telephone: false },
@@ -39,8 +53,9 @@ export const viewport: Viewport = {
 export default async function RootLayout({ children }: Readonly<{ children: ReactNode }>) {
   if (process.env.NANTTY_CLOUDFLARE_PRELAUNCH === "1") {
     return (
-      <html lang="en-NG" className={interFont.variable} data-theme="light">
-        <body>{children}</body>
+      <html lang="en-NG" className={interFont.variable} suppressHydrationWarning>
+        <head><StaticThemeScript /></head>
+        <body><ThemeProvider initialPreference="system">{children}</ThemeProvider></body>
       </html>
     );
   }

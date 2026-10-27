@@ -1,9 +1,12 @@
 import { cookies } from "next/headers";
 import { notFound, redirect } from "next/navigation";
+import type { Metadata } from "next";
 import type { ReactNode } from "react";
 
 import { AccountShell } from "@/components/shell/accountShell";
 import { buildSessionViewFromCookies } from "@/server/adsSessionView.service";
+
+export const metadata: Metadata = { robots: { index: false, follow: false } };
 
 export default async function AccountLayout({ children, params }: { readonly children: ReactNode; readonly params: Promise<{ accountId: string }> }) {
   const { accountId } = await params;
