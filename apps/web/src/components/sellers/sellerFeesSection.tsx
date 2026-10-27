@@ -23,7 +23,7 @@ export function SellerFeesSection() {
               Clear fees. No sales commission.
             </h2>
             <p className={styles.description}>
-              Opening a store costs a one-time $1. Nantty takes no commission on completed sales. Flutterwave's applicable payment-processing and withdrawal charges are shown before you confirm.
+              Opening a store costs a one-time $1. Nantty takes no commission on completed sales. Flutterwave&apos;s applicable payment-processing and withdrawal charges are shown before you confirm.
             </p>
             <p className={styles.notice} role="note">
               <FigmaIconTintedWithCurrentColor name="warning20" size={20} />
