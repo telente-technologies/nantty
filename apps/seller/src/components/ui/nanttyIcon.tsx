@@ -10,7 +10,7 @@ import {
 } from "@phosphor-icons/react/dist/ssr";
 import type { Icon, IconWeight } from "@phosphor-icons/react";
 
-import styles from "./zudoIcon.module.css";
+import styles from "./nanttyIcon.module.css";
 
 const iconMap = {
   arrowDown24: [ArrowDownIcon], arrowRight24: [ArrowRightIcon], arrowUp24: [ArrowUpIcon], caretUp24: [CaretUpIcon], caretUpDown24: [CaretUpDownIcon],
@@ -29,16 +29,16 @@ const iconMap = {
   receipt24: [ReceiptIcon], shareFat24: [ShareFatIcon], shieldCheck24: [ShieldCheckIcon], wifiSlash20: [WifiSlashIcon],
 } as const satisfies Record<string, readonly [Icon] | readonly [Icon, IconWeight]>;
 
-export type ZudoIconName = keyof typeof iconMap;
+export type NanttyIconName = keyof typeof iconMap;
 
-interface ZudoIconProps {
-  readonly name: ZudoIconName;
+interface NanttyIconProps {
+  readonly name: NanttyIconName;
   readonly size?: number;
   readonly className?: string;
   readonly label?: string;
 }
 
-export function ZudoIcon({ name, size = 20, className, label }: ZudoIconProps) {
+export function NanttyIcon({ name, size = 20, className, label }: NanttyIconProps) {
   const [PhosphorIcon, weight = "regular"] = iconMap[name] as readonly [Icon, IconWeight?];
   return (
     <PhosphorIcon
@@ -53,10 +53,10 @@ export function ZudoIcon({ name, size = 20, className, label }: ZudoIconProps) {
   );
 }
 
-export function IconLabel({ name, size = 14, children, className }: { readonly name: ZudoIconName; readonly size?: number; readonly children: ReactNode; readonly className?: string }) {
+export function IconLabel({ name, size = 14, children, className }: { readonly name: NanttyIconName; readonly size?: number; readonly children: ReactNode; readonly className?: string }) {
   return (
     <span className={className ? `${styles.iconLabel} ${className}` : styles.iconLabel}>
-      <ZudoIcon name={name} size={size} />
+      <NanttyIcon name={name} size={size} />
       {children}
     </span>
   );

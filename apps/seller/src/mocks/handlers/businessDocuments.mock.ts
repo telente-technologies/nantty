@@ -14,7 +14,7 @@ interface MockUploadIntent {
   isUploaded: boolean;
 }
 
-const holder = globalThis as typeof globalThis & { __zudomartSellerBusinessDocuments?: Map<string, BusinessDocumentRecord[]>; __zudomartSellerDocumentIntents?: Map<string, MockUploadIntent> };
+const holder = globalThis as typeof globalThis & { __nanttySellerBusinessDocuments?: Map<string, BusinessDocumentRecord[]>; __nanttySellerDocumentIntents?: Map<string, MockUploadIntent> };
 
 function blank(kind: BusinessDocumentKind): BusinessDocumentRecord {
   return { kind, label: labels[kind], status: "not_uploaded", fileUrl: null, rejectionReason: null, submittedAt: null };
@@ -28,13 +28,13 @@ function seed(storeId: string): BusinessDocumentRecord[] {
 }
 
 function readDocuments(storeId: string): BusinessDocumentRecord[] {
-  const map = (holder.__zudomartSellerBusinessDocuments ??= new Map());
+  const map = (holder.__nanttySellerBusinessDocuments ??= new Map());
   if (!map.has(storeId)) map.set(storeId, seed(storeId));
   return map.get(storeId) as BusinessDocumentRecord[];
 }
 
 function readIntents(): Map<string, MockUploadIntent> {
-  return (holder.__zudomartSellerDocumentIntents ??= new Map());
+  return (holder.__nanttySellerDocumentIntents ??= new Map());
 }
 
 function present(storeId: string): BusinessDocumentsResponse {

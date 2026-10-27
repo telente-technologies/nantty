@@ -15,7 +15,7 @@ interface PayoutOnboardingRecord {
 
 const CREATION_DELAY_MS = 6_000;
 const REVIEW_DELAY_MS = 12_000;
-const holder = globalThis as typeof globalThis & { __zudomartSellerPayoutOnboarding?: Map<string, PayoutOnboardingRecord> };
+const holder = globalThis as typeof globalThis & { __nanttySellerPayoutOnboarding?: Map<string, PayoutOnboardingRecord> };
 
 const blank = (): PayoutOnboardingState => ({
   role: "seller", status: "not_started", currentStep: "identity", completedSteps: [], requiresBusinessStep: false, legalName: null, idType: null, idLast4: null,
@@ -24,7 +24,7 @@ const blank = (): PayoutOnboardingState => ({
 });
 
 function read(storeId: string): PayoutOnboardingRecord {
-  const map = (holder.__zudomartSellerPayoutOnboarding ??= new Map());
+  const map = (holder.__nanttySellerPayoutOnboarding ??= new Map());
   if (!map.has(storeId)) map.set(storeId, { state: blank(), idNumber: "", legalName: "", identitySavedAt: null, creationFailed: false, submittedAt: null, linkFailedOnce: false });
   return map.get(storeId) as PayoutOnboardingRecord;
 }

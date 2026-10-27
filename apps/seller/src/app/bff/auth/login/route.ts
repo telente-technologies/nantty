@@ -22,7 +22,7 @@ export async function POST(request: NextRequest) {
     return respondWithBffError(400, "VALIDATION_FAILED", "Enter your email or username and your password.");
   }
 
-  const loginResult = await callSellerBackend({ method: "POST", path: "/auth/login", body: encodeJsonRequestBody({ identifier, password }), contentType: "application/json", forwardedHeaders: { "User-Agent": request.headers.get("user-agent")?.slice(0, 200) ?? "zudomart-dashboard" } });
+  const loginResult = await callSellerBackend({ method: "POST", path: "/auth/login", body: encodeJsonRequestBody({ identifier, password }), contentType: "application/json", forwardedHeaders: { "User-Agent": request.headers.get("user-agent")?.slice(0, 200) ?? "nantty-dashboard" } });
   if (loginResult.status !== 200) {
     const errorBody = readJsonFromBackendResult<ApiErrorBody>(loginResult);
     return respondWithBffError(loginResult.status === 429 ? 429 : 401, errorBody?.code ?? "INVALID_CREDENTIALS", loginResult.status === 429 ? "Too many attempts. Wait a minute and try again." : errorBody?.message ?? "That email, username or password is not right.");

@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Callout, LoadingBlock, StatTile } from "@/components/ui/feedback";
 import { DateRangeControl, FilterBar, type DateRangeValue } from "@/components/ui/filterControls";
 import { PageHeader, PageStack, Panel, ResponsiveGrid } from "@/components/ui/panel";
-import { ZudoIcon } from "@/components/ui/zudoIcon";
+import { NanttyIcon } from "@/components/ui/nanttyIcon";
 import { useMoneyFormatter } from "@/hooks/useMoneyFormatter.hook";
 import { usePlanFeatures } from "@/hooks/usePlanFeatures.hook";
 import { useSellerQuery } from "@/hooks/useSellerQuery.hook";
@@ -30,13 +30,13 @@ function AdsManagerLinks({ adsManagerUrl }: { readonly adsManagerUrl: string }) 
   return (
     <>
       <a href={adsManagerUrl} target="_blank" rel="noopener noreferrer" className={`${buttonStyles.button} ${buttonStyles.secondary} ${buttonStyles.medium}`}>
-        <ZudoIcon name="arrowUpRight24" size={18} /> Open Ads Manager
+        <NanttyIcon name="arrowUpRight24" size={18} /> Open Ads Manager
       </a>
       <a href={buildAdsManagerAccountLink(adsManagerUrl, "campaigns/new?objective=store_promotion")} target="_blank" rel="noopener noreferrer" className={`${buttonStyles.button} ${buttonStyles.secondary} ${buttonStyles.medium}`}>
-        <ZudoIcon name="buildingStore20" size={18} /> Promote store
+        <NanttyIcon name="buildingStore20" size={18} /> Promote store
       </a>
       <a href={buildAdsManagerAccountLink(adsManagerUrl, "campaigns/new")} target="_blank" rel="noopener noreferrer" className={`${buttonStyles.button} ${buttonStyles.primary} ${buttonStyles.medium}`}>
-        <ZudoIcon name="plus16" size={18} /> Create campaign
+        <NanttyIcon name="plus16" size={18} /> Create campaign
       </a>
     </>
   );
@@ -94,10 +94,10 @@ function AdsFreePlanTeaser() {
       <PlanLockedNotice feature="ads_tools" description="See spend, impressions, clicks, attributed orders and return on ad spend for every campaign right here, next to your sales. You can already create and run ads in Ads Manager on any plan." />
       <Panel title="What you get on Pro">
         <ul className={styles.teaserList}>
-          <li><ZudoIcon name="check16" size={14} /> Spend and revenue trend for any date range</li>
-          <li><ZudoIcon name="check16" size={14} /> Orders and revenue attributed to each campaign</li>
-          <li><ZudoIcon name="check16" size={14} /> Return on ad spend so you know what to scale</li>
-          <li><ZudoIcon name="check16" size={14} /> Ads results inside your downloadable reports</li>
+          <li><NanttyIcon name="check16" size={14} /> Spend and revenue trend for any date range</li>
+          <li><NanttyIcon name="check16" size={14} /> Orders and revenue attributed to each campaign</li>
+          <li><NanttyIcon name="check16" size={14} /> Return on ad spend so you know what to scale</li>
+          <li><NanttyIcon name="check16" size={14} /> Ads results inside your downloadable reports</li>
         </ul>
       </Panel>
     </div>

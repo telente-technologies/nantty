@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Callout } from "@/components/ui/feedback";
-import { IconLabel } from "@/components/ui/zudoIcon";
+import { IconLabel } from "@/components/ui/nanttyIcon";
 
 import styles from "./messages.module.css";
 

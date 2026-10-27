@@ -13,7 +13,7 @@ import { Callout, LoadingBlock } from "@/components/ui/feedback";
 import { FormErrorSummary } from "@/components/ui/formFields";
 import { PageHeader, PageStack } from "@/components/ui/panel";
 import { useToast } from "@/components/ui/toastProvider";
-import { ZudoIcon } from "@/components/ui/zudoIcon";
+import { NanttyIcon } from "@/components/ui/nanttyIcon";
 import { useSellerQuery } from "@/hooks/useSellerQuery.hook";
 import { useStoreContext } from "@/hooks/useStoreSettings.hook";
 import { readErrorMessageForDisplay, sendSellerApiRequest, SellerApiRequestError } from "@/services/clientApi.service";
@@ -71,7 +71,7 @@ export function StorefrontView() {
           <>
             {profile ? (
               <a href={profile.publicUrl} target="_blank" rel="noopener noreferrer" className={styles.muted}>
-                View my store <ZudoIcon name="arrowUpRight24" size={14} />
+                View my store <NanttyIcon name="arrowUpRight24" size={14} />
               </a>
             ) : null}
             <Button variant="primary" isBusy={isSaving} disabled={!hasUnsavedChanges} onClick={() => void saveStorefrontChanges()}>

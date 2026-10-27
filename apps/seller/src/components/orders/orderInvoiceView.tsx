@@ -12,7 +12,7 @@ import type { OnlineOrder } from "@/types/order.type";
 import { formatDateForDisplay, formatDateTimeForDisplay } from "@/utils/dateFormatting.util";
 
 import styles from "./packingSlipView.module.css";
-import { IconLabel } from "@/components/ui/zudoIcon";
+import { IconLabel } from "@/components/ui/nanttyIcon";
 
 export function OrderInvoiceView({ orderId, documentKind }: { readonly orderId: string; readonly documentKind: "invoice" | "receipt" }) {
   const { settings } = useStoreContext();

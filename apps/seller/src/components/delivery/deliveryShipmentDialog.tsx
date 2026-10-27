@@ -15,7 +15,7 @@ import type { DeliveryShipment } from "@/types/delivery.type";
 import { formatDateTimeForDisplay } from "@/utils/dateFormatting.util";
 
 import styles from "./delivery.module.css";
-import { IconLabel } from "@/components/ui/zudoIcon";
+import { IconLabel } from "@/components/ui/nanttyIcon";
 
 export function DeliveryShipmentDialog({ shipment, onClose, onShipmentChanged }: { readonly shipment: DeliveryShipment; readonly onClose: () => void; readonly onShipmentChanged: () => void }) {
   const { showToast } = useToast();

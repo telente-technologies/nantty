@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 
-import { ZudoIcon } from "@/components/ui/zudoIcon";
+import { NanttyIcon } from "@/components/ui/nanttyIcon";
 import { buildDateRangeEndingToday } from "@/utils/dateFormatting.util";
 
 import styles from "./filterControls.module.css";
@@ -17,7 +17,7 @@ export function SearchInput({ label, placeholder, value, onValueChange, debounce
   }, [draftValue, value, onValueChange, debounceMilliseconds]);
   return (
     <label className={styles.search}>
-      <ZudoIcon name="magnifyingGlass20" size={16} />
+      <NanttyIcon name="magnifyingGlass20" size={16} />
       <span className="visuallyHidden">{label}</span>
       <input type="search" value={draftValue} placeholder={placeholder ?? label} onChange={(event) => setDraftValue(event.target.value)} className={styles.searchInput} maxLength={120} />
     </label>

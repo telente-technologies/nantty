@@ -3,7 +3,7 @@
 import { EncryptedAttachment } from "@/components/messages/encryptedAttachment";
 import { SharedItemCard } from "@/components/messages/sharedItemCard";
 import { Button } from "@/components/ui/button";
-import { IconLabel } from "@/components/ui/zudoIcon";
+import { IconLabel } from "@/components/ui/nanttyIcon";
 import type { DecryptedConversationMessage } from "@/types/conversation.type";
 import { formatDateTimeForDisplay } from "@/utils/dateFormatting.util";
 import { describeMessageKind } from "@/utils/storeChat.util";

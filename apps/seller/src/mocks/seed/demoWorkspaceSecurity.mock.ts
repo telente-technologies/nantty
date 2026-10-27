@@ -47,7 +47,7 @@ function buildDemoIntegrations(storeId: string): StoreIntegration[] {
 export function buildDemoWorkspaceState(storeId: string): MockWorkspaceState {
   const isMainStore = storeId === "store_ife_lifestyle";
   const webhooks: WebhookEndpoint[] = isMainStore
-    ? [{ id: "whk_erp", url: "https://erp.ifelifestyle.ng/hooks/zudomart", description: "Warehouse system", events: ["order.created", "order.updated", "inventory.low_stock"], active: true, signingSecretPreview: "whsec_••••a91c", createdAt: hoursAgo(2000), lastDeliveryAt: hoursAgo(1), recentFailureCount: 1 }]
+    ? [{ id: "whk_erp", url: "https://erp.ifelifestyle.ng/hooks/nantty", description: "Warehouse system", events: ["order.created", "order.updated", "inventory.low_stock"], active: true, signingSecretPreview: "whsec_••••a91c", createdAt: hoursAgo(2000), lastDeliveryAt: hoursAgo(1), recentFailureCount: 1 }]
     : [];
   return {
     security: { twoStepVerification: { enabled: isMainStore, method: isMainStore ? "authenticator_app" : null, enabledAt: isMainStore ? hoursAgo(3000) : null }, passwordChangedAt: hoursAgo(1400), sessions: buildDemoSessions(), loginHistory: buildDemoLoginHistory() },

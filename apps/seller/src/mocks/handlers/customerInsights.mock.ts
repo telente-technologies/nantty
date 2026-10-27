@@ -38,8 +38,8 @@ function mergeAppBuyersIntoCustomerRoster(): void {
   const rosterState = readCustomerRosterState();
   if (rosterState.hasMergedAppBuyers) return;
   const database = readMockDatabase();
-  const knownUsernames = new Set(database.customers.map((customer) => customer.zudomartUsername).filter(Boolean));
-  database.customers = database.customers.map((customer) => (customer.zudomartUsername ? customer : { ...customer, zudomartUsername: buildUsernameFromCustomerName(customer.name) }));
+  const knownUsernames = new Set(database.customers.map((customer) => customer.nanttyUsername).filter(Boolean));
+  database.customers = database.customers.map((customer) => (customer.nanttyUsername ? customer : { ...customer, nanttyUsername: buildUsernameFromCustomerName(customer.name) }));
   for (const order of [...database.onlineOrders].reverse()) {
     if (knownUsernames.has(order.buyer.username)) continue;
     knownUsernames.add(order.buyer.username);
@@ -48,7 +48,7 @@ function mergeAppBuyersIntoCustomerRoster(): void {
       name: order.buyer.name,
       phone: order.shippingAddress.phone,
       email: null,
-      zudomartUsername: order.buyer.username,
+      nanttyUsername: order.buyer.username,
       city: order.shippingAddress.city,
       tags: [],
       notes: [],
@@ -67,9 +67,9 @@ function mergeAppBuyersIntoCustomerRoster(): void {
   rosterState.hasMergedAppBuyers = true;
 }
 
-export function listCountableOrdersForCustomer(customer: Pick<Customer, "zudomartUsername">): OnlineOrder[] {
-  if (!customer.zudomartUsername) return [];
-  return readMockDatabase().onlineOrders.filter((order) => order.buyer.username === customer.zudomartUsername && !excludedOrderStatuses.has(order.status));
+export function listCountableOrdersForCustomer(customer: Pick<Customer, "nanttyUsername">): OnlineOrder[] {
+  if (!customer.nanttyUsername) return [];
+  return readMockDatabase().onlineOrders.filter((order) => order.buyer.username === customer.nanttyUsername && !excludedOrderStatuses.has(order.status));
 }
 
 export function addPurchaseStatsToCustomer(customer: Customer): Customer {
@@ -104,9 +104,9 @@ export function listCustomersWithPurchaseStats(): Customer[] {
 }
 
 export function listCustomerPurchasesFromAppOrders(customer: Customer): CustomerPurchase[] {
-  if (!customer.zudomartUsername) return [];
+  if (!customer.nanttyUsername) return [];
   return readMockDatabase()
-    .onlineOrders.filter((order) => order.buyer.username === customer.zudomartUsername)
+    .onlineOrders.filter((order) => order.buyer.username === customer.nanttyUsername)
     .map((order) => ({ kind: "online_order" as const, id: order.id, reference: order.orderNumber, status: order.status, total: order.total, itemsCount: order.lines.reduce((sum, line) => sum + line.quantity, 0), createdAt: order.createdAt }))
     .sort((first, second) => second.createdAt.localeCompare(first.createdAt));
 }

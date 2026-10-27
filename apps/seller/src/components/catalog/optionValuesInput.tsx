@@ -4,7 +4,7 @@ import { useId, useRef, useState, type ClipboardEvent, type DragEvent, type Keyb
 
 import { addOptionValues, moveOptionValue, productOptionLimits } from "@/components/catalog/productOptions.util";
 import { Button } from "@/components/ui/button";
-import { ZudoIcon } from "@/components/ui/zudoIcon";
+import { NanttyIcon } from "@/components/ui/nanttyIcon";
 
 import styles from "./productOptions.module.css";
 
@@ -133,11 +133,11 @@ export function OptionValuesInput({ optionName, values, pendingText, errorMessag
                 onDragEnd={() => setDraggedIndex(null)}
                 onKeyDown={(event) => handleHandleKeyDown(event, index)}
               >
-                <ZudoIcon name="dotsSixVertical16" size={14} />
+                <NanttyIcon name="dotsSixVertical16" size={14} />
               </button>
               <span className={styles.chipText}>{value}</span>
               <button type="button" className={styles.chipRemove} aria-label={`Remove ${value}`} title={`Remove ${value}`} onClick={() => onRemoveValue(value)}>
-                <ZudoIcon name="cancel20" size={14} />
+                <NanttyIcon name="cancel20" size={14} />
               </button>
             </li>
           ))}

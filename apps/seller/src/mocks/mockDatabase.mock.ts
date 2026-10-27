@@ -67,13 +67,13 @@ function seedMockPlatformState(): MockPlatformState {
 }
 
 const globalMockStateHolder = globalThis as typeof globalThis & {
-  __zudomartDashboardMockPlatform?: MockPlatformState;
-  __zudomartDashboardMockViews?: Map<string | null, MockDatabase>;
+  __nanttyDashboardMockPlatform?: MockPlatformState;
+  __nanttyDashboardMockViews?: Map<string | null, MockDatabase>;
 };
 
 function readMockPlatformState(): MockPlatformState {
-  globalMockStateHolder.__zudomartDashboardMockPlatform ??= seedMockPlatformState();
-  return globalMockStateHolder.__zudomartDashboardMockPlatform;
+  globalMockStateHolder.__nanttyDashboardMockPlatform ??= seedMockPlatformState();
+  return globalMockStateHolder.__nanttyDashboardMockPlatform;
 }
 
 export function readMockStoreDataset(storeId: string): MockStoreDataset {
@@ -112,8 +112,8 @@ function buildMockDatabaseViewForStore(storeId: string | null): MockDatabase {
 
 export function readMockDatabase(): MockDatabase {
   const storeId = readStoreIdOfCurrentMockScope();
-  globalMockStateHolder.__zudomartDashboardMockViews ??= new Map();
-  const views = globalMockStateHolder.__zudomartDashboardMockViews;
+  globalMockStateHolder.__nanttyDashboardMockViews ??= new Map();
+  const views = globalMockStateHolder.__nanttyDashboardMockViews;
   const existingView = views.get(storeId);
   if (existingView) return existingView;
   const view = buildMockDatabaseViewForStore(storeId);
@@ -123,7 +123,7 @@ export function readMockDatabase(): MockDatabase {
 
 export function readGlobalMockSlice<Slice>(sliceKey: string, seedSlice: () => Slice): Slice {
   const holder = globalThis as unknown as Record<string, Slice | undefined>;
-  const globalKey = `__zudomartDashboardMockSlice_${sliceKey}`;
+  const globalKey = `__nanttyDashboardMockSlice_${sliceKey}`;
   holder[globalKey] ??= seedSlice();
   return holder[globalKey] as Slice;
 }

@@ -15,7 +15,7 @@ import type { Review } from "@/types/review.type";
 import { formatDateForDisplay, formatRelativeTimeFromNow } from "@/utils/dateFormatting.util";
 
 import styles from "./reviews.module.css";
-import { ZudoIcon } from "@/components/ui/zudoIcon";
+import { NanttyIcon } from "@/components/ui/nanttyIcon";
 
 export function StarRating({ rating }: { readonly rating: number }) {
   const rounded = Math.round(rating);
@@ -23,7 +23,7 @@ export function StarRating({ rating }: { readonly rating: number }) {
     <span style={{ display: "inline-flex", gap: 2 }}>
       {[1, 2, 3, 4, 5].map((position) => (
         <span key={position} style={{ opacity: position <= rounded ? 1 : 0.25 }}>
-          <ZudoIcon name="star16" size={14} />
+          <NanttyIcon name="star16" size={14} />
         </span>
       ))}
     </span>

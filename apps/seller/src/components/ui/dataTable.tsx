@@ -3,7 +3,7 @@ import type { ReactNode } from "react";
 import { Button } from "@/components/ui/button";
 
 import styles from "./dataTable.module.css";
-import { ZudoIcon } from "@/components/ui/zudoIcon";
+import { NanttyIcon } from "@/components/ui/nanttyIcon";
 
 export interface DataTableColumn<Row> {
   readonly key: string;
@@ -66,7 +66,7 @@ export function DataTable<Row>({ caption, columns, rows, readRowKey, isLoading, 
                     <button type="button" className={styles.sortButton} onClick={() => onSortChange(readNextSortState(sortState, column.sortKey as string))}>
                       {column.header}
                       <span aria-hidden="true" className={styles.sortMark}>
-                        <ZudoIcon name={sortState?.key === column.sortKey ? (sortState.direction === "ascending" ? "caretUp24" : "caretDown24") : "caretUpDown24"} size={14} />
+                        <NanttyIcon name={sortState?.key === column.sortKey ? (sortState.direction === "ascending" ? "caretUp24" : "caretDown24") : "caretUpDown24"} size={14} />
                       </span>
                     </button>
                   ) : (

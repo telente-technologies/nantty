@@ -7,7 +7,7 @@ import { ThemeAwareNanttyWordmark } from "@nantty/web-kit";
 
 import { FeaturePlanBadge } from "@/components/billing/planGate";
 import { useSellerSession } from "@/components/session/sellerSessionProvider";
-import { ZudoIcon } from "@/components/ui/zudoIcon";
+import { NanttyIcon } from "@/components/ui/nanttyIcon";
 import type { NavigationGroup } from "@/config/navigation.config";
 import { useInboxUnreadCount } from "@/hooks/useInboxUnreadCount.hook";
 
@@ -41,13 +41,13 @@ export function SidebarNavigation({ groups, isOpenOnSmallScreens, onNavigate }: 
                   <li key={item.href}>
                     {item.external ? (
                       <a href={item.href} className={styles.link} target="_blank" rel="noopener noreferrer">
-                        <ZudoIcon name={item.iconName} size={18} />
+                        <NanttyIcon name={item.iconName} size={18} />
                         <span className={styles.linkLabel}>{item.label}</span>
-                        <ZudoIcon name="arrowUpRight24" size={14} className={styles.externalMark} />
+                        <NanttyIcon name="arrowUpRight24" size={14} className={styles.externalMark} />
                       </a>
                     ) : (
                       <Link href={item.href} className={styles.link} aria-current={isActive ? "page" : undefined} onClick={onNavigate}>
-                        <ZudoIcon name={item.iconName} size={18} />
+                        <NanttyIcon name={item.iconName} size={18} />
                         <span className={styles.linkLabel}>{item.label}</span>
                         {item.feature ? <FeaturePlanBadge feature={item.feature} /> : null}
                         {item.href === "/messages" && unreadConversations > 0 ? (

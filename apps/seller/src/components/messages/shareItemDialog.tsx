@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { LoadingBlock } from "@/components/ui/feedback";
 import { SearchInput } from "@/components/ui/filterControls";
 import { ModalDialog } from "@/components/ui/modalDialog";
-import { IconLabel } from "@/components/ui/zudoIcon";
+import { IconLabel } from "@/components/ui/nanttyIcon";
 import { useSellerQuery } from "@/hooks/useSellerQuery.hook";
 import type { Product } from "@/types/catalog.type";
 import type { CursorPage } from "@/types/pagination.type";

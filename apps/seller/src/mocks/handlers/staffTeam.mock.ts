@@ -102,24 +102,24 @@ export function registerStaffTeamMockHandlers(): void {
     const principal = requireMockStorePrincipal(request);
     const body = readJsonObjectBody(request);
     const issues = validateObjectAgainstChecks(body, { role: fieldChecks.oneOf("Role", invitableRoles) });
-    const zudomartAccount = buildDemoUserAccounts().find((account) => account.id === body.userId);
-    if (!zudomartAccount) issues.push({ path: "userId", message: "Choose someone who already has a Nantty account." });
+    const nanttyAccount = buildDemoUserAccounts().find((account) => account.id === body.userId);
+    if (!nanttyAccount) issues.push({ path: "userId", message: "Choose someone who already has a Nantty account." });
     const locationIds = validateLocationIds(body.locationIds, issues);
     const customPermissions = readCustomPermissionsFromBody(principal.storeId, body.permissions, issues);
-    if (issues.length > 0 || !zudomartAccount) return respondWithValidationFailure(issues);
+    if (issues.length > 0 || !nanttyAccount) return respondWithValidationFailure(issues);
     const role = body.role as StaffRole;
     assertActorMayAssignRole(request, role);
     const database = readMockDatabase();
-    if (database.staff.some((staff) => staff.userId === zudomartAccount.id)) {
-      throw new MockHttpError(409, "STAFF_EXISTS", `@${zudomartAccount.username} is already on your team.`);
+    if (database.staff.some((staff) => staff.userId === nanttyAccount.id)) {
+      throw new MockHttpError(409, "STAFF_EXISTS", `@${nanttyAccount.username} is already on your team.`);
     }
     assertStaffSeatAvailable(principal.storeId);
     const record: MockStaffRecord = {
       id: createMockIdentifier("stf"),
-      userId: zudomartAccount.id,
-      name: zudomartAccount.name,
-      username: zudomartAccount.username,
-      avatarUrl: zudomartAccount.avatarUrl,
+      userId: nanttyAccount.id,
+      name: nanttyAccount.name,
+      username: nanttyAccount.username,
+      avatarUrl: nanttyAccount.avatarUrl,
       role,
       status: "invited",
       permissions: customPermissions ?? null,

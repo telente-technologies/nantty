@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 
 import { useSellerSession } from "@/components/session/sellerSessionProvider";
-import { ZudoIcon } from "@/components/ui/zudoIcon";
+import { NanttyIcon } from "@/components/ui/nanttyIcon";
 import type { NavigationGroup, NavigationItem } from "@/config/navigation.config";
 import type { SellerPermission } from "@/config/rolePermissions.config";
 
@@ -76,7 +76,7 @@ export function CommandPalette({ isOpen, onClose, groups }: { readonly isOpen: b
       }}
     >
       <div className={styles.searchRow}>
-        <ZudoIcon name="magnifyingGlass20" size={18} />
+        <NanttyIcon name="magnifyingGlass20" size={18} />
         <input
           autoFocus
           className={styles.searchInput}
@@ -117,7 +117,7 @@ export function CommandPalette({ isOpen, onClose, groups }: { readonly isOpen: b
             onMouseEnter={() => setHighlightedIndex(index)}
             onClick={() => runCommand(command)}
           >
-            <ZudoIcon name={command.iconName} size={16} />
+            <NanttyIcon name={command.iconName} size={16} />
             <span>{command.label}</span>
             {command.external ? <span className={styles.externalHint}>Opens Ads Manager</span> : null}
           </li>

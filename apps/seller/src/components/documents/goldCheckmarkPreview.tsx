@@ -1,5 +1,5 @@
 import { Callout } from "@/components/ui/feedback";
-import { ZudoIcon } from "@/components/ui/zudoIcon";
+import { NanttyIcon } from "@/components/ui/nanttyIcon";
 import type { BusinessDocumentsOverview } from "@/types/businessDocuments.type";
 
 const copyByState: Record<BusinessDocumentsOverview["goldCheckmark"], string> = {
@@ -13,7 +13,7 @@ export function GoldCheckmarkPreview({ storeName, goldCheckmark }: { readonly st
     <Callout tone={goldCheckmark === "granted" ? "success" : "info"} title="Preview of your Gold checkmark">
       <p style={{ display: "flex", alignItems: "center", gap: 6, fontWeight: 700, margin: "4px 0" }}>
         {storeName}
-        <span style={{ color: "var(--gold, #b8860b)", opacity: goldCheckmark === "granted" ? 1 : 0.55, display: "inline-flex" }}><ZudoIcon name="sealCheck20" size={18} /></span>
+        <span style={{ color: "var(--gold, #b8860b)", opacity: goldCheckmark === "granted" ? 1 : 0.55, display: "inline-flex" }}><NanttyIcon name="sealCheck20" size={18} /></span>
       </p>
       {copyByState[goldCheckmark]}
     </Callout>

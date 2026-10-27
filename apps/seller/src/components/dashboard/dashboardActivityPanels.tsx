@@ -7,14 +7,14 @@ import { ButtonLink } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/feedback";
 import { Panel } from "@/components/ui/panel";
 import { StatusBadge, type StatusTone } from "@/components/ui/statusBadge";
-import { ZudoIcon, type ZudoIconName } from "@/components/ui/zudoIcon";
+import { NanttyIcon, type NanttyIconName } from "@/components/ui/nanttyIcon";
 import { useMoneyFormatter } from "@/hooks/useMoneyFormatter.hook";
 import type { DashboardActivityKind, DashboardAlert, DashboardSummary } from "@/types/dashboard.type";
 import { formatDateTimeForDisplay, formatRelativeTimeFromNow } from "@/utils/dateFormatting.util";
 
 import styles from "./dashboard.module.css";
 
-const activityIconByKind: Record<DashboardActivityKind, ZudoIconName> = {
+const activityIconByKind: Record<DashboardActivityKind, NanttyIconName> = {
   order_placed: "shoppingCart24",
   order_shipped: "truck24",
   order_delivered: "check16",
@@ -63,7 +63,7 @@ export function DashboardActivityFeedPanel({ summary }: { readonly summary: Dash
           {summary.activity.map((entry) => (
             <li key={entry.id} className={styles.listRow}>
               <span className={styles.activityIcon} aria-hidden="true">
-                <ZudoIcon name={activityIconByKind[entry.kind]} size={14} />
+                <NanttyIcon name={activityIconByKind[entry.kind]} size={14} />
               </span>
               <span className={styles.rowMain}>
                 {entry.href ? (
@@ -105,7 +105,7 @@ export function DashboardAlertsPanel({ summary }: { readonly summary: DashboardS
                 <span className={styles.alertTitle}>{alert.title}</span>
                 <span className={styles.rowMeta}>{alert.description}</span>
               </span>
-              <ZudoIcon name="caretRight24" size={16} />
+              <NanttyIcon name="caretRight24" size={16} />
             </Link>
           </li>
         ))}

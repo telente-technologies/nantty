@@ -12,7 +12,7 @@ export interface Customer {
   readonly name: string;
   readonly phone: string | null;
   readonly email: string | null;
-  readonly zudomartUsername: string | null;
+  readonly nanttyUsername: string | null;
   readonly city: string | null;
   readonly tags: string[];
   readonly notes: CustomerNote[];

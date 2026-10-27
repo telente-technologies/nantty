@@ -13,7 +13,7 @@ import { useSellerSession } from "@/components/session/sellerSessionProvider";
 import { Button, IconButton } from "@/components/ui/button";
 import { Callout, EmptyState } from "@/components/ui/feedback";
 import { useToast } from "@/components/ui/toastProvider";
-import { IconLabel } from "@/components/ui/zudoIcon";
+import { IconLabel } from "@/components/ui/nanttyIcon";
 import { useStoreThread } from "@/hooks/useStoreThread.hook";
 import { foldStoreThread, isSeenByCustomer } from "@/utils/storeChat.util";
 

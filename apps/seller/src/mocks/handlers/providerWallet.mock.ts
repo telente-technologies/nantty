@@ -3,11 +3,11 @@ import { MockHttpError, requireMockStorePrincipal, respondWithJson } from "@/moc
 import { registerMockRoute } from "@/mocks/mockRouter.mock";
 
 type ConsentStatus = "not_started" | "pending" | "verified" | "failed";
-const consentHolder = globalThis as typeof globalThis & { __zudomartSellerBvnConsent?: Map<string, { status: ConsentStatus; startedAt: number }> };
+const consentHolder = globalThis as typeof globalThis & { __nanttySellerBvnConsent?: Map<string, { status: ConsentStatus; startedAt: number }> };
 const CONSENT_DELAY_MS = 6_000;
 
 function readConsent(storeId: string): { status: ConsentStatus; startedAt: number } {
-  const map = (consentHolder.__zudomartSellerBvnConsent ??= new Map());
+  const map = (consentHolder.__nanttySellerBvnConsent ??= new Map());
   const record = map.get(storeId) ?? { status: "not_started" as ConsentStatus, startedAt: 0 };
   if (record.status === "pending" && Date.now() - record.startedAt > CONSENT_DELAY_MS) record.status = "verified";
   map.set(storeId, record);

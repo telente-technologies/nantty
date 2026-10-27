@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
-import { ZudoIcon } from "@/components/ui/zudoIcon";
+import { NanttyIcon } from "@/components/ui/nanttyIcon";
 import { sendSellerApiRequest } from "@/services/clientApi.service";
 
 import styles from "./messages.module.css";
@@ -39,12 +39,12 @@ export function SharedItemCard({ reference }: { readonly reference: { readonly k
   }, [reference.kind, reference.id]);
 
   const icon = reference.kind === "order" ? "receipt24" : "package24";
-  if (card === "loading") return <span className={styles.sharedCard} aria-busy="true"><span className={styles.sharedCardImage}><ZudoIcon name={icon} /></span><span className={styles.sharedCardMeta}>Loading {kindLabels[reference.kind]?.toLowerCase() ?? "item"}…</span></span>;
-  if (card === null) return <span className={styles.sharedCard}><span className={styles.sharedCardImage}><ZudoIcon name={icon} /></span><span className={styles.sharedCardMeta}>Shared {kindLabels[reference.kind]?.toLowerCase() ?? "item"}</span></span>;
+  if (card === "loading") return <span className={styles.sharedCard} aria-busy="true"><span className={styles.sharedCardImage}><NanttyIcon name={icon} /></span><span className={styles.sharedCardMeta}>Loading {kindLabels[reference.kind]?.toLowerCase() ?? "item"}…</span></span>;
+  if (card === null) return <span className={styles.sharedCard}><span className={styles.sharedCardImage}><NanttyIcon name={icon} /></span><span className={styles.sharedCardMeta}>Shared {kindLabels[reference.kind]?.toLowerCase() ?? "item"}</span></span>;
   const body = (
     <>
       {/* eslint-disable-next-line @next/next/no-img-element */}
-      {card.imageUrl ? <img src={card.imageUrl} alt="" className={styles.sharedCardImage} loading="lazy" /> : <span className={styles.sharedCardImage}><ZudoIcon name={icon} /></span>}
+      {card.imageUrl ? <img src={card.imageUrl} alt="" className={styles.sharedCardImage} loading="lazy" /> : <span className={styles.sharedCardImage}><NanttyIcon name={icon} /></span>}
       <span>
         <span className={styles.sharedCardTitle}>{card.title}</span>
         <span className={styles.sharedCardMeta}>{card.meta}</span>

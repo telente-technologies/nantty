@@ -14,7 +14,7 @@ import type { SettlementDetail } from "@/types/finance.type";
 import { formatDateForDisplay, formatDateTimeForDisplay } from "@/utils/dateFormatting.util";
 
 import styles from "./wallet.module.css";
-import { IconLabel } from "@/components/ui/zudoIcon";
+import { IconLabel } from "@/components/ui/nanttyIcon";
 
 export function SettlementDetailView({ settlementId }: { readonly settlementId: string }) {
   const { formatMoney } = useMoneyFormatter();

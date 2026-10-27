@@ -17,7 +17,7 @@ import { useStoreContext } from "@/hooks/useStoreSettings.hook";
 import { readErrorMessageForDisplay, sendSellerApiRequest } from "@/services/clientApi.service";
 import type { Promotion } from "@/types/promotion.type";
 import type { PromotionInput } from "@/utils/promotionValidation.util";
-import { IconLabel } from "@/components/ui/zudoIcon";
+import { IconLabel } from "@/components/ui/nanttyIcon";
 
 export function PromotionEditorView({ promotionId }: { readonly promotionId: string | null }) {
   const router = useRouter();

@@ -66,7 +66,7 @@ export function DeveloperWebhookDialog({ webhook, onClose, onSaved }: { readonly
     <ModalDialog intent="webhook" isOpen onClose={onClose} width="large" title={webhook ? "Edit webhook" : "Add webhook"} description="We send a signed POST request to this address when the events you pick happen. Failed deliveries are retried for 24 hours." footer={<><Button onClick={onClose}>Cancel</Button><Button variant="primary" isBusy={isSaving} onClick={() => void saveWebhookEndpoint()}>{webhook ? "Save webhook" : "Add webhook"}</Button></>}>
       <div className={styles.formStack}>
         <FormErrorSummary messages={errorMessages} />
-        <TextField label="Endpoint URL" type="url" value={url} maxLength={240} placeholder="https://yourapp.ng/hooks/zudomart" onChange={(event) => setUrl(event.target.value)} />
+        <TextField label="Endpoint URL" type="url" value={url} maxLength={240} placeholder="https://yourapp.ng/hooks/nantty" onChange={(event) => setUrl(event.target.value)} />
         {webhook ? null : <TextField label="Description (optional)" value={description} maxLength={80} placeholder="Stock sync" onChange={(event) => setDescription(event.target.value)} />}
         <div className={styles.checkboxGrid} role="group" aria-label="Events">
           {webhookEvents.map((event) => (

@@ -17,7 +17,7 @@ import { ModalDialog } from "@/components/ui/modalDialog";
 import { KeyValueList, Panel } from "@/components/ui/panel";
 import { StatusBadge, type StatusTone } from "@/components/ui/statusBadge";
 import { useToast } from "@/components/ui/toastProvider";
-import { ZudoIcon } from "@/components/ui/zudoIcon";
+import { NanttyIcon } from "@/components/ui/nanttyIcon";
 import { useMoneyFormatter } from "@/hooks/useMoneyFormatter.hook";
 import { useSellerQuery } from "@/hooks/useSellerQuery.hook";
 import { readErrorMessageForDisplay, sendSellerApiRequest } from "@/services/clientApi.service";
@@ -100,7 +100,7 @@ export function BillingSettingsView() {
             <ul className={styles.categoryChecklist} aria-label="Included in your plan">
               {describePlanEntitlements(entitlements).map((description) => (
                 <li key={description} className={styles.rowTitle}>
-                  <ZudoIcon name="check16" size={14} /> {description}
+                  <NanttyIcon name="check16" size={14} /> {description}
                 </li>
               ))}
             </ul>

@@ -5,7 +5,7 @@ import { useSellerSession } from "@/components/session/sellerSessionProvider";
 import { Callout, ErrorCallout, LoadingBlock } from "@/components/ui/feedback";
 import { KeyValueList, Panel } from "@/components/ui/panel";
 import { StatusBadge } from "@/components/ui/statusBadge";
-import { ZudoIcon } from "@/components/ui/zudoIcon";
+import { NanttyIcon } from "@/components/ui/nanttyIcon";
 import { useSellerQuery } from "@/hooks/useSellerQuery.hook";
 import { formatDateForDisplay } from "@/utils/dateFormatting.util";
 
@@ -23,7 +23,7 @@ export function VerificationSettingsView() {
               label: "Badge on your store",
               value: verification?.badgeVisible ? (
                 <StatusBadge tone="highlight">
-                  <ZudoIcon name="sealCheck20" size={14} /> Gold {verification.tier === "PREMIUM" ? "Premium" : "Pro"}
+                  <NanttyIcon name="sealCheck20" size={14} /> Gold {verification.tier === "PREMIUM" ? "Premium" : "Pro"}
                 </StatusBadge>
               ) : (
                 "Hidden"

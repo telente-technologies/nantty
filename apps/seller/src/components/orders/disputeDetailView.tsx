@@ -18,9 +18,9 @@ import type { OrderDispute } from "@/types/order.type";
 import { formatDateTimeForDisplay, formatRelativeTimeFromNow } from "@/utils/dateFormatting.util";
 
 import styles from "./orders.module.css";
-import { IconLabel } from "@/components/ui/zudoIcon";
+import { IconLabel } from "@/components/ui/nanttyIcon";
 
-const senderLabels = { buyer: "Buyer", seller: "You", zudomart: "Nantty" } as const;
+const senderLabels = { buyer: "Buyer", seller: "You", nantty: "Nantty" } as const;
 
 export function DisputeDetailView({ disputeId }: { readonly disputeId: string }) {
   const { can } = useSellerSession();
@@ -79,7 +79,7 @@ export function DisputeDetailView({ disputeId }: { readonly disputeId: string })
         <Panel title="Conversation">
           <div className={styles.thread}>
             {dispute.messages.map((message) => (
-              <div key={message.id} className={`${styles.message} ${message.from === "seller" ? styles.message_seller : message.from === "zudomart" ? styles.message_zudomart : ""}`}>
+              <div key={message.id} className={`${styles.message} ${message.from === "seller" ? styles.message_seller : message.from === "nantty" ? styles.message_nantty : ""}`}>
                 <p className={styles.messageMeta}>{senderLabels[message.from]} · {formatDateTimeForDisplay(message.createdAt)}</p>
                 <p>{message.body}</p>
               </div>

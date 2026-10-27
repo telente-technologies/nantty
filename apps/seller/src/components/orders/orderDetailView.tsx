@@ -26,7 +26,7 @@ import type { OnlineOrder } from "@/types/order.type";
 import { formatDateTimeForDisplay } from "@/utils/dateFormatting.util";
 
 import styles from "./orders.module.css";
-import { IconLabel } from "@/components/ui/zudoIcon";
+import { IconLabel } from "@/components/ui/nanttyIcon";
 
 const refundableStatuses = new Set(["processing", "ready", "shipped", "delivered", "completed", "returned"]);
 

@@ -72,4 +72,4 @@ export async function dispatchMockApiRequest(call: MockApiCall): Promise<MockRes
   }
 }
 
-(globalThis as Record<string, unknown>).__zudomartMockBackend = "zudomart-mock-backend-bundled";
+(globalThis as Record<string, unknown>).__nanttyMockBackend = "nantty-mock-backend-bundled";

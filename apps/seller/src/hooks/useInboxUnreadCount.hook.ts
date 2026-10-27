@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { storeChatEngine } from "@/services/chatCrypto/storeChatEngine";
 import { sendSellerApiRequest } from "@/services/clientApi.service";
 
-export const inboxChangedEventName = "zudomart:inbox-changed";
+export const inboxChangedEventName = "nantty:inbox-changed";
 
 export function announceInboxChanged(): void {
   if (typeof window !== "undefined") window.dispatchEvent(new Event(inboxChangedEventName));

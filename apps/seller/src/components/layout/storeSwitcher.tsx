@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import { useSellerSession } from "@/components/session/sellerSessionProvider";
 import { StatusBadge } from "@/components/ui/statusBadge";
 import { useToast } from "@/components/ui/toastProvider";
-import { ZudoIcon } from "@/components/ui/zudoIcon";
+import { NanttyIcon } from "@/components/ui/nanttyIcon";
 import { sellerPlanLabels } from "@/config/planFeatures.config";
 import { staffRoleLabels } from "@/constants/roles.constant";
 import { usePlanFeatures } from "@/hooks/usePlanFeatures.hook";
@@ -60,7 +60,7 @@ export function StoreSwitcher() {
 
   const goldBadge = (
     <StatusBadge tone={plan === "free" ? "neutral" : "highlight"}>
-      {access?.verification.badgeVisible ? <ZudoIcon name="sealCheck20" size={14} /> : null} {sellerPlanLabels[plan]}
+      {access?.verification.badgeVisible ? <NanttyIcon name="sealCheck20" size={14} /> : null} {sellerPlanLabels[plan]}
     </StatusBadge>
   );
 
@@ -80,7 +80,7 @@ export function StoreSwitcher() {
           <span className={styles.storeName}>{access?.storeName ?? "Your store"}</span>
           {currentBrandName && currentBrandName !== access?.storeName ? <span className={styles.brandName}>{currentBrandName}</span> : null}
         </span>
-        <ZudoIcon name="caretDown24" size={14} />
+        <NanttyIcon name="caretDown24" size={14} />
       </button>
       {goldBadge}
       {isMenuOpen ? (
@@ -96,7 +96,7 @@ export function StoreSwitcher() {
                   {store.subscription && (store.subscription.status === "active" || store.subscription.status === "trialing") ? ` · ${store.subscription.plan === "BUSINESS" ? "Business" : "Pro"}` : " · Free"}
                 </span>
               </span>
-              {store.isCurrent ? <ZudoIcon name="check16" size={14} /> : switchingStoreId === store.storeId ? <span className={styles.menuItemMeta}>Switching…</span> : null}
+              {store.isCurrent ? <NanttyIcon name="check16" size={14} /> : switchingStoreId === store.storeId ? <span className={styles.menuItemMeta}>Switching…</span> : null}
             </button>
           ))}
           {brands.length > 0 ? (

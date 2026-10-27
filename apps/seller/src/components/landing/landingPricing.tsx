@@ -3,7 +3,7 @@ import type { SubscriptionPlan } from "@/types/subscription.type";
 import { formatMoneyForDisplay } from "@/utils/money.util";
 
 import styles from "./landingPricing.module.css";
-import { ZudoIcon } from "@/components/ui/zudoIcon";
+import { NanttyIcon } from "@/components/ui/nanttyIcon";
 import { PrelaunchLoginAction } from "./prelaunchLoginAction";
 
 function findYearlyPlanForTier(plans: readonly SubscriptionPlan[], tier: SubscriptionPlan["tier"]): SubscriptionPlan | undefined {
@@ -52,7 +52,7 @@ export function LandingPricing({ plans, locale, prelaunch = false }: { readonly 
                 <li key={plan.id} className={`${styles.planCard} ${plan.tier === "BUSINESS" ? styles.premium : ""}`}>
                   <div className={styles.planHeader}>
                     <span className={styles.badge} aria-hidden="true">
-                      <ZudoIcon name="check16" size={14} />
+                      <NanttyIcon name="check16" size={14} />
                     </span>
                     <h3 className={styles.planName}>{planName}</h3>
                   </div>

@@ -3,7 +3,7 @@ import { sendRequestToDashboardServer } from "@/services/clientApi.service";
 async function deleteCachedDashboardPages(): Promise<void> {
   if (typeof caches === "undefined") return;
   const cacheNames = await caches.keys();
-  await Promise.all(cacheNames.filter((cacheName) => cacheName.startsWith("zudomart-dashboard")).map((cacheName) => caches.delete(cacheName)));
+  await Promise.all(cacheNames.filter((cacheName) => cacheName.startsWith("nantty-dashboard")).map((cacheName) => caches.delete(cacheName)));
 }
 
 export async function signOutOfDashboardAndClearCachedPages(): Promise<void> {

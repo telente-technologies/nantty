@@ -10,7 +10,7 @@ import type { PayoutDocumentLink, PayoutOnboardingState } from "@/types/payoutOn
 import styles from "./payoutOnboarding.module.css";
 import { PayoutStepFrame } from "./payoutStepFrame";
 
-export const PAYOUT_VERIFICATION_CHANNEL = "zudomart-payout-verification";
+export const PAYOUT_VERIFICATION_CHANNEL = "nantty-payout-verification";
 const wait = (milliseconds: number) => new Promise((resolve) => setTimeout(resolve, milliseconds));
 
 export function PayoutDocumentStep({ state, stepNumber, stepCount, onChanged }: { readonly state: PayoutOnboardingState; readonly stepNumber: number; readonly stepCount: number; readonly onChanged: () => Promise<void> | void }) {
@@ -42,7 +42,7 @@ export function PayoutDocumentStep({ state, stepNumber, stepCount, onChanged }: 
     setIsUnavailable(false);
     try {
       const link = await sendSellerApiRequest<PayoutDocumentLink>("/payments/payout-onboarding/me/document-link", { method: "POST" });
-      window.open(link.url, "zudomart-payout-verification", "popup,width=520,height=760");
+      window.open(link.url, "nantty-payout-verification", "popup,width=520,height=760");
       void onChanged();
     } catch (error) {
       if (error instanceof SellerApiRequestError && error.status === 503) setIsUnavailable(true);

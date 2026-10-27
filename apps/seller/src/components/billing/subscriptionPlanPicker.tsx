@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Callout, ErrorCallout, LoadingBlock } from "@/components/ui/feedback";
 import { SegmentedControl } from "@/components/ui/navigationTabs";
 import { StatusBadge } from "@/components/ui/statusBadge";
-import { ZudoIcon } from "@/components/ui/zudoIcon";
+import { NanttyIcon } from "@/components/ui/nanttyIcon";
 import { planHighlightsByPlan, sellerPlanLabels, type SellerPlan } from "@/config/planFeatures.config";
 import { useSellerQuery } from "@/hooks/useSellerQuery.hook";
 import { readErrorMessageForDisplay, sendSellerApiRequest } from "@/services/clientApi.service";
@@ -30,7 +30,7 @@ function PlanHighlightsList({ plan }: { readonly plan: SellerPlan }) {
     <ul className={styles.entitlements}>
       {planHighlightsByPlan[plan].map((highlight) => (
         <li key={highlight}>
-          <ZudoIcon name="check16" size={14} /> {highlight}
+          <NanttyIcon name="check16" size={14} /> {highlight}
         </li>
       ))}
     </ul>
@@ -91,7 +91,7 @@ export function SubscriptionPlanPicker({ currentPlanId, currentPlan, offer }: { 
             <article key={plan.id} className={`${styles.planCard} ${sellerPlan === "business" ? styles.premium : ""}`}>
               <header className={styles.planHeader}>
                 <span className={styles.goldMark}>
-                  <ZudoIcon name="star16" size={16} />
+                  <NanttyIcon name="star16" size={16} />
                 </span>
                 <h3 className={styles.planName}>{planName}</h3>
                 {isCurrentPlan ? <StatusBadge tone="success">Current plan</StatusBadge> : null}
@@ -121,7 +121,7 @@ export function SubscriptionPlanPicker({ currentPlanId, currentPlan, offer }: { 
         {offer && currentPlan === "free" && plansQuery.data ? (
           <article className={styles.planCard}>
             <header className={styles.planHeader}>
-              <span className={styles.goldMark}><ZudoIcon name="sealCheck20" size={16} /></span>
+              <span className={styles.goldMark}><NanttyIcon name="sealCheck20" size={16} /></span>
               <h3 className={styles.planName}>Gold only</h3>
               {offer.goldOnlyPlan.isActive ? <StatusBadge tone="success">Current plan</StatusBadge> : null}
             </header>
@@ -131,9 +131,9 @@ export function SubscriptionPlanPicker({ currentPlanId, currentPlan, offer }: { 
               return <p className={styles.price}>{formatMoneyForDisplay(gold.price)}<span className={styles.interval}>/{billingInterval}</span></p>;
             })()}
             <ul className={styles.entitlements}>
-              <li><ZudoIcon name="check16" size={14} /> Gold checkmark and brand page features</li>
-              <li><ZudoIcon name="check16" size={14} /> No seller dashboard tools</li>
-              <li><ZudoIcon name="check16" size={14} /> Gold shows only after your business is verified</li>
+              <li><NanttyIcon name="check16" size={14} /> Gold checkmark and brand page features</li>
+              <li><NanttyIcon name="check16" size={14} /> No seller dashboard tools</li>
+              <li><NanttyIcon name="check16" size={14} /> Gold shows only after your business is verified</li>
             </ul>
             <Button size="large" fullWidth disabled={offer.goldOnlyPlan.isActive || pendingPlanId !== null} isBusy={pendingPlanId === "gold_only"} onClick={() => void startHostedCheckoutForPlan(billingInterval === "year" ? "gold_only_yearly" : "gold_only_monthly")}>{offer.goldOnlyPlan.isActive ? "Your plan" : "Choose Gold only"}</Button>
           </article>

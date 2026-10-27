@@ -23,11 +23,11 @@ interface BillingHolder {
   pending: Map<string, { storeId: string; planId: string; kind: "trial" | "gold_only" }>;
 }
 
-const holder = globalThis as typeof globalThis & { __zudomartSellerBilling?: BillingHolder };
+const holder = globalThis as typeof globalThis & { __nanttySellerBilling?: BillingHolder };
 
 function readHolder(): BillingHolder {
-  holder.__zudomartSellerBilling ??= { states: new Map(), pending: new Map() };
-  return holder.__zudomartSellerBilling;
+  holder.__nanttySellerBilling ??= { states: new Map(), pending: new Map() };
+  return holder.__nanttySellerBilling;
 }
 
 function seedState(storeId: string): TrialState {

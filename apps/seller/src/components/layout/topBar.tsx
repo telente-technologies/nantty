@@ -10,7 +10,7 @@ import { CompactWorkspaceSwitcher } from "@/components/layout/compactWorkspaceSw
 import { StoreSwitcher } from "@/components/layout/storeSwitcher";
 import { useSellerSession } from "@/components/session/sellerSessionProvider";
 import { IconButton } from "@/components/ui/button";
-import { ZudoIcon } from "@/components/ui/zudoIcon";
+import { NanttyIcon } from "@/components/ui/nanttyIcon";
 import { staffRoleLabels } from "@/constants/roles.constant";
 import { useStoreContext } from "@/hooks/useStoreSettings.hook";
 import { signOutOfDashboardAndClearCachedPages } from "@/services/signOut.service";
@@ -42,7 +42,7 @@ export function TopBar({ onOpenNavigation, onOpenCommandPalette }: { readonly on
       </div>
       {locations.length > 0 ? (
         <label className={`${styles.locationSwitcher} ${styles.wideOnlyFlex}`}>
-          <ZudoIcon name="mapPin24" size={16} />
+          <NanttyIcon name="mapPin24" size={16} />
           <span className="visuallyHidden">Current location</span>
           <select value={selectedLocationId ?? ""} onChange={(event) => void selectLocation(event.target.value)} className={styles.locationSelect}>
             {locations.filter((location) => location.active).map((location) => (
@@ -54,12 +54,12 @@ export function TopBar({ onOpenNavigation, onOpenCommandPalette }: { readonly on
         </label>
       ) : null}
       <button type="button" className={styles.commandButton} onClick={onOpenCommandPalette} aria-label="Search or jump to a page" aria-keyshortcuts="Control+K">
-        <ZudoIcon name="magnifyingGlass20" size={16} />
+        <NanttyIcon name="magnifyingGlass20" size={16} />
         <span className={styles.commandLabel}>Search or jump to…</span>
         <kbd className={styles.shortcut}>Ctrl K</kbd>
       </button>
       <a href={`${process.env.NEXT_PUBLIC_WEBAPP_URL ?? "https://web.nantty.com"}/help/selling`} className={styles.commandButton} target="_blank" rel="noopener noreferrer" aria-label="Help, opens in a new tab">
-        <ZudoIcon name="question24" size={16} />
+        <NanttyIcon name="question24" size={16} />
         <span className={styles.commandLabel}>Help</span>
       </a>
       <ThemeSwitcher iconOnly label="Colour theme" className={styles.themeSwitcher} />

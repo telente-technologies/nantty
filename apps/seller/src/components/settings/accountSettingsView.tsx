@@ -10,7 +10,7 @@ import { permissionsByStaffRole, sellerPermissionLabels, sellerPermissions } fro
 import { staffRoleLabels } from "@/constants/roles.constant";
 
 import styles from "./settings.module.css";
-import { IconLabel } from "@/components/ui/zudoIcon";
+import { IconLabel } from "@/components/ui/nanttyIcon";
 
 export function AccountSettingsView() {
   const { sessionView, can } = useSellerSession();

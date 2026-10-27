@@ -4,7 +4,7 @@ import type { ReactNode } from "react";
 
 import { useSellerSession } from "@/components/session/sellerSessionProvider";
 import { ButtonLink } from "@/components/ui/button";
-import { ZudoIcon } from "@/components/ui/zudoIcon";
+import { NanttyIcon } from "@/components/ui/nanttyIcon";
 import { paidPlanCheckmarkNote, planFeatureDescriptions, sellerPlanLabels, type PlanFeature, type SellerPlan } from "@/config/planFeatures.config";
 import { usePlanFeatures } from "@/hooks/usePlanFeatures.hook";
 
@@ -14,7 +14,7 @@ export function PlanBadge({ plan }: { readonly plan: SellerPlan }) {
   if (plan === "free") return null;
   return (
     <span className={`${styles.badge} ${plan === "business" ? styles.badgeBusiness : ""}`} title={`Included in ${sellerPlanLabels[plan]}`}>
-      <ZudoIcon name="star16" size={10} /> {sellerPlanLabels[plan]}
+      <NanttyIcon name="star16" size={10} /> {sellerPlanLabels[plan]}
     </span>
   );
 }
@@ -43,7 +43,7 @@ export function PlanLockedNotice({ feature, compact = false, description }: { re
   return (
     <div className={`${styles.locked} ${compact ? styles.lockedCompact : ""}`} role="note">
       <div className={styles.lockedHeader}>
-        <ZudoIcon name="shield24" size={18} />
+        <NanttyIcon name="shield24" size={18} />
         <span className={styles.lockedTitle}>{copy.title}</span>
         <PlanBadge plan={readRequiredPlan(feature)} />
       </div>

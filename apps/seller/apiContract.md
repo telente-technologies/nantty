@@ -1,6 +1,6 @@
 # Nantty Dashboard — API contract
 
-The Nantty Dashboard (`apps/seller`, hosted at `https://dashboard.<domain>`) is a Backend-for-Frontend: the browser only talks to the dashboard's own `/bff/*` routes, and the dashboard's server calls the API below with the seller's bearer token. The API must add the dashboard origin (`DASHBOARD_ORIGIN`, e.g. `https://dashboard.zudomart.com`) to its CORS allow-list (`CORS_ORIGINS`). Today every call is server-to-server from the dashboard's `/bff` routes, but the origin must be allowed for any browser call and the payment callback flow.
+The Nantty Dashboard (`apps/seller`, hosted at `https://dashboard.<domain>`) is a Backend-for-Frontend: the browser only talks to the dashboard's own `/bff/*` routes, and the dashboard's server calls the API below with the seller's bearer token. The API must add the dashboard origin (`DASHBOARD_ORIGIN`, e.g. `https://dashboard.nantty.com`) to its CORS allow-list (`CORS_ORIGINS`). Today every call is server-to-server from the dashboard's `/bff` routes, but the origin must be allowed for any browser call and the payment callback flow.
 
 ## Conventions
 
@@ -503,11 +503,11 @@ Permission: messages:manage. Body: none. Response 200: `Conversation` with `unre
 Errors: 404.
 
 ### Attachments and shared cards
-- Attachments are encrypted in the browser (`encryptAttachment`), uploaded with `POST /api/v1/media/uploads` `{ mimeType: "application/vnd.zudomart.encrypted", purpose: "chat", sizeBytes, sha256 }` (≤100 MB), then sent as `kind: "image"|"video"|"document"` with `mediaId`; the key/pointer travels only inside the ciphertext. Staff with `messages:manage` may use the chat upload paths without `media:upload`. A failed upload is abandoned with `DELETE /api/v1/media/uploads/:uploadId` and nothing is sent.
+- Attachments are encrypted in the browser (`encryptAttachment`), uploaded with `POST /api/v1/media/uploads` `{ mimeType: "application/vnd.nantty.encrypted", purpose: "chat", sizeBytes, sha256 }` (≤100 MB), then sent as `kind: "image"|"video"|"document"` with `mediaId`; the key/pointer travels only inside the ciphertext. Staff with `messages:manage` may use the chat upload paths without `media:upload`. A failed upload is abandoned with `DELETE /api/v1/media/uploads/:uploadId` and nothing is sent.
 - Product cards: `kind: "shared"` with `sharedContent {kind:"product", id}` inside the ciphertext; rendered with `GET /api/v1/chat/content?kind=product&id=` (messages:manage). Order cards: `kind: "shared"` with `sharedContent {kind:"order", id}` inside the ciphertext, rendered everywhere with `GET /api/v1/chat/content?kind=order&id=`. Social asks commerce (`GET /api/v1/internal/share-cards/order/:id?viewerId=`), which returns a minimal summary (order number, item count, status, total, first image) only to the buyer or that store's team with `orders:view`; anyone else gets `availability: "unavailable"`.
 
 ### Realtime (dashboard BFF only)
-`POST /bff/realtime` (CSRF-protected, messages:manage) exchanges the session for a short-lived realtime token (`POST /api/v1/auth/realtime-token`: audience `zudomart-realtime`, scope `realtime`, 90 s, bound to the session; refused by every HTTP service and the gateway) and returns `{ url, realtimeToken }` for the realtime socket (`SELLER_REALTIME_URL`, default `<SELLER_API_URL>/ws`). 404 REALTIME_UNAVAILABLE in mock mode; the dashboard then polls. One browser tab (Web Locks leader) holds the socket and the secure chat device and relays events to other tabs over BroadcastChannel. Inbox staff can subscribe to `conversation:<id>` (typing, read, message events) and receive `message.created` fan-out on `user:<id>`; typing frames show the store's name, never the staff member's.
+`POST /bff/realtime` (CSRF-protected, messages:manage) exchanges the session for a short-lived realtime token (`POST /api/v1/auth/realtime-token`: audience `nantty-realtime`, scope `realtime`, 90 s, bound to the session; refused by every HTTP service and the gateway) and returns `{ url, realtimeToken }` for the realtime socket (`SELLER_REALTIME_URL`, default `<SELLER_API_URL>/ws`). 404 REALTIME_UNAVAILABLE in mock mode; the dashboard then polls. One browser tab (Web Locks leader) holds the socket and the secure chat device and relays events to other tabs over BroadcastChannel. Inbox staff can subscribe to `conversation:<id>` (typing, read, message events) and receive `message.created` fan-out on `user:<id>`; typing frames show the store's name, never the staff member's.
 
 ## Customers (CRM)
 
@@ -619,7 +619,7 @@ PUT body `{ items: [{ productId, placement }] }` replaces the whole ordered list
 
 > **Contract-only (2026-10-21).** There is no `GET /seller/ads/summary` route in go-ads; the seller app serves this section from mocks. Keep `/seller/ads` out of the real API prefix list until the route is mounted.
 
-Campaigns are created and edited in Ads Manager (`NEXT_PUBLIC_ADS_MANAGER_URL`, `https://ads.zudomart.com`); creating ads is not gated. The dashboard only reads results. Types in `apps/seller/src/types/ads.type.ts`.
+Campaigns are created and edited in Ads Manager (`NEXT_PUBLIC_ADS_MANAGER_URL`, `https://ads.nantty.com`); creating ads is not gated. The dashboard only reads results. Types in `apps/seller/src/types/ads.type.ts`.
 
 ### GET /api/v1/seller/ads/summary
 Permission: ads:view. **Plan: pro** (`ads_tools`); 402 PLAN_FEATURE_REQUIRED on Free.
@@ -703,7 +703,7 @@ Permission: wallet:view
 Response 200: WalletBalances { escrow, pending (released, clearing — shown as "pending settlement"), available, nextEscrowReleaseAt }. Balances come only from the ledger.
 
 ### GET /api/v1/wallets/me (go-money, the signed-in user's Nantty balance)
-Permission: wallet:view (the BFF allows GET only). Type: `apps/seller/src/types/zudomartWallet.type.ts`.
+Permission: wallet:view (the BFF allows GET only). Type: `apps/seller/src/types/nanttyWallet.type.ts`.
 Response 200: `{ available, pending (escrow only), locked, inEscrow, payoutRequested, negativeBalance, nextAvailableAt, adCredit, earningsPayable, debts, coins: { spendable, earned }, lines: [{ key, label, description, amount }], verification: { level, withdrawalsUnlocked, waitingForVerification: Money, nextStep: "payout_setup"|"bank_validation"|"identity_check"|"business_verification"|null, message: string|null } }`.
 - `lines` keys in order: available ("Available to withdraw"), pending ("Pending (escrow)"), locked, earningsPayable ("Creator earnings"), adCredit ("Ad credit"), coins ("Coins", currency `"COIN"`, `amountMinor` = whole coins), debts ("Owed to Nantty"). The dashboard renders them in order with the backend `label` (description as secondary text), formats coins as "N coins" and never sums the lines. Older backends without `lines` fall back to available + pending.
 - `verification.message` (e.g. "Verify to withdraw ₦12,500") is null once withdrawals are unlocked (L1). When set, the finance page shows it as a banner with a "Get paid" link to `/settings/payouts`, or "Verify business" to `/settings/business-documents` when `nextStep` is `"business_verification"` (payout details verified, business verification pending). Unknown `nextStep` values fall back to payout setup. The message may read "Verify to withdraw your earnings" when the amount is zero.
@@ -931,7 +931,7 @@ Response 200: StorefrontProfile
 ```json
 {
   "storeId": "store_…", "name": "Ìfẹ́ Lifestyle", "handle": "ife.lifestyle",
-  "publicUrl": "https://zudomart.com/@ife.lifestyle",
+  "publicUrl": "https://nantty.com/@ife.lifestyle",
   "logoUrl": "https://… | null", "coverUrl": "https://… | null",
   "tagline": "≤80 chars", "description": "≤500 chars",
   "policies": { "returns": "…", "shipping": "…", "privacy": "…" },

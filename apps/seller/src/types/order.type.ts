@@ -127,6 +127,6 @@ export interface OrderDispute {
   readonly amount: Money;
   readonly status: DisputeStatus;
   readonly respondBy: string | null;
-  readonly messages: { readonly id: string; readonly from: "buyer" | "seller" | "zudomart"; readonly body: string; readonly createdAt: string }[];
+  readonly messages: { readonly id: string; readonly from: "buyer" | "seller" | "nantty"; readonly body: string; readonly createdAt: string }[];
   readonly openedAt: string;
 }

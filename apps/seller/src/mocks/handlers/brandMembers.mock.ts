@@ -21,13 +21,13 @@ export function registerBrandMembersMockRoutes(): void {
     requireBrandRole(member, ["owner", "admin"], "add team members");
     const body = readJsonObjectBody(request);
     const issues = validateObjectAgainstChecks(body, { role: fieldChecks.oneOf("Role", assignableBrandRoles) });
-    const zudomartAccount = buildDemoUserAccounts().find((account) => account.id === body.userId);
-    if (!zudomartAccount) issues.push({ path: "userId", message: "Choose someone who already has a Nantty account." });
-    if (issues.length > 0 || !zudomartAccount) return respondWithValidationFailure(issues);
-    if (brand.members.some((candidate) => candidate.userId === zudomartAccount.id)) throw new MockHttpError(409, "MEMBER_EXISTS", `@${zudomartAccount.username} is already on the brand team.`);
+    const nanttyAccount = buildDemoUserAccounts().find((account) => account.id === body.userId);
+    if (!nanttyAccount) issues.push({ path: "userId", message: "Choose someone who already has a Nantty account." });
+    if (issues.length > 0 || !nanttyAccount) return respondWithValidationFailure(issues);
+    if (brand.members.some((candidate) => candidate.userId === nanttyAccount.id)) throw new MockHttpError(409, "MEMBER_EXISTS", `@${nanttyAccount.username} is already on the brand team.`);
     if (brand.members.length >= maximumBrandMembers) throw new MockHttpError(409, "MEMBER_LIMIT_REACHED", `A brand team can have up to ${maximumBrandMembers} people.`);
     if (body.role === "admin" && member.role !== "owner") throw new MockHttpError(403, "BRAND_ROLE_FORBIDDEN", "Only the brand owner can add admins.");
-    const newMember: BrandMember = { id: createMockIdentifier("bmem"), userId: zudomartAccount.id, name: zudomartAccount.name, username: zudomartAccount.username, role: body.role as BrandMemberRole, status: "invited" };
+    const newMember: BrandMember = { id: createMockIdentifier("bmem"), userId: nanttyAccount.id, name: nanttyAccount.name, username: nanttyAccount.username, role: body.role as BrandMemberRole, status: "invited" };
     brand.members.push(newMember);
     recordBrandAuditEntry(principal, "brand.member_invited", brand.id, `Sent a brand team request to @${newMember.username} for ${brand.name} as ${newMember.role}`);
     return respondWithJson(201, newMember);

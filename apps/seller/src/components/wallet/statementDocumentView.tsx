@@ -12,7 +12,7 @@ import type { StatementDetail } from "@/types/finance.type";
 import { formatDateTimeForDisplay } from "@/utils/dateFormatting.util";
 
 import styles from "./statementDocument.module.css";
-import { IconLabel } from "@/components/ui/zudoIcon";
+import { IconLabel } from "@/components/ui/nanttyIcon";
 
 export function StatementDocumentView({ month }: { readonly month: string }) {
   const { formatMoney, locale } = useMoneyFormatter();

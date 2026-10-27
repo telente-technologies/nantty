@@ -131,7 +131,7 @@ export function buildDemoDisputes(orders: readonly OnlineOrder[], plan: DemoOnli
       respondBy: buildIsoDateDaysAgo(-2, 18),
       messages: [
         { id: "dm_1", from: "buyer", body: plan.disputeBuyerMessage, createdAt: buildIsoDateDaysAgo(1, 10) },
-        { id: "dm_2", from: "zudomart", body: "We have paused escrow release. Seller, please respond with photos of the packed item within 48 hours.", createdAt: buildIsoDateDaysAgo(1, 12) },
+        { id: "dm_2", from: "nantty", body: "We have paused escrow release. Seller, please respond with photos of the packed item within 48 hours.", createdAt: buildIsoDateDaysAgo(1, 12) },
       ],
       openedAt: buildIsoDateDaysAgo(1, 10),
     }));

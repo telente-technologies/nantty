@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import { useSellerSession } from "@/components/session/sellerSessionProvider";
 import { StatusBadge } from "@/components/ui/statusBadge";
 import { useToast } from "@/components/ui/toastProvider";
-import { ZudoIcon } from "@/components/ui/zudoIcon";
+import { NanttyIcon } from "@/components/ui/nanttyIcon";
 import { sellerPlanLabels } from "@/config/planFeatures.config";
 import { staffRoleLabels } from "@/constants/roles.constant";
 import { usePlanFeatures } from "@/hooks/usePlanFeatures.hook";
@@ -60,7 +60,7 @@ export function CompactWorkspaceSwitcher() {
             {selectedLocationName ? ` · ${selectedLocationName}` : ""}
           </span>
         </span>
-        <ZudoIcon name="caretDown24" size={14} />
+        <NanttyIcon name="caretDown24" size={14} />
       </button>
       {isMenuOpen ? (
         <div className={styles.menu} role="menu" aria-label="Store, plan and location">
@@ -76,7 +76,7 @@ export function CompactWorkspaceSwitcher() {
                     {store.storeName}
                     <span className={styles.meta}> · {staffRoleLabels[store.role]}</span>
                   </span>
-                  {store.isCurrent ? <ZudoIcon name="check16" size={14} /> : null}
+                  {store.isCurrent ? <NanttyIcon name="check16" size={14} /> : null}
                 </button>
               ))
             : null}
@@ -94,7 +94,7 @@ export function CompactWorkspaceSwitcher() {
               }}
             >
               <span>{location.name}</span>
-              {location.id === selectedLocationId ? <ZudoIcon name="check16" size={14} /> : null}
+              {location.id === selectedLocationId ? <NanttyIcon name="check16" size={14} /> : null}
             </button>
           ))}
         </div>

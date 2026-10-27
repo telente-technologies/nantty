@@ -1,5 +1,5 @@
 import styles from "./landingHero.module.css";
-import { ZudoIcon } from "@/components/ui/zudoIcon";
+import { NanttyIcon } from "@/components/ui/nanttyIcon";
 import { PrelaunchLoginAction } from "./prelaunchLoginAction";
 import { LandingProductPreview } from "./landingProductPreview";
 
@@ -52,7 +52,7 @@ export function LandingHero() {
           </p>
           <p className={`${styles.chip} ${styles.escrowChip}`}>
             <span className={styles.chipBadge} aria-hidden="true">
-              <ZudoIcon name="check16" size={14} />
+              <NanttyIcon name="check16" size={14} />
             </span>
             Escrow released to your wallet after delivery
           </p>

@@ -25,7 +25,7 @@ interface BrandWorkspaceValue {
 }
 
 const BrandWorkspaceContext = createContext<BrandWorkspaceValue | null>(null);
-const selectedBrandStorageKey = "zudomart-dashboard-selected-brand";
+const selectedBrandStorageKey = "nantty-dashboard-selected-brand";
 
 export function useBrandWorkspace(): BrandWorkspaceValue {
   const value = useContext(BrandWorkspaceContext);

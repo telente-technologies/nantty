@@ -73,7 +73,7 @@ export function ProductImportView() {
   }
 
   function downloadTemplateCsv() {
-    triggerBrowserDownload("zudomart-products-template.csv", convertRowsToCsvText(productCsvColumns.map((column) => column.header), [productCsvColumns.map((column) => column.example)]));
+    triggerBrowserDownload("nantty-products-template.csv", convertRowsToCsvText(productCsvColumns.map((column) => column.header), [productCsvColumns.map((column) => column.example)]));
   }
 
   const missingRequiredFields = mapping ? productCsvColumns.filter((column) => column.required && mapping[column.field] === null) : [];

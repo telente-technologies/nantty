@@ -2,15 +2,15 @@ import type { ReactNode } from "react";
 
 import { ErrorState, resolveCallerErrorCopy, type ErrorStateVariant } from "@nantty/web-kit";
 
-import { ZudoIcon, type ZudoIconName } from "@/components/ui/zudoIcon";
+import { NanttyIcon, type NanttyIconName } from "@/components/ui/nanttyIcon";
 
 import styles from "./feedback.module.css";
 
-export function EmptyState({ iconName = "squaresFour24", title, description, action }: { readonly iconName?: ZudoIconName; readonly title: string; readonly description?: ReactNode; readonly action?: ReactNode }) {
+export function EmptyState({ iconName = "squaresFour24", title, description, action }: { readonly iconName?: NanttyIconName; readonly title: string; readonly description?: ReactNode; readonly action?: ReactNode }) {
   return (
     <div className={styles.emptyState}>
       <span className={styles.emptyIcon}>
-        <ZudoIcon name={iconName} size={24} />
+        <NanttyIcon name={iconName} size={24} />
       </span>
       <p className={styles.emptyTitle}>{title}</p>
       {description ? <p className={styles.emptyDescription}>{description}</p> : null}
@@ -20,10 +20,10 @@ export function EmptyState({ iconName = "squaresFour24", title, description, act
 }
 
 export function Callout({ tone = "info", title, children, action }: { readonly tone?: "info" | "caution" | "error" | "success"; readonly title?: string; readonly children?: ReactNode; readonly action?: ReactNode }) {
-  const iconName: ZudoIconName = tone === "success" ? "sealCheck20" : tone === "info" ? "question24" : "warning20";
+  const iconName: NanttyIconName = tone === "success" ? "sealCheck20" : tone === "info" ? "question24" : "warning20";
   return (
     <div className={`${styles.callout} ${styles[tone]}`} role={tone === "error" ? "alert" : undefined}>
-      <ZudoIcon name={iconName} size={18} />
+      <NanttyIcon name={iconName} size={18} />
       <div className={styles.calloutBody}>
         {title ? <p className={styles.calloutTitle}>{title}</p> : null}
         {children ? <div>{children}</div> : null}

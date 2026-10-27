@@ -72,7 +72,7 @@ function filterAndSortCustomers(request: MockRequest): Customer[] {
       (!tag || customer.tags.includes(tag)) &&
       (!type || type === "all" || deriveCustomerTypeFromPurchases(customer) === type) &&
       (!segmentRules || doesCustomerMatchEverySegmentRule(customer, segmentRules)) &&
-      matchesSearchText(request.query.get("q"), customer.name, customer.phone, customer.email, customer.zudomartUsername, customer.city),
+      matchesSearchText(request.query.get("q"), customer.name, customer.phone, customer.email, customer.nanttyUsername, customer.city),
   );
   return [...customers].sort((first, second) => {
     const left = readSortValue(first);
@@ -139,7 +139,7 @@ export function registerCustomerMockHandlers(): void {
     const customer: Customer = {
       id: createMockIdentifier("cus"),
       ...input,
-      zudomartUsername: null,
+      nanttyUsername: null,
       city: null,
       notes: [],
       storeCreditBalance: { amountMinor: 0, currency: readMockDatabase().settings.currency },
@@ -159,7 +159,7 @@ export function registerCustomerMockHandlers(): void {
   registerMockRoute("GET", "/seller/customers/export", (request) => {
     requireMockStorePrincipal(request);
     const rows = filterAndSortCustomers(request).map((customer) => [
-      customer.name, customer.phone, customer.email, customer.zudomartUsername, customer.city, customer.tags.join(" "),
+      customer.name, customer.phone, customer.email, customer.nanttyUsername, customer.city, customer.tags.join(" "),
       convertMinorUnitsToMajorInputText(customer.totalSpent.amountMinor, customer.totalSpent.currency), customer.averageOrderValue ? convertMinorUnitsToMajorInputText(customer.averageOrderValue.amountMinor, customer.averageOrderValue.currency) : "", customer.totalSpent.currency, customer.purchasesCount, customer.firstPurchaseAt, customer.lastPurchaseAt, customer.marketingOptIn ? "yes" : "no",
     ]);
     const csvText = convertRowsToCsvText(["Name", "Phone", "Email", "Nantty username", "City", "Tags", "Total spent", "Average order value", "Currency", "Orders", "First order", "Last order", "Marketing opt-in"], rows);

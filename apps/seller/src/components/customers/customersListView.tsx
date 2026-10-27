@@ -61,7 +61,7 @@ export function CustomersListView({ initialSegmentId = "" }: { readonly initialS
   }
 
   const columns: DataTableColumn<Customer>[] = [
-    { key: "name", header: "Customer", sortKey: "name", render: (customer) => <span className={styles.primaryCell}><strong>{customer.name}</strong><span className={styles.muted}>{customer.zudomartUsername ? `@${customer.zudomartUsername}` : "No Nantty username"}{customer.city ? ` · ${customer.city}` : ""}</span></span> },
+    { key: "name", header: "Customer", sortKey: "name", render: (customer) => <span className={styles.primaryCell}><strong>{customer.name}</strong><span className={styles.muted}>{customer.nanttyUsername ? `@${customer.nanttyUsername}` : "No Nantty username"}{customer.city ? ` · ${customer.city}` : ""}</span></span> },
     { key: "type", header: "Type", render: (customer) => { const type = deriveCustomerTypeFromPurchases(customer); return <StatusBadge tone={customerTypeTones[type]}>{customerTypeLabels[type]}</StatusBadge>; } },
     { key: "tags", header: "Tags", hideBelowTablet: true, render: (customer) => <span className={styles.tagList}>{customer.tags.map((tag) => <StatusBadge key={tag} tone="info">{tag}</StatusBadge>)}</span> },
     { key: "purchases", header: "Orders", align: "end", sortKey: "purchases", render: (customer) => customer.purchasesCount },

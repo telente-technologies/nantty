@@ -9,7 +9,7 @@ export function buildDemoCustomersFromPlan(plan: DemoCustomerPlan, recordKey: st
     name,
     phone,
     email,
-    zudomartUsername: username,
+    nanttyUsername: username,
     city: null,
     tags,
     notes: index === 0 && plan.firstCustomerNote

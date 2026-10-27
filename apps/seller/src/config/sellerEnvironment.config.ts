@@ -1,5 +1,5 @@
 const isProductionRuntime = process.env.NODE_ENV === "production";
-const developmentOnlySessionSecret = "zudomart-dashboard-development-only-secret-never-use-in-production";
+const developmentOnlySessionSecret = "nantty-dashboard-development-only-secret-never-use-in-production";
 
 export function readSellerApiBaseUrl(): string {
   const configuredUrl = process.env.SELLER_API_URL ?? (isProductionRuntime ? "" : "http://localhost:8080");

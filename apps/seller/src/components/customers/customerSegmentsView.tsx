@@ -22,7 +22,7 @@ import type { CustomerSegment } from "@/types/customer.type";
 import type { CursorPage } from "@/types/pagination.type";
 
 import styles from "./customerSegments.module.css";
-import { IconLabel } from "@/components/ui/zudoIcon";
+import { IconLabel } from "@/components/ui/nanttyIcon";
 
 function CustomerSegmentCard({ segment, canEdit, onEdit, onDelete }: { readonly segment: CustomerSegment; readonly canEdit: boolean; readonly onEdit: () => void; readonly onDelete: () => void }) {
   const { formatMoney, formatMoneyCompact, currency } = useMoneyFormatter();

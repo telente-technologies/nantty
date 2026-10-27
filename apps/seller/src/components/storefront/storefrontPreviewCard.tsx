@@ -7,7 +7,7 @@ import { useStoreContext } from "@/hooks/useStoreSettings.hook";
 import { storefrontWeekdays, type StorefrontProfile } from "@/types/storefront.type";
 
 import styles from "./storefront.module.css";
-import { IconLabel } from "@/components/ui/zudoIcon";
+import { IconLabel } from "@/components/ui/nanttyIcon";
 
 function readStoreInitials(storeName: string): string {
   return storeName.split(/\s+/).filter(Boolean).slice(0, 2).map((word) => word[0]?.toUpperCase() ?? "").join("") || "Z";

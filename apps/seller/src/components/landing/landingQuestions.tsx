@@ -1,4 +1,4 @@
-import { ZudoIcon } from "@/components/ui/zudoIcon";
+import { NanttyIcon } from "@/components/ui/nanttyIcon";
 import { contactEmailDisplayText, contactMailtoHref } from "@/config/siteMetadata.config";
 import { landingQuestions } from "@/constants/landingContent.constant";
 
@@ -22,7 +22,7 @@ export function LandingQuestions() {
             <details key={item.question} className={styles.item}>
               <summary className={styles.question}>
                 {item.question}
-                <ZudoIcon name="plus16" size={18} className={styles.toggleIcon} />
+                <NanttyIcon name="plus16" size={18} className={styles.toggleIcon} />
               </summary>
               <p className={styles.answer}>{item.answer}</p>
             </details>

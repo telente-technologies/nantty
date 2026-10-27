@@ -1,11 +1,11 @@
 import type { PlanFeature } from "@/config/planFeatures.config";
 import type { SellerPermission } from "@/config/rolePermissions.config";
-import type { ZudoIconName } from "@/components/ui/zudoIcon";
+import type { NanttyIconName } from "@/components/ui/nanttyIcon";
 
 export interface NavigationItem {
   readonly label: string;
   readonly href: string;
-  readonly iconName: ZudoIconName;
+  readonly iconName: NanttyIconName;
   readonly permission: SellerPermission;
   readonly feature?: PlanFeature;
   readonly external?: boolean;

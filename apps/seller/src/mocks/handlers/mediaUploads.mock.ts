@@ -23,7 +23,7 @@ function doBytesMatchDeclaredImageType(bytes: Uint8Array, mimeType: string): boo
   return false;
 }
 
-const encryptedChatMimeType = "application/vnd.zudomart.encrypted";
+const encryptedChatMimeType = "application/vnd.nantty.encrypted";
 const maximumChatBytes = 100 * 1024 * 1024;
 export const mockChatMediaBlobs = new Map<string, Uint8Array>();
 

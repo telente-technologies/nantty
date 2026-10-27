@@ -4,7 +4,7 @@ import { useRef, useState, type ChangeEvent } from "react";
 
 import { Button, IconButton } from "@/components/ui/button";
 import { Panel } from "@/components/ui/panel";
-import { ZudoIcon } from "@/components/ui/zudoIcon";
+import { NanttyIcon } from "@/components/ui/nanttyIcon";
 import { acceptedProductImageMimeTypes, describeProductImageProblem, uploadProductImageInChunks } from "@/services/mediaUpload.service";
 import { readErrorMessageForDisplay } from "@/services/clientApi.service";
 import type { ProductImage } from "@/types/catalog.type";
@@ -74,7 +74,7 @@ export function ProductImagesSection({ images, onImagesChange, onUploadingChange
         ))}
         {images.length < maximumImages ? (
           <button type="button" className={styles.uploadDrop} onClick={() => fileInputRef.current?.click()}>
-            <ZudoIcon name="imageSquare24" size={22} />
+            <NanttyIcon name="imageSquare24" size={22} />
             Add photos
           </button>
         ) : null}

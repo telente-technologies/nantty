@@ -7,7 +7,7 @@ import type { ConversationMessage, DecryptedConversationMessage, DecryptedPrevie
 import { type EncryptedSendRequest, storeChatCrypto } from "./storeChatCrypto.service";
 import { broadcastFrame, createTabLeader, type LeaderChannel, type LeaderLocks, type TabLeader } from "./tabLeader";
 
-const channelName = "zudomart-seller-chat-engine";
+const channelName = "nantty-seller-chat-engine";
 type TopicClaim = { readonly tabId: string; readonly topic: string; readonly on: boolean };
 
 let leader: TabLeader | null = null;

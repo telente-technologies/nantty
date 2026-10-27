@@ -31,7 +31,7 @@ export interface DemoCatalogPlan {
   readonly brandTagsByProductKey: Readonly<Record<string, ProductBrandTag>>;
 }
 
-export type DemoCustomerRow = readonly [name: string, phone: string | null, email: string | null, zudomartUsername: string | null, tags: string[]];
+export type DemoCustomerRow = readonly [name: string, phone: string | null, email: string | null, nanttyUsername: string | null, tags: string[]];
 
 export interface DemoCustomerPlan {
   readonly rows: readonly DemoCustomerRow[];

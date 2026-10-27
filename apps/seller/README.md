@@ -1,6 +1,6 @@
 # Nantty Dashboard
 
-The seller operating system for Nantty, served on its own subdomain: `https://dashboard.<domain>` (for example `https://dashboard.zudomart.com`).
+The seller operating system for Nantty, served on its own subdomain: `https://dashboard.<domain>` (for example `https://dashboard.nantty.com`).
 
 **Nantty App = sell from anywhere. Nantty Dashboard = run your business.** Free for every approved Nantty seller — upgrade to Pro or Business when you grow. There is no in-store register: online orders are the marketplace orders customers place in the Nantty app, and team members are existing Nantty users who sign in with their own app credentials.
 
@@ -23,13 +23,13 @@ With `SELLER_USE_MOCKS=true` (the default in development) every API call is answ
 
 | Variable | Purpose |
 | --- | --- |
-| `NEXT_PUBLIC_SITE_URL` | Public URL of the dashboard, used for metadata and absolute links. Dev: `http://localhost:3200`. Prod: `https://dashboard.zudomart.com`. |
+| `NEXT_PUBLIC_SITE_URL` | Public URL of the dashboard, used for metadata and absolute links. Dev: `http://localhost:3200`. Prod: `https://dashboard.nantty.com`. |
 | `DASHBOARD_ORIGIN` | Origin accepted for state-changing requests (CSRF origin check). Usually the same as `NEXT_PUBLIC_SITE_URL`. |
 | `SELLER_API_URL` | Base URL of the Nantty API (server-side only). |
 | `SELLER_MEDIA_URL` | Optional media CDN origin allowed in the image CSP. |
 | `SELLER_USE_MOCKS` | `true` to use the demo backend. Defaults to `true` in development and `false` in production. |
 | `SELLER_SESSION_SECRET` | At least 32 random characters. Signs session, access-cache, operator and CSRF values. Required in production. |
-| `NEXT_PUBLIC_ADS_MANAGER_URL` | Link target of the "Advertise" item (the separate Ads Manager app). Dev default `http://localhost:3300`, prod default `https://ads.zudomart.com`. |
+| `NEXT_PUBLIC_ADS_MANAGER_URL` | Link target of the "Advertise" item (the separate Ads Manager app). Dev default `http://localhost:3300`, prod default `https://ads.nantty.com`. |
 
 ## Hosting on the dashboard subdomain
 

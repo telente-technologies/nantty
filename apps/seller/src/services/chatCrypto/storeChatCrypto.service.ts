@@ -19,7 +19,7 @@ const directory = createHttpKeyDirectory({
 
 let client: ChatCryptoClient | null = null;
 let previews: KeyValueStore | null = null;
-const crossTabLock = createWebLocksMutex("zudomart-seller-chat-crypto");
+const crossTabLock = createWebLocksMutex("nantty-seller-chat-crypto");
 const getClient = () => (client ??= new ChatCryptoClient({ storage: createSellerChatCryptoStorage(), directory, ...(crossTabLock === undefined ? {} : { lock: crossTabLock }) }));
 const getPreviews = () => (previews ??= createSealedPreviewStore());
 

@@ -12,7 +12,7 @@ import type { OnlineOrder } from "@/types/order.type";
 import { formatDateForDisplay } from "@/utils/dateFormatting.util";
 
 import styles from "./packingSlipView.module.css";
-import { IconLabel } from "@/components/ui/zudoIcon";
+import { IconLabel } from "@/components/ui/nanttyIcon";
 
 export function PackingSlipView({ orderId }: { readonly orderId: string }) {
   const { settings } = useStoreContext();

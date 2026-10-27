@@ -19,7 +19,7 @@ import { deriveCustomerTypeFromPurchases } from "@/utils/customerSegmentRules.ut
 import { formatDateForDisplay } from "@/utils/dateFormatting.util";
 
 import styles from "./customers.module.css";
-import { IconLabel } from "@/components/ui/zudoIcon";
+import { IconLabel } from "@/components/ui/nanttyIcon";
 
 export function CustomerDetailView({ customerId }: { readonly customerId: string }) {
   const { formatMoney } = useMoneyFormatter();
@@ -37,11 +37,11 @@ export function CustomerDetailView({ customerId }: { readonly customerId: string
       <PageHeader
         eyebrow={<Link href="/customers"><IconLabel name="arrowLeft24" size={16}>Customers</IconLabel></Link>}
         title={customer.name}
-        description={`${customer.zudomartUsername ? `@${customer.zudomartUsername} on Nantty` : "No Nantty username"}${customer.city ? ` · ${customer.city}` : ""}`}
+        description={`${customer.nanttyUsername ? `@${customer.nanttyUsername} on Nantty` : "No Nantty username"}${customer.city ? ` · ${customer.city}` : ""}`}
         actions={
           <>
             <StatusBadge tone={customerTypeTones[customerType]}>{customerTypeLabels[customerType]}</StatusBadge>
-            {customer.zudomartUsername ? <ButtonLink href={`/messages?customer=${encodeURIComponent(customer.zudomartUsername)}`} iconName="chatCircle24">Message</ButtonLink> : null}
+            {customer.nanttyUsername ? <ButtonLink href={`/messages?customer=${encodeURIComponent(customer.nanttyUsername)}`} iconName="chatCircle24">Message</ButtonLink> : null}
             <Button iconName="slidersHorizontal24" onClick={() => setIsEditDialogOpen(true)}>Edit profile</Button>
           </>
         }
